@@ -35,7 +35,7 @@ The core dependency for the other tools in this category. Designed to make async
 
 [**🐟 Pêcherie**](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#goto-src)
 <br/>
-Creates targeted and untargeted process hooks for your application/modules.
+Creates targeted and untargeted events/hooks.
 
 [**🏹 Archer**](https://github.com/ruby-cube/rue/tree/main/packages/archer#goto-src)
 <br/>
