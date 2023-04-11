@@ -30,6 +30,10 @@ export function beginScene(setUpScene?: (scene: Scene) => void, unattached: bool
         })
     }
 
+    if (__TEST__){
+        onEnded.handlers = handlers
+    }
+
     function end() {
         for (const cb of handlers) {
             cb()

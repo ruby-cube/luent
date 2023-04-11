@@ -3,7 +3,10 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
     "moduleResolution": "Node",
     "strict": true,
     "resolveJsonModule": true,
@@ -15,23 +18,57 @@
     "noImplicitReturns": false,
     "skipLibCheck": true,
     "paths": {
-      "@rue/utils": ["./packages/utils/index.ts"],
-      "@rue/actionry": ["./packages/actionry/index.ts"],
-      "@rue/archer": ["./packages/archer/index.ts"],
-      "@rue/ciel": ["./packages/ciel/index.ts"],
-      "@rue/dev": ["./packages/dev/index.ts"],
-      "@rue/ephemr": ["./packages/ephemr/index.ts"],
-      "@rue/etre": ["./packages/etre/index.ts"],
-      "@rue/modos": ["./packages/modos/index.ts"],
-      "@rue/nautic": ["./packages/nautic/index.ts"],
-      "@rue/paravue": ["./packages/paravue/index.ts"],
-      "@rue/pecherie": ["./packages/pecherie/index.ts"],
-      "@rue/planify": ["./packages/planify/index.ts"],
-      "@rue/ruelle": ["./packages/ruelle/index.ts"],
-      "@rue/thread": ["./packages/thread/index.ts"],
-      "@rue/turtledom": ["./packages/turtledom/index.ts"],
-      "@rue/voile": ["./packages/voile/index.ts"],
-      "@rue/types": ["./packages/types/index.ts"]
+      "@rue/utils": [
+        "./packages/utils/index.ts"
+      ],
+      "@rue/actionry": [
+        "./packages/actionry/index.ts"
+      ],
+      "@rue/archer": [
+        "./packages/archer/index.ts"
+      ],
+      "@rue/ciel": [
+        "./packages/ciel/index.ts"
+      ],
+      "@rue/dev": [
+        "./packages/dev/index.ts"
+      ],
+      "@rue/ephemr": [
+        "./packages/ephemr/index.ts"
+      ],
+      "@rue/etre": [
+        "./packages/etre/index.ts"
+      ],
+      "@rue/modos": [
+        "./packages/modos/index.ts"
+      ],
+      "@rue/nautic": [
+        "./packages/nautic/index.ts"
+      ],
+      "@rue/paravue": [
+        "./packages/paravue/index.ts"
+      ],
+      "@rue/pecherie": [
+        "./packages/pecherie/index.ts"
+      ],
+      "@rue/planify": [
+        "./packages/planify/index.ts"
+      ],
+      "@rue/ruelle": [
+        "./packages/ruelle/index.ts"
+      ],
+      "@rue/thread": [
+        "./packages/thread/index.ts"
+      ],
+      "@rue/turtledom": [
+        "./packages/turtledom/index.ts"
+      ],
+      "@rue/voile": [
+        "./packages/voile/index.ts"
+      ],
+      "@rue/types": [
+        "./packages/types/index.ts"
+      ]
     },
   },
   "include": [
