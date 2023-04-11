@@ -1,6 +1,6 @@
 import { describe, test, expect, vi } from "vitest";
-import { $type } from "../../types";
 import { createHook } from "../Hook";
+import { $type } from "@rue/utils";
 
 describe("return types of createHook's caster and listener", () => {
 

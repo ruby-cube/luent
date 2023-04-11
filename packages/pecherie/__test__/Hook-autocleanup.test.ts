@@ -1,73 +1,12 @@
-//@ts-nocheck
-import { nextTick } from "vue";
+//-@ts-nocheck
 import { vi, expect, describe, test, beforeEach } from "vitest";
-import { defineRole, PrivateRole, Role } from "../../etre/Role";
-import { createModos } from "../../modos/createModos";
-import { disposeOfModel, __$initDepotModule, isMakingModel, destroyModel } from "../../modos/depot";
-import { onDestroyed } from "../../modos/lifecycle-hooks";
-import { enrollModelMaker } from "../../modos/Model";
-import { $Modo } from "../../modos/Modo.role";
 import { beginScene, Scene } from "../../planify/Scene";
 import { defineAutoCleanup } from "../../planify/scheduleAutoCleanup";
-import { $type } from "../../types";
 import { createHook, DevListener } from "../Hook";
+import { $type } from "@rue/utils";
 
 
 
-describe("Autocleanup in modo system", () => {
-
-    test("CASE: inside $construct", () => {
-        __$initDepotModule();
-        defineAutoCleanup((cleanup) => {
-            if (isMakingModel()) {
-                return onDestroyed(cleanup);
-            }
-        })
-        const [castTestCase, onTestCase] = createHook({
-            hook: "test-hook",
-            data: $type as {
-                foo: "A"
-            },
-        });
-        const cb = vi.fn(() => { })
-
-        const $ListItem = defineRole({
-            prereqs: {
-                $Modo
-            },
-            $construct() {
-                onTestCase(cb)
-            }
-        });
-
-        const [createListItem] =
-            enrollModelMaker({
-                name: "ListItem",
-                make: $ListItem.reifier((data) => {
-                    $ListItem.confer();
-                    return {
-                        id: "listItem000",
-                    };
-                }, {
-                    __prereqs__: {
-                        $Modo
-                    }
-                })
-            });
-
-        const listItem = createListItem({ id: "lkjlkj" });
-
-        castTestCase({ foo: "A" });
-        expect(cb).toHaveBeenCalledTimes(1)
-
-        destroyModel(listItem);
-        castTestCase({ foo: "A" });
-        castTestCase({ foo: "A" });
-
-        expect(cb).toHaveBeenCalledTimes(1)
-
-    });
-})
 
 describe("cleanup functions are cleaned up if a different cleanup strategy executes", () => {
 
@@ -173,9 +112,9 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         });
 
         const cb = vi.fn(() => { })
-        let sceneCallbacks: DevListener<Scene["ended"]>["handlers"];
+        let sceneCallbacks: DevListener<Scene["onEnded"]>["handlers"];
         beginScene((scene) => {
-            sceneCallbacks = (<DevListener<Scene["ended"]>>scene.ended).handlers;
+            sceneCallbacks = (<DevListener<Scene["onEnded"]>>scene.onEnded).handlers;
             onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
 
             onMouseUp(() => {
@@ -214,14 +153,14 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         });
 
         const cb = vi.fn(() => { })
-        let sceneCallbacks: DevListener<Scene["ended"]>["handlers"];
+        let sceneCallbacks: DevListener<Scene["onEnded"]>["handlers"];
         beginScene((scene) => {
-            sceneCallbacks = (<DevListener<Scene["ended"]>>scene.ended).handlers;
+            sceneCallbacks = (<DevListener<Scene["onEnded"]>>scene.onEnded).handlers;
             onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
 
             onMouseUp(() => {
                 scene.end()
-            }, { once: true }, "__end-scene")
+            }, { once: true })
 
         })
 
@@ -262,10 +201,10 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
 
         const cb = vi.fn(() => { })
 
-        let sceneCallbacks: DevListener<Scene["ended"]>["handlers"];
+        let sceneCallbacks: DevListener<Scene["onEnded"]>["handlers"];
         settingUp = true;
         beginScene((scene) => {
-            sceneCallbacks = (<DevListener<Scene["ended"]>>scene.ended).handlers;
+            sceneCallbacks = (<DevListener<Scene["onEnded"]>>scene.onEnded).handlers;
             onTestCase(cb) // modo auto cleanup
         })
         settingUp = false;
@@ -306,11 +245,11 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         });
         const cb = vi.fn(() => { })
         const autoCleanupCallbacks = (<DevListener<typeof onTestUnmounted>>onTestUnmounted).handlers
-        let sceneCallbacks: DevListener<Scene["ended"]>["handlers"];
+        let sceneCallbacks: DevListener<Scene["onEnded"]>["handlers"];
 
         settingUp = true;
         beginScene((scene) => {
-            sceneCallbacks = (<DevListener<Scene["ended"]>>scene.ended).handlers;
+            sceneCallbacks = (<DevListener<Scene["onEnded"]>>scene.onEnded).handlers;
             onTestCase(cb) // modo auto cleanup
             onSceneEnder(() => {
                 scene.end();

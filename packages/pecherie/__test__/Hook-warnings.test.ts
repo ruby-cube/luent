@@ -1,7 +1,7 @@
 import { describe, test, expect, vi } from "vitest";
 import { onDestroyed } from "../../modos/lifecycle-hooks";
-import { $type } from "../../types";
 import { createHook } from "../Hook";
+import { $type } from "@rue/utils";
 
 //NOTE: Skipped during batch test runs
 

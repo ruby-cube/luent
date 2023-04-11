@@ -153,7 +153,7 @@ export type SchedulerOptions = {
     unlessCanceled?: ScheduleCancel
 }
 
-type ScheduledOp<CB extends Callback> = CB extends { isRemover: true } ? PendingCancelOp : PendingOp<ReturnType<CB>>
+export type ScheduledOp<CB extends Callback> = CB extends { isRemover: true } ? PendingCancelOp : PendingOp<ReturnType<CB>>
 
 export function $schedule<
     CB extends Callback,

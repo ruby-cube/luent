@@ -1,26 +1,43 @@
-//@ts-nocheck
-import { createHook } from "@rue/pecherie"
-import { Callback, markSceneSetup, OneTimeListener } from './planify';
+//-@ts-nocheck
+import { $schedule, Callback, Callbacks, markSceneSetup, OneTimeListener, ScheduledOp, SchedulerOptions } from './planify';
 import { defineSceneCleanup } from './scheduleAutoCleanup';
+import { noop } from "@rue/utils";
 
 export type Scene = {
     end: () => void;
-    ended: OneTimeListener<(ctx: {
-        hook: "scene-ended";
-    }) => unknown>
+    onEnded: SceneEndListener
 }
+
+export type SceneEndListener = (handler?: Callback, options?: SchedulerOptions)=> ScheduledOp<Callback>;
 
 export const UNATTACHED = true;
 
 
 export function beginScene(setUpScene?: (scene: Scene) => void, unattached: boolean = false) {
-    const [end, ended] = createHook({
-        hook: "scene-ended",
-        onceAsDefault: true
-    })
+    const handlers = new Set() as Callbacks;
 
-    const scene = { end, ended }
-    defineSceneCleanup(ended);
+    function onEnded(handler?: Callback, options?: SchedulerOptions) {
+        if (handler == null) {
+            handler = noop;
+        }
+        return $schedule(handler, options, {
+            enroll: (handler) => {
+                handlers.add(handler)
+            },
+            remove: (handler) => {
+                handlers.delete(handler)
+            }
+        })
+    }
+
+    function end() {
+        for (const cb of handlers) {
+            cb()
+        }
+    }
+
+    const scene = { end, onEnded }
+    defineSceneCleanup(onEnded);
 
     if (setUpScene) {
         markSceneSetup(true, unattached);
@@ -40,7 +57,7 @@ export function defineScene<CB extends (context: any, scene: Scene) => any>(cb: 
 
 
 const reMouse = defineScene((event: MouseEvent, scene) => {
-    
+
 
 })
 
@@ -51,7 +68,7 @@ const reMouse = defineScene((event: MouseEvent, scene) => {
 //     const scene = beginScene();
 //     onMouseMove(document, () => {
 //         // do stuff
-//     }, { until: scene.ended })
+//     }, { until: scene.onEnded })
 
 //     onMouseUp(document, () => {
 //         // do stuff

@@ -1,7 +1,8 @@
 
 // [Param: stop] The cleanup function
 
-import { Callback, CallbackRemover, OneTimeListener, PendingCancelOp, ScheduleStop } from "./planify";
+import type { SceneEndListener } from "./Scene";
+import type { Callback, CallbackRemover, PendingCancelOp } from "./planify";
 
 // [Return] boolean to indicate whether cleanup was successfully scheduled
 export let scheduleAutoCleanup: CleanupScheduler = () => {};
@@ -26,7 +27,7 @@ export let scheduleSceneCleanup: (stop: CallbackRemover<void>) => PendingCancelO
 export let schedulingSceneCleanup = false; // to prevent infinite loop of auto cleanup listener
 export let existingPendingSceneCleanup: PendingCancelOp | null;
 
-export function defineSceneCleanup(cleanupScheduler: OneTimeListener) {
+export function defineSceneCleanup(cleanupScheduler: SceneEndListener) {
     scheduleSceneCleanup = (stop) => {
         schedulingSceneCleanup = true;
         const pendingCancelOp = existingPendingSceneCleanup = cleanupScheduler(stop)

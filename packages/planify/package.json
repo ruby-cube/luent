@@ -3,7 +3,6 @@
     "private": true,
     "description": "",
     "dependencies": {
-      "@rue/pecherie": "workspace:*"
     },
     "devDependencies": {
       "@rue/dev": "workspace:*",

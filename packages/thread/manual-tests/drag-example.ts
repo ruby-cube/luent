@@ -20,11 +20,11 @@ export async function reMouseDown(e: MouseEvent) {
 
     onMouseLeave(target, () => {
         initDrag();
-    }, { until: scene.ended })
+    }, { until: scene.onEnded })
 
     onMouseEnter(target, () => {
         stopDrag();
-    }, { until: scene.ended })
+    }, { until: scene.onEnded })
 
 
 
@@ -33,7 +33,7 @@ export async function reMouseDown(e: MouseEvent) {
         mouseMoveListener =
             onMouseMove(document, (e) => {
                 console.log("moving object")
-            }, { until: scene.ended })
+            }, { until: scene.onEnded })
     }
 
     function stopDrag() {

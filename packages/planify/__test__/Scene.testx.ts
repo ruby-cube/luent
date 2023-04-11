@@ -6,9 +6,9 @@ import { onDestroyed } from "../../modos/lifecycle-hooks";
 import { enrollModelMaker } from "../../modos/Model";
 import { $Modo } from "../../modos/Modo.role";
 import { createHook } from "../../pecherie/Hook";
-import { defineAutoCleanup } from "../../planify/scheduleAutoCleanup";
-import { $type } from "../../types";
+import { defineAutoCleanup } from "../scheduleAutoCleanup";
 import { beginScene, UNATTACHED } from "../Scene";
+import { $type } from "@rue/utils";
 
 describe("Autocleanup of scenes", () => {
     beforeEach(() => {
