@@ -2,7 +2,7 @@ import { defineRole, Role, PrivateRole, enacts } from '@rue/etre';
 import { $type, } from '@rue/utils';
 import { Cast } from '@rue/types';
 import { $Modo } from '../Modo.role';
-import { disposeOfModel, getModel, inTrash, onModelMade, reinstateModel } from '../depot';
+import { disposeOfModel, getModel, inTrash, reinstateModel } from '../depot';
 import { PeaNode } from './PeaNode.role';
 import { beforeDisposedOf, onDestroyed, onInstated, onMade } from '../lifecycle-hooks';
 import { onActionCompleted, onActionStart } from '@rue/actionry';

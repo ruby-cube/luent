@@ -1,3 +1,12 @@
+import { defineAutoCleanup } from "@rue/planify";
+import { __$initDepotModule, destroyModel, isMakingModel } from "../depot";
+import { onDestroyed } from "../lifecycle-hooks";
+import { createHook } from "@rue/pecherie";
+import { $type } from "@rue/utils";
+import { expect, vi, describe, test } from "vitest";
+import { defineRole } from "@rue/etre";
+import { $Modo } from "../Modo.role";
+import { enrollModelMaker } from "../Model";
 
 describe("Autocleanup in modo system", () => {
 
@@ -53,3 +62,4 @@ describe("Autocleanup in modo system", () => {
 
     });
 })
+

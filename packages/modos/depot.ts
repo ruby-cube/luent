@@ -123,8 +123,8 @@ export function setupModel(data: DataEntry, modoDef: ModoDef) {
     const name = modoDef.name;
     makingModel = true;
     const model = modoDef.make(data); //main 
-    makingModel = false;
     if (modoDef[_IS_LIABLE_POD_]) initLiablePod();
+    makingModel = false;
     model.id = data.id;
     if ("clone" in model) {
         model.clone = () => modoDef.clone(model);

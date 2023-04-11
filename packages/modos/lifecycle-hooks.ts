@@ -5,23 +5,24 @@ import { Modo } from "./Modo.role";
 
 //NOTE: Lifecycle hooks can only be called within "make" function or role $construct
 
-function warnOutOfScopeLifecycleHook(hookFn: Function) {
-    console.warn(`${hookFn.name} hook must be run from within a Modos 'make' function scope`)
+function throwOutOfScopeLifecycleHook(hookFn: Function) {
+    throw new Error(`${hookFn.name} hook must be run from within a Modos 'make' function scope`)
 }
 
 export function onCreated(cb: (model: Modo) => void) {
-    if (__DEV__ && !isMakingModel()) warnOutOfScopeLifecycleHook(onCreated)
+    if (__DEV__ && !isMakingModel()) throwOutOfScopeLifecycleHook(onCreated)
     return onModelCreated((ctx) => cb(ctx.model), { once: true });
 }
 
 export function onMade(cb: (model: Modo) => void) {
-    if (__DEV__ && !isMakingModel()) warnOutOfScopeLifecycleHook(onMade)
+    console.log("running on made!")
+    if (__DEV__ && !isMakingModel()) throwOutOfScopeLifecycleHook(onMade)
     return onModelMade((ctx) => cb(ctx.model), { once: true });
 }
 
 
 export function onInstated<OPT extends ListenerOptions>(cb: (model: Modo) => void, options?: OPT) {
-    if (__DEV__ && !isMakingModel()) warnOutOfScopeLifecycleHook(onInstated)
+    if (__DEV__ && !isMakingModel()) throwOutOfScopeLifecycleHook(onInstated)
     let listener: ActiveListener;
     return $listen(cb, options, {
         enroll(cb) {
@@ -36,7 +37,7 @@ export function onInstated<OPT extends ListenerOptions>(cb: (model: Modo) => voi
 }
 
 export function onReinstated<OPT extends ListenerOptions>(cb: (model: Modo) => void, options?: OPT) {
-    if (__DEV__ && !isMakingModel()) warnOutOfScopeLifecycleHook(onReinstated)
+    if (__DEV__ && !isMakingModel()) throwOutOfScopeLifecycleHook(onReinstated)
     let listener: ActiveListener;
     return $listen(cb, options, {
         enroll(cb) {
@@ -53,7 +54,7 @@ export function onReinstated<OPT extends ListenerOptions>(cb: (model: Modo) => v
 
 
 export function beforeDisposedOf<OPT extends ListenerOptions>(cb: Parameters<typeof $beforeDisposedOf>[1], options?: OPT) {
-    if (__DEV__ && !isMakingModel()) warnOutOfScopeLifecycleHook(beforeDisposedOf)
+    if (__DEV__ && !isMakingModel()) throwOutOfScopeLifecycleHook(beforeDisposedOf)
     let listener: ActiveListener;
     return $listen(cb, options, {
         enroll(cb) {
@@ -68,7 +69,7 @@ export function beforeDisposedOf<OPT extends ListenerOptions>(cb: Parameters<typ
 }
 
 export function onDisposedOf<OPT extends ListenerOptions>(cb: Parameters<typeof $onDisposedOf>[1], options?: OPT) {
-    if (__DEV__ && !isMakingModel()) warnOutOfScopeLifecycleHook(onDisposedOf)
+    if (__DEV__ && !isMakingModel()) throwOutOfScopeLifecycleHook(onDisposedOf)
     let listener: ActiveListener;
     return $listen(cb, options, {
         enroll(cb) {
@@ -89,7 +90,7 @@ if (__TEST__) {
 
 
 export function beforeDestroyed(cb: (model: Modo) => void) {
-    if (__DEV__ && !isMakingModel()) warnOutOfScopeLifecycleHook(beforeDestroyed)
+    if (__DEV__ && !isMakingModel()) throwOutOfScopeLifecycleHook(beforeDestroyed)
     let pendingOp: PendingOp;
     return $listen(cb, {once: true}, {
         enroll(cb) {
@@ -104,7 +105,7 @@ export function beforeDestroyed(cb: (model: Modo) => void) {
 }
 
 export function onDestroyed(cb: Parameters<typeof $onDestroyed>[1]) {
-    if (__DEV__ && !isMakingModel()) warnOutOfScopeLifecycleHook(onDestroyed)
+    if (__DEV__ && !isMakingModel()) throwOutOfScopeLifecycleHook(onDestroyed)
     let pendingOp: PendingOp;
     const options = { once: true as const }
     return $listen(cb, options, {
