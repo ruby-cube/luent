@@ -58,7 +58,7 @@ Provides planified versions of Vue’s `watch` and `computed`, component utils, 
 ***Data Management***
 
 [**🪴 Être**](https://github.com/ruby-cube/rue/tree/main/packages/etre#goto-src)
-<br/>A system of composition for rich data models
+<br/>A system of composition for rich domain models
 
 **🔔 Modos**
 <br/>
