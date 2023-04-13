@@ -75,19 +75,19 @@ function initDrag(event){
         const y = ref(0);
         const position = compute(() => `${x.value}, ${y.value}`);
     
-        onMouseEnter(el, () => {
+        onMouseEnter(el, (event) => {
             // do work
         });
      
-        onMouseLeave(el, () => {
+        onMouseLeave(el, (event) => {
             // do work
         });
     
-        onMouseMove(document, () => {
+        onMouseMove(document, (event) => {
             // do work
         });
     
-        onMouseUp(document, () => {
+        onMouseUp(document, (event) => {
             // do work
             dragging.end()  // stops all listeners registered during scene
         })
