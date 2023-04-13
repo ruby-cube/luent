@@ -52,7 +52,7 @@ A planified version of `computed`.  `compute` differs from `computed` simply in 
 ### Usage
 
 ```ts
-const fullName = compute(() => firstName.value + " " + lastName.value, { 
+const fullName = compute(() => `${user.firstName} ${user.lastName}`, { 
     until: sessionDone 
 })
 ```
