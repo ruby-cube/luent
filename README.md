@@ -45,9 +45,9 @@ Sends and receives targeted messages/commands.
 <br/>
 Provides planified versions of schedulers and event listeners from Web API.
 
-[**🌴 Paravue**](https://github.com/ruby-cube/rue/tree/main/packages/paravue#goto-src)
+**🌴 Paravue**
 <br/>
-Provides planified versions of Vue’s `watch` and `computed`, component utils, and reactivity markers.
+*(coming soon)* Provides planified versions of Vue’s `watch` and `computed`, component utils, and reactivity markers.
 
 **🥀 Ephemr**
 <br/>
@@ -84,9 +84,9 @@ Provides planified versions of Vue’s `watch` and `computed`, component utils, 
 
 ***Vue Ecosystem***
 
-[**🌴 Paravue**](https://github.com/ruby-cube/rue/tree/main/packages/paravue#goto-src)
+**🌴 Paravue**
 <br/>
-Provides planified versions of Vue’s `watch` and `computed`, component utils, and reactivity markers.
+*(coming soon)* Provides planified versions of Vue’s `watch` and `computed`, component utils, and reactivity markers.
 
 **🎬 Actionry**
 <br/>
