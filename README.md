@@ -31,7 +31,7 @@ The repo contains the following categories: Event-driven/asynchronous programmin
 
 [**🪶 Planify**](https://github.com/ruby-cube/rue/tree/main/packages/planify#goto-src)
 <br/>
-The core dependency for the other tools in this category. Designed to make asynchronous, event-driven programming more clean, readable, and less prone to memory leaks.
+An event system designed to make asynchronous, event-driven programming more clean, readable, and less prone to memory leaks.
 
 [**🐟 Pêcherie**](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#goto-src)
 <br/>
