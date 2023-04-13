@@ -136,9 +136,9 @@ const [castMounted, onMounted] = createHook({
 <br/>
 
 ## Contribution
-I'm currently not looking for code contributions. However, I'm completely new to open source and would appreciate guidance from experienced open sourcerors particularly with regards to publishing to NPM, semantic versioning, managing monorepos, configuring package.json, typescript, build tools, scripts, and other dev ops stuff.
+I'm currently not looking for code contributions. However, I'm completely new to open source and would appreciate guidance from experienced open source maintainers.
 
-I'm also relatively new to software engineering itself and have been learning and building in isolation, so, to be quite honest, I don't know if what I've built and written is extremely naive. Thoughts and gentle feedback from more experienced devs would be appreciated.
+I'm also relatively new to software engineering itself and have been learning and building in isolation, so although I've done extensive research and have reasons for the decisions I've made in these projects, to be quite honest, I can't really tell how naive my solutions may be, from sheer lack of experience. Thoughts and gentle feedback from more experienced devs would be appreciated.
 
 Send a note to my gmail: ruby (dot) yiong. I would especially love to connect with someone in the Seattle area, though help from anywhere in the world would be appreciated too.
 
