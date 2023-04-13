@@ -133,7 +133,7 @@ heed(HIDE_ITEM, item, () => {
 
 ## Use Case
 
-Note that use cases are extremely rare. Message passing via an archer is unnecessary if the sender and receiver are declared in the same scope. Simple function declaration and invocation will suffice:
+Note that use cases are rare. Message passing via an archer is unnecessary if the sender and receiver are declared in the same scope. Simple function declaration and invocation will suffice:
 
 ```tsx
 // simple invocation
@@ -148,7 +148,7 @@ function reButtonClick() {
 }
 ```
 
-However, message passing becomes useful when you are working across scopes. For example, let’s say you have a function, `hideItems` that mutates component state. This can be complicated if the event handler that calls `hideItems` is registered in a component that is not directly related to the component’s whose state is being mutated. This is where Archer comes in handy.
+However, message passing becomes useful when you are working across scopes. For example, let’s say you have a function, `hideSelectedItems` that mutates component state. This can be complicated if the event handler that calls `hideSelectedItems` is registered in a component that is not directly related to the component’s whose state is being mutated. This is where Archer comes in handy.
 
 
 ```tsx
@@ -167,7 +167,7 @@ const HIDE_ITEM = defineMessage({
 // component A
 
 // script
-function hideItems(){
+function hideSelectedItems(){
     const items = getSelectedItems();
     for (const item of items) {
         send(HIDE_ITEM, { to: item }, { fade: true })
@@ -175,7 +175,7 @@ function hideItems(){
 }
 
 // template
-<div @click="hideItems">CLICK ME</div>
+<div @click="hideSelectedItems">CLICK ME</div>
 
 ```
 
