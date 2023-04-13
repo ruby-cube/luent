@@ -63,6 +63,8 @@ The function calls can potentially be transformed to `.value` during build time.
 
 Note that I still used `count.value` in the above example. The goal of this library is not to eliminate `.value`. I think it is important for developers to still conceptualize refs as refs so they don't lose sight of the reactivity and special handling it requires. The main goal is to provide reactive markers so the developer can see at a glance where reactivity is happening.
 
+⚠️ **Warning**: Ideally, `r$` would work within the template. However, due to auto-unref-ing by the Vue compiler, `r$` cannot be used in the template barring modifications to the Vue compiler.
+
 <br/>
 
 ## Reactivity Markers for Reactives
@@ -94,9 +96,6 @@ Note that in the case of reactive objects, the reactive marker functions do abso
 <br/>
 
 ⚠️ **Warning**: There is currently no way to enforce appropriate usage of these functions. It’s purely up to the developer whether the function correctly marks reactivity or not. Since they are cosmetic in nature, their usage can become incongruous during future code edits in a similar way comments can become outdated.
-
-
-⚠️ **Warning**: Ideally, `r$` would work within the template. However, due to auto-unref-ing by the Vue compiler, `r$` cannot be used in the template barring modifications to the Vue compiler.
 
 <br/>
 <br/> 
