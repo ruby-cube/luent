@@ -48,7 +48,7 @@ an alias for `queueMicrotask` from browser API. Here, microtasks are conceptuali
 
 ### Usage
 
-```jsx
+```js
 addPS(() => {
     // code that will run after the original task/handlers 
     // and previously queued microtasks finish running
@@ -63,7 +63,7 @@ planified `setImmediate` (as implemented by https://github.com/yuzujs/setImmedia
 
 ### Usage
 
-```jsx
+```js
 queueTask(() => {
     // code that will run after any previously 
     // queued tasks/events in the event loop
@@ -78,7 +78,7 @@ planified `requestAnimationFrame`, which schedules code to run before the next s
 
 ### Usage
 
-```jsx
+```js
 beforeScreenPaint(() => {
     // code that will after any previously queued rAF callbacks
     // and before the next screen paint
@@ -92,7 +92,7 @@ planified `setTimeout`
 
 ### Usage
 
-```jsx
+```js
 onTimeout(500, () => {
     // code that will run after 500ms
 });
@@ -121,7 +121,7 @@ onMouseDown(element, () => {
 
 People often name event handlers using the prefix “on-” followed by the event name, e.g. `onMouseUp`, as a concise alternative to the prefix “handle-”. When using Planify listeners, it’s helpful to distinguish handlers from listeners with a different naming convention for better clarity. In my own codebase, I use the prefix “re-”, as in “regarding” or “replying to” or “RE: Your email”, e.g. `reMouseUp`. 
 
-```jsx
+```js
 // handler
 function reMouseDown(event) {
     // handle mouse down...
@@ -137,7 +137,7 @@ function reMouseDown(event) {
 
 Template:
 
-```tsx
+```ts
 <div @mousedown="reMouseDown">{{ item }}</div>
 ```
 

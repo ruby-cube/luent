@@ -46,7 +46,7 @@ Creates an un-targeted hook.
 
 ### **Syntax**
 
-```tsx
+```ts
 const [emitter, listener] = createHook(config);
           |         |                    |
       CastHook      |               OptionalConfig
@@ -56,7 +56,7 @@ const [emitter, listener] = createHook(config);
 
 ### Basic Usage
 
-```jsx
+```js
 // module A (service)
 const [castPopulated, _onPopulated] = createHook({
     hook: "populated",
@@ -73,7 +73,7 @@ function populateTable(dataset: Data[]){
 
 ### Type Definitions
 
-```tsx
+```ts
 type CastHook = (context?: Context) => void | ReplyState;
 
 type SustainedListener = (handler?: Handler, options?: ListenerOptions) => ActiveListener;
@@ -92,7 +92,7 @@ type OptionalConfig = {
 }
 ```
 
-```tsx
+```ts
 type Context<DataAsArg, Hook, Data, ReplyMethods> = DataAsArg extends true ? Data : _Context<Hook, Data, ReplyMethods>
 
 type _Context<Hook, Data, ReplyMethods> = 
@@ -123,7 +123,7 @@ Creates a targeted hook. Emitters can target listeners using a target id.
 
 ### Syntax
 
-```tsx
+```ts
 const [emitter, listener] = createTargetedHook(config);
           |         |                            |
       CastHook      |                          Config
@@ -133,7 +133,7 @@ const [emitter, listener] = createTargetedHook(config);
 
 ### Basic Usage
 
-```tsx
+```ts
 // module A (service)
 
 const [castTablePopulated, _onTablePopulated] = createTargetedHook({
@@ -148,7 +148,7 @@ function tablePopulated(doc: Doc){
 }
 ```
 
-```jsx
+```js
 // module B (consumer)
 
 function initFormatting(doc: Doc){
@@ -160,7 +160,7 @@ function initFormatting(doc: Doc){
 
 ### Type Definitions
 
-```tsx
+```ts
 type CastTargetedHook = (target: TargetID, context?: Context) => void | ReplyState;
 
 type SustainedTargetedListener = (target: TargetID, handler?: Handler, options?: ListenerOptions) => ActiveListener;
@@ -189,7 +189,7 @@ type Config = {
 - `onceAsDefault`: *(optional)* by default, listeners are created as `SustainedListener`. If you would like the listener to be created as a `OneTimeListener`, set this option to `true`. Note that due to listener morphing, `SustainedListener` and `OneTimeListener` can behave as either sustained listeners or one-time listeners depending on the options passed in or the context of use.
 - `reply`: *(optional)* a factory function that generates state and methods to operate on that state. The listener can communicate back to the emitter by calling its methods. The mutated state will then be returned from the emitter.
     
-    ```tsx
+    ```ts
     // module A (service)
     
     const [castBeforePopulated, _beforePopulated] = createHook({
@@ -213,7 +213,7 @@ type Config = {
     }
     ```
     
-    ```tsx
+    ```ts
     // module B (consumer)
     
     function initFormatting(){

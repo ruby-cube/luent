@@ -39,7 +39,7 @@ This library eliminates the need for writing `.value` while providing visual mar
 
 ## Reactivity Markers for Refs
 
-```tsx
+```ts
 const firstName = ref("Kermit");
 const lastName = ref("The Frog");
 
@@ -72,7 +72,7 @@ The function calls can potentially be transformed to `.value` during build time.
 
 The same pattern can be applied to reactive objects:
 
-```jsx
+```js
 const item = reactive({
     content: "Type here...",
     bullet: null,

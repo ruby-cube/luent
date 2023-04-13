@@ -49,7 +49,7 @@ The system also allows for re-keying (in case of key collisions) and implementin
 
 `defineRole` takes in a config object that resembles a class definition, with a `$construct` function and methods. (credit: Code examples make references to Jim Henson's *The Frog Prince* (1971))
 
-```jsx
+```js
 // role A
 export const Frog = defineRole({
     $construct(data) {
@@ -61,7 +61,7 @@ export const Frog = defineRole({
 });
 ```
 
-```jsx
+```js
 // role B
 export const Prince = defineRole({
     $construct(data) {
@@ -75,7 +75,7 @@ export const Prince = defineRole({
 });
 ```
 
-```jsx
+```js
 // role C (composed of role A and role B)
 export const FrogPrince = defineRole({
     prereqs: {
@@ -94,7 +94,7 @@ export const FrogPrince = defineRole({
 export const createFrogPrince = FrogPrince.reifier();
 ```
 
-```jsx
+```js
 // instantiation
 const frogPrince = createFrogPrince({
     name: "Sir Robin the Brave",
@@ -114,7 +114,7 @@ frogPrince.name; // "Sir Robin the Brave"
 
 When implementing composition via Javascript classes, you may end up with a situation where the constructor of an inherited class runs redundantly.
 
-```jsx
+```js
 class Character {
     constructor() {
         console.log("setup")
@@ -144,7 +144,7 @@ const sirRobin = new FrogPrince(new Frog(), new Prince()) // logs "setup" twice
 
 With role creation, `prereqs` are gathered into a set and each prereq is run once only.
 
-```jsx
+```js
 const Character = defineRole({
     $construct(){
         console.log("setup")
@@ -173,7 +173,7 @@ const sirRobin = createFrogPrince(); // logs "setup" once
 
 In the examples above, the `reifier` method generates a function that will auto-compose the different roles into one object. However, in cases where roles interact with each other during construction, you will need to pass a manual compose function into the `reifier`:
 
-```jsx
+```js
 const Character = defineRole({
     $construct(data){
         return {
@@ -223,7 +223,7 @@ const sirRobin = createFrogPrince(data);
 
 The `confer` method of an abstract role returns an object with two properties: `props` and `methods`. These can be deconstructed, as in the example above, or spread, as in the example below:
 
-```jsx
+```js
 // manual compose
 const createFrogPrince = FrogPrince.reifier((data) => {
     const character = Character.confer(data);
@@ -250,7 +250,7 @@ When manually composing a data model, you may not always know what prereqs are n
 
 The `reifier` method also takes in a `__dev__` argument for development purposes. The `__dev__` parameter requires an object with the property `__prereqs__` that contains all the prereqs down all inheritance lines. Typescript will show an error if any roles are missing. In this way, you can easily obtain a list of what prereqs are required to create the object. In VSCode, simply *control+space* within the object brackets to see what prereqs are missing.
 
-```jsx
+```js
 // Typescript error will indicate missing properties/methods
 const createFrogPrince = FrogPrince.reifier((data) => {
     const frog = Frog.confer();
@@ -275,7 +275,7 @@ When manually composing, Être provides two collision check functions: `keyColli
 
 To rekey a prop or method, add a `__rekey__` prop to the second argument. The `__rekey__` prop is a rekey map that lets Typescript know what props and methods are being renamed to what.
 
-```tsx
+```ts
 const createFrogPrince = FrogPrince.reifier((data) => {
     const { props: { voice: froggyVoice } } = Frog.confer();
     const { props: { voice } } = Prince.confer()
@@ -309,17 +309,24 @@ if (__DEV__){
 
 When defining a role, the config’s interface property defines an interface that must be implemented either by one of the roles that inherits that role or by the manual compose function.
 
-```tsx
+```ts
 type ICharacter = {
     talk: () => void
 }
 
 const Character = defineRole({
-    interface: $type as ICharacter
+    interface: $type as ICharacter,
+    $construct(){
+        // character setup
+    },
+    exist(){ /* ... */ }
 })
 
 const Frog = defineRole({
     implements: $type as ICharacter,
+    prereqs: {
+        Character
+    },
     talk() {
         console.log("ribbit")        
     }
@@ -331,7 +338,7 @@ const Frog = defineRole({
 
 Objects can be type-checked via the `enacts` function, which takes in a role as the first argument and the object being type-checked as the second argument and returns a boolean.
 
-```jsx
+```js
 const isFrog = enacts(Frog, character);
 ```
 

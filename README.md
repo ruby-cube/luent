@@ -106,7 +106,7 @@ Typescript is highly encouraged for less headaches when defining types.
 
 Many of the functions in this repo take in configurations that are purely for typing purposes. If using pure Javascript, you can pass in an object or primitive that satisfies the type definition, for example: 
 
-```tsx
+```ts
 const [castMounted, onMounted] = createHook({
     data: { id: "" }, // enables type hints
 });
@@ -120,7 +120,7 @@ However, to make it explicit that the argument is a type definition, Rue utils p
 
 This convention opens the opportunity to remove the argument or config property at build time for leaner shipped code. 
 
-```tsx
+```ts
 import { $type } from "@rue/utils";
 
 const [castMounted, onMounted] = createHook({

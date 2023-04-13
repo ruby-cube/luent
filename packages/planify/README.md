@@ -53,7 +53,7 @@ Since Planify represents the overarching event system, this README presents more
 
 In browser and Node.js API, the word “listener” refers to the callback function passed into the `addListener` function. This to me is a misnomer and it pains me to follow this convention. For clarity, this is how terms are used within the Planify system:
 
-```jsx
+```js
 // Event: "mousedown"
 
 onMouseDown(document, () => {}, { until: onDestroyed })
@@ -62,7 +62,7 @@ targeted     target     callback       options
 listener
 ```
 
-```jsx
+```js
 // Hook: "table-populated"
 
 onTablePopulated((context) => { context.dataset })
@@ -99,7 +99,7 @@ There are two main types of listeners: one-time listeners and sustained listener
 
 **Sustained listeners** return an `ActiveListener` object. This object has a single `stop` method, which can be called to stop the listener.
 
-```jsx
+```js
 const mouseMoveListener = 
     onMouseMove(document, () => { 
         // do work 
@@ -112,7 +112,7 @@ onMouseUp(document, () => {
 
 **One-time listeners** return a `PendingOp` object, which is a cancellable `Promise`. If canceled, the handler will never run.
 
-```jsx
+```js
 const pendingOp = onTextInserted(() => {
     // do work
     return result;
@@ -134,7 +134,7 @@ Note: The `cancel` method will not survive a `.then` chain. This is by design. S
 A one-time listener can be turned into a sustained listener and vice-versa via the options parameter. The listener’s type definition will indicate whether it returns a `PendingOp` (as a one-time listener) or an `ActiveListener` (as a sustained listener). 
 Besides listener morphing, the options parameter is useful for marking listeners as one-time or sustained explicitly in the code.
 
-```jsx
+```js
 onTextInserted(() => {   // sustained listener
     // do work
 }, { sustained: true });
@@ -168,7 +168,7 @@ Handlers are called synchronously at the time of event emission. This allows for
 
 If asynchronous handling is needed, the developer can call an async scheduler or one-time listener from within the handler. In the example below, the synchonous handler calls the `addPS` scheduler (an alias for `queueMicrotask`) for asynchronous handling.
 
-```tsx
+```ts
 onPopulated(() => addPS(() => {
     // do something
 }))
@@ -176,7 +176,7 @@ onPopulated(() => addPS(() => {
 
 Alternatively, when using [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#goto-src) hooks, omit the callback function and options parameter to queue a microtask after an event is emitted via a promise:
 
-```tsx
+```ts
 onPopulated()
     .then(() => { 
         // do something
@@ -207,7 +207,7 @@ Planify provides four main cleanup strategies:
 
 One-time listeners enjoy automatic cleanup inherently. Sustained listeners can also enjoy automatic cleanup if initialized within a scope for which auto-cleanup has been defined. To enable auto-cleanup, define an auto-cleanup function before initializing an app:
 
-```tsx
+```ts
 // main.ts
 
 defineAutoCleanup((cleanup) => { // callback receives a cleanup function as the argument
@@ -223,7 +223,7 @@ const app = createApp(App);
 app.mount('#app');
 ```
 
-```jsx
+```js
 // App.vue
 
 export default defineComponent({
@@ -242,13 +242,13 @@ Note: The `onUnmounted` lifecycle hook in the example above is not the original 
 
 Specify when to stop/cancel a listener with the `until` / `unlessCanceled` property of the options argument.
     
-```jsx
+```js
 onPopulated(() => {
     // so much work...
 }, { until: onDocClosed })    
 ```
 
-```jsx
+```js
 // if the listener requires additional parameters beyond the handler:
 
 onPopulated(() => {
@@ -256,7 +256,7 @@ onPopulated(() => {
 }, { unlessCanceled: (cancel) => onTimeout(5000, cancel) }) 
 ```
 
-```jsx
+```js
 // NOT RECOMMENDED: using a non-planified listener 
 // (requires verbosity and conscientious programming to prevent memory leaks)
 
@@ -269,7 +269,7 @@ onPopulated(() => {
     
 **Important:** The cancellation scheduler (`onDocClosed` in the example below) must return a `PendingCancelOp` to ensure the cancel function is cleaned up once the handler is run. Typescript will safeguard against malformed cancellation schedulers by erroring:
     
-```jsx
+```js
 // GOOD:
 onPopulated(() => {
     // do work...
@@ -296,7 +296,7 @@ onPopulated(() => {
 
 Stop a listener by calling the stop method on an `ActiveListener`; cancel a pending op by calling the cancel method on a `PendingOp`.
     
-```jsx
+```js
 // stop an active listener
 
 const mouseMoveListener = 
@@ -351,7 +351,7 @@ function initDrag(event){
     
 The `Scene` object can alternatively be accessed from outside the scene:
 
-```jsx
+```js
 // This example doesn't represent a good use case; will replace with better example if I think of one...
 
 function initDrag(event){
@@ -391,7 +391,7 @@ Unless the developer is impeccably conscientious about cleanup, memory leaks wil
 
 Sometimes it is better for performance to target a particular instance when communicating via emitters. For this reason, [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#goto-src) and [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#goto-src) provide targeted listeners. Targeted listeners take in a targetID, which can be any type, so long as the emitter module and listener module agree on what to use as an identifier. 
 
-```tsx
+```ts
 // using an object as the targetID with Archer API
 
 // shared dependency
@@ -411,7 +411,7 @@ send(HIDE_ITEM, { to: item });
 
 If you would like to generate a deterministic string ID, Planify provides a simple ID generator that generates an ID based on a base id, optional prefixes, and an optional index.  
 
-```tsx
+```ts
 // using a generated string ID
 
 // listener module
@@ -482,7 +482,7 @@ The functions provided by [Pêcherie](https://github.com/ruby-cube/rue/tree/main
 Sets up a listener. Depending on options and config, this could behave as a one-time listener or a sustained listener.
 
 #### Syntax
-```tsx
+```ts
 const activeListener = $listen(handler, options, config)
         |                        |         |        |
  PendingOp | ActiveListener   Handler      |   ListenerConfig
@@ -490,7 +490,7 @@ const activeListener = $listen(handler, options, config)
 ```
 
 #### Type Definitions
-```tsx
+```ts
 type ListenerConfig = {
     enroll: (handler) => void, 
     remove: (handlerOrReturnVal) => void, 
@@ -503,7 +503,7 @@ type ListenerConfig = {
 Sets up a one-time listener.
 
 #### Syntax
-```tsx
+```ts
 const pendingOp = $schedule(handler, options, config)
            |                  |         |        |
       PendingOp            Handler      |   SchedulerConfig
@@ -511,7 +511,7 @@ const pendingOp = $schedule(handler, options, config)
 ```
 
 #### Type Definitions
-```tsx
+```ts
 type SchedulerConfig = {
     enroll: (handler) => void, 
     remove: (handlerOrReturnVal) => void, 
@@ -525,7 +525,7 @@ type PendingOp = Promise<ReturnType<Handler>> & { cancel: () => void }
 Sets up a sustained listener.
 
 #### Syntax
-```tsx
+```ts
 const activeListener = $subscribe(handler, options, config)
            |                        |         |        |
         ActiveListener            Handler     |   SubscribeConfig
@@ -533,7 +533,7 @@ const activeListener = $subscribe(handler, options, config)
 ```
 
 #### Type Definitions
-```tsx
+```ts
 type SubscribeConfig = {
     enroll: (handler) => void, 
     remove: (handlerOrReturnVal) => void, 
@@ -546,7 +546,7 @@ type ActiveListener = { stop: () => void }
 ### Basic Usage
 
 The `enroll` and `remove` functions must define how a handler is registered and removed. Both functions are passed a wrapped handler (`cb` in the example). Note that you must pass the listener and remover the *wrapped handler*, not the original handler. If, for example, you would like to planify an Node.js EventEmitter event, you might write something like this:
-```tsx
+```ts
 // planifying a Node EventEmitter listener
 
 export function onDataReceived(handler, options?) {
@@ -561,7 +561,7 @@ export function onDataReceived(handler, options?) {
 }
 ```
 If the `enroll` function returns something other than `void`, the return value will be passed to the remove function instead of the wrapped handler.
-```tsx
+```ts
 // planifying a setTimeout
 
 export function onTimeout(delay, handler, options?) {
@@ -579,7 +579,7 @@ export function onTimeout(delay, handler, options?) {
 
 To provide better developer experience for users of the listener/scheduler, use Typescript generics so that `$listen` and `$schedule` return the appropriate type based on the callback and options passed into it.
 
-```tsx
+```ts
 // planifying Vue's `watch`
 
 type Watch = typeof watch;
@@ -600,7 +600,7 @@ OPT extends ListenerOptions & WatchOptions,
 }
 ```
 
-```tsx
+```ts
 // planifying `requestAnimationFrame`
 
 export function beforeScreenPaint<
@@ -626,7 +626,7 @@ Event-driven code is notoriously difficult to debug. Additional support for easi
 
 - [ ]  `dataAsArg` blocks VSCode’s Intellisense when configuring the creation of a hook or message. A work-around (for until I fix this) is to temporarily comment out the `dataAsArg: true` option when you want to access Intellisense.
     
-    ```jsx
+    ```js
     // The issue:
     const [castPopulated, _onPopulated] = createHook({
         hook: "populated",
@@ -635,7 +635,7 @@ Event-driven code is notoriously difficult to debug. Additional support for easi
         // Intellisense (via CTRL+SPACE) fails to show rest of the options :(
     });
     ```
-    ```jsx
+    ```js
     // Temporary fix
     const [castPopulated, _onPopulated] = createHook({
         hook: "populated",

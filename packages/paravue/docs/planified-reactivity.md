@@ -38,7 +38,7 @@ A planified version of `watch`. `onChange` differs from the `watch` in two ways:
 
 ### Usage
 
-```jsx
+```js
 onChange(() => item.bullet, (value) => {
     // do stuff
 }, { until: docClosed })
@@ -51,7 +51,7 @@ A planified version of `computed`.  `compute` differs from `computed` simply in 
 
 ### Usage
 
-```tsx
+```ts
 const fullName = compute(() => firstName.value + " " + lastName.value, { 
     until: sessionDone 
 })
@@ -62,7 +62,7 @@ const fullName = compute(() => firstName.value + " " + lastName.value, {
 
 Auto-cleanup can be achieved using the Scene API
 
-```jsx
+```js
 import { beginScene } from "@rue/planify"
 
 // ...
