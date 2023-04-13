@@ -10,9 +10,7 @@
 
 ## Overview & Motivation
 
-Event-driven programming enables loose-coupling, proper delegation of responsibilities, and extensibility, improving maintainability of complex applications.
-
-However, memory leaks and stale callbacks are an inevitable concern when it comes to event subscription, and while many event systems do provide methods of cleanup, the ones I’ve encountered have felt somewhat cumbersome and unintuitive to me. 
+Event-driven programming enables loose-coupling, proper delegation of responsibilities, and extensibility, improving maintainability of complex applications. However, memory leaks and stale callbacks are an inevitable concern when it comes to event subscription, and while many event systems do provide methods of cleanup, the ones I’ve encountered have felt somewhat cumbersome and unintuitive to me. 
 
 Performance is another potential concern when it comes to event-driven architecture. When an emitter emits too broadly, listeners are forced to filter out the majority of triggered events in order to respond to the event that is applicable to their particular instance. That is potentially a lot of extraneous function calls.
 
