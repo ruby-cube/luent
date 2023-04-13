@@ -95,6 +95,9 @@ Note that in the case of reactive objects, the reactive marker functions do abso
 
 ⚠️ **Warning**: There is currently no way to enforce appropriate usage of these functions. It’s purely up to the developer whether the function correctly marks reactivity or not. Since they are cosmetic in nature, their usage can become incongruous during future code edits in a similar way comments can become outdated.
 
+
+⚠️ **Warning**: Ideally, `r$` would work within the template. However, due to auto-unref-ing by the Vue compiler, `r$` cannot be used in the template barring modifications to the Vue compiler.
+
 <br/>
 <br/> 
 
