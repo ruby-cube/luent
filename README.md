@@ -13,7 +13,7 @@
 
 ## Overview
 
-Rue.js is a collection of tools I created for myself in the process of building a fairly complex app. These Typescript-enhanced tools aim to support maintainability and extensibility as an app becomes more complex and thus more prone to scattered logic and tight coupling of unrelated modules. 
+Rue.js is a collection of tools I created in the process of building a fairly complex app. These Typescript-enhanced tools aim to support maintainability and extensibility as an app becomes more complex and thus more prone to scattered logic and tight coupling of unrelated modules. 
 
 The repo contains the following categories: Event-driven/asynchronous programming, data management, control flow, and Vue reactivity.
 
@@ -96,7 +96,7 @@ Provides planified versions of Vue’s `watch` and `computed`, component utils, 
 
 ## Compatibility
 
-While most of the tools are theoretically framework-agnostic, they were built with Vue 3 in mind and have not been tested with other frameworks. While some of the tools leverage Vue 3’s (awesome!) reactivity system, since Vue 3 reactivity is decoupled from the Vue component framework, these tools can be used apart from Vue components, with any other framework or vanilla javascript.
+While most of the tools are theoretically framework-agnostic, they were built with Vue 3 in mind and have not been tested with other frameworks. Note that since Vue 3 reactivity is decoupled from the Vue component framework, tools that leverage Vue 3's reactivity system can be use outside of Vue apps. (That said, I highly recommend the Vue component framework for its clarity of concepts and thoughtful design.)
 
 Typescript is highly encouraged for less headaches when defining types.
 
