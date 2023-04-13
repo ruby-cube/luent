@@ -102,17 +102,6 @@ Typescript is highly encouraged for less headaches when defining types.
 
 <br/>
 
-## Conventions
-
-Some conventions you may notice in the source code and the examples:
-
-- Development-only variables are often prefixed with double underscore to be removed at build time.
-- A dollar sign prefix `$` is used to indicate some sort of specialness. I use it in my codebases and examples to indicate the following:
-    - a macro variable that will be (or potentially will be) eliminated or transformed at build time
-    - a variable that serves as a stand-in until the actual value is available to plug in
-    - in the Être framework, a role object
-<br/>
-
 ## The `$type` variable
 
 Many of the functions in this repo take in configurations that are purely for typing purposes. If using pure Javascript, you can pass in an object or primitive that satisfies the type definition, for example: 
@@ -149,7 +138,7 @@ const [castMounted, onMounted] = createHook({
 ## Contribution
 I'm currently not looking for code contributions. However, I'm completely new to open source and would appreciate guidance from experienced open sourcerors particularly with regards to publishing to NPM, semantic versioning, managing monorepos, configuring package.json, typescript, build tools, scripts, and other dev ops stuff.
 
-I'm also relatively new to software engineering itself and have been learning and building in isolation, so, to be quite honest, I don't know if what I've built and written is extremely naive. I'm not even clear on whether [Planify](https://github.com/ruby-cube/rue/tree/main/packages/planify#goto-src) and [Être](https://github.com/ruby-cube/rue/tree/main/packages/etre#goto-src) are considered libraries or frameworks. Thoughts and gentle feedback from more experienced devs would be appreciated.
+I'm also relatively new to software engineering itself and have been learning and building in isolation, so, to be quite honest, I don't know if what I've built and written is extremely naive. Thoughts and gentle feedback from more experienced devs would be appreciated.
 
 Send a note to my gmail: ruby (dot) yiong. I would especially love to connect with someone in the Seattle area, though help from anywhere in the world would be appreciated too.
 
@@ -163,11 +152,6 @@ I am heavily influenced and greatly inspired by Vue and its brilliant, elegant, 
 
 <br>
 
-[**Quill**](https://quilljs.com/)
-
-The Quill docs and codebase opened my eyes to how beautiful and poetic an open source codebase can be without compromising the end product. I previously felt I had to suppressed the urge to write poetic code. Quill helped me realize that as long as it doesn’t impede clarity and I’m working on my own project… why not? :)
-
-<br/>
 
 ## Jiufen
 
