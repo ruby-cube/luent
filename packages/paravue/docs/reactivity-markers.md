@@ -27,13 +27,11 @@ This library eliminates the need for writing `.value` while providing visual mar
 
 **for refs:**
 - `r$(ref)`
-- `nr(ref)`
 - `set$(ref, value)`
 
 **for reactives:**
 - `v$(reactive.prop)`
-- `nv(reactive.prop)`
-- `set$: reactive.prop = value`
+- `$(reactive.prop = value)`
 
 <br/>
 
@@ -45,13 +43,7 @@ const lastName = ref("The Frog");
 
 
 // reactive reads
-const fullName = computed(() => r$(firstName) + " " + r$(lastName));
-
-
-// "non-reactive" reads
-if (nr(firstName).startsWith("K")) {
-    // do this
-}
+const fullName = computed(() => `${r$(firstName)} ${r$(lastName)}`);
 
 
 // reactive set
@@ -61,8 +53,6 @@ set$(firstName, "Sir Robin")
 // being passed around (no reactive marker needed)
 doSomething(firstName)
 ```
-
-Note that the difference between `r$` and `nr` is purely cosmetic. They are the same function, which returns the `.value` value; the name difference simply allows the developer to see at a glance where reactive tracking is happening.
 
 The function calls can potentially be transformed to `.value` during build time.
 
@@ -84,28 +74,19 @@ const item = reactive({
 const enthusedContent = computed(() => v$(item.content) + "!")
 
 
-// "non-reactive" reads
-if (bullet === nv(item.bullet)) {
-   // do that
-}
-
-
 // reactive set
-set$: item.bullet = "•"  // co-opting Javascript labels*
+$(item.bullet = "•")  // yes, this is valid Javascript
 
 
 // being passed around (no reactive marker needed)
 doSomething(item)
 ```
 
-Note that in the case of reactive objects, the reactive marker functions do absolutely nothing functionally and simply returns the input value. The sole purpose is to make reactivity explicit to the developer. While this may seem extraneous, it offers consistency between refs and reactives as well as keeps the door open for potential build time transformations, such as transforming `nv(item.bullet)` to `toRaw(item).bullet`. Any extraneous calls can also be removed during build time.
+Note that in the case of reactive objects, the reactive marker functions do absolutely nothing functionally and simply returns the input value. The sole purpose is to make reactivity explicit to the developer. While this may seem extraneous, it offers consistency between refs and reactives. Any extraneous calls can also be removed during build time.
 
-⚠️ * co-opting Javascript’s features is controversial.. but it’s temptingly the most elegant and least error-prone solution as compared to alternatives:
-- passing in key and value, `set$(item, “bullet”, “•”)`
-- callback, `set$(() ⇒ item.bullet = “•”)` 
-- co-opting a function call, `set$(item.bullet = “•”)` (yes, this is valid javascript)
+<br/>
 
-⚠️ **Warning**: There are no safeguards in place for appropriate usage of these functions. It’s purely up to the developer whether the function correctly marks reactivity or not. Since they are cosmetic in nature, their usage can become incongruous during future code edits in a similar way comments can become outdated.
+⚠️ **Warning**: There is currently no way to enforce appropriate usage of these functions. It’s purely up to the developer whether the function correctly marks reactivity or not. Since they are cosmetic in nature, their usage can become incongruous during future code edits in a similar way comments can become outdated.
 
 <br/>
 <br/> 
