@@ -152,6 +152,12 @@ I am heavily influenced and greatly inspired by Vue and its brilliant, elegant, 
 
 <br>
 
+[**Quill**](https://quilljs.com/)
+
+The Quill docs and codebase opened my eyes to how beautiful and poetic an open source codebase can be without compromising the end product. I previously felt I had to suppressed the urge to write poetic code. Quill helped me realize that as long as it doesn’t impede clarity and I’m working on my own project… why not? :)
+
+<br/>
+
 ## Jiufen
 
 Perusing a complex codebase, with its myriad paths of connection, is perhaps like wandering the labyrinthine lantern-lined walkways and underground tunnels of [Jiufen](https://www.nationalgeographic.com/travel/article/exploring-the-magic-of-taiwans-spirited-away-city). What you find is confusing and chaotic, astonishing and magical, yet somehow built on logic.
