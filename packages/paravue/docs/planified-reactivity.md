@@ -10,7 +10,7 @@
 
 ## Overview
 
-For rare use cases, where maybe you want to pass `watch` as a cleanup scheduler to a planified listener or you want to specify when to stop computing a value. Or you are working outside of a Vue component and want auto-cleanup using the Scene API. See Planify for an explanation of the Planify system.
+This library is for rare use cases, where maybe you want to pass `watch` as a cleanup scheduler to a planified listener or you want to specify when to stop computing a value. Or you are working outside of a Vue component and want auto-cleanup using the [Scene API](https://github.com/ruby-cube/rue/tree/main/packages/planify#scene-auto-cleanup). See [Planify](https://github.com/ruby-cube/rue/tree/main/packages/planify#goto-src) for an explanation of the Planify system.
 
 <br/>
 
