@@ -47,7 +47,7 @@ The system also allows for re-keying (in case of key collisions) and implementin
 
 ## Basic Usage
 
-`defineRole` takes in a config object that resembles a class definition, with a `$construct` function and methods.
+`defineRole` takes in a config object that resembles a class definition, with a `$construct` function and methods. (credit: Code examples make references to Jim Henson's *The Frog Prince* (1971))
 
 ```jsx
 // role A
