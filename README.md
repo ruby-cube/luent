@@ -152,7 +152,6 @@ I am heavily influenced and greatly inspired by Vue and its brilliant, elegant, 
 
 <br>
 
-
 ## Jiufen
 
 Perusing a complex codebase, with its myriad paths of connection, is perhaps like wandering the labyrinthine lantern-lined walkways and underground tunnels of [Jiufen](https://www.nationalgeographic.com/travel/article/exploring-the-magic-of-taiwans-spirited-away-city). What you find is confusing and chaotic, astonishing and magical, yet somehow built on logic.
