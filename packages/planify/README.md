@@ -423,12 +423,11 @@ export default defineComponent({
     setup(props){
         const { item, index } = props;
 
-        heed(HIDE_ITEM, genTargetID({
+        heed(HIDE_ITEM, genTargetID({  // "Mirror-InfoPanel_item01_9"
             id: item.id, // "item01"
             prefixes: ["Mirror", "InfoPanel"], 
             index: index // 9
-        }), // "Mirror-InfoPanel_item01_9"
-        () => {
+        }), () => {
             // mutate local state to hide the item
         });
     }
