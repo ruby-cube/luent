@@ -12,7 +12,7 @@
 
 Reactivity markers address two seemingly conflicting desires in the Vue community. On the one hand, people have expressed interest in eliminating `.value` , resulting in the experimental but ultimately abandoned Reactivity Transform. On the other hand, people have also expressed appreciation for how `.value` serves to make reactivity more explicit.
 
-This library eliminates the need for writing `.value` while providing visual markers for reactivity for both refs and reactives that can be used in both SFC and non-SFC Vue apps.
+This library reduces the need for writing `.value` while providing visual markers for reactivity for both refs and reactives that can be used in both SFC and non-SFC Vue apps.
 
 <br/>
 
@@ -38,23 +38,30 @@ This library eliminates the need for writing `.value` while providing visual mar
 ## Reactivity Markers for Refs
 
 ```ts
-const firstName = ref("Kermit");
-const lastName = ref("The Frog");
+const count = ref(0);
 
 
 // reactive reads
-const fullName = computed(() => `${r$(firstName)} ${r$(lastName)}`);
+const doubleCount = computed(() => r$(count) * 2);
+
+
+// non-reactive reads  (see note on using .value)
+if (count.value === 1) {
+    /* do stuff */
+}
 
 
 // reactive set
-set$(firstName, "Sir Robin")
+set$(count, count.value + 1)
 
 
 // being passed around (no reactive marker needed)
-doSomething(firstName)
+doSomething(count)
 ```
 
-The function calls can potentially be transformed to `.value` during build time.
+The function calls can potentially be transformed to `.value` during build time. 
+
+Note that I still used `count.value` in the above example. The goal of this library is not to eliminate `.value`. I think it is important for developers to still conceptualize refs as refs so they don't lose sight of the reactivity and special handling it requires. The main goal is to provide reactive markers so the developer can see at a glance where reactivity is happening.
 
 <br/>
 
