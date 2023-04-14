@@ -5,7 +5,7 @@
 
 # Rue
 
-<aside style="background-color: #444">
+<aside>
 ⚠️ <b>Experimental:</b> The projects in this repo are works-in-progress, not well-tested, with volatile APIs. Look and play, but definitely don’t use…
 </aside>
 <br/>
