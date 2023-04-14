@@ -10,7 +10,7 @@
 
 ## Overview
 
-Composition over inheritance, they say. How about both? Être is an exploration into creating a system of composition that retains elements of inheritance.
+Prefer composition over inheritance, they say. How about both? Être is an exploration into creating a system of composition that retains elements of inheritance.
 
 </br>
 
