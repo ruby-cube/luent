@@ -1,6 +1,8 @@
 #### [goto: src](https://github.com/ruby-cube/rue)
 <p align="center">
+<picture>
   <img width="240" src="https://github.com/ruby-cube/rue/blob/main/rue-logo%403x.png" alt="rue logo"/>
+  </picture>
 </p>
 
 # Rue
