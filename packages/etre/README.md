@@ -261,7 +261,7 @@ const createFrogPrince = FrogPrince.reifier((data) => {
     __prereqs__: { 
         Frog,
         Prince
-        // VSCode: control+space for intellisense to show other required roles: $Character
+        // VSCode: control+space for intellisense to show other required roles: Character
     }
 });
 ```
