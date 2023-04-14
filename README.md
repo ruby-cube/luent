@@ -47,10 +47,6 @@ Sends and receives targeted messages/commands.
 <br/>
 Provides planified versions of schedulers and event listeners from Web API.
 
-**🌴 Paravue**
-<br/>
-*(coming soon)* Provides planified versions of Vue’s `watch` and `computed`, component utils, and reactivity markers.
-
 **🥀 Ephemr**
 <br/>
 *(coming soon-ish)* Creates state machines using planified events and hooks
