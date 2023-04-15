@@ -1,5 +1,6 @@
-#### [goto: src](#)
-[@rue](https://github.com/ruby-cube/rue#goto-src)  &nbsp;&nbsp;|&nbsp; &nbsp;  [planify](https://github.com/ruby-cube/rue/tree/main/packages/planify#goto-src)  &nbsp;&nbsp;|&nbsp; &nbsp; [thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#goto-src)  &nbsp;&nbsp;|&nbsp; &nbsp; **pecherie**  &nbsp;&nbsp;|&nbsp; &nbsp; [archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#goto-src)
+<p><a id="readme-top" href="#"><b>goto: src</b></a></p>
+
+[@rue](https://github.com/ruby-cube/rue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp;  [planify](https://github.com/ruby-cube/rue/tree/main/packages/planify#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; [thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; **pecherie**  &nbsp;&nbsp;|&nbsp; &nbsp; [archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top)
 # Pêcherie 🐟
 
 <aside>
@@ -12,7 +13,7 @@
 
 Pêcherie is an exploration into how to make asynchronous and event-driven programming more developer-friendly. It exposes an API that creates custom events (referred to as hooks in this library), targeted and un-targeted.
 
-Pêcherie is based on the Planify event system. See [Planify](https://github.com/ruby-cube/rue/tree/main/packages/planify#goto-src) for an overview of foundational concepts as well as examples and explanations of one-time listeners vs sustained listeners, preventing memory leaks, and targeted listeners.
+Pêcherie is based on the Planify event system. See [Planify](https://github.com/ruby-cube/rue/tree/main/packages/planify#readme-top) for an overview of foundational concepts as well as examples and explanations of one-time listeners vs sustained listeners, preventing memory leaks, and targeted listeners.
 
 <p align="right"><a href="#">[src]</a></p>
 
@@ -28,7 +29,7 @@ Pêcherie is based on the Planify event system. See [Planify](https://github.com
 - [Pêcherie API](#pecherie-api)
 - [Hook Configuration](#hook-configuration)
 - [Target IDs](#target-ids)
-<p align="right"><a href="#goto-src">[top]</a></p>
+<p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Pecherie API
 
@@ -226,6 +227,6 @@ type Config = {
 
 The targetID can be any type so long as the emitter module and listener module agree on what to use as an identifier. See [Planify: Targeted Listeners](https://github.com/ruby-cube/rue/tree/main/packages/planify#targeted-listeners) for more information on targeted listeners and how to generate deterministic target ids.
 
-<p align="right"><a href="#goto-src">[top]</a></p>
+<p align="right"><a href="#readme-top">[top]</a></p>
 
 © 2023 - present [Ruby Y Wang](https://github.com/ruby-cube)

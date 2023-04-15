@@ -1,5 +1,6 @@
-#### [goto: src](#)
-[@rue](https://github.com/ruby-cube/rue#goto-src)  &nbsp;&nbsp;|&nbsp; &nbsp;  **planify**  &nbsp;&nbsp;|&nbsp; &nbsp; [thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#goto-src)  &nbsp;&nbsp;|&nbsp; &nbsp; [pecherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#goto-src)  &nbsp;&nbsp;|&nbsp; &nbsp; [archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#goto-src)
+<p><a id="readme-top" href="#"><b>goto: src</b></a></p>
+
+[@rue](https://github.com/ruby-cube/rue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp;  **planify**  &nbsp;&nbsp;|&nbsp; &nbsp; [thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; [pecherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; [archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top)
 # Planify 🪶
 
 <aside>
@@ -16,7 +17,7 @@ Performance is another potential concern when it comes to event-driven architect
 
 This project is the result of an exploration into how an event system might include a developer-friendly cleanup interface for better memory leak prevention as well as a method of targeted listening for better performance. 
 
-Since Planify represents the overarching event system, this README presents more of a discussion of foundational concepts within the system rather than practical API usage. Because Planify is primarily a supporting dependency for other libraries, many examples will reference the APIs of other Rue libraries such as [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#goto-src), [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#goto-src), and [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#goto-src). 
+Since Planify represents the overarching event system, this README presents more of a discussion of foundational concepts within the system rather than practical API usage. Because Planify is primarily a supporting dependency for other libraries, many examples will reference the APIs of other Rue libraries such as [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top), [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top), and [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top). 
 
 <p align="right"><a href="#">[src]</a></p>
 
@@ -47,7 +48,7 @@ Since Planify represents the overarching event system, this README presents more
 - [Planify API](#planify-api)
 - [Planned Features](#planned-features)
 - [Known Issues](#known-issues)
-<p align="right"><a href="#goto-src">[top]</a></p>
+<p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Concepts
 
@@ -85,9 +86,9 @@ Planify supports four distinct categories of asynchronous progamming:
 - scheduling callbacks
 
 These Rue libraries address the corresponding categories:
-- [**Thread**](https://github.com/ruby-cube/rue/tree/main/packages/thread#goto-src): user events & scheduling callbacks
-- [**Pêcherie**](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#goto-src): application events & process hooks
-- [**Archer**](https://github.com/ruby-cube/rue/tree/main/packages/archer#goto-src): messages/commands
+- [**Thread**](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top): user events & scheduling callbacks
+- [**Pêcherie**](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top): application events & process hooks
+- [**Archer**](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top): messages/commands
 
 The example listeners in this README (usually prefixed with "on" or "before") represent listeners created via one of the above libraries.
 
@@ -158,7 +159,7 @@ Listeners can also morph from their default depending on the usage context. For 
 
 ### Schedulers
 
-Schedulers are one-time listeners that cannot be converted into a sustained listeners. These are typically functions that queue a task to the main thread such as: `queueTask`, `beforeScreenPaint` (planified `requestAnimationFrame`), and `onTimeout` (planified `setTimeout`). See [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#goto-src) for more on existing schedulers.
+Schedulers are one-time listeners that cannot be converted into a sustained listeners. These are typically functions that queue a task to the main thread such as: `queueTask`, `beforeScreenPaint` (planified `requestAnimationFrame`), and `onTimeout` (planified `setTimeout`). See [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top) for more on existing schedulers.
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
@@ -174,7 +175,7 @@ onPopulated(() => addPS(() => {
 }))
 ```
 
-Alternatively, when using [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#goto-src) hooks, omit the callback function and options parameter to queue a microtask after an event is emitted via a promise:
+Alternatively, when using [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top) hooks, omit the callback function and options parameter to queue a microtask after an event is emitted via a promise:
 
 ```ts
 onPopulated()
@@ -389,7 +390,7 @@ Unless the developer is impeccably conscientious about cleanup, memory leaks wil
 
 ## Targeted Listeners
 
-Sometimes it is better for performance to target a particular instance when communicating via emitters. For this reason, [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#goto-src) and [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#goto-src) provide targeted listeners. Targeted listeners take in a targetID, which can be any type, so long as the emitter module and listener module agree on what to use as an identifier. 
+Sometimes it is better for performance to target a particular instance when communicating via emitters. For this reason, [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top) and [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top) provide targeted listeners. Targeted listeners take in a targetID, which can be any type, so long as the emitter module and listener module agree on what to use as an identifier. 
 
 ```ts
 // using an object as the targetID with Archer API
@@ -474,7 +475,7 @@ function workHard(item, index){
 
 ## Planify API
 
-The functions provided by [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#goto-src), [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#goto-src), [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#goto-src), and [Paravue](https://github.com/ruby-cube/rue/tree/main/packages/paravue#goto-src) should cover most use cases. However, if you would like to planify an existing listener or scheduler, Planify provides the `$listen`, `$schedule`, and `$subscribe` functions to acheive this.
+The functions provided by [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top), [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top), [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top), and [Paravue](https://github.com/ruby-cube/rue/tree/main/packages/paravue#readme-top) should cover most use cases. However, if you would like to planify an existing listener or scheduler, Planify provides the `$listen`, `$schedule`, and `$subscribe` functions to acheive this.
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
@@ -645,6 +646,6 @@ Event-driven code is notoriously difficult to debug. Additional support for easi
     });
     ```
 
-<p align="right"><a href="#goto-src">[top]</a></p>
+<p align="right"><a href="#readme-top">[top]</a></p>
 
 © 2023 - present [Ruby Y Wang](https://github.com/ruby-cube)
