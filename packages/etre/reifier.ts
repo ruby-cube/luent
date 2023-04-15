@@ -94,14 +94,14 @@ export function reifier<
 
         castComposed(model)
         return <Cast>model as WithoutSymbolKeys_Role<$ROL, RKYMP> extends WithoutSymbolKeys_ReturnOfCompose<CMP> ?
-            _Role<$ROL, INCLUDE_ROLE_MARKERS, "", RKYMP, "$CoreRole"> : "Error: Compose function returns excess properties. Additional properties must be added via `defineRole`";
+            _Role<$ROL, INCLUDE_ROLE_MARKERS, "", RKYMP, "$CoreRole"> : "Error: Compose function returns excess properties. Additional properties must be added via `role`";
     }
 
     return create;
 }
 
 export type HelpMe<$ROL extends $Role, RKYMP extends { [key: string]: { [key: string]: string; }; }, CMP extends (...args: any[]) => any> = WithoutSymbolKeys_Role<$ROL, RKYMP> extends WithoutSymbolKeys_ReturnOfCompose<CMP> ?
-    _Role<$ROL, INCLUDE_ROLE_MARKERS, "", RKYMP, "$CoreRole"> : "Error: Compose function returns excess properties. Additional properties must be added via `defineRole`";
+    _Role<$ROL, INCLUDE_ROLE_MARKERS, "", RKYMP, "$CoreRole"> : "Error: Compose function returns excess properties. Additional properties must be added via `role`";
 export type ComposeFunction<DAT, $ROL extends $Role, RKYMP extends { [key: string]: { [key: string]: string; }; }> = (data: DAT) => { [Key in KeysOfRole<$ROL, OMIT_ROLE_MARKERS, "", RKYMP, "$CoreRole">]: ValueInRole<$ROL, Key, OMIT_ROLE_MARKERS, "", RKYMP, "$CoreRole"> }
 
 

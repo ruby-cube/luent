@@ -1,11 +1,11 @@
 import { describe, test, expect, vi } from "vitest";
-import { Data, defineRole } from "../Role";
+import { Data, role } from "../Role";
 
 describe("reifer", () => {
 
     test("CASE: Reify a single role", () => {
 
-        const $Frog = defineRole({
+        const $Frog = role({
             $construct(data: Data<{ name: string }>) {
                 return {
                     name: data.name,
@@ -32,7 +32,7 @@ describe("reifer", () => {
 
     test("CASE: Reify a single role with auto compose", () => {
 
-        const $Frog = defineRole({
+        const $Frog = role({
             $construct(data: Data<{ name: string }>) {
                 return {
                     name: data.name,

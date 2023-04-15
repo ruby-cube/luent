@@ -1,4 +1,4 @@
-export { defineRole } from "./Role"
+export { role } from "./Role"
 export { keyCollisionCheck, roleCollisionCheck } from "./reifier"
 export { defineTypeCheck, enacts } from "./typecheck"
 export type * from "./Role"

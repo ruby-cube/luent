@@ -73,7 +73,7 @@ export type $Role = {
 
 
 
-export function defineRole<CFG extends {
+export function role<CFG extends {
     marker?: { [key: symbol]: any };
     $construct?: (...args: any[]) => any;
     prereqs?: { [key: string]: $Role };
@@ -217,7 +217,7 @@ export function resetConferCount() {
 // export function useRoleDefiner<H>(lifecycleHooks?: H) {
 //     const hooks = lifecycleHooks ? lifecycleHooks : {};
 
-//     function defineRole<CFG extends {
+//     function role<CFG extends {
 //         marker?: { [key: symbol]: any };
 //         $construct?: (this: {
 //             onComposed: (callback: (ctx: {
@@ -273,11 +273,11 @@ export function resetConferCount() {
 //             [_MARKER_]: MRK;
 //         }
 //     }
-//     return defineRole;
+//     return role;
 // }
 
 
-// export const defineRole = useRoleDefiner();
+// export const role = useRoleDefiner();
 
 
 // export let conferCount = 0;

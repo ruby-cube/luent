@@ -35,7 +35,7 @@ Archer is a system for sending and receiving targeted messages/commands across s
 
 [`send(MESSAGE, {to: targetID }, data)`](https://github.com/ruby-cube/rue/tree/main/packages/archer#sendmessage-to-targetid--data)
 
-[`re(MESSAGE, targetID, callback)`](https://github.com/ruby-cube/rue/tree/main/packages/archer#heedmessage-targetid-handler)
+[`re(MESSAGE, targetID, callback)`](https://github.com/ruby-cube/rue/tree/main/packages/archer#remessage-targetid-handler)
 
 </br>
 
