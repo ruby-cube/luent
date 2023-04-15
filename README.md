@@ -1,4 +1,4 @@
-<p><a id="readme-top" href="#"><b>goto: src</b></a></p>
+<nav><a id="readme-top" href="#"><b>goto: src</b></a></nav>
 
 <p align="center">
 <picture>

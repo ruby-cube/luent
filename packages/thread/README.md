@@ -1,4 +1,4 @@
-<p><a id="readme-top" href="#"><b>goto: src</b></a></p>
+<nav><a id="readme-top" href="#"><b>goto: src</b></a></nav>
 
 [@rue](https://github.com/ruby-cube/rue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp;  [planify](https://github.com/ruby-cube/rue/tree/main/packages/planify#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; **thread**  &nbsp;&nbsp;|&nbsp; &nbsp; [pecherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; [archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top)
 # Thread ⏳

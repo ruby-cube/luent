@@ -1,4 +1,4 @@
-<p><a id="readme-top" href="#"><b>goto: src</b></a></p>
+<nav><a id="readme-top" href="#"><b>goto: src</b></a></nav>
 
 [@rue](https://github.com/ruby-cube/rue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp;  **etre**  &nbsp;&nbsp;|&nbsp; &nbsp; modos
 # Être 🪴
