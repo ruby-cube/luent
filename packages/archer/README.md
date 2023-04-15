@@ -91,7 +91,7 @@ type Data = any;
 
 ## `re(MESSAGE, targetID, handler)`
 
- Called by the receiver. Defines how to handle the message.
+ Called by the receiver. Defines how to handle the message. Returns the handler.
 
 ### Syntax
 
