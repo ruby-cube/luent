@@ -67,9 +67,9 @@ export function send<
 }
 
 
-export type HeedReturn<MSG, CB extends Callback, OPT extends ListenerOptions> = MSG extends { onceAsDefault: true } ? OneTimeListenerReturn<CB, OPT, CB extends MaybeBadScheduler<OPT, CB> ? CB : never, MaybeBadScheduler<OPT, CB>> : SustainedListenerReturn<CB, OPT, CB extends MaybeBadScheduler<OPT, CB> ? CB : never, MaybeBadScheduler<OPT, CB>>;
+// export type HeedReturn<MSG, CB extends Callback, OPT extends ListenerOptions> = MSG extends { onceAsDefault: true } ? OneTimeListenerReturn<CB, OPT, CB extends MaybeBadScheduler<OPT, CB> ? CB : never, MaybeBadScheduler<OPT, CB>> : SustainedListenerReturn<CB, OPT, CB extends MaybeBadScheduler<OPT, CB> ? CB : never, MaybeBadScheduler<OPT, CB>>;
 
-export function heed<
+export function re<
     MSG extends MessageConfig,
     NME extends MSG extends { message: infer N } ? N : undefined,
     USE extends MSG extends { reply: infer S } ? S extends UseHookState ? S : () => { state: {} } : () => { state: {}, methods: {} },
@@ -78,12 +78,12 @@ export function heed<
     $DAT extends MSG extends { data: infer C } ? C : {},
     OPT extends ListenerOptions,
     CB extends (ctx: ARG) => unknown,
->(MESSAGE: MSG, id: $TGT, callback: CB, options?: OPT): HeedReturn<MSG, CB, OPT> {
+>(MESSAGE: MSG, id: $TGT, callback: CB, options?: OPT): CB {
     const { onceAsDefault } = MESSAGE;
     const callbackMap = messageMap.get(MESSAGE);
     if (callbackMap == null) throw new Error("Cannot find callbackMap") //TODO: write a more helpful error message
 
-    return <Cast>$listen(callback, options, {
+    $listen(callback, options, {
         enroll: (callback) => {
             callbackMap.set(id, callback)
         },
@@ -91,7 +91,9 @@ export function heed<
             callbackMap.delete(id)
         },
         onceAsDefault
-    }) as HeedReturn<MSG, CB, OPT>
+    })
+
+    return callback;
 }
 
 

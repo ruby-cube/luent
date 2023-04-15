@@ -401,7 +401,7 @@ const HIDE_ITEM = defineMessage({
 });
 
 // listener module
-heed(HIDE_ITEM, item, () => {
+re(HIDE_ITEM, item, () => {
     // mutate local state to hide the item
 });
 
@@ -416,14 +416,14 @@ If you would like to generate a deterministic string ID, Planify provides a simp
 
 // listener module
 import { genTargetID } from "@rue/planify";
-import { heed } from "@rue/archer"
+import { re } from "@rue/archer"
 
 export default defineComponent({
     props: ["index", "item"],
     setup(props){
         const { item, index } = props;
 
-        heed(HIDE_ITEM, genTargetID({  // "Mirror-InfoPanel_item01_9"
+        re(HIDE_ITEM, genTargetID({  // "Mirror-InfoPanel_item01_9"
             id: item.id, // "item01"
             prefixes: ["Mirror", "InfoPanel"], 
             index: index // 9

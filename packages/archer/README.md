@@ -35,7 +35,7 @@ Archer is a system for sending and receiving targeted messages/commands across s
 
 [`send(MESSAGE, {to: targetID }, data)`](https://github.com/ruby-cube/rue/tree/main/packages/archer#sendmessage-to-targetid--data)
 
-[`heed(MESSAGE, targetID, callback)`](https://github.com/ruby-cube/rue/tree/main/packages/archer#heedmessage-targetid-handler)
+[`re(MESSAGE, targetID, callback)`](https://github.com/ruby-cube/rue/tree/main/packages/archer#heedmessage-targetid-handler)
 
 </br>
 
@@ -89,16 +89,16 @@ type Data = any;
 ```
 </br>
 
-## `heed(MESSAGE, targetID, handler)`
+## `re(MESSAGE, targetID, handler)`
 
  Called by the receiver. Defines how to handle the message.
 
 ### Syntax
 
 ```ts
-heed(MESSAGE, targetID, handler)
-        |        |         |
-MessageConfig  TargetID  Handler
+const handler = re(MESSAGE, targetID, () => { /* ... */ })
+         |             |         |        |
+      Handler   MessageConfig  TargetID  Handler
 ```
 
 ### Type Definitions
@@ -125,7 +125,7 @@ send(HIDE_ITEM, { to: item });
 
 ```ts
 // listener module
-heed(HIDE_ITEM, item, () => {
+re(HIDE_ITEM, item, () => {
     // mutate local state to hide the item
 });
 ```
@@ -182,7 +182,7 @@ function hideSelectedItems(){
 ```ts
 // component B
 
-heed(HIDE_ITEM, item, (data) => {
+re(HIDE_ITEM, item, (data) => {
    // hide item
 })
 
@@ -191,7 +191,7 @@ heed(HIDE_ITEM, item, (data) => {
 
 ## Targeted Listening
 
-Archer’s heed function is a targeted listener for performance reasons. See [Planify: Targeted Listeners](https://github.com/ruby-cube/rue/tree/main/packages/planify#targeted-listeners) for more information on targeted listeners and how to generate deterministic target ids.
+Archer’s re function is a targeted listener for performance reasons. See [Planify: Targeted Listeners](https://github.com/ruby-cube/rue/tree/main/packages/planify#targeted-listeners) for more information on targeted listeners and how to generate deterministic target ids.
 
 <br/>
 <br/>

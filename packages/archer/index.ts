@@ -1,1 +1,1 @@
-export { send, heed, defineMessage } from "./Archer"
+export { send, re, defineMessage } from "./Archer"
