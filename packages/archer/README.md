@@ -1,43 +1,44 @@
-#### [goto: src](https://github.com/ruby-cube/rue/tree/main/packages/archer)
+#### [goto: src](#)
 [@rue](https://github.com/ruby-cube/rue#goto-src)  &nbsp;&nbsp;|&nbsp; &nbsp;  [planify](https://github.com/ruby-cube/rue/tree/main/packages/planify#goto-src)  &nbsp;&nbsp;|&nbsp; &nbsp; [thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#goto-src)  &nbsp;&nbsp;|&nbsp; &nbsp; [pecherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#goto-src)  &nbsp;&nbsp;|&nbsp; &nbsp; **archer**
 # Archer 🏹
 
 <aside>
 ⚠️ <b>Experimental:</b> Archer is a work-in-progress, not well-tested, with a volatile API. Look and play, but definitely don’t use…
 </aside>
-</br>
-</br>
+
+<p align="right"><a href="#">[src]</a></p>
 
 ## Overview
 
 Archer is a system for sending and receiving targeted messages/commands across scopes. Whereas [Pêcherie’s](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#goto-src) listeners collect handlers to be run at a particular point in a process, Archer’s message senders request a *specific* callback to be run. 
 
-<br/>
+<p align="right"><a href="#">[src]</a></p>
 
 ## Installation
 
 ```bash
 (coming soon ...)
 ```
-</br>
+<p align="right"><a href="#">[src]</a></p>
 
 ## Table of Contents
 
-- [Archer API](https://github.com/ruby-cube/rue/tree/main/packages/archer#archer-api)
-- [Basic Usage](https://github.com/ruby-cube/rue/tree/main/packages/archer#basic-usage)
-- [Use Case](https://github.com/ruby-cube/rue/tree/main/packages/archer#use-case)
-- [Targeted Listening](https://github.com/ruby-cube/rue/tree/main/packages/archer#targeted-listening)
-</br>
+- [Archer API](#archer-api)
+- [Basic Usage](#basic-usage)
+- [Use Case](#use-case)
+- [Targeted Listening](#targeted-listening)
+
+<p align="right"><a href="#goto-src">[top]</a></p>
 
 ## Archer API
 
-[`defineMessage(config)`](https://github.com/ruby-cube/rue/tree/main/packages/archer#definemessageconfig) 
+[`defineMessage(config)`](#definemessageconfig) 
 
-[`send(MESSAGE, {to: targetID }, data)`](https://github.com/ruby-cube/rue/tree/main/packages/archer#sendmessage-to-targetid--data)
+[`send(MESSAGE, {to: targetID }, data)`](#sendmessage-to-targetid--data)
 
-[`re(MESSAGE, targetID, callback)`](https://github.com/ruby-cube/rue/tree/main/packages/archer#remessage-targetid-handler)
+[`re(MESSAGE, targetID, callback)`](#remessage-targetid-handler)
 
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## `defineMessage(config)`
 
@@ -68,7 +69,7 @@ type MessageConfig = Config;
 
 See [Hook Configuration](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#hook-configuration) for info on configuration values.
 
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## `send(MESSAGE, {to: targetID }, data)`
 
@@ -87,7 +88,7 @@ type Reply = ReplyState | void;
 type TargetID = any;
 type Data = any;
 ```
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## `re(MESSAGE, targetID, handler)`
 
@@ -107,7 +108,7 @@ const handler = re(MESSAGE, targetID, () => { /* ... */ })
 type TargetID = any;
 type Handler = (data: Data) => any;
 ```
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Basic Usage
 
@@ -129,7 +130,7 @@ re(HIDE_ITEM, item, () => {
     // mutate local state to hide the item
 });
 ```
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Use Case
 
@@ -187,15 +188,12 @@ re(HIDE_ITEM, item, (data) => {
 })
 
 ```
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Targeted Listening
 
 Archer’s `re` function is a targeted listener for performance reasons. See [Planify: Targeted Listeners](https://github.com/ruby-cube/rue/tree/main/packages/planify#targeted-listeners) for more information on targeted listeners and how to generate deterministic target ids.
 
-<br/>
-<br/>
-
-[[top]](https://github.com/ruby-cube/rue/tree/main/packages/archer#goto-src)
+<p align="right"><a href="#goto-src">[top]</a></p>
 
 © 2023 - present [Ruby Y Wang](https://github.com/ruby-cube)

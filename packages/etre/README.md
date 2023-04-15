@@ -1,38 +1,38 @@
-#### [goto: src](https://github.com/ruby-cube/rue/tree/main/packages/etre)
+#### [goto: src](#)
 [@rue](https://github.com/ruby-cube/rue#goto-src)  &nbsp;&nbsp;|&nbsp; &nbsp;  **etre**  &nbsp;&nbsp;|&nbsp; &nbsp; modos
 # Être 🪴
 
 <aside>
 ⚠️ <b>Experimental:</b> Être is a work-in-progress, not well-tested, with a volatile API. Look and play, but definitely don’t use…
 </aside>
-</br>
-</br>
+
+<p align="right"><a href="#">[src]</a></p>
 
 ## Overview
 
 Prefer composition over inheritance, they say. How about both? Être is an exploration into creating a system of composition that retains elements of inheritance.
 
-</br>
+<p align="right"><a href="#">[src]</a></p>
 
 ## Installation
 
 ```bash
 (coming soon ...)
 ```
-</br>
+<p align="right"><a href="#">[src]</a></p>
 
 ## Table of Contents
 
-- [Concepts](https://github.com/ruby-cube/rue/tree/main/packages/etre#concepts-roles--prereqs)
-- [Être API](https://github.com/ruby-cube/rue/tree/main/packages/etre#%C3%AAtre-api)
-- [Basic Usage](https://github.com/ruby-cube/rue/tree/main/packages/etre#basic-usage)
-- [Non-redundant Inheritance](https://github.com/ruby-cube/rue/tree/main/packages/etre#non-redundant-inheritance)
-- [Auto-compose vs Manual Compose](https://github.com/ruby-cube/rue/tree/main/packages/etre#auto-compose-vs-manual-compose)
-- [Typescript hints and the `__dev__` parameter](https://github.com/ruby-cube/rue/tree/main/packages/etre#typescript-hints-and-the-__dev__-parameter)
-- [Rekey-ing](https://github.com/ruby-cube/rue/tree/main/packages/etre#rekey-ing)
-- [Interfaces](https://github.com/ruby-cube/rue/tree/main/packages/etre#interfaces)
-- [Type-checking](https://github.com/ruby-cube/rue/tree/main/packages/etre#type-checking)
-</br>
+- [Concepts](#concepts-roles--prereqs)
+- [Être API](#%C3%AAtre-api)
+- [Basic Usage](#basic-usage)
+- [Non-redundant Inheritance](#non-redundant-inheritance)
+- [Auto-compose vs Manual Compose](#auto-compose-vs-manual-compose)
+- [Typescript hints and the `__dev__` parameter](#typescript-hints-and-the-__dev__-parameter)
+- [Rekey-ing](#rekey-ing)
+- [Interfaces](#interfaces)
+- [Type-checking](#type-checking)
+<p align="right"><a href="#goto-src">[top]</a></p>
 
 ## Concepts: Roles & Prereqs
 
@@ -44,18 +44,18 @@ The instantiator function is obtained by calling the `reifier` method of a role.
 
 The system also allows for re-keying (in case of key collisions) and implementing interfaces.
 
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Être API
-[`role(config)`](https://github.com/ruby-cube/rue/tree/main/packages/etre#basic-usage)
+[`role(config)`](#basic-usage)
 
-[`enacts(Role, object)`](https://github.com/ruby-cube/rue/tree/main/packages/etre#type-checking)
+[`enacts(Role, object)`](#type-checking)
 
-[`keyCollisionCheck(Role, true, RekeyMap)`](https://github.com/ruby-cube/rue/tree/main/packages/etre#rekey-ing)
+[`keyCollisionCheck(Role, true, RekeyMap)`](#rekey-ing)
 
-[`roleCollisionCheck(Role)`](https://github.com/ruby-cube/rue/tree/main/packages/etre#rekey-ing)
+[`roleCollisionCheck(Role)`](#rekey-ing)
 
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Basic Usage
 
@@ -120,7 +120,7 @@ frogPrince.isValiantAndDaring(); // true
 frogPrince.sing();
 frogPrince.name; // "Sir Robin the Brave"
 ```
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Non-redundant Inheritance
 
@@ -179,7 +179,7 @@ const createFrogPrince = FrogPrince.reifier();
 
 const sirRobin = createFrogPrince(); // logs "setup" once
 ```
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Auto-compose vs Manual Compose
 
@@ -254,7 +254,7 @@ const createFrogPrince = FrogPrince.reifier((data) => {
 
 const sirRobin = createFrogPrince(data);
 ```
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Typescript hints and the `__dev__` parameter
 
@@ -277,7 +277,7 @@ const createFrogPrince = FrogPrince.reifier((data) => {
     }
 });
 ```
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Rekey-ing
 
@@ -315,7 +315,7 @@ if (__DEV__){
     roleCollisionCheck(FrogPrince);
 }
 ```
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Interfaces
 
@@ -344,7 +344,7 @@ const Frog = role({
     }
 })
 ```
-</br>
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Type-checking
 
@@ -354,9 +354,6 @@ Objects can be type-checked via the `enacts` function, which takes in a role as 
 const isFrog = enacts(Frog, character);
 ```
 
-<br/>
-<br/>
-
-[[top]](https://github.com/ruby-cube/rue/tree/main/packages/etre#goto-src)
+<p align="right"><a href="#goto-src">[top]</a></p>
 
 © 2023 - present [Ruby Y Wang](https://github.com/ruby-cube)
