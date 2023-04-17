@@ -352,7 +352,7 @@ const Frog = role({
 Objects can be type-checked via the `enacts` function, which takes in a role as the first argument and the object being type-checked as the second argument and returns a boolean.
 
 ```js
-const isFrog = enacts(Frog, character);
+const isFrog = enacts(character, Frog);
 ```
 
 <p align="right"><a href="#readme-top">[top]</a></p>

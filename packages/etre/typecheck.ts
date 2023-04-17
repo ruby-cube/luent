@@ -14,7 +14,7 @@ export type TypeDef<T> = T extends { __typeDef__: infer T } ? T : (T extends Cla
 
 export const rolesMap: WeakMap<MiscObj, Set<$Role>> = new WeakMap();
 
-export function enacts<T extends { __typeDef__: MiscObj }>(type: T, value: any): value is TypeDef<T> {
+export function enacts<T extends { __typeDef__: MiscObj }>(value: any, type: T): value is TypeDef<T> {
     if (value == null || !(value instanceof Object))
         return false;
 
