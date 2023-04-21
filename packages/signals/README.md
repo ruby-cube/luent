@@ -1,7 +1,7 @@
 # Signals
 
 <aside>
-⚠️ <b>Experimental:</b> Planify is a work-in-progress, not well-tested nor optimized, with a volatile API. Look and play, but definitely don’t use…
+⚠️ <b>Experimental:</b> Rue Signals is a work-in-progress, not well-tested nor optimized, with a volatile API. Look and play, but definitely don’t use…
 </aside>
 
 
