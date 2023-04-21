@@ -323,7 +323,7 @@ To make all direct properties reactive, use `signalize$()`. If you don’t need 
 
 ## `signalize(object)`
 
-Creates an object whose direct properties are reactive via signals and adds the -`$` suffix to reactive properties. Analogous to Vue’s `shallowReactive()`
+Creates an object whose direct properties are reactive via signals. Appends the -`$` suffix to reactive keys. Analogous to Vue’s `shallowReactive()`
 
 ### Syntax
 
@@ -357,7 +357,7 @@ As mentioned, only the direct properties of a signalized object are reactive. Fo
 
 ## `deepSignalize(object)`
 
-Creates an object whose properties (including nested properties) are reactive via signals. Analogous to Vue’s `reactive()`.
+Creates an object whose properties (including nested properties) are reactive via signals. Appends the -`$` suffix to reactive keys. Analogous to Vue’s `reactive()`.
 
 ### Syntax
 
