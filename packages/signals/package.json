@@ -1,0 +1,13 @@
+{
+    "name": "@rue/signals",
+    "private": true,
+    "description": "",
+    "dependencies": {
+        "vue": "^3.2.47"
+    },
+    "devDependencies": {
+        "@rue/types": "workspace:*"
+    },
+    "author": "Ruby Yi Wang",
+    "license": "MIT"
+}

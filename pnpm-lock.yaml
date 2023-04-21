@@ -235,6 +235,15 @@ importers:
       vite: 4.2.1_@types+node@18.15.11
       vue: 3.2.47
 
+  packages/signals:
+    specifiers:
+      '@rue/types': workspace:*
+      vue: ^3.2.47
+    dependencies:
+      vue: 3.2.47
+    devDependencies:
+      '@rue/types': link:../types
+
   packages/thread:
     specifiers:
       '@rue/planify': workspace:*

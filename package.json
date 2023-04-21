@@ -22,7 +22,8 @@
     "ni:dev": "pnpm -F @rue/dev install",
     "ni:voile": "pnpm -F @rue/voile install",
     "ni:ciel": "pnpm -F @rue/ciel install",
-    "ni:ephemr": "pnpm -F @rue/ephemr install"
+    "ni:ephemr": "pnpm -F @rue/ephemr install",
+    "ni:signals": "pnpm -F @rue/signals install"
   },
   "devDependencies": {
     "@types/node": "^18.15.11",

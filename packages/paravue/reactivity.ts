@@ -1,6 +1,9 @@
 import { computed, ComputedRef, DebuggerOptions, effectScope, onUnmounted as _onUnmounted, inject, isReactive, isRef, nextTick, PropType, Ref, ref, ShallowReactive, shallowReactive, toRaw, watch, WatchOptions, WatchStopHandle, onBeforeUnmount, getCurrentInstance, ComponentInternalInstance } from "vue";
 import { Callback, ListenerOptions, $listen, $subscribe} from "@rue/planify";
 import { isSettingUpComponent } from "./component";
+import { ExtensibleRef } from "../paravue/ExtensibleRef";
+
+export type ReactiveRef = Ref | ComputedRef | ExtensibleRef;
 
 export const reactive = shallowReactive as <T extends object>(target: T) => Reactive<T>;
 export type Reactive<T> = { [P in keyof ShallowReactive<{}>]-?: true; } & T
