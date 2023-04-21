@@ -52,6 +52,7 @@ This library stands on the shoulders of giants. It is a mere tweaking of existin
 <aside>
 ⚠️ <b>Note:</b> These docs use faux type definitions that aren’t actual usable types. They are simplified types for the purpose of clarity.
 </aside>
+
 </br>
 
 - Concepts
