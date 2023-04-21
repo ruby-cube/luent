@@ -671,7 +671,7 @@ Rue Signals’ current approach to iterables is to handle reactivity shallowly a
 ```tsx
 const items$ = $(["a", "b", "c"]);
 
-const excitedFirstItem$ = computed$(() => items$[0] + "!"); // simple access
+const excitedFirstItem$ = computed$(() => items$()[0] + "!"); // simple access
 
 $mutate(items$, (items) => items[2] = "d");  // simple assignment
 ```
