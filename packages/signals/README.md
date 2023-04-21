@@ -394,7 +394,7 @@ $set(position.prevPosition$, { x: 1, y: 9 })
 
 Note that while properties of nested objects will be made reactive, entries of iterables like arrays, sets, and maps will not be “signalized”. See Reactivity of Iterables for why entries of iterables are not made into signals.
 
-Note also that the object variable (`position` in the above example) is not a reactive. To make the object variable reactive along with all its properties and nested properties, use `deepSignalize$()`.
+Note also that the object reference (`position` in the above example) is not a reactive. To make the object variable reactive along with all its properties and nested properties, use `deepSignalize$()`.
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
