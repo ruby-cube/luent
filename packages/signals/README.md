@@ -3,9 +3,7 @@
 <aside>
 ⚠️ <b>Experimental:</b> Planify is a work-in-progress, not well-tested nor optimized, with a volatile API. Look and play, but definitely don’t use…
 </aside>
-<aside>
-⚠️ <b>Note:</b> These docs use faux type definitions that aren’t actual usable types. They are simplified types for the purpose of clarity.
-</aside>
+
 
 ## Overview
 
@@ -45,6 +43,10 @@ This library stands on the shoulders of giants. It is a mere tweaking of existin
 - Reactivity in Iterables
 - Tips
 - Performance Optimization
+
+<aside>
+⚠️ <b>Note:</b> These docs use faux type definitions that aren’t actual usable types. They are simplified types for the purpose of clarity.
+</aside>
 
 ## Signals
 
