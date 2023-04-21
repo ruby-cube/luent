@@ -92,7 +92,7 @@ Note that this library talks about reactivity in terms of reactive references.  
 
 ## Explicit Reactivity
 
-Signals as functions are inherently explicit about reactivity. However, this library makes reactive references even more explicit with the suffix -`$`, which can be pronounced “signal”. For example, `count$` can be read as “count signal”. 
+Signals as functions are inherently explicit about reactivity. However, this library makes reactive references even more explicit with the suffix -`$`. The `$` can be thought of as representing the word "signal".
 
 While variable names should generally focus on the problem domain and avoid including implementation details such as types, there is a case to be made that making reactivity explicit in variable names can aid in making code easier to understand and maintain, particularly since reactivity is not the native, expected behavior of JavaScript.
 
