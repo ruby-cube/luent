@@ -632,8 +632,8 @@ Here is a quick chart of how Rue Signals translates from Vue’s API:
 
 | Rue Signals | Vue API |
 | --- | --- |
-| $(initialValue) | shallowRef(initialValue) |
-| signalize(object) | shallowReactive(object) |
+| `$(initialValue)` | `shallowRef(initialValue)` |
+| `signalize(object)` | shallowReactive(object) |
 | deepSignalize(object) | reactive(object) |
 | signalize$(object) | shallowRef(shallowReactive(object)) |
 | deepSignalize$(object) | ref(object) |
