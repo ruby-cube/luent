@@ -49,6 +49,10 @@ This library stands on the shoulders of giants. It is a mere tweaking of existin
 
 ## Table of Contents
 
+<aside>
+⚠️ <b>Note:</b> These docs use faux type definitions that aren’t actual usable types. They are simplified types for the purpose of clarity.
+</aside>
+
 - Concepts
     - Signals
     - Reactive References
@@ -59,10 +63,6 @@ This library stands on the shoulders of giants. It is a mere tweaking of existin
 - Reactivity in Iterables
 - Tips
 - Performance Optimization
-
-<aside>
-⚠️ <b>Note:</b> These docs use faux type definitions that aren’t actual usable types. They are simplified types for the purpose of clarity.
-</aside>
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
