@@ -654,7 +654,7 @@ This library makes heavy use of the dollar sign in variable names. You may want 
 
 A point of difference between `signalize` and Vue’s `reactive` is that `reactive` can make any type of object reactive, including iterables like arrays, sets, and maps. It seamlessly handles fine-grained reactivity with proxy handlers under the hood.
 
-With Rue Signals, only basic non-iterable objects can have reactive properties. This limitation makes sense to some extent—iterables are very dynamic structures that can grow and shrink, rather than rigid property schemas. Sets don’t even have indices or keys to serve as reactive references. Also, applying a signal interface to array indices and map access is just too awful:
+With Rue Signals, only basic non-iterable objects can have reactive properties. This limitation makes sense to some extent—iterables are dynamic structures that can grow and shrink, rather than rigid property schemas. Sets don’t even have indices or keys to serve as reactive references. Also, applying a signal interface to array indices and map access is just too awful:
 
 ```tsx
 const items = signalize(["a", "b", "c"]);
