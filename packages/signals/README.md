@@ -55,7 +55,7 @@ This library stands on the shoulders of giants. It is a mere tweaking of existin
     - Explicit Reactivity
 - Basic Examples
 - Signal API
-- Vue Reactivity Counterparts
+- Vue Counterparts
 - Reactivity in Iterables
 - Tips
 - Performance Optimization
@@ -624,7 +624,7 @@ onMounted(() => {
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## Vue Reactivity Counterparts
+## Vue Counterparts
 
 Here is a quick chart of how Rue Signals translates from Vue’s API:
 
