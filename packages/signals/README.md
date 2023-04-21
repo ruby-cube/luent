@@ -31,9 +31,9 @@ However, due to limitations of the Javascript language (that is to say, because 
 - developers don’t always remember to add `.value`, leading to time spent debugging
 - due to ref auto-unwrapping in the template, ref access in scripts vs templates are inconsistent, contributing to the confusion
 - reactivity is lost when a reactive object is destructured, an unexpected behavior for those not well-versed in Vue’s reactivity system
-- destructuring a reactive object using `toRefs` requires a mental switch from “these are reactive properties that can be accessed directly” to “these are refs that now have a `value` property”
+- destructuring a reactive object using `toRefs` requires a mental switch from “these are reactive properties that can be accessed directly” to “these are now refs and have a `value` property”
 
-While these aren’t necessarily issues for the developer who’s versed in Vue’s nuances, they may pose as obstacles for the developer who’s new to Vue or who works with multiple frameworks across multiple projects.
+While these aren’t necessarily issues for the developer who’s versed in Vue’s nuances, they may pose as obstacles for developers new to Vue or who work with multiple frameworks across multiple projects.
 
 Rue Signals explores how exposing signals as an interface (rather than keeping them hidden) can alleviate these issues by offering a more consistent interface across reactive variables and properties, eliminating the need for conversions and mental switches, as well as by making reactivity more explicit, less unexpected.
 
