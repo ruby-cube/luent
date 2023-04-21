@@ -491,7 +491,7 @@ $set(position$, {
     x,
     y,
     prevPosition: {
-	      x: 0,
+        x: 0,
         y: 0,
     }
 });
