@@ -21,6 +21,46 @@ const item = signalize({   // shallowReactive
 })
 
 
+{
+    //@ts-expect-error
+    const myMap = signalize(new Map())
+}
+
+{
+    //@ts-expect-error
+    const myMap = deepSignalize(new Map())
+}
+
+{
+    //@ts-expect-error
+    const myMap = signalize$(new Map())
+}
+
+{
+    //@ts-expect-error
+    const myMap = deepSignalize$(new Map())
+}
+
+{
+    //@ts-expect-error
+    const array = signalize([])
+}
+
+{
+    //@ts-expect-error
+    const array = deepSignalize([])
+}
+
+{
+    //@ts-expect-error
+    const array = signalize$([])
+}
+
+{
+    //@ts-expect-error
+    const array = deepSignalize$([])
+}
+
 
 const item$ = signalize$({   // shallowRef(shallowReactive())
     bullet: "•",
@@ -41,12 +81,21 @@ const user = deepSignalize({  // reactive
     }
 })
 
+user.blog$()
+
 $set(user.blog$, deepSignalize({
     rhogj: 0,
     blue: {
         horse: "ocot"
     }
 }))
+
+$set(user.blog$, {
+    rhogj: 0,
+    blue: {
+        horse: "ocodt"
+    }
+})
 
 item.dog$().bellow
 
@@ -62,7 +111,7 @@ const user$ = deepSignalize$({     // ref
     }
 })
 
-user$().name$
+user$().blog$()
 
 const { blue$, rhogj$ } = user$().blog$()
 
@@ -90,12 +139,4 @@ listItems$()[1];
 
 $mutate(listItems$, (items) => items.push(1))
 
-$set(user$, {
-    name$: $(""),
-    blog$: $({
-        blue$: $({
-            horse$: $("")
-        }),
-        rhogj$: $(0)
-    })
-})
+
