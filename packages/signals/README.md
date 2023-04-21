@@ -628,7 +628,7 @@ onMounted(() => {
 
 ## Vue Counterparts
 
-Here is a quick chart of how Rue Signals translates from Vue’s API:
+Here is a quick chart of how Rue Signals API corresponds to Vue’s API:
 
 | Rue Signals | Vue API |
 | --- | --- |
