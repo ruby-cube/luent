@@ -6,8 +6,7 @@
 
 
 ## Overview
-
-Rue Signals aims to provide a more consistent and explicit interface for reactivity in Vue apps by exposing a signal-based API. Built on top of Vue’s shallow ref and computed ref.
+Rue Signals aims to bring more consistency and clarity to reactivity in Vue apps by exposing a signal-based API. Built on top of Vue’s shallow ref and computed ref.
 
 ## Motivation
 
