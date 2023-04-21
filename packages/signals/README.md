@@ -640,8 +640,7 @@ Here is a quick chart of how Rue Signals translates from Vue’s API:
 | `computed$(computation)` | `computed(computation)` |
 | `$set(signal, value)` | e.g. `myRef.value = value` |
 | `$mutate(signal, mutator)` | e.g. `myRef.value.push(item); triggerRef(myRef);` |
-| `nodeRef(key)`
-(alias for `templateRef(key)` from VueUse) | `shallowRef()` / `ref()` |
+| `nodeRef(key)` (alias for `templateRef(key)` from VueUse) | `shallowRef()` / `ref()` |
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
