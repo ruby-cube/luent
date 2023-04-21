@@ -33,9 +33,9 @@ However, due to limitations of the Javascript language (that is to say, because 
 - reactivity is lost when a reactive object is destructured, an unexpected behavior for those not well-versed in Vue’s reactivity system
 - destructuring a reactive object using `toRefs` requires a mental switch from “these are reactive properties that can be accessed directly” to “these are now refs and have a `value` property”
 
-While these aren’t necessarily issues for the developer who’s versed in Vue’s nuances, they may pose as obstacles for developers new to Vue or who work with multiple frameworks across multiple projects.
+While these aren’t necessarily issues for the developer who’s versed in Vue’s nuances, they may pose as obstacles for developers new to Vue or who work with multiple frameworks across different projects.
 
-Rue Signals explores how exposing signals as an interface (rather than keeping them hidden) can alleviate these issues by offering a more consistent interface across reactive variables and properties, eliminating the need for conversions and mental switches, as well as by making reactivity more explicit, less unexpected.
+Rue Signals explores how exposing signals as an interface (rather than keeping them hidden) can alleviate these issues by offering a more consistent handling of reactive variables and properties, eliminating the need for conversions and mental switches, as well as by making reactivity more explicit, less unexpected.
 
 There are, of course, tradeoffs with this approach: The concept of signals adds an additional layer of complexity over the concept of reactivity, and creating consistency across reactive variables and properties requires a sort of middle-ground level of verbosity (where reactive variable access becomes slightly less verbose than with Vue refs, and reactive property access becomes slightly more verbose than with Vue reactives). However, this middle-ground verbosity serves to add clarity and explicitness to the reactivity system, improving maintainability in the long run. Above all, a consistent and unified model for reactive references will hopefully create more ease in the developer experience.
 
