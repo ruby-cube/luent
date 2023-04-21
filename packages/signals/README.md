@@ -633,18 +633,18 @@ Here is a quick chart of how Rue Signals translates from Vue’s API:
 | Rue Signals | Vue API |
 | --- | --- |
 | `$(initialValue)` | `shallowRef(initialValue)` |
-| `signalize(object)` | shallowReactive(object) |
-| deepSignalize(object) | reactive(object) |
-| signalize$(object) | shallowRef(shallowReactive(object)) |
-| deepSignalize$(object) | ref(object) |
-| computed$(computation) | computed(computation) |
-| $set(signal, value) | example:
-myRef.value = value |
-| $mutate(signal, mutator) | example:
-myRef.value.push(item);
-triggerRef(myRef); |
-| nodeRef(key)
-(alias for templateRef(key) from VueUse) | shallowRef() / ref() |
+| `signalize(object)` | `shallowReactive(object)` |
+| `deepSignalize(object)` | `reactive(object)` |
+| `signalize$(object)` | `shallowRef(shallowReactive(object))` |
+| `deepSignalize$(object)` | `ref(object)` |
+| `computed$(computation)` | `computed(computation)` |
+| `$set(signal, value)` | example:
+`myRef.value = value` |
+| `$mutate(signal, mutator)` | example:
+`myRef.value.push(item);`
+`triggerRef(myRef);` |
+| `nodeRef(key)`
+(alias for `templateRef(key)` from VueUse) | `shallowRef()` / `ref()` |
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
