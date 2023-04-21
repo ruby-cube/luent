@@ -263,7 +263,7 @@ position$().x = 1 // no reactive effects
 
 ### Selective Nested Reactivity
 
-Shallow reactivity makes it possible to choose which properties to be reactive.
+Shallow reactivity makes it possible to choose which properties to make reactive.
 
 ```tsx
 const position$ = $({
