@@ -544,12 +544,12 @@ const newValue = $set(signal, value);
 ```tsx
 const count$ = $(1);
 
-const doubleCount$ = computed$(() => count$() * 2 ); // reactive tracking
+const doubleCount$ = computed$(() => count$() * 2 );
 
 function demoStuff() {
     doubleCount$(); // 2
 
-    $set(count$, 4);
+    $set(count$, 4); // triggers reactive effects
 
     doubleCount$(); // 8
 }
