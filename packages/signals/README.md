@@ -680,7 +680,7 @@ $mutate(items$, (items) => items[2] = "d");  // simple assignment
 
 ## Performance Optimizations
 
-As mentioned in the previous section, the Signals interface presents opportunities for optimizations under the hood. While currently a wrapper around Vue shallow refs, signals and the `$set` function could theoretically directly invoke the track and trigger functions. For signalized objects, there’s the opportunity for compiled time optimizations—perhaps employing proxies instead of looping through each property. But for now, the current focus is to hash out an API that feels good to use.
+As mentioned in the previous section, the Signals interface presents opportunities for optimizations under the hood. While currently a wrapper around Vue shallow refs, signals and the `$set` function could theoretically directly invoke the track and trigger functions for more efficiency. For signalized objects, there’s the opportunity for compiled time optimizations—perhaps employing proxies instead of looping through each property. But for now, the current focus is to hash out an API that feels good to use.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
