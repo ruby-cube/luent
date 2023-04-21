@@ -406,8 +406,8 @@ Creates a signal for a shallowly reactive object.  Appends the -`$` suffix to re
 
 ```tsx
 const reactiveVariable$ = signalize$(object);
-              |               | 
-           Signal           Object
+              |                        | 
+           Signal                    Object
 ```
 
 ### Usage
