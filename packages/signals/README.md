@@ -638,8 +638,8 @@ Here is a quick chart of how Rue Signals translates from Vue’s API:
 | `signalize$(object)` | `shallowRef(shallowReactive(object))` |
 | `deepSignalize$(object)` | `ref(object)` |
 | `computed$(computation)` | `computed(computation)` |
-| `$set(signal, value)` | example:`myRef.value = value` |
-| `$mutate(signal, mutator)` | example:`myRef.value.push(item); triggerRef(myRef);` |
+| `$set(signal, value)` | e.g. `myRef.value = value` |
+| `$mutate(signal, mutator)` | e.g. `myRef.value.push(item); triggerRef(myRef);` |
 | `nodeRef(key)`
 (alias for `templateRef(key)` from VueUse) | `shallowRef()` / `ref()` |
 
