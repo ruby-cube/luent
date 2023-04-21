@@ -1,4 +1,4 @@
-export { nr, nv, r$, v$, set$ } from "./reactivity-markers"
+export { nr, nv, r$, v$, set$ } from "./signals"
 export { afterReactiveFlush, onViewUpdated, compute, onChange, onUnmounted, reactive } from "./reactivity"
 export type { IReactive, Reactive } from "./reactivity"
 export { ExtensibleRef } from "./ExtensibleRef"
