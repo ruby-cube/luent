@@ -374,7 +374,7 @@ const position = deepSignalize({
     x: 0,
     y: 0,
     prevPosition: {
-	      x: 0,
+        x: 0,
         y: 0,
     }
 });
@@ -400,7 +400,7 @@ Note also that the object variable (`position` in the above example) is not a re
 
 ## `signalize$(object)`
 
-Creates a signal for a shallowly reactive object. Pronounced “signalize signal of”. Analogous to calling `shallowRef(shallowReactive(object))` in Vue.
+Creates a signal for a shallowly reactive object.  Appends the -`$` suffix to reactive keys. Pronounced “signalize signal of”. Analogous to calling `shallowRef(shallowReactive(object))` in Vue.
 
 ### Syntax
 
@@ -443,7 +443,7 @@ $set(position$, {
 
 ## `deepSignalize$(object)`
 
-Creates a signal for a deeply reactive object. Pronounced “deep signalize signal of”. Analogous to Vue’s `ref()`.
+Creates a signal for a deeply reactive object.  Appends the -`$` suffix to reactive keys. Pronounced “deep signalize signal of”. Analogous to Vue’s `ref()`.
 
 ### Syntax
 
