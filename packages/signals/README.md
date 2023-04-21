@@ -1,12 +1,23 @@
-# Signals
+<nav><a id="readme-top" href="#"><b>goto: src</b></a></nav>
+
+[@rue](https://github.com/ruby-cube/rue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; paravue  &nbsp;&nbsp;|&nbsp; &nbsp; **signals**  &nbsp;&nbsp;|&nbsp; &nbsp; actionry
+# Signals 🕊️
 
 <aside>
 ⚠️ <b>Experimental:</b> Rue Signals is a work-in-progress, not well-tested nor optimized, with a volatile API. Look and play, but definitely don’t use…
 </aside>
 
+<p align="right"><a href="#">[src]</a></p>
 
 ## Overview
 Rue Signals aims to bring more consistency and clarity to reactivity in Vue apps by exposing a signal-based API. Built on top of Vue’s shallow ref and computed ref.
+
+## Installation
+
+```bash
+(coming soon ...)
+```
+<p align="right"><a href="#">[src]</a></p>
 
 ## Motivation
 
@@ -26,9 +37,13 @@ Rue Signals explores how exposing signals as an interface (rather than keeping t
 
 There are, of course, tradeoffs with this approach: The concept of signals adds an additional layer of complexity over the concept of reactivity, and creating consistency across reactive variables and properties requires a sort of middle-ground level of verbosity (where reactive variable access becomes slightly less verbose than with Vue refs, and reactive property access becomes slightly more verbose than with Vue reactives). However, this middle-ground verbosity serves to add clarity and explicitness to the reactivity system, improving maintainability in the long run. Above all, a consistent and unified model for reactive references will hopefully create more ease in the developer experience.
 
+<p align="right"><a href="#">[src]</a></p>
+
 ## Inspiration
 
 This library stands on the shoulders of giants. It is a mere tweaking of existing APIs and concepts from Vue.js, Solid.js, Angular, and VueUse. Vue’s documentation already lays out how to create signals from Vue refs here.
+
+<p align="right"><a href="#">[src]</a></p>
 
 ## Table of Contents
 
@@ -47,6 +62,8 @@ This library stands on the shoulders of giants. It is a mere tweaking of existin
 ⚠️ <b>Note:</b> These docs use faux type definitions that aren’t actual usable types. They are simplified types for the purpose of clarity.
 </aside>
 
+<p align="right"><a href="#readme-top">[top]</a></p>
+
 ## Signals
 
 Different frameworks have different approaches to the concept of a signal. In this library, a signal is a function that serves conceptually as:
@@ -61,9 +78,13 @@ Different frameworks have different approaches to the concept of a signal. In th
 type Signal<T> = () => T // returns the current value of the reactive variable/property
 ```
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## Reactive References
 
 Note that this library talks about reactivity in terms of reactive references.  This differs from how Vue talks about reactivity in terms of reactive objects (since reactivity is implemented through hidden getters and setters). Thinking of reactivity in terms of reactive references allows reactivity to exist independently from objects as well as allows for more selectivity with regards to what should be reactive.
+
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Explicit Reactivity
 
@@ -121,6 +142,8 @@ While this library does not (currently?) enforce this convention for the naming 
 
 That said, if you need to expose properties to an external consumer that does not need to know about its reactive implementation, you should expose an object containing getters and setters rather than expose an object containing signals and reactivity markers.
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## Basic Examples
 
 Creating a signal and computed signal
@@ -165,6 +188,8 @@ const position = signalize({
 const coordinates$ = computed$(() => position.x$() + ", " + position.y$());
 ```
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## Signal API
 
 **Core signal creators and setters**
@@ -190,6 +215,8 @@ const coordinates$ = computed$(() => position.x$() + ", " + position.y$());
 **Template Ref**
 
 `nodeRef()`
+
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## `$(initialValue)`
 
@@ -288,6 +315,8 @@ $set(position$, createPosition({
 
 To make all direct properties reactive, use `signalize$()`. If you don’t need a reactive reference to the object itself, use `signalize()`.
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## `signalize(object)`
 
 Creates an object whose direct properties are reactive via signals and adds the -`$` suffix to reactive properties. Analogous to Vue’s `shallowReactive()`
@@ -319,6 +348,8 @@ Note that only a non-iterable object can be passed into signalize. Passing in an
 Note also that the position object itself does not have a reactive reference, only its properties. For a reactive reference to the object itself, use `signalize$()`.
 
 As mentioned, only the direct properties of a signalized object are reactive. For a deeply reactive object where all properties of nested objects are made reactive, use `deepSignalize()`.
+
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## `deepSignalize(object)`
 
@@ -361,6 +392,8 @@ Note that while properties of nested objects will be made reactive, entries of i
 
 Note also that the object variable (`position` in the above example) is not a reactive. To make the object variable reactive along with all its properties and nested properties, use `deepSignalize$()`.
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## `signalize$(object)`
 
 Creates a signal for a shallowly reactive object. Pronounced “signalize signal of”. Analogous to calling `shallowRef(shallowReactive(object))` in Vue.
@@ -401,6 +434,8 @@ $set(position$, {
     y
 });
 ```
+
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## `deepSignalize$(object)`
 
@@ -458,6 +493,8 @@ $set(position$, {
 });
 ```
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## `computed$(computation)`
 
 Creates a read-only signal for a computed variable or property. Pronounced “computed signal”. Counterpart to / a wrapper around Vue’s `computed()`.
@@ -483,6 +520,8 @@ $set(count$, 4);
 
 doubleCount$(); // 8
 ```
+
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## `$set(signal, valueOrManipulator)`
 
@@ -522,6 +561,8 @@ if (count > 10) {
 }
 ```
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## `$mutate(signal, mutator)`
 
 Mutates any mutable data structure stored in a reactive reference (represented by a signal) and signals to the reactivity system that change has occurred. It returns the value of the reactive reference for convenience. Pronounced “signaled mutate.”
@@ -557,6 +598,8 @@ function doSomething() {
 
 Note that the `$mutate` function passes the value of the reactive variable/property to the mutator, not the signal. Also note that `items` is not a modified clone. It is strictly equal to the original array passed into `$()`.
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## `nodeRef(key)`
 
 Rue Signals does not seek to replace Vue’s template refs with signals. In fact, it’s helpful to have a distinction between reactive state and a reactive container for DOM and component nodes. For convenience and reduced verbosity, this library exports `nodeRef`, an alias for VueUse’s awesome `templateRef`.
@@ -576,6 +619,8 @@ onMounted(() => {
   <input ref="username" />
 </template>
 ```
+
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Vue Reactivity Counterparts
 
@@ -597,9 +642,13 @@ triggerRef(myRef); |
 | nodeRef(key)
 (alias for templateRef(key) from VueUse) | shallowRef() / ref() |
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## Tips
 
 This library makes heavy use of the dollar sign in variable names. You may want to configure your IDE to include the dollar sign in word selections. How to in VSCode.
+
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Reactivity in Iterables
 
@@ -627,6 +676,12 @@ const excitedFirstItem$ = computed$(() => items$[0] + "!"); // simple access
 $mutate(items$, (items) => items[2] = "d");  // simple assignment
 ```
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## Performance Optimizations
 
 As mentioned in the previous section, the Signals interface presents opportunities for optimizations under the hood. While currently a wrapper around Vue shallow refs, signals and the `$set` function could theoretically directly invoke the track and trigger functions. For signalized objects, there’s the opportunity for compiled time optimizations—perhaps employing proxies instead of looping through each property. But for now, the current focus is to hash out an API that feels good to use.
+
+<p align="right"><a href="#readme-top">[top]</a></p>
+
+© 2023 - present [Ruby Y Wang](https://github.com/ruby-cube)
