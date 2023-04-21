@@ -501,7 +501,7 @@ $set(position$, {
 
 ## `computed$(computation)`
 
-Creates a read-only signal for a computed variable or property. Pronounced “computed signal”. Counterpart to / a wrapper around Vue’s `computed()`.
+Creates a read-only signal for a computed variable or property. Pronounced “computed signal”. A wrapper around Vue’s `computed()`.
 
 ### Syntax
 
