@@ -351,7 +351,7 @@ Note that only a non-iterable object can be passed into signalize. Passing in an
 
 Note also that the position object itself does not have a reactive reference, only its properties. For a reactive reference to the object itself, use `signalize$()`.
 
-As mentioned, only the direct properties of a signalized object are reactive. For a deeply reactive object where all properties of nested objects are made reactive, use `deepSignalize()`.
+For a deeply reactive object where all properties of nested objects are made reactive, use `deepSignalize()`.
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
