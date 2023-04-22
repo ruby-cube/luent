@@ -86,7 +86,7 @@ type Signal<T> = () => T // returns the current value of the reactive variable/p
 
 ## Reactive References
 
-Reactive references is a general term encompassing both reactive variables and reactive properties.
+Reactive references is the concept encompassing both reactive variables and reactive properties.
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
