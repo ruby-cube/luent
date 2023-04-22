@@ -86,7 +86,7 @@ type Signal<T> = () => T // returns the current value of the reactive variable/p
 
 ## Reactive References
 
-Note that this library talks about reactivity primarily in terms of reactive references.  This differs from how Vue primarily talks about reactivity, which is in terms of reactive objects (since reactivity is implemented through hidden getters and setters). Thinking of reactivity in terms of reactive references allows reactivity to exist independently from objects as well as allows for more selectivity with regards to what is made reactive.
+Reactive references is a general term encompassing both reactive variables and reactive properties.
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
