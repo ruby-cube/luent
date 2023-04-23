@@ -35,8 +35,8 @@ export function compute<T>(getter: () => T, options?: { until: (stop: () => void
         scope.run(() => {
             $subscribe(getter, options, {
                 enroll: (getter) => {
-                    if (__DEV__) computedRef = computed(getter, options); //assumes `run` runs synchronously. TODO: check if this is true
-                    else computedRef = computed(getter); //assumes `run` runs synchronously. TODO: check if this is true
+                    if (__DEV__) computedRef = computed(getter, options); //assumes `scope.run` runs synchronously. TODO: check if this is true
+                    else computedRef = computed(getter); //assumes `scope.run` runs synchronously. TODO: check if this is true
                 },
                 remove: () => scope.stop(),
             })
