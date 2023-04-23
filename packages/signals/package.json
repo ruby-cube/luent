@@ -3,10 +3,10 @@
     "private": true,
     "description": "",
     "dependencies": {
-        "vue": "^3.2.47"
+        "@vueuse/core": "^10.0.2"
     },
-    "devDependencies": {
-        "@rue/types": "workspace:*"
+    "peerDependencies": {
+        "vue": "^3.2.47"
     },
     "author": "Ruby Yi Wang",
     "license": "MIT"
