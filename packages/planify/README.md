@@ -212,7 +212,7 @@ One-time listeners enjoy automatic cleanup inherently. Sustained listeners can a
 // main.ts
 
 defineAutoCleanup((cleanup) => { // callback receives a cleanup function as the argument
-    if (isSettingUpComponent()) {
+    if (inComponentSetup()) {
         return onUnmounted(cleanup); // must return a PendingOp
     }
     if (isMakingModel()) {

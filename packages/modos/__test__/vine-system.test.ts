@@ -12,7 +12,7 @@ import { $PeapodPea } from "../vine/PeapodPea.role";
 import { $PodNode } from "../vine/PodNode.role";
 import { defineAutoCleanup } from "../../planify/scheduleAutoCleanup";
 import { onDestroyed } from "../lifecycle-hooks";
-import { isSettingUpComponent } from "../../paravue/component";
+import { inComponentSetup } from "../../paravue/component";
 import { doAction, onActionCompleted, onActionStart } from "../../actionry/actionry";
 import { beginScene, defineScene } from "../../planify/Scene";
 
@@ -52,7 +52,7 @@ describe("vine system", () => {
   beforeEach(() => {
     __$initDepotModule();
     defineAutoCleanup((cleanup) => {
-      if (isSettingUpComponent()) {
+      if (inComponentSetup()) {
         return onUnmounted(cleanup);
       }
       if (isMakingModel()) {

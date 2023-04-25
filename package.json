@@ -23,6 +23,7 @@
     "ni:voile": "pnpm -F @rue/voile install",
     "ni:ciel": "pnpm -F @rue/ciel install",
     "ni:ephemr": "pnpm -F @rue/ephemr install",
+    "ni:flask": "pnpm -F @rue/flask install",
     "ni:signals": "pnpm -F @rue/signals install"
   },
   "devDependencies": {

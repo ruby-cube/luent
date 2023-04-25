@@ -1,13 +1,13 @@
 {
-    "name": "@rue/signals",
+    "name": "@rue/flask",
     "private": true,
     "description": "",
     "dependencies": {
-        "@rue/paravue": "workspace:*",
+        "vue": "^3.2.47",
         "@rue/planify": "workspace:*"
     },
-    "peerDependencies": {
-        "vue": "^3.2.47"
+    "devDependencies": {
+        "@rue/types": "workspace:*"
     },
     "author": "Ruby Yi Wang",
     "license": "MIT"

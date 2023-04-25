@@ -33,7 +33,7 @@ Planified versions of Vue’s `watch` and `computed`
 
 **Component Utils**
 <br/>
-Planified version of Vue's `onUnmounted` and a simple `isSettingUpComponent` function for checking whether a function was invoked during component setup.
+Planified version of Vue's `onUnmounted` and a simple `inComponentSetup` function for checking whether a function was invoked during component setup.
 
 <br/>
 <br/>

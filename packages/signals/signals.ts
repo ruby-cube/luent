@@ -1,5 +1,7 @@
 //-@ts-nocheck
-import { ComputedRef, Ref, ShallowRef, computed, isRef, reactive, shallowReactive, shallowRef, triggerRef } from "vue";
+import { inComponentSetup } from "@rue/paravue";
+import { $subscribe } from "@rue/planify";
+import { ComputedRef, DebuggerOptions, Ref, ShallowRef, computed, effectScope, isRef, reactive, shallowReactive, shallowRef, triggerRef } from "vue";
 
 
 export type Signal<T> = () => T;
@@ -27,10 +29,39 @@ export function $<T>(value: T, _type?: SignalType): Signal<T> {
     return signal;
 }
 
+export function compute<T>(getter: () => T, options?: { until: (stop: () => void) => void, $lifetime?: true } & DebuggerOptions): ComputedRef<T> {
+    if (options && "until" in options) {
+        let computedRef: ComputedRef<T>;
+        const scope = effectScope(true);
+        scope.run(() => {
+            $subscribe(getter, options, {
+                enroll: (getter) => {
+                    if (__DEV__) computedRef = computed(getter, options); //assumes `scope.run` runs synchronously. TODO: check if this is true
+                    else computedRef = computed(getter); //assumes `scope.run` runs synchronously. TODO: check if this is true
+                },
+                remove: () => scope.stop(),
+            })
+        })
+        return computedRef!;
+    }
+    else if (inComponentSetup()) {
+        if (__DEV__) return computed(getter, options);
+        return computed(getter);
+    }
+    return computed(getter)
+}
 
-export function computed$<F extends () => any>(computation: F) {
-    const computedRef = computed(computation);
-    return () => computedRef.value;
+export function computed$<F extends () => any>(computation: F, outlive?: boolean) {
+    if (outlive) {
+        const scope = effectScope(true);
+        scope.run(()=>{
+
+        })
+    }
+    else {
+        const computedRef = computed(computation);
+        return () => computedRef.value;
+    }
 }
 
 type Unsignalized<T> = T extends { [_SIGNALIZED_]: true } ? { [Key in keyof T as Key extends `${infer K}$` ? K : never]: T[Key] extends () => any ? Unsignalized<ReturnType<T[Key]>> : Unsignalized<T[Key]> } : T; //TODO:

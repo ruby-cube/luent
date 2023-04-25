@@ -1,5 +1,5 @@
 import { computed, ComputedRef, nextTick, onMounted, Ref, ref } from 'vue';
-import { ExtensibleRef, set$, r$, isSettingUpComponent } from '@rue/paravue';
+import { ExtensibleRef, set$, r$, inComponentSetup } from '@rue/paravue';
 import { createHook } from '@rue/pecherie';
 import { ScheduleStop, beginScene, Scene } from '@rue/planify';
 import { addPS } from '@rue/thread';
@@ -80,7 +80,7 @@ class State extends ExtensibleRef {
             }
         }
         else {
-            if (isSettingUpComponent()) {
+            if (inComponentSetup()) {
                 onMounted(() => this.initTransitions(initialValue))
             }
             else {

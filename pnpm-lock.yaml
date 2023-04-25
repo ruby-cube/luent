@@ -129,6 +129,17 @@ importers:
       vite: 4.2.1_@types+node@18.15.11
       vue: 3.2.47
 
+  packages/flask:
+    specifiers:
+      '@rue/planify': workspace:*
+      '@rue/types': workspace:*
+      vue: ^3.2.47
+    dependencies:
+      '@rue/planify': link:../planify
+      vue: 3.2.47
+    devDependencies:
+      '@rue/types': link:../types
+
   packages/modos:
     specifiers:
       '@rue/actionry': workspace:*
@@ -174,9 +185,11 @@ importers:
     specifiers:
       '@rue/planify': workspace:*
       '@rue/types': workspace:*
+      '@vueuse/core': ^10.0.2
       vue: ^3.2.47
     dependencies:
       '@rue/planify': link:../planify
+      '@vueuse/core': 10.0.2_vue@3.2.47
       vue: 3.2.47
     devDependencies:
       '@rue/types': link:../types

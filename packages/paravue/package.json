@@ -4,6 +4,7 @@
     "description": "",
     "dependencies": {
         "vue": "^3.2.47",
+        "@vueuse/core": "^10.0.2",
         "@rue/planify": "workspace:*"
     },
     "devDependencies": {
