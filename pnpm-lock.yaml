@@ -16,6 +16,7 @@ importers:
 
   packages/actionry:
     specifiers:
+      '@rue/flask': workspace:*
       '@rue/paravue': workspace:*
       '@rue/pecherie': workspace:*
       '@rue/types': workspace:*
@@ -25,6 +26,7 @@ importers:
       vite: ^4.2.0
       vue: ^3.2.47
     dependencies:
+      '@rue/flask': link:../flask
       '@rue/paravue': link:../paravue
       '@rue/pecherie': link:../pecherie
     devDependencies:

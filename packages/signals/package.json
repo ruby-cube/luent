@@ -3,7 +3,6 @@
     "private": true,
     "description": "",
     "dependencies": {
-        "@rue/paravue": "workspace:*",
         "@rue/planify": "workspace:*"
     },
     "peerDependencies": {

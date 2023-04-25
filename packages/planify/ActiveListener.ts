@@ -1,3 +1,4 @@
+import { survivingRemovers } from "./outlive";
 import { ActiveListener, Callback, initAutoCleanup, initSceneAutoCleanup, ListenerOptions, PendingCancelOp } from "./planify";
 
 export function makeActiveListener<R, Arg extends R extends void ? Callback : R, CB extends Callback>(
@@ -10,21 +11,27 @@ export function makeActiveListener<R, Arg extends R extends void ? Callback : R,
 ) {
     const { enroll, remove, callback, options } = config;
     const until = options?.until || null;
+    const outlive = options?.$outlive;
     let returnVal: any;
     let pendingAutoStop: PendingCancelOp | void;
     let pendingSceneStop: PendingCancelOp | void;
     const stop = () => {
         remove(returnVal ?? callback);
-     
-        if (pendingAutoStop) pendingAutoStop.cancel()
-        if (pendingSceneStop) pendingSceneStop.cancel()
+        if (pendingAutoStop) pendingAutoStop.cancel();
+        if (pendingSceneStop) pendingSceneStop.cancel();
+        if (outlive) survivingRemovers.delete(stop);
     }
     stop.isRemover = true as const;
-    if (until) until(stop);
+    if (until) {
+        if (outlive) survivingRemovers.add(stop);
+        until(stop);
+    }
     returnVal = enroll(callback);
 
-    const success = pendingAutoStop = initAutoCleanup(stop);
-    pendingSceneStop = initSceneAutoCleanup(stop);
+    if (!outlive) {
+        var success = pendingAutoStop = initAutoCleanup(stop);
+        pendingSceneStop = initSceneAutoCleanup(stop);
+    }
 
     if (__DEV__) {
         const { until, $lifetime, $tilStop, once } = options || {};

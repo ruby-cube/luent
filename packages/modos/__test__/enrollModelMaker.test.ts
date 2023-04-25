@@ -1,4 +1,4 @@
-import { Data, defineRole } from "@rue/etre";
+import { Data, role } from "@rue/etre";
 import { __$initDepotModule, populateDepot } from "../depot";
 import { expect, describe, test } from "vitest";
 import { enrollModelMaker } from "../Model";
@@ -7,7 +7,7 @@ describe("enrollModelMaker", () => {
 
     test("CASE: Reify a single role, enroll as modo, no vine, create", () => {
         __$initDepotModule();
-        const $Frog = defineRole({
+        const $Frog = role({
             $construct(data: Data<{ name: string }>) {
                 return {
                     name: data.name,

@@ -1,6 +1,6 @@
 import { $type } from "../../types";
 import { IReactive } from "../../paravue/reactivity";
-import { $val, Data, defineRole, Interface, PrivateRole, Role } from "../../etre/Role";
+import { $val, Data, role, Interface, PrivateRole, Role } from "../../etre/Role";
 import { onComposed } from "../../etre/reifier";
 
 
@@ -9,7 +9,7 @@ export const BULLY = Symbol();
 type BullFrog = Role<typeof $BullFrog>
 type _BullFrog = PrivateRole<typeof $BullFrog>
 
-export const $BullFrog = defineRole({
+export const $BullFrog = role({
     marker: { [BULLY]: true },
 
     $construct() {
@@ -34,7 +34,7 @@ type IGrumpyFrog = Interface<typeof $GrumpyFrog>
 
 type GrumpyFrog = Role<typeof $GrumpyFrog>;
 
-export const $GrumpyFrog = defineRole({
+export const $GrumpyFrog = role({
     interface: $type as IReactive & {
         hey: () => {}
     },
@@ -56,7 +56,7 @@ type SwampFrogData = {
 
 export type SwampFrog = Role<typeof $SwampFrog>;
 
-export const $SwampFrog = defineRole({
+export const $SwampFrog = role({
     marker: { [SWAMP_FROG]: true },
     interface: $type as IReactive & {
         smurfs: (...args: any) => {}

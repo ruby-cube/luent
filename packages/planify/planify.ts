@@ -2,7 +2,9 @@ import { Cast, MiscObj } from "@rue/types";
 import { makeActiveListener } from "./ActiveListener";
 import { makePendingCancelOp } from "./PendingCancelOp";
 import { makePendingOp, PendingOp } from "./PendingOp";
-import { existingPendingAutoCleanup, existingPendingSceneCleanup, scheduleAutoCleanup, scheduleSceneCleanup, schedulingAutoCleanup, schedulingSceneCleanup } from "./scheduleAutoCleanup";
+import { existingPendingAutoCleanup, scheduleAutoCleanup, schedulingAutoCleanup } from "./scheduleAutoCleanup";
+import { existingPendingSceneCleanup, scheduleSceneCleanup, schedulingSceneCleanup } from "./scheduleSceneCleanup";
+import { beginScene } from "./Scene";
 
 
 export type ListenerOptions = {
@@ -12,11 +14,13 @@ export type ListenerOptions = {
     until?: ScheduleStop;
     $lifetime?: true;
     $tilStop?: true;
+    $outlive?: true;
 }
 
 
 export const $lifetime = true;
 export const $tilStop = true;
+export const $outlive = true;
 
 export type ActiveListener = {
     stop(): void;
@@ -94,14 +98,13 @@ export function $listen<
     let once: boolean | undefined = "once" in callback && callback.once === true || false;
     let sustain: boolean | undefined = true;
     const until = options?.until;
-    const scheduleCancellation = options?.unlessCanceled;
 
     if (onceAsDefault) {
         sustain = options?.sustain || options?.$lifetime || options?.$tilStop;
         once = (sustain || until) ? false : true;
     }
     else {
-        once = (once || options?.once || Boolean(scheduleCancellation));
+        once = (once || options?.once || Boolean(options?.unlessCanceled));
         sustain = !once;
     }
 
@@ -116,7 +119,7 @@ export function $listen<
             options?.$lifetime && options?.until ||
             options?.$lifetime && options?.once
         ) console.warn("Hook has conflicting options. Choose only one callback removal strategy.")
-        if (sustain && scheduleCancellation) throw new Error("Option `unlessCanceled` cannot be applied to a sustained hook. Use the `until` option or set the callback to run once with the `once` option");
+        if (sustain && options?.unlessCanceled) throw new Error("Option `unlessCanceled` cannot be applied to a sustained hook. Use the `until` option or set the callback to run once with the `once` option");
         if (once && until) throw new Error("Option `until` cannot be applied to a hook op that runs only once. Use the `unlessCanceled` option or sustain the listener with the `sustain` option");
     }
 
@@ -133,7 +136,7 @@ export function $listen<
             callback,
             enroll,
             remove,
-            scheduleCancellation
+            options
         }) as $ListenerReturn<ONCE, CB, OPT, C, MaybeCB>
     }
 
@@ -177,7 +180,7 @@ export function $schedule<
         callback,
         enroll,
         remove,
-        scheduleCancellation: options?.unlessCanceled
+        options
     }) as ScheduledOp<CB>
 }
 
@@ -202,6 +205,7 @@ function isRemover(callback: Callback) {
 //     }
 //     return success;
 // }
+
 
 
 export function initAutoCleanup(stop: CallbackRemover<void>) {
@@ -255,3 +259,7 @@ export function $subscribe<
         options
     }) as SustainedListenerReturn<CB, OPT, C, MaybeCB>
 }
+
+
+
+

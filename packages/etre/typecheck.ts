@@ -32,7 +32,7 @@ export function enacts<T extends { __typeDef__: MiscObj }>(value: any, type: T):
         return type.check(value);
 
     console.warn("invalid type", type)
-    throw new Error("[typecheck] Invalid `is` check type.")
+    throw new Error("[typecheck] Invalid `enacts` check type.")
 }
 
 // export function modelDefOf(model: Model) {

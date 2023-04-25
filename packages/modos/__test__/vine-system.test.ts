@@ -1,18 +1,16 @@
 import { beforeAll, beforeEach, describe, expect, test, vi } from "vitest"
 import { App, nextTick, onBeforeUnmount, watch } from "vue";
-import { $type } from "../../types";
-import { onUnmounted, reactive } from "../../paravue/reactivity";
 import { getModel, __$initDepotModule, isMakingModel, populateDepot } from "../depot";
 import { flatPeapod, PeaType } from "../revival/flatdata";
 import { $id, enrollModelMaker } from "../Model";
 import { $Modo } from "../Modo.role";
-import { Data, defineRole, Role, PrivateRole } from "../../etre/Role";
+import { Data, role, Role, PrivateRole } from "../../etre/Role";
 import { $PeaNode } from "../vine/PeaNode.role";
 import { $PeapodPea } from "../vine/PeapodPea.role";
 import { $PodNode } from "../vine/PodNode.role";
 import { defineAutoCleanup } from "../../planify/scheduleAutoCleanup";
 import { onDestroyed } from "../lifecycle-hooks";
-import { inComponentSetup } from "../../paravue/component";
+import { inComponentSetup, onUnmounted } from "../../paravue/component";
 import { doAction, onActionCompleted, onActionStart } from "../../actionry/actionry";
 import { beginScene, defineScene } from "../../planify/Scene";
 
@@ -80,7 +78,7 @@ function setupVineModels() {
   type ListItem = Role<typeof $ListItem>;
   type _ListItem = PrivateRole<typeof $ListItem>;
 
-  const $ListItem = defineRole({
+  const $ListItem = role({
     prereqs: {
       $PeapodPea
     }
@@ -110,7 +108,7 @@ function setupVineModels() {
   type List = Role<typeof $List>
   type _List = PrivateRole<typeof $List>
 
-  const $List = defineRole({
+  const $List = role({
     prereqs: {
       $PodNode,
       $PeapodPea
@@ -148,7 +146,7 @@ function setupVineModels() {
     ]
   })
 
-  const $Doc = defineRole({
+  const $Doc = role({
     prereqs: {
       $PodNode
     },

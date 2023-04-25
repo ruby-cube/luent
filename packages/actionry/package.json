@@ -4,7 +4,8 @@
     "description": "",
     "dependencies": {
         "@rue/pecherie": "workspace:*",
-        "@rue/paravue": "workspace:*"
+        "@rue/paravue": "workspace:*",
+        "@rue/flask": "workspace:*"
     },
     "devDependencies": {
         "@rue/utils": "workspace:*",

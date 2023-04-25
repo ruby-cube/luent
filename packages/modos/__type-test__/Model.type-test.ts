@@ -3,7 +3,7 @@ import { Cast } from '../../types';
 import { $type, Consolidate } from "../../types";
 import { IReactive, reactive } from "../../paravue/reactivity";
 import { $clone, $id, enrollModelMaker, ModelData } from "../Model";
-import { Data, Role, defineRole, $val, $Role, _INTERFACE_, _IMPLEMENTS_ } from "../../etre/Role";
+import { Data, Role, role, $val, $Role, _INTERFACE_, _IMPLEMENTS_ } from "../../etre/Role";
 import { $BullFrog, $GrumpyFrog, $SwampFrog, BULLY, SWAMP_FROG } from "./Role.type-test";
 import { flatPea, flatPeapod, PeaType } from "../revival/flatdata";
 import { implement } from "../../etre/reifier"
@@ -57,7 +57,7 @@ type _FrogData = { width: number }
 export type Frog = Role<typeof $Frog>;
 export type FrogData = ModelData<typeof createFrog>;
 
-export const $Frog = defineRole({
+export const $Frog = role({
     interface: $type as IReactive,
     marker: { [FROG]: true },
     prereqs: {
@@ -196,7 +196,7 @@ some.contents //string[]
 some.one.two //string[]
 some.tripleOne.tripleTwo.tripleThree //string
 
-const $Foo = defineRole({
+const $Foo = role({
     $construct(data: Data<{
         frog: "sir robin",
         contents: { id: string }[],

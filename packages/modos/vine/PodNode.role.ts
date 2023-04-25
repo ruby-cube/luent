@@ -1,4 +1,4 @@
-import { defineRole, Role, PrivateRole, enacts } from '@rue/etre';
+import { role, Role, PrivateRole, enacts } from '@rue/etre';
 import { $type, } from '@rue/utils';
 import { Cast } from '@rue/types';
 import { $Modo } from '../Modo.role';
@@ -14,7 +14,7 @@ console.log('LOADING Pod.role.ts ...');
 export type PodNode = Role<typeof $PodNode>
 type _PodNode = PrivateRole<typeof $PodNode>
 
-export const $PodNode = defineRole({
+export const $PodNode = role({
     prereqs: { $Modo },
 })
 

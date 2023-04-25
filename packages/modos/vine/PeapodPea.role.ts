@@ -1,4 +1,4 @@
-import { defineRole, Role, PrivateRole, enacts } from '@rue/etre';
+import { role, Role, PrivateRole, enacts } from '@rue/etre';
 import { $type } from '@rue/utils';
 import { Mutable } from '@rue/types';
 import { PodNode } from './PodNode.role';
@@ -12,7 +12,7 @@ console.log('LOADING PeapodPea.role.ts ...');
 export type PeapodPea = Role<typeof $PeapodPea>
 type _PeapodPea = PrivateRole<typeof $PeapodPea>
 
-export const $PeapodPea = defineRole({
+export const $PeapodPea = role({
     prereqs: { $PeaNode },
     interface: $type as IReactive & {
         index: number | null | undefined

@@ -3,6 +3,7 @@ import { createHook } from "../Hook";
 import { defineAutoCleanup } from "../../planify/scheduleAutoCleanup";
 import { $lifetime, $tilStop, Callback } from "../../planify/planify";
 import { $type } from "@rue/utils";
+import { DevHookListener } from "@rue/planify";
 
 
 
@@ -215,6 +216,30 @@ describe("one time handlers can be canceled", () => {
         castTestCase({ foo: "A" })
         expect(cb).toHaveBeenCalledTimes(0);
         expect(testCallbacks.size).toBe(0);
+    });
+
+    test.only("CASE: options: {unlessCanceled: onHook }, pendingOp.cancel()", () => {
+        const [castTestCase, onTestCase] = createHook({
+            hook: "test-hook",
+            data: $type as {
+                foo: "A"
+            },
+        });
+        const [castEnded, onEnded] = createHook({
+            hook: "ended",
+        });
+
+        const cb = vi.fn(() => { })
+        //@ts-expect-error
+        const testCallbacks = onTestCase.handlers
+
+        const pendingOp = onTestCase(cb, { unlessCanceled: onEnded });
+
+        pendingOp.cancel();
+        castTestCase({ foo: "A" })
+        expect(cb).toHaveBeenCalledTimes(0);
+        expect(testCallbacks.size).toBe(0);
+        expect((<DevHookListener<typeof onEnded>>onEnded).handlers.size).toBe(0);
     });
 
 

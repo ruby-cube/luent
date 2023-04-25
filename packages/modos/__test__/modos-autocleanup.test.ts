@@ -4,7 +4,7 @@ import { onDestroyed } from "../lifecycle-hooks";
 import { createHook } from "@rue/pecherie";
 import { $type } from "@rue/utils";
 import { expect, vi, describe, test } from "vitest";
-import { defineRole } from "@rue/etre";
+import { role } from "@rue/etre";
 import { $Modo } from "../Modo.role";
 import { enrollModelMaker } from "../Model";
 
@@ -25,7 +25,7 @@ describe("Autocleanup in modo system", () => {
         });
         const cb = vi.fn(() => { })
 
-        const $ListItem = defineRole({
+        const $ListItem = role({
             prereqs: {
                 $Modo
             },

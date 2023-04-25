@@ -1,12 +1,12 @@
 import { extend } from "@vue/shared";
 import { $type } from "../../types";
 import { keyCollisionCheck, KeyCollisionCheck, roleCollisionCheck } from "../../etre/reifier";
-import { $val, Data, defineRole, Role, _Role, Rekey, $Role, Core, Prereqs, _PREREQS_ } from "../../etre/Role";
+import { $val, Data, role, Role, _Role, Rekey, $Role, Core, Prereqs, _PREREQS_ } from "../../etre/Role";
 import { $v } from "../../../../OLD/x_preactive";
 
 type PreBullFrog = Role<typeof $BullFrog>
 
-export const $PreBullFrog = defineRole({
+export const $PreBullFrog = role({
     $construct() {
         return {
             woo_oo: "bully",
@@ -17,7 +17,7 @@ export const $PreBullFrog = defineRole({
 
 type BullFrog = Role<typeof $BullFrog>
 
-export const $BullFrog = defineRole({
+export const $BullFrog = role({
     prereqs: {
         $PreBullFrog
     },
@@ -39,7 +39,7 @@ type SwampFrogData = {
 
 export type SwampFrog = Role<typeof $SwampFrog>;
 
-export const $SwampFrog = defineRole({
+export const $SwampFrog = role({
     prereqs: {
         $BullFrog,
     },

@@ -1,7 +1,7 @@
 import { $type, Consolidate } from "../../types";
 import { IReactive, reactive } from "../../paravue/reactivity";
 import { ModelData } from "../Model";
-import { Data, defineRole, Role, PrivateRole } from "../../etre/Role";
+import { Data, role, Role, PrivateRole } from "../../etre/Role";
 import { $BullFrog, $GrumpyFrog, $SwampFrog } from "./Role.type-test";
 
 
@@ -11,7 +11,7 @@ export type Frog = Role<typeof $Frog>;
 export type FrogData = ModelData<typeof createFrog>;
 type _Frog = PrivateRole<typeof $Frog>;
 
-export const $Frog = defineRole({
+export const $Frog = role({
     interface: $type as IReactive,
     marker: { [FROG]: true },
     prereqs: {

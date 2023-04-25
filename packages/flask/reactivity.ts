@@ -1,9 +1,5 @@
-import { nextTick,  watch, WatchOptions } from "vue";
+import {  watch, WatchOptions } from "vue";
 import { ListenerOptions, $listen} from "@rue/planify";
-
-
-
-export const afterReactiveFlush = nextTick;
 
 
 export function onChange<
@@ -20,6 +16,10 @@ export function onChange<
         }
     });
 }
+
+
+
+
 
 // export function compute<T>(getter: () => T, options?: { until: (stop: () => void) => void, $lifetime?: true } & DebuggerOptions): ComputedRef<T> {
 //     if (options && "until" in options) {

@@ -1,4 +1,4 @@
-import { defineRole, Role, PrivateRole } from '@rue/etre';
+import { role, Role, PrivateRole } from '@rue/etre';
 import { Mutable } from '@rue/types';
 import { PodNode } from './PodNode.role';
 import { $PeaNode } from './PeaNode.role';
@@ -10,7 +10,7 @@ console.log('LOADING LonePea.role.ts ...');
 export type LonePea = Role<typeof $LonePea>;
 type _LonePea = PrivateRole<typeof $LonePea>;
 
-export const $LonePea = defineRole({
+export const $LonePea = role({
     prereqs: { $PeaNode },
 })
 

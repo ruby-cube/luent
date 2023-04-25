@@ -6,7 +6,7 @@ import { $Modo } from "../modos/Modo.role";
 import { onDestroyed } from "../modos/lifecycle-hooks";
 import { createHook } from "../pecherie/Hook";
 import { $type } from "../utils/utils";
-import { defineRole } from "../etre/Role";
+import { role } from "../etre/Role";
 import { UNATTACHED, beginScene } from "../planify/Scene";
 
 
@@ -34,7 +34,7 @@ describe("Autocleanup of scenes", () => {
         });
         const cb = vi.fn(() => { })
 
-        const $ListItem = defineRole({
+        const $ListItem = role({
             prereqs: {
                 $Modo
             },
@@ -208,7 +208,7 @@ function setupModelB(unattached?: boolean) {
     });
     const cb = vi.fn(() => { })
 
-    const $ListItem = defineRole({
+    const $ListItem = role({
         prereqs: {
             $Modo
         },

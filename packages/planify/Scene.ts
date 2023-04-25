@@ -1,7 +1,7 @@
 //-@ts-nocheck
 import { $schedule, Callback, Callbacks, markSceneSetup, OneTimeListener, ScheduledOp, SchedulerOptions } from './planify';
-import { defineSceneCleanup } from './scheduleAutoCleanup';
 import { noop } from "@rue/utils";
+import { registerCleanupScheduler } from './scheduleSceneCleanup';
 
 export type Scene = {
     end: () => void;
@@ -41,7 +41,7 @@ export function beginScene(setUpScene?: (scene: Scene) => void, unattached: bool
     }
 
     const scene = { end, onEnded }
-    defineSceneCleanup(onEnded);
+    registerCleanupScheduler(onEnded);
 
     if (setUpScene) {
         markSceneSetup(true, unattached);
