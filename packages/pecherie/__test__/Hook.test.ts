@@ -218,7 +218,7 @@ describe("one time handlers can be canceled", () => {
         expect(testCallbacks.size).toBe(0);
     });
 
-    test.only("CASE: options: {unlessCanceled: onHook }, pendingOp.cancel()", () => {
+    test("CASE: options: {unlessCanceled: onHook }, pendingOp.cancel()", () => {
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
             data: $type as {

@@ -7,7 +7,7 @@ import { onDestroyed } from "../modos/lifecycle-hooks";
 import { createHook } from "../pecherie/Hook";
 import { $type } from "../utils/utils";
 import { role } from "../etre/Role";
-import { UNATTACHED, beginScene } from "../planify/Scene";
+import { UNATTACHED, sceneSetup } from "../planify/Scene";
 
 
 describe("Autocleanup of scenes", () => {
@@ -39,7 +39,7 @@ describe("Autocleanup of scenes", () => {
                 $Modo
             },
             $construct() {
-                beginScene((scene) => {
+                sceneSetup((scene) => {
                     onTestCase(cb);
                     onTestEnded(() => {
                         scene.end()
@@ -213,7 +213,7 @@ function setupModelB(unattached?: boolean) {
             $Modo
         },
         $construct() {
-            const scene = beginScene(() => {
+            const scene = sceneSetup(() => {
                 onTestCase(cb);
                 onTestEnded(() => {
                     scene.end()

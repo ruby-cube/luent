@@ -313,17 +313,17 @@ onMouseUp(document, () => {
 
 #### Scene Auto-Cleanup
 
-Manage the lifetime of listeners by creating an impromptu listener scope, a “scene”, with  `beginScene`
+Manage the lifetime of listeners by creating an impromptu listener scope, a “scene”, with  `sceneSetup`
     
 ```js
 // SFC script
-import { beginScene } from "@rue/planify"
+import { sceneSetup } from "@rue/planify"
 
 // create a 'dragging' scene
 function initDrag(event){
     const el = event.target;
     
-    beginScene((dragging) => { // callback runs synchronously
+    sceneSetup((dragging) => { // callback runs synchronously
         
         onMouseEnter(el, () => {
             // do work
@@ -359,7 +359,7 @@ function initDrag(event){
     const el = event.target;
 
     const dragging = 
-        beginScene(() => {
+        sceneSetup(() => {
 
             onMouseEnter(el, () => {
                 // do work
@@ -465,7 +465,7 @@ function workHard(item, index){
 
 [`$subscribe(handler, options, config)`](#subscribehandler-options-config)
 
-[`beginScene(sceneDef)`](#scene-auto-cleanup) (Scene API)
+[`sceneSetup(sceneDef)`](#scene-auto-cleanup) (Scene API)
 
 [`defineAutoCleanup(cleanupFn)`](#auto-cleanup) (Auto Cleanup API)
 

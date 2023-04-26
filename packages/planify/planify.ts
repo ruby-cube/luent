@@ -4,7 +4,7 @@ import { makePendingCancelOp } from "./PendingCancelOp";
 import { makePendingOp, PendingOp } from "./PendingOp";
 import { existingPendingAutoCleanup, scheduleAutoCleanup, schedulingAutoCleanup } from "./scheduleAutoCleanup";
 import { existingPendingSceneCleanup, scheduleSceneCleanup, schedulingSceneCleanup } from "./scheduleSceneCleanup";
-import { beginScene } from "./Scene";
+import { sceneSetup } from "./Scene";
 
 
 export type ListenerOptions = {
@@ -74,10 +74,10 @@ export type MaybeBadScheduler<OPT, CB> = OPT extends { until: infer U } ? U exte
 
 
 let settingUpScene = false;
-let unattachedScene = false;
-export function markSceneSetup(state: boolean, unattached: boolean) {
+// let unattachedScene = false;
+export function markSceneSetup(state: boolean) {
     settingUpScene = state;
-    unattachedScene = unattached;
+    // unattachedScene = unattached;
 }
 
 
@@ -211,7 +211,7 @@ function isRemover(callback: Callback) {
 export function initAutoCleanup(stop: CallbackRemover<void>) {
     let success: void | PendingCancelOp = schedulingSceneCleanup ? existingPendingAutoCleanup! : undefined;
     if (settingUpScene) {
-        if (!unattachedScene && !schedulingAutoCleanup)
+        if (!schedulingAutoCleanup)
             success = scheduleAutoCleanup(stop);
     }
     else {

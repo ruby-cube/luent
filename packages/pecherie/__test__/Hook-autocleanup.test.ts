@@ -1,9 +1,10 @@
 //-@ts-nocheck
 import { vi, expect, describe, test, beforeEach } from "vitest";
-import { beginScene, Scene } from "../../planify/Scene";
+import { sceneSetup, Scene } from "../../planify/Scene";
 import { defineAutoCleanup } from "../../planify/scheduleAutoCleanup";
 import { createHook, DevListener } from "../Hook";
 import { $type } from "@rue/utils";
+import { Callback, Callbacks } from "@rue/planify";
 
 
 
@@ -112,9 +113,11 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         });
 
         const cb = vi.fn(() => { })
-        let sceneCallbacks: DevListener<Scene["onEnded"]>["handlers"];
-        beginScene((scene) => {
-            sceneCallbacks = (<DevListener<Scene["onEnded"]>>scene.onEnded).handlers;
+        let sceneCallbacks: Callbacks;
+        sceneSetup((scene) => {
+            sceneCallbacks =
+                //@ts-expect-error
+                scene.endHandlers;
             onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
 
             onMouseUp(() => {
@@ -153,9 +156,11 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         });
 
         const cb = vi.fn(() => { })
-        let sceneCallbacks: DevListener<Scene["onEnded"]>["handlers"];
-        beginScene((scene) => {
-            sceneCallbacks = (<DevListener<Scene["onEnded"]>>scene.onEnded).handlers;
+        let sceneCallbacks: Callbacks;
+        sceneSetup((scene) => {
+            sceneCallbacks =
+                //@ts-expect-error
+                scene.endHandlers;
             onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
 
             onMouseUp(() => {
@@ -201,10 +206,12 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
 
         const cb = vi.fn(() => { })
 
-        let sceneCallbacks: DevListener<Scene["onEnded"]>["handlers"];
         settingUp = true;
-        beginScene((scene) => {
-            sceneCallbacks = (<DevListener<Scene["onEnded"]>>scene.onEnded).handlers;
+        let sceneCallbacks: Callbacks;
+        sceneSetup((scene) => {
+            sceneCallbacks =
+                //@ts-expect-error
+                scene.endHandlers;
             onTestCase(cb) // modo auto cleanup
         })
         settingUp = false;
@@ -245,11 +252,13 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         });
         const cb = vi.fn(() => { })
         const autoCleanupCallbacks = (<DevListener<typeof onTestUnmounted>>onTestUnmounted).handlers
-        let sceneCallbacks: DevListener<Scene["onEnded"]>["handlers"];
 
         settingUp = true;
-        beginScene((scene) => {
-            sceneCallbacks = (<DevListener<Scene["onEnded"]>>scene.onEnded).handlers;
+        let sceneCallbacks: Callbacks;
+        sceneSetup((scene) => {
+            sceneCallbacks =
+                //@ts-expect-error
+                scene.endHandlers;
             onTestCase(cb) // modo auto cleanup
             onSceneEnder(() => {
                 scene.end();

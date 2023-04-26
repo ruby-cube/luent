@@ -7,7 +7,7 @@ import { PeaNode } from './PeaNode.role';
 import { beforeDisposedOf, onDestroyed, onInstated, onMade } from '../lifecycle-hooks';
 import { onActionCompleted, onActionStart } from '@rue/actionry';
 import { createHook } from '@rue/pecherie';
-import { $lifetime, beginScene } from '@rue/planify';
+import { $lifetime, sceneSetup } from '@rue/planify';
 console.log('LOADING Pod.role.ts ...');
 
 
@@ -95,7 +95,7 @@ export function disconnectPeaFromPod(pod: PodNode, pea: PeaNode) {
 
 
 onActionStart((action) => {
-    beginScene((actionScene) => {
+    sceneSetup((actionScene) => {
         const detachedPeas: Set<PeaNode> = new Set(); // collect peas for batch disposal
         const reattachedPeas: Set<PeaNode> = new Set(); // collect peas for batch instatement
 

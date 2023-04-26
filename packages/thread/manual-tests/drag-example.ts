@@ -1,5 +1,5 @@
 import { ActiveListener } from "../../planify/planify";
-import { beginScene } from "../../planify/Scene";
+import { sceneSetup } from "../../planify/Scene";
 import { useEventListener } from "../event-listeners";
 
 
@@ -11,7 +11,7 @@ const onMouseMove = useEventListener("mousemove");
 const onClick = useEventListener("click");
 
 export async function reMouseDown(e: MouseEvent) {
-    const scene = beginScene()
+    const scene = sceneSetup()
     const { target } = e;
     if (target === null) return;
     let action: "click" | "dragdrop" = "click";

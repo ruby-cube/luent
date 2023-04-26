@@ -2,7 +2,7 @@
 import { getKeyPathValue, KeyPath, toKeyPath, $type } from "@rue/utils";
 import { onActionCompleted, onActionStart } from '@rue/actionry';
 import { createHook } from '@rue/pecherie';
-import { $tilStop, OneTimeListener, beginScene } from "@rue/planify";
+import { $tilStop, OneTimeListener, sceneSetup } from "@rue/planify";
 import { onChange } from "@rue/paravue";
 import { Modo } from "../Modo.role";
 import { ModoSymbol } from "../Model";
@@ -79,7 +79,7 @@ function isUndoable(modelName: string) {
 
 function setupBatching() {
     onActionStart((action) => {
-        const actionScene = beginScene(() => {
+        const actionScene = sceneSetup(() => {
             const undoableBatch: UndoableChange[] = [];
 
             onUndoablePropChanged((change) => {

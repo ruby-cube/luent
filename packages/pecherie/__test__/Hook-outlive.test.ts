@@ -1,9 +1,8 @@
 //-@ts-nocheck
 import { vi, expect, describe, test, beforeEach } from "vitest";
-import { beginScene, Scene } from "../../planify/Scene";
+import { sceneSetup, Scene } from "../../planify/Scene";
 import { defineAutoCleanup } from "../../planify/scheduleAutoCleanup";
 import { createHook, DevListener } from "../Hook";
-import { $type } from "@rue/utils";
 import { $outlive, PendingOp } from "@rue/planify";
 import { survivingRemovers } from "../../planify/outlive";
 
@@ -18,14 +17,14 @@ import { survivingRemovers } from "../../planify/outlive";
 // Cases:
 // DONE until is called
 // DONE callback is called -- one-time listener
-// unlessCanceled is called
-// .cancel() is called
+// DONE unlessCanceled is called
+// DONE .cancel() is called
 
 
 describe(`hooks (and removers) configured with $outlive will survive scope disposal (either component setup or scene disposal); 
 survivingRemovers will be cleaned up once handler is run or removed`, () => {
 
-    test.only("CASE: register until and auto cleanup. Execute auto cleanup. Expect handler and until remover to survive", () => {
+    test("CASE: register until and auto cleanup. Execute auto cleanup. Expect handler and until remover to survive", () => {
         survivingRemovers.clear();
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
@@ -68,7 +67,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
         expect(handlers.size).toBe(1); // remover survived
     })
 
-    test.only("CASE: register unlessCanceled and auto cleanup. Execute auto cleanup. Expect handler and unlessCanceled remover to survive. Cleanup via callback call", () => {
+    test("CASE: register unlessCanceled and auto cleanup. Execute auto cleanup. Expect handler and unlessCanceled remover to survive. Cleanup via callback call", () => {
         survivingRemovers.clear();
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
@@ -116,7 +115,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
         expect(survivingRemovers.size).toBe(0) // survivingRemovers cleaned up
     })
 
-    test.only("CASE: register until in scene. End scene. Expect handler and until remover to survive. Cleanup via until remover call", () => { //TODO:
+    test("CASE: register until in scene. End scene. Expect handler and until remover to survive. Cleanup via until remover call", () => { //TODO:
         survivingRemovers.clear();
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
@@ -127,13 +126,15 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
 
         const cb = vi.fn(() => { })
 
-        const scene = beginScene(() => {
+        const scene = sceneSetup(() => {
             onTestCase(cb, { until: onSomethingEnded, $outlive }) // modo auto cleanup
         })
 
         expect(survivingRemovers.size).toBe(1) // survivingRemover registered
 
-        const sceneCleanupCallbacks = (<DevListener<typeof scene.onEnded>>scene.onEnded).handlers
+        const sceneCleanupCallbacks = 
+                //@ts-expect-error
+                scene.endHandlers;
         expect(sceneCleanupCallbacks.size).toBe(0); // autocleanup should not be registered
 
         castTestCase();
@@ -165,7 +166,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
         expect(survivingRemovers.size).toBe(0) // survivingRemovers cleaned up
     })
 
-    test.only("CASE: register unlessCanceled and scene. End scene. Expect handler and unlessCanceled remover to survive. Cleanup via unlessCanceled remover", () => {
+    test("CASE: register unlessCanceled and scene. End scene. Expect handler and unlessCanceled remover to survive. Cleanup via unlessCanceled remover", () => {
         survivingRemovers.clear();
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
@@ -177,13 +178,15 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
         const cb = vi.fn(() => { })
 
         let pendingOp: PendingOp;
-        const scene = beginScene(() => {
+        const scene = sceneSetup(() => {
             pendingOp = onTestCase(cb, { unlessCanceled: onSomethingEnded, $outlive }) // modo auto cleanup
         })
 
         expect(survivingRemovers.size).toBe(1) // survivingRemover registered
 
-        const sceneCleanupCallbacks = (<DevListener<typeof scene.onEnded>>scene.onEnded).handlers
+        const sceneCleanupCallbacks = 
+                //@ts-expect-error
+                scene.endHandlers;
         expect(sceneCleanupCallbacks.size).toBe(0); // autocleanup should not be registered
 
         scene.end();
@@ -205,7 +208,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
     })
 
 
-    test.only("CASE: register unlessCanceled and scene. End scene. Expect handler and unlessCanceled remover to survive. Cleanup via pendingOp.cancel()", () => {
+    test("CASE: register unlessCanceled and scene. End scene. Expect handler and unlessCanceled remover to survive. Cleanup via pendingOp.cancel()", () => {
         survivingRemovers.clear();
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
@@ -217,13 +220,15 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
         const cb = vi.fn(() => { })
 
         let pendingOp: PendingOp;
-        const scene = beginScene(() => {
+        const scene = sceneSetup(() => {
             pendingOp = onTestCase(cb, { unlessCanceled: onSomethingEnded, $outlive }) // modo auto cleanup
         })
 
         expect(survivingRemovers.size).toBe(1) // survivingRemover registered
 
-        const sceneCleanupCallbacks = (<DevListener<typeof scene.onEnded>>scene.onEnded).handlers
+        const sceneCleanupCallbacks = 
+                //@ts-expect-error
+                scene.endHandlers;
         expect(sceneCleanupCallbacks.size).toBe(0); // autocleanup should not be registered
 
         scene.end();

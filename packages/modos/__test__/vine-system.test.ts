@@ -12,7 +12,7 @@ import { defineAutoCleanup } from "../../planify/scheduleAutoCleanup";
 import { onDestroyed } from "../lifecycle-hooks";
 import { inComponentSetup, onUnmounted } from "../../paravue/component";
 import { doAction, onActionCompleted, onActionStart } from "../../actionry/actionry";
-import { beginScene, defineScene } from "../../planify/Scene";
+import { sceneSetup, defineScene } from "../../planify/Scene";
 
 
 const initalDatasets = [{
@@ -251,7 +251,7 @@ function runPeaDisposalTest() {
 
     function _initAction() {
       onActionStart((action) => {
-        beginScene((scene) => {
+        sceneSetup((scene) => {
 
           onActionCompleted(action, () => {
             console.log("action completed", action)
@@ -306,7 +306,7 @@ async function runReinstatePeasTest() {
 
     function initAction() {
       onActionStart((action) => {
-        beginScene((scene) => {
+        sceneSetup((scene) => {
           onActionCompleted(action, () => {
             console.log("REINSTATE action completed")
             xDoc01.contents = [xList01, xList02];

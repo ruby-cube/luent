@@ -1,7 +1,7 @@
 import { computed, ComputedRef, nextTick, onMounted, Ref, ref } from 'vue';
 import { ExtensibleRef, set$, r$, inComponentSetup } from '@rue/paravue';
 import { createHook } from '@rue/pecherie';
-import { ScheduleStop, beginScene, Scene } from '@rue/planify';
+import { ScheduleStop, sceneSetup, Scene } from '@rue/planify';
 import { addPS } from '@rue/thread';
 import { $type } from '@rue/utils';
 import { MiscObj } from '@rue/types';
@@ -241,7 +241,7 @@ class State extends ExtensibleRef {
         if (transition == null) return;
 
         this.currentState =
-            beginScene((scene) => {
+            sceneSetup((scene) => {
                 this.currentlyInitiating = value;
                 transition(this, this.context);
                 this.initSubstates(value)

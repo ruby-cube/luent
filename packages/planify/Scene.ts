@@ -1,25 +1,34 @@
 //-@ts-nocheck
 import { $schedule, Callback, Callbacks, markSceneSetup, OneTimeListener, ScheduledOp, SchedulerOptions } from './planify';
-import { noop } from "@rue/utils";
-import { registerCleanupScheduler } from './scheduleSceneCleanup';
+import { noop, run } from "@rue/utils";
+import { registerSceneCleanup } from './scheduleSceneCleanup';
 
-export type Scene = {
-    end: () => void;
-    onEnded: SceneEndListener
-}
+// export type Scene = {
+//     end: () => void;
+//     onEnded: SceneEndListener;
+//     resume: ()=>void;
+// }
 
-export type SceneEndListener = (handler?: Callback, options?: SchedulerOptions)=> ScheduledOp<Callback>;
+export class Scene {
+    outerScene: Scene | null |undefined
+    private endHandlers: Callbacks = new Set();
+    constructor(setUpScene: ((scene: Scene) => void | Promise<void>) | undefined) {
+        registerSceneCleanup(this);
 
-export const UNATTACHED = true;
+        if (setUpScene) {
+            run(async () => {
+                this._start();
+                await setUpScene(this);
+                this._end();
+            })
+        }
+    }
 
-
-export function beginScene(setUpScene?: (scene: Scene) => void, unattached: boolean = false) {
-    const handlers = new Set() as Callbacks;
-
-    function onEnded(handler?: Callback, options?: SchedulerOptions) {
+    onEnded(handler?: Callback, options?: SchedulerOptions) {
         if (handler == null) {
             handler = noop;
         }
+        const handlers = this.endHandlers;
         return $schedule(handler, options, {
             enroll: (handler) => {
                 handlers.add(handler)
@@ -30,30 +39,104 @@ export function beginScene(setUpScene?: (scene: Scene) => void, unattached: bool
         })
     }
 
-    if (__TEST__){
-        onEnded.handlers = handlers
-    }
-
-    function end() {
+    end() {
+        const handlers = this.endHandlers;
         for (const cb of handlers) {
             cb()
         }
     }
-
-    const scene = { end, onEnded }
-    registerCleanupScheduler(onEnded);
-
-    if (setUpScene) {
-        markSceneSetup(true, unattached);
-        setUpScene(scene);
-        markSceneSetup(false, unattached);
+    _start() {
+        this.outerScene = activeSceneSetup;
+        activeSceneSetup = this;
+        markSceneSetup(true);
     }
-    return scene;
+
+    _end() {
+        this.outerScene = this.outerScene?.outerScene;
+        activeSceneSetup = this.outerScene;
+        markSceneSetup(false);
+    }
+
+    async after<T>(promise: Promise<T>) {
+        if (__DEV__ && activeSceneSetup !== this) {
+            throw new Error(`scene.after() called outside of scene setup.`)
+        }
+        this._end();
+        try {
+            const result = await promise
+            return [result, null]
+        }
+        catch (err) {
+            return [null, err]
+        }
+        finally {
+            this._start();
+        }
+    }
 }
+
+// export type SceneEndListener = (handler?: Callback, options?: SchedulerOptions)=> ScheduledOp<Callback>;
+
+// export const UNATTACHED = true;
+
+let activeSceneSetup: Scene | null | undefined;
+
+export function getActiveScene(){
+    return activeSceneSetup;
+}
+
+export function sceneSetup(setUpScene: (scene: Scene) => void | Promise<void>) {
+    // const handlers = new Set() as Callbacks;
+
+    // function onEnded(handler?: Callback, options?: SchedulerOptions) {
+    //     if (handler == null) {
+    //         handler = noop;
+    //     }
+    //     return $schedule(handler, options, {
+    //         enroll: (handler) => {
+    //             handlers.add(handler)
+    //         },
+    //         remove: (handler) => {
+    //             handlers.delete(handler)
+    //         }
+    //     })
+    // }
+
+    // if (__TEST__){
+    //     onEnded.handlers = handlers
+    // }
+
+    // function end() {
+    //     for (const cb of handlers) {
+    //         cb()
+    //     }
+    // }
+
+    return new Scene(setUpScene);
+
+}
+
+
+
+// export async function resumeScene<T>(promise: Promise<T>) {
+//     if (__DEV__ && !activeScene) {
+//         console.warn(
+//             `resumeScene cannot be called outside of a scene`
+//         )
+//     }
+//     let res: Awaited<T>;
+
+//     res = await promise;
+//     activeScene = this;
+//     return res;
+//     return promise;
+// }
+
+
 
 export function defineScene<CB extends (context: any, scene: Scene) => any>(cb: CB) {
     return (context: Parameters<CB>[0]) => {
-        beginScene((scene) => {
+        sceneSetup((scene) => {
             cb(context, scene);
         })
     }
@@ -69,7 +152,7 @@ const reMouse = defineScene((event: MouseEvent, scene) => {
 // //USAGE:
 
 // function reMouseDown() {
-//     const scene = beginScene();
+//     const scene = sceneSetup();
 //     onMouseMove(document, () => {
 //         // do stuff
 //     }, { until: scene.onEnded })
@@ -80,23 +163,24 @@ const reMouse = defineScene((event: MouseEvent, scene) => {
 //     })
 // }
 
+
+function reMouseDown() {
+    sceneSetup(async (scene) => {
+        onMouseMove(document, () => {
+            // do stuff
+        })
+
+        const [result, error] = await scene.after(fetch(""))
+
+        onMouseUp(document, () => {
+            // do stuff
+            scene.end();
+        })
+    });
+}
+
 // function reMouseDown() {
-//     const scene =
-//         beginScene(() => {
-//             onMouseMove(document, () => {
-//                 // do stuff
-//             })
-
-//             onMouseUp(document, () => {
-//                 // do stuff
-//                 scene.end();
-//             })
-//         });
-
-// }
-
-// function reMouseDown() {
-//     beginScene((scene) => {
+//     sceneSetup((scene) => {
 //         onMouseMove(document, () => {
 //             // do stuff
 //         })
