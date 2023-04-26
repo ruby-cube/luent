@@ -40,9 +40,9 @@ export function inComponentSetup() {
 
 
 const componentMap = new WeakMap();
-export function onUnmounted(handler: Callback, options?: ListenerOptions) {
-    const currentInstance = getCurrentInstance();
-    if (!currentInstance) throw new Error("onUnmounted must be called from within component setup function")
+export function onComponentUnmounted(handler: Callback, options?: ListenerOptions & {target?: ComponentInternalInstance}) {
+    const currentInstance = options?.target || getCurrentInstance();
+    if (!currentInstance) throw new Error("onComponentUnmounted must be called from within component setup function")
     const existingCallbacks = componentMap.get(currentInstance);
     const handlers = existingCallbacks ? existingCallbacks : new Set();
     if (!existingCallbacks) {
@@ -52,9 +52,10 @@ export function onUnmounted(handler: Callback, options?: ListenerOptions) {
                 for (const cb of handlers) {
                     cb()
                 }
-            })
-        })
+            }, currentInstance)
+        }, currentInstance)
     }
+    
     return $listen(handler, options, {
         enroll(handler) {
             handlers.add(handler);
@@ -67,5 +68,5 @@ export function onUnmounted(handler: Callback, options?: ListenerOptions) {
 }
 
 if (__TEST__) {
-    onUnmounted.getCallbacks = (component: ComponentInternalInstance) => componentMap.get(component);
+    onComponentUnmounted.getCallbacks = (component: ComponentInternalInstance) => componentMap.get(component);
 }

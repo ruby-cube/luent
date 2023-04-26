@@ -1,6 +1,7 @@
 export { $listen, $schedule, $subscribe, $lifetime, $tilStop, $outlive, initAutoCleanup, initSceneAutoCleanup } from "./planify"
 export { defineAutoCleanup } from "./scheduleAutoCleanup"
 export { genTargetID } from "./targetID"
+export {inSceneSetup} from "./Scene"
 export type * from "./planify"
 export type * from "./dev-utils"
 export type * from "./PendingOp"

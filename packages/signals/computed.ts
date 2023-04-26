@@ -1,37 +1,42 @@
-import { $subscribe } from "@rue/planify";
+import { $subscribe, inSceneSetup } from "@rue/planify";
 import { ComputedRef, DebuggerOptions, computed, effectScope, getCurrentInstance as inComponentSetup } from "vue";
+import { Signal } from "./signals";
 
-export function compute<T>(getter: () => T, options?: { $outlive?: true, until: (stop: () => void) => void, $lifetime?: true } & DebuggerOptions): ComputedRef<T> {
-    if (options && "until" in options) {
-        let computedRef: ComputedRef<T>;
+export function computed$<T>(computation: () => T, options?: { $outlive?: true, until?: (stop: () => void) => void, $lifetime?: true } & DebuggerOptions): Signal<T> {
+    let computedRef: ComputedRef<T>;
+    if (inSceneSetup() || options && ("until" in options || "$outlive" in options && options.$outlive)) { //QUESTION: check if inFlask??
         const scope = effectScope(true);
         scope.run(() => {
-            $subscribe(getter, options, {
-                enroll: (getter) => {
-                    if (__DEV__) computedRef = computed(getter, options); //assumes `scope.run` runs synchronously. TODO: check if this is true
-                    else computedRef = computed(getter); //assumes `scope.run` runs synchronously. TODO: check if this is true
+            $subscribe(computation, options, {
+                enroll: (computation) => {
+                    if (__DEV__) computedRef = computed(computation, options); //assumes `scope.run` runs synchronously. TODO: check if this is true
+                    else computedRef = computed(computation); //assumes `scope.run` runs synchronously. TODO: check if this is true
                 },
                 remove: () => scope.stop(),
             })
         })
-        return computedRef!;
     }
-    else if (inComponentSetup()) {
-        if (__DEV__) return computed(getter, options);
-        return computed(getter);
-    }
-    return computed(getter)
+    // else if (inComponentSetup()) {
+    //     if (__DEV__) {
+    //         computedRef = computed(computation, options);
+    //         // return () => computedRef.value;
+    //     }
+    //     const computedRef = computed(computation);
+    //     // return () => computedRef.value;
+    // }
+    else computedRef = computed(computation);
+    return () => computedRef.value;
 }
 
-export function computed$<F extends () => any>(computation: F, outlive?: boolean) {
-    if (outlive) {
-        const scope = effectScope(true);
-        scope.run(() => {
+// export function computed$<F extends () => any>(computation: F, outlive?: boolean) {
+//     if (outlive) {
+//         const scope = effectScope(true);
+//         scope.run(() => {
 
-        })
-    }
-    else {
-        const computedRef = computed(computation);
-        return () => computedRef.value;
-    }
-}
+//         })
+//     }
+//     else {
+//         const computedRef = computed(computation);
+//         return () => computedRef.value;
+//     }
+// }

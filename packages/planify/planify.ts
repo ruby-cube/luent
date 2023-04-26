@@ -223,7 +223,7 @@ export function initAutoCleanup(stop: CallbackRemover<void>) {
 export function initSceneAutoCleanup(stop: CallbackRemover<void>) {
     let success: void | PendingCancelOp = schedulingSceneCleanup ? existingPendingSceneCleanup! : undefined;
     if (settingUpScene && !schedulingSceneCleanup) {
-        success = scheduleSceneCleanup(stop);
+        success = scheduleSceneCleanup!(stop);
     }
     return success;
 }

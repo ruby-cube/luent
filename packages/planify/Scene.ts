@@ -2,6 +2,8 @@
 import { $schedule, Callback, Callbacks, markSceneSetup, OneTimeListener, ScheduledOp, SchedulerOptions } from './planify';
 import { noop, run } from "@rue/utils";
 import { registerSceneCleanup } from './scheduleSceneCleanup';
+import { Flask, getRootFlask } from '../watch/flask';
+import { RootFlask } from '../watch/RootFlasks';
 
 // export type Scene = {
 //     end: () => void;
@@ -10,19 +12,10 @@ import { registerSceneCleanup } from './scheduleSceneCleanup';
 // }
 
 export class Scene {
-    outerScene: Scene | null |undefined
+    outerScene: Scene | null | undefined;
     private endHandlers: Callbacks = new Set();
-    constructor(setUpScene: ((scene: Scene) => void | Promise<void>) | undefined) {
-        registerSceneCleanup(this);
 
-        if (setUpScene) {
-            run(async () => {
-                this._start();
-                await setUpScene(this);
-                this._end();
-            })
-        }
-    }
+    constructor(public root: RootFlask | null | undefined) { }
 
     onEnded(handler?: Callback, options?: SchedulerOptions) {
         if (handler == null) {
@@ -45,23 +38,12 @@ export class Scene {
             cb()
         }
     }
-    _start() {
-        this.outerScene = activeSceneSetup;
-        activeSceneSetup = this;
-        markSceneSetup(true);
-    }
-
-    _end() {
-        this.outerScene = this.outerScene?.outerScene;
-        activeSceneSetup = this.outerScene;
-        markSceneSetup(false);
-    }
 
     async after<T>(promise: Promise<T>) {
         if (__DEV__ && activeSceneSetup !== this) {
             throw new Error(`scene.after() called outside of scene setup.`)
         }
-        this._end();
+        _endSetup(this);
         try {
             const result = await promise
             return [result, null]
@@ -70,9 +52,24 @@ export class Scene {
             return [null, err]
         }
         finally {
-            this._start();
+            _startSetup(this);
         }
     }
+}
+
+
+function _startSetup(scene: Scene) {
+    scene.outerScene = activeSceneSetup;
+    activeSceneSetup = scene;
+    registerSceneCleanup(scene);
+    markSceneSetup(true);
+}
+
+function _endSetup(scene: Scene) {
+    scene.outerScene = scene.outerScene?.outerScene;
+    activeSceneSetup = scene.outerScene;
+    registerSceneCleanup(activeSceneSetup);
+    markSceneSetup(!!activeSceneSetup || false);
 }
 
 // export type SceneEndListener = (handler?: Callback, options?: SchedulerOptions)=> ScheduledOp<Callback>;
@@ -81,40 +78,48 @@ export class Scene {
 
 let activeSceneSetup: Scene | null | undefined;
 
-export function getActiveScene(){
+export function getScene() {
     return activeSceneSetup;
 }
 
-export function sceneSetup(setUpScene: (scene: Scene) => void | Promise<void>) {
-    // const handlers = new Set() as Callbacks;
-
-    // function onEnded(handler?: Callback, options?: SchedulerOptions) {
-    //     if (handler == null) {
-    //         handler = noop;
-    //     }
-    //     return $schedule(handler, options, {
-    //         enroll: (handler) => {
-    //             handlers.add(handler)
-    //         },
-    //         remove: (handler) => {
-    //             handlers.delete(handler)
-    //         }
-    //     })
-    // }
-
-    // if (__TEST__){
-    //     onEnded.handlers = handlers
-    // }
-
-    // function end() {
-    //     for (const cb of handlers) {
-    //         cb()
-    //     }
-    // }
-
-    return new Scene(setUpScene);
-
+export function inSceneSetup() {
+    return Boolean(activeSceneSetup);
 }
+
+export function sceneSetup(setUpScene: (scene: Scene) => void | Promise<void>) {
+    const scene = new Scene(getRootFlask());
+    _startSetup(scene);
+    const returnValue = setUpScene(scene);
+    _resolveSetupEnd(scene, returnValue);
+    return scene;
+}
+
+export function scenify<A extends any[]>(setUpScene: (scene: Scene, ...args: A) => void | Promise<void>) {
+    return (...args: A) => {
+        const scene = new Scene(getRootFlask());
+        _startSetup(scene);
+        const returnValue = setUpScene(scene, ...args);
+        _resolveSetupEnd(scene, returnValue);
+    }
+}
+
+function _resolveSetupEnd(scene: Scene, returnValue: any) {
+    if (returnValue instanceof Promise) {
+        run(async () => {
+            await returnValue;
+            _endSetup(scene);
+        });
+    }
+    else {
+        _endSetup(scene);
+    }
+}
+
+// const reMouseDown = scenify((scene: Scene, event: MouseEvent) => {
+
+
+// })
+
 
 
 
@@ -164,20 +169,20 @@ const reMouse = defineScene((event: MouseEvent, scene) => {
 // }
 
 
-function reMouseDown() {
-    sceneSetup(async (scene) => {
-        onMouseMove(document, () => {
-            // do stuff
-        })
+// function reMouseDown() {
+//     sceneSetup(async (scene) => {
+//         onMouseMove(document, () => {
+//             // do stuff
+//         })
 
-        const [result, error] = await scene.after(fetch(""))
+//         const [result, error] = await scene.after(fetch(""))
 
-        onMouseUp(document, () => {
-            // do stuff
-            scene.end();
-        })
-    });
-}
+//         onMouseUp(document, () => {
+//             // do stuff
+//             scene.end();
+//         })
+//     });
+// }
 
 // function reMouseDown() {
 //     sceneSetup((scene) => {
