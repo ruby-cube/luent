@@ -24,11 +24,12 @@ export function getRootFlask(){
     return activeFlaskSetup?.root || _getRootFlask();
 }
 
+
 export function _getRootFlask() {
     for (const [targetGetter, RootFlask] of _rootFlaskClasses) {
         const target = targetGetter();
         if (target) {
-            return new RootFlask(target);
+            return new RootFlask(target); // creates a new rootFlask for all nested flasks... not ideal, but its currently too much of a headache to create a map and rootFlask.onDisposed(()=>map.delete(target)) cuz it messes up all my tests :(
         }
     }
     return activeFlaskSetup;
@@ -57,7 +58,7 @@ export class Flask implements ReactivityFlask {
     private disposalHandlers: Callbacks = new Set();
     constructor(
         public root: RootFlask | null | undefined,
-        private outlivesRoot: boolean | undefined
+        public outlivesRoot: boolean | undefined
     ) { }
 
     onDisposed(handler?: Callback, options?: SchedulerOptions) {
@@ -107,13 +108,13 @@ function _startSetup(flask: Flask) {
 }
 
 function _endSetup(flask: Flask) {
-    flask.outerFlask = flask.outerFlask?.outerFlask;
     activeFlaskSetup = flask.outerFlask;
+    flask.outerFlask = flask.outerFlask?.outerFlask;
 }
 
 function _resolveSetupEnd(flask: Flask, returnValue: any) {
     if (returnValue instanceof Promise) {
-        run(async () => {
+        return run(async () => {
             const result = await returnValue;
             _endSetup(flask);
             return result;

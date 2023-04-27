@@ -29,15 +29,16 @@ export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
 function cleanupScheduler(stop: CallbackRemover<void>) {
     const scene = getScene();
     const flask = getFlask();
+    const flaskAttachedToRoot = flask && !flask.outlivesRoot
     const rootFlask = flask ? flask.root : scene ? null : _getRootFlask();
     const pendingCancelOps = [];
-    if (scene) {
+    if (scene && (!flask || flaskAttachedToRoot)) {
         pendingCancelOps.push(scene.onEnded(stop));
     }
     if (flask) {
         pendingCancelOps.push(flask.onDisposed(stop));
     }
-    if (rootFlask && rootFlask !== flask) {
+    if (rootFlask && rootFlask !== flask && (!flask || flaskAttachedToRoot)) {
         pendingCancelOps.push(rootFlask.onDisposed(stop));
     }
     return pendingCancelOps;

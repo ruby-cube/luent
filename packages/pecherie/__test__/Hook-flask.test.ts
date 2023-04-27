@@ -4,19 +4,20 @@ import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
 import { $type } from "@rue/utils";
 import { Callback, Callbacks, initFlask } from "../../flask";
-import { Flask, flaskSetup } from "../../flask/flask";
+import { Flask, enflask, flaskSetup } from "../../flask/flask";
 
-// [ ] autocleanup with root flask
-// [ ] autocleanup with no root flask
-// [ ] cleanup cleanups if alternative cleanup strategy run
-// [ ] outlive root flask
+// cleanup cleanups if alternative cleanup strategy run
+// [X] autocleanup with root flask
+// [X] autocleanup with scene as root flask
+// [X] autocleanup with no root flask
+// [X] enflask
+// [ ] access root flask from params
 
-describe("autocleanup via flask", () => {
+describe("various flask usages where all cleanup strategies should be cleaned up once a cleanup strategy is run", () => {
 
-    test.only("CASE: auto cleanup, multiple handlers, with root flask. Root flask unmounts", () => {
+    test("CASE: With root flask. Root flask unmounts", () => {
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
-            // onceAsDefault: true,
         });
         let settingUp = false;
         initFlask({
@@ -34,78 +35,16 @@ describe("autocleanup via flask", () => {
         })
 
         const [castTestCaseC, onTestCaseC] = createHook({
-            hook: "test-hook-B",
+            hook: "test-hook-C",
+        })
+
+        const [castTestCaseD, onTestCaseD] = createHook({
+            hook: "test-hook-D",
         })
 
         const cb = vi.fn(() => { })
         const cbB = vi.fn(() => { })
-        //@ts-expect-error
-        const testCallbacksA = onTestCaseA.handlers
-        //@ts-expect-error
-        const testCallbacksB = onTestCaseB.handlers
-        //@ts-expect-error
-        const unmountedCallbacks = onTestUnmounted.handlers
-
-        settingUp = true;
-        const flask = flaskSetup((flask) => {
-            onTestCaseA(cb, {until: onTestCaseC});
-            onTestCaseB(cbB, {until: onTestCaseC});
-            onTestCaseC(()=>flask.dispose());
-            return flask;
-        })
-        settingUp = false;
-        expect(unmountedCallbacks.size).toBe(5);
-
-        castTestCaseA();
-        castTestCaseA();
-        castTestCaseA();
-        expect(cb).toHaveBeenCalledTimes(3);
-        castTestCaseB();
-        castTestCaseB();
-        expect(cbB).toHaveBeenCalledTimes(2);
-
-        castTestUnmounted();
-        expect(testCallbacksA.size).toBe(0);
-        expect(testCallbacksB.size).toBe(0);
-        expect(unmountedCallbacks.size).toBe(0);
-
-        //@ts-expect-error
-        expect(flask.disposalHandlers.size).toBe(0);
-
-        castTestCaseA();
-        expect(cb).toHaveBeenCalledTimes(3);
-        castTestCaseB();
-        expect(cbB).toHaveBeenCalledTimes(2);
-        // done("test done")
-    });
-
-
-    test.only("CASE: auto cleanup, multiple handlers, with root flask. Flask is disposed", () => {
-        const [castTestUnmounted, onTestUnmounted] = createHook({
-            hook: "test-unmounted-hook",
-            // onceAsDefault: true,
-        });
-        let settingUp = false;
-        initFlask({
-            rootFlasks: [{
-                setupChecker: () => settingUp,
-                autoCleanupScheduler: onTestUnmounted
-            }]
-        })
-        const [castTestCaseA, onTestCaseA] = createHook({
-            hook: "test-hook-A",
-        })
-
-        const [castTestCaseB, onTestCaseB] = createHook({
-            hook: "test-hook-B",
-        })
-
-        const [castTestCaseC, onTestCaseC] = createHook({
-            hook: "test-hook-B",
-        })
-
-        const cb = vi.fn(() => { })
-        const cbB = vi.fn(() => { })
+        const cbC = vi.fn(() => { })
         //@ts-expect-error
         const testCallbacksA = onTestCaseA.handlers
         //@ts-expect-error
@@ -116,9 +55,10 @@ describe("autocleanup via flask", () => {
         const unmountedCallbacks = onTestUnmounted.handlers
 
         settingUp = true;
-        const flask = flaskSetup((flask: Flask) => {
-            onTestCaseA(cb, {until: onTestUnmounted});
-            onTestCaseB(cbB, {until: onTestUnmounted});
+        const flask = flaskSetup((flask) => {
+            onTestCaseA(cb, { until: onTestCaseC });
+            onTestCaseB(cbB, { until: onTestCaseC });
+            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             return flask;
         })
@@ -133,325 +73,630 @@ describe("autocleanup via flask", () => {
         castTestCaseB();
         expect(cbB).toHaveBeenCalledTimes(2);
 
-        castTestCaseC();
+        expect(testCallbacksC.size).toBe(4);
+
+        castTestUnmounted();
+        expect(testCallbacksA.size).toBe(0);
+        expect(testCallbacksB.size).toBe(0);
+        expect(testCallbacksC.size).toBe(0);
+        expect(unmountedCallbacks.size).toBe(0);
+
+        //@ts-expect-error
+        expect(flask.disposalHandlers.size).toBe(0);
+
+        // handlers have been removed, expect no additional calls
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+    });
+
+    test.only("CASE: With root flask. Root flask unmounts; with rootFlask.onDisposed()", () => {
+        const [castTestUnmounted, onTestUnmounted] = createHook({
+            hook: "test-unmounted-hook",
+        });
+        let settingUp = false;
+        initFlask({
+            rootFlasks: [{
+                setupChecker: () => settingUp,
+                autoCleanupScheduler: onTestUnmounted
+            }]
+        })
+        const [castTestCaseA, onTestCaseA] = createHook({
+            hook: "test-hook-A",
+        })
+
+        const [castTestCaseB, onTestCaseB] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const [castTestCaseC, onTestCaseC] = createHook({
+            hook: "test-hook-C",
+        })
+
+        const [castTestCaseD, onTestCaseD] = createHook({
+            hook: "test-hook-D",
+        })
+
+        const cb = vi.fn(() => { })
+        const cbB = vi.fn(() => { })
+        const cbC = vi.fn(() => { })
+        const cbD = vi.fn(() => { })
+        //@ts-expect-error
+        const testCallbacksA = onTestCaseA.handlers
+        //@ts-expect-error
+        const testCallbacksB = onTestCaseB.handlers
+        //@ts-expect-error
+        const testCallbacksC = onTestCaseC.handlers
+        //@ts-expect-error
+        const unmountedCallbacks = onTestUnmounted.handlers
+
+        settingUp = true;
+        const flask = flaskSetup((flask, rootFlask) => {
+            onTestCaseA(cb, { until: onTestCaseC });
+            onTestCaseB(cbB, { until: onTestCaseC });
+            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseC(() => flask.dispose());
+            rootFlask.onDisposed(cbD) // adds 2 callbacks to unmounted; cbD and also to cancel
+            return flask;
+        })
+        settingUp = false;
+        expect(unmountedCallbacks.size).toBe(9);
+
+        castTestCaseA();
+        castTestCaseA();
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+        
+        expect(testCallbacksC.size).toBe(4);
+        
+        castTestUnmounted();
+        expect(cbD).toHaveBeenCalledTimes(1);
+        expect(testCallbacksA.size).toBe(0);
+        expect(testCallbacksB.size).toBe(0);
+        expect(testCallbacksC.size).toBe(0);
+        expect(unmountedCallbacks.size).toBe(0);
+
+        //@ts-expect-error
+        expect(flask.disposalHandlers.size).toBe(0);
+
+        // handlers have been removed, expect no additional calls
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+    });
+
+
+    test("CASE: With root flask. Flask is disposed", () => {
+        const [castTestUnmounted, onTestUnmounted] = createHook({
+            hook: "test-unmounted-hook",
+            // onceAsDefault: true,
+        });
+        let settingUp = false;
+        initFlask({
+            rootFlasks: [{
+                setupChecker: () => settingUp,
+                autoCleanupScheduler: onTestUnmounted
+            }]
+        })
+        const [castTestCaseA, onTestCaseA] = createHook({
+            hook: "test-hook-A",
+        })
+
+        const [castTestCaseB, onTestCaseB] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const [castTestCaseC, onTestCaseC] = createHook({
+            hook: "test-hook-C",
+        })
+
+        const [castTestCaseD, onTestCaseD] = createHook({
+            hook: "test-hook-D",
+        })
+
+        const cb = vi.fn(() => { })
+        const cbB = vi.fn(() => { })
+        const cbC = vi.fn(() => { })
+        //@ts-expect-error
+        const testCallbacksA = onTestCaseA.handlers
+        //@ts-expect-error
+        const testCallbacksB = onTestCaseB.handlers
+        //@ts-expect-error
+        const testCallbacksC = onTestCaseC.handlers
+        //@ts-expect-error
+        const unmountedCallbacks = onTestUnmounted.handlers
+
+        settingUp = true;
+        const flask = flaskSetup((flask) => {
+            onTestCaseA(cb, { until: onTestCaseC });
+            onTestCaseB(cbB, { until: onTestCaseC });
+            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseC(() => flask.dispose());
+            return flask;
+        })
+        settingUp = false;
+        expect(unmountedCallbacks.size).toBe(7);
+
+        castTestCaseA();
+        castTestCaseA();
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+
+        expect(testCallbacksC.size).toBe(4);
+
+        flask.dispose();
+        expect(testCallbacksA.size).toBe(0);
+        expect(testCallbacksB.size).toBe(0);
+        expect(testCallbacksC.size).toBe(0);
+        expect(unmountedCallbacks.size).toBe(0);
+
+        //@ts-expect-error
+        expect(flask.disposalHandlers.size).toBe(0);
+
+        // handlers have been removed, expect no additional calls
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+    });
+
+
+    test("CASE: With root flask. Flask is disposed via event", () => {
+        const [castTestUnmounted, onTestUnmounted] = createHook({
+            hook: "test-unmounted-hook",
+            // onceAsDefault: true,
+        });
+        let settingUp = false;
+        initFlask({
+            rootFlasks: [{
+                setupChecker: () => settingUp,
+                autoCleanupScheduler: onTestUnmounted
+            }]
+        })
+        const [castTestCaseA, onTestCaseA] = createHook({
+            hook: "test-hook-A",
+        })
+
+        const [castTestCaseB, onTestCaseB] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const [castTestCaseC, onTestCaseC] = createHook({
+            hook: "test-hook-C",
+        })
+
+        const [castTestCaseD, onTestCaseD] = createHook({
+            hook: "test-hook-D",
+        })
+
+        const cb = vi.fn(() => { })
+        const cbB = vi.fn(() => { })
+        const cbC = vi.fn(() => { })
+        //@ts-expect-error
+        const testCallbacksA = onTestCaseA.handlers
+        //@ts-expect-error
+        const testCallbacksB = onTestCaseB.handlers
+        //@ts-expect-error
+        const testCallbacksC = onTestCaseC.handlers
+        //@ts-expect-error
+        const unmountedCallbacks = onTestUnmounted.handlers
+
+        settingUp = true;
+        const flask = flaskSetup((flask) => {
+            onTestCaseA(cb, { until: onTestCaseC });
+            onTestCaseB(cbB, { until: onTestCaseC });
+            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseC(() => flask.dispose());
+            return flask;
+        })
+        settingUp = false;
+        expect(unmountedCallbacks.size).toBe(7);
+
+        castTestCaseA();
+        castTestCaseA();
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+
+        expect(testCallbacksC.size).toBe(4);
+
+        castTestCaseC()
+        expect(testCallbacksA.size).toBe(0);
+        expect(testCallbacksB.size).toBe(0);
+        expect(testCallbacksC.size).toBe(0);
+        expect(unmountedCallbacks.size).toBe(0);
+
+        //@ts-expect-error
+        expect(flask.disposalHandlers.size).toBe(0);
+
+        // handlers have been removed, expect no additional calls
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+    });
+
+    test("CASE: With root flask. Until is triggered", () => {
+        const [castTestUnmounted, onTestUnmounted] = createHook({
+            hook: "test-unmounted-hook",
+            // onceAsDefault: true,
+        });
+        let settingUp = false;
+        initFlask({
+            rootFlasks: [{
+                setupChecker: () => settingUp,
+                autoCleanupScheduler: onTestUnmounted
+            }]
+        })
+        const [castTestCaseA, onTestCaseA] = createHook({
+            hook: "test-hook-A",
+        })
+
+        const [castTestCaseB, onTestCaseB] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const [castTestCaseC, onTestCaseC] = createHook({
+            hook: "test-hook-C",
+        })
+
+        const [castTestCaseD, onTestCaseD] = createHook({
+            hook: "test-hook-D",
+        })
+
+        const cb = vi.fn(() => { })
+        const cbB = vi.fn(() => { })
+        const cbC = vi.fn(() => { })
+        //@ts-expect-error
+        const testCallbacksA = onTestCaseA.handlers
+        //@ts-expect-error
+        const testCallbacksB = onTestCaseB.handlers
+        //@ts-expect-error
+        const testCallbacksC = onTestCaseC.handlers
+        //@ts-expect-error
+        const unmountedCallbacks = onTestUnmounted.handlers
+
+        settingUp = true;
+        const flask = flaskSetup((flask) => {
+            onTestCaseA(cb, { until: onTestCaseC });
+            onTestCaseB(cbB, { until: onTestCaseC });
+            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            return flask;
+        })
+        settingUp = false;
+        expect(unmountedCallbacks.size).toBe(6);
+
+        castTestCaseA();
+        castTestCaseA();
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+
+        expect(testCallbacksC.size).toBe(3);
+
+        castTestCaseC()
+        expect(testCallbacksA.size).toBe(0);
+        expect(testCallbacksB.size).toBe(0);
+        expect(testCallbacksC.size).toBe(0);
+        expect(unmountedCallbacks.size).toBe(0);
+
+        //@ts-expect-error
+        expect(flask.disposalHandlers.size).toBe(0);
+
+        // handlers have been removed, expect no additional calls
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+    });
+
+
+    test("CASE: No root flask. Flask is disposed", () => {
+
+        const [castTestCaseA, onTestCaseA] = createHook({
+            hook: "test-hook-A",
+        })
+
+        const [castTestCaseB, onTestCaseB] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const [castTestCaseC, onTestCaseC] = createHook({
+            hook: "test-hook-C",
+        })
+
+        const [castTestCaseD, onTestCaseD] = createHook({
+            hook: "test-hook-D",
+        })
+
+        const cb = vi.fn(() => { })
+        const cbB = vi.fn(() => { })
+        const cbC = vi.fn(() => { })
+        //@ts-expect-error
+        const testCallbacksA = onTestCaseA.handlers
+        //@ts-expect-error
+        const testCallbacksB = onTestCaseB.handlers
+        //@ts-expect-error
+        const testCallbacksC = onTestCaseC.handlers
+
+        const flask = flaskSetup((flask) => {
+            onTestCaseA(cb, { until: onTestCaseC });
+            onTestCaseB(cbB, { until: onTestCaseC });
+            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseC(() => flask.dispose());
+            return flask;
+        })
+
+        castTestCaseA();
+        castTestCaseA();
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+
+        expect(testCallbacksC.size).toBe(4);
+
+        flask.dispose();
         expect(testCallbacksA.size).toBe(0);
         expect(testCallbacksB.size).toBe(0);
         expect(testCallbacksC.size).toBe(0);
 
         //@ts-expect-error
-        expect(flask!.disposalHandlers.size).toBe(0);
+        expect(flask.disposalHandlers.size).toBe(0);
 
-        expect(unmountedCallbacks.size).toBe(0);
-
+        // handlers have been removed, expect no additional calls
         castTestCaseA();
         expect(cb).toHaveBeenCalledTimes(3);
         castTestCaseB();
         expect(cbB).toHaveBeenCalledTimes(2);
-        // done("test done")
     });
 
 
-})
 
-describe("in flask, cleanup functions are cleaned up if a different cleanup strategy executes", () => {
+    test("CASE: Scene as root flask. Scene is ended", () => {
 
-    test.only("CASE: register until and auto cleanup and nested flask. Execute auto cleanup. Expect until's callback to be gone", () => {
-        const [castTestUnmounted, onTestUnmounted] = createHook({
-            hook: "test-unmounted-hook",
-        });
-        let settingUp = false;
-
-        initFlask({
-            rootFlasks: [{
-                setupChecker: () => settingUp,
-                autoCleanupScheduler: onTestUnmounted
-            }]
+        const [castTestCaseA, onTestCaseA] = createHook({
+            hook: "test-hook-A",
         })
 
-        const [castTestCase, onTestCase] = createHook({
-            hook: "test-hook",
-            data: $type as {
-                foo: "A"
-            },
-        });
-        const [castSomethingEnded, onSomethingEnded] = createHook({
-            hook: "test-hook",
-        });
+        const [castTestCaseB, onTestCaseB] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const [castTestCaseC, onTestCaseC] = createHook({
+            hook: "test-hook-C",
+        })
+
+        const [castTestCaseD, onTestCaseD] = createHook({
+            hook: "test-hook-D",
+        })
+
+        const [castEndItAll, onEndItAll] = createHook({
+            hook: "test-hook-D",
+        })
 
         const cb = vi.fn(() => { })
+        const cbB = vi.fn(() => { })
+        const cbC = vi.fn(() => { })
+        //@ts-expect-error
+        const testCallbacksA = onTestCaseA.handlers
+        //@ts-expect-error
+        const testCallbacksB = onTestCaseB.handlers
+        //@ts-expect-error
+        const testCallbacksC = onTestCaseC.handlers
 
-        settingUp = true;
-        const flask = flaskSetup((flask: Flask) => {
-            onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
-            return flask;
+        let flask: Flask;
+        sceneSetup((scene) => {
+            flask = flaskSetup((flask) => {
+                onTestCaseA(cb, { until: onTestCaseC });
+                onTestCaseB(cbB, { until: onTestCaseC });
+                onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+                onTestCaseC(() => flask.dispose());
+                return flask;
+            });
+            onEndItAll(() => scene.end())
         })
-        settingUp = false;
 
+        castTestCaseA();
+        castTestCaseA();
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
 
-        castTestCase({ foo: "A" });
-        expect(cb).toHaveBeenCalledTimes(1)
+        expect(testCallbacksC.size).toBe(4);
 
-        castTestUnmounted();
-        castTestCase({ foo: "A" });
-        castTestCase({ foo: "A" });
-
-        expect(cb).toHaveBeenCalledTimes(1);
-
-        const handlers = (<DevListener<typeof onSomethingEnded>>onSomethingEnded).handlers
-        expect(handlers.size).toBe(0);
+        castEndItAll();
+        expect(testCallbacksA.size).toBe(0);
+        expect(testCallbacksB.size).toBe(0);
+        expect(testCallbacksC.size).toBe(0);
 
         //@ts-expect-error
-        expect(flask!.disposalHandlers.size).toBe(0);
+        expect(flask.disposalHandlers.size).toBe(0);
 
-        const autoCleanupCallbacks = (<DevListener<typeof onTestUnmounted>>onTestUnmounted).handlers
-        expect(autoCleanupCallbacks.size).toBe(0);
-    })
+        // handlers have been removed, expect no additional calls
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+    });
 
-    test("CASE: register until and auto cleanup. Execute until. Expect autocleanup's callback to be gone", () => {
-        const [castTestUnmounted, onTestUnmounted] = createHook({
-            hook: "test-unmounted-hook",
-        });
-        let settingUp = false;
-        // defineAutoCleanup((cleanup) => { //Beware: this sets a global variable that will affect subsequent tests
-        //     if (settingUp) {
-        //         return onTestUnmounted(cleanup);
-        //     }
-        // })
-        initFlask({
-            rootFlasks: [{
-                setupChecker: () => settingUp,
-                autoCleanupScheduler: onTestUnmounted
-            }]
+    test("CASE: Scene as root flask. Flask is disposed", () => {
+
+        const [castTestCaseA, onTestCaseA] = createHook({
+            hook: "test-hook-A",
         })
 
-        const [castTestCase, onTestCase] = createHook({
-            hook: "test-hook",
-            data: $type as {
-                foo: "A"
-            },
-        });
-        const [castSomethingEnded, onSomethingEnded] = createHook({
-            hook: "test-hook",
-        });
+        const [castTestCaseB, onTestCaseB] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const [castTestCaseC, onTestCaseC] = createHook({
+            hook: "test-hook-C",
+        })
+
+        const [castTestCaseD, onTestCaseD] = createHook({
+            hook: "test-hook-D",
+        })
+
+        const [castEndItAll, onEndItAll] = createHook({
+            hook: "test-hook-D",
+        })
 
         const cb = vi.fn(() => { })
-        const handlers = (<DevListener<typeof onSomethingEnded>>onSomethingEnded).handlers
-        const autoCleanupCallbacks = (<DevListener<typeof onTestUnmounted>>onTestUnmounted).handlers
-
-        settingUp = true;
-        onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
-        settingUp = false;
-        castTestCase({ foo: "A" });
-        expect(cb).toHaveBeenCalledTimes(1)
-
-        castSomethingEnded();
-        castTestCase({ foo: "A" });
-        castTestCase({ foo: "A" });
-
-        expect(cb).toHaveBeenCalledTimes(1);
-
-        expect(handlers.size).toBe(0);
-        expect(autoCleanupCallbacks.size).toBe(0);
-
-    })
+        const cbB = vi.fn(() => { })
+        const cbC = vi.fn(() => { })
+        //@ts-expect-error
+        const testCallbacksA = onTestCaseA.handlers
+        //@ts-expect-error
+        const testCallbacksB = onTestCaseB.handlers
+        //@ts-expect-error
+        const testCallbacksC = onTestCaseC.handlers
+        //@ts-expect-error
+        const endItAllHandlers = onEndItAll.handlers
 
 
-    test("CASE: register until and scene. Execute scene cleanup. Expect both scene and until's callback to be gone", () => {
-        const [castTestCase, onTestCase] = createHook({
-            hook: "test-hook",
-            data: $type as {
-                foo: "A"
-            },
-        });
-        const [castSomethingEnded, onSomethingEnded] = createHook({
-            hook: "something-ended",
-        });
-        const [castMouseUp, onMouseUp] = createHook({
-            hook: "mouse-up",
-        });
+        let flask: Flask;
+        let scene: Scene;
+        sceneSetup((_scene) => {
+            scene = _scene
+            flask = flaskSetup((flask) => {
+                onTestCaseA(cb, { until: onTestCaseC });
+                onTestCaseB(cbB, { until: onTestCaseC });
+                onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+                onTestCaseC(() => flask.dispose());
+                return flask;
+            });
+            onEndItAll(() => _scene.end())
+        })
+
+        //@ts-expect-error
+        const sceneEndHandlers = scene.endHandlers
+        expect(sceneEndHandlers.size).toBe(8)
+
+        castTestCaseA();
+        castTestCaseA();
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+
+        expect(testCallbacksC.size).toBe(4);
+
+        //@ts-expect-error
+        flask.dispose();
+        expect(testCallbacksA.size).toBe(0);
+        expect(testCallbacksB.size).toBe(0);
+        expect(testCallbacksC.size).toBe(0);
+        expect(endItAllHandlers.size).toBe(1); // scene should not be affected
+
+        //@ts-expect-error
+        expect(flask.disposalHandlers.size).toBe(0);
+
+        // handlers have been removed, expect no additional calls
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+    });
+
+
+    test("CASE: Enflask. Scene as root flask. Flask is disposed", () => {
+
+        const [castTestCaseA, onTestCaseA] = createHook({
+            hook: "test-hook-A",
+        })
+
+        const [castTestCaseB, onTestCaseB] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const [castTestCaseC, onTestCaseC] = createHook({
+            hook: "test-hook-C",
+        })
+
+        const [castTestCaseD, onTestCaseD] = createHook({
+            hook: "test-hook-D",
+        })
+
+        const [castEndItAll, onEndItAll] = createHook({
+            hook: "test-hook-D",
+        })
 
         const cb = vi.fn(() => { })
-        let sceneCallbacks: Callbacks;
-        sceneSetup((scene) => {
-            sceneCallbacks =
-                //@ts-expect-error
-                scene.endHandlers;
-            onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
+        const cbB = vi.fn(() => { })
+        const cbC = vi.fn(() => { })
+        //@ts-expect-error
+        const testCallbacksA = onTestCaseA.handlers
+        //@ts-expect-error
+        const testCallbacksB = onTestCaseB.handlers
+        //@ts-expect-error
+        const testCallbacksC = onTestCaseC.handlers
+        //@ts-expect-error
+        const endItAllHandlers = onEndItAll.handlers
 
-            onMouseUp(() => {
-                scene.end()
-            })
+        let flask: Flask;
+        const useEnflaskedTest = enflask((_flask) => {
+            flask = _flask;
+            onTestCaseA(cb, { until: onTestCaseC });
+            onTestCaseB(cbB, { until: onTestCaseC });
+            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseC(() => flask.dispose());
+            return _flask;
+        });
+
+        let scene: Scene;
+        sceneSetup((_scene) => {
+            scene = _scene
+            const returnValue = useEnflaskedTest();
+            expect(returnValue).toBe(flask);
+            onEndItAll(() => _scene.end())
         })
 
-        castTestCase({ foo: "A" });
-        expect(cb).toHaveBeenCalledTimes(1)
+        //@ts-expect-error
+        const sceneEndHandlers = scene.endHandlers
+        expect(sceneEndHandlers.size).toBe(8)
 
-        castMouseUp();
-        castTestCase({ foo: "A" });
-        castTestCase({ foo: "A" });
+        castTestCaseA();
+        castTestCaseA();
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
 
-        expect(cb).toHaveBeenCalledTimes(1);
+        expect(testCallbacksC.size).toBe(4);
 
-        const handlers = (<DevListener<typeof onSomethingEnded>>onSomethingEnded).handlers
-        expect(handlers.size).toBe(0);
-        //@ts-ignore
-        expect(sceneCallbacks.size).toBe(0);
-    })
+        //@ts-expect-error
+        flask.dispose();
+        expect(testCallbacksA.size).toBe(0);
+        expect(testCallbacksB.size).toBe(0);
+        expect(testCallbacksC.size).toBe(0);
+        expect(endItAllHandlers.size).toBe(1); // scene should not be affected
 
+        //@ts-expect-error
+        expect(flask.disposalHandlers.size).toBe(0);
 
-    test("CASE: register `until` and `scene`. Execute `until`. Expect `scene`'s callback to be gone", () => {
-        const [castTestCase, onTestCase] = createHook({
-            hook: "test-hook",
-            data: $type as {
-                foo: "A"
-            },
-        });
-        const [castSomethingEnded, onSomethingEnded] = createHook({
-            hook: "something ended",
-        });
-        const [castMouseUp, onMouseUp] = createHook({
-            hook: "mouse-up",
-        });
+        // handlers have been removed, expect no additional calls
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+    });
 
-        const cb = vi.fn(() => { })
-        let sceneCallbacks: Callbacks;
-        sceneSetup((scene) => {
-            sceneCallbacks =
-                //@ts-expect-error
-                scene.endHandlers;
-            onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
-
-            onMouseUp(() => {
-                scene.end()
-            }, { once: true })
-
-        })
-
-        castTestCase({ foo: "A" });
-        expect(cb).toHaveBeenCalledTimes(1)
-
-        castSomethingEnded();
-        castTestCase({ foo: "A" });
-        castTestCase({ foo: "A" });
-
-        expect(cb).toHaveBeenCalledTimes(1);
-
-        //@ts-ignore
-        expect(sceneCallbacks.size).toBe(1);
-
-        castMouseUp()
-        //@ts-ignore
-        expect(sceneCallbacks.size).toBe(0);
-    })
-
-
-    test("CASE: register `scene` and auto cleanup. Execute auto cleanup. Expect `Scene` to be clean", () => {
-        const [castTestUnmounted, onTestUnmounted] = createHook({
-            hook: "test-unmounted-hook",
-        });
-        let settingUp = false;
-        // defineAutoCleanup((cleanup) => {
-        //     if (settingUp) {
-        //         return onTestUnmounted(cleanup);
-        //     }
-        // })
-        initFlask({
-            rootFlasks: [{
-                setupChecker: () => settingUp,
-                autoCleanupScheduler: onTestUnmounted
-            }]
-        })
-        const [castTestCase, onTestCase] = createHook({
-            hook: "test-hook",
-            data: $type as {
-                foo: "A"
-            },
-        });
-
-        const cb = vi.fn(() => { })
-
-        settingUp = true;
-        let sceneCallbacks: Callbacks;
-        sceneSetup((scene) => {
-            sceneCallbacks =
-                //@ts-expect-error
-                scene.endHandlers;
-            onTestCase(cb) // modo auto cleanup
-        })
-        settingUp = false;
-
-        //@ts-ignore
-        castTestCase({ foo: "A" });
-
-        castTestUnmounted();
-        castTestCase({ foo: "A" });
-        castTestCase({ foo: "A" });
-        expect(cb).toHaveBeenCalledTimes(1);
-
-        // check cleanup's cleanup
-        //@ts-ignore
-        expect(sceneCallbacks.size).toBe(0);
-    })
-
-
-    test("CASE: register `scene` and auto cleanup. Execute `scene` cleanup. Expect Autocleanup to be clean", () => {
-        const [castTestUnmounted, onTestUnmounted] = createHook({
-            hook: "test-unmounted-hook",
-        });
-        let settingUp = false;
-        // defineAutoCleanup((cleanup) => {
-        //     if (settingUp) {
-        //         return onTestUnmounted(cleanup);
-        //     }
-        // })
-        initFlask({
-            rootFlasks: [{
-                setupChecker: () => settingUp,
-                autoCleanupScheduler: onTestUnmounted
-            }]
-        })
-        const [castTestCase, onTestCase] = createHook({
-            hook: "test-hook",
-            data: $type as {
-                foo: "A"
-            },
-        });
-
-        const [castSceneEnder, onSceneEnder] = createHook({
-            hook: "test-hook",
-        });
-        const cb = vi.fn(() => { })
-        const autoCleanupCallbacks = (<DevListener<typeof onTestUnmounted>>onTestUnmounted).handlers
-
-        settingUp = true;
-        let sceneCallbacks: Callbacks;
-        sceneSetup((scene) => {
-            sceneCallbacks =
-                //@ts-expect-error
-                scene.endHandlers;
-            onTestCase(cb) // modo auto cleanup
-            onSceneEnder(() => {
-                scene.end();
-            })
-        })
-        settingUp = false;
-
-
-
-        //@ts-ignore
-        castTestCase({ foo: "A" });
-
-        castSceneEnder();
-        castTestCase({ foo: "A" });
-        castTestCase({ foo: "A" });
-        expect(cb).toHaveBeenCalledTimes(1);
-
-        // check cleanup's cleanup
-
-        //@ts-ignore
-        expect(sceneCallbacks.size).toBe(0);
-
-        //@ts-ignore
-        expect(autoCleanupCallbacks.size).toBe(0);
-    })
 })

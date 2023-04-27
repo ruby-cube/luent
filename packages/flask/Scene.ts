@@ -64,8 +64,8 @@ function _startSetup(scene: Scene) {
 }
 
 function _endSetup(scene: Scene) {
-    scene.outerScene = scene.outerScene?.outerScene;
     activeSceneSetup = scene.outerScene;
+    scene.outerScene = scene.outerScene?.outerScene;
     registerSceneCleanup(activeSceneSetup);
     markSceneSetup(!!activeSceneSetup || false);
 }
