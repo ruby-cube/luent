@@ -1,13 +1,14 @@
-import { describe, test, expect, vi } from "vitest";
+import { describe, test, expect, vi, beforeEach } from "vitest";
 import { createHook } from "../Hook";
 import { $lifetime, $tilStop, Callback } from "../../flask/flaskedListeners";
 import { $type } from "@rue/utils";
 import { DevHookListener, initFlask } from "../../flask";
+import { __resetGlobals } from "../../dev/__resetGlobals";
 
 
 
 describe("one time handlers are run only once", () => {
-
+    beforeEach(__resetGlobals);
     test("CASE: onceAsDefault: true", () => {
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
@@ -147,7 +148,7 @@ describe("one time handlers are run only once", () => {
 
 
 describe("one time handlers can be canceled", () => {
-
+    beforeEach(__resetGlobals);
 
     test("CASE: options {unlessCanceled: ScheduleCancel}", () => {
         const [castTestCase, onTestCase] = createHook({
@@ -249,7 +250,7 @@ describe("one time handlers can be canceled", () => {
 
 describe("Canceler will be cleaned up if one time handler is run", () => {
 
-
+    beforeEach(__resetGlobals);
     test("CASE: options {unlessCanceled: ScheduleCancel}", () => {
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
@@ -324,7 +325,7 @@ describe("Canceler will be cleaned up if one time handler is run", () => {
 
 describe("sustained listeners run until stopped", () => {
 
-
+    beforeEach(__resetGlobals);
     test("CASE: `until` option", () => {
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
@@ -470,7 +471,7 @@ describe("sustained listeners run until stopped", () => {
 
 
 describe("options should override default", () => {
-
+    beforeEach(__resetGlobals);
     test("CASE: onceAsDefault and sustain", () => {
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",

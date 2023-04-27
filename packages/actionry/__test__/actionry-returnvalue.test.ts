@@ -1,8 +1,9 @@
-import { describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 import { doAction } from "../actionry";
+import { __resetGlobals } from "../../dev/__resetGlobals";
 
 describe("doAction's returns the correct return value", () => {
-
+    beforeEach(__resetGlobals)
     test("CASE: return void, action name", () => {
         const returnVal = doAction("returnVoid", () => { })
 

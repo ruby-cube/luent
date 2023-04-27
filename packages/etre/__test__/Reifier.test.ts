@@ -1,8 +1,9 @@
-import { describe, test, expect, vi } from "vitest";
+import { describe, test, expect, vi, beforeEach } from "vitest";
 import { Data, role } from "../Role";
+import { __resetGlobals } from "../../dev/__resetGlobals";
 
 describe("reifer", () => {
-
+    beforeEach(__resetGlobals)
     test("CASE: Reify a single role", () => {
 
         const $Frog = role({

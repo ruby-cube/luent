@@ -1,8 +1,8 @@
-import { $subscribe, inSceneSetup } from "../flask";
+import { $subscribe, PendingCancelOp, ScheduleStop, inSceneSetup } from "../flask";
 import { ComputedRef, DebuggerOptions, computed, effectScope, getCurrentInstance as inComponentSetup } from "vue";
 import { Signal } from "./signals";
 
-export function computed$<T>(computation: () => T, options?: { $outlive?: true, until?: (stop: () => void) => void, $lifetime?: true } & DebuggerOptions): Signal<T> {
+export function computed$<T>(computation: () => T, options?: { $outlive?: true, until?: ScheduleStop, $lifetime?: true } & DebuggerOptions): Signal<T> {
     let computedRef: ComputedRef<T>;
     if (inSceneSetup() || options && ("until" in options || "$outlive" in options && options.$outlive)) { //QUESTION: check if inFlask??
         const scope = effectScope(true);

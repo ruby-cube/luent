@@ -8,10 +8,12 @@ import { $type } from "../utils/utils";
 import { role } from "../etre/Role";
 import { sceneSetup } from "../flask/Scene";
 import { initFlask } from "../flask/initFlask";
+import { __resetGlobals } from "../dev/__resetGlobals";
 
 
 describe("Autocleanup of scenes", () => {
     beforeEach(() => {
+        __resetGlobals();
         __$initDepotModule();
         // defineAutoCleanup((cleanup) => {
         //     if (isMakingModel()) {

@@ -4,10 +4,12 @@ import { $schedule, Callback, Callbacks, PendingCancelOp, PendingOp, SchedulerOp
 import { noop, run } from "@rue/utils";
 import { computed$ } from "../signals/computed";
 import { RootFlask, _rootFlaskClasses } from "./RootFlasks";
+import { Scene, getScene } from "./Scene";
+import { registerGlobalResetter } from "../dev/__resetGlobals";
 
 
 export type ReactivityFlask = {
-    onDisposed: (cb: () => void) => void;
+    onDisposed: (cb: () => void) => PendingCancelOp;
 }
 
 
@@ -16,12 +18,19 @@ export type ReactivityFlask = {
 
 let activeFlaskSetup: Flask | null | undefined = null;
 
+if (__TEST__) registerGlobalResetter(() => activeFlaskSetup = null);
+
+
 export function getFlask() {
     return activeFlaskSetup;
 }
 
-export function getRootFlask(){
-    return activeFlaskSetup?.root || _getRootFlask();
+export function getOuterFlask() {
+    return (<Flask>activeFlaskSetup)?._outerFlask || getRootFlask();
+}
+
+export function getRootFlask() {
+    return (<Flask>activeFlaskSetup)?._root || _getRootFlask();
 }
 
 
@@ -29,37 +38,39 @@ export function _getRootFlask() {
     for (const [targetGetter, RootFlask] of _rootFlaskClasses) {
         const target = targetGetter();
         if (target) {
-            return new RootFlask(target); // creates a new rootFlask for all nested flasks... not ideal, but its currently too much of a headache to create a map and rootFlask.onDisposed(()=>map.delete(target)) cuz it messes up all my tests :(
+            return new RootFlask(target) as RootFlask; // creates a new rootFlask for all nested flasks... not ideal, but its currently too much of a headache to create a map and rootFlask.onDisposed(()=>map.delete(target)) cuz it messes up all my tests :(
         }
     }
     return activeFlaskSetup;
 }
 
-
-function getSceneFlask() {
-    return {} as ReactivityFlask | null
+export function _inRootSetup() {
+    for (const [targetGetter] of _rootFlaskClasses) {
+        const target = targetGetter();
+        if (target) {
+            return !!target;
+        }
+    }
+    return !!activeFlaskSetup;
 }
 
-
-function defineRootFlask() {
-
-}
-
-
-// function _getRootFlask() {
-//     _getRootFlask() || getSceneFlask();
-//     return {} as ReactivityFlask | null
-// }
 
 
 
 export class Flask implements ReactivityFlask {
-    outerFlask: Flask | null | undefined;
     private disposalHandlers: Callbacks = new Set();
+    _outerFlask: Flask | undefined | null;
+    _root: Flask | RootFlask | Scene | undefined | null;
+    outlivesOuter: boolean | undefined;
     constructor(
-        public root: RootFlask | null | undefined,
-        public outlivesRoot: boolean | undefined
-    ) { }
+        root: Flask | RootFlask | Scene | undefined | null, // not sure what this would be used for
+        outerFlask: Flask | null | undefined, // not sure what this would be used for
+        outlivesOuter: boolean | undefined
+    ) {
+        this._root = root;
+        this._outerFlask = outerFlask;
+        this.outlivesOuter = outlivesOuter
+    }
 
     onDisposed(handler?: Callback, options?: SchedulerOptions) {
         if (handler == null) {
@@ -87,7 +98,7 @@ export class Flask implements ReactivityFlask {
         if (__DEV__ && activeFlaskSetup !== this) {
             throw new Error(`flask.after() called outside of flask setup.`)
         }
-        _endSetup(this);
+        _pauseSetup();
         try {
             const result = await promise
             return [result, null]
@@ -96,20 +107,26 @@ export class Flask implements ReactivityFlask {
             return [null, err]
         }
         finally {
-            _startSetup(this);
+            _resumeSetup(this);
         }
     }
 }
 
 
+function _pauseSetup() {
+    activeFlaskSetup = null;
+}
+
+function _resumeSetup(flask: Flask) {
+    activeFlaskSetup = flask;
+}
+
 function _startSetup(flask: Flask) {
-    flask.outerFlask = activeFlaskSetup;
     activeFlaskSetup = flask;
 }
 
 function _endSetup(flask: Flask) {
-    activeFlaskSetup = flask.outerFlask;
-    flask.outerFlask = flask.outerFlask?.outerFlask;
+    activeFlaskSetup = flask._outerFlask;
 }
 
 function _resolveSetupEnd(flask: Flask, returnValue: any) {
@@ -183,26 +200,32 @@ function _resolveSetupEnd(flask: Flask, returnValue: any) {
 //     return new ComponentFlask();
 // }
 
-export const OUTLIVE_ROOT = true;
+export const OUTLIVE = true;
 
-export function flaskSetup<T extends any | Promise<any>>(setUpFlask: (flask: Flask, rootFlask: ReactivityFlask) => T, outlive?: boolean) {
-    const rootFlask = _getRootFlask();
-    // if (!rootFlask) throw new Error("useFlask must be called during scene setup or component setup");
-    const flask = new Flask(rootFlask, outlive);
+export function flaskSetup<T extends any | Promise<any>>(setUpFlask: (flask: Flask, outerFlask: ReactivityFlask) => T, outlivesOuter?: boolean) {
+    const root = getScene() || _getRootFlask();
+    const outerFlask = activeFlaskSetup;
+    // if (!outerFlask) throw new Error("useFlask must be called during scene setup or component setup");
+    const flask = new Flask(root, outerFlask, outlivesOuter);
     _startSetup(flask);
-    // let result = setUpFlask(flask, rootFlask || flask);
-    return _resolveSetupEnd(flask, setUpFlask(flask, rootFlask || flask)) as T;
+    // let result = setUpFlask(flask, outerFlask || flask);
+    return _resolveSetupEnd(flask, setUpFlask(flask, outerFlask || root || flask)) as T;
 }
 
 
-export function enflask<A extends any[], T extends any | Promise<any>>(setUpFlask: (flask: Flask, rootFlask: ReactivityFlask, ...args: A) => T, outlive?: boolean) {
+export function enflask<A extends any[], T extends any | Promise<any>>(setUpFlask: (flask: Flask, outerFlask: ReactivityFlask, ...args: A) => T, outlivesOuter?: boolean) {
     return (...args: A) => {
-        const rootFlask = _getRootFlask();
+        const root = getScene() || _getRootFlask();
+        console.log("enflask root", root)
+        const outerFlask = activeFlaskSetup;
+        console.log("outerFlask??", outerFlask)
         // if (!rootFlask) throw new Error("useFlask must be called during scene setup or component setup");
-        const flask = new Flask(rootFlask, outlive);
+        const flask = new Flask(root, outerFlask, outlivesOuter);
+        console.log("start nested______________________________")
         _startSetup(flask);
-        let result = setUpFlask(flask, rootFlask || flask, ...args);
+        let result = setUpFlask(flask, outerFlask || root || flask, ...args);
         _resolveSetupEnd(flask, result);
+        console.log("end nested______________________________")
         return result;
     }
 }
@@ -238,7 +261,7 @@ export function enflask<A extends any[], T extends any | Promise<any>>(setUpFlas
 // inFlask;
 // OUTLIVE;
 
-// [ ] outlive option in computed, watch and watchEffect
+// [ ] outlivesOuter option in computed, watch and watchEffect
 
 // const result = await inFlask(fetch(".."))
 
@@ -290,20 +313,20 @@ export function enflask<A extends any[], T extends any | Promise<any>>(setUpFlas
 
 
 export function useMouse() {
-    return flaskSetup(async (flask, rootFlask) => {
+    return flaskSetup(async (flask, outerFlask) => {
         const x$ = computed$(() => {
 
         })
 
         const [result, error] = await flask.after(fetch(""));
 
-        rootFlask.onDisposed(() => {
+        outerFlask.onDisposed(() => {
 
         })
 
         return {
             x$
         }
-    }, OUTLIVE_ROOT)
+    }, OUTLIVE)
 }
 

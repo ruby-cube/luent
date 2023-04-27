@@ -4,12 +4,13 @@ import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
 import { $type } from "@rue/utils";
 import { Callback, Callbacks, initFlask } from "../../flask";
+import { __resetGlobals } from "../../dev/__resetGlobals";
 
 
 
 
 describe("cleanup functions are cleaned up if a different cleanup strategy executes", () => {
-
+    beforeEach(__resetGlobals);
     test("CASE: register until and auto cleanup. Execute auto cleanup. Expect until's callback to be gone", () => {
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
@@ -23,7 +24,7 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
 
         initFlask({
             rootFlasks: [{
-                setupChecker: ()=>settingUp,
+                setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
         })
@@ -63,14 +64,14 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         expect(autoCleanupCallbacks.size).toBe(0);
     })
 
-    test.only("CASE: register until and auto cleanup. Execute until. Expect autocleanup's callback to be gone", () => {
+    test("CASE: register until and auto cleanup. Execute until. Expect autocleanup's callback to be gone", () => {
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
         });
         let settingUp = false;
         initFlask({
             rootFlasks: [{
-                setupChecker: ()=>settingUp,
+                setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
         })
@@ -174,7 +175,7 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
 
             onMouseUp(() => {
                 scene.end()
-            }, { once: true })
+            })
 
         })
 
@@ -195,86 +196,16 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         expect(sceneCallbacks.size).toBe(0);
     })
 
-
-    test("CASE: register `scene` and auto cleanup. Execute auto cleanup. Expect `Scene` to be clean", () => {
-        const [castTestUnmounted, onTestUnmounted] = createHook({
-            hook: "test-unmounted-hook",
-        });
-        let settingUp = false;
-        // defineAutoCleanup((cleanup) => {
-        //     if (settingUp) {
-        //         return onTestUnmounted(cleanup);
-        //     }
-        // })
-        initFlask({
-            rootFlasks: [{
-                setupChecker: ()=>settingUp,
-                autoCleanupScheduler: onTestUnmounted
-            }]
-        })
+    test("CASE: register `scene`. Execute `scene` cleanup.", () => {
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
-            data: $type as {
-                foo: "A"
-            },
-        });
-
-        const cb = vi.fn(() => { })
-
-        settingUp = true;
-        let sceneCallbacks: Callbacks;
-        sceneSetup((scene) => {
-            sceneCallbacks =
-                //@ts-expect-error
-                scene.endHandlers;
-            onTestCase(cb) // modo auto cleanup
-        })
-        settingUp = false;
-
-        //@ts-ignore
-        castTestCase({ foo: "A" });
-
-        castTestUnmounted();
-        castTestCase({ foo: "A" });
-        castTestCase({ foo: "A" });
-        expect(cb).toHaveBeenCalledTimes(1);
-
-        // check cleanup's cleanup
-        //@ts-ignore
-        expect(sceneCallbacks.size).toBe(0);
-    })
-
-
-    test("CASE: register `scene` and auto cleanup. Execute `scene` cleanup. Expect Autocleanup to be clean", () => {
-        const [castTestUnmounted, onTestUnmounted] = createHook({
-            hook: "test-unmounted-hook",
-        });
-        let settingUp = false;
-        // defineAutoCleanup((cleanup) => {
-        //     if (settingUp) {
-        //         return onTestUnmounted(cleanup);
-        //     }
-        // })
-        initFlask({
-            rootFlasks: [{
-                setupChecker: ()=>settingUp,
-                autoCleanupScheduler: onTestUnmounted
-            }]
-        })
-        const [castTestCase, onTestCase] = createHook({
-            hook: "test-hook",
-            data: $type as {
-                foo: "A"
-            },
         });
 
         const [castSceneEnder, onSceneEnder] = createHook({
             hook: "test-hook",
         });
         const cb = vi.fn(() => { })
-        const autoCleanupCallbacks = (<DevListener<typeof onTestUnmounted>>onTestUnmounted).handlers
 
-        settingUp = true;
         let sceneCallbacks: Callbacks;
         sceneSetup((scene) => {
             sceneCallbacks =
@@ -285,24 +216,20 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
                 scene.end();
             })
         })
-        settingUp = false;
-
-
 
         //@ts-ignore
-        castTestCase({ foo: "A" });
+        expect(sceneCallbacks.size).toBe(2);
+
+        castTestCase();
 
         castSceneEnder();
-        castTestCase({ foo: "A" });
-        castTestCase({ foo: "A" });
+        castTestCase();
+        castTestCase();
         expect(cb).toHaveBeenCalledTimes(1);
 
         // check cleanup's cleanup
 
         //@ts-ignore
         expect(sceneCallbacks.size).toBe(0);
-
-        //@ts-ignore
-        expect(autoCleanupCallbacks.size).toBe(0);
     })
 })

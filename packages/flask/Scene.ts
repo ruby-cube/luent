@@ -3,7 +3,8 @@ import { $schedule, Callback, Callbacks, markSceneSetup, OneTimeListener, Schedu
 import { noop, run } from "@rue/utils";
 import { registerSceneCleanup } from './scheduleSceneCleanup';
 import { RootFlask } from './RootFlasks';
-import { _getRootFlask } from './flask';
+import { _getRootFlask, _inRootSetup, getFlask } from './flask';
+import { PendingOp } from './PendingOp';
 
 // export type Scene = {
 //     end: () => void;
@@ -12,8 +13,13 @@ import { _getRootFlask } from './flask';
 // }
 
 export class Scene {
-    outerScene: Scene | null | undefined;
+    // outerScene: Scene | null | undefined;
     private endHandlers: Callbacks = new Set();
+    onDisposed: (handler?: Callback, options?: SchedulerOptions) => PendingOp<any>; // internal
+
+    constructor() {
+        this.onDisposed = this.onEnded;
+    }
 
     onEnded(handler?: Callback, options?: SchedulerOptions) {
         if (handler == null) {
@@ -41,7 +47,7 @@ export class Scene {
         if (__DEV__ && activeSceneSetup !== this) {
             throw new Error(`scene.after() called outside of scene setup.`)
         }
-        _endSetup(this);
+        _endSetup();
         try {
             const result = await promise
             return [result, null]
@@ -57,18 +63,26 @@ export class Scene {
 
 
 function _startSetup(scene: Scene) {
-    scene.outerScene = activeSceneSetup;
     activeSceneSetup = scene;
-    registerSceneCleanup(scene);
-    markSceneSetup(true);
 }
 
-function _endSetup(scene: Scene) {
-    activeSceneSetup = scene.outerScene;
-    scene.outerScene = scene.outerScene?.outerScene;
-    registerSceneCleanup(activeSceneSetup);
-    markSceneSetup(!!activeSceneSetup || false);
+function _endSetup() {
+    activeSceneSetup = null;
 }
+
+// function _startSetup(scene: Scene) {
+//     scene.outerScene = activeSceneSetup;
+//     activeSceneSetup = scene;
+//     // registerSceneCleanup(scene);
+//     // markSceneSetup(true);
+// }
+
+// function _endSetup(scene: Scene) {
+//     activeSceneSetup = scene.outerScene;
+//     scene.outerScene = scene.outerScene?.outerScene;
+//     // registerSceneCleanup(activeSceneSetup);
+//     // markSceneSetup(!!activeSceneSetup || false);
+// }
 
 // export type SceneEndListener = (handler?: Callback, options?: SchedulerOptions)=> ScheduledOp<Callback>;
 
@@ -84,32 +98,40 @@ export function inSceneSetup() {
     return Boolean(activeSceneSetup);
 }
 
+function throwNoNestedScenes(){
+    if (getScene() || getFlask() || _inRootSetup()) throw new Error("Scene cannot be nested in another flask, scene, or setup")
+}
+
 export function sceneSetup(setUpScene: (scene: Scene) => void | Promise<void>) {
+    if (__DEV__) throwNoNestedScenes();
     const scene = new Scene();
     _startSetup(scene);
     const returnValue = setUpScene(scene);
     _resolveSetupEnd(scene, returnValue);
-    return scene;
+    return scene; // for testing convenience
 }
 
 export function scenify<A extends any[]>(setUpScene: (scene: Scene, ...args: A) => void | Promise<void>) {
     return (...args: A) => {
+        if (__DEV__) throwNoNestedScenes();
         const scene = new Scene();
         _startSetup(scene);
         const returnValue = setUpScene(scene, ...args);
         _resolveSetupEnd(scene, returnValue);
+        // return returnValue;
     }
 }
 
 function _resolveSetupEnd(scene: Scene, returnValue: any) {
     if (returnValue instanceof Promise) {
         run(async () => {
-            await returnValue;
-            _endSetup(scene);
+            const result = await returnValue;
+            _endSetup();
+            // return result;
         });
     }
     else {
-        _endSetup(scene);
+        _endSetup();
     }
 }
 

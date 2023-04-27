@@ -1,11 +1,12 @@
-import { describe, test, expect, vi } from "vitest";
+import { describe, test, expect, vi, beforeEach } from "vitest";
 import { $type } from "@rue/utils";
 import { createHook } from "../Hook";
+import { __resetGlobals } from "../../dev/__resetGlobals";
 
 //NOTE: Skipped during batch test runs
 
 describe.skip("memory leak warnings and safeguards", () => {
-
+    beforeEach(__resetGlobals);
     test("CASE: sustained listener with no stop strategy", () => { 
         const [_, onTestCase] = createHook({
             hook: "test-hook",

@@ -4,6 +4,7 @@ import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
 import { $outlive, PendingOp, initFlask } from "../../flask";
 import { survivingRemovers } from "../../flask/outlive";
+import { __resetGlobals } from "../../dev/__resetGlobals";
 
 // Describe: Handlers and removers will outlive scope
 // Cases:
@@ -22,7 +23,7 @@ import { survivingRemovers } from "../../flask/outlive";
 
 describe(`hooks (and removers) configured with $outlive will survive scope disposal (either component setup or scene disposal); 
 survivingRemovers will be cleaned up once handler is run or removed`, () => {
-
+    beforeEach(__resetGlobals);
     test("CASE: register until and auto cleanup. Execute auto cleanup. Expect handler and until remover to survive", () => {
         survivingRemovers.clear();
         const [castTestUnmounted, onTestUnmounted] = createHook({

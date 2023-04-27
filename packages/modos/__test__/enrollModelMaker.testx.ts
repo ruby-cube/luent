@@ -1,10 +1,11 @@
 import { Data, role } from "@rue/etre";
 import { __$initDepotModule, populateDepot } from "../depot";
-import { expect, describe, test } from "vitest";
+import { expect, describe, test, beforeEach } from "vitest";
 import { enrollModelMaker } from "../Model";
+import { __resetGlobals } from "../../dev/__resetGlobals";
 
 describe("enrollModelMaker", () => {
-
+    beforeEach(__resetGlobals)
     test("CASE: Reify a single role, enroll as modo, no vine, create", () => {
         __$initDepotModule();
         const $Frog = role({

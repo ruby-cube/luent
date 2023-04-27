@@ -1,9 +1,10 @@
-import { describe, test, expect, vi } from "vitest";
+import { describe, test, expect, vi, beforeEach } from "vitest";
 import { createHook } from "../Hook";
 import { $type } from "@rue/utils";
+import { __resetGlobals } from "../../dev/__resetGlobals";
 
 describe("return types of createHook's caster and listener", () => {
-
+    beforeEach(__resetGlobals);
     test("CASE: OneTimeListener", () => new Promise(async (done) => {
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
@@ -77,7 +78,7 @@ describe("return types of createHook's caster and listener", () => {
 
 
 describe("arg of handler", () => {
-
+    beforeEach(__resetGlobals);
     test("CASE: data object", () => {
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",

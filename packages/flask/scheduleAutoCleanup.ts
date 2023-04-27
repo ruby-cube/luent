@@ -3,7 +3,7 @@
 
 import { _rootFlaskClasses } from "./RootFlasks";
 import { getScene } from "./Scene";
-import { getFlask, _getRootFlask } from "./flask";
+import { getFlask, _getRootFlask, Flask } from "./flask";
 import type { Callback, CallbackRemover, PendingCancelOp } from "./flaskedListeners";
 
 // [Return] boolean to indicate whether cleanup was successfully scheduled
@@ -15,7 +15,7 @@ type CleanupScheduler = (stop: CallbackRemover<void>) => PendingCancelOp[] | voi
 
 // export function defineAutoCleanup(cleanupScheduler: (stop: CallbackRemover<void>) => PendingCancelOp | void) {
 export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
-    if (_rootFlaskClasses.size === 0) return;
+    // if (_rootFlaskClasses.size === 0) return;
     schedulingAutoCleanup = true;
     const success = existingPendingAutoCleanup = cleanupScheduler(stop);
     schedulingAutoCleanup = false;
@@ -26,26 +26,47 @@ export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
 
 
 
+// function cleanupScheduler(stop: CallbackRemover<void>) {
+//     const scene = getScene();
+//     const flask = getFlask();
+//     const flaskAttachedToOuter = flask && !(<Flask>flask).outlivesOuter
+//     const outerFlask = flask ? ("outerFlask" in flask ? flask.outerFlask : flask) : (scene ? null : _getRootFlask()); //TODO: I need to climb the tree scheduling autocleanups
+//     const pendingCancelOps = [];
+//     if (scene && (!flask || flaskAttachedToOuter)) {
+//         pendingCancelOps.push(scene.onEnded(stop));
+//     }
+//     if (flask) {
+//         pendingCancelOps.push(flask.onDisposed(stop));
+//     }
+//     if (outerFlask && outerFlask !== flask && (!flask || flaskAttachedToOuter)) {
+//         pendingCancelOps.push(outerFlask.onDisposed(stop));
+//     }
+//     return pendingCancelOps;
+
+// }
+
+// FIX: is existingPendingCancelOps getting in the way of nested flask cleanup?
+
 function cleanupScheduler(stop: CallbackRemover<void>) {
-    const scene = getScene();
+    const pendingCancelOps = [] as PendingCancelOp[];
     const flask = getFlask();
-    const flaskAttachedToRoot = flask && !flask.outlivesRoot
-    const rootFlask = flask ? flask.root : scene ? null : _getRootFlask();
-    const pendingCancelOps = [];
-    if (scene && (!flask || flaskAttachedToRoot)) {
-        pendingCancelOps.push(scene.onEnded(stop));
+    const rootFlask = (<Flask>flask)?._root || getScene() || _getRootFlask();
+    let nestedFlask = null;
+    let currentFlask = flask || rootFlask;
+    if (currentFlask) {
+        do {
+            pendingCancelOps.push(currentFlask.onDisposed(stop));
+            nestedFlask = currentFlask;
+            currentFlask = (<Flask>currentFlask)._outerFlask || (currentFlask !== rootFlask ? rootFlask : null);
+        } while (currentFlask && isAttached(<Flask>nestedFlask))
     }
-    if (flask) {
-        pendingCancelOps.push(flask.onDisposed(stop));
-    }
-    if (rootFlask && rootFlask !== flask && (!flask || flaskAttachedToRoot)) {
-        pendingCancelOps.push(rootFlask.onDisposed(stop));
-    }
+    if (pendingCancelOps.length === 0) return;
     return pendingCancelOps;
 }
 
-
-
+function isAttached(flask: Flask) {
+    return !flask.outlivesOuter;
+}
 
 
 

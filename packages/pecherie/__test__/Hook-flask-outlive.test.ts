@@ -4,7 +4,8 @@ import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
 import { $type } from "@rue/utils";
 import { Callback, Callbacks, initFlask } from "../../flask";
-import { Flask, OUTLIVE_ROOT, enflask, flaskSetup } from "../../flask/flask";
+import { Flask, OUTLIVE, enflask, flaskSetup } from "../../flask/flask";
+import { __resetGlobals } from "../../dev/__resetGlobals";
 
 // cleanup cleanups if alternative cleanup strategy run
 // [X] outlive root flask
@@ -12,8 +13,8 @@ import { Flask, OUTLIVE_ROOT, enflask, flaskSetup } from "../../flask/flask";
 // [X] outlive without root flask
 
 describe("flask with outlive option--should not be disposed when root flask is disposed", () => {
-
-    test.only("CASE: With root flask. Root flask unmounts", () => {
+    beforeEach(__resetGlobals);
+    test("CASE: With root flask. Root flask unmounts", () => {
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
         });
@@ -61,7 +62,7 @@ describe("flask with outlive option--should not be disposed when root flask is d
             onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             return flask;
-        }, OUTLIVE_ROOT);
+        }, OUTLIVE);
         onTestCaseD(cb);
         settingUp = false;
         expect(unmountedCallbacks.size).toBe(1);
@@ -94,7 +95,7 @@ describe("flask with outlive option--should not be disposed when root flask is d
     });
 
    
-    test.only("CASE: Scene as root flask. Scene is ended", () => {
+    test("CASE: Scene as root flask. Scene is ended", () => {
 
         const [castTestCaseA, onTestCaseA] = createHook({
             hook: "test-hook-A",
@@ -138,7 +139,7 @@ describe("flask with outlive option--should not be disposed when root flask is d
                 onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
                 onTestCaseC(() => flask.dispose());
                 return flask;
-            }, OUTLIVE_ROOT);
+            }, OUTLIVE);
             onTestCaseD(cb)
             onEndItAll(() => _scene.end())
         })
@@ -175,7 +176,7 @@ describe("flask with outlive option--should not be disposed when root flask is d
     });
 
 
-    test.only("CASE: No root flask. Flask is disposed. Outlive root should have no effect", () => {
+    test("CASE: No root flask. Flask is disposed. Outlive root should have no effect", () => {
 
         const [castTestCaseA, onTestCaseA] = createHook({
             hook: "test-hook-A",
@@ -209,7 +210,7 @@ describe("flask with outlive option--should not be disposed when root flask is d
             onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             return flask;
-        }, OUTLIVE_ROOT)
+        }, OUTLIVE)
 
         castTestCaseA();
         castTestCaseA();

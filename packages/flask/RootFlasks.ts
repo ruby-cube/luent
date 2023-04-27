@@ -1,7 +1,8 @@
-import { ActiveListener, PendingOp } from ".";
+import { ActiveListener, PendingCancelOp, PendingOp } from ".";
 import { getCurrentInstance } from "vue";
 import { ReactivityFlask } from "./flask";
 import { inComponentSetup, onComponentUnmounted } from "../paravue/component";
+import { registerGlobalResetter } from "../dev/__resetGlobals";
 
 export type RootFlask = {
     target: any | null;
@@ -44,14 +45,18 @@ export type RootFlaskConfigs = {
 // })
 
 export const _rootFlaskClasses = new Map();
+
+if (__TEST__) registerGlobalResetter(() => _rootFlaskClasses.clear())
+
 export function _declareRootFlaskClasses(rootFlaskConfigs: RootFlaskConfigs) {
     for (const { targetGetter, setupChecker, autoCleanupScheduler } of rootFlaskConfigs) {
         const flaskCheck = targetGetter || setupChecker;
         class RootFlask {
             target: any
-            onDisposed: (this: RootFlask, cb: () => void) => void
+            onDisposed: (this: RootFlask, cb: () => void) => PendingCancelOp;
             constructor(target: any) {
                 this.target = target;
+                //@ts-expect-error: to allow ActiveListener as return when configuring
                 this.onDisposed = autoCleanupScheduler;
             }
         }

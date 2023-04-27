@@ -13,6 +13,7 @@ import { inComponentSetup, onComponentUnmounted } from "../../paravue/component"
 import { doAction, onActionCompleted, onActionStart } from "../../actionry/actionry";
 import { sceneSetup, defineScene } from "../../flask/Scene";
 import { initFlask } from "@rue/flask";
+import { __resetGlobals } from "../../dev/__resetGlobals";
 
 
 const initalDatasets = [{
@@ -48,6 +49,7 @@ const initalDatasets = [{
 
 describe("vine system", () => {
   beforeEach(() => {
+    __resetGlobals()
     __$initDepotModule();
     // defineAutoCleanup((cleanup) => {
     //   if (inComponentSetup()) {

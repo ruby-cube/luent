@@ -7,8 +7,12 @@ import { expect, vi, describe, test } from "vitest";
 import { role } from "@rue/etre";
 import { $Modo } from "../Modo.role";
 import { enrollModelMaker } from "../Model";
+import { beforeEach } from "node:test";
+import { __resetGlobals } from "../../dev/__resetGlobals";
+
 
 describe("Autocleanup in modo system", () => {
+    beforeEach(__resetGlobals);
 
     test("CASE: inside $construct", () => {
         __$initDepotModule();
