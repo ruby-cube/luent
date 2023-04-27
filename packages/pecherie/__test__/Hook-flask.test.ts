@@ -778,8 +778,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         settingUp = false;
         expect(unmountedCallbacks.size).toBe(11);
         //@ts-ignore
-        expect(flask.disposalHandlers.size).toBe(10); //FIX: should be responsible for nestedFlask , 8
-
+        expect(flask.disposalHandlers.size).toBe(10);
 
         castTestCaseA();
         castTestCaseA();

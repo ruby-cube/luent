@@ -2,7 +2,6 @@
 import { vi, expect, describe, test, beforeEach } from "vitest";
 import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
-import { $type } from "@rue/utils";
 import { Callback, Callbacks, initFlask } from "../../flask";
 import { Flask, OUTLIVE, enflask, flaskSetup } from "../../flask/flask";
 import { __resetGlobals } from "../../dev/__resetGlobals";
@@ -226,6 +225,99 @@ describe("flask with outlive option--should not be disposed when root flask is d
         expect(testCallbacksA.size).toBe(0);
         expect(testCallbacksB.size).toBe(0);
         expect(testCallbacksC.size).toBe(0);
+
+        //@ts-expect-error
+        expect(flask.disposalHandlers.size).toBe(0);
+
+        // handlers have been removed, expect no additional calls
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+    });
+
+
+    test.only("CASE: Nested flask that outlives outerflask. With root flask. Root flask unmounts; with rootFlask.onDisposed()", () => {
+        const [castTestUnmounted, onTestUnmounted] = createHook({
+            hook: "test-unmounted-hook",
+        });
+        let settingUp = false;
+        initFlask({
+            rootFlasks: [{
+                setupChecker: () => settingUp,
+                autoCleanupScheduler: onTestUnmounted
+            }]
+        })
+        const [castTestCaseA, onTestCaseA] = createHook({
+            hook: "test-hook-A",
+        })
+
+        const [castTestCaseB, onTestCaseB] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const [castTestCaseC, onTestCaseC] = createHook({
+            hook: "test-hook-C",
+        })
+
+        const [castTestCaseD, onTestCaseD] = createHook({
+            hook: "test-hook-D",
+        })
+
+        const cb = vi.fn(() => { })
+        const cbB = vi.fn(() => { })
+        const cbC = vi.fn(() => { })
+        const cbD = vi.fn(() => { })
+        //@ts-expect-error
+        const testCallbacksA = onTestCaseA.handlers
+        //@ts-expect-error
+        const testCallbacksB = onTestCaseB.handlers
+        //@ts-expect-error
+        const testCallbacksC = onTestCaseC.handlers
+        //@ts-expect-error
+        const testCallbacksD = onTestCaseD.handlers
+        //@ts-expect-error
+        const unmountedCallbacks = onTestUnmounted.handlers
+
+        const useNestedFlask = enflask((flask, outerFlask, outerScopeRootFlask) => {
+            onTestCaseD(cb, {until: onTestCaseC});
+        }, OUTLIVE);
+
+        settingUp = true;
+        const flask = flaskSetup((flask, rootFlask) => {
+            onTestCaseA(cb, { until: onTestCaseC });
+            onTestCaseB(cbB, { until: onTestCaseC });
+
+            useNestedFlask(rootFlask);
+
+            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseC(() => flask.dispose());
+            rootFlask.onDisposed(cbD) // adds 2 callbacks to unmounted; cbD and also to cancel
+            return flask;
+        })
+        settingUp = false;
+        expect(unmountedCallbacks.size).toBe(9);
+        //@ts-ignore
+        expect(flask.disposalHandlers.size).toBe(8);
+
+
+        castTestCaseA();
+        castTestCaseA();
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+
+        expect(testCallbacksC.size).toBe(5);
+
+        castTestUnmounted();
+        expect(cbD).toHaveBeenCalledTimes(1);
+        expect(testCallbacksA.size).toBe(0);
+        expect(testCallbacksB.size).toBe(0);
+        expect(testCallbacksC.size).toBe(1);
+        expect(testCallbacksD.size).toBe(1);
+        expect(unmountedCallbacks.size).toBe(0);
 
         //@ts-expect-error
         expect(flask.disposalHandlers.size).toBe(0);
