@@ -1,11 +1,8 @@
 //-@ts-nocheck
 
-import { $schedule, Callback, Callbacks, PendingCancelOp, PendingOp, SchedulerOptions } from "@rue/planify";
+import { $schedule, Callback, Callbacks, PendingCancelOp, PendingOp, SchedulerOptions } from "../flask";
 import { noop, run } from "@rue/utils";
-import { ComponentInternalInstance, EffectScope, computed, effectScope, getCurrentInstance, getCurrentScope, onScopeDispose } from "vue";
 import { computed$ } from "../signals/computed";
-import exp from "constants";
-import { inComponentSetup, onComponentUnmounted } from "../paravue/component";
 import { RootFlask, _rootFlaskClasses } from "./RootFlasks";
 
 
@@ -14,7 +11,7 @@ export type ReactivityFlask = {
 }
 
 
-// If an async flask calls getRootFlask() after an await, should it be able to access the original root flask? or should it return null?
+// If an async flask calls _getRootFlask() after an await, should it be able to access the original root flask? or should it return null?
 // should root flasks cleanup async flasks?
 
 let activeFlaskSetup: Flask | null | undefined = null;
@@ -23,9 +20,13 @@ export function getFlask() {
     return activeFlaskSetup;
 }
 
-export function getRootFlask() {
-    for (const [getTarget, RootFlask] of _rootFlaskClasses) {
-        const target = getTarget();
+export function getRootFlask(){
+    return activeFlaskSetup?.root || _getRootFlask();
+}
+
+export function _getRootFlask() {
+    for (const [targetGetter, RootFlask] of _rootFlaskClasses) {
+        const target = targetGetter();
         if (target) {
             return new RootFlask(target);
         }
@@ -44,8 +45,8 @@ function defineRootFlask() {
 }
 
 
-// function getRootFlask() {
-//     getRootFlask() || getSceneFlask();
+// function _getRootFlask() {
+//     _getRootFlask() || getSceneFlask();
 //     return {} as ReactivityFlask | null
 // }
 
@@ -55,7 +56,7 @@ export class Flask implements ReactivityFlask {
     outerFlask: Flask | null | undefined;
     private disposalHandlers: Callbacks = new Set();
     constructor(
-        private root: RootFlask | null | undefined,
+        public root: RootFlask | null | undefined,
         private outlivesRoot: boolean | undefined
     ) { }
 
@@ -113,12 +114,14 @@ function _endSetup(flask: Flask) {
 function _resolveSetupEnd(flask: Flask, returnValue: any) {
     if (returnValue instanceof Promise) {
         run(async () => {
-            await returnValue;
+            const result = await returnValue;
             _endSetup(flask);
+            return result;
         });
     }
     else {
         _endSetup(flask);
+        return returnValue;
     }
 }
 
@@ -182,19 +185,18 @@ function _resolveSetupEnd(flask: Flask, returnValue: any) {
 export const OUTLIVE_ROOT = true;
 
 export function flaskSetup<T extends any | Promise<any>>(setUpFlask: (flask: Flask, rootFlask: ReactivityFlask) => T, outlive?: boolean) {
-    const rootFlask = getRootFlask();
+    const rootFlask = _getRootFlask();
     // if (!rootFlask) throw new Error("useFlask must be called during scene setup or component setup");
     const flask = new Flask(rootFlask, outlive);
     _startSetup(flask);
-    let result = setUpFlask(flask, rootFlask || flask);
-    _resolveSetupEnd(flask, result);
-    return result;
+    // let result = setUpFlask(flask, rootFlask || flask);
+    return _resolveSetupEnd(flask, setUpFlask(flask, rootFlask || flask)) as T;
 }
 
 
 export function enflask<A extends any[], T extends any | Promise<any>>(setUpFlask: (flask: Flask, rootFlask: ReactivityFlask, ...args: A) => T, outlive?: boolean) {
     return (...args: A) => {
-        const rootFlask = getRootFlask();
+        const rootFlask = _getRootFlask();
         // if (!rootFlask) throw new Error("useFlask must be called during scene setup or component setup");
         const flask = new Flask(rootFlask, outlive);
         _startSetup(flask);

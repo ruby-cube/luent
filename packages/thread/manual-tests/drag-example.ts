@@ -1,5 +1,5 @@
-import { ActiveListener } from "../../planify/planify";
-import { sceneSetup } from "../../planify/Scene";
+import { ActiveListener } from "../../flask/flaskedListeners";
+import { sceneSetup } from "../../flask/Scene";
 import { useEventListener } from "../event-listeners";
 
 

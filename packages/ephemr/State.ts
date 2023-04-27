@@ -1,7 +1,7 @@
 import { computed, ComputedRef, nextTick, onMounted, Ref, ref } from 'vue';
 import { ExtensibleRef, set$, r$, inComponentSetup } from '@rue/paravue';
 import { createHook } from '@rue/pecherie';
-import { ScheduleStop, sceneSetup, Scene } from '@rue/planify';
+import { ScheduleStop, sceneSetup, Scene } from '../flask';
 import { addPS } from '@rue/thread';
 import { $type } from '@rue/utils';
 import { MiscObj } from '@rue/types';

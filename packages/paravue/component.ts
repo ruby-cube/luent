@@ -1,4 +1,4 @@
-import { $listen, Callback, ListenerOptions } from "@rue/planify"
+import { $listen, Callback, ListenerOptions } from "../flask"
 import { ComponentInternalInstance, getCurrentInstance, onBeforeUnmount, PropType, onUnmounted as _onUnmounted } from "vue"
 
 export const OPTIONAL = Symbol("optionalProp")

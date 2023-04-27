@@ -1,5 +1,5 @@
 import { $type } from "@rue/utils";
-import { Callback } from "../../planify/planify";
+import { Callback } from "../../flask/flaskedListeners";
 import { createHook } from "../Hook";
 
 { //CASE: listener has been wrapped improperly, expect error

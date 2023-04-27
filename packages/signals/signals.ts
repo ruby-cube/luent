@@ -1,6 +1,6 @@
 //-@ts-nocheck
 import { inComponentSetup } from "@rue/paravue";
-import { $subscribe } from "@rue/planify";
+import { $subscribe } from "../flask";
 import { ComputedRef, DebuggerOptions, Ref, ShallowRef, computed, effectScope, isRef, reactive, shallowReactive, shallowRef, triggerRef } from "vue";
 
 

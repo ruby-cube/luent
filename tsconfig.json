@@ -51,8 +51,8 @@
       "@rue/pecherie": [
         "./packages/pecherie/index.ts"
       ],
-      "@rue/planify": [
-        "./packages/planify/index.ts"
+      "@rue/flask": [
+        "./packages/flask/index.ts"
       ],
       "@rue/ruelle": [
         "./packages/ruelle/index.ts"

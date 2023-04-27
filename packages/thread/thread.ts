@@ -1,5 +1,5 @@
 import "setimmediate"
-import { Callback, $schedule, SchedulerOptions } from "@rue/planify";
+import { Callback, $schedule, SchedulerOptions } from "../flask";
 
 //NOTE:
 // There is no microtask queue during nextRender phase. Any microtasks scheduled within a beforeScreenPaint cb will be run synchronously.

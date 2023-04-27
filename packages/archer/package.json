@@ -3,7 +3,7 @@
     "private": true,
     "description": "",
     "dependencies": {
-        "@rue/planify": "workspace:*"
+        "@rue/flask": "workspace:*"
     },
     "devDependencies": {
         "@rue/types": "workspace:*",

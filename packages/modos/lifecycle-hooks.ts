@@ -1,4 +1,4 @@
-import { $listen, ActiveListener, Callback, ListenerOptions, PendingOp } from "@rue/planify";
+import { $listen, ActiveListener, Callback, ListenerOptions, PendingOp } from "../flask";
 import { $beforeDestroyed, $beforeDisposedOf, $onDestroyed, $onDisposedOf, isMakingModel, onModelCreated, onModelMade, $onInstated, $onReinstated } from "./depot";
 import { Modo } from "./Modo.role";
 

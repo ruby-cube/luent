@@ -199,7 +199,7 @@ importers:
   packages/pecherie:
     specifiers:
       '@rue/dev': workspace:*
-      '@rue/planify': workspace:*
+      '@rue/flask': workspace:*
       '@rue/types': workspace:*
       '@rue/utils': workspace:*
       '@types/node': ^18.15.11
@@ -207,7 +207,7 @@ importers:
       vite: ^4.2.0
       vue: ^3.2.47
     dependencies:
-      '@rue/planify': link:../planify
+      '@rue/flask': link:../flask
       '@rue/utils': link:../utils
     devDependencies:
       '@rue/dev': link:../dev

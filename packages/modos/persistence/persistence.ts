@@ -4,7 +4,7 @@ import { Modo } from '../Modo.role';
 import { onActionCompleted, onActionStart } from '@rue/actionry';
 import { createHook } from '@rue/pecherie';
 import { $onDestroyed, $onModelDestroyed, onModelCreated, onModelMade } from "../depot";
-import { $tilStop, OneTimeListener, sceneSetup } from "@rue/planify";
+import { $tilStop, OneTimeListener, sceneSetup } from "../../flask";
 import { onChange } from "@rue/paravue";
 import { ModoSymbol } from "../Model";
 import { flatten, wasRevived } from "../revival/flatten";

@@ -7,7 +7,7 @@ import { PeaNode } from './PeaNode.role';
 import { beforeDisposedOf, onDestroyed, onInstated, onMade } from '../lifecycle-hooks';
 import { onActionCompleted, onActionStart } from '@rue/actionry';
 import { createHook } from '@rue/pecherie';
-import { $lifetime, sceneSetup } from '@rue/planify';
+import { $lifetime, sceneSetup } from '../../flask';
 console.log('LOADING Pod.role.ts ...');
 
 

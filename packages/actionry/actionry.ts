@@ -2,7 +2,7 @@
 import { $type } from '@rue/utils';
 import { MiscObj } from '@rue/types';
 import { createHook, createTargetedHook } from '@rue/pecherie';
-import { afterReactiveFlush } from '@rue/flask';
+import { afterReactiveFlush } from '../watch';
 
 
 //NOTE: An action is the main operation that captures user intent.

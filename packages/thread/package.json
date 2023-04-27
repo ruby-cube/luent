@@ -3,7 +3,7 @@
   "private": true,
   "description": "",
   "dependencies": {
-    "@rue/planify": "workspace:*",
+    "@rue/flask": "workspace:*",
     "@rue/utils": "workspace:*",
     "setimmediate": "^1.0.5"
   },

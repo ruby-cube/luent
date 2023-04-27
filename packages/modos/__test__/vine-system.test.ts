@@ -8,11 +8,11 @@ import { Data, role, Role, PrivateRole } from "../../etre/Role";
 import { $PeaNode } from "../vine/PeaNode.role";
 import { $PeapodPea } from "../vine/PeapodPea.role";
 import { $PodNode } from "../vine/PodNode.role";
-import { defineAutoCleanup } from "../../planify/scheduleAutoCleanup";
 import { onDestroyed } from "../lifecycle-hooks";
-import { inComponentSetup, onUnmounted } from "../../paravue/component";
+import { inComponentSetup, onComponentUnmounted } from "../../paravue/component";
 import { doAction, onActionCompleted, onActionStart } from "../../actionry/actionry";
-import { sceneSetup, defineScene } from "../../planify/Scene";
+import { sceneSetup, defineScene } from "../../flask/Scene";
+import { initFlask } from "@rue/flask";
 
 
 const initalDatasets = [{
@@ -49,13 +49,23 @@ const initalDatasets = [{
 describe("vine system", () => {
   beforeEach(() => {
     __$initDepotModule();
-    defineAutoCleanup((cleanup) => {
-      if (inComponentSetup()) {
-        return onUnmounted(cleanup);
-      }
-      if (isMakingModel()) {
-        return onDestroyed(cleanup);
-      }
+    // defineAutoCleanup((cleanup) => {
+    //   if (inComponentSetup()) {
+    //     return onUnmounted(cleanup);
+    //   }
+    //   if (isMakingModel()) {
+    //     return onDestroyed(cleanup);
+    //   }
+    // })
+    initFlask({
+      rootFlasks: [{
+        setupChecker: isMakingModel,
+        autoCleanupScheduler: onDestroyed
+      },
+      {
+        setupChecker: inComponentSetup,
+        autoCleanupScheduler: onComponentUnmounted
+      }]
     })
   })
   test("CASE: Populates depot", () => {
@@ -66,7 +76,7 @@ describe("vine system", () => {
     runPeaDisposalTest();
   });
 
-  test("CASE: Populates depot, disposes detached peas, and reinstates peas", () => { 
+  test("CASE: Populates depot, disposes detached peas, and reinstates peas", () => {
     return runReinstatePeasTest();
   });
 });

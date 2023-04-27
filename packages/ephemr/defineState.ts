@@ -1,4 +1,4 @@
-import { ScheduleStop } from '@rue/planify';
+import { ScheduleStop } from '../flask';
 import { MiscObj } from '@rue/types';
 import { Precondition, StateRef, StateTransitions } from './State';
 

@@ -1,4 +1,4 @@
-import { $subscribe, inSceneSetup } from "@rue/planify";
+import { $subscribe, inSceneSetup } from "../flask";
 import { ComputedRef, DebuggerOptions, computed, effectScope, getCurrentInstance as inComponentSetup } from "vue";
 import { Signal } from "./signals";
 

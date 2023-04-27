@@ -1,4 +1,4 @@
-import { Callback, Callbacks, ListenerOptions, OneTimeTargetedListener, $listen, SustainedTargetedListener, initAutoCleanup, initSceneAutoCleanup, PendingCancelOp } from '@rue/planify';
+import { Callback, Callbacks, ListenerOptions, OneTimeTargetedListener, $listen, SustainedTargetedListener, initAutoCleanup, initSceneAutoCleanup, PendingCancelOp } from '../flask';
 import { ContextData, HookConfig, ReturnOfCaster, runHandlers, UseHookState } from './Hook';
 import { noop } from '@rue/utils';
 import { Cast, MiscObj } from '@rue/types';
@@ -35,17 +35,20 @@ export function createTargetedHook<
         const existingCallbacks = targetMap.get(target);
         const handlers = existingCallbacks ? existingCallbacks : new Set() as Callbacks;
         if (!existingCallbacks) {
-            let pendingAutoCleanup: PendingCancelOp | void;
-            let pendingSceneCleanup: PendingCancelOp | void;
+            let pendingAutoCleanups: PendingCancelOp[] | void;
+            // let pendingSceneCleanup: PendingCancelOp | void;
             targetMap.set(target, handlers);
             const cleanup = () => {
                 targetMap.delete(target);
-                if (pendingAutoCleanup) pendingAutoCleanup.cancel();
-                if (pendingSceneCleanup) pendingSceneCleanup.cancel();
+                if (pendingAutoCleanups) {
+                    for (const cleanup of pendingAutoCleanups){
+                        cleanup.cancel();}
+                    }
+                // if (pendingSceneCleanup) pendingSceneCleanup.cancel();
             };
             cleanup.isRemover = true as const;
-            pendingAutoCleanup = initAutoCleanup(cleanup)
-            pendingSceneCleanup = initSceneAutoCleanup(cleanup)
+            pendingAutoCleanups = initAutoCleanup(cleanup)
+            // pendingSceneCleanup = initSceneAutoCleanup(cleanup)
         }
         return $listen(handler, options, {
             enroll: (_callback) => {

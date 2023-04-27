@@ -1,10 +1,9 @@
 //-@ts-nocheck
 import { vi, expect, describe, test, beforeEach } from "vitest";
-import { sceneSetup, Scene } from "../../planify/Scene";
-import { defineAutoCleanup } from "../../planify/scheduleAutoCleanup";
+import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
-import { $outlive, PendingOp } from "@rue/planify";
-import { survivingRemovers } from "../../planify/outlive";
+import { $outlive, PendingOp, initFlask } from "../../flask";
+import { survivingRemovers } from "../../flask/outlive";
 
 // Describe: Handlers and removers will outlive scope
 // Cases:
@@ -30,10 +29,16 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
             hook: "test-unmounted-hook",
         });
         let settingUp = false;
-        defineAutoCleanup((cleanup) => { //Beware: this sets a global variable that will affect subsequent tests
-            if (settingUp) {
-                return onTestUnmounted(cleanup);
-            }
+        // defineAutoCleanup((cleanup) => { //Beware: this sets a global variable that will affect subsequent tests
+        //     if (settingUp) {
+        //         return onTestUnmounted(cleanup);
+        //     }
+        // })
+        initFlask({
+            rootFlasks: [{
+                setupChecker: () => settingUp,
+                autoCleanupScheduler: onTestUnmounted
+            }]
         })
 
         const [castTestCase, onTestCase] = createHook({
@@ -73,10 +78,16 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
             hook: "test-unmounted-hook",
         });
         let settingUp = false;
-        defineAutoCleanup((cleanup) => { //Beware: this sets a global variable that will affect subsequent tests
-            if (settingUp) {
-                return onTestUnmounted(cleanup);
-            }
+        // defineAutoCleanup((cleanup) => { //Beware: this sets a global variable that will affect subsequent tests
+        //     if (settingUp) {
+        //         return onTestUnmounted(cleanup);
+        //     }
+        // })
+        initFlask({
+            rootFlasks: [{
+                setupChecker: () => settingUp,
+                autoCleanupScheduler: onTestUnmounted
+            }]
         })
 
         const [castTestCase, onTestCase] = createHook({
@@ -132,9 +143,9 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
 
         expect(survivingRemovers.size).toBe(1) // survivingRemover registered
 
-        const sceneCleanupCallbacks = 
-                //@ts-expect-error
-                scene.endHandlers;
+        const sceneCleanupCallbacks =
+            //@ts-expect-error
+            scene.endHandlers;
         expect(sceneCleanupCallbacks.size).toBe(0); // autocleanup should not be registered
 
         castTestCase();
@@ -184,9 +195,9 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
 
         expect(survivingRemovers.size).toBe(1) // survivingRemover registered
 
-        const sceneCleanupCallbacks = 
-                //@ts-expect-error
-                scene.endHandlers;
+        const sceneCleanupCallbacks =
+            //@ts-expect-error
+            scene.endHandlers;
         expect(sceneCleanupCallbacks.size).toBe(0); // autocleanup should not be registered
 
         scene.end();
@@ -226,9 +237,9 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
 
         expect(survivingRemovers.size).toBe(1) // survivingRemover registered
 
-        const sceneCleanupCallbacks = 
-                //@ts-expect-error
-                scene.endHandlers;
+        const sceneCleanupCallbacks =
+            //@ts-expect-error
+            scene.endHandlers;
         expect(sceneCleanupCallbacks.size).toBe(0); // autocleanup should not be registered
 
         scene.end();

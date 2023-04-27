@@ -39,7 +39,7 @@ export type Callback = (...arg: any[]) => any;
 export type Callbacks = Set<Callback | CallbackRemover<any>>;
 export type ScheduleRemoval = ScheduleCancel | ScheduleStop;
 export type ScheduleCancel = (cancel: CallbackRemover<never | void>) => PendingCancelOp;
-export type ScheduleStop = (stop: CallbackRemover<void>) => void;
+export type ScheduleStop = (stop: CallbackRemover<void>) => PendingCancelOp;
 
 
 export type OneTimeListener<CB extends Callback = Callback, O extends MiscObj = {}> = <
@@ -209,16 +209,19 @@ function isRemover(callback: Callback) {
 
 
 export function initAutoCleanup(stop: CallbackRemover<void>) {
-    let success: void | PendingCancelOp = schedulingSceneCleanup ? existingPendingAutoCleanup! : undefined;
-    if (settingUpScene) {
-        if (!schedulingAutoCleanup)
-            success = scheduleAutoCleanup(stop);
-    }
-    else {
-        success = schedulingAutoCleanup ? existingPendingAutoCleanup! : scheduleAutoCleanup(stop);
-    }
-    return success;
+    return schedulingAutoCleanup ? existingPendingAutoCleanup! : scheduleAutoCleanup(stop);
 }
+// export function initAutoCleanup(stop: CallbackRemover<void>) {
+//     let success: void | PendingCancelOp[] = schedulingSceneCleanup ? existingPendingAutoCleanup! : undefined;
+//     if (settingUpScene) {
+//         if (!schedulingAutoCleanup)
+//             success = scheduleAutoCleanup(stop);
+//     }
+//     else {
+//         success = schedulingAutoCleanup ? existingPendingAutoCleanup! : scheduleAutoCleanup(stop);
+//     }
+//     return success;
+// }
 
 export function initSceneAutoCleanup(stop: CallbackRemover<void>) {
     let success: void | PendingCancelOp = schedulingSceneCleanup ? existingPendingSceneCleanup! : undefined;

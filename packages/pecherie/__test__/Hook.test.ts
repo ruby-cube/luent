@@ -1,9 +1,8 @@
 import { describe, test, expect, vi } from "vitest";
 import { createHook } from "../Hook";
-import { defineAutoCleanup } from "../../planify/scheduleAutoCleanup";
-import { $lifetime, $tilStop, Callback } from "../../planify/planify";
+import { $lifetime, $tilStop, Callback } from "../../flask/flaskedListeners";
 import { $type } from "@rue/utils";
-import { DevHookListener } from "@rue/planify";
+import { DevHookListener, initFlask } from "../../flask";
 
 
 
@@ -377,16 +376,22 @@ describe("sustained listeners run until stopped", () => {
     });
 
 
-    test("CASE: auto cleanup, multiple handlers", () => new Promise((done) => {
+    test("CASE: auto cleanup, multiple handlers", () => {
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
             // onceAsDefault: true,
         });
         let settingUp = false;
-        defineAutoCleanup((cleanup) => {
-            if (settingUp) {
-                return onTestUnmounted(cleanup);
-            }
+        // defineAutoCleanup((cleanup) => {
+        //     if (settingUp) {
+        //         return onTestUnmounted(cleanup);
+        //     }
+        // })
+        initFlask({
+            rootFlasks: [{
+                setupChecker: ()=>settingUp,
+                autoCleanupScheduler: onTestUnmounted
+            }]
         })
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
@@ -403,7 +408,7 @@ describe("sustained listeners run until stopped", () => {
         onTestCase(cb);
         onTestCase(cbB);
         settingUp = false;
-        expect(unmountedCallbacks.size).toBe(2);
+        expect(unmountedCallbacks.size).toBe(2); //FIX: currently 0
 
         castTestCase();
         castTestCase();
@@ -417,8 +422,7 @@ describe("sustained listeners run until stopped", () => {
         castTestCase();
         expect(cb).toHaveBeenCalledTimes(3);
         expect(cbB).toHaveBeenCalledTimes(3);
-        done("test done")
-    }));
+    });
 
 
     test("CASE: auto cleanup", () => {
@@ -427,10 +431,16 @@ describe("sustained listeners run until stopped", () => {
             // onceAsDefault: true,
         });
         let settingUp = false;
-        defineAutoCleanup((cleanup) => {
-            if (settingUp) {
-                return onTestUnmounted(cleanup);
-            }
+        // defineAutoCleanup((cleanup) => {
+        //     if (settingUp) {
+        //         return onTestUnmounted(cleanup);
+        //     }
+        // })
+        initFlask({
+            rootFlasks: [{
+                setupChecker: ()=>settingUp,
+                autoCleanupScheduler: onTestUnmounted
+            }]
         })
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
@@ -450,7 +460,7 @@ describe("sustained listeners run until stopped", () => {
         expect(cb).toHaveBeenCalledTimes(3);
 
         castTestUnmounted();
-        expect(testCallbacks.size).toBe(0);
+        expect(testCallbacks.size).toBe(0); //FIX: currently 1
 
         castTestCase();
         expect(cb).toHaveBeenCalledTimes(3);

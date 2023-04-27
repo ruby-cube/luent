@@ -4,7 +4,7 @@
   "description": "",
   "dependencies": {
     "@rue/utils": "workspace:*",
-    "@rue/planify": "workspace:*"
+    "@rue/flask": "workspace:*"
   },
   "devDependencies": {
     "@rue/types": "workspace:*",

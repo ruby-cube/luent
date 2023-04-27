@@ -1,24 +1,32 @@
 import { vi, expect, describe, test, beforeEach } from "vitest";
 import { __$initDepotModule, destroyModel, isMakingModel, $onDestroyed } from "../modos/depot";
-import { defineAutoCleanup } from "../planify/scheduleAutoCleanup";
 import { enrollModelMaker } from "../modos/Model";
 import { $Modo } from "../modos/Modo.role";
 import { onDestroyed } from "../modos/lifecycle-hooks";
 import { createHook } from "../pecherie/Hook";
 import { $type } from "../utils/utils";
 import { role } from "../etre/Role";
-import { UNATTACHED, sceneSetup } from "../planify/Scene";
+import { sceneSetup } from "../flask/Scene";
+import { initFlask } from "../flask/initFlask";
 
 
 describe("Autocleanup of scenes", () => {
     beforeEach(() => {
         __$initDepotModule();
-        defineAutoCleanup((cleanup) => {
-            if (isMakingModel()) {
-                console.log("scheduling auto cleanup")
-                return onDestroyed(cleanup);
-            }
+        // defineAutoCleanup((cleanup) => {
+        //     if (isMakingModel()) {
+        //         console.log("scheduling auto cleanup")
+        //         return onDestroyed(cleanup);
+        //     }
+        // })
+
+        initFlask({
+            rootFlasks: [{
+                setupChecker: isMakingModel,
+                autoCleanupScheduler: onDestroyed
+            }]
         })
+
     })
 
     function setupModel(unattached?: boolean) {

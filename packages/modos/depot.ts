@@ -7,7 +7,7 @@ import { getModelDef, ModoDef, _IS_LIABLE_POD_, _REVIVE_ } from "./Model";
 import { Modo } from "./Modo.role";
 import { UID } from "./types";
 import { heed, defineMessage, send } from "@rue/archer";
-import { DevHookCaster, DevHookListener } from '@rue/planify';
+import { DevHookCaster, DevHookListener } from '../flask';
 import { useRegistrar } from "@rue/utils";
 import { Revived, toRevived } from "./revival/flatten";
 import { initLiablePod } from "./vine/PodNode.role";

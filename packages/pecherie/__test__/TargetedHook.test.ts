@@ -1,9 +1,8 @@
 import { describe, test, expect, vi } from "vitest";
 import { createHook } from "../Hook";
-import { defineAutoCleanup } from "../../planify/scheduleAutoCleanup";
-import { $lifetime, $tilStop } from "../../planify/planify";
 import { createTargetedHook } from "../TargetedHook";
 import { $type } from "@rue/utils";
+import { initFlask, $lifetime, $tilStop } from "@rue/flask";
 
 
 
@@ -313,10 +312,16 @@ describe("sustained listeners run until stopped", () => {
             hook: "test-unmounted-hook",
         });
         let settingUp = false;
-        defineAutoCleanup((cleanup) => {
-            if (settingUp) {
-                return onTestUnmounted(cleanup);
-            }
+        // defineAutoCleanup((cleanup) => {
+        //     if (settingUp) {
+        //         return onTestUnmounted(cleanup);
+        //     }
+        // })
+        initFlask({
+            rootFlasks: [{
+                setupChecker: ()=>settingUp,
+                autoCleanupScheduler: onTestUnmounted
+            }]
         })
         const [castTestCase, onTestCase] = createTargetedHook({
             hook: "test-hook",
@@ -334,7 +339,7 @@ describe("sustained listeners run until stopped", () => {
         //@ts-ignore
         const targetMap = onTestCase.targetMap
 
-        expect(unmountedCallbacks.size).toBe(2);
+        expect(unmountedCallbacks.size).toBe(2); // FIX: currently 0
         castTestCase(model);
         castTestCase(model);
         castTestCase(model);

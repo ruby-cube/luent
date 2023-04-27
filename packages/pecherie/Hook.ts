@@ -1,7 +1,7 @@
 //@-ts-nocheck
 import { PerformanceCheck, usePerformanceCheck } from "@rue/dev";
 import { Cast, MiscObj, UnionToIntersection } from '@rue/types';
-import { Callback, CallbackRemover, Callbacks, ListenerOptions, OneTimeListener, PendingCancelOp, ScheduleCancel, ScheduleRemoval, ScheduleStop, $listen, SustainedListener } from '@rue/planify';
+import { Callback, CallbackRemover, Callbacks, ListenerOptions, OneTimeListener, PendingCancelOp, ScheduleCancel, ScheduleRemoval, ScheduleStop, $listen, SustainedListener } from '../flask';
 import { noop } from "@rue/utils";
 
 let performanceCheck: PerformanceCheck;

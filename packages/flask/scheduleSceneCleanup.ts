@@ -1,4 +1,4 @@
-import { CallbackRemover, PendingCancelOp } from "@rue/planify";
+import { CallbackRemover, PendingCancelOp } from ".";
 import { Scene } from "./Scene"
 
 

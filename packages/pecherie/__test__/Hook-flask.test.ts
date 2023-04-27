@@ -4,26 +4,166 @@ import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
 import { $type } from "@rue/utils";
 import { Callback, Callbacks, initFlask } from "../../flask";
+import { Flask, flaskSetup } from "../../flask/flask";
+
+// [ ] autocleanup with root flask
+// [ ] autocleanup with no root flask
+// [ ] cleanup cleanups if alternative cleanup strategy run
+// [ ] outlive root flask
+
+describe("autocleanup via flask", () => {
+
+    test.only("CASE: auto cleanup, multiple handlers, with root flask. Root flask unmounts", () => {
+        const [castTestUnmounted, onTestUnmounted] = createHook({
+            hook: "test-unmounted-hook",
+            // onceAsDefault: true,
+        });
+        let settingUp = false;
+        initFlask({
+            rootFlasks: [{
+                setupChecker: () => settingUp,
+                autoCleanupScheduler: onTestUnmounted
+            }]
+        })
+        const [castTestCaseA, onTestCaseA] = createHook({
+            hook: "test-hook-A",
+        })
+
+        const [castTestCaseB, onTestCaseB] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const [castTestCaseC, onTestCaseC] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const cb = vi.fn(() => { })
+        const cbB = vi.fn(() => { })
+        //@ts-expect-error
+        const testCallbacksA = onTestCaseA.handlers
+        //@ts-expect-error
+        const testCallbacksB = onTestCaseB.handlers
+        //@ts-expect-error
+        const unmountedCallbacks = onTestUnmounted.handlers
+
+        settingUp = true;
+        const flask = flaskSetup((flask) => {
+            onTestCaseA(cb, {until: onTestCaseC});
+            onTestCaseB(cbB, {until: onTestCaseC});
+            onTestCaseC(()=>flask.dispose());
+            return flask;
+        })
+        settingUp = false;
+        expect(unmountedCallbacks.size).toBe(5);
+
+        castTestCaseA();
+        castTestCaseA();
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+
+        castTestUnmounted();
+        expect(testCallbacksA.size).toBe(0);
+        expect(testCallbacksB.size).toBe(0);
+        expect(unmountedCallbacks.size).toBe(0);
+
+        //@ts-expect-error
+        expect(flask.disposalHandlers.size).toBe(0);
+
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+        // done("test done")
+    });
 
 
+    test.only("CASE: auto cleanup, multiple handlers, with root flask. Flask is disposed", () => {
+        const [castTestUnmounted, onTestUnmounted] = createHook({
+            hook: "test-unmounted-hook",
+            // onceAsDefault: true,
+        });
+        let settingUp = false;
+        initFlask({
+            rootFlasks: [{
+                setupChecker: () => settingUp,
+                autoCleanupScheduler: onTestUnmounted
+            }]
+        })
+        const [castTestCaseA, onTestCaseA] = createHook({
+            hook: "test-hook-A",
+        })
+
+        const [castTestCaseB, onTestCaseB] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const [castTestCaseC, onTestCaseC] = createHook({
+            hook: "test-hook-B",
+        })
+
+        const cb = vi.fn(() => { })
+        const cbB = vi.fn(() => { })
+        //@ts-expect-error
+        const testCallbacksA = onTestCaseA.handlers
+        //@ts-expect-error
+        const testCallbacksB = onTestCaseB.handlers
+        //@ts-expect-error
+        const testCallbacksC = onTestCaseC.handlers
+        //@ts-expect-error
+        const unmountedCallbacks = onTestUnmounted.handlers
+
+        settingUp = true;
+        const flask = flaskSetup((flask: Flask) => {
+            onTestCaseA(cb, {until: onTestUnmounted});
+            onTestCaseB(cbB, {until: onTestUnmounted});
+            onTestCaseC(() => flask.dispose());
+            return flask;
+        })
+        settingUp = false;
+        expect(unmountedCallbacks.size).toBe(7);
+
+        castTestCaseA();
+        castTestCaseA();
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+
+        castTestCaseC();
+        expect(testCallbacksA.size).toBe(0);
+        expect(testCallbacksB.size).toBe(0);
+        expect(testCallbacksC.size).toBe(0);
+
+        //@ts-expect-error
+        expect(flask!.disposalHandlers.size).toBe(0);
+
+        expect(unmountedCallbacks.size).toBe(0);
+
+        castTestCaseA();
+        expect(cb).toHaveBeenCalledTimes(3);
+        castTestCaseB();
+        expect(cbB).toHaveBeenCalledTimes(2);
+        // done("test done")
+    });
 
 
-describe("cleanup functions are cleaned up if a different cleanup strategy executes", () => {
+})
 
-    test("CASE: register until and auto cleanup. Execute auto cleanup. Expect until's callback to be gone", () => {
+describe("in flask, cleanup functions are cleaned up if a different cleanup strategy executes", () => {
+
+    test.only("CASE: register until and auto cleanup and nested flask. Execute auto cleanup. Expect until's callback to be gone", () => {
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
         });
         let settingUp = false;
-        // defineAutoCleanup((cleanup) => { //Beware: this sets a global variable that will affect subsequent tests
-        //     if (settingUp) {
-        //         return onTestUnmounted(cleanup);
-        //     }
-        // })
 
         initFlask({
             rootFlasks: [{
-                setupChecker: ()=>settingUp,
+                setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
         })
@@ -41,15 +181,15 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         const cb = vi.fn(() => { })
 
         settingUp = true;
-        onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
+        const flask = flaskSetup((flask: Flask) => {
+            onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
+            return flask;
+        })
         settingUp = false;
 
 
         castTestCase({ foo: "A" });
-        expect(cb).toHaveBeenCalledTimes(1);
-
-        const autoCleanupCallbacks = (<DevListener<typeof onTestUnmounted>>onTestUnmounted).handlers
-        expect(autoCleanupCallbacks.size).toBe(2);
+        expect(cb).toHaveBeenCalledTimes(1)
 
         castTestUnmounted();
         castTestCase({ foo: "A" });
@@ -60,17 +200,26 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         const handlers = (<DevListener<typeof onSomethingEnded>>onSomethingEnded).handlers
         expect(handlers.size).toBe(0);
 
+        //@ts-expect-error
+        expect(flask!.disposalHandlers.size).toBe(0);
+
+        const autoCleanupCallbacks = (<DevListener<typeof onTestUnmounted>>onTestUnmounted).handlers
         expect(autoCleanupCallbacks.size).toBe(0);
     })
 
-    test.only("CASE: register until and auto cleanup. Execute until. Expect autocleanup's callback to be gone", () => {
+    test("CASE: register until and auto cleanup. Execute until. Expect autocleanup's callback to be gone", () => {
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
         });
         let settingUp = false;
+        // defineAutoCleanup((cleanup) => { //Beware: this sets a global variable that will affect subsequent tests
+        //     if (settingUp) {
+        //         return onTestUnmounted(cleanup);
+        //     }
+        // })
         initFlask({
             rootFlasks: [{
-                setupChecker: ()=>settingUp,
+                setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
         })
@@ -208,7 +357,7 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         // })
         initFlask({
             rootFlasks: [{
-                setupChecker: ()=>settingUp,
+                setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
         })
@@ -257,7 +406,7 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         // })
         initFlask({
             rootFlasks: [{
-                setupChecker: ()=>settingUp,
+                setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
         })

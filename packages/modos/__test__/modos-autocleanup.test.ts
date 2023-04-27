@@ -1,4 +1,4 @@
-import { defineAutoCleanup } from "@rue/planify";
+import { initFlask } from "../../flask";
 import { __$initDepotModule, destroyModel, isMakingModel } from "../depot";
 import { onDestroyed } from "../lifecycle-hooks";
 import { createHook } from "@rue/pecherie";
@@ -12,10 +12,11 @@ describe("Autocleanup in modo system", () => {
 
     test("CASE: inside $construct", () => {
         __$initDepotModule();
-        defineAutoCleanup((cleanup) => {
-            if (isMakingModel()) {
-                return onDestroyed(cleanup);
-            }
+        initFlask({
+            rootFlasks: [{
+                setupChecker: isMakingModel,
+                autoCleanupScheduler: onDestroyed
+            }]
         })
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",

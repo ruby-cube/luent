@@ -1,6 +1,6 @@
 import { EqualTypes, typeTest } from "../../dev/type-test";
-import { PendingOp } from "../../planify/PendingOp";
-import { $lifetime, $tilStop, ActiveListener, Callback, OneTimeTargetedListener, SustainedTargetedListener } from "../../planify/planify";
+import { PendingOp } from "../../flask/PendingOp";
+import { $lifetime, $tilStop, ActiveListener, Callback, OneTimeTargetedListener, SustainedTargetedListener } from "../../flask/flaskedListeners";
 import { useEventListener } from "../event-listeners";
 
 

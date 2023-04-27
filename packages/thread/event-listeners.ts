@@ -1,4 +1,4 @@
-import { ActiveListener, Callback, CallbackRemover, ListenerOptions, OneTimeListener, OneTimeTargetedListener, PendingCancelOp, ScheduleCancel, ScheduleRemoval, ScheduleStop, $listen, SustainedListener, SustainedTargetedListener } from '@rue/planify';
+import { ActiveListener, Callback, CallbackRemover, ListenerOptions, OneTimeListener, OneTimeTargetedListener, PendingCancelOp, ScheduleCancel, ScheduleRemoval, ScheduleStop, $listen, SustainedListener, SustainedTargetedListener } from '../flask';
 import { noop } from '@rue/utils';
 
 const listenerMap: Map<string, SustainedTargetedListener> = new Map();

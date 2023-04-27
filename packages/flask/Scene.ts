@@ -1,9 +1,9 @@
 //-@ts-nocheck
-import { $schedule, Callback, Callbacks, markSceneSetup, OneTimeListener, ScheduledOp, SchedulerOptions } from './planify';
+import { $schedule, Callback, Callbacks, markSceneSetup, OneTimeListener, ScheduledOp, SchedulerOptions } from './flaskedListeners';
 import { noop, run } from "@rue/utils";
 import { registerSceneCleanup } from './scheduleSceneCleanup';
-import { Flask, getRootFlask } from '../watch/flask';
-import { RootFlask } from '../watch/RootFlasks';
+import { RootFlask } from './RootFlasks';
+import { _getRootFlask } from './flask';
 
 // export type Scene = {
 //     end: () => void;
@@ -14,8 +14,6 @@ import { RootFlask } from '../watch/RootFlasks';
 export class Scene {
     outerScene: Scene | null | undefined;
     private endHandlers: Callbacks = new Set();
-
-    constructor(public root: RootFlask | null | undefined) { }
 
     onEnded(handler?: Callback, options?: SchedulerOptions) {
         if (handler == null) {
@@ -87,7 +85,7 @@ export function inSceneSetup() {
 }
 
 export function sceneSetup(setUpScene: (scene: Scene) => void | Promise<void>) {
-    const scene = new Scene(getRootFlask());
+    const scene = new Scene();
     _startSetup(scene);
     const returnValue = setUpScene(scene);
     _resolveSetupEnd(scene, returnValue);
@@ -96,7 +94,7 @@ export function sceneSetup(setUpScene: (scene: Scene) => void | Promise<void>) {
 
 export function scenify<A extends any[]>(setUpScene: (scene: Scene, ...args: A) => void | Promise<void>) {
     return (...args: A) => {
-        const scene = new Scene(getRootFlask());
+        const scene = new Scene();
         _startSetup(scene);
         const returnValue = setUpScene(scene, ...args);
         _resolveSetupEnd(scene, returnValue);

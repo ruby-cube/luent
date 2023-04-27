@@ -1,21 +1,21 @@
 
 // [Param: stop] The cleanup function
 
-import { _rootFlaskClasses } from "../watch/RootFlasks";
-import { getFlask, getRootFlask } from "../watch/flask";
+import { _rootFlaskClasses } from "./RootFlasks";
 import { getScene } from "./Scene";
-import type { Callback, CallbackRemover, PendingCancelOp } from "./planify";
+import { getFlask, _getRootFlask } from "./flask";
+import type { Callback, CallbackRemover, PendingCancelOp } from "./flaskedListeners";
 
 // [Return] boolean to indicate whether cleanup was successfully scheduled
 // export let scheduleAutoCleanup: CleanupScheduler = () => { };
 export let schedulingAutoCleanup = false; // to prevent infinite loop of auto cleanup listener
-export let existingPendingAutoCleanup: PendingCancelOp | void | null;
+export let existingPendingAutoCleanup: PendingCancelOp[] | void | null;
 
-type CleanupScheduler = (stop: CallbackRemover<void>) => PendingCancelOp | void
+type CleanupScheduler = (stop: CallbackRemover<void>) => PendingCancelOp[] | void
 
 // export function defineAutoCleanup(cleanupScheduler: (stop: CallbackRemover<void>) => PendingCancelOp | void) {
 export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
-    if (_rootFlaskClasses.size === 0) return false;
+    if (_rootFlaskClasses.size === 0) return;
     schedulingAutoCleanup = true;
     const success = existingPendingAutoCleanup = cleanupScheduler(stop);
     schedulingAutoCleanup = false;
@@ -27,11 +27,20 @@ export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
 
 
 function cleanupScheduler(stop: CallbackRemover<void>) {
-    const flask = getScene() || getFlask();
-    const rootFlask = flask ? flask.root : getRootFlask();
-    if (rootFlask) {
-        return rootFlask.onDisposed(stop);
+    const scene = getScene();
+    const flask = getFlask();
+    const rootFlask = flask ? flask.root : scene ? null : _getRootFlask();
+    const pendingCancelOps = [];
+    if (scene) {
+        pendingCancelOps.push(scene.onEnded(stop));
     }
+    if (flask) {
+        pendingCancelOps.push(flask.onDisposed(stop));
+    }
+    if (rootFlask && rootFlask !== flask) {
+        pendingCancelOps.push(rootFlask.onDisposed(stop));
+    }
+    return pendingCancelOps;
 }
 
 

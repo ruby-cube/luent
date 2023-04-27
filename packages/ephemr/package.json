@@ -5,7 +5,7 @@
     "dependencies": {
         "@rue/pecherie": "workspace:*",
         "@rue/paravue": "workspace:*",
-        "@rue/planify": "workspace:*",
+        "@rue/flask": "workspace:*",
         "@rue/thread": "workspace:*"
     },
     "devDependencies": {
