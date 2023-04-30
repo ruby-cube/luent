@@ -1,9 +1,9 @@
 
 // [Param: stop] The cleanup function
 
-import { _rootFlaskClasses } from "./RootFlasks";
+import { _getCovertFlask } from "./CovertFlasks";
 import { getScene } from "./Scene";
-import { getFlask, _getRootFlask, Flask } from "./flask";
+import { getFlask, Flask, ReactivityFlask } from "./flask";
 import type { Callback, CallbackRemover, PendingCancelOp } from "./flaskedListeners";
 
 // [Return] boolean to indicate whether cleanup was successfully scheduled
@@ -15,7 +15,7 @@ type CleanupScheduler = (stop: CallbackRemover<void>) => PendingCancelOp[] | voi
 
 // export function defineAutoCleanup(cleanupScheduler: (stop: CallbackRemover<void>) => PendingCancelOp | void) {
 export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
-    // if (_rootFlaskClasses.size === 0) return;
+    // if (_covertFlaskClasses.size === 0) return;
     schedulingAutoCleanup = true;
     const success = existingPendingAutoCleanup = cleanupScheduler(stop);
     schedulingAutoCleanup = false;
@@ -30,7 +30,7 @@ export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
 //     const scene = getScene();
 //     const flask = getFlask();
 //     const flaskAttachedToOuter = flask && !(<Flask>flask).outlivesOuter
-//     const outerFlask = flask ? ("outerFlask" in flask ? flask.outerFlask : flask) : (scene ? null : _getRootFlask()); //TODO: I need to climb the tree scheduling autocleanups
+//     const outerFlask = flask ? ("outerFlask" in flask ? flask.outerFlask : flask) : (scene ? null : _getCovertFlask()); //TODO: I need to climb the tree scheduling autocleanups
 //     const pendingCancelOps = [];
 //     if (scene && (!flask || flaskAttachedToOuter)) {
 //         pendingCancelOps.push(scene.onEnded(stop));
@@ -50,9 +50,9 @@ export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
 function cleanupScheduler(stop: CallbackRemover<void>) {
     const pendingCancelOps = [] as PendingCancelOp[];
     const flask = getFlask();
-    const rootFlask = (<Flask>flask)?._root || getScene() || _getRootFlask();
+    const rootFlask = (<Flask>flask)?._root || getScene() || _getCovertFlask();
     let nestedFlask = null;
-    let currentFlask = flask || rootFlask;
+    let currentFlask: ReactivityFlask | null | undefined = flask || rootFlask;
     if (currentFlask) {
         do {
             pendingCancelOps.push(currentFlask.onDisposed(stop));

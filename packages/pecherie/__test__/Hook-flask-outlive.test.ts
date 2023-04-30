@@ -237,7 +237,7 @@ describe("flask with outlive option--should not be disposed when root flask is d
     });
 
 
-    test.only("CASE: Nested flask that outlives outerflask. With root flask. Root flask unmounts; with rootFlask.onDisposed()", () => {
+    test.only("CASE: Nested flask that outlives outerflask. With root flask. Root flask unmounts; with covertFlask.onDisposed()", () => {
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
         });
@@ -279,20 +279,20 @@ describe("flask with outlive option--should not be disposed when root flask is d
         //@ts-expect-error
         const unmountedCallbacks = onTestUnmounted.handlers
 
-        const useNestedFlask = enflask((flask, outerFlask, outerScopeRootFlask) => {
+        const useNestedFlask = enflask((flask, outerFlask, outerScopeCovertFlask) => {
             onTestCaseD(cb, {until: onTestCaseC});
         }, OUTLIVE);
 
         settingUp = true;
-        const flask = flaskSetup((flask, rootFlask) => {
+        const flask = flaskSetup((flask, covertFlask) => {
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
 
-            useNestedFlask(rootFlask);
+            useNestedFlask(covertFlask);
 
             onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
             onTestCaseC(() => flask.dispose());
-            rootFlask.onDisposed(cbD) // adds 2 callbacks to unmounted; cbD and also to cancel
+            covertFlask.onDisposed(cbD) // adds 2 callbacks to unmounted; cbD and also to cancel
             return flask;
         })
         settingUp = false;

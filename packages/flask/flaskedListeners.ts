@@ -3,7 +3,7 @@ import { makeActiveListener } from "./ActiveListener";
 import { makePendingCancelOp } from "./PendingCancelOp";
 import { makePendingOp, PendingOp } from "./PendingOp";
 import { existingPendingAutoCleanup, scheduleAutoCleanup, schedulingAutoCleanup } from "./scheduleAutoCleanup";
-import { existingPendingSceneCleanup, scheduleSceneCleanup, schedulingSceneCleanup } from "./scheduleSceneCleanup";
+import { existingPendingSceneCleanup, scheduleSceneCleanup, schedulingSceneCleanup } from "./x_scheduleSceneCleanup";
 import { sceneSetup } from "./Scene";
 
 

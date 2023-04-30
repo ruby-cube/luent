@@ -3,17 +3,18 @@
 import { $schedule, Callback, Callbacks, PendingCancelOp, PendingOp, SchedulerOptions } from "../flask";
 import { noop, run } from "@rue/utils";
 import { computed$ } from "../signals/computed";
-import { RootFlask, _rootFlaskClasses } from "./RootFlasks";
+import { CovertFlask, _covertFlaskConfigs, _getCovertFlask } from "./CovertFlasks";
 import { Scene, getScene } from "./Scene";
 import { registerGlobalResetter } from "../dev/__resetGlobals";
 
 
 export type ReactivityFlask = {
     onDisposed: (cb: () => void) => PendingCancelOp;
+    after: (promise: Promise<any>) => Promise<unknown[]>;
 }
 
 
-// If an async flask calls _getRootFlask() after an await, should it be able to access the original root flask? or should it return null?
+// If an async flask calls _getCovertFlask() after an await, should it be able to access the original root flask? or should it return null?
 // should root flasks cleanup async flasks?
 
 let activeFlaskSetup: Flask | null | undefined = null;
@@ -26,33 +27,14 @@ export function getFlask() {
 }
 
 export function getOuterFlask() {
-    return (<Flask>activeFlaskSetup)?._outerFlask || getRootFlask();
+    return (<Flask>activeFlaskSetup)?._outerFlask || getCovertFlask();
 }
 
-export function getRootFlask() {
-    return (<Flask>activeFlaskSetup)?._root || _getRootFlask();
+export function getCovertFlask() {
+    return (<Flask>activeFlaskSetup)?._root || _getCovertFlask();
 }
 
 
-export function _getRootFlask() {
-    for (const [targetGetter, RootFlask] of _rootFlaskClasses) {
-        const target = targetGetter();
-        if (target) {
-            return new RootFlask(target) as RootFlask; // creates a new rootFlask for all nested flasks... not ideal, but its currently too much of a headache to create a map and rootFlask.onDisposed(()=>map.delete(target)) cuz it messes up all my tests :(
-        }
-    }
-    return activeFlaskSetup;
-}
-
-export function _inRootSetup() {
-    for (const [targetGetter] of _rootFlaskClasses) {
-        const target = targetGetter();
-        if (target) {
-            return !!target;
-        }
-    }
-    return !!activeFlaskSetup;
-}
 
 
 
@@ -60,10 +42,10 @@ export function _inRootSetup() {
 export class Flask implements ReactivityFlask {
     private disposalHandlers: Callbacks = new Set();
     _outerFlask: Flask | undefined | null;
-    _root: Flask | RootFlask | Scene | undefined | null;
+    _root: Flask | CovertFlask | Scene | undefined | null;
     outlivesOuter: boolean | undefined;
     constructor(
-        root: Flask | RootFlask | Scene | undefined | null, // not sure what this would be used for
+        root: Flask | CovertFlask | Scene | undefined | null, // not sure what this would be used for
         outerFlask: Flask | null | undefined, // not sure what this would be used for
         outlivesOuter: boolean | undefined
     ) {
@@ -203,7 +185,7 @@ function _resolveSetupEnd(flask: Flask, returnValue: any) {
 export const OUTLIVE = true;
 
 export function flaskSetup<T extends any | Promise<any>>(setUpFlask: (flask: Flask, outerFlask: ReactivityFlask) => T, outlivesOuter?: boolean) {
-    const root = getScene() || _getRootFlask();
+    const root = getScene() || _getCovertFlask();
     const outerFlask = activeFlaskSetup;
     // if (!outerFlask) throw new Error("useFlask must be called during scene setup or component setup");
     const flask = new Flask(root, outerFlask, outlivesOuter);
@@ -215,11 +197,11 @@ export function flaskSetup<T extends any | Promise<any>>(setUpFlask: (flask: Fla
 
 export function enflask<A extends any[], T extends any | Promise<any>>(setUpFlask: (flask: Flask, outerFlask: ReactivityFlask, ...args: A) => T, outlivesOuter?: boolean) {
     return (...args: A) => {
-        const root = getScene() || _getRootFlask();
+        const root = getScene() || _getCovertFlask();
         console.log("enflask root", root)
         const outerFlask = activeFlaskSetup;
         console.log("outerFlask??", outerFlask)
-        // if (!rootFlask) throw new Error("useFlask must be called during scene setup or component setup");
+        // if (!covertFlask) throw new Error("useFlask must be called during scene setup or component setup");
         const flask = new Flask(root, outerFlask, outlivesOuter);
         console.log("start nested______________________________")
         _startSetup(flask);

@@ -1,17 +1,15 @@
 import { PendingOp } from "./PendingOp";
-import { RootFlask, RootFlaskConfig, _declareRootFlaskClasses } from "./RootFlasks"
-import { ActiveListener } from "./flaskedListeners";
+import { CovertFlask, CovertFlaskConfig, _setCovertFlaskConfigs, } from "./CovertFlasks"
+import { Callback } from "./flaskedListeners";
 
 export function initFlask(config: {
-    covertFlasks: ({
-        setupChecker: () => boolean;
-        autoCleanupScheduler: (cleanup: () => void) => PendingOp | ActiveListener;
-    } | {
+    covertFlasks: {
         targetGetter: () => any;
-        autoCleanupScheduler: (this: RootFlask, cleanup: () => void) => PendingOp | ActiveListener;
-    })[]
+        onSetupEnd: (this: CovertFlask, callback: Callback) => any;
+        autoCleanupScheduler: (this: CovertFlask, cleanup: () => void) => PendingOp;
+    }[]
 }) {
-    _declareRootFlaskClasses(config.covertFlasks);
+    _setCovertFlaskConfigs(config.covertFlasks);
 }
 
 

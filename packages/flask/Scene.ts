@@ -1,9 +1,9 @@
 //@ts-nocheck
 import { $schedule, Callback, Callbacks, markSceneSetup, OneTimeListener, ScheduledOp, SchedulerOptions } from './flaskedListeners';
 import { noop, run } from "@rue/utils";
-import { registerSceneCleanup } from './scheduleSceneCleanup';
-import { RootFlask } from './RootFlasks';
-import { _getRootFlask, _inRootSetup, getFlask } from './flask';
+import { registerSceneCleanup } from './x_scheduleSceneCleanup';
+import { CovertFlask } from './CovertFlasks';
+import { _getCovertFlask, _inCovertFlaskSetup, getFlask } from './flask';
 import { PendingOp } from './PendingOp';
 import { onMounted } from 'vue';
 
@@ -100,7 +100,7 @@ export function inSceneSetup() {
 }
 
 function throwNoNestedScenes() {
-    if (getScene() || getFlask() || _inRootSetup()) throw new Error("Scene cannot be nested in another flask, scene, or setup")
+    if (getScene() || getFlask() || _inCovertFlaskSetup()) throw new Error("Scene cannot be nested in another flask, scene, or setup")
 }
 
 export function sceneSetup(setUpScene: (scene: Scene) => void | Promise<void>) {
