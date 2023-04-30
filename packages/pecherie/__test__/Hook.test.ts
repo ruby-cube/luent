@@ -389,7 +389,7 @@ describe("sustained listeners run until stopped", () => {
         //     }
         // })
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: ()=>settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
@@ -438,7 +438,7 @@ describe("sustained listeners run until stopped", () => {
         //     }
         // })
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: ()=>settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]

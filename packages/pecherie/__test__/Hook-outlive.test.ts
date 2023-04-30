@@ -36,7 +36,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
         //     }
         // })
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
@@ -85,7 +85,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
         //     }
         // })
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]

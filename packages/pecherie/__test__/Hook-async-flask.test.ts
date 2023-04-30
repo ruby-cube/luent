@@ -29,7 +29,7 @@ describe("async flask", () => {
         });
         let settingUp = false;
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]

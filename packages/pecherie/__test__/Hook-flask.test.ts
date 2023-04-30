@@ -22,7 +22,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         });
         let settingUp = false;
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
@@ -98,7 +98,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         });
         let settingUp = false;
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
@@ -179,7 +179,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         });
         let settingUp = false;
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
@@ -257,7 +257,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         });
         let settingUp = false;
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
@@ -334,7 +334,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         });
         let settingUp = false;
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
@@ -715,7 +715,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         });
         let settingUp = false;
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]

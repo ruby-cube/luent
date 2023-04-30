@@ -23,7 +23,7 @@ describe("Autocleanup of scenes", () => {
         // })
 
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: isMakingModel,
                 autoCleanupScheduler: onDestroyed
             }]

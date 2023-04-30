@@ -23,7 +23,7 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         // })
 
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
@@ -70,7 +70,7 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
         });
         let settingUp = false;
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]

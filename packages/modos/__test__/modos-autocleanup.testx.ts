@@ -17,7 +17,7 @@ describe("Autocleanup in modo system", () => {
     test("CASE: inside $construct", () => {
         __$initDepotModule();
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: isMakingModel,
                 autoCleanupScheduler: onDestroyed
             }]

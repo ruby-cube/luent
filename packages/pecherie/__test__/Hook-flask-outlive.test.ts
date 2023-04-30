@@ -19,7 +19,7 @@ describe("flask with outlive option--should not be disposed when root flask is d
         });
         let settingUp = false;
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]
@@ -243,7 +243,7 @@ describe("flask with outlive option--should not be disposed when root flask is d
         });
         let settingUp = false;
         initFlask({
-            rootFlasks: [{
+            covertFlasks: [{
                 setupChecker: () => settingUp,
                 autoCleanupScheduler: onTestUnmounted
             }]

@@ -1,10 +1,11 @@
-//-@ts-nocheck
+//@ts-nocheck
 import { $schedule, Callback, Callbacks, markSceneSetup, OneTimeListener, ScheduledOp, SchedulerOptions } from './flaskedListeners';
 import { noop, run } from "@rue/utils";
 import { registerSceneCleanup } from './scheduleSceneCleanup';
 import { RootFlask } from './RootFlasks';
 import { _getRootFlask, _inRootSetup, getFlask } from './flask';
 import { PendingOp } from './PendingOp';
+import { onMounted } from 'vue';
 
 // export type Scene = {
 //     end: () => void;
@@ -98,7 +99,7 @@ export function inSceneSetup() {
     return Boolean(activeSceneSetup);
 }
 
-function throwNoNestedScenes(){
+function throwNoNestedScenes() {
     if (getScene() || getFlask() || _inRootSetup()) throw new Error("Scene cannot be nested in another flask, scene, or setup")
 }
 
@@ -111,7 +112,7 @@ export function sceneSetup(setUpScene: (scene: Scene) => void | Promise<void>) {
     return scene; // for testing convenience
 }
 
-export function scenify<A extends any[]>(setUpScene: (scene: Scene, ...args: A) => void | Promise<void>) {
+export function enscene<A extends any[]>(setUpScene: (scene: Scene, ...args: A) => void | Promise<void>) {
     return (...args: A) => {
         if (__DEV__) throwNoNestedScenes();
         const scene = new Scene();
@@ -135,7 +136,46 @@ function _resolveSetupEnd(scene: Scene, returnValue: any) {
     }
 }
 
-// const reMouseDown = scenify((scene: Scene, event: MouseEvent) => {
+
+
+
+
+// const [result, error] = await after(
+//     onMouseDown(() => {
+//         //do something
+//     }, { unlessCanceled: (cancel) => onMounted(cancel) })
+// );
+
+// if (error) {
+//     throw new Error(error);
+// }
+// else if (result === 0) {
+//     result;
+// }
+
+
+
+// try {
+//     const result = await onMouseDown(() => {
+//         //do something
+//     }, { unlessCanceled: (cancel) => onMounted(cancel) });
+
+//     if (result === 0) {
+//         result;
+//     };
+// }
+// catch (err) {
+//     throw new Error(error);
+// }
+
+// const pendingMouseOp = onMouseDown(() => {
+//     // do soemthing
+// }, { unlessCanceled: (cancel) => onMounted(cancel) });
+
+// const [result, error] = await after(pendingMouseOp);
+
+
+// const reMouseDown = enscene((scene: Scene, event: MouseEvent) => {
 
 
 // })
@@ -159,19 +199,6 @@ function _resolveSetupEnd(scene: Scene, returnValue: any) {
 
 
 
-export function defineScene<CB extends (context: any, scene: Scene) => any>(cb: CB) {
-    return (context: Parameters<CB>[0]) => {
-        sceneSetup((scene) => {
-            cb(context, scene);
-        })
-    }
-}
-
-
-const reMouse = defineScene((event: MouseEvent, scene) => {
-
-
-})
 
 
 // //USAGE:

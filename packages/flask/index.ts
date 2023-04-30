@@ -1,4 +1,4 @@
-export { $listen, $schedule, $subscribe, $lifetime, $tilStop, $outlive, initAutoCleanup, initSceneAutoCleanup } from "./flaskedListeners"
+export { $listen, $schedule, $subscribe, $lifetime, $tilStop, $outlive, initAutoCleanup } from "./flaskedListeners"
 export { initFlask } from "./initFlask"
 export { genTargetID } from "./targetID"
 export {inSceneSetup} from "./Scene"

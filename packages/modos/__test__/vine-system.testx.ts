@@ -60,7 +60,7 @@ describe("vine system", () => {
     //   }
     // })
     initFlask({
-      rootFlasks: [{
+      covertFlasks: [{
         setupChecker: isMakingModel,
         autoCleanupScheduler: onDestroyed
       },

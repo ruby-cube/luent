@@ -3,7 +3,7 @@ import { RootFlask, RootFlaskConfig, _declareRootFlaskClasses } from "./RootFlas
 import { ActiveListener } from "./flaskedListeners";
 
 export function initFlask(config: {
-    rootFlasks: ({
+    covertFlasks: ({
         setupChecker: () => boolean;
         autoCleanupScheduler: (cleanup: () => void) => PendingOp | ActiveListener;
     } | {
@@ -11,12 +11,12 @@ export function initFlask(config: {
         autoCleanupScheduler: (this: RootFlask, cleanup: () => void) => PendingOp | ActiveListener;
     })[]
 }) {
-    _declareRootFlaskClasses(config.rootFlasks);
+    _declareRootFlaskClasses(config.covertFlasks);
 }
 
 
 // initFlask({
-//     rootFlasks: [
+//     covertFlasks: [
 //         {
 //         }
 
