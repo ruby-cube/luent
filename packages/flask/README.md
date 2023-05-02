@@ -271,6 +271,7 @@ onMouseUp(document, () => {
     mouseMoveListener.stop();
 });
 ```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 **One-time listeners** return a `PendingOp` object, which is a cancellable `Promise`. If canceled, the handler will never run.
 
