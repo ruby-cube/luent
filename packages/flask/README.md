@@ -340,7 +340,6 @@ Conversely, subscriptions are sustained listeners that cannot morph into a one-t
 A key feature of this library is the ability to perform batch cleanups. This is achieved through the concept of flasked scopes, or flasks. A flask collects listeners and reactive effects that are registered during its setup and performs cleanup upon its disposal. This all happens under the hood so as not to clutter application code.
 
 There are three distinct types of flasks: 
-
 - covert flasks
 - scenes
 - nestable flasks
