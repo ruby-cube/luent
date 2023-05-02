@@ -344,6 +344,8 @@ There are three distinct types of flasks:
 - scenes
 - nestable flasks
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ### **Covert Flasks**
 
 Covert flasks are the vessels for automatic batch cleanup. Any entity that is instantiated through some sort of setup or constructor function and which exposes a setup end hook as well as a lifecycle end hook (e.g. `onUnmounted`, `onDestroyed`, etc) can serve as a covert flask. The lifecycle hook must be made into a flasked listener (or at least return an object that implements the `PendingOp` interface). Note that these requirements exclude Vue Options API components.
@@ -389,6 +391,7 @@ export default defineComponent({
     }
 })
 ```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ### Scenes
 
@@ -452,6 +455,7 @@ onMouseDown(document, enscene((drawing, event) => {
 ```
 
 Scenes are useful for sharing state across the handlers of event flows like [ mouse down —> mouse move —> mouse up ] or [ key down —> before input —> input ].
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ### Nestable Flasks
 
