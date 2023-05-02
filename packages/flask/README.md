@@ -626,6 +626,8 @@ initFlask({
 
 `initFlask(config)`
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## `initFlask(config)`
 
 ### Syntax
@@ -785,6 +787,8 @@ onMouseDown(document, enscene((drawing, event) => {
 
 `enflask(setUpFlask)`
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## `flaskSetup(setUpFlask)`
 
 ### Syntax
@@ -906,13 +910,13 @@ const useTable = enflask((flask) => {
 
 ## Flasked Listeners API
 
+The functions provided by [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top), [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top), [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top), and [Paravue](https://github.com/ruby-cube/rue/tree/main/packages/paravue#readme-top) should cover most use cases. However, if you would like to flasking an existing listener or scheduler, Flask provides the `$listen`, `$schedule`, and `$subscribe` functions to acheive this.
+
 `$listen(handler, options, config)`
 
 `$schedule(callback, options, config)`
 
 `$subscribe(handler, options, config)`
-
-The functions provided by [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top), [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top), [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top), and [Paravue](https://github.com/ruby-cube/rue/tree/main/packages/paravue#readme-top) should cover most use cases. However, if you would like to planify an existing listener or scheduler, Planify provides the `$listen`, `$schedule`, and `$subscribe` functions to acheive this.
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
@@ -1065,7 +1069,7 @@ Flask prevents memory leaks with three main approaches:
 
 ### Memory Leak Warnings
 
-Unless the developer is impeccably conscientious about cleanup, memory leaks will inevitably creep into your system when using event listeners. As an additional guard against memory leaks, Planify will log a warning during development if it does not detect a cleanup strategy in place for a listener.
+Unless the developer is impeccably conscientious about cleanup, memory leaks will inevitably creep into your system when using event listeners. As an additional guard against memory leaks, Flask will log a warning during development if it does not detect a cleanup strategy in place for a listener.
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
