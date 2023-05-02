@@ -255,6 +255,8 @@ Flasked listeners can be obtained through several ways:
 - the Thread library, which provides flasked schedulers and flasked user event listeners from Web API
 - the Watch library, which provides flasked versions of Vue’s watch, watchEffect, and computed
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ### One-time listener vs Sustained listener
 
 There are two main types of flasked listeners: one-time listeners and sustained listeners. As their names suggest, one-time listeners will listen at most once (i.e. the handler can run no more than one time) and the sustained listeners will continue to listen so long as the listener remains active (i.e. the handler will run every time the event or hook is emitted).
@@ -271,7 +273,6 @@ onMouseUp(document, () => {
     mouseMoveListener.stop();
 });
 ```
-<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 **One-time listeners** return a `PendingOp` object, which is a cancellable `Promise`. If canceled, the handler will never run.
 
