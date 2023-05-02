@@ -1,6 +1,6 @@
 <nav><a id="readme-top" href="#"><b>goto: src</b></a></nav>
 
-[@rue](https://github.com/ruby-cube/rue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp;  **Flask**  &nbsp;&nbsp;|&nbsp; &nbsp; [thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; [pecherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; [archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top)
+[@rue](https://github.com/ruby-cube/rue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp;  **flask**  &nbsp;&nbsp;|&nbsp; &nbsp; [thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; [pecherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; [archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top)
 # Flask ⚗️
 
 <aside>
@@ -15,9 +15,13 @@ Event-driven programming is a useful paradigm that enables loose-coupling, prope
 
 Flask offers a developer-friendly event system where listeners and reactive effects are contained in “flasks” for easy cleanup, allowing application code to be more clean, readable, and less prone to memory leaks.
 
+<p align="right"><a href="#">[src]</a></p>
+
 ## Inspiration & Motivation
 
 The library is very much inspired by my experiences with Vue.js and its thoughtful design. The auto-cleanup in Flask comes straight out of the desire to implement Vue’s auto-cleanup of reactive effects, but for event listeners. The concept of batching cleanup of reactive effects and nested effect scopes comes from Anthony Fu’s `effectScope` RFC proposal. Lastly, the idea of resuming effect scopes comes from Jods’ Async Setup RFC proposal.
+
+<p align="right"><a href="#">[src]</a></p>
 
 ## Table of Contents
 
@@ -41,10 +45,13 @@ The library is very much inspired by my experiences with Vue.js and its thoughtf
 - Enflask API
 - Memory Leak Prevention
 - Planned Features
+<p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Examples
 
 (Note that the event listeners in the examples below are not directly provided by Flask. They are examples of “flasked listeners” created using Flask’s API. Note also: the Flask cleanup system will only work with flasked listeners. For how to create or obtain flasked listeners, see Flasked Listeners. Lastly, these examples do not represent real use cases; they were fabricated for demonstration purposes.)
+
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ### Individual Cleanup with Flasked Listeners
 
@@ -86,6 +93,7 @@ onMouseUp(document, () => {
     mouseMoveListener.stop();
 }, { once: true });
 ```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ### Batch Cleanup with Flasks
 
@@ -217,8 +225,7 @@ function initDrag(event){
 <!-- SFC template -->
 <div @mousedown="initDrag">item</div>
 ```
-
-## Concepts
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Flasked Listener
 
@@ -282,7 +289,7 @@ const result = await pendingOp;
 
 Note: The `cancel` method will not survive a `.then` chain. This is by design. Since the return of a `.then` chain is too easily mistaken for the return of the first call rather than the last call of the chain, it is preferred to save the `PendingOp` to a variable before chaining or awaiting if you need to call the cancel method.
 
-[[toc]](https://github.com/ruby-cube/rue/tree/main/packages/planify#table-of-contents)
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ### Listener Morphing
 
@@ -310,7 +317,7 @@ Sustained listeners can also morph into a one-time listener if it is passed into
 
 To create a morphable listener, use `$listen` from the Flasked Listeners API.
 
-[[toc]](https://github.com/ruby-cube/rue/tree/main/packages/planify#table-of-contents)
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ### Schedulers
 
@@ -321,6 +328,8 @@ To create a scheduler, use `$schedule` from the Flasked Listeners API.
 ### Subscriptions
 
 Conversely, subscriptions are sustained listeners that cannot morph into a one-time listener. To create subscription functions, use `$subscribe` from the Flasked Listeners API.
+
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Flasks
 
@@ -378,7 +387,7 @@ export default defineComponent({
 })
 ```
 
-### **Scenes**
+### Scenes
 
 A scene is essentially an impromptu covert flask, useful for automatic batch cleanup of listeners that are registered within an event handler instead of, say, a component setup function.
 
@@ -441,7 +450,7 @@ onMouseDown(document, enscene((drawing, event) => {
 
 Scenes are useful for sharing state across the handlers of event flows like [ mouse down —> mouse move —> mouse up ] or [ key down —> before input —> input ].
 
-**Nestable Flasks**
+### Nestable Flasks
 
 A nestable flask can be created within any other flask or serve as a root flask itself. This allows for more fine-grained control over when listeners are disposed of: a nested flask can be disposed of earlier than its outer flask or even outlive its outer flask. 
 
@@ -508,6 +517,8 @@ const useTable = enflask((flask) => {
 
 Nestable flasks are useful for managing shared state across multiple usages of a composable—initiating shared state when there is at least one usage and cleaning up the state when no longer used.
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ## Outlive
 
 Just as a nestable flask can outlive its outer flask, a listener can outlive its containing flask by configuring the options argument with the `$outlive` constant.
@@ -525,6 +536,7 @@ export default defineComponent({
     }
 });
 ```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## **Asynchronous Listener registration**
 
@@ -601,6 +613,7 @@ initFlask({
     }]
 });
 ```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Flask API
 
@@ -642,12 +655,15 @@ initFlask({
     }]
 });
 ```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Scene API
 
 `sceneSetup(setUpScene)`
 
 `enscene(setUpScene)`
+
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## `sceneSetup(setUpScene)`
 
@@ -706,6 +722,7 @@ function initDrag(event){
 <!-- SFC template -->
 <div @mousedown="initDrag">item</div>
 ```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## `enscene(setUpScene)`
 
@@ -753,6 +770,7 @@ onMouseDown(document, enscene((drawing, event) => {
     });
 });
 ```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Enflask API
 
@@ -819,6 +837,7 @@ function useTable() {
     }, OUTLIVE);
 }
 ```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## `enflask(setUpFlask)`
 
@@ -876,6 +895,7 @@ const useTable = enflask((flask) => {
     return { /* ... */ };
 });
 ```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Flasked Listeners API
 
@@ -885,11 +905,148 @@ const useTable = enflask((flask) => {
 
 `$subscribe(handler, options, config)`
 
-## `$listen(handler, options, config)`
+The functions provided by [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top), [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top), [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top), and [Paravue](https://github.com/ruby-cube/rue/tree/main/packages/paravue#readme-top) should cover most use cases. However, if you would like to planify an existing listener or scheduler, Planify provides the `$listen`, `$schedule`, and `$subscribe` functions to acheive this.
 
-## `$schedule(callback, options, config)`
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `$subscribe(handler, options, config)`
+### `$listen(handler, options, config)`
+Sets up a listener. Depending on options and config, this could behave as a one-time listener or a sustained listener.
+
+#### Syntax
+```ts
+const activeListener = $listen(handler, options, config)
+        |                        |         |        |
+ PendingOp | ActiveListener   Handler      |   ListenerConfig
+                                     ListenerOptions
+```
+
+#### Type Definitions
+```ts
+type ListenerConfig = {
+    enroll: (handler) => void, 
+    remove: (handlerOrReturnVal) => void, 
+    onceAsDefault?: true | undefined
+}
+```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
+### `$schedule(handler, options, config)`
+Sets up a one-time listener.
+
+#### Syntax
+```ts
+const pendingOp = $schedule(handler, options, config)
+           |                  |         |        |
+      PendingOp            Handler      |   SchedulerConfig
+                                  ListenerOptions
+```
+
+#### Type Definitions
+```ts
+type SchedulerConfig = {
+    enroll: (handler) => void, 
+    remove: (handlerOrReturnVal) => void, 
+}
+
+type PendingOp = Promise<ReturnType<Handler>> & { cancel: () => void }
+```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
+### `$subscribe(handler, options, config)`
+Sets up a sustained listener.
+
+#### Syntax
+```ts
+const activeListener = $subscribe(handler, options, config)
+           |                        |         |        |
+        ActiveListener            Handler     |   SubscribeConfig
+                                       ListenerOptions
+```
+
+#### Type Definitions
+```ts
+type SubscribeConfig = {
+    enroll: (handler) => void, 
+    remove: (handlerOrReturnVal) => void, 
+}
+
+type ActiveListener = { stop: () => void }
+```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
+### Basic Usage
+
+The `enroll` and `remove` functions must define how a handler is registered and removed. Both functions are passed a wrapped handler (`cb` in the example). Note that you must pass the listener and remover the *wrapped handler*, not the original handler. If, for example, you would like to flask an Node.js EventEmitter event, you might write something like this:
+```ts
+// flasking a Node EventEmitter listener
+
+export function onDataReceived(handler, options?) {
+    return $listen(handler, options, {
+        enroll(cb) {
+            eventEmitter.on('data-received', cb); // pass in `cb`, not `handler`
+        },
+        remove(cb) {
+            eventEmitter.off('data-received', cb);  // pass in `cb`, not `handler`
+        }
+    });
+}
+```
+If the `enroll` function returns something other than `void`, the return value will be passed to the remove function instead of the wrapped handler.
+```ts
+// flasking a setTimeout
+
+export function onTimeout(delay, handler, options?) {
+    return $schedule(handler, options, {
+        enroll(cb) {
+            return setTimeout(cb, delay);
+        },
+        remove: clearTimeout
+    });
+}
+```
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
+### Advanced Usage
+
+To provide better developer experience for users of the listener/scheduler, use Typescript generics so that `$listen` and `$schedule` return the appropriate type based on the callback and options passed into it.
+
+```ts
+// flasking Vue's `watch`
+
+type Watch = typeof watch;
+
+export function onChange<
+CB extends Parameters<Watch>[1], 
+OPT extends ListenerOptions & WatchOptions,
+>(target: Parameters<Watch>[0], handler: CB, options?: OPT) {
+
+    return $listen(handler, options, {
+        enroll(cb) {
+            return watch(target, cb, options);
+        },
+        remove(unwatch) {
+            unwatch();
+        }
+    });
+}
+```
+
+```ts
+// flasking `requestAnimationFrame`
+
+export function beforeScreenPaint<
+CB extends Callback,
+OPT extends ListenerOptions
+>(handler: CB, options?: OPT) {
+
+    return $schedule(handler, options, {
+        enroll: requestAnimationFrame,
+        remove: cancelAnimationFrame
+    });
+}
+```
+
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Memory Leak Prevention
 
@@ -902,6 +1059,8 @@ Flask prevents memory leaks with three main approaches:
 ### Memory Leak Warnings
 
 Unless the developer is impeccably conscientious about cleanup, memory leaks will inevitably creep into your system when using event listeners. As an additional guard against memory leaks, Planify will log a warning during development if it does not detect a cleanup strategy in place for a listener.
+
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Planned Features
 
