@@ -3,7 +3,7 @@ import { vi, expect, describe, test, beforeEach } from "vitest";
 import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
 import { Callback, Callbacks, initFlask } from "../../flask";
-import { Flask, OUTLIVE, enflask, flaskSetup } from "../../flask/flask";
+import { NestableFlask, OUTLIVE, enflask, flaskSetup } from "../../flask/flask";
 import { __resetGlobals } from "../../dev/__resetGlobals";
 
 // cleanup cleanups if alternative cleanup strategy run
@@ -129,7 +129,7 @@ describe("flask with outlive option--should not be disposed when root flask is d
         const testCallbacksD = onTestCaseD.handlers
 
         let scene: Scene
-        let flask: Flask;
+        let flask: NestableFlask;
         sceneSetup((_scene) => {
             scene = _scene;
             flask = flaskSetup((flask) => {
@@ -175,7 +175,7 @@ describe("flask with outlive option--should not be disposed when root flask is d
     });
 
 
-    test("CASE: No root flask. Flask is disposed. Outlive root should have no effect", () => {
+    test("CASE: No root flask. NestableFlask is disposed. Outlive root should have no effect", () => {
 
         const [castTestCaseA, onTestCaseA] = createHook({
             hook: "test-hook-A",

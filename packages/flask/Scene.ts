@@ -3,7 +3,7 @@ import { $schedule, Callback, Callbacks, markSceneSetup, OneTimeListener, Schedu
 import { noop, run } from "@rue/utils";
 import { registerSceneCleanup } from './x_scheduleSceneCleanup';
 import { CovertFlask } from './CovertFlasks';
-import { _getCovertFlask, _inCovertFlaskSetup, getFlask } from './flask';
+import { getCovertFlask, _inCovertFlaskSetup, getFlask } from './flask';
 import { PendingOp } from './PendingOp';
 import { onMounted } from 'vue';
 

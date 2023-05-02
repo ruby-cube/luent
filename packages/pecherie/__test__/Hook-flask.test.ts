@@ -4,7 +4,7 @@ import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
 import { $type } from "@rue/utils";
 import { Callback, Callbacks, initFlask } from "../../flask";
-import { Flask, enflask, flaskSetup, getFlask, getOuterFlask, getCovertFlask } from "../../flask/flask";
+import { NestableFlask, enflask, flaskSetup, getFlask, getOuterFlask, getCovertFlask } from "../../flask/flask";
 import { __resetGlobals } from "../../dev/__resetGlobals";
 
 // cleanup cleanups if alternative cleanup strategy run
@@ -172,7 +172,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
     });
 
 
-    test("CASE: With root flask. Flask is disposed", () => {
+    test("CASE: With root flask. NestableFlask is disposed", () => {
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
             // onceAsDefault: true,
@@ -250,7 +250,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
     });
 
 
-    test("CASE: With root flask. Flask is disposed via event", () => {
+    test("CASE: With root flask. NestableFlask is disposed via event", () => {
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
             // onceAsDefault: true,
@@ -404,7 +404,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
     });
 
 
-    test("CASE: No root flask. Flask is disposed", () => {
+    test("CASE: No root flask. NestableFlask is disposed", () => {
 
         const [castTestCaseA, onTestCaseA] = createHook({
             hook: "test-hook-A",
@@ -499,7 +499,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         //@ts-expect-error
         const testCallbacksC = onTestCaseC.handlers
 
-        let flask: Flask;
+        let flask: NestableFlask;
         sceneSetup((scene) => {
             flask = flaskSetup((flask) => {
                 onTestCaseA(cb, { until: onTestCaseC });
@@ -536,7 +536,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         expect(cbB).toHaveBeenCalledTimes(2);
     });
 
-    test("CASE: Scene as root flask. Flask is disposed", () => {
+    test("CASE: Scene as root flask. NestableFlask is disposed", () => {
 
         const [castTestCaseA, onTestCaseA] = createHook({
             hook: "test-hook-A",
@@ -571,7 +571,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         const endItAllHandlers = onEndItAll.handlers
 
 
-        let flask: Flask;
+        let flask: NestableFlask;
         let scene: Scene;
         sceneSetup((_scene) => {
             scene = _scene
@@ -625,7 +625,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
     });
 
 
-    test("CASE: Enflask. Scene as root flask. Flask is disposed", () => {
+    test("CASE: Enflask. Scene as root flask. NestableFlask is disposed", () => {
 
         const [castTestCaseA, onTestCaseA] = createHook({
             hook: "test-hook-A",
@@ -659,7 +659,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         //@ts-expect-error
         const endItAllHandlers = onEndItAll.handlers
 
-        let flask: Flask;
+        let flask: NestableFlask;
         const useEnflaskedTest = enflask((_flask) => {
             flask = _flask;
             onTestCaseA(cb, { until: onTestCaseC });

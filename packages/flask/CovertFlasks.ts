@@ -1,22 +1,19 @@
 import { ActiveListener, Callback, PendingCancelOp, PendingOp } from ".";
-import { getCurrentInstance } from "vue";
-import { ReactivityFlask } from "./flask";
+import { Flask } from "./flask";
 import { registerGlobalResetter } from "../dev/__resetGlobals";
 
 
 
-export class CovertFlask implements ReactivityFlask {
-    target: any
+export class CovertFlask implements Flask {
+    entity: any
     onDisposed: (this: CovertFlask, cb: () => void) => PendingCancelOp;
-    onSetupEnd: (this: CovertFlask, callback: Callback) => any;
-    constructor(target: any, private targetGetter: () => any, autoCleanupScheduler: (this: CovertFlask, cb: () => void) => PendingCancelOp, onSetupEnd: (this: CovertFlask, callback: Callback) => any) {
-        this.target = target;
+    constructor(entity: any, private entityGetter: () => any, autoCleanupScheduler: (this: CovertFlask, cb: () => void) => PendingCancelOp) {
+        this.entity = entity;
         this.onDisposed = autoCleanupScheduler;
-        this.onSetupEnd = onSetupEnd
     }
     async after<T>(promise: Promise<T>) {
         if (__DEV__) {
-            if (this.targetGetter() !== this.target || activeCovertFlask !== this) {
+            if (this.entityGetter() !== this.entity || activeCovertFlask !== this) {
                 throw new Error(`covertFlask.after() called outside of covert flask setup.`)
             }
         }
@@ -35,14 +32,12 @@ export class CovertFlask implements ReactivityFlask {
 }
 
 export type CovertFlaskConfig = {
-    targetGetter: () => any;
-    onSetupEnd: (this: CovertFlask, callback: Callback) => any;
+    entityGetter: () => any;
     autoCleanupScheduler: (this: CovertFlask, callback: Callback) => PendingOp;
 };
 
 export type CovertFlaskConfigs = {
-    targetGetter: () => any;
-    onSetupEnd: (this: CovertFlask, callback: Callback) => any;
+    entityGetter: () => any;
     autoCleanupScheduler: (this: CovertFlask, callback: Callback) => PendingOp;
 }[];
 
@@ -50,7 +45,7 @@ export type CovertFlaskConfigs = {
 
 // _registerCovertFlasks([ 
 //     {
-//         targetGetter: getCurrentInstance,
+//         entityGetter: getCurrentInstance,
 //         autoCleanupScheduler(this: CovertFlask, cleanup: () => void) {
 //             return onComponentUnmounted(cleanup, { target: this.target })
 //         }
@@ -71,12 +66,7 @@ export type CovertFlaskConfigs = {
 // export const _covertFlaskClasses = new Map();
 
 
-// export function _declareCovertFlaskClasses(covertFlaskConfigs: CovertFlaskConfigs) {
-//     for (const { targetGetter, onSetupEnd, autoCleanupScheduler } of covertFlaskConfigs) {
 
-//         _covertFlaskClasses.set(targetGetter, _CovertFlask);
-//     }
-// }
 
 //NOTE: Because activeCovertFlask is not set at the start of setup or unset at the end of setup, 
 // it should not be used to check for the activeCovertFlask. It's only used here to restore the covert flask
@@ -90,14 +80,13 @@ if (__TEST__) registerGlobalResetter(() => _covertFlaskConfigs = null)
 
 let activeCovertFlask: CovertFlask | null | undefined;
 
-export function _getCovertFlask() {
+export function getCovertFlask() {
     if (_covertFlaskConfigs)
-        for (const { targetGetter, onSetupEnd, autoCleanupScheduler } of _covertFlaskConfigs) {
-            const target = targetGetter();
-            if (target) {
-                if (activeCovertFlask?.target === target) return activeCovertFlask;
-                activeCovertFlask = new CovertFlask(target, targetGetter, onSetupEnd, autoCleanupScheduler) as CovertFlask;
-                activeCovertFlask.onSetupEnd(_closeSetup);
+        for (const { entityGetter, autoCleanupScheduler } of _covertFlaskConfigs) {
+            const entity = entityGetter();
+            if (entity) {
+                if (activeCovertFlask?.entity === entity) return activeCovertFlask;
+                activeCovertFlask = new CovertFlask(entity, entityGetter, autoCleanupScheduler) as CovertFlask;
                 return activeCovertFlask;
             }
             else {
@@ -108,9 +97,9 @@ export function _getCovertFlask() {
 
 export function _inCovertFlaskSetup() {
     if (_covertFlaskConfigs)
-        for (const { targetGetter } of _covertFlaskConfigs) {
-            const target = targetGetter();
-            if (target) {
+        for (const { entityGetter } of _covertFlaskConfigs) {
+            const entity = entityGetter();
+            if (entity) {
                 return true;
             }
             else {

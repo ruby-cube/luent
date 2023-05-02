@@ -1,9 +1,9 @@
 
 // [Param: stop] The cleanup function
 
-import { _getCovertFlask } from "./CovertFlasks";
+import { getCovertFlask } from "./CovertFlasks";
 import { getScene } from "./Scene";
-import { getFlask, Flask, ReactivityFlask } from "./flask";
+import { getFlask, NestableFlask, Flask } from "./flask";
 import type { Callback, CallbackRemover, PendingCancelOp } from "./flaskedListeners";
 
 // [Return] boolean to indicate whether cleanup was successfully scheduled
@@ -29,8 +29,8 @@ export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
 // function cleanupScheduler(stop: CallbackRemover<void>) {
 //     const scene = getScene();
 //     const flask = getFlask();
-//     const flaskAttachedToOuter = flask && !(<Flask>flask).outlivesOuter
-//     const outerFlask = flask ? ("outerFlask" in flask ? flask.outerFlask : flask) : (scene ? null : _getCovertFlask()); //TODO: I need to climb the tree scheduling autocleanups
+//     const flaskAttachedToOuter = flask && !(<NestableFlask>flask).outlivesOuter
+//     const outerFlask = flask ? ("outerFlask" in flask ? flask.outerFlask : flask) : (scene ? null : getCovertFlask()); //TODO: I need to climb the tree scheduling autocleanups
 //     const pendingCancelOps = [];
 //     if (scene && (!flask || flaskAttachedToOuter)) {
 //         pendingCancelOps.push(scene.onEnded(stop));
@@ -50,21 +50,21 @@ export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
 function cleanupScheduler(stop: CallbackRemover<void>) {
     const pendingCancelOps = [] as PendingCancelOp[];
     const flask = getFlask();
-    const rootFlask = (<Flask>flask)?._root || getScene() || _getCovertFlask();
+    const rootFlask = (<NestableFlask>flask)?._root || getScene() || getCovertFlask();
     let nestedFlask = null;
-    let currentFlask: ReactivityFlask | null | undefined = flask || rootFlask;
+    let currentFlask: Flask | null | undefined = flask || rootFlask;
     if (currentFlask) {
         do {
             pendingCancelOps.push(currentFlask.onDisposed(stop));
             nestedFlask = currentFlask;
-            currentFlask = (<Flask>currentFlask)._outerFlask || (currentFlask !== rootFlask ? rootFlask : null);
-        } while (currentFlask && isAttached(<Flask>nestedFlask))
+            currentFlask = (<NestableFlask>currentFlask)._outerFlask || (currentFlask !== rootFlask ? rootFlask : null);
+        } while (currentFlask && isAttached(<NestableFlask>nestedFlask))
     }
     if (pendingCancelOps.length === 0) return;
     return pendingCancelOps;
 }
 
-function isAttached(flask: Flask) {
+function isAttached(flask: NestableFlask) {
     return !flask.outlivesOuter;
 }
 

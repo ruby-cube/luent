@@ -3,21 +3,24 @@
 import { $schedule, Callback, Callbacks, PendingCancelOp, PendingOp, SchedulerOptions } from "../flask";
 import { noop, run } from "@rue/utils";
 import { computed$ } from "../signals/computed";
-import { CovertFlask, _covertFlaskConfigs, _getCovertFlask } from "./CovertFlasks";
+import { CovertFlask, _covertFlaskConfigs, getCovertFlask } from "./CovertFlasks";
 import { Scene, getScene } from "./Scene";
 import { registerGlobalResetter } from "../dev/__resetGlobals";
 
 
-export type ReactivityFlask = {
+// TODO: flask.after must handle pausing and resuming all outer flasks
+// QUESTION: does setup have to be wrapped in enflask() for async?
+
+export type Flask = {
     onDisposed: (cb: () => void) => PendingCancelOp;
     after: (promise: Promise<any>) => Promise<unknown[]>;
 }
 
 
-// If an async flask calls _getCovertFlask() after an await, should it be able to access the original root flask? or should it return null?
+// If an async flask calls getCovertFlask() after an await, should it be able to access the original root flask? or should it return null?
 // should root flasks cleanup async flasks?
 
-let activeFlaskSetup: Flask | null | undefined = null;
+let activeFlaskSetup: NestableFlask | null | undefined = null;
 
 if (__TEST__) registerGlobalResetter(() => activeFlaskSetup = null);
 
@@ -27,26 +30,27 @@ export function getFlask() {
 }
 
 export function getOuterFlask() {
-    return (<Flask>activeFlaskSetup)?._outerFlask || getCovertFlask();
+    return (<NestableFlask>activeFlaskSetup)?._outerFlask;
 }
 
-export function getCovertFlask() {
-    return (<Flask>activeFlaskSetup)?._root || _getCovertFlask();
+export function getRootFlask() {
+    return (<NestableFlask>activeFlaskSetup)?._root || getCovertFlask();
 }
 
 
 
+const something = null as NestableFlask;
+something.
 
 
-
-export class Flask implements ReactivityFlask {
+export class NestableFlask implements Flask {
     private disposalHandlers: Callbacks = new Set();
-    _outerFlask: Flask | undefined | null;
-    _root: Flask | CovertFlask | Scene | undefined | null;
+    _outerFlask: NestableFlask | undefined | null;
+    _root: NestableFlask | CovertFlask | Scene | undefined | null;
     outlivesOuter: boolean | undefined;
     constructor(
-        root: Flask | CovertFlask | Scene | undefined | null, // not sure what this would be used for
-        outerFlask: Flask | null | undefined, // not sure what this would be used for
+        root: NestableFlask | CovertFlask | Scene | undefined | null, // not sure what this would be used for
+        outerFlask: NestableFlask | null | undefined, // not sure what this would be used for
         outlivesOuter: boolean | undefined
     ) {
         this._root = root;
@@ -99,19 +103,19 @@ function _pauseSetup() {
     activeFlaskSetup = null;
 }
 
-function _resumeSetup(flask: Flask) {
+function _resumeSetup(flask: NestableFlask) {
     activeFlaskSetup = flask;
 }
 
-function _startSetup(flask: Flask) {
+function _startSetup(flask: NestableFlask) {
     activeFlaskSetup = flask;
 }
 
-function _endSetup(flask: Flask) {
+function _endSetup(flask: NestableFlask) {
     activeFlaskSetup = flask._outerFlask;
 }
 
-function _resolveSetupEnd(flask: Flask, returnValue: any) {
+function _resolveSetupEnd(flask: NestableFlask, returnValue: any) {
     if (returnValue instanceof Promise) {
         return run(async () => {
             const result = await returnValue;
@@ -126,12 +130,12 @@ function _resolveSetupEnd(flask: Flask, returnValue: any) {
 }
 
 
-// class Flask implements ReactivityFlask {
+// class NestableFlask implements Flask {
 //     private scope: InternalEffectScope;
 //     private state: Map<any, any> | undefined;
-//     private outerFlask: ReactivityFlask | null;
+//     private outerFlask: Flask | null;
 
-//     constructor(cb: (flask: Flask, outerFlask: ReactivityFlask | null) => void, public detached?: boolean) {
+//     constructor(cb: (flask: NestableFlask, outerFlask: Flask | null) => void, public detached?: boolean) {
 //         const outerFlask = this.outerFlask = activeFlaskSetup || getComponentFlask(); // FIX: see note on getComponentFlask
 //         const scope = this.scope = effectScope(detached) as InternalEffectScope;
 //         activeFlaskSetup = this;
@@ -184,25 +188,25 @@ function _resolveSetupEnd(flask: Flask, returnValue: any) {
 
 export const OUTLIVE = true;
 
-export function flaskSetup<T extends any | Promise<any>>(setUpFlask: (flask: Flask, outerFlask: ReactivityFlask) => T, outlivesOuter?: boolean) {
-    const root = getScene() || _getCovertFlask();
+export function flaskSetup<T extends any | Promise<any>>(setUpFlask: (flask: NestableFlask, outerFlask: Flask) => T, outlivesOuter?: boolean) {
+    const root = getScene() || getCovertFlask() || getFlask();
     const outerFlask = activeFlaskSetup;
     // if (!outerFlask) throw new Error("useFlask must be called during scene setup or component setup");
-    const flask = new Flask(root, outerFlask, outlivesOuter);
+    const flask = new NestableFlask(root, outerFlask, outlivesOuter);
     _startSetup(flask);
     // let result = setUpFlask(flask, outerFlask || flask);
     return _resolveSetupEnd(flask, setUpFlask(flask, outerFlask || root || flask)) as T;
 }
 
 
-export function enflask<A extends any[], T extends any | Promise<any>>(setUpFlask: (flask: Flask, outerFlask: ReactivityFlask, ...args: A) => T, outlivesOuter?: boolean) {
+export function enflask<A extends any[], T extends any | Promise<any>>(setUpFlask: (flask: NestableFlask, outerFlask: Flask, ...args: A) => T, outlivesOuter?: boolean) {
     return (...args: A) => {
-        const root = getScene() || _getCovertFlask();
+        const root = getScene() || getCovertFlask() || getFlask();
         console.log("enflask root", root)
         const outerFlask = activeFlaskSetup;
         console.log("outerFlask??", outerFlask)
         // if (!covertFlask) throw new Error("useFlask must be called during scene setup or component setup");
-        const flask = new Flask(root, outerFlask, outlivesOuter);
+        const flask = new NestableFlask(root, outerFlask, outlivesOuter);
         console.log("start nested______________________________")
         _startSetup(flask);
         let result = setUpFlask(flask, outerFlask || root || flask, ...args);
@@ -249,7 +253,7 @@ export function enflask<A extends any[], T extends any | Promise<any>>(setUpFlas
 
 // function createSharedComposable(composable: (...args: any[]) => any) {
 //     let subscribers = 0
-//     let state: any | null, flask: Flask | null
+//     let state: any | null, flask: NestableFlask | null
 
 //     const dispose = () => {
 //         if (flask && --subscribers <= 0) {
@@ -258,7 +262,7 @@ export function enflask<A extends any[], T extends any | Promise<any>>(setUpFlas
 //         }
 //     }
 
-//     return (outerFlask: ReactivityFlask, ...args: any[]) => {
+//     return (outerFlask: Flask, ...args: any[]) => {
 //         flask = useFlask(() => {
 //             subscribers++
 //             if (!state) {

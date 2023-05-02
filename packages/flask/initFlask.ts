@@ -4,8 +4,7 @@ import { Callback } from "./flaskedListeners";
 
 export function initFlask(config: {
     covertFlasks: {
-        targetGetter: () => any;
-        onSetupEnd: (this: CovertFlask, callback: Callback) => any;
+        entityGetter: () => any;
         autoCleanupScheduler: (this: CovertFlask, cleanup: () => void) => PendingOp;
     }[]
 }) {
