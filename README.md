@@ -32,7 +32,7 @@ The repo contains the following categories: Event-driven/asynchronous programmin
 
 ***Event-driven Programming***
 
-[**🪶 Planify**](https://github.com/ruby-cube/rue/tree/main/packages/planify#readme-top)
+[**⚗️ Flask**](https://github.com/ruby-cube/rue/tree/main/packages/flask#readme-top)
 <br/>
 An event system designed to make asynchronous, event-driven programming more clean, readable, and less prone to memory leaks.
 
