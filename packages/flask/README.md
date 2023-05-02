@@ -327,6 +327,8 @@ Schedulers are one-time listeners that cannot morph into a sustained listeners. 
 
 To create a scheduler, use `$schedule` from the Flasked Listeners API.
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
 ### Subscriptions
 
 Conversely, subscriptions are sustained listeners that cannot morph into a one-time listener. To create subscription functions, use `$subscribe` from the Flasked Listeners API.
