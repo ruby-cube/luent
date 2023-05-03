@@ -19,37 +19,38 @@ Flask offers a developer-friendly event system where listeners and reactive effe
 
 ## Inspiration & Motivation
 
-The library is very much inspired by my experiences with Vue.js and its thoughtful design. The auto-cleanup in Flask comes straight out of the desire to implement Vue’s auto-cleanup of reactive effects, but for event listeners. The concept of batching cleanup of reactive effects and nested effect scopes comes from Anthony Fu’s `effectScope` RFC proposal. Lastly, the idea of resuming effect scopes comes from Jods’ Async Setup RFC proposal.
+This library is very much inspired by my experiences with [Vue.js](https://vuejs.org/) and its thoughtful design. The auto-cleanup of event listeners in Flask was inspired by Vue’s auto-cleanup of reactive effects. The concept of batching cleanup of reactive effects and nested effect scopes comes from [Anthony Fu’s `effectScope` Vue RFC proposal](https://github.com/vuejs/rfcs/blob/master/active-rfcs/0041-reactivity-effect-scope.md). Lastly, the idea of resuming effect scopes comes from [Jods’ Async Setup Vue RFC proposal](https://github.com/vuejs/rfcs/discussions/234#issuecomment-728955621).
 
 <p align="right"><a href="#">[src]</a></p>
 
 ## Table of Contents
 
-- Examples
-    - Individual Cleanup with Flasked Listeners
-    - Batch Cleanup with Flasks
+- [Examples](#examples)
+    - [Individual Cleanup with Flasked Listeners](#individual-cleanup-with-flasked-listeners)
+    - [Batch Cleanup with Flasks](#batch-cleanup-with-flasks)
 - Concepts
-    - Flasked Listeners
-        - One-time Listeners vs Sustained Listeners
-        - Listener Morphing
-        - Schedulers
-        - Subscriptions
-    - Flasks
-        - Covert Flasks
-        - Scene
-        - Nestable Flasks
-        - Asynchronous Listener Registration
-    - Outlive
-- Flask API
-- Flasked Listeners API
-- Enflask API
-- Memory Leak Prevention
-- Planned Features
+    - [Flasked Listeners](#flasked-listeners)
+        - [One-time Listeners vs Sustained Listeners](#one-time-listener-vs-sustained-listener)
+        - [Listener Morphing](#listener-morphing)
+        - [Schedulers](#schedulers)
+        - [Subscriptions](#subscriptions)
+        - [Synchronous vs Asynchronous Handling](#synchronous-vs-asynchronous-handling)
+    - [Flasks](#flasks)
+        - [Covert Flasks](#covert-flasks)
+        - [Scenes](#scenes)
+        - [Nestable Flasks](#nestable-flasks)
+        - [Asynchronous Listener Registration](#asynchronous-listener-registration)
+    - [Outlive](#outlive)
+- [Flask API](#flask-api)
+- [Flasked Listeners API](#flasked-listeners-api)
+- [Enflask API](#enflask-api)
+- [Memory Leak Prevention](#memory-leak-prevention)
+- [Planned Features](#planned-features)
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## Examples
 
-(Note that the event listeners in the examples below are not directly provided by Flask. They are examples of “flasked listeners” created using Flask’s API. Note also: the Flask cleanup system will only work with flasked listeners. For how to create or obtain flasked listeners, see Flasked Listeners. Lastly, these examples do not represent real use cases; they were fabricated for demonstration purposes.)
+(Note that the event listeners in the examples below are not directly provided by Flask. They are examples of “flasked listeners” created using [Flask’s API](#flasked-listeners-api). Note also: the Flask cleanup system will only work with flasked listeners. For how to create or obtain flasked listeners, see [Flasked Listeners](#flasked-listeners). Lastly, these examples do not represent real use cases; they were fabricated for demonstration purposes.)
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
@@ -101,7 +102,7 @@ Here are examples of what cleanup may look like using Flask’s batch cleanup st
 
 … **via covert flask auto-cleanup**
 
-The Flask event system can be configured to have “covert flasks” within which auto-cleanup occurs. In this example, the component setup is the covert flask. All listeners registered during component setup will be automatically cleaned up when the component unmounts. (See Covert Flasks).
+The Flask event system can be configured to have “covert flasks” within which auto-cleanup occurs. In this example, the component setup is the covert flask. All listeners registered during component setup will be automatically cleaned up when the component unmounts. (See [Covert Flasks](#covert-flasks)).
 
 ```tsx
 // TableBlock.vue
@@ -127,7 +128,7 @@ export default defineComponent({
 
 … **via nestable flask cleanup**
 
-Listeners and reactive effects registered within a nestable flask can be handled independently of an outer flask via the Enflask API. Listeners and reactive effects are collected in a flask (created either by `flaskSetup()` or `enflask()`) and disposed of when the flask is disposed of:
+Listeners and reactive effects registered within a nestable flask can be handled independently of an outer flask via the [Enflask API](#enflask-api). Listeners and reactive effects are collected in a flask (created either by [`flaskSetup()`](#flasksetupsetupflask) or [`enflask()`](#enflasksetupflask)) and disposed of when the flask is disposed of:
 
 ```tsx
 import { flaskSetup } from "@rue/flask";
@@ -157,7 +158,7 @@ function useTable() {
 }
 ```
 
-Nested flasks can be configured to “outlive” its outer flask via the `outlive` parameter:
+Nestable flasks can be configured to “outlive” its outer flask via the `outlive` parameter. For readability, Flask provides an `OUTLIVE` constant that can be passed in as the argument:
 
 ```tsx
 import { flaskSetup, OUTLIVE } from "@rue/flask";
@@ -190,7 +191,7 @@ function useTable() {
 
 … **via scene cleanup**
 
-Flask’s Scene API offers an alternative way of thinking about batch cleanup. Listeners are contained within a “scene” and are stopped when the scene ends. This is particularly useful for event handlers that need to register their own event listeners. See Flasks to understand the difference between a scene and other types of flasks.
+Flask’s [Scene API](#scene-api) offers an alternative way of thinking about batch cleanup. Listeners are contained within a “scene” and are stopped when the scene ends. This is particularly useful for event handlers that need to register their own event listeners. See [Flasks](#flasks) to understand the difference between a scene and other types of flasks.
 
 ```jsx
 // SFC script
@@ -227,9 +228,17 @@ function initDrag(event){
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## Flasked Listener
+## Flasked Listeners
 
-In browser and Node.js API, the word “listener” refers to the callback passed into the `addListener` function. This to me is a misnomer and it pains me to follow this convention. For clarity, Here is how terms are used within the Flask system:
+Flasked listeners are listeners that are hooked into the Flask event system, where the mess of listener cleanup is handled under the hood. Flasked listeners can be obtained through several ways:
+
+- the [Flasked Listener API](#flasked-listeners-api), which can be used to turn existing listeners into flasked listeners as well as to create new flasked listeners
+- the [Pecherie library](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top), which creates flasked listeners for application events and process hooks
+- the [Archer library](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top), which provides a flasked listener for targeted messages
+- the [Thread library](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top), which provides flasked schedulers and flasked user event listeners from Web API
+- the [Watch library](https://github.com/ruby-cube/rue/tree/main/packages/watch#readme-top), which provides flasked versions of Vue’s watch, watchEffect, and computed
+
+Note that in browser and Node.js API, the word “listener” refers to the callback passed into the `addListener` function. This to me is a misnomer and it pains me to follow this convention. For clarity, here is how terms are used within the Flask system:
 
 ```tsx
 onPopulated((context) => { context.data }, { until: onDocClosed })
@@ -244,22 +253,11 @@ onMouseDown(document, () => {}, { until: onDestroyed })
 targeted     target   handler     listener
 listener                           options
 ```
-
-Flasked listeners are listeners that are hooked into the Flask event system, where the mess of listener cleanup is handled under the hood. 
-
-Flasked listeners can be obtained through several ways:
-
-- the Flasked Listener API, which can be used to turn existing listeners into flasked listeners as well as create new flasked listeners
-- the Pecherie library, which creates flasked listeners for application events and process hooks
-- the Archer library, which provides a flasked listener for targeted messages
-- the Thread library, which provides flasked schedulers and flasked user event listeners from Web API
-- the Watch library, which provides flasked versions of Vue’s watch, watchEffect, and computed
-
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ### One-time listener vs Sustained listener
 
-There are two main types of flasked listeners: one-time listeners and sustained listeners. As their names suggest, one-time listeners will listen at most once (i.e. the handler can run no more than one time) and the sustained listeners will continue to listen so long as the listener remains active (i.e. the handler will run every time the event or hook is emitted).
+There are two main types of flasked listeners: one-time listeners and sustained listeners. As their names suggest, one-time listeners will listen at most once (i.e. the handler can run at most one time) and the sustained listeners will continue to listen so long as the listener remains active (i.e. the handler will run every time the event or hook is emitted).
 
 **Sustained listeners** return an `ActiveListener` object. This object has a single `stop` method, which can be called to stop the listener.
 
@@ -325,14 +323,41 @@ To create a morphable listener, use `$listen` from the Flasked Listeners API.
 
 Schedulers are one-time listeners that cannot morph into a sustained listeners. These are typically functions that queue a task to the main thread such as: `queueTask`, `beforeScreenPaint` (flasked `requestAnimationFrame`), and `onTimeout` (flasked `setTimeout`). See [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top) for more on existing schedulers.
 
-To create a scheduler, use `$schedule` from the Flasked Listeners API.
+To create a scheduler, use `$schedule` from [the Flasked Listeners API](#flasked-listeners-api).
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ### Subscriptions
 
-Conversely, subscriptions are sustained listeners that cannot morph into a one-time listener. To create subscription functions, use `$subscribe` from the Flasked Listeners API.
+Conversely, subscriptions are sustained listeners that cannot morph into a one-time listener. To create subscription functions, use `$subscribe` from [the Flasked Listeners API](#flasked-listeners-api).
 
+<p align="right"><a href="#table-of-contents">[toc]</a></p>
+
+### Synchronous vs Asynchronous Handling
+
+Handlers are called synchronously at the time of event emission. This allows for “before event” hooks as well as the possibility of handlers communicating back to the source of the event (see [`reply`](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#hook-configuration)). 
+
+If asynchronous handling is needed, the developer can call an async scheduler or one-time listener from within the handler. In the example below, the synchonous handler calls the `addPS` scheduler (an alias for `queueMicrotask`) for asynchronous handling.
+
+```ts
+onPopulated(() => addPS(() => {
+    // do something
+}))
+```
+
+Alternatively, when using [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top) hooks, omit the callback function and options parameter to queue a microtask after an event is emitted via a promise:
+
+```ts
+onPopulated()
+    .then(() => { 
+        // do something
+    })
+
+/* or */
+
+await onPopulated();
+// do something
+```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Flasks
@@ -340,17 +365,17 @@ Conversely, subscriptions are sustained listeners that cannot morph into a one-t
 A key feature of this library is the ability to perform batch cleanups. This is achieved through the concept of flasked scopes, or flasks. A flask collects listeners and reactive effects that are registered during its setup and performs cleanup upon its disposal. This all happens under the hood so as not to clutter application code.
 
 There are three distinct types of flasks: 
-- covert flasks
-- scenes
-- nestable flasks
+- [covert flasks](#covert-flasks)
+- [scenes](#scenes)
+- [nestable flasks](#nestable-flasks)
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-### **Covert Flasks**
+### Covert Flasks
 
-Covert flasks are the vessels for automatic batch cleanup. Any entity that is instantiated through some sort of setup or constructor function and which exposes a setup end hook as well as a lifecycle end hook (e.g. `onUnmounted`, `onDestroyed`, etc) can serve as a covert flask. The lifecycle hook must be made into a flasked listener (or at least return an object that implements the `PendingOp` interface). Note that these requirements exclude Vue Options API components.
+Covert flasks are the vessels for automatic batch cleanup. Any entity that is instantiated through some sort of setup or constructor function and which exposes a lifecycle end hook (e.g. `onUnmounted`, `onDestroyed`, etc) can serve as a covert flask. The lifecycle hook must be made into a [flasked listener](#flasked-listeners-api) (or at least return an object that implements the `PendingOp` interface). Note that these requirements exclude Vue Options API components.
 
-Covert flasks must be registered at initiation of the flask event system via `initFlask()`. Below is an example of registering Vue components as covert flasks (using functions provided by the Paravue library):
+Covert flasks must be registered at initiation of the flask event system via `initFlask()`. Below is an example of registering Vue components as covert flasks (using functions provided by [the Paravue library](https://github.com/ruby-cube/rue/tree/main/packages/paravue#readme-top):
 
 ```tsx
 // main.ts
@@ -366,7 +391,7 @@ initFlask({
 });
 ```
 
-(Note: This example assumes the covert flask will contain only synchronous code. To learn how to register a covert flask that can survive asynchronous code, see Asynchronous Listener Registration.)
+(Note: This example assumes the covert flask will contain only synchronous code. To learn how to register a covert flask that can survive asynchronous code, see [Asynchronous Listener Registration](#asynchronous-listener-registration).)
 
 After initiation, any flasked listener that is registered within a covert flask will enjoy automatic cleanup when the entity is unmounted/destroyed/disposed of/etc.
 
@@ -455,6 +480,7 @@ onMouseDown(document, enscene((drawing, event) => {
 ```
 
 Scenes are useful for sharing state across the handlers of event flows like [ mouse down —> mouse move —> mouse up ] or [ key down —> before input —> input ].
+
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ### Nestable Flasks
@@ -547,9 +573,9 @@ export default defineComponent({
 
 ## **Asynchronous Listener registration**
 
-Both the Scene API and Enflask API provide ways of restoring the flask for listeners that must be registered after awaiting a promise.
+Both the [Scene API](#scene-api) and [Enflask API](#enflask-api) provide ways of restoring the flask for listeners that must be registered after awaiting a promise.
 
-If you register a listener after awaiting a promise, the listener will be registered outside of the enflasked scope and therefore will not be cleaned up along with the flask. In the example below, `onSomeEvent` will not be cleaned up when the flask is disposed of.
+Normally, if you register a listener after awaiting a promise, the listener will be registered outside of the enflasked scope and therefore will not be cleaned up along with the flask. In the example below, `onSomeEvent` will not be cleaned up when the flask is disposed of.
 
 ```tsx
 function useTable() {
@@ -603,7 +629,7 @@ function useTable() {
 }
 ```
 
-Note that in order for covert flasks to be restored after awaiting a promise, the registered `autoCleanupScheduler` must be written in a way that targets a specific instance of the covert flask entity. The `autoCleanupSchedule` will become a method on the covert flask, which has a target property whose value is the return value of the `targetGetter`. In this way, the target instance can be passed into the lifecycle end hook.
+Note that in order for covert flasks to be restored after awaiting a promise, the registered `autoCleanupScheduler` must be written in a way that targets a specific instance of the covert flask entity. The `autoCleanupScheduler` will become a method on the covert flask, which has an `entity` property whose value is the return value of the `entityGetter`. In this way, the target instance can be passed into the lifecycle end hook.
 
 ```tsx
 // main.ts
@@ -624,7 +650,7 @@ initFlask({
 
 ## Flask API
 
-`initFlask(config)`
+[`initFlask(config)`](#initflaskconfig)
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
@@ -649,7 +675,7 @@ type CovertFlaskConfig = {
 
 ### Usage
 
-(See Covert Flasks and Asynchronous Listener Registration for notes on usage)
+(See [Covert Flasks](#covert-flasks) and [Asynchronous Listener Registration](#asynchronous-listener-registration) for notes on usage)
 
 ```tsx
 // main.ts
@@ -668,9 +694,9 @@ initFlask({
 
 ## Scene API
 
-`sceneSetup(setUpScene)`
+[`sceneSetup(setUpScene)`](#scenesetupsetupscene)
 
-`enscene(setUpScene)`
+[`enscene(setUpScene)`](#enscenesetupscene)
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
@@ -696,7 +722,7 @@ type Scene = {
 
 ### Usage
 
-(See Scene for notes on usage)
+(See [Scenes](#scenes) for notes on usage)
 
 ```jsx
 // SFC script
@@ -759,7 +785,7 @@ type Scene = {
 
 ### Usage
 
-(See Scene for notes on usage)
+(See [Scenes](#scenes) for notes on usage)
 
 ```jsx
 import { enscene } from "@rue/flask"
@@ -783,9 +809,11 @@ onMouseDown(document, enscene((drawing, event) => {
 
 ## Enflask API
 
-`flaskSetup(setUpFlask)`
+[`flaskSetup(setUpFlask)`](#flasksetupsetupflask)
 
-`enflask(setUpFlask)`
+[`enflask(setUpFlask)`](#enflasksetupflask)
+
+`OUTLIVE`
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
@@ -796,7 +824,7 @@ onMouseDown(document, enscene((drawing, event) => {
 ```tsx
 const returnValue = flaskSetup(setUpFlask, OUTLIVE)
            |                        |         | 
-           R                    SetUpFlask   true | undefined
+           R                    SetUpFlask   true
 ```
 
 ### Type Definitions
@@ -818,7 +846,7 @@ type Flask = {
 
 ### Usage
 
-(See Nested Flasks for notes on usage)
+(See [Nestable Flasks](#nestable-flasks) for notes on usage)
 
 ```tsx
 import { flaskSetup, OUTLIVE } from "@rue/flask";
@@ -881,7 +909,7 @@ type Flask = {
 
 ### Usage
 
-(See Nested Flasks for notes on usage)
+(See [Nestable Flasks](#nestable-flasks) for notes on usage)
 
 ```jsx
 const useTable = enflask((flask) => {
@@ -910,13 +938,15 @@ const useTable = enflask((flask) => {
 
 ## Flasked Listeners API
 
-The functions provided by [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top), [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top), [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top), and [Paravue](https://github.com/ruby-cube/rue/tree/main/packages/paravue#readme-top) should cover most use cases. However, if you would like to flasking an existing listener or scheduler, Flask provides the `$listen`, `$schedule`, and `$subscribe` functions to acheive this.
+The functions provided by [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top), [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top), [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top), and [Paravue](https://github.com/ruby-cube/rue/tree/main/packages/paravue#readme-top) should cover most use cases. However, if you would like to flask an existing listener or scheduler, Flask provides the `$listen`, `$schedule`, and `$subscribe` functions to acheive this.
 
-`$listen(handler, options, config)`
+[`$listen(handler, options, config)`](#listenhandler-options-config)
 
-`$schedule(callback, options, config)`
+[`$schedule(callback, options, config)`](#schedulehandler-options-config)
 
-`$subscribe(handler, options, config)`
+[`$subscribe(handler, options, config)`](#subscribehandler-options-config)
+
+`$outlive`
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
@@ -938,6 +968,16 @@ type ListenerConfig = {
     remove: (handlerOrReturnVal) => void, 
     onceAsDefault?: true | undefined
 }
+
+type ListenerOptions = {
+    once?: true;
+    sustain?: true;
+    unlessCanceled?: ScheduleCancel;
+    until?: ScheduleStop;
+    $lifetime?: true;
+    $tilStop?: true;
+    $outlive?: true;
+}
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
@@ -957,9 +997,15 @@ const pendingOp = $schedule(handler, options, config)
 type SchedulerConfig = {
     enroll: (handler) => void, 
     remove: (handlerOrReturnVal) => void, 
-}
+};
 
-type PendingOp = Promise<ReturnType<Handler>> & { cancel: () => void }
+type PendingOp = Promise<ReturnType<Handler>> & { cancel: () => void };
+
+type ListenerOptions = {
+    unlessCanceled?: ScheduleCancel;
+    $lifetime?: true;
+    $outlive?: true;
+}
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
@@ -981,7 +1027,14 @@ type SubscribeConfig = {
     remove: (handlerOrReturnVal) => void, 
 }
 
-type ActiveListener = { stop: () => void }
+type ActiveListener = { stop: () => void };
+
+type ListenerOptions = {
+    until?: ScheduleStop;
+    $lifetime?: true;
+    $tilStop?: true;
+    $outlive?: true;
+}
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
