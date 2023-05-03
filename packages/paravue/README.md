@@ -121,7 +121,7 @@ onUnmounted(() => {
 
 ## `nodeRef()`
 
-For convenience and reduced verbosity, this library exports the function `nodeRef`, an alias for VueUse’s awesome [templateRef](https://vueuse.org/core/templateRef/#templateref).
+An alias for VueUse’s awesome [templateRef](https://vueuse.org/core/templateRef/#templateref).
 
 ### Syntax
 ```tsx
@@ -149,7 +149,7 @@ onMounted(() => {
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## `onViewUpdated()`
-an alias for Vue's `nextTick` (see [nextTick](https://vuejs.org/api/general.html#nexttick))
+An alias for Vue's `nextTick` (see [nextTick](https://vuejs.org/api/general.html#nexttick))
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
