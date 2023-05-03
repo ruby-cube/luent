@@ -217,10 +217,6 @@ const coordinates$ = computed$(() => position.x$() + ", " + position.y$());
 
 [deepSignalize$()](#deepsignalize-1)
 
-**Template Ref**
-
-[nodeRef()](#noderef)
-
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## `$()`
@@ -594,36 +590,6 @@ $set(position$, {
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `nodeRef()`
-
-Rue Signals does not recommend replacing Vue’s template refs with signals. In fact, it’s helpful to have a distinction between reactive state and a reactive container for DOM and component nodes. For convenience and reduced verbosity, this library exports the function `nodeRef`, an alias for VueUse’s awesome [templateRef](https://vueuse.org/core/templateRef/#templateref).
-
-### Syntax
-```tsx
-const _nodeRef = nodeRef(key)
-         |                |
-         |             string
-    Ref<Node|ComponentPublicInstance>
-```
-
-### Usage
-
-```tsx
-const inputRef = nodeRef("username");
-
-onMounted(() => {
-  inputRef.value.focus()
-})
-```
-
-```html
-<template>
-  <input ref="username" />
-</template>
-```
-
-<p align="right"><a href="#table-of-contents">[toc]</a></p>
-
 ## Vue Counterparts
 
 Here is a quick chart of how the Signal API corresponds to Vue’s API:
@@ -638,7 +604,8 @@ Here is a quick chart of how the Signal API corresponds to Vue’s API:
 | `computed$(computation)` | `computed(computation)` |
 | `$set(signal, value)` | e.g. `myRef.value = value` |
 | `$mutate(signal, mutator)` | e.g. `myRef.value.push(item); triggerRef(myRef);` |
-| `nodeRef(key)` (alias for `templateRef(key)` from VueUse) | `shallowRef()` / `ref()` |
+
+Note: Rue Signals does not recommend replacing Vue’s template refs with signals. In fact, it’s helpful to have a distinction between reactive state and a reactive container for DOM and component nodes.
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
