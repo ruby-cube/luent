@@ -1,6 +1,7 @@
 <nav><a id="readme-top" href="#"><b>goto: src</b></a></nav>
 
-[@rue](https://github.com/ruby-cube/rue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; paravue  &nbsp;&nbsp;|&nbsp; &nbsp; **signals**  &nbsp;&nbsp;|&nbsp; &nbsp; actionry
+[@rue](https://github.com/ruby-cube/rue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp;  [paravue](https://github.com/ruby-cube/rue/tree/main/packages/paravue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; [watch](https://github.com/ruby-cube/rue/tree/main/packages/watch#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; **signals**  &nbsp;&nbsp;|&nbsp; &nbsp; actionry
+
 # Signals 🕊️
 
 <aside>
