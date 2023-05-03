@@ -43,11 +43,17 @@ Watch provides [flasked](https://github.com/ruby-cube/rue/tree/main/packages/fla
 ## `compute()`
 Flasked version of Vue's `computed`
 
+<p align="right"><a href="#readme-top">[top]</a></p>
+
 ## `onChange()`
-Flasked version of Vue's `onChange`
+Flasked version of Vue's `watch`
+
+<p align="right"><a href="#readme-top">[top]</a></p>
 
 ## `initReactiveEffect()`
-Flasked version of Vue's `initReactiveEffect`
+Flasked version of Vue's `watchEffect`
+
+<p align="right"><a href="#readme-top">[top]</a></p>
 
 ## `afterReactiveFlush()`
 an alias for `nextTick`
