@@ -940,13 +940,13 @@ const useTable = enflask((flask) => {
 
 The functions provided by [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top), [Archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top), [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top), and [Paravue](https://github.com/ruby-cube/rue/tree/main/packages/paravue#readme-top) should cover most use cases. However, if you would like to flask an existing listener or scheduler, Flask provides the `$listen`, `$schedule`, and `$subscribe` functions to acheive this.
 
-[`$listen(handler, options, config)`](#listenhandler-options-config)
+[$listen(handler, options, config)](#listenhandler-options-config)
 
 [$schedule(callback, options, config)](#schedulehandler-options-config)
 
-[`$subscribe(handler, options, config)`](#subscribehandler-options-config)
+[$subscribe(handler, options, config)](#subscribehandler-options-config)
 
-`$outlive`
+$outlive
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
