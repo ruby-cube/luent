@@ -48,13 +48,13 @@ The system also allows for re-keying (in case of key collisions) and implementin
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
 ## Être API
-[`role(config)`](#basic-usage)
+[role()](#basic-usage)
 
-[`enacts(Role, object)`](#type-checking)
+[enacts()](#type-checking)
 
-[`keyCollisionCheck(Role, true, RekeyMap)`](#rekey-ing)
+[keyCollisionCheck()](#rekey-ing)
 
-[`roleCollisionCheck(Role)`](#rekey-ing)
+[roleCollisionCheck()](#rekey-ing)
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 

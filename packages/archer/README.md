@@ -33,15 +33,15 @@ Archer is a system for sending and receiving targeted messages/commands across s
 
 ## Archer API
 
-[`defineMessage(config)`](#definemessageconfig) 
+[defineMessage()](#definemessage) 
 
-[`send(MESSAGE, {to: targetID }, data)`](#sendmessage-to-targetid--data)
+[send()](#send)
 
-[`re(MESSAGE, targetID, callback)`](#remessage-targetid-handler)
+[re()](#re)
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `defineMessage(config)`
+## `defineMessage()`
 
 ### Syntax
 
@@ -72,7 +72,7 @@ See [Hook Configuration](https://github.com/ruby-cube/rue/tree/main/packages/pec
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `send(MESSAGE, {to: targetID }, data)`
+## `send()`
 
 ### Syntax
 
@@ -91,7 +91,7 @@ type Data = any;
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `re(MESSAGE, targetID, handler)`
+## `re()`
 
  Called by the receiver. Defines how to handle the message. Returns the handler.
 

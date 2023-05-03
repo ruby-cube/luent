@@ -33,19 +33,24 @@ Thread provides planified versions of schedulers and event listeners from Web AP
 
 Planified schedulers return a `ScheduledOp`, which is essentially a cancellable `Promise`. The only option they take is a `unlessCanceled` cancellation scheduler.
 
-[`addPS(callback)`](#addpscallback) 
+[addPS()](#addps) 
 
-[`queueTask(callback, options?)`](#queuetaskcallback-options)
+[queueTask()](#queuetask)
 
-[`beforeScreenPaint(callback, options?)`](#beforescreenpaintcallback-options)
+[beforeScreenPaint()](#beforescreenpaint)
 
-[`onTimeout(delay, callback, options?)`](#ontimeoutdelay-callback-options)
+[onTimeout()](#ontimeout)
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `addPS(callback)` 
+## `addPS()` 
 
 an alias for `queueMicrotask` from browser API. Here, microtasks are conceptualized as postscripts to event loop tasks.
+
+### Syntax
+```tsx
+addPS(callback);
+```
 
 ### Usage
 
@@ -58,9 +63,23 @@ addPS(() => {
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `queueTask(callback, options?)`
+## `queueTask()`
 
 planified `setImmediate` (as implemented by https://github.com/yuzujs/setImmediate). It essentially queues a task in the event loop’s task queue.
+
+### Syntax
+```tsx
+queueTask(callback, options);
+                       |
+                SchedulerOptions?
+```
+
+### Type Definitions
+```tsx
+type SchedulerOptions = {
+    unlessCanceled: (stop: () => void) => PendingOp;
+}
+```
 
 ### Usage
 
@@ -73,9 +92,23 @@ queueTask(() => {
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `beforeScreenPaint(callback, options?)`
+## `beforeScreenPaint()`
 
 planified `requestAnimationFrame`, which schedules code to run before the next screen paint.
+
+### Syntax
+```tsx
+requestAnimationFrame(callback, options);
+                                   |
+                           SchedulerOptions?
+```
+
+### Type Definitions
+```tsx
+type SchedulerOptions = {
+    unlessCanceled: (stop: () => void) => PendingOp;
+}
+```
 
 ### Usage
 
@@ -87,9 +120,22 @@ beforeScreenPaint(() => {
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `onTimeout(delay, callback, options?)`
+## `onTimeout()`
 
 planified `setTimeout`
+
+```tsx
+onTimeout(delay, callback, options);
+            |                   |
+          number         SchedulerOptions?
+```
+
+### Type Definitions
+```tsx
+type SchedulerOptions = {
+    unlessCanceled: (stop: () => void) => PendingOp;
+}
+```
 
 ### Usage
 

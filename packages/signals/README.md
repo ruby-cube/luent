@@ -19,6 +19,7 @@ Rue Signals aims to bring more consistency, clarity, and selectivity to reactivi
 ```bash
 (coming soon ...)
 ```
+
 <p align="right"><a href="#">[src]</a></p>
 
 ## Motivation
@@ -60,7 +61,7 @@ This library stands on the shoulders of giants. It is a mere tweaking of existin
     - [Reactive References](#reactive-references)
     - [Explicit Reactivity](#explicit-reactivity)
 - [Basic Examples](#basic-examples)
-- [Signal API](#signal-api)
+- [Signals API](#signals-api)
 - [Vue Counterparts](#vue-counterparts)
 - [Reactivity in Iterables](#reactivity-in-iterables)
 - [Tips](#tips)
@@ -193,35 +194,35 @@ const coordinates$ = computed$(() => position.x$() + ", " + position.y$());
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## Signal API
+## Signals API
 
 **Core signal creators and setters**
 
-[`$(initialValue)`](#initialvalue)
+[$()](#)
 
-[`computed$(computation)`](#computedcomputation)
+[computed$()](#computed)
 
-[`$set(signal, valueOrManipulator)`](#setsignal-valueormanipulator)
+[$set()](#set)
 
-[`$mutate(signal, mutator)`](#mutatesignal-mutator)
+[$mutate()](#mutate)
 
 **Convenience signal creators**
 
-[`signalize(object)`](#signalizeobject)
+[signalize()](#signalize)
 
-[`deepSignalize(object)`](#deepsignalizeobject)
+[deepSignalize()](#deepsignalize)
 
-[`signalize$(object)`](#signalizeobject-1)
+[signalize$()](#signalize-1)
 
-[`deepSignalize$(object)`](#deepsignalizeobject-1)
+[deepSignalize$()](#deepsignalize-1)
 
 **Template Ref**
 
-[`nodeRef(key)`](#noderefkey)
+[nodeRef()](#noderef)
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `$(initialValue)`
+## `$()`
 
 Creates a signal. `$` can be pronounced “signal for”. Analogous to Vue’s `shallowRef()`.
 
@@ -259,7 +260,7 @@ const x$ = computed$(() => position$().x.toString()) // no reactive tracking of 
 
 position$().x = 1 // no reactive effects
 ```
-To make all direct properties reactive, use [`signalize$()`](#signalizeobject-1). If you don’t need a reactive reference to the object itself, use [`signalize()`](#signalizeobject).
+To make all direct properties reactive, use [signalize$()](#signalize-1). If you don’t need a reactive reference to the object itself, use [signalize()](#signalize).
 
 ### Selective Nested Reactivity
 
@@ -319,7 +320,7 @@ $set(position$, createPosition({
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `computed$(computation)`
+## `computed$()`
 
 Creates a read-only signal for a computed variable or property. Pronounced “computed signal”. A wrapper around Vue’s `computed()`.
 
@@ -347,7 +348,7 @@ doubleCount$(); // 8
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `$set(signal, valueOrManipulator)`
+## `$set()`
 
 Sets the value of a reactive property or variable (represented by a signal) and signals to the reactivity system if a value change has occurred. Returns the new value for convenience. Pronounced “signaled set.”
 
@@ -395,7 +396,7 @@ Note that manipulators can only be used if the value is a primitive. Use `$mutat
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `$mutate(signal, mutator)`
+## `$mutate()`
 
 Mutates any mutable data structure stored in a reactive reference (represented by a signal) and signals to the reactivity system that change has occurred. It returns the value of the reactive reference for convenience. Pronounced “signaled mutate.”
 
@@ -432,7 +433,7 @@ Note that the `$mutate` function passes the value of the reactive variable/prope
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `signalize(object)`
+## `signalize()`
 
 Creates an object whose direct properties are reactive via signals. Appends the -`$` suffix to reactive keys. Analogous to Vue’s `shallowReactive()`
 
@@ -460,13 +461,13 @@ $set(position.x$, 1) // triggers reactive effects
 
 Note that only a non-iterable object can be passed into signalize. Passing in an array, set, map, or primitive, will throw an error. (see [Reactivity in Iterables](#reactivity-in-iterables) for why the entries of iterables are not made into signals).
 
-Note also that the position object itself does not have a reactive reference, only its properties. For a reactive reference to the object itself, use [`signalize$()`](#signalizeobject-1).
+Note also that the position object itself does not have a reactive reference, only its properties. For a reactive reference to the object itself, use [signalize$()](#signalizeobject-1).
 
-For a deeply reactive object where all properties of nested objects are made reactive, use [`deepSignalize()`](#deepsignalizeobject).
+For a deeply reactive object where all properties of nested objects are made reactive, use [deepSignalize()](#deepsignalize).
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `deepSignalize(object)`
+## `deepSignalize()`
 
 Creates an object whose properties (including nested properties) are reactive via signals. Appends the -`$` suffix to reactive keys. Analogous to Vue’s `reactive()`.
 
@@ -505,11 +506,11 @@ $set(position.prevPosition$, { x: 1, y: 9 })
 
 Note that while properties of nested objects will be made reactive, entries of iterables like arrays, sets, and maps will not be “signalized”. See [Reactivity of Iterables](#reactivity-in-iterables) for why entries of iterables are not made into signals.
 
-Note also that the object reference (`position` in the above example) is not a reactive. To make the object variable reactive along with all its properties and nested properties, use [`deepSignalize$()`](#deepsignalizeobject-1).
+Note also that the object reference (`position` in the above example) is not a reactive. To make the object variable reactive along with all its properties and nested properties, use [deepSignalize$()](#deepsignalize-1).
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `signalize$(object)`
+## `signalize$()`
 
 Creates a signal for a shallowly reactive object.  Appends the -`$` suffix to reactive keys. Pronounced “signalize signal of”. Analogous to calling `shallowRef(shallowReactive(object))` in Vue.
 
@@ -545,7 +546,7 @@ $set(position$, {
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `deepSignalize$(object)`
+## `deepSignalize$()`
 
 Creates a signal for a deeply reactive object.  Appends the -`$` suffix to reactive keys. Pronounced “deep signalize signal of”. Analogous to Vue’s `ref()`.
 
@@ -592,9 +593,17 @@ $set(position$, {
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `nodeRef(key)`
+## `nodeRef()`
 
-Rue Signals does not recommend replacing Vue’s template refs with signals. In fact, it’s helpful to have a distinction between reactive state and a reactive container for DOM and component nodes. For convenience and reduced verbosity, this library exports the function `nodeRef`, an alias for VueUse’s awesome [`templateRef`](https://vueuse.org/core/templateRef/#templateref).
+Rue Signals does not recommend replacing Vue’s template refs with signals. In fact, it’s helpful to have a distinction between reactive state and a reactive container for DOM and component nodes. For convenience and reduced verbosity, this library exports the function `nodeRef`, an alias for VueUse’s awesome [templateRef](https://vueuse.org/core/templateRef/#templateref).
+
+### Syntax
+```tsx
+const _nodeRef = nodeRef(key)
+         |                |
+         |             string
+    Ref<Node|ComponentPublicInstance>
+```
 
 ### Usage
 

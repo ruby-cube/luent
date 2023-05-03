@@ -34,7 +34,7 @@ export type FunctionType<F extends (...args: any) => any> = (...args: Parameters
 // export type VPropsType<T> = Readonly<
 // LooseRequired<
 //   Readonly<ExtractPropTypes<T>> & {
-//     [x: `on${string}`]:
+//     [x: `on${string}]:
 //       | ((...args: any[]) => any)
 //       | ((...args: unknown[]) => any);
 //   }
