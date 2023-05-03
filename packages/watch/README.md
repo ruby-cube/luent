@@ -43,20 +43,133 @@ Watch provides [flasked](https://github.com/ruby-cube/rue/tree/main/packages/fla
 ## `compute()`
 Flasked version of Vue's `computed`
 
+### Syntax
+```tsx
+const computedRef = compute(computation, options)
+          |                      |          |
+    ComputedRef<R>            () => R     SubscribeOptions?
+```
+
+### Type Definitions
+```tsx
+type SubscribeOptions = {
+    $outlive?: true;
+    until?: (stop: () => void) => PendingCancelOp;
+}
+```
+
+### Usage
+```tsx
+const count = ref(0);
+
+const doubleCount = compute(() => count.value * 2, { until: onDeactivated})
+```
+
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## `onChange()`
 Flasked version of Vue's `watch`
+
+### Syntax
+```tsx
+const activeWatcher = onChange(getter, handler, options)
+          |                      |       |          |
+     ActiveListener           () => T    |    ListenerOptions?
+                                  (value: T, prevValue: T) => void
+```
+
+### Type Definitions
+```tsx
+type ActiveListener = {
+    stop: () => void
+}
+
+type ListenerOptions = {
+    once?: true;
+    sustain?: true;
+    unlessCanceled?: ScheduleCancel;
+    until?: ScheduleStop;
+    $lifetime?: true;
+    $tilStop?: true;
+    $outlive?: true;
+    immediate?: boolean // default: false
+    deep?: boolean // default: false
+    flush?: 'pre' | 'post' | 'sync' // default: 'pre'
+    onTrack?: (event: DebuggerEvent) => void
+    onTrigger?: (event: DebuggerEvent) => void
+}
+```
+
+### Usage
+```tsx
+const count = ref(0);
+
+const activeWatcher = onChange(() => count.value, (count) => { 
+    // do something
+});
+
+onMouseUp(el, () => {
+    if (/* ... */) {
+        activeWatcher.stop()
+    }
+});
+```
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## `initReactiveEffect()`
 Flasked version of Vue's `watchEffect`
 
+
+### Syntax
+```tsx
+const activeWatcher = initReactiveEffect(effect, options)
+          |                                |         |
+     ActiveListener                        |    ListenerOptions?
+                                       () => void
+```
+
+### Type Definitions
+```tsx
+type ActiveListener = {
+    stop: () => void
+}
+
+type ListenerOptions = {
+    once?: true;
+    sustain?: true;
+    unlessCanceled?: ScheduleCancel;
+    until?: ScheduleStop;
+    $lifetime?: true;
+    $tilStop?: true;
+    $outlive?: true;
+    flush?: 'pre' | 'post' | 'sync' // default: 'pre'
+    onTrack?: (event: DebuggerEvent) => void
+    onTrigger?: (event: DebuggerEvent) => void
+}
+```
+
+### Usage
+```tsx
+const count = ref(0);
+
+const activeWatcher = initReactiveEffect(() => { 
+    if (count.value > 10) {
+        // do something
+    }
+});
+
+onMouseDown(el, () => {
+    if (/* ... */) {
+        activeWatcher.stop()
+    }
+});
+```
+
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## `afterReactiveFlush()`
-an alias for `nextTick`
+an alias for Vue's `nextTick` (see [nextTick](https://vuejs.org/api/general.html#nexttick))
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
