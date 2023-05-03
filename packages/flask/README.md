@@ -232,11 +232,11 @@ function initDrag(event){
 
 Flasked listeners are listeners that are hooked into the Flask event system, where the mess of listener cleanup is handled under the hood. Flasked listeners can be obtained through several ways:
 
-- the [Flasked Listener API](#flasked-listeners-api), which can be used to turn existing listeners into flasked listeners as well as to create new flasked listeners
-- the [Pecherie library](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top), which creates flasked listeners for application events and process hooks
-- the [Archer library](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top), which provides a flasked listener for targeted messages
-- the [Thread library](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top), which provides flasked schedulers and flasked user event listeners from Web API
-- the [Watch library](https://github.com/ruby-cube/rue/tree/main/packages/watch#readme-top), which provides flasked versions of Vue’s watch, watchEffect, and computed
+- [the Flasked Listener API](#flasked-listeners-api), which can be used to turn existing listeners into flasked listeners as well as to create new flasked listeners
+- [the Pecherie library](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top), which creates flasked listeners for application events and process hooks
+- [the Archer library](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top), which provides a flasked listener for targeted messages
+- [the Thread library](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top), which provides flasked schedulers and flasked user event listeners from Web API
+- [the Watch library](https://github.com/ruby-cube/rue/tree/main/packages/watch#readme-top), which provides flasked versions of Vue’s watch, watchEffect, and computed
 
 Note that in browser and Node.js API, the word “listener” refers to the callback passed into the `addListener` function. This to me is a misnomer and it pains me to follow this convention. For clarity, here is how terms are used within the Flask system:
 
