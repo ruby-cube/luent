@@ -1,6 +1,5 @@
 import { PendingOp } from "./PendingOp";
 import { CovertFlask, CovertFlaskConfig, _setCovertFlaskConfigs, } from "./CovertFlasks"
-import { Callback } from "./flaskedListeners";
 
 export function initFlask(config: {
     covertFlasks: {
@@ -10,12 +9,3 @@ export function initFlask(config: {
 }) {
     _setCovertFlaskConfigs(config.covertFlasks);
 }
-
-
-// initFlask({
-//     covertFlasks: [
-//         {
-//         }
-
-//     ]
-// })

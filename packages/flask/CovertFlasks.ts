@@ -47,12 +47,12 @@ export type CovertFlaskConfigs = {
 //     {
 //         entityGetter: getCurrentInstance,
 //         autoCleanupScheduler(this: CovertFlask, cleanup: () => void) {
-//             return onComponentUnmounted(cleanup, { target: this.target })
+//             return onUnmounted(cleanup, { target: this.target })
 //         }
 //     },
 //     {
 //         setupChecker: inComponentSetup,
-//         autoCleanupScheduler: onComponentUnmounted
+//         autoCleanupScheduler: onUnmounted
 //     }
 // ])
 

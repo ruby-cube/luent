@@ -9,7 +9,7 @@ import { $PeaNode } from "../vine/PeaNode.role";
 import { $PeapodPea } from "../vine/PeapodPea.role";
 import { $PodNode } from "../vine/PodNode.role";
 import { onDestroyed } from "../lifecycle-hooks";
-import { inComponentSetup, onComponentUnmounted } from "../../paravue/component";
+import { inComponentSetup, onUnmounted } from "../../paravue/component";
 import { doAction, onActionCompleted, onActionStart } from "../../actionry/actionry";
 import { sceneSetup, defineScene } from "../../flask/Scene";
 import { initFlask } from "@rue/flask";
@@ -66,7 +66,7 @@ describe("vine system", () => {
       },
       {
         setupChecker: inComponentSetup,
-        autoCleanupScheduler: onComponentUnmounted
+        autoCleanupScheduler: onUnmounted
       }]
     })
   })

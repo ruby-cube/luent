@@ -66,6 +66,9 @@
       "@rue/voile": [
         "./packages/voile/index.ts"
       ],
+      "@rue/watch": [
+        "./packages/watch/index.ts"
+      ],
       "@rue/types": [
         "./packages/types/index.ts"
       ]

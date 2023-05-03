@@ -4,7 +4,8 @@
     "description": "",
     "dependencies": {
         "vue": "^3.2.47",
-        "@rue/flask": "workspace:*"
+        "@rue/flask": "workspace:*",
+        "@rue/paravue": "workspace:*"
     },
     "devDependencies": {
         "@rue/types": "workspace:*"

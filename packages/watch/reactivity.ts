@@ -1,4 +1,4 @@
-import {  computed, ComputedRef, DebuggerOptions, effectScope, watch, WatchOptions } from "vue";
+import {  computed, ComputedRef, DebuggerOptions, effectScope, watch, watchEffect, WatchOptions, WatchOptionsBase } from "vue";
 import { ListenerOptions, $listen, $subscribe, PendingCancelOp} from "@rue/flask";
 import { inComponentSetup } from "@rue/paravue";
 
@@ -19,6 +19,19 @@ export function onChange<
 }
 
 
+export function initReactiveEffect<
+    CB extends Parameters<typeof watchEffect>[0],
+    O extends ListenerOptions & WatchOptionsBase,
+>(effect: CB, options?: O) {
+    return $listen(effect, options, {
+        enroll(handler) {
+            return watch(effect, handler, options);
+        },
+        remove(unwatch) {
+            unwatch();
+        }
+    });
+}
 
 
 

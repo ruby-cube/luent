@@ -51,7 +51,7 @@ function cleanupScheduler(stop: CallbackRemover<void>) {
     const pendingCancelOps = [] as PendingCancelOp[];
     const flask = getFlask();
     const rootFlask = (<NestableFlask>flask)?._root || getScene() || getCovertFlask();
-    let nestedFlask = null;
+    let nestedFlask: Flask | null = null;
     let currentFlask: Flask | null | undefined = flask || rootFlask;
     if (currentFlask) {
         do {

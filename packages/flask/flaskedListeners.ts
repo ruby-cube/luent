@@ -3,8 +3,6 @@ import { makeActiveListener } from "./ActiveListener";
 import { makePendingCancelOp } from "./PendingCancelOp";
 import { makePendingOp, PendingOp } from "./PendingOp";
 import { existingPendingAutoCleanup, scheduleAutoCleanup, schedulingAutoCleanup } from "./scheduleAutoCleanup";
-import { existingPendingSceneCleanup, scheduleSceneCleanup, schedulingSceneCleanup } from "./x_scheduleSceneCleanup";
-import { sceneSetup } from "./Scene";
 
 
 export type ListenerOptions = {
@@ -223,13 +221,13 @@ export function initAutoCleanup(stop: CallbackRemover<void>) {
 //     return success;
 // }
 
-export function initSceneAutoCleanup(stop: CallbackRemover<void>) {
-    let success: void | PendingCancelOp = schedulingSceneCleanup ? existingPendingSceneCleanup! : undefined;
-    if (settingUpScene && !schedulingSceneCleanup) {
-        success = scheduleSceneCleanup!(stop);
-    }
-    return success;
-}
+// export function initSceneAutoCleanup(stop: CallbackRemover<void>) {
+//     let success: void | PendingCancelOp = schedulingSceneCleanup ? existingPendingSceneCleanup! : undefined;
+//     if (settingUpScene && !schedulingSceneCleanup) {
+//         success = scheduleSceneCleanup!(stop);
+//     }
+//     return success;
+// }
 
 
 

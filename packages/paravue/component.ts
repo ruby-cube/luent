@@ -1,5 +1,5 @@
 import { $listen, Callback, ListenerOptions } from "../flask"
-import { ComponentInternalInstance, getCurrentInstance, onBeforeUnmount, PropType, onUnmounted as _onUnmounted, defineComponent, ComponentPublicInstance } from "vue"
+import { ComponentInternalInstance, getCurrentInstance, onBeforeUnmount, PropType, onUnmounted as _onUnmounted, ComponentPublicInstance } from "vue"
 
 export const OPTIONAL = Symbol("optionalProp")
 
@@ -39,10 +39,11 @@ export function inComponentSetup() {
 
 
 
+
 const componentMap = new WeakMap();
-export function onComponentUnmounted(handler: Callback, options?: ListenerOptions & { target?: ComponentInternalInstance }) {
+export function onUnmounted(handler: Callback, options?: ListenerOptions & { target?: ComponentInternalInstance }) {
   const currentInstance = options?.target || getCurrentInstance();
-  if (!currentInstance) throw new Error("onComponentUnmounted must be called from within component setup function")
+  if (!currentInstance) throw new Error("onUnmounted must be called from within component setup function")
   const existingCallbacks = componentMap.get(currentInstance);
   const handlers = existingCallbacks ? existingCallbacks : new Set();
   if (!existingCallbacks) {
@@ -68,7 +69,7 @@ export function onComponentUnmounted(handler: Callback, options?: ListenerOption
 }
 
 if (__TEST__) {
-  onComponentUnmounted.getCallbacks = (component: ComponentInternalInstance) => componentMap.get(component);
+  onUnmounted.getCallbacks = (component: ComponentInternalInstance) => componentMap.get(component);
 }
 
 

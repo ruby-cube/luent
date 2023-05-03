@@ -185,12 +185,12 @@ importers:
 
   packages/paravue:
     specifiers:
-      '@rue/planify': workspace:*
+      '@rue/flask': workspace:*
       '@rue/types': workspace:*
       '@vueuse/core': ^10.0.2
       vue: ^3.2.47
     dependencies:
-      '@rue/planify': link:../planify
+      '@rue/flask': link:../flask
       '@vueuse/core': 10.0.2_vue@3.2.47
       vue: 3.2.47
     devDependencies:
@@ -330,6 +330,19 @@ importers:
       typescript: 4.9.5
       vite: 4.2.1_@types+node@18.15.11
       vue: 3.2.47
+
+  packages/watch:
+    specifiers:
+      '@rue/flask': workspace:*
+      '@rue/paravue': workspace:*
+      '@rue/types': workspace:*
+      vue: ^3.2.47
+    dependencies:
+      '@rue/flask': link:../flask
+      '@rue/paravue': link:../paravue
+      vue: 3.2.47
+    devDependencies:
+      '@rue/types': link:../types
 
 packages:
 
