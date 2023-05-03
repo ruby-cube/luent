@@ -14,10 +14,7 @@
     "ni:modos": "pnpm -F @rue/modos install",
     "ni:nautic": "pnpm -F @rue/nautic install",
     "ni:paravue": "pnpm -F @rue/paravue install",
-<<<<<<< HEAD
     "ni:flask": "pnpm -F @rue/flask install",
-=======
->>>>>>> main
     "ni:ruelle": "pnpm -F @rue/ruelle install",
     "ni:thread": "pnpm -F @rue/thread install",
     "ni:turtledom": "pnpm -F @rue/turtledom install",
