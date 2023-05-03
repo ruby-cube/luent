@@ -942,7 +942,7 @@ The functions provided by [Pêcherie](https://github.com/ruby-cube/rue/tree/main
 
 [`$listen(handler, options, config)`](#listenhandler-options-config)
 
-[`$schedule(callback, options, config)`](#schedulehandler-options-config)
+[$schedule(callback, options, config)](#schedulehandler-options-config)
 
 [`$subscribe(handler, options, config)`](#subscribehandler-options-config)
 
