@@ -46,11 +46,11 @@ Sends and receives targeted messages/commands.
 
 [**⏳ Thread**](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top)
 <br/>
-Provides planified versions of schedulers and event listeners from Web API.
+Provides flasked versions of schedulers and event listeners from Web API.
 
 **🥀 Ephemr**
 <br/>
-*(coming soon-ish)* Creates state machines using planified events and hooks
+*(coming soon-ish)* Creates state machines using flasked events and hooks
 
 <br/>
 
@@ -85,7 +85,7 @@ Provides planified versions of schedulers and event listeners from Web API.
 
 **🌴 Paravue**
 <br/>
-*(coming soon)* Provides planified versions of Vue’s `watch` and `computed` and component utils.
+*(coming soon)* Provides flasked versions of Vue’s `watch` and `computed` and component utils.
 
 **🎬 Actionry**
 <br/>

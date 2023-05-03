@@ -1,5 +1,9 @@
 import "setimmediate"
+<<<<<<< HEAD
 import { Callback, $schedule, SchedulerOptions } from "../flask";
+=======
+import { Callback, $schedule, SchedulerOptions } from "@rue/flask";
+>>>>>>> main
 
 //NOTE:
 // There is no microtask queue during nextRender phase. Any microtasks scheduled within a beforeScreenPaint cb will be run synchronously.

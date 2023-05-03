@@ -1,4 +1,4 @@
-import { Callback, Callbacks, ListenerOptions, OneTimeTargetedListener, $listen, SustainedTargetedListener, initAutoCleanup, initSceneAutoCleanup, PendingCancelOp } from '../flask';
+import { Callback, Callbacks, ListenerOptions, OneTimeTargetedListener, $listen, SustainedTargetedListener, initAutoCleanup, initSceneAutoCleanup, PendingCancelOp } from '@rue/flask';
 import { ContextData, HookConfig, ReturnOfCaster, runHandlers, UseHookState } from './Hook';
 import { noop } from '@rue/utils';
 import { Cast, MiscObj } from '@rue/types';

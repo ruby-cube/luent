@@ -1,7 +1,7 @@
 //@-ts-nocheck
 import { PerformanceCheck, usePerformanceCheck } from "@rue/dev";
 import { Cast, MiscObj } from '@rue/types';
-import { Callback, CallbackRemover, ListenerOptions, $listen, SustainedListenerReturn, MaybeBadScheduler, OneTimeListenerReturn } from '../flask';
+import { Callback, CallbackRemover, ListenerOptions, $listen, SustainedListenerReturn, MaybeBadScheduler, OneTimeListenerReturn } from '@rue/flask';
 import { ContextData, HookConfig, ReturnOfCaster, UseHookState } from '@rue/pecherie';
 
 

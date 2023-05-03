@@ -1,6 +1,6 @@
 <nav><a id="readme-top" href="#"><b>goto: src</b></a></nav>
 
-[@rue](https://github.com/ruby-cube/rue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp;  [planify](https://github.com/ruby-cube/rue/tree/main/packages/planify#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; **thread**  &nbsp;&nbsp;|&nbsp; &nbsp; [pecherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; [archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top)
+[@rue](https://github.com/ruby-cube/rue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp;  [flask](https://github.com/ruby-cube/rue/tree/main/packages/flask#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; **thread**  &nbsp;&nbsp;|&nbsp; &nbsp; [pecherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; [archer](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top)
 # Thread ⏳
 
 <aside>
@@ -11,7 +11,7 @@
 
 ## Overview
 
-Thread provides planified versions of schedulers and event listeners from Web APIs.
+Thread provides flasked versions of schedulers and event listeners from Web APIs.
 
 <p align="right"><a href="#">[src]</a></p>
 
@@ -71,7 +71,7 @@ addPS(() => {
 
 ## `queueTask()`
 
-planified `setImmediate` (as implemented by https://github.com/yuzujs/setImmediate). It essentially queues a task in the event loop’s task queue.
+flasked `setImmediate` (as implemented by https://github.com/yuzujs/setImmediate). It essentially queues a task in the event loop’s task queue.
 
 ### Syntax
 ```tsx
@@ -100,7 +100,7 @@ queueTask(() => {
 
 ## `beforeScreenPaint()`
 
-planified `requestAnimationFrame`, which schedules code to run before the next screen paint.
+flasked `requestAnimationFrame`, which schedules code to run before the next screen paint.
 
 ### Syntax
 ```tsx
@@ -128,7 +128,7 @@ beforeScreenPaint(() => {
 
 ## `onTimeout()`
 
-planified `setTimeout`
+flasked `setTimeout`
 
 ```tsx
 onTimeout(delay, callback, options);
@@ -155,7 +155,7 @@ onTimeout(500, () => {
 
 ## Event Listeners API
 
-The Event Listeners API provides planified browser event listeners with the `useEventListener` function. `useEventListener` returns the requested event listener if it already exists in the app, otherwise, it creates the listener and stores it for future access to avoid redundant instances.
+The Event Listeners API provides flasked browser event listeners with the `useEventListener` function. `useEventListener` returns the requested event listener if it already exists in the app, otherwise, it creates the listener and stores it for future access to avoid redundant instances.
 
 ### Usage
 

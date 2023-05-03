@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { ActiveListener } from "../../flask/flaskedListeners";
 import { sceneSetup } from "../../flask/Scene";
+=======
+import { ActiveListener } from "../../flask/flask";
+import { beginScene } from "../../flask/Scene";
+>>>>>>> main
 import { useEventListener } from "../event-listeners";
 
 
