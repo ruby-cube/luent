@@ -1,5 +1,6 @@
-import {  watch, WatchOptions } from "vue";
-import { ListenerOptions, $listen} from "../flask";
+import {  computed, ComputedRef, DebuggerOptions, effectScope, watch, WatchOptions } from "vue";
+import { ListenerOptions, $listen, $subscribe, PendingCancelOp} from "@rue/flask";
+import { inComponentSetup } from "@rue/paravue";
 
 
 export function onChange<
@@ -21,24 +22,24 @@ export function onChange<
 
 
 
-// export function compute<T>(getter: () => T, options?: { until: (stop: () => void) => void, $lifetime?: true } & DebuggerOptions): ComputedRef<T> {
-//     if (options && "until" in options) {
-//         let computedRef: ComputedRef<T>;
-//         const scope = effectScope(true);
-//         scope.run(() => {
-//             $subscribe(getter, options, {
-//                 enroll: (getter) => {
-//                     if (__DEV__) computedRef = computed(getter, options); //assumes `scope.run` runs synchronously. TODO: check if this is true
-//                     else computedRef = computed(getter); //assumes `scope.run` runs synchronously. TODO: check if this is true
-//                 },
-//                 remove: () => scope.stop(),
-//             })
-//         })
-//         return computedRef!;
-//     }
-//     else if (inComponentSetup()) {
-//         if (__DEV__) return computed(getter, options);
-//         return computed(getter);
-//     }
-//     return computed(getter)
-// }
+export function compute<T>(getter: () => T, options?: { until: (stop: () => void) => PendingCancelOp, $lifetime?: true } & DebuggerOptions): ComputedRef<T> {
+    if (options && "until" in options) {
+        let computedRef: ComputedRef<T>;
+        const scope = effectScope(true);
+        scope.run(() => {
+            $subscribe(getter, options, {
+                enroll: (getter) => {
+                    if (__DEV__) computedRef = computed(getter, options);
+                    else computedRef = computed(getter);
+                },
+                remove: () => scope.stop(),
+            })
+        })
+        return computedRef!;
+    }
+    else if (inComponentSetup()) {
+        if (__DEV__) return computed(getter, options);
+        return computed(getter);
+    }
+    return computed(getter)
+}

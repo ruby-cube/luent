@@ -25,6 +25,12 @@ This library is very much inspired by my experiences with [Vue.js](https://vuejs
 
 ## Table of Contents
 
+<aside>
+⚠️ <b>Note:</b> These docs use faux TS type definitions that aren’t actual usable TS types. They are simplified types for the purpose of clarity.
+</aside>
+</br>
+</br>
+
 - [Examples](#examples)
     - [Individual Cleanup with Flasked Listeners](#individual-cleanup-with-flasked-listeners)
     - [Batch Cleanup with Flasks](#batch-cleanup-with-flasks)
