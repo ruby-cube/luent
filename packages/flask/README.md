@@ -128,7 +128,7 @@ export default defineComponent({
 
 … **via nestable flask cleanup**
 
-Listeners and reactive effects registered within a nestable flask can be handled independently of an outer flask via the [Enflask API](#enflask-api). Listeners and reactive effects are collected in a flask (created either by [`flaskSetup()`](#flasksetupsetupflask) or [`enflask()`](#enflasksetupflask)) and disposed of when the flask is disposed of:
+Listeners and reactive effects registered within a nestable flask can be handled independently of an outer flask via the [Enflask API](#enflask-api). Listeners and reactive effects are collected in a flask (created either by `flaskSetup()` or `enflask()`) and disposed of when the flask is disposed of:
 
 ```tsx
 import { flaskSetup } from "@rue/flask";
@@ -335,7 +335,7 @@ Conversely, subscriptions are sustained listeners that cannot morph into a one-t
 
 ### Synchronous vs Asynchronous Handling
 
-Handlers are called synchronously at the time of event emission. This allows for “before event” hooks as well as the possibility of handlers communicating back to the source of the event (see [`reply`](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#hook-configuration)). 
+Handlers are called synchronously at the time of event emission. This allows for “before event” hooks as well as the possibility of handlers communicating back to the source of the event (see [reply](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#hook-configuration)). 
 
 If asynchronous handling is needed, the developer can call an async scheduler or one-time listener from within the handler. In the example below, the synchonous handler calls the `addPS` scheduler (an alias for `queueMicrotask`) for asynchronous handling.
 
@@ -650,11 +650,11 @@ initFlask({
 
 ## Flask API
 
-[`initFlask(config)`](#initflaskconfig)
+[initFlask()](#initflask)
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `initFlask(config)`
+## `initFlask()`
 
 ### Syntax
 
@@ -694,13 +694,13 @@ initFlask({
 
 ## Scene API
 
-[`sceneSetup(setUpScene)`](#scenesetupsetupscene)
+[sceneSetup()](#scenesetup)
 
-[`enscene(setUpScene)`](#enscenesetupscene)
+[enscene()](#enscene)
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `sceneSetup(setUpScene)`
+## `sceneSetup()`
 
 ### Syntax
 
@@ -759,7 +759,7 @@ function initDrag(event){
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `enscene(setUpScene)`
+## `enscene()`
 
 ### Syntax
 
@@ -809,15 +809,15 @@ onMouseDown(document, enscene((drawing, event) => {
 
 ## Enflask API
 
-[`flaskSetup(setUpFlask)`](#flasksetupsetupflask)
+[flaskSetup()](#flasksetup)
 
-[`enflask(setUpFlask)`](#enflasksetupflask)
+[enflask()](#enflask)
 
-`OUTLIVE`
+OUTLIVE`
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `flaskSetup(setUpFlask)`
+## `flaskSetup()`
 
 ### Syntax
 
@@ -878,7 +878,7 @@ function useTable() {
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `enflask(setUpFlask)`
+## `enflask()`
 
 ### Syntax
 
