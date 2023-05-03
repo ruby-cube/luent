@@ -1,4 +1,4 @@
-import { $listen, Callback, ListenerOptions } from "../flask"
+import { $listen, Callback, ListenerOptions } from "@rue/flask"
 import { ComponentInternalInstance, getCurrentInstance, onBeforeUnmount, PropType, onUnmounted as _onUnmounted, ComponentPublicInstance } from "vue"
 
 export const OPTIONAL = Symbol("optionalProp")
