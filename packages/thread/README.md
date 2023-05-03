@@ -24,6 +24,12 @@ Thread provides planified versions of schedulers and event listeners from Web AP
 
 ## Table of Contents
 
+<aside>
+⚠️ <b>Note:</b> These docs use faux TS type definitions that aren’t actual usable TS types. They are simplified types for the purpose of clarity.
+</aside>
+</br>
+</br>
+
 - [Thread API](#thread-api)
 - [Event Listeners API](#event-listeners-api)
 - [Naming Conventions](#naming-conventions)

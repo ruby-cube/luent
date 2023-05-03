@@ -26,6 +26,12 @@ Pêcherie is based on the Planify event system. See [Planify](https://github.com
 
 ## Table of Contents
 
+<aside>
+⚠️ <b>Note:</b> These docs use faux TS type definitions that aren’t actual usable TS types. They are simplified types for the purpose of clarity.
+</aside>
+</br>
+</br>
+
 - [Pêcherie API](#pecherie-api)
 - [Hook Configuration](#hook-configuration)
 - [Target IDs](#target-ids)
