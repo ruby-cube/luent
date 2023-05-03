@@ -50,7 +50,7 @@ This library is very much inspired by my experiences with [Vue.js](https://vuejs
 
 ## Examples
 
-(Note that the event listeners in the examples below are not directly provided by Flask. They are examples of “flasked listeners” created using [Flask’s API](#flasked-listeners-api). Note also: the Flask cleanup system will only work with flasked listeners. For how to create or obtain flasked listeners, see [Flasked Listeners](#flasked-listeners). Lastly, these examples do not represent real use cases; they were fabricated for demonstration purposes.)
+Note that the event listeners in the examples below are not directly provided by Flask. They are examples of “flasked listeners” created using [Flask’s API](#flasked-listeners-api). Note also: the Flask cleanup system will only work with flasked listeners. For how to create or obtain flasked listeners, see [Flasked Listeners](#flasked-listeners). Lastly, these examples do not represent real use cases; they were fabricated for demonstration purposes.
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
