@@ -41,7 +41,7 @@ Watch provides [flasked](https://github.com/ruby-cube/rue/tree/main/packages/fla
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## `compute()`
-Flasked version of Vue's `computed`
+Flasked version of Vue's `computed`.
 
 ### Syntax
 ```tsx
@@ -68,7 +68,7 @@ const doubleCount = compute(() => count.value * 2, { until: onDeactivated})
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## `onChange()`
-Flasked version of Vue's `watch`
+Flasked version of Vue's `watch`. Runs handler whenever value of reactive reference changes.
 
 ### Syntax
 ```tsx
@@ -118,7 +118,7 @@ onMouseUp(el, () => {
 <p align="right"><a href="#readme-top">[top]</a></p>
 
 ## `initReactiveEffect()`
-Flasked version of Vue's `watchEffect`
+Flasked version of Vue's `watchEffect`. Runs the effect synchronously, and re-run every time the value of any reactive references accessed in the effect changes.
 
 
 ### Syntax
