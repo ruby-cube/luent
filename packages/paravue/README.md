@@ -19,8 +19,7 @@ Paravue provides a handful of component utils, including a [flasked](https://git
 ## Installation
 
 ```bash
-(coming soon ...)
-
+(coming)
 ```
 <p align="right"><a href="#">[src]</a></p>
 
