@@ -199,7 +199,71 @@ re(HIDE_ITEM, item, (data) => {
 
 ## Targeted Listening
 
-Archer’s `re` function is a targeted listener for performance reasons. See [Planify: Targeted Listeners](https://github.com/ruby-cube/rue/tree/main/packages/flask#targeted-listeners) for more information on targeted listeners and how to generate deterministic target ids.
+Sometimes it is better for performance to target a particular instance when communicating via emitters. For this reason, Archer and [Pêcherie](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top) allow for targeted listening. Targeted listeners take in a targetID, which can be any type, so long as the emitter module and listener module agree on what to use as an identifier. 
+
+```ts
+// using an object as the targetID with Archer API
+
+// shared dependency
+const HIDE_ITEM = defineMessage({
+    message: "hide-item",
+    targetID: $type as Object 
+});
+
+// listener module
+re(HIDE_ITEM, item, () => {
+    // mutate local state to hide the item
+});
+
+// emitter module
+send(HIDE_ITEM, { to: item });
+```
+
+If you would like to generate a deterministic string ID, Rue Utils provides a simple ID generator that generates an ID based on a base id, optional prefixes, and an optional index.  
+
+```ts
+// using a generated string ID
+
+// listener module
+import { genTargetID } from "@rue/utils";
+import { re } from "@rue/archer"
+
+export default defineComponent({
+    props: ["index", "item"],
+    setup(props){
+        const { item, index } = props;
+
+        re(HIDE_ITEM, genTargetID({  // "Mirror-InfoPanel_item01_9"
+            id: item.id, // "item01"
+            prefixes: ["Mirror", "InfoPanel"], 
+            index: index // 9
+        }), () => {
+            // mutate local state to hide the item
+        });
+    }
+})
+
+// emitter module
+import { genTargetID } from "@rue/planify";
+import { dispatch } from "@rue/archer"
+
+const HIDE_ITEM = defineMessage({
+    message: "hide-item",
+    targetID: $type as string 
+});
+
+function workHard(item, index){
+    // do work
+        
+    send(HIDE_ITEM, {
+       to: genTargetID({
+          id: item.id, 
+          prefixes: ["Mirror", "InfoPanel"], 
+          index
+       }), // "Mirror-InfoPanel_item01_9"
+    });
+}
+```
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 

@@ -1135,3 +1135,7 @@ Unless the developer is impeccably conscientious about cleanup, memory leaks wil
 ## Planned Features
 
 Event-driven code is notoriously difficult to debug. Additional support for easing the debugging experience is in the works.
+
+<p align="right"><a href="#readme-top">[top]</a></p>
+
+© 2023 - present [Ruby Y Wang](https://github.com/ruby-cube)

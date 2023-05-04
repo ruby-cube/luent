@@ -1,7 +1,7 @@
 <nav><a id="readme-top" href="#"><b>goto: src</b></a></nav>
 
 [@rue](https://github.com/ruby-cube/rue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp;  [paravue](https://github.com/ruby-cube/rue/tree/main/packages/paravue#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; **watch**  &nbsp;&nbsp;|&nbsp; &nbsp; [signals](https://github.com/ruby-cube/rue/tree/main/packages/signals#readme-top)  &nbsp;&nbsp;|&nbsp; &nbsp; actionry
-# Watch ⏳
+# Watch 🦇
 
 <aside>
 ⚠️ <b>Experimental:</b> Watch is a work-in-progress, not well-tested nor optimized, with a volatile API. Look and play, but definitely don’t use…

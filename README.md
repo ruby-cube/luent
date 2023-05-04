@@ -18,7 +18,7 @@
 
 Rue.js is a collection of tools I created in the process of building a fairly complex app. These Typescript-enhanced tools aim to support maintainability and extensibility as an app becomes more complex and thus more prone to scattered logic and tight coupling of unrelated modules. 
 
-The repo contains the following categories: Event-driven/asynchronous programming, data management, control flow, and Vue reactivity.
+The repo contains the following categories: Event-driven/asynchronous programming, object-oriented programming, Vue ecosystem, and control flow.
 
 <p align="right"><a href="#">[src]</a></p>
 
@@ -48,16 +48,33 @@ Sends and receives targeted messages/commands.
 <br/>
 Provides flasked versions of schedulers and event listeners from Web API.
 
-**🥀 Ephemr**
-<br/>
-*(coming soon-ish)* Creates state machines using flasked events and hooks
 
 <br/>
 
-***Data Management***
+***Object-Oriented Programming***
 
 [**🪴 Être**](https://github.com/ruby-cube/rue/tree/main/packages/etre#readme-top)
 <br/>A system of composition for rich domain models
+
+<br/>
+
+***Vue Ecosystem***
+
+[**🕊️ Signals**](https://github.com/ruby-cube/rue/tree/main/packages/signals#readme-top)
+<br/>
+Alternative to Vue's `ref` and `reactive`. Aims to bring more consistency, clarity, and selectivity to reactivity in Vue apps by exposing a signal-based API.
+
+[**🌴 Paravue**](https://github.com/ruby-cube/rue/tree/main/packages/paravue#readme-top)
+<br/>
+Provides Vue component utils, including a flasked version of Vue’s `onUnmounted`.
+
+[**🦇 Watch**](https://github.com/ruby-cube/rue/tree/main/packages/watch#readme-top)
+<br/>
+Provides flasked versions of Vue’s `watch`, `watchEffect` and `computed`.
+
+**🎬 Actionry**
+<br/>
+*(coming soon-ish)* Define actions. Useful for batching reactive effects based on actions.
 
 **🔔 Modos**
 <br/>
@@ -66,6 +83,10 @@ Provides flasked versions of schedulers and event listeners from Web API.
 - **Vine**: two-way tree structure
 - **Persistence**: batches changes for calls to the database
 - **History**: batches changes for undo/redo
+
+**🥀 Ephemr**
+<br/>
+*(coming soon-ish)* Creates state machines using flasked events and hooks
 
 <br/>
 
@@ -78,26 +99,6 @@ Provides flasked versions of schedulers and event listeners from Web API.
 **⛵ Voile**
 <br/>
 *(coming soon-ish)* Compositional control flow for making complex control flows more efficient.
-
-<br/>
-
-***Vue Ecosystem***
-
-**🌴 Paravue**
-<br/>
-*(coming soon)* Provides flasked versions of Vue’s `watch` and `computed` and component utils.
-
-**🎬 Actionry**
-<br/>
-*(coming soon-ish)* Define actions. Useful for batching reactive effects based on actions.
-
-<p align="right"><a href="#readme-top">[top]</a></p>
-
-## Compatibility
-
-While most of the tools are theoretically framework-agnostic, they were built with Vue 3 in mind and have not been tested with other frameworks. Note that since Vue 3 reactivity is decoupled from the Vue component framework, tools that leverage Vue 3's reactivity system can be use outside of Vue apps. That said, I highly recommend the Vue component framework for its clarity of concepts and thoughtful design.
-
-Typescript is highly encouraged for less headaches when defining types.
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
