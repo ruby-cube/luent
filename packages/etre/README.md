@@ -37,7 +37,7 @@ Prefer composition over inheritance, they say. How about both? Être is an explo
 
 ## Concepts: Roles & Prereqs
 
-In this system, composition and inheritance is achieved through the concepts of roles and prereqs. A role can have other roles as prereqs. The instantiated role will possess all the properties and methods of the role as well as all the properties and methods of its prereqs and its prereqs’ prereqs… all the way up the lines of inheritance.
+In this system, composition and inheritance are achieved through the concepts of roles and prereqs. A role can have other roles as prereqs. The instantiated role will possess all the properties and methods of the role as well as all the properties and methods of its prereqs and its prereqs’ prereqs… all the way up the lines of inheritance.
 
 This differs from traditional inheritance in that a role can have many prereqs whereas a class can extend only one other class. It differs from traditional composition through dependency injection in that prereqs cannot be redundant. With dependency injection, if a class A is composed of class B and C, which both inherit class D, class D’s constructor will run twice in order to instantiate class A. In the Être system, prereqs are collected into a set at the time of creating the instantiator function, ensuring non-redundancy.
 
@@ -79,12 +79,12 @@ export const Frog = role({
 export const Prince = role({
     $construct(data) {
         return {
-            mountainOfTalent: data.mountainOfTalent
+            talent: data.talent
         }
     },
-    isValiantAndDaring() { /* ... */ },
-    isNobleOfBearing() { /* ... */ },
-    isCourageousAndGallant() { /* ... */ },
+    isValiant() { /* ... */ },
+    isNoble() { /* ... */ },
+    isGallant() { /* ... */ },
 });
 ```
 
@@ -112,12 +112,12 @@ export const createFrogPrince = FrogPrince.reifier();
 const frogPrince = createFrogPrince({
     name: "Sir Robin the Brave",
     location: "wishing well",
-    mountainOfTalent: ["singing", "sword fights"]
+    talent: ["singing", "sword fights"]
 })
 
 // method calls & property access
 frogPrince.croak(); // "ribbit"
-frogPrince.isValiantAndDaring(); // true
+frogPrince.isValiant(); // true
 frogPrince.sing();
 frogPrince.name; // "Sir Robin the Brave"
 ```

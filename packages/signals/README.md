@@ -45,7 +45,7 @@ There are, of course, tradeoffs with this approach: The concept of signals adds 
 
 ## Inspiration
 
-This library stands on the shoulders of giants. It is a mere tweaking of existing APIs and concepts from [Vue.js](https://vuejs.org/guide/extras/reactivity-in-depth.html), [Solid.js](https://www.solidjs.com/guides/reactivity), [Angular](https://angular.io/docs), and [VueUse](https://vueuse.org/core/templateRef/). Vue’s documentation already lays out how to create signals from Vue refs [here](https://vuejs.org/guide/extras/reactivity-in-depth.html#connection-to-signals).
+This library stands on the shoulders of giants. It is a mere tweaking of existing APIs and concepts from [Vue.js](https://vuejs.org/guide/extras/reactivity-in-depth.html), [Solid.js](https://www.solidjs.com/guides/reactivity), and [Angular](https://angular.io/docs). Vue’s documentation already lays out how to create signals from Vue refs [here](https://vuejs.org/guide/extras/reactivity-in-depth.html#connection-to-signals).
 
 <p align="right"><a href="#readme-top">[top]</a></p>
 
