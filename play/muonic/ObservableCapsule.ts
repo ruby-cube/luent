@@ -1,0 +1,21 @@
+import { reactive } from "vue";
+
+export type AnyObject = { [key: string | symbol]: any }
+export type Observable<T> = { [ObservableMarker]: true } & T
+const ObservableMarker = Symbol("observable")
+
+export interface ObservableCapsule {
+    $: AnyObject
+    makeObservable: () => void;
+}
+
+export function makeObservable(this: ObservableCapsule) {
+    if (this.$[ObservableMarker]) return;
+    this.$ = o$(this.$);
+}
+
+function o$<T extends AnyObject>(target: T): Observable<T> {
+    const observable = reactive(target);
+    observable[ObservableMarker] = true;
+    return observable as unknown as Observable<T>;
+}
