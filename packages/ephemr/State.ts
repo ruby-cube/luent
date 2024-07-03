@@ -4,7 +4,7 @@ import { createHook } from '@rue/pecherie';
 import { ScheduleStop, sceneSetup, Scene } from '../flask';
 import { addPS } from '@rue/thread';
 import { $type } from '@rue/utils';
-import { MiscObj } from '@rue/types';
+import { AnyObject } from '@rue/types';
 
 type StateValue = string | null
 
@@ -36,10 +36,10 @@ class State extends ExtensibleRef {
     constructor(
         public id: string,
         private states: StateTransitions,
-        private initial: StateValue | ((context?: MiscObj) => StateValue),
+        private initial: StateValue | ((context?: AnyObject) => StateValue),
         precondition: Precondition | PreconditionGetter | undefined,
         private until: ScheduleStop | undefined,
-        private context: MiscObj | undefined
+        private context: AnyObject | undefined
     ) {
         super();
 
@@ -120,7 +120,7 @@ class State extends ExtensibleRef {
         if (__DEV__) __validateCanBecomeCall(this.currentlyInitiating);
         if (__DEV__) __validateStateValue(stateValue, this.states);
         const initState = () => { this.$becomes(stateValue) }
-        initState.if = (condition: (context: MiscObj | undefined) => boolean) => {
+        initState.if = (condition: (context: AnyObject | undefined) => boolean) => {
             return () => {
                 if (condition(this.context)) {
                     this.$becomes(stateValue);
@@ -345,7 +345,7 @@ function __validateCanBecomeCall(currentlyInitiating: StateValue) {
     }
 }
 
-export function onlyIf(condition: (context: MiscObj | undefined) => boolean) {
+export function onlyIf(condition: (context: AnyObject | undefined) => boolean) {
     return condition;
 }
 

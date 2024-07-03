@@ -1,4 +1,4 @@
-import { MiscObj } from '@rue/types';
+import { AnyObject } from '@rue/types';
 import { ComponentPublicInstance, computed, ComputedRef, getCurrentInstance } from 'vue';
 
 
@@ -16,7 +16,7 @@ function genTreePathId() {
     return pathId;
 }
 
-function hasParent(node: MiscObj): node is { $parent: ComponentPublicInstance } {
+function hasParent(node: AnyObject): node is { $parent: ComponentPublicInstance } {
     return "$parent" in node && node.$parent;
 }
 

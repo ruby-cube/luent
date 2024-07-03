@@ -1,5 +1,5 @@
 
-export type MiscObj = { [key: string | number | symbol]: any }
+export type AnyObject = { [key: string | symbol]: any }
 
 export type Identity<T> = { // Flattens intersection
   [P in keyof T]: T[P]

@@ -1,4 +1,4 @@
-import { MiscObj } from "@rue/types";
+import { AnyObject } from "@rue/types";
 
 
 const completedChecks: Set<Function> | null = (__DEV__) ? new Set() : null;
@@ -7,8 +7,8 @@ export function useVoile<
     CFG extends {
         __prereqs__?: (Function | Function[])[] | true;
         check: {
-            (...args: any[]): boolean | MiscObj;
-            context?: MiscObj
+            (...args: any[]): boolean | AnyObject;
+            context?: AnyObject
         },
     },
     CB extends CFG extends { check: infer C } ? C : never

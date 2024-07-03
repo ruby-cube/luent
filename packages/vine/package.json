@@ -1,0 +1,12 @@
+{
+    "name": "@rue/vine",
+    "private": true,
+    "description": "",
+    "dependencies": {
+    },
+    "devDependencies": {
+        "@rue/types": "workspace:*"
+    },
+    "author": "Ruby Yi Wang",
+    "license": "MIT"
+}

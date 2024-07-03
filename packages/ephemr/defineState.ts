@@ -1,9 +1,9 @@
 import { ScheduleStop } from '../flask';
-import { MiscObj } from '@rue/types';
+import { AnyObject } from '@rue/types';
 import { Precondition, StateRef, StateTransitions } from './State';
 
 
-export function defineState<T extends StateTransitions<C>, C extends MiscObj>(
+export function defineState<T extends StateTransitions<C>, C extends AnyObject>(
     def: {
         id: string,
         precondition?: (context: C) => Precondition,

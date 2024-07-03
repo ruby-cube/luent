@@ -1,25 +1,25 @@
 import {  isClass } from '@rue/utils';
-import { Cast, Class, MiscObj } from '@rue/types';
+import { Cast, Class, AnyObject } from '@rue/types';
 
 import { $Role, _PREREQS_ } from "./Role";
 
-export type RoleDef = { __typeDef__: MiscObj };
-export type TypeChecker<T = MiscObj> = (value: any) => value is T;
+export type RoleDef = { __typeDef__: AnyObject };
+export type TypeChecker<T = AnyObject> = (value: any) => value is T;
 export type ContextualType = {
     check: TypeChecker,
-    __typeDef__: MiscObj
+    __typeDef__: AnyObject
 }
 
 export type TypeDef<T> = T extends { __typeDef__: infer T } ? T : (T extends Class ? Class["prototype"] : never);
 
-export const rolesMap: WeakMap<MiscObj, Set<$Role>> = new WeakMap();
+export const rolesMap: WeakMap<AnyObject, Set<$Role>> = new WeakMap();
 
-export function enacts<T extends { __typeDef__: MiscObj }>(value: any, type: T): value is TypeDef<T> {
+export function enacts<T extends { __typeDef__: AnyObject }>(value: any, type: T): value is TypeDef<T> {
     if (value == null || !(value instanceof Object))
         return false;
 
     if (is$Role(type)) {
-        const roles = rolesMap.get(<MiscObj><Cast>value)
+        const roles = rolesMap.get(<AnyObject><Cast>value)
         if (roles) return roles.has(<$Role>type);
         else return false;
     }

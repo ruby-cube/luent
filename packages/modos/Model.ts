@@ -1,5 +1,5 @@
 import { getKeyPathValue, KeyPath, setKeyPath, toKeyPath, clone } from "@rue/utils";
-import { Cast, Class, MiscObj } from "@rue/types";
+import { Cast, Class, AnyObject } from "@rue/types";
 import { DataEntry, DatasetName, toDatasetName } from "./datasets";
 import { $Role, _DATA_MARKER_, _ID_, _INTERFACE_, _MARKER_, _PREREQS_, _Role } from "@rue/etre";
 import { Modo } from './Modo.role';
@@ -14,7 +14,7 @@ export const PEA_MARKER = Symbol("modos-PEA_MARKER");
 export const $id = "";
 export const $clone = () => { };
 
-export type ModelData<F extends ((data: any) => MiscObj) | Class | { (data: any): MiscObj }> = F extends Class ? Omit<ConstructorParameters<F>[0], typeof _DATA_MARKER_> : F extends (...args: any[]) => any ? F extends { [_REVIVE_]: infer R } ? R extends ReviveConfig[] ? _FlatData<Omit<Parameters<F>[0], typeof _DATA_MARKER_>, R> : Omit<Parameters<F>[0], typeof _DATA_MARKER_> : Omit<Parameters<F>[0], typeof _DATA_MARKER_> : never;
+export type ModelData<F extends ((data: any) => AnyObject) | Class | { (data: any): AnyObject }> = F extends Class ? Omit<ConstructorParameters<F>[0], typeof _DATA_MARKER_> : F extends (...args: any[]) => any ? F extends { [_REVIVE_]: infer R } ? R extends ReviveConfig[] ? _FlatData<Omit<Parameters<F>[0], typeof _DATA_MARKER_>, R> : Omit<Parameters<F>[0], typeof _DATA_MARKER_> : Omit<Parameters<F>[0], typeof _DATA_MARKER_> : never;
 
 // export type ModelData<T extends _ModelDef> = { id?: string } & (T extends { [_REVIVE_]: infer R } ? R extends ReviveConfig[] ? _FlatData<T, R> : _ModelData<T> : _ModelData<T>);
 // export type _ModelData<T extends _ModelDef> = (T extends { [_CORE_]: Class } ? { [Key in keyof CoreData<T>]: CoreData<T>[Key] } : {}) & (T extends { [_PREREQS_]: { [key: string]: $Role } } ? _DataFromRoles<T> : {});
@@ -23,7 +23,7 @@ export type ModelData<F extends ((data: any) => MiscObj) | Class | { (data: any)
 // export type ReviveConfig[] = (KeyPathWithPeaMarker | KeyPath)[];
 
 
-type _FlatData<T extends MiscObj, R extends ReviveConfig[]> =
+type _FlatData<T extends AnyObject, R extends ReviveConfig[]> =
     Omit<T, FirstLevelKeys<R>> & { [Key in OneLevelNestedKeys<R>]: FlatValue<T[Key]> }
     & { [Key in TwoLevelNestedKeys<R>]: Omit<T[Key], SecondLevelKey<R, Key>> & { [Key2 in SecondLevelKey<R, Key>]: FlatValue<T[Key][Key2]> } }
     & { [Key in ThreeLevelNestedKeys<R>]: Omit<T[Key], SecondLevelKey<R, Key>> & { [Key2 in SecondLevelKey<R, Key>]: Omit<T[Key][Key2], ThirdLevelKey<R, Key, Key2>> & { [Key3 in ThirdLevelKey<R, Key, Key2>]: FlatValue<T[Key][Key2][Key3]> } } }
@@ -53,7 +53,7 @@ export type ModoDef = {
     make: (data: DataEntry) => Modo;
     [_REVIVE_]: ReviveConfig[] | undefined;
     [_IS_LIABLE_POD_]: boolean;
-    clone: (data: MiscObj) => Modo;
+    clone: (data: AnyObject) => Modo;
 }
 
 
@@ -156,11 +156,11 @@ export function enrollModelMaker<
 //     MR extends { [key: symbol]: any } | undefined = undefined,
 //     COR extends Class | undefined = undefined,
 //     ROL extends { [key: string]: $Role } | undefined = undefined,
-//     IFC extends MiscObj | undefined = undefined,
+//     IFC extends AnyObject | undefined = undefined,
 //     // RVE extends {[key: number]: {[key: number]: KPT}} | undefined = undefined,
 //     RVE extends KPT[] | undefined = undefined,
 //     // RVE extends (KeyPathWithPeaMarker | KeyPath)[] | undefined = undefined,
-//     OPS extends MiscObj | undefined = undefined,
+//     OPS extends AnyObject | undefined = undefined,
 // >(config: {
 //     name: NME,
 //     marker?: MR,
@@ -237,8 +237,8 @@ export function enrollModelMaker<
 //     marker?: { [key: symbol]: any };
 //     core?: Class;
 //     prereqs?: { [key: string]: $Role };
-//     interface?: MiscObj;
-//     ops?: MiscObj;
+//     interface?: AnyObject;
+//     ops?: AnyObject;
 //     revive?: KPT[],  //NOTE: Include ModelDefs is purely for inducing the import of pea modules
 
 // },
@@ -266,7 +266,7 @@ export function enrollModelMaker<
 //         // { [Key in keyof _Role<{ [_CORE_]: COR, [_PREREQS_]: PRQ, [_INTERFACE_]: IFC, [_MARKER_]: MRK }>]: _Role<{ [_CORE_]: COR, [_PREREQS_]: PRQ, [_INTERFACE_]: IFC, [_MARKER_]: MRK }>[Key] };
 //         reify: CFG extends { core: infer C } ?
 //         C extends Class ? (...args: ConstructorParameters<C>) => C["prototype"]
-//         // : C extends MiscObj ? () => { [Key in keyof C as C[Key] extends { [_DATA_MARKER_]: true } ? never : Key]: C[Key] }
+//         // : C extends AnyObject ? () => { [Key in keyof C as C[Key] extends { [_DATA_MARKER_]: true } ? never : Key]: C[Key] }
 //         : null
 //         : null;
 //         [_CORE_]: COR;
@@ -301,8 +301,8 @@ export function enrollModelMaker<
 //         marker?: { [key: symbol]: any };
 //         core?: Class;
 //         prereqs?: { [key: string]: $Role };
-//         interface?: MiscObj;
-//         ops?: MiscObj;
+//         interface?: AnyObject;
+//         ops?: AnyObject;
 
 //         name: string,
 //         revive?: KPT[],  //NOTE: Include ModelDefs is purely for inducing the import of pea modules
@@ -338,7 +338,7 @@ export function enrollModelMaker<
 //     // MKE extends CFG extends {make: infer M} ? M : undefined,
 //     // MR extends { [key: symbol]: any } | undefined = undefined,
 //     // PRQ extends { [key: string]: $Role } | undefined = undefined,
-//     // IFC extends MiscObj | undefined = undefined,
+//     // IFC extends AnyObject | undefined = undefined,
 //     // RVE extends {[key: number]: {[key: number]: KPT}} | undefined = undefined,
 //     RVE extends (CFG extends { revive: infer R } ? R : undefined),
 // // RVE extends (KeyPathWithPeaMarker | KeyPath)[] | undefined = undefined,
@@ -402,7 +402,7 @@ export function enrollModelMaker<
 //         // { [Key in keyof _Role<{ [_CORE_]: COR, [_PREREQS_]: PRQ, [_INTERFACE_]: IFC, [_MARKER_]: MRK }>]: _Role<{ [_CORE_]: COR, [_PREREQS_]: PRQ, [_INTERFACE_]: IFC, [_MARKER_]: MRK }>[Key] };
 //         reify: CFG extends { core: infer C } ?
 //         C extends Class ? (...args: ConstructorParameters<C>) => C["prototype"]
-//         // : C extends MiscObj ? () => { [Key in keyof C as C[Key] extends { [_DATA_MARKER_]: true } ? never : Key]: C[Key] }
+//         // : C extends AnyObject ? () => { [Key in keyof C as C[Key] extends { [_DATA_MARKER_]: true } ? never : Key]: C[Key] }
 //         : null
 //         : null;
 //         [_CORE_]: COR;

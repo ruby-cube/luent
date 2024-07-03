@@ -1,4 +1,4 @@
-import { Cast, MiscObj } from "@rue/types";
+import { Cast, AnyObject } from "@rue/types";
 import { makeActiveListener } from "./ActiveListener";
 import { makePendingCancelOp } from "./PendingCancelOp";
 import { makePendingOp, PendingOp } from "./PendingOp";
@@ -40,25 +40,25 @@ export type ScheduleCancel = (cancel: CallbackRemover<never | void>) => PendingC
 export type ScheduleStop = (stop: CallbackRemover<void>) => PendingCancelOp;
 
 
-export type OneTimeListener<CB extends Callback = Callback, O extends MiscObj = {}> = <
+export type OneTimeListener<CB extends Callback = Callback, O extends AnyObject = {}> = <
     OPT extends ListenerOptions & O,
     C extends MaybeCB,
     MaybeCB extends MaybeBadScheduler<OPT, CB>
 >(callback: C, options?: OPT) => OneTimeListenerReturn<CB, OPT, C, MaybeCB>;
 
-export type SustainedListener<CB extends Callback = Callback, O extends MiscObj = {}> = <
+export type SustainedListener<CB extends Callback = Callback, O extends AnyObject = {}> = <
     OPT extends ListenerOptions & O,
     C extends MaybeCB,
     MaybeCB extends MaybeBadScheduler<OPT, CB>
 >(callback: C, options?: OPT) => SustainedListenerReturn<CB, OPT, C, MaybeCB>
 
-export type OneTimeTargetedListener<T = any, CB extends Callback = Callback, O extends MiscObj = {}> = <
+export type OneTimeTargetedListener<T = any, CB extends Callback = Callback, O extends AnyObject = {}> = <
     OPT extends ListenerOptions & O,
     C extends MaybeCB,
     MaybeCB extends MaybeBadScheduler<OPT, CB>
 >(target: T, callback: C, options?: OPT) => OneTimeListenerReturn<CB, OPT, C, MaybeCB>;
 
-export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O extends MiscObj = {}> = <
+export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O extends AnyObject = {}> = <
     OPT extends ListenerOptions & O,
     C extends MaybeCB,
     MaybeCB extends MaybeBadScheduler<OPT, CB>

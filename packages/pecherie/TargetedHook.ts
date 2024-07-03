@@ -1,7 +1,7 @@
 import { Callback, Callbacks, ListenerOptions, OneTimeTargetedListener, $listen, SustainedTargetedListener, initAutoCleanup, PendingCancelOp } from '@rue/flask';
 import { ContextData, HookConfig, ReturnOfCaster, runHandlers, UseHookState } from './Hook';
 import { noop } from '@rue/utils';
-import { Cast, MiscObj } from '@rue/types';
+import { Cast, AnyObject } from '@rue/types';
 
 
 
@@ -19,7 +19,7 @@ export function createTargetedHook<
     CB extends (ctx: ARG) => unknown,
     S extends CFG extends { dataAsArg: true } ? ((target: $TGT, arg: $DAT) => ReturnOfCaster<USE>) : keyof $DAT extends never ? ((target: $TGT) => ReturnOfCaster<USE>) : ((target: $TGT, data: { [Key in keyof $DAT]: $DAT[Key] }) => ReturnOfCaster<USE>),
     CFG extends HookConfig<LIT, $DAT, USE> & { targetID?: unknown },
-    $TGT extends CFG extends { targetID: infer T } ? T extends undefined ? MiscObj : T : MiscObj,
+    $TGT extends CFG extends { targetID: infer T } ? T extends undefined ? AnyObject : T : AnyObject,
 >(config: CFG): [CastHook<S>, CFG extends { onceAsDefault: true } ? OneTimeTargetedListener<$TGT, CB> : SustainedTargetedListener<$TGT, CB>] {
     const _config = config || {} as HookConfig<LIT, $DAT, USE>;
     const { hook, reply, onceAsDefault, dataAsArg } = _config;

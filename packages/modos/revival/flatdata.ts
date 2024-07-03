@@ -1,6 +1,6 @@
 import { watch } from "vue";
 import { getKeyPathValue, KeyPath, KeyPathString, setKeyPath, toKeyPath } from "@rue/utils";
-import { Cast, MiscObj, Mutable } from "@rue/types";
+import { Cast, AnyObject, Mutable } from "@rue/types";
 import { getModel, populateDepot } from "../depot";
 import { PEA_MARKER } from "../Model";
 import { $PeapodPea, PeapodPea } from "../vine/PeapodPea.role";
@@ -12,7 +12,7 @@ import { Modo } from "../Modo.role";
 import { $LonePea, LonePea } from "../vine/LonePea.role";
 
 
-export type Flat<T extends MiscObj, K extends (keyof T) | undefined = undefined> = K extends string | number | symbol ? (Omit<T, K> & { [key in K]: T[key] extends any[] ? UID[] : UID }) : T;
+export type Flat<T extends AnyObject, K extends (keyof T) | undefined = undefined> = K extends string | number | symbol ? (Omit<T, K> & { [key in K]: T[key] extends any[] ? UID[] : UID }) : T;
 
 // export type PropsToRevive = (KeyPath | KeyPathWithPeaMarker)[];
 export type ModelsToRevive = Map<ModelToRevive[], ReviveConfig[]>;

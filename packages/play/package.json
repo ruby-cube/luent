@@ -1,0 +1,14 @@
+{
+    "name": "@rue/play",
+    "private": true,
+    "description": "",
+    "dependencies": {
+        "@rue/vine": "workspace:*",
+        "@rue/muonic": "workspace:*"
+    },
+    "devDependencies": {
+        "@rue/types": "workspace:*"
+    },
+    "author": "Ruby Yi Wang",
+    "license": "MIT"
+}

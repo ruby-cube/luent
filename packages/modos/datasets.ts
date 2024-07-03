@@ -1,4 +1,4 @@
-import { MiscObj } from '@rue/types';
+import { AnyObject } from '@rue/types';
 import { _genId } from './depot';
 import { UID } from './types';
 
@@ -8,14 +8,14 @@ export type DataEntry = { id: UID };
 
 export type RawDataset = {
     name: string,
-    entries: MiscObj[],
+    entries: AnyObject[],
 }
 export type Dataset = {
     name: string,
-    entries: (DataEntry & MiscObj)[],
+    entries: (DataEntry & AnyObject)[],
 }
 
-// export function getDatasetName(ClassOrInstance: ModelType | MiscObj) {
+// export function getDatasetName(ClassOrInstance: ModelType | AnyObject) {
 //     const isClass = ClassOrInstance instanceof Function;
 //     const Class = isClass ? ClassOrInstance : null;
 //     const instance = !isClass ? ClassOrInstance : null;
@@ -55,7 +55,7 @@ export function registerDatasetNames(mappings: { [key: ModelName]: DatasetName }
 
 }
 
-// export function toDataset(modelTypeOrName: string | ModelType, dataset: MiscObj[]): Dataset {
+// export function toDataset(modelTypeOrName: string | ModelType, dataset: AnyObject[]): Dataset {
 //     const isModelType = typeof modelTypeOrName !== "string";
 //     const modelType = isModelType ? modelTypeOrName : null;
 //     const name = modelType ? getDatasetName(modelType) : modelTypeOrName as string;
@@ -65,7 +65,7 @@ export function registerDatasetNames(mappings: { [key: ModelName]: DatasetName }
 //     }
 // }
 
-export function toDataset(datasetName: string, dataset: MiscObj[]): RawDataset {
+export function toDataset(datasetName: string, dataset: AnyObject[]): RawDataset {
     return {
         name: datasetName,
         entries: dataset

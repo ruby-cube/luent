@@ -1,7 +1,7 @@
 import { isRef, onMounted, ref, Ref, watch } from "vue";
-import { MiscObj } from "@rue/types";
+import { AnyObject } from "@rue/types";
 
-type Model = MiscObj
+type Model = AnyObject
 
 //Use cases: 
 // (deprecated) model --> ui (maybe be mapped to many ui's)  for when ui actions are dependent on model's tree traversal

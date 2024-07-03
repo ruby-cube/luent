@@ -1,6 +1,6 @@
 //@-ts-nocheck
 import { PerformanceCheck, usePerformanceCheck } from "@rue/dev";
-import { Cast, MiscObj } from '@rue/types';
+import { Cast, AnyObject } from '@rue/types';
 import { Callback, CallbackRemover, ListenerOptions, $listen, SustainedListenerReturn, MaybeBadScheduler, OneTimeListenerReturn } from '@rue/flask';
 import { ContextData, HookConfig, ReturnOfCaster, UseHookState } from '@rue/pecherie';
 
@@ -33,7 +33,7 @@ const _useHookState = () => { return { state: {}, methods: {} }; };
 
 export function send<
     MSG extends MessageConfig,
-    $TGT extends MSG extends { targetID: infer T } ? T extends undefined ? MiscObj : T : MiscObj,
+    $TGT extends MSG extends { targetID: infer T } ? T extends undefined ? AnyObject : T : AnyObject,
     $DAT extends MSG extends { data: infer C } ? C : {},
     USE extends MSG extends { reply: infer S } ? S extends UseHookState ? S : () => { state: {} } : () => { state: {}, methods: {} },
     D extends MSG extends { dataAsArg: true } ? $DAT : keyof $DAT extends never ? never : { [Key in keyof $DAT]: $DAT[Key] },
@@ -74,7 +74,7 @@ export function re<
     NME extends MSG extends { message: infer N } ? N : undefined,
     USE extends MSG extends { reply: infer S } ? S extends UseHookState ? S : () => { state: {} } : () => { state: {}, methods: {} },
     ARG extends MSG extends { dataAsArg: true } ? $DAT : { [Key in keyof ({ message: NME } & ContextData<$DAT> & ReturnType<USE>["methods"])]: ({ message: NME } & ContextData<$DAT> & ReturnType<USE>["methods"])[Key] },
-    $TGT extends MSG extends { targetID: infer T } ? T extends undefined ? MiscObj : T : MiscObj,
+    $TGT extends MSG extends { targetID: infer T } ? T extends undefined ? AnyObject : T : AnyObject,
     $DAT extends MSG extends { data: infer C } ? C : {},
     OPT extends ListenerOptions,
     CB extends (ctx: ARG) => unknown,

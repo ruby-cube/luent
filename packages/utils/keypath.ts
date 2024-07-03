@@ -1,4 +1,4 @@
-import { MiscObj, Mutable, MutableObject } from "@rue/types";
+import { AnyObject, Mutable, MutableObject } from "@rue/types";
 
 export type KeyPath = string[];
 export type KeyPathString = string;
@@ -26,7 +26,7 @@ export function toKeyPathArray(array: KeyPathString[]) {
     return keyPathArray;
 }
 
-export function getKeyPathValue(object: MiscObj, keyPath: string[]): any {
+export function getKeyPathValue(object: AnyObject, keyPath: string[]): any {
     let level = object;
     for (const key of keyPath) {
         if (__DEV__ && !(key in level)) console.error(`getKeypathValue: key (${key}) in keypath (${keyPath}) does not exist on object`) //DEV
@@ -35,7 +35,7 @@ export function getKeyPathValue(object: MiscObj, keyPath: string[]): any {
     return level;
 }
 
-export function setKeyPath(object: Mutable<MiscObj>, keyPath: string[], value: any) {
+export function setKeyPath(object: Mutable<AnyObject>, keyPath: string[], value: any) {
     let level = object;
     const _keyPath = [...keyPath];
     const key = _keyPath.pop();

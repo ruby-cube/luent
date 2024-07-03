@@ -1,6 +1,6 @@
 //@-ts-nocheck
 import { $type } from '@rue/utils';
-import { MiscObj } from '@rue/types';
+import { AnyObject } from '@rue/types';
 import { createHook, createTargetedHook } from '@rue/pecherie';
 import { afterReactiveFlush } from '../watch';
 
@@ -9,7 +9,7 @@ import { afterReactiveFlush } from '../watch';
 
 export type ActionContext = {
     event?: { type: string }
-} & MiscObj
+} & AnyObject
 
 
 let activeActions: Set<string> = new Set();

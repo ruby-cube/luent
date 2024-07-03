@@ -62,3 +62,10 @@ export function copyAllButIndices(array: any[], indices: number[] | Set<number>)
 }
 
 export const isArray = Array.isArray;
+
+export function isIterable(obj: any) {
+    if (obj == null) {
+      return false;
+    }
+    return typeof obj[Symbol.iterator] === 'function';
+  }

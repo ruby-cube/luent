@@ -1,0 +1,15 @@
+{
+    "name": "@rue/muonic",
+    "private": true,
+    "description": "",
+    "dependencies": {
+        "vue": "^3.4.31",
+        "@vueuse/core": "^10.11.0",
+        "@rue/flask": "workspace:*"
+    },
+    "devDependencies": {
+        "@rue/types": "workspace:*"
+    },
+    "author": "Ruby Yi Wang",
+    "license": "MIT"
+}

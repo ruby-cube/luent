@@ -3,7 +3,7 @@ import { EqualTypes, typeTest } from "../../dev/type-test";
 import { Callback, OneTimeTargetedListener } from "../../flask/flaskedListeners";
 import { createHook } from "../Hook"
 import { createTargetedHook } from "../TargetedHook"
-import { MiscObj } from "@rue/types";
+import { AnyObject } from "@rue/types";
 
 {/* CASE: no targetIdType */
 
@@ -16,7 +16,7 @@ import { MiscObj } from "@rue/types";
         onceAsDefault: true,
     })
     const targ = {};
-    typeTest<EqualTypes<typeof onTestCase, OneTimeTargetedListener<MiscObj, Callback>>>(true);
+    typeTest<EqualTypes<typeof onTestCase, OneTimeTargetedListener<AnyObject, Callback>>>(true);
     onTestCase(targ, (ctx) => {
         return "hi"
     })

@@ -1,4 +1,4 @@
-import { MiscObj } from '@rue/types';
+import { AnyObject } from '@rue/types';
 import { App, InjectionKey } from "vue"
 import type { StateCapsule } from "./StateCapsule"
 import type { StateSlice } from "./StateSlice";
@@ -15,7 +15,7 @@ STATUS: WIP
 
 export type Ciel = {
     toApp: App;
-    state: MiscObj;
+    state: AnyObject;
     integratedSlices: Set<() => StateSlice>;
     capsuleDepot: Map<string, StateCapsule>;
 }

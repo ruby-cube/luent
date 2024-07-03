@@ -1,4 +1,4 @@
-import { MiscObj } from "@rue/utils";
+import { AnyObject } from "@rue/utils";
 
 
 function defineEventFlow(name: string, { }) {
@@ -37,7 +37,7 @@ export function useControlFlow() {
         compileControlFlowMap() {
             const controlFlowMap = {
 
-            } as MiscObj
+            } as AnyObject
 
             for (const flow of flows) {
 

@@ -1,5 +1,5 @@
 import { $type } from "@rue/utils";
-import { Cast, Class, UnionToIntersection, MiscObj } from "@rue/types";
+import { Cast, Class, UnionToIntersection, AnyObject } from "@rue/types";
 import { conferCount, Data, Interface, Prereqs, resetConferCount, RoleMarker, _INIT_, _DATA_MARKER_, _PREREQS_, _Role, _INTERFACE_, $Role, Core, ValueInRole, KeysOfRole, OMIT_ROLE_MARKERS, INCLUDE_ROLE_MARKERS } from "./Role";
 import { rolesMap } from './typecheck';
 import { createHook } from '@rue/pecherie';
@@ -25,21 +25,21 @@ export function roleCollisionCheck(role: $Role) {
 }
 
 
-export type DataFromRoles<$ROL extends { [key: string]: $Role } | undefined> = UnionToIntersection<$ROL extends { [key: string]: infer R } ? R extends { [_INIT_]: (...args: any[]) => MiscObj | undefined; } ? { [Key in keyof CoreData<R>]: CoreData<R>[Key] } & (R extends { [_PREREQS_]: infer P } ? P extends { [key: string]: $Role; } ? DataFromRoles<P> : {} : {}) : never : never>;
-export type CoreData<R extends { [_INIT_]: (...args: any[]) => MiscObj | undefined }> = R extends { [_INIT_]: infer C } ? C extends (...args: infer A) => MiscObj ? Omit<UnionToIntersection<DataInParams<A>>, typeof _DATA_MARKER_> : {} : {};
+export type DataFromRoles<$ROL extends { [key: string]: $Role } | undefined> = UnionToIntersection<$ROL extends { [key: string]: infer R } ? R extends { [_INIT_]: (...args: any[]) => AnyObject | undefined; } ? { [Key in keyof CoreData<R>]: CoreData<R>[Key] } & (R extends { [_PREREQS_]: infer P } ? P extends { [key: string]: $Role; } ? DataFromRoles<P> : {} : {}) : never : never>;
+export type CoreData<R extends { [_INIT_]: (...args: any[]) => AnyObject | undefined }> = R extends { [_INIT_]: infer C } ? C extends (...args: infer A) => AnyObject ? Omit<UnionToIntersection<DataInParams<A>>, typeof _DATA_MARKER_> : {} : {};
 type DataInParams<P extends any[]> = P extends { [key: number]: infer A } ? A extends { [_DATA_MARKER_]: true } ? A : {} : {};
 
 const [castComposed, _onComposed] = createHook({
     hook: "composed",
     onceAsDefault: true,
-    data: $type as MiscObj, //model
+    data: $type as AnyObject, //model
 })
 
 export const onComposed = _onComposed
 
 // Auto-compose function
-function _compose(rolesSet: Set<$Role>, data: MiscObj | undefined) {
-    const model = {} as MiscObj;
+function _compose(rolesSet: Set<$Role>, data: AnyObject | undefined) {
+    const model = {} as AnyObject;
     for (const $Role of rolesSet) {
         const confer = $Role.confer;
         if (confer) {
@@ -106,7 +106,7 @@ export type ComposeFunction<DAT, $ROL extends $Role, RKYMP extends { [key: strin
 
 
 type WithoutSymbolKeys_Role<R extends $Role, RKYMP extends { [key: string]: { [key: string]: `${string}` } } = {}> = { [Key in KeysOfRole<R, OMIT_ROLE_MARKERS, "", RKYMP, "$CoreRole"> as Key extends symbol ? never : Key]: ValueInRole<R, Key, OMIT_ROLE_MARKERS, "", RKYMP, "$CoreRole"> }
-type WithoutSymbolKeys_ReturnOfCompose<T extends (...args: any[]) => any> = T extends (...args: any[]) => infer R ? R extends MiscObj ? { [Key in keyof R as Key extends symbol ? never : Key]: R[Key] } : never : never
+type WithoutSymbolKeys_ReturnOfCompose<T extends (...args: any[]) => any> = T extends (...args: any[]) => infer R ? R extends AnyObject ? { [Key in keyof R as Key extends symbol ? never : Key]: R[Key] } : never : never
 
 type _Prereqs<T extends { [key: string]: $Role }> = T & (T extends { [Key in keyof T]: infer R } ? R extends { [_PREREQS_]: { [key: string]: $Role } } ? UnionToIntersection<_Prereqs<R[typeof _PREREQS_]>> : {} : {})
 type GatheredPrereqs<T extends { [key: string]: $Role } | undefined> = T extends { [Key in keyof T]: infer R } ? R extends { [_PREREQS_]: { [key: string]: $Role } } ? UnionToIntersection<_Prereqs<R[typeof _PREREQS_]>> : {} : {}
@@ -134,7 +134,7 @@ function countConferFunctions(roles: Set<$Role>) {
 }
 
 
-export function implement<R extends $Role, I extends (R extends { [_INTERFACE_]: infer I } ? I extends MiscObj ? I : never : never), V extends I[K], K extends keyof I>(role: R, key: K, value: V) {
+export function implement<R extends $Role, I extends (R extends { [_INTERFACE_]: infer I } ? I extends AnyObject ? I : never : never), V extends I[K], K extends keyof I>(role: R, key: K, value: V) {
     return value;
 }
 

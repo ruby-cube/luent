@@ -1,12 +1,12 @@
 
 /* PURE OPS */
 
-import { MiscObj } from "@rue/types";
+import { AnyObject } from "@rue/types";
 
 export function getSpreadableMethods(object: Object) {
     const proto = Object.getPrototypeOf(object);
     const methodKeys = Object.getOwnPropertyNames(proto);
-    const methods = {} as MiscObj;
+    const methods = {} as AnyObject;
     for (const key of methodKeys) {
         if (key === "constructor") continue;
         methods[key] = proto[key];
@@ -90,7 +90,7 @@ export function addProps(target: {[key: string | number | symbol]: any}, source:
 }
 
 function swapKeysAndValues(source: { [key: string]: string }) {
-    const target = {} as MiscObj;
+    const target = {} as AnyObject;
     for (const key in source) {
         target[source[key]] = key;
     }

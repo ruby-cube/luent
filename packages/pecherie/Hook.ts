@@ -1,6 +1,6 @@
 //@-ts-nocheck
 import { PerformanceCheck, usePerformanceCheck } from "@rue/dev";
-import { Cast, MiscObj, UnionToIntersection } from '@rue/types';
+import { Cast, AnyObject, UnionToIntersection } from '@rue/types';
 import { Callback, CallbackRemover, Callbacks, ListenerOptions, OneTimeListener, PendingCancelOp, ScheduleCancel, ScheduleRemoval, ScheduleStop, $listen, SustainedListener } from '@rue/flask';
 import { noop } from "@rue/utils";
 
@@ -13,7 +13,7 @@ type CastHook<S extends ((data: any) => any) | (() => any)> = S;
 
 export type DevListener<L> = L & { handlers: Callbacks }
 
-export type ContextData<T> = T extends MiscObj ? T : { data: T };
+export type ContextData<T> = T extends AnyObject ? T : { data: T };
 
 export type DataAsArg<$DAT, USE extends UseHookState> = keyof $DAT extends never ? false : keyof ReturnType<USE>["methods"] extends never ? true : false;
 export type HookConfig<LIT, $DAT, USE extends UseHookState> = { hook?: LIT, data?: any, reply?: UseHookState, onceAsDefault?: true, dataAsArg?: DataAsArg<$DAT, USE> };
@@ -68,7 +68,7 @@ export function createHook<
 }
 
 
-export function runHandlers(hook: string, handlers: Callbacks | undefined, data: MiscObj | undefined, dataAsArg: boolean | undefined, useHookState: UseHookState, reply: UseHookState | undefined) {
+export function runHandlers(hook: string, handlers: Callbacks | undefined, data: AnyObject | undefined, dataAsArg: boolean | undefined, useHookState: UseHookState, reply: UseHookState | undefined) {
     if (__DEV__) performanceCheck.start(hook);
     const { state, methods } = useHookState();
 
