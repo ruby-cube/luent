@@ -75,6 +75,7 @@
     },
   },
   "include": [
-    "packages"
+    "packages",
+    "play"
   ]
 }

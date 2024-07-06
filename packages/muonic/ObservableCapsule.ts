@@ -14,7 +14,7 @@ export function initObservable(this: ObservableCapsule) {
     this.$ = o$(this.$);
 }
 
-function o$<T extends AnyObject>(target: T): Observable<T> {
+export function o$<T extends AnyObject>(target: T): Observable<T> {
     const observable = reactive(target);
     observable[ObservableMarker] = true;
     return observable as unknown as Observable<T>;
