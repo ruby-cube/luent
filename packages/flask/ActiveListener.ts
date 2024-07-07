@@ -1,5 +1,5 @@
 import { survivingRemovers } from "./outlive";
-import { ActiveListener, Callback, initAutoCleanup, initSceneAutoCleanup, ListenerOptions, PendingCancelOp } from "./flaskedListeners";
+import { ActiveListener, Callback, initAutoCleanup, ListenerOptions, PendingCancelOp } from "./flaskedListeners";
 
 export function makeActiveListener<R, Arg extends R extends void ? Callback : R, CB extends Callback>(
     config: {
