@@ -65,7 +65,11 @@ export const isArray = Array.isArray;
 
 export function isIterable(obj: any) {
     if (obj == null) {
-      return false;
+        return false;
     }
     return typeof obj[Symbol.iterator] === 'function';
-  }
+}
+
+export function removeItem(item: any, arr: any[]) {
+    arr.splice(arr.indexOf(item), 1)
+}
