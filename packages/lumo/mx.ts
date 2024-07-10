@@ -6,14 +6,14 @@ import { $, hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
 import { getWithoutTracking } from "../muonic/DependencyTracker";
 import { ListRenderKit } from "./mxsFor";
 import { LifecycleHooks } from "./lifecycle";
-import { ConditionalRenderKit } from "./mxIf";
+import { InitialConditionalRenderKit } from "./mxIf";
 import { isEqual } from "@rue/utils";
 
 
 type NodeCluster = (DOMNode | DynamicNodeCluster)[]
 // type DynamicNodeCluster = NodeCluster[]
 
-export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit | string | ReactiveSignal<string> // TODO: Attach context to DOMNode, InternalComponent, ListRenderKit, and ConditionalRenderKit
+export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | InitialConditionalRenderKit | string | ReactiveSignal<string> // TODO: Attach context to DOMNode, InternalComponent, ListRenderKit, and InitialConditionalRenderKit
 
 
 
@@ -183,7 +183,7 @@ function setUpNodeEntity(parent: DOMNode, nodeEntity: NodeEntity, clusterBuilder
     else if (nodeEntity instanceof ListRenderKit) { // this may or may not be dynamic, depending on data
         setUpNodeList(parent, nodeEntity, clusterBuilder);
     }
-    else if (nodeEntity instanceof ConditionalRenderKit) {
+    else if (nodeEntity instanceof InitialConditionalRenderKit) {
         setUpConditionalEntity(parent, nodeEntity, clusterBuilder)
     }
     else {
@@ -201,10 +201,10 @@ function setUpNode(parent: DOMNode, node: DOMNode, nodeClusterBuilder: NodeClust
 
 
 function setUpComponent(parent: DOMNode, component: InternalComponent, nodeClusterBuilder: NodeClusterBuilder) { //TODO: what if a component's root elements is conditional or a dynamic list??
-    const entities = component.domNodes;
+    const nodeEntities = component.initialNodeEntities;
     if (!(parent instanceof HTMLElement)) throw new Error("Parent cannot be a text node")
     component.runTasks(LifecycleHooks.BEFORE_MOUNT);
-    for (const nodeEntity of entities) {
+    for (const nodeEntity of nodeEntities) {
         if (nodeEntity instanceof Node) {
             parent.appendChild(nodeEntity);
             nodeClusterBuilder.appendStaticNode(nodeEntity)
@@ -239,37 +239,26 @@ function setUpNodeList(parent: DOMNode, renderKit: ListRenderKit, nodeClusterBui
     }
 }
 
-function setUpConditionalEntity(parent: DOMNode, renderKit: ConditionalRenderKit, nodeClusterBuilder: NodeClusterBuilder) {
+function setUpConditionalEntity(parent: DOMNode, renderKit: InitialConditionalRenderKit, nodeClusterBuilder: NodeClusterBuilder) {
+    const { conditionalKits, initialNodeEntities, $initialConditions, initialIndex } = renderKit;
+
     const dynamicCluster = nodeClusterBuilder.appendDynamicCluster();
 
-    const { $condition, renderConditional, renderElse, elseIf, initialNodeEntities, $initialConditions, initialIndex } = renderKit; //TODO: renderKit should have conditionalKits
-    let activeClusterBuilder: NodeClusterBuilder;
-
-    const clusterBuilder = dynamicCluster.appendNodeCluster();
-    const conditionalKits: {
+    const _conditionalKits: {
         $condition?: ReactiveSignal<boolean>;
         clusterBuilder: NodeClusterBuilder;
         renderConditional: () => NodeEntity[];
-    }[] = [{ $condition, clusterBuilder, renderConditional }]
-    if (initialIndex === 0) activeClusterBuilder = clusterBuilder;
+    }[] = []
 
-    if (elseIf) {
-        for (let i = 0; i < elseIf.length; i++) {
-            const { $condition, renderConditional } = elseIf[i];
-            const clusterBuilder = dynamicCluster.appendNodeCluster();
-            conditionalKits.push({ $condition, clusterBuilder, renderConditional });
-            if (initialIndex === i + 1) activeClusterBuilder = clusterBuilder
-        }
-    }
-
-    if (renderElse) {
+    for (let i = 0; i < conditionalKits.length; i++) {
+        const { renderConditional, $condition } = conditionalKits[i];
         const clusterBuilder = dynamicCluster.appendNodeCluster();
-        conditionalKits.push({ clusterBuilder, renderConditional: renderElse })
+        _conditionalKits.push({ $condition, clusterBuilder, renderConditional });
     }
 
     for (const nodeEntity of initialNodeEntities) {
         // append to dom and node cluster
-        setUpNodeEntity(parent, nodeEntity, activeClusterBuilder) //FIX: this needs to be the cluster builder of the initial satisfied condition, not the first condition
+        setUpNodeEntity(parent, nodeEntity, _conditionalKits[initialIndex].clusterBuilder)
     }
 
     //    0                               1    2
@@ -285,30 +274,103 @@ function setUpConditionalEntity(parent: DOMNode, renderKit: ConditionalRenderKit
     watchForUpdate($initialConditions, updateConditional, { once: true })
 
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-        if (!isEqual(newValue, oldValue)) {
-            const conditions: ReactiveSignal<boolean>[] = [];
-            for (const kit of conditionalKits) {
-                const { clusterBuilder, renderConditional, $condition } = kit;
-                if ($condition && getWithoutTracking($condition) || !$condition) {
-                    if ($condition) conditions.push($condition);
-                    const nodeEntities = renderConditional();
-                    for (const nodeEntity of nodeEntities) {
-                        setUpNodeEntity(parent, nodeEntity, clusterBuilder)
-                    }
+        if (isEqual(newValue, oldValue)) return;
+        const conditions: ReactiveSignal<boolean>[] = [];
+        for (const kit of _conditionalKits) {
+            const { clusterBuilder, renderConditional, $condition } = kit;
+            if ($condition && getWithoutTracking($condition) || !$condition) {
+                //TODO:  unmount previous nodes
 
-                    // unmount previous nodes
-
-                    watchForUpdate($(() => {
-                        const values: boolean[] = [];
-                        for (const $condition of conditions) {
-                            values.push($condition());
-                        }
-                        return values;
-                    }), updateConditional, { once: true })
-                    break;
+                if ($condition) conditions.push($condition);
+                const nodeEntities = renderConditional();
+                for (const nodeEntity of nodeEntities) {
+                    setUpNodeEntity(parent, nodeEntity, clusterBuilder)
                 }
+
+                watchForUpdate($(() => {
+                    const values: boolean[] = [];
+                    for (const $condition of conditions) {
+                        values.push($condition());
+                    }
+                    return values;
+                }), updateConditional, { once: true })
+                break;
             }
         }
+
     }
 }
+
+// function setUpConditionalEntity(parent: DOMNode, renderKit: InitialConditionalRenderKit, nodeClusterBuilder: NodeClusterBuilder) {
+//     const dynamicCluster = nodeClusterBuilder.appendDynamicCluster();
+
+//     const { $condition, renderConditional, renderElse, elseIf, initialNodeEntities, $initialConditions, initialIndex } = renderKit; //TODO: renderKit should have conditionalKits
+//     let activeClusterBuilder: NodeClusterBuilder;
+
+//     const clusterBuilder = dynamicCluster.appendNodeCluster();
+//     const conditionalKits: {
+//         $condition?: ReactiveSignal<boolean>;
+//         clusterBuilder: NodeClusterBuilder;
+//         renderConditional: () => NodeEntity[];
+//     }[] = [{ $condition, clusterBuilder, renderConditional }]
+//     if (initialIndex === 0) activeClusterBuilder = clusterBuilder;
+
+//     if (elseIf) {
+//         for (let i = 0; i < elseIf.length; i++) {
+//             const { $condition, renderConditional } = elseIf[i];
+//             const clusterBuilder = dynamicCluster.appendNodeCluster();
+//             conditionalKits.push({ $condition, clusterBuilder, renderConditional });
+//             if (initialIndex === i + 1) activeClusterBuilder = clusterBuilder
+//         }
+//     }
+
+//     if (renderElse) {
+//         const clusterBuilder = dynamicCluster.appendNodeCluster();
+//         conditionalKits.push({ clusterBuilder, renderConditional: renderElse })
+//     }
+
+//     for (const nodeEntity of initialNodeEntities) {
+//         // append to dom and node cluster
+//         setUpNodeEntity(parent, nodeEntity, activeClusterBuilder) //FIX: this needs to be the cluster builder of the initial satisfied condition, not the first condition
+//     }
+
+//     //    0                               1    2
+//     // [[node, [maybe dynamic cluster]], [ ], [ ]] --- dynamic cluster
+//     //  |                                 |
+//     //  active cluster                   inactive cluster
+//     //
+//     // 
+//     // [activeKit, kit, kit] --- conditionalKits
+//     //
+
+//     // set up watcher for updates
+//     watchForUpdate($initialConditions, updateConditional, { once: true })
+
+//     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
+//         if (!isEqual(newValue, oldValue)) {
+//             const conditions: ReactiveSignal<boolean>[] = [];
+//             for (const kit of conditionalKits) {
+//                 const { clusterBuilder, renderConditional, $condition } = kit;
+//                 if ($condition && getWithoutTracking($condition) || !$condition) {
+//                     if ($condition) conditions.push($condition);
+//                     const nodeEntities = renderConditional();
+//                     for (const nodeEntity of nodeEntities) {
+//                         setUpNodeEntity(parent, nodeEntity, clusterBuilder)
+//                     }
+
+//                     // unmount previous nodes
+
+//                     watchForUpdate($(() => {
+//                         const values: boolean[] = [];
+//                         for (const $condition of conditions) {
+//                             values.push($condition());
+//                         }
+//                         return values;
+//                     }), updateConditional, { once: true })
+//                     break;
+//                 }
+//             }
+//         }
+//     }
+// }
 

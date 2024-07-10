@@ -41,9 +41,9 @@ function setUpComponent<T extends ComponentSetup>(Component: T, config: Componen
         const _component = Component(props)
         if (!_component) throw new Error("Component setup must return component blueprint")
         const { render, provides, exposes, scoped, global } = _component;
-        const domNodes = render();
+        const nodeEntities = render();
 
-        component.domNodes = domNodes;
+        component.initialNodeEntities = nodeEntities;
         component.provides = provides;
         component.component = { ...exposes };
         if (ref) {
@@ -68,10 +68,10 @@ function setUpComponent<T extends ComponentSetup>(Component: T, config: Componen
 
 export function unmountComponent(component: InternalComponent) {
     component.runTasks(LifecycleHooks.BEFORE_UNMOUNT);
-    const nodes = component.domNodes;
-    for (const node of nodes) {
-        node.remove();
-    }
+    // const nodes = component.initialNodeEntities;
+    // for (const node of nodes) {
+    //     node.remove();
+    // }
     component.runTasks(LifecycleHooks.UNMOUNTED);
 }
 

@@ -3,7 +3,7 @@ import { Slot } from "./mxSlot";
 import { Signal } from "../muonic/useSignalize";
 import { LifecycleHooks } from "./lifecycle";
 import { ListRenderKit } from "./mxsFor";
-import { ConditionalRenderKit } from "./mxIf";
+import { InitialConditionalRenderKit } from "./mxIf";
 import { ReactiveSignal } from "../muonic/useDerivedSignal";
 import { NodeEntity } from "./mx";
 
@@ -35,7 +35,7 @@ export class InternalComponent {
     provides: AnyObject | undefined;
     component: Component | undefined;
     parent: InternalComponent | 'root';
-    domNodes: (DOMNode | ListRenderKit | ConditionalRenderKit | InternalComponent | string | ReactiveSignal<string>)[] = []; //TODO: add context type??
+    initialNodeEntities: NodeEntity[] = []; //TODO: add context type??
     tasks: {
         [LifecycleHooks.BEFORE_MOUNT]: Set<() => void> | undefined;
         [LifecycleHooks.BEFORE_UNMOUNT]: Set<() => void> | undefined;
