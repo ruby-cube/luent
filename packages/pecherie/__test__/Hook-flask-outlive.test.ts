@@ -3,7 +3,7 @@ import { vi, expect, describe, test, beforeEach } from "vitest";
 import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
 import { Callback, Callbacks, initFlask } from "../../flask";
-import { NestableFlask, OUTLIVE, enflask, flaskSetup } from "../../flask/flask";
+import { NestableFlask, OUTLIVE, enflask, collectEffects } from "../../flask/flask";
 import { __resetGlobals } from "../../dev/__resetGlobals";
 
 // cleanup cleanups if alternative cleanup strategy run
@@ -55,10 +55,10 @@ describe("flask with outlive option--should not be disposed when root flask is d
         const unmountedCallbacks = onTestUnmounted.handlers
 
         settingUp = true;
-        const flask = flaskSetup((flask) => {
+        const flask = collectEffects((flask) => {
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
-            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseD(cbC, { cancel: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             return flask;
         }, OUTLIVE);
@@ -132,10 +132,10 @@ describe("flask with outlive option--should not be disposed when root flask is d
         let flask: NestableFlask;
         sceneSetup((_scene) => {
             scene = _scene;
-            flask = flaskSetup((flask) => {
+            flask = collectEffects((flask) => {
                 onTestCaseA(cb, { until: onTestCaseC });
                 onTestCaseB(cbB, { until: onTestCaseC });
-                onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+                onTestCaseD(cbC, { cancel: onTestCaseC });
                 onTestCaseC(() => flask.dispose());
                 return flask;
             }, OUTLIVE);
@@ -203,10 +203,10 @@ describe("flask with outlive option--should not be disposed when root flask is d
         //@ts-expect-error
         const testCallbacksC = onTestCaseC.handlers
 
-        const flask = flaskSetup((flask) => {
+        const flask = collectEffects((flask) => {
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
-            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseD(cbC, { cancel: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             return flask;
         }, OUTLIVE)
@@ -284,13 +284,13 @@ describe("flask with outlive option--should not be disposed when root flask is d
         }, OUTLIVE);
 
         settingUp = true;
-        const flask = flaskSetup((flask, covertFlask) => {
+        const flask = collectEffects((flask, covertFlask) => {
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
 
             useNestedFlask(covertFlask);
 
-            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseD(cbC, { cancel: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             covertFlask.onDisposed(cbD) // adds 2 callbacks to unmounted; cbD and also to cancel
             return flask;

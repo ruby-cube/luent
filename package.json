@@ -2,6 +2,7 @@
   "name": "@rue/root",
   "private": true,
   "description": "A collection of TypeScript-enhanced libraries to manage complexity. Covers event-driven architecture, composition, tree structures, and control flow",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -24,7 +25,8 @@
     "ni:ciel": "pnpm -F @rue/ciel install",
     "ni:ephemr": "pnpm -F @rue/ephemr install",
     "ni:watch": "pnpm -F @rue/watch install",
-    "ni:signals": "pnpm -F @rue/signals install"
+    "ni:signals": "pnpm -F @rue/signals install",
+    "ni:muonic": "pnpm -F @rue/muonic install"
   },
   "devDependencies": {
     "@types/node": "^18.15.11",

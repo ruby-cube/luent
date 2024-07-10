@@ -41,26 +41,26 @@ import { useEventListener } from "../event-listeners";
         typeTest<EqualTypes<typeof pendingOp, PendingOp<number>>>(true);
     }
 
-    {    // CASE: unlessCanceled option
+    {    // CASE: cancel option
         const onMouseUp = useEventListener("mouseup");
         const pendingOp = onMouseDown(document, (e) => {
             return 9;
-        }, { unlessCanceled: (cancel) => onMouseUp(document, cancel) })
+        }, { cancel: (cancel) => onMouseUp(document, cancel) })
         typeTest<EqualTypes<typeof pendingOp, PendingOp<number>>>(true);
     }
 
-    {    // CASE: unlessCanceled option, malformed--must return PendingCancelOp
+    {    // CASE: cancel option, malformed--must return PendingCancelOp
         onMouseDown(document, (e) => {
             return 9;
             //@ts-expect-error
-        }, { unlessCanceled: () => onMouseUp })
+        }, { cancel: () => onMouseUp })
     }
 
-    {    // CASE: unlessCanceled option, malformed type
+    {    // CASE: cancel option, malformed type
         onMouseDown(document, (e) => {
             return 9;
             //@ts-expect-error
-        }, { unlessCanceled: true })
+        }, { cancel: true })
     }
 
     {    // CASE: sustain option
@@ -124,26 +124,26 @@ import { useEventListener } from "../event-listeners";
         typeTest<EqualTypes<typeof pendingOp, PendingOp<number>>>(true);
     }
 
-    {    // CASE: unlessCanceled option
+    {    // CASE: cancel option
         const onMouseUp = useEventListener("mouseup");
         const pendingOp = onMouseDown(document, (e) => {
             return 9;
-        }, { unlessCanceled: (cancel) => onMouseUp(document, cancel) })
+        }, { cancel: (cancel) => onMouseUp(document, cancel) })
         typeTest<EqualTypes<typeof pendingOp, PendingOp<number>>>(true);
     }
 
-    {    // CASE: unlessCanceled option, malformed--must return PendingCancelOp
+    {    // CASE: cancel option, malformed--must return PendingCancelOp
         onMouseDown(document, (e) => {
             return 9;
             //@ts-expect-error
-        }, { unlessCanceled: () => onMouseUp })
+        }, { cancel: () => onMouseUp })
     }
 
-    {    // CASE: unlessCanceled option, malformed type
+    {    // CASE: cancel option, malformed type
         onMouseDown(document, (e) => {
             return 9;
             //@ts-expect-error
-        }, { unlessCanceled: true })
+        }, { cancel: true })
     }
 
     {    // CASE: sustain option

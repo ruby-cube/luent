@@ -1,0 +1,14 @@
+{
+    "name": "@rue/lumo",
+    "private": true,
+    "description": "",
+    "dependencies": {
+        "@rue/muonic": "workspace:*",
+        "@rue/flask": "workspace:*"
+    },
+    "devDependencies": {
+        "@rue/types": "workspace:*"
+    },
+    "author": "Ruby Yi Wang",
+    "license": "MIT"
+}

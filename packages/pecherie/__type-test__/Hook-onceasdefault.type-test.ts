@@ -73,7 +73,7 @@ import { $type } from "@rue/utils"
 
     const pendingOp = onTestCase((ctx) => {
         return "hi"
-    }, { unlessCanceled: (cancel) => onTestUnmounted(cancel) })  //FIX: this should not produce an error ...
+    }, { cancel: (cancel) => onTestUnmounted(cancel) })  //FIX: this should not produce an error ...
 }
 
 
@@ -89,7 +89,7 @@ import { $type } from "@rue/utils"
 
     const pendingOp = onTestCase((ctx) => {
         return "hi"
-    }, { unlessCanceled: onTestUnmounted }) //FIX: this should not produce an error ...
+    }, { cancel: onTestUnmounted }) //FIX: this should not produce an error ...
     typeTest<EqualTypes<typeof pendingOp, PendingOp<string>>>(true);
 
     pendingOp.cancel()
@@ -110,7 +110,7 @@ import { $type } from "@rue/utils"
     const pendingOp = onTestCase((ctx) => {
         return "hi"
         //@ts-expect-error: targeted hook needs to be wrapped in an arrow function
-    }, { unlessCanceled: onTestUnmounted })
+    }, { cancel: onTestUnmounted })
 
 }
 
@@ -127,7 +127,7 @@ import { $type } from "@rue/utils"
     const pendingOp = onTestCase((ctx) => {
         return "hi"
         //@ts-expect-error: schedule cancel cb does not return a pending op
-    }, { unlessCanceled: (cancel) => { onTestUnmounted(cancel) } })
+    }, { cancel: (cancel) => { onTestUnmounted(cancel) } })
 }
 
 
@@ -160,7 +160,7 @@ type CallbackRemover = {
         return "hi"
     }, {
         //@ts-expect-error: no args
-        unlessCanceled: () => onTestUnmounted
+        cancel: () => onTestUnmounted
     })
 }
 

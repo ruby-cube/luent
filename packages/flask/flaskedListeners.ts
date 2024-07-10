@@ -1,28 +1,37 @@
 import { Cast, AnyObject } from "@rue/types";
-import { makeActiveListener } from "./ActiveListener";
+import { ActiveListener, makeActiveListener } from "./ActiveListener";
 import { makePendingCancelOp } from "./PendingCancelOp";
 import { makePendingOp, PendingOp } from "./PendingOp";
 import { existingPendingAutoCleanup, scheduleAutoCleanup, schedulingAutoCleanup } from "./scheduleAutoCleanup";
 
 
 export type ListenerOptions = {
+    outlive?: true;
     once?: true;
-    sustain?: true;
-    unlessCanceled?: ScheduleCancel;
+    cancel?: ScheduleCancel;
     until?: ScheduleStop;
-    $lifetime?: true;
-    $tilStop?: true;
-    $outlive?: true;
+    sustain?: true;
+}
+
+export type SustainedListenerOptions = {
+    once?: true;
+    cancel?: ScheduleCancel;
+} | {
+    until?: ScheduleStop;
+}
+
+export type OneTimeListenerOptions = {
+    cancel?: ScheduleCancel
 }
 
 
-export const $lifetime = true;
-export const $tilStop = true;
-export const $outlive = true;
 
-export type ActiveListener = {
-    stop(): void;
-}
+
+// export const $lifetime = true;
+// export const $tilStop = true;
+export const outlive = true;
+
+
 
 export type PendingCancelOp = {
     cancel: () => void;
@@ -64,8 +73,8 @@ export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O
     MaybeCB extends MaybeBadScheduler<OPT, CB>
 >(target: T, callback: C, options?: OPT) => SustainedListenerReturn<CB, OPT, C, MaybeCB>;
 
-export type OneTimeListenerReturn<CB extends Callback, OPT, C extends MaybeCB, MaybeCB extends MaybeBadScheduler<OPT, CB>> = C extends { isRemover: true } ? PendingCancelOp : (OPT extends { once: true } | { unlessCanceled: ScheduleCancel } | undefined ? PendingOp<ReturnType<C>> : (OPT extends { sustain: true } | { until: ScheduleStop } | { $tilStop: true } | { $lifetime: true } ? ActiveListener : PendingOp<ReturnType<C>>));
-export type SustainedListenerReturn<CB extends Callback, OPT, C extends MaybeCB, MaybeCB extends MaybeBadScheduler<OPT, CB>> = C extends { isRemover: true } ? PendingCancelOp : OPT extends { once: true } | { unlessCanceled: ScheduleCancel } ? PendingOp<ReturnType<C>> : OPT extends { sustain: true } | { until: ScheduleStop } | undefined ? ActiveListener : ActiveListener;
+export type OneTimeListenerReturn<CB extends Callback, OPT, C extends MaybeCB, MaybeCB extends MaybeBadScheduler<OPT, CB>> = C extends { isRemover: true } ? PendingCancelOp : (OPT extends { once: true } | { cancel: ScheduleCancel } | undefined ? PendingOp<ReturnType<C>> : (OPT extends { sustain: true } | { until: ScheduleStop } ? ActiveListener : PendingOp<ReturnType<C>>));
+export type SustainedListenerReturn<CB extends Callback, OPT, C extends MaybeCB, MaybeCB extends MaybeBadScheduler<OPT, CB>> = C extends { isRemover: true } ? PendingCancelOp : OPT extends { once: true } | { cancel: ScheduleCancel } ? PendingOp<ReturnType<C>> : OPT extends { sustain: true } | { until: ScheduleStop } | undefined ? ActiveListener : ActiveListener;
 
 export type MaybeBadScheduler<OPT, CB> = OPT extends { until: infer U } ? U extends (arg: infer P) => any ? P extends Callback ? CB : "Error: Parameter needed in `until` listener" : CB : CB;
 
@@ -83,42 +92,42 @@ export function $listen<
     CB extends Callback,
     RET,
     ARG extends RET extends void ? CB : RET,
-    ONCE extends {onceAsDefault?: true},
+    ONCE extends { onceAsDefault?: true },
     OPT extends ListenerOptions | undefined,
     C extends MaybeCB,
     MaybeCB extends MaybeBadScheduler<OPT, CB>,
 >(callback: CB, options: OPT, config: {
     enroll: (callback: Callback) => RET,
     remove: (cbOrReturnVal: ARG) => void
-} & ONCE): ONCE extends {onceAsDefault: true} ? OneTimeListenerReturn<CB, OPT, C, MaybeCB> : SustainedListenerReturn<CB, OPT, C, MaybeCB> {
+} & ONCE): ONCE extends { onceAsDefault: true } ? OneTimeListenerReturn<CB, OPT, C, MaybeCB> : SustainedListenerReturn<CB, OPT, C, MaybeCB> {
 
     const { enroll, remove, onceAsDefault } = config;
     let once: boolean | undefined = "once" in callback && callback.once === true || false;
     let sustain: boolean | undefined = true;
     const until = options?.until;
 
-    if (onceAsDefault) {
-        sustain = options?.sustain || options?.$lifetime || options?.$tilStop;
+    if (onceAsDefault) { //QUESTION: Does it ever make sense to have once as default and sustain as an option??
+        sustain = options?.sustain 
         once = (sustain || until) ? false : true;
     }
     else {
-        once = (once || options?.once || Boolean(options?.unlessCanceled));
+        once = (once || options?.once || Boolean(options?.cancel));
         sustain = !once;
     }
 
     if (__DEV__) {
         if (
-            options?.unlessCanceled && options?.until ||
-            options?.unlessCanceled && options?.sustain ||
-            options?.once && options?.sustain ||
-            options?.once && options?.until ||
-            options?.$lifetime && options?.$tilStop ||
-            options?.$lifetime && options?.unlessCanceled ||
-            options?.$lifetime && options?.until ||
-            options?.$lifetime && options?.once
+            options?.cancel && options?.until ||
+            // options?.cancel && options?.sustain ||
+            // options?.once && options?.sustain ||
+            options?.once && options?.until
+            // options?.$lifetime && options?.$tilStop ||
+            // options?.$lifetime && options?.cancel ||
+            // options?.$lifetime && options?.until ||
+            // options?.$lifetime && options?.once
         ) console.warn("Hook has conflicting options. Choose only one callback removal strategy.")
-        if (sustain && options?.unlessCanceled) throw new Error("Option `unlessCanceled` cannot be applied to a sustained hook. Use the `until` option or set the callback to run once with the `once` option");
-        if (once && until) throw new Error("Option `until` cannot be applied to a hook op that runs only once. Use the `unlessCanceled` option or sustain the listener with the `sustain` option");
+        if (sustain && options?.cancel) throw new Error("Option `cancel` cannot be applied to a sustained hook. Use the `until` option or set the callback to run once with the `once` option");
+        if (once && until) throw new Error("Option `until` cannot be applied to a hook op that runs only once. Use the `cancel` option or sustain the listener with the `sustain` option");
     }
 
     if (isRemover(callback)) {
@@ -147,11 +156,11 @@ export function $listen<
 }
 
 
-type $ListenerReturn<ONCE, CB extends Callback, OPT, C extends MaybeCB, MaybeCB extends MaybeBadScheduler<OPT, CB>> = ONCE extends {onceAsDefault: true} ? OneTimeListenerReturn<CB, OPT, C, MaybeCB> : SustainedListenerReturn<CB, OPT, C, MaybeCB>
+type $ListenerReturn<ONCE, CB extends Callback, OPT, C extends MaybeCB, MaybeCB extends MaybeBadScheduler<OPT, CB>> = ONCE extends { onceAsDefault: true } ? OneTimeListenerReturn<CB, OPT, C, MaybeCB> : SustainedListenerReturn<CB, OPT, C, MaybeCB>
 
 
 export type SchedulerOptions = {
-    unlessCanceled?: ScheduleCancel
+    cancel?: ScheduleCancel
 }
 
 export type ScheduledOp<CB extends Callback> = CB extends { isRemover: true } ? PendingCancelOp : PendingOp<ReturnType<CB>>
@@ -231,7 +240,7 @@ export function initAutoCleanup(stop: CallbackRemover<void>) {
 
 
 
-export function $subscribe<
+export function $subscribe<  //QUESTION: is this really necessary? Just use $listen..  The only use case is "computed"
     CB extends Callback,
     RET,
     ARG extends RET extends void ? CB : RET,

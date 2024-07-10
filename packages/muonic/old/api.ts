@@ -370,7 +370,7 @@ function set(ar: any, ars: (arg: any) => any) {
 
 watch($count, (val, oldVal) => { }) // watch signal
 
-watch(() => frog.$.child, (val, oldVal) => { }) // watch single property
+watch($(() => frog.$.child), (val, oldVal) => { }) // watch single property
 
 watch(frog.$, (val, oldVal, changedProps) => {  // watch all properties, deeply?
     val === frog.$
@@ -378,8 +378,8 @@ watch(frog.$, (val, oldVal, changedProps) => {  // watch all properties, deeply?
 })
 
 
-watch(() => [$count(), frog.$.child, frog.$.color], (val, oldVal) => { // watch multiple properties
-    val === frog.$
+watch($(() => [$count(), frog.$.child, frog.$.color]), (val, oldVal) => { // watch multiple properties
+    val === 
     oldVal === copyOfOriginal(frog.$)
 })
 

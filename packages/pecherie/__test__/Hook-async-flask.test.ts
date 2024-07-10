@@ -4,7 +4,7 @@ import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
 import { $type } from "@rue/utils";
 import { Callback, Callbacks, initFlask } from "../../flask";
-import { NestableFlask, enflask, flaskSetup, getFlask, getOuterFlask, getCovertFlask } from "../../flask/flask";
+import { NestableFlask, enflask, collectEffects, getFlask, getOuterFlask, getCovertFlask } from "../../flask/flask";
 import exp from "constants";
 import { __resetGlobals } from "../../dev/__resetGlobals";
 
@@ -63,7 +63,7 @@ describe("async flask", () => {
         const unmountedCallbacks = onTestUnmounted.handlers
 
         settingUp = true;
-        const flask = await flaskSetup(async (flask, covertFlask) => {
+        const flask = await collectEffects(async (flask, covertFlask) => {
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
 
@@ -74,7 +74,7 @@ describe("async flask", () => {
             const afterCovertFlask = getCovertFlask();
             expect(afterCovertFlask).toBe(covertFlask);
 
-            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseD(cbC, { cancel: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             return flask;
         })

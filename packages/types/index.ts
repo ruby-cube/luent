@@ -29,7 +29,13 @@ export type Public<T> = Omit<T, PrivateKeys<keyof T>>
 
 export type FunctionType<F extends (...args: any) => any> = (...args: Parameters<F>) => ReturnType<F>
 
+export type OptionalKeys<T> = {
+  [K in keyof T]-?: {} extends Pick<T, K> ? K : never
+}[keyof T];
 
+export type RequiredKeys<T> = {
+  [K in keyof T]-?: {} extends Pick<T, K> ? never : K
+}[keyof T];
 
 // export type VPropsType<T> = Readonly<
 // LooseRequired<

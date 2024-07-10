@@ -1,5 +1,9 @@
 import { survivingRemovers } from "./outlive";
-import { ActiveListener, Callback, initAutoCleanup, ListenerOptions, PendingCancelOp } from "./flaskedListeners";
+import { Callback, initAutoCleanup, ListenerOptions, PendingCancelOp } from "./flaskedListeners";
+
+export type ActiveListener = {
+    stop(): void;
+}
 
 export function makeActiveListener<R, Arg extends R extends void ? Callback : R, CB extends Callback>(
     config: {
@@ -11,7 +15,7 @@ export function makeActiveListener<R, Arg extends R extends void ? Callback : R,
 ) {
     const { enroll, remove, callback, options } = config;
     const until = options?.until || null;
-    const outlive = options?.$outlive;
+    const outlive = options?.outlive;
     let returnVal: any;
     let pendingAutoStops: PendingCancelOp[] | void;
     let pendingStop: PendingCancelOp | undefined
@@ -25,7 +29,6 @@ export function makeActiveListener<R, Arg extends R extends void ? Callback : R,
                 cleanup.cancel();
             }
         }
-        // if (pendingSceneStop) pendingSceneStop.cancel();
     }
     stop.isRemover = true as const;
     if (until) {
@@ -36,15 +39,14 @@ export function makeActiveListener<R, Arg extends R extends void ? Callback : R,
 
     if (!outlive) {
         var success = pendingAutoStops = initAutoCleanup(stop);
-        // pendingSceneStop = initSceneAutoCleanup(stop);
     }
 
     if (__DEV__) {
-        const { until, $lifetime, $tilStop, once } = options || {};
+        const { until, once } = options || {};
         if (
             // !pendingSceneStop && 
-            !success && !once && !until && !$lifetime && !$tilStop) {
-            console.warn("This listener doesn't have a callback removal strategy (run once, run until, or auto cleanup). This is considered a memory leak if this listener is not intended to last the lifetime of the app. Pass the `$lifetime` or `$tilStop` flag in the options param to prevent this warning. Also check if auto cleanup callback returns a success flag")
+            !success && !once && !until) {
+            console.warn("This listener doesn't have a callback removal strategy (run once, run until, or auto cleanup). This is considered a memory leak if this listener is not intended to last the lifetime of the app. Check if auto cleanup callback returns a success flag")
             console.trace();
         }
     }

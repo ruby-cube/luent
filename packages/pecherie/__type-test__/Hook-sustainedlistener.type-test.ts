@@ -67,7 +67,7 @@ import { $lifetime, $tilStop, ActiveListener } from "../../flask/flaskedListener
 
     const pendingOp = onTestCase((ctx) => {
         return "hi"
-    }, { unlessCanceled: (cancel) => onTestUnmounted(cancel) })
+    }, { cancel: (cancel) => onTestUnmounted(cancel) })
 }
 
 
@@ -82,7 +82,7 @@ import { $lifetime, $tilStop, ActiveListener } from "../../flask/flaskedListener
 
     const pendingOp = onTestCase((ctx) => {
         return "hi"
-    }, { unlessCanceled: onTestUnmounted })
+    }, { cancel: onTestUnmounted })
     typeTest<EqualTypes<typeof pendingOp, PendingOp<string>>>(true);
 
     const returnVal = castTestCase()
@@ -100,7 +100,7 @@ import { $lifetime, $tilStop, ActiveListener } from "../../flask/flaskedListener
     const pendingOp = onTestCase((ctx) => {
         return "hi"
         //@ts-expect-error: targeted hook needs to be wrapped in an arrow function
-    }, { unlessCanceled: onTestUnmounted })
+    }, { cancel: onTestUnmounted })
 
 }
 
@@ -116,7 +116,7 @@ import { $lifetime, $tilStop, ActiveListener } from "../../flask/flaskedListener
     const pendingOp = onTestCase((ctx) => {
         return "hi"
         //@ts-expect-error: schedule cancel cb does not return a pending op
-    }, { unlessCanceled: (cancel) => { onTestUnmounted(cancel) } })
+    }, { cancel: (cancel) => { onTestUnmounted(cancel) } })
 }
 
 
@@ -131,7 +131,7 @@ import { $lifetime, $tilStop, ActiveListener } from "../../flask/flaskedListener
     const pendingOp = onTestCase((ctx) => {
         return "hi"
         //@ts-expect-error: no args
-    }, { unlessCanceled: () => onTestUnmounted() })
+    }, { cancel: () => onTestUnmounted() })
 }
 
 

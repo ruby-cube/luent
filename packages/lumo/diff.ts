@@ -3,7 +3,7 @@ import { longestCommonSubsequence } from "./lcs";
 
 
 
-function diff(newArr: AnyObject[], oldArr: AnyObject[]) {
+export function diff(newArr: AnyObject[], oldArr: AnyObject[]) {
     const newSet = new Set(newArr);
     const oldSet = new Set(oldArr);
     const newArrCommonItems = [];

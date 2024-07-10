@@ -1,5 +1,5 @@
 import { survivingRemovers } from "./outlive";
-import { Callback, CallbackRemover, initAutoCleanup, initSceneAutoCleanup, ListenerOptions, PendingCancelOp, ScheduleCancel } from "./flaskedListeners";
+import { Callback, CallbackRemover, initAutoCleanup, ListenerOptions, PendingCancelOp } from "./flaskedListeners";
 
 export type PendingOp<T = unknown> = Promise<T> & {
     cancel: () => void;
@@ -13,7 +13,26 @@ export class Cancellation {
     }
 }
 
+// watch ... until
+// listen ... until
+// onUpdated (do this) ... until
+// onClick (do this) ... until
+// onClick ... once: true  x until
+// onUnmounted ... x until
+// queueTask ... x until
 
+/* 
+const pendingOp = onUnmounted(()=>{
+
+})
+
+onUpdated(()=>{
+    if (something){
+        pendingOp.stop();
+    }
+}, {once: true})
+
+ */
 
 export function makePendingOp<R, Arg extends R extends void ? Callback : R, CB extends Callback>(config: {
     callback: CB,
@@ -22,8 +41,8 @@ export function makePendingOp<R, Arg extends R extends void ? Callback : R, CB e
     options: ListenerOptions | undefined
 }): PendingOp<ReturnType<CB>> {
     const { callback, enroll, remove, options } = config;
-    const scheduleCancellation = options?.unlessCanceled;
-    const outlive = options?.$outlive;
+    const scheduleCancellation = options?.cancel;
+    const outlive = options?.outlive;
     let returnVal: any;
     let $resolve: (reason?: any) => void;
     let $reject: (reason?: any) => void;

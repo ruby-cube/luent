@@ -183,7 +183,7 @@ function _resolveSetupEnd(flask: NestableFlask, returnValue: any) {
 
 export const OUTLIVE = true;
 
-export function flaskSetup<T extends any | Promise<any>>(setUpFlask: (flask: NestableFlask, outerFlask: Flask) => T, outlivesOuter?: boolean) {
+export function collectEffects<T extends any | Promise<any>>(setUpFlask: (flask: NestableFlask, outerFlask: Flask) => T, outlivesOuter?: boolean) {
     const root = getScene() || getCovertFlask() || getFlask();
     const outerFlask = activeFlaskSetup;
     // if (!outerFlask) throw new Error("useFlask must be called during scene setup or component setup");
@@ -294,7 +294,7 @@ export function enflask<A extends any[], T extends any | Promise<any>>(setUpFlas
 
 
 // export function useMouse() {
-//     return flaskSetup(async (flask, outerFlask) => {
+//     return collectEffects(async (flask, outerFlask) => {
 //         const x$ = computed$(() => {
 
 //         })

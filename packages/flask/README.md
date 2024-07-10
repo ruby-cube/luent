@@ -134,13 +134,13 @@ export default defineComponent({
 
 … **via nestable flask cleanup**
 
-Listeners and reactive effects registered within a nestable flask can be handled independently of an outer flask via the [Enflask API](#enflask-api). Listeners and reactive effects are collected in a flask (created either by `flaskSetup()` or `enflask()`) and disposed of when the flask is disposed of:
+Listeners and reactive effects registered within a nestable flask can be handled independently of an outer flask via the [Enflask API](#enflask-api). Listeners and reactive effects are collected in a flask (created either by `collectEffects()` or `enflask()`) and disposed of when the flask is disposed of:
 
 ```tsx
-import { flaskSetup } from "@rue/flask";
+import { collectEffects } from "@rue/flask";
 
 function useTable() {
-    return flaskSetup((flask) => {
+    return collectEffects((flask) => {
     
         const values = reactive([1, 2, 3]);
     
@@ -167,10 +167,10 @@ function useTable() {
 Nestable flasks can be configured to “outlive” its outer flask via the `outlive` parameter. For readability, Flask provides an `OUTLIVE` constant that can be passed in as the argument:
 
 ```tsx
-import { flaskSetup, OUTLIVE } from "@rue/flask";
+import { collectEffects, OUTLIVE } from "@rue/flask";
 
 function useTable() {
-    return flaskSetup((flask, outerFlask) => {
+    return collectEffects((flask, outerFlask) => {
     
         const values = reactive([1, 2, 3]);
     
@@ -316,7 +316,7 @@ onPopulated(() => {   // sustained listener
 
 onPopulated(() => {   // one-time listener
     // do work
-}, { unlessCanceled: onActionCanceled });
+}, { cancel: onActionCanceled });
 ```
 
 Sustained listeners can also morph into a one-time listener if it is passed into another listener as a cleanup scheduler as is the case with `onActionCanceled` above.
@@ -327,7 +327,7 @@ To create a morphable listener, use `$listen` from the Flasked Listeners API.
 
 ### Schedulers
 
-Schedulers are one-time listeners that cannot morph into a sustained listeners. These are typically functions that queue a task to the main thread such as: `queueTask`, `beforeScreenPaint` (flasked `requestAnimationFrame`), and `onTimeout` (flasked `setTimeout`). See [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top) for more on existing schedulers.
+Schedulers are one-time listeners that cannot morph into a sustained listeners. These are typically functions that queue a task to the main thread such as: `queueTask`, `onAnimationFrame` (flasked `requestAnimationFrame`), and `onTimeout` (flasked `setTimeout`). See [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top) for more on existing schedulers.
 
 To create a scheduler, use `$schedule` from [the Flasked Listeners API](#flasked-listeners-api).
 
@@ -343,10 +343,10 @@ Conversely, subscriptions are sustained listeners that cannot morph into a one-t
 
 Handlers are called synchronously at the time of event emission. This allows for “before event” hooks as well as the possibility of handlers communicating back to the source of the event (see [reply](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#hook-configuration)). 
 
-If asynchronous handling is needed, the developer can call an async scheduler or one-time listener from within the handler. In the example below, the synchonous handler calls the `addPS` scheduler (an alias for `queueMicrotask`) for asynchronous handling.
+If asynchronous handling is needed, the developer can call an async scheduler or one-time listener from within the handler. In the example below, the synchonous handler calls the `queuePostTask` scheduler (an alias for `queueMicrotask`) for asynchronous handling.
 
 ```ts
-onPopulated(() => addPS(() => {
+onPopulated(() => queuePostTask(() => {
     // do something
 }))
 ```
@@ -493,13 +493,13 @@ Scenes are useful for sharing state across the handlers of event flows like [ mo
 
 A nestable flask can be created within any other flask or serve as a root flask itself. This allows for more fine-grained control over when listeners are disposed of: a nested flask can be disposed of earlier than its outer flask or even outlive its outer flask. 
 
-A nestable flask can be created via `flaskSetup()`, or alternatively `enflask()`. `flaskSetup()` sets up a flask within the function it’s called in:
+A nestable flask can be created via `collectEffects()`, or alternatively `enflask()`. `collectEffects()` sets up a flask within the function it’s called in:
 
 ```tsx
-import { flaskSetup, OUTLIVE } from "@rue/flask";
+import { collectEffects, OUTLIVE } from "@rue/flask";
 
 function useTable() {
-    return flaskSetup((flask, outerFlask) => {
+    return collectEffects((flask, outerFlask) => {
     
         const values = reactive([1, 2, 3]);
     
@@ -560,16 +560,16 @@ Nestable flasks are useful for managing shared state across multiple usages of a
 
 ## Outlive
 
-Just as a nestable flask can outlive its outer flask, a listener can outlive its containing flask by configuring the options argument with the `$outlive` constant.
+Just as a nestable flask can outlive its outer flask, a listener can outlive its containing flask by configuring the options argument with the `outlive` constant.
 
 ```tsx
-import { $outlive } from "@rue/flask";
+import { outlive } from "@rue/flask";
 
 export default defineComponent({
     setup(){
         onPopulated(() => {
             // do stuff
-        }, { $outlive, until: onExpired })
+        }, { outlive, until: onExpired })
 
         return { /* ... */ };
     }
@@ -585,7 +585,7 @@ Normally, if you register a listener after awaiting a promise, the listener will
 
 ```tsx
 function useTable() {
-    return flaskSetup(async(flask) => {
+    return collectEffects(async(flask) => {
     
         const values = reactive([1, 2, 3]);
     
@@ -611,7 +611,7 @@ To solve this, a promise must be passed into the `.after()` method of a scene or
 
 ```tsx
 function useTable() {
-    return flaskSetup(async(flask) => {
+    return collectEffects(async(flask) => {
     
         const values = reactive([1, 2, 3]);
     
@@ -815,7 +815,7 @@ onMouseDown(document, enscene((drawing, event) => {
 
 ## Enflask API
 
-[flaskSetup()](#flasksetup)
+[collectEffects()](#flasksetup)
 
 [enflask()](#enflask)
 
@@ -823,12 +823,12 @@ OUTLIVE`
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `flaskSetup()`
+## `collectEffects()`
 
 ### Syntax
 
 ```tsx
-const returnValue = flaskSetup(setUpFlask, OUTLIVE)
+const returnValue = collectEffects(setUpFlask, OUTLIVE)
            |                        |         | 
            R                    SetUpFlask   true
 ```
@@ -855,10 +855,10 @@ type Flask = {
 (See [Nestable Flasks](#nestable-flasks) for notes on usage)
 
 ```tsx
-import { flaskSetup, OUTLIVE } from "@rue/flask";
+import { collectEffects, OUTLIVE } from "@rue/flask";
 
 function useTable() {
-    return flaskSetup((flask, outerFlask) => {
+    return collectEffects((flask, outerFlask) => {
     
         const values = reactive([1, 2, 3]);
     
@@ -952,7 +952,7 @@ The functions provided by [Pêcherie](https://github.com/ruby-cube/rue/tree/main
 
 [$subscribe(handler, options, config)](#subscribehandler-options-config)
 
-$outlive
+outlive
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
@@ -978,11 +978,11 @@ type ListenerConfig = {
 type ListenerOptions = {
     once?: true;
     sustain?: true;
-    unlessCanceled?: ScheduleCancel;
+    cancel?: ScheduleCancel;
     until?: ScheduleStop;
     $lifetime?: true;
     $tilStop?: true;
-    $outlive?: true;
+    outlive?: true;
 }
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
@@ -1008,9 +1008,9 @@ type SchedulerConfig = {
 type PendingOp = Promise<ReturnType<Handler>> & { cancel: () => void };
 
 type ListenerOptions = {
-    unlessCanceled?: ScheduleCancel;
+    cancel?: ScheduleCancel;
     $lifetime?: true;
-    $outlive?: true;
+    outlive?: true;
 }
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
@@ -1039,7 +1039,7 @@ type ListenerOptions = {
     until?: ScheduleStop;
     $lifetime?: true;
     $tilStop?: true;
-    $outlive?: true;
+    outlive?: true;
 }
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
@@ -1104,7 +1104,7 @@ OPT extends ListenerOptions & WatchOptions,
 ```ts
 // flasking `requestAnimationFrame`
 
-export function beforeScreenPaint<
+export function onAnimationFrame<
 CB extends Callback,
 OPT extends ListenerOptions
 >(handler: CB, options?: OPT) {

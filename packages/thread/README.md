@@ -37,31 +37,31 @@ Thread provides flasked versions of schedulers and event listeners from Web APIs
 
 ## Thread API
 
-Planified schedulers return a `ScheduledOp`, which is essentially a cancellable `Promise`. The only option they take is a `unlessCanceled` cancellation scheduler.
+Planified schedulers return a `ScheduledOp`, which is essentially a cancellable `Promise`. The only option they take is a `cancel` cancellation scheduler.
 
-[addPS()](#addps) 
+[queuePostTask()](#addps) 
 
 [queueTask()](#queuetask)
 
-[beforeScreenPaint()](#beforescreenpaint)
+[onAnimationFrame()](#beforescreenpaint)
 
 [onTimeout()](#ontimeout)
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `addPS()` 
+## `queuePostTask()` 
 
 an alias for `queueMicrotask` from browser API. Here, microtasks are conceptualized as postscripts to event loop tasks.
 
 ### Syntax
 ```tsx
-addPS(callback);
+queuePostTask(callback);
 ```
 
 ### Usage
 
 ```js
-addPS(() => {
+queuePostTask(() => {
     // code that will run after the original task/handlers 
     // and previously queued microtasks finish running
     // but before the next event loop task
@@ -83,7 +83,7 @@ queueTask(callback, options);
 ### Type Definitions
 ```tsx
 type SchedulerOptions = {
-    unlessCanceled: (stop: () => void) => PendingOp;
+    cancel: (stop: () => void) => PendingOp;
 }
 ```
 
@@ -94,11 +94,11 @@ queueTask(() => {
     // code that will run after any previously 
     // queued tasks/events in the event loop
     // (unless canceled by the action-completed hook)
-}, { unlessCanceled: onActionCompleted });
+}, { cancel: onActionCompleted });
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `beforeScreenPaint()`
+## `onAnimationFrame()`
 
 flasked `requestAnimationFrame`, which schedules code to run before the next screen paint.
 
@@ -112,14 +112,14 @@ requestAnimationFrame(callback, options);
 ### Type Definitions
 ```tsx
 type SchedulerOptions = {
-    unlessCanceled: (stop: () => void) => PendingOp;
+    cancel: (stop: () => void) => PendingOp;
 }
 ```
 
 ### Usage
 
 ```js
-beforeScreenPaint(() => {
+onAnimationFrame(() => {
     // code that will after any previously queued rAF callbacks
     // and before the next screen paint
 });
@@ -139,7 +139,7 @@ onTimeout(delay, callback, options);
 ### Type Definitions
 ```tsx
 type SchedulerOptions = {
-    unlessCanceled: (stop: () => void) => PendingOp;
+    cancel: (stop: () => void) => PendingOp;
 }
 ```
 

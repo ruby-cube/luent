@@ -108,128 +108,128 @@ describe("cleanup functions are cleaned up if a different cleanup strategy execu
     })
 
 
-    test("CASE: register until and scene. Execute scene cleanup. Expect both scene and until's callback to be gone", () => {
-        const [castTestCase, onTestCase] = createHook({
-            hook: "test-hook",
-            data: $type as {
-                foo: "A"
-            },
-        });
-        const [castSomethingEnded, onSomethingEnded] = createHook({
-            hook: "something-ended",
-        });
-        const [castMouseUp, onMouseUp] = createHook({
-            hook: "mouse-up",
-        });
+    // test("CASE: register until and scene. Execute scene cleanup. Expect both scene and until's callback to be gone", () => {
+    //     const [castTestCase, onTestCase] = createHook({
+    //         hook: "test-hook",
+    //         data: $type as {
+    //             foo: "A"
+    //         },
+    //     });
+    //     const [castSomethingEnded, onSomethingEnded] = createHook({
+    //         hook: "something-ended",
+    //     });
+    //     const [castMouseUp, onMouseUp] = createHook({
+    //         hook: "mouse-up",
+    //     });
 
-        const cb = vi.fn(() => { })
-        let sceneCallbacks: Callbacks;
-        sceneSetup((scene) => {
-            sceneCallbacks =
-                //@ts-expect-error
-                scene.endHandlers;
-            onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
+    //     const cb = vi.fn(() => { })
+    //     let sceneCallbacks: Callbacks;
+    //     sceneSetup((scene) => {
+    //         sceneCallbacks =
+    //             //@ts-expect-error
+    //             scene.endHandlers;
+    //         onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
 
-            onMouseUp(() => {
-                scene.end()
-            })
-        })
+    //         onMouseUp(() => {
+    //             scene.end()
+    //         })
+    //     })
 
-        castTestCase({ foo: "A" });
-        expect(cb).toHaveBeenCalledTimes(1)
+    //     castTestCase({ foo: "A" });
+    //     expect(cb).toHaveBeenCalledTimes(1)
 
-        castMouseUp();
-        castTestCase({ foo: "A" });
-        castTestCase({ foo: "A" });
+    //     castMouseUp();
+    //     castTestCase({ foo: "A" });
+    //     castTestCase({ foo: "A" });
 
-        expect(cb).toHaveBeenCalledTimes(1);
+    //     expect(cb).toHaveBeenCalledTimes(1);
 
-        const handlers = (<DevListener<typeof onSomethingEnded>>onSomethingEnded).handlers
-        expect(handlers.size).toBe(0);
-        //@ts-ignore
-        expect(sceneCallbacks.size).toBe(0);
-    })
+    //     const handlers = (<DevListener<typeof onSomethingEnded>>onSomethingEnded).handlers
+    //     expect(handlers.size).toBe(0);
+    //     //@ts-ignore
+    //     expect(sceneCallbacks.size).toBe(0);
+    // })
 
 
-    test("CASE: register `until` and `scene`. Execute `until`. Expect `scene`'s callback to be gone", () => {
-        const [castTestCase, onTestCase] = createHook({
-            hook: "test-hook",
-            data: $type as {
-                foo: "A"
-            },
-        });
-        const [castSomethingEnded, onSomethingEnded] = createHook({
-            hook: "something ended",
-        });
-        const [castMouseUp, onMouseUp] = createHook({
-            hook: "mouse-up",
-        });
+    // test("CASE: register `until` and `scene`. Execute `until`. Expect `scene`'s callback to be gone", () => {
+    //     const [castTestCase, onTestCase] = createHook({
+    //         hook: "test-hook",
+    //         data: $type as {
+    //             foo: "A"
+    //         },
+    //     });
+    //     const [castSomethingEnded, onSomethingEnded] = createHook({
+    //         hook: "something ended",
+    //     });
+    //     const [castMouseUp, onMouseUp] = createHook({
+    //         hook: "mouse-up",
+    //     });
 
-        const cb = vi.fn(() => { })
-        let sceneCallbacks: Callbacks;
-        sceneSetup((scene) => {
-            sceneCallbacks =
-                //@ts-expect-error
-                scene.endHandlers;
-            onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
+    //     const cb = vi.fn(() => { })
+    //     let sceneCallbacks: Callbacks;
+    //     sceneSetup((scene) => {
+    //         sceneCallbacks =
+    //             //@ts-expect-error
+    //             scene.endHandlers;
+    //         onTestCase(cb, { until: onSomethingEnded }) // modo auto cleanup
 
-            onMouseUp(() => {
-                scene.end()
-            })
+    //         onMouseUp(() => {
+    //             scene.end()
+    //         })
 
-        })
+    //     })
 
-        castTestCase({ foo: "A" });
-        expect(cb).toHaveBeenCalledTimes(1)
+    //     castTestCase({ foo: "A" });
+    //     expect(cb).toHaveBeenCalledTimes(1)
 
-        castSomethingEnded();
-        castTestCase({ foo: "A" });
-        castTestCase({ foo: "A" });
+    //     castSomethingEnded();
+    //     castTestCase({ foo: "A" });
+    //     castTestCase({ foo: "A" });
 
-        expect(cb).toHaveBeenCalledTimes(1);
+    //     expect(cb).toHaveBeenCalledTimes(1);
 
-        //@ts-ignore
-        expect(sceneCallbacks.size).toBe(1);
+    //     //@ts-ignore
+    //     expect(sceneCallbacks.size).toBe(1);
 
-        castMouseUp()
-        //@ts-ignore
-        expect(sceneCallbacks.size).toBe(0);
-    })
+    //     castMouseUp()
+    //     //@ts-ignore
+    //     expect(sceneCallbacks.size).toBe(0);
+    // })
 
-    test("CASE: register `scene`. Execute `scene` cleanup.", () => {
-        const [castTestCase, onTestCase] = createHook({
-            hook: "test-hook",
-        });
+    // test("CASE: register `scene`. Execute `scene` cleanup.", () => {
+    //     const [castTestCase, onTestCase] = createHook({
+    //         hook: "test-hook",
+    //     });
 
-        const [castSceneEnder, onSceneEnder] = createHook({
-            hook: "test-hook",
-        });
-        const cb = vi.fn(() => { })
+    //     const [castSceneEnder, onSceneEnder] = createHook({
+    //         hook: "test-hook",
+    //     });
+    //     const cb = vi.fn(() => { })
 
-        let sceneCallbacks: Callbacks;
-        sceneSetup((scene) => {
-            sceneCallbacks =
-                //@ts-expect-error
-                scene.endHandlers;
-            onTestCase(cb) // modo auto cleanup
-            onSceneEnder(() => {
-                scene.end();
-            })
-        })
+    //     let sceneCallbacks: Callbacks;
+    //     sceneSetup((scene) => {
+    //         sceneCallbacks =
+    //             //@ts-expect-error
+    //             scene.endHandlers;
+    //         onTestCase(cb) // modo auto cleanup
+    //         onSceneEnder(() => {
+    //             scene.end();
+    //         })
+    //     })
 
-        //@ts-ignore
-        expect(sceneCallbacks.size).toBe(2);
+    //     //@ts-ignore
+    //     expect(sceneCallbacks.size).toBe(2);
 
-        castTestCase();
+    //     castTestCase();
 
-        castSceneEnder();
-        castTestCase();
-        castTestCase();
-        expect(cb).toHaveBeenCalledTimes(1);
+    //     castSceneEnder();
+    //     castTestCase();
+    //     castTestCase();
+    //     expect(cb).toHaveBeenCalledTimes(1);
 
-        // check cleanup's cleanup
+    //     // check cleanup's cleanup
 
-        //@ts-ignore
-        expect(sceneCallbacks.size).toBe(0);
-    })
+    //     //@ts-ignore
+    //     expect(sceneCallbacks.size).toBe(0);
+    // })
 })

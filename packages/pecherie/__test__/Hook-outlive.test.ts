@@ -2,7 +2,7 @@
 import { vi, expect, describe, test, beforeEach } from "vitest";
 import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
-import { $outlive, PendingOp, initFlask } from "../../flask";
+import { outlive, PendingOp, initFlask } from "../../flask";
 import { survivingRemovers } from "../../flask/outlive";
 import { __resetGlobals } from "../../dev/__resetGlobals";
 
@@ -17,11 +17,11 @@ import { __resetGlobals } from "../../dev/__resetGlobals";
 // Cases:
 // DONE until is called
 // DONE callback is called -- one-time listener
-// DONE unlessCanceled is called
+// DONE cancel is called
 // DONE .cancel() is called
 
 
-describe(`hooks (and removers) configured with $outlive will survive scope disposal (either component setup or scene disposal); 
+describe(`hooks (and removers) configured with outlive will survive scope disposal (either component setup or scene disposal); 
 survivingRemovers will be cleaned up once handler is run or removed`, () => {
     beforeEach(__resetGlobals);
     test("CASE: register until and auto cleanup. Execute auto cleanup. Expect handler and until remover to survive", () => {
@@ -52,7 +52,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
         const cb = vi.fn(() => { })
 
         settingUp = true;
-        onTestCase(cb, { until: onSomethingEnded, $outlive }) // modo auto cleanup
+        onTestCase(cb, { until: onSomethingEnded, outlive }) // modo auto cleanup
         settingUp = false;
 
         expect(survivingRemovers.size).toBe(1) // survivingRemover registered
@@ -73,7 +73,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
         expect(handlers.size).toBe(1); // remover survived
     })
 
-    test("CASE: register unlessCanceled and auto cleanup. Execute auto cleanup. Expect handler and unlessCanceled remover to survive. Cleanup via callback call", () => {
+    test("CASE: register cancel and auto cleanup. Execute auto cleanup. Expect handler and cancel remover to survive. Cleanup via callback call", () => {
         survivingRemovers.clear();
         const [castTestUnmounted, onTestUnmounted] = createHook({
             hook: "test-unmounted-hook",
@@ -101,7 +101,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
         const cb = vi.fn(() => { })
 
         settingUp = true;
-        onTestCase(cb, { unlessCanceled: onSomethingEnded, $outlive }) // modo auto cleanup
+        onTestCase(cb, { cancel: onSomethingEnded, outlive }) // modo auto cleanup
         settingUp = false;
 
         expect(survivingRemovers.size).toBe(1) // survivingRemover registered
@@ -139,7 +139,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
         const cb = vi.fn(() => { })
 
         const scene = sceneSetup(() => {
-            onTestCase(cb, { until: onSomethingEnded, $outlive }) // modo auto cleanup
+            onTestCase(cb, { until: onSomethingEnded, outlive }) // modo auto cleanup
         })
 
         expect(survivingRemovers.size).toBe(1) // survivingRemover registered
@@ -178,7 +178,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
         expect(survivingRemovers.size).toBe(0) // survivingRemovers cleaned up
     })
 
-    test("CASE: register unlessCanceled and scene. End scene. Expect handler and unlessCanceled remover to survive. Cleanup via unlessCanceled remover", () => {
+    test("CASE: register cancel and scene. End scene. Expect handler and cancel remover to survive. Cleanup via cancel remover", () => {
         survivingRemovers.clear();
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
@@ -191,7 +191,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
 
         let pendingOp: PendingOp;
         const scene = sceneSetup(() => {
-            pendingOp = onTestCase(cb, { unlessCanceled: onSomethingEnded, $outlive }) // modo auto cleanup
+            pendingOp = onTestCase(cb, { cancel: onSomethingEnded, outlive }) // modo auto cleanup
         })
 
         expect(survivingRemovers.size).toBe(1) // survivingRemover registered
@@ -220,7 +220,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
     })
 
 
-    test("CASE: register unlessCanceled and scene. End scene. Expect handler and unlessCanceled remover to survive. Cleanup via pendingOp.cancel()", () => {
+    test("CASE: register cancel and scene. End scene. Expect handler and cancel remover to survive. Cleanup via pendingOp.cancel()", () => {
         survivingRemovers.clear();
         const [castTestCase, onTestCase] = createHook({
             hook: "test-hook",
@@ -233,7 +233,7 @@ survivingRemovers will be cleaned up once handler is run or removed`, () => {
 
         let pendingOp: PendingOp;
         const scene = sceneSetup(() => {
-            pendingOp = onTestCase(cb, { unlessCanceled: onSomethingEnded, $outlive }) // modo auto cleanup
+            pendingOp = onTestCase(cb, { cancel: onSomethingEnded, outlive }) // modo auto cleanup
         })
 
         expect(survivingRemovers.size).toBe(1) // survivingRemover registered

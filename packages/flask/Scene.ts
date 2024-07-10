@@ -142,7 +142,7 @@ function _resolveSetupEnd(scene: Scene, returnValue: any) {
 // const [result, error] = await after(
 //     onMouseDown(() => {
 //         //do something
-//     }, { unlessCanceled: (cancel) => onMounted(cancel) })
+//     }, { cancel: (cancel) => onMounted(cancel) })
 // );
 
 // if (error) {
@@ -157,7 +157,7 @@ function _resolveSetupEnd(scene: Scene, returnValue: any) {
 // try {
 //     const result = await onMouseDown(() => {
 //         //do something
-//     }, { unlessCanceled: (cancel) => onMounted(cancel) });
+//     }, { cancel: (cancel) => onMounted(cancel) });
 
 //     if (result === 0) {
 //         result;
@@ -169,7 +169,7 @@ function _resolveSetupEnd(scene: Scene, returnValue: any) {
 
 // const pendingMouseOp = onMouseDown(() => {
 //     // do soemthing
-// }, { unlessCanceled: (cancel) => onMounted(cancel) });
+// }, { cancel: (cancel) => onMounted(cancel) });
 
 // const [result, error] = await after(pendingMouseOp);
 

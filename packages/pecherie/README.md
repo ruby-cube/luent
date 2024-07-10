@@ -112,7 +112,7 @@ type PendingOp = Promise<ReturnType<Handler>> & { cancel: () => void; };
 
 type ListenerOptions = { once: true } 
     | { sustain: true }
-    | { unlessCanceled: ScheduleCancel }
+    | { cancel: ScheduleCancel }
     | { until: ScheduleStop }
     | { $lifetime: true }
     | { $tilStop: true }

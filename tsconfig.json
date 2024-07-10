@@ -76,6 +76,6 @@
   },
   "include": [
     "packages",
-    "play"
-  ]
+    "src", 
+    "src/main.ts"  ]
 }

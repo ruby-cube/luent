@@ -1,5 +1,5 @@
 import { survivingRemovers } from "./outlive";
-import { Callback, PendingCancelOp, initAutoCleanup, initSceneAutoCleanup } from "./flaskedListeners";
+import { Callback, PendingCancelOp, initAutoCleanup } from "./flaskedListeners";
 
 
 //QUESTION: should "outlive" apply to pending cancel ops??

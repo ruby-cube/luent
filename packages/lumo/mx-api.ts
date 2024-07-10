@@ -1,12 +1,15 @@
+//@ts-nocheck
 import { AnyObject } from "@rue/types";
 import { Observable, o$ } from "../muonic/ObservableCapsule";
 import { $ } from "../signals";
+import { DOMNode } from "./component";
+import { ListRenderKit } from "./mx";
 
 type Signal<T> = () => T
 
-type For<T> = {
-    for: (item: T, i: number) => Nodes<any>,
-    of: [Observable<T>, ...string[]] | Signal<T>
+type ListRenderKit<T> = {
+    render: () => DOMNode[],
+    $data: Signal<T>
 }
 
 type Slot = () => Nodes<any> | undefined
@@ -24,16 +27,47 @@ function List() {
 
     return {
         render: () => [
-            hx("h1", { text: 'Shopping' }),
-            hx("div", {
+            mx("h1", { nodes: [mxB('Shopping'), 'at the mall'] }),
+            mx("div", {
                 class: 'list',
                 nodes: [
-                    hxsForItem("p", $items),
-                    hx("button", { text: 'add' })
+                    mxIf($active, {
+                        then: renderListBlock({
+                            text: 'I sad'
+                        }),
+                        elseIf: [$loading, renderLoadingBlock({
+                            text: 'I loading'
+                        })],
+                        else: renderPlaceholder({
+                            text: 'help me'
+                        })
+                    }),
+                    mxListBlockIf($active, {
+                        stuff: 0
+                    }),
+                    mxsFor((item, i) => m('p', {
+                        props: {
+                            $dog
+                        },
+                        text: item.text,
+                        key: i,
+                        ref: "item"
+                    }), $items),
+                    mx("button", { text: 'add' }),
+                    mxO(ListItem, {
+                        props: {
+                            $dog,
+                            $position,
+                            slot,
+                            startCount,
+                            $color,
+                            $item,
+                            reItemClicked
+                        }
+                    })
                 ]
             })
         ]
-
         ,
 
         style: {
@@ -42,18 +76,28 @@ function List() {
     }
 }
 
+function mxBold(text: string) {
+    return mx('b', { nodes: [...text] })
+}
 
 
-function hxsForItem(p: `p`, $items: () => any): For<{ text: string }> {
-    return {
-        for: (item, i) =>
-            hx(p, {
-                text: item.text,
-                key: i,
-                ref: "item"
-            }),
-        of: $items
-    };
+
+
+function mxsForItem(p: `p`, $items: () => any): ListRenderKit<{ text: string }> {
+    return forEach((item, i) =>
+        mx(p, {
+            text: item.text,
+            key: i,
+            ref: "item"
+        }), $items)
+}
+
+function renderListBlock(config: Parameters<typeof mO>[1]) {
+    return () => mO(ListBlock, config)
+}
+
+function renderP(config: any) {
+    return () => m('p', config)
 }
 
 
@@ -77,30 +121,39 @@ function ListBlock(props: {
 
     }
 
+    /* 
+    <ListItem> 
+        <p> 
+            <li>hello</li>
+            <li> hello</li>
+        </p>
+    </ListItem>
+    */
+
     return {
         render: () =>
-            hx(ListItem, {
+            mx(ListItem, {
                 props: {
                     $dog: $dog,
-                    $position: () => frame$.center,
+                    $position: $(() => frame$.center),
                     startCount: 0,
                     reItemClicked,
                 },
-                slot: () => [
-                    hx('p', {
+                heading: slot((props) => [
+                    mx('p', {
                         nodes: [
-                            hx('li', { text: "hello" }),
-                            hx('li', { text: "dolly" })
+                            mx('li', { text: "hello" }),
+                            mx('li', { text: "dolly" })
                         ]
                     })
-                ],
-                counterSlot: () =>
-                    hx('p', {
+                ]),
+                counter: slot((props) =>
+                    mx('p', {
                         nodes: [
-                            hx('li', { text: "hello" }),
-                            hx('li', { text: "dolly" })
+                            mx('li', { text: "hello" }),
+                            mx('li', { text: "dolly" })
                         ]
-                    })
+                    }))
             }),
 
         provide(): Needs<typeof this> {
@@ -127,6 +180,12 @@ function ListBlock(props: {
         `,
     }
 }
+
+function slot() {
+
+}
+
+
 
 type Needs<T> = T extends { render: infer RENDER } ? RENDER extends (arg: any) => infer R ? R extends { context: infer C } ? C : never : never : never
 // type Component<T = any> = { render: () => Nodes<any>, provides?: Provides<T> }
@@ -161,14 +220,18 @@ function ListItem(
         $color?: boolean;
     }> & {
         startCount: number;
-        slot: () => Nodes<any>
+        slots: {
+            heading: () => Nodes<any>
+        },
         reItemClicked?: (e: { frog: boolean }) => void,
     },
     context = getContext<{
-        sir?: string;
-        robin?: number;
-        theBrave?: boolean;
-    }>(["robin", "sir", "theBrave"])
+        sir: string;
+        robin: number;
+        theBrave: boolean;
+        farm?: {};
+        animals?: boolean;
+    }>(["robin", "sir", "theBrave"], ['farm', 'animals'])
 ) {
 
     const { $dog, $position, $color, $item, slot } = props;
@@ -217,11 +280,15 @@ function ListItem(
 
         // prioritize being able to see the structure, semantic roles, and functionality at a glance. Define dynamic styles in helper functions and static styles in return object
         render: () =>
-            hx("p", {
+            mx("p", {
                 class: 'list-item', // style classes are for state and reusable styles
                 style: pStyle($isActive, $isHighlighted),
                 nodes: [
-                    hx(slot)
+                    mxSlot(slot, {
+                        props: {
+
+                        }
+                    })
                 ]
             }),
 
@@ -282,7 +349,7 @@ type ElementConfig<T extends ComponentSetup<AnyObject> | string> = {
     class?: string | { [key: string]: () => boolean };
     style?: any;
     // nodes?: { for: (item: any) => (() => void), in: Signal<any> | [Observable<{}>, ...string[]] }[]
-    nodes?: (Nodes<any> | For<any>)[]
+    nodes?: (Nodes<any> | ListRenderKit<any> | string)[]
     text?: string | (() => void)
     key?: string | number
     ref?: string
@@ -290,21 +357,21 @@ type ElementConfig<T extends ComponentSetup<AnyObject> | string> = {
 
 
 
-function hx<T extends string | ComponentSetup<any>>(tagName: T, configA?: ElementConfig<T>, configB?: ElementConfig<T>) {
+function mx<T extends string | ComponentSetup<any>>(tagName: T, configA?: ElementConfig<T>, configB?: ElementConfig<T>) {
     return {} as unknown as Nodes<T>
 }
 
 type Nodes<T> = { [key: number]: Node, context: T extends (props: any, context: infer C) => any ? C : never }
 
-// function hxIf($isActive: () => boolean,)
+// function mxIf($isActive: () => boolean,)
 
 // return () =>
-//     hx('div', {
+//     mx('div', {
 //         class: "counter",
 //         style: { color() { counter.visible ? 'red' : 'blue' } },
 //         on: { click: toggleColor },
 //         nodes: [
-//             hx('button', { text: "increment" }),
-//             hx('button', { text: "decrement" }),
+//             mx('button', { text: "increment" }),
+//             mx('button', { text: "decrement" }),
 //         ]
 //     })

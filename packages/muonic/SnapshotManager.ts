@@ -1,12 +1,17 @@
 import { AnyObject } from "@rue/types";
 
+//NOTE: Temporarily pause development of this until usefulness is confirmed
+// Currently, for snapshots to work, we need to take a snapshot of every piece of state created upon initialization with signalize or reactivize
+// this seems expensive ... even if it's incorporated into the reactive proxy and signal function, not sure if it's worth it
+// This is meant as a way to have snapshots the way immutable practices do, without all the copying of objects
+
 
 type Snapshot = AnyObject;
 type IndexedSnapshot = [number, Snapshot]
 type SnapshotStack = IndexedSnapshot[];
 
 export class SnapshotManager {
-    snapshotMap: WeakMap<AnyObject, SnapshotStack> = new WeakMap();
+    private snapshotMap: WeakMap<AnyObject, SnapshotStack> = new WeakMap();
     takeSnapshot(target: AnyObject, index: number) {
         const snapshotMap = this.snapshotMap;
         const snapshot = new Proxy({ ...target }, {
@@ -26,7 +31,7 @@ export class SnapshotManager {
         return snapshot;
     }
 
-    storeSnapshot(snapshot: Snapshot, target: AnyObject, index: number) {
+    private storeSnapshot(snapshot: Snapshot, target: AnyObject, index: number) {
         let snapshots = this.snapshotMap.get(target);
         if (!snapshots) {
             snapshots = []
@@ -49,6 +54,7 @@ function findSnapshot(snapshots: SnapshotStack, index: number) {
             closestIndex = _index;
         }
     }
-    if (closestI === undefined) throw "No snapshot found";
+    if (closestI === undefined) return;
+    // if (closestI === undefined) throw "No snapshot found";
     return snapshots[closestI][1];
 }

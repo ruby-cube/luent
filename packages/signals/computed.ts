@@ -2,9 +2,9 @@ import { $subscribe, PendingCancelOp, ScheduleStop, inSceneSetup } from "../flas
 import { ComputedRef, DebuggerOptions, computed, effectScope, getCurrentInstance as inComponentSetup } from "vue";
 import { Signal } from "./signals";
 
-export function computed$<T>(computation: () => T, options?: { $outlive?: true, until?: ScheduleStop, $lifetime?: true } & DebuggerOptions): Signal<T> {
+export function computed$<T>(computation: () => T, options?: { outlive?: true, until?: ScheduleStop, $lifetime?: true } & DebuggerOptions): Signal<T> {
     let computedRef: ComputedRef<T>;
-    if (inSceneSetup() || options && ("until" in options || "$outlive" in options && options.$outlive)) { //QUESTION: check if inFlask??
+    if (inSceneSetup() || options && ("until" in options || "outlive" in options && options.outlive)) { //QUESTION: check if inFlask??
         const scope = effectScope(true);
         scope.run(() => {
             $subscribe(computation, options, {

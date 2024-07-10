@@ -53,7 +53,7 @@ const computedRef = compute(computation, options)
 ### Type Definitions
 ```tsx
 type SubscribeOptions = {
-    $outlive?: true;
+    outlive?: true;
     until?: (stop: () => void) => PendingCancelOp;
 }
 ```
@@ -87,11 +87,11 @@ type ActiveListener = {
 type ListenerOptions = {
     once?: true;
     sustain?: true;
-    unlessCanceled?: ScheduleCancel;
+    cancel?: ScheduleCancel;
     until?: ScheduleStop;
     $lifetime?: true;
     $tilStop?: true;
-    $outlive?: true;
+    outlive?: true;
     immediate?: boolean // default: false
     deep?: boolean // default: false
     flush?: 'pre' | 'post' | 'sync' // default: 'pre'
@@ -138,11 +138,11 @@ type ActiveListener = {
 type ListenerOptions = {
     once?: true;
     sustain?: true;
-    unlessCanceled?: ScheduleCancel;
+    cancel?: ScheduleCancel;
     until?: ScheduleStop;
     $lifetime?: true;
     $tilStop?: true;
-    $outlive?: true;
+    outlive?: true;
     flush?: 'pre' | 'post' | 'sync' // default: 'pre'
     onTrack?: (event: DebuggerEvent) => void
     onTrigger?: (event: DebuggerEvent) => void

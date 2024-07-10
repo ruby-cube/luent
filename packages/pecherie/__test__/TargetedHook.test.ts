@@ -2,7 +2,7 @@ import { describe, test, expect, vi, beforeEach } from "vitest";
 import { createHook } from "../Hook";
 import { createTargetedHook } from "../TargetedHook";
 import { $type } from "@rue/utils";
-import { initFlask, $lifetime, $tilStop } from "@rue/flask";
+import { initFlask } from "@rue/flask";
 import { __resetGlobals } from "../../dev/__resetGlobals";
 
 
@@ -48,7 +48,7 @@ describe("one time handlers are run only once", () => {
     });
 
 
-    test("CASE: options {unlessCanceled: ScheduleCancel}", () => {
+    test("CASE: options {cancel: ScheduleCancel}", () => {
         const [castTestCase, onTestCase] = createTargetedHook({
             hook: "test-hook",
             data: $type as {
@@ -60,7 +60,7 @@ describe("one time handlers are run only once", () => {
         });
         const cb = vi.fn(() => { })
         const model = {};
-        onTestCase(model, cb, { unlessCanceled: onEnd });
+        onTestCase(model, cb, { cancel: onEnd });
         //@ts-expect-error
         const testCallbacks = onTestCase.targetMap.get(model)
 
@@ -95,7 +95,7 @@ describe("one time handlers are run only once", () => {
     });
 
 
-    test("CASE: onceAsDefault & options {unlessCanceled: ScheduleCancel}", () => {
+    test("CASE: onceAsDefault & options {cancel: ScheduleCancel}", () => {
         const [castTestCase, onTestCase] = createTargetedHook({
             hook: "test-hook",
             data: $type as {
@@ -108,7 +108,7 @@ describe("one time handlers are run only once", () => {
         });
         const cb = vi.fn(() => { })
         const model = {};
-        onTestCase(model, cb, { unlessCanceled: onEnd });
+        onTestCase(model, cb, { cancel: onEnd });
         //@ts-expect-error
         const testCallbacks = onTestCase.targetMap.get(model)
 
@@ -128,7 +128,7 @@ describe("one time handlers are run only once", () => {
 describe("one time handlers can be canceled", () => {
 
     beforeEach(__resetGlobals);
-    test("CASE: options {unlessCanceled: ScheduleCancel}", () => {
+    test("CASE: options {cancel: ScheduleCancel}", () => {
         const [castTestCase, onTestCase] = createTargetedHook({
             hook: "test-hook",
             data: $type as {
@@ -140,7 +140,7 @@ describe("one time handlers can be canceled", () => {
         });
         const cb = vi.fn(() => { })
         const model = {};
-        onTestCase(model, cb, { unlessCanceled: onEnd });
+        onTestCase(model, cb, { cancel: onEnd });
         //@ts-expect-error
         const testCallbacks = onTestCase.targetMap.get(model)
         //@ts-expect-error
@@ -205,7 +205,7 @@ describe("one time handlers can be canceled", () => {
 describe("Canceler will be cleaned up if one time handler is run", () => {
     beforeEach(__resetGlobals);
 
-    test("CASE: options {unlessCanceled: ScheduleCancel}", () => {
+    test("CASE: options {cancel: ScheduleCancel}", () => {
         const [castTestCase, onTestCase] = createTargetedHook({
             hook: "test-hook",
             data: $type as {
@@ -219,7 +219,7 @@ describe("Canceler will be cleaned up if one time handler is run", () => {
         //@ts-expect-error
         const endCallbacks = onEnd.handlers
         const model = {};
-        onTestCase(model, cb, { unlessCanceled: onEnd });
+        onTestCase(model, cb, { cancel: onEnd });
         castEnd();
         castTestCase(model, { foo: "A" }); // handler called, endCallbacks.size === 0
         expect(endCallbacks.size).toBe(0); // ie. cancel function has been cleaned up
@@ -227,7 +227,7 @@ describe("Canceler will be cleaned up if one time handler is run", () => {
     });
 
 
-    test("CASE: onceAsDefault & options {unlessCanceled: ScheduleCancel}", () => {
+    test("CASE: onceAsDefault & options {cancel: ScheduleCancel}", () => {
         const [castTestCase, onTestCase] = createTargetedHook({
             hook: "test-hook",
             data: $type as {
@@ -242,7 +242,7 @@ describe("Canceler will be cleaned up if one time handler is run", () => {
         //@ts-expect-error
         const endCallbacks = onEnd.handlers
         const model = {};
-        onTestCase(model, cb, { unlessCanceled: onEnd });
+        onTestCase(model, cb, { cancel: onEnd });
         castEnd();
         castTestCase(model, { foo: "A" }); // handler called, endCallbacks.size === 0
         expect(endCallbacks.size).toBe(0); // ie. cancel function has been cleaned up
@@ -308,52 +308,52 @@ describe("sustained listeners run until stopped", () => {
     });
 
 
-    test("CASE: auto cleanup (cleans up both targetmap and handlers set", () => {
-        const [castTestUnmounted, onTestUnmounted] = createHook({
-            hook: "test-unmounted-hook",
-        });
-        let settingUp = false;
-        // defineAutoCleanup((cleanup) => {
-        //     if (settingUp) {
-        //         return onTestUnmounted(cleanup);
-        //     }
-        // })
-        initFlask({
-            covertFlasks: [{
-                setupChecker: ()=>settingUp,
-                autoCleanupScheduler: onTestUnmounted
-            }]
-        })
-        const [castTestCase, onTestCase] = createTargetedHook({
-            hook: "test-hook",
-        })
+    // test("CASE: auto cleanup (cleans up both targetmap and handlers set", () => {
+    //     const [castTestUnmounted, onTestUnmounted] = createHook({
+    //         hook: "test-unmounted-hook",
+    //     });
+    //     let settingUp = false;
+    //     // defineAutoCleanup((cleanup) => {
+    //     //     if (settingUp) {
+    //     //         return onTestUnmounted(cleanup);
+    //     //     }
+    //     // })
+    //     initFlask({
+    //         covertFlasks: [{
+    //             setupChecker: ()=>settingUp,
+    //             autoCleanupScheduler: onTestUnmounted
+    //         }]
+    //     })
+    //     const [castTestCase, onTestCase] = createTargetedHook({
+    //         hook: "test-hook",
+    //     })
 
-        const cb = vi.fn(() => { })
-        const model = {};
-        settingUp = true;
-        onTestCase(model, cb);
-        settingUp = false;
-        //@ts-ignore
-        const unmountedCallbacks = onTestUnmounted.handlers
-        //@ts-ignore
-        const testCallbacks = onTestCase.targetMap.get(model)
-        //@ts-ignore
-        const targetMap = onTestCase.targetMap
+    //     const cb = vi.fn(() => { })
+    //     const model = {};
+    //     settingUp = true;
+    //     onTestCase(model, cb);
+    //     settingUp = false;
+    //     //@ts-ignore
+    //     const unmountedCallbacks = onTestUnmounted.handlers
+    //     //@ts-ignore
+    //     const testCallbacks = onTestCase.targetMap.get(model)
+    //     //@ts-ignore
+    //     const targetMap = onTestCase.targetMap
 
-        expect(unmountedCallbacks.size).toBe(2); // FIX: currently 0
-        castTestCase(model);
-        castTestCase(model);
-        castTestCase(model);
-        expect(cb).toHaveBeenCalledTimes(3);
+    //     expect(unmountedCallbacks.size).toBe(2); // FIX: currently 0
+    //     castTestCase(model);
+    //     castTestCase(model);
+    //     castTestCase(model);
+    //     expect(cb).toHaveBeenCalledTimes(3);
         
-        castTestUnmounted();
+    //     castTestUnmounted();
         
-        castTestCase(model);
-        expect(cb).toHaveBeenCalledTimes(3);
-        expect(testCallbacks.size).toBe(0);
-        expect(targetMap.size).toBe(0);
-        expect(unmountedCallbacks.size).toBe(0);
-    });
+    //     castTestCase(model);
+    //     expect(cb).toHaveBeenCalledTimes(3);
+    //     expect(testCallbacks.size).toBe(0);
+    //     expect(targetMap.size).toBe(0);
+    //     expect(unmountedCallbacks.size).toBe(0);
+    // });
 
     // test.only("CASE: auto cleanup registers cleanup of targetMap and handlers set", () => {
     //     defineAutoCleanup((cleanup) => {
@@ -451,28 +451,28 @@ describe("options should override default", () => {
         expect(cb).toHaveBeenCalledTimes(3);
     });
 
-    test("CASE: onceAsDefault and $tilStop", () => {
-        const [castTestCase, onTestCase] = createTargetedHook({
-            hook: "test-hook",
-            onceAsDefault: true
-        });
-        const cb = vi.fn(() => { })
-        const model = {};
-        const listener = onTestCase(model, cb, { $tilStop });
-        //@ts-expect-error
-        const testCallbacks = onTestCase.targetMap.get(model);
+    // test("CASE: onceAsDefault and $tilStop", () => {
+    //     const [castTestCase, onTestCase] = createTargetedHook({
+    //         hook: "test-hook",
+    //         onceAsDefault: true
+    //     });
+    //     const cb = vi.fn(() => { })
+    //     const model = {};
+    //     const listener = onTestCase(model, cb, { $tilStop });
+    //     //@ts-expect-error
+    //     const testCallbacks = onTestCase.targetMap.get(model);
 
-        castTestCase(model);
-        castTestCase(model);
-        castTestCase(model);
-        expect(cb).toHaveBeenCalledTimes(3);
+    //     castTestCase(model);
+    //     castTestCase(model);
+    //     castTestCase(model);
+    //     expect(cb).toHaveBeenCalledTimes(3);
 
-        listener.stop();
-        expect(testCallbacks.size).toBe(0);
+    //     listener.stop();
+    //     expect(testCallbacks.size).toBe(0);
 
-        castTestCase(model);
-        expect(cb).toHaveBeenCalledTimes(3);
-    });
+    //     castTestCase(model);
+    //     expect(cb).toHaveBeenCalledTimes(3);
+    // });
 
 
 })

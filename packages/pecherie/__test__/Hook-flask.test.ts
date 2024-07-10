@@ -4,7 +4,7 @@ import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
 import { $type } from "@rue/utils";
 import { Callback, Callbacks, initFlask } from "../../flask";
-import { NestableFlask, enflask, flaskSetup, getFlask, getOuterFlask, getCovertFlask } from "../../flask/flask";
+import { NestableFlask, enflask, collectEffects, getFlask, getOuterFlask } from "../../flask/flask";
 import { __resetGlobals } from "../../dev/__resetGlobals";
 
 // cleanup cleanups if alternative cleanup strategy run
@@ -56,10 +56,10 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         const unmountedCallbacks = onTestUnmounted.handlers
 
         settingUp = true;
-        const flask = flaskSetup((flask) => {
+        const flask = collectEffects((flask) => {
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
-            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseD(cbC, { cancel: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             return flask;
         })
@@ -133,10 +133,10 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         const unmountedCallbacks = onTestUnmounted.handlers
 
         settingUp = true;
-        const flask = flaskSetup((flask, covertFlask) => {
+        const flask = collectEffects((flask, covertFlask) => {
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
-            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseD(cbC, { cancel: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             covertFlask.onDisposed(cbD) // adds 2 callbacks to unmounted; cbD and also to cancel
             return flask;
@@ -213,10 +213,10 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         const unmountedCallbacks = onTestUnmounted.handlers
 
         settingUp = true;
-        const flask = flaskSetup((flask) => {
+        const flask = collectEffects((flask) => {
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
-            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseD(cbC, { cancel: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             return flask;
         })
@@ -291,10 +291,10 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         const unmountedCallbacks = onTestUnmounted.handlers
 
         settingUp = true;
-        const flask = flaskSetup((flask) => {
+        const flask = collectEffects((flask) => {
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
-            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseD(cbC, { cancel: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             return flask;
         })
@@ -368,10 +368,10 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         const unmountedCallbacks = onTestUnmounted.handlers
 
         settingUp = true;
-        const flask = flaskSetup((flask) => {
+        const flask = collectEffects((flask) => {
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
-            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseD(cbC, { cancel: onTestCaseC });
             return flask;
         })
         settingUp = false;
@@ -432,10 +432,10 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         //@ts-expect-error
         const testCallbacksC = onTestCaseC.handlers
 
-        const flask = flaskSetup((flask) => {
+        const flask = collectEffects((flask) => {
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
-            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseD(cbC, { cancel: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             return flask;
         })
@@ -501,10 +501,10 @@ describe("various flask usages where all cleanup strategies should be cleaned up
 
         let flask: NestableFlask;
         sceneSetup((scene) => {
-            flask = flaskSetup((flask) => {
+            flask = collectEffects((flask) => {
                 onTestCaseA(cb, { until: onTestCaseC });
                 onTestCaseB(cbB, { until: onTestCaseC });
-                onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+                onTestCaseD(cbC, { cancel: onTestCaseC });
                 onTestCaseC(() => flask.dispose());
                 return flask;
             });
@@ -578,12 +578,12 @@ describe("various flask usages where all cleanup strategies should be cleaned up
             //@ts-expect-error
             const sceneEndHandlers = scene.endHandlers;
             console.log("sceneEndHandlers", sceneEndHandlers.size)
-            flask = flaskSetup((flask) => {
+            flask = collectEffects((flask) => {
                 onTestCaseA(cb, { until: onTestCaseC });
                 console.log("sceneEndHandlersA", sceneEndHandlers.size)
                 onTestCaseB(cbB, { until: onTestCaseC });
                 console.log("sceneEndHandlersB", sceneEndHandlers.size)
-                onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+                onTestCaseD(cbC, { cancel: onTestCaseC });
                 console.log("sceneEndHandlersD", sceneEndHandlers.size)
                 onTestCaseC(() => flask.dispose());
                 console.log("sceneEndHandlersC", sceneEndHandlers.size)
@@ -664,7 +664,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
             flask = _flask;
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
-            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseD(cbC, { cancel: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             return _flask;
         });
@@ -760,7 +760,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
         })
 
         settingUp = true;
-        const flask = flaskSetup((flask, covertFlask) => {
+        const flask = collectEffects((flask, covertFlask) => {
             onTestCaseA(cb, { until: onTestCaseC });
             onTestCaseB(cbB, { until: onTestCaseC });
 
@@ -770,7 +770,7 @@ describe("various flask usages where all cleanup strategies should be cleaned up
             const _covertFlask = getCovertFlask();
             expect(_covertFlask).toBe(covertFlask);
 
-            onTestCaseD(cbC, { unlessCanceled: onTestCaseC });
+            onTestCaseD(cbC, { cancel: onTestCaseC });
             onTestCaseC(() => flask.dispose());
             covertFlask.onDisposed(cbD) // adds 2 callbacks to unmounted; cbD and also to cancel
             return flask;

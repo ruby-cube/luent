@@ -2,7 +2,7 @@ import { computed, ComputedRef, nextTick, onMounted, Ref, ref } from 'vue';
 import { ExtensibleRef, set$, r$, inComponentSetup } from '@rue/paravue';
 import { createHook } from '@rue/pecherie';
 import { ScheduleStop, sceneSetup, Scene } from '../flask';
-import { addPS } from '@rue/thread';
+import { queuePostTask } from '@rue/thread';
 import { $type } from '@rue/utils';
 import { AnyObject } from '@rue/types';
 
@@ -84,7 +84,7 @@ class State extends ExtensibleRef {
                 onMounted(() => this.initTransitions(initialValue))
             }
             else {
-                addPS(() => this.initTransitions(initialValue))
+                queuePostTask(() => this.initTransitions(initialValue))
             }
         }
     }
@@ -218,7 +218,7 @@ class State extends ExtensibleRef {
     [_init]() {
         const initial = this.initial
         set$(this.stateValue, isInitialValue(initial) ? initial : initial(this.context));
-        addPS(() => {
+        queuePostTask(() => {
             this.initTransitions(this.initialValue)
         })
     }

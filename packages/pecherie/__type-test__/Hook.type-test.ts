@@ -17,5 +17,5 @@ import { createHook } from "../Hook";
     }
 
     //@ts-expect-error: must return PendingCancelOp
-    onTestCase(() => { }, { unlessCanceled: onWrappedEnd });
+    onTestCase(() => { }, { cancel: onWrappedEnd });
 }

@@ -1,4 +1,4 @@
-import { ActiveListener, Callback, PendingCancelOp, PendingOp } from ".";
+import { Callback, PendingCancelOp, PendingOp } from ".";
 import { Flask } from "./flask";
 import { registerGlobalResetter } from "../dev/__resetGlobals";
 

@@ -106,7 +106,7 @@ type PendingOp = {
 
 type HookOptions = {
     target?: ComponentPublicInstance;
-    unlessCanceled?: (cancel: () => void) => PendingCancelOp;
+    cancel?: (cancel: () => void) => PendingCancelOp;
 }
 ```
 
@@ -114,7 +114,7 @@ type HookOptions = {
 ```tsx
 onUnmounted(() => { 
     // do stuff
-}, { unlessCanceled: onActionEscaped });
+}, { cancel: onActionEscaped });
 ```
 
 <p align="right"><a href="#readme-top">[top]</a></p>
