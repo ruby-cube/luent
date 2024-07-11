@@ -58,6 +58,16 @@ type MxIfConfig = {
     else?: () => NodeEntity[]
 }
 
+export function genConditionsSignal(conditions: ReactiveSignal<boolean>[]) {
+    return $(() => {
+        const values: boolean[] = [];
+        for (const $condition of conditions) {
+            values.push($condition());
+        }
+        return values;
+    }) // $(() => [$conditionA(), $conditionB()])
+}
+
 
 export function mxIf($condition: ReactiveSignal<boolean>, config: MxIfConfig): InitialConditionalRenderKit {
     const { then: renderConditional, else: renderElse, elseIf: elseIfKit } = config;
@@ -65,13 +75,7 @@ export function mxIf($condition: ReactiveSignal<boolean>, config: MxIfConfig): I
     const conditions = [$condition]; // stop pushing when value is true;
     let conditionMet: boolean = getWithoutTracking($condition) //TODO: not sure if getWithoutTracking is needed
     let initialIndex = 0;
-    const $initialConditions = $(() => {
-        const values: boolean[] = [];
-        for (const $condition of conditions) {
-            values.push($condition());
-        }
-        return values;
-    }) // $(() => [$conditionA(), $conditionB()])
+    const $initialConditions = genConditionsSignal(conditions);
 
     if (elseIfKit) {
         if (hasSignal(elseIfKit[0])) {

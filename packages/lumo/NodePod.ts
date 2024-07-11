@@ -1,0 +1,160 @@
+import { AnyObject } from "@rue/types";
+import { DOMNode, InternalComponent } from "./component";
+import { Interface } from "readline";
+
+// Node Pods represent groups of nodes created by `mxsFor` and `mxIf`.
+// 
+// A root node pod represents the child nodes NodeList of a parent DOMNode, NOT the root node(s) of a component.
+// They are ignorant of component boundaries and care only about:
+// - the distinguishing static nodes from dynamic pods
+// - the boundary between parent and child in the DOM (given that a root node pod represents a child nodes NodeList)
+// 
+// The main purpose of node pods is to aid in node insertions when updates are triggered by dynamic `mxsFor` and `mxIf`
+// DynamicNodePod supports in emitting Update and Unmounted hooks by collecting components in the `activeComponents` property
+// For Unmounting: activeComponents should collect the highest component of a branch, then let the unmount cascade unmount any descendant components.
+// For Updates: call emit(UPDATED) for the PARENT component not the components within via getCurrentComponent();
+//
+// A new root node pod is created when mx is called and passed through the set up of its (child) node entities.
+// The root node pod should not be passed to grand children.
+//
+// When setting up node entities for the first time, it doesn't matter whether you append to the DOM or append to node pods first
+//
+// When updating by inserting node entities, insert into the node pods first, then insert into the DOM. Must insert via forwards loop.
+// When updating by removing node entities, remove from DOM first, then remove from node pods and clear active components array. Remove via backwards loop if using index.
+//
+// When updating by inserting node entities, a new node pod 
+// (1) created
+// (2) populated
+// (3) batch inserted into its containing dynamic node pod
+//
+
+//
+// export type NodePod = (DOMNode | DynamicNodePod)[]
+//
+// [node, node, [[node, [node]], [node, [node]]]]
+
+
+export class NodePod extends Array<DOMNode | DynamicNodePod> {
+    index?: number;
+    pod?: DynamicNodePod;
+    componentsToUnmount?: InternalComponent[];
+
+    constructor(pod?: DynamicNodePod, index?: number) {
+        super();
+        this.index = index;
+        this.pod = pod;
+        this.componentsToUnmount = [];
+    }
+
+    get prevNode(): DOMNode | null {
+        if (this.index === undefined) return null;
+        const item = this.pod?.[this.index - 1];
+        if (!item && !this.pod) return null;
+        if (!item) return this.pod!.prevNode
+        return item.lastNode;
+    }
+
+    get lastNode(): DOMNode | null {
+        const entity = this.at(- 1);
+        if (!entity) return null;
+        if (entity instanceof DynamicNodePod) return entity.lastNode;
+        return entity;
+    }
+
+    appendStaticNode(node: DOMNode) {
+        super.push(node);
+    }
+
+    appendDynamicPod() {
+        const dynamicPod = new DynamicNodePod(this, super.length)
+        super.push(dynamicPod);
+        return dynamicPod;
+    }
+
+    connect(pod: DynamicNodePod, index: number){
+        this.index = index;
+        this.pod = pod;
+    }
+
+    disconnect(){
+        this.index = undefined
+        this.pod = undefined
+    }
+
+    // resetComponentsToUnmount(){
+    //     this.componentsToUnmount = this.pod ? [] : undefined;
+    // }
+}
+
+export class DynamicNodePod extends Array<NodePod> {
+    index: number;
+    pod: NodePod;
+    // private _activeComponents: InternalComponent[] = []
+
+    constructor(pod: NodePod, index: number) {
+        super();
+        this.index = index;
+        this.pod = pod;
+    }
+
+    appendNodePod() {
+        const nodePod = new NodePod(this, super.length);
+        super.push(nodePod)
+        return nodePod;
+    }
+
+    get prevNode() {
+        const item = this.pod[this.index - 1];
+        if (!item) return this.pod.prevNode;
+        if (item instanceof DynamicNodePod) {
+            return item.lastNode;
+        }
+        return item;
+    }
+
+    get lastNode(): DOMNode | null {
+        const nodePod = super.at(- 1);
+        if (!nodePod) return null;
+        return nodePod.lastNode;
+    }
+
+    replaceNodePod(index: number, nodePod: NodePod) {
+        this[index] = nodePod;
+        nodePod.connect(this, index)
+    }
+
+    removeNodePods(index: number, deleteCount: number) {
+        const nodePods = super.splice(index, deleteCount)
+        for (const nodePod of nodePods) {
+            nodePod.index = undefined;
+            nodePod.pod = undefined;
+            nodePod.disconnect();
+        }
+    }
+
+    insertNodePods(index: number, nodePods: NodePod[]) {
+        super.splice(index, 0, ...nodePods)
+        let count = 0;
+        for (const nodePod of nodePods) {
+            nodePod.connect(this, index + count)
+            count++
+        }
+    }
+
+    // includeComponent(component: InternalComponent) {
+    //     this._activeComponents.push(component);
+    // }
+
+    // includeComponents(components: InternalComponent[]) {
+    //     const activeComponents = this._activeComponents
+    //     activeComponents.splice(activeComponents.length, 0, ...components)
+    // }
+
+    // clearComponents() {
+    //     this._activeComponents = [];
+    // }
+
+    // get activeComponents() {
+    //     return this._activeComponents;
+    // }
+}

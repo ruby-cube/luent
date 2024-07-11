@@ -94,7 +94,7 @@ export function $<T extends any>(pureGetter: () => T, memoize?: 'memoize'): Deri
             // @ts-expect-error private method
             _this.updateValue(newValue)
             // @ts-expect-error private method
-            if (_this.memoized) _this.trackDependencies(pureGetter, !!memoize) // to catch conditionals
+            if (_this.memoized) _this.trackDependencies(pureGetter, !!memoize) // to catch signals hidden in conditionals
             return newValue;
         }
         return _this.value;

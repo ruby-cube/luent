@@ -4,6 +4,8 @@ import { Observable, o$ } from "../muonic/ObservableCapsule";
 import { $ } from "../signals";
 import { DOMNode } from "./component";
 import { ListRenderKit } from "./mx";
+import { ReactiveSignal } from "../muonic/useDerivedSignal";
+import { mxO } from "./mxO";
 
 type Signal<T> = () => T
 
@@ -45,14 +47,26 @@ function List() {
                     mxListBlockIf($active, {
                         stuff: 0
                     }),
-                    mxsFor((item, i) => m('p', {
-                        props: {
-                            $dog
-                        },
-                        text: item.text,
-                        key: i,
-                        ref: "item"
-                    }), $items),
+                    
+                    mxsFor((item, i) => [
+                        m('p', {
+                            props: {
+                                $dog
+                            },
+                            nodes: [
+                                mx('div', {
+                                    nodes: mxO(ListBlock)
+                                }),
+                                mxO(Frog),
+                                mxIf($active, {
+                                    this: () => mO(Cat)
+                                })
+                            ],
+                            ref: "item"
+                        }),
+                        mxO(Dog)
+                    ], $items, 'id'),
+
                     mx("button", { text: 'add' }),
                     mxO(ListItem, {
                         props: {
@@ -83,11 +97,10 @@ function mxBold(text: string) {
 
 
 
-function mxsForItem(p: `p`, $items: () => any): ListRenderKit<{ text: string }> {
-    return forEach((item, i) =>
+function mxsForItem(p: `p`, $items: ReactiveSignal): ListRenderKit<{ text: string }> {
+    return forEach((entry) =>
         mx(p, {
-            text: item.text,
-            key: i,
+            text: $(() => entry[VALUE]),
             ref: "item"
         }), $items)
 }
@@ -161,15 +174,6 @@ function ListBlock(props: {
                 robin: 9
             }
         },
-
-
-        critical: css`
-            .list-item {
-                background-color: blue;
-                color: red;
-                width: 2px;
-            }
-        `,
 
         global: css`
             .list-item {

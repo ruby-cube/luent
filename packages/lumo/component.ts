@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { Slot } from "./mxSlot";
 import { Signal } from "../muonic/useSignalize";
-import { LifecycleHooks } from "./lifecycle";
+import { LifecycleHook } from "./lifecycle";
 import { ListRenderKit } from "./mxsFor";
 import { InitialConditionalRenderKit } from "./mxIf";
 import { ReactiveSignal } from "../muonic/useDerivedSignal";
@@ -37,19 +37,19 @@ export class InternalComponent {
     parent: InternalComponent | 'root';
     initialNodeEntities: NodeEntity[] = []; //TODO: add context type??
     tasks: {
-        [LifecycleHooks.BEFORE_MOUNT]: Set<() => void> | undefined;
-        [LifecycleHooks.BEFORE_UNMOUNT]: Set<() => void> | undefined;
-        [LifecycleHooks.BEFORE_UPDATE]: Set<() => void> | undefined;
-        [LifecycleHooks.MOUNTED]: Set<() => void> | undefined;
-        [LifecycleHooks.UNMOUNTED]: Set<() => void> | undefined;
-        [LifecycleHooks.UPDATED]: Set<() => void> | undefined;
+        [LifecycleHook.BEFORE_MOUNT]: Set<() => void> | undefined;
+        [LifecycleHook.BEFORE_UNMOUNT]: Set<() => void> | undefined;
+        [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
+        [LifecycleHook.MOUNTED]: Set<() => void> | undefined;
+        [LifecycleHook.UNMOUNTED]: Set<() => void> | undefined;
+        [LifecycleHook.UPDATED]: Set<() => void> | undefined;
     } = {
-            [LifecycleHooks.BEFORE_MOUNT]: undefined,
-            [LifecycleHooks.BEFORE_UNMOUNT]: undefined,
-            [LifecycleHooks.BEFORE_UPDATE]: undefined,
-            [LifecycleHooks.MOUNTED]: undefined,
-            [LifecycleHooks.UNMOUNTED]: undefined,
-            [LifecycleHooks.UPDATED]: undefined,
+            [LifecycleHook.BEFORE_MOUNT]: undefined,
+            [LifecycleHook.BEFORE_UNMOUNT]: undefined,
+            [LifecycleHook.BEFORE_UPDATE]: undefined,
+            [LifecycleHook.MOUNTED]: undefined,
+            [LifecycleHook.UNMOUNTED]: undefined,
+            [LifecycleHook.UPDATED]: undefined,
         };
 
     hasUpdates: boolean = false;
@@ -58,13 +58,13 @@ export class InternalComponent {
         this.parent = parent;
     }
 
-    private getTaskQueue(hookName: LifecycleHooks) {
+    private getTaskQueue(hookName: LifecycleHook) {
         let taskQueue = this.tasks[hookName]
         if (!taskQueue) throw new Error("taskQueue not found")
         return taskQueue;
     }
 
-    emit(hookName: LifecycleHooks) {
+    emit(hookName: LifecycleHook) {
         const taskQueue = this.getTaskQueue(hookName);
         for (const task of taskQueue) {
             task();

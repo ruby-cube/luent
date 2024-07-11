@@ -5,7 +5,7 @@ import { AnyObject } from "@rue/types";
 import { ActiveListener } from "../flask/ActiveListener";
 import { getCurrentUpdateCycle, setCurrentUpdateCycle, UpdateCycle } from "./UpdateCycle";
 import { DependencyTracker, getDependencyTracker, ReactiveProp } from "./DependencyTracker";
-import { DERIVED_SIGNAL, DerivedSignal, isDerivedSignal } from "./useDerivedSignal";
+import { DERIVED_SIGNAL, DerivedSignal, isDerivedSignal, ReactiveSignal } from "./useDerivedSignal";
 import { isEqual } from "@rue/utils";
 
 //QUESTION: How useful is watching deep?
@@ -42,36 +42,36 @@ function isReactiveEffect(task: Function): task is ReactiveEffect {
 
 
 
-export function watch<T>(target: Signal<T> | (() => T) | ReactiveObject<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: WatchOptions) {
-    return _watch(handler, target, options);
+export function watch<T>(target: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: WatchOptions) {
+    return _initializeEffect(handler, target, options);
 }
 
-export function initializeEffect(effect: () => void, options?: EffectOptions) {
-    return _watch(effect, undefined, options);
+export function initializeEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived signal and effect combined into one function
+    return _initializeEffect(effect, undefined, options);
 }
 
 // export function initializeUpdate(effect: () => void) {
-//     return _watch(effect, undefined, { phase: 'update' });
+//     return _initializeEffect(effect, undefined, { phase: 'update' });
 // }
 
 // export function watchForUpdate<T>(target: Signal<T> | (() => T) | ReactiveObject<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, component: InternalComponent) {
-//     return _watch(handler, target, { phase: 'update' });
+//     return _initializeEffect(handler, target, { phase: 'update' });
 // }
 
 const derivedSignalMap: WeakMap<Function, DerivedSignal> = new WeakMap();
 const reactiveEffects: WeakSet<Function> = new WeakSet();
 
 
-function _watch<T>(handler: ReactiveEffect, target: undefined, options?: _WatchOptions): ActiveListener
-function _watch<T>(handler: ChangeHandler, target?: Signal<T> | (() => T) | ReactiveObject<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener
-function _watch<T>(handler: ChangeHandler | ReactiveEffect, target?: Signal<T> | (() => T) | ReactiveObject<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener {
+export function _initializeEffect<T>(handler: ReactiveEffect, target: undefined, options?: _WatchOptions): ActiveListener
+export function _initializeEffect<T>(handler: ChangeHandler, target?: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener
+export function _initializeEffect<T>(handler: ChangeHandler | ReactiveEffect, target?: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener {
     const { phase, deep } = options ?? {};
     let taskQueues: Set<Effect>[];
     const isReactiveEffect = target === undefined;
 
     // collect tracked refs and get taskQueues
     if (target instanceof Function || isReactiveEffect) {
-        const dependencies = getDependencies(target || handler, isReactiveEffect)
+        const dependencies = getDependencies(target || handler, isReactiveEffect) //TODO: must retrack dependencies onChange like with derivedSignal to catch conditional dependencies? .. should the logic live here instead of in $()?
         taskQueues = useTaskQueues(dependencies, phase, deep);
     }
     else {

@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { ComponentSetup, getCurrentComponent, InternalComponent, setCurrentComponent } from "./component";
 import { SetKey, Signal } from "../muonic/useSignalize";
-import { LifecycleHooks } from "./lifecycle";
+import { LifecycleHook } from "./lifecycle";
 import { collectEffects } from "../flask/flask";
 import { onUnmounted } from "@rue/paravue";
 
@@ -61,17 +61,17 @@ function setUpComponent<T extends ComponentSetup>(Component: T, config: Componen
 }
 
 // export function mountComponent(parent: HTMLElement, component: InternalComponent) {
-//     component.emit(LifecycleHooks.BEFORE_MOUNT);
+//     component.emit(LifecycleHook.BEFORE_MOUNT);
 //     parent.append(...component.domNodes);
-//     component.emit(LifecycleHooks.MOUNTED);
+//     component.emit(LifecycleHook.MOUNTED);
 // }
 
 export function unmountComponent(component: InternalComponent) {
-    component.emit(LifecycleHooks.BEFORE_UNMOUNT);
+    component.emit(LifecycleHook.BEFORE_UNMOUNT);
     // const nodes = component.initialNodeEntities;
     // for (const node of nodes) {
     //     node.remove();
     // }
-    component.emit(LifecycleHooks.UNMOUNTED);
+    component.emit(LifecycleHook.UNMOUNTED);
 }
 
