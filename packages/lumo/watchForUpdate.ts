@@ -20,14 +20,14 @@ export function watchForUpdate<T>(target: ReactiveSignal<T>, handler: (newValue:
     const _handler = (newValue: any, oldValue: any) => {
         handler(newValue, oldValue);
         if (component.hasUpdates === true) return;
-        component.hasUpdates = true; // makes sure component.runTasks() runs only once per cycle even if many changes happen
+        component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
 
         onBeforeUpdatePhase(() => {
-            component.runTasks(LifecycleHooks.BEFORE_UPDATE)
+            component.emit(LifecycleHooks.BEFORE_UPDATE)
         }, { once: true }) // assuming cleanup flask is set up
 
         onUpdateComplete(() => {
-            component.runTasks(LifecycleHooks.UPDATED)
+            component.emit(LifecycleHooks.UPDATED)
             component.hasUpdates = false; // resets for the next cycle
         }, { once: true })
     }

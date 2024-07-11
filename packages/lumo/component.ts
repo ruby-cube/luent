@@ -64,7 +64,7 @@ export class InternalComponent {
         return taskQueue;
     }
 
-    runTasks(hookName: LifecycleHooks) {
+    emit(hookName: LifecycleHooks) {
         const taskQueue = this.getTaskQueue(hookName);
         for (const task of taskQueue) {
             task();

@@ -7,11 +7,12 @@ import { getWithoutTracking } from "../muonic/DependencyTracker";
 import { ListRenderKit } from "./mxsFor";
 import { LifecycleHooks } from "./lifecycle";
 import { InitialConditionalRenderKit } from "./mxIf";
-import { isEqual } from "@rue/utils";
+import { appendItems, isEqual } from "@rue/utils";
 
 
 type NodeCluster = (DOMNode | DynamicNodeCluster)[]
 // type DynamicNodeCluster = NodeCluster[]
+
 
 export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | InitialConditionalRenderKit | string | ReactiveSignal<string> // TODO: Attach context to DOMNode, InternalComponent, ListRenderKit, and InitialConditionalRenderKit
 
@@ -65,18 +66,33 @@ export function mx<T extends keyof HTMLElementTagNameMap>(tagName: T, config: DO
     return domNode;
 }
 
-function setUpTextNode(parent: DOMNode, text: ReactiveSignal | string, nodeClusterBuilder?: NodeClusterBuilder) {
+function setUpTextNode(parent: HTMLElement, text: ReactiveSignal | string, nodeClusterBuilder?: NodeClusterBuilder, fragment?: DocumentFragment) {
     const textNode = createTextNode(text); //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
     if (nodeClusterBuilder) {
         nodeClusterBuilder.appendStaticNode(textNode)
     }
-    parent.appendChild(textNode);
+
+    const root = fragment ? fragment : parent;
+    root.appendChild(textNode)
+
     if (hasSignal(text)) {
         keepTextNodeUpdated(text, textNode)
     }
 }
 
-function keepTextNodeUpdated($text: () => string, textNode: CharacterData) {
+// function mountDOMNode(parent: HTMLElement, node: DOMNode, prevSibling?: DOMNode | null) {
+//     if (prevSibling) {
+//         prevSibling.after(node) //TODO: instead, collect consecutive nodes and mount them together?
+//     }
+//     else if (prevSibling === null) {
+//         parent.prepend(node)
+//     }
+//     else {
+//         parent.appendChild(node);
+//     }
+// }
+
+function keepTextNodeUpdated($text: ReactiveSignal<string>, textNode: CharacterData) {
     watchForUpdate($text, (newValue) => {
         textNode.data = newValue;
     });
@@ -88,20 +104,20 @@ function createTextNode(value: ReactiveSignal | string) {
     return textNode;
 }
 
-function mountNode(parent: DOMNode, node: DOMNode) {
-    parent.appendChild(node);
-}
+// function mountNode(parent: DOMNode, node: DOMNode) {
+//     parent.appendChild(node);
+// }
 
-function mountNodes(parent: DOMNode, nodes: (DOMNode | DOMNode[])[]) {
-    for (const nodeOrGroup of nodes) {
-        if (nodeOrGroup instanceof Array) {
-            mountNodes(parent, nodeOrGroup);
-        }
-        else {
-            parent.appendChild(nodeOrGroup);
-        }
-    }
-}
+// function mountNodes(parent: DOMNode, nodes: (DOMNode | DOMNode[])[]) {
+//     for (const nodeOrGroup of nodes) {
+//         if (nodeOrGroup instanceof Array) {
+//             mountNodes(parent, nodeOrGroup);
+//         }
+//         else {
+//             parent.appendChild(nodeOrGroup);
+//         }
+//     }
+// }
 
 class NodeClusterBuilder {
     cluster: NodeCluster = [];
@@ -133,6 +149,7 @@ class DynamicNodeCluster {
     private cluster: NodeCluster[] = []
     index: number;
     pod: NodeCluster;
+    private _activeComponents: InternalComponent[] = []
 
     constructor(pod: NodeCluster, index: number) {
         this.index = index;
@@ -168,23 +185,53 @@ class DynamicNodeCluster {
         }
         return item;
     }
+
+    replaceNodeCluster(index: number, nodeCluster: NodeCluster) {
+        this.cluster[index] = nodeCluster;
+    }
+
+    removeNodeClusters(index: number, deleteCount: number) {
+        this.cluster.splice(index, deleteCount)
+    }
+
+    insertNodeClusters(index: number, ...nodeClusters: NodeCluster[]) {
+        this.cluster.splice(index, 0, ...nodeClusters)
+    }
+
+    includeComponent(component: InternalComponent) {
+        this._activeComponents.push(component);
+    }
+
+    includeComponents(components: InternalComponent[]) {
+        const activeComponents = this._activeComponents
+        activeComponents.splice(activeComponents.length, 0, ...components)
+    }
+
+    clearComponents() {
+        this._activeComponents = [];
+    }
+
+    get activeComponents() {
+        return this._activeComponents;
+    }
 }
 
-function setUpNodeEntity(parent: DOMNode, nodeEntity: NodeEntity, clusterBuilder: NodeClusterBuilder) {
+function setUpNodeEntity(parent: HTMLElement, nodeEntity: NodeEntity, clusterBuilder: NodeClusterBuilder, dynamicCluster?: DynamicNodeCluster, fragment?: DocumentFragment) {
     if (typeof nodeEntity === "string" || hasSignal(nodeEntity)) {
-        setUpTextNode(parent, nodeEntity, clusterBuilder)
+        setUpTextNode(parent, nodeEntity, clusterBuilder, fragment)
     }
     else if (nodeEntity instanceof Node) { // from Web API
-        setUpNode(parent, nodeEntity, clusterBuilder)
+        setUpNode(parent, nodeEntity, clusterBuilder, fragment)
     }
     else if (nodeEntity instanceof InternalComponent) {
-        setUpComponent(parent, nodeEntity, clusterBuilder)
+        setUpComponent(parent, nodeEntity, clusterBuilder, dynamicCluster, fragment) //QUESTION: not sure if this needs updateMode passed in
+        if (dynamicCluster) dynamicCluster.includeComponent(nodeEntity);
     }
     else if (nodeEntity instanceof ListRenderKit) { // this may or may not be dynamic, depending on data
-        setUpNodeList(parent, nodeEntity, clusterBuilder);
+        setUpNodeList(parent, nodeEntity, clusterBuilder, dynamicCluster, fragment);
     }
     else if (nodeEntity instanceof InitialConditionalRenderKit) {
-        setUpConditionalEntity(parent, nodeEntity, clusterBuilder)
+        setUpConditionalEntity(parent, nodeEntity, clusterBuilder, dynamicCluster, fragment)
     }
     else {
         throw new Error("Invalid input")
@@ -193,41 +240,46 @@ function setUpNodeEntity(parent: DOMNode, nodeEntity: NodeEntity, clusterBuilder
 
 
 
-function setUpNode(parent: DOMNode, node: DOMNode, nodeClusterBuilder: NodeClusterBuilder) {
+function setUpNode(parent: HTMLElement, node: DOMNode, nodeClusterBuilder: NodeClusterBuilder, fragment?: DocumentFragment) {
     nodeClusterBuilder.appendStaticNode(node)
-    parent.appendChild(node);
+    const root = fragment ? fragment : parent;
+    root.appendChild(node)
 }
 
 
 
-function setUpComponent(parent: DOMNode, component: InternalComponent, nodeClusterBuilder: NodeClusterBuilder) { //TODO: what if a component's root elements is conditional or a dynamic list??
+function setUpComponent(parent: HTMLElement, component: InternalComponent, nodeClusterBuilder: NodeClusterBuilder, dynamicCluster?: DynamicNodeCluster, fragment?: DocumentFragment) { //TODO: what if a component's root elements is conditional or a dynamic list??
     const nodeEntities = component.initialNodeEntities;
     if (!(parent instanceof HTMLElement)) throw new Error("Parent cannot be a text node")
-    component.runTasks(LifecycleHooks.BEFORE_MOUNT);
+    const root = fragment ? fragment : parent;
+    if (!fragment) component.emit(LifecycleHooks.BEFORE_MOUNT);
     for (const nodeEntity of nodeEntities) {
         if (nodeEntity instanceof Node) {
-            parent.appendChild(nodeEntity);
+            root.appendChild(nodeEntity);
             nodeClusterBuilder.appendStaticNode(nodeEntity)
         }
         else if (nodeEntity instanceof ListRenderKit) {
-            setUpNodeList(parent, nodeEntity, nodeClusterBuilder)
+            setUpNodeList(parent, nodeEntity, nodeClusterBuilder, dynamicCluster, fragment)
         }
     }
-    component.runTasks(LifecycleHooks.MOUNTED);
+    if (!fragment) component.emit(LifecycleHooks.MOUNTED);
 }
 
-function setUpNodeList(parent: DOMNode, renderKit: ListRenderKit, nodeClusterBuilder: NodeClusterBuilder) {
+function setUpNodeList(parent: HTMLElement, renderKit: ListRenderKit, nodeClusterBuilder: NodeClusterBuilder, dynamicCluster?: DynamicNodeCluster, fragment?: DocumentFragment) {
     const { data, initialNodeEntities, renderItem } = renderKit;
     const isDynamic = hasSignal(data);
-    const dynamicCluster = isDynamic ? nodeClusterBuilder.appendDynamicCluster() : null;
+    const _dynamicCluster = isDynamic ? nodeClusterBuilder.appendDynamicCluster() : undefined;
 
     for (const nodeEntities of initialNodeEntities) {
-        nodeClusterBuilder = dynamicCluster?.appendNodeCluster() || nodeClusterBuilder;
+        nodeClusterBuilder = _dynamicCluster?.appendNodeCluster() || nodeClusterBuilder;
         for (const nodeEntity of nodeEntities) {
             // append to dom and node cluster
-            setUpNodeEntity(parent, nodeEntity, nodeClusterBuilder);
+            setUpNodeEntity(parent, nodeEntity, nodeClusterBuilder, _dynamicCluster, fragment);
         }
     }
+
+    if (dynamicCluster && _dynamicCluster) dynamicCluster.includeComponents(_dynamicCluster.activeComponents)
+
 
     if (isDynamic) {
         // set up watcher for updates
@@ -239,10 +291,14 @@ function setUpNodeList(parent: DOMNode, renderKit: ListRenderKit, nodeClusterBui
     }
 }
 
-function setUpConditionalEntity(parent: DOMNode, renderKit: InitialConditionalRenderKit, nodeClusterBuilder: NodeClusterBuilder) {
+const UPDATE_MODE = true;
+
+function setUpConditionalEntity(parent: HTMLElement, renderKit: InitialConditionalRenderKit, nodeClusterBuilder: NodeClusterBuilder, dynamicCluster?: DynamicNodeCluster, fragment?: DocumentFragment) {
     const { conditionalKits, initialNodeEntities, $initialConditions, initialIndex } = renderKit;
 
-    const dynamicCluster = nodeClusterBuilder.appendDynamicCluster();
+    let activeIndex = initialIndex;
+
+    const _dynamicCluster = nodeClusterBuilder.appendDynamicCluster();
 
     const _conditionalKits: {
         $condition?: ReactiveSignal<boolean>;
@@ -252,14 +308,15 @@ function setUpConditionalEntity(parent: DOMNode, renderKit: InitialConditionalRe
 
     for (let i = 0; i < conditionalKits.length; i++) {
         const { renderConditional, $condition } = conditionalKits[i];
-        const clusterBuilder = dynamicCluster.appendNodeCluster();
+        const clusterBuilder = _dynamicCluster.appendNodeCluster();
         _conditionalKits.push({ $condition, clusterBuilder, renderConditional });
     }
 
     for (const nodeEntity of initialNodeEntities) {
         // append to dom and node cluster
-        setUpNodeEntity(parent, nodeEntity, _conditionalKits[initialIndex].clusterBuilder)
+        setUpNodeEntity(parent, nodeEntity, _conditionalKits[initialIndex].clusterBuilder, _dynamicCluster, fragment)
     }
+    if (dynamicCluster && _dynamicCluster) dynamicCluster.includeComponents(_dynamicCluster.activeComponents) // aggregate components to unmount
 
     //    0                               1    2
     // [[node, [maybe dynamic cluster]], [ ], [ ]] --- dynamic cluster
@@ -276,29 +333,76 @@ function setUpConditionalEntity(parent: DOMNode, renderKit: InitialConditionalRe
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
         if (isEqual(newValue, oldValue)) return;
         const conditions: ReactiveSignal<boolean>[] = [];
-        for (const kit of _conditionalKits) {
-            const { clusterBuilder, renderConditional, $condition } = kit;
+        for (let i = 0; i < conditionalKits.length; i++) {
+            const kit = conditionalKits[i]
+            const { renderConditional, $condition } = kit;
+            if ($condition) conditions.push($condition);
             if ($condition && getWithoutTracking($condition) || !$condition) {
-                //TODO:  unmount previous nodes
+                //unmount previous nodes
+                removeConditionalNodes(_dynamicCluster, activeIndex);
+                _dynamicCluster.clearComponents();
+                _dynamicCluster.replaceNodeCluster(activeIndex, []); // clears previous
 
-                if ($condition) conditions.push($condition);
+                // mount new nodes
+                activeIndex = i;
+                const clusterBuilder = new NodeClusterBuilder();
+                _dynamicCluster.replaceNodeCluster(activeIndex, clusterBuilder.cluster);
+
                 const nodeEntities = renderConditional();
+                const fragment = new DocumentFragment()
                 for (const nodeEntity of nodeEntities) {
-                    setUpNodeEntity(parent, nodeEntity, clusterBuilder)
+                    setUpNodeEntity(parent, nodeEntity, clusterBuilder, _dynamicCluster, fragment)
                 }
-
-                watchForUpdate($(() => {
-                    const values: boolean[] = [];
-                    for (const $condition of conditions) {
-                        values.push($condition());
-                    }
-                    return values;
-                }), updateConditional, { once: true })
+                insertConditionalNodes(parent, _dynamicCluster, fragment)
                 break;
             }
         }
+        watchForUpdate($(() => {
+            const values: boolean[] = [];
+            for (const $condition of conditions) {
+                values.push($condition());
+            }
+            return values;
+        }), updateConditional, { once: true })
 
     }
+}
+
+function emitHookBatch(hookName: LifecycleHooks, components: InternalComponent[]) {
+    for (const compo of components) {
+        compo.emit(hookName);
+    }
+}
+
+function removeConditionalNodes(dynamicCluster: DynamicNodeCluster, activeIndex: number) {
+    const nodeCluster = dynamicCluster.get()[activeIndex];
+    const components = dynamicCluster.activeComponents;
+    emitHookBatch(LifecycleHooks.BEFORE_UNMOUNT, components)
+    removeNodes(nodeCluster)
+    emitHookBatch(LifecycleHooks.UNMOUNTED, components)
+}
+
+function removeNodes(nodeCluster: NodeCluster) {
+    for (const nodeEntity of nodeCluster) {
+        if (nodeEntity instanceof DynamicNodeCluster) {
+            const nodeClusters = nodeEntity.get()
+            for (const nodeCluster of nodeClusters) {
+                removeNodes(nodeCluster) // What if there were components nested here? how do you unmount them?
+            }
+        }
+        else {
+            nodeEntity.remove()
+        }
+    }
+}
+
+function insertConditionalNodes(parent: HTMLElement, dynamicCluster: DynamicNodeCluster, fragment: DocumentFragment) {
+    const components = dynamicCluster.activeComponents;
+    emitHookBatch(LifecycleHooks.BEFORE_MOUNT, components)
+    let prevSibling = dynamicCluster.prevNode;
+    if (prevSibling) prevSibling.after(fragment)
+    else parent.prepend(fragment)
+    emitHookBatch(LifecycleHooks.MOUNTED, components)
 }
 
 // function setUpConditionalEntity(parent: DOMNode, renderKit: InitialConditionalRenderKit, nodeClusterBuilder: NodeClusterBuilder) {

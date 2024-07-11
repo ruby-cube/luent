@@ -73,3 +73,7 @@ export function isIterable(obj: any) {
 export function removeItem(item: any, arr: any[]) {
     arr.splice(arr.indexOf(item), 1)
 }
+
+export function appendItems(arr: any[], items: any[]){
+    arr.splice(arr.length, 0, ...items)
+}

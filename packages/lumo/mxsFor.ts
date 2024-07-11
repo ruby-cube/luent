@@ -1,6 +1,6 @@
 import { getWithoutTracking } from "../muonic/DependencyTracker";
 import { hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
-import { DOMNode } from "./component";
+import { DOMNode, InternalComponent } from "./component";
 import { NodeEntity } from "./mx";
 
 
@@ -11,7 +11,7 @@ export class ListRenderKit<T = any> {
     constructor(
         public renderItem: RenderItem<T> | DOMNode, //QUESTION: Does this need the context object?
         public initialNodeEntities: NodeEntity[][],
-        public data: ListData
+        public data: ListData,
     ) { }
 }
 
