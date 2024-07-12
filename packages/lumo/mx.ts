@@ -197,11 +197,13 @@ function setUpNodeList(
     if (isDynamic) {
         // set up watcher for updates
         watchForUpdate(data, (newValue: AnyObject[], oldValue: AnyObject[]) => {
-            const { removeKit, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
+            const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
             if (noChange) return;
             if (dynamicPod!.length !== newValue.length) throw new Error("dynamicPod and data length are mismatched. This should never happen.")
-            removeListItemNodes(component, dynamicPod!, removeKit!)
+            component.emit(LifecycleHook.BEFORE_UPDATE)
+            removeListItemNodes(dynamicPod!, indicesToRemove!);
             insertAndMoveListItemNodes(component, insertAndMoveKit!, dynamicPod!, parent, renderItem)
+            component.emit(LifecycleHook.UPDATED)
 
         })
     }

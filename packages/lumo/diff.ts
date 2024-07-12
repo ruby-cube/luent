@@ -3,8 +3,7 @@ import { longestCommonSubsequence } from "./lcs";
 import { UniqueItem } from "./mxsFor";
 import { isEqual } from "@rue/utils";
 
-type Index = number
-type Count = number
+
 
 export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | UniqueItem[], idKey?: string | symbol) { //TODO: Originally wrote this diffing arrays of objects and unique ids, but I need it to work for any[]s, wrap repeat values in an object or function and put in stand-in arrays
     const _newArr = idKey ? toIdArray(newArr, idKey) : newArr;
@@ -16,7 +15,7 @@ export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | U
     const oldArrCommonItems = [];
     const newItems = new Set();
     const indicesToRemove: number[] = [];
-    const indicesAndRemoveCount: [Index, Count][] = [];
+    // const indicesAndRemoveCount: [Index, Count][] = [];
 
 
     // find items to insert
@@ -32,16 +31,9 @@ export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | U
     // find items to remove
     let j = 0;
     while (j < _oldArr.length) {
-        const item = _newArr[j];
+        const item = _oldArr[j];
         if (newSet.has(item)) oldArrCommonItems.push(item);
         else {
-            const prevEntry = indicesAndRemoveCount.at(-1);
-            if (prevEntry && prevEntry[0] + 1 === j) {
-                prevEntry[1]++; // increment count
-            }
-            else {
-                indicesAndRemoveCount.push([j, 1])
-            }
             indicesToRemove.push(j)
         }
         j++;
@@ -54,22 +46,23 @@ export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | U
 
     return {
         insertAndMoveKit: {
-            isNewItem: (item: any) => newItems.has(item),
-            itemHasMoved: (item: any) => lcs.indexOf(item) === -1,
+            isNewItem: (id: any) => newItems.has(id),
+            hasMoved: (id: any) => lcs.indexOf(id) === -1,
+            isRemoved: (id: any) => !newSet.has(id),
             newArrayAsIDs: _newArr,
+            oldArrayAsIDs: _oldArr,
             getItem: (_newArr instanceof IDArray) ? _newArr.getItem : ((id: any) => id),
         },
-        removeKit: {
-            indicesToRemove,
-            indicesAndRemoveCount,
-        }
+        indicesToRemove,
     }
 }
 
 export type InsertAndMoveKit = {
-    isNewItem: (item: any) => boolean;
-    itemHasMoved: (item: any) => boolean;
+    isNewItem: (id: any) => boolean;
+    hasMoved: (id: any) => boolean;
+    isRemoved: (id: any) => boolean;
     newArrayAsIDs: any[];
+    oldArrayAsIDs: any[];
     getItem: (id: any) => any;
 }
 

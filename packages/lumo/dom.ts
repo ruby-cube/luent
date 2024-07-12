@@ -6,11 +6,8 @@ import { RenderItem } from "./mxsFor";
 import { DynamicNodePod, NodePod } from "./NodePod";
 
 
-export function removeListItemNodes(component: InternalComponent, dynamicList: DynamicNodePod, removeKit: { indicesToRemove: number[], indicesAndRemoveCount: [number, number][] }) {
-    const { indicesAndRemoveCount, indicesToRemove } = removeKit;
-
+export function removeListItemNodes(dynamicList: DynamicNodePod, indicesToRemove: number[]) {
     // remove from DOM
-    component.emit(LifecycleHook.BEFORE_UPDATE)
     for (const index of indicesToRemove) {
         const nodePod = dynamicList[index];
         const components = nodePod.componentsToUnmount;
@@ -18,21 +15,13 @@ export function removeListItemNodes(component: InternalComponent, dynamicList: D
         removeDOMNodes(dynamicList[index])
         emitHookBatch(LifecycleHook.UNMOUNTED, components!)
     }
-    component.emit(LifecycleHook.UPDATED)
-
-    // remove from node pod
-    let i = indicesAndRemoveCount.length; // loop through backwards to avoid having to recalculate index
-    while (i--) {
-        const [index, count] = indicesAndRemoveCount[i];
-        dynamicList!.removeNodePods(index, count);
-    }
 }
 
-
+type Index = number
+type Count = number
 
 export function insertAndMoveListItemNodes(component: InternalComponent, insertAndMoveKit: InsertAndMoveKit, dynamicList: DynamicNodePod, parent: HTMLElement, renderItem: RenderItem) {
-    const { getItem, isNewItem, itemHasMoved, newArrayAsIDs } = insertAndMoveKit;
-    const nodes = parent.childNodes;
+    const { getItem, isNewItem, hasMoved, newArrayAsIDs, oldArrayAsIDs, isRemoved } = insertAndMoveKit;
     if (dynamicList.length !== newArrayAsIDs.length) throw "dynamicPod and data length are mismatched"
     const indicesAndNodePods: [number, NodePod[]][] = []
     const indicesAndFragments: [number, DocumentFragment][] = []
@@ -41,48 +30,84 @@ export function insertAndMoveListItemNodes(component: InternalComponent, insertA
     let i = 0
     while (i < newArrayAsIDs.length) {
         const id = newArrayAsIDs[i];
-        if (isNewItem(id)) { // collect consecutive new items onto the same fragment
+        const _isNewItem = isNewItem(id);
+        const _itemHasMoved = hasMoved(id);
+        const nodePod = _isNewItem ? new NodePod()
+            : _itemHasMoved ? dynamicList[oldArrayAsIDs.indexOf(id)] // dynamicList[index]
+                : null;
+
+        if (!nodePod) continue; // item is not new and has not moved
+
+        const prevEntry = indicesAndNodePods.at(-1);
+        if (prevEntry && prevEntry[0] + 1 === i) {
+            prevEntry[1].push(nodePod); // include nodePod for re/insertion
+        }
+        else {
+            indicesAndNodePods.push([i, [nodePod]]) // create new batch of nodePods for re/insertion
+            fragment = new DocumentFragment();
+            indicesAndFragments.push([i, fragment]) // queue fragment for mounting
+        }
+
+        if (isNewItem(id)) {
+            // create and collect consecutive new items onto the same fragment
             const nodeEntities = renderItem(getItem(id), i);
-            const nodePod = new NodePod();
-
-            const prevEntry = indicesAndNodePods.at(-1);
-            if (prevEntry && prevEntry[0] + 1 === i) {
-                prevEntry[1].push(nodePod);
-            }
-            else {
-                indicesAndNodePods.push([i, [nodePod]])
-                fragment = new DocumentFragment();
-                indicesAndFragments.push([i, fragment])
-            }
-
             for (const nodeEntity of nodeEntities) {
                 setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
             }
         }
-        else if (itemHasMoved(id)) {
-            // move node
-            //TODO: append existing nodes to fragment
-            const prevNode = nodes.item(i - 1);
-            if (prevNode) {
-                prevNode.after(nodes.item(i))
-            }
-            else {
-                parent.prepend(nodes.item(i))
-            }
+        else if (hasMoved(id)) {
+            // move node to fragment (DOM will auto-remove node from DOM)
+            appendNodes(fragment, nodePod);
         }
     }
 
-    // (1) insert nodes into node pods
+    // queue nodePod removal
+    const indicesAndRemoveCount: [Index, Count][] = [];
+    let j = 0;
+    while (j < oldArrayAsIDs.length) {
+        const id = oldArrayAsIDs[j];
+        if (isRemoved(id) || hasMoved(id)) {
+            const prevEntry = indicesAndRemoveCount.at(-1);
+            if (prevEntry && prevEntry[0] + 1 === j) {
+                prevEntry[1]++; // increment count
+            }
+            else {
+                indicesAndRemoveCount.push([j, 1])
+            }
+        }
+        j++;
+    }
+
+    // (1) remove nodePods 
+    let k = indicesAndRemoveCount.length; // loop through backwards to avoid having to recalculate index
+    while (k--) {
+        const [index, count] = indicesAndRemoveCount[k];
+        dynamicList!.removeNodePods(index, count);
+    }
+
+    // (2) insert nodes into node pods
     for (const [index, nodePods] of indicesAndNodePods) {
         dynamicList.insertNodePods(index, nodePods)
     }
 
-    // (2) insert nodes into DOM
-    component.emit(LifecycleHook.BEFORE_UPDATE) //TODO: make sure this surrounds the item moving loop
+    // (3) insert nodes into DOM
     for (const [index, fragment] of indicesAndFragments) {
         const prevNode = dynamicList[index].prevNode
         if (prevNode) prevNode.after(fragment);
         parent.prepend(fragment);
     }
-    component.emit(LifecycleHook.UPDATED)
 }
+
+function appendNodes(fragment: DocumentFragment, nodePod: NodePod) {
+    for (const nodeOrPod of nodePod) {
+        if (nodeOrPod instanceof Node) {
+            fragment.appendChild(nodeOrPod)
+        }
+        else {
+            for (const nodePod of nodeOrPod) {
+                appendNodes(fragment, nodePod)
+            }
+        }
+    }
+}
+
