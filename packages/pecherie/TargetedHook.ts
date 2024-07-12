@@ -107,7 +107,7 @@ export function createTargetedHook<
 // beforeInsertText({}, (ctx) => {
 //     ctx.hey
 //     ctx.hook
-// }, { until: (stop) => onBeforeUnmount(stop) });
+// }, { until: (stop) => onPreunmount(stop) });
 
 // const state = castInsertText({}, { hey: "lkj" })
 // state.defaultPrevented

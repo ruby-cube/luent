@@ -89,7 +89,7 @@ export class UpdateCycle {
 
 function _runNonSyncTasks() {   // TODO: how to prevent update blocking if tasks take too long? Also figure out how to use rAF
     runNonSyncTasks('pre');
-    _runTasks(Hooks.BEFORE_UPDATE)
+    _runTasks(Hooks.PREUPDATE)
     runNonSyncTasks('update');
     _runTasks(Hooks.UPDATE_COMPLETED)
     runNonSyncTasks('post');
@@ -102,11 +102,11 @@ function _runNonSyncTasks() {   // TODO: how to prevent update blocking if tasks
 
 enum Hooks {
     UPDATE_COMPLETED = "uc",
-    BEFORE_UPDATE = "bc",
+    PREUPDATE = "bc",
 }
 
 const tasks: { [K in Hooks]: Set<() => void> } = {
-    [Hooks.BEFORE_UPDATE]: new Set(),
+    [Hooks.PREUPDATE]: new Set(),
     [Hooks.UPDATE_COMPLETED]: new Set(),
 }
 

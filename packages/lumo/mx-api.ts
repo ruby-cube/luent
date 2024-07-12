@@ -6,6 +6,8 @@ import { DOMNode } from "./component";
 import { ListRenderKit } from "./mx";
 import { ReactiveSignal } from "../muonic/useDerivedSignal";
 import { mxO } from "./mxO";
+import { onPremount } from "./lifecycle";
+import { initializeEffect } from "../muonic/watch";
 
 type Signal<T> = () => T
 
@@ -23,15 +25,163 @@ const _P = "p"
 const _BUTTON = "button"
 const _H1 = "h1"
 
+// function dynamicStyle(effect: (refs: { [key: string]: DOMNode }) => void) {
+//     onPremount((refs: { [key: string]: DOMNode }) => {
+//         initializeEffect(() => { effect(refs) })
+//     })
+// }
+
 function List() {
 
+    // onPremount(() => {
+    //     const listItems = getDOMNode('listItems')
+
+    //     initializeEffect(() => {
+    //         for (const item of listItems) {
+    //             if ($isActive)
+    //                 item.style.backgroundColor = 'blue'
+    //             else
+    //                 item.style.backgroundColor = "gray"
+    //         }
+    //     })
+    // })
+
+    // dynamicStyle(({ $listItems, frame }) => {  // essentially onPremount and initialize effect
+    //     for (const item of $listItems()) { //TODO: I want to only set the style for new items...
+    //         if ($isActive)
+    //             item.style.backgroundColor = 'blue'
+    //         else
+    //             item.style.backgroundColor = "gray"
+    //     }
+    // })
+
+    // watchItems($listItemNodes, (item, i) => { // runs immediately
+    //     dynamicStyle(() => { // runs eagerly
+    //         if ($isActive) item.style.color = "red"
+    //         else item.style.color = 'gray'
+    //     })
+    // })
+
+    // dynamicStyle(({ $listItems, frame }) => {  // essentially onPremount and initialize effect
+    //     for (const item of $listItems()) { //TODO: I want to only set the style for new items...
+    //         if ($isActive)
+    //             item.style.backgroundColor = 'blue'
+    //         else
+    //             item.style.backgroundColor = "gray"
+    //     }
+    // })
+
+
+    // dynamicClass($isActive, ({ frame }) => {  // static node
+    //     frame.classList.toggle('active')
+    // })
+
+    // watchNode($frame, (frame) => { // runs eagerly
+    //     dynamicClass($isActive, (isActive) => {  // what if frame's existence is dynamic?
+    //         frame.classList.toggle('active') // run lazily because its a toggle
+    //     })
+    // })
+
+    const itemsRef = new NodeRef();
+    const headingRef = new NodeRef();
+
+    onPremount(() => {
+        console.log(itemsRef.nodes)
+    })
+
+    itemsRef.beforeMount((item, i) => {
+
+    })
+
+    dynamicClasses(itemsRef, [
+        // manipulation instructions
+        (o) => {  // one-to-one binding, coarse-grained
+            if ($dragging())
+                o.add('dragging');
+
+            if ($highlighted() && $isActive())
+                o.add('highlight');
+        },
+        (o) => { // one-to-one binding, fine-grained
+            if ($dragging())
+                o.add('dragging')
+        },
+        (o) => {
+            if ($highlighted() && $isActive())
+                o.add('highlight')
+        },
+        (o) => { // one-to-one binding, fine-grained
+            if ($dragging()) {
+                o.add('dragging')
+                o.remove('highlight')
+                o.remove('grow')
+            }
+            else {
+                o.add('highlight')
+                o.remove('dragging')
+            }
+        },
+
+        // over-writes classes
+        (o) => {
+            if ($highlighted() && $isActive())
+                o.replace(`dragging highlight`)
+        },
+    ])
+
+
+    dynamicStyles(itemsRef, [
+        (o) => {  // one-to-one binding, coarse-grained
+            o.backgroundColor = $mainColor()
+            o.width = `${listItem$.width} px`;
+            o.height = `${$height()} px`;
+        },
+        // one-to-one binding, fine-grained
+        (o) => { o.backgroundColor = $mainColor() },
+        (o) => { o.width = `${listItem$.width + 1} px` },
+        (o) => { o.height = `${$height()} px` },
+        (o) => { o[`--box-width`] = `${listItem$.width} px` },
+
+        (o) => {
+            if ($dragging()) { // one-to-many binding
+                o.backgroundColor = 'gray';
+                o.width = `${listItem$.width} px`;
+                o.height = `${$height()} px`;
+            } else {
+                o.backgroundColor = 'red';
+                o.width = `0 px`;
+            }
+        },
+        (o) => {
+            if ($dragging()) {
+                o.backgroundColor = 'gray';
+                o.width = `${listItem$.width} px`;
+                o.height = `${$height()} px`;
+                o[`--box-width`] = `${listItem$.width}px`;
+            }
+            else if ($isActive()) {
+                o.backgroundColor = 'red';
+                o.width = `0 px`;
+            }
+        },
+
+        // over-writes styles
+        (o) => {
+            if ($dragging()) o.cssText = `background-color: pink`
+            else if ($isActive()) o.cssText = ``
+            else o.cssText = `--box-width: ${listItem$.width}px`;
+        }
+    ])
 
 
     return {
         render: () => [
             mx("h1", { nodes: [mxB('Shopping'), 'at the mall'] }),
             mx("div", {
-                class: 'list',
+                class: `list list-item--some ${box}`, // static values only for initial render
+                style: {
+                    backgroundColor: 'green'  // static values only for initial render
+                },
                 nodes: [
                     mxIf($active, {
                         then: renderListBlock({
@@ -47,25 +197,24 @@ function List() {
                     mxListBlockIf($active, {
                         stuff: 0
                     }),
-                    
-                    mxsFor((item, i) => [
+
+                    mxsFor((item, index) => [
                         m('p', {
-                            props: {
-                                $dog
-                            },
+                            class: 'list',
                             nodes: [
                                 mx('div', {
-                                    nodes: mxO(ListBlock)
+                                    nodes: mxO(ListBlock),
+                                    ref: headingsRef, index
                                 }),
                                 mxO(Frog),
                                 mxIf($active, {
                                     this: () => mO(Cat)
                                 })
                             ],
-                            ref: "item"
+                            ref: paragraphsRef, index,
                         }),
                         mxO(Dog)
-                    ], $items, 'id'),
+                    ], $items, 'UID'), // idKey defaults to 'id'
 
                     mx("button", { text: 'add' }),
                     mxO(ListItem, {
@@ -77,7 +226,8 @@ function List() {
                             $color,
                             $item,
                             reItemClicked
-                        }
+                        },
+                        ref: listItemRef
                     })
                 ]
             })

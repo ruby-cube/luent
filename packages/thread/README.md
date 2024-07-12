@@ -39,29 +39,29 @@ Thread provides flasked versions of schedulers and event listeners from Web APIs
 
 Planified schedulers return a `ScheduledOp`, which is essentially a cancellable `Promise`. The only option they take is a `cancel` cancellation scheduler.
 
-[queuePostTask()](#addps) 
+[queuePS()](#addps) 
 
 [queueTask()](#queuetask)
 
-[onAnimationFrame()](#beforescreenpaint)
+[queuePrerepaint()](#beforescreenpaint)
 
 [onTimeout()](#ontimeout)
 
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `queuePostTask()` 
+## `queuePS()` 
 
 an alias for `queueMicrotask` from browser API. Here, microtasks are conceptualized as postscripts to event loop tasks.
 
 ### Syntax
 ```tsx
-queuePostTask(callback);
+queuePS(callback);
 ```
 
 ### Usage
 
 ```js
-queuePostTask(() => {
+queuePS(() => {
     // code that will run after the original task/handlers 
     // and previously queued microtasks finish running
     // but before the next event loop task
@@ -98,7 +98,7 @@ queueTask(() => {
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `onAnimationFrame()`
+## `queuePrerepaint()`
 
 flasked `requestAnimationFrame`, which schedules code to run before the next screen paint.
 
@@ -119,7 +119,7 @@ type SchedulerOptions = {
 ### Usage
 
 ```js
-onAnimationFrame(() => {
+queuePrerepaint(() => {
     // code that will after any previously queued rAF callbacks
     // and before the next screen paint
 });

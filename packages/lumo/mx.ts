@@ -11,11 +11,13 @@ import { appendItems, isEqual } from "@rue/utils";
 import { diff } from "./diff";
 import { insertAndMoveListItemNodes, removeListItemNodes } from "./dom";
 import { isReactive } from "../muonic/useReactivize";
-import { DynamicNodePod, NodePod } from "./NodePod";
+import { _DynamicNodePod, _NodePod } from "./NodePod";
+import { _NodeRef, castOnCreatedHook, NodeRef } from "./NodeRef";
+import { onUnmounted } from "@rue/paravue";
 
 
 
-// type DynamicNodePod = NodePod[]
+// type _DynamicNodePod = _NodePod[]
 
 
 export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | InitialConditionalRenderKit | string | ReactiveSignal<string> // TODO: Attach context to DOMNode, InternalComponent, ListRenderKit, and InitialConditionalRenderKit
@@ -24,14 +26,14 @@ export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | InitialCo
 
 
 type DOMNodeConfig<T extends keyof HTMLElementTagNameMap> = {
-    attrs?: AnyObject;
-    on?: { [key: string]: () => void } //TODO: how to distinguish handler from reactive getter??
-    class?: string | { [key: string]: () => boolean };
+    attributes?: AnyObject;
+    on?: { [key: string]: () => void }
+    class?: string;
     style?: any;
     text?: string | ReactiveSignal<string>;
     nodes?: NodeEntity[];
-    key?: string | number
-    ref?: Signal
+    ref?: NodeRef,
+    index?: number
 }
 
 
@@ -42,35 +44,61 @@ type DOMNodeConfig<T extends keyof HTMLElementTagNameMap> = {
 
 
 export function mx<T extends keyof HTMLElementTagNameMap>(tagName: T, config: DOMNodeConfig<T> = {}): DOMNode {
-    const { nodes, text, attrs, class: _class, style, on, ref, key } = config;
+    const { nodes, text, attributes, class: _class, style, on, ref, index } = config;
     const domNode = document.createElement(tagName);
     const component = getCurrentComponent();
     if (!component || component === "root") throw new Error("No component :(")
     if (text != null && nodes) throw new Error(`Element ${tagName} cannot contain both text and nodes`)
+
     if (text) setUpTextNode(domNode, text)
     else if (nodes) {
-        const nodePod = new NodePod();
+        const nodePod = new _NodePod();
         for (const nodeEntity of nodes) {
             setUpNodeEntity(component, domNode, nodeEntity, nodePod)
         }
     }
 
+    if (_class) domNode.classList.value = _class
+
     if (on) {
         for (const event in on) {
-
+            const handler = on[event]
+            domNode.addEventListener(event, handler)
+            onUnmounted(() => domNode.removeEventListener(event, handler))
         }
     }
 
+    if (style) {
+        for (const property in style) {
+            domNode.style.setProperty(property, style[property])
+        }
+    }
+
+    if (attributes) {
+        for (const property in attributes) {
+            domNode.setAttribute(property, attributes[property])
+        }
+    }
 
     if (ref) {
-        //@ts-expect-error
-        ref[SetKey](() => domNode) //NOTE: DomNode will never change for static entities
+        assignNodeRef(ref, domNode, index)
+        castOnCreatedHook(ref, domNode, index)
     }
 
     return domNode;
 }
 
-function setUpTextNode(parent: HTMLElement, text: ReactiveSignal | string, nodePod?: NodePod, fragment?: DocumentFragment) {
+function assignNodeRef(ref: _NodeRef, domNode: HTMLElement, index: number | undefined) {
+    if (index != null) {
+        let nodes = ref.nodes ? ref.nodes! : []
+        nodes[index] = domNode;
+    }
+    else {
+        ref.node = domNode // domNode will never change for static entities
+    }
+}
+
+function setUpTextNode(parent: HTMLElement, text: ReactiveSignal | string, nodePod?: _NodePod, fragment?: DocumentFragment) {
     const textNode = createTextNode(text); //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
     if (nodePod) {
         nodePod.appendStaticNode(textNode)
@@ -128,7 +156,7 @@ export function setUpNodeEntity(
     component: InternalComponent,
     parent: HTMLElement,
     nodeEntity: NodeEntity,
-    nodePod: NodePod,
+    nodePod: _NodePod,
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[],
 ) {
@@ -155,7 +183,7 @@ export function setUpNodeEntity(
 
 
 
-function setUpNode(parent: HTMLElement, node: DOMNode, nodePod: NodePod, fragment?: DocumentFragment) {
+function setUpNode(parent: HTMLElement, node: DOMNode, nodePod: _NodePod, fragment?: DocumentFragment) {
     nodePod.appendStaticNode(node)
     const root = fragment ? fragment : parent;
     root.appendChild(node)
@@ -163,10 +191,10 @@ function setUpNode(parent: HTMLElement, node: DOMNode, nodePod: NodePod, fragmen
 
 
 
-function setUpComponent(parentComponent: InternalComponent, parent: HTMLElement, component: InternalComponent, nodePod: NodePod, fragment?: DocumentFragment) { //TODO: what if a component's root elements is conditional or a dynamic list??
+function setUpComponent(parentComponent: InternalComponent, parent: HTMLElement, component: InternalComponent, nodePod: _NodePod, fragment?: DocumentFragment) { //TODO: what if a component's root elements is conditional or a dynamic list??
     const nodeEntities = component.initialNodeEntities;
     if (!(parent instanceof HTMLElement)) throw new Error("Parent cannot be a text node")
-    component.emit(LifecycleHook.BEFORE_MOUNT);
+    component.emit(LifecycleHook.PREMOUNT);
     for (const nodeEntity of nodeEntities) {
         setUpNodeEntity(parentComponent, parent, nodeEntity, nodePod, fragment)
     }
@@ -177,7 +205,7 @@ function setUpNodeList(
     component: InternalComponent,
     parent: HTMLElement,
     renderKit: ListRenderKit,
-    nodePod: NodePod,
+    nodePod: _NodePod,
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[]
 ) {
@@ -200,7 +228,7 @@ function setUpNodeList(
             const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
             if (noChange) return;
             if (dynamicPod!.length !== newValue.length) throw new Error("dynamicPod and data length are mismatched. This should never happen.")
-            component.emit(LifecycleHook.BEFORE_UPDATE)
+            component.emit(LifecycleHook.PREUPDATE)
             removeListItemNodes(dynamicPod!, indicesToRemove!);
             insertAndMoveListItemNodes(component, insertAndMoveKit!, dynamicPod!, parent, renderItem)
             component.emit(LifecycleHook.UPDATED)
@@ -214,7 +242,7 @@ function setUpConditionalEntity(
     component: InternalComponent,
     parent: HTMLElement,
     renderKit: InitialConditionalRenderKit,
-    nodePod: NodePod,
+    nodePod: _NodePod,
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[],
 ) {
@@ -226,7 +254,7 @@ function setUpConditionalEntity(
 
     const _conditionalKits: {
         $condition?: ReactiveSignal<boolean>;
-        nodePod: NodePod;
+        nodePod: _NodePod;
         renderConditional: () => NodeEntity[];
     }[] = []
 
@@ -278,20 +306,20 @@ export function emitHookBatch(hookName: LifecycleHook, components: InternalCompo
     }
 }
 
-function removePrevConditionalNodes(component: InternalComponent, dynamicPod: DynamicNodePod, activeIndex: number) {
+function removePrevConditionalNodes(component: InternalComponent, dynamicPod: _DynamicNodePod, activeIndex: number) {
     const nodePod = dynamicPod[activeIndex];
     const components = nodePod.componentsToUnmount;
-    emitHookBatch(LifecycleHook.BEFORE_UNMOUNT, components!)
-    component.emit(LifecycleHook.BEFORE_UPDATE)
+    emitHookBatch(LifecycleHook.PREUNMOUNT, components!)
+    component.emit(LifecycleHook.PREUPDATE)
     removeDOMNodes(nodePod)
     emitHookBatch(LifecycleHook.UNMOUNTED, components!)
     component.emit(LifecycleHook.UPDATED)
-    dynamicPod.replaceNodePod(activeIndex, new NodePod()); // clears previous
+    dynamicPod.replaceNodePod(activeIndex, new _NodePod()); // clears previous
 }
 
-export function removeDOMNodes(nodePod: NodePod) {
+export function removeDOMNodes(nodePod: _NodePod) {
     for (const nodeEntity of nodePod) {
-        if (nodeEntity instanceof DynamicNodePod) {
+        if (nodeEntity instanceof _DynamicNodePod) {
             for (const nodePod of nodeEntity) {
                 removeDOMNodes(nodePod) // What if there were components nested here? how do you unmount them?
             }
@@ -302,8 +330,8 @@ export function removeDOMNodes(nodePod: NodePod) {
     }
 }
 
-function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: DynamicNodePod, renderConditional: () => NodeEntity[], activeIndex: number) {
-    const nodePod = new NodePod();
+function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[], activeIndex: number) {
+    const nodePod = new _NodePod();
     dynamicPod.replaceNodePod(activeIndex, nodePod);
 
     const nodeEntities = renderConditional();
@@ -311,7 +339,7 @@ function insertNewConditionalNodes(component: InternalComponent, parent: HTMLEle
     for (const nodeEntity of nodeEntities) {
         setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
     }
-    component.emit(LifecycleHook.BEFORE_UPDATE);
+    component.emit(LifecycleHook.PREUPDATE);
     let prevSibling = dynamicPod.prevNode;
     if (prevSibling) prevSibling.after(fragment)
     else parent.prepend(fragment)

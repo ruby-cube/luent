@@ -3,15 +3,15 @@ import { InsertAndMoveKit } from "./diff";
 import { LifecycleHook } from "./lifecycle";
 import { emitHookBatch, removeDOMNodes, setUpNodeEntity } from "./mx";
 import { RenderItem } from "./mxsFor";
-import { DynamicNodePod, NodePod } from "./NodePod";
+import { _DynamicNodePod, _NodePod } from "./NodePod";
 
 
-export function removeListItemNodes(dynamicList: DynamicNodePod, indicesToRemove: number[]) {
+export function removeListItemNodes(dynamicList: _DynamicNodePod, indicesToRemove: number[]) {
     // remove from DOM
     for (const index of indicesToRemove) {
         const nodePod = dynamicList[index];
         const components = nodePod.componentsToUnmount;
-        emitHookBatch(LifecycleHook.BEFORE_UNMOUNT, components!)
+        emitHookBatch(LifecycleHook.PREUNMOUNT, components!)
         removeDOMNodes(dynamicList[index])
         emitHookBatch(LifecycleHook.UNMOUNTED, components!)
     }
@@ -20,10 +20,10 @@ export function removeListItemNodes(dynamicList: DynamicNodePod, indicesToRemove
 type Index = number
 type Count = number
 
-export function insertAndMoveListItemNodes(component: InternalComponent, insertAndMoveKit: InsertAndMoveKit, dynamicList: DynamicNodePod, parent: HTMLElement, renderItem: RenderItem) {
+export function insertAndMoveListItemNodes(component: InternalComponent, insertAndMoveKit: InsertAndMoveKit, dynamicList: _DynamicNodePod, parent: HTMLElement, renderItem: RenderItem) {
     const { getItem, isNewItem, hasMoved, newArrayAsIDs, oldArrayAsIDs, isRemoved } = insertAndMoveKit;
     if (dynamicList.length !== newArrayAsIDs.length) throw "dynamicPod and data length are mismatched"
-    const indicesAndNodePods: [number, NodePod[]][] = []
+    const indicesAndNodePods: [number, _NodePod[]][] = []
     const indicesAndFragments: [number, DocumentFragment][] = []
     let fragment = new DocumentFragment();
 
@@ -32,7 +32,7 @@ export function insertAndMoveListItemNodes(component: InternalComponent, insertA
         const id = newArrayAsIDs[i];
         const _isNewItem = isNewItem(id);
         const _itemHasMoved = hasMoved(id);
-        const nodePod = _isNewItem ? new NodePod()
+        const nodePod = _isNewItem ? new _NodePod()
             : _itemHasMoved ? dynamicList[oldArrayAsIDs.indexOf(id)] // dynamicList[index]
                 : null;
 
@@ -98,7 +98,7 @@ export function insertAndMoveListItemNodes(component: InternalComponent, insertA
     }
 }
 
-function appendNodes(fragment: DocumentFragment, nodePod: NodePod) {
+function appendNodes(fragment: DocumentFragment, nodePod: _NodePod) {
     for (const nodeOrPod of nodePod) {
         if (nodeOrPod instanceof Node) {
             fragment.appendChild(nodeOrPod)

@@ -4,6 +4,7 @@ import { SetKey, Signal } from "../muonic/useSignalize";
 import { LifecycleHook } from "./lifecycle";
 import { collectEffects } from "../flask/flask";
 import { onUnmounted } from "@rue/paravue";
+import { _NodeRef } from "./NodeRef";
 
 type ComponentConfig<T extends ComponentSetup<AnyObject> | string> = {
     props?: T extends (props: infer P, emit: any) => any ? { [K in keyof P]: P[K] } : never;
@@ -47,8 +48,7 @@ function setUpComponent<T extends ComponentSetup>(Component: T, config: Componen
         component.provides = provides;
         component.component = { ...exposes };
         if (ref) {
-            //@ts-expect-error
-            ref[SetKey](() => component.component)
+            (<_NodeRef>ref).component = component.component
         }
 
 
@@ -61,13 +61,13 @@ function setUpComponent<T extends ComponentSetup>(Component: T, config: Componen
 }
 
 // export function mountComponent(parent: HTMLElement, component: InternalComponent) {
-//     component.emit(LifecycleHook.BEFORE_MOUNT);
+//     component.emit(LifecycleHook.PREMOUNT);
 //     parent.append(...component.domNodes);
 //     component.emit(LifecycleHook.MOUNTED);
 // }
 
 export function unmountComponent(component: InternalComponent) {
-    component.emit(LifecycleHook.BEFORE_UNMOUNT);
+    component.emit(LifecycleHook.PREUNMOUNT);
     // const nodes = component.initialNodeEntities;
     // for (const node of nodes) {
     //     node.remove();

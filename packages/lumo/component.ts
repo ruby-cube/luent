@@ -7,7 +7,7 @@ import { InitialConditionalRenderKit } from "./mxIf";
 import { ReactiveSignal } from "../muonic/useDerivedSignal";
 import { NodeEntity } from "./mx";
 
-export type NodeRef = Signal<Component | DOMNode | (DOMNode | Component)[]>
+// export type NodeRef = Signal<Component | DOMNode | (DOMNode | Component)[]>
 
 export type DOMNode = CharacterData | HTMLElement
 export type Props = {
@@ -37,16 +37,16 @@ export class InternalComponent {
     parent: InternalComponent | 'root';
     initialNodeEntities: NodeEntity[] = []; //TODO: add context type??
     tasks: {
-        [LifecycleHook.BEFORE_MOUNT]: Set<() => void> | undefined;
-        [LifecycleHook.BEFORE_UNMOUNT]: Set<() => void> | undefined;
-        [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
+        [LifecycleHook.PREMOUNT]: Set<() => void> | undefined;
+        [LifecycleHook.PREUNMOUNT]: Set<() => void> | undefined;
+        [LifecycleHook.PREUPDATE]: Set<() => void> | undefined;
         [LifecycleHook.MOUNTED]: Set<() => void> | undefined;
         [LifecycleHook.UNMOUNTED]: Set<() => void> | undefined;
         [LifecycleHook.UPDATED]: Set<() => void> | undefined;
     } = {
-            [LifecycleHook.BEFORE_MOUNT]: undefined,
-            [LifecycleHook.BEFORE_UNMOUNT]: undefined,
-            [LifecycleHook.BEFORE_UPDATE]: undefined,
+            [LifecycleHook.PREMOUNT]: undefined,
+            [LifecycleHook.PREUNMOUNT]: undefined,
+            [LifecycleHook.PREUPDATE]: undefined,
             [LifecycleHook.MOUNTED]: undefined,
             [LifecycleHook.UNMOUNTED]: undefined,
             [LifecycleHook.UPDATED]: undefined,

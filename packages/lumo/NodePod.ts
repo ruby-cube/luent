@@ -10,7 +10,7 @@ import { Interface } from "readline";
 // - the boundary between parent and child in the DOM (given that a root node pod represents a child nodes NodeList)
 // 
 // The main purpose of node pods is to aid in node insertions when updates are triggered by dynamic `mxsFor` and `mxIf`
-// DynamicNodePod supports in emitting Update and Unmounted hooks by collecting components in the `activeComponents` property
+// _DynamicNodePod supports in emitting Update and Unmounted hooks by collecting components in the `activeComponents` property
 // For Unmounting: activeComponents should collect the highest component of a branch, then let the unmount cascade unmount any descendant components.
 // For Updates: call emit(UPDATED) for the PARENT component not the components within via getCurrentComponent();
 //
@@ -29,17 +29,22 @@ import { Interface } from "readline";
 //
 
 //
-// export type NodePod = (DOMNode | DynamicNodePod)[]
+// export type _NodePod = (DOMNode | _DynamicNodePod)[]
 //
 // [node, node, [[node, [node]], [node, [node]]]]
 
+export type NodePod = ReadonlyArray<DOMNode | DynamicNodePod> 
+// & {index?: number, prevNode: ()=> DOMNode | null}
 
-export class NodePod extends Array<DOMNode | DynamicNodePod> {
+
+
+
+export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
     index?: number;
-    pod?: DynamicNodePod;
+    pod?: _DynamicNodePod;
     componentsToUnmount?: InternalComponent[];
 
-    constructor(pod?: DynamicNodePod, index?: number) {
+    constructor(pod?: _DynamicNodePod, index?: number) {
         super();
         this.index = index;
         this.pod = pod;
@@ -57,7 +62,7 @@ export class NodePod extends Array<DOMNode | DynamicNodePod> {
     get lastNode(): DOMNode | null {
         const entity = this.at(- 1);
         if (!entity) return null;
-        if (entity instanceof DynamicNodePod) return entity.lastNode;
+        if (entity instanceof _DynamicNodePod) return entity.lastNode;
         return entity;
     }
 
@@ -66,12 +71,12 @@ export class NodePod extends Array<DOMNode | DynamicNodePod> {
     }
 
     appendDynamicPod() {
-        const dynamicPod = new DynamicNodePod(this, super.length)
+        const dynamicPod = new _DynamicNodePod(this, super.length)
         super.push(dynamicPod);
         return dynamicPod;
     }
 
-    connect(pod: DynamicNodePod, index: number){
+    connect(pod: _DynamicNodePod, index: number){
         this.index = index;
         this.pod = pod;
     }
@@ -86,19 +91,32 @@ export class NodePod extends Array<DOMNode | DynamicNodePod> {
     // }
 }
 
-export class DynamicNodePod extends Array<NodePod> {
+const hey: NodePod = new _NodePod()
+const ho = hey[0]
+
+// if (ho instanceof Node){
+
+// }
+// else {
+//     ho.
+// }
+
+type DynamicNodePod = ReadonlyArray<NodePod>
+// & Omit<_NodePod, 'appendNodePod'>
+
+export class _DynamicNodePod extends Array<_NodePod> {
     index: number;
-    pod: NodePod;
+    pod: _NodePod;
     // private _activeComponents: InternalComponent[] = []
 
-    constructor(pod: NodePod, index: number) {
+    constructor(pod: _NodePod, index: number) {
         super();
         this.index = index;
         this.pod = pod;
     }
 
     appendNodePod() {
-        const nodePod = new NodePod(this, super.length);
+        const nodePod = new _NodePod(this, super.length);
         super.push(nodePod)
         return nodePod;
     }
@@ -106,7 +124,7 @@ export class DynamicNodePod extends Array<NodePod> {
     get prevNode() {
         const item = this.pod[this.index - 1];
         if (!item) return this.pod.prevNode;
-        if (item instanceof DynamicNodePod) {
+        if (item instanceof _DynamicNodePod) {
             return item.lastNode;
         }
         return item;
@@ -118,7 +136,7 @@ export class DynamicNodePod extends Array<NodePod> {
         return nodePod.lastNode;
     }
 
-    replaceNodePod(index: number, nodePod: NodePod) {
+    replaceNodePod(index: number, nodePod: _NodePod) {
         this[index] = nodePod;
         nodePod.connect(this, index)
     }
@@ -132,7 +150,7 @@ export class DynamicNodePod extends Array<NodePod> {
         }
     }
 
-    insertNodePods(index: number, nodePods: NodePod[]) {
+    insertNodePods(index: number, nodePods: _NodePod[]) {
         super.splice(index, 0, ...nodePods)
         let count = 0;
         for (const nodePod of nodePods) {

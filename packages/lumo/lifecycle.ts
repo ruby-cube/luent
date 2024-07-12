@@ -5,13 +5,11 @@ import { getCurrentComponent, InternalComponent } from "./component";
 type TaskQueue = Set<() => void>
 
 export enum LifecycleHook {
-    // BEFORE_CREATE = 'bc',
-    // CREATED = 'c',
-    BEFORE_MOUNT = 'bm',
+    PREMOUNT = 'pm',
     MOUNTED = 'm',
-    BEFORE_UPDATE = 'bu',
+    PREUPDATE = 'pu',
     UPDATED = 'u',
-    BEFORE_UNMOUNT = 'bum',
+    PREUNMOUNT = 'pum',
     UNMOUNTED = 'um',
     // DEACTIVATED = 'da',
     // ACTIVATED = 'a',
@@ -32,7 +30,7 @@ function useTaskQueue(component: InternalComponent, hookName: LifecycleHook) {
 }
 
 
-function createLifecycleHook(name: Exclude<LifecycleHook, LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDATED>) {
+function createLifecycleHook(name: Exclude<LifecycleHook, LifecycleHook.PREUPDATE | LifecycleHook.UPDATED>) {
     return function on(handler: () => void, _component?: InternalComponent) {
         const component = _component || getCurrentComponent();
         if (!component || component === 'root') throw new Error("Lifecycle hooks cannot be called outside of component setup");
@@ -49,7 +47,7 @@ function createLifecycleHook(name: Exclude<LifecycleHook, LifecycleHook.BEFORE_U
     }
 }
 
-function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDATED) {
+function createUpdateHook(name: LifecycleHook.PREUPDATE | LifecycleHook.UPDATED) {
     return function on(handler: () => void, options?: ListenerOptions, _component?: InternalComponent) {
         const component = _component || getCurrentComponent();
         if (!component || component === 'root') throw new Error("Lifecycle hooks cannot be called outside of component setup");
@@ -67,19 +65,19 @@ function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDA
     }
 }
 
-export const onBeforeMount = createLifecycleHook(LifecycleHook.BEFORE_MOUNT)
+export const onPremount = createLifecycleHook(LifecycleHook.PREMOUNT)
 export const onMounted = createLifecycleHook(LifecycleHook.MOUNTED)
-export const onBeforeUpdate = createUpdateHook(LifecycleHook.BEFORE_UPDATE)
+export const onPreupdate = createUpdateHook(LifecycleHook.PREUPDATE)
 export const onUpdated = createUpdateHook(LifecycleHook.UPDATED)
-export const onBeforeUnmount = createLifecycleHook(LifecycleHook.BEFORE_UNMOUNT)
+export const onPreunmount = createLifecycleHook(LifecycleHook.PREUNMOUNT)
 export const onUnmounted = createLifecycleHook(LifecycleHook.UNMOUNTED)
 
 
 
 export default {
-    onBeforeMount,
-    onBeforeUnmount,
-    onBeforeUpdate,
+    onPremount,
+    onPreunmount,
+    onPreupdate,
     onMounted,
     onUnmounted,
     onUpdated,

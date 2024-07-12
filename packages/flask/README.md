@@ -327,7 +327,7 @@ To create a morphable listener, use `$listen` from the Flasked Listeners API.
 
 ### Schedulers
 
-Schedulers are one-time listeners that cannot morph into a sustained listeners. These are typically functions that queue a task to the main thread such as: `queueTask`, `onAnimationFrame` (flasked `requestAnimationFrame`), and `onTimeout` (flasked `setTimeout`). See [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top) for more on existing schedulers.
+Schedulers are one-time listeners that cannot morph into a sustained listeners. These are typically functions that queue a task to the main thread such as: `queueTask`, `queuePrerepaint` (flasked `requestAnimationFrame`), and `onTimeout` (flasked `setTimeout`). See [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top) for more on existing schedulers.
 
 To create a scheduler, use `$schedule` from [the Flasked Listeners API](#flasked-listeners-api).
 
@@ -343,10 +343,10 @@ Conversely, subscriptions are sustained listeners that cannot morph into a one-t
 
 Handlers are called synchronously at the time of event emission. This allows for “before event” hooks as well as the possibility of handlers communicating back to the source of the event (see [reply](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#hook-configuration)). 
 
-If asynchronous handling is needed, the developer can call an async scheduler or one-time listener from within the handler. In the example below, the synchonous handler calls the `queuePostTask` scheduler (an alias for `queueMicrotask`) for asynchronous handling.
+If asynchronous handling is needed, the developer can call an async scheduler or one-time listener from within the handler. In the example below, the synchonous handler calls the `queuePS` scheduler (an alias for `queueMicrotask`) for asynchronous handling.
 
 ```ts
-onPopulated(() => queuePostTask(() => {
+onPopulated(() => queuePS(() => {
     // do something
 }))
 ```
@@ -1104,7 +1104,7 @@ OPT extends ListenerOptions & WatchOptions,
 ```ts
 // flasking `requestAnimationFrame`
 
-export function onAnimationFrame<
+export function queuePrerepaint<
 CB extends Callback,
 OPT extends ListenerOptions
 >(handler: CB, options?: OPT) {

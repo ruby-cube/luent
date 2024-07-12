@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref, onBeforeMount, onBeforeUpdate, onMounted, onUpdated, onUnmounted, onBeforeUnmount } from 'vue'
+import { reactive, ref, onBeforeMount, onBeforeUpdate, onMounted, onUpdated, onUnmounted, onPreunmount } from 'vue'
 import Comp from './Comp.vue'
 
 console.log("APP: running setup")
@@ -36,7 +36,7 @@ onUpdated(()=>{
   console.log("APP: updated")
 })
 
-onBeforeUnmount(()=>{
+onPreunmount(()=>{
   console.log("APP: before unmount")
 })
 

@@ -19,7 +19,7 @@ export function watchForUpdate<T>(target: ReactiveSignal<T> | ReactiveObject<T e
         component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
 
         onBeforeUpdatePhase(() => {
-            component.emit(LifecycleHook.BEFORE_UPDATE)
+            component.emit(LifecycleHook.PREUPDATE)
         }, { once: true }) // assuming cleanup flask is set up
 
         onUpdateComplete(() => {
@@ -56,7 +56,7 @@ export function watchForUpdate<T>(target: ReactiveSignal<T> | ReactiveObject<T e
 //         component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
 
 //         onBeforeUpdatePhase(() => {
-//             component.emit(LifecycleHook.BEFORE_UPDATE)
+//             component.emit(LifecycleHook.PREUPDATE)
 //         }, { once: true }) // assuming cleanup flask is set up
 
 //         onUpdateComplete(() => {
