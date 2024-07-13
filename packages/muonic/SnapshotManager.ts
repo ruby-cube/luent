@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 
 //NOTE: Temporarily pause development of this until usefulness is confirmed
-// Currently, for snapshots to work, we need to take a snapshot of every piece of state created upon initialization with toSignal or reactivize
+// Currently, for snapshots to work, we need to take a snapshot of every piece of state created upon initialization with $ or reactivize
 // this seems expensive ... even if it's incorporated into the reactive proxy and signal function, not sure if it's worth it
 // This is meant as a way to have snapshots the way immutable practices do, without all the copying of objects
 

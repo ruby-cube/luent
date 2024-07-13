@@ -1,7 +1,7 @@
 import { AnyObject, OptionalKeys } from "@rue/types";
 import { DOMNode, getCurrentComponent, InternalComponent } from "./component";
 import { watchForUpdate } from "./watchForUpdate";
-import { $, hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
+import {  hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
 import { getWithoutTracking } from "../muonic/DependencyTracker";
 import { ListRenderKit } from "./mxsFor";
 import { LifecycleHook, onUnmounted } from "./lifecycle";

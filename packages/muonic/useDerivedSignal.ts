@@ -49,7 +49,7 @@ export class DerivedSignalState {
 
     private trackDependencies(getter: () => any, memoize: boolean) {
         const tracker = new DependencyTracker();
-        const value = tracker.callToCollectDependencies(getter);
+        const [_, value] = tracker.callToCollectDependencies(getter);
         this.value = value;
         const deps = this.dependencies = tracker.dependencies
 
@@ -77,7 +77,7 @@ export class DerivedSignalState {
 }
 
 
-export function $<T extends any>(pureGetter: () => T, memoize?: 'memoize'): DerivedSignal<T> {
+export function makeDerivedSignal<T extends any>(pureGetter: () => T, memoize?: 'memoize'): DerivedSignal<T> {
     let initialized = false;
     const derivedSignal = () => {
         //TODO: check for containing flask, warn if no flask
@@ -91,9 +91,10 @@ export function $<T extends any>(pureGetter: () => T, memoize?: 'memoize'): Deri
         }
         if (_this.hasChanged || !_this.memoized) {
             const newValue = pureGetter();
+
             // @ts-expect-error private method
             _this.updateValue(newValue)
-            // @ts-expect-error private method
+            //@ts-expect-error private method
             if (_this.memoized) _this.trackDependencies(pureGetter, !!memoize) // to catch signals hidden in conditionals
             return newValue;
         }

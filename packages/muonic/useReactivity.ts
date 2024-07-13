@@ -1,19 +1,27 @@
 import { getWithoutTracking } from "./DependencyTracker";
-import { ReactiveObject, useReactivize } from "./useReactivize";
-import { isSignal, Signal, useSignalize } from "./useSignalize"
+import { DerivedSignal, makeDerivedSignal } from "./useDerivedSignal";
+import { Signal, signalize } from "./useSignalize";
 
-export function useReactivity() {
-    const s = useSignalize();
-    const r = useReactivize();
+// export function useReactivity() {
+//     const s = useSignalize();
+//     const r = useReactivize();
 
-    return {
-        toSignal: s.toSignal,
-        set: s.set,
-        reactivize: r.reactivize,
-        mu: r.mu
+//     return {
+//         $: s.$,
+//         set: s.set,
+//         reactivize: r.reactivize,
+//         mu: r.mu
+//     }
+// }
+
+export function $<T>(pureGetter: () => T, memoize?: "memoize"): DerivedSignal<T>
+export function $<T>(value: T): Signal<T>
+export function $<T>(valueOrPureGetter: T | (() => T), memoize?: "memoize"): Signal<T> | DerivedSignal<T> {
+    if (valueOrPureGetter instanceof Function){
+        return makeDerivedSignal(valueOrPureGetter, memoize)
     }
+    return signalize(valueOrPureGetter)
 }
-
 
 
 let _hasSignal = false;

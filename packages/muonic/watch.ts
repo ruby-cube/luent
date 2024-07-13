@@ -276,7 +276,7 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
             const oldValue = _derivedSignal.value;
             const newValue = derivedSignal();
             if (!isEqual(newValue, oldValue)) {
-                task(oldValue, newValue);
+                task(newValue, oldValue);
             }
         }
         else if (isReactiveEffect(task)) {
@@ -319,7 +319,7 @@ export function runNonSyncTasks(phase: "pre" | "post" | "update") {
             }
         }
     }
-
+    
     const triggeredSignals = updateCycle.triggeredSignals;
     if (triggeredSignals) {
         for (const [signal, [newValue, oldValue]] of triggeredSignals) {

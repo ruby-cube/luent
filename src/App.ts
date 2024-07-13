@@ -1,16 +1,17 @@
 import { m, mx } from "../packages/lumo/mx";
 import { mxsFor } from "../packages/lumo/mxsFor";
-import { $ } from "../packages/muonic/useDerivedSignal";
+import { $ } from "../packages/muonic/useReactivity";
 import { useReactivize } from "../packages/muonic/useReactivize";
-import { useSignalize } from "../packages/muonic/useSignalize";
+import { set } from "../packages/muonic/useSignalize";
 
 export function App() {
-    const { mu, reactivize } = useReactivize()
-    const { set, toSignal } = useSignalize()
+    // const { mu, o$ } = useReactivize()
+    // const { set, $ } = useSignalize()
 
-    const $list = toSignal(['one', 'two', 'three'])
-    const $count = toSignal(0); //TODO: I don't like how toSignal is so long, making the value so far away from the variable
-    const $doubleCount = $(() => $count() * 2) //FIX: double count's value lags behind
+    const $list = $(['one', 'two', 'three'])
+    const $count = $(0);
+    const $another = $(2);
+    const $doubleCount = $(() => $count() * $another()) //FIX: double count's value lags behind
 
     function click() {
         // set($list, (o) => [...o, "hi"+count])
@@ -21,6 +22,9 @@ export function App() {
     return {
         render: () => [
             mx('div', {
+                text: $doubleCount
+            }),
+            mx('div', {
                 text: $count
                 // nodes: [
                 //     mx('ul', {
@@ -29,9 +33,6 @@ export function App() {
                 //         ]
                 //     })
                 // ]
-            }),
-            mx('div', {
-                text: $doubleCount
             }),
             mx('button', {
                 text: 'click me',

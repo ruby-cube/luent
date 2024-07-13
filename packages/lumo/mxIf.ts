@@ -1,5 +1,6 @@
 import { getWithoutTracking } from "../muonic/DependencyTracker";
-import { $, hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal"
+import { hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal"
+import { $ } from "../muonic/useReactivity";
 import { NodeEntity } from "./mx";
 
 export class InitialConditionalRenderKit {

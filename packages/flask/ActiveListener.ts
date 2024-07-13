@@ -46,8 +46,8 @@ export function makeActiveListener<R, Arg extends R extends void ? Callback : R,
         if (
             // !pendingSceneStop && 
             !success && !once && !until) {
-            console.warn("This listener doesn't have a callback removal strategy (run once, run until, or auto cleanup). This is considered a memory leak if this listener is not intended to last the lifetime of the app. Check if auto cleanup callback returns a success flag")
-            console.trace();
+            // console.warn("This listener doesn't have a callback removal strategy (run once, run until, or auto cleanup). This is considered a memory leak if this listener is not intended to last the lifetime of the app. Check if auto cleanup callback returns a success flag")
+            // console.trace();
         }
     }
 
