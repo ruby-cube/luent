@@ -12,7 +12,7 @@ type PrivateSignal<T> = {
     _type: SignalType;
 }
 
-const _SIGNALIZED_ = Symbol("signalized");
+const _SIGNALIZED_ = Symbol("toSignald");
 
 const SIGNAL = 0 as const;
 const SHALLOW = 1 as const;
@@ -30,9 +30,9 @@ export function $<T>(value: T, _type?: SignalType): Signal<T> {
 }
 
 
-type Unsignalized<T> = T extends { [_SIGNALIZED_]: true } ? { [Key in keyof T as Key extends `${infer K}$` ? K : never]: T[Key] extends () => any ? Unsignalized<ReturnType<T[Key]>> : Unsignalized<T[Key]> } : T; //TODO:
+type UntoSignald<T> = T extends { [_SIGNALIZED_]: true } ? { [Key in keyof T as Key extends `${infer K}$` ? K : never]: T[Key] extends () => any ? UntoSignald<ReturnType<T[Key]>> : UntoSignald<T[Key]> } : T; //TODO:
 
-export function $set<T>(signal: Signal<T>, valueOrManipulator: T | ((value: T) => T) | Unsignalized<T>) {
+export function $set<T>(signal: Signal<T>, valueOrManipulator: T | ((value: T) => T) | UntoSignald<T>) {
     const ref = (<PrivateSignal<T>>signal)._ref;
     const type = (<PrivateSignal<T>>signal)._type;
     const currentValue = ref.value;
@@ -49,7 +49,7 @@ export function $set<T>(signal: Signal<T>, valueOrManipulator: T | ((value: T) =
         }
         else if (type === SHALLOW && !(_SIGNALIZED_ in (<Object>value))) {
             //@ts-expect-error
-            ref.value = signalize(value);
+            ref.value = toSignal(value);
         }
         else {
             //@ts-expect-error
@@ -69,7 +69,7 @@ function validateManipulation(value: any) {
 
 type Signalizable<T extends { [key: string]: any }> = T extends any[] ? never : T extends Map<any, any> ? never : T extends Set<any> ? never : T extends { [key: string]: any } ? T : never;
 
-export function signalize<T extends { [key: string]: any }>(obj: Signalizable<T>): T extends Signalizable<T> ? { [Key in keyof T as Key extends string ? `${Key}$` : never]: Signal<T[Key]> } & { [_SIGNALIZED_]: true } : never {
+export function toSignal<T extends { [key: string]: any }>(obj: Signalizable<T>): T extends Signalizable<T> ? { [Key in keyof T as Key extends string ? `${Key}$` : never]: Signal<T[Key]> } & { [_SIGNALIZED_]: true } : never {
     validateSignalizeInput(obj);
     const signalObj = { [_SIGNALIZED_]: true };
     for (const key in obj) {    //TODO: see if proxy implementation would be more performant
@@ -81,8 +81,8 @@ export function signalize<T extends { [key: string]: any }>(obj: Signalizable<T>
     return signalObj;
 }
 
-export function signalize$<T extends { [key: string]: any }>(obj: Signalizable<T>) {
-    return $(signalize(obj), SHALLOW);
+export function toSignal$<T extends { [key: string]: any }>(obj: Signalizable<T>) {
+    return $(toSignal(obj), SHALLOW);
 }
 
 

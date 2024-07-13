@@ -11,7 +11,7 @@ export function useSignalize() {
     const signalValues: WeakMap<Signal, any> = new WeakMap();
 
     const set = <T>(signal: Signal<T>, genNewValue: (value: T) => T) => {
-        if (!signalValues.has(signal)) throw "`set` can only set local signals created with corresponding `signalize` function"
+        if (!signalValues.has(signal)) throw "`set` can only set local signals created with corresponding `toSignal` function"
         const value = signal();
         const newValue = genNewValue(value)
         if (value === newValue) return value;
@@ -21,7 +21,7 @@ export function useSignalize() {
     }
 
     return {
-        signalize<T>(value: T): Signal<T> {  //TODO: add track
+        toSignal<T>(value: T): Signal<T> {  //TODO: add track
             const signal = () => {
                 emitSignal();
                 const value = signalValues.get(signal)

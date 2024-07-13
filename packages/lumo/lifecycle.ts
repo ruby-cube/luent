@@ -65,7 +65,7 @@ function createUpdateHook(name: LifecycleHook.PREUPDATE | LifecycleHook.UPDATED)
     }
 }
 
-export const onPremount = createLifecycleHook(LifecycleHook.PREMOUNT)
+export const onPremount = createLifecycleHook(LifecycleHook.PREMOUNT) //TODO: Rename premount to something else ... it has ambiguous meaning--it could mean mount ahead of time
 export const onMounted = createLifecycleHook(LifecycleHook.MOUNTED)
 export const onPreupdate = createUpdateHook(LifecycleHook.PREUPDATE)
 export const onUpdated = createUpdateHook(LifecycleHook.UPDATED)

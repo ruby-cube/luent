@@ -7,7 +7,7 @@ export function useReactivity() {
     const r = useReactivize();
 
     return {
-        signalize: s.signalize,
+        toSignal: s.toSignal,
         set: s.set,
         reactivize: r.reactivize,
         mu: r.mu

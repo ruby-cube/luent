@@ -20,7 +20,7 @@ export function useReactivize(config?: { snapshots: boolean }) {
                     track(value, target, key)
                     return value;
                 },
-                set(target: T, key: keyof T, newValue) {
+                set(target: T, key: keyof T, newValue) { //TODO: need a different approach to Arrays, Sets, and Map
                     if (!mutationPermitted) throw "Object is readonly. It can only be mutated through corresponding `mu` function"
                     const oldValue = target[key];
                     if (oldValue === newValue) return false;
@@ -30,7 +30,7 @@ export function useReactivize(config?: { snapshots: boolean }) {
                     return true;
                 }
             })
-
+            localReactives.add(reactive)
             return reactive as ReactiveObject<T>
         },
 

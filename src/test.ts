@@ -12,9 +12,9 @@ export function manipulateDOM(element: HTMLElement) {
     element.append(button)
 }
 
-const { signalize, set } = useSignalize();
+const { toSignal, set } = useSignalize();
 
-const $frog = signalize({
+const $frog = toSignal({
     name: "kermit"
 })
 

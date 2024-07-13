@@ -1,11 +1,10 @@
-import { AnyObject } from "@rue/types";
-import { SetKey, Signal } from "../muonic/useSignalize";
+import { AnyObject, OptionalKeys } from "@rue/types";
 import { DOMNode, getCurrentComponent, InternalComponent } from "./component";
 import { watchForUpdate } from "./watchForUpdate";
 import { $, hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
 import { getWithoutTracking } from "../muonic/DependencyTracker";
 import { ListRenderKit } from "./mxsFor";
-import { LifecycleHook } from "./lifecycle";
+import { LifecycleHook, onUnmounted } from "./lifecycle";
 import { genConditionsSignal, InitialConditionalRenderKit } from "./mxIf";
 import { appendItems, isEqual } from "@rue/utils";
 import { diff } from "./diff";
@@ -13,34 +12,23 @@ import { insertAndMoveListItemNodes, removeListItemNodes } from "./dom";
 import { isReactive } from "../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod } from "./NodePod";
 import { _NodeRef, castOnCreatedHook, NodeRef } from "./NodeRef";
-import { onUnmounted } from "@rue/paravue";
 
 
+export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | InitialConditionalRenderKit | string | ReactiveSignal<string> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and InitialConditionalRenderKit
 
-// type _DynamicNodePod = _NodePod[]
-
-
-export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | InitialConditionalRenderKit | string | ReactiveSignal<string> // TODO: Attach context to DOMNode, InternalComponent, ListRenderKit, and InitialConditionalRenderKit
-
-
+export const m = mx;
 
 
 type DOMNodeConfig<T extends keyof HTMLElementTagNameMap> = {
     attributes?: AnyObject;
     on?: { [key: string]: () => void }
     class?: string;
-    style?: any;
-    text?: string | ReactiveSignal<string>;
+    style?: { [K in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[K] };
+    text?: any | ReactiveSignal<any>;
     nodes?: NodeEntity[];
     ref?: NodeRef,
     index?: number
 }
-
-
-
-
-
-
 
 
 export function mx<T extends keyof HTMLElementTagNameMap>(tagName: T, config: DOMNodeConfig<T> = {}): DOMNode {
@@ -50,7 +38,7 @@ export function mx<T extends keyof HTMLElementTagNameMap>(tagName: T, config: DO
     if (!component || component === "root") throw new Error("No component :(")
     if (text != null && nodes) throw new Error(`Element ${tagName} cannot contain both text and nodes`)
 
-    if (text) setUpTextNode(domNode, text)
+    if (text !== undefined) setUpTextNode(domNode, text)
     else if (nodes) {
         const nodePod = new _NodePod();
         for (const nodeEntity of nodes) {
@@ -70,7 +58,7 @@ export function mx<T extends keyof HTMLElementTagNameMap>(tagName: T, config: DO
 
     if (style) {
         for (const property in style) {
-            domNode.style.setProperty(property, style[property])
+            domNode.style[property] = style[property]!
         }
     }
 
@@ -98,7 +86,7 @@ function assignNodeRef(ref: _NodeRef, domNode: HTMLElement, index: number | unde
     }
 }
 
-function setUpTextNode(parent: HTMLElement, text: ReactiveSignal | string, nodePod?: _NodePod, fragment?: DocumentFragment) {
+function setUpTextNode(parent: HTMLElement, text: ReactiveSignal | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
     const textNode = createTextNode(text); //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
     if (nodePod) {
         nodePod.appendStaticNode(textNode)
@@ -130,8 +118,9 @@ function keepTextNodeUpdated($text: ReactiveSignal<string>, textNode: CharacterD
     });
 }
 
-function createTextNode(value: ReactiveSignal | string) {
-    const text = typeof value === "string" ? value : getWithoutTracking(value);
+function createTextNode(value: ReactiveSignal | any) {
+    const _value = hasSignal(value) ? getWithoutTracking(value): value;
+    const text = _value.toString() //TODO: make sure it works with any value
     const textNode = document.createTextNode(text);
     return textNode;
 }
@@ -191,7 +180,7 @@ function setUpNode(parent: HTMLElement, node: DOMNode, nodePod: _NodePod, fragme
 
 
 
-function setUpComponent(parentComponent: InternalComponent, parent: HTMLElement, component: InternalComponent, nodePod: _NodePod, fragment?: DocumentFragment) { //TODO: what if a component's root elements is conditional or a dynamic list??
+export function setUpComponent(parentComponent: InternalComponent, parent: HTMLElement, component: InternalComponent, nodePod: _NodePod, fragment?: DocumentFragment) { //TODO: what if a component's root elements is conditional or a dynamic list??
     const nodeEntities = component.initialNodeEntities;
     if (!(parent instanceof HTMLElement)) throw new Error("Parent cannot be a text node")
     component.emit(LifecycleHook.PREMOUNT);

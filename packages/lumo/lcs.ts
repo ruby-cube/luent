@@ -81,54 +81,54 @@ function getSubsequence(sequence: string | any[], startIndex: number, length: nu
 
 
 
-const wordsA = [
-    "blast",
-    "exposure",
-    "agree",
-    "stitch",
-    "characteristic",
-    "strict",
-    "paralyzed",
-    "talk",
-    "worry",
-    "moon",
-    "cycle",
-    "old",
-    "shift",
-    "message",
-    "reject",
-    "overall",
-    "settlement",
-    "hold",
-    "flat",
-    "fling",
-]
+// const wordsA = [
+//     "blast",
+//     "exposure",
+//     "agree",
+//     "stitch",
+//     "characteristic",
+//     "strict",
+//     "paralyzed",
+//     "talk",
+//     "worry",
+//     "moon",
+//     "cycle",
+//     "old",
+//     "shift",
+//     "message",
+//     "reject",
+//     "overall",
+//     "settlement",
+//     "hold",
+//     "flat",
+//     "fling",
+// ]
 
-const wordsB = [
-    "abtsl",
-    "rpsexeuo",
-    "aeegr",
-    "scttih",
-    "ectratrhiicsac",
-    "citrst",
-    "layrdeazp",
-    "lkta",
-    "owyrr",
-    "onom",
-    "lecyc",
-    "dol",
-    "thfsi",
-    "emesgas",
-    "jecert",
-    "lorevla",
-    "tmnlesetet",
-    "dlho",
-    "tfla",
-    "nilgf",
-]
+// const wordsB = [
+//     "abtsl",
+//     "rpsexeuo",
+//     "aeegr",
+//     "scttih",
+//     "ectratrhiicsac",
+//     "citrst",
+//     "layrdeazp",
+//     "lkta",
+//     "owyrr",
+//     "onom",
+//     "lecyc",
+//     "dol",
+//     "thfsi",
+//     "emesgas",
+//     "jecert",
+//     "lorevla",
+//     "tmnlesetet",
+//     "dlho",
+//     "tfla",
+//     "nilgf",
+// ]
 
-let i = 0;
-while (i < wordsB.length) {
-    console.log(longestCommonSubsequence(wordsA[i], wordsB[i]))
-    i++;
-}
+// let i = 0;
+// while (i < wordsB.length) {
+//     console.log(longestCommonSubsequence(wordsA[i], wordsB[i]))
+//     i++;
+// }

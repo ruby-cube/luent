@@ -7,7 +7,7 @@ import { NodeRef } from "./NodeRef";
 import { _NodePod } from "./NodePod";
 
 
-export type RenderItem<T = any> = (item: T, i: number) => NodeEntity[]
+export type RenderItem<T = any> = (item: T, i: number) => NodeEntity[] //TODO: don't require an array
 // type ListData = AnyObject | any[] | Set<any> | Map<any, any> | ReactiveObject<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
 type ListData = any[] | ReactiveObject<AnyObject[] | UniqueItem[]> | ReactiveSignal<AnyObject[] | UniqueItem>
 export type UniqueItem = any;
@@ -18,7 +18,6 @@ export class ListRenderKit<T = any> {
         public initialNodeEntities: NodeEntity[][],
         public data: ListData,
         public idKey?: string,
-        // public ref?: NodeRef,
     ) { }
 }
 

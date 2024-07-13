@@ -1,7 +1,11 @@
+import { createApp } from '../packages/lumo/createApp';
+import { App } from './App';
 import './style.css'
 import { manipulateDOM } from './test';
 
+const app = createApp(App)
 
+app.mount('#app')
 // document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 //   <div>
 //     <a href="https://vitejs.dev" target="_blank">
@@ -22,11 +26,11 @@ import { manipulateDOM } from './test';
 
 // setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
 
-const app = document.getElementById("app");
+// const app = document.getElementById("app");
 
-app?.appendChild(document.createTextNode("hello worldly dinos"))
+// app?.appendChild(document.createTextNode("hello worldly dinos"))
 
-manipulateDOM(app!)
+// manipulateDOM(app!)
 // setupApp(app!);
 
 // const app = createApp(App);

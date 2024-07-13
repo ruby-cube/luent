@@ -8,6 +8,7 @@ import { ReactiveSignal } from "../muonic/useDerivedSignal";
 import { mxO } from "./mxO";
 import { onPremount } from "./lifecycle";
 import { initializeEffect } from "../muonic/watch";
+import { reMouseDown } from "../actionry/__test__/actionry.type-test";
 
 type Signal<T> = () => T
 
@@ -89,7 +90,7 @@ function List() {
         console.log(itemsRef.nodes)
     })
 
-    itemsRef.beforeMount((item, i) => {
+    itemsRef.onCreated((itemNode, i) => {
 
     })
 
@@ -173,6 +174,14 @@ function List() {
         }
     ])
 
+    dynamicEvents(listRef, {
+        click: $(() => $active() ? reClick : null)
+    })
+
+    dynamicEvents(listRef, {
+        click: () => $active() ? reClick : null
+    })
+
 
     return {
         render: () => [
@@ -181,6 +190,10 @@ function List() {
                 class: `list list-item--some ${box}`, // static values only for initial render
                 style: {
                     backgroundColor: 'green'  // static values only for initial render
+                },
+                on: {
+                    click: $(() => $active() ? reClick : null),
+                    mousedown: reMouseDown
                 },
                 nodes: [
                     mxIf($active, {

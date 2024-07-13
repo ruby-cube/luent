@@ -37,17 +37,17 @@ export class InternalComponent {
     parent: InternalComponent | 'root';
     initialNodeEntities: NodeEntity[] = []; //TODO: add context type??
     tasks: {
-        [LifecycleHook.PREMOUNT]: Set<() => void> | undefined;
+        [LifecycleHook.PREMOUNT]: Set<() => void>;
         [LifecycleHook.PREUNMOUNT]: Set<() => void> | undefined;
         [LifecycleHook.PREUPDATE]: Set<() => void> | undefined;
-        [LifecycleHook.MOUNTED]: Set<() => void> | undefined;
+        [LifecycleHook.MOUNTED]: Set<() => void>;
         [LifecycleHook.UNMOUNTED]: Set<() => void> | undefined;
         [LifecycleHook.UPDATED]: Set<() => void> | undefined;
     } = {
-            [LifecycleHook.PREMOUNT]: undefined,
+            [LifecycleHook.PREMOUNT]: new Set(),
+            [LifecycleHook.MOUNTED]: new Set(),
             [LifecycleHook.PREUNMOUNT]: undefined,
             [LifecycleHook.PREUPDATE]: undefined,
-            [LifecycleHook.MOUNTED]: undefined,
             [LifecycleHook.UNMOUNTED]: undefined,
             [LifecycleHook.UPDATED]: undefined,
         };

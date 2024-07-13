@@ -1,10 +1,9 @@
 import { AnyObject } from "@rue/types";
 import { ComponentSetup, getCurrentComponent, InternalComponent, setCurrentComponent } from "./component";
 import { SetKey, Signal } from "../muonic/useSignalize";
-import { LifecycleHook } from "./lifecycle";
+import { LifecycleHook, onUnmounted } from "./lifecycle";
 import { collectEffects } from "../flask/flask";
-import { onUnmounted } from "@rue/paravue";
-import { _NodeRef } from "./NodeRef";
+import { _NodeRef, castOnCreatedHook, NodeRef } from "./NodeRef";
 
 type ComponentConfig<T extends ComponentSetup<AnyObject> | string> = {
     props?: T extends (props: infer P, emit: any) => any ? { [K in keyof P]: P[K] } : never;
@@ -13,8 +12,8 @@ type ComponentConfig<T extends ComponentSetup<AnyObject> | string> = {
     class?: string | { [key: string]: () => boolean };
     style?: any;
     text?: string | (() => void)
-    key?: string | number
-    ref?: Signal
+    ref?: NodeRef
+    index?: number
 }
 
 // export class TextRenderer {
@@ -38,7 +37,7 @@ export function mxO<T extends ComponentSetup>(Component: T, config: ComponentCon
 
 function setUpComponent<T extends ComponentSetup>(Component: T, config: ComponentConfig<T> = {}, component: InternalComponent) {
     collectEffects((flask, outerFlask) => {
-        const { props, on, class: _class, key, ref, style, text, ...other } = config;
+        const { props, on, class: _class, ref, style, text, index, ...other } = config;
         const _component = Component(props)
         if (!_component) throw new Error("Component setup must return component blueprint")
         const { render, provides, exposes, scoped, global } = _component;
@@ -54,12 +53,25 @@ function setUpComponent<T extends ComponentSetup>(Component: T, config: Componen
 
         //TODO: Slots (make sure parent is correct)
         //TODO: HTML attributes, including data
+        if (ref) {
+            assignNodeRef(ref, component.component, index)
+            castOnCreatedHook(ref, component, index)
+        }
 
         onUnmounted(flask.dispose)
         outerFlask.onDisposed(() => unmountComponent(component))
     })
 }
 
+function assignNodeRef(ref: _NodeRef, component: AnyObject, index: number | undefined) {
+    if (index != null) {
+        let nodes = ref.components ? ref.components! : []
+        nodes[index] = component;
+    }
+    else {
+        ref.component = component
+    }
+}
 // export function mountComponent(parent: HTMLElement, component: InternalComponent) {
 //     component.emit(LifecycleHook.PREMOUNT);
 //     parent.append(...component.domNodes);

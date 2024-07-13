@@ -1,17 +1,17 @@
 import { $listen, ListenerOptions, ScheduleStop } from "@rue/flask"
-import { Component } from "./component"
+import { Component, InternalComponent } from "./component"
 import { _NodePod } from "./NodePod"
 import { removeItem } from "@rue/utils"
 
 type Task = ((item: HTMLElement) => void) | ((item: HTMLElement, index?: number) => void)
 const hookMap: WeakMap<_NodeRef, Task[]> = new WeakMap()
 
-export class NodeRef {
+export class NodeRef { //TODO: Add generics
     readonly node?: HTMLElement
     readonly nodes?: HTMLElement[]
     readonly component?: Component
     readonly components?: Component[]
-    onCreated(callback: ((item: HTMLElement) => void) | ((item: HTMLElement, index?: number) => void), options?: { until: ScheduleStop; }) {
+    onCreated(callback: (item: HTMLElement, index?: number) => void, options?: { until: ScheduleStop; }) {
         const tasks = hookMap.get(this) ? hookMap.get(this)! : [];
 
         return $listen(callback, options, {
@@ -25,11 +25,11 @@ export class NodeRef {
     }
 }
 
-export function castOnCreatedHook(ref: _NodeRef, domNode: HTMLElement, index: number | undefined) {
+export function castOnCreatedHook(ref: _NodeRef, entity: HTMLElement | InternalComponent, index: number | undefined) {
     const tasks = hookMap.get(ref)
-    if (!tasks) throw new Error("BeforeNodeMount tasks cannot be found")
+    if (!tasks) throw new Error("OnCreated tasks cannot be found")
     for (const task of tasks) {
-        task(domNode, index)
+        task(entity, index)
     }
 }
 
@@ -39,3 +39,5 @@ export type _NodeRef = {
     component?: Component
     components?: Component[]
 }
+
+const itemsRef = new NodeRef()
