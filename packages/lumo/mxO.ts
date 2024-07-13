@@ -4,6 +4,7 @@ import { SetKey, Signal } from "../muonic/useSignalize";
 import { LifecycleHook, onUnmounted } from "./lifecycle";
 import { collectEffects } from "../flask/flask";
 import { _NodeRef, castOnCreatedHook, NodeRef } from "./NodeRef";
+import { normalizeRenderOutput } from "./mx";
 
 type ComponentConfig<T extends ComponentSetup<AnyObject> | string> = {
     props?: T extends (props: infer P, emit: any) => any ? { [K in keyof P]: P[K] } : never;
@@ -40,8 +41,8 @@ function setUpComponent<T extends ComponentSetup>(Component: T, config: Componen
         const { props, on, class: _class, ref, style, text, index, ...other } = config;
         const _component = Component(props)
         if (!_component) throw new Error("Component setup must return component blueprint")
-        const { render, provides, exposes, scoped, global } = _component;
-        const nodeEntities = render();
+        const { render, provides, exposes } = _component;
+        const nodeEntities = normalizeRenderOutput(render());
 
         component.initialNodeEntities = nodeEntities;
         component.provides = provides;

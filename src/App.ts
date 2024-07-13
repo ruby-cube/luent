@@ -1,4 +1,5 @@
 import { m, mx } from "../packages/lumo/mx";
+import { mxIf } from "../packages/lumo/mxIf";
 import { mxsFor } from "../packages/lumo/mxsFor";
 import { $ } from "../packages/muonic/useReactivity";
 import { useReactivize } from "../packages/muonic/useReactivize";
@@ -11,12 +12,19 @@ export function App() {
     const $list = $(['one', 'two', 'three'])
     const $count = $(0);
     const $another = $(2);
-    const $doubleCount = $(() => $count() * $another()) //FIX: double count's value lags behind
+    const $doubleCount = $(() => {
+        console.log("recalculating")
+        return $count() + $another()
+    }) //FIX: double count's value lags behind
+
+    const $active = $(true);
 
     function click() {
         // set($list, (o) => [...o, "hi"+count])
         // count++;
-        set($count, (c) => c + 1);
+        // set($count, (c) => c + 2);
+        // set($another, (v) => v - 2)
+        set($active, (v) => !v)
     }
 
     return {
@@ -26,13 +34,30 @@ export function App() {
             }),
             mx('div', {
                 text: $count
-                // nodes: [
-                //     mx('ul', {
-                //         nodes: [
-                //             mxsFor((item) => [m('li', { text: item })], $list)
-                //         ]
-                //     })
-                // ]
+            }),
+            mx('div', {
+                nodes: [
+                    mx('ul', {
+                        nodes: [
+                            mxsFor((item) => m('li', { text: item }), $list)
+                        ]
+                    })
+                ]
+            }),
+            mx('div', {
+                nodes: [
+                    mx('ul', {
+                        nodes: [
+                            mxIf($active, {
+                                then: () => [
+                                    m('div', { text: 'show me' }),
+                                    m('button', {text: 'on'})
+                                ],
+                                else: () => m('div', { text: 'or else' })
+                            })
+                        ]
+                    })
+                ]
             }),
             mx('button', {
                 text: 'click me',

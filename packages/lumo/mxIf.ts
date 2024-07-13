@@ -1,7 +1,8 @@
 import { getWithoutTracking } from "../muonic/DependencyTracker";
 import { hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal"
 import { $ } from "../muonic/useReactivity";
-import { NodeEntity } from "./mx";
+import { setCurrentComponent } from "./component";
+import { NodeEntity, normalizeRenderOutput } from "./mx";
 
 export class InitialConditionalRenderKit {
     constructor(
@@ -18,7 +19,7 @@ export class InitialConditionalRenderKit {
 
 export type ConditionalRenderKit = {
     $condition?: ReactiveSignal<boolean>,
-    renderConditional: () => NodeEntity[],
+    renderConditional: () => NodeEntity[] | NodeEntity,
 }
 // export class InitialConditionalRenderKit {
 //     constructor(
@@ -33,11 +34,11 @@ export type ConditionalRenderKit = {
 // }
 
 export type ElseIfRenderKit = {
-    renderConditional: () => NodeEntity[];
+    renderConditional: () => NodeEntity[] | NodeEntity;
     $condition: ReactiveSignal<boolean>;
 }
 
-type ElseIfThen = [ReactiveSignal<boolean>, () => NodeEntity[]]
+type ElseIfThen = [ReactiveSignal<boolean>, () => NodeEntity[] | NodeEntity]
 
 // API:
 //
@@ -54,9 +55,9 @@ type ElseIfThen = [ReactiveSignal<boolean>, () => NodeEntity[]]
 // })
 
 type MxIfConfig = {
-    then: () => NodeEntity[];
-    elseIf?: ElseIfThen[] | [ReactiveSignal<boolean>, () => NodeEntity[]]
-    else?: () => NodeEntity[]
+    then: () => NodeEntity[] | NodeEntity;
+    elseIf?: ElseIfThen[] | [ReactiveSignal<boolean>, () => NodeEntity[] | NodeEntity]
+    else?: () => NodeEntity[] | NodeEntity
 }
 
 export function genConditionsSignal(conditions: ReactiveSignal<boolean>[]) {
@@ -94,7 +95,7 @@ export function mxIf($condition: ReactiveSignal<boolean>, config: MxIfConfig): I
         if (!conditionMet) initialIndex++;
     }
 
-    function processElseIf($condition: ReactiveSignal<boolean>, renderConditional: () => NodeEntity[]) {
+    function processElseIf($condition: ReactiveSignal<boolean>, renderConditional: () => NodeEntity[] | NodeEntity) {
         conditionalKits.push({ renderConditional })
         if (!conditionMet) {
             conditions.push($condition)
@@ -103,7 +104,7 @@ export function mxIf($condition: ReactiveSignal<boolean>, config: MxIfConfig): I
         conditionMet = getWithoutTracking($condition)
     }
 
-    const nodeEntities = conditionalKits[initialIndex].renderConditional()
+    const nodeEntities = normalizeRenderOutput(conditionalKits[initialIndex].renderConditional())
 
     const renderKit = new InitialConditionalRenderKit(conditionalKits, nodeEntities, $initialConditions, initialIndex)
 

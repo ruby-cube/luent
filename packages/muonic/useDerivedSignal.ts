@@ -91,7 +91,7 @@ export function makeDerivedSignal<T extends any>(pureGetter: () => T, memoize?: 
         }
         if (_this.hasChanged || !_this.memoized) {
             const newValue = pureGetter();
-
+            console.log(_this)
             // @ts-expect-error private method
             _this.updateValue(newValue)
             //@ts-expect-error private method

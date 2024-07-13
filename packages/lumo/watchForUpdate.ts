@@ -28,8 +28,7 @@ export function watchForUpdate<T>(target: ReactiveSignal<T> | ReactiveObject<T e
         }, { once: true })
     }
 
-    const _options = { until: onUnmounted, ...options }
-    return _initializeEffect(_handler, target, _options)
+    return _initializeEffect(_handler, target, options) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
 

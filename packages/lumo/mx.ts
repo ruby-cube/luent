@@ -1,7 +1,7 @@
 import { AnyObject, OptionalKeys } from "@rue/types";
-import { DOMNode, getCurrentComponent, InternalComponent } from "./component";
+import { DOMNode, getCurrentComponent, InternalComponent, setCurrentComponent } from "./component";
 import { watchForUpdate } from "./watchForUpdate";
-import {  hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
+import { hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
 import { getWithoutTracking } from "../muonic/DependencyTracker";
 import { ListRenderKit } from "./mxsFor";
 import { LifecycleHook, onUnmounted } from "./lifecycle";
@@ -35,6 +35,7 @@ export function mx<T extends keyof HTMLElementTagNameMap>(tagName: T, config: DO
     const { nodes, text, attributes, class: _class, style, on, ref, index } = config;
     const domNode = document.createElement(tagName);
     const component = getCurrentComponent();
+    console.log("component", component)
     if (!component || component === "root") throw new Error("No component :(")
     if (text != null && nodes) throw new Error(`Element ${tagName} cannot contain both text and nodes`)
 
@@ -119,7 +120,7 @@ function keepTextNodeUpdated($text: ReactiveSignal<string>, textNode: CharacterD
 }
 
 function createTextNode(value: ReactiveSignal | any) {
-    const _value = hasSignal(value) ? getWithoutTracking(value): value;
+    const _value = hasSignal(value) ? getWithoutTracking(value) : value;
     const text = _value.toString() //TODO: make sure it works with any value
     const textNode = document.createTextNode(text);
     return textNode;
@@ -244,7 +245,7 @@ function setUpConditionalEntity(
     const _conditionalKits: {
         $condition?: ReactiveSignal<boolean>;
         nodePod: _NodePod;
-        renderConditional: () => NodeEntity[];
+        renderConditional: () => NodeEntity[] | NodeEntity;
     }[] = []
 
     for (let i = 0; i < conditionalKits.length; i++) {
@@ -285,7 +286,9 @@ function setUpConditionalEntity(
                 break;
             }
         }
+        setCurrentComponent(component)
         watchForUpdate(genConditionsSignal(conditions), updateConditional, { once: true })
+        setCurrentComponent(null)
     }
 }
 
@@ -319,11 +322,13 @@ export function removeDOMNodes(nodePod: _NodePod) {
     }
 }
 
-function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[], activeIndex: number) {
+function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[] | NodeEntity, activeIndex: number) {
     const nodePod = new _NodePod();
     dynamicPod.replaceNodePod(activeIndex, nodePod);
+    setCurrentComponent(component);
+    const nodeEntities = normalizeRenderOutput(renderConditional());
+    setCurrentComponent(null)
 
-    const nodeEntities = renderConditional();
     const fragment = new DocumentFragment()
     for (const nodeEntity of nodeEntities) {
         setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
@@ -333,5 +338,9 @@ function insertNewConditionalNodes(component: InternalComponent, parent: HTMLEle
     if (prevSibling) prevSibling.after(fragment)
     else parent.prepend(fragment)
     component.emit(LifecycleHook.UPDATED);
+}
+
+export function normalizeRenderOutput(output: NodeEntity[] | NodeEntity) {
+    return output instanceof Array ? output : [output]
 }
 

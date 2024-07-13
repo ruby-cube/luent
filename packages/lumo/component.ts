@@ -6,6 +6,7 @@ import { ListRenderKit } from "./mxsFor";
 import { InitialConditionalRenderKit } from "./mxIf";
 import { ReactiveSignal } from "../muonic/useDerivedSignal";
 import { NodeEntity } from "./mx";
+import { U } from "vitest/dist/types-94cfe4b4";
 
 // export type NodeRef = Signal<Component | DOMNode | (DOMNode | Component)[]>
 
@@ -21,7 +22,7 @@ export type Props = {
 
 
 export type ComponentSetup<T extends Props = AnyObject> = (props?: T, context?: AnyObject) => {
-    render: () => NodeEntity[];
+    render: () => NodeEntity[] | NodeEntity;
     exposes?: AnyObject;
     provides?: AnyObject;
     scoped?: string;
@@ -37,15 +38,15 @@ export class InternalComponent {
     parent: InternalComponent | 'root';
     initialNodeEntities: NodeEntity[] = []; //TODO: add context type??
     tasks: {
-        [LifecycleHook.PREMOUNT]: Set<() => void>;
+        [LifecycleHook.PREMOUNT]: Set<() => void> | undefined;
         [LifecycleHook.PREUNMOUNT]: Set<() => void> | undefined;
         [LifecycleHook.PREUPDATE]: Set<() => void> | undefined;
-        [LifecycleHook.MOUNTED]: Set<() => void>;
+        [LifecycleHook.MOUNTED]: Set<() => void> | undefined;
         [LifecycleHook.UNMOUNTED]: Set<() => void> | undefined;
         [LifecycleHook.UPDATED]: Set<() => void> | undefined;
     } = {
-            [LifecycleHook.PREMOUNT]: new Set(),
-            [LifecycleHook.MOUNTED]: new Set(),
+            [LifecycleHook.PREMOUNT]: undefined,
+            [LifecycleHook.MOUNTED]: undefined,
             [LifecycleHook.PREUNMOUNT]: undefined,
             [LifecycleHook.PREUPDATE]: undefined,
             [LifecycleHook.UNMOUNTED]: undefined,
@@ -60,12 +61,13 @@ export class InternalComponent {
 
     private getTaskQueue(hookName: LifecycleHook) {
         let taskQueue = this.tasks[hookName]
-        if (!taskQueue) throw new Error("taskQueue not found")
+        // if (!taskQueue) throw new Error("taskQueue not found")
         return taskQueue;
     }
 
     emit(hookName: LifecycleHook) {
         const taskQueue = this.getTaskQueue(hookName);
+        if (!taskQueue) return;
         for (const task of taskQueue) {
             task();
         }
@@ -79,7 +81,7 @@ export function getCurrentComponent() {
     return currentComponent;
 }
 
-export function setCurrentComponent(component: InternalComponent | 'root') {
+export function setCurrentComponent(component: InternalComponent | 'root' | null) {
     currentComponent = component
 }
 
