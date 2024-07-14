@@ -1,11 +1,11 @@
 import { AnyObject } from "@rue/types";
-import { Slot } from "./mxSlot";
+import { Slot } from "./mXSlot";
 import { Signal } from "../muonic/useSignalize";
 import { LifecycleHook } from "./lifecycle";
-import { ListRenderKit } from "./mxsFor";
-import { InitialConditionalRenderKit } from "./mxIf";
+import { ListRenderKit } from "./mXsFor";
+import { InitialConditionalRenderKit } from "./mXIf";
 import { ReactiveSignal } from "../muonic/useDerivedSignal";
-import { NodeEntity } from "./mx";
+import { NodeEntity } from "./mX";
 import { U } from "vitest/dist/types-94cfe4b4";
 
 // export type NodeRef = Signal<Component | DOMNode | (DOMNode | Component)[]>
@@ -36,7 +36,7 @@ export class InternalComponent {
     provides: AnyObject | undefined;
     component: Component | undefined;
     parent: InternalComponent | 'root';
-    initialNodeEntities: NodeEntity[] = []; //TODO: add context type??
+    initialNodeEntities: NodeEntity[] = []; //TODO: add context type?? //QUESTION: should this be cleared or updated?
     tasks: {
         [LifecycleHook.PREMOUNT]: Set<() => void> | undefined;
         [LifecycleHook.PREUNMOUNT]: Set<() => void> | undefined;

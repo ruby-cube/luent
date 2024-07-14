@@ -111,12 +111,12 @@ function ListItem(props: I["props"], context: I["context"]): Component<I> { // c
 
     return {
         render: () =>
-            mx("div", {
+            _mX("div", {
                 class: ["dark", $active, $(item.color)],
                 nodes: [
-                    mx("span", { text: "something" }),
+                    _mX("span", { text: "something" }),
                     ...bullets.map((bullet) =>
-                        mx(BulletArea, {
+                        _mX(BulletArea, {
                             class: "frog",
                             text: bullet,
                             on: {
@@ -160,7 +160,7 @@ function BulletArea(props: {}, context: Th["context"]): Component<Th> {
 
     return {
         render: () =>
-            mx("button", {
+            _mX("button", {
                 class: "dark",
                 on: {
                     "click": handleClick
@@ -183,7 +183,7 @@ function InputArea(props: {}, context: InputContext) {
 
 }
 
-function mx(name: string | Function, props?: RenderProps) {
+function _mX(name: string | Function, props?: RenderProps) {
     return () => {
         doc.createElement(name);
         if (props?.nodes) {

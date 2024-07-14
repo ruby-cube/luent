@@ -2,19 +2,19 @@ import { AnyObject } from "@rue/types";
 import { DOMNode, InternalComponent } from "./component";
 import { Interface } from "readline";
 
-// Node Pods represent groups of nodes created by `mxsFor` and `mxIf`.
+// Node Pods represent groups of nodes created by `mXsFor` and `mXIf`.
 // 
 // A root node pod represents the child nodes NodeList of a parent DOMNode, NOT the root node(s) of a component.
 // They are ignorant of component boundaries and care only about:
 // - the distinguishing static nodes from dynamic pods
 // - the boundary between parent and child in the DOM (given that a root node pod represents a child nodes NodeList)
 // 
-// The main purpose of node pods is to aid in node insertions when updates are triggered by dynamic `mxsFor` and `mxIf`
+// The main purpose of node pods is to aid in node insertions when updates are triggered by dynamic `mXsFor` and `mXIf`
 // _DynamicNodePod supports in emitting Update and Unmounted hooks by collecting components in the `activeComponents` property
 // For Unmounting: activeComponents should collect the highest component of a branch, then let the unmount cascade unmount any descendant components.
 // For Updates: call emit(UPDATED) for the PARENT component not the components within via getCurrentComponent();
 //
-// A new root node pod is created when mx is called and passed through the set up of its (child) node entities.
+// A new root node pod is created when _mX is called and passed through the set up of its (child) node entities.
 // The root node pod should not be passed to grand children.
 //
 // When setting up node entities for the first time, it doesn't matter whether you append to the DOM or append to node pods first

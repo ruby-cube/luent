@@ -37,7 +37,7 @@ import { NodeRef } from "./NodeRef";
 //     },
 // ])
 
-export function dynamicClasses(nodeRef: NodeRef, reactiveEffects: ((o: DOMTokenList) => void)[]) {
+export function bindClasses(nodeRef: NodeRef, reactiveEffects: ((o: DOMTokenList) => void)[]) {
     nodeRef.onCreated((node) => {
         for (const effect of reactiveEffects) {
             initializeEffect(() => effect(node.classList))
@@ -45,7 +45,7 @@ export function dynamicClasses(nodeRef: NodeRef, reactiveEffects: ((o: DOMTokenL
     })
 }
 
-export function dynamicStyles(nodeRef: NodeRef, reactiveEffects: ((o: CSSStyleDeclaration) => void)[]) {
+export function bindStyles(nodeRef: NodeRef, reactiveEffects: ((o: CSSStyleDeclaration) => void)[]) {
     nodeRef.onCreated((node) => {
         for (const effect of reactiveEffects) {
             initializeEffect(() => effect(node.style))

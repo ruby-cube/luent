@@ -3,47 +3,53 @@ import { DOMNode, getCurrentComponent, InternalComponent, setCurrentComponent } 
 import { watchForUpdate } from "./watchForUpdate";
 import { hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
 import { getWithoutTracking } from "../muonic/DependencyTracker";
-import { ListRenderKit } from "./mxsFor";
+import { ListRenderKit } from "./mXsFor";
 import { LifecycleHook, onUnmounted } from "./lifecycle";
-import { genConditionsSignal, InitialConditionalRenderKit } from "./mxIf";
+import { genConditionsSignal, InitialConditionalRenderKit } from "./mXIf";
 import { appendItems, isEqual } from "@rue/utils";
 import { diff } from "./diff";
 import { insertAndMoveListItemNodes, removeListItemNodes } from "./dom";
 import { isReactive } from "../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod } from "./NodePod";
 import { _NodeRef, castOnCreatedHook, NodeRef } from "./NodeRef";
+import { useReactivity } from "../muonic/useReactivity";
+import { Signal } from "../muonic/useSignalize";
+import { initializeEffect, watch } from "../muonic/watch";
+import { symlink } from "fs";
 
 
 export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | InitialConditionalRenderKit | string | ReactiveSignal<string> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and InitialConditionalRenderKit
 
-export const m = mx;
+export const m = _mX;
 
+
+// type EventHandler = T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
 type DOMNodeConfig<T extends keyof HTMLElementTagNameMap> = {
     attributes?: AnyObject;
-    on?: { [key: string]: () => void }
+    on?: { [key: string]: (e: Event, index?: number) => void }
     class?: string;
     style?: { [K in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[K] };
     text?: any | ReactiveSignal<any>;
-    nodes?: NodeEntity[];
+    children?: NodeEntity[];
     ref?: NodeRef,
-    index?: number
+    $index?: Signal<number>
 }
 
+export const _internalReactivity = useReactivity()
 
-export function mx<T extends keyof HTMLElementTagNameMap>(tagName: T, config: DOMNodeConfig<T> = {}): DOMNode {
-    const { nodes, text, attributes, class: _class, style, on, ref, index } = config;
+export function _mX<T extends keyof HTMLElementTagNameMap>(tagName: T, config: DOMNodeConfig<T> = {}): DOMNode {
+    const { children, text, attributes, class: _class, style, on, ref, $index } = config;
     const domNode = document.createElement(tagName);
     const component = getCurrentComponent();
-    console.log("component", component)
     if (!component || component === "root") throw new Error("No component :(")
-    if (text != null && nodes) throw new Error(`Element ${tagName} cannot contain both text and nodes`)
+    if (text != null && children) throw new Error(`Element ${tagName} cannot contain both text and childNodes`)
 
     if (text !== undefined) setUpTextNode(domNode, text)
-    else if (nodes) {
+    else if (children) {
         const nodePod = new _NodePod();
-        for (const nodeEntity of nodes) {
-            setUpNodeEntity(component, domNode, nodeEntity, nodePod)
+        for (const childNodeEntity of children) {
+            setUpNodeEntity(component, domNode, childNodeEntity, nodePod)
         }
     }
 
@@ -52,9 +58,17 @@ export function mx<T extends keyof HTMLElementTagNameMap>(tagName: T, config: DO
     if (on) {
         for (const event in on) {
             const handler = on[event]
-            domNode.addEventListener(event, handler)
-            onUnmounted(() => domNode.removeEventListener(event, handler))
+            const _handler = $index ? (e: Event) => handler(e, $index()) : handler
+            domNode.addEventListener(event, _handler)
+            onUnmounted(() => domNode.removeEventListener(event, _handler))
         }
+        // if ($index != null) {
+        //     domNode.setAttribute('data-index', $index().toString());
+        //     watchForUpdate($index, () => {
+        //         console.log("updating index", $index())
+        //         domNode.setAttribute('data-index', $index().toString()); //TODO: how do I update this when the list changes?
+        //     }) //TODO: Will this be removed when component unmounts?
+        // }
     }
 
     if (style) {
@@ -70,17 +84,18 @@ export function mx<T extends keyof HTMLElementTagNameMap>(tagName: T, config: DO
     }
 
     if (ref) {
-        assignNodeRef(ref, domNode, index)
-        castOnCreatedHook(ref, domNode, index)
+        assignNodeRef(ref, domNode, $index)
+        castOnCreatedHook(ref, domNode, $index)
     }
+
 
     return domNode;
 }
 
-function assignNodeRef(ref: _NodeRef, domNode: HTMLElement, index: number | undefined) {
-    if (index != null) {
+function assignNodeRef(ref: _NodeRef, domNode: HTMLElement, $index: Signal<number> | undefined) {
+    if ($index != null) {
         let nodes = ref.nodes ? ref.nodes! : []
-        nodes[index] = domNode;
+        nodes[$index()] = domNode;
     }
     else {
         ref.node = domNode // domNode will never change for static entities
@@ -149,22 +164,30 @@ export function setUpNodeEntity(
     nodePod: _NodePod,
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[],
+    $index?: Signal<number>
 ) {
     if (typeof nodeEntity === "string" || hasSignal(nodeEntity)) {
         setUpTextNode(parent, nodeEntity, nodePod, fragment)
     }
-    else if (nodeEntity instanceof Node) { // from Web API
+    else if (nodeEntity instanceof HTMLElement) { // from Web API
         setUpNode(parent, nodeEntity, nodePod, fragment)
+        if ($index != null) {
+            nodeEntity.setAttribute('data-index', $index().toString()); // This is for when an index is passed to a component (in contrast with passing directly to an _mX element)
+            watchForUpdate($index, () => {
+                console.log("running effect", $index())
+                nodeEntity.setAttribute('data-index', $index().toString()); // This is for when an index is passed to a component (in contrast with passing directly to an _mX element)
+            }) //TODO: effect clean up??
+        }
     }
     else if (nodeEntity instanceof InternalComponent) {
-        setUpComponent(component, parent, nodeEntity, nodePod, fragment)
+        setUpComponent(component, parent, nodeEntity, nodePod, fragment, $index)
         if (componentsToUnmount) componentsToUnmount.push(nodeEntity);
     }
     else if (nodeEntity instanceof ListRenderKit) { // this may or may not be dynamic, depending on data
-        setUpNodeList(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
+        setUpNodeList(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount, $index);
     }
     else if (nodeEntity instanceof InitialConditionalRenderKit) {
-        setUpConditionalEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount)
+        setUpConditionalEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount, $index)
     }
     else {
         throw new Error("Invalid input")
@@ -181,12 +204,19 @@ function setUpNode(parent: HTMLElement, node: DOMNode, nodePod: _NodePod, fragme
 
 
 
-export function setUpComponent(parentComponent: InternalComponent, parent: HTMLElement, component: InternalComponent, nodePod: _NodePod, fragment?: DocumentFragment) { //TODO: what if a component's root elements is conditional or a dynamic list??
+export function setUpComponent(
+    parentComponent: InternalComponent,
+    parent: HTMLElement,
+    component: InternalComponent,
+    nodePod: _NodePod,
+    fragment?: DocumentFragment,
+    $index?: Signal<number>
+) { //TODO: what if a component's root elements is conditional or a dynamic list??
     const nodeEntities = component.initialNodeEntities;
     if (!(parent instanceof HTMLElement)) throw new Error("Parent cannot be a text node")
     component.emit(LifecycleHook.PREMOUNT);
     for (const nodeEntity of nodeEntities) {
-        setUpNodeEntity(parentComponent, parent, nodeEntity, nodePod, fragment)
+        setUpNodeEntity(parentComponent, parent, nodeEntity, nodePod, fragment, undefined, $index)
     }
     component.emit(LifecycleHook.MOUNTED);
 }
@@ -197,33 +227,45 @@ function setUpNodeList(
     renderKit: ListRenderKit,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
-    componentsToUnmount?: InternalComponent[]
+    componentsToUnmount?: InternalComponent[],
+    $index?: Signal<number>
 ) {
-    const { data, initialNodeEntities, renderItem, idKey } = renderKit;
+    const { data, initialNodeEntities, renderItem, indices } = renderKit;
     const isDynamic = isReactive(data) || hasSignal(data);
     const dynamicPod = isDynamic ? nodePod.appendDynamicPod() : undefined;
 
     for (const nodeEntities of initialNodeEntities) {
         nodePod = isDynamic ? dynamicPod!.appendNodePod() : nodePod;
         for (const nodeEntity of nodeEntities) {
-            setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
+            setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount, $index);
         }
     }
 
     // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
 
     if (isDynamic) {
+        const dynamicIndices = new DynamicIndices(indices)
+
         // set up watcher for updates
         watchForUpdate(data, (newValue: AnyObject[], oldValue: AnyObject[]) => {
-            const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
+            const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue)
             if (noChange) return;
-            if (dynamicPod!.length !== newValue.length) throw new Error("dynamicPod and data length are mismatched. This should never happen.")
+            if (dynamicPod!.length !== oldValue.length) throw new Error("dynamicPod and data length are mismatched. This should never happen.")
             component.emit(LifecycleHook.PREUPDATE)
             removeListItemNodes(dynamicPod!, indicesToRemove!);
-            insertAndMoveListItemNodes(component, insertAndMoveKit!, dynamicPod!, parent, renderItem)
+            insertAndMoveListItemNodes(component, insertAndMoveKit!, dynamicPod!, parent, renderItem, dynamicIndices)
             component.emit(LifecycleHook.UPDATED)
-
         })
+    }
+}
+
+export class DynamicIndices  {
+    current: Signal<number>[];
+    constructor(indices: Signal<number>[]){
+        this.current = indices
+    }
+    update(newIndices: Signal<number>[]) {
+        this.current = newIndices
     }
 }
 
@@ -235,6 +277,7 @@ function setUpConditionalEntity(
     nodePod: _NodePod,
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[],
+    $index?: Signal<number>
 ) {
     const { conditionalKits, initialNodeEntities, $initialConditions, initialIndex } = renderKit;
 
@@ -256,7 +299,7 @@ function setUpConditionalEntity(
 
     for (const nodeEntity of initialNodeEntities) {
         // append to dom and node pod
-        setUpNodeEntity(component, parent, nodeEntity, _conditionalKits[initialIndex].nodePod, fragment, componentsToUnmount)
+        setUpNodeEntity(component, parent, nodeEntity, _conditionalKits[initialIndex].nodePod, fragment, componentsToUnmount, $index)
     }
     // if (dynamicPod && _dynamicPod) dynamicPod.includeComponents(_dynamicPod.activeComponents) // aggregate components to unmount
 
@@ -331,7 +374,7 @@ function insertNewConditionalNodes(component: InternalComponent, parent: HTMLEle
 
     const fragment = new DocumentFragment()
     for (const nodeEntity of nodeEntities) {
-        setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
+        setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount) //TODO: pass in index in case it's in a list?
     }
     component.emit(LifecycleHook.PREUPDATE);
     let prevSibling = dynamicPod.prevNode;

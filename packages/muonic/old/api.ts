@@ -15,9 +15,9 @@ toSignal // shallow, for object literals only
 
 set
 
-useReactivityKit() // returns reactivize and mutation function
+useReactivityKit() // returns o$ and mutation function
 
-reactivize // returns a readonly object
+o$ // returns a readonly object
 
 mu function  // two functions .. (1) because $ is automatically readonly, you need this function to mutate, it helps protect state (2) it also implements snapshots for rolling back state
 

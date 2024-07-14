@@ -1,8 +1,9 @@
-import { InternalComponent } from "./component";
+import { Signal } from "../muonic/useSignalize";
+import { InternalComponent, setCurrentComponent } from "./component";
 import { InsertAndMoveKit } from "./diff";
 import { LifecycleHook } from "./lifecycle";
-import { emitHookBatch, removeDOMNodes, setUpNodeEntity } from "./mx";
-import { RenderItem } from "./mxsFor";
+import { _internalReactivity, DynamicIndices, emitHookBatch, normalizeRenderOutput, removeDOMNodes, setUpNodeEntity } from "./mX";
+import { RenderItem } from "./mXsFor";
 import { _DynamicNodePod, _NodePod } from "./NodePod";
 
 
@@ -20,24 +21,39 @@ export function removeListItemNodes(dynamicList: _DynamicNodePod, indicesToRemov
 type Index = number
 type Count = number
 
-export function insertAndMoveListItemNodes(component: InternalComponent, insertAndMoveKit: InsertAndMoveKit, dynamicList: _DynamicNodePod, parent: HTMLElement, renderItem: RenderItem) {
-    const { getItem, isNewItem, hasMoved, newArrayAsIDs, oldArrayAsIDs, isRemoved } = insertAndMoveKit;
-    if (dynamicList.length !== newArrayAsIDs.length) throw "dynamicPod and data length are mismatched"
+export function insertAndMoveListItemNodes(
+    component: InternalComponent,
+    insertAndMoveKit: InsertAndMoveKit,
+    dynamicList: _DynamicNodePod,
+    parent: HTMLElement,
+    renderItem: RenderItem,
+    dynamicIndices: DynamicIndices
+) {
+    const { getOriginalItem, isNewItem, hasMoved, newUArray, oldUArray, isRemoved } = insertAndMoveKit;
+    if (dynamicList.length !== oldUArray.length) throw "dynamicPod and data length are mismatched"
     const indicesAndNodePods: [number, _NodePod[]][] = []
     const indicesAndFragments: [number, DocumentFragment][] = []
     let fragment = new DocumentFragment();
 
-    let i = 0
-    while (i < newArrayAsIDs.length) {
-        const id = newArrayAsIDs[i];
-        const _isNewItem = isNewItem(id);
-        const _itemHasMoved = hasMoved(id);
+    const newIndices: Signal<number>[] = [];
+
+    for (let i = 0; i < newUArray.length; i++) {
+        const uItem = newUArray[i];
+        const _isNewItem = isNewItem(uItem);
+        const _itemHasMoved = hasMoved(uItem);
+        const prevIndex = oldUArray.indexOf(uItem)
         const nodePod = _isNewItem ? new _NodePod()
-            : _itemHasMoved ? dynamicList[oldArrayAsIDs.indexOf(id)] // dynamicList[index]
+            : _itemHasMoved ? dynamicList[prevIndex] // dynamicList[index]
                 : null;
 
-        if (!nodePod) continue; // item is not new and has not moved
+        if (!_isNewItem) {
+            // get index from old indices 
+            const $index = dynamicIndices.current[prevIndex];
+            newIndices.push($index);
+            _internalReactivity.set($index, () => i) //TODO: I don't know if it's okay to set a Signal inside an effect...
+        }; // item is not new and has not moved
 
+        if (!nodePod) continue;
         const prevEntry = indicesAndNodePods.at(-1);
         if (prevEntry && prevEntry[0] + 1 === i) {
             prevEntry[1].push(nodePod); // include nodePod for re/insertion
@@ -48,24 +64,29 @@ export function insertAndMoveListItemNodes(component: InternalComponent, insertA
             indicesAndFragments.push([i, fragment]) // queue fragment for mounting
         }
 
-        if (isNewItem(id)) {
+        if (isNewItem(uItem)) {
+            const $index = _internalReactivity.$(i)
+            newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
-            const nodeEntities = renderItem(getItem(id), i);
+            setCurrentComponent(component)
+            const nodeEntities = normalizeRenderOutput(renderItem(getOriginalItem(uItem), $index));
+            setCurrentComponent(null)
             for (const nodeEntity of nodeEntities) {
                 setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
             }
         }
-        else if (hasMoved(id)) {
+        else if (hasMoved(uItem)) {
             // move node to fragment (DOM will auto-remove node from DOM)
             appendNodes(fragment, nodePod);
         }
     }
+    dynamicIndices.update(newIndices)
 
     // queue nodePod removal
     const indicesAndRemoveCount: [Index, Count][] = [];
     let j = 0;
-    while (j < oldArrayAsIDs.length) {
-        const id = oldArrayAsIDs[j];
+    while (j < oldUArray.length) {
+        const id = oldUArray[j];
         if (isRemoved(id) || hasMoved(id)) {
             const prevEntry = indicesAndRemoveCount.at(-1);
             if (prevEntry && prevEntry[0] + 1 === j) {
@@ -90,7 +111,9 @@ export function insertAndMoveListItemNodes(component: InternalComponent, insertA
         dynamicList.insertNodePods(index, nodePods)
     }
 
-    // (3) insert nodes into DOM
+    // (3) update data-attribute index //TODO:
+
+    // (4) insert nodes into DOM
     for (const [index, fragment] of indicesAndFragments) {
         const prevNode = dynamicList[index].prevNode
         if (prevNode) prevNode.after(fragment);

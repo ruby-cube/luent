@@ -15,7 +15,7 @@ export type ComponentSetup = () => Component
 
 
 
-function mx(Comp: any, props: any){
+function _mX(Comp: any, props: any){
     const comp = Comp();
     const _render = comp.render()
     watch( , _render);

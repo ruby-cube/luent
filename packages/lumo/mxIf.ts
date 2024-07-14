@@ -1,8 +1,6 @@
 import { getWithoutTracking } from "../muonic/DependencyTracker";
-import { hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal"
-import { $ } from "../muonic/useReactivity";
-import { setCurrentComponent } from "./component";
-import { NodeEntity, normalizeRenderOutput } from "./mx";
+import { hasSignal, makeDerivedSignal, ReactiveSignal } from "../muonic/useDerivedSignal"
+import { NodeEntity, normalizeRenderOutput } from "./mX";
 
 export class InitialConditionalRenderKit {
     constructor(
@@ -42,7 +40,7 @@ type ElseIfThen = [ReactiveSignal<boolean>, () => NodeEntity[] | NodeEntity]
 
 // API:
 //
-// mxIf($active, {
+// _mXIf($active, {
 //     then: renderListBlock({
 //         text: 'I sad'
 //     }),
@@ -61,7 +59,7 @@ type MxIfConfig = {
 }
 
 export function genConditionsSignal(conditions: ReactiveSignal<boolean>[]) {
-    return $(() => {
+    return makeDerivedSignal(() => {
         const values: boolean[] = [];
         for (const $condition of conditions) {
             values.push($condition());
@@ -71,7 +69,7 @@ export function genConditionsSignal(conditions: ReactiveSignal<boolean>[]) {
 }
 
 
-export function mxIf($condition: ReactiveSignal<boolean>, config: MxIfConfig): InitialConditionalRenderKit {
+export function _mXIf($condition: ReactiveSignal<boolean>, config: MxIfConfig): InitialConditionalRenderKit {
     const { then: renderConditional, else: renderElse, elseIf: elseIfKit } = config;
     const conditionalKits: ConditionalRenderKit[] = [{ $condition, renderConditional }];
     const conditions = [$condition]; // stop pushing when value is true;

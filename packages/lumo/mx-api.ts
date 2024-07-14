@@ -3,9 +3,9 @@ import { AnyObject } from "@rue/types";
 import { Observable, o$ } from "../muonic/ObservableCapsule";
 import { $ } from "../signals";
 import { DOMNode } from "./component";
-import { ListRenderKit } from "./mx";
+import { ListRenderKit } from "./mX";
 import { ReactiveSignal } from "../muonic/useDerivedSignal";
-import { mxO } from "./mxO";
+import { mXO } from "./mXO";
 import { onPremount } from "./lifecycle";
 import { initializeEffect } from "../muonic/watch";
 import { reMouseDown } from "../actionry/__test__/actionry.type-test";
@@ -185,8 +185,8 @@ function List() {
 
     return {
         render: () => [
-            mx("h1", { nodes: [mxB('Shopping'), 'at the mall'] }),
-            mx("div", {
+            _mX("h1", { nodes: [mXB('Shopping'), 'at the mall'] }),
+            _mX("div", {
                 class: `list list-item--some ${box}`, // static values only for initial render
                 style: {
                     backgroundColor: 'green'  // static values only for initial render
@@ -195,8 +195,9 @@ function List() {
                     click: $(() => $active() ? reClick : null),
                     mousedown: reMouseDown
                 },
-                nodes: [
-                    mxIf($active, {
+                children: [
+                    _mXIsContent({ $active, $loading }), // to simplify mXIf into a 'dynamic functional component' to keep render tree readable
+                    _mXIf($active, {
                         then: renderListBlock({
                             text: 'I sad'
                         }),
@@ -207,30 +208,30 @@ function List() {
                             text: 'help me'
                         })
                     }),
-                    mxListBlockIf($active, {
+                    mXListBlockIf($active, {
                         stuff: 0
                     }),
 
-                    mxsFor((item, index) => [
+                    _mXsFor((item, index) => [
                         m('p', {
-                            class: 'list',
-                            nodes: [
-                                mx('div', {
-                                    nodes: mxO(ListBlock),
-                                    ref: headingsRef, index
+                            class: 'paragrpah',
+                            children: [
+                                _mX('div', {
+                                    children: [
+                                        _mXO(ListBlock)
+                                    ]
                                 }),
-                                mxO(Frog),
-                                mxIf($active, {
+                                _mXO(Frog),
+                                _mXIf($active, {
                                     this: () => mO(Cat)
                                 })
-                            ],
-                            ref: paragraphsRef, index,
+                            ]
                         }),
-                        mxO(Dog)
-                    ], $items, 'UID'), // idKey defaults to 'id'
+                        mO(Dog)
+                    ], $items),
 
-                    mx("button", { text: 'add' }),
-                    mxO(ListItem, {
+                    mX("button", { text: 'add' }),
+                    mXO(ListItem, {
                         props: {
                             $dog,
                             $position,
@@ -253,16 +254,30 @@ function List() {
     }
 }
 
-function mxBold(text: string) {
-    return mx('b', { nodes: [...text] })
+function mXIsContent({ $active, $loading }) {
+    return mXIf($active, {
+        then: renderListBlock({
+            text: 'I sad'
+        }),
+        elseIf: [$loading, renderLoadingBlock({
+            text: 'I loading'
+        })],
+        else: renderPlaceholder({
+            text: 'help me'
+        })
+    })
+}
+
+function mXBold(text: string) {
+    return mX('b', { nodes: [...text] })
 }
 
 
 
 
-function mxsForItem(p: `p`, $items: ReactiveSignal): ListRenderKit<{ text: string }> {
+function mXsForItem(p: `p`, $items: ReactiveSignal): ListRenderKit<{ text: string }> {
     return forEach((entry) =>
-        mx(p, {
+        mX(p, {
             text: $(() => entry[VALUE]),
             ref: "item"
         }), $items)
@@ -308,7 +323,7 @@ function ListBlock(props: {
 
     return {
         render: () =>
-            mx(ListItem, {
+            mX(ListItem, {
                 props: {
                     $dog: $dog,
                     $position: $(() => frame$.center),
@@ -316,18 +331,18 @@ function ListBlock(props: {
                     reItemClicked,
                 },
                 heading: slot((props) => [
-                    mx('p', {
+                    mX('p', {
                         nodes: [
-                            mx('li', { text: "hello" }),
-                            mx('li', { text: "dolly" })
+                            mX('li', { text: "hello" }),
+                            mX('li', { text: "dolly" })
                         ]
                     })
                 ]),
                 counter: slot((props) =>
-                    mx('p', {
+                    mX('p', {
                         nodes: [
-                            mx('li', { text: "hello" }),
-                            mx('li', { text: "dolly" })
+                            mX('li', { text: "hello" }),
+                            mX('li', { text: "dolly" })
                         ]
                     }))
             }),
@@ -447,11 +462,11 @@ function ListItem(
 
         // prioritize being able to see the structure, semantic roles, and functionality at a glance. Define dynamic styles in helper functions and static styles in return object
         render: () =>
-            mx("p", {
+            mX("p", {
                 class: 'list-item', // style classes are for state and reusable styles
                 style: pStyle($isActive, $isHighlighted),
                 nodes: [
-                    mxSlot(slot, {
+                    mXSlot(slot, {
                         props: {
 
                         }
@@ -524,21 +539,21 @@ type ElementConfig<T extends ComponentSetup<AnyObject> | string> = {
 
 
 
-function mx<T extends string | ComponentSetup<any>>(tagName: T, configA?: ElementConfig<T>, configB?: ElementConfig<T>) {
+function mX<T extends string | ComponentSetup<any>>(tagName: T, configA?: ElementConfig<T>, configB?: ElementConfig<T>) {
     return {} as unknown as Nodes<T>
 }
 
 type Nodes<T> = { [key: number]: Node, context: T extends (props: any, context: infer C) => any ? C : never }
 
-// function mxIf($isActive: () => boolean,)
+// function mXIf($isActive: () => boolean,)
 
 // return () =>
-//     mx('div', {
+//     mX('div', {
 //         class: "counter",
 //         style: { color() { counter.visible ? 'red' : 'blue' } },
 //         on: { click: toggleColor },
 //         nodes: [
-//             mx('button', { text: "increment" }),
-//             mx('button', { text: "decrement" }),
+//             mX('button', { text: "increment" }),
+//             mX('button', { text: "decrement" }),
 //         ]
 //     })

@@ -1,13 +1,12 @@
 import { AnyObject } from "@rue/types";
-import { longestCommonSubsequence } from "./lcs";
-import { UniqueItem } from "./mxsFor";
+import { longestCommonSubstring } from "./lcs";
+import { UniqueItem } from "./mXsFor";
 import { isEqual } from "@rue/utils";
 
 
 
-export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | UniqueItem[], idKey?: string | symbol) { //TODO: Originally wrote this diffing arrays of objects and unique ids, but I need it to work for any[]s, wrap repeat values in an object or function and put in stand-in arrays
-    const _newArr = idKey ? toIdArray(newArr, idKey) : newArr;
-    const _oldArr = idKey ? toIdArray(oldArr, idKey) : oldArr;
+export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | UniqueItem[]) { //TODO: Originally wrote this diffing arrays of objects and unique ids, but I need it to work for any[]s, wrap repeat values in an object or function and put in stand-in arrays
+    const { uniqueItemArrays: [_newArr, _oldArr], getOriginalItem } = makeItemsUnique(newArr, oldArr);
 
     const newSet = new Set(_newArr);
     const oldSet = new Set(_oldArr);
@@ -39,49 +38,121 @@ export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | U
         j++;
     }
 
-    if (isEqual(newArrCommonItems, oldArrCommonItems)) return { noChange: true };
-
+    if (isEqual(newSet, oldSet)) return { noChange: true };
     // find longest common sequence
-    const { seq: lcs } = longestCommonSubsequence(newArrCommonItems, oldArrCommonItems);
+    const lcs = longestCommonSubstring(newArrCommonItems, oldArrCommonItems);
+
 
     return {
         insertAndMoveKit: {
-            isNewItem: (id: any) => newItems.has(id),
-            hasMoved: (id: any) => lcs.indexOf(id) === -1,
-            isRemoved: (id: any) => !newSet.has(id),
-            newArrayAsIDs: _newArr,
-            oldArrayAsIDs: _oldArr,
-            getItem: (_newArr instanceof IDArray) ? _newArr.getItem : ((id: any) => id),
+            isNewItem: (item: any) => newItems.has(item),
+            hasMoved: (item: any) => lcs.indexOf(item) === -1,
+            isRemoved: (item: any) => !newSet.has(item),
+            newUArray: _newArr,
+            oldUArray: _oldArr,
+            getOriginalItem
         },
         indicesToRemove,
     }
 }
 
 export type InsertAndMoveKit = {
-    isNewItem: (id: any) => boolean;
-    hasMoved: (id: any) => boolean;
-    isRemoved: (id: any) => boolean;
-    newArrayAsIDs: any[];
-    oldArrayAsIDs: any[];
-    getItem: (id: any) => any;
+    isNewItem: (uItem: any) => boolean;
+    hasMoved: (uItem: any) => boolean;
+    isRemoved: (uItem: any) => boolean;
+    newUArray: any[];
+    oldUArray: any[];
+    getOriginalItem: (uItem: any) => any;
 }
 
-function toIdArray(target: AnyObject[], idKey: string | symbol) {
-    const idArray = new IDArray();
-    for (const item of target) {
-        idArray.push(item[idKey])
-    }
+// function toIdArray(target: AnyObject[], idKey: string | symbol) {
+//     const idArray = new UniqueArray();
+//     for (const item of target) {
+//         idArray.push(item[idKey])
+//     }
+//     const itemMap: Map<any, any> = new Map();
+//     idArray.getItem = (id: any) => {
+//         const item = itemMap.get(id);
+//         if (!item) throw new Error(`There is no item associated with ${id}`)
+//         return item;
+//     }
+//     return idArray;
+// }
+
+// class UniqueArray extends Array {
+//     getItem: (uItem: any) => any = (uItem: any) => uItem;
+// }
+
+
+function makeItemsUnique(arr1: any[], arr2: any[]) {
+    const uniqueArr1 = [];
+    const uniqueArr2 = [];
     const itemMap: Map<any, any> = new Map();
-    idArray.getItem = (id: any) => {
-        const item = itemMap.get(id);
-        if (!item) throw new Error(`There is no item associated with ${id}`)
-        return item;
+    const arr1Set = new Set();
+    const arr2Set = new Set();
+    const uMap: Map<any, AnyObject[]> = new Map();
+
+    for (let i = 0; i < arr1.length; i++) {
+        const item = arr1[i];
+        if (arr1Set.has(item)) {
+            // make item unique
+            const uItem = [item]
+
+            // store for arr2 compariston
+            let uItems = uMap.get(item)
+            if (!uItems) {
+                uItems = []
+                uMap.set(item, uItems);
+            }
+            uItems.push(uItem);
+
+            // add to unique array
+            uniqueArr1.push(uItem)
+
+            // map for retrieval
+            itemMap.set(uItem, item)
+        }
+        else {
+            arr1Set.add(item)
+            uniqueArr1.push(item)
+        }
     }
-    return idArray;
+
+    for (let i = 0; i < arr2.length; i++) {
+        const item = arr2[i];
+        if (uMap.has(item)) {
+            const uItems = uMap.get(item);
+            if (uItems && uItems.length > 0) {
+                const uItem = uItems.pop();
+                if (uItems.length === 0) {
+                    uMap.delete(item);
+                }
+                uniqueArr2.push(uItem);
+
+                // map for retrieval
+                itemMap.set(uItem, item)
+            }
+            else {
+                throw new Error("Something's wrong with the control flow.")
+            }
+        }
+        else if (arr2Set.has(item)) {
+            const uItem = [item] // make item unique
+            uniqueArr2.push(uItem);
+            // map for retrieval
+            itemMap.set(uItem, item)
+        }
+        else {
+            arr2Set.add(item)
+            uniqueArr2.push(item)
+        }
+    }
+    function getOriginalItem(uItem: any) {
+        return itemMap.get(uItem) || uItem
+    }
+
+    return {
+        uniqueItemArrays: [uniqueArr1, uniqueArr2],
+        getOriginalItem
+    }
 }
-
-class IDArray extends Array {
-    getItem: (id: any) => any = (id: any) => id
-}
-
-

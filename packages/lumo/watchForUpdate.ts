@@ -27,7 +27,6 @@ export function watchForUpdate<T>(target: ReactiveSignal<T> | ReactiveObject<T e
             component.hasUpdates = false; // resets for the next cycle
         }, { once: true })
     }
-
     return _initializeEffect(_handler, target, options) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 

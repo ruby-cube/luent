@@ -1,4 +1,4 @@
-import { NodeEntity } from "./mx";
+import { NodeEntity } from "./mX";
 
 const allSlots: WeakSet<Slot> = new WeakSet()
 
@@ -10,7 +10,7 @@ export function slot(slot: Slot) {
     return slot;
 }
 
-export function mxSlot() {
+export function _mXSlot() {
 
 }
 

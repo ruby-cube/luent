@@ -64,7 +64,7 @@ export class UpdateCycle {
             props.set(key, [newValue, oldValue]);
             return;
         }
-        taskQueue = getTaskQueueForProp(target, key, 'update');
+        taskQueue = getTaskQueueForProp(target, key, 'update'); //DEBUG: This is where things go awry for lists
         if (taskQueue) {
             props.set(key, [newValue, oldValue]);
             return;

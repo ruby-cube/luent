@@ -4,7 +4,7 @@ import { SetKey, Signal } from "../muonic/useSignalize";
 import { LifecycleHook, onUnmounted } from "./lifecycle";
 import { collectEffects } from "../flask/flask";
 import { _NodeRef, castOnCreatedHook, NodeRef } from "./NodeRef";
-import { normalizeRenderOutput } from "./mx";
+import { normalizeRenderOutput } from "./mX";
 
 type ComponentConfig<T extends ComponentSetup<AnyObject> | string> = {
     props?: T extends (props: infer P, emit: any) => any ? { [K in keyof P]: P[K] } : never;
@@ -14,7 +14,7 @@ type ComponentConfig<T extends ComponentSetup<AnyObject> | string> = {
     style?: any;
     text?: string | (() => void)
     ref?: NodeRef
-    index?: number
+    $index?: Signal<number>
 }
 
 // export class TextRenderer {
@@ -24,7 +24,7 @@ type ComponentConfig<T extends ComponentSetup<AnyObject> | string> = {
 //     }){}
 // }
 
-export function mxO<T extends ComponentSetup>(Component: T, config: ComponentConfig<T> = {}) {
+export function _mXO<T extends ComponentSetup>(Component: T, config: ComponentConfig<T> = {}) {
     const parent = getCurrentComponent();
     if (!parent) throw new Error("No parent component")
 
@@ -38,7 +38,7 @@ export function mxO<T extends ComponentSetup>(Component: T, config: ComponentCon
 
 function setUpComponent<T extends ComponentSetup>(Component: T, config: ComponentConfig<T> = {}, component: InternalComponent) {
     collectEffects((flask, outerFlask) => {
-        const { props, on, class: _class, ref, style, text, index, ...other } = config;
+        const { props, on, class: _class, ref, style, text, $index, ...other } = config;
         const _component = Component(props)
         if (!_component) throw new Error("Component setup must return component blueprint")
         const { render, provides, exposes } = _component;
@@ -51,23 +51,22 @@ function setUpComponent<T extends ComponentSetup>(Component: T, config: Componen
             (<_NodeRef>ref).component = component.component
         }
 
-
         //TODO: Slots (make sure parent is correct)
         //TODO: HTML attributes, including data
         if (ref) {
-            assignNodeRef(ref, component.component, index)
-            castOnCreatedHook(ref, component, index)
+            assignNodeRef(ref, component.component, $index)
+            castOnCreatedHook(ref, component, $index)
         }
 
-        onUnmounted(flask.dispose)
+        onUnmounted(() => flask.dispose())
         outerFlask.onDisposed(() => unmountComponent(component))
     })
 }
 
-function assignNodeRef(ref: _NodeRef, component: AnyObject, index: number | undefined) {
-    if (index != null) {
+function assignNodeRef(ref: _NodeRef, component: AnyObject, $index: Signal<number> | undefined) {
+    if ($index != null) {
         let nodes = ref.components ? ref.components! : []
-        nodes[index] = component;
+        nodes[$index()] = component;
     }
     else {
         ref.component = component

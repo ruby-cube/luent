@@ -169,25 +169,25 @@ class EffectRecord {
 
 const signalTaskQueues: WeakMap<Signal, Map<Phase, Set<Effect>>> = new WeakMap();
 const reactivePropsTaskQueues: WeakMap<ReactiveObject, Map<string, Map<Phase, Set<Effect>>>> = new WeakMap();
-const reactiveObjTaskQueues: WeakMap<ReactiveObject, Map<'pre' | 'post', Set<Effect>>> = new WeakMap();
+const reactiveObjTaskQueues: WeakMap<ReactiveObject, Map<'pre' | 'post' | 'update', Set<Effect>>> = new WeakMap();
 
 export function useTaskQueues(deps: (Signal | ReactiveProp)[], phase: Phase = 'pre', deep: boolean = false) {
     const taskQueues: Set<Effect>[] = [];
     for (const dep of deps) {
         if (isSignal(dep)) {
-            const flushMap = signalTaskQueues.get(dep) || new Map();
-            const taskQueue = flushMap.get(phase) || new Set()
-            flushMap.set(phase, taskQueue);
-            signalTaskQueues.set(dep, flushMap);
+            const phaseMap = signalTaskQueues.get(dep) || new Map();
+            const taskQueue = phaseMap.get(phase) || new Set()
+            phaseMap.set(phase, taskQueue);
+            signalTaskQueues.set(dep, phaseMap);
             taskQueues.push(taskQueue);
         }
         else {
             const [reactiveObj, key] = dep;
             const propMap = reactivePropsTaskQueues.get(reactiveObj) || new Map();
-            const flushMap = propMap.get(key) || new Map();
-            const taskQueue = flushMap.get(phase) || new Set()
-            flushMap.set(phase, taskQueue);
-            propMap.set(key, flushMap)
+            const phaseMap = propMap.get(key) || new Map();
+            const taskQueue = phaseMap.get(phase) || new Set()
+            phaseMap.set(phase, taskQueue);
+            propMap.set(key, phaseMap)
             reactivePropsTaskQueues.set(reactiveObj, propMap);
             taskQueues.push(taskQueue);
         }
@@ -198,15 +198,15 @@ export function useTaskQueues(deps: (Signal | ReactiveProp)[], phase: Phase = 'p
 function useTaskQueuesForReactive(reactive: ReactiveObject, phase: Phase = 'pre', deep: boolean = false) {
     const taskQueues: Set<Effect>[] = [];
     if (phase === 'sync') throw "Reactive effect cannot run synchronously on property change when watching reactive objects. Did you mean to watch a reactive property?"
-    const flushMap = reactiveObjTaskQueues.get(reactive) || new Map();
-    const taskQueue = flushMap.get(phase) || new Set()
-    flushMap.set(phase, taskQueue);
-    reactiveObjTaskQueues.set(reactive, flushMap);
+    const phaseMap = reactiveObjTaskQueues.get(reactive) || new Map();
+    const taskQueue = phaseMap.get(phase) || new Set()
+    phaseMap.set(phase, taskQueue);
+    reactiveObjTaskQueues.set(reactive, phaseMap);
     taskQueues.push(taskQueue);
     return taskQueues;
 }
 
-function getTaskQueueForReactive(reactive: ReactiveObject, phase: 'pre' | 'post') {
+function getTaskQueueForReactive(reactive: ReactiveObject, phase: 'pre' | 'post' | 'update') {
     return reactiveObjTaskQueues.get(reactive)?.get(phase);
 }
 
@@ -223,7 +223,8 @@ export function getTaskQueueForProp(target: ReactiveObject, key: string, phase: 
 
 
 export function trigger(target: Signal | ReactiveObject, newValue: any, oldValue: any, key?: string) {
-    if (newValue === oldValue) return;
+    if (isEqual(newValue, oldValue)) return;
+    // if (newValue === oldValue) return;
     let currentUpdateCycle = getCurrentUpdateCycle()
     if (!currentUpdateCycle) {
         currentUpdateCycle = new UpdateCycle();
@@ -299,7 +300,7 @@ export function runNonSyncTasks(phase: "pre" | "post" | "update") {
     const triggeredReactives = updateCycle.triggeredReactives;
     if (triggeredReactives) {
         for (const [reactive, keys] of triggeredReactives) {
-            if (phase !== 'update') {
+            // if (phase !== 'update') {
                 const taskQueue = getTaskQueueForReactive(reactive, phase);
                 if (taskQueue) {
                     for (const task of taskQueue) {
@@ -309,7 +310,7 @@ export function runNonSyncTasks(phase: "pre" | "post" | "update") {
                         task(reactive, snapshotMap.get(reactive))
                     }
                 }
-            }
+            // }
 
             for (const [key, [newValue, oldValue]] of keys) {
                 const taskQueue = getTaskQueueForProp(reactive, key, phase);
@@ -319,7 +320,7 @@ export function runNonSyncTasks(phase: "pre" | "post" | "update") {
             }
         }
     }
-    
+
     const triggeredSignals = updateCycle.triggeredSignals;
     if (triggeredSignals) {
         for (const [signal, [newValue, oldValue]] of triggeredSignals) {

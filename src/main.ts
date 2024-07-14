@@ -1,7 +1,6 @@
 import { createApp } from '../packages/lumo/createApp';
 import { App } from './App';
 import './style.css'
-import { manipulateDOM } from './test';
 
 const app = createApp(App)
 

@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 
 //NOTE: Temporarily pause development of this until usefulness is confirmed
-// Currently, for snapshots to work, we need to take a snapshot of every piece of state created upon initialization with $ or reactivize
+// Currently, for snapshots to work, we need to take a snapshot of every piece of state created upon initialization with $ or o$
 // this seems expensive ... even if it's incorporated into the reactive proxy and signal function, not sure if it's worth it
 // This is meant as a way to have snapshots the way immutable practices do, without all the copying of objects
 
@@ -14,14 +14,17 @@ export class SnapshotManager {
     private snapshotMap: WeakMap<AnyObject, SnapshotStack> = new WeakMap();
     takeSnapshot(target: AnyObject, index: number) {
         const snapshotMap = this.snapshotMap;
-        const snapshot = new Proxy({ ...target }, {
+        const snapshot = new Proxy(target instanceof Array ? [...target] : { ...target }, {
             get(target, key) {
+                //@ts-expect-error
                 const value = target[key];
                 if (value instanceof Object) {
+                    //@ts-expect-error
                     const snapshots = snapshotMap.get(target[key])
                     if (!snapshots) return value;
                     return findSnapshot(snapshots, index) || value;
                 }
+                //@ts-expect-error
                 return target[key];
             },
             set() { return false } // immutable
