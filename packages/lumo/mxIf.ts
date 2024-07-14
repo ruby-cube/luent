@@ -4,14 +4,10 @@ import { NodeEntity, normalizeRenderOutput } from "./mX";
 
 export class InitialConditionalRenderKit {
     constructor(
-        // public renderConditional: () => NodeEntity[],
-        // public $condition: ReactiveSignal<boolean>,
         public conditionalKits: ConditionalRenderKit[],
         public initialNodeEntities: NodeEntity[],
         public $initialConditions: ReactiveSignal<boolean[]>,
         public initialIndex: number,
-        // public elseIf?: ElseIfRenderKit[],
-        // public renderElse?: () => NodeEntity[]
     ) { }
 }
 
@@ -19,17 +15,6 @@ export type ConditionalRenderKit = {
     $condition?: ReactiveSignal<boolean>,
     renderConditional: () => NodeEntity[] | NodeEntity,
 }
-// export class InitialConditionalRenderKit {
-//     constructor(
-//         public renderConditional: () => NodeEntity[],
-//         public $condition: ReactiveSignal<boolean>,
-//         public initialNodeEntities: NodeEntity[],
-//         public $initialConditions: ReactiveSignal<boolean[]>,
-//         public initialIndex: number,
-//         public elseIf?: ElseIfRenderKit[],
-//         public renderElse?: () => NodeEntity[]
-//     ) { }
-// }
 
 export type ElseIfRenderKit = {
     renderConditional: () => NodeEntity[] | NodeEntity;

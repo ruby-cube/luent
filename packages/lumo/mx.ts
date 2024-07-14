@@ -3,12 +3,11 @@ import { DOMNode, getCurrentComponent, InternalComponent, setCurrentComponent } 
 import { watchForUpdate } from "./watchForUpdate";
 import { hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
 import { getWithoutTracking } from "../muonic/DependencyTracker";
-import { ListRenderKit } from "./mXsFor";
+import { DynamicIndices, insertAndMoveListItemNodes, ListRenderKit, removeListItemNodes } from "./mXsFor";
 import { LifecycleHook, onUnmounted } from "./lifecycle";
 import { genConditionsSignal, InitialConditionalRenderKit } from "./mXIf";
 import { appendItems, isEqual } from "@rue/utils";
 import { diff } from "./diff";
-import { insertAndMoveListItemNodes, removeListItemNodes } from "./dom";
 import { isReactive } from "../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod } from "./NodePod";
 import { _NodeRef, castOnCreatedHook, NodeRef } from "./NodeRef";
@@ -243,15 +242,6 @@ function setUpNodeList(
     }
 }
 
-export class DynamicIndices  {
-    current: Signal<number>[];
-    constructor(indices: Signal<number>[]){
-        this.current = indices
-    }
-    update(newIndices: Signal<number>[]) {
-        this.current = newIndices
-    }
-}
 
 
 function setUpConditionalEntity(
@@ -324,16 +314,7 @@ export function emitHookBatch(hookName: LifecycleHook, components: InternalCompo
     }
 }
 
-function removePrevConditionalNodes(component: InternalComponent, dynamicPod: _DynamicNodePod, activeIndex: number) {
-    const nodePod = dynamicPod[activeIndex];
-    const components = nodePod.componentsToUnmount;
-    emitHookBatch(LifecycleHook.PREUNMOUNT, components!)
-    component.emit(LifecycleHook.PREUPDATE)
-    removeDOMNodes(nodePod)
-    emitHookBatch(LifecycleHook.UNMOUNTED, components!)
-    component.emit(LifecycleHook.UPDATED)
-    dynamicPod.replaceNodePod(activeIndex, new _NodePod()); // clears previous
-}
+
 
 export function removeDOMNodes(nodePod: _NodePod) {
     for (const nodeEntity of nodePod) {
@@ -346,6 +327,17 @@ export function removeDOMNodes(nodePod: _NodePod) {
             nodeEntity.remove()
         }
     }
+}
+
+function removePrevConditionalNodes(component: InternalComponent, dynamicPod: _DynamicNodePod, activeIndex: number) {
+    const nodePod = dynamicPod[activeIndex];
+    const components = nodePod.componentsToUnmount;
+    emitHookBatch(LifecycleHook.PREUNMOUNT, components!)
+    component.emit(LifecycleHook.PREUPDATE)
+    removeDOMNodes(nodePod)
+    emitHookBatch(LifecycleHook.UNMOUNTED, components!)
+    component.emit(LifecycleHook.UPDATED)
+    dynamicPod.replaceNodePod(activeIndex, new _NodePod()); // clears previous
 }
 
 function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[] | NodeEntity, activeIndex: number) {
