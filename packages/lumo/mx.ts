@@ -62,13 +62,6 @@ export function _mX<T extends keyof HTMLElementTagNameMap>(tagName: T, config: D
             domNode.addEventListener(event, _handler)
             onUnmounted(() => domNode.removeEventListener(event, _handler))
         }
-        // if ($index != null) {
-        //     domNode.setAttribute('data-index', $index().toString());
-        //     watchForUpdate($index, () => {
-        //         console.log("updating index", $index())
-        //         domNode.setAttribute('data-index', $index().toString()); //TODO: how do I update this when the list changes?
-        //     }) //TODO: Will this be removed when component unmounts?
-        // }
     }
 
     if (style) {
@@ -171,23 +164,16 @@ export function setUpNodeEntity(
     }
     else if (nodeEntity instanceof HTMLElement) { // from Web API
         setUpNode(parent, nodeEntity, nodePod, fragment)
-        if ($index != null) {
-            nodeEntity.setAttribute('data-index', $index().toString()); // This is for when an index is passed to a component (in contrast with passing directly to an _mX element)
-            watchForUpdate($index, () => {
-                console.log("running effect", $index())
-                nodeEntity.setAttribute('data-index', $index().toString()); // This is for when an index is passed to a component (in contrast with passing directly to an _mX element)
-            }) //TODO: effect clean up??
-        }
     }
     else if (nodeEntity instanceof InternalComponent) {
-        setUpComponent(component, parent, nodeEntity, nodePod, fragment, $index)
+        setUpComponent(component, parent, nodeEntity, nodePod, fragment)
         if (componentsToUnmount) componentsToUnmount.push(nodeEntity);
     }
     else if (nodeEntity instanceof ListRenderKit) { // this may or may not be dynamic, depending on data
-        setUpNodeList(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount, $index);
+        setUpNodeList(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
     }
     else if (nodeEntity instanceof InitialConditionalRenderKit) {
-        setUpConditionalEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount, $index)
+        setUpConditionalEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount)
     }
     else {
         throw new Error("Invalid input")
@@ -210,13 +196,12 @@ export function setUpComponent(
     component: InternalComponent,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
-    $index?: Signal<number>
 ) { //TODO: what if a component's root elements is conditional or a dynamic list??
     const nodeEntities = component.initialNodeEntities;
     if (!(parent instanceof HTMLElement)) throw new Error("Parent cannot be a text node")
     component.emit(LifecycleHook.PREMOUNT);
     for (const nodeEntity of nodeEntities) {
-        setUpNodeEntity(parentComponent, parent, nodeEntity, nodePod, fragment, undefined, $index)
+        setUpNodeEntity(parentComponent, parent, nodeEntity, nodePod, fragment)
     }
     component.emit(LifecycleHook.MOUNTED);
 }
@@ -228,7 +213,6 @@ function setUpNodeList(
     nodePod: _NodePod,
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[],
-    $index?: Signal<number>
 ) {
     const { data, initialNodeEntities, renderItem, indices } = renderKit;
     const isDynamic = isReactive(data) || hasSignal(data);
@@ -237,7 +221,7 @@ function setUpNodeList(
     for (const nodeEntities of initialNodeEntities) {
         nodePod = isDynamic ? dynamicPod!.appendNodePod() : nodePod;
         for (const nodeEntity of nodeEntities) {
-            setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount, $index);
+            setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
         }
     }
 
@@ -277,7 +261,6 @@ function setUpConditionalEntity(
     nodePod: _NodePod,
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[],
-    $index?: Signal<number>
 ) {
     const { conditionalKits, initialNodeEntities, $initialConditions, initialIndex } = renderKit;
 
@@ -299,7 +282,7 @@ function setUpConditionalEntity(
 
     for (const nodeEntity of initialNodeEntities) {
         // append to dom and node pod
-        setUpNodeEntity(component, parent, nodeEntity, _conditionalKits[initialIndex].nodePod, fragment, componentsToUnmount, $index)
+        setUpNodeEntity(component, parent, nodeEntity, _conditionalKits[initialIndex].nodePod, fragment, componentsToUnmount)
     }
     // if (dynamicPod && _dynamicPod) dynamicPod.includeComponents(_dynamicPod.activeComponents) // aggregate components to unmount
 

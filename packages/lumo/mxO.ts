@@ -6,10 +6,11 @@ import { collectEffects } from "../flask/flask";
 import { _NodeRef, castOnCreatedHook, NodeRef } from "./NodeRef";
 import { normalizeRenderOutput } from "./mX";
 
+// on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 type ComponentConfig<T extends ComponentSetup<AnyObject> | string> = {
     props?: T extends (props: infer P, emit: any) => any ? { [K in keyof P]: P[K] } : never;
 
-    on?: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
+    on?: { [key: string]: (e: Event, index?: number) => void }
     class?: string | { [key: string]: () => boolean };
     style?: any;
     text?: string | (() => void)
@@ -47,9 +48,6 @@ function setUpComponent<T extends ComponentSetup>(Component: T, config: Componen
         component.initialNodeEntities = nodeEntities;
         component.provides = provides;
         component.component = { ...exposes };
-        if (ref) {
-            (<_NodeRef>ref).component = component.component
-        }
 
         //TODO: Slots (make sure parent is correct)
         //TODO: HTML attributes, including data
@@ -57,6 +55,21 @@ function setUpComponent<T extends ComponentSetup>(Component: T, config: Componen
             assignNodeRef(ref, component.component, $index)
             castOnCreatedHook(ref, component, $index)
         }
+
+        if (props && '$index' in props){
+            const $index = props.$index;
+            if (on) {
+                for (const event in on) {
+                    const handler = on[event]
+                    const _handler = $index ? (e: Event) => handler(e, $index()) : handler
+                    domNode.addEventListener(event, _handler) //TODO: attach fall-through events on root or designated root domNode if more than one root
+                    onUnmounted(() => domNode.removeEventListener(event, _handler))
+
+                    //TODO: reattach listeners if domNode changes!
+                }
+            }
+        }
+
 
         onUnmounted(() => flask.dispose())
         outerFlask.onDisposed(() => unmountComponent(component))
