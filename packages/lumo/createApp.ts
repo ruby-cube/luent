@@ -1,8 +1,6 @@
-import { AnyObject } from "@rue/types";
 import { Component, ComponentSetup, InternalComponent, setCurrentComponent } from "./component";
-import { LifecycleHook } from "./lifecycle";
-import { NodeEntity, setUpComponent } from "./mX";
-import { _mXO } from "./mXO";
+import { NodeEntity, setUpComponent } from "./mE";
+import { makeComponent } from "./makeComponent";
 import { _NodePod } from "./NodePod";
 
 export function createApp(App: ComponentSetup) {
@@ -11,7 +9,7 @@ export function createApp(App: ComponentSetup) {
         mount(id: string) {
             const root = document.querySelector(id);
             if (!(root instanceof HTMLElement)) throw new Error('No root element to mount app to. Check selector string')
-            const component = _mXO(this.App)
+            const component = makeComponent(this.App)
             const nodePod = new _NodePod();
             setUpComponent(new InternalComponent('root'), root, component, nodePod)
         }

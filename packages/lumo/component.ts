@@ -1,22 +1,14 @@
 import { AnyObject } from "@rue/types";
-import { Slot } from "./mXSlot";
-import { Signal } from "../muonic/useSignalize";
 import { LifecycleHook } from "./lifecycle";
-import { ListRenderKit } from "./mXsFor";
-import { InitialConditionalRenderKit } from "./mXIf";
-import { ReactiveSignal } from "../muonic/useDerivedSignal";
-import { NodeEntity } from "./mX";
-import { U } from "vitest/dist/types-94cfe4b4";
+import { NodeEntity } from "./mE";
+import { RenderSlot, SlotRenderer } from "./makeComponent";
 
 // export type NodeRef = Signal<Component | DOMNode | (DOMNode | Component)[]>
 
 export type DOMNode = CharacterData | HTMLElement
 export type Props = {
     [key: string]: any;
-    slot?: Slot;
-    slots?: {
-        [key: string]: Slot
-    },
+    slot?: RenderSlot | SlotRenderer
 }
 
 

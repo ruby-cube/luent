@@ -1,7 +1,7 @@
-import { m, _mX } from "../packages/lumo/mX";
-import { _mXIf } from "../packages/lumo/mXIf";
-import { _mXO } from "../packages/lumo/mXO";
-import { _mXsFor } from "../packages/lumo/mXsFor";
+import { m, mE } from "../packages/lumo/mE";
+import { ifCase } from "../packages/lumo/ifCase";
+import { _mXO } from "../packages/lumo/makeComponent";
+import { forEachIn } from "../packages/lumo/forEachIn";
 import { useReactivity } from "../packages/muonic/useReactivity";
 import { Signal } from "../packages/muonic/useSignalize";
 import { watch } from "../packages/muonic/watch";
@@ -61,48 +61,43 @@ export function App() {
 
     return {
         render: () => [
-            // _mX('div', {
+            // mE('div', {
             //     text: $doubleCount
             // }),
-            // _mX('div', {
+            // mE('div', {
             //     text: $count
             // }),
-            _mX('div', {
-                children: [
-                    _mX('ul', {
-                        children: [
-                            _mXsFor((item, $index) => [
-                                m('li', {
-                                    text: item,
-                                    style: { cursor: 'pointer' },
-                                    on: { click: clickItem },
-                                    $index
-                                }),
-                                m('li', { text: item + ' copy' })
-                            ], list$)
-                        ]
-                    })
+            mE('div', [
+                mE('ul', [
+                    forEachIn(list$, (item, $index) => [
+                        m('li', {
+                            text: item,
+                            style: { cursor: 'pointer' },
+                            on: { click: clickItem },
+                            $index
+                        }),
+                        m('li', { text: item + ' copy' })
+                    ])
                 ]
-            }),
-            _mX('div', {
-                children: [
-                    _mX('ul', {
-                        children: [
-                            _mXIf($active, {
-                                then: () => [
-                                    m('div', { text: 'show me' }),
-                                    m('button', { text: 'on' })
-                                ],
-                                else: () => [
-                                    m('div', { text: 'or else' }),
-                                    _mXO(List)
-                                ]
-                            }),
+                )
+            ]),
+            mE('div', [
+                mE('ul', [
+                    ifCase($active, {
+                        then: () => [
+                            m('div', { text: 'show me' }),
+                            m('button', { text: 'on' })
+                        ],
+                        else: () => [
+                            m('div', { text: 'or else' }),
+                            _mXO(List)
                         ]
-                    })
+                    }),
                 ]
-            }),
-            _mX('button', {
+                )
+            ]
+            ),
+            mE('button', {
                 text: 'click me',
                 on: {
                     click
@@ -116,22 +111,22 @@ export function App() {
 function List() {
     return {
         render: () => [
-            _mX('h2', {
+            mE('h2', {
                 text: "I'm a component",
                 style: {
                     backgroundColor: 'gold',
                     border: '1px solid black'
                 }
             }),
-            _mX('div', {
+            mE('div', {
                 style: {
                     backgroundColor: 'gold'
                 },
                 children: [
-                    _mX('blockquote', {
+                    mE('blockquote', {
                         text: 'e pluribus unum'
                     }),
-                    _mX('button', {
+                    mE('button', {
                         text: 'off',
                         style: {
                             backgroundColor: 'ghostwhite'

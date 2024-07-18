@@ -5,32 +5,10 @@ import './style.css'
 const app = createApp(App)
 
 app.mount('#app')
-// document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-//   <div>
-//     <a href="https://vitejs.dev" target="_blank">
-//       <img src="${viteLogo}" class="logo" alt="Vite logo" />
-//     </a>
-//     <a href="https://www.typescriptlang.org/" target="_blank">
-//       <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-//     </a>
-//     <h1>Vite + TypeScript</h1>
-//     <div class="card">
-//       <button id="counter" type="button"></button>
-//     </div>
-//     <p class="read-the-docs">
-//       Click on the Vite and TypeScript logos to learn more
-//     </p>
-//   </div>
-// `
 
-// setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
+// const sideBarSlot = document.querySelector('#real');
+const sideBarSlot = document.querySelector('side-bar');
+console.log(sideBarSlot)
+const sideBar = document.querySelector('#side-bar') as HTMLTemplateElement
 
-// const app = document.getElementById("app");
-
-// app?.appendChild(document.createTextNode("hello worldly dinos"))
-
-// manipulateDOM(app!)
-// setupApp(app!);
-
-// const app = createApp(App);
-// app.mount('#app');
+sideBarSlot?.replaceWith(sideBar.content.cloneNode(true))

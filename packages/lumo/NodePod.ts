@@ -14,7 +14,7 @@ import { Interface } from "readline";
 // For Unmounting: activeComponents should collect the highest component of a branch, then let the unmount cascade unmount any descendant components.
 // For Updates: call emit(UPDATED) for the PARENT component not the components within via getCurrentComponent();
 //
-// A new root node pod is created when _mX is called and passed through the set up of its (child) node entities.
+// A new root node pod is created when mE is called and passed through the set up of its (child) node entities.
 // The root node pod should not be passed to grand children.
 //
 // When setting up node entities for the first time, it doesn't matter whether you append to the DOM or append to node pods first

@@ -26,7 +26,7 @@ type _EffectOptions = {
     phase?: Phase;
 } & ListenerOptions
 
-type Phase = 'pre' | 'update' | 'post' | 'sync'
+type Phase = 'pre' | 'render' | 'post' | 'sync'
 
 
 type ChangeHandler = (newValue: any, oldValue: any) => void
@@ -51,11 +51,11 @@ export function initializeEffect(effect: () => void, options?: EffectOptions) { 
 }
 
 // export function initializeUpdate(effect: () => void) {
-//     return _initializeEffect(effect, undefined, { phase: 'update' });
+//     return _initializeEffect(effect, undefined, { phase: 'render' });
 // }
 
-// export function watchForUpdate<T>(target: Signal<T> | (() => T) | ReactiveObject<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, component: InternalComponent) {
-//     return _initializeEffect(handler, target, { phase: 'update' });
+// export function watchForRender<T>(target: Signal<T> | (() => T) | ReactiveObject<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, component: InternalComponent) {
+//     return _initializeEffect(handler, target, { phase: 'render' });
 // }
 
 const derivedSignalMap: WeakMap<Function, DerivedSignal> = new WeakMap();
@@ -169,7 +169,7 @@ class EffectRecord {
 
 const signalTaskQueues: WeakMap<Signal, Map<Phase, Set<Effect>>> = new WeakMap();
 const reactivePropsTaskQueues: WeakMap<ReactiveObject, Map<string, Map<Phase, Set<Effect>>>> = new WeakMap();
-const reactiveObjTaskQueues: WeakMap<ReactiveObject, Map<'pre' | 'post' | 'update', Set<Effect>>> = new WeakMap();
+const reactiveObjTaskQueues: WeakMap<ReactiveObject, Map<'pre' | 'post' | 'render', Set<Effect>>> = new WeakMap();
 
 export function useTaskQueues(deps: (Signal | ReactiveProp)[], phase: Phase = 'pre', deep: boolean = false) {
     const taskQueues: Set<Effect>[] = [];
@@ -206,15 +206,15 @@ function useTaskQueuesForReactive(reactive: ReactiveObject, phase: Phase = 'pre'
     return taskQueues;
 }
 
-function getTaskQueueForReactive(reactive: ReactiveObject, phase: 'pre' | 'post' | 'update') {
+function getTaskQueueForReactive(reactive: ReactiveObject, phase: 'pre' | 'post' | 'render') {
     return reactiveObjTaskQueues.get(reactive)?.get(phase);
 }
 
-function getTaskQueueForSignal(signal: Signal, phase: 'pre' | 'post' | 'update') {
+function getTaskQueueForSignal(signal: Signal, phase: 'pre' | 'post' | 'render') {
     return signalTaskQueues.get(signal)?.get(phase);
 }
 
-export function getTaskQueueForProp(target: ReactiveObject, key: string, phase: 'pre' | 'post' | 'update') {
+export function getTaskQueueForProp(target: ReactiveObject, key: string, phase: 'pre' | 'post' | 'render') {
     return reactivePropsTaskQueues.get(target)?.get(key)?.get(phase)
 }
 
@@ -237,7 +237,7 @@ export function trigger(target: Signal | ReactiveObject, newValue: any, oldValue
     runSyncTasks(target, newValue, oldValue, key);
     tracker?.restore();
 
-    // collect triggered refs for this cycle for 'pre', 'update', and 'post' phases
+    // collect triggered refs for this cycle for 'pre', 'render', and 'post' phases
     if (isSignal(target)) currentUpdateCycle.flagSignal(target, newValue, oldValue)
     else currentUpdateCycle.flagReactive(target, key!, newValue, oldValue)
 
@@ -293,14 +293,14 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
 
 
 
-export function runNonSyncTasks(phase: "pre" | "post" | "update") {
+export function runNonSyncTasks(phase: "pre" | "post" | "render") {
     const updateCycle = getCurrentUpdateCycle();
     if (!updateCycle) throw "No current update cycle :("
     const completedTasks = updateCycle.completedTasks;
     const triggeredReactives = updateCycle.triggeredReactives;
     if (triggeredReactives) {
         for (const [reactive, keys] of triggeredReactives) {
-            // if (phase !== 'update') {
+            // if (phase !== 'render') {
                 const taskQueue = getTaskQueueForReactive(reactive, phase);
                 if (taskQueue) {
                     for (const task of taskQueue) {

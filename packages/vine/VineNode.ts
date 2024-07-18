@@ -11,10 +11,11 @@ import { getKeyPathValue } from "@rue/utils";
 
 export const DONE = Symbol("exit tree")
 
-// Singleton, maps childNode to parentNode
 type ChildNode = VineNode;
 type ParentNode = VineNode;
 type PodKeypath = string[];
+
+// Singleton, maps childNode to parentNode
 const vineConnections: WeakMap<ChildNode, [ParentNode, PodKeypath]> = new WeakMap();
 
 function connectPeaToParent(pea: VineNode, parent: VineNode, podKeypath: string[]) {

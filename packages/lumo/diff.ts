@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { longestCommonSubstring } from "./lcs";
-import { UniqueItem } from "./mXsFor";
+import { UniqueItem } from "./forEachIn";
 import { isEqual } from "@rue/utils";
 
 

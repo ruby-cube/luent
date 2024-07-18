@@ -1,19 +1,32 @@
-import { $listen, ListenerOptions, ScheduleStop } from "@rue/flask"
-import { Component, InternalComponent } from "./component"
+import { $listen, ActiveListener, ListenerOptions, ScheduleStop } from "@rue/flask"
+import { Component, ComponentSetup, InternalComponent } from "./component"
 import { _NodePod } from "./NodePod"
 import { removeItem } from "@rue/utils"
 import { Signal } from "../muonic/useSignalize"
+import { HTMLTag } from "./mE"
+import { ListData } from "./forEachIn"
 
-type Task = ((item: HTMLElement) => void) | ((item: HTMLElement, index?: number) => void)
+
+
+
+
+type Task = ((item: HTMLElement | InternalComponent) => void) | ((item: HTMLElement | InternalComponent, $index?: Signal<number>) => void)
 const hookMap: WeakMap<_NodeRef, Task[]> = new WeakMap()
 
-export class NodeRef { //TODO: Add generics
+export class NodeRef<T extends HTMLElement | InternalComponent = HTMLElement | InternalComponent> { //TODO: Add generics
     readonly node?: HTMLElement
     readonly nodes?: HTMLElement[]
     readonly component?: Component
     readonly components?: Component[]
-    onCreated(callback: (item: HTMLElement, index?: number) => void, options?: { until: ScheduleStop; }) { //TODO: should index be a Signal?
-        const tasks = hookMap.get(this) ? hookMap.get(this)! : [];
+    private list?: ListData
+    private initialized: boolean = false
+
+    constructor(public nodeType: HTMLTag | ComponentSetup, list?: ListData) {
+        this.list = list;
+    }
+
+    onCreated(callback: (item: T, $index?: Signal<number>) => void, options?: { until: ScheduleStop; }) { //TODO: should index be a Signal?
+        const tasks = hookMap.get(<_NodeRef><unknown>this) ? hookMap.get(<_NodeRef><unknown>this)! : [];
 
         return $listen(callback, options, {
             enroll(cb) {
@@ -26,6 +39,7 @@ export class NodeRef { //TODO: Add generics
     }
 }
 
+
 export function castOnCreatedHook(ref: _NodeRef, entity: HTMLElement | InternalComponent, $index: Signal<number> | undefined) {
     const tasks = hookMap.get(ref)
     if (!tasks) throw new Error("OnCreated tasks cannot be found")
@@ -34,9 +48,14 @@ export function castOnCreatedHook(ref: _NodeRef, entity: HTMLElement | InternalC
     }
 }
 
-export type _NodeRef = {
+export type _NodeRef<T extends HTMLElement | InternalComponent = HTMLElement | InternalComponent> = {
     node?: HTMLElement
     nodes?: HTMLElement[]
     component?: Component
     components?: Component[]
+    list?: ListData;
+    initialized: boolean;
+    onCreated: (callback: (item: T, $index?: Signal<number>) => void, options?: {
+        until: ScheduleStop;
+    }) => ActiveListener
 }

@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
-import { _internalReactivity, emitHookBatch, NodeEntity, normalizeRenderOutput, removeDOMNodes, setUpNodeEntity } from "./mX";
+import { _internalReactivity, emitHookBatch, NodeEntity, normalizeRenderOutput, removeDOMNodes, setUpNodeEntity } from "./mE";
 import { isReactive, ReactiveObject } from "../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod } from "./NodePod";
 import { Signal } from "../muonic/useSignalize";
@@ -11,7 +11,7 @@ import { InsertAndMoveKit } from "./diff";
 
 export type RenderItem<T = any> = (item: T, $index: Signal<number>) => NodeEntity[] | NodeEntity
 // type ListData = AnyObject | any[] | Set<any> | Map<any, any> | ReactiveObject<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
-type ListData = any[] | ReactiveObject<AnyObject[] | UniqueItem[]> | ReactiveSignal<AnyObject[] | UniqueItem>
+export type ListData = any[] | ReactiveObject<AnyObject[] | UniqueItem[]> | ReactiveSignal<AnyObject[] | UniqueItem>
 export type UniqueItem = any;
 
 export class ListRenderKit<T = any> {
@@ -23,10 +23,10 @@ export class ListRenderKit<T = any> {
     ) { }
 }
 
-export function _mXsFor(render: RenderItem, data: any[]): ListRenderKit // static list
-export function _mXsFor(render: RenderItem, data: ReactiveObject<UniqueItem[]> | ReactiveSignal<UniqueItem[]>): ListRenderKit // dynamic list
-export function _mXsFor(render: RenderItem, data: ReactiveObject<AnyObject[]> | ReactiveSignal<AnyObject>): ListRenderKit // dynamic list
-export function _mXsFor(render: RenderItem, data: ListData): ListRenderKit {
+export function forEachIn(data: any[], render: RenderItem): ListRenderKit // static list
+export function forEachIn(data: ReactiveObject<UniqueItem[]> | ReactiveSignal<UniqueItem[]>, render: RenderItem): ListRenderKit // dynamic list
+export function forEachIn(data: ReactiveObject<AnyObject[]> | ReactiveSignal<AnyObject>, render: RenderItem): ListRenderKit // dynamic list
+export function forEachIn(data: ListData, render: RenderItem): ListRenderKit {
     const domNodes = [];
     const list = hasSignal(data) ? data() : data;
 

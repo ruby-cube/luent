@@ -3,12 +3,15 @@ import { AnyObject } from "@rue/types";
 import { Observable, o$ } from "../muonic/ObservableCapsule";
 import { $ } from "../signals";
 import { DOMNode } from "./component";
-import { ListRenderKit } from "./mX";
+import { ListRenderKit } from "./mE";
 import { ReactiveSignal } from "../muonic/useDerivedSignal";
-import { mXO } from "./mXO";
+import { mEO } from "./mEO";
 import { onPremount } from "./lifecycle";
 import { initializeEffect } from "../muonic/watch";
 import { reMouseDown } from "../actionry/__test__/actionry.type-test";
+import { NodeEntity } from "./mE";
+import { setUpComponent } from "./mE";
+import { forEachIn } from "./forEachIn";
 
 type Signal<T> = () => T
 
@@ -182,69 +185,84 @@ function List() {
         click: () => $active() ? reClick : null
     })
 
+    const xMainBlock = setUpNode('div', {
+        class: [
+
+        ],
+        on: {
+            click,
+            mousedown
+        }
+    })
+
+    const xItems = setUpNodesIn(list$, 'div', (item, i) => ({
+
+    }))
+
+    // dynamic rendering
+    // - list with reactive data // ref stays the same, contents will be replaced with new renders
+    // - mountIf // ref stays the same, contents change
 
     return {
         render: () => [
-            _mX("h1", { nodes: [mXB('Shopping'), 'at the mall'] }),
-            _mX("div", {
-                class: `list list-item--some ${box}`, // static values only for initial render
-                style: {
-                    backgroundColor: 'green'  // static values only for initial render
-                },
-                on: {
-                    click: $(() => $active() ? reClick : null),
-                    mousedown: reMouseDown
-                },
-                children: [
-                    _mXIsContent({ $active, $loading }), // to simplify mXIf into a 'dynamic functional component' to keep render tree readable
-                    _mXIf($active, {
-                        then: renderListBlock({
-                            text: 'I sad'
-                        }),
-                        elseIf: [$loading, renderLoadingBlock({
-                            text: 'I loading'
-                        })],
-                        else: renderPlaceholder({
-                            text: 'help me'
-                        })
-                    }),
-                    mXListBlockIf($active, {
-                        stuff: 0
-                    }),
+            mE("h1", [mB('Shopping'), 'at the mall'], h1Ref),
 
-                    _mXsFor((item, index) => [
-                        m('p', {
-                            class: 'paragrpah',
-                            children: [
-                                _mX('div', {
-                                    children: [
-                                        _mXO(ListBlock)
-                                    ]
-                                }),
-                                _mXO(Frog),
-                                _mXIf($active, {
-                                    this: () => mO(Cat)
-                                })
+            mountIf($active, () =>
+                mE("h1", [mB('Shopping'), 'at the mall'], h1Ref)
+            ),
+
+            ifCase($active, {
+                mount: () => mE("h1", [mB('Shopping'), 'at the mall'], h1Ref)
+            }),
+
+            mE('div', [
+                mEContent({ $active, $loading }), // to simplify mEIf into a 'dynamic functional component' to keep render tree readable
+
+                ifCase($active, {
+                    mount: () => mE(xList, 'I sad', { preserve: true }), // to preserve one but not the other
+                    else: () => mE(xPlaceholder, 'help mE')
+                }, { transition: 'out-in', preserve: true }), // to preserve all
+
+                ifCase($active, {
+                    show: mE(xList, 'I sad'),
+                    else: mE(xPlaceholder, 'help mE')
+                }, { transition: 'out-in' }),
+
+                ifCase($active, {
+                    show: mE(xList, 'I sad')
+                }, { transition: 'out-in' }),
+
+                forEachIn($items, (item, index) => [
+                    mE('p', [
+                        mE('div', [
+                            mE(ListBlock)
+                        ]),
+                        mE(Frog, {
+                            description: [
+
                             ]
                         }),
-                        mO(Dog)
-                    ], $items),
+                        ifCase($active, {
+                            then: () => mE(Cat)
+                        })
+                    ]),
+                    mE(Dog)
+                ], { transition: 'stuf' }),
 
-                    mX("button", { text: 'add' }),
-                    mXO(ListItem, {
-                        props: {
-                            $dog,
-                            $position,
-                            slot,
-                            startCount,
-                            $color,
-                            $item,
-                            reItemClicked
-                        },
-                        ref: listItemRef
-                    })
-                ]
-            })
+                mE("button", 'add'),
+                mE(ListItem, {
+                    props: {
+                        $dog,
+                        $position,
+                        slot,
+                        startCount,
+                        $color,
+                        $item,
+                        reItemClicked
+                    },
+                    ref: listItemRef
+                })
+            ], mainBlockRef)
         ]
         ,
 
@@ -254,8 +272,10 @@ function List() {
     }
 }
 
-function mXIsContent({ $active, $loading }) {
-    return mXIf($active, {
+
+
+function mEIsContent({ $active, $loading }) {
+    return mEIf($active, {
         then: renderListBlock({
             text: 'I sad'
         }),
@@ -263,21 +283,106 @@ function mXIsContent({ $active, $loading }) {
             text: 'I loading'
         })],
         else: renderPlaceholder({
-            text: 'help me'
+            text: 'help mE'
         })
     })
 }
 
-function mXBold(text: string) {
-    return mX('b', { nodes: [...text] })
+function mEBold(text: string) {
+    return mE('b', { nodes: [...text] })
+}
+
+function Card() {
+
+
+
+    return {
+        render: () =>
+            mE('div', [
+                mE(Slot)
+            ])
+    }
+}
+
+function App() {
+
+
+    const oCard =
+        setUpNode(Card, {
+            class: 'card',
+            slot: {
+                description: ({ $width }) => ({
+                    styles: [
+                        (o) => {
+                            o.width = $width()
+                        }
+                    ]
+                })
+            }
+        })
+
+    const descriptionDiv =
+        setUpNode('div');
+
+    return {
+        render: () =>
+            mE('div', [
+                mE(Card, {
+                    title: () => 'Hello World',
+                    description: ({ $width }) =>
+                        mE('div', [
+                            $(o => `Soft feathers ${$width()} and what not`)
+                        ], 'div')
+                }, Card),
+                forEachIn(list$, (item, i) =>
+                    mE('div', [item]))
+            ], 'div')
+    }
 }
 
 
+function Card(props: {
+    slot: {
+        title: () => string,
+        description: (props: {
+            $width: Signal<number>
+        }) => NodeEntity[],
+    }
+}) {
 
 
-function mXsForItem(p: `p`, $items: ReactiveSignal): ListRenderKit<{ text: string }> {
+
+    const $width = $(9)
+
+    return {
+        render: () => [
+            mE('h1', [
+                slot.title()
+            ]),
+            mE('div', [
+                slot.description($width)
+            ])]
+    }
+}
+
+// function test(){
+//     return (
+//     <div>
+//         <CardBlock ref={ oCardBlock } slot-props={{ $width }}>
+//             {
+//                 forEachIn(item$, (item, i) => 
+//                     <div ref={ descriptionDiv } slot="description" >{ `soft feathers ${$width()} and what not` }</div>)
+//             }
+//         </CardBlock>
+//     </div>
+// )
+// }
+
+
+
+function mEsForItem(p: `p`, $items: ReactiveSignal): ListRenderKit<{ text: string }> {
     return forEach((entry) =>
-        mX(p, {
+        mE(p, {
             text: $(() => entry[VALUE]),
             ref: "item"
         }), $items)
@@ -323,7 +428,7 @@ function ListBlock(props: {
 
     return {
         render: () =>
-            mX(ListItem, {
+            mE(ListItem, {
                 props: {
                     $dog: $dog,
                     $position: $(() => frame$.center),
@@ -331,18 +436,18 @@ function ListBlock(props: {
                     reItemClicked,
                 },
                 heading: slot((props) => [
-                    mX('p', {
+                    mE('p', {
                         nodes: [
-                            mX('li', { text: "hello" }),
-                            mX('li', { text: "dolly" })
+                            mE('li', { text: "hello" }),
+                            mE('li', { text: "dolly" })
                         ]
                     })
                 ]),
                 counter: slot((props) =>
-                    mX('p', {
+                    mE('p', {
                         nodes: [
-                            mX('li', { text: "hello" }),
-                            mX('li', { text: "dolly" })
+                            mE('li', { text: "hello" }),
+                            mE('li', { text: "dolly" })
                         ]
                     }))
             }),
@@ -462,15 +567,15 @@ function ListItem(
 
         // prioritize being able to see the structure, semantic roles, and functionality at a glance. Define dynamic styles in helper functions and static styles in return object
         render: () =>
-            mX("p", {
+            mE("p", {
                 class: 'list-item', // style classes are for state and reusable styles
                 style: pStyle($isActive, $isHighlighted),
                 nodes: [
-                    mXSlot(slot, {
+                    mESlot(slot, {
                         props: {
 
                         }
-                    })
+                    }, slot, 'main')
                 ]
             }),
 
@@ -520,10 +625,6 @@ function css(style: TemplateStringsArray) {
 
 
 
-function cx() {
-
-}
-
 type ComponentSetup<T extends AnyObject> = (props: T, context: AnyObject) => { render: () => Nodes<any> }
 type ElementConfig<T extends ComponentSetup<AnyObject> | string> = {
     props?: T extends (props: infer P, emit: any) => any ? { [K in keyof P]: P[K] } : never;
@@ -537,23 +638,25 @@ type ElementConfig<T extends ComponentSetup<AnyObject> | string> = {
     ref?: string
 }
 
+type ComponentOptions = { preserve: true }
+type ElementOptions = { main: true }
 
 
-function mX<T extends string | ComponentSetup<any>>(tagName: T, configA?: ElementConfig<T>, configB?: ElementConfig<T>) {
+function mE<T extends string | ComponentSetup<any>>(tagName: T, configA?: ElementConfig<T>, configB?: ElementConfig<T>) {
     return {} as unknown as Nodes<T>
 }
 
 type Nodes<T> = { [key: number]: Node, context: T extends (props: any, context: infer C) => any ? C : never }
 
-// function mXIf($isActive: () => boolean,)
+// function mEIf($isActive: () => boolean,)
 
 // return () =>
-//     mX('div', {
+//     mE('div', {
 //         class: "counter",
 //         style: { color() { counter.visible ? 'red' : 'blue' } },
 //         on: { click: toggleColor },
 //         nodes: [
-//             mX('button', { text: "increment" }),
-//             mX('button', { text: "decrement" }),
+//             mE('button', { text: "increment" }),
+//             mE('button', { text: "decrement" }),
 //         ]
 //     })
