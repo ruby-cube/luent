@@ -1,4 +1,4 @@
-import { inject, InjectionKey, onPreunmount } from "vue";
+import { inject, InjectionKey, onBeforeUnmount } from "vue";
 
 
 export const acquire = inject; // renamed to better fit the analogy
@@ -12,7 +12,7 @@ export function discloseCommons<T>(targetID: T, key: InjectionKey<unknown>) {
     const disclosureMap = existingMap || new Map();
     if (!existingMap) targetMap.set(targetID, disclosureMap);
     disclosureMap.set(key, acquire(key));
-    onPreunmount(() => {
+    onBeforeUnmount(() => {
         targetMap.delete(targetID);
     })
 }

@@ -1,6 +1,6 @@
 <script setup>
 import Bullet from "./Bullet.vue"
-import {onBeforeMount, onBeforeUpdate, onMounted, onUpdated, onUnmounted, onPreunmount} from "vue"
+import {onBeforeMount, onBeforeUpdate, onMounted, onUpdated, onUnmounted, onBeforeUnmount} from "vue"
 const props = defineProps({item: String, index: Number})
 console.log(props.index, "COMP: running setup")
 
@@ -21,7 +21,7 @@ onUpdated(()=>{
   console.log(props.index, "COMP: updated")
 })
 
-onPreunmount(()=>{
+onBeforeUnmount(()=>{
   console.log(props.index, "COMP: before unmount")
 })
 

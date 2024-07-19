@@ -29,26 +29,32 @@ export class InternalComponent {
     component: Component | undefined;
     parent: InternalComponent | 'root';
     initialNodeEntities: NodeEntity[] = []; //TODO: add context type?? //QUESTION: should this be cleared or updated?
+    preserve: boolean = false;
     tasks: {
-        [LifecycleHook.PREMOUNT]: Set<() => void> | undefined;
-        [LifecycleHook.PREUNMOUNT]: Set<() => void> | undefined;
-        [LifecycleHook.PREUPDATE]: Set<() => void> | undefined;
+        [LifecycleHook.BEFORE_MOUNT]: Set<() => void> | undefined;
+        [LifecycleHook.BEFORE_UNMOUNT]: Set<() => void> | undefined;
+        [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
         [LifecycleHook.MOUNTED]: Set<() => void> | undefined;
         [LifecycleHook.UNMOUNTED]: Set<() => void> | undefined;
         [LifecycleHook.UPDATED]: Set<() => void> | undefined;
+        [LifecycleHook.ACTIVATED]: Set<() => void> | undefined;
+        [LifecycleHook.DEACTIVATED]: Set<() => void> | undefined;
     } = {
-            [LifecycleHook.PREMOUNT]: undefined,
+            [LifecycleHook.BEFORE_MOUNT]: undefined,
             [LifecycleHook.MOUNTED]: undefined,
-            [LifecycleHook.PREUNMOUNT]: undefined,
-            [LifecycleHook.PREUPDATE]: undefined,
+            [LifecycleHook.BEFORE_UNMOUNT]: undefined,
+            [LifecycleHook.BEFORE_UPDATE]: undefined,
             [LifecycleHook.UNMOUNTED]: undefined,
             [LifecycleHook.UPDATED]: undefined,
+            [LifecycleHook.ACTIVATED]: undefined,
+            [LifecycleHook.DEACTIVATED]: undefined,
         };
 
     hasUpdates: boolean = false;
 
-    constructor(parent: InternalComponent | 'root') {
+    constructor(parent: InternalComponent | 'root', preserve: boolean) {
         this.parent = parent;
+        this.preserve = preserve
     }
 
     private getTaskQueue(hookName: LifecycleHook) {

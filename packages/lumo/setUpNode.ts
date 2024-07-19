@@ -1,4 +1,4 @@
-import { ComponentSetup } from "./component";
+import { ComponentSetup, InternalComponent } from "./component";
 import { DOMNodeConfig, HTMLTag } from "./mE";
 import { ComponentConfig } from "./makeComponent";
 import { NodeRef } from "./NodeRef";
@@ -27,8 +27,8 @@ const nodeConfigMap: WeakMap<NodeRef, DOMNodeConfig | ComponentConfig | ListConf
 export function setUpNode<T extends HTMLTag | ComponentSetup>(
     nodeType: T,
     config: Config<T>
-): NodeRef {
-    return _setUpNode(nodeType, config)
+) {
+    return _setUpNode(nodeType, config) as T extends HTMLTag ? NodeRef<HTMLElement> : NodeRef<InternalComponent>
 }
 
 export function getNodeConfig<T extends NodeRef>(nodeRef: T) {
@@ -40,7 +40,7 @@ export function setUpNodesIn<T extends HTMLTag | ComponentSetup, L extends ListD
     nodeType: T,
     config: ListConfig<T, L>
 ) {
-    return _setUpNode(nodeType, config)
+    return _setUpNode(nodeType, config) as T extends HTMLTag ? NodeRef<HTMLElement> : NodeRef<InternalComponent>
 }
 
 function _setUpNode(

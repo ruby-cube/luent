@@ -1,6 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { DOMNode, InternalComponent } from "./component";
 import { Interface } from "readline";
+import { NodeRef } from "./NodeRef";
 
 // Node Pods represent groups of nodes created by `mXsFor` and `mXIf`.
 // 
@@ -42,13 +43,13 @@ export type NodePod = ReadonlyArray<DOMNode | DynamicNodePod>
 export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
     index?: number;
     pod?: _DynamicNodePod;
-    componentsToUnmount?: InternalComponent[];
+    componentsToUnmount: InternalComponent[] = [];
+    refs: NodeRef[] = [];
 
     constructor(pod?: _DynamicNodePod, index?: number) {
         super();
         this.index = index;
         this.pod = pod;
-        this.componentsToUnmount = [];
     }
 
     get prevNode(): DOMNode | null {
@@ -67,12 +68,12 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
     }
 
     appendStaticNode(node: DOMNode) {
-        super.push(node);
+        this.push(node);
     }
 
     appendDynamicPod() {
-        const dynamicPod = new _DynamicNodePod(this, super.length)
-        super.push(dynamicPod);
+        const dynamicPod = new _DynamicNodePod(this, this.length)
+        this.push(dynamicPod);
         return dynamicPod;
     }
 
@@ -89,10 +90,21 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
     // resetComponentsToUnmount(){
     //     this.componentsToUnmount = this.pod ? [] : undefined;
     // }
+
+    forEachNode(doTask: (node: DOMNode)=>void){
+        for (const nodeEntity of this) {
+            if (nodeEntity instanceof _DynamicNodePod) {
+                for (const nodePod of nodeEntity) {
+                    nodePod.forEachNode(doTask)
+                }
+            }
+            else {
+                doTask(nodeEntity)
+            }
+        }
+    }
 }
 
-const hey: NodePod = new _NodePod()
-const ho = hey[0]
 
 // if (ho instanceof Node){
 

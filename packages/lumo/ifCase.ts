@@ -1,6 +1,10 @@
+import { clone } from "@rue/utils";
 import { getWithoutTracking } from "../muonic/DependencyTracker";
 import { hasSignal, makeDerivedSignal, ReactiveSignal } from "../muonic/useDerivedSignal"
+import { ReactiveObject } from "../muonic/useReactivize";
+import { onActivated, onDeactivated } from "./lifecycle";
 import { NodeEntity, normalizeRenderOutput } from "./mE";
+import { initializeRenderEffect, watchForRender } from "./watchForRender";
 
 export class ConditionalKit {
     constructor(
@@ -81,10 +85,27 @@ function isRenderFunction(elseValue: (() => NodeEntity[] | NodeEntity) | NodeEnt
     return elseValue instanceof Function;
 }
 
-export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfConfig | ShowIfConfig, options: ConditionalOptions | undefined) {
+let preserveAll = false;
+
+export function getPreserveValue() {
+    return preserveAll;
+}
+
+function wrapIfPreserve(renderConditional: () => NodeEntity[] | NodeEntity, preserve: boolean) {
+    if (!preserve) return renderConditional;
+    return () => {
+        preserveAll = true;
+        const nodeEntities = renderConditional()
+        preserveAll = false;
+        return nodeEntities
+    }
+}
+
+export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfConfig, options: ConditionalOptions | undefined) {
     const { else: elseValue, elseIf: elseIfKit } = config;
-    const renderConditional = 'mount' in config ? config.mount : undefined
-    const showIfEntities: ShowIfEntities | undefined = 'show' in config ? [config.show] : undefined;
+    const { preserve, transition } = options || {}
+    const renderConditional = wrapIfPreserve(config.mount, !!preserve)
+    // const showIfEntities: ShowIfEntities | undefined = 'show' in config ? [config.show] : undefined;
     const conditionalKits: ConditionalRenderKit[] = [{ $condition, renderConditional }];
     const conditions = [$condition]; // stop pushing when value is true;
     let conditionMet: boolean = getWithoutTracking($condition) //TODO: not sure if getWithoutTracking is needed
@@ -95,7 +116,7 @@ export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfCon
     if (elseIfKit) {
         if (isElseIfCollection(elseIfKit)) {
             for (const [$condition, renderConditional] of elseIfKit) {
-                processElseIf($condition, renderConditional);
+                processElseIf($condition, wrapIfPreserve(renderConditional, !!preserve));
             }
         }
         else {
@@ -119,11 +140,11 @@ export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfCon
 
     function processElseValue(elseValue: (() => NodeEntity[] | NodeEntity) | NodeEntity[] | NodeEntity) {
         if (isRenderFunction(elseValue)) {
-            conditionalKits.push({ renderConditional: elseValue })
+            conditionalKits.push({ renderConditional: wrapIfPreserve(elseValue, !!preserve) })
         }
         else {
             conditionalKits.push({ renderConditional: undefined });
-            showIfEntities!.push(elseValue)
+            // showIfEntities!.push(elseValue)
         }
     }
 
@@ -136,4 +157,37 @@ export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfCon
 
 export function mountIf($condition: ReactiveSignal<boolean>, renderConditional: () => NodeEntity[] | NodeEntity, options?: ConditionalOptions): ConditionalKit {
     return _mountIf($condition, { mount: renderConditional }, options)
+}
+
+
+export function watchForRenderAndPreserve(target: ReactiveSignal<any> | ReactiveObject, handler: (newValue: any, oldValue: any) => void, options?: { once: true }) {
+    const watcher = watchForRender(target, handler, options);
+    const oldValue = hasSignal(target) ? target : target instanceof Array ? [...target] : { ...target } //TODO: doesn't account for sets or maps
+    onDeactivated(() => {
+        watcher.stop()
+    })
+    if (hasSignal(target)) {
+        onActivated(() => {
+            handler(target(), oldValue)
+            watchForRender(target, handler, options)
+        })
+    }
+    else {
+        onActivated(() => {
+            handler(target, oldValue)
+            watchForRender(target, handler, options)
+        })
+    }
+}
+
+export function initializeRenderEffectAndPreserve(handler: () => void) {
+    const watcher = initializeRenderEffect(handler);
+
+    onDeactivated(() => {
+        watcher.stop()
+    })
+
+    onActivated(() => {
+        initializeRenderEffect(handler)
+    })
 }

@@ -1,5 +1,5 @@
 import { beforeAll, beforeEach, describe, expect, test, vi } from "vitest"
-import { App, nextTick, onPreunmount, watch } from "vue";
+import { App, nextTick, onBeforeUnmount, watch } from "vue";
 import { getModel, __$initDepotModule, isMakingModel, populateDepot } from "../depot";
 import { flatPeapod, PeaType } from "../revival/flatdata";
 import { $id, enrollModelMaker } from "../Model";

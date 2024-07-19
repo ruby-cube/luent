@@ -1,5 +1,5 @@
 <script setup>
-import {onBeforeMount, onBeforeUpdate, onMounted, onUpdated, onUnmounted, onPreunmount} from "vue"
+import {onBeforeMount, onBeforeUpdate, onMounted, onUpdated, onUnmounted, onBeforeUnmount} from "vue"
 console.log("BULLET: running setup")
 onBeforeMount(()=>{
   console.log("BULLET: before mount")
@@ -17,7 +17,7 @@ onUpdated(()=>{
   console.log("BULLET: updated")
 })
 
-onPreunmount(()=>{
+onBeforeUnmount(()=>{
   console.log("BULLET: before unmount")
 })
 

@@ -1,10 +1,12 @@
-import { m, mE } from "../packages/lumo/mE";
 import { ifCase } from "../packages/lumo/ifCase";
-import { _mXO } from "../packages/lumo/makeComponent";
 import { forEachIn } from "../packages/lumo/forEachIn";
 import { useReactivity } from "../packages/muonic/useReactivity";
 import { Signal } from "../packages/muonic/useSignalize";
 import { watch } from "../packages/muonic/watch";
+import { mE } from "../packages/lumo/mE";
+import { setUpNode, setUpNodesIn } from "../packages/lumo/setUpNode";
+import { ReactiveSignal } from "../packages/muonic/useDerivedSignal";
+import { onDeactivated, onUnmounted } from "../packages/lumo/lifecycle";
 
 const { $, mu, o$, set } = useReactivity()
 
@@ -15,8 +17,8 @@ export function App() {
     const $another = $(2);
     const $doubleCount = $(() => {
         console.log("recalculating")
-        return $count() + $another()
-    }) //FIX: double count's value lags behind
+        return $count() * 2
+    })
 
     const $active = $(true);
     let count = 0
@@ -28,7 +30,7 @@ export function App() {
         count++
         // set($list, (o) => [...o, "hi" + count])
         // count++;
-        // set($count, (c) => c + 2);
+        set($count, (c) => c + 1);
         // changeFrog()
         // set($another, (v) => v - 2)
         // set($active, (v) => !v)
@@ -59,81 +61,118 @@ export function App() {
         console.log("old frog", oldFrog)
     })
 
+    const xLis = setUpNodesIn(list$, 'li', (_, $index) => ({
+        style: { cursor: 'pointer' },
+        on: { click: clickItem },
+        $index
+    }))
+
+    const xButton = setUpNode('button', {
+        on: {
+            click
+        }
+    })
+
+    const xToggleButton = setUpNode('button', {
+        on: {
+            click() {
+                set($active, (val) => !val)
+            }
+        }
+    })
+
     return {
         render: () => [
-            // mE('div', {
-            //     text: $doubleCount
-            // }),
-            // mE('div', {
-            //     text: $count
-            // }),
+            mE('div', [$doubleCount]),
+            mE('div', [
+                // mE('ul', [
+                //     forEachIn(list$, (item) => [
+                //         mE('li', [item], xLis),
+                //         // mE('li', [item + ' copy'])
+                //     ])
+                // ], 'ul')
+            ], 'div'),
+
             mE('div', [
                 mE('ul', [
-                    forEachIn(list$, (item, $index) => [
-                        m('li', {
-                            text: item,
-                            style: { cursor: 'pointer' },
-                            on: { click: clickItem },
-                            $index
-                        }),
-                        m('li', { text: item + ' copy' })
-                    ])
-                ]
-                )
-            ]),
-            mE('div', [
-                mE('ul', [
+                    mE('button', ['toggle'], xToggleButton),
                     ifCase($active, {
-                        then: () => [
-                            m('div', { text: 'show me' }),
-                            m('button', { text: 'on' })
+                        mount: () => [
+                            // mE('div', [$count]),
+                            mE(List, [], {}, { preserve: true })
                         ],
                         else: () => [
-                            m('div', { text: 'or else' }),
-                            _mXO(List)
-                        ]
-                    }),
-                ]
-                )
-            ]
-            ),
-            mE('button', {
-                text: 'click me',
-                on: {
-                    click
-                }
-            })
+                            mE('div', ['show me']),
+                            mE('button', ['Non functioning'])
+                        ],
+                    }, {preserve: true}),
+                    mE('div', ['something else']),
+                    // ifCase($active, {
+                    //     mount: () => [
+                    //         mE('div', ['show me']),
+                    //         mE('button', ['Non functioning'])
+                    //     ],
+                    //     else: () => [
+                    //         mE('div', ['or else']),
+                    //         mE(List)
+                    //     ]
+                    // }),
+                ], 'ul')
+            ], 'div'),
+            mE('button', ['click me'], xButton),
         ]
     }
 }
 
 
 function List() {
+
+    onDeactivated(()=>{
+        console.log("deactivated")
+    })
+    
+    onUnmounted(()=>{
+        console.log("unmounted")
+
+    })
+
+    const $count = $(0);
+    function increment() {
+        set($count, c => c + 1)
+    }
+
+    const xH2 = setUpNode('h2', {
+        style: {
+            backgroundColor: 'gold',
+            border: '1px solid black'
+        }
+    })
+
+    const xDiv = setUpNode('div', {
+        style: {
+            backgroundColor: 'gold'
+        }
+    })
+
+    const xButton = setUpNode('button', {
+        style: {
+            backgroundColor: 'ghostwhite'
+        },
+        on: {
+            click() {
+                increment()
+            }
+        }
+    })
+
+
     return {
         render: () => [
-            mE('h2', {
-                text: "I'm a component",
-                style: {
-                    backgroundColor: 'gold',
-                    border: '1px solid black'
-                }
-            }),
-            mE('div', {
-                style: {
-                    backgroundColor: 'gold'
-                },
-                children: [
-                    mE('blockquote', {
-                        text: 'e pluribus unum'
-                    }),
-                    mE('button', {
-                        text: 'off',
-                        style: {
-                            backgroundColor: 'ghostwhite'
-                        }
-                    })
-                ]
-            })
+            mE('h2', ["I'm a component"], xH2),
+            mE('div', [
+                mE('blockquote', [$count]),
+                mE('button', ['increment'], xButton)
+            ], xDiv)
         ]
     }
 }

@@ -1,10 +1,11 @@
 import { AnyObject } from "@rue/types";
-import { ComponentSetup, getCurrentComponent, InternalComponent, setCurrentComponent } from "./component";
+import { Component, ComponentSetup, getCurrentComponent, InternalComponent, setCurrentComponent } from "./component";
 import { SetKey, Signal } from "../muonic/useSignalize";
-import { LifecycleHook, onUnmounted } from "./lifecycle";
+import { LifecycleHook, onActivated, onBeforeUnmount, onDeactivated, onUnmounted } from "./lifecycle";
 import { collectEffects } from "@rue/flask/flask";
-import { _NodeRef, castOnCreatedHook, NodeRef } from "./NodeRef";
+import { _NodeRef, assignNodeRef, castOnCreatedHook, NodeRef } from "./NodeRef";
 import { NodeEntity, normalizeRenderOutput } from "./mE";
+import { getPreserveValue } from "./ifCase";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 export type ComponentConfig<T extends ComponentSetup<AnyObject> = ComponentSetup> = {
@@ -32,16 +33,19 @@ export type RenderSlot = (props: any) => NodeEntity[]
 export type ComponentOptions = { preserve?: true }
 
 export function makeComponent<T extends ComponentSetup>(
-    Component: T, 
-    config: ComponentConfig<T> = {}, 
+    Component: T,
+    config: ComponentConfig<T> = {},
     slots: NodeEntity[] | RenderSlot[] | SlotRenderer = [], //TODO:
     ref: _NodeRef<InternalComponent> | undefined = undefined,
     options: ComponentOptions | undefined = undefined //TODO:
-) { 
+) {
     const parent = getCurrentComponent();
     if (!parent) throw new Error("No parent component")
 
-    const component = new InternalComponent(parent);
+    const preserve = options && options.preserve || parent !== 'root' && parent.preserve || getPreserveValue() || false;
+
+    const component = new InternalComponent(parent, preserve);
+    console.log("preserve", component.preserve)
     setCurrentComponent(component)
     runComponentSetup(Component, config, component, ref);
     setCurrentComponent(parent) // for sibling components to access parent, must be set AFTER `render()`
@@ -49,8 +53,9 @@ export function makeComponent<T extends ComponentSetup>(
 }
 
 
+
 function runComponentSetup<T extends ComponentSetup>(Component: T, config: ComponentConfig<T> = {}, component: InternalComponent, ref: _NodeRef<InternalComponent> | undefined) {
-    collectEffects((flask, outerFlask) => {
+    collectEffects((flask) => {
         const { props, on, class: _class, style, $index, ...other } = config;
         const _component = Component(props)
         if (!_component) throw new Error("Component setup must return component blueprint")
@@ -61,51 +66,86 @@ function runComponentSetup<T extends ComponentSetup>(Component: T, config: Compo
         component.provides = provides;
         component.component = { ...exposes };
 
-        //TODO: Slots (make sure parent is correct)
-        //TODO: HTML attributes, including data
         if (ref) {
-            assignNodeRef(ref, component.component, $index)
+            const publicComponent = component.component
+            assignNodeRef(ref, publicComponent, $index)
+            setUpRefUpdates(ref, publicComponent, $index, component.preserve)
             castOnCreatedHook(ref, component, $index)
         }
 
-        if (props && '$index' in props) {
-            const $index = props.$index;
-            if (on) {
-                const domNode = getMainDOMNode() //TODO:
-                for (const event in on) {
-                    const handler = on[event]
-                    const _handler = $index ? (e: Event) => handler(e, $index()) : handler
-                    domNode.addEventListener(event, _handler) //TODO: attach fall-through events on root or designated root domNode if more than one root
-                    onUnmounted(() => domNode.removeEventListener(event, _handler))
+        //TODO: Slots (make sure parent is correct)
+        //TODO: assigned classes, events, style, HTML attributes (on first root, unless has been assigned to another element or component)
 
-                    //TODO: reattach listeners if domNode changes!
-                }
-            }
+        // if (props && '$index' in props) {
+        //     const $index = props.$index;
+        //     if (on) {
+        //         const domNode = getMainDOMNode() //TODO:
+        //         for (const event in on) {
+        //             const handler = on[event]
+        //             const _handler = $index ? (e: Event) => handler(e, $index()) : handler
+        //             domNode.addEventListener(event, _handler) //TODO: attach fall-through events on root or designated root domNode if more than one root
+        //             onUnmounted(() => domNode.removeEventListener(event, _handler))
+
+        //             //TODO: reattach listeners if domNode changes!
+        //         }
+        //     }
+        // }
+
+
+        // set up hook cascade
+        const parent = component.parent;
+        if (parent instanceof InternalComponent) {
+            onBeforeUnmount(() => component.emit(LifecycleHook.BEFORE_UNMOUNT), parent)
+            onUnmounted(() => component.emit(LifecycleHook.UNMOUNTED), parent)
+            onDeactivated(() => component.emit(LifecycleHook.DEACTIVATED), undefined, parent)
+            onActivated(() => component.emit(LifecycleHook.ACTIVATED), undefined, parent)
         }
-
-
         onUnmounted(() => flask.dispose())
-        outerFlask.onDisposed(() => unmountComponent(component))
     })
 }
 
-function assignNodeRef(ref: _NodeRef<InternalComponent>, component: AnyObject, $index: Signal<number> | undefined) {
-    if ($index != null) {
-        let nodes = ref.components ? ref.components! : []
-        nodes[$index()] = component;
+
+function setUpRefUpdates(ref: _NodeRef, component: Component, $index: Signal<number> | undefined, preserve: boolean) {
+    if (ref.initialized === true) return;
+    if ($index) { // only initiate once per list
+        const components = ref.components;
+        if (preserve) {
+            onDeactivated(() => {
+                ref.components = null;
+            })
+            onActivated(() => {
+                ref.components = components
+            })
+        }
+        onBeforeUnmount(() => {
+            ref.components = null;
+        })
     }
     else {
-        ref.component = component
+        if (preserve) {
+            onDeactivated(() => {
+                ref.component = null;
+            })
+            onActivated(() => {
+                ref.component = component
+            })
+        }
+        onBeforeUnmount(() => {
+            ref.component = null;
+        })
     }
+    ref.initialized = true;
 }
+
+
 // export function mountComponent(parent: HTMLElement, component: InternalComponent) {
-//     component.emit(LifecycleHook.PREMOUNT);
+//     component.emit(LifecycleHook.BEFORE_MOUNT);
 //     parent.append(...component.domNodes);
 //     component.emit(LifecycleHook.MOUNTED);
 // }
 
 export function unmountComponent(component: InternalComponent) {
-    component.emit(LifecycleHook.PREUNMOUNT);
+    component.emit(LifecycleHook.BEFORE_UNMOUNT);
     // const nodes = component.initialNodeEntities;
     // for (const node of nodes) {
     //     node.remove();

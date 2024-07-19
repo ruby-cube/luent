@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
-import { _internalReactivity, emitHookBatch, NodeEntity, normalizeRenderOutput, removeDOMNodes, setUpNodeEntity } from "./mE";
+import { _internalReactivity, emitHookBatch, NodeEntity, normalizeRenderOutput, setUpNodeEntity } from "./mE";
 import { isReactive, ReactiveObject } from "../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod } from "./NodePod";
 import { Signal } from "../muonic/useSignalize";
@@ -23,6 +23,24 @@ export class ListRenderKit<T = any> {
     ) { }
 }
 
+// let settingUpList: boolean = false;
+let currentItem: any;
+let $currentIndex: Signal<number> | undefined;
+
+export function getCurrentItemAndIndex(): [any, Signal<number>] {
+    if ($currentIndex === undefined) throw new Error('Not currently setting up a list; cannot get item and index')
+    return [currentItem, $currentIndex]
+}
+
+export function setCurrentItemAndIndex(item: any, $index: Signal<number>){
+    currentItem = item;
+    $currentIndex = $index;
+}
+
+// export function isSettingUpList() {
+//     return settingUpList;
+// }
+
 export function forEachIn(data: any[], render: RenderItem): ListRenderKit // static list
 export function forEachIn(data: ReactiveObject<UniqueItem[]> | ReactiveSignal<UniqueItem[]>, render: RenderItem): ListRenderKit // dynamic list
 export function forEachIn(data: ReactiveObject<AnyObject[]> | ReactiveSignal<AnyObject>, render: RenderItem): ListRenderKit // dynamic list
@@ -32,22 +50,28 @@ export function forEachIn(data: ListData, render: RenderItem): ListRenderKit {
 
     const indices = []
 
+    // settingUpList = true;
     let i = 0;
     while (i < list.length) {
         const $index = _internalReactivity.$(i)
+        const item = list[i]
+        currentItem = item;
+        $currentIndex = $index;
         indices.push($index)
-        domNodes.push(normalizeRenderOutput(render(list[i], $index)))
+        domNodes.push(normalizeRenderOutput(render(item, $index)));
         i++;
     }
+    currentItem = undefined;
+    $currentIndex = undefined;
+    // settingUpList = false;
 
-    
     return new ListRenderKit(render, domNodes, data, indices);
 }
 
 
-export class DynamicIndices  {
+export class DynamicIndices {
     current: Signal<number>[];
-    constructor(indices: Signal<number>[]){
+    constructor(indices: Signal<number>[]) {
         this.current = indices
     }
     update(newIndices: Signal<number>[]) {
@@ -62,10 +86,17 @@ export function removeListItemNodes(dynamicList: _DynamicNodePod, indicesToRemov
     for (const index of indicesToRemove) {
         const nodePod = dynamicList[index];
         const components = nodePod.componentsToUnmount;
-        emitHookBatch(LifecycleHook.PREUNMOUNT, components!)
+        emitHookBatch(LifecycleHook.BEFORE_UNMOUNT, components!)
         removeDOMNodes(dynamicList[index])
         emitHookBatch(LifecycleHook.UNMOUNTED, components!)
     }
+}
+
+function removeDOMNodes(nodePod: _NodePod){
+    nodePod.forEachNode((node)=>{
+        node.remove();
+        //TODO: I don't know how to update refs for list
+    })
 }
 
 type Index = number
@@ -115,11 +146,13 @@ export function insertAndMoveListItemNodes(
         }
 
         if (isNewItem(uItem)) {
+            const item = getOriginalItem(uItem)
             const $index = _internalReactivity.$(i)
+            setCurrentItemAndIndex(item, $index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
             setCurrentComponent(component)
-            const nodeEntities = normalizeRenderOutput(renderItem(getOriginalItem(uItem), $index));
+            const nodeEntities = normalizeRenderOutput(renderItem(item, $index));
             setCurrentComponent(null)
             for (const nodeEntity of nodeEntities) {
                 setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)

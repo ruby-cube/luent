@@ -39,3 +39,8 @@ export function getContext<T extends AnyObject>(keys: RequiredKeys<T>[], optiona
     return context;
 }
 
+
+
+function fromContext(key: symbol | string, source?: 'root' | 'app') {
+    if (source === 'root') return root.provides[key]
+}

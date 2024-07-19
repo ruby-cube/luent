@@ -6,7 +6,7 @@ import { DOMNode } from "./component";
 import { ListRenderKit } from "./mE";
 import { ReactiveSignal } from "../muonic/useDerivedSignal";
 import { mEO } from "./mEO";
-import { onPremount } from "./lifecycle";
+import { onBeforeMount } from "./lifecycle";
 import { initializeEffect } from "../muonic/watch";
 import { reMouseDown } from "../actionry/__test__/actionry.type-test";
 import { NodeEntity } from "./mE";
@@ -30,14 +30,14 @@ const _BUTTON = "button"
 const _H1 = "h1"
 
 // function dynamicStyle(effect: (refs: { [key: string]: DOMNode }) => void) {
-//     onPremount((refs: { [key: string]: DOMNode }) => {
+//     onBeforeMount((refs: { [key: string]: DOMNode }) => {
 //         initializeEffect(() => { effect(refs) })
 //     })
 // }
 
 function List() {
 
-    // onPremount(() => {
+    // onBeforeMount(() => {
     //     const listItems = getDOMNode('listItems')
 
     //     initializeEffect(() => {
@@ -50,7 +50,7 @@ function List() {
     //     })
     // })
 
-    // dynamicStyle(({ $listItems, frame }) => {  // essentially onPremount and initialize effect
+    // dynamicStyle(({ $listItems, frame }) => {  // essentially onBeforeMount and initialize effect
     //     for (const item of $listItems()) { //TODO: I want to only set the style for new items...
     //         if ($isActive)
     //             item.style.backgroundColor = 'blue'
@@ -66,7 +66,7 @@ function List() {
     //     })
     // })
 
-    // dynamicStyle(({ $listItems, frame }) => {  // essentially onPremount and initialize effect
+    // dynamicStyle(({ $listItems, frame }) => {  // essentially onBeforeMount and initialize effect
     //     for (const item of $listItems()) { //TODO: I want to only set the style for new items...
     //         if ($isActive)
     //             item.style.backgroundColor = 'blue'
@@ -89,7 +89,7 @@ function List() {
     const itemsRef = new NodeRef();
     const headingRef = new NodeRef();
 
-    onPremount(() => {
+    onBeforeMount(() => {
         console.log(itemsRef.nodes)
     })
 

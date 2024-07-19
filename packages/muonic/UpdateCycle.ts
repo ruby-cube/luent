@@ -64,7 +64,7 @@ export class UpdateCycle {
             props.set(key, [newValue, oldValue]);
             return;
         }
-        taskQueue = getTaskQueueForProp(target, key, 'update'); //DEBUG: This is where things go awry for lists
+        taskQueue = getTaskQueueForProp(target, key, 'render');
         if (taskQueue) {
             props.set(key, [newValue, oldValue]);
             return;
@@ -89,8 +89,8 @@ export class UpdateCycle {
 
 function _runNonSyncTasks() {   // TODO: how to prevent update blocking if tasks take too long? Also figure out how to use rAF
     runNonSyncTasks('pre');
-    _runTasks(Hooks.PREUPDATE)
-    runNonSyncTasks('update');
+    _runTasks(Hooks.BEFORE_UPDATE)
+    runNonSyncTasks('render');
     _runTasks(Hooks.UPDATE_COMPLETED)
     runNonSyncTasks('post');
     endUpdateCycle();
@@ -102,11 +102,11 @@ function _runNonSyncTasks() {   // TODO: how to prevent update blocking if tasks
 
 enum Hooks {
     UPDATE_COMPLETED = "uc",
-    PREUPDATE = "bc",
+    BEFORE_UPDATE = "bc",
 }
 
 const tasks: { [K in Hooks]: Set<() => void> } = {
-    [Hooks.PREUPDATE]: new Set(),
+    [Hooks.BEFORE_UPDATE]: new Set(),
     [Hooks.UPDATE_COMPLETED]: new Set(),
 }
 

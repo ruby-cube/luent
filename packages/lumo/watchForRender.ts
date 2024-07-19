@@ -9,7 +9,7 @@ import { AnyObject } from "@rue/types";
 
 export function initializeRenderEffect(effect: () => void) {
     const component = getCurrentComponent();
-    if (!component || component === "root") throw Error("watchForRender must be called within component setup")
+    if (!component || component === "root") throw Error("initializeRenderEffect must be called within component setup")
 
     const _handler = () => {
         effect();
@@ -39,7 +39,7 @@ function setUpUpdateHooks(component: InternalComponent) {
     component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
 
     onBeforeUpdatePhase(() => {
-        component.emit(LifecycleHook.PREUPDATE)
+        component.emit(LifecycleHook.BEFORE_UPDATE)
     }, { once: true }) // assuming cleanup flask is set up
 
     onUpdateComplete(() => {
@@ -73,7 +73,7 @@ function setUpUpdateHooks(component: InternalComponent) {
 //         component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
 
 //         onBeforeUpdatePhase(() => {
-//             component.emit(LifecycleHook.PREUPDATE)
+//             component.emit(LifecycleHook.BEFORE_UPDATE)
 //         }, { once: true }) // assuming cleanup flask is set up
 
 //         onUpdateComplete(() => {
