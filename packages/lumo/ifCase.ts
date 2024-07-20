@@ -1,30 +1,32 @@
-import { clone } from "@rue/utils";
 import { getWithoutTracking } from "../muonic/DependencyTracker";
 import { hasSignal, makeDerivedSignal, ReactiveSignal } from "../muonic/useDerivedSignal"
 import { ReactiveObject } from "../muonic/useReactivize";
 import { onActivated, onDeactivated } from "./lifecycle";
 import { NodeEntity, normalizeRenderOutput } from "./mE";
 import { initializeRenderEffect, watchForRender } from "./watchForRender";
+import { getCurrentComponent, InternalComponent, setCurrentComponent } from "./component";
 
 export class ConditionalKit {
     constructor(
         public conditionalKits: ConditionalRenderKit[],
-        public initialNodeEntities: NodeEntity[] | ShowIfEntities,
+        public initialNodeEntities: NodeEntity[],
         public $initialConditions: ReactiveSignal<boolean[]>,
         public initialIndex: number,
-        public type: 'show' | 'mount' | 'preserve'
     ) { }
 }
 
-type ShowIfEntities = (NodeEntity[] | NodeEntity)[]
+type ShowIfEntities = NodeEntity[] | NodeEntity;
+export type MountIfRenderersConfig = (() => NodeEntity)[] | (() => NodeEntity)
+export type MountIfRenderers = ((() => NodeEntity) | NodeEntity)[]
 
 export type ConditionalRenderKit = { // ManifestationKit
     $condition?: ReactiveSignal<boolean>,
-    renderConditional: (() => NodeEntity[] | NodeEntity) | undefined | (() => void), // set display property
+    renderConditional: ()=>NodeEntity[]
+    // (() => NodeEntity[] | NodeEntity) | undefined | (() => void), // set display property
 }
 
 export type ElseIfRenderKit = {
-    renderConditional: () => NodeEntity[] | NodeEntity;
+    renderConditional: ()=>NodeEntity[];
     $condition: ReactiveSignal<boolean>;
 }
 
@@ -46,12 +48,12 @@ type ConditionalOptions = {
 //         text: 'help me'
 //     })
 // })
-type ElseIfMount = [ReactiveSignal<boolean>, () => NodeEntity[] | NodeEntity]
+type ElseIfMount = [ReactiveSignal<boolean>, MountIfRenderers]
 
 type MountIfConfig = {
-    mount: () => NodeEntity[] | NodeEntity;
-    elseIf?: ElseIfMount[] | [ReactiveSignal<boolean>, () => NodeEntity[] | NodeEntity]
-    else?: () => NodeEntity[] | NodeEntity
+    mount: MountIfRenderersConfig;
+    elseIf?: ElseIfMount[] | [ReactiveSignal<boolean>, MountIfRenderersConfig]
+    else?: MountIfRenderersConfig
 }
 
 type ElseIfShow = [ReactiveSignal<boolean>, NodeEntity[] | NodeEntity]
@@ -74,37 +76,97 @@ export function genConditionsSignal(conditions: ReactiveSignal<boolean>[]) {
 
 
 export function ifCase($condition: ReactiveSignal<boolean>, config: MountIfConfig | ShowIfConfig, options?: ConditionalOptions): ConditionalKit {
-    return _mountIf($condition, config, options);
+    if ('mount' in config) return _mountIf($condition, config, options);
+    // return _showIf($condition, config, options)
 }
 
 function isElseIfCollection(elseIfKit: ElseIfShow | ElseIfShow[] | ElseIfMount | ElseIfMount[]): elseIfKit is ElseIfMount[] | ElseIfShow[] {
     return !hasSignal(elseIfKit[0]);
 }
 
-function isRenderFunction(elseValue: (() => NodeEntity[] | NodeEntity) | NodeEntity | NodeEntity[]): elseValue is () => NodeEntity[] | NodeEntity {
-    return elseValue instanceof Function;
+// function isRenderFunction(elseValue: (() => NodeEntity[] | NodeEntity) | NodeEntity | NodeEntity[]): elseValue is () => NodeEntity[] | NodeEntity {
+//     return elseValue instanceof Function;
+// }
+
+let _preserveAll = false;
+
+export function preserveAllRequested() {
+    return _preserveAll;
 }
 
-let preserveAll = false;
+let _isSettingUpConditionalMount = false;
 
-export function getPreserveValue() {
-    return preserveAll;
+export function isSettingUpConditionalMount() {
+    return _isSettingUpConditionalMount;
 }
 
-function wrapIfPreserve(renderConditional: () => NodeEntity[] | NodeEntity, preserve: boolean) {
-    if (!preserve) return renderConditional;
+function wrapRenderersWithContext(conditionalRenderers: MountIfRenderersConfig, preserve: boolean): MountIfRenderers {
+    if (conditionalRenderers instanceof Array) {
+        const renderers = []
+        for (const renderer of conditionalRenderers) {
+            const _renderer = wrapWithContext(renderer, preserve)
+            renderers.push(_renderer)
+        }
+        return renderers;
+    }
+    return [wrapWithContext(conditionalRenderers, preserve)] // normalize to array
+}
+
+function wrapWithContext(renderConditional: () => NodeEntity, preserve: boolean) {
+    if (!preserve) return () => {
+        _isSettingUpConditionalMount = true;
+        const nodeEntity = renderConditional()
+        _isSettingUpConditionalMount = false;
+        return nodeEntity;
+    }
     return () => {
-        preserveAll = true;
-        const nodeEntities = renderConditional()
-        preserveAll = false;
-        return nodeEntities
+        _isSettingUpConditionalMount = true;
+        _preserveAll = true;
+        const nodeEntity = renderConditional()
+        _preserveAll = false;
+        _isSettingUpConditionalMount = false;
+        return nodeEntity
+    }
+}
+
+
+function renderConditional_initial(renderers: MountIfRenderers): NodeEntity[] | NodeEntity {
+    const nodeEntities = []
+    for (let i = 0; i < renderers.length; i++) {
+        const render = renderers[i];
+        const output = render();
+        if (output instanceof InternalComponent && output.preserve) {
+            renderers[i] = output;
+        }
+        nodeEntities.push(output);
+    }
+    return nodeEntities;
+}
+
+function renderConditional(renderers: MountIfRenderers) {
+    const nodeEntities = []
+    for (const render of renderers) {
+        nodeEntities.push(render instanceof Function ? render() : render)
+    }
+    return nodeEntities;
+}
+
+function composeConditionalRenderer(conditionalRenderers: MountIfRenderersConfig, preserve: boolean) {
+    let initialized = false;
+    const renderers = wrapRenderersWithContext(conditionalRenderers, preserve)
+    return () => {
+        if (!initialized) {
+            initialized = true;
+            return renderConditional_initial(renderers);
+        }
+        return renderConditional(renderers);
     }
 }
 
 export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfConfig, options: ConditionalOptions | undefined) {
     const { else: elseValue, elseIf: elseIfKit } = config;
-    const { preserve, transition } = options || {}
-    const renderConditional = wrapIfPreserve(config.mount, !!preserve)
+    const preserveAll = options && options.preserve || false;
+    const renderConditional = composeConditionalRenderer(config.mount, preserveAll)
     // const showIfEntities: ShowIfEntities | undefined = 'show' in config ? [config.show] : undefined;
     const conditionalKits: ConditionalRenderKit[] = [{ $condition, renderConditional }];
     const conditions = [$condition]; // stop pushing when value is true;
@@ -115,8 +177,8 @@ export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfCon
     // populate conditional kits
     if (elseIfKit) {
         if (isElseIfCollection(elseIfKit)) {
-            for (const [$condition, renderConditional] of elseIfKit) {
-                processElseIf($condition, wrapIfPreserve(renderConditional, !!preserve));
+            for (const [$condition, renderers] of elseIfKit) {
+                processElseIf($condition, composeConditionalRenderer(renderers, preserveAll));
             }
         }
         else {
@@ -125,12 +187,12 @@ export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfCon
     }
 
     if (elseValue) {
-        processElseValue(elseValue);
+        conditionalKits.push({ renderConditional: composeConditionalRenderer(elseValue, preserveAll) })
         if (!conditionMet) initialIndex++;
     }
 
-    function processElseIf($condition: ReactiveSignal<boolean>, elseIfValue: (() => NodeEntity[] | NodeEntity) | NodeEntity[] | NodeEntity) {
-        processElseValue(elseIfValue);
+    function processElseIf($condition: ReactiveSignal<boolean>, elseIfValue: MountIfRenderersConfig) {
+        conditionalKits.push({ renderConditional: composeConditionalRenderer(elseIfValue, preserveAll) })
         if (!conditionMet) {
             conditions.push($condition)
             initialIndex++
@@ -138,22 +200,12 @@ export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfCon
         conditionMet = getWithoutTracking($condition) //QUESTION: is getWithOutTracking necessary?
     }
 
-    function processElseValue(elseValue: (() => NodeEntity[] | NodeEntity) | NodeEntity[] | NodeEntity) {
-        if (isRenderFunction(elseValue)) {
-            conditionalKits.push({ renderConditional: wrapIfPreserve(elseValue, !!preserve) })
-        }
-        else {
-            conditionalKits.push({ renderConditional: undefined });
-            // showIfEntities!.push(elseValue)
-        }
-    }
-
-    const nodeEntities = 'mount' in config ? normalizeRenderOutput((<() => NodeEntity[] | NodeEntity>conditionalKits[initialIndex].renderConditional)()) : showIfEntities
-    const conditionalType = 'show' in config ? 'show' : options && options.preserve ? 'preserve' : 'mount'
-    const renderKit = new ConditionalKit(conditionalKits, nodeEntities!, $initialConditions, initialIndex, conditionalType)
-
-    return renderKit;
+    const nodeEntities = normalizeRenderOutput(conditionalKits[initialIndex].renderConditional())
+    return new ConditionalKit(conditionalKits, nodeEntities, $initialConditions, initialIndex)
 }
+
+
+
 
 export function mountIf($condition: ReactiveSignal<boolean>, renderConditional: () => NodeEntity[] | NodeEntity, options?: ConditionalOptions): ConditionalKit {
     return _mountIf($condition, { mount: renderConditional }, options)
@@ -161,6 +213,9 @@ export function mountIf($condition: ReactiveSignal<boolean>, renderConditional: 
 
 
 export function watchForRenderAndPreserve(target: ReactiveSignal<any> | ReactiveObject, handler: (newValue: any, oldValue: any) => void, options?: { once: true }) {
+    const component = getCurrentComponent();
+    if (!component || component === "root") throw new Error("No component found")
+
     const watcher = watchForRender(target, handler, options);
     const oldValue = hasSignal(target) ? target : target instanceof Array ? [...target] : { ...target } //TODO: doesn't account for sets or maps
     onDeactivated(() => {
@@ -169,13 +224,17 @@ export function watchForRenderAndPreserve(target: ReactiveSignal<any> | Reactive
     if (hasSignal(target)) {
         onActivated(() => {
             handler(target(), oldValue)
+            setCurrentComponent(component)
             watchForRender(target, handler, options)
+            setCurrentComponent(null)
         })
     }
     else {
         onActivated(() => {
             handler(target, oldValue)
+            setCurrentComponent(component)
             watchForRender(target, handler, options)
+            setCurrentComponent(null)
         })
     }
 }

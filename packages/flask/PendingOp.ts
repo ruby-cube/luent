@@ -1,99 +1,69 @@
-import { survivingRemovers } from "./outlive";
-import { Callback, CallbackRemover, initAutoCleanup, ListenerOptions, PendingCancelOp } from "./flaskedListeners";
+import { addToFlask } from "./flask";
+import { CallbackRemover, SchedulerOptions } from "./flaskedListeners";
+import { PendingCancelOp } from "./PendingCancelOp";
 
 export type PendingOp<T = unknown> = Promise<T> & {
     cancel: () => void;
 }
 
-
 export class Cancellation {
-    reason: string | undefined;
-    constructor(reason?: string) {
+    reason: string | Error | undefined;
+    constructor(reason?: string | Error) {
         this.reason = reason;
     }
 }
 
-// watch ... until
-// listen ... until
-// onUpdated (do this) ... until
-// onClick (do this) ... until
-// onClick ... once: true  x until
-// onUnmounted ... x until
-// queueTask ... x until
-
-/* 
-const pendingOp = onUnmounted(()=>{
-
-})
-
-onUpdated(()=>{
-    if (something){
-        pendingOp.stop();
-    }
-}, {once: true})
-
- */
-
-export function makePendingOp<R, Arg extends R extends void ? Callback : R, CB extends Callback>(config: {
+export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
     callback: CB,
-    enroll: (callback: CB) => R,
-    remove: (cbOrReturnVal: Arg) => void,
-    options: ListenerOptions | undefined
+    enroll: (callback: CB) => any,
+    remove: (cbOrReturnVal: (() => any) | any) => void,
+    options: SchedulerOptions | undefined
 }): PendingOp<ReturnType<CB>> {
     const { callback, enroll, remove, options } = config;
     const scheduleCancellation = options?.cancel;
-    const outlive = options?.outlive;
+
     let returnVal: any;
-    let $resolve: (reason?: any) => void;
-    let $reject: (reason?: any) => void;
-    const pendingOp = new Promise((resolve, reject) => {
-        $resolve = resolve;
-        $reject = reject;
-    }) as PendingOp<ReturnType<CB>>;
+    let _resolve: (result?: any) => void;
+    let _reject: (reason?: any) => void;
+    let pendingCancelOp: PendingCancelOp | null;
 
-    let pendingAutoCleanups: PendingCancelOp[] | void;
-    // let pendingSceneCleanup: PendingCancelOp | void;
-    const _cancel = ((arg: any) => {
-        remove(returnVal ?? _callback);
-        if (outlive) survivingRemovers.delete(_cancel);
-        else if (pendingAutoCleanups) {
-            for (const cleanup of pendingAutoCleanups) {
-                cleanup.cancel()
-            }
-        };
-        // if (pendingSceneCleanup) pendingSceneCleanup.cancel();
-        if (pendingCancelOp) pendingCancelOp.cancel();
-        if (arg) {
-            console.trace();
-            $reject(new Cancellation("Potential memory leak detected. Callback remover may have been wrapped. This prevents cleanup of callback remover. Check trace for wrapped listeners with wrapped callbacks."));
-        }
-        else {
-            $resolve(new Cancellation("Pending op canceled."))
-        }
-    }) as CallbackRemover<never | void>;
-    _cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.
-    pendingOp.cancel = _cancel;
-
-    if (outlive && scheduleCancellation) survivingRemovers.add(_cancel); // ensures cancellation also outlives containing scope
-    const pendingCancelOp = scheduleCancellation ? scheduleCancellation(_cancel) : null;
-    if (!outlive) {
-        pendingAutoCleanups = initAutoCleanup(_cancel);
-        // pendingSceneCleanup = initSceneAutoCleanup(_cancel);
-    }
-    if (__DEV__ && pendingCancelOp === undefined) console.warn("Cancellation Scheduler doesn't return a pending op for cleanup. This could potentially cause a memory leak")  //TBH, this is not a serious memory leak since it'll just run a callback that deletes a non-existent callback. But it may be more complicated for instance hooks...
-
-    const _callback = ((arg: unknown) => {
+    const _callback = ((...arg: any[]) => {
+        _resolve(callback(...arg));
         remove(returnVal ?? _callback);
         if (pendingCancelOp) pendingCancelOp.cancel();
-        if (outlive) survivingRemovers.delete(_cancel);
-        else if (pendingAutoCleanups) {
-            for (const cleanup of pendingAutoCleanups) {
-                cleanup.cancel()
-            }
-        };
-        $resolve(callback(arg));
     }) as CB
-    returnVal = enroll(_callback);
+    try {
+        returnVal = enroll(_callback);
+    }
+    finally {
+        const pendingOp = new Promise((resolve, reject) => {
+            _resolve = resolve;
+            _reject = reject;
+        }) as PendingOp<ReturnType<CB>>
 
-    return pendingOp;
+        const _cancel = (() => {
+            try {
+                remove(returnVal ?? _callback);
+            }
+            catch (e) {
+                console.trace();
+                const err = e instanceof Error ? e : new Error(String(e));
+                _reject(new Cancellation(err));
+            }
+            finally {
+                if (pendingCancelOp) pendingCancelOp.cancel();
+                _reject(new Cancellation("Pending op canceled."))
+            }
+        }) as CallbackRemover;
+        _cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.
+
+        pendingOp.cancel = _cancel;
+
+        addToFlask(_cancel)
+
+        pendingCancelOp = scheduleCancellation ? scheduleCancellation(_cancel) : null;
+
+        return pendingOp;
+    }
+
 }

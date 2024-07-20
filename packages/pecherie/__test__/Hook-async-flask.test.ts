@@ -4,7 +4,7 @@ import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
 import { $type } from "@rue/utils";
 import { Callback, Callbacks, initFlask } from "../../flask";
-import { NestableFlask, enflask, collectEffects, getFlask, getOuterFlask, getCovertFlask } from "../../flask/flask";
+import { NestableFlask, enflask, collectEffects, getFlask, getOuterFlask, getCovertFlask } from "../../flask/_flask";
 import exp from "constants";
 import { __resetGlobals } from "../../dev/__resetGlobals";
 

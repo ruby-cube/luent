@@ -3,7 +3,7 @@
 
 import { getCovertFlask } from "./CovertFlasks";
 import { getScene } from "./Scene";
-import { getFlask, NestableFlask, Flask } from "./flask";
+import { getFlask, NestableFlask, Flask } from "./_flask";
 import type { Callback, CallbackRemover, PendingCancelOp } from "./flaskedListeners";
 
 // [Return] boolean to indicate whether cleanup was successfully scheduled
@@ -11,10 +11,10 @@ import type { Callback, CallbackRemover, PendingCancelOp } from "./flaskedListen
 export let schedulingAutoCleanup = false; // to prevent infinite loop of auto cleanup listener
 export let existingPendingAutoCleanup: PendingCancelOp[] | void | null;
 
-type CleanupScheduler = (stop: CallbackRemover<void>) => PendingCancelOp[] | void
+type CleanupScheduler = (stop: CallbackRemover) => PendingCancelOp[] | void
 
-// export function defineAutoCleanup(cleanupScheduler: (stop: CallbackRemover<void>) => PendingCancelOp | void) {
-export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
+// export function defineAutoCleanup(cleanupScheduler: (stop: CallbackRemover) => PendingCancelOp | void) {
+export function scheduleAutoCleanup(stop: CallbackRemover) {
     // if (_covertFlaskClasses.size === 0) return;
     schedulingAutoCleanup = true;
     const success = existingPendingAutoCleanup = cleanupScheduler(stop);
@@ -26,7 +26,7 @@ export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
 
 
 
-// function cleanupScheduler(stop: CallbackRemover<void>) {
+// function cleanupScheduler(stop: CallbackRemover) {
 //     const scene = getScene();
 //     const flask = getFlask();
 //     const flaskAttachedToOuter = flask && !(<NestableFlask>flask).outlivesOuter
@@ -47,7 +47,7 @@ export function scheduleAutoCleanup(stop: CallbackRemover<void>) {
 
 // FIX: is existingPendingCancelOps getting in the way of nested flask cleanup?
 
-function cleanupScheduler(stop: CallbackRemover<void>) {
+function cleanupScheduler(stop: CallbackRemover) {
     const pendingCancelOps = [] as PendingCancelOp[];
     const flask = getFlask();
     const rootFlask = (<NestableFlask>flask)?._root || getScene() || getCovertFlask();

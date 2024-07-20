@@ -1,5 +1,5 @@
 import { Callback, PendingCancelOp, PendingOp } from ".";
-import { Flask } from "./flask";
+import { Flask } from "./_flask";
 import { registerGlobalResetter } from "../dev/__resetGlobals";
 
 

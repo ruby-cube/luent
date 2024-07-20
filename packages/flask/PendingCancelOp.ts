@@ -1,45 +1,36 @@
-import { survivingRemovers } from "./outlive";
-import { Callback, PendingCancelOp, initAutoCleanup } from "./flaskedListeners";
+import { addToFlask } from "./flask";
 
+export type PendingCancelOp = {
+    cancel: () => void;
+}
 
-//QUESTION: should "outlive" apply to pending cancel ops??
 export function makePendingCancelOp(config: {
-    callback: Callback,
-    enroll: (cb: Callback) => any,
+    callback: () => void,
+    enroll: (cb: () => void) => any,
     remove: (cbOrReturnVal: any) => void
-}) {
+}): PendingCancelOp {
     const { callback, enroll, remove } = config
     let returnVal: any;
-    let pendingAutoCleanups: PendingCancelOp[] | void;
-    // let pendingSceneCleanup: PendingCancelOp | void;
-    const outlive = survivingRemovers.has(callback);
+
     const _callback = () => {
         callback();
-        remove(returnVal ?? _callback);
-        if (outlive) survivingRemovers.delete(callback);
-        else if (pendingAutoCleanups) {
-            for (const cleanup of pendingAutoCleanups){
-                cleanup.cancel();
-            }
-        }
+        remove(returnVal ?? _callback); // will only be called once
     }
-    const cancel = () => { 
-        remove(returnVal ?? _callback);
-        if (outlive) survivingRemovers.delete(callback);
-        else if (pendingAutoCleanups) {
-            for (const cleanup of pendingAutoCleanups){
-                cleanup.cancel();
-            }
-        }
-    }
-    cancel.isRemover = true as const;
-    if (!outlive){
-        pendingAutoCleanups = initAutoCleanup(cancel)
-        // pendingSceneCleanup = initSceneAutoCleanup(cancel)
-    }
-    returnVal = enroll(_callback);
 
-    return {
-        cancel
-    } as PendingCancelOp
+    try {
+        returnVal = enroll(_callback);
+    }
+    finally {
+        const cancel = () => {
+            remove(returnVal ?? _callback);
+        }
+        cancel.isRemover = true as const;
+
+        addToFlask(cancel)
+
+        return {
+            cancel
+        }
+    }
+
 }

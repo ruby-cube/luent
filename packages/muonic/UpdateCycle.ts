@@ -120,7 +120,7 @@ function _runTasks(hookName: Hooks) {
 }
 
 export function onUpdateComplete(task: () => void, options?: { once?: true, until?: ScheduleStop }) {
-    return $listen(task, options, {
+    return $listen(task, options || {}, {
         enroll(task) {
             updateCompletedTasks.push(task)
         },
@@ -131,7 +131,7 @@ export function onUpdateComplete(task: () => void, options?: { once?: true, unti
 }
 
 export function onBeforeUpdatePhase(task: () => void, options?: { once?: true, until?: ScheduleStop }) {
-    return $listen(task, options, {
+    return $listen(task, options || {}, {
         enroll(task) {
             updateCompletedTasks.push(task)
         },

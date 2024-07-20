@@ -34,7 +34,7 @@ import { NodeRef } from "./NodeRef";
 //
 // [node, node, [[node, [node]], [node, [node]]]]
 
-export type NodePod = ReadonlyArray<DOMNode | DynamicNodePod> 
+export type NodePod = ReadonlyArray<DOMNode | DynamicNodePod>
 // & {index?: number, prevNode: ()=> DOMNode | null}
 
 
@@ -77,12 +77,12 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
         return dynamicPod;
     }
 
-    connect(pod: _DynamicNodePod, index: number){
+    connect(pod: _DynamicNodePod, index: number) {
         this.index = index;
         this.pod = pod;
     }
 
-    disconnect(){
+    disconnect() {
         this.index = undefined
         this.pod = undefined
     }
@@ -91,15 +91,16 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
     //     this.componentsToUnmount = this.pod ? [] : undefined;
     // }
 
-    forEachNode(doTask: (node: DOMNode)=>void){
+    forEachNode(doTask: (node: DOMNode, index: number | undefined) => void, index?: number) {
         for (const nodeEntity of this) {
             if (nodeEntity instanceof _DynamicNodePod) {
-                for (const nodePod of nodeEntity) {
-                    nodePod.forEachNode(doTask)
+                for (let i = 0; i < nodeEntity.length; i++) {
+                    const nodePod = nodeEntity[i];
+                    nodePod.forEachNode(doTask, i)
                 }
             }
             else {
-                doTask(nodeEntity)
+                doTask(nodeEntity, index)
             }
         }
     }

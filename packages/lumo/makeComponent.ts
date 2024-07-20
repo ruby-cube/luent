@@ -3,9 +3,9 @@ import { Component, ComponentSetup, getCurrentComponent, InternalComponent, setC
 import { SetKey, Signal } from "../muonic/useSignalize";
 import { LifecycleHook, onActivated, onBeforeUnmount, onDeactivated, onUnmounted } from "./lifecycle";
 import { collectEffects } from "@rue/flask/flask";
-import { _NodeRef, assignNodeRef, castOnCreatedHook, NodeRef } from "./NodeRef";
+import { _NodeRef, NodeRef } from "./NodeRef";
 import { NodeEntity, normalizeRenderOutput } from "./mE";
-import { getPreserveValue } from "./ifCase";
+import { isSettingUpConditionalMount, preserveAllRequested } from "./ifCase";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 export type ComponentConfig<T extends ComponentSetup<AnyObject> = ComponentSetup> = {
@@ -32,30 +32,49 @@ export type RenderSlot = (props: any) => NodeEntity[]
 // }
 export type ComponentOptions = { preserve?: true }
 
+
 export function makeComponent<T extends ComponentSetup>(
     Component: T,
     config: ComponentConfig<T> = {},
     slots: NodeEntity[] | RenderSlot[] | SlotRenderer = [], //TODO:
-    ref: _NodeRef<InternalComponent> | undefined = undefined,
-    options: ComponentOptions | undefined = undefined //TODO:
+    ref: NodeRef<Component> | undefined = undefined,
+    options: ComponentOptions | undefined = undefined
 ) {
     const parent = getCurrentComponent();
     if (!parent) throw new Error("No parent component")
 
-    const preserve = options && options.preserve || parent !== 'root' && parent.preserve || getPreserveValue() || false;
+    const preserve = getPreserveStatus(options, parent)
 
     const component = new InternalComponent(parent, preserve);
-    console.log("preserve", component.preserve)
     setCurrentComponent(component)
-    runComponentSetup(Component, config, component, ref);
+    runComponentSetup(Component, config, component, ref, slots);
     setCurrentComponent(parent) // for sibling components to access parent, must be set AFTER `render()`
     return component;
 }
 
+function getPreserveStatus(
+    options: ComponentOptions | undefined,
+    parent: InternalComponent | 'root',
+) {
+    let preserveRequested: boolean | undefined = options && options.preserve;
+    if (preserveRequested && !isSettingUpConditionalMount()) {
+        preserveRequested = false;
+        if (__DEV__) console.warn('Extraneous preserve component request. Preserve component only within conditional `ifCase(condition, { mount: () => {} })` or `mountIf`')
+    }
+
+    return preserveRequested || preserveAllRequested() || parent !== 'root' && parent.preserve;
+}
 
 
-function runComponentSetup<T extends ComponentSetup>(Component: T, config: ComponentConfig<T> = {}, component: InternalComponent, ref: _NodeRef<InternalComponent> | undefined) {
-    collectEffects((flask) => {
+
+function runComponentSetup<T extends ComponentSetup>(
+    Component: T,
+    config: ComponentConfig<T> = {},
+    component: InternalComponent,
+    ref: NodeRef<Component> | undefined,
+    slots: NodeEntity[] | RenderSlot[] | SlotRenderer
+) {
+    collectEffects((flask, outerFlask) => {
         const { props, on, class: _class, style, $index, ...other } = config;
         const _component = Component(props)
         if (!_component) throw new Error("Component setup must return component blueprint")
@@ -67,10 +86,11 @@ function runComponentSetup<T extends ComponentSetup>(Component: T, config: Compo
         component.component = { ...exposes };
 
         if (ref) {
+            const _ref = new _NodeRef(ref);
             const publicComponent = component.component
-            assignNodeRef(ref, publicComponent, $index)
-            setUpRefUpdates(ref, publicComponent, $index, component.preserve)
-            castOnCreatedHook(ref, component, $index)
+            _ref.assignValue(publicComponent, $index)
+            setUpRefUpdates(_ref, publicComponent, $index, component.preserve)
+            _ref.castOnCreatedHook(publicComponent, $index)
         }
 
         //TODO: Slots (make sure parent is correct)
@@ -91,50 +111,52 @@ function runComponentSetup<T extends ComponentSetup>(Component: T, config: Compo
         //     }
         // }
 
-
+        outerFlask?.onDisposal(flask.dispose) // no outer flask means it's the root component
+    
         // set up hook cascade
         const parent = component.parent;
         if (parent instanceof InternalComponent) {
-            onBeforeUnmount(() => component.emit(LifecycleHook.BEFORE_UNMOUNT), parent)
+            onBeforeUnmount(() => component.emit(LifecycleHook.BEFORE_UNMOUNT), parent) //TODO: how do these get cleaned up?
             onUnmounted(() => component.emit(LifecycleHook.UNMOUNTED), parent)
             onDeactivated(() => component.emit(LifecycleHook.DEACTIVATED), undefined, parent)
             onActivated(() => component.emit(LifecycleHook.ACTIVATED), undefined, parent)
         }
-        onUnmounted(() => flask.dispose())
     })
+
 }
 
 
 function setUpRefUpdates(ref: _NodeRef, component: Component, $index: Signal<number> | undefined, preserve: boolean) {
     if (ref.initialized === true) return;
-    if ($index) { // only initiate once per list
-        const components = ref.components;
+    // if ($index) { // only initiate once per list
+    //     const components = ref.components;
+    //     if (preserve) {
+    //         onDeactivated(() => {
+    //             ref.components = null;
+    //         })
+    //         onActivated(() => {
+    //             ref.components = components
+    //         })
+    //     }
+    //     onBeforeUnmount(() => {
+    //         ref.components = null;
+    //     })
+    // }
+    // else {
         if (preserve) {
             onDeactivated(() => {
-                ref.components = null;
+                ref.setValue(null)
             })
             onActivated(() => {
-                ref.components = components
+                ref.setValue(component)
             })
         }
+
         onBeforeUnmount(() => {
-            ref.components = null;
+            ref.setValue(null);
         })
-    }
-    else {
-        if (preserve) {
-            onDeactivated(() => {
-                ref.component = null;
-            })
-            onActivated(() => {
-                ref.component = component
-            })
-        }
-        onBeforeUnmount(() => {
-            ref.component = null;
-        })
-    }
-    ref.initialized = true;
+    // }
+    ref.markInitialized();
 }
 
 

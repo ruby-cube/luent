@@ -1,5 +1,5 @@
 import { AnyObject, OptionalKeys } from "@rue/types";
-import { ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, setCurrentComponent } from "./component";
+import { Component, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, setCurrentComponent } from "./component";
 import { hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
 import { getWithoutTracking } from "../muonic/DependencyTracker";
 import { DynamicIndices, getCurrentItemAndIndex, insertAndMoveListItemNodes, ListRenderKit, removeListItemNodes } from "./forEachIn";
@@ -9,7 +9,7 @@ import { appendItems, copyAllBut, isEqual } from "@rue/utils";
 import { diff } from "./diff";
 import { isReactive } from "../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod, NodePod } from "./NodePod";
-import { _NodeRef, assignNodeRef, castOnCreatedHook, getNodRef, NodeRef, nullNodeRef } from "./NodeRef";
+import { _NodeRef, getNodRef, NodeRef } from "./NodeRef";
 import { useReactivity } from "../muonic/useReactivity";
 import { Signal } from "../muonic/useSignalize";
 import { getNodeConfig } from "./setUpNode";
@@ -24,7 +24,7 @@ export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | Condition
 
 function setUpDynamicClasses(component: InternalComponent, nodeRef: _NodeRef<HTMLElement>, reactiveEffects: ((o: DOMTokenList) => void)[]) {
     const _initializeRenderEffect = component.preserve ? initializeRenderEffectAndPreserve : initializeRenderEffect
-    nodeRef.onCreated((node) => {
+    nodeRef.o.onCreated((node) => {
         for (const effect of reactiveEffects) {
             _initializeRenderEffect(() => effect(node.classList))
         }
@@ -34,7 +34,7 @@ function setUpDynamicClasses(component: InternalComponent, nodeRef: _NodeRef<HTM
 
 function setUpDynamicStyles(component: InternalComponent, nodeRef: _NodeRef<HTMLElement>, reactiveEffects: ((o: CSSStyleDeclaration) => void)[]) {
     const _initializeRenderEffect = component.preserve ? initializeRenderEffectAndPreserve : initializeRenderEffect
-    nodeRef.onCreated((node) => {
+    nodeRef.o.onCreated((node) => {
         for (const effect of reactiveEffects) {
             _initializeRenderEffect(() => effect(node.style))
         }
@@ -61,48 +61,49 @@ export type HTMLTag = keyof HTMLElementTagNameMap
 
 
 export const _internalReactivity = useReactivity()
-
+type ClosingTag<T extends ComponentSetup = ComponentSetup> = NodeClosingTag | ComponentClosingTag<T>
+type NodeClosingTag = HTMLTag | NodeRef | DOMNodeConfig
+type ComponentClosingTag<T extends ComponentSetup = ComponentSetup> = T | NodeRef | ComponentConfig
 
 export function mE(
     nodeType: HTMLTag,
     childNodes?: NodeEntity[],
-    closingTag?: HTMLTag | NodeRef | DOMNodeConfig,
+    closingTag?: HTMLTag | NodeRef<HTMLElement> | DOMNodeConfig,
     // options?: ElementOptions
 ): DOMNode
 export function mE(
     nodeType: HTMLTag,
     childNodes?: NodeEntity[],
-    closingTag?: HTMLTag | NodeRef | DOMNodeConfig,
+    closingTag?: HTMLTag | NodeRef<HTMLElement> | DOMNodeConfig,
     // closingTag?: HTMLTag | NodeRef | DOMNodeConfig | ElementOptions,
 ): DOMNode
 export function mE<T extends ComponentSetup>(
     nodeType: T,
     childNodes?: NodeEntity[] | RenderSlot[] | SlotRenderer<T>,
-    closingTag?: T | NodeRef | ComponentConfig,
+    closingTag?: T | NodeRef<Component> | ComponentConfig,
     options?: ComponentOptions
 ): InternalComponent
 export function mE<T extends ComponentSetup>(
     nodeType: T,
     childNodes?: NodeEntity[] | RenderSlot[] | SlotRenderer<T>,
-    closingTag?: T | NodeRef | ComponentConfig | ComponentOptions
+    closingTag?: T | NodeRef<Component> | ComponentConfig | ComponentOptions
 ): InternalComponent
 export function mE(
     nodeType: HTMLTag | ComponentSetup,
     childNodes?: NodeEntity[] | RenderSlot[] | SlotRenderer,
     // closingTag?: HTMLTag | ComponentSetup | NodeRef | DOMNodeConfig | ComponentConfig | ElementOptions,
-    closingTag?: HTMLTag | ComponentSetup | NodeRef | DOMNodeConfig | ComponentConfig,
+    closingTag?: ClosingTag,
     // options?: ElementOptions | ComponentOptions
     options?: ComponentOptions
 ): DOMNode | InternalComponent {
     validateClosingTag(nodeType, closingTag);
-    const ref: _NodeRef | undefined = closingTag instanceof NodeRef ? <_NodeRef><unknown>closingTag : undefined;
+    const ref: NodeRef | undefined = closingTag instanceof NodeRef ? <NodeRef><unknown>closingTag : undefined;
     const config = _getNodeConfig(closingTag);
     const _options = options ? options : isOptions(closingTag) ? closingTag : undefined
     if (typeof nodeType === 'string') {
-
-        return makeElement(nodeType, <DOMNodeConfig>config, <NodeEntity[]>childNodes, <_NodeRef<HTMLElement>>ref)
+        return makeElement(nodeType, <DOMNodeConfig>config, <NodeEntity[]>childNodes, <NodeRef<HTMLElement>>ref)
     }
-    return makeComponent(nodeType, <ComponentConfig>config, childNodes, <_NodeRef<InternalComponent>>ref, <ComponentOptions>_options)
+    return makeComponent(nodeType, <ComponentConfig>config, childNodes, <NodeRef<Component>>ref, <ComponentOptions>_options)
 }
 
 function isOptions(maybeOptions: any): maybeOptions is ComponentOptions {
@@ -153,18 +154,17 @@ function initializeRef( // should this be initialize ref?
     }
 
     onBeforeUnmount(() => {
-        ref.node = null;
-        ref.nodes = null;
+        ref.setValue(null);
     })
 
-    ref.initialized = true
+    ref.markInitialized()
 }
 
 export function makeElement<T extends keyof HTMLElementTagNameMap>(
     tagName: T,
     config: DOMNodeConfig = {},
     childNodes: NodeEntity[] | undefined,
-    ref: _NodeRef<HTMLElement> | undefined,
+    ref: NodeRef<HTMLElement> | undefined,
     // options?: ElementOptions
 ): DOMNode {
 
@@ -177,11 +177,10 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     // if (text !== undefined) setUpTextNode(domNode, text)
     // else 
 
-
     if (childNodes) {
         const nodePod = new _NodePod();
         for (const childNodeEntity of childNodes) {
-            setUpNodeEntity(component, domNode, childNodeEntity, nodePod)
+            setUpNodeEntity(component, domNode, childNodeEntity, nodePod, undefined)
         }
     }
 
@@ -210,9 +209,10 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     }
 
     if (ref) {
-        assignNodeRef(ref, domNode, $index) //TODO: need a better strategy for updating ref nodes
-        initializeRef(component, dynamicClasses, dynamicStyles, ref)
-        castOnCreatedHook(ref, domNode, $index)
+        const _ref = new _NodeRef(ref)
+        _ref.assignValue(domNode, $index)
+        initializeRef(component, dynamicClasses, dynamicStyles, _ref)
+        _ref.castOnCreatedHook(domNode, $index)
     }
 
     // if (options) {
@@ -320,7 +320,7 @@ export function setUpNodeEntity(
         setUpNodeList(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
     }
     else if (nodeEntity instanceof ConditionalKit) {
-        setUpConditionalEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount)
+        setUpConditionalEntity(component, parent, nodeEntity, nodePod, fragment)
     }
     else {
         setUpTextNode(parent, nodeEntity, nodePod, fragment)
@@ -376,7 +376,7 @@ function setUpNodeList(
 
     if (isDynamic) {
         const dynamicIndices = new DynamicIndices(indices)
-        const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
+        const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender //TODO: Not sure if I need this yet
 
         // set up watcher for updates
         _watchForRender(data, (newValue: AnyObject[], oldValue: AnyObject[]) => {
@@ -399,9 +399,9 @@ function setUpConditionalEntity(
     renderKit: ConditionalKit,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
-    componentsToUnmount?: InternalComponent[],
+    // componentsToUnmount?: InternalComponent[],
 ) {
-    const { conditionalKits, initialNodeEntities, $initialConditions, initialIndex, type } = renderKit;
+    const { conditionalKits, initialNodeEntities, $initialConditions, initialIndex } = renderKit;
 
     let activeIndex = initialIndex;
 
@@ -410,7 +410,7 @@ function setUpConditionalEntity(
     const _conditionalKits: {
         $condition?: ReactiveSignal<boolean>;
         nodePod: _NodePod;
-        renderConditional: (() => NodeEntity[] | NodeEntity) | (() => void);
+        renderConditional: () => NodeEntity[];
     }[] = []
 
     for (let i = 0; i < conditionalKits.length; i++) {
@@ -421,7 +421,8 @@ function setUpConditionalEntity(
 
     for (const nodeEntity of initialNodeEntities) {
         // append to dom and node pod
-        setUpNodeEntity(component, parent, nodeEntity, _conditionalKits[initialIndex].nodePod, fragment, componentsToUnmount)
+        const nodePod = _conditionalKits[initialIndex].nodePod;
+        setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
     }
     // if (dynamicPod && _dynamicPod) dynamicPod.includeComponents(_dynamicPod.activeComponents) // aggregate components to unmount
 
@@ -447,16 +448,17 @@ function setUpConditionalEntity(
             const { renderConditional, $condition } = kit;
             if ($condition) conditions.push($condition);
             if ($condition && getWithoutTracking($condition) || !$condition) {
-                // if (type === 'show') hidePrevConditionalNodes(component, dynamicPod, activeIndex) //FIX:
-                // else 
-                removePrevConditionalNodes(component, dynamicPod, activeIndex, renderConditional);
+                console.log("remove and insert!")
+                component.emit(LifecycleHook.BEFORE_UPDATE)
+                removePrevConditionalNodes(dynamicPod, activeIndex, renderConditional);
                 activeIndex = i;
                 insertNewConditionalNodes(component, parent, dynamicPod, renderConditional, activeIndex)
+                component.emit(LifecycleHook.UPDATED)
                 break;
             }
         }
         setCurrentComponent(component)
-        watchForRender(genConditionsSignal(conditions), updateConditional, { once: true })
+        _watchForRender(genConditionsSignal(conditions), updateConditional, { once: true })
         setCurrentComponent(null)
     }
 
@@ -473,10 +475,9 @@ export function emitHookBatch(hookName: LifecycleHook, components: InternalCompo
 
 // }
 
-export function removeDOMNodes(nodePod: _NodePod, type: 'destroy' | 'preserve') {
+export function removeDOMNodes(nodePod: _NodePod) {
     nodePod.forEachNode((node) => {
         node.remove();
-        nullNodeRef(node, type);
     })
 }
 
@@ -487,31 +488,46 @@ export function populateFragment(fragment: DocumentFragment, nodePod: _NodePod) 
     })
 }
 
-const preservedNodePods: WeakMap<() => NodeEntity[] | NodeEntity, _NodePod> = new WeakMap();
+const preservedNodePods: WeakMap<() => NodeEntity[], _NodePod> = new WeakMap();
 
-function getPreservedNodePod(renderConditional: () => NodeEntity[] | NodeEntity) {
+function getPreservedNodePod(renderConditional: () => NodeEntity[]) {
     const nodePod = preservedNodePods.get(renderConditional)
     if (!nodePod) throw new Error("nodePod missing")
     return nodePod;
 }
 
-function removePrevConditionalNodes(component: InternalComponent, dynamicPod: _DynamicNodePod, activeIndex: number, renderConditional: () => NodeEntity[] | NodeEntity) {
-    const preserve = component.preserve;
+function removePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeIndex: number, renderConditional: () => NodeEntity[]) {
+    // component === App
+    // const preserve = component.preserve;
     const nodePod = dynamicPod[activeIndex];
     const components = nodePod.componentsToUnmount;
 
-    if (preserve) {
-        preservedNodePods.set(renderConditional, nodePod)
-    }
-    else {
-        emitHookBatch(LifecycleHook.BEFORE_UNMOUNT, components)
-    }
+    // if (preserve) {
+    //     preservedNodePods.set(renderConditional, nodePod) // I don't think this is necessary...
+    // }
+    // else {
+    emitBeforeUnmount(components)
+    // }
 
-    component.emit(LifecycleHook.BEFORE_UPDATE)
-    removeDOMNodes(nodePod, preserve ? 'preserve' : 'destroy')
-    emitHookBatch(preserve ? LifecycleHook.DEACTIVATED : LifecycleHook.UNMOUNTED, components)
-    component.emit(LifecycleHook.UPDATED)
+    removeDOMNodes(nodePod)
+    nullNodeRefValues(nodePod, components)
+    // emitHookBatch(preserve ? LifecycleHook.DEACTIVATED : LifecycleHook.UNMOUNTED, components)
+    emitUnmountedOrDeactivated(components)
     dynamicPod.replaceNodePod(activeIndex, new _NodePod()); // clears previous
+}
+
+function emitUnmountedOrDeactivated(components: InternalComponent[]) {
+    for (const component of components) {
+        if (component.preserve) component.emit(LifecycleHook.DEACTIVATED);
+        else component.emit(LifecycleHook.UNMOUNTED);
+    }
+}
+
+function emitBeforeUnmount(components: InternalComponent[]) {
+    for (const component of components) {
+        if (component.preserve) continue;
+        component.emit(LifecycleHook.BEFORE_UNMOUNT);
+    }
 }
 
 function hidePrevConditionalNodes(component: InternalComponent, dynamicPod: _DynamicNodePod, activeIndex: number) {
@@ -524,32 +540,64 @@ function hidePrevConditionalNodes(component: InternalComponent, dynamicPod: _Dyn
     component.emit(LifecycleHook.UPDATED)
 }
 
-function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[] | NodeEntity, activeIndex: number) {
-    const preserve = component.preserve;
-    const nodePod = preserve ? getPreservedNodePod(renderConditional) : new _NodePod();
+function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[], activeIndex: number) {
+    // const nodePod = preserve ? getPreservedNodePod(renderConditional) : new _NodePod();
+    const nodePod = new _NodePod();
     dynamicPod.replaceNodePod(activeIndex, nodePod);
 
     const fragment = new DocumentFragment();
 
-    if (!preserve) {
-        setCurrentComponent(component);
-        const nodeEntities = normalizeRenderOutput(renderConditional());
-        setCurrentComponent(null)
+    // if (!preserve) {
+    setCurrentComponent(component);
+    const nodeEntities = normalizeRenderOutput(renderConditional());
+    setCurrentComponent(null)
 
-        for (const nodeEntity of nodeEntities) {
-            setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount) //TODO: pass in index in case it's in a list?
-        }
+    for (const nodeEntity of nodeEntities) {
+        setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount) //TODO: pass in index in case it's in a list?
     }
-    else {
-        populateFragment(fragment, nodePod);
-        emitHookBatch(LifecycleHook.ACTIVATED, nodePod.componentsToUnmount)
-    }
+    // }
+    // else {
+    //     populateFragment(fragment, nodePod);
+    // }
 
-    component.emit(LifecycleHook.BEFORE_UPDATE);
+    emitActivated(nodePod.componentsToUnmount)
+    restoreNodeRefValues(nodePod, nodePod.componentsToUnmount)
+
+ 
     let prevSibling = dynamicPod.prevNode;
     if (prevSibling) prevSibling.after(fragment)
     else parent.prepend(fragment)
-    component.emit(LifecycleHook.UPDATED);
+}
+
+function nullNodeRefValues(nodePod: _NodePod, components: Component[]) {
+    nodePod.forEachNode(node => {
+        const ref = getNodRef(node);
+        if (ref && ref.o.value) ref.setValue(null)
+    })
+    // for (const component of components){ //NOTE: Deferred until needed (see note in restoreNodeRefValues)
+    //     const ref = getNodRef(component);
+    //     if (ref && ref.o.value) ref.setValue(null)
+    // }
+}
+
+function restoreNodeRefValues(nodePod: _NodePod, components: Component[]) {
+    nodePod.forEachNode((node, index) => {
+        const ref = getNodRef(node);
+        if (ref) {
+            if (index === undefined) ref.setValue(node);
+            else ref.insertNode(node, index);
+        }
+    })
+    // for (const component of components){ //NOTE: Deferred until needed: nulling and restoring node ref for components. Getting the correct index is tricky.
+    //     const ref = getNodRef(component);
+    //     if (ref && ref.o.value) ref.setValue(component)
+    // }
+}
+
+function emitActivated(components: InternalComponent[]) {
+    for (const component of components) {
+        if (component.preserve) component.emit(LifecycleHook.ACTIVATED);
+    }
 }
 
 export function normalizeRenderOutput(output: NodeEntity[] | NodeEntity) {

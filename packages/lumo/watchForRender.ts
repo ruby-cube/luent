@@ -25,6 +25,7 @@ export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveObject<T e
     if (!component || component === "root") throw Error("watchForRender must be called within component setup")
 
     const _handler = (newValue: any, oldValue: any) => {
+        console.trace()
         handler(newValue, oldValue);
         setUpUpdateHooks(component)
     }

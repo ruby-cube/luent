@@ -3,7 +3,7 @@ import { vi, expect, describe, test, beforeEach } from "vitest";
 import { sceneSetup, Scene } from "../../flask/Scene";
 import { createHook, DevListener } from "../Hook";
 import { Callback, Callbacks, initFlask } from "../../flask";
-import { NestableFlask, OUTLIVE, enflask, collectEffects } from "../../flask/flask";
+import { NestableFlask, OUTLIVE, enflask, collectEffects } from "../../flask/_flask";
 import { __resetGlobals } from "../../dev/__resetGlobals";
 
 // cleanup cleanups if alternative cleanup strategy run

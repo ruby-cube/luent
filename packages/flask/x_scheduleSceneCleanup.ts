@@ -2,7 +2,7 @@ import { CallbackRemover, PendingCancelOp } from ".";
 import { Scene } from "./Scene"
 
 
-export let scheduleSceneCleanup: ((stop: CallbackRemover<void>) => PendingCancelOp) | null;
+export let scheduleSceneCleanup: ((stop: CallbackRemover) => PendingCancelOp) | null;
 export let schedulingSceneCleanup = false; // to prevent infinite loop of auto cleanup listener
 export let existingPendingSceneCleanup: PendingCancelOp | null;
 

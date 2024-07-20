@@ -1,57 +1,65 @@
-import { survivingRemovers } from "./outlive";
-import { Callback, initAutoCleanup, ListenerOptions, PendingCancelOp } from "./flaskedListeners";
+import { Callback, ListenerOptions } from "./flaskedListeners";
+import { addToFlask } from "./flask";
+import { PendingCancelOp } from "./PendingCancelOp";
 
 export type ActiveListener = {
     stop(): void;
 }
 
-export function makeActiveListener<R, Arg extends R extends void ? Callback : R, CB extends Callback>(
-    config: {
-        callback: CB,
-        enroll: (callback: CB) => R,
-        remove: (cbOrReturnVal: Arg) => void,
-        options: ListenerOptions | undefined
-    }
-) {
+
+export type RemoveFunction<E extends EnrollFunction> =
+    E extends (arg: any) => infer R ?
+    R extends Callback ?
+    (cleanUp: R) => void
+    : (wrappedCB: Callback) => void
+    : never
+export type EnrollFunction = (wrappedCB: Callback) => void | Callback
+
+type ActiveListenerConfig<E extends EnrollFunction = EnrollFunction> = {
+    callback: Callback,
+    enroll: E,
+    remove: RemoveFunction<E>,
+    options: ListenerOptions | undefined
+}
+
+export function makeActiveListener<E extends (wrappedCB: Callback) => void | Callback>(
+    config: ActiveListenerConfig<E>
+): ActiveListener {
     const { enroll, remove, callback, options } = config;
-    const until = options?.until || null;
-    const outlive = options?.outlive;
-    let returnVal: any;
-    let pendingAutoStops: PendingCancelOp[] | void;
-    let pendingStop: PendingCancelOp | undefined
-    // let pendingSceneStop: PendingCancelOp | void;
-    const stop = () => {
-        remove(returnVal ?? callback);
-        if (pendingStop) pendingStop.cancel();
-        if (outlive) survivingRemovers.delete(stop);
-        else if (pendingAutoStops) {
-            for (const cleanup of pendingAutoStops){
-                cleanup.cancel();
+    const once = options?.once;
+
+    let returnVal: void | Callback;
+
+    const _callback = once ? (...args: any[]) => {
+        callback(...args);
+        remove(returnVal ?? _callback)
+    } : callback;
+
+    try {
+        returnVal = enroll(_callback);
+    }
+    finally {
+        const until = options?.until || null;
+        let pendingStop: PendingCancelOp | undefined
+
+        const stop = () => {
+            try {
+                remove(returnVal ?? callback);
+            }
+            finally {
+                if (pendingStop) pendingStop.cancel();
             }
         }
-    }
-    stop.isRemover = true as const;
-    if (until) {
-        if (outlive) survivingRemovers.add(stop);
-        pendingStop = until(stop);
-    }
-    returnVal = enroll(callback);
+        stop.isRemover = true as const;
 
-    if (!outlive) {
-        var success = pendingAutoStops = initAutoCleanup(stop);
-    }
+        if (until) {
+            pendingStop = until(stop);
+        }
 
-    if (__DEV__) {
-        const { until, once } = options || {};
-        if (
-            // !pendingSceneStop && 
-            !success && !once && !until) {
-            // console.warn("This listener doesn't have a callback removal strategy (run once, run until, or auto cleanup). This is considered a memory leak if this listener is not intended to last the lifetime of the app. Check if auto cleanup callback returns a success flag")
-            // console.trace();
+        addToFlask(stop);
+
+        return {
+            stop
         }
     }
-
-    return {
-        stop
-    } as ActiveListener
 }

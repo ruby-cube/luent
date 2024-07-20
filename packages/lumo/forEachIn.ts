@@ -7,6 +7,7 @@ import { Signal } from "../muonic/useSignalize";
 import { LifecycleHook } from "./lifecycle";
 import { InternalComponent, setCurrentComponent } from "./component";
 import { InsertAndMoveKit } from "./diff";
+import { getNodRef } from "./NodeRef";
 
 
 export type RenderItem<T = any> = (item: T, $index: Signal<number>) => NodeEntity[] | NodeEntity
@@ -32,7 +33,7 @@ export function getCurrentItemAndIndex(): [any, Signal<number>] {
     return [currentItem, $currentIndex]
 }
 
-export function setCurrentItemAndIndex(item: any, $index: Signal<number>){
+export function setCurrentItemAndIndex(item: any, $index: Signal<number>) {
     currentItem = item;
     $currentIndex = $index;
 }
@@ -87,17 +88,25 @@ export function removeListItemNodes(dynamicList: _DynamicNodePod, indicesToRemov
         const nodePod = dynamicList[index];
         const components = nodePod.componentsToUnmount;
         emitHookBatch(LifecycleHook.BEFORE_UNMOUNT, components!)
-        removeDOMNodes(dynamicList[index])
+        removeDOMNodes(nodePod)
+        removeNodesFromRef(nodePod)
         emitHookBatch(LifecycleHook.UNMOUNTED, components!)
     }
 }
 
-function removeDOMNodes(nodePod: _NodePod){
-    nodePod.forEachNode((node)=>{
+function removeDOMNodes(nodePod: _NodePod) {
+    nodePod.forEachNode((node) => {
         node.remove();
-        //TODO: I don't know how to update refs for list
     })
 }
+
+function removeNodesFromRef(nodePod: _NodePod) {
+    nodePod.forEachNode((node, index) => {
+        const ref = getNodRef(node)
+        if (ref) ref.removeNode(index!)
+    })
+}
+
 
 type Index = number
 type Count = number
@@ -189,7 +198,7 @@ export function insertAndMoveListItemNodes(
         dynamicList!.removeNodePods(index, count);
     }
 
-    // (2) insert nodes into node pods
+    // (2) insert node pods into dynamic list
     for (const [index, nodePods] of indicesAndNodePods) {
         dynamicList.insertNodePods(index, nodePods)
     }
@@ -199,6 +208,16 @@ export function insertAndMoveListItemNodes(
         const prevNode = dynamicList[index].prevNode
         if (prevNode) prevNode.after(fragment);
         parent.prepend(fragment);
+    }
+
+    // (4) update node refs
+    for (const [_, nodePods] of indicesAndNodePods) {
+        for (const nodePod of nodePods) {
+            nodePod.forEachNode((node, index) => {
+                const ref = getNodRef(node);
+                if (ref) ref.insertNode(node, index!)
+            })
+        }
     }
 }
 

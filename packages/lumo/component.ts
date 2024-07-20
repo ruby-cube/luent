@@ -2,6 +2,7 @@ import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "./lifecycle";
 import { NodeEntity } from "./mE";
 import { RenderSlot, SlotRenderer } from "./makeComponent";
+import { _NodeRef } from "./NodeRef";
 
 // export type NodeRef = Signal<Component | DOMNode | (DOMNode | Component)[]>
 
@@ -29,7 +30,7 @@ export class InternalComponent {
     component: Component | undefined;
     parent: InternalComponent | 'root';
     initialNodeEntities: NodeEntity[] = []; //TODO: add context type?? //QUESTION: should this be cleared or updated?
-    preserve: boolean = false;
+    preserve: boolean;
     tasks: {
         [LifecycleHook.BEFORE_MOUNT]: Set<() => void> | undefined;
         [LifecycleHook.BEFORE_UNMOUNT]: Set<() => void> | undefined;

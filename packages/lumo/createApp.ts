@@ -11,7 +11,9 @@ export function createApp(App: ComponentSetup) {
             if (!(root instanceof HTMLElement)) throw new Error('No root element to mount app to. Check selector string')
             const component = makeComponent(this.App)
             const nodePod = new _NodePod();
-            setUpComponent(new InternalComponent('root', false), root, component, nodePod)
+            setCurrentComponent(component)
+            setUpComponent(component, root, component, nodePod)
+            setCurrentComponent(null)
         }
     }
 }

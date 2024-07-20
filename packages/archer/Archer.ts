@@ -14,7 +14,7 @@ type MessageConfig<LIT = string, $DAT = any, USE extends UseHookState = typeof _
 }
 
 type TargetID = any
-type CallbackMap = Map<TargetID, Callback | CallbackRemover<void>>
+type CallbackMap = Map<TargetID, Callback | CallbackRemover>
 
 const messageMap: Map<MessageConfig, CallbackMap> = new Map() //TODO: Clean up?? Is it necessary?
 

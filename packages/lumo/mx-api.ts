@@ -90,7 +90,7 @@ function List() {
     const headingRef = new NodeRef();
 
     onBeforeMount(() => {
-        console.log(itemsRef.nodes)
+        console.log(itemsRef.value)
     })
 
     itemsRef.onCreated((itemNode, i) => {
