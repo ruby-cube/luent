@@ -5,6 +5,7 @@ import { onActivated, onDeactivated } from "./lifecycle";
 import { NodeEntity, normalizeRenderOutput } from "./mE";
 import { initializeRenderEffect, watchForRender } from "./watchForRender";
 import { getCurrentComponent, InternalComponent, setCurrentComponent } from "./component";
+import { Signal } from "../muonic/useSignalize";
 
 export class ConditionalKit {
     constructor(
@@ -21,12 +22,12 @@ export type MountIfRenderers = ((() => NodeEntity) | NodeEntity)[]
 
 export type ConditionalRenderKit = { // ManifestationKit
     $condition?: ReactiveSignal<boolean>,
-    renderConditional: ()=>NodeEntity[]
+    renderConditional: () => NodeEntity[]
     // (() => NodeEntity[] | NodeEntity) | undefined | (() => void), // set display property
 }
 
 export type ElseIfRenderKit = {
-    renderConditional: ()=>NodeEntity[];
+    renderConditional: () => NodeEntity[];
     $condition: ReactiveSignal<boolean>;
 }
 
@@ -191,19 +192,35 @@ export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfCon
         if (!conditionMet) initialIndex++;
     }
 
+    conditionalKits.push({ renderConditional: () => [] })
+    if (!conditionMet) initialIndex++;
+
+
     function processElseIf($condition: ReactiveSignal<boolean>, elseIfValue: MountIfRenderersConfig) {
-        conditionalKits.push({ renderConditional: composeConditionalRenderer(elseIfValue, preserveAll) })
+        conditionalKits.push({ $condition, renderConditional: composeConditionalRenderer(elseIfValue, preserveAll) })
         if (!conditionMet) {
             conditions.push($condition)
             initialIndex++
+            conditionMet = getWithoutTracking($condition) //QUESTION: is getWithOutTracking necessary?
         }
-        conditionMet = getWithoutTracking($condition) //QUESTION: is getWithOutTracking necessary?
     }
 
     const nodeEntities = normalizeRenderOutput(conditionalKits[initialIndex].renderConditional())
     return new ConditionalKit(conditionalKits, nodeEntities, $initialConditions, initialIndex)
 }
 
+// export function composeConditions(conditionalKits: ConditionalRenderKit[]) {
+//     let conditionMet = false;
+//     const conditions: ReactiveSignal<boolean>[] = []
+//     for (const { $condition } of conditionalKits) {
+//         if (conditionMet) break;
+//         if ($condition) {
+//             conditions.push($condition);
+//             conditionMet = getWithoutTracking($condition);
+//         }
+//     }
+//     return conditions
+// }
 
 
 

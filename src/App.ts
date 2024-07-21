@@ -92,7 +92,8 @@ export function App() {
     const oList = setUpNode(List, {})
     const xDiv = setUpNode('div', {})
 
-    const $active = $(true);
+    const $active = $(false);
+    const $ready = $(false);
 
 
     return {
@@ -101,10 +102,10 @@ export function App() {
             ifCase($active, {
                 mount: () =>
                     mE('div', [
-                        "hellow world"
-                        // mE(List, [], oList),
+                        // "hellow world"
+                        mE(List, [], oList),
                     ], xDiv),
-                else: () => mE('p', ['none'])
+                elseIf: [$ready, () => mE('p', ['none'])]
             }),
             mE('button', ['toggle'], xButton),
             mE('div', [$count]),

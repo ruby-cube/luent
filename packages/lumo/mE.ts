@@ -442,13 +442,13 @@ function setUpConditionalEntity(
 
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
         if (isEqual(newValue, oldValue)) return;
-        const conditions: ReactiveSignal<boolean>[] = [];
+        
+        const conditions: ReactiveSignal<boolean>[] = []
         for (let i = 0; i < conditionalKits.length; i++) {
             const kit = conditionalKits[i]
             const { renderConditional, $condition } = kit;
             if ($condition) conditions.push($condition);
             if ($condition && getWithoutTracking($condition) || !$condition) {
-                console.log("remove and insert!")
                 component.emit(LifecycleHook.BEFORE_UPDATE)
                 removePrevConditionalNodes(dynamicPod, activeIndex, renderConditional);
                 activeIndex = i;
@@ -457,6 +457,8 @@ function setUpConditionalEntity(
                 break;
             }
         }
+
+        // const conditions: ReactiveSignal<boolean>[] = composeConditions(conditionalKits)
         setCurrentComponent(component)
         _watchForRender(genConditionsSignal(conditions), updateConditional, { once: true })
         setCurrentComponent(null)
