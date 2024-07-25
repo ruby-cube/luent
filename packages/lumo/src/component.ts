@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "./lifecycle";
 import { NodeEntity } from "./mE";
-import { RenderSlot, SlotRenderer } from "./makeComponent";
+import { RenderSlot, SlotRenderer } from "./mO";
 import { _NodeRef } from "./NodeRef";
 
 // export type NodeRef = Signal<Component | DOMNode | (DOMNode | Component)[]>
@@ -14,13 +14,7 @@ export type Props = {
 
 
 
-export type ComponentSetup<T extends Props = AnyObject> = (props?: T, context?: AnyObject) => {
-    render: () => NodeEntity[] | NodeEntity;
-    exposes?: AnyObject;
-    provides?: AnyObject;
-    scoped?: string;
-    global?: string;
-}
+export type ComponentSetup<T extends Props = AnyObject> = (props?: T, context?: AnyObject) => NodeEntity[] | NodeEntity
 
 export type Component = AnyObject // contains anything in expose
 
@@ -74,14 +68,30 @@ export class InternalComponent {
 }
 
 
+// Manages component "stack"
 let currentComponent: InternalComponent | null | "root" = "root";
+let prevComponent: InternalComponent | null | "root" = null;
 
 export function getCurrentComponent() {
     return currentComponent;
 }
 
-export function setCurrentComponent(component: InternalComponent | 'root' | null) {
-    currentComponent = component
+export function pushComponent(component: InternalComponent | null | "root") {
+    prevComponent = currentComponent;
+    currentComponent = component;
+}
+
+export function popComponent() {
+    currentComponent = prevComponent;
+}
+
+
+
+
+export function expose(component: AnyObject) {
+    const _component = getCurrentComponent();
+    if (_component === null || _component === "root") throw new Error("Cannot call `expose` outside of component setup")
+    _component.component = component;
 }
 
 // export function runUpdates(this: InternalComponent) {

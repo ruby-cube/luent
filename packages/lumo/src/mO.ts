@@ -1,11 +1,11 @@
 import { AnyObject } from "@rue/types";
-import { Component, ComponentSetup, getCurrentComponent, InternalComponent, setCurrentComponent } from "./component";
-import { SetKey, Signal } from "../muonic/useSignalize";
+import { Component, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "./component";
+import { SetKey, Signal } from "../../muonic/useSignalize";
 import { LifecycleHook, onActivated, onBeforeUnmount, onDeactivated, onUnmounted } from "./lifecycle";
 import { collectEffects } from "@rue/flask/flask";
 import { _NodeRef, NodeRef } from "./NodeRef";
 import { NodeEntity, normalizeRenderOutput } from "./mE";
-import { isSettingUpConditionalMount, preserveAllRequested } from "./ifCase";
+import { isSettingUpConditionalMount, preserveAllRequested } from "./mountIf";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 export type ComponentConfig<T extends ComponentSetup<AnyObject> = ComponentSetup> = {
@@ -46,9 +46,9 @@ export function makeComponent<T extends ComponentSetup>(
     const preserve = getPreserveStatus(options, parent)
 
     const component = new InternalComponent(parent, preserve);
-    setCurrentComponent(component)
+    pushComponent(component)
     runComponentSetup(Component, config, component, ref, slots);
-    setCurrentComponent(parent) // for sibling components to access parent, must be set AFTER `render()`
+    popComponent() // for sibling components to access parent, must be set AFTER `Component()`
     return component;
 }
 
@@ -76,18 +76,16 @@ function runComponentSetup<T extends ComponentSetup>(
 ) {
     collectEffects((flask, outerFlask) => {
         const { props, on, class: _class, style, $index, ...other } = config;
-        const _component = Component(props)
-        if (!_component) throw new Error("Component setup must return component blueprint")
-        const { render, provides, exposes } = _component;
-        const nodeEntities = normalizeRenderOutput(render());
+        // const _component = Component(props)
+        // if (!_component) throw new Error("Component setup must return component blueprint")
+        // const { render, provides, exposes } = _component;
+        const nodeEntities = normalizeRenderOutput(Component(props));
 
         component.initialNodeEntities = nodeEntities;
-        component.provides = provides;
-        component.component = { ...exposes };
 
         if (ref) {
             const _ref = new _NodeRef(ref);
-            const publicComponent = component.component
+            const publicComponent = component.component || {};
             _ref.assignValue(publicComponent, $index)
             setUpRefUpdates(_ref, publicComponent, $index, component.preserve)
             _ref.castOnCreatedHook(publicComponent, $index)

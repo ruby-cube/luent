@@ -1,3 +1,4 @@
+import { Callback } from "./flaskedListeners";
 
 
 type Flask = {
@@ -8,22 +9,24 @@ type Flask = {
 
 // Manages flask stack
 let activeFlask: NestableFlask | null = null;
+let previousFlask: NestableFlask | null = null;
 
-function activateFlask(flask: NestableFlask) {
-    flask.setOuter(activeFlask);
+function pushFlask(flask: NestableFlask) {
+    // flask.setOuter(activeFlask);
+    previousFlask = activeFlask;
     activeFlask = flask;
 }
 
-function popFlask(flask: NestableFlask) {
-    activeFlask = flask.outer;
+function popFlask() {
+    activeFlask = previousFlask;
 }
 
-export function getCurrentFlask() {
+export function getActiveFlask() {
     return activeFlask;
 }
 
 export function onFlaskDisposal(cb: () => void) {
-    const flask = getCurrentFlask();
+    const flask = getActiveFlask();
     if (!flask) return;
     flask.o.onDisposal(cb);
 }
@@ -59,13 +62,24 @@ function createFlask(_flask: NestableFlask) {
 }
 
 export function collectEffects(run: (flask: Flask, outerFlask: Flask | null) => any) {
+    const outerFlask = getActiveFlask();
     const _flask = new NestableFlask();
     try {
-        activateFlask(_flask);
-        return run(_flask.o, _flask?.outer?.o || null);
+        pushFlask(_flask);
+        return run(_flask.o, outerFlask?.o || null);
     }
     finally {
-        popFlask(_flask);
+        popFlask();
+    }
+}
+
+
+export function bindFlask(callback: Callback){
+    const flask = getActiveFlask()!;
+    return (...args: any[])=>{
+        pushFlask(flask)
+        callback();
+        popFlask();
     }
 }
 
@@ -81,7 +95,7 @@ export function collectEffects(run: (flask: Flask, outerFlask: Flask | null) => 
 INTERNAL 
 */
 export function addToFlask(cleanup: () => void) {
-    const _flask = getCurrentFlask();
+    const _flask = getActiveFlask();
     _flask?.cleanups.add(cleanup)
 }
 

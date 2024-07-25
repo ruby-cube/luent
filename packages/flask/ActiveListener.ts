@@ -1,5 +1,5 @@
 import { Callback, ListenerOptions } from "./flaskedListeners";
-import { addToFlask } from "./flask";
+import { addToFlask, getActiveFlask, bindFlask } from "./flask";
 import { PendingCancelOp } from "./PendingCancelOp";
 
 export type ActiveListener = {
@@ -30,10 +30,10 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 
     let returnVal: void | Callback;
 
-    const _callback = once ? (...args: any[]) => {
+    const _callback = bindFlask(once ? (...args: any[]) => {
         callback(...args);
         remove(returnVal ?? _callback)
-    } : callback;
+    } : callback);
 
     try {
         returnVal = enroll(_callback);

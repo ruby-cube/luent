@@ -2,7 +2,7 @@ import { $listen, ActiveListener, ListenerOptions, ScheduleStop } from "@rue/fla
 import { Component, ComponentSetup, DOMNode, InternalComponent } from "./component"
 import { _NodePod } from "./NodePod"
 import { removeItem } from "@rue/utils"
-import { Signal } from "../muonic/useSignalize"
+import { Signal } from "../../muonic/useSignalize"
 import { HTMLTag } from "./mE"
 
 

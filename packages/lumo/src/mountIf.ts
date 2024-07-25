@@ -1,11 +1,11 @@
-import { getWithoutTracking } from "../muonic/DependencyTracker";
-import { hasSignal, makeDerivedSignal, ReactiveSignal } from "../muonic/useDerivedSignal"
-import { ReactiveObject } from "../muonic/useReactivize";
+import { getWithoutTracking } from "../../muonic/DependencyTracker";
+import { DerivedSignal, hasSignal, makeDerivedSignal, ReactiveSignal } from "../../muonic/useDerivedSignal"
+import { ReactiveObject } from "../../muonic/useReactivize";
 import { onActivated, onDeactivated } from "./lifecycle";
 import { NodeEntity, normalizeRenderOutput } from "./mE";
-import { initializeRenderEffect, watchForRender } from "./watchForRender";
-import { getCurrentComponent, InternalComponent, setCurrentComponent } from "./component";
-import { Signal } from "../muonic/useSignalize";
+import { watchRenderEffect, watchForRender } from "./watchForRender";
+import { getCurrentComponent, InternalComponent, popComponent, pushComponent } from "./component";
+import { Signal } from "../../muonic/useSignalize";
 
 export class ConditionalKit {
     constructor(
@@ -18,7 +18,7 @@ export class ConditionalKit {
 
 type ShowIfEntities = NodeEntity[] | NodeEntity;
 export type MountIfRenderersConfig = (() => NodeEntity)[] | (() => NodeEntity)
-export type MountIfRenderers = ((() => NodeEntity) | NodeEntity)[]
+export type MountIfRenderers = ((() => NodeEntity) | NodeEntity)[] | (() => NodeEntity)
 
 export type ConditionalRenderKit = { // ManifestationKit
     $condition?: ReactiveSignal<boolean>,
@@ -49,11 +49,12 @@ type ConditionalOptions = {
 //         text: 'help me'
 //     })
 // })
-type ElseIfMount = [ReactiveSignal<boolean>, MountIfRenderers]
+type ElseIfMount = [ReactiveSignal<boolean>, MountIfRenderersConfig]
 
 type MountIfConfig = {
     mount: MountIfRenderersConfig;
-    elseIf?: ElseIfMount[] | [ReactiveSignal<boolean>, MountIfRenderersConfig]
+    elseIf?: [ReactiveSignal<boolean>, MountIfRenderersConfig] | ElseIfMount[]
+    // elseIf?: ElseIfMount[] | [Signal<boolean>, MountIfRenderers] | [DerivedSignal<boolean>, MountIfRenderers]
     else?: MountIfRenderersConfig
 }
 
@@ -101,7 +102,7 @@ export function isSettingUpConditionalMount() {
     return _isSettingUpConditionalMount;
 }
 
-function wrapRenderersWithContext(conditionalRenderers: MountIfRenderersConfig, preserve: boolean): MountIfRenderers {
+function wrapRenderersWithContext(conditionalRenderers: MountIfRenderersConfig, preserve: boolean): MountIfRenderersConfig {
     if (conditionalRenderers instanceof Array) {
         const renderers = []
         for (const renderer of conditionalRenderers) {
@@ -131,12 +132,13 @@ function wrapWithContext(renderConditional: () => NodeEntity, preserve: boolean)
 }
 
 
-function renderConditional_initial(renderers: MountIfRenderers): NodeEntity[] | NodeEntity {
+function renderConditional_initial(renderers: (() => NodeEntity)[]): NodeEntity[] | NodeEntity {
     const nodeEntities = []
     for (let i = 0; i < renderers.length; i++) {
         const render = renderers[i];
         const output = render();
         if (output instanceof InternalComponent && output.preserve) {
+            //@ts-ignore
             renderers[i] = output;
         }
         nodeEntities.push(output);
@@ -144,7 +146,7 @@ function renderConditional_initial(renderers: MountIfRenderers): NodeEntity[] | 
     return nodeEntities;
 }
 
-function renderConditional(renderers: MountIfRenderers) {
+function renderConditional(renderers: (() => NodeEntity)[]) {
     const nodeEntities = []
     for (const render of renderers) {
         nodeEntities.push(render instanceof Function ? render() : render)
@@ -241,29 +243,29 @@ export function watchForRenderAndPreserve(target: ReactiveSignal<any> | Reactive
     if (hasSignal(target)) {
         onActivated(() => {
             handler(target(), oldValue)
-            setCurrentComponent(component)
+            pushComponent(component)
             watchForRender(target, handler, options)
-            setCurrentComponent(null)
+            popComponent()
         })
     }
     else {
         onActivated(() => {
             handler(target, oldValue)
-            setCurrentComponent(component)
+            pushComponent(component)
             watchForRender(target, handler, options)
-            setCurrentComponent(null)
+            popComponent()
         })
     }
 }
 
-export function initializeRenderEffectAndPreserve(handler: () => void) {
-    const watcher = initializeRenderEffect(handler);
+export function watchRenderEffectAndPreserve(handler: () => void) {
+    const watcher = watchRenderEffect(handler);
 
     onDeactivated(() => {
         watcher.stop()
     })
 
     onActivated(() => {
-        initializeRenderEffect(handler)
+        watchRenderEffect(handler)
     })
 }

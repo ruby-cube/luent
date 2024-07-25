@@ -1,4 +1,4 @@
-import { createApp } from '../packages/lumo/createApp';
+import { createApp } from '../../../packages/lumo/src';
 import { App } from './App';
 import './style.css'
 

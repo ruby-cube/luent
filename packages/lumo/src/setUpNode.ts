@@ -1,10 +1,10 @@
 import { Component, ComponentSetup, InternalComponent } from "./component";
 import { DOMNodeConfig, HTMLTag } from "./mE";
-import { ComponentConfig } from "./makeComponent";
+import { ComponentConfig } from "./mO";
 import { NodeRef } from "./NodeRef";
 import { ListData } from "./forEachIn";
-import { Signal } from "../muonic/useSignalize";
-import { ReactiveSignal } from "../muonic/useDerivedSignal";
+import { Signal } from "../../muonic/useSignalize";
+import { ReactiveSignal } from "../../muonic/useDerivedSignal";
 
 // const xMainBlock = setUpNode('div', {
 //     class: [

@@ -3,8 +3,9 @@
     "private": true,
     "description": "",
     "dependencies": {
+        "@rue/flask": "workspace:*",
         "@rue/muonic": "workspace:*",
-        "@rue/flask": "workspace:*"
+        "@rue/utils": "workspace:*"
     },
     "devDependencies": {
         "@rue/types": "workspace:*"

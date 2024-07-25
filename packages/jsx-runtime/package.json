@@ -1,10 +1,9 @@
 {
-    "name": "@rue/play",
+    "name": "@rue/jsx-dev-runtime",
     "private": true,
     "description": "",
     "dependencies": {
-        "@rue/vine": "workspace:*",
-        "@rue/muonic": "workspace:*"
+        "@rue/lumo": "workspace:*"
     },
     "devDependencies": {
         "@rue/types": "workspace:*"

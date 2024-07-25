@@ -1,17 +1,17 @@
 //@ts-nocheck
 import { AnyObject } from "@rue/types";
-import { Observable, o$ } from "../muonic/ObservableCapsule";
+import { Observable, o$ } from "../../muonic/ObservableCapsule";
 import { $ } from "../signals";
-import { DOMNode } from "./component";
-import { ListRenderKit } from "./mE";
-import { ReactiveSignal } from "../muonic/useDerivedSignal";
+import { DOMNode } from "../src/component";
+import { ListRenderKit } from "../src/mE";
+import { ReactiveSignal } from "../../muonic/useDerivedSignal";
 import { mEO } from "./mEO";
-import { onBeforeMount } from "./lifecycle";
-import { initializeEffect } from "../muonic/watch";
+import { onBeforeMount } from "../src/lifecycle";
+import { watchEffect } from "../../muonic/watch";
 import { reMouseDown } from "../actionry/__test__/actionry.type-test";
-import { NodeEntity } from "./mE";
-import { setUpComponent } from "./mE";
-import { forEachIn } from "./forEachIn";
+import { NodeEntity } from "../src/mE";
+import { setUpComponent } from "../src/mE";
+import { forEachIn } from "../src/forEachIn";
 
 type Signal<T> = () => T
 
@@ -31,7 +31,7 @@ const _H1 = "h1"
 
 // function dynamicStyle(effect: (refs: { [key: string]: DOMNode }) => void) {
 //     onBeforeMount((refs: { [key: string]: DOMNode }) => {
-//         initializeEffect(() => { effect(refs) })
+//         watchEffect(() => { effect(refs) })
 //     })
 // }
 
@@ -40,7 +40,7 @@ function List() {
     // onBeforeMount(() => {
     //     const listItems = getDOMNode('listItems')
 
-    //     initializeEffect(() => {
+    //     watchEffect(() => {
     //         for (const item of listItems) {
     //             if ($isActive)
     //                 item.style.backgroundColor = 'blue'
@@ -234,9 +234,9 @@ function List() {
 
                 forEachIn($items, (item, index) => [
                     mE('p', [
-                        mE('div', [
+                        mE(Item, [
                             mE(ListBlock)
-                        ]),
+                        ], xItems.setUp(item, index)),
                         mE(Frog, {
                             description: [
 
@@ -310,29 +310,29 @@ function App() {
     const oCard =
         setUpNode(Card, {
             class: 'card',
-            slot: {
-                description: ({ $width }) => ({
-                    styles: [
-                        (o) => {
-                            o.width = $width()
-                        }
-                    ]
-                })
-            }
         })
 
     const descriptionDiv =
-        setUpNode('div');
+        setUpSlotContent(Card, {
+            description: ['div', ({ $width }) => ({
+                styles: [
+                    (o) => {
+                        o.width = $width()
+                    }
+                ]
+            })]
+        });
+
 
     return {
         render: () =>
             mE('div', [
-                mE(Card, {
+                mE(Card, {  //pass render functions directly into component
                     title: () => 'Hello World',
                     description: ({ $width }) =>
                         mE('div', [
                             $(o => `Soft feathers ${$width()} and what not`)
-                        ], 'div')
+                        ], descDiv.setUp($width))
                 }, Card),
                 forEachIn(list$, (item, i) =>
                     mE('div', [item]))

@@ -1,20 +1,20 @@
 import { AnyObject, OptionalKeys } from "@rue/types";
-import { Component, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, setCurrentComponent } from "./component";
-import { hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
-import { getWithoutTracking } from "../muonic/DependencyTracker";
+import { Component, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "./component";
+import { hasSignal, ReactiveSignal } from "../../muonic/useDerivedSignal";
+import { getWithoutTracking } from "../../muonic/DependencyTracker";
 import { DynamicIndices, getCurrentItemAndIndex, insertAndMoveListItemNodes, ListRenderKit, removeListItemNodes } from "./forEachIn";
 import { LifecycleHook, onBeforeUnmount, onUnmounted } from "./lifecycle";
-import { _mountIf, genConditionsSignal, ConditionalKit, watchForRenderAndPreserve, initializeRenderEffectAndPreserve } from "./ifCase";
+import { _mountIf, genConditionsSignal, ConditionalKit, watchForRenderAndPreserve, watchRenderEffectAndPreserve } from "./mountIf";
 import { appendItems, copyAllBut, isEqual } from "@rue/utils";
 import { diff } from "./diff";
-import { isReactive } from "../muonic/useReactivize";
+import { isReactive } from "../../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod, NodePod } from "./NodePod";
 import { _NodeRef, getNodRef, NodeRef } from "./NodeRef";
-import { useReactivity } from "../muonic/useReactivity";
-import { Signal } from "../muonic/useSignalize";
+import { useReactivity } from "../../muonic/useReactivity";
+import { Signal } from "../../muonic/useSignalize";
 import { getNodeConfig } from "./setUpNode";
-import { ComponentConfig, ComponentOptions, makeComponent, RenderSlot, SlotRenderer } from "./makeComponent";
-import { initializeRenderEffect, watchForRender } from "./watchForRender";
+import { ComponentConfig, ComponentOptions, makeComponent, RenderSlot, SlotRenderer } from "./mO";
+import { watchRenderEffect, watchForRender } from "./watchForRender";
 import { hideDOMNodes } from "./showIf";
 
 export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | ConditionalKit | any | ReactiveSignal<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
@@ -23,20 +23,20 @@ export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | Condition
 
 
 function setUpDynamicClasses(component: InternalComponent, nodeRef: _NodeRef<HTMLElement>, reactiveEffects: ((o: DOMTokenList) => void)[]) {
-    const _initializeRenderEffect = component.preserve ? initializeRenderEffectAndPreserve : initializeRenderEffect
+    const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
     nodeRef.o.onCreated((node) => {
         for (const effect of reactiveEffects) {
-            _initializeRenderEffect(() => effect(node.classList))
+            _watchRenderEffect(() => effect(node.classList))
         }
     })
 
 }
 
 function setUpDynamicStyles(component: InternalComponent, nodeRef: _NodeRef<HTMLElement>, reactiveEffects: ((o: CSSStyleDeclaration) => void)[]) {
-    const _initializeRenderEffect = component.preserve ? initializeRenderEffectAndPreserve : initializeRenderEffect
+    const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
     nodeRef.o.onCreated((node) => {
         for (const effect of reactiveEffects) {
-            _initializeRenderEffect(() => effect(node.style))
+            _watchRenderEffect(() => effect(node.style))
         }
     })
 }
@@ -48,8 +48,8 @@ export type DOMNodeConfig = {
     on?: { [key: string]: ((e: Event, index: number) => void) | ((e: Event) => void) }
     class?: string;
     style?: { [K in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[K] };
-    dynamicClasses?: ((o: DOMTokenList) => void)[],
-    dynamicStyles?: ((o: CSSStyleDeclaration) => void)[],
+    $class?: ((o: DOMTokenList) => void)[],
+    $style?: ((o: CSSStyleDeclaration) => void)[],
     // text?: any | ReactiveSignal<any>;
     // children?: NodeEntity[];
     // ref?: NodeRef,
@@ -168,7 +168,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     // options?: ElementOptions
 ): DOMNode {
 
-    const { attributes, class: _class, style, on, $index, dynamicClasses, dynamicStyles } = config;
+    const { attributes, class: _class, style, on, $index, $class, $style } = config;
     const domNode = document.createElement(tagName);
     const component = getCurrentComponent();
     if (!component || component === "root") throw new Error("No component :(")
@@ -211,7 +211,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     if (ref) {
         const _ref = new _NodeRef(ref)
         _ref.assignValue(domNode, $index)
-        initializeRef(component, dynamicClasses, dynamicStyles, _ref)
+        initializeRef(component, $class, $style, _ref)
         _ref.castOnCreatedHook(domNode, $index)
     }
 
@@ -459,9 +459,9 @@ function setUpConditionalEntity(
         }
 
         // const conditions: ReactiveSignal<boolean>[] = composeConditions(conditionalKits)
-        setCurrentComponent(component)
+        pushComponent(component)
         _watchForRender(genConditionsSignal(conditions), updateConditional, { once: true })
-        setCurrentComponent(null)
+        popComponent()
     }
 
 }
@@ -550,9 +550,9 @@ function insertNewConditionalNodes(component: InternalComponent, parent: HTMLEle
     const fragment = new DocumentFragment();
 
     // if (!preserve) {
-    setCurrentComponent(component);
+    pushComponent(component);
     const nodeEntities = normalizeRenderOutput(renderConditional());
-    setCurrentComponent(null)
+    popComponent()
 
     for (const nodeEntity of nodeEntities) {
         setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount) //TODO: pass in index in case it's in a list?

@@ -38,7 +38,7 @@ toSignals
 
 watch
 
-initializeEffect
+watchEffect
 
 
 // Things to consider

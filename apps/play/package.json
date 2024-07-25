@@ -1,0 +1,24 @@
+{
+    "name": "@rue/play",
+    "private": true,
+    "description": "",
+    "scripts": {
+        "dev": "vite",
+        "build-babel": "tsc --jsx react-jsx && babel src -d dist"
+    },
+    "dependencies": {
+        "@rue/flask": "workspace:*",
+        "@rue/muonic": "workspace:*",
+        "@rue/lumo": "workspace:*",
+        "@rue/jsx-dev-runtime": "workspace:*"
+    },
+    "devDependencies": {
+        "@rue/types": "workspace:*",
+        "@babel/cli": "^7.24.8",
+        "@babel/core": "^7.24.9",
+        "@babel/plugin-transform-react-jsx": "^7.24.7"
+
+    },
+    "author": "Ruby Yi Wang",
+    "license": "MIT"
+}

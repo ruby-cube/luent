@@ -43,28 +43,28 @@ function isReactiveEffect(task: Function): task is ReactiveEffect {
 
 
 export function watch<T>(target: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: WatchOptions) {
-    return _initializeEffect(handler, target, options);
+    return _watchEffect(handler, target, options);
 }
 
-export function initializeEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived signal and effect combined into one function
-    return _initializeEffect(effect, undefined, options);
+export function watchEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived signal and effect combined into one function
+    return _watchEffect(effect, undefined, options);
 }
 
 // export function initializeUpdate(effect: () => void) {
-//     return _initializeEffect(effect, undefined, { phase: 'render' });
+//     return _watchEffect(effect, undefined, { phase: 'render' });
 // }
 
 // export function watchForRender<T>(target: Signal<T> | (() => T) | ReactiveObject<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, component: InternalComponent) {
-//     return _initializeEffect(handler, target, { phase: 'render' });
+//     return _watchEffect(handler, target, { phase: 'render' });
 // }
 
 const derivedSignalMap: WeakMap<Function, DerivedSignal> = new WeakMap();
 const reactiveEffects: WeakSet<Function> = new WeakSet();
 
 
-export function _initializeEffect<T>(handler: ReactiveEffect, target: undefined, options?: _WatchOptions): ActiveListener
-export function _initializeEffect<T>(handler: ChangeHandler, target?: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener
-export function _initializeEffect<T>(handler: ChangeHandler | ReactiveEffect, target?: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener {
+export function _watchEffect<T>(handler: ReactiveEffect, target: undefined, options?: _WatchOptions): ActiveListener
+export function _watchEffect<T>(handler: ChangeHandler, target?: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener
+export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener {
     const { phase, deep } = options ?? {};
     let taskQueues: Set<Effect>[];
     const isReactiveEffect = target === undefined;
@@ -223,7 +223,7 @@ export function getTaskQueueForProp(target: ReactiveObject, key: string, phase: 
 
 
 export function trigger(target: Signal | ReactiveObject, newValue: any, oldValue: any, key?: string) {
-    if (isEqual(newValue, oldValue)) return;
+    if (isEqual(newValue, oldValue)) return;  //FIX: potentially expensive for complex objects?
     // if (newValue === oldValue) return;
     let currentUpdateCycle = getCurrentUpdateCycle()
     if (!currentUpdateCycle) {
@@ -276,7 +276,7 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
             const _derivedSignal = derivedSignal[DERIVED_SIGNAL]
             const oldValue = _derivedSignal.value;
             const newValue = derivedSignal();
-            if (!isEqual(newValue, oldValue)) {
+            if (!isEqual(newValue, oldValue)) {  //FIX: potentially expensive for complex objects
                 task(newValue, oldValue);
             }
         }

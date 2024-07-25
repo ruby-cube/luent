@@ -4,7 +4,6 @@
   "description": "A collection of TypeScript-enhanced libraries to manage complexity. Covers event-driven architecture, composition, tree structures, and control flow",
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest --run --reporter verbose",
@@ -26,13 +25,20 @@
     "ni:ephemr": "pnpm -F @rue/ephemr install",
     "ni:watch": "pnpm -F @rue/watch install",
     "ni:signals": "pnpm -F @rue/signals install",
+    "ni:lumo": "pnpm -F @rue/lumo install",
+    "ni:play": "pnpm -F @rue/play install",
+    "dev": "pnpm -F @rue/play dev",
+    "build-babel": "pnpm -F @rue/play build-babel",
     "ni:muonic": "pnpm -F @rue/muonic install"
   },
   "devDependencies": {
-    "@types/node": "^18.15.11",
-    "typescript": "^4.9.3",
-    "vite": "^4.2.0",
-    "vitest": "^0.29.2"
+    "@types/node": "^20.14.12",
+    "typescript": "^5.5.4",
+    "vite": "^5.3.4",
+    "vite-plugin-babel": "^1.2.0",
+    "vitest": "^2.0.4",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT"

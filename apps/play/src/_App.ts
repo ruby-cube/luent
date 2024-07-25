@@ -1,12 +1,5 @@
-import { ifCase } from "../packages/lumo/ifCase";
-import { forEachIn } from "../packages/lumo/forEachIn";
-import { useReactivity } from "../packages/muonic/useReactivity";
-import { Signal } from "../packages/muonic/useSignalize";
-import { watch } from "../packages/muonic/watch";
-import { mE } from "../packages/lumo/mE";
-import { setUpNode, setUpNodesIn } from "../packages/lumo/setUpNode";
-import { ReactiveSignal } from "../packages/muonic/useDerivedSignal";
-import { onActivated, onBeforeMount, onBeforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../packages/lumo/lifecycle";
+import { ifCase, forEachIn, setUpNode, setUpNodesIn, onActivated, onBeforeMount, onBeforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../../../packages/lumo/src";
+import { useReactivity, Signal, watch, ReactiveSignal } from "@rue/muonic";
 
 const { $, mu, o$, set } = useReactivity()
 
@@ -84,7 +77,7 @@ export function App() {
         on: {
             click() {
                 // set($count, c=>c+1)
-                set($active, (val) => !val)
+                set($ready, (val) => !val)
             }
         }
     })
@@ -94,21 +87,63 @@ export function App() {
 
     const $active = $(false);
     const $ready = $(false);
+    const $done = $(false);
 
 
     return {
         render: () => [
             mE('h1', ["A person's a person no matter how small"]),
-            ifCase($active, {
-                mount: () =>
+            $showIf($active,
+                mE('div', [
+                    mO(ListBlock),
+                ], 'div')
+            ),
+
+            $show([{
+                if: [$active, o =>
                     mE('div', [
-                        // "hellow world"
-                        mE(List, [], oList),
-                    ], xDiv),
-                elseIf: [$ready, () => mE('p', ['none'])]
+                        mO(ListBlock),
+                        mE('div', ["hello"])
+                    ], xDiv)
+                ]
+            },
+            {
+                elseIf: [$ready, o =>
+                    mE('p', ['none'])
+                ]
+            },
+            {
+                elseIf: [$done, o =>
+                    mE('p', ['done'])
+                ]
+            },
+            {
+                else: [o =>
+                    "nothing"
+                ]
+            }]),
+            $mount(o => {
+                if ($active()) return fresh(o =>
+                    mE('div', [
+                        mO(ListBlock),
+                        mE('div', [
+                            "hello"
+                        ], 'div')
+                    ], xDiv))
+
+                else if ($ready()) return o =>
+                    mE('p', ['none'])
+
+                else if ($done()) return o =>
+                    mE('p', ['done'])
+
+                else return o =>
+                    'nothing'
             }),
             mE('button', ['toggle'], xButton),
             mE('div', [$count]),
+
+
             // mE('div', [
             // ], 'div'),
 

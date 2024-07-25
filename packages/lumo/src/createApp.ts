@@ -1,6 +1,6 @@
-import { Component, ComponentSetup, InternalComponent, setCurrentComponent } from "./component";
+import { Component, ComponentSetup, InternalComponent, popComponent, pushComponent } from "./component";
 import { NodeEntity, setUpComponent } from "./mE";
-import { makeComponent } from "./makeComponent";
+import { makeComponent } from "./mO";
 import { _NodePod } from "./NodePod";
 
 export function createApp(App: ComponentSetup) {
@@ -11,9 +11,9 @@ export function createApp(App: ComponentSetup) {
             if (!(root instanceof HTMLElement)) throw new Error('No root element to mount app to. Check selector string')
             const component = makeComponent(this.App)
             const nodePod = new _NodePod();
-            setCurrentComponent(component)
+            pushComponent(component)
             setUpComponent(component, root, component, nodePod)
-            setCurrentComponent(null)
+            popComponent()
         }
     }
 }

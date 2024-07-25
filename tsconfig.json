@@ -9,6 +9,8 @@
     ],
     "moduleResolution": "Node",
     "strict": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@rue",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
@@ -21,8 +23,20 @@
       "@rue/utils": [
         "./packages/utils/index.ts"
       ],
+      "@rue/jsx-runtime": [
+        "./packages/jsx-runtime/core/jsx-runtime.ts"
+      ],
+      "@rue/jsx-dev-runtime": [
+        "./packages/jsx-runtime/core/jsx-runtime.ts"
+      ],
       "@rue/actionry": [
         "./packages/actionry/index.ts"
+      ],
+      "@rue/lumo": [
+        "./packages/lumo/src/index.ts"
+      ],
+      "@rue/muonic": [
+        "./packages/muonic/src/index.ts"
       ],
       "@rue/archer": [
         "./packages/archer/index.ts"
@@ -54,9 +68,6 @@
       "@rue/flask": [
         "./packages/flask/index.ts"
       ],
-      "@rue/ruelle": [
-        "./packages/ruelle/index.ts"
-      ],
       "@rue/thread": [
         "./packages/thread/index.ts"
       ],
@@ -76,6 +87,10 @@
   },
   "include": [
     "packages",
-    "src", 
-    "src/main.ts"  ]
+    "apps",
+  ],
+  "exclude": [
+    "**/x_old",
+    "**/old"
+  ]
 }

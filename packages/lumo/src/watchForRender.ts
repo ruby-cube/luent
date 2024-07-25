@@ -1,21 +1,21 @@
-import { _initializeEffect, getDependencies, useTaskQueues } from "../muonic/watch";
+import { _watchEffect, getDependencies, useTaskQueues } from "../../muonic/watch";
 import { getCurrentComponent, InternalComponent } from "./component";
 import { LifecycleHook, onUnmounted } from "./lifecycle";
-import { onBeforeUpdatePhase, onUpdateComplete } from "../muonic/UpdateCycle";
-import { ReactiveSignal } from "../muonic/useDerivedSignal";
-import { ReactiveObject } from "../muonic/useReactivize";
+import { onBeforeUpdatePhase, onUpdateComplete } from "../../muonic/UpdateCycle";
+import { ReactiveSignal } from "../../muonic/useDerivedSignal";
+import { ReactiveObject } from "../../muonic/useReactivize";
 import { AnyObject } from "@rue/types";
 
 
-export function initializeRenderEffect(effect: () => void) {
+export function watchRenderEffect(effect: () => void) {
     const component = getCurrentComponent();
-    if (!component || component === "root") throw Error("initializeRenderEffect must be called within component setup")
+    if (!component || component === "root") throw Error("watchRenderEffect must be called within component setup")
 
     const _handler = () => {
         effect();
         setUpUpdateHooks(component)
     }
-    return _initializeEffect(_handler, undefined, {
+    return _watchEffect(_handler, undefined, {
         phase: 'render'
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
@@ -29,7 +29,7 @@ export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveObject<T e
         handler(newValue, oldValue);
         setUpUpdateHooks(component)
     }
-    return _initializeEffect(_handler, target, {
+    return _watchEffect(_handler, target, {
         once: options?.once,
         phase: 'render'
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask

@@ -38,7 +38,7 @@ export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | U
         j++;
     }
 
-    if (isEqual(newSet, oldSet)) return { noChange: true };
+    if (isEqual(newSet, oldSet)) return { noChange: true }; //FIX: potentially expensive to run isEqual
     // find longest common sequence
     const lcs = longestCommonSubstring(newArrCommonItems, oldArrCommonItems);
 

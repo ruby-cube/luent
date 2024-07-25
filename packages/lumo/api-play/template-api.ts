@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { AnyObject } from "@rue/types";
-import { forEachIn } from "./forEachIn";
+import { forEachIn } from "../src/forEachIn";
 
 
 template(App, 'app-tmp', html`

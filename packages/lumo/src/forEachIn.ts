@@ -1,11 +1,11 @@
 import { AnyObject } from "@rue/types";
-import { hasSignal, ReactiveSignal } from "../muonic/useDerivedSignal";
+import { hasSignal, ReactiveSignal } from "../../muonic/useDerivedSignal";
 import { _internalReactivity, emitHookBatch, NodeEntity, normalizeRenderOutput, setUpNodeEntity } from "./mE";
-import { isReactive, ReactiveObject } from "../muonic/useReactivize";
+import { isReactive, ReactiveObject } from "../../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod } from "./NodePod";
-import { Signal } from "../muonic/useSignalize";
+import { Signal } from "../../muonic/useSignalize";
 import { LifecycleHook } from "./lifecycle";
-import { InternalComponent, setCurrentComponent } from "./component";
+import { InternalComponent, popComponent, pushComponent } from "./component";
 import { InsertAndMoveKit } from "./diff";
 import { getNodRef } from "./NodeRef";
 
@@ -160,9 +160,9 @@ export function insertAndMoveListItemNodes(
             setCurrentItemAndIndex(item, $index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
-            setCurrentComponent(component)
+            pushComponent(component)
             const nodeEntities = normalizeRenderOutput(renderItem(item, $index));
-            setCurrentComponent(null)
+            popComponent()
             for (const nodeEntity of nodeEntities) {
                 setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
             }

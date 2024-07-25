@@ -1,4 +1,4 @@
-import { addToFlask } from "./flask";
+import { addToFlask, bindFlask } from "./flask";
 import { CallbackRemover, SchedulerOptions } from "./flaskedListeners";
 import { PendingCancelOp } from "./PendingCancelOp";
 
@@ -27,11 +27,11 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
     let _reject: (reason?: any) => void;
     let pendingCancelOp: PendingCancelOp | null;
 
-    const _callback = ((...arg: any[]) => {
+    const _callback = (bindFlask((...arg: any[]) => {
         _resolve(callback(...arg));
         remove(returnVal ?? _callback);
         if (pendingCancelOp) pendingCancelOp.cancel();
-    }) as CB
+    })) as CB
     try {
         returnVal = enroll(_callback);
     }

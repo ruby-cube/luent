@@ -1,5 +1,5 @@
 import { $type } from "@rue/utils"
-import { getContext } from "../lumo/provides"
+import { getContext } from "../x_old/provides"
 import { AnyObject, RequiredKeys } from "@rue/types"
 
 export const ciel = {
