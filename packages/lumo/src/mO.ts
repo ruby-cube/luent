@@ -5,7 +5,7 @@ import { LifecycleHook, onActivated, onBeforeUnmount, onDeactivated, onUnmounted
 import { collectEffects } from "@rue/flask/flask";
 import { _NodeRef, NodeRef } from "./NodeRef";
 import { NodeEntity, normalizeRenderOutput } from "./mE";
-import { isSettingUpConditionalMount, preserveAllRequested } from "./mountIf";
+import { preserveAllRequested } from "./mountIf";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 export type ComponentConfig<T extends ComponentSetup<AnyObject> = ComponentSetup> = {
@@ -56,13 +56,13 @@ function getPreserveStatus(
     options: ComponentOptions | undefined,
     parent: InternalComponent | 'root',
 ) {
-    let preserveRequested: boolean | undefined = options && options.preserve;
-    if (preserveRequested && !isSettingUpConditionalMount()) {
-        preserveRequested = false;
-        if (__DEV__) console.warn('Extraneous preserve component request. Preserve component only within conditional `ifCase(condition, { mount: () => {} })` or `mountIf`')
-    }
+    // let preserveRequested: boolean | undefined = options && options.preserve;
+    // if (preserveRequested && !isSettingUpConditionalMount()) {
+    //     preserveRequested = false;
+    //     if (__DEV__) console.warn('Extraneous preserve component request. Preserve component only within conditional `ifCase(condition, { mount: () => {} })` or `mountIf`')
+    // }
 
-    return preserveRequested || preserveAllRequested() || parent !== 'root' && parent.preserve;
+    return preserveAllRequested() || parent !== 'root' && parent.preserve;
 }
 
 

@@ -77,10 +77,7 @@ export function genConditionsSignal(conditions: ReactiveSignal<boolean>[]) {
 }
 
 
-export function ifCase($condition: ReactiveSignal<boolean>, config: MountIfConfig | ShowIfConfig, options?: ConditionalOptions): ConditionalKit {
-    if ('mount' in config) return _mountIf($condition, config, options);
-    // return _showIf($condition, config, options)
-}
+
 
 function isElseIfCollection(elseIfKit: ElseIfShow | ElseIfShow[] | ElseIfMount | ElseIfMount[]): elseIfKit is ElseIfMount[] | ElseIfShow[] {
     return !hasSignal(elseIfKit[0]);
@@ -96,11 +93,11 @@ export function preserveAllRequested() {
     return _preserveAll;
 }
 
-let _isSettingUpConditionalMount = false;
+// let _isSettingUpConditionalMount = false;
 
-export function isSettingUpConditionalMount() {
-    return _isSettingUpConditionalMount;
-}
+// export function isSettingUpConditionalMount() {
+//     return _isSettingUpConditionalMount;
+// }
 
 function wrapRenderersWithContext(conditionalRenderers: MountIfRenderersConfig, preserve: boolean): MountIfRenderersConfig {
     if (conditionalRenderers instanceof Array) {
@@ -193,9 +190,10 @@ export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfCon
         conditionalKits.push({ renderConditional: composeConditionalRenderer(elseValue, preserveAll) })
         if (!conditionMet) initialIndex++;
     }
-
-    conditionalKits.push({ renderConditional: () => [] })
-    if (!conditionMet) initialIndex++;
+    else {
+        conditionalKits.push({ renderConditional: () => [] })
+        if (!conditionMet) initialIndex++;
+    }
 
 
     function processElseIf($condition: ReactiveSignal<boolean>, elseIfValue: MountIfRenderersConfig) {
@@ -223,12 +221,15 @@ export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfCon
 //     }
 //     return conditions
 // }
+// {$mountIf($active, () => <p>hey</p>)}
+// {$elseIf($active, () => <p>hey</p>)}
+// {$else($active, () => <p>hey</p>)}
 
 
 
-export function mountIf($condition: ReactiveSignal<boolean>, renderConditional: () => NodeEntity[] | NodeEntity, options?: ConditionalOptions): ConditionalKit {
-    return _mountIf($condition, { mount: renderConditional }, options)
-}
+// export function mountIf($condition: ReactiveSignal<boolean>, renderConditional: () => NodeEntity[] | NodeEntity, options?: ConditionalOptions): ConditionalKit {
+//     return _mountIf($condition, { mount: renderConditional }, options)
+// }
 
 
 export function watchForRenderAndPreserve(target: ReactiveSignal<any> | ReactiveObject, handler: (newValue: any, oldValue: any) => void, options?: { once: true }) {

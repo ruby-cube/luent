@@ -15,9 +15,10 @@ import { Signal } from "../../muonic/useSignalize";
 import { getNodeConfig } from "./setUpNode";
 import { ComponentConfig, ComponentOptions, makeComponent, RenderSlot, SlotRenderer } from "./mO";
 import { watchRenderEffect, watchForRender } from "./watchForRender";
-import { hideDOMNodes } from "./showIf";
+import { hideDOMNodes, setUpConditionalShowEntity } from "./showIf";
+import { ConditionalRenderKit, ConditionalSeries, getConditionalSeries, isConditionalSeriesEnd, noElseBlock, startConditionalSeries } from "./$mountIf";
 
-export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | ConditionalKit | any | ReactiveSignal<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
+export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit | any | ReactiveSignal<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
 
 // type ElementOptions = { main?: true }
 
@@ -179,8 +180,34 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
     if (childNodes) {
         const nodePod = new _NodePod();
-        for (const childNodeEntity of childNodes) {
-            setUpNodeEntity(component, domNode, childNodeEntity, nodePod, undefined)
+        for (let i = 0; i < childNodes.length; i++) {
+            const childNodeEntity = childNodes[i];
+            if (childNodeEntity instanceof ConditionalRenderKit) {
+                // 1
+                if (childNodeEntity.isStart) {
+                    startConditionalSeries(childNodeEntity.type)
+                }
+                else if (isConditionalSeriesEnd(i, childNodes)) {
+                    childNodeEntity.markEnd();
+                }
+
+                // 2
+                const conditionalSeries = getConditionalSeries()!;
+                conditionalSeries.addRenderKit(childNodeEntity);
+                if (noElseBlock(childNodeEntity)) {
+                    conditionalSeries.addElse();
+                }
+
+                // 3
+                if (childNodeEntity.isEnd) {
+                    conditionalSeries.evaluateConditions();
+                    if (conditionalSeries.type === 'show') setUpConditionalShowEntity(component, domNode, conditionalSeries, nodePod)
+                    else setUpConditionalEntity(component, domNode, conditionalSeries, nodePod)
+                }
+            }
+            else {
+                setUpNodeEntity(component, domNode, childNodeEntity, nodePod, undefined)
+            }
         }
     }
 
@@ -319,9 +346,9 @@ export function setUpNodeEntity(
     else if (nodeEntity instanceof ListRenderKit) { // this may or may not be dynamic, depending on data
         setUpNodeList(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
     }
-    else if (nodeEntity instanceof ConditionalKit) {
-        setUpConditionalEntity(component, parent, nodeEntity, nodePod, fragment)
-    }
+    // else if (nodeEntity instanceof ConditionalRenderKit) {
+    //     setUpConditionalEntity(component, parent, nodeEntity, nodePod, fragment)
+    // }
     else {
         setUpTextNode(parent, nodeEntity, nodePod, fragment)
     }
@@ -396,33 +423,41 @@ function setUpNodeList(
 function setUpConditionalEntity(
     component: InternalComponent,
     parent: HTMLElement,
-    renderKit: ConditionalKit,
+    conditionalSeries: ConditionalSeries,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
     // componentsToUnmount?: InternalComponent[],
 ) {
-    const { conditionalKits, initialNodeEntities, $initialConditions, initialIndex } = renderKit;
+    const { conditionalKits, $conditions } = conditionalSeries;
 
-    let activeIndex = initialIndex;
+    const activeIndex = conditionalSeries.activeIndex;
 
     const dynamicPod = nodePod.appendDynamicPod();
+    const _nodePod = dynamicPod.appendNodePod()
 
-    const _conditionalKits: {
-        $condition?: ReactiveSignal<boolean>;
-        nodePod: _NodePod;
-        renderConditional: () => NodeEntity[];
-    }[] = []
+    // const _conditionalKits: {
+    //     $condition?: ReactiveSignal<boolean>;
+    //     nodePod: _NodePod;
+    //     renderConditional: () => NodeEntity[];
+    // }[] = []
 
-    for (let i = 0; i < conditionalKits.length; i++) {
-        const { renderConditional, $condition } = conditionalKits[i];
-        const nodePod = dynamicPod.appendNodePod();
-        _conditionalKits.push({ $condition, nodePod, renderConditional });
-    }
+    // for (let i = 0; i < conditionalKits.length; i++) {
+    //     const { renderConditional, $condition } = conditionalKits[i];
+    //     // let nodePod;
+    //     if (i === activeIndex){
+    //         nodePod = dynamicPod.appendNodePod()
+    //     }
+    //     else {
+    //         nodePod = new _NodePod()
+    //     }
+    //     // _conditionalKits.push({ $condition, nodePod, renderConditional });
+    // }
+
+    const initialNodeEntities = normalizeRenderOutput(conditionalKits[activeIndex].renderConditional())
 
     for (const nodeEntity of initialNodeEntities) {
         // append to dom and node pod
-        const nodePod = _conditionalKits[initialIndex].nodePod;
-        setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
+        setUpNodeEntity(component, parent, nodeEntity, _nodePod, fragment, nodePod.componentsToUnmount)
     }
     // if (dynamicPod && _dynamicPod) dynamicPod.includeComponents(_dynamicPod.activeComponents) // aggregate components to unmount
 
@@ -438,29 +473,28 @@ function setUpConditionalEntity(
     // set up watcher for updates
     const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
 
-    _watchForRender($initialConditions, updateConditional, { once: true })
+    _watchForRender($conditions, updateConditional, { once: true })
 
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
         if (isEqual(newValue, oldValue)) return;
-        
-        const conditions: ReactiveSignal<boolean>[] = []
+
+        // const conditions: ReactiveSignal<boolean>[] = []
         for (let i = 0; i < conditionalKits.length; i++) {
             const kit = conditionalKits[i]
             const { renderConditional, $condition } = kit;
-            if ($condition) conditions.push($condition);
+            // if ($condition) conditions.push($condition);
             if ($condition && getWithoutTracking($condition) || !$condition) {
                 component.emit(LifecycleHook.BEFORE_UPDATE)
-                removePrevConditionalNodes(dynamicPod, activeIndex, renderConditional);
-                activeIndex = i;
-                insertNewConditionalNodes(component, parent, dynamicPod, renderConditional, activeIndex)
+                removePrevConditionalNodes(dynamicPod, renderConditional);
+                insertNewConditionalNodes(component, parent, dynamicPod, renderConditional)
                 component.emit(LifecycleHook.UPDATED)
                 break;
             }
         }
+        const $conditions = conditionalSeries.evaluateConditions();
 
-        // const conditions: ReactiveSignal<boolean>[] = composeConditions(conditionalKits)
         pushComponent(component)
-        _watchForRender(genConditionsSignal(conditions), updateConditional, { once: true })
+        _watchForRender($conditions, updateConditional, { once: true })
         popComponent()
     }
 
@@ -498,10 +532,10 @@ function getPreservedNodePod(renderConditional: () => NodeEntity[]) {
     return nodePod;
 }
 
-function removePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeIndex: number, renderConditional: () => NodeEntity[]) {
+function removePrevConditionalNodes(dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[]) {
     // component === App
     // const preserve = component.preserve;
-    const nodePod = dynamicPod[activeIndex];
+    const nodePod = dynamicPod[0];
     const components = nodePod.componentsToUnmount;
 
     // if (preserve) {
@@ -515,7 +549,7 @@ function removePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeIndex: nu
     nullNodeRefValues(nodePod, components)
     // emitHookBatch(preserve ? LifecycleHook.DEACTIVATED : LifecycleHook.UNMOUNTED, components)
     emitUnmountedOrDeactivated(components)
-    dynamicPod.replaceNodePod(activeIndex, new _NodePod()); // clears previous
+    // dynamicPod.replaceNodePod(0, new _NodePod()); // clears previous
 }
 
 function emitUnmountedOrDeactivated(components: InternalComponent[]) {
@@ -532,21 +566,21 @@ function emitBeforeUnmount(components: InternalComponent[]) {
     }
 }
 
-function hidePrevConditionalNodes(component: InternalComponent, dynamicPod: _DynamicNodePod, activeIndex: number) {
-    const nodePod = dynamicPod[activeIndex];
-    const components = nodePod.componentsToUnmount;
-    emitHookBatch(LifecycleHook.BEFORE_UNMOUNT, components!)
-    component.emit(LifecycleHook.BEFORE_UPDATE)
-    hideDOMNodes(nodePod)
-    emitHookBatch(LifecycleHook.UNMOUNTED, components!)
-    component.emit(LifecycleHook.UPDATED)
-}
 
-function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[], activeIndex: number) {
+
+function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[]) {
     // const nodePod = preserve ? getPreservedNodePod(renderConditional) : new _NodePod();
     const nodePod = new _NodePod();
-    dynamicPod.replaceNodePod(activeIndex, nodePod);
+    dynamicPod.replaceNodePod(0, nodePod);
+    renderAndAppendConditionalNodePod(nodePod, component, parent, dynamicPod, renderConditional);
 
+    emitActivated(nodePod.componentsToUnmount)
+    restoreNodeRefValues(nodePod, nodePod.componentsToUnmount)
+
+
+}
+
+export function renderAndAppendConditionalNodePod(nodePod: _NodePod, component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[]) {
     const fragment = new DocumentFragment();
 
     // if (!preserve) {
@@ -557,19 +591,12 @@ function insertNewConditionalNodes(component: InternalComponent, parent: HTMLEle
     for (const nodeEntity of nodeEntities) {
         setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount) //TODO: pass in index in case it's in a list?
     }
-    // }
-    // else {
-    //     populateFragment(fragment, nodePod);
-    // }
 
-    emitActivated(nodePod.componentsToUnmount)
-    restoreNodeRefValues(nodePod, nodePod.componentsToUnmount)
-
- 
     let prevSibling = dynamicPod.prevNode;
     if (prevSibling) prevSibling.after(fragment)
     else parent.prepend(fragment)
 }
+
 
 function nullNodeRefValues(nodePod: _NodePod, components: Component[]) {
     nodePod.forEachNode(node => {

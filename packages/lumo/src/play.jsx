@@ -8,66 +8,66 @@ function ListBlock() {
   return {
     render: () => (
       <>
-      <div class="container">
-        {
-          forEachIn($list, (item, i) =>
-            <ListItem class="list-item">{item}</ListItem>
-          )
-        }
-        <div>
-          {$mount([
-            {
-              if: [$isActive,
-                <div class="list-border">
-                  <ListBlock>
-                    <div>
-                      "hello"
-                    </div>
-                  </ListBlock>
-                </div>]
-            },
-
-            {
-              elseIf: [$isReady, o =>
-                <p>none</p>]
-            },
-
-            {
-              elseIf: [$isDone, o =>
-                <p>done</p>]
-            },
-
-            {
-              else: o =>
-                'nothing'
-            }
-          ])}
-        </div>
-        <div>
+        <div class="container">
           {
-            $mount(() => {
-              if ($isActive()) return o =>
-                <div>
-                  <ListBlock>
-                    <div>
-                      "hello"
-                    </div>
-                  </ListBlock>
-                </div>
-
-              else if ($isReady()) return o =>
-                <p>none</p>
-
-              else if ($isDone()) return o =>
-                <p>done</p>
-
-              else return o =>
-                'nothing'
-            })
+            forEachIn($list, (item, i) =>
+              <ListItem class="list-item">{item}</ListItem>
+            )
           }
+          <div>
+            {$mount([
+              {
+                if: [$isActive,
+                  <div class="list-border">
+                    <ListBlock>
+                      <div>
+                        "hello"
+                      </div>
+                    </ListBlock>
+                  </div>]
+              },
+
+              {
+                elseIf: [$isReady, o =>
+                  <p>none</p>]
+              },
+
+              {
+                elseIf: [$isDone, o =>
+                  <p>done</p>]
+              },
+
+              {
+                else: o =>
+                  'nothing'
+              }
+            ])}
+          </div>
+          <div>
+            {
+              $mount(() => {
+                if ($isActive()) return o =>
+                  <div>
+                    <ListBlock>
+                      <div>
+                        "hello"
+                      </div>
+                    </ListBlock>
+                  </div>
+
+                else if ($isReady()) return o =>
+                  <p>none</p>
+
+                else if ($isDone()) return o =>
+                  <p>done</p>
+
+                else return o =>
+                  'nothing'
+              })
+            }
+          </div>
         </div>
-      </div>
-      <dialog></dialog>
+        <dialog></dialog>
       </>
     ),
     provides: {},
@@ -90,9 +90,17 @@ export function App(props) {
       )}
       <h2>Start editing to see some magic happen!</h2>
       <div>
-        {$mountIf($active, () => <p>hey</p>)}
-        {$elseIf($active, () => <p>hey</p>)}
-        {$else($active, () => <p>hey</p>)}
+        {$mountIf($active, () =>
+          <>
+            <p>hey</p>
+            <p>hey</p>
+          </>
+        )}
+        {$elseIf($active, [
+          o => <p>hey</p>,
+          o => <p>hey</p>
+        ])}
+        {$else(() => <p>hey</p>)}
       </div>
     </div>
   );
