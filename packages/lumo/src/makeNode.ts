@@ -17,18 +17,22 @@ export type RenderFunction<Params = unknown> = Params extends [] ?
 
 export type EventHandler<K extends keyof HTMLElementEventMap> = (event: HTMLElementEventMap[K]) => void
 
-export type AssignAttributes = {
-    events?: { [K in keyof HTMLElementEventMap]?: EventHandler<K> | DerivedSignal<EventHandler<K>> | (EventHandler<K> | DerivedSignal<EventHandler<K>>)[] };
-    classes?: (((o: DOMTokenList) => void) | string)[],
-    styles?: (((o: CSSStyleDeclaration) => void) | string)[],
-    attributes?: AnyObject
+export type EventsConfig = { 
+    [K in keyof HTMLElementEventMap]?: EventHandler<K> | DerivedSignal<EventHandler<K>> | (EventHandler<K> | DerivedSignal<EventHandler<K>>)[] 
+}
+
+export type AssignedAttributes = {
+    events: { [key: string]: (EventListener | DerivedSignal<EventListener>)[] };
+    classes: (((o: DOMTokenList) => void) | string)[],
+    styles: (((o: CSSStyleDeclaration) => void) | string)[],
+    other: { [key: string]: (any | DerivedSignal<any>)[] }
 }
 
 export type NodeSetupConfig = {
-    on?: { [K in keyof HTMLElementEventMap]?: EventHandler<K> | DerivedSignal<EventHandler<K>> | (EventHandler<K> | DerivedSignal<EventHandler<K>>)[] };
+    on?: EventsConfig
     class?: string | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[],
     style?: string | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[],
-    assigned?: AssignAttributes
+    assigned?: AssignedAttributes
 }
 
 export type JSXConfig<T extends HTMLElement | InternalComponent> = {

@@ -246,17 +246,17 @@ export function watchForRenderAndPreserve(target: ReactiveSignal<any> | Reactive
     if (hasSignal(target)) {
         onActivated(() => {
             handler(target(), oldValue)
-            pushComponent(component)
+            // pushComponent(component)
             watchForRender(target, handler, options)
-            popComponent()
+            // popComponent()
         })
     }
     else {
         onActivated(() => {
             handler(target, oldValue)
-            pushComponent(component)
+            // pushComponent(component)
             watchForRender(target, handler, options)
-            popComponent()
+            // popComponent()
         })
     }
 }

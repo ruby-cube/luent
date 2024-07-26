@@ -162,9 +162,9 @@ export function insertAndMoveListItemNodes(
             setCurrentItemAndIndex(item, $index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
-            pushComponent(component)
+            // pushComponent(component)
             const nodeEntities = normalizeToArray(renderItem(item, $index));
-            popComponent()
+            // popComponent()
             for (const nodeEntity of nodeEntities) {
                 setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
             }

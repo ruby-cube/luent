@@ -18,7 +18,7 @@ export class SnapshotManager {
             get(target, key) {
                 //@ts-expect-error
                 const value = target[key];
-                if (value instanceof Object) {
+                if (value instanceof Object) { //TODO: make sure functions are handled appropriately
                     //@ts-expect-error
                     const snapshots = snapshotMap.get(target[key])
                     if (!snapshots) return value;

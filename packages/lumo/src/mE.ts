@@ -1,6 +1,6 @@
 import { AnyObject, OptionalKeys } from "@rue/types";
 import { Component, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "./component";
-import { hasSignal, ReactiveSignal } from "../../muonic/useDerivedSignal";
+import { DerivedSignal, hasSignal, ReactiveSignal } from "../../muonic/useDerivedSignal";
 import { getWithoutTracking } from "../../muonic/DependencyTracker";
 import { DynamicIndices, getCurrentItemAndIndex, insertAndMoveListItemNodes, ListRenderKit, removeListItemNodes } from "./forEachIn";
 import { LifecycleHook, onBeforeUnmount, onUnmounted } from "./lifecycle";
@@ -13,11 +13,12 @@ import { _NodeRef, getNodeRef, NodeRef } from "./NodeRef";
 import { useReactivity } from "../../muonic/useReactivity";
 import { Signal } from "../../muonic/useSignalize";
 import { getNodeConfig } from "./setUpNode";
-import { ComponentConfig, ComponentOptions, makeComponent, RenderSlot } from "./mO";
+import { analyzeAttributes, ComponentConfig, ComponentOptions, composeEvents, makeComponent, RenderSlot, warnOverlappingKeys } from "./mO";
 import { watchRenderEffect, watchForRender } from "./watchForRender";
 import { hideDOMNodes, setUpConditionalShowSeries } from "./showIf";
 import { buildConditionalSeries, ConditionalRenderKit, ConditionalSeries, noElseBlock, validateStandAloneConditional } from "./$if";
-import { initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig } from "./makeNode";
+import { AssignedAttributes, initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig } from "./makeNode";
+import { PendingOp } from "@rue/flask";
 
 export const _internalReactivity = useReactivity()
 
@@ -40,10 +41,23 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     ref: NodeRef<HTMLElement> | undefined,
     $index: Signal<number> | undefined
 ): DOMNode {
+    const { class: classString, style: styleString, ...jsxOther } = jsxConfig;
+    const { class: _class, style, on, assigned, ...other } = setupConfig;
+    const assignedClasses = assigned?.classes || []
+    const assignedStyles = assigned?.styles || []
+    const assignedEvents = assigned?.events || {}
+    const assignedAttributes = assigned?.other || {}
 
-    const { class: classString, style: styleString, ...other } = jsxConfig;
-    const { class: _class, on, style, assigned, ...attributes } = setupConfig;
-    const { attributes: assignedAttributes, classes: assignedClasses, events: assignedEvents, styles: assignedStyles } = assigned || {};
+    const { jsxAttributes, jsxEvents } = analyzeAttributes(jsxOther)
+
+    if (__DEV__) warnOverlappingKeys(jsxAttributes, other, assignedAttributes);
+
+    const attributes = {
+        events: composeEvents([jsxEvents, on || {}, assignedEvents]),
+        classes: [classString, ...normalizeToArray(_class), ...assignedClasses],
+        styles: [styleString, ...normalizeToArray(style), ...assignedStyles],
+        other: { ...other, ...jsxAttributes, ...assignedAttributes }
+    };
 
     const domNode = document.createElement(tagName);
     const component = getCurrentComponent();
@@ -53,7 +67,6 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
         const _ref = new _NodeRef(ref)
         _ref.assignValue(domNode, $index)
         initializeRef(component, _ref)
-        _ref.castOnCreatedHook(domNode, $index)
     }
 
     if (childNodes) {
@@ -68,42 +81,78 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
         }
     }
 
-    if (on) {
-        for (const event in on) {
-            const handler = on[event]
-            const _handler = $index ? (e: Event) => handler(e, $index()) : handler as EventListenerOrEventListenerObject
-            domNode.addEventListener(event, _handler)
-            onUnmounted(() => domNode.removeEventListener(event, _handler))
-        }
-    }
-
-    if (_class) domNode.classList.value = _class
-
-    if (style) {
-        for (const property in style) {
-            domNode.style[property] = style[property]!
-        }
-    }
-
-    if (other) {
-        for (const property in other) {
-            domNode.setAttribute(property, other[property])
-        }
-    }
-
-
-
-    // if (options) {
-    //     const { main } = options
-    //     if ('mountIf' in options) _mountIf(options.mountIf, { mount: () => makeElement(tagName, config, childNodes, ref, { main }) }) //TODO: not sure about main yet, do I store it on initialization or reset it on each new render?
-    //     if ('showIf' in options);// TODO: showIf
-    // }
-
+    applyAttributes(domNode, attributes)
 
     return domNode;
 }
 
+export function applyAttributes(node: HTMLElement, attributes: AssignedAttributes) {
+    const { classes, events, other, styles } = attributes;
+    const component = getCurrentComponent() //TODO: not sure if this gets the right component or if it's needed
+    if (!component) throw new Error('component not found')
+    setUpClasses(component, node, classes)
+    setUpStyles(component, node, styles)
+    setUpEvents(node, events);
+    setUpAttributes(node, attributes);
 
+}
+
+function setUpAttributes(node: HTMLElement, attributes: { [key: string]: any | DerivedSignal<any> }) {
+    for (const key in attributes) {
+        const value = attributes[key]
+        if (hasSignal(value)) {
+            const _value = value();
+            setAttribute(node, key, _value)
+            watchForRender(value, (newValue) => {
+                setAttribute(node, key, newValue)
+            })
+        }
+        else {
+            node.setAttribute(key, toString(value))
+        }
+    }
+}
+
+function setAttribute(node: HTMLElement, key: string, value: any) {
+    if (value) {
+        node.setAttribute(key, toString(value))
+    }
+    else {
+        node.removeAttribute(key);
+    }
+}
+
+function setUpEvents(node: HTMLElement, events: { [key: string]: (EventListener | DerivedSignal<EventListener>)[] }) {
+    for (const key in events) {
+        const handlers = events[key]
+        for (const handler of handlers) {
+            if (hasSignal(handler)) {
+                const _handler = handler();
+                let pendingCleanup: PendingOp;
+                if (_handler) {
+                    pendingCleanup = attachEventHandler(node, key, _handler)
+                }
+                watchForRender(handler, (newValue, oldValue) => { //QUESTION: When will this be cleaned up if it's a fallthrough attribute?
+                    if (newValue) {
+                        pendingCleanup = attachEventHandler(node, key, newValue);
+                    }
+                    if (oldValue) {
+                        node.removeEventListener(key, oldValue)
+                        pendingCleanup.cancel()
+                    }
+                })
+            }
+            else {
+                attachEventHandler(node, key, handler)
+            }
+        }
+    }
+}
+
+function attachEventHandler(node: HTMLElement, key: string, handler: EventListener) {
+    node.addEventListener(key, handler)
+    return onUnmounted(() => node.removeEventListener(key, handler))
+}
 
 function setUpClasses(component: InternalComponent, node: HTMLElement, classes: (((o: DOMTokenList) => void) | string)[]) {
     const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
@@ -119,10 +168,10 @@ function setUpClasses(component: InternalComponent, node: HTMLElement, classes: 
     }
 }
 
-function warnDuplicateClasses(classesA: string, classesB: string){
+function warnDuplicateClasses(classesA: string, classesB: string) {
     const aClasses = new Set(classesA.split(' '))
     const bClasses = classesB.split(' ')
-    for (const className of bClasses){
+    for (const className of bClasses) {
         if (aClasses.has(className)) {
             console.warn(`Duplicate class name: ${className}`);
             console.trace();
@@ -130,11 +179,8 @@ function warnDuplicateClasses(classesA: string, classesB: string){
     }
 }
 
-function setUpStyles(component: InternalComponent, node: HTMLElement, styles: (((o: CSSStyleDeclaration) => void | string))[]) {
-    // if (nodeRef.initialized) return;
+function setUpStyles(component: InternalComponent, node: HTMLElement, styles: (((o: CSSStyleDeclaration) => void) | string)[]) {
     const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
-    // if (!nodeRef) throw new Error(`nodeRef must be passed into mE to register dynamic styles`)
-    // nodeRef.o.onCreated((node) => {
     const style = node.style;
     for (const entry of styles) {
         if (entry instanceof Function) {
@@ -145,13 +191,12 @@ function setUpStyles(component: InternalComponent, node: HTMLElement, styles: ((
             style.cssText = style.cssText + "; " + entry
         }
     }
-    // })
 }
 
-function warnOverlappingStyles(stylesA: string, stylesB: string){
+function warnOverlappingStyles(stylesA: string, stylesB: string) {
     const aStyles = new Set(stylesA.split('; '))
     const bStyles = stylesB.split('; ')
-    for (const styling of bStyles){
+    for (const styling of bStyles) {
         if (aStyles.has(styling)) {
             console.warn(`Duplicate styling: ${styling}`);
             console.trace();
@@ -346,7 +391,7 @@ function setUpConditionalSeries(
     // evaluate conditions and render
     const { $conditions, activeIndex } = series.evaluateConditions()
     const initialNodeEntities = series.render(activeIndex)
-    
+
     // append to dom and node pod
     const dynamicPod = nodePod.appendDynamicPod();
     const _nodePod = dynamicPod.appendNodePod()
@@ -372,9 +417,9 @@ function setUpConditionalSeries(
         component.emit(LifecycleHook.UPDATED)
 
         // set up for next update
-        pushComponent(component)
+        // pushComponent(component)
         _watchForRender($conditions, updateConditional, { once: true })
-        popComponent()
+        // popComponent()
     }
 }
 

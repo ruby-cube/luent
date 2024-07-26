@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "./lifecycle";
 import { RenderSlot, SlotRenderer } from "./mO";
 import { _NodeRef } from "./NodeRef";
-import { AssignAttributes, EventHandler, NodeEntity, RenderFunction } from "./makeNode";
+import { AssignedAttributes, EventHandler, NodeEntity, RenderFunction } from "./makeNode";
 import { DerivedSignal } from "@rue/muonic";
 
 // export type NodeRef = Signal<Component | DOMNode | (DOMNode | Component)[]>
@@ -26,7 +26,7 @@ export class InternalComponent {
     context: AnyObject | undefined;
     provides: AnyObject | undefined;
     component: Component | undefined;
-    attributes: AssignAttributes | null = null;
+    attributes: AssignedAttributes | null = null;
     parent: InternalComponent | null;
     nodeEntities: NodeEntity[] = []; //TODO: add context type?? //QUESTION: should this be cleared or updated?
     preserve: boolean;

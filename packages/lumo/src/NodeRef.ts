@@ -28,22 +28,22 @@ export class NodeRef<T extends HTMLElement | Component = HTMLElement | Component
         // this.list = list;
     }
 
-    onCreated(callback: (item: T, $index?: Signal<number>) => void, options?: { until: ScheduleStop; }) { //TODO: should index be a Signal?
-        let tasks = hookMap.get(this);
-        if (!tasks) {
-            tasks = new Set();
-            hookMap.set(this, tasks);
-        }
+    // onCreated(callback: (item: T, $index?: Signal<number>) => void, options?: { until: ScheduleStop; }) { //TODO: should index be a Signal?
+    //     let tasks = hookMap.get(this);
+    //     if (!tasks) {
+    //         tasks = new Set();
+    //         hookMap.set(this, tasks);
+    //     }
 
-        return $listen(callback, options || {}, {
-            enroll(cb) {
-                tasks.add(cb)
-            },
-            remove(cb) {
-                tasks.delete(cb);
-            }
-        })
-    }
+    //     return $listen(callback, options || {}, {
+    //         enroll(cb) {
+    //             tasks.add(cb)
+    //         },
+    //         remove(cb) {
+    //             tasks.delete(cb);
+    //         }
+    //     })
+    // }
 }
 
 
@@ -87,13 +87,13 @@ export class _NodeRef<T extends HTMLElement | Component = HTMLElement | Componen
         refMap.set(value, this);
     }
 
-    castOnCreatedHook(entity: T, $index: Signal<number> | undefined) {
-        const tasks = hookMap.get(this.o)
-        if (!tasks) return;
-        for (const task of tasks) {
-            task(entity, $index)
-        }
-    }
+    // castOnCreatedHook(entity: T, $index: Signal<number> | undefined) {
+    //     const tasks = hookMap.get(this.o)
+    //     if (!tasks) return;
+    //     for (const task of tasks) {
+    //         task(entity, $index)
+    //     }
+    // }
 }
 
 

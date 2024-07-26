@@ -1,4 +1,4 @@
-export const htmlEvents = new Set([
+const htmlEvents = new Set([
   // Mouse Events
   "onclick",
   "ondblclick",
@@ -100,8 +100,16 @@ export const htmlEvents = new Set([
   "ontransitionend"
 ]);
 
-export const globalHTMLAttributes = new Set([
+export function isHTMLEvent(attibuteName: string){
+  return htmlEvents.has(attibuteName)
+}
+
+const globalHTMLAttributes = new Set([
   'accesskey', 'class', 'contenteditable', 'contextmenu', 'data-*', 'dir',
   'draggable', 'hidden', 'id', 'lang', 'spellcheck', 'style', 'tabindex', 
   'title', 'translate'
 ])
+
+export function isHTMLAttribute(key: string, tag: keyof HTMLElementTagNameMap) {
+  return globalHTMLAttributes.has(key) || key.startsWith('aria-') || key.startsWith('data-') //TODO: need to add element specific attributes
+}

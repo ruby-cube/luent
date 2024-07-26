@@ -85,9 +85,9 @@ export function setUpConditionalShowSeries(
         showConditionalNodes(component, parent, dynamicPod, activeIndex, nodePod)
         component.emit(LifecycleHook.UPDATED)
 
-        pushComponent(component)
+        // pushComponent(component)
         _watchForRender($conditions, updateConditional, { once: true })
-        popComponent()
+        // popComponent()
     }
 }
 

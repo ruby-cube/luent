@@ -5,13 +5,11 @@ import { LifecycleHook, onActivated, onBeforeUnmount, onDeactivated, onUnmounted
 import { collectEffects } from "@rue/flask/flask";
 import { _NodeRef, NodeRef } from "./NodeRef";
 import { preserveAllRequested } from "../api-play/mountIf";
-import { AssignAttributes, initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig, RenderFunction } from "./makeNode";
+import { AssignedAttributes, EventsConfig, initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig, RenderFunction } from "./makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { globalHTMLAttributes, htmlEvents } from "./html/attributes";
-import { HTMLTag } from "./mE";
-import { jsx } from "@rue/jsx-runtime";
-import { ListRenderKit } from "./forEachIn";
-import { ConditionalRenderKit } from "./$if";
+import { isHTMLEvent } from "./html/attributes";
+import { applyAttributes } from "./mE";
+import { DerivedSignal } from "@rue/muonic";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 export type ComponentConfig<T extends ComponentSetup<AnyObject> = ComponentSetup> = {
@@ -111,21 +109,18 @@ function runComponentSetup(
         const assignedClasses = assigned?.classes || []
         const assignedStyles = assigned?.styles || []
         const assignedEvents = assigned?.events || {}
-        const assignedAttributes = assigned?.attributes || {}
+        const assignedAttributes = assigned?.other || {}
 
         const { jsxAttributes, jsxEvents } = analyzeAttributes(other)
 
         if (__DEV__) warnOverlappingKeys(jsxAttributes, props); // pass in all attributes as props ... it's too hard to distinguish props from attributes
         if (__DEV__) warnOverlappingKeys(jsxAttributes, attributes, assignedAttributes);
 
-        const classes = normalizeToArray(_class)
-        const styles = normalizeToArray(style)
-
         component.attributes = {
-            events: composeEvents(jsxEvents, on, assignedEvents),  //TODO: compose events per event, gather handlers into arrays if multiple per event
-            classes: [classString, ...classes, ...assignedClasses],
-            styles: [styleString, ...styles, ...assignedStyles],
-            attributes: { ...attributes, ...jsxAttributes, ...assignedAttributes }
+            events: composeEvents([jsxEvents, on || {}, assignedEvents]),
+            classes: [classString, ...normalizeToArray(_class), ...assignedClasses],
+            styles: [styleString, ...normalizeToArray(style), ...assignedStyles],
+            other: { ...attributes, ...jsxAttributes, ...assignedAttributes }
         }; // must set BEFORE component setup is called
 
         const nodeEntities = normalizeToArray(Component({ ...props, ...jsxAttributes, slot }));
@@ -138,7 +133,6 @@ function runComponentSetup(
             _ref.assignValue(publicComponent, $index)
             // setUpRefUpdates(_ref, publicComponent, $index, component.preserve)
             initializeRef(component, _ref)
-            _ref.castOnCreatedHook(publicComponent, $index)
         }
 
         if (component.attributes) { // if `getAttributes` is called, this will be null
@@ -160,9 +154,39 @@ function runComponentSetup(
     })
 }
 
-function assignAttributes(nodeEntity: NodeEntity, attributes: AssignAttributes) {
+
+export function composeEvents(
+    events: { [key: string]: Function | Function[] }[],
+) {
+    const target: { [key: string]: Function[] } = {};
+    for (const _events of events) {
+        for (const key in _events) {
+            const value = _events[key];
+            if (key in target) {
+                const handlers = target[key];
+                if (value instanceof Array) {
+                    handlers.push(...value);
+                }
+                else {
+                    handlers.push(value)
+                }
+            }
+            else {
+                if (value instanceof Array) {
+                    target[key] = [...value]
+                }
+                else {
+                    target[key] = [value]
+                }
+            }
+        }
+    }
+    return target as { [key: string]: (EventListener | DerivedSignal<EventListener>)[] };
+}
+
+function assignAttributes(nodeEntity: NodeEntity, attributes: AssignedAttributes) {
     if (nodeEntity instanceof HTMLElement) { // from Web API
-        applyAssignedAttributes(nodeEntity, attributes);
+        applyAttributes(nodeEntity, attributes);
     }
     else if (nodeEntity instanceof InternalComponent) {
         assignAttributes(nodeEntity.nodeEntities[0], attributes)
@@ -172,33 +196,35 @@ function assignAttributes(nodeEntity: NodeEntity, attributes: AssignAttributes) 
     }
 }
 
-function warnOverlappingKeys(propsA: AnyObject, propsB: AnyObject | undefined, propsC?: AnyObject) {
+
+
+export function warnOverlappingKeys(propsA: AnyObject, propsB: AnyObject | undefined, propsC?: AnyObject) {
     if (!propsC && !propsB) return;
     if (propsC) {
         for (const key in propsA) {
-            if (key in propsC) console.warn('Duplicate prop keys. Props in `setUpNode` will be overridden')
+            if (key in propsC) console.warn('Duplicate prop keys. Props from `setUpNode` will be overridden')
         }
         if (!propsB) return;
         for (const key in propsA) {
-            if (key in propsB) console.warn('Duplicate prop keys. Props in `setUpNode` will be overridden')
+            if (key in propsB) console.warn('Duplicate prop keys. Props from `setUpNode` will be overridden')
         }
         for (const key in propsB) {
-            if (key in propsC) console.warn('Duplicate prop keys. Props in `setUpNode` will be overridden')
+            if (key in propsC) console.warn('Duplicate prop keys. Props from `setUpNode` will be overridden')
         }
     }
     else if (propsB) {
         for (const key in propsA) {
-            if (key in propsB) console.warn('Duplicate prop keys. Props in `setUpNode` will be overridden')
+            if (key in propsB) console.warn('Duplicate prop keys. Props from `setUpNode` will be overridden')
         }
     }
 }
 
-function analyzeAttributes(jsxEntries: AnyObject) {
+export function analyzeAttributes(jsxEntries: AnyObject) {
     const jsxEvents: AnyObject = {};
     // const jsxProps: AnyObject = {};
     const jsxAttributes: AnyObject = {};
     for (const key in jsxEntries) {
-        if (htmlEvents.has(key)) {
+        if (isHTMLEvent(key)) {
             jsxEvents[key.slice(2)] = jsxEntries[key];
         }
         // else if (isHTMLAttribute(key, tag)) {
@@ -215,9 +241,7 @@ function analyzeAttributes(jsxEntries: AnyObject) {
     }
 }
 
-function isHTMLAttribute(key: string, tag: HTMLTag) {
-    return globalHTMLAttributes.has(key) || key.startsWith('aria-') || key.startsWith('data-') //TODO: need to add element specific attributes
-}
+
 
 // function setUpRefUpdates(ref: _NodeRef, component: Component, $index: Signal<number> | undefined, preserve: boolean) {
 //     if (ref.initialized === true) return;
