@@ -5,7 +5,7 @@ class Provider {
     entries: Map<Symbol | string, any> = new Map();
 
     constructor(
-        public component: InternalComponent | "root" | null,
+        public component: InternalComponent | null,
         public parent: Provider | null
     ) { }
 }
@@ -29,7 +29,7 @@ function popProvider() {
 // Public API
 export function provide<T>(key: SymbolKey<T> | symbol | string, value: T) {
     const component = getCurrentComponent();
-    if (component === "root") provideGlobal(key, value);
+    if (component === null) provideGlobal(key, value);
     let provider = currentProvider;
     if (!provider || provider.component !== component) {
         provider = new Provider(component, provider);

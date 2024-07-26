@@ -4,57 +4,78 @@ import { SetKey, Signal } from "../../muonic/useSignalize";
 import { LifecycleHook, onActivated, onBeforeUnmount, onDeactivated, onUnmounted } from "./lifecycle";
 import { collectEffects } from "@rue/flask/flask";
 import { _NodeRef, NodeRef } from "./NodeRef";
-import { NodeEntity, normalizeRenderOutput } from "./mE";
 import { preserveAllRequested } from "./mountIf";
+import { initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig, RenderFunction } from "./makeNode";
+import { normalizeToArray } from "@rue/utils";
+import { globalHTMLAttributes, htmlEvents } from "./html/attributes";
+import { HTMLTag } from "./mE";
+import { jsx } from "@rue/jsx-runtime";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 export type ComponentConfig<T extends ComponentSetup<AnyObject> = ComponentSetup> = {
-    props?: T extends (props: infer P) => any ? { [K in keyof P]: P[K] } : never;
-    on?: { [key: string]: (e: Event, index?: number) => void } //TODO: limit these to web events
-    class?: string | { [key: string]: () => boolean };
-    style?: any;
-    //TODO: add dynamic classes and styles
-    $index?: Signal<number>
+    props?: T extends (props: infer P) => any ? { [K in keyof P]?: P[K] } : never;
 }
 
-export type SlotRenderer<T extends ComponentSetup = ComponentSetup> =
+export type RenderSlot<T extends ComponentSetupWithSlot = ComponentSetupWithSlot> =
     T extends (props: infer P) => any ?
-    P extends { slot: infer R } ? R : never
-    : never
+    P extends { slot: infer R } ?
+    R : undefined : undefined
 
-export type RenderSlot = (props: any) => NodeEntity[]
-
-// export class TextRenderer {
-//     constructor(public props: {
-//         $data: ReactiveSignal<string>
-//         text: string
-//     }){}
-// }
 export type ComponentOptions = { preserve?: true }
 
+export type SlotRenderer = { slot: RenderFunction | ((props: AnyObject) => NodeEntity[] | NodeEntity) | { [key: string]: RenderFunction | ((props: AnyObject) => NodeEntity[] | NodeEntity) } }
 
-export function makeComponent<T extends ComponentSetup>(
+type ComponentSetupWithSlot<P extends SlotRenderer = SlotRenderer> = (props: P) => NodeEntity[] | NodeEntity
+
+
+export function mO<T extends ComponentSetupWithSlot>(
     Component: T,
-    config: ComponentConfig<T> = {},
-    slots: NodeEntity[] | RenderSlot[] | SlotRenderer = [], //TODO:
-    ref: NodeRef<Component> | undefined = undefined,
-    options: ComponentOptions | undefined = undefined
-) {
+    slot: RenderSlot<T>,
+    jsxConfig?: T extends (props: infer P) => any ? P : never & JSXConfig<InternalComponent>,
+    setupConfig?: ComponentConfig<T extends (props: AnyObject) => any ? T : never> & NodeSetupConfig
+): InternalComponent
+export function mO<T extends ComponentSetup>(
+    Component: T,
+    slot?: RenderSlot<T>,
+    jsxConfig?: T extends (props: infer P) => any ? P : never & JSXConfig<InternalComponent>,
+    setupConfig?: ComponentConfig<T> & NodeSetupConfig
+): InternalComponent {
+    return makeNode(Component, slot, jsxConfig, setupConfig) as InternalComponent
+}
+
+export function makeComponent(
+    Component: ComponentSetup,
+    slot: SlotRenderer | undefined,
+    jsxConfig: JSXConfig<InternalComponent>,
+    setupConfig: ComponentConfig & NodeSetupConfig,
+    ref: NodeRef<InternalComponent> | undefined,
+    $index: Signal<number> | undefined
+): InternalComponent {
     const parent = getCurrentComponent();
     if (!parent) throw new Error("No parent component")
 
-    const preserve = getPreserveStatus(options, parent)
+    const preserve = getPreserveStatus(parent);
 
     const component = new InternalComponent(parent, preserve);
     pushComponent(component)
-    runComponentSetup(Component, config, component, ref, slots);
+    runComponentSetup(Component, component, slot, jsxConfig, setupConfig, ref, $index);
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
     return component;
 }
 
+// on?: { [key: string]: ((e: Event, index: number) => void) | ((e: Event) => void) } //TODO: limit to web events
+// class?: string;
+// style?: { [K in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[K] };
+// $class?: ((o: DOMTokenList) => void)[],
+// $style?: ((o: CSSStyleDeclaration) => void)[],
+// ref?: NodeRef,
+// $index?: Signal<number>
+
+
+
 function getPreserveStatus(
-    options: ComponentOptions | undefined,
-    parent: InternalComponent | 'root',
+    // options: ComponentOptions | undefined,
+    parent: InternalComponent | null,
 ) {
     // let preserveRequested: boolean | undefined = options && options.preserve;
     // if (preserveRequested && !isSettingUpConditionalMount()) {
@@ -62,24 +83,45 @@ function getPreserveStatus(
     //     if (__DEV__) console.warn('Extraneous preserve component request. Preserve component only within conditional `ifCase(condition, { mount: () => {} })` or `mountIf`')
     // }
 
-    return preserveAllRequested() || parent !== 'root' && parent.preserve;
+    return preserveAllRequested() || !!parent && parent.preserve;
 }
 
+export function getAttributes() {
+    const component = getCurrentComponent();
+    if (!component) throw new Error('`getAttributes` can only be called from within component setup')
+    const attributes = component.attributes;
+    component.attributes = null;
+    return attributes
+}
 
-
-function runComponentSetup<T extends ComponentSetup>(
-    Component: T,
-    config: ComponentConfig<T> = {},
+function runComponentSetup(
+    Component: ComponentSetup,
     component: InternalComponent,
+    slot: SlotRenderer | undefined,
+    jsxConfig: JSXConfig<InternalComponent>,
+    setupConfig: ComponentConfig & NodeSetupConfig,
     ref: NodeRef<Component> | undefined,
-    slots: NodeEntity[] | RenderSlot[] | SlotRenderer
+    $index: Signal<number> | undefined
 ) {
     collectEffects((flask, outerFlask) => {
-        const { props, on, class: _class, style, $index, ...other } = config;
-        // const _component = Component(props)
-        // if (!_component) throw new Error("Component setup must return component blueprint")
-        // const { render, provides, exposes } = _component;
-        const nodeEntities = normalizeRenderOutput(Component(props));
+        const { class: classString, style: styleString, ...other } = jsxConfig;
+        const { class: _class, on, props, style, ...attributes } = setupConfig;
+        const { jsxProps, jsxAttributes, jsxEvents } = analyzeAttributes(other, 'div') //FIX: Need a better solution 'div' is a standin tag
+        
+        if (__DEV__) warnOverlappingKeys(jsxProps, props);
+        if (__DEV__) warnOverlappingKeys(jsxAttributes, attributes);
+
+        const classes = normalizeToArray(_class)
+        const styles = normalizeToArray(style)
+
+        component.attributes = {  
+            on: {},  //TODO: compose events per event, gather handlers into arrays if multiple per event
+            classes: [classString, ...classes],
+            styles: [styleString, ...styles],
+            attributes: {...attributes, jsxAttributes} 
+        }; // must set BEFORE component setup is called
+
+        const nodeEntities = normalizeToArray(Component({ ...props, ...jsxProps, slot }));
 
         component.initialNodeEntities = nodeEntities;
 
@@ -87,30 +129,34 @@ function runComponentSetup<T extends ComponentSetup>(
             const _ref = new _NodeRef(ref);
             const publicComponent = component.component || {};
             _ref.assignValue(publicComponent, $index)
-            setUpRefUpdates(_ref, publicComponent, $index, component.preserve)
+            // setUpRefUpdates(_ref, publicComponent, $index, component.preserve)
+            initializeRef(component, _ref)
             _ref.castOnCreatedHook(publicComponent, $index)
         }
 
-        //TODO: Slots (make sure parent is correct)
-        //TODO: assigned classes, events, style, HTML attributes (on first root, unless has been assigned to another element or component)
+        if (component.attributes) { // if `getAttributes` is called, this will be null
+            // fallthrough attributes onto root or first node
 
-        // if (props && '$index' in props) {
-        //     const $index = props.$index;
-        //     if (on) {
-        //         const domNode = getMainDOMNode() //TODO:
-        //         for (const event in on) {
-        //             const handler = on[event]
-        //             const _handler = $index ? (e: Event) => handler(e, $index()) : handler
-        //             domNode.addEventListener(event, _handler) //TODO: attach fall-through events on root or designated root domNode if more than one root
-        //             onUnmounted(() => domNode.removeEventListener(event, _handler))
+            if (on){
+    
+            }
+    
+            if (classes) {
+    
+            }
+    
+            if (styles){
+    
+            }
 
-        //             //TODO: reattach listeners if domNode changes!
-        //         }
-        //     }
-        // }
+            if (attributes){
+
+            }
+        }
+
 
         outerFlask?.onDisposal(flask.dispose) // no outer flask means it's the root component
-    
+
         // set up hook cascade
         const parent = component.parent;
         if (parent instanceof InternalComponent) {
@@ -120,42 +166,73 @@ function runComponentSetup<T extends ComponentSetup>(
             onActivated(() => component.emit(LifecycleHook.ACTIVATED), undefined, parent)
         }
     })
-
 }
 
+function warnOverlappingKeys(propsA: AnyObject, propsB: AnyObject | undefined) {
+    if (!propsB) return;
+    for (const key in propsA) {
+        if (key in propsB) console.warn('Duplicate prop keys. Props in `setUpNode` will be overridden')
+    }
+}
 
-function setUpRefUpdates(ref: _NodeRef, component: Component, $index: Signal<number> | undefined, preserve: boolean) {
-    if (ref.initialized === true) return;
-    // if ($index) { // only initiate once per list
-    //     const components = ref.components;
-    //     if (preserve) {
-    //         onDeactivated(() => {
-    //             ref.components = null;
-    //         })
-    //         onActivated(() => {
-    //             ref.components = components
-    //         })
-    //     }
-    //     onBeforeUnmount(() => {
-    //         ref.components = null;
-    //     })
-    // }
-    // else {
-        if (preserve) {
-            onDeactivated(() => {
-                ref.setValue(null)
-            })
-            onActivated(() => {
-                ref.setValue(component)
-            })
+function analyzeAttributes(jsxEntries: AnyObject, tag: HTMLTag) {
+    const jsxEvents: AnyObject = {};
+    const jsxProps: AnyObject = {};
+    const jsxAttributes: AnyObject = {};
+    for (const key in jsxEntries) {
+        if (htmlEvents.has(key)) {
+            jsxEvents[key.slice(2)] = jsxEntries[key];
         }
-
-        onBeforeUnmount(() => {
-            ref.setValue(null);
-        })
-    // }
-    ref.markInitialized();
+        else if (isHTMLAttribute(key, tag)) {
+            jsxAttributes[key] = jsxEntries[key];
+        }
+        else {
+            jsxProps[key] = jsxEntries[key];
+        }
+    }
+    return {
+        jsxAttributes,
+        jsxEvents,
+        jsxProps
+    }
 }
+
+function isHTMLAttribute(key: string, tag: HTMLTag) {
+    return globalHTMLAttributes.has(key) || key.startsWith('aria-') || key.startsWith('data-') //TODO: need to add element specific attributes
+}
+
+// function setUpRefUpdates(ref: _NodeRef, component: Component, $index: Signal<number> | undefined, preserve: boolean) {
+//     if (ref.initialized === true) return;
+//     // if ($index) { // only initiate once per list
+//     //     const components = ref.components;
+//     //     if (preserve) {
+//     //         onDeactivated(() => {
+//     //             ref.components = null;
+//     //         })
+//     //         onActivated(() => {
+//     //             ref.components = components
+//     //         })
+//     //     }
+//     //     onBeforeUnmount(() => {
+//     //         ref.components = null;
+//     //     })
+//     // }
+//     // else {
+//     if (preserve) {
+//         onDeactivated(() => {
+//             ref.setValue(null)
+//         })
+//         onActivated(() => {
+//             ref.setValue(component)
+//         })
+//     }
+
+//     onBeforeUnmount(() => {
+//         ref.setValue(null);
+//     })
+//     // }
+//     ref.markInitialized();
+// }
 
 
 // export function mountComponent(parent: HTMLElement, component: InternalComponent) {

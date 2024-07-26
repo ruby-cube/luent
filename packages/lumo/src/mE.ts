@@ -4,8 +4,8 @@ import { hasSignal, ReactiveSignal } from "../../muonic/useDerivedSignal";
 import { getWithoutTracking } from "../../muonic/DependencyTracker";
 import { DynamicIndices, getCurrentItemAndIndex, insertAndMoveListItemNodes, ListRenderKit, removeListItemNodes } from "./forEachIn";
 import { LifecycleHook, onBeforeUnmount, onUnmounted } from "./lifecycle";
-import { _mountIf, genConditionsSignal, ConditionalKit, watchForRenderAndPreserve, watchRenderEffectAndPreserve } from "./mountIf";
-import { appendItems, copyAllBut, isEqual } from "@rue/utils";
+import { _mountIf, genConditionsSignal, ConditionalKit, watchForRenderAndPreserve, watchRenderEffectAndPreserve, RenderConditional } from "./mountIf";
+import { appendItems, copyAllBut, isEqual, normalizeToArray } from "@rue/utils";
 import { diff } from "./diff";
 import { isReactive } from "../../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod, NodePod } from "./NodePod";
@@ -13,170 +13,45 @@ import { _NodeRef, getNodRef, NodeRef } from "./NodeRef";
 import { useReactivity } from "../../muonic/useReactivity";
 import { Signal } from "../../muonic/useSignalize";
 import { getNodeConfig } from "./setUpNode";
-import { ComponentConfig, ComponentOptions, makeComponent, RenderSlot, SlotRenderer } from "./mO";
+import { ComponentConfig, ComponentOptions, makeComponent, RenderSlot } from "./mO";
 import { watchRenderEffect, watchForRender } from "./watchForRender";
 import { hideDOMNodes, setUpConditionalShowEntity } from "./showIf";
-import { ConditionalRenderKit, ConditionalSeries, getConditionalSeries, isConditionalSeriesEnd, noElseBlock, startConditionalSeries } from "./$mountIf";
+import { ConditionalRenderKit, ConditionalSeries, getConditionalSeries, isConditionalSeriesEnd, noElseBlock, startConditionalSeries } from "./$if";
+import { initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig } from "./makeNode";
 
-export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit | any | ReactiveSignal<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
-
-// type ElementOptions = { main?: true }
-
-
-function setUpDynamicClasses(component: InternalComponent, nodeRef: _NodeRef<HTMLElement>, reactiveEffects: ((o: DOMTokenList) => void)[]) {
-    const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
-    nodeRef.o.onCreated((node) => {
-        for (const effect of reactiveEffects) {
-            _watchRenderEffect(() => effect(node.classList))
-        }
-    })
-
-}
-
-function setUpDynamicStyles(component: InternalComponent, nodeRef: _NodeRef<HTMLElement>, reactiveEffects: ((o: CSSStyleDeclaration) => void)[]) {
-    const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
-    nodeRef.o.onCreated((node) => {
-        for (const effect of reactiveEffects) {
-            _watchRenderEffect(() => effect(node.style))
-        }
-    })
-}
-// type EventHandler = T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
-
-
-export type DOMNodeConfig = {
-    attributes?: AnyObject;
-    on?: { [key: string]: ((e: Event, index: number) => void) | ((e: Event) => void) }
-    class?: string;
-    style?: { [K in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[K] };
-    $class?: ((o: DOMTokenList) => void)[],
-    $style?: ((o: CSSStyleDeclaration) => void)[],
-    // text?: any | ReactiveSignal<any>;
-    // children?: NodeEntity[];
-    // ref?: NodeRef,
-    $index?: Signal<number>
-}
+export const _internalReactivity = useReactivity()
 
 export type HTMLTag = keyof HTMLElementTagNameMap
 
-
-
-export const _internalReactivity = useReactivity()
-type ClosingTag<T extends ComponentSetup = ComponentSetup> = NodeClosingTag | ComponentClosingTag<T>
-type NodeClosingTag = HTMLTag | NodeRef | DOMNodeConfig
-type ComponentClosingTag<T extends ComponentSetup = ComponentSetup> = T | NodeRef | ComponentConfig
-
 export function mE(
     nodeType: HTMLTag,
     childNodes?: NodeEntity[],
-    closingTag?: HTMLTag | NodeRef<HTMLElement> | DOMNodeConfig,
-    // options?: ElementOptions
-): DOMNode
-export function mE(
-    nodeType: HTMLTag,
-    childNodes?: NodeEntity[],
-    closingTag?: HTMLTag | NodeRef<HTMLElement> | DOMNodeConfig,
-    // closingTag?: HTMLTag | NodeRef | DOMNodeConfig | ElementOptions,
-): DOMNode
-export function mE<T extends ComponentSetup>(
-    nodeType: T,
-    childNodes?: NodeEntity[] | RenderSlot[] | SlotRenderer<T>,
-    closingTag?: T | NodeRef<Component> | ComponentConfig,
-    options?: ComponentOptions
-): InternalComponent
-export function mE<T extends ComponentSetup>(
-    nodeType: T,
-    childNodes?: NodeEntity[] | RenderSlot[] | SlotRenderer<T>,
-    closingTag?: T | NodeRef<Component> | ComponentConfig | ComponentOptions
-): InternalComponent
-export function mE(
-    nodeType: HTMLTag | ComponentSetup,
-    childNodes?: NodeEntity[] | RenderSlot[] | SlotRenderer,
-    // closingTag?: HTMLTag | ComponentSetup | NodeRef | DOMNodeConfig | ComponentConfig | ElementOptions,
-    closingTag?: ClosingTag,
-    // options?: ElementOptions | ComponentOptions
-    options?: ComponentOptions
-): DOMNode | InternalComponent {
-    validateClosingTag(nodeType, closingTag);
-    const ref: NodeRef | undefined = closingTag instanceof NodeRef ? <NodeRef><unknown>closingTag : undefined;
-    const config = _getNodeConfig(closingTag);
-    const _options = options ? options : isOptions(closingTag) ? closingTag : undefined
-    if (typeof nodeType === 'string') {
-        return makeElement(nodeType, <DOMNodeConfig>config, <NodeEntity[]>childNodes, <NodeRef<HTMLElement>>ref)
-    }
-    return makeComponent(nodeType, <ComponentConfig>config, childNodes, <NodeRef<Component>>ref, <ComponentOptions>_options)
-}
-
-function isOptions(maybeOptions: any): maybeOptions is ComponentOptions {
-    return maybeOptions instanceof Object && ('preserve' in maybeOptions)
-}
-
-
-function validateClosingTag(nodeType: HTMLTag | ComponentSetup, closingTag: HTMLTag | ComponentSetup | NodeRef | DOMNodeConfig | ComponentConfig | ComponentOptions | undefined) {
-    if (closingTag === undefined || isOptions(closingTag)) return;
-    if (nodeType === closingTag) return;
-    if (typeof closingTag === 'string') throw new Error(`closing tag, ${closingTag}, does not match opening tag ${nodeType}`);
-    if (closingTag instanceof Function) throw new Error(`Component, ${closingTag.name}, does not match node type, ${nodeType}`)
-    if (closingTag instanceof NodeRef && closingTag.nodeType !== nodeType) throw new Error(`Node ref's node type, ${closingTag.nodeType}, does not match node type, ${nodeType}`);
-}
-
-
-function _getNodeConfig(closingTag: HTMLTag | ComponentSetup | NodeRef | DOMNodeConfig | ComponentConfig | ComponentOptions | undefined) {
-    if (typeof closingTag === 'string' || closingTag instanceof Function || closingTag === undefined) return {};
-    if (closingTag instanceof NodeRef) {
-        const config = getNodeConfig(closingTag);
-        if (config instanceof Function) {
-            const [item, $index] = getCurrentItemAndIndex();
-            const _config = config(item, $index)
-            return _config
-        }
-        return config;
-    }
-    return closingTag;
-}
-
-function initializeRef( // should this be initialize ref?
-    component: InternalComponent,
-    dynamicClasses: ((o: DOMTokenList) => void)[] | undefined,
-    dynamicStyles: ((o: CSSStyleDeclaration) => void)[] | undefined,
-    ref: _NodeRef<HTMLElement>,
-    // options?: ElementOptions
-) {
-    if (ref.initialized === true) return;
-
-    if (dynamicClasses) {
-        if (!ref) throw new Error(`nodeRef must be passed into mE to register dynamic classes`)
-        setUpDynamicClasses(component, ref, dynamicClasses)
-    }
-
-    if (dynamicStyles) {
-        if (!ref) throw new Error(`nodeRef must be passed into mE to register dynamic styles`)
-        setUpDynamicStyles(component, ref, dynamicStyles)
-    }
-
-    onBeforeUnmount(() => {
-        ref.setValue(null);
-    })
-
-    ref.markInitialized()
+    jsxConfig?: JSXConfig<HTMLElement>,
+    setupConfig?: NodeSetupConfig,
+): DOMNode {
+    return makeNode(nodeType, childNodes, jsxConfig, setupConfig) as DOMNode
 }
 
 export function makeElement<T extends keyof HTMLElementTagNameMap>(
     tagName: T,
-    config: DOMNodeConfig = {},
     childNodes: NodeEntity[] | undefined,
+    jsxConfig: JSXConfig<HTMLElement>,
+    setupConfig: NodeSetupConfig,
     ref: NodeRef<HTMLElement> | undefined,
-    // options?: ElementOptions
+    $index: Signal<number> | undefined
 ): DOMNode {
 
-    const { attributes, class: _class, style, on, $index, $class, $style } = config;
+    const { class: _class, style, ...other } = jsxConfig;
     const domNode = document.createElement(tagName);
     const component = getCurrentComponent();
-    if (!component || component === "root") throw new Error("No component :(")
-    // if (text != null && childNodes) throw new Error(`Element ${tagName} cannot contain both text and childNodes`)
+    if (!component) throw new Error("No component :(")
 
-    // if (text !== undefined) setUpTextNode(domNode, text)
-    // else 
+    if (ref) {
+        const _ref = new _NodeRef(ref)
+        _ref.assignValue(domNode, $index)
+        initializeRef(component, _ref)
+        _ref.castOnCreatedHook(domNode, $index)
+    }
 
     if (childNodes) {
         const nodePod = new _NodePod();
@@ -211,9 +86,6 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
         }
     }
 
-    if (_class) domNode.classList.value = _class
-
-
     if (on) {
         for (const event in on) {
             const handler = on[event]
@@ -223,24 +95,21 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
         }
     }
 
+    if (_class) domNode.classList.value = _class
+
     if (style) {
         for (const property in style) {
             domNode.style[property] = style[property]!
         }
     }
 
-    if (attributes) {
-        for (const property in attributes) {
-            domNode.setAttribute(property, attributes[property])
+    if (other) {
+        for (const property in other) {
+            domNode.setAttribute(property, other[property])
         }
     }
 
-    if (ref) {
-        const _ref = new _NodeRef(ref)
-        _ref.assignValue(domNode, $index)
-        initializeRef(component, $class, $style, _ref)
-        _ref.castOnCreatedHook(domNode, $index)
-    }
+
 
     // if (options) {
     //     const { main } = options
@@ -250,6 +119,30 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
 
     return domNode;
+}
+
+
+
+function setUpDynamicClasses(component: InternalComponent, nodeRef: _NodeRef<HTMLElement>, reactiveEffects: ((o: DOMTokenList) => void)[]) {
+    if (nodeRef.initialized) return;
+    const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
+    if (!nodeRef) throw new Error(`nodeRef must be passed into mE to register dynamic classes`)
+    nodeRef.o.onCreated((node) => {
+        for (const effect of reactiveEffects) {
+            _watchRenderEffect(() => effect(node.classList))
+        }
+    })
+}
+
+function setUpDynamicStyles(component: InternalComponent, nodeRef: _NodeRef<HTMLElement>, reactiveEffects: ((o: CSSStyleDeclaration) => void)[]) {
+    if (nodeRef.initialized) return;
+    const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
+    if (!nodeRef) throw new Error(`nodeRef must be passed into mE to register dynamic styles`)
+    nodeRef.o.onCreated((node) => {
+        for (const effect of reactiveEffects) {
+            _watchRenderEffect(() => effect(node.style))
+        }
+    })
 }
 
 function setUpRefNulling(ref: _NodePod, $index: Signal<number>) {
@@ -292,7 +185,7 @@ function setUpTextNode(parent: HTMLElement, text: ReactiveSignal | any, nodePod?
 
 function keepTextNodeUpdated($text: ReactiveSignal<any>, textNode: CharacterData) {
     const component = getCurrentComponent();
-    if (!component || component === "root") throw new Error("No component found")
+    if (!component) throw new Error("No component found")
     const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
     _watchForRender($text, (newValue: any) => {
         textNode.data = toString(newValue);
@@ -438,7 +331,7 @@ function setUpConditionalEntity(
     // const _conditionalKits: {
     //     $condition?: ReactiveSignal<boolean>;
     //     nodePod: _NodePod;
-    //     renderConditional: () => NodeEntity[];
+    //     renderConditional: RenderConditional;
     // }[] = []
 
     // for (let i = 0; i < conditionalKits.length; i++) {
@@ -453,7 +346,7 @@ function setUpConditionalEntity(
     //     // _conditionalKits.push({ $condition, nodePod, renderConditional });
     // }
 
-    const initialNodeEntities = normalizeRenderOutput(conditionalKits[activeIndex].renderConditional())
+    const initialNodeEntities = normalizeToArray(conditionalKits[activeIndex].renderConditional())
 
     for (const nodeEntity of initialNodeEntities) {
         // append to dom and node pod
@@ -524,15 +417,15 @@ export function populateFragment(fragment: DocumentFragment, nodePod: _NodePod) 
     })
 }
 
-const preservedNodePods: WeakMap<() => NodeEntity[], _NodePod> = new WeakMap();
+const preservedNodePods: WeakMap<RenderConditional, _NodePod> = new WeakMap();
 
-function getPreservedNodePod(renderConditional: () => NodeEntity[]) {
+function getPreservedNodePod(renderConditional: RenderConditional) {
     const nodePod = preservedNodePods.get(renderConditional)
     if (!nodePod) throw new Error("nodePod missing")
     return nodePod;
 }
 
-function removePrevConditionalNodes(dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[]) {
+function removePrevConditionalNodes(dynamicPod: _DynamicNodePod, renderConditional: RenderConditional) {
     // component === App
     // const preserve = component.preserve;
     const nodePod = dynamicPod[0];
@@ -568,7 +461,7 @@ function emitBeforeUnmount(components: InternalComponent[]) {
 
 
 
-function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[]) {
+function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: RenderConditional) {
     // const nodePod = preserve ? getPreservedNodePod(renderConditional) : new _NodePod();
     const nodePod = new _NodePod();
     dynamicPod.replaceNodePod(0, nodePod);
@@ -580,12 +473,12 @@ function insertNewConditionalNodes(component: InternalComponent, parent: HTMLEle
 
 }
 
-export function renderAndAppendConditionalNodePod(nodePod: _NodePod, component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[]) {
+export function renderAndAppendConditionalNodePod(nodePod: _NodePod, component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: RenderConditional) {
     const fragment = new DocumentFragment();
 
     // if (!preserve) {
     pushComponent(component);
-    const nodeEntities = normalizeRenderOutput(renderConditional());
+    const nodeEntities = normalizeToArray(renderConditional());
     popComponent()
 
     for (const nodeEntity of nodeEntities) {
@@ -629,7 +522,5 @@ function emitActivated(components: InternalComponent[]) {
     }
 }
 
-export function normalizeRenderOutput(output: NodeEntity[] | NodeEntity) {
-    return output instanceof Array ? output : [output]
-}
+
 

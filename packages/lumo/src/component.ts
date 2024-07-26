@@ -1,8 +1,8 @@
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "./lifecycle";
-import { NodeEntity } from "./mE";
 import { RenderSlot, SlotRenderer } from "./mO";
 import { _NodeRef } from "./NodeRef";
+import { NodeEntity, RenderFunction } from "./makeNode";
 
 // export type NodeRef = Signal<Component | DOMNode | (DOMNode | Component)[]>
 
@@ -14,7 +14,10 @@ export type Props = {
 
 
 
-export type ComponentSetup<T extends Props = AnyObject> = (props?: T, context?: AnyObject) => NodeEntity[] | NodeEntity
+export type ComponentSetup<T extends AnyObject | never = AnyObject> =
+    T extends AnyObject ?
+    (props: T) => NodeEntity[] | NodeEntity
+    : RenderFunction
 
 export type Component = AnyObject // contains anything in expose
 
@@ -22,7 +25,8 @@ export class InternalComponent {
     context: AnyObject | undefined;
     provides: AnyObject | undefined;
     component: Component | undefined;
-    parent: InternalComponent | 'root';
+    attributes: AnyObject | null = null;
+    parent: InternalComponent | null;
     initialNodeEntities: NodeEntity[] = []; //TODO: add context type?? //QUESTION: should this be cleared or updated?
     preserve: boolean;
     tasks: {
@@ -47,7 +51,7 @@ export class InternalComponent {
 
     hasUpdates: boolean = false;
 
-    constructor(parent: InternalComponent | 'root', preserve: boolean) {
+    constructor(parent: InternalComponent | null, preserve: boolean) {
         this.parent = parent;
         this.preserve = preserve
     }
@@ -65,18 +69,20 @@ export class InternalComponent {
             task();
         }
     }
+
+
 }
 
 
 // Manages component "stack"
-let currentComponent: InternalComponent | null | "root" = "root";
-let prevComponent: InternalComponent | null | "root" = null;
+let currentComponent: InternalComponent | null  = null;
+let prevComponent: InternalComponent | null  = null;
 
 export function getCurrentComponent() {
     return currentComponent;
 }
 
-export function pushComponent(component: InternalComponent | null | "root") {
+export function pushComponent(component: InternalComponent | null ) {
     prevComponent = currentComponent;
     currentComponent = component;
 }
@@ -90,7 +96,7 @@ export function popComponent() {
 
 export function expose(component: AnyObject) {
     const _component = getCurrentComponent();
-    if (_component === null || _component === "root") throw new Error("Cannot call `expose` outside of component setup")
+    if (_component === null) throw new Error("Cannot call `expose` outside of component setup")
     _component.component = component;
 }
 

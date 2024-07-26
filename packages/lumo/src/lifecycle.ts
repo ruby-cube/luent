@@ -33,7 +33,7 @@ function useTaskQueue(component: InternalComponent, hookName: LifecycleHook) {
 function createLifecycleHook(name: Exclude<LifecycleHook, LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDATED>) {
     return function on(handler: () => void, _component?: InternalComponent) {
         const component = _component || getCurrentComponent();
-        if (!component || component === 'root') throw new Error("Lifecycle hooks cannot be called outside of component setup");
+        if (!component) throw new Error("Lifecycle hooks cannot be called outside of component setup");
         const taskQueue = useTaskQueue(component, name)
 
         return $schedule(handler, {}, {
@@ -51,7 +51,7 @@ function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDA
     return function on(handler: () => void, options?: ListenerOptions, _component?: InternalComponent) {
         const component = _component || getCurrentComponent();
         console.log('hook', name, component)
-        if (!component || component === 'root') throw new Error("Lifecycle hooks cannot be called outside of component setup");
+        if (!component) throw new Error("Lifecycle hooks cannot be called outside of component setup");
         const taskQueue = useTaskQueue(component, name)
 
         return $listen(handler, options || {}, {

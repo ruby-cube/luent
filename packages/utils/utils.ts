@@ -20,3 +20,7 @@ export const $type = 0 as unknown;
 
 export const isEqual = _.isEqual
 
+
+export function normalizeToArray(value: any | any[]) {
+    return value instanceof Array ? value : [value]
+}

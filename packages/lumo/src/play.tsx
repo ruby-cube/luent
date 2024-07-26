@@ -1,10 +1,12 @@
-
+//@ts-nocheck
 
 function ListItem() {
   return {};
 }
 
-function ListBlock() {
+function ListBlock(props: {}, attributes) {
+
+
   return {
     render: () => (
       <>
@@ -85,23 +87,32 @@ export function App(props) {
   return (
     <div class='App'>
       <h1>Hello React.</h1>
-      {forEachIn($list, (item) =>
+      {forEachIn($list, (item, $index) =>
         <div>{item}</div>
       )}
       <h2>Start editing to see some magic happen!</h2>
       <div>
-        {$mountIf($active, () =>
+        {$activateIf($active, o =>
           <>
             <p>hey</p>
             <p>hey</p>
           </>
         )}
-        {$elseIf($active, [
-          o => <p>hey</p>,
-          o => <p>hey</p>
-        ])}
-        {$else(() => <p>hey</p>)}
+        {$else(o =>
+          <p>hey</p>
+        )}
       </div>
+      <ListBlock ref={list_block}>
+        {{
+          $text,
+          description: (o =>
+            <>
+              <h1>{$heading()}</h1>
+              <p>{$description()}</p>
+            </>
+          )
+        }}
+      </ListBlock>
     </div>
   );
 }
@@ -112,7 +123,7 @@ function forEachIn(list, fn) {
   }
 }
 
-function $mountIf(config, fn) {
+function $createIf(config, fn) {
 
 }
 

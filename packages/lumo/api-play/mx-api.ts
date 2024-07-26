@@ -99,22 +99,22 @@ function List() {
 
     dynamicClasses(itemsRef, [
         // manipulation instructions
-        (o) => {  // one-to-one binding, coarse-grained
+        o => {  // one-to-one binding, coarse-grained
             if ($dragging())
                 o.add('dragging');
 
             if ($highlighted() && $isActive())
                 o.add('highlight');
         },
-        (o) => { // one-to-one binding, fine-grained
+        o => { // one-to-one binding, fine-grained
             if ($dragging())
                 o.add('dragging')
         },
-        (o) => {
+        o => {
             if ($highlighted() && $isActive())
                 o.add('highlight')
         },
-        (o) => { // one-to-one binding, fine-grained
+        o => { // one-to-one binding, fine-grained
             if ($dragging()) {
                 o.add('dragging')
                 o.remove('highlight')
@@ -127,7 +127,7 @@ function List() {
         },
 
         // over-writes classes
-        (o) => {
+        o => {
             if ($highlighted() && $isActive())
                 o.replace(`dragging highlight`)
         },
@@ -135,18 +135,18 @@ function List() {
 
 
     dynamicStyles(itemsRef, [
-        (o) => {  // one-to-one binding, coarse-grained
+        o => {  // one-to-one binding, coarse-grained
             o.backgroundColor = $mainColor()
             o.width = `${listItem$.width} px`;
             o.height = `${$height()} px`;
         },
         // one-to-one binding, fine-grained
-        (o) => { o.backgroundColor = $mainColor() },
-        (o) => { o.width = `${listItem$.width + 1} px` },
-        (o) => { o.height = `${$height()} px` },
-        (o) => { o[`--box-width`] = `${listItem$.width} px` },
+        o => { o.backgroundColor = $mainColor() },
+        o => { o.width = `${listItem$.width + 1} px` },
+        o => { o.height = `${$height()} px` },
+        o => { o[`--box-width`] = `${listItem$.width} px` },
 
-        (o) => {
+        o => {
             if ($dragging()) { // one-to-many binding
                 o.backgroundColor = 'gray';
                 o.width = `${listItem$.width} px`;
@@ -156,7 +156,7 @@ function List() {
                 o.width = `0 px`;
             }
         },
-        (o) => {
+        o => {
             if ($dragging()) {
                 o.backgroundColor = 'gray';
                 o.width = `${listItem$.width} px`;
@@ -170,7 +170,7 @@ function List() {
         },
 
         // over-writes styles
-        (o) => {
+        o => {
             if ($dragging()) o.cssText = `background-color: pink`
             else if ($isActive()) o.cssText = ``
             else o.cssText = `--box-width: ${listItem$.width}px`;
@@ -178,11 +178,7 @@ function List() {
     ])
 
     dynamicEvents(listRef, {
-        click: $(() => $active() ? reClick : null)
-    })
-
-    dynamicEvents(listRef, {
-        click: () => $active() ? reClick : null
+        click: $(o => $active() ? reClick : null)
     })
 
     const xMainBlock = setUpNode('div', {
@@ -190,13 +186,18 @@ function List() {
 
         ],
         on: {
-            click,
-            mousedown
+            click: [
+
+            ],
+            mousedown: $mouseDown
         }
     })
 
-    const xItems = setUpNodesIn(list$, 'div', (item, i) => ({
-
+    const xItems = setUpNodesIn(list$, 'div', (item, $index) => ({
+        on: {
+            click: (e) => reClick(e, $index())
+        },
+        source: $source
     }))
 
     // dynamic rendering
@@ -316,7 +317,7 @@ function App() {
         setUpSlotContent(Card, {
             description: ['div', ({ $width }) => ({
                 styles: [
-                    (o) => {
+                    o => {
                         o.width = $width()
                     }
                 ]

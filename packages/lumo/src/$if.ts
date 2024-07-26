@@ -1,7 +1,9 @@
 import { getWithoutTracking, makeDerivedSignal, ReactiveSignal } from "@rue/muonic";
-import { NodeEntity, normalizeRenderOutput } from "./mE";
 import { InternalComponent } from "./component";
 import { _NodePod } from "./NodePod";
+import { NodeEntity, RenderFunction } from "./makeNode";
+import { RenderConditional } from "./mountIf";
+import { normalizeToArray } from "@rue/utils";
 
 
 
@@ -17,7 +19,7 @@ export class ConditionalSeries {
     $conditions = genConditionsSignal(this.conditions);
 
     constructor(
-        public type: 'mount' | 'show' | 'get'
+        public type: 'create' | 'show' | 'activate'
     ) { }
 
     addRenderKit(renderKit: ConditionalRenderKit) {
@@ -40,8 +42,7 @@ export class ConditionalSeries {
     evaluateConditions() {
         const conditionalKits = this.conditionalKits;
         for (let i = 0; i < conditionalKits.length; i++) {
-            const kit = conditionalKits[i]
-            const { renderConditional, $condition } = kit;
+            const $condition = conditionalKits[i].$condition
             if ($condition) this.conditions.push($condition);
             if ($condition && getWithoutTracking($condition) || !$condition) {
                 this.activeIndex = i;
@@ -64,7 +65,7 @@ export function genConditionsSignal(conditions: ReactiveSignal<boolean>[]) {
 
 let conditionalSeries: ConditionalSeries | undefined;
 
-export function startConditionalSeries(type: 'mount' | 'show' | 'get' | 'elseIf' | 'else') {
+export function startConditionalSeries(type: 'create' | 'show' | 'activate' | 'elseIf' | 'else') {
     if (type === 'else' || type === 'elseIf') throw new Error('Cannot start a conditional series with an else block')
     conditionalSeries = new ConditionalSeries(type);
 }
@@ -78,8 +79,8 @@ export class ConditionalRenderKit {
     isStart: boolean = false;
 
     constructor(
-        public type: 'mount' | 'show' | 'get' | 'elseIf' | 'else',
-        public renderConditional: () => NodeEntity[],
+        public type: 'create' | 'show' | 'activate' | 'elseIf' | 'else',
+        public renderConditional: RenderConditional,
         public $condition?: ReactiveSignal<boolean>,
     ) {
         if (type === 'else') {
@@ -94,28 +95,29 @@ export class ConditionalRenderKit {
     }
 }
 
-function $if($condition: ReactiveSignal<boolean>, renderConditional: () => NodeEntity[] | NodeEntity, type: 'mount' | 'show' | 'get' | 'elseIf'): ConditionalRenderKit {
-    return new ConditionalRenderKit(type, renderConditional, $condition)
+function $if($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction, type: 'create' | 'show' | 'activate' | 'elseIf'): ConditionalRenderKit {
+    const _renderConditional = type === 'activate' ? wrapToPreserve(renderConditional) : wrapToNormalize(renderConditional)
+    return new ConditionalRenderKit(type, _renderConditional, $condition)
 }
 
 
-export function $mountIf($condition: ReactiveSignal<boolean>, renderConditional: () => NodeEntity[] | NodeEntity) {
-    return $if($condition, renderConditional, 'mount')
+export function $createIf($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction) {
+    return $if($condition, renderConditional, 'create')
 }
 
-export function $showIf($condition: ReactiveSignal<boolean>, renderConditional: () => NodeEntity[] | NodeEntity) {
+export function $showIf($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction) {
     return $if($condition, renderConditional, 'show')
 }
 
-export function $getIf($condition: ReactiveSignal<boolean>, renderConditional: () => NodeEntity[] | NodeEntity) {
-    return $if($condition, wrapToPreserve(renderConditional), 'get')
+export function $activateIf($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction) {
+    return $if($condition, renderConditional, 'activate')
 }
 
-export function $elseIf($condition: ReactiveSignal<boolean>, renderConditional: () => NodeEntity[] | NodeEntity) {
+export function $elseIf($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction) {
     return $if($condition, renderConditional, 'elseIf')
 }
 
-export function $else(renderConditional: () => NodeEntity[] | NodeEntity) {
+export function $else(renderConditional: RenderFunction) {
     return new ConditionalRenderKit('else', renderConditional)
 }
 
@@ -145,21 +147,29 @@ export function noElseBlock(renderKit: ConditionalRenderKit) {
     return false;
 }
 
+
+
+// $activateIf
+
 let _preserveAll = false;
 
 export function preserveAllRequested() {
     return _preserveAll;
 }
 
-function wrapToPreserve(renderConditional: () => NodeEntity[] | NodeEntity) {
-    let nodeEntities: NodeEntity[] | NodeEntity | undefined;
+function wrapToPreserve(renderConditional: RenderFunction) {
+    let nodeEntities: NodeEntity[];
     return () => {
         if (!nodeEntities) {
             _preserveAll = true;
-            nodeEntities = renderConditional();
+            nodeEntities = normalizeToArray(renderConditional());
             _preserveAll = false;
             return nodeEntities;
         }
         return nodeEntities;
     }
+}
+
+function wrapToNormalize(renderConditional: RenderFunction) {
+    return () => normalizeToArray(renderConditional())
 }

@@ -15,6 +15,8 @@ import { ReactiveSignal } from "../../muonic/useDerivedSignal";
 //     }
 // })
 
+
+
 type Config<T extends HTMLTag | ComponentSetup = HTMLTag | ComponentSetup> = T extends HTMLTag ? DOMNodeConfig : ComponentConfig<T extends ComponentSetup ? T : never>
 type ListConfig<
     T extends HTMLTag | ComponentSetup = HTMLTag | ComponentSetup,

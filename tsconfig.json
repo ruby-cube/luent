@@ -88,6 +88,7 @@
   "include": [
     "packages",
     "apps",
+    "custom-jsx.d.ts"
   ],
   "exclude": [
     "**/x_old",

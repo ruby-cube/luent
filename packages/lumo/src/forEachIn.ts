@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { hasSignal, ReactiveSignal } from "../../muonic/useDerivedSignal";
-import { _internalReactivity, emitHookBatch, NodeEntity, normalizeRenderOutput, setUpNodeEntity } from "./mE";
+import { _internalReactivity, emitHookBatch, normalizeToArray, setUpNodeEntity } from "./mE";
 import { isReactive, ReactiveObject } from "../../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod } from "./NodePod";
 import { Signal } from "../../muonic/useSignalize";
@@ -8,6 +8,7 @@ import { LifecycleHook } from "./lifecycle";
 import { InternalComponent, popComponent, pushComponent } from "./component";
 import { InsertAndMoveKit } from "./diff";
 import { getNodRef } from "./NodeRef";
+import { NodeEntity } from "./makeNode";
 
 
 export type RenderItem<T = any> = (item: T, $index: Signal<number>) => NodeEntity[] | NodeEntity
@@ -28,8 +29,8 @@ export class ListRenderKit<T = any> {
 let currentItem: any;
 let $currentIndex: Signal<number> | undefined;
 
-export function getCurrentItemAndIndex(): [any, Signal<number>] {
-    if ($currentIndex === undefined) throw new Error('Not currently setting up a list; cannot get item and index')
+export function getCurrentItemAndIndex(): [any, Signal<number>] | [undefined, undefined] {
+    if ($currentIndex === undefined) return [undefined, undefined]
     return [currentItem, $currentIndex]
 }
 
@@ -59,7 +60,7 @@ export function forEachIn(data: ListData, render: RenderItem): ListRenderKit {
         currentItem = item;
         $currentIndex = $index;
         indices.push($index)
-        domNodes.push(normalizeRenderOutput(render(item, $index)));
+        domNodes.push(normalizeToArray(render(item, $index)));
         i++;
     }
     currentItem = undefined;
@@ -161,7 +162,7 @@ export function insertAndMoveListItemNodes(
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
             pushComponent(component)
-            const nodeEntities = normalizeRenderOutput(renderItem(item, $index));
+            const nodeEntities = normalizeToArray(renderItem(item, $index));
             popComponent()
             for (const nodeEntity of nodeEntities) {
                 setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)

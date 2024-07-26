@@ -1,12 +1,13 @@
 import { getWithoutTracking, ReactiveSignal } from "@rue/muonic"
-import { ConditionalSeries } from "./$mountIf"
+import { ConditionalSeries } from "./$if"
 import { DOMNode, InternalComponent, popComponent, pushComponent } from "./component"
 import { _DynamicNodePod, _NodePod } from "./NodePod"
-import { NodeEntity, normalizeRenderOutput, renderAndAppendConditionalNodePod, setUpNodeEntity } from "./mE"
-import { watchForRenderAndPreserve } from "./mountIf"
+import { normalizeToArray, renderAndAppendConditionalNodePod, setUpNodeEntity } from "./mE"
+import { RenderConditional, watchForRenderAndPreserve } from "./mountIf"
 import { watchForRender } from "./watchForRender"
 import { isEqual } from "@rue/utils"
 import { LifecycleHook } from "./lifecycle"
+import { NodeEntity } from "./makeNode"
 
 const showIfMap: WeakMap<DOMNode, string> = new WeakMap()
 
@@ -70,7 +71,7 @@ export function setUpConditionalShowEntity(
         // _conditionalKits.push({ $condition, nodePod, renderConditional });
     }
 
-    const initialNodeEntities = normalizeRenderOutput(conditionalKits[activeIndex].renderConditional())
+    const initialNodeEntities = normalizeToArray(conditionalKits[activeIndex].renderConditional())
 
     for (const nodeEntity of initialNodeEntities) {
         // append to dom and node pod
@@ -124,7 +125,7 @@ function hidePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeIndex: numb
 }
 
 
-function showConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: () => NodeEntity[], activeIndex: number) {
+function showConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: RenderConditional, activeIndex: number) {
     const nodePod = dynamicPod[activeIndex];
     if (nodePod.length === 0) {
         renderAndAppendConditionalNodePod(nodePod, component, parent, dynamicPod, renderConditional) // lazy render

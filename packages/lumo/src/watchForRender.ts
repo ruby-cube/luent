@@ -9,7 +9,7 @@ import { AnyObject } from "@rue/types";
 
 export function watchRenderEffect(effect: () => void) {
     const component = getCurrentComponent();
-    if (!component || component === "root") throw Error("watchRenderEffect must be called within component setup")
+    if (!component) throw Error("watchRenderEffect must be called within component setup")
 
     const _handler = () => {
         effect();
@@ -22,7 +22,7 @@ export function watchRenderEffect(effect: () => void) {
 
 export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: { once?: true }) {
     const component = getCurrentComponent();
-    if (!component || component === "root") throw Error("watchForRender must be called within component setup")
+    if (!component) throw Error("watchForRender must be called within component setup")
 
     const _handler = (newValue: any, oldValue: any) => {
         console.trace()
