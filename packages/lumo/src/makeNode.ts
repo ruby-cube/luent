@@ -9,18 +9,26 @@ import { getNodeConfig } from "./setUpNode";
 import { AnyObject } from "@rue/types";
 import { onBeforeUnmount } from "./lifecycle";
 
-export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit | any | ReactiveSignal<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
+export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveSignal<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
 
 export type RenderFunction<Params = unknown> = Params extends [] ?
     (...args: Params) => NodeEntity[] | NodeEntity :
     () => NodeEntity[] | NodeEntity
 
-type EventHandler<K extends keyof HTMLElementEventMap> = (event: HTMLElementEventMap[K]) => void
+export type EventHandler<K extends keyof HTMLElementEventMap> = (event: HTMLElementEventMap[K]) => void
+
+export type AssignAttributes = {
+    events?: { [K in keyof HTMLElementEventMap]?: EventHandler<K> | DerivedSignal<EventHandler<K>> | (EventHandler<K> | DerivedSignal<EventHandler<K>>)[] };
+    classes?: (((o: DOMTokenList) => void) | string)[],
+    styles?: (((o: CSSStyleDeclaration) => void) | string)[],
+    attributes?: AnyObject
+}
 
 export type NodeSetupConfig = {
     on?: { [K in keyof HTMLElementEventMap]?: EventHandler<K> | DerivedSignal<EventHandler<K>> | (EventHandler<K> | DerivedSignal<EventHandler<K>>)[] };
     class?: string | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[],
     style?: string | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[],
+    assigned?: AssignAttributes
 }
 
 export type JSXConfig<T extends HTMLElement | InternalComponent> = {

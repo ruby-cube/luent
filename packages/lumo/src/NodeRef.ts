@@ -100,7 +100,7 @@ export class _NodeRef<T extends HTMLElement | Component = HTMLElement | Componen
 
 const refMap: WeakMap<DOMNode | Component, _NodeRef> = new WeakMap()
 
-export function getNodRef(node: DOMNode | Component) { // AnyObject is component's exposed methods and state
+export function getNodeRef(node: DOMNode | Component) { // AnyObject is component's exposed methods and state
     return refMap.get(node)
 }
 

@@ -1,8 +1,8 @@
-import { getWithoutTracking, makeDerivedSignal, ReactiveSignal } from "@rue/muonic";
+import { DerivedSignal, getWithoutTracking, makeDerivedSignal, ReactiveSignal } from "@rue/muonic";
 import { InternalComponent } from "./component";
 import { _NodePod } from "./NodePod";
 import { NodeEntity, RenderFunction } from "./makeNode";
-import { RenderConditional } from "./mountIf";
+import { RenderConditional } from "../api-play/mountIf";
 import { normalizeToArray } from "@rue/utils";
 
 
@@ -15,8 +15,6 @@ export class ConditionalSeries {
     conditionalKits: ConditionalRenderKit[] = [];
     conditions: ReactiveSignal<boolean>[] = [];
     conditionMet: boolean = false;
-    activeIndex = 0;
-    $conditions = genConditionsSignal(this.conditions);
 
     constructor(
         public type: 'create' | 'show' | 'activate'
@@ -25,18 +23,13 @@ export class ConditionalSeries {
     addRenderKit(renderKit: ConditionalRenderKit) {
         this.conditionalKits.push(renderKit);
         const $condition = renderKit.$condition;
-        if (!this.conditionMet) {
-            if ($condition) {
-                this.conditions.push($condition)
-                // this.conditionMet = getWithoutTracking($condition) //QUESTION: is getWithOutTracking necessary?
-            }
-            // this.activeIndex++
+        if (!this.conditionMet && $condition) {
+            this.conditions.push($condition)
         }
     }
 
     addElse() {
         this.conditionalKits.push(new ConditionalRenderKit('else', () => []))
-        // if (!this.conditionMet) this.activeIndex++;
     }
 
     evaluateConditions() {
@@ -45,11 +38,17 @@ export class ConditionalSeries {
             const $condition = conditionalKits[i].$condition
             if ($condition) this.conditions.push($condition);
             if ($condition && getWithoutTracking($condition) || !$condition) {
-                this.activeIndex = i;
-                return this.$conditions = genConditionsSignal(this.conditions);
+                return {
+                    activeIndex: i,
+                    $conditions: genConditionsSignal(this.conditions)
+                };
             }
         }
         throw new Error('Else case is missing')
+    }
+
+    render(index: number) {
+        return this.conditionalKits[index].renderConditional()
     }
 }
 
@@ -63,91 +62,67 @@ export function genConditionsSignal(conditions: ReactiveSignal<boolean>[]) {
     }) // $(() => [$conditionA(), $conditionB()])
 }
 
-let conditionalSeries: ConditionalSeries | undefined;
+// let conditionalSeries: ConditionalSeries | undefined;
 
-export function startConditionalSeries(type: 'create' | 'show' | 'activate' | 'elseIf' | 'else') {
-    if (type === 'else' || type === 'elseIf') throw new Error('Cannot start a conditional series with an else block')
-    conditionalSeries = new ConditionalSeries(type);
-}
+// export function startConditionalSeries(type: 'create' | 'show' | 'activate' | 'elseIf' | 'else') {
+//     if (type === 'else' || type === 'elseIf') throw new Error('Cannot start a conditional series with an else block')
+//     conditionalSeries = new ConditionalSeries(type);
+// }
 
-export function getConditionalSeries() {
-    return conditionalSeries;
-}
+// export function getConditionalSeries() {
+//     return conditionalSeries;
+// }
 
 export class ConditionalRenderKit {
-    isEnd: boolean = false;
-    isStart: boolean = false;
 
     constructor(
-        public type: 'create' | 'show' | 'activate' | 'elseIf' | 'else',
+        public statement: 'if' | 'elseIf' | 'else',
         public renderConditional: RenderConditional,
+        public type: 'create' | 'show' | 'activate' = 'create',
         public $condition?: ReactiveSignal<boolean>,
-    ) {
-        if (type === 'else') {
-            this.isEnd = true;
-        }
-        else if (type !== 'elseIf') {
-            this.isStart = true;
-        }
-    }
-    markEnd() {
-        this.isEnd = true;
-    }
+    ) { }
 }
 
-function $if($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction, type: 'create' | 'show' | 'activate' | 'elseIf'): ConditionalRenderKit {
+let currentConditionalType: 'create' | 'show' | 'activate' = 'create'
+
+export function $if($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction,): ConditionalRenderKit
+export function $if($condition: ReactiveSignal<boolean>, type: 'create' | 'show' | 'activate', renderConditional: RenderFunction,): ConditionalRenderKit
+export function $if($condition: ReactiveSignal<boolean>, param2: 'create' | 'show' | 'activate' | RenderFunction, renderConditional?: RenderFunction,): ConditionalRenderKit {
+    const typeSpecified = typeof param2 === "string";
+    const renderFunction = typeSpecified ? renderConditional : param2;
+    const type = typeSpecified ? param2 : 'create';
+    if (!renderFunction) throw new Error('render function is missing');
+    currentConditionalType = type;
+    return _if($condition, renderFunction, 'if', type)
+}
+
+function _if($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction, statement: 'if' | 'elseIf' = 'if', type: 'create' | 'show' | 'activate' = currentConditionalType) {
     const _renderConditional = type === 'activate' ? wrapToPreserve(renderConditional) : wrapToNormalize(renderConditional)
-    return new ConditionalRenderKit(type, _renderConditional, $condition)
-}
-
-
-export function $createIf($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction) {
-    return $if($condition, renderConditional, 'create')
-}
-
-export function $showIf($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction) {
-    return $if($condition, renderConditional, 'show')
-}
-
-export function $activateIf($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction) {
-    return $if($condition, renderConditional, 'activate')
+    return new ConditionalRenderKit(statement, _renderConditional, type, $condition)
 }
 
 export function $elseIf($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction) {
-    return $if($condition, renderConditional, 'elseIf')
+    return _if($condition, renderConditional, 'elseIf')
 }
 
 export function $else(renderConditional: RenderFunction) {
-    return new ConditionalRenderKit('else', renderConditional)
+    const type = currentConditionalType;
+    return new ConditionalRenderKit('else', renderConditional, currentConditionalType)
 }
 
 
-export function isConditionalSeriesEnd(index: number, nodeEntities: NodeEntity[]) {
-    if (index === nodeEntities.length - 1) return true;
-    if (!(nodeEntities[index + 1] instanceof ConditionalRenderKit)) return true;
-    if (nodeEntities[index + 1].isStart) return true;
+
+export function noElseBlock(statements: ConditionalRenderKit[]) {
+    if (statements.length === 0) throw new Error(`Conditional series is empty`)
+    if (statements.at(-1)!.statement !== 'else') return true;
     return false;
 }
 
-
-export function setUpConditionalRenderKit(
-    component: InternalComponent,
-    parent: HTMLElement,
-    renderKit: ConditionalRenderKit,
-    nodePod: _NodePod,
-    fragment?: DocumentFragment,
-) {
-    const conditionalSeries = getConditionalSeries();
-
+export function validateStandAloneConditional(conditionalKit: ConditionalRenderKit, nodeEntities: NodeEntity[], index: number) {
+    if (conditionalKit.statement !== 'if') throw new Error(`$${conditionalKit.type} conditional must be contained in a fragment that begins with $if`)
+    const nextEntity = nodeEntities[index + 1];
+    if (nextEntity instanceof ConditionalRenderKit && nextEntity.statement !== 'if') throw new Error(`A series of conditional statements must be enclosed in a fragment`)
 }
-
-export function noElseBlock(renderKit: ConditionalRenderKit) {
-    if (renderKit.isEnd && renderKit.type !== 'else')
-        return true;
-    return false;
-}
-
-
 
 // $activateIf
 
@@ -173,3 +148,36 @@ function wrapToPreserve(renderConditional: RenderFunction) {
 function wrapToNormalize(renderConditional: RenderFunction) {
     return () => normalizeToArray(renderConditional())
 }
+
+
+
+
+export function buildConditionalSeries(statements: ConditionalRenderKit[]) {
+    const series = new ConditionalSeries(statements[0].type)
+    for (let i = 0; i < statements.length; i++) {
+        const kit = statements[i]
+        if (i === 0 && kit.statement !== 'if' || i !== 0 && kit.statement === 'if') {
+            if (__DEV__) throw new Error('$if must be the first child of a conditional series')
+            else continue;
+        }
+        if (!(kit instanceof ConditionalRenderKit)) {
+            if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the $if, $elseIf, and $else functions")
+            else continue;
+        }
+        if (i !== statements.length - 1 && kit.statement === 'else') {
+            if (__DEV__) throw new Error("$else must be the very last statement of a conditional series");
+            else continue;
+        }
+        series.addRenderKit(kit);
+    }
+    if (noElseBlock(statements)) {
+        series.addElse()
+    }
+    series.evaluateConditions()
+    return series;
+}
+
+
+// function validateConditionalStatements(statements: ConditionalRenderKit[]) {
+
+// }

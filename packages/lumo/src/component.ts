@@ -2,7 +2,8 @@ import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "./lifecycle";
 import { RenderSlot, SlotRenderer } from "./mO";
 import { _NodeRef } from "./NodeRef";
-import { NodeEntity, RenderFunction } from "./makeNode";
+import { AssignAttributes, EventHandler, NodeEntity, RenderFunction } from "./makeNode";
+import { DerivedSignal } from "@rue/muonic";
 
 // export type NodeRef = Signal<Component | DOMNode | (DOMNode | Component)[]>
 
@@ -25,9 +26,9 @@ export class InternalComponent {
     context: AnyObject | undefined;
     provides: AnyObject | undefined;
     component: Component | undefined;
-    attributes: AnyObject | null = null;
+    attributes: AssignAttributes | null = null;
     parent: InternalComponent | null;
-    initialNodeEntities: NodeEntity[] = []; //TODO: add context type?? //QUESTION: should this be cleared or updated?
+    nodeEntities: NodeEntity[] = []; //TODO: add context type?? //QUESTION: should this be cleared or updated?
     preserve: boolean;
     tasks: {
         [LifecycleHook.BEFORE_MOUNT]: Set<() => void> | undefined;

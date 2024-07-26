@@ -23,7 +23,6 @@ function popProvider() {
     currentProvider = previousProvider;
 }
 
-//TODO: [ ] typescript generics 
 
 
 // Public API

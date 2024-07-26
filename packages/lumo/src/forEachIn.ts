@@ -1,14 +1,15 @@
 import { AnyObject } from "@rue/types";
 import { hasSignal, ReactiveSignal } from "../../muonic/useDerivedSignal";
-import { _internalReactivity, emitHookBatch, normalizeToArray, setUpNodeEntity } from "./mE";
+import { _internalReactivity, emitHookBatch, setUpNodeEntity } from "./mE";
 import { isReactive, ReactiveObject } from "../../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod } from "./NodePod";
 import { Signal } from "../../muonic/useSignalize";
 import { LifecycleHook } from "./lifecycle";
 import { InternalComponent, popComponent, pushComponent } from "./component";
 import { InsertAndMoveKit } from "./diff";
-import { getNodRef } from "./NodeRef";
+import { getNodeRef } from "./NodeRef";
 import { NodeEntity } from "./makeNode";
+import { normalizeToArray } from "@rue/utils";
 
 
 export type RenderItem<T = any> = (item: T, $index: Signal<number>) => NodeEntity[] | NodeEntity
@@ -103,7 +104,7 @@ function removeDOMNodes(nodePod: _NodePod) {
 
 function removeNodesFromRef(nodePod: _NodePod) {
     nodePod.forEachNode((node, index) => {
-        const ref = getNodRef(node)
+        const ref = getNodeRef(node)
         if (ref) ref.removeNode(index!)
     })
 }
@@ -215,7 +216,7 @@ export function insertAndMoveListItemNodes(
     for (const [_, nodePods] of indicesAndNodePods) {
         for (const nodePod of nodePods) {
             nodePod.forEachNode((node, index) => {
-                const ref = getNodRef(node);
+                const ref = getNodeRef(node);
                 if (ref) ref.insertNode(node, index!)
             })
         }

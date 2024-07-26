@@ -12,7 +12,7 @@ function ListBlock(props: {}, attributes) {
       <>
         <div class="container">
           {
-            forEachIn($list, (item, i) =>
+            forEachIn($list, 'uid', (item, i) =>
               <ListItem class="list-item">{item}</ListItem>
             )
           }
@@ -107,12 +107,37 @@ export function App(props) {
           $text,
           description: (o =>
             <>
-              <h1>{$heading()}</h1>
-              <p>{$description()}</p>
+              <h1>{$heading}</h1>
+              <p>{$description}</p>
             </>
           )
         }}
       </ListBlock>
+
+      <div>
+        {$(o => {
+          if ($active())
+            return $textK() + $textA()
+          else
+            return $textK()
+        })}
+        {$textB}
+        {$textC}
+      </div>
+
+      <div>
+        <>
+          {$if($active, 'create', o =>
+            $textK() + $textA()
+          )}
+          {$else(o =>
+            $textK()
+          )}
+        </>
+        {$textB()}
+        {$textC()}
+      </div>
+
     </div>
   );
 }

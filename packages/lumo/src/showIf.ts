@@ -2,8 +2,8 @@ import { getWithoutTracking, ReactiveSignal } from "@rue/muonic"
 import { ConditionalSeries } from "./$if"
 import { DOMNode, InternalComponent, popComponent, pushComponent } from "./component"
 import { _DynamicNodePod, _NodePod } from "./NodePod"
-import { normalizeToArray, renderAndAppendConditionalNodePod, setUpNodeEntity } from "./mE"
-import { RenderConditional, watchForRenderAndPreserve } from "./mountIf"
+import { mountConditional, setUpNodeEntity } from "./mE"
+import { RenderConditional, watchForRenderAndPreserve } from "../api-play/mountIf"
 import { watchForRender } from "./watchForRender"
 import { isEqual } from "@rue/utils"
 import { LifecycleHook } from "./lifecycle"
@@ -45,49 +45,30 @@ function showDOMNodes(nodePod: _NodePod) {
 
 
 
-export function setUpConditionalShowEntity(
+export function setUpConditionalShowSeries(
     component: InternalComponent,
     parent: HTMLElement,
-    conditionalSeries: ConditionalSeries,
+    series: ConditionalSeries,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
     // componentsToUnmount?: InternalComponent[],
 ) {
-    const { conditionalKits, $conditions } = conditionalSeries;
 
-    const activeIndex = conditionalSeries.activeIndex;
-
+    const { $conditions, activeIndex } = series.evaluateConditions()
     const dynamicPod = nodePod.appendDynamicPod();
 
-    // const _conditionalKits: {
-    //     $condition?: ReactiveSignal<boolean>;
-    //     nodePod: _NodePod;
-    //     renderConditional: () => NodeEntity[];
-    // }[] = []
-
-    for (let i = 0; i < conditionalKits.length; i++) {
-        // const { renderConditional, $condition } = conditionalKits[i];
-        const nodePod = dynamicPod.appendNodePod()
-        // _conditionalKits.push({ $condition, nodePod, renderConditional });
+    let statementCount = series.conditionalKits.length;
+    while (statementCount--) {
+        dynamicPod.appendNodePod()
     }
 
-    const initialNodeEntities = normalizeToArray(conditionalKits[activeIndex].renderConditional())
+    const initialNodeEntities = series.render(activeIndex);
 
+    // append to dom and node pod
     for (const nodeEntity of initialNodeEntities) {
-        // append to dom and node pod
         const nodePod = dynamicPod[activeIndex];
         setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
     }
-    // if (dynamicPod && _dynamicPod) dynamicPod.includeComponents(_dynamicPod.activeComponents) // aggregate components to unmount
-
-    //    0                               1    2
-    // [[node, [maybe dynamic pod]], [ ], [ ]] --- dynamic pod
-    //  |                                 |
-    //  active pod                   inactive pod
-    //
-    // 
-    // [activeKit, kit, kit] --- conditionalKits
-    //
 
     // set up watcher for updates
     const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
@@ -96,21 +77,13 @@ export function setUpConditionalShowEntity(
 
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
         if (isEqual(newValue, oldValue)) return;
+        const { $conditions, activeIndex } = series.evaluateConditions();
 
-        // const conditions: ReactiveSignal<boolean>[] = []
-        for (let i = 0; i < conditionalKits.length; i++) {
-            const kit = conditionalKits[i]
-            const { renderConditional, $condition } = kit;
-            // if ($condition) conditions.push($condition);
-            if ($condition && getWithoutTracking($condition) || !$condition) {
-                component.emit(LifecycleHook.BEFORE_UPDATE)
-                hidePrevConditionalNodes(dynamicPod, activeIndex);
-                showConditionalNodes(component, parent, dynamicPod, renderConditional, i)
-                component.emit(LifecycleHook.UPDATED)
-                break;
-            }
-        }
-        const $conditions = conditionalSeries.evaluateConditions();
+        component.emit(LifecycleHook.BEFORE_UPDATE)
+        hidePrevConditionalNodes(dynamicPod, activeIndex);
+        const nodeEntities = series.render(activeIndex);
+        showConditionalNodes(component, parent, dynamicPod, activeIndex, nodePod)
+        component.emit(LifecycleHook.UPDATED)
 
         pushComponent(component)
         _watchForRender($conditions, updateConditional, { once: true })
@@ -125,10 +98,10 @@ function hidePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeIndex: numb
 }
 
 
-function showConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: RenderConditional, activeIndex: number) {
+function showConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, activeIndex: number, nodeEntities: NodeEntity[]) {
     const nodePod = dynamicPod[activeIndex];
-    if (nodePod.length === 0) {
-        renderAndAppendConditionalNodePod(nodePod, component, parent, dynamicPod, renderConditional) // lazy render
+    if (nodePod.length === 0) { // lazy render
+        mountConditional(nodePod, component, parent, dynamicPod, nodeEntities) 
     }
     showDOMNodes(nodePod) //QUESTION: Not sure if this should be in an else block... is it necessary to set display on newly rendered nodes?
 }

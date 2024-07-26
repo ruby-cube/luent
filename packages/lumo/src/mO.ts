@@ -4,12 +4,14 @@ import { SetKey, Signal } from "../../muonic/useSignalize";
 import { LifecycleHook, onActivated, onBeforeUnmount, onDeactivated, onUnmounted } from "./lifecycle";
 import { collectEffects } from "@rue/flask/flask";
 import { _NodeRef, NodeRef } from "./NodeRef";
-import { preserveAllRequested } from "./mountIf";
-import { initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig, RenderFunction } from "./makeNode";
+import { preserveAllRequested } from "../api-play/mountIf";
+import { AssignAttributes, initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig, RenderFunction } from "./makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { globalHTMLAttributes, htmlEvents } from "./html/attributes";
 import { HTMLTag } from "./mE";
 import { jsx } from "@rue/jsx-runtime";
+import { ListRenderKit } from "./forEachIn";
+import { ConditionalRenderKit } from "./$if";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 export type ComponentConfig<T extends ComponentSetup<AnyObject> = ComponentSetup> = {
@@ -91,7 +93,7 @@ export function getAttributes() {
     if (!component) throw new Error('`getAttributes` can only be called from within component setup')
     const attributes = component.attributes;
     component.attributes = null;
-    return attributes
+    return attributes!
 }
 
 function runComponentSetup(
@@ -105,25 +107,30 @@ function runComponentSetup(
 ) {
     collectEffects((flask, outerFlask) => {
         const { class: classString, style: styleString, ...other } = jsxConfig;
-        const { class: _class, on, props, style, ...attributes } = setupConfig;
-        const { jsxProps, jsxAttributes, jsxEvents } = analyzeAttributes(other, 'div') //FIX: Need a better solution 'div' is a standin tag
-        
-        if (__DEV__) warnOverlappingKeys(jsxProps, props);
-        if (__DEV__) warnOverlappingKeys(jsxAttributes, attributes);
+        const { class: _class, style, on, props, assigned, ...attributes } = setupConfig;
+        const assignedClasses = assigned?.classes || []
+        const assignedStyles = assigned?.styles || []
+        const assignedEvents = assigned?.events || {}
+        const assignedAttributes = assigned?.attributes || {}
+
+        const { jsxAttributes, jsxEvents } = analyzeAttributes(other)
+
+        if (__DEV__) warnOverlappingKeys(jsxAttributes, props); // pass in all attributes as props ... it's too hard to distinguish props from attributes
+        if (__DEV__) warnOverlappingKeys(jsxAttributes, attributes, assignedAttributes);
 
         const classes = normalizeToArray(_class)
         const styles = normalizeToArray(style)
 
-        component.attributes = {  
-            on: {},  //TODO: compose events per event, gather handlers into arrays if multiple per event
-            classes: [classString, ...classes],
-            styles: [styleString, ...styles],
-            attributes: {...attributes, jsxAttributes} 
+        component.attributes = {
+            events: composeEvents(jsxEvents, on, assignedEvents),  //TODO: compose events per event, gather handlers into arrays if multiple per event
+            classes: [classString, ...classes, ...assignedClasses],
+            styles: [styleString, ...styles, ...assignedStyles],
+            attributes: { ...attributes, ...jsxAttributes, ...assignedAttributes }
         }; // must set BEFORE component setup is called
 
-        const nodeEntities = normalizeToArray(Component({ ...props, ...jsxProps, slot }));
+        const nodeEntities = normalizeToArray(Component({ ...props, ...jsxAttributes, slot }));
 
-        component.initialNodeEntities = nodeEntities;
+        component.nodeEntities = nodeEntities;
 
         if (ref) {
             const _ref = new _NodeRef(ref);
@@ -136,24 +143,9 @@ function runComponentSetup(
 
         if (component.attributes) { // if `getAttributes` is called, this will be null
             // fallthrough attributes onto root or first node
-
-            if (on){
-    
-            }
-    
-            if (classes) {
-    
-            }
-    
-            if (styles){
-    
-            }
-
-            if (attributes){
-
-            }
+            assignAttributes(nodeEntities[0], component.attributes);
+            component.attributes = null;
         }
-
 
         outerFlask?.onDisposal(flask.dispose) // no outer flask means it's the root component
 
@@ -168,32 +160,58 @@ function runComponentSetup(
     })
 }
 
-function warnOverlappingKeys(propsA: AnyObject, propsB: AnyObject | undefined) {
-    if (!propsB) return;
-    for (const key in propsA) {
-        if (key in propsB) console.warn('Duplicate prop keys. Props in `setUpNode` will be overridden')
+function assignAttributes(nodeEntity: NodeEntity, attributes: AssignAttributes) {
+    if (nodeEntity instanceof HTMLElement) { // from Web API
+        applyAssignedAttributes(nodeEntity, attributes);
+    }
+    else if (nodeEntity instanceof InternalComponent) {
+        assignAttributes(nodeEntity.nodeEntities[0], attributes)
+    }
+    else if (__DEV__) {
+        console.warn('assigned attributes cannot be automatically applied. Please assign manually.')
     }
 }
 
-function analyzeAttributes(jsxEntries: AnyObject, tag: HTMLTag) {
+function warnOverlappingKeys(propsA: AnyObject, propsB: AnyObject | undefined, propsC?: AnyObject) {
+    if (!propsC && !propsB) return;
+    if (propsC) {
+        for (const key in propsA) {
+            if (key in propsC) console.warn('Duplicate prop keys. Props in `setUpNode` will be overridden')
+        }
+        if (!propsB) return;
+        for (const key in propsA) {
+            if (key in propsB) console.warn('Duplicate prop keys. Props in `setUpNode` will be overridden')
+        }
+        for (const key in propsB) {
+            if (key in propsC) console.warn('Duplicate prop keys. Props in `setUpNode` will be overridden')
+        }
+    }
+    else if (propsB) {
+        for (const key in propsA) {
+            if (key in propsB) console.warn('Duplicate prop keys. Props in `setUpNode` will be overridden')
+        }
+    }
+}
+
+function analyzeAttributes(jsxEntries: AnyObject) {
     const jsxEvents: AnyObject = {};
-    const jsxProps: AnyObject = {};
+    // const jsxProps: AnyObject = {};
     const jsxAttributes: AnyObject = {};
     for (const key in jsxEntries) {
         if (htmlEvents.has(key)) {
             jsxEvents[key.slice(2)] = jsxEntries[key];
         }
-        else if (isHTMLAttribute(key, tag)) {
-            jsxAttributes[key] = jsxEntries[key];
-        }
+        // else if (isHTMLAttribute(key, tag)) {
+        // }
         else {
-            jsxProps[key] = jsxEntries[key];
+            jsxAttributes[key] = jsxEntries[key];
+            // jsxProps[key] = jsxEntries[key];
         }
     }
     return {
         jsxAttributes,
         jsxEvents,
-        jsxProps
+        // jsxProps
     }
 }
 
@@ -243,7 +261,7 @@ function isHTMLAttribute(key: string, tag: HTMLTag) {
 
 export function unmountComponent(component: InternalComponent) {
     component.emit(LifecycleHook.BEFORE_UNMOUNT);
-    // const nodes = component.initialNodeEntities;
+    // const nodes = component.nodeEntities;
     // for (const node of nodes) {
     //     node.remove();
     // }

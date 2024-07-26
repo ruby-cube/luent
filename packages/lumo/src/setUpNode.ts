@@ -1,10 +1,11 @@
 import { Component, ComponentSetup, InternalComponent } from "./component";
-import { DOMNodeConfig, HTMLTag } from "./mE";
+import { HTMLTag } from "./mE";
 import { ComponentConfig } from "./mO";
 import { NodeRef } from "./NodeRef";
 import { ListData } from "./forEachIn";
 import { Signal } from "../../muonic/useSignalize";
 import { ReactiveSignal } from "../../muonic/useDerivedSignal";
+import { NodeSetupConfig } from "./makeNode";
 
 // const xMainBlock = setUpNode('div', {
 //     class: [
@@ -17,14 +18,14 @@ import { ReactiveSignal } from "../../muonic/useDerivedSignal";
 
 
 
-type Config<T extends HTMLTag | ComponentSetup = HTMLTag | ComponentSetup> = T extends HTMLTag ? DOMNodeConfig : ComponentConfig<T extends ComponentSetup ? T : never>
+type Config<T extends HTMLTag | ComponentSetup = HTMLTag | ComponentSetup> = T extends HTMLTag ? NodeSetupConfig : ComponentConfig<T extends ComponentSetup ? T : never> & NodeSetupConfig
 type ListConfig<
     T extends HTMLTag | ComponentSetup = HTMLTag | ComponentSetup,
     L extends ListData = ListData
 > = L extends (infer I)[] ? (item: I, $index: Signal<number>) => Config<T>
     : L extends ReactiveSignal<infer I> ? (item: I, $index: Signal<number>) => Config<T> : never
 
-const nodeConfigMap: WeakMap<NodeRef, DOMNodeConfig | ComponentConfig | ListConfig> = new WeakMap()
+const nodeConfigMap: WeakMap<NodeRef, NodeSetupConfig | ListConfig> = new WeakMap()
 
 export function setUpNode<T extends HTMLTag | ComponentSetup>(
     nodeType: T,

@@ -92,6 +92,7 @@
   ],
   "exclude": [
     "**/x_old",
-    "**/old"
+    "**/old",
+    "**/api-play"
   ]
 }

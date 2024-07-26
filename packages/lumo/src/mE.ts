@@ -4,19 +4,19 @@ import { hasSignal, ReactiveSignal } from "../../muonic/useDerivedSignal";
 import { getWithoutTracking } from "../../muonic/DependencyTracker";
 import { DynamicIndices, getCurrentItemAndIndex, insertAndMoveListItemNodes, ListRenderKit, removeListItemNodes } from "./forEachIn";
 import { LifecycleHook, onBeforeUnmount, onUnmounted } from "./lifecycle";
-import { _mountIf, genConditionsSignal, ConditionalKit, watchForRenderAndPreserve, watchRenderEffectAndPreserve, RenderConditional } from "./mountIf";
+import { _mountIf, genConditionsSignal, ConditionalKit, watchForRenderAndPreserve, watchRenderEffectAndPreserve, RenderConditional } from "../api-play/mountIf";
 import { appendItems, copyAllBut, isEqual, normalizeToArray } from "@rue/utils";
 import { diff } from "./diff";
 import { isReactive } from "../../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod, NodePod } from "./NodePod";
-import { _NodeRef, getNodRef, NodeRef } from "./NodeRef";
+import { _NodeRef, getNodeRef, NodeRef } from "./NodeRef";
 import { useReactivity } from "../../muonic/useReactivity";
 import { Signal } from "../../muonic/useSignalize";
 import { getNodeConfig } from "./setUpNode";
 import { ComponentConfig, ComponentOptions, makeComponent, RenderSlot } from "./mO";
 import { watchRenderEffect, watchForRender } from "./watchForRender";
-import { hideDOMNodes, setUpConditionalShowEntity } from "./showIf";
-import { ConditionalRenderKit, ConditionalSeries, getConditionalSeries, isConditionalSeriesEnd, noElseBlock, startConditionalSeries } from "./$if";
+import { hideDOMNodes, setUpConditionalShowSeries } from "./showIf";
+import { buildConditionalSeries, ConditionalRenderKit, ConditionalSeries, noElseBlock, validateStandAloneConditional } from "./$if";
 import { initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig } from "./makeNode";
 
 export const _internalReactivity = useReactivity()
@@ -41,7 +41,10 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     $index: Signal<number> | undefined
 ): DOMNode {
 
-    const { class: _class, style, ...other } = jsxConfig;
+    const { class: classString, style: styleString, ...other } = jsxConfig;
+    const { class: _class, on, style, assigned, ...attributes } = setupConfig;
+    const { attributes: assignedAttributes, classes: assignedClasses, events: assignedEvents, styles: assignedStyles } = assigned || {};
+
     const domNode = document.createElement(tagName);
     const component = getCurrentComponent();
     if (!component) throw new Error("No component :(")
@@ -56,33 +59,12 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     if (childNodes) {
         const nodePod = new _NodePod();
         for (let i = 0; i < childNodes.length; i++) {
-            const childNodeEntity = childNodes[i];
+            let childNodeEntity = childNodes[i];
             if (childNodeEntity instanceof ConditionalRenderKit) {
-                // 1
-                if (childNodeEntity.isStart) {
-                    startConditionalSeries(childNodeEntity.type)
-                }
-                else if (isConditionalSeriesEnd(i, childNodes)) {
-                    childNodeEntity.markEnd();
-                }
-
-                // 2
-                const conditionalSeries = getConditionalSeries()!;
-                conditionalSeries.addRenderKit(childNodeEntity);
-                if (noElseBlock(childNodeEntity)) {
-                    conditionalSeries.addElse();
-                }
-
-                // 3
-                if (childNodeEntity.isEnd) {
-                    conditionalSeries.evaluateConditions();
-                    if (conditionalSeries.type === 'show') setUpConditionalShowEntity(component, domNode, conditionalSeries, nodePod)
-                    else setUpConditionalEntity(component, domNode, conditionalSeries, nodePod)
-                }
+                validateStandAloneConditional(childNodeEntity, childNodes, i);
+                childNodeEntity = [childNodeEntity]
             }
-            else {
-                setUpNodeEntity(component, domNode, childNodeEntity, nodePod, undefined)
-            }
+            setUpNodeEntity(component, domNode, childNodeEntity, nodePod, undefined)
         }
     }
 
@@ -123,26 +105,58 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
 
 
-function setUpDynamicClasses(component: InternalComponent, nodeRef: _NodeRef<HTMLElement>, reactiveEffects: ((o: DOMTokenList) => void)[]) {
-    if (nodeRef.initialized) return;
+function setUpClasses(component: InternalComponent, node: HTMLElement, classes: (((o: DOMTokenList) => void) | string)[]) {
     const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
-    if (!nodeRef) throw new Error(`nodeRef must be passed into mE to register dynamic classes`)
-    nodeRef.o.onCreated((node) => {
-        for (const effect of reactiveEffects) {
-            _watchRenderEffect(() => effect(node.classList))
+    const classList = node.classList
+    for (const entry of classes) {
+        if (entry instanceof Function) {
+            _watchRenderEffect(() => entry(classList))
         }
-    })
+        else {
+            if (__DEV__) warnDuplicateClasses(node.className, entry);
+            node.className = node.className + " " + entry
+        }
+    }
 }
 
-function setUpDynamicStyles(component: InternalComponent, nodeRef: _NodeRef<HTMLElement>, reactiveEffects: ((o: CSSStyleDeclaration) => void)[]) {
-    if (nodeRef.initialized) return;
-    const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
-    if (!nodeRef) throw new Error(`nodeRef must be passed into mE to register dynamic styles`)
-    nodeRef.o.onCreated((node) => {
-        for (const effect of reactiveEffects) {
-            _watchRenderEffect(() => effect(node.style))
+function warnDuplicateClasses(classesA: string, classesB: string){
+    const aClasses = new Set(classesA.split(' '))
+    const bClasses = classesB.split(' ')
+    for (const className of bClasses){
+        if (aClasses.has(className)) {
+            console.warn(`Duplicate class name: ${className}`);
+            console.trace();
         }
-    })
+    }
+}
+
+function setUpStyles(component: InternalComponent, node: HTMLElement, styles: (((o: CSSStyleDeclaration) => void | string))[]) {
+    // if (nodeRef.initialized) return;
+    const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
+    // if (!nodeRef) throw new Error(`nodeRef must be passed into mE to register dynamic styles`)
+    // nodeRef.o.onCreated((node) => {
+    const style = node.style;
+    for (const entry of styles) {
+        if (entry instanceof Function) {
+            _watchRenderEffect(() => entry(style))
+        }
+        else {
+            if (__DEV__) warnOverlappingStyles(style.cssText, entry);
+            style.cssText = style.cssText + "; " + entry
+        }
+    }
+    // })
+}
+
+function warnOverlappingStyles(stylesA: string, stylesB: string){
+    const aStyles = new Set(stylesA.split('; '))
+    const bStyles = stylesB.split('; ')
+    for (const styling of bStyles){
+        if (aStyles.has(styling)) {
+            console.warn(`Duplicate styling: ${styling}`);
+            console.trace();
+        }
+    }
 }
 
 function setUpRefNulling(ref: _NodePod, $index: Signal<number>) {
@@ -239,14 +253,15 @@ export function setUpNodeEntity(
     else if (nodeEntity instanceof ListRenderKit) { // this may or may not be dynamic, depending on data
         setUpNodeList(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
     }
-    // else if (nodeEntity instanceof ConditionalRenderKit) {
-    //     setUpConditionalEntity(component, parent, nodeEntity, nodePod, fragment)
-    // }
+    else if (nodeEntity instanceof Array) {
+        // conditional series
+        const series = buildConditionalSeries(nodeEntity);
+        setUpConditionalSeries(component, parent, series, nodePod, fragment)
+    }
     else {
         setUpTextNode(parent, nodeEntity, nodePod, fragment)
     }
 }
-
 
 
 function mountNode(parent: HTMLElement, node: DOMNode, nodePod: _NodePod, fragment?: DocumentFragment) {
@@ -264,7 +279,7 @@ export function setUpComponent(
     nodePod: _NodePod,
     fragment?: DocumentFragment,
 ) { //TODO: what if a component's root elements is conditional or a dynamic list??
-    const nodeEntities = component.initialNodeEntities;
+    const nodeEntities = component.nodeEntities;
     if (!(parent instanceof HTMLElement)) throw new Error("Parent cannot be a text node")
     component.emit(LifecycleHook.BEFORE_MOUNT);
     for (const nodeEntity of nodeEntities) {
@@ -312,85 +327,55 @@ function setUpNodeList(
 }
 
 
+//    0                               1    2
+// [[node, [maybe dynamic pod]], [ ], [ ]] --- dynamic pod
+//  |                                 |
+//  active pod                   inactive pod
+//
+// 
+// [activeKit, kit, kit] --- conditionalKits
+//
 
-function setUpConditionalEntity(
+function setUpConditionalSeries(
     component: InternalComponent,
     parent: HTMLElement,
-    conditionalSeries: ConditionalSeries,
+    series: ConditionalSeries,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
-    // componentsToUnmount?: InternalComponent[],
 ) {
-    const { conditionalKits, $conditions } = conditionalSeries;
-
-    const activeIndex = conditionalSeries.activeIndex;
-
+    // evaluate conditions and render
+    const { $conditions, activeIndex } = series.evaluateConditions()
+    const initialNodeEntities = series.render(activeIndex)
+    
+    // append to dom and node pod
     const dynamicPod = nodePod.appendDynamicPod();
     const _nodePod = dynamicPod.appendNodePod()
-
-    // const _conditionalKits: {
-    //     $condition?: ReactiveSignal<boolean>;
-    //     nodePod: _NodePod;
-    //     renderConditional: RenderConditional;
-    // }[] = []
-
-    // for (let i = 0; i < conditionalKits.length; i++) {
-    //     const { renderConditional, $condition } = conditionalKits[i];
-    //     // let nodePod;
-    //     if (i === activeIndex){
-    //         nodePod = dynamicPod.appendNodePod()
-    //     }
-    //     else {
-    //         nodePod = new _NodePod()
-    //     }
-    //     // _conditionalKits.push({ $condition, nodePod, renderConditional });
-    // }
-
-    const initialNodeEntities = normalizeToArray(conditionalKits[activeIndex].renderConditional())
-
     for (const nodeEntity of initialNodeEntities) {
-        // append to dom and node pod
         setUpNodeEntity(component, parent, nodeEntity, _nodePod, fragment, nodePod.componentsToUnmount)
     }
-    // if (dynamicPod && _dynamicPod) dynamicPod.includeComponents(_dynamicPod.activeComponents) // aggregate components to unmount
-
-    //    0                               1    2
-    // [[node, [maybe dynamic pod]], [ ], [ ]] --- dynamic pod
-    //  |                                 |
-    //  active pod                   inactive pod
-    //
-    // 
-    // [activeKit, kit, kit] --- conditionalKits
-    //
 
     // set up watcher for updates
     const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
-
     _watchForRender($conditions, updateConditional, { once: true })
 
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
         if (isEqual(newValue, oldValue)) return;
 
-        // const conditions: ReactiveSignal<boolean>[] = []
-        for (let i = 0; i < conditionalKits.length; i++) {
-            const kit = conditionalKits[i]
-            const { renderConditional, $condition } = kit;
-            // if ($condition) conditions.push($condition);
-            if ($condition && getWithoutTracking($condition) || !$condition) {
-                component.emit(LifecycleHook.BEFORE_UPDATE)
-                removePrevConditionalNodes(dynamicPod, renderConditional);
-                insertNewConditionalNodes(component, parent, dynamicPod, renderConditional)
-                component.emit(LifecycleHook.UPDATED)
-                break;
-            }
-        }
-        const $conditions = conditionalSeries.evaluateConditions();
+        // evaluate conditions
+        const { $conditions, activeIndex } = series.evaluateConditions();
 
+        // render and add/remove node pods
+        component.emit(LifecycleHook.BEFORE_UPDATE)
+        removePrevConditionalNodes(dynamicPod);
+        const nodeEntities = series.render(activeIndex)
+        insertNewConditionalNodes(component, parent, dynamicPod, nodeEntities)
+        component.emit(LifecycleHook.UPDATED)
+
+        // set up for next update
         pushComponent(component)
         _watchForRender($conditions, updateConditional, { once: true })
         popComponent()
     }
-
 }
 
 export function emitHookBatch(hookName: LifecycleHook, components: InternalComponent[] | undefined) {
@@ -425,7 +410,7 @@ function getPreservedNodePod(renderConditional: RenderConditional) {
     return nodePod;
 }
 
-function removePrevConditionalNodes(dynamicPod: _DynamicNodePod, renderConditional: RenderConditional) {
+function removePrevConditionalNodes(dynamicPod: _DynamicNodePod) {
     // component === App
     // const preserve = component.preserve;
     const nodePod = dynamicPod[0];
@@ -461,25 +446,18 @@ function emitBeforeUnmount(components: InternalComponent[]) {
 
 
 
-function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: RenderConditional) {
+function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, nodeEntities: NodeEntity[]) {
     // const nodePod = preserve ? getPreservedNodePod(renderConditional) : new _NodePod();
     const nodePod = new _NodePod();
     dynamicPod.replaceNodePod(0, nodePod);
-    renderAndAppendConditionalNodePod(nodePod, component, parent, dynamicPod, renderConditional);
+    mountConditional(nodePod, component, parent, dynamicPod, nodeEntities);
 
     emitActivated(nodePod.componentsToUnmount)
     restoreNodeRefValues(nodePod, nodePod.componentsToUnmount)
-
-
 }
 
-export function renderAndAppendConditionalNodePod(nodePod: _NodePod, component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, renderConditional: RenderConditional) {
+export function mountConditional(nodePod: _NodePod, component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, nodeEntities: NodeEntity[]) {
     const fragment = new DocumentFragment();
-
-    // if (!preserve) {
-    pushComponent(component);
-    const nodeEntities = normalizeToArray(renderConditional());
-    popComponent()
 
     for (const nodeEntity of nodeEntities) {
         setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount) //TODO: pass in index in case it's in a list?
@@ -493,25 +471,25 @@ export function renderAndAppendConditionalNodePod(nodePod: _NodePod, component: 
 
 function nullNodeRefValues(nodePod: _NodePod, components: Component[]) {
     nodePod.forEachNode(node => {
-        const ref = getNodRef(node);
+        const ref = getNodeRef(node);
         if (ref && ref.o.value) ref.setValue(null)
     })
     // for (const component of components){ //NOTE: Deferred until needed (see note in restoreNodeRefValues)
-    //     const ref = getNodRef(component);
+    //     const ref = getNodeRef(component);
     //     if (ref && ref.o.value) ref.setValue(null)
     // }
 }
 
 function restoreNodeRefValues(nodePod: _NodePod, components: Component[]) {
     nodePod.forEachNode((node, index) => {
-        const ref = getNodRef(node);
+        const ref = getNodeRef(node);
         if (ref) {
             if (index === undefined) ref.setValue(node);
             else ref.insertNode(node, index);
         }
     })
     // for (const component of components){ //NOTE: Deferred until needed: nulling and restoring node ref for components. Getting the correct index is tricky.
-    //     const ref = getNodRef(component);
+    //     const ref = getNodeRef(component);
     //     if (ref && ref.o.value) ref.setValue(component)
     // }
 }

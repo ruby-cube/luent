@@ -22,5 +22,6 @@ export const isEqual = _.isEqual
 
 
 export function normalizeToArray(value: any | any[]) {
-    return value instanceof Array ? value : [value]
+    if (value === undefined) return [];
+    return value instanceof Array ? value : [value];
 }
