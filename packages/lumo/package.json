@@ -2,10 +2,12 @@
     "name": "@rue/lumo",
     "private": true,
     "description": "",
+    "module": "./src/index",
     "dependencies": {
         "@rue/flask": "workspace:*",
         "@rue/muonic": "workspace:*",
-        "@rue/utils": "workspace:*"
+        "@rue/utils": "workspace:*",
+        "@vue/runtime-dom": "^3.4.34"
     },
     "devDependencies": {
         "@rue/types": "workspace:*"

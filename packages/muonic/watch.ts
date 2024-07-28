@@ -12,10 +12,12 @@ import { isEqual } from "@rue/utils";
 
 type WatchOptions = {
     deep?: boolean;
+    eager?: true;
 } & EffectOptions
 
 type _WatchOptions = {
     deep?: boolean;
+    eager?: true;
 } & _EffectOptions
 
 type EffectOptions = {
@@ -65,7 +67,7 @@ const reactiveEffects: WeakSet<Function> = new WeakSet();
 export function _watchEffect<T>(handler: ReactiveEffect, target: undefined, options?: _WatchOptions): ActiveListener
 export function _watchEffect<T>(handler: ChangeHandler, target?: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener
 export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener {
-    const { phase, deep } = options ?? {};
+    const { phase, deep, eager } = options ?? {};
     let taskQueues: Set<Effect>[];
     const isReactiveEffect = target === undefined;
 
@@ -77,7 +79,14 @@ export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?
     else {
         // watch all properties of reactive
         taskQueues = useTaskQueuesForReactive(target, phase, deep)
+        // handler([{target, key, newValue, oldValue}]) //TODO: change argument to this format
     }
+
+    if (eager && target) {
+        const value = target instanceof Function ? target() : target
+        handler(value, value)
+    }
+
 
     // set up listeners
     const activeListeners: (ActiveListener | PendingOp)[] = [];
@@ -301,15 +310,15 @@ export function runNonSyncTasks(phase: "pre" | "post" | "render") {
     if (triggeredReactives) {
         for (const [reactive, keys] of triggeredReactives) {
             // if (phase !== 'render') {
-                const taskQueue = getTaskQueueForReactive(reactive, phase);
-                if (taskQueue) {
-                    for (const task of taskQueue) {
-                        const snapshotMap = updateCycle.snapshotMap;
-                        if (!snapshotMap) throw "no snapshot map :("
-                        // TODO: compare snapshot to current object .. are they equal? if so, don't run tasks and get rid of snapshot ... should the diff be deep?
-                        task(reactive, snapshotMap.get(reactive))
-                    }
+            const taskQueue = getTaskQueueForReactive(reactive, phase);
+            if (taskQueue) {
+                for (const task of taskQueue) {
+                    const snapshotMap = updateCycle.snapshotMap;
+                    if (!snapshotMap) throw "no snapshot map :("
+                    // TODO: compare snapshot to current object .. are they equal? if so, don't run tasks and get rid of snapshot ... should the diff be deep?
+                    task(reactive, snapshotMap.get(reactive))
                 }
+            }
             // }
 
             for (const [key, [newValue, oldValue]] of keys) {

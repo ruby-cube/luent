@@ -1,9 +1,8 @@
 import { getWithoutTracking, ReactiveSignal } from "@rue/muonic"
-import { ConditionalSeries } from "./$if"
+import { ConditionalSeries, watchForRenderAndPreserve } from "./$if"
 import { DOMNode, InternalComponent, popComponent, pushComponent } from "./component"
 import { _DynamicNodePod, _NodePod } from "./NodePod"
 import { mountConditional, setUpNodeEntity } from "./mE"
-import { RenderConditional, watchForRenderAndPreserve } from "../api-play/mountIf"
 import { watchForRender } from "./watchForRender"
 import { isEqual } from "@rue/utils"
 import { LifecycleHook } from "./lifecycle"
@@ -101,7 +100,7 @@ function hidePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeIndex: numb
 function showConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, activeIndex: number, nodeEntities: NodeEntity[]) {
     const nodePod = dynamicPod[activeIndex];
     if (nodePod.length === 0) { // lazy render
-        mountConditional(nodePod, component, parent, dynamicPod, nodeEntities) 
+        mountConditional(nodePod, component, parent, dynamicPod, nodeEntities)
     }
     showDOMNodes(nodePod) //QUESTION: Not sure if this should be in an else block... is it necessary to set display on newly rendered nodes?
 }

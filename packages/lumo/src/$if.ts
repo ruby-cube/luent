@@ -1,11 +1,12 @@
-import { DerivedSignal, getWithoutTracking, makeDerivedSignal, ReactiveSignal } from "@rue/muonic";
-import { InternalComponent } from "./component";
+import { DerivedSignal, getWithoutTracking, hasSignal, makeDerivedSignal, ReactiveObject, ReactiveSignal } from "@rue/muonic";
+import { getCurrentComponent, InternalComponent } from "./component";
 import { _NodePod } from "./NodePod";
 import { NodeEntity, RenderFunction } from "./makeNode";
-import { RenderConditional } from "../api-play/mountIf";
 import { normalizeToArray } from "@rue/utils";
+import { watchForRender, watchRenderEffect } from "./watchForRender";
+import { onActivated, onDeactivated } from "./lifecycle";
 
-
+export type RenderConditional = () => NodeEntity[]
 
 type ConditionalOptions = {
     transition?: unknown //TODO:,
@@ -181,3 +182,43 @@ export function buildConditionalSeries(statements: ConditionalRenderKit[]) {
 // function validateConditionalStatements(statements: ConditionalRenderKit[]) {
 
 // }
+
+
+export function watchForRenderAndPreserve(target: ReactiveSignal<any> | ReactiveObject, handler: (newValue: any, oldValue: any) => void, options?: { once: true }) {
+    const component = getCurrentComponent();
+    if (!component) throw new Error("No component found")
+
+    const watcher = watchForRender(target, handler, options);
+    const oldValue = hasSignal(target) ? target : target instanceof Array ? [...target] : { ...target } //TODO: doesn't account for sets or maps
+    onDeactivated(() => {
+        watcher.stop()
+    })
+    if (hasSignal(target)) {
+        onActivated(() => {
+            handler(target(), oldValue)
+            // pushComponent(component)
+            watchForRender(target, handler, options)
+            // popComponent()
+        })
+    }
+    else {
+        onActivated(() => {
+            handler(target, oldValue)
+            // pushComponent(component)
+            watchForRender(target, handler, options)
+            // popComponent()
+        })
+    }
+}
+
+export function watchRenderEffectAndPreserve(handler: () => void) {
+    const watcher = watchRenderEffect(handler);
+
+    onDeactivated(() => {
+        watcher.stop()
+    })
+
+    onActivated(() => {
+        watchRenderEffect(handler)
+    })
+}

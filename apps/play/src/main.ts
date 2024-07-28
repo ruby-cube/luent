@@ -1,4 +1,6 @@
-import { createApp } from '../../../packages/lumo/src';
+import { createApp } from '@rue/lumo';
+// import {jsx} from '@rue/jsx-dev-runtime'
+// console.log(jsx)
 import { App } from './App';
 import './style.css'
 

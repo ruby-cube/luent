@@ -12,6 +12,7 @@ import { reMouseDown } from "../actionry/__test__/actionry.type-test";
 import { NodeEntity } from "../src/mE";
 import { setUpComponent } from "../src/mE";
 import { forEachIn } from "../src/forEachIn";
+import { watchForRender, watchRenderEffect } from "../src/watchForRender";
 
 type Signal<T> = () => T
 
@@ -97,18 +98,28 @@ function List() {
 
     })
 
+
+
     dynamicClasses(itemsRef, [
+        {
+            dragging: $dragging,
+            highlight: $(() => $highlighted() & $isActive())
+        },
         // manipulation instructions
         o => {  // one-to-one binding, coarse-grained
             if ($dragging())
                 o.add('dragging');
+            else o.remove('dragging')
 
             if ($highlighted() && $isActive())
                 o.add('highlight');
+            else o.remove('highlight')
         },
         o => { // one-to-one binding, fine-grained
             if ($dragging())
                 o.add('dragging')
+            else
+                o.remove('dragging')
         },
         o => {
             if ($highlighted() && $isActive())

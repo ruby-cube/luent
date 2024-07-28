@@ -11,6 +11,10 @@
     "strict": true,
     "jsx": "react-jsx",
     "jsxImportSource": "@rue",
+    "types": [
+      "./packages/lumo/jsx-runtime/src/index",
+      "./packages/lumo/jsx-runtime/jsx-dev-runtime.d.ts"
+    ],
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
@@ -20,20 +24,23 @@
     "noImplicitReturns": false,
     "skipLibCheck": true,
     "paths": {
+      "react/jsx-runtime": ["./packages/lumo/jsx-runtime"],
+      "react-dom": ["./packages/lumo/jsx-runtime"],
+      "react-dom/*": ["./packages/lumo/jsx-runtime/*"],
       "@rue/utils": [
         "./packages/utils/index.ts"
-      ],
-      "@rue/jsx-runtime": [
-        "./packages/jsx-runtime/core/jsx-runtime.ts"
-      ],
-      "@rue/jsx-dev-runtime": [
-        "./packages/jsx-runtime/core/jsx-runtime.ts"
       ],
       "@rue/actionry": [
         "./packages/actionry/index.ts"
       ],
       "@rue/lumo": [
         "./packages/lumo/src/index.ts"
+      ],
+      "@rue/jsx-runtime": [
+        "./packages/lumo/jsx-runtime/src/index.ts"
+      ],
+      "@rue/jsx-dev-runtime": [
+        "./packages/lumo/jsx-runtime/src/index.ts"
       ],
       "@rue/muonic": [
         "./packages/muonic/src/index.ts"
@@ -88,7 +95,7 @@
   "include": [
     "packages",
     "apps",
-    "custom-jsx.d.ts"
+    "**/src/*"
   ],
   "exclude": [
     "**/x_old",

@@ -4,7 +4,6 @@ import { DerivedSignal, hasSignal, ReactiveSignal } from "../../muonic/useDerive
 import { getWithoutTracking } from "../../muonic/DependencyTracker";
 import { DynamicIndices, getCurrentItemAndIndex, insertAndMoveListItemNodes, ListRenderKit, removeListItemNodes } from "./forEachIn";
 import { LifecycleHook, onBeforeUnmount, onUnmounted } from "./lifecycle";
-import { _mountIf, genConditionsSignal, ConditionalKit, watchForRenderAndPreserve, watchRenderEffectAndPreserve, RenderConditional } from "../api-play/mountIf";
 import { appendItems, copyAllBut, isEqual, normalizeToArray } from "@rue/utils";
 import { diff } from "./diff";
 import { isReactive } from "../../muonic/useReactivize";
@@ -12,11 +11,11 @@ import { _DynamicNodePod, _NodePod, NodePod } from "./NodePod";
 import { _NodeRef, getNodeRef, NodeRef } from "./NodeRef";
 import { useReactivity } from "../../muonic/useReactivity";
 import { Signal } from "../../muonic/useSignalize";
-import { getNodeConfig } from "./setUpNode";
-import { analyzeAttributes, ComponentConfig, ComponentOptions, composeEvents, makeComponent, RenderSlot, warnOverlappingKeys } from "./mO";
+import { getNodeConfig } from "./_setUpNode";
+import { analyzeAttributes, ComponentConfig, ComponentOptions, composeEvents, makeComponent, warnOverlappingKeys } from "./mO";
 import { watchRenderEffect, watchForRender } from "./watchForRender";
 import { hideDOMNodes, setUpConditionalShowSeries } from "./showIf";
-import { buildConditionalSeries, ConditionalRenderKit, ConditionalSeries, noElseBlock, validateStandAloneConditional } from "./$if";
+import { buildConditionalSeries, ConditionalRenderKit, ConditionalSeries, noElseBlock, RenderConditional, validateStandAloneConditional, watchForRenderAndPreserve, watchRenderEffectAndPreserve } from "./$if";
 import { AssignedAttributes, initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig } from "./makeNode";
 import { PendingOp } from "@rue/flask";
 
@@ -54,8 +53,8 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
     const attributes = {
         events: composeEvents([jsxEvents, on || {}, assignedEvents]),
-        classes: [classString, ...normalizeToArray(_class), ...assignedClasses],
-        styles: [styleString, ...normalizeToArray(style), ...assignedStyles],
+        classes: [...normalizeToArray(classString), ...normalizeToArray(_class), ...assignedClasses],
+        styles: [...normalizeToArray(styleString), ...normalizeToArray(style), ...assignedStyles],
         other: { ...other, ...jsxAttributes, ...assignedAttributes }
     };
 
@@ -64,12 +63,13 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     if (!component) throw new Error("No component :(")
 
     if (ref) {
-        const _ref = new _NodeRef(ref)
+        const _ref = ref.value instanceof Array ? getNodeRef(ref.value)! : new _NodeRef(ref)
         _ref.assignValue(domNode, $index)
         initializeRef(component, _ref)
     }
 
     if (childNodes) {
+        console.log("childNodes", tagName, childNodes)
         const nodePod = new _NodePod();
         for (let i = 0; i < childNodes.length; i++) {
             let childNodeEntity = childNodes[i];
@@ -101,11 +101,9 @@ function setUpAttributes(node: HTMLElement, attributes: { [key: string]: any | D
     for (const key in attributes) {
         const value = attributes[key]
         if (hasSignal(value)) {
-            const _value = value();
-            setAttribute(node, key, _value)
             watchForRender(value, (newValue) => {
                 setAttribute(node, key, newValue)
-            })
+            }, { eager: true })
         }
         else {
             node.setAttribute(key, toString(value))
@@ -122,25 +120,24 @@ function setAttribute(node: HTMLElement, key: string, value: any) {
     }
 }
 
-function setUpEvents(node: HTMLElement, events: { [key: string]: (EventListener | DerivedSignal<EventListener>)[] }) {
+
+function setUpEvents(node: HTMLElement, events: { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] }) {
     for (const key in events) {
         const handlers = events[key]
         for (const handler of handlers) {
             if (hasSignal(handler)) {
-                const _handler = handler();
                 let pendingCleanup: PendingOp;
-                if (_handler) {
-                    pendingCleanup = attachEventHandler(node, key, _handler)
-                }
-                watchForRender(handler, (newValue, oldValue) => { //QUESTION: When will this be cleaned up if it's a fallthrough attribute?
+                let previousHandler: EventListener | null = null;
+                watchForRender(handler, (newValue) => { //QUESTION: When will this be cleaned up if it's a fallthrough attribute?
                     if (newValue) {
                         pendingCleanup = attachEventHandler(node, key, newValue);
                     }
-                    if (oldValue) {
-                        node.removeEventListener(key, oldValue)
+                    if (previousHandler) {
+                        node.removeEventListener(key, previousHandler) //TODO: What about signals that return null?
                         pendingCleanup.cancel()
                     }
-                })
+                    previousHandler = newValue;
+                }, { eager: true })
             }
             else {
                 attachEventHandler(node, key, handler)
@@ -154,21 +151,35 @@ function attachEventHandler(node: HTMLElement, key: string, handler: EventListen
     return onUnmounted(() => node.removeEventListener(key, handler))
 }
 
-function setUpClasses(component: InternalComponent, node: HTMLElement, classes: (((o: DOMTokenList) => void) | string)[]) {
+type DynamicClassesConfig = {
+    [key: string]: ReactiveSignal<boolean>;
+}
+
+function setUpClasses(component: InternalComponent, node: HTMLElement, classes: (((o: DOMTokenList) => void) | string | DynamicClassesConfig)[]) {
     const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
     const classList = node.classList
     for (const entry of classes) {
         if (entry instanceof Function) {
             _watchRenderEffect(() => entry(classList))
         }
+        else if (entry instanceof Object){
+            for (const key in entry) {
+                const $signal = entry[key];
+                watchForRender($signal, (value) => { //QUESTION: should this have a preserve version?
+                    if (value) classList.add(key);
+                    else classList.remove(key);
+                }, { eager: true })
+            }
+        }
         else {
-            if (__DEV__) warnDuplicateClasses(node.className, entry);
+            if (__DEV__ && entry) warnDuplicateClasses(node.className, entry);
             node.className = node.className + " " + entry
         }
     }
 }
 
 function warnDuplicateClasses(classesA: string, classesB: string) {
+
     const aClasses = new Set(classesA.split(' '))
     const bClasses = classesB.split(' ')
     for (const className of bClasses) {
@@ -182,18 +193,21 @@ function warnDuplicateClasses(classesA: string, classesB: string) {
 function setUpStyles(component: InternalComponent, node: HTMLElement, styles: (((o: CSSStyleDeclaration) => void) | string)[]) {
     const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
     const style = node.style;
+    console.log(styles)
+    console.trace()
     for (const entry of styles) {
         if (entry instanceof Function) {
             _watchRenderEffect(() => entry(style))
         }
         else {
-            if (__DEV__) warnOverlappingStyles(style.cssText, entry);
+            if (__DEV__ && entry) warnOverlappingStyles(style.cssText, entry);
             style.cssText = style.cssText + "; " + entry
         }
     }
 }
 
 function warnOverlappingStyles(stylesA: string, stylesB: string) {
+    console.log(stylesB)
     const aStyles = new Set(stylesA.split('; '))
     const bStyles = stylesB.split('; ')
     for (const styling of bStyles) {

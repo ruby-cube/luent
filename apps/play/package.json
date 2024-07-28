@@ -8,16 +8,15 @@
     },
     "dependencies": {
         "@rue/flask": "workspace:*",
-        "@rue/muonic": "workspace:*",
+        "@rue/jsx-runtime": "workspace:*",
         "@rue/lumo": "workspace:*",
-        "@rue/jsx-dev-runtime": "workspace:*"
+        "@rue/muonic": "workspace:*"
     },
     "devDependencies": {
-        "@rue/types": "workspace:*",
         "@babel/cli": "^7.24.8",
         "@babel/core": "^7.24.9",
-        "@babel/plugin-transform-react-jsx": "^7.24.7"
-
+        "@babel/plugin-transform-react-jsx": "^7.24.7",
+        "@rue/types": "workspace:*"
     },
     "author": "Ruby Yi Wang",
     "license": "MIT"

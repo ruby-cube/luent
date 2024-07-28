@@ -12,13 +12,17 @@ export default defineConfig({
     babel()
   ],
   resolve: {
-    alias: 
-    {
-    //   // '@rue/utils': resolve(__dirname, 'packages/utils/index.ts'),
-    //   '@rue/jsx-runtime': resolve(__dirname, 'packages/jsx-runtime/src/index.ts'),
-      // '@rue/jsx-dev-runtime': resolve(__dirname, 'packages/jsx-runtime/jsx-runtime.ts')
+    alias: {
+    // //   '@rue/utils': resolve(__dirname, 'packages/utils/index.ts'),
+    //   // '@rue/lumo/jsx-runtime': resolve(__dirname, 'packages/jsx-runtime/core/jsx-runtime.ts'),
+      '@rue/jsx-dev-runtime': resolve(__dirname, '../../packages/lumo/jsx-runtime/src/index.ts')
     }
-
+    // [
+    //   {
+    //     find: "@rue/jsx-dev-runtime",
+    //     replacement: "./packages/jsx-runtime/src/index.ts",
+    //   },
+    // ]
   },
   define: {
     __DEV__: true,

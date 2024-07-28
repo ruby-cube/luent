@@ -104,13 +104,11 @@ export function App(props) {
       </div>
       <ListBlock ref={list_block}>
         {{
-          $text,
-          description: (o =>
+          slot: () =>
             <>
               <h1>{$heading}</h1>
               <p>{$description}</p>
             </>
-          )
         }}
       </ListBlock>
 

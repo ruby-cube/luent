@@ -1,8 +1,10 @@
 const presets = [];
 const plugins = [
   [
-    "@babel/plugin-transform-react-jsx",
-    { runtime: "automatic", importSource: "@rue/jsx-runtime" },
+    "@babel/plugin-transform-react-jsx",{ 
+      runtime: "automatic", 
+      importSource: "../../packages/lumo/jsx-runtime/src" 
+    },
   ],
 ];
 

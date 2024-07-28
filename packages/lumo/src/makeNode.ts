@@ -3,11 +3,19 @@ import { ConditionalRenderKit } from "./$if";
 import { ComponentSetup, DOMNode, InternalComponent } from "./component";
 import { getCurrentItemAndIndex, ListRenderKit } from "./forEachIn";
 import { HTMLTag, makeElement } from "./mE";
-import { ComponentConfig, makeComponent, RenderSlot, SlotRenderer } from "./mO";
+import { ComponentConfig, makeComponent, InferSlotted } from "./mO";
 import { _NodeRef, NodeRef } from "./NodeRef";
-import { getNodeConfig } from "./setUpNode";
+import { getNodeConfig } from "./_setUpNode";
 import { AnyObject } from "@rue/types";
 import { onBeforeUnmount } from "./lifecycle";
+
+export function Fragment(){
+
+}
+
+export function jsx(tag: any, config: any, ...children: any[]){
+    return makeNode(tag, children, config || {})
+}
 
 export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveSignal<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
 
@@ -22,7 +30,7 @@ export type EventsConfig = {
 }
 
 export type AssignedAttributes = {
-    events: { [key: string]: (EventListener | DerivedSignal<EventListener>)[] };
+    events: { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] };
     classes: (((o: DOMTokenList) => void) | string)[],
     styles: (((o: CSSStyleDeclaration) => void) | string)[],
     other: { [key: string]: (any | DerivedSignal<any>)[] }
@@ -45,7 +53,7 @@ export type JSXConfig<T extends HTMLElement | InternalComponent> = {
 
 export function makeNode(
     nodeType: HTMLTag | ComponentSetup,
-    childNodes?: NodeEntity[] | RenderSlot,
+    childNodes?: NodeEntity[] | InferSlotted,
     configA: (JSXConfig<HTMLElement>) | (JSXConfig<InternalComponent> & ComponentConfig) = {},
     configB?: NodeSetupConfig & (AnyObject | ComponentConfig),
 ): DOMNode | InternalComponent {
@@ -63,7 +71,7 @@ export function makeNode(
         )
     return makeComponent(
         nodeType,
-        <SlotRenderer>childNodes,
+        <InferSlotted>childNodes,
         <JSXConfig<InternalComponent> & ComponentConfig>configA,
         nodeConfig,
         <NodeRef<InternalComponent>>ref,

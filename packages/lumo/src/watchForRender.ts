@@ -20,18 +20,18 @@ export function watchRenderEffect(effect: () => void) {
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
-export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: { once?: true }) {
+export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: { once?: true, eager?: true }) {
     const component = getCurrentComponent();
     if (!component) throw Error("watchForRender must be called within component setup")
 
     const _handler = (newValue: any, oldValue: any) => {
-        console.trace()
         handler(newValue, oldValue);
         setUpUpdateHooks(component)
     }
     return _watchEffect(_handler, target, {
         once: options?.once,
-        phase: 'render'
+        eager: options?.eager,
+        phase: 'render',
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 

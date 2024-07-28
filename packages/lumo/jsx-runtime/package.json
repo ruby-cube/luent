@@ -1,7 +1,10 @@
 {
-    "name": "@rue/jsx-dev-runtime",
+    "name": "@rue/jsx-runtime",
     "private": true,
     "description": "",
+    "module": "src/index.js",
+    "source": "src/index.js",
+    "types": "src/index.d.ts",
     "dependencies": {
         "@rue/lumo": "workspace:*"
     },

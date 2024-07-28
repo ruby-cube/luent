@@ -3,62 +3,64 @@ import { Component, ComponentSetup, getCurrentComponent, InternalComponent, popC
 import { SetKey, Signal } from "../../muonic/useSignalize";
 import { LifecycleHook, onActivated, onBeforeUnmount, onDeactivated, onUnmounted } from "./lifecycle";
 import { collectEffects } from "@rue/flask/flask";
-import { _NodeRef, NodeRef } from "./NodeRef";
-import { preserveAllRequested } from "../api-play/mountIf";
+import { _NodeRef, getNodeRef, NodeRef } from "./NodeRef";
 import { AssignedAttributes, EventsConfig, initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig, RenderFunction } from "./makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { isHTMLEvent } from "./html/attributes";
 import { applyAttributes } from "./mE";
 import { DerivedSignal } from "@rue/muonic";
+import { preserveAllRequested } from "./$if";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 export type ComponentConfig<T extends ComponentSetup<AnyObject> = ComponentSetup> = {
     props?: T extends (props: infer P) => any ? { [K in keyof P]?: P[K] } : never;
 }
 
-export type RenderSlot<T extends ComponentSetupWithSlot = ComponentSetupWithSlot> =
-    T extends (props: infer P) => any ?
-    P extends { slot: infer R } ?
-    R : undefined : undefined
-
 export type ComponentOptions = { preserve?: true }
 
-export type SlotRenderer = { slot: RenderFunction | ((props: AnyObject) => NodeEntity[] | NodeEntity) | { [key: string]: RenderFunction | ((props: AnyObject) => NodeEntity[] | NodeEntity) } }
+export type InferSlotted<T extends ComponentSetupWithSlot = ComponentSetupWithSlot> =
+    T extends (props: infer P) => any ?
+    P extends { slotted: infer S } ?
+    S
+    : never
+    : never
 
-type ComponentSetupWithSlot<P extends SlotRenderer = SlotRenderer> = (props: P) => NodeEntity[] | NodeEntity
+export type PropsWithSlot = {
+    slot: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
+}
+
+type ComponentSetupWithSlot<P extends PropsWithSlot = PropsWithSlot> =
+    (props: P) => NodeEntity[] | NodeEntity
 
 
 export function mO<T extends ComponentSetupWithSlot>(
     Component: T,
-    slot: RenderSlot<T>,
+    slotted: InferSlotted<T>,
     jsxConfig?: T extends (props: infer P) => any ? P : never & JSXConfig<InternalComponent>,
     setupConfig?: ComponentConfig<T extends (props: AnyObject) => any ? T : never> & NodeSetupConfig
 ): InternalComponent
 export function mO<T extends ComponentSetup>(
     Component: T,
-    slot?: RenderSlot<T>,
+    slotted?: InferSlotted<T>,
     jsxConfig?: T extends (props: infer P) => any ? P : never & JSXConfig<InternalComponent>,
     setupConfig?: ComponentConfig<T> & NodeSetupConfig
 ): InternalComponent {
-    return makeNode(Component, slot, jsxConfig, setupConfig) as InternalComponent
+    return makeNode(Component, slotted, jsxConfig, setupConfig) as InternalComponent
 }
 
 export function makeComponent(
     Component: ComponentSetup,
-    slot: SlotRenderer | undefined,
+    slotted: InferSlotted | undefined,
     jsxConfig: JSXConfig<InternalComponent>,
     setupConfig: ComponentConfig & NodeSetupConfig,
     ref: NodeRef<InternalComponent> | undefined,
     $index: Signal<number> | undefined
 ): InternalComponent {
     const parent = getCurrentComponent();
-    if (!parent) throw new Error("No parent component")
-
     const preserve = getPreserveStatus(parent);
-
     const component = new InternalComponent(parent, preserve);
     pushComponent(component)
-    runComponentSetup(Component, component, slot, jsxConfig, setupConfig, ref, $index);
+    runComponentSetup(Component, component, slotted, jsxConfig, setupConfig, ref, $index);
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
     return component;
 }
@@ -97,7 +99,7 @@ export function getAttributes() {
 function runComponentSetup(
     Component: ComponentSetup,
     component: InternalComponent,
-    slot: SlotRenderer | undefined,
+    slotted: InferSlotted | undefined,
     jsxConfig: JSXConfig<InternalComponent>,
     setupConfig: ComponentConfig & NodeSetupConfig,
     ref: NodeRef<Component> | undefined,
@@ -110,7 +112,6 @@ function runComponentSetup(
         const assignedStyles = assigned?.styles || []
         const assignedEvents = assigned?.events || {}
         const assignedAttributes = assigned?.other || {}
-
         const { jsxAttributes, jsxEvents } = analyzeAttributes(other)
 
         if (__DEV__) warnOverlappingKeys(jsxAttributes, props); // pass in all attributes as props ... it's too hard to distinguish props from attributes
@@ -118,17 +119,17 @@ function runComponentSetup(
 
         component.attributes = {
             events: composeEvents([jsxEvents, on || {}, assignedEvents]),
-            classes: [classString, ...normalizeToArray(_class), ...assignedClasses],
-            styles: [styleString, ...normalizeToArray(style), ...assignedStyles],
+            classes: [...normalizeToArray(classString), ...normalizeToArray(_class), ...assignedClasses],
+            styles: [...normalizeToArray(styleString), ...normalizeToArray(style), ...assignedStyles],
             other: { ...attributes, ...jsxAttributes, ...assignedAttributes }
         }; // must set BEFORE component setup is called
 
-        const nodeEntities = normalizeToArray(Component({ ...props, ...jsxAttributes, slot }));
+        const nodeEntities = normalizeToArray(Component({ ...props, ...jsxAttributes, slotted }));
 
         component.nodeEntities = nodeEntities;
 
         if (ref) {
-            const _ref = new _NodeRef(ref);
+            const _ref = ref.value instanceof Array ? getNodeRef(ref.value)! : new _NodeRef(ref)
             const publicComponent = component.component || {};
             _ref.assignValue(publicComponent, $index)
             // setUpRefUpdates(_ref, publicComponent, $index, component.preserve)
@@ -181,7 +182,7 @@ export function composeEvents(
             }
         }
     }
-    return target as { [key: string]: (EventListener | DerivedSignal<EventListener>)[] };
+    return target as { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] };
 }
 
 function assignAttributes(nodeEntity: NodeEntity, attributes: AssignedAttributes) {

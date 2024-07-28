@@ -22,8 +22,7 @@ manage what to show on the screen as you wait for something to resolve. Like a l
 */
 
 
-import React from 'react';
-import { jsx as mE, jsxs as mE } from "react/jsx-runtime";
+
 export function App(props) {
     const list = ["a", "b"];
     const active = true;

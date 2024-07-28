@@ -5,7 +5,8 @@
     "dependencies": {
         "vue": "^3.4.31",
         "@vueuse/core": "^10.11.0",
-        "@rue/flask": "workspace:*"
+        "@rue/flask": "workspace:*",
+        "@rue/utils": "workspace:*"
     },
     "devDependencies": {
         "@rue/types": "workspace:*"

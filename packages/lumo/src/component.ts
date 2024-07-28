@@ -1,6 +1,5 @@
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "./lifecycle";
-import { RenderSlot, SlotRenderer } from "./mO";
 import { _NodeRef } from "./NodeRef";
 import { AssignedAttributes, EventHandler, NodeEntity, RenderFunction } from "./makeNode";
 import { DerivedSignal } from "@rue/muonic";
@@ -10,15 +9,19 @@ import { DerivedSignal } from "@rue/muonic";
 export type DOMNode = CharacterData | HTMLElement
 export type Props = {
     [key: string]: any;
-    slot?: RenderSlot | SlotRenderer
+    slot?: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
 }
 
+export type RenderSlotted<P extends any = undefined> = 
+P extends undefined ? ()=>NodeEntity | NodeEntity[] 
+: (props: P) => NodeEntity | NodeEntity[] 
+
+export type Slotted = NodeEntity | NodeEntity[]
 
 
-export type ComponentSetup<T extends AnyObject | never = AnyObject> =
-    T extends AnyObject ?
-    (props: T) => NodeEntity[] | NodeEntity
-    : RenderFunction
+export type ComponentSetup<P = any> = P extends never ?
+    () => NodeEntity[] | NodeEntity :
+    (props: P) => NodeEntity[] | NodeEntity
 
 export type Component = AnyObject // contains anything in expose
 
@@ -76,14 +79,14 @@ export class InternalComponent {
 
 
 // Manages component "stack"
-let currentComponent: InternalComponent | null  = null;
-let prevComponent: InternalComponent | null  = null;
+let currentComponent: InternalComponent | null = null;
+let prevComponent: InternalComponent | null = null;
 
 export function getCurrentComponent() {
     return currentComponent;
 }
 
-export function pushComponent(component: InternalComponent | null ) {
+export function pushComponent(component: InternalComponent | null) {
     prevComponent = currentComponent;
     currentComponent = component;
 }

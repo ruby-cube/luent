@@ -2,7 +2,6 @@ import { getWithoutTracking } from "../../muonic/DependencyTracker";
 import { DerivedSignal, hasSignal, makeDerivedSignal, ReactiveSignal } from "../../muonic/useDerivedSignal"
 import { ReactiveObject } from "../../muonic/useReactivize";
 import { onActivated, onDeactivated } from "../src/lifecycle";
-import { normalizeToArray } from "../src/mE";
 import { watchRenderEffect, watchForRender } from "../src/watchForRender";
 import { getCurrentComponent, InternalComponent, popComponent, pushComponent } from "../src/component";
 import { Signal } from "../../muonic/useSignalize";
@@ -20,7 +19,7 @@ export class ConditionalKit {
 type ShowIfEntities = NodeEntity[] | NodeEntity;
 export type MountIfRenderersConfig = (() => NodeEntity)[] | (() => NodeEntity)
 export type MountIfRenderers = ((() => NodeEntity) | NodeEntity)[] | (() => NodeEntity)
-export type RenderConditional = () => NodeEntity[]
+
 
 export type ConditionalRenderKit = { // ManifestationKit
     $condition?: ReactiveSignal<boolean>,
@@ -233,42 +232,3 @@ export function _mountIf($condition: ReactiveSignal<boolean>, config: MountIfCon
 //     return _mountIf($condition, { mount: renderConditional }, options)
 // }
 
-
-export function watchForRenderAndPreserve(target: ReactiveSignal<any> | ReactiveObject, handler: (newValue: any, oldValue: any) => void, options?: { once: true }) {
-    const component = getCurrentComponent();
-    if (!component) throw new Error("No component found")
-
-    const watcher = watchForRender(target, handler, options);
-    const oldValue = hasSignal(target) ? target : target instanceof Array ? [...target] : { ...target } //TODO: doesn't account for sets or maps
-    onDeactivated(() => {
-        watcher.stop()
-    })
-    if (hasSignal(target)) {
-        onActivated(() => {
-            handler(target(), oldValue)
-            // pushComponent(component)
-            watchForRender(target, handler, options)
-            // popComponent()
-        })
-    }
-    else {
-        onActivated(() => {
-            handler(target, oldValue)
-            // pushComponent(component)
-            watchForRender(target, handler, options)
-            // popComponent()
-        })
-    }
-}
-
-export function watchRenderEffectAndPreserve(handler: () => void) {
-    const watcher = watchRenderEffect(handler);
-
-    onDeactivated(() => {
-        watcher.stop()
-    })
-
-    onActivated(() => {
-        watchRenderEffect(handler)
-    })
-}

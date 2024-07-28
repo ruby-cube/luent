@@ -50,7 +50,6 @@ function createLifecycleHook(name: Exclude<LifecycleHook, LifecycleHook.BEFORE_U
 function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDATED | LifecycleHook.ACTIVATED | LifecycleHook.DEACTIVATED) {
     return function on(handler: () => void, options?: ListenerOptions, _component?: InternalComponent) {
         const component = _component || getCurrentComponent();
-        console.log('hook', name, component)
         if (!component) throw new Error("Lifecycle hooks cannot be called outside of component setup");
         const taskQueue = useTaskQueue(component, name)
 

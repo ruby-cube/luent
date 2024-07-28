@@ -8,11 +8,13 @@ import { HTMLTag } from "./mE"
 
 
 
+type Something<T extends HTMLElement> = T;
+
 
 type Task = ((item: HTMLElement | Component) => void) | ((item: HTMLElement | Component, $index?: Signal<number>) => void)
 const hookMap: WeakMap<NodeRef, Set<Task>> = new WeakMap()
 
-export class NodeRef<T extends HTMLElement | Component = HTMLElement | Component> { //TODO: Add generics
+export class NodeRef<T extends HTMLElementTagNameMap[HTMLTag] | Component = HTMLElement | Component> { //TODO: Add generics
     // readonly node?: HTMLElement
     // readonly nodes?: HTMLElement[]
     // readonly component?: Component
@@ -67,7 +69,7 @@ export class _NodeRef<T extends HTMLElement | Component = HTMLElement | Componen
         pod.splice(index, 0, node); //TODO: should this be splice?
     }
 
-    removeNode(index: number){
+    removeNode(index: number) {
         const pod = this.o.value as T[]
         pod.splice(index, 1);
     }
@@ -80,6 +82,7 @@ export class _NodeRef<T extends HTMLElement | Component = HTMLElement | Componen
         if ($index != null) {
             let nodes = <(HTMLElement | Component)[]>this.o.value || []
             nodes[$index()] = value;
+            refMap.set(nodes, this);
         }
         else {
             this.setValue(value) // will never change for static entities
@@ -98,9 +101,9 @@ export class _NodeRef<T extends HTMLElement | Component = HTMLElement | Componen
 
 
 
-const refMap: WeakMap<DOMNode | Component, _NodeRef> = new WeakMap()
+const refMap: WeakMap<DOMNode | Component | DOMNode[] | Component[], _NodeRef> = new WeakMap()
 
-export function getNodeRef(node: DOMNode | Component) { // AnyObject is component's exposed methods and state
+export function getNodeRef(node: DOMNode | Component | DOMNode[] | Component[]) { // AnyObject is component's exposed methods and state
     return refMap.get(node)
 }
 
