@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { forEachIn, NodeConfig, RenderSlotted } from "@rue/lumo";
 import { useReactivity } from "@rue/muonic"
 import { watchRenderEffect } from "../../../packages/lumo/src/watchForRender";
@@ -90,8 +91,10 @@ export function App() {
     return (
         <>
             <div {...outer_div}>
-                {forEachIn($list, (item) => (
-                    <div>{item.content}</div>
+                {forEachIn($list, (item, $i) => (
+                    <div {...list_item()}>
+                        {item.content}
+                    </div>
                 ), 'uid')}
             </div>
             <div data-some="hi" style="background-color: red">ho</div>
