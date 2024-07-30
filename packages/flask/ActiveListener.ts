@@ -7,13 +7,13 @@ export type ActiveListener = {
 }
 
 
+export type EnrollFunction = (wrappedCB: Callback) => any
 export type RemoveFunction<E extends EnrollFunction> =
     E extends (arg: any) => infer R ?
     R extends Callback ?
     (cleanUp: R) => void
-    : (wrappedCB: Callback) => void
+    : (forRemoval: R) => void
     : never
-export type EnrollFunction = (wrappedCB: Callback) => void | Callback
 
 type ActiveListenerConfig<E extends EnrollFunction = EnrollFunction> = {
     callback: Callback,
@@ -28,7 +28,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
     const { enroll, remove, callback, options } = config;
     const once = options?.once;
 
-    let returnVal: void | Callback;
+    let returnVal: any;
 
     const _callback = bindFlask(once ? (...args: any[]) => {
         callback(...args);

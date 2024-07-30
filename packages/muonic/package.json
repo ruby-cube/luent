@@ -6,6 +6,7 @@
         "vue": "^3.4.31",
         "@vueuse/core": "^10.11.0",
         "@rue/flask": "workspace:*",
+        "@rue/thread": "workspace:*",
         "@rue/utils": "workspace:*"
     },
     "devDependencies": {

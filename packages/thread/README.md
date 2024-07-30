@@ -43,7 +43,7 @@ Planified schedulers return a `ScheduledOp`, which is essentially a cancellable 
 
 [queueTask()](#queuetask)
 
-[queuePrerepaint()](#beforescreenpaint)
+[beforeRepaint()](#beforescreenpaint)
 
 [onTimeout()](#ontimeout)
 
@@ -98,7 +98,7 @@ queueTask(() => {
 ```
 <p align="right"><a href="#table-of-contents">[toc]</a></p>
 
-## `queuePrerepaint()`
+## `beforeRepaint()`
 
 flasked `requestAnimationFrame`, which schedules code to run before the next screen paint.
 
@@ -119,7 +119,7 @@ type SchedulerOptions = {
 ### Usage
 
 ```js
-queuePrerepaint(() => {
+beforeRepaint(() => {
     // code that will after any previously queued rAF callbacks
     // and before the next screen paint
 });

@@ -1,4 +1,4 @@
-import { ifCase, forEachIn, setUpNode, setUpNodesIn, onActivated, onBeforeMount, onBeforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../../../packages/lumo/src";
+import { ifCase, forEachIn, setUpNode, setUpNodesIn, onActivated, beforeMount, beforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../../../packages/lumo/src";
 import { useReactivity, Signal, watch, ReactiveSignal } from "@rue/muonic";
 
 const { $, mu, o$, set } = useReactivity()
@@ -194,11 +194,11 @@ function List() {
     //     console.log("unmounted")
     // })
 
-    // onBeforeUnmount(() => {
+    // beforeUnmount(() => {
     //     console.log("before unmount")
     // })
 
-    // onBeforeMount(() => {
+    // beforeMount(() => {
     //     console.log("before mount")
     // })
 

@@ -1,7 +1,11 @@
+import { AnyObject } from "@rue/types";
 import { ActiveListener, EnrollFunction, makeActiveListener, RemoveFunction } from "./ActiveListener";
 import { makePendingCancelOp, PendingCancelOp } from "./PendingCancelOp";
 import { makePendingOp, PendingOp } from "./PendingOp";
 
+export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O extends AnyObject = {}> = <
+    OPT extends ListenerOptions & O,
+>(target: T, callback: CB, options?: OPT) => ActiveListener;
 
 export type ListenerOptions = {
     once?: true;

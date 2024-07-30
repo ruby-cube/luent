@@ -84,7 +84,18 @@ export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?
 
     if (eager && target) {
         const value = target instanceof Function ? target() : target
-        handler(value, value)
+        handler(value, value) //TODO: Schedule according to phase
+        if (phase === 'sync') {
+        }
+        else if (phase === 'pre') {
+            
+        }
+        else if (phase === 'render') {
+
+        }
+        else if (phase === 'post') {
+
+        }
     }
 
 

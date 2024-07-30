@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { Component, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "./component";
 import { SetKey, Signal } from "../../muonic/useSignalize";
-import { LifecycleHook, onActivated, onBeforeUnmount, onDeactivated, onUnmounted } from "./lifecycle";
+import { LifecycleHook, onActivated, beforeUnmount, onDeactivated, onUnmounted } from "./lifecycle";
 import { collectEffects } from "@rue/flask/flask";
 import { _NodeRef, getNodeRef, NodeRef } from "./NodeRef";
 import { AssignedAttributes, EventsConfig, initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig, RenderFunction } from "./makeNode";
@@ -22,8 +22,8 @@ export type InferSlotted<T extends ComponentSetupWithSlot = ComponentSetupWithSl
     T extends (props: infer P) => any ?
     P extends { slotted: infer S } ?
     S
-    : never
-    : never
+    : undefined
+    : undefined
 
 export type PropsWithSlot = {
     slot: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
@@ -36,13 +36,13 @@ type ComponentSetupWithSlot<P extends PropsWithSlot = PropsWithSlot> =
 export function mO<T extends ComponentSetupWithSlot>(
     Component: T,
     slotted: InferSlotted<T>,
-    jsxConfig?: T extends (props: infer P) => any ? P : never & JSXConfig<InternalComponent>,
+    jsxConfig?: T extends (props: infer P) => any ? P : undefined & JSXConfig<InternalComponent>,
     setupConfig?: ComponentConfig<T extends (props: AnyObject) => any ? T : never> & NodeSetupConfig
 ): InternalComponent
 export function mO<T extends ComponentSetup>(
     Component: T,
-    slotted?: InferSlotted<T>,
-    jsxConfig?: T extends (props: infer P) => any ? P : never & JSXConfig<InternalComponent>,
+    slotted?: InferSlotted<T> | undefined,
+    jsxConfig?: T extends (props: infer P) => any ? P : undefined & JSXConfig<InternalComponent>,
     setupConfig?: ComponentConfig<T> & NodeSetupConfig
 ): InternalComponent {
     return makeNode(Component, slotted, jsxConfig, setupConfig) as InternalComponent
@@ -147,7 +147,7 @@ function runComponentSetup(
         // set up hook cascade
         const parent = component.parent;
         if (parent instanceof InternalComponent) {
-            onBeforeUnmount(() => component.emit(LifecycleHook.BEFORE_UNMOUNT), parent) //TODO: how do these get cleaned up?
+            beforeUnmount(() => component.emit(LifecycleHook.BEFORE_UNMOUNT), parent) //TODO: how do these get cleaned up?
             onUnmounted(() => component.emit(LifecycleHook.UNMOUNTED), parent)
             onDeactivated(() => component.emit(LifecycleHook.DEACTIVATED), undefined, parent)
             onActivated(() => component.emit(LifecycleHook.ACTIVATED), undefined, parent)
@@ -256,7 +256,7 @@ export function analyzeAttributes(jsxEntries: AnyObject) {
 //     //             ref.components = components
 //     //         })
 //     //     }
-//     //     onBeforeUnmount(() => {
+//     //     beforeUnmount(() => {
 //     //         ref.components = null;
 //     //     })
 //     // }
@@ -270,7 +270,7 @@ export function analyzeAttributes(jsxEntries: AnyObject) {
 //         })
 //     }
 
-//     onBeforeUnmount(() => {
+//     beforeUnmount(() => {
 //         ref.setValue(null);
 //     })
 //     // }

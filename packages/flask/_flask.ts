@@ -1,10 +1,10 @@
-//-@ts-nocheck
 
-import { $schedule, Callback, Callbacks, PendingCancelOp, PendingOp, SchedulerOptions } from ".";
+import { $schedule, Callback, Callbacks, PendingOp, SchedulerOptions } from ".";
 import { noop, run } from "@rue/utils";
 import { CovertFlask, _covertFlaskConfigs, getCovertFlask } from "./CovertFlasks";
 import { Scene, getScene } from "./Scene";
 import { registerGlobalResetter } from "@rue/dev";
+import { PendingCancelOp } from "./PendingCancelOp";
 
 
 // TODO: flask.after must handle pausing and resuming all outer flasks

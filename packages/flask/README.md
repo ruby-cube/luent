@@ -327,7 +327,7 @@ To create a morphable listener, use `$listen` from the Flasked Listeners API.
 
 ### Schedulers
 
-Schedulers are one-time listeners that cannot morph into a sustained listeners. These are typically functions that queue a task to the main thread such as: `queueTask`, `queuePrerepaint` (flasked `requestAnimationFrame`), and `onTimeout` (flasked `setTimeout`). See [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top) for more on existing schedulers.
+Schedulers are one-time listeners that cannot morph into a sustained listeners. These are typically functions that queue a task to the main thread such as: `queueTask`, `beforeRepaint` (flasked `requestAnimationFrame`), and `onTimeout` (flasked `setTimeout`). See [Thread](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top) for more on existing schedulers.
 
 To create a scheduler, use `$schedule` from [the Flasked Listeners API](#flasked-listeners-api).
 
@@ -1104,7 +1104,7 @@ OPT extends ListenerOptions & WatchOptions,
 ```ts
 // flasking `requestAnimationFrame`
 
-export function queuePrerepaint<
+export function beforeRepaint<
 CB extends Callback,
 OPT extends ListenerOptions
 >(handler: CB, options?: OPT) {

@@ -64,21 +64,21 @@ function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDA
     }
 }
 
-export const onBeforeMount = createLifecycleHook(LifecycleHook.BEFORE_MOUNT) //TODO: Rename premount to something else ... it has ambiguous meaning--it could mean mount ahead of time
+export const beforeMount = createLifecycleHook(LifecycleHook.BEFORE_MOUNT) //TODO: Rename premount to something else ... it has ambiguous meaning--it could mean mount ahead of time
 export const onMounted = createLifecycleHook(LifecycleHook.MOUNTED)
-export const onBeforeUpdate = createUpdateHook(LifecycleHook.BEFORE_UPDATE)
+export const beforeUpdate = createUpdateHook(LifecycleHook.BEFORE_UPDATE)
 export const onUpdated = createUpdateHook(LifecycleHook.UPDATED)
 export const onActivated = createUpdateHook(LifecycleHook.ACTIVATED)
 export const onDeactivated = createUpdateHook(LifecycleHook.DEACTIVATED)
-export const onBeforeUnmount = createLifecycleHook(LifecycleHook.BEFORE_UNMOUNT)
+export const beforeUnmount = createLifecycleHook(LifecycleHook.BEFORE_UNMOUNT)
 export const onUnmounted = createLifecycleHook(LifecycleHook.UNMOUNTED)
 
 
 
 export default {
-    onBeforeMount,
-    onBeforeUnmount,
-    onBeforeUpdate,
+    beforeMount,
+    beforeUnmount,
+    beforeUpdate,
     onMounted,
     onUnmounted,
     onUpdated,

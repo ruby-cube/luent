@@ -1,7 +1,7 @@
 import { _watchEffect, getDependencies, useTaskQueues } from "../../muonic/watch";
 import { getCurrentComponent, InternalComponent } from "./component";
 import { LifecycleHook, onUnmounted } from "./lifecycle";
-import { onBeforeUpdatePhase, onUpdateComplete } from "../../muonic/UpdateCycle";
+import { beforeUpdatePhase, onUpdateComplete } from "../../muonic/UpdateCycle";
 import { ReactiveSignal } from "../../muonic/useDerivedSignal";
 import { ReactiveObject } from "../../muonic/useReactivize";
 import { AnyObject } from "@rue/types";
@@ -39,7 +39,7 @@ function setUpUpdateHooks(component: InternalComponent) {
     if (component.hasUpdates === true) return;
     component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
 
-    onBeforeUpdatePhase(() => {
+    beforeUpdatePhase(() => {
         component.emit(LifecycleHook.BEFORE_UPDATE)
     }, { once: true }) // assuming cleanup flask is set up
 
@@ -73,7 +73,7 @@ function setUpUpdateHooks(component: InternalComponent) {
 //         if (component.hasUpdates === true) return;
 //         component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
 
-//         onBeforeUpdatePhase(() => {
+//         beforeUpdatePhase(() => {
 //             component.emit(LifecycleHook.BEFORE_UPDATE)
 //         }, { once: true }) // assuming cleanup flask is set up
 

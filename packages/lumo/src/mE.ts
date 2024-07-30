@@ -3,7 +3,7 @@ import { Component, ComponentSetup, DOMNode, getCurrentComponent, InternalCompon
 import { DerivedSignal, hasSignal, ReactiveSignal } from "../../muonic/useDerivedSignal";
 import { getWithoutTracking } from "../../muonic/DependencyTracker";
 import { DynamicIndices, getCurrentItemAndIndex, insertAndMoveListItemNodes, ListRenderKit, removeListItemNodes } from "./forEachIn";
-import { LifecycleHook, onBeforeUnmount, onUnmounted } from "./lifecycle";
+import { LifecycleHook, beforeUnmount, onUnmounted } from "./lifecycle";
 import { appendItems, copyAllBut, isEqual, normalizeToArray } from "@rue/utils";
 import { diff } from "./diff";
 import { isReactive } from "../../muonic/useReactivize";
@@ -11,13 +11,15 @@ import { _DynamicNodePod, _NodePod, NodePod } from "./NodePod";
 import { _NodeRef, getNodeRef, NodeRef } from "./NodeRef";
 import { useReactivity } from "../../muonic/useReactivity";
 import { Signal } from "../../muonic/useSignalize";
-import { getNodeConfig } from "./_setUpNode";
+import { getNodeConfig } from "../api-play/_setUpNode";
 import { analyzeAttributes, ComponentConfig, ComponentOptions, composeEvents, makeComponent, warnOverlappingKeys } from "./mO";
 import { watchRenderEffect, watchForRender } from "./watchForRender";
 import { hideDOMNodes, setUpConditionalShowSeries } from "./showIf";
 import { buildConditionalSeries, ConditionalRenderKit, ConditionalSeries, noElseBlock, RenderConditional, validateStandAloneConditional, watchForRenderAndPreserve, watchRenderEffectAndPreserve } from "./$if";
 import { AssignedAttributes, initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig } from "./makeNode";
-import { PendingOp } from "@rue/flask";
+import { ActiveListener, PendingOp } from "@rue/flask";
+import { useEventTick } from "./EventTick";
+import { runNonSyncTasks } from "@rue/muonic";
 
 export const _internalReactivity = useReactivity()
 
@@ -123,33 +125,32 @@ function setAttribute(node: HTMLElement, key: string, value: any) {
 
 function setUpEvents(node: HTMLElement, events: { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] }) {
     for (const key in events) {
-        const handlers = events[key]
-        for (const handler of handlers) {
-            if (hasSignal(handler)) {
-                let pendingCleanup: PendingOp;
-                let previousHandler: EventListener | null = null;
-                watchForRender(handler, (newValue) => { //QUESTION: When will this be cleaned up if it's a fallthrough attribute?
-                    if (newValue) {
-                        pendingCleanup = attachEventHandler(node, key, newValue);
-                    }
-                    if (previousHandler) {
-                        node.removeEventListener(key, previousHandler) //TODO: What about signals that return null?
-                        pendingCleanup.cancel()
-                    }
-                    previousHandler = newValue;
-                }, { eager: true })
+        const handlers = events[key];
+        const event = useEventTick(node, key, () => runNonSyncTasks('pre'));
+        event.updateHandlers(() => {
+            for (const handler of handlers) {
+                if (hasSignal(handler)) {
+                    let listener: ActiveListener;
+                    watchForRender(handler, (newValue) => {
+                        event.updateHandlers(() => {
+                            if (listener) {
+                                listener.stop();
+                            }
+                            if (newValue) {
+                                listener = event.attachHandler(newValue, {});
+                            }
+                        })
+                    }, { eager: true })
+                }
+                else {
+                    event.attachHandler(handler, {})
+                }
             }
-            else {
-                attachEventHandler(node, key, handler)
-            }
-        }
+        })
     }
 }
 
-function attachEventHandler(node: HTMLElement, key: string, handler: EventListener) {
-    node.addEventListener(key, handler)
-    return onUnmounted(() => node.removeEventListener(key, handler))
-}
+
 
 type DynamicClassesConfig = {
     [key: string]: ReactiveSignal<boolean>;
@@ -162,7 +163,7 @@ function setUpClasses(component: InternalComponent, node: HTMLElement, classes: 
         if (entry instanceof Function) {
             _watchRenderEffect(() => entry(classList))
         }
-        else if (entry instanceof Object){
+        else if (entry instanceof Object) {
             for (const key in entry) {
                 const $signal = entry[key];
                 watchForRender($signal, (value) => { //QUESTION: should this have a preserve version?
@@ -223,7 +224,7 @@ function setUpRefNulling(ref: _NodePod, $index: Signal<number>) {
 
     }
     else {
-        onBeforeUnmount(() => {
+        beforeUnmount(() => {
 
         })
     }

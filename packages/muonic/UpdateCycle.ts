@@ -5,6 +5,7 @@ import { Signal } from "./useSignalize";
 import { getTaskQueueForProp, runNonSyncTasks } from "./watch";
 import { $listen, ScheduleStop } from "@rue/flask";
 import { removeItem } from "../utils/array";
+import { beforeRepaint, queueTask } from "@rue/thread";
 
 const snapshotManager = new SnapshotManager();
 
@@ -20,7 +21,7 @@ export function setCurrentUpdateCycle(updateCycle: UpdateCycle) {
     return currentUpdateCycle = updateCycle;
 }
 
-function endUpdateCycle() {
+export function endUpdateCycle() {
     currentUpdateCycle = undefined;
 }
 
@@ -33,7 +34,15 @@ export class UpdateCycle {
     constructor() {
         updateCycleCount++;
         currentUpdateCycle = this;
-        queueMicrotask(_runNonSyncTasks)
+        beforeRepaint(() => {
+            _runTasks(Hooks.BEFORE_UPDATE)
+            runNonSyncTasks('render');
+            _runTasks(Hooks.UPDATE_COMPLETED)
+            queueTask(() => {
+                runNonSyncTasks('post');
+                endUpdateCycle();
+            })
+        })
     }
 
     flagSignal(signal: Signal, newValue: any, oldValue: any) {
@@ -87,20 +96,13 @@ export class UpdateCycle {
     }
 }
 
-function _runNonSyncTasks() {   // TODO: how to prevent update blocking if tasks take too long? Also figure out how to use rAF
-    runNonSyncTasks('pre');
-    _runTasks(Hooks.BEFORE_UPDATE)
-    runNonSyncTasks('render');
-    _runTasks(Hooks.UPDATE_COMPLETED)
-    runNonSyncTasks('post');
-    endUpdateCycle();
-}
 
 
 
 
 
-enum Hooks {
+
+export enum Hooks {
     UPDATE_COMPLETED = "uc",
     BEFORE_UPDATE = "bc",
 }
@@ -112,7 +114,7 @@ const tasks: { [K in Hooks]: Set<() => void> } = {
 
 const updateCompletedTasks: (() => void)[] = [];
 
-function _runTasks(hookName: Hooks) {
+export function _runTasks(hookName: Hooks) {
     const _tasks = tasks[hookName]
     for (const task of _tasks) {
         task();
@@ -130,7 +132,7 @@ export function onUpdateComplete(task: () => void, options?: { once?: true, unti
     })
 }
 
-export function onBeforeUpdatePhase(task: () => void, options?: { once?: true, until?: ScheduleStop }) {
+export function beforeUpdatePhase(task: () => void, options?: { once?: true, until?: ScheduleStop }) {
     return $listen(task, options || {}, {
         enroll(task) {
             updateCompletedTasks.push(task)

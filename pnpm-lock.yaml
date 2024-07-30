@@ -148,6 +148,9 @@ importers:
       '@rue/flask':
         specifier: workspace:*
         version: link:../flask
+      '@rue/thread':
+        specifier: workspace:*
+        version: link:../thread
       '@rue/utils':
         specifier: workspace:*
         version: link:../utils

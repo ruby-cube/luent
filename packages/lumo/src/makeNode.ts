@@ -5,9 +5,9 @@ import { getCurrentItemAndIndex, ListRenderKit } from "./forEachIn";
 import { HTMLTag, makeElement } from "./mE";
 import { ComponentConfig, makeComponent, InferSlotted } from "./mO";
 import { _NodeRef, NodeRef } from "./NodeRef";
-import { getNodeConfig } from "./_setUpNode";
+import { getNodeConfig } from "../api-play/_setUpNode";
 import { AnyObject } from "@rue/types";
-import { onBeforeUnmount } from "./lifecycle";
+import { beforeUnmount } from "./lifecycle";
 
 export function Fragment(){
 
@@ -36,11 +36,12 @@ export type AssignedAttributes = {
     other: { [key: string]: (any | DerivedSignal<any>)[] }
 }
 
-export type NodeSetupConfig = {
+export type NodeSetupConfig<K extends HTMLTag = HTMLTag> = {
     on?: EventsConfig
     class?: string | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[],
     style?: string | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[],
-    assigned?: AssignedAttributes
+    assigned?: AssignedAttributes,
+    attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[]
 }
 
 export type JSXConfig<T extends HTMLElement | InternalComponent> = {
@@ -109,7 +110,7 @@ export function initializeRef( // should this be initialize ref?
     //     setUpDynamicStyles(component, ref, dynamicStyles)
     // }
 
-    onBeforeUnmount(() => {
+    beforeUnmount(() => {
         ref.setValue(null);
     })
 

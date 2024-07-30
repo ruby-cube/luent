@@ -1,5 +1,5 @@
 import { getCurrentComponent, InternalComponent } from "./component";
-import { onBeforeMount } from "./lifecycle";
+import { beforeMount } from "./lifecycle";
 
 class Provider {
     entries: Map<Symbol | string, any> = new Map();
@@ -33,7 +33,7 @@ export function provide<T>(key: SymbolKey<T> | symbol | string, value: T) {
     if (!provider || provider.component !== component) {
         provider = new Provider(component, provider);
         pushProvider(provider);
-        onBeforeMount(() => {
+        beforeMount(() => {
             popProvider()
         })
     }

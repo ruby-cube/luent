@@ -5,7 +5,7 @@ import { $lifetime, $tilStop, ActiveListener, Callback, OneTimeTargetedListener,
 =======
 import { $lifetime, $tilStop, ActiveListener, Callback, OneTimeTargetedListener, SustainedTargetedListener } from "../../flask/flask";
 >>>>>>> main
-import { useEventListener } from "../event-listeners";
+import { useEventListener } from "../../lumo/src/event-listeners";
 
 
 {//CASE: No config

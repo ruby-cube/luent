@@ -1,5 +1,6 @@
-import { RenderSlotted, setUpNode } from "@rue/lumo";
+import { NodeConfig, RenderSlotted, setUpNode } from "@rue/lumo";
 import { useReactivity } from "@rue/muonic"
+import { watchRenderEffect } from "../../../packages/lumo/src/watchForRender";
 
 
 const { $, set } = useReactivity();
@@ -46,20 +47,20 @@ export function App() {
 
     const frog_block = useNodeRef();
 
+
     const $list = $(["a", "b", "c"])
     // const item_div = setUpNodesFor($list, 'div', (item, $index) => ({
     // }))
     const $active = $(true);
 
-    const outer_div = setUpNode('div', {
+    const outer_div: NodeConfig<'div'> = {
         class: [
             o => {
                 if ($active()) o.add("active");
                 else o.remove("active")
             }
         ],
-        src: $(() => $address() + 2), // string | ReactiveSignal<string | undefined>
-        manipulations: [
+        attributes: [
             o => {
                 if ($caseA()) {
                     o.setAttribute('sfdf', "sdfsdf")
@@ -74,16 +75,21 @@ export function App() {
                 }
             }
         ]
+    }
 
+    beforeMount(() => {
+        const outerDiv = outerDivRef();
 
-
+        watchRenderEffect(() => {
+            outerDiv.setAttribute('id', $divId())
+        })
     })
 
 
 
     return (
         <>
-            <div data-some="hi" class="frog">hei</div>
+            <div {...outer_div}>hei</div>
             <div data-some="hi" style="background-color: red">ho</div>
 
             <DocSlab dog="dlkjf">{o =>

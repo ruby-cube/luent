@@ -6,7 +6,7 @@ import { DOMNode } from "../src/component";
 import { ListRenderKit } from "../src/mE";
 import { ReactiveSignal } from "../../muonic/useDerivedSignal";
 import { mEO } from "./mEO";
-import { onBeforeMount } from "../src/lifecycle";
+import { beforeMount } from "../src/lifecycle";
 import { watchEffect } from "../../muonic/watch";
 import { reMouseDown } from "../actionry/__test__/actionry.type-test";
 import { NodeEntity } from "../src/mE";
@@ -31,14 +31,14 @@ const _BUTTON = "button"
 const _H1 = "h1"
 
 // function dynamicStyle(effect: (refs: { [key: string]: DOMNode }) => void) {
-//     onBeforeMount((refs: { [key: string]: DOMNode }) => {
+//     beforeMount((refs: { [key: string]: DOMNode }) => {
 //         watchEffect(() => { effect(refs) })
 //     })
 // }
 
 function List() {
 
-    // onBeforeMount(() => {
+    // beforeMount(() => {
     //     const listItems = getDOMNode('listItems')
 
     //     watchEffect(() => {
@@ -51,7 +51,7 @@ function List() {
     //     })
     // })
 
-    // dynamicStyle(({ $listItems, frame }) => {  // essentially onBeforeMount and initialize effect
+    // dynamicStyle(({ $listItems, frame }) => {  // essentially beforeMount and initialize effect
     //     for (const item of $listItems()) { //TODO: I want to only set the style for new items...
     //         if ($isActive)
     //             item.style.backgroundColor = 'blue'
@@ -67,7 +67,7 @@ function List() {
     //     })
     // })
 
-    // dynamicStyle(({ $listItems, frame }) => {  // essentially onBeforeMount and initialize effect
+    // dynamicStyle(({ $listItems, frame }) => {  // essentially beforeMount and initialize effect
     //     for (const item of $listItems()) { //TODO: I want to only set the style for new items...
     //         if ($isActive)
     //             item.style.backgroundColor = 'blue'
@@ -90,7 +90,7 @@ function List() {
     const itemsRef = new NodeRef();
     const headingRef = new NodeRef();
 
-    onBeforeMount(() => {
+    beforeMount(() => {
         console.log(itemsRef.value)
     })
 

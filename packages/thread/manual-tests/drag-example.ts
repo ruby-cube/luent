@@ -5,7 +5,7 @@ import { sceneSetup } from "../../flask/Scene";
 import { ActiveListener } from "../../flask/flask";
 import { beginScene } from "../../flask/Scene";
 >>>>>>> main
-import { useEventListener } from "../event-listeners";
+import { useEventListener } from "../../lumo/src/event-listeners";
 
 
 const onMouseDown = useEventListener("mousedown");

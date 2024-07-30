@@ -7,6 +7,7 @@
 import * as CSS from "csstype";
 import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
+import { ReactiveSignal } from "@rue/muonic";
 
 export function jsxDEV(): "frog"
 export function jsx(): "frog"
@@ -1665,7 +1666,7 @@ declare namespace React {
     //     JSXElementConstructor<infer P> ? P
     //     : T extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[T]
     //     : {};
-    type ComponentProps<T extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>> = {froggo: number}
+    type ComponentProps<T extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>> = { froggo: number }
 
     /**
      * Used to retrieve the props a component accepts with its ref. Can either be
@@ -2903,8 +2904,8 @@ declare namespace React {
         suppressHydrationWarning?: boolean | undefined;
 
         // Standard HTML Attributes
-        class?: string | undefined;
-        style?: CSSProperties | undefined;
+        // class?: string | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[]; // #LUMO-EDIT
+        // style?: CSSProperties | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[]; // #LUMO-EDIT
         accessKey?: string | undefined;
         autoFocus?: boolean | undefined;
         contentEditable?: Booleanish | "inherit" | "plaintext-only" | undefined;
@@ -4305,6 +4306,15 @@ type ReactManagedAttributes<C, P> = C extends { propTypes: infer T; defaultProps
     : P;
 
 declare global {
+
+
+    namespace Lumo {
+        type ReactivizeProps<P extends { [key: string]: any }> = {
+            [K in keyof P]: P[K] | ReactiveSignal<P[K]>
+        }
+    }
+
+
     /**
      * @deprecated Use `React.JSX` instead of the global `JSX` namespace.
      */
@@ -4341,13 +4351,23 @@ declare global {
             : ReactManagedAttributes<T, P>
             : ReactManagedAttributes<C, P>;
 
-        interface IntrinsicAttributes extends React.Attributes { 
+        interface IntrinsicAttributes extends React.Attributes {
             ref?: Lumo.NodeRef //#LUMO-EDIT
             // slotted?: Lumo.InferSlotted
         }
         interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> { }
 
-        interface IntrinsicElements {
+        type CSSProperties = React.CSSProperties
+
+        type IntrinsicElements = {
+            [K in keyof JSX._IntrinsicElements]: Lumo.ReactivizeProps<JSX._IntrinsicElements[K]> & {
+                class?: string | ReactiveSignal<string | undefined> | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[];
+                style?: CSSProperties | ReactiveSignal<CSSProperties | undefined> | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[];
+                attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
+            }
+        }
+
+        interface _IntrinsicElements {
             // HTML
             a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
             abbr: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
