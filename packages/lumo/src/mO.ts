@@ -198,7 +198,10 @@ export function analyzeAttributes(entries: AnyObject) {
     // const jsxProps: AnyObject = {};
     const attributes: AnyObject = {};
     for (const key in entries) {
-        if (isHTMLEvent(key)) {
+        if (key === "children"){
+            continue;
+        }
+        else if (isHTMLEvent(key)) {
             events[key.slice(2)] = entries[key];
         }
         // else if (isHTMLAttribute(key, tag)) {

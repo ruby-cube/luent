@@ -110,7 +110,8 @@ export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?
     }
 
     let _handler = isReactiveEffect ? wrapToRetrack(<() => void>handler, activeListeners, options || {}, phase, deep) : handler;
-    _handler = options?.once ? wrapOneTimeHandler(_handler, stop) : _handler;
+    _handler = options?.once ? (options.once = false, toSelfremoving(_handler, stop)) : _handler; 
+    // ^ set once to false so that it will not be extraneously re-wrapped by $listen
 
     for (const taskQueue of taskQueues) {
         const activeListener = $listen(_handler, options || {}, {
@@ -136,7 +137,7 @@ export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?
     }
 }
 
-function wrapOneTimeHandler(handler: (...args: any[]) => void, stop: () => void) {
+function toSelfremoving(handler: (...args: any[]) => void, stop: () => void) {
     return (...args: any[]) => {
         stop();
         handler(...args)
@@ -233,8 +234,8 @@ export function useTaskQueues(deps: (Signal | ReactiveProp)[], phase: Phase = 'p
             phaseMap.set(phase, taskQueue);
             signalTaskQueues.set(dep, phaseMap);
             taskQueues.push(taskQueue);
-            console.log(dep.__devName, taskQueue, phase)
-            taskQueue.__devName = dep.__devName;
+            // console.log(dep.__devName, taskQueue, phase)
+            // taskQueue.__devName = dep.__devName;
         }
         else {
             const [reactiveObj, key] = dep;

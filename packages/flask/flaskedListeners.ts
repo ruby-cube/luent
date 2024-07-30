@@ -8,7 +8,7 @@ export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O
 >(target: T, callback: CB, options?: OPT) => ActiveListener;
 
 export type ListenerOptions = {
-    once?: true;
+    once?: boolean;
     until?: ScheduleStop;
 }
 

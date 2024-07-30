@@ -54,6 +54,9 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     }
 
     if (childNodes) {
+        if (tagName === 'article') {
+            console.log("my childnodes", childNodes[0])
+        }
         const nodePod = new _NodePod();
         for (let i = 0; i < childNodes.length; i++) {
             let childNodeEntity = childNodes[i];
@@ -312,6 +315,10 @@ export function setUpNodeEntity(
     else if (nodeEntity instanceof Array) {
         // conditional series
         const series = buildConditionalSeries(nodeEntity);
+        setUpConditionalSeries(component, parent, series, nodePod, fragment)
+    }
+    else if (nodeEntity instanceof ConditionalRenderKit){
+        const series = buildConditionalSeries([nodeEntity]);
         setUpConditionalSeries(component, parent, series, nodePod, fragment)
     }
     else {
