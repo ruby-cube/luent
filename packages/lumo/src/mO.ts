@@ -8,7 +8,7 @@ import { ComponentConfig, EventsConfig, initializeRef, makeNode, NodeEntity, Ren
 import { normalizeToArray } from "@rue/utils";
 import { isHTMLEvent } from "./html/attributes";
 import { DerivedSignal } from "@rue/muonic";
-import { preserveAllRequested } from "./$if";
+import { ConditionalRenderKit, preserveAllRequested } from "./$if";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
@@ -88,6 +88,15 @@ function getPreserveStatus(
 //     return attributes!
 // }
 
+function normalizeToFragmentArray(entity: any) { // distinguish conditional series from 
+    if (entity instanceof ConditionalRenderKit) return [[entity]];
+    if (entity instanceof Array) { // check if conditional series
+        if (entity[0] instanceof ConditionalRenderKit) return [entity];
+        return entity;
+    }
+    return normalizeToArray(entity);
+}
+
 function runComponentSetup(
     Component: ComponentSetup,
     component: InternalComponent,
@@ -97,7 +106,7 @@ function runComponentSetup(
 ) {
     collectEffects((flask, outerFlask) => {
         const ref = config.ref
-        const nodeEntities = normalizeToArray(Component({ ...config, slotted }));
+        const nodeEntities = normalizeToFragmentArray(Component({ ...config, slotted }));
 
         component.nodeEntities = nodeEntities;
 
@@ -198,7 +207,7 @@ export function analyzeAttributes(entries: AnyObject) {
     // const jsxProps: AnyObject = {};
     const attributes: AnyObject = {};
     for (const key in entries) {
-        if (key === "children"){
+        if (key === "children") {
             continue;
         }
         else if (isHTMLEvent(key)) {

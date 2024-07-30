@@ -1,24 +1,25 @@
-import { ComponentSetup, HTMLTag, makeNode, NodeEntity } from "@rue/lumo";
+import { ComponentSetup, ConditionalRenderKit, HTMLTag, makeNode, NodeEntity } from "@rue/lumo";
 import { normalizeToArray } from "@rue/utils";
+import { ConditionalKit } from "../../../../apps/play/src/play";
 
 
 export const jsxDEV = jsx;
 
 export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: NodeEntity }) {
+    const children = config.children;
     if (nodeType instanceof Function && nodeType !== Fragment) {
         return makeNode(
             nodeType,
-            config.children,
+            children,
             config
         );
     }
-    const children = normalizeToArray(config.children)
     if (nodeType === Fragment) {
-        return children;
+        return normalizeToArray(children)
     }
     return makeNode(
         nodeType,
-        children,
+        normalizeToArray(children),
         config
     );
 

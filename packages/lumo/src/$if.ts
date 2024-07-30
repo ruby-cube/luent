@@ -159,6 +159,7 @@ export function buildConditionalSeries(statements: ConditionalRenderKit[]) {
     for (let i = 0; i < statements.length; i++) {
         const kit = statements[i]
         if (i === 0 && kit.statement !== 'if' || i !== 0 && kit.statement === 'if') {
+            console.log(i, kit, statements)
             if (__DEV__) throw new Error('$if must be the first child of a conditional series')
             else continue;
         }

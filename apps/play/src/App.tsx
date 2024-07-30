@@ -1,18 +1,27 @@
 import { $else, $elseIf, $if, ComponentSetup, forEachIn, NodeConfig, RenderSlotted } from "@rue/lumo";
 import { useReactivity, watchEffect } from "@rue/muonic"
 import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/loadComponent";
-import { TestBlock } from "./TestBlock";
+import { TestBlockA } from "./TestBlock";
 
 
 const { $, set } = useReactivity();
 
 const loadSideBlock = idleLoadComponent({
-    load: () => {
-        const result = import('./SideBlock').then(({ SideBlock }) => SideBlock)
-        console.log("what's this?", result)
-        return result;
+    load: () => artificialDelay(import('./SideBlock').then(({ SideBlock }) => SideBlock)),
+    Placeholder() {
+        return (
+            <div>Eep! I'm not ready</div>
+        )
     }
 });
+
+function artificialDelay(promise: Promise<ComponentSetup<unknown>>){
+    return new Promise((resolve, reject)=>{
+        setTimeout(()=>{
+            resolve(promise)
+        }, 700)
+    })
+}
 
 export function App() {
     const $count = $(0)
@@ -38,7 +47,7 @@ export function App() {
 
     const SideBlock = loadSideBlock()
 
-    const $active = $(false);
+    const $active = $(true);
 
     function activate() {
         set($active, (v) => !v)
@@ -54,7 +63,7 @@ export function App() {
             <article>
                 <SideBlock frog='sir robin'></SideBlock>
             </article>
-            <TestBlock $active={$active}></TestBlock>
+            <TestBlockA $active={$active}></TestBlockA>
             <button onclick={activate}>activate</button>
             <>
                 {$if($visible, 'create', () =>
@@ -63,11 +72,11 @@ export function App() {
                         <p>play!</p>
                     </>
                 )}
-                {/* {$elseIf($dark, () =>
+                {$elseIf($dark, () =>
                     <p>dark</p>
                 )}
                 {$else(() =>
-                    <p>gone</p>)} */}
+                    <p>gone</p>)}
             </>
 
             <button onclick={increment}>increment</button>

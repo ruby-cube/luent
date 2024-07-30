@@ -317,10 +317,10 @@ export function setUpNodeEntity(
         const series = buildConditionalSeries(nodeEntity);
         setUpConditionalSeries(component, parent, series, nodePod, fragment)
     }
-    else if (nodeEntity instanceof ConditionalRenderKit){
-        const series = buildConditionalSeries([nodeEntity]);
-        setUpConditionalSeries(component, parent, series, nodePod, fragment)
-    }
+    // else if (nodeEntity instanceof ConditionalRenderKit){
+    //     const series = buildConditionalSeries([nodeEntity]);
+    //     setUpConditionalSeries(component, parent, series, nodePod, fragment)
+    // }
     else {
         setUpTextNode(parent, nodeEntity, nodePod, fragment)
     }
