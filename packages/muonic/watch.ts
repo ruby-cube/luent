@@ -88,7 +88,7 @@ export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?
         if (phase === 'sync') {
         }
         else if (phase === 'pre') {
-            
+
         }
         else if (phase === 'render') {
 
@@ -102,8 +102,10 @@ export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?
     // set up listeners
     const activeListeners: (ActiveListener | PendingOp)[] = [];
 
+    let _handler = isReactiveEffect ? wrapToRetrack(<() => void>handler, activeListeners, options || {}, phase, deep) : handler;
+
     for (const taskQueue of taskQueues) {
-        const activeListener = $listen(handler, options!, {
+        const activeListener = $listen(_handler, options || {}, {
             enroll(task) {
                 if (target && isDerivedSignal(target)) {
                     derivedSignalMap.set(task, target)
@@ -130,6 +132,26 @@ export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?
     }
 }
 
+function wrapToRetrack(effect: () => void, listeners: (ActiveListener | PendingOp)[], options: ListenerOptions, phase?: Phase, deep?: boolean) {
+    const _effect = () => {
+        listeners.length = 0;
+        const dependencies = getDependencies(effect, true)
+        const taskQueues = useTaskQueues(dependencies, phase, deep);
+        for (const taskQueue of taskQueues) {
+            const activeListener = $listen(_effect, options, {
+                enroll(task) {
+                    reactiveEffects.add(task)
+                    taskQueue.add(task)
+                },
+                remove(task) {
+                    taskQueue.delete(task)
+                }
+            });
+            listeners.push(activeListener);
+        }
+    }
+    return _effect;
+}
 
 export function getDependencies(reactiveFunction: Function, isReactiveEffect?: boolean) {
     if (isSignal(reactiveFunction)) return [reactiveFunction];
