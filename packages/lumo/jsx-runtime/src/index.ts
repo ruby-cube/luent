@@ -9,7 +9,6 @@ export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Node
         return makeNode(
             nodeType,
             config.children,
-            //@ts-expect-error
             config
         );
     }
@@ -20,7 +19,6 @@ export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Node
     return makeNode(
         nodeType,
         children,
-        //@ts-expect-error
         config
     );
 

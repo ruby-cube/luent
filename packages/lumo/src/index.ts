@@ -2,7 +2,7 @@ export * from './NodePod' //TODO: Limit to public API
 export * from './NodeRef' //TODO: Limit to public API
 export * from './component' //TODO: Limit to public API
 // export * from './component-tree' //TODO: Limit to public API
-export * from './setUpNode' //TODO: Limit to public API
+export * from './NodeConfig' //TODO: Limit to public API
 export * from './createApp' //TODO: Limit to public API
 export * from './forEachIn' //TODO: Limit to public API
 export * from './lifecycle' //TODO: Limit to public API

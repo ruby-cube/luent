@@ -12,11 +12,11 @@ import { _NodeRef, getNodeRef, NodeRef } from "./NodeRef";
 import { useReactivity } from "../../muonic/useReactivity";
 import { Signal } from "../../muonic/useSignalize";
 import { getNodeConfig } from "../api-play/_setUpNode";
-import { analyzeAttributes, ComponentConfig, ComponentOptions, composeEvents, makeComponent, warnOverlappingKeys } from "./mO";
+import { analyzeAttributes } from "./mO";
 import { watchRenderEffect, watchForRender } from "./watchForRender";
 import { hideDOMNodes, setUpConditionalShowSeries } from "./showIf";
 import { buildConditionalSeries, ConditionalRenderKit, ConditionalSeries, noElseBlock, RenderConditional, validateStandAloneConditional, watchForRenderAndPreserve, watchRenderEffectAndPreserve } from "./$if";
-import { AssignedAttributes, initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig } from "./makeNode";
+import { ElementConfig, initializeRef, makeNode, NodeEntity } from "./makeNode";
 import { ActiveListener, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
 import { runNonSyncTasks } from "@rue/muonic";
@@ -28,37 +28,20 @@ export type HTMLTag = keyof HTMLElementTagNameMap
 export function mE(
     nodeType: HTMLTag,
     childNodes?: NodeEntity[],
-    jsxConfig?: JSXConfig<HTMLElement>,
-    setupConfig?: NodeSetupConfig,
+    config?: ElementConfig,
 ): DOMNode {
-    return makeNode(nodeType, childNodes, jsxConfig, setupConfig) as DOMNode
+    return makeNode(nodeType, childNodes, config) as DOMNode
 }
 
 export function makeElement<T extends keyof HTMLElementTagNameMap>(
     tagName: T,
     childNodes: NodeEntity[] | undefined,
-    jsxConfig: JSXConfig<HTMLElement>,
-    setupConfig: NodeSetupConfig,
-    ref: NodeRef<HTMLElement> | undefined,
+    config: ElementConfig,
     $index: Signal<number> | undefined
 ): DOMNode {
-    const { class: classString, style: styleString, ...jsxOther } = jsxConfig;
-    const { class: _class, style, on, assigned, ...other } = setupConfig;
-    const assignedClasses = assigned?.classes || []
-    const assignedStyles = assigned?.styles || []
-    const assignedEvents = assigned?.events || {}
-    const assignedAttributes = assigned?.other || {}
+    const { class: classes, style: styles, ref, ...other } = config;
 
-    const { jsxAttributes, jsxEvents } = analyzeAttributes(jsxOther)
-
-    if (__DEV__) warnOverlappingKeys(jsxAttributes, other, assignedAttributes);
-
-    const attributes = {
-        events: composeEvents([jsxEvents, on || {}, assignedEvents]),
-        classes: [...normalizeToArray(classString), ...normalizeToArray(_class), ...assignedClasses],
-        styles: [...normalizeToArray(styleString), ...normalizeToArray(style), ...assignedStyles],
-        other: { ...other, ...jsxAttributes, ...assignedAttributes }
-    };
+    const { attributes, events } = analyzeAttributes(other)
 
     const domNode = document.createElement(tagName);
     const component = getCurrentComponent();
@@ -71,7 +54,6 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     }
 
     if (childNodes) {
-        console.log("childNodes", tagName, childNodes)
         const nodePod = new _NodePod();
         for (let i = 0; i < childNodes.length; i++) {
             let childNodeEntity = childNodes[i];
@@ -83,21 +65,15 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
         }
     }
 
-    applyAttributes(domNode, attributes)
+    setUpClasses(component, domNode, normalizeToArray(classes))
+    setUpStyles(component, domNode, normalizeToArray(styles))
+    setUpEvents(domNode, events);
+    setUpAttributes(domNode, attributes);
 
     return domNode;
 }
 
-export function applyAttributes(node: HTMLElement, attributes: AssignedAttributes) {
-    const { classes, events, other, styles } = attributes;
-    const component = getCurrentComponent() //TODO: not sure if this gets the right component or if it's needed
-    if (!component) throw new Error('component not found')
-    setUpClasses(component, node, classes)
-    setUpStyles(component, node, styles)
-    setUpEvents(node, events);
-    setUpAttributes(node, attributes);
 
-}
 
 function setUpAttributes(node: HTMLElement, attributes: { [key: string]: any | DerivedSignal<any> }) {
     for (const key in attributes) {

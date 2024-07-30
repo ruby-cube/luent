@@ -4,17 +4,13 @@ import { SetKey, Signal } from "../../muonic/useSignalize";
 import { LifecycleHook, onActivated, beforeUnmount, onDeactivated, onUnmounted } from "./lifecycle";
 import { collectEffects } from "@rue/flask/flask";
 import { _NodeRef, getNodeRef, NodeRef } from "./NodeRef";
-import { AssignedAttributes, EventsConfig, initializeRef, JSXConfig, makeNode, NodeEntity, NodeSetupConfig, RenderFunction } from "./makeNode";
+import { ComponentConfig, EventsConfig, initializeRef, makeNode, NodeEntity, RenderFunction } from "./makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { isHTMLEvent } from "./html/attributes";
-import { applyAttributes } from "./mE";
 import { DerivedSignal } from "@rue/muonic";
 import { preserveAllRequested } from "./$if";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
-export type ComponentConfig<T extends ComponentSetup<AnyObject> = ComponentSetup> = {
-    props?: T extends (props: infer P) => any ? { [K in keyof P]?: P[K] } : never;
-}
 
 export type ComponentOptions = { preserve?: true }
 
@@ -36,31 +32,27 @@ type ComponentSetupWithSlot<P extends PropsWithSlot = PropsWithSlot> =
 export function mO<T extends ComponentSetupWithSlot>(
     Component: T,
     slotted: InferSlotted<T>,
-    jsxConfig?: T extends (props: infer P) => any ? P : undefined & JSXConfig<InternalComponent>,
-    setupConfig?: ComponentConfig<T extends (props: AnyObject) => any ? T : never> & NodeSetupConfig
+    config?: ComponentConfig<T>
 ): InternalComponent
 export function mO<T extends ComponentSetup>(
     Component: T,
     slotted?: InferSlotted<T> | undefined,
-    jsxConfig?: T extends (props: infer P) => any ? P : undefined & JSXConfig<InternalComponent>,
-    setupConfig?: ComponentConfig<T> & NodeSetupConfig
+    config?: ComponentConfig<T>
 ): InternalComponent {
-    return makeNode(Component, slotted, jsxConfig, setupConfig) as InternalComponent
+    return makeNode(Component, slotted, config || {}) as InternalComponent
 }
 
 export function makeComponent(
     Component: ComponentSetup,
     slotted: InferSlotted | undefined,
-    jsxConfig: JSXConfig<InternalComponent>,
-    setupConfig: ComponentConfig & NodeSetupConfig,
-    ref: NodeRef<InternalComponent> | undefined,
+    config: ComponentConfig,
     $index: Signal<number> | undefined
 ): InternalComponent {
     const parent = getCurrentComponent();
     const preserve = getPreserveStatus(parent);
     const component = new InternalComponent(parent, preserve);
     pushComponent(component)
-    runComponentSetup(Component, component, slotted, jsxConfig, setupConfig, ref, $index);
+    runComponentSetup(Component, component, slotted, config, $index);
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
     return component;
 }
@@ -88,43 +80,24 @@ function getPreserveStatus(
     return preserveAllRequested() || !!parent && parent.preserve;
 }
 
-export function getAttributes() {
-    const component = getCurrentComponent();
-    if (!component) throw new Error('`getAttributes` can only be called from within component setup')
-    const attributes = component.attributes;
-    component.attributes = null;
-    return attributes!
-}
+// export function getAttributes() {
+//     const component = getCurrentComponent();
+//     if (!component) throw new Error('`getAttributes` can only be called from within component setup')
+//     const attributes = component.attributes;
+//     component.attributes = null;
+//     return attributes!
+// }
 
 function runComponentSetup(
     Component: ComponentSetup,
     component: InternalComponent,
     slotted: InferSlotted | undefined,
-    jsxConfig: JSXConfig<InternalComponent>,
-    setupConfig: ComponentConfig & NodeSetupConfig,
-    ref: NodeRef<Component> | undefined,
+    config: ComponentConfig,
     $index: Signal<number> | undefined
 ) {
     collectEffects((flask, outerFlask) => {
-        const { class: classString, style: styleString, ...other } = jsxConfig;
-        const { class: _class, style, on, props, assigned, ...attributes } = setupConfig;
-        const assignedClasses = assigned?.classes || []
-        const assignedStyles = assigned?.styles || []
-        const assignedEvents = assigned?.events || {}
-        const assignedAttributes = assigned?.other || {}
-        const { jsxAttributes, jsxEvents } = analyzeAttributes(other)
-
-        if (__DEV__) warnOverlappingKeys(jsxAttributes, props); // pass in all attributes as props ... it's too hard to distinguish props from attributes
-        if (__DEV__) warnOverlappingKeys(jsxAttributes, attributes, assignedAttributes);
-
-        component.attributes = {
-            events: composeEvents([jsxEvents, on || {}, assignedEvents]),
-            classes: [...normalizeToArray(classString), ...normalizeToArray(_class), ...assignedClasses],
-            styles: [...normalizeToArray(styleString), ...normalizeToArray(style), ...assignedStyles],
-            other: { ...attributes, ...jsxAttributes, ...assignedAttributes }
-        }; // must set BEFORE component setup is called
-
-        const nodeEntities = normalizeToArray(Component({ ...props, ...jsxAttributes, slotted }));
+        const ref = config.ref
+        const nodeEntities = normalizeToArray(Component({ ...config, slotted }));
 
         component.nodeEntities = nodeEntities;
 
@@ -136,11 +109,11 @@ function runComponentSetup(
             initializeRef(component, _ref)
         }
 
-        if (component.attributes) { // if `getAttributes` is called, this will be null
-            // fallthrough attributes onto root or first node
-            assignAttributes(nodeEntities[0], component.attributes);
-            component.attributes = null;
-        }
+        // if (component.attributes) { // if `getAttributes` is called, this will be null
+        //     // fallthrough attributes onto root or first node
+        //     assignAttributes(nodeEntities[0], component.attributes);
+        //     component.attributes = null;
+        // }
 
         outerFlask?.onDisposal(flask.dispose) // no outer flask means it's the root component
 
@@ -185,17 +158,17 @@ export function composeEvents(
     return target as { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] };
 }
 
-function assignAttributes(nodeEntity: NodeEntity, attributes: AssignedAttributes) {
-    if (nodeEntity instanceof HTMLElement) { // from Web API
-        applyAttributes(nodeEntity, attributes);
-    }
-    else if (nodeEntity instanceof InternalComponent) {
-        assignAttributes(nodeEntity.nodeEntities[0], attributes)
-    }
-    else if (__DEV__) {
-        console.warn('assigned attributes cannot be automatically applied. Please assign manually.')
-    }
-}
+// function assignAttributes(nodeEntity: NodeEntity, attributes: AssignedAttributes) {
+//     if (nodeEntity instanceof HTMLElement) { // from Web API
+//         applyAttributes(nodeEntity, attributes);
+//     }
+//     else if (nodeEntity instanceof InternalComponent) {
+//         assignAttributes(nodeEntity.nodeEntities[0], attributes)
+//     }
+//     else if (__DEV__) {
+//         console.warn('assigned attributes cannot be automatically applied. Please assign manually.')
+//     }
+// }
 
 
 
@@ -220,24 +193,24 @@ export function warnOverlappingKeys(propsA: AnyObject, propsB: AnyObject | undef
     }
 }
 
-export function analyzeAttributes(jsxEntries: AnyObject) {
-    const jsxEvents: AnyObject = {};
+export function analyzeAttributes(entries: AnyObject) {
+    const events: AnyObject = {};
     // const jsxProps: AnyObject = {};
-    const jsxAttributes: AnyObject = {};
-    for (const key in jsxEntries) {
+    const attributes: AnyObject = {};
+    for (const key in entries) {
         if (isHTMLEvent(key)) {
-            jsxEvents[key.slice(2)] = jsxEntries[key];
+            events[key.slice(2)] = entries[key];
         }
         // else if (isHTMLAttribute(key, tag)) {
         // }
         else {
-            jsxAttributes[key] = jsxEntries[key];
+            attributes[key] = entries[key];
             // jsxProps[key] = jsxEntries[key];
         }
     }
     return {
-        jsxAttributes,
-        jsxEvents,
+        attributes,
+        events,
         // jsxProps
     }
 }
