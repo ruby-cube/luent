@@ -27,7 +27,8 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 ): ActiveListener {
     const { enroll, remove, callback, options } = config;
     const once = options?.once;
-
+    // console.log("MakeActiveListener!")
+// console.trace()
     let returnVal: any;
 
     const _callback = bindFlask(once ? (...args: any[]) => {
@@ -44,7 +45,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 
         const stop = () => {
             try {
-                remove(returnVal ?? callback);
+                remove(returnVal ?? _callback);
             }
             finally {
                 if (pendingStop) pendingStop.cancel();

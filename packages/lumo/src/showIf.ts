@@ -77,16 +77,16 @@ export function setUpConditionalShowSeries(
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
         if (isEqual(newValue, oldValue)) return;
         const { $conditions, activeIndex } = series.evaluateConditions();
-
+        
+        pushComponent(component)
         component.emit(LifecycleHook.BEFORE_UPDATE)
         hidePrevConditionalNodes(dynamicPod, activeIndex);
         const nodeEntities = series.render(activeIndex);
-        showConditionalNodes(component, parent, dynamicPod, activeIndex, nodePod)
+        showConditionalNodes(component, parent, dynamicPod, activeIndex, nodeEntities)
         component.emit(LifecycleHook.UPDATED)
 
-        // pushComponent(component)
         _watchForRender($conditions, updateConditional, { once: true })
-        // popComponent()
+        popComponent()
     }
 }
 

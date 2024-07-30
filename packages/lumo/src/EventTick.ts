@@ -37,7 +37,7 @@ class EventTick {
             this.afterEventListener?.stop();
         }
         else if (this.prevHandlerCount === 0 && this.handlerCount > 0) {
-            this.afterEventListener = this.attachHandler(this._afterEventHandler, {});
+            this.afterEventListener = this.attachHandler(this._afterEventHandler = (e: Event) => afterEventHandler(this, e), {});
         }
     }
 
@@ -75,46 +75,50 @@ class EventTick {
 
     finalHandlerAdded = false;
 
-    _afterEventHandler(e: Event) {
-        if (
-            e.bubbles === false ||
-            (<Event & { propagationStopped: boolean }>e).propagationStopped
-        ) {
-            this.afterEventHandler(e); // the final event tick handler
-        }
-        if (this.finalHandlerAdded === true) {
-            return;
-        }
-        else {
-            this.finalHandlerAdded = true;
-            document.addEventListener(this.event, () => {
-                this.afterEventHandler(e); // the final event tick handler
-                this.finalHandlerAdded = false; // reset for next event tick
-            });
-        }
+    _afterEventHandler: ((e: Event) => void) | undefined
+}
+
+function afterEventHandler(tick: EventTick, e: Event) {
+    const { afterEventHandler, event } = tick
+    if (
+        e.bubbles === false ||
+        (<Event & { propagationStopped: boolean }>e).propagationStopped
+    ) {
+        afterEventHandler(e); // the final event tick handler
+    }
+    if (tick.finalHandlerAdded === true) {
+        return;
+    }
+    else {
+        tick.finalHandlerAdded = true;
+        document.addEventListener(event, () => {
+            afterEventHandler(e); // the final event tick handler
+            tick.finalHandlerAdded = false; // reset for next event tick
+        }, { once: true });
     }
 }
 
 function createLumoEvent(e: Event) {
-    return new Proxy(e, {
-        get(target: Event, key: keyof Event | 'propagationStopped') {
-            let propagationStopped = false;
-            if (key === 'stopPropagation') {
-                return () => {
-                    propagationStopped = true;
-                    target.stopPropagation()
-                };
-            }
-            else if (key === 'propagationStopped') {
-                return propagationStopped;
-            }
-            else {
-                return target[key];
-            }
-        }
-    }) as Event & { propagationStopped: boolean }
+    return new Proxy(e, lumoEventTraps) as Event & { propagationStopped: boolean }
 }
 
+const lumoEventTraps = {
+    get(target: Event, key: keyof Event | 'propagationStopped') {
+        let propagationStopped = false;
+        if (key === 'stopPropagation') {
+            return () => {
+                propagationStopped = true;
+                target.stopPropagation()
+            };
+        }
+        else if (key === 'propagationStopped') {
+            return propagationStopped;
+        }
+        else {
+            return target[key];
+        }
+    }
+}
 
 // Event Flow or Scene, do I need event tick for these cases?
 // function reMouseDown(e) {

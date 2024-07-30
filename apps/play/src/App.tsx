@@ -1,150 +1,52 @@
-//@ts-nocheck
-import { forEachIn, NodeConfig, RenderSlotted } from "@rue/lumo";
+import { $else, $elseIf, $if, forEachIn, NodeConfig, RenderSlotted } from "@rue/lumo";
 import { useReactivity } from "@rue/muonic"
 import { watchRenderEffect } from "../../../packages/lumo/src/watchForRender";
+import { count } from "console";
 
 
 const { $, set } = useReactivity();
 
 export function App() {
+    const $count = $(0)
 
-    const docSlabNode = useNodeRef();
-
-    // const doc_slab = setUpNode(DocSlab, {
-    //     ref: docSlabNode,
-    //     props: {
-    //         dog: 'arf'
-    //     },
-    //     style: [
-    //         "background-color: green",
-    //         o => {
-    //             o.color = "black"
-    //         }
-    //     ],
-    //     on: {
-    //         click(e) {
-    //             const node = docSlabNode()
-    //         }
-    //     }
-    // })
-
-    // const doc_slab = setUpNode(DocSlab, {
-    //     dog: 'arf',
-    //     ref: docSlabNode,
-    //     style: [
-    //         csss`background-color: green`,
-    //         o => {
-    //             o.color = "black"
-    //         }
-    //     ],
-    //     onclick(e) {
-    //         const node = docSlabNode()
-    //     },
-    //     onmouseup: [
-    //         cancelAction,
-    //         resetUI
-    //     ]
-    // })
-
-    const frog_block = useNodeRef();
-
-
-    const $list = $(["a", "b", "c"])
-    // const item_div = setUpNodesFor($list, 'div', (item, $index) => ({
-    // }))
-    const $active = $(true);
-
-    const outer_div: NodeConfig<'div'> = {
-        class: [
-            o => {
-                if ($active()) o.add("active");
-                else o.remove("active")
-            }
-        ],
-        attributes: [
-            o => {
-                if ($caseA()) {
-                    o.setAttribute('sfdf', "sdfsdf")
-                    o.setAttribute('sfdf', "sdfsdf")
-                }
-                else if ($caseB()) {
-                    o.setAttribute('sfdf', "sdfsdf")
-                    o.setAttribute('sfdf', "sdfsdf")
-                }
-                else {
-                    o.setAttribute('sfdf', "sdfsdf")
-                }
-            }
-        ]
+    function increment() {
+        set($count, count => count + 1)
     }
 
-    beforeMount(() => {
-        const outerDiv = outerDivRef();
-
-        watchRenderEffect(() => {
-            outerDiv.setAttribute('id', $divId())
-        })
-    })
-
-
-
-    return (
-        <>
-            <div {...outer_div}>
-                {forEachIn($list, (item, $i) => (
-                    <div {...list_item()}>
-                        {item.content}
-                    </div>
-                ), 'uid')}
-            </div>
-            <div data-some="hi" style="background-color: red">ho</div>
-
-            <DocSlab dog="dlkjf">{o =>
-                <div>{o.doggy.toString()}</div>
-            }</DocSlab>
-
-            {/* {forEachIn($list, (item, $i) => (
-                <div {...item_div(item, $i)}>{item}</div>
-            ))} */}
-        </>
-    )
-}
-
-function FrogBlock() {
-
-}
-
-function useNodeRef() {
-
-}
-
-function csss(props: TemplateStringsArray) {
-
-}
-
-const style = document.createElement('style')
-style.innerHTML = `
-.frog {
-background-color: green
-}
-`
-
-const head = document.getElementsByTagName('head');
-head[0].appendChild(style)
-
-function DocSlab(
-    props: {
-        dog: string,
-        slotted: RenderSlotted<{ doggy: number }>
+    function decrement() {
+        set($count, count => count - 1)
     }
-) {
-    const { slotted } = props
-    const $stuff = $("hi")
-    const $other = $("ho")
-    console.log(slotted)
+
+    const $visible = $(true, undefined, '$visible');
+    const $dark = $(true, undefined, '$dark');
+
+    function toggleVisibility() {
+        set($visible, visible => !visible)
+    }
+
+    function toggleDarkness() {
+        set($dark, dark => !dark)
+    }
+
     return (
         <div>
-            <div>{slotted({ doggy: 3 })}</div>
+            <>
+                {$if($visible, 'create', () =>
+                    <>
+                        {/* <p>{$count}</p> */}
+                        <p>play!</p>
+                    </>
+                )}
+                {$elseIf($dark, () =>
+                    <p>dark</p>
+                )}
+                {$else(() =>
+                    <p>gone</p>)}
+            </>
+            <button onclick={increment}>increment</button>
+            <button onclick={decrement}>decrement</button>
+            <button onclick={toggleVisibility}>show/hide</button>
+            <button onclick={toggleDarkness}>toggle darkness</button>
         </div>
     )
-}   
+}

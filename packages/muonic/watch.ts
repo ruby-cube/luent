@@ -70,7 +70,6 @@ export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?
     const { phase, deep, eager } = options ?? {};
     let taskQueues: Set<Effect>[];
     const isReactiveEffect = target === undefined;
-
     // collect tracked refs and get taskQueues
     if (target instanceof Function || isReactiveEffect) {
         const dependencies = getDependencies(target || handler, isReactiveEffect) //TODO: must retrack dependencies onChange like with derivedSignal to catch conditional dependencies? .. should the logic live here instead of in $()?
@@ -99,10 +98,19 @@ export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?
     }
 
 
+
     // set up listeners
     const activeListeners: (ActiveListener | PendingOp)[] = [];
 
+    function stop() {
+        for (const activeListener of activeListeners) {
+            if ('stop' in activeListener) activeListener.stop();
+            else activeListener.cancel();
+        }
+    }
+
     let _handler = isReactiveEffect ? wrapToRetrack(<() => void>handler, activeListeners, options || {}, phase, deep) : handler;
+    _handler = options?.once ? wrapOneTimeHandler(_handler, stop) : _handler;
 
     for (const taskQueue of taskQueues) {
         const activeListener = $listen(_handler, options || {}, {
@@ -121,14 +129,17 @@ export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?
         });
         activeListeners.push(activeListener);
     }
+    // console.log("activeListeners", activeListeners)
 
     return {
-        stop() {
-            for (const activeListener of activeListeners) {
-                if ('stop' in activeListener) activeListener.stop();
-                else activeListener.cancel();
-            }
-        }
+        stop
+    }
+}
+
+function wrapOneTimeHandler(handler: (...args: any[]) => void, stop: () => void) {
+    return (...args: any[]) => {
+        stop();
+        handler(...args)
     }
 }
 
@@ -222,6 +233,8 @@ export function useTaskQueues(deps: (Signal | ReactiveProp)[], phase: Phase = 'p
             phaseMap.set(phase, taskQueue);
             signalTaskQueues.set(dep, phaseMap);
             taskQueues.push(taskQueue);
+            console.log(dep.__devName, taskQueue, phase)
+            taskQueue.__devName = dep.__devName;
         }
         else {
             const [reactiveObj, key] = dep;
@@ -337,7 +350,7 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
 
 export function runNonSyncTasks(phase: "pre" | "post" | "render") {
     const updateCycle = getCurrentUpdateCycle();
-    if (!updateCycle) throw "No current update cycle :("
+    if (!updateCycle) throw new Error(`No current update cycle :( ${phase}`)
     const completedTasks = updateCycle.completedTasks;
     const triggeredReactives = updateCycle.triggeredReactives;
     if (triggeredReactives) {

@@ -107,7 +107,7 @@ function setAttribute(node: HTMLElement, key: string, value: any) {
 
 function setUpEvents(node: HTMLElement, events: { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] }) {
     for (const key in events) {
-        const handlers = events[key];
+        const handlers = normalizeToArray(events[key]);
         const event = useEventTick(node, key, () => runNonSyncTasks('pre'));
         event.updateHandlers(() => {
             for (const handler of handlers) {
@@ -176,8 +176,6 @@ function warnDuplicateClasses(classesA: string, classesB: string) {
 function setUpStyles(component: InternalComponent, node: HTMLElement, styles: (((o: CSSStyleDeclaration) => void) | string)[]) {
     const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
     const style = node.style;
-    console.log(styles)
-    console.trace()
     for (const entry of styles) {
         if (entry instanceof Function) {
             _watchRenderEffect(() => entry(style))
@@ -196,7 +194,6 @@ function normalizeStyle(statement: string) {
 }
 
 function warnOverlappingStyles(stylesA: string, stylesB: string) {
-    console.log(stylesB)
     const aStyles = new Set(stylesA.split('; '))
     const bStyles = stylesB.split('; ')
     for (const styling of bStyles) {
@@ -418,7 +415,9 @@ function setUpConditionalSeries(
     _watchForRender($conditions, updateConditional, { once: true })
 
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
+        console.log("update conditional")
         if (isEqual(newValue, oldValue)) return;
+        pushComponent(component)
 
         // evaluate conditions
         const { $conditions, activeIndex } = series.evaluateConditions();
@@ -431,9 +430,8 @@ function setUpConditionalSeries(
         component.emit(LifecycleHook.UPDATED)
 
         // set up for next update
-        // pushComponent(component)
         _watchForRender($conditions, updateConditional, { once: true })
-        // popComponent()
+        popComponent()
     }
 }
 

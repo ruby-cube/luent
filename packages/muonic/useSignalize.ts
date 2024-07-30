@@ -24,7 +24,7 @@ export function useSignalize() {
         return newValue;
     }
 
-    function signalize<T>(value: T): Signal<T> {
+    function signalize<T>(value: T, __devName?: string): Signal<T> {
         const signal = () => {
             emitSignal();
             const value = signalValues.get(signal)
@@ -34,16 +34,17 @@ export function useSignalize() {
         signalValues.set(signal, value)
         signal[SIGNAL_MARKER] = true;
         signal[SetKey] = set;
+        signal.__devName = __devName;
         return signal;
     }
 
-    function $<T>(pureGetter: () => T, memoize?: "memoize"): DerivedSignal<T>
+    function $<T>(pureGetter: () => T, memoize?: "memoize", __devName?: string): DerivedSignal<T>
     function $<T>(value: T): Signal<T>
-    function $<T>(valueOrPureGetter: T | (() => T), memoize?: "memoize"): Signal<T> | DerivedSignal<T> {
+    function $<T>(valueOrPureGetter: T | (() => T), memoize?: "memoize",  __devName?: string): Signal<T> | DerivedSignal<T> {
         if (valueOrPureGetter instanceof Function) {
             return makeDerivedSignal(valueOrPureGetter, memoize)
         }
-        return signalize(valueOrPureGetter)
+        return signalize(valueOrPureGetter, __devName)
     }
 
     return {

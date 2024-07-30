@@ -78,7 +78,7 @@ export function bindFlask(callback: Callback){
     const flask = getActiveFlask()!;
     return (...args: any[])=>{
         pushFlask(flask)
-        callback();
+        callback(...args);
         popFlask();
     }
 }

@@ -108,7 +108,8 @@ export function $elseIf($condition: ReactiveSignal<boolean>, renderConditional: 
 
 export function $else(renderConditional: RenderFunction) {
     const type = currentConditionalType;
-    return new ConditionalRenderKit('else', renderConditional, currentConditionalType)
+    const _renderConditional = type === 'activate' ? wrapToPreserve(renderConditional) : wrapToNormalize(renderConditional)
+    return new ConditionalRenderKit('else', _renderConditional, currentConditionalType)
 }
 
 
@@ -209,6 +210,7 @@ export function watchForRenderAndPreserve(target: ReactiveSignal<any> | Reactive
             // popComponent()
         })
     }
+    return watcher
 }
 
 export function watchRenderEffectAndPreserve(handler: () => void) {

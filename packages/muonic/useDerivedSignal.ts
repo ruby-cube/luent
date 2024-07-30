@@ -38,10 +38,16 @@ export class DerivedSignalState {
     hasChanged: boolean = false;
     memoized: boolean = true;
 
+    // constructor(){
+    //     console.log("making new derived signal state")
+    //     console.trace()
+    // }
+
     private watchers: ActiveListener[] = [];
 
     private stopPrevWatchers() {
         for (const watcher of this.watchers) {
+            console.log("stopping previous")
             watcher.stop();
         }
         this.watchers = [];
@@ -53,7 +59,7 @@ export class DerivedSignalState {
         this.value = value;
         const deps = this.dependencies = tracker.dependencies
 
-        if (memoize || deps.length > 1) { // auto-memoize for multiple dependencies
+        if (memoize || deps.length > 10) { // auto-memoize for multiple dependencies
             this.stopPrevWatchers();
             for (let i = 0; i < deps.length; i++) {
                 const dep = deps[i]
