@@ -39,7 +39,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     config: ElementConfig,
     $index: Signal<number> | undefined
 ): DOMNode {
-    const { class: classes, style: styles, ref, ...other } = config;
+    const { class: classes, style: styles, ref, attributes: attributeChanges, ...other } = config;
 
     const { attributes, events } = analyzeAttributes(other)
 
@@ -69,6 +69,12 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     setUpStyles(component, domNode, normalizeToArray(styles))
     setUpEvents(domNode, events);
     setUpAttributes(domNode, attributes);
+    if (attributeChanges)
+        setUpAttributeChanges(
+            domNode,
+            //@ts-expect-error
+            attributeChanges
+        );
 
     return domNode;
 }
@@ -79,7 +85,7 @@ function setUpAttributes(node: HTMLElement, attributes: { [key: string]: any | D
     for (const key in attributes) {
         const value = attributes[key]
         if (hasSignal(value)) {
-            watchForRender(value, (newValue) => {
+            watchForRender(value, (newValue) => { //TODO: only attributes that affect layout should be scheduled for render
                 setAttribute(node, key, newValue)
             }, { eager: true })
         }
@@ -177,10 +183,16 @@ function setUpStyles(component: InternalComponent, node: HTMLElement, styles: ((
             _watchRenderEffect(() => entry(style))
         }
         else {
-            if (__DEV__ && entry) warnOverlappingStyles(style.cssText, entry);
-            style.cssText = style.cssText + "; " + entry
+            if (__DEV__ && entry) warnOverlappingStyles(style.cssText, normalizeStyle(entry));
+            style.cssText = style.cssText + "; " + normalizeStyle(entry)
         }
     }
+}
+
+function normalizeStyle(statement: string) {
+    statement.trim();
+    if (statement.endsWith(';')) return statement.substring(0, statement.length - 1);
+    return statement;
 }
 
 function warnOverlappingStyles(stylesA: string, stylesB: string) {
@@ -191,6 +203,17 @@ function warnOverlappingStyles(stylesA: string, stylesB: string) {
         if (aStyles.has(styling)) {
             console.warn(`Duplicate styling: ${styling}`);
             console.trace();
+        }
+    }
+}
+
+function setUpAttributeChanges(node: HTMLElement, changes: ((o: HTMLElement) => void)[] | ((o: HTMLElement) => void)) {
+    if (changes instanceof Function) {
+        watchRenderEffect(() => changes(node)) // watchAndPreserve?
+    }
+    else {
+        for (const change of changes) {
+            watchRenderEffect(() => change(node))
         }
     }
 }
@@ -332,7 +355,7 @@ function setUpNodeList(
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[],
 ) {
-    const { data, initialNodeEntities, renderItem, indices } = renderKit;
+    const { data, initialNodeEntities, renderItem, indices, idKey } = renderKit;
     const isDynamic = isReactive(data) || hasSignal(data);
     const dynamicPod = isDynamic ? nodePod.appendDynamicPod() : undefined;
 
@@ -351,7 +374,7 @@ function setUpNodeList(
 
         // set up watcher for updates
         _watchForRender(data, (newValue: AnyObject[], oldValue: AnyObject[]) => {
-            const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue)
+            const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
             if (noChange) return;
             if (dynamicPod!.length !== oldValue.length) throw new Error("dynamicPod and data length are mismatched. This should never happen.")
             component.emit(LifecycleHook.BEFORE_UPDATE)

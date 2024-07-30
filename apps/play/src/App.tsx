@@ -1,4 +1,4 @@
-import { NodeConfig, RenderSlotted, setUpNode } from "@rue/lumo";
+import { forEachIn, NodeConfig, RenderSlotted } from "@rue/lumo";
 import { useReactivity } from "@rue/muonic"
 import { watchRenderEffect } from "../../../packages/lumo/src/watchForRender";
 
@@ -89,7 +89,11 @@ export function App() {
 
     return (
         <>
-            <div {...outer_div}>hei</div>
+            <div {...outer_div}>
+                {forEachIn($list, (item) => (
+                    <div>{item.content}</div>
+                ), 'uid')}
+            </div>
             <div data-some="hi" style="background-color: red">ho</div>
 
             <DocSlab dog="dlkjf">{o =>

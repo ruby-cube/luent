@@ -5,8 +5,8 @@ import { isEqual } from "@rue/utils";
 
 
 
-export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | UniqueItem[]) { //TODO: Originally wrote this diffing arrays of objects and unique ids, but I need it to work for any[]s, wrap repeat values in an object or function and put in stand-in arrays
-    const { uniqueItemArrays: [_newArr, _oldArr], getOriginalItem } = makeItemsUnique(newArr, oldArr);
+export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | UniqueItem[], idKey: string | undefined) { //TODO: Originally wrote this diffing arrays of objects and unique ids, but I need it to work for any[]s, wrap repeat values in an object or function and put in stand-in arrays
+    const { uniqueItemArrays: [_newArr, _oldArr], getOriginalItem } = makeItemsUnique(newArr, oldArr, idKey);
 
     const newSet = new Set(_newArr);
     const oldSet = new Set(_oldArr);
@@ -62,29 +62,36 @@ export type InsertAndMoveKit = {
     isRemoved: (uItem: any) => boolean;
     newUArray: any[];
     oldUArray: any[];
-    getOriginalItem: (uItem: any) => any;
+    getOriginalItem: (uniqueItem: any, uniqueArray: any[]) => any
 }
 
-// function toIdArray(target: AnyObject[], idKey: string | symbol) {
-//     const idArray = new UniqueArray();
-//     for (const item of target) {
-//         idArray.push(item[idKey])
-//     }
-//     const itemMap: Map<any, any> = new Map();
-//     idArray.getItem = (id: any) => {
-//         const item = itemMap.get(id);
-//         if (!item) throw new Error(`There is no item associated with ${id}`)
-//         return item;
-//     }
-//     return idArray;
-// }
+function toIdArray(target: AnyObject[], idKey: string | symbol) {
+    const idArray = new UniqueArray();
+    for (const item of target) {
+        idArray.push(item[idKey])
+    }
+    const itemMap: Map<any, any> = new Map();
+    idArray.getItem = (id: any) => {
+        const item = itemMap.get(id);
+        if (!item) throw new Error(`There is no item associated with ${id}`)
+        return item;
+    }
+    return idArray;
+}
 
-// class UniqueArray extends Array {
-//     getItem: (uItem: any) => any = (uItem: any) => uItem;
-// }
+class UniqueArray extends Array {
+    getItem: (uItem: any) => any = (uItem: any) => uItem;
+}
 
 
-function makeItemsUnique(arr1: any[], arr2: any[]) {
+function makeItemsUnique(arr1: any[], arr2: any[], idKey: string | undefined): {
+    uniqueItemArrays: [any[], any[]];
+    getOriginalItem: (uniqueItem: any, uniqueArray: any[]) => any;
+} {
+    if (idKey) return {
+        uniqueItemArrays: [toIdArray(arr1, idKey), toIdArray(arr2, idKey)],
+        getOriginalItem: (id: any, uArray: any[]) => (<UniqueArray>uArray).getItem(id)
+    }
     const uniqueArr1 = [];
     const uniqueArr2 = [];
     const itemMap: Map<any, any> = new Map();

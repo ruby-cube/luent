@@ -22,7 +22,8 @@ export class ListRenderKit<T = any> {
         public renderItem: RenderItem<T>, //QUESTION: Does this need the context object?
         public initialNodeEntities: NodeEntity[][],
         public data: ListData,
-        public indices: Signal<number>[]
+        public indices: Signal<number>[],
+        public idKey: string | undefined
     ) { }
 }
 
@@ -44,10 +45,10 @@ export function setCurrentItemAndIndex(item: any, $index: Signal<number>) {
 //     return settingUpList;
 // }
 
-export function forEachIn(data: any[], render: RenderItem): ListRenderKit // static list
-export function forEachIn(data: ReactiveObject<UniqueItem[]> | ReactiveSignal<UniqueItem[]>, render: RenderItem): ListRenderKit // dynamic list
-export function forEachIn(data: ReactiveObject<AnyObject[]> | ReactiveSignal<AnyObject>, render: RenderItem): ListRenderKit // dynamic list
-export function forEachIn(data: ListData, render: RenderItem): ListRenderKit {
+export function forEachIn(data: any[], render: RenderItem, idKey?: string): ListRenderKit // static list
+export function forEachIn(data: ReactiveObject<UniqueItem[]> | ReactiveSignal<UniqueItem[]>, render: RenderItem, idKey?: string): ListRenderKit // dynamic list
+export function forEachIn(data: ReactiveObject<AnyObject[]> | ReactiveSignal<AnyObject>, render: RenderItem, idKey?: string): ListRenderKit // dynamic list
+export function forEachIn(data: ListData, render: RenderItem, idKey?: string): ListRenderKit {
     const domNodes = [];
     const list = hasSignal(data) ? data() : data;
 
@@ -68,7 +69,7 @@ export function forEachIn(data: ListData, render: RenderItem): ListRenderKit {
     $currentIndex = undefined;
     // settingUpList = false;
 
-    return new ListRenderKit(render, domNodes, data, indices);
+    return new ListRenderKit(render, domNodes, data, indices, idKey);
 }
 
 
@@ -157,7 +158,7 @@ export function insertAndMoveListItemNodes(
         }
 
         if (isNewItem(uItem)) {
-            const item = getOriginalItem(uItem)
+            const item = getOriginalItem(uItem, newUArray)
             const $index = _internalReactivity.$(i)
             setCurrentItemAndIndex(item, $index); // to retreive config
             newIndices.push($index);
