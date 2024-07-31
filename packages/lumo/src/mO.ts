@@ -1,9 +1,9 @@
 import { AnyObject } from "@rue/types";
-import { Component, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "./component";
+import { PublicComponent, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent, COMPONENT } from "./component";
 import { SetKey, Signal } from "../../muonic/useSignalize";
 import { LifecycleHook, onActivated, beforeUnmount, onDeactivated, onUnmounted } from "./lifecycle";
 import { collectEffects } from "@rue/flask/flask";
-import { _NodeRef, getNodeRef, NodeRef } from "./NodeRef";
+import { InternalNodeRef, getNodeRef, NodeRef } from "./NodeRef";
 import { ComponentConfig, EventsConfig, initializeRef, makeNode, NodeEntity, RenderFunction } from "./makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { isHTMLEvent } from "./html/attributes";
@@ -97,6 +97,17 @@ function normalizeToFragmentArray(entity: any) { // distinguish conditional seri
     return normalizeToArray(entity);
 }
 
+function extractNodeEntities(output: NodeEntity | NodeEntity[] | [PublicComponent, NodeEntity | NodeEntity[]]) {
+    if (!(output instanceof Array)) return output;
+    if (output.length === 2
+        && output[0] instanceof Object
+        && COMPONENT in output[0]
+    ) {
+        return output.pop();
+    }
+    return output;
+}
+
 function runComponentSetup(
     Component: ComponentSetup,
     component: InternalComponent,
@@ -105,14 +116,15 @@ function runComponentSetup(
     $index: Signal<number> | undefined
 ) {
     collectEffects((flask, outerFlask) => {
-        const ref = config.ref
-        const nodeEntities = normalizeToFragmentArray(Component({ ...config, slotted }));
+        const ref = config.ref as NodeRef<ComponentSetup | ComponentSetup[]>
+
+        const nodeEntities = normalizeToFragmentArray(extractNodeEntities(Component({ ...config, slotted })));
 
         component.nodeEntities = nodeEntities;
 
         if (ref) {
-            const _ref = ref.value instanceof Array ? getNodeRef(ref.value)! : new _NodeRef(ref)
-            const publicComponent = component.component || {};
+            const _ref = ref.o instanceof Array ? getNodeRef(ref.o)! : new InternalNodeRef(ref)
+            const publicComponent = component.component || null;
             _ref.assignValue(publicComponent, $index)
             // setUpRefUpdates(_ref, publicComponent, $index, component.preserve)
             initializeRef(component, _ref)
@@ -168,7 +180,7 @@ export function composeEvents(
 }
 
 // function assignAttributes(nodeEntity: NodeEntity, attributes: AssignedAttributes) {
-//     if (nodeEntity instanceof HTMLElement) { // from Web API
+//     if (nodeEntity instanceof Element) { // from Web API
 //         applyAttributes(nodeEntity, attributes);
 //     }
 //     else if (nodeEntity instanceof InternalComponent) {
@@ -229,7 +241,7 @@ export function analyzeAttributes(entries: AnyObject) {
 
 
 
-// function setUpRefUpdates(ref: _NodeRef, component: Component, $index: Signal<number> | undefined, preserve: boolean) {
+// function setUpRefUpdates(ref: InternalNodeRef, component: Component, $index: Signal<number> | undefined, preserve: boolean) {
 //     if (ref.initialized === true) return;
 //     // if ($index) { // only initiate once per list
 //     //     const components = ref.components;
@@ -263,7 +275,7 @@ export function analyzeAttributes(entries: AnyObject) {
 // }
 
 
-// export function mountComponent(parent: HTMLElement, component: InternalComponent) {
+// export function mountComponent(parent: Element, component: InternalComponent) {
 //     component.emit(LifecycleHook.BEFORE_MOUNT);
 //     parent.append(...component.domNodes);
 //     component.emit(LifecycleHook.MOUNTED);

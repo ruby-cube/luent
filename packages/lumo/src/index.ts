@@ -13,3 +13,4 @@ export * from './$if' //TODO: Limit to public API
 export * from './showIf' //TODO: Limit to public API
 export * from './provide' //TODO: Limit to public API
 export * from './event-listeners' //TODO: Limit to public API
+export * from './teleportTo' //TODO: Limit to public API

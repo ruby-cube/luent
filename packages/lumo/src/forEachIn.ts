@@ -105,7 +105,7 @@ function removeDOMNodes(nodePod: _NodePod) {
 
 function removeNodesFromRef(nodePod: _NodePod) {
     nodePod.forEachNode((node, index) => {
-        const ref = getNodeRef(node)
+        const ref = getNodeRef(node) //FIX: What about textnodes?
         if (ref) ref.removeNode(index!)
     })
 }
@@ -118,7 +118,7 @@ export function insertAndMoveListItemNodes(
     component: InternalComponent,
     insertAndMoveKit: InsertAndMoveKit,
     dynamicList: _DynamicNodePod,
-    parent: HTMLElement,
+    parent: Element,
     renderItem: RenderItem,
     dynamicIndices: DynamicIndices
 ) {
@@ -209,8 +209,9 @@ export function insertAndMoveListItemNodes(
     // (3) insert nodes into DOM
     for (const [index, fragment] of indicesAndFragments) {
         const prevNode = dynamicList[index].prevNode
-        if (prevNode) prevNode.after(fragment);
-        parent.prepend(fragment);
+        if (prevNode && prevNode === parent) parent.append(fragment) // for teleport
+        else if (prevNode) prevNode.after(fragment);
+        else parent.prepend(fragment);
     }
 
     // (4) update node refs
@@ -218,7 +219,7 @@ export function insertAndMoveListItemNodes(
         for (const nodePod of nodePods) {
             nodePod.forEachNode((node, index) => {
                 const ref = getNodeRef(node);
-                if (ref) ref.insertNode(node, index!)
+                if (ref) ref.insertNode(node, index!) //FIX: What about text nodes?
             })
         }
     }

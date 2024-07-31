@@ -1,4 +1,4 @@
-import { Component, ComponentSetup, InternalComponent } from "./component";
+import { PublicComponent, ComponentSetup, InternalComponent } from "./component";
 import { HTMLTag } from "./mE";
 import { NodeRef } from "./NodeRef";
 import { ListData } from "./forEachIn";

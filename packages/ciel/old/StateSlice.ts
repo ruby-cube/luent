@@ -1,4 +1,4 @@
-import { ComputedRef, effectScope, inject, Ref } from "vue";
+import { ComputedRef, effectScope, inject, NodeRef } from "vue";
 import { addProps } from "@rue/utils";
 import {  UnionToIntersection } from "@rue/types";
 import { CIEL } from "./Ciel";
@@ -15,7 +15,7 @@ export function defineStateSlice<F extends (...initialSetupConfig: any[]) => { [
 }
 
 export type StateSlice = {
-    [key: string]: Function | Ref | ComputedRef
+    [key: string]: Function | NodeRef | ComputedRef
 }
 
 

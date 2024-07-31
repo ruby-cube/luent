@@ -12,7 +12,7 @@ const showIfMap: WeakMap<DOMNode, string> = new WeakMap()
 
 export function hideDOMNodes(nodePod: _NodePod) {
     nodePod.forEachNode((node) => {
-        if (node instanceof HTMLElement) {
+        if (node instanceof Element) {
             showIfMap.set(node, node.style.display)
             node.style.display = 'none'
         }
@@ -25,10 +25,14 @@ export function hideDOMNodes(nodePod: _NodePod) {
 
 function showDOMNodes(nodePod: _NodePod) {
     nodePod.forEachNode((node) => {
-        if (node instanceof HTMLElement) {
+        if (node instanceof Element) {
             const display = showIfMap.get(node)
-            if (display === undefined) throw new Error("previous display info missing")
-            node.style.display = display
+            if (display === undefined) {
+                node.style.removeProperty('display');
+            }
+            else {
+                node.style.display = display
+            }
         }
         else {
             const text = showIfMap.get(node)
@@ -46,7 +50,7 @@ function showDOMNodes(nodePod: _NodePod) {
 
 export function setUpConditionalShowSeries(
     component: InternalComponent,
-    parent: HTMLElement,
+    parent: Element,
     series: ConditionalSeries,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
@@ -75,6 +79,7 @@ export function setUpConditionalShowSeries(
     _watchForRender($conditions, updateConditional, { once: true })
 
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
+        console.log("show if!")
         if (isEqual(newValue, oldValue)) return;
         const { $conditions, activeIndex } = series.evaluateConditions();
         
@@ -97,7 +102,7 @@ function hidePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeIndex: numb
 }
 
 
-function showConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, activeIndex: number, nodeEntities: NodeEntity[]) {
+function showConditionalNodes(component: InternalComponent, parent: Element, dynamicPod: _DynamicNodePod, activeIndex: number, nodeEntities: NodeEntity[]) {
     const nodePod = dynamicPod[activeIndex];
     if (nodePod.length === 0) { // lazy render
         mountConditional(nodePod, component, parent, dynamicPod, nodeEntities)

@@ -1,35 +1,34 @@
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "./lifecycle";
-import { _NodeRef } from "./NodeRef";
-import { AssignedAttributes, EventHandler, NodeEntity, RenderFunction } from "./makeNode";
+import { InternalNodeRef } from "./NodeRef";
+import { EventHandler, NodeEntity, RenderFunction } from "./makeNode";
 import { DerivedSignal } from "@rue/muonic";
 
-// export type NodeRef = Signal<Component | DOMNode | (DOMNode | Component)[]>
+// export type NodeRef = Signal<PublicComponent | DOMNode | (DOMNode | PublicComponent)[]>
 
-export type DOMNode = CharacterData | HTMLElement
+export type DOMNode = CharacterData | Element
 export type Props = {
     [key: string]: any;
     slot?: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
 }
 
-export type RenderSlotted<P extends any = undefined> = 
-P extends undefined ? ()=>NodeEntity | NodeEntity[] 
-: (props: P) => NodeEntity | NodeEntity[] 
+export type RenderSlotted<P extends any = undefined> =
+    P extends undefined ? () => NodeEntity | NodeEntity[]
+    : (props: P) => NodeEntity | NodeEntity[]
 
 export type Slotted = NodeEntity | NodeEntity[]
 
 
 export type ComponentSetup<P = any> = P extends never ?
-    () => NodeEntity[] | NodeEntity :
-    (props: P) => NodeEntity[] | NodeEntity
+    (() => NodeEntity[] | NodeEntity) | (() => [PublicComponent, NodeEntity[] | NodeEntity]) :
+    ((props: P) => NodeEntity[] | NodeEntity) | ((props: P) => [PublicComponent, NodeEntity[] | NodeEntity])
 
-export type Component = AnyObject // contains anything in expose
+export type PublicComponent = { COMPONENT: true } // contains anything in expose
 
 export class InternalComponent {
     context: AnyObject | undefined;
     provides: AnyObject | undefined;
-    component: Component | undefined;
-    attributes: AssignedAttributes | null = null;
+    component: PublicComponent | null = null;
     parent: InternalComponent | null;
     nodeEntities: NodeEntity[] = []; //TODO: add context type?? //QUESTION: should this be cleared or updated?
     preserve: boolean;
@@ -96,12 +95,16 @@ export function popComponent() {
 }
 
 
+export const COMPONENT = Symbol()
 
-
-export function expose(component: AnyObject) {
+export function expose<T extends AnyObject>(component: T) {
     const _component = getCurrentComponent();
     if (_component === null) throw new Error("Cannot call `expose` outside of component setup")
-    _component.component = component;
+    const publicComponent = _component.component = {
+        COMPONENT: true as const,
+        ...component
+    };
+    return publicComponent;
 }
 
 // export function runUpdates(this: InternalComponent) {

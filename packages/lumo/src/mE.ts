@@ -1,5 +1,5 @@
 import { AnyObject, OptionalKeys } from "@rue/types";
-import { Component, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "./component";
+import { PublicComponent, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "./component";
 import { DerivedSignal, hasSignal, ReactiveSignal } from "../../muonic/useDerivedSignal";
 import { getWithoutTracking } from "../../muonic/DependencyTracker";
 import { DynamicIndices, getCurrentItemAndIndex, insertAndMoveListItemNodes, ListRenderKit, removeListItemNodes } from "./forEachIn";
@@ -8,7 +8,7 @@ import { appendItems, copyAllBut, isEqual, normalizeToArray } from "@rue/utils";
 import { diff } from "./diff";
 import { isReactive } from "../../muonic/useReactivize";
 import { _DynamicNodePod, _NodePod, NodePod } from "./NodePod";
-import { _NodeRef, getNodeRef, NodeRef } from "./NodeRef";
+import { InternalNodeRef, getNodeRef, NodeRef } from "./NodeRef";
 import { useReactivity } from "../../muonic/useReactivity";
 import { Signal } from "../../muonic/useSignalize";
 import { getNodeConfig } from "../api-play/_setUpNode";
@@ -48,7 +48,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     if (!component) throw new Error("No component :(")
 
     if (ref) {
-        const _ref = ref.value instanceof Array ? getNodeRef(ref.value)! : new _NodeRef(ref)
+        const _ref = ref.o instanceof Array ? getNodeRef(ref.o)! : new InternalNodeRef(ref)
         _ref.assignValue(domNode, $index)
         initializeRef(component, _ref)
     }
@@ -84,7 +84,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
 
 
-function setUpAttributes(node: HTMLElement, attributes: { [key: string]: any | DerivedSignal<any> }) {
+function setUpAttributes(node: Element, attributes: { [key: string]: any | DerivedSignal<any> }) {
     for (const key in attributes) {
         const value = attributes[key]
         if (hasSignal(value)) {
@@ -98,7 +98,7 @@ function setUpAttributes(node: HTMLElement, attributes: { [key: string]: any | D
     }
 }
 
-function setAttribute(node: HTMLElement, key: string, value: any) {
+function setAttribute(node: Element, key: string, value: any) {
     if (value) {
         node.setAttribute(key, toString(value))
     }
@@ -108,7 +108,7 @@ function setAttribute(node: HTMLElement, key: string, value: any) {
 }
 
 
-function setUpEvents(node: HTMLElement, events: { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] }) {
+function setUpEvents(node: Element, events: { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] }) {
     for (const key in events) {
         const handlers = normalizeToArray(events[key]);
         const event = useEventTick(node, key, () => runNonSyncTasks('pre'));
@@ -141,7 +141,7 @@ type DynamicClassesConfig = {
     [key: string]: ReactiveSignal<boolean>;
 }
 
-function setUpClasses(component: InternalComponent, node: HTMLElement, classes: (((o: DOMTokenList) => void) | string | DynamicClassesConfig)[]) {
+function setUpClasses(component: InternalComponent, node: Element, classes: (((o: DOMTokenList) => void) | string | DynamicClassesConfig)[]) {
     const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
     const classList = node.classList
     for (const entry of classes) {
@@ -207,7 +207,7 @@ function warnOverlappingStyles(stylesA: string, stylesB: string) {
     }
 }
 
-function setUpAttributeChanges(node: HTMLElement, changes: ((o: HTMLElement) => void)[] | ((o: HTMLElement) => void)) {
+function setUpAttributeChanges(node: Element, changes: ((o: Element) => void)[] | ((o: Element) => void)) {
     if (changes instanceof Function) {
         watchRenderEffect(() => changes(node)) // watchAndPreserve?
     }
@@ -229,7 +229,7 @@ function setUpRefNulling(ref: _NodePod, $index: Signal<number>) {
     }
 }
 
-function setUpTextNode(parent: HTMLElement, text: ReactiveSignal | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
+function setUpTextNode(parent: Element, text: ReactiveSignal | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
 
     const textNode = createTextNode(text); //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
     if (nodePod) {
@@ -244,7 +244,7 @@ function setUpTextNode(parent: HTMLElement, text: ReactiveSignal | any, nodePod?
     }
 }
 
-// function mountDOMNode(parent: HTMLElement, node: DOMNode, prevSibling?: DOMNode | null) {
+// function mountDOMNode(parent: Element, node: DOMNode, prevSibling?: DOMNode | null) {
 //     if (prevSibling) {
 //         prevSibling.after(node) //TODO: instead, collect consecutive nodes and mount them together?
 //     }
@@ -296,13 +296,13 @@ function toString(value: any) {
 
 export function setUpNodeEntity(
     component: InternalComponent,
-    parent: HTMLElement,
+    parent: Element, //TODO: parent is as optional as fragment I think...
     nodeEntity: NodeEntity,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[],
 ) {
-    if (nodeEntity instanceof HTMLElement) { // from Web API
+    if (nodeEntity instanceof Element) { // from Web API
         mountNode(parent, nodeEntity, nodePod, fragment)
     }
     else if (nodeEntity instanceof InternalComponent) {
@@ -315,7 +315,12 @@ export function setUpNodeEntity(
     else if (nodeEntity instanceof Array) {
         // conditional series
         const series = buildConditionalSeries(nodeEntity);
-        setUpConditionalSeries(component, parent, series, nodePod, fragment)
+        if (series.type === 'create' || series.type === 'activate') {
+            setUpConditionalSeries(component, parent, series, nodePod, fragment)
+        }
+        else if (series.type === 'show') {
+            setUpConditionalShowSeries(component, parent, series, nodePod, fragment)
+        }
     }
     // else if (nodeEntity instanceof ConditionalRenderKit){
     //     const series = buildConditionalSeries([nodeEntity]);
@@ -327,7 +332,7 @@ export function setUpNodeEntity(
 }
 
 
-function mountNode(parent: HTMLElement, node: DOMNode, nodePod: _NodePod, fragment?: DocumentFragment) {
+function mountNode(parent: Element, node: DOMNode, nodePod: _NodePod, fragment?: DocumentFragment) {
     nodePod.appendStaticNode(node)
     const root = fragment ? fragment : parent;
     root.appendChild(node)
@@ -337,13 +342,13 @@ function mountNode(parent: HTMLElement, node: DOMNode, nodePod: _NodePod, fragme
 
 export function setUpComponent(
     parentComponent: InternalComponent,
-    parent: HTMLElement,
+    parent: Element,
     component: InternalComponent,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
 ) { //TODO: what if a component's root elements is conditional or a dynamic list??
     const nodeEntities = component.nodeEntities;
-    if (!(parent instanceof HTMLElement)) throw new Error("Parent cannot be a text node")
+    if (!(parent instanceof Element)) throw new Error("Parent cannot be a text node")
     component.emit(LifecycleHook.BEFORE_MOUNT);
     for (const nodeEntity of nodeEntities) {
         setUpNodeEntity(parentComponent, parent, nodeEntity, nodePod, fragment)
@@ -353,7 +358,7 @@ export function setUpComponent(
 
 function setUpNodeList(
     component: InternalComponent,
-    parent: HTMLElement,
+    parent: Element,
     renderKit: ListRenderKit,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
@@ -401,7 +406,7 @@ function setUpNodeList(
 
 function setUpConditionalSeries(
     component: InternalComponent,
-    parent: HTMLElement,
+    parent: Element,
     series: ConditionalSeries,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
@@ -433,6 +438,7 @@ function setUpConditionalSeries(
         component.emit(LifecycleHook.BEFORE_UPDATE)
         removePrevConditionalNodes(dynamicPod);
         const nodeEntities = series.render(activeIndex)
+        console.log("nodeEntities", nodeEntities, activeIndex, series)
         insertNewConditionalNodes(component, parent, dynamicPod, nodeEntities)
         component.emit(LifecycleHook.UPDATED)
 
@@ -510,7 +516,7 @@ function emitBeforeUnmount(components: InternalComponent[]) {
 
 
 
-function insertNewConditionalNodes(component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, nodeEntities: NodeEntity[]) {
+function insertNewConditionalNodes(component: InternalComponent, parent: Element, dynamicPod: _DynamicNodePod, nodeEntities: NodeEntity[]) {
     // const nodePod = preserve ? getPreservedNodePod(renderConditional) : new _NodePod();
     const nodePod = new _NodePod();
     dynamicPod.replaceNodePod(0, nodePod);
@@ -520,7 +526,7 @@ function insertNewConditionalNodes(component: InternalComponent, parent: HTMLEle
     restoreNodeRefValues(nodePod, nodePod.componentsToUnmount)
 }
 
-export function mountConditional(nodePod: _NodePod, component: InternalComponent, parent: HTMLElement, dynamicPod: _DynamicNodePod, nodeEntities: NodeEntity[]) {
+export function mountConditional(nodePod: _NodePod, component: InternalComponent, parent: Element, dynamicPod: _DynamicNodePod, nodeEntities: NodeEntity[]) {
     const fragment = new DocumentFragment();
 
     for (const nodeEntity of nodeEntities) {
@@ -528,23 +534,24 @@ export function mountConditional(nodePod: _NodePod, component: InternalComponent
     }
 
     let prevSibling = dynamicPod.prevNode;
-    if (prevSibling) prevSibling.after(fragment)
+    if (prevSibling && prevSibling === parent) parent.append(fragment) //for teleport
+    else if (prevSibling) prevSibling.after(fragment)
     else parent.prepend(fragment)
 }
 
 
-function nullNodeRefValues(nodePod: _NodePod, components: Component[]) {
+function nullNodeRefValues(nodePod: _NodePod, components: InternalComponent[]) {
     nodePod.forEachNode(node => {
         const ref = getNodeRef(node);
-        if (ref && ref.o.value) ref.setValue(null)
+        if (ref && ref.o.o) ref.setValue(undefined) 
     })
     // for (const component of components){ //NOTE: Deferred until needed (see note in restoreNodeRefValues)
-    //     const ref = getNodeRef(component);
+    //     const ref = getNodeRef(component.component);
     //     if (ref && ref.o.value) ref.setValue(null)
     // }
 }
 
-function restoreNodeRefValues(nodePod: _NodePod, components: Component[]) {
+function restoreNodeRefValues(nodePod: _NodePod, components: InternalComponent[]) {
     nodePod.forEachNode((node, index) => {
         const ref = getNodeRef(node);
         if (ref) {
@@ -553,8 +560,8 @@ function restoreNodeRefValues(nodePod: _NodePod, components: Component[]) {
         }
     })
     // for (const component of components){ //NOTE: Deferred until needed: nulling and restoring node ref for components. Getting the correct index is tricky.
-    //     const ref = getNodeRef(component);
-    //     if (ref && ref.o.value) ref.setValue(component)
+    //     const ref = getNodeRef(component.component);
+    //     if (ref && ref.o.value) ref.setValue(component.component)
     // }
 }
 

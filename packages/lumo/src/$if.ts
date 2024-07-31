@@ -15,7 +15,7 @@ type ConditionalOptions = {
 export class ConditionalSeries {
     conditionalKits: ConditionalRenderKit[] = [];
     conditions: ReactiveSignal<boolean>[] = [];
-    conditionMet: boolean = false;
+    // conditionMet: boolean = false;
 
     constructor(
         public type: 'create' | 'show' | 'activate'
@@ -23,10 +23,6 @@ export class ConditionalSeries {
 
     addRenderKit(renderKit: ConditionalRenderKit) {
         this.conditionalKits.push(renderKit);
-        const $condition = renderKit.$condition;
-        if (!this.conditionMet && $condition) {
-            this.conditions.push($condition)
-        }
     }
 
     addElse() {
@@ -34,6 +30,7 @@ export class ConditionalSeries {
     }
 
     evaluateConditions() {
+        this.conditions = [];
         const conditionalKits = this.conditionalKits;
         for (let i = 0; i < conditionalKits.length; i++) {
             const $condition = conditionalKits[i].$condition
@@ -156,6 +153,7 @@ function wrapToNormalize(renderConditional: RenderFunction) {
 
 export function buildConditionalSeries(statements: ConditionalRenderKit[]) {
     const series = new ConditionalSeries(statements[0].type)
+    console.log("series begining", series.conditions.length)
     for (let i = 0; i < statements.length; i++) {
         const kit = statements[i]
         if (i === 0 && kit.statement !== 'if' || i !== 0 && kit.statement === 'if') {
@@ -176,7 +174,6 @@ export function buildConditionalSeries(statements: ConditionalRenderKit[]) {
     if (noElseBlock(statements)) {
         series.addElse()
     }
-    series.evaluateConditions()
     return series;
 }
 

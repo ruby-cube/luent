@@ -1,10 +1,10 @@
 import { DerivedSignal, ReactiveSignal } from "@rue/muonic";
 import { ConditionalRenderKit } from "./$if";
-import { Component, ComponentSetup, DOMNode, InternalComponent } from "./component";
+import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "./component";
 import { getCurrentItemAndIndex, ListRenderKit } from "./forEachIn";
 import { HTMLTag, makeElement } from "./mE";
 import { makeComponent, InferSlotted } from "./mO";
-import { _NodeRef, NodeRef } from "./NodeRef";
+import { InternalNodeRef, NodeRef } from "./NodeRef";
 import { getNodeConfig } from "../api-play/_setUpNode";
 import { AnyObject } from "@rue/types";
 import { beforeUnmount } from "./lifecycle";
@@ -44,12 +44,12 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
     attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeConfig<HTMLElementTagNameMap[K]>
 
-type NodeConfig<T extends HTMLElement | InternalComponent> = {
-    ref?: NodeRef<T extends HTMLElement ? T : T extends { component: infer C } ? C extends Component ? C : never : never>,
+type NodeConfig<T extends Element | ComponentSetup> = {
+    ref?: NodeRef<T>,
 }
 
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> = 
-T extends (props: infer P) => any ? P & NodeConfig<InternalComponent> : never
+T extends (props: infer P) => any ? P & NodeConfig<T> : never
 
 
 export function makeNode(
@@ -88,7 +88,7 @@ export function _getNodeConfig(ref: NodeRef | undefined) {
 
 export function initializeRef( // should this be initialize ref?
     component: InternalComponent,
-    ref: _NodeRef,
+    ref: InternalNodeRef,
     // options?: ElementOptions
 ) {
     if (ref.initialized === true) return; // to prevent registering multiple watchers for lists
@@ -104,7 +104,7 @@ export function initializeRef( // should this be initialize ref?
     // }
 
     beforeUnmount(() => {
-        ref.setValue(null);
+        ref.setValue(undefined);
     })
 
     ref.markInitialized()

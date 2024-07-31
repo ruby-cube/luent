@@ -210,7 +210,7 @@ declare namespace React {
      * <div ref="myRef" />
      * ```
      */
-    // type LegacyRef<T> = string | Ref<T>; // #LUMO-EDIT (Replaced with NodeRef)
+    // type LegacyRef<T> = string | Ref<T>; // #LUMO-EDIT (Replaced with Ref)
 
     /**
      * Retrieves the type of the 'ref' prop for a given component type or tag name.
@@ -311,7 +311,7 @@ declare namespace React {
          *
          * @see {@link https://react.dev/learn/referencing-values-with-refs#refs-and-the-dom React Docs}
          */
-        ref?: Lumo.NodeRef<T> | undefined;
+        ref?: Lumo.Ref<T> | undefined;
     }
 
     /**
@@ -358,7 +358,7 @@ declare namespace React {
 
     type CElement<P, T extends Component<P, ComponentState>> = ComponentElement<P, T>;
     interface ComponentElement<P, T extends Component<P, ComponentState>> extends ReactElement<P, ComponentClass<P>> {
-        ref?: Lumo.NodeRef<T> | undefined;
+        ref?: Lumo.Ref<T> | undefined;
     }
 
     /**
@@ -369,7 +369,7 @@ declare namespace React {
     // string fallback for custom web-components
     interface DOMElement<P extends HTMLAttributes<T> | SVGAttributes<T>, T extends Element>
         extends ReactElement<P, string> {
-        ref: Lumo.NodeRef<T>;
+        ref: Lumo.Ref<T>;
     }
 
     // ReactHTML for ReactHTMLElement
@@ -4280,7 +4280,7 @@ declare global {
             : ReactManagedAttributes<C, P>;
 
         interface IntrinsicAttributes extends React.Attributes {
-            ref?: Lumo.NodeRef //#LUMO-EDIT
+            ref?: Lumo.Ref //#LUMO-EDIT
             // slotted?: Lumo.InferSlotted
         }
         interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> { }

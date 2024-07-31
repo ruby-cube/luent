@@ -78,6 +78,9 @@ export type Class = {
   new(...args: any[]): Object;
 };
 
+export type ArrayItem<A extends unknown[]> = 
+  A extends (infer I)[] ? I : never;
+
 
 
 

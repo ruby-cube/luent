@@ -1,89 +1,116 @@
-import { $else, $elseIf, $if, ComponentSetup, forEachIn, NodeConfig, RenderSlotted } from "@rue/lumo";
-import { useReactivity, watchEffect } from "@rue/muonic"
+//@ts-nocheck
+import { $else, $elseIf, $if, COMPONENT, Component, ComponentSetup, ConditionalRenderKit, expose, forEachIn, NodeConfig, NodeEntity, NodeRef, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
+import { Signal, useReactivity, watchEffect } from "@rue/muonic"
 import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/loadComponent";
 import { TestBlockA } from "./TestBlock";
+import { Sign } from "crypto";
 
 
 const { $, set } = useReactivity();
 
 const loadSideBlock = idleLoadComponent({
-    load: () => artificialDelay(import('./SideBlock').then(({ SideBlock }) => SideBlock)),
+    load: () => import('./SideBlock').then(({ SideBlock }) => SideBlock),
     Placeholder() {
-        return (
-            <div>Eep! I'm not ready</div>
-        )
+        return <div>Eep! I'm not ready</div>
     }
 });
 
-function artificialDelay(promise: Promise<ComponentSetup<unknown>>){
-    return new Promise((resolve, reject)=>{
-        setTimeout(()=>{
-            resolve(promise)
-        }, 700)
-    })
-}
+const onClick = useEventListener('click');
 
-export function App() {
-    const $count = $(0)
+export function List() {
+    const $list = $([{ id: "one", content: "frog" }, { id: "two", content: "frog" }, { id: "three", content: "fly" }, { id: "four", content: "swamp" }])
 
-    function increment() {
-        set($count, count => count + 1)
-    }
+    const dialog_box = useNodeRef<typeof DialogBox>()
 
-    function decrement() {
-        set($count, count => count - 1)
-    }
+    teleportTo('body',
+        <DialogBox ref={dialog_box} />
+    )
 
-    const $visible = $(true);
-    const $dark = $(true);
-
-    function toggleVisibility() {
-        set($visible, visible => !visible)
-    }
-
-    function toggleDarkness() {
-        set($dark, dark => !dark)
-    }
-
-    const SideBlock = loadSideBlock()
-
-    const $active = $(true);
-
-    function activate() {
-        set($active, (v) => !v)
+    function openModal() {
+        dialog_box.o!.open()
     }
 
     return (
         <div>
-            {/* <>
-                {$if($loaded, () => (
-                    <div>hi</div>
-                ))}
-            </> */}
-            <article>
-                <SideBlock frog='sir robin'></SideBlock>
-            </article>
-            <TestBlockA $active={$active}></TestBlockA>
-            <button onclick={activate}>activate</button>
-            <>
-                {$if($visible, 'create', () =>
-                    <>
-                        <p>{$count}</p>
-                        <p>play!</p>
-                    </>
-                )}
-                {$elseIf($dark, () =>
-                    <p>dark</p>
-                )}
-                {$else(() =>
-                    <p>gone</p>)}
-            </>
-
-            <button onclick={increment}>increment</button>
-            <button onclick={decrement}>decrement</button>
-            <button onclick={toggleVisibility}>show/hide</button>
-            <button onclick={toggleDarkness}>toggle darkness</button>
+            {forEachIn($list, (item, $index) => (
+                <>
+                    <li>{item.content}</li>
+                    <p>{$index}</p>
+                </>
+            ), 'id')}
+            {/* <button onclick={openModal}>open</button> */}
         </div>
     )
 }
 
+export function App() {
+    const $active = $(false);
+    function toggleActive() {
+        set($active, state => !state)
+    }
+
+    return (
+        <>
+            <HereBlock $active={$active}></HereBlock>
+            <button onclick={toggleActive}>click</button>
+        </>
+    )
+}
+
+const appi = useNodeRef<typeof App>() //TODO: array
+const eh = appi.value
+
+
+export function Appi() {
+    const $active = $(false);
+    function toggleActive() {
+        set($active, state => !state)
+    }
+
+    return [
+        expose({
+            $active,
+            toggleActive
+        }),
+        <>
+            <HereBlock $active={$active}></HereBlock>
+            <button onclick={toggleActive}>click</button>
+        </>
+    ]
+}
+
+
+function HereBlock(props: { $active: Signal<boolean> }) {
+    const { $active } = props;
+
+    return $if($active, 'show', () => (
+        <p>I AM HERE</p>
+    ))
+}
+
+function DialogBox() {
+    const $open = $(false)
+
+    function open() {
+        console.log("open sesame")
+        set($open, () => true)
+    }
+
+    function close() {
+        set($open, () => false)
+    }
+
+
+    return [
+        expose({
+            open,
+            close
+        }),
+        $if($open, 'show', () => (
+            <dialog style="background-color: gray" open>
+                Stop
+                <button onclick={close}>close</button>
+            </dialog>
+        ))
+    ]
+}

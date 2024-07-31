@@ -30,7 +30,6 @@ export function loadComponent<P>(config: {
         }
         pendingComponent.then((_Component) => {
             clearTimeout(timeoutID)
-            console.log("this should be a function", _Component)
             lazyComponents.set(load, _Component)
             Component = _Component;
             set($loading, () => false)
