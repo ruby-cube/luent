@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { SnapshotManager } from "./SnapshotManager";
-import { ReactiveObject } from "./useReactivize";
-import { Signal } from "./useSignalize";
+import { ReactiveObject } from "./useReactiveObjects";
+import { Signal } from "./useSignals";
 import { getTaskQueueForProp, runNonSyncTasks } from "./watch";
 import { $listen, ScheduleStop } from "@rue/flask";
 import { removeItem } from "../utils/array";

@@ -1,6 +1,6 @@
 import { ActiveListener } from "@rue/flask";
 import { DependencyTracker, ReactiveProp } from "./DependencyTracker";
-import { isSignal, Signal, SIGNAL_MARKER } from "./useSignalize";
+import { isSignal, Signal, SIGNAL_MARKER } from "./useSignals";
 import { watch } from "./watch";
 
 // The $ function has various purposes
@@ -37,11 +37,6 @@ export class DerivedSignalState {
     dependencies: (Signal | ReactiveProp)[] = [];
     hasChanged: boolean = false;
     memoized: boolean = true;
-
-    // constructor(){
-    //     console.log("making new derived signal state")
-    //     console.trace()
-    // }
 
     private watchers: ActiveListener[] = [];
 

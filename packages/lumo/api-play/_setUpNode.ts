@@ -3,7 +3,7 @@ import { HTMLTag } from "../src/element/mE";
 import { ComponentConfig } from "../src/component/mO";
 import { NodeRef } from "../src/node/NodeRef";
 import { ListData } from "../src/list/forEachIn";
-import { Signal } from "@rue/muonic/useSignalize";
+import { Signal } from "@rue/muonic/useSignals";
 import { ReactiveSignal } from "@rue/muonic/useDerivedSignal";
 import { NodeSetupConfig, RenderFunction } from "../src/makeNode";
 

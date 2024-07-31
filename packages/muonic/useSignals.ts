@@ -1,14 +1,14 @@
 import { AnyObject } from "@rue/types";
 import { track, trigger } from "./watch";
 import { emitSignal } from "./useReactivity";
-import { DerivedSignal, makeDerivedSignal } from "./useDerivedSignal";
+import { DerivedSignal, makeDerivedSignal } from "./DerivedSignal";
 
 export type Signal<T = any> = { (): T;[SIGNAL_MARKER]: boolean; }
 export const SIGNAL_MARKER = Symbol();
 export const SetKey = Symbol();
 
 
-export function useSignalize() {
+export function useSignals() {
     const signalValues: WeakMap<Signal, any> = new WeakMap();
 
     function set<T>(signal: Signal<T>, genNewValue: (value: T) => T) {

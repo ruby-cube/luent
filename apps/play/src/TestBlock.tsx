@@ -1,7 +1,7 @@
 import { $elseIf, $if } from "@rue/lumo";
-import { Signal, useSignalize } from "@rue/muonic";
+import { Signal, useSignals } from "@rue/muonic";
 
-const { $, set } = useSignalize()
+const { $, set } = useSignals()
 
 export function TestBlockA(props: { $active: Signal<boolean> }) {
     const { $active } = props

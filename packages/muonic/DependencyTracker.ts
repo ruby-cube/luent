@@ -1,5 +1,5 @@
-import { ReactiveObject } from "./useReactivize";
-import { Signal } from "./useSignalize";
+import { ReactiveObject } from "./useReactiveObjects";
+import { Signal } from "./useSignals";
 
 export type ReactiveProp = [ReactiveObject, string | symbol]
 

@@ -1,8 +1,8 @@
 import { AnyObject } from "@rue/types";
 import { hasSignal, ReactiveSignal } from "@rue/muonic/useDerivedSignal";
-import { isReactive, ReactiveObject } from "@rue/muonic/useReactivize";
+import { isReactive, ReactiveObject } from "@rue/muonic/useReactiveObjects";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
-import { Signal } from "@rue/muonic/useSignalize";
+import { Signal } from "@rue/muonic/useSignals";
 import { InternalComponent, popComponent, pushComponent } from "../component/component";
 import { diff, InsertAndMoveKit } from "./diff";
 import { getNodeRef } from "../node/NodeRef";

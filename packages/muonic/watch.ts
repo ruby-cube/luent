@@ -1,11 +1,11 @@
 import { $listen, ListenerOptions, PendingOp, ScheduleStop } from "@rue/flask";
-import { isSignal, Signal } from "./useSignalize";
-import { ReactiveObject } from "./useReactivize";
+import { isSignal, Signal } from "./useSignals";
+import { ReactiveObject } from "./useReactiveObjects";
 import { AnyObject } from "@rue/types";
 import { ActiveListener } from "../flask/ActiveListener";
 import { getCurrentUpdateCycle, setCurrentUpdateCycle, UpdateCycle } from "./UpdateCycle";
 import { DependencyTracker, getDependencyTracker, ReactiveProp } from "./DependencyTracker";
-import { DERIVED_SIGNAL, DerivedSignal, isDerivedSignal, ReactiveSignal } from "./useDerivedSignal";
+import { DERIVED_SIGNAL, DerivedSignal, isDerivedSignal, ReactiveSignal } from "./DerivedSignal";
 import { isEqual } from "@rue/utils";
 
 //QUESTION: How useful is watching deep?

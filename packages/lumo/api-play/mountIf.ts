@@ -1,10 +1,10 @@
 import { getWithoutTracking } from "../../muonic/DependencyTracker";
 import { DerivedSignal, hasSignal, makeDerivedSignal, ReactiveSignal } from "../../muonic/useDerivedSignal"
-import { ReactiveObject } from "../../muonic/useReactivize";
+import { ReactiveObject } from "../../muonic/useReactiveObjects";
 import { onActivated, onDeactivated } from "../src/lifecycle";
 import { watchRenderEffect, watchForRender } from "../src/watchForRender";
 import { getCurrentComponent, InternalComponent, popComponent, pushComponent } from "../src/component";
-import { Signal } from "../../muonic/useSignalize";
+import { Signal } from "../../muonic/useSignals";
 import { NodeEntity } from "../src/makeNode";
 
 export class ConditionalKit {

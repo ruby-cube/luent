@@ -4,11 +4,11 @@ import { DerivedSignal, hasSignal, ReactiveSignal } from "@rue/muonic/useDerived
 import { getWithoutTracking } from "@rue/muonic/DependencyTracker";
 import { appendItems, copyAllBut, isEqual, normalizeToArray } from "@rue/utils";
 import { diff } from "../list/diff";
-import { isReactive } from "@rue/muonic/useReactivize";
+import { isReactive } from "@rue/muonic/useReactiveObjects";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, getNodeRef, NodeRef } from "../node/NodeRef";
 import { useReactivity } from "@rue/muonic/useReactivity";
-import { Signal } from "@rue/muonic/useSignalize";
+import { Signal, useSignals } from "@rue/muonic/useSignals";
 import { analyzeAttributes } from "../component/mO";
 import { watchRenderEffect, watchForRender } from "../reactivity/watchForRender";
 import { hideDOMNodes, setUpConditionalShowSeries } from "../conditional/showIf";
@@ -20,7 +20,7 @@ import { runNonSyncTasks } from "@rue/muonic";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
 import { beforeUnmount } from "../component/lifecycle";
 
-export const _internalReactivity = useReactivity()
+const _internalReactivity = useSignals()
 
 export type HTMLTag = keyof HTMLElementTagNameMap
 

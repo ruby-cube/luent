@@ -6,7 +6,7 @@ export type ReactiveObject<T extends AnyObject = AnyObject> = T
 
 const setOfReactives = new WeakSet();
 
-export function useReactivize(config?: { snapshots: boolean }) {
+export function useReactiveObjects(config?: { snapshots: boolean }) {
     const localReactives: WeakSet<ReactiveObject> = new WeakSet();
 
     let mutationPermitted = false;

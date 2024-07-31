@@ -2,7 +2,7 @@ import { PublicComponent, ComponentSetup, InternalComponent } from "../component
 import { HTMLTag } from "../element/mE";
 import { NodeRef } from "./NodeRef";
 import { ListData } from "../list/forEachIn";
-import { Signal } from "@rue/muonic/useSignalize";
+import { Signal } from "@rue/muonic/useSignals";
 import { DerivedSignal, ReactiveSignal } from "@rue/muonic/useDerivedSignal";
 import { ComponentConfig, ElementConfig, RenderFunction } from "./makeNode";
 import { ReactiveObject } from "@rue/muonic";
