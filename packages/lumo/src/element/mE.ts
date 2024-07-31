@@ -1,17 +1,14 @@
 import { AnyObject, OptionalKeys } from "@rue/types";
 import { PublicComponent, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "../component/component";
-import { DerivedSignal, hasSignal, ReactiveSignal } from "@rue/muonic/useDerivedSignal";
+import { DerivedSignal, hasSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { getWithoutTracking } from "@rue/muonic/DependencyTracker";
 import { appendItems, copyAllBut, isEqual, normalizeToArray } from "@rue/utils";
-import { diff } from "../list/diff";
 import { isReactive } from "@rue/muonic/useReactiveObjects";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, getNodeRef, NodeRef } from "../node/NodeRef";
-import { useReactivity } from "@rue/muonic/useReactivity";
 import { Signal, useSignals } from "@rue/muonic/useSignals";
 import { analyzeAttributes } from "../component/mO";
 import { watchRenderEffect, watchForRender } from "../reactivity/watchForRender";
-import { hideDOMNodes, setUpConditionalShowSeries } from "../conditional/showIf";
 import { buildConditionalSeries, ConditionalRenderKit, ConditionalSeries, noElseBlock, RenderConditional, validateStandAloneConditional, watchForRenderAndPreserve, watchRenderEffectAndPreserve } from "../conditional/$if";
 import { ElementConfig, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { ActiveListener, PendingOp } from "@rue/flask";
@@ -228,7 +225,7 @@ function setUpRefNulling(ref: _NodePod, $index: Signal<number>) {
     }
 }
 
-function setUpTextNode(parent: Element, text: ReactiveSignal | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
+export function setUpTextNode(parent: Element, text: ReactiveSignal | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
 
     const textNode = createTextNode(text); //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
     if (nodePod) {

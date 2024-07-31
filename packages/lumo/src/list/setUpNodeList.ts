@@ -1,4 +1,4 @@
-import { hasSignal, isReactive, Signal } from "@rue/muonic";
+import { hasSignal, isReactive, Signal, useSignals } from "@rue/muonic";
 import { InternalComponent } from "../component/component";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { DynamicIndices, ListRenderKit, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
@@ -8,11 +8,11 @@ import { watchForRender } from "../reactivity/watchForRender";
 import { AnyObject } from "@rue/types";
 import { diff, InsertAndMoveKit } from "./diff";
 import { LifecycleHook } from "../component/lifecycle";
-import { emitHookBatch } from "../conditional/setUpConditionalSeries";
 import { getNodeRef } from "../node/NodeRef";
-import { _internalReactivity } from "../element/mE";
 import { normalizeToArray } from "@rue/utils";
+import { emitHookBatch } from "../conditional/setUpConditionalMount";
 
+const _internalReactivity = useSignals()
 
 export function setUpNodeList(
     component: InternalComponent,

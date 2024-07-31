@@ -1,16 +1,12 @@
 import { AnyObject } from "@rue/types";
-import { hasSignal, ReactiveSignal } from "@rue/muonic/useDerivedSignal";
+import { hasSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { isReactive, ReactiveObject } from "@rue/muonic/useReactiveObjects";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
-import { Signal } from "@rue/muonic/useSignals";
-import { InternalComponent, popComponent, pushComponent } from "../component/component";
-import { diff, InsertAndMoveKit } from "./diff";
-import { getNodeRef } from "../node/NodeRef";
+import { Signal, useSignals } from "@rue/muonic/useSignals";
 import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { watchForRenderAndPreserve } from "../conditional/$if";
-import { watchForRender } from "../reactivity/watchForRender";
 
+const _internalReactivity = useSignals()
 
 export type RenderItem<T = any> = (item: T, $index: Signal<number>) => NodeEntity[] | NodeEntity
 // type ListData = AnyObject | any[] | Set<any> | Map<any, any> | ReactiveObject<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?

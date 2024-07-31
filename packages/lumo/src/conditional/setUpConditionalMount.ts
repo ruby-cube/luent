@@ -8,7 +8,7 @@ import { LifecycleHook } from "../component/lifecycle";
 import { NodeEntity } from "../node/makeNode";
 import { getNodeRef } from "../node/NodeRef";
 
-export function setUpConditionalSeries(
+export function setUpConditionalMount(
     component: InternalComponent,
     parent: Element,
     series: ConditionalSeries,

@@ -1,13 +1,12 @@
 import { InternalComponent } from "../component/component";
 import { setUpComponent } from "../component/setUpComponent";
 import { buildConditionalSeries } from "../conditional/$if";
-import { setUpConditionalSeries } from "../conditional/setUpConditionalSeries";
-import { setUpConditionalShowSeries } from "../conditional/showIf";
-import { mountElement } from "../element/mE";
+import { setUpConditionalDisplay } from "../conditional/setUpConditionalDisplay";
+import { setUpConditionalMount } from "../conditional/setUpConditionalMount";
+import { mountElement, setUpTextNode,  } from "../element/mE";
 import { ListRenderKit } from "../list/forEachIn";
 import { setUpNodeList } from "../list/setUpNodeList";
 import { NodeEntity } from "./makeNode";
-import { setUpTextNode } from "./mE";
 import { _NodePod } from "./NodePod";
 
 export function setUpNodeEntity(
@@ -32,15 +31,15 @@ export function setUpNodeEntity(
         // conditional series
         const series = buildConditionalSeries(nodeEntity);
         if (series.type === 'create' || series.type === 'activate') {
-            setUpConditionalSeries(component, parent, series, nodePod, fragment)
+            setUpConditionalMount(component, parent, series, nodePod, fragment)
         }
         else if (series.type === 'show') {
-            setUpConditionalShowSeries(component, parent, series, nodePod, fragment)
+            setUpConditionalDisplay(component, parent, series, nodePod, fragment)
         }
     }
     // else if (nodeEntity instanceof ConditionalRenderKit){
     //     const series = buildConditionalSeries([nodeEntity]);
-    //     setUpConditionalSeries(component, parent, series, nodePod, fragment)
+    //     setUpConditionalMount(component, parent, series, nodePod, fragment)
     // }
     else {
         setUpTextNode(parent, nodeEntity, nodePod, fragment)
