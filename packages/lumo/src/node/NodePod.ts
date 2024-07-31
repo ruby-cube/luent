@@ -1,6 +1,4 @@
-import { AnyObject } from "@rue/types";
 import { DOMNode, InternalComponent } from "../component/component";
-import { Interface } from "readline";
 import { NodeRef } from "./NodeRef";
 
 // Node Pods represent groups of nodes created by `mXsFor` and `mXIf`.

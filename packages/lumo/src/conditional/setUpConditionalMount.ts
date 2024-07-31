@@ -160,7 +160,7 @@ function restoreNodeRefValues(nodePod: _NodePod, components: InternalComponent[]
         const ref = getNodeRef(node);
         if (ref) {
             if (index === undefined) ref.setValue(node);
-            else ref.insertNode(node, index);
+            else ref.insertNode(<Element>node, index);
         }
     })
     // for (const component of components){ //NOTE: Deferred until needed: nulling and restoring node ref for components. Getting the correct index is tricky.

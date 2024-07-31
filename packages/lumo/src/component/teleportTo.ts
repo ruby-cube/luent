@@ -1,8 +1,8 @@
 import { normalizeToArray } from "@rue/utils";
 import { getCurrentComponent } from "./component";
 import { NodeEntity } from "../node/makeNode";
-import { setUpNodeEntity } from "../element/mE";
 import { _NodePod } from "../node/NodePod";
+import { setUpNodeEntity } from "../node/setUpNodeEntity";
 
 export function teleportTo(container: string | Element, nodeEntities: NodeEntity | NodeEntity[]) {
     const component = getCurrentComponent();

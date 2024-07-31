@@ -127,7 +127,7 @@ function runComponentSetup(
             const publicComponent = component.component || null;
             _ref.assignValue(publicComponent, $index)
             // setUpRefUpdates(_ref, publicComponent, $index, component.preserve)
-            initializeRef(component, _ref)
+            initializeRef(_ref)
         }
 
         // if (component.attributes) { // if `getAttributes` is called, this will be null

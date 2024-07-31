@@ -188,7 +188,7 @@ export function insertAndMoveListItemNodes(
         for (const nodePod of nodePods) {
             nodePod.forEachNode((node, index) => {
                 const ref = getNodeRef(node);
-                if (ref) ref.insertNode(node, index!) //FIX: What about text nodes?
+                if (ref) ref.insertNode(<Element>node, index!)
             })
         }
     }

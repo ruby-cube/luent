@@ -1,9 +1,7 @@
-import { AnyObject, OptionalKeys } from "@rue/types";
 import { PublicComponent, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "../component/component";
 import { DerivedSignal, hasSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { getWithoutTracking } from "@rue/muonic/DependencyTracker";
 import { appendItems, copyAllBut, isEqual, normalizeToArray } from "@rue/utils";
-import { isReactive } from "@rue/muonic/useReactiveObjects";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, getNodeRef, NodeRef } from "../node/NodeRef";
 import { Signal, useSignals } from "@rue/muonic/useSignals";
@@ -46,7 +44,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     if (ref) {
         const _ref = ref.o instanceof Array ? getNodeRef(ref.o)! : new InternalNodeRef(ref)
         _ref.assignValue(domNode, $index)
-        initializeRef(component, _ref)
+        initializeRef(_ref)
     }
 
     if (childNodes) {

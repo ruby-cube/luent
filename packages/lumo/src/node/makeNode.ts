@@ -6,7 +6,6 @@ import { HTMLTag, makeElement } from "../element/mE";
 import { makeComponent, InferSlotted } from "../component/mO";
 import { InternalNodeRef, NodeRef } from "./NodeRef";
 import { getNodeConfig } from "../../api-play/_setUpNode";
-import { AnyObject } from "@rue/types";
 import { beforeUnmount } from "../component/lifecycle";
 
 export function Fragment() {
@@ -87,7 +86,6 @@ export function _getNodeConfig(ref: NodeRef | undefined) {
 }
 
 export function initializeRef( // should this be initialize ref?
-    component: InternalComponent,
     ref: InternalNodeRef,
     // options?: ElementOptions
 ) {
