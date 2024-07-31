@@ -41,14 +41,14 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
     class?: string | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[],
     style?: string | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[],
     attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
-} & NodeConfig<HTMLElementTagNameMap[K]>
+} & NodeSetup<HTMLElementTagNameMap[K]>
 
-type NodeConfig<T extends Element | ComponentSetup> = {
+type NodeSetup<T extends Element | ComponentSetup> = {
     ref?: NodeRef<T>,
 }
 
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> = 
-T extends (props: infer P) => any ? P & NodeConfig<T> : never
+T extends (props: infer P) => any ? P & NodeSetup<T> : never
 
 
 export function makeNode(

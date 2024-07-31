@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { $else, $elseIf, $if, COMPONENT, Component, ComponentSetup, ConditionalRenderKit, expose, forEachIn, NodeConfig, NodeEntity, NodeRef, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
+import { $else, $elseIf, $if, COMPONENT, Component, ComponentSetup, ConditionalRenderKit, expose, forEachIn, NodeSetup, NodeEntity, NodeRef, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
 import { Signal, useReactivity, watchEffect } from "@rue/muonic"
 import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { TestBlockA } from "./TestBlock";
@@ -20,15 +20,15 @@ const onClick = useEventListener('click');
 export function List() {
     const $list = $([{ id: "one", content: "frog" }, { id: "two", content: "frog" }, { id: "three", content: "fly" }, { id: "four", content: "swamp" }])
 
-    const dialog_box = useNodeRef<typeof DialogBox>()
-
-    teleportTo('body',
-        <DialogBox ref={dialog_box} />
-    )
+    const dialog_box = new NodeRef<typeof DialogBox>()
 
     function openModal() {
         dialog_box.o!.open()
     }
+    
+    teleportTo('body',
+        <DialogBox ref={dialog_box} />
+    )
 
     return (
         <div>
@@ -38,45 +38,15 @@ export function List() {
                     <p>{$index}</p>
                 </>
             ), 'id')}
-            {/* <button onclick={openModal}>open</button> */}
+            <button onclick={openModal}>open</button>
         </div>
     )
 }
 
 export function App() {
-    const $active = $(false);
-    function toggleActive() {
-        set($active, state => !state)
-    }
-
     return (
-        <>
-            <HereBlock $active={$active}></HereBlock>
-            <button onclick={toggleActive}>click</button>
-        </>
+        <List></List>
     )
-}
-
-const appi = useNodeRef<typeof App>() //TODO: array
-const eh = appi.value
-
-
-export function Appi() {
-    const $active = $(false);
-    function toggleActive() {
-        set($active, state => !state)
-    }
-
-    return [
-        expose({
-            $active,
-            toggleActive
-        }),
-        <>
-            <HereBlock $active={$active}></HereBlock>
-            <button onclick={toggleActive}>click</button>
-        </>
-    ]
 }
 
 
@@ -106,11 +76,10 @@ function DialogBox() {
             open,
             close
         }),
-        $if($open, 'show', () => (
-            <dialog style="background-color: gray" open>
-                Stop
-                <button onclick={close}>close</button>
-            </dialog>
-        ))
+
+        <dialog style="background-color: gray" open={$open}>
+            Stop
+            <button onclick={close}>close</button>
+        </dialog>
     ]
 }

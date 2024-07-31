@@ -24,7 +24,7 @@ export type ComponentSetup<P = any> = P extends never ?
     (() => NodeEntity[] | NodeEntity) | (() => [PublicComponent, NodeEntity[] | NodeEntity]) :
     ((props: P) => NodeEntity[] | NodeEntity) | ((props: P) => [PublicComponent, NodeEntity[] | NodeEntity])
 
-export type PublicComponent = { COMPONENT: true } // contains anything in expose
+export type PublicComponent = { [COMPONENT]: true } // contains anything in expose
 
 export class InternalComponent {
     context: AnyObject | undefined;
@@ -102,10 +102,14 @@ export function expose<T extends AnyObject>(component: T) {
     const _component = getCurrentComponent();
     if (_component === null) throw new Error("Cannot call `expose` outside of component setup")
     const publicComponent = _component.component = {
-        COMPONENT: true as const,
+        [COMPONENT]: true as const,
         ...component
     };
     return publicComponent;
+}
+
+export function isComponent(){
+
 }
 
 // export function runUpdates(this: InternalComponent) {

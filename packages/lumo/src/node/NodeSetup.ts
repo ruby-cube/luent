@@ -6,7 +6,7 @@ import { DerivedSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { ComponentConfig, ElementConfig, RenderFunction } from "./makeNode";
 
 
-export type NodeConfig<T extends HTMLTag | ComponentSetup> =
+export type NodeSetup<T extends HTMLTag | ComponentSetup> =
     T extends ComponentSetup ? ComponentConfig<T>
     : T extends HTMLTag ? ElementConfig<T> 
     : never
@@ -17,7 +17,7 @@ export type ItemNodeConfig<
     L extends ListData
 > =
     L extends (infer I)[] ?
-    ((item?: I, $index?: Signal<number>) => NodeConfig<T>)
+    ((item?: I, $index?: Signal<number>) => NodeSetup<T>)
     : L extends ReactiveSignal<(infer I)[]> ?
-    (item?: I, $index?: Signal<number>) => NodeConfig<T>
+    (item?: I, $index?: Signal<number>) => NodeSetup<T>
     : never

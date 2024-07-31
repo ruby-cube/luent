@@ -21,13 +21,13 @@ import { NodeSetupConfig, RenderFunction } from "../src/makeNode";
 type Config<T extends HTMLTag | ComponentSetup = HTMLTag | ComponentSetup> = T extends (props: infer P) => any ? {props: P} & NodeSetupConfig : NodeSetupConfig
 
 // T extends HTMLTag ? NodeSetupConfig : ComponentConfig<T extends ComponentSetup ? T : never> & NodeSetupConfig
-type ListConfig<
+type ListSetup<
     T extends HTMLTag | ComponentSetup = HTMLTag | ComponentSetup,
     L extends ListData = ListData
 > = L extends (infer I)[] ? (item: I, $index: Signal<number>) => Config<T>
     : L extends ReactiveSignal<infer I> ? (item: I, $index: Signal<number>) => Config<T> : never
 
-const nodeConfigMap: WeakMap<NodeRef, NodeSetupConfig | ListConfig> = new WeakMap()
+const nodeConfigMap: WeakMap<NodeRef, NodeSetupConfig | ListSetup> = new WeakMap()
 
 export function setUpNode<T extends HTMLTag | ComponentSetup>(
     nodeType: T,
@@ -47,7 +47,7 @@ export function getNodeConfig<T extends NodeRef>(nodeRef: T) {
 export function setUpNodesIn<T extends HTMLTag | ComponentSetup, L extends ListData>(
     list: L, // This is here for typing purposes only //TODO: should I use this to validate?
     nodeType: T,
-    config: ListConfig<T, L>
+    config: ListSetup<T, L>
 ) {
     return _setUpNode(nodeType, config) as T extends HTMLTag ?
         NodeRef<
@@ -58,7 +58,7 @@ export function setUpNodesIn<T extends HTMLTag | ComponentSetup, L extends ListD
 
 function _setUpNode(
     nodeType: HTMLTag | ComponentSetup,
-    config: Config | ListConfig
+    config: Config | ListSetup
 ): NodeRef {
     const nodeRef = new NodeRef(nodeType)
     nodeConfigMap.set(nodeRef, config)
