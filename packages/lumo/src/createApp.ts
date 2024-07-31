@@ -1,8 +1,8 @@
-import { PublicComponent, ComponentSetup, InternalComponent, popComponent, pushComponent } from "./component";
-import { NodeEntity, RenderFunction } from "./makeNode";
-import { setUpComponent } from "./mE";
-import { mO } from "./mO";
-import { _NodePod } from "./NodePod";
+import { PublicComponent, ComponentSetup, InternalComponent, popComponent, pushComponent } from "./component/component";
+import { NodeEntity, RenderFunction } from "./node/makeNode";
+import { mO } from "./component/mO";
+import { _NodePod } from "./node/NodePod";
+import { setUpComponent } from "./component/setUpComponent";
 
 export function createApp(App: RenderFunction) {
     return {

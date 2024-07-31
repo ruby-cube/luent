@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { $else, $elseIf, $if, COMPONENT, Component, ComponentSetup, ConditionalRenderKit, expose, forEachIn, NodeConfig, NodeEntity, NodeRef, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
 import { Signal, useReactivity, watchEffect } from "@rue/muonic"
-import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/loadComponent";
+import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { TestBlockA } from "./TestBlock";
 import { Sign } from "crypto";
 

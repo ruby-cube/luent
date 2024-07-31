@@ -1,85 +1,54 @@
+import { hasSignal, isReactive, Signal } from "@rue/muonic";
+import { InternalComponent } from "../component/component";
+import { _DynamicNodePod, _NodePod } from "../node/NodePod";
+import { DynamicIndices, ListRenderKit, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
+import { setUpNodeEntity } from "../node/setUpNodeEntity";
+import { watchForRenderAndPreserve } from "../conditional/$if";
+import { watchForRender } from "../reactivity/watchForRender";
 import { AnyObject } from "@rue/types";
-import { hasSignal, ReactiveSignal } from "../../muonic/useDerivedSignal";
-import { _internalReactivity, emitHookBatch, setUpNodeEntity } from "./mE";
-import { isReactive, ReactiveObject } from "../../muonic/useReactivize";
-import { _DynamicNodePod, _NodePod } from "./NodePod";
-import { Signal } from "../../muonic/useSignalize";
-import { LifecycleHook } from "./lifecycle";
-import { InternalComponent, popComponent, pushComponent } from "./component";
-import { InsertAndMoveKit } from "./diff";
-import { getNodeRef } from "./NodeRef";
-import { NodeEntity } from "./makeNode";
+import { diff, InsertAndMoveKit } from "./diff";
+import { LifecycleHook } from "../component/lifecycle";
+import { emitHookBatch } from "../conditional/setUpConditionalSeries";
+import { getNodeRef } from "../node/NodeRef";
+import { _internalReactivity } from "../element/mE";
 import { normalizeToArray } from "@rue/utils";
 
 
-export type RenderItem<T = any> = (item: T, $index: Signal<number>) => NodeEntity[] | NodeEntity
-// type ListData = AnyObject | any[] | Set<any> | Map<any, any> | ReactiveObject<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
-export type ListData = any[] | ReactiveObject<AnyObject[] | UniqueItem[]> | ReactiveSignal<AnyObject[] | UniqueItem>
-export type UniqueItem = any;
+export function setUpNodeList(
+    component: InternalComponent,
+    parent: Element,
+    renderKit: ListRenderKit,
+    nodePod: _NodePod,
+    fragment?: DocumentFragment,
+    componentsToUnmount?: InternalComponent[],
+) {
+    const { data, initialNodeEntities, renderItem, indices, idKey } = renderKit;
+    const isDynamic = isReactive(data) || hasSignal(data);
+    const dynamicPod = isDynamic ? nodePod.appendDynamicPod() : undefined;
 
-export class ListRenderKit<T = any> {
-    constructor(
-        public renderItem: RenderItem<T>, //QUESTION: Does this need the context object?
-        public initialNodeEntities: NodeEntity[][],
-        public data: ListData,
-        public indices: Signal<number>[],
-        public idKey: string | undefined
-    ) { }
-}
-
-// let settingUpList: boolean = false;
-let currentItem: any;
-let $currentIndex: Signal<number> | undefined;
-
-export function getCurrentItemAndIndex(): [any, Signal<number>] | [undefined, undefined] {
-    if ($currentIndex === undefined) return [undefined, undefined]
-    return [currentItem, $currentIndex]
-}
-
-export function setCurrentItemAndIndex(item: any, $index: Signal<number>) {
-    currentItem = item;
-    $currentIndex = $index;
-}
-
-// export function isSettingUpList() {
-//     return settingUpList;
-// }
-
-export function forEachIn(data: any[], render: RenderItem, idKey?: string): ListRenderKit // static list
-export function forEachIn(data: ReactiveObject<UniqueItem[]> | ReactiveSignal<UniqueItem[]>, render: RenderItem, idKey?: string): ListRenderKit // dynamic list
-export function forEachIn(data: ReactiveObject<AnyObject[]> | ReactiveSignal<AnyObject>, render: RenderItem, idKey?: string): ListRenderKit // dynamic list
-export function forEachIn(data: ListData, render: RenderItem, idKey?: string): ListRenderKit {
-    const domNodes = [];
-    const list = hasSignal(data) ? data() : data;
-
-    const indices = []
-
-    // settingUpList = true;
-    let i = 0;
-    while (i < list.length) {
-        const $index = _internalReactivity.$(i)
-        const item = list[i]
-        currentItem = item;
-        $currentIndex = $index;
-        indices.push($index)
-        domNodes.push(normalizeToArray(render(item, $index)));
-        i++;
+    for (const nodeEntities of initialNodeEntities) {
+        nodePod = isDynamic ? dynamicPod!.appendNodePod() : nodePod;
+        for (const nodeEntity of nodeEntities) {
+            setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
+        }
     }
-    currentItem = undefined;
-    $currentIndex = undefined;
-    // settingUpList = false;
 
-    return new ListRenderKit(render, domNodes, data, indices, idKey);
-}
+    // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
 
+    if (isDynamic) {
+        const dynamicIndices = new DynamicIndices(indices)
+        const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender //TODO: Not sure if I need this yet
 
-export class DynamicIndices {
-    current: Signal<number>[];
-    constructor(indices: Signal<number>[]) {
-        this.current = indices
-    }
-    update(newIndices: Signal<number>[]) {
-        this.current = newIndices
+        // set up watcher for updates
+        _watchForRender(data, (newValue: AnyObject[], oldValue: AnyObject[]) => {
+            const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
+            if (noChange) return;
+            if (dynamicPod!.length !== oldValue.length) throw new Error("dynamicPod and data length are mismatched. This should never happen.")
+            component.emit(LifecycleHook.BEFORE_UPDATE)
+            removeListItemNodes(dynamicPod!, indicesToRemove!);
+            insertAndMoveListItemNodes(component, insertAndMoveKit!, dynamicPod!, parent, renderItem, dynamicIndices)
+            component.emit(LifecycleHook.UPDATED)
+        })
     }
 }
 
@@ -237,4 +206,3 @@ function appendNodes(fragment: DocumentFragment, nodePod: _NodePod) {
         }
     }
 }
-

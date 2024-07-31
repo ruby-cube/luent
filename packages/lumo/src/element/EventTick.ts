@@ -1,6 +1,4 @@
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
-import { onUnmounted } from "./lifecycle";
-import { getActiveFlask } from "@rue/flask/flask";
 
 const eventTickMap: WeakMap<EventTarget, Map<string, EventTick>> = new WeakMap();
 

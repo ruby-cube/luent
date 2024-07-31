@@ -1,12 +1,13 @@
 import { getWithoutTracking, ReactiveSignal } from "@rue/muonic"
 import { ConditionalSeries, watchForRenderAndPreserve } from "./$if"
-import { DOMNode, InternalComponent, popComponent, pushComponent } from "./component"
-import { _DynamicNodePod, _NodePod } from "./NodePod"
-import { mountConditional, setUpNodeEntity } from "./mE"
-import { watchForRender } from "./watchForRender"
+import { DOMNode, InternalComponent, popComponent, pushComponent } from "../component/component"
+import { _DynamicNodePod, _NodePod } from "../node/NodePod"
+import { watchForRender } from "../reactivity/watchForRender"
 import { isEqual } from "@rue/utils"
 import { LifecycleHook } from "./lifecycle"
-import { NodeEntity } from "./makeNode"
+import { NodeEntity } from "../node/makeNode"
+import { mountConditional } from "./setUpConditionalSeries"
+import { setUpNodeEntity } from "../node/setUpNodeEntity"
 
 const showIfMap: WeakMap<DOMNode, string> = new WeakMap()
 

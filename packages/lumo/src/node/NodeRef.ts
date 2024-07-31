@@ -1,7 +1,7 @@
-import { PublicComponent, ComponentSetup } from "./component"
+import { PublicComponent, ComponentSetup } from "../component/component"
 import { _NodePod } from "./NodePod"
 import { Signal } from "@rue/muonic/useSignalize"
-import { ConditionalRenderKit } from "./$if"
+import { ConditionalRenderKit } from "../conditional/$if"
 import { ArrayItem } from "@rue/types"
 
 

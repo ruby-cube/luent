@@ -1,8 +1,9 @@
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "./lifecycle";
-import { InternalNodeRef } from "./NodeRef";
-import { EventHandler, NodeEntity, RenderFunction } from "./makeNode";
+import { InternalNodeRef } from "../node/NodeRef";
+import { EventHandler, NodeEntity, RenderFunction } from "../node/makeNode";
 import { DerivedSignal } from "@rue/muonic";
+import { _NodePod } from "../node/NodePod";
 
 // export type NodeRef = Signal<PublicComponent | DOMNode | (DOMNode | PublicComponent)[]>
 
@@ -124,3 +125,5 @@ export function expose<T extends AnyObject>(component: T) {
 //     }
 //     return taskQueue;
 // }
+
+

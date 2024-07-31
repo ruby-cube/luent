@@ -41,7 +41,7 @@ export function provide<T>(key: SymbolKey<T> | symbol | string, value: T) {
 }
 
 
-export function pull<T>(key: SymbolKey<T> | symbol | string, optional?: '?'): T | undefined {
+export function fromContext<T>(key: SymbolKey<T> | symbol | string, optional?: '?'): T | undefined {
     const component = getCurrentComponent();
     let provider = currentProvider;
     if (!provider && !optional) throw new Error("There is no provider in this component's ancestry. `fromContext` can only be called from within a component's setup")
@@ -54,7 +54,7 @@ export function pull<T>(key: SymbolKey<T> | symbol | string, optional?: '?'): T 
         parent = parent.parent;
     }
     try {
-        return pullGlobal(key);
+        return fromGlobal(key);
     }
     catch(e){
         if (optional) return undefined;
@@ -70,7 +70,7 @@ export function provideGlobal<T>(key: SymbolKey<T> | symbol | string, value: T) 
     globalEntries.set(key, value);
 }
 
-export function pullGlobal<T>(key: SymbolKey<T> | symbol | string, optional?: '?'): T | undefined {
+export function fromGlobal<T>(key: SymbolKey<T> | symbol | string, optional?: '?'): T | undefined {
     if (!optional && !globalEntries.has(key)) throw new Error("This value has not been provided globally")
     return globalEntries.get(key)
 }
@@ -83,4 +83,4 @@ export type SymbolKey<T> = T & symbol;
 // Usage
 // const SELECTION = Symbol() as SymbolKey<{ position: number }> // define keys in a keys file
 // provide(SELECTION, { position: 9 }) // in component
-// const selection = pull(SELECTION); // in component
+// const selection = fromContext(SELECTION); // in component

@@ -1,13 +1,13 @@
 import { DerivedSignal, ReactiveSignal } from "@rue/muonic";
-import { ConditionalRenderKit } from "./$if";
-import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "./component";
-import { getCurrentItemAndIndex, ListRenderKit } from "./forEachIn";
-import { HTMLTag, makeElement } from "./mE";
-import { makeComponent, InferSlotted } from "./mO";
+import { ConditionalRenderKit } from "../conditional/$if";
+import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../component/component";
+import { getCurrentItemAndIndex, ListRenderKit } from "../list/forEachIn";
+import { HTMLTag, makeElement } from "../element/mE";
+import { makeComponent, InferSlotted } from "../component/mO";
 import { InternalNodeRef, NodeRef } from "./NodeRef";
-import { getNodeConfig } from "../api-play/_setUpNode";
+import { getNodeConfig } from "../../api-play/_setUpNode";
 import { AnyObject } from "@rue/types";
-import { beforeUnmount } from "./lifecycle";
+import { beforeUnmount } from "../component/lifecycle";
 
 export function Fragment() {
 

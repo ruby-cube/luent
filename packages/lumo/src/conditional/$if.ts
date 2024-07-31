@@ -1,10 +1,10 @@
 import { DerivedSignal, getWithoutTracking, hasSignal, makeDerivedSignal, ReactiveObject, ReactiveSignal } from "@rue/muonic";
-import { getCurrentComponent, InternalComponent } from "./component";
-import { _NodePod } from "./NodePod";
-import { NodeEntity, RenderFunction } from "./makeNode";
+import { getCurrentComponent, InternalComponent } from "../component/component";
+import { _NodePod } from "../node/NodePod";
+import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { watchForRender, watchRenderEffect } from "./watchForRender";
-import { onActivated, onDeactivated } from "./lifecycle";
+import { watchForRender, watchRenderEffect } from "../reactivity/watchForRender";
+import { onActivated, onDeactivated } from "../component/lifecycle";
 
 export type RenderConditional = () => NodeEntity[]
 

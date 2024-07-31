@@ -1,6 +1,6 @@
 import { useSignalize } from "@rue/muonic";
 import { ComponentSetup } from "./component";
-import { $else, $elseIf, $if } from "./$if";
+import { $else, $elseIf, $if } from "../conditional/$if";
 import { noop } from "@rue/utils";
 
 const { $, set } = useSignalize();

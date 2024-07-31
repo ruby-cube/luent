@@ -1,10 +1,10 @@
-import { _watchEffect, getDependencies, useTaskQueues } from "../../muonic/watch";
-import { getCurrentComponent, InternalComponent } from "./component";
-import { LifecycleHook, onUnmounted } from "./lifecycle";
-import { beforeUpdatePhase, onUpdateComplete } from "../../muonic/UpdateCycle";
-import { ReactiveSignal } from "../../muonic/useDerivedSignal";
-import { ReactiveObject } from "../../muonic/useReactivize";
+import { _watchEffect, getDependencies, useTaskQueues } from "@rue/muonic/watch";
+import { getCurrentComponent, InternalComponent } from "../component/component";
+import { beforeUpdatePhase, onUpdateComplete } from "@rue/muonic/UpdateCycle";
+import { ReactiveSignal } from "@rue/muonic/useDerivedSignal";
+import { ReactiveObject } from "@rue/muonic/useReactivize";
 import { AnyObject } from "@rue/types";
+import { LifecycleHook } from "../component/lifecycle";
 
 
 export function watchRenderEffect(effect: () => void) {
