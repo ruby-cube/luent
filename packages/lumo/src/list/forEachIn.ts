@@ -55,7 +55,6 @@ export function forEachIn(data: ListData, render: RenderItem, idKey?: string): L
     const indices = []
     const flasks: Flask[] = []
 
-    // settingUpList = true;
     let i = 0;
     while (i < list.length) {
         const $index = _listReactivity.$(i)
@@ -64,17 +63,17 @@ export function forEachIn(data: ListData, render: RenderItem, idKey?: string): L
         $currentIndex = $index;
         indices.push($index)
         collectEffects((flask, outerFlask) => {
+            console.log("outerflask", outerFlask)
             domNodes.push(normalizeToArray(render(item, $index)));
             if (isDynamic) {
-                flasks.push();
-                outerFlask?.onDisposal(flask.dispose)
+                flasks.push(flask);
             }
+            outerFlask?.onDisposal(flask.dispose)
         })
         i++;
     }
     currentItem = undefined;
     $currentIndex = undefined;
-    // settingUpList = false;
 
     return new ListRenderKit(render, domNodes, data, indices, idKey, flasks);
 }

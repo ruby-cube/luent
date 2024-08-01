@@ -11,7 +11,7 @@ import { LifecycleHook } from "../component/lifecycle";
 import { getNodeRef } from "../node/NodeRef";
 import { normalizeToArray } from "@rue/utils";
 import { emitHookBatch, removeDOMNodes } from "../conditional/setUpConditionalMount";
-import { collectEffects, Flask } from "@rue/flask";
+import { collectEffects, Flask, getActiveFlask } from "@rue/flask";
 import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle";
 import { NodeEntity } from "../node/makeNode";
 
@@ -58,7 +58,11 @@ export function setUpNodeList(
         // set up watcher for updates
         const updateCycle = getCurrentUpdateCycle();
         _watchForRender(data, (newValue: AnyObject[], oldValue: AnyObject[]) => {
-            if (updateCycle === getCurrentUpdateCycle()) return;
+            if (updateCycle === getCurrentUpdateCycle()) {
+                console.warn("prevented same update cycle")
+                return;
+            }
+            console.log("updating node list", getActiveFlask())
             const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
             if (noChange) return;
             if (dynamicPod!.length !== oldValue.length) throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)

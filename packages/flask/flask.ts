@@ -35,23 +35,18 @@ export function onFlaskDisposal(cb: () => void) {
 
 
 class NestableFlask {
-    o: Flask;
+    o: Flask = createFlask(this)
     outer: NestableFlask | null = null
     setOuter(flask: NestableFlask | null) {
         this.outer = flask;
     }
     cleanups: Set<() => void> = new Set()
-    constructor(flask: Flask) {
-        this.o = flask
-    }
 }
 
 
-export function createFlask() {
+function createFlask(_flask: NestableFlask) {
 
-    let _flask: NestableFlask;
-
-    const flask = {
+    return {
         dispose() {
             const cleanups = _flask.cleanups;
             for (const cleanUp of cleanups) {
@@ -73,16 +68,12 @@ export function createFlask() {
                 popFlask();
             }
         }
-    }
-
-    _flask = new NestableFlask(flask)
-
-    return flask;
+    };
 }
 
 export function collectEffects<T>(run: (flask: Flask, outerFlask: Flask | null) => T) {
     const outerFlask = getActiveFlask();
-    const _flask = new NestableFlask(createFlask());
+    const _flask = new NestableFlask();
     try {
         pushFlask(_flask);
         return run(_flask.o, outerFlask?.o || null);

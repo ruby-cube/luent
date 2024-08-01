@@ -37,7 +37,7 @@ export function setUpConditionalMount(
         prevFlask = flask;
         const updateCycle = getCurrentUpdateCycle()
         function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-            if (updateCycle === getCurrentUpdateCycle()){
+            if (updateCycle === getCurrentUpdateCycle()) {
                 console.warn("Dev Note: This warning is here to test to see if updateCycle for initiation is ever the same as updating the conditional. If this warning shows, that means this is not useless code")
                 return;
             }
@@ -45,7 +45,7 @@ export function setUpConditionalMount(
             pushComponent(component)
             // evaluate conditions
             const { $conditions, activeIndex } = series.evaluateConditions();
-
+            console.log("updating conditional")
             // render and add/remove node pods
             component.emit(LifecycleHook.BEFORE_UPDATE)
             removePrevConditionalNodes(component, dynamicPod);
