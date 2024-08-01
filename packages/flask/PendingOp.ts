@@ -52,7 +52,7 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
             }
             finally {
                 if (pendingCancelOp) pendingCancelOp.cancel();
-                _reject(new Cancellation("Pending op canceled."))
+                _resolve(new Cancellation("Pending op canceled."))
             }
         }) as CallbackRemover;
         _cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.

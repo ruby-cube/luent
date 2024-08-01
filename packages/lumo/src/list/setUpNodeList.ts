@@ -1,7 +1,7 @@
 import { hasSignal, isReactive, Signal, useSignals } from "@rue/muonic";
-import { InternalComponent } from "../component/component";
+import { InternalComponent, popComponent, pushComponent } from "../component/component";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
-import { DynamicIndices, ListRenderKit, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
+import { _listReactivity, DynamicIndices, ListRenderKit, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
 import { watchForRenderAndPreserve } from "../conditional/$if";
 import { watchForRender } from "../reactivity/watchForRender";
@@ -10,9 +10,10 @@ import { diff, InsertAndMoveKit } from "./diff";
 import { LifecycleHook } from "../component/lifecycle";
 import { getNodeRef } from "../node/NodeRef";
 import { normalizeToArray } from "@rue/utils";
-import { emitHookBatch } from "../conditional/setUpConditionalMount";
+import { emitHookBatch, removeDOMNodes } from "../conditional/setUpConditionalMount";
+import { collectEffects } from "@rue/flask";
+import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle";
 
-const _internalReactivity = useSignals()
 
 export function setUpNodeList(
     component: InternalComponent,
@@ -22,34 +23,40 @@ export function setUpNodeList(
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[],
 ) {
+    console.log("setting up node list") //This runs because of the conditional
     const { data, initialNodeEntities, renderItem, indices, idKey } = renderKit;
     const isDynamic = isReactive(data) || hasSignal(data);
     const dynamicPod = isDynamic ? nodePod.appendDynamicPod() : undefined;
 
-    for (const nodeEntities of initialNodeEntities) {
-        nodePod = isDynamic ? dynamicPod!.appendNodePod() : nodePod;
-        for (const nodeEntity of nodeEntities) {
-            setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
+
+        for (const nodeEntities of initialNodeEntities) {
+            nodePod = isDynamic ? dynamicPod!.appendNodePod() : nodePod;
+            for (const nodeEntity of nodeEntities) {
+                setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
+            }
         }
-    }
 
-    // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
+        // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
+        
+        if (isDynamic) {
+            const dynamicIndices = new DynamicIndices(indices)
+            const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender //TODO: Not sure if I need this yet
 
-    if (isDynamic) {
-        const dynamicIndices = new DynamicIndices(indices)
-        const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender //TODO: Not sure if I need this yet
-
-        // set up watcher for updates
-        _watchForRender(data, (newValue: AnyObject[], oldValue: AnyObject[]) => {
-            const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
-            if (noChange) return;
-            if (dynamicPod!.length !== oldValue.length) throw new Error("dynamicPod and data length are mismatched. This should never happen.")
-            component.emit(LifecycleHook.BEFORE_UPDATE)
-            removeListItemNodes(dynamicPod!, indicesToRemove!);
-            insertAndMoveListItemNodes(component, insertAndMoveKit!, dynamicPod!, parent, renderItem, dynamicIndices)
-            component.emit(LifecycleHook.UPDATED)
-        })
-    }
+            // set up watcher for updates
+            const updateCycle = getCurrentUpdateCycle();
+            _watchForRender(data, (newValue: AnyObject[], oldValue: AnyObject[]) => {
+                if (updateCycle === getCurrentUpdateCycle()) return;
+                const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
+                if (noChange) return;
+                if (dynamicPod!.length !== oldValue.length) throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)
+                pushComponent(component)
+                component.emit(LifecycleHook.BEFORE_UPDATE)
+                removeListItemNodes(dynamicPod!, indicesToRemove!);
+                insertAndMoveListItemNodes(component, insertAndMoveKit!, dynamicPod!, parent, renderItem, dynamicIndices)
+                component.emit(LifecycleHook.UPDATED)
+                popComponent()
+            })
+        }
 }
 
 
@@ -66,15 +73,9 @@ export function removeListItemNodes(dynamicList: _DynamicNodePod, indicesToRemov
     }
 }
 
-function removeDOMNodes(nodePod: _NodePod) {
-    nodePod.forEachNode((node) => {
-        node.remove();
-    })
-}
-
 function removeNodesFromRef(nodePod: _NodePod) {
     nodePod.forEachNode((node, index) => {
-        const ref = getNodeRef(node) //FIX: What about textnodes?
+        const ref = getNodeRef(node)
         if (ref) ref.removeNode(index!)
     })
 }
@@ -112,7 +113,7 @@ export function insertAndMoveListItemNodes(
             // get index from old indices 
             const $index = dynamicIndices.current[prevIndex];
             newIndices.push($index);
-            _internalReactivity.set($index, () => i) //TODO: I don't know if it's okay to set a Signal inside an effect...
+            _listReactivity.set($index, () => i)
         }; // item is not new and has not moved
 
         if (!nodePod) continue;
@@ -127,14 +128,13 @@ export function insertAndMoveListItemNodes(
         }
 
         if (isNewItem(uItem)) {
+            console.log("new Item!")
             const item = getOriginalItem(uItem, newUArray)
-            const $index = _internalReactivity.$(i)
+            const $index = _listReactivity.$(i)
             setCurrentItemAndIndex(item, $index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
-            // pushComponent(component)
             const nodeEntities = normalizeToArray(renderItem(item, $index));
-            // popComponent()
             for (const nodeEntity of nodeEntities) {
                 setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
             }

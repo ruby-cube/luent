@@ -8,6 +8,7 @@ import { LifecycleHook } from "../component/lifecycle"
 import { NodeEntity } from "../node/makeNode"
 import { mountConditional } from "./setUpConditionalMount"
 import { setUpNodeEntity } from "../node/setUpNodeEntity"
+import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle"
 
 export function setUpConditionalDisplay(
     component: InternalComponent,
@@ -41,7 +42,12 @@ export function setUpConditionalDisplay(
 
     let prevIndex = activeIndex;
 
+    const updateCycle = getCurrentUpdateCycle()
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
+        if (updateCycle === getCurrentUpdateCycle()){
+            console.warn("Dev Note: This warning is here to test to see if updateCycle for initiation is ever the same as updating the conditional. If this warning shows, that means this is not useless code")
+            return;
+        }
         if (isEqual(newValue, oldValue)) return;
         const { $conditions, activeIndex } = series.evaluateConditions();
 

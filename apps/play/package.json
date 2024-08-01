@@ -10,7 +10,8 @@
         "@rue/flask": "workspace:*",
         "@rue/jsx-runtime": "workspace:*",
         "@rue/lumo": "workspace:*",
-        "@rue/muonic": "workspace:*"
+        "@rue/muonic": "workspace:*",
+        "@rue/utils": "workspace:*"
     },
     "devDependencies": {
         "@babel/cli": "^7.24.8",

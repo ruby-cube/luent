@@ -38,6 +38,9 @@ importers:
       '@rue/muonic':
         specifier: workspace:*
         version: link:../../packages/muonic
+      '@rue/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
     devDependencies:
       '@babel/cli':
         specifier: ^7.24.8

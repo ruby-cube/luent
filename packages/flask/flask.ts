@@ -1,7 +1,7 @@
 import { Callback } from "./flaskedListeners";
 
 
-type Flask = {
+export type Flask = {
     dispose: () => void;
     onDisposal: (cleanUp: () => void) => void;
 }

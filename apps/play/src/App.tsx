@@ -1,12 +1,16 @@
-//@ts-nocheck
-import { $else, $elseIf, $if, COMPONENT, Component, ComponentSetup, ConditionalRenderKit, expose, forEachIn, NodeSetup, NodeEntity, NodeRef, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
+import { $else, $elseIf, $if, COMPONENT, ComponentSetup, ConditionalRenderKit, expose, forEachIn, NodeEntity, NodeRef, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
 import { Signal, useReactivity, watchEffect } from "@rue/muonic"
 import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/component/loadComponent";
-import { TestBlockA } from "./TestBlock";
-import { Sign } from "crypto";
+import { useRandomColorGenerator } from "@rue/utils";
 
 
 const { $, set } = useReactivity();
+const randomColor = useRandomColorGenerator()
+let id = 4;
+
+function genId() {
+    return id++;
+}
 
 const loadSideBlock = idleLoadComponent({
     load: () => import('./SideBlock').then(({ SideBlock }) => SideBlock),
@@ -18,16 +22,69 @@ const loadSideBlock = idleLoadComponent({
 const onClick = useEventListener('click');
 
 export function List() {
-    const $list = $([{ id: "one", content: "frog" }, { id: "two", content: "frog" }, { id: "three", content: "fly" }, { id: "four", content: "swamp" }])
+    const $list = $([
+        { id: 0, content: "frog" },
+        { id: 1, content: "frog" },
+        { id: 2, content: "fly" },
+        { id: 3, content: "swamp" }
+    ])
 
-
-
-    const $visible = $(false);
-
-    function toggleVisibility() {
-        set($visible, visibility => !visibility)
+    function insertItem(index: number) {
+        const list = [...$list()];
+        list.splice(index, 0, {
+            id: genId(),
+            content: (Math.random() * 100).toString()
+        })
+        console.log("list", list)
+        set($list, () => list)
     }
 
+    function removeItem(index: number) {
+        const list = [...$list()];
+        list.splice(index, 1);
+        set($list, () => list)
+    }
+
+    const { openModal } = useModal();
+
+    return (
+        <div>
+            <>
+                {$if($(() => $list().length === 0), 'create', () => (
+                    <div
+                        onclick={() => insertItem(0)}
+                        style="background-color: gray; cursor: pointer"
+                    >
+                        insert
+                    </div>
+                ))}
+                {$else(() =>
+                    forEachIn($list, (item, $index) => (
+                        <div style={`background-color: ${randomColor.get()}`}>
+                            <p
+                                onclick={() => removeItem($index())}
+                                style="cursor: pointer"
+                            >
+                                X
+                            </p>
+                            <li>{item.content}</li>
+                            <p>{$index}</p>
+                            <div
+                                onclick={() => insertItem($index() + 1)}
+                                style="background-color: gray; cursor: pointer"
+                            >
+                                insert
+                            </div>
+                        </div>
+                    ), 'id')
+                )}
+            </>
+            <button onclick={openModal}>open</button>
+        </div>
+    )
+}
+
+function useModal() {
     const dialog_box = new NodeRef<typeof DialogBox>()
 
     function openModal() {
@@ -38,31 +95,33 @@ export function List() {
         <DialogBox ref={dialog_box} />
     )
 
+    return {
+        openModal
+    }
+}
+
+function VisibilityBlock() {
+    const $visible = $(false);
+
+    function toggleVisibility() {
+        set($visible, visibility => !visibility)
+    }
     return (
-        <div>
+        <>
             <div style="display: flex">
-                <>
-                    {$if($visible, 'show', () => (
-                        <>
-                            <div>surprise</div>
-                            <div>surprise!</div>
-                            <div>surprise!!</div>
-                        </>
-                    ))}
-                    {$else(() => (
-                        <div>:)</div>
-                    ))}
-                </>
+                {$if($visible, 'show', () => (
+                    <>
+                        <div>surprise</div>
+                        <div>surprise!</div>
+                        <div>surprise!!</div>
+                    </>
+                ))}
+                {$else(() => (
+                    <div>:)</div>
+                ))}
             </div>
             <button onclick={toggleVisibility}>show/hide</button>
-            {forEachIn($list, (item, $index) => (
-                <>
-                    <li>{item.content}</li>
-                    <p>{$index}</p>
-                </>
-            ), 'id')}
-            <button onclick={openModal}>open</button>
-        </div>
+        </>
     )
 }
 

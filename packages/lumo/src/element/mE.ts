@@ -15,7 +15,6 @@ import { runNonSyncTasks } from "@rue/muonic";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
 import { beforeUnmount } from "../component/lifecycle";
 
-const _internalReactivity = useSignals()
 
 export type HTMLTag = keyof HTMLElementTagNameMap
 

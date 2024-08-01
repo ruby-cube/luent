@@ -2,6 +2,7 @@ import { AnyObject } from "@rue/types";
 import { longestCommonSubstring } from "./lcs";
 import { UniqueItem } from "./forEachIn";
 import { isEqual } from "@rue/utils";
+import { it } from "node:test";
 
 
 
@@ -67,10 +68,13 @@ export type InsertAndMoveKit = {
 
 function toIdArray(target: AnyObject[], idKey: string | symbol) {
     const idArray = new UniqueArray();
+    const itemMap: Map<any, any> = new Map();
+    
     for (const item of target) {
         idArray.push(item[idKey])
+        itemMap.set(item[idKey], item )
     }
-    const itemMap: Map<any, any> = new Map();
+    
     idArray.getItem = (id: any) => {
         const item = itemMap.get(id);
         if (!item) throw new Error(`There is no item associated with ${id}`)

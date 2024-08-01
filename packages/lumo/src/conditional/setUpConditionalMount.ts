@@ -7,6 +7,8 @@ import { ConditionalSeries, RenderConditional, watchForRenderAndPreserve } from 
 import { LifecycleHook } from "../component/lifecycle";
 import { NodeEntity } from "../node/makeNode";
 import { getNodeRef } from "../node/NodeRef";
+import { collectEffects, Flask } from "@rue/flask/flask";
+import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle";
 
 export function setUpConditionalMount(
     component: InternalComponent,
@@ -17,39 +19,51 @@ export function setUpConditionalMount(
 ) {
     // evaluate conditions and render
     const { $conditions, activeIndex } = series.evaluateConditions()
-    const initialNodeEntities = series.render(activeIndex)
+    let prevFlask: Flask;
 
-    // append to dom and node pod
-    const dynamicPod = nodePod.appendDynamicPod();
-    const _nodePod = dynamicPod.appendNodePod()
-    for (const nodeEntity of initialNodeEntities) {
-        setUpNodeEntity(component, parent, nodeEntity, _nodePod, fragment, nodePod.componentsToUnmount)
-    }
+    collectEffects((flask, outerFlask) => {
+        const initialNodeEntities = series.render(activeIndex)
 
-    // set up watcher for updates
-    const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
-    _watchForRender($conditions, updateConditional, { once: true })
+        // append to dom and node pod
+        const dynamicPod = nodePod.appendDynamicPod();
+        const _nodePod = dynamicPod.appendNodePod()
+        for (const nodeEntity of initialNodeEntities) {
+            setUpNodeEntity(component, parent, nodeEntity, _nodePod, fragment, nodePod.componentsToUnmount)
+        }
 
-    function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-        console.log("update conditional")
-        if (isEqual(newValue, oldValue)) return;
-        pushComponent(component)
-
-        // evaluate conditions
-        const { $conditions, activeIndex } = series.evaluateConditions();
-
-        // render and add/remove node pods
-        component.emit(LifecycleHook.BEFORE_UPDATE)
-        removePrevConditionalNodes(dynamicPod);
-        const nodeEntities = series.render(activeIndex)
-        console.log("nodeEntities", nodeEntities, activeIndex, series)
-        insertNewConditionalNodes(component, parent, dynamicPod, nodeEntities)
-        component.emit(LifecycleHook.UPDATED)
-
-        // set up for next update
+        // set up watcher for updates
+        const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
         _watchForRender($conditions, updateConditional, { once: true })
-        popComponent()
-    }
+        prevFlask = flask;
+        const updateCycle = getCurrentUpdateCycle()
+        function updateConditional(newValue: boolean[], oldValue: boolean[]) {
+            if (updateCycle === getCurrentUpdateCycle()){
+                console.warn("Dev Note: This warning is here to test to see if updateCycle for initiation is ever the same as updating the conditional. If this warning shows, that means this is not useless code")
+                return;
+            }
+            if (isEqual(newValue, oldValue)) return;
+            pushComponent(component)
+            // evaluate conditions
+            const { $conditions, activeIndex } = series.evaluateConditions();
+
+            // render and add/remove node pods
+            component.emit(LifecycleHook.BEFORE_UPDATE)
+            removePrevConditionalNodes(component, dynamicPod);
+            prevFlask.dispose();
+            outerFlask?.onDisposal(flask.dispose)
+            collectEffects((flask, outerFlask) => {
+                const nodeEntities = series.render(activeIndex)
+                insertNewConditionalNodes(component, parent, dynamicPod, nodeEntities)
+                component.emit(LifecycleHook.UPDATED)
+
+                // set up for next update
+                _watchForRender($conditions, updateConditional, { once: true })
+                prevFlask = flask;
+                outerFlask?.onDisposal(flask.dispose)
+            })
+            popComponent()
+        }
+    })
 }
 
 export function emitHookBatch(hookName: LifecycleHook, components: InternalComponent[] | undefined) {
@@ -63,11 +77,7 @@ export function emitHookBatch(hookName: LifecycleHook, components: InternalCompo
 
 // }
 
-export function removeDOMNodes(nodePod: _NodePod) {
-    nodePod.forEachNode((node) => {
-        node.remove();
-    })
-}
+
 
 
 export function populateFragment(fragment: DocumentFragment, nodePod: _NodePod) {
@@ -84,24 +94,14 @@ function getPreservedNodePod(renderConditional: RenderConditional) {
     return nodePod;
 }
 
-function removePrevConditionalNodes(dynamicPod: _DynamicNodePod) {
-    // component === App
-    // const preserve = component.preserve;
+function removePrevConditionalNodes(component: InternalComponent, dynamicPod: _DynamicNodePod) {
     const nodePod = dynamicPod[0];
     const components = nodePod.componentsToUnmount;
 
-    // if (preserve) {
-    //     preservedNodePods.set(renderConditional, nodePod) // I don't think this is necessary...
-    // }
-    // else {
     emitBeforeUnmount(components)
-    // }
-
     removeDOMNodes(nodePod)
-    nullNodeRefValues(nodePod, components)
-    // emitHookBatch(preserve ? LifecycleHook.DEACTIVATED : LifecycleHook.UNMOUNTED, components)
+    if (!component.preserve) nullNodeRefValues(nodePod, components)
     emitUnmountedOrDeactivated(components)
-    // dynamicPod.replaceNodePod(0, new _NodePod()); // clears previous
 }
 
 function emitUnmountedOrDeactivated(components: InternalComponent[]) {
@@ -118,6 +118,11 @@ function emitBeforeUnmount(components: InternalComponent[]) {
     }
 }
 
+export function removeDOMNodes(nodePod: _NodePod) {
+    nodePod.forEachNode((node) => {
+        node.remove();
+    })
+}
 
 
 function insertNewConditionalNodes(component: InternalComponent, parent: Element, dynamicPod: _DynamicNodePod, nodeEntities: NodeEntity[]) {
@@ -127,7 +132,7 @@ function insertNewConditionalNodes(component: InternalComponent, parent: Element
     mountConditional(nodePod, component, parent, dynamicPod, nodeEntities);
 
     emitActivated(nodePod.componentsToUnmount)
-    restoreNodeRefValues(nodePod, nodePod.componentsToUnmount)
+    // restoreNodeRefValues(nodePod, nodePod.componentsToUnmount)
 }
 
 export function mountConditional(nodePod: _NodePod, component: InternalComponent, parent: Element, dynamicPod: _DynamicNodePod, nodeEntities: NodeEntity[]) {
@@ -147,12 +152,12 @@ export function mountConditional(nodePod: _NodePod, component: InternalComponent
 function nullNodeRefValues(nodePod: _NodePod, components: InternalComponent[]) {
     nodePod.forEachNode(node => {
         const ref = getNodeRef(node);
-        if (ref && ref.o.o) ref.setValue(undefined) 
+        if (ref && ref.o.o) ref.setValue(undefined)
     })
-    // for (const component of components){ //NOTE: Deferred until needed (see note in restoreNodeRefValues)
-    //     const ref = getNodeRef(component.component);
-    //     if (ref && ref.o.value) ref.setValue(null)
-    // }
+    for (const component of components) {
+        const ref = getNodeRef(component.component);
+        if (ref && ref.o.o) ref.setValue(null)
+    }
 }
 
 function restoreNodeRefValues(nodePod: _NodePod, components: InternalComponent[]) {

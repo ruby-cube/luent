@@ -5,8 +5,9 @@ import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Signal, useSignals } from "@rue/muonic/useSignals";
 import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
+import { collectEffects, Flask } from "@rue/flask";
 
-const _internalReactivity = useSignals()
+export const _listReactivity = useSignals()
 
 export type RenderItem<T = any> = (item: T, $index: Signal<number>) => NodeEntity[] | NodeEntity
 // type ListData = AnyObject | any[] | Set<any> | Map<any, any> | ReactiveObject<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
@@ -19,7 +20,7 @@ export class ListRenderKit<T = any> {
         public initialNodeEntities: NodeEntity[][],
         public data: ListData,
         public indices: Signal<number>[],
-        public idKey: string | undefined
+        public idKey: string | undefined,
     ) { }
 }
 
@@ -45,27 +46,27 @@ export function forEachIn(data: any[], render: RenderItem, idKey?: string): List
 export function forEachIn(data: ReactiveObject<UniqueItem[]> | ReactiveSignal<UniqueItem[]>, render: RenderItem, idKey?: string): ListRenderKit // dynamic list
 export function forEachIn(data: ReactiveObject<AnyObject[]> | ReactiveSignal<AnyObject>, render: RenderItem, idKey?: string): ListRenderKit // dynamic list
 export function forEachIn(data: ListData, render: RenderItem, idKey?: string): ListRenderKit {
-    const domNodes = [];
-    const list = hasSignal(data) ? data() : data;
+        const domNodes = [];
+        const list = hasSignal(data) ? data() : data;
 
-    const indices = []
+        const indices = []
 
-    // settingUpList = true;
-    let i = 0;
-    while (i < list.length) {
-        const $index = _internalReactivity.$(i)
-        const item = list[i]
-        currentItem = item;
-        $currentIndex = $index;
-        indices.push($index)
-        domNodes.push(normalizeToArray(render(item, $index)));
-        i++;
-    }
-    currentItem = undefined;
-    $currentIndex = undefined;
-    // settingUpList = false;
+        // settingUpList = true;
+        let i = 0;
+        while (i < list.length) {
+            const $index = _listReactivity.$(i)
+            const item = list[i]
+            currentItem = item;
+            $currentIndex = $index;
+            indices.push($index)
+            domNodes.push(normalizeToArray(render(item, $index)));
+            i++;
+        }
+        currentItem = undefined;
+        $currentIndex = undefined;
+        // settingUpList = false;
 
-    return new ListRenderKit(render, domNodes, data, indices, idKey);
+        return new ListRenderKit(render, domNodes, data, indices, idKey);
 }
 
 
