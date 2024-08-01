@@ -18,7 +18,7 @@ export function setUpConditionalDisplay(
     fragment?: DocumentFragment,
     // componentsToUnmount?: InternalComponent[],
 ) {
-
+console.log("setting up conditional display")
     const { $conditions, activeIndex } = series.evaluateConditions()
     const dynamicPod = nodePod.appendDynamicPod();
 

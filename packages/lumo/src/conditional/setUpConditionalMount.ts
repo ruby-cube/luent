@@ -21,7 +21,7 @@ export function setUpConditionalMount(
     const { $conditions, activeIndex } = series.evaluateConditions()
     let prevFlask: Flask;
 
-    collectEffects((flask, outerFlask) => {
+    collectEffects((flask, outerFlask) => { //QUESTION: Do I need to remove this for preserve?
         const initialNodeEntities = series.render(activeIndex)
 
         // append to dom and node pod

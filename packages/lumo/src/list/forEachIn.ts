@@ -6,6 +6,7 @@ import { Signal, useSignals } from "@rue/muonic/useSignals";
 import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { collectEffects, Flask } from "@rue/flask";
+import { DOMNode } from "../component/component";
 
 export const _listReactivity = useSignals()
 
@@ -21,6 +22,7 @@ export class ListRenderKit<T = any> {
         public data: ListData,
         public indices: Signal<number>[],
         public idKey: string | undefined,
+        public flasks: Flask[]
     ) { }
 }
 
@@ -46,27 +48,35 @@ export function forEachIn(data: any[], render: RenderItem, idKey?: string): List
 export function forEachIn(data: ReactiveObject<UniqueItem[]> | ReactiveSignal<UniqueItem[]>, render: RenderItem, idKey?: string): ListRenderKit // dynamic list
 export function forEachIn(data: ReactiveObject<AnyObject[]> | ReactiveSignal<AnyObject>, render: RenderItem, idKey?: string): ListRenderKit // dynamic list
 export function forEachIn(data: ListData, render: RenderItem, idKey?: string): ListRenderKit {
-        const domNodes = [];
-        const list = hasSignal(data) ? data() : data;
+    const domNodes: (NodeEntity | NodeEntity[])[] = [];
+    const list = hasSignal(data) ? data() : data;
+    const isDynamic = isReactive(data) || hasSignal(data);
 
-        const indices = []
+    const indices = []
+    const flasks: Flask[] = []
 
-        // settingUpList = true;
-        let i = 0;
-        while (i < list.length) {
-            const $index = _listReactivity.$(i)
-            const item = list[i]
-            currentItem = item;
-            $currentIndex = $index;
-            indices.push($index)
+    // settingUpList = true;
+    let i = 0;
+    while (i < list.length) {
+        const $index = _listReactivity.$(i)
+        const item = list[i]
+        currentItem = item;
+        $currentIndex = $index;
+        indices.push($index)
+        collectEffects((flask, outerFlask) => {
             domNodes.push(normalizeToArray(render(item, $index)));
-            i++;
-        }
-        currentItem = undefined;
-        $currentIndex = undefined;
-        // settingUpList = false;
+            if (isDynamic) {
+                flasks.push();
+                outerFlask?.onDisposal(flask.dispose)
+            }
+        })
+        i++;
+    }
+    currentItem = undefined;
+    $currentIndex = undefined;
+    // settingUpList = false;
 
-        return new ListRenderKit(render, domNodes, data, indices, idKey);
+    return new ListRenderKit(render, domNodes, data, indices, idKey, flasks);
 }
 
 

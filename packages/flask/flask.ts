@@ -4,6 +4,7 @@ import { Callback } from "./flaskedListeners";
 export type Flask = {
     dispose: () => void;
     onDisposal: (cleanUp: () => void) => void;
+    collectEffects: <T>(run: ()=>T) => T;
 }
 
 
@@ -32,6 +33,7 @@ export function onFlaskDisposal(cb: () => void) {
 }
 
 
+
 class NestableFlask {
     o: Flask = createFlask(this);
     outer: NestableFlask | null = null
@@ -55,13 +57,24 @@ function createFlask(_flask: NestableFlask) {
         _flask.cleanups.add(cleanUp); //TODO: do cleanUps need to be removed?
     }
 
+    function collectEffects(run: () => any) {
+        try {
+            pushFlask(_flask);
+            return run();
+        }
+        finally {
+            popFlask();
+        }
+    }
+
     return {
         dispose,
-        onDisposal
+        onDisposal,
+        collectEffects
     }
 }
 
-export function collectEffects(run: (flask: Flask, outerFlask: Flask | null) => any) {
+export function collectEffects<T>(run: (flask: Flask, outerFlask: Flask | null) => T) {
     const outerFlask = getActiveFlask();
     const _flask = new NestableFlask();
     try {
@@ -74,9 +87,9 @@ export function collectEffects(run: (flask: Flask, outerFlask: Flask | null) => 
 }
 
 
-export function bindFlask(callback: Callback){
+export function bindFlask(callback: Callback) {
     const flask = getActiveFlask()!;
-    return (...args: any[])=>{
+    return (...args: any[]) => {
         pushFlask(flask)
         callback(...args);
         popFlask();

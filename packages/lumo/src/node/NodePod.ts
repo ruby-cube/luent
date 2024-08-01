@@ -1,3 +1,4 @@
+import { Flask } from "@rue/flask";
 import { DOMNode, InternalComponent } from "../component/component";
 import { NodeRef } from "./NodeRef";
 
@@ -43,7 +44,7 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
     pod?: _DynamicNodePod;
     componentsToUnmount: InternalComponent[] = [];
     refs: NodeRef[] = [];
-
+    flask?: Flask
     constructor(pod?: _DynamicNodePod, index?: number) {
         super();
         this.index = index;
@@ -101,6 +102,10 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
                 doTask(nodeEntity, index)
             }
         }
+    }
+
+    setFlask(flask: Flask){
+        this.flask = flask;
     }
 }
 

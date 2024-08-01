@@ -11,8 +11,9 @@ import { LifecycleHook } from "../component/lifecycle";
 import { getNodeRef } from "../node/NodeRef";
 import { normalizeToArray } from "@rue/utils";
 import { emitHookBatch, removeDOMNodes } from "../conditional/setUpConditionalMount";
-import { collectEffects } from "@rue/flask";
+import { collectEffects, Flask } from "@rue/flask";
 import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle";
+import { NodeEntity } from "../node/makeNode";
 
 
 export function setUpNodeList(
@@ -24,39 +25,51 @@ export function setUpNodeList(
     componentsToUnmount?: InternalComponent[],
 ) {
     console.log("setting up node list") //This runs because of the conditional
-    const { data, initialNodeEntities, renderItem, indices, idKey } = renderKit;
+    const { data, initialNodeEntities, renderItem, indices, idKey, flasks } = renderKit;
     const isDynamic = isReactive(data) || hasSignal(data);
     const dynamicPod = isDynamic ? nodePod.appendDynamicPod() : undefined;
 
 
-        for (const nodeEntities of initialNodeEntities) {
-            nodePod = isDynamic ? dynamicPod!.appendNodePod() : nodePod;
+    for (let i = 0; i < initialNodeEntities.length; i++) {
+        const nodeEntities = initialNodeEntities[i];
+        nodePod = isDynamic ? dynamicPod!.appendNodePod() : nodePod;
+        if (isDynamic) {
+            const flask = flasks[i];
+            nodePod.setFlask(flask)
+            flask.collectEffects(() => {
+                for (const nodeEntity of nodeEntities) {
+                    setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
+                }
+            })
+        }
+        else {
             for (const nodeEntity of nodeEntities) {
                 setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
             }
         }
+    }
 
-        // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
-        
-        if (isDynamic) {
-            const dynamicIndices = new DynamicIndices(indices)
-            const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender //TODO: Not sure if I need this yet
+    // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
 
-            // set up watcher for updates
-            const updateCycle = getCurrentUpdateCycle();
-            _watchForRender(data, (newValue: AnyObject[], oldValue: AnyObject[]) => {
-                if (updateCycle === getCurrentUpdateCycle()) return;
-                const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
-                if (noChange) return;
-                if (dynamicPod!.length !== oldValue.length) throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)
-                pushComponent(component)
-                component.emit(LifecycleHook.BEFORE_UPDATE)
-                removeListItemNodes(dynamicPod!, indicesToRemove!);
-                insertAndMoveListItemNodes(component, insertAndMoveKit!, dynamicPod!, parent, renderItem, dynamicIndices)
-                component.emit(LifecycleHook.UPDATED)
-                popComponent()
-            })
-        }
+    if (isDynamic) {
+        const dynamicIndices = new DynamicIndices(indices)
+        const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender //TODO: Not sure if I need this yet
+
+        // set up watcher for updates
+        const updateCycle = getCurrentUpdateCycle();
+        _watchForRender(data, (newValue: AnyObject[], oldValue: AnyObject[]) => {
+            if (updateCycle === getCurrentUpdateCycle()) return;
+            const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
+            if (noChange) return;
+            if (dynamicPod!.length !== oldValue.length) throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)
+            pushComponent(component)
+            component.emit(LifecycleHook.BEFORE_UPDATE)
+            removeListItemNodes(dynamicPod!, indicesToRemove!);
+            insertAndMoveListItemNodes(component, insertAndMoveKit!, dynamicPod!, parent, renderItem, dynamicIndices)
+            component.emit(LifecycleHook.UPDATED)
+            popComponent()
+        })
+    }
 }
 
 
@@ -69,6 +82,7 @@ export function removeListItemNodes(dynamicList: _DynamicNodePod, indicesToRemov
         emitHookBatch(LifecycleHook.BEFORE_UNMOUNT, components!)
         removeDOMNodes(nodePod)
         removeNodesFromRef(nodePod)
+        nodePod.flask!.dispose();
         emitHookBatch(LifecycleHook.UNMOUNTED, components!)
     }
 }
@@ -90,7 +104,7 @@ export function insertAndMoveListItemNodes(
     dynamicList: _DynamicNodePod,
     parent: Element,
     renderItem: RenderItem,
-    dynamicIndices: DynamicIndices
+    dynamicIndices: DynamicIndices,
 ) {
     const { getOriginalItem, isNewItem, hasMoved, newUArray, oldUArray, isRemoved } = insertAndMoveKit;
     if (dynamicList.length !== oldUArray.length) throw "dynamicPod and data length are mismatched"
@@ -128,16 +142,20 @@ export function insertAndMoveListItemNodes(
         }
 
         if (isNewItem(uItem)) {
-            console.log("new Item!")
             const item = getOriginalItem(uItem, newUArray)
             const $index = _listReactivity.$(i)
             setCurrentItemAndIndex(item, $index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
-            const nodeEntities = normalizeToArray(renderItem(item, $index));
-            for (const nodeEntity of nodeEntities) {
-                setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
-            }
+            let nodeEntities;
+            collectEffects((flask, outerFlask) => {
+                nodeEntities = normalizeToArray(renderItem(item, $index));
+                for (const nodeEntity of nodeEntities!) {
+                    setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
+                }
+                nodePod.setFlask(flask);
+                outerFlask?.onDisposal(flask.dispose)
+            })
         }
         else if (hasMoved(uItem)) {
             // move node to fragment (DOM will auto-remove node from DOM)
@@ -168,6 +186,7 @@ export function insertAndMoveListItemNodes(
     while (k--) {
         const [index, count] = indicesAndRemoveCount[k];
         dynamicList!.removeNodePods(index, count);
+
     }
 
     // (2) insert node pods into dynamic list
