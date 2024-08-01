@@ -1,4 +1,4 @@
-import { _watchEffect, getDependencies, useTaskQueues } from "@rue/muonic/watch";
+import { _watchEffect, ChangeHandler, getDependencies, useTaskQueues } from "@rue/muonic/watch";
 import { getCurrentComponent, InternalComponent } from "../component/component";
 import { beforeUpdatePhase, onUpdateComplete } from "@rue/muonic/UpdateCycle";
 import { ReactiveSignal } from "@rue/muonic/DerivedSignal";
@@ -20,7 +20,7 @@ export function watchRenderEffect(effect: () => void) {
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
-export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: { once?: true, eager?: true }) {
+export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: { once?: true, eager?: true }) {
     const component = getCurrentComponent();
     if (!component) throw Error("watchForRender must be called within component setup")
 

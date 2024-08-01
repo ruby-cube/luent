@@ -34,7 +34,7 @@ type Phase = 'pre' | 'render' | 'post' | 'sync'
 
 
 type MutationHandler<T extends any[] | Map<any, any> | Set<any> = any[] | Map<any, any> | Set<any>> = (newValue: T, oldValue: T, ops?: MutationOp[]) => void
-type ChangeHandler<T = AnyObject> = T extends any[] | Map<any, any> | Set<any> ? MutationHandler<T> : (newValue: T, oldValue: T, ops?: (MutationOp | SetOp)[]) => void
+export type ChangeHandler<T = AnyObject> = T extends any[] | Map<any, any> | Set<any> ? MutationHandler<T> : (newValue: T, oldValue: T, ops?: (MutationOp | SetOp)[]) => void
 type ReactiveEffect = () => void //TODO: onCleanup function?
 type Effect = ChangeHandler | ReactiveEffect
 

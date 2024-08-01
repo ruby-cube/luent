@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { track, trigger } from "./watch";
 import { emitSignal } from "./useReactivity";
-import { KeyPath } from "@rue/utils";
+import { KeyPath, Ref } from "@rue/utils";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
@@ -10,15 +10,19 @@ const reactiveMap: WeakMap<ReactiveModel, AnyObject> = new WeakMap();
 
 export function useReactiveModel(config?: { snapshots: boolean }) {
     const localReactives: WeakSet<ReactiveModel> = new WeakSet();
+    function addLocalReactive(reactive: ReactiveModel) {
+        localReactives.add(reactive);
+    }
 
-    let mutationPermitted = false;
+    let mutationPermitted = new Ref(false);
 
     return {
         o$<T extends AnyObject>(target: T): ReactiveModel<T> {
+            if (reactiveMap.has(target)) return target; // prevents double wrapped reactive
 
             const reactive = target instanceof Array ?
                 createReactiveArray(target, mutationPermitted)
-                : createReactiveObject(target, mutationPermitted)
+                : createReactiveObject(target, addLocalReactive, mutationPermitted)
             localReactives.add(reactive)
             reactiveMap.set(reactive, target)
             return reactive as ReactiveModel<T>
@@ -26,9 +30,9 @@ export function useReactiveModel(config?: { snapshots: boolean }) {
 
         mu<T extends ReactiveModel>(target: T, mutation: (o: T) => void) {
             if (!localReactives.has(target)) throw "`mu` can only mutate local reactives created with corresponding `o$` function";
-            mutationPermitted = true;
+            mutationPermitted.o = true;
             mutation(target);
-            mutationPermitted = false;
+            mutationPermitted.o = false;
         }
     }
 }
@@ -50,7 +54,7 @@ export function toRaw<T extends AnyObject>(reactive: ReactiveModel<T>): T {
     return raw as T;
 }
 
-function createReactiveObject(target: AnyObject, mutationPermitted: boolean) {
+function createReactiveObject(target: AnyObject, addLocalReactive: (reactive: ReactiveModel) => void, mutationPermitted: Ref<boolean>) {
     const reactive = new Proxy(target, {
         get(target, key, receiver) {
             const value = Reflect.get(target, key, receiver);
@@ -62,7 +66,7 @@ function createReactiveObject(target: AnyObject, mutationPermitted: boolean) {
             return value;
         },
         set(target, key, newValue, receiver) {
-            if (!mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
+            if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
             const oldValue = Reflect.get(target, key, receiver);
             if (oldValue !== newValue) {
                 trigger(reactive, newValue, oldValue, key)
@@ -71,17 +75,28 @@ function createReactiveObject(target: AnyObject, mutationPermitted: boolean) {
             return true;
         }
     })
+    for (const key in target) {
+        const value = target[key];
+        if (reactiveMap.has(value)) continue; // prevents double wrapped reactive
+        if (Object.getPrototypeOf(value) === Object) {
+            const reactive = createReactiveObject(value, addLocalReactive, mutationPermitted)
+            reactiveMap.set(reactive, value);
+            addLocalReactive(reactive);
+        }
+    }
     return reactive;
 }
 
 
 
-function createReactiveArray(target: any[], mutationPermitted: boolean) {
+
+
+function createReactiveArray(target: any[], mutationPermitted: Ref<boolean>) {
     const reactive = new Proxy(target, {
         get(target, key, receiver) {
             const value = Reflect.get(target, key, receiver);
             if (isMutatingArrayMethod(key)) {
-                if (!mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
+                if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
                 return (...args: any[]) => {
                     trigger(reactive, target, target, key, args)
                     return (<Function>value).apply(target, args);
@@ -93,7 +108,7 @@ function createReactiveArray(target: any[], mutationPermitted: boolean) {
             return value;
         },
         set(target, key, newValue, receiver) {
-            if (!mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
+            if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
             const oldValue = Reflect.get(target, key, receiver);
             if (oldValue !== newValue || !isNonTrackable(key, Array)) {
                 trigger(reactive, newValue, oldValue, key)
