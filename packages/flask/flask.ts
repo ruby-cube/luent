@@ -4,7 +4,7 @@ import { Callback } from "./flaskedListeners";
 export type Flask = {
     dispose: () => void;
     onDisposal: (cleanUp: () => void) => void;
-    collectEffects: <T>(run: ()=>T) => T;
+    collectEffects: <T>(run: (outerFlask: Flask | null) => T) => T;
 }
 
 
@@ -35,48 +35,54 @@ export function onFlaskDisposal(cb: () => void) {
 
 
 class NestableFlask {
-    o: Flask = createFlask(this);
+    o: Flask;
     outer: NestableFlask | null = null
     setOuter(flask: NestableFlask | null) {
         this.outer = flask;
     }
     cleanups: Set<() => void> = new Set()
+    constructor(flask: Flask) {
+        this.o = flask
+    }
 }
 
 
-function createFlask(_flask: NestableFlask) {
+export function createFlask() {
 
-    function dispose() {
-        const cleanups = _flask.cleanups;
-        for (const cleanUp of cleanups) {
-            cleanUp();
+    let _flask: NestableFlask;
+
+    const flask = {
+        dispose() {
+            const cleanups = _flask.cleanups;
+            for (const cleanUp of cleanups) {
+                cleanUp();
+            }
+        },
+
+        onDisposal(cleanUp: () => void) {
+            _flask.cleanups.add(cleanUp); //TODO: do cleanUps need to be removed?
+        },
+
+        collectEffects(run: (outerFlask: Flask | null) => any) {
+            const outerFlask = getActiveFlask();
+            try {
+                pushFlask(_flask);
+                return run(outerFlask?.o || null);
+            }
+            finally {
+                popFlask();
+            }
         }
     }
 
-    function onDisposal(cleanUp: () => void) {
-        _flask.cleanups.add(cleanUp); //TODO: do cleanUps need to be removed?
-    }
+    _flask = new NestableFlask(flask)
 
-    function collectEffects(run: () => any) {
-        try {
-            pushFlask(_flask);
-            return run();
-        }
-        finally {
-            popFlask();
-        }
-    }
-
-    return {
-        dispose,
-        onDisposal,
-        collectEffects
-    }
+    return flask;
 }
 
 export function collectEffects<T>(run: (flask: Flask, outerFlask: Flask | null) => T) {
     const outerFlask = getActiveFlask();
-    const _flask = new NestableFlask();
+    const _flask = new NestableFlask(createFlask());
     try {
         pushFlask(_flask);
         return run(_flask.o, outerFlask?.o || null);

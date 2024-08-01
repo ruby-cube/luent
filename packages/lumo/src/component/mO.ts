@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { PublicComponent, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent, COMPONENT } from "./component";
 import { SetKey, Signal } from "@rue/muonic/useSignals";
-import { collectEffects } from "@rue/flask/flask";
+import { collectEffects, createFlask } from "@rue/flask/flask";
 import { InternalNodeRef, getNodeRef, NodeRef } from "../node/NodeRef";
 import { ComponentConfig, EventsConfig, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
