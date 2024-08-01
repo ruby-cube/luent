@@ -61,7 +61,7 @@ export class DerivedSignalState {
                 const _isSignal = isSignal(dep);
                 const reactive = _isSignal ? null : dep[0];
                 const key = _isSignal ? null : dep[1];
-                const watcher = watch(_isSignal ? dep : () => reactive![key!], (newValue, oldValue) => {
+                const watcher = watch(_isSignal ? dep : () => reactive![key!], (newValue: any, oldValue: any) => {
                     if (newValue !== oldValue) this.hasChanged = true;
                 }, { phase: 'sync' }) //NOTE: Derived Signals that are *called* outside of a component's set up must be contained in a flask for cleanup. I think flask inheritance convers this?
                 this.watchers.push(watcher);

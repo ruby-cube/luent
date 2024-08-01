@@ -1,10 +1,10 @@
 let maybeWatch: [AnyObject, string | symbol] | null = null;
 let toWatch: [AnyObject, string | symbol][] | null = null;
 let settingUpComputed = false;
-type Getter = (target: AnyObject, key: string | symbol) => void
+type Getter = (target: AnyObject, key: string | number | symbol, receiver: unknown) => void
 const getterMap: Map<AnyObject, Map<string | symbol, Getter[]>> = new Map();
-type Setter = (value, oldValue, target, key) => void
-const setterMap: Map<AnyObject, Map<string | symbol, Setter[]>> = new Map();
+type Setter = (value, oldValue, target, key, receiver: unknown) => void
+const setterMap: Map<AnyObject, Map<string | number | symbol, Setter[]>> = new Map();
 
 class Observable {
     $: AnyObject
@@ -99,21 +99,21 @@ type AnyObject = { [key: string | number | symbol]: any }
 
 function o$<T extends AnyObject>(target: T) { // only create a proxy if object literal or Array literal (constructor === Object) (Array literal)
     return new Proxy(target, {
-        get(target, key) {
+        get(target, key, receiver) {
             maybeWatch = [target, key];
             if (settingUpComputed) collectForWatch(target, key);
-            runGetters(target, key)
-            return target[key];
+            runGetters(target, key, receiver)
+            return Reflect.get(target, key, receiver);;
         },
-        set(target: AnyObject, key, value) {
+        set(target: AnyObject, key, value, receiver) {
             try {
-                runSetters(target, key, value);
+                runSetters(target, key, value, receiver);
             }
             catch (e) {
                 console.error(e);
                 return false;
             }
-            target[key] = value;
+            Reflect.set(target, key, receiver);
             return true;
         }
     })
@@ -126,26 +126,26 @@ function collectForWatch(target: AnyObject, key: string | symbol) {
 
 
 
-function runGetters(target: AnyObject, key: string | symbol) {
+function runGetters(target: AnyObject, key: string | symbol, receiver: unknown) {
     const getterQueueMap = getterMap.get(target);
     const getterQueue = getterQueueMap?.get(key);
     if (getterQueue) {
         let i = 0
         while (i < getterQueue.length) {
-            getterQueue[i](target, key)
+            getterQueue[i](target, key, receiver)
             i++;
         }
     }
 }
 
-function runSetters(target: AnyObject, key: string | symbol, value: any) {
+function runSetters(target: AnyObject, key: string | symbol, value: any, receiver: unknown) {
     const prevValue = target[key];
     const setterQueueMap = setterMap.get(target);
     const setterQueue = setterQueueMap?.get(key);
     if (setterQueue) {
         let i = 0
         while (i < setterQueue.length) {
-            setterQueue[i](value, prevValue, target, key)
+            setterQueue[i](value, prevValue, target, key, receiver)
             i++;
         }
     }

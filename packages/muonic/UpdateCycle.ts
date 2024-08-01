@@ -1,11 +1,12 @@
 import { AnyObject } from "@rue/types";
 import { SnapshotManager } from "./SnapshotManager";
-import { ReactiveObject } from "./useReactiveObjects";
+import { ReactiveModel } from "./useReactiveModel";
 import { Signal } from "./useSignals";
 import { getTaskQueueForProp, runNonSyncTasks } from "./watch";
 import { $listen, ScheduleStop } from "@rue/flask";
 import { removeItem } from "../utils/array";
 import { beforeRepaint, queueTask } from "@rue/thread";
+import { MutationOp, SetOp } from "./deepWatch";
 
 const snapshotManager = new SnapshotManager();
 
@@ -27,8 +28,8 @@ export function endUpdateCycle() {
 
 export class UpdateCycle {
     triggeredSignals: Map<Signal, [any, any]> | undefined;
-    triggeredReactives: Map<ReactiveObject, Map<string, [any, any]>> | undefined;
-    snapshotMap: Map<ReactiveObject, AnyObject> | undefined;
+    triggeredReactives: Map<ReactiveModel, Map<PropertyKey, [any, any]>> | undefined;
+    snapshotMap: Map<ReactiveModel, AnyObject> | undefined;
     completedTasks: Set<Function> = new Set();
 
     constructor() {
@@ -54,7 +55,7 @@ export class UpdateCycle {
         signals.set(signal, [newValue, oldValue]);
     }
 
-    flagReactive(target: ReactiveObject, key: string, newValue: any, oldValue: any) {
+    flagReactive(target: ReactiveModel, key: PropertyKey, newValue: any, oldValue: any) {
         let targetMap = this.triggeredReactives
         if (!targetMap) {
             targetMap = new Map();
@@ -85,14 +86,44 @@ export class UpdateCycle {
         }
     }
 
-    takeSnapshot(reactive: ReactiveObject) {
+    takeSnapshot(reactive: ReactiveModel, target: AnyObject) {
         let snapshotMap = this.snapshotMap;
         if (!snapshotMap) {
             snapshotMap = new Map();
             this.snapshotMap = snapshotMap;
         }
         if (snapshotMap.has(reactive)) return; // snapshot of original state already taken for this cycle, no need to take another
-        snapshotMap.set(reactive, snapshotManager.takeSnapshot(reactive, updateCycleCount)) // snapshots are shallow clones!
+        const snapshot = snapshotManager.takeSnapshot(target, updateCycleCount)
+        snapshotMap.set(reactive, snapshot) // snapshots are shallow clones!
+        return snapshot;
+    }
+
+    opsMap: WeakMap<ReactiveModel, (MutationOp | SetOp)[]> = new WeakMap();
+    
+    composeOps(target: ReactiveModel, ops: (MutationOp | SetOp)[]){
+        let existingOps = this.opsMap.get(target);
+        if (existingOps) {
+            existingOps.push(...ops)
+        }
+        else {
+            this.opsMap.set(target, ops);
+        }
+    }
+
+    recordOp(target: ReactiveModel, op: MutationOp | SetOp){
+
+        //TODO: consolidate set ops (cannot consolidate mutation ops, those need to be in order)
+        let existingOps = this.opsMap.get(target);
+        if (existingOps) {
+            existingOps.push(op)
+        }
+        else {
+            this.opsMap.set(target, [op]);
+        }
+    }
+
+    getOps(target: ReactiveModel) {
+        return this.opsMap.get(target)
     }
 }
 

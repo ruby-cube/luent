@@ -1,4 +1,4 @@
-import { DerivedSignal, getWithoutTracking, hasSignal, makeDerivedSignal, ReactiveObject, ReactiveSignal } from "@rue/muonic";
+import { DerivedSignal, getWithoutTracking, hasSignal, makeDerivedSignal, ReactiveModel, ReactiveSignal } from "@rue/muonic";
 import { getCurrentComponent, InternalComponent } from "../component/component";
 import { _NodePod } from "../node/NodePod";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
@@ -183,7 +183,7 @@ export function buildConditionalSeries(statements: ConditionalRenderKit[]) {
 // }
 
 
-export function watchForRenderAndPreserve(target: ReactiveSignal<any> | ReactiveObject, handler: (newValue: any, oldValue: any) => void, options?: { once: true }) {
+export function watchForRenderAndPreserve(target: ReactiveSignal<any> | ReactiveModel, handler: (newValue: any, oldValue: any) => void, options?: { once: true }) {
     const component = getCurrentComponent();
     if (!component) throw new Error("No component found")
 

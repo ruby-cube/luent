@@ -1,11 +1,11 @@
 import { getWithoutTracking } from "./DependencyTracker";
 import { DerivedSignal, makeDerivedSignal } from "./DerivedSignal";
-import { useReactiveObjects } from "./useReactiveObjects";
+import { useReactiveModel } from "./useReactiveModel";
 import { useSignals } from "./useSignals";
 
 export function useReactivity() {
     const s = useSignals();
-    const r = useReactiveObjects();
+    const r = useReactiveModel();
 
     return {
         $: s.$,

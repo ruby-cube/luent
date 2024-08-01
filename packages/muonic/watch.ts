@@ -1,16 +1,18 @@
 import { $listen, ListenerOptions, PendingOp, ScheduleStop } from "@rue/flask";
 import { isSignal, Signal } from "./useSignals";
-import { ReactiveObject } from "./useReactiveObjects";
+import { isReactiveModel, isReactiveObject, ReactiveModel } from "./useReactiveModel";
 import { AnyObject } from "@rue/types";
 import { ActiveListener } from "../flask/ActiveListener";
 import { getCurrentUpdateCycle, setCurrentUpdateCycle, UpdateCycle } from "./UpdateCycle";
 import { DependencyTracker, getDependencyTracker, ReactiveProp } from "./DependencyTracker";
 import { DERIVED_SIGNAL, DerivedSignal, isDerivedSignal, ReactiveSignal } from "./DerivedSignal";
 import { isEqual } from "@rue/utils";
+import { deepWatch, MutationOp, SetOp } from "./deepWatch";
+import { C } from "vitest/dist/reporters-B7ebVMkT";
 
 //QUESTION: How useful is watching deep?
 
-type WatchOptions = {
+export type WatchOptions = {
     deep?: boolean;
     eager?: true;
 } & EffectOptions
@@ -31,7 +33,8 @@ type _EffectOptions = {
 type Phase = 'pre' | 'render' | 'post' | 'sync'
 
 
-type ChangeHandler = (newValue: any, oldValue: any) => void
+type MutationHandler<T extends any[] | Map<any, any> | Set<any> = any[] | Map<any, any> | Set<any>> = (newValue: T, oldValue: T, ops?: MutationOp[]) => void
+type ChangeHandler<T = AnyObject> = T extends any[] | Map<any, any> | Set<any> ? MutationHandler<T> : (newValue: T, oldValue: T, ops?: (MutationOp | SetOp)[]) => void
 type ReactiveEffect = () => void //TODO: onCleanup function?
 type Effect = ChangeHandler | ReactiveEffect
 
@@ -44,7 +47,18 @@ function isReactiveEffect(task: Function): task is ReactiveEffect {
 
 
 
-export function watch<T>(target: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: WatchOptions) {
+export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
+    if (isReactiveObject(target)) {
+        const watchers = deepWatch(target, [], options || {});
+        function stop() {
+            for (const watcher of watchers) {
+                watcher.stop();
+            }
+        }
+        return {
+            stop
+        }
+    }
     return _watchEffect(handler, target, options);
 }
 
@@ -56,7 +70,7 @@ export function watchEffect(effect: () => void, options?: EffectOptions) { //NOT
 //     return _watchEffect(effect, undefined, { phase: 'render' });
 // }
 
-// export function watchForRender<T>(target: Signal<T> | (() => T) | ReactiveObject<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, component: InternalComponent) {
+// export function watchForRender<T>(target: Signal<T> | (() => T) | ReactiveModel<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, component: InternalComponent) {
 //     return _watchEffect(handler, target, { phase: 'render' });
 // }
 
@@ -65,8 +79,8 @@ const reactiveEffects: WeakSet<Function> = new WeakSet();
 
 
 export function _watchEffect<T>(handler: ReactiveEffect, target: undefined, options?: _WatchOptions): ActiveListener
-export function _watchEffect<T>(handler: ChangeHandler, target?: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener
-export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?: ReactiveSignal<T> | ReactiveObject<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener {
+export function _watchEffect<T>(handler: ChangeHandler<T>, target?: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener
+export function _watchEffect<T>(handler: ChangeHandler<T> | ReactiveEffect, target?: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, options?: _WatchOptions): ActiveListener {
     const { phase, deep, eager } = options ?? {};
     let taskQueues: Set<Effect>[];
     const isReactiveEffect = target === undefined;
@@ -97,24 +111,21 @@ export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?
         }
     }
 
-
-
     // set up listeners
-    const activeListeners: (ActiveListener | PendingOp)[] = [];
+    const watchers: ActiveListener[] = [];
 
     function stop() {
-        for (const activeListener of activeListeners) {
-            if ('stop' in activeListener) activeListener.stop();
-            else activeListener.cancel();
+        for (const watcher of watchers) {
+            watcher.stop();
         }
     }
 
-    let _handler = isReactiveEffect ? wrapToRetrack(<() => void>handler, activeListeners, options || {}, phase, deep) : handler;
-    _handler = options?.once ? (options.once = false, toSelfremoving(_handler, stop)) : _handler; 
+    let _handler = isReactiveEffect ? wrapToRetrack(<() => void>handler, watchers, options || {}, phase, deep) : handler;
+    _handler = options?.once ? (options.once = false, toSelfremoving(_handler, stop)) : _handler;
     // ^ set once to false so that it will not be extraneously re-wrapped by $listen
 
     for (const taskQueue of taskQueues) {
-        const activeListener = $listen(_handler, options || {}, {
+        const watcher = $listen(_handler, options || {}, {
             enroll(task) {
                 if (target && isDerivedSignal(target)) {
                     derivedSignalMap.set(task, target)
@@ -128,7 +139,7 @@ export function _watchEffect<T>(handler: ChangeHandler | ReactiveEffect, target?
                 taskQueue.delete(task)
             }
         });
-        activeListeners.push(activeListener);
+        watchers.push(<ActiveListener>watcher);
     }
     // console.log("activeListeners", activeListeners)
 
@@ -187,8 +198,8 @@ export function getDependencies(reactiveFunction: Function, isReactiveEffect?: b
 
 
 export function track(value: any, target: Signal): void
-export function track(value: any, target: ReactiveObject, key: string | symbol): void
-export function track(value: any, target: Signal | ReactiveObject, key?: string | symbol) {
+export function track(value: any, target: ReactiveModel, key: string | symbol): void
+export function track(value: any, target: Signal | ReactiveModel, key?: string | symbol) {
     const tracker = getDependencyTracker();
     if (!tracker) return;
     if (tracker.shouldTrack) {
@@ -221,9 +232,11 @@ class EffectRecord {
     ) { }
 }
 
+type PropertyKey = string | number | symbol
+
 const signalTaskQueues: WeakMap<Signal, Map<Phase, Set<Effect>>> = new WeakMap();
-const reactivePropsTaskQueues: WeakMap<ReactiveObject, Map<string, Map<Phase, Set<Effect>>>> = new WeakMap();
-const reactiveObjTaskQueues: WeakMap<ReactiveObject, Map<'pre' | 'post' | 'render', Set<Effect>>> = new WeakMap();
+const reactivePropsTaskQueues: WeakMap<ReactiveModel, Map<PropertyKey, Map<Phase, Set<Effect>>>> = new WeakMap();
+const reactiveObjTaskQueues: WeakMap<ReactiveModel, Map<'pre' | 'post' | 'render', Set<Effect>>> = new WeakMap();
 
 export function useTaskQueues(deps: (Signal | ReactiveProp)[], phase: Phase = 'pre', deep: boolean = false) {
     const taskQueues: Set<Effect>[] = [];
@@ -251,7 +264,7 @@ export function useTaskQueues(deps: (Signal | ReactiveProp)[], phase: Phase = 'p
     return taskQueues;
 }
 
-function useTaskQueuesForReactive(reactive: ReactiveObject, phase: Phase = 'pre', deep: boolean = false) {
+function useTaskQueuesForReactive(reactive: ReactiveModel, phase: Phase = 'pre', deep: boolean = false) {
     const taskQueues: Set<Effect>[] = [];
     if (phase === 'sync') throw "Reactive effect cannot run synchronously on property change when watching reactive objects. Did you mean to watch a reactive property?"
     const phaseMap = reactiveObjTaskQueues.get(reactive) || new Map();
@@ -262,7 +275,7 @@ function useTaskQueuesForReactive(reactive: ReactiveObject, phase: Phase = 'pre'
     return taskQueues;
 }
 
-function getTaskQueueForReactive(reactive: ReactiveObject, phase: 'pre' | 'post' | 'render') {
+function getTaskQueueForReactive(reactive: ReactiveModel, phase: 'pre' | 'post' | 'render') {
     return reactiveObjTaskQueues.get(reactive)?.get(phase);
 }
 
@@ -270,7 +283,7 @@ function getTaskQueueForSignal(signal: Signal, phase: 'pre' | 'post' | 'render')
     return signalTaskQueues.get(signal)?.get(phase);
 }
 
-export function getTaskQueueForProp(target: ReactiveObject, key: string, phase: 'pre' | 'post' | 'render') {
+export function getTaskQueueForProp(target: ReactiveModel, key: PropertyKey, phase: 'pre' | 'post' | 'render') {
     return reactivePropsTaskQueues.get(target)?.get(key)?.get(phase)
 }
 
@@ -278,7 +291,7 @@ export function getTaskQueueForProp(target: ReactiveObject, key: string, phase: 
 
 
 
-export function trigger(target: Signal | ReactiveObject, newValue: any, oldValue: any, key?: string) {
+export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue: any, key?: PropertyKey, args?: any[]) {
     if (isEqual(newValue, oldValue)) return;  //FIX: potentially expensive for complex objects?
     // if (newValue === oldValue) return;
     let currentUpdateCycle = getCurrentUpdateCycle()
@@ -295,15 +308,30 @@ export function trigger(target: Signal | ReactiveObject, newValue: any, oldValue
 
     // collect triggered refs for this cycle for 'pre', 'render', and 'post' phases
     if (isSignal(target)) currentUpdateCycle.flagSignal(target, newValue, oldValue)
-    else currentUpdateCycle.flagReactive(target, key!, newValue, oldValue)
+    else {
+        currentUpdateCycle.flagReactive(target, key!, newValue, oldValue)
+    }
 
     // take snapshot clone if watching reactive object, this will be the old value
     if (reactiveObjTaskQueues.has(target)) {
-        currentUpdateCycle.takeSnapshot(target);
+        const snapshot = currentUpdateCycle.takeSnapshot(target, oldValue);
+        if (args) {
+            currentUpdateCycle.recordOp(target, {
+                op: <string>key,
+                args
+            })
+        }
+        else if (key) {
+            currentUpdateCycle.recordOp(target, {
+                keyPath: [<string>key],
+                newValue,
+                oldValue
+            })
+        }
     }
 }
 
-function runSyncTasks(target: Signal | ReactiveObject, newValue: any, oldValue: any, key?: string) {
+function runSyncTasks(target: Signal | ReactiveModel, newValue: any, oldValue: any, key?: string | number | symbol) {
     const updateCycle = getCurrentUpdateCycle();
     if (!updateCycle) throw new Error("No update cycle :(")
     const completedTasks = updateCycle.completedTasks;
@@ -362,8 +390,25 @@ export function runNonSyncTasks(phase: "pre" | "post" | "render") {
                 for (const task of taskQueue) {
                     const snapshotMap = updateCycle.snapshotMap;
                     if (!snapshotMap) throw "no snapshot map :("
-                    // TODO: compare snapshot to current object .. are they equal? if so, don't run tasks and get rid of snapshot ... should the diff be deep?
-                    task(reactive, snapshotMap.get(reactive))
+                    const snapshot = snapshotMap.get(reactive)
+                    if (!snapshot) throw "no snapshot :("
+                    const ops = updateCycle.getOps(reactive);
+                    if (ops && ops.length === 0) {
+                        return;
+                    }
+                    else if (
+                        (reactive instanceof Array || reactive instanceof Set) &&
+                        isShallowEqual(
+                            reactive,
+                            //@ts-expect-error
+                            snapshot
+                        )) {
+                        return;
+                    }
+                    else if (reactive instanceof Map) {
+                        // TODO: Not sure what to do here yet
+                    }
+                    task(reactive, snapshot, ops) //QUESTION: Why is this not non-repeating tasks?
                 }
             }
             // }
@@ -386,4 +431,21 @@ export function runNonSyncTasks(phase: "pre" | "post" | "render") {
             }
         }
     }
+}
+
+function isShallowEqual(collectionA: any[] | Set<any>, collectionB: any[] | Set<any>) {
+    const arrayA = normalizeCollectionToArray(collectionA)
+    const arrayB = normalizeCollectionToArray(collectionB)
+    const length = arrayA.length;
+    if (length !== arrayB.length) return false;
+    for (let i = 0; i < length; i++) {
+        if (arrayA[i] !== arrayB[i]) return false;
+    }
+    return true;
+}
+
+function normalizeCollectionToArray(collection: any[] | Set<any>) {
+    if (collection instanceof Array) return collection;
+    if (collection instanceof Set) return Array.from(collection);
+    throw new Error("Invalid input. Must input set or array")
 }

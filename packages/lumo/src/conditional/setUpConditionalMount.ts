@@ -19,51 +19,54 @@ export function setUpConditionalMount(
 ) {
     // evaluate conditions and render
     const { $conditions, activeIndex } = series.evaluateConditions()
+    const dynamicPod = nodePod.appendDynamicPod();
+    const _nodePod = dynamicPod.appendNodePod()
+
     let prevFlask: Flask;
 
     collectEffects((flask, outerFlask) => { //QUESTION: Do I need to remove this for preserve?
         const initialNodeEntities = series.render(activeIndex)
 
         // append to dom and node pod
-        const dynamicPod = nodePod.appendDynamicPod();
-        const _nodePod = dynamicPod.appendNodePod()
         for (const nodeEntity of initialNodeEntities) {
             setUpNodeEntity(component, parent, nodeEntity, _nodePod, fragment, nodePod.componentsToUnmount)
         }
-
-        // set up watcher for updates
-        const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
-        _watchForRender($conditions, updateConditional, { once: true })
         prevFlask = flask;
-        const updateCycle = getCurrentUpdateCycle()
-        function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-            if (updateCycle === getCurrentUpdateCycle()) {
-                console.warn("Dev Note: This warning is here to test to see if updateCycle for initiation is ever the same as updating the conditional. If this warning shows, that means this is not useless code")
-                return;
-            }
-            if (isEqual(newValue, oldValue)) return;
-            pushComponent(component)
-            // evaluate conditions
-            const { $conditions, activeIndex } = series.evaluateConditions();
-            console.log("updating conditional")
-            // render and add/remove node pods
-            component.emit(LifecycleHook.BEFORE_UPDATE)
-            removePrevConditionalNodes(component, dynamicPod);
-            prevFlask.dispose();
-            outerFlask?.onDisposal(flask.dispose)
-            collectEffects((flask, outerFlask) => {
-                const nodeEntities = series.render(activeIndex)
-                insertNewConditionalNodes(component, parent, dynamicPod, nodeEntities)
-                component.emit(LifecycleHook.UPDATED)
-
-                // set up for next update
-                _watchForRender($conditions, updateConditional, { once: true })
-                prevFlask = flask;
-                outerFlask?.onDisposal(flask.dispose)
-            })
-            popComponent()
-        }
+        outerFlask?.onDisposal(flask.dispose)
     })
+
+    // set up watcher for updates
+    const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
+    _watchForRender($conditions, updateConditional, { once: true })
+    const updateCycle = getCurrentUpdateCycle()
+    function updateConditional(newValue: boolean[], oldValue: boolean[]) {
+        if (updateCycle === getCurrentUpdateCycle()) {
+            console.warn("Dev Note: This warning is here to test to see if updateCycle for initiation is ever the same as updating the conditional. If this warning shows, that means this is not useless code")
+            return;
+        }
+        if (isEqual(newValue, oldValue)) return;
+        pushComponent(component)
+        // evaluate conditions
+        const { $conditions, activeIndex } = series.evaluateConditions();
+        console.log("updating conditional")
+        // render and add/remove node pods
+        component.emit(LifecycleHook.BEFORE_UPDATE)
+        removePrevConditionalNodes(component, dynamicPod);
+        prevFlask.dispose();
+
+        collectEffects((flask, outerFlask) => {
+            const nodeEntities = series.render(activeIndex)
+            insertNewConditionalNodes(component, parent, dynamicPod, nodeEntities)
+            prevFlask = flask;
+            outerFlask?.onDisposal(flask.dispose)
+        })
+        component.emit(LifecycleHook.UPDATED)
+
+        // set up for next update
+        _watchForRender($conditions, updateConditional, { once: true })
+        popComponent()
+    }
+
 }
 
 export function emitHookBatch(hookName: LifecycleHook, components: InternalComponent[] | undefined) {

@@ -1,4 +1,4 @@
-import { hasSignal, isReactive, Signal, useSignals } from "@rue/muonic";
+import { hasSignal, isReactiveModel, Signal, useSignals } from "@rue/muonic";
 import { InternalComponent, popComponent, pushComponent } from "../component/component";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { _listReactivity, DynamicIndices, ListRenderKit, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
@@ -26,7 +26,7 @@ export function setUpNodeList(
 ) {
     console.log("setting up node list") //This runs because of the conditional
     const { data, initialNodeEntities, renderItem, indices, idKey, flasks } = renderKit;
-    const isDynamic = isReactive(data) || hasSignal(data);
+    const isDynamic = isReactiveModel(data) || hasSignal(data);
     const dynamicPod = isDynamic ? nodePod.appendDynamicPod() : undefined;
 
 
@@ -62,7 +62,6 @@ export function setUpNodeList(
                 console.warn("prevented same update cycle")
                 return;
             }
-            console.log("updating node list", getActiveFlask())
             const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
             if (noChange) return;
             if (dynamicPod!.length !== oldValue.length) throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)

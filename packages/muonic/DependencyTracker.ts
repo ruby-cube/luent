@@ -1,7 +1,7 @@
-import { ReactiveObject } from "./useReactiveObjects";
+import { ReactiveModel } from "./useReactiveModel";
 import { Signal } from "./useSignals";
 
-export type ReactiveProp = [ReactiveObject, string | symbol]
+export type ReactiveProp = [ReactiveModel, string | symbol]
 
 let activeDepTracker: DependencyTracker | null = null;
 
@@ -14,13 +14,13 @@ export function getDependencyTracker() {
 export class DependencyTracker {
 
     trackedSignals: Set<Signal> = new Set();
-    trackedProps: Map<ReactiveObject, Set<string | symbol>> = new Map();
+    trackedProps: Map<ReactiveModel, Set<string | symbol>> = new Map();
 
     addSignal(signal: Signal) {
         this.trackedSignals.add(signal);
     }
 
-    addProp(target: ReactiveObject, key: string | symbol) {
+    addProp(target: ReactiveModel, key: string | symbol) {
         let reactiveMap = this.trackedProps
         let trackedProps = reactiveMap.get(target)
         if (!trackedProps) {

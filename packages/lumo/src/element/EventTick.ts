@@ -101,7 +101,7 @@ function createLumoEvent(e: Event) {
 }
 
 const lumoEventTraps = {
-    get(target: Event, key: keyof Event | 'propagationStopped') {
+    get(target: Event, key: keyof Event | 'propagationStopped', receiver: Event) {
         let propagationStopped = false;
         if (key === 'stopPropagation') {
             return () => {
@@ -113,7 +113,7 @@ const lumoEventTraps = {
             return propagationStopped;
         }
         else {
-            return target[key];
+            return Reflect.get(target, key, receiver);
         }
     }
 }

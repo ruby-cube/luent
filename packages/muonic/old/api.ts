@@ -30,7 +30,7 @@ observable capsule
 
 memoize
 isSignal
-isReactive
+isReactiveModel
 toSignals
 
 --

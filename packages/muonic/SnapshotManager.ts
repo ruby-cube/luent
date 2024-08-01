@@ -12,29 +12,27 @@ type SnapshotStack = IndexedSnapshot[];
 
 export class SnapshotManager {
     private snapshotMap: WeakMap<AnyObject, SnapshotStack> = new WeakMap();
-    takeSnapshot(target: AnyObject, index: number) {
+    takeSnapshot(original: AnyObject, index: number) {
         const snapshotMap = this.snapshotMap;
-        const snapshot = new Proxy(target instanceof Array ? [...target] : { ...target }, {
-            get(target, key) {
-                //@ts-expect-error
-                const value = target[key];
+        const snapshot = new Proxy(original instanceof Array ? [...original] : { ...original }, {
+            get(target, key, receiver) {
+                const value = Reflect.get(target, key, receiver);
                 if (value instanceof Object) { //TODO: make sure functions are handled appropriately
-                    //@ts-expect-error
-                    const snapshots = snapshotMap.get(target[key])
+                    const snapshots = snapshotMap.get(value)
                     if (!snapshots) return value;
                     return findSnapshot(snapshots, index) || value;
                 }
-                //@ts-expect-error
-                return target[key];
+                return value;
             },
             set() { return false } // immutable
         });
 
-        this.storeSnapshot(snapshot, target, index)
+        this.storeSnapshot(snapshot, original, index)
         return snapshot;
     }
 
     private storeSnapshot(snapshot: Snapshot, target: AnyObject, index: number) {
+        console.log("snapshot", snapshot)
         let snapshots = this.snapshotMap.get(target);
         if (!snapshots) {
             snapshots = []

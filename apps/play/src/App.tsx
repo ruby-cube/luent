@@ -4,7 +4,7 @@ import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/com
 import { useRandomColorGenerator } from "@rue/utils";
 
 
-const { $, set } = useReactivity();
+const { $, set, o$, mu } = useReactivity();
 const randomColor = useRandomColorGenerator()
 let id = 4;
 
@@ -22,27 +22,33 @@ const loadSideBlock = idleLoadComponent({
 const onClick = useEventListener('click');
 
 export function List() {
-    const $list = $([
+    const list$ = o$([
         { id: 0, content: "frog" },
         { id: 1, content: "frog" },
         { id: 2, content: "fly" },
         { id: 3, content: "swamp" }
     ])
 
+    // const $listUI = $($list().map((item)=>({id: item.id, selected: false})))
+
     function insertItem(index: number) {
-        const list = [...$list()];
-        list.splice(index, 0, {
-            id: genId(),
-            content: (Math.random() * 100).toString()
+        mu(list$, list => {
+            list.splice(index, 0, {
+                id: genId(),
+                content: (Math.random() * 100).toString(),
+            })
         })
-        console.log("list", list)
-        set($list, () => list)
+    }
+
+    function selectItem(index: number) {
+
     }
 
     function removeItem(index: number) {
-        const list = [...$list()];
-        list.splice(index, 1);
-        set($list, () => list)
+        mu(list$, list => {
+            list.splice(index, 1);
+            console.log(list);
+        })
     }
 
     const { openModal } = useModal();
@@ -50,7 +56,7 @@ export function List() {
     return (
         <div>
             <>
-                {$if($(() => $list().length === 0), 'create', () => (
+                {$if($(() => list$.length === 0), 'create', () => (
                     <div
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
@@ -59,7 +65,7 @@ export function List() {
                     </div>
                 ))}
                 {$else(() =>
-                    forEachIn($list, (item, $index) => (
+                    forEachIn(list$, (item, $index) => (
                         <div style={`background-color: ${randomColor.get()}`}>
                             <p
                                 onclick={() => removeItem($index())}

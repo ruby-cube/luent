@@ -67,6 +67,7 @@ export type InsertAndMoveKit = {
 }
 
 function toIdArray(target: AnyObject[], idKey: string | symbol) {
+    console.log("toIdArray", target)
     const idArray = new UniqueArray();
     const itemMap: Map<any, any> = new Map();
     
@@ -74,7 +75,7 @@ function toIdArray(target: AnyObject[], idKey: string | symbol) {
         idArray.push(item[idKey])
         itemMap.set(item[idKey], item )
     }
-    
+
     idArray.getItem = (id: any) => {
         const item = itemMap.get(id);
         if (!item) throw new Error(`There is no item associated with ${id}`)
