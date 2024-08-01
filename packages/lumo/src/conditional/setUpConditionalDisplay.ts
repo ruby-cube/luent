@@ -39,20 +39,23 @@ export function setUpConditionalDisplay(
 
     _watchForRender($conditions, updateConditional, { once: true })
 
+    let prevIndex = activeIndex;
+
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-        console.log("show if!")
         if (isEqual(newValue, oldValue)) return;
         const { $conditions, activeIndex } = series.evaluateConditions();
 
         pushComponent(component)
         component.emit(LifecycleHook.BEFORE_UPDATE)
-        hidePrevConditionalNodes(dynamicPod, activeIndex);
+        hidePrevConditionalNodes(dynamicPod, prevIndex);
         const nodeEntities = series.render(activeIndex);
         showConditionalNodes(component, parent, dynamicPod, activeIndex, nodeEntities)
         component.emit(LifecycleHook.UPDATED)
 
         _watchForRender($conditions, updateConditional, { once: true })
         popComponent()
+
+        prevIndex = activeIndex;
     }
 }
 

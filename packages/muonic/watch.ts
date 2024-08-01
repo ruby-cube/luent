@@ -351,7 +351,7 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
 
 export function runNonSyncTasks(phase: "pre" | "post" | "render") {
     const updateCycle = getCurrentUpdateCycle();
-    if (!updateCycle) throw new Error(`No current update cycle :( ${phase}`)
+    if (!updateCycle) return;
     const completedTasks = updateCycle.completedTasks;
     const triggeredReactives = updateCycle.triggeredReactives;
     if (triggeredReactives) {

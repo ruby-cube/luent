@@ -48,14 +48,12 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     }
 
     if (childNodes) {
-        if (tagName === 'article') {
-            console.log("my childnodes", childNodes[0])
-        }
+        const _childNodes = wrapIfConditionalSeries(childNodes)
         const nodePod = new _NodePod();
-        for (let i = 0; i < childNodes.length; i++) {
-            let childNodeEntity = childNodes[i];
+        for (let i = 0; i < _childNodes.length; i++) {
+            let childNodeEntity = _childNodes[i];
             if (childNodeEntity instanceof ConditionalRenderKit) {
-                validateStandAloneConditional(childNodeEntity, childNodes, i);
+                validateStandAloneConditional(childNodeEntity, _childNodes, i);
                 childNodeEntity = [childNodeEntity]
             }
             setUpNodeEntity(component, domNode, childNodeEntity, nodePod, undefined)
@@ -76,7 +74,31 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     return domNode;
 }
 
+function wrapIfConditionalSeries(nodeEntities: NodeEntity[]) {
+    if (isNotConditionalSeries(nodeEntities)) {
+        return nodeEntities;
+    }
+    validateConditionalSeries(nodeEntities, false)
+    return [nodeEntities];
+}
 
+
+function isNotConditionalSeries(nodeEntities: NodeEntity[]) {
+    return !(nodeEntities[0] instanceof ConditionalRenderKit) ||
+        !(nodeEntities[nodeEntities.length - 1] instanceof ConditionalRenderKit)
+}
+
+function validateConditionalSeries(nodeEntities: ConditionalRenderKit[], isNotConditionalSeries: false) {
+    if (isNotConditionalSeries !== false)
+        throw new Error(`validateConditionalSeries must be called after isNotConditionalSeries`)
+    if (nodeEntities[0].statement !== 'if' || nodeEntities[nodeEntities.length - 1].statement === 'if')
+        throw new Error("Invalid conditional series")
+    for (let i = 1; i < nodeEntities.length - 1; i++) {
+        const nodeEntity = nodeEntities[i];
+        if (!(nodeEntity instanceof ConditionalRenderKit) || nodeEntity.statement === 'if' || nodeEntity.statement == 'else')
+            throw new Error("Invalid conditional series")
+    }
+}
 
 function setUpAttributes(node: Element, attributes: { [key: string]: any | DerivedSignal<any> }) {
     for (const key in attributes) {

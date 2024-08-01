@@ -22,8 +22,8 @@ export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Node
         normalizeToArray(children),
         config
     );
-
 }
+
 
 // export function jsxs(nodeType: HTMLTag | ComponentSetup, config: { children: NodeEntity[] }) {
 //     console.log("JSXS")

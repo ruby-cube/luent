@@ -20,18 +20,41 @@ const onClick = useEventListener('click');
 export function List() {
     const $list = $([{ id: "one", content: "frog" }, { id: "two", content: "frog" }, { id: "three", content: "fly" }, { id: "four", content: "swamp" }])
 
+
+
+    const $visible = $(false);
+
+    function toggleVisibility() {
+        set($visible, visibility => !visibility)
+    }
+
     const dialog_box = new NodeRef<typeof DialogBox>()
 
     function openModal() {
         dialog_box.o!.open()
     }
-    
+
     teleportTo('body',
         <DialogBox ref={dialog_box} />
     )
 
     return (
         <div>
+            <div style="display: flex">
+                <>
+                    {$if($visible, 'show', () => (
+                        <>
+                            <div>surprise</div>
+                            <div>surprise!</div>
+                            <div>surprise!!</div>
+                        </>
+                    ))}
+                    {$else(() => (
+                        <div>:)</div>
+                    ))}
+                </>
+            </div>
+            <button onclick={toggleVisibility}>show/hide</button>
             {forEachIn($list, (item, $index) => (
                 <>
                     <li>{item.content}</li>
