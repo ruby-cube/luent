@@ -292,8 +292,6 @@ export function getTaskQueueForProp(target: ReactiveModel, key: PropertyKey, pha
 
 
 export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue: any, key?: PropertyKey, args?: any[]) {
-    if (isEqual(newValue, oldValue)) return;  //FIX: potentially expensive for complex objects?
-    // if (newValue === oldValue) return;
     let currentUpdateCycle = getCurrentUpdateCycle()
     if (!currentUpdateCycle) {
         currentUpdateCycle = new UpdateCycle();
@@ -360,9 +358,9 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
             const _derivedSignal = derivedSignal[DERIVED_SIGNAL]
             const oldValue = _derivedSignal.value;
             const newValue = derivedSignal();
-            if (!isEqual(newValue, oldValue)) {  //FIX: potentially expensive for complex objects
-                task(newValue, oldValue);
-            }
+            if (!hasChanged(newValue, oldValue))
+                return;
+            task(newValue, oldValue);
         }
         else if (isReactiveEffect(task)) {
             task() //TODO: pass in clean up function?
@@ -374,6 +372,16 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
     }
 }
 
+
+export function hasChanged(newValue: any, oldValue: any) { //TODO: this is really tricky.. do I do a shallow diff or a deep diff for arrays??
+    if (oldValue instanceof Array && areShallowEqualArrays(oldValue, newValue)) return false
+    if (oldValue instanceof Set && areEqualSets(oldValue, newValue)) return false; // inherently shallow
+    if (oldValue instanceof Map && areEqualMaps(newValue, oldValue)) return false; // deep
+    if (oldValue instanceof Object && reactivePropsAreEqual(oldValue, newValue)) return false; // partial deep
+    if (oldValue instanceof Object && isEqual(oldValue, newValue)) return false; // deep
+    if (oldValue === newValue) return false;
+    return true;
+}
 
 
 
@@ -393,21 +401,10 @@ export function runNonSyncTasks(phase: "pre" | "post" | "render") {
                     const snapshot = snapshotMap.get(reactive)
                     if (!snapshot) throw "no snapshot :("
                     const ops = updateCycle.getOps(reactive);
-                    if (ops && ops.length === 0) {
+                    if (ops && ops.length === 0)
                         return;
-                    }
-                    else if (
-                        (reactive instanceof Array || reactive instanceof Set) &&
-                        isShallowEqual(
-                            reactive,
-                            //@ts-expect-error
-                            snapshot
-                        )) {
+                    else if (!hasChanged(reactive, snapshot))
                         return;
-                    }
-                    else if (reactive instanceof Map) {
-                        // TODO: Not sure what to do here yet
-                    }
                     task(reactive, snapshot, ops) //QUESTION: Why is this not non-repeating tasks?
                 }
             }
@@ -433,19 +430,51 @@ export function runNonSyncTasks(phase: "pre" | "post" | "render") {
     }
 }
 
-function isShallowEqual(collectionA: any[] | Set<any>, collectionB: any[] | Set<any>) {
-    const arrayA = normalizeCollectionToArray(collectionA)
-    const arrayB = normalizeCollectionToArray(collectionB)
-    const length = arrayA.length;
-    if (length !== arrayB.length) return false;
-    for (let i = 0; i < length; i++) {
+export function isShallowEqual(collectionA: any[] | Set<any>, collectionB: any[] | Set<any>) {
+    if (collectionA instanceof Array) return areShallowEqualArrays(collectionA, <any[]>collectionB);
+    if (collectionA instanceof Set) return areEqualSets(collectionA, <Set<any>>collectionB);
+    if (__DEV__) console.warn("Not yet implemented for Objects and Map")
+}
+
+export function areEqualArrays(arrayA: any[], arrayB: any[]) {
+    if (arrayA.length !== arrayB.length) return false;
+    for (let i = 0; i < arrayA.length; i++) {
+        if (hasChanged(arrayA[i], arrayB[i])) return false;
+    }
+    return true;
+}
+
+export function areShallowEqualArrays(arrayA: any[], arrayB: any[]) {
+    if (arrayA.length !== arrayB.length) return false;
+    for (let i = 0; i < arrayA.length; i++) {
         if (arrayA[i] !== arrayB[i]) return false;
     }
     return true;
 }
 
-function normalizeCollectionToArray(collection: any[] | Set<any>) {
-    if (collection instanceof Array) return collection;
-    if (collection instanceof Set) return Array.from(collection);
-    throw new Error("Invalid input. Must input set or array")
+
+export function reactivePropsAreEqual(reactiveA: ReactiveModel, reactiveB: ReactiveModel) {
+    if (!isReactiveObject(reactiveA) || !isReactiveObject(reactiveB)) throw new Error("Invalid input type");
+    for (const key in reactiveA) {
+        const valueA = reactiveA[key];
+        const valueB = reactiveB[key];
+        return hasChanged(valueA, valueB);
+    }
+}
+
+function areEqualSets(setA: Set<any>, setB: Set<any>) {
+    if (setA.size !== setB.size) return false;
+    for (const item of setA) {
+        if (!setB.has(item)) return false;
+    }
+    return true;
+}
+
+function areEqualMaps(mapA: Map<any, any>, mapB: Map<any, any>) {
+    if (mapA.size !== mapB.size) return false;
+    for (const [key, value] of mapA) {
+        if (!mapB.has(key)) return false;
+        if (hasChanged(value, mapB.get(key)))
+            return false;
+    }
 }

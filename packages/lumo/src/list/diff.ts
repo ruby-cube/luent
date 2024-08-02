@@ -1,13 +1,14 @@
 import { AnyObject } from "@rue/types";
 import { longestCommonSubstring } from "./lcs";
 import { UniqueItem } from "./forEachIn";
-import { isEqual } from "@rue/utils";
-import { it } from "node:test";
+import { areShallowEqualArrays, isShallowEqual } from "@rue/muonic";
 
 
-
-export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | UniqueItem[], idKey: string | undefined) { //TODO: Originally wrote this diffing arrays of objects and unique ids, but I need it to work for any[]s, wrap repeat values in an object or function and put in stand-in arrays
+// TODO: implementation for sets, objects, and maps
+export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | UniqueItem[], idKey: string | undefined) {
     const { uniqueItemArrays: [_newArr, _oldArr], getOriginalItem } = makeItemsUnique(newArr, oldArr, idKey);
+    
+    if (areShallowEqualArrays(_newArr, _oldArr)) return { noChange: true };
 
     const newSet = new Set(_newArr);
     const oldSet = new Set(_oldArr);
@@ -39,7 +40,6 @@ export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | U
         j++;
     }
 
-    if (isEqual(newSet, oldSet)) return { noChange: true }; //FIX: potentially expensive to run isEqual
     // find longest common sequence
     const lcs = longestCommonSubstring(newArrCommonItems, oldArrCommonItems);
 
@@ -70,10 +70,10 @@ function toIdArray(target: AnyObject[], idKey: string | symbol) {
     console.log("toIdArray", target)
     const idArray = new UniqueArray();
     const itemMap: Map<any, any> = new Map();
-    
+
     for (const item of target) {
         idArray.push(item[idKey])
-        itemMap.set(item[idKey], item )
+        itemMap.set(item[idKey], item)
     }
 
     idArray.getItem = (id: any) => {

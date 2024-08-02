@@ -1,7 +1,7 @@
 import { PublicComponent, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "../component/component";
 import { DerivedSignal, hasSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { getWithoutTracking } from "@rue/muonic/DependencyTracker";
-import { appendItems, copyAllBut, isEqual, normalizeToArray } from "@rue/utils";
+import {  normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, getNodeRef, NodeRef } from "../node/NodeRef";
 import { Signal, useSignals } from "@rue/muonic/useSignals";

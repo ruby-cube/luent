@@ -1,4 +1,3 @@
-import { isEqual } from "@rue/utils";
 import { InternalComponent, popComponent, pushComponent } from "../component/component";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
@@ -9,6 +8,7 @@ import { NodeEntity } from "../node/makeNode";
 import { getNodeRef } from "../node/NodeRef";
 import { collectEffects, Flask } from "@rue/flask/flask";
 import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle";
+import { areShallowEqualArrays, isShallowEqual } from "@rue/muonic";
 
 export function setUpConditionalMount(
     component: InternalComponent,
@@ -44,7 +44,7 @@ export function setUpConditionalMount(
             console.warn("Dev Note: This warning is here to test to see if updateCycle for initiation is ever the same as updating the conditional. If this warning shows, that means this is not useless code")
             return;
         }
-        if (isEqual(newValue, oldValue)) return;
+        if (areShallowEqualArrays(newValue, oldValue)) return;
         pushComponent(component)
         // evaluate conditions
         const { $conditions, activeIndex } = series.evaluateConditions();

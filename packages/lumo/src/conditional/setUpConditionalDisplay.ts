@@ -1,9 +1,8 @@
-import { getWithoutTracking, ReactiveSignal } from "@rue/muonic"
+import { areShallowEqualArrays, getWithoutTracking, isShallowEqual, ReactiveSignal } from "@rue/muonic"
 import { ConditionalSeries, watchForRenderAndPreserve } from "./$if"
 import { DOMNode, InternalComponent, popComponent, pushComponent } from "../component/component"
 import { _DynamicNodePod, _NodePod } from "../node/NodePod"
 import { watchForRender } from "../reactivity/watchForRender"
-import { isEqual } from "@rue/utils"
 import { LifecycleHook } from "../component/lifecycle"
 import { NodeEntity } from "../node/makeNode"
 import { mountConditional } from "./setUpConditionalMount"
@@ -48,7 +47,7 @@ console.log("setting up conditional display")
             console.warn("Dev Note: This warning is here to test to see if updateCycle for initiation is ever the same as updating the conditional. If this warning shows, that means this is not useless code")
             return;
         }
-        if (isEqual(newValue, oldValue)) return;
+        if (areShallowEqualArrays(newValue, oldValue)) return;
         const { $conditions, activeIndex } = series.evaluateConditions();
 
         pushComponent(component)

@@ -1,7 +1,7 @@
 import { ActiveListener } from "@rue/flask";
 import { DependencyTracker, ReactiveProp } from "./DependencyTracker";
 import { isSignal, Signal, SIGNAL_MARKER } from "./useSignals";
-import { watch } from "./watch";
+import { hasChanged, watch } from "./watch";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -62,7 +62,7 @@ export class DerivedSignalState {
                 const reactive = _isSignal ? null : dep[0];
                 const key = _isSignal ? null : dep[1];
                 const watcher = watch(_isSignal ? dep : () => reactive![key!], (newValue: any, oldValue: any) => {
-                    if (newValue !== oldValue) this.hasChanged = true;
+                    if (hasChanged(newValue, oldValue)) this.hasChanged = true;
                 }, { phase: 'sync' }) //NOTE: Derived Signals that are *called* outside of a component's set up must be contained in a flask for cleanup. I think flask inheritance convers this?
                 this.watchers.push(watcher);
             }
