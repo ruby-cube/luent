@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { track, trigger } from "./watch";
 import { emitSignal } from "./useReactivity";
-import { KeyPath, Ref } from "@rue/utils";
+import { isObjectLiteral, KeyPath, Ref } from "@rue/utils";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
@@ -20,8 +20,8 @@ export function useReactiveModel(config?: { snapshots: boolean }) {
         o$<T extends AnyObject>(target: T): ReactiveModel<T> {
             if (reactiveMap.has(target)) return target; // prevents double wrapped reactive
 
-            const reactive = toRaw(target) instanceof Array ? //TODO: Sets and maps
-                createReactiveArray(<any[]><unknown>target, mutationPermitted)
+            const reactive = target instanceof Array ? //TODO: Sets and maps
+                createReactiveArray(<any[]><unknown>target, addLocalReactive, mutationPermitted)
                 : createReactiveObject(target, addLocalReactive, mutationPermitted)
             localReactives.add(reactive)
             reactiveMap.set(reactive, target)
@@ -63,7 +63,7 @@ function createReactiveObject(target: AnyObject, addLocalReactive: (reactive: Re
             const descriptor = Reflect.getOwnPropertyDescriptor(target, key);
             if (descriptor?.writable === false) return value;
             emitSignal();
-            track(value, target, key)
+            track(value, reactive, key)
             return value;
         },
         set(target, key, newValue, receiver) {
@@ -78,13 +78,15 @@ function createReactiveObject(target: AnyObject, addLocalReactive: (reactive: Re
     })
     for (const key in target) {
         const value = target[key];
+        if (!(value instanceof Object)) continue;
         if (reactiveMap.has(value)) continue; // prevents double wrapped reactive
-        if (Object.getPrototypeOf(value) === Object) {
-            const reactive = createReactiveObject(value, addLocalReactive, mutationPermitted)
-            target[key] = reactive;
-            reactiveMap.set(reactive, value);
-            addLocalReactive(reactive);
-        }
+        const value$ = isObjectLiteral(value) ?
+            createReactiveObject(value, addLocalReactive, mutationPermitted) :
+            value instanceof Array ? createReactiveArray(value, addLocalReactive, mutationPermitted) : null; //TODO: Maps and sets
+        if (value$ === null) continue;
+        target[key] = value$;
+        reactiveMap.set(value$, value);
+        addLocalReactive(value$);
     }
     return reactive;
 }
@@ -93,14 +95,13 @@ function createReactiveObject(target: AnyObject, addLocalReactive: (reactive: Re
 
 
 
-function createReactiveArray(target: any[], mutationPermitted: Ref<boolean>) {
+function createReactiveArray(target: any[], addLocalReactive: (target: ReactiveModel) => void, mutationPermitted: Ref<boolean>) {
     const reactive = new Proxy(target, {
         get(target, key, receiver) {
             const value = Reflect.get(target, key, receiver);
             if (isMutatingArrayMethod(key)) {
                 if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
                 return (...args: any[]) => {
-            console.log("trigger via", key)
                     trigger(reactive, target, target, key, args);
                     // return (<Function>value).apply(target, args);
                     return (<Function>value).apply(reactive, args);
@@ -108,22 +109,31 @@ function createReactiveArray(target: any[], mutationPermitted: Ref<boolean>) {
             }
             if (isNonTrackable(key, Array)) return value;
             emitSignal();
-            track(value, target, key)
-            console.log("track length", key === 'length')
+            track(value, reactive, key)
             return value;
         },
         set(target, key, newValue, receiver) {
-            console.log("trigger length", key === 'length', newValue)
             if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
             const oldValue = Reflect.get(target, key, receiver);
             if (oldValue !== newValue || !isNonTrackable(key, Array)) {
-                console.log("triggered", key, newValue)
                 trigger(reactive, newValue, oldValue, key)
             }
             Reflect.set(target, key, newValue, receiver);
             return true;
         }
     })
+    for (let i = 0; i < target.length; i++) {
+        const item = target[i]
+        if (reactiveMap.has(item)) continue;
+        if (!(item instanceof Object)) continue;
+        const item$ = isObjectLiteral(item) ?
+        createReactiveObject(item, addLocalReactive, mutationPermitted) :
+        item instanceof Array ? createReactiveArray(item, addLocalReactive, mutationPermitted) : null;
+        if (item$ === null) continue;  //TODO: Maps and sets
+        target[i] = item$;
+        reactiveMap.set(item$, item);
+        addLocalReactive(item$);
+    }
     return reactive;
 }
 

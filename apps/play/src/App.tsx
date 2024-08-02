@@ -1,5 +1,5 @@
 import { $else, $elseIf, $if, COMPONENT, ComponentSetup, ConditionalRenderKit, expose, forEachIn, NodeEntity, NodeRef, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
-import { Signal, useReactivity, watchEffect } from "@rue/muonic"
+import { Signal, useReactivity, watch, watchEffect } from "@rue/muonic"
 import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { useRandomColorGenerator } from "@rue/utils";
 
@@ -35,6 +35,12 @@ export function List() {
         { id: 3, content: "swamp" }
     ])
 
+    function changeContent(index: number) {
+        const item$ = list$[index];
+        mu(item$, o => {
+            o.content = 'something else'
+        })
+    }
     // const $listUI = $($list().map((item)=>({id: item.id, selected: false})))
 
     function insertItem(index: number) {
@@ -67,11 +73,28 @@ export function List() {
         // })
         mu(list$, list => {
             list.splice(index, 1);
-            console.log(list);
         })
     }
 
     const { openModal } = useModal();
+
+    // const frog$ = o$({
+    //     name: "sir robin"
+    // })
+
+    // function changeFrogName() {
+    //     mu(frog$, o => {
+    //         o.name = o.name === "kermit" ? "sir robin" : "kermit"
+    //     })
+    // }
+
+    // watch($(() => frog$.name.last), (value, oldValue, ops) => {
+
+    // })
+
+    // watch($(frog$, 'name.last'), (value, oldValue, ops) => {
+
+    // })
 
     return (
         <div>
@@ -85,7 +108,7 @@ export function List() {
                     </div>
                 ))}
                 {$else(() =>
-                    forEachIn(list$, (item, $index) => (
+                    forEachIn(list$, (item$, $index) => (
                         <div style={`background-color: ${randomColor.get()}`}>
                             <p
                                 onclick={() => removeItem($index())}
@@ -93,7 +116,9 @@ export function List() {
                             >
                                 X
                             </p>
-                            <li>{item.content}</li>
+                            <li onclick={() => changeContent($index())}>
+                                {$(()=>item$.content)}
+                            </li>
                             <p>{$index}</p>
                             <div
                                 onclick={() => insertItem($index() + 1)}

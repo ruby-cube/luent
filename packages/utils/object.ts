@@ -96,3 +96,8 @@ function swapKeysAndValues(source: { [key: string]: string }) {
     }
     return target;
 }
+
+
+export function isObjectLiteral(obj: AnyObject){
+return Object.getPrototypeOf(obj).constructor === Object;
+}

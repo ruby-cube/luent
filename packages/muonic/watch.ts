@@ -88,7 +88,6 @@ export function _watchEffect<T>(handler: ChangeHandler<T> | ReactiveEffect, targ
     if (target instanceof Function || isReactiveEffect) {
         const dependencies = getDependencies(target || handler, isReactiveEffect) //TODO: must retrack dependencies onChange like with derivedSignal to catch conditional dependencies? .. should the logic live here instead of in $()?
         taskQueues = useTaskQueues(dependencies, phase, deep);
-        console.log("useTaskQueuesForReactive", target)
     }
     else {
         // watch all properties of reactive
@@ -252,6 +251,8 @@ export function useTaskQueues(deps: (Signal | ReactiveProp)[], phase: Phase = 'p
             // taskQueue.__devName = dep.__devName;
         }
         else {
+            console.log("get dependencies", dep)
+            console.trace()
             const [reactiveObj, key] = dep;
             const propMap = reactivePropsTaskQueues.get(reactiveObj) || new Map();
             const phaseMap = propMap.get(key) || new Map();
@@ -260,6 +261,9 @@ export function useTaskQueues(deps: (Signal | ReactiveProp)[], phase: Phase = 'p
             propMap.set(key, phaseMap)
             reactivePropsTaskQueues.set(reactiveObj, propMap);
             taskQueues.push(taskQueue);
+            console.log(taskQueues)
+            console.log(reactivePropsTaskQueues)
+            console.log("reactiv", isReactiveObject(reactiveObj))
         }
     }
     return taskQueues;

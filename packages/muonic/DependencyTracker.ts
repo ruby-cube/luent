@@ -1,4 +1,4 @@
-import { ReactiveModel } from "./useReactiveModel";
+import { isReactiveObject, ReactiveModel } from "./useReactiveModel";
 import { Signal } from "./useSignals";
 
 export type ReactiveProp = [ReactiveModel, string | symbol]

@@ -12,8 +12,9 @@ export const _listReactivity = useSignals()
 
 export type RenderItem<T = any> = (item: T, $index: Signal<number>) => NodeEntity[] | NodeEntity
 // type ListData = AnyObject | any[] | Set<any> | Map<any, any> | ReactiveModel<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
-export type ListData = any[] | ReactiveModel<AnyObject[] | UniqueItem[]> | ReactiveSignal<AnyObject[] | UniqueItem>
+export type ListData<T = any> = Collection<T> | ReactiveModel<Collection<T>> | ReactiveSignal<Collection<T>>
 export type UniqueItem = any;
+type Collection<T> = T[] | Set<T>
 
 export class ListRenderKit<T = any> {
     constructor(
@@ -44,21 +45,22 @@ export function setCurrentItemAndIndex(item: any, $index: Signal<number>) {
 //     return settingUpList;
 // }
 
-export function forEachIn(data: any[], render: RenderItem, idKey?: string): ListRenderKit // static list
-export function forEachIn(data: ReactiveModel<UniqueItem[]> | ReactiveSignal<UniqueItem[]>, render: RenderItem, idKey?: string): ListRenderKit // dynamic list
-export function forEachIn(data: ReactiveModel<AnyObject[]> | ReactiveSignal<AnyObject>, render: RenderItem, idKey?: string): ListRenderKit // dynamic list
-export function forEachIn(data: ListData, render: RenderItem, idKey?: string): ListRenderKit {
+export function forEachIn<T>(data: Collection<T>, render: RenderItem<T>, idKey?: string): ListRenderKit // static list
+export function forEachIn<T>(data: ReactiveModel<Collection<T>> | ReactiveSignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
+export function forEachIn<T>(data: ReactiveModel<Collection<T>> | ReactiveSignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
+export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: string): ListRenderKit {
     const domNodes: (NodeEntity | NodeEntity[])[] = [];
     const list = hasSignal(data) ? data() : data;
+    const _list = list instanceof Array ? list : list instanceof Set ? Array.from(list) : list //TODO: Maps and objects
     const isDynamic = isReactiveModel(data) || hasSignal(data);
 
     const indices = []
     const flasks: Flask[] = []
 
     let i = 0;
-    while (i < list.length) {
+    while (i < _list.length) {
         const $index = _listReactivity.$(i)
-        const item = list[i]
+        const item = _list[i]
         currentItem = item;
         $currentIndex = $index;
         indices.push($index)
