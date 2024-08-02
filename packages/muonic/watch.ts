@@ -1,6 +1,6 @@
 import { $listen, ListenerOptions, PendingOp, ScheduleStop } from "@rue/flask";
 import { isSignal, Signal } from "./useSignals";
-import { isReactiveModel, isReactiveObject, ReactiveModel } from "./useReactiveModel";
+import { isReactiveModel, isReactiveObject, ReactiveModel, toRaw } from "./useReactiveModel";
 import { AnyObject } from "@rue/types";
 import { ActiveListener } from "../flask/ActiveListener";
 import { getCurrentUpdateCycle, setCurrentUpdateCycle, UpdateCycle } from "./UpdateCycle";
@@ -88,6 +88,7 @@ export function _watchEffect<T>(handler: ChangeHandler<T> | ReactiveEffect, targ
     if (target instanceof Function || isReactiveEffect) {
         const dependencies = getDependencies(target || handler, isReactiveEffect) //TODO: must retrack dependencies onChange like with derivedSignal to catch conditional dependencies? .. should the logic live here instead of in $()?
         taskQueues = useTaskQueues(dependencies, phase, deep);
+        console.log("useTaskQueuesForReactive", target)
     }
     else {
         // watch all properties of reactive
@@ -276,6 +277,8 @@ function useTaskQueuesForReactive(reactive: ReactiveModel, phase: Phase = 'pre',
 }
 
 function getTaskQueueForReactive(reactive: ReactiveModel, phase: 'pre' | 'post' | 'render') {
+    console.log("getTaskQUeu")
+    console.log(phase, reactiveObjTaskQueues.get(reactive))
     return reactiveObjTaskQueues.get(reactive)?.get(phase);
 }
 
@@ -307,6 +310,7 @@ export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue:
     // collect triggered refs for this cycle for 'pre', 'render', and 'post' phases
     if (isSignal(target)) currentUpdateCycle.flagSignal(target, newValue, oldValue)
     else {
+console.log("flag reactive")
         currentUpdateCycle.flagReactive(target, key!, newValue, oldValue)
     }
 
@@ -373,15 +377,7 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
 }
 
 
-export function hasChanged(newValue: any, oldValue: any) { //TODO: this is really tricky.. do I do a shallow diff or a deep diff for arrays??
-    if (oldValue instanceof Array && areShallowEqualArrays(oldValue, newValue)) return false
-    if (oldValue instanceof Set && areEqualSets(oldValue, newValue)) return false; // inherently shallow
-    if (oldValue instanceof Map && areEqualMaps(newValue, oldValue)) return false; // deep
-    if (oldValue instanceof Object && reactivePropsAreEqual(oldValue, newValue)) return false; // partial deep
-    if (oldValue instanceof Object && isEqual(oldValue, newValue)) return false; // deep
-    if (oldValue === newValue) return false;
-    return true;
-}
+
 
 
 
@@ -393,8 +389,9 @@ export function runNonSyncTasks(phase: "pre" | "post" | "render") {
     if (triggeredReactives) {
         for (const [reactive, keys] of triggeredReactives) {
             // if (phase !== 'render') {
-            const taskQueue = getTaskQueueForReactive(reactive, phase);
-            if (taskQueue) {
+                console.log("yes triggered reactives", reactive, keys)
+                const taskQueue = getTaskQueueForReactive(reactive, phase);
+                if (taskQueue) {
                 for (const task of taskQueue) {
                     const snapshotMap = updateCycle.snapshotMap;
                     if (!snapshotMap) throw "no snapshot map :("
@@ -403,8 +400,9 @@ export function runNonSyncTasks(phase: "pre" | "post" | "render") {
                     const ops = updateCycle.getOps(reactive);
                     if (ops && ops.length === 0)
                         return;
-                    else if (!hasChanged(reactive, snapshot))
+                    else if (!hasChanged(reactive, snapshot)){
                         return;
+                    }
                     task(reactive, snapshot, ops) //QUESTION: Why is this not non-repeating tasks?
                 }
             }
@@ -430,9 +428,21 @@ export function runNonSyncTasks(phase: "pre" | "post" | "render") {
     }
 }
 
+export function hasChanged(newValue: any, oldValue: any) { //TODO: this is really tricky.. do I do a shallow diff or a deep diff for arrays?? I think it should be shallow diff because if you are watching an array, you typically care about the order
+    const original = toRaw(newValue);
+    if (original instanceof Array) return !areShallowEqualArrays(oldValue, newValue);
+    if (original instanceof Set) return !areEqualSets(oldValue, newValue); // inherently shallow
+    if (original instanceof Map) return !areEqualMaps(newValue, oldValue); // deep
+    if (isReactiveObject(newValue)) return !reactivePropsAreEqual(oldValue, newValue); // partial deep
+    if (original instanceof Object) return !isEqual(oldValue, newValue); // deep
+    if (oldValue === newValue) return false;
+    return true;
+}
+
 export function isShallowEqual(collectionA: any[] | Set<any>, collectionB: any[] | Set<any>) {
-    if (collectionA instanceof Array) return areShallowEqualArrays(collectionA, <any[]>collectionB);
-    if (collectionA instanceof Set) return areEqualSets(collectionA, <Set<any>>collectionB);
+    const original = toRaw(collectionA)
+    if (original instanceof Array) return areShallowEqualArrays(<any[]>collectionA, <any[]>collectionB);
+    if (original instanceof Set) return areEqualSets(<Set<any>>collectionA, <Set<any>>collectionB);
     if (__DEV__) console.warn("Not yet implemented for Objects and Map")
 }
 
@@ -458,8 +468,9 @@ export function reactivePropsAreEqual(reactiveA: ReactiveModel, reactiveB: React
     for (const key in reactiveA) {
         const valueA = reactiveA[key];
         const valueB = reactiveB[key];
-        return hasChanged(valueA, valueB);
+        if (hasChanged(valueA, valueB)) return false;
     }
+    return true;
 }
 
 function areEqualSets(setA: Set<any>, setB: Set<any>) {
@@ -477,4 +488,5 @@ function areEqualMaps(mapA: Map<any, any>, mapB: Map<any, any>) {
         if (hasChanged(value, mapB.get(key)))
             return false;
     }
+    return true;
 }

@@ -20,8 +20,8 @@ export function useReactiveModel(config?: { snapshots: boolean }) {
         o$<T extends AnyObject>(target: T): ReactiveModel<T> {
             if (reactiveMap.has(target)) return target; // prevents double wrapped reactive
 
-            const reactive = target instanceof Array ?
-                createReactiveArray(target, mutationPermitted)
+            const reactive = toRaw(target) instanceof Array ? //TODO: Sets and maps
+                createReactiveArray(<any[]><unknown>target, mutationPermitted)
                 : createReactiveObject(target, addLocalReactive, mutationPermitted)
             localReactives.add(reactive)
             reactiveMap.set(reactive, target)
@@ -42,9 +42,10 @@ export function isReactiveModel(obj: AnyObject): obj is ReactiveModel {
 }
 
 export function isReactiveObject(obj: AnyObject): obj is ReactiveModel {
-    if (obj instanceof Array) return false;
-    if (obj instanceof Map) return false;
-    if (obj instanceof Set) return false;
+    const original = toRaw(obj);
+    if (original instanceof Array) return false;
+    if (original instanceof Map) return false;
+    if (original instanceof Set) return false;
     return reactiveMap.has(obj);
 }
 
@@ -71,7 +72,7 @@ function createReactiveObject(target: AnyObject, addLocalReactive: (reactive: Re
             if (oldValue !== newValue) {
                 trigger(reactive, newValue, oldValue, key)
             }
-            Reflect.set(target, key, receiver);
+            Reflect.set(target, key, newValue, receiver);
             return true;
         }
     })
@@ -80,6 +81,7 @@ function createReactiveObject(target: AnyObject, addLocalReactive: (reactive: Re
         if (reactiveMap.has(value)) continue; // prevents double wrapped reactive
         if (Object.getPrototypeOf(value) === Object) {
             const reactive = createReactiveObject(value, addLocalReactive, mutationPermitted)
+            target[key] = reactive;
             reactiveMap.set(reactive, value);
             addLocalReactive(reactive);
         }
@@ -98,22 +100,27 @@ function createReactiveArray(target: any[], mutationPermitted: Ref<boolean>) {
             if (isMutatingArrayMethod(key)) {
                 if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
                 return (...args: any[]) => {
-                    trigger(reactive, target, target, key, args)
-                    return (<Function>value).apply(target, args);
+            console.log("trigger via", key)
+                    trigger(reactive, target, target, key, args);
+                    // return (<Function>value).apply(target, args);
+                    return (<Function>value).apply(reactive, args);
                 };
             }
             if (isNonTrackable(key, Array)) return value;
             emitSignal();
             track(value, target, key)
+            console.log("track length", key === 'length')
             return value;
         },
         set(target, key, newValue, receiver) {
+            console.log("trigger length", key === 'length', newValue)
             if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
             const oldValue = Reflect.get(target, key, receiver);
             if (oldValue !== newValue || !isNonTrackable(key, Array)) {
+                console.log("triggered", key, newValue)
                 trigger(reactive, newValue, oldValue, key)
             }
-            Reflect.set(target, key, receiver);
+            Reflect.set(target, key, newValue, receiver);
             return true;
         }
     })
@@ -139,8 +146,11 @@ function isNonTrackable(key: PropertyKey, type: typeof Array | typeof Object | t
 
 const nonTrackableObjectKeys = getNonTrackableKeys({})
 const nonTrackableArrayKeys = getNonTrackableKeys([])
+nonTrackableArrayKeys.delete('length')
 const nonTrackableMapKeys = getNonTrackableKeys(new Map())
+nonTrackableMapKeys.delete('size')
 const nonTrackableSetKeys = getNonTrackableKeys(new Set())
+nonTrackableSetKeys.delete('size')
 
 function getNonTrackableKeys(target: AnyObject) {
     return new Set(Object.getOwnPropertyNames(Object.getPrototypeOf(target)))

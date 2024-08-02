@@ -1,4 +1,4 @@
-import { DerivedSignal, getWithoutTracking, hasSignal, makeDerivedSignal, ReactiveModel, ReactiveSignal } from "@rue/muonic";
+import { DerivedSignal, getWithoutTracking, hasSignal, makeDerivedSignal, ReactiveModel, ReactiveSignal, toRaw } from "@rue/muonic";
 import { getCurrentComponent, InternalComponent } from "../component/component";
 import { _NodePod } from "../node/NodePod";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
@@ -188,13 +188,13 @@ export function watchForRenderAndPreserve(target: ReactiveSignal<any> | Reactive
     if (!component) throw new Error("No component found")
 
     const watcher = watchForRender(target, handler, options);
-    const oldValue = hasSignal(target) ? target : target instanceof Array ? [...target] : { ...target } //TODO: doesn't account for sets or maps
+    const oldValue = hasSignal(target) ? target : toRaw(target) instanceof Array ? [...target] : { ...target } //TODO: doesn't account for sets or maps
     onDeactivated(() => {
         watcher.stop()
     })
     if (hasSignal(target)) {
         onActivated(() => {
-            handler(target(), oldValue)
+            handler(target(), oldValue) //FIX: Why am I calling this here? what about snapshots?
             // pushComponent(component)
             watchForRender(target, handler, options)
             // popComponent()

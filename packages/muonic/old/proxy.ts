@@ -113,7 +113,7 @@ function o$<T extends AnyObject>(target: T) { // only create a proxy if object l
                 console.error(e);
                 return false;
             }
-            Reflect.set(target, key, receiver);
+            Reflect.set(target, key, value, receiver);
             return true;
         }
     })

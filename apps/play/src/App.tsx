@@ -28,10 +28,24 @@ export function List() {
         { id: 2, content: "fly" },
         { id: 3, content: "swamp" }
     ])
+    const $list = $([
+        { id: 0, content: "frog" },
+        { id: 1, content: "frog" },
+        { id: 2, content: "fly" },
+        { id: 3, content: "swamp" }
+    ])
 
     // const $listUI = $($list().map((item)=>({id: item.id, selected: false})))
 
     function insertItem(index: number) {
+        // set($list, list => {
+        //     const _list = [...list]
+        //     _list.splice(index, 0, {
+        //         id: genId(),
+        //         content: (Math.random() * 100).toString(),
+        //     })
+        //     return _list;
+        // })
         mu(list$, list => {
             list.splice(index, 0, {
                 id: genId(),
@@ -45,6 +59,12 @@ export function List() {
     }
 
     function removeItem(index: number) {
+        // set($list, list => {
+        //     const _list = [...list]
+        //     _list.splice(index, 1);
+        //     console.log(list);
+        //     return _list
+        // })
         mu(list$, list => {
             list.splice(index, 1);
             console.log(list);
