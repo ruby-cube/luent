@@ -7,6 +7,7 @@ import { $listen, ScheduleStop } from "@rue/flask";
 import { removeItem } from "../utils/array";
 import { beforeRepaint, queueTask } from "@rue/thread";
 import { MutationOp, SetOp } from "./deepWatch";
+import { asReactiveProp } from "./ReactiveProp";
 
 const snapshotManager = new SnapshotManager();
 
@@ -68,21 +69,13 @@ export class UpdateCycle {
             targetMap.set(target, props);
         }
 
-        // only need to store key and values if taskqueues exist
-        let taskQueue = getTaskQueueForProp(target, key, 'pre');
-        if (taskQueue) {
-            props.set(key, [newValue, oldValue]);
-            return;
-        }
-        taskQueue = getTaskQueueForProp(target, key, 'render');
-        if (taskQueue) {
-            props.set(key, [newValue, oldValue]);
-            return;
-        }
-        taskQueue = getTaskQueueForProp(target, key, 'post');
-        if (taskQueue) {
-            props.set(key, [newValue, oldValue]);
-            return;
+        const phases = ['pre', 'render', 'post'] as const
+        for (const phase of phases) {
+            let taskQueue = getTaskQueueForProp(asReactiveProp(target, key), phase);
+            if (taskQueue) {
+                props.set(key, [newValue, oldValue]);
+                return; // return because we only need to store key and values if taskqueues exist
+            }
         }
     }
 
@@ -99,8 +92,8 @@ export class UpdateCycle {
     }
 
     opsMap: WeakMap<ReactiveModel, (MutationOp | SetOp)[]> = new WeakMap();
-    
-    composeOps(target: ReactiveModel, ops: (MutationOp | SetOp)[]){
+
+    composeOps(target: ReactiveModel, ops: (MutationOp | SetOp)[]) {
         let existingOps = this.opsMap.get(target);
         if (existingOps) {
             existingOps.push(...ops)
@@ -110,7 +103,7 @@ export class UpdateCycle {
         }
     }
 
-    recordOp(target: ReactiveModel, op: MutationOp | SetOp){
+    recordOp(target: ReactiveModel, op: MutationOp | SetOp) {
 
         //TODO: consolidate set ops (cannot consolidate mutation ops, those need to be in order)
         let existingOps = this.opsMap.get(target);

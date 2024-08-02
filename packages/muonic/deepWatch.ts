@@ -6,6 +6,7 @@ import { ActiveListener } from "@rue/flask";
 import { AnyObject } from "@rue/types";
 
 export type MutationOp = {
+    keyPath?: KeyPath,
     op: string,
     args: any[]
 }
@@ -25,6 +26,10 @@ export function isSetOp(op: AnyObject): op is SetOp {
 }
 
 // Watch API for mutations
+
+// watch($(o=>frog$.position.x), (xValue, oldXValue, )=>{
+
+// })
 
 // watch(list$, (rawArray, snapshot, ops: MutationOp[]) => { // Shallow watch
 

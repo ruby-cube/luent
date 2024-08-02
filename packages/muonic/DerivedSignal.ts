@@ -1,7 +1,8 @@
 import { ActiveListener } from "@rue/flask";
-import { DependencyTracker, ReactiveProp } from "./DependencyTracker";
+import { DependencyTracker } from "./DependencyTracker";
 import { isSignal, Signal, SIGNAL_MARKER } from "./useSignals";
 import { hasChanged, watch } from "./watch";
+import { ReactiveProp } from "./ReactiveProp";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions

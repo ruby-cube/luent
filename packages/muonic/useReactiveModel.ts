@@ -3,6 +3,7 @@ import { track, trigger } from "./watch";
 import { emitSignal } from "./useReactivity";
 import { isObjectLiteral, KeyPath, Ref } from "@rue/utils";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
+import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 
@@ -127,8 +128,8 @@ function createReactiveArray(target: any[], addLocalReactive: (target: ReactiveM
         if (reactiveMap.has(item)) continue;
         if (!(item instanceof Object)) continue;
         const item$ = isObjectLiteral(item) ?
-        createReactiveObject(item, addLocalReactive, mutationPermitted) :
-        item instanceof Array ? createReactiveArray(item, addLocalReactive, mutationPermitted) : null;
+            createReactiveObject(item, addLocalReactive, mutationPermitted) :
+            item instanceof Array ? createReactiveArray(item, addLocalReactive, mutationPermitted) : null;
         if (item$ === null) continue;  //TODO: Maps and sets
         target[i] = item$;
         reactiveMap.set(item$, item);
