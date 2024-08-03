@@ -32,7 +32,6 @@ export class SnapshotManager {
     }
 
     private storeSnapshot(snapshot: Snapshot, target: AnyObject, index: number) {
-        console.log("snapshot", snapshot)
         let snapshots = this.snapshotMap.get(target);
         if (!snapshots) {
             snapshots = []

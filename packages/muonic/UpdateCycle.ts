@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { SnapshotManager } from "./SnapshotManager";
-import { ReactiveModel } from "./useReactiveModel";
+import { ReactiveModel } from "./useReactiveModels";
 import { Signal } from "./useSignals";
 import { getTaskQueueForProp, runNonSyncTasks } from "./watch";
 import { $listen, ScheduleStop } from "@rue/flask";

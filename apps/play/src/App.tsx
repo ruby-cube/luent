@@ -2,6 +2,7 @@ import { $else, $elseIf, $if, COMPONENT, ComponentSetup, ConditionalRenderKit, e
 import { Signal, useReactivity, watch, watchEffect } from "@rue/muonic"
 import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { useRandomColorGenerator } from "@rue/utils";
+import { __addDevName } from "@rue/muonic/debug";
 
 
 const { $, set, o$, mu } = useReactivity();
@@ -21,13 +22,53 @@ const loadSideBlock = idleLoadComponent({
 
 const onClick = useEventListener('click');
 
+// shallow reactive model o$
+// deep reactive model o$$$
+// shallow signal $ (also derived signal)
+// deep signal $$$
+// memo$()
+
 export function List() {
+
+    const $active = $(true)
+    if (__DEV__) __addDevName($active, '$active')
+
+        const $ready = $(true)
+    if (__DEV__) __addDevName($ready, '$ready')
+
+
     const list$ = o$([
         { id: 0, content: "frog" },
-        { id: 1, content: "frog" },
-        { id: 2, content: "fly" },
-        { id: 3, content: "swamp" }
+        // { id: 1, content: "frog" },
+        // { id: 2, content: "fly" },
+        // { id: 2, content: "fly" },
+        // { id: 3, content: "swamp" }
     ])
+
+    watchEffect(()=>{
+        list$[0].content
+    }, {
+        onTrack(dep){
+console.log(dep)
+        }
+    })
+    
+    // watchEffect(()=>{
+
+    watch(list$, () => {
+        console.log(`list$ changed!`)
+    }, {
+        // onTrigger() {
+        //     console.log("list$ triggered")
+        //     console.trace()
+        // },
+        // onTrack(){
+        //     console.log("list tracked!!")
+        //     console.trace()
+        // }
+    })
+    // })
+
     const $list = $([
         { id: 0, content: "frog" },
         { id: 1, content: "frog" },
@@ -53,10 +94,10 @@ export function List() {
         //     return _list;
         // })
         mu(list$, list => {
-            list.splice(index, 0, {
+            list.splice(index, 0, o$({
                 id: genId(),
                 content: (Math.random() * 100).toString(),
-            })
+            }))
         })
     }
 
@@ -117,7 +158,7 @@ export function List() {
                                 X
                             </p>
                             <li onclick={() => changeContent($index())}>
-                                {$(()=>item$.content)}
+                                {$(() => item$.content)}
                             </li>
                             <p>{$index}</p>
                             <div
@@ -153,6 +194,7 @@ function useModal() {
 
 function VisibilityBlock() {
     const $visible = $(false);
+    __addDevName($visible, '$visible')
 
     function toggleVisibility() {
         set($visible, visibility => !visibility)
@@ -193,6 +235,7 @@ function HereBlock(props: { $active: Signal<boolean> }) {
 
 function DialogBox() {
     const $open = $(false)
+    __addDevName($open, '$open')
 
     function open() {
         console.log("open sesame")

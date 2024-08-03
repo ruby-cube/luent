@@ -2,7 +2,7 @@ import { _watchEffect, ChangeHandler, getDependencies, useTaskQueues } from "@ru
 import { getCurrentComponent, InternalComponent } from "../component/component";
 import { beforeUpdatePhase, onUpdateComplete } from "@rue/muonic/UpdateCycle";
 import { ReactiveSignal } from "@rue/muonic/DerivedSignal";
-import { ReactiveModel } from "@rue/muonic/useReactiveModel";
+import { ReactiveModel } from "@rue/muonic/useReactiveModels";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
 

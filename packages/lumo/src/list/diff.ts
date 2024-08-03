@@ -67,7 +67,6 @@ export type InsertAndMoveKit = {
 }
 
 function toIdArray(target: AnyObject[], idKey: string | symbol) {
-    console.log("toIdArray", target)
     const idArray = new UniqueArray();
     const itemMap: Map<any, any> = new Map();
 

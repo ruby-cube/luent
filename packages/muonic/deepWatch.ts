@@ -1,5 +1,5 @@
 import { KeyPath } from "@rue/utils";
-import { isReactiveModel, isReactiveObject, ReactiveModel } from "./useReactiveModel";
+import { isReactiveModel, isReactiveObject, ReactiveModel } from "./useReactiveModels";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 import { _watchEffect, watch, WatchOptions } from "./watch";
 import { ActiveListener } from "@rue/flask";

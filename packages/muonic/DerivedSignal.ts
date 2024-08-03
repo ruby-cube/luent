@@ -43,7 +43,6 @@ export class DerivedSignalState {
 
     private stopPrevWatchers() {
         for (const watcher of this.watchers) {
-            console.log("stopping previous")
             watcher.stop();
         }
         this.watchers = [];

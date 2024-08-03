@@ -1,5 +1,5 @@
 import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
-import { isReactiveObject, ReactiveModel } from "./useReactiveModel";
+import { isReactiveObject, ReactiveModel } from "./useReactiveModels";
 import { Signal } from "./useSignals";
 
 
@@ -20,8 +20,8 @@ export class DependencyTracker {
         this.trackedSignals.add(signal);
     }
 
-    addProp(target: ReactiveModel, key: string | symbol) {
-        this.trackedProps.add(asReactiveProp(target, key))
+    addProp(prop: ReactiveProp) {
+        this.trackedProps.add(prop)
     }
 
     shouldTrack: boolean = false;
@@ -46,8 +46,9 @@ export class DependencyTracker {
         const value = signalOrEffect();
         this.stop();
         activeDepTracker = null;
-        if (__DEV__ && this.dependencies.length === 0)
+        if (__DEV__ && this.dependencies.length === 0){
             throw new Error('Watch target or derived signal has no dependencies (and therefore no reactivity')
+        }
         return [this.dependencies, value];
     }
 

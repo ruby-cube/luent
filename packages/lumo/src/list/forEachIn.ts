@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { hasSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
-import { isReactiveModel, ReactiveModel } from "@rue/muonic/useReactiveModel";
+import { isReactiveModel, ReactiveModel } from "@rue/muonic/useReactiveModels";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Signal, useSignals } from "@rue/muonic/useSignals";
 import { NodeEntity } from "../node/makeNode";

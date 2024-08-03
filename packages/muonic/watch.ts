@@ -1,6 +1,6 @@
 import { $listen, ListenerOptions, PendingOp, ScheduleStop } from "@rue/flask";
 import { isSignal, Signal } from "./useSignals";
-import { isReactiveModel, isReactiveObject, ReactiveModel, toRaw } from "./useReactiveModel";
+import { isReactiveModel, isReactiveObject, ReactiveModel, toRaw } from "./useReactiveModels";
 import { AnyObject } from "@rue/types";
 import { ActiveListener } from "../flask/ActiveListener";
 import { getCurrentUpdateCycle, setCurrentUpdateCycle, UpdateCycle } from "./UpdateCycle";
@@ -8,7 +8,7 @@ import { DependencyTracker, getDependencyTracker } from "./DependencyTracker";
 import { DERIVED_SIGNAL, DerivedSignal, hasSignal, isDerivedSignal, ReactiveSignal } from "./DerivedSignal";
 import { isEqual } from "@rue/utils";
 import { deepWatch, MutationOp, SetOp } from "./deepWatch";
-import { collectReactiveProps, registerDebuggers, runTrackDebugger, WatchDebugOptions } from "./debug";
+import { collectReactiveProps, registerDebuggers, runTrackDebugger, runTriggerDebugger, WatchDebugOptions } from "./debug";
 import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
 
 //QUESTION: How useful is watching deep?
@@ -16,11 +16,11 @@ import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
 export type WatchOptions = {
     deep?: boolean;
     eager?: true;
-} & EffectOptions & WatchDebugOptions
+} & EffectOptions 
 
 type EffectOptions = {
     phase?: Phase;
-} & ListenerOptions
+} & ListenerOptions & WatchDebugOptions
 
 type Phase = 'pre' | 'render' | 'post' | 'sync'
 
@@ -92,8 +92,11 @@ export function _watchEffect<T>(handler: ChangeHandler<T> | ReactiveEffect, targ
         // watch all properties of reactive
         taskQueues = useTaskQueuesForReactive(target, phase, deep)
         if (__DEV__) {
-            const dependencies = collectReactiveProps(target);
-            registerDebuggers(dependencies, options)
+            if (isReactiveObject(target)) {
+                const dependencies = collectReactiveProps(target);
+                registerDebuggers(dependencies, options)
+            }
+            registerDebuggers(target, options)
         }
     }
 
@@ -199,20 +202,18 @@ export function getDependencies(reactiveFunction: Function, isReactiveEffect?: b
 
 
 
-export function track(value: any, target: Signal): void
-export function track(value: any, target: ReactiveModel, key: string | symbol): void
-export function track(value: any, target: Signal | ReactiveModel, key?: string | symbol) {
+export function track(target: Signal): void
+export function track(target: ReactiveModel, key: string | symbol): void
+export function track(target: Signal | ReactiveModel, key?: string | symbol) {
     const tracker = getDependencyTracker();
     if (!tracker) return;
     if (tracker.shouldTrack) {
         if (isSignal(target)) {
             tracker.addSignal(target);
-            if (__DEV__) runTrackDebugger(target)
         }
         else {
             if (!key) throw new Error("Cannot track undefined key")
-            tracker.addProp(target, key);
-            if (__DEV__) runTrackDebugger(asReactiveProp(target, key))
+            tracker.addProp(asReactiveProp(target, key));
         }
     }
 }
@@ -287,6 +288,14 @@ export function getTaskQueueForProp(prop: ReactiveProp, phase: 'pre' | 'post' | 
 
 
 export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue: any, key?: PropertyKey, args?: any[]) {
+    if (__DEV__) {
+        if (args) {
+            runTriggerDebugger(target)
+        }
+        else if (key) runTriggerDebugger(asReactiveProp(target, key))
+        else runTriggerDebugger(<Signal>target)
+    }
+
     let currentUpdateCycle = getCurrentUpdateCycle()
     if (!currentUpdateCycle) {
         currentUpdateCycle = new UpdateCycle();

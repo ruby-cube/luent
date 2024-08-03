@@ -1,25 +1,27 @@
 import { getWithoutTracking } from "./DependencyTracker";
-import { DerivedSignal, makeDerivedSignal } from "./DerivedSignal";
-import { useReactiveModel } from "./useReactiveModel";
+import { useReactiveModels } from "./useReactiveModels";
 import { useSignals } from "./useSignals";
 
 export function useReactivity() {
-    const s = useSignals();
-    const r = useReactiveModel();
+    const r = useReactiveModels();
+    const s = useSignals(r);
 
     return {
+        $$$: s.$$$,
+        $$: s.$$,
         $: s.$,
-        set: s.set,
+        o$$$: r.o$$$,
         o$: r.o$,
-        mu: r.mu
+        set: s.set,
+        mu: r.mu,
     }
 }
 
 let _hasSignal = false;
 
-export function hasReactivity_Dev(maybeSignal: any): maybeSignal is Function {
+export function hasReactivity_DEV(maybeSignal: any): maybeSignal is Function {
     if (!(maybeSignal instanceof Function)) return false;
-    console.warn('Using `hasReactivity_Dev` on a function with unknown side effects can cause bugs. To avoid unknown side-effects, use `hasSignal` to check for reactivity and pass any impromptu getters into the $ function. `hasReactivity_Dev` is only to check if you have a wrapped signal')
+    console.warn('Using `hasReactivity_DEV` on a function with unknown side effects can cause bugs. To avoid unknown side-effects, use `hasSignal` to check for reactivity and pass any impromptu getters into the $ function. `hasReactivity_DEV` is only to check if you have a wrapped signal')
     _hasSignal = false;
     getWithoutTracking(maybeSignal)
     if (_hasSignal) {

@@ -83,7 +83,6 @@ export function loadComponent<P>(config: {
     return (props: P) => (
         <>
             {$if($loaded, 'create', () => {
-                console.log("loaded!")
                 return <Component {...props}></Component>
             }
             )}
