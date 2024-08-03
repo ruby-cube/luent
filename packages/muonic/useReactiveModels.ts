@@ -2,17 +2,17 @@ import { AnyObject } from "@rue/types";
 import { track, trigger } from "./watch";
 import { emitSignal } from "./useReactivity";
 import { isObjectLiteral, KeyPath, Ref } from "@rue/utils";
+import { isTuple, tuple } from "./Tuple";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject) => void
-
-//TODO: sets, maps, and tuples
 
 const reactiveMap: WeakMap<ReactiveModel, AnyObject> = new WeakMap();
 const deepReactives: WeakSet<ReactiveModel> = new WeakSet();
 const DEEP = true;
 const O$DEPTH = 1;
 const O$$$DEPTH = 3;
+
 
 export function isDeepReactive(value: any): value is ReactiveModel {
     return deepReactives.has(value);
@@ -128,6 +128,7 @@ function maybeReactivize(
     registerReactive: RegisterReactive,
     mutationPermitted: Ref<boolean>,
 ) {
+    if (reactiveMap.has(newValue)) return newValue;
     const reactiveDepth = shouldReactivize(reactive, oldValue, newValue);
     return reactiveDepth === O$$$DEPTH ? createReactive(newValue, registerReactive, mutationPermitted, DEEP)
         : reactiveDepth === O$DEPTH ? createReactive(newValue, registerReactive, mutationPermitted)
@@ -140,9 +141,13 @@ function createReactive(
     mutationPermitted: Ref<boolean>,
     deep?: boolean
 ) {
+    if (reactiveMap.has(value)) return value;
     return isObjectLiteral(value) ? createReactiveObject(value, registerReactive, mutationPermitted, deep)
-        : value instanceof Array ? createReactiveArray(value, registerReactive, mutationPermitted, deep)
-            : null; //TODO: Maps and sets
+        : isTuple(value) ? createReactiveTuple(value, registerReactive, mutationPermitted, deep)
+            : value instanceof Array ? createReactiveArray(value, registerReactive, mutationPermitted, deep)
+                : value instanceof Set ? createReactiveSet(value, registerReactive, mutationPermitted, deep)
+                    : value instanceof Map ? createReactiveMap(value, registerReactive, mutationPermitted, deep)
+                        : null;
 }
 
 
@@ -396,7 +401,7 @@ function createReactiveSet(
     if (deep) {
         createReactiveArrayItems(values, registerReactive, mutationPermitted)
         target.clear();
-        for (const value of values){
+        for (const value of values) {
             target.add(value);
         }
     }
