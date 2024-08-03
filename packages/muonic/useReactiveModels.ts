@@ -27,30 +27,26 @@ export function useReactiveModels(config?: { snapshots: boolean }) {
 
     let mutationPermitted = new Ref(false);
 
+    function _o$(target: AnyObject, deep?: boolean) {
+        if (reactiveMap.has(target)) return target; // prevents double wrapped reactive
+
+        const reactive = createReactive(target, registerReactive, mutationPermitted, deep)
+        if (reactive === null) {
+            if (__DEV__) console.warn(`INVALID INPUT: o$ must receive a reference-type primitive (object)`)
+            return target;
+        }
+        registerReactive(reactive, target);
+        if (deep) deepReactives.add(reactive);
+        return reactive;
+    }
+
     return {
         o$$$<T extends AnyObject>(target: T): ReactiveModel<T> {
-            if (reactiveMap.has(target)) return target; // prevents double wrapped reactive
-
-            const reactive = createReactive(target, registerReactive, mutationPermitted, DEEP)
-            if (reactive === null) {
-                if (__DEV__) console.warn(`INVALID INPUT: o$ must receive an reference-type primitive (object)`)
-                return target;
-            }
-            registerReactive(reactive, target);
-            deepReactives.add(reactive);
-            return reactive as ReactiveModel<T>
+            return _o$(target, DEEP);
         },
 
         o$<T extends AnyObject>(target: T): ReactiveModel<T> {
-            if (reactiveMap.has(target)) return target; // prevents double wrapped reactive
-
-            const reactive = createReactive(target, registerReactive, mutationPermitted)
-            if (reactive === null) {
-                if (__DEV__) console.warn(`INVALID INPUT: o$ must receive an reference-type primitive (object)`)
-                return target;
-            }
-            registerReactive(reactive, target)
-            return reactive as ReactiveModel<T>
+            return _o$(target);
         },
 
         mu<T extends ReactiveModel>(target: T, mutation: (o: T) => void) {
