@@ -162,6 +162,13 @@ function queueForNextCycle(phaseQueue: PhaseQueue, phase: Phase) {
     })
 }
 
+// Semaphore for derived signal to forward dependencies
+let initializingEffect = false;
+
+export function isInitializingEffect() {
+    return initializingEffect;
+}
+
 export function initializeEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived signal and effect combined into one function
     const phase = options?.phase || 'pre';
     const retrack = options?.retrack;
@@ -169,7 +176,10 @@ export function initializeEffect(effect: () => void, options?: EffectOptions) { 
     let phaseQueues: PhaseQueue[];
 
     // collect tracked refs and get taskQueues
+    initializingEffect = true;
     const dependencies = getDependencies(effect, true) //TODO: must retrack dependencies onChange like with derivedSignal to catch conditional dependencies? .. should the logic live here instead of in $()?
+    initializingEffect = false;
+
     phaseQueues = usePhaseQueues(dependencies, phase);
     if (__DEV__) {
         registerDebuggers(dependencies, options)

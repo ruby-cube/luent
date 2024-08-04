@@ -1,7 +1,7 @@
 import { ActiveListener } from "@rue/flask";
-import { DependencyTracker } from "./DependencyTracker";
+import { DependencyTracker, getDependencyTracker } from "./DependencyTracker";
 import { isSignal, Signal, SIGNAL_MARKER } from "./useSignals";
-import { hasChanged, watch } from "./watch";
+import { hasChanged, isInitializingEffect, watch } from "./watch";
 import { ReactiveProp } from "./ReactiveProp";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 import { noop } from "@rue/utils";
@@ -147,6 +147,14 @@ export function makeDerivedSignal<T extends any>(pureGetter: () => T, retrack?: 
             }
             return newValue;
         }
+
+        // forward dependencies to initEffect
+        if (isInitializingEffect()){
+            const tracker = getDependencyTracker();
+            if (!tracker) throw new Error("No tracker :( This should never happen")
+            tracker.dependencies.push(..._this.dependencies)
+        }
+
         return _this.value;
     }
     const props = new DerivedSignalState();
