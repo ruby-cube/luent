@@ -3,7 +3,7 @@ import { getCurrentComponent, InternalComponent } from "../component/component";
 import { _NodePod } from "../node/NodePod";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { watchForRender, watchRenderEffect } from "../reactivity/watchForRender";
+import { watchForRender, initializeRender } from "../reactivity/watchForRender";
 import { onActivated, onDeactivated } from "../component/lifecycle";
 
 export type RenderConditional = () => NodeEntity[]
@@ -211,14 +211,14 @@ export function watchForRenderAndPreserve(target: ReactiveSignal<any> | Reactive
     return watcher
 }
 
-export function watchRenderEffectAndPreserve(handler: () => void) {
-    const watcher = watchRenderEffect(handler);
+export function initializeRenderAndPreserve(handler: () => void) {
+    const watcher = initializeRender(handler);
 
     onDeactivated(() => {
         watcher.stop()
     })
 
     onActivated(() => {
-        watchRenderEffect(handler)
+        initializeRender(handler)
     })
 }

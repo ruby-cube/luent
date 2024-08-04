@@ -3,6 +3,7 @@ import { track, trigger } from "./watch";
 import { emitSignal } from "./useReactivity";
 import { DerivedSignal, makeDerivedSignal } from "./DerivedSignal";
 import { isDeepReactive, isReactiveModel, ReactiveModel, useReactiveModels } from "./useReactiveModels";
+import { getDependencyTracker } from "./DependencyTracker";
 
 export type Signal<T = any> = { (): T;[SIGNAL_MARKER]: boolean; }
 export const SIGNAL_MARKER = Symbol();
@@ -51,6 +52,7 @@ export function useSignals(reactiveModelKit?: {
     function signalize<T>(value: T, deep?: 2 | 3): Signal<T> {
 
         const signal = () => {
+            console.log("tracker", getDependencyTracker())
             emitSignal();
             const value = signalValues.get(signal)
             track(signal)

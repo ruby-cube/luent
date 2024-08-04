@@ -6,8 +6,8 @@ import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, getNodeRef, NodeRef } from "../node/NodeRef";
 import { Signal, useSignals } from "@rue/muonic/useSignals";
 import { analyzeAttributes } from "../component/mO";
-import { watchRenderEffect, watchForRender } from "../reactivity/watchForRender";
-import { buildConditionalSeries, ConditionalRenderKit, ConditionalSeries, noElseBlock, RenderConditional, validateStandAloneConditional, watchForRenderAndPreserve, watchRenderEffectAndPreserve } from "../conditional/$if";
+import { initializeRender, watchForRender } from "../reactivity/watchForRender";
+import { buildConditionalSeries, ConditionalRenderKit, ConditionalSeries, noElseBlock, RenderConditional, validateStandAloneConditional, watchForRenderAndPreserve, initializeRenderAndPreserve } from "../conditional/$if";
 import { ElementConfig, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { ActiveListener, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
@@ -157,11 +157,11 @@ type DynamicClassesConfig = {
 }
 
 function setUpClasses(component: InternalComponent, node: Element, classes: (((o: DOMTokenList) => void) | string | DynamicClassesConfig)[]) {
-    const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
+    const _initializeRender = component.preserve ? initializeRenderAndPreserve : initializeRender
     const classList = node.classList
     for (const entry of classes) {
         if (entry instanceof Function) {
-            _watchRenderEffect(() => entry(classList))
+            _initializeRender(() => entry(classList))
         }
         else if (entry instanceof Object) {
             for (const key in entry) {
@@ -192,11 +192,11 @@ function warnDuplicateClasses(classesA: string, classesB: string) {
 }
 
 function setUpStyles(component: InternalComponent, node: HTMLElement, styles: (((o: CSSStyleDeclaration) => void) | string)[]) {
-    const _watchRenderEffect = component.preserve ? watchRenderEffectAndPreserve : watchRenderEffect
+    const _initializeRender = component.preserve ? initializeRenderAndPreserve : initializeRender
     const style = node.style;
     for (const entry of styles) {
         if (entry instanceof Function) {
-            _watchRenderEffect(() => entry(style))
+            _initializeRender(() => entry(style))
         }
         else {
             if (__DEV__ && entry) warnOverlappingStyles(style.cssText, normalizeStyle(entry));
@@ -224,11 +224,11 @@ function warnOverlappingStyles(stylesA: string, stylesB: string) {
 
 function setUpAttributeChanges(node: Element, changes: ((o: Element) => void)[] | ((o: Element) => void)) {
     if (changes instanceof Function) {
-        watchRenderEffect(() => changes(node)) // watchAndPreserve?
+        initializeRender(() => changes(node)) // watchAndPreserve?
     }
     else {
         for (const change of changes) {
-            watchRenderEffect(() => change(node))
+            initializeRender(() => change(node))
         }
     }
 }

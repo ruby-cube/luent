@@ -1,5 +1,5 @@
 import { $else, $elseIf, $if, COMPONENT, ComponentSetup, ConditionalRenderKit, expose, forEachIn, NodeEntity, NodeRef, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
-import { Signal, useReactivity, watch, watchEffect } from "@rue/muonic"
+import { Signal, useReactivity, watch, initializeEffect } from "@rue/muonic"
 import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic/debug";
@@ -46,7 +46,7 @@ export function List() {
     ])
 
 
-//     watchEffect(()=>{
+//     initializeEffect(()=>{
 //         list$[0].content
 //     }, {
 //         onTrack(dep){
@@ -54,7 +54,7 @@ export function List() {
 //         }
 //     })
     
-    // watchEffect(()=>{
+    // initializeEffect(()=>{
 
     watch(list$, () => {
         console.log(`list$ changed!`)

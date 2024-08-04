@@ -12,7 +12,7 @@ import { reMouseDown } from "../actionry/__test__/actionry.type-test";
 import { NodeEntity } from "../src/mE";
 import { setUpComponent } from "../src/mE";
 import { forEachIn } from "../src/forEachIn";
-import { watchForRender, watchRenderEffect } from "../src/watchForRender";
+import { watchForRender, initializeRender } from "../src/watchForRender";
 
 type Signal<T> = () => T
 

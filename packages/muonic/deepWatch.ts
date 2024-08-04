@@ -1,7 +1,7 @@
 import { KeyPath } from "@rue/utils";
 import { isReactiveModel, isReactiveObject, ReactiveModel } from "./useReactiveModels";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
-import { _watchEffect, watch, WatchOptions } from "./watch";
+import { _initializeEffect, watch, WatchOptions } from "./watch";
 import { ActiveListener } from "@rue/flask";
 import { AnyObject } from "@rue/types";
 
@@ -84,7 +84,7 @@ function watchProps(target: ReactiveModel, keyPath: KeyPath, options: WatchOptio
 
 export function deepWatch(target: ReactiveModel, keyPath: KeyPath, options: WatchOptions) {
     const watcher =
-        _watchEffect((_, __, ops) => {
+        _initializeEffect((_, __, ops) => {
             if (ops && isSetOp(ops)) {
                 if (__DEV__ && ops.keyPath[0] !== keyPath.at(-1)) throw new Error(`KeyPaths don't match! ${ops.keyPath} and ${keyPath}`)
                 composeOps(target, {

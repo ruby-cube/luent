@@ -243,7 +243,7 @@ export function enflask<A extends any[], T extends any | Promise<any>>(setUpFlas
 // inFlask;
 // OUTLIVE;
 
-// [ ] outlivesOuter option in computed, watch and watchEffect
+// [ ] outlivesOuter option in computed, watch and initializeEffect
 
 // const result = await inFlask(fetch(".."))
 

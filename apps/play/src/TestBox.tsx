@@ -1,6 +1,6 @@
-import { useReactivity } from "@rue/muonic";
+import { useReactivity, initializeEffect } from "@rue/muonic";
 
-const { o$$$, mu, $ } = useReactivity();
+const { o$$$, mu, $, set } = useReactivity();
 
 //tests:
 //- reactivity of nested object
@@ -14,22 +14,36 @@ export function TextBox() {
         }
     })
 
+    const $count = $(0);
     function moveRight() {
-        mu(box$, o => {
-            o.position.x = o.position.x + 1;
-        })
+        set($count, count => count + 1)
+        // mu(box$, o => {
+        //     o.position.x = o.position.x + 1;
+        // })
     }
 
     function moveLeft() {
-        mu(box$, o => {
-            o.position.x = o.position.x - 1;
-        })
+        set($count, count => count - 1)
+        // mu(box$, o => {
+        //     o.position.x = o.position.x - 1;
+        // })
     }
+
+    // initializeEffect(() => {
+    //     console.log("watch effect", $count())
+    // })
+
+    // const $positionX = $(() => box$.position.x)
 
 
     return (
         <>
-            <div>position x: {$(() => box$.position.x)}</div>
+            <div style={[
+                'background-color: lightgray',
+                o => {
+                    o.transform = `translate(${box$.position.x} px)`
+                }
+            ]}>I'm a box</div>
             <button onclick={moveRight}>moveRight</button>
             <button onclick={moveLeft}>moveLeft</button>
         </>

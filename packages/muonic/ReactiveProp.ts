@@ -8,9 +8,9 @@ export type ReactiveProp = [ReactiveModel, PropertyKey]
 
 class _ReactiveProp extends Array {
     constructor(
-        private model: ReactiveModel,
-        private key: PropertyKey,
-        private propMap?: Map<PropertyKey, _ReactiveProp>,
+        model: ReactiveModel,
+        key: PropertyKey,
+        propMap?: Map<PropertyKey, _ReactiveProp>,
     ) {
         super();
         if (!propMap) {
@@ -20,6 +20,11 @@ class _ReactiveProp extends Array {
         this.push(model, key);
         propMap.set(key, this)
     }
+}
+
+export function isReactiveProp(value: any): value is ReactiveProp {
+    if (!(value instanceof Object)) return false;
+    return value instanceof _ReactiveProp;
 }
 
 export function asReactiveProp(
