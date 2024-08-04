@@ -4,6 +4,7 @@ import { emitSignal } from "./useReactivity";
 import { DerivedSignal, makeDerivedSignal } from "./DerivedSignal";
 import { isDeepReactive, isReactiveModel, ReactiveModel, useReactiveModels } from "./useReactiveModels";
 import { getDependencyTracker } from "./DependencyTracker";
+import { getCurrentUpdateCycle } from "./UpdateCycle";
 
 export type Signal<T = any> = { (): T;[SIGNAL_MARKER]: boolean; }
 export const SIGNAL_MARKER = Symbol();
@@ -33,6 +34,8 @@ export function useSignals(reactiveModelKit?: {
         if (!signalValues.has(signal))
             throw new Error("Signal must be set by its corresponding locally instantiated set function")
 
+
+
         const value = signal();
         const newValue = genNewValue(value)
 
@@ -43,7 +46,9 @@ export function useSignals(reactiveModelKit?: {
                 $$DepthSignals.has(signal) ? reactiveModelKit!.o$(newValue) :
                     newValue : newValue
 
-        trigger(signal, _newValue, value);
+        const updateCycle = trigger(signal, _newValue, value);
+        updateCycle.storeInitialValue(signal, value);
+
         signalValues.set(signal, _newValue);
 
         return _newValue;
@@ -85,11 +90,11 @@ export function useSignals(reactiveModelKit?: {
         return signal;
     }
 
-    function $<T>(pureGetter: () => T, memoize?: "memoize"): DerivedSignal<T>
+    function $<T>(pureGetter: () => T, retrack?: true): DerivedSignal<T>
     function $<T>(value: T): Signal<T>
-    function $<T>(valueOrPureGetter: T | (() => T), memoize?: "memoize"): Signal<T> | DerivedSignal<T> {
+    function $<T>(valueOrPureGetter: T | (() => T), retrack?: true): Signal<T> | DerivedSignal<T> {
         if (valueOrPureGetter instanceof Function) {
-            return makeDerivedSignal(valueOrPureGetter, memoize)
+            return makeDerivedSignal(valueOrPureGetter, retrack)
         }
         return signalize(valueOrPureGetter)
     }

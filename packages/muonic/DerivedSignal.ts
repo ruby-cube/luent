@@ -3,6 +3,8 @@ import { DependencyTracker } from "./DependencyTracker";
 import { isSignal, Signal, SIGNAL_MARKER } from "./useSignals";
 import { hasChanged, watch } from "./watch";
 import { ReactiveProp } from "./ReactiveProp";
+import { getCurrentUpdateCycle } from "./UpdateCycle";
+import { noop } from "@rue/utils";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -33,11 +35,39 @@ export function hasSignal(maybeSignal: any): maybeSignal is DerivedSignal | Sign
     return false;
 }
 
+const depMap: WeakMap<Signal | ReactiveProp, Set<DerivedSignal>> = new WeakMap(); // to get old value of derived signal during trigger
+const watchedDerivedSignals: WeakSet<DerivedSignalState> = new WeakSet();
+
+export function getDependentDerivedSignals(dep: Signal | ReactiveProp){
+    return depMap.get(dep);
+}
+
+
+function addToDepMap(derivedSignal: DerivedSignal, deps: (Signal | ReactiveProp)[]) {
+    for (const dep of deps) {
+        let derivedSignals = depMap.get(dep);
+        if (!derivedSignals) {
+            derivedSignals = new Set()
+            depMap.set(dep, derivedSignals)
+        }
+        derivedSignals.add(derivedSignal)
+    }
+
+    derivedSignal[DERIVED_SIGNAL].removeFromDepMap = () => {
+        for (const dep of deps) {
+            const derivedSignals = depMap.get(dep)!;
+            derivedSignals.delete(derivedSignal)
+        }
+    }
+}
+
+
 export class DerivedSignalState {
     value: any;
     dependencies: (Signal | ReactiveProp)[] = [];
     hasChanged: boolean = false;
-    memoized: boolean = true;
+
+    removeFromDepMap: undefined | (() => void);
 
     private watchers: ActiveListener[] = [];
 
@@ -48,54 +78,73 @@ export class DerivedSignalState {
         this.watchers = [];
     }
 
-    private trackDependencies(getter: () => any, memoize: boolean) {
+    private trackDependencies(getter: () => any, derivedSignal: DerivedSignal) {
         const tracker = new DependencyTracker();
         const [_, value] = tracker.callToCollectDependencies(getter);
         this.value = value;
         const deps = this.dependencies = tracker.dependencies
 
-        if (memoize || deps.length > 1) { // auto-memoize for multiple dependencies
-            this.stopPrevWatchers();
-            for (let i = 0; i < deps.length; i++) {
-                const dep = deps[i]
-                const _isSignal = isSignal(dep);
-                const reactive = _isSignal ? null : dep[0];
-                const key = _isSignal ? null : dep[1];
-                const watcher = watch(_isSignal ? dep : () => reactive![key!], (newValue: any, oldValue: any) => {
-                    if (hasChanged(newValue, oldValue)) this.hasChanged = true;
-                }, { phase: 'sync' }) //NOTE: Derived Signals that are *called* outside of a component's set up must be contained in a flask for cleanup. I think flask inheritance convers this?
-                this.watchers.push(watcher);
-            }
+        // detect dirtying
+        this.stopPrevWatchers();
+        for (let i = 0; i < deps.length; i++) {
+            const dep = deps[i]
+            const _isSignal = isSignal(dep);
+            const [reactive, key] = _isSignal ? [null, null] : dep;
+            const watcher = watch(_isSignal ? dep : () => reactive![key!], (newValue: any) => {
+                const updateCycle = getCurrentUpdateCycle()
+                if (!updateCycle) throw new Error("no update cycle. not sure if this should happen")
+                const oldValue = updateCycle.getInitialValue(dep);
+                if (newValue !== oldValue) this.hasChanged = true;
+            }, { phase: 'sync' }) //NOTE: Derived Signals that are *called* outside of a component's set up must be contained in a flask for cleanup. I think flask inheritance convers this?
+            this.watchers.push(watcher);
         }
-        else {
-            this.memoized = false;
+
+        // To retreive initialValue from update cycle during trigger to be used as old value
+        if (this.isWatched()) {
+            const removeFromDepMap = derivedSignal[DERIVED_SIGNAL].removeFromDepMap
+            if (removeFromDepMap) removeFromDepMap();
+            addToDepMap(derivedSignal, deps);
         }
     }
 
     private updateValue(value: any) {
         this.value = value;
     }
+
+    markAsWatched() {
+        watchedDerivedSignals.add(this);
+    }
+
+    markUnwatched() {
+        watchedDerivedSignals.delete(this);
+    }
+
+    isWatched() {
+        return watchedDerivedSignals.has(this)
+    }
 }
 
 
-export function makeDerivedSignal<T extends any>(pureGetter: () => T, memoize?: 'memoize'): DerivedSignal<T> {
+export function makeDerivedSignal<T extends any>(pureGetter: () => T, retrack?: boolean): DerivedSignal<T> {
     let initialized = false;
     const derivedSignal = () => {
         //TODO: check for containing flask, warn if no flask
         const _this = (<DerivedSignal><unknown>derivedSignal)[DERIVED_SIGNAL]
         if (!_this) throw new Error("derived signal props not found")
 
-        if (initialized === false) {
+        if (!initialized) {
             // @ts-expect-error private method
-            _this.trackDependencies(pureGetter, !!memoize);
+            _this.trackDependencies(pureGetter, <DerivedSignal><unknown>derivedSignal);
             initialized = true;
         }
-        if (_this.hasChanged || !_this.memoized) {
+        if (_this.hasChanged) {
             const newValue = pureGetter();
             // @ts-expect-error private method
             _this.updateValue(newValue)
-            //@ts-expect-error private method
-            if (_this.memoized) _this.trackDependencies(pureGetter, !!memoize) // to catch signals hidden in conditionals
+            if (retrack) {
+                //@ts-expect-error private method
+                _this.trackDependencies(pureGetter, <DerivedSignal><unknown>derivedSignal) // to catch signals hidden in conditionals
+            }
             return newValue;
         }
         return _this.value;

@@ -1,6 +1,6 @@
-import { _initializeEffect, ChangeHandler, getDependencies, useTaskQueues } from "@rue/muonic/watch";
+import { _initializeEffect, ChangeHandler, getDependencies, usePhaseQueues } from "@rue/muonic/watch";
 import { getCurrentComponent, InternalComponent } from "../component/component";
-import { beforeUpdatePhase, onUpdateComplete } from "@rue/muonic/UpdateCycle";
+import { beforeRender, onRendered } from "@rue/muonic/UpdateCycle";
 import { ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { ReactiveModel } from "@rue/muonic/useReactiveModels";
 import { AnyObject } from "@rue/types";
@@ -39,11 +39,11 @@ function setUpUpdateHooks(component: InternalComponent) {
     if (component.hasUpdates === true) return;
     component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
 
-    beforeUpdatePhase(() => {
+    beforeRender(() => {
         component.emit(LifecycleHook.BEFORE_UPDATE)
     }, { once: true }) // assuming cleanup flask is set up
 
-    onUpdateComplete(() => {
+    onRendered(() => {
         component.emit(LifecycleHook.UPDATED)
         component.hasUpdates = false; // resets for the next cycle
     }, { once: true })
@@ -57,15 +57,15 @@ function setUpUpdateHooks(component: InternalComponent) {
 
 //     // collect tracked refs and get taskQueues
 //     const deps = getDependencies(target)
-//     const taskQueues = useTaskQueues(deps, 'update')
+//     const taskQueues = usePhaseQueues(deps, 'update')
 
 //     if (target instanceof Function || isReactiveEffect) {
 //         const dependencies = getDependencies(target || handler, isReactiveEffect)
-//         taskQueues = useTaskQueues(dependencies, phase, deep);
+//         taskQueues = usePhaseQueues(dependencies, phase, deep);
 //     }
 //     else {
 //         // watch all properties of reactive
-//         taskQueues = useTaskQueuesForReactive(target, phase, deep)
+//         taskQueues = usePhaseQueuesForReactive(target, phase, deep)
 //     }
 
 //     const _handler = (newValue: any, oldValue: any) => {
@@ -73,11 +73,11 @@ function setUpUpdateHooks(component: InternalComponent) {
 //         if (component.hasUpdates === true) return;
 //         component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
 
-//         beforeUpdatePhase(() => {
+//         beforeRender(() => {
 //             component.emit(LifecycleHook.BEFORE_UPDATE)
 //         }, { once: true }) // assuming cleanup flask is set up
 
-//         onUpdateComplete(() => {
+//         onRendered(() => {
 //             component.emit(LifecycleHook.UPDATED)
 //             component.hasUpdates = false; // resets for the next cycle
 //         }, { once: true })

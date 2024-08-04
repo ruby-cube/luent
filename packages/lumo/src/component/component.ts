@@ -113,7 +113,7 @@ export function isComponent(){
 }
 
 // export function runUpdates(this: InternalComponent) {
-//     const taskQueue = useTaskQueue(this);
+//     const taskQueue = usePhaseQueue(this);
 //     for (const task of taskQueue) {
 //         task();
 //     }
@@ -121,7 +121,7 @@ export function isComponent(){
 // }
 
 
-// function useTaskQueue(component: InternalComponent) {
+// function usePhaseQueue(component: InternalComponent) {
 //     let taskQueue = component.updates
 //     if (!taskQueue) {
 //         taskQueue = new Set();

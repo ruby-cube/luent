@@ -20,7 +20,7 @@ export enum LifecycleHook {
 }
 
 
-function useTaskQueue(component: InternalComponent, hookName: LifecycleHook) {
+function usePhaseQueue(component: InternalComponent, hookName: LifecycleHook) {
     let taskQueue = component.tasks[hookName]
     if (!taskQueue) {
         taskQueue = new Set();
@@ -34,7 +34,7 @@ function createLifecycleHook(name: Exclude<LifecycleHook, LifecycleHook.BEFORE_U
     return function on(handler: () => void, _component?: InternalComponent) {
         const component = _component || getCurrentComponent();
         if (!component) throw new Error("Lifecycle hooks cannot be called outside of component setup");
-        const taskQueue = useTaskQueue(component, name)
+        const taskQueue = usePhaseQueue(component, name)
 
         return $schedule(handler, {}, {
             enroll(handler) {
@@ -51,7 +51,7 @@ function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDA
     return function on(handler: () => void, options?: ListenerOptions, _component?: InternalComponent) {
         const component = _component || getCurrentComponent();
         if (!component) throw new Error("Lifecycle hooks cannot be called outside of component setup");
-        const taskQueue = useTaskQueue(component, name)
+        const taskQueue = usePhaseQueue(component, name)
 
         return $listen(handler, options || {}, {
             enroll(handler) {

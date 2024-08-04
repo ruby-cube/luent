@@ -7,7 +7,10 @@ import { $listen, ScheduleStop } from "@rue/flask";
 import { removeItem } from "../utils/array";
 import { beforeRepaint, queueTask } from "@rue/thread";
 import { MutationOp, SetOp } from "./deepWatch";
-import { asReactiveProp } from "./ReactiveProp";
+import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
+import { DerivedSignal } from "./DerivedSignal";
+
+export type Phase = 'pre' | 'render' | 'post' | 'sync'
 
 const snapshotManager = new SnapshotManager();
 
@@ -37,11 +40,12 @@ export class UpdateCycle {
         updateCycleCount++;
         currentUpdateCycle = this;
         beforeRepaint(() => {
-            _runTasks(Hooks.BEFORE_UPDATE)
+            _runTasks(Hooks.BEFORE_RENDER)
             runNonSyncTasks('render');
-            _runTasks(Hooks.UPDATE_COMPLETED)
+            _runTasks(Hooks.ON_RENDERED)
             queueTask(() => {
                 runNonSyncTasks('post');
+                _runTasks(Hooks.ON_UPDATE_COMPLETED)
                 endUpdateCycle();
             })
         })
@@ -126,53 +130,96 @@ export class UpdateCycle {
     getOps(target: ReactiveModel) {
         return this.opsMap.get(target)
     }
+
+
+    tasks: {
+        [Hooks.BEFORE_RENDER]: Set<Function>,
+        [Hooks.ON_RENDERED]: Set<Function>,
+        [Hooks.ON_PRE_PHASE_COMPLETED]: Set<Function>,
+        [Hooks.ON_UPDATE_COMPLETED]: Set<Function>,
+    } = {
+            [Hooks.BEFORE_RENDER]: new Set(),
+            [Hooks.ON_RENDERED]: new Set(),
+            [Hooks.ON_PRE_PHASE_COMPLETED]: new Set(),
+            [Hooks.ON_UPDATE_COMPLETED]: new Set(),
+        }
+
+
+    initialValueMap: Map<Signal | ReactiveProp | DerivedSignal, any> = new Map();
+    getInitialValue(reactiveRef: Signal | ReactiveProp | DerivedSignal) {
+        if (!this.initialValueMap.has(reactiveRef)) return this.NULL;
+        return this.initialValueMap.get(reactiveRef);
+    }
+    storeInitialValue(reactiveRef: Signal | ReactiveProp | DerivedSignal, value: any) {
+        this.initialValueMap.set(reactiveRef, value);
+    }
+    NULL = Symbol();
+
+
+    mustRetrack: Set<DerivedSignal> = new Set();
+    retracked: Set<DerivedSignal> = new Set();
 }
 
 
 
+// derived signals
+// track when you first call it
+// retrack whenever you call it and it has changed
 
 
 
 
 export enum Hooks {
-    UPDATE_COMPLETED = "uc",
-    BEFORE_UPDATE = "bc",
+    ON_PRE_PHASE_COMPLETED = "oppc",
+    BEFORE_RENDER = "br",
+    ON_RENDERED = "or",
+    ON_UPDATE_COMPLETED = "uc"
 }
 
-const tasks: { [K in Hooks]: Set<() => void> } = {
-    [Hooks.BEFORE_UPDATE]: new Set(),
-    [Hooks.UPDATE_COMPLETED]: new Set(),
-}
 
-const updateCompletedTasks: (() => void)[] = [];
+// const updateCompletedTasks: (() => void)[] = [];
 
 export function _runTasks(hookName: Hooks) {
+    const tasks = getCurrentUpdateCycle()?.tasks;
+    if (!tasks) throw new Error('No update cycle :(. This should never happen')
     const _tasks = tasks[hookName]
     for (const task of _tasks) {
         task();
     }
 }
 
-export function onUpdateComplete(task: () => void, options?: { once?: true, until?: ScheduleStop }) {
-    return $listen(task, options || {}, {
-        enroll(task) {
-            updateCompletedTasks.push(task)
-        },
-        remove(task) {
-            removeItem(task, updateCompletedTasks)
-        }
-    })
+function createUpdateCycleHook(hookName: Hooks) {
+    return (task: () => void, options?: { once?: true, until?: ScheduleStop }) => {
+        const tasks = getCurrentUpdateCycle()?.tasks;
+        if (!tasks) throw new Error('No update cycle :(. This should never happen')
+        return $listen(task, options || {}, {
+            enroll(task) {
+                tasks[hookName].add(task)
+            },
+            remove(task) {
+                tasks[hookName].delete(task)
+            }
+        })
+    }
 }
 
-export function beforeUpdatePhase(task: () => void, options?: { once?: true, until?: ScheduleStop }) {
-    return $listen(task, options || {}, {
-        enroll(task) {
-            updateCompletedTasks.push(task)
-        },
-        remove(task) {
-            removeItem(task, updateCompletedTasks)
-        }
-    })
+export const onRendered = createUpdateCycleHook(Hooks.ON_RENDERED)
+export const beforeRender = createUpdateCycleHook(Hooks.BEFORE_RENDER)
+export const onPreRenderCompleted = createUpdateCycleHook(Hooks.ON_PRE_PHASE_COMPLETED)
+export const onUpdateCompleted = createUpdateCycleHook(Hooks.ON_PRE_PHASE_COMPLETED)
+
+export function onPhaseCompleted(phase: Phase, handler: () => void) {
+    if (phase === 'pre') {
+        onPreRenderCompleted(handler)
+    }
+    else if (phase === 'render') {
+        onRendered(handler)
+    }
+    else if (phase === 'post') {
+        onUpdateCompleted(handler)
+
+    }
+    else if (phase === 'sync') {
+        throw new Error('This has not been implemented yet')
+    }
 }
-
-
