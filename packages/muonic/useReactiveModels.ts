@@ -90,7 +90,7 @@ function createReactiveObject(
             const descriptor = Reflect.getOwnPropertyDescriptor(target, key);
             if (descriptor?.writable === false) return value;
             emitSignal();
-            track(reactive, key)
+            track(reactive, key);
             return value;
         },
         set: createReactiveSetter(

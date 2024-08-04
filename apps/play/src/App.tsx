@@ -5,7 +5,7 @@ import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic/debug";
 
 
-const { $, set, o$, mu } = useReactivity();
+const { $, set, o$, mu, $$, $$$, o$$$ } = useReactivity();
 const randomColor = useRandomColorGenerator()
 let id = 4;
 
@@ -37,21 +37,22 @@ export function List() {
     if (__DEV__) __addDevName($ready, '$ready')
 
 
-    const list$ = o$([
+    const list$ = o$$$([
         { id: 0, content: "frog" },
-        // { id: 1, content: "frog" },
-        // { id: 2, content: "fly" },
-        // { id: 2, content: "fly" },
-        // { id: 3, content: "swamp" }
+        { id: 1, content: "frog" },
+        { id: 2, content: "fly" },
+        { id: 2, content: "fly" },
+        { id: 3, content: "swamp" }
     ])
 
-    watchEffect(()=>{
-        list$[0].content
-    }, {
-        onTrack(dep){
-console.log(dep)
-        }
-    })
+
+//     watchEffect(()=>{
+//         list$[0].content
+//     }, {
+//         onTrack(dep){
+// console.log(dep)
+//         }
+//     })
     
     // watchEffect(()=>{
 
@@ -69,7 +70,7 @@ console.log(dep)
     })
     // })
 
-    const $list = $([
+    const $list = $$$([
         { id: 0, content: "frog" },
         { id: 1, content: "frog" },
         { id: 2, content: "fly" },
@@ -94,10 +95,10 @@ console.log(dep)
         //     return _list;
         // })
         mu(list$, list => {
-            list.splice(index, 0, o$({
+            list.splice(index, 0, {
                 id: genId(),
                 content: (Math.random() * 100).toString(),
-            }))
+            })
         })
     }
 

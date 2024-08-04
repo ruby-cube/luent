@@ -3,7 +3,9 @@ import { createApp } from '@rue/lumo';
 // console.log(jsx)
 import { App } from './App';
 import './style.css'
-const app = createApp(App)
+import { TestCounter } from './TestCounter';
+import { TextBox } from './TestBox';
+const app = createApp(TextBox)
 
 app.mount('#app')
 

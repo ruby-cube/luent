@@ -10,6 +10,7 @@ import { isEqual } from "@rue/utils";
 import { deepWatch, MutationOp, SetOp } from "./deepWatch";
 import { collectReactiveProps, registerDebuggers, runTrackDebugger, runTriggerDebugger, WatchDebugOptions } from "./debug";
 import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
+import { trace } from "console";
 
 //QUESTION: How useful is watching deep?
 
@@ -133,7 +134,7 @@ export function _watchEffect<T>(handler: ChangeHandler<T> | ReactiveEffect, targ
         const watcher = $listen(_handler, options || {}, {
             enroll(task) {
                 if (target && isDerivedSignal(target)) {
-                    derivedSignalMap.set(task, target)
+                    derivedSignalMap.set(task, target);
                 }
                 else if (isReactiveEffect) {
                     reactiveEffects.add(task)
@@ -146,7 +147,6 @@ export function _watchEffect<T>(handler: ChangeHandler<T> | ReactiveEffect, targ
         });
         watchers.push(<ActiveListener>watcher);
     }
-    // console.log("activeListeners", activeListeners)
 
     return {
         stop
@@ -213,7 +213,7 @@ export function track(target: Signal | ReactiveModel, key?: string | symbol) {
         }
         else {
             if (!key) throw new Error("Cannot track undefined key")
-            tracker.addProp(asReactiveProp(target, key));
+                tracker.addProp(asReactiveProp(target, key));
         }
     }
 }
