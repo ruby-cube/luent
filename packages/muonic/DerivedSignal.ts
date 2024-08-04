@@ -1,4 +1,4 @@
-import { ActiveListener } from "@rue/flask";
+import { ActiveListener, collectEffects, getActiveFlask, onFlaskDisposal } from "@rue/flask";
 import { DependencyTracker, getDependencyTracker } from "./DependencyTracker";
 import { isSignal, Signal, SIGNAL_MARKER } from "./useSignals";
 import { hasChanged, isInitializingEffect, watch } from "./watch";
@@ -38,7 +38,7 @@ export function hasSignal(maybeSignal: any): maybeSignal is DerivedSignal | Sign
 const depMap: WeakMap<Signal | ReactiveProp, Set<DerivedSignal>> = new WeakMap(); // to get old value of derived signal during trigger
 const watchedDerivedSignals: WeakSet<DerivedSignalState> = new WeakSet();
 
-export function getDependentDerivedSignals(dep: Signal | ReactiveProp){
+export function getDependentDerivedSignals(dep: Signal | ReactiveProp) {
     return depMap.get(dep);
 }
 
@@ -86,10 +86,12 @@ export class DerivedSignalState {
 
         // detect dirtying
         this.stopPrevWatchers();
+
         for (let i = 0; i < deps.length; i++) {
             const dep = deps[i]
             const _isSignal = isSignal(dep);
             const [reactive, key] = _isSignal ? [null, null] : dep;
+
             const watcher = watch(_isSignal ? dep : () => reactive![key!], (newValue: any) => {
                 const updateCycle = getCurrentUpdateCycle()
                 if (!updateCycle) throw new Error("no update cycle. not sure if this should happen")
@@ -98,6 +100,12 @@ export class DerivedSignalState {
             }, { phase: 'sync' }) //NOTE: Derived Signals that are *called* outside of a component's set up must be contained in a flask for cleanup. I think flask inheritance convers this?
             this.watchers.push(watcher);
         }
+
+        const flask = getActiveFlask();
+        if (!flask) console.warn('derived signal is being used outside of a flask... this could lead to memory leaks')
+        flask?.o.onDisposal(() => {
+            this.stopPrevWatchers();
+        })
 
         // To retreive initialValue from update cycle during trigger to be used as old value
         if (this.isWatched()) {
@@ -128,7 +136,7 @@ export class DerivedSignalState {
 export function makeDerivedSignal<T extends any>(pureGetter: () => T, retrack?: boolean): DerivedSignal<T> {
     let initialized = false;
     const derivedSignal = () => {
-        //TODO: check for containing flask, warn if no flask
+
         const _this = (<DerivedSignal><unknown>derivedSignal)[DERIVED_SIGNAL]
         if (!_this) throw new Error("derived signal props not found")
 
@@ -149,7 +157,7 @@ export function makeDerivedSignal<T extends any>(pureGetter: () => T, retrack?: 
         }
 
         // forward dependencies to initEffect
-        if (isInitializingEffect()){
+        if (isInitializingEffect()) {
             const tracker = getDependencyTracker();
             if (!tracker) throw new Error("No tracker :( This should never happen")
             tracker.dependencies.push(..._this.dependencies)
