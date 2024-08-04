@@ -91,6 +91,14 @@ export class UpdateCycle {
         return snapshot;
     }
 
+    getSnapshot(reactive: ReactiveModel) {
+        const snapshotMap = this.snapshotMap;
+        if (!snapshotMap) throw "no snapshot map :("
+        const snapshot = snapshotMap.get(reactive)
+        if (!snapshot) throw "no snapshot :("
+        return snapshot
+    }
+
     opsMap: WeakMap<ReactiveModel, (MutationOp | SetOp)[]> = new WeakMap();
 
     composeOps(target: ReactiveModel, ops: (MutationOp | SetOp)[]) {

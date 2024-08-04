@@ -32,12 +32,17 @@ type ReactiveEffect = () => void //TODO: onCleanup function?
 type Effect = ChangeHandler | ReactiveEffect
 
 
+let isRunningEffect = false;
+function runEffect(effect: () => void) {
+    isRunningEffect = true;
+    effect()
+    isRunningEffect = false;
+}
+
 
 function isReactiveEffect(task: Function): task is ReactiveEffect {
     return reactiveEffects.has(task)
 }
-
-
 
 
 export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
@@ -103,8 +108,9 @@ export function _initializeEffect<T>(handler: ChangeHandler<T> | ReactiveEffect,
 
     if (eager && target) {
         const value = target instanceof Function ? target() : target
-        handler(value, value) //TODO: Schedule according to phase
+        //TODO: Schedule according to phase
         if (phase === 'sync') {
+            runEffect(() => handler(value, value))
         }
         else if (phase === 'pre') {
 
@@ -377,13 +383,19 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
             const newValue = derivedSignal();
             if (!hasChanged(newValue, oldValue))
                 return;
-            task(newValue, oldValue);
+            runEffect(() => {
+                task(newValue, oldValue);
+            })
         }
         else if (isReactiveEffect(task)) {
-            task() //TODO: pass in clean up function?
+            runEffect(() => {
+                task() //TODO: pass in clean up function?
+            })
         }
         else {
-            task(newValue, oldValue)
+            runEffect(() => {
+                task(newValue, oldValue)
+            })
         }
         completedTasks.add(task)
     }
@@ -416,7 +428,9 @@ export function runNonSyncTasks(phase: "pre" | "post" | "render") {
                     else if (!hasChanged(reactive, snapshot)) {
                         return;
                     }
-                    task(reactive, snapshot, ops) //QUESTION: Why is this not non-repeating tasks?
+                    runEffect(() => {
+                        task(reactive, snapshot, ops) //QUESTION: Why is this not non-repeating tasks?
+                    })
                 }
             }
             // }
