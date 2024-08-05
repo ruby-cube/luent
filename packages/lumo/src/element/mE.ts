@@ -62,6 +62,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     setUpClasses(component, domNode, normalizeToArray(classes))
     setUpStyles(component, domNode, normalizeToArray(styles))
     setUpEvents(domNode, events);
+    console.log(domNode)
     setUpAttributes(domNode, attributes);
     if (attributeChanges)
         setUpAttributeChanges(

@@ -4,6 +4,17 @@ import { Signal } from "./useSignals";
 
 
 let activeDepTracker: DependencyTracker | null = null;
+let outerDepTracker: DependencyTracker | null = null;
+
+function pushDepTracker(tracker: DependencyTracker) {
+    outerDepTracker = activeDepTracker;
+    activeDepTracker = tracker;
+}
+
+function popDepTracker() {
+    activeDepTracker = outerDepTracker;
+    outerDepTracker = null;
+}
 
 
 export function getDependencyTracker() {
@@ -41,12 +52,12 @@ export class DependencyTracker {
     }
 
     callToCollectDependencies(signalOrEffect: Function) {
-        activeDepTracker = this;
+        pushDepTracker(this);
         this.start();
         const value = signalOrEffect();
         this.stop();
-        activeDepTracker = null;
-        if (__DEV__ && this.dependencies.length === 0){
+        popDepTracker();
+        if (__DEV__ && this.dependencies.length === 0) {
             throw new Error('Watch target or derived signal has no dependencies (and therefore no reactivity')
         }
         return [this.dependencies, value];

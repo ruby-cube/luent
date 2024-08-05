@@ -101,11 +101,7 @@ export class DerivedSignalState {
             this.watchers.push(watcher);
         }
 
-        const flask = getActiveFlask();
-        if (!flask) console.warn('derived signal is being used outside of a flask... this could lead to memory leaks')
-        flask?.o.onDisposal(() => {
-            this.stopPrevWatchers();
-        })
+        if (__DEV__ && !getActiveFlask()) console.warn('derived signal is being used outside of a flask... this could lead to memory leaks')
 
         // To retreive initialValue from update cycle during trigger to be used as old value
         if (this.isWatched()) {
@@ -136,7 +132,6 @@ export class DerivedSignalState {
 export function makeDerivedSignal<T extends any>(pureGetter: () => T, retrack?: boolean): DerivedSignal<T> {
     let initialized = false;
     const derivedSignal = () => {
-
         const _this = (<DerivedSignal><unknown>derivedSignal)[DERIVED_SIGNAL]
         if (!_this) throw new Error("derived signal props not found")
 

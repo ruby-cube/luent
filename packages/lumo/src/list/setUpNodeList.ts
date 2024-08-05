@@ -24,7 +24,6 @@ export function setUpNodeList(
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[],
 ) {
-    console.log("setting up node list") //This runs because of the conditional
     const { data, initialNodeEntities, renderItem, indices, idKey, flasks } = renderKit;
     const isDynamic = isReactiveModel(data) || hasSignal(data);
     const dynamicPod = isDynamic ? nodePod.appendDynamicPod() : undefined;

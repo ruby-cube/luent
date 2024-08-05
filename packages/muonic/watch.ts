@@ -34,7 +34,7 @@ export type ChangeHandler<T = AnyObject> = T extends any[] | Map<any, any> | Set
 type ReactiveEffect = () => void //TODO: onCleanup function?
 type Effect = ChangeHandler | ReactiveEffect
 
-
+// manages nested watch calls to prevent infinite loops
 let isRunningEffect = false;
 function runEffect(effect: () => void) {
     isRunningEffect = true;
@@ -77,8 +77,7 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
     // collect tracked refs and get taskQueues
     if (target instanceof Function) { //QUESTION: Should I allow plain functions as targets or require them all to be derived signals?
         if (isDerivedSignal(target)) target[DERIVED_SIGNAL].markAsWatched();
-
-        const dependencies = getDependencies(target, false) //TODO: must retrack dependencies onChange like with derivedSignal to catch conditional dependencies? .. should the logic live here instead of in $()?
+        const dependencies = getDependencies(target, false) //TODO: should initialize during the correct phase, not all sync or at least after component elements are created
         phaseQueues = usePhaseQueues(dependencies, phase);
         if (__DEV__) {
             registerDebuggers(dependencies, options)

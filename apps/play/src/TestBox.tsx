@@ -1,3 +1,4 @@
+import { beforeMount, NodeRef } from "@rue/lumo";
 import { useReactivity, initializeEffect } from "@rue/muonic";
 
 const { o$$$, mu, $, set } = useReactivity();
@@ -16,21 +17,30 @@ export function TextBox() {
 
     const $count = $(0);
     function moveRight() {
-        set($count, count => count + 1)
-        // mu(box$, o => {
-        //     o.position.x = o.position.x + 1;
-        // })
+        // set($count, count => count + 1)
+        mu(box$, o => {
+            o.position.x = o.position.x + 10;
+        })
     }
 
     function moveLeft() {
-        set($count, count => count - 1)
-        // mu(box$, o => {
-        //     o.position.x = o.position.x - 1;
-        // })
+        // set($count, count => count - 1)
+        mu(box$, o => {
+            o.position.x = o.position.x - 10;
+        })
     }
 
-    // initializeEffect(() => {
-    //     console.log("watch effect", $count())
+    const divRef = new NodeRef()
+const $anotherCount = $(()=>$count())
+    initializeEffect(()=>{
+        $anotherCount()
+    })
+
+    // beforeMount(()=>{
+    //     initializeEffect(() => {
+    //         divRef.o.style.transform = `translate(${box$.position.x}px)`
+    //         console.log("running effect!!!", divRef.o.style.transform)
+    //     }, {phase: 'render'})
     // })
 
     // const $positionX = $(() => box$.position.x)
@@ -38,10 +48,10 @@ export function TextBox() {
 
     return (
         <>
-            <div style={[
+            <div ref={divRef} style={[
                 'background-color: lightgray',
                 o => {
-                    o.transform = `translate(${box$.position.x} px)`
+                    o.transform = `translate(${box$.position.x}px)`
                 }
             ]}>I'm a box</div>
             <button onclick={moveRight}>moveRight</button>

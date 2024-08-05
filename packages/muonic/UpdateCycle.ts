@@ -190,13 +190,15 @@ export function _runTasks(hookName: Hooks) {
 
 function createUpdateCycleHook(hookName: Hooks) {
     return (task: () => void, options?: { once?: true, until?: ScheduleStop }) => {
-        const tasks = getCurrentUpdateCycle()?.tasks;
-        if (!tasks) throw new Error('No update cycle :(. This should never happen')
         return $listen(task, options || {}, {
             enroll(task) {
+                const tasks = getCurrentUpdateCycle()?.tasks;
+                if (!tasks) throw new Error('No update cycle :(. This should never happen')
                 tasks[hookName].add(task)
             },
             remove(task) {
+                const tasks = getCurrentUpdateCycle()?.tasks;
+                if (!tasks) throw new Error('No update cycle :(. This should never happen')
                 tasks[hookName].delete(task)
             }
         })

@@ -1,4 +1,4 @@
-import { _initializeEffect, ChangeHandler, getDependencies, usePhaseQueues } from "@rue/muonic/watch";
+import { ChangeHandler, getDependencies, initializeEffect, usePhaseQueues, watch } from "@rue/muonic/watch";
 import { getCurrentComponent, InternalComponent } from "../component/component";
 import { beforeRender, onRendered } from "@rue/muonic/UpdateCycle";
 import { ReactiveSignal } from "@rue/muonic/DerivedSignal";
@@ -15,7 +15,7 @@ export function initializeRender(effect: () => void) {
         effect();
         setUpUpdateHooks(component)
     }
-    return _initializeEffect(_handler, undefined, {
+    return initializeEffect(_handler, {
         phase: 'render'
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
@@ -28,7 +28,7 @@ export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T ex
         handler(newValue, oldValue);
         setUpUpdateHooks(component)
     }
-    return _initializeEffect(_handler, target, {
+    return watch(target, _handler, {
         once: options?.once,
         eager: options?.eager,
         phase: 'render',
