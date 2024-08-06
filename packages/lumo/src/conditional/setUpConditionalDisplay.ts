@@ -41,12 +41,8 @@ console.log("setting up conditional display")
 
     let prevIndex = activeIndex;
 
-    const updateCycle = getCurrentUpdateCycle()
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-        if (updateCycle === getCurrentUpdateCycle()){
-            console.warn("Dev Note: This warning is here to test to see if updateCycle for initiation is ever the same as updating the conditional. If this warning shows, that means this is not useless code")
-            return;
-        }
+
         if (areShallowEqualArrays(newValue, oldValue)) return;
         const { $conditions, activeIndex } = series.evaluateConditions();
 

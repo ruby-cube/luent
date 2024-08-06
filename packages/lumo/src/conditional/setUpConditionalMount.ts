@@ -8,7 +8,7 @@ import { NodeEntity } from "../node/makeNode";
 import { getNodeRef } from "../node/NodeRef";
 import { collectEffects, Flask } from "@rue/flask/flask";
 import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle";
-import { areShallowEqualArrays, isShallowEqual } from "@rue/muonic";
+import { areShallowEqualArrays, getDependencyTracker, getWithoutTracking, isShallowEqual } from "@rue/muonic";
 
 export function setUpConditionalMount(
     component: InternalComponent,
@@ -37,18 +37,14 @@ export function setUpConditionalMount(
 
     // set up watcher for updates
     const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
-    _watchForRender($conditions, updateConditional, { once: true })
-    const updateCycle = getCurrentUpdateCycle()
+
+    _watchForRender($conditions, updateConditional, {once: true})
+    // const updateCycle = getCurrentUpdateCycle()
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-        if (updateCycle === getCurrentUpdateCycle()) {
-            console.warn("Dev Note: This warning is here to test to see if updateCycle for initiation is ever the same as updating the conditional. If this warning shows, that means this is not useless code")
-            return;
-        }
         if (areShallowEqualArrays(newValue, oldValue)) return;
         pushComponent(component)
         // evaluate conditions
         const { $conditions, activeIndex } = series.evaluateConditions();
-        console.log("updating conditional")
         // render and add/remove node pods
         component.emit(LifecycleHook.BEFORE_UPDATE)
         removePrevConditionalNodes(component, dynamicPod);
@@ -63,7 +59,7 @@ export function setUpConditionalMount(
         component.emit(LifecycleHook.UPDATED)
 
         // set up for next update
-        _watchForRender($conditions, updateConditional, { once: true })
+        _watchForRender($conditions, updateConditional, {once: true})
         popComponent()
     }
 

@@ -14,6 +14,7 @@ import { useEventTick } from "./EventTick";
 import { runNonSyncTasks } from "@rue/muonic";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
 import { beforeUnmount } from "../component/lifecycle";
+import { _runTasks, Hooks } from "@rue/muonic/UpdateCycle";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -62,7 +63,6 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     setUpClasses(component, domNode, normalizeToArray(classes))
     setUpStyles(component, domNode, normalizeToArray(styles))
     setUpEvents(domNode, events);
-    console.log(domNode)
     setUpAttributes(domNode, attributes);
     if (attributeChanges)
         setUpAttributeChanges(
@@ -127,7 +127,10 @@ function setAttribute(node: Element, key: string, value: any) {
 function setUpEvents(node: Element, events: { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] }) {
     for (const key in events) {
         const handlers = normalizeToArray(events[key]);
-        const event = useEventTick(node, key, () => runNonSyncTasks('pre'));
+        const event = useEventTick(node, key, () => {
+            runNonSyncTasks('pre');
+            _runTasks(Hooks.AFTER_PRERENDER_PHASE)
+        });
         event.updateHandlers(() => {
             for (const handler of handlers) {
                 if (hasSignal(handler)) {

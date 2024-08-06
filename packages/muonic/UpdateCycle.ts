@@ -1,14 +1,14 @@
 import { AnyObject } from "@rue/types";
 import { SnapshotManager } from "./SnapshotManager";
 import { ReactiveModel } from "./useReactiveModels";
-import { Signal } from "./useSignals";
+import { isSignal, Signal } from "./useSignals";
 import { getTaskQueueForProp, runNonSyncTasks } from "./watch";
 import { $listen, ScheduleStop } from "@rue/flask";
 import { removeItem } from "../utils/array";
 import { beforeRepaint, queueTask } from "@rue/thread";
 import { MutationOp, SetOp } from "./deepWatch";
-import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
-import { DerivedSignal } from "./DerivedSignal";
+import { asReactiveProp, isReactiveProp, ReactiveProp } from "./ReactiveProp";
+import { DerivedSignal, isDerivedSignal } from "./DerivedSignal";
 
 export type Phase = 'pre' | 'render' | 'post' | 'sync'
 
@@ -57,7 +57,9 @@ export class UpdateCycle {
             signals = new Map();
             this.triggeredSignals = signals
         }
-        signals.set(signal, [newValue, oldValue]);
+        const values = signals.get(signal);
+        if (values) values[0] = newValue;  // preserves initial old value at start of cycle
+        else signals.set(signal, [newValue, oldValue]);
     }
 
     flagReactive(target: ReactiveModel, key: PropertyKey, newValue: any, oldValue: any) {
@@ -77,8 +79,10 @@ export class UpdateCycle {
         for (const phase of phases) {
             let taskQueue = getTaskQueueForProp(asReactiveProp(target, key), phase);
             if (taskQueue) {
-                props.set(key, [newValue, oldValue]);
-                return; // return because we only need to store key and values if taskqueues exist
+                const values = props.get(key);
+                if (values) values[0] = newValue // preserves initial old value at start of cycle
+                else props.set(key, [newValue, oldValue]);
+                return; // return because we only need to store key and values if taskqueues exist (in case flagReactive is just for watching a whole reactiveModel)
             }
         }
     }
@@ -135,22 +139,26 @@ export class UpdateCycle {
     tasks: {
         [Hooks.BEFORE_RENDER]: Set<Function>,
         [Hooks.ON_RENDERED]: Set<Function>,
-        [Hooks.ON_PRE_PHASE_COMPLETED]: Set<Function>,
+        [Hooks.AFTER_PRERENDER_PHASE]: Set<Function>,
         [Hooks.ON_UPDATE_COMPLETED]: Set<Function>,
     } = {
             [Hooks.BEFORE_RENDER]: new Set(),
             [Hooks.ON_RENDERED]: new Set(),
-            [Hooks.ON_PRE_PHASE_COMPLETED]: new Set(),
+            [Hooks.AFTER_PRERENDER_PHASE]: new Set(),
             [Hooks.ON_UPDATE_COMPLETED]: new Set(),
         }
 
 
-    initialValueMap: Map<Signal | ReactiveProp | DerivedSignal, any> = new Map();
+    initialValueMap: Map<DerivedSignal, any> = new Map();
     getInitialValue(reactiveRef: Signal | ReactiveProp | DerivedSignal) {
-        if (!this.initialValueMap.has(reactiveRef)) return this.NULL;
-        return this.initialValueMap.get(reactiveRef);
+        if (isSignal(reactiveRef)) return this.triggeredSignals?.get(reactiveRef)?.[1]
+        else if (isReactiveProp(reactiveRef)) this.triggeredReactives?.get(reactiveRef[0])?.get(reactiveRef[1])?.[1]
+        else if (isDerivedSignal(reactiveRef)){
+            if (!this.initialValueMap.has(reactiveRef)) return this.NULL;
+            return this.initialValueMap.get(reactiveRef);
+        }
     }
-    storeInitialValue(reactiveRef: Signal | ReactiveProp | DerivedSignal, value: any) {
+    storeInitialValue(reactiveRef: DerivedSignal, value: any) {
         this.initialValueMap.set(reactiveRef, value);
     }
     NULL = Symbol();
@@ -170,7 +178,7 @@ export class UpdateCycle {
 
 
 export enum Hooks {
-    ON_PRE_PHASE_COMPLETED = "oppc",
+    AFTER_PRERENDER_PHASE = "oppc",
     BEFORE_RENDER = "br",
     ON_RENDERED = "or",
     ON_UPDATE_COMPLETED = "uc"
@@ -184,6 +192,7 @@ export function _runTasks(hookName: Hooks) {
     if (!tasks) throw new Error('No update cycle :(. This should never happen')
     const _tasks = tasks[hookName]
     for (const task of _tasks) {
+        console.log("Running tasks", hookName)
         task();
     }
 }
@@ -207,12 +216,12 @@ function createUpdateCycleHook(hookName: Hooks) {
 
 export const onRendered = createUpdateCycleHook(Hooks.ON_RENDERED)
 export const beforeRender = createUpdateCycleHook(Hooks.BEFORE_RENDER)
-export const onPreRenderCompleted = createUpdateCycleHook(Hooks.ON_PRE_PHASE_COMPLETED)
-export const onUpdateCompleted = createUpdateCycleHook(Hooks.ON_PRE_PHASE_COMPLETED)
+export const afterPrerenderPhase = createUpdateCycleHook(Hooks.AFTER_PRERENDER_PHASE)
+export const onUpdateCompleted = createUpdateCycleHook(Hooks.ON_UPDATE_COMPLETED)
 
 export function onPhaseCompleted(phase: Phase, handler: () => void) {
     if (phase === 'pre') {
-        onPreRenderCompleted(handler)
+        afterPrerenderPhase(handler)
     }
     else if (phase === 'render') {
         onRendered(handler)
@@ -221,7 +230,7 @@ export function onPhaseCompleted(phase: Phase, handler: () => void) {
         onUpdateCompleted(handler)
 
     }
-    else if (phase === 'sync') {
-        throw new Error('This has not been implemented yet')
+    else if (phase === 'sync'){
+        throw new Error("This should never happen. There is no after sync phase hook")
     }
 }

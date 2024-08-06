@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { $else, $elseIf, $if, COMPONENT, ComponentSetup, ConditionalRenderKit, expose, forEachIn, NodeEntity, NodeRef, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
 import { Signal, useReactivity, watch, initializeEffect } from "@rue/muonic"
 import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/component/loadComponent";
@@ -33,7 +34,15 @@ export function List() {
     const $active = $(true)
     if (__DEV__) __addDevName($active, '$active')
 
-        const $ready = $(true)
+    function toggleActiveState() {
+        set($active, active => !active)
+    }
+
+    const $visible = $(() => $active())
+
+
+
+    const $ready = $(true)
     if (__DEV__) __addDevName($ready, '$ready')
 
 
@@ -41,34 +50,21 @@ export function List() {
         { id: 0, content: "frog" },
         { id: 1, content: "frog" },
         { id: 2, content: "fly" },
-        { id: 2, content: "fly" },
         { id: 3, content: "swamp" }
     ])
 
 
-//     initializeEffect(()=>{
-//         list$[0].content
-//     }, {
-//         onTrack(dep){
-// console.log(dep)
-//         }
-//     })
-    
+
+    //     initializeEffect(()=>{
+    //         list$[0].content
+    //     }, {
+    //         onTrack(dep){
+    // console.log(dep)
+    //         }
+    //     })
+
     // initializeEffect(()=>{
 
-    watch(list$, () => {
-        console.log(`list$ changed!`)
-    }, {
-        // onTrigger() {
-        //     console.log("list$ triggered")
-        //     console.trace()
-        // },
-        // onTrack(){
-        //     console.log("list tracked!!")
-        //     console.trace()
-        // }
-    })
-    // })
 
     const $list = $$$([
         { id: 0, content: "frog" },
@@ -77,8 +73,11 @@ export function List() {
         { id: 3, content: "swamp" }
     ])
 
+    if (__DEV__) __addDevName($list, '$list')
+
+
     function changeContent(index: number) {
-        const item$ = list$[index];
+        const item$ = $list()[index];
         mu(item$, o => {
             o.content = 'something else'
         })
@@ -86,20 +85,20 @@ export function List() {
     // const $listUI = $($list().map((item)=>({id: item.id, selected: false})))
 
     function insertItem(index: number) {
-        // set($list, list => {
-        //     const _list = [...list]
-        //     _list.splice(index, 0, {
-        //         id: genId(),
-        //         content: (Math.random() * 100).toString(),
-        //     })
-        //     return _list;
-        // })
-        mu(list$, list => {
-            list.splice(index, 0, {
+        set($list, list => {
+            const _list = [...list]
+            _list.splice(index, 0, {
                 id: genId(),
                 content: (Math.random() * 100).toString(),
             })
+            return _list;
         })
+        // mu(list$, list => {
+        //     list.splice(index, 0, {
+        //         id: genId(),
+        //         content: (Math.random() * 100).toString(),
+        //     })
+        // })
     }
 
     function selectItem(index: number) {
@@ -107,15 +106,14 @@ export function List() {
     }
 
     function removeItem(index: number) {
-        // set($list, list => {
-        //     const _list = [...list]
-        //     _list.splice(index, 1);
-        //     console.log(list);
-        //     return _list
-        // })
-        mu(list$, list => {
-            list.splice(index, 1);
+        set($list, list => {
+            const _list = [...list]
+            _list.splice(index, 1);
+            return _list
         })
+        // mu(list$, list => {
+        //     list.splice(index, 1);
+        // })
     }
 
     const { openModal } = useModal();
@@ -138,10 +136,15 @@ export function List() {
 
     // })
 
+    // const frog$ = o$({
+    //     name: "sir robin"
+    // })
+
+
     return (
         <div>
             <>
-                {$if($(() => list$.length === 0), 'create', () => (
+                {$if($(() => $list().length === 0), 'create', () => (
                     <div
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
@@ -150,7 +153,7 @@ export function List() {
                     </div>
                 ))}
                 {$else(() =>
-                    forEachIn(list$, (item$, $index) => (
+                    forEachIn($list, (item$, $index) => (
                         <div style={`background-color: ${randomColor.get()}`}>
                             <p
                                 onclick={() => removeItem($index())}

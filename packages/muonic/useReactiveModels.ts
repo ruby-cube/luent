@@ -3,6 +3,7 @@ import { track, trigger } from "./watch";
 import { emitSignal } from "./useReactivity";
 import { isObjectLiteral, KeyPath, Ref } from "@rue/utils";
 import { isTuple, tuple } from "./Tuple";
+import { asReactiveProp } from "./ReactiveProp";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject) => void
@@ -316,7 +317,7 @@ function createReactiveTuple(
 }
 
 function createReactiveArrayGetter(reactiveRef: Ref<ReactiveModel>, handleMutatingMethod: (key: string, value: any) => void) {
-    return (target: any[], key: string, receiver: any[]) => {
+    return function get(target: any[], key: string, receiver: any[]) {
         const value = Reflect.get(target, key, receiver);
         if (isMutatingArrayMethod(key)) {
             return handleMutatingMethod(key, value);
@@ -329,7 +330,8 @@ function createReactiveArrayGetter(reactiveRef: Ref<ReactiveModel>, handleMutati
 }
 
 function createReactiveSetter(DataStructure: typeof Array | typeof Object | typeof Set | typeof Map, reactive: Ref<ReactiveModel>, registerReactive: RegisterReactive, mutationPermitted: Ref<boolean>) {
-    return (target: AnyObject, key: string, newValue: any, receiver: any[]) => {
+    return function set(target: AnyObject, key: string, newValue: any, receiver: AnyObject) {
+        if (key === 'length') console.log("length being set")
         if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
         const oldValue = Reflect.get(target, key, receiver);
         if (oldValue === newValue || isNonTrackable(key, DataStructure)) {

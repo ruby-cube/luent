@@ -1,10 +1,9 @@
-import { ActiveListener, collectEffects, getActiveFlask, onFlaskDisposal } from "@rue/flask";
+import { ActiveListener, getActiveFlask, onFlaskDisposal } from "@rue/flask";
 import { DependencyTracker, getDependencyTracker } from "./DependencyTracker";
 import { isSignal, Signal, SIGNAL_MARKER } from "./useSignals";
-import { hasChanged, isInitializingEffect, watch } from "./watch";
-import { ReactiveProp } from "./ReactiveProp";
+import { watch } from "./watch";
+import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
-import { noop } from "@rue/utils";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -151,10 +150,9 @@ export function makeDerivedSignal<T extends any>(pureGetter: () => T, retrack?: 
             return newValue;
         }
 
-        // forward dependencies to initEffect
-        if (isInitializingEffect()) {
-            const tracker = getDependencyTracker();
-            if (!tracker) throw new Error("No tracker :( This should never happen")
+        // forward dependencies to outer dependency tracker
+        const tracker = getDependencyTracker();
+        if (tracker) {
             tracker.dependencies.push(..._this.dependencies)
         }
 

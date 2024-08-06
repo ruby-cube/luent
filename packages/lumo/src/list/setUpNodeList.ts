@@ -55,12 +55,12 @@ export function setUpNodeList(
         const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender //TODO: Not sure if I need this yet
 
         // set up watcher for updates
-        const updateCycle = getCurrentUpdateCycle();
+        // const updateCycle = getCurrentUpdateCycle();
         _watchForRender(data, (newValue: AnyObject[], oldValue: AnyObject[]) => {
-            if (updateCycle === getCurrentUpdateCycle()) {
-                console.warn("prevented same update cycle")
-                return;
-            }
+            // if (updateCycle === getCurrentUpdateCycle()) {
+            //     console.warn("prevented same update cycle")
+            //     return;
+            // }
             const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
             if (noChange) return;
             if (dynamicPod!.length !== oldValue.length) throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)

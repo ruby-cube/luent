@@ -153,11 +153,9 @@ function wrapToNormalize(renderConditional: RenderFunction) {
 
 export function buildConditionalSeries(statements: ConditionalRenderKit[]) {
     const series = new ConditionalSeries(statements[0].type)
-    console.log("series begining", series.conditions.length)
     for (let i = 0; i < statements.length; i++) {
         const kit = statements[i]
         if (i === 0 && kit.statement !== 'if' || i !== 0 && kit.statement === 'if') {
-            console.log(i, kit, statements)
             if (__DEV__) throw new Error('$if must be the first child of a conditional series (or extraneous use of fragment)')
             else continue;
         }

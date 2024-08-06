@@ -5,6 +5,7 @@ import { ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { ReactiveModel } from "@rue/muonic/useReactiveModels";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
+import { getWithoutTracking } from "@rue/muonic";
 
 
 export function initializeRender(effect: () => void) {

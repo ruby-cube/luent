@@ -34,8 +34,6 @@ export function useSignals(reactiveModelKit?: {
         if (!signalValues.has(signal))
             throw new Error("Signal must be set by its corresponding locally instantiated set function")
 
-
-
         const value = signal();
         const newValue = genNewValue(value)
 
@@ -46,8 +44,7 @@ export function useSignals(reactiveModelKit?: {
                 $$DepthSignals.has(signal) ? reactiveModelKit!.o$(newValue) :
                     newValue : newValue
 
-        const updateCycle = trigger(signal, _newValue, value);
-        updateCycle.storeInitialValue(signal, value);
+        trigger(signal, _newValue, value);
 
         signalValues.set(signal, _newValue);
 

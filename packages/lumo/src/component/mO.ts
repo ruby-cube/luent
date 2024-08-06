@@ -108,7 +108,7 @@ function extractNodeEntities(output: NodeEntity | NodeEntity[] | [PublicComponen
     return output;
 }
 
-function runComponentSetup(
+export function runComponentSetup(
     Component: ComponentSetup,
     component: InternalComponent,
     slotted: InferSlotted | undefined,

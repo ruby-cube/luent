@@ -5,7 +5,9 @@ import { createApp } from '@rue/lumo';
 import './style.css'
 import { TestCounter } from './TestCounter';
 import { TextBox } from './TestBox';
-const app = createApp(TextBox)
+import { App } from './App';
+import { TestConditional } from './TestConditional';
+const app = createApp(App)
 
 app.mount('#app')
 

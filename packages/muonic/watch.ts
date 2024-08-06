@@ -3,7 +3,7 @@ import { isSignal, Signal } from "./useSignals";
 import { isReactiveModel, isReactiveObject, ReactiveModel, toRaw } from "./useReactiveModels";
 import { AnyObject } from "@rue/types";
 import { ActiveListener } from "../flask/ActiveListener";
-import { getCurrentUpdateCycle, onPhaseCompleted, Phase, setCurrentUpdateCycle, UpdateCycle } from "./UpdateCycle";
+import { _runTasks, getCurrentUpdateCycle, Hooks, onPhaseCompleted, Phase, setCurrentUpdateCycle, UpdateCycle } from "./UpdateCycle";
 import { DependencyTracker, getDependencyTracker } from "./DependencyTracker";
 import { DERIVED_SIGNAL, DerivedSignal, getDependentDerivedSignals, hasSignal, isDerivedSignal, ReactiveSignal } from "./DerivedSignal";
 import { isEqual } from "@rue/utils";
@@ -78,6 +78,10 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
     if (target instanceof Function) { //QUESTION: Should I allow plain functions as targets or require them all to be derived signals?
         if (isDerivedSignal(target)) target[DERIVED_SIGNAL].markAsWatched();
         const dependencies = getDependencies(target, false) //TODO: should initialize during the correct phase, not all sync or at least after component elements are created
+        // if (dependencies.find((dep) => '__devName' in dep && dep.__devName === '$list')) {
+        //     console.log('deps', dependencies)
+        //     console.log('handler', handler)
+        // }
         phaseQueues = usePhaseQueues(dependencies, phase);
         if (__DEV__) {
             registerDebuggers(dependencies, options)
@@ -124,9 +128,13 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
 
     const _handler = options?.once ? (options.once = false, toSelfremoving(handler, stop)) : handler;
     // ^ set once to false so that it will not be extraneously re-wrapped by $listen
-
-    const forNextCycle = shouldScheduleForNextCycle();
-
+    
+    const forNextCycle = phase === 'sync' ? false : shouldScheduleForNextCycle();
+    
+    if (target.__devName === '$list') {
+        console.log("=======")
+        console.log("Target: $list")
+    }
     for (const phaseQueue of phaseQueues) {
         const taskQueue = useTaskQueue(phaseQueue, forNextCycle)
         if (forNextCycle) queueForNextCycle(phaseQueue, phase)
@@ -144,6 +152,9 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
         watchers.push(<ActiveListener>watcher);
     }
 
+    if (target.__devName === '$list') {
+        console.log("=======")
+    }
 
     return {
         stop
@@ -151,22 +162,23 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
 }
 
 function queueForNextCycle(phaseQueue: PhaseQueue, phase: Phase) {
+    console.log("queuing for next cycle: to be queued", phase, phaseQueue[TO_BE_QUEUED]?.size)
+    console.log("in queue", phaseQueue[TASK_QUEUE].size)
     const toBeQueued = phaseQueue[TO_BE_QUEUED]!
     const taskQueue = phaseQueue[TASK_QUEUE];
     onPhaseCompleted(phase, () => {
+        console.log(phase, "phase completed. to be queued:", toBeQueued.size)
         for (const task of toBeQueued!) {
+
             taskQueue.add(task);
         }
+        console.log("queuing complete, in queue", taskQueue.size)
+
         toBeQueued.clear()
     })
 }
 
-// Semaphore for derived signal to forward dependencies
-let initializingEffect = false;
 
-export function isInitializingEffect() {
-    return initializingEffect;
-}
 
 export function initializeEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived signal and effect combined into one function
     const phase = options?.phase || 'pre';
@@ -175,9 +187,7 @@ export function initializeEffect(effect: () => void, options?: EffectOptions) { 
     let phaseQueues: PhaseQueue[];
 
     // collect tracked refs and get taskQueues
-    initializingEffect = true;
-    const dependencies = getDependencies(effect, true) //TODO: must retrack dependencies onChange like with derivedSignal to catch conditional dependencies? .. should the logic live here instead of in $()?
-    initializingEffect = false;
+    const dependencies = getDependencies(effect, true)
 
     phaseQueues = usePhaseQueues(dependencies, phase);
     if (__DEV__) {
@@ -240,9 +250,13 @@ function useTaskQueue(phaseQueue: PhaseQueue, forNextCycle: boolean) {
 
         return {
             add(effect: Effect) {
+                console.log('to be queued before size', toBeQueued.size)
+                console.log("adding to toBeQueued", effect)
                 toBeQueued.add(effect);
+                console.log('to be queued after size', toBeQueued.size)
             },
             delete(effect: Effect) {
+                console.log("deleting from toBeQueued", effect)
                 taskQueue.delete(effect);
                 toBeQueued.delete(effect);
             }
@@ -268,7 +282,7 @@ function wrapToRetrack(effect: () => void, options: EffectOptions, prevWatcher: 
     return _effect;
 }
 
-export function getDependencies(reactiveFunction: Function, isReactiveEffect?: boolean) {
+export function getDependencies(reactiveFunction: Function, isReactiveEffect?: boolean): (Signal | ReactiveProp)[] {
     if (isSignal(reactiveFunction)) return [reactiveFunction];
     const tracker = new DependencyTracker();
     if (isReactiveEffect) {
@@ -409,7 +423,10 @@ export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue:
     tracker?.restore();
 
     // collect triggered refs for this cycle for 'pre', 'render', and 'post' phases
-    if (isSignal(target)) currentUpdateCycle.flagSignal(target, newValue, oldValue)
+    if (isSignal(target)) {
+        currentUpdateCycle.flagSignal(target, newValue, oldValue)
+
+    }
     else {
         currentUpdateCycle.flagReactive(target, key!, newValue, oldValue)
     }
@@ -468,7 +485,6 @@ function runSyncTasks(target: Signal | ReactiveModel, newValue: any, oldValue: a
 
 
 function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: any, completedTasks: Set<Function>) {
-    console.log("run non repeating tasks", taskQueue)
     for (const task of taskQueue) {
         if (completedTasks.has(task)) continue;
         if (derivedSignalMap.has(task)) {
@@ -476,12 +492,12 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
             if (!derivedSignal) throw new Error("derived signal not found")
             const updateCycle = getCurrentUpdateCycle();
             if (!updateCycle) throw new Error("No update cycle :( whyyy")
-            const oldValue = updateCycle.getInitialValue(derivedSignal)
+            const _oldValue = updateCycle.getInitialValue(derivedSignal)
             const newValue = derivedSignal();
-            if (!hasChanged(newValue, oldValue))
+            if (!hasChanged(newValue, _oldValue))
                 return;
             runEffect(() => {
-                task(newValue, oldValue);
+                task(newValue, _oldValue);
             })
         }
         else if (isReactiveEffect(task)) {
@@ -504,7 +520,6 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
 
 
 export function runNonSyncTasks(phase: "pre" | "post" | "render") {
-    console.log("runNonSyncTasks")
     const updateCycle = getCurrentUpdateCycle();
     if (!updateCycle) return;
     const completedTasks = updateCycle.completedTasks;
