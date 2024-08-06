@@ -378,7 +378,14 @@ export function getTaskQueueForProp(prop: ReactiveProp, phase: Phase) {
 }
 
 
-
+export function useUpdateCycle(){
+    let updateCycle = getCurrentUpdateCycle()
+    if (!updateCycle) {
+        updateCycle = new UpdateCycle();
+        setCurrentUpdateCycle(updateCycle)
+    }
+    return updateCycle;
+}
 
 
 export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue: any, key?: PropertyKey, args?: any[]) {
@@ -390,11 +397,7 @@ export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue:
         else runTriggerDebugger(<Signal>target)
     }
 
-    let updateCycle = getCurrentUpdateCycle()
-    if (!updateCycle) {
-        updateCycle = new UpdateCycle();
-        setCurrentUpdateCycle(updateCycle)
-    }
+    const updateCycle = useUpdateCycle()
 
     // run sync tasks
     const tracker = getDependencyTracker();

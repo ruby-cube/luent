@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { storeInitialDerivedValueIfNeeded, track, trigger } from "./watch";
+import { storeInitialDerivedValueIfNeeded, track, trigger, useUpdateCycle } from "./watch";
 import { emitSignal } from "./useReactivity";
 import { isObjectLiteral, KeyPath, Ref } from "@rue/utils";
 import { isTuple, tuple } from "./Tuple";
@@ -165,7 +165,8 @@ function shouldReactivize(
 function createReactiveArray(
     target: any[],
     registerReactive: RegisterReactive,
-    mutationPermitted: Ref<boolean>, deep?: boolean
+    mutationPermitted: Ref<boolean>,
+    deep?: boolean
 ) {
     const sampleValueRef = new Ref<any>();
     const reactiveRef = new Ref<ReactiveModel>();
@@ -179,7 +180,8 @@ function createReactiveArray(
                 sampleValueRef,
                 registerReactive,
                 mutationPermitted
-            )),
+            )
+        ),
         set: createReactiveSetter(
             Array,
             reactiveRef,
@@ -196,39 +198,131 @@ function createReactiveArray(
     return reactive;
 }
 
-function isNonTrackable(key: PropertyKey, type: typeof Array | typeof Object | typeof Map | typeof Set) {
+function isNonTrackable(key: PropertyKey, DataStructure: typeof Array | typeof Set | typeof Map | typeof Object) {
     if (typeof key !== "string") return false;
-    if (type === Object) {
-        return nonTrackableObjectKeys.has(key)
-    }
-    else if (type === Array) {
-        return nonTrackableArrayKeys.has(key)
-
-    }
-    else if (type === Map) {
-        return nonTrackableMapKeys.has(key)
-    }
-    else if (type === Set) {
-        return nonTrackableSetKeys.has(key)
-    }
+    if (DataStructure instanceof Array || DataStructure instanceof Set || DataStructure instanceof Map)
+        return key in nonTrackableCollectionKeys || key in nonTrackableObjectKeys;
+    return key in nonTrackableObjectKeys
 }
 
 //TODO: actually, there are many methods that should be trackable! like array.find ... etc
-const nonTrackableObjectKeys = getNonTrackableKeys({}) //TODO: key in object 
-const nonTrackableArrayKeys = getNonTrackableKeys([])
-nonTrackableArrayKeys.delete('length')
-const nonTrackableMapKeys = getNonTrackableKeys(new Map())
-nonTrackableMapKeys.delete('size')
-nonTrackableMapKeys.delete('get')
-const nonTrackableSetKeys = getNonTrackableKeys(new Set())
-nonTrackableSetKeys.delete('size')
-nonTrackableSetKeys.delete('has')
-
-function getNonTrackableKeys(target: AnyObject) {
-    return new Set(Object.getOwnPropertyNames(Object.getPrototypeOf(target)))
+const nonTrackableObjectKeys = {
+    constructor: true,
+    __defineGetter__: true,
+    __defineSetter__: true,
+    hasOwnProperty: true,
+    __lookupGetter__: true,
+    __lookupSetter__: true,
+    isPrototypeOf: true,
+    propertyIsEnumerable: true,
+    toString: true,
+    valueOf: true,
+    __proto__: true,
+    toLocaleString: true
 }
 
-const mutatingArrayMethods = {
+const nonTrackableCollectionKeys = {
+    forEach: true
+}
+
+ const trackableCollectionOps = {
+    keys: true,  // newIterable = keys()
+    entries: true, // newEntriesIterator = entries()
+    values: true, // newIterable = values()
+ }
+
+const trackableArrayOps = {
+    at: true, // item = at(index)
+
+    find: true, // item = find(callbackFn, thisArg?)
+    findLast: true, // item = findLast(callbackFn, thisArg?)
+        
+    findIndex: true, // index = findIndex(callbackFn, thisArg?)
+    findLastIndex: true, // index = findLastIndex(callbackFn, thisArg?)
+    
+    lastIndexOf: true, // index = lastIndexOf(item, fromIndex)
+    indexOf: true, // index = indexOf(item, fromIndex)
+    
+    // copyWithin: true,
+    // fill: true,
+    // pop: true,
+    // push: true,
+    // reverse: true,
+    // shift: true,
+    // unshift: true,
+    // sort: true,
+    // splice: true,
+    
+    // keys: true,  // newIterable = keys()
+    // entries: true, // newEntriesIterator = entries()
+    // values: true, // newIterable = values()
+    // forEach: true,
+    
+    includes: true, // boolean = includes(searchElement, fromIndex?)
+    every: true, // boolean = every(callbackFn, thisArg?)
+    some: true, // boolean = some(callbackFn, thisArg?)
+    
+    reduce: true, // result = reduce(callbackFn, initialValue?)
+    reduceRight: true, // result = reduceRight(callbackFn, initialValue?)
+    
+    toReversed: true, // newArray = toReversed()
+    flat: true, // newArray = flat(depth?)
+
+    slice: true, // newArray = slice(start?, end?)
+    concat: true, // newArray = concat(arrayB, arrayC, ...)
+    toSorted: true, // newArray = toSorted(compareFn?)
+    toSpliced: true, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
+    with: true, // newArray = arrayInstance.with(index, value)
+    
+    filter: true, // newArray = filter(callbackFn, thisArg?)
+    flatMap: true, // newArray = flatMap(callbackFn, thisArg?)
+    map: true, // newArray = map(callbackFn, thisArg?)
+    
+    join: true, // string = join(separator?)
+    toLocaleString: true, // string = toLocaleString()
+    toString: true, // string = toString()
+}
+
+const trackableMapOps = {
+    get: true, // value = get(key)
+    has: true, // boolean = has(key)
+    // set: true,
+    // delete: true,
+    // clear: true,
+    // forEach: true,
+    // entries: true, // newEntriesIterator = entries()
+    // keys: true, // newIterable = keys()
+    // values: true, // newIterable = values()
+    // size: true,
+}
+
+const trackableSetOps = {
+    has: true, // boolean = has(item)
+
+    // add: true,
+    // delete: true,
+    // clear: true,
+    // forEach: true,
+    // size: true,
+    // entries: true, // newEntriesIterator = entries()
+    // keys: true, // newIterable = keys()
+    // values: true, // newIterable = values()
+
+    difference: true, // newSet = difference(otherSet)
+    union: true,
+    intersection: true,
+    symmetricDifference: true, 
+
+    isSubsetOf: true, // boolean = isSubsetOf(otherSet)
+    isSupersetOf: true, // boolean = isSupersetOf(otherSet)
+    isDisjointFrom: true, // boolean = isDisjointFrom(otherSet)
+}
+
+// function getNonTrackableKeys(target: AnyObject) {
+//     return new Set(Object.getOwnPropertyNames(Object.getPrototypeOf(target)))
+// }
+
+const mutatingArrayOps = {
     push: true,
     pop: true,
     shift: true,
@@ -240,17 +334,19 @@ const mutatingArrayMethods = {
     fill: true
 };
 
-const mutatingSetMethods = {
+const mutatingSetOps = {
     add: true,
     delete: true,
+    clear: true
 }
 
-const mutatingMapMethods = {
+const mutatingMapOps = {
     delete: true,
-    set: true
+    set: true,
+    clear: true
 }
 
-const insertMethods = {
+const insertOps = {
     push: { from: 0 },
     unshift: { from: 0 },
     splice: { from: 2 },
@@ -259,9 +355,9 @@ const insertMethods = {
     set: { from: 0 }
 }
 
-function isMutatingArrayMethod(key: PropertyKey) {
+function isMutatingArrayOps(key: PropertyKey) {
     if (typeof key !== "string") return false;
-    return key in mutatingArrayMethods;
+    return key in mutatingArrayOps;
 }
 
 
@@ -279,9 +375,9 @@ function maybeReactivizeArgs(
     registerReactive: RegisterReactive,
     mutationPermitted: Ref<boolean>
 ) {
-    if (!(op in insertMethods)) return args;
+    if (!(op in insertOps)) return args;
 
-    const itemPosition = insertMethods[<keyof typeof insertMethods>op]
+    const itemPosition = insertOps[<keyof typeof insertOps>op]
     const hasSingleItem = 'at' in itemPosition
     const newItems = hasSingleItem ? [args[itemPosition.at]] : args.slice(itemPosition.from);
     const _newItems: any[] = [];
@@ -321,11 +417,11 @@ function createReactiveTuple(
     return reactive;
 }
 
-function createReactiveArrayGetter(reactiveRef: Ref<ReactiveModel>, handleMutatingMethod: (key: string, value: any, receiver: AnyObject) => void) {
+function createReactiveArrayGetter(reactiveRef: Ref<ReactiveModel>, handleMutatingMethod: (key: string, fn: Function) => { [key: string]: (...args: any[]) => any }) {
     return function get(target: any[], key: string, receiver: any[]) {
         const value = Reflect.get(target, key, receiver);
-        if (isMutatingArrayMethod(key)) {
-            return handleMutatingMethod(key, value, receiver);
+        if (isMutatingArrayOps(key)) {
+            return handleMutatingMethod(key, value)[key];
         }
         if (isNonTrackable(key, Array)) return value;
         emitSignal();
@@ -372,8 +468,6 @@ function createReactiveArrayItems(
         const item$ = createReactive(item, registerReactive, mutationPermitted, DEEP)
         if (item$ === null) continue;
         target[i] = item$;
-        // registerReactive(item$, item)
-        // deepReactives.add(item$)
     }
 }
 
@@ -390,18 +484,16 @@ function createReactiveSet(
     const reactive = new Proxy(target, {
         get: (target: Set<any>, key: string, receiver: Set<any>) => {
             const value = Reflect.get(target, key, receiver);
-            if (key in mutatingSetMethods) {
+            if (key in mutatingSetOps) {
                 return useMutatingMethodHandler(
                     reactiveRef,
                     target,
                     sampleValueRef,
                     registerReactive,
                     mutationPermitted
-                )(key, value, receiver)
+                )(key, value)[key]
             }
-            console.log("before", key)
             if (isNonTrackable(key, Set)) return value;
-            console.log("after")
             emitSignal();
             track(reactive, key)
             return value;
@@ -430,22 +522,39 @@ function useMutatingMethodHandler(
     registerReactive: RegisterReactive,
     mutationPermitted: Ref<boolean>
 ) {
-    return (key: string, value: any, receiver: AnyObject) => {
+    return (key: string, fn: Function) => {
         if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
-        return (...args: any[]) => {
-            const reactive = reactiveRef.o!;
-            const _args = maybeReactivizeArgs(<string>key, args, reactive, sampleValueRef.o!, registerReactive, mutationPermitted);
-            const updateCycle = trigger(reactive, target, target, key, args); // trigger for mutation
 
-            const sizeKey = target instanceof Array ? 'length' : 'size';
-            storeInitialDerivedValueIfNeeded(updateCycle, reactive, sizeKey); // Order matters. This must be called before mutation occurs
-            const oldSize = reactive[sizeKey];
-            const output = (<Function>value).apply(receiver, args);
-            const newSize = reactive[sizeKey];
-            if (oldSize !== newSize) {
-                trigger(reactive, newSize, oldSize, sizeKey); // trigger for length/size change
+        return { // return an object with key so that function will have a name (for dev purposes)
+            [key]: (...args: any[]) => {
+                const reactive = reactiveRef.o!;
+                const _args = maybeReactivizeArgs(<string>key, args, reactive, sampleValueRef.o!, registerReactive, mutationPermitted);
+                const updateCycle = useUpdateCycle();
+
+                if (target instanceof Map && key === 'set') {
+                    const oldValue = target.get(args[0]);
+                    const newValue = args[1];
+                    if (oldValue !== newValue) {
+                        trigger(reactive, target, target, key, args);
+                    }
+                }
+
+                const sizeKey = target instanceof Array ? 'length' : 'size';
+                storeInitialDerivedValueIfNeeded(updateCycle, reactive, sizeKey); // Order matters. This must be called before mutation occurs
+                const oldSize = reactive[sizeKey];
+                const output = fn.apply(target, args);
+                const newSize = reactive[sizeKey];
+
+
+                if (target instanceof Array || oldSize !== newSize || target instanceof Map && key !== 'set') {
+                    trigger(reactive, target, target, key, args); // trigger for mutation (only trigger for sets and maps if size changed)
+                }
+
+                if (oldSize !== newSize) {
+                    trigger(reactive, newSize, oldSize, sizeKey); // trigger for length/size change
+                }
+                return output;
             }
-            return output;
         }
     }
 }
@@ -465,20 +574,20 @@ function createReactiveMap(
             const value = Reflect.get(target, key, receiver);
             if (key === 'get') {
                 return (mapKey: any) => {
-                    const mapValue = target.get(mapKey);
+                    const mapValue = value.call(target, mapKey)
                     emitSignal();
                     track(reactive, mapKey)
                     return mapValue;
                 }
             }
-            if (key in mutatingMapMethods) {
+            if (key in mutatingMapOps) {
                 return useMutatingMethodHandler(
                     reactiveRef,
                     target,
                     sampleValueRef,
                     registerReactive,
                     mutationPermitted
-                )(<string>key, value, receiver)
+                )(<string>key, value)[<string>key]
             }
             if (isNonTrackable(key, Map)) return value;
             emitSignal();
@@ -506,8 +615,6 @@ function createReactiveMap(
         //     const item$ = createReactive(item, registerReactive, mutationPermitted, DEEP)
         //     if (item$ === null) continue;
         //     target[i] = item$;
-        //     registerReactive(item$, item)
-        //     deepReactives.add(item$)
         // }
         // target.clear()
         // loop through entries and target.set(key, value)
