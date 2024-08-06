@@ -12,9 +12,9 @@ type SnapshotStack = IndexedSnapshot[];
 
 export class SnapshotManager {
     private snapshotMap: WeakMap<AnyObject, SnapshotStack> = new WeakMap();
-    takeSnapshot(original: AnyObject, index: number) {
+    takeSnapshot(original: AnyObject, index: number, clone: undefined | AnyObject) {
         const snapshotMap = this.snapshotMap;
-        const snapshot = new Proxy(original instanceof Array ? [...original] : { ...original }, {
+        const snapshot = new Proxy(clone ? clone : original instanceof Array ? [...original] : { ...original }, {
             get(target, key, receiver) {
                 const value = Reflect.get(target, key, receiver);
                 if (value instanceof Object) { //TODO: make sure functions are handled appropriately

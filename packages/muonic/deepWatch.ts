@@ -1,9 +1,10 @@
-import { KeyPath } from "@rue/utils";
 import { isReactiveModel, isReactiveObject, ReactiveModel } from "./useReactiveModels";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 import {  watch, WatchOptions } from "./watch";
 import { ActiveListener } from "@rue/flask";
 import { AnyObject } from "@rue/types";
+
+type KeyPath = PropertyKey[]
 
 export type MutationOp = {
     keyPath?: KeyPath,

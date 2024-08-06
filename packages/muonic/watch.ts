@@ -378,7 +378,7 @@ export function getTaskQueueForProp(prop: ReactiveProp, phase: Phase) {
 }
 
 
-export function useUpdateCycle(){
+export function useUpdateCycle() {
     let updateCycle = getCurrentUpdateCycle()
     if (!updateCycle) {
         updateCycle = new UpdateCycle();
@@ -388,12 +388,9 @@ export function useUpdateCycle(){
 }
 
 
-export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue: any, key?: PropertyKey, args?: any[]) {
+export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue: any, key?: PropertyKey) {
     if (__DEV__) {
-        if (args) {
-            runTriggerDebugger(target)
-        }
-        else if (key) runTriggerDebugger(asReactiveProp(target, key))
+        if (key) runTriggerDebugger(asReactiveProp(target, key))
         else runTriggerDebugger(<Signal>target)
     }
 
@@ -413,26 +410,39 @@ export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue:
         updateCycle.flagReactive(target, key!, newValue, oldValue)
     }
 
-    // take snapshot clone if watching reactive object, this will be the old value
-    if (reactiveModelTaskQueues.has(target)) {
-        const snapshot = updateCycle.takeSnapshot(target, oldValue);
-        if (args) {
-            updateCycle.recordOp(target, {
-                op: <string>key,
-                args
-            })
-        }
-        else if (key) {
-            updateCycle.recordOp(target, {
-                keyPath: [<string>key],
-                newValue,
-                oldValue
-            })
-        }
+    if (isWatchedModel(target)) {
+        updateCycle.recordOp(target, {
+            keyPath: [key!],
+            newValue,
+            oldValue
+        })
     }
 
     return updateCycle;
 }
+
+// export function triggerOp(target: ReactiveModel, op: string, args: any[]) {
+//     if (__DEV__) {
+//         runTriggerDebugger(target)
+//     }
+
+//     const updateCycle = useUpdateCycle()
+//     // updateCycle.flagTrackableOps(target, op, args)
+
+//     if (isWatchedModel(target)) {
+//         updateCycle.recordOp(target, {
+//             op,
+//             args
+//         })
+//     }
+
+//     return updateCycle;
+// }
+
+export function isWatchedModel(target: ReactiveModel) {
+    return reactiveModelTaskQueues.has(target)
+}
+
 
 
 

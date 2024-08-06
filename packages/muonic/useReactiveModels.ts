@@ -1,10 +1,8 @@
 import { AnyObject } from "@rue/types";
-import { storeInitialDerivedValueIfNeeded, track, trigger, useUpdateCycle } from "./watch";
+import { isWatchedModel, storeInitialDerivedValueIfNeeded, track, trigger, useUpdateCycle } from "./watch";
 import { emitSignal } from "./useReactivity";
 import { isObjectLiteral, KeyPath, Ref } from "@rue/utils";
 import { isTuple, tuple } from "./Tuple";
-import { asReactiveProp } from "./ReactiveProp";
-import { getCurrentUpdateCycle, setCurrentUpdateCycle, UpdateCycle } from "./UpdateCycle";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject) => void
@@ -86,7 +84,9 @@ function createReactiveObject(
     const reactive = new Proxy(target, {
         get(target, key, receiver) {
             const value = Reflect.get(target, key, receiver);
-            if (isNonTrackable(key, Object)) return value;
+            if (isNonTrackable(key, Object)) {
+                return value;
+            }
             const descriptor = Reflect.getOwnPropertyDescriptor(target, key);
             if (descriptor?.writable === false) return value;
             emitSignal();
@@ -198,7 +198,7 @@ function createReactiveArray(
     return reactive;
 }
 
-function isNonTrackable(key: PropertyKey, DataStructure: typeof Array | typeof Set | typeof Map | typeof Object) {
+function isNonTrackable(key: PropertyKey, DataStructure: typeof Array | typeof Object | typeof Set | typeof Map) {
     if (typeof key !== "string") return false;
     if (DataStructure instanceof Array || DataStructure instanceof Set || DataStructure instanceof Map)
         return key in nonTrackableCollectionKeys || key in nonTrackableObjectKeys;
@@ -225,24 +225,24 @@ const nonTrackableCollectionKeys = {
     forEach: true
 }
 
- const trackableCollectionOps = {
+const trackableCollectionOps = {
     keys: true,  // newIterable = keys()
     entries: true, // newEntriesIterator = entries()
     values: true, // newIterable = values()
- }
+}
 
 const trackableArrayOps = {
     at: true, // item = at(index)
 
     find: true, // item = find(callbackFn, thisArg?)
     findLast: true, // item = findLast(callbackFn, thisArg?)
-        
+
     findIndex: true, // index = findIndex(callbackFn, thisArg?)
     findLastIndex: true, // index = findLastIndex(callbackFn, thisArg?)
-    
+
     lastIndexOf: true, // index = lastIndexOf(item, fromIndex)
     indexOf: true, // index = indexOf(item, fromIndex)
-    
+
     // copyWithin: true,
     // fill: true,
     // pop: true,
@@ -252,19 +252,19 @@ const trackableArrayOps = {
     // unshift: true,
     // sort: true,
     // splice: true,
-    
+
     // keys: true,  // newIterable = keys()
     // entries: true, // newEntriesIterator = entries()
     // values: true, // newIterable = values()
     // forEach: true,
-    
+
     includes: true, // boolean = includes(searchElement, fromIndex?)
     every: true, // boolean = every(callbackFn, thisArg?)
     some: true, // boolean = some(callbackFn, thisArg?)
-    
+
     reduce: true, // result = reduce(callbackFn, initialValue?)
     reduceRight: true, // result = reduceRight(callbackFn, initialValue?)
-    
+
     toReversed: true, // newArray = toReversed()
     flat: true, // newArray = flat(depth?)
 
@@ -273,11 +273,11 @@ const trackableArrayOps = {
     toSorted: true, // newArray = toSorted(compareFn?)
     toSpliced: true, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
     with: true, // newArray = arrayInstance.with(index, value)
-    
+
     filter: true, // newArray = filter(callbackFn, thisArg?)
     flatMap: true, // newArray = flatMap(callbackFn, thisArg?)
     map: true, // newArray = map(callbackFn, thisArg?)
-    
+
     join: true, // string = join(separator?)
     toLocaleString: true, // string = toLocaleString()
     toString: true, // string = toString()
@@ -311,7 +311,7 @@ const trackableSetOps = {
     difference: true, // newSet = difference(otherSet)
     union: true,
     intersection: true,
-    symmetricDifference: true, 
+    symmetricDifference: true,
 
     isSubsetOf: true, // boolean = isSubsetOf(otherSet)
     isSupersetOf: true, // boolean = isSupersetOf(otherSet)
@@ -323,15 +323,20 @@ const trackableSetOps = {
 // }
 
 const mutatingArrayOps = {
-    push: true,
-    pop: true,
-    shift: true,
-    unshift: true,
-    splice: true,
-    sort: true,
-    reverse: true,
-    copyWithin: true,
-    fill: true
+    // changes length
+    push: true, // will change length
+    unshift: true, // will change length
+
+    pop: true, // will change length (unless already empty)
+    shift: true, //  will change length (unless already empty)
+
+    splice: true, // may or may not change length (many different cases to check)
+
+    // length will not change (index will change)
+    reverse: true, // may or may not change array (no change if length === 0 || 1)
+    sort: true, // may or may not change array (no change if length === 0 || 1   or if array already sorted)
+    fill: true, // may or may not change array (no change if array already filled with the item or length === 0)
+    copyWithin: true, // may or may not change array (no change if items all the same or length === 0)
 };
 
 const mutatingSetOps = {
@@ -341,8 +346,8 @@ const mutatingSetOps = {
 }
 
 const mutatingMapOps = {
-    delete: true,
     set: true,
+    delete: true,
     clear: true
 }
 
@@ -441,6 +446,16 @@ function createReactiveSetter(DataStructure: typeof Array | typeof Object | type
         const reactive = reactiveRef.o!
         const _newValue = maybeReactivize(newValue, reactive, oldValue, registerReactive, mutationPermitted)
         const updateCycle = trigger(reactive, _newValue, oldValue, key)
+
+        if (isWatchedModel(reactive)) {
+            updateCycle.takeSnapshot(reactive, target)
+            updateCycle.recordOp(reactive, {
+                keyPath: [<string>key],
+                newValue: _newValue,
+                oldValue
+            })
+        }
+
         storeInitialDerivedValueIfNeeded(updateCycle, reactive, key)
         Reflect.set(target, key, _newValue, receiver);
         return true;
@@ -530,24 +545,34 @@ function useMutatingMethodHandler(
                 const reactive = reactiveRef.o!;
                 const _args = maybeReactivizeArgs(<string>key, args, reactive, sampleValueRef.o!, registerReactive, mutationPermitted);
                 const updateCycle = useUpdateCycle();
+                const clone = target instanceof Array ? [...target] : target // cloning before mutation //TODO: how do you clone a map or a set?
 
                 if (target instanceof Map && key === 'set') {
                     const oldValue = target.get(args[0]);
                     const newValue = args[1];
                     if (oldValue !== newValue) {
-                        trigger(reactive, target, target, key, args);
+                        if (isWatchedModel(reactive)) {
+                            updateCycle.takeSnapshot(reactive, target, clone)
+                        }
+                        trigger(reactive, newValue, oldValue, args[0]);
                     }
                 }
 
                 const sizeKey = target instanceof Array ? 'length' : 'size';
                 storeInitialDerivedValueIfNeeded(updateCycle, reactive, sizeKey); // Order matters. This must be called before mutation occurs
                 const oldSize = reactive[sizeKey];
-                const output = fn.apply(target, args);
+                const output = fn.apply(reactive, args);
                 const newSize = reactive[sizeKey];
 
-
+                // because we want to compare size, this must happen after mutation, so we need to clone the object beforehand
                 if (target instanceof Array || oldSize !== newSize || target instanceof Map && key !== 'set') {
-                    trigger(reactive, target, target, key, args); // trigger for mutation (only trigger for sets and maps if size changed)
+                    if (isWatchedModel(reactive)) {
+                        updateCycle.takeSnapshot(reactive, target, clone);
+                        updateCycle.recordOp(target, {
+                            op: key,
+                            args
+                        })
+                    }
                 }
 
                 if (oldSize !== newSize) {

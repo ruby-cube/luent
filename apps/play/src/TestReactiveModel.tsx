@@ -16,6 +16,12 @@ function genId() {
 
 export function List() {
 
+    const frog$ = o$({
+
+    })
+
+    console.log(frog$.hasOwnProperty('frog'))
+
     const list$ = o$$$([
         { id: 0, content: "frog" },
         { id: 1, content: "robin" },

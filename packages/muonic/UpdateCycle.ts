@@ -88,16 +88,16 @@ export class UpdateCycle {
         }
     }
 
-    takeSnapshot(reactive: ReactiveModel, target: AnyObject) {
+    takeSnapshot(reactive: ReactiveModel, target: AnyObject, clone?: AnyObject) { 
         let snapshotMap = this.snapshotMap;
         if (!snapshotMap) {
             snapshotMap = new Map();
             this.snapshotMap = snapshotMap;
         }
         if (snapshotMap.has(reactive)) return; // snapshot of original state already taken for this cycle, no need to take another
-        const snapshot = snapshotManager.takeSnapshot(target, updateCycleCount)
-        snapshotMap.set(reactive, snapshot) // snapshots are shallow clones!
-        return snapshot;
+        const _snapshot = snapshotManager.takeSnapshot(target, updateCycleCount, clone)
+        snapshotMap.set(reactive, _snapshot) // snapshots are shallow clones!
+        return _snapshot;
     }
 
     getSnapshot(reactive: ReactiveModel) {
