@@ -37,8 +37,6 @@ export function useReactiveModels(config?: { snapshots: boolean }) {
             if (__DEV__) console.warn(`INVALID INPUT: o$ must receive a reference-type primitive (object)`)
             return target;
         }
-        registerReactive(reactive, target);
-        if (deep) deepReactives.add(reactive);
         return reactive;
     }
 
@@ -112,8 +110,6 @@ function createReactiveObject(
             const value$ = createReactive(value, registerReactive, mutationPermitted, DEEP)
             if (value$ === null) continue;
             target[key] = value$;
-            registerReactive(value$, value)
-            deepReactives.add(value$)
         }
     }
     return reactive;
@@ -128,12 +124,9 @@ function maybeReactivize(
 ) {
     if (reactiveMap.has(newValue)) return newValue;
     const reactiveDepth = shouldReactivize(reactive, oldValue, newValue);
-    const _newValue = reactiveDepth === O$$$DEPTH ? createReactive(newValue, registerReactive, mutationPermitted, DEEP)
+    return reactiveDepth === O$$$DEPTH ? createReactive(newValue, registerReactive, mutationPermitted, DEEP)
         : reactiveDepth === O$DEPTH ? createReactive(newValue, registerReactive, mutationPermitted)
             : newValue;
-    if (reactiveDepth !== false) registerReactive(_newValue, newValue); //TODO: should I move this logic to createReactive?
-    if (reactiveDepth === O$$$DEPTH) deepReactives.add(_newValue)
-    return _newValue;
 }
 
 function createReactive(
@@ -143,12 +136,17 @@ function createReactive(
     deep?: boolean
 ) {
     if (reactiveMap.has(value)) return value;
-    return isObjectLiteral(value) ? createReactiveObject(value, registerReactive, mutationPermitted, deep)
+    const reactive = isObjectLiteral(value) ? createReactiveObject(value, registerReactive, mutationPermitted, deep)
         : isTuple(value) ? createReactiveTuple(value, registerReactive, mutationPermitted, deep)
             : value instanceof Array ? createReactiveArray(value, registerReactive, mutationPermitted, deep)
                 : value instanceof Set ? createReactiveSet(value, registerReactive, mutationPermitted, deep)
                     : value instanceof Map ? createReactiveMap(value, registerReactive, mutationPermitted, deep)
                         : null;
+    if (reactive) {
+        registerReactive(reactive, value);
+        if (deep) deepReactives.add(reactive)
+    }
+    return reactive;
 }
 
 
@@ -215,13 +213,16 @@ function isNonTrackable(key: PropertyKey, type: typeof Array | typeof Object | t
     }
 }
 
-const nonTrackableObjectKeys = getNonTrackableKeys({})
+//TODO: actually, there are many methods that should be trackable! like array.find ... etc
+const nonTrackableObjectKeys = getNonTrackableKeys({}) //TODO: key in object 
 const nonTrackableArrayKeys = getNonTrackableKeys([])
 nonTrackableArrayKeys.delete('length')
 const nonTrackableMapKeys = getNonTrackableKeys(new Map())
 nonTrackableMapKeys.delete('size')
+nonTrackableMapKeys.delete('get')
 const nonTrackableSetKeys = getNonTrackableKeys(new Set())
 nonTrackableSetKeys.delete('size')
+nonTrackableSetKeys.delete('has')
 
 function getNonTrackableKeys(target: AnyObject) {
     return new Set(Object.getOwnPropertyNames(Object.getPrototypeOf(target)))
@@ -320,11 +321,11 @@ function createReactiveTuple(
     return reactive;
 }
 
-function createReactiveArrayGetter(reactiveRef: Ref<ReactiveModel>, handleMutatingMethod: (key: string, value: any) => void) {
+function createReactiveArrayGetter(reactiveRef: Ref<ReactiveModel>, handleMutatingMethod: (key: string, value: any, receiver: AnyObject) => void) {
     return function get(target: any[], key: string, receiver: any[]) {
         const value = Reflect.get(target, key, receiver);
         if (isMutatingArrayMethod(key)) {
-            return handleMutatingMethod(key, value);
+            return handleMutatingMethod(key, value, receiver);
         }
         if (isNonTrackable(key, Array)) return value;
         emitSignal();
@@ -371,8 +372,8 @@ function createReactiveArrayItems(
         const item$ = createReactive(item, registerReactive, mutationPermitted, DEEP)
         if (item$ === null) continue;
         target[i] = item$;
-        registerReactive(item$, item)
-        deepReactives.add(item$)
+        // registerReactive(item$, item)
+        // deepReactives.add(item$)
     }
 }
 
@@ -396,9 +397,11 @@ function createReactiveSet(
                     sampleValueRef,
                     registerReactive,
                     mutationPermitted
-                )(key, value)
+                )(key, value, receiver)
             }
+            console.log("before", key)
             if (isNonTrackable(key, Set)) return value;
+            console.log("after")
             emitSignal();
             track(reactive, key)
             return value;
@@ -427,7 +430,7 @@ function useMutatingMethodHandler(
     registerReactive: RegisterReactive,
     mutationPermitted: Ref<boolean>
 ) {
-    return (key: string, value: any) => {
+    return (key: string, value: any, receiver: AnyObject) => {
         if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
         return (...args: any[]) => {
             const reactive = reactiveRef.o!;
@@ -437,7 +440,7 @@ function useMutatingMethodHandler(
             const sizeKey = target instanceof Array ? 'length' : 'size';
             storeInitialDerivedValueIfNeeded(updateCycle, reactive, sizeKey); // Order matters. This must be called before mutation occurs
             const oldSize = reactive[sizeKey];
-            const output = (<Function>value).apply(target, args);
+            const output = (<Function>value).apply(receiver, args);
             const newSize = reactive[sizeKey];
             if (oldSize !== newSize) {
                 trigger(reactive, newSize, oldSize, sizeKey); // trigger for length/size change
@@ -475,7 +478,7 @@ function createReactiveMap(
                     sampleValueRef,
                     registerReactive,
                     mutationPermitted
-                )(<string>key, value)
+                )(<string>key, value, receiver)
             }
             if (isNonTrackable(key, Map)) return value;
             emitSignal();

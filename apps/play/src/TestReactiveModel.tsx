@@ -39,8 +39,21 @@ export function List() {
         })
     }
 
-    function selectItem(index: number) {
+    const selected$ = o$(new Set())
 
+    function toggleSelect(index: number) {
+        return;
+        const item$ = list$[index]
+        if (selected$.has(item$)) {
+            mu(selected$, o => {
+                o.delete(item$)
+            })
+        }
+        else {
+            mu(selected$, o => {
+                o.add(item$)
+            })
+        }
     }
 
     function removeItem(index: number) {
@@ -48,10 +61,6 @@ export function List() {
             list.splice(index, 1);
         })
     }
-
-    watch($(() => list$.length), ()=>{
-        console.log("list length changed")
-    })
 
     return (
         <div>
@@ -66,7 +75,14 @@ export function List() {
                 ))}
                 {$else(() =>
                     forEachIn(list$, (item$, $index) => (
-                        <div style={`background-color: ${randomColor.get()}`}>
+                        <div
+                            onclick={() => toggleSelect($index())}
+                            style={[
+                                `background-color: ${randomColor.get()}`,
+                                // o => {
+                                //     o.outline = selected$.has(item$) ? 'thick solid blue' : '';
+                                // }
+                                ]}>
                             <p
                                 onclick={() => removeItem($index())}
                                 style="cursor: pointer"
