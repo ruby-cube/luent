@@ -39,9 +39,10 @@ export function setUpConditionalMount(
     const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
 
     _watchForRender($conditions, updateConditional, {once: true})
-    // const updateCycle = getCurrentUpdateCycle()
+
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
         if (areShallowEqualArrays(newValue, oldValue)) return;
+
         pushComponent(component)
         // evaluate conditions
         const { $conditions, activeIndex } = series.evaluateConditions();

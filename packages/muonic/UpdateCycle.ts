@@ -80,6 +80,7 @@ export class UpdateCycle {
             let taskQueue = getTaskQueueForProp(asReactiveProp(target, key), phase);
             if (taskQueue) {
                 const values = props.get(key);
+                if (key === 'length') console.log(phase, newValue, oldValue)
                 if (values) values[0] = newValue // preserves initial old value at start of cycle
                 else props.set(key, [newValue, oldValue]);
                 return; // return because we only need to store key and values if taskqueues exist (in case flagReactive is just for watching a whole reactiveModel)
@@ -189,10 +190,9 @@ export enum Hooks {
 
 export function _runTasks(hookName: Hooks) {
     const tasks = getCurrentUpdateCycle()?.tasks;
-    if (!tasks) throw new Error('No update cycle :(. This should never happen')
+    if (!tasks) return;
     const _tasks = tasks[hookName]
     for (const task of _tasks) {
-        console.log("Running tasks", hookName)
         task();
     }
 }

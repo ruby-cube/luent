@@ -1,9 +1,10 @@
 import { AnyObject } from "@rue/types";
-import { track, trigger } from "./watch";
+import { storeInitialDerivedValueIfNeeded, track, trigger } from "./watch";
 import { emitSignal } from "./useReactivity";
 import { isObjectLiteral, KeyPath, Ref } from "@rue/utils";
 import { isTuple, tuple } from "./Tuple";
 import { asReactiveProp } from "./ReactiveProp";
+import { getCurrentUpdateCycle, setCurrentUpdateCycle, UpdateCycle } from "./UpdateCycle";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject) => void
@@ -127,9 +128,12 @@ function maybeReactivize(
 ) {
     if (reactiveMap.has(newValue)) return newValue;
     const reactiveDepth = shouldReactivize(reactive, oldValue, newValue);
-    return reactiveDepth === O$$$DEPTH ? createReactive(newValue, registerReactive, mutationPermitted, DEEP)
+    const _newValue = reactiveDepth === O$$$DEPTH ? createReactive(newValue, registerReactive, mutationPermitted, DEEP)
         : reactiveDepth === O$DEPTH ? createReactive(newValue, registerReactive, mutationPermitted)
             : newValue;
+    if (reactiveDepth !== false) registerReactive(_newValue, newValue); //TODO: should I move this logic to createReactive?
+    if (reactiveDepth === O$$$DEPTH) deepReactives.add(_newValue)
+    return _newValue;
 }
 
 function createReactive(
@@ -329,20 +333,30 @@ function createReactiveArrayGetter(reactiveRef: Ref<ReactiveModel>, handleMutati
     }
 }
 
-function createReactiveSetter(DataStructure: typeof Array | typeof Object | typeof Set | typeof Map, reactive: Ref<ReactiveModel>, registerReactive: RegisterReactive, mutationPermitted: Ref<boolean>) {
+function createReactiveSetter(DataStructure: typeof Array | typeof Object | typeof Set | typeof Map, reactiveRef: Ref<ReactiveModel>, registerReactive: RegisterReactive, mutationPermitted: Ref<boolean>) {
     return function set(target: AnyObject, key: string, newValue: any, receiver: AnyObject) {
-        if (key === 'length') console.log("length being set")
         if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
         const oldValue = Reflect.get(target, key, receiver);
-        if (oldValue === newValue || isNonTrackable(key, DataStructure)) {
+        if (oldValue === newValue || isNonTrackable(key, DataStructure) || isNonSettable(key, DataStructure)) {
             Reflect.set(target, key, newValue, receiver);
             return true;
         }
-        const _newValue = maybeReactivize(newValue, reactive.o!, oldValue, registerReactive, mutationPermitted)
-        trigger(reactive.o!, _newValue, oldValue, key)
+        const reactive = reactiveRef.o!
+        const _newValue = maybeReactivize(newValue, reactive, oldValue, registerReactive, mutationPermitted)
+        const updateCycle = trigger(reactive, _newValue, oldValue, key)
+        storeInitialDerivedValueIfNeeded(updateCycle, reactive, key)
         Reflect.set(target, key, _newValue, receiver);
         return true;
     }
+}
+
+// Because insertion of values don't yield differing new and old values for size and length in the setter,
+// we need to manually check old and new values at time of mutation
+function isNonSettable(key: string, DataStructure: typeof Array | typeof Object | typeof Set | typeof Map) {
+    if (DataStructure === Object) return false;
+    if (DataStructure === Array && key === 'length') return true;
+    if (key === 'size') return true;
+    return false;
 }
 
 function createReactiveArrayItems(
@@ -416,9 +430,19 @@ function useMutatingMethodHandler(
     return (key: string, value: any) => {
         if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
         return (...args: any[]) => {
-            const _args = maybeReactivizeArgs(<string>key, args, reactiveRef.o!, sampleValueRef.o!, registerReactive, mutationPermitted);
-            trigger(reactiveRef.o!, target, target, key, args);
-            return (<Function>value).apply(reactiveRef.o!, args); // must be applied to reactive instead of raw target so setthing length can trigger change
+            const reactive = reactiveRef.o!;
+            const _args = maybeReactivizeArgs(<string>key, args, reactive, sampleValueRef.o!, registerReactive, mutationPermitted);
+            const updateCycle = trigger(reactive, target, target, key, args); // trigger for mutation
+
+            const sizeKey = target instanceof Array ? 'length' : 'size';
+            storeInitialDerivedValueIfNeeded(updateCycle, reactive, sizeKey); // Order matters. This must be called before mutation occurs
+            const oldSize = reactive[sizeKey];
+            const output = (<Function>value).apply(target, args);
+            const newSize = reactive[sizeKey];
+            if (oldSize !== newSize) {
+                trigger(reactive, newSize, oldSize, sizeKey); // trigger for length/size change
+            }
+            return output;
         }
     }
 }

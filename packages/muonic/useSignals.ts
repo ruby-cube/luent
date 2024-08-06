@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { track, trigger } from "./watch";
+import { storeInitialDerivedValueIfNeeded, track, trigger } from "./watch";
 import { emitSignal } from "./useReactivity";
 import { DerivedSignal, makeDerivedSignal } from "./DerivedSignal";
 import { isDeepReactive, isReactiveModel, ReactiveModel, useReactiveModels } from "./useReactiveModels";
@@ -44,7 +44,8 @@ export function useSignals(reactiveModelKit?: {
                 $$DepthSignals.has(signal) ? reactiveModelKit!.o$(newValue) :
                     newValue : newValue
 
-        trigger(signal, _newValue, value);
+        const updateCycle = trigger(signal, _newValue, value);
+        storeInitialDerivedValueIfNeeded(updateCycle, signal)
 
         signalValues.set(signal, _newValue);
 

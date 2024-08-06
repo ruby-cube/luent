@@ -7,7 +7,8 @@ import { TestCounter } from './TestCounter';
 import { TextBox } from './TestBox';
 import { App } from './App';
 import { TestConditional } from './TestConditional';
-const app = createApp(App)
+import { List } from './TestReactiveModel';
+const app = createApp(List)
 
 app.mount('#app')
 

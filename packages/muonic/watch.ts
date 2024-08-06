@@ -78,10 +78,7 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
     if (target instanceof Function) { //QUESTION: Should I allow plain functions as targets or require them all to be derived signals?
         if (isDerivedSignal(target)) target[DERIVED_SIGNAL].markAsWatched();
         const dependencies = getDependencies(target, false) //TODO: should initialize during the correct phase, not all sync or at least after component elements are created
-        // if (dependencies.find((dep) => '__devName' in dep && dep.__devName === '$list')) {
-        //     console.log('deps', dependencies)
-        //     console.log('handler', handler)
-        // }
+
         phaseQueues = usePhaseQueues(dependencies, phase);
         if (__DEV__) {
             registerDebuggers(dependencies, options)
@@ -128,13 +125,9 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
 
     const _handler = options?.once ? (options.once = false, toSelfremoving(handler, stop)) : handler;
     // ^ set once to false so that it will not be extraneously re-wrapped by $listen
-    
+
     const forNextCycle = phase === 'sync' ? false : shouldScheduleForNextCycle();
-    
-    if (target.__devName === '$list') {
-        console.log("=======")
-        console.log("Target: $list")
-    }
+
     for (const phaseQueue of phaseQueues) {
         const taskQueue = useTaskQueue(phaseQueue, forNextCycle)
         if (forNextCycle) queueForNextCycle(phaseQueue, phase)
@@ -152,27 +145,18 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
         watchers.push(<ActiveListener>watcher);
     }
 
-    if (target.__devName === '$list') {
-        console.log("=======")
-    }
-
     return {
         stop
     }
 }
 
 function queueForNextCycle(phaseQueue: PhaseQueue, phase: Phase) {
-    console.log("queuing for next cycle: to be queued", phase, phaseQueue[TO_BE_QUEUED]?.size)
-    console.log("in queue", phaseQueue[TASK_QUEUE].size)
     const toBeQueued = phaseQueue[TO_BE_QUEUED]!
     const taskQueue = phaseQueue[TASK_QUEUE];
     onPhaseCompleted(phase, () => {
-        console.log(phase, "phase completed. to be queued:", toBeQueued.size)
         for (const task of toBeQueued!) {
-
             taskQueue.add(task);
         }
-        console.log("queuing complete, in queue", taskQueue.size)
 
         toBeQueued.clear()
     })
@@ -250,13 +234,9 @@ function useTaskQueue(phaseQueue: PhaseQueue, forNextCycle: boolean) {
 
         return {
             add(effect: Effect) {
-                console.log('to be queued before size', toBeQueued.size)
-                console.log("adding to toBeQueued", effect)
                 toBeQueued.add(effect);
-                console.log('to be queued after size', toBeQueued.size)
             },
             delete(effect: Effect) {
-                console.log("deleting from toBeQueued", effect)
                 taskQueue.delete(effect);
                 toBeQueued.delete(effect);
             }
@@ -410,10 +390,10 @@ export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue:
         else runTriggerDebugger(<Signal>target)
     }
 
-    let currentUpdateCycle = getCurrentUpdateCycle()
-    if (!currentUpdateCycle) {
-        currentUpdateCycle = new UpdateCycle();
-        setCurrentUpdateCycle(currentUpdateCycle)
+    let updateCycle = getCurrentUpdateCycle()
+    if (!updateCycle) {
+        updateCycle = new UpdateCycle();
+        setCurrentUpdateCycle(updateCycle)
     }
 
     // run sync tasks
@@ -424,24 +404,23 @@ export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue:
 
     // collect triggered refs for this cycle for 'pre', 'render', and 'post' phases
     if (isSignal(target)) {
-        currentUpdateCycle.flagSignal(target, newValue, oldValue)
-
+        updateCycle.flagSignal(target, newValue, oldValue)
     }
     else {
-        currentUpdateCycle.flagReactive(target, key!, newValue, oldValue)
+        updateCycle.flagReactive(target, key!, newValue, oldValue)
     }
 
     // take snapshot clone if watching reactive object, this will be the old value
     if (reactiveModelTaskQueues.has(target)) {
-        const snapshot = currentUpdateCycle.takeSnapshot(target, oldValue);
+        const snapshot = updateCycle.takeSnapshot(target, oldValue);
         if (args) {
-            currentUpdateCycle.recordOp(target, {
+            updateCycle.recordOp(target, {
                 op: <string>key,
                 args
             })
         }
         else if (key) {
-            currentUpdateCycle.recordOp(target, {
+            updateCycle.recordOp(target, {
                 keyPath: [<string>key],
                 newValue,
                 oldValue
@@ -449,19 +428,24 @@ export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue:
         }
     }
 
-    // set initialValue for derived signals
+    return updateCycle;
+}
+
+
+
+export function storeInitialDerivedValueIfNeeded(updateCycle: UpdateCycle, target: Signal | ReactiveModel, key?: string) {
     const derivedSignals = getDependentDerivedSignals(isSignal(target) ? target : asReactiveProp(target, key!));
+    console.log(derivedSignals)
     if (derivedSignals) {
+        console.log("storing derivedValue for", target, key)
+        // const updateCycle = useUpdateCycle();
         for (const derivedSignal of derivedSignals) {
-            const initialValue = currentUpdateCycle.getInitialValue(derivedSignal)
-            if (initialValue === currentUpdateCycle.NULL) {
-                currentUpdateCycle.storeInitialValue(derivedSignal, derivedSignal())
+            const initialValue = updateCycle.getInitialValue(derivedSignal)
+            if (initialValue === updateCycle.NULL) {
+                updateCycle.storeInitialValue(derivedSignal, derivedSignal())
             }
         }
     }
-
-
-    return currentUpdateCycle;
 }
 
 function runSyncTasks(target: Signal | ReactiveModel, newValue: any, oldValue: any, key?: string | number | symbol) {
@@ -494,6 +478,7 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
             if (!updateCycle) throw new Error("No update cycle :( whyyy")
             const _oldValue = updateCycle.getInitialValue(derivedSignal)
             const newValue = derivedSignal();
+            console.log("derived signal", _oldValue, newValue)
             if (!hasChanged(newValue, _oldValue))
                 return;
             runEffect(() => {
@@ -547,6 +532,7 @@ export function runNonSyncTasks(phase: "pre" | "post" | "render") {
             for (const [key, [newValue, oldValue]] of keys) {
                 const taskQueue = getTaskQueueForProp(asReactiveProp(reactive, key), phase);
                 if (taskQueue) {
+                    if (key === 'length') console.log(phase, "running length tasks", newValue, oldValue)
                     runNonRepeatingTasks(taskQueue, newValue, oldValue, completedTasks)
                 }
             }
