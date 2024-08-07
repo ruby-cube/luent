@@ -1,14 +1,16 @@
 import { AnyObject } from "@rue/types";
 import { SnapshotManager } from "./SnapshotManager";
-import { ReactiveModel } from "./useReactiveModels";
+import { isReactiveModel, ReactiveModel } from "./useReactiveModels";
 import { isSignal, Signal } from "./useSignals";
-import { getTaskQueueForProp, runNonSyncTasks } from "./watch";
+import {  runNonSyncTasks } from "./watch";
 import { $listen, ScheduleStop } from "@rue/flask";
 import { removeItem } from "../utils/array";
 import { beforeRepaint, queueTask } from "@rue/thread";
 import { MutationOp, SetOp } from "./deepWatch";
-import { asReactiveProp, isReactiveProp, ReactiveProp } from "./ReactiveProp";
+import { asReactiveProp, getReactiveProp, isReactiveProp, ReactiveProp } from "./ReactiveProp";
 import { DerivedSignal, isDerivedSignal } from "./DerivedSignal";
+import { UNDEFINED } from "@rue/utils";
+import { ReactiveAtom } from "./DependencyTracker";
 
 export type Phase = 'pre' | 'render' | 'post' | 'sync'
 
@@ -31,8 +33,9 @@ export function endUpdateCycle() {
 }
 
 export class UpdateCycle {
-    triggeredSignals: Map<Signal, [any, any]> | undefined;
-    triggeredReactives: Map<ReactiveModel, Map<PropertyKey, [any, any]>> | undefined;
+    triggeredReactiveAtom: Map<ReactiveAtom, [any, any]> | undefined;
+    triggeredReactives: Map<ReactiveModel, [ReactiveModel, AnyObject]> | undefined; // snapshot
+
     snapshotMap: Map<ReactiveModel, AnyObject> | undefined;
     completedTasks: Set<Function> = new Set();
 
@@ -51,44 +54,42 @@ export class UpdateCycle {
         })
     }
 
-    flagSignal(signal: Signal, newValue: any, oldValue: any) {
-        let signals = this.triggeredSignals
-        if (!signals) {
-            signals = new Map();
-            this.triggeredSignals = signals
+    flagReactiveAtom(target: ReactiveAtom, newValue: any, oldValue: any) {
+        let atomMap = this.triggeredReactiveAtom
+        if (!atomMap) {
+            atomMap = new Map();
+            this.triggeredReactiveAtom = atomMap
         }
-        const values = signals.get(signal);
+        const values = atomMap.get(target);
         if (values) values[0] = newValue;  // preserves initial old value at start of cycle
-        else signals.set(signal, [newValue, oldValue]);
+        else atomMap.set(target, [newValue, oldValue]);
     }
 
-    flagReactive(target: ReactiveModel, key: PropertyKey, newValue: any, oldValue: any) {
-        let targetMap = this.triggeredReactives
-        if (!targetMap) {
-            targetMap = new Map();
-            this.triggeredReactives = targetMap
+    flagReactive(target: ReactiveModel, snapshot: AnyObject) {
+        let reactivesMap = this.triggeredReactives
+        if (!reactivesMap) {
+            reactivesMap = new Map();
+            this.triggeredReactives = reactivesMap
         }
 
-        let props = targetMap.get(target)
-        if (!props) {
-            props = new Map();
-            targetMap.set(target, props);
-        }
+        const values = reactivesMap.get(target)
+        if (!values) reactivesMap.set(target, [target, snapshot])
 
-        const phases = ['pre', 'render', 'post'] as const
-        for (const phase of phases) {
-            let taskQueue = getTaskQueueForProp(asReactiveProp(target, key), phase);
-            if (taskQueue) {
-                const values = props.get(key);
-                if (key === 'length') console.log(phase, newValue, oldValue)
-                if (values) values[0] = newValue // preserves initial old value at start of cycle
-                else props.set(key, [newValue, oldValue]);
-                return; // return because we only need to store key and values if taskqueues exist (in case flagReactive is just for watching a whole reactiveModel)
-            }
-        }
+        // const phases = ['pre', 'render', 'post'] as const
+        // for (const phase of phases) {
+        //     const reactiveProp = getReactiveProp(target, key)
+        //     if (!reactiveProp) return;
+        //     let taskQueue = getTaskQueueForProp(reactiveProp, phase);
+        //     if (taskQueue) {
+        //         const values = props.get(key);
+        //         if (values) values[0] = newValue // preserves initial old value at start of cycle
+        //         else props.set(key, [newValue, oldValue]);
+        //         return; // return because we only need to store key and values if *any* taskqueue exists (in case flagReactive is just for watching a whole reactiveModel)
+        //     }
+        // }
     }
 
-    takeSnapshot(reactive: ReactiveModel, target: AnyObject, clone?: AnyObject) { 
+    takeSnapshot(reactive: ReactiveModel, target: AnyObject, clone?: AnyObject) {
         let snapshotMap = this.snapshotMap;
         if (!snapshotMap) {
             snapshotMap = new Map();
@@ -150,19 +151,26 @@ export class UpdateCycle {
         }
 
 
-    initialValueMap: Map<DerivedSignal, any> = new Map();
-    getInitialValue(reactiveRef: Signal | ReactiveProp | DerivedSignal) {
-        if (isSignal(reactiveRef)) return this.triggeredSignals?.get(reactiveRef)?.[1]
-        else if (isReactiveProp(reactiveRef)) this.triggeredReactives?.get(reactiveRef[0])?.get(reactiveRef[1])?.[1]
-        else if (isDerivedSignal(reactiveRef)){
-            if (!this.initialValueMap.has(reactiveRef)) return this.NULL;
-            return this.initialValueMap.get(reactiveRef);
+    derivedSignalMap: Map<DerivedSignal, any> = new Map();
+
+    storeInitialValue(derivedSignal: DerivedSignal, value: any) {
+        this.derivedSignalMap.set(derivedSignal, value);
+    }
+
+    getInitialValue(target: ReactiveAtom | DerivedSignal | ReactiveModel) {
+        if (isReactiveModel(target)) {
+            if (!this.triggeredReactives?.has(target)) return UNDEFINED;
+            return this.triggeredReactives.get(target)![1]
+        }
+        else if (isDerivedSignal(target)) {
+            if (!this.derivedSignalMap.has(target)) return UNDEFINED;
+            return this.derivedSignalMap.get(target);
+        }
+        else {
+            if (!this.triggeredReactiveAtom?.has(target)) return UNDEFINED;
+            return this.triggeredReactiveAtom.get(target)![1]
         }
     }
-    storeInitialValue(reactiveRef: DerivedSignal, value: any) {
-        this.initialValueMap.set(reactiveRef, value);
-    }
-    NULL = Symbol();
 
 
     mustRetrack: Set<DerivedSignal> = new Set();
@@ -230,7 +238,7 @@ export function onPhaseCompleted(phase: Phase, handler: () => void) {
         onUpdateCompleted(handler)
 
     }
-    else if (phase === 'sync'){
+    else if (phase === 'sync') {
         throw new Error("This should never happen. There is no after sync phase hook")
     }
 }

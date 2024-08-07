@@ -1,7 +1,7 @@
 import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
-import { isReactiveObject, ReactiveModel } from "./useReactiveModels";
-import { Signal } from "./useSignals";
+import { isSignal, Signal } from "./useSignals";
 
+export type ReactiveAtom = Signal | ReactiveProp
 
 let activeDepTracker: DependencyTracker | null = null;
 let outerDepTracker: DependencyTracker | null = null;
@@ -24,15 +24,10 @@ export function getDependencyTracker() {
 
 export class DependencyTracker {
 
-    trackedSignals: Set<Signal> = new Set();
-    trackedProps: Set<ReactiveProp> = new Set();
+    deps: Set<ReactiveAtom> = new Set()
 
-    addSignal(signal: Signal) {
-        this.trackedSignals.add(signal);
-    }
-
-    addProp(prop: ReactiveProp) {
-        this.trackedProps.add(prop)
+    addDep(dep: ReactiveAtom) {
+        this.deps.add(dep);
     }
 
     shouldTrack: boolean = false;
@@ -63,21 +58,12 @@ export class DependencyTracker {
         return [this.dependencies, value];
     }
 
-    private _dependencies: (Signal | ReactiveProp)[] | undefined;
+    private _dependencies?: (ReactiveAtom)[] = undefined
 
     get dependencies() {
         let deps = this._dependencies;
         if (deps === undefined) {
-            deps = [];
-            const signals = this.trackedSignals
-            for (const signal of signals) {
-                deps.push(signal)
-            }
-            const reactiveProps = this.trackedProps
-            for (const prop of reactiveProps) {
-                deps.push(prop);
-            }
-            this._dependencies = deps;
+            deps = this._dependencies = Array.from(this.deps);
         }
         return deps
     }

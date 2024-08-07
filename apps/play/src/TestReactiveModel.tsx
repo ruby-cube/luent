@@ -16,18 +16,16 @@ function genId() {
 
 export function List() {
 
-    const frog$ = o$({
-
-    })
-
-    console.log(frog$.hasOwnProperty('frog'))
-
     const list$ = o$$$([
         { id: 0, content: "frog" },
         { id: 1, content: "robin" },
         { id: 2, content: "fly" },
         { id: 3, content: "swamp" }
     ])
+
+    initializeEffect(() => {
+        console.log("some starts with f", list$.some((item) => item.content.startsWith('f')))
+    })
 
     function changeContent(index: number) {
         const item$ = list$[index];
@@ -47,8 +45,11 @@ export function List() {
 
     const selected$ = o$(new Set())
 
-    function toggleSelect(index: number) {
-        return;
+    const deleteBtnRef = new NodeRef()
+    const insertBtnRef = new NodeRef()
+
+    function toggleSelect(e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) {
+        if (e.target === deleteBtnRef.o[index] || e.target === insertBtnRef.o[index]) return;
         const item$ = list$[index]
         if (selected$.has(item$)) {
             mu(selected$, o => {
@@ -62,17 +63,24 @@ export function List() {
         }
     }
 
+    onMounted(() => {
+        console.log(insertBtnRef.o)
+    })
+
     function removeItem(index: number) {
         mu(list$, list => {
+            selected$.delete(list[index])
             list.splice(index, 1);
         })
     }
+
 
     return (
         <div>
             <>
                 {$if($(() => list$.length === 0), 'create', () => (
                     <div
+                    
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
@@ -82,16 +90,18 @@ export function List() {
                 {$else(() =>
                     forEachIn(list$, (item$, $index) => (
                         <div
-                            onclick={() => toggleSelect($index())}
+                        onclick={(e) => toggleSelect(e, $index())}
                             style={[
                                 `background-color: ${randomColor.get()}`,
-                                // o => {
-                                //     o.outline = selected$.has(item$) ? 'thick solid blue' : '';
-                                // }
-                                ]}>
+                                o => {
+                                    o.outline = selected$.has(item$) ? 'thick solid blue' : '';
+                                    console.log("running outline effect")
+                                }
+                            ]}>
                             <p
                                 onclick={() => removeItem($index())}
                                 style="cursor: pointer"
+                                ref={deleteBtnRef}
                             >
                                 X
                             </p>
@@ -102,6 +112,7 @@ export function List() {
                             <div
                                 onclick={() => insertItem($index() + 1)}
                                 style="background-color: gray; cursor: pointer"
+                                ref={insertBtnRef}
                             >
                                 insert
                             </div>

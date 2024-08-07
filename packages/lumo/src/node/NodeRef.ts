@@ -66,7 +66,6 @@ export class InternalNodeRef<
     setValue(value: NodeReferent<T> | null | undefined) {
         //@ts-expect-error read-only
         this.o.o = value;
-        const eh = this.o.o;
         return value;
     }
 
@@ -86,9 +85,11 @@ export class InternalNodeRef<
 
     assignValue(value: NodeReferent<T>, $index: Signal<number> | undefined) {
         if ($index != null) {
-            let nodes = (this.o.o || []) as NodeArray<T>
+            //@ts-expect-error read-only
+            let nodes = this.o.o = (this.o.o || []) as NodeArray<T>
             nodes[$index()] = value as ArrayItem<NodeArray<T>>;
             refMap.set(nodes, this);
+            console.log('setting node refs',)
         }
         else {
             this.setValue(value) // will never change for static entities
@@ -97,7 +98,7 @@ export class InternalNodeRef<
             refMap.set(value, this);
         }
     }
-    
+
 }
 
 

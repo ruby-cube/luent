@@ -3,9 +3,15 @@ import { isWatchedModel, storeInitialDerivedValueIfNeeded, track, trigger, useUp
 import { emitSignal } from "./useReactivity";
 import { isObjectLiteral, KeyPath, Ref } from "@rue/utils";
 import { isTuple, tuple } from "./Tuple";
+import { asReactiveProp, getReactiveProp } from "./ReactiveProp";
+import { shallowClone } from "./SnapshotManager";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject) => void
+type ReactiveModelRegistry = {
+    register: RegisterReactive,
+    mutationPermitted: boolean
+}
 
 const reactiveMap: WeakMap<ReactiveModel, AnyObject> = new WeakMap();
 const deepReactives: WeakSet<ReactiveModel> = new WeakSet();
@@ -20,17 +26,18 @@ export function isDeepReactive(value: any): value is ReactiveModel {
 
 export function useReactiveModels(config?: { snapshots: boolean }) {
     const localReactives: WeakSet<ReactiveModel> = new WeakSet();
-    function registerReactive(reactive: ReactiveModel, target: AnyObject) {
-        localReactives.add(reactive);
-        reactiveMap.set(reactive, target);
+    const registry = {
+        register(reactive: ReactiveModel, target: AnyObject) {
+            localReactives.add(reactive);
+            reactiveMap.set(reactive, target);
+        },
+        mutationPermitted: false,
     }
-
-    let mutationPermitted = new Ref(false);
 
     function _o$(target: AnyObject, deep?: boolean) {
         if (reactiveMap.has(target)) return target; // prevents double wrapped reactive
 
-        const reactive = createReactive(target, registerReactive, mutationPermitted, deep)
+        const reactive = createReactive(target, registry, deep)
         if (reactive === null) {
             if (__DEV__) console.warn(`INVALID INPUT: o$ must receive a reference-type primitive (object)`)
             return target;
@@ -49,9 +56,9 @@ export function useReactiveModels(config?: { snapshots: boolean }) {
 
         mu<T extends ReactiveModel>(target: T, mutation: (o: T) => void) {
             if (!localReactives.has(target)) throw "`mu` can only mutate local reactives created with corresponding `o$` function";
-            mutationPermitted.o = true;
+            registry.mutationPermitted = true;
             mutation(target);
-            mutationPermitted.o = false;
+            registry.mutationPermitted = false;
         }
     }
 }
@@ -76,11 +83,11 @@ export function toRaw<T extends AnyObject>(reactive: ReactiveModel<T>): T {
 
 function createReactiveObject(
     target: AnyObject,
-    registerReactive: RegisterReactive,
-    mutationPermitted: Ref<boolean>,
+    registry: ReactiveModelRegistry,
     deep?: boolean
 ) {
     const reactiveRef = new Ref<ReactiveModel>()
+
     const reactive = new Proxy(target, {
         get(target, key, receiver) {
             const value = Reflect.get(target, key, receiver);
@@ -90,15 +97,19 @@ function createReactiveObject(
             const descriptor = Reflect.getOwnPropertyDescriptor(target, key);
             if (descriptor?.writable === false) return value;
             emitSignal();
-            track(reactive, key);
+            track(asReactiveProp(reactive, key));
             return value;
         },
-        set: createReactiveSetter(
-            Object,
-            reactiveRef,
-            registerReactive,
-            mutationPermitted
-        )
+        set: (target, key, value, receiver) =>
+            reactiveSetter(
+                Object,
+                reactiveRef,
+                registry,
+                target,
+                key,
+                value,
+                receiver
+            )
     })
     reactiveRef.o = reactive;
 
@@ -107,7 +118,7 @@ function createReactiveObject(
             const value = target[key];
             if (!(value instanceof Object)) continue;
             if (reactiveMap.has(value)) continue; // prevents double wrapped reactive
-            const value$ = createReactive(value, registerReactive, mutationPermitted, DEEP)
+            const value$ = createReactive(value, registry, DEEP)
             if (value$ === null) continue;
             target[key] = value$;
         }
@@ -119,31 +130,29 @@ function maybeReactivize(
     newValue: any,
     reactive: ReactiveModel,
     oldValue: any,
-    registerReactive: RegisterReactive,
-    mutationPermitted: Ref<boolean>,
+    registry: ReactiveModelRegistry
 ) {
     if (reactiveMap.has(newValue)) return newValue;
     const reactiveDepth = shouldReactivize(reactive, oldValue, newValue);
-    return reactiveDepth === O$$$DEPTH ? createReactive(newValue, registerReactive, mutationPermitted, DEEP)
-        : reactiveDepth === O$DEPTH ? createReactive(newValue, registerReactive, mutationPermitted)
+    return reactiveDepth === O$$$DEPTH ? createReactive(newValue, registry, DEEP)
+        : reactiveDepth === O$DEPTH ? createReactive(newValue, registry)
             : newValue;
 }
 
 function createReactive(
     value: any,
-    registerReactive: RegisterReactive,
-    mutationPermitted: Ref<boolean>,
+    registry: ReactiveModelRegistry,
     deep?: boolean
 ) {
     if (reactiveMap.has(value)) return value;
-    const reactive = isObjectLiteral(value) ? createReactiveObject(value, registerReactive, mutationPermitted, deep)
-        : isTuple(value) ? createReactiveTuple(value, registerReactive, mutationPermitted, deep)
-            : value instanceof Array ? createReactiveArray(value, registerReactive, mutationPermitted, deep)
-                : value instanceof Set ? createReactiveSet(value, registerReactive, mutationPermitted, deep)
-                    : value instanceof Map ? createReactiveMap(value, registerReactive, mutationPermitted, deep)
+    const reactive = isObjectLiteral(value) ? createReactiveObject(value, registry, deep)
+        : isTuple(value) ? createReactiveTuple(value, registry, deep)
+            : value instanceof Array ? createReactiveArray(value, registry, deep)
+                : value instanceof Set ? createReactiveSet(value, registry, deep)
+                    : value instanceof Map ? createReactiveMap(value, registry, deep)
                         : null;
     if (reactive) {
-        registerReactive(reactive, value);
+        registry.register(reactive, value);
         if (deep) deepReactives.add(reactive)
     }
     return reactive;
@@ -164,36 +173,48 @@ function shouldReactivize(
 
 function createReactiveArray(
     target: any[],
-    registerReactive: RegisterReactive,
-    mutationPermitted: Ref<boolean>,
+    registry: ReactiveModelRegistry,
     deep?: boolean
 ) {
-    const sampleValueRef = new Ref<any>();
     const reactiveRef = new Ref<ReactiveModel>();
+    let sampleValue: any;
 
     const reactive = new Proxy(target, {
-        get: createReactiveArrayGetter(
-            reactiveRef,
-            useMutatingMethodHandler(
-                reactiveRef,
-                target,
-                sampleValueRef,
-                registerReactive,
-                mutationPermitted
-            )
+        get: (target, key, receiver) => reactiveArrayGetter(
+            reactive,
+            (key, fn) => (...args: any[]) => {
+                if (!registry.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
+                return mutatingOp(
+                    args,
+                    reactive,
+                    target,
+                    sampleValue,
+                    registry,
+                    key,
+                    fn
+                )
+            },
+            target,
+            key,
+            receiver
         ),
-        set: createReactiveSetter(
-            Array,
-            reactiveRef,
-            registerReactive,
-            mutationPermitted
-        )
+        set: (target, key, value, receiver) =>
+            reactiveSetter(
+                Array,
+                reactiveRef,
+                registry,
+                target,
+                key,
+                value,
+                receiver
+            )
+
     })
-    sampleValueRef.o = reactive[0];
     reactiveRef.o = reactive;
+    sampleValue = reactive[0];
 
     if (deep) {
-        createReactiveArrayItems(target, registerReactive, mutationPermitted)
+        createReactiveArrayItems(target, registry)
     }
     return reactive;
 }
@@ -232,16 +253,41 @@ const trackableCollectionOps = {
 }
 
 const trackableArrayOps = {
-    at: true, // item = at(index)
+    // same as accessor
+    at: true, // item = at(index) //NOTE: trackable ops
 
+    // whole array, triggered by any change to array
+
+    toReversed: true, // newArray = toReversed()
+    flat: true, // newArray = flat(depth?)
+    toSorted: true, // newArray = toSorted(compareFn?)
+    flatMap: true, // newArray = flatMap(callbackFn, thisArg?)
+    map: true, // newArray = map(callbackFn, thisArg?)
+    reduce: true, // result = reduce(callbackFn, initialValue?)
+    reduceRight: true, // result = reduceRight(callbackFn, initialValue?)
+
+    join: true, // string = join(separator?)
+    toLocaleString: true, // string = toLocaleString() 
+    toString: true, // string = toString()
+
+
+    // check if result changed
+    lastIndexOf: true, // index = lastIndexOf(item, fromIndex)
+    indexOf: true, // index = indexOf(item, fromIndex)
+    includes: true, // boolean = includes(item, fromIndex?)
+
+    // args
     find: true, // item = find(callbackFn, thisArg?)
     findLast: true, // item = findLast(callbackFn, thisArg?)
 
     findIndex: true, // index = findIndex(callbackFn, thisArg?)
     findLastIndex: true, // index = findLastIndex(callbackFn, thisArg?)
 
-    lastIndexOf: true, // index = lastIndexOf(item, fromIndex)
-    indexOf: true, // index = indexOf(item, fromIndex)
+    filter: true, // newArray = filter(callbackFn, thisArg?)
+
+    every: true, // boolean = every(callbackFn, thisArg?)
+    some: true, // boolean = some(callbackFn, thisArg?)
+
 
     // copyWithin: true,
     // fill: true,
@@ -258,34 +304,18 @@ const trackableArrayOps = {
     // values: true, // newIterable = values()
     // forEach: true,
 
-    includes: true, // boolean = includes(searchElement, fromIndex?)
-    every: true, // boolean = every(callbackFn, thisArg?)
-    some: true, // boolean = some(callbackFn, thisArg?)
-
-    reduce: true, // result = reduce(callbackFn, initialValue?)
-    reduceRight: true, // result = reduceRight(callbackFn, initialValue?)
-
-    toReversed: true, // newArray = toReversed()
-    flat: true, // newArray = flat(depth?)
 
     slice: true, // newArray = slice(start?, end?)
+
     concat: true, // newArray = concat(arrayB, arrayC, ...)
-    toSorted: true, // newArray = toSorted(compareFn?)
     toSpliced: true, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
+
     with: true, // newArray = arrayInstance.with(index, value)
-
-    filter: true, // newArray = filter(callbackFn, thisArg?)
-    flatMap: true, // newArray = flatMap(callbackFn, thisArg?)
-    map: true, // newArray = map(callbackFn, thisArg?)
-
-    join: true, // string = join(separator?)
-    toLocaleString: true, // string = toLocaleString()
-    toString: true, // string = toString()
 }
 
 const trackableMapOps = {
-    get: true, // value = get(key)
-    has: true, // boolean = has(key)
+    get: true, // value = get(key)  //NOTE: trackable ops
+    has: true, // boolean = has(key) //NOTE: trackable ops
     // set: true,
     // delete: true,
     // clear: true,
@@ -297,7 +327,7 @@ const trackableMapOps = {
 }
 
 const trackableSetOps = {
-    has: true, // boolean = has(item)
+    has: true, // boolean = has(item) //NOTE: trackable ops
 
     // add: true,
     // delete: true,
@@ -308,7 +338,7 @@ const trackableSetOps = {
     // keys: true, // newIterable = keys()
     // values: true, // newIterable = values()
 
-    difference: true, // newSet = difference(otherSet)
+    difference: true, // newSet = difference(otherSet) 
     union: true,
     intersection: true,
     symmetricDifference: true,
@@ -377,8 +407,7 @@ function maybeReactivizeArgs(
     args: any[],
     reactive: ReactiveModel,
     sampleValue: any,
-    registerReactive: RegisterReactive,
-    mutationPermitted: Ref<boolean>
+    registry: ReactiveModelRegistry
 ) {
     if (!(op in insertOps)) return args;
 
@@ -387,7 +416,7 @@ function maybeReactivizeArgs(
     const newItems = hasSingleItem ? [args[itemPosition.at]] : args.slice(itemPosition.from);
     const _newItems: any[] = [];
     for (const newItem of newItems) {
-        _newItems.push(maybeReactivize(newItem, reactive, sampleValue, registerReactive, mutationPermitted))
+        _newItems.push(maybeReactivize(newItem, reactive, sampleValue, registry))
     }
     if (hasSingleItem) {
         args[itemPosition.at] = _newItems[0];
@@ -401,65 +430,96 @@ function maybeReactivizeArgs(
 
 function createReactiveTuple(
     target: any[],
-    registerReactive: RegisterReactive,
-    mutationPermitted: Ref<boolean>,
+    registry: ReactiveModelRegistry,
     deep?: boolean
 ) {
-    const reactiveRef = new Ref<ReactiveModel>();
 
+    const reactiveRef = new Ref<ReactiveModel>()
     const reactive = new Proxy(target, {
-        get: createReactiveArrayGetter(reactiveRef, () => {
-            throw new Error("Tuples can only be mutated by index")
-        }),
-        set: createReactiveSetter(Array, reactiveRef, registerReactive, mutationPermitted)
+        get: (target, key, receiver) => reactiveArrayGetter(
+            reactive,
+            () => {
+                throw new Error("Tuples can only be mutated by index")
+            },
+            target,
+            key,
+            receiver
+        ),
+        set: (target, key, value, receiver) =>
+            reactiveSetter(
+                Array,
+                reactiveRef,
+                registry,
+                target,
+                key,
+                value,
+                receiver
+            )
     })
-
     reactiveRef.o = reactive;
 
     if (deep) {
-        createReactiveArrayItems(target, registerReactive, mutationPermitted)
+        createReactiveArrayItems(target, registry)
     }
     return reactive;
 }
 
-function createReactiveArrayGetter(reactiveRef: Ref<ReactiveModel>, handleMutatingMethod: (key: string, fn: Function) => { [key: string]: (...args: any[]) => any }) {
-    return function get(target: any[], key: string, receiver: any[]) {
-        const value = Reflect.get(target, key, receiver);
-        if (isMutatingArrayOps(key)) {
-            return handleMutatingMethod(key, value)[key];
-        }
-        if (isNonTrackable(key, Array)) return value;
-        emitSignal();
-        track(reactiveRef.o!, key)
-        return value;
+
+function reactiveArrayGetter(
+    reactive: ReactiveModel,
+    handleMutatingMethod: (key: string | symbol, fn: Function) => (...args: any[]) => any,
+    target: any[],
+    key: string | symbol,
+    receiver: any[]
+) {
+    const value = Reflect.get(target, key, receiver);
+    if (isMutatingArrayOps(key)) {
+        return handleMutatingMethod(key, value);
     }
+    if (isNonTrackable(key, Array)) return value;
+    emitSignal();
+    track(asReactiveProp(reactive, key))
+    return value;
 }
 
-function createReactiveSetter(DataStructure: typeof Array | typeof Object | typeof Set | typeof Map, reactiveRef: Ref<ReactiveModel>, registerReactive: RegisterReactive, mutationPermitted: Ref<boolean>) {
-    return function set(target: AnyObject, key: string, newValue: any, receiver: AnyObject) {
-        if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
-        const oldValue = Reflect.get(target, key, receiver);
-        if (oldValue === newValue || isNonTrackable(key, DataStructure) || isNonSettable(key, DataStructure)) {
-            Reflect.set(target, key, newValue, receiver);
-            return true;
-        }
-        const reactive = reactiveRef.o!
-        const _newValue = maybeReactivize(newValue, reactive, oldValue, registerReactive, mutationPermitted)
-        const updateCycle = trigger(reactive, _newValue, oldValue, key)
 
-        if (isWatchedModel(reactive)) {
-            updateCycle.takeSnapshot(reactive, target)
-            updateCycle.recordOp(reactive, {
-                keyPath: [<string>key],
-                newValue: _newValue,
-                oldValue
-            })
-        }
-
-        storeInitialDerivedValueIfNeeded(updateCycle, reactive, key)
-        Reflect.set(target, key, _newValue, receiver);
+function reactiveSetter(
+    DataStructure: typeof Array | typeof Object | typeof Set | typeof Map,
+    reactiveRef: Ref<ReactiveModel>,
+    registry: ReactiveModelRegistry,
+    target: AnyObject,
+    key: string | symbol,
+    newValue: any,
+    receiver: AnyObject
+) {
+    if (!registry.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
+    const reactive = reactiveRef.o!
+    const prop = getReactiveProp(reactive, key);
+    if (!prop) {
+        Reflect.set(target, key, newValue, receiver);
         return true;
     }
+    const oldValue = Reflect.get(target, key, receiver);
+    if (oldValue === newValue || isNonTrackable(key, DataStructure) || isNonSettable(<string>key, DataStructure)) {
+        Reflect.set(target, key, newValue, receiver);
+        return true;
+    }
+    const _newValue = maybeReactivize(newValue, reactive, oldValue, registry)
+    const updateCycle = trigger(reactive, _newValue, oldValue, key)
+
+    if (isWatchedModel(reactive)) {
+        // TODO: I need to trigger to flag reactive
+        updateCycle.takeSnapshot(reactive, target)
+        updateCycle.recordOp(reactive, {
+            keyPath: [<string>key],
+            newValue: _newValue,
+            oldValue
+        })
+    }
+
+    storeInitialDerivedValueIfNeeded(updateCycle, prop)
+    Reflect.set(target, key, _newValue, receiver);
+    return true;
 }
 
 // Because insertion of values don't yield differing new and old values for size and length in the setter,
@@ -473,14 +533,13 @@ function isNonSettable(key: string, DataStructure: typeof Array | typeof Object 
 
 function createReactiveArrayItems(
     target: any[],
-    registerReactive: RegisterReactive,
-    mutationPermitted: Ref<boolean>
+    registry: ReactiveModelRegistry
 ) {
     for (let i = 0; i < target.length; i++) {
         const item = target[i]
         if (reactiveMap.has(item)) continue;
         if (!(item instanceof Object)) continue;
-        const item$ = createReactive(item, registerReactive, mutationPermitted, DEEP)
+        const item$ = createReactive(item, registry, DEEP)
         if (item$ === null) continue;
         target[i] = item$;
     }
@@ -490,38 +549,48 @@ function createReactiveArrayItems(
 
 function createReactiveSet(
     target: Set<any>,
-    registerReactive: RegisterReactive,
-    mutationPermitted: Ref<boolean>, deep?: boolean
+    registry: ReactiveModelRegistry,
+    deep?: boolean
 ) {
-    let sampleValueRef = new Ref<any>();;
-    const reactiveRef = new Ref<ReactiveModel>();
+    // const reactiveRef = new Ref<ReactiveModel>();
+    let sampleValue: any;
 
     const reactive = new Proxy(target, {
         get: (target: Set<any>, key: string, receiver: Set<any>) => {
             const value = Reflect.get(target, key, receiver);
+
             if (key in mutatingSetOps) {
-                return useMutatingMethodHandler(
-                    reactiveRef,
-                    target,
-                    sampleValueRef,
-                    registerReactive,
-                    mutationPermitted
-                )(key, value)[key]
+                return (...args: any[]) => {
+                    if (!registry.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
+                    return mutatingOp(
+                        args,
+                        reactive,
+                        target,
+                        sampleValue,
+                        registry,
+                        key,
+                        value
+                    )
+                }
+            }
+            if (key === 'has') {
+                return (item: any) =>
+                    trackedGetOp(item, reactive, target, value)
             }
             if (isNonTrackable(key, Set)) return value;
             emitSignal();
-            track(reactive, key)
+            track(asReactiveProp(reactive, key))
             return value;
         }
     })
 
-    reactiveRef.o = reactive;
+    // reactiveRef.o = reactive;
 
     const values = Array.from(target);
-    sampleValueRef.o = values[0];
+    sampleValue = values[0];
 
     if (deep) {
-        createReactiveArrayItems(values, registerReactive, mutationPermitted)
+        createReactiveArrayItems(values, registry)
         target.clear();
         for (const value of values) {
             target.add(value);
@@ -530,106 +599,117 @@ function createReactiveSet(
     return reactive;
 }
 
-function useMutatingMethodHandler(
-    reactiveRef: Ref<ReactiveModel>,
+
+
+
+
+function mutatingOp(
+    args: any[],
+    reactive: ReactiveModel,
     target: AnyObject,
-    sampleValueRef: Ref<any>,
-    registerReactive: RegisterReactive,
-    mutationPermitted: Ref<boolean>
+    sampleValue: any,
+    registry: ReactiveModelRegistry,
+    key: string | symbol,
+    fn: Function
 ) {
-    return (key: string, fn: Function) => {
-        if (!mutationPermitted.o) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
+    const _args = maybeReactivizeArgs(<string>key, args, reactive, sampleValue, registry);
+    const updateCycle = useUpdateCycle();
+    const clone = shallowClone(target) // cloning before mutation
 
-        return { // return an object with key so that function will have a name (for dev purposes)
-            [key]: (...args: any[]) => {
-                const reactive = reactiveRef.o!;
-                const _args = maybeReactivizeArgs(<string>key, args, reactive, sampleValueRef.o!, registerReactive, mutationPermitted);
-                const updateCycle = useUpdateCycle();
-                const clone = target instanceof Array ? [...target] : target // cloning before mutation //TODO: how do you clone a map or a set?
-
-                if (target instanceof Map && key === 'set') {
-                    const oldValue = target.get(args[0]);
-                    const newValue = args[1];
-                    if (oldValue !== newValue) {
-                        if (isWatchedModel(reactive)) {
-                            updateCycle.takeSnapshot(reactive, target, clone)
-                        }
-                        trigger(reactive, newValue, oldValue, args[0]);
-                    }
-                }
-
-                const sizeKey = target instanceof Array ? 'length' : 'size';
-                storeInitialDerivedValueIfNeeded(updateCycle, reactive, sizeKey); // Order matters. This must be called before mutation occurs
-                const oldSize = reactive[sizeKey];
-                const output = fn.apply(reactive, args);
-                const newSize = reactive[sizeKey];
-
-                // because we want to compare size, this must happen after mutation, so we need to clone the object beforehand
-                if (target instanceof Array || oldSize !== newSize || target instanceof Map && key !== 'set') {
-                    if (isWatchedModel(reactive)) {
-                        updateCycle.takeSnapshot(reactive, target, clone);
-                        updateCycle.recordOp(target, {
-                            op: key,
-                            args
-                        })
-                    }
-                }
-
-                if (oldSize !== newSize) {
-                    trigger(reactive, newSize, oldSize, sizeKey); // trigger for length/size change
-                }
-                return output;
+    if (target instanceof Map && key === 'set') {
+        const oldValue = target.get(_args[0]);
+        const newValue = _args[1];
+        if (oldValue !== newValue) {
+            if (isWatchedModel(reactive)) {
+                // TODO: I need to trigger to flag reactive
+                updateCycle.takeSnapshot(reactive, target, clone)
             }
+            trigger(reactive, newValue, oldValue, _args[0]);
         }
     }
-}
 
+    const sizeKey = target instanceof Array ? 'length' : 'size';
+    const sizeProp = getReactiveProp(reactive, sizeKey)
+    if (sizeProp) {
+        storeInitialDerivedValueIfNeeded(updateCycle, sizeProp); // Order matters. This must be called before mutation occurs
+    }
+    const oldSize = target[sizeKey];
+    const output = fn.apply(target, _args);
+    const newSize = target[sizeKey];
+
+    // because we want to compare size, this must happen after mutation, so we need to clone the object beforehand
+    if (target instanceof Array || oldSize !== newSize || target instanceof Map && key !== 'set') {
+        // TODO: I need to trigger to flag reactive
+        if (isWatchedModel(reactive)) {
+            updateCycle.takeSnapshot(reactive, target, clone);
+            updateCycle.recordOp(target, {
+                op: <string>key,
+                args: _args
+            })
+        }
+    }
+
+    if (oldSize !== newSize) {
+        if (sizeProp)
+            trigger(reactive, newSize, oldSize, sizeKey); // trigger for length/size change
+        if (target instanceof Set && key === 'add') {
+            trigger(target, true, false, _args[0])
+        }
+        else if (target instanceof Set && key === 'delete') {
+            trigger(target, false, true, _args[0])
+        }
+    }
+    return output;
+}
 
 function createReactiveMap(
     target: Map<any, any>,
-    registerReactive: RegisterReactive,
-    mutationPermitted: Ref<boolean>,
+    registry: ReactiveModelRegistry,
     deep?: boolean
 ) {
     const reactiveRef = new Ref<ReactiveModel>()
-    const sampleValueRef = new Ref<[any, any]>()
+    let sampleValue: any;
 
     const reactive = new Proxy(target, {
         get(target, key, receiver) {
             const value = Reflect.get(target, key, receiver);
-            if (key === 'get') {
-                return (mapKey: any) => {
-                    const mapValue = value.call(target, mapKey)
-                    emitSignal();
-                    track(reactive, mapKey)
-                    return mapValue;
-                }
+            if (key === 'get' || key === 'has') {
+                return (item: any) => trackedGetOp(item, reactive, target, value);
             }
             if (key in mutatingMapOps) {
-                return useMutatingMethodHandler(
-                    reactiveRef,
-                    target,
-                    sampleValueRef,
-                    registerReactive,
-                    mutationPermitted
-                )(<string>key, value)[<string>key]
+                return (...args: any[]) => {
+                    if (!registry.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
+                    return mutatingOp(
+                        args,
+                        reactive,
+                        target,
+                        sampleValue,
+                        registry,
+                        key,
+                        value
+                    )
+                }
             }
             if (isNonTrackable(key, Map)) return value;
             emitSignal();
-            track(reactive, key)
+            track(asReactiveProp(reactive, key))
             return value;
         },
-        set: createReactiveSetter(
-            Map,
-            reactiveRef,
-            registerReactive,
-            mutationPermitted
-        )
+        set: (target, key, value, receiver) =>
+            reactiveSetter(
+                Map,
+                reactiveRef,
+                registry,
+                target,
+                key,
+                value,
+                receiver
+            )
     })
-    const entries = Array.from(target)
-
     reactiveRef.o = reactive;
-    sampleValueRef.o = entries[0]
+
+    const entries = Array.from(target)
+    sampleValue = entries[0]
 
     if (deep) {
         throw new Error("Deep has not been implemented for reactive maps!") //TODO: implement if needed
@@ -637,7 +717,7 @@ function createReactiveMap(
         //     const [key, value] = entries[i];
         //     if (reactiveMap.has(item)) continue;
         //     if (!(item instanceof Object)) continue;
-        //     const item$ = createReactive(item, registerReactive, mutationPermitted, DEEP)
+        //     const item$ = createReactive(item, registry, DEEP)
         //     if (item$ === null) continue;
         //     target[i] = item$;
         // }
@@ -645,4 +725,11 @@ function createReactiveMap(
         // loop through entries and target.set(key, value)
     }
     return reactive;
+}
+
+
+function trackedGetOp(item: any, reactive: ReactiveModel, target: AnyObject, fn: (item: any) => any) {
+    emitSignal();
+    track(asReactiveProp(reactive, item))
+    return fn.call(target, item)
 }

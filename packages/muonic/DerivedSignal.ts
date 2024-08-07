@@ -1,5 +1,5 @@
 import { ActiveListener, getActiveFlask, onFlaskDisposal } from "@rue/flask";
-import { DependencyTracker, getDependencyTracker } from "./DependencyTracker";
+import { DependencyTracker, getDependencyTracker, ReactiveAtom } from "./DependencyTracker";
 import { isSignal, Signal, SIGNAL_MARKER } from "./useSignals";
 import { watch } from "./watch";
 import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
@@ -34,15 +34,15 @@ export function hasSignal(maybeSignal: any): maybeSignal is DerivedSignal | Sign
     return false;
 }
 
-const depMap: WeakMap<Signal | ReactiveProp, Set<DerivedSignal>> = new WeakMap(); // to get old value of derived signal during trigger
+const depMap: WeakMap<ReactiveAtom, Set<DerivedSignal>> = new WeakMap(); // to get old value of derived signal during trigger
 const watchedDerivedSignals: WeakSet<DerivedSignalState> = new WeakSet();
 
-export function getDependentDerivedSignals(dep: Signal | ReactiveProp) {
+export function getDependentDerivedSignals(dep: ReactiveAtom) {
     return depMap.get(dep);
 }
 
 
-function addToDepMap(derivedSignal: DerivedSignal, deps: (Signal | ReactiveProp)[]) {
+function addToDepMap(derivedSignal: DerivedSignal, deps: (ReactiveAtom)[]) {
     for (const dep of deps) {
         let derivedSignals = depMap.get(dep);
         if (!derivedSignals) {
@@ -63,7 +63,7 @@ function addToDepMap(derivedSignal: DerivedSignal, deps: (Signal | ReactiveProp)
 
 export class DerivedSignalState {
     value: any;
-    dependencies: (Signal | ReactiveProp)[] = [];
+    dependencies: (ReactiveAtom)[] = [];
     hasChanged: boolean = false;
 
     removeFromDepMap: undefined | (() => void);

@@ -14,7 +14,7 @@ export class SnapshotManager {
     private snapshotMap: WeakMap<AnyObject, SnapshotStack> = new WeakMap();
     takeSnapshot(original: AnyObject, index: number, clone: undefined | AnyObject) {
         const snapshotMap = this.snapshotMap;
-        const snapshot = new Proxy(clone ? clone : original instanceof Array ? [...original] : { ...original }, {
+        const snapshot = new Proxy(clone ? clone : shallowClone(original), {
             get(target, key, receiver) {
                 const value = Reflect.get(target, key, receiver);
                 if (value instanceof Object) { //TODO: make sure functions are handled appropriately
@@ -57,4 +57,11 @@ function findSnapshot(snapshots: SnapshotStack, index: number) {
     if (closestI === undefined) return;
     // if (closestI === undefined) throw "No snapshot found";
     return snapshots[closestI][1];
+}
+
+export function shallowClone(data: AnyObject) {
+    if (data instanceof Array) return [...data];
+    if (data instanceof Set) return new Set(data);
+    if (data instanceof Map) return new Map(data);
+    return { ...data }
 }
