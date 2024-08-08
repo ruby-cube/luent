@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { isWatchedModel, storeInitialDerivedValueIfNeeded, track, trigger, useUpdateCycle } from "./watch";
+import { isWatchedModel, storeInitialDerivedValueIfNeeded, track, trigger, triggerReactiveModel, useUpdateCycle } from "./watch";
 import { emitSignal } from "./useReactivity";
 import { isObjectLiteral, KeyPath, Ref } from "@rue/utils";
 import { isTuple, tuple } from "./Tuple";
@@ -558,9 +558,7 @@ function reactiveSetter(
     }
 
     if (isWatchedModel(reactive)) {
-        // TODO: I need to trigger to flag reactive
-        updateCycle.takeSnapshot(reactive, target)
-        updateCycle.recordOp(reactive, {
+        triggerReactiveModel(reactive, shallowClone(target), {
             keyPath: [<string>key],
             newValue: _newValue,
             oldValue
@@ -672,18 +670,21 @@ function mutatingOp(
     const _args = maybeReactivizeArgs(<string>key, args, reactive, sampleValue, registry);
     const updateCycle = useUpdateCycle();
     const clone = shallowClone(target) // cloning before mutation
+    let hasMutated = false;
 
-    const oldMapValue = target instanceof Map && key === 'set' || key === 'clear' || key === 'delete' ? target.get(_args[0]) : null;
+    const oldMapValue = target instanceof Map && (key === 'set' || key === 'clear' || key === 'delete') ? target.get(_args[0]) : null;
     const lastItem = target instanceof Array && key === 'pop' ? target.at(-1) : null
 
     if (target instanceof Map && key === 'set') {
         const mapKey = _args[0]
-        // const oldValue = target.get(mapKey);
         const newValue = _args[1];
         if (oldMapValue !== newValue) {
             if (isWatchedModel(reactive)) {
-                // TODO: I need to trigger to flag reactive
-                updateCycle.takeSnapshot(reactive, target, clone)
+                triggerReactiveModel(reactive, clone, {
+                    keyPath: [<string>key],
+                    newValue,
+                    oldValue: oldMapValue
+                })
             }
             const hasOp = getTrackableOp(reactive, 'has', mapKey)
             if (hasOp) trigger(hasOp, newValue, oldMapValue);
@@ -703,50 +704,58 @@ function mutatingOp(
 
     // because we want to compare size, this must happen after mutation, so we need to clone the object beforehand
     if (target instanceof Array || oldSize !== newSize || target instanceof Map && key !== 'set') {
-        // TODO: I need to trigger to flag reactive
-        if (isWatchedModel(reactive)) {
-            updateCycle.takeSnapshot(reactive, target, clone);
-            updateCycle.recordOp(target, {
-                op: <string>key,
-                args: _args
-            })
-        }
+        hasMutated = true;
     }
 
     if (oldSize !== newSize) {
+        hasMutated = true;
         if (sizeProp)
             trigger(sizeProp, newSize, oldSize); // trigger for length/size change
+
         if (target instanceof Array && key === 'pop') {
             const prop = getReactiveProp(reactive, oldSize - 1)
-            if (prop) trigger(prop, undefined, lastItem);
+            if (prop)
+                trigger(prop, undefined, lastItem);
             const op = getTrackableOp(reactive, 'at', oldSize - 1)
-            if (op) trigger(op, undefined, lastItem);
+            if (op)
+                trigger(op, undefined, lastItem);
         }
         else if (target instanceof Set && key === 'add') {
             const item = _args[0]
             const op = getTrackableOp(reactive, 'has', item)
-            if (op) trigger(op, true, false)
+            if (op)
+                trigger(op, true, false)
         }
         else if ((target instanceof Set || target instanceof Map) && key === 'delete') {
             const item = _args[0]
             const op = getTrackableOp(reactive, 'has', item)
-            if (op) trigger(op, false, true)
+            if (op)
+                trigger(op, false, true)
             if (target instanceof Map) {
                 const op = getTrackableOp(reactive, 'get', item)
-                if (op) trigger(op, undefined, oldMapValue)
+                if (op)
+                    trigger(op, undefined, oldMapValue)
             }
         }
         else if ((target instanceof Set || target instanceof Map) && key === 'clear') {
-            for (const entry of target) {
+            for (const entry of <Set<any> | Map<any, any>>clone) {
                 const item = target instanceof Set ? entry : entry[0]
                 const op = getTrackableOp(reactive, 'has', item)
-                if (op) trigger(op, false, true)
+                if (op)
+                    trigger(op, false, true)
                 if (target instanceof Map) {
                     const op = getTrackableOp(reactive, 'get', item)
-                    if (op) trigger(op, undefined, oldMapValue)
+                    if (op)
+                        trigger(op, undefined, oldMapValue)
                 }
             }
         }
+    }
+    if (hasMutated && isWatchedModel(reactive)) {
+        triggerReactiveModel(reactive, clone, {
+            op: <string>key,
+            args: _args
+        })
     }
 
     return output;

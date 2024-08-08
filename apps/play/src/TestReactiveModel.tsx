@@ -27,13 +27,6 @@ export function List() {
     // initializeEffect(() => {
     //     console.log("some starts with f", list$.some((item) => item.content.startsWith('f')))
     // })
-
-    initializeEffect(() => {
-        console.log('----------------')
-        list$[3]
-        console.log('----------------')
-    })
-
  
 
     function changeContent(index: number) {
@@ -106,7 +99,6 @@ export function List() {
                                 `background-color: ${randomColor.get()}`,
                                 o => {
                                     o.outline = selected$.has(item$) ? 'thick solid blue' : '';
-                                    console.log("running outline effect")
                                 }
                             ]}>
                             <p

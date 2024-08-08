@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { SnapshotManager } from "./SnapshotManager";
 import { isReactiveModel, ReactiveModel } from "./useReactiveModels";
 import { isSignal, Signal } from "./useSignals";
-import {  runNonSyncTasks } from "./watch";
+import { runNonSyncTasks } from "./watch";
 import { $listen, ScheduleStop } from "@rue/flask";
 import { removeItem } from "../utils/array";
 import { beforeRepaint, queueTask } from "@rue/thread";
@@ -95,7 +95,8 @@ export class UpdateCycle {
             snapshotMap = new Map();
             this.snapshotMap = snapshotMap;
         }
-        if (snapshotMap.has(reactive)) return; // snapshot of original state already taken for this cycle, no need to take another
+        if (snapshotMap.has(reactive))
+            return snapshotMap.get(reactive)!; // snapshot of original state already taken for this cycle, no need to take another
         const _snapshot = snapshotManager.takeSnapshot(target, updateCycleCount, clone)
         snapshotMap.set(reactive, _snapshot) // snapshots are shallow clones!
         return _snapshot;

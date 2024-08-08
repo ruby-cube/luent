@@ -11,6 +11,7 @@ import { deepWatch, MutationOp, SetOp } from "./deepWatch";
 import { collectReactiveProps, registerDebuggers, runTriggerDebugger, WatchDebugOptions } from "./debug";
 import { asReactiveProp, getReactiveProp, isReactiveProp, ReactiveProp } from "./ReactiveProp";
 import { PendingCancelOp } from "../flask/PendingCancelOp";
+import { table } from "console";
 
 //QUESTION: How useful is watching deep?
 
@@ -405,15 +406,11 @@ export function trigger(target: ReactiveAtom, newValue: any, oldValue: any) { //
     return updateCycle;
 }
 
-export function triggerReactiveModel() {
-    if (isWatchedModel(target)) {
-        updateCycle.flagReactive(target, oldValue)
-        updateCycle.recordOp(target, {
-            keyPath: [key!],
-            newValue,
-            oldValue
-        })
-    }
+export function triggerReactiveModel(reactive: ReactiveModel, clone: AnyObject, op: MutationOp | SetOp) {
+    const updateCycle = useUpdateCycle();
+    const snapshot = updateCycle.takeSnapshot(reactive, toRaw(reactive), clone)
+    updateCycle.flagReactive(reactive, snapshot)
+    updateCycle.recordOp(reactive, op)
 }
 
 // export function triggerOp(target: ReactiveModel, op: string, args: any[]) {
