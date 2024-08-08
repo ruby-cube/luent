@@ -31,7 +31,6 @@ export function asReactiveProp(
     model: ReactiveModel,
     key: PropertyKey
 ): ReactiveProp {
-    console.log('model', model)
     const propMap = reactivePropMap.get(model);
     if (!propMap) return new _ReactiveProp(model, key) as unknown as ReactiveProp;
     const reactiveProp = propMap.get(key);
@@ -48,4 +47,9 @@ export function getReactiveProp(
     const reactiveProp = propMap.get(key);
     if (!reactiveProp) return null;
     return reactiveProp as unknown as ReactiveProp
+}
+
+export function getReactivePropValue(prop: ReactiveProp) {
+    const [target, key] = prop
+    return target[key];
 }

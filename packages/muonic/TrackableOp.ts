@@ -2,7 +2,7 @@
 
 
 
-import { ReactiveModel, toRaw } from "../useReactiveModels";
+import { ReactiveModel, toRaw } from "./useReactiveModels";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
 
@@ -53,7 +53,13 @@ export function asTrackableOp(
     return trackableOp as unknown as TrackableOp
 }
 
-function getTrackableOp(
+
+export function getTrackableOpValue(op: TrackableOp) {
+    const [target, arg, key] = op;
+    return target[key](arg);
+}
+
+export function getTrackableOp(
     model: ReactiveModel,
     op: string,
     key: any
@@ -67,55 +73,55 @@ function getTrackableOp(
     return trackableOp as unknown as TrackableOp
 }
 
-export function getTrackableOps(
-    model: ReactiveModel,
-    triggerOp: TriggerOp,
-    key: any
-): TrackableOp[] | null {
-    const ops = getCorrespondingOps(model, triggerOp);
-    const trackableOps = []
-    for (const op of ops) {
-        const trackableOp = getTrackableOp(model, op, key)
-        if (!trackableOp) continue;
-        trackableOps.push(trackableOp);
-    }
-    if (trackableOps.length === 0)
-        return null;
-    return trackableOps;
-}
+// export function getTrackableOps(
+//     model: ReactiveModel,
+//     triggerOp: TriggerOp,
+//     key: any
+// ): TrackableOp[] | null {
+//     const ops = getCorrespondingOps(model, triggerOp);
+//     const trackableOps = []
+//     for (const op of ops) {
+//         const trackableOp = getTrackableOp(model, op, key)
+//         if (!trackableOp) continue;
+//         trackableOps.push(trackableOp);
+//     }
+//     if (trackableOps.length === 0)
+//         return null;
+//     return trackableOps;
+// }
 
 
 
 // ---
 
 
-type TriggerOp = 'set' | 'delete' | 'add' | '_set_'
+// type TriggerOp = 'set' | 'delete' | 'add' | '_set_'
 
-const mapTriggerOpsMap = {
-    set: ['get', 'has'],
-    delete: ['get', 'has']
-}
+// const mapTriggerOpsMap = {
+//     set: ['get', 'has'],
+//     delete: ['get', 'has']
+// }
 
-const setTriggerOpsMap = {
-    add: ['has'],
-    delete: ['has']
-}
+// const setTriggerOpsMap = {
+//     add: ['has'],
+//     delete: ['has']
+// }
 
-const arrayTriggerOpsMap = {
-    _set_: ['at'],
-}
+// const arrayTriggerOpsMap = {
+//     _set_: ['at'],
+// }
 
 
-function getCorrespondingOps(reactive: ReactiveModel, triggerOp: TriggerOp) {
-    const model = toRaw(reactive);
-    if (model instanceof Array && triggerOp in arrayTriggerOpsMap) {
-        return arrayTriggerOpsMap[<keyof typeof arrayTriggerOpsMap>triggerOp];
-    }
-    if (model instanceof Set && triggerOp in setTriggerOpsMap) {
-        return setTriggerOpsMap[<keyof typeof setTriggerOpsMap>triggerOp];
-    }
-    if (model instanceof Map && triggerOp in mapTriggerOpsMap) {
-        return mapTriggerOpsMap[<keyof typeof mapTriggerOpsMap>triggerOp];
-    }
-    throw new Error(`INVALID INPUT: reactive: ${reactive}, triggerOp: ${triggerOp}`)
-}
+// function getCorrespondingOps(reactive: ReactiveModel, triggerOp: TriggerOp) {
+//     const model = toRaw(reactive);
+//     if (model instanceof Array && triggerOp in arrayTriggerOpsMap) {
+//         return arrayTriggerOpsMap[<keyof typeof arrayTriggerOpsMap>triggerOp];
+//     }
+//     if (model instanceof Set && triggerOp in setTriggerOpsMap) {
+//         return setTriggerOpsMap[<keyof typeof setTriggerOpsMap>triggerOp];
+//     }
+//     if (model instanceof Map && triggerOp in mapTriggerOpsMap) {
+//         return mapTriggerOpsMap[<keyof typeof mapTriggerOpsMap>triggerOp];
+//     }
+//     throw new Error(`INVALID INPUT: reactive: ${reactive}, triggerOp: ${triggerOp}`)
+// }

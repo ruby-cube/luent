@@ -55,7 +55,7 @@ export function useSignals(reactiveModelKit?: {
     function signalize<T>(value: T, deep?: 2 | 3): Signal<T> {
 
         const signal = () => {
-            emitSignal();
+            if (__DEV__) emitSignal();
             const value = signalValues.get(signal)
             track(signal)
             return value;

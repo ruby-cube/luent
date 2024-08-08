@@ -5,6 +5,7 @@ import { isObjectLiteral, KeyPath, Ref } from "@rue/utils";
 import { isTuple, tuple } from "./Tuple";
 import { asReactiveProp, getReactiveProp } from "./ReactiveProp";
 import { shallowClone } from "./SnapshotManager";
+import { asTrackableOp, getTrackableOp } from "./TrackableOp";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject) => void
@@ -96,7 +97,7 @@ function createReactiveObject(
             }
             const descriptor = Reflect.getOwnPropertyDescriptor(target, key);
             if (descriptor?.writable === false) return value;
-            emitSignal();
+            if (__DEV__) emitSignal();
             track(asReactiveProp(reactive, key));
             return value;
         },
@@ -396,11 +397,11 @@ function isMutatingArrayOps(key: PropertyKey) {
 }
 
 
-// function isIntegerKey(key: unknown) {
-//     const keyAsNumber = Number(key);
-//     if (isNaN(keyAsNumber)) return false;
-//     if (Number.isInteger(keyAsNumber)) return true
-// }
+function isIntegerKey(key: unknown) {
+    const keyAsNumber = Number(key);
+    if (isNaN(keyAsNumber)) return false;
+    if (Number.isInteger(keyAsNumber)) return true
+}
 
 function maybeReactivizeArgs(
     op: string,
@@ -477,7 +478,17 @@ function reactiveArrayGetter(
         return handleMutatingMethod(key, value);
     }
     if (isNonTrackable(key, Array)) return value;
-    emitSignal();
+    if (key === 'at') {
+        return (index: number) =>
+            trackedGetOp(
+                index,
+                reactive,
+                target,
+                key,
+                value
+            )
+    }
+    if (__DEV__) emitSignal();
     track(asReactiveProp(reactive, key))
     return value;
 }
@@ -494,8 +505,9 @@ function reactiveSetter(
 ) {
     if (!registry.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
     const reactive = reactiveRef.o!
+    const op = target instanceof Array && isIntegerKey(key) ? getTrackableOp(reactive, 'at', key) : null;
     const prop = getReactiveProp(reactive, key);
-    if (!prop) {
+    if (!prop && !op) {
         Reflect.set(target, key, newValue, receiver);
         return true;
     }
@@ -505,7 +517,45 @@ function reactiveSetter(
         return true;
     }
     const _newValue = maybeReactivize(newValue, reactive, oldValue, registry)
-    const updateCycle = trigger(reactive, _newValue, oldValue, key)
+
+    const updateCycle = useUpdateCycle();
+
+    if (prop) {
+        trigger(prop, _newValue, oldValue)
+        storeInitialDerivedValueIfNeeded(updateCycle, prop)
+    }
+
+    if (op) {
+        trigger(op, _newValue, oldValue)
+        storeInitialDerivedValueIfNeeded(updateCycle, op)
+    }
+
+    if (target instanceof Array) {
+        if (key === 'length') {
+            const newLength = _newValue > -1 ? _newValue < target.length ? _newValue : target.length : 0;
+            let i = target.length;
+            while (i > newLength) {
+                i--;
+                const prop = getReactiveProp(reactive, i.toString())
+                if (prop) {
+                    const item = target[i];
+                    trigger(prop, undefined, item)
+                }
+                const op = getTrackableOp(reactive, 'at', i.toString())
+                if (op) {
+                    const item = target[i];
+                    trigger(op, undefined, item);
+                }
+            }
+        }
+        else if (isIntegerKey(key)) {
+            const op = getTrackableOp(reactive, 'at', key)
+            if (op) {
+                const oldValue = target[parseInt(<string>key)]
+                trigger(op, _newValue, oldValue);
+            }
+        }
+    }
 
     if (isWatchedModel(reactive)) {
         // TODO: I need to trigger to flag reactive
@@ -517,7 +567,6 @@ function reactiveSetter(
         })
     }
 
-    storeInitialDerivedValueIfNeeded(updateCycle, prop)
     Reflect.set(target, key, _newValue, receiver);
     return true;
 }
@@ -573,12 +622,20 @@ function createReactiveSet(
                     )
                 }
             }
+
             if (key === 'has') {
                 return (item: any) =>
-                    trackedGetOp(item, reactive, target, value)
+                    trackedGetOp(
+                        item,
+                        reactive,
+                        target,
+                        key,
+                        value
+                    )
             }
+
             if (isNonTrackable(key, Set)) return value;
-            emitSignal();
+            if (__DEV__) emitSignal();
             track(asReactiveProp(reactive, key))
             return value;
         }
@@ -616,15 +673,22 @@ function mutatingOp(
     const updateCycle = useUpdateCycle();
     const clone = shallowClone(target) // cloning before mutation
 
+    const oldMapValue = target instanceof Map && key === 'set' || key === 'clear' || key === 'delete' ? target.get(_args[0]) : null;
+    const lastItem = target instanceof Array && key === 'pop' ? target.at(-1) : null
+
     if (target instanceof Map && key === 'set') {
-        const oldValue = target.get(_args[0]);
+        const mapKey = _args[0]
+        // const oldValue = target.get(mapKey);
         const newValue = _args[1];
-        if (oldValue !== newValue) {
+        if (oldMapValue !== newValue) {
             if (isWatchedModel(reactive)) {
                 // TODO: I need to trigger to flag reactive
                 updateCycle.takeSnapshot(reactive, target, clone)
             }
-            trigger(reactive, newValue, oldValue, _args[0]);
+            const hasOp = getTrackableOp(reactive, 'has', mapKey)
+            if (hasOp) trigger(hasOp, newValue, oldMapValue);
+            const getOp = getTrackableOp(reactive, 'get', mapKey)
+            if (getOp) trigger(getOp, newValue, oldMapValue);
         }
     }
 
@@ -651,14 +715,40 @@ function mutatingOp(
 
     if (oldSize !== newSize) {
         if (sizeProp)
-            trigger(reactive, newSize, oldSize, sizeKey); // trigger for length/size change
-        if (target instanceof Set && key === 'add') {
-            trigger(target, true, false, _args[0])
+            trigger(sizeProp, newSize, oldSize); // trigger for length/size change
+        if (target instanceof Array && key === 'pop') {
+            const prop = getReactiveProp(reactive, oldSize - 1)
+            if (prop) trigger(prop, undefined, lastItem);
+            const op = getTrackableOp(reactive, 'at', oldSize - 1)
+            if (op) trigger(op, undefined, lastItem);
         }
-        else if (target instanceof Set && key === 'delete') {
-            trigger(target, false, true, _args[0])
+        else if (target instanceof Set && key === 'add') {
+            const item = _args[0]
+            const op = getTrackableOp(reactive, 'has', item)
+            if (op) trigger(op, true, false)
+        }
+        else if ((target instanceof Set || target instanceof Map) && key === 'delete') {
+            const item = _args[0]
+            const op = getTrackableOp(reactive, 'has', item)
+            if (op) trigger(op, false, true)
+            if (target instanceof Map) {
+                const op = getTrackableOp(reactive, 'get', item)
+                if (op) trigger(op, undefined, oldMapValue)
+            }
+        }
+        else if ((target instanceof Set || target instanceof Map) && key === 'clear') {
+            for (const entry of target) {
+                const item = target instanceof Set ? entry : entry[0]
+                const op = getTrackableOp(reactive, 'has', item)
+                if (op) trigger(op, false, true)
+                if (target instanceof Map) {
+                    const op = getTrackableOp(reactive, 'get', item)
+                    if (op) trigger(op, undefined, oldMapValue)
+                }
+            }
         }
     }
+
     return output;
 }
 
@@ -674,7 +764,14 @@ function createReactiveMap(
         get(target, key, receiver) {
             const value = Reflect.get(target, key, receiver);
             if (key === 'get' || key === 'has') {
-                return (item: any) => trackedGetOp(item, reactive, target, value);
+                return (item: any) =>
+                    trackedGetOp(
+                        item,
+                        reactive,
+                        target,
+                        key,
+                        value
+                    );
             }
             if (key in mutatingMapOps) {
                 return (...args: any[]) => {
@@ -691,7 +788,7 @@ function createReactiveMap(
                 }
             }
             if (isNonTrackable(key, Map)) return value;
-            emitSignal();
+            if (__DEV__) emitSignal();
             track(asReactiveProp(reactive, key))
             return value;
         },
@@ -727,9 +824,11 @@ function createReactiveMap(
     return reactive;
 }
 
-
-function trackedGetOp(item: any, reactive: ReactiveModel, target: AnyObject, fn: (item: any) => any) {
-    emitSignal();
-    track(asReactiveProp(reactive, item))
-    return fn.call(target, item)
+// A 'get op' is a o(1) get-like operation like set.has() or array.at()
+function trackedGetOp(key: any, reactive: ReactiveModel, target: AnyObject, op: string, fn: (key: any) => any) {
+    if (__DEV__) emitSignal();
+    if (op === 'at' && key === -1)
+        key = target.length - 1;
+    track(asTrackableOp(reactive, op, key))
+    return fn.call(target, key)
 }

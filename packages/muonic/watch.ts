@@ -332,7 +332,7 @@ export function usePhaseQueues(deps: ReactiveAtom[], phase: Phase = 'pre') {
     return taskQueues;
 }
 
-function usePhaseQueue(target: Signal | ReactiveProp  | ReactiveModel, phase: Phase = 'pre') {
+function usePhaseQueue(target: Signal | ReactiveProp | ReactiveModel, phase: Phase = 'pre') {
     const taskQueueMap = (isReactiveModel(target) ? reactiveModelTaskQueues : reactiveAtomTaskQueues) as
         WeakMap<ReactiveAtom | ReactiveModel, Map<Phase, PhaseQueue>>
 
@@ -358,7 +358,7 @@ function usePhaseQueuesForReactive(reactive: ReactiveModel, phase: Phase = 'pre'
     return taskQueues;
 }
 
-export function getTaskQueue(target: Signal | ReactiveProp  | ReactiveModel, phase: Phase) {
+export function getTaskQueue(target: Signal | ReactiveProp | ReactiveModel, phase: Phase) {
     if (isReactiveModel(target))
         return reactiveModelTaskQueues.get(target)?.get(<Exclude<Phase, 'sync'>>phase)?.[TASK_QUEUE]
     return reactiveAtomTaskQueues.get(target)?.get(phase)?.[TASK_QUEUE]
@@ -386,35 +386,26 @@ export function useUpdateCycle() {
     return updateCycle;
 }
 
-export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue: any, key: any = UNDEFINED) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol
+export function trigger(target: ReactiveAtom, newValue: any, oldValue: any) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol
     if (__DEV__) {
-        if (key !== UNDEFINED) {
-            const prop = getReactiveProp(target, key)
-            if (prop) runTriggerDebugger(prop)
-        }
-        else runTriggerDebugger(<Signal>target)
+        runTriggerDebugger(target)
     }
 
     const updateCycle = useUpdateCycle()
 
     // run sync tasks
-    const _target = isSignal(target) ? target : key === UNDEFINED ? null : getReactiveProp(target, key); //QUESTION: Should I allow sync tasks for reactives?
-    if (_target) {
-        const tracker = getDependencyTracker();
-        tracker?.stop(); // in case reactive refs are set during an effect
-        runSyncTasks(_target, newValue, oldValue);
-        tracker?.restore();
-    }
+    const tracker = getDependencyTracker();
+    tracker?.stop(); // in case reactive refs are set during an effect
+    runSyncTasks(target, newValue, oldValue);
+    tracker?.restore();
 
     // collect triggered refs for this cycle for 'pre', 'render', and 'post' phases
-    if (isSignal(target)) {
-        updateCycle.flagReactiveAtom(target, newValue, oldValue)
-    }
-    else if (key !== UNDEFINED) {
-        const prop = getReactiveProp(target, key)
-        if (prop) updateCycle.flagReactiveAtom(prop, newValue, oldValue)
-    }
+    updateCycle.flagReactiveAtom(target, newValue, oldValue)
 
+    return updateCycle;
+}
+
+export function triggerReactiveModel() {
     if (isWatchedModel(target)) {
         updateCycle.flagReactive(target, oldValue)
         updateCycle.recordOp(target, {
@@ -423,8 +414,6 @@ export function trigger(target: Signal | ReactiveModel, newValue: any, oldValue:
             oldValue
         })
     }
-
-    return updateCycle;
 }
 
 // export function triggerOp(target: ReactiveModel, op: string, args: any[]) {
@@ -485,7 +474,6 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
             if (!updateCycle) throw new Error("No update cycle :( whyyy")
             const _oldValue = updateCycle.getInitialValue(derivedSignal)
             const newValue = derivedSignal();
-            console.log("derived signal", _oldValue, newValue)
             if (!hasChanged(newValue, _oldValue))
                 return;
             runEffect(() => {

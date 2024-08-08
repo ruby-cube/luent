@@ -3,6 +3,7 @@ import { Signal, useReactivity, watch, initializeEffect, isReactiveModel } from 
 import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic/debug";
+import { clear } from "console";
 
 
 const { $, set, o$, mu, $$, $$$, o$$$ } = useReactivity();
@@ -23,9 +24,17 @@ export function List() {
         { id: 3, content: "swamp" }
     ])
 
+    // initializeEffect(() => {
+    //     console.log("some starts with f", list$.some((item) => item.content.startsWith('f')))
+    // })
+
     initializeEffect(() => {
-        console.log("some starts with f", list$.some((item) => item.content.startsWith('f')))
+        console.log('----------------')
+        list$[3]
+        console.log('----------------')
     })
+
+ 
 
     function changeContent(index: number) {
         const item$ = list$[index];
@@ -48,6 +57,12 @@ export function List() {
     const deleteBtnRef = new NodeRef()
     const insertBtnRef = new NodeRef()
 
+    function clearSelection() {
+        mu(selected$, o => {
+            selected$.clear()
+        })
+    }
+
     function toggleSelect(e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) {
         if (e.target === deleteBtnRef.o[index] || e.target === insertBtnRef.o[index]) return;
         const item$ = list$[index]
@@ -63,10 +78,6 @@ export function List() {
         }
     }
 
-    onMounted(() => {
-        console.log(insertBtnRef.o)
-    })
-
     function removeItem(index: number) {
         mu(list$, list => {
             selected$.delete(list[index])
@@ -80,7 +91,7 @@ export function List() {
             <>
                 {$if($(() => list$.length === 0), 'create', () => (
                     <div
-                    
+
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
@@ -90,7 +101,7 @@ export function List() {
                 {$else(() =>
                     forEachIn(list$, (item$, $index) => (
                         <div
-                        onclick={(e) => toggleSelect(e, $index())}
+                            onclick={(e) => toggleSelect(e, $index())}
                             style={[
                                 `background-color: ${randomColor.get()}`,
                                 o => {
@@ -120,6 +131,7 @@ export function List() {
                     ), 'id')
                 )}
             </>
+            <button onclick={clearSelection}>clear</button>
         </div>
     )
 }

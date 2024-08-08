@@ -113,7 +113,6 @@ const lumoEventTraps = {
             return propagationStopped;
         }
         else {
-            console.log('key', key)
             return target[key];
             return Reflect.get(target, key, receiver);
         }

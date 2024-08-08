@@ -1,7 +1,8 @@
-import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
+import { asReactiveProp, getReactivePropValue, isReactiveProp, ReactiveProp } from "./ReactiveProp";
+import { getTrackableOpValue, isTrackableOp, TrackableOp } from "./TrackableOp";
 import { isSignal, Signal } from "./useSignals";
 
-export type ReactiveAtom = Signal | ReactiveProp
+export type ReactiveAtom = Signal | ReactiveProp | TrackableOp
 
 let activeDepTracker: DependencyTracker | null = null;
 let outerDepTracker: DependencyTracker | null = null;
@@ -70,12 +71,17 @@ export class DependencyTracker {
 }
 
 
-export function getWithoutTracking(getter: (() => any) | ReactiveProp) {
+export function getWithoutTracking(reactiveRef: (() => any) | ReactiveProp | TrackableOp) {
     const tracker = getDependencyTracker();
     tracker?.stop();
     let value;
-    if (getter instanceof Function) value = getter();
-    else value = getter[0][getter[1]]; // ie. reactive[key]
+    if (reactiveRef instanceof Function)
+        value = reactiveRef();
+    else if (isReactiveProp(reactiveRef))
+        value = getReactivePropValue(reactiveRef);
+    else if (isTrackableOp(reactiveRef))
+        value = getTrackableOpValue(reactiveRef)
     tracker?.restore();
     return value;
 }
+

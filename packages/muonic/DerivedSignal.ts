@@ -2,8 +2,9 @@ import { ActiveListener, getActiveFlask, onFlaskDisposal } from "@rue/flask";
 import { DependencyTracker, getDependencyTracker, ReactiveAtom } from "./DependencyTracker";
 import { isSignal, Signal, SIGNAL_MARKER } from "./useSignals";
 import { watch } from "./watch";
-import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
+import { getReactivePropValue, isReactiveProp } from "./ReactiveProp";
+import { getTrackableOpValue, isTrackableOp } from "./TrackableOp";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -84,23 +85,28 @@ export class DerivedSignalState {
         const deps = this.dependencies = tracker.dependencies
 
         // detect dirtying
-        this.stopPrevWatchers();
+        this.stopPrevWatchers(); //QUESTION: Why not just use {once: true} ?
 
         for (let i = 0; i < deps.length; i++) {
             const dep = deps[i]
-            const _isSignal = isSignal(dep);
-            const [reactive, key] = _isSignal ? [null, null] : dep;
+            const target = isSignal(dep) ? dep
+                : isReactiveProp(dep) ? () => getReactivePropValue(dep)
+                    : isTrackableOp(dep) ? () => getTrackableOpValue(dep)
+                        : null
+            if (target === null) throw new Error(`INVALID DEP: ${dep}`)
 
-            const watcher = watch(_isSignal ? dep : () => reactive![key!], (newValue: any) => {
+            const watcher = watch(target, (newValue: any) => {
                 const updateCycle = getCurrentUpdateCycle()
                 if (!updateCycle) throw new Error("no update cycle. not sure if this should happen")
                 const oldValue = updateCycle.getInitialValue(dep);
                 if (newValue !== oldValue) this.hasChanged = true;
-            }, { phase: 'sync' }) //NOTE: Derived Signals that are *called* outside of a component's set up must be contained in a flask for cleanup. I think flask inheritance convers this?
+            }, { phase: 'sync' })
+
             this.watchers.push(watcher);
         }
 
-        if (__DEV__ && !getActiveFlask()) console.warn('derived signal is being used outside of a flask... this could lead to memory leaks')
+        if (__DEV__ && !getActiveFlask())
+            console.warn('Derived signal called outside of a flask could lead to memory leaks. Contain this call in a flask and dispose of the flask when done.')
 
         // To retreive initialValue from update cycle during trigger to be used as old value
         if (this.isWatched()) {
