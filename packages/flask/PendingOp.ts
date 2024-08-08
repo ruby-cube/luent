@@ -21,6 +21,7 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
 }): PendingOp<ReturnType<CB>> {
     const { callback, enroll, remove, options } = config;
     const scheduleCancellation = options?.cancel;
+    const outlive = options?.outlive
 
     let returnVal: any;
     let _resolve: (result?: any) => void;
@@ -59,7 +60,7 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
 
         pendingOp.cancel = _cancel;
 
-        addToFlask(_cancel)
+        if (!outlive) addToFlask(_cancel)
 
         pendingCancelOp = scheduleCancellation ? scheduleCancellation(_cancel) : null;
 

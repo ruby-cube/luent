@@ -3,6 +3,7 @@ import { Callback } from "./flaskedListeners";
 
 export type Flask = {
     dispose: () => void;
+    outer?: Flask;
     onDisposal: (cleanUp: () => void) => void;
     collectEffects: <T>(run: (outerFlask: Flask | null) => T) => T;
 }
@@ -13,7 +14,7 @@ let activeFlask: NestableFlask | null = null;
 let previousFlask: NestableFlask | null = null;
 
 function pushFlask(flask: NestableFlask) {
-    // flask.setOuter(activeFlask);
+    flask.setOuter(activeFlask);
     previousFlask = activeFlask;
     activeFlask = flask;
 }
@@ -24,6 +25,10 @@ function popFlask() {
 
 export function getActiveFlask() {
     return activeFlask;
+}
+
+export function getFlask(){
+    return activeFlask?.o;
 }
 
 export function onFlaskDisposal(cb: () => void) {
@@ -39,6 +44,7 @@ class NestableFlask {
     outer: NestableFlask | null = null
     setOuter(flask: NestableFlask | null) {
         this.outer = flask;
+        this.o.outer = flask?.o;
     }
     cleanups: Set<() => void> = new Set()
 }
@@ -53,6 +59,8 @@ function createFlask(_flask: NestableFlask) {
                 cleanUp();
             }
         },
+
+        outer: _flask.outer?.o,
 
         onDisposal(cleanUp: () => void) {
             _flask.cleanups.add(cleanUp); //TODO: do cleanUps need to be removed?

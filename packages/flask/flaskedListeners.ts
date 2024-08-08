@@ -10,6 +10,7 @@ export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O
 export type ListenerOptions = {
     once?: boolean;
     until?: ScheduleStop;
+    outlive?: boolean;
 }
 
 export type CallbackRemover = {
@@ -58,7 +59,8 @@ export function $listen<
 
 
 export type SchedulerOptions = {
-    cancel?: ScheduleCancel
+    cancel?: ScheduleCancel,
+    outlive?: boolean
 }
 
 export type ScheduledOp<CB extends Callback> = CB extends { isRemover: true } ? PendingCancelOp : PendingOp<ReturnType<CB>>

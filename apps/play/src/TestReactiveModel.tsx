@@ -126,11 +126,12 @@ export function List() {
                     ), 'id')
                 )}
             </>
-            <button onclick={$if($active, capture.once(clearSelection))}>clear</button>
+            <button onclick={clearSelection}>clear</button>
+            {/* <button onclick={$if($active, capture.once(clearSelection))}>clear</button> */}
 
-            <button
+            {/* <button
                 onclick={thisAlone(preventDefault(stopPropagation(allowDefault((e) => { clearSelection(e, index) }))))}
-            >clear</button>
+            >clear</button> */}
         </div>
     )
 }

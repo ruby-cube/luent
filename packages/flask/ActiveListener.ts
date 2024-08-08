@@ -27,6 +27,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 ): ActiveListener {
     const { enroll, remove, callback, options } = config;
     const once = options?.once;
+    const outlive = options?.outlive;
     // console.log("MakeActiveListener!")
 // console.trace()
     let returnVal: any;
@@ -57,7 +58,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
             pendingStop = until(stop);
         }
 
-        addToFlask(stop);
+        if (!outlive) addToFlask(stop);
 
         return {
             stop

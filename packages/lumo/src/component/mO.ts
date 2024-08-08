@@ -123,7 +123,7 @@ export function runComponentSetup(
         component.nodeEntities = nodeEntities;
 
         if (ref) {
-            const _ref = ref.o instanceof Array ? getNodeRef(ref.o)! : new InternalNodeRef(ref)
+            const _ref = ref.o instanceof Array ? getNodeRef(ref.o) || new InternalNodeRef(ref) : new InternalNodeRef(ref)
             const publicComponent = component.component || null;
             _ref.assignValue(publicComponent, $index)
             // setUpRefUpdates(_ref, publicComponent, $index, component.preserve)

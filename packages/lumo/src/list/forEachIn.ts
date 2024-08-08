@@ -5,7 +5,7 @@ import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Signal, useSignals } from "@rue/muonic/useSignals";
 import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { $listen, Callback, collectEffects, Flask } from "@rue/flask";
+import { $listen, Callback, collectEffects, Flask, ListenerOptions } from "@rue/flask";
 import { DOMNode } from "../component/InternalComponent";
 
 export const _listReactivity = useSignals()
@@ -38,6 +38,7 @@ export class ListRenderKit<T = any> {
     onUpdatedTasks: Set<Function> = new Set()
 
     castUpdated(toFromIndices: [number, number][]) {
+        console.log("tasks", this.onUpdatedTasks)
         for (const task of this.onUpdatedTasks) {
             task(toFromIndices)
         }
@@ -65,14 +66,16 @@ export function isUpdatingList() {
     return activeList && activeList.isUpdating;
 }
 
-export function onListUpdated(task: (toFromIndices: [number, number][]) => void) {
+export function onListUpdated(task: (toFromIndices: [number, number][]) => void, options: ListenerOptions) {
     const list = activeList;
     if (!list) throw new Error(`onListUpdated hook must be called during list setup`)
-    $listen(task, {}, {
+    return $listen(task, options, {
         enroll(cb) {
             list.onUpdatedTasks.add(cb);
         },
         remove(cb) {
+            console.log('deleting list task')
+            console.trace()
             list.onUpdatedTasks.delete(cb)
         }
     })
@@ -119,6 +122,7 @@ export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: s
         $currentIndex = $index;
         indices.push($index)
         collectEffects((flask, outerFlask) => {
+            console.log("outerflask?", outerFlask)
             domNodes.push(normalizeToArray(render(item, $index)));
             if (isDynamic) {
                 flasks.push(flask);

@@ -115,29 +115,29 @@ export function insertAndMoveListItemNodes(
     const indicesAndNodePods: [number, _NodePod[]][] = []
     const indicesAndFragments: [number, DocumentFragment][] = []
     let fragment = new DocumentFragment();
-
+    
     const newIndices: Signal<number>[] = [];
     const toFromIndices: [number, number][] = []
-
+    
     for (let i = 0; i < newUArray.length; i++) {
         const uItem = newUArray[i];
         const _isNewItem = isNewItem(uItem);
         const _itemHasMoved = hasMoved(uItem);
         const prevIndex = oldUArray.indexOf(uItem)
         const nodePod = _isNewItem ? new _NodePod()
-            : _itemHasMoved ? dynamicList[prevIndex] // dynamicList[index]
-                : null;
-
+        : _itemHasMoved ? dynamicList[prevIndex] // dynamicList[index]
+        : null;
+        
         if (!_isNewItem) {
             // update $index value
             const $index = dynamicIndices.current[prevIndex];
             newIndices.push($index);
             _listReactivity.set($index, () => i)
-
+            
             // to update refs
             toFromIndices.push([i, prevIndex]);
         };
-
+        
         if (!nodePod) continue;
         const prevEntry = indicesAndNodePods.at(-1);
         if (prevEntry && prevEntry[0] + 1 === i) {
@@ -173,7 +173,7 @@ export function insertAndMoveListItemNodes(
         }
     }
     dynamicIndices.update(newIndices)
-
+    
     // queue nodePod removal
     const indicesAndRemoveCount: [Index, Count][] = [];
     let j = 0;
@@ -190,20 +190,20 @@ export function insertAndMoveListItemNodes(
         }
         j++;
     }
-
+    
     // (1) remove nodePods 
     let k = indicesAndRemoveCount.length; // loop through backwards to avoid having to recalculate index
     while (k--) {
         const [index, count] = indicesAndRemoveCount[k];
         dynamicList!.removeNodePods(index, count);
-
+        
     }
-
+    
     // (2) insert node pods into dynamic list
     for (const [index, nodePods] of indicesAndNodePods) {
         dynamicList.insertNodePods(index, nodePods)
     }
-
+    
     // (3) insert nodes into DOM
     for (const [index, fragment] of indicesAndFragments) {
         const prevNode = dynamicList[index].prevNode
@@ -212,11 +212,12 @@ export function insertAndMoveListItemNodes(
         else parent.prepend(fragment);
     }
 
-    listRenderKit.castUpdated({ toFromIndices })
+    console.log("insert and move listItem nodes")
+    listRenderKit.castUpdated(toFromIndices)
 
     // (4) update node refs
     // for (const [_, nodePods] of indicesAndNodePods) {
-    //     console.log('nodePods',nodePods)
+        //     console.log('nodePods',nodePods)
     //     for (const nodePod of nodePods) {
     //         nodePod.forEachNode((node, index) => {
     //             const ref = getNodeRef(node); //FIX: THis is broken .. this only assigns a ref to the root nodes of a list

@@ -42,7 +42,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     if (!component) throw new Error("No component :(")
 
     if (ref) {
-        const _ref = ref.o instanceof Array ? getNodeRef(ref.o)! : new InternalNodeRef(ref)
+        const _ref = ref.o instanceof Array ? getNodeRef(ref.o) || new InternalNodeRef(ref) : new InternalNodeRef(ref)
         _ref.assignValue(domNode, $index)
         initializeRef(_ref)
     }

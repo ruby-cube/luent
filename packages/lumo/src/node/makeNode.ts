@@ -7,7 +7,7 @@ import { makeComponent, InferSlotted } from "../component/mO";
 import { InternalNodeRef, NodeRef } from "./NodeRef";
 import { getNodeConfig } from "../../api-play/_setUpNode";
 import { beforeUnmount } from "../component/lifecycle";
-import { getActiveFlask, onFlaskDisposal } from "@rue/flask";
+import { getActiveFlask, getFlask, onFlaskDisposal } from "@rue/flask";
 
 export function Fragment() {
 
@@ -92,23 +92,23 @@ export function initializeRef( // should this be initialize ref?
 ) {
     if (ref.initialized === true) return; // to prevent registering multiple watchers for lists
 
-    // if (dynamicClasses) {
-    //     if (!ref) throw new Error(`nodeRef must be passed into mE to register dynamic classes`)
-    //     setUpDynamicClasses(component, ref, dynamicClasses)
-    // }
-
-    // if (dynamicStyles) {
-    //     if (!ref) throw new Error(`nodeRef must be passed into mE to register dynamic styles`)
-    //     setUpDynamicStyles(component, ref, dynamicStyles)
-    // }
-    onFlaskDisposal(() => {
+    // dispose with outer flask because we don't want to dispose when first item is removed
+    const outerFlask = getFlask()?.outer
+console.log('outerFlask', getActiveFlask()?.outer)
+console.trace()
+    outerFlask?.onDisposal(() => {
+        console.log("disposing ref value")
         ref.setValue(undefined);
+        ref.initialized = false;
     })
 
     if (isSettingUpList()) {
-        onListUpdated((toFromIndices) => {
-            ref.updateListRef(toFromIndices)
-        })
+        const listUpdatedListener =
+            onListUpdated((toFromIndices) => {
+                ref.updateListRef(toFromIndices)
+            }, { outlive: true })
+
+        outerFlask?.onDisposal(listUpdatedListener.stop)
     }
 
     ref.markInitialized()
