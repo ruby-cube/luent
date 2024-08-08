@@ -1,12 +1,13 @@
 import { DerivedSignal, ReactiveSignal } from "@rue/muonic";
 import { ConditionalRenderKit } from "../conditional/$if";
-import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../component/component";
-import { getCurrentItemAndIndex, ListRenderKit } from "../list/forEachIn";
+import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
+import { getCurrentItemAndIndex, isSettingUpList, ListRenderKit, onListUpdated } from "../list/forEachIn";
 import { HTMLTag, makeElement } from "../element/mE";
 import { makeComponent, InferSlotted } from "../component/mO";
 import { InternalNodeRef, NodeRef } from "./NodeRef";
 import { getNodeConfig } from "../../api-play/_setUpNode";
 import { beforeUnmount } from "../component/lifecycle";
+import { getActiveFlask, onFlaskDisposal } from "@rue/flask";
 
 export function Fragment() {
 
@@ -47,8 +48,8 @@ type NodeSetup<T extends Element | ComponentSetup> = {
     ref?: NodeRef<T>,
 }
 
-export type ComponentConfig<T extends ComponentSetup = ComponentSetup> = 
-T extends (props: infer P) => any ? P & NodeSetup<T> : never
+export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
+    T extends (props: infer P) => any ? P & NodeSetup<T> : never
 
 
 export function makeNode(
@@ -100,10 +101,15 @@ export function initializeRef( // should this be initialize ref?
     //     if (!ref) throw new Error(`nodeRef must be passed into mE to register dynamic styles`)
     //     setUpDynamicStyles(component, ref, dynamicStyles)
     // }
-
-    beforeUnmount(() => {
+    onFlaskDisposal(() => {
         ref.setValue(undefined);
     })
+
+    if (isSettingUpList()) {
+        onListUpdated((toFromIndices) => {
+            ref.updateListRef(toFromIndices)
+        })
+    }
 
     ref.markInitialized()
 }

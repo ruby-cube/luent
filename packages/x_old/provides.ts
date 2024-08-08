@@ -1,5 +1,5 @@
 import { AnyObject, OptionalKeys, RequiredKeys } from "@rue/types";
-import { getCurrentComponent, InternalComponent } from "../lumo/src/component/component";
+import { getCurrentComponent, InternalComponent } from "../lumo/src/component/InternalComponent";
 
 export function getContext<T extends AnyObject>(keys: RequiredKeys<T>[], optional?: OptionalKeys<T>[]): T {
     const component = getCurrentComponent()

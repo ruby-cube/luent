@@ -1,4 +1,4 @@
-import { getCurrentComponent, InternalComponent } from "./component";
+import { getCurrentComponent, InternalComponent } from "./InternalComponent";
 import { beforeMount } from "./lifecycle";
 
 class Provider {

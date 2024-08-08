@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { PublicComponent, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent, COMPONENT } from "./component";
+import { PublicComponent, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent, COMPONENT } from "./InternalComponent";
 import { SetKey, Signal } from "@rue/muonic/useSignals";
 import { collectEffects } from "@rue/flask/flask";
 import { InternalNodeRef, getNodeRef, NodeRef } from "../node/NodeRef";

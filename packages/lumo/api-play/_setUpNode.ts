@@ -1,4 +1,4 @@
-import { Component, ComponentSetup, InternalComponent } from "../src/component/component";
+import { Component, ComponentSetup, InternalComponent } from "../src/component/InternalComponent";
 import { HTMLTag } from "../src/element/mE";
 import { ComponentConfig } from "../src/component/mO";
 import { NodeRef } from "../src/node/NodeRef";

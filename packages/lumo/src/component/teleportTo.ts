@@ -1,5 +1,5 @@
 import { normalizeToArray } from "@rue/utils";
-import { getCurrentComponent } from "./component";
+import { getCurrentComponent } from "./InternalComponent";
 import { NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";

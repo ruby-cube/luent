@@ -1,6 +1,6 @@
 import { _NodePod } from "../node/NodePod";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
-import { InternalComponent } from "./component";
+import { InternalComponent } from "./InternalComponent";
 import { LifecycleHook } from "./lifecycle";
 
 export function setUpComponent(

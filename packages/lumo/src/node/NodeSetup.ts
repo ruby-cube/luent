@@ -1,4 +1,4 @@
-import { PublicComponent, ComponentSetup, InternalComponent } from "../component/component";
+import { PublicComponent, ComponentSetup, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag } from "../element/mE";
 import { ListData } from "../list/forEachIn";
 import { Signal } from "@rue/muonic/useSignals";

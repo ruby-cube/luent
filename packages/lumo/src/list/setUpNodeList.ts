@@ -1,19 +1,18 @@
 import { hasSignal, isReactiveModel, Signal, useSignals } from "@rue/muonic";
-import { InternalComponent, popComponent, pushComponent } from "../component/component";
+import { InternalComponent, popComponent, pushComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
-import { _listReactivity, DynamicIndices, ListRenderKit, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
+import { _listReactivity, DynamicIndices, ListRenderKit, popList, pushList, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
 import { watchForRenderAndPreserve } from "../conditional/$if";
 import { watchForRender } from "../reactivity/watchForRender";
 import { AnyObject } from "@rue/types";
 import { diff, InsertAndMoveKit } from "./diff";
 import { LifecycleHook } from "../component/lifecycle";
-import { getNodeRef } from "../node/NodeRef";
+import { getNodeRef, InternalNodeRef } from "../node/NodeRef";
 import { normalizeToArray } from "@rue/utils";
 import { emitHookBatch, removeDOMNodes } from "../conditional/setUpConditionalMount";
 import { collectEffects, Flask, getActiveFlask } from "@rue/flask";
-import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle";
-import { NodeEntity } from "../node/makeNode";
+
 
 
 export function setUpNodeList(
@@ -64,12 +63,14 @@ export function setUpNodeList(
             const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
             if (noChange) return;
             if (dynamicPod!.length !== oldValue.length) throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)
-            pushComponent(component)
-            component.emit(LifecycleHook.BEFORE_UPDATE)
-            removeListItemNodes(dynamicPod!, indicesToRemove!);
-            insertAndMoveListItemNodes(component, insertAndMoveKit!, dynamicPod!, parent, renderItem, dynamicIndices)
-            component.emit(LifecycleHook.UPDATED)
-            popComponent()
+            renderKit.runUpdate(() => {
+                pushComponent(component)
+                component.emit(LifecycleHook.BEFORE_UPDATE) //FIX: this should be called in before render and onRendered hooks
+                removeListItemNodes(dynamicPod!, indicesToRemove!);
+                insertAndMoveListItemNodes(component, renderKit, insertAndMoveKit!, dynamicPod!, parent, renderItem, dynamicIndices)
+                component.emit(LifecycleHook.UPDATED)
+                popComponent()
+            })
         })
     }
 }
@@ -102,6 +103,7 @@ type Count = number
 
 export function insertAndMoveListItemNodes(
     component: InternalComponent,
+    listRenderKit: ListRenderKit,
     insertAndMoveKit: InsertAndMoveKit,
     dynamicList: _DynamicNodePod,
     parent: Element,
@@ -115,6 +117,7 @@ export function insertAndMoveListItemNodes(
     let fragment = new DocumentFragment();
 
     const newIndices: Signal<number>[] = [];
+    const toFromIndices: [number, number][] = []
 
     for (let i = 0; i < newUArray.length; i++) {
         const uItem = newUArray[i];
@@ -126,11 +129,14 @@ export function insertAndMoveListItemNodes(
                 : null;
 
         if (!_isNewItem) {
-            // get index from old indices 
+            // update $index value
             const $index = dynamicIndices.current[prevIndex];
             newIndices.push($index);
             _listReactivity.set($index, () => i)
-        }; // item is not new and has not moved
+
+            // to update refs
+            toFromIndices.push([i, prevIndex]);
+        };
 
         if (!nodePod) continue;
         const prevEntry = indicesAndNodePods.at(-1);
@@ -151,7 +157,9 @@ export function insertAndMoveListItemNodes(
             // create and collect consecutive new items onto the same fragment
             let nodeEntities;
             collectEffects((flask, outerFlask) => {
+                pushList(listRenderKit)
                 nodeEntities = normalizeToArray(renderItem(item, $index));
+                popList();
                 for (const nodeEntity of nodeEntities!) {
                     setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
                 }
@@ -204,16 +212,23 @@ export function insertAndMoveListItemNodes(
         else parent.prepend(fragment);
     }
 
+    listRenderKit.castUpdated({ toFromIndices })
+
     // (4) update node refs
-    for (const [_, nodePods] of indicesAndNodePods) {
-        for (const nodePod of nodePods) {
-            nodePod.forEachNode((node, index) => {
-                const ref = getNodeRef(node);
-                if (ref) ref.insertNode(<Element>node, index!)
-            })
-        }
-    }
+    // for (const [_, nodePods] of indicesAndNodePods) {
+    //     console.log('nodePods',nodePods)
+    //     for (const nodePod of nodePods) {
+    //         nodePod.forEachNode((node, index) => {
+    //             const ref = getNodeRef(node); //FIX: THis is broken .. this only assigns a ref to the root nodes of a list
+    //             console.log("inserting node into ref!", ref)
+    //             if (ref) ref.insertNode(<Element>node, index!)
+    //                 if (ref) console.log(ref.o)
+    //         })
+    //     }
+    // }
 }
+
+
 
 function appendNodes(fragment: DocumentFragment, nodePod: _NodePod) {
     for (const nodeOrPod of nodePod) {

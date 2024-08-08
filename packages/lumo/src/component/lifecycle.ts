@@ -1,5 +1,5 @@
 import { $listen, $schedule, ListenerOptions } from "@rue/flask";
-import { getCurrentComponent, InternalComponent } from "./component";
+import { getCurrentComponent, InternalComponent } from "./InternalComponent";
 
 
 type TaskQueue = Set<() => void>

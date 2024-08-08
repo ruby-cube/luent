@@ -1,4 +1,4 @@
-import { InternalComponent } from "../component/component";
+import { InternalComponent } from "../component/InternalComponent";
 import { setUpComponent } from "../component/setUpComponent";
 import { buildConditionalSeries } from "../conditional/$if";
 import { setUpConditionalDisplay } from "../conditional/setUpConditionalDisplay";

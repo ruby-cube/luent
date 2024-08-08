@@ -1,8 +1,9 @@
-import { PublicComponent, ComponentSetup } from "../component/component"
+import { PublicComponent, ComponentSetup } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { Signal } from "@rue/muonic/useSignals"
 import { ConditionalRenderKit } from "../conditional/$if"
 import { ArrayItem } from "@rue/types"
+import { isUpdatingList, onListUpdated } from "../list/forEachIn"
 
 
 
@@ -51,7 +52,10 @@ type NodeReferent<
     : null
 
 
-type NodeArray<T extends RefSource> = Exclude<NodeReferent<Exclude<T, Element | null | ComponentSetup>>, null>;
+type NodeArray<T extends RefSource = RefSource> = Exclude<NodeReferent<Exclude<T, Element | null | ComponentSetup>>, null>;
+
+type ListUpdates = any[]
+const listUpdateMap: WeakMap<InternalNodeRef, ListUpdates> = new WeakMap()
 
 export class InternalNodeRef<
     T extends RefSource
@@ -85,21 +89,42 @@ export class InternalNodeRef<
 
     assignValue(value: NodeReferent<T>, $index: Signal<number> | undefined) {
         if ($index != null) {
-            let nodes =
+            let nodes = isUpdatingList() ? this.getNewListNodes()
                 //@ts-expect-error read-only
-                this.o.o =
-                (this.o.o || []) as NodeArray<T>
+                : this.o.o = (this.o.o || []) as NodeArray<T>
             nodes[$index()] = value as ArrayItem<NodeArray<T>>;
             refMap.set(nodes, this);
         }
         else {
             this.setValue(value) // will never change for static entities
         }
+        
         if (value) {
             refMap.set(value, this);
         }
     }
 
+    getNewListNodes() {
+        let nodes = listUpdateMap.get(this);
+        if (!nodes) {
+            nodes = []
+            listUpdateMap.set(this, nodes)
+        }
+        return nodes;
+    }
+
+    updateListRef(toFromIndices: [number, number][]) {
+        const prevNodes: NodeReferent[] = this.o.o || [];
+        const newNodes = listUpdateMap.get(this) || [];
+
+        for (const indices of toFromIndices) {
+            const [to, from] = indices
+            const node = prevNodes[from];
+            newNodes[to] = node;
+        }
+        //@ts-expect-error readonly
+        this.o.o = newNodes;
+    }
 }
 
 

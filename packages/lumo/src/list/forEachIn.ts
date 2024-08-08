@@ -5,8 +5,8 @@ import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Signal, useSignals } from "@rue/muonic/useSignals";
 import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { collectEffects, Flask } from "@rue/flask";
-import { DOMNode } from "../component/component";
+import { $listen, Callback, collectEffects, Flask } from "@rue/flask";
+import { DOMNode } from "../component/InternalComponent";
 
 export const _listReactivity = useSignals()
 
@@ -25,6 +25,57 @@ export class ListRenderKit<T = any> {
         public idKey: string | undefined,
         public flasks: Flask[]
     ) { }
+
+    isUpdating = false;
+
+    runUpdate(update: () => void) {
+        this.isUpdating = true;
+        update();
+        this.isUpdating = false;
+    }
+
+
+    onUpdatedTasks: Set<Function> = new Set()
+
+    castUpdated(toFromIndices: [number, number][]) {
+        for (const task of this.onUpdatedTasks) {
+            task(toFromIndices)
+        }
+    }
+}
+
+let activeList: ListRenderKit | null = null
+let outerList: ListRenderKit | null = null
+
+export function pushList(list: ListRenderKit) {
+    outerList = activeList;
+    activeList = list
+}
+
+export function popList() {
+    activeList = outerList;
+    outerList = null;
+}
+
+export function isSettingUpList() {
+    return !!activeList;
+}
+
+export function isUpdatingList() {
+    return activeList && activeList.isUpdating;
+}
+
+export function onListUpdated(task: (toFromIndices: [number, number][]) => void) {
+    const list = activeList;
+    if (!list) throw new Error(`onListUpdated hook must be called during list setup`)
+    $listen(task, {}, {
+        enroll(cb) {
+            list.onUpdatedTasks.add(cb);
+        },
+        remove(cb) {
+            list.onUpdatedTasks.delete(cb)
+        }
+    })
 }
 
 // let settingUpList: boolean = false;
@@ -54,9 +105,12 @@ export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: s
     const _list = list instanceof Array ? list : list instanceof Set ? Array.from(list) : list //TODO: Maps and objects
     const isDynamic = isReactiveModel(data) || hasSignal(data);
 
-    const indices = []
+    const indices: Signal<number>[] = []
     const flasks: Flask[] = []
 
+    const listRenderKit = new ListRenderKit(render, domNodes, data, indices, idKey, flasks)
+
+    pushList(listRenderKit);
     let i = 0;
     while (i < _list.length) {
         const $index = _listReactivity.$(i)
@@ -75,8 +129,9 @@ export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: s
     }
     currentItem = undefined;
     $currentIndex = undefined;
+    popList();
 
-    return new ListRenderKit(render, domNodes, data, indices, idKey, flasks);
+    return listRenderKit;
 }
 
 

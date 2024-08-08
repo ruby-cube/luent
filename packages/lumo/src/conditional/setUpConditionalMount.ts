@@ -1,4 +1,4 @@
-import { InternalComponent, popComponent, pushComponent } from "../component/component";
+import { InternalComponent, popComponent, pushComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
 import { watchForRender } from "../reactivity/watchForRender";

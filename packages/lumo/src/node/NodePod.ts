@@ -1,5 +1,5 @@
 import { Flask } from "@rue/flask";
-import { DOMNode, InternalComponent } from "../component/component";
+import { DOMNode, InternalComponent } from "../component/InternalComponent";
 import { NodeRef } from "./NodeRef";
 
 // Node Pods represent groups of nodes created by `mXsFor` and `mXIf`.

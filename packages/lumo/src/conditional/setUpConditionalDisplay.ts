@@ -1,6 +1,6 @@
 import { areShallowEqualArrays, getWithoutTracking, isShallowEqual, ReactiveSignal } from "@rue/muonic"
 import { ConditionalSeries, watchForRenderAndPreserve } from "./$if"
-import { DOMNode, InternalComponent, popComponent, pushComponent } from "../component/component"
+import { DOMNode, InternalComponent, popComponent, pushComponent } from "../component/InternalComponent"
 import { _DynamicNodePod, _NodePod } from "../node/NodePod"
 import { watchForRender } from "../reactivity/watchForRender"
 import { LifecycleHook } from "../component/lifecycle"

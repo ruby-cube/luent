@@ -1,5 +1,5 @@
 import { useSignals } from "@rue/muonic";
-import { ComponentSetup } from "./component";
+import { ComponentSetup } from "./InternalComponent";
 import { $else, $elseIf, $if } from "../conditional/$if";
 import { noop } from "@rue/utils";
 

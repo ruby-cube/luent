@@ -1,7 +1,7 @@
-import { PublicComponent, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "../component/component";
+import { PublicComponent, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "../component/InternalComponent";
 import { DerivedSignal, hasSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { getWithoutTracking } from "@rue/muonic/DependencyTracker";
-import {  normalizeToArray } from "@rue/utils";
+import { normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, getNodeRef, NodeRef } from "../node/NodeRef";
 import { Signal, useSignals } from "@rue/muonic/useSignals";
@@ -141,13 +141,13 @@ function setUpEvents(node: Element, events: { [key: string]: (EventListener | De
                                 listener.stop();
                             }
                             if (newValue) {
-                                listener = event.attachHandler(newValue, {});
+                                listener = event.attachHandler(newValue, newValue.options || {});
                             }
                         })
                     }, { eager: true })
                 }
                 else {
-                    event.attachHandler(handler, {})
+                    event.attachHandler(handler, handler.options || {})
                 }
             }
         })

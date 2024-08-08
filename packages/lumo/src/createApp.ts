@@ -1,4 +1,4 @@
-import { PublicComponent, ComponentSetup, InternalComponent, popComponent, pushComponent } from "./component/component";
+import { PublicComponent, ComponentSetup, InternalComponent, popComponent, pushComponent } from "./component/InternalComponent";
 import { NodeEntity, RenderFunction } from "./node/makeNode";
 import { mO, runComponentSetup } from "./component/mO";
 import { _NodePod } from "./node/NodePod";

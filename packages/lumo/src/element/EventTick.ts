@@ -17,7 +17,7 @@ export function useEventTick(target: EventTarget, event: string, afterEventHandl
 }
 
 // The after event listener runs one final handler after all other tasks for the event has been completed
-class EventTick {
+export class EventTick {
     handlerCount = 0;
     prevHandlerCount = 0;
     afterEventListener: ActiveListener | undefined;

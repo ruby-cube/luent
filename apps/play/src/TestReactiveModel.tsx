@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { $else, $elseIf, $if, COMPONENT, ComponentSetup, ConditionalRenderKit, expose, forEachIn, NodeEntity, NodeRef, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
 import { Signal, useReactivity, watch, initializeEffect, isReactiveModel } from "@rue/muonic"
 import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/component/loadComponent";
@@ -27,7 +28,7 @@ export function List() {
     // initializeEffect(() => {
     //     console.log("some starts with f", list$.some((item) => item.content.startsWith('f')))
     // })
- 
+
 
     function changeContent(index: number) {
         const item$ = list$[index];
@@ -57,7 +58,9 @@ export function List() {
     }
 
     function toggleSelect(e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) {
+        console.log('toogleSelect?', index, e.target, insertBtnRef.o)
         if (e.target === deleteBtnRef.o[index] || e.target === insertBtnRef.o[index]) return;
+        console.log('toogleSelect', index)
         const item$ = list$[index]
         if (selected$.has(item$)) {
             mu(selected$, o => {
@@ -123,7 +126,11 @@ export function List() {
                     ), 'id')
                 )}
             </>
-            <button onclick={clearSelection}>clear</button>
+            <button onclick={$if($active, capture.once(clearSelection))}>clear</button>
+
+            <button
+                onclick={thisAlone(preventDefault(stopPropagation(allowDefault((e) => { clearSelection(e, index) }))))}
+            >clear</button>
         </div>
     )
 }
