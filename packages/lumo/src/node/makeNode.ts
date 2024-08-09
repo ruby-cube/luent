@@ -94,8 +94,6 @@ export function initializeRef( // should this be initialize ref?
 
     // dispose with outer flask because we don't want to dispose when first item is removed
     const outerFlask = getFlask()?.outer
-console.log('outerFlask', getActiveFlask()?.outer)
-console.trace()
     outerFlask?.onDisposal(() => {
         console.log("disposing ref value")
         ref.setValue(undefined);

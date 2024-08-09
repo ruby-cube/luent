@@ -3,7 +3,7 @@ import { Callback } from "./flaskedListeners";
 
 export type Flask = {
     dispose: () => void;
-    outer?: Flask;
+    readonly outer?: Flask;
     onDisposal: (cleanUp: () => void) => void;
     collectEffects: <T>(run: (outerFlask: Flask | null) => T) => T;
 }
@@ -23,10 +23,12 @@ function popFlask() {
     activeFlask = previousFlask;
 }
 
+// INTERNAL
 export function getActiveFlask() {
     return activeFlask;
 }
 
+// PUBLIC
 export function getFlask(){
     return activeFlask?.o;
 }
@@ -44,6 +46,7 @@ class NestableFlask {
     outer: NestableFlask | null = null
     setOuter(flask: NestableFlask | null) {
         this.outer = flask;
+        //@ts-expect-error setting read-only
         this.o.outer = flask?.o;
     }
     cleanups: Set<() => void> = new Set()

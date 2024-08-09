@@ -122,7 +122,6 @@ export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: s
         $currentIndex = $index;
         indices.push($index)
         collectEffects((flask, outerFlask) => {
-            console.log("outerflask?", outerFlask)
             domNodes.push(normalizeToArray(render(item, $index)));
             if (isDynamic) {
                 flasks.push(flask);

@@ -116,15 +116,11 @@ export class InternalNodeRef<
     updateListRef(toFromIndices: [number, number][]) {
         const prevNodes: NodeReferent[] = this.o.o || [];
         const newNodes = listUpdateMap.get(this) || [];
-        console.log("prevNodes", [...prevNodes])
-        console.log("newNodes", [...newNodes])
-        console.log("toFrom", toFromIndices)
         for (const indices of toFromIndices) {
             const [to, from] = indices
             const node = prevNodes[from];
             newNodes[to] = node;
         }
-        console.log("newNodes", [...newNodes])
         //@ts-expect-error readonly
         this.o.o = newNodes;
         listUpdateMap.delete(this)

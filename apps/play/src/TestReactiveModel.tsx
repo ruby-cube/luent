@@ -5,6 +5,7 @@ import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/com
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic/debug";
 import { clear } from "console";
+import { thisAlone } from "../../../packages/lumo/src/element/event-modifiers";
 
 
 const { $, set, o$, mu, $$, $$$, o$$$ } = useReactivity();
@@ -48,8 +49,6 @@ export function List() {
 
     const selected$ = o$(new Set())
 
-    const deleteBtnRef = new NodeRef()
-    const insertBtnRef = new NodeRef()
 
     function clearSelection() {
         mu(selected$, o => {
@@ -58,9 +57,6 @@ export function List() {
     }
 
     function toggleSelect(e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) {
-        console.log('toogleSelect?', index, e.target, insertBtnRef.o)
-        if (e.target === deleteBtnRef.o[index] || e.target === insertBtnRef.o[index]) return;
-        console.log('toogleSelect', index)
         const item$ = list$[index]
         if (selected$.has(item$)) {
             mu(selected$, o => {
@@ -97,7 +93,7 @@ export function List() {
                 {$else(() =>
                     forEachIn(list$, (item$, $index) => (
                         <div
-                            onclick={(e) => toggleSelect(e, $index())}
+                            onclick={thisAlone((e) => toggleSelect(e, $index()))}
                             style={[
                                 `background-color: ${randomColor.get()}`,
                                 o => {
@@ -105,9 +101,8 @@ export function List() {
                                 }
                             ]}>
                             <p
-                                onclick={() => removeItem($index())}
+                                onclick={[(e) => removeItem($index())]}
                                 style="cursor: pointer"
-                                ref={deleteBtnRef}
                             >
                                 X
                             </p>
@@ -118,7 +113,12 @@ export function List() {
                             <div
                                 onclick={() => insertItem($index() + 1)}
                                 style="background-color: gray; cursor: pointer"
-                                ref={insertBtnRef}
+                            >
+                                insert
+                            </div>
+                            <div
+                                onclick={() => insertSelectedItem($index() + 1)}
+                                style="background-color: white; cursor: pointer"
                             >
                                 insert
                             </div>

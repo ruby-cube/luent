@@ -1,8 +1,9 @@
 
 type EventOptions = {
-    capture?: true,
-    once?: true,
-    passive?: true
+    capture?: true;
+    once?: true;
+    preventDefault?: true;
+    passive?: false
 }
 
 type HandlerWithOptions = {
@@ -12,46 +13,46 @@ type HandlerWithOptions = {
 
 type Capture = {
     once: Capture_Once
-    passive: Passive_Capture
+    preventDefault: Prevent_Capture
 }
 type Once = {
     capture: Capture_Once
-    passive: Once_Passive
+    preventDefault: Once_Prevent
 }
-type Passive = {
-    once: Once_Passive
-    capture: Passive_Capture
+type Prevent = {
+    once: Once_Prevent
+    capture: Prevent_Capture
 }
 
 type Capture_Once = {
-    passive: typeof once_passive_capture
+    preventDefault: typeof once_prevent_capture
 }
 
-type Once_Passive = {
-    capture: typeof once_passive_capture
+type Once_Prevent = {
+    capture: typeof once_prevent_capture
 }
 
-type Passive_Capture = {
-    once: typeof once_passive_capture
+type Prevent_Capture = {
+    once: typeof once_prevent_capture
 }
 
 
 export const capture = _capture as Capture & typeof _capture
 export const once = _once as Once & typeof _once
-export const allowDefault = _passive as Passive & typeof _passive
+export const preventDefault = _prevent as Prevent & typeof _prevent
 
 capture.once = capture_once as Capture_Once & typeof capture_once
-capture.passive = passive_capture as Passive_Capture & typeof passive_capture
+capture.preventDefault = prevent_capture as Prevent_Capture & typeof prevent_capture
 once.capture = capture_once as Capture_Once & typeof capture_once
-once.passive = once_passive as Once_Passive & typeof once_passive
-allowDefault.capture = passive_capture as Passive_Capture & typeof passive_capture
-allowDefault.once = once_passive as Once_Passive & typeof once_passive
-capture.once.passive = once_passive_capture
-once.passive.capture = once_passive_capture
-allowDefault.capture.once = once_passive_capture
-capture.passive.once = once_passive_capture
-once.capture.passive = once_passive_capture
-allowDefault.once.capture = once_passive_capture
+once.preventDefault = once_prevent as Once_Prevent & typeof once_prevent
+preventDefault.capture = prevent_capture as Prevent_Capture & typeof prevent_capture
+preventDefault.once = once_prevent as Once_Prevent & typeof once_prevent
+capture.once.preventDefault = once_prevent_capture
+once.preventDefault.capture = once_prevent_capture
+preventDefault.capture.once = once_prevent_capture
+capture.preventDefault.once = once_prevent_capture
+once.capture.preventDefault = once_prevent_capture
+preventDefault.once.capture = once_prevent_capture
 
 function _capture<T extends Function>(handler: T) {
     (<HandlerWithOptions><unknown>handler).options = {
@@ -69,11 +70,14 @@ function _once<T extends Function>(handler: T) {
 }
 
 
-function _passive<T extends Function>(handler: T) {
+function _prevent<T extends (e: Event) => void>(handler: T) {
     (<HandlerWithOptions><unknown>handler).options = {
-        passive: true
+        passive: false
     };
-    return handler
+    return (e: Parameters<T>[0]) => {
+        e.preventDefault();
+        handler(e)
+    }
 }
 
 
@@ -85,30 +89,39 @@ function capture_once<T extends Function>(handler: T) {
     return handler
 }
 
-function passive_capture<T extends Function>(handler: T) {
+function prevent_capture<T extends (e: Event) => void>(handler: T) {
     (<HandlerWithOptions><unknown>handler).options = {
         capture: true,
-        passive: true
+        passive: false
     };
-    return handler
+    return (e: Parameters<T>[0]) => {
+        e.preventDefault();
+        handler(e)
+    }
 }
 
-function once_passive<T extends Function>(handler: T) {
+function once_prevent<T extends (e: Event) => void>(handler: T) {
     (<HandlerWithOptions><unknown>handler).options = {
         once: true,
-        passive: true
+        passive: false
     };
-    return handler
+    return (e: Parameters<T>[0]) => {
+        e.preventDefault();
+        handler(e)
+    }
 }
 
 
-function once_passive_capture<T extends Function>(handler: T) {
+function once_prevent_capture<T extends (e: Event) => void>(handler: T) {
     (<HandlerWithOptions><unknown>handler).options = {
         once: true,
-        passive: true,
-        capture: true
+        capture: true,
+        passive: false
     };
-    return handler
+    return (e: Parameters<T>[0]) => {
+        e.preventDefault();
+        handler(e)
+    }
 }
 
 

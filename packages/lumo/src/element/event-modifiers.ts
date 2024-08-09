@@ -1,10 +1,10 @@
 import { EventTick } from "./EventTick";
 
 export function thisAlone<T extends (e: Event) => void>(handler: T) {
-    return (element: HTMLElement, e: Parameters<T>[0]) => {
+    return ((element: Element, e: T extends (e: infer E)=>void ? E : never) => {
         if (e.target !== element) return;
         handler(e)
-    }
+    })
 }
 
 export function stopPropagation<T extends (e: Event) => void>(handler: T) { //TODO: Make sure this works properly with EventTick
@@ -23,9 +23,4 @@ export function endEvent<T extends (e: Event) => void>(handler: T) { //TODO: Mak
     }
 }
 
-export function preventDefault<T extends (e: Event) => void>(handler: T) {
-    return (e: Parameters<T>[0]) => {
-        e.preventDefault();
-        handler(e)
-    }
-}
+

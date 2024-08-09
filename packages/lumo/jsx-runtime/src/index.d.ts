@@ -2391,6 +2391,19 @@ declare namespace React {
         type ReactivizeProps<P extends { [key: string]: any }> = {
             [K in keyof P]: P[K] | ReactiveSignal<P[K]>
         }
+        type MouseEventHandlerWithElement<T = Element> = ((element: T, e: MouseEvent<T, globalThis.MouseEvent>) => void)
+        type DragEventHandlerWithElement<T = Element> = ((element: T, e: (event: DragEvent<T>) => void) => void)
+        type ClipboardEventHandlerWithElement<T = Element> = ((element: T, e: (event: ClipboardEvent<T>) => void) => void)
+        type CompositionEventHandlerWithElement<T = Element> = ((element: T, e: (event: CompositionEvent<T>) => void) => void)
+        type FocusEventHandlerWithElement<T = Element> = ((element: T, e: (event: FocusEvent<T, Element>) => void) => void)
+        type FormEventHandlerWithElement<T = Element> = ((element: T, e: (event: FormEvent<T>) => void) => void)
+        type KeyboardEventHandlerWithElement<T = Element> = ((element: T, e: (event: KeyboardEvent<T>) => void) => void)
+        type TouchEventHandlerWithElement<T = Element> = ((element: T, e: (event: TouchEvent<T>) => void) => void)
+        type PointerEventHandlerWithElement<T = Element> = ((element: T, e: (event: PointerEvent<T>) => void) => void)
+        type WheelEventHandlerWithElement<T = Element> = ((element: T, e: (event: WheelEvent<T>) => void) => void)
+        type TransitionEventHandlerWithElement<T = Element> = ((element: T, e: (event: TransitionEvent<T>) => void) => void)
+        type AnimationEventHandlerWithElement<T = Element> = ((element: T, e: (event: AnimationEvent<T>) => void) => void)
+        type UIEventHandlerWithElement<T = Element> = ((element: T, e: (event: UIEvent<T, globalThis.UIEvent>) => void) => void)
     }
 
     type DOMAttributes<T> = _DOMAttributes<T> & Lumo.ReactivizeProps<DOMEvents<T>>
@@ -2405,34 +2418,34 @@ declare namespace React {
     }
 
     interface DOMEvents<T> {// Clipboard Events
-        oncopy?: ClipboardEventHandler<T> | undefined;
-        oncut?: ClipboardEventHandler<T> | undefined;
-        onpaste?: ClipboardEventHandler<T> | undefined;
+        oncopy?: ClipboardEventHandler<T> | Lumo.ClipboardEventHandlerWithElement<T>;
+        oncut?: ClipboardEventHandler<T> |  Lumo.ClipboardEventHandlerWithElement<T>;
+        onpaste?: ClipboardEventHandler<T> |  Lumo.ClipboardEventHandlerWithElement<T>;
 
         // Composition Events
-        oncompositionend?: CompositionEventHandler<T> | undefined;
-        oncompositionstart?: CompositionEventHandler<T> | undefined;
-        oncompositionupdate?: CompositionEventHandler<T> | undefined;
+        oncompositionend?: CompositionEventHandler<T> | Lumo.CompositionEventHandlerWithElement<T>;
+        oncompositionstart?: CompositionEventHandler<T> | Lumo.CompositionEventHandlerWithElement<T>;
+        oncompositionupdate?: CompositionEventHandler<T> | Lumo.CompositionEventHandlerWithElement<T>;
 
         // Focus Events
-        onfocus?: FocusEventHandler<T> | undefined;
-        onblur?: FocusEventHandler<T> | undefined;
+        onfocus?: FocusEventHandler<T> | Lumo.FocusEventHandlerWithElement<T>;
+        onblur?: FocusEventHandler<T> | Lumo.FocusEventHandlerWithElement<T>;
 
         // Form Events
-        onchange?: FormEventHandler<T> | undefined;
-        onbeforeinput?: FormEventHandler<T> | undefined;
-        oninput?: FormEventHandler<T> | undefined;
-        onreset?: FormEventHandler<T> | undefined;
-        onsubmit?: FormEventHandler<T> | undefined;
-        oninvalid?: FormEventHandler<T> | undefined;
+        onchange?: FormEventHandler<T> | Lumo.FormEventHandlerWithElement<T>;
+        onbeforeinput?: FormEventHandler<T> | Lumo.FormEventHandlerWithElement<T>;
+        oninput?: FormEventHandler<T> | Lumo.FormEventHandlerWithElement<T>;
+        onreset?: FormEventHandler<T> | Lumo.FormEventHandlerWithElement<T>;
+        onsubmit?: FormEventHandler<T> | Lumo.FormEventHandlerWithElement<T>;
+        oninvalid?: FormEventHandler<T> | Lumo.FormEventHandlerWithElement<T>;
 
         // Image Events
         onload?: ReactEventHandler<T> | undefined;
         onerror?: ReactEventHandler<T> | undefined; // also a Media Event
 
         // Keyboard Events
-        onkeydown?: KeyboardEventHandler<T> | undefined;
-        onkeyup?: KeyboardEventHandler<T> | undefined;
+        onkeydown?: KeyboardEventHandler<T> | Lumo.KeyboardEventHandlerWithElement<T>;
+        onkeyup?: KeyboardEventHandler<T> | Lumo.KeyboardEventHandlerWithElement<T>;
 
         // Media Events
         onabort?: ReactEventHandler<T> | undefined;
@@ -2460,60 +2473,60 @@ declare namespace React {
         onwaiting?: ReactEventHandler<T> | undefined;
 
         // MouseEvents
-        onauxclick?: MouseEventHandler<T> | undefined;
-        onclick?: MouseEventHandler<T> | undefined;
-        oncontextmenu?: MouseEventHandler<T> | undefined;
-        ondoubleclick?: MouseEventHandler<T> | undefined;
-        ondrag?: DragEventHandler<T> | undefined;
-        ondragend?: DragEventHandler<T> | undefined;
-        ondragenter?: DragEventHandler<T> | undefined;
-        ondragexit?: DragEventHandler<T> | undefined;
-        ondragleave?: DragEventHandler<T> | undefined;
-        ondragover?: DragEventHandler<T> | undefined;
-        ondragstart?: DragEventHandler<T> | undefined;
-        ondrop?: DragEventHandler<T> | undefined;
-        onmousedown?: MouseEventHandler<T> | undefined;
-        onmouseenter?: MouseEventHandler<T> | undefined;
-        onmouseleave?: MouseEventHandler<T> | undefined;
-        onmousemove?: MouseEventHandler<T> | undefined;
-        onmouseout?: MouseEventHandler<T> | undefined;
-        onmouseover?: MouseEventHandler<T> | undefined;
-        onmouseup?: MouseEventHandler<T> | undefined;
+        onauxclick?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
+        onclick?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
+        oncontextmenu?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
+        ondoubleclick?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
+        ondrag?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
+        ondragend?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
+        ondragenter?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
+        ondragexit?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
+        ondragleave?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
+        ondragover?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
+        ondragstart?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
+        ondrop?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
+        onmousedown?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
+        onmouseenter?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
+        onmouseleave?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
+        onmousemove?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
+        onmouseout?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
+        onmouseover?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
+        onmouseup?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
 
         // Selection Events
         onselect?: ReactEventHandler<T> | undefined;
 
         // Touch Events
-        ontouchcancel?: TouchEventHandler<T> | undefined;
-        ontouchend?: TouchEventHandler<T> | undefined;
-        ontouchmove?: TouchEventHandler<T> | undefined;
-        ontouchstart?: TouchEventHandler<T> | undefined;
+        ontouchcancel?: TouchEventHandler<T> | Lumo.TouchEventHandlerWithElement<T>;
+        ontouchend?: TouchEventHandler<T> | Lumo.TouchEventHandlerWithElement<T>;
+        ontouchmove?: TouchEventHandler<T> | Lumo.TouchEventHandlerWithElement<T>;
+        ontouchstart?: TouchEventHandler<T> | Lumo.TouchEventHandlerWithElement<T>;
 
         // Pointer Events
-        onpointerdown?: PointerEventHandler<T> | undefined;
-        onpointermove?: PointerEventHandler<T> | undefined;
-        onpointerup?: PointerEventHandler<T> | undefined;
-        onpointercancel?: PointerEventHandler<T> | undefined;
-        onpointerenter?: PointerEventHandler<T> | undefined;
-        onpointerleave?: PointerEventHandler<T> | undefined;
-        onpointerover?: PointerEventHandler<T> | undefined;
-        onpointerout?: PointerEventHandler<T> | undefined;
-        ongotpointercapture?: PointerEventHandler<T> | undefined;
-        onlostpointercapture?: PointerEventHandler<T> | undefined;
+        onpointerdown?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
+        onpointermove?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
+        onpointerup?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
+        onpointercancel?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
+        onpointerenter?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
+        onpointerleave?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
+        onpointerover?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
+        onpointerout?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
+        ongotpointercapture?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
+        onlostpointercapture?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
 
         // UI Events
-        onscroll?: UIEventHandler<T> | undefined;
+        onscroll?: UIEventHandler<T> | Lumo.UIEventHandlerWithElement<T>;
 
         // Wheel Events
-        onwheel?: WheelEventHandler<T> | undefined;
+        onwheel?: WheelEventHandler<T> | Lumo.WheelEventHandlerWithElement<T>;
 
         // Animation Events
-        onanimationstart?: AnimationEventHandler<T> | undefined;
-        onanimationend?: AnimationEventHandler<T> | undefined;
-        onanimationiteration?: AnimationEventHandler<T> | undefined;
+        onanimationstart?: AnimationEventHandler<T> | Lumo.AnimationEventHandlerWithElement<T>;
+        onanimationend?: AnimationEventHandler<T> | Lumo.AnimationEventHandlerWithElement<T>;
+        onanimationiteration?: AnimationEventHandler<T> | Lumo.AnimationEventHandlerWithElement<T>;
 
         // Transition Events
-        ontransitionend?: TransitionEventHandler<T> | undefined;
+        ontransitionend?: TransitionEventHandler<T> | Lumo.TransitionEventHandlerWithElement<T>;
     }
 
     export interface CSSProperties extends CSS.Properties<string | number> {
