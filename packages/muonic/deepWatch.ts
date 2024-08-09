@@ -1,19 +1,27 @@
 import { isReactiveModel, isReactiveObject, ReactiveModel } from "./useReactiveModels";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
-import {  watch, WatchOptions } from "./watch";
+import { watch, WatchOptions } from "./watch";
 import { ActiveListener } from "@rue/flask";
 import { AnyObject } from "@rue/types";
+import { reactive } from "vue";
 
 type KeyPath = PropertyKey[]
 
+
+export type MutationRecord = {
+    target: ReactiveModel,
+    targetPath?: KeyPath, // undefined means the target is the root watched model
+    op: MutationOp | SetOp
+}
+
 export type MutationOp = {
-    keyPath?: KeyPath,
-    op: string,
+    type: string,
     args: any[]
 }
 
 export type SetOp = {
-    keyPath: KeyPath,
+    type: '[[set]]' | 'set' | 'add' | 'delete',
+    key: string | symbol,
     newValue: any,
     oldValue: any
 }
@@ -23,7 +31,7 @@ export function isMutationOp(op: AnyObject): op is MutationOp {
 }
 
 export function isSetOp(op: AnyObject): op is SetOp {
-    return 'keyPath' in op;
+    return 'key' in op;
 }
 
 // Watch API for mutations
@@ -67,45 +75,56 @@ export function isSetOp(op: AnyObject): op is SetOp {
 //     b.pet = "dog"
 // })
 
+type NestedModel = ReactiveModel;
+type RootModel = ReactiveModel;
 
+const deepWatchMap: WeakMap<NestedModel, [RootModel, KeyPath]> = new WeakMap()
 
+export function isNestedWatched(reactive: ReactiveModel) {
+    return deepWatchMap.has(reactive);
+}
 
-function watchProps(target: ReactiveModel, keyPath: KeyPath, options: WatchOptions) {
-    const watchers: ActiveListener[] = []
+export function getRootWatchedModelAndKeyPath(reactive: ReactiveModel){
+    if (!isNestedWatched(reactive)) throw new Error('INVALID INPUT: Must be nested watched model. Check with `isNestedWatched`')
+    return deepWatchMap.get(reactive)!;
+}
+
+export function watchProps(target: ReactiveModel, rootTarget: ReactiveModel, keyPath: KeyPath) {
     for (const key in target) {
         const value = target[key]
         const _keyPath = [...keyPath, key];
         if (isReactiveObject(value)) { // excludes arrays, maps, and sets in deep watch
-            const _watchers = deepWatch(value, _keyPath, options);
-            watchers.push(..._watchers)
+            deepWatchMap.set(value, [rootTarget, _keyPath])
+            watchProps(value, rootTarget, keyPath)
         }
     }
-    return watchers;
 }
 
-export function deepWatch(target: ReactiveModel, keyPath: KeyPath, options: WatchOptions) {
-    const watcher =
-        watch(target, (_, __, ops) => {
-            if (ops && isSetOp(ops)) {
-                if (__DEV__ && ops.keyPath[0] !== keyPath.at(-1)) throw new Error(`KeyPaths don't match! ${ops.keyPath} and ${keyPath}`)
-                composeOps(target, {
-                    ...ops,
-                    //@ts-expect-error
-                    keyPath
-                })
-            }
-            else if (ops) {
-                composeOps(target, ops);
-            }
-        }, options)
-    const watchers =
-        watchProps(target, keyPath, options)
 
-    watchers.push(watcher)
-    return watchers;
-}
 
-function composeOps(target: ReactiveModel, ops: (SetOp | MutationOp)[] | undefined) {
+// function deepWatch(target: ReactiveModel, keyPath: KeyPath, options: WatchOptions) {
+//     const watcher =
+//         watch(target, (_, __, ops) => {
+//             if (ops && isSetOp(ops)) {
+//                 if (__DEV__ && ops.keyPath[0] !== keyPath.at(-1)) throw new Error(`KeyPaths don't match! ${ops.keyPath} and ${keyPath}`)
+//                 composeOps(target, {
+//                     ...ops,
+//                     //@ts-expect-error
+//                     keyPath
+//                 })
+//             }
+//             else if (ops) {
+//                 composeOps(target, ops);
+//             }
+//         }, options)
+//     const watchers =
+//         watchProps(target, keyPath, options)
+
+//     watchers.push(watcher)
+//     return watchers;
+// }
+
+function composeOps(target: ReactiveModel, ops: MutationRecord[] | undefined) {
     if (!ops) return;
     const updateCycle = getCurrentUpdateCycle();
     if (!updateCycle) throw new Error("No update cycle :(")

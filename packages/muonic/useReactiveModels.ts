@@ -6,6 +6,7 @@ import { isTuple, tuple } from "./Tuple";
 import { asReactiveProp, getReactiveProp } from "./ReactiveProp";
 import { shallowClone } from "./SnapshotManager";
 import { asTrackableOp, getTrackableOp } from "./TrackableOp";
+import { getRootWatchedModelAndKeyPath, isNestedWatched } from "./deepWatch";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject) => void
@@ -558,11 +559,34 @@ function reactiveSetter(
     }
 
     if (isWatchedModel(reactive)) {
-        triggerReactiveModel(reactive, shallowClone(target), {
-            keyPath: [<string>key],
-            newValue: _newValue,
-            oldValue
-        })
+        triggerReactiveModel(reactive, {
+            target: reactive,
+            op: {
+                type: '[[set]]',
+                key,
+                newValue: _newValue,
+                oldValue
+            }
+        },
+            updateCycle.getSnapshot(reactive) ?
+                undefined : shallowClone(target)
+        ) // only create clone if snapshot does not already exist
+    }
+    if (isNestedWatched(reactive)) {
+        const [rootWatchedModel, keyPath] = getRootWatchedModelAndKeyPath(reactive)
+        triggerReactiveModel(rootWatchedModel, {
+            target: reactive,
+            targetPath: keyPath,
+            op: {
+                type: '[[set]]',
+                key,
+                newValue: _newValue,
+                oldValue
+            }
+        },
+            updateCycle.getSnapshot(rootWatchedModel) ?
+                undefined : shallowClone(toRaw(rootWatchedModel))
+        )
     }
 
     Reflect.set(target, key, _newValue, receiver);
@@ -669,7 +693,7 @@ function mutatingOp(
 ) {
     const _args = maybeReactivizeArgs(<string>key, args, reactive, sampleValue, registry);
     const updateCycle = useUpdateCycle();
-    const clone = shallowClone(target) // cloning before mutation
+    const clone = updateCycle.getSnapshot(reactive) ? undefined : shallowClone(target) // cloning before mutation if snapshot does not already exist
     let hasMutated = false;
 
     const oldMapValue = target instanceof Map && (key === 'set' || key === 'clear' || key === 'delete') ? target.get(_args[0]) : null;
@@ -680,12 +704,30 @@ function mutatingOp(
         const newValue = _args[1];
         if (oldMapValue !== newValue) {
             if (isWatchedModel(reactive)) {
-                triggerReactiveModel(reactive, clone, {
-                    keyPath: [<string>key],
-                    newValue,
-                    oldValue: oldMapValue
-                })
+                triggerReactiveModel(reactive, {
+                    target: reactive,
+                    op: {
+                        type: 'set',
+                        key,
+                        newValue,
+                        oldValue: oldMapValue
+                    }
+                }, clone)
             }
+            if (isNestedWatched(reactive)) {
+                const [rootWatchedModel, keyPath] = getRootWatchedModelAndKeyPath(reactive)
+                triggerReactiveModel(rootWatchedModel, {
+                    target: reactive,
+                    targetPath: keyPath,
+                    op: {
+                        type: 'set',
+                        key,
+                        newValue,
+                        oldValue: oldMapValue
+                    }
+                }, clone)
+            }
+
             const hasOp = getTrackableOp(reactive, 'has', mapKey)
             if (hasOp) trigger(hasOp, newValue, oldMapValue);
             const getOp = getTrackableOp(reactive, 'get', mapKey)
@@ -738,7 +780,7 @@ function mutatingOp(
             }
         }
         else if ((target instanceof Set || target instanceof Map) && key === 'clear') {
-            for (const entry of <Set<any> | Map<any, any>>clone) {
+            for (const entry of <Set<any> | Map<any, any>>clone || updateCycle.getSnapshot(reactive)) {
                 const item = target instanceof Set ? entry : entry[0]
                 const op = getTrackableOp(reactive, 'has', item)
                 if (op)
@@ -751,11 +793,28 @@ function mutatingOp(
             }
         }
     }
-    if (hasMutated && isWatchedModel(reactive)) {
-        triggerReactiveModel(reactive, clone, {
-            op: <string>key,
-            args: _args
-        })
+    
+    if (hasMutated) {
+        if (isWatchedModel(reactive)) {
+            triggerReactiveModel(reactive, {
+                target: reactive,
+                op: {
+                    type: <string>key,
+                    args: _args
+                }
+            }, clone)
+        }
+        if (isNestedWatched(reactive)) {
+            const [rootWatchedModel, keyPath] = getRootWatchedModelAndKeyPath(reactive)
+            triggerReactiveModel(rootWatchedModel, {
+                target: reactive,
+                targetPath: keyPath,
+                op: {
+                    type: <string>key,
+                    args: _args
+                }
+            }, clone)
+        }
     }
 
     return output;

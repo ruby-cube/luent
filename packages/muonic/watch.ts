@@ -7,11 +7,10 @@ import { _runTasks, getCurrentUpdateCycle, Hooks, onPhaseCompleted, Phase, setCu
 import { DependencyTracker, getDependencyTracker, ReactiveAtom } from "./DependencyTracker";
 import { DERIVED_SIGNAL, DerivedSignal, getDependentDerivedSignals, hasSignal, isDerivedSignal, ReactiveSignal } from "./DerivedSignal";
 import { isEqual, UNDEFINED } from "@rue/utils";
-import { deepWatch, MutationOp, SetOp } from "./deepWatch";
+import { MutationRecord, MutationOp, SetOp, watchProps } from "./deepWatch";
 import { collectReactiveProps, registerDebuggers, runTriggerDebugger, WatchDebugOptions } from "./debug";
 import { asReactiveProp, getReactiveProp, isReactiveProp, ReactiveProp } from "./ReactiveProp";
 import { PendingCancelOp } from "../flask/PendingCancelOp";
-import { table } from "console";
 
 //QUESTION: How useful is watching deep?
 
@@ -31,8 +30,8 @@ export type EffectOptions = {
 
 
 
-type MutationHandler<T extends any[] | Map<any, any> | Set<any> = any[] | Map<any, any> | Set<any>> = (newValue: T, oldValue: T, ops?: MutationOp[]) => void
-export type ChangeHandler<T = AnyObject> = T extends any[] | Map<any, any> | Set<any> ? MutationHandler<T> : (newValue: T, oldValue: T, ops?: (MutationOp | SetOp)[]) => void
+type MutationHandler<T extends any[] | Map<any, any> | Set<any> = any[] | Map<any, any> | Set<any>> = (newValue: T, oldValue: T, ops?: MutationRecord[]) => void
+export type ChangeHandler<T = AnyObject> = T extends any[] | Map<any, any> | Set<any> ? MutationHandler<T> : (newValue: T, oldValue: T, ops?: MutationRecord[]) => void
 type ReactiveEffect = () => void //TODO: onCleanup function?
 type Effect = ChangeHandler | ReactiveEffect
 
@@ -63,15 +62,7 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
 
 
     if (deep && isReactiveModel(target)) { //TODO: deep watch for $$ and $$$ signals?
-        const watchers = deepWatch(target, [], options || {});
-        function stop() {
-            for (const watcher of watchers) {
-                watcher.stop();
-            }
-        }
-        return {
-            stop
-        }
+       watchProps(target, target, []);
     }
 
     let phaseQueues: PhaseQueue[];
@@ -406,7 +397,7 @@ export function trigger(target: ReactiveAtom, newValue: any, oldValue: any) { //
     return updateCycle;
 }
 
-export function triggerReactiveModel(reactive: ReactiveModel, clone: AnyObject, op: MutationOp | SetOp) {
+export function triggerReactiveModel(reactive: ReactiveModel, op: MutationRecord, clone?: AnyObject) {
     const updateCycle = useUpdateCycle();
     const snapshot = updateCycle.takeSnapshot(reactive, toRaw(reactive), clone)
     updateCycle.flagReactive(reactive, snapshot)
@@ -434,8 +425,6 @@ export function triggerReactiveModel(reactive: ReactiveModel, clone: AnyObject, 
 export function isWatchedModel(target: ReactiveModel) {
     return reactiveModelTaskQueues.has(target)
 }
-
-
 
 
 export function storeInitialDerivedValueIfNeeded(updateCycle: UpdateCycle, target: ReactiveAtom) {
@@ -509,6 +498,7 @@ export function runNonSyncTasks(phase: "pre" | "post" | "render") {
             if (taskQueue) {
                 for (const task of taskQueue) {
                     const snapshot = updateCycle.getSnapshot(reactive);
+                    if (!snapshot) throw new Error("No snapshot :(. This should never happen")
                     const ops = updateCycle.getOps(reactive);
                     if (ops && ops.length === 0)
                         return;

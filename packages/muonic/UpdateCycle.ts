@@ -6,7 +6,7 @@ import { runNonSyncTasks } from "./watch";
 import { $listen, ScheduleStop } from "@rue/flask";
 import { removeItem } from "../utils/array";
 import { beforeRepaint, queueTask } from "@rue/thread";
-import { MutationOp, SetOp } from "./deepWatch";
+import { MutationRecord, SetOp } from "./deepWatch";
 import { asReactiveProp, getReactiveProp, isReactiveProp, ReactiveProp } from "./ReactiveProp";
 import { DerivedSignal, isDerivedSignal } from "./DerivedSignal";
 import { UNDEFINED } from "@rue/utils";
@@ -104,15 +104,15 @@ export class UpdateCycle {
 
     getSnapshot(reactive: ReactiveModel) {
         const snapshotMap = this.snapshotMap;
-        if (!snapshotMap) throw "no snapshot map :("
+        if (!snapshotMap) return null;
         const snapshot = snapshotMap.get(reactive)
-        if (!snapshot) throw "no snapshot :("
+        if (!snapshot) return null;
         return snapshot
     }
 
-    opsMap: WeakMap<ReactiveModel, (MutationOp | SetOp)[]> = new WeakMap();
+    opsMap: WeakMap<ReactiveModel, MutationRecord[]> = new WeakMap();
 
-    composeOps(target: ReactiveModel, ops: (MutationOp | SetOp)[]) {
+    composeOps(target: ReactiveModel, ops: MutationRecord[]) {
         let existingOps = this.opsMap.get(target);
         if (existingOps) {
             existingOps.push(...ops)
@@ -122,7 +122,7 @@ export class UpdateCycle {
         }
     }
 
-    recordOp(target: ReactiveModel, op: MutationOp | SetOp) {
+    recordOp(target: ReactiveModel, op: MutationRecord) {
 
         //TODO: consolidate set ops (cannot consolidate mutation ops, those need to be in order)
         let existingOps = this.opsMap.get(target);
