@@ -1,9 +1,9 @@
 import { PublicComponent, ComponentSetup } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { Signal } from "@rue/muonic/useSignals"
-import { ConditionalRenderKit } from "../conditional/$if"
 import { ArrayItem } from "@rue/types"
 import { isUpdatingList, onListUpdated } from "../list/forEachIn"
+import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
 
 
 

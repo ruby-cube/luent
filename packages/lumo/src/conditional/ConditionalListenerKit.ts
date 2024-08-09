@@ -1,0 +1,42 @@
+import { ReactiveSignal } from "@rue/muonic";
+import { NodeEntity } from "../node/makeNode";
+import { ConditionalKit } from "./ConditionalKit";
+import { NodeRef } from "../node/NodeRef";
+import { ListenOptions } from "net";
+
+
+type ListenerLifespan = ListenOptions;
+
+const THIS_NODE = 0 as const;
+const CHILD_NODES = 1 as const;
+
+type EventTarget = string | NodeRef | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
+
+type EventTargetOptions = {
+    targets: EventTarget[]
+} | {
+    excluded: EventTarget[]
+}
+
+type EventHandlerModifiers = {
+    prevent?: true;
+    stop?: true;
+    end?: true;
+}
+
+type EventHandler<T> = T | [T, EventHandlerModifiers] | [T, EventTargetOptions] | [T, ListenerLifespan]
+    | [T, EventHandlerModifiers, EventTargetOptions] | [T, EventTargetOptions, ListenerLifespan] | [T, EventHandlerModifiers, ListenerLifespan]
+    | [T, EventHandlerModifiers, EventTargetOptions, ListenerLifespan]
+
+type EventListenerValue<T> = T | ConditionalKit<T>[] | ConditionalKit<T>
+
+export class ConditionalListenerKit extends ConditionalKit<EventHandler<EventListener>> {
+
+    constructor(
+        statementType: 'if' | 'elseIf' | 'else',
+        public eventHandler: EventHandler<EventListener>,
+        $condition?: ReactiveSignal<boolean>,
+    ) {
+        super(statementType, eventHandler, $condition)
+    }
+}

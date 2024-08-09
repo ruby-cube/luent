@@ -1,11 +1,7 @@
-//@ts-nocheck
-import { $else, $elseIf, $if, COMPONENT, ComponentSetup, ConditionalRenderKit, expose, forEachIn, NodeEntity, NodeRef, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
+import { $else, $elseIf, $if, COMPONENT, ComponentSetup, ConditionalRenderKit, expose, forEachIn, NodeEntity, NodeRef, onMounted, preventDefault, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
 import { Signal, useReactivity, watch, initializeEffect, isReactiveModel } from "@rue/muonic"
-import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic/debug";
-import { clear } from "console";
-import { thisAlone } from "../../../packages/lumo/src/element/event-modifiers";
 
 
 const { $, set, o$, mu, $$, $$$, o$$$ } = useReactivity();
@@ -93,7 +89,7 @@ export function List() {
                 {$else(() =>
                     forEachIn(list$, (item$, $index) => (
                         <div
-                            onclick={thisAlone((e) => toggleSelect(e, $index()))}
+                            onclick={(e) => toggleSelect(e, $index())}
                             style={[
                                 `background-color: ${randomColor.get()}`,
                                 o => {
@@ -101,7 +97,7 @@ export function List() {
                                 }
                             ]}>
                             <p
-                                onclick={[(e) => removeItem($index())]}
+                                onclick={(e) => removeItem($index())}
                                 style="cursor: pointer"
                             >
                                 X
@@ -116,22 +112,40 @@ export function List() {
                             >
                                 insert
                             </div>
-                            <div
+                            {/* <div
                                 onclick={() => insertSelectedItem($index() + 1)}
                                 style="background-color: white; cursor: pointer"
                             >
                                 insert
-                            </div>
+                            </div> */}
                         </div>
                     ), 'id')
                 )}
             </>
             <button onclick={clearSelection}>clear</button>
-            {/* <button onclick={$if($active, capture.once(clearSelection))}>clear</button> */}
+            {/* <button onclick={$if($active, capture.once(clearSelection))}>clear</button>
 
-            {/* <button
-                onclick={thisAlone(preventDefault(stopPropagation(allowDefault((e) => { clearSelection(e, index) }))))}
-            >clear</button> */}
+            <button
+                onclick={[() => increment($index()), preventDefault.endHere, target(THIS_NODE), { once: true }]}
+            >
+                clear
+            </button>
+
+            <button
+                onclick={[increment, { until: onMounted }]}
+            >
+                clear
+            </button>
+            <button
+                onclick={[
+                    $if($active, [
+                        increment, runOnce.preventDefault, target(THIS_NODE)
+                    ]),
+                    $else(decrement)
+                ]}
+            >
+                clear
+            </button> */}
         </div>
     )
 }

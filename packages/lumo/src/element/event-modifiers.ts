@@ -1,26 +1,56 @@
-import { EventTick } from "./EventTick";
+import { ListenOptions } from "net";
+import { NodeRef } from "../node/NodeRef"
 
-export function thisAlone<T extends (e: Event) => void>(handler: T) {
-    return ((element: Element, e: T extends (e: infer E)=>void ? E : never) => {
-        if (e.target !== element) return;
-        handler(e)
-    })
+type ListenerLifespan = ListenOptions;
+
+const THIS_NODE = 0 as const;
+const CHILD_NODES = 1 as const;
+
+type EventTarget = string | NodeRef | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
+
+type EventHandlerModifiers = {
+    prevent?: true;
+    stop?: true;
+    end?: true;
 }
 
-export function stopPropagation<T extends (e: Event) => void>(handler: T) { //TODO: Make sure this works properly with EventTick
-    return (e: Parameters<T>[0]) => {
-        e.stopPropagation()
-        handler(e)
+
+export function target(...targets: EventTarget[]) {
+    return {
+        targets,
     }
 }
 
-export function endEvent<T extends (e: Event) => void>(handler: T) { //TODO: Make sure this works properly with EventTick
-    return (eventTick: EventTick, e: Parameters<T>[0]) => {
-        e.stopImmediatePropagation();
-        handler(e)
-        const afterEventHandler = eventTick._afterEventHandler || ((e) => eventTick.afterEventHandler(eventTick, e))
-        eventTick.attachHandler(eventTick._afterEventHandler!, {})
+export function exclude(...nodes: EventTarget[]) {
+    return {
+        excluded: nodes
     }
 }
 
+const preventDefault_stopPropagation = {
+    prevent: true,
+    stop: true
+} as const
+
+const preventDefault_endHere = {
+    prevent: true,
+    end: true
+} as const
+
+
+export const preventDefault = {
+    stopPropagation: preventDefault_stopPropagation,
+    endHere: preventDefault_endHere,
+    prevent: true,
+} as const
+
+export const stopPropagation = {
+    preventDefault: preventDefault_stopPropagation,
+    stop: true
+} as const
+
+export const endHere = {
+    preventDefault: preventDefault_endHere,
+    end: true
+} as const
 

@@ -2,18 +2,20 @@ import { InternalComponent, popComponent, pushComponent } from "../component/Int
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
 import { watchForRender } from "../reactivity/watchForRender";
-import { ConditionalSeries, RenderConditional, watchForRenderAndPreserve } from "./$if";
+import { watchForRenderAndPreserve } from "./$if";
 import { LifecycleHook } from "../component/lifecycle";
 import { NodeEntity } from "../node/makeNode";
 import { getNodeRef } from "../node/NodeRef";
 import { collectEffects, Flask } from "@rue/flask/flask";
 import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle";
 import { areShallowEqualArrays, getDependencyTracker, getWithoutTracking, isShallowEqual } from "@rue/muonic";
+import { ConditionalRenderSeries } from "./ConditionalRenderSeries";
+import { RenderConditional } from "./ConditionalRenderKit";
 
 export function setUpConditionalMount(
     component: InternalComponent,
     parent: Element,
-    series: ConditionalSeries,
+    series: ConditionalRenderSeries,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
 ) {

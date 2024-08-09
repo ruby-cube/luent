@@ -7,8 +7,9 @@ import { ComponentConfig, EventsConfig, initializeRef, makeNode, NodeEntity, Ren
 import { normalizeToArray } from "@rue/utils";
 import { isHTMLEvent } from "../html/attributes";
 import { DerivedSignal } from "@rue/muonic";
-import { ConditionalRenderKit, preserveAllRequested } from "../conditional/$if";
+import { preserveAllRequested } from "../conditional/$if";
 import { beforeUnmount, LifecycleHook, onActivated, onDeactivated, onUnmounted } from "./lifecycle";
+import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 

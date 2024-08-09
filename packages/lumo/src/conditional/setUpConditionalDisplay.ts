@@ -1,5 +1,5 @@
 import { areShallowEqualArrays, getWithoutTracking, isShallowEqual, ReactiveSignal } from "@rue/muonic"
-import { ConditionalSeries, watchForRenderAndPreserve } from "./$if"
+import { watchForRenderAndPreserve } from "./$if"
 import { DOMNode, InternalComponent, popComponent, pushComponent } from "../component/InternalComponent"
 import { _DynamicNodePod, _NodePod } from "../node/NodePod"
 import { watchForRender } from "../reactivity/watchForRender"
@@ -8,11 +8,12 @@ import { NodeEntity } from "../node/makeNode"
 import { mountConditional } from "./setUpConditionalMount"
 import { setUpNodeEntity } from "../node/setUpNodeEntity"
 import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle"
+import { ConditionalRenderSeries } from "./ConditionalRenderSeries"
 
 export function setUpConditionalDisplay(
     component: InternalComponent,
     parent: Element,
-    series: ConditionalSeries,
+    series: ConditionalRenderSeries,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
     // componentsToUnmount?: InternalComponent[],
@@ -21,7 +22,7 @@ console.log("setting up conditional display")
     const { $conditions, activeIndex } = series.evaluateConditions()
     const dynamicPod = nodePod.appendDynamicPod();
 
-    let statementCount = series.conditionalKits.length;
+    let statementCount = series.statements.length;
     while (statementCount--) {
         dynamicPod.appendNodePod()
     }

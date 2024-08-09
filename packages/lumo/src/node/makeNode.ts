@@ -1,5 +1,4 @@
 import { DerivedSignal, ReactiveSignal } from "@rue/muonic";
-import { ConditionalRenderKit } from "../conditional/$if";
 import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { getCurrentItemAndIndex, isSettingUpList, ListRenderKit, onListUpdated } from "../list/forEachIn";
 import { HTMLTag, makeElement } from "../element/mE";
@@ -8,6 +7,7 @@ import { InternalNodeRef, NodeRef } from "./NodeRef";
 import { getNodeConfig } from "../../api-play/_setUpNode";
 import { beforeUnmount } from "../component/lifecycle";
 import { getActiveFlask, getFlask, onFlaskDisposal } from "@rue/flask";
+import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 
 export function Fragment() {
 

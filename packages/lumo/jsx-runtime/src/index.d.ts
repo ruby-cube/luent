@@ -2387,26 +2387,38 @@ declare namespace React {
     interface SVGLineElementAttributes<T> extends SVGProps<T> { }
     interface SVGTextElementAttributes<T> extends SVGProps<T> { }
 
-    namespace Lumo {
+    namespace L {
         type ReactivizeProps<P extends { [key: string]: any }> = {
             [K in keyof P]: P[K] | ReactiveSignal<P[K]>
         }
-        type MouseEventHandlerWithElement<T = Element> = ((element: T, e: MouseEvent<T, globalThis.MouseEvent>) => void)
-        type DragEventHandlerWithElement<T = Element> = ((element: T, e: (event: DragEvent<T>) => void) => void)
-        type ClipboardEventHandlerWithElement<T = Element> = ((element: T, e: (event: ClipboardEvent<T>) => void) => void)
-        type CompositionEventHandlerWithElement<T = Element> = ((element: T, e: (event: CompositionEvent<T>) => void) => void)
-        type FocusEventHandlerWithElement<T = Element> = ((element: T, e: (event: FocusEvent<T, Element>) => void) => void)
-        type FormEventHandlerWithElement<T = Element> = ((element: T, e: (event: FormEvent<T>) => void) => void)
-        type KeyboardEventHandlerWithElement<T = Element> = ((element: T, e: (event: KeyboardEvent<T>) => void) => void)
-        type TouchEventHandlerWithElement<T = Element> = ((element: T, e: (event: TouchEvent<T>) => void) => void)
-        type PointerEventHandlerWithElement<T = Element> = ((element: T, e: (event: PointerEvent<T>) => void) => void)
-        type WheelEventHandlerWithElement<T = Element> = ((element: T, e: (event: WheelEvent<T>) => void) => void)
-        type TransitionEventHandlerWithElement<T = Element> = ((element: T, e: (event: TransitionEvent<T>) => void) => void)
-        type AnimationEventHandlerWithElement<T = Element> = ((element: T, e: (event: AnimationEvent<T>) => void) => void)
-        type UIEventHandlerWithElement<T = Element> = ((element: T, e: (event: UIEvent<T, globalThis.UIEvent>) => void) => void)
+
+        type ListenerLifespan = ListenOptions;
+
+        const THIS_NODE = 0 as const;
+        const CHILD_NODES = 1 as const;
+
+        type EventTarget = string | NodeRef | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
+
+        type EventTargetOptions = {
+            targets: EventTarget[]
+        } | {
+            excluded: EventTarget[]
+        }
+
+        type EventHandlerModifiers = {
+            prevent?: true;
+            stop?: true;
+            end?: true;
+        }
+
+        type EventHandler<T> = T | [T, EventHandlerModifiers] | [T, EventTargetOptions] | [T, ListenerLifespan]
+            | [T, EventHandlerModifiers, EventTargetOptions] | [T, EventTargetOptions, ListenerLifespan] | [T, EventHandlerModifiers, ListenerLifespan]
+            | [T, EventHandlerModifiers, EventTargetOptions, ListenerLifespan]
+
+        type EventListenerValue<T> = T | ConditionalKit<T>[] | ConditionalKit<T>
     }
 
-    type DOMAttributes<T> = _DOMAttributes<T> & Lumo.ReactivizeProps<DOMEvents<T>>
+    type DOMAttributes<T> = _DOMAttributes<T> & L.ReactivizeProps<DOMEvents<T>>
 
     interface _DOMAttributes<T> {
         slotted?: Lumo.NodeEntity | undefined;
@@ -2419,8 +2431,8 @@ declare namespace React {
 
     interface DOMEvents<T> {// Clipboard Events
         oncopy?: ClipboardEventHandler<T> | Lumo.ClipboardEventHandlerWithElement<T>;
-        oncut?: ClipboardEventHandler<T> |  Lumo.ClipboardEventHandlerWithElement<T>;
-        onpaste?: ClipboardEventHandler<T> |  Lumo.ClipboardEventHandlerWithElement<T>;
+        oncut?: ClipboardEventHandler<T> | Lumo.ClipboardEventHandlerWithElement<T>;
+        onpaste?: ClipboardEventHandler<T> | Lumo.ClipboardEventHandlerWithElement<T>;
 
         // Composition Events
         oncompositionend?: CompositionEventHandler<T> | Lumo.CompositionEventHandlerWithElement<T>;
@@ -2474,7 +2486,7 @@ declare namespace React {
 
         // MouseEvents
         onauxclick?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
-        onclick?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
+        onclick?: MouseEventHandler<T> | [MouseEventHandler<T>, ...number[]] | [string, MouseEventHandler<T>, ...number[]];
         oncontextmenu?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
         ondoubleclick?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
         ondrag?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
@@ -2504,15 +2516,15 @@ declare namespace React {
 
         // Pointer Events
         onpointerdown?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
-        onpointermove?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
-        onpointerup?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
-        onpointercancel?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
-        onpointerenter?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
-        onpointerleave?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
-        onpointerover?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
-        onpointerout?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
-        ongotpointercapture?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
-        onlostpointercapture?: PointerEventHandler<T> |  Lumo.PointerEventHandlerWithElement<T>;
+        onpointermove?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
+        onpointerup?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
+        onpointercancel?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
+        onpointerenter?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
+        onpointerleave?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
+        onpointerover?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
+        onpointerout?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
+        ongotpointercapture?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
+        onlostpointercapture?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
 
         // UI Events
         onscroll?: UIEventHandler<T> | Lumo.UIEventHandlerWithElement<T>;

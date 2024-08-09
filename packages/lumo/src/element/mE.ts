@@ -7,7 +7,7 @@ import { InternalNodeRef, getNodeRef, NodeRef } from "../node/NodeRef";
 import { Signal, useSignals } from "@rue/muonic/useSignals";
 import { analyzeAttributes } from "../component/mO";
 import { initializeRender, watchForRender } from "../reactivity/watchForRender";
-import { buildConditionalSeries, ConditionalRenderKit, ConditionalSeries, noElseBlock, RenderConditional, validateStandAloneConditional, watchForRenderAndPreserve, initializeRenderAndPreserve } from "../conditional/$if";
+import {  watchForRenderAndPreserve, initializeRenderAndPreserve } from "../conditional/$if";
 import { ElementConfig, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { ActiveListener, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
@@ -15,6 +15,8 @@ import { runNonSyncTasks } from "@rue/muonic";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
 import { beforeUnmount } from "../component/lifecycle";
 import { _runTasks, Hooks } from "@rue/muonic/UpdateCycle";
+import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
+import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -91,11 +93,11 @@ function isNotConditionalSeries(nodeEntities: NodeEntity[]) {
 function validateConditionalSeries(nodeEntities: ConditionalRenderKit[], isNotConditionalSeries: false) {
     if (isNotConditionalSeries !== false)
         throw new Error(`validateConditionalSeries must be called after isNotConditionalSeries`)
-    if (nodeEntities[0].statement !== 'if' || nodeEntities[nodeEntities.length - 1].statement === 'if')
+    if (nodeEntities[0].statementType !== 'if' || nodeEntities[nodeEntities.length - 1].statementType=== 'if')
         throw new Error("Invalid conditional series")
     for (let i = 1; i < nodeEntities.length - 1; i++) {
         const nodeEntity = nodeEntities[i];
-        if (!(nodeEntity instanceof ConditionalRenderKit) || nodeEntity.statement === 'if' || nodeEntity.statement == 'else')
+        if (!(nodeEntity instanceof ConditionalRenderKit) || nodeEntity.statementType === 'if' || nodeEntity.statementType == 'else')
             throw new Error("Invalid conditional series")
     }
 }
@@ -209,10 +211,10 @@ function setUpStyles(component: InternalComponent, node: HTMLElement, styles: ((
     }
 }
 
-function normalizeStyle(statement: string) {
-    statement.trim();
-    if (statement.endsWith(';')) return statement.substring(0, statement.length - 1);
-    return statement;
+function normalizeStyle(expression: string) {
+    expression.trim();
+    if (expression.endsWith(';')) return expression.substring(0, expression.length - 1);
+    return expression;
 }
 
 function warnOverlappingStyles(stylesA: string, stylesB: string) {
