@@ -30,8 +30,8 @@ export type EffectOptions = {
 
 
 
-type MutationHandler<T extends any[] | Map<any, any> | Set<any> = any[] | Map<any, any> | Set<any>> = (newValue: T, oldValue: T, ops?: MutationRecord[]) => void
-export type ChangeHandler<T = AnyObject> = T extends any[] | Map<any, any> | Set<any> ? MutationHandler<T> : (newValue: T, oldValue: T, ops?: MutationRecord[]) => void
+type MutationHandler<T extends AnyObject = AnyObject> = (newValue: T, oldValue: T, ops?: MutationRecord[]) => void
+export type ChangeHandler<T = AnyObject> = (newValue: T, oldValue: T, ops?: MutationRecord[]) => void
 type ReactiveEffect = () => void //TODO: onCleanup function?
 type Effect = ChangeHandler | ReactiveEffect
 

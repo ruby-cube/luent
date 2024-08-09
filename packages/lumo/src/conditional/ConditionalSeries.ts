@@ -8,7 +8,6 @@ export class ConditionalSeries {
         public statements: ConditionalKit[], 
         makeElseKit: () => ConditionalKit
     ) { 
-
         for (let i = 0; i < statements.length; i++) {
             const kit = statements[i]
             if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
@@ -20,10 +19,10 @@ export class ConditionalSeries {
                 else continue;
             }
             if (i !== statements.length - 1 && kit.statementType === 'else') {
+                console.log('statements', statements)
                 if (__DEV__) throw new Error("$else must be the very last statement of a conditional series");
                 else continue;
             }
-            this.addKit(kit);
         }
         if (noElseBlock(statements)) {
             this.addKit(makeElseKit())

@@ -55,7 +55,7 @@ export function setUpNodeList(
 
         // set up watcher for updates
         // const updateCycle = getCurrentUpdateCycle();
-        _watchForRender(data, (newValue: AnyObject[], oldValue: AnyObject[]) => {
+        _watchForRender(data, (newValue: any[], oldValue: any[]) => {
             // if (updateCycle === getCurrentUpdateCycle()) {
             //     console.warn("prevented same update cycle")
             //     return;
@@ -212,7 +212,6 @@ export function insertAndMoveListItemNodes(
         else parent.prepend(fragment);
     }
 
-    console.log("insert and move listItem nodes")
     listRenderKit.castUpdated(toFromIndices)
 
     // (4) update node refs
