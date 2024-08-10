@@ -93,7 +93,7 @@ export function removeListItemNodes(dynamicList: _DynamicNodePod, indicesToRemov
 function removeNodesFromRef(nodePod: _NodePod) {
     nodePod.forEachNode((node, index) => {
         const ref = getNodeRef(node)
-        if (ref) ref.removeNode(index!)
+        if (ref) ref.removeNode(index!) //TODO: This
     })
 }
 

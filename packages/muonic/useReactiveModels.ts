@@ -56,11 +56,12 @@ export function useReactiveModels(config?: { snapshots: boolean }) {
             return _o$(target);
         },
 
-        mu<T extends ReactiveModel>(target: T, mutation: (o: T) => void) {
+        mu<T extends ReactiveModel, R>(target: T, mutation: (o: T) => R): R {
             if (!localReactives.has(target)) throw "`mu` can only mutate local reactives created with corresponding `o$` function";
             registry.mutationPermitted = true;
-            mutation(target);
+            const output = mutation(target);
             registry.mutationPermitted = false;
+            return output;
         }
     }
 }
@@ -793,7 +794,7 @@ function mutatingOp(
             }
         }
     }
-    
+
     if (hasMutated) {
         if (isWatchedModel(reactive)) {
             triggerReactiveModel(reactive, {

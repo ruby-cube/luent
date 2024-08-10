@@ -39,7 +39,6 @@ export class ListRenderKit<T = any> {
     onUpdatedTasks: Set<Function> = new Set()
 
     castUpdated(toFromIndices: [number, number][]) {
-        console.log("tasks", this.onUpdatedTasks)
         for (const task of this.onUpdatedTasks) {
             task(toFromIndices)
         }

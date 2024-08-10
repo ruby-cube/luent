@@ -101,9 +101,11 @@ export function initializeRef( // should this be initialize ref?
     })
 
     if (isSettingUpList()) {
+        console.log("isSettingup list")
         const listUpdatedListener =
             onListUpdated((toFromIndices) => {
                 ref.updateListRef(toFromIndices)
+                console.log('listref', ref.o)
             }, { outlive: true })
 
         outerFlask?.onDisposal(listUpdatedListener.stop)

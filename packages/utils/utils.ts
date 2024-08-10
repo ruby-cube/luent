@@ -28,3 +28,37 @@ export function normalizeToArray(value: any | any[]) {
 
 export const UNDEFINED = Symbol();
 
+
+export function removeMultipleUniqueItems(uniqueItemsToRemove: Set<any>, list: any[], ){ // assumes items are unique
+    const indicesAndRemoveCount: [number, number][] = [];
+    const removedItems = [];
+    let j = 0;
+    while (j < list.length) {
+        const id = list[j];
+        if (uniqueItemsToRemove.has(id)) {
+            const prevEntry = indicesAndRemoveCount.at(-1);
+            if (prevEntry && prevEntry[0] + 1 === j) {
+                prevEntry[1]++; // increment count
+            }
+            else {
+                indicesAndRemoveCount.push([j, 1])
+            }
+            removedItems.push(id)
+        }
+        j++;
+    }
+    let k = indicesAndRemoveCount.length; // loop through backwards to avoid having to recalculate index
+    while (k--) {
+        const [index, count] = indicesAndRemoveCount[k];
+        list.splice(index, count);
+    }
+    return removedItems;
+}
+
+
+export function useIncrementalID(){
+    let count = 0;
+    return function getIncrementalID(){
+        return count++;
+    }
+}

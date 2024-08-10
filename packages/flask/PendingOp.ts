@@ -1,5 +1,6 @@
 import { addToFlask, bindFlask } from "./flask";
 import { CallbackRemover, SchedulerOptions } from "./flaskedListeners";
+import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
 
 export type PendingOp<T = unknown> = Promise<T> & {
@@ -45,6 +46,7 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
         const _cancel = (() => {
             try {
                 remove(returnVal ?? _callback);
+                if (__DEV__) unmarkNoCleanup(pendingOp);
             }
             catch (e) {
                 console.trace();
@@ -63,6 +65,8 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
         if (!outlive) addToFlask(_cancel)
 
         pendingCancelOp = scheduleCancellation ? scheduleCancellation(_cancel) : null;
+
+        if (__DEV__) setUpCleanupWarning!(pendingOp, scheduleCancellation)
 
         return pendingOp;
     }

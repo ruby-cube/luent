@@ -1,6 +1,7 @@
 import { Callback, ListenerOptions } from "./flaskedListeners";
-import { addToFlask, getActiveFlask, bindFlask } from "./flask";
+import { addToFlask, getActiveFlask, bindFlask, getFlask } from "./flask";
 import { PendingCancelOp } from "./PendingCancelOp";
+import { genIncrementalId, markNoCleanup, setUpCleanupWarning, shouldWarnNoCleanup, unmarkNoCleanup } from "./initFlask";
 
 export type ActiveListener = {
     stop(): void;
@@ -28,8 +29,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
     const { enroll, remove, callback, options } = config;
     const once = options?.once;
     const outlive = options?.outlive;
-    // console.log("MakeActiveListener!")
-// console.trace()
+
     let returnVal: any;
 
     const _callback = bindFlask(once ? (...args: any[]) => {
@@ -47,6 +47,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
         const stop = () => {
             try {
                 remove(returnVal ?? _callback);
+                if (__DEV__) unmarkNoCleanup(activeListener);
             }
             finally {
                 if (pendingStop) pendingStop.cancel();
@@ -60,8 +61,13 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 
         if (!outlive) addToFlask(stop);
 
-        return {
-            stop
+        const activeListener = {
+            stop,
         }
+
+        if (__DEV__) setUpCleanupWarning!(activeListener, until)
+
+
+        return activeListener as ActiveListener;
     }
 }

@@ -1,6 +1,6 @@
 import { $else, $elseIf, $if, COMPONENT, ComponentSetup, expose, forEachIn, NodeEntity, NodeRef, onMounted, preventDefault, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
 import { Signal, useReactivity, watch, initializeEffect, isReactiveModel } from "@rue/muonic"
-import { useRandomColorGenerator } from "@rue/utils";
+import { removeMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic/debug";
 
 
@@ -43,6 +43,14 @@ export function List() {
         })
     }
 
+
+    function moveSelectedItems(index: number) {
+        mu(list$, list => {
+            const removedItems = removeMultipleUniqueItems(selected$, list)
+            list.splice(index, 0, ...removedItems)
+        })
+    }
+
     const selected$ = o$(new Set())
 
 
@@ -54,7 +62,6 @@ export function List() {
 
     function toggleSelect(e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) {
         if (e.target instanceof HTMLElement && e.target.style.cursor === 'pointer') return;
-        console.log("toggle select")
         const item$ = list$[index]
         if (selected$.has(item$)) {
             mu(selected$, o => {
@@ -75,11 +82,13 @@ export function List() {
         })
     }
 
+    const itemNode = new NodeRef()
+
 
     return (
         <div>
             <>
-                {$if($(() => list$.length === 0), 'create', () => (
+                {$if($(() => list$.length === 0), 'show', () => (
                     <div
 
                         onclick={() => insertItem(0)}
@@ -91,6 +100,7 @@ export function List() {
                 {$else(() =>
                     forEachIn(list$, (item$, $index) => (
                         <div
+                            ref={itemNode}
                             onclick={(e) => toggleSelect(e, $index())}
                             style={[
                                 `background-color: ${randomColor.get()}`,
@@ -114,12 +124,12 @@ export function List() {
                             >
                                 insert
                             </div>
-                            {/* <div
-                                onclick={() => insertSelectedItem($index() + 1)}
+                            <div
+                                onclick={() => moveSelectedItems($index() + 1)}
                                 style="background-color: white; cursor: pointer"
                             >
                                 insert
-                            </div> */}
+                            </div>
                         </div>
                     ), 'id')
                 )}
