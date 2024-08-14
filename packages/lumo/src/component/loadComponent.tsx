@@ -1,9 +1,7 @@
-import { useSignals } from "@rue/muonic";
 import { ComponentSetup } from "./InternalComponent";
 import { $else, $elseIf, $if } from "../conditional/$if";
 import { noop } from "@rue/utils";
-
-const { $, set } = useSignals();
+import { toSignal } from "@rue/muonic";
 
 const lazyComponents: Map<() => Promise<ComponentSetup>, ComponentSetup> = new Map()
 
@@ -15,30 +13,30 @@ export function loadComponent<P>(config: {
 }, idleID?: number) {
     if (idleID != null) cancelIdleCallback(idleID);
     const { load, ErrorView, Placeholder, timeout } = config;
-    const $loading = $(true);
-    const $timedOut = $(false);
-    const $loaded = $(false);
+    const $loading = toSignal(true);
+    const $timedOut = toSignal(false);
+    const $loaded = toSignal(false);
     let timeoutID: any;
     let Component: ComponentSetup = lazyComponents.get(load) || noop
     if (Component == noop) {
         const pendingComponent = load();
         if (timeout) {
             timeoutID = setTimeout(() => {
-                set($timedOut, () => true);
-                set($loading, () => false)
+                $timedOut.set(() => true);
+                $loading.set(() => false)
             }, timeout)
         }
         pendingComponent.then((_Component) => {
             clearTimeout(timeoutID)
             lazyComponents.set(load, _Component)
             Component = _Component;
-            set($loading, () => false)
-            set($loaded, () => true)
+            $loading.set(() => false)
+            $loaded.set(() => true)
         })
     }
     else {
-        set($loaded, () => true)
-        set($loading, () => false)
+        $loaded.set(() => true)
+        $loading.set(() => false)
     }
 
     if (Placeholder && ErrorView) {

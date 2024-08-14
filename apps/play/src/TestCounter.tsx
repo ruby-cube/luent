@@ -1,6 +1,4 @@
-import { useReactivity } from "@rue/muonic"
 
-const { $, set, o$, mu, o$$$ } = useReactivity();
 
 // Tests:
 // - simple signal
@@ -8,16 +6,18 @@ const { $, set, o$, mu, o$$$ } = useReactivity();
 // - derived signal in template
 // - derived signal with memo
 
+import { $, toReactive, toSignal } from "@rue/muonic"
+
 export function TestCounterSignals() {
-    const $count = $(0)
-    const $doubleCount = $(() => $count() * 2)
+    const $count = toSignal(0)
+    const $doubleCount = toSignal(() => $count() * 2)
 
     function increment() {
-        set($count, count => count + 1)
+        $count.set(count => count + 1)
     }
 
     function decrement() {
-        set($count, count => count - 1)
+        $count.set(count => count - 1)
     }
 
     return (
@@ -46,21 +46,17 @@ export function TestCounter() {
 }
 
 function useCounter() {
-    const counter$ = o$({
+    const counter$ = toReactive({
         count: 0
     })
 
     return {
         counter$,
         increment() {
-            mu(counter$, o => {
-                o.count = o.count + 1;
-            })
+            counter$.count = counter$.count + 1;
         },
         decrement() {
-            mu(counter$, o => {
-                o.count = o.count - 1
-            })
+            counter$.count = counter$.count - 1
         }
     }
 }

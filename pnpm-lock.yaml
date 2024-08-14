@@ -32,6 +32,9 @@ importers:
       '@rue/jsx-runtime':
         specifier: workspace:*
         version: link:../../packages/lumo/jsx-runtime
+      '@rue/lumin':
+        specifier: workspace:*
+        version: link:../../packages/lumin
       '@rue/lumo':
         specifier: workspace:*
         version: link:../../packages/lumo
@@ -113,9 +116,28 @@ importers:
       vite:
         specifier: ^5.3.2
         version: 5.3.4(@types/node@20.14.12)
-      vue:
-        specifier: ^3.4.31
-        version: 3.4.34(typescript@5.5.4)
+
+  packages/lumin:
+    dependencies:
+      '@rue/utils':
+        specifier: workspace:*
+        version: link:../utils
+    devDependencies:
+      '@rue/dev':
+        specifier: workspace:*
+        version: link:../dev
+      '@rue/types':
+        specifier: workspace:*
+        version: link:../types
+      '@types/node':
+        specifier: ^20.14.9
+        version: 20.14.12
+      typescript:
+        specifier: ^5.5.3
+        version: 5.5.4
+      vite:
+        specifier: ^5.3.2
+        version: 5.3.5(@types/node@20.14.12)
 
   packages/lumo:
     dependencies:
@@ -128,9 +150,6 @@ importers:
       '@rue/utils':
         specifier: workspace:*
         version: link:../utils
-      '@vue/runtime-dom':
-        specifier: ^3.4.34
-        version: 3.4.34
     devDependencies:
       '@rue/types':
         specifier: workspace:*
@@ -157,12 +176,6 @@ importers:
       '@rue/utils':
         specifier: workspace:*
         version: link:../utils
-      '@vueuse/core':
-        specifier: ^10.11.0
-        version: 10.11.0(vue@3.4.34)
-      vue:
-        specifier: ^3.4.31
-        version: 3.4.34(typescript@5.5.4)
     devDependencies:
       '@rue/types':
         specifier: workspace:*
@@ -2463,6 +2476,7 @@ packages:
       '@vue/server-renderer': 3.4.34(vue@3.4.34)
       '@vue/shared': 3.4.34
       typescript: 5.5.4
+    dev: false
 
   /which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}

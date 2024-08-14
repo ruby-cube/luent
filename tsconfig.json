@@ -33,6 +33,9 @@
       "@rue/actionry": [
         "./packages/actionry/index.ts"
       ],
+      "@rue/lumin": [
+        "./packages/lumin/index.ts"
+      ],
       "@rue/lumo": [
         "./packages/lumo/src/index.ts"
       ],

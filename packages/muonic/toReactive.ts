@@ -1,18 +1,22 @@
 import { AnyObject } from "@rue/types";
 import { isWatchedModel, storeInitialDerivedValueIfNeeded, track, trigger, triggerReactiveModel, useUpdateCycle } from "./watch";
-import { emitSignal } from "./useReactivity";
+import { emitSignal } from "./hasReactivity_DEV";
 import { isObjectLiteral, KeyPath, Ref } from "@rue/utils";
-import { isTuple, tuple } from "./Tuple";
+import { isTuple, tuple } from "./tuple";
 import { asReactiveProp, getReactiveProp } from "./ReactiveProp";
 import { shallowClone } from "./SnapshotManager";
 import { asTrackableOp, getTrackableOp } from "./TrackableOp";
 import { getRootWatchedModelAndKeyPath, isNestedWatched } from "./deepWatch";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
-type RegisterReactive = (reactive: ReactiveModel, target: AnyObject) => void
-type ReactiveModelRegistry = {
-    register: RegisterReactive,
-    mutationPermitted: boolean
+type RegisterReactive = (reactive: ReactiveModel, target: AnyObject, deep: boolean | undefined) => void
+// type RegisterReactive = {
+//     register: RegisterReactive,
+//     mutationPermitted: boolean
+// }
+
+export type Readonly<T extends AnyObject = AnyObject> = {
+    readonly [K in keyof T]: T[K]
 }
 
 const reactiveMap: WeakMap<ReactiveModel, AnyObject> = new WeakMap();
@@ -21,50 +25,53 @@ const DEEP = true;
 const O$DEPTH = 1;
 const O$$$DEPTH = 3;
 
+function register(reactive: ReactiveModel, target: AnyObject, deep: boolean | undefined) {
+    // localReactives.add(reactive);
+    reactiveMap.set(reactive, target);
+    if (deep) deepReactives.add(reactive)
+}
+
 
 export function isDeepReactive(value: any): value is ReactiveModel {
     return deepReactives.has(value);
 }
 
-export function useReactiveModels(config?: { snapshots: boolean }) {
-    const localReactives: WeakSet<ReactiveModel> = new WeakSet();
-    const registry = {
-        register(reactive: ReactiveModel, target: AnyObject) {
-            localReactives.add(reactive);
-            reactiveMap.set(reactive, target);
-        },
-        mutationPermitted: false,
+// export function useReactiveModels(config?: { snapshots: boolean }) {
+// const localReactives: WeakSet<ReactiveModel> = new WeakSet();
+// const register = {
+//     ,
+//     mutationPermitted: false,
+// }
+
+function _o$(target: AnyObject, deep?: boolean) {
+    if (reactiveMap.has(target)) return target; // prevents double wrapped reactive
+
+    const reactive = createReactive(target, register, deep)
+    if (reactive === null) {
+        if (__DEV__) console.warn(`INVALID INPUT: o$ must receive a reference-type primitive (object)`)
+        return target;
     }
-
-    function _o$(target: AnyObject, deep?: boolean) {
-        if (reactiveMap.has(target)) return target; // prevents double wrapped reactive
-
-        const reactive = createReactive(target, registry, deep)
-        if (reactive === null) {
-            if (__DEV__) console.warn(`INVALID INPUT: o$ must receive a reference-type primitive (object)`)
-            return target;
-        }
-        return reactive;
-    }
-
-    return {
-        o$$$<T extends AnyObject>(target: T): ReactiveModel<T> {
-            return _o$(target, DEEP);
-        },
-
-        o$<T extends AnyObject>(target: T): ReactiveModel<T> {
-            return _o$(target);
-        },
-
-        mu<T extends ReactiveModel, R>(target: T, mutation: (o: T) => R): R {
-            if (!localReactives.has(target)) throw "`mu` can only mutate local reactives created with corresponding `o$` function";
-            registry.mutationPermitted = true;
-            const output = mutation(target);
-            registry.mutationPermitted = false;
-            return output;
-        }
-    }
+    return reactive;
 }
+
+// return {
+export function toDeepReactive<T extends AnyObject>(target: T): ReactiveModel<T> {
+    return _o$(target, DEEP);
+}
+
+export function toReactive<T extends AnyObject>(target: T): ReactiveModel<T> {
+    return _o$(target);
+}
+
+// mu<T extends ReactiveModel, R>(mutation: () => R): R {
+//     // if (!localReactives.has(target)) throw "`mu` can only mutate local reactives created with corresponding `o$` function";
+//     register.mutationPermitted = true;
+//     const output = mutation();
+//     register.mutationPermitted = false;
+//     return output;
+// }
+// }
+// }
 
 export function isReactiveModel(obj: AnyObject): obj is ReactiveModel {
     return reactiveMap.has(obj);
@@ -86,7 +93,7 @@ export function toRaw<T extends AnyObject>(reactive: ReactiveModel<T>): T {
 
 function createReactiveObject(
     target: AnyObject,
-    registry: ReactiveModelRegistry,
+    register: RegisterReactive,
     deep?: boolean
 ) {
     const reactiveRef = new Ref<ReactiveModel>()
@@ -107,7 +114,7 @@ function createReactiveObject(
             reactiveSetter(
                 Object,
                 reactiveRef,
-                registry,
+                register,
                 target,
                 key,
                 value,
@@ -121,7 +128,7 @@ function createReactiveObject(
             const value = target[key];
             if (!(value instanceof Object)) continue;
             if (reactiveMap.has(value)) continue; // prevents double wrapped reactive
-            const value$ = createReactive(value, registry, DEEP)
+            const value$ = createReactive(value, register, DEEP)
             if (value$ === null) continue;
             target[key] = value$;
         }
@@ -133,30 +140,29 @@ function maybeReactivize(
     newValue: any,
     reactive: ReactiveModel,
     oldValue: any,
-    registry: ReactiveModelRegistry
+    register: RegisterReactive
 ) {
     if (reactiveMap.has(newValue)) return newValue;
     const reactiveDepth = shouldReactivize(reactive, oldValue, newValue);
-    return reactiveDepth === O$$$DEPTH ? createReactive(newValue, registry, DEEP)
-        : reactiveDepth === O$DEPTH ? createReactive(newValue, registry)
+    return reactiveDepth === O$$$DEPTH ? createReactive(newValue, register, DEEP)
+        : reactiveDepth === O$DEPTH ? createReactive(newValue, register)
             : newValue;
 }
 
 function createReactive(
     value: any,
-    registry: ReactiveModelRegistry,
+    register: RegisterReactive,
     deep?: boolean
 ) {
     if (reactiveMap.has(value)) return value;
-    const reactive = isObjectLiteral(value) ? createReactiveObject(value, registry, deep)
-        : isTuple(value) ? createReactiveTuple(value, registry, deep)
-            : value instanceof Array ? createReactiveArray(value, registry, deep)
-                : value instanceof Set ? createReactiveSet(value, registry, deep)
-                    : value instanceof Map ? createReactiveMap(value, registry, deep)
+    const reactive = isObjectLiteral(value) ? createReactiveObject(value, register, deep)
+        : isTuple(value) ? createReactiveTuple(value, register, deep)
+            : value instanceof Array ? createReactiveArray(value, register, deep)
+                : value instanceof Set ? createReactiveSet(value, register, deep)
+                    : value instanceof Map ? createReactiveMap(value, register, deep)
                         : null;
     if (reactive) {
-        registry.register(reactive, value);
-        if (deep) deepReactives.add(reactive)
+        register(reactive, value, deep);
     }
     return reactive;
 }
@@ -176,7 +182,7 @@ function shouldReactivize(
 
 function createReactiveArray(
     target: any[],
-    registry: ReactiveModelRegistry,
+    register: RegisterReactive,
     deep?: boolean
 ) {
     const reactiveRef = new Ref<ReactiveModel>();
@@ -186,13 +192,13 @@ function createReactiveArray(
         get: (target, key, receiver) => reactiveArrayGetter(
             reactive,
             (key, fn) => (...args: any[]) => {
-                if (!registry.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
+                // if (!register.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
                 return mutatingOp(
                     args,
                     reactive,
                     target,
                     sampleValue,
-                    registry,
+                    register,
                     key,
                     fn
                 )
@@ -205,7 +211,7 @@ function createReactiveArray(
             reactiveSetter(
                 Array,
                 reactiveRef,
-                registry,
+                register,
                 target,
                 key,
                 value,
@@ -217,7 +223,7 @@ function createReactiveArray(
     sampleValue = reactive[0];
 
     if (deep) {
-        createReactiveArrayItems(target, registry)
+        createReactiveArrayItems(target, register)
     }
     return reactive;
 }
@@ -410,7 +416,7 @@ function maybeReactivizeArgs(
     args: any[],
     reactive: ReactiveModel,
     sampleValue: any,
-    registry: ReactiveModelRegistry
+    register: RegisterReactive
 ) {
     if (!(op in insertOps)) return args;
 
@@ -419,7 +425,7 @@ function maybeReactivizeArgs(
     const newItems = hasSingleItem ? [args[itemPosition.at]] : args.slice(itemPosition.from);
     const _newItems: any[] = [];
     for (const newItem of newItems) {
-        _newItems.push(maybeReactivize(newItem, reactive, sampleValue, registry))
+        _newItems.push(maybeReactivize(newItem, reactive, sampleValue, register))
     }
     if (hasSingleItem) {
         args[itemPosition.at] = _newItems[0];
@@ -433,7 +439,7 @@ function maybeReactivizeArgs(
 
 function createReactiveTuple(
     target: any[],
-    registry: ReactiveModelRegistry,
+    register: RegisterReactive,
     deep?: boolean
 ) {
 
@@ -452,7 +458,7 @@ function createReactiveTuple(
             reactiveSetter(
                 Array,
                 reactiveRef,
-                registry,
+                register,
                 target,
                 key,
                 value,
@@ -462,7 +468,7 @@ function createReactiveTuple(
     reactiveRef.o = reactive;
 
     if (deep) {
-        createReactiveArrayItems(target, registry)
+        createReactiveArrayItems(target, register)
     }
     return reactive;
 }
@@ -499,13 +505,13 @@ function reactiveArrayGetter(
 function reactiveSetter(
     DataStructure: typeof Array | typeof Object | typeof Set | typeof Map,
     reactiveRef: Ref<ReactiveModel>,
-    registry: ReactiveModelRegistry,
+    register: RegisterReactive,
     target: AnyObject,
     key: string | symbol,
     newValue: any,
     receiver: AnyObject
 ) {
-    if (!registry.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
+    // if (!register.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
     const reactive = reactiveRef.o!
     const op = target instanceof Array && isIntegerKey(key) ? getTrackableOp(reactive, 'at', key) : null;
     const prop = getReactiveProp(reactive, key);
@@ -518,7 +524,7 @@ function reactiveSetter(
         Reflect.set(target, key, newValue, receiver);
         return true;
     }
-    const _newValue = maybeReactivize(newValue, reactive, oldValue, registry)
+    const _newValue = maybeReactivize(newValue, reactive, oldValue, register)
 
     const updateCycle = useUpdateCycle();
 
@@ -605,13 +611,13 @@ function isNonSettable(key: string, DataStructure: typeof Array | typeof Object 
 
 function createReactiveArrayItems(
     target: any[],
-    registry: ReactiveModelRegistry
+    register: RegisterReactive
 ) {
     for (let i = 0; i < target.length; i++) {
         const item = target[i]
         if (reactiveMap.has(item)) continue;
         if (!(item instanceof Object)) continue;
-        const item$ = createReactive(item, registry, DEEP)
+        const item$ = createReactive(item, register, DEEP)
         if (item$ === null) continue;
         target[i] = item$;
     }
@@ -621,7 +627,7 @@ function createReactiveArrayItems(
 
 function createReactiveSet(
     target: Set<any>,
-    registry: ReactiveModelRegistry,
+    register: RegisterReactive,
     deep?: boolean
 ) {
     // const reactiveRef = new Ref<ReactiveModel>();
@@ -633,13 +639,13 @@ function createReactiveSet(
 
             if (key in mutatingSetOps) {
                 return (...args: any[]) => {
-                    if (!registry.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
+                    // if (!register.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
                     return mutatingOp(
                         args,
                         reactive,
                         target,
                         sampleValue,
-                        registry,
+                        register,
                         key,
                         value
                     )
@@ -670,7 +676,7 @@ function createReactiveSet(
     sampleValue = values[0];
 
     if (deep) {
-        createReactiveArrayItems(values, registry)
+        createReactiveArrayItems(values, register)
         target.clear();
         for (const value of values) {
             target.add(value);
@@ -688,11 +694,11 @@ function mutatingOp(
     reactive: ReactiveModel,
     target: AnyObject,
     sampleValue: any,
-    registry: ReactiveModelRegistry,
+    register: RegisterReactive,
     key: string | symbol,
     fn: Function
 ) {
-    const _args = maybeReactivizeArgs(<string>key, args, reactive, sampleValue, registry);
+    const _args = maybeReactivizeArgs(<string>key, args, reactive, sampleValue, register);
     const updateCycle = useUpdateCycle();
     const clone = updateCycle.getSnapshot(reactive) ? undefined : shallowClone(target) // cloning before mutation if snapshot does not already exist
     let hasMutated = false;
@@ -823,7 +829,7 @@ function mutatingOp(
 
 function createReactiveMap(
     target: Map<any, any>,
-    registry: ReactiveModelRegistry,
+    register: RegisterReactive,
     deep?: boolean
 ) {
     const reactiveRef = new Ref<ReactiveModel>()
@@ -844,13 +850,13 @@ function createReactiveMap(
             }
             if (key in mutatingMapOps) {
                 return (...args: any[]) => {
-                    if (!registry.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
+                    // if (!register.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
                     return mutatingOp(
                         args,
                         reactive,
                         target,
                         sampleValue,
-                        registry,
+                        register,
                         key,
                         value
                     )
@@ -865,7 +871,7 @@ function createReactiveMap(
             reactiveSetter(
                 Map,
                 reactiveRef,
-                registry,
+                register,
                 target,
                 key,
                 value,
@@ -883,7 +889,7 @@ function createReactiveMap(
         //     const [key, value] = entries[i];
         //     if (reactiveMap.has(item)) continue;
         //     if (!(item instanceof Object)) continue;
-        //     const item$ = createReactive(item, registry, DEEP)
+        //     const item$ = createReactive(item, register, DEEP)
         //     if (item$ === null) continue;
         //     target[i] = item$;
         // }

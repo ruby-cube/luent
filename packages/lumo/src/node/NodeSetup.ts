@@ -1,9 +1,9 @@
 import { PublicComponent, ComponentSetup, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag } from "../element/mE";
 import { ListData } from "../list/forEachIn";
-import { Signal } from "@rue/muonic/useSignals";
 import { DerivedSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { ComponentConfig, ElementConfig, RenderFunction } from "./makeNode";
+import { Signal } from "@rue/muonic";
 
 
 export type NodeSetup<T extends HTMLTag | ComponentSetup> =

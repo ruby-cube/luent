@@ -1,6 +1,6 @@
 import { ActiveListener, getActiveFlask, onFlaskDisposal } from "@rue/flask";
 import { DependencyTracker, getDependencyTracker, ReactiveAtom } from "./DependencyTracker";
-import { isSignal, Signal, SIGNAL_MARKER } from "./useSignals";
+import { isSignal, Signal, SIGNAL_MARKER } from "./toSignal";
 import { watch } from "./watch";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 import { getReactivePropValue, isReactiveProp } from "./ReactiveProp";
@@ -134,7 +134,8 @@ export class DerivedSignalState {
 }
 
 
-export function makeDerivedSignal<T extends any>(pureGetter: () => T, retrack?: boolean): DerivedSignal<T> {
+
+export function $<T extends any>(pureGetter: () => T, retrack?: boolean): DerivedSignal<T> {
     let initialized = false;
     const derivedSignal = () => {
         const _this = (<DerivedSignal><unknown>derivedSignal)[DERIVED_SIGNAL]

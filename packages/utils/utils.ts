@@ -29,7 +29,7 @@ export function normalizeToArray(value: any | any[]) {
 export const UNDEFINED = Symbol();
 
 
-export function removeMultipleUniqueItems(uniqueItemsToRemove: Set<any>, list: any[], ){ // assumes items are unique
+export function moveMultipleUniqueItems(uniqueItemsToRemove: Set<any>, list: any[], reinsertionIndex: number){ // assumes items are unique
     const indicesAndRemoveCount: [number, number][] = [];
     const removedItems = [];
     let j = 0;
@@ -43,7 +43,8 @@ export function removeMultipleUniqueItems(uniqueItemsToRemove: Set<any>, list: a
             else {
                 indicesAndRemoveCount.push([j, 1])
             }
-            removedItems.push(id)
+            removedItems.push(id);
+            if (reinsertionIndex > j) reinsertionIndex--; // adjust index
         }
         j++;
     }
@@ -52,7 +53,7 @@ export function removeMultipleUniqueItems(uniqueItemsToRemove: Set<any>, list: a
         const [index, count] = indicesAndRemoveCount[k];
         list.splice(index, count);
     }
-    return removedItems;
+    list.splice(reinsertionIndex, 0, ...removedItems)
 }
 
 

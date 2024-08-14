@@ -1,4 +1,4 @@
-import { Callback } from "./flaskedListeners";
+import { Callback } from "./flaskableListeners";
 
 
 export type Flask = {

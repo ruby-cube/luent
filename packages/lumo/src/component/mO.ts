@@ -1,12 +1,11 @@
 import { AnyObject } from "@rue/types";
 import { PublicComponent, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent, COMPONENT } from "./InternalComponent";
-import { SetKey, Signal } from "@rue/muonic/useSignals";
 import { collectEffects } from "@rue/flask/flask";
 import { InternalNodeRef, getNodeRef, NodeRef } from "../node/NodeRef";
 import { ComponentConfig, EventsConfig, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { isHTMLEvent } from "../html/attributes";
-import { DerivedSignal } from "@rue/muonic";
+import { DerivedSignal, Signal } from "@rue/muonic";
 import { preserveAllRequested } from "../conditional/$if";
 import { beforeUnmount, LifecycleHook, onActivated, onDeactivated, onUnmounted } from "./lifecycle";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
@@ -17,7 +16,7 @@ export type ComponentOptions = { preserve?: true }
 
 export type InferSlotted<T extends ComponentSetupWithSlot = ComponentSetupWithSlot> =
     T extends (props: infer P) => any ?
-    P extends { slotted: infer S } ?
+    P extends { Slotted: infer S } ?
     S
     : undefined
     : undefined

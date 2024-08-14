@@ -69,7 +69,7 @@ export type ArrayToIntersection<A extends any[]> = UnionToIntersection<A[number]
 
 
 export type MutableObject = { [key: string | symbol | number]: any };
-export type Mutable<T> = T & {[Key in keyof T]: T[Key]};
+export type Mutable<T> = T & { [Key in keyof T]: T[Key] };
 
 export type Cast = unknown; // force type casting
 
@@ -78,7 +78,7 @@ export type Class = {
   new(...args: any[]): Object;
 };
 
-export type ArrayItem<A extends unknown[]> = 
+export type ArrayItem<A extends unknown[]> =
   A extends (infer I)[] ? I : never;
 
 
@@ -88,3 +88,5 @@ export type ArrayItem<A extends unknown[]> =
  * Construct a type with the properties of T except for those in type K.
  */
 export type Skip<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+
+export type MaybePromise<T> = Promise<T> | T

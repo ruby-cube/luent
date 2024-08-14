@@ -5,6 +5,12 @@ import { _NodePod } from "./node/NodePod";
 import { setUpComponent } from "./component/setUpComponent";
 import { collectEffects, Flask } from "@rue/flask";
 
+let appRoot: Element;
+
+export function getAppRoot(){
+    return appRoot;
+}
+
 export function createApp(App: RenderFunction) {
     return {
         App,
@@ -12,6 +18,7 @@ export function createApp(App: RenderFunction) {
         mount(id: string) {
             const root = document.querySelector(id);
             if (!(root instanceof Element)) throw new Error('No root element to mount app to. Check selector string')
+            appRoot = root;
             const parentComponent = new InternalComponent(null, false);
             const component = mO(this.App, undefined)
             const nodePod = new _NodePod();

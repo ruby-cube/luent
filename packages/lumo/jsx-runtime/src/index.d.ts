@@ -4263,7 +4263,7 @@ declare global {
 
     namespace Lumo {
         type ReactivizeProps<P extends { [key: string]: any }> = {
-            [K in keyof P]: P[K] | ReactiveSignal<P[K]>
+            [K in keyof P]: Exclude<P[K], undefined> | ReactiveSignal<Exclude<P[K], undefined>> // exclude undefined because undefined comes from optional props
         }
     }
 

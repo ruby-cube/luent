@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { SnapshotManager } from "./SnapshotManager";
-import { isReactiveModel, ReactiveModel } from "./useReactiveModels";
-import { isSignal, Signal } from "./useSignals";
+import { isReactiveModel, ReactiveModel } from "./toReactive";
+import { isSignal, Signal } from "./toSignal";
 import { runNonSyncTasks } from "./watch";
 import { $listen, ScheduleStop } from "@rue/flask";
 import { removeItem } from "../utils/array";

@@ -6,8 +6,7 @@
     "dependencies": {
         "@rue/flask": "workspace:*",
         "@rue/muonic": "workspace:*",
-        "@rue/utils": "workspace:*",
-        "@vue/runtime-dom": "^3.4.34"
+        "@rue/utils": "workspace:*"
     },
     "devDependencies": {
         "@rue/types": "workspace:*"

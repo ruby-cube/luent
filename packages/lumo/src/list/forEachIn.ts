@@ -1,14 +1,11 @@
-import { AnyObject } from "@rue/types";
 import { hasSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
-import { isReactiveModel, ReactiveModel } from "@rue/muonic/useReactiveModels";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
-import { Signal, useSignals } from "@rue/muonic/useSignals";
 import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { $listen, Callback, collectEffects, Flask, ListenerOptions } from "@rue/flask";
 import { DOMNode } from "../component/InternalComponent";
+import { isReactiveModel, ReactiveModel, Readonly, Signal, toSignal } from "@rue/muonic";
 
-export const _listReactivity = useSignals()
 
 export type RenderItem<T = any> = (item: T, $index: Signal<number>) => NodeEntity[] | NodeEntity
 // type ListData = AnyObject | any[] | Set<any> | Map<any, any> | ReactiveModel<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
@@ -104,7 +101,7 @@ export function forEachIn<T>(data: ReactiveModel<Collection<T>> | ReactiveSignal
 export function forEachIn<T>(data: ReactiveModel<Collection<T>> | ReactiveSignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
 export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: string): ListRenderKit {
     const domNodes: (NodeEntity | NodeEntity[])[] = [];
-    const list = hasSignal(data) ? data() : data;
+    const list = hasSignal(data) ? data() : <Collection<T>>data;
     const _list = list instanceof Array ? list : list //TODO: need to implement for sets, maps, and objects
     const isDynamic = isReactiveModel(data) || hasSignal(data);
 
@@ -116,7 +113,7 @@ export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: s
     pushList(listRenderKit);
     let i = 0;
     while (i < _list.length) {
-        const $index = _listReactivity.$(i)
+        const $index = toSignal(i)
         const item = _list[i]
         currentItem = item;
         $currentIndex = $index;

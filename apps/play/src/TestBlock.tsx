@@ -1,18 +1,39 @@
-import { $elseIf, $if } from "@rue/lumo";
-import { Signal, useSignals } from "@rue/muonic";
+import { $elseIf, $if, expose, NodeRef, onMounted } from "@rue/lumo";
+import { Signal, toSignal } from "@rue/muonic";
 
-const { $, set } = useSignals()
 
 export function TestBlockA(props: { $active: Signal<boolean> }) {
     const { $active } = props
-    const $black = $(true);
+    const $black = toSignal(true);
+
+    expose({
+        dog: "hi"
+    })
+    
     return $if($active, 'create', () => (
                 <div>TestBlockA!!</div>
             ))
 }
+
+function Lap(){
+    const testBlock = new NodeRef<typeof TestBlockA>()
+    const $active = toSignal(false)
+
+    onMounted(()=>{
+        const hey = testBlock.o
+    })
+
+    return (
+        <div>fkj
+        <TestBlockA $active={$active}></TestBlockA>
+        </div>
+    )
+}
+
+
 export function TestBlockB(props: { $active: Signal<boolean> }) {
     const { $active } = props
-    const $black = $(true);
+    const $black = toSignal(true);
 
     return (
         <>

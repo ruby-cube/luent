@@ -1,10 +1,9 @@
 import { $else, $elseIf, $if, COMPONENT, ComponentSetup, expose, forEachIn, NodeEntity, NodeRef, onMounted, preventDefault, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
-import { Signal, useReactivity, watch, initializeEffect, isReactiveModel } from "@rue/muonic"
-import { removeMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
+import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic/debug";
+import { $, toDeepReactive, toReactive } from "@rue/muonic";
 
 
-const { $, set, o$, mu, $$, $$$, o$$$ } = useReactivity();
 const randomColor = useRandomColorGenerator()
 let id = 4;
 
@@ -15,7 +14,7 @@ function genId() {
 
 export function List() {
 
-    const list$ = o$$$([
+    const list$ = toDeepReactive([
         { id: 0, content: "frog" },
         { id: 1, content: "robin" },
         { id: 2, content: "fly" },
@@ -29,57 +28,42 @@ export function List() {
 
     function changeContent(index: number) {
         const item$ = list$[index];
-        mu(item$, o => {
-            o.content = 'something else'
-        })
+        item$.content = 'something else'
     }
 
     function insertItem(index: number) {
-        mu(list$, list => {
-            list.splice(index, 0, {
-                id: genId(),
-                content: (Math.random() * 100).toString(),
-            })
+        list$.splice(index, 0, {
+            id: genId(),
+            content: (Math.random() * 100).toString(),
         })
     }
 
 
     function moveSelectedItems(index: number) {
-        mu(list$, list => {
-            const removedItems = removeMultipleUniqueItems(selected$, list)
-            list.splice(index, 0, ...removedItems)
-        })
+            moveMultipleUniqueItems(selected$, list$, index)
     }
 
-    const selected$ = o$(new Set())
+    const selected$ = toReactive(new Set())
 
 
     function clearSelection() {
-        mu(selected$, o => {
             selected$.clear()
-        })
     }
 
     function toggleSelect(e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) {
-        if (e.target instanceof HTMLElement && e.target.style.cursor === 'pointer') return;
-        const item$ = list$[index]
-        if (selected$.has(item$)) {
-            mu(selected$, o => {
-                o.delete(item$)
-            })
-        }
-        else {
-            mu(selected$, o => {
-                o.add(item$)
-            })
-        }
+            if (e.target instanceof HTMLElement && e.target.style.cursor === 'pointer') return;
+            const item$ = list$[index]
+            if (selected$.has(item$)) {
+                selected$.delete(item$)
+            }
+            else {
+                selected$.add(item$)
+            }
     }
 
     function removeItem(index: number) {
-        mu(list$, list => {
-            selected$.delete(list[index])
-            list.splice(index, 1);
-        })
+            selected$.delete(list$[index])
+            list$.splice(index, 1);
     }
 
     const itemNode = new NodeRef()

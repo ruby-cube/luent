@@ -1,4 +1,4 @@
-import { Callback, ListenerOptions } from "./flaskedListeners";
+import { Callback, ListenerOptions } from "./flaskableListeners";
 import { addToFlask, getActiveFlask, bindFlask, getFlask } from "./flask";
 import { PendingCancelOp } from "./PendingCancelOp";
 import { genIncrementalId, markNoCleanup, setUpCleanupWarning, shouldWarnNoCleanup, unmarkNoCleanup } from "./initFlask";

@@ -1,4 +1,4 @@
-import { getWithoutTracking, makeDerivedSignal, ReactiveSignal } from "@rue/muonic";
+import { getWithoutTracking, $, ReactiveSignal } from "@rue/muonic";
 import { ConditionalKit } from "./ConditionalKit";
 
 export class ConditionalSeries {
@@ -51,13 +51,13 @@ export class ConditionalSeries {
 }
 
 export function genConditionsSignal(conditions: ReactiveSignal<boolean>[]) {
-    return makeDerivedSignal(() => {
+    return $(() => {
         const values: boolean[] = [];
         for (const $condition of conditions) {
             values.push($condition());
         }
         return values;
-    }) // $(() => [$conditionA(), $conditionB()])
+    }) // $(() => [$conditionA(), $conditionB(), ...])
 }
 
 

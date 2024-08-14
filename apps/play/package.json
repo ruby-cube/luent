@@ -10,6 +10,7 @@
         "@rue/flask": "workspace:*",
         "@rue/jsx-runtime": "workspace:*",
         "@rue/lumo": "workspace:*",
+        "@rue/lumin": "workspace:*",
         "@rue/muonic": "workspace:*",
         "@rue/utils": "workspace:*"
     },

@@ -5,11 +5,12 @@ import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries"
 import { buildConditionalSeries, ConditionalSeries } from "../conditional/ConditionalSeries";
 import { setUpConditionalDisplay } from "../conditional/setUpConditionalDisplay";
 import { setUpConditionalMount } from "../conditional/setUpConditionalMount";
-import { mountElement, setUpTextNode, } from "../element/mE";
+import { mountElement } from "../element/mountElement";
 import { ListRenderKit } from "../list/forEachIn";
 import { setUpNodeList } from "../list/setUpNodeList";
 import { NodeEntity } from "./makeNode";
 import { _NodePod } from "./NodePod";
+import { setUpTextNode } from "./setUpTextNode";
 
 export function setUpNodeEntity(
     component: InternalComponent,
@@ -19,7 +20,7 @@ export function setUpNodeEntity(
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[],
 ) {
-    if (nodeEntity instanceof Element) { // from Web API
+    if (nodeEntity instanceof Element) { // Element type from Web API
         mountElement(parent, nodeEntity, nodePod, fragment)
     }
     else if (nodeEntity instanceof InternalComponent) {
@@ -31,7 +32,7 @@ export function setUpNodeEntity(
     }
     else if (nodeEntity instanceof Array) {
         // conditional series
-        const series =  new ConditionalRenderSeries(nodeEntity, nodeEntity[0].type, () => new ConditionalRenderKit('else', () => []))
+        const series = new ConditionalRenderSeries(nodeEntity, nodeEntity[0].type, () => new ConditionalRenderKit('else', () => []))
         if (series.type === 'create' || series.type === 'activate') {
             setUpConditionalMount(component, parent, series, nodePod, fragment)
         }
@@ -39,10 +40,6 @@ export function setUpNodeEntity(
             setUpConditionalDisplay(component, parent, series, nodePod, fragment)
         }
     }
-    // else if (nodeEntity instanceof ConditionalRenderKit){
-    //     const series = buildConditionalSeries([nodeEntity]);
-    //     setUpConditionalMount(component, parent, series, nodePod, fragment)
-    // }
     else {
         setUpTextNode(parent, nodeEntity, nodePod, fragment)
     }

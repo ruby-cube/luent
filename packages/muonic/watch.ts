@@ -1,6 +1,6 @@
 import { $listen, ListenerOptions, PendingOp, ScheduleStop } from "@rue/flask";
-import { isSignal, Signal } from "./useSignals";
-import { isReactiveModel, isReactiveObject, ReactiveModel, toRaw } from "./useReactiveModels";
+import { isSignal, Signal } from "./toSignal";
+import { isReactiveModel, isReactiveObject, ReactiveModel, toRaw } from "./toReactive";
 import { AnyObject } from "@rue/types";
 import { ActiveListener } from "../flask/ActiveListener";
 import { _runTasks, getCurrentUpdateCycle, Hooks, onPhaseCompleted, Phase, setCurrentUpdateCycle, UpdateCycle } from "./UpdateCycle";

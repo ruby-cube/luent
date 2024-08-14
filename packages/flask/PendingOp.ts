@@ -1,5 +1,5 @@
 import { addToFlask, bindFlask } from "./flask";
-import { CallbackRemover, SchedulerOptions } from "./flaskedListeners";
+import { CallbackRemover, SchedulerOptions } from "./flaskableListeners";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
 

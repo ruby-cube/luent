@@ -1,6 +1,6 @@
 import { $type } from "@rue/utils";
 import { EqualTypes, typeTest } from "../../dev/type-test";
-import { Callback, OneTimeTargetedListener } from "../../flask/flaskedListeners";
+import { Callback, OneTimeTargetedListener } from "../../flask/flaskableListeners";
 import { createHook } from "../Hook"
 import { createTargetedHook } from "../TargetedHook"
 import { AnyObject } from "@rue/types";

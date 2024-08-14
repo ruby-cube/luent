@@ -1,7 +1,7 @@
-import { hasSignal, isReactiveModel, Signal, useSignals } from "@rue/muonic";
+import { hasSignal, isReactiveModel, Signal, toSignal } from "@rue/muonic";
 import { InternalComponent, popComponent, pushComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
-import { _listReactivity, DynamicIndices, ListRenderKit, popList, pushList, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
+import { DynamicIndices, ListRenderKit, popList, pushList, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
 import { watchForRenderAndPreserve } from "../conditional/$if";
 import { watchForRender } from "../reactivity/watchForRender";
@@ -132,7 +132,7 @@ export function insertAndMoveListItemNodes(
             // update $index value
             const $index = dynamicIndices.current[prevIndex];
             newIndices.push($index);
-            _listReactivity.set($index, () => i)
+            $index.set(() => i)
             
             // to update refs
             toFromIndices.push([i, prevIndex]);
@@ -151,7 +151,7 @@ export function insertAndMoveListItemNodes(
 
         if (isNewItem(uItem)) {
             const item = getOriginalItem(uItem, newUArray)
-            const $index = _listReactivity.$(i)
+            const $index = toSignal(i)
             setCurrentItemAndIndex(item, $index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment

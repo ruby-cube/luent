@@ -1,38 +1,32 @@
 import { beforeMount, NodeRef } from "@rue/lumo";
-import { useReactivity, initializeEffect } from "@rue/muonic";
+import {  $, initializeEffect, toDeepReactive, toSignal } from "@rue/muonic";
 
-const { o$$$, mu, $, set } = useReactivity();
 
 //tests:
 //- reactivity of nested object
 
 export function TextBox() {
 
-    const box$ = o$$$({
+    const box$ = toDeepReactive({
         position: {
             x: 0,
             y: 0
         }
     })
 
-    const $count = $(0);
+    const $count = toSignal(0);
+    
     function moveRight() {
-        // set($count, count => count + 1)
-        mu(box$, o => {
-            o.position.x = o.position.x + 10;
-        })
+            box$.position.x = box$.position.x + 10;
     }
 
     function moveLeft() {
-        // set($count, count => count - 1)
-        mu(box$, o => {
-            o.position.x = o.position.x - 10;
-        })
+            box$.position.x = box$.position.x - 10;
     }
 
     const divRef = new NodeRef()
-const $anotherCount = $(()=>$count())
-    initializeEffect(()=>{
+    const $anotherCount = $(() => $count())
+    initializeEffect(() => {
         $anotherCount()
     })
 

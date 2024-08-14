@@ -1,4 +1,4 @@
-import { isReactiveModel, isReactiveObject, ReactiveModel } from "./useReactiveModels";
+import { isReactiveModel, isReactiveObject, ReactiveModel } from "./toReactive";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 import { watch, WatchOptions } from "./watch";
 import { ActiveListener } from "@rue/flask";

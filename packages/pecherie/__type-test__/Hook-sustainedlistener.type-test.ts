@@ -2,7 +2,7 @@ import { EqualTypes, typeTest } from "../../dev/type-test"
 import { createHook } from "../Hook"
 import { PendingOp } from "../../flask/PendingOp"
 import { createTargetedHook } from "../TargetedHook"
-import { $lifetime, $tilStop, ActiveListener } from "../../flask/flaskedListeners"
+import { $lifetime, $tilStop, ActiveListener } from "../../flask/flaskableListeners"
 
 
 {/* CASE: Sustained listener. No listener options */

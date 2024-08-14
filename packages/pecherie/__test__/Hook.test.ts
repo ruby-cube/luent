@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import { createHook } from "../Hook";
-import { $lifetime, $tilStop, Callback } from "../../flask/flaskedListeners";
+import { $lifetime, $tilStop, Callback } from "../../flask/flaskableListeners";
 import { $type } from "@rue/utils";
 import { DevHookListener, initFlask } from "../../flask";
 import { __resetGlobals } from "../../dev/__resetGlobals";

@@ -73,8 +73,6 @@ export class InternalComponent {
             task();
         }
     }
-
-
 }
 
 
@@ -108,9 +106,7 @@ export function expose<T extends AnyObject>(component: T) {
     return publicComponent;
 }
 
-export function isComponent(){
 
-}
 
 // export function runUpdates(this: InternalComponent) {
 //     const taskQueue = usePhaseQueue(this);

@@ -1,6 +1,6 @@
 import { expectTypeOf } from "vitest"
 import { EqualTypes, typeTest } from "../../dev/type-test"
-import { ActiveListener } from "../../flask/flaskedListeners"
+import { ActiveListener } from "../../flask/flaskableListeners"
 import { createHook } from "../Hook"
 import { $type } from "@rue/utils"
 
