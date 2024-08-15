@@ -1,11 +1,10 @@
 import { $else, $elseIf, $if, $Node, COMPONENT, ComponentSetup, expose, forEachIn, NodeEntity, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
-import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic/debug";
-import { MaybePromise } from "@rue/types";
 import { $Signal, Signal } from "@rue/muonic/$Signal";
 import { DeepReactive$ } from "@rue/muonic/Reactive$";
 import { $ } from "@rue/muonic";
+import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
 
 
 const randomColor = useRandomColorGenerator()
@@ -15,11 +14,27 @@ function genId() {
     return id++;
 }
 
-const loadSideBlock = idleLoadComponent({
-    load: () => import('./SideBlock').then(({ SideBlock }) => SideBlock),
-    Placeholder() {
-        return <div>Eep! I'm not ready</div>
-    }
+
+
+const SideBlock = lazyLoadComponent({
+    load: () => {
+        const promise = import('./SideBlock').then(({ SideBlock }) => SideBlock)
+        return new Promise((resolve: (SideBlock: ComponentSetup) => void, reject) => {
+            setTimeout(() => {
+                promise.then((SideBlock) => {
+                    resolve(SideBlock)
+                })
+            }, 6000)
+        })
+    },
+    onIdle: true,
+    Placeholder(props) {
+        return <div>Eep! I'm not ready {props.frog}</div>
+    },
+    // timeout: 5000,
+    ErrorView(props) {
+        return <div>{props.error}</div>
+    },
 });
 
 const onClick = useEventListener('click');
@@ -30,46 +45,20 @@ const onClick = useEventListener('click');
 // deep signal $$$
 // memo$()
 
+export function App() {
+    return (
+        <List></List>
+    )
+}
+
 export function List() {
 
     const $active = $Signal(true)
     if (__DEV__) __addDevName($active, '$active')
 
-    function toggleActiveState() {
-        $active.set(active => !active)
-    }
-
-    const $visible = $Signal(() => $active())
-
-
-
-    const $ready = $Signal(true)
-    if (__DEV__) __addDevName($ready, '$ready')
-
-
-    const list$ = DeepReactive$([
-        { id: 0, content: "frog" },
-        { id: 1, content: "frog" },
-        { id: 2, content: "fly" },
-        { id: 3, content: "swamp" }
-    ])
-
-
-
-    //     initializeEffect(()=>{
-    //         list$[0].content
-    //     }, {
-    //         onTrack(dep){
-    // console.log(dep)
-    //         }
-    //     })
-
-    // initializeEffect(()=>{
-
-
     const $list = $Signal(DeepReactive$([
         { id: 0, content: "frog" },
-        { id: 1, content: "frog" },
+        { id: 1, content: "dog" },
         { id: 2, content: "fly" },
         { id: 3, content: "swamp" }
     ]))
@@ -81,18 +70,8 @@ export function List() {
         const item$ = $list()[index];
         item$.content = 'something else'
     }
-    // const $listUI = $($list().map((item)=>({id: item.id, selected: false})))
 
     function insertItem(index: number) {
-        // set($list, list => {
-        //     const _list = [...list]
-        //     _list.splice(index, 0, {
-        //         id: genId(),
-        //         content: (Math.random() * 100).toString(),
-        //     })
-        //     return _list;
-        // })
-
         $list.set(list => {
             const newList = [...list];
             newList.splice(index, 0, {
@@ -101,17 +80,6 @@ export function List() {
             });
             return newList;
         })
-
-        // mu(list$, list => {
-        //     list.splice(index, 0, {
-        //         id: genId(),
-        //         content: (Math.random() * 100).toString(),
-        //     })
-        // })
-    }
-
-    function selectItem(index: number) {
-
     }
 
     function removeItem(index: number) {
@@ -120,35 +88,15 @@ export function List() {
             _list.splice(index, 1);
             return _list
         })
-        // mu(list$, list => {
-        //     list.splice(index, 1);
-        // })
     }
 
     const { openModal } = useModal();
 
-    // const frog$ = o$({
-    //     name: "sir robin"
-    // })
+    const $showSideBlock = $Signal(true)
 
-    // function changeFrogName() {
-    //     mu(frog$, o => {
-    //         o.name = o.name === "kermit" ? "sir robin" : "kermit"
-    //     })
-    // }
-
-    // watch($(() => frog$.name.last), (value, oldValue, ops) => {
-
-    // })
-
-    // watch($(frog$, 'name.last'), (value, oldValue, ops) => {
-
-    // })
-
-    // const frog$ = o$({
-    //     name: "sir robin"
-    // })
-
+    function showSideBlock() {
+        $showSideBlock.set(o => true)
+    }
 
     return (
         <div>
@@ -185,78 +133,32 @@ export function List() {
                 )}
             </>
             <button onclick={openModal}>open</button>
-            {$await(
-                <ListItem />, {
-                placeholder: () => <div>Loading...</div>,
-                error: () => <div>Error</div>
-            })}
+            <>
+                {$if($showSideBlock, 'create', () =>
+                    <SideBlock frog="sir robin" />
+                )}
+            </>
+            <button onclick={showSideBlock}>show Side Block</button>
         </div>
     )
 }
 
-async function ListItem() {
 
-}
-
-function $await<T>(something: MaybePromise<T>, alt: { placeholder: any, error: any }) {
-
-}
 
 function useModal() {
-    const dialog_box = $Node<typeof DialogBox>()
+    const $dialogBox = $Node<typeof DialogBox>()
 
     function openModal() {
-        dialog_box()!.open()
+        $dialogBox()!.open()
     }
 
     teleportTo('body',
-        <DialogBox ref={dialog_box} />
+        <DialogBox ref={$dialogBox} />
     )
 
     return {
         openModal
     }
-}
-
-function VisibilityBlock() {
-    const $visible = $Signal(false);
-    __addDevName($visible, '$visible')
-
-    function toggleVisibility() {
-        $visible.set(visibility => !visibility)
-    }
-    return (
-        <>
-            <div style="display: flex">
-                {$if($visible, 'show', () => (
-                    <>
-                        <div>surprise</div>
-                        <div>surprise!</div>
-                        <div>surprise!!</div>
-                    </>
-                ))}
-                {$else(() => (
-                    <div>:)</div>
-                ))}
-            </div>
-            <button onclick={toggleVisibility}>show/hide</button>
-        </>
-    )
-}
-
-export function App() {
-    return (
-        <List></List>
-    )
-}
-
-
-function HereBlock(props: { $active: Signal<boolean> }) {
-    const { $active } = props;
-
-    return $if($active, 'show', () => (
-        <p>I AM HERE</p>
-    ))
 }
 
 function DialogBox() {

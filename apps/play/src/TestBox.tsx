@@ -5,7 +5,7 @@ import {  $, initializeEffect, DeepReactive$, $Signal } from "@rue/muonic";
 //tests:
 //- reactivity of nested object
 
-export function TextBox() {
+export function TestBox() {
 
     const box$ = DeepReactive$({
         position: {
@@ -48,8 +48,8 @@ export function TextBox() {
                     o.transform = `translate(${box$.position.x}px)`
                 }
             ]}>I'm a box</div>
-            <button onclick={moveRight}>moveRight</button>
             <button onclick={moveLeft}>moveLeft</button>
+            <button onclick={moveRight}>moveRight</button>
         </>
     )
 }

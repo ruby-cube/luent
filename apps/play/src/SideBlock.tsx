@@ -1,8 +1,8 @@
-export function SideBlock(props: {frog: 'sir robin'}){
-    console.log("creating sideblock!")
+export function SideBlock(props: { frog: 'sir robin' }) {
     return (
         <div>
-        SideBlock
+            Yay it worked
+            {props.frog}
         </div>
     )
 }
