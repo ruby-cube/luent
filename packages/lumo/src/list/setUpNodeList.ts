@@ -1,4 +1,4 @@
-import { hasSignal, isReactiveModel, Signal, toSignal } from "@rue/muonic";
+import { hasSignal, isReactiveModel, Signal, $Signal } from "@rue/muonic";
 import { InternalComponent, popComponent, pushComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { DynamicIndices, ListRenderKit, popList, pushList, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
@@ -8,7 +8,7 @@ import { watchForRender } from "../reactivity/watchForRender";
 import { AnyObject } from "@rue/types";
 import { diff, InsertAndMoveKit } from "./diff";
 import { LifecycleHook } from "../component/lifecycle";
-import { getNodeRef, InternalNodeRef } from "../node/NodeRef";
+import { getNodeRef, InternalNodeRef } from "../node/$Node";
 import { normalizeToArray } from "@rue/utils";
 import { emitHookBatch, removeDOMNodes } from "../conditional/setUpConditionalMount";
 import { collectEffects, Flask, getActiveFlask } from "@rue/flask";
@@ -151,7 +151,7 @@ export function insertAndMoveListItemNodes(
 
         if (isNewItem(uItem)) {
             const item = getOriginalItem(uItem, newUArray)
-            const $index = toSignal(i)
+            const $index = $Signal(i)
             setCurrentItemAndIndex(item, $index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment

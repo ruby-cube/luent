@@ -1,13 +1,13 @@
 import { getActiveFlask } from "@rue/flask";
 import { $else, $if } from "@rue/lumo";
-import { $, toReactive, toSignal } from "@rue/muonic";
+import { $, Reactive$, $Signal } from "@rue/muonic";
 
 
 export function TestConditional() {
 
-    const $active = toSignal(true)
+    const $active = $Signal(true)
 
-    const list$ = toReactive([1, 2, 3])
+    const list$ = Reactive$([1, 2, 3])
 
     function insert() {
         list$.push(list$.length + 1)

@@ -1,10 +1,10 @@
-import { $elseIf, $if, expose, NodeRef, onMounted } from "@rue/lumo";
-import { Signal, toSignal } from "@rue/muonic";
+import { $elseIf, $if, $Node, expose, onMounted } from "@rue/lumo";
+import { Signal, $Signal } from "@rue/muonic";
 
 
 export function TestBlockA(props: { $active: Signal<boolean> }) {
     const { $active } = props
-    const $black = toSignal(true);
+    const $black = $Signal(true);
 
     expose({
         dog: "hi"
@@ -16,11 +16,11 @@ export function TestBlockA(props: { $active: Signal<boolean> }) {
 }
 
 function Lap(){
-    const testBlock = new NodeRef<typeof TestBlockA>()
-    const $active = toSignal(false)
+    const $testBlock = $Node<typeof TestBlockA>()
+    const $active = $Signal(false)
 
     onMounted(()=>{
-        const hey = testBlock.o
+        const hey = $testBlock()
     })
 
     return (
@@ -33,7 +33,7 @@ function Lap(){
 
 export function TestBlockB(props: { $active: Signal<boolean> }) {
     const { $active } = props
-    const $black = toSignal(true);
+    const $black = $Signal(true);
 
     return (
         <>

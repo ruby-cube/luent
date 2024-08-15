@@ -1,10 +1,8 @@
 import { PublicComponent, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "../component/InternalComponent";
 import { DerivedSignal, hasSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
-import { getWithoutTracking } from "@rue/muonic/DependencyTracker";
 import { normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
-import { InternalNodeRef, getNodeRef, NodeRef } from "../node/NodeRef";
-import { analyzeAttributes } from "../component/mO";
+import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
 import { initializeRender, watchForRender } from "../reactivity/watchForRender";
 import { watchForRenderAndPreserve, initializeRenderAndPreserve } from "../conditional/$if";
 import { ElementConfig, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
@@ -16,7 +14,10 @@ import { beforeUnmount } from "../component/lifecycle";
 import { _runTasks, Hooks } from "@rue/muonic/UpdateCycle";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
-import { getElement, isHydrating } from "../hydration/hydration";
+import { isHydrating } from "../hydration/hydration";
+import { getElement } from "../hydration/getElement";
+import { AnyObject } from "@rue/types";
+import { isHTMLEvent } from "../html/attributes";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -45,7 +46,8 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     const domNode = isHydrating() ? getElement() : document.createElement(tagName);
 
     if (ref) {
-        const _ref = ref.o instanceof Array ? getNodeRef(ref.o) || new InternalNodeRef(ref) : new InternalNodeRef(ref)
+        const refValue = ref()
+        const _ref = refValue instanceof Array ? getNodeRef(refValue) || new InternalNodeRef(ref) : new InternalNodeRef(ref)
         _ref.assignValue(domNode, $index)
         initializeRef(_ref)
     }
@@ -100,6 +102,31 @@ function validateConditionalSeries(nodeEntities: ConditionalRenderKit[], isNotCo
         const nodeEntity = nodeEntities[i];
         if (!(nodeEntity instanceof ConditionalRenderKit) || nodeEntity.statementType === 'if' || nodeEntity.statementType == 'else')
             throw new Error("Invalid conditional series")
+    }
+}
+
+function analyzeAttributes(entries: AnyObject) {
+    const events: AnyObject = {};
+    // const jsxProps: AnyObject = {};
+    const attributes: AnyObject = {};
+    for (const key in entries) {
+        if (key === "children") {
+            continue;
+        }
+        else if (isHTMLEvent(key)) {
+            events[key.slice(2)] = entries[key];
+        }
+        // else if (isHTMLAttribute(key, tag)) {
+        // }
+        else {
+            attributes[key] = entries[key];
+            // jsxProps[key] = jsxEntries[key];
+        }
+    }
+    return {
+        attributes,
+        events,
+        // jsxProps
     }
 }
 
@@ -183,7 +210,7 @@ function setUpClasses(component: InternalComponent, node: Element, classes: (((o
                 }, { eager: true })
             }
         }
-        else {
+        else if (!isHydrating()){
             if (__DEV__ && entry) warnDuplicateClasses(node.className, entry);
             node.className = node.className + " " + entry
         }
@@ -209,7 +236,7 @@ function setUpStyles(component: InternalComponent, node: Element, styles: (((o: 
         if (entry instanceof Function) {
             _initializeRender(() => entry(style))
         }
-        else {
+        else if (!isHydrating()){
             if (__DEV__ && entry) warnOverlappingStyles(style.cssText, normalizeStyle(entry));
             style.cssText = style.cssText + "; " + normalizeStyle(entry)
         }

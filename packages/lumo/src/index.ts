@@ -1,5 +1,5 @@
 export * from './node/NodePod' //TODO: Limit to public API
-export * from './node/NodeRef' //TODO: Limit to public API
+export * from './node/$Node' //TODO: Limit to public API
 export * from './component/InternalComponent' //TODO: Limit to public API
 export * from './node/NodeSetup' //TODO: Limit to public API
 export * from './createApp' //TODO: Limit to public API

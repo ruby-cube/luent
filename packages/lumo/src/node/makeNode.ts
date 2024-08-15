@@ -3,7 +3,7 @@ import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../
 import { getCurrentItemAndIndex, isSettingUpList, ListRenderKit, onListUpdated } from "../list/forEachIn";
 import { HTMLTag, makeElement } from "../element/mE";
 import { makeComponent, InferSlotted } from "../component/mO";
-import { InternalNodeRef, NodeRef } from "./NodeRef";
+import { InternalNodeRef, NodeSignal } from "./$Node";
 import { getNodeConfig } from "../../api-play/_setUpNode";
 import { beforeUnmount } from "../component/lifecycle";
 import { getActiveFlask, getFlask, onFlaskDisposal } from "@rue/flask";
@@ -45,7 +45,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 } & NodeSetup<HTMLElementTagNameMap[K]>
 
 type NodeSetup<T extends Element | ComponentSetup> = {
-    ref?: NodeRef<T>,
+    ref?: NodeSignal<T>,
 }
 
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
@@ -73,7 +73,7 @@ export function makeNode(
     )
 }
 
-export function _getNodeConfig(ref: NodeRef | undefined) {
+export function _getNodeConfig(ref: NodeSignal | undefined) {
     if (ref) {
         const config = getNodeConfig(ref);
         if (config instanceof Function) {
@@ -105,7 +105,6 @@ export function initializeRef( // should this be initialize ref?
         const listUpdatedListener =
             onListUpdated((toFromIndices) => {
                 ref.updateListRef(toFromIndices)
-                console.log('listref', ref.o)
             }, { outlive: true })
 
         outerFlask?.onDisposal(listUpdatedListener.stop)

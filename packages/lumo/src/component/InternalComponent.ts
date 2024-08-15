@@ -1,11 +1,10 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject, MaybePromise } from "@rue/types";
 import { LifecycleHook } from "./lifecycle";
-import { InternalNodeRef } from "../node/NodeRef";
+import { InternalNodeRef } from "../node/$Node";
 import { EventHandler, NodeEntity, RenderFunction } from "../node/makeNode";
 import { DerivedSignal } from "@rue/muonic";
 import { _NodePod } from "../node/NodePod";
 
-// export type NodeRef = Signal<PublicComponent | DOMNode | (DOMNode | PublicComponent)[]>
 
 export type DOMNode = CharacterData | Element
 export type Props = {
@@ -31,7 +30,7 @@ export class InternalComponent {
     provides: AnyObject | undefined;
     component: PublicComponent | null = null;
     parent: InternalComponent | null;
-    nodeEntities: NodeEntity[] = []; //TODO: add context type?? //QUESTION: should this be cleared or updated?
+    nodeEntities: MaybePromise<NodeEntity[]> = []; //TODO: add context type?? //QUESTION: should this be cleared or updated?
     preserve: boolean;
     tasks: {
         [LifecycleHook.BEFORE_MOUNT]: Set<() => void> | undefined;

@@ -1,10 +1,9 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject, MaybePromise } from "@rue/types";
 import { PublicComponent, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent, COMPONENT } from "./InternalComponent";
-import { collectEffects } from "@rue/flask/flask";
-import { InternalNodeRef, getNodeRef, NodeRef } from "../node/NodeRef";
+import { collectEffects, Flask } from "@rue/flask/flask";
+import { InternalNodeRef, NodeSignal, getNodeRef, get$Node } from "../node/$Node";
 import { ComponentConfig, EventsConfig, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { isHTMLEvent } from "../html/attributes";
 import { DerivedSignal, Signal } from "@rue/muonic";
 import { preserveAllRequested } from "../conditional/$if";
 import { beforeUnmount, LifecycleHook, onActivated, onDeactivated, onUnmounted } from "./lifecycle";
@@ -62,7 +61,7 @@ export function makeComponent(
 // style?: { [K in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[K] };
 // $class?: ((o: DOMTokenList) => void)[],
 // $style?: ((o: CSSStyleDeclaration) => void)[],
-// ref?: NodeRef,
+// ref?: NodeSignal,
 // $index?: Signal<number>
 
 
@@ -116,68 +115,89 @@ export function runComponentSetup(
     $index: Signal<number> | undefined
 ) {
     collectEffects((flask, outerFlask) => {
-        const ref = config.ref as NodeRef<ComponentSetup | ComponentSetup[]>
+        const output = Component({ ...config, slotted })
+        if (output instanceof Promise) {
+            component.nodeEntities = output;
+            popComponent()
+            output.then((output) => {
+                pushComponent(component);
+                setUpStuff(component, output, config.ref, $index, flask)
+                popComponent()
+                return component;
+            }) //TODO: Error handling
 
-        const nodeEntities = normalizeToFragmentArray(extractNodeEntities(Component({ ...config, slotted })));
-
-        component.nodeEntities = nodeEntities;
-
-        if (ref) {
-            const _ref = ref.o instanceof Array ? getNodeRef(ref.o) || new InternalNodeRef(ref) : new InternalNodeRef(ref)
-            const publicComponent = component.component || null;
-            _ref.assignValue(publicComponent, $index)
-            // setUpRefUpdates(_ref, publicComponent, $index, component.preserve)
-            initializeRef(_ref)
+            //TODO: how to pause flask and continue flask?
+            // return new Promise((resolve, reject) => {
+            //     resolve(component)
+            // })
         }
-
-        // if (component.attributes) { // if `getAttributes` is called, this will be null
-        //     // fallthrough attributes onto root or first node
-        //     assignAttributes(nodeEntities[0], component.attributes);
-        //     component.attributes = null;
-        // }
-
-        outerFlask?.onDisposal(flask.dispose) // no outer flask means it's the root component
-
-        // set up hook cascade
-        const parent = component.parent;
-        if (parent instanceof InternalComponent) {
-            beforeUnmount(() => component.emit(LifecycleHook.BEFORE_UNMOUNT), parent) //TODO: how do these get cleaned up?
-            onUnmounted(() => component.emit(LifecycleHook.UNMOUNTED), parent)
-            onDeactivated(() => component.emit(LifecycleHook.DEACTIVATED), undefined, parent)
-            onActivated(() => component.emit(LifecycleHook.ACTIVATED), undefined, parent)
+        else {
+            setUpStuff(component, output, config.ref, $index, flask)
         }
     })
 }
 
-
-export function composeEvents(
-    events: { [key: string]: Function | Function[] }[],
+function setUpStuff(
+    component: InternalComponent,
+    output: NodeEntity | NodeEntity[] | [AnyObject, NodeEntity[]],
+    ref: NodeSignal | undefined,
+    $index: Signal<number> | undefined,
+    flask: Flask
 ) {
-    const target: { [key: string]: Function[] } = {};
-    for (const _events of events) {
-        for (const key in _events) {
-            const value = _events[key];
-            if (key in target) {
-                const handlers = target[key];
-                if (value instanceof Array) {
-                    handlers.push(...value);
-                }
-                else {
-                    handlers.push(value)
-                }
-            }
-            else {
-                if (value instanceof Array) {
-                    target[key] = [...value]
-                }
-                else {
-                    target[key] = [value]
-                }
-            }
-        }
+    const nodeEntities = normalizeToFragmentArray(extractNodeEntities(output));
+
+    component.nodeEntities = nodeEntities;
+
+    if (ref) {
+        const refValue = ref()
+        const _ref = refValue instanceof Array ? getNodeRef(refValue) || new InternalNodeRef(ref) : new InternalNodeRef(ref)
+        const publicComponent = component.component || null;
+        _ref.assignValue(publicComponent, $index)
+        // setUpRefUpdates(_ref, publicComponent, $index, component.preserve)
+        initializeRef(_ref)
     }
-    return target as { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] };
+
+    flask.outer?.onDisposal(flask.dispose) // no outer flask means it's the root component
+
+    // set up hook cascade
+    const parent = component.parent;
+    if (parent instanceof InternalComponent) {
+        beforeUnmount(() => component.emit(LifecycleHook.BEFORE_UNMOUNT), parent) //TODO: how do these get cleaned up?
+        onUnmounted(() => component.emit(LifecycleHook.UNMOUNTED), parent)
+        onDeactivated(() => component.emit(LifecycleHook.DEACTIVATED), undefined, parent)
+        onActivated(() => component.emit(LifecycleHook.ACTIVATED), undefined, parent)
+    }
 }
+
+
+// export function composeEvents(
+//     events: { [key: string]: Function | Function[] }[],
+// ) {
+//     const target: { [key: string]: Function[] } = {};
+//     for (const _events of events) {
+//         for (const key in _events) {
+//             const value = _events[key];
+//             if (key in target) {
+//                 const handlers = target[key];
+//                 if (value instanceof Array) {
+//                     handlers.push(...value);
+//                 }
+//                 else {
+//                     handlers.push(value)
+//                 }
+//             }
+//             else {
+//                 if (value instanceof Array) {
+//                     target[key] = [...value]
+//                 }
+//                 else {
+//                     target[key] = [value]
+//                 }
+//             }
+//         }
+//     }
+//     return target as { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] };
+// }
 
 // function assignAttributes(nodeEntity: NodeEntity, attributes: AssignedAttributes) {
 //     if (nodeEntity instanceof Element) { // from Web API
@@ -193,51 +213,28 @@ export function composeEvents(
 
 
 
-export function warnOverlappingKeys(propsA: AnyObject, propsB: AnyObject | undefined, propsC?: AnyObject) {
-    if (!propsC && !propsB) return;
-    if (propsC) {
-        for (const key in propsA) {
-            if (key in propsC) console.warn('Duplicate prop keys. Props from `setUpNode` will be overridden')
-        }
-        if (!propsB) return;
-        for (const key in propsA) {
-            if (key in propsB) console.warn('Duplicate prop keys. Props from `setUpNode` will be overridden')
-        }
-        for (const key in propsB) {
-            if (key in propsC) console.warn('Duplicate prop keys. Props from `setUpNode` will be overridden')
-        }
-    }
-    else if (propsB) {
-        for (const key in propsA) {
-            if (key in propsB) console.warn('Duplicate prop keys. Props from `setUpNode` will be overridden')
-        }
-    }
-}
+// export function warnOverlappingKeys(propsA: AnyObject, propsB: AnyObject | undefined, propsC?: AnyObject) {
+//     if (!propsC && !propsB) return;
+//     if (propsC) {
+//         for (const key in propsA) {
+//             if (key in propsC) console.warn('Duplicate prop keys. Props from `setUpNode` will be overridden')
+//         }
+//         if (!propsB) return;
+//         for (const key in propsA) {
+//             if (key in propsB) console.warn('Duplicate prop keys. Props from `setUpNode` will be overridden')
+//         }
+//         for (const key in propsB) {
+//             if (key in propsC) console.warn('Duplicate prop keys. Props from `setUpNode` will be overridden')
+//         }
+//     }
+//     else if (propsB) {
+//         for (const key in propsA) {
+//             if (key in propsB) console.warn('Duplicate prop keys. Props from `setUpNode` will be overridden')
+//         }
+//     }
+// }
 
-export function analyzeAttributes(entries: AnyObject) {
-    const events: AnyObject = {};
-    // const jsxProps: AnyObject = {};
-    const attributes: AnyObject = {};
-    for (const key in entries) {
-        if (key === "children") {
-            continue;
-        }
-        else if (isHTMLEvent(key)) {
-            events[key.slice(2)] = entries[key];
-        }
-        // else if (isHTMLAttribute(key, tag)) {
-        // }
-        else {
-            attributes[key] = entries[key];
-            // jsxProps[key] = jsxEntries[key];
-        }
-    }
-    return {
-        attributes,
-        events,
-        // jsxProps
-    }
-}
+
 
 
 

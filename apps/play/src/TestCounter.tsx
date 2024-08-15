@@ -6,11 +6,11 @@
 // - derived signal in template
 // - derived signal with memo
 
-import { $, toReactive, toSignal } from "@rue/muonic"
+import { $, Reactive$, $Signal } from "@rue/muonic"
 
 export function TestCounterSignals() {
-    const $count = toSignal(0)
-    const $doubleCount = toSignal(() => $count() * 2)
+    const $count = $Signal(0)
+    const $doubleCount = $Signal(() => $count() * 2)
 
     function increment() {
         $count.set(count => count + 1)
@@ -46,7 +46,7 @@ export function TestCounter() {
 }
 
 function useCounter() {
-    const counter$ = toReactive({
+    const counter$ = Reactive$({
         count: 0
     })
 

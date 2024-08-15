@@ -1,8 +1,11 @@
-import { $else, $elseIf, $if, COMPONENT, ComponentSetup, expose, forEachIn, NodeEntity, NodeRef, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
-import { Signal, watch, initializeEffect, toSignal, toDeepReactive, $ } from "@rue/muonic"
+import { $else, $elseIf, $if, $Node, COMPONENT, ComponentSetup, expose, forEachIn, NodeEntity, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
 import { idleLoadComponent, loadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic/debug";
+import { MaybePromise } from "@rue/types";
+import { $Signal, Signal } from "@rue/muonic/$Signal";
+import { DeepReactive$ } from "@rue/muonic/Reactive$";
+import { $ } from "@rue/muonic";
 
 
 const randomColor = useRandomColorGenerator()
@@ -29,22 +32,22 @@ const onClick = useEventListener('click');
 
 export function List() {
 
-    const $active = toSignal(true)
+    const $active = $Signal(true)
     if (__DEV__) __addDevName($active, '$active')
 
     function toggleActiveState() {
         $active.set(active => !active)
     }
 
-    const $visible = toSignal(() => $active())
+    const $visible = $Signal(() => $active())
 
 
 
-    const $ready = toSignal(true)
+    const $ready = $Signal(true)
     if (__DEV__) __addDevName($ready, '$ready')
 
 
-    const list$ = toDeepReactive([
+    const list$ = DeepReactive$([
         { id: 0, content: "frog" },
         { id: 1, content: "frog" },
         { id: 2, content: "fly" },
@@ -64,7 +67,7 @@ export function List() {
     // initializeEffect(()=>{
 
 
-    const $list = toSignal(toDeepReactive([
+    const $list = $Signal(DeepReactive$([
         { id: 0, content: "frog" },
         { id: 1, content: "frog" },
         { id: 2, content: "fly" },
@@ -200,10 +203,10 @@ function $await<T>(something: MaybePromise<T>, alt: { placeholder: any, error: a
 }
 
 function useModal() {
-    const dialog_box = new NodeRef<typeof DialogBox>()
+    const dialog_box = $Node<typeof DialogBox>()
 
     function openModal() {
-        dialog_box.o!.open()
+        dialog_box()!.open()
     }
 
     teleportTo('body',
@@ -216,7 +219,7 @@ function useModal() {
 }
 
 function VisibilityBlock() {
-    const $visible = toSignal(false);
+    const $visible = $Signal(false);
     __addDevName($visible, '$visible')
 
     function toggleVisibility() {
@@ -257,7 +260,7 @@ function HereBlock(props: { $active: Signal<boolean> }) {
 }
 
 function DialogBox() {
-    const $open = toSignal(false)
+    const $open = $Signal(false)
     __addDevName($open, '$open')
 
     function open() {

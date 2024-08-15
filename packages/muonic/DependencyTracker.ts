@@ -1,6 +1,6 @@
 import { asReactiveProp, getReactivePropValue, isReactiveProp, ReactiveProp } from "./ReactiveProp";
 import { getTrackableOpValue, isTrackableOp, TrackableOp } from "./TrackableOp";
-import { isSignal, Signal } from "./toSignal";
+import { isSignal, Signal } from "./$Signal";
 
 export type ReactiveAtom = Signal | ReactiveProp | TrackableOp
 

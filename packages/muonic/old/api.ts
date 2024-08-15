@@ -11,7 +11,7 @@ type Signal<T = any> = (value?: T | NoArg) => T
 
 useSignalKit()
 
-toSignal // shallow, for object literals only
+$Signal // shallow, for object literals only
 
 set
 
@@ -163,9 +163,9 @@ class Counter {
 
 
 // Is there any reason to watch your own state or create hooks in your own methods? ... not really, so it's weird to create signals within a class
-const { toSignal, muonize, mu } = useReactivityKit({ snapshots: true });
+const { $Signal, muonize, mu } = useReactivityKit({ snapshots: true });
 
-const $complex = toSignal({
+const $complex = $Signal({
     name: "harry",
     points: { x: 0, y: 0 }
 }, DEEP)

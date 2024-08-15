@@ -3,12 +3,13 @@ import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
 import { isUpdatingList, onListUpdated } from "../list/forEachIn"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
-import { Signal } from "@rue/muonic"
+import { $Signal, Signal } from "@rue/muonic/$Signal"
+import { asReadonly, ReadonlySignal } from "@rue/muonic/asReadonly"
 
 
 
 type Task = ((item: Element | PublicComponent) => void) | ((item: Element | PublicComponent, $index?: Signal<number>) => void)
-const hookMap: WeakMap<NodeRef, Set<Task>> = new WeakMap()
+const hookMap: WeakMap<NodeSignal, Set<Task>> = new WeakMap()
 
 type RefSource = Element | ComponentSetup | Element[] | ComponentSetup[]
 
@@ -18,11 +19,34 @@ type RefSource = Element | ComponentSetup | Element[] | ComponentSetup[]
 * - undefined means ref has not been set or has been removed from the DOM
 * - null means component did not expose anything
 */
-export class NodeRef<
+// export class NodeRef<
+//     T extends RefSource
+//     = RefSource
+// > {
+//     readonly o: NodeReferent<T> | undefined; // o stands for object (as in target) of reference 
+// }
+
+export type NodeSignal<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
+export type _NodeSignal<T extends RefSource = RefSource> = Signal<NodeReferent<T> | undefined>
+
+const $nodeMap: WeakMap<NodeSignal, _NodeSignal> = new WeakMap()
+
+export function get$Node($nodeAsReadonly: NodeSignal) {
+    const $node = $nodeMap.get($nodeAsReadonly);
+    if (!$node) throw new Error("No $node :(. This should never happen")
+    return $node;
+}
+
+export function $Node<
     T extends RefSource
     = RefSource
-> {
-    readonly o: NodeReferent<T> | undefined; // o stands for object (as in target) of reference 
+>() {
+    const $node = $Signal<NodeReferent<T> | undefined | null>();
+    if (__DEV__) {
+        const $nodeAsReadonly = asReadonly($node) as ReadonlySignal<NodeReferent<T> | undefined | null>;
+        $nodeMap.set($nodeAsReadonly, $node)
+    }
+    return $node;
 }
 
 
@@ -63,23 +87,25 @@ export class InternalNodeRef<
     // preserve: boolean = false;
     // preserved: T | undefined = undefined;
     initialized: boolean = false; // prevent multiple initializations for arrays
+    o: _NodeSignal<RefSource>
     constructor(
-        public o: NodeRef<T>
-    ) { }
+        ref: NodeSignal<RefSource>
+    ) {
+        this.o = __DEV__ ? get$Node(ref) : ref as _NodeSignal<RefSource>
+    }
 
     setValue(value: NodeReferent<T> | null | undefined) {
-        //@ts-expect-error read-only
-        this.o.o = value;
+        this.o.set(() => value)
         return value;
     }
 
     insertNode(node: ArrayItem<NodeArray<T>>, index: number) {
-        const pod = this.setValue(this.o.o || [] as unknown as NodeReferent<T>)! as NodeArray<T>
+        const pod = this.setValue(this.o() || [] as unknown as NodeReferent<T>)! as NodeArray<T>
         pod.splice(index, 0, node); //TODO: should this be splice?
     }
 
     removeNode(index: number) {
-        const pod = this.o.o as NodeArray<T>
+        const pod = this.o() as NodeArray<T>
         pod.splice(index, 1);
     }
 
@@ -90,8 +116,7 @@ export class InternalNodeRef<
     assignValue(value: NodeReferent<T>, $index: Signal<number> | undefined) {
         if ($index != null) {
             let nodes = isUpdatingList() ? this.getNewListNodes()
-                //@ts-expect-error read-only
-                : this.o.o = (this.o.o || []) as NodeArray<T>
+                : this.o.set(() => (this.o() || []) as NodeArray<T>)
             nodes[$index()] = value as ArrayItem<NodeArray<T>>;
             refMap.set(nodes, this);
         }
@@ -114,15 +139,14 @@ export class InternalNodeRef<
     }
 
     updateListRef(toFromIndices: [number, number][]) {
-        const prevNodes: NodeReferent[] = this.o.o || [];
+        const prevNodes: NodeReferent[] = this.o() || [];
         const newNodes = listUpdateMap.get(this) || [];
         for (const indices of toFromIndices) {
             const [to, from] = indices
             const node = prevNodes[from];
             newNodes[to] = node;
         }
-        //@ts-expect-error readonly
-        this.o.o = newNodes;
+        this.o.set(() => newNodes);
         listUpdateMap.delete(this)
         refMap.set(newNodes, this);
     }

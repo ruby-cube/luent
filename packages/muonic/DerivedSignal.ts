@@ -1,10 +1,11 @@
 import { ActiveListener, getActiveFlask, onFlaskDisposal } from "@rue/flask";
 import { DependencyTracker, getDependencyTracker, ReactiveAtom } from "./DependencyTracker";
-import { isSignal, Signal, SIGNAL_MARKER } from "./toSignal";
+import { isSignal, Signal, SIGNAL_MARKER } from "./$Signal";
 import { watch } from "./watch";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 import { getReactivePropValue, isReactiveProp } from "./ReactiveProp";
 import { getTrackableOpValue, isTrackableOp } from "./TrackableOp";
+import { READONLY_SIGNAL } from "./asReadonly";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -31,7 +32,7 @@ export function isDerivedSignal(maybeDerivedSignal: any): maybeDerivedSignal is 
 
 export function hasSignal(maybeSignal: any): maybeSignal is DerivedSignal | Signal {
     if (!(maybeSignal instanceof Function)) return false;
-    if (SIGNAL_MARKER in maybeSignal || DERIVED_SIGNAL in maybeSignal) return true;
+    if (SIGNAL_MARKER in maybeSignal || DERIVED_SIGNAL in maybeSignal || READONLY_SIGNAL in maybeSignal) return true;
     return false;
 }
 

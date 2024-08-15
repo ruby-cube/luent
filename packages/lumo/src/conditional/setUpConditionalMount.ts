@@ -5,7 +5,7 @@ import { watchForRender } from "../reactivity/watchForRender";
 import { watchForRenderAndPreserve } from "./$if";
 import { LifecycleHook } from "../component/lifecycle";
 import { NodeEntity } from "../node/makeNode";
-import { getNodeRef } from "../node/NodeRef";
+import { getNodeRef } from "../node/$Node";
 import { collectEffects, Flask } from "@rue/flask/flask";
 import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle";
 import { areShallowEqualArrays, getDependencyTracker, getWithoutTracking, isShallowEqual } from "@rue/muonic";
@@ -154,11 +154,11 @@ export function mountConditional(nodePod: _NodePod, component: InternalComponent
 function nullNodeRefValues(nodePod: _NodePod, components: InternalComponent[]) {
     nodePod.forEachNode(node => {
         const ref = getNodeRef(node);
-        if (ref && ref.o.o) ref.setValue(undefined)
+        if (ref && ref.o()) ref.setValue(undefined)
     })
     for (const component of components) {
         const ref = getNodeRef(component.component);
-        if (ref && ref.o.o) ref.setValue(null)
+        if (ref && ref.o()) ref.setValue(null)
     }
 }
 

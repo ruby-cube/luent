@@ -1,6 +1,6 @@
 import { Flask } from "@rue/flask";
 import { DOMNode, InternalComponent } from "../component/InternalComponent";
-import { NodeRef } from "./NodeRef";
+import { NodeSignal } from "./$Node";
 
 // Node Pods represent groups of nodes created by `mXsFor` and `mXIf`.
 // 
@@ -43,7 +43,7 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
     index?: number;
     pod?: _DynamicNodePod;
     componentsToUnmount: InternalComponent[] = [];
-    refs: NodeRef[] = [];
+    refs: NodeSignal[] = [];
     flask?: Flask
     constructor(pod?: _DynamicNodePod, index?: number) {
         super();

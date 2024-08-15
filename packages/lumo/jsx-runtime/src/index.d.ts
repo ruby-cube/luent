@@ -8,6 +8,7 @@ import * as CSS from "csstype";
 import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
 import { ReactiveSignal } from "@rue/muonic";
+import { NodeSignal } from "../../src/node/$Node";
 
 export function jsxDEV(): "frog"
 export function jsx(): "frog"
@@ -2397,7 +2398,7 @@ declare namespace React {
         const THIS_NODE = 0 as const;
         const CHILD_NODES = 1 as const;
 
-        type EventTarget = string | NodeRef | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
+        type EventTarget = string | NodeSignal | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
 
         type EventTargetOptions = {
             targets: EventTarget[]

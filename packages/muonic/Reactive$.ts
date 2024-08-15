@@ -55,11 +55,11 @@ function _o$(target: AnyObject, deep?: boolean) {
 }
 
 // return {
-export function toDeepReactive<T extends AnyObject>(target: T): ReactiveModel<T> {
+export function DeepReactive$<T extends AnyObject>(target: T): ReactiveModel<T> {
     return _o$(target, DEEP);
 }
 
-export function toReactive<T extends AnyObject>(target: T): ReactiveModel<T> {
+export function Reactive$<T extends AnyObject>(target: T): ReactiveModel<T> {
     return _o$(target);
 }
 

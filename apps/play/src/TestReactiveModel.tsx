@@ -1,7 +1,7 @@
-import { $else, $elseIf, $if, COMPONENT, ComponentSetup, expose, forEachIn, NodeEntity, NodeRef, onMounted, preventDefault, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
+import { $else, $elseIf, $if, $Node, COMPONENT, ComponentSetup, expose, forEachIn, NodeEntity, onMounted, preventDefault, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic/debug";
-import { $, toDeepReactive, toReactive } from "@rue/muonic";
+import { $, DeepReactive$, Reactive$ } from "@rue/muonic";
 
 
 const randomColor = useRandomColorGenerator()
@@ -14,7 +14,7 @@ function genId() {
 
 export function List() {
 
-    const list$ = toDeepReactive([
+    const list$ = DeepReactive$([
         { id: 0, content: "frog" },
         { id: 1, content: "robin" },
         { id: 2, content: "fly" },
@@ -43,7 +43,7 @@ export function List() {
             moveMultipleUniqueItems(selected$, list$, index)
     }
 
-    const selected$ = toReactive(new Set())
+    const selected$ = Reactive$(new Set())
 
 
     function clearSelection() {
@@ -66,7 +66,7 @@ export function List() {
             list$.splice(index, 1);
     }
 
-    const itemNode = new NodeRef()
+    const $itemNode = $Node()
 
 
     return (
@@ -84,7 +84,7 @@ export function List() {
                 {$else(() =>
                     forEachIn(list$, (item$, $index) => (
                         <div
-                            ref={itemNode}
+                            ref={$itemNode}
                             onclick={(e) => toggleSelect(e, $index())}
                             style={[
                                 `background-color: ${randomColor.get()}`,

@@ -2,7 +2,7 @@
 
 
 
-import { ReactiveModel, toRaw } from "./toReactive";
+import { ReactiveModel, toRaw } from "./Reactive$";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
 

@@ -1,4 +1,4 @@
-import { toSignal, $, $mutate, $set, computed$, deepSignalize, deepSignalize$, toSignal$ } from "../signals";
+import { $Signal, $, $mutate, $set, computed$, deepSignalize, deepSignalize$, $Signal$ } from "../signals";
 
 //TODO: write type tests
 
@@ -11,7 +11,7 @@ const selection$ = $({
 
 
 
-const item = toSignal({   // shallowReactive
+const item = $Signal({   // shallowReactive
     bullet: "•",
     blog: 0,
     dog: {
@@ -23,7 +23,7 @@ const item = toSignal({   // shallowReactive
 
 {
     //@ts-expect-error
-    const myMap = toSignal(new Map())
+    const myMap = $Signal(new Map())
 }
 
 {
@@ -33,7 +33,7 @@ const item = toSignal({   // shallowReactive
 
 {
     //@ts-expect-error
-    const myMap = toSignal$(new Map())
+    const myMap = $Signal$(new Map())
 }
 
 {
@@ -43,7 +43,7 @@ const item = toSignal({   // shallowReactive
 
 {
     //@ts-expect-error
-    const array = toSignal([])
+    const array = $Signal([])
 }
 
 {
@@ -53,7 +53,7 @@ const item = toSignal({   // shallowReactive
 
 {
     //@ts-expect-error
-    const array = toSignal$([])
+    const array = $Signal$([])
 }
 
 {
@@ -62,7 +62,7 @@ const item = toSignal({   // shallowReactive
 }
 
 
-const item$ = toSignal$({   // shallowRef(shallowReactive())
+const item$ = $Signal$({   // shallowRef(shallowReactive())
     bullet: "•",
     blog: [0],
     dog: {

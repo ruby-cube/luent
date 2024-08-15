@@ -1,24 +1,24 @@
 import { ComponentSetup } from "./InternalComponent";
 import { $else, $elseIf, $if } from "../conditional/$if";
 import { noop } from "@rue/utils";
-import { toSignal } from "@rue/muonic";
+import { $Signal } from "@rue/muonic";
 
 const lazyComponents: Map<() => Promise<ComponentSetup>, ComponentSetup> = new Map()
 
 export function loadComponent<P>(config: {
     load: () => Promise<ComponentSetup<P>>,
-    Placeholder?: ComponentSetup,
+    Placeholder?: ComponentSetup, //QUESTION: Does this need to be a component setup or can it be a render function?
     timeout?: number,
     ErrorView?: ComponentSetup
 }, idleID?: number) {
     if (idleID != null) cancelIdleCallback(idleID);
     const { load, ErrorView, Placeholder, timeout } = config;
-    const $loading = toSignal(true);
-    const $timedOut = toSignal(false);
-    const $loaded = toSignal(false);
+    const $loading = $Signal(true);
+    const $timedOut = $Signal(false);
+    const $loaded = $Signal(false);
     let timeoutID: any;
-    let Component: ComponentSetup = lazyComponents.get(load) || noop
-    if (Component == noop) {
+    let Component: ComponentSetup = lazyComponents.get(load) || noop //TODO: I don't get how this works. Something to do with idleCallback
+    if (Component === noop) {
         const pendingComponent = load();
         if (timeout) {
             timeoutID = setTimeout(() => {
@@ -43,10 +43,10 @@ export function loadComponent<P>(config: {
         return (props: P) => (
             <>
                 {$if($loading, 'create', () =>
-                    <Placeholder></Placeholder>
+                    <Placeholder {...props}></Placeholder>
                 )}
                 {$elseIf($timedOut, () =>
-                    <ErrorView></ErrorView>
+                    <ErrorView {...props}></ErrorView>
                 )}
                 {$else(() =>
                     <Component {...props}></Component>
@@ -58,7 +58,7 @@ export function loadComponent<P>(config: {
         return (props: P) => (
             <>
                 {$if($loading, 'create', () =>
-                    <Placeholder></Placeholder>
+                    <Placeholder {...props}></Placeholder>
                 )}
                 {$elseIf($loaded, () =>
                     <Component {...props}></Component>
@@ -70,7 +70,7 @@ export function loadComponent<P>(config: {
         return (props: P) => (
             <>
                 {$if($timedOut, 'create', () =>
-                    <ErrorView></ErrorView>
+                    <ErrorView {...props}></ErrorView>
                 )}
                 {$elseIf($loaded, () =>
                     <Component {...props}></Component>

@@ -1,5 +1,5 @@
-import { beforeMount, NodeRef } from "@rue/lumo";
-import {  $, initializeEffect, toDeepReactive, toSignal } from "@rue/muonic";
+import { $Node, beforeMount } from "@rue/lumo";
+import {  $, initializeEffect, DeepReactive$, $Signal } from "@rue/muonic";
 
 
 //tests:
@@ -7,14 +7,14 @@ import {  $, initializeEffect, toDeepReactive, toSignal } from "@rue/muonic";
 
 export function TextBox() {
 
-    const box$ = toDeepReactive({
+    const box$ = DeepReactive$({
         position: {
             x: 0,
             y: 0
         }
     })
 
-    const $count = toSignal(0);
+    const $count = $Signal(0);
     
     function moveRight() {
             box$.position.x = box$.position.x + 10;
@@ -24,7 +24,7 @@ export function TextBox() {
             box$.position.x = box$.position.x - 10;
     }
 
-    const divRef = new NodeRef()
+    const $div = $Node()
     const $anotherCount = $(() => $count())
     initializeEffect(() => {
         $anotherCount()
@@ -42,7 +42,7 @@ export function TextBox() {
 
     return (
         <>
-            <div ref={divRef} style={[
+            <div ref={$div} style={[
                 'background-color: lightgray',
                 o => {
                     o.transform = `translate(${box$.position.x}px)`

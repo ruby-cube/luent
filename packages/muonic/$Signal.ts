@@ -1,6 +1,6 @@
 import { storeInitialDerivedValueIfNeeded, track, trigger } from "./watch";
 import { emitSignal } from "./hasReactivity_DEV";
-import { isDeepReactive, isReactiveModel, ReactiveModel, toDeepReactive, toReactive } from "./toReactive";
+import { isDeepReactive, isReactiveModel, ReactiveModel, DeepReactive$, Reactive$ } from "./Reactive$";
 import { AnyObject } from "@rue/types";
 
 export type Signal<T = any> = {
@@ -17,7 +17,7 @@ const $$$DepthSignals: WeakSet<Signal> = new WeakSet();
 
 
 
-export function toSignal<T>(value: T): Signal<T> {
+export function $Signal<T>(value?: T): Signal<T> {
 
     const signal = () => {
         if (__DEV__) emitSignal();
@@ -57,8 +57,8 @@ function set<T>(this: Signal<T>, toNewValue: (value: T) => T) {
     if (value === newValue) return value;
 
     const _newValue = newValue instanceof Object ?
-        $$$DepthSignals.has(this) ? toDeepReactive(newValue) :
-            $$DepthSignals.has(this) ? toReactive(newValue) :
+        $$$DepthSignals.has(this) ? DeepReactive$(newValue) :
+            $$DepthSignals.has(this) ? Reactive$(newValue) :
                 newValue : newValue
 
     const updateCycle = trigger(this, _newValue, value);

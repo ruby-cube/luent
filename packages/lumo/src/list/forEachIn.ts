@@ -4,7 +4,7 @@ import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { $listen, Callback, collectEffects, Flask, ListenerOptions } from "@rue/flask";
 import { DOMNode } from "../component/InternalComponent";
-import { isReactiveModel, ReactiveModel, Readonly, Signal, toSignal } from "@rue/muonic";
+import { isReactiveModel, ReactiveModel, Readonly, Signal, $Signal } from "@rue/muonic";
 
 
 export type RenderItem<T = any> = (item: T, $index: Signal<number>) => NodeEntity[] | NodeEntity
@@ -113,7 +113,7 @@ export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: s
     pushList(listRenderKit);
     let i = 0;
     while (i < _list.length) {
-        const $index = toSignal(i)
+        const $index = $Signal(i)
         const item = _list[i]
         currentItem = item;
         $currentIndex = $index;
