@@ -1,4 +1,5 @@
-import { $if, expose, onMounted } from "@rue/lumo"
+//@ts-nocheck
+import { $if, expose, NodeEntity, onMounted, RenderFunction } from "@rue/lumo"
 import { $, watch } from "@rue/muonic"
 import { $Signal } from "@rue/muonic/$Signal";
 
@@ -81,27 +82,39 @@ function ItemBlockB() {
 
     const $content = $Signal('');
 
-    const pendingData = fetch("").then((response) => {
-        response.json().then((data) => {
+    $await(fetch(""))
+        .then(async (response) => {
+            const data = await response.json()
             $content.set(() => data.content)
         })
-    })
 
-    return $await(pendingData, () =>
+    return (
         <div>{$content}</div>
     )
 }
 
+function Something() {
 
-function $await(a: any, b: any) {
 
+
+    return (
+        <div>
+            <h1>Hello</h1>
+            {$pending(() =>
+                <ItemBlock />
+            )}
+        </div>
+    )
 }
 
-function $Ready<T>(promise: Promise<T>) {
-    const $signal = $Signal(false);
-    promise.then(() => {
-        $signal.set(() => true)
+function $pending(render) {
+    return $pend({
+        pending: render,
+        placeholder: () => <div>loading...</div>,
+        timeout: 100,
+        error: () => <div>Sorry :(</div>
     })
-    return $signal
 }
+
+
 

@@ -162,19 +162,19 @@ function nullNodeRefValues(nodePod: _NodePod, components: InternalComponent[]) {
     }
 }
 
-function restoreNodeRefValues(nodePod: _NodePod, components: InternalComponent[]) {
-    nodePod.forEachNode((node, index) => {
-        const ref = getNodeRef(node);
-        if (ref) {
-            if (index === undefined) ref.setValue(node);
-            else ref.insertNode(<Element>node, index);
-        }
-    })
-    // for (const component of components){ //NOTE: Deferred until needed: nulling and restoring node ref for components. Getting the correct index is tricky.
-    //     const ref = getNodeRef(component.component);
-    //     if (ref && ref.o.value) ref.setValue(component.component)
-    // }
-}
+// function restoreNodeRefValues(nodePod: _NodePod, components: InternalComponent[]) {
+//     nodePod.forEachNode((node, index) => {
+//         const ref = getNodeRef(node);
+//         if (ref) {
+//             if (index === undefined) ref.setValue(node);
+//             else ref.insertNode(node, index);
+//         }
+//     })
+//     // for (const component of components){ //NOTE: Deferred until needed: nulling and restoring node ref for components. Getting the correct index is tricky.
+//     //     const ref = getNodeRef(component.component);
+//     //     if (ref && ref.o.value) ref.setValue(component.component)
+//     // }
+// }
 
 function emitActivated(components: InternalComponent[]) {
     for (const component of components) {

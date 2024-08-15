@@ -3,6 +3,7 @@ import { NodeEntity } from "../node/makeNode";
 import { ConditionalKit } from "./ConditionalKit";
 import { ListenOptions } from "net";
 import { NodeSignal } from "../node/$Node";
+import { Booleanny } from "@rue/types";
 
 
 type ListenerLifespan = ListenOptions;
@@ -35,7 +36,7 @@ export class ConditionalListenerKit extends ConditionalKit<EventHandler<EventLis
     constructor(
         statementType: 'if' | 'elseIf' | 'else',
         public eventHandler: EventHandler<EventListener>,
-        $condition?: ReactiveSignal<boolean>,
+        $condition?: ReactiveSignal<Booleanny>,
     ) {
         super(statementType, eventHandler, $condition)
     }

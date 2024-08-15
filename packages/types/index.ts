@@ -90,3 +90,5 @@ export type ArrayItem<A extends unknown[]> =
 export type Skip<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export type MaybePromise<T> = Promise<T> | T
+
+export type Booleanny = any

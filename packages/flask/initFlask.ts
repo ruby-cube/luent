@@ -8,12 +8,10 @@ export let shouldWarnNoCleanup = false;
 const listenersWithNoCleanup = new Set();
 
 export function markNoCleanup(listener: ActiveListener | PendingOp) {
-    console.log("marking no cleanup")
     listenersWithNoCleanup.add(listener);
 }
 
 export function unmarkNoCleanup(listener: ActiveListener | PendingOp) {
-    console.log("removeing no cleanup")
     listenersWithNoCleanup.delete(listener)
 }
 

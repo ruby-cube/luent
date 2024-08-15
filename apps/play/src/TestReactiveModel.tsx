@@ -66,7 +66,7 @@ export function List() {
             list$.splice(index, 1);
     }
 
-    const $itemNode = $Node()
+    const $itemDiv = $Node<'div'>()
 
 
     return (
@@ -84,7 +84,7 @@ export function List() {
                 {$else(() =>
                     forEachIn(list$, (item$, $index) => (
                         <div
-                            ref={$itemNode}
+                            ref={$itemDiv}
                             onclick={(e) => toggleSelect(e, $index())}
                             style={[
                                 `background-color: ${randomColor.get()}`,

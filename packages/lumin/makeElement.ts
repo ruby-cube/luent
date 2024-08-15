@@ -3,6 +3,7 @@ import { HTMLString } from "./makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { ReactiveSignal } from "../muonic";
 import { buildElementString } from "./buildElement";
+import { Booleanny } from "@rue/types";
 
 export type HTMLTag = keyof HTMLElementTagNameMap
 
@@ -129,7 +130,7 @@ function setUpEvents(node: Element, events: { [key: string]: (EventListener | De
 
 
 type DynamicClassesConfig = {
-    [key: string]: ReactiveSignal<boolean>;
+    [key: string]: ReactiveSignal<Booleanny>;
 }
 
 function setUpClasses(node: Element, classes: (((o: DOMTokenList) => void) | string | DynamicClassesConfig)[]) {

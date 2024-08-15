@@ -16,7 +16,7 @@ import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
-import { AnyObject } from "@rue/types";
+import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
 
 
@@ -191,7 +191,7 @@ function setUpEvents(node: Element, events: { [key: string]: (EventListener | De
 
 
 type DynamicClassesConfig = {
-    [key: string]: ReactiveSignal<boolean>;
+    [key: string]: ReactiveSignal<Booleanny>;
 }
 
 function setUpClasses(component: InternalComponent, node: Element, classes: (((o: DOMTokenList) => void) | string | DynamicClassesConfig)[]) {

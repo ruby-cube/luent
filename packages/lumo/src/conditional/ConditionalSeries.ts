@@ -1,8 +1,9 @@
 import { getWithoutTracking, $, ReactiveSignal } from "@rue/muonic";
 import { ConditionalKit } from "./ConditionalKit";
+import { Booleanny } from "@rue/types";
 
 export class ConditionalSeries {
-    conditions: ReactiveSignal<boolean>[] = [];
+    conditions: ReactiveSignal<Booleanny>[] = [];
 
     constructor(
         public statements: ConditionalKit[], 
@@ -50,11 +51,11 @@ export class ConditionalSeries {
     }
 }
 
-export function genConditionsSignal(conditions: ReactiveSignal<boolean>[]) {
+export function genConditionsSignal(conditions: ReactiveSignal<Booleanny>[]) {
     return $(() => {
         const values: boolean[] = [];
         for (const $condition of conditions) {
-            values.push($condition());
+            values.push(Boolean($condition()));
         }
         return values;
     }) // $(() => [$conditionA(), $conditionB(), ...])

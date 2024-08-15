@@ -5,13 +5,14 @@ import { isUpdatingList, onListUpdated } from "../list/forEachIn"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
 import { $Signal, Signal } from "@rue/muonic/$Signal"
 import { asReadonly, ReadonlySignal } from "@rue/muonic/asReadonly"
+import { HTMLTag } from "../element/mE"
 
 
 
 type Task = ((item: Element | PublicComponent) => void) | ((item: Element | PublicComponent, $index?: Signal<number>) => void)
 const hookMap: WeakMap<NodeSignal, Set<Task>> = new WeakMap()
 
-type RefSource = Element | ComponentSetup | Element[] | ComponentSetup[]
+type RefSource = HTMLTag | ComponentSetup | HTMLTag[] | ComponentSetup[]
 
 
 /* 
@@ -41,10 +42,11 @@ export function $Node<
     T extends RefSource
     = RefSource
 >() {
-    const $node = $Signal<NodeReferent<T> | undefined | null>();
+    let $node = $Signal<NodeReferent<T> | undefined | null>();
     if (__DEV__) {
         const $nodeAsReadonly = asReadonly($node) as ReadonlySignal<NodeReferent<T> | undefined | null>;
         $nodeMap.set($nodeAsReadonly, $node)
+        $node = $nodeAsReadonly as unknown as Signal<NodeReferent<T> | undefined | null>;
     }
     return $node;
 }
@@ -55,8 +57,8 @@ type NodeReferent<
     T extends RefSource
     = RefSource
 > =
-    T extends Element ? T :
-    T extends Element[] ? T :
+    T extends HTMLTag ? HTMLElementTagNameMap[T] : //TODO: SVGs and Math elements
+    T extends HTMLTag[] ? T extends (infer H)[] ? H extends HTMLTag ? HTMLElementTagNameMap[H][] : never : never :
     T extends (...args: any[]) => infer R ?
     R extends (infer I)[] ?
     I extends PublicComponent | JSX.Element ?
@@ -76,7 +78,7 @@ type NodeReferent<
     : null
 
 
-type NodeArray<T extends RefSource = RefSource> = Exclude<NodeReferent<Exclude<T, Element | null | ComponentSetup>>, null>;
+type NodeArray<T extends RefSource = RefSource> = Exclude<NodeReferent<Exclude<T, HTMLTag | null | ComponentSetup>>, null>;
 
 type ListUpdates = any[]
 const listUpdateMap: WeakMap<InternalNodeRef, ListUpdates> = new WeakMap()
@@ -99,9 +101,9 @@ export class InternalNodeRef<
         return value;
     }
 
-    insertNode(node: ArrayItem<NodeArray<T>>, index: number) {
+    insertNode(node: Element, index: number) {
         const pod = this.setValue(this.o() || [] as unknown as NodeReferent<T>)! as NodeArray<T>
-        pod.splice(index, 0, node); //TODO: should this be splice?
+        pod.splice(index, 0, <ArrayItem<NodeArray<T>>>node); //TODO: should this be splice?
     }
 
     removeNode(index: number) {

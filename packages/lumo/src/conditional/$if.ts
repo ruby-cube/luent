@@ -7,7 +7,7 @@ import { watchForRender, initializeRender } from "../reactivity/watchForRender";
 import { onActivated, onDeactivated } from "../component/lifecycle";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { shallowClone } from "@rue/muonic/SnapshotManager";
-import { AnyObject } from "@rue/types";
+import { AnyObject, Booleanny } from "@rue/types";
 
 
 
@@ -18,9 +18,9 @@ type ConditionalOptions = {
 
 let currentRenderType: 'create' | 'show' | 'activate' = 'create'
 
-export function $if($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction,): ConditionalRenderKit
-export function $if($condition: ReactiveSignal<boolean>, type: 'create' | 'show' | 'activate', renderConditional: RenderFunction,): ConditionalRenderKit
-export function $if($condition: ReactiveSignal<boolean>, param2: 'create' | 'show' | 'activate' | RenderFunction, renderConditional?: RenderFunction,): ConditionalRenderKit {
+export function $if($condition: ReactiveSignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit
+export function $if($condition: ReactiveSignal<Booleanny>, type: 'create' | 'show' | 'activate', renderConditional: RenderFunction,): ConditionalRenderKit
+export function $if($condition: ReactiveSignal<Booleanny>, param2: 'create' | 'show' | 'activate' | RenderFunction, renderConditional?: RenderFunction,): ConditionalRenderKit {
     const typeSpecified = typeof param2 === "string";
     const renderFunction = typeSpecified ? renderConditional : param2;
     const type = typeSpecified ? param2 : 'create';
@@ -29,12 +29,12 @@ export function $if($condition: ReactiveSignal<boolean>, param2: 'create' | 'sho
     return _if($condition, renderFunction, 'if', type)
 }
 
-function _if($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction, statementType: 'if' | 'elseIf' = 'if', type: 'create' | 'show' | 'activate' = currentRenderType) {
+function _if($condition: ReactiveSignal<Booleanny>, renderConditional: RenderFunction, statementType: 'if' | 'elseIf' = 'if', type: 'create' | 'show' | 'activate' = currentRenderType) {
     const _renderConditional = type === 'activate' ? wrapToPreserve(renderConditional) : wrapToNormalize(renderConditional)
     return new ConditionalRenderKit(statementType, _renderConditional, type, $condition)
 }
 
-export function $elseIf($condition: ReactiveSignal<boolean>, renderConditional: RenderFunction) {
+export function $elseIf($condition: ReactiveSignal<Booleanny>, renderConditional: RenderFunction) {
     return _if($condition, renderConditional, 'elseIf')
 }
 

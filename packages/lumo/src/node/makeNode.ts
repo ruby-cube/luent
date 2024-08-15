@@ -4,7 +4,6 @@ import { getCurrentItemAndIndex, isSettingUpList, ListRenderKit, onListUpdated }
 import { HTMLTag, makeElement } from "../element/mE";
 import { makeComponent, InferSlotted } from "../component/mO";
 import { InternalNodeRef, NodeSignal } from "./$Node";
-import { getNodeConfig } from "../../api-play/_setUpNode";
 import { beforeUnmount } from "../component/lifecycle";
 import { getActiveFlask, getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
@@ -42,9 +41,9 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
     class?: string | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[],
     style?: string | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[],
     attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
-} & NodeSetup<HTMLElementTagNameMap[K]>
+} & NodeSetup<K>
 
-type NodeSetup<T extends Element | ComponentSetup> = {
+type NodeSetup<T extends HTMLTag | ComponentSetup> = {
     ref?: NodeSignal<T>,
 }
 
@@ -73,18 +72,18 @@ export function makeNode(
     )
 }
 
-export function _getNodeConfig(ref: NodeSignal | undefined) {
-    if (ref) {
-        const config = getNodeConfig(ref);
-        if (config instanceof Function) {
-            const [item, $index] = getCurrentItemAndIndex();
-            const _config = config(item, $index!)
-            return _config
-        }
-        return config;
-    }
-    return undefined;
-}
+// export function _getNodeConfig(ref: NodeSignal | undefined) {
+//     if (ref) {
+//         const config = getNodeConfig(ref);
+//         if (config instanceof Function) {
+//             const [item, $index] = getCurrentItemAndIndex();
+//             const _config = config(item, $index!)
+//             return _config
+//         }
+//         return config;
+//     }
+//     return undefined;
+// }
 
 export function initializeRef( // should this be initialize ref?
     ref: InternalNodeRef,
