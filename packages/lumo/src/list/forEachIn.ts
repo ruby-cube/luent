@@ -42,29 +42,36 @@ export class ListRenderKit<T = any> {
     }
 }
 
-let activeList: ListRenderKit | null = null
-let outerList: ListRenderKit | null = null
+// let activeList: ListRenderKit | null = null
+// let outerList: ListRenderKit | null = null
+
+const listSetupStack: ListRenderKit[] = [];
 
 export function pushList(list: ListRenderKit) {
-    outerList = activeList;
-    activeList = list
+    // outerList = activeList;
+    // activeList = list
+
+    listSetupStack.push(list)
 }
 
 export function popList() {
-    activeList = outerList;
-    outerList = null;
+    // activeList = outerList;
+    // outerList = null;
+    return listSetupStack.pop()
 }
 
+
 export function isSettingUpList() {
-    return !!activeList;
+    return listSetupStack.length !== 0;
 }
 
 export function isUpdatingList() {
+    const activeList = listSetupStack.at(-1)
     return activeList && activeList.isUpdating;
 }
 
 export function onListUpdated(task: (toFromIndices: [number, number][]) => void, options: ListenerOptions) {
-    const list = activeList;
+    const list = listSetupStack.at(-1);
     if (!list) throw new Error(`onListUpdated hook must be called during list setup`)
     return $listen(task, options, {
         enroll(cb) {

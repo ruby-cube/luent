@@ -1,5 +1,4 @@
 import { InternalComponent } from "../component/InternalComponent";
-import { setUpComponent } from "../component/setUpComponent";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
 import { buildConditionalSeries, ConditionalSeries } from "../conditional/ConditionalSeries";
@@ -10,7 +9,7 @@ import { ListRenderKit } from "../list/forEachIn";
 import { setUpNodeList } from "../list/setUpNodeList";
 import { NodeEntity } from "./makeNode";
 import { _NodePod } from "./NodePod";
-import { setUpTextNode } from "./setUpTextNode";
+import { mountTextNode } from "./mountTextNode";
 
 export function setUpNodeEntity(
     component: InternalComponent,
@@ -24,7 +23,7 @@ export function setUpNodeEntity(
         mountElement(parent, nodeEntity, nodePod, fragment)
     }
     else if (nodeEntity instanceof InternalComponent) {
-        setUpComponent(component, parent, nodeEntity, nodePod, fragment)
+        nodeEntity.mount(component, parent, nodePod, fragment)
         if (componentsToUnmount) componentsToUnmount.push(nodeEntity);
     }
     else if (nodeEntity instanceof ListRenderKit) { // this may or may not be dynamic, depending on data
@@ -41,6 +40,6 @@ export function setUpNodeEntity(
         }
     }
     else {
-        setUpTextNode(parent, nodeEntity, nodePod, fragment)
+        mountTextNode(parent, nodeEntity, nodePod, fragment)
     }
 }

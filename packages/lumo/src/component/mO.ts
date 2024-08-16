@@ -120,35 +120,20 @@ export function runComponentSetup(
     $index: Signal<number> | undefined
 ) {
     collectEffects((flask, outerFlask) => {
+        component.setFlask(flask);
         const output = Component({ ...config, slotted })
-        if (output instanceof Promise) {
+        if (output instanceof Promise)
             throw new Error("Components cannot return a promise. Use $pend and $await to handle promises within component setup")
-            // component.nodeEntities = output;
-            // popComponent()
-            // output.then((output) => {
-            //     pushComponent(component);
-            //     setUpStuff(component, output, config.ref, $index, flask)
-            //     popComponent()
-            //     return component;
-            // }) //TODO: Error handling
 
-            // //TODO: how to pause flask and continue flask?
-            // // return new Promise((resolve, reject) => {
-            // //     resolve(component)
-            // // })
-        }
-        else {
-            setUpStuff(component, output, config.ref, $index, flask)
-        }
+        initializeComponent(component, output, config.ref, $index)
     }, Component.name)
 }
 
-function setUpStuff(
+function initializeComponent(
     component: InternalComponent,
     output: NodeEntity | NodeEntity[] | [AnyObject, NodeEntity[]],
     ref: NodeSignal | undefined,
     $index: Signal<number> | undefined,
-    flask: Flask
 ) {
     const nodeEntities = normalizeToFragmentArray(extractNodeEntities(output));
 
@@ -163,6 +148,7 @@ function setUpStuff(
         initializeRef(_ref)
     }
 
+    const flask = component.flask!;
     flask.outer?.onDisposal(flask.dispose) // no outer flask means it's the root component
 
     // set up hook cascade
@@ -284,12 +270,12 @@ function setUpStuff(
 //     component.emit(LifecycleHook.MOUNTED);
 // }
 
-export function unmountComponent(component: InternalComponent) {
-    component.emit(LifecycleHook.BEFORE_UNMOUNT);
-    // const nodes = component.nodeEntities;
-    // for (const node of nodes) {
-    //     node.remove();
-    // }
-    component.emit(LifecycleHook.UNMOUNTED);
-}
+// export function unmountComponent(component: InternalComponent) {
+//     component.emit(LifecycleHook.BEFORE_UNMOUNT);
+//     // const nodes = component.nodeEntities;
+//     // for (const node of nodes) {
+//     //     node.remove();
+//     // }
+//     component.emit(LifecycleHook.UNMOUNTED);
+// }
 

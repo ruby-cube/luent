@@ -4,22 +4,26 @@ import { isSignal, Signal } from "./$Signal";
 
 export type ReactiveAtom = Signal | ReactiveProp | TrackableOp
 
-let activeDepTracker: DependencyTracker | null = null;
-let outerDepTracker: DependencyTracker | null = null;
+// let activeDepTracker: DependencyTracker | null = null;
+// let outerDepTracker: DependencyTracker | null = null;
+const depTrackerStack: DependencyTracker[] = []
 
 function pushDepTracker(tracker: DependencyTracker) {
-    outerDepTracker = activeDepTracker;
-    activeDepTracker = tracker;
+    // outerDepTracker = activeDepTracker;
+    // activeDepTracker = tracker;
+    depTrackerStack.push(tracker)
 }
 
 function popDepTracker() {
-    activeDepTracker = outerDepTracker;
-    outerDepTracker = null;
+    // activeDepTracker = outerDepTracker;
+    // outerDepTracker = null;
+    return depTrackerStack.pop()
 }
 
 
 export function getDependencyTracker() {
-    return activeDepTracker;
+    // return activeDepTracker;
+    return depTrackerStack.at(-1) || null
 }
 
 

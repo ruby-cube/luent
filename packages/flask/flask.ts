@@ -6,37 +6,45 @@ export type Flask = {
     readonly outer?: Flask;
     onDisposal: (cleanUp: () => void) => void;
     collectEffects: <T>(run: (outerFlask: Flask | null) => T) => T;
+    reactivate: () => void;
+    deactivate: () => void;
 }
 
 
 // Manages flask stack
-// let activeFlask: NestableFlask | null = null;
+let activeFlask: NestableFlask | null = null;
 let previousFlask: NestableFlask | null = null;
 const flaskStack: NestableFlask[] = [];
 
-function pushFlask(flask: NestableFlask) {
-    const prevFlask = flaskStack.at(-1)
-    if (prevFlask)flask.setOuter(prevFlask);
+export function pushFlask(flask: NestableFlask) {
+    if (!flask.__devName) console.trace()
+    console.log("push flask", flask ? flask.__devName : "NO FLASK")
+    // const outer = flaskStack.at(-1);
+    // if (outer) flask.setOuter(outer)
+    // if (activeFlask)flask.setOuter(activeFlask);
     // previousFlask = activeFlask;
     // activeFlask = flask;
     flaskStack.push(flask)
 }
 
-function popFlask() {
+export function popFlask() {
+    // const outer = activeFlask!.outer;
     // activeFlask = previousFlask;
-    // previousFlask = null;
-    flaskStack.pop();
+    // previousFlask = outer;
+    const outer = flaskStack.pop();
+    console.log("pop", outer ? outer.__devName : "NO FLASK", "-->", flaskStack.at(-1) ? flaskStack.at(-1)!.__devName : "NO FLASK")
 }
 
 // INTERNAL
 export function getActiveFlask() {
-    // return activeFlask;
-    return flaskStack.at(-1)
+    return flaskStack.at(-1) || null
+    return activeFlask;
 }
 
 // PUBLIC
 export function getFlask() {
-    return getActiveFlask()?.o;
+    return getActiveFlask()?.o
+    return activeFlask?.o;
 }
 
 export function onFlaskDisposal(cb: () => void) {
@@ -49,15 +57,16 @@ export function onFlaskDisposal(cb: () => void) {
 
 class NestableFlask {
     o: Flask = createFlask(this)
-    outer: NestableFlask | null = null
-    setOuter(flask: NestableFlask | null) {
-        this.outer = flask;
-        //@ts-expect-error setting read-only
-        this.o.outer = flask?.o;
-    }
+    // outer: NestableFlask | null = null
+    // setOuter(flask: NestableFlask | null) {
+    // }
     cleanups: Set<() => void> = new Set()
 
-    constructor(public __devName: string) { }
+    constructor(public outer: NestableFlask | null, public __devName: string) {
+        this.outer = outer;
+        //@ts-expect-error setting read-only
+        this.o.outer = outer?.o;
+    }
 }
 
 
@@ -82,23 +91,31 @@ function createFlask(_flask: NestableFlask) {
             try {
                 pushFlask(_flask);
                 return run(outerFlask?.o || null);
-            }
-            finally {
+            } finally {
                 popFlask();
             }
+        },
+
+        reactivate() {
+            pushFlask(_flask)
+        },
+
+        deactivate() {
+            if (getActiveFlask() === _flask)
+                popFlask()
         }
     };
 }
 
 export function collectEffects<T>(run: (flask: Flask, outerFlask: Flask | null) => T, __devName: string) {
     const outerFlask = getActiveFlask();
-    const _flask = new NestableFlask(__devName);
+    const _flask = new NestableFlask(outerFlask, __devName);
     try {
         pushFlask(_flask);
         return run(_flask.o, outerFlask?.o || null);
-    }
-    finally {
+    } finally {
         popFlask();
+
     }
 }
 
@@ -106,9 +123,9 @@ export function collectEffects<T>(run: (flask: Flask, outerFlask: Flask | null) 
 export function bindFlask(callback: Callback) {
     const flask = getActiveFlask()!;
     return (...args: any[]) => {
-        pushFlask(flask)
+        if (flask) pushFlask(flask)
         callback(...args);
-        popFlask();
+        if (flask) popFlask();
     }
 }
 

@@ -4,7 +4,7 @@ import { getCurrentComponent } from "../component/InternalComponent";
 import { watchForRenderAndPreserve } from "../conditional/$if";
 import { watchForRender } from "../reactivity/watchForRender";
 
-export function setUpTextNode(parent: Element, text: ReactiveSignal | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
+export function mountTextNode(parent: Element, text: ReactiveSignal | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
 
     const textNode = createTextNode(text); //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
     if (nodePod) {

@@ -64,7 +64,7 @@ export function $pend(promiseValueOrConfig: Promise<any> | Promise<any>[] | Pend
 
     if (Placeholder && ErrorView) {
         return function PendingComponent(props: AnyObject) {
-     
+            console.log("[ setting up pending component ]", Pending.name)
             const internalComponent = collectPromises(props)
             //QUESTION: Do I have to set up an entire component? or can I just pass in the props? if a ref is used, you need to set up component
             return (
@@ -77,7 +77,7 @@ export function $pend(promiseValueOrConfig: Promise<any> | Promise<any>[] | Pend
         }
     }
     if (Placeholder) {
-        return (props: AnyObject) => {
+        return function PendingComponent (props: AnyObject)  {
             const internalComponent = collectPromises(props)
             return (
                 <>

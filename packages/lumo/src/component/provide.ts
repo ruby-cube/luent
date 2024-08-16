@@ -21,6 +21,7 @@ function pushProvider(provider: Provider) {
 
 function popProvider() {
     currentProvider = previousProvider;
+    previousProvider = previousProvider?.parent || null
 }
 
 

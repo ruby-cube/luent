@@ -38,13 +38,19 @@ export type NodePod = ReadonlyArray<DOMNode | DynamicNodePod>
 
 
 
-
+// Node pods contain the children of an element,the nodes of a component, or a grouping within a dynamic node pod (for lists and conditionals)
 export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
     index?: number;
     pod?: _DynamicNodePod;
     componentsToUnmount: InternalComponent[] = [];
     refs: NodeSignal[] = [];
-    flask?: Flask
+
+    flask?: Flask // for dynamic lists to dispose of effects
+
+    setFlask(flask: Flask) {
+        this.flask = flask;
+    }
+
     constructor(pod?: _DynamicNodePod, index?: number) {
         super();
         this.index = index;
@@ -53,10 +59,11 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
 
     get prevNode(): DOMNode | null {
         if (this.index === undefined) return null;
-        const item = this.pod?.[this.index - 1];
-        if (!item && !this.pod) return null;
-        if (!item) return this.pod!.prevNode
-        return item.lastNode;
+        const entity = this.pod?.[this.index - 1];
+        if (!entity && !this.pod) return null;
+        if (!entity) return this.pod!.prevNode
+        return entity.lastNode;
+        // return entity;
     }
 
     get lastNode(): DOMNode | null {
@@ -76,6 +83,12 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
         return dynamicPod;
     }
 
+    // appendNodePod() {
+    //     const nodePod = new _NodePod(this, this.length)
+    //     this.push(nodePod)
+    //     return nodePod;
+    // }
+
     connect(pod: _DynamicNodePod, index: number) {
         this.index = index;
         this.pod = pod;
@@ -94,19 +107,24 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
         for (const nodeEntity of this) {
             if (nodeEntity instanceof _DynamicNodePod) {
                 for (let i = 0; i < nodeEntity.length; i++) {
-                    const nodePod = nodeEntity[i];
-                    nodePod.forEachNode(doTask, i)
+                    const entity = nodeEntity[i];
+                    // if (entity instanceof _NodePod) {
+                    entity.forEachNode(doTask, i)
+                    // }
+                    // else {
+                    //     doTask(entity, i)
+                    // }
                 }
             }
+            // else if (nodeEntity instanceof _NodePod) {
+            //     nodeEntity.forEachNode(doTask, index)
+            // }
             else {
                 doTask(nodeEntity, index)
             }
         }
     }
 
-    setFlask(flask: Flask){
-        this.flask = flask;
-    }
 }
 
 

@@ -3,7 +3,7 @@ import { isSignal, Signal } from "./$Signal";
 import { isReactiveModel, isReactiveObject, ReactiveModel, toRaw } from "./Reactive$";
 import { AnyObject } from "@rue/types";
 import { ActiveListener } from "../flask/ActiveListener";
-import { _runTasks, getCurrentUpdateCycle, Hooks, onPhaseCompleted, Phase, setCurrentUpdateCycle, UpdateCycle } from "./UpdateCycle";
+import { _runTasks, getCurrentUpdateCycle, Hooks, onPhaseCompleted, Phase, startUpdateCycle, UpdateCycle } from "./UpdateCycle";
 import { DependencyTracker, getDependencyTracker, getWithoutTracking, ReactiveAtom } from "./DependencyTracker";
 import { DERIVED_SIGNAL, DerivedSignal, getDependentDerivedSignals, hasSignal, isDerivedSignal, ReactiveSignal } from "./DerivedSignal";
 import { isEqual, UNDEFINED } from "@rue/utils";
@@ -369,7 +369,7 @@ export function useUpdateCycle() {
     let updateCycle = getCurrentUpdateCycle()
     if (!updateCycle) {
         updateCycle = new UpdateCycle();
-        setCurrentUpdateCycle(updateCycle)
+        startUpdateCycle(updateCycle)
     }
     return updateCycle;
 }

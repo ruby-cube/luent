@@ -4,6 +4,8 @@ import { InternalNodeRef } from "../node/$Node";
 import { EventHandler, NodeEntity, RenderFunction } from "../node/makeNode";
 import { DerivedSignal } from "@rue/muonic";
 import { _NodePod } from "../node/NodePod";
+import { Flask, pushFlask } from "@rue/flask";
+import { setUpNodeEntity } from "../node/setUpNodeEntity";
 
 
 export type DOMNode = CharacterData | Element
@@ -29,9 +31,18 @@ export class InternalComponent {
     context: AnyObject | undefined;
     provides: AnyObject | undefined;
     component: PublicComponent | null = null;
-    parent: InternalComponent | null;
-    nodeEntities: MaybePromise<NodeEntity[]> = []; //TODO: add context type?? //QUESTION: should this be cleared or updated?
-    preserve: boolean;
+    flask: Flask | undefined;
+
+    setFlask(flask: Flask) {
+        this.flask = flask;
+    }
+
+    nodePod: _NodePod | undefined;
+    setNodePod(nodePod: _NodePod) {
+        this.nodePod = nodePod;
+    }
+
+    nodeEntities: NodeEntity[] = []; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
     tasks: {
         [LifecycleHook.BEFORE_MOUNT]: Set<() => void> | undefined;
         [LifecycleHook.BEFORE_UNMOUNT]: Set<() => void> | undefined;
@@ -54,10 +65,10 @@ export class InternalComponent {
 
     hasUpdates: boolean = false;
 
-    constructor(parent: InternalComponent | null, preserve: boolean) {
-        this.parent = parent;
-        this.preserve = preserve
-    }
+    constructor(
+        public parent: InternalComponent | null,
+        public preserve: boolean
+    ) { }
 
     private getTaskQueue(hookName: LifecycleHook) {
         let taskQueue = this.tasks[hookName]
@@ -71,6 +82,34 @@ export class InternalComponent {
         for (const task of taskQueue) {
             task();
         }
+    }
+
+    mount(
+        parentComponent: InternalComponent,
+        parent: Element,
+        nodePod: _NodePod,
+        fragment?: DocumentFragment,
+    ) { //TODO: what if a component's root elements is conditional or a dynamic list??
+        const nodeEntities = this.nodeEntities;
+        if (!(parent instanceof Element))
+            throw new Error("Parent cannot be a text node")
+        this.emit(LifecycleHook.BEFORE_MOUNT);
+        pushComponent(this)
+        const _nodePod = nodePod.appendDynamicPod().appendNodePod();
+        this.setNodePod(_nodePod)
+        for (const nodeEntity of nodeEntities) {
+            setUpNodeEntity(parentComponent, parent, nodeEntity, _nodePod, fragment)
+        }
+        popComponent()
+        this.emit(LifecycleHook.MOUNTED);
+    }
+
+
+    unmount() {
+        this.emit(LifecycleHook.BEFORE_UNMOUNT);
+        const nodePod = this.nodePod;
+        nodePod?.forEachNode((node) => node.remove())
+        this.emit(LifecycleHook.UNMOUNTED);
     }
 }
 
@@ -86,10 +125,17 @@ export function getCurrentComponent() {
 export function pushComponent(component: InternalComponent | null) {
     prevComponent = currentComponent;
     currentComponent = component;
+    const flask = component?.flask
+    if (flask) flask.reactivate()
 }
 
 export function popComponent() {
+    const popped = currentComponent;
     currentComponent = prevComponent;
+    prevComponent = prevComponent?.parent || null
+    const flask = popped?.flask;
+    if (flask) flask.deactivate();
+    return popped;
 }
 
 
