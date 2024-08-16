@@ -27,7 +27,6 @@ export function setUpConditionalMount(
     let prevFlask: Flask;
 
     collectEffects((flask, outerFlask) => { //QUESTION: Do I need to remove this for preserve?
-        console.log("[ setting up conditional ]")
         const initialNodeEntities = series.render(activeIndex)
 
         // append to dom and node pod
@@ -41,7 +40,6 @@ export function setUpConditionalMount(
     // set up watcher for updates
     const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
 
-    console.log("**set up conditional watcher flask: ", getActiveFlask()?.__devName)
     _watchForRender($conditions, updateConditional, {once: true})
 
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {

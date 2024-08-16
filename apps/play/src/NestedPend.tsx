@@ -20,13 +20,12 @@ const PendingTextArea = $pend({
     // ErrorView: ({ error }: { error: any }) => <div>Ohh noes!! {error}</div>
 })
 
-export function MainSite() {
+export function NestedPend() {
     const $count = $Signal(0)
     return (
         <>
             <h1>Hello World</h1>
             <PendingListBlock></PendingListBlock>
-            <PendingTextArea></PendingTextArea>
             <p>{$count}</p>
             <button onclick={() => $count.set(c => c + 1)}>click</button>
         </>
@@ -43,7 +42,7 @@ function ListBlock() {
     return (
         <div>
             <h2>list</h2>
-            {/* <ItemBlockA></ItemBlockA> */}
+            <PendingTextArea></PendingTextArea>
             <ItemBlockB></ItemBlockB>
         </div>
     )

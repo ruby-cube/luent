@@ -14,37 +14,37 @@ export type Flask = {
 // Manages flask stack
 let activeFlask: NestableFlask | null = null;
 let previousFlask: NestableFlask | null = null;
-const flaskStack: NestableFlask[] = [];
+// const flaskStack: NestableFlask[] = [];
 
 export function pushFlask(flask: NestableFlask) {
-    if (!flask.__devName) console.trace()
-    console.log("push flask", flask ? flask.__devName : "NO FLASK")
+    if (!flask.__devName) console.trace("Flask does not have a dev name!")
+    // console.log("push flask", flask ? flask.__devName : "NO FLASK")
     // const outer = flaskStack.at(-1);
     // if (outer) flask.setOuter(outer)
     // if (activeFlask)flask.setOuter(activeFlask);
-    // previousFlask = activeFlask;
-    // activeFlask = flask;
-    flaskStack.push(flask)
+    previousFlask = activeFlask;
+    activeFlask = flask;
+    // flaskStack.push(flask)
 }
 
 export function popFlask() {
     // const outer = activeFlask!.outer;
-    // activeFlask = previousFlask;
-    // previousFlask = outer;
-    const outer = flaskStack.pop();
-    console.log("pop", outer ? outer.__devName : "NO FLASK", "-->", flaskStack.at(-1) ? flaskStack.at(-1)!.__devName : "NO FLASK")
+    activeFlask = previousFlask;
+    previousFlask = previousFlask?.outer || null;
+    // const outer = flaskStack.pop();
+    // console.log("pop", previousFlask ? previousFlask.__devName : "NO FLASK", "-->", activeFlask ? activeFlask!.__devName : "NO FLASK")
 }
 
 // INTERNAL
 export function getActiveFlask() {
-    return flaskStack.at(-1) || null
+    // return flaskStack.at(-1) || null
     return activeFlask;
 }
 
 // PUBLIC
 export function getFlask() {
-    return getActiveFlask()?.o
-    return activeFlask?.o;
+    // return getActiveFlask()?.o
+    return activeFlask?.o || null;
 }
 
 export function onFlaskDisposal(cb: () => void) {

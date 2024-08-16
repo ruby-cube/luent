@@ -12,10 +12,11 @@ import { configureFlask } from '../../../packages/flask/initFlask';
 import { MainSite } from './AwaitTest';
 import { ConditionalFlaskTest } from './ConditionalFlaskTest';
 import { Root } from './TreeTest';
+import { NestedPend } from './NestedPend';
 
 
 
-const app = createApp(MainSite)
+const app = createApp(NestedPend)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

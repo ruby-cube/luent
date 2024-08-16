@@ -25,7 +25,8 @@ export function getCurrentUpdateCycle() {
 }
 
 export function startUpdateCycle(updateCycle: UpdateCycle) {
-    if (currentUpdateCycle) throw new Error("Overlapping update cycles! Need to implement a different type of update cycle management system")
+    if (currentUpdateCycle)
+        throw new Error("Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
     return currentUpdateCycle = updateCycle;
 }
 
