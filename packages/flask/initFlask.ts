@@ -1,7 +1,7 @@
 import { useIncrementalID } from "@rue/utils";
 import { ActiveListener } from "./ActiveListener";
 import { PendingOp } from "./PendingOp";
-import { getFlask } from "./flask";
+import { getActiveFlask, getFlask } from "./flask";
 
 export let shouldWarnNoCleanup = false;
 

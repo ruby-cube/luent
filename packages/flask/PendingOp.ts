@@ -46,7 +46,7 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
         const _cancel = (() => {
             try {
                 remove(returnVal ?? _callback);
-                if (__DEV__) unmarkNoCleanup(pendingOp);
+                // if (__DEV__) unmarkNoCleanup(pendingOp);
             }
             catch (e) {
                 console.trace();
@@ -66,7 +66,7 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
 
         pendingCancelOp = scheduleCancellation ? scheduleCancellation(_cancel) : null;
 
-        if (__DEV__) setUpCleanupWarning!(pendingOp, scheduleCancellation)
+        // if (__DEV__) setUpCleanupWarning!(pendingOp, scheduleCancellation)
 
         return pendingOp;
     }

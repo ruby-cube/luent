@@ -10,28 +10,33 @@ export type Flask = {
 
 
 // Manages flask stack
-let activeFlask: NestableFlask | null = null;
+// let activeFlask: NestableFlask | null = null;
 let previousFlask: NestableFlask | null = null;
+const flaskStack: NestableFlask[] = [];
 
 function pushFlask(flask: NestableFlask) {
-    if (activeFlask)flask.setOuter(activeFlask);
-    previousFlask = activeFlask;
-    activeFlask = flask;
+    const prevFlask = flaskStack.at(-1)
+    if (prevFlask)flask.setOuter(prevFlask);
+    // previousFlask = activeFlask;
+    // activeFlask = flask;
+    flaskStack.push(flask)
 }
 
 function popFlask() {
-    activeFlask = previousFlask;
-    previousFlask = null;
+    // activeFlask = previousFlask;
+    // previousFlask = null;
+    flaskStack.pop();
 }
 
 // INTERNAL
 export function getActiveFlask() {
-    return activeFlask;
+    // return activeFlask;
+    return flaskStack.at(-1)
 }
 
 // PUBLIC
 export function getFlask() {
-    return activeFlask?.o;
+    return getActiveFlask()?.o;
 }
 
 export function onFlaskDisposal(cb: () => void) {

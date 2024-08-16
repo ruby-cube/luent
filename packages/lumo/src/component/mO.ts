@@ -1,6 +1,6 @@
 import { AnyObject, MaybePromise } from "@rue/types";
 import { PublicComponent, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent, COMPONENT } from "./InternalComponent";
-import { collectEffects, Flask } from "@rue/flask/flask";
+import { collectEffects, Flask, getActiveFlask, getFlask } from "@rue/flask/flask";
 import { InternalNodeRef, NodeSignal, getNodeRef, get$Node } from "../node/$Node";
 import { ComponentConfig, EventsConfig, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
@@ -122,19 +122,20 @@ export function runComponentSetup(
     collectEffects((flask, outerFlask) => {
         const output = Component({ ...config, slotted })
         if (output instanceof Promise) {
-            component.nodeEntities = output;
-            popComponent()
-            output.then((output) => {
-                pushComponent(component);
-                setUpStuff(component, output, config.ref, $index, flask)
-                popComponent()
-                return component;
-            }) //TODO: Error handling
+            throw new Error("Components cannot return a promise. Use $pend and $await to handle promises within component setup")
+            // component.nodeEntities = output;
+            // popComponent()
+            // output.then((output) => {
+            //     pushComponent(component);
+            //     setUpStuff(component, output, config.ref, $index, flask)
+            //     popComponent()
+            //     return component;
+            // }) //TODO: Error handling
 
-            //TODO: how to pause flask and continue flask?
-            // return new Promise((resolve, reject) => {
-            //     resolve(component)
-            // })
+            // //TODO: how to pause flask and continue flask?
+            // // return new Promise((resolve, reject) => {
+            // //     resolve(component)
+            // // })
         }
         else {
             setUpStuff(component, output, config.ref, $index, flask)

@@ -40,7 +40,7 @@ function ListBlock() {
     return (
         <div>
             <h2>list</h2>
-            <ItemBlockA></ItemBlockA>
+            {/* <ItemBlockA></ItemBlockA> */}
             <ItemBlockB></ItemBlockB>
         </div>
     )
