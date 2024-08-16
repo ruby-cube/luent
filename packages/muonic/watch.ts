@@ -369,7 +369,7 @@ export function useUpdateCycle() {
     let updateCycle = getCurrentUpdateCycle()
     if (!updateCycle) {
         updateCycle = new UpdateCycle();
-        startUpdateCycle(updateCycle)
+        
     }
     return updateCycle;
 }

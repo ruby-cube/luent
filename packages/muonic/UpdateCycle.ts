@@ -25,7 +25,7 @@ export function getCurrentUpdateCycle() {
 }
 
 export function startUpdateCycle(updateCycle: UpdateCycle) {
-    // if (currentUpdateCycle) throw new Error("Overlapping update cycles! Need to implement a different type of update cycle management system")
+    if (currentUpdateCycle) throw new Error("Overlapping update cycles! Need to implement a different type of update cycle management system")
     return currentUpdateCycle = updateCycle;
 }
 
@@ -41,8 +41,8 @@ export class UpdateCycle {
     completedTasks: Set<Function> = new Set();
 
     constructor() {
+        startUpdateCycle(this)
         updateCycleCount++;
-        currentUpdateCycle = this;
         beforeRepaint(() => {
             _runTasks(Hooks.BEFORE_RENDER)
             runNonSyncTasks('render');
