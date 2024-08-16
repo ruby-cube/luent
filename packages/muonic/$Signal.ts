@@ -43,7 +43,6 @@ export function $Signal<T>(value?: T): Signal<T> {
     return signal;
 }
 
-
 function set<T>(this: Signal<T>, toNewValue: (value: T) => T) {
     if (!(SIGNAL_MARKER in this))
         throw new Error("[Invalid Input] `set` can only set type `Signal`")

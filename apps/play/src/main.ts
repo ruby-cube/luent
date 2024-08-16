@@ -9,10 +9,12 @@ import { App } from './App';
 import { TestConditional } from './TestConditional';
 import { List } from './TestReactiveModel';
 import { configureFlask } from '../../../packages/flask/initFlask';
+import { MainSite } from './AwaitTest';
+import { ConditionalFlaskTest } from './ConditionalFlaskTest';
 
 
 
-const app = createApp(App)
+const app = createApp(MainSite)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

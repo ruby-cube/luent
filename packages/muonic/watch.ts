@@ -4,7 +4,7 @@ import { isReactiveModel, isReactiveObject, ReactiveModel, toRaw } from "./React
 import { AnyObject } from "@rue/types";
 import { ActiveListener } from "../flask/ActiveListener";
 import { _runTasks, getCurrentUpdateCycle, Hooks, onPhaseCompleted, Phase, setCurrentUpdateCycle, UpdateCycle } from "./UpdateCycle";
-import { DependencyTracker, getDependencyTracker, ReactiveAtom } from "./DependencyTracker";
+import { DependencyTracker, getDependencyTracker, getWithoutTracking, ReactiveAtom } from "./DependencyTracker";
 import { DERIVED_SIGNAL, DerivedSignal, getDependentDerivedSignals, hasSignal, isDerivedSignal, ReactiveSignal } from "./DerivedSignal";
 import { isEqual, UNDEFINED } from "@rue/utils";
 import { MutationRecord, MutationOp, SetOp, watchProps } from "./deepWatch";
@@ -12,7 +12,6 @@ import { collectReactiveProps, registerDebuggers, runTriggerDebugger, WatchDebug
 import { asReactiveProp, getReactiveProp, isReactiveProp, ReactiveProp } from "./ReactiveProp";
 import { PendingCancelOp } from "../flask/PendingCancelOp";
 
-//QUESTION: How useful is watching deep?
 
 type UpdateCycleOptions = {
     phase?: Phase;
@@ -55,14 +54,13 @@ function isReactiveEffect(task: Function): task is ReactiveEffect {
 }
 
 
-
 export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
     const { deep, eager } = options ?? {};
     const phase = options?.phase || 'pre'
 
 
     if (deep && isReactiveModel(target)) { //TODO: deep watch for $$ and $$$ signals?
-       watchProps(target, target, []);
+        watchProps(target, target, []);
     }
 
     let phaseQueues: PhaseQueue[];
@@ -118,7 +116,6 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
     // ^ set once to false so that it will not be extraneously re-wrapped by $listen
 
     const forNextCycle = phase === 'sync' ? false : shouldScheduleForNextCycle();
-
 
     watcher = $listen(_handler, options || {}, {
         enroll(task) {
@@ -338,7 +335,6 @@ function usePhaseQueue(target: Signal | ReactiveProp | ReactiveModel, phase: Pha
         phaseQueue = [new Set(), undefined]
         phaseMap.set(phase, phaseQueue)
     }
-
     return phaseQueue;
 }
 
@@ -393,7 +389,6 @@ export function trigger(target: ReactiveAtom, newValue: any, oldValue: any) { //
 
     // collect triggered refs for this cycle for 'pre', 'render', and 'post' phases
     updateCycle.flagReactiveAtom(target, newValue, oldValue)
-
     return updateCycle;
 }
 
@@ -452,7 +447,9 @@ function runSyncTasks(target: ReactiveAtom, newValue: any, oldValue: any) {
 
 function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: any, completedTasks: Set<Function>) {
     for (const task of taskQueue) {
-        if (completedTasks.has(task)) continue;
+        if (completedTasks.has(task)) {
+            continue;
+        }
         if (derivedSignalMap.has(task)) {
             const derivedSignal = derivedSignalMap.get(task);
             if (!derivedSignal) throw new Error("derived signal not found")
@@ -460,8 +457,9 @@ function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: a
             if (!updateCycle) throw new Error("No update cycle :( whyyy")
             const _oldValue = updateCycle.getInitialValue(derivedSignal)
             const newValue = derivedSignal();
-            if (!hasChanged(newValue, _oldValue))
+            if (!hasChanged(newValue, _oldValue)) {
                 return;
+            }
             runEffect(() => {
                 task(newValue, _oldValue);
             })

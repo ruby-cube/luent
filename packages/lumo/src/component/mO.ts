@@ -35,6 +35,11 @@ export function mO<T extends ComponentSetupWithSlot>(
 ): InternalComponent
 export function mO<T extends ComponentSetup>(
     Component: T,
+    slotted?: undefined,
+    config?: ComponentConfig<T>
+): InternalComponent
+export function mO<T extends ComponentSetup>(
+    Component: T,
     slotted?: InferSlotted<T> | undefined,
     config?: ComponentConfig<T>
 ): InternalComponent {
@@ -134,7 +139,7 @@ export function runComponentSetup(
         else {
             setUpStuff(component, output, config.ref, $index, flask)
         }
-    })
+    }, Component.name)
 }
 
 function setUpStuff(

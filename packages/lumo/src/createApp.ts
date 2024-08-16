@@ -26,7 +26,7 @@ export function createApp(App: RenderFunction) {
             collectEffects((flask) => {
                 this.flask = flask
                 setUpComponent(parentComponent, root, component, nodePod)
-            })
+            }, 'RootComponent')
             popComponent()
             return component;
         },

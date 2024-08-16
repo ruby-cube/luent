@@ -94,13 +94,11 @@ export function initializeRef( // should this be initialize ref?
     // dispose with outer flask because we don't want to dispose when first item is removed
     const outerFlask = getFlask()?.outer
     outerFlask?.onDisposal(() => {
-        console.log("disposing ref value")
         ref.setValue(undefined);
         ref.initialized = false;
     })
 
     if (isSettingUpList()) {
-        console.log("isSettingup list")
         const listUpdatedListener =
             onListUpdated((toFromIndices) => {
                 ref.updateListRef(toFromIndices)

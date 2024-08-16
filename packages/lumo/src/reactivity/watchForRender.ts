@@ -2,9 +2,9 @@ import { ChangeHandler, getDependencies, initializeEffect, usePhaseQueues, watch
 import { getCurrentComponent, InternalComponent } from "../component/InternalComponent";
 import { beforeRender, onRendered } from "@rue/muonic/UpdateCycle";
 import { ReactiveSignal } from "@rue/muonic/DerivedSignal";
-import { ReactiveModel } from "@rue/muonic/useReactiveModels";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
+import { getWithoutTracking, ReactiveModel } from "@rue/muonic";
 
 
 export function initializeRender(effect: () => void) {
@@ -23,6 +23,7 @@ export function initializeRender(effect: () => void) {
 export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: { once?: true, eager?: true }) {
     const component = getCurrentComponent();
     if (!component) throw Error("watchForRender must be called within component setup")
+
 
     const _handler = (newValue: any, oldValue: any) => {
         handler(newValue, oldValue);

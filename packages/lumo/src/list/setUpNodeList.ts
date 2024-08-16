@@ -165,7 +165,7 @@ export function insertAndMoveListItemNodes(
                 }
                 nodePod.setFlask(flask);
                 outerFlask?.onDisposal(flask.dispose)
-            })
+            }, insertAndMoveListItemNodes.name)
         }
         else if (hasMoved(uItem)) {
             // move node to fragment (DOM will auto-remove node from DOM)

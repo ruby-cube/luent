@@ -14,13 +14,14 @@ let activeFlask: NestableFlask | null = null;
 let previousFlask: NestableFlask | null = null;
 
 function pushFlask(flask: NestableFlask) {
-    flask.setOuter(activeFlask);
+    if (activeFlask)flask.setOuter(activeFlask);
     previousFlask = activeFlask;
     activeFlask = flask;
 }
 
 function popFlask() {
     activeFlask = previousFlask;
+    previousFlask = null;
 }
 
 // INTERNAL
@@ -29,7 +30,7 @@ export function getActiveFlask() {
 }
 
 // PUBLIC
-export function getFlask(){
+export function getFlask() {
     return activeFlask?.o;
 }
 
@@ -50,13 +51,15 @@ class NestableFlask {
         this.o.outer = flask?.o;
     }
     cleanups: Set<() => void> = new Set()
+
+    constructor(public __devName: string) { }
 }
 
 
 function createFlask(_flask: NestableFlask) {
-
     return {
         dispose() {
+            // console.trace("disposing flask")
             const cleanups = _flask.cleanups;
             for (const cleanUp of cleanups) {
                 cleanUp();
@@ -82,9 +85,9 @@ function createFlask(_flask: NestableFlask) {
     };
 }
 
-export function collectEffects<T>(run: (flask: Flask, outerFlask: Flask | null) => T) {
+export function collectEffects<T>(run: (flask: Flask, outerFlask: Flask | null) => T, __devName: string) {
     const outerFlask = getActiveFlask();
-    const _flask = new NestableFlask();
+    const _flask = new NestableFlask(__devName);
     try {
         pushFlask(_flask);
         return run(_flask.o, outerFlask?.o || null);

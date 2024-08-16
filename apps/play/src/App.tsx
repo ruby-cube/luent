@@ -24,12 +24,33 @@ const SideBlock = lazyLoadComponent({
                 promise.then((SideBlock) => {
                     resolve(SideBlock)
                 })
-            }, 6000)
+            }, 6000) // simulate network latency
         })
     },
     onIdle: true,
     Placeholder(props) {
         return <div>Eep! I'm not ready {props.frog}</div>
+    },
+    // timeout: 5000,
+    ErrorView(props) {
+        return <div>{props.error}</div>
+    },
+});
+
+const TestBox = lazyLoadComponent({
+    load: () => {
+        const promise = import('./TestBox').then(({ TestBox }) => TestBox)
+        return new Promise((resolve: (SideBlock: ComponentSetup) => void, reject) => {
+            setTimeout(() => {
+                promise.then((SideBlock) => {
+                    resolve(SideBlock)
+                })
+            }, 2000) // simulate network latency
+        })
+    },
+    onIdle: true,
+    Placeholder(props) {
+        return <div>loading test box...</div>
     },
     // timeout: 5000,
     ErrorView(props) {
@@ -92,7 +113,7 @@ export function List() {
 
     const { openModal } = useModal();
 
-    const $showSideBlock = $Signal(true)
+    const $showSideBlock = $Signal(false)
 
     function showSideBlock() {
         $showSideBlock.set(o => true)
@@ -135,7 +156,10 @@ export function List() {
             <button onclick={openModal}>open</button>
             <>
                 {$if($showSideBlock, 'create', () =>
-                    <SideBlock frog="sir robin" />
+                    <>
+                        <TestBox />
+                        <SideBlock frog="sir robin" />
+                    </>
                 )}
             </>
             <button onclick={showSideBlock}>show Side Block</button>
@@ -166,7 +190,6 @@ function DialogBox() {
     __addDevName($open, '$open')
 
     function open() {
-        console.log("open sesame")
         $open.set(() => true)
     }
 

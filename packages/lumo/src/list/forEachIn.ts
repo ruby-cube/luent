@@ -71,7 +71,6 @@ export function onListUpdated(task: (toFromIndices: [number, number][]) => void,
             list.onUpdatedTasks.add(cb);
         },
         remove(cb) {
-            console.log('deleting list task')
             console.trace()
             list.onUpdatedTasks.delete(cb)
         }
@@ -124,7 +123,7 @@ export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: s
                 flasks.push(flask);
             }
             outerFlask?.onDisposal(flask.dispose)
-        })
+        }, 'forEachIn')
         i++;
     }
     currentItem = undefined;

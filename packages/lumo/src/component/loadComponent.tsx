@@ -7,10 +7,10 @@ const lazyComponents: Map<() => Promise<ComponentSetup>, ComponentSetup> = new M
 
 export function lazyLoadComponent<P>(config: {
     load: () => Promise<ComponentSetup<P>>,
-    Placeholder?: ComponentSetup, //QUESTION: Does this need to be a component setup or can it be a render function?
+    onIdle?: boolean
+    Placeholder?: ComponentSetup,
     timeout?: number,
     ErrorView?: ComponentSetup<{ error: any }>,
-    onIdle?: boolean
 }) { //TODO: Idle load priorities
     const { load, ErrorView, Placeholder, timeout, onIdle } = config;
     const $loading = $Signal(true);
@@ -110,7 +110,7 @@ export function lazyLoadComponent<P>(config: {
     }
     return (props: P) => {
         loadComponent();
-        
+
         return (
             <>
                 {$if($loaded, 'create', () => {

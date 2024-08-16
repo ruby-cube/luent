@@ -20,7 +20,6 @@ export class ConditionalSeries {
                 else continue;
             }
             if (i !== statements.length - 1 && kit.statementType === 'else') {
-                console.log('statements', statements)
                 if (__DEV__) throw new Error("$else must be the very last statement of a conditional series");
                 else continue;
             }

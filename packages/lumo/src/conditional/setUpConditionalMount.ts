@@ -6,7 +6,7 @@ import { watchForRenderAndPreserve } from "./$if";
 import { LifecycleHook } from "../component/lifecycle";
 import { NodeEntity } from "../node/makeNode";
 import { getNodeRef } from "../node/$Node";
-import { collectEffects, Flask } from "@rue/flask/flask";
+import { collectEffects, Flask, getActiveFlask, getFlask } from "@rue/flask/flask";
 import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle";
 import { areShallowEqualArrays, getDependencyTracker, getWithoutTracking, isShallowEqual } from "@rue/muonic";
 import { ConditionalRenderSeries } from "./ConditionalRenderSeries";
@@ -35,16 +35,16 @@ export function setUpConditionalMount(
         }
         prevFlask = flask;
         outerFlask?.onDisposal(flask.dispose)
-    })
+    }, 'setUpConditionalMount')
 
     // set up watcher for updates
     const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
 
+    console.log("set up conditional watcher flask: ", getActiveFlask(), getActiveFlask()?.__devName)
     _watchForRender($conditions, updateConditional, {once: true})
 
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
         if (areShallowEqualArrays(newValue, oldValue)) return;
-
         pushComponent(component)
         // evaluate conditions
         const { $conditions, activeIndex } = series.evaluateConditions();
@@ -58,7 +58,7 @@ export function setUpConditionalMount(
             insertNewConditionalNodes(component, parent, dynamicPod, nodeEntities)
             prevFlask = flask;
             outerFlask?.onDisposal(flask.dispose)
-        })
+        }, 'updateConditional')
         component.emit(LifecycleHook.UPDATED)
 
         // set up for next update

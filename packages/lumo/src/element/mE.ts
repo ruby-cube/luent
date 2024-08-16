@@ -65,7 +65,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
         }
     }
 
-    setUpClasses(component, domNode, normalizeToArray(classes)) //TODO: If hydrating skip non reactive stuff
+    setUpClasses(component, domNode, normalizeToArray(classes))
     setUpStyles(component, domNode, normalizeToArray(styles))
     setUpEvents(domNode, events);
     setUpAttributes(domNode, attributes);
@@ -138,7 +138,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: any | Deriv
                 setAttribute(node, key, newValue)
             }, { eager: true })
         }
-        else {
+        else if (!isHydrating()) {
             node.setAttribute(key, toString(value))
         }
     }
