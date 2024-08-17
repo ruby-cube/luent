@@ -2,7 +2,7 @@ import { PublicComponent, ComponentSetup, InternalComponent, popComponent, pushC
 import { NodeEntity, RenderFunction } from "./node/makeNode";
 import { makeComponent, mO, runComponentSetup } from "./component/mO";
 import { _NodePod } from "./node/NodePod";
-import { collectEffects, Flask } from "@rue/flask";
+import { collectEffects, EffectFlask } from "@rue/flask";
 import { LifecycleHook } from "./component/lifecycle";
 
 let appRoot: Element;

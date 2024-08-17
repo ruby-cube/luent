@@ -1,4 +1,4 @@
-import { Flask } from "@rue/flask";
+import { EffectFlask } from "@rue/flask";
 import { DOMNode, InternalComponent } from "../component/InternalComponent";
 import { NodeSignal } from "./$Node";
 
@@ -45,9 +45,9 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
     componentsToUnmount: InternalComponent[] = [];
     refs: NodeSignal[] = [];
 
-    flask?: Flask // for dynamic lists to dispose of effects
+    flask?: EffectFlask // for dynamic lists to dispose of effects
 
-    setFlask(flask: Flask) {
+    setFlask(flask: EffectFlask) {
         this.flask = flask;
     }
 

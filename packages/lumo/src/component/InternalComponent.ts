@@ -4,7 +4,7 @@ import { InternalNodeRef } from "../node/$Node";
 import { EventHandler, NodeEntity, RenderFunction } from "../node/makeNode";
 import { DerivedSignal } from "@rue/muonic";
 import { _NodePod } from "../node/NodePod";
-import { Flask, pushFlask } from "@rue/flask";
+import { EffectFlask, pushFlask } from "@rue/flask";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
 
 
@@ -31,9 +31,9 @@ export class InternalComponent {
     context: AnyObject | undefined;
     provides: AnyObject | undefined;
     component: PublicComponent | null = null;
-    flask: Flask | undefined;
+    flask: EffectFlask | undefined;
 
-    setFlask(flask: Flask) {
+    setFlask(flask: EffectFlask) {
         this.flask = flask;
     }
 

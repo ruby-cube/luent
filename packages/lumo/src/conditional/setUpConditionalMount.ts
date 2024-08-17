@@ -6,7 +6,7 @@ import { watchForRenderAndPreserve } from "./$if";
 import { LifecycleHook } from "../component/lifecycle";
 import { NodeEntity } from "../node/makeNode";
 import { getNodeRef } from "../node/$Node";
-import { collectEffects, Flask, getActiveFlask, getFlask } from "@rue/flask/flask";
+import { collectEffects, EffectFlask, getActiveFlask, getFlask } from "@rue/flask/flask";
 import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle";
 import { areShallowEqualArrays, getDependencyTracker, getWithoutTracking, isShallowEqual } from "@rue/muonic";
 import { ConditionalRenderSeries } from "./ConditionalRenderSeries";
@@ -24,7 +24,7 @@ export function setUpConditionalMount(
     const dynamicPod = nodePod.appendDynamicPod();
     const _nodePod = dynamicPod.appendNodePod()
 
-    let prevFlask: Flask;
+    let prevFlask: EffectFlask;
 
     collectEffects((flask, outerFlask) => { //QUESTION: Do I need to remove this for preserve?
         const initialNodeEntities = series.render(activeIndex)

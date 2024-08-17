@@ -1,4 +1,4 @@
-import { addToFlask, bindFlask } from "./flask";
+import { bindFlask, getFlask, onFlaskDisposal } from "./flask";
 import { CallbackRemover, SchedulerOptions } from "./flaskableListeners";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
@@ -26,49 +26,51 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
 
     let returnVal: any;
     let _resolve: (result?: any) => void;
-    let _reject: (reason?: any) => void;
+    let pendingOp: PendingOp<ReturnType<CB>>
     let pendingCancelOp: PendingCancelOp | null;
+    let pendingFlaskCleanup: PendingCancelOp | undefined;
 
     const _callback = (bindFlask((...arg: any[]) => {
         _resolve(callback(...arg));
-        remove(returnVal ?? _callback);
-        if (pendingCancelOp) pendingCancelOp.cancel();
+        _remove()
     })) as CB
+
+    function _remove() {
+        try {
+            remove(returnVal ?? _callback);
+            if (__DEV__) unmarkNoCleanup(pendingOp);
+        }
+        finally {
+            if (pendingCancelOp) pendingCancelOp.cancel();
+            if (pendingFlaskCleanup) pendingFlaskCleanup.cancel();
+        }
+    }
+
     try {
         returnVal = enroll(_callback);
     }
     finally {
-        const pendingOp = new Promise((resolve, reject) => {
+        pendingOp = new Promise((resolve) => {
             _resolve = resolve;
-            _reject = reject;
         }) as PendingOp<ReturnType<CB>>
 
-        const _cancel = (() => {
-            try {
-                remove(returnVal ?? _callback);
-                // if (__DEV__) unmarkNoCleanup(pendingOp);
-            }
-            catch (e) {
-                console.trace();
-                const err = e instanceof Error ? e : new Error(String(e));
-                _reject(new Cancellation(err));
-            }
-            finally {
-                if (pendingCancelOp) pendingCancelOp.cancel();
-                _resolve(new Cancellation("Pending op canceled."))
-            }
+        let callCount = 0;
+        const cancel = (() => {
+            if (callCount > 0) return;
+            callCount++;
+            _remove();
+            _resolve(new Cancellation("Pending op canceled."))
         }) as CallbackRemover;
-        _cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.
+        cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.
 
-        pendingOp.cancel = _cancel;
+        pendingOp.cancel = cancel;
 
-        if (!outlive) addToFlask(_cancel)
+        if (!outlive) pendingFlaskCleanup = onFlaskDisposal(cancel)
 
-        pendingCancelOp = scheduleCancellation ? scheduleCancellation(_cancel) : null;
+        pendingCancelOp = scheduleCancellation ? scheduleCancellation(cancel) : null;
 
-        // if (__DEV__) setUpCleanupWarning!(pendingOp, scheduleCancellation)
+        if (__DEV__) setUpCleanupWarning!(pendingOp, scheduleCancellation)
 
         return pendingOp;
     }
-
 }

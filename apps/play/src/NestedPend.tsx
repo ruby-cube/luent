@@ -144,7 +144,7 @@ function simLongFetchB(word: string) {
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve(word);
-        }, 9000)
+        }, 4000)
     })
 }
 

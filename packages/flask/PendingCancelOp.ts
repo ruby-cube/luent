@@ -1,4 +1,4 @@
-import { addToFlask } from "./flask";
+import { bindFlask, getFlask, onFlaskDisposal } from "./flask";
 
 export type PendingCancelOp = {
     cancel: () => void;
@@ -11,25 +11,30 @@ export function makePendingCancelOp(config: {
 }): PendingCancelOp {
     const { callback, enroll, remove } = config
     let returnVal: any;
+    let pendingFlaskCleanup: PendingCancelOp | undefined;
 
-    const _callback = () => {
+    const _callback = bindFlask(() => { //QUESTION: I'm not 100% sure if I need to bindFlask
         callback();
-        remove(returnVal ?? _callback); // will only be called once
+        _remove(); // so that callback will only be called once
+    })
+
+    let callCount = 0;
+    function _remove() {
+        if (callCount > 0) return;
+        callCount++;
+        remove(returnVal ?? _callback);
+        if (pendingFlaskCleanup) pendingFlaskCleanup.cancel()
     }
+    _remove.isRemover = true as const;
+
+    pendingFlaskCleanup = onFlaskDisposal(_remove)
 
     try {
         returnVal = enroll(_callback);
     }
     finally {
-        const cancel = () => {
-            remove(returnVal ?? _callback);
-        }
-        cancel.isRemover = true as const;
-
-        addToFlask(cancel)
-
         return {
-            cancel
+            cancel: _remove
         }
     }
 

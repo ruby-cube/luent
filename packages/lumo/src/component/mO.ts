@@ -1,6 +1,6 @@
 import { AnyObject, MaybePromise } from "@rue/types";
 import { PublicComponent, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent, COMPONENT } from "./InternalComponent";
-import { collectEffects, Flask, getActiveFlask, getFlask } from "@rue/flask/flask";
+import { collectEffects, EffectFlask, getActiveFlask, getFlask } from "@rue/flask/flask";
 import { InternalNodeRef, NodeSignal, getNodeRef, get$Node } from "../node/$Node";
 import { ComponentConfig, EventsConfig, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";

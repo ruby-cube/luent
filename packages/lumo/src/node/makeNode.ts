@@ -5,7 +5,7 @@ import { HTMLTag, makeElement } from "../element/mE";
 import { makeComponent, InferSlotted } from "../component/mO";
 import { InternalNodeRef, NodeSignal } from "./$Node";
 import { beforeUnmount } from "../component/lifecycle";
-import { getActiveFlask, getFlask, onFlaskDisposal } from "@rue/flask";
+import {  getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 
 export function Fragment() {

@@ -1,6 +1,0 @@
-export { role } from "./Role"
-export { keyCollisionCheck, roleCollisionCheck } from "./reifier"
-export { defineTypeCheck, enacts } from "./typecheck"
-export type * from "./Role"
-export type * from "./reifier"
-export type * from "./typecheck"
