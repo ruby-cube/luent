@@ -11,7 +11,7 @@ export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O
 export type ListenerOptions = {
     once?: boolean;
     until?: ScheduleStop;
-    flask?: EffectFlask;
+    flask?: EffectFlask | null | 'outlive';
 }
 
 export type CallbackRemover = {
@@ -61,7 +61,7 @@ export function $listen<
 
 export type SchedulerOptions = {
     cancel?: ScheduleCancel,
-    flask?: EffectFlask
+    flask?: EffectFlask | null | 'outlive',
 }
 
 export type ScheduledOp<CB extends Callback> = CB extends { isRemover: true } ? PendingCancelOp : PendingOp<ReturnType<CB>>

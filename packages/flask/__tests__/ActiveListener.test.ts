@@ -113,6 +113,15 @@ describe("ActiveListener", () => {
         expect(onFlaskDisposal).toHaveBeenCalledWith(expect.any(Function));
     });
 
+    it('should not call onFlaskDisposal if flask === "outlive"', () => {
+        config.options.flask = 'outlive';
+
+        makeActiveListener(config);
+
+        expect(onFlaskDisposal).not.toHaveBeenCalled();
+
+    });
+
 
     it('should handle missing options object gracefully', () => {
         config.options = undefined;
