@@ -1,8 +1,8 @@
 import { DerivedSignal, ReactiveSignal } from "@rue/muonic";
 import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { getCurrentItemAndIndex, isSettingUpList, ListRenderKit, onListUpdated } from "../list/forEachIn";
-import { HTMLTag, makeElement } from "../element/mE";
-import { makeComponent, InferSlotted } from "../component/mO";
+import { HTMLTag, makeElement } from "../element/makeElement";
+import { makeComponent, InferSlotted } from "../component/makeComponent";
 import { InternalNodeRef, NodeSignal } from "./$Node";
 import { beforeUnmount } from "../component/lifecycle";
 import {  getFlask, onFlaskDisposal } from "@rue/flask";

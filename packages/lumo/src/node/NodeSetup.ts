@@ -1,5 +1,5 @@
 import { PublicComponent, ComponentSetup, InternalComponent } from "../component/InternalComponent";
-import { HTMLTag } from "../element/mE";
+import { HTMLTag } from "../element/makeElement";
 import { ListData } from "../list/forEachIn";
 import { DerivedSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { ComponentConfig, ElementConfig, RenderFunction } from "./makeNode";

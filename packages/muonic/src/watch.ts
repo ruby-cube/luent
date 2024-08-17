@@ -2,7 +2,7 @@ import { $listen, ListenerOptions, PendingOp, ScheduleStop } from "@rue/flask";
 import { isSignal, Signal } from "./$Signal";
 import { isReactiveModel, isReactiveObject, ReactiveModel, toRaw } from "./Reactive$";
 import { AnyObject } from "@rue/types";
-import { ActiveListener } from "../flask/ActiveListener";
+import { ActiveListener } from "../../flask/ActiveListener";
 import { _runTasks, getCurrentUpdateCycle, Hooks, onPhaseCompleted, Phase, startUpdateCycle, UpdateCycle } from "./UpdateCycle";
 import { DependencyTracker, getDependencyTracker, getWithoutTracking, ReactiveAtom } from "./DependencyTracker";
 import { DERIVED_SIGNAL, DerivedSignal, getDependentDerivedSignals, hasSignal, isDerivedSignal, ReactiveSignal } from "./DerivedSignal";
@@ -10,7 +10,7 @@ import { isEqual, UNDEFINED } from "@rue/utils";
 import { MutationRecord, MutationOp, SetOp, watchProps } from "./deepWatch";
 import { collectReactiveProps, registerDebuggers, runTriggerDebugger, WatchDebugOptions } from "./debug";
 import { asReactiveProp, getReactiveProp, isReactiveProp, ReactiveProp } from "./ReactiveProp";
-import { PendingCancelOp } from "../flask/PendingCancelOp";
+import { PendingCancelOp } from "../../flask/PendingCancelOp";
 
 
 type UpdateCycleOptions = {

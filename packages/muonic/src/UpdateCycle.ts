@@ -4,7 +4,7 @@ import { isReactiveModel, ReactiveModel } from "./Reactive$";
 import { isSignal, Signal } from "./$Signal";
 import { runNonSyncTasks } from "./watch";
 import { $listen, ScheduleStop } from "@rue/flask";
-import { removeItem } from "../utils/array";
+import { removeItem } from "../../utils/array";
 import { beforeRepaint, queueTask } from "@rue/thread";
 import { MutationRecord, SetOp } from "./deepWatch";
 import { asReactiveProp, getReactiveProp, isReactiveProp, ReactiveProp } from "./ReactiveProp";

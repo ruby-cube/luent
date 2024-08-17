@@ -16,7 +16,7 @@ import { NestedPend } from './NestedPend';
 
 
 
-const app = createApp(List)
+const app = createApp(MainSite)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

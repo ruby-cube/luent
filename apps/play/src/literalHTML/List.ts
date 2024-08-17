@@ -1,4 +1,4 @@
-import { fromEntries, html } from "@rue/lumin"
+import { fromEntries, html } from "../../../../packages/literate"
 
 const list = [
     {

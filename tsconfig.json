@@ -34,7 +34,7 @@
         "./packages/actionry/index.ts"
       ],
       "@rue/lumin": [
-        "./packages/lumin/index.ts"
+        "./packages/literate/index.ts"
       ],
       "@rue/lumo": [
         "./packages/lumo/src/index.ts"
@@ -99,10 +99,5 @@
     "packages",
     "apps",
     "**/src/*"
-  ],
-  "exclude": [
-    "**/x_old",
-    "**/old",
-    "**/api-play"
   ]
 }

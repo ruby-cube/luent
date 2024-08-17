@@ -1,10 +1,8 @@
-import { hasSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { $listen, Callback, collectEffects, EffectFlask, ListenerOptions } from "@rue/flask";
-import { DOMNode } from "../component/InternalComponent";
-import { isReactiveModel, ReactiveModel, Readonly, Signal, $Signal } from "@rue/muonic";
+import { isReactiveModel, ReactiveModel, Readonly, Signal, $Signal, hasSignal, ReactiveSignal } from "@rue/muonic";
 
 
 export type RenderItem<T = any> = (item: T, $index: Signal<number>) => NodeEntity[] | NodeEntity

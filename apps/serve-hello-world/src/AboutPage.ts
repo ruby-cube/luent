@@ -1,0 +1,18 @@
+import { AnyObject } from "@rue/types";
+import { html } from "./lumin.js";
+
+export function AboutPage() {
+    return [
+        expose({
+            title: 'About'
+        }),
+        html`
+            <h3>About</h3>
+            <div>About Me: Lorem Ipsum</div>
+        `
+    ]
+}
+
+function expose<T extends AnyObject>(component: T) {
+    return component;
+}

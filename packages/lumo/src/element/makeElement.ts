@@ -1,5 +1,5 @@
 import { PublicComponent, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "../component/InternalComponent";
-import { DerivedSignal, hasSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
+import { DerivedSignal, hasSignal, ReactiveSignal, _runTasks, Hooks } from "@rue/muonic";
 import { normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
@@ -11,7 +11,6 @@ import { useEventTick } from "./EventTick";
 import { runNonSyncTasks, Signal } from "@rue/muonic";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
 import { beforeUnmount } from "../component/lifecycle";
-import { _runTasks, Hooks } from "@rue/muonic/UpdateCycle";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
 import { isHydrating } from "../hydration/hydration";

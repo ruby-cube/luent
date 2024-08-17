@@ -2,6 +2,7 @@
     "name": "@rue/muonic",
     "private": true,
     "description": "",
+    "module": "./src/index",
     "dependencies": {
         "@rue/flask": "workspace:*",
         "@rue/thread": "workspace:*",

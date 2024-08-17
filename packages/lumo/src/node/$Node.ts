@@ -3,9 +3,8 @@ import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
 import { isUpdatingList, onListUpdated } from "../list/forEachIn"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
-import { $Signal, Signal } from "@rue/muonic/$Signal"
-import { asReadonly, ReadonlySignal } from "@rue/muonic/asReadonly"
-import { HTMLTag } from "../element/mE"
+import { $Signal, Signal, asReadonly, ReadonlySignal } from "@rue/muonic"
+import { HTMLTag } from "../element/makeElement"
 
 
 

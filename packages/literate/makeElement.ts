@@ -1,7 +1,7 @@
 import { analyzeAttributes, ElementConfig } from "@rue/lumo";
 import { HTMLString } from "./makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { ReactiveSignal } from "../muonic";
+import { ReactiveSignal } from "../muonic/src";
 import { buildElementString } from "./buildElement";
 import { Booleanny } from "@rue/types";
 

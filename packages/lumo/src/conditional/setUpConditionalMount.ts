@@ -7,7 +7,6 @@ import { LifecycleHook } from "../component/lifecycle";
 import { NodeEntity } from "../node/makeNode";
 import { getNodeRef } from "../node/$Node";
 import { collectEffects, EffectFlask } from "@rue/flask/flask";
-import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle";
 import { areShallowEqualArrays, getDependencyTracker, getWithoutTracking, isShallowEqual } from "@rue/muonic";
 import { ConditionalRenderSeries } from "./ConditionalRenderSeries";
 import { RenderConditional } from "./ConditionalRenderKit";

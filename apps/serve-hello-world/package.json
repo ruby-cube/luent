@@ -1,0 +1,32 @@
+{
+  "name": "serve-hello-world",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev-server": "nodemon",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "nodemonCOnfig": {
+    "watch": [],
+    "exec": "ts-node index.ts",
+    "ext": "ts,js,json"
+  },
+  "author": "Ruby Wang",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "to-kebab": "^1.0.7",
+    "@rue/lumo": "workspace:*",
+    "@rue/muonic": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.2.0",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.6.3",
+    "typescript": "^5.5.4"
+  }
+}

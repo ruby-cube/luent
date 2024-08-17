@@ -6,7 +6,7 @@ import { normalizeToArray } from "@rue/utils";
 import { watchForRender, initializeRender } from "../reactivity/watchForRender";
 import { onActivated, onDeactivated } from "../component/lifecycle";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
-import { shallowClone } from "@rue/muonic/SnapshotManager";
+import { shallowClone } from "@rue/muonic";
 import { AnyObject, Booleanny } from "@rue/types";
 
 

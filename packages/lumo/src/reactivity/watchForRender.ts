@@ -1,7 +1,5 @@
-import { ChangeHandler, getDependencies, initializeEffect, usePhaseQueues, watch } from "@rue/muonic/watch";
+import { beforeRender, ChangeHandler, getDependencies, initializeEffect, onRendered, ReactiveSignal, usePhaseQueues, watch } from "@rue/muonic";
 import { getCurrentComponent, InternalComponent } from "../component/InternalComponent";
-import { beforeRender, onRendered } from "@rue/muonic/UpdateCycle";
-import { ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
 import { getWithoutTracking, ReactiveModel } from "@rue/muonic";

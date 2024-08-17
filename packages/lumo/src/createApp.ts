@@ -1,6 +1,6 @@
 import { PublicComponent, ComponentSetup, InternalComponent, popComponent, pushComponent } from "./component/InternalComponent";
 import { NodeEntity, RenderFunction } from "./node/makeNode";
-import { makeComponent, mO, runComponentSetup } from "./component/mO";
+import { makeComponent, mO, runComponentSetup } from "./component/makeComponent";
 import { _NodePod } from "./node/NodePod";
 import { collectEffects, EffectFlask } from "@rue/flask";
 import { LifecycleHook } from "./component/lifecycle";
