@@ -11,7 +11,7 @@ import { LifecycleHook } from "../component/lifecycle";
 import { getNodeRef, InternalNodeRef } from "../node/$Node";
 import { normalizeToArray } from "@rue/utils";
 import { emitHookBatch, removeDOMNodes } from "../conditional/setUpConditionalMount";
-import { collectEffects, EffectFlask, getActiveFlask } from "@rue/flask";
+import { collectEffects} from "@rue/flask";
 
 
 

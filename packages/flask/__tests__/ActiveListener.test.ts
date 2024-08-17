@@ -1,10 +1,11 @@
 import { describe, test, expect, vi, beforeEach, it } from "vitest";
 import { makeActiveListener } from "../ActiveListener";
-import { bindFlask, onFlaskDisposal } from "../flask";
+import { bindFlask, onFlaskDisposal, getFlask, EffectFlask } from "../flask";
 
 vi.mock('../flask', () => ({
     onFlaskDisposal: vi.fn(),
-    bindFlask: vi.fn()
+    bindFlask: vi.fn(),
+    getFlask: vi.fn()
 }));
 
 describe("ActiveListener", () => {
@@ -28,6 +29,7 @@ describe("ActiveListener", () => {
         };
         vi.mocked(onFlaskDisposal).mockImplementation(vi.fn());
         vi.mocked(bindFlask).mockImplementation(cb => cb);
+        vi.mocked(getFlask).mockImplementation(() => ({} as EffectFlask));
     });
 
 
@@ -90,16 +92,20 @@ describe("ActiveListener", () => {
         expect(cancelMock).toHaveBeenCalled();
     });
 
-    it('should not add `stop` to flask if `outlive` is true', () => {
-        config.options.outlive = true;
+    it('should not call onFlaskDisposal if custom flask passed in; call flask.onDisposal instead', () => {
+        const flask = { onDisposal: vi.fn() };
+        config.options.flask = flask;
 
         makeActiveListener(config);
 
         expect(onFlaskDisposal).not.toHaveBeenCalled();
+
+        expect(flask.onDisposal).toHaveBeenCalledOnce();
+        expect(flask.onDisposal).toHaveBeenCalledWith(expect.any(Function));
     });
 
-    it('should add stop to Flask if `outlive` is not true', () => {
-        config.options.outlive = undefined;
+    it('should call onFlaskDisposal if no flask passed in', () => {
+        config.options.flask = undefined;
 
         makeActiveListener(config);
 

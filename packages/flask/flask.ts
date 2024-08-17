@@ -45,7 +45,7 @@ export class EffectFlask {
         const cleanups = this.#cleanups;
         cleanups.add(cleanUp); //TODO: do cleanUps need to be removed?
         return {
-            cancel(){
+            cancel() {
                 cleanups.delete(cleanUp)
             }
         }
@@ -75,13 +75,13 @@ export function collectEffects<T>(run: (flask: EffectFlask, outerFlask: EffectFl
 }
 
 
-export function bindFlask(callback: Callback) {
-    const flask = getFlask()!;
-    return (...args: any[]) => {
-        if (flask) pushFlask(flask)
+export function bindFlask(callback: Callback, flask: EffectFlask | null = getFlask()) {
+    if (flask) return (...args: any[]) => {
+        pushFlask(flask)
         callback(...args);
-        if (flask) popFlask();
+        popFlask();
     }
+    return callback;
 }
 
 // USAGE: 
@@ -91,27 +91,6 @@ export function bindFlask(callback: Callback) {
 // })
 
 
-
-// /* 
-// INTERNAL 
-// */
-// export function addToFlask(cleanup: () => void) {
-//     const _flask = getActiveFlask();
-//     _flask?.#cleanups.add(cleanup)
-// }
-
-// USAGE:
-//
-// function makeActiveListener() {
-//     addToFlask(activeListener.stop);
-//
-//     const activeListener = {
-//         stop() {
-//             // remove effect from effects queue
-//         }
-//     }
-//     return activeListener
-// }
 
 
 

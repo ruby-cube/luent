@@ -2,6 +2,7 @@ import { AnyObject } from "@rue/types";
 import { ActiveListener, EnrollFunction, makeActiveListener, RemoveFunction } from "./ActiveListener";
 import { makePendingCancelOp, PendingCancelOp } from "./PendingCancelOp";
 import { makePendingOp, PendingOp } from "./PendingOp";
+import { EffectFlask } from "./flask";
 
 export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O extends AnyObject = {}> = <
     OPT extends ListenerOptions & O,
@@ -10,7 +11,7 @@ export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O
 export type ListenerOptions = {
     once?: boolean;
     until?: ScheduleStop;
-    outlive?: boolean;
+    flask?: EffectFlask;
 }
 
 export type CallbackRemover = {
@@ -60,7 +61,7 @@ export function $listen<
 
 export type SchedulerOptions = {
     cancel?: ScheduleCancel,
-    outlive?: boolean
+    flask?: EffectFlask
 }
 
 export type ScheduledOp<CB extends Callback> = CB extends { isRemover: true } ? PendingCancelOp : PendingOp<ReturnType<CB>>

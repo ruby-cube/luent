@@ -22,7 +22,7 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
 }): PendingOp<ReturnType<CB>> {
     const { callback, enroll, remove, options } = config;
     const scheduleCancellation = options?.cancel;
-    const outlive = options?.outlive
+    const flask = options?.flask
 
     let returnVal: any;
     let _resolve: (result?: any) => void;
@@ -30,10 +30,12 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
     let pendingCancelOp: PendingCancelOp | null;
     let pendingFlaskCleanup: PendingCancelOp | undefined;
 
-    const _callback = (bindFlask((...arg: any[]) => {
+    const _callback = bindFlask(oneTimeCallback, flask) as CB
+
+    function oneTimeCallback(...arg: any[]) {
         _resolve(callback(...arg));
         _remove()
-    })) as CB
+    }
 
     function _remove() {
         try {
@@ -65,11 +67,11 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
 
         pendingOp.cancel = cancel;
 
-        if (!outlive) pendingFlaskCleanup = onFlaskDisposal(cancel)
+        pendingFlaskCleanup = flask ? flask.onDisposal(cancel) : onFlaskDisposal(cancel)
 
         pendingCancelOp = scheduleCancellation ? scheduleCancellation(cancel) : null;
 
-        if (__DEV__) setUpCleanupWarning!(pendingOp, scheduleCancellation)
+        if (__DEV__) setUpCleanupWarning!(pendingOp, scheduleCancellation, flask || getFlask())
 
         return pendingOp;
     }

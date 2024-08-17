@@ -1,4 +1,4 @@
-import { ActiveListener, getActiveFlask, onFlaskDisposal } from "@rue/flask";
+import { ActiveListener, getFlask } from "@rue/flask";
 import { DependencyTracker, getDependencyTracker, ReactiveAtom } from "./DependencyTracker";
 import { isSignal, Signal, SIGNAL_MARKER } from "./$Signal";
 import { watch } from "./watch";
@@ -106,7 +106,7 @@ export class DerivedSignalState {
             this.watchers.push(watcher);
         }
 
-        if (__DEV__ && !getActiveFlask())
+        if (__DEV__ && !getFlask())
             console.warn('Derived signal called outside of a flask could lead to memory leaks. Contain this call in a flask and dispose of the flask when done.')
 
         // To retreive initialValue from update cycle during trigger to be used as old value

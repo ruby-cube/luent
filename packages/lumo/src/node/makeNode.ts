@@ -102,9 +102,7 @@ export function initializeRef( // should this be initialize ref?
         const listUpdatedListener =
             onListUpdated((toFromIndices) => {
                 ref.updateListRef(toFromIndices)
-            }, { outlive: true })
-
-        outerFlask?.onDisposal(listUpdatedListener.stop)
+            }, { flask: outerFlask })
     }
 
     ref.markInitialized()

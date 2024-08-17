@@ -1,7 +1,7 @@
 import { useIncrementalID } from "@rue/utils";
 import { ActiveListener } from "./ActiveListener";
 import { PendingOp } from "./PendingOp";
-import { getActiveFlask, getFlask } from "./flask";
+import { EffectFlask, getFlask } from "./flask";
 
 export let shouldWarnNoCleanup = false;
 
@@ -32,9 +32,8 @@ export function configureFlask(config: {
 
 export const genIncrementalId = __DEV__ ? useIncrementalID() : undefined;
 
-export const setUpCleanupWarning = __DEV__ ? (listener: ActiveListener | PendingOp, cleanupFn: Function | null | undefined) => {
+export const setUpCleanupWarning = __DEV__ ? (listener: ActiveListener | PendingOp, cleanupFn: Function | null | undefined, flask: EffectFlask | null) => {
     if (shouldWarnNoCleanup) {
-        const flask = getFlask();
         if (!flask && !cleanupFn) {
             const listenerID = genIncrementalId!();
             //@ts-expect-error

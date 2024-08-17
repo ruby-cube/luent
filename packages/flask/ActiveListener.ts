@@ -32,7 +32,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
         return { stop: () => { } };
     }
     const once = options?.once;
-    const outlive = options?.outlive;
+    const flask = options?.flask;
 
     let returnVal: any;
     let pendingStop: PendingCancelOp | undefined
@@ -42,14 +42,16 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
         stop: _remove
     }
 
-    const _callback = bindFlask(once ? (...args: any[]) => {
+    const _callback = bindFlask(once ? oneTimeCallback : callback, flask);
+
+    function oneTimeCallback(...args: any[]) {
         try {
             callback(...args);
         }
         finally {
             _remove()
         }
-    } : callback);
+    }
 
     let callCount = 0;
     function _remove() {
@@ -67,16 +69,16 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
     _remove.isRemover = true as const;
 
     const until = options?.until || null;
-    
+
     if (until) {
         pendingStop = until(_remove);
         if (__DEV__ && (!pendingStop || pendingStop && !("cancel" in pendingStop)))
             console.warn('`until` function should be a flaskable scheduler that return a PendingCancelOp for cleanup. See @rue/flask')
     }
-    
-    if (!outlive) pendingFlaskCleanup = onFlaskDisposal(_remove);
-    
-    if (__DEV__) setUpCleanupWarning!(activeListener, until)
+
+    pendingFlaskCleanup = flask ? flask.onDisposal(_remove) : onFlaskDisposal(_remove);
+
+    if (__DEV__) setUpCleanupWarning!(activeListener, until, flask || getFlask())
 
     try {
         returnVal = enroll(_callback);
