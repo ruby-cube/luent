@@ -28,23 +28,20 @@ export function onFlaskDisposal(cb: () => void) {
 
 
 export class EffectFlask {
-    #cleanups: Set<() => void> = new Set()
+    #cleanups: Set<() => void>;
+    dispose: () => void;
 
     constructor(public outer: EffectFlask | null, public __devName: string) {
         this.outer = outer;
-    }
-
-    #_dispose() {
-        const cleanups = this.#cleanups;
-        for (const cleanUp of cleanups) {
-            cleanUp();
-        }
-    }
-
-    get dispose(){
-        const flask = this;
-        return ()=>{
-            flask.#_dispose()
+        const cleanups: Set<() => void> = new Set()
+        this.#cleanups = cleanups
+        let called = false;
+        this.dispose = () => {
+            if (called) return;
+            called = true;
+            for (const cleanUp of cleanups) {
+                cleanUp();
+            }
         }
     }
 

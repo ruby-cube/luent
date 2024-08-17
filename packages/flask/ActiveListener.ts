@@ -54,12 +54,12 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
         }
     }
 
-    let callCount = 0;
+    let called = false;
     function _remove() {
-        if (callCount !== 0) return;
-        callCount++;
+        if (called) return;
         try {
             remove(returnVal ?? _callback);
+            called = true;
             if (__DEV__) unmarkNoCleanup(activeListener);
         }
         finally {

@@ -56,12 +56,12 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
             _resolve = resolve;
         }) as PendingOp<ReturnType<CB>>
 
-        let callCount = 0;
+        let called = false;
         const cancel = (() => {
-            if (callCount > 0) return;
-            callCount++;
+            if (called) return;
             _remove();
             _resolve(new Cancellation("Pending op canceled."))
+            called = true;
         }) as CallbackRemover;
         cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.
 

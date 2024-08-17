@@ -18,12 +18,16 @@ export function makePendingCancelOp(config: {
         _remove(); // so that callback will only be called once
     })
 
-    let callCount = 0;
+    let called = false;
     function _remove() {
-        if (callCount > 0) return;
-        callCount++;
-        remove(returnVal ?? _callback);
-        if (pendingFlaskCleanup) pendingFlaskCleanup.cancel()
+        if (called) return;
+        try {
+            remove(returnVal ?? _callback);
+            called = true;
+        }
+        finally {
+            if (pendingFlaskCleanup) pendingFlaskCleanup.cancel()
+        }
     }
     _remove.isRemover = true as const;
 
