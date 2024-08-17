@@ -34,10 +34,17 @@ export class EffectFlask {
         this.outer = outer;
     }
 
-    dispose() {
+    #_dispose() {
         const cleanups = this.#cleanups;
         for (const cleanUp of cleanups) {
             cleanUp();
+        }
+    }
+
+    get dispose(){
+        const flask = this;
+        return ()=>{
+            flask.#_dispose()
         }
     }
 
