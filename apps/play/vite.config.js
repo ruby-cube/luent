@@ -25,6 +25,7 @@ export default defineConfig({
     // ]
   },
   define: {
+    __SSR__: false,
     __DEV__: true,
     __TEST__: true,
     __DOCU__: false,

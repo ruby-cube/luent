@@ -7,7 +7,7 @@
 
 export async function MainSite(
     props: {
-        Slot: () => MaybePromise<StaticComponent<{ title: string }>>
+        Slot: () => MaybePromise<SSRComponent<{ title: string }>>
     }
 ) {
 

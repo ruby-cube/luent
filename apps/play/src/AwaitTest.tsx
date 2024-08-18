@@ -59,7 +59,7 @@ function TextArea() {
         <div>
             <h2>text area {$word}</h2>
             <ItemBlockC />
-            <ItemBlockD />
+            <ItemBlockD />     {/* ${mO(ItemBlockD)}  ==> Promise<SSRComponent>*/}
         </div>
     )
 }
@@ -101,11 +101,11 @@ function ItemBlockC() {
 function ItemBlockD() {
     const $word = $Signal("not ready")
 
-    $await(simLongFetchB("tilted"))
+    $await(simLongFetchB("tilted"))              // [promise]
         .then(word => $word.set(o => word))
 
     return (
-        <div>{$word}</div>
+        <div>{$word}</div> // {strings: ['<div>', '<div>'], values: [$word]}   (makeComponent should detect $await call and wrap component in promise) 
     )
 }
 

@@ -1,6 +1,5 @@
-import { ComponentSetup, ConditionalRenderKit, HTMLTag, makeNode, NodeEntity } from "@rue/lumo";
+import { ComponentSetup, HTMLTag, makeNode, NodeEntity } from "@rue/lumo";
 import { normalizeToArray } from "@rue/utils";
-import { ConditionalKit } from "../../../../apps/play/src/play";
 
 
 export const jsxDEV = jsx;

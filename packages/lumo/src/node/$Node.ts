@@ -52,7 +52,7 @@ export function $Node<
 
 
 
-type NodeReferent<
+export type NodeReferent<
     T extends RefSource
     = RefSource
 > =
@@ -114,9 +114,9 @@ export class InternalNodeRef<
         this.initialized = true;
     }
 
-    assignValue(value: NodeReferent<T>, $index: Signal<number> | undefined) {
+    assignValue(value: NodeReferent<T>, $index?: Signal<number> | undefined) {
         if ($index != null) {
-            let nodes = isUpdatingList() ? this.getNewListNodes()
+            let nodes = !__SSR__ && isUpdatingList() ? this.getNewListNodes()
                 : this.o.set(() => (this.o() || []) as NodeArray<T>)
             nodes[$index()] = value as ArrayItem<NodeArray<T>>;
             refMap.set(nodes, this);

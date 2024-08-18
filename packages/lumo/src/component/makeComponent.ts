@@ -1,13 +1,14 @@
 import { AnyObject, MaybePromise } from "@rue/types";
 import { PublicComponent, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent, COMPONENT } from "./InternalComponent";
-import { collectEffects,  } from "@rue/flask/flask";
+import { collectEffects, } from "@rue/flask/flask";
 import { InternalNodeRef, NodeSignal, getNodeRef, get$Node } from "../node/$Node";
-import { ComponentConfig, EventsConfig, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
+import { ComponentConfig, EventsConfig, initializeListRef, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { DerivedSignal, Signal } from "@rue/muonic";
 import { preserveAllRequested } from "../conditional/$if";
 import { beforeUnmount, LifecycleHook, onActivated, onDeactivated, onUnmounted } from "./lifecycle";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
+import { getCurrentItemAndIndex } from "../list/forEachIn";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
@@ -43,7 +44,8 @@ export function mO<T extends ComponentSetup>(
     slotted?: InferSlotted<T> | undefined,
     config?: ComponentConfig<T>
 ): InternalComponent {
-    return makeNode(Component, slotted, config || {}) as InternalComponent
+    const [_, $index] = getCurrentItemAndIndex()
+    return makeComponent(Component, slotted, config, $index)
 }
 
 export function makeComponent(
@@ -135,17 +137,15 @@ function initializeComponent(
     ref: NodeSignal | undefined,
     $index: Signal<number> | undefined,
 ) {
-    const nodeEntities = normalizeToFragmentArray(extractNodeEntities(output));
+    const nodeEntities = normalizeToFragmentArray(extractNodeEntities(output)); //TODO: Validate output and get publicComponent from output
 
     component.nodeEntities = nodeEntities;
 
     if (ref) {
-        const refValue = ref()
-        const _ref = refValue instanceof Array ? getNodeRef(refValue) || new InternalNodeRef(ref) : new InternalNodeRef(ref)
         const publicComponent = component.component || null;
-        _ref.assignValue(publicComponent, $index)
-        // setUpRefUpdates(_ref, publicComponent, $index, component.preserve)
-        initializeRef(_ref)
+        if ($index) initializeListRef(ref, publicComponent, $index)
+        else initializeRef(ref, publicComponent)
+
     }
 
     const flask = component.flask!;

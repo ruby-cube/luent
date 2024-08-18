@@ -1,11 +1,11 @@
-import { DerivedSignal, ReactiveSignal } from "@rue/muonic";
+import { DerivedSignal, ReactiveSignal, Signal } from "@rue/muonic";
 import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { getCurrentItemAndIndex, isSettingUpList, ListRenderKit, onListUpdated } from "../list/forEachIn";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlotted } from "../component/makeComponent";
-import { InternalNodeRef, NodeSignal } from "./$Node";
+import { getNodeRef, InternalNodeRef, NodeReferent, NodeSignal } from "./$Node";
 import { beforeUnmount } from "../component/lifecycle";
-import {  getFlask, onFlaskDisposal } from "@rue/flask";
+import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 
 export function Fragment() {
@@ -85,25 +85,43 @@ export function makeNode(
 //     return undefined;
 // }
 
-export function initializeRef( // should this be initialize ref?
-    ref: InternalNodeRef,
+export function initializeListRef( // should this be initialize ref?
+    ref: NodeSignal,
+    value: NodeReferent,
+    $index: Signal<number>
     // options?: ElementOptions
 ) {
-    if (ref.initialized === true) return; // to prevent registering multiple watchers for lists
+    const _ref = useInternalNodeRef(ref)
+    _ref.assignValue(value, $index);
+    if (_ref.initialized === true) return; // to prevent registering multiple watchers for lists
 
     // dispose with outer flask because we don't want to dispose when first item is removed
     const outerFlask = getFlask()?.outer
     outerFlask?.onDisposal(() => {
-        ref.setValue(undefined);
-        ref.initialized = false;
+        _ref.setValue(undefined);
+        _ref.initialized = false;
     })
 
-    if (isSettingUpList()) {
+    if (isSettingUpList() && !__SSR__) {
         const listUpdatedListener =
             onListUpdated((toFromIndices) => {
-                ref.updateListRef(toFromIndices)
+                _ref.updateListRef(toFromIndices)
             }, { flask: outerFlask })
     }
 
-    ref.markInitialized()
+    _ref.markInitialized()
+}
+
+export function initializeRef(ref: NodeSignal, value: NodeReferent) {
+    const _ref = useInternalNodeRef(ref);
+    _ref.assignValue(value)
+    const flask = getFlask()
+    flask?.onDisposal(() => {
+        _ref.setValue(undefined);
+    })
+}
+
+export function useInternalNodeRef(ref: NodeSignal) {
+    const refValue = ref()
+    return refValue instanceof Array ? getNodeRef(refValue) || new InternalNodeRef(ref) : new InternalNodeRef(ref)
 }

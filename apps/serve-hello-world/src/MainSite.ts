@@ -1,8 +1,9 @@
 import { $Node } from "@rue/lumo";
-import { html, StaticComponent } from "./lumin.js";
+import { html, SSRComponent } from "./lumin.js";
+import { mO } from "./makeComponent.js";
 
 export function MainSite(props: {
-    Slotted: { Page: () => StaticComponent<{ title: string }> }
+    Slotted: { Page: () => SSRComponent<{ title: string }> }
 }) {
     const {Slotted} = props
 

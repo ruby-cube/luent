@@ -34,7 +34,7 @@ export function provide<T>(key: SymbolKey<T> | symbol | string, value: T) {
     if (!provider || provider.component !== component) {
         provider = new Provider(component, provider);
         pushProvider(provider);
-        beforeMount(() => {
+        beforeMount(() => { //TODO: Make this applicable to SSR too
             popProvider()
         })
     }

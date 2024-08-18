@@ -5,7 +5,7 @@ import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
 import { initializeRender, watchForRender } from "../reactivity/watchForRender";
 import { watchForRenderAndPreserve, initializeRenderAndPreserve } from "../conditional/$if";
-import { ElementConfig, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
+import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { ActiveListener, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
 import { runNonSyncTasks, Signal } from "@rue/muonic";
@@ -45,10 +45,8 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     const domNode = isHydrating() ? getElement() : document.createElement(tagName);
 
     if (ref) {
-        const refValue = ref()
-        const _ref = refValue instanceof Array ? getNodeRef(refValue) || new InternalNodeRef(ref) : new InternalNodeRef(ref)
-        _ref.assignValue(domNode, $index)
-        initializeRef(_ref)
+        if ($index) initializeListRef(ref, domNode, $index)
+        else initializeRef(ref, domNode)
     }
 
     if (childNodes) {
@@ -209,7 +207,7 @@ function setUpClasses(component: InternalComponent, node: Element, classes: (((o
                 }, { eager: true })
             }
         }
-        else if (!isHydrating()){
+        else if (!isHydrating()) {
             if (__DEV__ && entry) warnDuplicateClasses(node.className, entry);
             node.className = node.className + " " + entry
         }
@@ -235,7 +233,7 @@ function setUpStyles(component: InternalComponent, node: Element, styles: (((o: 
         if (entry instanceof Function) {
             _initializeRender(() => entry(style))
         }
-        else if (!isHydrating()){
+        else if (!isHydrating()) {
             if (__DEV__ && entry) warnOverlappingStyles(style.cssText, normalizeStyle(entry));
             style.cssText = style.cssText + "; " + normalizeStyle(entry)
         }
