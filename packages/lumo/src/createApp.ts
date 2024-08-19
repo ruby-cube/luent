@@ -1,9 +1,10 @@
-import { PublicComponent, ComponentSetup, InternalComponent, popComponent, pushComponent } from "./component/InternalComponent";
+import { PublicComponent, ComponentSetup, InternalComponent } from "./component/InternalComponent";
 import { NodeEntity, RenderFunction } from "./node/makeNode";
 import { makeComponent, mO, runComponentSetup } from "./component/makeComponent";
 import { _NodePod } from "./node/NodePod";
 import { collectEffects, EffectFlask } from "@rue/flask";
 import { LifecycleHook } from "./component/lifecycle";
+import { popComponent, pushComponent } from "./component/componentStack";
 
 let appRoot: Element;
 
@@ -39,7 +40,7 @@ export function createApp(App: ComponentSetup) {
 
             // (3) attach developer's root component to root element
             component.mount(parentComponent, root, new _NodePod())
-
+            component.emit(LifecycleHook.SETUP_COMPLETED)
             popComponent()
 
             return component;

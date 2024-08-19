@@ -6,6 +6,7 @@ import { DerivedSignal } from "@rue/muonic";
 import { _NodePod } from "../node/NodePod";
 import { EffectFlask, pushFlask } from "@rue/flask";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
+import { getCurrentComponent, popComponent, pushComponent } from "./componentStack";
 
 
 export type DOMNode = CharacterData | Element
@@ -44,6 +45,7 @@ export class InternalComponent {
 
     nodeEntities: NodeEntity[] = []; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
     tasks: {
+        [LifecycleHook.SETUP_COMPLETED]: Set<() => void> | undefined;
         [LifecycleHook.BEFORE_MOUNT]: Set<() => void> | undefined;
         [LifecycleHook.BEFORE_UNMOUNT]: Set<() => void> | undefined;
         [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
@@ -53,6 +55,7 @@ export class InternalComponent {
         [LifecycleHook.ACTIVATED]: Set<() => void> | undefined;
         [LifecycleHook.DEACTIVATED]: Set<() => void> | undefined;
     } = {
+            [LifecycleHook.SETUP_COMPLETED]: undefined,
             [LifecycleHook.BEFORE_MOUNT]: undefined,
             [LifecycleHook.MOUNTED]: undefined,
             [LifecycleHook.BEFORE_UNMOUNT]: undefined,
@@ -68,7 +71,8 @@ export class InternalComponent {
     constructor(
         public parent: InternalComponent | null,
         public preserve: boolean
-    ) { }
+    ) {
+    }
 
     private getTaskQueue(hookName: LifecycleHook) {
         let taskQueue = this.tasks[hookName]
@@ -114,35 +118,12 @@ export class InternalComponent {
 }
 
 
-// Manages component "stack"
-let currentComponent: InternalComponent | null = null;
-let prevComponent: InternalComponent | null = null;
-
-export function getCurrentComponent() {
-    return currentComponent;
-}
-
-export function pushComponent(component: InternalComponent | null) {
-    prevComponent = currentComponent;
-    currentComponent = component;
-    const flask = component?.flask
-    if (flask) flask.reactivate()
-}
-
-export function popComponent() {
-    const popped = currentComponent;
-    currentComponent = prevComponent;
-    prevComponent = prevComponent?.parent || null
-    const flask = popped?.flask;
-    if (flask) flask.deactivate();
-    return popped;
-}
 
 
 export const COMPONENT = Symbol()
 
 export function expose<T extends AnyObject>(component: T) {
-    const _component = getCurrentComponent();
+    const _component = getCurrentComponent<InternalComponent>();
     if (_component === null) throw new Error("Cannot call `expose` outside of component setup")
     const publicComponent = _component.component = {
         [COMPONENT]: true as const,

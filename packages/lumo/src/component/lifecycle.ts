@@ -1,10 +1,12 @@
 import { $listen, $schedule, ListenerOptions } from "@rue/flask";
-import { getCurrentComponent, InternalComponent } from "./InternalComponent";
+import { InternalComponent } from "./InternalComponent";
+import { getCurrentComponent } from "./componentStack";
 
 
 type TaskQueue = Set<() => void>
 
 export enum LifecycleHook {
+    SETUP_COMPLETED = 'sc',
     BEFORE_MOUNT = 'bm',
     MOUNTED = 'm',
     BEFORE_UPDATE = 'bu',
@@ -20,7 +22,7 @@ export enum LifecycleHook {
 }
 
 
-function usePhaseQueue(component: InternalComponent, hookName: LifecycleHook) {
+function useTaskQueue(component: InternalComponent, hookName: LifecycleHook) {
     let taskQueue = component.tasks[hookName]
     if (!taskQueue) {
         taskQueue = new Set();
@@ -32,9 +34,9 @@ function usePhaseQueue(component: InternalComponent, hookName: LifecycleHook) {
 
 function createLifecycleHook(name: Exclude<LifecycleHook, LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDATED>) {
     return function on(handler: () => void, _component?: InternalComponent) {
-        const component = _component || getCurrentComponent();
+        const component = _component || getCurrentComponent<InternalComponent>();
         if (!component) throw new Error("Lifecycle hooks cannot be called outside of component setup");
-        const taskQueue = usePhaseQueue(component, name)
+        const taskQueue = useTaskQueue(component, name)
 
         return $schedule(handler, {}, {
             enroll(handler) {
@@ -49,9 +51,9 @@ function createLifecycleHook(name: Exclude<LifecycleHook, LifecycleHook.BEFORE_U
 
 function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDATED | LifecycleHook.ACTIVATED | LifecycleHook.DEACTIVATED) {
     return function on(handler: () => void, options?: ListenerOptions, _component?: InternalComponent) {
-        const component = _component || getCurrentComponent();
+        const component = _component || getCurrentComponent<InternalComponent>();
         if (!component) throw new Error("Lifecycle hooks cannot be called outside of component setup");
-        const taskQueue = usePhaseQueue(component, name)
+        const taskQueue = useTaskQueue(component, name)
 
         return $listen(handler, options || {}, {
             enroll(handler) {
@@ -64,6 +66,7 @@ function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDA
     }
 }
 
+export const onSetupCompleted = createLifecycleHook(LifecycleHook.SETUP_COMPLETED)
 export const beforeMount = createLifecycleHook(LifecycleHook.BEFORE_MOUNT) //TODO: Rename premount to something else ... it has ambiguous meaning--it could mean mount ahead of time
 export const onMounted = createLifecycleHook(LifecycleHook.MOUNTED)
 export const beforeUpdate = createUpdateHook(LifecycleHook.BEFORE_UPDATE)

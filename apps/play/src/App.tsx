@@ -1,8 +1,6 @@
 import { $else, $elseIf, $if, $Node, COMPONENT, ComponentSetup, expose, forEachIn, NodeEntity, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
-import { __addDevName } from "@rue/muonic/debug";
-import { $Signal, Signal } from "@rue/muonic/$Signal";
-import { DeepReactive$ } from "@rue/muonic/Reactive$";
+import { __addDevName, $Signal, DeepReactive$ } from "@rue/muonic";
 import { $ } from "@rue/muonic";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
 

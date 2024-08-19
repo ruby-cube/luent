@@ -1,4 +1,4 @@
-import { html } from "../../../../packages/literate";
+import { html } from "../../../../packages/literate/src";
 import { List } from "./List";
 
 

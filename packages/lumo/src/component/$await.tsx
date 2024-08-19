@@ -10,7 +10,7 @@ import { mO } from "./makeComponent";
 const pendingPromisesStack: Promise<any>[][] = []
 
 export function $await(promiseValue: Promise<any> | Promise<any>[]) {
-    if (pendingPromisesStack.length === 0) throw new Error('$await must eventually be handled by a $pend call in a parent component. If you want to handle the promise with a placeholder and error view in this component, use $pend instead');
+    if (pendingPromisesStack.length === 0) throw new Error('$await must eventually be handled by a $Suspense call in a parent component. If you want to handle the promise with a placeholder and error view in this component, use $Suspense instead');
     const promise = promiseValue instanceof Array ?
         Promise.all(promiseValue)
         : promiseValue
@@ -26,9 +26,9 @@ type PendConfig = {
     ErrorView?: ComponentSetup<{ error: any }>
 }
 
-export function $pend(promiseValueOrConfig: PendConfig): ComponentSetup
-export function $pend(promiseValueOrConfig: Promise<any> | Promise<any>[], config: PendConfig): ComponentSetup
-export function $pend(promiseValueOrConfig: Promise<any> | Promise<any>[] | PendConfig, config?: PendConfig) {
+export function $Suspense(promiseValueOrConfig: PendConfig): ComponentSetup
+export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[], config: PendConfig): ComponentSetup
+export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | PendConfig, config?: PendConfig) {
     const _config = config || promiseValueOrConfig as PendConfig
     const promise = config ? promiseValueOrConfig as Promise<any> : undefined;
     const { Pending, ErrorView, Placeholder, timeout } = _config;

@@ -14,3 +14,4 @@ export * from './element/event-listeners' //TODO: Limit to public API
 export * from './element/event-modifiers' //TODO: Limit to public API
 export * from './component/teleportTo' //TODO: Limit to public API
 export * from './component/lifecycle'
+export * from './component/componentStack'

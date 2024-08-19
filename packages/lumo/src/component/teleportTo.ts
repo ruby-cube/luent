@@ -1,11 +1,12 @@
 import { normalizeToArray } from "@rue/utils";
-import { getCurrentComponent } from "./InternalComponent";
 import { NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
+import { getCurrentComponent } from "./componentStack";
+import { InternalComponent } from "./InternalComponent";
 
 export function teleportTo(container: string | Element, nodeEntities: NodeEntity | NodeEntity[]) {
-    const component = getCurrentComponent();
+    const component = getCurrentComponent<InternalComponent>();
     if (!component) throw new Error(`teleportTo must be called from within ComponentSetup`)
     const _container = typeof container === "string" ? document.querySelector(container) : container;
     if (!_container) throw new Error('teleportTo container not found. Please check selector')

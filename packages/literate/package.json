@@ -1,9 +1,11 @@
 {
-    "name": "@rue/lumin",
+    "name": "@rue/literate",
     "private": true,
     "description": "",
     "dependencies": {
-      "@rue/utils": "workspace:*"
+      "@rue/utils": "workspace:*",
+      "@rue/lumo": "workspace:*",
+      "@rue/flask": "workspace:*"
     },
     "devDependencies": {
       "@rue/dev": "workspace:*",

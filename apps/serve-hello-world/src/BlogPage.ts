@@ -1,5 +1,5 @@
 import { blogPosts } from "./data.js";
-import { fromEntries, html } from "./lumin.js";
+import { fromEntries, html } from "../../../packages/literate/src/Literate.js";
 import { PostPreview } from "./PostPreview.js";
 
 export async function BlogPage() {

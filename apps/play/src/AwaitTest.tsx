@@ -1,9 +1,9 @@
 import { $Signal } from "@rue/muonic"
-import { $await, $pend } from "../../../packages/lumo/src/component/$await"
+import { $await, $Suspense } from "../../../packages/lumo/src/component/$await"
 
 
 
-const PendingListBlock = $pend({
+const PendingListBlock = $Suspense({
     Pending: ListBlock,
     Placeholder() {
         return (<div>I'm not ready...</div>)
@@ -12,7 +12,7 @@ const PendingListBlock = $pend({
     ErrorView: ({ error }: { error: any }) => <div>Oops! {error}</div>
 })
 
-const PendingTextArea = $pend({
+const PendingTextArea = $Suspense({
     Pending: TextArea,
     Placeholder() {
         return (<div>loading...</div>)

@@ -1,5 +1,5 @@
 import { DerivedSignal, getWithoutTracking, hasSignal, ReactiveModel, ReactiveSignal, toRaw } from "@rue/muonic";
-import { getCurrentComponent, InternalComponent } from "../component/InternalComponent";
+import {  InternalComponent } from "../component/InternalComponent";
 import { _NodePod } from "../node/NodePod";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
@@ -8,6 +8,7 @@ import { onActivated, onDeactivated } from "../component/lifecycle";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { shallowClone } from "@rue/muonic";
 import { AnyObject, Booleanny } from "@rue/types";
+import { getCurrentComponent } from "../component/componentStack";
 
 
 

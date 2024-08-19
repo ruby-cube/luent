@@ -1,5 +1,5 @@
 import { AnyObject, MaybePromise } from "@rue/types";
-import { PublicComponent, ComponentSetup, getCurrentComponent, InternalComponent, popComponent, pushComponent, COMPONENT } from "./InternalComponent";
+import { PublicComponent, ComponentSetup, InternalComponent,COMPONENT } from "./InternalComponent";
 import { collectEffects, } from "@rue/flask/flask";
 import { InternalNodeRef, NodeSignal, getNodeRef, get$Node } from "../node/$Node";
 import { ComponentConfig, EventsConfig, initializeListRef, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
@@ -9,6 +9,7 @@ import { preserveAllRequested } from "../conditional/$if";
 import { beforeUnmount, LifecycleHook, onActivated, onDeactivated, onUnmounted } from "./lifecycle";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentItemAndIndex } from "../list/forEachIn";
+import { getCurrentComponent, popComponent, pushComponent } from "./componentStack";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
@@ -54,11 +55,12 @@ export function makeComponent(
     config: ComponentConfig,
     $index: Signal<number> | undefined
 ): InternalComponent {
-    const parent = getCurrentComponent();
+    const parent = getCurrentComponent<InternalComponent>();
     const preserve = getPreserveStatus(parent);
     const component = new InternalComponent(parent, preserve);
     pushComponent(component)
     runComponentSetup(Component, component, slotted, config, $index);
+    component.emit(LifecycleHook.SETUP_COMPLETED)
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
     return component;
 }
@@ -125,7 +127,7 @@ export function runComponentSetup(
         component.setFlask(flask);
         const output = Component({ ...config, slotted })
         if (output instanceof Promise)
-            throw new Error("Components cannot return a promise. Use $pend and $await to handle promises within component setup")
+            throw new Error("Components cannot return a promise. Use $Suspense and $await to handle promises within component setup")
 
         initializeComponent(component, output, config.ref, $index)
     }, Component.name)

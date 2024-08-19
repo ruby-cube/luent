@@ -1,4 +1,4 @@
-import { html } from "./lumin.js";
+import { html } from "../../../packages/literate/src/Literate.js";
 
 export function NotFound(){
     return {

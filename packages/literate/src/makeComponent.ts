@@ -1,13 +1,13 @@
-import { COMPONENT, ComponentConfig, getCurrentItemAndIndex, getNodeRef, InferSlotted, initializeListRef, initializeRef, InternalNodeRef, NodeSignal, popComponent, PublicComponent, pushComponent } from "@rue/lumo";
-import { SSRComponent, SSRComponentSetup, TemplateLiteral } from "./lumin.js";
+import { COMPONENT, ComponentConfig, getCurrentItemAndIndex, getNodeRef, InferSlotted, initializeListRef, initializeRef, InternalNodeRef, NodeSignal, PublicComponent, pushComponent, popComponent } from "@rue/lumo";
+import { Literate } from "./Literate.js";
 import { Signal } from "@rue/muonic";
 import { AnyObject, MaybePromise } from "@rue/types";
 import { collectEffects, getFlask } from "@rue/flask";
-import { storeResolvedValue } from "./pendingComponent.js";
-import { getPendingTimeout } from "./createSSRApp.js";
+import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
+import { getCurrentComponent } from "../../lumo/src/component/componentStack.js";
 
 
-// const allPromises: Promise<any>[] = [] // collect promises from $pend
+// const allPromises: Promise<any>[] = [] // collect promises from $Suspense
 
 // export function trackPromise(promise: Promise<any>) {  //FIX: I don't think I actually need this?
 //     allPromises.push(promise);
@@ -18,17 +18,17 @@ export function mO<T extends SSRComponentSetup>( //TODO: Type should be SSRCompo
     Component: T,
     slotted: InferSlotted<T>,
     config?: ComponentConfig<T>
-): MaybePromise<SSRComponent>
+): SSRComponent
 export function mO<T extends SSRComponentSetup>(
     Component: T,
     slotted?: undefined,
     config?: ComponentConfig<T>
-): MaybePromise<SSRComponent>
+): SSRComponent
 export function mO<T extends SSRComponentSetup>(
     Component: T,
     slotted?: InferSlotted<T> | undefined,
     config?: ComponentConfig<T>
-): MaybePromise<SSRComponent> {
+): SSRComponent {
     const [_, $index] = getCurrentItemAndIndex()
     return makeComponent(Component, slotted, config, $index)
 }
@@ -38,33 +38,15 @@ export function makeComponent(
     slotted: InferSlotted | undefined,
     config: ComponentConfig,
     $index: Signal<number> | undefined
-): MaybePromise<SSRComponent> {
-
-    const component = new SSRComponent();
-    //@ts-expect-error
+): SSRComponent {
+    const parent = getCurrentComponent<SSRComponent>()
+    const component = new SSRComponent(parent);
     pushComponent(component)
     runComponentSetup(Component, component, slotted, config, $index);
+    component.emit(LifecycleHook.SETUP_COMPLETED)
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
 
-    // if (allPromises.length === 0) {
-        return component;
-    // }
-    // const pendingComponent: Promise<SSRComponent>
-    //     = new Promise((resolve) => {
-    //         const promise = Promise.all(allPromises);
-    //         let resolved = false;
-    //         promise.then(resolveIfNeeded)
-    //         getPendingTimeout().then(resolveIfNeeded)
-
-    //         function resolveIfNeeded() {
-    //             if (resolved) return;
-    //             storeResolvedValue(pendingComponent, component)
-    //             resolved = true;
-    //             resolve(component);
-    //         }
-    //     })
-    // allPromises.length = 0;
-    // return pendingComponent;
+    return component;
 }
 
 
@@ -90,14 +72,14 @@ export function runComponentSetup(
 
 function initializeComponent(
     component: SSRComponent,
-    output: TemplateLiteral | Promise<SSRComponent> | [PublicComponent, TemplateLiteral],
+    output: Literate | Promise<SSRComponent> | [PublicComponent, Literate],
     ref: NodeSignal | undefined,
     $index: Signal<number> | undefined,
 ) {
-    const templateLiteral = output instanceof Array ? output[1] : output;
+    const _output = output instanceof Array ? output[1] : output;
     const publicComponent = output instanceof Array ? output[0] : null;
 
-    component.templateLiteral = templateLiteral;
+    component.output = _output;
 
     if (ref) {
         if ($index) initializeListRef(ref, publicComponent, $index)
@@ -109,14 +91,14 @@ function initializeComponent(
 }
 
 function validateOutput(output: any) {
-    // if (output instanceof Promise)
-        // throw new Error("Components cannot return a promise. Use $pend and $await to handle promises within component setup")
-    if (output instanceof TemplateLiteral) return;
+    if (output instanceof Promise && !('pendingLiterateSSRComponent' in output))
+        throw new Error("Components cannot return a promise. Use $Suspense and $await to handle promises within component setup")
+    if (output instanceof Literate) return;
     if (isComponentTuple(output)) return;
-    throw new Error("INVALID RETURN: Component setup must return either a TemplateLiteral or a ComponentTuple ([PublicComponent, TemplateLiteral])")
+    throw new Error("INVALID RETURN: Component setup must return either a Literate or a ComponentTuple ([PublicComponent, Literate])")
 }
 
-function isComponentTuple(output: TemplateLiteral | [PublicComponent, TemplateLiteral]) {
+function isComponentTuple(output: Literate | [PublicComponent, Literate]) {
     if (!(output instanceof Array)) return false;
     if (output.length === 2
         && output[0] instanceof Object

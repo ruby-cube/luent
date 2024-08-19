@@ -1,5 +1,5 @@
 import { hasSignal, isReactiveModel, Signal, $Signal } from "@rue/muonic";
-import { InternalComponent, popComponent, pushComponent } from "../component/InternalComponent";
+import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { DynamicIndices, ListRenderKit, popList, pushList, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
@@ -12,6 +12,7 @@ import { getNodeRef, InternalNodeRef } from "../node/$Node";
 import { normalizeToArray } from "@rue/utils";
 import { emitHookBatch, removeDOMNodes } from "../conditional/setUpConditionalMount";
 import { collectEffects} from "@rue/flask";
+import { popComponent, pushComponent } from "../component/componentStack";
 
 
 

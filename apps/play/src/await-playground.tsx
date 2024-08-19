@@ -1,7 +1,7 @@
 function App() {
     return (
         <div>
-            {$pend(<ListBlock />, {
+            {$Suspense(<ListBlock />, {
                 fallback: () =>
                     <div>loading...</div>
             })}
@@ -33,7 +33,7 @@ function $await<T>(Element: T): Promise<T> {
     })
 }
 
-function $pend<T>(Element: T, config: {
+function $Suspense<T>(Element: T, config: {
     fallback: () => any
 }) {
     return Element

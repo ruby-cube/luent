@@ -1,4 +1,4 @@
-import { html } from "./lumin.js";
+import { html } from "../../../packages/literate/src/Literate.js";
 import { BlogPost as Post } from "./PostPreview.js";
 
 export function BlogPost(post: Post) {

@@ -1,4 +1,4 @@
-import { PublicComponent, ComponentSetup, DOMNode, getCurrentComponent, InternalComponent, popComponent, pushComponent } from "../component/InternalComponent";
+import { PublicComponent, ComponentSetup, DOMNode, InternalComponent} from "../component/InternalComponent";
 import { DerivedSignal, hasSignal, ReactiveSignal, _runTasks, Hooks } from "@rue/muonic";
 import { normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
@@ -17,6 +17,7 @@ import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
+import { getCurrentComponent } from "../component/componentStack";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -39,7 +40,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
     const { attributes, events } = analyzeAttributes(other)
 
-    const component = getCurrentComponent();
+    const component = getCurrentComponent<InternalComponent>();
     if (!component) throw new Error("No component :(")
 
     const domNode = isHydrating() ? getElement() : document.createElement(tagName);

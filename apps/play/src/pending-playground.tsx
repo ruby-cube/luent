@@ -108,7 +108,7 @@ function Something() {
 }
 
 function $pending(render) {
-    return $pend({
+    return $Suspense({
         pending: render,
         placeholder: () => <div>loading...</div>,
         timeout: 100,

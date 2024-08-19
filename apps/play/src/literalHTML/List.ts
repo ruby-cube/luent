@@ -1,4 +1,4 @@
-import { fromEntries, html } from "../../../../packages/literate"
+import { fromEntries, html } from "../../../../packages/literate/src"
 
 const list = [
     {

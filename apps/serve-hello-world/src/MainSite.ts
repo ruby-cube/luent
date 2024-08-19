@@ -1,6 +1,6 @@
 import { $Node } from "@rue/lumo";
-import { html, SSRComponent } from "./lumin.js";
-import { mO } from "./makeComponent.js";
+import { html, SSRComponent } from "../../../packages/literate/src/Literate.js";
+import { mO } from "../../../packages/literate/src/makeComponent.js";
 
 export function MainSite(props: {
     Slotted: { Page: () => SSRComponent<{ title: string }> }

@@ -3,7 +3,7 @@ import { MainSite } from './src/MainSite.js';
 import { HomePage } from './src/HomePage.js';
 import { AboutPage } from './src/AboutPage.js';
 import { BlogPage } from './src/BlogPage.js';
-import { memoize } from './src/lumin.js';
+import { memoize } from '../../packages/literate/src/Literate.js';
 import { NotFound } from './src/NotFound.js';
 import { BlogPost } from './src/BlogPost.js';
 //@ts-expect-error
@@ -13,6 +13,7 @@ const app = express();
 // app.use((request, response) => {
 //     console.log("Got a request!")
 // })
+
 
 
 app.get('/', async (request, response) => {

@@ -1,12 +1,16 @@
-import { getCurrentComponent, InternalComponent } from "./InternalComponent";
-import { beforeMount } from "./lifecycle";
+import { AnyObject } from "@rue/types";
+import { onSetupCompleted } from "./lifecycle";
+import { getCurrentComponent } from "./componentStack";
+
+type Component = AnyObject
 
 class Provider {
     entries: Map<Symbol | string, any> = new Map();
 
     constructor(
-        public component: InternalComponent | null,
-        public parent: Provider | null
+        public component: Component,
+        public parent: Provider | null,
+        public root: Provider = this
     ) { }
 }
 
@@ -24,17 +28,26 @@ function popProvider() {
     previousProvider = previousProvider?.parent || null
 }
 
-
+export function initializeRootProvider(component: Component){
+    const provider = new Provider(component, null);
+    pushProvider(provider);
+    onSetupCompleted(() => {
+        popProvider()
+    })
+}
 
 // Public API
 export function provide<T>(key: SymbolKey<T> | symbol | string, value: T) {
     const component = getCurrentComponent();
-    if (component === null) provideGlobal(key, value);
+    if (component === null) {
+        provideGlobal(key, value);
+        return;
+    }
     let provider = currentProvider;
     if (!provider || provider.component !== component) {
-        provider = new Provider(component, provider);
+        provider = new Provider(component, provider, provider?.root);
         pushProvider(provider);
-        beforeMount(() => { //TODO: Make this applicable to SSR too
+        onSetupCompleted(() => {
             popProvider()
         })
     }
@@ -43,10 +56,20 @@ export function provide<T>(key: SymbolKey<T> | symbol | string, value: T) {
 
 
 export function fromContext<T>(key: SymbolKey<T> | symbol | string, optional?: '?'): T | undefined {
+    return _fromContext(key, optional);
+}
+
+
+export function _fromContext<T>(key: SymbolKey<T> | symbol | string, optional: '?' | undefined, root?: 'root'): T | undefined {
     const component = getCurrentComponent();
     let provider = currentProvider;
     if (!provider && !optional) throw new Error("There is no provider in this component's ancestry. `fromContext` can only be called from within a component's setup")
     if (!provider) return undefined;
+
+    if (root) {
+        return provider.root.entries.get(key)
+    }
+
     // climb provider tree
     let parent = provider.component === component ? provider.parent : provider;
     while (parent !== null) {
@@ -57,10 +80,34 @@ export function fromContext<T>(key: SymbolKey<T> | symbol | string, optional?: '
     try {
         return fromGlobal(key);
     }
-    catch(e){
+    catch (e) {
         if (optional) return undefined;
         throw new Error("There is no provider that contains the requested key")
     }
+}
+
+
+// class RootStore {
+//     rootEntries: Map<symbol | string, any> = new Map();
+
+//     provide<T>(key: SymbolKey<T> | symbol | string, value: T) {
+//         globalEntries.set(key, value);
+//     }
+// }
+
+// export function provideAppWide(){
+
+// }
+
+export function fromAppRoot<T>(key: SymbolKey<T> | symbol | string, optional?: '?'): T | undefined {
+    return _fromContext(key, optional, 'root');
+}
+
+export function getAppWideResource<T>(key: SymbolKey<T>, errorMsg: string) {
+    const resource = fromAppRoot(key)
+    if (!resource)
+        throw new Error(errorMsg)
+    return resource as T
 }
 
 
