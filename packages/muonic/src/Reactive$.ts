@@ -7,6 +7,7 @@ import { asReactiveProp, getReactiveProp } from "./ReactiveProp";
 import { shallowClone } from "./SnapshotManager";
 import { asTrackableOp, getTrackableOp } from "./TrackableOp";
 import { getRootWatchedModelAndKeyPath, isNestedWatched } from "./deepWatch";
+import { isIntegerKey } from "../../utils/encapsulate";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject, deep: boolean | undefined) => void
@@ -405,11 +406,7 @@ function isMutatingArrayOps(key: PropertyKey) {
 }
 
 
-function isIntegerKey(key: unknown) {
-    const keyAsNumber = Number(key);
-    if (isNaN(keyAsNumber)) return false;
-    if (Number.isInteger(keyAsNumber)) return true
-}
+
 
 function maybeReactivizeArgs(
     op: string,
@@ -598,6 +595,12 @@ function reactiveSetter(
 
     Reflect.set(target, key, _newValue, receiver);
     return true;
+}
+
+export function isIntegerKey(key: unknown) {
+    const keyAsNumber = Number(key);
+    if (isNaN(keyAsNumber)) return false;
+    if (Number.isInteger(keyAsNumber)) return true
 }
 
 // Because insertion of values don't yield differing new and old values for size and length in the setter,

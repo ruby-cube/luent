@@ -1,13 +1,13 @@
 import { initializeRootProvider, popComponent, provide, pushComponent } from "@rue/lumo";
-import { getResolvedValue, initializePromiseMap, initializeSuspense } from "./$Suspense.js";
 import { buildHTML, Literate } from "./Literate.js";
-import { makeComponent, runComponentSetup } from "./makeComponent.js";
+import { runComponentSetup } from "./makeComponent.js";
 import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
-import { ResponseTimer } from "./ResponseTimer.js";
+import { RESPONSE_TIMER, ResponseTimer } from "./ResponseTimer.js";
+import { getResolvedComponent } from "./PendingComponentMap.js";
 
 
 export async function generateHTML(Root: SSRComponentSetup, timeout: number) {
-    const timer = new ResponseTimer(timeout);
+    const timer = timeout != null ? new ResponseTimer(timeout) : undefined;
     const allPromises: Promise<Literate>[] = [] // collect $Suspense promises
 
     const component = makeRootComponent(Root, timer)
@@ -17,7 +17,7 @@ export async function generateHTML(Root: SSRComponentSetup, timeout: number) {
         if (allPromises.length === 0)
             throw new Error("Mismatch between allPromises and component readiness. This should never happen")
         await Promise.allSettled(allPromises)
-        const component = getResolvedValue(output)
+        const component = getResolvedComponent(output)
         const resolvedOutput = component.output
         if (resolvedOutput instanceof Promise)
             throw new Error("Mismatch between promise and component readiness. This should never happen")
@@ -50,12 +50,11 @@ function templateLiteralIsReady(templateLiteral: Literate) {
 }
 
 
-function makeRootComponent(Root: SSRComponentSetup, timer: ResponseTimer) {
+function makeRootComponent(Root: SSRComponentSetup, timer: ResponseTimer | undefined) {
     const component = new SSRComponent(null);
     pushComponent(component)
     initializeRootProvider(component);
-    initializePromiseMap()
-    initializeSuspense(timer)
+    if (timer) provide(RESPONSE_TIMER, timer)
     runComponentSetup(Root, component, undefined, undefined, undefined);
     component.emit(LifecycleHook.SETUP_COMPLETED)
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`

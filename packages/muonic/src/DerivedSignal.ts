@@ -15,7 +15,7 @@ import { READONLY_SIGNAL } from "./asReadonly";
 // Note that siganl with only one dependency could still be a derived signal.
 
 
-export const DERIVED_SIGNAL = Symbol()
+export const DERIVED_SIGNAL = Symbol('derived signal')
 
 export type DerivedSignal<T = any> = {
     (): T

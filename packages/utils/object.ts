@@ -34,7 +34,7 @@ export function clone<T extends { [key: string | number | symbol]: any }>(obj: T
 }
 
 export function deepClone<T extends Object>(obj: T) {
-    return JSON.parse(JSON.stringify(obj));
+    return structuredClone(obj)
 }
 
 export function cloneWithAdditionalProps<T extends Object, P extends Object>(target: T, props: P) {
@@ -100,4 +100,8 @@ function swapKeysAndValues(source: { [key: string]: string }) {
 
 export function isObjectLiteral(obj: AnyObject){
 return Object.getPrototypeOf(obj).constructor === Object;
+}
+
+export function isExtendedObject(entity: any){
+    return entity instanceof Object && Object.getPrototypeOf(entity).constructor !== Object
 }

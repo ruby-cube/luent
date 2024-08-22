@@ -42,7 +42,7 @@ export function climbUp(this: VineNode, op: (node: VineNode) => typeof DONE | vo
     const parent = this.parent;
     const done = op(parent);
     if (done === DONE) return;
-    if (!("climbUp" in parent)) throw "climbUp method does not exist in parent node";
+    if (!("climbUp" in parent)) throw new Error("climbUp method does not exist in parent node");
 
     (<typeof climbUp>parent.climbUp)(op);
 }

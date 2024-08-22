@@ -120,7 +120,7 @@ export class InternalComponent {
 
 
 
-export const COMPONENT = Symbol()
+export const COMPONENT = Symbol('component')
 
 export function expose<T extends AnyObject>(component: T) {
     const _component = getCurrentComponent<InternalComponent>();

@@ -1,4 +1,3 @@
-import { reactive } from "vue";
 
 export type AnyObject = { [key: string | symbol]: any }
 export type Observable<T> = { [ObservableMarker]: true } & T

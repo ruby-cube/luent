@@ -78,3 +78,6 @@ export function appendItems(arr: any[], items: any[]){
     arr.splice(arr.length, 0, ...items)
 }
 
+export function isExtendedArray(entity: any){
+    return entity instanceof Array && Object.getPrototypeOf(entity).constructor !== Array
+}

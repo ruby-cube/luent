@@ -7,7 +7,7 @@ export type ReadonlySignal<T = any> = {
     [READONLY_SIGNAL]: true
 }
 
-export const READONLY_SIGNAL = Symbol();
+export const READONLY_SIGNAL = Symbol('readonly signal');
 
 export function asReadonly<R extends Signal<T> | ReactiveModel, T>(reactiveRef: R): R extends Signal ? ReadonlySignal<T> : R {
     if (isSignal(reactiveRef)) {
@@ -21,3 +21,5 @@ export function asReadonly<R extends Signal<T> | ReactiveModel, T>(reactiveRef: 
     }
     return reactiveRef;
 }
+
+

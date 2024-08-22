@@ -1,7 +1,7 @@
 import { EffectFlask } from "@rue/flask";
 import { PublicComponent } from "@rue/lumo";
 import { SSRComponent } from "./SSRComponent.js";
-import { getResolvedValue, isResolved } from "./$Suspense.js";
+import { getResolvedComponent, isResolved } from "./PendingComponentMap.js";
 
 type AnyObject = { [key: string | symbol | number]: any }
 // export type SSRComponent<T extends AnyObject = AnyObject> = { render: () => string } & T;
@@ -104,7 +104,7 @@ function processSSRComponent(component: SSRComponent, string: string, resultStri
     const output = component.output;
     if (output instanceof Promise) {
         if (isResolved(output)) {
-            processTemplateLiteral(<Literate>getResolvedValue(output).output, string, resultStrings, resultValues)
+            processTemplateLiteral(<Literate>getResolvedComponent(output).output, string, resultStrings, resultValues)
         }
         else {
             resultStrings.push("");

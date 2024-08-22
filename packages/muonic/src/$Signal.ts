@@ -9,7 +9,7 @@ export type Signal<T = any> = {
     set: (toNewValue: (value: T) => T) => T
 }
 
-export const SIGNAL_MARKER = Symbol();
+export const SIGNAL_MARKER = Symbol('signal marker');
 
 const signalValues: WeakMap<Signal, any> = new WeakMap();
 const $$DepthSignals: WeakSet<Signal> = new WeakSet();
