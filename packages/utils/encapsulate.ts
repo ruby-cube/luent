@@ -16,7 +16,7 @@ export function encapsulate(target: AnyObject) {
                         return value.call(target, ...args)
                     }
                 }
-                return value;
+                return value instanceof Object ? encapsulate(value) : value;
             }
             if (value instanceof Function && isMutatingMethod(DataStructure, key)) {
                 return (...args: any[]) => {
@@ -24,7 +24,7 @@ export function encapsulate(target: AnyObject) {
                         throw new Error(`This object has be encapsulated and can only be mutated by its provided methods`)
                 };
             }
-            return value;
+            return value instanceof Object ? encapsulate(value) : value;
         },
         set(target, key, value, receiver) {
             if (__DEV__)

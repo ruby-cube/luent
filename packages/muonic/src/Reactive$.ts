@@ -156,7 +156,7 @@ function createReactive(
 ): ReactiveModel | null {
     if (reactiveMap.has(value)) return value;
     const reactive = isPlainObject(value) ? createReactiveObject(value, register, deep)
-        : isReactiveCapsule(value) ? createReactive(value.$, register, deep)
+        // : isReactiveCapsule(value) ? createReactive(value.$, register, deep)
             : isTuple(value) ? createReactiveTuple(value, register, deep)
                 : value instanceof Array ? createReactiveArray(value, register, deep)
                     : value instanceof Set ? createReactiveSet(value, register, deep)
@@ -168,12 +168,12 @@ function createReactive(
     return reactive;
 }
 
-function isReactiveCapsule(value: any): value is { $: AnyObject } {
-    if (!(value instanceof Object) || isPlainObject(value)) return false;
-    if (!('$' in value)) return false;
-    if (!(value.$ instanceof Object)) return false;
-    return true;
-}
+// function isReactiveCapsule(value: any): value is { $: AnyObject } {
+//     if (!(value instanceof Object) || isPlainObject(value)) return false;
+//     if (!('$' in value)) return false;
+//     if (!(value.$ instanceof Object)) return false;
+//     return true;
+// }
 
 
 function shouldReactivize(
