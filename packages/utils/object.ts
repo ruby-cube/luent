@@ -98,10 +98,7 @@ function swapKeysAndValues(source: { [key: string]: string }) {
 }
 
 
-export function isObjectLiteral(obj: AnyObject){
-return Object.getPrototypeOf(obj).constructor === Object;
+export function isPlainObject(obj: AnyObject){
+return obj.constructor === Object;
 }
 
-export function isExtendedObject(entity: any){
-    return entity instanceof Object && Object.getPrototypeOf(entity).constructor !== Object
-}

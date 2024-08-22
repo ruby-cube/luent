@@ -1,13 +1,12 @@
 import { AnyObject } from "@rue/types";
 import { isWatchedModel, storeInitialDerivedValueIfNeeded, track, trigger, triggerReactiveModel, useUpdateCycle } from "./watch";
 import { emitSignal } from "./hasReactivity_DEV";
-import { isObjectLiteral, KeyPath, Ref } from "@rue/utils";
+import { isPlainObject, KeyPath, Ref, isMutatingMapMethod, isMutatingSetMethod, isMutatingArrayMethod, inheritsFrom } from "@rue/utils";
 import { isTuple, tuple } from "./tuple";
 import { asReactiveProp, getReactiveProp } from "./ReactiveProp";
 import { shallowClone } from "./SnapshotManager";
 import { asTrackableOp, getTrackableOp } from "./TrackableOp";
 import { getRootWatchedModelAndKeyPath, isNestedWatched } from "./deepWatch";
-import { isIntegerKey } from "../../utils/encapsulate";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject, deep: boolean | undefined) => void
@@ -44,15 +43,15 @@ export function isDeepReactive(value: any): value is ReactiveModel {
 //     mutationPermitted: false,
 // }
 
-function _o$(target: AnyObject, deep?: boolean) {
+function _o$<T extends AnyObject>(target: T, deep?: boolean): T {
     if (reactiveMap.has(target)) return target; // prevents double wrapped reactive
 
     const reactive = createReactive(target, register, deep)
     if (reactive === null) {
-        if (__DEV__) console.warn(`INVALID INPUT: o$ must receive a reference-type primitive (object)`)
+        if (__DEV__) console.warn(`INVALID INPUT: Reactive$ must receive a reference-type primitive (object)`)
         return target;
     }
-    return reactive;
+    return reactive as T;
 }
 
 // return {
@@ -154,18 +153,26 @@ function createReactive(
     value: any,
     register: RegisterReactive,
     deep?: boolean
-) {
+): ReactiveModel | null {
     if (reactiveMap.has(value)) return value;
-    const reactive = isObjectLiteral(value) ? createReactiveObject(value, register, deep)
-        : isTuple(value) ? createReactiveTuple(value, register, deep)
-            : value instanceof Array ? createReactiveArray(value, register, deep)
-                : value instanceof Set ? createReactiveSet(value, register, deep)
-                    : value instanceof Map ? createReactiveMap(value, register, deep)
-                        : null;
+    const reactive = isPlainObject(value) ? createReactiveObject(value, register, deep)
+        : isReactiveCapsule(value) ? createReactive(value.$, register, deep)
+            : isTuple(value) ? createReactiveTuple(value, register, deep)
+                : value instanceof Array ? createReactiveArray(value, register, deep)
+                    : value instanceof Set ? createReactiveSet(value, register, deep)
+                        : value instanceof Map ? createReactiveMap(value, register, deep)
+                            : null;
     if (reactive) {
         register(reactive, value, deep);
     }
     return reactive;
+}
+
+function isReactiveCapsule(value: any): value is { $: AnyObject } {
+    if (!(value instanceof Object) || isPlainObject(value)) return false;
+    if (!('$' in value)) return false;
+    if (!(value.$ instanceof Object)) return false;
+    return true;
 }
 
 
@@ -362,34 +369,6 @@ const trackableSetOps = {
 //     return new Set(Object.getOwnPropertyNames(Object.getPrototypeOf(target)))
 // }
 
-const mutatingArrayOps = {
-    // changes length
-    push: true, // will change length
-    unshift: true, // will change length
-
-    pop: true, // will change length (unless already empty)
-    shift: true, //  will change length (unless already empty)
-
-    splice: true, // may or may not change length (many different cases to check)
-
-    // length will not change (index will change)
-    reverse: true, // may or may not change array (no change if length === 0 || 1)
-    sort: true, // may or may not change array (no change if length === 0 || 1   or if array already sorted)
-    fill: true, // may or may not change array (no change if array already filled with the item or length === 0)
-    copyWithin: true, // may or may not change array (no change if items all the same or length === 0)
-};
-
-const mutatingSetOps = {
-    add: true,
-    delete: true,
-    clear: true
-}
-
-const mutatingMapOps = {
-    set: true,
-    delete: true,
-    clear: true
-}
 
 const insertOps = {
     push: { from: 0 },
@@ -400,10 +379,7 @@ const insertOps = {
     set: { from: 0 }
 }
 
-function isMutatingArrayOps(key: PropertyKey) {
-    if (typeof key !== "string") return false;
-    return key in mutatingArrayOps;
-}
+
 
 
 
@@ -479,7 +455,7 @@ function reactiveArrayGetter(
     receiver: any[]
 ) {
     const value = Reflect.get(target, key, receiver);
-    if (isMutatingArrayOps(key)) {
+    if (isMutatingArrayMethod(key)) {
         return handleMutatingMethod(key, value);
     }
     if (isNonTrackable(key, Array)) return value;
@@ -640,7 +616,7 @@ function createReactiveSet(
         get: (target: Set<any>, key: string, receiver: Set<any>) => {
             const value = Reflect.get(target, key, receiver);
 
-            if (key in mutatingSetOps) {
+            if (isMutatingSetMethod(key)) {
                 return (...args: any[]) => {
                     // if (!register.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
                     return mutatingOp(
@@ -851,7 +827,7 @@ function createReactiveMap(
                         value
                     );
             }
-            if (key in mutatingMapOps) {
+            if (isMutatingMapMethod(key)) {
                 return (...args: any[]) => {
                     // if (!register.mutationPermitted) throw new Error("Object is readonly. It can only be mutated through corresponding `mu` function")
                     return mutatingOp(

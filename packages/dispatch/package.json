@@ -1,0 +1,11 @@
+{
+    "name": "@rue/dispatch",
+    "private": true,
+    "description": "",
+    "dependencies": {
+    },
+    "devDependencies": {
+    },
+    "author": "Ruby Yi Wang",
+    "license": "MIT"
+  }

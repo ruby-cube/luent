@@ -1,24 +1,16 @@
 import { AnyObject } from "@rue/types";
-import { isExtendedArray } from "./array";
-import { isExtendedObject } from "./object";
 
-function encapsulate(target: AnyObject) {
+export function encapsulate(target: AnyObject) {
     if (!(target instanceof Object)) {
         if (__DEV__) console.warn('Invalid input')
         return target;
     }
-    if (target instanceof Array) {
-        return encapsulateArray(target);
-    }
-    return encapsulateObject(target)
-}
 
-
-function encapsulateArray(target: Array<any>): Omit<Array<any>, 'push'> { //TODO: only omit mutating methods that are not own methods
     return new Proxy(target, {
         get(target, key, receiver) {
             const value = Reflect.get(target, key, receiver)
-            if (isExtendedArray(target) && hasOwnPropertyOrMethod(target, key)) {
+            const DataStructure = getBaseDataStructure(target);
+            if (inheritsFrom(DataStructure, target) && hasOwnPropertyOrMethod(target, key)) {
                 if (value instanceof Function) {
                     return (...args: any) => {
                         return value.call(target, ...args)
@@ -26,32 +18,7 @@ function encapsulateArray(target: Array<any>): Omit<Array<any>, 'push'> { //TODO
                 }
                 return value;
             }
-            if (value instanceof Function && isMutatingArrayMethod(key)) {
-                return (...args: any[]) => {
-                    if (__DEV__)
-                        throw new Error(`This array has be encapsulated and can only be mutated by its provided methods`)
-                };
-            }
-            return value;
-        },
-        set(target, key, value, receiver) {
-            if (__DEV__)
-                throw new Error(`This array has be encapsulated and can only be mutated by its provided methods`)
-            Reflect.set(target, key, value, receiver)
-            return true;
-        }
-    })
-}
-
-
-function encapsulateObject(target: Object) { //TODO: only omit mutating methods that are not own methods
-    return new Proxy(target, {
-        get(target, key, receiver) {
-            const value = Reflect.get(target, key, receiver)
-            if (isExtendedObject(target) && hasOwnPropertyOrMethod(target, key)) {
-                return value;
-            }
-            if (value instanceof Function && isMutatingObjectMethod(key)) {
+            if (value instanceof Function && isMutatingMethod(DataStructure, key)) {
                 return (...args: any[]) => {
                     if (__DEV__)
                         throw new Error(`This object has be encapsulated and can only be mutated by its provided methods`)
@@ -59,15 +26,102 @@ function encapsulateObject(target: Object) { //TODO: only omit mutating methods 
             }
             return value;
         },
-        set() {
+        set(target, key, value, receiver) {
             if (__DEV__)
                 throw new Error(`This object has be encapsulated and can only be mutated by its provided methods`)
+            Reflect.set(target, key, value, receiver)
             return true;
         }
-    })
+    }) as Omit<Array<any>, 'push'>  //TODO: only omit mutating methods that are not own methods
+}
+
+function getBaseDataStructure(target: Object){
+    if (target instanceof Array) return Array;
+    if (target instanceof Object) return Object;
+    throw new Error('Invalid Input')
 }
 
 
+
+// function inheritsFrom(DataStructure: typeof Array | typeof Object, target: any){
+//     switch (DataStructure) {
+//         case Object:
+//             return inheritsFromObject(target);
+
+//         case Array:
+//             return inheritsFromArray(target);
+    
+//         default:
+//             throw new Error('Invalid Input')
+//     }
+// }
+
+export function inheritsFrom(DataStructure: Function, entity: any){
+    return entity instanceof DataStructure && Object.getPrototypeOf(entity).constructor !== DataStructure
+}
+
+
+const mutatingArrayOps = {
+    // changes length
+    push: true, // will change length
+    unshift: true, // will change length
+
+    pop: true, // will change length (unless already empty)
+    shift: true, //  will change length (unless already empty)
+
+    splice: true, // may or may not change length (many different cases to check)
+
+    // length will not change (index will change)
+    reverse: true, // may or may not change array (no change if length === 0 || 1)
+    sort: true, // may or may not change array (no change if length === 0 || 1   or if array already sorted)
+    fill: true, // may or may not change array (no change if array already filled with the item or length === 0)
+    copyWithin: true, // may or may not change array (no change if items all the same or length === 0)
+};
+
+const mutatingSetOps = {
+    add: true,
+    delete: true,
+    clear: true
+}
+
+const mutatingMapOps = {
+    set: true,
+    delete: true,
+    clear: true
+}
+
+
+function isMutatingMethod(DataStructure: typeof Array | typeof Object | typeof Set | typeof Map, key: PropertyKey){
+       switch (DataStructure) {
+        case Object:
+            return false;
+            
+        case Array:
+            return isMutatingArrayMethod(key);
+
+        case Set:
+            return isMutatingSetMethod(key);
+            
+        case Map:
+            return isMutatingMapMethod(key);
+    
+        default:
+            throw new Error('Invalid Input')
+    }
+}
+
+
+export function isMutatingArrayMethod(key: PropertyKey) {
+    return key in mutatingArrayOps;
+}
+
+export function isMutatingSetMethod(key: PropertyKey) {
+    return key in mutatingSetOps;
+}
+
+export function isMutatingMapMethod(key: PropertyKey) {
+    return key in mutatingMapOps;
+}
 
 
 function hasOwnPropertyOrMethod(target: Object, key: PropertyKey) {
