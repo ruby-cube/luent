@@ -1,13 +1,13 @@
-import { $Node } from "@rue/lumo";
-import { html, SSRComponent } from "../../../packages/literate/src/Literate.js";
-import { mO } from "../../../packages/literate/src/makeComponent.js";
+import { html, Literate, mO, SSRComponent, SSRComponentSetup } from "@rue/literate";
+import { $Node, ComponentSetup, InternalComponent, PublicComponent } from "@rue/lumo";
+import { Signal } from "@rue/muonic";
 
-export function MainSite(props: {
-    Slotted: { Page: () => SSRComponent<{ title: string }> }
+export function MainSite({
+    Slot
+}: {
+    Slot: () => [PublicComponent & {title: string}, Literate] 
 }) {
-    const {Slotted} = props
-
-    const $page = $Node();
+    const $page = $Node<() => SSRComponent<{ title: string }>>() as unknown as Signal<{ title: string }>;
 
     return html`
         <!DOCTYPE html>
@@ -25,8 +25,7 @@ export function MainSite(props: {
                 <a href="/about">About</a>
                 <a href="/blog">Blog</a>
             </nav>
-            ${mO(Slotted.Page, { ref: $page })}
-            <!-- <div class=${['list-block', (o) => { if ($active()) o.add('active') }]}>hi</div> -->
+            ${mO(Slot, { ref: $page })}
         </body>
         
         </html>
@@ -34,8 +33,8 @@ export function MainSite(props: {
 }
 
 
-function AboutPage(){
-    return 
+function AboutPage() {
+    return
 }
 
 

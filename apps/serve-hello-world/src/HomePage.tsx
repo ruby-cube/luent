@@ -1,16 +1,17 @@
-//@ts-nocheck
-import { html } from "../../../packages/literate/src/Literate.js";
 
-export function HomePage() {
+// export function HomePage() {
 
-    return {
-        title: 'Home',
-        render: html`
-            <h3>Home</h3>
-            <div>Home sweet home</div>
-        `
-    }
-}
+import { html } from "@rue/literate";
+import { expose } from "@rue/lumo";
+
+//     return {
+//         title: 'Home',
+//         render: html`
+//             <h3>Home</h3>
+//             <div>Home sweet home</div>
+//         `
+//     }
+// }
 
 export function HomePage() {
 

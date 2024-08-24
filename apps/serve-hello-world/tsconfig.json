@@ -24,6 +24,9 @@
       "@rue/lumo": [
         "../../packages/lumo/src/index.js"
       ],
+      "@rue/literate": [
+        "../../packages/literate/src/index.js"
+      ],
       "@rue/muonic": [
         "../../packages/muonic/src/index.js"
       ]
@@ -31,5 +34,5 @@
     "include": [
       "../../packages",
       "**/src/*"
-    ]
+, "../play/PlayElementIO.tsx"    ]
   }

@@ -7,6 +7,7 @@ import { NotFound } from './src/NotFound.js';
 import { BlogPost } from './src/BlogPost.js';
 //@ts-expect-error
 import { toKebab } from "to-kebab"
+import { generateHTML } from '@rue/literate';
 
 const app = express();
 // app.use((request, response) => {
@@ -16,18 +17,20 @@ const app = express();
 
 
 app.get('/', async (request, response) => {
-    const page = await memoize('home-page', () => MainSite(HomePage))
-    response.send(page.render());
+    // const page = await memoize('home-page', () => MainSite(HomePage))
+    const page = await generateHTML(() => MainSite({ Slot: HomePage }), 1000)
+    response.send(page);
 })
 
 app.get('/about', async (request, response) => {
-    const page = await memoize('about-page', () => MainSite(AboutPage))
-    response.send(page.render());
+    // const page = await memoize('about-page', () => MainSite(AboutPage))
+    const page = await generateHTML(() => MainSite({ Slot: AboutPage }), 1000)
+    response.send(page);
 })
 
 app.get('/blog', async (request, response) => {
-    const page = await memoize('blog-page', () => MainSite(BlogPage))
-    response.send(page.render());
+    const page = await generateHTML(() => MainSite({ Slot: BlogPage }), 1000)
+    response.send(page);
 })
 
 app.get('/blog/:slug', async (request, response) => {
@@ -38,18 +41,18 @@ app.get('/blog/:slug', async (request, response) => {
         toKebab(item.title) === slug ? item : null
     )
     if (post) {
-        const page = await memoize(slug, () => MainSite(() => BlogPost(post)))
-        response.send(page.render());
+        const page = await generateHTML(() => MainSite({ Slot: () => BlogPage({ post }) }), 1000)
+        response.send(page);
     }
     else {
-        const page = await memoize('not-found', () => MainSite(NotFound))
-        response.send(page.render());
+        const page = await generateHTML(() => MainSite({ Slot: NotFound }), 1000)
+        response.send(page);
     }
 })
 
 app.get('*', async (request, response) => {
-    const page = await memoize('not-found', () => MainSite(NotFound))
-    response.send(page.render());
+    const page = await generateHTML(() => MainSite({ Slot: NotFound }), 1000)
+    response.send(page);
 })
 
 app.listen(3000, () => {

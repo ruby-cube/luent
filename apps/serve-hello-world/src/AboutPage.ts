@@ -1,5 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { html } from "../../../packages/literate/src/Literate.js";
+import { expose } from "@rue/lumo";
 
 export function AboutPage() {
     return [
@@ -13,6 +14,3 @@ export function AboutPage() {
     ]
 }
 
-function expose<T extends AnyObject>(component: T) {
-    return component;
-}

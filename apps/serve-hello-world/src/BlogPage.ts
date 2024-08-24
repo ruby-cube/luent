@@ -1,19 +1,35 @@
 import { blogPosts } from "./data.js";
 import { fromEntries, html } from "../../../packages/literate/src/Literate.js";
-import { PostPreview } from "./PostPreview.js";
+import { BlogPost, PostPreview } from "./PostPreview.js";
+import { $await, mO, $Suspense } from "@rue/literate";
+import { $Signal } from "@rue/muonic";
+import { expose } from "@rue/lumo";
 
-export async function BlogPage() {
-    const data = await import('./data.js')
-    return {
-        title: 'Blog',
-        render: html`
+export function BlogPage() {
+    const $blogPosts = $Signal([])
+    const pendingBlogPosts = $await(import('./data.js'))
+        .then((posts)=>{
+            $blogPosts.set(v=> posts)
+        })
+
+    const PendingPostPreviews = $Suspense(pendingBlogPosts, {
+            Pending: () => html`
+                ${fromEntries($blogPosts,(post, index) => 
+                        mO(PostPreview, {post})
+                )}
+            `
+    })
+
+    return [
+        expose({
+            title: 'Blog'
+        }),
+        html`
             <h1>Blog posts are listed here</h1>
             <main>
-                ${fromEntries(data.blogPosts,(post, index) => 
-                    PostPreview(post).render()
-                )}
+                ${mO(PendingPostPreviews)}
             </main>
-            `
-    }
+        `
+    ]
 }
 

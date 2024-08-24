@@ -19,6 +19,7 @@
     "express": "^4.19.2",
     "to-kebab": "^1.0.7",
     "@rue/lumo": "workspace:*",
+    "@rue/literate": "workspace:*",
     "@rue/muonic": "workspace:*"
   },
   "devDependencies": {
