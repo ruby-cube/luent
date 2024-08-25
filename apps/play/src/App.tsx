@@ -1,4 +1,4 @@
-import { $else, $elseIf, $if, $Node, COMPONENT, ComponentSetup, expose, forEachIn, NodeEntity, onMounted, RenderSlotted, teleportTo, useEventListener } from "@rue/lumo";
+import { $else, $elseIf, $if, $Node, COMPONENT, ComponentSetup, expose, forEachIn, NodeEntity, onMounted, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, $Signal, DeepReactive$ } from "@rue/muonic";
 import { $ } from "@rue/muonic";

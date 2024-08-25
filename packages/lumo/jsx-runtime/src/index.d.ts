@@ -386,14 +386,14 @@ declare namespace React {
     }
 
     interface ReactPortal extends ReactElement {
-        slotted: Lumo.NodeEntity;
+        Slot: Lumo.NodeEntity;
     }
 
     //
     // Factories
     // ----------------------------------------------------------------------
 
-    type Factory<P> = (props?: Attributes & P, ...slotted: NodeEntity[]) => ReactElement<P>;
+    type Factory<P> = (props?: Attributes & P, ...Slot: NodeEntity[]) => ReactElement<P>;
 
     /**
      * @deprecated Please use `FunctionComponentFactory`
@@ -402,12 +402,12 @@ declare namespace React {
 
     type FunctionComponentFactory<P> = (
         props?: Attributes & P,
-        ...slotted: Lumo.InferSlotted<(props?: P) => any>[] // #LUMO-EDIT
+        ...Slot: Lumo.InferSlotted<(props?: P) => any>[] // #LUMO-EDIT
     ) => FunctionComponentElement<P>;
 
     type ComponentFactory<P, T extends Component<P, ComponentState>> = (
         props?: ClassAttributes<T> & P,
-        ...slotted: Lumo.InferSlotted<(props?: P) => any>[] //#LUMO-EDIT
+        ...Slot: Lumo.InferSlotted<(props?: P) => any>[] //#LUMO-EDIT
     ) => CElement<P, T>;
 
     type CFactory<P, T extends Component<P, ComponentState>> = ComponentFactory<P, T>;
@@ -415,19 +415,19 @@ declare namespace React {
 
     type DOMFactory<P extends DOMAttributes<T>, T extends Element> = (
         props?: ClassAttributes<T> & P | null,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ) => DOMElement<P, T>;
 
     interface HTMLFactory<T extends HTMLElement> extends DetailedHTMLFactory<AllHTMLAttributes<T>, T> { }
 
     interface DetailedHTMLFactory<P extends HTMLAttributes<T>, T extends HTMLElement> extends DOMFactory<P, T> {
-        (props?: ClassAttributes<T> & P | null, ...slotted: NodeEntity[]): DetailedReactHTMLElement<P, T>;
+        (props?: ClassAttributes<T> & P | null, ...Slot: NodeEntity[]): DetailedReactHTMLElement<P, T>;
     }
 
     interface SVGFactory extends DOMFactory<SVGAttributes<SVGElement>, SVGElement> {
         (
             props?: ClassAttributes<SVGElement> & SVGAttributes<SVGElement> | null,
-            ...slotted: Lumo.NodeEntity[]
+            ...Slot: Lumo.NodeEntity[]
         ): ReactSVGElement;
     }
 
@@ -466,10 +466,10 @@ declare namespace React {
      * @example
      *
      * ```tsx
-     * // Typing slotted
-     * type Props = { slotted: Lumo.NodeEntity }
+     * // Typing Slot
+     * type Props = { Slot: Lumo.NodeEntity }
      *
-     * const Component = ({ slotted }: Props) => <div>{slotted}</div>
+     * const Component = ({ Slot }: Props) => <div>{Slot}</div>
      *
      * <Component>hello</Component>
      * ```
@@ -534,22 +534,22 @@ declare namespace React {
     function createElement(
         type: "input",
         props?: InputHTMLAttributes<HTMLInputElement> & ClassAttributes<HTMLInputElement> | null,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): DetailedReactHTMLElement<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
     function createElement<P extends HTMLAttributes<T>, T extends HTMLElement>(
         type: keyof ReactHTML,
         props?: ClassAttributes<T> & P | null,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): DetailedReactHTMLElement<P, T>;
     function createElement<P extends SVGAttributes<T>, T extends SVGElement>(
         type: keyof ReactSVG,
         props?: ClassAttributes<T> & P | null,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): ReactSVGElement;
     function createElement<P extends DOMAttributes<T>, T extends Element>(
         type: string,
         props?: ClassAttributes<T> & P | null,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): DOMElement<P, T>;
 
     // Custom components
@@ -557,17 +557,17 @@ declare namespace React {
     function createElement<P extends {}>(
         type: FunctionComponent<P>,
         props?: Attributes & P | null,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): FunctionComponentElement<P>;
     function createElement<P extends {}, T extends Component<P, ComponentState>, C extends ComponentClass<P>>(
         type: ClassType<P, T, C>,
         props?: ClassAttributes<T> & P | null,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): CElement<P, T>;
     function createElement<P extends {}>(
         type: FunctionComponent<P> | ComponentClass<P> | string,
         props?: Attributes & P | null,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): ReactElement<P>;
 
     // DOM Elements
@@ -575,42 +575,42 @@ declare namespace React {
     function cloneElement<P extends HTMLAttributes<T>, T extends HTMLElement>(
         element: DetailedReactHTMLElement<P, T>,
         props?: P,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): DetailedReactHTMLElement<P, T>;
     // ReactHTMLElement, less specific
     function cloneElement<P extends HTMLAttributes<T>, T extends HTMLElement>(
         element: ReactHTMLElement<T>,
         props?: P,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): ReactHTMLElement<T>;
     // SVGElement
     function cloneElement<P extends SVGAttributes<T>, T extends SVGElement>(
         element: ReactSVGElement,
         props?: P,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): ReactSVGElement;
     // DOM Element (has to be the last, because type checking stops at first overload that fits)
     function cloneElement<P extends DOMAttributes<T>, T extends Element>(
         element: DOMElement<P, T>,
         props?: DOMAttributes<T> & P,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): DOMElement<P, T>;
 
     // Custom components
     function cloneElement<P>(
         element: FunctionComponentElement<P>,
         props?: Partial<P> & Attributes,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): FunctionComponentElement<P>;
     function cloneElement<P, T extends Component<P, ComponentState>>(
         element: CElement<P, T>,
         props?: Partial<P> & ClassAttributes<T>,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): CElement<P, T>;
     function cloneElement<P>(
         element: ReactElement<P>,
         props?: Partial<P> & Attributes,
-        ...slotted: Lumo.NodeEntity[]
+        ...Slot: Lumo.NodeEntity[]
     ): ReactElement<P>;
 
     /**
@@ -620,7 +620,7 @@ declare namespace React {
      */
     interface ProviderProps<T> {
         value: T;
-        slotted?: Lumo.NodeEntity | undefined;
+        Slot?: Lumo.NodeEntity | undefined;
     }
 
     /**
@@ -629,7 +629,7 @@ declare namespace React {
      * @template T The type of the value the context provides.
      */
     interface ConsumerProps<T> {
-        slotted: (value: T) => Lumo.NodeEntity;
+        Slot: (value: T) => Lumo.NodeEntity;
     }
 
     /**
@@ -797,13 +797,13 @@ declare namespace React {
      */
     const Children: {
         map<T, C>(
-            slotted: C | readonly C[],
+            Slot: C | readonly C[],
             fn: (child: C, index: number) => T,
         ): C extends null | undefined ? C : Array<Exclude<T, boolean | null | undefined>>;
-        forEach<C>(slotted: C | readonly C[], fn: (child: C, index: number) => void): void;
-        count(slotted: any): number;
-        only<C>(slotted: C): C extends any[] ? never : C;
-        toArray(slotted: Lumo.NodeEntity | Lumo.NodeEntity[]): Array<Exclude<Lumo.NodeEntity, boolean | null | undefined>>;
+        forEach<C>(Slot: C | readonly C[], fn: (child: C, index: number) => void): void;
+        count(Slot: any): number;
+        only<C>(Slot: C): C extends any[] ? never : C;
+        toArray(Slot: Lumo.NodeEntity | Lumo.NodeEntity[]): Array<Exclude<Lumo.NodeEntity, boolean | null | undefined>>;
     };
     /**
      * Lets you group elements without a wrapper node.
@@ -832,7 +832,7 @@ declare namespace React {
      * </>
      * ```
      */
-    const Fragment: ExoticComponent<{ slotted?: Lumo.NodeEntity | undefined }>;
+    const Fragment: ExoticComponent<{ Slot?: Lumo.NodeEntity | undefined }>;
 
     /**
      * Lets you find common bugs in your components early during development.
@@ -849,7 +849,7 @@ declare namespace React {
      * </StrictMode>
      * ```
      */
-    const StrictMode: ExoticComponent<{ slotted?: Lumo.NodeEntity | undefined }>;
+    const StrictMode: ExoticComponent<{ Slot?: Lumo.NodeEntity | undefined }>;
 
     /**
      * The props accepted by {@link Suspense}.
@@ -857,14 +857,14 @@ declare namespace React {
      * @see {@link https://react.dev/reference/react/Suspense React Docs}
      */
     interface SuspenseProps {
-        slotted?: Lumo.NodeEntity | undefined;
+        Slot?: Lumo.NodeEntity | undefined;
 
         /** A fallback react tree to show when a Suspense child (like React.lazy) suspends */
         fallback?: Lumo.NodeEntity;
     }
 
     /**
-     * Lets you display a fallback until its slotted have finished loading.
+     * Lets you display a fallback until its Slot have finished loading.
      *
      * @see {@link https://react.dev/reference/react/Suspense React Docs}
      *
@@ -943,7 +943,7 @@ declare namespace React {
      * @see {@link https://react.dev/reference/react/Profiler React Docs}
      */
     interface ProfilerProps {
-        slotted?: Lumo.NodeEntity | undefined;
+        Slot?: Lumo.NodeEntity | undefined;
         id: string;
         onRender: ProfilerOnRenderCallback;
     }
@@ -1598,13 +1598,13 @@ declare namespace React {
      *
      * ```tsx
      * interface Props {
-     *   slotted?: Lumo.NodeEntity;
+     *   Slot?: Lumo.NodeEntity;
      *   type: "submit" | "button";
      * }
      *
      * export const FancyButton = forwardRef<HTMLButtonElement, Props>((props, ref) => (
      *   <button ref={ref} className="MyClassName" type={props.type}>
-     *     {props.slotted}
+     *     {props.Slot}
      *   </button>
      * ));
      * ```
@@ -1634,7 +1634,7 @@ declare namespace React {
         : P
         : P;
 
-    type PropsWithChildren<P = unknown> = P & { slotted?: Lumo.NodeEntity | undefined };
+    type PropsWithChildren<P = unknown> = P & { Slot?: Lumo.NodeEntity | undefined };
 
     /**
      * Used to retrieve the props a component accepts. Can either be passed a string,
@@ -2422,7 +2422,7 @@ declare namespace React {
     type DOMAttributes<T> = _DOMAttributes<T> & L.ReactivizeProps<DOMEvents<T>>
 
     interface _DOMAttributes<T> {
-        slotted?: Lumo.NodeEntity | undefined;
+        Slot?: Lumo.NodeEntity | undefined;
         dangerouslySetInnerHTML?: {
             // Should be InnerHTML['innerHTML'].
             // But unfortunately we're mixing renderer-specific type declarations.
@@ -4152,13 +4152,13 @@ declare namespace React {
     // Sync with type of `const Children`.
     interface ReactChildren {
         map<T, C>(
-            slotted: C | readonly C[],
+            Slot: C | readonly C[],
             fn: (child: C, index: number) => T,
         ): C extends null | undefined ? C : Array<Exclude<T, boolean | null | undefined>>;
-        forEach<C>(slotted: C | readonly C[], fn: (child: C, index: number) => void): void;
-        count(slotted: any): number;
-        only<C>(slotted: C): C extends any[] ? never : C;
-        toArray(slotted: Lumo.NodeEntity | Lumo.NodeEntity[]): Array<Exclude<Lumo.NodeEntity, boolean | null | undefined>>;
+        forEach<C>(Slot: C | readonly C[], fn: (child: C, index: number) => void): void;
+        count(Slot: any): number;
+        only<C>(Slot: C): C extends any[] ? never : C;
+        toArray(Slot: Lumo.NodeEntity | Lumo.NodeEntity[]): Array<Exclude<Lumo.NodeEntity, boolean | null | undefined>>;
     }
 
     //
@@ -4293,7 +4293,7 @@ declare global {
             props: {};
         }
         interface ElementChildrenAttribute {
-            slotted: {};
+            Slot: {};
         }
 
         // We can't recurse forever because `type` can't be self-referential;
@@ -4307,7 +4307,7 @@ declare global {
 
         interface IntrinsicAttributes extends React.Attributes {
             ref?: Lumo.Ref //#LUMO-EDIT
-            // slotted?: Lumo.InferSlotted
+            // Slot?: Lumo.InferSlotted
         }
         interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> { }
 

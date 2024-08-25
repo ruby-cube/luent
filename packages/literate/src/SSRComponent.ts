@@ -2,21 +2,24 @@ import { EffectFlask } from "@rue/flask"
 import { PublicComponent } from "@rue/lumo"
 import { AnyObject } from "@rue/types"
 import { Literate } from "./Literate"
-import { Component } from "../../lumo/src/component/componentStack"
+import { TreeNode } from "../../lumo/src/component/componentStack"
 
 export enum LifecycleHook {
     SETUP_COMPLETED = 'sc'
 }
 
-export type SSRComponentSetup<P = any> = P extends never ?
-    (() => Literate | Promise<SSRComponent>) | (() => [PublicComponent, Literate]) :
-    ((props: P) => Literate | Promise<SSRComponent>) | ((props: P) => [PublicComponent, Literate])
+export type SSRComponentSetup<P extends AnyObject | undefined = undefined, E extends AnyObject | undefined = undefined> =
+    P extends undefined ?
+    E extends undefined ? (() => Literate | Promise<SSRComponent>)
+    : (() => [E, Literate])
+    : E extends undefined ? ((props: P) => Literate | Promise<SSRComponent>)
+    : ((props: P) => [E, Literate])
 
-export class SSRComponent<T extends AnyObject = AnyObject> implements Component {
-    flask!: EffectFlask
-    setFlask(flask: EffectFlask) {
-        this.flask = flask
-    }
+export class SSRComponent<T extends AnyObject | null = null> implements TreeNode {
+    // flask!: EffectFlask
+    // setFlask(flask: EffectFlask) {
+    //     this.flask = flask
+    // }
 
     constructor(
         public parent: SSRComponent | null,
@@ -25,9 +28,9 @@ export class SSRComponent<T extends AnyObject = AnyObject> implements Component 
     // strings!: string[];
     // values!: any[];
     output!: Literate | Promise<SSRComponent>
-    component!: PublicComponent | null
+    component!: T | null
 
-    initialize(output: Literate | Promise<SSRComponent>, component: PublicComponent | null) {
+    initialize(output: Literate | Promise<SSRComponent>, component: T | null) {
         this.output = output
         this.component = component
     }

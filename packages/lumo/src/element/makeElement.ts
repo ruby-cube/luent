@@ -4,13 +4,11 @@ import { normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
 import { initializeRender, watchForRender } from "../reactivity/watchForRender";
-import { watchForRenderAndPreserve, initializeRenderAndPreserve } from "../conditional/$if";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { ActiveListener, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
 import { runNonSyncTasks, Signal } from "@rue/muonic";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
-import { beforeUnmount } from "../component/lifecycle";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
 import { isHydrating } from "../hydration/hydration";
@@ -18,6 +16,8 @@ import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
 import { getCurrentComponent } from "../component/componentStack";
+import { getActiveDynamicNode } from "../dynamic/DynamicNode";
+import { beforeUnmount } from "../dynamic/lifecycle";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -193,11 +193,10 @@ type DynamicClassesConfig = {
 }
 
 function setUpClasses(component: InternalComponent, node: Element, classes: (((o: DOMTokenList) => void) | string | DynamicClassesConfig)[]) {
-    const _initializeRender = component.preserve ? initializeRenderAndPreserve : initializeRender
     const classList = node.classList
     for (const entry of classes) {
         if (entry instanceof Function) {
-            _initializeRender(() => entry(classList))
+            initializeRender(() => entry(classList))
         }
         else if (entry instanceof Object) {
             for (const key in entry) {
@@ -228,11 +227,10 @@ function warnDuplicateClasses(classesA: string, classesB: string) {
 }
 
 function setUpStyles(component: InternalComponent, node: Element, styles: (((o: CSSStyleDeclaration) => void) | string)[]) {
-    const _initializeRender = component.preserve ? initializeRenderAndPreserve : initializeRender
     const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
     for (const entry of styles) {
         if (entry instanceof Function) {
-            _initializeRender(() => entry(style))
+            initializeRender(() => entry(style))
         }
         else if (!isHydrating()) {
             if (__DEV__ && entry) warnOverlappingStyles(style.cssText, normalizeStyle(entry));

@@ -3,6 +3,8 @@ import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { $listen, Callback, collectEffects, EffectFlask, ListenerOptions } from "@rue/flask";
 import { isReactiveModel, ReactiveModel, Readonly, Signal, $Signal, hasSignal, ReactiveSignal } from "@rue/muonic";
+import { makeDynamicNode } from "../dynamic/makeDynamicNode";
+import { DynamicNode } from "../dynamic/DynamicNode";
 
 
 export type RenderItem<T = any> = (item: T, $index: Signal<number>) => NodeEntity[] | NodeEntity
@@ -19,7 +21,7 @@ export class ListRenderKit<T = any> {
         public data: ListData,
         public indices: Signal<number>[],
         public idKey: string | undefined,
-        public flasks: EffectFlask[]
+        public dynamicNodes: DynamicNode[]
     ) { }
 
     isUpdating = false;
@@ -110,9 +112,9 @@ export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: s
     const isDynamic = isReactiveModel(data) || hasSignal(data);
 
     const indices: Signal<number>[] = []
-    const flasks: EffectFlask[] = []
+    const dynamicNodes: DynamicNode[] = []
 
-    const listRenderKit = new ListRenderKit(render, domNodes, data, indices, idKey, flasks)
+    const listRenderKit = new ListRenderKit(render, domNodes, data, indices, idKey, dynamicNodes)
 
     pushList(listRenderKit);
     let i = 0;
@@ -122,13 +124,19 @@ export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: s
         currentItem = item;
         $currentIndex = $index;
         indices.push($index)
-        collectEffects((flask, outerFlask) => {
+
+        if (isDynamic){
+            const dynamicNode = makeDynamicNode(renderListItem)
+            dynamicNodes.push(dynamicNode)
+        }
+        else {
+            renderListItem()
+        }
+
+        function renderListItem(){
             domNodes.push(normalizeToArray(render(item, $index)));
-            if (isDynamic) {
-                flasks.push(flask);
-            }
-            outerFlask?.onDisposal(flask.dispose)
-        }, 'forEachIn')
+        }
+
         i++;
     }
     currentItem = undefined;

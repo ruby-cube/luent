@@ -1,15 +1,16 @@
 import { AnyObject, MaybePromise } from "@rue/types";
-import { PublicComponent, ComponentSetup, InternalComponent,COMPONENT } from "./InternalComponent";
+import { PublicComponent, ComponentSetup, InternalComponent, COMPONENT, Component } from "./InternalComponent";
 import { collectEffects, } from "@rue/flask/flask";
 import { InternalNodeRef, NodeSignal, getNodeRef, get$Node } from "../node/$Node";
 import { ComponentConfig, EventsConfig, initializeListRef, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { DerivedSignal, Signal } from "@rue/muonic";
 import { preserveAllRequested } from "../conditional/$if";
-import { beforeUnmount, LifecycleHook, onActivated, onDeactivated, onUnmounted } from "./lifecycle";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentItemAndIndex } from "../list/forEachIn";
 import { getCurrentComponent, popComponent, pushComponent } from "./componentStack";
+import { DynamicNode } from "../dynamic/DynamicNode";
+import { LifecycleHook } from "./lifecycle";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
@@ -17,13 +18,13 @@ export type ComponentOptions = { preserve?: true }
 
 export type InferSlotted<T extends ComponentSetupWithSlot = ComponentSetupWithSlot> =
     T extends (props: infer P) => any ?
-    P extends { Slotted: infer S } ?
+    P extends { Slot: infer S } ?
     S
     : undefined
     : undefined
 
 export type PropsWithSlot = {
-    slot: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
+    Slot: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
 }
 
 type ComponentSetupWithSlot<P extends PropsWithSlot = PropsWithSlot> =
@@ -32,34 +33,33 @@ type ComponentSetupWithSlot<P extends PropsWithSlot = PropsWithSlot> =
 
 export function mO<T extends ComponentSetupWithSlot>(
     Component: T,
-    slotted: InferSlotted<T>,
+    Slot: InferSlotted<T>,
     config?: ComponentConfig<T>
 ): InternalComponent
 export function mO<T extends ComponentSetup>(
     Component: T,
-    slotted?: undefined,
+    Slot?: undefined,
     config?: ComponentConfig<T>
 ): InternalComponent
 export function mO<T extends ComponentSetup>(
     Component: T,
-    slotted?: InferSlotted<T> | undefined,
+    Slot?: InferSlotted<T> | undefined,
     config?: ComponentConfig<T>
 ): InternalComponent {
     const [_, $index] = getCurrentItemAndIndex()
-    return makeComponent(Component, slotted, config, $index)
+    return makeComponent(Component, Slot, config, $index)
 }
 
 export function makeComponent(
     Component: ComponentSetup,
-    slotted: InferSlotted | undefined,
+    Slot: InferSlotted | undefined,
     config: ComponentConfig,
     $index: Signal<number> | undefined
 ): InternalComponent {
     const parent = getCurrentComponent<InternalComponent>();
-    const preserve = getPreserveStatus(parent);
-    const component = new InternalComponent(parent, preserve);
+    const component = new InternalComponent(parent);
     pushComponent(component)
-    runComponentSetup(Component, component, slotted, config, $index);
+    runComponentSetup(Component, component, Slot, config, $index);
     component.emit(LifecycleHook.SETUP_COMPLETED)
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
     return component;
@@ -75,18 +75,7 @@ export function makeComponent(
 
 
 
-function getPreserveStatus(
-    // options: ComponentOptions | undefined,
-    parent: InternalComponent | null,
-) {
-    // let preserveRequested: boolean | undefined = options && options.preserve;
-    // if (preserveRequested && !isSettingUpConditionalMount()) {
-    //     preserveRequested = false;
-    //     if (__DEV__) console.warn('Extraneous preserve component request. Preserve component only within conditional `ifCase(condition, { mount: () => {} })` or `mountIf`')
-    // }
 
-    return preserveAllRequested() || !!parent && parent.preserve;
-}
 
 // export function getAttributes() {
 //     const component = getCurrentComponent();
@@ -105,62 +94,60 @@ function normalizeToFragmentArray(entity: any) { // distinguish conditional seri
     return normalizeToArray(entity);
 }
 
-function extractNodeEntities(output: NodeEntity | NodeEntity[] | [PublicComponent, NodeEntity | NodeEntity[]]) {
-    if (!(output instanceof Array)) return output;
-    if (output.length === 2
-        && output[0] instanceof Object
-        && COMPONENT in output[0]
-    ) {
-        return output.pop();
-    }
-    return output;
+function extractNodeEntities(component: Component) {
+    if (!('initialNodeEntities' in component)) throw new Error('Component setup must return a Component. Pass jsx into `mx` function')
+    return component.initialNodeEntities;
+    // if (!(output instanceof Array)) return output;
+    // if (output.length === 2
+    //     && output[0] instanceof Object
+    //     && COMPONENT in output[0]
+    // ) {
+    //     return output.pop();
+    // }
+    // return output;
 }
 
 export function runComponentSetup(
     Component: ComponentSetup,
     component: InternalComponent,
-    slotted: InferSlotted | undefined,
+    Slot: InferSlotted | undefined,
     config: ComponentConfig,
     $index: Signal<number> | undefined
 ) {
-    collectEffects((flask, outerFlask) => {
-        component.setFlask(flask);
-        const output = Component({ ...config, slotted })
-        if (output instanceof Promise)
-            throw new Error("Components cannot return a promise. Use $Suspense and $await to handle promises within component setup")
+    // collectEffects((flask, outerFlask) => {
+    // component.setFlask(flask);
+    const output = Component({ ...config, Slot })
+    if (output instanceof Promise)
+        throw new Error("Components cannot return a promise. Use $Suspense and $await to handle promises within component setup")
 
-        initializeComponent(component, output, config.ref, $index)
-    }, Component.name)
+    initializeComponent(component, output, config.ref, $index)
+    // }, Component.name)
 }
 
 function initializeComponent(
     component: InternalComponent,
-    output: NodeEntity | NodeEntity[] | [AnyObject, NodeEntity[]],
+    output: Component,
     ref: NodeSignal | undefined,
     $index: Signal<number> | undefined,
 ) {
     const nodeEntities = normalizeToFragmentArray(extractNodeEntities(output)); //TODO: Validate output and get publicComponent from output
 
-    component.nodeEntities = nodeEntities;
+    component.initialNodeEntities = nodeEntities;
 
     if (ref) {
-        const publicComponent = component.component || null;
+        const publicComponent = output.component || null;
         if ($index) initializeListRef(ref, publicComponent, $index)
         else initializeRef(ref, publicComponent)
-
     }
-
-    const flask = component.flask!;
-    flask.outer?.onDisposal(flask.dispose) // no outer flask means it's the root component
 
     // set up hook cascade
-    const parent = component.parent;
-    if (parent instanceof InternalComponent) {
-        beforeUnmount(() => component.emit(LifecycleHook.BEFORE_UNMOUNT), parent) //TODO: how do these get cleaned up?
-        onUnmounted(() => component.emit(LifecycleHook.UNMOUNTED), parent)
-        onDeactivated(() => component.emit(LifecycleHook.DEACTIVATED), undefined, parent)
-        onActivated(() => component.emit(LifecycleHook.ACTIVATED), undefined, parent)
-    }
+    // const parent = component.parent;
+    // if (parent instanceof InternalComponent) {
+    //     beforeUnmount(() => component.emit(LifecycleHook.BEFORE_UNMOUNT), parent) //TODO: how do these get cleaned up?
+    //     onUnmounted(() => component.emit(LifecycleHook.UNMOUNTED), parent)
+    //     onDeactivated(() => component.emit(LifecycleHook.BEFORE_DEACTIVATE), undefined, parent)
+    //     onActivated(() => component.emit(LifecycleHook.ACTIVATED), undefined, parent)
+    // }
 }
 
 

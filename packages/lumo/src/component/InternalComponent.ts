@@ -1,76 +1,89 @@
 import { AnyObject, MaybePromise } from "@rue/types";
 import { LifecycleHook } from "./lifecycle";
-import { InternalNodeRef } from "../node/$Node";
 import { EventHandler, NodeEntity, RenderFunction } from "../node/makeNode";
-import { DerivedSignal } from "@rue/muonic";
 import { _NodePod } from "../node/NodePod";
-import { EffectFlask, pushFlask } from "@rue/flask";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
 import { getCurrentComponent, popComponent, pushComponent } from "./componentStack";
 
 
 export type DOMNode = CharacterData | Element
-export type Props = {
-    [key: string]: any;
-    slot?: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
+// export type Props = {
+//     [key: string]: any;
+//     Slot?: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
+// }
+
+// export type RenderSlot<P extends any = undefined> =
+//     P extends undefined ? () => NodeEntity | NodeEntity[]
+//     : (props: P) => NodeEntity | NodeEntity[]
+
+// export type Slot = NodeEntity | NodeEntity[]
+export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (props: P) => Component
+
+// export type Slot<T> = T extends AnyObject ? InternalComponent<T> : NodeEntity | NodeEntity[]
+export const COMPONENT = Symbol('public component')
+export type PublicComponent<T extends undefined | AnyObject = undefined | AnyObject> = T extends undefined ? undefined : { [COMPONENT]: true } & T // contains anything in expose
+
+export interface Component<T extends undefined | AnyObject = undefined | AnyObject> {
+    component: PublicComponent<T>;
+    initialNodeEntities: NodeEntity
 }
 
-export type RenderSlotted<P extends any = undefined> =
-    P extends undefined ? () => NodeEntity | NodeEntity[]
-    : (props: P) => NodeEntity | NodeEntity[]
+export function mx<T extends AnyObject = AnyObject>(render: NodeEntity): Component<T>
+export function mx<T extends AnyObject = AnyObject>(exposedComponent: T | NodeEntity, render: NodeEntity): Component<T>
+export function mx<T extends AnyObject = AnyObject>(exposedComponentOrRender: T | NodeEntity, render?: NodeEntity): Component<T> {
 
-export type Slotted = NodeEntity | NodeEntity[]
+    const component = render ? { component: exposedComponentOrRender, initialNodeEntities: render } : {component: undefined, initialNodeEntities: exposedComponentOrRender}
+    const unnestedComponent = unnestComponent(component) 
 
-
-export type ComponentSetup<P = any> = P extends never ?
-    (() => NodeEntity[] | NodeEntity) | (() => [PublicComponent, NodeEntity[] | NodeEntity]) :
-    ((props: P) => NodeEntity[] | NodeEntity) | ((props: P) => [PublicComponent, NodeEntity[] | NodeEntity])
-
-export type PublicComponent = { [COMPONENT]: true } // contains anything in expose
-
-export class InternalComponent {
-    context: AnyObject | undefined;
-    provides: AnyObject | undefined;
-    component: PublicComponent | null = null;
-    flask: EffectFlask | undefined;
-
-    setFlask(flask: EffectFlask) {
-        this.flask = flask;
+    return {
+        component: arguments.length === 2 ? { [COMPONENT]: true as const, ...exposedComponentOrRender } : component !== unnestedComponent? unnestedComponent.component : undefined,
+        initialNodeEntities: unnestedComponent.initialNodeEntities
     }
+}
 
-    nodePod: _NodePod | undefined;
-    setNodePod(nodePod: _NodePod) {
-        this.nodePod = nodePod;
-    }
+export class InternalComponent<T extends undefined | AnyObject = undefined | AnyObject> implements Component {
+    // context: AnyObject | undefined;
+    // provides: AnyObject | undefined;
+    component: PublicComponent<T> | undefined = undefined;
+    initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
+    // flask: EffectFlask | undefined;
 
-    nodeEntities: NodeEntity[] = []; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
+    // setFlask(flask: EffectFlask) {
+    //     this.flask = flask;
+    // }
+
+    // nodePod: _NodePod | undefined;
+    // setNodePod(nodePod: _NodePod) {
+    //     this.nodePod = nodePod;
+    // }
+
     tasks: {
         [LifecycleHook.SETUP_COMPLETED]: Set<() => void> | undefined;
-        [LifecycleHook.BEFORE_MOUNT]: Set<() => void> | undefined;
-        [LifecycleHook.BEFORE_UNMOUNT]: Set<() => void> | undefined;
+        // [LifecycleHook.BEFORE_MOUNT]: Set<() => void> | undefined;
+        // [LifecycleHook.BEFORE_UNMOUNT]: Set<() => void> | undefined;
         [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
-        [LifecycleHook.MOUNTED]: Set<() => void> | undefined;
-        [LifecycleHook.UNMOUNTED]: Set<() => void> | undefined;
+        // [LifecycleHook.MOUNTED]: Set<() => void> | undefined;
+        // [LifecycleHook.UNMOUNTED]: Set<() => void> | undefined;
         [LifecycleHook.UPDATED]: Set<() => void> | undefined;
-        [LifecycleHook.ACTIVATED]: Set<() => void> | undefined;
-        [LifecycleHook.DEACTIVATED]: Set<() => void> | undefined;
+        // [LifecycleHook.ACTIVATED]: Set<() => void> | undefined;
+        // [LifecycleHook.BEFORE_DEACTIVATE]: Set<() => void> | undefined;
     } = {
             [LifecycleHook.SETUP_COMPLETED]: undefined,
-            [LifecycleHook.BEFORE_MOUNT]: undefined,
-            [LifecycleHook.MOUNTED]: undefined,
-            [LifecycleHook.BEFORE_UNMOUNT]: undefined,
+            // [LifecycleHook.BEFORE_MOUNT]: undefined,
+            // [LifecycleHook.MOUNTED]: undefined,
+            // [LifecycleHook.BEFORE_UNMOUNT]: undefined,
             [LifecycleHook.BEFORE_UPDATE]: undefined,
-            [LifecycleHook.UNMOUNTED]: undefined,
+            // [LifecycleHook.UNMOUNTED]: undefined,
             [LifecycleHook.UPDATED]: undefined,
-            [LifecycleHook.ACTIVATED]: undefined,
-            [LifecycleHook.DEACTIVATED]: undefined,
+            // [LifecycleHook.ACTIVATED]: undefined,
+            // [LifecycleHook.BEFORE_DEACTIVATE]: undefined,
         };
 
     hasUpdates: boolean = false;
 
     constructor(
         public parent: InternalComponent | null,
-        public preserve: boolean
+        // public preserve: boolean
     ) {
     }
 
@@ -94,43 +107,46 @@ export class InternalComponent {
         nodePod: _NodePod,
         fragment?: DocumentFragment,
     ) { //TODO: what if a component's root elements is conditional or a dynamic list??
-        const nodeEntities = this.nodeEntities;
+        const nodeEntities = this.initialNodeEntities!;
         if (!(parent instanceof Element))
             throw new Error("Parent cannot be a text node")
-        this.emit(LifecycleHook.BEFORE_MOUNT);
+        // this.emit(LifecycleHook.BEFORE_MOUNT);
         pushComponent(this)
-        const _nodePod = nodePod.appendDynamicPod().appendNodePod();
-        this.setNodePod(_nodePod)
+        const _nodePod = nodePod.appendDynamicPod().appendNodePod(); //TODO: prevent overly nested node pods
+        // this.setNodePod(_nodePod)
         for (const nodeEntity of nodeEntities) {
             setUpNodeEntity(parentComponent, parent, nodeEntity, _nodePod, fragment)
         }
         popComponent()
-        this.emit(LifecycleHook.MOUNTED);
-    }
-
-
-    unmount() {
-        this.emit(LifecycleHook.BEFORE_UNMOUNT);
-        const nodePod = this.nodePod;
-        nodePod?.forEachNode((node) => node.remove())
-        this.emit(LifecycleHook.UNMOUNTED);
+        // this.emit(LifecycleHook.MOUNTED);
     }
 }
 
 
-
-
-export const COMPONENT = Symbol('component')
-
-export function expose<T extends AnyObject>(component: T) {
-    const _component = getCurrentComponent<InternalComponent>();
-    if (_component === null) throw new Error("Cannot call `expose` outside of component setup")
-    const publicComponent = _component.component = {
-        [COMPONENT]: true as const,
-        ...component
-    };
-    return publicComponent;
+function unnestComponent(component: Component) {
+    const nodeEntities = component.initialNodeEntities!;
+    if (nodeEntities.length > 1 || nodeEntities.length === 0)
+        return component;
+    if (nodeEntities[0] instanceof InternalComponent) {
+        const component = nodeEntities[0]
+        if (!component.initialNodeEntities)
+            return component;
+        return unnestComponent(component)
+    }
+    return component
 }
+
+
+
+// export function expose<T extends AnyObject>(component: T) {
+//     const _component = getCurrentComponent<InternalComponent>();
+//     if (_component === null) throw new Error("Cannot call `expose` outside of component setup")
+//     const publicComponent = _component.component = {
+//         [COMPONENT]: true as const,
+//         ...component
+//     };
+//     return publicComponent;
+// }
 
 
 

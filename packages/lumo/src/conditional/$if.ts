@@ -3,7 +3,6 @@ import {  InternalComponent } from "../component/InternalComponent";
 import { _NodePod } from "../node/NodePod";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { watchForRender, initializeRender } from "../reactivity/watchForRender";
 import { onActivated, onDeactivated } from "../component/lifecycle";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { shallowClone } from "@rue/muonic";
@@ -81,43 +80,3 @@ function wrapToNormalize(renderConditional: RenderFunction) {
 
 // }
 
-
-export function watchForRenderAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: (newValue: any, oldValue: any) => void, options?: { once: true }) {
-    const component = getCurrentComponent();
-    if (!component) throw new Error("No component found")
-
-    const watcher = watchForRender(target, handler, options);
-    const oldValue = hasSignal(target) ? target() : shallowClone(target)
-    onDeactivated(() => {
-        watcher.stop()
-    })
-    if (hasSignal(target)) {
-        onActivated(() => {
-            handler(target(), oldValue) //FIX: Why am I calling this here? what about snapshots?
-            // pushComponent(component)
-            watchForRender(target, handler, options)
-            // popComponent()
-        })
-    }
-    else {
-        onActivated(() => {
-            handler(target, oldValue)
-            // pushComponent(component)
-            watchForRender(target, handler, options)
-            // popComponent()
-        })
-    }
-    return watcher
-}
-
-export function initializeRenderAndPreserve(handler: () => void) {
-    const watcher = initializeRender(handler);
-
-    onDeactivated(() => {
-        watcher.stop()
-    })
-
-    onActivated(() => {
-        initializeRender(handler)
-    })
-}

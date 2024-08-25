@@ -4,19 +4,18 @@ import { getCurrentItemAndIndex, isSettingUpList, ListRenderKit, onListUpdated }
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlotted } from "../component/makeComponent";
 import { getNodeRef, InternalNodeRef, NodeReferent, NodeSignal } from "./$Node";
-import { beforeUnmount } from "../component/lifecycle";
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 
 export function Fragment() {
-
+    // for jsx-runtime
 }
 
 export function jsx(tag: any, config: any, ...children: any[]) {
     return makeNode(tag, children, config || {})
 }
 
-export type NodeEntity = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveSignal<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
+export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveSignal<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
 
 export type RenderFunction<Params = unknown> = Params extends [] ?
     (...args: Params) => NodeEntity[] | NodeEntity :
@@ -48,7 +47,7 @@ type NodeSetup<T extends HTMLTag | ComponentSetup> = {
 }
 
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
-    T extends (props: infer P) => any ? P & NodeSetup<T> : never
+    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends ()=>any ? NodeSetup<T> : never
 
 
 export function makeNode(

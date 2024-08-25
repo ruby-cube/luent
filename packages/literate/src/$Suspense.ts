@@ -7,7 +7,6 @@ import { TypedKey, constAppState } from "@rue/lumo";
 import { getResponseTimer, RESPONSE_TIMER, ResponseTimer } from "./ResponseTimer.js";
 import { storeResolvedComponent } from "./PendingComponentMap.js";
 
-const timer = getResponseTimer();
 
 const PENDING_PROMISES_STACK = Symbol('pending promises stack') as TypedKey<Promise<any>[][]>
 
@@ -16,6 +15,7 @@ const getPendingPromisesStack = constAppState(PENDING_PROMISES_STACK, () => [])
 export function $Suspense(promiseValueOrConfig: PendConfig): SSRComponentSetup
 export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[], config: PendConfig): SSRComponentSetup
 export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | PendConfig, config?: PendConfig) {
+    const timer = getResponseTimer();
     const _config = config || promiseValueOrConfig as PendConfig
     const promise = config ? promiseValueOrConfig as Promise<any> : undefined;
     const { Pending, Placeholder } = _config;
@@ -27,7 +27,7 @@ export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | 
         const pendingPromises = promise ? [promise] : []
         pendingPromisesStack.push(pendingPromises);
 
-        const internalComponent = makeComponent(Pending, props.Slotted, props, undefined); // any nested $await calls will collect promises into the pendingPromises array
+        const internalComponent = makeComponent(Pending, props.Slot, props, undefined); // any nested $await calls will collect promises into the pendingPromises array
         if (pendingPromises.length === 0) return internalComponent.output;
         const allPromises = Promise.allSettled(pendingPromises);
         // if (__SSR__) trackPromise(allPromises)
@@ -47,7 +47,7 @@ export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | 
             function resolveWithPlaceholder() {
                 if (resolved) return;
                 resolved = true;
-                const placeholderComponent = makeComponent(_Placeholder, props.Slotted, props, undefined)
+                const placeholderComponent = makeComponent(_Placeholder, props.Slot, props, undefined)
                 storeResolvedComponent(pendingComponent, <SSRComponent><unknown>placeholderComponent)
                 resolve(placeholderComponent)
             }

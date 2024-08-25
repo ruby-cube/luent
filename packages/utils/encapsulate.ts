@@ -1,14 +1,52 @@
 import { AnyObject } from "@rue/types";
 
-export function encapsulate(target: AnyObject) {
+const ENCAPSULATED = Symbol('encapsulated')
+
+// class MyArray extends Array {
+//     constructor() {
+//         super()
+//     }
+
+//     mush() {
+
+//     }
+
+//     push(a: any) {
+//         return super.push(a)
+//     }
+// }
+
+// type EncapsulatedArray = Encapulated<MyArray, 'push'>
+
+type MutatingArrayMethods = 'push' | 'pop' | 'splice' | 'shift' | 'unshift' | 'fill'
+type MutatingSetMethods = 'add' | 'delete' | 'clear'
+type MutatingMapMethods = 'set' | 'delete' | 'clear'
+
+export type Encapulated<
+    T extends AnyObject,
+    OverriddenMethods extends string
+> = Readonly<Omit<T,
+    Exclude<
+        T extends Array<any> ? MutatingArrayMethods
+        : T extends Set<any> ? MutatingSetMethods
+        : T extends Map<any, any> ? MutatingMapMethods
+        : '',
+        OverriddenMethods
+    >
+>>
+
+
+
+export function encapsulate<T extends AnyObject>(target: T): T {
+    if (ENCAPSULATED in target) return target;
     if (!(target instanceof Object)) {
         if (__DEV__) console.warn('Invalid input')
         return target;
     }
 
-    return new Proxy(target, {
+    const encapsulatedObject = new Proxy(target, {
         get(target, key, receiver) {
-            const value = Reflect.get(target, key, receiver)
+            const value: any = Reflect.get(target, key, receiver)
             const DataStructure = getBaseDataStructure(target);
             if (inheritsFrom(DataStructure, target) && hasOwnPropertyOrMethod(target, key)) {
                 if (value instanceof Function) {
@@ -32,10 +70,13 @@ export function encapsulate(target: AnyObject) {
             Reflect.set(target, key, value, receiver)
             return true;
         }
-    }) as Omit<Array<any>, 'push'>  //TODO: only omit mutating methods that are not own methods
+    }) as T & { [ENCAPSULATED]: true }
+    // as Omit<AnyObject, 'push'>  //TODO: only omit mutating methods that are not own methods
+    encapsulatedObject[ENCAPSULATED] = true;
+    return encapsulatedObject
 }
 
-function getBaseDataStructure(target: Object){
+function getBaseDataStructure(target: Object) {
     if (target instanceof Array) return Array;
     if (target instanceof Object) return Object;
     throw new Error('Invalid Input')
@@ -50,13 +91,13 @@ function getBaseDataStructure(target: Object){
 
 //         case Array:
 //             return inheritsFromArray(target);
-    
+
 //         default:
 //             throw new Error('Invalid Input')
 //     }
 // }
 
-export function inheritsFrom(DataStructure: Function, entity: any){
+export function inheritsFrom(DataStructure: Function, entity: any) {
     return entity instanceof DataStructure && Object.getPrototypeOf(entity).constructor !== DataStructure
 }
 
@@ -91,20 +132,20 @@ const mutatingMapOps = {
 }
 
 
-function isMutatingMethod(DataStructure: typeof Array | typeof Object | typeof Set | typeof Map, key: PropertyKey){
-       switch (DataStructure) {
+function isMutatingMethod(DataStructure: typeof Array | typeof Object | typeof Set | typeof Map, key: PropertyKey) {
+    switch (DataStructure) {
         case Object:
             return false;
-            
+
         case Array:
             return isMutatingArrayMethod(key);
 
         case Set:
             return isMutatingSetMethod(key);
-            
+
         case Map:
             return isMutatingMapMethod(key);
-    
+
         default:
             throw new Error('Invalid Input')
     }

@@ -7,14 +7,14 @@ type TaskQueue = Set<() => void>
 
 export enum LifecycleHook {
     SETUP_COMPLETED = 'sc',
-    BEFORE_MOUNT = 'bm',
-    MOUNTED = 'm',
+    // BEFORE_MOUNT = 'bm',
+    // MOUNTED = 'm',
     BEFORE_UPDATE = 'bu',
     UPDATED = 'u',
-    BEFORE_UNMOUNT = 'bum',
-    UNMOUNTED = 'um',
-    DEACTIVATED = 'da',
-    ACTIVATED = 'a',
+    // BEFORE_UNMOUNT = 'bum',
+    // UNMOUNTED = 'um',
+    // BEFORE_DEACTIVATE = 'da',
+    // ACTIVATED = 'a',
     // RENDER_TRIGGERED = 'rtg',
     // RENDER_TRACKED = 'rtc',
     // ERROR_CAPTURED = 'ec',
@@ -49,7 +49,7 @@ function createLifecycleHook(name: Exclude<LifecycleHook, LifecycleHook.BEFORE_U
     }
 }
 
-function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDATED | LifecycleHook.ACTIVATED | LifecycleHook.DEACTIVATED) {
+function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDATED) {
     return function on(handler: () => void, options?: ListenerOptions, _component?: InternalComponent) {
         const component = _component || getCurrentComponent<InternalComponent>();
         if (!component) throw new Error("Lifecycle hooks cannot be called outside of component setup");
@@ -67,22 +67,24 @@ function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDA
 }
 
 export const onSetupCompleted = createLifecycleHook(LifecycleHook.SETUP_COMPLETED)
-export const beforeMount = createLifecycleHook(LifecycleHook.BEFORE_MOUNT) //TODO: Rename premount to something else ... it has ambiguous meaning--it could mean mount ahead of time
-export const onMounted = createLifecycleHook(LifecycleHook.MOUNTED)
+// export const beforeMount = createLifecycleHook(LifecycleHook.BEFORE_MOUNT) //TODO: Rename premount to something else ... it has ambiguous meaning--it could mean mount ahead of time
+// export const onMounted = createLifecycleHook(LifecycleHook.MOUNTED)
 export const beforeUpdate = createUpdateHook(LifecycleHook.BEFORE_UPDATE)
 export const onUpdated = createUpdateHook(LifecycleHook.UPDATED)
-export const onActivated = createUpdateHook(LifecycleHook.ACTIVATED)
-export const onDeactivated = createUpdateHook(LifecycleHook.DEACTIVATED)
-export const beforeUnmount = createLifecycleHook(LifecycleHook.BEFORE_UNMOUNT)
-export const onUnmounted = createLifecycleHook(LifecycleHook.UNMOUNTED)
+
+// export const onActivated = createUpdateHook(LifecycleHook.ACTIVATED)
+// export const onDeactivated = createUpdateHook(LifecycleHook.BEFORE_DEACTIVATE)
+// export const beforeUnmount = createLifecycleHook(LifecycleHook.BEFORE_UNMOUNT)
+// export const onUnmounted = createLifecycleHook(LifecycleHook.UNMOUNTED)
 
 
 
 export default {
-    beforeMount,
-    beforeUnmount,
+    onSetupCompleted,
+    // beforeMount,
+    // beforeUnmount,
     beforeUpdate,
-    onMounted,
-    onUnmounted,
+    // onMounted,
+    // onUnmounted,
     onUpdated,
 }

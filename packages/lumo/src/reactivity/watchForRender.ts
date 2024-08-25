@@ -1,20 +1,33 @@
-import { beforeRender, ChangeHandler, getDependencies, initializeEffect, onRendered, ReactiveSignal, usePhaseQueues, watch } from "@rue/muonic";
+import { beforeRender, ChangeHandler, getDependencies, hasSignal, initializeEffect as _initializeEffect, onRendered, ReactiveSignal, shallowClone, usePhaseQueues, watch as _watch, WatchOptions } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
 import { getWithoutTracking, ReactiveModel } from "@rue/muonic";
-import { getCurrentComponent } from "../component/componentStack";
+import { getCurrentComponent, popComponent, pushComponent } from "../component/componentStack";
+import { getActiveDynamicNode } from "../dynamic/DynamicNode";
+import { ActiveListener } from "@rue/flask";
+import { beforeDeactivate, onActivated } from "../dynamic/lifecycle";
 
 
 export function initializeRender(effect: () => void) {
     const component = getCurrentComponent<InternalComponent>();
-    if (!component) throw Error("initializeRender must be called within component setup")
+    if (!component) throw new Error("initializeRender must be called within component setup")
 
+    const dynamicNode = getActiveDynamicNode()
+    if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
+    if (dynamicNode.preserve)
+        return _initializeAndPreserve(effect, true)
+
+    return _initializeRender(effect)
+}
+
+function _initializeRender(effect: () => void) {
+    const component = getCurrentComponent<InternalComponent>()!;
     const _handler = () => {
         effect();
         setUpUpdateHooks(component)
     }
-    return initializeEffect(_handler, {
+    return _initializeEffect(_handler, {
         phase: 'render'
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
@@ -23,12 +36,22 @@ export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T ex
     const component = getCurrentComponent<InternalComponent>();
     if (!component) throw Error("watchForRender must be called within component setup")
 
+    const dynamicNode = getActiveDynamicNode()
+    if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
 
+    if (dynamicNode.preserve)
+        return watchAndPreserve(target, handler, { phase: 'render', ...options || {} })
+
+    return _watchForRender(target, handler, options)
+}
+
+function _watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: { once?: true, eager?: true }) {
+    const component = getCurrentComponent<InternalComponent>()!;
     const _handler = (newValue: any, oldValue: any) => {
         handler(newValue, oldValue);
         setUpUpdateHooks(component)
     }
-    return watch(target, _handler, {
+    return _watch(target, _handler, {
         once: options?.once,
         eager: options?.eager,
         phase: 'render',
@@ -50,6 +73,68 @@ function setUpUpdateHooks(component: InternalComponent) {
 }
 
 
+
+function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveListener {
+    const initializeFn = renderPhase ? _initializeRender : _initializeEffect;
+    const watcher = initializeFn(effect)
+
+    beforeDeactivate(() => {
+        watcher.stop()
+    })
+
+    onActivated(() => {
+        initializeFn(effect)
+    })
+
+    return watcher;
+}
+
+export function initializeEffect(effect: () => void) {
+    const dynamicNode = getActiveDynamicNode()
+    if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
+
+    if (dynamicNode.preserve)
+        return _initializeAndPreserve(effect)
+    return _initializeEffect(effect)
+}
+
+export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
+    const dynamicNode = getActiveDynamicNode()
+    if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
+
+    if (dynamicNode.preserve)
+        return watchAndPreserve(target, handler, options)
+    return _watch(target, handler, options)
+}
+
+function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
+    const component = getCurrentComponent();
+    if (!component) throw new Error("No component found")
+    const watchFn = options?.phase === 'render' ? _watchForRender : _watch
+
+    const watcher = watchFn(target, handler, options);
+    const oldValue = hasSignal(target) ? target() : shallowClone(target)
+    beforeDeactivate(() => {
+        watcher.stop()
+    })
+    if (hasSignal(target)) {
+        onActivated(() => {
+            handler(target(), oldValue) //FIX: Why am I calling this here? what about snapshots?
+            pushComponent(component)
+            watchFn(target, handler, options)
+            popComponent()
+        })
+    }
+    else {
+        onActivated(() => {
+            handler(target, oldValue)
+            pushComponent(component)
+            watchFn(target, handler, options)
+            popComponent()
+        })
+    }
+    return watcher
+}
 
 // export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: { once?: true }) {
 //     const component = getCurrentComponent();

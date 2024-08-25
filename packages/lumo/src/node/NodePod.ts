@@ -42,14 +42,14 @@ export type NodePod = ReadonlyArray<DOMNode | DynamicNodePod>
 export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
     index?: number;
     pod?: _DynamicNodePod;
-    componentsToUnmount: InternalComponent[] = [];
+    // componentsToUnmount: InternalComponent[] = [];
     refs: NodeSignal[] = [];
 
-    flask?: EffectFlask // for dynamic lists to dispose of effects
+    // flask?: EffectFlask // for dynamic lists to dispose of effects
 
-    setFlask(flask: EffectFlask) {
-        this.flask = flask;
-    }
+    // setFlask(flask: EffectFlask) {
+    //     this.flask = flask;
+    // }
 
     constructor(pod?: _DynamicNodePod, index?: number) {
         super();
@@ -124,7 +124,6 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
             }
         }
     }
-
 }
 
 

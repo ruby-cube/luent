@@ -3,18 +3,19 @@ import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { DynamicIndices, ListRenderKit, popList, pushList, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
 import { setUpNodeEntity } from "../node/setUpNodeEntity";
-import { watchForRenderAndPreserve } from "../conditional/$if";
 import { watchForRender } from "../reactivity/watchForRender";
 import { AnyObject } from "@rue/types";
 import { diff, InsertAndMoveKit } from "./diff";
-import { LifecycleHook } from "../component/lifecycle";
 import { getNodeRef, InternalNodeRef } from "../node/$Node";
 import { normalizeToArray } from "@rue/utils";
-import { emitHookBatch, removeDOMNodes } from "../conditional/setUpConditionalMount";
-import { collectEffects} from "@rue/flask";
+import { collectEffects } from "@rue/flask";
 import { popComponent, pushComponent } from "../component/componentStack";
+import { DynamicNode, getActiveDynamicNode } from "../dynamic/DynamicNode";
+import { LifecycleHook as DynamicLifecycleHook } from "../dynamic/lifecycle";
+import { LifecycleHook } from "../component/lifecycle";
+import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 
-
+const dynamicNodeMap: WeakMap<_NodePod, DynamicNode> = new WeakMap() // map node pod to dynamic node for easy retrieval. We don't want to have to rearrange the dynamic nodes array with every list change
 
 export function setUpNodeList(
     component: InternalComponent,
@@ -24,7 +25,7 @@ export function setUpNodeList(
     fragment?: DocumentFragment,
     componentsToUnmount?: InternalComponent[],
 ) {
-    const { data, initialNodeEntities, renderItem, indices, idKey, flasks } = renderKit;
+    const { data, initialNodeEntities, renderItem, indices, idKey, dynamicNodes } = renderKit;
     const isDynamic = isReactiveModel(data) || hasSignal(data);
     const dynamicPod = isDynamic ? nodePod.appendDynamicPod() : undefined;
 
@@ -33,12 +34,15 @@ export function setUpNodeList(
         const nodeEntities = initialNodeEntities[i];
         nodePod = isDynamic ? dynamicPod!.appendNodePod() : nodePod;
         if (isDynamic) {
-            const flask = flasks[i];
-            nodePod.setFlask(flask)
+            const dynamicNode = dynamicNodes[i];
+            const flask = dynamicNode.flask!;
             flask.reactivate()
             for (const nodeEntity of nodeEntities) {
                 setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
             }
+            dynamicNode.emit(DynamicLifecycleHook.MOUNTED)
+            dynamicNode.setNodePod(nodePod)
+            dynamicNodeMap.set(nodePod, dynamicNode)
             flask.deactivate()
         }
         else {
@@ -52,11 +56,10 @@ export function setUpNodeList(
 
     if (isDynamic) {
         const dynamicIndices = new DynamicIndices(indices)
-        const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender //TODO: Not sure if I need this yet
 
         // set up watcher for updates
         // const updateCycle = getCurrentUpdateCycle();
-        _watchForRender(data, (newValue: any[], oldValue: any[]) => {
+        watchForRender(data, (newValue: any[], oldValue: any[]) => {
             // if (updateCycle === getCurrentUpdateCycle()) {
             //     console.warn("prevented same update cycle")
             //     return;
@@ -82,21 +85,17 @@ export function removeListItemNodes(dynamicList: _DynamicNodePod, indicesToRemov
     // remove from DOM
     for (const index of indicesToRemove) {
         const nodePod = dynamicList[index];
-        const components = nodePod.componentsToUnmount;
-        emitHookBatch(LifecycleHook.BEFORE_UNMOUNT, components!)
-        removeDOMNodes(nodePod)
-        removeNodesFromRef(nodePod)
-        nodePod.flask!.dispose();
-        emitHookBatch(LifecycleHook.UNMOUNTED, components!)
+        const dynamicNode = dynamicNodeMap.get(nodePod)
+        dynamicNode?.unmount()
     }
 }
 
-function removeNodesFromRef(nodePod: _NodePod) {
-    nodePod.forEachNode((node, index) => {
-        const ref = getNodeRef(node)
-        if (ref) ref.removeNode(index!) //TODO: This
-    })
-}
+// function removeNodesFromRef(nodePod: _NodePod) {
+//     nodePod.forEachNode((node, index) => {
+//         const ref = getNodeRef(node)
+//         if (ref) ref.removeNode(index!) //TODO: This
+//     })
+// }
 
 
 type Index = number
@@ -156,17 +155,17 @@ export function insertAndMoveListItemNodes(
             setCurrentItemAndIndex(item, $index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
-            let nodeEntities;
-            collectEffects((flask, outerFlask) => {
+
+            const dynamicNode = makeDynamicNode(function renderNewListItem() {
                 pushList(listRenderKit)
-                nodeEntities = normalizeToArray(renderItem(item, $index));
+                const nodeEntities = normalizeToArray(renderItem(item, $index));
                 popList();
                 for (const nodeEntity of nodeEntities!) {
-                    setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
+                    setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment)
                 }
-                nodePod.setFlask(flask);
-                outerFlask?.onDisposal(flask.dispose)
-            }, insertAndMoveListItemNodes.name)
+            }, nodePod)
+            dynamicNode.emit(DynamicLifecycleHook.MOUNTED)
+            dynamicNodeMap.set(nodePod, dynamicNode)
         }
         else if (hasMoved(uItem)) {
             // move node to fragment (DOM will auto-remove node from DOM)

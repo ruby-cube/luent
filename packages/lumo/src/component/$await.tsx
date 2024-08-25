@@ -49,7 +49,7 @@ export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | 
         const pendingPromises = promise ? [promise] : []
         pendingPromisesStack.push(pendingPromises);
 
-        const internalComponent = mO(Pending, props.Slotted, props); // any nested $await calls will collect promises into the pendingPromises array
+        const internalComponent = mO(Pending, props.Slot, props); // any nested $await calls will collect promises into the pendingPromises array
         const allPromises = Promise.all(pendingPromises);
         pendingPromisesStack.pop();
         allPromises
@@ -70,7 +70,7 @@ export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | 
             const internalComponent = collectPromises(props)
             //QUESTION: Do I have to set up an entire component? or can I just pass in the props? if a ref is used, you need to set up component
             return [
-                $if($pending, 'create', () => mO(Placeholder, props.Slotted, props)),
+                $if($pending, 'create', () => mO(Placeholder, props.Slot, props)),
                 $elseIf($error, () => mO(ErrorView, undefined, { ...props, error: $error() })),
                 $else(() => internalComponent)
             ]
@@ -80,7 +80,7 @@ export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | 
         return function PendingComponent(props: AnyObject) {
             const internalComponent = collectPromises(props)
             return [
-                $if($pending, 'create', () => mO(Placeholder, props.Slotted, props)),
+                $if($pending, 'create', () => mO(Placeholder, props.Slot, props)),
                 $else(() => internalComponent)
             ]
         }

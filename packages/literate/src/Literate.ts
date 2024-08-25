@@ -2,19 +2,28 @@ import { EffectFlask } from "@rue/flask";
 import { PublicComponent } from "@rue/lumo";
 import { SSRComponent } from "./SSRComponent.js";
 import { getResolvedComponent, isResolved } from "./PendingComponentMap.js";
+import { hasSignal, Signal } from "@rue/muonic";
 
 type AnyObject = { [key: string | symbol | number]: any }
 // export type SSRComponent<T extends AnyObject = AnyObject> = { render: () => string } & T;
 
 // export type MaybePromise<T extends AnyObject = AnyObject> = T | Promise<T>
 
-export function fromEntries<T>(list: T[], render: (item: T, index: number) => string) {
-    let result = ''
-    for (let i = 0; i < list.length; i++) {
-        const item = list[i];
-        result += render(item, i)
+export function fromEntries<T>(list: T[] | Signal<T[]>, render: (item: T, index: number) => string) {
+    if (hasSignal(list)) {
+        return () => buildList(list)
     }
-    return result;
+
+    function buildList(list: T[] | Signal<T[]>) {
+        const _list = hasSignal(list) ? list() : list
+        let result = ''
+        for (let i = 0; i < _list.length; i++) {
+            const item = _list[i];
+            result += render(item, i)
+        }
+        return result;
+    }
+    return buildList(list)
 }
 
 
@@ -55,7 +64,7 @@ export class Literate {
 type PromiseValue = Promise<SSRComponent> | { strings: string[], values: PromiseValue[] }
 
 export function buildHTML(templateLiteral: Literate) {
-    const {strings, values} = templateLiteral
+    const { strings, values } = templateLiteral
     const resultStrings: string[] = [];
     const resultValues: PromiseValue[] = [];
 

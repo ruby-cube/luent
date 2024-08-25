@@ -1,6 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { onSetupCompleted } from "./lifecycle";
 import { getCurrentComponent } from "./componentStack";
+import { encapsulate } from "@rue/utils";
 
 type Component = AnyObject
 
@@ -124,14 +125,18 @@ export function _fromContext<T, OPT extends '?' | (() => T) | undefined>(key: Ty
             }
             return handleResourceNotFound(key, initializeOrOptional, root)
         }
-        return provider.root.entries.get(key)
+        const value = provider.root.entries.get(key)
+        return __DEV__ && value instanceof Object ? encapsulate(value) : value;
     }
 
     // climb provider tree
     let parent = provider.component === component ? provider.parent : provider;
     while (parent !== null) {
         const entries = parent.entries
-        if (entries.has(key)) return entries.get(key);
+        if (entries.has(key)) {
+            const value = entries.get(key);
+            return  __DEV__ && value instanceof Object ? encapsulate(value) : value;
+        }
         parent = parent.parent;
     }
     try {
@@ -209,7 +214,8 @@ export function provideGlobal<T>(key: TypedKey<T>, value: T) {
 export function fromGlobal<T, OPT extends '?' | undefined = undefined>(key: TypedKey<T>, optional?: OPT): OPT extends '?' ? T | undefined : T {
     if (!optional && !globalEntries.has(key))
         throw new Error(`A value for '${key.toString()}' has not been provided globally`)
-    return globalEntries.get(key)
+    const value = globalEntries.get(key)
+    return  __DEV__ && value instanceof Object ? encapsulate(value) : value;
 }
 
 

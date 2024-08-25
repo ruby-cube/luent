@@ -14,35 +14,35 @@ import { getCurrentComponent } from "../../lumo/src/component/componentStack.js"
 // }
 
 
-export function mO<T extends SSRComponentSetup>( //TODO: Type should be SSRComponentSetupWithSlot
+export function mO<T extends SSRComponentSetup<any>>( //TODO: Type should be SSRComponentSetupWithSlot
     Component: T,
-    slotted: InferSlotted<T>,
+    Slot: InferSlotted<T>,
+    config?: ComponentConfig<T>
+): SSRComponent
+export function mO<T extends SSRComponentSetup<any>>(
+    Component: T,
+    Slot?: undefined,
     config?: ComponentConfig<T>
 ): SSRComponent
 export function mO<T extends SSRComponentSetup>(
     Component: T,
-    slotted?: undefined,
-    config?: ComponentConfig<T>
-): SSRComponent
-export function mO<T extends SSRComponentSetup>(
-    Component: T,
-    slotted?: InferSlotted<T> | undefined,
+    Slot?: InferSlotted<T> | undefined,
     config?: ComponentConfig<T>
 ): SSRComponent {
     const [_, $index] = getCurrentItemAndIndex()
-    return makeComponent(Component, slotted, config, $index)
+    return makeComponent(Component, Slot, config, $index)
 }
 
 export function makeComponent(
     Component: SSRComponentSetup,
-    slotted: InferSlotted | undefined,
+    Slot: InferSlotted | undefined,
     config: ComponentConfig,
     $index: Signal<number> | undefined
 ): SSRComponent {
     const parent = getCurrentComponent<SSRComponent>()
     const component = new SSRComponent(parent);
     pushComponent(component)
-    runComponentSetup(Component, component, slotted, config, $index);
+    runComponentSetup(Component, component, Slot, config, $index);
     component.emit(LifecycleHook.SETUP_COMPLETED)
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
 
@@ -51,15 +51,15 @@ export function makeComponent(
 
 
 export function runComponentSetup(
-    Component: SSRComponentSetup,
+    Component: SSRComponentSetup<{}>,
     component: SSRComponent,
-    slotted: InferSlotted | undefined,
+    Slot: InferSlotted | undefined,
     config: ComponentConfig,
     $index: Signal<number> | undefined
 ) {
     collectEffects((flask, outerFlask) => {
         component.setFlask(flask);
-        const output = Component({ ...config, slotted })
+        const output = Component({ ...config, Slot })
         try {
             validateOutput(output);
             initializeComponent(component, output, config.ref, $index)
@@ -86,8 +86,8 @@ function initializeComponent(
         else initializeRef(ref, publicComponent)
     }
 
-    const flask = component.flask!;
-    flask.outer?.onDisposal(flask.dispose) // no outer flask means it's the root component
+    // const flask = component.flask!;
+    // flask.outer?.onDisposal(flask.dispose) // no outer flask means it's the root component
 }
 
 function validateOutput(output: any) {

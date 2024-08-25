@@ -1,9 +1,7 @@
 import { getWithoutTracking, hasSignal, ReactiveSignal } from "@rue/muonic";
 import { _NodePod } from "./NodePod";
-import { watchForRenderAndPreserve } from "../conditional/$if";
 import { watchForRender } from "../reactivity/watchForRender";
-import { getCurrentComponent } from "../component/componentStack";
-import { InternalComponent } from "../component/InternalComponent";
+import { getActiveDynamicNode } from "../dynamic/DynamicNode";
 
 export function mountTextNode(parent: Element, text: ReactiveSignal | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
 
@@ -21,10 +19,7 @@ export function mountTextNode(parent: Element, text: ReactiveSignal | any, nodeP
 }
 
 function keepTextNodeUpdated($text: ReactiveSignal<any>, textNode: CharacterData) {
-    const component = getCurrentComponent<InternalComponent>();
-    if (!component) throw new Error("No component found")
-    const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
-    _watchForRender($text, (newValue: any) => {
+    watchForRender($text, (newValue: any) => {
         textNode.data = toString(newValue);
     });
 }

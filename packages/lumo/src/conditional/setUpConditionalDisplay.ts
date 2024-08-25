@@ -1,14 +1,13 @@
 import { areShallowEqualArrays, getWithoutTracking, isShallowEqual, ReactiveSignal } from "@rue/muonic"
-import { watchForRenderAndPreserve } from "./$if"
-import { DOMNode, InternalComponent, popComponent, pushComponent } from "../component/InternalComponent"
+import { DOMNode, InternalComponent} from "../component/InternalComponent"
 import { _DynamicNodePod, _NodePod } from "../node/NodePod"
 import { watchForRender } from "../reactivity/watchForRender"
 import { LifecycleHook } from "../component/lifecycle"
 import { NodeEntity } from "../node/makeNode"
 import { mountConditional } from "./setUpConditionalMount"
 import { setUpNodeEntity } from "../node/setUpNodeEntity"
-import { getCurrentUpdateCycle } from "@rue/muonic/UpdateCycle"
 import { ConditionalRenderSeries } from "./ConditionalRenderSeries"
+import { popComponent, pushComponent } from "../component/componentStack"
 
 export function setUpConditionalDisplay(
     component: InternalComponent,
@@ -31,13 +30,12 @@ export function setUpConditionalDisplay(
     // append to dom and node pod
     for (const nodeEntity of initialNodeEntities) {
         const nodePod = dynamicPod[activeIndex];
-        setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, nodePod.componentsToUnmount)
+        setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment)
     }
 
     // set up watcher for updates
-    const _watchForRender = component.preserve ? watchForRenderAndPreserve : watchForRender
 
-    _watchForRender($conditions, updateConditional, { once: true })
+    watchForRender($conditions, updateConditional, { once: true })
 
     let prevIndex = activeIndex;
 
@@ -53,7 +51,7 @@ export function setUpConditionalDisplay(
         showConditionalNodes(component, parent, dynamicPod, activeIndex, nodeEntities)
         component.emit(LifecycleHook.UPDATED)
 
-        _watchForRender($conditions, updateConditional, { once: true })
+        watchForRender($conditions, updateConditional, { once: true })
         popComponent()
 
         prevIndex = activeIndex;
