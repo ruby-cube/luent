@@ -43,8 +43,10 @@ export function createApp(App: ComponentSetup) {
             appRoot = root;
 
             // (3) attach developer's root component to root element
+            pushDynamicNode(dynamicNode)
             component.mount(parentComponent, root, nodePod) //TODO: if this is a remount, how would it be different than a first mount
             dynamicNode.emit(DynamicLifecycleHook.MOUNTED)
+            popDynamicNode()
 
             return component;
         },

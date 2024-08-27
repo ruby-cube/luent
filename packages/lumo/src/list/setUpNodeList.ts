@@ -10,7 +10,7 @@ import { getNodeRef, InternalNodeRef } from "../node/$Node";
 import { normalizeToArray } from "@rue/utils";
 import { collectEffects } from "@rue/flask";
 import { popComponent, pushComponent } from "../component/componentStack";
-import { DynamicNode, getActiveDynamicNode } from "../dynamic/DynamicNode";
+import { DynamicNode, getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/DynamicNode";
 import { LifecycleHook as DynamicLifecycleHook } from "../dynamic/lifecycle";
 import { LifecycleHook } from "../component/lifecycle";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
@@ -35,15 +35,17 @@ export function setUpNodeList(
         nodePod = isDynamic ? dynamicPod!.appendNodePod() : nodePod;
         if (isDynamic) {
             const dynamicNode = dynamicNodes[i];
-            const flask = dynamicNode.flask!;
-            flask.reactivate()
+            pushDynamicNode(dynamicNode)
+            // const flask = dynamicNode.flask!;
+            // flask.reactivate()
             for (const nodeEntity of nodeEntities) {
                 setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
             }
             dynamicNode.emit(DynamicLifecycleHook.MOUNTED)
             dynamicNode.setNodePod(nodePod)
             dynamicNodeMap.set(nodePod, dynamicNode)
-            flask.deactivate()
+            // flask.deactivate()
+            popDynamicNode()
         }
         else {
             for (const nodeEntity of nodeEntities) {
@@ -59,6 +61,7 @@ export function setUpNodeList(
 
         // set up watcher for updates
         // const updateCycle = getCurrentUpdateCycle();
+        const parentDynamicNode = getActiveDynamicNode()
         watchForRender(data, (newValue: any[], oldValue: any[]) => {
             // if (updateCycle === getCurrentUpdateCycle()) {
             //     console.warn("prevented same update cycle")
@@ -68,12 +71,14 @@ export function setUpNodeList(
             if (noChange) return;
             if (dynamicPod!.length !== oldValue.length) throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)
             renderKit.runUpdate(() => {
+                pushDynamicNode(parentDynamicNode!)
                 pushComponent(component)
                 component.emit(LifecycleHook.BEFORE_UPDATE) //FIX: this should be called in before render and onRendered hooks
                 removeListItemNodes(dynamicPod!, indicesToRemove!);
                 insertAndMoveListItemNodes(component, renderKit, insertAndMoveKit!, dynamicPod!, parent, renderItem, dynamicIndices)
                 component.emit(LifecycleHook.UPDATED)
                 popComponent()
+                popDynamicNode()
             })
         })
     }

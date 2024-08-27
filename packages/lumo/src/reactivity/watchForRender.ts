@@ -6,7 +6,7 @@ import { getWithoutTracking, ReactiveModel } from "@rue/muonic";
 import { getCurrentComponent, popComponent, pushComponent } from "../component/componentStack";
 import { getActiveDynamicNode } from "../dynamic/DynamicNode";
 import { ActiveListener } from "@rue/flask";
-import { beforeDeactivate, onActivated } from "../dynamic/lifecycle";
+import { beforeUnmount, onMounted } from "../dynamic/lifecycle";
 
 
 export function initializeRender(effect: () => void) {
@@ -76,14 +76,14 @@ function setUpUpdateHooks(component: InternalComponent) {
 
 function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveListener {
     const initializeFn = renderPhase ? _initializeRender : _initializeEffect;
-    const watcher = initializeFn(effect)
+    const watcher = { stop: () => { } }
 
-    beforeDeactivate(() => {
-        watcher.stop()
+    onMounted(() => {
+        watcher.stop = initializeFn(effect).stop
     })
 
-    onActivated(() => {
-        initializeFn(effect)
+    beforeUnmount(() => {
+        watcher.stop()
     })
 
     return watcher;
@@ -112,27 +112,28 @@ function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends
     if (!component) throw new Error("No component found")
     const watchFn = options?.phase === 'render' ? _watchForRender : _watch
 
-    const watcher = watchFn(target, handler, options);
+    const watcher = {stop: ()=>{}}
+    // watchFn(target, handler, options); //FIX: Because onMounted runs for the first mount and subsequent mounts, maybe I don't need this?
     const oldValue = hasSignal(target) ? target() : shallowClone(target)
-    beforeDeactivate(() => {
-        watcher.stop()
-    })
     if (hasSignal(target)) {
-        onActivated(() => {
+        onMounted(() => {
             handler(target(), oldValue) //FIX: Why am I calling this here? what about snapshots?
             pushComponent(component)
-            watchFn(target, handler, options)
+            watcher.stop = watchFn(target, handler, options).stop
             popComponent()
         })
     }
     else {
-        onActivated(() => {
+        onMounted(() => {
             handler(target, oldValue)
             pushComponent(component)
-            watchFn(target, handler, options)
+            watcher.stop = watchFn(target, handler, options).stop
             popComponent()
         })
     }
+    beforeUnmount(() => {
+        watcher.stop()
+    })
     return watcher
 }
 

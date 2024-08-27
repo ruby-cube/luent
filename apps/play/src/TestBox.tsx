@@ -1,4 +1,4 @@
-import { $Node } from "@rue/lumo";
+import { $Node, mx } from "@rue/lumo";
 import {  $, initializeEffect, DeepReactive$, $Signal } from "@rue/muonic";
 
 
@@ -40,7 +40,7 @@ export function TestBox() {
     // const $positionX = $(() => box$.position.x)
 
 
-    return (
+    return mx(
         <>
             <div ref={$div} style={[
                 'background-color: lightgray',

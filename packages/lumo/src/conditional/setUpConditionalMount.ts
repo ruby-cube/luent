@@ -10,6 +10,7 @@ import { ConditionalRenderSeries } from "./ConditionalRenderSeries";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { popComponent, pushComponent } from "../component/componentStack";
 import { LifecycleHook as DynamicLifecycleHook } from "../dynamic/lifecycle";
+import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/DynamicNode";
 
 export function setUpConditionalMount(
     component: InternalComponent,
@@ -34,11 +35,13 @@ export function setUpConditionalMount(
 
     // set up watcher for updates
     watchForRender($conditions, updateConditional, { once: true })
+    const parentDynamicNode = getActiveDynamicNode();
 
     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
         console.log("[ updating conditional ]")
         if (areShallowEqualArrays(newValue, oldValue)) return;
         pushComponent(component)
+        pushDynamicNode(parentDynamicNode!)
         // evaluate conditions
         const { $conditions, activeIndex } = series.evaluateConditions();
 
@@ -59,6 +62,7 @@ export function setUpConditionalMount(
         // set up for next update
         watchForRender($conditions, updateConditional, { once: true })
         popComponent()
+        popDynamicNode()
     }
 
 }

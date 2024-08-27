@@ -1,4 +1,4 @@
-import { $elseIf, $if, $Node, expose, onMounted } from "@rue/lumo";
+import { $elseIf, $if, $Node } from "@rue/lumo";
 import { Signal, $Signal } from "@rue/muonic";
 
 

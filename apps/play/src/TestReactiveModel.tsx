@@ -1,4 +1,4 @@
-import { $else, $elseIf, $if, $Node, COMPONENT, ComponentSetup, expose, forEachIn, NodeEntity, onMounted, preventDefault, teleportTo, useEventListener } from "@rue/lumo";
+import { $else, $elseIf, $if, $Node, COMPONENT, ComponentSetup, expose, forEachIn, mx, NodeEntity, onMounted, preventDefault, teleportTo, useEventListener } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic";
 import { $, DeepReactive$, Reactive$ } from "@rue/muonic";
@@ -69,10 +69,10 @@ export function List() {
     const $itemDiv = $Node<'div'>()
 
 
-    return (
+    return mx(
         <div>
             <>
-                {$if($(() => list$.length === 0), 'show', () => (
+                {$if($(() => list$.length === 0), 'create', () => (
                     <div
 
                         onclick={() => insertItem(0)}

@@ -82,12 +82,14 @@ export function getActiveDynamicNode() {
     return activeDynamicNode;
 }
 
-export function pushDynamicNode(component: DynamicNode) {
+export function pushDynamicNode(dynamicNode: DynamicNode) {
     parent = activeDynamicNode;
-    activeDynamicNode = component;
+    activeDynamicNode = dynamicNode;
+    dynamicNode.flask?.reactivate()
 }
 
 export function popDynamicNode() {
+    activeDynamicNode?.flask?.deactivate();
     activeDynamicNode = parent;
     parent = parent?.parent || null;
 }
