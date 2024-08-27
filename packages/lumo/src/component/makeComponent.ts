@@ -1,22 +1,18 @@
-import { AnyObject, MaybePromise } from "@rue/types";
 import { PublicComponent, ComponentSetup, InternalComponent, COMPONENT, Component } from "./InternalComponent";
-import { collectEffects, } from "@rue/flask/flask";
 import { InternalNodeRef, NodeSignal, getNodeRef, get$Node } from "../node/$Node";
 import { ComponentConfig, EventsConfig, initializeListRef, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { DerivedSignal, Signal } from "@rue/muonic";
-import { preserveAllRequested } from "../conditional/$if";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentItemAndIndex } from "../list/forEachIn";
 import { getCurrentComponent, popComponent, pushComponent } from "./componentStack";
-import { DynamicNode } from "../dynamic/DynamicNode";
 import { LifecycleHook } from "./lifecycle";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
 export type ComponentOptions = { preserve?: true }
 
-export type InferSlotted<T extends ComponentSetupWithSlot = ComponentSetupWithSlot> =
+export type InferSlot<T extends ComponentSetup = ComponentSetup> =
     T extends (props: infer P) => any ?
     P extends { Slot: infer S } ?
     S
@@ -27,32 +23,32 @@ export type PropsWithSlot = {
     Slot: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
 }
 
-type ComponentSetupWithSlot<P extends PropsWithSlot = PropsWithSlot> =
+export type ComponentSetupWithSlot<P extends PropsWithSlot = PropsWithSlot> =
     (props: P) => NodeEntity[] | NodeEntity
 
 
-export function mO<T extends ComponentSetupWithSlot>(
-    Component: T,
-    Slot: InferSlotted<T>,
-    config?: ComponentConfig<T>
-): InternalComponent
+// export function mO<T extends ComponentSetupWithSlot>(
+//     Component: T,
+//     Slot: InferSlot<T>,
+//     config?: ComponentConfig<T>
+// ): InternalComponent
+// export function mO<T extends ComponentSetup>(
+//     Component: T,
+//     Slot?: undefined,
+//     config?: ComponentConfig<T>
+// ): InternalComponent
 export function mO<T extends ComponentSetup>(
     Component: T,
-    Slot?: undefined,
-    config?: ComponentConfig<T>
-): InternalComponent
-export function mO<T extends ComponentSetup>(
-    Component: T,
-    Slot?: InferSlotted<T> | undefined,
+    Slot: InferSlot<T>,
     config?: ComponentConfig<T>
 ): InternalComponent {
     const [_, $index] = getCurrentItemAndIndex()
-    return makeComponent(Component, Slot, config, $index)
+    return makeComponent(Component, Slot, config || {}, $index)
 }
 
 export function makeComponent(
     Component: ComponentSetup,
-    Slot: InferSlotted | undefined,
+    Slot: InferSlot | undefined,
     config: ComponentConfig,
     $index: Signal<number> | undefined
 ): InternalComponent {
@@ -60,7 +56,7 @@ export function makeComponent(
     const component = new InternalComponent(parent);
     pushComponent(component)
     runComponentSetup(Component, component, Slot, config, $index);
-    component.emit(LifecycleHook.SETUP_COMPLETED)
+    component.emit(LifecycleHook.CREATED)
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
     return component;
 }
@@ -95,7 +91,8 @@ function normalizeToFragmentArray(entity: any) { // distinguish conditional seri
 }
 
 function extractNodeEntities(component: Component) {
-    if (!('initialNodeEntities' in component)) throw new Error('Component setup must return a Component. Pass jsx into `mx` function')
+    if (!('initialNodeEntities' in component))
+        throw new Error('Component setup must return a Component. Pass jsx into `mx` function')
     return component.initialNodeEntities;
     // if (!(output instanceof Array)) return output;
     // if (output.length === 2
@@ -110,7 +107,7 @@ function extractNodeEntities(component: Component) {
 export function runComponentSetup(
     Component: ComponentSetup,
     component: InternalComponent,
-    Slot: InferSlotted | undefined,
+    Slot: InferSlot | undefined,
     config: ComponentConfig,
     $index: Signal<number> | undefined
 ) {

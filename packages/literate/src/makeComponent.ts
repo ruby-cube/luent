@@ -1,4 +1,4 @@
-import { COMPONENT, ComponentConfig, getCurrentItemAndIndex, getNodeRef, InferSlotted, initializeListRef, initializeRef, InternalNodeRef, NodeSignal, PublicComponent, pushComponent, popComponent } from "@rue/lumo";
+import { COMPONENT, ComponentConfig, getCurrentItemAndIndex, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeSignal, PublicComponent, pushComponent, popComponent } from "@rue/lumo";
 import { Literate } from "./Literate.js";
 import { Signal } from "@rue/muonic";
 import { AnyObject, MaybePromise } from "@rue/types";
@@ -16,7 +16,7 @@ import { getCurrentComponent } from "../../lumo/src/component/componentStack.js"
 
 export function mO<T extends SSRComponentSetup<any>>( //TODO: Type should be SSRComponentSetupWithSlot
     Component: T,
-    Slot: InferSlotted<T>,
+    Slot: InferSlot<T>,
     config?: ComponentConfig<T>
 ): SSRComponent
 export function mO<T extends SSRComponentSetup<any>>(
@@ -26,7 +26,7 @@ export function mO<T extends SSRComponentSetup<any>>(
 ): SSRComponent
 export function mO<T extends SSRComponentSetup>(
     Component: T,
-    Slot?: InferSlotted<T> | undefined,
+    Slot?: InferSlot<T> | undefined,
     config?: ComponentConfig<T>
 ): SSRComponent {
     const [_, $index] = getCurrentItemAndIndex()
@@ -35,7 +35,7 @@ export function mO<T extends SSRComponentSetup>(
 
 export function makeComponent(
     Component: SSRComponentSetup,
-    Slot: InferSlotted | undefined,
+    Slot: InferSlot | undefined,
     config: ComponentConfig,
     $index: Signal<number> | undefined
 ): SSRComponent {
@@ -43,7 +43,7 @@ export function makeComponent(
     const component = new SSRComponent(parent);
     pushComponent(component)
     runComponentSetup(Component, component, Slot, config, $index);
-    component.emit(LifecycleHook.SETUP_COMPLETED)
+    component.emit(LifecycleHook.CREATED)
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
 
     return component;
@@ -53,7 +53,7 @@ export function makeComponent(
 export function runComponentSetup(
     Component: SSRComponentSetup<{}>,
     component: SSRComponent,
-    Slot: InferSlotted | undefined,
+    Slot: InferSlot | undefined,
     config: ComponentConfig,
     $index: Signal<number> | undefined
 ) {

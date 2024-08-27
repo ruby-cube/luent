@@ -24,7 +24,7 @@ export function setUpNodeEntity(
     }
     else if (nodeEntity instanceof InternalComponent) {
         nodeEntity.mount(component, parent, nodePod, fragment)
-        if (componentsToUnmount) componentsToUnmount.push(nodeEntity);
+        // if (componentsToUnmount) componentsToUnmount.push(nodeEntity);
     }
     else if (nodeEntity instanceof ListRenderKit) { // this may or may not be dynamic, depending on data
         setUpNodeList(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);

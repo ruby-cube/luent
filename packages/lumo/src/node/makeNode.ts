@@ -2,7 +2,7 @@ import { DerivedSignal, ReactiveSignal, Signal } from "@rue/muonic";
 import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { getCurrentItemAndIndex, isSettingUpList, ListRenderKit, onListUpdated } from "../list/forEachIn";
 import { HTMLTag, makeElement } from "../element/makeElement";
-import { makeComponent, InferSlotted } from "../component/makeComponent";
+import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
 import { getNodeRef, InternalNodeRef, NodeReferent, NodeSignal } from "./$Node";
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
@@ -52,7 +52,7 @@ export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
 
 export function makeNode(
     nodeType: HTMLTag | ComponentSetup,
-    childNodes: NodeEntity[] | InferSlotted,
+    childNodes: NodeEntity[] | InferSlot,
     config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent {
     const [_, $index] = getCurrentItemAndIndex(); //TODO: I need to understand $index and whether it needs to be a signal or if rerenders will take care of it
@@ -65,7 +65,7 @@ export function makeNode(
         )
     return makeComponent(
         nodeType,
-        <InferSlotted>childNodes,
+        <InferSlot>childNodes,
         <ComponentConfig>config,
         $index
     )
@@ -111,7 +111,7 @@ export function initializeListRef( // should this be initialize ref?
     _ref.markInitialized()
 }
 
-export function initializeRef(ref: NodeSignal, value: NodeReferent) {
+export function initializeRef(ref: NodeSignal, value: NodeReferent | null) {
     const _ref = useInternalNodeRef(ref);
     _ref.assignValue(value)
     const flask = getFlask()

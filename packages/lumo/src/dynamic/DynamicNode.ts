@@ -1,7 +1,7 @@
 import { EffectFlask } from "@rue/flask";
 import { preserveAllRequested } from "../conditional/$if";
 import { _NodePod } from "../node/NodePod";
-import { beforeDeactivate, beforeUnmount, LifecycleHook, onActivated } from "./lifecycle";
+import { LifecycleHook } from "./lifecycle";
 
 export class DynamicNode {
     flask: EffectFlask | undefined;
@@ -25,14 +25,16 @@ export class DynamicNode {
 
     tasks: {
         [LifecycleHook.BEFORE_UNMOUNT]: Set<() => void> | undefined;
+        [LifecycleHook.BEFORE_DESTROY]: Set<() => void> | undefined;
         [LifecycleHook.MOUNTED]: Set<() => void> | undefined;
-        [LifecycleHook.ACTIVATED]: Set<() => void> | undefined;
-        [LifecycleHook.BEFORE_DEACTIVATE]: Set<() => void> | undefined;
+        // [LifecycleHook.ACTIVATED]: Set<() => void> | undefined;
+        // [LifecycleHook.BEFORE_DEACTIVATE]: Set<() => void> | undefined;
     } = {
             [LifecycleHook.BEFORE_UNMOUNT]: undefined,
+            [LifecycleHook.BEFORE_DESTROY]: undefined,
             [LifecycleHook.MOUNTED]: undefined,
-            [LifecycleHook.ACTIVATED]: undefined,
-            [LifecycleHook.BEFORE_DEACTIVATE]: undefined,
+            // [LifecycleHook.ACTIVATED]: undefined,
+            // [LifecycleHook.BEFORE_DEACTIVATE]: undefined,
         };
 
     private getTaskQueue(hookName: LifecycleHook) {
@@ -50,8 +52,18 @@ export class DynamicNode {
     }
 
     unmount() {
-        if (this.preserve) this.emit(LifecycleHook.BEFORE_DEACTIVATE)
-        else this.emit(LifecycleHook.BEFORE_UNMOUNT)
+        this.emit(LifecycleHook.BEFORE_UNMOUNT)
+        const nodePod = this.nodePod;
+        if (!nodePod) throw new Error('No nodePod :( This should never happen')
+        nodePod.forEachNode((node) => {
+            node.remove();
+        })
+        // TODO: null node refs, preserve if needed
+        this.flask?.dispose(); //TODO: instead of disposing, need to remove and preserve somehow
+    }
+
+    destroy() {
+        this.emit(LifecycleHook.BEFORE_DESTROY)
         const nodePod = this.nodePod;
         if (!nodePod) throw new Error('No nodePod :( This should never happen')
         nodePod.forEachNode((node) => {

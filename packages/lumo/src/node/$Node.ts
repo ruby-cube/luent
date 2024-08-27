@@ -53,8 +53,7 @@ export function $Node<
 
 
 export type NodeReferent<
-    T extends RefSource
-    = RefSource
+    T extends RefSource = RefSource
 > =
     T extends HTMLTag ? HTMLElementTagNameMap[T] : //TODO: SVGs and Math elements
     T extends HTMLTag[] ? T extends (infer H)[] ? H extends HTMLTag ? HTMLElementTagNameMap[H][] : never : never :

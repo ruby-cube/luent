@@ -5,10 +5,9 @@ import { DynamicNode, getActiveDynamicNode } from "./DynamicNode";
 type TaskQueue = Set<() => void>
 
 export enum LifecycleHook {
-    BEFORE_UNMOUNT = 'bum',
     MOUNTED = 'm',
-    BEFORE_DEACTIVATE = 'da',
-    ACTIVATED = 'a',
+    BEFORE_UNMOUNT = 'bum',
+    BEFORE_DESTROY = 'bd',
 }
 
 
@@ -22,7 +21,7 @@ function useTaskQueue(node: DynamicNode, hookName: LifecycleHook) {
 }
 
 
-function createLifecycleHook(name: LifecycleHook.BEFORE_UNMOUNT | LifecycleHook.MOUNTED) {
+function createLifecycleHook(name: LifecycleHook.BEFORE_DESTROY) {
     return function on(handler: () => void, _node?: DynamicNode) {
         const node = _node || getActiveDynamicNode();
         if (!node) throw new Error("Lifecycle hooks cannot be called outside of component setup");
@@ -39,7 +38,7 @@ function createLifecycleHook(name: LifecycleHook.BEFORE_UNMOUNT | LifecycleHook.
     }
 }
 
-function createUpdateHook(name: LifecycleHook.ACTIVATED | LifecycleHook.BEFORE_DEACTIVATE) {
+function createUpdateHook(name: LifecycleHook.MOUNTED | LifecycleHook.BEFORE_UNMOUNT) {
     return function on(handler: () => void, options?: ListenerOptions, _node?: DynamicNode) {
         const node = _node || getActiveDynamicNode();
         if (!node) throw new Error("Lifecycle hooks cannot be called outside of component setup");
@@ -57,16 +56,15 @@ function createUpdateHook(name: LifecycleHook.ACTIVATED | LifecycleHook.BEFORE_D
 }
 
 
-export const onActivated = createUpdateHook(LifecycleHook.ACTIVATED)
-export const beforeDeactivate = createUpdateHook(LifecycleHook.BEFORE_DEACTIVATE)
-export const beforeUnmount = createLifecycleHook(LifecycleHook.BEFORE_UNMOUNT)
-export const onMounted = createLifecycleHook(LifecycleHook.MOUNTED)
+export const beforeUnmount = createUpdateHook(LifecycleHook.BEFORE_UNMOUNT)
+export const onMounted = createUpdateHook(LifecycleHook.MOUNTED)
+export const beforeDestroy = createLifecycleHook(LifecycleHook.BEFORE_DESTROY)
 
 
 
 export default {
     onMounted,
     beforeUnmount,
-    onActivated,
-    beforeDeactivate
+    // onActivated,
+    // beforeDeactivate
 }

@@ -25,35 +25,38 @@ export function getAppRoot() {
 // }
 
 export function createApp(App: ComponentSetup) {
+    // (1) create a mock RootComponent to serve as the parent to developer's root component
+    const parentComponent = new InternalComponent(null); //QUESTION: Do I really need this?
+    
+    // (2) instantiate developer's root component
+    const { component, dynamicNode } = makeRootComponent(App)
+    component.emit(LifecycleHook.CREATED)
+    const nodePod = new _NodePod()
+
     return {
-        // App,
-        // flask: undefined as Flask | undefined,
-        component: undefined as InternalComponent | undefined,
-        dynamicNode: undefined as DynamicNode | undefined,
+        component,
+        dynamicNode,
+
         mount(id: string) {
             const root = document.querySelector(id);
             if (!(root instanceof Element)) throw new Error('No root element to mount app to. Check selector string')
             appRoot = root;
 
-            // (1) create a mock RootComponent to serve as the parent to developer's root component
-            const parentComponent = new InternalComponent(null); //QUESTION: Do I really need this?
-            pushComponent(parentComponent)
-
-            // (2) instantiate developer's root component
-            const { component, dynamicNode } = makeRootComponent(App)
-            component.emit(LifecycleHook.SETUP_COMPLETED)
-            this.component = component;
-            this.dynamicNode = dynamicNode;
-
             // (3) attach developer's root component to root element
-            component.mount(parentComponent, root, new _NodePod())
+            component.mount(parentComponent, root, nodePod) //TODO: if this is a remount, how would it be different than a first mount
             dynamicNode.emit(DynamicLifecycleHook.MOUNTED)
-            popComponent()
 
             return component;
         },
+
         unmount() {
-            this.dynamicNode!.emit(DynamicLifecycleHook.BEFORE_UNMOUNT); //TODO: add mount and unmount hooks to root component
+            this.dynamicNode!.emit(DynamicLifecycleHook.BEFORE_UNMOUNT);
+            const nodePod = this.dynamicNode!.nodePod;
+            nodePod?.forEachNode((node) => node.remove()) //TODO: Preserve
+        },
+
+        destroy() {
+            this.dynamicNode!.emit(DynamicLifecycleHook.BEFORE_DESTROY);
             const nodePod = this.dynamicNode!.nodePod;
             nodePod?.forEachNode((node) => node.remove())
         }
@@ -79,7 +82,7 @@ export function makeRootComponent(
     }, 'RootComponent')
     popDynamicNode();
 
-    component.emit(LifecycleHook.SETUP_COMPLETED)
+    component.emit(LifecycleHook.CREATED)
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
     return { component, dynamicNode };
 }

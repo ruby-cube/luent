@@ -5,7 +5,7 @@ import { Literate } from "./Literate"
 import { TreeNode } from "../../lumo/src/component/componentStack"
 
 export enum LifecycleHook {
-    SETUP_COMPLETED = 'sc'
+    CREATED = 'sc'
 }
 
 export type SSRComponentSetup<P extends AnyObject | undefined = undefined, E extends AnyObject | undefined = undefined> =
@@ -36,9 +36,9 @@ export class SSRComponent<T extends AnyObject | null = null> implements TreeNode
     }
 
     #tasks: {
-        [LifecycleHook.SETUP_COMPLETED]: Set<() => void> | undefined;
+        [LifecycleHook.CREATED]: Set<() => void> | undefined;
     } = {
-            [LifecycleHook.SETUP_COMPLETED]: undefined,
+            [LifecycleHook.CREATED]: undefined,
         };
 
     #getTaskQueue(hookName: LifecycleHook) {

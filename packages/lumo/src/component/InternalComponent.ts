@@ -42,54 +42,28 @@ export function mx<T extends AnyObject = AnyObject>(exposedComponentOrRender: T 
 }
 
 export class InternalComponent<T extends undefined | AnyObject = undefined | AnyObject> implements Component {
-    // context: AnyObject | undefined;
-    // provides: AnyObject | undefined;
     component: PublicComponent<T> | undefined = undefined;
     initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
-    // flask: EffectFlask | undefined;
-
-    // setFlask(flask: EffectFlask) {
-    //     this.flask = flask;
-    // }
-
-    // nodePod: _NodePod | undefined;
-    // setNodePod(nodePod: _NodePod) {
-    //     this.nodePod = nodePod;
-    // }
 
     tasks: {
-        [LifecycleHook.SETUP_COMPLETED]: Set<() => void> | undefined;
-        // [LifecycleHook.BEFORE_MOUNT]: Set<() => void> | undefined;
-        // [LifecycleHook.BEFORE_UNMOUNT]: Set<() => void> | undefined;
+        [LifecycleHook.CREATED]: Set<() => void> | undefined;
         [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
-        // [LifecycleHook.MOUNTED]: Set<() => void> | undefined;
-        // [LifecycleHook.UNMOUNTED]: Set<() => void> | undefined;
         [LifecycleHook.UPDATED]: Set<() => void> | undefined;
-        // [LifecycleHook.ACTIVATED]: Set<() => void> | undefined;
-        // [LifecycleHook.BEFORE_DEACTIVATE]: Set<() => void> | undefined;
     } = {
-            [LifecycleHook.SETUP_COMPLETED]: undefined,
-            // [LifecycleHook.BEFORE_MOUNT]: undefined,
-            // [LifecycleHook.MOUNTED]: undefined,
-            // [LifecycleHook.BEFORE_UNMOUNT]: undefined,
+            [LifecycleHook.CREATED]: undefined,
             [LifecycleHook.BEFORE_UPDATE]: undefined,
-            // [LifecycleHook.UNMOUNTED]: undefined,
             [LifecycleHook.UPDATED]: undefined,
-            // [LifecycleHook.ACTIVATED]: undefined,
-            // [LifecycleHook.BEFORE_DEACTIVATE]: undefined,
         };
 
     hasUpdates: boolean = false;
 
     constructor(
         public parent: InternalComponent | null,
-        // public preserve: boolean
     ) {
     }
 
     private getTaskQueue(hookName: LifecycleHook) {
         let taskQueue = this.tasks[hookName]
-        // if (!taskQueue) throw new Error("taskQueue not found")
         return taskQueue;
     }
 
@@ -110,15 +84,11 @@ export class InternalComponent<T extends undefined | AnyObject = undefined | Any
         const nodeEntities = this.initialNodeEntities!;
         if (!(parent instanceof Element))
             throw new Error("Parent cannot be a text node")
-        // this.emit(LifecycleHook.BEFORE_MOUNT);
         pushComponent(this)
-        const _nodePod = nodePod.appendDynamicPod().appendNodePod(); //TODO: prevent overly nested node pods
-        // this.setNodePod(_nodePod)
         for (const nodeEntity of nodeEntities) {
-            setUpNodeEntity(parentComponent, parent, nodeEntity, _nodePod, fragment)
+            setUpNodeEntity(parentComponent, parent, nodeEntity, nodePod, fragment)
         }
         popComponent()
-        // this.emit(LifecycleHook.MOUNTED);
     }
 }
 

@@ -6,19 +6,9 @@ import { getCurrentComponent } from "./componentStack";
 type TaskQueue = Set<() => void>
 
 export enum LifecycleHook {
-    SETUP_COMPLETED = 'sc',
-    // BEFORE_MOUNT = 'bm',
-    // MOUNTED = 'm',
+    CREATED = 'c',
     BEFORE_UPDATE = 'bu',
     UPDATED = 'u',
-    // BEFORE_UNMOUNT = 'bum',
-    // UNMOUNTED = 'um',
-    // BEFORE_DEACTIVATE = 'da',
-    // ACTIVATED = 'a',
-    // RENDER_TRIGGERED = 'rtg',
-    // RENDER_TRACKED = 'rtc',
-    // ERROR_CAPTURED = 'ec',
-    // SERVER_PREFETCH = 'sp',
 }
 
 
@@ -66,25 +56,14 @@ function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDA
     }
 }
 
-export const onSetupCompleted = createLifecycleHook(LifecycleHook.SETUP_COMPLETED)
-// export const beforeMount = createLifecycleHook(LifecycleHook.BEFORE_MOUNT) //TODO: Rename premount to something else ... it has ambiguous meaning--it could mean mount ahead of time
-// export const onMounted = createLifecycleHook(LifecycleHook.MOUNTED)
+export const onCreated = createLifecycleHook(LifecycleHook.CREATED)
 export const beforeUpdate = createUpdateHook(LifecycleHook.BEFORE_UPDATE)
 export const onUpdated = createUpdateHook(LifecycleHook.UPDATED)
-
-// export const onActivated = createUpdateHook(LifecycleHook.ACTIVATED)
-// export const onDeactivated = createUpdateHook(LifecycleHook.BEFORE_DEACTIVATE)
-// export const beforeUnmount = createLifecycleHook(LifecycleHook.BEFORE_UNMOUNT)
-// export const onUnmounted = createLifecycleHook(LifecycleHook.UNMOUNTED)
 
 
 
 export default {
-    onSetupCompleted,
-    // beforeMount,
-    // beforeUnmount,
+    onCreated,
     beforeUpdate,
-    // onMounted,
-    // onUnmounted,
     onUpdated,
 }

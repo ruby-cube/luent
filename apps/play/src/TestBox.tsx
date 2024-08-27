@@ -1,4 +1,4 @@
-import { $Node, beforeMount } from "@rue/lumo";
+import { $Node } from "@rue/lumo";
 import {  $, initializeEffect, DeepReactive$, $Signal } from "@rue/muonic";
 
 

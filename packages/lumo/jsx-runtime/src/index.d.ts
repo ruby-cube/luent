@@ -402,12 +402,12 @@ declare namespace React {
 
     type FunctionComponentFactory<P> = (
         props?: Attributes & P,
-        ...Slot: Lumo.InferSlotted<(props?: P) => any>[] // #LUMO-EDIT
+        ...Slot: Lumo.InferSlot<(props?: P) => any>[] // #LUMO-EDIT
     ) => FunctionComponentElement<P>;
 
     type ComponentFactory<P, T extends Component<P, ComponentState>> = (
         props?: ClassAttributes<T> & P,
-        ...Slot: Lumo.InferSlotted<(props?: P) => any>[] //#LUMO-EDIT
+        ...Slot: Lumo.InferSlot<(props?: P) => any>[] //#LUMO-EDIT
     ) => CElement<P, T>;
 
     type CFactory<P, T extends Component<P, ComponentState>> = ComponentFactory<P, T>;
@@ -4307,7 +4307,7 @@ declare global {
 
         interface IntrinsicAttributes extends React.Attributes {
             ref?: Lumo.Ref //#LUMO-EDIT
-            // Slot?: Lumo.InferSlotted
+            // Slot?: Lumo.InferSlot
         }
         interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> { }
 

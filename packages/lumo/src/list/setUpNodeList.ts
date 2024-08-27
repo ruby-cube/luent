@@ -111,7 +111,7 @@ export function insertAndMoveListItemNodes(
     dynamicIndices: DynamicIndices,
 ) {
     const { getOriginalItem, isNewItem, hasMoved, newUArray, oldUArray, isRemoved } = insertAndMoveKit;
-    if (dynamicList.length !== oldUArray.length) throw "dynamicPod and data length are mismatched"
+    if (dynamicList.length !== oldUArray.length) throw new Error("dynamicPod and data length are mismatched")
     const indicesAndNodePods: [number, _NodePod[]][] = []
     const indicesAndFragments: [number, DocumentFragment][] = []
     let fragment = new DocumentFragment();

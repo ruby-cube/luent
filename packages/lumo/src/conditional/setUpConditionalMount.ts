@@ -7,7 +7,6 @@ import { NodeEntity } from "../node/makeNode";
 import { getNodeRef } from "../node/$Node";
 import { areShallowEqualArrays, getDependencyTracker, getWithoutTracking, isShallowEqual } from "@rue/muonic";
 import { ConditionalRenderSeries } from "./ConditionalRenderSeries";
-import { RenderConditional } from "./ConditionalRenderKit";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { popComponent, pushComponent } from "../component/componentStack";
 import { LifecycleHook as DynamicLifecycleHook } from "../dynamic/lifecycle";
@@ -54,8 +53,7 @@ export function setUpConditionalMount(
             dynamicPod.replaceNodePod(0, nodePod);
             mountConditional(nodePod, component, parent, dynamicPod, nodeEntities);
         }, nodePod)
-        if (dynamicNode.preserve) dynamicNode.emit(DynamicLifecycleHook.ACTIVATED) //FIX: emit mounted if it's the first render
-        else dynamicNode.emit(DynamicLifecycleHook.MOUNTED)
+        dynamicNode.emit(DynamicLifecycleHook.MOUNTED)
         component.emit(LifecycleHook.UPDATED)
 
         // set up for next update
@@ -65,12 +63,12 @@ export function setUpConditionalMount(
 
 }
 
-export function emitHookBatch(hookName: LifecycleHook, components: InternalComponent[] | undefined) {
-    if (!components) return;
-    for (const compo of components) {
-        compo.emit(hookName);
-    }
-}
+// export function emitHookBatch(hookName: LifecycleHook, components: InternalComponent[] | undefined) {
+//     if (!components) return;
+//     for (const compo of components) {
+//         compo.emit(hookName);
+//     }
+// }
 
 // function forEachInNodePod(nodePod: _NodePod, doTask: (node: DOMNode) => void) {
 
@@ -85,13 +83,13 @@ export function populateFragment(fragment: DocumentFragment, nodePod: _NodePod) 
     })
 }
 
-const preservedNodePods: WeakMap<RenderConditional, _NodePod> = new WeakMap();
+// const preservedNodePods: WeakMap<RenderConditional, _NodePod> = new WeakMap();
 
-function getPreservedNodePod(renderConditional: RenderConditional) {
-    const nodePod = preservedNodePods.get(renderConditional)
-    if (!nodePod) throw new Error("nodePod missing")
-    return nodePod;
-}
+// function getPreservedNodePod(renderConditional: RenderConditional) {
+//     const nodePod = preservedNodePods.get(renderConditional)
+//     if (!nodePod) throw new Error("nodePod missing")
+//     return nodePod;
+// }
 
 // function removePrevConditionalNodes(component: InternalComponent, dynamicPod: _DynamicNodePod) {
 //     const nodePod = dynamicPod[0];
@@ -170,10 +168,6 @@ function nullNodeRefValues(nodePod: _NodePod, components: InternalComponent[]) {
 //     // }
 // }
 
-function emitActivated(components: InternalComponent[]) { //FIX: these should be dynamic nodes
-    for (const component of components) {
-        if (component.preserve) component.emit(LifecycleHook.ACTIVATED);
-    }
-}
+
 
 
