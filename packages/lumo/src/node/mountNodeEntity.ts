@@ -1,4 +1,4 @@
-import { InternalComponent } from "../component/InternalComponent";
+import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
 import { mountElement } from "../element/mountElement";
@@ -18,14 +18,16 @@ export function mountNodeEntity(
     }
     else if (nodeEntity instanceof InternalComponent) {
         nodeEntity.mount(parent, nodePod, fragment)
-        // if (componentsToUnmount) componentsToUnmount.push(nodeEntity);
     }
-    else if (nodeEntity instanceof ListRenderKit) { // this may or may not be dynamic, depending on data
+    else if (nodeEntity instanceof ListRenderKit) { // may or may not be dynamic, depending on data
         nodeEntity.mount(parent, nodePod, fragment);
     }
     else if (nodeEntity instanceof Array) {
-        // conditional series
-        const series = new ConditionalRenderSeries(nodeEntity, nodeEntity[0].type, () => new ConditionalRenderKit('else', () => [], 'create', component))
+        const series = new ConditionalRenderSeries(
+            nodeEntity,
+            nodeEntity[0].type,
+            () => new ConditionalRenderKit('else', () => [], 'create', getComponent(mountNodeEntity.name))
+        )
         series.mount(parent, nodePod, fragment)
     }
     else {

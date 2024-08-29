@@ -1,7 +1,6 @@
 import { collectEffects, EffectFlask } from "@rue/flask";
-import { shouldPreserve } from "../conditional/create_if";
 import { _NodePod } from "../node/NodePod";
-import { onDeactivate, onDestroy, LifecycleHook, onActivated } from "./lifecycle";
+import {  LifecycleHook } from "./lifecycle";
 
 export class DynamicNode {
     flask: EffectFlask | undefined;
@@ -74,7 +73,7 @@ export class DynamicNode {
 
     destroy() {
         this.unmount();
-        this.emit(LifecycleHook.ON_DESTROY) //TODO: THis should remove all onActivated and onDeactivated listeners
+        this.emit(LifecycleHook.ON_DESTROY) // this stops all onActivated and onDeactivate listeners that are set to go until destroy
         this.nodePod = undefined
         this.flask = undefined
         this.parent = null
@@ -105,8 +104,20 @@ export function popDynamicNode() {
 }
 
 
+let reactivating = false;
+
+export function markReactivation(){
+    reactivating = true;
+}
+
+export function unmarkReactivation(){
+    reactivating = false;
+}
 
 
+export function isReactivation(){
+    return reactivating;
+}
 
 
 

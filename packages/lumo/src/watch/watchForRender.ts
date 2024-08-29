@@ -4,9 +4,10 @@ import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
 import { getWithoutTracking, ReactiveModel } from "@rue/muonic";
 import { getCurrentComponent, popComponent, pushComponent } from "../component/componentStack";
-import { getActiveDynamicNode } from "../dynamic/DynamicNode";
+import { DynamicNode, getActiveDynamicNode, isReactivation } from "../dynamic/DynamicNode";
 import { ActiveListener } from "@rue/flask";
 import { onActivated, onDeactivate, onDestroy } from "../dynamic/lifecycle";
+import { noop } from "@rue/utils";
 
 
 export function initializeRender(effect: () => void) {
@@ -75,16 +76,26 @@ function setUpUpdateHooks(component: InternalComponent) {
 
 
 function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveListener {
+    const reactivation = isReactivation()
     const initializeFn = renderPhase ? _initializeRender : _initializeEffect;
-    const watcher = { stop: () => { } }
+    const dynamicNode = getActiveDynamicNode()!
+    const watcher = { stop: noop }
 
     onActivated(() => {
         watcher.stop = initializeFn(effect).stop
-    }, { until: onDestroy, flask: 'outlive' })
+    }, { once: true }, dynamicNode)
 
-    onDeactivate(() => {
+    onDeactivate(deactivateAndReactivate, { once: true }, dynamicNode)
+
+    function deactivateAndReactivate() {
         watcher.stop()
-    }, { until: onDestroy, flask: 'outlive' })
+        if (!reactivation) {
+            onActivated(() => {
+                watcher.stop = initializeFn(effect).stop
+                onDeactivate(deactivateAndReactivate, { once: true }, dynamicNode)
+            }, { once: true }, dynamicNode)
+        }
+    }
 
     return watcher;
 }
@@ -108,31 +119,48 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
 }
 
 function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
+    const reactivation = isReactivation()
     const component = getCurrentComponent();
     if (!component) throw new Error("No component found")
     const watchFn = options?.phase === 'render' ? _watchForRender : _watch
+    const dynamicNode = getActiveDynamicNode()!
 
-    const watcher = { stop: () => { } }
-    const oldValue = hasSignal(target) ? target() : shallowClone(target)
-    if (hasSignal(target)) {
-        onActivated(() => {
-            handler(target(), oldValue) //FIX: Why am I calling this here? what about snapshots?
-            pushComponent(component)
-            watcher.stop = watchFn(target, handler, options).stop
-            popComponent()
-        }, { until: onDestroy, flask: 'outlive' })
-    }
-    else {
-        onActivated(() => {
-            handler(target, oldValue)
-            pushComponent(component)
-            watcher.stop = watchFn(target, handler, options).stop
-            popComponent()
-        }, { until: onDestroy, flask: 'outlive' })
-    }
-    onDeactivate(() => {
+    const watcher = { stop: noop }
+    let oldValue: any
+    initializeOnActivated()
+    onDeactivate(deactivateAndReactivate, { once: true }, dynamicNode)
+    
+    function deactivateAndReactivate() {
+        oldValue = hasSignal(target) ? target() : shallowClone(target)
         watcher.stop()
-    }, { until: onDestroy, flask: 'outlive' })
+        if (!reactivation) {
+            initializeOnActivated()
+        }
+    }
+
+    function initializeOnActivated() {
+        if (hasSignal(target)) {
+            onActivated(() => {
+                handler(target(), oldValue)
+                initializeWatcher()
+            }, { once: true }, dynamicNode)
+        }
+        else {
+            onActivated(() => {
+                handler(<ReactiveModel<T extends AnyObject ? T : never>>target, oldValue)
+                initializeWatcher()
+            }, { once: true }, dynamicNode)
+        }
+    }
+
+    function initializeWatcher() {
+        pushComponent(component)
+        watcher.stop = watchFn(target, handler, options).stop
+        popComponent()
+    }
+
+
+
     return watcher
 }
 

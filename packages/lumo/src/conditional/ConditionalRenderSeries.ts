@@ -1,6 +1,6 @@
 import { InternalComponent } from "../component/InternalComponent";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
-import { DynamicNode, getActiveDynamicNode, NULLISH_DYNAMIC_NODE, popDynamicNode, pushDynamicNode } from "../dynamic/DynamicNode";
+import { DynamicNode, getActiveDynamicNode, markReactivation, NULLISH_DYNAMIC_NODE, popDynamicNode, pushDynamicNode, unmarkReactivation } from "../dynamic/DynamicNode";
 import { LifecycleHook as DynamicLifecycleHook } from "../dynamic/lifecycle";
 import { NodeEntity } from "../node/makeNode";
 import { mountNodeEntity } from "../node/mountNodeEntity";
@@ -155,7 +155,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             }
         })
         popComponent()
-        dynamicNode.emit(DynamicLifecycleHook.ON_ACTIVATED)
         series.storeDynamicNode(dynamicNode, activeIndex)
     }
 
@@ -191,7 +190,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         parent: Element
     ) {
         const activationType = this.statements[activeIndex].type
-        const preserve = activationType === 'create' ? false: true;
+        const preserve = activationType === 'create' ? false : true;
         const series = this;
         const component = this.component
         const dynamicNodePod = this.dynamicNodePod
@@ -207,21 +206,21 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                 const nodeEntities = series.render(activeIndex)
                 mountConditional(nodePod, parent, dynamicNodePod, nodeEntities);
             })
-            dynamicNode.emit(DynamicLifecycleHook.ON_ACTIVATED)
             series.storeDynamicNode(dynamicNode, activeIndex)
         }
         else {
             dynamicNode.activate(function updateConditional() {
+                if (preserve) markReactivation()
                 const nodeEntities = series.render(activeIndex);
                 if (activationType === 'show') {
-                    showConditionalNodes( parent, dynamicNodePod, activeIndex, nodeEntities)
+                    showConditionalNodes(parent, dynamicNodePod, activeIndex, nodeEntities)
                 }
                 else {
                     series.replaceNodePod(activeIndex, nodePod);
                     mountConditional(nodePod, parent, dynamicNodePod, nodeEntities)
                 }
+                if (preserve) unmarkReactivation()
             })
-            dynamicNode.emit(DynamicLifecycleHook.ON_ACTIVATED)
         }
         popComponent()
     }

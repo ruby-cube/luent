@@ -111,14 +111,11 @@ export function runComponentSetup(
     config: ComponentConfig,
     $index: Signal<number> | undefined
 ) {
-    // collectEffects((flask, outerFlask) => {
-    // component.setFlask(flask);
     const output = Component({ ...config, Slot })
     if (output instanceof Promise)
         throw new Error("Components cannot return a promise. Use $Suspense and $await to handle promises within component setup")
 
     initializeComponent(component, output, config.ref, $index)
-    // }, Component.name)
 }
 
 function initializeComponent(
@@ -137,14 +134,6 @@ function initializeComponent(
         else initializeRef(ref, publicComponent)
     }
 
-    // set up hook cascade
-    // const parent = component.parent;
-    // if (parent instanceof InternalComponent) {
-    //     beforeUnmount(() => component.emit(LifecycleHook.BEFORE_UNMOUNT), parent) //TODO: how do these get cleaned up?
-    //     onUnmounted(() => component.emit(LifecycleHook.UNMOUNTED), parent)
-    //     onDeactivated(() => component.emit(LifecycleHook.ON_DEACTIVATE), undefined, parent)
-    //     onActivated(() => component.emit(LifecycleHook.ON_ACTIVATED), undefined, parent)
-    // }
 }
 
 

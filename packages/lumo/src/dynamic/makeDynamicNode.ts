@@ -1,7 +1,7 @@
 import { collectEffects, EffectFlask } from "@rue/flask";
 import { DynamicNode, getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "./DynamicNode";
 import { _NodePod } from "../node/NodePod";
-import { onDestroy, beforeUnmount, LifecycleHook, onActivated, onDeactivate } from "./lifecycle";
+import { onDestroy, LifecycleHook, onActivated, onDeactivate } from "./lifecycle";
 
 
 // export function activateDynamicNode(
@@ -22,17 +22,20 @@ import { onDestroy, beforeUnmount, LifecycleHook, onActivated, onDeactivate } fr
 export function makeDynamicNode(preserve: boolean, nodePod?: _NodePod) {
     const parent = getActiveDynamicNode();
     const dynamicNode = new DynamicNode(parent, preserve, nodePod);
-    // set up hook cascade //QUESTION: Is this the right place to set up hook cascade?
     if (parent instanceof DynamicNode) {
         onActivated(() => { dynamicNode.emit(LifecycleHook.ON_ACTIVATED) }, {
-            until: (cleanup) => onDestroy(cleanup, parent),
-            flask: 'outlive'
-        }, parent)
+            until: onDestroyDynamicNode,
+        })
         onDeactivate(() => { dynamicNode.deactivate() }, {
-            until: (cleanup) => onDestroy(cleanup, parent),
-            flask: 'outlive'
-        }, parent)
-        onDestroy(() => { dynamicNode.destroy() }, parent)
+            until: onDestroyDynamicNode,
+        })
+        onDestroy(() => { dynamicNode.destroy() }, {
+            cancel: onDestroyDynamicNode
+        })
+    }
+
+    function onDestroyDynamicNode(cleanUp: ()=>void){
+        return onDestroy(cleanUp, {}, dynamicNode)
     }
     return dynamicNode;
 }

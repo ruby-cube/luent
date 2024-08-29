@@ -1,4 +1,4 @@
-import { $listen, $schedule, ListenerOptions } from "@rue/flask";
+import { $listen, $schedule, ListenerOptions, SchedulerOptions } from "@rue/flask";
 import { DynamicNode, getActiveDynamicNode } from "./DynamicNode";
 
 
@@ -22,12 +22,12 @@ function useTaskQueue(node: DynamicNode, hookName: LifecycleHook) {
 
 
 function createLifecycleHook(name: LifecycleHook.ON_DESTROY) {
-    return function on(handler: () => void, _node?: DynamicNode) {
+    return function on(handler: () => void, options?: SchedulerOptions, _node?: DynamicNode) {
         const node = _node || getActiveDynamicNode();
         if (!node) throw new Error("Lifecycle hooks cannot be called outside of component setup");
         const taskQueue = useTaskQueue(node, name)
 
-        return $schedule(handler, {}, {
+        return $schedule(handler, options || {}, {
             enroll(handler) {
                 taskQueue.add(handler)
             },
@@ -38,13 +38,13 @@ function createLifecycleHook(name: LifecycleHook.ON_DESTROY) {
     }
 }
 
-function createUpdateHook(name: LifecycleHook.ON_ACTIVATED | LifecycleHook.ON_DEACTIVATE) {
-    return function on(handler: () => void, options?: ListenerOptions, _node?: DynamicNode) {
+function createActivationHook(name: LifecycleHook.ON_ACTIVATED | LifecycleHook.ON_DEACTIVATE) {
+    return function on(handler: () => void, options: ListenerOptions = {}, _node?: DynamicNode) {
         const node = _node || getActiveDynamicNode();
         if (!node) throw new Error("Lifecycle hooks cannot be called outside of component setup");
         const taskQueue = useTaskQueue(node, name)
 
-        return $listen(handler, options || {}, {
+        return $listen(handler, { until: (cleanUp) => onDestroy(cleanUp, {}, node), flask: 'outlive', ...options }, {
             enroll(handler) {
                 taskQueue.add(handler)
             },
@@ -56,8 +56,8 @@ function createUpdateHook(name: LifecycleHook.ON_ACTIVATED | LifecycleHook.ON_DE
 }
 
 
-export const onDeactivate = createUpdateHook(LifecycleHook.ON_DEACTIVATE)
-export const onActivated = createUpdateHook(LifecycleHook.ON_ACTIVATED)
+export const onDeactivate = createActivationHook(LifecycleHook.ON_DEACTIVATE)
+export const onActivated = createActivationHook(LifecycleHook.ON_ACTIVATED)
 export const onDestroy = createLifecycleHook(LifecycleHook.ON_DESTROY)
 
 
