@@ -1,7 +1,8 @@
-import {  $Node, COMPONENT, ComponentSetup, create_if, else_create, else_show, iterate_over, mx, NodeEntity, preventDefault, show_if, teleportTo, useEventListener } from "@rue/lumo";
+import { $Node, COMPONENT, ComponentSetup, create_if, else_create, else_mount, else_show, iterate_over, mount_if, mx, NodeEntity, preventDefault, show_if, teleportTo, useEventListener } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { __addDevName } from "@rue/muonic";
+import { $Signal, __addDevName } from "@rue/muonic";
 import { $, DeepReactive$, Reactive$ } from "@rue/muonic";
+import { create } from "domain";
 
 
 const randomColor = useRandomColorGenerator()
@@ -68,57 +69,66 @@ export function List() {
 
     const $itemDiv = $Node<'div'>()
 
+    const $alive = $Signal(true)
+
+    function destroy() {
+        $alive.set(() => false)
+    }
 
     return mx(
-        <div>
-            <>
-                {show_if($(() => list$.length === 0), () => (
-                    <div
-                        onclick={() => insertItem(0)}
-                        style="background-color: gray; cursor: pointer"
-                    >
-                        insert
-                    </div>
-                ))}
-                {else_show(() =>
-                    iterate_over(list$, (item$, $index) => (
-                        <div
-                            ref={$itemDiv}
-                            onclick={(e) => toggleSelect(e, $index())}
-                            style={[
-                                `background-color: ${randomColor.get()}`,
-                                o => {
-                                    o.outline = selected$.has(item$) ? 'thick solid blue' : '';
-                                }
-                            ]}>
-                            <p
-                                onclick={(e) => removeItem($index())}
-                                style="cursor: pointer"
-                            >
-                                X
-                            </p>
-                            <li onclick={() => changeContent($index())}>
-                                {$(() => item$.content)}
-                            </li>
-                            <p>{$index}</p>
+        <>
+            {create_if($alive, () => (
+
+                <div>
+                    <button onclick={destroy}>destroy</button>
+                    <>
+                        {mount_if($(() => list$.length === 0), () => (
                             <div
-                                onclick={() => insertItem($index() + 1)}
+                                onclick={() => insertItem(0)}
                                 style="background-color: gray; cursor: pointer"
                             >
                                 insert
                             </div>
-                            <div
-                                onclick={() => moveSelectedItems($index() + 1)}
-                                style="background-color: white; cursor: pointer"
-                            >
-                                insert
-                            </div>
-                        </div>
-                    ), 'id')
-                )}
-            </>
-            <button onclick={clearSelection}>clear</button>
-            {/* <button onclick={$if($active, capture.once(clearSelection))}>clear</button>
+                        ))}
+                        {else_mount(() =>
+                            iterate_over(list$, (item$, $index) => (
+                                <div
+                                    ref={$itemDiv}
+                                    onclick={(e) => toggleSelect(e, $index())}
+                                    style={[
+                                        `background-color: ${randomColor.get()}`,
+                                        o => {
+                                            o.outline = selected$.has(item$) ? 'thick solid blue' : '';
+                                        }
+                                    ]}>
+                                    <p
+                                        onclick={(e) => removeItem($index())}
+                                        style="cursor: pointer"
+                                    >
+                                        X
+                                    </p>
+                                    <li onclick={() => changeContent($index())}>
+                                        {$(() => item$.content)}
+                                    </li>
+                                    <p>{$index}</p>
+                                    <div
+                                        onclick={() => insertItem($index() + 1)}
+                                        style="background-color: gray; cursor: pointer"
+                                    >
+                                        insert
+                                    </div>
+                                    <div
+                                        onclick={() => moveSelectedItems($index() + 1)}
+                                        style="background-color: white; cursor: pointer"
+                                    >
+                                        insert
+                                    </div>
+                                </div>
+                            ), 'id')
+                        )}
+                    </>
+                    <button onclick={clearSelection}>clear</button>
+                    {/* <button onclick={$if($active, capture.once(clearSelection))}>clear</button>
 
             <button
                 onclick={[() => increment($index()), preventDefault.endHere, target(THIS_NODE), { once: true }]}
@@ -141,6 +151,8 @@ export function List() {
             >
                 clear
             </button> */}
-        </div>
+                </div>
+            ))}
+        </>
     )
 }

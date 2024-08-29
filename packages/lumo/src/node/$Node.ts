@@ -1,10 +1,10 @@
 import { PublicComponent, ComponentSetup } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
-import { isUpdatingList, onListUpdated } from "../list/iterate_over"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
 import { $Signal, Signal, asReadonly, ReadonlySignal } from "@rue/muonic"
 import { HTMLTag } from "../element/makeElement"
+import { isUpdatingList } from "../list/listStack"
 
 
 

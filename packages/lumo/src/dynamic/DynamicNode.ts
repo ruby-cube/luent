@@ -72,6 +72,7 @@ export class DynamicNode {
     }
 
     destroy() {
+        console.log("DESTROY")
         this.unmount();
         this.emit(LifecycleHook.ON_DESTROY) // this stops all onActivated and onDeactivate listeners that are set to go until destroy
         this.nodePod = undefined

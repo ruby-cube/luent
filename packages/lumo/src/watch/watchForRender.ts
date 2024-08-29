@@ -1,5 +1,5 @@
 import { beforeRender, ChangeHandler, getDependencies, hasSignal, initializeEffect as _initializeEffect, onRendered, ReactiveSignal, shallowClone, usePhaseQueues, watch as _watch, WatchOptions } from "@rue/muonic";
-import { InternalComponent } from "../component/InternalComponent";
+import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
 import { getWithoutTracking, ReactiveModel } from "@rue/muonic";
@@ -73,11 +73,19 @@ function setUpUpdateHooks(component: InternalComponent) {
     }, { once: true })
 }
 
-
+function bindWithComponent(fn: Function, component: InternalComponent) {
+    return (...args: any[]) => {
+        pushComponent(component)
+        const output = fn(...args)
+        popComponent()
+        return output;
+    }
+}
 
 function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveListener {
     const mountPhase = isMountPhase()
-    const initializeFn = renderPhase ? _initializeRender : _initializeEffect;
+    const component = getComponent(_initializeAndPreserve.name)
+    const initializeFn = bindWithComponent(renderPhase ? _initializeRender : _initializeEffect, component);
     const dynamicNode = getActiveDynamicNode()!
     const watcher = { stop: noop }
 
@@ -120,19 +128,22 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
 
 function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
     const mountPhase = isMountPhase()
-    const component = getCurrentComponent();
-    if (!component) throw new Error("No component found")
+    const component = getComponent(watchAndPreserve.name);
     const watchFn = options?.phase === 'render' ? _watchForRender : _watch
     const dynamicNode = getActiveDynamicNode()!
 
     const watcher = { stop: noop }
+    let reactivation = false; //FIX: I'm not sure if this is helping with reactivation
     let oldValue: any
     initializeOnActivated()
     onDeactivate(deactivateAndReactivate, { once: true }, dynamicNode)
-    
+
     function deactivateAndReactivate() {
         oldValue = hasSignal(target) ? target() : shallowClone(target)
+        reactivation = true;
         watcher.stop()
+        console.log("DEACTIVATION")
+        console.log('mountPhase', mountPhase)
         if (!mountPhase) {
             initializeOnActivated()
         }
@@ -141,25 +152,26 @@ function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends
     function initializeOnActivated() {
         if (hasSignal(target)) {
             onActivated(() => {
-                handler(target(), oldValue)
+                console.log('onActivated callback')
+                console.log('reactivation', reactivation)
+                if (reactivation) handler(target(), oldValue)
                 initializeWatcher()
             }, { once: true }, dynamicNode)
         }
         else {
             onActivated(() => {
-                handler(<ReactiveModel<T extends AnyObject ? T : never>>target, oldValue)
+                if (reactivation) handler(<ReactiveModel<T extends AnyObject ? T : never>>target, oldValue)
                 initializeWatcher()
             }, { once: true }, dynamicNode)
         }
     }
 
     function initializeWatcher() {
+        console.log('initializing watcher')
         pushComponent(component)
         watcher.stop = watchFn(target, handler, options).stop
         popComponent()
     }
-
-
 
     return watcher
 }

@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { longestCommonSubstring } from "./lcs";
-import { UniqueItem } from "./iterate_over";
 import { areShallowEqualArrays, isShallowEqual } from "@rue/muonic";
+import { UniqueItem } from "./iterate_over";
 
 
 // TODO: implementation for sets, objects, and maps
@@ -69,7 +69,6 @@ export type InsertAndMoveKit = {
 function toIdArray(target: AnyObject[], idKey: string | symbol) {
     const idArray = new UniqueArray();
     const itemMap: Map<any, any> = new Map();
-
     for (const item of target) {
         idArray.push(item[idKey])
         itemMap.set(item[idKey], item)

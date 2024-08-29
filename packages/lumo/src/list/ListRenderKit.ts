@@ -62,7 +62,7 @@ export class ListRenderKit<T = any> {
         parent: Element,
         nodePod: _NodePod,
         fragment?: DocumentFragment,
-    ){
+    ) {
         const data = this.data
         const renderItem = this.renderItem
         const idKey = this.idKey
@@ -72,8 +72,8 @@ export class ListRenderKit<T = any> {
         const isDynamic = isReactiveModel(data) || hasSignal(data);
         const dynamicNodePod = this.dynamicNodePod = isDynamic ? nodePod.appendDynamicPod() : undefined;
         const indices: Signal<number>[] = []
-    
-        pushComponent(component)
+
+
         pushList(this);
         for (let i = 0; i < _list.length; i++) {
             const $index = $Signal(i)
@@ -81,39 +81,40 @@ export class ListRenderKit<T = any> {
             currentItem = item;
             $currentIndex = $index;
             indices.push($index)
-    
+
             nodePod = isDynamic ? dynamicNodePod!.appendNodePod() : nodePod;
             if (isDynamic) {
                 const dynamicNode = makeDynamicNode(false)
                 dynamicNode.activate(function mountDynamicItem() {
+                    pushComponent(component)
                     const nodeEntities = normalizeToArray(renderItem(item, $index))
                     for (const nodeEntity of nodeEntities) {
                         mountNodeEntity(parent, nodeEntity, nodePod, fragment);
                     }
+                    popComponent()
                 })
                 dynamicNode.setNodePod(nodePod)
                 dynamicNodeMap.set(nodePod, dynamicNode)
             }
             else {
+                pushComponent(component)
                 const nodeEntities = normalizeToArray(renderItem(item, $index))
                 for (const nodeEntity of nodeEntities) {
                     mountNodeEntity(parent, nodeEntity, nodePod, fragment);
                 }
+                popComponent()
             }
         }
-        currentItem = undefined;
-        $currentIndex = undefined;
-        popList();
-        popComponent()
-    
+
         // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
-    
+
         if (isDynamic) {
             const dynamicIndices = new DynamicIndices(indices)
-    
+
             // set up watcher for updates
             // const updateCycle = getCurrentUpdateCycle();
             const parentDynamicNode = getActiveDynamicNode()
+            pushComponent(component)
             watchForRender(data, (newValue: any[], oldValue: any[]) => {
                 // if (updateCycle === getCurrentUpdateCycle()) {
                 //     console.warn("prevented same update cycle")
@@ -134,7 +135,11 @@ export class ListRenderKit<T = any> {
                     popDynamicNode()
                 })
             })
+            popComponent()
         }
+        currentItem = undefined;
+        $currentIndex = undefined;
+        popList();
 
     }
 
@@ -151,17 +156,17 @@ export class ListRenderKit<T = any> {
         insertAndMoveKit: InsertAndMoveKit,
         parent: Element,
         dynamicIndices: DynamicIndices,
-    ){
+    ) {
         const { getOriginalItem, isNewItem, hasMoved, newUArray, oldUArray, isRemoved } = insertAndMoveKit;
         const dynamicList = this.dynamicNodePod!
         if (dynamicList.length !== oldUArray.length) throw new Error("dynamicPod and data length are mismatched")
         const indicesAndNodePods: [number, _NodePod[]][] = []
         const indicesAndFragments: [number, DocumentFragment][] = []
         let fragment = new DocumentFragment();
-    
+
         const newIndices: Signal<number>[] = [];
         const toFromIndices: [number, number][] = []
-    
+
         for (let i = 0; i < newUArray.length; i++) {
             const uItem = newUArray[i];
             const _isNewItem = isNewItem(uItem);
@@ -170,17 +175,17 @@ export class ListRenderKit<T = any> {
             const nodePod = _isNewItem ? new _NodePod()
                 : _itemHasMoved ? dynamicList[prevIndex] // dynamicList[index]
                     : null;
-    
+
             if (!_isNewItem) {
                 // update $index value
                 const $index = dynamicIndices.current[prevIndex];
                 newIndices.push($index);
                 $index.set(() => i)
-    
+
                 // to update refs
                 toFromIndices.push([i, prevIndex]);
             };
-    
+
             if (!nodePod) continue;
             const prevEntry = indicesAndNodePods.at(-1);
             if (prevEntry && prevEntry[0] + 1 === i) {
@@ -191,14 +196,14 @@ export class ListRenderKit<T = any> {
                 fragment = new DocumentFragment();
                 indicesAndFragments.push([i, fragment]) // queue fragment for mounting
             }
-    
+
             if (isNewItem(uItem)) {
                 const item = getOriginalItem(uItem, newUArray)
                 const $index = $Signal(i)
                 setCurrentItemAndIndex(item, $index); // to retreive config
                 newIndices.push($index);
                 // create and collect consecutive new items onto the same fragment
-    
+
                 const dynamicNode = makeDynamicNode(false, nodePod)
                 const renderItem = this.renderItem
                 pushComponent(this.component)
@@ -219,7 +224,7 @@ export class ListRenderKit<T = any> {
             }
         }
         dynamicIndices.update(newIndices)
-    
+
         // queue nodePod removal
         const indicesAndRemoveCount: [Index, Count][] = [];
         let j = 0;
@@ -236,20 +241,20 @@ export class ListRenderKit<T = any> {
             }
             j++;
         }
-    
+
         // (1) remove nodePods 
         let k = indicesAndRemoveCount.length; // loop through backwards to avoid having to recalculate index
         while (k--) {
             const [index, count] = indicesAndRemoveCount[k];
             dynamicList!.removeNodePods(index, count);
-    
+
         }
-    
+
         // (2) insert node pods into dynamic list
         for (const [index, nodePods] of indicesAndNodePods) {
             dynamicList.insertNodePods(index, nodePods)
         }
-    
+
         // (3) insert nodes into DOM
         for (const [index, fragment] of indicesAndFragments) {
             const prevNode = dynamicList[index].prevNode
@@ -257,9 +262,9 @@ export class ListRenderKit<T = any> {
             else if (prevNode) prevNode.after(fragment);
             else parent.prepend(fragment);
         }
-    
+
         this.castUpdated(toFromIndices)
-    
+
         // (4) update node refs
         // for (const [_, nodePods] of indicesAndNodePods) {
         //     console.log('nodePods',nodePods)

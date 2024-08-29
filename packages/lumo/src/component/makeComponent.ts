@@ -4,9 +4,9 @@ import { ComponentConfig, EventsConfig, initializeListRef, initializeRef, makeNo
 import { normalizeToArray } from "@rue/utils";
 import { DerivedSignal, Signal } from "@rue/muonic";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
-import { getCurrentItemAndIndex } from "../list/iterate_over";
 import { getCurrentComponent, popComponent, pushComponent } from "./componentStack";
 import { LifecycleHook } from "./lifecycle";
+import { getCurrentItemAndIndex } from "../list/ListRenderKit";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 

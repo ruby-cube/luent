@@ -15,7 +15,6 @@ type ConditionalOptions = {
 }
 
 
-let currentRenderType: 'create' | 'show' | 'mount' = 'create'
 let currentNodePodIndex: number | undefined = undefined
 function resetCurrentNodePodIndex(index?: number) {
     currentNodePodIndex = index ?? undefined;
