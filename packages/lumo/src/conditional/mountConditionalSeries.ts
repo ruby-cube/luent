@@ -1,70 +1,24 @@
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
-import { setUpNodeEntity } from "../node/setUpNodeEntity";
-import { watchForRender } from "../reactivity/watchForRender";
+import { watchForRender } from "../watch/watchForRender";
 import { LifecycleHook } from "../component/lifecycle";
 import { NodeEntity } from "../node/makeNode";
 import { getNodeRef } from "../node/$Node";
 import { areShallowEqualArrays, getDependencyTracker, getWithoutTracking, isShallowEqual } from "@rue/muonic";
 import { ConditionalRenderSeries } from "./ConditionalRenderSeries";
-import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { popComponent, pushComponent } from "../component/componentStack";
 import { LifecycleHook as DynamicLifecycleHook } from "../dynamic/lifecycle";
-import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/DynamicNode";
+import { DynamicNode, getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/DynamicNode";
+import { Fragment } from "@rue/jsx-runtime";
 
-export function setUpConditionalMount(
+export function mountConditionalSeries(
     component: InternalComponent,
     parent: Element,
     series: ConditionalRenderSeries,
     nodePod: _NodePod,
     fragment?: DocumentFragment,
 ) {
-    // evaluate conditions and render
-    const { $conditions, activeIndex } = series.evaluateConditions()
-    const dynamicPod = nodePod.appendDynamicPod();
-    const _nodePod = dynamicPod.appendNodePod()
-
-    let dynamicNode = makeDynamicNode(function renderConditional() {
-        const initialNodeEntities = series.render(activeIndex)
-        // append to dom and node pod
-        for (const nodeEntity of initialNodeEntities) {
-            setUpNodeEntity(component, parent, nodeEntity, _nodePod, fragment) //QUESTION: Why don't I call mountConditional here?
-        }
-    }, nodePod)
-    dynamicNode.emit(DynamicLifecycleHook.MOUNTED)
-
-    // set up watcher for updates
-    watchForRender($conditions, updateConditional, { once: true })
-    const parentDynamicNode = getActiveDynamicNode();
-
-    function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-        console.log("[ updating conditional ]")
-        if (areShallowEqualArrays(newValue, oldValue)) return;
-        pushComponent(component)
-        pushDynamicNode(parentDynamicNode!)
-        // evaluate conditions
-        const { $conditions, activeIndex } = series.evaluateConditions();
-
-        // render and add/remove node pods
-        component.emit(LifecycleHook.BEFORE_UPDATE)
-        dynamicNode.unmount()
-
-        // set up new conditional pod
-        const nodePod = new _NodePod();
-        dynamicNode = makeDynamicNode(function renderConditionalUpdate() {
-            const nodeEntities = series.render(activeIndex)
-            dynamicPod.replaceNodePod(0, nodePod);
-            mountConditional(nodePod, component, parent, dynamicPod, nodeEntities);
-        }, nodePod)
-        dynamicNode.emit(DynamicLifecycleHook.MOUNTED)
-        component.emit(LifecycleHook.UPDATED)
-
-        // set up for next update
-        watchForRender($conditions, updateConditional, { once: true })
-        popComponent()
-        popDynamicNode()
-    }
-
+   
 }
 
 // export function emitHookBatch(hookName: LifecycleHook, components: InternalComponent[] | undefined) {
@@ -74,18 +28,18 @@ export function setUpConditionalMount(
 //     }
 // }
 
-// function forEachInNodePod(nodePod: _NodePod, doTask: (node: DOMNode) => void) {
+// function iterate_overNodePod(nodePod: _NodePod, doTask: (node: DOMNode) => void) {
 
 // }
 
 
 
 
-export function populateFragment(fragment: DocumentFragment, nodePod: _NodePod) {
-    nodePod.forEachNode((node) => {
-        fragment.appendChild(node)
-    })
-}
+// export function populateFragment(fragment: DocumentFragment, nodePod: _NodePod) {
+//     nodePod.forEachNode((node) => {
+//         fragment.appendChild(node)
+//     })
+// }
 
 // const preservedNodePods: WeakMap<RenderConditional, _NodePod> = new WeakMap();
 
@@ -133,18 +87,6 @@ export function populateFragment(fragment: DocumentFragment, nodePod: _NodePod) 
 //     // restoreNodeRefValues(nodePod, nodePod.componentsToUnmount)
 // }
 
-export function mountConditional(nodePod: _NodePod, component: InternalComponent, parent: Element, dynamicPod: _DynamicNodePod, nodeEntities: NodeEntity[]) {
-    const fragment = new DocumentFragment();
-
-    for (const nodeEntity of nodeEntities) {
-        setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment) //TODO: pass in index in case it's in a list?
-    }
-
-    let prevSibling = dynamicPod.prevNode;
-    if (prevSibling && prevSibling === parent) parent.append(fragment) //for teleport
-    else if (prevSibling) prevSibling.after(fragment)
-    else parent.prepend(fragment)
-}
 
 
 function nullNodeRefValues(nodePod: _NodePod, components: InternalComponent[]) {

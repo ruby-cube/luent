@@ -3,7 +3,7 @@ import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { $listen, Callback, collectEffects, EffectFlask, ListenerOptions } from "@rue/flask";
 import { isReactiveModel, ReactiveModel, Readonly, Signal, $Signal, hasSignal, ReactiveSignal } from "@rue/muonic";
-import { makeDynamicNode } from "../dynamic/makeDynamicNode";
+import {  makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { DynamicNode } from "../dynamic/DynamicNode";
 
 
@@ -78,7 +78,6 @@ export function onListUpdated(task: (toFromIndices: [number, number][]) => void,
             list.onUpdatedTasks.add(cb);
         },
         remove(cb) {
-            console.trace()
             list.onUpdatedTasks.delete(cb)
         }
     })
@@ -102,10 +101,10 @@ export function setCurrentItemAndIndex(item: any, $index: Signal<number>) {
 //     return settingUpList;
 // }
 
-export function forEachIn<T>(data: Collection<T>, render: RenderItem<T>, idKey?: string): ListRenderKit // static list
-export function forEachIn<T>(data: ReactiveModel<Collection<T>> | ReactiveSignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
-export function forEachIn<T>(data: ReactiveModel<Collection<T>> | ReactiveSignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
-export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: string): ListRenderKit {
+export function iterate_over<T>(data: Collection<T>, render: RenderItem<T>, idKey?: string): ListRenderKit // static list
+export function iterate_over<T>(data: ReactiveModel<Collection<T>> | ReactiveSignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
+export function iterate_over<T>(data: ReactiveModel<Collection<T>> | ReactiveSignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
+export function iterate_over<T>(data: ListData<T>, render: RenderItem<T>, idKey?: string): ListRenderKit {
     const domNodes: (NodeEntity | NodeEntity[])[] = [];
     const list = hasSignal(data) ? data() : <Collection<T>>data;
     const _list = list instanceof Array ? list : list //TODO: need to implement for sets, maps, and objects
@@ -126,7 +125,8 @@ export function forEachIn<T>(data: ListData<T>, render: RenderItem<T>, idKey?: s
         indices.push($index)
 
         if (isDynamic){
-            const dynamicNode = makeDynamicNode(renderListItem)
+            const dynamicNode = makeDynamicNode()
+            dynamicNode.activate(renderListItem)
             dynamicNodes.push(dynamicNode)
         }
         else {

@@ -1,7 +1,7 @@
 import { normalizeToArray } from "@rue/utils";
 import { NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
-import { setUpNodeEntity } from "../node/setUpNodeEntity";
+import { mountNodeEntity } from "../node/mountNodeEntity";
 import { getCurrentComponent } from "./componentStack";
 import { InternalComponent } from "./InternalComponent";
 
@@ -14,6 +14,6 @@ export function teleportTo(container: string | Element, nodeEntities: NodeEntity
     nodePod.appendStaticNode(_container) // serves as an indicator to append instead of prepend for dynamic updates
     const _nodeEntities = normalizeToArray(nodeEntities)
     for (const nodeEntity of _nodeEntities) {
-        setUpNodeEntity(component, _container, nodeEntity, nodePod)
+        mountNodeEntity(component, _container, nodeEntity, nodePod)
     }
 }

@@ -1,4 +1,4 @@
-import { ifCase, forEachIn, setUpNode, setUpNodesIn, onActivated, beforeMount, beforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../../../packages/lumo/src";
+import { ifCase, iterate_over, setUpNode, setUpNodesIn, onActivated, beforeMount, beforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../../../packages/lumo/src";
 import { useReactivity, Signal, watch, ReactiveSignal } from "@rue/muonic";
 
 const { $, mu, o$, set } = useReactivity()
@@ -261,12 +261,12 @@ function List() {
             // mE('blockquote', [$count]),
             // mE('button', ['increment'], xButton),
             mE('ul', [
-                forEachIn(list$, (item) => [
+                iterate_over(list$, (item) => [
                     mE('li', [item]),
                     // mE('li', [item + ' copy'])
                 ])
             ], 'ul'),
-            forEachIn(list$, () =>
+            iterate_over(list$, () =>
                 mE(ListItem)
             )
             // ])

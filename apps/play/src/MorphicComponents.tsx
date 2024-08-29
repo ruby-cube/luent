@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { $Signal, Signal, watch } from "@rue/muonic"
-import { watchForRender } from "../../../packages/lumo/src/reactivity/watchForRender";
+import { watchForRender } from "../../../packages/lumo/src/watch/watchForRender";
 import { $Node } from "@rue/lumo";
 
 export function MainBlock() {
@@ -24,18 +24,13 @@ export function MainBlock() {
 
     const $list = $Signal(['ho'])
 
-    const [$records_list, $recordNodes] = $ListPort($records, (record) => (
+    const $records_list = $ListPort($records, (record) => (
         <h1>{record.content}</h1>
     ), { ref: $recordNodes, IDKey: 'id' })
 
     function changeMainContent(index) {
         $main_content.setTo($bye)
         $main_content.setTo($recordsNodes, 9)
-        $records_list.update((records) => { //records is a proxy that mutates the data with portable nodes instead of data items
-            const record = $recordNodes()[index]
-            records.insert(record, 2) // Can insert PortableNode or new data
-            records.delete(index)
-        })
     }
 
     return (

@@ -1,7 +1,7 @@
-import { EffectFlask } from "@rue/flask";
-import { preserveAllRequested } from "../conditional/$if";
+import { collectEffects, EffectFlask } from "@rue/flask";
+import { preserveAllRequested } from "../conditional/create_if";
 import { _NodePod } from "../node/NodePod";
-import { LifecycleHook } from "./lifecycle";
+import { beforeDeactivate, beforeDestroy, beforeUnmount, LifecycleHook } from "./lifecycle";
 
 export class DynamicNode {
     flask: EffectFlask | undefined;
@@ -24,17 +24,17 @@ export class DynamicNode {
     }
 
     tasks: {
+        [LifecycleHook.MOUNTED]: Set<() => void> | undefined;
         [LifecycleHook.BEFORE_UNMOUNT]: Set<() => void> | undefined;
         [LifecycleHook.BEFORE_DESTROY]: Set<() => void> | undefined;
-        [LifecycleHook.MOUNTED]: Set<() => void> | undefined;
         // [LifecycleHook.ACTIVATED]: Set<() => void> | undefined;
-        // [LifecycleHook.BEFORE_DEACTIVATE]: Set<() => void> | undefined;
+        [LifecycleHook.BEFORE_DEACTIVATE]: Set<() => void> | undefined;
     } = {
+            [LifecycleHook.MOUNTED]: undefined,
             [LifecycleHook.BEFORE_UNMOUNT]: undefined,
             [LifecycleHook.BEFORE_DESTROY]: undefined,
-            [LifecycleHook.MOUNTED]: undefined,
             // [LifecycleHook.ACTIVATED]: undefined,
-            // [LifecycleHook.BEFORE_DEACTIVATE]: undefined,
+            [LifecycleHook.BEFORE_DEACTIVATE]: undefined,
         };
 
     private getTaskQueue(hookName: LifecycleHook) {
@@ -51,6 +51,31 @@ export class DynamicNode {
         }
     }
 
+    activate(render: () => void) {
+        pushDynamicNode(this);
+        collectEffects((flask) => {
+            this.setFlask(flask)
+
+            render()
+
+            // set up hook cascade
+            const parent = this.parent;
+            if (parent instanceof DynamicNode) {
+                beforeDeactivate(() => this.deactivate(), undefined, parent)
+                beforeUnmount(() => this.unmount(), undefined, parent)
+                beforeDestroy(() => this.destroy(), parent)
+            }
+        }, render.name)
+        this.emit(LifecycleHook.MOUNTED) //TODO: changed to activated
+        popDynamicNode();
+    }
+
+
+    deactivate() {
+        this.emit(LifecycleHook.BEFORE_DEACTIVATE)
+        this.flask?.dispose()
+    }
+
     unmount() {
         this.emit(LifecycleHook.BEFORE_UNMOUNT)
         const nodePod = this.nodePod;
@@ -58,21 +83,21 @@ export class DynamicNode {
         nodePod.forEachNode((node) => {
             node.remove();
         })
-        // TODO: null node refs, preserve if needed
-        this.flask?.dispose(); //TODO: instead of disposing, need to remove and preserve somehow
+        this.deactivate()
     }
 
     destroy() {
+        this.unmount();
         this.emit(LifecycleHook.BEFORE_DESTROY)
-        const nodePod = this.nodePod;
-        if (!nodePod) throw new Error('No nodePod :( This should never happen')
-        nodePod.forEachNode((node) => {
-            node.remove();
-        })
-        // TODO: null node refs, preserve if needed
-        this.flask?.dispose();
+        this.nodePod = undefined
+        this.flask = undefined
+        this.parent = null
+        this.deactivate()
+        //TODO: clear or null all tasks??
     }
 }
+
+export const NULLISH_DYNAMIC_NODE = new DynamicNode(null)
 
 
 let activeDynamicNode: DynamicNode | null = null

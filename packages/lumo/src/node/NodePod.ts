@@ -126,6 +126,8 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
     }
 }
 
+export const NULLISH_NODE_POD = new _NodePod()
+
 
 // if (ho instanceof Node){
 

@@ -1,9 +1,8 @@
 import { hasSignal, isReactiveModel, Signal, $Signal } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
-import { DynamicIndices, ListRenderKit, popList, pushList, RenderItem, setCurrentItemAndIndex } from "./forEachIn";
-import { setUpNodeEntity } from "../node/setUpNodeEntity";
-import { watchForRender } from "../reactivity/watchForRender";
+import { DynamicIndices, ListRenderKit, popList, pushList, RenderItem, setCurrentItemAndIndex } from "./iterate_over";
+import { watchForRender } from "../watch/watchForRender";
 import { AnyObject } from "@rue/types";
 import { diff, InsertAndMoveKit } from "./diff";
 import { getNodeRef, InternalNodeRef } from "../node/$Node";
@@ -13,9 +12,11 @@ import { popComponent, pushComponent } from "../component/componentStack";
 import { DynamicNode, getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/DynamicNode";
 import { LifecycleHook as DynamicLifecycleHook } from "../dynamic/lifecycle";
 import { LifecycleHook } from "../component/lifecycle";
-import { makeDynamicNode } from "../dynamic/makeDynamicNode";
+import {  makeDynamicNode } from "../dynamic/makeDynamicNode";
+import { mountNodeEntity } from "../node/mountNodeEntity";
 
-const dynamicNodeMap: WeakMap<_NodePod, DynamicNode> = new WeakMap() // map node pod to dynamic node for easy retrieval. We don't want to have to rearrange the dynamic nodes array with every list change
+// map node pod to dynamic node for easy retrieval. We don't want to have to rearrange the dynamic nodes array with every list change
+const dynamicNodeMap: WeakMap<_NodePod, DynamicNode> = new WeakMap() 
 
 export function setUpNodeList(
     component: InternalComponent,
@@ -39,7 +40,7 @@ export function setUpNodeList(
             // const flask = dynamicNode.flask!;
             // flask.reactivate()
             for (const nodeEntity of nodeEntities) {
-                setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
+                mountNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
             }
             dynamicNode.emit(DynamicLifecycleHook.MOUNTED)
             dynamicNode.setNodePod(nodePod)
@@ -49,7 +50,7 @@ export function setUpNodeList(
         }
         else {
             for (const nodeEntity of nodeEntities) {
-                setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
+                mountNodeEntity(component, parent, nodeEntity, nodePod, fragment, componentsToUnmount);
             }
         }
     }
@@ -161,14 +162,15 @@ export function insertAndMoveListItemNodes(
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
 
-            const dynamicNode = makeDynamicNode(function renderNewListItem() {
+            const dynamicNode = makeDynamicNode(nodePod)
+            dynamicNode.activate(function renderNewListItem() {
                 pushList(listRenderKit)
                 const nodeEntities = normalizeToArray(renderItem(item, $index));
                 popList();
                 for (const nodeEntity of nodeEntities!) {
-                    setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment)
+                    mountNodeEntity(component, parent, nodeEntity, nodePod, fragment)
                 }
-            }, nodePod)
+            })
             dynamicNode.emit(DynamicLifecycleHook.MOUNTED)
             dynamicNodeMap.set(nodePod, dynamicNode)
         }

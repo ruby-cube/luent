@@ -19,7 +19,7 @@ import { NestedPend } from './NestedPend';
 const app = createApp(List)
 
 if (__DEV__) configureFlask({
-    warnNoCleanup: true
+    warnNoCleanup: false
 })
 
 app.mount('#app')

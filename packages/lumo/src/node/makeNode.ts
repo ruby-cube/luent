@@ -1,6 +1,6 @@
 import { DerivedSignal, ReactiveSignal, Signal } from "@rue/muonic";
 import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
-import { getCurrentItemAndIndex, isSettingUpList, ListRenderKit, onListUpdated } from "../list/forEachIn";
+import { getCurrentItemAndIndex, isSettingUpList, ListRenderKit, onListUpdated } from "../list/iterate_over";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
 import { getNodeRef, InternalNodeRef, NodeReferent, NodeSignal } from "./$Node";

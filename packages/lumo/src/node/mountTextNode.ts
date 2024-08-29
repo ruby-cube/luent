@@ -1,6 +1,6 @@
 import { getWithoutTracking, hasSignal, ReactiveSignal } from "@rue/muonic";
 import { _NodePod } from "./NodePod";
-import { watchForRender } from "../reactivity/watchForRender";
+import { watchForRender } from "../watch/watchForRender";
 import { getActiveDynamicNode } from "../dynamic/DynamicNode";
 
 export function mountTextNode(parent: Element, text: ReactiveSignal | any, nodePod?: _NodePod, fragment?: DocumentFragment) {

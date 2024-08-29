@@ -1,5 +1,5 @@
 import { ComponentSetup } from "./InternalComponent";
-import { $else, $elseIf, $if } from "../conditional/$if";
+import { $else, $elseIf, $if } from "../conditional/create_if";
 import { noop } from "@rue/utils";
 import { $Signal } from "@rue/muonic";
 

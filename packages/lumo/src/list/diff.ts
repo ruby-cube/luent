@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { longestCommonSubstring } from "./lcs";
-import { UniqueItem } from "./forEachIn";
+import { UniqueItem } from "./iterate_over";
 import { areShallowEqualArrays, isShallowEqual } from "@rue/muonic";
 
 

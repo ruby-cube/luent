@@ -8,6 +8,7 @@ export enum LifecycleHook {
     MOUNTED = 'm',
     BEFORE_UNMOUNT = 'bum',
     BEFORE_DESTROY = 'bd',
+    BEFORE_DEACTIVATE = 'bda',
 }
 
 
@@ -38,7 +39,7 @@ function createLifecycleHook(name: LifecycleHook.BEFORE_DESTROY) {
     }
 }
 
-function createUpdateHook(name: LifecycleHook.MOUNTED | LifecycleHook.BEFORE_UNMOUNT) {
+function createUpdateHook(name: LifecycleHook.MOUNTED | LifecycleHook.BEFORE_UNMOUNT | LifecycleHook.BEFORE_DEACTIVATE) {
     return function on(handler: () => void, options?: ListenerOptions, _node?: DynamicNode) {
         const node = _node || getActiveDynamicNode();
         if (!node) throw new Error("Lifecycle hooks cannot be called outside of component setup");
@@ -57,6 +58,7 @@ function createUpdateHook(name: LifecycleHook.MOUNTED | LifecycleHook.BEFORE_UNM
 
 
 export const beforeUnmount = createUpdateHook(LifecycleHook.BEFORE_UNMOUNT)
+export const beforeDeactivate = createUpdateHook(LifecycleHook.BEFORE_DEACTIVATE)
 export const onMounted = createUpdateHook(LifecycleHook.MOUNTED)
 export const beforeDestroy = createLifecycleHook(LifecycleHook.BEFORE_DESTROY)
 

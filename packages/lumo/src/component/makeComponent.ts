@@ -4,7 +4,7 @@ import { ComponentConfig, EventsConfig, initializeListRef, initializeRef, makeNo
 import { normalizeToArray } from "@rue/utils";
 import { DerivedSignal, Signal } from "@rue/muonic";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
-import { getCurrentItemAndIndex } from "../list/forEachIn";
+import { getCurrentItemAndIndex } from "../list/iterate_over";
 import { getCurrentComponent, popComponent, pushComponent } from "./componentStack";
 import { LifecycleHook } from "./lifecycle";
 

@@ -4,11 +4,13 @@ import { Booleanny } from "@rue/types";
 
 export class ConditionalSeries {
     conditions: ReactiveSignal<Booleanny>[] = [];
+    prevActiveIndex?: number = undefined;
+    activeIndex?: number = undefined;
 
     constructor(
-        public statements: ConditionalKit[], 
+        public statements: ConditionalKit[],
         makeElseKit: () => ConditionalKit
-    ) { 
+    ) {
         for (let i = 0; i < statements.length; i++) {
             const kit = statements[i]
             if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
@@ -40,6 +42,8 @@ export class ConditionalSeries {
             const $condition = conditionalKits[i].$condition
             if ($condition) this.conditions.push($condition);
             if ($condition && getWithoutTracking($condition) || !$condition) {
+                this.prevActiveIndex = this.activeIndex;
+                this.activeIndex = i;
                 return {
                     activeIndex: i,
                     $conditions: genConditionsSignal(this.conditions)
@@ -62,28 +66,28 @@ export function genConditionsSignal(conditions: ReactiveSignal<Booleanny>[]) {
 
 
 
-export function buildConditionalSeries(statements: ConditionalKit[], series: ConditionalSeries, makeElseKit: () => ConditionalKit) {
-    for (let i = 0; i < statements.length; i++) {
-        const kit = statements[i]
-        if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
-            if (__DEV__) throw new Error('$if must be the first child of a conditional series (or extraneous use of fragment)')
-            else continue;
-        }
-        if (!(kit instanceof ConditionalKit)) {
-            if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the $if, $elseIf, and $else functions")
-            else continue;
-        }
-        if (i !== statements.length - 1 && kit.statementType === 'else') {
-            if (__DEV__) throw new Error("$else must be the very last statement of a conditional series");
-            else continue;
-        }
-        series.addKit(kit);
-    }
-    if (noElseBlock(statements)) {
-        series.addKit(makeElseKit())
-    }
-    return series;
-}
+// export function buildConditionalSeries(statements: ConditionalKit[], series: ConditionalSeries, makeElseKit: () => ConditionalKit) {
+//     for (let i = 0; i < statements.length; i++) {
+//         const kit = statements[i]
+//         if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
+//             if (__DEV__) throw new Error('$if must be the first child of a conditional series (or extraneous use of fragment)')
+//             else continue;
+//         }
+//         if (!(kit instanceof ConditionalKit)) {
+//             if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the $if, $elseIf, and $else functions")
+//             else continue;
+//         }
+//         if (i !== statements.length - 1 && kit.statementType === 'else') {
+//             if (__DEV__) throw new Error("$else must be the very last statement of a conditional series");
+//             else continue;
+//         }
+//         series.addKit(kit);
+//     }
+//     if (noElseBlock(statements)) {
+//         series.addKit(makeElseKit())
+//     }
+//     return series;
+// }
 
 function noElseBlock(statements: ConditionalKit[]) {
     if (statements.length === 0) throw new Error(`Conditional series is empty`)
@@ -92,9 +96,9 @@ function noElseBlock(statements: ConditionalKit[]) {
 }
 
 export function validateStandAloneConditional(conditionalKit: ConditionalKit, series: any[], index: number) {
-    if (conditionalKit.statementType !== 'if') 
+    if (conditionalKit.statementType !== 'if')
         throw new Error(`$${conditionalKit.statementType} conditional must be contained in a fragment or array that begins with $if`)
     const nextEntity = series[index + 1];
-    if (nextEntity instanceof ConditionalKit && nextEntity.statementType !== 'if') 
+    if (nextEntity instanceof ConditionalKit && nextEntity.statementType !== 'if')
         throw new Error(`A series of conditional statements must be enclosed in a fragment or array`)
 }

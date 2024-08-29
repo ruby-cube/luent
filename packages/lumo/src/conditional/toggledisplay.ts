@@ -1,12 +1,11 @@
 import { areShallowEqualArrays, getWithoutTracking, isShallowEqual, ReactiveSignal } from "@rue/muonic"
 import { DOMNode, InternalComponent} from "../component/InternalComponent"
 import { _DynamicNodePod, _NodePod } from "../node/NodePod"
-import { watchForRender } from "../reactivity/watchForRender"
+import { watchForRender } from "../watch/watchForRender"
 import { LifecycleHook } from "../component/lifecycle"
 import { NodeEntity } from "../node/makeNode"
-import { mountConditional } from "./setUpConditionalMount"
-import { setUpNodeEntity } from "../node/setUpNodeEntity"
-import { ConditionalRenderSeries } from "./ConditionalRenderSeries"
+import { mountNodeEntity } from "../node/mountNodeEntity"
+import { ConditionalRenderSeries, mountConditional } from "./ConditionalRenderSeries"
 import { popComponent, pushComponent } from "../component/componentStack"
 
 export function setUpConditionalDisplay(
@@ -25,12 +24,13 @@ export function setUpConditionalDisplay(
         dynamicPod.appendNodePod()
     }
 
+    
     const initialNodeEntities = series.render(activeIndex);
 
     // append to dom and node pod
     for (const nodeEntity of initialNodeEntities) {
         const nodePod = dynamicPod[activeIndex];
-        setUpNodeEntity(component, parent, nodeEntity, nodePod, fragment)
+        mountNodeEntity(component, parent, nodeEntity, nodePod, fragment)
     }
 
     // set up watcher for updates
@@ -46,26 +46,28 @@ export function setUpConditionalDisplay(
 
         pushComponent(component)
         component.emit(LifecycleHook.BEFORE_UPDATE)
+
         hidePrevConditionalNodes(dynamicPod, prevIndex);
         const nodeEntities = series.render(activeIndex);
         showConditionalNodes(component, parent, dynamicPod, activeIndex, nodeEntities)
-        component.emit(LifecycleHook.UPDATED)
-
+        
+        
         watchForRender($conditions, updateConditional, { once: true })
+
+        component.emit(LifecycleHook.UPDATED)
         popComponent()
 
         prevIndex = activeIndex;
     }
 }
 
-function hidePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeIndex: number) {
+export function hidePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeIndex: number) {
     const nodePod = dynamicPod[activeIndex];
-    const components = nodePod.componentsToUnmount;
     hideDOMNodes(nodePod)
 }
 
 
-function showConditionalNodes(component: InternalComponent, parent: Element, dynamicPod: _DynamicNodePod, activeIndex: number, nodeEntities: NodeEntity[]) {
+export function showConditionalNodes(component: InternalComponent, parent: Element, dynamicPod: _DynamicNodePod, activeIndex: number, nodeEntities: NodeEntity[]) {
     const nodePod = dynamicPod[activeIndex];
     if (nodePod.length === 0) { // lazy render
         mountConditional(nodePod, component, parent, dynamicPod, nodeEntities)

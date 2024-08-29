@@ -3,12 +3,12 @@ import { DerivedSignal, hasSignal, ReactiveSignal, _runTasks, Hooks } from "@rue
 import { normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
-import { initializeRender, watchForRender } from "../reactivity/watchForRender";
+import { initializeRender, watchForRender } from "../watch/watchForRender";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { ActiveListener, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
 import { runNonSyncTasks, Signal } from "@rue/muonic";
-import { setUpNodeEntity } from "../node/setUpNodeEntity";
+import { mountNodeEntity } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
 import { isHydrating } from "../hydration/hydration";
@@ -59,7 +59,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
                 validateStandAloneConditional(childNodeEntity, _childNodes, i);
                 childNodeEntity = [childNodeEntity]
             }
-            setUpNodeEntity(component, domNode, childNodeEntity, nodePod, undefined)
+            mountNodeEntity(component, domNode, childNodeEntity, nodePod, undefined)
         }
     }
 

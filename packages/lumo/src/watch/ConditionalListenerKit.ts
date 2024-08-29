@@ -1,6 +1,6 @@
 import { ReactiveSignal } from "@rue/muonic";
 import { NodeEntity } from "../node/makeNode";
-import { ConditionalKit } from "./ConditionalKit";
+import { ConditionalKit } from "../conditional/ConditionalKit";
 import { ListenOptions } from "net";
 import { NodeSignal } from "../node/$Node";
 import { Booleanny } from "@rue/types";

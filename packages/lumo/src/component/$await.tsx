@@ -1,5 +1,5 @@
 import { $Signal, __addDevName } from "@rue/muonic";
-import { $else, $elseIf, $if } from "../conditional/$if";
+import { $else, $elseIf, $if } from "../conditional/create_if";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { ComponentSetup } from "./InternalComponent";
 import { AnyObject } from "@rue/types";

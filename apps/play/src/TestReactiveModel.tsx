@@ -1,4 +1,4 @@
-import { $else, $elseIf, $if, $Node, COMPONENT, ComponentSetup, expose, forEachIn, mx, NodeEntity, onMounted, preventDefault, teleportTo, useEventListener } from "@rue/lumo";
+import {  $Node, COMPONENT, ComponentSetup, create_if, else_create, iterate_over, mx, NodeEntity, preventDefault, teleportTo, useEventListener } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic";
 import { $, DeepReactive$, Reactive$ } from "@rue/muonic";
@@ -40,30 +40,30 @@ export function List() {
 
 
     function moveSelectedItems(index: number) {
-            moveMultipleUniqueItems(selected$, list$, index)
+        moveMultipleUniqueItems(selected$, list$, index)
     }
 
     const selected$ = Reactive$(new Set())
 
 
     function clearSelection() {
-            selected$.clear()
+        selected$.clear()
     }
 
     function toggleSelect(e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) {
-            if (e.target instanceof HTMLElement && e.target.style.cursor === 'pointer') return;
-            const item$ = list$[index]
-            if (selected$.has(item$)) {
-                selected$.delete(item$)
-            }
-            else {
-                selected$.add(item$)
-            }
+        if (e.target instanceof HTMLElement && e.target.style.cursor === 'pointer') return;
+        const item$ = list$[index]
+        if (selected$.has(item$)) {
+            selected$.delete(item$)
+        }
+        else {
+            selected$.add(item$)
+        }
     }
 
     function removeItem(index: number) {
-            selected$.delete(list$[index])
-            list$.splice(index, 1);
+        selected$.delete(list$[index])
+        list$.splice(index, 1);
     }
 
     const $itemDiv = $Node<'div'>()
@@ -72,17 +72,16 @@ export function List() {
     return mx(
         <div>
             <>
-                {$if($(() => list$.length === 0), 'create', () => (
+                {create_if($(() => list$.length === 0), () => (
                     <div
-
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
                     </div>
                 ))}
-                {$else(() =>
-                    forEachIn(list$, (item$, $index) => (
+                {else_create(() =>
+                    iterate_over(list$, (item$, $index) => (
                         <div
                             ref={$itemDiv}
                             onclick={(e) => toggleSelect(e, $index())}

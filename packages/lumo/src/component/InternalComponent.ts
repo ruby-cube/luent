@@ -2,8 +2,8 @@ import { AnyObject, MaybePromise } from "@rue/types";
 import { LifecycleHook } from "./lifecycle";
 import { EventHandler, NodeEntity, RenderFunction } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
-import { setUpNodeEntity } from "../node/setUpNodeEntity";
 import { getCurrentComponent, popComponent, pushComponent } from "./componentStack";
+import { mountNodeEntity } from "../node/mountNodeEntity";
 
 
 export type DOMNode = CharacterData | Element
@@ -86,7 +86,7 @@ export class InternalComponent<T extends undefined | AnyObject = undefined | Any
             throw new Error("Parent cannot be a text node")
         pushComponent(this)
         for (const nodeEntity of nodeEntities) {
-            setUpNodeEntity(parentComponent, parent, nodeEntity, nodePod, fragment)
+            mountNodeEntity(parentComponent, parent, nodeEntity, nodePod, fragment)
         }
         popComponent()
     }

@@ -1,4 +1,4 @@
-import { Collection, forEachIn } from "@rue/lumo"
+import { Collection, iterate_over } from "@rue/lumo"
 import { ReactiveModel, Signal } from "@rue/muonic"
 import { Sign } from "crypto"
 
@@ -40,7 +40,7 @@ const portableItemKeyMap: Map<ListPortType, UID> = new Map()
 const renderPortableItemMap: Map<UID, () => any> = new Map()
 
 function $ListPort<L extends any[] = any[]>(listData: Signal<L> | ReactiveModel<L>, renderItem: RenderListItem<L>, UIDKey: string, config: { type: string, ref?: Signal<PortableNode> }) {
-    const listRenderKit = forEachIn(listData as Collection<L extends (infer I)[] ? I : never>, renderItem, UIDKey)
+    const listRenderKit = iterate_over(listData as Collection<L extends (infer I)[] ? I : never>, renderItem, UIDKey)
 
     return listRenderKit;
 }
