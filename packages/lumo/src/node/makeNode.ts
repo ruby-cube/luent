@@ -1,11 +1,12 @@
 import { DerivedSignal, ReactiveSignal, Signal } from "@rue/muonic";
 import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
-import { getCurrentItemAndIndex, isSettingUpList, ListRenderKit, onListUpdated } from "../list/iterate_over";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
 import { getNodeRef, InternalNodeRef, NodeReferent, NodeSignal } from "./$Node";
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
+import { getCurrentItemAndIndex, ListRenderKit } from "../list/ListRenderKit";
+import { isSettingUpList, onListUpdated } from "../list/listStack";
 
 export function Fragment() {
     // for jsx-runtime

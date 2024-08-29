@@ -46,13 +46,13 @@ export class InternalComponent<T extends undefined | AnyObject = undefined | Any
     initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
 
     tasks: {
-        [LifecycleHook.CREATED]: Set<() => void> | undefined;
+        [LifecycleHook.AFTER_CREATE]: Set<() => void> | undefined;
         [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
-        [LifecycleHook.UPDATED]: Set<() => void> | undefined;
+        [LifecycleHook.AFTER_UPDATE]: Set<() => void> | undefined;
     } = {
-            [LifecycleHook.CREATED]: undefined,
+            [LifecycleHook.AFTER_CREATE]: undefined,
             [LifecycleHook.BEFORE_UPDATE]: undefined,
-            [LifecycleHook.UPDATED]: undefined,
+            [LifecycleHook.AFTER_UPDATE]: undefined,
         };
 
     hasUpdates: boolean = false;
@@ -76,7 +76,6 @@ export class InternalComponent<T extends undefined | AnyObject = undefined | Any
     }
 
     mount(
-        parentComponent: InternalComponent,
         parent: Element,
         nodePod: _NodePod,
         fragment?: DocumentFragment,
@@ -86,7 +85,7 @@ export class InternalComponent<T extends undefined | AnyObject = undefined | Any
             throw new Error("Parent cannot be a text node")
         pushComponent(this)
         for (const nodeEntity of nodeEntities) {
-            mountNodeEntity(parentComponent, parent, nodeEntity, nodePod, fragment)
+            mountNodeEntity(parent, nodeEntity, nodePod, fragment)
         }
         popComponent()
     }
@@ -106,7 +105,13 @@ function unnestComponent(component: Component) {
     return component
 }
 
-
+export function getComponent(functionName: string) {
+    const component = getCurrentComponent<InternalComponent>()
+    if (!component) {
+        throw new Error(`${functionName} can only be called from a component setup`)
+    }
+    return component
+}
 
 // export function expose<T extends AnyObject>(component: T) {
 //     const _component = getCurrentComponent<InternalComponent>();

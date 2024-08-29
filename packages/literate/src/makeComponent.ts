@@ -43,7 +43,7 @@ export function makeComponent(
     const component = new SSRComponent(parent);
     pushComponent(component)
     runComponentSetup(Component, component, Slot, config, $index);
-    component.emit(LifecycleHook.CREATED)
+    component.emit(LifecycleHook.AFTER_CREATE)
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
 
     return component;

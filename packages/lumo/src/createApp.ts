@@ -24,14 +24,16 @@ export function getAppRoot() {
 //     )
 // }
 
-export function createApp(App: ComponentSetup) {
+export function createApp(App: ComponentSetup, config?: { remountable: boolean }) {
     // (1) create a mock RootComponent to serve as the parent to developer's root component
     const parentComponent = new InternalComponent(null); //QUESTION: Do I really need this?
     
     // (2) instantiate developer's root component
-    const { component, dynamicNode } = makeRootComponent(App)
-    component.emit(LifecycleHook.CREATED)
+    const component = new InternalComponent(null);
     const nodePod = new _NodePod()
+    const remountable = config?.remountable
+    const preserve = remountable ? true : false
+    const dynamicNode = new DynamicNode(null, preserve, nodePod);
 
     return {
         component,
@@ -42,52 +44,35 @@ export function createApp(App: ComponentSetup) {
             if (!(root instanceof Element)) throw new Error('No root element to mount app to. Check selector string')
             appRoot = root;
 
+            pushComponent(component)
             // (3) attach developer's root component to root element
-            pushDynamicNode(dynamicNode)
-            component.mount(parentComponent, root, nodePod) //TODO: if this is a remount, how would it be different than a first mount
-            dynamicNode.emit(DynamicLifecycleHook.MOUNTED)
-            popDynamicNode()
+            dynamicNode.activate(function mountRootComponent() {
+                runComponentSetup(App, component, undefined, {}, undefined); // preserve node entities for remount
+                component.emit(LifecycleHook.AFTER_CREATE)
+                component.mount(parentComponent, root, nodePod) //TODO: if this is a remount, how would it be different than a first mount
+            })
+            popComponent() // for sibling components to access parent, must be set AFTER `Component()`
 
             return component;
         },
 
-        unmount() {
-            this.dynamicNode!.emit(DynamicLifecycleHook.BEFORE_UNMOUNT);
+        unmount() { //TODO: should I call dynamicNode.unmount() instead of emit?? same for destroy?
+            if (!remountable) {
+                if (__DEV__) throw new Error('App cannot be unmounted. Did you mean to call `destroy`? To enable unmount and remount, set `remountable` to true in config.')
+                return;
+            }
+            this.dynamicNode!.emit(DynamicLifecycleHook.ON_DEACTIVATE);
             const nodePod = this.dynamicNode!.nodePod;
             nodePod?.forEachNode((node) => node.remove()) //TODO: Preserve
         },
 
         destroy() {
-            this.dynamicNode!.emit(DynamicLifecycleHook.BEFORE_DESTROY);
-            const nodePod = this.dynamicNode!.nodePod;
-            nodePod?.forEachNode((node) => node.remove())
+            this.unmount()
+            this.dynamicNode!.emit(DynamicLifecycleHook.ON_DESTROY);
         }
-
     }
 }
 
-
-
-export function makeRootComponent(
-    Component: ComponentSetup,
-): { component: InternalComponent, dynamicNode: DynamicNode } {
-    const component = new InternalComponent(null);
-    pushComponent(component)
-
-    const dynamicNode = new DynamicNode(null);
-    pushDynamicNode(dynamicNode);
-    collectEffects((flask) => {
-        dynamicNode.setFlask(flask)
-
-        runComponentSetup(Component, component, undefined, {}, undefined);
-
-    }, 'RootComponent')
-    popDynamicNode();
-
-    component.emit(LifecycleHook.CREATED)
-    popComponent() // for sibling components to access parent, must be set AFTER `Component()`
-    return { component, dynamicNode };
-}
 
 
 

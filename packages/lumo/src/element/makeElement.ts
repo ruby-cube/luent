@@ -1,4 +1,4 @@
-import { PublicComponent, ComponentSetup, DOMNode, InternalComponent} from "../component/InternalComponent";
+import { PublicComponent, ComponentSetup, DOMNode, InternalComponent, getComponent} from "../component/InternalComponent";
 import { DerivedSignal, hasSignal, ReactiveSignal, _runTasks, Hooks } from "@rue/muonic";
 import { normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
@@ -17,7 +17,7 @@ import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
 import { getCurrentComponent } from "../component/componentStack";
 import { getActiveDynamicNode } from "../dynamic/DynamicNode";
-import { beforeUnmount } from "../dynamic/lifecycle";
+import { onDeactivate } from "../dynamic/lifecycle";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -40,8 +40,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
     const { attributes, events } = analyzeAttributes(other)
 
-    const component = getCurrentComponent<InternalComponent>();
-    if (!component) throw new Error("No component :(")
+    const component = getComponent(makeElement.name)
 
     const domNode = isHydrating() ? getElement() : document.createElement(tagName);
 
@@ -59,7 +58,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
                 validateStandAloneConditional(childNodeEntity, _childNodes, i);
                 childNodeEntity = [childNodeEntity]
             }
-            mountNodeEntity(component, domNode, childNodeEntity, nodePod, undefined)
+            mountNodeEntity(domNode, childNodeEntity, nodePod, undefined)
         }
     }
 
@@ -272,7 +271,7 @@ function setUpRefNulling(ref: _NodePod, $index: Signal<number>) {
 
     }
     else {
-        beforeUnmount(() => {
+        onDeactivate(() => {
 
         })
     }

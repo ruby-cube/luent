@@ -6,9 +6,9 @@ import { getCurrentComponent } from "./componentStack";
 type TaskQueue = Set<() => void>
 
 export enum LifecycleHook {
-    CREATED = 'c',
+    AFTER_CREATE = 'c',
     BEFORE_UPDATE = 'bu',
-    UPDATED = 'u',
+    AFTER_UPDATE = 'u',
 }
 
 
@@ -22,7 +22,7 @@ function useTaskQueue(component: InternalComponent, hookName: LifecycleHook) {
 }
 
 
-function createLifecycleHook(name: Exclude<LifecycleHook, LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDATED>) {
+function createLifecycleHook(name: Exclude<LifecycleHook, LifecycleHook.BEFORE_UPDATE | LifecycleHook.AFTER_UPDATE>) {
     return function on(handler: () => void, _component?: InternalComponent) {
         const component = _component || getCurrentComponent<InternalComponent>();
         if (!component) throw new Error("Lifecycle hooks cannot be called outside of component setup");
@@ -39,7 +39,7 @@ function createLifecycleHook(name: Exclude<LifecycleHook, LifecycleHook.BEFORE_U
     }
 }
 
-function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDATED) {
+function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.AFTER_UPDATE) {
     return function on(handler: () => void, options?: ListenerOptions, _component?: InternalComponent) {
         const component = _component || getCurrentComponent<InternalComponent>();
         if (!component) throw new Error("Lifecycle hooks cannot be called outside of component setup");
@@ -56,14 +56,14 @@ function createUpdateHook(name: LifecycleHook.BEFORE_UPDATE | LifecycleHook.UPDA
     }
 }
 
-export const onCreated = createLifecycleHook(LifecycleHook.CREATED)
+export const afterCreate = createLifecycleHook(LifecycleHook.AFTER_CREATE)
 export const beforeUpdate = createUpdateHook(LifecycleHook.BEFORE_UPDATE)
-export const onUpdated = createUpdateHook(LifecycleHook.UPDATED)
+export const afterUpdate = createUpdateHook(LifecycleHook.AFTER_UPDATE)
 
 
 
 export default {
-    onCreated,
+    afterCreate,
     beforeUpdate,
-    onUpdated,
+    afterUpdate,
 }

@@ -1,4 +1,4 @@
-import {  $Node, COMPONENT, ComponentSetup, create_if, else_create, iterate_over, mx, NodeEntity, preventDefault, teleportTo, useEventListener } from "@rue/lumo";
+import {  $Node, COMPONENT, ComponentSetup, create_if, else_create, else_show, iterate_over, mx, NodeEntity, preventDefault, show_if, teleportTo, useEventListener } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { __addDevName } from "@rue/muonic";
 import { $, DeepReactive$, Reactive$ } from "@rue/muonic";
@@ -72,7 +72,7 @@ export function List() {
     return mx(
         <div>
             <>
-                {create_if($(() => list$.length === 0), () => (
+                {show_if($(() => list$.length === 0), () => (
                     <div
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
@@ -80,7 +80,7 @@ export function List() {
                         insert
                     </div>
                 ))}
-                {else_create(() =>
+                {else_show(() =>
                     iterate_over(list$, (item$, $index) => (
                         <div
                             ref={$itemDiv}

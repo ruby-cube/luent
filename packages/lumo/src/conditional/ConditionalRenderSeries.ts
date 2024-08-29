@@ -17,8 +17,8 @@ import { LifecycleHook } from "../component/lifecycle";
 
 export class ConditionalRenderSeries extends ConditionalSeries {
     declare statements: ConditionalRenderKit[];
-    dynamicNodes: DynamicNode[] = []
-    storeDynamicNode(dynamicNode: DynamicNode, index: number) {
+    private dynamicNodes: DynamicNode[] = []
+    private storeDynamicNode(dynamicNode: DynamicNode, index: number) {
         if (__DEV__ && this.dynamicNodes[index] !== NULLISH_DYNAMIC_NODE && this.dynamicNodes[index] !== undefined)
             throw new Error('Dynamic Node already exists at this index')
         this.dynamicNodes[index] = dynamicNode;
@@ -26,7 +26,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
     private _dynamicNodePod!: _DynamicNodePod;
 
-    initDynamicNodePod(dynamicNodePod: _DynamicNodePod) {
+    private initDynamicNodePod(dynamicNodePod: _DynamicNodePod) {
         if (this._dynamicNodePod) {
             if (__DEV__) throw new Error('dynamicNodePod can only be initialized once')
             return;
@@ -52,18 +52,18 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         console.log('how many', dynamicNodePod.length)
     }
 
-    get dynamicNodePod() {
+    private get dynamicNodePod() {
         if (__DEV__ && !this._dynamicNodePod)
             throw new Error('Dynamic Node Pod has not been initialized')
         return this._dynamicNodePod;
     }
 
-    getNodePod(index: number) {
+    private getNodePod(index: number) {
         const nodePodIndex = this.toNodePodIndex(index)
         return this.dynamicNodePod[nodePodIndex]
     }
 
-    replaceNodePod(index: number, nodePod: _NodePod) {
+    private replaceNodePod(index: number, nodePod: _NodePod) {
         const nodePodIndex = this.toNodePodIndex(index)
         this.dynamicNodePod.replaceNodePod(nodePodIndex, nodePod)
     }
@@ -76,16 +76,18 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         return nodePodIndex;
     }
 
+    component: InternalComponent
+
     constructor(
         statements: ConditionalRenderKit[],
         public type: 'create' | 'show' | 'mount',
         makeElseKit: () => ConditionalRenderKit
     ) {
         super(statements, makeElseKit);
+        this.component = statements[0].component;
     }
 
     mount(
-        component: InternalComponent,
         parent: Element,
         nodePod: _NodePod,
         fragment?: DocumentFragment,
@@ -94,12 +96,13 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const { $conditions, activeIndex } = this.evaluateConditions()
         const dynamicPod = nodePod.appendDynamicPod();
         const series = this;
+        const component = this.component
         this.initDynamicNodePod(dynamicPod)
 
         const parentDynamicNode = getActiveDynamicNode();
-        if (__DEV__ && !parentDynamicNode) 
+        if (__DEV__ && !parentDynamicNode)
             throw new Error('No active dynamic node. This should never happen since the root component is a dynamic node')
-        this.appendConditional(activeIndex, component, parent, fragment)
+        this.appendConditional(activeIndex, parent, fragment)
 
         // set up watcher for updates
         watchForRender($conditions, updateConditional, { once: true })
@@ -117,42 +120,46 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             // render and add/remove node pods
             series.deactivateConditional()
             const { $conditions, activeIndex } = series.evaluateConditions();
-            series.activateConditional(activeIndex, component, parent)
+            series.activateConditional(activeIndex, parent)
 
             // set up for next update
             watchForRender($conditions, updateConditional, { once: true })
 
-            component.emit(LifecycleHook.UPDATED)
+            component.emit(LifecycleHook.AFTER_UPDATE)
             popComponent()
             popDynamicNode()
         }
     }
 
-    render(index: number) {
+    private render(index: number) {
         return this.statements[index].renderConditional()
     }
 
-    appendConditional(
+    private appendConditional(
         activeIndex: number,
-        component: InternalComponent,
         parent: Element,
         fragment?: DocumentFragment,
     ) {
         const series = this;
         const nodePod = this.getNodePod(activeIndex)
-        const dynamicNode = makeDynamicNode(nodePod)
+        const activationType = this.statements[activeIndex].type
+        const component = this.component
+        const preserve = activationType === 'create' ? false : true;
+        const dynamicNode = makeDynamicNode(preserve, nodePod)
+        pushComponent(component)
         dynamicNode.activate(function renderConditional() {
             const nodeEntities = series.render(activeIndex)
             // append to dom (through existing fragment if any) and node pod
             for (const nodeEntity of nodeEntities) {
-                mountNodeEntity(component, parent, nodeEntity, nodePod, fragment)
+                mountNodeEntity(parent, nodeEntity, nodePod, fragment)
             }
         })
+        popComponent()
+        dynamicNode.emit(DynamicLifecycleHook.ON_ACTIVATED)
         series.storeDynamicNode(dynamicNode, activeIndex)
-        dynamicNode.emit(DynamicLifecycleHook.MOUNTED) //TODO: change to activated
     }
 
-    deactivateConditional() {
+    private deactivateConditional() {
         const activeIndex = this.activeIndex;
         console.log('deactivateConditional', activeIndex)
         if (activeIndex == null)
@@ -165,65 +172,72 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             const dynamicNode = this.dynamicNodes[activeIndex]
             console.log('dynamicNode', dynamicNode)
             // if (dynamicNode){
-                if (activationType === 'create') {
-                    console.log('activationType', activationType)
-                    this.dynamicNodes[activeIndex] = NULLISH_DYNAMIC_NODE; // release reference
-                    this.replaceNodePod(activeIndex, NULLISH_NODE_POD)
-                    dynamicNode.destroy()
-                    console.log("DESTROY")
-                }
-                else if (activationType === 'mount') {
-                    dynamicNode.unmount()
-                }
+            if (activationType === 'create') {
+                console.log('activationType', activationType)
+                this.dynamicNodes[activeIndex] = NULLISH_DYNAMIC_NODE; // release reference
+                this.replaceNodePod(activeIndex, NULLISH_NODE_POD)
+                dynamicNode.destroy()
+                console.log("ON_DESTROY")
+            }
+            else if (activationType === 'mount') {
+                dynamicNode.unmount()
+            }
             // }
         }
     }
 
-    activateConditional(
+    private activateConditional(
         activeIndex: number,
-        component: InternalComponent,
         parent: Element
     ) {
         const activationType = this.statements[activeIndex].type
+        const preserve = activationType === 'create' ? false: true;
         const series = this;
+        const component = this.component
         const dynamicNodePod = this.dynamicNodePod
         // set up new conditional pod if needed
         const _nodePod = dynamicNodePod[activeIndex]
         const nodePod = _nodePod === NULLISH_NODE_POD || !_nodePod ? new _NodePod() : _nodePod;
 
+        pushComponent(component)
         let dynamicNode = this.dynamicNodes[activeIndex]
-        console.log("dynamicNode?", dynamicNode)
-        console.log("dynamicNode is nullish?", dynamicNode === NULLISH_DYNAMIC_NODE)
         if (dynamicNode === undefined || dynamicNode === NULLISH_DYNAMIC_NODE) {
-            dynamicNode = makeDynamicNode(nodePod);
+            dynamicNode = makeDynamicNode(preserve, nodePod);
             dynamicNode.activate(function renderConditionalUpdate() {
                 const nodeEntities = series.render(activeIndex)
-                mountConditional(nodePod, component, parent, dynamicNodePod, nodeEntities);
+                mountConditional(nodePod, parent, dynamicNodePod, nodeEntities);
             })
+            dynamicNode.emit(DynamicLifecycleHook.ON_ACTIVATED)
             series.storeDynamicNode(dynamicNode, activeIndex)
         }
         else {
             dynamicNode.activate(function updateConditional() {
                 const nodeEntities = series.render(activeIndex);
                 if (activationType === 'show') {
-                    showConditionalNodes(component, parent, dynamicNodePod, activeIndex, nodeEntities)
+                    showConditionalNodes( parent, dynamicNodePod, activeIndex, nodeEntities)
                 }
                 else {
                     series.replaceNodePod(activeIndex, nodePod);
-                    mountConditional(nodePod, component, parent, dynamicNodePod, nodeEntities)
+                    mountConditional(nodePod, parent, dynamicNodePod, nodeEntities)
                 }
             })
+            dynamicNode.emit(DynamicLifecycleHook.ON_ACTIVATED)
         }
-        dynamicNode.emit(DynamicLifecycleHook.MOUNTED) //TODO: change to activated
+        popComponent()
     }
 
 }
 
-export function mountConditional(nodePod: _NodePod, component: InternalComponent, parent: Element, dynamicPod: _DynamicNodePod, nodeEntities: NodeEntity[]) {
+export function mountConditional(
+    nodePod: _NodePod,
+    parent: Element,
+    dynamicPod: _DynamicNodePod,
+    nodeEntities: NodeEntity[]
+) {
     const fragment = new DocumentFragment();
 
     for (const nodeEntity of nodeEntities) {
-        mountNodeEntity(component, parent, nodeEntity, nodePod, fragment) //TODO: pass in index in case it's in a list?
+        mountNodeEntity(parent, nodeEntity, nodePod, fragment) //TODO: pass in index in case it's in a list?
     }
 
     let prevSibling = dynamicPod.prevNode;
@@ -231,3 +245,16 @@ export function mountConditional(nodePod: _NodePod, component: InternalComponent
     else if (prevSibling) prevSibling.after(fragment)
     else parent.prepend(fragment)
 }
+
+
+
+// function nullNodeRefValues(nodePod: _NodePod, components: InternalComponent[]) {
+//     nodePod.forEachNode(node => {
+//         const ref = getNodeRef(node);
+//         if (ref && ref.o()) ref.setValue(undefined)
+//     })
+//     for (const component of components) {
+//         const ref = getNodeRef(component.component);
+//         if (ref && ref.o()) ref.setValue(null)
+//     }
+// }

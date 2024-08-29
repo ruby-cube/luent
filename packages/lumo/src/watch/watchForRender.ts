@@ -6,7 +6,7 @@ import { getWithoutTracking, ReactiveModel } from "@rue/muonic";
 import { getCurrentComponent, popComponent, pushComponent } from "../component/componentStack";
 import { getActiveDynamicNode } from "../dynamic/DynamicNode";
 import { ActiveListener } from "@rue/flask";
-import { beforeUnmount, onMounted } from "../dynamic/lifecycle";
+import { onActivated, onDeactivate, onDestroy } from "../dynamic/lifecycle";
 
 
 export function initializeRender(effect: () => void) {
@@ -67,7 +67,7 @@ function setUpUpdateHooks(component: InternalComponent) {
     }, { once: true }) // assuming cleanup flask is set up
 
     onRendered(() => {
-        component.emit(LifecycleHook.UPDATED)
+        component.emit(LifecycleHook.AFTER_UPDATE)
         component.hasUpdates = false; // resets for the next cycle
     }, { once: true })
 }
@@ -78,13 +78,13 @@ function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveL
     const initializeFn = renderPhase ? _initializeRender : _initializeEffect;
     const watcher = { stop: () => { } }
 
-    onMounted(() => {
+    onActivated(() => {
         watcher.stop = initializeFn(effect).stop
-    })
+    }, { until: onDestroy, flask: 'outlive' })
 
-    beforeUnmount(() => {
+    onDeactivate(() => {
         watcher.stop()
-    })
+    }, { until: onDestroy, flask: 'outlive' })
 
     return watcher;
 }
@@ -112,28 +112,27 @@ function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends
     if (!component) throw new Error("No component found")
     const watchFn = options?.phase === 'render' ? _watchForRender : _watch
 
-    const watcher = {stop: ()=>{}}
-    // watchFn(target, handler, options); //FIX: Because onMounted runs for the first mount and subsequent mounts, maybe I don't need this?
+    const watcher = { stop: () => { } }
     const oldValue = hasSignal(target) ? target() : shallowClone(target)
     if (hasSignal(target)) {
-        onMounted(() => {
+        onActivated(() => {
             handler(target(), oldValue) //FIX: Why am I calling this here? what about snapshots?
             pushComponent(component)
             watcher.stop = watchFn(target, handler, options).stop
             popComponent()
-        })
+        }, { until: onDestroy, flask: 'outlive' })
     }
     else {
-        onMounted(() => {
+        onActivated(() => {
             handler(target, oldValue)
             pushComponent(component)
             watcher.stop = watchFn(target, handler, options).stop
             popComponent()
-        })
+        }, { until: onDestroy, flask: 'outlive' })
     }
-    beforeUnmount(() => {
+    onDeactivate(() => {
         watcher.stop()
-    })
+    }, { until: onDestroy, flask: 'outlive' })
     return watcher
 }
 
@@ -164,7 +163,7 @@ function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends
 //         }, { once: true }) // assuming cleanup flask is set up
 
 //         onRendered(() => {
-//             component.emit(LifecycleHook.UPDATED)
+//             component.emit(LifecycleHook.AFTER_UPDATE)
 //             component.hasUpdates = false; // resets for the next cycle
 //         }, { once: true })
 //     }

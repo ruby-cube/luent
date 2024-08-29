@@ -5,6 +5,8 @@ import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { shallowClone } from "@rue/muonic";
 import { AnyObject, Booleanny } from "@rue/types";
+import { getCurrentComponent } from "../component/componentStack";
+import { getComponent, InternalComponent } from "../component/InternalComponent";
 
 
 
@@ -30,49 +32,103 @@ function resetCurrentNodePodIndex(index?: number) {
 //     return _if($condition, renderFunction, 'if', type)
 // }
 
+
+
 export function create_if($condition: ReactiveSignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
     resetCurrentNodePodIndex()
-    return new ConditionalRenderKit('if', wrapToNormalize(renderConditional), 'create', { $condition })
+    return new ConditionalRenderKit(
+        'if',
+        wrapToNormalize(renderConditional),
+        'create',
+        getComponent(create_if.name),
+        { $condition }
+    )
 }
 
 export function else_create_if($condition: ReactiveSignal<Booleanny>, renderConditional: RenderFunction) {
-    return new ConditionalRenderKit('elseIf', wrapToNormalize(renderConditional), 'create', { $condition })
+    return new ConditionalRenderKit(
+        'elseIf',
+        wrapToNormalize(renderConditional),
+        'create',
+        getComponent(else_create_if.name),
+        { $condition }
+    )
 }
 
 export function else_create(renderConditional: RenderFunction) {
-    return new ConditionalRenderKit('else', wrapToNormalize(renderConditional), 'create')
+    return new ConditionalRenderKit(
+        'else',
+        wrapToNormalize(renderConditional),
+        'create',
+        getComponent(else_create.name),
+    )
 }
 
 export function mount_if($condition: ReactiveSignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
     resetCurrentNodePodIndex()
-    return new ConditionalRenderKit('if', wrapToPreserve(renderConditional), 'mount', { $condition })
+    return new ConditionalRenderKit(
+        'if',
+        wrapToPreserve(renderConditional),
+        'mount',
+        getComponent(mount_if.name),
+        { $condition }
+    )
 }
 
 export function else_mount_if($condition: ReactiveSignal<Booleanny>, renderConditional: RenderFunction) {
-    return new ConditionalRenderKit('elseIf', wrapToPreserve(renderConditional), 'mount', { $condition })
+    return new ConditionalRenderKit(
+        'elseIf',
+        wrapToPreserve(renderConditional),
+        'mount',
+        getComponent(else_mount_if.name),
+        { $condition }
+    )
 }
 
 export function else_mount(renderConditional: RenderFunction) {
-    return new ConditionalRenderKit('else', wrapToPreserve(renderConditional), 'mount')
+    return new ConditionalRenderKit(
+        'else',
+        wrapToPreserve(renderConditional),
+        'mount',
+        getComponent(else_mount.name),
+    )
 }
 
 export function show_if($condition: ReactiveSignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
     resetCurrentNodePodIndex(0)
-    return new ConditionalRenderKit('if', wrapToNormalize(renderConditional), 'show', { $condition })
+    return new ConditionalRenderKit(
+        'if',
+        wrapToNormalize(renderConditional),
+        'show',
+        getComponent(show_if.name),
+        { $condition }
+    )
 }
 
 export function else_show_if($condition: ReactiveSignal<Booleanny>, renderConditional: RenderFunction) {
     if (currentNodePodIndex === undefined)
         currentNodePodIndex = 0;
     else currentNodePodIndex++;
-    return new ConditionalRenderKit('elseIf', wrapToNormalize(renderConditional), 'show', { nodePodIndex: currentNodePodIndex, $condition })
+    return new ConditionalRenderKit(
+        'elseIf',
+        wrapToNormalize(renderConditional),
+        'show',
+        getComponent(else_show_if.name),
+        { nodePodIndex: currentNodePodIndex, $condition }
+    )
 }
 
 export function else_show(renderConditional: RenderFunction) {
     if (currentNodePodIndex === undefined)
         currentNodePodIndex = 0;
     else currentNodePodIndex++;
-    return new ConditionalRenderKit('else', wrapToNormalize(renderConditional), 'show', { nodePodIndex: currentNodePodIndex })
+    return new ConditionalRenderKit(
+        'else',
+        wrapToNormalize(renderConditional),
+        'show',
+        getComponent(else_show.name),
+        { nodePodIndex: currentNodePodIndex }
+    )
 }
 
 // function _if($condition: ReactiveSignal<Booleanny>, renderConditional: RenderFunction, statementType: 'if' | 'elseIf' = 'if', type: 'create' | 'show' | 'mount' = currentRenderType) {
@@ -93,19 +149,13 @@ export function else_show(renderConditional: RenderFunction) {
 
 
 
-let _preserveAll = false;
 
-export function preserveAllRequested() {
-    return _preserveAll;
-}
 
 function wrapToPreserve(renderConditional: RenderFunction) {
     let nodeEntities: NodeEntity[];
     return () => {
         if (!nodeEntities) {
-            _preserveAll = true;
             nodeEntities = normalizeToArray(renderConditional());
-            _preserveAll = false;
             return nodeEntities;
         }
         return nodeEntities;

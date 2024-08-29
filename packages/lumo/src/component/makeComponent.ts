@@ -56,7 +56,7 @@ export function makeComponent(
     const component = new InternalComponent(parent);
     pushComponent(component)
     runComponentSetup(Component, component, Slot, config, $index);
-    component.emit(LifecycleHook.CREATED)
+    component.emit(LifecycleHook.AFTER_CREATE)
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
     return component;
 }
@@ -142,8 +142,8 @@ function initializeComponent(
     // if (parent instanceof InternalComponent) {
     //     beforeUnmount(() => component.emit(LifecycleHook.BEFORE_UNMOUNT), parent) //TODO: how do these get cleaned up?
     //     onUnmounted(() => component.emit(LifecycleHook.UNMOUNTED), parent)
-    //     onDeactivated(() => component.emit(LifecycleHook.BEFORE_DEACTIVATE), undefined, parent)
-    //     onActivated(() => component.emit(LifecycleHook.ACTIVATED), undefined, parent)
+    //     onDeactivated(() => component.emit(LifecycleHook.ON_DEACTIVATE), undefined, parent)
+    //     onActivated(() => component.emit(LifecycleHook.ON_ACTIVATED), undefined, parent)
     // }
 }
 

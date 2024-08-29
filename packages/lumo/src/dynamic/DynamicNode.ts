@@ -1,7 +1,7 @@
 import { collectEffects, EffectFlask } from "@rue/flask";
-import { preserveAllRequested } from "../conditional/create_if";
+import { shouldPreserve } from "../conditional/create_if";
 import { _NodePod } from "../node/NodePod";
-import { beforeDeactivate, beforeDestroy, beforeUnmount, LifecycleHook } from "./lifecycle";
+import { onDeactivate, onDestroy, LifecycleHook, onActivated } from "./lifecycle";
 
 export class DynamicNode {
     flask: EffectFlask | undefined;
@@ -10,13 +10,13 @@ export class DynamicNode {
         this.flask = flask;
     }
 
-    preserve: boolean;
 
     constructor(
         public parent: DynamicNode | null,
+        public preserve?: boolean,
         public nodePod?: _NodePod
     ) {
-        this.preserve = getPreserveStatus(parent)
+        this.preserve = !!parent && parent.preserve || preserve || false
     }
 
     setNodePod(nodePod: _NodePod) {
@@ -24,17 +24,13 @@ export class DynamicNode {
     }
 
     tasks: {
-        [LifecycleHook.MOUNTED]: Set<() => void> | undefined;
-        [LifecycleHook.BEFORE_UNMOUNT]: Set<() => void> | undefined;
-        [LifecycleHook.BEFORE_DESTROY]: Set<() => void> | undefined;
-        // [LifecycleHook.ACTIVATED]: Set<() => void> | undefined;
-        [LifecycleHook.BEFORE_DEACTIVATE]: Set<() => void> | undefined;
+        [LifecycleHook.ON_ACTIVATED]: Set<() => void> | undefined;
+        [LifecycleHook.ON_DESTROY]: Set<() => void> | undefined;
+        [LifecycleHook.ON_DEACTIVATE]: Set<() => void> | undefined;
     } = {
-            [LifecycleHook.MOUNTED]: undefined,
-            [LifecycleHook.BEFORE_UNMOUNT]: undefined,
-            [LifecycleHook.BEFORE_DESTROY]: undefined,
-            // [LifecycleHook.ACTIVATED]: undefined,
-            [LifecycleHook.BEFORE_DEACTIVATE]: undefined,
+            [LifecycleHook.ON_ACTIVATED]: undefined,
+            [LifecycleHook.ON_DESTROY]: undefined,
+            [LifecycleHook.ON_DEACTIVATE]: undefined,
         };
 
     private getTaskQueue(hookName: LifecycleHook) {
@@ -55,29 +51,19 @@ export class DynamicNode {
         pushDynamicNode(this);
         collectEffects((flask) => {
             this.setFlask(flask)
-
             render()
-
-            // set up hook cascade
-            const parent = this.parent;
-            if (parent instanceof DynamicNode) {
-                beforeDeactivate(() => this.deactivate(), undefined, parent)
-                beforeUnmount(() => this.unmount(), undefined, parent)
-                beforeDestroy(() => this.destroy(), parent)
-            }
         }, render.name)
-        this.emit(LifecycleHook.MOUNTED) //TODO: changed to activated
         popDynamicNode();
+        this.emit(LifecycleHook.ON_ACTIVATED)
     }
 
 
     deactivate() {
-        this.emit(LifecycleHook.BEFORE_DEACTIVATE)
+        this.emit(LifecycleHook.ON_DEACTIVATE)
         this.flask?.dispose()
     }
 
     unmount() {
-        this.emit(LifecycleHook.BEFORE_UNMOUNT)
         const nodePod = this.nodePod;
         if (!nodePod) throw new Error('No nodePod :( This should never happen')
         nodePod.forEachNode((node) => {
@@ -88,11 +74,10 @@ export class DynamicNode {
 
     destroy() {
         this.unmount();
-        this.emit(LifecycleHook.BEFORE_DESTROY)
+        this.emit(LifecycleHook.ON_DESTROY) //TODO: THis should remove all onActivated and onDeactivated listeners
         this.nodePod = undefined
         this.flask = undefined
         this.parent = null
-        this.deactivate()
         //TODO: clear or null all tasks??
     }
 }
@@ -120,18 +105,7 @@ export function popDynamicNode() {
 }
 
 
-export function getPreserveStatus(
-    // options: ComponentOptions | undefined,
-    parent: DynamicNode | null,
-) {
-    // let preserveRequested: boolean | undefined = options && options.preserve;
-    // if (preserveRequested && !isSettingUpConditionalMount()) {
-    //     preserveRequested = false;
-    //     if (__DEV__) console.warn('Extraneous preserve component request. Preserve component only within conditional `ifCase(condition, { mount: () => {} })` or `mountIf`')
-    // }
 
-    return preserveAllRequested() || !!parent && parent.preserve;
-}
 
 
 
