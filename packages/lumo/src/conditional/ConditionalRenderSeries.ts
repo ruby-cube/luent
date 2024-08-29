@@ -1,6 +1,6 @@
 import { InternalComponent } from "../component/InternalComponent";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
-import { DynamicNode, getActiveDynamicNode, markReactivation, NULLISH_DYNAMIC_NODE, popDynamicNode, pushDynamicNode, unmarkReactivation } from "../dynamic/DynamicNode";
+import { DynamicNode, getActiveDynamicNode, markMountPhase, NULLISH_DYNAMIC_NODE, popDynamicNode, pushDynamicNode, unmarkMountPhase } from "../dynamic/DynamicNode";
 import { LifecycleHook as DynamicLifecycleHook } from "../dynamic/lifecycle";
 import { NodeEntity } from "../node/makeNode";
 import { mountNodeEntity } from "../node/mountNodeEntity";
@@ -150,9 +150,11 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         dynamicNode.activate(function renderConditional() {
             const nodeEntities = series.render(activeIndex)
             // append to dom (through existing fragment if any) and node pod
+            if (preserve) markMountPhase()
             for (const nodeEntity of nodeEntities) {
                 mountNodeEntity(parent, nodeEntity, nodePod, fragment)
             }
+            if (preserve) unmarkMountPhase()
         })
         popComponent()
         series.storeDynamicNode(dynamicNode, activeIndex)
@@ -169,19 +171,14 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         }
         else {
             const dynamicNode = this.dynamicNodes[activeIndex]
-            console.log('dynamicNode', dynamicNode)
-            // if (dynamicNode){
             if (activationType === 'create') {
-                console.log('activationType', activationType)
                 this.dynamicNodes[activeIndex] = NULLISH_DYNAMIC_NODE; // release reference
                 this.replaceNodePod(activeIndex, NULLISH_NODE_POD)
                 dynamicNode.destroy()
-                console.log("ON_DESTROY")
             }
             else if (activationType === 'mount') {
                 dynamicNode.unmount()
             }
-            // }
         }
     }
 
@@ -204,14 +201,16 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             dynamicNode = makeDynamicNode(preserve, nodePod);
             dynamicNode.activate(function renderConditionalUpdate() {
                 const nodeEntities = series.render(activeIndex)
+                if (preserve) markMountPhase()
                 mountConditional(nodePod, parent, dynamicNodePod, nodeEntities);
+                if (preserve) unmarkMountPhase()
             })
             series.storeDynamicNode(dynamicNode, activeIndex)
         }
         else {
             dynamicNode.activate(function updateConditional() {
-                if (preserve) markReactivation()
                 const nodeEntities = series.render(activeIndex);
+                if (preserve) markMountPhase()
                 if (activationType === 'show') {
                     showConditionalNodes(parent, dynamicNodePod, activeIndex, nodeEntities)
                 }
@@ -219,7 +218,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                     series.replaceNodePod(activeIndex, nodePod);
                     mountConditional(nodePod, parent, dynamicNodePod, nodeEntities)
                 }
-                if (preserve) unmarkReactivation()
+                if (preserve) unmarkMountPhase()
             })
         }
         popComponent()

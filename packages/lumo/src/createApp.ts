@@ -6,7 +6,7 @@ import { collectEffects, EffectFlask } from "@rue/flask";
 import { LifecycleHook } from "./component/lifecycle";
 import { LifecycleHook as DynamicLifecycleHook } from "./dynamic/lifecycle";
 import { popComponent, pushComponent } from "./component/componentStack";
-import { DynamicNode, markReactivation, unmarkReactivation } from "./dynamic/DynamicNode";
+import { DynamicNode, markMountPhase, unmarkMountPhase } from "./dynamic/DynamicNode";
 
 let appRoot: Element;
 
@@ -45,11 +45,11 @@ export function createApp(App: ComponentSetup, config?: { remountable: boolean }
             pushComponent(component)
             // (2) attach developer's root component to root element
             dynamicNode.activate(function mountRootComponent() {
-                if (remountable) markReactivation()
                 runComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
                 component.emit(LifecycleHook.AFTER_CREATE)
+                if (remountable) markMountPhase()
                 component.mount(root, nodePod) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
-                if (remountable) unmarkReactivation()
+                if (remountable) unmarkMountPhase()
             })
             popComponent() // for sibling components to access parent, must be set AFTER `Component()`
 

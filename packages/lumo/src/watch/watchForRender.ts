@@ -4,7 +4,7 @@ import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
 import { getWithoutTracking, ReactiveModel } from "@rue/muonic";
 import { getCurrentComponent, popComponent, pushComponent } from "../component/componentStack";
-import { DynamicNode, getActiveDynamicNode, isReactivation } from "../dynamic/DynamicNode";
+import { DynamicNode, getActiveDynamicNode, isMountPhase } from "../dynamic/DynamicNode";
 import { ActiveListener } from "@rue/flask";
 import { onActivated, onDeactivate, onDestroy } from "../dynamic/lifecycle";
 import { noop } from "@rue/utils";
@@ -76,7 +76,7 @@ function setUpUpdateHooks(component: InternalComponent) {
 
 
 function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveListener {
-    const reactivation = isReactivation()
+    const mountPhase = isMountPhase()
     const initializeFn = renderPhase ? _initializeRender : _initializeEffect;
     const dynamicNode = getActiveDynamicNode()!
     const watcher = { stop: noop }
@@ -89,7 +89,7 @@ function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveL
 
     function deactivateAndReactivate() {
         watcher.stop()
-        if (!reactivation) {
+        if (!mountPhase) {
             onActivated(() => {
                 watcher.stop = initializeFn(effect).stop
                 onDeactivate(deactivateAndReactivate, { once: true }, dynamicNode)
@@ -119,7 +119,7 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
 }
 
 function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
-    const reactivation = isReactivation()
+    const mountPhase = isMountPhase()
     const component = getCurrentComponent();
     if (!component) throw new Error("No component found")
     const watchFn = options?.phase === 'render' ? _watchForRender : _watch
@@ -133,7 +133,7 @@ function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends
     function deactivateAndReactivate() {
         oldValue = hasSignal(target) ? target() : shallowClone(target)
         watcher.stop()
-        if (!reactivation) {
+        if (!mountPhase) {
             initializeOnActivated()
         }
     }

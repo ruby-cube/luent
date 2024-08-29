@@ -104,19 +104,19 @@ export function popDynamicNode() {
 }
 
 
-let reactivating = false;
+let mounting = false;
 
-export function markReactivation(){
-    reactivating = true;
+export function markMountPhase(){
+    mounting = true;
 }
 
-export function unmarkReactivation(){
-    reactivating = false;
+export function unmarkMountPhase(){
+    mounting = false;
 }
 
 
-export function isReactivation(){
-    return reactivating;
+export function isMountPhase(){
+    return mounting;
 }
 
 

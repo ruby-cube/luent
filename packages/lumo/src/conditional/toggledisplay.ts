@@ -1,65 +1,8 @@
-import { areShallowEqualArrays, getWithoutTracking, isShallowEqual, ReactiveSignal } from "@rue/muonic"
-import { DOMNode, InternalComponent} from "../component/InternalComponent"
+import { DOMNode } from "../component/InternalComponent"
 import { _DynamicNodePod, _NodePod } from "../node/NodePod"
-import { watchForRender } from "../watch/watchForRender"
-import { LifecycleHook } from "../component/lifecycle"
 import { NodeEntity } from "../node/makeNode"
-import { mountNodeEntity } from "../node/mountNodeEntity"
-import { ConditionalRenderSeries, mountConditional } from "./ConditionalRenderSeries"
-import { popComponent, pushComponent } from "../component/componentStack"
+import { mountConditional } from "./ConditionalRenderSeries"
 
-// export function setUpConditionalDisplay(
-//     component: InternalComponent,
-//     parent: Element,
-//     series: ConditionalRenderSeries,
-//     nodePod: _NodePod,
-//     fragment?: DocumentFragment,
-//     // componentsToUnmount?: InternalComponent[],
-// ) {
-//     const { $conditions, activeIndex } = series.evaluateConditions()
-//     const dynamicPod = nodePod.appendDynamicPod();
-
-//     let statementCount = series.statements.length;
-//     while (statementCount--) {
-//         dynamicPod.appendNodePod()
-//     }
-
-    
-//     const initialNodeEntities = series.render(activeIndex);
-
-//     // append to dom and node pod
-//     for (const nodeEntity of initialNodeEntities) {
-//         const nodePod = dynamicPod[activeIndex];
-//         mountNodeEntity(component, parent, nodeEntity, nodePod, fragment)
-//     }
-
-//     // set up watcher for updates
-
-//     watchForRender($conditions, updateConditional, { once: true })
-
-//     let prevIndex = activeIndex;
-
-//     function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-
-//         if (areShallowEqualArrays(newValue, oldValue)) return;
-//         const { $conditions, activeIndex } = series.evaluateConditions();
-
-//         pushComponent(component)
-//         component.emit(LifecycleHook.BEFORE_UPDATE)
-
-//         hidePrevConditionalNodes(dynamicPod, prevIndex);
-//         const nodeEntities = series.render(activeIndex);
-//         showConditionalNodes(component, parent, dynamicPod, activeIndex, nodeEntities)
-        
-        
-//         watchForRender($conditions, updateConditional, { once: true })
-
-//         component.emit(LifecycleHook.AFTER_UPDATE)
-//         popComponent()
-
-//         prevIndex = activeIndex;
-//     }
-// }
 
 export function hidePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeIndex: number) {
     const nodePod = dynamicPod[activeIndex];
@@ -67,7 +10,7 @@ export function hidePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeInde
 }
 
 
-export function showConditionalNodes( parent: Element, dynamicPod: _DynamicNodePod, activeIndex: number, nodeEntities: NodeEntity[]) {
+export function showConditionalNodes(parent: Element, dynamicPod: _DynamicNodePod, activeIndex: number, nodeEntities: NodeEntity[]) {
     const nodePod = dynamicPod[activeIndex];
     if (nodePod.length === 0) { // lazy render
         mountConditional(nodePod, parent, dynamicPod, nodeEntities)
