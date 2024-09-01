@@ -69,7 +69,6 @@ function setUpUpdateHooks(component: InternalComponent) {
     // }, { once: true })
 
     onRendered(() => {
-        console.log("onRendered cb: emit after update")
         component.emit(LifecycleHook.ON_UPDATED) //NOTE: I don't know if I even need an after update hook...
         component.hasUpdates = false; // resets for the next cycle
     }, { once: true })
@@ -144,8 +143,6 @@ function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends
         oldValue = hasSignal(target) ? target() : shallowClone(target)
         reactivation = true;
         watcher.stop()
-        console.log("DEACTIVATION")
-        console.log('mountPhase', mountPhase)
         if (!mountPhase) {
             initializeOnActivated()
         }
@@ -154,8 +151,6 @@ function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends
     function initializeOnActivated() {
         if (hasSignal(target)) {
             onActivated(() => {
-                console.log('onActivated callback')
-                console.log('reactivation', reactivation)
                 if (reactivation) handler(target(), oldValue)
                 initializeWatcher()
             }, { once: true }, dynamicNode)
@@ -169,7 +164,6 @@ function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends
     }
 
     function initializeWatcher() {
-        console.log('initializing watcher')
         pushComponent(component)
         watcher.stop = watchFn(target, handler, options).stop
         popComponent()

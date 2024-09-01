@@ -107,17 +107,17 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
     // set up listeners
     // const watchers: ActiveListener[] = [];
     let watcher: ActiveListener | PendingCancelOp
-    function stop() {
-        if (isDerivedSignal(target)) target[DERIVED_SIGNAL].markUnwatched();
-        'stop' in watcher ? watcher.stop() : watcher.cancel()
-    }
+    // function stop() {
+    //     if (isDerivedSignal(target)) target[DERIVED_SIGNAL].markUnwatched();
+    //     'stop' in watcher ? watcher.stop() : watcher.cancel()
+    // }
 
-    const _handler = options?.once ? (options.once = false, toSelfremoving(handler, stop)) : handler;
+    // const _handler = options?.once ? (options.once = false, toSelfremoving(handler, stop)) : handler;
     // ^ set once to false so that it will not be extraneously re-wrapped by $listen
 
     const forNextCycle = phase === 'sync' ? false : shouldScheduleForNextCycle();
 
-    watcher = $listen(_handler, options || {}, {
+    watcher = $listen(handler, options || {}, {
         enroll(task) {
             if (isDerivedSignal(target)) { //TODO: Dunno if I need this anymore
                 derivedSignalMap.set(task, target);
@@ -129,6 +129,8 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
             }
         },
         remove(task) {
+            if (isDerivedSignal(target))
+                target[DERIVED_SIGNAL].markUnwatched();
             for (const phaseQueue of phaseQueues) {
                 const taskQueue = useTaskQueue(phaseQueue, forNextCycle)
                 taskQueue.delete(task)
@@ -136,9 +138,7 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
         }
     });
 
-    return {
-        stop
-    }
+    return watcher
 }
 
 function queueForNextCycle(phaseQueue: PhaseQueue, phase: Phase) {
@@ -170,28 +170,33 @@ export function initializeEffect(effect: () => void, options?: EffectOptions) { 
     }
 
     // set up listeners
-    let watcher: ActiveListener | PendingCancelOp
+    let watcher: ActiveListener
 
-    function stop() {
-        'stop' in watcher ? watcher.stop() : watcher.cancel()
-    }
+    // function stop() {
+    //     'stop' in watcher ? watcher.stop() : watcher.cancel()
+    // }
 
-    const _watcher = {
-        stop
-    }
+    // const _watcher = {
+    //     stop
+    // }
 
-    function replaceCleanupFunction(stop: () => void) {
-        _watcher.stop = stop
-    }
+    // function replaceCleanupFunction(stop: () => void) {
+    //     _watcher.stop = stop
+    // }
 
 
-    let _handler = retrack ? wrapToRetrack(<() => void>effect, options || {}, _watcher, replaceCleanupFunction) : effect;
-    _handler = options?.once && !retrack ? toSelfremoving(_handler, stop) : _handler; // retrack is inherently self-removing
+    let _handler = retrack ? () => {
+        watcher.stop()
+        const _watcher = initializeEffect(effect, options) // no need to call effect because initializeEffect will call it
+        watcher.stop = _watcher.stop
+    } : effect;
+    // _handler = options?.once && !retrack ? toSelfremoving(_handler, stop) : _handler; // retrack is inherently self-removing
 
-    // set once to false so that it will not be extraneously re-wrapped by $listen
-    if (options?.once || retrack) {
-        options.once = false;
-    }
+    // // set once to false so that it will not be extraneously re-wrapped by $listen
+    // if (options?.once || retrack) {
+    //     options.once = false;
+    // }
+    if (retrack) options.once = true;
 
     const forNextCycle = shouldScheduleForNextCycle();
 
@@ -238,21 +243,21 @@ function useTaskQueue(phaseQueue: PhaseQueue, forNextCycle: boolean) {
 }
 
 
-function toSelfremoving(handler: (...args: any[]) => void, stop: () => void) {
-    return (...args: any[]) => {
-        stop();
-        handler(...args)
-    }
-}
+// function toSelfremoving(handler: (...args: any[]) => void, stop: () => void) {
+//     return (...args: any[]) => {
+//         stop();
+//         handler(...args)
+//     }
+// }
 
-function wrapToRetrack(effect: () => void, options: EffectOptions, prevWatcher: ActiveListener, replaceCleanup: (stop: () => void) => void) {
-    const _effect = () => {
-        prevWatcher.stop();
-        const watcher = initializeEffect(effect, options) // no need to call effect because initializeEffect will call it
-        replaceCleanup(watcher.stop);
-    }
-    return _effect;
-}
+// function wrapToRetrack(effect: () => void, options: EffectOptions, prevWatcher: ActiveListener, replaceCleanup: (stop: () => void) => void) {
+//     const _effect = () => {
+//         prevWatcher.stop();
+//         const watcher = initializeEffect(effect, options) // no need to call effect because initializeEffect will call it
+//         replaceCleanup(watcher.stop);
+//     }
+//     return _effect;
+// }
 
 export function getDependencies(reactiveFunction: Function, isReactiveEffect?: boolean): ReactiveAtom[] {
     if (isSignal(reactiveFunction)) return [reactiveFunction];
@@ -369,7 +374,7 @@ export function useUpdateCycle() {
     let updateCycle = getCurrentUpdateCycle()
     if (!updateCycle) {
         updateCycle = new UpdateCycle();
-        
+
     }
     return updateCycle;
 }

@@ -47,6 +47,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 
     function oneTimeCallback(...args: any[]) {
         try {
+            console.log('one time callback')
             callback(...args);
         }
         finally {
@@ -56,6 +57,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 
     let called = false;
     function _remove() {
+        console.log("REMOVE", called)
         if (called) return;
         try {
             remove(returnVal ?? _callback);
@@ -64,7 +66,11 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
         }
         finally {
             if (pendingStop && 'cancel' in pendingStop) pendingStop.cancel();
-            if (pendingFlaskCleanup && 'cancel' in pendingFlaskCleanup) pendingFlaskCleanup.cancel();
+            if (pendingFlaskCleanup && 'cancel' in pendingFlaskCleanup) {
+                console.log("pending flask cleanup")
+                pendingFlaskCleanup.cancel();
+            }
+            console.log('remove done', pendingFlaskCleanup)
         }
     }
     _remove.isRemover = true as const;
@@ -81,6 +87,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
         flask && flask !== "outlive" ? flask.onDisposal(_remove)
             : flask === 'outlive' ? undefined
                 : onFlaskDisposal(_remove);
+    // console.log('pendingFlaskCleanup', pendingFlaskCleanup)
 
     if (__DEV__ && flask !== "outlive") setUpCleanupWarning!(activeListener, until, flask || getFlask())
 

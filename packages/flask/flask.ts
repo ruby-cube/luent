@@ -46,12 +46,13 @@ export class EffectFlask {
     }
 
     onDisposal(cleanUp: () => void) {
-        console.trace('adding cleanup')
+        const devName = this.__devName
+        console.trace('adding cleanup', this.__devName)
         const cleanups = this.#cleanups;
         cleanups.add(cleanUp);
         return {
             cancel() {
-                console.trace('cancel cleanup')
+                console.trace('cancel cleanup', devName)
                 cleanups.delete(cleanUp)
             }
         }

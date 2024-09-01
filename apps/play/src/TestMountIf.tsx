@@ -15,20 +15,18 @@ export function MountIf() {
 
     return mx(
         <>
-            {/* {[
+            {[
                 create_if($active, () =>
                     <>
-                        <div>{$count}</div>
-                        <div>{$doubleCount}</div>
+                        <div>Hi</div>
+                        {/* <div>{$doubleCount}</div> */}
                     </>
                 ),
                 else_create(() =>
                     <p>bye</p>
                 )
-            ]} */}
-            <p>{$count}</p>
-            {/* <button onclick={toggleActive}>toggle</button> */}
-            <button onclick={increment}>increment</button>
+            ]}
+            <button onclick={toggleActive}>toggle</button>
         </>
     )
 }

@@ -3,7 +3,7 @@ import { SnapshotManager } from "./SnapshotManager";
 import { isReactiveModel, ReactiveModel } from "./Reactive$";
 import { isSignal, Signal } from "./$Signal";
 import { runNonSyncTasks } from "./watch";
-import { $listen, ScheduleStop } from "@rue/flask";
+import { $listen, $schedule, ScheduleStop } from "@rue/flask";
 import { removeItem } from "../../utils/array";
 import { beforeRepaint, queueTask } from "@rue/thread";
 import { MutationRecord, SetOp } from "./deepWatch";
@@ -208,8 +208,8 @@ export function _runTasks(hookName: Hooks) {
 }
 
 function createUpdateCycleHook(hookName: Hooks) {
-    return (task: () => void, options?: { once?: true, until?: ScheduleStop }) => {
-        return $listen(task, options || {}, {
+    return (task: () => void, options?: { cancel?: ScheduleStop }) => {
+        return $schedule(task, options || {}, {
             enroll(task) {
                 const tasks = getCurrentUpdateCycle()?.tasks;
                 if (!tasks) throw new Error('No update cycle :(. This should never happen')
