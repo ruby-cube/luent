@@ -32,9 +32,6 @@ importers:
       '@rue/jsx-runtime':
         specifier: workspace:*
         version: link:../../packages/lumo/jsx-runtime
-      '@rue/lumin':
-        specifier: workspace:*
-        version: link:../../packages/literate
       '@rue/lumo':
         specifier: workspace:*
         version: link:../../packages/lumo
@@ -60,6 +57,9 @@ importers:
 
   apps/serve-hello-world:
     dependencies:
+      '@rue/literate':
+        specifier: workspace:*
+        version: link:../../packages/literate
       '@rue/lumo':
         specifier: workspace:*
         version: link:../../packages/lumo
@@ -107,6 +107,8 @@ importers:
         specifier: ^3.2.47
         version: 3.4.34(typescript@4.9.5)
 
+  packages/dispatch: {}
+
   packages/flask:
     dependencies:
       '@rue/utils':
@@ -131,6 +133,12 @@ importers:
 
   packages/literate:
     dependencies:
+      '@rue/flask':
+        specifier: workspace:*
+        version: link:../flask
+      '@rue/lumo':
+        specifier: workspace:*
+        version: link:../lumo
       '@rue/utils':
         specifier: workspace:*
         version: link:../utils
@@ -231,10 +239,6 @@ importers:
         version: 4.5.3(@types/node@18.19.42)
 
   packages/utils:
-    dependencies:
-      lodash:
-        specifier: ^4.17.21
-        version: 4.17.21
     devDependencies:
       '@rue/types':
         specifier: workspace:*
@@ -2026,10 +2030,6 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
     dev: true
-
-  /lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
-    dev: false
 
   /loupe@3.1.1:
     resolution: {integrity: sha512-edNu/8D5MKVfGVFRhFf8aAxiTM6Wumfz5XsaatSxlD3w4R1d/WEKUTydCdPGbl9K7QG/Ca3GnDV2sIKIpXRQcw==}

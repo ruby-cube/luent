@@ -46,13 +46,13 @@ export class InternalComponent<T extends undefined | AnyObject = undefined | Any
     initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
 
     tasks: {
-        [LifecycleHook.AFTER_CREATE]: Set<() => void> | undefined;
-        [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
-        [LifecycleHook.AFTER_UPDATE]: Set<() => void> | undefined;
+        [LifecycleHook.ON_CREATED]: Set<() => void> | undefined;
+        // [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
+        [LifecycleHook.ON_UPDATED]: Set<() => void> | undefined;
     } = {
-            [LifecycleHook.AFTER_CREATE]: undefined,
-            [LifecycleHook.BEFORE_UPDATE]: undefined,
-            [LifecycleHook.AFTER_UPDATE]: undefined,
+            [LifecycleHook.ON_CREATED]: undefined,
+            // [LifecycleHook.BEFORE_UPDATE]: undefined,
+            [LifecycleHook.ON_UPDATED]: undefined,
         };
 
     hasUpdates: boolean = false;

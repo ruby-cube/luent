@@ -1,4 +1,4 @@
-import { ifCase, iterate_over, setUpNode, setUpNodesIn, onActivated, beforeMount, beforeUnmount, onDeactivated, onMounted, onUnmounted, afterUpdate } from "../../../packages/lumo/src";
+import { ifCase, iterate_over, setUpNode, setUpNodesIn, onActivated, beforeMount, beforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../../../packages/lumo/src";
 import { useReactivity, Signal, watch, ReactiveSignal } from "@rue/muonic";
 
 const { $, mu, o$, set } = useReactivity()
@@ -244,7 +244,7 @@ function List() {
     //     $index: i
     // }))
 
-    // oItems.afterCreate((item, $index)=>{
+    // oItems.onCreated((item, $index)=>{
     //     console.log('item', item)
     //     console.log(console.log)
     // })

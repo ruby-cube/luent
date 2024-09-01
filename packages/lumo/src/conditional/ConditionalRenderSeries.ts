@@ -115,7 +115,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             if (areShallowEqualArrays(newValue, oldValue)) return;
 
             pushDynamicNode(parentDynamicNode!)
-            component.emit(LifecycleHook.BEFORE_UPDATE)
+            // component.emit(LifecycleHook.BEFORE_UPDATE)
 
             // (1)
             series.deactivateConditional()
@@ -134,7 +134,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             popComponent()
 
 
-            component.emit(LifecycleHook.AFTER_UPDATE)
+            // component.emit(LifecycleHook.ON_UPDATED)
             popDynamicNode()
         }
     }
@@ -212,7 +212,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         }
         else {
             console.log("REACTIVATION")
-            dynamicNode.activate(function updateConditional() {
+            dynamicNode.reactivate(function updateConditional() {
                 const nodeEntities = series.render(activeIndex);
                 if (preserve) markMountPhase()
                 if (activationType === 'show') {

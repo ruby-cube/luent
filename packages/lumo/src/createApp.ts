@@ -46,7 +46,7 @@ export function createApp(App: ComponentSetup, config?: { remountable: boolean }
             // (2) attach developer's root component to root element
             dynamicNode.activate(function mountRootComponent() {
                 runComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
-                component.emit(LifecycleHook.AFTER_CREATE)
+                component.emit(LifecycleHook.ON_CREATED)
                 if (remountable) markMountPhase()
                 component.mount(root, nodePod) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
                 if (remountable) unmarkMountPhase()
@@ -70,7 +70,6 @@ export function createApp(App: ComponentSetup, config?: { remountable: boolean }
         }
     }
 }
-
 
 
 

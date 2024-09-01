@@ -33,6 +33,7 @@ export function List() {
     }
 
     function insertItem(index: number) {
+        console.log("insert item")
         list$.splice(index, 0, {
             id: genId(),
             content: (Math.random() * 100).toString(),
@@ -82,7 +83,7 @@ export function List() {
                 <div>
                     <button onclick={destroy}>destroy</button>
                     <>
-                        {mount_if($(() => list$.length === 0), () => (
+                        {mount_if($(() => {console.log('reevaluate list length === 0'); return list$.length === 0}), () => (
                             <div
                                 onclick={() => insertItem(0)}
                                 style="background-color: gray; cursor: pointer"

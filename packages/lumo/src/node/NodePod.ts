@@ -12,7 +12,7 @@ import { NodeSignal } from "./$Node";
 // The main purpose of node pods is to aid in node insertions when updates are triggered by dynamic `mXsFor` and `mXIf`
 // _DynamicNodePod supports in emitting Update and Unmounted hooks by collecting components in the `activeComponents` property
 // For Unmounting: activeComponents should collect the highest component of a branch, then let the unmount cascade unmount any descendant components.
-// For Updates: call emit(AFTER_UPDATE) for the PARENT component not the components within via getCurrentComponent();
+// For Updates: call emit(ON_UPDATED) for the PARENT component not the components within via getCurrentComponent();
 //
 // A new root node pod is created when mE is called and passed through the set up of its (child) node entities.
 // The root node pod should not be passed to grand children.

@@ -1,6 +1,6 @@
 import { collectEffects, EffectFlask } from "@rue/flask";
 import { _NodePod } from "../node/NodePod";
-import {  LifecycleHook } from "./lifecycle";
+import { LifecycleHook } from "./lifecycle";
 
 export class DynamicNode {
     flask: EffectFlask | undefined;
@@ -57,15 +57,24 @@ export class DynamicNode {
     }
 
 
-    deactivate() {
-        this.emit(LifecycleHook.ON_DEACTIVATE)
-        this.flask?.dispose()
+    reactivate(render: () => void) {
+        pushDynamicNode(this);
+        this.flask?.reactivate()
+        render()
+        this.flask?.deactivate()
+        popDynamicNode();
+        this.emit(LifecycleHook.ON_ACTIVATED)
     }
 
+
+    deactivate() {
+        this.emit(LifecycleHook.ON_DEACTIVATE)
+    }
+    
     unmount() {
         const nodePod = this.nodePod;
         if (!nodePod) throw new Error('No nodePod :( This should never happen')
-        nodePod.forEachNode((node) => {
+            nodePod.forEachNode((node) => {
             node.remove();
         })
         this.deactivate()
@@ -75,6 +84,7 @@ export class DynamicNode {
         console.log("DESTROY")
         this.unmount();
         this.emit(LifecycleHook.ON_DESTROY) // this stops all onActivated and onDeactivate listeners that are set to go until destroy
+        this.flask?.dispose()
         this.nodePod = undefined
         this.flask = undefined
         this.parent = null
@@ -107,16 +117,16 @@ export function popDynamicNode() {
 
 let mounting = false;
 
-export function markMountPhase(){
+export function markMountPhase() {
     mounting = true;
 }
 
-export function unmarkMountPhase(){
+export function unmarkMountPhase() {
     mounting = false;
 }
 
 
-export function isMountPhase(){
+export function isMountPhase() {
     return mounting;
 }
 

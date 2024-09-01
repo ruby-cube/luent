@@ -1,6 +1,6 @@
-import { PublicComponent, ComponentSetup, DOMNode, InternalComponent, getComponent} from "../component/InternalComponent";
+import { PublicComponent, ComponentSetup, DOMNode, InternalComponent, getComponent } from "../component/InternalComponent";
 import { DerivedSignal, hasSignal, ReactiveSignal, _runTasks, Hooks } from "@rue/muonic";
-import { normalizeToArray } from "@rue/utils";
+import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
 import { initializeRender, watchForRender } from "../watch/watchForRender";
@@ -16,8 +16,8 @@ import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
 import { getCurrentComponent } from "../component/componentStack";
-import { getActiveDynamicNode } from "../dynamic/DynamicNode";
-import { onDeactivate } from "../dynamic/lifecycle";
+import { getActiveDynamicNode, isMountPhase } from "../dynamic/DynamicNode";
+import { onActivated, onDeactivate } from "../dynamic/lifecycle";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap

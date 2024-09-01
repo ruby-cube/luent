@@ -45,7 +45,6 @@ export class UpdateCycle {
         startUpdateCycle(this)
         updateCycleCount++;
         beforeRepaint(() => {
-            _runTasks(Hooks.BEFORE_RENDER)
             runNonSyncTasks('render');
             _runTasks(Hooks.ON_RENDERED)
             queueTask(() => {

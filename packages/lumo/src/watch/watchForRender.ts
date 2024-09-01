@@ -63,12 +63,14 @@ function setUpUpdateHooks(component: InternalComponent) {
     if (component.hasUpdates === true) return;
     component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
 
-    beforeRender(() => {
-        component.emit(LifecycleHook.BEFORE_UPDATE)
-    }, { once: true }) // assuming cleanup flask is set up
+    // beforeRender(() => { //NOTE: This causes a memory leak because the listener is registered AFTER beforeRender is emitted. Before update needs to be emitted elsewhere.
+    //     console.log("beforeRender cb: emit before update")
+    //     component.emit(LifecycleHook.BEFORE_UPDATE)
+    // }, { once: true })
 
     onRendered(() => {
-        component.emit(LifecycleHook.AFTER_UPDATE)
+        console.log("onRendered cb: emit after update")
+        component.emit(LifecycleHook.ON_UPDATED) //NOTE: I don't know if I even need an after update hook...
         component.hasUpdates = false; // resets for the next cycle
     }, { once: true })
 }
@@ -203,7 +205,7 @@ function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends
 //         }, { once: true }) // assuming cleanup flask is set up
 
 //         onRendered(() => {
-//             component.emit(LifecycleHook.AFTER_UPDATE)
+//             component.emit(LifecycleHook.ON_UPDATED)
 //             component.hasUpdates = false; // resets for the next cycle
 //         }, { once: true })
 //     }

@@ -3,9 +3,7 @@ import { _NodePod } from "../node/NodePod";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
-import { shallowClone } from "@rue/muonic";
 import { AnyObject, Booleanny } from "@rue/types";
-import { getCurrentComponent } from "../component/componentStack";
 import { getComponent, InternalComponent } from "../component/InternalComponent";
 
 

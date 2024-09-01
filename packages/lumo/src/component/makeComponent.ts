@@ -56,7 +56,7 @@ export function makeComponent(
     const component = new InternalComponent(parent);
     pushComponent(component)
     runComponentSetup(Component, component, Slot, config, $index);
-    component.emit(LifecycleHook.AFTER_CREATE)
+    component.emit(LifecycleHook.ON_CREATED)
     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
     return component;
 }

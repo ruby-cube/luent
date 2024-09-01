@@ -46,10 +46,12 @@ export class EffectFlask {
     }
 
     onDisposal(cleanUp: () => void) {
+        console.trace('adding cleanup')
         const cleanups = this.#cleanups;
-        cleanups.add(cleanUp); //TODO: do cleanUps need to be removed?
+        cleanups.add(cleanUp);
         return {
             cancel() {
+                console.trace('cancel cleanup')
                 cleanups.delete(cleanUp)
             }
         }

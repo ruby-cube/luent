@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { afterCreate } from "./lifecycle";
+import { onCreated } from "./lifecycle";
 import { getCurrentComponent } from "./componentStack";
 import { encapsulate } from "@rue/utils";
 
@@ -32,7 +32,7 @@ function popProvider() {
 export function initializeRootProvider(component: Component) {
     const provider = new Provider(component, null);
     pushProvider(provider);
-    afterCreate(() => {
+    onCreated(() => {
         popProvider()
     })
 }
@@ -49,7 +49,7 @@ export function provide<T>(key: TypedKey<T>, value: T) {
     if (!provider || provider.component !== component) {
         provider = new Provider(component, provider, provider?.root);
         pushProvider(provider);
-        afterCreate(() => {
+        onCreated(() => {
             popProvider()
         })
     }

@@ -62,7 +62,7 @@ function asData<T>(portableItem: PortableItem<T>) {
 
 
 
-afterCreate()
+onCreated()
 
 onDestroy()
 
