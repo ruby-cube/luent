@@ -1,13 +1,10 @@
 import { AnyObject } from "@rue/types";
 import { SnapshotManager } from "./SnapshotManager";
 import { isReactiveModel, ReactiveModel } from "./Reactive$";
-import { isSignal, Signal } from "./$Signal";
 import { runNonSyncTasks } from "./watch";
-import { $listen, $schedule, ScheduleStop } from "@rue/flask";
-import { removeItem } from "../../utils/array";
+import { $listen, $schedule, ScheduleCancel, SchedulerOptions, ScheduleStop } from "@rue/flask";
 import { beforeRepaint, queueTask } from "@rue/thread";
 import { MutationRecord, SetOp } from "./deepWatch";
-import { asReactiveProp, getReactiveProp, isReactiveProp, ReactiveProp } from "./ReactiveProp";
 import { DerivedSignal, isDerivedSignal } from "./DerivedSignal";
 import { UNDEFINED } from "@rue/utils";
 import { ReactiveAtom } from "./DependencyTracker";
@@ -51,8 +48,8 @@ export class UpdateCycle {
                 runNonSyncTasks('post');
                 _runTasks(Hooks.ON_UPDATE_COMPLETED)
                 endUpdateCycle();
-            })
-        })
+            }, {__devName: queueTask.name})
+        }, { __devName: beforeRepaint.name })
     }
 
     flagReactiveAtom(target: ReactiveAtom, newValue: any, oldValue: any) {
@@ -208,8 +205,10 @@ export function _runTasks(hookName: Hooks) {
 }
 
 function createUpdateCycleHook(hookName: Hooks) {
-    return (task: () => void, options?: { cancel?: ScheduleStop }) => {
-        return $schedule(task, options || {}, {
+    return (task: () => void, options?: { cancel?: ScheduleCancel; }) => {
+        const _options = <SchedulerOptions>options || { flask: '' }
+        _options.flask = 'outlive'
+        return $schedule(task, _options, {
             enroll(task) {
                 const tasks = getCurrentUpdateCycle()?.tasks;
                 if (!tasks) throw new Error('No update cycle :(. This should never happen')

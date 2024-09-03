@@ -8,7 +8,7 @@ import { _DynamicNodePod, _NodePod, NULLISH_NODE_POD } from "../node/NodePod";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { ConditionalSeries } from "./ConditionalSeries";
 import { hidePrevConditionalNodes, showConditionalNodes } from "./toggledisplay";
-import { watchForRender } from "../watch/watchForRender";
+import { setUpUpdateHooks, watchForRender } from "../watch/watchForRender";
 import { areShallowEqualArrays } from "@rue/muonic";
 import { popComponent, pushComponent } from "../component/componentStack";
 import { LifecycleHook } from "../component/lifecycle";
@@ -91,6 +91,55 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         nodePod: _NodePod,
         fragment?: DocumentFragment,
     ) {
+// // evaluate conditions and render
+// const { $conditions, activeIndex } = this.evaluateConditions()
+// const dynamicPod = nodePod.appendDynamicPod();
+// const series = this;
+// const component = this.component
+// this.initDynamicNodePod(dynamicPod)
+
+// const parentDynamicNode = getActiveDynamicNode();
+// if (__DEV__ && !parentDynamicNode)
+//     throw new Error('No active dynamic node. This should never happen since the root component is a dynamic node')
+// pushComponent(component)
+// this.appendConditional(activeIndex, parent, fragment)
+// popComponent()
+
+// // set up watcher for updates
+// pushComponent(component) // must pushComponent separately from appendConditional
+// watchForRender($conditions, updateConditional, { once: true })
+// popComponent()
+
+// function updateConditional(newValue: boolean[], oldValue: boolean[]) {
+//     if (areShallowEqualArrays(newValue, oldValue)) return;
+//     console.log("update conditional")
+
+//     pushDynamicNode(parentDynamicNode!)
+//     // component.emit(LifecycleHook.BEFORE_UPDATE)
+
+//     // (1)
+//     series.deactivateConditional()
+
+//     // (2)
+//     const { $conditions, activeIndex } = series.evaluateConditions();
+
+//     // (3)
+//     pushComponent(component)
+//     series.activateConditional(activeIndex, parent)
+//     popComponent()
+
+//     // (4) set up for next update
+//     pushComponent(component)
+//     watchForRender($conditions, updateConditional, { once: true })
+//     popComponent()
+
+
+//     // component.emit(LifecycleHook.ON_UPDATED)
+//     popDynamicNode()
+//     console.log('update conditional done')
+// }
+
+
         // evaluate conditions and render
         const { $conditions, activeIndex } = this.evaluateConditions()
         const dynamicPod = nodePod.appendDynamicPod();
@@ -98,24 +147,30 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const component = this.component
         this.initDynamicNodePod(dynamicPod)
 
-        const parentDynamicNode = getActiveDynamicNode();
-        if (__DEV__ && !parentDynamicNode)
-            throw new Error('No active dynamic node. This should never happen since the root component is a dynamic node')
-        pushComponent(component)
-        this.appendConditional(activeIndex, parent, fragment)
-        popComponent()
+        const _nodePod = this.getNodePod(activeIndex)
+        const activationType = this.statements[activeIndex].type
+        const preserve = activationType === 'create' ? false : true;
+        const dynamicNode = makeDynamicNode(preserve, _nodePod)
+        
+        dynamicNode.activate(function renderConditional() {
+            pushComponent(component)
+            series.appendConditional(activeIndex, parent, fragment)
+            popComponent()
+            
+            // set up watcher for updates
+            //NOTE: Must watchForRender inside conditional dynamicNode (rather than parent dynamic node) so that $condition gets cleaned up with flask disposal 
+            watchForRender($conditions, updateConditional, { once: true, __devName: 'mount conditional' })
+        })
+        this.storeDynamicNode(dynamicNode, activeIndex)
 
-        // set up watcher for updates
-        pushComponent(component) // must pushComponent separately from appendConditional
-        watchForRender($conditions, updateConditional, { once: true })
-        popComponent()
+
+        const parentDynamicNode = getActiveDynamicNode()
+        if (!parentDynamicNode) throw new Error('No dynamicNode :( This should never happen since root component is a dynamic node')
 
         function updateConditional(newValue: boolean[], oldValue: boolean[]) {
             if (areShallowEqualArrays(newValue, oldValue)) return;
             console.log("update conditional")
-
             pushDynamicNode(parentDynamicNode!)
-            // component.emit(LifecycleHook.BEFORE_UPDATE)
 
             // (1)
             series.deactivateConditional()
@@ -127,16 +182,16 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             pushComponent(component)
             series.activateConditional(activeIndex, parent)
             popComponent()
-
-            // (4) set up for next update
-            pushComponent(component)
-            watchForRender($conditions, updateConditional, { once: true })
-            popComponent()
-
-
-            // component.emit(LifecycleHook.ON_UPDATED)
+            
+            // (4)
+            setUpUpdateHooks(component)
+            
+            // (5) set up for next update
+            const dynamicNode = series.dynamicNodes[activeIndex]
+            pushDynamicNode(dynamicNode)
+            watchForRender($conditions, updateConditional, { once: true, __devName: updateConditional.name })
             popDynamicNode()
-            console.log('update conditional done')
+            popDynamicNode()
         }
     }
 
@@ -149,21 +204,32 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         parent: Element,
         fragment?: DocumentFragment,
     ) {
-        const series = this;
+        // const series = this;
+        // const nodePod = this.getNodePod(activeIndex)
+        // const activationType = this.statements[activeIndex].type
+        // const preserve = activationType === 'create' ? false : true;
+        // const dynamicNode = makeDynamicNode(preserve, nodePod)
+        // dynamicNode.activate(function renderConditional() {
+        //     const nodeEntities = series.render(activeIndex)
+        //     // append to dom (through existing fragment if any) and node pod
+        //     if (preserve) markMountPhase()
+        //     for (const nodeEntity of nodeEntities) {
+        //         mountNodeEntity(parent, nodeEntity, nodePod, fragment)
+        //     }
+        //     if (preserve) unmarkMountPhase()
+        // })
+        // series.storeDynamicNode(dynamicNode, activeIndex)
+
         const nodePod = this.getNodePod(activeIndex)
         const activationType = this.statements[activeIndex].type
         const preserve = activationType === 'create' ? false : true;
-        const dynamicNode = makeDynamicNode(preserve, nodePod)
-        dynamicNode.activate(function renderConditional() {
-            const nodeEntities = series.render(activeIndex)
-            // append to dom (through existing fragment if any) and node pod
-            if (preserve) markMountPhase()
-            for (const nodeEntity of nodeEntities) {
-                mountNodeEntity(parent, nodeEntity, nodePod, fragment)
-            }
-            if (preserve) unmarkMountPhase()
-        })
-        series.storeDynamicNode(dynamicNode, activeIndex)
+        const nodeEntities = this.render(activeIndex)
+        // append to dom (through existing fragment if any) and node pod
+        if (preserve) markMountPhase()
+        for (const nodeEntity of nodeEntities) {
+            mountNodeEntity(parent, nodeEntity, nodePod, fragment)
+        }
+        if (preserve) unmarkMountPhase()
     }
 
     private deactivateConditional() {
@@ -191,6 +257,43 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         activeIndex: number,
         parent: Element
     ) {
+
+        // const activationType = this.statements[activeIndex].type
+        // const preserve = activationType === 'create' ? false : true;
+        // const series = this;
+        // const dynamicNodePod = this.dynamicNodePod
+        // // set up new conditional pod if needed
+        // const _nodePod = dynamicNodePod[activeIndex]
+        // const nodePod = _nodePod === NULLISH_NODE_POD || !_nodePod ? new _NodePod() : _nodePod;
+
+        // let dynamicNode = this.dynamicNodes[activeIndex]
+        // if (dynamicNode === undefined || dynamicNode === NULLISH_DYNAMIC_NODE) {
+        //     dynamicNode = makeDynamicNode(preserve, nodePod);
+        //     dynamicNode.activate(function renderConditionalUpdate() {
+        //         const nodeEntities = series.render(activeIndex)
+        //         if (preserve) markMountPhase()
+        //         mountConditional(nodePod, parent, dynamicNodePod, nodeEntities);
+        //         if (preserve) unmarkMountPhase()
+        //     })
+        //     series.storeDynamicNode(dynamicNode, activeIndex)
+        // }
+        // else {
+        //     dynamicNode.reactivate(function updateConditional() {
+        //         const nodeEntities = series.render(activeIndex);
+        //         if (preserve) markMountPhase()
+        //         if (activationType === 'show') {
+        //             showConditionalNodes(parent, dynamicNodePod, activeIndex, nodeEntities)
+        //         }
+        //         else {
+        //             series.replaceNodePod(activeIndex, nodePod);
+        //             mountConditional(nodePod, parent, dynamicNodePod, nodeEntities)
+        //         }
+        //         if (preserve) unmarkMountPhase()
+        //     })
+        // }
+
+        //---------
+
         const activationType = this.statements[activeIndex].type
         const preserve = activationType === 'create' ? false : true;
         const series = this;

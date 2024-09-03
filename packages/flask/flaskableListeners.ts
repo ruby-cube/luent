@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { ActiveListener, EnrollFunction, makeActiveListener, RemoveFunction } from "./ActiveListener";
 import { makePendingCancelOp, PendingCancelOp } from "./PendingCancelOp";
 import { makePendingOp, PendingOp } from "./PendingOp";
-import { EffectFlask } from "./flask";
+import { EffectFlask } from "./EffectFlask";
 
 export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O extends AnyObject = {}> = <
     OPT extends ListenerOptions & O,

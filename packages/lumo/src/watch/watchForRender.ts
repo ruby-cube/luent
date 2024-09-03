@@ -29,13 +29,13 @@ function _initializeRender(effect: () => void) {
         setUpUpdateHooks(component)
     }
     return _initializeEffect(_handler, {
-        phase: 'render'
+        phase: 'render',
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
 export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: { once?: true, eager?: true }) {
-    const component = getCurrentComponent<InternalComponent>();
-    if (!component) throw Error("watchForRender must be called within component setup")
+    // const component = getCurrentComponent<InternalComponent>();
+    // if (!component) throw Error("watchForRender must be called within component setup")
 
     const dynamicNode = getActiveDynamicNode()
     if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
@@ -47,19 +47,20 @@ export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T ex
 }
 
 function _watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: { once?: true, eager?: true }) {
-    const component = getCurrentComponent<InternalComponent>()!;
-    const _handler = (newValue: any, oldValue: any) => {
-        handler(newValue, oldValue);
-        setUpUpdateHooks(component)
-    }
-    return _watch(target, _handler, {
+    // const component = getCurrentComponent<InternalComponent>()!;
+    // const _handler = (newValue: any, oldValue: any) => {
+        // handler(newValue, oldValue);
+        // setUpUpdateHooks(component)
+    // }
+    return _watch(target, handler, {
         once: options?.once,
         eager: options?.eager,
         phase: 'render',
+        __devName: options?.__devName
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
-function setUpUpdateHooks(component: InternalComponent) {
+export function setUpUpdateHooks(component: InternalComponent) {
     if (component.hasUpdates === true) return;
     component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
 
@@ -71,7 +72,7 @@ function setUpUpdateHooks(component: InternalComponent) {
     onRendered(() => {
         component.emit(LifecycleHook.ON_UPDATED) //NOTE: I don't know if I even need an after update hook...
         component.hasUpdates = false; // resets for the next cycle
-    }, { once: true })
+    }, { once: true, __devName: setUpUpdateHooks.name })
 }
 
 function bindWithComponent(fn: Function, component: InternalComponent) {
@@ -129,7 +130,7 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
 
 function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
     const mountPhase = isMountPhase()
-    const component = getComponent(watchAndPreserve.name);
+    // const component = getComponent(watchAndPreserve.name);
     const watchFn = options?.phase === 'render' ? _watchForRender : _watch
     const dynamicNode = getActiveDynamicNode()!
 
@@ -164,9 +165,9 @@ function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends
     }
 
     function initializeWatcher() {
-        pushComponent(component)
+        // pushComponent(component)
         watcher.stop = watchFn(target, handler, options).stop
-        popComponent()
+        // popComponent()
     }
 
     return watcher

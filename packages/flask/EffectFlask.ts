@@ -1,3 +1,4 @@
+
 import { Callback } from "./flaskableListeners";
 
 // Manages flask stack
@@ -30,9 +31,10 @@ export function onFlaskDisposal(cb: () => void) {
 export class EffectFlask {
     #cleanups: Set<() => void>;
     dispose: () => void;
+    outer: EffectFlask | null = null;
 
-    constructor(public outer: EffectFlask | null, public __devName: string) {
-        this.outer = outer;
+    constructor(public __devName: string) {
+        this.outer = getFlask();
         const cleanups: Set<() => void> = new Set()
         this.#cleanups = cleanups
         let called = false;
@@ -66,36 +68,55 @@ export class EffectFlask {
         if (getFlask() === this)
             popFlask()
     }
+
+    collectEffects<T>(run: (outerFlask: EffectFlask | null) => T) {
+        try {
+            pushFlask(this);
+            return run(this.outer);
+        } finally {
+            popFlask();
+
+        }
+    }
 }
 
 
 export function collectEffects<T>(run: (flask: EffectFlask, outerFlask: EffectFlask | null) => T, __devName: string) {
-    const outerFlask = getFlask();
-    const _flask = new EffectFlask(outerFlask, __devName);
+    const flask = new EffectFlask(__devName);
     try {
-        pushFlask(_flask);
-        return run(_flask, outerFlask || null);
+        pushFlask(flask);
+        return run(flask, flask.outer || null);
     } finally {
         popFlask();
-
     }
 }
 
 
-export function bindFlask(callback: Callback, flask: EffectFlask | null = getFlask()) {
-    if (flask) return (...args: any[]) => {
-        pushFlask(flask)
-        callback(...args);
-        popFlask();
-    }
+export function bindFlask(callback: Callback, flask: EffectFlask | null = null) {
+    if (flask) {
+        function callbackBoundToFlask(...args: any[]) {
+            pushFlask(flask!)
+            callback(...args);
+            popFlask();
+        }
+        return callbackBoundToFlask
+    } 
     return callback;
 }
 
 // USAGE: 
 // collectEffects((flask, outerFlask) => {
-//     watch($item, ()=>{ /* do something */ })
+//     watch($item, () => { /* do something */ })
 //     outerFlask?.onDisposal(flask.dispose)
 // })
+
+// const flask = new EffectFlask(NESTABLE);
+
+// flask.collectEffects((outerFlask) => {
+
+//     outerFlask?.onDisposal(flask.dispose)
+// })
+// flask.outer.onDisposal(flask.dispose)
 
 
 

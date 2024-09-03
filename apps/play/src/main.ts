@@ -14,6 +14,7 @@ import { configureFlask } from '../../../packages/flask/initFlask';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 import { MountIf } from './TestMountIf';
+import { List } from './TestReactiveModel';
 
 
 

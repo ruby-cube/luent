@@ -21,7 +21,7 @@ export function mountTextNode(parent: Element, text: ReactiveSignal | any, nodeP
 function keepTextNodeUpdated($text: ReactiveSignal<any>, textNode: CharacterData) {
     watchForRender($text, (newValue: any) => {
         textNode.data = toString(newValue);
-    });
+    }, { __devName: keepTextNodeUpdated.name });
 }
 
 

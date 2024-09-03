@@ -101,7 +101,7 @@ export class DerivedSignalState {
                 if (!updateCycle) throw new Error("no update cycle. not sure if this should happen")
                 const oldValue = updateCycle.getInitialValue(dep);
                 if (newValue !== oldValue) this.hasChanged = true;
-            }, { phase: 'sync' })
+            }, { phase: 'sync', __devName: this.trackDependencies.name })
 
             this.watchers.push(watcher);
         }

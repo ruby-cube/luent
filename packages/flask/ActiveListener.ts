@@ -1,5 +1,5 @@
 import { Callback, ListenerOptions } from "./flaskableListeners";
-import { bindFlask, getFlask, onFlaskDisposal } from "./flask";
+import { bindFlask, getFlask, onFlaskDisposal } from "./EffectFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
 import { genIncrementalId, markNoCleanup, setUpCleanupWarning, shouldWarnNoCleanup, unmarkNoCleanup } from "./initFlask";
 
@@ -74,6 +74,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
         }
     }
     _remove.isRemover = true as const;
+    _remove.__devName = options.__devName;
 
     const until = options?.until || null;
 

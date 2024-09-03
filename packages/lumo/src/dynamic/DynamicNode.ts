@@ -59,9 +59,9 @@ export class DynamicNode {
 
     reactivate(render: () => void) {
         pushDynamicNode(this);
-        this.flask?.reactivate()
+        // this.flask?.reactivate()
         render()
-        this.flask?.deactivate()
+        // this.flask?.deactivate()
         popDynamicNode();
         this.emit(LifecycleHook.ON_ACTIVATED)
     }

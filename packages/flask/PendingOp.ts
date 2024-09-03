@@ -1,4 +1,4 @@
-import { bindFlask, getFlask, onFlaskDisposal } from "./flask";
+import { bindFlask, getFlask, onFlaskDisposal } from "./EffectFlask";
 import { CallbackRemover, SchedulerOptions } from "./flaskableListeners";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
@@ -64,7 +64,8 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
             called = true;
         }) as CallbackRemover;
         cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.
-
+        cancel.__devName = options.__devName;
+        
         pendingOp.cancel = cancel;
 
         pendingFlaskCleanup =

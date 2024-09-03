@@ -35,7 +35,7 @@ export class EventTick {
             this.afterEventListener?.stop();
         }
         else if (this.prevHandlerCount === 0 && this.handlerCount > 0) {
-            this.afterEventListener = this.attachHandler(this._afterEventHandler = (e: Event) => afterEventHandler(this, e), {});
+            this.afterEventListener = this.attachHandler(this._afterEventHandler = (e: Event) => afterEventHandler(this, e), {__devName: this.updateHandlers.name});
         }
     }
 

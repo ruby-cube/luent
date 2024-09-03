@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach, it } from "vitest";
 import { makeActiveListener } from "../ActiveListener";
-import { bindFlask, onFlaskDisposal, getFlask, EffectFlask } from "../flask";
+import { bindFlask, onFlaskDisposal, getFlask, EffectFlask } from "../EffectFlask";
 
 vi.mock('../flask', () => ({
     onFlaskDisposal: vi.fn(),

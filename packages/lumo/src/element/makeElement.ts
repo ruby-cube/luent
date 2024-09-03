@@ -172,13 +172,13 @@ function setUpEvents(node: Element, events: { [key: string]: (EventListener | De
                                 listener.stop();
                             }
                             if (newValue) {
-                                listener = event.attachHandler(newValue, newValue.options || {});
+                                listener = event.attachHandler(newValue, newValue.options || {__devName: setUpEvents.name});
                             }
                         })
                     }, { eager: true })
                 }
                 else {
-                    event.attachHandler(handler, handler.options || {})
+                    event.attachHandler(handler, handler.options || {__devName: setUpEvents.name})
                 }
             }
         })

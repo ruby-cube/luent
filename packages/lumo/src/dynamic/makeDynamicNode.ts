@@ -30,7 +30,8 @@ export function makeDynamicNode(preserve: boolean, nodePod?: _NodePod) {
             until: onDestroyDynamicNode,
         })
         onDestroy(() => { dynamicNode.destroy() }, {
-            cancel: onDestroyDynamicNode
+            cancel: onDestroyDynamicNode,
+            __devName: 'makeDynamicNode, onDestroy'
         })
     }
 
