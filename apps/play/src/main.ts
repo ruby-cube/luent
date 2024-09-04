@@ -7,7 +7,7 @@ import './style.css'
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
-// import { List } from './TestReactiveModel';
+import { List } from './TestReactiveModel';
 import { configureFlask } from '../../../packages/flask/initFlask';
 // import { MainSite } from './AwaitTest';
 // import { ConditionalFlaskTest } from './ConditionalFlaskTest';
@@ -20,7 +20,7 @@ import { makeDynamicNode } from '../../../packages/lumo/src/dynamic/makeDynamicN
 
 
 
-const app = createApp(MountIf)
+const app = createApp(List)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: false

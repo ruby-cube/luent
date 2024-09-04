@@ -131,7 +131,6 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
         remove(task) {
             if (isDerivedSignal(target)){
                 target[DERIVED_SIGNAL]?.markUnwatched();
-                derivedSignalMap.delete(task)
             }
             for (const phaseQueue of phaseQueues) {
                 const taskQueue = useTaskQueue(phaseQueue, forNextCycle)

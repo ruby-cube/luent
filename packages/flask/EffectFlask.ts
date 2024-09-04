@@ -95,7 +95,7 @@ export function collectEffects<T>(run: (flask: EffectFlask, outerFlask: EffectFl
 }
 
 
-export function bindFlask(callback: Callback, flask: EffectFlask | null = null) {
+export function bindFlask(callback: Callback, flask: EffectFlask | null = getFlask()) {
     if (flask) {
         function callbackBoundToFlask(...args: any[]) {
             pushFlask(flask!)

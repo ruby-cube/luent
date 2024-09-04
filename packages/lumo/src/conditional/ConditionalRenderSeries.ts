@@ -158,7 +158,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             popComponent()
 
             // set up watcher for updates
-            //NOTE: Must watchForRender inside conditional dynamicNode (rather than parent dynamic node) so that $condition gets cleaned up with flask disposal 
+            //NOTE: Must watchForRender inside conditional dynamicNode (rather than parent dynamic node) so that $condition gets cleaned up with flask disposal, preventng memory leak
             watchForRender($conditions, updateConditional, { once: true, __devName: 'mount conditional' })
         })
         this.storeDynamicNode(dynamicNode, activeIndex)
@@ -167,7 +167,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const parentDynamicNode = getActiveDynamicNode()
         if (!parentDynamicNode) throw new Error('No dynamicNode :( This should never happen since root component is a dynamic node')
 
-        let $prevConditions = $conditions
+        let $prevConditions = $conditions // allows $conditions to be dereferenced, preventing memory leak
 
         function updateConditional(newValue: boolean[], oldValue: boolean[]) {
             if (areShallowEqualArrays(newValue, oldValue)) return;
