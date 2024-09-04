@@ -52,6 +52,7 @@ export class EffectFlask {
         console.trace('adding cleanup', this.__devName)
         const cleanups = this.#cleanups;
         cleanups.add(cleanUp);
+        // return new PendingFlaskCleanup(cleanups, cleanUp)
         return {
             cancel() {
                 console.trace('cancel cleanup', devName)
@@ -79,6 +80,8 @@ export class EffectFlask {
         }
     }
 }
+
+
 
 
 export function collectEffects<T>(run: (flask: EffectFlask, outerFlask: EffectFlask | null) => T, __devName: string) {

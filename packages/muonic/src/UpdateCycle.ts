@@ -172,8 +172,8 @@ export class UpdateCycle {
     }
 
 
-    mustRetrack: Set<DerivedSignal> = new Set();
-    retracked: Set<DerivedSignal> = new Set();
+    // mustRetrack: Set<DerivedSignal> = new Set();
+    // retracked: Set<DerivedSignal> = new Set();
 }
 
 

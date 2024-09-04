@@ -70,7 +70,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
                 console.log("pending flask cleanup")
                 pendingFlaskCleanup.cancel();
             }
-            console.log('remove done', pendingFlaskCleanup)
+            // console.log('remove done', pendingFlaskCleanup)
         }
     }
     _remove.isRemover = true as const;

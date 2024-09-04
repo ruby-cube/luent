@@ -6,11 +6,12 @@
 // - derived signal in template
 // - derived signal with memo
 
+import { mx } from "@rue/lumo"
 import { $, Reactive$, $Signal } from "@rue/muonic"
 
 export function TestCounterSignals() {
     const $count = $Signal(0)
-    const $doubleCount = $Signal(() => $count() * 2)
+    const $doubleCount = $(() => $count() * 2)
 
     function increment() {
         $count.set(count => count + 1)
@@ -20,11 +21,11 @@ export function TestCounterSignals() {
         $count.set(count => count - 1)
     }
 
-    return (
+    return mx(
         <>
             <div>{$count}</div>
-            <div>{$doubleCount}</div>
-            <div>{$(() => `The count is: ${$count()}. Doubled: ${$doubleCount()}`)}</div>
+            <div>{$doubleCount}</div> 
+            <div>{$(() => `The count is: ${$count()}. Doubled: ${$doubleCount()}`)}</div> 
             <button onclick={increment}>increment</button>
             <button onclick={decrement}>decrement</button>
         </>

@@ -62,6 +62,11 @@ function addToDepMap(derivedSignal: DerivedSignal, deps: (ReactiveAtom)[]) {
     }
 }
 
+export function destroyDerivedSignal(signal: DerivedSignal){
+    signal[DERIVED_SIGNAL].destroy();
+    signal[DERIVED_SIGNAL] = null;
+    signal.destroy()
+}
 
 export class DerivedSignalState {
     value: any;
@@ -70,10 +75,16 @@ export class DerivedSignalState {
 
     removeFromDepMap: undefined | (() => void);
 
-    private watchers: ActiveListener[] = [];
+    private watchers: ActiveListener[] | null = [];
+
+    destroy(){
+        this.stopPrevWatchers();
+        this.watchers = null;
+        this.removeFromDepMap?.()
+    }
 
     private stopPrevWatchers() {
-        for (const watcher of this.watchers) {
+        for (const watcher of this.watchers!) {
             watcher.stop();
         }
         this.watchers = [];
@@ -87,6 +98,7 @@ export class DerivedSignalState {
 
         // detect dirtying
         this.stopPrevWatchers(); //QUESTION: Why not just use {once: true} ?
+        let state = this;
 
         for (let i = 0; i < deps.length; i++) {
             const dep = deps[i]
@@ -100,10 +112,11 @@ export class DerivedSignalState {
                 const updateCycle = getCurrentUpdateCycle()
                 if (!updateCycle) throw new Error("no update cycle. not sure if this should happen")
                 const oldValue = updateCycle.getInitialValue(dep);
-                if (newValue !== oldValue) this.hasChanged = true;
-            }, { phase: 'sync', __devName: this.trackDependencies.name })
+                if (newValue !== oldValue) state.hasChanged = true;
+                state = null;
+            }, { phase: 'sync', __devName: state.trackDependencies.name })
 
-            this.watchers.push(watcher);
+            state.watchers!.push(watcher);
         }
 
         if (__DEV__ && !getFlask())
@@ -138,22 +151,23 @@ export class DerivedSignalState {
 
 export function $<T extends any>(pureGetter: () => T, retrack?: boolean): DerivedSignal<T> {
     let initialized = false;
-    const derivedSignal = () => {
-        const _this = (<DerivedSignal><unknown>derivedSignal)[DERIVED_SIGNAL]
-        if (!_this) throw new Error("derived signal props not found")
+    let state: DerivedSignalState; 
+    const derivedSignal = function $derivedSignal() {
+        // const _this = (<DerivedSignal><unknown>derivedSignal)[DERIVED_SIGNAL]
+        if (!state) throw new Error("derived signal props not found")
 
         if (!initialized) {
             // @ts-expect-error private method
-            _this.trackDependencies(pureGetter, <DerivedSignal><unknown>derivedSignal);
+            state.trackDependencies(pureGetter, <DerivedSignal><unknown>derivedSignal);
             initialized = true;
         }
-        if (_this.hasChanged) {
+        if (state.hasChanged) {
             const newValue = pureGetter();
             // @ts-expect-error private method
-            _this.updateValue(newValue)
+            state.updateValue(newValue)
             if (retrack) {
                 //@ts-expect-error private method
-                _this.trackDependencies(pureGetter, <DerivedSignal><unknown>derivedSignal) // to catch signals hidden in conditionals
+                state.trackDependencies(pureGetter, <DerivedSignal><unknown>derivedSignal) // to catch signals hidden in conditionals
             }
             return newValue;
         }
@@ -161,13 +175,14 @@ export function $<T extends any>(pureGetter: () => T, retrack?: boolean): Derive
         // forward dependencies to outer dependency tracker
         const tracker = getDependencyTracker();
         if (tracker) {
-            tracker.dependencies.push(..._this.dependencies)
+            tracker.dependencies.push(...state.dependencies)
         }
 
-        return _this.value;
+        return state.value;
     }
-    const props = new DerivedSignalState();
-    (<DerivedSignal><unknown>derivedSignal)[DERIVED_SIGNAL] = props;
+    state = new DerivedSignalState();
+    (<DerivedSignal><unknown>derivedSignal)[DERIVED_SIGNAL] = state;
+    derivedSignal.destroy = ()=>{state = undefined}
 
     return <DerivedSignal><unknown>derivedSignal;
 }

@@ -9,7 +9,7 @@ import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { ConditionalSeries } from "./ConditionalSeries";
 import { hidePrevConditionalNodes, showConditionalNodes } from "./toggledisplay";
 import { setUpUpdateHooks, watchForRender } from "../watch/watchForRender";
-import { areShallowEqualArrays } from "@rue/muonic";
+import { areShallowEqualArrays, destroyDerivedSignal } from "@rue/muonic";
 import { popComponent, pushComponent } from "../component/componentStack";
 import { LifecycleHook } from "../component/lifecycle";
 
@@ -91,53 +91,53 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         nodePod: _NodePod,
         fragment?: DocumentFragment,
     ) {
-// // evaluate conditions and render
-// const { $conditions, activeIndex } = this.evaluateConditions()
-// const dynamicPod = nodePod.appendDynamicPod();
-// const series = this;
-// const component = this.component
-// this.initDynamicNodePod(dynamicPod)
+        // // evaluate conditions and render
+        // const { $conditions, activeIndex } = this.evaluateConditions()
+        // const dynamicPod = nodePod.appendDynamicPod();
+        // const series = this;
+        // const component = this.component
+        // this.initDynamicNodePod(dynamicPod)
 
-// const parentDynamicNode = getActiveDynamicNode();
-// if (__DEV__ && !parentDynamicNode)
-//     throw new Error('No active dynamic node. This should never happen since the root component is a dynamic node')
-// pushComponent(component)
-// this.appendConditional(activeIndex, parent, fragment)
-// popComponent()
+        // const parentDynamicNode = getActiveDynamicNode();
+        // if (__DEV__ && !parentDynamicNode)
+        //     throw new Error('No active dynamic node. This should never happen since the root component is a dynamic node')
+        // pushComponent(component)
+        // this.appendConditional(activeIndex, parent, fragment)
+        // popComponent()
 
-// // set up watcher for updates
-// pushComponent(component) // must pushComponent separately from appendConditional
-// watchForRender($conditions, updateConditional, { once: true })
-// popComponent()
+        // // set up watcher for updates
+        // pushComponent(component) // must pushComponent separately from appendConditional
+        // watchForRender($conditions, updateConditional, { once: true })
+        // popComponent()
 
-// function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-//     if (areShallowEqualArrays(newValue, oldValue)) return;
-//     console.log("update conditional")
+        // function updateConditional(newValue: boolean[], oldValue: boolean[]) {
+        //     if (areShallowEqualArrays(newValue, oldValue)) return;
+        //     console.log("update conditional")
 
-//     pushDynamicNode(parentDynamicNode!)
-//     // component.emit(LifecycleHook.BEFORE_UPDATE)
+        //     pushDynamicNode(parentDynamicNode!)
+        //     // component.emit(LifecycleHook.BEFORE_UPDATE)
 
-//     // (1)
-//     series.deactivateConditional()
+        //     // (1)
+        //     series.deactivateConditional()
 
-//     // (2)
-//     const { $conditions, activeIndex } = series.evaluateConditions();
+        //     // (2)
+        //     const { $conditions, activeIndex } = series.evaluateConditions();
 
-//     // (3)
-//     pushComponent(component)
-//     series.activateConditional(activeIndex, parent)
-//     popComponent()
+        //     // (3)
+        //     pushComponent(component)
+        //     series.activateConditional(activeIndex, parent)
+        //     popComponent()
 
-//     // (4) set up for next update
-//     pushComponent(component)
-//     watchForRender($conditions, updateConditional, { once: true })
-//     popComponent()
+        //     // (4) set up for next update
+        //     pushComponent(component)
+        //     watchForRender($conditions, updateConditional, { once: true })
+        //     popComponent()
 
 
-//     // component.emit(LifecycleHook.ON_UPDATED)
-//     popDynamicNode()
-//     console.log('update conditional done')
-// }
+        //     // component.emit(LifecycleHook.ON_UPDATED)
+        //     popDynamicNode()
+        //     console.log('update conditional done')
+        // }
 
 
         // evaluate conditions and render
@@ -151,12 +151,12 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const activationType = this.statements[activeIndex].type
         const preserve = activationType === 'create' ? false : true;
         const dynamicNode = makeDynamicNode(preserve, _nodePod)
-        
+
         dynamicNode.activate(function renderConditional() {
             pushComponent(component)
             series.appendConditional(activeIndex, parent, fragment)
             popComponent()
-            
+
             // set up watcher for updates
             //NOTE: Must watchForRender inside conditional dynamicNode (rather than parent dynamic node) so that $condition gets cleaned up with flask disposal 
             watchForRender($conditions, updateConditional, { once: true, __devName: 'mount conditional' })
@@ -167,25 +167,29 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const parentDynamicNode = getActiveDynamicNode()
         if (!parentDynamicNode) throw new Error('No dynamicNode :( This should never happen since root component is a dynamic node')
 
+        let $prevConditions = $conditions
+
         function updateConditional(newValue: boolean[], oldValue: boolean[]) {
             if (areShallowEqualArrays(newValue, oldValue)) return;
             console.log("update conditional")
             pushDynamicNode(parentDynamicNode!)
 
             // (1)
+            destroyDerivedSignal($prevConditions)
             series.deactivateConditional()
 
             // (2)
             const { $conditions, activeIndex } = series.evaluateConditions();
+            $prevConditions = $conditions
 
             // (3)
             pushComponent(component)
             series.activateConditional(activeIndex, parent)
             popComponent()
-            
+
             // (4)
             setUpUpdateHooks(component)
-            
+
             // (5) set up for next update
             const dynamicNode = series.dynamicNodes[activeIndex]
             pushDynamicNode(dynamicNode)

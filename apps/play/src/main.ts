@@ -14,7 +14,9 @@ import { configureFlask } from '../../../packages/flask/initFlask';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 import { MountIf } from './TestMountIf';
-import { List } from './TestReactiveModel';
+import { $, $Signal, destroyDerivedSignal, watch } from '@rue/muonic';
+import { watchForRender } from '../../../packages/lumo/src/watch/watchForRender';
+import { makeDynamicNode } from '../../../packages/lumo/src/dynamic/makeDynamicNode';
 
 
 
@@ -29,3 +31,29 @@ app.mount('#app')
 // window.addEventListener('beforeunload', () => {
 //     console.log("unloading...")
 // })
+
+// function doSomething() {
+//     const dynamicNode = makeDynamicNode(false)
+//     const unrelated = true;
+//     const $count = $Signal(0)
+//     function increment() {
+//         $count.set(c => c + 1)
+//     }
+//     const $doubleCount = $(() => $count() * 2)
+//     let prevDoubleCount = $doubleCount;
+//     dynamicNode.activate(() => {
+//         watchForRender($doubleCount, function $stubbornHandler() {
+//             console.log("tada")
+//             destroyDerivedSignal(prevDoubleCount)
+//             prevDoubleCount = null;
+//         }, { once: true })
+//     })
+//     return { $doubleCount, $count, increment, unrelated, dynamicNode };
+// }
+
+// export let { $doubleCount, $count, increment, unrelated, dynamicNode } = doSomething();
+// increment()
+// const number = $doubleCount();
+// console.log(number)
+// $doubleCount = null;
+// dynamicNode.destroy()

@@ -19,7 +19,7 @@ const $$$DepthSignals: WeakSet<Signal> = new WeakSet();
 
 export function $Signal<T>(value?: T): Signal<T> {
 
-    const signal = () => {
+    const signal = function $signal() {
         if (__DEV__) emitSignal();
         const value = signalValues.get(signal)
         track(signal)
