@@ -3,7 +3,7 @@ import { onPhaseCompleted, Phase, useUpdateCycle } from "./UpdateCycle";
 import { ReactiveAtom } from "../derivations/ReactiveAtom";
 import { ReactiveModel } from "../reactivemodel/Reactive$";
 import { DerivedSignal, isDerivedSignal } from "../derivations/DerivedSignal";
-import { ReactiveEffect } from "./watch";
+import { ReactiveEffect, runEffect } from "./watch";
 import { getDependencyTracker } from "../derivations/DependencyTracker";
 
 
@@ -60,7 +60,7 @@ export class WatchTarget<T extends ReactiveAtom | ReactiveModel | DerivedSignal 
         const tracker = getDependencyTracker();
         tracker?.stop(); // in case reactive refs are triggered during a reactiveEffect
         for (const effect of effects) {
-            effect(...args)
+            runEffect(effect, args)
         }
         tracker?.restore();
     }

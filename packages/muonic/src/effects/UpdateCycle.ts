@@ -9,6 +9,7 @@ import { areEqual } from "./areEqual";
 import { DerivedSignal } from "../derivations/DerivedSignal";
 import { isReactiveModel, ReactiveModel } from "../reactivemodel/Reactive$";
 import { SnapshotManager } from "../reactivemodel/SnapshotManager";
+import { runEffect } from "./watch";
 
 type ReactiveTarget = ReactiveAtom | DerivedSignal | ReactiveModel
 
@@ -155,7 +156,7 @@ export class UpdateCycle {
                         const oldValue = this.getInitialValue(target);
                         const newValue = getCurrentValue(target);
                         if (!areEqual(newValue, oldValue)) {
-                            effect(newValue, oldValue)
+                            runEffect(effect, [newValue, oldValue])
                         }
                     }
                 }
@@ -164,7 +165,7 @@ export class UpdateCycle {
         const reactiveEffects = this.reactiveEffects.get(phase)
         if (reactiveEffects) {
             for (const effect of reactiveEffects) {
-                effect();
+                runEffect(effect);
             }
         }
     }
@@ -184,14 +185,14 @@ export class UpdateCycle {
         }
 
 
-        runTasks(hookName: Hooks) {
-            const tasks = getCurrentUpdateCycle()?.tasks;
-            if (!tasks) return;
-            const _tasks = tasks[hookName]
-            for (const task of _tasks) {
-                task();
-            }
+    runTasks(hookName: Hooks) {
+        const tasks = getCurrentUpdateCycle()?.tasks;
+        if (!tasks) return;
+        const _tasks = tasks[hookName]
+        for (const task of _tasks) {
+            task();
         }
+    }
 }
 
 function getCurrentValue(target: ReactiveTarget) {
@@ -217,7 +218,7 @@ export enum Hooks {
 
 
 function createUpdateCycleHook(hookName: Hooks) {
-    return (task: () => void, options?: { cancel?: ScheduleCancel; __devName?: string}) => {
+    return (task: () => void, options?: { cancel?: ScheduleCancel; __devName?: string }) => {
         const _options = <SchedulerOptions>options || { flask: '' }
         _options.flask = 'outlive'
         return $schedule(task, _options, {
@@ -257,10 +258,10 @@ export function onPhaseCompleted(phase: Phase, handler: () => void) {
 }
 
 
-export function runPrerenderEffectsAndTasks(){
-        const updateCycle = getCurrentUpdateCycle()
-        if (updateCycle){
-            updateCycle.runEffects('pre');
-            updateCycle.runTasks(Hooks.AFTER_PRERENDER_PHASE)
-        }
+export function runPrerenderEffectsAndTasks() {
+    const updateCycle = getCurrentUpdateCycle()
+    if (updateCycle) {
+        updateCycle.runEffects('pre');
+        updateCycle.runTasks(Hooks.AFTER_PRERENDER_PHASE)
+    }
 }

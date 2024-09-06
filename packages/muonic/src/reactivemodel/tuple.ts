@@ -1,16 +1,14 @@
 
-// const position$ = o$(tuple([0, 3]))
+const allTuples = new WeakSet()
 
-const allTuples: WeakSet<any[]> = new WeakSet();
-
-export function tuple(value: any[]) {
+export function tuple<T extends [any] | any[]>(value: T): T {
     if (!(value instanceof Array)) {
         return value;
     }
-    allTuples.add(value);
+    allTuples.add(value)
     return value;
 }
 
-export function isTuple(value: any): value is any[] {
+export function isTuple<T extends object>(value: T): value is T {
     return allTuples.has(value);
 }

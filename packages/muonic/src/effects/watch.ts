@@ -3,11 +3,12 @@ import { watchProps } from "./deepWatch";
 import { ReactiveGetter, WatchTarget } from "./WatchTarget";
 import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
 import { ReactiveDerivation } from "../derivations/ReactiveDerivation";
-import { Phase } from "./UpdateCycle";
+import { Phase, useUpdateCycle } from "./UpdateCycle";
 import { WatchDebugOptions } from "./debug";
 import { DERIVED_SIGNAL, isDerivedSignal, ReactiveSignal } from "../derivations/DerivedSignal";
 import { isReactiveModel, ReactiveModel } from "../reactivemodel/Reactive$";
 import { createReactiveEffect } from "../derivations/ReactiveEffect";
+import { getWithoutTracking } from "../derivations/DependencyTracker";
 
 
 type UpdateCycleOptions = {
@@ -35,9 +36,10 @@ type Effect = ChangeHandler | ReactiveEffect
 // manages nested watch calls to prevent infinite loops
 let isRunningEffect = false;
 
-function runEffect(effect: () => void) {
+export function runEffect(effect: (...args: any[]) => void, args?: any[]) {
     isRunningEffect = true;
-    effect()
+    if (args) effect(...args)
+    else effect()
     isRunningEffect = false;
 }
 
@@ -60,20 +62,15 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
         target() // tracks dependencies
     }
 
-    if (eager && target) {
-        const value = target instanceof Function ? target() : target
-        //TODO: Schedule according to phase
+    if (eager) {
+        const value = target instanceof Function ? getWithoutTracking(target) : target
         if (phase === 'sync') {
-            runEffect(() => effect(value, value))
+            runEffect(effect, [value, value])
         }
-        else if (phase === 'pre') {
-
-        }
-        else if (phase === 'render') {
-
-        }
-        else if (phase === 'post') {
-
+        else {
+            const updateCycle = useUpdateCycle()
+            updateCycle.storeInitialValue(target, value)
+            updateCycle.scheduleEffect(target, effect, phase)
         }
     }
 
@@ -98,13 +95,13 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
 
 
 
-export function initReactiveEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived signal and effect combined into one function
+export function initializeReactiveEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived signal and effect combined into one function
     const phase = options?.phase || 'pre';
     const retrack = options?.retrack || false;
     const reactiveEffect = createReactiveEffect(effect, retrack)
     const watchTarget = asWatchTarget(reactiveEffect);
 
-    reactiveEffect();
+    runEffect(reactiveEffect);
 
     const forNextCycle = phase === 'sync' ? false : shouldScheduleForNextCycle();
 
