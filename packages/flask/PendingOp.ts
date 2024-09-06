@@ -67,7 +67,8 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
             called = true;
         }) as CallbackRemover;
         cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.
-        cancel.__devName = options.__devName;
+        //@ts-expect-error
+        cancel.__devName = options?.__devName;
 
         pendingOp.cancel = cancel;
 
