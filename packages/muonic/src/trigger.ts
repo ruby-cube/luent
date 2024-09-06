@@ -14,13 +14,13 @@ export function triggerReactivePrimitive(target: ReactivePrimitive, newValue: an
     }
 
     const updateCycle = useUpdateCycle()
-
+    
     if (isWatched(target)) {
         const watchTarget = asWatchTarget(target);
         updateCycle.storeInitialValue(target, oldValue)
         watchTarget.triggerEffects(newValue, oldValue)
     }
-
+    
     if (isReactiveAtom(target)) {
         const atom = asReactiveAtom(target);
         atom.triggerDerivations()

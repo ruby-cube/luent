@@ -33,7 +33,7 @@ function _initializeRender(effect: () => void) {
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
-export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: { once?: true, eager?: true }) {
+export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: { once?: true, eager?: true, __devName?: string }) {
     // const component = getCurrentComponent<InternalComponent>();
     // if (!component) throw Error("watchForRender must be called within component setup")
 

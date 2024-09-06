@@ -141,7 +141,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
 
         // evaluate conditions and render
-        const { $conditions, activeIndex } = this.evaluateConditions()
+        const $conditions = this.genConditionsSignal()
+        const activeIndex = this.evaluateConditions()
         const dynamicPod = nodePod.appendDynamicPod();
         const series = this;
         const component = this.component
@@ -167,21 +168,17 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const parentDynamicNode = getActiveDynamicNode()
         if (!parentDynamicNode) throw new Error('No dynamicNode :( This should never happen since root component is a dynamic node')
 
-        let $prevConditions = $conditions // allows $conditions to be dereferenced, preventing memory leak
 
         function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-            console.log("checking arrays")
             if (areShallowEqualArrays(newValue, oldValue)) return;
             console.log("update conditional")
             pushDynamicNode(parentDynamicNode!)
 
             // (1)
-            // destroyDerivedSignal($prevConditions)
             series.deactivateConditional()
 
             // (2)
-            const { $conditions, activeIndex } = series.evaluateConditions();
-            $prevConditions = $conditions
+            const activeIndex = series.evaluateConditions();
 
             // (3)
             pushComponent(component)

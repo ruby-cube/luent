@@ -2,7 +2,7 @@ import { SetMap } from "@rue/utils";
 import { onPhaseCompleted, Phase, useUpdateCycle } from "./UpdateCycle";
 import { ReactiveAtom } from "./ReactiveAtom";
 import { ReactiveModel } from "./Reactive$";
-import { DerivedSignal } from "./DerivedSignal";
+import { DerivedSignal, isDerivedSignal } from "./DerivedSignal";
 import { ReactiveEffect } from "./watch";
 import { getDependencyTracker } from "./DependencyTracker";
 

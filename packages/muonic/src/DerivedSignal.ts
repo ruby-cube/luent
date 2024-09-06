@@ -1,5 +1,6 @@
 import { isSignal, Signal, SIGNAL_MARKER } from "./$Signal";
 import { READONLY_SIGNAL } from "./asReadonly";
+import { getDependencyTracker } from "./DependencyTracker";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 
 // The $ function has various purposes
@@ -52,20 +53,21 @@ export function $<T extends any>(pureGetter: () => T, retrack: boolean = false):
         if (!initialized || signal.dirty && retrack) {
             const value = signal.trackDependencies(pureGetter);
             signal.forwardDependencies(signal.dependencies)
-            if (signal.dirty) {
-                signal.updateValue(value)
-                signal.undirty()
-            }
+            signal.updateValue(value)
+            signal.undirty()
             initialized = true;
             return value;
         }
-
+        
         if (signal.dirty) {
+            signal.forwardDependencies(signal.dependencies)
             const newValue = pureGetter();
             signal.updateValue(newValue)
             signal.undirty()
             return newValue;
         }
+
+        signal.forwardDependencies(signal.dependencies)
 
         return signal.value; // memoized value
     }

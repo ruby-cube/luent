@@ -55,7 +55,6 @@ export class DependencyTracker {
         pushDepTracker(this);
         this.start();
         const value = signalOrEffect();
-        console.log('value from callToCollect', value)
         this.stop();
         popDepTracker();
         if (__DEV__ && this.dependencies.length === 0) {

@@ -13,6 +13,10 @@ export class ConditionalSeries {
     ) {
         for (let i = 0; i < statements.length; i++) {
             const kit = statements[i]
+            const $condition = kit.$condition
+            if ($condition){
+                this.conditions.push($condition)
+            }
             if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
                 if (__DEV__) throw new Error('$if must be the first child of a conditional series (or extraneous use of fragment/array)')
                 else continue;
@@ -36,34 +40,32 @@ export class ConditionalSeries {
     }
 
     evaluateConditions() {
-        this.conditions = [];
-        const conditionalKits = this.statements;
-        for (let i = 0; i < conditionalKits.length; i++) {
-            const $condition = conditionalKits[i].$condition
-            if ($condition) this.conditions.push($condition);
-            if ($condition && getWithoutTracking($condition) || !$condition) {
+        const conditions = this.conditions
+        for (let i = 0; i < conditions.length; i++) {
+            const $condition = conditions[i]
+            if (getWithoutTracking($condition)) {
                 this.prevActiveIndex = this.activeIndex;
                 this.activeIndex = i;
-                return {
-                    activeIndex: i,
-                    $conditions: genConditionsSignal(this.conditions)
-                };
+                return i;
             }
         }
-        throw new Error('Else case is missing')
+        this.prevActiveIndex = this.activeIndex;
+        this.activeIndex = conditions.length;
+        return conditions.length;
+    }
+
+    genConditionsSignal() {
+        const conditions = this.conditions
+        return $(() => {
+            const values: boolean[] = [];
+            for (const $condition of conditions) {
+                values.push(Boolean($condition()));
+            }
+            return values;
+        }, true) // $(() => [$conditionA(), $conditionB(), ...])
     }
 }
 
-export function genConditionsSignal(conditions: ReactiveSignal<Booleanny>[]) {
-    return $(() => {
-        const values: boolean[] = [];
-        for (const $condition of conditions) {
-            values.push(Boolean($condition()));
-        }
-        console.log('conditions', values)
-        return values;
-    }) // $(() => [$conditionA(), $conditionB(), ...]) //TODO: set retracking to true?
-}
 
 
 

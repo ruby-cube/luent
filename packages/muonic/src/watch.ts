@@ -5,7 +5,7 @@ import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 import { Phase } from "./UpdateCycle";
 import { WatchDebugOptions } from "./debug";
-import { ReactiveSignal } from "./DerivedSignal";
+import { DERIVED_SIGNAL, isDerivedSignal, ReactiveSignal } from "./DerivedSignal";
 import { isReactiveModel, ReactiveModel } from "./Reactive$";
 
 
@@ -55,6 +55,9 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
     }
 
     const watchTarget = asWatchTarget(target);
+    if (isDerivedSignal(target) && target[DERIVED_SIGNAL].dependencies.length === 0) {
+        target() // tracks dependencies
+    }
 
     if (eager && target) {
         const value = target instanceof Function ? target() : target

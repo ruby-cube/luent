@@ -30,7 +30,7 @@ export function MountIf() {
 
     return mx(
         <>
-            {/* {[
+            {[
                 create_if($activeAndReady, () =>
                     <>
                         <div>Hi</div>
@@ -39,7 +39,7 @@ export function MountIf() {
                 else_create(() =>
                     <p>bye</p>
                 )
-            ]} */}
+            ]}
             <div>Both: {$activeAndReady}</div>
             <button onclick={toggleActive}>toggle active {$active}</button>
             <button onclick={toggleReady}>toggle ready {$ready}</button>

@@ -57,7 +57,7 @@ export class ReactiveDerivation<T extends DerivedSignal | ReactiveEffect = Deriv
     }
 
     forwardDependencies(deps: ReactivePrimitive[]) {
-        const tracker = getDependencyTracker();
+        const tracker = getDependencyTracker()
         if (tracker) {
             tracker.dependencies.push(...deps)
         }

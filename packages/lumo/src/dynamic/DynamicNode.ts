@@ -68,7 +68,6 @@ export class DynamicNode {
 
 
     deactivate() {
-        console.log('deactivate')
         this.emit(LifecycleHook.ON_DEACTIVATE)
     }
     
@@ -83,9 +82,7 @@ export class DynamicNode {
 
     destroy() {
         this.unmount();
-        console.log('destroy')
         this.emit(LifecycleHook.ON_DESTROY) // this stops all onActivated and onDeactivate listeners that are set to go until destroy
-        console.log('dispose')
         this.flask?.dispose()
         this.nodePod = undefined
         this.flask = undefined

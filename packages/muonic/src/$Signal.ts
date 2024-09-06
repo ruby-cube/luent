@@ -23,7 +23,6 @@ export function $Signal<T>(value?: T): Signal<T> {
     const signal = function $signal() {
         if (__DEV__) emitSignal();
         const value = signalValues.get(signal)
-        console.log("getting signal value", value)
         track(signal)
         return value;
     }

@@ -1,5 +1,5 @@
 import { PublicComponent, ComponentSetup, DOMNode, InternalComponent, getComponent } from "../component/InternalComponent";
-import { DerivedSignal, hasSignal, ReactiveSignal, _runTasks, Hooks } from "@rue/muonic";
+import { DerivedSignal, hasSignal, ReactiveSignal, Hooks, getCurrentUpdateCycle, runPrerenderEffectsAndTasks } from "@rue/muonic";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
@@ -7,7 +7,7 @@ import { initializeRender, watchForRender } from "../watch/watchForRender";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { ActiveListener, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
-import { runNonSyncEffects, Signal } from "@rue/muonic";
+import { Signal } from "@rue/muonic";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
@@ -156,10 +156,7 @@ function toString(value: any) {
 function setUpEvents(node: Element, events: { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] }) {
     for (const key in events) {
         const handlers = normalizeToArray(events[key]);
-        const event = useEventTick(node, key, () => {
-            runNonSyncEffects('pre');
-            _runTasks(Hooks.AFTER_PRERENDER_PHASE)
-        });
+        const event = useEventTick(node, key, runPrerenderEffectsAndTasks);
         event.updateHandlers(() => {
             for (const handler of handlers) {
                 if (hasSignal(handler)) {

@@ -52,10 +52,10 @@ export class UpdateCycle {
         updateCycleCount++;
         beforeRepaint(() => {
             this.runEffects('render');
-            _runTasks(Hooks.ON_RENDERED)
+            this.runTasks(Hooks.ON_RENDERED)
             queueTask(() => {
                 this.runEffects('post');
-                _runTasks(Hooks.ON_UPDATE_COMPLETED)
+                this.runTasks(Hooks.ON_UPDATE_COMPLETED)
                 endUpdateCycle();
             }, { __devName: queueTask.name })
         }, { __devName: beforeRepaint.name })
@@ -184,6 +184,14 @@ export class UpdateCycle {
         }
 
 
+        runTasks(hookName: Hooks) {
+            const tasks = getCurrentUpdateCycle()?.tasks;
+            if (!tasks) return;
+            const _tasks = tasks[hookName]
+            for (const task of _tasks) {
+                task();
+            }
+        }
 }
 
 function getCurrentValue(target: ReactiveTarget) {
@@ -207,14 +215,6 @@ export enum Hooks {
 
 // const updateCompletedTasks: (() => void)[] = [];
 
-export function _runTasks(hookName: Hooks) {
-    const tasks = getCurrentUpdateCycle()?.tasks;
-    if (!tasks) return;
-    const _tasks = tasks[hookName]
-    for (const task of _tasks) {
-        task();
-    }
-}
 
 function createUpdateCycleHook(hookName: Hooks) {
     return (task: () => void, options?: { cancel?: ScheduleCancel; __devName?: string}) => {
@@ -257,7 +257,10 @@ export function onPhaseCompleted(phase: Phase, handler: () => void) {
 }
 
 
-//FIX: This is a stand-in until I figure out how to schedule pre-render effects
-export function runNonSyncEffects(phase: 'pre'){
-
+export function runPrerenderEffectsAndTasks(){
+        const updateCycle = getCurrentUpdateCycle()
+        if (updateCycle){
+            updateCycle.runEffects('pre');
+            updateCycle.runTasks(Hooks.AFTER_PRERENDER_PHASE)
+        }
 }
