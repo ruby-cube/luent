@@ -2,6 +2,7 @@ import { Callback, ListenerOptions } from "./flaskableListeners";
 import { bindFlask, getFlask, onFlaskDisposal } from "./EffectFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
 import { genIncrementalId, markNoCleanup, setUpCleanupWarning, shouldWarnNoCleanup, unmarkNoCleanup } from "./initFlask";
+import { mapHandlers } from "./handlerMap";
 
 export type ActiveListener = {
     stop(): void;
@@ -45,9 +46,10 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 
     const _callback = bindFlask(once ? oneTimeCallback : callback, flask === 'outlive' ? null : flask);
 
+    mapHandlers(_callback, callback);
+
     function oneTimeCallback(...args: any[]) {
         try {
-            console.log('one time callback')
             callback(...args);
         }
         finally {
@@ -57,7 +59,6 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 
     let called = false;
     function _remove() {
-        console.log("REMOVE", called)
         if (called) return;
         try {
             remove(returnVal ?? _callback);
@@ -67,7 +68,6 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
         finally {
             if (pendingStop && 'cancel' in pendingStop) pendingStop.cancel();
             if (pendingFlaskCleanup && 'cancel' in pendingFlaskCleanup) {
-                console.log("pending flask cleanup")
                 pendingFlaskCleanup.cancel();
             }
             // console.log('remove done', pendingFlaskCleanup)

@@ -1,13 +1,14 @@
-import { AnyObject } from "@rue/types";
-import { SnapshotManager } from "./SnapshotManager";
-import { isReactiveModel, ReactiveModel } from "./Reactive$";
-import { runNonSyncEffects } from "./watch";
-import { $listen, $schedule, ScheduleCancel, SchedulerOptions, ScheduleStop } from "@rue/flask";
+import { DerivedSignal, isDerivedSignal, isReactiveModel, isSignal, ReactiveEffect, ReactiveModel, SnapshotManager } from "@rue/muonic";
 import { beforeRepaint, queueTask } from "@rue/thread";
-import { MutationRecord, SetOp } from "./deepWatch";
-import { DerivedSignal, isDerivedSignal } from "./DerivedSignal";
-import { UNDEFINED } from "@rue/utils";
-import { ReactivePrimitive } from "./DependencyTracker";
+import { ReactiveAtom } from "./ReactiveAtom";
+import { $schedule, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
+import { Effect } from "./WatchTarget";
+import { SetMap, UNDEFINED } from "@rue/utils";
+import { areEqual } from "./areEqual";
+import { AnyObject } from "@rue/types";
+import { MutationRecord } from "../src/deepWatch";
+
+type ReactiveTarget = ReactiveAtom | DerivedSignal | ReactiveModel
 
 export type Phase = 'pre' | 'render' | 'post' | 'sync'
 
@@ -21,6 +22,15 @@ export function getCurrentUpdateCycle() {
     return currentUpdateCycle;
 }
 
+export function useUpdateCycle() {
+    let updateCycle = getCurrentUpdateCycle()
+    if (!updateCycle) {
+        updateCycle = new UpdateCycle();
+
+    }
+    return updateCycle;
+}
+
 export function startUpdateCycle(updateCycle: UpdateCycle) {
     if (currentUpdateCycle)
         throw new Error("Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
@@ -32,60 +42,24 @@ export function endUpdateCycle() {
 }
 
 export class UpdateCycle {
-    triggeredReactiveAtom: Map<ReactivePrimitive, [any, any]> | undefined;
-    triggeredReactives: Map<ReactiveModel, [ReactiveModel, AnyObject]> | undefined; // snapshot
 
-    snapshotMap: Map<ReactiveModel, AnyObject> | undefined;
-    completedEffects: Set<Function> = new Set();
+    //TODO: Manage snapshots and ops
 
     constructor() {
         startUpdateCycle(this)
         updateCycleCount++;
         beforeRepaint(() => {
-            runNonSyncEffects('render');
+            this.runEffects('render');
             _runTasks(Hooks.ON_RENDERED)
             queueTask(() => {
-                runNonSyncEffects('post');
+                this.runEffects('post');
                 _runTasks(Hooks.ON_UPDATE_COMPLETED)
                 endUpdateCycle();
-            }, {__devName: queueTask.name})
+            }, { __devName: queueTask.name })
         }, { __devName: beforeRepaint.name })
     }
 
-    flagReactiveAtom(target: ReactivePrimitive, newValue: any, oldValue: any) {
-        let atomMap = this.triggeredReactiveAtom
-        if (!atomMap) {
-            atomMap = new Map();
-            this.triggeredReactiveAtom = atomMap
-        }
-        const values = atomMap.get(target);
-        if (values) values[0] = newValue;  // preserves initial old value at start of cycle
-        else atomMap.set(target, [newValue, oldValue]);
-    }
-
-    flagReactive(target: ReactiveModel, snapshot: AnyObject) {
-        let reactivesMap = this.triggeredReactives
-        if (!reactivesMap) {
-            reactivesMap = new Map();
-            this.triggeredReactives = reactivesMap
-        }
-
-        const values = reactivesMap.get(target)
-        if (!values) reactivesMap.set(target, [target, snapshot])
-
-        // const phases = ['pre', 'render', 'post'] as const
-        // for (const phase of phases) {
-        //     const reactiveProp = getReactiveProp(target, key)
-        //     if (!reactiveProp) return;
-        //     let taskQueue = getTaskQueueForProp(reactiveProp, phase);
-        //     if (taskQueue) {
-        //         const values = props.get(key);
-        //         if (values) values[0] = newValue // preserves initial old value at start of cycle
-        //         else props.set(key, [newValue, oldValue]);
-        //         return; // return because we only need to store key and values if *any* taskqueue exists (in case flagReactive is just for watching a whole reactiveModel)
-        //     }
-        // }
-    }
+    snapshotMap: Map<ReactiveModel, AnyObject> | undefined;
 
     takeSnapshot(reactive: ReactiveModel, target: AnyObject, clone?: AnyObject) {
         let snapshotMap = this.snapshotMap;
@@ -137,6 +111,64 @@ export class UpdateCycle {
     }
 
 
+    // INITIAL VALUES
+
+    initialValues: Map<ReactiveTarget, any> = new Map();
+
+    storeInitialValue(target: ReactiveTarget, value: any) {
+        const intialValue = this.getInitialValue(target);
+        if (intialValue !== UNDEFINED) return; // initial value already stored
+        this.initialValues.set(target, value);
+    }
+
+    getInitialValue(target: ReactiveTarget) {
+        if (!this.initialValues.has(target)) return UNDEFINED;
+        return this.initialValues.get(target);
+    }
+
+    // EFFECTS
+
+    effects: SetMap<Phase, Effect> = new SetMap();
+    reactiveEffects: SetMap<Phase, Effect> = new SetMap();
+
+    targetMap: SetMap<Effect, ReactiveTarget> = new SetMap();
+
+    scheduleEffect(target: ReactiveTarget, effect: Effect, phase: Phase) {
+        if (target === unwrap(effect)) {
+            this.reactiveEffects.addToSet(effect, phase)
+        }
+        else {
+            this.targetMap.addToSet(target, effect)
+            this.effects.addToSet(effect, phase)
+        }
+    }
+
+    runEffects(phase: Phase) {
+        const effects = this.effects.get(phase);
+        if (effects) {
+            for (const effect of effects) {
+                const targets = this.targetMap.get(effect);
+                if (targets) {
+                    for (const target of targets) {
+                        const oldValue = this.getInitialValue(target);
+                        const newValue = getCurrentValue(target);
+                        if (!areEqual(newValue, oldValue)) {
+                            effect(newValue, oldValue)
+                        }
+                    }
+                }
+            }
+        }
+        const reactiveEffects = this.reactiveEffects.get(phase)
+        if (reactiveEffects) {
+            for (const effect of reactiveEffects) {
+                effect();
+            }
+        }
+    }
+
+    // TASKS
+
     tasks: {
         [Hooks.BEFORE_RENDER]: Set<Function>,
         [Hooks.ON_RENDERED]: Set<Function>,
@@ -150,38 +182,16 @@ export class UpdateCycle {
         }
 
 
-    derivedSignalMap: Map<DerivedSignal, any> = new Map();
-
-    storeInitialValue(derivedSignal: DerivedSignal, value: any) {
-        this.derivedSignalMap.set(derivedSignal, value);
-    }
-
-    getInitialValue(target: ReactivePrimitive | DerivedSignal | ReactiveModel) {
-        if (isReactiveModel(target)) {
-            if (!this.triggeredReactives?.has(target)) return UNDEFINED;
-            return this.triggeredReactives.get(target)![1]
-        }
-        else if (isDerivedSignal(target)) {
-            if (!this.derivedSignalMap.has(target)) return UNDEFINED;
-            return this.derivedSignalMap.get(target);
-        }
-        else {
-            if (!this.triggeredReactiveAtom?.has(target)) return UNDEFINED;
-            return this.triggeredReactiveAtom.get(target)![1]
-        }
-    }
-
-
-    // mustRetrack: Set<DerivedSignal> = new Set();
-    // retracked: Set<DerivedSignal> = new Set();
 }
 
-
-
-// derived signals
-// track when you first call it
-// retrack whenever you call it and it has changed
-
+function getCurrentValue(target: ReactiveTarget) {
+    if (target instanceof Function) {
+        return target()
+    }
+    else if (isReactiveModel(target)) {
+        return target;
+    }
+}
 
 
 

@@ -20,7 +20,7 @@ import { makeDynamicNode } from '../../../packages/lumo/src/dynamic/makeDynamicN
 
 
 
-const app = createApp(List)
+const app = createApp(MountIf)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: false

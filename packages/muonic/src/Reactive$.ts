@@ -1,5 +1,4 @@
 import { AnyObject } from "@rue/types";
-import { isWatchedModel, storeInitialDerivedValueIfNeeded, track, trigger, triggerReactiveModel, useUpdateCycle } from "./watch";
 import { emitSignal } from "./hasReactivity_DEV";
 import { isPlainObject, KeyPath, Ref, isMutatingMapMethod, isMutatingSetMethod, isMutatingArrayMethod, inheritsFrom } from "@rue/utils";
 import { isTuple, tuple } from "./tuple";
@@ -7,6 +6,12 @@ import { asReactiveProp, getReactiveProp } from "./ReactiveProp";
 import { shallowClone } from "./SnapshotManager";
 import { asTrackableOp, getTrackableOp } from "./TrackableOp";
 import { getRootWatchedModelAndKeyPath, isNestedWatched } from "./deepWatch";
+import { triggerReactiveModel, triggerReactivePrimitive } from "../src_v2/trigger";
+import { isWatched } from "../src_v2/watch";
+import { asReactiveAtom, isReactiveAtom } from "../src_v2/ReactiveAtom";
+import { isDerivedSignal } from "./DerivedSignal";
+import { getWithoutTracking, track } from "./DependencyTracker";
+import { useUpdateCycle } from "../src_v2/UpdateCycle";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject, deep: boolean | undefined) => void
@@ -157,11 +162,11 @@ function createReactive(
     if (reactiveMap.has(value)) return value;
     const reactive = isPlainObject(value) ? createReactiveObject(value, register, deep)
         // : isReactiveCapsule(value) ? createReactive(value.$, register, deep)
-            : isTuple(value) ? createReactiveTuple(value, register, deep)
-                : value instanceof Array ? createReactiveArray(value, register, deep)
-                    : value instanceof Set ? createReactiveSet(value, register, deep)
-                        : value instanceof Map ? createReactiveMap(value, register, deep)
-                            : null;
+        : isTuple(value) ? createReactiveTuple(value, register, deep)
+            : value instanceof Array ? createReactiveArray(value, register, deep)
+                : value instanceof Set ? createReactiveSet(value, register, deep)
+                    : value instanceof Map ? createReactiveMap(value, register, deep)
+                        : null;
     if (reactive) {
         register(reactive, value, deep);
     }
@@ -499,16 +504,14 @@ function reactiveSetter(
     }
     const _newValue = maybeReactivize(newValue, reactive, oldValue, register)
 
-    const updateCycle = useUpdateCycle();
+
 
     if (prop) {
-        trigger(prop, _newValue, oldValue)
-        storeInitialDerivedValueIfNeeded(updateCycle, prop)
+        triggerReactivePrimitive(prop, _newValue, oldValue)
     }
 
     if (op) {
-        trigger(op, _newValue, oldValue)
-        storeInitialDerivedValueIfNeeded(updateCycle, op)
+        triggerReactivePrimitive(op, _newValue, oldValue)
     }
 
     if (target instanceof Array) {
@@ -520,12 +523,12 @@ function reactiveSetter(
                 const prop = getReactiveProp(reactive, i.toString())
                 if (prop) {
                     const item = target[i];
-                    trigger(prop, undefined, item)
+                    triggerReactivePrimitive(prop, undefined, item)
                 }
                 const op = getTrackableOp(reactive, 'at', i.toString())
                 if (op) {
                     const item = target[i];
-                    trigger(op, undefined, item);
+                    triggerReactivePrimitive(op, undefined, item);
                 }
             }
         }
@@ -533,12 +536,13 @@ function reactiveSetter(
             const op = getTrackableOp(reactive, 'at', key)
             if (op) {
                 const oldValue = target[parseInt(<string>key)]
-                trigger(op, _newValue, oldValue);
+                triggerReactivePrimitive(op, _newValue, oldValue);
             }
         }
     }
 
-    if (isWatchedModel(reactive)) {
+    if (isWatched(reactive)) {
+        const updateCycle = useUpdateCycle();
         triggerReactiveModel(reactive, {
             target: reactive,
             op: {
@@ -553,6 +557,7 @@ function reactiveSetter(
         ) // only create clone if snapshot does not already exist
     }
     if (isNestedWatched(reactive)) {
+        const updateCycle = useUpdateCycle();
         const [rootWatchedModel, keyPath] = getRootWatchedModelAndKeyPath(reactive)
         triggerReactiveModel(rootWatchedModel, {
             target: reactive,
@@ -689,7 +694,7 @@ function mutatingOp(
         const mapKey = _args[0]
         const newValue = _args[1];
         if (oldMapValue !== newValue) {
-            if (isWatchedModel(reactive)) {
+            if (isWatched(reactive)) {
                 triggerReactiveModel(reactive, {
                     target: reactive,
                     op: {
@@ -715,16 +720,23 @@ function mutatingOp(
             }
 
             const hasOp = getTrackableOp(reactive, 'has', mapKey)
-            if (hasOp) trigger(hasOp, newValue, oldMapValue);
+            if (hasOp) triggerReactivePrimitive(hasOp, newValue, oldMapValue);
             const getOp = getTrackableOp(reactive, 'get', mapKey)
-            if (getOp) trigger(getOp, newValue, oldMapValue);
+            if (getOp) triggerReactivePrimitive(getOp, newValue, oldMapValue);
         }
     }
 
     const sizeKey = target instanceof Array ? 'length' : 'size';
     const sizeProp = getReactiveProp(reactive, sizeKey)
-    if (sizeProp) {
-        storeInitialDerivedValueIfNeeded(updateCycle, sizeProp); // Order matters. This must be called before mutation occurs
+    if (sizeProp && isReactiveAtom(sizeProp)) {
+        const atom = asReactiveAtom(sizeProp);
+        for (const derivation of atom.derivations) {
+            const derivedSignal = derivation.o;
+            if (isDerivedSignal(derivedSignal)) {
+                const updateCycle = useUpdateCycle()
+                updateCycle.storeInitialValue(derivedSignal, getWithoutTracking(derivedSignal)) // Order matters. This must be called before mutation occurs
+            }
+        }
     }
     const oldSize = target[sizeKey];
     const output = fn.apply(target, _args);
@@ -738,31 +750,31 @@ function mutatingOp(
     if (oldSize !== newSize) {
         hasMutated = true;
         if (sizeProp)
-            trigger(sizeProp, newSize, oldSize); // trigger for length/size change
+            triggerReactivePrimitive(sizeProp, newSize, oldSize); // trigger for length/size change
 
         if (target instanceof Array && key === 'pop') {
             const prop = getReactiveProp(reactive, oldSize - 1)
             if (prop)
-                trigger(prop, undefined, lastItem);
+                triggerReactivePrimitive(prop, undefined, lastItem);
             const op = getTrackableOp(reactive, 'at', oldSize - 1)
             if (op)
-                trigger(op, undefined, lastItem);
+                triggerReactivePrimitive(op, undefined, lastItem);
         }
         else if (target instanceof Set && key === 'add') {
             const item = _args[0]
             const op = getTrackableOp(reactive, 'has', item)
             if (op)
-                trigger(op, true, false)
+                triggerReactivePrimitive(op, true, false)
         }
         else if ((target instanceof Set || target instanceof Map) && key === 'delete') {
             const item = _args[0]
             const op = getTrackableOp(reactive, 'has', item)
             if (op)
-                trigger(op, false, true)
+                triggerReactivePrimitive(op, false, true)
             if (target instanceof Map) {
                 const op = getTrackableOp(reactive, 'get', item)
                 if (op)
-                    trigger(op, undefined, oldMapValue)
+                    triggerReactivePrimitive(op, undefined, oldMapValue)
             }
         }
         else if ((target instanceof Set || target instanceof Map) && key === 'clear') {
@@ -770,18 +782,18 @@ function mutatingOp(
                 const item = target instanceof Set ? entry : entry[0]
                 const op = getTrackableOp(reactive, 'has', item)
                 if (op)
-                    trigger(op, false, true)
+                    triggerReactivePrimitive(op, false, true)
                 if (target instanceof Map) {
                     const op = getTrackableOp(reactive, 'get', item)
                     if (op)
-                        trigger(op, undefined, oldMapValue)
+                        triggerReactivePrimitive(op, undefined, oldMapValue)
                 }
             }
         }
     }
 
     if (hasMutated) {
-        if (isWatchedModel(reactive)) {
+        if (isWatched(reactive)) {
             triggerReactiveModel(reactive, {
                 target: reactive,
                 op: {

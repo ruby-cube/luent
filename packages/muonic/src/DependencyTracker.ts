@@ -2,7 +2,7 @@ import { asReactiveProp, getReactivePropValue, isReactiveProp, ReactiveProp } fr
 import { getTrackableOpValue, isTrackableOp, TrackableOp } from "./TrackableOp";
 import { isSignal, Signal } from "./$Signal";
 
-export type ReactiveAtom = Signal | ReactiveProp | TrackableOp
+export type ReactivePrimitive = Signal | ReactiveProp | TrackableOp
 
 // let activeDepTracker: DependencyTracker | null = null;
 // let outerDepTracker: DependencyTracker | null = null;
@@ -29,9 +29,9 @@ export function getDependencyTracker() {
 
 export class DependencyTracker {
 
-    deps: Set<ReactiveAtom> = new Set()
+    deps: Set<ReactivePrimitive> = new Set()
 
-    addDep(dep: ReactiveAtom) {
+    addDep(dep: ReactivePrimitive) {
         this.deps.add(dep);
     }
 
@@ -55,6 +55,7 @@ export class DependencyTracker {
         pushDepTracker(this);
         this.start();
         const value = signalOrEffect();
+        console.log('value from callToCollect', value)
         this.stop();
         popDepTracker();
         if (__DEV__ && this.dependencies.length === 0) {
@@ -63,7 +64,7 @@ export class DependencyTracker {
         return [this.dependencies, value];
     }
 
-    private _dependencies?: (ReactiveAtom)[] = undefined
+    private _dependencies?: ReactivePrimitive[] = undefined
 
     get dependencies() {
         let deps = this._dependencies;
@@ -89,3 +90,10 @@ export function getWithoutTracking(reactiveRef: (() => any) | ReactiveProp | Tra
     return value;
 }
 
+export function track(target: ReactivePrimitive) {
+    const tracker = getDependencyTracker();
+    if (!tracker) return;
+    if (tracker.shouldTrack) {
+        tracker.addDep(target)
+    }
+}

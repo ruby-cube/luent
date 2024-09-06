@@ -83,7 +83,7 @@ export function List() {
                 <div>
                     <button onclick={destroy}>destroy</button>
                     <>
-                        {mount_if($(() => {console.log('reevaluate list length === 0'); return list$.length === 0}), () => (
+                        {create_if($(() => {console.log('reevaluate list length === 0'); return list$.length === 0}), () => (
                             <div
                                 onclick={() => insertItem(0)}
                                 style="background-color: gray; cursor: pointer"
@@ -91,7 +91,7 @@ export function List() {
                                 insert
                             </div>
                         ))}
-                        {else_mount(() =>
+                        {else_create(() =>
                             iterate_over(list$, (item$, $index) => (
                                 <div
                                     ref={$itemDiv}

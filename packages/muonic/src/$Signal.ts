@@ -1,7 +1,8 @@
-import { storeInitialDerivedValueIfNeeded, track, trigger } from "./watch";
 import { emitSignal } from "./hasReactivity_DEV";
 import { isDeepReactive, isReactiveModel, ReactiveModel, DeepReactive$, Reactive$ } from "./Reactive$";
-import { AnyObject } from "@rue/types";
+import { track } from "./DependencyTracker";
+import { useUpdateCycle } from "../src_v2/UpdateCycle";
+import { triggerReactivePrimitive } from "../src_v2/trigger";
 
 export type Signal<T = any> = {
     (): T;
@@ -22,6 +23,7 @@ export function $Signal<T>(value?: T): Signal<T> {
     const signal = function $signal() {
         if (__DEV__) emitSignal();
         const value = signalValues.get(signal)
+        console.log("getting signal value", value)
         track(signal)
         return value;
     }
@@ -60,11 +62,8 @@ function set<T>(this: Signal<T>, toNewValue: (value: T) => T) {
             $$DepthSignals.has(this) ? Reactive$(newValue) :
                 newValue : newValue
 
-    const updateCycle = trigger(this, _newValue, value);
-    storeInitialDerivedValueIfNeeded(updateCycle, this)
-
     signalValues.set(this, _newValue);
-
+    triggerReactivePrimitive(this, _newValue, value);
     return _newValue;
 }
 

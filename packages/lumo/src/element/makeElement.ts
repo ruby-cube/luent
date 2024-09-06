@@ -7,7 +7,7 @@ import { initializeRender, watchForRender } from "../watch/watchForRender";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { ActiveListener, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
-import { runNonSyncTasks, Signal } from "@rue/muonic";
+import { runNonSyncEffects, Signal } from "@rue/muonic";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
@@ -159,7 +159,7 @@ function setUpEvents(node: Element, events: { [key: string]: (EventListener | De
     for (const key in events) {
         const handlers = normalizeToArray(events[key]);
         const event = useEventTick(node, key, () => {
-            runNonSyncTasks('pre');
+            runNonSyncEffects('pre');
             _runTasks(Hooks.AFTER_PRERENDER_PHASE)
         });
         event.updateHandlers(() => {

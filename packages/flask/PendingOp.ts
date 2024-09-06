@@ -1,5 +1,6 @@
 import { bindFlask, getFlask, onFlaskDisposal } from "./EffectFlask";
 import { CallbackRemover, SchedulerOptions } from "./flaskableListeners";
+import { mapHandlers } from "./handlerMap";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
 
@@ -31,6 +32,8 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
     let pendingFlaskCleanup: PendingCancelOp | undefined;
 
     const _callback = bindFlask(oneTimeCallback, flask === 'outlive' ? null : flask) as CB
+
+    mapHandlers(_callback, callback);
 
     function oneTimeCallback(...arg: any[]) {
         _resolve(callback(...arg));
@@ -65,7 +68,7 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
         }) as CallbackRemover;
         cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.
         cancel.__devName = options.__devName;
-        
+
         pendingOp.cancel = cancel;
 
         pendingFlaskCleanup =

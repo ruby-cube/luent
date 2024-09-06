@@ -170,6 +170,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         let $prevConditions = $conditions // allows $conditions to be dereferenced, preventing memory leak
 
         function updateConditional(newValue: boolean[], oldValue: boolean[]) {
+            console.log("checking arrays")
             if (areShallowEqualArrays(newValue, oldValue)) return;
             console.log("update conditional")
             pushDynamicNode(parentDynamicNode!)

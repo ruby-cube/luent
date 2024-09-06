@@ -60,8 +60,9 @@ export function genConditionsSignal(conditions: ReactiveSignal<Booleanny>[]) {
         for (const $condition of conditions) {
             values.push(Boolean($condition()));
         }
+        console.log('conditions', values)
         return values;
-    }) // $(() => [$conditionA(), $conditionB(), ...])
+    }) // $(() => [$conditionA(), $conditionB(), ...]) //TODO: set retracking to true?
 }
 
 

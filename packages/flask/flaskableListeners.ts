@@ -12,6 +12,7 @@ export type ListenerOptions = {
     once?: boolean;
     until?: ScheduleStop;
     flask?: EffectFlask | null | 'outlive';
+    __devName?: string;
 }
 
 export type CallbackRemover = {
@@ -62,6 +63,7 @@ export function $listen<
 export type SchedulerOptions = {
     cancel?: ScheduleCancel,
     flask?: EffectFlask | null | 'outlive',
+    __devName?: string
 }
 
 export type ScheduledOp<CB extends Callback> = CB extends { isRemover: true } ? PendingCancelOp : PendingOp<ReturnType<CB>>
