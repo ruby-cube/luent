@@ -21,17 +21,15 @@ export class ReactiveDerivation<T extends DerivedSignal | ReactiveEffect = Deriv
     }
 
     trigger() {
-        const reactiveEntity = this.o;
-        if (isWatched(reactiveEntity)) {
-            if (isDerivedSignal(reactiveEntity)) {
-                const updateCycle = useUpdateCycle()
-                updateCycle.storeInitialValue(reactiveEntity, getWithoutTracking(reactiveEntity))
-            }
-            asWatchTarget(reactiveEntity).triggerEffects();
-        }
         // @ts-expect-error readonly
         this.dirty = true;
+        const reactiveEntity = this.o;
+        if (isWatched(reactiveEntity)) {
+            asWatchTarget(reactiveEntity).triggerEffects();
+        }
     }
+
+    storeInitialValue() { } // override by derived signal
 
     dependencies: ReactivePrimitive[] = []
     atoms: ReactiveAtom[] = []

@@ -6,6 +6,12 @@ import { MutationRecord } from "./effects/deepWatch";
 import { ReactivePrimitive } from "./derivations/DependencyTracker";
 import { runTriggerDebugger } from "./effects/debug";
 import { ReactiveModel, toRaw } from "./reactivemodel/Reactive$";
+import { TrackableOp } from "./reactivemodel/TrackableOp";
+import { ReactiveProp } from "./reactivemodel/ReactiveProp";
+
+
+
+
 
 
 export function triggerReactivePrimitive(target: ReactivePrimitive, newValue: any, oldValue: any) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol
@@ -13,11 +19,11 @@ export function triggerReactivePrimitive(target: ReactivePrimitive, newValue: an
         runTriggerDebugger(target)
     }
 
-    const updateCycle = useUpdateCycle()
+    // const updateCycle = useUpdateCycle()
     
     if (isWatched(target)) {
         const watchTarget = asWatchTarget(target);
-        updateCycle.storeInitialValue(target, oldValue)
+        // updateCycle.storeInitialValue(target, oldValue)
         watchTarget.triggerEffects(newValue, oldValue)
     }
     
@@ -25,8 +31,6 @@ export function triggerReactivePrimitive(target: ReactivePrimitive, newValue: an
         const atom = asReactiveAtom(target);
         atom.triggerDerivations()
     }
-
-    return updateCycle;
 }
 
 export function triggerReactiveModel(reactive: ReactiveModel, op: MutationRecord, clone?: AnyObject) {

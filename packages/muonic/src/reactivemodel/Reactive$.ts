@@ -2,9 +2,9 @@ import { AnyObject } from "@rue/types";
 import { emitSignal } from "../hasReactivity_DEV";
 import { isPlainObject, KeyPath, Ref, isMutatingMapMethod, isMutatingSetMethod, isMutatingArrayMethod, inheritsFrom } from "@rue/utils";
 import { isTuple, tuple } from "./tuple";
-import { asReactiveProp, getReactiveProp } from "./ReactiveProp";
+import { asReactiveProp, getReactiveProp, ReactiveProp } from "./ReactiveProp";
 import { shallowClone } from "./SnapshotManager";
-import { asTrackableOp, getTrackableOp } from "./TrackableOp";
+import { asTrackableOp, getTrackableOp, TrackableOp } from "./TrackableOp";
 import { getRootWatchedModelAndKeyPath, isNestedWatched } from "../effects/deepWatch";
 import { triggerReactiveModel, triggerReactivePrimitive } from "../trigger";
 import { isWatched } from "../effects/watch";
@@ -14,6 +14,11 @@ import { getWithoutTracking, track } from "../derivations/DependencyTracker";
 import { useUpdateCycle } from "../effects/UpdateCycle";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
+export enum ReactiveModelDepth {
+    SHALLOW = 1,
+    DEEP = 2
+}
+
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject, deep: boolean | undefined) => void
 // type RegisterReactive = {
 //     register: RegisterReactive,
@@ -77,6 +82,16 @@ export function Reactive$<T extends AnyObject>(target: T): ReactiveModel<T> {
 // }
 // }
 // }
+function storeInitialValues(target: ReactiveProp | TrackableOp){
+    if (isReactiveAtom(target)) {
+        const atom = asReactiveAtom(target);
+        atom.storeInitialDerivedValues()
+    }
+}
+
+function storeSnapshot(){
+
+}
 
 export function isReactiveModel(obj: AnyObject): obj is ReactiveModel {
     return reactiveMap.has(obj);

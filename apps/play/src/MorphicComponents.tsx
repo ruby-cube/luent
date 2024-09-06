@@ -56,7 +56,7 @@ function $MorphicPort(initialKey: string | Signal<any>, switchMap: { [key: strin
     const $render = $Signal(switchMap[$key()])
 
     watch($key, (key) => {
-        $render.set(switchMap[key])
+        $render.setFrom(switchMap[key])
     })
 
     function $Morphable() {
@@ -74,7 +74,7 @@ function MainContent() {
         <div>hello</div>)
 
     function changeMainContent() {
-        $mainContent.set(() => () =>
+        $mainContent.setTo(() =>
             <div>bye</div>
         )
     }

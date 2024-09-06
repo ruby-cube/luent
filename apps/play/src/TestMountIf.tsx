@@ -5,24 +5,24 @@ export function MountIf() {
     const $count = $Signal(0)
     const $doubleCount = $(() => $count() * 2)
     function increment() {
-        $count.set(count => count + 1)
+        $count.setFrom(count => count + 1)
     }
 
     const $count2 = $Signal(0)
     const $sum = $(() => $count() + $count2())
     function increment2() {
-        $count2.set(count => count + 1)
+        $count2.setFrom(count => count + 1)
     }
 
 
     const $active = $Signal(false)
     function toggleActive() {
-        $active.set(active => !active)
+        $active.setFrom(active => !active)
     }
 
     const $ready = $Signal(true)
     function toggleReady() {
-        $ready.set(ready => !ready)
+        $ready.setFrom(ready => !ready)
     }
 
 
@@ -31,7 +31,7 @@ export function MountIf() {
     return mx(
         <>
             {[
-                create_if($activeAndReady, () =>
+                create_if($active, () =>
                     <>
                         <div>Hi</div>
                     </>
@@ -40,9 +40,9 @@ export function MountIf() {
                     <p>bye</p>
                 )
             ]}
-            <div>Both: {$activeAndReady}</div>
+            {/* <div>Both: {$activeAndReady}</div> */}
             <button onclick={toggleActive}>toggle active {$active}</button>
-            <button onclick={toggleReady}>toggle ready {$ready}</button>
+            {/* <button onclick={toggleReady}>toggle ready {$ready}</button> */}
             {/* <div>{$sum}</div>
             <button onclick={increment}>increment {$count}</button>
             <button onclick={increment2}>increment {$count2}</button> */}

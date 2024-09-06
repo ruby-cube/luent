@@ -73,7 +73,7 @@ export function List() {
     const $alive = $Signal(true)
 
     function destroy() {
-        $alive.set(() => false)
+        $alive.setTo(false)
     }
 
     return mx(

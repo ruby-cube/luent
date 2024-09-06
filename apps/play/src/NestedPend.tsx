@@ -27,7 +27,7 @@ export function NestedPend() {
             <h1>Hello World</h1>
             <PendingListBlock></PendingListBlock>
             <p>{$count}</p>
-            <button onclick={() => $count.set(c => c + 1)}>click</button>
+            <button onclick={() => $count.setFrom(c => c + 1)}>click</button>
         </>
     )
 }
@@ -52,7 +52,7 @@ function TextArea() {
     const $word = $Signal("not ready")
 
     $await(simFetchC("pomp"))
-        .then(word => $word.set(o => word))
+        .then(word => $word.setTo(word))
 
     return (
         <div>
@@ -68,7 +68,7 @@ function ItemBlockA() {
     const $word = $Signal("not ready")
 
     $await(simFetch("calico"))
-        .then(word => $word.set(o => word))
+        .then(word => $word.setTo(word))
 
     return (
         <div>{$word}</div>
@@ -79,7 +79,7 @@ function ItemBlockB() {
     const $word = $Signal("not ready")
 
     $await(simLongFetch("basset"))
-        .then(word => $word.set(o => word))
+        .then(word => $word.setTo(word))
 
     return (
         <div>{$word}</div>
@@ -90,7 +90,7 @@ function ItemBlockC() {
     const $word = $Signal("not ready")
 
     $await(simFetchB("cerulean"))
-        .then(word => $word.set(o => word))
+        .then(word => $word.setTo(word))
 
     return (
         <div>{$word}</div>
@@ -101,7 +101,7 @@ function ItemBlockD() {
     const $word = $Signal("not ready")
 
     $await(simLongFetchB("tilted"))
-        .then(word => $word.set(o => word))
+        .then(word => $word.setTo(word))
 
     return (
         <div>{$word}</div>

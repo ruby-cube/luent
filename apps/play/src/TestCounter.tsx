@@ -14,11 +14,11 @@ export function TestCounterSignals() {
     const $doubleCount = $(() => $count() * 2)
 
     function increment() {
-        $count.set(count => count + 1)
+        $count.setFrom(count => count + 1)
     }
 
     function decrement() {
-        $count.set(count => count - 1)
+        $count.setFrom(count => count - 1)
     }
 
     return mx(

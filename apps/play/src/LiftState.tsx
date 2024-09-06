@@ -9,11 +9,11 @@ function ParentBlock() {
     const $count = $Signal(4);
 
     function increment() {
-        $count.set(c => c + 1)
+        $count.setFrom(c => c + 1)
     }
 
     function decrement() {
-        $count.set(c => c - 1)
+        $count.setFrom(c => c - 1)
     }
 
     const $doubleCount = $(() => $count() * 2)

@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { $else, $elseIf, $if, $Node, COMPONENT, ComponentSetup, expose, iterate_over, NodeEntity, onMounted, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, $Signal, DeepReactive$ } from "@rue/muonic";
@@ -92,7 +91,7 @@ export function List() {
     }
 
     function insertItem(index: number) {
-        $list.set(list => {
+        $list.setFrom(list => {
             const newList = [...list];
             newList.splice(index, 0, {
                 id: genId(),
@@ -103,7 +102,7 @@ export function List() {
     }
 
     function removeItem(index: number) {
-        $list.set(list => {
+        $list.setFrom(list => {
             const _list = [...list]
             _list.splice(index, 1);
             return _list
@@ -115,7 +114,7 @@ export function List() {
     const $showSideBlock = $Signal(false)
 
     function showSideBlock() {
-        $showSideBlock.set(o => true)
+        $showSideBlock.setTo(true)
     }
 
     return (
@@ -189,11 +188,11 @@ function DialogBox() {
     __addDevName($open, '$open')
 
     function open() {
-        $open.set(() => true)
+        $open.setTo(true)
     }
 
     function close() {
-        $open.set(() => false)
+        $open.setTo(false)
     }
 
     return [

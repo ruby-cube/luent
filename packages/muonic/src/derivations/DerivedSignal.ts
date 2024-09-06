@@ -1,6 +1,8 @@
 import { isSignal, Signal, SIGNAL_MARKER } from "../$Signal";
 import { READONLY_SIGNAL } from "../asReadonly";
-import { getDependencyTracker } from "./DependencyTracker";
+import { useUpdateCycle } from "../effects/UpdateCycle";
+import { isWatched } from "../effects/watch";
+import { getDependencyTracker, getWithoutTracking } from "./DependencyTracker";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 
 // The $ function has various purposes
@@ -42,6 +44,14 @@ class DerivedSignalState<T extends DerivedSignal = DerivedSignal> extends Reacti
     updateValue(value: any) {
         this.value = value;
     }
+
+    override storeInitialValue(): void {
+        const $signal = this.o
+        if (isWatched($signal)) {
+            const updateCycle = useUpdateCycle()
+            updateCycle.storeInitialValue($signal, getWithoutTracking($signal)) //QUESTION: I don't know if getWithoutTracking is necessary here
+        }
+    }
 }
 
 
@@ -58,7 +68,7 @@ export function $<T extends any>(pureGetter: () => T, retrack: boolean = false):
             initialized = true;
             return value;
         }
-        
+
         if (signal.dirty) {
             const newValue = pureGetter();
             signal.forwardDependencies(signal.dependencies)

@@ -10,9 +10,9 @@
     "devDependencies": {
       "@rue/dev": "workspace:*",
       "@rue/types": "workspace:*",
-      "@types/node": "^20.14.9",
-      "typescript": "^5.5.3",
-      "vite": "^5.3.2"
+      "@types/node": "^22.5.4",
+      "typescript": "^5.5.4",
+      "vite": "^5.4.3"
     },
     "author": "Ruby Yi Wang",
     "license": "MIT"

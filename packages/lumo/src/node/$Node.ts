@@ -26,9 +26,11 @@ type RefSource = HTMLTag | ComponentSetup | HTMLTag[] | ComponentSetup[]
 //     readonly o: NodeReferent<T> | undefined; // o stands for object (as in target) of reference 
 // }
 
+
 export type NodeSignal<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
 export type _NodeSignal<T extends RefSource = RefSource> = Signal<NodeReferent<T> | undefined>
 
+// map readonly $node to $node
 const $nodeMap: WeakMap<NodeSignal, _NodeSignal> = new WeakMap()
 
 export function get$Node($nodeAsReadonly: NodeSignal) {
@@ -95,7 +97,7 @@ export class InternalNodeRef<
     }
 
     setValue(value: NodeReferent<T> | null | undefined) {
-        this.o.set(() => value)
+        this.o.setTo(value)
         return value;
     }
 
@@ -116,7 +118,7 @@ export class InternalNodeRef<
     assignValue(value: NodeReferent<T>, $index?: Signal<number> | undefined) {
         if ($index != null) {
             let nodes = !__SSR__ && isUpdatingList() ? this.getNewListNodes()
-                : this.o.set(() => (this.o() || []) as NodeArray<T>)
+                : this.o.setTo((this.o() || []) as NodeArray<T>)
             nodes[$index()] = value as ArrayItem<NodeArray<T>>;
             refMap.set(nodes, this);
         }
@@ -146,7 +148,7 @@ export class InternalNodeRef<
             const node = prevNodes[from];
             newNodes[to] = node;
         }
-        this.o.set(() => newNodes);
+        this.o.setTo(newNodes);
         listUpdateMap.delete(this)
         refMap.set(newNodes, this);
     }

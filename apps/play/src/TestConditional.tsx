@@ -19,7 +19,7 @@ export function TestConditional() {
 
 
     function toggleActiveState() {
-        $active.set(active => !active)
+        $active.setFrom(active => !active)
     }
 
 

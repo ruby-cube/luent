@@ -44,7 +44,7 @@ function NavBar() {
 function ReactiveBlock() {
     const $active = toSignal(true);
     function toggleActive() {
-        $active.set(active => !active)
+        $active.setFrom(active => !active)
     }
 
     const $count = toSignal(0);

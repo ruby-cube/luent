@@ -1,70 +1,94 @@
 import { emitSignal } from "./hasReactivity_DEV";
-import { isDeepReactive, isReactiveModel, ReactiveModel, DeepReactive$, Reactive$ } from "./reactivemodel/Reactive$";
+import { isDeepReactive, isReactiveModel, DeepReactive$, Reactive$, ReactiveModelDepth } from "./reactivemodel/Reactive$";
 import { track } from "./derivations/DependencyTracker";
 import { useUpdateCycle } from "./effects/UpdateCycle";
 import { triggerReactivePrimitive } from "./trigger";
+import { asReactiveAtom, isReactiveAtom } from "./derivations/ReactiveAtom";
+import { isWatched } from "./effects/watch";
 
 export type Signal<T = any> = {
     (): T;
     [SIGNAL_MARKER]: boolean;
-    set: (toNewValue: (value: T) => T) => T
+    x__depth: undefined | ReactiveModelDepth;
+    setFrom: (toNewValue: (value: T) => T) => T
+    setTo: (newValue: T) => T
 }
 
-export const SIGNAL_MARKER = Symbol('signal marker');
-
-const signalValues: WeakMap<Signal, any> = new WeakMap();
-const $$DepthSignals: WeakSet<Signal> = new WeakSet();
-const $$$DepthSignals: WeakSet<Signal> = new WeakSet();
+export const SIGNAL_MARKER = 'x__isSignal';
 
 
-
-export function $Signal<T>(value?: T): Signal<T> {
-
-    const signal = function $signal() {
+export function $Signal<T>(value: T): Signal<T> {
+    let _value: T = value;
+    function $signal() {
         if (__DEV__) emitSignal();
-        const value = signalValues.get(signal)
-        track(signal)
-        return value;
+        track($signal)
+        return _value;
     }
 
-    // mark reactive depth of value
+    // mark reactive depth of value if value is ReactiveModel
     if (value instanceof Object) {
         if (isDeepReactive(value)) {
-            $$$DepthSignals.add(signal)
+            $signal.x__depth = ReactiveModelDepth.DEEP;
         }
         else if (isReactiveModel(value)) {
-            $$DepthSignals.add(signal);
+            $signal.x__depth = ReactiveModelDepth.SHALLOW;
         }
     }
 
-    signalValues.set(signal, value)
-    signal[SIGNAL_MARKER] = true;
-    signal.set = set;
+    $signal[SIGNAL_MARKER] = true;
+    $signal.setTo = setTo;
+    $signal.setFrom = setFrom;
 
-    return signal;
+    function setTo(newValue: T) {
+        if (_value === newValue) return _value;
+        const _newValue = maybeReactivizeValue(newValue, $signal)
+        return setValueAndTrigger(_newValue);
+    }
+
+    function setFrom(toNewValue: (value: T) => T) {
+        const newValue = toNewValue(_value)
+        if (_value === newValue) return _value;
+        const _newValue = maybeReactivizeValue(newValue, $signal)
+        return setValueAndTrigger(_newValue);
+    }
+
+    function setValueAndTrigger(newValue: T) {
+        storeInitialValues($signal, _value)
+        _value = newValue;
+        triggerReactivePrimitive($signal, newValue, _value);
+        return newValue;
+    }
+
+    return $signal as Signal<T>;
 }
 
-function set<T>(this: Signal<T>, toNewValue: (value: T) => T) {
-    if (!(SIGNAL_MARKER in this))
-        throw new Error("[Invalid Input] `set` can only set type `Signal`")
-
-    if (!signalValues.has(this))
-        throw new Error("Signal not found :( This should never happen.")
-
-    const value = signalValues.get(this);
-    const newValue = toNewValue(value)
-
-    if (value === newValue) return value;
-
-    const _newValue = newValue instanceof Object ?
-        $$$DepthSignals.has(this) ? DeepReactive$(newValue) :
-            $$DepthSignals.has(this) ? Reactive$(newValue) :
+function maybeReactivizeValue(newValue: any, $signal: Signal) {
+    return newValue instanceof Object ?
+        $signal.x__depth === ReactiveModelDepth.DEEP ? DeepReactive$(newValue) :
+            $signal.x__depth === ReactiveModelDepth.SHALLOW ? Reactive$(newValue) :
                 newValue : newValue
-
-    signalValues.set(this, _newValue);
-    triggerReactivePrimitive(this, _newValue, value);
-    return _newValue;
 }
+
+
+
+function storeInitialValues(signal: Signal, oldValue: any) {
+
+    if (isWatched(signal)) {
+        const updateCycle = useUpdateCycle()
+        updateCycle.storeInitialValue(signal, oldValue)
+    }
+
+    if (isReactiveAtom(signal)) {
+        const atom = asReactiveAtom(signal);
+        atom.storeInitialDerivedValues()
+    }
+}
+
+// ORDER:
+// - store initial value
+// - set value
+// - trigger effects (run sync effects, schedule effects)
+// - trigger derivations effects (run sync effects, schedule effects)
 
 
 export function isSignal(maybeSignal: any): maybeSignal is Signal {

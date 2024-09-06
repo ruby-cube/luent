@@ -68,11 +68,11 @@ function ChildBlock({ initialCount }: {
     const $count = $Signal(initialCount || 0)
 
     function increment() {
-        $count.set(c => c + 1)
+        $count.setFrom(c => c + 1)
     }
 
     function decrement() {
-        $count.set(c => c - 1)
+        $count.setFrom(c => c - 1)
     }
 
     return {

@@ -3,13 +3,12 @@ import { fromEntries, html } from "../../../packages/literate/src/Literate.js";
 import { BlogPost, PostPreview } from "./PostPreview.js";
 import { $await, mO, $Suspense } from "@rue/literate";
 import { $Signal } from "@rue/muonic";
-import { expose } from "@rue/lumo";
 
 export function BlogPage() {
     const $blogPosts = $Signal([])
     const pendingBlogPosts = $await(import('./data.js'))
         .then((posts)=>{
-            $blogPosts.set(v=> posts)
+            $blogPosts.setTo(posts)
         })
 
     const PendingPostPreviews = $Suspense(pendingBlogPosts, {

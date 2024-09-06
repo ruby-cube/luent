@@ -14,7 +14,7 @@ function ComponentA() {
     const $pending = $Signal(true);
 
     setTimeout(() => {
-        $pending.set(o => false)
+        $pending.setTo(false)
     }, 500)
 
     return (
@@ -30,7 +30,7 @@ function ComponentB() {
     const $error = $Signal(false);
 
     setTimeout(() => {
-        $pending.set(o => false)
+        $pending.setTo(false)
     }, 5000)
 
     return (

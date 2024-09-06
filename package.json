@@ -32,11 +32,11 @@
     "ni:muonic": "pnpm -F @rue/muonic install"
   },
   "devDependencies": {
-    "@types/node": "^20.14.12",
+    "@types/node": "^22.5.4",
     "typescript": "^5.5.4",
-    "vite": "^5.3.5",
+    "vite": "^5.4.3",
     "vite-plugin-babel": "^1.2.0",
-    "vitest": "^2.0.4"
+    "vitest": "^2.0.5"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT"

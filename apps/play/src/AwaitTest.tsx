@@ -28,7 +28,7 @@ export function MainSite() {
             <PendingListBlock></PendingListBlock>
             <PendingTextArea></PendingTextArea>
             <p>{$count}</p>
-            <button onclick={() => $count.set(c => c + 1)}>click</button>
+            <button onclick={() => $count.setFrom(count => count + 1)}>click</button>
         </>
     )
 }
@@ -53,7 +53,7 @@ function TextArea() {
     const $word = $Signal("not ready")
 
     $await(simFetchC("pomp"))
-        .then(word => $word.set(o => word))
+        .then(word => $word.setTo(word))
 
     return (
         <div>
@@ -69,7 +69,7 @@ function ItemBlockA() {
     const $word = $Signal("not ready")
 
     $await(simFetch("calico"))
-        .then(word => $word.set(o => word))
+        .then(word => $word.setTo(word))
 
     return (
         <div>{$word}</div>
@@ -80,7 +80,7 @@ function ItemBlockB() {
     const $word = $Signal("not ready")
 
     $await(simLongFetch("basset"))
-        .then(word => $word.set(o => word))
+        .then(word => $word.setTo(word))
 
     return (
         <div>{$word}</div>
@@ -91,7 +91,7 @@ function ItemBlockC() {
     const $word = $Signal("not ready")
 
     $await(simFetchB("cerulean"))
-        .then(word => $word.set(o => word))
+        .then(word => $word.setTo(word))
 
     return (
         <div>{$word}</div>
@@ -102,7 +102,7 @@ function ItemBlockD() {
     const $word = $Signal("not ready")
 
     $await(simLongFetchB("tilted"))              // [promise]
-        .then(word => $word.set(o => word))
+        .then(word => $word.setTo(word))
 
     return (
         <div>{$word}</div> // {strings: ['<div>', '<div>'], values: [$word]}   (makeComponent should detect $await call and wrap component in promise) 
