@@ -9,7 +9,7 @@ import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { ConditionalSeries } from "./ConditionalSeries";
 import { hidePrevConditionalNodes, showConditionalNodes } from "./toggledisplay";
 import { setUpUpdateHooks, watchForRender } from "../watch/watchForRender";
-import { areShallowEqualArrays, destroyDerivedSignal } from "@rue/muonic";
+import { areShallowEqualArrays } from "@rue/muonic";
 import { popComponent, pushComponent } from "../component/componentStack";
 import { LifecycleHook } from "../component/lifecycle";
 
@@ -176,7 +176,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             pushDynamicNode(parentDynamicNode!)
 
             // (1)
-            destroyDerivedSignal($prevConditions)
+            // destroyDerivedSignal($prevConditions)
             series.deactivateConditional()
 
             // (2)

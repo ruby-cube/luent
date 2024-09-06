@@ -6,12 +6,12 @@ import { asReactiveProp, getReactiveProp } from "./ReactiveProp";
 import { shallowClone } from "./SnapshotManager";
 import { asTrackableOp, getTrackableOp } from "./TrackableOp";
 import { getRootWatchedModelAndKeyPath, isNestedWatched } from "./deepWatch";
-import { triggerReactiveModel, triggerReactivePrimitive } from "../src_v2/trigger";
-import { isWatched } from "../src_v2/watch";
-import { asReactiveAtom, isReactiveAtom } from "../src_v2/ReactiveAtom";
+import { triggerReactiveModel, triggerReactivePrimitive } from "./trigger";
+import { isWatched } from "./watch";
+import { asReactiveAtom, isReactiveAtom } from "./ReactiveAtom";
 import { isDerivedSignal } from "./DerivedSignal";
 import { getWithoutTracking, track } from "./DependencyTracker";
-import { useUpdateCycle } from "../src_v2/UpdateCycle";
+import { useUpdateCycle } from "./UpdateCycle";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject, deep: boolean | undefined) => void

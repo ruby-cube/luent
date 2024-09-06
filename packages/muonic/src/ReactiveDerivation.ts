@@ -1,9 +1,8 @@
-import { DependencyTracker, getDependencyTracker, getWithoutTracking, ReactivePrimitive } from "../src/DependencyTracker";
-import { WatchTarget } from "./WatchTarget";
-import { DerivedSignal, isDerivedSignal, onUpdateCompleted, ReactiveEffect } from "@rue/muonic";
+import { DependencyTracker, getDependencyTracker, getWithoutTracking, ReactivePrimitive } from "./DependencyTracker";
 import { asReactiveAtom, ReactiveAtom } from "./ReactiveAtom";
-import { asWatchTarget, isWatched } from "./watch";
+import { asWatchTarget, isWatched, ReactiveEffect } from "./watch";
 import { useUpdateCycle } from "./UpdateCycle";
+import { DerivedSignal, isDerivedSignal } from "./DerivedSignal";
 
 
 

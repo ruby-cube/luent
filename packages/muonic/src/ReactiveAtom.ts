@@ -1,4 +1,4 @@
-import { ReactivePrimitive } from "../src/DependencyTracker";
+import { ReactivePrimitive } from "./DependencyTracker";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 
 

@@ -2,9 +2,10 @@ export * from "./DerivedSignal" //TODO: limit exports to public api
 export * from "./hasReactivity_DEV" //TODO: limit exports to public api
 export * from "./Reactive$" //TODO: limit exports to public api
 export * from "./$Signal" //TODO: limit exports to public api
-export * from "./watch" //TODO: limit exports to public api
 export * from "./DependencyTracker" //TODO: limit exports to public api
+export * from "./watch" //TODO: limit exports to public api
 export * from "./asReadonly" //TODO: limit exports to public api
 export * from "./debug" //TODO: limit exports to public api
 export * from "./UpdateCycle" //TODO: limit exports to public api
 export * from "./SnapshotManager" //TODO: limit exports to public api
+export * from "./areEqual" //TODO: limit exports to public api

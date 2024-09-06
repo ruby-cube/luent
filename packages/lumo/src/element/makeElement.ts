@@ -15,8 +15,6 @@ import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
-import { getCurrentComponent } from "../component/componentStack";
-import { getActiveDynamicNode, isMountPhase } from "../dynamic/DynamicNode";
 import { onActivated, onDeactivate } from "../dynamic/lifecycle";
 
 

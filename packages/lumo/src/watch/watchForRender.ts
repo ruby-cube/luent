@@ -1,4 +1,4 @@
-import { beforeRender, ChangeHandler, getDependencies, hasSignal, initializeEffect as _initializeEffect, onRendered, ReactiveSignal, shallowClone, usePhaseQueues, watch as _watch, WatchOptions } from "@rue/muonic";
+import { beforeRender, ChangeHandler, hasSignal, initializeEffect as _initializeEffect, onRendered, ReactiveSignal, shallowClone, watch as _watch, WatchOptions } from "@rue/muonic";
 import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
@@ -46,7 +46,7 @@ export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T ex
     return _watchForRender(target, handler, options)
 }
 
-function _watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: { once?: true, eager?: true }) {
+function _watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: { once?: true, eager?: true , __devName?: string}) {
     // const component = getCurrentComponent<InternalComponent>()!;
     // const _handler = (newValue: any, oldValue: any) => {
         // handler(newValue, oldValue);
@@ -72,7 +72,7 @@ export function setUpUpdateHooks(component: InternalComponent) {
     onRendered(() => {
         component.emit(LifecycleHook.ON_UPDATED) //NOTE: I don't know if I even need an after update hook...
         component.hasUpdates = false; // resets for the next cycle
-    }, { once: true, __devName: setUpUpdateHooks.name })
+    }, { __devName: setUpUpdateHooks.name })
 }
 
 function bindWithComponent(fn: Function, component: InternalComponent) {

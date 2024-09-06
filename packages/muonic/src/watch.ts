@@ -1,16 +1,12 @@
-import { $listen, ListenerOptions, PendingOp, ScheduleStop } from "@rue/flask";
-import { isSignal, Signal } from "./$Signal";
-import { isReactiveModel, isReactiveObject, ReactiveModel, toRaw } from "./Reactive$";
 import { AnyObject } from "@rue/types";
-import { ActiveListener } from "../../flask/ActiveListener";
-import { _runTasks, getCurrentUpdateCycle, Hooks, onPhaseCompleted, Phase, startUpdateCycle, UpdateCycle } from "./UpdateCycle";
-import { DependencyTracker, getDependencyTracker, ReactivePrimitive } from "./DependencyTracker";
-import { DERIVED_SIGNAL, DerivedSignal, getDependentDerivedSignals, hasSignal, isDerivedSignal, ReactiveSignal } from "./DerivedSignal";
-import { isEqual, UNDEFINED } from "@rue/utils";
-import { MutationRecord, MutationOp, SetOp, watchProps } from "./deepWatch";
-import { collectReactiveProps, registerDebuggers, runTriggerDebugger, WatchDebugOptions } from "./debug";
-import { asReactiveProp, getReactiveProp, isReactiveProp, ReactiveProp } from "./ReactiveProp";
-import { PendingCancelOp } from "../../flask/PendingCancelOp";
+import { watchProps } from "./deepWatch";
+import { ReactiveGetter, WatchTarget } from "./WatchTarget";
+import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
+import { ReactiveDerivation } from "./ReactiveDerivation";
+import { Phase } from "./UpdateCycle";
+import { WatchDebugOptions } from "./debug";
+import { ReactiveSignal } from "./DerivedSignal";
+import { isReactiveModel, ReactiveModel } from "./Reactive$";
 
 
 type UpdateCycleOptions = {
@@ -34,64 +30,37 @@ export type ChangeHandler<T = AnyObject> = (newValue: T, oldValue: T, ops?: Muta
 export type ReactiveEffect = () => void //TODO: onCleanup function?
 type Effect = ChangeHandler | ReactiveEffect
 
+
 // manages nested watch calls to prevent infinite loops
 let isRunningEffect = false;
+
 function runEffect(effect: () => void) {
     isRunningEffect = true;
     effect()
     isRunningEffect = false;
 }
+
 function shouldScheduleForNextCycle() {
     return isRunningEffect;
 }
 
-const derivedSignalMap: WeakMap<Function, DerivedSignal> = new WeakMap();
-
-const reactiveEffects: WeakSet<Function> = new WeakSet();
-
-function isReactiveEffect(task: Function): task is ReactiveEffect {
-    return reactiveEffects.has(task)
-}
 
 
-export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
+export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, effect: ChangeHandler<T>, options?: WatchOptions) {
     const { deep, eager } = options ?? {};
     const phase = options?.phase || 'pre'
-
 
     if (deep && isReactiveModel(target)) { //TODO: deep watch for $$ and $$$ signals?
         watchProps(target, target, []);
     }
 
-    let phaseQueues: PhaseQueue[];
-
-    // collect tracked refs and get taskQueues
-    if (target instanceof Function) { //QUESTION: Should I allow plain functions as targets or require them all to be derived signals?
-        if (isDerivedSignal(target)) target[DERIVED_SIGNAL].markAsWatched();
-        const dependencies = getDependencies(target, false) //TODO: should initialize during the correct phase, not all sync or at least after component elements are created
-
-        phaseQueues = usePhaseQueues(dependencies, phase);
-        if (__DEV__) {
-            registerDebuggers(dependencies, options)
-        }
-    }
-    else {
-        // watch all properties of reactive
-        phaseQueues = usePhaseQueuesForReactive(target, phase)
-        if (__DEV__) {
-            if (isReactiveObject(target)) {
-                const dependencies = collectReactiveProps(target);
-                registerDebuggers(dependencies, options)
-            }
-            registerDebuggers(target, options)
-        }
-    }
+    const watchTarget = asWatchTarget(target);
 
     if (eager && target) {
         const value = target instanceof Function ? target() : target
         //TODO: Schedule according to phase
         if (phase === 'sync') {
-            runEffect(() => handler(value, value))
+            runEffect(() => effect(value, value))
         }
         else if (phase === 'pre') {
 
@@ -104,402 +73,86 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
         }
     }
 
-    // set up listeners
-    // const watchers: ActiveListener[] = [];
-    let watcher: ActiveListener | PendingCancelOp
-    // function stop() {
-    //     if (isDerivedSignal(target)) target[DERIVED_SIGNAL].markUnwatched();
-    //     'stop' in watcher ? watcher.stop() : watcher.cancel()
-    // }
-
-    // const _handler = options?.once ? (options.once = false, toSelfremoving(handler, stop)) : handler;
-    // ^ set once to false so that it will not be extraneously re-wrapped by $listen
-
     const forNextCycle = phase === 'sync' ? false : shouldScheduleForNextCycle();
 
-    watcher = $listen(handler, options || {}, {
-        enroll(task) {
-            for (const phaseQueue of phaseQueues) {
-                const taskQueue = useTaskQueue(phaseQueue, forNextCycle)
-                if (forNextCycle) queueForNextCycle(phaseQueue, phase)
-                taskQueue.add(task)
+    const watcher = $listen(effect, options || {}, {
+        enroll(_effect) {
+            if (forNextCycle) {
+                watchTarget.queueForNextCycle(_effect, phase)
+            }
+            else {
+                watchTarget.queueEffect(_effect, phase)
             }
         },
-        remove(task) {
-            for (const phaseQueue of phaseQueues) {
-                const taskQueue = useTaskQueue(phaseQueue, forNextCycle)
-                taskQueue.delete(task)
-            }
+        remove(_effect) {
+            watchTarget.removeEffect(_effect, phase)
         }
     });
 
     return watcher
 }
 
-function queueForNextCycle(phaseQueue: PhaseQueue, phase: Phase) {
-    const toBeQueued = phaseQueue[TO_BE_QUEUED]!
-    const taskQueue = phaseQueue[TASK_QUEUE];
-    onPhaseCompleted(phase, () => {
-        for (const task of toBeQueued!) {
-            taskQueue.add(task);
-        }
-
-        toBeQueued.clear()
-    })
-}
 
 
 
 export function initializeEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived signal and effect combined into one function
     const phase = options?.phase || 'pre';
     const retrack = options?.retrack;
+    const watchTarget = asWatchTarget(reactiveEffect);
+    const _effect = new ReactiveDerivation(reactiveEffect, retrack)
 
-    let phaseQueues: PhaseQueue[];
+    let initialized = false;
 
-    // collect tracked refs and get taskQueues
-    const dependencies = getDependencies(effect, true)
-
-    phaseQueues = usePhaseQueues(dependencies, phase);
-    if (__DEV__) {
-        registerDebuggers(dependencies, options)
+    function reactiveEffect() {
+        if (!initialized || _effect.dirty && retrack) {
+            _effect.trackDependencies(effect);
+            _effect.forwardDependencies(_effect.dependencies) //QUESTION: Not sure if reactive effects need to forward dependencies as well
+            if (_effect.dirty) {
+                _effect.undirty()
+            }
+            initialized = true;
+        }
+        else {
+            effect()
+        }
     }
 
-    // set up listeners
-    let watcher: ActiveListener
+    reactiveEffect();
 
-    // function stop() {
-    //     'stop' in watcher ? watcher.stop() : watcher.cancel()
-    // }
+    const forNextCycle = phase === 'sync' ? false : shouldScheduleForNextCycle();
 
-    // const _watcher = {
-    //     stop
-    // }
-
-    // function replaceCleanupFunction(stop: () => void) {
-    //     _watcher.stop = stop
-    // }
-
-
-    let _handler = retrack ? () => {
-        watcher.stop()
-        const _watcher = initializeEffect(effect, options) // no need to call effect because initializeEffect will call it
-        watcher.stop = _watcher.stop
-    } : effect;
-    // _handler = options?.once && !retrack ? toSelfremoving(_handler, stop) : _handler; // retrack is inherently self-removing
-
-    // // set once to false so that it will not be extraneously re-wrapped by $listen
-    // if (options?.once || retrack) {
-    //     options.once = false;
-    // }
-    if (retrack) options.once = true;
-
-    const forNextCycle = shouldScheduleForNextCycle();
-
-    watcher = $listen(_handler, options || {}, {
-        enroll(task) {
-            for (const phaseQueue of phaseQueues) {
-                const taskQueue = useTaskQueue(phaseQueue, forNextCycle);
-                if (forNextCycle) queueForNextCycle(phaseQueue, phase)
-                taskQueue.add(task)
+    const watcher = $listen(reactiveEffect, options || {}, {
+        enroll(_effect) {
+            if (forNextCycle) {
+                watchTarget.queueForNextCycle(_effect, phase)
             }
-            reactiveEffects.add(task)
+            else {
+                watchTarget.queueEffect(_effect, phase)
+            }
         },
-        remove(task) {
-            for (const phaseQueue of phaseQueues) {
-                const taskQueue = useTaskQueue(phaseQueue, forNextCycle);
-                if (forNextCycle) queueForNextCycle(phaseQueue, phase)
-                taskQueue.delete(task)
-            }
+        remove(_effect) {
+            watchTarget.removeEffect(_effect, phase)
         }
     });
 
-    return watcher;
+    return watcher
 }
 
-function useTaskQueue(phaseQueue: PhaseQueue, forNextCycle: boolean) {
-    const taskQueue = phaseQueue[TASK_QUEUE]
-    if (forNextCycle) {
-        let toBeQueued = phaseQueue[TO_BE_QUEUED]
-        if (!toBeQueued) {
-            toBeQueued = phaseQueue[TO_BE_QUEUED] = new Set()
-        }
 
-        return {
-            add(effect: Effect) {
-                toBeQueued.add(effect);
-            },
-            delete(effect: Effect) {
-                taskQueue.delete(effect);
-                toBeQueued.delete(effect);
-            }
-        }
+
+
+
+const watchTargetMap: WeakMap<ReactiveSignal | ReactiveGetter | ReactiveModel | ReactiveEffect, WatchTarget> = new WeakMap()
+
+export function isWatched(target: ReactiveSignal | ReactiveGetter | ReactiveModel | ReactiveEffect) {
+    return watchTargetMap.get(target);
+}
+
+export function asWatchTarget(target: ReactiveSignal | ReactiveGetter | ReactiveModel | ReactiveEffect): WatchTarget {
+    let watchTarget = watchTargetMap.get(target);
+    if (!watchTarget) {
+        watchTarget = new WatchTarget(target)
+        watchTargetMap.set(target, watchTarget)
     }
-    return taskQueue
+    return watchTarget;
 }
-
-
-// function toSelfremoving(handler: (...args: any[]) => void, stop: () => void) {
-//     return (...args: any[]) => {
-//         stop();
-//         handler(...args)
-//     }
-// }
-
-// function wrapToRetrack(effect: () => void, options: EffectOptions, prevWatcher: ActiveListener, replaceCleanup: (stop: () => void) => void) {
-//     const _effect = () => {
-//         prevWatcher.stop();
-//         const watcher = initializeEffect(effect, options) // no need to call effect because initializeEffect will call it
-//         replaceCleanup(watcher.stop);
-//     }
-//     return _effect;
-// }
-
-export function getDependencies(reactiveFunction: Function, isReactiveEffect?: boolean): ReactivePrimitive[] {
-    if (isSignal(reactiveFunction)) return [reactiveFunction];
-    if (isDerivedSignal(reactiveFunction)) {
-        const derivedSignal = reactiveFunction[DERIVED_SIGNAL];
-        const deps = derivedSignal.dependencies;
-        if (deps.length > 0) return deps;
-        reactiveFunction(); // allow derived signal's internal tracking to collect dependencies
-        return derivedSignal.dependencies;
-    }
-    const tracker = new DependencyTracker();
-    if (isReactiveEffect) {
-        const [deps] = tracker.callToCollectDependencies(reactiveFunction) //TODO: pass in cleanup function?
-        return deps;
-    }
-    const [deps] = tracker.callToCollectDependencies(reactiveFunction)
-    return deps;
-}
-
-
-
-
-
-
-// type SignalToDerivedMap = WeakMap<Signal, WeakSet<() => any>> //QUESTION: not sure if weak set will work, or if I need to subscribe and unsubscribe
-
-// class DerivedSignalTasks {
-//     constructor(
-//         public value: any,
-//         public deps: ReactivePrimitive[] = [],
-//         public pre?: Set<Effect> | undefined,
-//         public post?: Set<Effect> | undefined,
-//     ) { }
-// }
-
-// class EffectRecord {
-//     constructor(
-//         public deps: ReactivePrimitive[] = [],
-//         public phase: 'pre' | 'post',
-//         public effect: Effect,
-//     ) { }
-// }
-
-// type PropertyKey = string | number | symbol
-
-// const TASK_QUEUE = 0;
-// const TO_BE_QUEUED = 1;
-
-// type PhaseQueue = [Set<Effect>, undefined | Set<Effect>]
-// const reactiveAtomTaskQueues: WeakMap<ReactivePrimitive, Map<Phase, PhaseQueue>> = new WeakMap();
-// const reactiveModelTaskQueues: WeakMap<ReactiveModel, Map<'pre' | 'post' | 'render', PhaseQueue>> = new WeakMap();
-
-// export function usePhaseQueues(deps: ReactivePrimitive[], phase: Phase = 'pre') {
-//     const taskQueues: PhaseQueue[] = [];
-//     for (const dep of deps) {
-//         taskQueues.push(usePhaseQueue(dep, phase));
-//     }
-//     return taskQueues;
-// }
-
-// function usePhaseQueue(target: Signal | ReactiveProp | ReactiveModel, phase: Phase = 'pre') {
-//     const taskQueueMap = (isReactiveModel(target) ? reactiveModelTaskQueues : reactiveAtomTaskQueues) as
-//         WeakMap<ReactivePrimitive | ReactiveModel, Map<Phase, PhaseQueue>>
-
-//     let phaseMap = taskQueueMap.get(target)
-//     if (!phaseMap) {
-//         phaseMap = new Map();
-//         taskQueueMap.set(target, phaseMap)
-//     }
-//     let phaseQueue = phaseMap.get(phase)
-//     if (!phaseQueue) {
-//         phaseQueue = [new Set(), undefined]
-//         phaseMap.set(phase, phaseQueue)
-//     }
-//     return phaseQueue;
-// }
-
-// function usePhaseQueuesForReactive(reactive: ReactiveModel, phase: Phase = 'pre') {
-//     const taskQueues: PhaseQueue[] = [];
-//     if (phase === 'sync')
-//         throw new Error('"Reactive effect cannot run synchronously on property change when watching reactive objects. Did you mean to watch a reactive property?"')
-//     taskQueues.push(usePhaseQueue(reactive, phase));
-//     return taskQueues;
-// }
-
-// export function getTaskQueue(target: Signal | ReactiveProp | ReactiveModel, phase: Phase) {
-//     if (isReactiveModel(target))
-//         return reactiveModelTaskQueues.get(target)?.get(<Exclude<Phase, 'sync'>>phase)?.[TASK_QUEUE]
-//     return reactiveAtomTaskQueues.get(target)?.get(phase)?.[TASK_QUEUE]
-// }
-
-// function getTaskQueueForReactive(reactive: ReactiveModel, phase: 'pre' | 'post' | 'render') {
-//     return reactiveModelTaskQueues.get(reactive)?.get(phase)?.[TASK_QUEUE];
-// }
-
-// function getTaskQueueForSignal(signal: Signal, phase: Phase) {
-//     return signalTaskQueues.get(signal)?.get(phase)?.[TASK_QUEUE];
-// }
-
-// export function getTaskQueueForProp(prop: ReactiveProp, phase: Phase) {
-//     return reactivePropTaskQueues.get(prop)?.get(phase)?.[TASK_QUEUE]
-// }
-
-
-
-
-export function trigger(target: ReactivePrimitive, newValue: any, oldValue: any) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol
-    if (__DEV__) {
-        runTriggerDebugger(target)
-    }
-
-    const updateCycle = useUpdateCycle()
-
-    // run sync tasks
-    const tracker = getDependencyTracker();
-    tracker?.stop(); // in case reactive refs are set during an effect
-    runSyncTasks(target, newValue, oldValue);
-    tracker?.restore();
-
-    // collect triggered refs for this cycle for 'pre', 'render', and 'post' phases
-    updateCycle.flagReactiveAtom(target, newValue, oldValue)
-    return updateCycle;
-}
-
-export function triggerReactiveModel(reactive: ReactiveModel, op: MutationRecord, clone?: AnyObject) {
-    const updateCycle = useUpdateCycle();
-    const snapshot = updateCycle.takeSnapshot(reactive, toRaw(reactive), clone)
-    updateCycle.flagReactive(reactive, snapshot)
-    updateCycle.recordOp(reactive, op)
-}
-
-// export function triggerOp(target: ReactiveModel, op: string, args: any[]) {
-//     if (__DEV__) {
-//         runTriggerDebugger(target)
-//     }
-
-//     const updateCycle = useUpdateCycle()
-//     // updateCycle.flagTrackableOps(target, op, args)
-
-//     if (isWatchedModel(target)) {
-//         updateCycle.recordOp(target, {
-//             op,
-//             args
-//         })
-//     }
-
-//     return updateCycle;
-// }
-
-// export function isWatchedModel(target: ReactiveModel) {
-//     return reactiveModelTaskQueues.has(target)
-// }
-
-
-// export function storeInitialDerivedValueIfNeeded(updateCycle: UpdateCycle, target: ReactivePrimitive) {
-//     const derivedSignals = getDependentDerivedSignals(target);
-//     if (derivedSignals) {
-//         for (const derivedSignal of derivedSignals) {
-//                 updateCycle.storeInitialValue(derivedSignal, derivedSignal())
-//         }
-//     }
-// }
-
-// function runSyncTasks(target: ReactivePrimitive, newValue: any, oldValue: any) {
-//     const updateCycle = getCurrentUpdateCycle();
-//     if (!updateCycle) throw new Error("No update cycle :(")
-//     const completedEffects = updateCycle.completedEffects;
-//     const taskQueue = getTaskQueue(target, 'sync')
-//     if (taskQueue) {
-//         runNonRepeatingTasks(taskQueue, newValue, oldValue, completedEffects)
-//     }
-// }
-
-
-// function runNonRepeatingTasks(taskQueue: Set<Effect>, newValue: any, oldValue: any, completedEffects: Set<Function>) {
-//     for (const task of taskQueue) {
-//         if (completedEffects.has(task)) {
-//             continue;
-//         }
-//         if (derivedSignalMap.has(task)) {
-//             const derivedSignal = derivedSignalMap.get(task);
-//             if (!derivedSignal) throw new Error("derived signal not found")
-//             const updateCycle = getCurrentUpdateCycle();
-//             if (!updateCycle) throw new Error("No update cycle :( whyyy")
-//             const _oldValue = updateCycle.getInitialValue(derivedSignal)
-//             const newValue = derivedSignal();
-//             if (!areEqual(newValue, _oldValue)) {
-//                 return;
-//             }
-//             runEffect(() => {
-//                 task(newValue, _oldValue);
-//             })
-//         }
-//         else if (isReactiveEffect(task)) {
-//             runEffect(() => {
-//                 task() //TODO: pass in clean up function?
-//             })
-//         }
-//         else {
-//             runEffect(() => {
-//                 task(newValue, oldValue)
-//             })
-//         }
-//         completedEffects.add(task)
-//     }
-// }
-
-
-
-
-
-
-// export function runNonSyncEffects(phase: "pre" | "post" | "render") {
-//     const updateCycle = getCurrentUpdateCycle();
-//     if (!updateCycle) return;
-//     const completedEffects = updateCycle.completedEffects;
-
-//     const reactiveMap = updateCycle.triggeredReactives;
-//     if (reactiveMap) {
-//         for (const [reactive, keys] of reactiveMap) {
-//             // if (phase !== 'render') {
-//             const taskQueue = getTaskQueue(reactive, phase);
-//             if (taskQueue) {
-//                 for (const task of taskQueue) {
-//                     const snapshot = updateCycle.getSnapshot(reactive);
-//                     if (!snapshot) throw new Error("No snapshot :(. This should never happen")
-//                     const ops = updateCycle.getOps(reactive);
-//                     if (ops && ops.length === 0)
-//                         return;
-//                     else if (!areEqual(reactive, snapshot)) {
-//                         return;
-//                     }
-//                     runEffect(() => {
-//                         task(reactive, snapshot, ops) //QUESTION: Why is this not non-repeating tasks?
-//                     })
-//                 }
-//             }
-//         }
-//     }
-
-//     const atomMap = updateCycle.triggeredReactiveAtom;
-//     if (atomMap) {
-//         for (const [atom, [newValue, oldValue]] of atomMap) {
-//             const taskQueue = getTaskQueue(atom, phase);
-//             if (taskQueue) {
-//                 runNonRepeatingTasks(taskQueue, newValue, oldValue, completedEffects)
-//             }
-//         }
-//     }
-// }

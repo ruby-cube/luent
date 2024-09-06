@@ -1,6 +1,6 @@
 import { isSignal, Signal, SIGNAL_MARKER } from "./$Signal";
 import { READONLY_SIGNAL } from "./asReadonly";
-import { ReactiveDerivation } from "../src_v2/ReactiveDerivation";
+import { ReactiveDerivation } from "./ReactiveDerivation";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
