@@ -1,14 +1,14 @@
 import { beforeRepaint, queueTask } from "@rue/thread";
-import { ReactiveAtom } from "./ReactiveAtom";
+import { ReactiveAtom } from "../derivations/ReactiveAtom";
 import { $schedule, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
 import { Effect } from "./WatchTarget";
 import { SetMap, UNDEFINED } from "@rue/utils";
 import { AnyObject } from "@rue/types";
 import { MutationRecord } from "./deepWatch";
 import { areEqual } from "./areEqual";
-import { DerivedSignal } from "./DerivedSignal";
-import { isReactiveModel, ReactiveModel } from "./Reactive$";
-import { SnapshotManager } from "./SnapshotManager";
+import { DerivedSignal } from "../derivations/DerivedSignal";
+import { isReactiveModel, ReactiveModel } from "../reactivemodel/Reactive$";
+import { SnapshotManager } from "../reactivemodel/SnapshotManager";
 
 type ReactiveTarget = ReactiveAtom | DerivedSignal | ReactiveModel
 

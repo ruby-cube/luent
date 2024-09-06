@@ -1,11 +1,11 @@
-import { useUpdateCycle } from "./UpdateCycle";
-import { asWatchTarget, isWatched } from "./watch";
-import { asReactiveAtom, isReactiveAtom } from "./ReactiveAtom";
+import { useUpdateCycle } from "./effects/UpdateCycle";
+import { asWatchTarget, isWatched } from "./effects/watch";
+import { asReactiveAtom, isReactiveAtom } from "./derivations/ReactiveAtom";
 import { AnyObject } from "@rue/types";
-import { MutationRecord } from "./deepWatch";
-import { ReactivePrimitive } from "./DependencyTracker";
-import { runTriggerDebugger } from "./debug";
-import { ReactiveModel, toRaw } from "./Reactive$";
+import { MutationRecord } from "./effects/deepWatch";
+import { ReactivePrimitive } from "./derivations/DependencyTracker";
+import { runTriggerDebugger } from "./effects/debug";
+import { ReactiveModel, toRaw } from "./reactivemodel/Reactive$";
 
 
 export function triggerReactivePrimitive(target: ReactivePrimitive, newValue: any, oldValue: any) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol

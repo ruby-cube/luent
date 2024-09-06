@@ -63,7 +63,7 @@ export class ConditionalSeries {
             }
             return values;
         }, true) // $(() => [$conditionA(), $conditionB(), ...])
-    }
+    } // must retrack in case any of its conditions require retracking
 }
 
 

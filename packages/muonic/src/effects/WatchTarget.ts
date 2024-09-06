@@ -1,10 +1,10 @@
 import { SetMap } from "@rue/utils";
 import { onPhaseCompleted, Phase, useUpdateCycle } from "./UpdateCycle";
-import { ReactiveAtom } from "./ReactiveAtom";
-import { ReactiveModel } from "./Reactive$";
-import { DerivedSignal, isDerivedSignal } from "./DerivedSignal";
+import { ReactiveAtom } from "../derivations/ReactiveAtom";
+import { ReactiveModel } from "../reactivemodel/Reactive$";
+import { DerivedSignal, isDerivedSignal } from "../derivations/DerivedSignal";
 import { ReactiveEffect } from "./watch";
-import { getDependencyTracker } from "./DependencyTracker";
+import { getDependencyTracker } from "../derivations/DependencyTracker";
 
 
 export type Effect = (...args: any[]) => void;

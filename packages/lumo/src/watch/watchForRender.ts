@@ -1,4 +1,4 @@
-import { beforeRender, ChangeHandler, hasSignal, initializeEffect as _initializeEffect, onRendered, ReactiveSignal, shallowClone, watch as _watch, WatchOptions } from "@rue/muonic";
+import { beforeRender, ChangeHandler, hasSignal, initReactiveEffect as _initReactiveEffect, onRendered, ReactiveSignal, shallowClone, watch as _watch, WatchOptions } from "@rue/muonic";
 import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
@@ -28,7 +28,7 @@ function _initializeRender(effect: () => void) {
         effect();
         setUpUpdateHooks(component)
     }
-    return _initializeEffect(_handler, {
+    return _initReactiveEffect(_handler, {
         phase: 'render',
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
@@ -87,7 +87,7 @@ function bindWithComponent(fn: Function, component: InternalComponent) {
 function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveListener {
     const mountPhase = isMountPhase()
     const component = getComponent(_initializeAndPreserve.name)
-    const initializeFn = bindWithComponent(renderPhase ? _initializeRender : _initializeEffect, component);
+    const initializeFn = bindWithComponent(renderPhase ? _initializeRender : _initReactiveEffect, component);
     const dynamicNode = getActiveDynamicNode()!
     const watcher = { stop: noop }
 
@@ -110,13 +110,13 @@ function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveL
     return watcher;
 }
 
-export function initializeEffect(effect: () => void) {
+export function initReactiveEffect(effect: () => void) {
     const dynamicNode = getActiveDynamicNode()
     if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
 
     if (dynamicNode.preserve)
         return _initializeAndPreserve(effect)
-    return _initializeEffect(effect)
+    return _initReactiveEffect(effect)
 }
 
 export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {

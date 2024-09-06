@@ -1,17 +1,17 @@
 import { AnyObject } from "@rue/types";
-import { emitSignal } from "./hasReactivity_DEV";
+import { emitSignal } from "../hasReactivity_DEV";
 import { isPlainObject, KeyPath, Ref, isMutatingMapMethod, isMutatingSetMethod, isMutatingArrayMethod, inheritsFrom } from "@rue/utils";
 import { isTuple, tuple } from "./tuple";
 import { asReactiveProp, getReactiveProp } from "./ReactiveProp";
 import { shallowClone } from "./SnapshotManager";
 import { asTrackableOp, getTrackableOp } from "./TrackableOp";
-import { getRootWatchedModelAndKeyPath, isNestedWatched } from "./deepWatch";
-import { triggerReactiveModel, triggerReactivePrimitive } from "./trigger";
-import { isWatched } from "./watch";
-import { asReactiveAtom, isReactiveAtom } from "./ReactiveAtom";
-import { isDerivedSignal } from "./DerivedSignal";
-import { getWithoutTracking, track } from "./DependencyTracker";
-import { useUpdateCycle } from "./UpdateCycle";
+import { getRootWatchedModelAndKeyPath, isNestedWatched } from "../effects/deepWatch";
+import { triggerReactiveModel, triggerReactivePrimitive } from "../trigger";
+import { isWatched } from "../effects/watch";
+import { asReactiveAtom, isReactiveAtom } from "../derivations/ReactiveAtom";
+import { isDerivedSignal } from "../derivations/DerivedSignal";
+import { getWithoutTracking, track } from "../derivations/DependencyTracker";
+import { useUpdateCycle } from "../effects/UpdateCycle";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject, deep: boolean | undefined) => void

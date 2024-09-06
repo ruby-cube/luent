@@ -1,5 +1,5 @@
 import { isSignal, Signal } from "./$Signal";
-import { isReactiveModel, ReactiveModel } from "./Reactive$";
+import { isReactiveModel, ReactiveModel } from "./reactivemodel/Reactive$";
 
 
 export type ReadonlySignal<T = any> = {

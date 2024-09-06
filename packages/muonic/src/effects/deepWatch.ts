@@ -1,4 +1,4 @@
-import { isReactiveModel, isReactiveObject, ReactiveModel } from "./Reactive$";
+import { isReactiveModel, isReactiveObject, ReactiveModel } from "../reactivemodel/Reactive$";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 import { AnyObject } from "@rue/types";
 

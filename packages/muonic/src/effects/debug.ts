@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
-import { asReactiveProp, ReactiveProp } from "./ReactiveProp";
-import { isReactiveModel, ReactiveModel } from "./Reactive$";
-import { Signal } from "./$Signal";
+import { asReactiveProp, ReactiveProp } from "../reactivemodel/ReactiveProp";
+import { isReactiveModel, ReactiveModel } from "../reactivemodel/Reactive$";
+import { Signal } from "../$Signal";
 
 //TODO: onTrigger works as desired. onTrack needs to be rethunk.
 

@@ -1,6 +1,6 @@
-import { asReactiveProp, getReactivePropValue, isReactiveProp, ReactiveProp } from "./ReactiveProp";
-import { getTrackableOpValue, isTrackableOp, TrackableOp } from "./TrackableOp";
-import { isSignal, Signal } from "./$Signal";
+import { asReactiveProp, getReactivePropValue, isReactiveProp, ReactiveProp } from "../reactivemodel/ReactiveProp";
+import { getTrackableOpValue, isTrackableOp, TrackableOp } from "../reactivemodel/TrackableOp";
+import { isSignal, Signal } from "../$Signal";
 
 export type ReactivePrimitive = Signal | ReactiveProp | TrackableOp
 

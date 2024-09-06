@@ -2,11 +2,12 @@ import { AnyObject } from "@rue/types";
 import { watchProps } from "./deepWatch";
 import { ReactiveGetter, WatchTarget } from "./WatchTarget";
 import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
-import { ReactiveDerivation } from "./ReactiveDerivation";
+import { ReactiveDerivation } from "../derivations/ReactiveDerivation";
 import { Phase } from "./UpdateCycle";
 import { WatchDebugOptions } from "./debug";
-import { DERIVED_SIGNAL, isDerivedSignal, ReactiveSignal } from "./DerivedSignal";
-import { isReactiveModel, ReactiveModel } from "./Reactive$";
+import { DERIVED_SIGNAL, isDerivedSignal, ReactiveSignal } from "../derivations/DerivedSignal";
+import { isReactiveModel, ReactiveModel } from "../reactivemodel/Reactive$";
+import { createReactiveEffect } from "../derivations/ReactiveEffect";
 
 
 type UpdateCycleOptions = {
@@ -97,28 +98,11 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
 
 
 
-
-export function initializeEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived signal and effect combined into one function
+export function initReactiveEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived signal and effect combined into one function
     const phase = options?.phase || 'pre';
-    const retrack = options?.retrack;
+    const retrack = options?.retrack || false;
+    const reactiveEffect = createReactiveEffect(effect, retrack)
     const watchTarget = asWatchTarget(reactiveEffect);
-    const _effect = new ReactiveDerivation(reactiveEffect, retrack)
-
-    let initialized = false;
-
-    function reactiveEffect() {
-        if (!initialized || _effect.dirty && retrack) {
-            _effect.trackDependencies(effect);
-            _effect.forwardDependencies(_effect.dependencies) //QUESTION: Not sure if reactive effects need to forward dependencies as well
-            if (_effect.dirty) {
-                _effect.undirty()
-            }
-            initialized = true;
-        }
-        else {
-            effect()
-        }
-    }
 
     reactiveEffect();
 

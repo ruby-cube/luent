@@ -1,7 +1,7 @@
 import { emitSignal } from "./hasReactivity_DEV";
-import { isDeepReactive, isReactiveModel, ReactiveModel, DeepReactive$, Reactive$ } from "./Reactive$";
-import { track } from "./DependencyTracker";
-import { useUpdateCycle } from "./UpdateCycle";
+import { isDeepReactive, isReactiveModel, ReactiveModel, DeepReactive$, Reactive$ } from "./reactivemodel/Reactive$";
+import { track } from "./derivations/DependencyTracker";
+import { useUpdateCycle } from "./effects/UpdateCycle";
 import { triggerReactivePrimitive } from "./trigger";
 
 export type Signal<T = any> = {

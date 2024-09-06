@@ -22,7 +22,7 @@ export function List() {
         { id: 3, content: "swamp" }
     ])
 
-    // initializeEffect(() => {
+    // initReactiveEffect(() => {
     //     console.log("some starts with f", list$.some((item) => item.content.startsWith('f')))
     // })
 

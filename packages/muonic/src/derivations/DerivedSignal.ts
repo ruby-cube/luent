@@ -1,5 +1,5 @@
-import { isSignal, Signal, SIGNAL_MARKER } from "./$Signal";
-import { READONLY_SIGNAL } from "./asReadonly";
+import { isSignal, Signal, SIGNAL_MARKER } from "../$Signal";
+import { READONLY_SIGNAL } from "../asReadonly";
 import { getDependencyTracker } from "./DependencyTracker";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 
@@ -60,8 +60,8 @@ export function $<T extends any>(pureGetter: () => T, retrack: boolean = false):
         }
         
         if (signal.dirty) {
-            signal.forwardDependencies(signal.dependencies)
             const newValue = pureGetter();
+            signal.forwardDependencies(signal.dependencies)
             signal.updateValue(newValue)
             signal.undirty()
             return newValue;

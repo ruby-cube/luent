@@ -1,7 +1,7 @@
 import { DependencyTracker, getDependencyTracker, getWithoutTracking, ReactivePrimitive } from "./DependencyTracker";
 import { asReactiveAtom, ReactiveAtom } from "./ReactiveAtom";
-import { asWatchTarget, isWatched, ReactiveEffect } from "./watch";
-import { useUpdateCycle } from "./UpdateCycle";
+import { asWatchTarget, isWatched, ReactiveEffect } from "../effects/watch";
+import { useUpdateCycle } from "../effects/UpdateCycle";
 import { DerivedSignal, isDerivedSignal } from "./DerivedSignal";
 
 
