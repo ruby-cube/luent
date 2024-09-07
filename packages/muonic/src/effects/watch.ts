@@ -5,10 +5,12 @@ import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
 import { ReactiveDerivation } from "../derivations/ReactiveDerivation";
 import { Phase, useUpdateCycle } from "./UpdateCycle";
 import { WatchDebugOptions } from "./debug";
-import { DERIVED_SIGNAL, isDerivedSignal, ReactiveSignal } from "../derivations/DerivedSignal";
+import { $, DERIVED_SIGNAL, isDerivedSignal, ReactiveSignal } from "../derivations/DerivedSignal";
 import { isReactiveModel, ReactiveModel } from "../reactivemodel/Reactive$";
 import { createReactiveEffect } from "../derivations/ReactiveEffect";
 import { getWithoutTracking } from "../derivations/DependencyTracker";
+import { asReactiveProp } from "../reactivemodel/ReactiveProp";
+import { areEqual } from "./areEqual";
 
 
 type UpdateCycleOptions = {
@@ -36,10 +38,9 @@ type Effect = ChangeHandler | ReactiveEffect
 // manages nested watch calls to prevent infinite loops
 let isRunningEffect = false;
 
-export function runEffect(effect: (...args: any[]) => void, args?: any[]) {
+export function runEffect(effect: () => void) {
     isRunningEffect = true;
-    if (args) effect(...args)
-    else effect()
+    effect()
     isRunningEffect = false;
 }
 
@@ -47,36 +48,62 @@ function shouldScheduleForNextCycle() {
     return isRunningEffect;
 }
 
+function toDerivedSignal(reactive: ReactiveModel, keys: PropertyKey[]) {
+    return $(() => {
+        const values = []
+        for (const key of keys) {
+            values.push(reactive[key])
+        }
+        return values;
+    })
+}
 
+function getValue(target: Function | AnyObject, key?: PropertyKey) {
+    return target instanceof Function ? target() : key ? target[key] : target
+}
 
-export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, effect: ChangeHandler<T>, options?: WatchOptions) {
-    const { deep, eager } = options ?? {};
-    const phase = options?.phase || 'pre'
+export function watch<T>(target: ReactiveModel<T extends AnyObject ? T : never>, keys: (keyof T)[], effect: ChangeHandler<T>, options?: WatchOptions): ActiveListener
+export function watch<T>(target: ReactiveModel<T extends AnyObject ? T : never>, key: keyof T, effect: ChangeHandler<T>, options?: WatchOptions): ActiveListener
+export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, effect: ChangeHandler<T>, options?: WatchOptions): ActiveListener
+export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, effectOrKeys: ChangeHandler<T> | keyof T | (keyof T)[], optionsOrEffect?: WatchOptions | ChangeHandler<T>, options?: WatchOptions) {
+    const keys = effectOrKeys instanceof Function ? undefined : effectOrKeys instanceof Array ? effectOrKeys : undefined
+    const key = typeof effectOrKeys === 'string' ? effectOrKeys as keyof T : undefined
+    const effect = keys ? optionsOrEffect as ChangeHandler<T> : effectOrKeys as ChangeHandler<T>;
+    const _options = keys ? options : optionsOrEffect as WatchOptions | undefined;
+    const noKeys = !(keys || key)
 
-    if (deep && isReactiveModel(target)) { //TODO: deep watch for $$ and $$$ signals?
-        watchProps(target, target, []);
+    const { deep, eager } = _options ?? {};
+    const phase = _options?.phase || 'pre'
+
+    const _target = keys instanceof Array ? toDerivedSignal(target, keys) : key ? asReactiveProp(target, key) : target; //TODO: allow target to be map or set and keys to be keys or entries
+
+    if (noKeys && deep && isReactiveModel(_target)) { //TODO: deep watch for $$ and $$$ signals?
+        watchProps(_target, _target, []);
     }
 
-    const watchTarget = asWatchTarget(target);
-    if (isDerivedSignal(target) && target[DERIVED_SIGNAL].dependencies.length === 0) {
-        target() // tracks dependencies
+    const watchTarget = asWatchTarget(_target);
+    let oldValue = getValue(_target, key)
+
+    function _effect() {
+        const newValue = getValue(_target, key) //TODO: snapshot?
+        if (areEqual(newValue, oldValue)) return;
+        effect(newValue, oldValue)
+        oldValue = newValue;
     }
 
     if (eager) {
-        const value = target instanceof Function ? getWithoutTracking(target) : target
         if (phase === 'sync') {
-            runEffect(effect, [value, value])
+            runEffect(_effect)
         }
         else {
             const updateCycle = useUpdateCycle()
-            updateCycle.storeInitialValue(target, value)
-            updateCycle.scheduleEffect(target, effect, phase)
+            updateCycle.scheduleEffect(_target, _effect, phase)
         }
     }
 
     const forNextCycle = phase === 'sync' ? false : shouldScheduleForNextCycle();
 
-    const watcher = $listen(effect, options || {}, {
+    const watcher = $listen(_effect, _options || {}, {
         enroll(_effect) {
             if (forNextCycle) {
                 watchTarget.queueForNextCycle(_effect, phase)
@@ -128,8 +155,9 @@ export function initializeReactiveEffect(effect: () => void, options?: EffectOpt
 
 const watchTargetMap: WeakMap<ReactiveSignal | ReactiveGetter | ReactiveModel | ReactiveEffect, WatchTarget> = new WeakMap()
 
-export function isWatched(target: ReactiveSignal | ReactiveGetter | ReactiveModel | ReactiveEffect) {
-    return watchTargetMap.get(target);
+export function isWatched(target: ReactiveSignal | ReactiveGetter | ReactiveModel | ReactiveEffect | null | undefined) {
+    if (!target) return false;
+    return Boolean(watchTargetMap.get(target));
 }
 
 export function asWatchTarget(target: ReactiveSignal | ReactiveGetter | ReactiveModel | ReactiveEffect): WatchTarget {

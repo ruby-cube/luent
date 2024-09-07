@@ -29,8 +29,6 @@ export class ReactiveDerivation<T extends DerivedSignal | ReactiveEffect = Deriv
         }
     }
 
-    storeInitialValue() { } // override by derived signal
-
     dependencies: ReactivePrimitive[] = []
     atoms: ReactiveAtom[] = []
 

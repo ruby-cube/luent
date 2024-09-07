@@ -44,14 +44,6 @@ class DerivedSignalState<T extends DerivedSignal = DerivedSignal> extends Reacti
     updateValue(value: any) {
         this.value = value;
     }
-
-    override storeInitialValue(): void {
-        const $signal = this.o
-        if (isWatched($signal)) {
-            const updateCycle = useUpdateCycle()
-            updateCycle.storeInitialValue($signal, getWithoutTracking($signal)) //QUESTION: I don't know if getWithoutTracking is necessary here
-        }
-    }
 }
 
 

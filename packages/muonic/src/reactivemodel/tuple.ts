@@ -9,6 +9,6 @@ export function tuple<T extends [any] | any[]>(value: T): T {
     return value;
 }
 
-export function isTuple<T extends object>(value: T): value is T {
+export function isTuple<T extends object>(value: T) {
     return allTuples.has(value);
 }

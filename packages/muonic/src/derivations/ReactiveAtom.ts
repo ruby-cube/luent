@@ -22,17 +22,12 @@ export class ReactiveAtom {
             derivation.trigger();
         }
     }
-
-    storeInitialDerivedValues(){
-        for (const derivation of this.derivations){
-            derivation.storeInitialValue()
-        }
-    }
 }
 
 const reactiveAtomMap: WeakMap<ReactivePrimitive, ReactiveAtom> = new WeakMap()
 
-export function isReactiveAtom(primitive: ReactivePrimitive) {
+export function isReactiveAtom(primitive: ReactivePrimitive | null | undefined) {
+    if (!primitive) return false;
     return Boolean(reactiveAtomMap.get(primitive));
 }
 

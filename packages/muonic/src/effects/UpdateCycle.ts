@@ -114,34 +114,16 @@ export class UpdateCycle {
     }
 
 
-    // INITIAL VALUES
-
-    initialValues: Map<ReactiveTarget, any> = new Map();
-
-    storeInitialValue(target: ReactiveTarget, value: any) {
-        const intialValue = this.getInitialValue(target);
-        if (intialValue !== UNDEFINED) return; // initial value already stored
-        this.initialValues.set(target, value);
-    }
-
-    getInitialValue(target: ReactiveTarget) {
-        if (!this.initialValues.has(target)) return UNDEFINED;
-        return this.initialValues.get(target);
-    }
-
     // EFFECTS
 
     effects: SetMap<Phase, Effect> = new SetMap();
     reactiveEffects: SetMap<Phase, Effect> = new SetMap();
-
-    targetMap: SetMap<Effect, ReactiveTarget> = new SetMap();
 
     scheduleEffect(target: ReactiveTarget, effect: Effect, phase: Phase) {
         if (target === unwrap(effect)) {
             this.reactiveEffects.addToSet(effect, phase)
         }
         else {
-            this.targetMap.addToSet(target, effect)
             this.effects.addToSet(effect, phase)
         }
     }
@@ -150,16 +132,7 @@ export class UpdateCycle {
         const effects = this.effects.get(phase);
         if (effects) {
             for (const effect of effects) {
-                const targets = this.targetMap.get(effect);
-                if (targets) {
-                    for (const target of targets) {
-                        const oldValue = this.getInitialValue(target);
-                        const newValue = getCurrentValue(target);
-                        if (!areEqual(newValue, oldValue)) {
-                            runEffect(effect, [newValue, oldValue])
-                        }
-                    }
-                }
+                runEffect(effect)
             }
         }
         const reactiveEffects = this.reactiveEffects.get(phase)
@@ -195,14 +168,14 @@ export class UpdateCycle {
     }
 }
 
-function getCurrentValue(target: ReactiveTarget) {
-    if (target instanceof Function) {
-        return target()
-    }
-    else if (isReactiveModel(target)) {
-        return target;
-    }
-}
+// function getCurrentValue(target: ReactiveTarget) {
+//     if (target instanceof Function) {
+//         return target()
+//     }
+//     else if (isReactiveModel(target)) {
+//         return target;
+//     }
+// }
 
 
 

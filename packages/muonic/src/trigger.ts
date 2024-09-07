@@ -4,42 +4,27 @@ import { asReactiveAtom, isReactiveAtom } from "./derivations/ReactiveAtom";
 import { AnyObject } from "@rue/types";
 import { MutationRecord } from "./effects/deepWatch";
 import { ReactivePrimitive } from "./derivations/DependencyTracker";
-import { runTriggerDebugger } from "./effects/debug";
 import { ReactiveModel, toRaw } from "./reactivemodel/Reactive$";
-import { TrackableOp } from "./reactivemodel/TrackableOp";
+import { Signal } from "./$Signal";
 import { ReactiveProp } from "./reactivemodel/ReactiveProp";
 
 
-
-
-
-
-export function triggerReactivePrimitive(target: ReactivePrimitive, newValue: any, oldValue: any) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol
-    if (__DEV__) {
-        runTriggerDebugger(target)
-    }
-
-    // const updateCycle = useUpdateCycle()
-    
+export function trigger(target: Signal | ReactiveProp) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol
     if (isWatched(target)) {
-        const watchTarget = asWatchTarget(target);
-        // updateCycle.storeInitialValue(target, oldValue)
-        watchTarget.triggerEffects(newValue, oldValue)
+        asWatchTarget(target).triggerEffects()
     }
-    
+    triggerReactiveAtom(target)
+}
+
+export function triggerReactiveAtom(target: ReactivePrimitive) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol
     if (isReactiveAtom(target)) {
-        const atom = asReactiveAtom(target);
-        atom.triggerDerivations()
+        asReactiveAtom(target).triggerDerivations()
     }
 }
 
-export function triggerReactiveModel(reactive: ReactiveModel, op: MutationRecord, clone?: AnyObject) {
-    if (isWatched(reactive)) {
-        const updateCycle = useUpdateCycle();
-        const snapshot = updateCycle.takeSnapshot(reactive, toRaw(reactive), clone)
-        updateCycle.storeInitialValue(reactive, snapshot)
-        updateCycle.recordOp(reactive, op)
-        const watchTarget = asWatchTarget(reactive);
-        watchTarget.triggerEffects()
-    }
+export function triggerReactiveModel(reactive: ReactiveModel) {
+    asWatchTarget(reactive).triggerEffects()
 }
+
+
+

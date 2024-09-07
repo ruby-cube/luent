@@ -1,17 +1,18 @@
 import { AnyObject } from "@rue/types";
 import { emitSignal } from "../hasReactivity_DEV";
-import { isPlainObject, KeyPath, Ref, isMutatingMapMethod, isMutatingSetMethod, isMutatingArrayMethod, inheritsFrom } from "@rue/utils";
+import { isPlainObject, KeyPath, Ref, isMutatingMapMethod, isMutatingSetMethod, isMutatingArrayMethod, inheritsFrom, UNDEFINED } from "@rue/utils";
 import { isTuple, tuple } from "./tuple";
 import { asReactiveProp, getReactiveProp, ReactiveProp } from "./ReactiveProp";
 import { shallowClone } from "./SnapshotManager";
 import { asTrackableOp, getTrackableOp, TrackableOp } from "./TrackableOp";
 import { getRootWatchedModelAndKeyPath, isNestedWatched } from "../effects/deepWatch";
-import { triggerReactiveModel, triggerReactivePrimitive } from "../trigger";
+import { trigger, triggerReactiveAtom, triggerReactiveModel, triggerReactivePrimitive } from "../trigger";
 import { isWatched } from "../effects/watch";
 import { asReactiveAtom, isReactiveAtom } from "../derivations/ReactiveAtom";
 import { isDerivedSignal } from "../derivations/DerivedSignal";
 import { getWithoutTracking, track } from "../derivations/DependencyTracker";
 import { useUpdateCycle } from "../effects/UpdateCycle";
+import { MutationRecord } from "../effects/deepWatch";
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T
 export enum ReactiveModelDepth {
@@ -20,10 +21,6 @@ export enum ReactiveModelDepth {
 }
 
 type RegisterReactive = (reactive: ReactiveModel, target: AnyObject, deep: boolean | undefined) => void
-// type RegisterReactive = {
-//     register: RegisterReactive,
-//     mutationPermitted: boolean
-// }
 
 export type Readonly<T extends AnyObject = AnyObject> = {
     readonly [K in keyof T]: T[K]
@@ -32,26 +29,16 @@ export type Readonly<T extends AnyObject = AnyObject> = {
 const reactiveMap: WeakMap<ReactiveModel, AnyObject> = new WeakMap();
 const deepReactives: WeakSet<ReactiveModel> = new WeakSet();
 const DEEP = true;
-const O$DEPTH = 1;
-const O$$$DEPTH = 3;
 
 function register(reactive: ReactiveModel, target: AnyObject, deep: boolean | undefined) {
-    // localReactives.add(reactive);
     reactiveMap.set(reactive, target);
     if (deep) deepReactives.add(reactive)
 }
-
 
 export function isDeepReactive(value: any): value is ReactiveModel {
     return deepReactives.has(value);
 }
 
-// export function useReactiveModels(config?: { snapshots: boolean }) {
-// const localReactives: WeakSet<ReactiveModel> = new WeakSet();
-// const register = {
-//     ,
-//     mutationPermitted: false,
-// }
 
 function _o$<T extends AnyObject>(target: T, deep?: boolean): T {
     if (reactiveMap.has(target)) return target; // prevents double wrapped reactive
@@ -82,15 +69,16 @@ export function Reactive$<T extends AnyObject>(target: T): ReactiveModel<T> {
 // }
 // }
 // }
-function storeInitialValues(target: ReactiveProp | TrackableOp){
-    if (isReactiveAtom(target)) {
-        const atom = asReactiveAtom(target);
-        atom.storeInitialDerivedValues()
+
+
+function storeSnapshot(reactive: ReactiveModel, op: MutationRecord, clone?: AnyObject) {
+    const updateCycle = useUpdateCycle();
+    const target = toRaw(reactive)
+    let snapshot = updateCycle.getSnapshot(reactive)
+    if (!snapshot) {
+        snapshot = updateCycle.takeSnapshot(reactive, target, clone || shallowClone(target))
     }
-}
-
-function storeSnapshot(){
-
+    updateCycle.recordOp(reactive, op)
 }
 
 export function isReactiveModel(obj: AnyObject): obj is ReactiveModel {
@@ -164,8 +152,8 @@ function maybeReactivize(
 ) {
     if (reactiveMap.has(newValue)) return newValue;
     const reactiveDepth = shouldReactivize(reactive, oldValue, newValue);
-    return reactiveDepth === O$$$DEPTH ? createReactive(newValue, register, DEEP)
-        : reactiveDepth === O$DEPTH ? createReactive(newValue, register)
+    return reactiveDepth === ReactiveModelDepth.DEEP ? createReactive(newValue, register, DEEP)
+        : reactiveDepth === ReactiveModelDepth.SHALLOW ? createReactive(newValue, register)
             : newValue;
 }
 
@@ -200,10 +188,10 @@ function shouldReactivize(
     target: ReactiveModel,
     prevValue: any,
     newValue: any,
-): 1 | 3 | false {
+): ReactiveModelDepth | false {
     if (!(newValue instanceof Object)) return false;
-    if (deepReactives.has(target)) return O$$$DEPTH;
-    if (reactiveMap.has(prevValue)) return O$DEPTH;
+    if (deepReactives.has(target)) return ReactiveModelDepth.DEEP;
+    if (reactiveMap.has(prevValue)) return ReactiveModelDepth.SHALLOW;
     return false;
 }
 
@@ -496,7 +484,120 @@ function reactiveArrayGetter(
 
 
 function reactiveSetter(
-    DataStructure: typeof Array | typeof Object | typeof Set | typeof Map,
+    DataStructure: typeof Array | typeof Object | typeof Map, // and Tuple
+    reactiveRef: Ref<ReactiveModel>,
+    register: RegisterReactive,
+    target: AnyObject,
+    key: string | symbol,
+    newValue: any,
+    receiver: AnyObject
+) {
+    const reactive = reactiveRef.o!
+    const prop = getReactiveProp(reactive, key);
+    if (!prop) {
+        if (__DEV__) console.warn(`I'm curious if this is even possible--Setting a prop that is not a reactive prop`)
+        Reflect.set(target, key, newValue, receiver); //QUESTION: Do I need to pass the newValue through 'maybeReactivize"?
+        return true;
+    }
+
+    const oldValue = Reflect.get(target, key, receiver);
+    if (oldValue === newValue
+        || isNonTrackable(key, DataStructure)
+        || isNonSettable(<string>key, DataStructure)
+        || !isWritable(target, key)) { //QUESTION: Are these conditions redundant?
+        Reflect.set(target, key, newValue, receiver);
+        return true;
+    }
+
+    const _newValue = maybeReactivize(newValue, reactive, oldValue, register)
+    const conditions: [boolean, boolean] = [
+        isWatched(reactive),
+        isNestedWatched(reactive)
+    ]
+
+    // (1) Store initial values
+    takeSnapshots(
+        reactive,
+        key,
+        _newValue,
+        oldValue,
+        ...conditions
+    )
+
+    // (2) Set prop
+    Reflect.set(target, key, _newValue, receiver);
+
+
+    // (3) Trigger effects and derivations
+    triggerEffectsAndDerivations(
+        reactive,
+        prop,
+        ...conditions
+    )
+
+    return true;
+}
+
+function takeSnapshots(
+    reactive: ReactiveModel,
+    key: string | symbol,
+    newValue: any,
+    oldValue: any,
+    isWatchedReactive: boolean,
+    isNestedWatched: boolean,
+) {
+
+    if (isWatchedReactive) {
+        const updateCycle = useUpdateCycle()
+        storeSnapshot(reactive, {
+            target: reactive,
+            op: {
+                type: '[[set]]',
+                key,
+                newValue: newValue,
+                oldValue
+            }
+        })
+    }
+
+    if (isNestedWatched) {
+        const [rootWatchedModel, keyPath] = getRootWatchedModelAndKeyPath(reactive)
+        storeSnapshot(rootWatchedModel, {
+            target: reactive,
+            targetPath: keyPath,
+            op: {
+                type: '[[set]]',
+                key,
+                newValue: newValue,
+                oldValue
+            }
+        })
+    }
+}
+
+
+function triggerEffectsAndDerivations(
+    reactive: ReactiveModel,
+    prop: ReactiveProp | null,
+    isWatchedReactive: boolean,
+    isNestedWatched: boolean,
+) {
+    if (prop) {
+        trigger(prop)
+    }
+
+    if (isWatchedReactive) {
+        triggerReactiveModel(reactive)
+    }
+
+    if (isNestedWatched) {
+        const [rootWatchedModel] = getRootWatchedModelAndKeyPath(reactive)
+        triggerReactiveModel(rootWatchedModel)
+    }
+}
+
+
+function reactiveArraySetter(
     reactiveRef: Ref<ReactiveModel>,
     register: RegisterReactive,
     target: AnyObject,
@@ -513,83 +614,60 @@ function reactiveSetter(
         return true;
     }
     const oldValue = Reflect.get(target, key, receiver);
-    if (oldValue === newValue || isNonTrackable(key, DataStructure) || isNonSettable(<string>key, DataStructure)) {
+    if (oldValue === newValue || isNonTrackable(key, Array)) {
         Reflect.set(target, key, newValue, receiver);
         return true;
     }
+
     const _newValue = maybeReactivize(newValue, reactive, oldValue, register)
+    const conditions: [boolean, boolean] = [
+        isWatched(reactive),
+        isNestedWatched(reactive)
+    ]
+
+    //(1) take snapshots if needed
+    takeSnapshots(
+        reactive,
+        key,
+        _newValue,
+        oldValue,
+        ...conditions
+    )
+
+    //(2) set prop
+    Reflect.set(target, key, _newValue, receiver);
 
 
-
-    if (prop) {
-        triggerReactivePrimitive(prop, _newValue, oldValue)
-    }
+    // (3) Trigger effects and derivations
+    triggerEffectsAndDerivations(
+        reactive,
+        prop,
+        ...conditions
+    )
 
     if (op) {
-        triggerReactivePrimitive(op, _newValue, oldValue)
+        triggerReactiveAtom(op)
     }
 
-    if (target instanceof Array) {
-        if (key === 'length') {
-            const newLength = _newValue > -1 ? _newValue < target.length ? _newValue : target.length : 0;
-            let i = target.length;
-            while (i > newLength) {
-                i--;
-                const prop = getReactiveProp(reactive, i.toString())
-                if (prop) {
-                    const item = target[i];
-                    triggerReactivePrimitive(prop, undefined, item)
-                }
-                const op = getTrackableOp(reactive, 'at', i.toString())
-                if (op) {
-                    const item = target[i];
-                    triggerReactivePrimitive(op, undefined, item);
-                }
+    if (key === 'length') {
+        const newLength = _newValue > -1 ? _newValue < target.length ? _newValue : target.length : 0;
+        let i = target.length;
+        while (i > newLength) {
+            i--;
+            const prop = getReactiveProp(reactive, i.toString())
+            if (prop) {
+                trigger(prop)
             }
-        }
-        else if (isIntegerKey(key)) {
-            const op = getTrackableOp(reactive, 'at', key)
+            const op = getTrackableOp(reactive, 'at', i.toString())
             if (op) {
-                const oldValue = target[parseInt(<string>key)]
-                triggerReactivePrimitive(op, _newValue, oldValue);
+                if (isReactiveAtom(op)) {
+                    triggerReactiveAtom(op)
+                }
             }
         }
+        // only need to trigger when truncating an array (when expanding an array, the expanded indices don't exist yet, and can't be tracked)
     }
 
-    if (isWatched(reactive)) {
-        const updateCycle = useUpdateCycle();
-        triggerReactiveModel(reactive, {
-            target: reactive,
-            op: {
-                type: '[[set]]',
-                key,
-                newValue: _newValue,
-                oldValue
-            }
-        },
-            updateCycle.getSnapshot(reactive) ?
-                undefined : shallowClone(target)
-        ) // only create clone if snapshot does not already exist
-    }
-    if (isNestedWatched(reactive)) {
-        const updateCycle = useUpdateCycle();
-        const [rootWatchedModel, keyPath] = getRootWatchedModelAndKeyPath(reactive)
-        triggerReactiveModel(rootWatchedModel, {
-            target: reactive,
-            targetPath: keyPath,
-            op: {
-                type: '[[set]]',
-                key,
-                newValue: _newValue,
-                oldValue
-            }
-        },
-            updateCycle.getSnapshot(rootWatchedModel) ?
-                undefined : shallowClone(toRaw(rootWatchedModel))
-        )
-    }
-
-    Reflect.set(target, key, _newValue, receiver);
     return true;
 }
 
@@ -599,12 +677,15 @@ export function isIntegerKey(key: unknown) {
     if (Number.isInteger(keyAsNumber)) return true
 }
 
+function isWritable(target: Object, key: PropertyKey) {
+    const descriptor = Reflect.getOwnPropertyDescriptor(target, key);
+    if (descriptor?.writable === false) return true;
+}
+
 // Because insertion of values don't yield differing new and old values for size and length in the setter,
 // we need to manually check old and new values at time of mutation
 function isNonSettable(key: string, DataStructure: typeof Array | typeof Object | typeof Set | typeof Map) {
-    if (DataStructure === Object) return false;
-    if (DataStructure === Array && key === 'length') return true;
-    if (key === 'size') return true;
+    if ((DataStructure === Set || DataStructure === Map) && key === 'size') return true;
     return false;
 }
 
@@ -735,24 +816,15 @@ function mutatingOp(
             }
 
             const hasOp = getTrackableOp(reactive, 'has', mapKey)
-            if (hasOp) triggerReactivePrimitive(hasOp, newValue, oldMapValue);
+            if (hasOp && isReactiveAtom(hasOp)) triggerReactiveAtom(hasOp);
             const getOp = getTrackableOp(reactive, 'get', mapKey)
-            if (getOp) triggerReactivePrimitive(getOp, newValue, oldMapValue);
+            if (getOp && isReactiveAtom(hasOp)) triggerReactiveAtom(getOp);
         }
     }
 
     const sizeKey = target instanceof Array ? 'length' : 'size';
     const sizeProp = getReactiveProp(reactive, sizeKey)
-    if (sizeProp && isReactiveAtom(sizeProp)) {
-        const atom = asReactiveAtom(sizeProp);
-        for (const derivation of atom.derivations) {
-            const derivedSignal = derivation.o;
-            if (isDerivedSignal(derivedSignal)) {
-                const updateCycle = useUpdateCycle()
-                updateCycle.storeInitialValue(derivedSignal, getWithoutTracking(derivedSignal)) // Order matters. This must be called before mutation occurs
-            }
-        }
-    }
+
     const oldSize = target[sizeKey];
     const output = fn.apply(target, _args);
     const newSize = target[sizeKey];
@@ -765,31 +837,31 @@ function mutatingOp(
     if (oldSize !== newSize) {
         hasMutated = true;
         if (sizeProp)
-            triggerReactivePrimitive(sizeProp, newSize, oldSize); // trigger for length/size change
+            trigger(sizeProp); // trigger for length/size change
 
         if (target instanceof Array && key === 'pop') {
             const prop = getReactiveProp(reactive, oldSize - 1)
             if (prop)
-                triggerReactivePrimitive(prop, undefined, lastItem);
+                trigger(prop);
             const op = getTrackableOp(reactive, 'at', oldSize - 1)
             if (op)
-                triggerReactivePrimitive(op, undefined, lastItem);
+                triggerReactiveAtom(op);
         }
         else if (target instanceof Set && key === 'add') {
             const item = _args[0]
             const op = getTrackableOp(reactive, 'has', item)
             if (op)
-                triggerReactivePrimitive(op, true, false)
+                triggerReactiveAtom(op)
         }
         else if ((target instanceof Set || target instanceof Map) && key === 'delete') {
             const item = _args[0]
             const op = getTrackableOp(reactive, 'has', item)
             if (op)
-                triggerReactivePrimitive(op, false, true)
+                triggerReactiveAtom(op)
             if (target instanceof Map) {
                 const op = getTrackableOp(reactive, 'get', item)
                 if (op)
-                    triggerReactivePrimitive(op, undefined, oldMapValue)
+                    triggerReactiveAtom(op)
             }
         }
         else if ((target instanceof Set || target instanceof Map) && key === 'clear') {
@@ -797,11 +869,11 @@ function mutatingOp(
                 const item = target instanceof Set ? entry : entry[0]
                 const op = getTrackableOp(reactive, 'has', item)
                 if (op)
-                    triggerReactivePrimitive(op, false, true)
+                    triggerReactiveAtom(op)
                 if (target instanceof Map) {
                     const op = getTrackableOp(reactive, 'get', item)
                     if (op)
-                        triggerReactivePrimitive(op, undefined, oldMapValue)
+                        triggerReactiveAtom(op)
                 }
             }
         }

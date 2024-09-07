@@ -5,12 +5,13 @@ import { ReactiveModel } from "../reactivemodel/Reactive$";
 import { DerivedSignal, isDerivedSignal } from "../derivations/DerivedSignal";
 import { ReactiveEffect, runEffect } from "./watch";
 import { getDependencyTracker } from "../derivations/DependencyTracker";
+import { ReactiveProp } from "../reactivemodel/ReactiveProp";
 
 
 export type Effect = (...args: any[]) => void;
 export type ReactiveGetter = () => any
 
-export class WatchTarget<T extends ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveGetter = ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveGetter> {
+export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveGetter = ReactiveProp | ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveGetter> {
 
     constructor(public target: T) { }
 
@@ -45,10 +46,10 @@ export class WatchTarget<T extends ReactiveAtom | ReactiveModel | DerivedSignal 
         this.effects.removeFromSet(effect, phase)
     }
 
-    triggerEffects(...args: any[]) {
+    triggerEffects() {
         for (const [phase, effects] of this.effects) {
             if (phase === 'sync') {
-                this.runSyncEffects(effects, args);
+                this.runSyncEffects(effects);
             }
             else {
                 this.scheduleEffects(effects, phase)
@@ -56,11 +57,11 @@ export class WatchTarget<T extends ReactiveAtom | ReactiveModel | DerivedSignal 
         }
     }
 
-    runSyncEffects(effects: Set<Effect>, args: any[]) {
+    runSyncEffects(effects: Set<Effect>) {
         const tracker = getDependencyTracker();
         tracker?.stop(); // in case reactive refs are triggered during a reactiveEffect
         for (const effect of effects) {
-            runEffect(effect, args)
+            runEffect(effect)
         }
         tracker?.restore();
     }

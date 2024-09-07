@@ -9,8 +9,9 @@ import { ReactiveModel, toRaw } from "./Reactive$";
 const trackableOpMap: WeakMap<ReactiveModel, Map<any, OpMap>> = new WeakMap();
 
 type OpMap = Map<string, _TrackableOp>
+type OpName = string
 
-export type TrackableOp = [ReactiveModel, any, string]
+export type TrackableOp = [ReactiveModel, any, OpName]
 
 class _TrackableOp extends Array {
     constructor(
