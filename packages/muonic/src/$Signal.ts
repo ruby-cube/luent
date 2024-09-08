@@ -18,7 +18,6 @@ export const SIGNAL_MARKER = 'x__isAtomicSignal';
 
 
 export function $Signal<T>(value: T): AtomicSignal<T> {
-    let prevValue = value;
     let _value: T = value;
     function $signal() {
         if (__DEV__) emitSignal();
@@ -42,16 +41,16 @@ export function $Signal<T>(value: T): AtomicSignal<T> {
 
     function setTo(newValue: T) {
         if (_value === newValue) return _value;
-        return setValueAndTrigger(newValue);
+        return setValue(newValue);
     }
 
     function setFrom(toNewValue: (value: T) => T) {
         const newValue = toNewValue(_value)
         if (_value === newValue) return _value;
-        return setValueAndTrigger(newValue);
+        return setValue(newValue);
     }
 
-    function setValueAndTrigger(newValue: T) {
+    function setValue(newValue: T) {
         const _newValue = maybeReactivizeValue(newValue, $signal)
         _value = _newValue;
         trigger($signal);

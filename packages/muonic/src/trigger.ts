@@ -18,6 +18,7 @@ export function trigger(target: AtomicSignal | ReactiveProp) { //TODO: what happ
 
 export function triggerReactiveAtom(target: ReactivePrimitive) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol
     if (isReactiveAtom(target)) {
+        console.log("trigger", target)
         asReactiveAtom(target).triggerDerivations()
     }
 }

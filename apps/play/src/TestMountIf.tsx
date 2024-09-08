@@ -41,7 +41,7 @@ export function MountIf() {
                 )
             ]}
             {/* <div>Both: {$activeAndReady}</div> */}
-            <button onclick={toggleActive}>toggle active {$active}</button>
+            <button onclick={toggleActive}>toggle active</button>
             {/* <button onclick={toggleReady}>toggle ready {$ready}</button> */}
             {/* <div>{$sum}</div>
             <button onclick={increment}>increment {$count}</button>

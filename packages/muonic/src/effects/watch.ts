@@ -6,7 +6,7 @@ import { ReactiveDerivation } from "../derivations/ReactiveDerivation";
 import { Phase, useUpdateCycle } from "./UpdateCycle";
 import { WatchDebugOptions } from "./debug";
 import { $, DERIVED_SIGNAL, isDerivedSignal, isSignal, ReactiveSignal } from "../derivations/DerivedSignal";
-import { isIntegerKey, isReactiveModel, ReactiveModel, toWatchedProp } from "../reactivemodel/Reactive$";
+import { isIntegerKey, isReactiveModel, ReactiveModel, toRaw, toWatchedProp } from "../reactivemodel/Reactive$";
 import { AS_DERIVATION, createReactiveEffect } from "../derivations/ReactiveEffect";
 import { getWithoutTracking } from "../derivations/DependencyTracker";
 import { asReactiveProp } from "../reactivemodel/ReactiveProp";
@@ -84,7 +84,9 @@ export function watch<T>(target: ReactiveGetter | ReactiveSignal<T> | ReactiveMo
 
     const _target = keys instanceof Array ? toDerivedSignal(target, keys) : key ? toWatchedProp(target, key) : target;
 
+    let isReactiveGetter = false;
     if (_target instanceof Function && !isSignal(_target)) {
+        isReactiveGetter = true;
         trackReactiveGetter(_target);
     }
     else if (noKeys && deep && isReactiveModel(_target)) { //TODO: deep watch for $$ and $$$ signals?
@@ -95,7 +97,8 @@ export function watch<T>(target: ReactiveGetter | ReactiveSignal<T> | ReactiveMo
     let oldValue = getValue(_target, key) //TODO: Snapshot or MutationRecord for reactivemodels?
 
     function _effect() {
-        const newValue = getValue(_target, key)
+        console.log("running effect")
+        const newValue = getValue(_target, key) // This is when retracking happens
         if (areEqual(newValue, oldValue)) return;
         effect(newValue, oldValue)
         oldValue = newValue;
@@ -110,13 +113,17 @@ export function watch<T>(target: ReactiveGetter | ReactiveSignal<T> | ReactiveMo
 
     const watcher = $listen(_effect, _options || {}, {
         enroll(_effect) {
+            console.log("enrolling")
             if (forNextCycle) watchTarget.queueForNextCycle(_effect, phase)
             else watchTarget.queueEffect(_effect, phase)
         },
         remove(_effect) {
+            console.log("removing effect for", toRaw(target))
             watchTarget.removeEffect(_effect, phase)
-            if (AS_DERIVATION in _target) _target[AS_DERIVATION].untrackDependencies()
             unwatch(watchTarget)
+            if (isReactiveGetter) {
+                if (AS_DERIVATION in _target) _target[AS_DERIVATION].untrackDependencies()
+            }
             watchTarget.emitUnwatched()
         }
     });

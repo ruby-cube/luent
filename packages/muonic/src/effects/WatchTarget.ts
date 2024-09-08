@@ -25,10 +25,12 @@ export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel |
 
     queueForNextCycle(effect: Effect, phase: Phase) {
         if (!this.nextCycleEffects) this.initializeNextCycleEffects()
-        const toBeQueued = this.nextCycleEffects?.get(phase);
-        const mustSetUpQueueTransfer = toBeQueued?.size === 0;
         this.nextCycleEffects!.addToSet(effect, phase)
         this.watchCount++;
+        console.log("queing for next cycle, watchcount", this.watchCount)
+        const toBeQueued = this.nextCycleEffects?.get(phase);
+        if (!toBeQueued) return;
+        const mustSetUpQueueTransfer = toBeQueued.size > 0;
 
         if (mustSetUpQueueTransfer) {
             onPhaseCompleted(phase, () => {
@@ -77,16 +79,16 @@ export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel |
         }
     }
 
-    private cleanUp?: ()=>void
+    private cleanUp?: () => void
 
-    onUnwatched(cleanUp: ()=>void){
+    onUnwatched(cleanUp: () => void) {
         if (__DEV__ && this.cleanUp) {
             console.error('Overriding existing cleanup function. This means we need an array for onUnwatched tasks')
         }
         this.cleanUp = cleanUp;
     }
 
-    emitUnwatched(){
+    emitUnwatched() {
         this.cleanUp?.()
     }
 }

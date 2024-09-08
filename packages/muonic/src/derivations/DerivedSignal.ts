@@ -4,6 +4,7 @@ import { useUpdateCycle } from "../effects/UpdateCycle";
 import { isWatched } from "../effects/watch";
 import { getDependencyTracker, getWithoutTracking } from "./DependencyTracker";
 import { ReactiveDerivation } from "./ReactiveDerivation";
+import { AS_DERIVATION } from "./ReactiveEffect";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -17,7 +18,9 @@ export const DERIVED_SIGNAL = Symbol('derived signal')
 
 export type DerivedSignal<T = any> = {
     (): T
-    [DERIVED_SIGNAL]: DerivedSignalState
+    [DERIVED_SIGNAL]: true
+    [AS_DERIVATION]: DerivedSignalState
+    destroy: ()=>void
 }
 
 export type ReactiveSignal<T = any> = DerivedSignal<T> | AtomicSignal<T>;
@@ -50,7 +53,6 @@ class DerivedSignalState<T extends DerivedSignal = DerivedSignal> extends Reacti
 export function $<T extends any>(pureGetter: () => T, retrack: boolean = false): DerivedSignal<T> {
     let initialized = false;
     const signal = new DerivedSignalState(<DerivedSignal><unknown>$derivedSignal, retrack);
-    (<DerivedSignal><unknown>$derivedSignal)[DERIVED_SIGNAL] = signal;
     function $derivedSignal() {
         if (!initialized || signal.dirty && retrack) {
             const value = signal.trackDependencies(pureGetter);
@@ -72,6 +74,9 @@ export function $<T extends any>(pureGetter: () => T, retrack: boolean = false):
         signal.forwardDependencies(signal.dependencies)
 
         return signal.value; // memoized value
+    }
+    $derivedSignal.destroy = ()=>{
+        signal.untrackDependencies()
     }
 
     return <DerivedSignal><unknown>$derivedSignal;

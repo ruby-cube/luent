@@ -73,7 +73,6 @@ export class ReactiveDerivation {
     untrackDependencies(){
         this.resetAtoms();
         this.dependencies.length = 0;
-        
     }
 }
 
