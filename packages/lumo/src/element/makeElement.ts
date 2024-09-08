@@ -153,28 +153,13 @@ function toString(value: any) {
 }
 
 
-function setUpEvents(node: Element, events: { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] }) {
+function setUpEvents(node: Element, events: { [key: string]: EventListener[] }) {
     for (const key in events) {
         const handlers = normalizeToArray(events[key]);
         const event = useEventTick(node, key, runPrerenderEffectsAndTasks);
         event.updateHandlers(() => {
             for (const handler of handlers) {
-                if (isSignal(handler)) {
-                    let listener: ActiveListener;
-                    watchForRender(handler, (newValue) => {
-                        event.updateHandlers(() => {
-                            if (listener) {
-                                listener.stop();
-                            }
-                            if (newValue) {
-                                listener = event.attachHandler(newValue, newValue.options || {__devName: setUpEvents.name});
-                            }
-                        })
-                    }, { eager: true })
-                }
-                else {
-                    event.attachHandler(handler, handler.options || {__devName: setUpEvents.name})
-                }
+                event.attachHandler(handler, handler.options || { __devName: setUpEvents.name })
             }
         })
     }

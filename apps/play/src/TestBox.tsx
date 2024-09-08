@@ -1,5 +1,5 @@
 import { $Node, mx } from "@rue/lumo";
-import {  $, initializeReactiveEffect, DeepReactive$, $Signal } from "@rue/muonic";
+import {  $, $initializeEffect, DeepReactive$, $Signal } from "@rue/muonic";
 
 
 //tests:
@@ -26,12 +26,12 @@ export function TestBox() {
 
     const $div = $Node()
     const $anotherCount = $(() => $count())
-    initializeReactiveEffect(() => {
+    $initializeEffect(() => {
         $anotherCount()
     })
 
     // beforeMount(()=>{
-    //     initializeReactiveEffect(() => {
+    //     $initializeEffect(() => {
     //         divRef.o.style.transform = `translate(${box$.position.x}px)`
     //         console.log("running effect!!!", divRef.o.style.transform)
     //     }, {phase: 'render'})

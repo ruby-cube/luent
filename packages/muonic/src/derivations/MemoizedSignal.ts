@@ -1,4 +1,3 @@
-import { sign } from "crypto";
 import { isAtomicSignal, AtomicSignal, SIGNAL_MARKER } from "../$Signal";
 import { READONLY_SIGNAL } from "../asReadonly";
 import { useUpdateCycle } from "../effects/UpdateCycle";
@@ -54,9 +53,7 @@ export function $<T extends any>(pureGetter: () => T, retrack: boolean = false):
     let initialized = false;
     const signal = new DerivedSignalState(<DerivedSignal><unknown>$derivedSignal, retrack);
     function $derivedSignal() {
-        console.log("dirty", signal.dirty)
         if (!initialized || signal.dirty && retrack) {
-            console.log("retracking...", pureGetter)
             const value = signal.trackDependencies(pureGetter);
             signal.forwardDependencies(signal.dependencies)
             signal.updateValue(value)
@@ -77,7 +74,6 @@ export function $<T extends any>(pureGetter: () => T, retrack: boolean = false):
 
         return signal.value; // memoized value
     }
-    $derivedSignal[DERIVED_SIGNAL] = true;
     $derivedSignal.destroy = ()=>{
         signal.untrackDependencies()
     }

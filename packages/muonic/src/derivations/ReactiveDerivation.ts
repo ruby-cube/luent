@@ -1,12 +1,10 @@
 import { DependencyTracker, getDependencyTracker, getWithoutTracking, ReactivePrimitive } from "./DependencyTracker";
 import { asReactiveAtom, ReactiveAtom } from "./ReactiveAtom";
 import { asWatchTarget, isWatched, ReactiveEffect } from "../effects/watch";
-import { DerivedSignal, isDerivedSignal } from "./DerivedSignal";
-import { AS_DERIVATION } from "./ReactiveEffect";
-import { ReactiveGetter } from "./ReactiveGetter";
 import { AnyObject } from "@rue/types";
 
 
+export const AS_DERIVATION = 'x__asDerivation'
 
 export class ReactiveDerivation {
 
@@ -28,6 +26,7 @@ export class ReactiveDerivation {
         // @ts-expect-error readonly
         this.dirty = true;
         const reactiveEntity = this.o;
+        console.log("triggered", reactiveEntity, isWatched(reactiveEntity))
         if (isWatched(reactiveEntity)) {
             asWatchTarget(reactiveEntity).triggerEffects();
         }
@@ -40,6 +39,7 @@ export class ReactiveDerivation {
         const tracker = new DependencyTracker();
         const [_, value] = tracker.callToCollectDependencies(reactiveDerivation);
         const deps = this.dependencies = tracker.dependencies;
+        console.log("deps", deps)
         this.initializeAtoms(deps)
 
         return value;

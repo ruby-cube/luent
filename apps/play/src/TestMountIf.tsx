@@ -1,5 +1,5 @@
 import { create_if, else_create, else_mount, mount_if, mx } from "@rue/lumo";
-import { $, $Signal } from "@rue/muonic";
+import { $, $Signal, isSignal } from "@rue/muonic";
 
 export function MountIf() {
     const $count = $Signal(0)
@@ -31,7 +31,7 @@ export function MountIf() {
     return mx(
         <>
             {[
-                create_if($active, () =>
+                create_if($activeAndReady, () =>
                     <>
                         <div>Hi</div>
                     </>
@@ -40,9 +40,9 @@ export function MountIf() {
                     <p>bye</p>
                 )
             ]}
-            {/* <div>Both: {$activeAndReady}</div> */}
-            <button onclick={toggleActive}>toggle active</button>
-            {/* <button onclick={toggleReady}>toggle ready {$ready}</button> */}
+            <div>Both: {$activeAndReady}</div>
+            <button onclick={toggleActive}>toggle active {$active}</button>
+            <button onclick={toggleReady}>toggle ready {$ready}</button>
             {/* <div>{$sum}</div>
             <button onclick={increment}>increment {$count}</button>
             <button onclick={increment2}>increment {$count2}</button> */}

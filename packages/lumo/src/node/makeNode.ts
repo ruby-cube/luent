@@ -25,7 +25,7 @@ export type RenderFunction<Params = unknown> = Params extends [] ?
 export type EventHandler<K extends keyof HTMLElementEventMap> = (event: HTMLElementEventMap[K]) => void
 
 export type EventsConfig = {
-    [K in keyof HTMLElementEventMap]?: EventHandler<K> | DerivedSignal<EventHandler<K>> | (EventHandler<K> | DerivedSignal<EventHandler<K>>)[]
+    [K in keyof HTMLElementEventMap]?: EventHandler<K> | EventHandler<K>[]
 }
 
 // export type AssignedAttributes = {

@@ -56,13 +56,13 @@ export class ConditionalSeries {
 
     genConditionsSignal() {
         const conditions = this.conditions
-        return $(() => {
+        return () => {
             const values: boolean[] = [];
             for (const $condition of conditions) {
                 values.push(Boolean($condition()));
             }
             return values;
-        }, true) // $(() => [$conditionA(), $conditionB(), ...])
+        } // $(() => [$conditionA(), $conditionB(), ...])
     } // must retrack in case any of its conditions require retracking
 }
 

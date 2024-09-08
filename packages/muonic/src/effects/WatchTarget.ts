@@ -6,12 +6,12 @@ import { DerivedSignal, isDerivedSignal } from "../derivations/DerivedSignal";
 import { ReactiveEffect, runEffect } from "./watch";
 import { getDependencyTracker } from "../derivations/DependencyTracker";
 import { ReactiveProp } from "../reactivemodel/ReactiveProp";
-import { ReactiveGetter } from "../derivations/ReactiveGetter";
+import { ReactiveFunction } from "../derivations/ReactiveFunction";
 
 
 export type Effect = (...args: any[]) => void;
 
-export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveGetter = ReactiveProp | ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveGetter> {
+export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveFunction = ReactiveProp | ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveFunction> {
 
     constructor(public target: T) { }
 
@@ -27,7 +27,6 @@ export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel |
         if (!this.nextCycleEffects) this.initializeNextCycleEffects()
         this.nextCycleEffects!.addToSet(effect, phase)
         this.watchCount++;
-        console.log("queing for next cycle, watchcount", this.watchCount)
         const toBeQueued = this.nextCycleEffects?.get(phase);
         if (!toBeQueued) return;
         const mustSetUpQueueTransfer = toBeQueued.size > 0;

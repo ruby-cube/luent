@@ -1,13 +1,19 @@
-import { beforeRender, ChangeHandler, isSignal, initializeReactiveEffect as _initializeReactiveEffect, onRendered, ReactiveSignal, shallowClone, watch as _watch, WatchOptions } from "@rue/muonic";
+import { beforeRender, ChangeHandler, isSignal, $initializeEffect as _$initializeEffect, onRendered, ReactiveSignal, shallowClone, watch as _watch, WatchOptions } from "@rue/muonic";
 import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
-import { getWithoutTracking, ReactiveModel } from "@rue/muonic";
+import { ReactiveModel } from "@rue/muonic";
 import { getCurrentComponent, popComponent, pushComponent } from "../component/componentStack";
 import { DynamicNode, getActiveDynamicNode, isMountPhase } from "../dynamic/DynamicNode";
-import { ActiveListener } from "@rue/flask";
+import { ActiveListener, ListenerOptions } from "@rue/flask";
 import { onActivated, onDeactivate, onDestroy } from "../dynamic/lifecycle";
 import { noop } from "@rue/utils";
+
+type WatchForRenderOptions = {
+    deep?: boolean;
+    eager?: true;
+    retrack?: boolean;
+} & ListenerOptions
 
 
 export function initializeRender(effect: () => void) {
@@ -28,17 +34,18 @@ function _initializeRender(effect: () => void) {
         effect();
         setUpUpdateHooks(component)
     }
-    return _initializeReactiveEffect(_handler, {
+    return _$initializeEffect(_handler, {
         phase: 'render',
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
-export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: { once?: true, eager?: true, __devName?: string }) {
+export function watchForRender<T>(target: () => any | ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchForRenderOptions) {
     // const component = getCurrentComponent<InternalComponent>();
     // if (!component) throw Error("watchForRender must be called within component setup")
 
     const dynamicNode = getActiveDynamicNode()
     if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
+
 
     if (dynamicNode.preserve)
         return watchAndPreserve(target, handler, { phase: 'render', ...options || {} })
@@ -46,18 +53,13 @@ export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T ex
     return _watchForRender(target, handler, options)
 }
 
-function _watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: { once?: true, eager?: true , __devName?: string}) {
+function _watchForRender<T>(target: () => any | ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchForRenderOptions) {
     // const component = getCurrentComponent<InternalComponent>()!;
     // const _handler = (newValue: any, oldValue: any) => {
-        // handler(newValue, oldValue);
-        // setUpUpdateHooks(component)
+    // handler(newValue, oldValue);
+    // setUpUpdateHooks(component)
     // }
-    return _watch(target, handler, {
-        once: options?.once,
-        eager: options?.eager,
-        phase: 'render',
-        __devName: options?.__devName
-    }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
+    return _watch(target, handler, { phase: 'render', ...options || {} }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
 export function setUpUpdateHooks(component: InternalComponent) {
@@ -87,7 +89,7 @@ function bindWithComponent(fn: Function, component: InternalComponent) {
 function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveListener {
     const mountPhase = isMountPhase()
     const component = getComponent(_initializeAndPreserve.name)
-    const initializeFn = bindWithComponent(renderPhase ? _initializeRender : _initializeReactiveEffect, component);
+    const initializeFn = bindWithComponent(renderPhase ? _initializeRender : _$initializeEffect, component);
     const dynamicNode = getActiveDynamicNode()!
     const watcher = { stop: noop }
 
@@ -110,16 +112,16 @@ function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveL
     return watcher;
 }
 
-export function initializeReactiveEffect(effect: () => void) {
+export function $initializeEffect(effect: () => void) {
     const dynamicNode = getActiveDynamicNode()
     if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
 
     if (dynamicNode.preserve)
         return _initializeAndPreserve(effect)
-    return _initializeReactiveEffect(effect)
+    return _$initializeEffect(effect)
 }
 
-export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
+export function watch<T>(target: () => any | ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
     const dynamicNode = getActiveDynamicNode()
     if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
 
@@ -128,7 +130,7 @@ export function watch<T>(target: ReactiveSignal<T> | ReactiveModel<T extends Any
     return _watch(target, handler, options)
 }
 
-function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
+function watchAndPreserve<T>(target: () => any | ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
     const mountPhase = isMountPhase()
     // const component = getComponent(watchAndPreserve.name);
     const watchFn = options?.phase === 'render' ? _watchForRender : _watch

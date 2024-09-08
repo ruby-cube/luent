@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { emitSignal } from "../hasReactivity_DEV";
+import { emitSignal } from "../debug";
 import { isPlainObject, KeyPath, isMutatingMapMethod, isMutatingSetMethod, isMutatingArrayMethod, inheritsFrom, UNDEFINED } from "@rue/utils";
 import { isTuple, tuple } from "./tuple";
 import { asReactiveProp, getReactiveProp, ReactiveProp } from "./ReactiveProp";

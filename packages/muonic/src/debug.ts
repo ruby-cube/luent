@@ -1,20 +1,5 @@
 import { getWithoutTracking } from "./derivations/DependencyTracker";
 
-// export function useReactivity() {
-//     const r = useReactiveModels();
-//     const s = useSignals(r);
-
-
-//     return {
-//         $_o$$$: s.$$$,
-//         $_o$: s.$$,
-//         $: s.$,
-//         o$$$: r.o$$$,
-//         o$: r.o$,
-//         set: s.set,
-//         mu: r.mu,
-//     }
-// }
 
 let _isSignal = false;
 

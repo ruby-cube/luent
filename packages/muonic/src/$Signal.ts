@@ -1,4 +1,4 @@
-import { emitSignal } from "./hasReactivity_DEV";
+import { emitSignal } from "./debug";
 import { isDeepReactive, isReactiveModel, DeepReactive$, Reactive$, ReactiveModelDepth } from "./reactivemodel/Reactive$";
 import { track } from "./derivations/DependencyTracker";
 import { useUpdateCycle } from "./effects/UpdateCycle";

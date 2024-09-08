@@ -1,5 +1,5 @@
 export * from "./derivations/DerivedSignal" //TODO: limit exports to public api
-export * from "./hasReactivity_DEV" //TODO: limit exports to public api
+export * from "./debug" //TODO: limit exports to public api
 export * from "./reactivemodel/Reactive$" //TODO: limit exports to public api
 export * from "./$Signal" //TODO: limit exports to public api
 export * from "./derivations/DependencyTracker" //TODO: limit exports to public api
