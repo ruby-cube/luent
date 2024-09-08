@@ -76,6 +76,19 @@ export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel |
             updateCycle.scheduleEffect(this.target, effect, phase)
         }
     }
+
+    private cleanUp?: ()=>void
+
+    onUnwatched(cleanUp: ()=>void){
+        if (__DEV__ && this.cleanUp) {
+            console.error('Overriding existing cleanup function. This means we need an array for onUnwatched tasks')
+        }
+        this.cleanUp = cleanUp;
+    }
+
+    emitUnwatched(){
+        this.cleanUp?.()
+    }
 }
 
 

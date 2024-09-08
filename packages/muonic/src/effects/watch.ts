@@ -6,7 +6,7 @@ import { ReactiveDerivation } from "../derivations/ReactiveDerivation";
 import { Phase, useUpdateCycle } from "./UpdateCycle";
 import { WatchDebugOptions } from "./debug";
 import { $, DERIVED_SIGNAL, isDerivedSignal, isSignal, ReactiveSignal } from "../derivations/DerivedSignal";
-import { isIntegerKey, isReactiveModel, ReactiveModel, toWatchedProp, untrackIfIndex } from "../reactivemodel/Reactive$";
+import { isIntegerKey, isReactiveModel, ReactiveModel, toWatchedProp } from "../reactivemodel/Reactive$";
 import { AS_DERIVATION, createReactiveEffect } from "../derivations/ReactiveEffect";
 import { getWithoutTracking } from "../derivations/DependencyTracker";
 import { asReactiveProp } from "../reactivemodel/ReactiveProp";
@@ -117,7 +117,7 @@ export function watch<T>(target: ReactiveGetter | ReactiveSignal<T> | ReactiveMo
             watchTarget.removeEffect(_effect, phase)
             if (AS_DERIVATION in _target) _target[AS_DERIVATION].untrackDependencies()
             unwatch(watchTarget)
-            if (key) untrackIfIndex(target, key) // must be called after removeEffect and untrackDependencies
+            watchTarget.emitUnwatched()
         }
     });
 

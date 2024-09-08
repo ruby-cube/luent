@@ -1,7 +1,7 @@
 import { ReactivePrimitive } from "./DependencyTracker";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 
-
+export const CLEAN_UP = 'x__cleanUp'
 
 export class ReactiveAtom {
 
@@ -13,17 +13,27 @@ export class ReactiveAtom {
         this.derivations.add(derivation)
     }
 
-    deleteDerivation(derivation: ReactiveDerivation){
+    deleteDerivation(derivation: ReactiveDerivation) {
         this.derivations.delete(derivation)
-        if (this.derivations.size === 0){
+        if (this.derivations.size === 0) {
             reactiveAtomMap.delete(this.primitive)
         }
+        this.cleanUp?.()
     }
 
     triggerDerivations() {
         for (const derivation of this.derivations) {
             derivation.trigger();
         }
+    }
+
+    cleanUp?: () => void
+
+    onUntracked(cleanUp: () => void) {
+        if (__DEV__ && this.cleanUp) {
+            console.error('Overriding existing cleanup function. This means we need an array for onUntracked tasks')
+        }
+        this.cleanUp = cleanUp;
     }
 }
 

@@ -8,7 +8,7 @@ import { asTrackableOp, getTrackableOp, TrackableOp } from "./TrackableOp";
 import { getRootWatchedModelAndKeyPath, isNestedWatched } from "../effects/deepWatch";
 import { trigger, triggerReactiveAtom, triggerReactiveModel } from "../trigger";
 import { asWatchTarget, isWatched } from "../effects/watch";
-import { asReactiveAtom, isReactiveAtom } from "../derivations/ReactiveAtom";
+import { asReactiveAtom, CLEAN_UP, isReactiveAtom } from "../derivations/ReactiveAtom";
 import { isDerivedSignal } from "../derivations/DerivedSignal";
 import { getWithoutTracking, track } from "../derivations/DependencyTracker";
 import { useUpdateCycle } from "../effects/UpdateCycle";
@@ -473,19 +473,25 @@ function createReactiveTuple(
 export function toWatchedProp(target: ReactiveModel, key: PropertyKey) {
     if (toRaw(target) instanceof Array && isIntegerKey(key)) {
         target[TRACKED_INDICES].add(parseInt(<string>key))
+
+        // clean up
+        const prop = asReactiveProp(target, key)
+        const watchTarget = asWatchTarget(prop)
+        watchTarget.onUnwatched(()=>{
+            untrackIndex(target, key)
+        })
+        return prop;
     }
     return asReactiveProp(target, key)
 }
 
-// must be called after unwatch and untrack
-export function untrackIfIndex(target: ReactiveModel, key: PropertyKey) {
-    if (toRaw(target) instanceof Array && isIntegerKey(key)) {
-        const prop = asReactiveProp(target, key)
-        const watchTarget = asWatchTarget(prop)
-        const atom = asReactiveAtom(prop)
-        if (watchTarget.watchCount === 0 && atom.derivations.size === 0) {
-            target[TRACKED_INDICES].delete(parseInt(<string>key))
-        }
+
+function untrackIndex(target: ReactiveModel, key: PropertyKey) {
+    const prop = asReactiveProp(target, key)
+    const watchTarget = asWatchTarget(prop)
+    const atom = asReactiveAtom(prop)
+    if (watchTarget.watchCount === 0 && atom.derivations.size === 0) {
+        target[TRACKED_INDICES].delete(parseInt(<string>key))
     }
 }
 
@@ -506,20 +512,24 @@ function reactiveArrayGetter(
     }
     if (isNonTrackable(key, Array)) return value;
     if (key === 'at') {
-        return (index: number) =>
-            trackedGetOp(
-                index,
-                reactive,
-                target,
-                key,
-                value,
-                getTrackedIndices
-            )
+        return useGetOp(
+            reactive,
+            target,
+            key,
+            value,
+            getTrackedIndices
+        )
     }
 
     const tracked = track(reactive, key)
     if (tracked && isIntegerKey(key)) {
         getTrackedIndices().add(parseInt(<string>key))
+
+        // clean up when untracked
+        const prop = asReactiveProp(reactive, key)
+        const atom = asReactiveAtom(prop)
+        const cleanUp = () => untrackIndex(reactive, key)
+        atom.onUntracked(cleanUp)
     }
     return value;
 }
@@ -723,20 +733,18 @@ function createReactiveSet(
 
             switch (key) {
                 case 'has':
-                    return (item: any) =>
-                        trackedGetOp(
-                            item,
-                            reactive,
-                            target,
-                            key,
-                            value,
-                            function getTrackedEntries() {
-                                if (targetSet[TRACKED_ENTRIES])
-                                    return targetSet[TRACKED_ENTRIES]
-                                targetSet[TRACKED_ENTRIES] = new Set()
-                                return targetSet[TRACKED_ENTRIES];
-                            }
-                        );
+                    return useGetOp(
+                        reactive,
+                        target,
+                        key,
+                        value,
+                        function getTrackedEntries() {
+                            if (targetSet[TRACKED_ENTRIES])
+                                return targetSet[TRACKED_ENTRIES]
+                            targetSet[TRACKED_ENTRIES] = new Set()
+                            return targetSet[TRACKED_ENTRIES];
+                        }
+                    );
 
                 case 'add':
                     return addOp
@@ -978,20 +986,18 @@ function createReactiveMap(
             switch (key) {
                 case 'get':
                 case 'has':
-                    return (item: any) =>
-                        trackedGetOp(
-                            item,
-                            reactive,
-                            target,
-                            key,
-                            value,
-                            function getTrackedEntries() {
-                                if (targetMap[TRACKED_ENTRIES])
-                                    return targetMap[TRACKED_ENTRIES]
-                                targetMap[TRACKED_ENTRIES] = new Set()
-                                return targetMap[TRACKED_ENTRIES];
-                            }
-                        );
+                    return useGetOp(
+                        reactive,
+                        target,
+                        key,
+                        value,
+                        function getTrackedEntries() {
+                            if (targetMap[TRACKED_ENTRIES])
+                                return targetMap[TRACKED_ENTRIES]
+                            targetMap[TRACKED_ENTRIES] = new Set()
+                            return targetMap[TRACKED_ENTRIES];
+                        }
+                    );
 
                 case 'set':
                     return setOp
@@ -1023,7 +1029,6 @@ function createReactiveMap(
 
 
     function setOp(key: any, newValue: any) {
-
         const oldSize = target.size
         const oldValue = target.get(key);
         const _newValue = maybeReactivize(newValue, reactive, oldValue, register) //FIX: I don't know if relying on oldValue to determine reactivize is reliable. What if user sets value to undefined?
@@ -1075,11 +1080,23 @@ function createReactiveMap(
 }
 
 // A 'get op' is a o(1) get-like operation like set.has() or array.at()
-function trackedGetOp(arg: any, reactive: ReactiveModel, target: AnyObject, op: string, fn: (key: any) => any, getTrackedEntryKeys?: () => Set<number>) {
-    if (__DEV__) emitSignal();
-    const tracked = track(reactive, op, arg)
-    if (tracked && getTrackedEntryKeys) {
-        getTrackedEntryKeys().add(arg)
+function useGetOp(reactive: ReactiveModel, target: AnyObject, op: string, fn: (key: any) => any, getTrackedEntryKeys: () => Set<number>) {
+    return function getOp(arg: any) {
+        if (__DEV__) emitSignal();
+        const tracked = track(reactive, op, arg)
+        if (tracked) {
+            const trackedEntryKeys = getTrackedEntryKeys()
+            trackedEntryKeys.add(arg)
+
+            // clean up when untracked
+            const trackableOp = asTrackableOp(reactive, op, arg)
+            const atom = asReactiveAtom(trackableOp)
+            atom.onUntracked(() => {
+                if (atom.derivations.size === 0) {
+                    trackedEntryKeys.delete(arg)
+                }
+            })
+        }
+        return fn.call(target, arg)
     }
-    return fn.call(target, arg)
 }
