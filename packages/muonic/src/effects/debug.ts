@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { asReactiveProp, ReactiveProp } from "../reactivemodel/ReactiveProp";
 import { isReactiveModel, ReactiveModel } from "../reactivemodel/Reactive$";
-import { Signal } from "../$Signal";
+import { AtomicSignal } from "../$Signal";
 
 //TODO: onTrigger works as desired. onTrack needs to be rethunk.
 
@@ -10,13 +10,13 @@ export type WatchDebugOptions = {
     onTrigger?: OnTrigger;
 }
 
-type OnTrack = (target?: Signal | ReactiveProp | ReactiveModel) => void
+type OnTrack = (target?: AtomicSignal | ReactiveProp | ReactiveModel) => void
 type OnTrigger = () => void
 
-const onTrackMap: Map<Signal | ReactiveProp | ReactiveModel, OnTrack> = new Map();
-const onTriggerMap: Map<Signal | ReactiveProp | ReactiveModel, OnTrigger> = new Map();
+const onTrackMap: Map<AtomicSignal | ReactiveProp | ReactiveModel, OnTrack> = new Map();
+const onTriggerMap: Map<AtomicSignal | ReactiveProp | ReactiveModel, OnTrigger> = new Map();
 
-export function registerDebuggers(targets: (Signal | ReactiveProp)[] | ReactiveModel, options: WatchDebugOptions | undefined){
+export function registerDebuggers(targets: (AtomicSignal | ReactiveProp)[] | ReactiveModel, options: WatchDebugOptions | undefined){
     const {onTrack, onTrigger} = options ?? {}
     const _targets = isReactiveModel(targets) ? [targets] : targets
     if (onTrack){
@@ -31,12 +31,12 @@ export function registerDebuggers(targets: (Signal | ReactiveProp)[] | ReactiveM
     }
 }
 
-export function runTrackDebugger(target: Signal | ReactiveProp | ReactiveModel){
+export function runTrackDebugger(target: AtomicSignal | ReactiveProp | ReactiveModel){
     const onTrack = onTrackMap.get(target);
     if (onTrack) onTrack();
 }
 
-export function runTriggerDebugger(target: Signal | ReactiveProp | ReactiveModel){
+export function runTriggerDebugger(target: AtomicSignal | ReactiveProp | ReactiveModel){
     const onTrigger = onTriggerMap.get(target);
     if (onTrigger) onTrigger();
 }

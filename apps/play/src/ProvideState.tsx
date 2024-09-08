@@ -54,7 +54,7 @@ function ChildBlock() {
 
 
 function SiblingBlock({ $count }: {
-    $count?: Signal<number>
+    $count?: AtomicSignal<number>
 }) {
 
     return (

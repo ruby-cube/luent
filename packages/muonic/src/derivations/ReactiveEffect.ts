@@ -1,17 +1,20 @@
+import { ReactiveEffect } from "../effects/watch";
 import { ReactiveDerivation } from "./ReactiveDerivation";
+
+export const AS_DERIVATION = 'x__asDerivation'
 
 export function createReactiveEffect(effect: () => void, retrack: boolean) {
 
-    const _effect = new ReactiveDerivation(reactiveEffect, retrack)
+    const derivation = new ReactiveDerivation(reactiveEffect, retrack)
 
     let initialized = false;
 
     function reactiveEffect() {
-        if (!initialized || _effect.dirty && retrack) {
-            _effect.trackDependencies(effect);
-            _effect.forwardDependencies(_effect.dependencies) //QUESTION: Not sure if reactive effects need to forward dependencies as well
-            if (_effect.dirty) {
-                _effect.undirty()
+        if (!initialized || derivation.dirty && retrack) {
+            derivation.trackDependencies(effect);
+            derivation.forwardDependencies(derivation.dependencies) //QUESTION: Not sure if reactive effects need to forward dependencies as well
+            if (derivation.dirty) {
+                derivation.undirty()
             }
             initialized = true;
         }
@@ -19,5 +22,8 @@ export function createReactiveEffect(effect: () => void, retrack: boolean) {
             effect()
         }
     }
-    return reactiveEffect;
+
+    return reactiveEffect as ReactiveEffect
 }
+
+

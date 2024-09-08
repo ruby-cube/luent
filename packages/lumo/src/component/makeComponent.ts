@@ -2,7 +2,7 @@ import { PublicComponent, ComponentSetup, InternalComponent, COMPONENT, Componen
 import { InternalNodeRef, NodeSignal, getNodeRef, get$Node } from "../node/$Node";
 import { ComponentConfig, EventsConfig, initializeListRef, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { DerivedSignal, Signal } from "@rue/muonic";
+import { DerivedSignal, AtomicSignal } from "@rue/muonic";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentComponent, popComponent, pushComponent } from "./componentStack";
 import { LifecycleHook } from "./lifecycle";
@@ -50,7 +50,7 @@ export function makeComponent(
     Component: ComponentSetup,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: Signal<number> | undefined
+    $index: AtomicSignal<number> | undefined
 ): InternalComponent {
     const parent = getCurrentComponent<InternalComponent>();
     const component = new InternalComponent(parent);
@@ -67,7 +67,7 @@ export function makeComponent(
 // $class?: ((o: DOMTokenList) => void)[],
 // $style?: ((o: CSSStyleDeclaration) => void)[],
 // ref?: NodeSignal,
-// $index?: Signal<number>
+// $index?: AtomicSignal<number>
 
 
 
@@ -109,7 +109,7 @@ export function runComponentSetup(
     component: InternalComponent,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: Signal<number> | undefined
+    $index: AtomicSignal<number> | undefined
 ) {
     const output = Component({ ...config, Slot })
     if (output instanceof Promise)
@@ -122,7 +122,7 @@ function initializeComponent(
     component: InternalComponent,
     output: Component,
     ref: NodeSignal | undefined,
-    $index: Signal<number> | undefined,
+    $index: AtomicSignal<number> | undefined,
 ) {
     const nodeEntities = normalizeToFragmentArray(extractNodeEntities(output)); //TODO: Validate output and get publicComponent from output
 
@@ -205,7 +205,7 @@ function initializeComponent(
 
 
 
-// function setUpRefUpdates(ref: InternalNodeRef, component: Component, $index: Signal<number> | undefined, preserve: boolean) {
+// function setUpRefUpdates(ref: InternalNodeRef, component: Component, $index: AtomicSignal<number> | undefined, preserve: boolean) {
 //     if (ref.initialized === true) return;
 //     // if ($index) { // only initiate once per list
 //     //     const components = ref.components;

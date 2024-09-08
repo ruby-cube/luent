@@ -6,15 +6,16 @@ import { DerivedSignal, isDerivedSignal } from "../derivations/DerivedSignal";
 import { ReactiveEffect, runEffect } from "./watch";
 import { getDependencyTracker } from "../derivations/DependencyTracker";
 import { ReactiveProp } from "../reactivemodel/ReactiveProp";
+import { ReactiveGetter } from "../derivations/ReactiveGetter";
 
 
 export type Effect = (...args: any[]) => void;
-export type ReactiveGetter = () => any
 
 export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveGetter = ReactiveProp | ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveGetter> {
 
     constructor(public target: T) { }
 
+    watchCount = 0
     nextCycleEffects: SetMap<Phase, Effect> | undefined;
     effects: SetMap<Phase, Effect> = new SetMap()
 
@@ -27,6 +28,7 @@ export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel |
         const toBeQueued = this.nextCycleEffects?.get(phase);
         const mustSetUpQueueTransfer = toBeQueued?.size === 0;
         this.nextCycleEffects!.addToSet(effect, phase)
+        this.watchCount++;
 
         if (mustSetUpQueueTransfer) {
             onPhaseCompleted(phase, () => {
@@ -40,10 +42,12 @@ export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel |
 
     queueEffect(effect: Effect, phase: Phase) {
         this.effects.addToSet(effect, phase)
+        this.watchCount++;
     }
 
     removeEffect(effect: Effect, phase: Phase) {
         this.effects.removeFromSet(effect, phase)
+        this.watchCount--
     }
 
     triggerEffects() {

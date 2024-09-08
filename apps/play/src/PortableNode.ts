@@ -1,5 +1,5 @@
 import { Collection, iterate_over } from "@rue/lumo"
-import { ReactiveModel, Signal } from "@rue/muonic"
+import { ReactiveModel, AtomicSignal } from "@rue/muonic"
 import { Sign } from "crypto"
 
 class PortableNode {
@@ -21,7 +21,7 @@ class PortableNode {
 
 class ListPort<L extends any[] = any[]> {
 
-    constructor(list: Signal<L> | ReactiveModel<L>, renderItem: RenderListItem<L>) {
+    constructor(list: AtomicSignal<L> | ReactiveModel<L>, renderItem: RenderListItem<L>) {
 
     }
 
@@ -30,7 +30,7 @@ class ListPort<L extends any[] = any[]> {
     // }
 }
 
-type RenderListItem<L extends any[]> = (item: L extends (infer I)[] ? I : never, $index: Signal<number>) => any
+type RenderListItem<L extends any[]> = (item: L extends (infer I)[] ? I : never, $index: AtomicSignal<number>) => any
 
 type ListPortType = string
 type UID = string | number | symbol
@@ -39,7 +39,7 @@ const portableItemKeyMap: Map<ListPortType, UID> = new Map()
 
 const renderPortableItemMap: Map<UID, () => any> = new Map()
 
-function $ListPort<L extends any[] = any[]>(listData: Signal<L> | ReactiveModel<L>, renderItem: RenderListItem<L>, UIDKey: string, config: { type: string, ref?: Signal<PortableNode> }) {
+function $ListPort<L extends any[] = any[]>(listData: AtomicSignal<L> | ReactiveModel<L>, renderItem: RenderListItem<L>, UIDKey: string, config: { type: string, ref?: AtomicSignal<PortableNode> }) {
     const listRenderKit = iterate_over(listData as Collection<L extends (infer I)[] ? I : never>, renderItem, UIDKey)
 
     return listRenderKit;

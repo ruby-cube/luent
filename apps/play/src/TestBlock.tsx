@@ -1,8 +1,8 @@
 import { $elseIf, $if, $Node } from "@rue/lumo";
-import { Signal, $Signal } from "@rue/muonic";
+import { AtomicSignal, $Signal } from "@rue/muonic";
 
 
-export function TestBlockA(props: { $active: Signal<boolean> }) {
+export function TestBlockA(props: { $active: AtomicSignal<boolean> }) {
     const { $active } = props
     const $black = $Signal(true);
 
@@ -31,7 +31,7 @@ function Lap(){
 }
 
 
-export function TestBlockB(props: { $active: Signal<boolean> }) {
+export function TestBlockB(props: { $active: AtomicSignal<boolean> }) {
     const { $active } = props
     const $black = $Signal(true);
 

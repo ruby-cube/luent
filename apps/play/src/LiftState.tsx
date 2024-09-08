@@ -38,7 +38,7 @@ function ParentBlock() {
 
 
 function ChildBlock({ $count }: {
-    $count?: Signal<number>;
+    $count?: AtomicSignal<number>;
     increment: () => void
     decrement: () => void
 }) {
@@ -54,7 +54,7 @@ function ChildBlock({ $count }: {
 
 
 function SiblingBlock({ $count }: {
-    $count?: Signal<number>
+    $count?: AtomicSignal<number>
 }) {
 
     return (

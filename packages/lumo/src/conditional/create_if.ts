@@ -1,4 +1,4 @@
-import { DerivedSignal, getWithoutTracking, hasSignal, ReactiveModel, ReactiveSignal, toRaw } from "@rue/muonic";
+import { DerivedSignal, getWithoutTracking, isSignal, ReactiveModel, ReactiveSignal, toRaw } from "@rue/muonic";
 import { _NodePod } from "../node/NodePod";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";

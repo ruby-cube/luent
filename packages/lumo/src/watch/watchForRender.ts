@@ -1,4 +1,4 @@
-import { beforeRender, ChangeHandler, hasSignal, initializeReactiveEffect as _initializeReactiveEffect, onRendered, ReactiveSignal, shallowClone, watch as _watch, WatchOptions } from "@rue/muonic";
+import { beforeRender, ChangeHandler, isSignal, initializeReactiveEffect as _initializeReactiveEffect, onRendered, ReactiveSignal, shallowClone, watch as _watch, WatchOptions } from "@rue/muonic";
 import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
@@ -141,7 +141,7 @@ function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends
     onDeactivate(deactivateAndReactivate, { once: true }, dynamicNode)
 
     function deactivateAndReactivate() {
-        oldValue = hasSignal(target) ? target() : shallowClone(target)
+        oldValue = isSignal(target) ? target() : shallowClone(target)
         reactivation = true;
         watcher.stop()
         if (!mountPhase) {
@@ -150,7 +150,7 @@ function watchAndPreserve<T>(target: ReactiveSignal<T> | ReactiveModel<T extends
     }
 
     function initializeOnActivated() {
-        if (hasSignal(target)) {
+        if (isSignal(target)) {
             onActivated(() => {
                 if (reactivation) handler(target(), oldValue)
                 initializeWatcher()

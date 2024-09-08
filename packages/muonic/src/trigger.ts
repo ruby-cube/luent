@@ -5,11 +5,11 @@ import { AnyObject } from "@rue/types";
 import { MutationRecord } from "./effects/deepWatch";
 import { ReactivePrimitive } from "./derivations/DependencyTracker";
 import { ReactiveModel, toRaw } from "./reactivemodel/Reactive$";
-import { Signal } from "./$Signal";
+import { AtomicSignal } from "./$Signal";
 import { ReactiveProp } from "./reactivemodel/ReactiveProp";
 
 
-export function trigger(target: Signal | ReactiveProp) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol
+export function trigger(target: AtomicSignal | ReactiveProp) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol
     if (isWatched(target)) {
         asWatchTarget(target).triggerEffects()
     }

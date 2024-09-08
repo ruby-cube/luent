@@ -1,5 +1,5 @@
 import { PublicComponent, ComponentSetup, DOMNode, InternalComponent, getComponent } from "../component/InternalComponent";
-import { DerivedSignal, hasSignal, ReactiveSignal, Hooks, getCurrentUpdateCycle, runPrerenderEffectsAndTasks } from "@rue/muonic";
+import { DerivedSignal, isSignal, ReactiveSignal, Hooks, getCurrentUpdateCycle, runPrerenderEffectsAndTasks } from "@rue/muonic";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
@@ -7,7 +7,7 @@ import { initializeRender, watchForRender } from "../watch/watchForRender";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { ActiveListener, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
-import { Signal } from "@rue/muonic";
+import { AtomicSignal } from "@rue/muonic";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
@@ -32,7 +32,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     tagName: T,
     childNodes: NodeEntity[] | undefined,
     config: ElementConfig,
-    $index: Signal<number> | undefined
+    $index: AtomicSignal<number> | undefined
 ): DOMNode {
     const { class: classes, style: styles, ref, attributes: dynamicAttributes, ...other } = config;
 
@@ -128,7 +128,7 @@ function analyzeAttributes(entries: AnyObject) {
 function setUpAttributes(node: Element, attributes: { [key: string]: any | DerivedSignal<any> }) {
     for (const key in attributes) {
         const value = attributes[key]
-        if (hasSignal(value)) {
+        if (isSignal(value)) {
             watchForRender(value, (newValue) => { //TODO: only attributes that affect layout should be scheduled for render
                 setAttribute(node, key, newValue)
             }, { eager: true })
@@ -159,7 +159,7 @@ function setUpEvents(node: Element, events: { [key: string]: (EventListener | De
         const event = useEventTick(node, key, runPrerenderEffectsAndTasks);
         event.updateHandlers(() => {
             for (const handler of handlers) {
-                if (hasSignal(handler)) {
+                if (isSignal(handler)) {
                     let listener: ActiveListener;
                     watchForRender(handler, (newValue) => {
                         event.updateHandlers(() => {
@@ -261,7 +261,7 @@ function setUpDynamicAttributes(node: Element, changes: ((o: Element) => void)[]
     }
 }
 
-function setUpRefNulling(ref: _NodePod, $index: Signal<number>) {
+function setUpRefNulling(ref: _NodePod, $index: AtomicSignal<number>) {
     if ($index && $index() === 0) {
 
     }

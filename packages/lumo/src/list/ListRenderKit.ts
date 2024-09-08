@@ -1,4 +1,4 @@
-import { $Signal, hasSignal, isReactiveModel, Signal } from "@rue/muonic";
+import { $Signal, isSignal, isReactiveModel, AtomicSignal } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./iterate_over";
@@ -19,14 +19,14 @@ type Count = number
 const dynamicNodeMap: WeakMap<_NodePod, DynamicNode> = new WeakMap()
 
 let currentItem: any;
-let $currentIndex: Signal<number> | undefined;
+let $currentIndex: AtomicSignal<number> | undefined;
 
-export function getCurrentItemAndIndex(): [any, Signal<number>] | [undefined, undefined] {
+export function getCurrentItemAndIndex(): [any, AtomicSignal<number>] | [undefined, undefined] {
     if ($currentIndex === undefined) return [undefined, undefined]
     return [currentItem, $currentIndex]
 }
 
-export function setCurrentItemAndIndex(item: any, $index: Signal<number>) {
+export function setCurrentItemAndIndex(item: any, $index: AtomicSignal<number>) {
     currentItem = item;
     $currentIndex = $index;
 }
@@ -67,11 +67,11 @@ export class ListRenderKit<T = any> {
         const renderItem = this.renderItem
         const idKey = this.idKey
         const component = this.component
-        const list = hasSignal(data) ? data() : <Collection<any>>data;
+        const list = isSignal(data) ? data() : <Collection<any>>data;
         const _list = list instanceof Array ? list : list //TODO: need to implement for sets, maps, and objects
-        const isDynamic = isReactiveModel(data) || hasSignal(data);
+        const isDynamic = isReactiveModel(data) || isSignal(data);
         const dynamicNodePod = this.dynamicNodePod = isDynamic ? nodePod.appendDynamicPod() : undefined;
-        const indices: Signal<number>[] = []
+        const indices: AtomicSignal<number>[] = []
 
 
         pushList(this);
@@ -164,7 +164,7 @@ export class ListRenderKit<T = any> {
         const indicesAndFragments: [number, DocumentFragment][] = []
         let fragment = new DocumentFragment();
 
-        const newIndices: Signal<number>[] = [];
+        const newIndices: AtomicSignal<number>[] = [];
         const toFromIndices: [number, number][] = []
 
         for (let i = 0; i < newUArray.length; i++) {
@@ -281,11 +281,11 @@ export class ListRenderKit<T = any> {
 }
 
 export class DynamicIndices {
-    current: Signal<number>[];
-    constructor(indices: Signal<number>[]) {
+    current: AtomicSignal<number>[];
+    constructor(indices: AtomicSignal<number>[]) {
         this.current = indices
     }
-    update(newIndices: Signal<number>[]) {
+    update(newIndices: AtomicSignal<number>[]) {
         this.current = newIndices
     }
 }

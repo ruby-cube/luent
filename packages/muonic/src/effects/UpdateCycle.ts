@@ -15,7 +15,7 @@ type ReactiveTarget = ReactiveAtom | DerivedSignal | ReactiveModel
 
 export type Phase = 'pre' | 'render' | 'post' | 'sync'
 
-const snapshotManager = new SnapshotManager();
+// const snapshotManager = new SnapshotManager();
 
 let updateCycleCount = -1;
 
@@ -46,8 +46,6 @@ export function endUpdateCycle() {
 
 export class UpdateCycle {
 
-    //TODO: Manage snapshots and ops
-
     constructor() {
         startUpdateCycle(this)
         updateCycleCount++;
@@ -62,28 +60,32 @@ export class UpdateCycle {
         }, { __devName: beforeRepaint.name })
     }
 
-    snapshotMap: Map<ReactiveModel, AnyObject> | undefined;
-
-    takeSnapshot(reactive: ReactiveModel, target: AnyObject, clone?: AnyObject) {
-        let snapshotMap = this.snapshotMap;
-        if (!snapshotMap) {
-            snapshotMap = new Map();
-            this.snapshotMap = snapshotMap;
-        }
-        if (snapshotMap.has(reactive))
-            return snapshotMap.get(reactive)!; // snapshot of original state already taken for this cycle, no need to take another
-        const _snapshot = snapshotManager.takeSnapshot(target, updateCycleCount, clone)
-        snapshotMap.set(reactive, _snapshot) // snapshots are shallow clones!
-        return _snapshot;
+    get count() {
+        return updateCycleCount;
     }
 
-    getSnapshot(reactive: ReactiveModel) {
-        const snapshotMap = this.snapshotMap;
-        if (!snapshotMap) return null;
-        const snapshot = snapshotMap.get(reactive)
-        if (!snapshot) return null;
-        return snapshot
-    }
+    // snapshotMap: Map<ReactiveModel, AnyObject> | undefined;
+
+    // takeSnapshot(reactive: ReactiveModel, target: AnyObject, clone?: AnyObject) {
+    //     let snapshotMap = this.snapshotMap;
+    //     if (!snapshotMap) {
+    //         snapshotMap = new Map();
+    //         this.snapshotMap = snapshotMap;
+    //     }
+    //     if (snapshotMap.has(reactive))
+    //         return snapshotMap.get(reactive)!; // snapshot of original state already taken for this cycle, no need to take another
+    //     const _snapshot = snapshotManager.takeSnapshot(target, updateCycleCount, clone)
+    //     snapshotMap.set(reactive, _snapshot) // snapshots are shallow clones!
+    //     return _snapshot;
+    // }
+
+    // getSnapshot(reactive: ReactiveModel) {
+    //     const snapshotMap = this.snapshotMap;
+    //     if (!snapshotMap) return null;
+    //     const snapshot = snapshotMap.get(reactive)
+    //     if (!snapshot) return null;
+    //     return snapshot
+    // }
 
     opsMap: WeakMap<ReactiveModel, MutationRecord[]> = new WeakMap();
 

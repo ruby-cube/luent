@@ -3,7 +3,7 @@ import { HTMLTag } from "../element/makeElement";
 import { ListData } from "../list/iterate_over";
 import { DerivedSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
 import { ComponentConfig, ElementConfig, RenderFunction } from "./makeNode";
-import { Signal } from "@rue/muonic";
+import { AtomicSignal } from "@rue/muonic";
 
 
 export type NodeSetup<T extends HTMLTag | ComponentSetup> =
@@ -17,7 +17,7 @@ export type ItemNodeConfig<
     L extends ListData
 > =
     L extends (infer I)[] ?
-    ((item?: I, $index?: Signal<number>) => NodeSetup<T>)
+    ((item?: I, $index?: AtomicSignal<number>) => NodeSetup<T>)
     : L extends ReactiveSignal<(infer I)[]> ?
-    (item?: I, $index?: Signal<number>) => NodeSetup<T>
+    (item?: I, $index?: AtomicSignal<number>) => NodeSetup<T>
     : never

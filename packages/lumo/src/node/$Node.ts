@@ -2,13 +2,13 @@ import { PublicComponent, ComponentSetup } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
-import { $Signal, Signal, asReadonly, ReadonlySignal } from "@rue/muonic"
+import { $Signal, AtomicSignal, asReadonly, ReadonlySignal } from "@rue/muonic"
 import { HTMLTag } from "../element/makeElement"
 import { isUpdatingList } from "../list/listStack"
 
 
 
-type Task = ((item: Element | PublicComponent) => void) | ((item: Element | PublicComponent, $index?: Signal<number>) => void)
+type Task = ((item: Element | PublicComponent) => void) | ((item: Element | PublicComponent, $index?: AtomicSignal<number>) => void)
 const hookMap: WeakMap<NodeSignal, Set<Task>> = new WeakMap()
 
 type RefSource = HTMLTag | ComponentSetup | HTMLTag[] | ComponentSetup[]
@@ -28,7 +28,7 @@ type RefSource = HTMLTag | ComponentSetup | HTMLTag[] | ComponentSetup[]
 
 
 export type NodeSignal<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
-export type _NodeSignal<T extends RefSource = RefSource> = Signal<NodeReferent<T> | undefined>
+export type _NodeSignal<T extends RefSource = RefSource> = AtomicSignal<NodeReferent<T> | undefined>
 
 // map readonly $node to $node
 const $nodeMap: WeakMap<NodeSignal, _NodeSignal> = new WeakMap()
@@ -47,7 +47,7 @@ export function $Node<
     if (__DEV__) {
         const $nodeAsReadonly = asReadonly($node) as ReadonlySignal<NodeReferent<T> | undefined | null>;
         $nodeMap.set($nodeAsReadonly, $node)
-        $node = $nodeAsReadonly as unknown as Signal<NodeReferent<T> | undefined | null>;
+        $node = $nodeAsReadonly as unknown as AtomicSignal<NodeReferent<T> | undefined | null>;
     }
     return $node;
 }
@@ -115,7 +115,7 @@ export class InternalNodeRef<
         this.initialized = true;
     }
 
-    assignValue(value: NodeReferent<T>, $index?: Signal<number> | undefined) {
+    assignValue(value: NodeReferent<T>, $index?: AtomicSignal<number> | undefined) {
         if ($index != null) {
             let nodes = !__SSR__ && isUpdatingList() ? this.getNewListNodes()
                 : this.o.setTo((this.o() || []) as NodeArray<T>)
@@ -162,7 +162,7 @@ export function getNodeRef(referent: any) { // AnyObject is component's exposed 
     return refMap.get(referent)
 }
 
-// export function assignNodeRef(ref: InternalNodeRef, value: Element | PublicComponent, $index: Signal<number> | undefined) {
+// export function assignNodeRef(ref: InternalNodeRef, value: Element | PublicComponent, $index: AtomicSignal<number> | undefined) {
 //     if ($index != null) {
 //         let nodes = <(Element | PublicComponent)[]>ref.o.value || []
 //         nodes[$index()] = value;
@@ -176,7 +176,7 @@ export function getNodeRef(referent: any) { // AnyObject is component's exposed 
 
 
 
-// function assignNodeRef(ref: InternalNodeRef<InternalComponent>, component: AnyObject, $index: Signal<number> | undefined) {
+// function assignNodeRef(ref: InternalNodeRef<InternalComponent>, component: AnyObject, $index: AtomicSignal<number> | undefined) {
 //     if ($index != null) {
 //         let nodes = ref.components ? ref.components! : []
 //         nodes[$index()] = component;

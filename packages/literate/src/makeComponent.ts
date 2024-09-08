@@ -1,6 +1,6 @@
 import { COMPONENT, ComponentConfig, getCurrentItemAndIndex, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeSignal, PublicComponent, pushComponent, popComponent } from "@rue/lumo";
 import { Literate } from "./Literate.js";
-import { Signal } from "@rue/muonic";
+import { AtomicSignal } from "@rue/muonic";
 import { AnyObject, MaybePromise } from "@rue/types";
 import { collectEffects, getFlask } from "@rue/flask";
 import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
@@ -37,7 +37,7 @@ export function makeComponent(
     Component: SSRComponentSetup,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: Signal<number> | undefined
+    $index: AtomicSignal<number> | undefined
 ): SSRComponent {
     const parent = getCurrentComponent<SSRComponent>()
     const component = new SSRComponent(parent);
@@ -55,7 +55,7 @@ export function runComponentSetup(
     component: SSRComponent,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: Signal<number> | undefined
+    $index: AtomicSignal<number> | undefined
 ) {
     collectEffects((flask, outerFlask) => {
         component.setFlask(flask);
@@ -74,7 +74,7 @@ function initializeComponent(
     component: SSRComponent,
     output: Literate | Promise<SSRComponent> | [PublicComponent, Literate],
     ref: NodeSignal | undefined,
-    $index: Signal<number> | undefined,
+    $index: AtomicSignal<number> | undefined,
 ) {
     const _output = output instanceof Array ? output[1] : output;
     const publicComponent = output instanceof Array ? output[0] : null;

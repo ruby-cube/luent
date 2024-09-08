@@ -1,8 +1,10 @@
 import { asReactiveProp, getReactivePropValue, isReactiveProp, ReactiveProp } from "../reactivemodel/ReactiveProp";
-import { getTrackableOpValue, isTrackableOp, TrackableOp } from "../reactivemodel/TrackableOp";
-import { isSignal, Signal } from "../$Signal";
+import { asTrackableOp, getTrackableOpValue, isTrackableOp, TrackableOp } from "../reactivemodel/TrackableOp";
+import { isAtomicSignal, AtomicSignal } from "../$Signal";
+import { ReactiveModel } from "../reactivemodel/Reactive$";
+import { UNDEFINED } from "@rue/utils";
 
-export type ReactivePrimitive = Signal | ReactiveProp | TrackableOp
+export type ReactivePrimitive = AtomicSignal | ReactiveProp | TrackableOp
 
 // let activeDepTracker: DependencyTracker | null = null;
 // let outerDepTracker: DependencyTracker | null = null;
@@ -89,10 +91,16 @@ export function getWithoutTracking(reactiveRef: (() => any) | ReactiveProp | Tra
     return value;
 }
 
-export function track(target: ReactivePrimitive) {
+export function track(target: AtomicSignal): boolean
+export function track(target: ReactiveModel, key: string | symbol): boolean
+export function track(target: ReactiveModel, key: string | symbol, arg: any): boolean
+export function track(target: AtomicSignal | ReactiveModel, key: string | symbol = UNDEFINED, arg: any = UNDEFINED) {
     const tracker = getDependencyTracker();
-    if (!tracker) return;
+    if (!tracker) return false;
     if (tracker.shouldTrack) {
-        tracker.addDep(target)
+        const _target = arg !== UNDEFINED ? asTrackableOp(target, <string>key, arg) : key !== UNDEFINED ? asReactiveProp(target, key) : target as AtomicSignal
+        tracker.addDep(_target)
+        return true;
     }
+    return false;
 }

@@ -1,12 +1,12 @@
 //@ts-nocheck
-import { $Signal, Signal, watch } from "@rue/muonic"
+import { $Signal, AtomicSignal, watch } from "@rue/muonic"
 import { watchForRender } from "../../../packages/lumo/src/watch/watchForRender";
 import { $Node } from "@rue/lumo";
 
 export function MainBlock() {
 
-    const $hello = $PortableNode() as unknown as Signal<PortableNode>
-    const $bye = $PortableNode() as unknown as Signal<PortableNode>
+    const $hello = $PortableNode() as unknown as AtomicSignal<PortableNode>
+    const $bye = $PortableNode() as unknown as AtomicSignal<PortableNode>
 
     const helloView = $hello()
     helloView.remove()
@@ -42,7 +42,7 @@ export function MainBlock() {
     )
 }
 
-function $portable(render: (() => any) | Signal<PortableNode>, $ref: Signal<PortableNode> | (() => any)) {
+function $portable(render: (() => any) | AtomicSignal<PortableNode>, $ref: AtomicSignal<PortableNode> | (() => any)) {
     return render;
 }
 
@@ -50,7 +50,7 @@ function $MorphicNode(){
     
 }
 
-function $MorphicPort(initialKey: string | Signal<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; setTo: (key: string) => any } {
+function $MorphicPort(initialKey: string | AtomicSignal<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; setTo: (key: string) => any } {
 
     const $key = $Signal(initialKey)
     const $render = $Signal(switchMap[$key()])
@@ -87,12 +87,12 @@ function MainContent() {
     )
 }
 
-function $morphling($render: Signal<() => any>) {
+function $morphling($render: AtomicSignal<() => any>) {
     return new MorphlingKit($render)
 }
 
 class MorphlingKit {
-    constructor(public $render: Signal<() => any>) { }
+    constructor(public $render: AtomicSignal<() => any>) { }
 }
 
 function setUpMorphling(morphlingKit: MorphlingKit) {

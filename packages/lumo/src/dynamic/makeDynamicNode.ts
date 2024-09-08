@@ -8,7 +8,7 @@ import { onDestroy, LifecycleHook, onActivated, onDeactivate } from "./lifecycle
 //     Component: ComponentSetup,
 //     Slot: InferSlot | undefined,
 //     config: ComponentConfig,
-//     $index: Signal<number> | undefined
+//     $index: AtomicSignal<number> | undefined
 // ): InternalComponent {
 //     const parent = getCurrentComponent<InternalComponent>();
 //     const component = new InternalComponent(parent);

@@ -1,4 +1,4 @@
-import { isSignal, Signal, SIGNAL_MARKER } from "../$Signal";
+import { isAtomicSignal, AtomicSignal, SIGNAL_MARKER } from "../$Signal";
 import { READONLY_SIGNAL } from "../asReadonly";
 import { useUpdateCycle } from "../effects/UpdateCycle";
 import { isWatched } from "../effects/watch";
@@ -20,7 +20,7 @@ export type DerivedSignal<T = any> = {
     [DERIVED_SIGNAL]: DerivedSignalState
 }
 
-export type ReactiveSignal<T = any> = DerivedSignal<T> | Signal<T>;
+export type ReactiveSignal<T = any> = DerivedSignal<T> | AtomicSignal<T>;
 
 export function isDerivedSignal(maybeDerivedSignal: any): maybeDerivedSignal is DerivedSignal {
     if (!(maybeDerivedSignal instanceof Function)) return false
@@ -28,13 +28,13 @@ export function isDerivedSignal(maybeDerivedSignal: any): maybeDerivedSignal is 
 }
 
 
-export function hasSignal(maybeSignal: any): maybeSignal is DerivedSignal | Signal {
+export function isSignal(maybeSignal: any): maybeSignal is DerivedSignal | AtomicSignal {
     if (!(maybeSignal instanceof Function)) return false;
     if (SIGNAL_MARKER in maybeSignal || DERIVED_SIGNAL in maybeSignal || READONLY_SIGNAL in maybeSignal) return true;
     return false;
 }
 
-class DerivedSignalState<T extends DerivedSignal = DerivedSignal> extends ReactiveDerivation<T> {
+class DerivedSignalState<T extends DerivedSignal = DerivedSignal> extends ReactiveDerivation {
     value: any;
 
     constructor(derivedSignal: T, retrack: boolean) {

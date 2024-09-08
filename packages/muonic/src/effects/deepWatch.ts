@@ -2,7 +2,7 @@ import { isReactiveModel, isReactiveObject, ReactiveModel } from "../reactivemod
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 import { AnyObject } from "@rue/types";
 
-type KeyPath = PropertyKey[]
+export type KeyPath = PropertyKey[]
 
 
 export type MutationRecord = {

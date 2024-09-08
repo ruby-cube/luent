@@ -1,4 +1,4 @@
-import { DerivedSignal, ReactiveSignal, Signal } from "@rue/muonic";
+import { DerivedSignal, ReactiveSignal, AtomicSignal } from "@rue/muonic";
 import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
@@ -88,7 +88,7 @@ export function makeNode(
 export function initializeListRef( // should this be initialize ref?
     ref: NodeSignal,
     value: NodeReferent,
-    $index: Signal<number>
+    $index: AtomicSignal<number>
     // options?: ElementOptions
 ) {
     const _ref = useInternalNodeRef(ref)

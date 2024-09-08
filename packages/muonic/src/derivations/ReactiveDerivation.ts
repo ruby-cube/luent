@@ -1,17 +1,21 @@
 import { DependencyTracker, getDependencyTracker, getWithoutTracking, ReactivePrimitive } from "./DependencyTracker";
 import { asReactiveAtom, ReactiveAtom } from "./ReactiveAtom";
 import { asWatchTarget, isWatched, ReactiveEffect } from "../effects/watch";
-import { useUpdateCycle } from "../effects/UpdateCycle";
 import { DerivedSignal, isDerivedSignal } from "./DerivedSignal";
+import { AS_DERIVATION } from "./ReactiveEffect";
+import { ReactiveGetter } from "./ReactiveGetter";
+import { AnyObject } from "@rue/types";
 
 
 
-export class ReactiveDerivation<T extends DerivedSignal | ReactiveEffect = DerivedSignal | ReactiveEffect> {
+export class ReactiveDerivation {
 
     constructor(
-        public readonly o: T,
+        public readonly o: AnyObject,
         public readonly retrack: boolean = false
-    ) { }
+    ) { 
+        o[AS_DERIVATION] = this;
+    }
 
     readonly dirty: boolean = false;
 
@@ -59,11 +63,17 @@ export class ReactiveDerivation<T extends DerivedSignal | ReactiveEffect = Deriv
         }
     }
 
-    resetAtoms() {
+    resetAtoms(){
         for (const atom of this.atoms) {
             atom.deleteDerivation(this)
         }
         this.atoms.length = 0;
+    }
+
+    untrackDependencies(){
+        this.resetAtoms();
+        this.dependencies.length = 0;
+        
     }
 }
 

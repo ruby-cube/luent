@@ -13,8 +13,11 @@ export class ReactiveAtom {
         this.derivations.add(derivation)
     }
 
-    deleteDerivation(derivation: ReactiveDerivation) {
-        this.derivations?.delete(derivation)
+    deleteDerivation(derivation: ReactiveDerivation){
+        this.derivations.delete(derivation)
+        if (this.derivations.size === 0){
+            reactiveAtomMap.delete(this.primitive)
+        }
     }
 
     triggerDerivations() {
