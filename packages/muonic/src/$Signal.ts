@@ -1,86 +1,99 @@
 import { emitSignal } from "./debug";
 import { isDeepReactive, isReactiveModel, DeepReactive$, Reactive$, ReactiveModelDepth } from "./reactivemodel/Reactive$";
 import { track } from "./derivations/DependencyTracker";
-import { useUpdateCycle } from "./effects/UpdateCycle";
 import { trigger } from "./trigger";
-import { asReactiveAtom, isReactiveAtom } from "./derivations/ReactiveAtom";
-import { isWatched } from "./effects/watch";
+import { _destroyAsAtom, _initializeAsAtom, ReactivePrimitive } from "./ReactivePrimitive";
+import { ReactiveAtom } from "./derivations/ReactiveAtom";
 
 export type AtomicSignal<T = any> = {
     (): T;
-    [SIGNAL_MARKER]: boolean;
-    x__depth: undefined | ReactiveModelDepth;
+    [SIGNAL_MARKER]: SignalState<T>;
     setFrom: (toNewValue: (value: T) => T) => T
     setTo: (newValue: T) => T
 }
 
 export const SIGNAL_MARKER = 'x__isAtomicSignal';
 
+export class SignalState<T = unknown> implements ReactivePrimitive {
 
-export function $Signal<T>(value: T): AtomicSignal<T> {
-    let _value: T = value;
+    constructor(
+        public $signal: AtomicSignal<T>,
+        public value: T,
+        public depth?: ReactiveModelDepth
+    ) { }
+
+    asAtom?: ReactiveAtom | undefined;
+    initializeAsAtom(atom: ReactiveAtom) {
+        _initializeAsAtom.apply(this, [atom])
+    }
+    destroyAsAtom() {
+        _destroyAsAtom.apply(this)
+    }
+}
+
+
+export function $Signal<T>(value: T) {
+    let signalState: SignalState
+
     function $signal() {
         if (__DEV__) emitSignal();
         track($signal)
-        return _value;
+        return signalState.value;
     }
 
     // mark reactive depth of value if value is ReactiveModel
-    if (value instanceof Object) {
-        if (isDeepReactive(value)) {
-            $signal.x__depth = ReactiveModelDepth.DEEP;
-        }
-        else if (isReactiveModel(value)) {
-            $signal.x__depth = ReactiveModelDepth.SHALLOW;
-        }
-    }
+    const depth =
+        value instanceof Object ?
+            isDeepReactive(value) ? ReactiveModelDepth.DEEP
+                : isReactiveModel(value) ? ReactiveModelDepth.SHALLOW
+                    : undefined
+            : undefined
 
-    $signal[SIGNAL_MARKER] = true;
-    $signal.setTo = setTo;
-    $signal.setFrom = setFrom;
+    signalState = new SignalState($signal, value, depth)
 
-    function setTo(newValue: T) {
-        if (_value === newValue) return _value;
-        return setValue(newValue);
-    }
-
-    function setFrom(toNewValue: (value: T) => T) {
-        const newValue = toNewValue(_value)
-        if (_value === newValue) return _value;
-        return setValue(newValue);
-    }
-
-    function setValue(newValue: T) {
-        const _newValue = maybeReactivizeValue(newValue, $signal)
-        _value = _newValue;
-        trigger($signal);
-        return _newValue;
-    }
+    $signal[SIGNAL_MARKER] = signalState;
+    $signal.setTo = setTo.bind(signalState);
+    $signal.setFrom = setFrom.bind(signalState);
 
     return $signal as AtomicSignal<T>;
 }
 
-function maybeReactivizeValue(newValue: any, $signal: AtomicSignal) {
-    return newValue instanceof Object ?
-        $signal.x__depth === ReactiveModelDepth.DEEP ? DeepReactive$(newValue) :
-            $signal.x__depth === ReactiveModelDepth.SHALLOW ? Reactive$(newValue) :
-                newValue : newValue
+
+function setTo(this: SignalState, newValue: unknown) {
+    const value = this.value;
+    if (value === newValue) return value;
+    return setValue(this, newValue);
 }
 
-
-
+function setFrom(this: SignalState, toNewValue: (value: unknown) => unknown) {
+    const value = this.value;
+    const newValue = toNewValue(value)
+    if (value === newValue) return value;
+    return setValue(this, newValue);
+}
 
 // ORDER:
-// - store initial value
 // - set value
 // - trigger effects (run sync effects, schedule effects)
 // - trigger derivations effects (run sync effects, schedule effects)
+
+function setValue(signal: SignalState, newValue: unknown) {
+    const $signal = signal.$signal;
+    const _newValue = maybeReactivizeValue(newValue, signal)
+    signal.value = _newValue;
+    trigger($signal[SIGNAL_MARKER]);
+    return _newValue;
+}
+
+function maybeReactivizeValue(newValue: unknown, signal: SignalState) {
+    return newValue instanceof Object ?
+        signal.depth === ReactiveModelDepth.DEEP ? DeepReactive$(newValue) :
+            signal.depth === ReactiveModelDepth.SHALLOW ? Reactive$(newValue) :
+                newValue : newValue
+}
 
 
 export function isAtomicSignal(maybeSignal: any): maybeSignal is AtomicSignal {
     if (maybeSignal instanceof Function) return SIGNAL_MARKER in maybeSignal;
     return false;
 }
-
-
-

@@ -2,6 +2,8 @@
 
 
 
+import { ReactiveAtom } from "../derivations/ReactiveAtom";
+import { _destroyAsAtom, _initializeAsAtom, ReactivePrimitive } from "../ReactivePrimitive";
 import { ReactiveModel, toRaw } from "./Reactive$";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
@@ -13,7 +15,7 @@ type OpName = string
 
 export type TrackableOp = [ReactiveModel, any, OpName]
 
-class _TrackableOp extends Array {
+class _TrackableOp extends Array implements ReactivePrimitive {
     constructor(
         model: ReactiveModel,
         key: any,
@@ -32,6 +34,14 @@ class _TrackableOp extends Array {
         }
         this.push(model, key, op);
         opMap.set(op, this)
+    }
+
+    asAtom?: ReactiveAtom | undefined;
+    initializeAsAtom(atom: ReactiveAtom) {
+        _initializeAsAtom.apply(this, [atom])
+    }
+    destroyAsAtom() {
+        _destroyAsAtom.apply(this)
     }
 }
 

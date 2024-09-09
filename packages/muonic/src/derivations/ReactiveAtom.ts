@@ -1,4 +1,5 @@
-import { ReactivePrimitive } from "./DependencyTracker";
+import { WatchTarget } from "../effects/WatchTarget";
+import { ReactivePrimitive } from "../ReactivePrimitive";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 
 export const CLEAN_UP = 'x__cleanUp'
@@ -16,7 +17,7 @@ export class ReactiveAtom {
     deleteDerivation(derivation: ReactiveDerivation) {
         this.derivations.delete(derivation)
         if (this.derivations.size === 0) {
-            reactiveAtomMap.delete(this.primitive)
+            this.primitive.destroyAsAtom()
         }
         this.cleanUp?.()
     }
@@ -35,21 +36,25 @@ export class ReactiveAtom {
         }
         this.cleanUp = cleanUp;
     }
+
+
 }
 
-const reactiveAtomMap: WeakMap<ReactivePrimitive, ReactiveAtom> = new WeakMap()
+// WeakMap causes memory leak since ReactiveAtom references the Reactive primitive
+// const reactiveAtomMap: WeakMap<ReactivePrimitive, ReactiveAtom> = new WeakMap()
 
 export function isReactiveAtom(primitive: ReactivePrimitive | null | undefined) {
     if (!primitive) return false;
-    return Boolean(reactiveAtomMap.get(primitive));
+    return Boolean(primitive.asAtom);
 }
 
 export function asReactiveAtom(primitive: ReactivePrimitive) {
-    let atom = reactiveAtomMap.get(primitive);
+    let atom = primitive.asAtom;
     if (!atom) {
         atom = new ReactiveAtom(primitive)
-        reactiveAtomMap.set(primitive, atom)
+        primitive.initializeAsAtom(atom)
     }
     return atom;
 }
+
 

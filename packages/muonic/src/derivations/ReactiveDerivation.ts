@@ -1,7 +1,8 @@
-import { DependencyTracker, getDependencyTracker, getWithoutTracking, ReactivePrimitive } from "./DependencyTracker";
+import { DependencyTracker, getDependencyTracker } from "./DependencyTracker";
 import { asReactiveAtom, ReactiveAtom } from "./ReactiveAtom";
 import { asWatchTarget, isWatched, ReactiveEffect } from "../effects/watch";
 import { AnyObject } from "@rue/types";
+import { ReactivePrimitive } from "../ReactivePrimitive";
 
 
 export const AS_DERIVATION = 'x__asDerivation'
