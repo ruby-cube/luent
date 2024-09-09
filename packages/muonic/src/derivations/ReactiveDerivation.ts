@@ -26,7 +26,6 @@ export class ReactiveDerivation {
         // @ts-expect-error readonly
         this.dirty = true;
         const reactiveEntity = this.o;
-        console.log("triggered", reactiveEntity, isWatched(reactiveEntity))
         if (isWatched(reactiveEntity)) {
             asWatchTarget(reactiveEntity).triggerEffects();
         }
@@ -39,7 +38,6 @@ export class ReactiveDerivation {
         const tracker = new DependencyTracker();
         const [_, value] = tracker.callToCollectDependencies(reactiveDerivation);
         const deps = this.dependencies = tracker.dependencies;
-        console.log("deps", deps)
         this.initializeAtoms(deps)
 
         return value;

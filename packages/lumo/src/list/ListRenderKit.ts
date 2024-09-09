@@ -148,7 +148,7 @@ export class ListRenderKit<T = any> {
         for (const index of indicesToRemove) {
             const nodePod = this.dynamicNodePod![index];
             const dynamicNode = dynamicNodeMap.get(nodePod)
-            dynamicNode?.unmount()
+            dynamicNode?.destroy()
         }
     }
 

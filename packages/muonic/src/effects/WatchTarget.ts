@@ -7,17 +7,20 @@ import { ReactiveEffect, runEffect } from "./watch";
 import { getDependencyTracker } from "../derivations/DependencyTracker";
 import { ReactiveProp } from "../reactivemodel/ReactiveProp";
 import { ReactiveFunction } from "../derivations/ReactiveFunction";
+import { unwrap } from "@rue/flask";
 
 
 export type Effect = (...args: any[]) => void;
 
 export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveFunction = ReactiveProp | ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveFunction> {
 
-    constructor(public target: T) { }
+    constructor(public target: T) {
+        this.effects = new SetMap()
+     }
 
     watchCount = 0
     nextCycleEffects: SetMap<Phase, Effect> | undefined;
-    effects: SetMap<Phase, Effect> = new SetMap()
+    effects: SetMap<Phase, Effect>;
 
     initializeNextCycleEffects() {
         this.nextCycleEffects = new SetMap()

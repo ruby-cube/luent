@@ -1,4 +1,4 @@
-import { $else, $elseIf, $if, $Node, COMPONENT, ComponentSetup, expose, iterate_over, NodeEntity, onMounted, teleportTo, useEventListener } from "@rue/lumo";
+import { $Node, COMPONENT, ComponentSetup, create_if, else_create, iterate_over, mx, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, $Signal, DeepReactive$ } from "@rue/muonic";
 import { $ } from "@rue/muonic";
@@ -14,47 +14,47 @@ function genId() {
 
 
 
-const SideBlock = lazyLoadComponent({
-    load: () => {
-        const promise = import('./SideBlock').then(({ SideBlock }) => SideBlock)
-        return new Promise((resolve: (SideBlock: ComponentSetup) => void, reject) => {
-            setTimeout(() => {
-                promise.then((SideBlock) => {
-                    resolve(SideBlock)
-                })
-            }, 6000) // simulate network latency
-        })
-    },
-    onIdle: true,
-    Placeholder(props) {
-        return <div>Eep! I'm not ready {props.frog}</div>
-    },
-    // timeout: 5000,
-    ErrorView(props) {
-        return <div>{props.error}</div>
-    },
-});
+// const SideBlock = lazyLoadComponent({
+//     load: () => {
+//         const promise = import('./SideBlock').then(({ SideBlock }) => SideBlock)
+//         return new Promise((resolve: (SideBlock: ComponentSetup) => void, reject) => {
+//             setTimeout(() => {
+//                 promise.then((SideBlock) => {
+//                     resolve(SideBlock)
+//                 })
+//             }, 6000) // simulate network latency
+//         })
+//     },
+//     onIdle: true,
+//     Placeholder(props) {
+//         return <div>Eep! I'm not ready {props.frog}</div>
+//     },
+//     // timeout: 5000,
+//     ErrorView(props) {
+//         return <div>{props.error}</div>
+//     },
+// });
 
-const TestBox = lazyLoadComponent({
-    load: () => {
-        const promise = import('./TestBox').then(({ TestBox }) => TestBox)
-        return new Promise((resolve: (SideBlock: ComponentSetup) => void, reject) => {
-            setTimeout(() => {
-                promise.then((SideBlock) => {
-                    resolve(SideBlock)
-                })
-            }, 2000) // simulate network latency
-        })
-    },
-    onIdle: true,
-    Placeholder(props) {
-        return <div>loading test box...</div>
-    },
-    // timeout: 5000,
-    ErrorView(props) {
-        return <div>{props.error}</div>
-    },
-});
+// const TestBox = lazyLoadComponent({
+//     load: () => {
+//         const promise = import('./TestBox').then(({ TestBox }) => TestBox)
+//         return new Promise((resolve: (SideBlock: ComponentSetup) => void, reject) => {
+//             setTimeout(() => {
+//                 promise.then((SideBlock) => {
+//                     resolve(SideBlock)
+//                 })
+//             }, 2000) // simulate network latency
+//         })
+//     },
+//     onIdle: true,
+//     Placeholder(props) {
+//         return <div>loading test box...</div>
+//     },
+//     // timeout: 5000,
+//     ErrorView(props) {
+//         return <div>{props.error}</div>
+//     },
+// });
 
 const onClick = useEventListener('click');
 
@@ -65,7 +65,7 @@ const onClick = useEventListener('click');
 // memo$()
 
 export function App() {
-    return (
+    return mx(
         <List></List>
     )
 }
@@ -117,10 +117,10 @@ export function List() {
         $showSideBlock.setTo(true)
     }
 
-    return (
+    return mx(
         <div>
             <>
-                {$if($(() => $list().length === 0), 'create', () => (
+                {create_if($(() => $list().length === 0), () => (
                     <div
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
@@ -128,7 +128,7 @@ export function List() {
                         insert
                     </div>
                 ))}
-                {$else(() =>
+                {else_create(() =>
                     iterate_over($list, (item$, $index) => (
                         <div style={`background-color: ${randomColor.get()}`}>
                             <p
@@ -152,14 +152,14 @@ export function List() {
                 )}
             </>
             <button onclick={openModal}>open</button>
-            <>
+            {/* <>
                 {$if($showSideBlock, 'create', () =>
                     <>
                         <TestBox />
                         <SideBlock frog="sir robin" />
                     </>
                 )}
-            </>
+            </> */}
             <button onclick={showSideBlock}>show Side Block</button>
         </div>
     )
@@ -195,15 +195,15 @@ function DialogBox() {
         $open.setTo(false)
     }
 
-    return [
-        expose({
+    return mx(
+        {
             open,
             close
-        }),
+        },
 
         <dialog style="background-color: gray" open={$open}>
             Stop
             <button onclick={close}>close</button>
         </dialog>
-    ]
+    )
 }

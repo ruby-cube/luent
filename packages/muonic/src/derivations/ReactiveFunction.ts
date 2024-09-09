@@ -15,7 +15,6 @@ function trackReactiveFunction(derivation: ReactiveDerivation, fn: () => any) {
 }
 
 export function createReactiveFunction(fn: () => any, retrack: boolean) {
-    console.log("retrack", retrack, fn)
     if (retrack) {
         const derivation = new ReactiveDerivation(reactiveFunction, retrack)
 

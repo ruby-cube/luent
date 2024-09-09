@@ -1,6 +1,6 @@
 import { $Node, COMPONENT, ComponentSetup, create_if, else_create, else_mount, else_show, iterate_over, mount_if, mx, NodeEntity, preventDefault, show_if, teleportTo, useEventListener } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { $Signal, __addDevName } from "@rue/muonic";
+import { $Signal, __addDevName, watch } from "@rue/muonic";
 import { $, DeepReactive$, Reactive$ } from "@rue/muonic";
 import { create } from "domain";
 
@@ -26,14 +26,21 @@ export function List() {
     //     console.log("some starts with f", list$.some((item) => item.content.startsWith('f')))
     // })
 
+    function changeItem(index: number) {
+        list$[index] = {
+            id: genId(),
+            content: (Math.random() * 100).toString(),
+        }
+    }
+
 
     function changeContent(index: number) {
         const item$ = list$[index];
         item$.content = 'something else'
     }
 
+
     function insertItem(index: number) {
-        console.log("insert item")
         list$.splice(index, 0, {
             id: genId(),
             content: (Math.random() * 100).toString(),
@@ -83,7 +90,7 @@ export function List() {
                 <div>
                     <button onclick={destroy}>destroy</button>
                     <>
-                        {create_if($(() => {console.log('reevaluate list length === 0'); return list$.length === 0}), () => (
+                        {create_if($(() => { console.log('reevaluate list length === 0'); return list$.length === 0 }), () => (
                             <div
                                 onclick={() => insertItem(0)}
                                 style="background-color: gray; cursor: pointer"

@@ -9,6 +9,7 @@ import { $, isSignal, ReactiveSignal } from "../derivations/DerivedSignal";
 import {  isReactiveModel, ReactiveModel, toRaw, toWatchedProp } from "../reactivemodel/Reactive$";
 import { areEqual } from "./areEqual";
 import { createReactiveFunction, ReactiveFunction } from "../derivations/ReactiveFunction";
+import { shallowClone } from "../reactivemodel/SnapshotManager";
 
 
 type UpdateCycleOptions = {
@@ -92,15 +93,14 @@ export function watch<T>(target: () => any | ReactiveSignal<T> | ReactiveModel<T
     if (noKeys && deep && isReactiveModel(_target)) { //TODO: deep watch for $$ and $$$ signals?
         watchProps(_target, _target, []);
     }
-console.log("rewatching...")
     const watchTarget = asWatchTarget(_target);
-    let oldValue = getValue(_target, key) //TODO: Snapshot or MutationRecord for reactivemodels?
+    let oldValue = isReactiveModel(target)? shallowClone(target): getValue(_target, key) //TODO: Snapshot or MutationRecord for reactivemodels?
 
     function _effect() {
         const newValue = getValue(_target, key) // This is when retracking happens
         if (areEqual(newValue, oldValue)) return;
         effect(newValue, oldValue)
-        oldValue = newValue;
+        oldValue = isReactiveModel(target)? shallowClone(newValue): newValue;
     }
 
     if (eager) {
@@ -174,7 +174,6 @@ export function isWatched(target: Watchable | null | undefined) {
 export function asWatchTarget(target: Watchable): WatchTarget {
     let watchTarget = watchTargetMap.get(target);
     if (!watchTarget) {
-        console.log("WATCHED")
         watchTarget = new WatchTarget(target)
         watchTargetMap.set(target, watchTarget)
     }
@@ -184,6 +183,5 @@ export function asWatchTarget(target: Watchable): WatchTarget {
 function unwatch(watchTarget: WatchTarget) {
     if (watchTarget.watchCount === 0) {
         watchTargetMap.delete(watchTarget.target)
-        console.log("UNWATCHED")
     }
 }

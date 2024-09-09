@@ -615,16 +615,16 @@ function reactiveSetter(
     const prop = getReactiveProp(reactive, key);
     if (!prop) {
         if (__DEV__) console.warn(`I'm curious if this is even possible--Setting a prop that is not a reactive prop`)
-        Reflect.set(target, key, newValue, receiver); //QUESTION: Do I need to pass the newValue through 'maybeReactivize"?
+            Reflect.set(target, key, newValue, receiver); //QUESTION: Do I need to pass the newValue through 'maybeReactivize"?
         return true;
     }
-
+    
     const oldValue = Reflect.get(target, key, receiver);
     if (oldValue === newValue
         || isNonTrackable(key, DataStructure)
         || isNonSettable(<string>key, DataStructure)
         || !isWritable(target, key)) { //QUESTION: Are these conditions redundant?
-        Reflect.set(target, key, newValue, receiver);
+            Reflect.set(target, key, newValue, receiver);
         return true;
     }
 
@@ -691,7 +691,8 @@ function triggerReactiveWithSetOp(
 
 function isWritable(target: Object, key: PropertyKey) {
     const descriptor = Reflect.getOwnPropertyDescriptor(target, key);
-    if (descriptor?.writable === false) return true;
+    if (descriptor?.writable === true) return true;
+    return false;
 }
 
 // Because insertion of values don't yield differing new and old values for size and length in the setter,
@@ -908,18 +909,18 @@ function mutatingArrayOp(
 ) {
     const _args = maybeReactivizeArgs(key, args, reactive, sampleValue, register);
 
-    const lengthProp = getReactiveProp(reactive, 'length')
-
     const oldLength = target.length;
     const output = fn.apply(target, _args); // perform mutation
-    const newLength = target.lenth;
-
-    if (oldLength == newLength) return output;
-
+    const newLength = target.length;
+    
+    if (oldLength === newLength) return output; //FIX: Some methods will mutate but not change the length, like fill
+    
     storeSnapshot(reactive)
-
-    if (lengthProp)
+    
+    const lengthProp = getReactiveProp(reactive, 'length')
+    if (lengthProp){
         trigger(lengthProp); // trigger for length change
+    }
 
     if (key === 'pop') {
         const prop = getReactiveProp(reactive, oldLength - 1)

@@ -5,6 +5,8 @@ import { useUpdateCycle } from "../effects/UpdateCycle";
 import { isWatched } from "../effects/watch";
 import { getDependencyTracker, getWithoutTracking } from "./DependencyTracker";
 import { AS_DERIVATION, ReactiveDerivation } from "./ReactiveDerivation";
+import { getActiveDynamicNode } from "../../../lumo/src/dynamic/DynamicNode";
+import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -20,7 +22,7 @@ export type DerivedSignal<T = any> = {
     (): T
     [DERIVED_SIGNAL]: true
     [AS_DERIVATION]: DerivedSignalState
-    destroy: ()=>void
+    untrack: ()=>void
 }
 
 export type ReactiveSignal<T = any> = DerivedSignal<T> | AtomicSignal<T>;
@@ -54,9 +56,7 @@ export function $<T extends any>(pureGetter: () => T, retrack: boolean = false):
     let initialized = false;
     const signal = new DerivedSignalState(<DerivedSignal><unknown>$derivedSignal, retrack);
     function $derivedSignal() {
-        console.log("dirty", signal.dirty)
         if (!initialized || signal.dirty && retrack) {
-            console.log("retracking...", pureGetter)
             const value = signal.trackDependencies(pureGetter);
             signal.forwardDependencies(signal.dependencies)
             signal.updateValue(value)
@@ -78,9 +78,12 @@ export function $<T extends any>(pureGetter: () => T, retrack: boolean = false):
         return signal.value; // memoized value
     }
     $derivedSignal[DERIVED_SIGNAL] = true;
-    $derivedSignal.destroy = ()=>{
+    $derivedSignal.untrack = ()=>{
         signal.untrackDependencies()
     }
+    onDestroy(()=>{
+        signal.untrackDependencies()
+    })
 
     return <DerivedSignal><unknown>$derivedSignal;
 }

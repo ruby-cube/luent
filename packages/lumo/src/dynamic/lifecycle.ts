@@ -11,6 +11,8 @@ export enum LifecycleHook {
 }
 
 
+
+
 function useTaskQueue(node: DynamicNode, hookName: LifecycleHook) {
     let taskQueue = node.tasks[hookName]
     if (!taskQueue) {

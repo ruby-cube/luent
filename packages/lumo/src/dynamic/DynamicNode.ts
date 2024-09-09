@@ -1,6 +1,12 @@
 import { collectEffects, EffectFlask } from "@rue/flask";
 import { _NodePod } from "../node/NodePod";
-import { LifecycleHook } from "./lifecycle";
+// import { LifecycleHook } from "./lifecycle";
+// console.log(LifecycleHook)
+export enum LifecycleHook {
+    ON_ACTIVATED = 'a',
+    ON_DEACTIVATE = 'bda',
+    ON_DESTROY = 'bd',
+}
 
 export class DynamicNode {
     flask: EffectFlask | undefined;
@@ -70,11 +76,15 @@ export class DynamicNode {
     deactivate() {
         this.emit(LifecycleHook.ON_DEACTIVATE)
     }
-    
+
     unmount() {
         const nodePod = this.nodePod;
-        if (!nodePod) throw new Error('No nodePod :( This should never happen')
-            nodePod.forEachNode((node) => {
+        if (!nodePod) {
+            // throw new Error('No nodePod :( This should never happen')
+            console.warn("No nodePod :( nodePod was never set or already destroyed by hook cascade (not sure if this is problematic yet. It might be when differentiating create, mount, and show)")
+            return;
+        }
+        nodePod.forEachNode((node) => {
             node.remove();
         })
         this.deactivate()

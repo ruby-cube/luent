@@ -5,7 +5,7 @@ import { createApp } from '@rue/lumo';
 import './style.css'
 // import { TestCounter } from './TestCounter';
 // import { TestBox } from './TestBox';
-// import { App } from './App';
+import { App } from './App';
 // import { TestConditional } from './TestConditional';
 import { List } from './TestReactiveModel';
 import { configureFlask } from '../../../packages/flask/initFlask';
@@ -13,13 +13,10 @@ import { configureFlask } from '../../../packages/flask/initFlask';
 // import { ConditionalFlaskTest } from './ConditionalFlaskTest';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
-import { MountIf } from './TestMountIf';
-import { watchForRender } from '../../../packages/lumo/src/watch/watchForRender';
-import { makeDynamicNode } from '../../../packages/lumo/src/dynamic/makeDynamicNode';
 
 
 
-const app = createApp(MountIf)
+const app = createApp(List)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: false
