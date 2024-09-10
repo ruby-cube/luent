@@ -1,11 +1,11 @@
-import { asReactiveProp, getReactivePropValue, isReactiveProp, ReactiveProp } from "../reactivemodel/ReactiveProp";
-import { asTrackableOp, getTrackableOpValue, isTrackableOp, TrackableOp } from "../reactivemodel/TrackableOp";
-import { isAtomicSignal, AtomicSignal, SIGNAL_MARKER } from "../$Signal";
-import { ReactiveModel } from "../reactivemodel/Reactive$";
+import { asObservedProp, getObservedPropValue, isObservedProp, ObservedProp } from "../reactivemodel/ObservedProp";
+import { asTrackedOp, getTrackableOpValue, isTrackedOp, TrackedOp } from "../reactivemodel/TrackedOp";
+import { isAtomicSignal, AtomicSignal, SIGNAL_MARKER, SignalState } from "../$Signal";
 import { UNDEFINED } from "@rue/utils";
 import { ReactivePrimitive } from "../ReactivePrimitive";
+import { MetaReactiveModel, ReactiveModel } from "../reactivemodel/ReactiveModel";
 
-// export type ReactivePrimitive = AtomicSignal | ReactiveProp | TrackableOp
+// export type ReactivePrimitive = AtomicSignal | ObservedProp | TrackedOp
 
 // let activeDepTracker: DependencyTracker | null = null;
 // let outerDepTracker: DependencyTracker | null = null;
@@ -78,28 +78,30 @@ export class DependencyTracker {
 }
 
 
-export function getWithoutTracking(reactiveRef: (() => any) | ReactiveProp | TrackableOp) {
+export function getWithoutTracking(reactiveRef: (() => any) | ObservedProp | TrackedOp) {
     const tracker = getDependencyTracker();
     tracker?.stop();
     let value;
     if (reactiveRef instanceof Function)
         value = reactiveRef();
-    else if (isReactiveProp(reactiveRef))
-        value = getReactivePropValue(reactiveRef);
-    else if (isTrackableOp(reactiveRef))
+    else if (isObservedProp(reactiveRef))
+        value = getObservedPropValue(reactiveRef);
+    else if (isTrackedOp(reactiveRef))
         value = getTrackableOpValue(reactiveRef)
     tracker?.restore();
     return value;
 }
 
-export function track(target: AtomicSignal): boolean
-export function track(target: ReactiveModel, key: string | symbol): boolean
-export function track(target: ReactiveModel, key: string | symbol, arg: any): boolean
-export function track(target: AtomicSignal | ReactiveModel, key: string | symbol = UNDEFINED, arg: any = UNDEFINED) {
+export function track(target: SignalState): boolean
+export function track(target: MetaReactiveModel, key: string | symbol): boolean
+export function track(target: MetaReactiveModel, key: string | symbol, arg: any): boolean
+export function track(target: SignalState | MetaReactiveModel, key: string | symbol = UNDEFINED, arg: any = UNDEFINED) {
     const tracker = getDependencyTracker();
     if (!tracker) return false;
     if (tracker.shouldTrack) {
-        const _target = arg !== UNDEFINED ? asTrackableOp(target, <string>key, arg) : key !== UNDEFINED ? asReactiveProp(target, key) : target[SIGNAL_MARKER]
+        const _target = arg !== UNDEFINED ? asTrackedOp(<MetaReactiveModel>target, <string>key, arg)
+            : key !== UNDEFINED ? asObservedProp(target, key)
+                : <SignalState>target
         tracker.addDep(_target)
         return true;
     }

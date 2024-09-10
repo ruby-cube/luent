@@ -1,11 +1,6 @@
-import { sign } from "crypto";
 import { isAtomicSignal, AtomicSignal, SIGNAL_MARKER } from "../$Signal";
 import { READONLY_SIGNAL } from "../asReadonly";
-import { useUpdateCycle } from "../effects/UpdateCycle";
-import { isWatched } from "../effects/watch";
-import { getDependencyTracker, getWithoutTracking } from "./DependencyTracker";
 import { AS_DERIVATION, ReactiveDerivation } from "./ReactiveDerivation";
-import { getActiveDynamicNode } from "../../../lumo/src/dynamic/DynamicNode";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 
 // The $ function has various purposes
@@ -22,7 +17,7 @@ export type DerivedSignal<T = any> = {
     (): T
     [DERIVED_SIGNAL]: true
     [AS_DERIVATION]: DerivedSignalState
-    untrack: ()=>void
+    untrack: () => void
 }
 
 export type ReactiveSignal<T = any> = DerivedSignal<T> | AtomicSignal<T>;
@@ -40,11 +35,12 @@ export function isSignal(maybeSignal: any): maybeSignal is DerivedSignal | Atomi
 }
 
 class DerivedSignalState<T extends DerivedSignal = DerivedSignal> extends ReactiveDerivation {
-    value: any;
 
     constructor(derivedSignal: T, retrack: boolean) {
         super(derivedSignal, retrack);
     }
+
+    value: any;
 
     updateValue(value: any) {
         this.value = value;
@@ -78,10 +74,10 @@ export function $<T extends any>(pureGetter: () => T, retrack: boolean = false):
         return signal.value; // memoized value
     }
     $derivedSignal[DERIVED_SIGNAL] = true;
-    $derivedSignal.untrack = ()=>{
+    $derivedSignal.untrack = () => {
         signal.untrackDependencies()
     }
-    onDestroy(()=>{
+    onDestroy(() => {
         signal.untrackDependencies()
     })
 

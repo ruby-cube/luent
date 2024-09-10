@@ -2,8 +2,10 @@ import { emitSignal } from "./debug";
 import { isDeepReactive, isReactiveModel, DeepReactive$, Reactive$, ReactiveModelDepth } from "./reactivemodel/Reactive$";
 import { track } from "./derivations/DependencyTracker";
 import { trigger } from "./trigger";
-import { _destroyAsAtom, _initializeAsAtom, ReactivePrimitive } from "./ReactivePrimitive";
 import { ReactiveAtom } from "./derivations/ReactiveAtom";
+import { destroyAsAtom, initializeAsAtom, ReactivePrimitive } from "./ReactivePrimitive";
+import { unwatch, watch, Watchable } from "./effects/Watchable";
+import { WatchTarget } from "./effects/WatchTarget";
 
 export type AtomicSignal<T = any> = {
     (): T;
@@ -12,9 +14,9 @@ export type AtomicSignal<T = any> = {
     setTo: (newValue: T) => T
 }
 
-export const SIGNAL_MARKER = 'x__isAtomicSignal';
+export const SIGNAL_MARKER = Symbol('signal');
 
-export class SignalState<T = unknown> implements ReactivePrimitive {
+export class SignalState<T = unknown> implements ReactivePrimitive, Watchable {
 
     constructor(
         public $signal: AtomicSignal<T>,
@@ -22,13 +24,13 @@ export class SignalState<T = unknown> implements ReactivePrimitive {
         public depth?: ReactiveModelDepth
     ) { }
 
+    asWatchTarget?: WatchTarget<Watchable> | undefined;
+    watch = watch
+    unwatch = unwatch
+
     asAtom?: ReactiveAtom | undefined;
-    initializeAsAtom(atom: ReactiveAtom) {
-        _initializeAsAtom.apply(this, [atom])
-    }
-    destroyAsAtom() {
-        _destroyAsAtom.apply(this)
-    }
+    initializeAsAtom = initializeAsAtom
+    destroyAsAtom = destroyAsAtom
 }
 
 
@@ -37,7 +39,7 @@ export function $Signal<T>(value: T) {
 
     function $signal() {
         if (__DEV__) emitSignal();
-        track($signal)
+        track(signalState)
         return signalState.value;
     }
 

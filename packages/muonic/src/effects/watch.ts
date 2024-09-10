@@ -1,15 +1,16 @@
 import { AnyObject } from "@rue/types";
 import { watchProps } from "./deepWatch";
-import { WatchTarget } from "./WatchTarget";
+import { asWatchTarget, WatchTarget } from "./WatchTarget";
 import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
 import { AS_DERIVATION, ReactiveDerivation } from "../derivations/ReactiveDerivation";
 import { Phase, useUpdateCycle } from "./UpdateCycle";
 import { WatchDebugOptions } from "./debug";
 import { $, isSignal, ReactiveSignal } from "../derivations/DerivedSignal";
-import {  isReactiveModel, ReactiveModel, toRaw, toWatchedProp } from "../reactivemodel/Reactive$";
+import {  isReactiveModel, toRaw, toWatchedProp } from "../reactivemodel/Reactive$";
 import { areEqual } from "./areEqual";
 import { createReactiveFunction, ReactiveFunction } from "../derivations/ReactiveFunction";
 import { shallowClone } from "../reactivemodel/SnapshotManager";
+import { ReactiveModel } from "../reactivemodel/ReactiveModel";
 
 
 type UpdateCycleOptions = {
@@ -112,16 +113,13 @@ export function watch<T>(target: () => any | ReactiveSignal<T> | ReactiveModel<T
 
     const watcher = $listen(_effect, _options || {}, {
         enroll(_effect) {
-            if (forNextCycle) watchTarget.queueForNextCycle(_effect, phase)
-            else watchTarget.queueEffect(_effect, phase)
+            watchTarget.watch(_effect, phase, forNextCycle)
         },
         remove(_effect) {
-            watchTarget.removeEffect(_effect, phase)
-            unwatch(watchTarget)
+            watchTarget.unwatch(_effect, phase)
             if (isReactiveFunction) {
                 (<ReactiveFunction>_target)[AS_DERIVATION].untrackDependencies()
             }
-            watchTarget.emitUnwatched()
         }
     });
 
@@ -142,17 +140,11 @@ export function $initializeEffect(effect: () => void, options?: EffectOptions) {
 
     const watcher = $listen(reactiveEffect, options || {}, {
         enroll(_effect) {
-            if (forNextCycle) {
-                watchTarget.queueForNextCycle(_effect, phase)
-            }
-            else {
-                watchTarget.queueEffect(_effect, phase)
-            }
+            watchTarget.watch(_effect, phase, forNextCycle)
         },
         remove(_effect) {
-            watchTarget.removeEffect(_effect, phase)
+            watchTarget.unwatch(_effect, phase)
             reactiveEffect[AS_DERIVATION].untrackDependencies()
-            unwatch(watchTarget)
         }
     });
 
@@ -161,27 +153,3 @@ export function $initializeEffect(effect: () => void, options?: EffectOptions) {
 
 
 
-
-type Watchable = ReactiveSignal | ReactiveFunction | ReactiveModel | ReactiveEffect
-
-const watchTargetMap: WeakMap<Watchable, WatchTarget> = new WeakMap()
-
-export function isWatched(target: Watchable | null | undefined) {
-    if (!target) return false;
-    return Boolean(watchTargetMap.get(target));
-}
-
-export function asWatchTarget(target: Watchable): WatchTarget {
-    let watchTarget = watchTargetMap.get(target);
-    if (!watchTarget) {
-        watchTarget = new WatchTarget(target)
-        watchTargetMap.set(target, watchTarget)
-    }
-    return watchTarget;
-}
-
-function unwatch(watchTarget: WatchTarget) {
-    if (watchTarget.watchCount === 0) {
-        watchTargetMap.delete(watchTarget.target)
-    }
-}

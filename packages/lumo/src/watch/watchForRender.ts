@@ -2,12 +2,12 @@ import { beforeRender, ChangeHandler, isSignal, $initializeEffect as _$initializ
 import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
-import { ReactiveModel } from "@rue/muonic";
 import { getCurrentComponent, popComponent, pushComponent } from "../component/componentStack";
 import { DynamicNode, getActiveDynamicNode, isMountPhase } from "../dynamic/DynamicNode";
 import { ActiveListener, ListenerOptions } from "@rue/flask";
 import { onActivated, onDeactivate, onDestroy } from "../dynamic/lifecycle";
 import { noop } from "@rue/utils";
+import { ReactiveModel } from "../../../muonic/src/reactivemodel/ReactiveModel";
 
 type WatchForRenderOptions = {
     deep?: boolean;

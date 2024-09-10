@@ -1,35 +1,30 @@
 import { SetMap } from "@rue/utils";
 import { onPhaseCompleted, Phase, useUpdateCycle } from "./UpdateCycle";
-import { ReactiveAtom } from "../derivations/ReactiveAtom";
-import { ReactiveModel } from "../reactivemodel/Reactive$";
-import { DerivedSignal, isDerivedSignal } from "../derivations/DerivedSignal";
-import { ReactiveEffect, runEffect } from "./watch";
+import { runEffect } from "./watch";
 import { getDependencyTracker } from "../derivations/DependencyTracker";
-import { ReactiveProp } from "../reactivemodel/ReactiveProp";
-import { ReactiveFunction } from "../derivations/ReactiveFunction";
-import { unwrap } from "@rue/flask";
+import { Watchable } from "./Watchable";
 
 
 export type Effect = (...args: any[]) => void;
 
-export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveFunction = ReactiveProp | ReactiveAtom | ReactiveModel | DerivedSignal | ReactiveEffect | ReactiveFunction> {
+export class WatchTarget<T extends Watchable = Watchable> {
 
     constructor(public target: T) {
         this.effects = new SetMap()
-     }
+        target.watch(this)
+    }
 
     watchCount = 0
-    nextCycleEffects: SetMap<Phase, Effect> | undefined;
-    effects: SetMap<Phase, Effect>;
+    private nextCycleEffects: SetMap<Phase, Effect> | undefined;
+    private effects: SetMap<Phase, Effect>;
 
-    initializeNextCycleEffects() {
+    private initializeNextCycleEffects() {
         this.nextCycleEffects = new SetMap()
     }
 
-    queueForNextCycle(effect: Effect, phase: Phase) {
+    private queueForNextCycle(effect: Effect, phase: Phase) {
         if (!this.nextCycleEffects) this.initializeNextCycleEffects()
         this.nextCycleEffects!.addToSet(effect, phase)
-        this.watchCount++;
         const toBeQueued = this.nextCycleEffects?.get(phase);
         if (!toBeQueued) return;
         const mustSetUpQueueTransfer = toBeQueued.size > 0;
@@ -44,14 +39,32 @@ export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel |
         }
     }
 
-    queueEffect(effect: Effect, phase: Phase) {
+    private queueEffect(effect: Effect, phase: Phase) {
         this.effects.addToSet(effect, phase)
+    }
+    
+    private removeEffect(effect: Effect, phase: Phase) {
+        this.effects.removeFromSet(effect, phase)
+    }
+    
+    watch(effect: Effect, phase: Phase, forNextCycle: boolean){
+        if (forNextCycle) {
+            this.queueForNextCycle(effect, phase)
+        }
+        else {
+            this.queueEffect(effect, phase)
+        }
         this.watchCount++;
     }
-
-    removeEffect(effect: Effect, phase: Phase) {
-        this.effects.removeFromSet(effect, phase)
+    
+    unwatch(effect: Effect, phase: Phase){
+        this.removeEffect(effect, phase)
         this.watchCount--
+        if (this.watchCount === 0){
+            this.target.unwatch()
+        }
+
+        this.emitUnwatched()
     }
 
     triggerEffects() {
@@ -65,7 +78,7 @@ export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel |
         }
     }
 
-    runSyncEffects(effects: Set<Effect>) {
+    private runSyncEffects(effects: Set<Effect>) {
         const tracker = getDependencyTracker();
         tracker?.stop(); // in case reactive refs are triggered during a reactiveEffect
         for (const effect of effects) {
@@ -74,7 +87,7 @@ export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel |
         tracker?.restore();
     }
 
-    scheduleEffects(effects: Set<Effect>, phase: Phase) {
+    private scheduleEffects(effects: Set<Effect>, phase: Phase) {
         const updateCycle = useUpdateCycle()
         for (const effect of effects) {
             updateCycle.scheduleEffect(this.target, effect, phase)
@@ -90,9 +103,21 @@ export class WatchTarget<T extends ReactiveProp | ReactiveAtom | ReactiveModel |
         this.cleanUp = cleanUp;
     }
 
-    emitUnwatched() {
+    private emitUnwatched() {
         this.cleanUp?.()
     }
 }
 
 
+export function isWatched(target: Watchable | null | undefined) {
+    if (!target) return false;
+    return Boolean(target.asWatchTarget);
+}
+
+export function asWatchTarget(target: Watchable): WatchTarget {
+    let watchTarget = target.asWatchTarget;
+    if (!watchTarget) {
+        watchTarget = new WatchTarget(target)
+    }
+    return watchTarget;
+}

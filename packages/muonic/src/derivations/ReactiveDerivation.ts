@@ -1,18 +1,19 @@
 import { DependencyTracker, getDependencyTracker } from "./DependencyTracker";
 import { asReactiveAtom, ReactiveAtom } from "./ReactiveAtom";
-import { asWatchTarget, isWatched, ReactiveEffect } from "../effects/watch";
 import { AnyObject } from "@rue/types";
 import { ReactivePrimitive } from "../ReactivePrimitive";
+import { unwatch, watch, Watchable } from "../effects/Watchable";
+import { asWatchTarget, isWatched, WatchTarget } from "../effects/WatchTarget";
 
 
 export const AS_DERIVATION = 'x__asDerivation'
 
-export class ReactiveDerivation {
+export class ReactiveDerivation implements Watchable {
 
     constructor(
         public readonly o: AnyObject,
         public readonly retrack: boolean = false
-    ) { 
+    ) {
         o[AS_DERIVATION] = this;
     }
 
@@ -26,7 +27,7 @@ export class ReactiveDerivation {
     trigger() {
         // @ts-expect-error readonly
         this.dirty = true;
-        const reactiveEntity = this.o;
+        const reactiveEntity = this.o; //FIX:
         if (isWatched(reactiveEntity)) {
             asWatchTarget(reactiveEntity).triggerEffects();
         }
@@ -62,17 +63,21 @@ export class ReactiveDerivation {
         }
     }
 
-    resetAtoms(){
+    resetAtoms() {
         for (const atom of this.atoms) {
             atom.deleteDerivation(this)
         }
         this.atoms.length = 0;
     }
 
-    untrackDependencies(){
+    untrackDependencies() {
         this.resetAtoms();
         this.dependencies.length = 0;
     }
+
+    asWatchTarget?: WatchTarget | undefined;
+    watch = watch;
+    unwatch = unwatch;
 }
 
 

@@ -1,4 +1,4 @@
-import { isReactiveModel, isReactiveObject, ReactiveModel } from "../reactivemodel/Reactive$";
+import { isReactiveModel, isReactiveObject } from "../reactivemodel/Reactive$";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 import { AnyObject } from "@rue/types";
 
@@ -71,6 +71,8 @@ export function isSetOp(op: AnyObject): op is SetOp {
 // mu(state$.a.b, b => {
 //     b.pet = "dog"
 // })
+
+//FIX:
 
 type NestedModel = ReactiveModel;
 type RootModel = ReactiveModel;

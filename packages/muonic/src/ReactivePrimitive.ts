@@ -7,10 +7,10 @@ export interface ReactivePrimitive {
 
 }
 
-export function _initializeAsAtom(this: ReactivePrimitive, atom: ReactiveAtom) {
+export function initializeAsAtom(this: ReactivePrimitive, atom: ReactiveAtom) {
     this.asAtom = atom
 }
 
-export function _destroyAsAtom(this: ReactivePrimitive){
+export function destroyAsAtom(this: ReactivePrimitive){
     this.asAtom = undefined
 }

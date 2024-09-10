@@ -1,4 +1,5 @@
-import { Reactive$, ReactiveModel } from "./Reactive$"
+import { Reactive$ } from "./Reactive$"
+import { ReactiveModel } from "./ReactiveModel"
 
 class Frog {
     $: ReactiveModel<{

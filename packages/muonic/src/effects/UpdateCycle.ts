@@ -7,11 +7,12 @@ import { AnyObject } from "@rue/types";
 import { MutationRecord } from "./deepWatch";
 import { areEqual } from "./areEqual";
 import { DerivedSignal } from "../derivations/DerivedSignal";
-import { isReactiveModel, ReactiveModel } from "../reactivemodel/Reactive$";
 import { SnapshotManager } from "../reactivemodel/SnapshotManager";
 import { runEffect } from "./watch";
+import { MetaReactiveModel, ReactiveModel } from "../reactivemodel/ReactiveModel";
+import { ReactiveDerivation } from "../derivations/ReactiveDerivation";
 
-type ReactiveTarget = ReactiveAtom | DerivedSignal | ReactiveModel
+type ReactiveTarget = ReactiveAtom | ReactiveModel | ReactiveDerivation
 
 export type Phase = 'pre' | 'render' | 'post' | 'sync'
 
@@ -99,7 +100,7 @@ export class UpdateCycle {
         }
     }
 
-    recordOp(target: ReactiveModel, op: MutationRecord) {
+    recordOp(metaReactive: MetaReactiveModel, op: MutationRecord) { //FIX:
 
         //TODO: consolidate set ops (cannot consolidate mutation ops, those need to be in order)
         let existingOps = this.opsMap.get(target);

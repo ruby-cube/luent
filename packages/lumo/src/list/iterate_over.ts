@@ -2,11 +2,12 @@ import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { $listen, Callback, collectEffects, EffectFlask, ListenerOptions } from "@rue/flask";
-import { isReactiveModel, ReactiveModel, Readonly, AtomicSignal, $Signal, isSignal, ReactiveSignal } from "@rue/muonic";
 import {  makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { ListRenderKit } from "./ListRenderKit";
+import { AtomicSignal, ReactiveSignal } from "@rue/muonic";
+import { ReactiveModel } from "../../../muonic/src/reactivemodel/ReactiveModel";
 
 
 export type RenderItem<T = any> = (item: T, $index: AtomicSignal<number>) => NodeEntity[] | NodeEntity

@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { asReactiveProp, ReactiveProp } from "../reactivemodel/ReactiveProp";
+import { asObservedProp, ObservedProp } from "../reactivemodel/ObservedProp";
 import { isReactiveModel, ReactiveModel } from "../reactivemodel/Reactive$";
 import { AtomicSignal } from "../$Signal";
 
@@ -10,13 +10,13 @@ export type WatchDebugOptions = {
     onTrigger?: OnTrigger;
 }
 
-type OnTrack = (target?: AtomicSignal | ReactiveProp | ReactiveModel) => void
+type OnTrack = (target?: AtomicSignal | ObservedProp | ReactiveModel) => void
 type OnTrigger = () => void
 
-const onTrackMap: Map<AtomicSignal | ReactiveProp | ReactiveModel, OnTrack> = new Map();
-const onTriggerMap: Map<AtomicSignal | ReactiveProp | ReactiveModel, OnTrigger> = new Map();
+const onTrackMap: Map<AtomicSignal | ObservedProp | ReactiveModel, OnTrack> = new Map();
+const onTriggerMap: Map<AtomicSignal | ObservedProp | ReactiveModel, OnTrigger> = new Map();
 
-export function registerDebuggers(targets: (AtomicSignal | ReactiveProp)[] | ReactiveModel, options: WatchDebugOptions | undefined){
+export function registerDebuggers(targets: (AtomicSignal | ObservedProp)[] | ReactiveModel, options: WatchDebugOptions | undefined){
     const {onTrack, onTrigger} = options ?? {}
     const _targets = isReactiveModel(targets) ? [targets] : targets
     if (onTrack){
@@ -31,21 +31,21 @@ export function registerDebuggers(targets: (AtomicSignal | ReactiveProp)[] | Rea
     }
 }
 
-export function runTrackDebugger(target: AtomicSignal | ReactiveProp | ReactiveModel){
+export function runTrackDebugger(target: AtomicSignal | ObservedProp | ReactiveModel){
     const onTrack = onTrackMap.get(target);
     if (onTrack) onTrack();
 }
 
-export function runTriggerDebugger(target: AtomicSignal | ReactiveProp | ReactiveModel){
+export function runTriggerDebugger(target: AtomicSignal | ObservedProp | ReactiveModel){
     const onTrigger = onTriggerMap.get(target);
     if (onTrigger) onTrigger();
 }
 
-export function collectReactiveProps(target: ReactiveModel, deps?: ReactiveProp[]) {
+export function collectReactiveProps(target: ReactiveModel, deps?: ObservedProp[]) {
     if (!isReactiveModel(target)) return [];
     const _deps = deps || [];
     for (const key in target) {
-        _deps.push(asReactiveProp(target, key));
+        _deps.push(asObservedProp(target, key));
         const value = target[key];
         collectReactiveProps(value, _deps);
     }
