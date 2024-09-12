@@ -13,6 +13,7 @@ type SnapshotStack = IndexedSnapshot[];
 export class SnapshotManager {
     private snapshotMap: WeakMap<AnyObject, SnapshotStack> = new WeakMap();
     takeSnapshot(original: AnyObject, index: number, clone: undefined | AnyObject) {
+        return; //TODO: temporarily disable
         const snapshotMap = this.snapshotMap;
         const snapshot = new Proxy(clone ? clone : shallowClone(original), {
             get(target, key, receiver) {

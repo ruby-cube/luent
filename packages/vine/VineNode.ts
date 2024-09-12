@@ -9,7 +9,7 @@ import { AnyObject } from "@rue/types";
 import { isIterable } from "../utils/array";
 import { getKeyPathValue } from "@rue/utils";
 
-export const DONE = Symbol("exit tree")
+export const DONE = Symbol("exitTree")
 
 type ChildNode = VineNode;
 type ParentNode = VineNode;

@@ -38,6 +38,9 @@ importers:
       '@rue/muonic':
         specifier: workspace:*
         version: link:../../packages/muonic
+      '@rue/thread':
+        specifier: workspace:*
+        version: link:../../packages/thread
       '@rue/utils':
         specifier: workspace:*
         version: link:../../packages/utils
@@ -54,6 +57,9 @@ importers:
       '@rue/types':
         specifier: workspace:*
         version: link:../../packages/types
+      vite:
+        specifier: ^5.4.3
+        version: 5.4.3(@types/node@22.5.4)
 
   apps/serve-hello-world:
     dependencies:
@@ -197,9 +203,6 @@ importers:
       typescript:
         specifier: ^5.5.4
         version: 5.5.4
-      vite:
-        specifier: ^5.4.3
-        version: 5.4.3(@types/node@22.5.4)
 
   packages/types:
     devDependencies:

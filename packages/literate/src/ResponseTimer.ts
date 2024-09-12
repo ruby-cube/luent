@@ -13,7 +13,7 @@ export class ResponseTimer {
     }
 }
 
-export const RESPONSE_TIMER = Symbol('response timer') as TypedKey<ResponseTimer>
+export const RESPONSE_TIMER = Symbol('responseTimer') as TypedKey<ResponseTimer>
 
 
 export function getResponseTimer(){

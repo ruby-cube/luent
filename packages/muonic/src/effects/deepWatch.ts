@@ -1,4 +1,5 @@
-import { isReactiveModel, isReactiveObject } from "../reactivemodel/Reactive$";
+import {  isReactiveModel, isReactiveObject, ReactiveModel, toRaw } from "../reactivemodel/Reactive$";
+import { MetaReactiveModel } from "../reactivemodel/ReactiveModel";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 import { AnyObject } from "@rue/types";
 
@@ -7,13 +8,15 @@ export type KeyPath = PropertyKey[]
 
 export type MutationRecord = {
     target: ReactiveModel,
-    targetPath?: KeyPath, // undefined means the target is the root watched model
+    // root?: ReactiveModel,
+    // targetPath?: KeyPath, // undefined means the target is the root watched model
     op: MutationOp | SetOp
 }
 
 export type MutationOp = {
     type: string,
-    args: any[]
+    args: any[],
+    output: any
 }
 
 export type SetOp = {
@@ -72,7 +75,6 @@ export function isSetOp(op: AnyObject): op is SetOp {
 //     b.pet = "dog"
 // })
 
-//FIX:
 
 type NestedModel = ReactiveModel;
 type RootModel = ReactiveModel;
@@ -83,21 +85,50 @@ export function isNestedWatched(reactive: ReactiveModel) {
     return deepWatchMap.has(reactive);
 }
 
-export function getRootWatchedModelAndKeyPath(reactive: ReactiveModel){
+export function getRootWatchedModelAndKeyPath(reactive: ReactiveModel) {
     if (!isNestedWatched(reactive)) throw new Error('INVALID INPUT: Must be nested watched model. Check with `isNestedWatched`')
     return deepWatchMap.get(reactive)!;
 }
 
-export function watchProps(target: ReactiveModel, rootTarget: ReactiveModel, keyPath: KeyPath) {
-    for (const key in target) {
-        const value = target[key]
-        const _keyPath = [...keyPath, key];
-        if (isReactiveObject(value)) { // excludes arrays, maps, and sets in deep watch
-            deepWatchMap.set(value, [rootTarget, _keyPath])
-            watchProps(value, rootTarget, keyPath)
+type NestedWatcher<T> = T extends NestedModel[] ? { unwatch: () => void } : void
+
+export function watchProps<N extends NestedModel[] | undefined>(target: ReactiveModel, rootTarget: ReactiveModel, keyPath: KeyPath, nestedModels?: N): NestedWatcher<N> {
+    const _nestedModels: NestedModel[] = nestedModels || [];
+    const raw = toRaw(target)
+    if (raw instanceof Array){
+        for (let i = 0; i < raw.length; i++){
+            const value = raw[i]
+            const _keyPath = [...keyPath, i];
+            if (isReactiveModel(value)) { // excludes  maps, and sets in deep watch
+                deepWatchMap.set(value, [rootTarget, _keyPath])
+                watchProps(value, rootTarget, keyPath, _nestedModels)
+            }
         }
     }
+    else if (isReactiveObject(target)){
+        for (const key in raw) {
+            const value = raw[key]
+            const _keyPath = [...keyPath, key];
+            if (isReactiveModel(value)) { // excludes  maps, and sets in deep watch
+                deepWatchMap.set(value, [rootTarget, _keyPath])
+                watchProps(value, rootTarget, keyPath, _nestedModels)
+            }
+        }
+    }
+    
+    if (!nestedModels) {
+        return {
+            unwatch() {
+                for (const model of _nestedModels) {
+                    deepWatchMap.delete(model)
+                }
+            }
+        } as NestedWatcher<N>
+    }
+
+    return undefined as NestedWatcher<N>
 }
+
 
 
 

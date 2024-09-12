@@ -44,11 +44,11 @@ export function runTriggerDebugger(target: AtomicSignal | ObservedProp | Reactiv
 export function collectReactiveProps(target: ReactiveModel, deps?: ObservedProp[]) {
     if (!isReactiveModel(target)) return [];
     const _deps = deps || [];
-    for (const key in target) {
-        _deps.push(asObservedProp(target, key));
-        const value = target[key];
-        collectReactiveProps(value, _deps);
-    }
+    // for (const key in target) {
+    //     _deps.push(asObservedProp(target, key));
+    //     const value = target[key];
+    //     collectReactiveProps(value, _deps);
+    // }
     return _deps;
 }
 

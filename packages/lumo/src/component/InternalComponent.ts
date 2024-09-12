@@ -20,7 +20,7 @@ export type DOMNode = CharacterData | Element
 export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (props: P) => Component
 
 // export type Slot<T> = T extends AnyObject ? InternalComponent<T> : NodeEntity | NodeEntity[]
-export const COMPONENT = Symbol('public component')
+export const COMPONENT = Symbol('publicComponent')
 export type PublicComponent<T extends undefined | AnyObject = undefined | AnyObject> = T extends undefined ? undefined : { [COMPONENT]: true } & T // contains anything in expose
 
 export interface Component<T extends undefined | AnyObject = undefined | AnyObject> {

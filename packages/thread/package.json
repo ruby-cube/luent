@@ -4,13 +4,11 @@
   "description": "",
   "dependencies": {
     "@rue/flask": "workspace:*",
-    "@rue/utils": "workspace:*",
-    "setimmediate": "^1.0.5"
+    "@rue/utils": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.5.4",
-    "typescript": "^5.5.4",
-    "vite": "^5.4.3"
+    "typescript": "^5.5.4"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT"

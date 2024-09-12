@@ -1,18 +1,13 @@
-import { beforeRepaint, queueTask } from "@rue/thread";
-import { ReactiveAtom } from "../derivations/ReactiveAtom";
+import { setImmediate, clearImmediate } from "@rue/thread";
 import { $schedule, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
-import { Effect } from "./WatchTarget";
-import { SetMap, UNDEFINED } from "@rue/utils";
-import { AnyObject } from "@rue/types";
+import { SetMap } from "@rue/utils";
 import { MutationRecord } from "./deepWatch";
-import { areEqual } from "./areEqual";
-import { DerivedSignal } from "../derivations/DerivedSignal";
-import { SnapshotManager } from "../reactivemodel/SnapshotManager";
-import { runEffect } from "./watch";
-import { MetaReactiveModel, ReactiveModel } from "../reactivemodel/ReactiveModel";
-import { ReactiveDerivation } from "../derivations/ReactiveDerivation";
+import { ReactiveModel } from "../reactivemodel/Reactive$";
+// import { runEffect } from "./watch";
 
-type ReactiveTarget = ReactiveAtom | ReactiveModel | ReactiveDerivation
+export type Watchable = any
+// AtomicSignal | DerivedSignal | ReactiveFunction  | ReactiveModel | ObservedProp
+export type Effect = (...args: any[]) => void;
 
 export type Phase = 'pre' | 'render' | 'post' | 'sync'
 
@@ -21,13 +16,24 @@ export type Phase = 'pre' | 'render' | 'post' | 'sync'
 let updateCycleCount = -1;
 
 let currentUpdateCycle: UpdateCycle | undefined;
+let flushingUpdateCycle: UpdateCycle | undefined;
+
+function startFlushPhase(phase: Phase, updateCycle: UpdateCycle) {
+    updateCycle.setPhase(phase);
+    flushingUpdateCycle = updateCycle
+}
+
+function endFlushPhase(updateCyle: UpdateCycle) {
+    updateCyle.endPhase()
+    flushingUpdateCycle = undefined
+}
 
 export function getCurrentUpdateCycle() {
     return currentUpdateCycle;
 }
 
 export function useUpdateCycle() {
-    let updateCycle = getCurrentUpdateCycle()
+    let updateCycle = currentUpdateCycle
     if (!updateCycle) {
         updateCycle = new UpdateCycle();
 
@@ -35,30 +41,52 @@ export function useUpdateCycle() {
     return updateCycle;
 }
 
-export function startUpdateCycle(updateCycle: UpdateCycle) {
+export function getFlushingUpdateCycle() {
+    return flushingUpdateCycle;
+}
+
+
+
+function startCollectingEffects(updateCycle: UpdateCycle) {
     if (currentUpdateCycle)
         throw new Error("Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
     return currentUpdateCycle = updateCycle;
 }
 
-export function endUpdateCycle() {
+function endCollectingEffects() {
     currentUpdateCycle = undefined;
 }
 
 export class UpdateCycle {
-
+    phase?: Phase = 'sync'
+    setPhase(phase: Phase) {
+        this.phase = phase
+    }
+    endPhase() {
+        this.phase = undefined
+    }
     constructor() {
-        startUpdateCycle(this)
         updateCycleCount++;
-        beforeRepaint(() => {
-            this.runEffects('render');
-            this.runTasks(Hooks.ON_RENDERED)
-            queueTask(() => {
-                this.runEffects('post');
-                this.runTasks(Hooks.ON_UPDATE_COMPLETED)
-                endUpdateCycle();
-            }, { __devName: queueTask.name })
-        }, { __devName: beforeRepaint.name })
+        startCollectingEffects(this)
+        queueTask(() => { //QUESTION: Should I wrap in a flask??
+            endCollectingEffects();
+            startFlushPhase('pre', this)
+            this.runEffects('pre');
+            this.runTasks(Hooks.AFTER_PRERENDER_PHASE)
+            endFlushPhase(this)
+            beforeRepaint(() => {
+                startFlushPhase('render', this)
+                this.runEffects('render');
+                this.runTasks(Hooks.ON_RENDERED)
+                endFlushPhase(this)
+                queueTask(() => {
+                    startFlushPhase('post', this)
+                    this.runEffects('post');
+                    this.runTasks(Hooks.ON_UPDATE_COMPLETED)
+                    endFlushPhase(this)
+                })
+            })
+        })
     }
 
     get count() {
@@ -100,9 +128,9 @@ export class UpdateCycle {
         }
     }
 
-    recordOp(metaReactive: MetaReactiveModel, op: MutationRecord) { //FIX:
+    recordOp(target: ReactiveModel, op: MutationRecord) { //FIX:
 
-        //TODO: consolidate set ops (cannot consolidate mutation ops, those need to be in order)
+        // TODO: consolidate set ops (cannot consolidate mutation ops, those need to be in order)
         let existingOps = this.opsMap.get(target);
         if (existingOps) {
             existingOps.push(op)
@@ -122,7 +150,7 @@ export class UpdateCycle {
     effects: SetMap<Phase, Effect> = new SetMap();
     reactiveEffects: SetMap<Phase, Effect> = new SetMap();
 
-    scheduleEffect(target: ReactiveTarget, effect: Effect, phase: Phase) {
+    scheduleEffect(target: Watchable, effect: Effect, phase: Phase) {
         if (target === unwrap(effect)) {
             this.reactiveEffects.addToSet(effect, phase)
         }
@@ -135,13 +163,15 @@ export class UpdateCycle {
         const effects = this.effects.get(phase);
         if (effects) {
             for (const effect of effects) {
-                runEffect(effect)
+                // runEffect(effect)
+                effect()
             }
         }
         const reactiveEffects = this.reactiveEffects.get(phase)
         if (reactiveEffects) {
             for (const effect of reactiveEffects) {
-                runEffect(effect);
+                // runEffect(effect);
+                effect()
             }
         }
     }
@@ -162,7 +192,7 @@ export class UpdateCycle {
 
 
     runTasks(hookName: Hooks) {
-        const tasks = getCurrentUpdateCycle()?.tasks;
+        const tasks = currentUpdateCycle?.tasks;
         if (!tasks) return;
         const _tasks = tasks[hookName]
         for (const task of _tasks) {
@@ -199,12 +229,12 @@ function createUpdateCycleHook(hookName: Hooks) {
         _options.flask = 'outlive'
         return $schedule(task, _options, {
             enroll(task) {
-                const tasks = getCurrentUpdateCycle()?.tasks;
+                const tasks = currentUpdateCycle?.tasks;
                 if (!tasks) throw new Error('No update cycle :(. This should never happen')
                 tasks[hookName].add(task)
             },
             remove(task) {
-                const tasks = getCurrentUpdateCycle()?.tasks;
+                const tasks = currentUpdateCycle?.tasks;
                 if (!tasks) throw new Error('No update cycle :(. This should never happen')
                 tasks[hookName].delete(task)
             }
@@ -234,10 +264,26 @@ export function onPhaseCompleted(phase: Phase, handler: () => void) {
 }
 
 
-export function runPrerenderEffectsAndTasks() {
-    const updateCycle = getCurrentUpdateCycle()
-    if (updateCycle) {
-        updateCycle.runEffects('pre');
-        updateCycle.runTasks(Hooks.AFTER_PRERENDER_PHASE)
+// export function runPrerenderEffectsAndTasks() {
+//     const updateCycle = getCurrentUpdateCycle()
+//     if (updateCycle) {
+//         updateCycle.runEffects('pre');
+//         updateCycle.runTasks(Hooks.AFTER_PRERENDER_PHASE)
+//     }
+// }
+
+function beforeRepaint(cb: () => void) {
+    const id = requestAnimationFrame(cb)
+    return {
+        cancel: () => cancelAnimationFrame(id)
+    }
+}
+
+function queueTask(cb: () => void) {
+    const id = setImmediate(cb)
+    return {
+        cancel() {
+            clearImmediate(id)
+        }
     }
 }

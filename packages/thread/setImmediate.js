@@ -1,17 +1,22 @@
-(function (global, undefined) {
-    "use strict";
+// (function (_global, undefined) {
+//     "use strict";
+const _global =typeof self === "undefined"
+? typeof global === "undefined"
+  ? this
+  : global
+: self
 
-    if (global.setImmediate) {
-      return;
+    if (_global.setImmediate) {
+      console.log("already", _global.setImmediate)
     }
 
     var nextHandle = 1; // Spec says greater than zero
     var tasksByHandle = {};
     var currentlyRunningATask = false;
-    var doc = global.document;
+    var doc = _global.document;
     var registerImmediate;
 
-    function setImmediate(callback) {
+    export function setImmediate(callback) {
       // Callback can either be a function or a string
       if (typeof callback !== "function") {
         callback = new Function("" + callback);
@@ -28,7 +33,7 @@
       return nextHandle++;
     }
 
-    function clearImmediate(handle) {
+    export function clearImmediate(handle) {
       delete tasksByHandle[handle];
     }
 
@@ -85,28 +90,29 @@
 
     function canUsePostMessage() {
       // The test against `importScripts` prevents this implementation from being installed inside a web worker,
-      // where `global.postMessage` means something completely different and can't be used for this purpose.
-      if (global.postMessage && !global.importScripts) {
+      // where `_global.postMessage` means something completely different and can't be used for this purpose.
+      if (_global.postMessage && !_global.importScripts) {
         var postMessageIsAsynchronous = true;
-        var oldOnMessage = global.onmessage;
-        global.onmessage = function () {
+        var oldOnMessage = _global.onmessage;
+        _global.onmessage = function () {
           postMessageIsAsynchronous = false;
         };
-        global.postMessage("", "*");
-        global.onmessage = oldOnMessage;
+        _global.postMessage("", "*");
+        _global.onmessage = oldOnMessage;
         return postMessageIsAsynchronous;
       }
     }
 
     function installPostMessageImplementation() {
-      // Installs an event handler on `global` for the `message` event: see
+      console.log("post message yes")
+      // Installs an event handler on `_global` for the `message` event: see
       // * https://developer.mozilla.org/en/DOM/window.postMessage
       // * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
 
       var messagePrefix = "setImmediate$" + Math.random() + "$";
       var onGlobalMessage = function (event) {
         if (
-          event.source === global &&
+          event.source === _global &&
           typeof event.data === "string" &&
           event.data.indexOf(messagePrefix) === 0
         ) {
@@ -114,14 +120,14 @@
         }
       };
 
-      if (global.addEventListener) {
-        global.addEventListener("message", onGlobalMessage, false);
+      if (_global.addEventListener) {
+        _global.addEventListener("message", onGlobalMessage, false);
       } else {
-        global.attachEvent("onmessage", onGlobalMessage);
+        _global.attachEvent("onmessage", onGlobalMessage);
       }
 
       registerImmediate = function (handle) {
-        global.postMessage(messagePrefix + handle, "*");
+        _global.postMessage(messagePrefix + handle, "*");
       };
     }
 
@@ -159,34 +165,39 @@
       };
     }
 
-    // If supported, we should attach to the prototype of global, since that is where setTimeout et al. live.
-    var attachTo = Object.getPrototypeOf && Object.getPrototypeOf(global);
-    attachTo = attachTo && attachTo.setTimeout ? attachTo : global;
+    // If supported, we should attach to the prototype of _global, since that is where setTimeout et al. live.
+    var attachTo = Object.getPrototypeOf && Object.getPrototypeOf(_global);
+    attachTo = attachTo && attachTo.setTimeout ? attachTo : _global;
 
     // Don't get fooled by e.g. browserify environments.
-    if ({}.toString.call(global.process) === "[object process]") {
+    if ({}.toString.call(_global.process) === "[object process]") {
+      console.log("next tick")
       // For Node.js before 0.9
       installNextTickImplementation();
     } else if (canUsePostMessage()) {
+      console.log("post")
       // For non-IE10 modern browsers
       installPostMessageImplementation();
-    } else if (global.MessageChannel) {
+    } else if (_global.MessageChannel) {
+      console.log("message channel")
       // For web workers, where supported
       installMessageChannelImplementation();
     } else if (doc && "onreadystatechange" in doc.createElement("script")) {
+      console.log("state change")
       // For IE 6–8
       installReadyStateChangeImplementation();
     } else {
+      console.log("set time out")
       // For older browsers
       installSetTimeoutImplementation();
     }
 
     attachTo.setImmediate = setImmediate;
     attachTo.clearImmediate = clearImmediate;
-  })(
-    typeof self === "undefined"
-      ? typeof global === "undefined"
-        ? this
-        : global
-      : self
-  );
+  // })(
+  //   typeof self === "undefined"
+  //     ? typeof _global === "undefined"
+  //       ? this
+  //       : _global
+  //     : self
+  // );

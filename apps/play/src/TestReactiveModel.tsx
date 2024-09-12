@@ -1,8 +1,8 @@
 import { $Node, COMPONENT, ComponentSetup, create_if, else_create, else_mount, else_show, iterate_over, mount_if, mx, NodeEntity, preventDefault, show_if, teleportTo, useEventListener } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { $Signal, __addDevName, watch } from "@rue/muonic";
+import { $Signal, __addDevName } from "@rue/muonic";
 import { $, DeepReactive$, Reactive$ } from "@rue/muonic";
-import { create } from "domain";
+import { watch } from "../../../packages/lumo/src/watch/watchForRender";
 
 
 const randomColor = useRandomColorGenerator()
@@ -22,6 +22,12 @@ export function List() {
         { id: 3, content: "swamp" }
     ])
 
+    console.log("works?", list$ instanceof Array)
+
+    watch(list$, (list, mutations)=>{
+        console.log("mutations", mutations)
+    }, {deep: true})
+
     // $initializeEffect(() => {
     //     console.log("some starts with f", list$.some((item) => item.content.startsWith('f')))
     // })
@@ -35,6 +41,7 @@ export function List() {
 
 
     function changeContent(index: number) {
+        console.log("changing content")
         const item$ = list$[index];
         item$.content = 'something else'
     }
@@ -82,85 +89,98 @@ export function List() {
     function destroy() {
         $alive.setTo(false)
     }
+    // const item$ = list$[0]
+    //     watch($(() => item$.content), (newValue, oldValue) => {
+    //         console.log("changed", newValue, oldValue)
+    //     }, { phase: 'render' })
+    //     console.log("------------")
 
+    // setTimeout(()=>{
+    //     changeContent(0)
+    // }, 1)
+
+    // return mx("hi")
     return mx(
+        // <>
+        //     {create_if($alive, () => (
+
+        //         <div>
+        //             <button onclick={destroy}>destroy</button>
         <>
-            {create_if($alive, () => (
-
-                <div>
-                    <button onclick={destroy}>destroy</button>
-                    <>
-                        {create_if($(() => { console.log('reevaluate list length === 0'); return list$.length === 0 }), () => (
-                            <div
-                                onclick={() => insertItem(0)}
-                                style="background-color: gray; cursor: pointer"
-                            >
-                                insert
-                            </div>
-                        ))}
-                        {else_create(() =>
-                            iterate_over(list$, (item$, $index) => (
-                                <div
-                                    ref={$itemDiv}
-                                    onclick={(e) => toggleSelect(e, $index())}
-                                    style={[
-                                        `background-color: ${randomColor.get()}`,
-                                        o => {
-                                            o.outline = selected$.has(item$) ? 'thick solid blue' : '';
-                                        }
-                                    ]}>
-                                    <p
-                                        onclick={(e) => removeItem($index())}
-                                        style="cursor: pointer"
-                                    >
-                                        X
-                                    </p>
-                                    <li onclick={() => changeContent($index())}>
-                                        {$(() => item$.content)}
-                                    </li>
-                                    <p>{$index}</p>
-                                    <div
-                                        onclick={() => insertItem($index() + 1)}
-                                        style="background-color: gray; cursor: pointer"
-                                    >
-                                        insert
-                                    </div>
-                                    <div
-                                        onclick={() => moveSelectedItems($index() + 1)}
-                                        style="background-color: white; cursor: pointer"
-                                    >
-                                        insert
-                                    </div>
-                                </div>
-                            ), 'id')
-                        )}
-                    </>
-                    <button onclick={clearSelection}>clear</button>
-                    {/* <button onclick={$if($active, capture.once(clearSelection))}>clear</button>
-
-            <button
-                onclick={[() => increment($index()), preventDefault.endHere, target(THIS_NODE), { once: true }]}
+            {/* //                 {create_if($(() => { console.log('reevaluate list length === 0'); return list$.length === 0 }), () => ( */}
+            <div
+                onclick={() => insertItem(0)}
+                style="background-color: gray; cursor: pointer"
             >
-                clear
-            </button>
+                insert
+            </div>
+            {/* //                 ))} */}
+            {/* //                 {else_create(() => */}
 
-            <button
-                onclick={[increment, { until: onMounted }]}
-            >
-                clear
-            </button>
-            <button
-                onclick={[
-                    $if($active, [
-                        increment, runOnce.preventDefault, target(THIS_NODE)
-                    ]),
-                    $else(decrement)
-                ]}
-            >
-                clear
-            </button> */}
+            {iterate_over(list$, (item$, $index) => (
+                <div
+                    ref={$itemDiv}
+                    onclick={(e) => toggleSelect(e, $index())}
+                    style={[
+                        `background-color: ${randomColor.get()}`,
+                        o => {
+                            o.outline = selected$.has(item$) ? 'thick solid blue' : '';
+                        }
+                    ]}>
+                    <p
+                        onclick={(e) => removeItem($index())}
+                        style="cursor: pointer"
+                    >
+                        X
+                    </p>
+
+                    <li onclick={() => changeContent($index())}>
+                        {$(() => item$.content)}
+                    </li>
+                    <p>{$index}</p>
+                    <div
+                        onclick={() => insertItem($index() + 1)}
+                        style="background-color: gray; cursor: pointer"
+                    >
+                        insert
+                    </div>
+                    <div
+                        onclick={() => moveSelectedItems($index() + 1)}
+                        style="background-color: white; cursor: pointer"
+                    >
+                        insert
+                    </div>
                 </div>
-            ))}
+            ), 'id')}
         </>
+        //                 )}
+        //             </>
+        //             <button onclick={clearSelection}>clear</button>
+        //             {/* <button onclick={$if($active, capture.once(clearSelection))}>clear</button>
+
+        //     <button
+        //         onclick={[() => increment($index()), preventDefault.endHere, target(THIS_NODE), { once: true }]}
+        //     >
+        //         clear
+        //     </button>
+
+        //     <button
+        //         onclick={[increment, { until: onMounted }]}
+        //     >
+        //         clear
+        //     </button>
+        //     <button
+        //         onclick={[
+        //             $if($active, [
+        //                 increment, runOnce.preventDefault, target(THIS_NODE)
+        //             ]),
+        //             $else(decrement)
+        //         ]}
+        //     >
+        //         clear
+        //     </button> */}
+        //         </div>
+        //     ))}
+        // </>
     )
 }

@@ -89,6 +89,7 @@ function afterEventHandler(tick: EventTick, e: Event) {
     }
     else {
         tick.finalHandlerAdded = true;
+        console.trace("adding afterevent handler")
         document.addEventListener(event, () => {
             afterEventHandler(e); // the final event tick handler
             tick.finalHandlerAdded = false; // reset for next event tick

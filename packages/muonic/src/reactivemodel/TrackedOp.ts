@@ -2,39 +2,39 @@
 
 
 
-import { ReactiveAtom } from "../derivations/ReactiveAtom";
-import { destroyAsAtom, initializeAsAtom, ReactivePrimitive } from "../ReactivePrimitive";
-import { MetaReactiveModel, REACTIVE_MODEL_MARKER } from "./ReactiveModel";
+import { asReactiveAtom } from "../derivations/ReactiveAtom";
+import { META } from "../ReactiveEntity";
+import { ReactiveModel } from "./Reactive$";
+import { Collection, MetaReactiveCollection } from "./ReactiveCollection";
+import { MetaReactiveModel } from "./ReactiveModel";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
 
-type OpMap = Map<string, TrackedOp>
+type EntryKeyMap = Map<EntryKey, TrackedOp>
+type OpMap = Map<OpName, EntryKeyMap>
+type EntryKey = any
 type OpName = string
 
-const MODEL = 0;
-const OP = 1;
-const ENTRY_KEY = 2;
+const trackedOpMap: Map<ReactiveModel, OpMap> = new Map()
 
-
-export class TrackedOp extends Array implements ReactivePrimitive {
+export class TrackedOp {
 
     constructor(
-        metaReactive: MetaReactiveModel,
-        entryKey: any,
-        op: string,
+        public reactive: ReactiveModel,
+        public op: string,
+        public entryKey: any,
     ) {
-        super();
-        metaReactive.registerTrackedOp(op, entryKey, this)
-        this.push(metaReactive, op, entryKey);
+        registerTrackedOp(this, reactive, op, entryKey)
     }
 
     destroy() {
-        (<MetaReactiveModel>this[MODEL]).unregisterTrackedOp(this[OP], this[ENTRY_KEY])
+        unregisterTrackedOp(this.reactive, this.op, this.entryKey)
     }
+}
 
-    asAtom?: ReactiveAtom | undefined;
-    initializeAsAtom = initializeAsAtom
-    destroyAsAtom = destroyAsAtom
+
+export function getTrackableOpValue(op: TrackedOp) {
+    return op.reactive[op.op](op.entryKey);
 }
 
 export function isTrackedOp(value: any): value is TrackedOp {
@@ -43,22 +43,69 @@ export function isTrackedOp(value: any): value is TrackedOp {
 }
 
 export function asTrackedOp(
-    model: MetaReactiveModel,
+    model: ReactiveModel<Collection>,
     op: string,
     key: any
 ): TrackedOp {
-    const trackedOp = model.getTrackedOp(key, op)
+    const trackedOp = getTrackedOp(model, op, key)
     if (trackedOp) return trackedOp;
-    return new TrackedOp(model, key, op)
+    return createTrackedOp(model, op, key)
+}
+
+function getTrackedOp(
+    model: ReactiveModel,
+    op: string,
+    key: any
+){
+    return trackedOpMap.get(model)?.get(op)?.get(key)
+}
+
+function createTrackedOp(
+    model: ReactiveModel<Collection>,
+    op: string,
+    key: any
+){
+    const metaReactive = model[META];
+    const trackedOp = new TrackedOp(model, op, key)
+    metaReactive.addObservedEntryKey(key)
+    const atom = asReactiveAtom(trackedOp);
+    atom.onUntracked(() => {
+        if (atom.derivations.size === 0) {
+            metaReactive.deleteObservedEntryKey(key)
+            trackedOp.destroy()
+        }
+    })
+    return trackedOp;
 }
 
 
-export function getTrackableOpValue(op: TrackedOp) {
-    const [target, arg, key] = op;
-    return target[key](arg);
+
+function registerTrackedOp(trackedOp: TrackedOp, model: ReactiveModel, op: string, key: any) {
+    let opMap = trackedOpMap.get(model)
+    if (!opMap) {
+        opMap = new Map()
+        trackedOpMap.set(model, opMap)
+    }
+    let entryKeyMap = opMap.get(op)
+    if (!entryKeyMap) {
+        entryKeyMap = new Map()
+        opMap.set(op, entryKeyMap)
+    }
+    entryKeyMap.set(key, trackedOp);
 }
 
-
+function unregisterTrackedOp(reactive: ReactiveModel, op: string, entryKey: any) {
+    const opMap = trackedOpMap.get(reactive)!
+    const entryKeyMap = opMap.get(op)!
+    if (__DEV__ && !entryKeyMap) throw new Error("No entryKeyMap :( this should never happen")
+    entryKeyMap.delete(entryKey)
+    if (entryKeyMap.size === 0) {
+        opMap.delete(op)
+    }
+    if (opMap.size === 0) {
+        trackedOpMap.delete(reactive)
+    }
+}
 
 // export function getTrackableOps(
 //     model: ReactiveModel,

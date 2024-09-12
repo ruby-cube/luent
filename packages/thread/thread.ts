@@ -1,5 +1,5 @@
-import "setimmediate"
 import { Callback, $schedule, SchedulerOptions } from "@rue/flask";
+import {setImmediate, clearImmediate} from "./setImmediate"
 
 //NOTE:
 // There is no microtask queue during nextRender phase. Any microtasks scheduled within a beforeRepaint cb will be run synchronously.

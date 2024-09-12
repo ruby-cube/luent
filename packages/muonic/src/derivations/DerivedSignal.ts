@@ -1,7 +1,8 @@
-import { isAtomicSignal, AtomicSignal, SIGNAL_MARKER } from "../$Signal";
+import { isAtomicSignal, AtomicSignal } from "../$Signal";
 import { READONLY_SIGNAL } from "../asReadonly";
-import { AS_DERIVATION, ReactiveDerivation } from "./ReactiveDerivation";
+import { ReactiveDerivation } from "./ReactiveDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
+import { META, ReactiveEntity } from "../ReactiveEntity";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -11,12 +12,11 @@ import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 // Note that siganl with only one dependency could still be a derived signal.
 
 
-export const DERIVED_SIGNAL = Symbol('derived signal')
+export const DERIVED_SIGNAL = Symbol('derivedSignal')
 
 export type DerivedSignal<T = any> = {
     (): T
-    [DERIVED_SIGNAL]: true
-    [AS_DERIVATION]: DerivedSignalState
+    [META]: MetaDerivedSignal
     untrack: () => void
 }
 
@@ -24,20 +24,22 @@ export type ReactiveSignal<T = any> = DerivedSignal<T> | AtomicSignal<T>;
 
 export function isDerivedSignal(maybeDerivedSignal: any): maybeDerivedSignal is DerivedSignal {
     if (!(maybeDerivedSignal instanceof Function)) return false
-    return DERIVED_SIGNAL in maybeDerivedSignal;
+    return maybeDerivedSignal[META]?.type === DERIVED_SIGNAL;
 }
 
 
 export function isSignal(maybeSignal: any): maybeSignal is DerivedSignal | AtomicSignal {
     if (!(maybeSignal instanceof Function)) return false;
-    if (SIGNAL_MARKER in maybeSignal || DERIVED_SIGNAL in maybeSignal || READONLY_SIGNAL in maybeSignal) return true;
+    if (isAtomicSignal(maybeSignal) || isDerivedSignal(maybeSignal) || READONLY_SIGNAL in maybeSignal) return true;
     return false;
 }
 
-class DerivedSignalState<T extends DerivedSignal = DerivedSignal> extends ReactiveDerivation {
+class MetaDerivedSignal<T extends DerivedSignal = DerivedSignal> extends ReactiveDerivation {
 
-    constructor(derivedSignal: T, retrack: boolean) {
-        super(derivedSignal, retrack);
+    override type = DERIVED_SIGNAL
+
+    constructor(override readonly o: T, retrack: boolean) {
+        super(o, DERIVED_SIGNAL, retrack);
     }
 
     value: any;
@@ -50,35 +52,35 @@ class DerivedSignalState<T extends DerivedSignal = DerivedSignal> extends Reacti
 
 export function $<T extends any>(pureGetter: () => T, retrack: boolean = false): DerivedSignal<T> {
     let initialized = false;
-    const signal = new DerivedSignalState(<DerivedSignal><unknown>$derivedSignal, retrack);
+    const derived = new MetaDerivedSignal(<DerivedSignal><unknown>$derivedSignal, retrack);
     function $derivedSignal() {
-        if (!initialized || signal.dirty && retrack) {
-            const value = signal.trackDependencies(pureGetter);
-            signal.forwardDependencies(signal.dependencies)
-            signal.updateValue(value)
-            signal.undirty()
+        if (!initialized || derived.dirty && retrack) {
+            const value = derived.trackAtoms(pureGetter);
+            derived.forwardAtoms(derived.atoms)
+            derived.updateValue(value)
+            derived.undirty()
             initialized = true;
             return value;
         }
 
-        if (signal.dirty) {
+        if (derived.dirty) {
             const newValue = pureGetter();
-            signal.forwardDependencies(signal.dependencies)
-            signal.updateValue(newValue)
-            signal.undirty()
+            derived.forwardAtoms(derived.atoms)
+            derived.updateValue(newValue)
+            derived.undirty()
             return newValue;
         }
 
-        signal.forwardDependencies(signal.dependencies)
+        derived.forwardAtoms(derived.atoms)
 
-        return signal.value; // memoized value
+        return derived.value; // memoized value
     }
-    $derivedSignal[DERIVED_SIGNAL] = true;
+    $derivedSignal[META] = derived;
     $derivedSignal.untrack = () => {
-        signal.untrackDependencies()
+        derived.untrackAtoms()
     }
     onDestroy(() => {
-        signal.untrackDependencies()
+        derived.untrackAtoms()
     })
 
     return <DerivedSignal><unknown>$derivedSignal;

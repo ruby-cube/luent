@@ -2,7 +2,7 @@ import { provideAppState, TypedKey, constAppState } from "@rue/lumo";
 import { SSRComponent } from "./SSRComponent";
 
 
-const PROMISE_MAP = Symbol('promise map') as TypedKey<WeakMap<Promise<SSRComponent>, SSRComponent>>
+const PROMISE_MAP = Symbol('promiseMap') as TypedKey<WeakMap<Promise<SSRComponent>, SSRComponent>>
 
 const getPromiseMap = constAppState(PROMISE_MAP, () => new WeakMap())
 

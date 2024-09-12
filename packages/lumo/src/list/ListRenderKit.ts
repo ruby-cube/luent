@@ -1,4 +1,4 @@
-import { $Signal, isSignal, isReactiveModel, AtomicSignal } from "@rue/muonic";
+import { $Signal, isSignal, isReactiveModel, AtomicSignal, ReactiveModel, toRaw, shallowClone, ReactiveSignal } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./iterate_over";
@@ -11,6 +11,8 @@ import { DynamicNode, getActiveDynamicNode, popDynamicNode, pushDynamicNode } fr
 import { watchForRender } from "../watch/watchForRender";
 import { diff, InsertAndMoveKit } from "./diff";
 import { LifecycleHook } from "../component/lifecycle";
+import { META } from "../../../muonic/src/ReactiveEntity";
+import { MutationRecord } from "../../../muonic/src/effects/deepWatch";
 
 
 type Index = number
@@ -69,7 +71,8 @@ export class ListRenderKit<T = any> {
         const component = this.component
         const list = isSignal(data) ? data() : <Collection<any>>data;
         const _list = list instanceof Array ? list : list //TODO: need to implement for sets, maps, and objects
-        const isDynamic = isReactiveModel(data) || isSignal(data);
+        const _isReactiveModel = isReactiveModel(data)
+        const isDynamic = _isReactiveModel || isSignal(data);
         const dynamicNodePod = this.dynamicNodePod = isDynamic ? nodePod.appendDynamicPod() : undefined;
         const indices: AtomicSignal<number>[] = []
 
@@ -115,14 +118,14 @@ export class ListRenderKit<T = any> {
             // const updateCycle = getCurrentUpdateCycle();
             const parentDynamicNode = getActiveDynamicNode()
             pushComponent(component)
+            const rawData = _isReactiveModel ? toRaw(data) : undefined
+            let clone = _isReactiveModel ? shallowClone(rawData!) as any[] : undefined
             watchForRender(data, (newValue: any[], oldValue: any[]) => {
-                // if (updateCycle === getCurrentUpdateCycle()) {
-                //     console.warn("prevented same update cycle")
-                //     return;
-                // }
-                const { indicesToRemove, insertAndMoveKit, noChange } = diff(newValue, oldValue, idKey)
+                const _oldValue = clone || oldValue;
+                if (_isReactiveModel) clone = shallowClone(rawData!) as any[]
+                const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || newValue, _oldValue, idKey)
                 if (noChange) return;
-                if (dynamicNodePod!.length !== oldValue.length)
+                if (dynamicNodePod!.length !== _oldValue.length)
                     throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)
                 this.runUpdate(() => {
                     pushDynamicNode(parentDynamicNode!)
@@ -135,6 +138,8 @@ export class ListRenderKit<T = any> {
                     popDynamicNode()
                 })
             })
+
+
             popComponent()
         }
         currentItem = undefined;

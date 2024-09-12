@@ -6,8 +6,7 @@ import {  makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { ListRenderKit } from "./ListRenderKit";
-import { AtomicSignal, ReactiveSignal } from "@rue/muonic";
-import { ReactiveModel } from "../../../muonic/src/reactivemodel/ReactiveModel";
+import { AtomicSignal, ReactiveModel, ReactiveSignal } from "@rue/muonic";
 
 
 export type RenderItem<T = any> = (item: T, $index: AtomicSignal<number>) => NodeEntity[] | NodeEntity

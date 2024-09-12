@@ -5,7 +5,7 @@ import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
 import { initializeRender, watchForRender } from "../watch/watchForRender";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
-import { ActiveListener, PendingOp } from "@rue/flask";
+import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
 import { AtomicSignal } from "@rue/muonic";
 import { mountNodeEntity } from "../node/mountNodeEntity";
@@ -152,16 +152,21 @@ function toString(value: any) {
     return value.toString(); //TODO: make sure it works with any value
 }
 
-
-function setUpEvents(node: Element, events: { [key: string]: EventListener[] }) {
+//TODO: figure out how to incorporate options into inline events
+function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, options?: ListenerOptions & AddEventListenerOptions) {
     for (const key in events) {
         const handlers = normalizeToArray(events[key]);
-        const event = useEventTick(node, key, runPrerenderEffectsAndTasks);
-        event.updateHandlers(() => {
-            for (const handler of handlers) {
-                event.attachHandler(handler, handler.options || { __devName: setUpEvents.name })
-            }
-        })
+        for (const handler of handlers) {
+            return $listen(handler, options || {}, {
+                enroll: (cb) => {
+                    node.addEventListener(key, cb, options);
+                },
+                remove: (cb) => {
+                    node.removeEventListener(key, cb, options);
+                }
+            })
+        }
+
     }
 }
 

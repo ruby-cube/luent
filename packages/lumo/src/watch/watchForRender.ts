@@ -1,4 +1,4 @@
-import { beforeRender, ChangeHandler, isSignal, $initializeEffect as _$initializeEffect, onRendered, ReactiveSignal, shallowClone, watch as _watch, WatchOptions } from "@rue/muonic";
+import { beforeRender, isSignal, $initializeEffect as _$initializeEffect, onRendered, ReactiveSignal, shallowClone, watch as _watch, WatchOptions, ReactiveModel, ChangeEffect, MutationEffect, RawEffect, EffectOrKeys, OptionsOrEffect, RawWatchTarget } from "@rue/muonic";
 import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
@@ -7,7 +7,6 @@ import { DynamicNode, getActiveDynamicNode, isMountPhase } from "../dynamic/Dyna
 import { ActiveListener, ListenerOptions } from "@rue/flask";
 import { onActivated, onDeactivate, onDestroy } from "../dynamic/lifecycle";
 import { noop } from "@rue/utils";
-import { ReactiveModel } from "../../../muonic/src/reactivemodel/ReactiveModel";
 
 type WatchForRenderOptions = {
     deep?: boolean;
@@ -39,7 +38,12 @@ function _initializeRender(effect: () => void) {
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
-export function watchForRender<T>(target: () => any | ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchForRenderOptions) {
+type Effect<T = any> = MutationEffect<T extends AnyObject ? T : never> | ChangeEffect<T>
+
+
+export function watchForRender<T extends AnyObject>(target: ReactiveModel<T>, effect: MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener
+export function watchForRender<T>(target: () => T | ReactiveSignal<T>, effect: ChangeEffect<T>, options?: WatchForRenderOptions): ActiveListener
+export function watchForRender<T>(target: RawWatchTarget<T>, effect: Effect<T>, options?: WatchForRenderOptions) {
     // const component = getCurrentComponent<InternalComponent>();
     // if (!component) throw Error("watchForRender must be called within component setup")
 
@@ -48,18 +52,18 @@ export function watchForRender<T>(target: () => any | ReactiveSignal<T> | Reacti
 
 
     if (dynamicNode.preserve)
-        return watchAndPreserve(target, handler, { phase: 'render', ...options || {} })
+        return watchAndPreserve(target, effect, { phase: 'render', ...options || {} })
 
-    return _watchForRender(target, handler, options)
+    return _watchForRender(target, effect, options)
 }
 
-function _watchForRender<T>(target: () => any | ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchForRenderOptions) {
+export function _watchForRender<T>(target: RawWatchTarget, effect: Effect, options?: WatchForRenderOptions) {
     // const component = getCurrentComponent<InternalComponent>()!;
     // const _handler = (newValue: any, oldValue: any) => {
     // handler(newValue, oldValue);
     // setUpUpdateHooks(component)
     // }
-    return _watch(target, handler, { phase: 'render', ...options || {} }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
+    return _watch(target, effect, { phase: 'render', ...options || {} }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
 export function setUpUpdateHooks(component: InternalComponent) {
@@ -121,16 +125,21 @@ export function $initializeEffect(effect: () => void) {
     return _$initializeEffect(effect)
 }
 
-export function watch<T>(target: () => any | ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
+
+export function watch<T extends AnyObject>(target: ReactiveModel<T>, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
+export function watch<T extends AnyObject>(target: ReactiveModel<T>, keys: (keyof T)[], effect: ChangeEffect<(T[keyof T])[]>, options?: WatchOptions): ActiveListener
+export function watch<T extends AnyObject>(target: ReactiveModel<T>, key: keyof T, effect: ChangeEffect<T[keyof T]>, options?: WatchOptions): ActiveListener
+export function watch<T>(target: () => T | ReactiveSignal<T>, effect: ChangeEffect<T>, options?: WatchOptions): ActiveListener
+export function watch<T>(target: ReactiveModel<T extends AnyObject? T: never>| (() => T | ReactiveSignal<T>), effectOrKeys: EffectOrKeys<T>, optionsOrEffect?: OptionsOrEffect<T>, options?: WatchOptions) {
     const dynamicNode = getActiveDynamicNode()
     if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
 
     if (dynamicNode.preserve)
-        return watchAndPreserve(target, handler, options)
-    return _watch(target, handler, options)
+        return watchAndPreserve(target, effectOrKeys, optionsOrEffect, options)
+    return _watch(<any>target, <any>effectOrKeys, <any>optionsOrEffect, options)
 }
 
-function watchAndPreserve<T>(target: () => any | ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: ChangeHandler<T>, options?: WatchOptions) {
+function watchAndPreserve<T>(target: RawWatchTarget<T>, effectOrKeys: EffectOrKeys<T>, optionsOrEffect?: OptionsOrEffect<T>, options?: WatchOptions) {
     const mountPhase = isMountPhase()
     // const component = getComponent(watchAndPreserve.name);
     const watchFn = options?.phase === 'render' ? _watchForRender : _watch
@@ -139,7 +148,7 @@ function watchAndPreserve<T>(target: () => any | ReactiveSignal<T> | ReactiveMod
     const watcher = { stop: noop }
     let reactivation = false; //FIX: I'm not sure if this is helping with reactivation
     let oldValue: any
-    initializeOnActivated()
+    // initializeOnActivated()
     onDeactivate(deactivateAndReactivate, { once: true }, dynamicNode)
 
     function deactivateAndReactivate() {
@@ -147,30 +156,31 @@ function watchAndPreserve<T>(target: () => any | ReactiveSignal<T> | ReactiveMod
         reactivation = true;
         watcher.stop()
         if (!mountPhase) {
-            initializeOnActivated()
+            // initializeOnActivated()
         }
     }
 
-    function initializeOnActivated() {
-        if (isSignal(target)) {
-            onActivated(() => {
-                if (reactivation) handler(target(), oldValue)
-                initializeWatcher()
-            }, { once: true }, dynamicNode)
-        }
-        else {
-            onActivated(() => {
-                if (reactivation) handler(<ReactiveModel<T extends AnyObject ? T : never>>target, oldValue)
-                initializeWatcher()
-            }, { once: true }, dynamicNode)
-        }
-    }
+    //FIX: Needs major fixing, temporarily commented out to quiet ts
+    // function initializeOnActivated() {
+    //     if (isSignal(target)) {
+    //         onActivated(() => {
+    //             if (reactivation) effect(target(), oldValue)
+    //             initializeWatcher()
+    //         }, { once: true }, dynamicNode)
+    //     }
+    //     else {
+    //         onActivated(() => {
+    //             if (reactivation) effect(<ReactiveModel<T extends AnyObject ? T : never>>target, oldValue)
+    //             initializeWatcher()
+    //         }, { once: true }, dynamicNode)
+    //     }
+    // }
 
-    function initializeWatcher() {
-        // pushComponent(component)
-        watcher.stop = watchFn(target, handler, options).stop
-        // popComponent()
-    }
+    // function initializeWatcher() {
+    //     // pushComponent(component)
+    //     watcher.stop = watchFn(target, effect, options).stop
+    //     // popComponent()
+    // }
 
     return watcher
 }

@@ -1,46 +1,39 @@
 import { emitSignal } from "./debug";
 import { isDeepReactive, isReactiveModel, DeepReactive$, Reactive$, ReactiveModelDepth } from "./reactivemodel/Reactive$";
-import { track } from "./derivations/DependencyTracker";
+import { getActiveTracker } from "./derivations/DependencyTracker";
 import { trigger } from "./trigger";
-import { ReactiveAtom } from "./derivations/ReactiveAtom";
-import { destroyAsAtom, initializeAsAtom, ReactivePrimitive } from "./ReactivePrimitive";
-import { unwatch, watch, Watchable } from "./effects/Watchable";
-import { WatchTarget } from "./effects/WatchTarget";
+import { META, ReactiveEntity } from "./ReactiveEntity";
 
 export type AtomicSignal<T = any> = {
     (): T;
-    [SIGNAL_MARKER]: SignalState<T>;
+    [META]: MetaSignal<T>;
     setFrom: (toNewValue: (value: T) => T) => T
     setTo: (newValue: T) => T
 }
 
-export const SIGNAL_MARKER = Symbol('signal');
+export const SIGNAL = Symbol('signal');
 
-export class SignalState<T = unknown> implements ReactivePrimitive, Watchable {
+export class MetaSignal<T = unknown> implements  ReactiveEntity {
+
+    type = SIGNAL
 
     constructor(
-        public $signal: AtomicSignal<T>,
+        readonly o: AtomicSignal<T>,
         public value: T,
-        public depth?: ReactiveModelDepth
+        readonly depth?: ReactiveModelDepth
     ) { }
-
-    asWatchTarget?: WatchTarget<Watchable> | undefined;
-    watch = watch
-    unwatch = unwatch
-
-    asAtom?: ReactiveAtom | undefined;
-    initializeAsAtom = initializeAsAtom
-    destroyAsAtom = destroyAsAtom
 }
 
 
 export function $Signal<T>(value: T) {
-    let signalState: SignalState
+    let metaSignal: MetaSignal
 
     function $signal() {
         if (__DEV__) emitSignal();
-        track(signalState)
-        return signalState.value;
+        const tracker = getActiveTracker()
+        if (!tracker) return metaSignal.value
+        tracker.track($signal)
+        return metaSignal.value;
     }
 
     // mark reactive depth of value if value is ReactiveModel
@@ -51,23 +44,23 @@ export function $Signal<T>(value: T) {
                     : undefined
             : undefined
 
-    signalState = new SignalState($signal, value, depth)
+    metaSignal = new MetaSignal($signal, value, depth)
 
-    $signal[SIGNAL_MARKER] = signalState;
-    $signal.setTo = setTo.bind(signalState);
-    $signal.setFrom = setFrom.bind(signalState);
+    $signal[META] = metaSignal;
+    $signal.setTo = setTo.bind(metaSignal);
+    $signal.setFrom = setFrom.bind(metaSignal);
 
     return $signal as AtomicSignal<T>;
 }
 
 
-function setTo(this: SignalState, newValue: unknown) {
+function setTo(this: MetaSignal, newValue: unknown) {
     const value = this.value;
     if (value === newValue) return value;
     return setValue(this, newValue);
 }
 
-function setFrom(this: SignalState, toNewValue: (value: unknown) => unknown) {
+function setFrom(this: MetaSignal, toNewValue: (value: unknown) => unknown) {
     const value = this.value;
     const newValue = toNewValue(value)
     if (value === newValue) return value;
@@ -79,15 +72,15 @@ function setFrom(this: SignalState, toNewValue: (value: unknown) => unknown) {
 // - trigger effects (run sync effects, schedule effects)
 // - trigger derivations effects (run sync effects, schedule effects)
 
-function setValue(signal: SignalState, newValue: unknown) {
-    const $signal = signal.$signal;
+function setValue(signal: MetaSignal, newValue: unknown) {
+    const $signal = signal.o;
     const _newValue = maybeReactivizeValue(newValue, signal)
     signal.value = _newValue;
-    trigger($signal[SIGNAL_MARKER]);
+    trigger($signal);
     return _newValue;
 }
 
-function maybeReactivizeValue(newValue: unknown, signal: SignalState) {
+function maybeReactivizeValue(newValue: unknown, signal: MetaSignal) {
     return newValue instanceof Object ?
         signal.depth === ReactiveModelDepth.DEEP ? DeepReactive$(newValue) :
             signal.depth === ReactiveModelDepth.SHALLOW ? Reactive$(newValue) :
@@ -96,6 +89,6 @@ function maybeReactivizeValue(newValue: unknown, signal: SignalState) {
 
 
 export function isAtomicSignal(maybeSignal: any): maybeSignal is AtomicSignal {
-    if (maybeSignal instanceof Function) return SIGNAL_MARKER in maybeSignal;
+    if (maybeSignal instanceof Function) return maybeSignal[META]?.type === SIGNAL;
     return false;
 }

@@ -1,12 +1,20 @@
-import { WatchTarget } from "../effects/WatchTarget";
-import { ReactivePrimitive } from "../ReactivePrimitive";
+import { AtomicSignal, MetaSignal } from "../$Signal";
+import { ObservedProp } from "../reactivemodel/ObservedProp";
+import { TrackedOp } from "../reactivemodel/TrackedOp";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 
 export const CLEAN_UP = 'x__cleanUp'
 
+export type ReactivePrimitive = AtomicSignal | ObservedProp | TrackedOp
+
+
+const reactiveAtomMap: WeakMap<ReactivePrimitive, ReactiveAtom> = new WeakMap()
+
 export class ReactiveAtom {
 
-    constructor(public primitive: ReactivePrimitive) { }
+    constructor(public primitive: ReactivePrimitive) { 
+        reactiveAtomMap.set(primitive, this)
+    }
 
     derivations: Set<ReactiveDerivation> = new Set() // replaces depMap and flagging of reactive atoms
 
@@ -17,9 +25,9 @@ export class ReactiveAtom {
     deleteDerivation(derivation: ReactiveDerivation) {
         this.derivations.delete(derivation)
         if (this.derivations.size === 0) {
-            this.primitive.destroyAsAtom()
+            reactiveAtomMap.delete(this.primitive)
         }
-        this.cleanUp?.()
+        this.cleanUp?.(this.primitive)
     }
 
     triggerDerivations() {
@@ -28,31 +36,26 @@ export class ReactiveAtom {
         }
     }
 
-    cleanUp?: () => void
+    cleanUp?: (primitive: ReactivePrimitive) => void
 
-    onUntracked(cleanUp: () => void) {
+    onUntracked(cleanUp: (primitive: ReactivePrimitive) => void) {
         if (__DEV__ && this.cleanUp) {
             console.error('Overriding existing cleanup function. This means we need an array for onUntracked tasks')
         }
         this.cleanUp = cleanUp;
     }
-
-
 }
 
-// WeakMap causes memory leak since ReactiveAtom references the Reactive primitive
-// const reactiveAtomMap: WeakMap<ReactivePrimitive, ReactiveAtom> = new WeakMap()
 
 export function isReactiveAtom(primitive: ReactivePrimitive | null | undefined) {
     if (!primitive) return false;
-    return Boolean(primitive.asAtom);
+    return Boolean(reactiveAtomMap.get(primitive));
 }
 
 export function asReactiveAtom(primitive: ReactivePrimitive) {
-    let atom = primitive.asAtom;
+    let atom = reactiveAtomMap.get(primitive)
     if (!atom) {
         atom = new ReactiveAtom(primitive)
-        primitive.initializeAsAtom(atom)
     }
     return atom;
 }

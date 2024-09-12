@@ -17,3 +17,7 @@ export class MetaReactiveCollection<T extends Collection = Collection> extends M
         this.observedEntryKeys.delete(entryKey)
     }
 }
+
+export function isCollection(target: unknown): target is Collection {
+    return target instanceof Array || target instanceof Set || target instanceof Map
+}

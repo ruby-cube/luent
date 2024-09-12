@@ -8,7 +8,7 @@ import { getResponseTimer, RESPONSE_TIMER, ResponseTimer } from "./ResponseTimer
 import { storeResolvedComponent } from "./PendingComponentMap.js";
 
 
-const PENDING_PROMISES_STACK = Symbol('pending promises stack') as TypedKey<Promise<any>[][]>
+const PENDING_PROMISES_STACK = Symbol('pendingPromisesStack') as TypedKey<Promise<any>[][]>
 
 const getPendingPromisesStack = constAppState(PENDING_PROMISES_STACK, () => [])
 

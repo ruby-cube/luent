@@ -1,22 +1,25 @@
-import { AS_DERIVATION, ReactiveDerivation } from "./ReactiveDerivation";
+import { META } from "../ReactiveEntity";
+import { ReactiveDerivation } from "./ReactiveDerivation";
 
 // Used to create reactive effect and reactive getters
 
 export type ReactiveFunction = {
     (...args: any[]): any;
-    [AS_DERIVATION]: ReactiveDerivation;
+    [META]: ReactiveDerivation;
     initialize: () => ReactiveFunction;
 }
 
 function trackReactiveFunction(derivation: ReactiveDerivation, fn: () => any) {
-    const value = derivation.trackDependencies(fn);
-    derivation.forwardDependencies(derivation.dependencies) //QUESTION: Not sure if reactive effects need to forward dependencies as well
+    const value = derivation.trackAtoms(fn);
+    derivation.forwardAtoms(derivation.atoms) //QUESTION: Not sure if reactive effects need to forward dependencies as well
     return value;
 }
 
+const REACTIVE_FUNCTION = Symbol('reactiveFunction')
+
 export function createReactiveFunction(fn: () => any, retrack: boolean) {
     if (retrack) {
-        const derivation = new ReactiveDerivation(reactiveFunction, retrack)
+        const derivation = new ReactiveDerivation(reactiveFunction,REACTIVE_FUNCTION, retrack)
 
         function reactiveFunction() {
             if (derivation.dirty) {
@@ -28,6 +31,7 @@ export function createReactiveFunction(fn: () => any, retrack: boolean) {
                 return fn()
             }
         }
+        reactiveFunction[META] = derivation
         reactiveFunction.initialize = () => {
             trackReactiveFunction(derivation, fn);
             return reactiveFunction;
@@ -36,12 +40,15 @@ export function createReactiveFunction(fn: () => any, retrack: boolean) {
         return reactiveFunction as ReactiveFunction
     }
     else {
-        const derivation = new ReactiveDerivation(fn)
-        //@ts-expect-error
-        fn.initialize = () => {
+        const derivation = new ReactiveDerivation(reactiveFunction, REACTIVE_FUNCTION)
+        function reactiveFunction(){
+            return fn()
+        }
+        reactiveFunction.initialize = () => {
             trackReactiveFunction(derivation, fn);
             return fn;
         }
-        return fn as ReactiveFunction;
+        reactiveFunction[META] = derivation
+        return reactiveFunction as ReactiveFunction;
     }
 }
