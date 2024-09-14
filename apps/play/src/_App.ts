@@ -1,5 +1,5 @@
 import { ifCase, iterate_over, setUpNode, setUpNodesIn, onActivated, beforeMount, beforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../../../packages/lumo/src";
-import { useReactivity, AtomicSignal, watch, ReactiveSignal } from "@rue/muonic";
+import { useReactivity, AtomicSignal, watch, AnySignal } from "@rue/muonic";
 
 const { $, mu, o$, set } = useReactivity()
 

@@ -1,4 +1,4 @@
-import { AtomicSignal, MetaSignal } from "../$Signal";
+import { AtomicSignal, MetaSignal } from "../Signal";
 import { ObservedProp } from "../reactivemodel/ObservedProp";
 import { TrackedOp } from "../reactivemodel/TrackedOp";
 import { ReactiveDerivation } from "./ReactiveDerivation";

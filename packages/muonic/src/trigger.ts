@@ -1,6 +1,6 @@
 import { asReactiveAtom, isReactiveAtom, ReactivePrimitive } from "./derivations/ReactiveAtom";
 import { getMetaReactive, ReactiveModel, toRaw } from "./reactivemodel/ReactiveModel";
-import { AtomicSignal, MetaSignal } from "./$Signal";
+import { AtomicSignal, MetaSignal } from "./Signal";
 import { ObservedProp } from "./reactivemodel/ObservedProp";
 import { asWatchTarget, isWatched } from "./effects/WatchTarget";
 

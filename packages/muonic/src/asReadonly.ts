@@ -1,4 +1,4 @@
-import { isSignal, AtomicSignal } from "./$Signal";
+import { isSignal, AtomicSignal } from "./Signal";
 import { isReactiveModel, ReactiveModel } from "./reactivemodel/ReactiveModel";
 import { META, ReactiveEntity } from "./ReactiveEntity";
 

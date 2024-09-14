@@ -2,7 +2,6 @@ import { $Node, COMPONENT, ComponentSetup, create_if, else_create, else_mount, e
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { $Signal, __addDevName, DeepReactiveModel, isDeepReactive, isReactiveModel, ReactiveModel } from "@rue/muonic";
 import { $, o$$, o$ } from "@rue/muonic";
-import { watch } from "../../../packages/lumo/src/watch/watchForRender";
 
 
 const randomColor = useRandomColorGenerator()
@@ -30,26 +29,26 @@ export function List() {
     // console.log("isShallowReactive // true", isReactiveModel(list$$._), list$$._[0])
     // console.log("isreactive //false", isReactiveModel(list$$._[0]))
 
-    watch($(() => list$$['3']), (newValue, old) => {
-        console.log("index 3", newValue, old)
-    })
+    // watch($(() => list$$[3]), (newValue, old) => {
+    //     console.log("index 3", newValue, old)
+    // })
 
-    console.log("works?", list$$ instanceof Array)
+    // console.log("works?", list$$ instanceof Array)
 
-    watch(list$$, (list, mutations) => {
-        // console.log("mutations", mutations)
-    })
+    // watch(list$$, (list, mutations) => {
+    //     // console.log("mutations", mutations)
+    // })
 
     // $initializeEffect(() => {
     //     console.log("some starts with f", list$$.some((item) => item.content.startsWith('f')))
     // })
 
-    function changeItem(index: number) {
-        list$$._$[index] = {
-            id: genId(),
-            content: (Math.random() * 100).toString(),
-        }
-    }
+    // function changeItem(index: number) {
+    //     list$$._$[index] = {
+    //         id: genId(),
+    //         content: (Math.random() * 100).toString(),
+    //     }
+    // }
 
 
     function changeContent(index: number) {
@@ -60,15 +59,15 @@ export function List() {
 
 
     function insertItem(index: number) {
-        list$$._.splice(index, 0, {
+        list$$.splice(index, 0, {
             id: genId(),
             content: (Math.random() * 100).toString(),
         })
     }
 
-    function z$<T extends AnyObject>(value: T): DeepReactiveModel<T> {
-        return value as DeepReactiveModel<T>;
-    }
+    // function z$<T extends AnyObject>(value: T): DeepReactiveModel<T> {
+    //     return value as DeepReactiveModel<T>;
+    // }
 
     function moveSelectedItems(index: number) {
         moveMultipleUniqueItems(selected$, list$$, index)

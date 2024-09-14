@@ -1,4 +1,4 @@
-import { $Signal, isAnySignal, isReactiveModel, AtomicSignal, ReactiveModel, toRaw, shallowClone, ReactiveSignal, isDeepReactive, asDeepReactive, isSignal, ModelReactivityDepth, getMetaSignal } from "@rue/muonic";
+import { $Signal, isAnySignal, isReactiveModel, AtomicSignal, ReactiveModel, toRaw, shallowClone, AnySignal, isDeepReactive, asDeepReactive, isSignal, ModelReactivityDepth, getMetaSignal } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./iterate_over";
@@ -34,7 +34,7 @@ export function setCurrentIndex($index: AtomicSignal<number> | undefined) {
 export class ListRenderKit<T = any> {
     constructor(
         public renderItem: RenderItem<T>, //QUESTION: Does this need the context object?
-        public data: Collection<T> | ReactiveModel<Collection<T>> | ReactiveSignal<Collection<T>>,
+        public data: Collection<T> | ReactiveModel<Collection<T>> | AnySignal<Collection<T>>,
         public component: InternalComponent,
         public idKey: string | undefined
     ) { }

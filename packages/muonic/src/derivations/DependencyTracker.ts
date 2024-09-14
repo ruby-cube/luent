@@ -1,5 +1,5 @@
-import { asObservedProp, getObservedPropValue, isObservedProp, ObservedProp } from "../reactivemodel/ObservedProp";
-import { asTrackedOp, getTrackableOpValue, isTrackedOp, TrackedOp } from "../reactivemodel/TrackedOp";
+import { isObservedProp, ObservedProp } from "../reactivemodel/ObservedProp";
+import { isTrackedOp, TrackedOp } from "../reactivemodel/TrackedOp";
 import { asReactiveAtom, ReactiveAtom, ReactivePrimitive } from "./ReactiveAtom";
 
 
@@ -86,9 +86,9 @@ export function getWithoutTracking(reactiveRef: (() => any) | ObservedProp | Tra
     if (reactiveRef instanceof Function)
         value = reactiveRef();
     else if (isObservedProp(reactiveRef))
-        value = getObservedPropValue(reactiveRef);
+        value = reactiveRef.getValue();
     else if (isTrackedOp(reactiveRef))
-        value = getTrackableOpValue(reactiveRef)
+        value = reactiveRef.getOutput()
     tracker?.restore();
     return value;
 }

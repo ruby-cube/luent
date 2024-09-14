@@ -1,3 +1,5 @@
+import { ReactiveModel, AnySignal } from "@rue/muonic"
+
 const TYPE = null as unknown
 
 type Ant = {
@@ -171,4 +173,22 @@ type StringOrNumber = string | number
     doSomething(<() => any>TYPE)  // GOOD
 
     function doSomething<T>(argA: Object) { }
+}
+
+type DeepReactiveModel<T extends AnyObject = AnyObject> = T & {o$: any};
+{
+    function something<T extends AnyObject>(){
+        doSomething(<DeepReactiveModel<T>>TYPE)  // GOOD
+    }
+
+    function doSomething<T>(argA: DeepReactiveModel<T extends AnyObject ? T : never>) { }
+}
+
+export type RawWatchTarget<T = any | AnyObject> = T extends AnyObject ? () => T | AnySignal<T> | ReactiveModel<T> | DeepReactiveModel<T> : () => T | AnySignal<T> 
+{
+    function something<T extends AnyObject>(){
+        doSomething(<ReactiveModel<T>>TYPE)  // GOOD
+    }
+
+    function doSomething<T>(argA: T extends AnyObject ? () => T | AnySignal<T> | ReactiveModel<T> | DeepReactiveModel<T> : () => T | AnySignal<T> ) { }
 }

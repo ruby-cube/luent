@@ -154,10 +154,10 @@ export function watchProps<N extends NestedModel[] | undefined>(target: Reactive
 //     return watchers;
 // }
 
-function composeOps(target: ReactiveModel, ops: MutationRecord[] | undefined) {
-    if (!ops) return;
-    const updateCycle = getCurrentUpdateCycle();
-    if (!updateCycle) throw new Error("No update cycle :(")
-    updateCycle.composeOps(target, ops)
-}
+// function composeOps(target: ReactiveModel, ops: MutationRecord[] | undefined) {
+//     if (!ops) return;
+//     const updateCycle = getCurrentUpdateCycle();
+//     if (!updateCycle) throw new Error("No update cycle :(")
+//     updateCycle.composeOps(target, ops)
+// }
 

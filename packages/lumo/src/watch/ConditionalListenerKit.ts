@@ -1,4 +1,4 @@
-import { ReactiveSignal } from "@rue/muonic";
+import { AnySignal } from "@rue/muonic";
 import { NodeEntity } from "../node/makeNode";
 import { ConditionalKit } from "../conditional/ConditionalKit";
 import { ListenOptions } from "net";
@@ -36,7 +36,7 @@ export class ConditionalListenerKit extends ConditionalKit<EventHandler<EventLis
     constructor(
         statementType: 'if' | 'elseIf' | 'else',
         public eventHandler: EventHandler<EventListener>,
-        $condition?: ReactiveSignal<Booleanny>,
+        $condition?: AnySignal<Booleanny>,
     ) {
         super(statementType, eventHandler, $condition)
     }

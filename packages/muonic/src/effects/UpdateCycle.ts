@@ -118,20 +118,19 @@ export class UpdateCycle {
 
     opsMap: WeakMap<MetaReactiveModel, MutationRecord[]> = new WeakMap();
 
-    composeOps(target: ReactiveModel, ops: MutationRecord[]) {
-        const meta = getMetaReactive(target)
-        let existingOps = this.opsMap.get(meta);
-        if (existingOps) {
-            existingOps.push(...ops)
-        }
-        else {
-            this.opsMap.set(meta, ops);
-        }
-    }
+    // composeOps(target: ReactiveModel, ops: MutationRecord[]) {
+    //     const meta = getMetaReactive(target)
+    //     let existingOps = this.opsMap.get(meta);
+    //     if (existingOps) {
+    //         existingOps.push(...ops)
+    //     }
+    //     else {
+    //         this.opsMap.set(meta, ops);
+    //     }
+    // }
 
     recordOp(target: ReactiveModel, op: MutationRecord) { //FIX:
         const meta = getMetaReactive(target)
-        // TODO: consolidate set ops (cannot consolidate mutation ops, those need to be in order)
         let existingOps = this.opsMap.get(meta);
         if (existingOps) {
             existingOps.push(op)

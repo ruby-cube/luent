@@ -1,5 +1,5 @@
 import { PublicComponent, ComponentSetup, DOMNode, InternalComponent, getComponent } from "../component/InternalComponent";
-import { DerivedSignal, isAnySignal, ReactiveSignal, Hooks, getCurrentUpdateCycle } from "@rue/muonic";
+import { DerivedSignal, isAnySignal, AnySignal, Hooks, getCurrentUpdateCycle } from "@rue/muonic";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
@@ -173,7 +173,7 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
 
 
 type DynamicClassesConfig = {
-    [key: string]: ReactiveSignal<Booleanny>;
+    [key: string]: AnySignal<Booleanny>;
 }
 
 function setUpClasses(component: InternalComponent, node: Element, classes: (((o: DOMTokenList) => void) | string | DynamicClassesConfig)[]) {

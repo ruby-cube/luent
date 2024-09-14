@@ -1,4 +1,4 @@
-import { ReactiveSignal } from "@rue/muonic";
+import { AnySignal } from "@rue/muonic";
 import { NodeEntity } from "../node/makeNode";
 import { ConditionalKit } from "./ConditionalKit";
 import { Booleanny } from "@rue/types";
@@ -17,7 +17,7 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional>{
         public component: InternalComponent,
         optionals?: {
             nodePodIndex?: number,
-            $condition?: ReactiveSignal<Booleanny>,
+            $condition?: AnySignal<Booleanny>,
         }
     ) { 
         super(statementType, renderConditional, optionals?.$condition)

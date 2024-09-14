@@ -1,9 +1,9 @@
-import { getWithoutTracking, $, ReactiveSignal } from "@rue/muonic";
+import { getWithoutTracking, $, AnySignal } from "@rue/muonic";
 import { ConditionalKit } from "./ConditionalKit";
 import { Booleanny } from "@rue/types";
 
 export class ConditionalSeries {
-    conditions: ReactiveSignal<Booleanny>[] = [];
+    conditions: AnySignal<Booleanny>[] = [];
     prevActiveIndex?: number = undefined;
     activeIndex?: number = undefined;
 

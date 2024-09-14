@@ -9,7 +9,7 @@ import { isFunctionWithProps } from "@rue/utils";
 export type AtomicSignal<T = any> = {
     (): T;
     [META]: MetaSignal<T>;
-    setFrom: (toNewValue: (value: T) => T) => T
+    update: (toNewValue: (value: T) => T) => T
     setTo: (newValue: T) => T
 }
 
@@ -50,7 +50,7 @@ export function $Signal<T>(value: T) {
 
     $signal[META] = metaSignal;
     $signal.setTo = setTo.bind(metaSignal);
-    $signal.setFrom = setFrom.bind(metaSignal);
+    $signal.update = update.bind(metaSignal);
 
     return $signal as AtomicSignal<T>;
 }
@@ -58,15 +58,13 @@ export function $Signal<T>(value: T) {
 
 function setTo(this: MetaSignal, newValue: unknown) {
     const value = this.value;
-    if (value === newValue) return value;
-    return setValue(this, newValue);
+    return setValue(this, newValue, value);
 }
 
-function setFrom(this: MetaSignal, toNewValue: (value: unknown) => unknown) {
+function update(this: MetaSignal, toNewValue: (value: unknown) => unknown) {
     const value = this.value;
     const newValue = toNewValue(value)
-    if (value === newValue) return value;
-    return setValue(this, newValue);
+    return setValue(this, newValue, value);
 }
 
 // ORDER:
@@ -74,7 +72,8 @@ function setFrom(this: MetaSignal, toNewValue: (value: unknown) => unknown) {
 // - trigger effects (run sync effects, schedule effects)
 // - trigger derivations effects (run sync effects, schedule effects)
 
-function setValue(signal: MetaSignal, newValue: unknown) {
+function setValue(signal: MetaSignal, newValue: unknown, oldValue: unknown) {
+    if (oldValue === newValue) return oldValue;
     const $signal = signal.o;
     const _newValue = maybeReactivizeValue(newValue, signal)
     signal.value = _newValue;

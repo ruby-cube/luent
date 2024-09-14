@@ -5,7 +5,7 @@ import { $if } from "@rue/lumo"
 export function Root() {
     const $active = $Signal(true)
     function toggleActive() {
-        $active.setFrom(value => !value)
+        $active.update(value => !value)
     }
     return (
         <>
@@ -37,7 +37,7 @@ export function Root() {
 //     })
 
 //     promise.then(() => {
-//         $count.setFrom(c => c + 1)
+//         $count.update(c => c + 1)
 //     })
 
 //     return (

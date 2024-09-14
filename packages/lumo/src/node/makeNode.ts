@@ -1,4 +1,4 @@
-import { DerivedSignal, ReactiveSignal, AtomicSignal } from "@rue/muonic";
+import { DerivedSignal, AnySignal, AtomicSignal } from "@rue/muonic";
 import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
@@ -16,7 +16,7 @@ export function jsx(tag: any, config: any, ...children: any[]) {
     return makeNode(tag, children, config || {})
 }
 
-export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveSignal<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
+export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | AnySignal<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
 
 export type RenderFunction<Params = unknown> = Params extends [] ?
     (...args: Params) => NodeEntity[] | NodeEntity :

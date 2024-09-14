@@ -1,4 +1,4 @@
-import { beforeRender, isAnySignal, $initializeEffect as _$initializeEffect, onRendered, ReactiveSignal, shallowClone, watch as _watch, WatchOptions, ReactiveModel, ChangeEffect, MutationEffect, RawEffect, EffectOrKeys, OptionsOrEffect, RawWatchTarget } from "@rue/muonic";
+import { beforeRender, isAnySignal, $initializeEffect as _$initializeEffect, onRendered, AnySignal, shallowClone, watch as _watch, WatchOptions, ReactiveModel, ChangeEffect, MutationEffect } from "@rue/muonic";
 import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
@@ -41,9 +41,9 @@ function _initializeRender(effect: () => void) {
 type Effect<T = any> = MutationEffect<T extends AnyObject ? T : never> | ChangeEffect<T>
 
 
-export function watchForRender<T extends AnyObject>(target: ReactiveModel<T>, effect: MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener
-export function watchForRender<T>(target: () => T | ReactiveSignal<T>, effect: ChangeEffect<T>, options?: WatchForRenderOptions): ActiveListener
-export function watchForRender<T>(target: RawWatchTarget<T>, effect: Effect<T>, options?: WatchForRenderOptions) {
+export function watchForRender<T extends ReactiveModel>(target: T, effect: MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener
+export function watchForRender<T extends () => any | AnySignal>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchForRenderOptions): ActiveListener
+export function watchForRender<T extends () => any | AnySignal | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener {
     // const component = getCurrentComponent<InternalComponent>();
     // if (!component) throw Error("watchForRender must be called within component setup")
 
@@ -57,7 +57,7 @@ export function watchForRender<T>(target: RawWatchTarget<T>, effect: Effect<T>, 
     return _watchForRender(target, effect, options)
 }
 
-export function _watchForRender<T>(target: RawWatchTarget, effect: Effect, options?: WatchForRenderOptions) {
+export function _watchForRender(target: () => any | AnySignal | ReactiveModel, effect: Effect, options?: WatchForRenderOptions) {
     // const component = getCurrentComponent<InternalComponent>()!;
     // const _handler = (newValue: any, oldValue: any) => {
     // handler(newValue, oldValue);
@@ -126,20 +126,18 @@ export function $initializeEffect(effect: () => void) {
 }
 
 
-export function watch<T extends AnyObject>(target: ReactiveModel<T>, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
-export function watch<T extends AnyObject>(target: ReactiveModel<T>, keys: (keyof T)[], effect: ChangeEffect<(T[keyof T])[]>, options?: WatchOptions): ActiveListener
-export function watch<T extends AnyObject>(target: ReactiveModel<T>, key: keyof T, effect: ChangeEffect<T[keyof T]>, options?: WatchOptions): ActiveListener
-export function watch<T>(target: () => T | ReactiveSignal<T>, effect: ChangeEffect<T>, options?: WatchOptions): ActiveListener
-export function watch<T>(target: ReactiveModel<T extends AnyObject? T: never>| (() => T | ReactiveSignal<T>), effectOrKeys: EffectOrKeys<T>, optionsOrEffect?: OptionsOrEffect<T>, options?: WatchOptions) {
+export function watch<T extends ReactiveModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
+export function watch<T extends () => any | AnySignal>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
+export function watch<T extends () => any | AnySignal | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
     const dynamicNode = getActiveDynamicNode()
     // if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
 
     if (dynamicNode && dynamicNode.preserve)
-        return watchAndPreserve(target, effectOrKeys, optionsOrEffect, options)
-    return _watch(<any>target, <any>effectOrKeys, <any>optionsOrEffect, options)
+        return watchAndPreserve(target, effect, options)
+    return _watch(target, effect, options)
 }
 
-function watchAndPreserve<T>(target: RawWatchTarget<T>, effectOrKeys: EffectOrKeys<T>, optionsOrEffect?: OptionsOrEffect<T>, options?: WatchOptions) {
+function watchAndPreserve<T extends () => any | AnySignal | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions) {
     const mountPhase = isMountPhase()
     // const component = getComponent(watchAndPreserve.name);
     const watchFn = options?.phase === 'render' ? _watchForRender : _watch
@@ -185,7 +183,7 @@ function watchAndPreserve<T>(target: RawWatchTarget<T>, effectOrKeys: EffectOrKe
     return watcher
 }
 
-// export function watchForRender<T>(target: ReactiveSignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: { once?: true }) {
+// export function watchForRender<T>(target: AnySignal<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: { once?: true }) {
 //     const component = getCurrentComponent();
 //     if (!component || component === "root") throw Error("watchForRender must be called within component setup")
 

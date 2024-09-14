@@ -2,6 +2,9 @@ import type { AnyObject } from "@rue/types"
 import type { ReactiveModel, ReactiveTraps } from "./ReactiveModel"
 import type { TrackedOp } from "./TrackedOp"
 import type { ReactiveEntity } from "../ReactiveEntity"
+import { ObservedProp } from "./ObservedProp"
+import { PropSignal } from "./PropSignal"
+import { DerivedSignal } from "../derivations/DerivedSignal"
 
 
 
@@ -32,42 +35,87 @@ export class MetaReactiveModel<T extends AnyObject = AnyObject> implements React
         public traps?: ReactiveTraps<T>
     ) { }
 
-    // observedProps: Map<PropertyKey, ObservedProp> = new Map()
+    observedProps?: Map<PropertyKey, ObservedProp>
 
-    // registerObservedProp(key: PropertyKey, prop: ObservedProp) {
-    //     this.observedProps.set(key, prop)
-    // }
+    registerObservedProp(key: PropertyKey, prop: ObservedProp) {
+        if (!this.observedProps) this.observedProps = new Map()
+        this.observedProps.set(key, prop)
+    }
 
-    // unregisterObservedProp(key: PropertyKey) {
-    //     this.observedProps.delete(key)
-    // }
+    unregisterObservedProp(key: PropertyKey) {
+        if (!this.observedProps) return;
+        this.observedProps.delete(key)
+    }
 
-    // getObservedProp(key: PropertyKey) {
-    //     return this.observedProps.get(key)
-    // }
+    getObservedProp(key: PropertyKey) {
+        if (!this.observedProps) return;
+        return this.observedProps.get(key)
+    }
 
-    // trackedOps: Map<OpName, OpMap> = new Map()
 
-    // registerTrackedOp(op: OpName, entryKey: EntryKey, trackedOp: TrackedOp) {
-    //     let opMap = this.trackedOps.get(op);
-    //     if (!opMap) {
-    //         opMap = new Map();
-    //         this.trackedOps.set(op, opMap)
-    //     }
-    //     opMap.set(entryKey, trackedOp)
-    // }
 
-    // unregisterTrackedOp(op: OpName, entryKey: EntryKey) {
-    //     const opMap = this.trackedOps.get(op)
-    //     opMap?.delete(entryKey)
-    //     if (opMap?.size === 0) {
-    //         this.trackedOps.delete(op)
-    //     }
-    // }
+    propSignals?: Map<PropertyKey, PropSignal>
 
-    // getTrackedOp(op: OpName, entryKey: EntryKey) {
-    //     return this.trackedOps.get(op)?.get(entryKey)
-    // }
+    registerPropSignal(key: PropertyKey, signal: PropSignal) {
+        if (!this.propSignals) this.propSignals = new Map()
+        this.propSignals.set(key, signal)
+    }
+
+    unregisterPropSignal(key: PropertyKey) { //QUESTION: When to unregister?  when watchcount === 0 and observedProps atom size === 0?
+        if (!this.propSignals) return;
+        this.propSignals.delete(key)
+    }
+
+    getPropSignal(key: PropertyKey) {
+        if (!this.propSignals) return;
+        return this.propSignals.get(key)
+    }
+
+
+    multiPropSignals?: Map<string, DerivedSignal>
+
+    registerMultiPropSignal(key: string, signal: DerivedSignal) {
+        if (!this.multiPropSignals) this.multiPropSignals = new Map()
+        this.multiPropSignals.set(key, signal)
+    }
+
+    unregisterMultiPropSignal(key: string) { //QUESTION: When to unregister?
+        if (!this.multiPropSignals) return;
+        this.multiPropSignals.delete(key)
+    }
+
+    getMultiPropSignal(key: string) {
+        if (!this.multiPropSignals) return;
+        return this.multiPropSignals.get(key)
+    }
+
+
+
+    trackedOps?: Map<OpName, OpMap>
+
+    registerTrackedOp(op: OpName, entryKey: EntryKey, trackedOp: TrackedOp) {
+        if (!this.trackedOps) this.trackedOps = new Map()
+        let opMap = this.trackedOps.get(op);
+        if (!opMap) {
+            opMap = new Map();
+            this.trackedOps.set(op, opMap)
+        }
+        opMap.set(entryKey, trackedOp)
+    }
+
+    unregisterTrackedOp(op: OpName, entryKey: EntryKey) {
+        if (!this.trackedOps) return;
+        const opMap = this.trackedOps.get(op)
+        opMap?.delete(entryKey)
+        if (opMap?.size === 0) {
+            this.trackedOps.delete(op)
+        }
+    }
+
+    getTrackedOp(op: OpName, entryKey: EntryKey) {
+        if (!this.trackedOps) return;
+        return this.trackedOps.get(op)?.get(entryKey)
+    }
 }
 
 

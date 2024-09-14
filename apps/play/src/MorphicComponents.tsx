@@ -56,7 +56,7 @@ function $MorphicPort(initialKey: string | AtomicSignal<any>, switchMap: { [key:
     const $render = $Signal(switchMap[$key()])
 
     watch($key, (key) => {
-        $render.setFrom(switchMap[key])
+        $render.update(switchMap[key])
     })
 
     function $Morphable() {

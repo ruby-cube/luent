@@ -91,7 +91,7 @@ export function List() {
     }
 
     function insertItem(index: number) {
-        $list.setFrom(list => {
+        $list.update(list => {
             const newList = [...list];
             newList.splice(index, 0, {
                 id: genId(),
@@ -102,7 +102,7 @@ export function List() {
     }
 
     function removeItem(index: number) {
-        $list.setFrom(list => {
+        $list.update(list => {
             const _list = [...list]
             _list.splice(index, 1);
             return _list

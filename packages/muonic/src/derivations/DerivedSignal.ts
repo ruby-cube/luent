@@ -1,4 +1,4 @@
-import { isSignal, AtomicSignal } from "../$Signal";
+import { isSignal, AtomicSignal } from "../Signal";
 import { READONLY_SIGNAL } from "../asReadonly";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
@@ -20,7 +20,7 @@ export type DerivedSignal<T = any> = {
     untrack: () => void
 }
 
-export type ReactiveSignal<T = any> = DerivedSignal<T> | AtomicSignal<T>;
+export type AnySignal<T = any> = DerivedSignal<T> | AtomicSignal<T>;
 
 export function isDerivedSignal(maybeDerivedSignal: any): maybeDerivedSignal is DerivedSignal {
     if (!(maybeDerivedSignal instanceof Function)) return false

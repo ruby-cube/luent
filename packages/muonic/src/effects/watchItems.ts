@@ -1,29 +1,40 @@
 import { ActiveListener } from "@rue/flask";
-import { isAnySignal, ReactiveSignal } from "../derivations/DerivedSignal";
-import { isReactiveModel, ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
+import { isAnySignal, AnySignal } from "../derivations/DerivedSignal";
+import { DeepReactiveModel, isReactiveModel, o$$, ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
 import { ChangeEffect, isMutationOp, MutationEffect, watch, WatchOptions } from "./watch";
 import { insertOps } from "../reactivemodel/ReactiveCapsule";
 import { isIntegerKey } from "../reactivemodel/ReactiveArray";
 import { AnyObject } from "@rue/types";
 
-type WatchersMap = Map<ReactiveModel | ReactiveSignal, ActiveListener>
+type WatchersMap = Map<AnyObject | AnySignal, ActiveListener>
 
 
 export type KeyPath = PropertyKey[]
 
 
 
-export function watchItems<T extends ReactiveModel | ReactiveSignal>(
+export function watchItems<T extends AnyObject>(
+    reactiveList: ReactiveModel<AnySignal<T>[]>,
+    effect: ChangeEffect<T>,
+    options?: WatchOptions
+): ActiveListener
+export function watchItems<T extends AnyObject>(
     reactiveList: ReactiveModel<T[]>,
+    effect: MutationEffect<T>,
+    options?: WatchOptions
+): ActiveListener
+export function watchItems<T extends AnyObject>(
+    reactiveList: DeepReactiveModel<T[]> | ReactiveModel<AnySignal<T>[]>,
     effect: ChangeEffect<T> | MutationEffect<T>,
     options?: WatchOptions
 ) {
-    const array = toRaw(reactiveList)
+    const array = toRaw(reactiveList) as T[] | AnySignal<T>[]
     const watchers: WatchersMap = new Map()
     const _options = options || {}
 
     for (const item of array) {
-        watchers.set(item, watch(item, effect, _options))
+        const target = isAnySignal(item) ? item : o$$(item) as DeepReactiveModel<T>
+        watchers.set(item, watch(<AnySignal>target, effect, _options)) // typecasting one of the possibilities to quiet typescript
     }
 
     // watch new items, unwatch deleted items
@@ -41,7 +52,7 @@ export function watchItems<T extends ReactiveModel | ReactiveSignal>(
 
                     case 'pop':
                     case 'shift':
-                        unwatchItem(output, watchers)
+                        unwatchItem(toRaw(output), watchers)
                         break;
 
                     case 'splice':
@@ -72,27 +83,28 @@ export function watchItems<T extends ReactiveModel | ReactiveSignal>(
     }
 }
 
-function watchNewItem(newItem: ReactiveModel | ReactiveSignal, effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap) {
-    watchers.set(newItem, watch(newItem, effect, options)) //TODO: must inherit original flask
+function watchNewItem(newItem: AnyObject | AnySignal, effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap) {
+    const target = isAnySignal(newItem) ? newItem : o$$(newItem)
+    watchers.set(newItem, watch(target, effect, options)) //TODO: must inherit original flask
     return watchers;
 }
 
-function watchNewItems(newItems: (ReactiveModel | ReactiveSignal)[], effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap) {
+function watchNewItems(newItems: AnyObject[], effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap) {
     for (const item of newItems) {
         watchNewItem(item, effect, options, watchers)
     }
     return watchers;
 }
 
-function unwatchItem(item: ReactiveModel | ReactiveSignal, watchers: WatchersMap) {
+function unwatchItem(item: AnyObject | AnySignal, watchers: WatchersMap) {
     const watcher = watchers.get(item)
     if (!watcher) throw new Error("No watcher that corresponds with this item :( This should never happen")
     watcher.stop()
 }
 
-function unwatchItems(items: (ReactiveModel | ReactiveSignal)[], watchers: WatchersMap) {
+function unwatchItems(items: AnyObject[], watchers: WatchersMap) {
     for (const item of items) {
-        unwatchItem(item, watchers)
+        unwatchItem(toRaw(item), watchers)
     }
 }
 
@@ -104,8 +116,8 @@ function unwatchAll(watchers: WatchersMap) {
 
 
 
-export function watchEntries<T extends ReactiveModel | ReactiveSignal, V>(
-    reactive: ReactiveModel<Set<T>> | ReactiveModel<Map<T, V>>,
+export function watchEntries<T, V>(
+    reactive: DeepReactiveModel<Set<T>> | DeepReactiveModel<Map<T, V>>,
     effect: ChangeEffect | MutationEffect,
     options?: WatchOptions
 ) {
@@ -123,7 +135,7 @@ export function watchEntries<T extends ReactiveModel | ReactiveSignal, V>(
     }
 
     // watch new items, unwatch deleted items
-    watchers.set(reactive, watch(reactive, (_, mutations) => {
+    watchers.set(collection, watch(reactive, (_, mutations) => {
         for (const mutation of mutations) {
             const op = mutation.op;
             if (isMutationOp(op)) {

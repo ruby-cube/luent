@@ -4,7 +4,7 @@
 
 import { asReactiveAtom } from "../derivations/ReactiveAtom";
 import { META } from "../ReactiveEntity";
-import { Collection } from "./MetaReactiveModel";
+import { Collection, MetaReactiveCollection, MetaReactiveModel } from "./MetaReactiveModel";
 import { getMetaReactive, ReactiveModel } from "./ReactiveModel";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
@@ -19,22 +19,26 @@ const trackedOpMap: Map<ReactiveModel, OpMap> = new Map()
 export class TrackedOp {
 
     constructor(
-        public reactive: ReactiveModel,
+        public metaReactive: MetaReactiveModel,
         public op: string,
         public entryKey: any,
     ) {
-        registerTrackedOp(this, reactive, op, entryKey)
+        metaReactive.registerTrackedOp(op, entryKey, this)
     }
 
     destroy() {
-        unregisterTrackedOp(this.reactive, this.op, this.entryKey)
+        this.metaReactive.unregisterTrackedOp(this.op, this.entryKey)
+    }
+
+    getOutput(){
+        return this.metaReactive.rawTarget[this.op](this.entryKey)
     }
 }
 
 
-export function getTrackableOpValue(op: TrackedOp) {
-    return op.reactive[op.op](op.entryKey);
-}
+// export function getOpOutput(op: TrackedOp) {
+//     return op.metaReactive.rawTarget[op.op](op.entryKey);
+// }
 
 export function isTrackedOp(value: any): value is TrackedOp {
     if (!(value instanceof Object)) return false;
@@ -65,7 +69,7 @@ function createTrackedOp(
     key: any
 ){
     const metaReactive = getMetaReactive(model);
-    const trackedOp = new TrackedOp(model, op, key)
+    const trackedOp = new TrackedOp(metaReactive, op, key)
     metaReactive.addObservedEntryKey(key)
     const atom = asReactiveAtom(trackedOp);
     atom.onUntracked(() => {
@@ -79,32 +83,32 @@ function createTrackedOp(
 
 
 
-function registerTrackedOp(trackedOp: TrackedOp, model: ReactiveModel, op: string, key: any) {
-    let opMap = trackedOpMap.get(model)
-    if (!opMap) {
-        opMap = new Map()
-        trackedOpMap.set(model, opMap)
-    }
-    let entryKeyMap = opMap.get(op)
-    if (!entryKeyMap) {
-        entryKeyMap = new Map()
-        opMap.set(op, entryKeyMap)
-    }
-    entryKeyMap.set(key, trackedOp);
-}
+// function registerTrackedOp(trackedOp: TrackedOp, model: ReactiveModel, op: string, key: any) {
+//     let opMap = trackedOpMap.get(model)
+//     if (!opMap) {
+//         opMap = new Map()
+//         trackedOpMap.set(model, opMap)
+//     }
+//     let entryKeyMap = opMap.get(op)
+//     if (!entryKeyMap) {
+//         entryKeyMap = new Map()
+//         opMap.set(op, entryKeyMap)
+//     }
+//     entryKeyMap.set(key, trackedOp);
+// }
 
-function unregisterTrackedOp(reactive: ReactiveModel, op: string, entryKey: any) {
-    const opMap = trackedOpMap.get(reactive)!
-    const entryKeyMap = opMap.get(op)!
-    if (__DEV__ && !entryKeyMap) throw new Error("No entryKeyMap :( this should never happen")
-    entryKeyMap.delete(entryKey)
-    if (entryKeyMap.size === 0) {
-        opMap.delete(op)
-    }
-    if (opMap.size === 0) {
-        trackedOpMap.delete(reactive)
-    }
-}
+// function unregisterTrackedOp(reactive: ReactiveModel, op: string, entryKey: any) {
+//     const opMap = trackedOpMap.get(reactive)!
+//     const entryKeyMap = opMap.get(op)!
+//     if (__DEV__ && !entryKeyMap) throw new Error("No entryKeyMap :( this should never happen")
+//     entryKeyMap.delete(entryKey)
+//     if (entryKeyMap.size === 0) {
+//         opMap.delete(op)
+//     }
+//     if (opMap.size === 0) {
+//         trackedOpMap.delete(reactive)
+//     }
+// }
 
 // export function getTrackableOps(
 //     model: ReactiveModel,

@@ -1,7 +1,7 @@
 import { PublicComponent, ComponentSetup, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag } from "../element/makeElement";
 import { ListData } from "../list/iterate_over";
-import { DerivedSignal, ReactiveSignal } from "@rue/muonic/DerivedSignal";
+import { DerivedSignal, AnySignal } from "@rue/muonic/DerivedSignal";
 import { ComponentConfig, ElementConfig, RenderFunction } from "./makeNode";
 import { AtomicSignal } from "@rue/muonic";
 
@@ -18,6 +18,6 @@ export type ItemNodeConfig<
 > =
     L extends (infer I)[] ?
     ((item?: I, $index?: AtomicSignal<number>) => NodeSetup<T>)
-    : L extends ReactiveSignal<(infer I)[]> ?
+    : L extends AnySignal<(infer I)[]> ?
     (item?: I, $index?: AtomicSignal<number>) => NodeSetup<T>
     : never

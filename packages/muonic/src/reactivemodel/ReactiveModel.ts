@@ -25,9 +25,12 @@ export enum ModelReactivityDepth {
 }
 export const DEEP = true;
 
-export type ReactiveModel<T extends AnyObject = AnyObject> = T
+export type ReactiveModel<T extends AnyObject = AnyObject> = T & { readonly [REACTIVE_MODEL]?: true }
 
-export type DeepReactiveModel<T extends AnyObject = AnyObject> = { [K in keyof T]: T[K] extends Function ? (this: DeepReactiveModel<T>, ...args: Parameters<T[K]>) => ReturnType<T[K]> : T[K] extends AnyObject ? DeepReactiveModel<T[K]> : T[K] } & { readonly _$: ReactiveModel<T> }
+export type DeepReactiveModel<T extends AnyObject = AnyObject> = { [K in keyof T]: T[K] extends Function ? (this: DeepReactiveModel<T>, ...args: Parameters<T[K]>) => ReturnType<T[K]> : T[K] extends AnyObject ? DeepReactiveModel<T[K]> : T[K] } & {
+    readonly _$: ReactiveModel<T>,
+    readonly [REACTIVE_MODEL]?: true
+}
 
 export type Readonly<T extends AnyObject = AnyObject> = {
     readonly [K in keyof T]: T[K]
@@ -94,12 +97,12 @@ export function createReactiveTraps(
 
 
 
-export function isReactiveModel<T>(value: T): value is T extends ReactiveModel ? T : never {
+export function isReactiveModel(value: any): value is ReactiveModel {
     if (!isObject(value)) return false;
     return value[META]?.type === REACTIVE_MODEL;
 }
 
-export function isDeepReactive<T>(value: T): value is T extends DeepReactiveModel ? T : never {
+export function isDeepReactive(value: any): value is DeepReactiveModel {
     return isObject(value) && value[META]?.deepReactive === value
 }
 

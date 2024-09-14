@@ -5,24 +5,24 @@ export function MountIf() {
     // const $count = $Signal(0)
     // const $doubleCount = $(() => $count() * 2)
     // function increment() {
-    //     $count.setFrom(count => count + 1)
+    //     $count.update(count => count + 1)
     // }
 
     // const $count2 = $Signal(0)
     // const $sum = $(() => $count() + $count2())
     // function increment2() {
-    //     $count2.setFrom(count => count + 1)
+    //     $count2.update(count => count + 1)
     // }
 
 
     const $active = $Signal(false)
     function toggleActive() {
-        $active.setFrom(active => !active)
+        $active.update(active => !active)
     }
 
     // const $ready = $Signal(true)
     // function toggleReady() {
-    //     $ready.setFrom(ready => !ready)
+    //     $ready.update(ready => !ready)
     // }
 
 
