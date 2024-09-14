@@ -1,14 +1,16 @@
-import { createApp } from '@rue/lumo';
+// import { createApp } from '@rue/lumo';
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
+import { watch } from '../../../packages/lumo/src/watch/watchForRender';
 import './style.css'
 // import { TestCounter } from './TestCounter';
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
-import { configureFlask } from '../../../packages/flask/initFlask';
-import { List } from './TestReactiveModel';
+// import { configureFlask } from '../../../packages/flask/initFlask';
+// import { List } from './TestReactiveModel';
+import { DeepReactiveModel, getMetaReactive, o$, o$$ } from '@rue/muonic';
 // import { MountIf } from './TestMountIf';
 // import { queueTask } from '@rue/thread';
 // import { UpdateCycle } from '@rue/muonic';
@@ -17,14 +19,39 @@ import { List } from './TestReactiveModel';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
+class Frog {
+    qualities = { a: "brave" }
+    setQualities(qualities: { a: string }) {
+        console.log("setting qualities", this)
+        this.qualities = qualities
+        return this.qualities
+    }
+    getQualities() {
+        return [this.qualities, 1]
+    }
+}
 
-const app = createApp(List)
 
-if (__DEV__) configureFlask({
-    warnNoCleanup: false
+const frog$$ = o$$(new Frog())
+
+
+watch(frog$$, (val, old) => {
+    console.log("new", val)
+    console.log("old", old)
 })
+frog$$._$.setQualities({ a: "gallant" })
+//   frog$$._$.qualities = {a: "gallant"} 
 
-app.mount('#app')
+console.log("qualities", frog$$.qualities)
+//   msg.value = isReactive(frog.getQualities()[0])
+
+// const app = createApp(List)
+
+// if (__DEV__) configureFlask({
+//     warnNoCleanup: false
+// })
+
+// app.mount('#app')
 
 // queueTask(()=>{
 //     console.log("hi")

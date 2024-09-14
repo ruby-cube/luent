@@ -1,7 +1,7 @@
 import { $Node, COMPONENT, ComponentSetup, create_if, else_create, else_mount, else_show, iterate_over, mount_if, mx, NodeEntity, preventDefault, show_if, teleportTo, useEventListener } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { $Signal, __addDevName } from "@rue/muonic";
-import { $, DeepReactive$, Reactive$ } from "@rue/muonic";
+import { $Signal, __addDevName, DeepReactiveModel, isDeepReactive, isReactiveModel, ReactiveModel } from "@rue/muonic";
+import { $, o$$, o$ } from "@rue/muonic";
 import { watch } from "../../../packages/lumo/src/watch/watchForRender";
 
 
@@ -15,25 +15,37 @@ function genId() {
 
 export function List() {
 
-    const list$ = DeepReactive$([
+    const list$$ = o$$([
         { id: 0, content: "frog" },
         { id: 1, content: "robin" },
         { id: 2, content: "fly" },
         { id: 3, content: "swamp" }
     ])
 
-    console.log("works?", list$ instanceof Array)
+    list$$._$[0] = { id: 2, content: "fly" }
 
-    watch(list$, (list, mutations)=>{
-        console.log("mutations", mutations)
-    }, {deep: true})
+    // console.log("is reactive?", isReactiveModel(list$$), list$$)
+    // console.log("is deep", isDeepReactive(list$$))
+    // console.log("isReactive //true", isReactiveModel(list$$[0]))
+    // console.log("isShallowReactive // true", isReactiveModel(list$$._), list$$._[0])
+    // console.log("isreactive //false", isReactiveModel(list$$._[0]))
+
+    watch($(() => list$$['3']), (newValue, old) => {
+        console.log("index 3", newValue, old)
+    })
+
+    console.log("works?", list$$ instanceof Array)
+
+    watch(list$$, (list, mutations) => {
+        // console.log("mutations", mutations)
+    })
 
     // $initializeEffect(() => {
-    //     console.log("some starts with f", list$.some((item) => item.content.startsWith('f')))
+    //     console.log("some starts with f", list$$.some((item) => item.content.startsWith('f')))
     // })
 
     function changeItem(index: number) {
-        list$[index] = {
+        list$$._$[index] = {
             id: genId(),
             content: (Math.random() * 100).toString(),
         }
@@ -42,24 +54,27 @@ export function List() {
 
     function changeContent(index: number) {
         console.log("changing content")
-        const item$ = list$[index];
+        const item$ = list$$[index];
         item$.content = 'something else'
     }
 
 
     function insertItem(index: number) {
-        list$.splice(index, 0, {
+        list$$._.splice(index, 0, {
             id: genId(),
             content: (Math.random() * 100).toString(),
         })
     }
 
-
-    function moveSelectedItems(index: number) {
-        moveMultipleUniqueItems(selected$, list$, index)
+    function z$<T extends AnyObject>(value: T): DeepReactiveModel<T> {
+        return value as DeepReactiveModel<T>;
     }
 
-    const selected$ = Reactive$(new Set())
+    function moveSelectedItems(index: number) {
+        moveMultipleUniqueItems(selected$, list$$, index)
+    }
+
+    const selected$ = o$(new Set())
 
 
     function clearSelection() {
@@ -68,7 +83,7 @@ export function List() {
 
     function toggleSelect(e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) {
         if (e.target instanceof HTMLElement && e.target.style.cursor === 'pointer') return;
-        const item$ = list$[index]
+        const item$ = list$$[index]
         if (selected$.has(item$)) {
             selected$.delete(item$)
         }
@@ -78,8 +93,8 @@ export function List() {
     }
 
     function removeItem(index: number) {
-        selected$.delete(list$[index])
-        list$.splice(index, 1);
+        selected$.delete(list$$[index])
+        list$$.splice(index, 1);
     }
 
     const $itemDiv = $Node<'div'>()
@@ -89,7 +104,7 @@ export function List() {
     function destroy() {
         $alive.setTo(false)
     }
-    // const item$ = list$[0]
+    // const item$ = list$$[0]
     //     watch($(() => item$.content), (newValue, oldValue) => {
     //         console.log("changed", newValue, oldValue)
     //     }, { phase: 'render' })
@@ -107,7 +122,7 @@ export function List() {
         //         <div>
         //             <button onclick={destroy}>destroy</button>
         <>
-            {/* //                 {create_if($(() => { console.log('reevaluate list length === 0'); return list$.length === 0 }), () => ( */}
+            {/* //                 {create_if($(() => { console.log('reevaluate list length === 0'); return list$$.length === 0 }), () => ( */}
             <div
                 onclick={() => insertItem(0)}
                 style="background-color: gray; cursor: pointer"
@@ -117,7 +132,7 @@ export function List() {
             {/* //                 ))} */}
             {/* //                 {else_create(() => */}
 
-            {iterate_over(list$, (item$, $index) => (
+            {iterate_over(list$$, (item$, $index) => (
                 <div
                     ref={$itemDiv}
                     onclick={(e) => toggleSelect(e, $index())}
@@ -152,10 +167,10 @@ export function List() {
                     </div>
                 </div>
             ), 'id')}
+            <button onclick={clearSelection}>clear</button>
         </>
         //                 )}
         //             </>
-        //             <button onclick={clearSelection}>clear</button>
         //             {/* <button onclick={$if($active, capture.once(clearSelection))}>clear</button>
 
         //     <button

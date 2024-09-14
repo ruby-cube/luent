@@ -1,5 +1,5 @@
-import {  isReactiveModel, isReactiveObject, ReactiveModel, toRaw } from "../reactivemodel/Reactive$";
-import { MetaReactiveModel } from "../reactivemodel/ReactiveModel";
+import {  isReactiveModel, ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
+import { isReactiveObject } from "../reactivemodel/ReactiveObject";
 import { getCurrentUpdateCycle } from "./UpdateCycle";
 import { AnyObject } from "@rue/types";
 

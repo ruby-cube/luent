@@ -4,9 +4,8 @@
 
 import { asReactiveAtom } from "../derivations/ReactiveAtom";
 import { META } from "../ReactiveEntity";
-import { ReactiveModel } from "./Reactive$";
-import { Collection, MetaReactiveCollection } from "./ReactiveCollection";
-import { MetaReactiveModel } from "./ReactiveModel";
+import { Collection } from "./MetaReactiveModel";
+import { getMetaReactive, ReactiveModel } from "./ReactiveModel";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
 
@@ -52,7 +51,7 @@ export function asTrackedOp(
     return createTrackedOp(model, op, key)
 }
 
-function getTrackedOp(
+export function getTrackedOp(
     model: ReactiveModel,
     op: string,
     key: any
@@ -65,7 +64,7 @@ function createTrackedOp(
     op: string,
     key: any
 ){
-    const metaReactive = model[META];
+    const metaReactive = getMetaReactive(model);
     const trackedOp = new TrackedOp(model, op, key)
     metaReactive.addObservedEntryKey(key)
     const atom = asReactiveAtom(trackedOp);

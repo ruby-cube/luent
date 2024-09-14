@@ -7,7 +7,7 @@
 // - derived signal with memo
 
 import { mx } from "@rue/lumo"
-import { $, Reactive$, $Signal } from "@rue/muonic"
+import { $, o$, $Signal } from "@rue/muonic"
 
 export function TestCounterSignals() {
     const $count = $Signal(0)
@@ -47,7 +47,7 @@ export function TestCounter() {
 }
 
 function useCounter() {
-    const counter$ = Reactive$({
+    const counter$ = o$({
         count: 0
     })
 

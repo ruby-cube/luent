@@ -1,12 +1,12 @@
 import { $else, $if } from "@rue/lumo";
-import { $, Reactive$, $Signal } from "@rue/muonic";
+import { $, o$, $Signal } from "@rue/muonic";
 
 
 export function TestConditional() {
 
     const $active = $Signal(true)
 
-    const list$ = Reactive$([1, 2, 3])
+    const list$ = o$([1, 2, 3])
 
     function insert() {
         list$.push(list$.length + 1)

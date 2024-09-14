@@ -25,7 +25,7 @@ export function clone<T extends { [key: string | number | symbol]: any }>(obj: T
         }
         return _clone;
     }
-    if (obj instanceof Array){
+    if (obj instanceof Array) {
         return [...obj];
     }
     return {
@@ -81,10 +81,10 @@ export function cloneWithMods<T extends Object, P extends Object, K extends (key
 /* EFFECTIVE OPS */
 
 //NOTE: `addProps` contrasts with `assign` in that it prevents name collisions with existing props by throwing an error
-export function addProps(target: {[key: string | number | symbol]: any}, source: {[key: string | number | symbol]: any}){
-    for (const key in source){
+export function addProps(target: { [key: string | number | symbol]: any }, source: { [key: string | number | symbol]: any }) {
+    for (const key in source) {
         if (target[key] === undefined) throw new Error(`Name collision. A '${key}' prop already exists on this object. Please rename prop`);
-        target[key] = source[key];   
+        target[key] = source[key];
     }
     return target;
 }
@@ -98,7 +98,16 @@ function swapKeysAndValues(source: { [key: string]: string }) {
 }
 
 
-export function isPlainObject(obj: AnyObject){
-return obj.constructor === Object;
+export function isPlainObject(obj: AnyObject) {
+    return obj.constructor === Object;
 }
 
+export function isObject<T>(value: T): value is T extends AnyObject ? T : never {
+    return value instanceof Object;
+}
+
+export function isFunctionWithProps<T>(value: T): value is T extends Function ? T & AnyObject : never {
+    return value instanceof Function;
+}
+
+export type ProxyTargetKey = string | symbol

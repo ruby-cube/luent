@@ -1,12 +1,17 @@
 import { ActiveListener } from "@rue/flask";
-import { isSignal, ReactiveSignal } from "../derivations/DerivedSignal";
-import { isReactiveModel, ReactiveModel, toRaw } from "../reactivemodel/Reactive$";
-import { ChangeEffect, MutationEffect, watch, WatchOptions } from "./watch";
-import { isMutationOp } from "./deepWatch";
+import { isAnySignal, ReactiveSignal } from "../derivations/DerivedSignal";
+import { isReactiveModel, ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
+import { ChangeEffect, isMutationOp, MutationEffect, watch, WatchOptions } from "./watch";
 import { insertOps } from "../reactivemodel/ReactiveCapsule";
 import { isIntegerKey } from "../reactivemodel/ReactiveArray";
+import { AnyObject } from "@rue/types";
 
 type WatchersMap = Map<ReactiveModel | ReactiveSignal, ActiveListener>
+
+
+export type KeyPath = PropertyKey[]
+
+
 
 export function watchItems<T extends ReactiveModel | ReactiveSignal>(
     reactiveList: ReactiveModel<T[]>,
@@ -68,7 +73,7 @@ export function watchItems<T extends ReactiveModel | ReactiveSignal>(
 }
 
 function watchNewItem(newItem: ReactiveModel | ReactiveSignal, effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap) {
-    watchers.set(newItem, watch(newItem, effect, options))
+    watchers.set(newItem, watch(newItem, effect, options)) //TODO: must inherit original flask
     return watchers;
 }
 
@@ -157,10 +162,10 @@ export function watchEntries<T extends ReactiveModel | ReactiveSignal, V>(
 
 function watchMapEntry(entry: any[], effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap) {
     const [key, value] = entry
-    if (isReactiveModel(key) || isSignal(key)) {
+    if (isReactiveModel(key) || isAnySignal(key)) {
         watchers.set(key, watch(key, effect, options))
     }
-    else if (isReactiveModel(value) || isSignal(value)) {
+    else if (isReactiveModel(value) || isAnySignal(value)) {
         watchers.set(value, watch(value, effect, options))
     }
 }

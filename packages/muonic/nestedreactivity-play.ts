@@ -35,7 +35,11 @@ const location$ = location.$
 const position$ = o$(frog$.location.position)
 //TODO: Keep a WeakMap of reactives so if an object is already made into a reactive, return that reactive instead of creating a new one
 
-const frog$$ = o$$()
+const $frog$ = $Signal(o$(new Frog()))
+
+const $frog$$ = $Signal(o$$(new Frog()))
+
+const frog$$ = o$$(new Frog())
 
 watch(o$(frog$.location.position), () => {
 
@@ -46,13 +50,15 @@ watch(frog$$.location.position, ()=>{
 })
 
 // reactive property access vs reactive creation...
-frog$$._.location // what if I want to track when location prop changeds but I don't want the location to be made reactive?? it's different.
+frog$$._$.location // what if I want to track when location prop changeds but I don't want the location to be made reactive?? it's different.
 
 frog$$ // deep reactive proxy that will make any downstream objects reactive
 
-frog$$._ // shallow reactive proxy that will not make any down stream objects reactive
+frog$$._$ // shallow reactive proxy that will not make any down stream objects reactive
 
-const frog$ = frog$$._ 
+frog$$._o // raw
+
+const frog$ = frog$$.o$ 
 
 
 
@@ -62,7 +68,7 @@ const todos$ = o$([{
 
 const item$ = todo$[0] // reactive
 
-const item = todos$._[0] // inert
+const item = todos$.o[0] // inert
 
 todos$$.push({
     content: "hi"

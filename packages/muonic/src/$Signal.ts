@@ -1,8 +1,10 @@
 import { emitSignal } from "./debug";
-import { isDeepReactive, isReactiveModel, DeepReactive$, Reactive$, ReactiveModelDepth } from "./reactivemodel/Reactive$";
+import { isDeepReactive, isReactiveModel, o$$, o$, ModelReactivityDepth } from "./reactivemodel/ReactiveModel";
 import { getActiveTracker } from "./derivations/DependencyTracker";
 import { trigger } from "./trigger";
 import { META, ReactiveEntity } from "./ReactiveEntity";
+import { sign } from "crypto";
+import { isFunctionWithProps } from "@rue/utils";
 
 export type AtomicSignal<T = any> = {
     (): T;
@@ -13,14 +15,14 @@ export type AtomicSignal<T = any> = {
 
 export const SIGNAL = Symbol('signal');
 
-export class MetaSignal<T = unknown> implements  ReactiveEntity {
+export class MetaSignal<T = unknown> implements ReactiveEntity {
 
     type = SIGNAL
 
     constructor(
         readonly o: AtomicSignal<T>,
         public value: T,
-        readonly depth?: ReactiveModelDepth
+        readonly depth?: ModelReactivityDepth
     ) { }
 }
 
@@ -39,8 +41,8 @@ export function $Signal<T>(value: T) {
     // mark reactive depth of value if value is ReactiveModel
     const depth =
         value instanceof Object ?
-            isDeepReactive(value) ? ReactiveModelDepth.DEEP
-                : isReactiveModel(value) ? ReactiveModelDepth.SHALLOW
+            isDeepReactive(value) ? ModelReactivityDepth.DEEP
+                : isReactiveModel(value) ? ModelReactivityDepth.SHALLOW
                     : undefined
             : undefined
 
@@ -82,13 +84,17 @@ function setValue(signal: MetaSignal, newValue: unknown) {
 
 function maybeReactivizeValue(newValue: unknown, signal: MetaSignal) {
     return newValue instanceof Object ?
-        signal.depth === ReactiveModelDepth.DEEP ? DeepReactive$(newValue) :
-            signal.depth === ReactiveModelDepth.SHALLOW ? Reactive$(newValue) :
+        signal.depth === ModelReactivityDepth.DEEP ? o$$(newValue) :
+            signal.depth === ModelReactivityDepth.SHALLOW ? o$(newValue) :
                 newValue : newValue
 }
 
 
-export function isAtomicSignal(maybeSignal: any): maybeSignal is AtomicSignal {
-    if (maybeSignal instanceof Function) return maybeSignal[META]?.type === SIGNAL;
+export function isSignal<T>(maybeSignal: T): maybeSignal is T extends AtomicSignal ? T : never {
+    if (isFunctionWithProps(maybeSignal)) return maybeSignal[META]?.type === SIGNAL;
     return false;
+}
+
+export function getMetaSignal<T>(signal: AtomicSignal<T>): MetaSignal<T> {
+    return signal[META]
 }

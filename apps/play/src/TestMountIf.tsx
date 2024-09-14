@@ -1,5 +1,5 @@
 import { create_if, else_create, else_mount, mount_if, mx } from "@rue/lumo";
-import { $, $Signal, isSignal } from "@rue/muonic";
+import { $, $Signal, isAnySignal } from "@rue/muonic";
 
 export function MountIf() {
     // const $count = $Signal(0)

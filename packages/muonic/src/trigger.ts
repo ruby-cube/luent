@@ -1,27 +1,23 @@
 import { asReactiveAtom, isReactiveAtom, ReactivePrimitive } from "./derivations/ReactiveAtom";
-import { ReactiveModel, toRaw } from "./reactivemodel/Reactive$";
+import { getMetaReactive, ReactiveModel, toRaw } from "./reactivemodel/ReactiveModel";
 import { AtomicSignal, MetaSignal } from "./$Signal";
 import { ObservedProp } from "./reactivemodel/ObservedProp";
 import { asWatchTarget, isWatched } from "./effects/WatchTarget";
 
 
-export function trigger(target: AtomicSignal | ObservedProp) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol
+export function trigger(target: AtomicSignal | ObservedProp) {
     if (isWatched(target)) {
         asWatchTarget(target).triggerEffects()
     }
     triggerReactiveAtom(target)
 }
 
-export function triggerReactiveAtom(target: ReactivePrimitive) { //TODO: what happens if key for trackable ops is  undefined or null ? I need to use a UNDEFINED symbol
+export function triggerReactiveAtom(target: ReactivePrimitive) {
     if (isReactiveAtom(target)) {
         asReactiveAtom(target).triggerDerivations()
     }
 }
 
 export function triggerReactiveModel(reactive: ReactiveModel) {
-   
-    asWatchTarget(reactive).triggerEffects()
+    asWatchTarget(getMetaReactive(reactive)).triggerEffects()
 }
-
-
-

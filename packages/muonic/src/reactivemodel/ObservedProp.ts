@@ -1,16 +1,14 @@
-import { UNDEFINED } from "@rue/utils";
 import { asReactiveAtom, ReactiveAtom } from "../derivations/ReactiveAtom";
 import { asWatchTarget, WatchTarget } from "../effects/WatchTarget";
-import { MetaReactiveModel } from "./ReactiveModel";
-import { ReactiveModel, toRaw } from "./Reactive$";
+import { getMetaReactive, ReactiveModel, toRaw } from "./ReactiveModel";
 import { META } from "../ReactiveEntity";
-import { MetaReactiveCollection } from "./ReactiveCollection";
 import { watch } from "fs";
 import { isIntegerKey } from "./ReactiveArray";
+import { MetaReactiveCollection, MetaReactiveModel } from "./MetaReactiveModel";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
 
-const observedPropMap: Map<ReactiveModel, Map<PropertyKey, ObservedProp>> = new Map()
+const observedPropMap: Map<MetaReactiveModel, Map<PropertyKey, ObservedProp>> = new Map()
 // const KEY = '1'
 // const MODEL = '0'
 
@@ -19,15 +17,15 @@ const observedPropMap: Map<ReactiveModel, Map<PropertyKey, ObservedProp>> = new 
 export class ObservedProp {
 
     constructor(
-        public reactive: ReactiveModel,
+        public metaReactive: MetaReactiveModel,
         public key: PropertyKey,
     ) {
-        registerObservedProp(this, reactive, key)
+        registerObservedProp(this, metaReactive, key)
         //TODO: destroy when watchCount === 0 && atom.derivations.size === 0
     }
 
     destroy() {
-        unregisterObservedProp(this.reactive, this.key)
+        unregisterObservedProp(this.metaReactive, this.key)
     }
 }
 
@@ -45,19 +43,19 @@ export function asObservedProp(
     return createObservedProp(reactive, key);
 }
 
-function getObservedProp(
+export function getObservedProp(
     reactive: ReactiveModel,
     key: PropertyKey
 ) {
-    return observedPropMap.get(reactive)?.get(key);
+    return observedPropMap.get(getMetaReactive(reactive))?.get(key);
 }
 
 function createObservedProp(
     reactive: ReactiveModel,
     key: PropertyKey
 ) {
-    const metaReactive = reactive[META];
-    const prop = new ObservedProp(reactive, key);
+    const metaReactive = getMetaReactive(reactive);
+    const prop = new ObservedProp(metaReactive, key);
     const isIndex = toRaw(metaReactive) instanceof Array && isIntegerKey(key)
     if (isIndex) {
         (<MetaReactiveCollection>metaReactive).addObservedEntryKey(key);
@@ -79,24 +77,24 @@ function createObservedProp(
 
 
 export function getObservedPropValue(prop: ObservedProp) {
-    return prop.reactive[prop.key];
+    return prop.metaReactive.rawTarget[prop.key];
 }
 
 
-function registerObservedProp(prop: ObservedProp, reactive: ReactiveModel, key: PropertyKey,) {
-    let propMap = observedPropMap.get(reactive)
+function registerObservedProp(prop: ObservedProp, metaReactive: MetaReactiveModel, key: PropertyKey,) {
+    let propMap = observedPropMap.get(metaReactive)
     if (!propMap) {
         propMap = new Map()
-        observedPropMap.set(reactive, propMap)
+        observedPropMap.set(metaReactive, propMap)
     }
     propMap.set(key, prop) // propMap should always exist because new ObservedProp is called after new Map() is called
 }
 
-function unregisterObservedProp(reactive: ReactiveModel, key: PropertyKey) {
-    const propMap = observedPropMap.get(reactive)!
+function unregisterObservedProp(metaReactive: MetaReactiveModel, key: PropertyKey) {
+    const propMap = observedPropMap.get(metaReactive)!
     if (__DEV__ && !propMap) throw new Error("No propMap :( this should never happen")
     propMap.delete(key)
     if (propMap.size === 0) {
-        observedPropMap.delete(reactive)
+        observedPropMap.delete(metaReactive)
     }
 }

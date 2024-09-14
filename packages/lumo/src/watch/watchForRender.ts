@@ -1,4 +1,4 @@
-import { beforeRender, isSignal, $initializeEffect as _$initializeEffect, onRendered, ReactiveSignal, shallowClone, watch as _watch, WatchOptions, ReactiveModel, ChangeEffect, MutationEffect, RawEffect, EffectOrKeys, OptionsOrEffect, RawWatchTarget } from "@rue/muonic";
+import { beforeRender, isAnySignal, $initializeEffect as _$initializeEffect, onRendered, ReactiveSignal, shallowClone, watch as _watch, WatchOptions, ReactiveModel, ChangeEffect, MutationEffect, RawEffect, EffectOrKeys, OptionsOrEffect, RawWatchTarget } from "@rue/muonic";
 import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { LifecycleHook } from "../component/lifecycle";
@@ -132,9 +132,9 @@ export function watch<T extends AnyObject>(target: ReactiveModel<T>, key: keyof 
 export function watch<T>(target: () => T | ReactiveSignal<T>, effect: ChangeEffect<T>, options?: WatchOptions): ActiveListener
 export function watch<T>(target: ReactiveModel<T extends AnyObject? T: never>| (() => T | ReactiveSignal<T>), effectOrKeys: EffectOrKeys<T>, optionsOrEffect?: OptionsOrEffect<T>, options?: WatchOptions) {
     const dynamicNode = getActiveDynamicNode()
-    if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
+    // if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
 
-    if (dynamicNode.preserve)
+    if (dynamicNode && dynamicNode.preserve)
         return watchAndPreserve(target, effectOrKeys, optionsOrEffect, options)
     return _watch(<any>target, <any>effectOrKeys, <any>optionsOrEffect, options)
 }
@@ -152,7 +152,7 @@ function watchAndPreserve<T>(target: RawWatchTarget<T>, effectOrKeys: EffectOrKe
     onDeactivate(deactivateAndReactivate, { once: true }, dynamicNode)
 
     function deactivateAndReactivate() {
-        oldValue = isSignal(target) ? target() : shallowClone(target)
+        oldValue = isAnySignal(target) ? target() : shallowClone(target)
         reactivation = true;
         watcher.stop()
         if (!mountPhase) {
@@ -162,7 +162,7 @@ function watchAndPreserve<T>(target: RawWatchTarget<T>, effectOrKeys: EffectOrKe
 
     //FIX: Needs major fixing, temporarily commented out to quiet ts
     // function initializeOnActivated() {
-    //     if (isSignal(target)) {
+    //     if (isAnySignal(target)) {
     //         onActivated(() => {
     //             if (reactivation) effect(target(), oldValue)
     //             initializeWatcher()

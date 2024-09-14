@@ -1,6 +1,6 @@
 import { $Node, COMPONENT, ComponentSetup, create_if, else_create, iterate_over, mx, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
-import { __addDevName, $Signal, DeepReactive$ } from "@rue/muonic";
+import { __addDevName, $Signal, o$$ } from "@rue/muonic";
 import { $ } from "@rue/muonic";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
 
@@ -75,7 +75,7 @@ export function List() {
     const $active = $Signal(true)
     if (__DEV__) __addDevName($active, '$active')
 
-    const $list = $Signal(DeepReactive$([
+    const $list = $Signal(o$$([
         { id: 0, content: "frog" },
         { id: 1, content: "dog" },
         { id: 2, content: "fly" },

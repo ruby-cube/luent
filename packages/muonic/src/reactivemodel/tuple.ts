@@ -1,5 +1,5 @@
 
-const allTuples = new WeakSet()
+const allTuples: WeakSet<any[]> = new WeakSet()
 
 export function tuple<T extends [any] | any[]>(value: T): T {
     if (!(value instanceof Array)) {
@@ -9,6 +9,6 @@ export function tuple<T extends [any] | any[]>(value: T): T {
     return value;
 }
 
-export function isTuple<T extends object>(value: T) {
+export function isTuple(value: any): value is any[] {
     return allTuples.has(value);
 }

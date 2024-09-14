@@ -1,4 +1,4 @@
-import { COMPONENT, ComponentConfig, getCurrentItemAndIndex, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeSignal, PublicComponent, pushComponent, popComponent } from "@rue/lumo";
+import { COMPONENT, ComponentConfig, getCurrentIndex, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeSignal, PublicComponent, pushComponent, popComponent } from "@rue/lumo";
 import { Literate } from "./Literate.js";
 import { AtomicSignal } from "@rue/muonic";
 import { AnyObject, MaybePromise } from "@rue/types";
@@ -29,7 +29,7 @@ export function mO<T extends SSRComponentSetup>(
     Slot?: InferSlot<T> | undefined,
     config?: ComponentConfig<T>
 ): SSRComponent {
-    const [_, $index] = getCurrentItemAndIndex()
+    const $index = getCurrentIndex()
     return makeComponent(Component, Slot, config, $index)
 }
 

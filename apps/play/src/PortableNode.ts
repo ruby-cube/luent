@@ -1,6 +1,5 @@
 import { Collection, iterate_over } from "@rue/lumo"
 import { ReactiveModel, AtomicSignal } from "@rue/muonic"
-import { Sign } from "crypto"
 
 class PortableNode {
 

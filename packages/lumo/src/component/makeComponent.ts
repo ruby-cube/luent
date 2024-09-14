@@ -6,7 +6,7 @@ import { DerivedSignal, AtomicSignal } from "@rue/muonic";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentComponent, popComponent, pushComponent } from "./componentStack";
 import { LifecycleHook } from "./lifecycle";
-import { getCurrentItemAndIndex } from "../list/ListRenderKit";
+import { getCurrentIndex } from "../list/ListRenderKit";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
@@ -42,7 +42,7 @@ export function mO<T extends ComponentSetup>(
     Slot: InferSlot<T>,
     config?: ComponentConfig<T>
 ): InternalComponent {
-    const [_, $index] = getCurrentItemAndIndex()
+    const $index = getCurrentIndex()
     return makeComponent(Component, Slot, config || {}, $index)
 }
 

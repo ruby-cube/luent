@@ -1,11 +1,11 @@
 export * from "./derivations/DerivedSignal" //TODO: limit exports to public api
 export * from "./debug" //TODO: limit exports to public api
-export * from "./reactivemodel/Reactive$" //TODO: limit exports to public api
+export * from "./reactivemodel/ReactiveModel" //TODO: limit exports to public api
 export * from "./$Signal" //TODO: limit exports to public api
 export * from "./derivations/DependencyTracker" //TODO: limit exports to public api
 export * from "./effects/watch" //TODO: limit exports to public api
 export * from "./asReadonly" //TODO: limit exports to public api
 export * from "./effects/debug" //TODO: limit exports to public api
 export * from "./effects/UpdateCycle" //TODO: limit exports to public api
-export * from "./reactivemodel/SnapshotManager" //TODO: limit exports to public api
+export * from "./reactivemodel/TimeTraveler" //TODO: limit exports to public api
 export * from "./effects/areEqual" //TODO: limit exports to public api

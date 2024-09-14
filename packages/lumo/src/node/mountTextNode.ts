@@ -1,4 +1,4 @@
-import { getWithoutTracking, isSignal, ReactiveSignal } from "@rue/muonic";
+import { getWithoutTracking, isAnySignal, ReactiveSignal } from "@rue/muonic";
 import { _NodePod } from "./NodePod";
 import { watchForRender } from "../watch/watchForRender";
 import { getActiveDynamicNode } from "../dynamic/DynamicNode";
@@ -13,7 +13,7 @@ export function mountTextNode(parent: Element, text: ReactiveSignal | any, nodeP
     const root = fragment ? fragment : parent;
     root.appendChild(textNode)
 
-    if (isSignal(text)) {
+    if (isAnySignal(text)) {
         keepTextNodeUpdated(text, textNode)
     }
 }
@@ -27,7 +27,7 @@ function keepTextNodeUpdated($text: ReactiveSignal<any>, textNode: CharacterData
 
 
 function createTextNode(value: ReactiveSignal | any) {
-    const _value = isSignal(value) ? getWithoutTracking(value) : value;
+    const _value = isAnySignal(value) ? getWithoutTracking(value) : value;
     const text = toString(_value)
     const textNode = document.createTextNode(text);
     return textNode;

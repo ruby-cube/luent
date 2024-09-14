@@ -1,5 +1,5 @@
 import { PublicComponent, ComponentSetup, DOMNode, InternalComponent, getComponent } from "../component/InternalComponent";
-import { DerivedSignal, isSignal, ReactiveSignal, Hooks, getCurrentUpdateCycle, runPrerenderEffectsAndTasks } from "@rue/muonic";
+import { DerivedSignal, isAnySignal, ReactiveSignal, Hooks, getCurrentUpdateCycle } from "@rue/muonic";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
@@ -128,7 +128,7 @@ function analyzeAttributes(entries: AnyObject) {
 function setUpAttributes(node: Element, attributes: { [key: string]: any | DerivedSignal<any> }) {
     for (const key in attributes) {
         const value = attributes[key]
-        if (isSignal(value)) {
+        if (isAnySignal(value)) {
             watchForRender(value, (newValue) => { //TODO: only attributes that affect layout should be scheduled for render
                 setAttribute(node, key, newValue)
             }, { eager: true })

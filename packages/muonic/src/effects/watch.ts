@@ -1,12 +1,11 @@
 import { AnyObject } from "@rue/types";
-import { MutationRecord, watchProps } from "./deepWatch";
 import { asWatchTarget, WatchTarget } from "./WatchTarget";
 import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
 import { ReactiveDerivation } from "../derivations/ReactiveDerivation";
 import { getCurrentUpdateCycle, getFlushingUpdateCycle, Phase, useUpdateCycle } from "./UpdateCycle";
 import { WatchDebugOptions } from "./debug";
-import { $, isSignal, ReactiveSignal } from "../derivations/DerivedSignal";
-import { isReactiveModel, ReactiveModel, } from "../reactivemodel/Reactive$";
+import { $, isAnySignal, ReactiveSignal } from "../derivations/DerivedSignal";
+import { getMetaReactive, isReactiveModel, ReactiveModel, toRaw, } from "../reactivemodel/ReactiveModel";
 import { areEqual } from "./areEqual";
 import { createReactiveFunction, ReactiveFunction } from "../derivations/ReactiveFunction";
 import { META } from "../ReactiveEntity";
@@ -28,6 +27,34 @@ export type EffectOptions = {
 } & UpdateCycleOptions & ListenerOptions & WatchDebugOptions
 
 
+
+export type MutationRecord = {
+    target: ReactiveModel,
+    // root?: ReactiveModel,
+    // targetPath?: KeyPath, // undefined means the target is the root watched model
+    op: MutationOp | SetOp
+}
+
+export type MutationOp = {
+    type: string,
+    args: any[],
+    output: any
+}
+
+export type SetOp = {
+    type: '[[set]]' | 'set' | 'add' | 'delete',
+    key: string | symbol,
+    newValue: any,
+    oldValue: any
+}
+
+export function isMutationOp(op: AnyObject): op is MutationOp {
+    return "op" in op;
+}
+
+export function isSetOp(op: AnyObject): op is SetOp {
+    return 'key' in op;
+}
 
 
 export type MutationEffect<T extends AnyObject = AnyObject> = (newValue: ReactiveModel<T>, mutations: MutationRecord[]) => void
@@ -52,7 +79,7 @@ type Effect = () => void
 //     return isRunningEffect;
 // }
 
-function toDerivedSignal(reactive: ReactiveModel, keys: (PropertyKey | number)[]) {
+function toDerivedSignal(reactive: ReactiveModel, keys: PropertyKey[]) {
     return $(() => {
         const values = []
         for (const key of keys) {
@@ -80,10 +107,10 @@ export function watch<T>(target: () => T | ReactiveSignal<T>, effect: ChangeEffe
 export function watch<T>(target: RawWatchTarget<T>, effectOrKeys: EffectOrKeys<T>, optionsOrEffect?: OptionsOrEffect<T>, options?: WatchOptions) {
     const keys = effectOrKeys instanceof Function ? undefined : effectOrKeys instanceof Array ? effectOrKeys : undefined
     const key = typeof effectOrKeys === 'string' ? effectOrKeys as keyof T : undefined
-    const effect = keys ? optionsOrEffect as RawEffect : effectOrKeys as RawEffect;
-    const _options = keys ? options : optionsOrEffect as WatchOptions | undefined;
+    const effect = keys || key ? optionsOrEffect as RawEffect : effectOrKeys as RawEffect;
+    const _options = keys || key ? options : optionsOrEffect as WatchOptions | undefined;
     const retrack = _options?.retrack ?? false
-    let isReactiveFunction = target instanceof Function && !isSignal(target);
+    let isReactiveFunction = target instanceof Function && !isAnySignal(target);
 
     const _target =
         isReactiveFunction ? createReactiveFunction(<() => any>target, retrack).initialize()
@@ -100,11 +127,11 @@ export function watch<T>(target: RawWatchTarget<T>, effectOrKeys: EffectOrKeys<T
 
     const watchTarget = asWatchTarget(_target);
 
-    let oldValue = getValue(_target, <PropertyKey>key) //TODO: Snapshot or MutationRecord for reactivemodels?
+    let oldValue = getValue(key ? target : _target, <PropertyKey>key) //TODO: Snapshot or MutationRecord for reactivemodels?
 
     function changeEffect() {
-        const newValue = getValue(_target, <PropertyKey>key) // This is when retracking happens
-        if (areEqual(newValue, oldValue)) return;
+        const newValue = getValue(key ? target : _target, <PropertyKey>key) // This is when retracking happens
+        if (areEqual(toRaw(newValue), toRaw(oldValue))) return;
         effect(newValue, oldValue)
         oldValue = newValue;
     }
@@ -127,12 +154,13 @@ function watchReactiveModel(target: ReactiveModel, effect: (target: ReactiveMode
     const phase = options?.phase || 'pre'
     // const deep = options?.deep
 
-    const watchTarget = asWatchTarget(target);
+    const watchTarget = asWatchTarget(getMetaReactive(target));
 
     // const nestedWatcher = deep ? watchProps(target, target, []) : undefined;
 
     function mutationEffect() {
         const updateCycle = phase === 'sync' ? getCurrentUpdateCycle() : getFlushingUpdateCycle()
+        console.log("updateCycle", updateCycle)
         const mutations = updateCycle?.getOps(target)
         if (!mutations) throw new Error("No mutations :(")
         effect(target, mutations)

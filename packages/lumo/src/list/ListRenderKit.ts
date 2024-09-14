@@ -1,4 +1,4 @@
-import { $Signal, isSignal, isReactiveModel, AtomicSignal, ReactiveModel, toRaw, shallowClone, ReactiveSignal } from "@rue/muonic";
+import { $Signal, isAnySignal, isReactiveModel, AtomicSignal, ReactiveModel, toRaw, shallowClone, ReactiveSignal, isDeepReactive, asDeepReactive, isSignal, ModelReactivityDepth, getMetaSignal } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./iterate_over";
@@ -10,9 +10,8 @@ import { mountNodeEntity } from "../node/mountNodeEntity";
 import { DynamicNode, getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/DynamicNode";
 import { watchForRender } from "../watch/watchForRender";
 import { diff, InsertAndMoveKit } from "./diff";
-import { LifecycleHook } from "../component/lifecycle";
+import { Sign } from "crypto";
 import { META } from "../../../muonic/src/ReactiveEntity";
-import { MutationRecord } from "../../../muonic/src/effects/deepWatch";
 
 
 type Index = number
@@ -20,23 +19,22 @@ type Count = number
 
 const dynamicNodeMap: WeakMap<_NodePod, DynamicNode> = new WeakMap()
 
-let currentItem: any;
+// let currentItem: any;
 let $currentIndex: AtomicSignal<number> | undefined;
 
-export function getCurrentItemAndIndex(): [any, AtomicSignal<number>] | [undefined, undefined] {
-    if ($currentIndex === undefined) return [undefined, undefined]
-    return [currentItem, $currentIndex]
+export function getCurrentIndex(): AtomicSignal<number> | undefined {
+    return $currentIndex
 }
 
-export function setCurrentItemAndIndex(item: any, $index: AtomicSignal<number>) {
-    currentItem = item;
+export function setCurrentIndex($index: AtomicSignal<number> | undefined) {
+    // currentItem = item;
     $currentIndex = $index;
 }
 
 export class ListRenderKit<T = any> {
     constructor(
         public renderItem: RenderItem<T>, //QUESTION: Does this need the context object?
-        public data: ListData,
+        public data: Collection<T> | ReactiveModel<Collection<T>> | ReactiveSignal<Collection<T>>,
         public component: InternalComponent,
         public idKey: string | undefined
     ) { }
@@ -69,10 +67,10 @@ export class ListRenderKit<T = any> {
         const renderItem = this.renderItem
         const idKey = this.idKey
         const component = this.component
-        const list = isSignal(data) ? data() : <Collection<any>>data;
+        const list = isAnySignal(data) ? data() : <Collection<any>>data;
         const _list = list instanceof Array ? list : list //TODO: need to implement for sets, maps, and objects
         const _isReactiveModel = isReactiveModel(data)
-        const isDynamic = _isReactiveModel || isSignal(data);
+        const isDynamic = _isReactiveModel || isAnySignal(data);
         const dynamicNodePod = this.dynamicNodePod = isDynamic ? nodePod.appendDynamicPod() : undefined;
         const indices: AtomicSignal<number>[] = []
 
@@ -81,7 +79,7 @@ export class ListRenderKit<T = any> {
         for (let i = 0; i < _list.length; i++) {
             const $index = $Signal(i)
             const item = _list[i]
-            currentItem = item;
+            // currentItem = item;
             $currentIndex = $index;
             indices.push($index)
 
@@ -118,8 +116,8 @@ export class ListRenderKit<T = any> {
             // const updateCycle = getCurrentUpdateCycle();
             const parentDynamicNode = getActiveDynamicNode()
             pushComponent(component)
-            const rawData = _isReactiveModel ? toRaw(data) : undefined
-            let clone = _isReactiveModel ? shallowClone(rawData!) as any[] : undefined
+            const rawData = isReactiveModel(data) ? toRaw(data) : undefined
+            let clone = isReactiveModel(data) ? shallowClone(rawData!) : undefined
             watchForRender(data, (newValue: any[], oldValue: any[]) => {
                 const _oldValue = clone || oldValue;
                 if (_isReactiveModel) clone = shallowClone(rawData!) as any[]
@@ -138,11 +136,9 @@ export class ListRenderKit<T = any> {
                     popDynamicNode()
                 })
             })
-
-
             popComponent()
         }
-        currentItem = undefined;
+        // currentItem = undefined;
         $currentIndex = undefined;
         popList();
 
@@ -163,8 +159,8 @@ export class ListRenderKit<T = any> {
         dynamicIndices: DynamicIndices,
     ) {
         const { getOriginalItem, isNewItem, hasMoved, newUArray, oldUArray, isRemoved } = insertAndMoveKit;
-        const dynamicList = this.dynamicNodePod!
-        if (dynamicList.length !== oldUArray.length) throw new Error("dynamicPod and data length are mismatched")
+        const dynamicNodePod = this.dynamicNodePod!
+        if (dynamicNodePod.length !== oldUArray.length) throw new Error("dynamicPod and data length are mismatched")
         const indicesAndNodePods: [number, _NodePod[]][] = []
         const indicesAndFragments: [number, DocumentFragment][] = []
         let fragment = new DocumentFragment();
@@ -178,7 +174,7 @@ export class ListRenderKit<T = any> {
             const _itemHasMoved = hasMoved(uItem);
             const prevIndex = oldUArray.indexOf(uItem)
             const nodePod = _isNewItem ? new _NodePod()
-                : _itemHasMoved ? dynamicList[prevIndex] // dynamicList[index]
+                : _itemHasMoved ? dynamicNodePod[prevIndex] // dynamicNodePod[index]
                     : null;
 
             if (!_isNewItem) {
@@ -205,7 +201,7 @@ export class ListRenderKit<T = any> {
             if (isNewItem(uItem)) {
                 const item = getOriginalItem(uItem, newUArray)
                 const $index = $Signal(i)
-                setCurrentItemAndIndex(item, $index); // to retreive config
+                setCurrentIndex($index); // to retreive config
                 newIndices.push($index);
                 // create and collect consecutive new items onto the same fragment
 
@@ -213,12 +209,15 @@ export class ListRenderKit<T = any> {
                 const renderItem = this.renderItem
                 pushComponent(this.component)
                 pushList(this)
+                const list = this.data;
+                const _item = isDeepReactive(list) || isSignal(list) && getMetaSignal(list).depth === ModelReactivityDepth.DEEP ? asDeepReactive(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
                 dynamicNode.activate(function renderNewListItem() {
-                    const nodeEntities = normalizeToArray(renderItem(item, $index));
+                    const nodeEntities = normalizeToArray(renderItem(_item, $index));
                     for (const nodeEntity of nodeEntities!) {
                         mountNodeEntity(parent, nodeEntity, nodePod, fragment)
                     }
                 })
+                setCurrentIndex(undefined)
                 popList();
                 popComponent()
                 dynamicNodeMap.set(nodePod, dynamicNode)
@@ -251,18 +250,18 @@ export class ListRenderKit<T = any> {
         let k = indicesAndRemoveCount.length; // loop through backwards to avoid having to recalculate index
         while (k--) {
             const [index, count] = indicesAndRemoveCount[k];
-            dynamicList!.removeNodePods(index, count);
+            dynamicNodePod!.removeNodePods(index, count);
 
         }
 
         // (2) insert node pods into dynamic list
         for (const [index, nodePods] of indicesAndNodePods) {
-            dynamicList.insertNodePods(index, nodePods)
+            dynamicNodePod.insertNodePods(index, nodePods)
         }
 
         // (3) insert nodes into DOM
         for (const [index, fragment] of indicesAndFragments) {
-            const prevNode = dynamicList[index].prevNode
+            const prevNode = dynamicNodePod[index].prevNode
             if (prevNode && prevNode === parent) parent.append(fragment) // for teleport
             else if (prevNode) prevNode.after(fragment);
             else parent.prepend(fragment);

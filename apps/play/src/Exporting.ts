@@ -6,6 +6,7 @@ class App {
 
 type PublicApp = ReadOnly<App>
 
+// export type { App as App }
 export type { PublicApp as App }
 
 export function isApp(x: any): x is PublicApp {

@@ -114,6 +114,7 @@ export class WatchTarget<T extends Watchable = Watchable> {
 
 
 export function isWatched(target: Watchable | null | undefined) {
+    console.log('watchTargetMap', watchTargetMap)
     if (!target) return false;
     return Boolean(watchTargetMap.get(target));
 }

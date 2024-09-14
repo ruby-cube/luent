@@ -2,7 +2,7 @@ import { EffectFlask } from "@rue/flask";
 import { PublicComponent } from "@rue/lumo";
 import { SSRComponent } from "./SSRComponent.js";
 import { getResolvedComponent, isResolved } from "./PendingComponentMap.js";
-import { isSignal, AtomicSignal } from "@rue/muonic";
+import { isAnySignal, AtomicSignal } from "@rue/muonic";
 
 type AnyObject = { [key: string | symbol | number]: any }
 // export type SSRComponent<T extends AnyObject = AnyObject> = { render: () => string } & T;
@@ -10,12 +10,12 @@ type AnyObject = { [key: string | symbol | number]: any }
 // export type MaybePromise<T extends AnyObject = AnyObject> = T | Promise<T>
 
 export function fromEntries<T>(list: T[] | AtomicSignal<T[]>, render: (item: T, index: number) => string) {
-    if (isSignal(list)) {
+    if (isAnySignal(list)) {
         return () => buildList(list)
     }
 
     function buildList(list: T[] | AtomicSignal<T[]>) {
-        const _list = isSignal(list) ? list() : list
+        const _list = isAnySignal(list) ? list() : list
         let result = ''
         for (let i = 0; i < _list.length; i++) {
             const item = _list[i];
@@ -36,7 +36,7 @@ export function html(...args: any[]) {
 
     // for (let i = 1; i < args.length; i++) {
     //     const value = args[i]
-    //     // if (isSignal(value)) {
+    //     // if (isAnySignal(value)) {
     //     //     const pendingValue = new Promise((resolve) => {
     //     //         watch(value, (newValue) => {
     //     //             resolve(newValue)

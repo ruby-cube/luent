@@ -2,7 +2,8 @@ import { setImmediate, clearImmediate } from "@rue/thread";
 import { $schedule, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
 import { SetMap } from "@rue/utils";
 import { MutationRecord } from "./deepWatch";
-import { ReactiveModel } from "../reactivemodel/Reactive$";
+import { getMetaReactive, ReactiveModel } from "../reactivemodel/ReactiveModel";
+import { MetaReactiveModel } from "../reactivemodel/MetaReactiveModel";
 // import { runEffect } from "./watch";
 
 export type Watchable = any
@@ -11,7 +12,6 @@ export type Effect = (...args: any[]) => void;
 
 export type Phase = 'pre' | 'render' | 'post' | 'sync'
 
-// const snapshotManager = new SnapshotManager();
 
 let updateCycleCount = -1;
 
@@ -116,32 +116,34 @@ export class UpdateCycle {
     //     return snapshot
     // }
 
-    opsMap: WeakMap<ReactiveModel, MutationRecord[]> = new WeakMap();
+    opsMap: WeakMap<MetaReactiveModel, MutationRecord[]> = new WeakMap();
 
     composeOps(target: ReactiveModel, ops: MutationRecord[]) {
-        let existingOps = this.opsMap.get(target);
+        const meta = getMetaReactive(target)
+        let existingOps = this.opsMap.get(meta);
         if (existingOps) {
             existingOps.push(...ops)
         }
         else {
-            this.opsMap.set(target, ops);
+            this.opsMap.set(meta, ops);
         }
     }
 
     recordOp(target: ReactiveModel, op: MutationRecord) { //FIX:
-
+        const meta = getMetaReactive(target)
         // TODO: consolidate set ops (cannot consolidate mutation ops, those need to be in order)
-        let existingOps = this.opsMap.get(target);
+        let existingOps = this.opsMap.get(meta);
         if (existingOps) {
             existingOps.push(op)
         }
         else {
-            this.opsMap.set(target, [op]);
+            this.opsMap.set(meta, [op]);
         }
     }
 
     getOps(target: ReactiveModel) {
-        return this.opsMap.get(target)
+        const meta = getMetaReactive(target)
+        return this.opsMap.get(meta)
     }
 
 

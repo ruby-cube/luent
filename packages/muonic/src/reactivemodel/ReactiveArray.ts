@@ -2,200 +2,190 @@ import { AnyObject } from "@rue/types";
 import { isReactiveAtom } from "../derivations/ReactiveAtom";
 import { META } from "../ReactiveEntity";
 import { trigger, triggerReactiveAtom } from "../trigger";
-import { asObservedProp } from "./ObservedProp";
-import { createReactive, DEEP, isNonTrackable, isReactiveModel, maybeReactivize, ReactiveModel, ReactiveModelContainer, storeSnapshot, toRaw, triggerReactiveWithSetOp, useForwardingHandlers } from "./Reactive$";
-import { MetaReactiveCollection } from "./ReactiveCollection";
-import { asTrackedOp } from "./TrackedOp";
-import { maybeReactivizeArgs, triggerReactiveWithMutationOp, useGetOp } from "./ReactiveCapsule";
-import { MetaReactiveModel } from "./ReactiveModel";
+import { asObservedProp, getObservedProp } from "./ObservedProp";
+import { asDeepReactive, asShallowReactive, createReactive, createReactiveTraps, DEEP, isNonTrackable, isReactiveModel, maybeAsDeepReactive, maybeUnreactivize, ReactiveModel, registerReactive, storeSnapshot, toRaw, triggerReactiveWithSetOp } from "./ReactiveModel";
+import { asTrackedOp, getTrackedOp } from "./TrackedOp";
+import { maybeUnreactivizeArgs, triggerReactiveWithMutationOp, useGetOp } from "./ReactiveCapsule";
 import { emitSignal } from "../debug";
 import { isMutatingArrayMethod } from "@rue/utils";
 import { getActiveTracker } from "../derivations/DependencyTracker";
+import { Collection, MetaReactiveCollection, MetaReactiveModel } from "./MetaReactiveModel";
 
 export function createReactiveArray(
     target: any[],
-    deep: boolean = false
+    deep: boolean = false,
+    existingMeta?: MetaReactiveCollection<any[]>
 ) {
-    // const array = target as any[] & { [TRACKED_INDICES]: Set<number> | undefined }
-    let sampleValue: any;
-
-    const container = new ReactiveModelContainer(target, deep)
-    const metaReactive = container[META]
-
-    const reactive = new Proxy(container, {
-        get: (_, key, receiver) =>
-            reactiveArrayGetter(
+    const traps = createReactiveTraps(target,
+        function get(target, key, receiver) {
+            console.log("getting", key)
+            return reactiveArrayGetter(
+                reactive,
                 metaReactive,
+                deep,
                 function handleMutatingMethod(key: string, fn) {
                     return (...args: any[]) => {
                         return mutatingArrayOp(
                             args,
+                            reactive,
                             metaReactive,
                             target,
-                            sampleValue,
                             key,
                             fn
                         )
                     }
                 },
-                target,
+                <any[]>target,
                 key,
                 receiver
-            ),
-        set: (_, key, value, receiver) =>
-            reactiveArraySetter(
+            )
+        },
+        function set(target, key, value, receiver) {
+            console.log("setting", key, "to", value)
+            return reactiveArraySetter(
+                reactive,
                 metaReactive,
                 target,
                 key,
                 value,
                 receiver
             )
-        ,
-        getPrototypeOf() {
-            return Reflect.getPrototypeOf(target)
-        },
-        has(_: unknown, key: PropertyKey) {
-            return Reflect.has(target, key)
-        },
-        deleteProperty(_: unknown, key: any) {
-            return Reflect.deleteProperty(target, key)
-        },
-        ownKeys() {
-            return Reflect.ownKeys(target)
-        },
-        setPrototypeOf(_: unknown, proto: ReactiveModelContainer | null) {
-            return Reflect.setPrototypeOf(target, proto)
-        },
-        isExtensible() {
-            return Reflect.isExtensible(target)
-        },
-        preventExtensions() {
-            return Reflect.preventExtensions(target)
-        },
-        getOwnPropertyDescriptor(_: unknown, key: PropertyKey) {
-            return Reflect.getOwnPropertyDescriptor(target, key)
-        },
-        defineProperty(_: unknown, key: PropertyKey, attributes: PropertyDescriptor & ThisType<any>) {
-            return Reflect.defineProperty(target, key, attributes)
         }
-    })
-    sampleValue = target[0];
-    metaReactive.initReactiveModel(reactive)
+    )
+    const metaReactive = existingMeta || new MetaReactiveCollection(target, traps)
+    const reactive = new Proxy(target, traps) as ReactiveModel<any[]>
 
-    if (deep) {
-        createReactiveArrayItems(target)
-    }
-    return reactive;
+    return registerReactive(
+        target,
+        reactive,
+        metaReactive,
+        deep
+    )
 }
 
 
-export function createReactiveTuple(
-    target: any[],
-    deep: boolean = false
+export function createReactiveTuple<T extends any[]>(
+    target: T,
+    deep: boolean = false,
+    existingMeta?: MetaReactiveCollection<T>
 ) {
 
-    const container = new ReactiveModelContainer(target, deep)
-    const metaReactive = container[META]
-    const reactive = new Proxy(container, {
-        get: (_, key, receiver) =>
-            reactiveArrayGetter(
+    const traps = createReactiveTraps(target,
+        function get(target, key, receiver) {
+            return reactiveArrayGetter(
+                reactive,
                 metaReactive,
+                deep,
                 function handleMutatingMethod() {
                     throw new Error("Tuples can only be mutated by index")
                 },
-                target,
+                <any[]>target,
                 key,
                 receiver
-            ),
-        set: (_, key, value, receiver) =>
-            reactiveArraySetter(
+            )
+        },
+        function set(target, key, value, receiver) {
+            return reactiveArraySetter(
+                reactive,
                 metaReactive,
                 target,
                 key,
                 value,
                 receiver
             )
-    })
-    metaReactive.initReactiveModel(reactive)
+        }
+    )
 
-    if (deep) {
-        createReactiveArrayItems(target)
-    }
-    return reactive;
+    const metaReactive = existingMeta || new MetaReactiveCollection(target, traps)
+    const reactive = new Proxy(target, traps) as ReactiveModel<any[]>
+
+    return registerReactive(
+        target,
+        reactive,
+        metaReactive,
+        deep
+    )
 }
 
-export function createReactiveArrayItems(
-    target: any[],
-) {
-    for (let i = 0; i < target.length; i++) {
-        const item = target[i]
-        if (isReactiveModel(item)) continue;
-        if (!(item instanceof Object)) continue;
-        const item$ = createReactive(item, DEEP)
-        if (item$ === null) continue;
-        target[i] = item$;
-    }
-}
+// export function createReactiveArrayItems(
+//     target: any[],
+// ) {
+//     for (let i = 0; i < target.length; i++) {
+//         const item = target[i]
+//         if (isReactiveModel(item)) continue;
+//         if (!(item instanceof Object)) continue;
+//         const item$ = createReactive(item, DEEP)
+//         if (item$ === null) continue;
+//         target[i] = item$;
+//     }
+// }
 
 
 function reactiveArrayGetter(
+    reactive: ReactiveModel<Collection>,
     metaReactive: MetaReactiveCollection,
+    deep: boolean,
     handleMutatingMethod: (key: string, fn: Function) => (...args: any[]) => any,
     target: any[],
     key: string | symbol,
-    receiver: any[]
+    receiver: AnyObject
 ) {
     if (__DEV__) emitSignal();
     if (key === META) return metaReactive;
+    if (key === '_$' && deep) return asShallowReactive(target);
     const value = Reflect.get(target, key, receiver);
     if (typeof key === 'symbol' && key.description === 'Symbol.iterator') {
         return value;
     }
+    if (isNonTrackable(key, Array)) return value;
     if (isMutatingArrayMethod(key)) {
         return handleMutatingMethod(<string>key, value);
     }
     if (key === 'at') {
         return useGetOp(
-            metaReactive,
+            reactive,
             target,
             key,
             value
         )
     }
-
+    
+    const _value = maybeAsDeepReactive(value, deep)
     const tracker = getActiveTracker()
-    if (!tracker || isNonTrackable(key, Array)) return value;
+    if (!tracker) return _value;
 
-    const reactive = metaReactive.o
     tracker.track(asObservedProp(reactive, key))
-    return value;
+    return _value;
 }
 
 
 
 function reactiveArraySetter(
+    reactive: ReactiveModel,
     metaReactive: MetaReactiveCollection,
     target: AnyObject,
     key: string | symbol,
     newValue: any,
     receiver: AnyObject
 ) {
-    const reactive = metaReactive.o
-    const op = target instanceof Array && isIntegerKey(key) ? asTrackedOp(reactive, 'at', key) : null;
-    const prop = asObservedProp(reactive, key);
+    const _newValue = maybeUnreactivize(newValue)
+    const op = target instanceof Array && isIntegerKey(key) ? getTrackedOp(reactive, 'at', key) : null;
+    const prop = getObservedProp(reactive, key);
     if (!prop && !op) {
-        Reflect.set(target, key, newValue, receiver);
+        // Reflect.set(target, key, newValue, receiver);
+        target[key] = _newValue
         return true;
     }
     const oldValue = Reflect.get(target, key, receiver);
-    if (oldValue === newValue || isNonTrackable(key, Array)) {
-        Reflect.set(target, key, newValue, receiver);
+    if (oldValue === _newValue || isNonTrackable(key, Array)) {
+        // Reflect.set(target, key, newValue, receiver);
+        target[key] = _newValue
         return true;
     }
 
-    const _newValue = maybeReactivize(newValue, metaReactive, oldValue)
 
-    Reflect.set(target, key, _newValue, receiver);
+    // Reflect.set(target, key, _newValue, receiver);
+    target[key] = _newValue
 
     storeSnapshot(metaReactive)
 
@@ -216,11 +206,11 @@ function reactiveArraySetter(
             }
             const index = parseInt(indexKey)
             if (index > _newValue || index > oldValue) {
-                const prop = asObservedProp(reactive, indexKey)
+                const prop = getObservedProp(reactive, indexKey)
                 if (prop) {
                     trigger(prop)
                 }
-                const op = asTrackedOp(reactive, 'at', index)
+                const op = getTrackedOp(reactive, 'at', index)
                 if (op) {
                     if (isReactiveAtom(op)) {
                         triggerReactiveAtom(op)
@@ -231,7 +221,7 @@ function reactiveArraySetter(
     }
 
     triggerReactiveWithSetOp(
-        metaReactive.o,
+        reactive,
         key,
         _newValue,
         oldValue,
@@ -250,32 +240,29 @@ export function isIntegerKey(key: unknown) {
 
 function mutatingArrayOp(
     args: any[],
+    reactive: ReactiveModel<any[]>,
     metaReactive: MetaReactiveModel<any[]>,
     target: AnyObject,
-    sampleValue: any,
     key: string,
     fn: Function
 ) {
-    const reactive = metaReactive.o
-    const _args = maybeReactivizeArgs(key, args, metaReactive, sampleValue);
+    const _args = maybeUnreactivizeArgs(key, args);
     const oldLength = target.length;
-    const output = fn.apply(target, _args); // perform mutation
+    const output = fn.apply(reactive, _args); // perform mutation
     const newLength = target.length;
 
     if (oldLength === newLength) return output; //FIX: Some methods will mutate but not change the length, like fill
-
-
     storeSnapshot(metaReactive)
 
-    const lengthProp = asObservedProp(reactive, 'length')
+    const lengthProp = getObservedProp(reactive, 'length')
     if (lengthProp) {
         trigger(lengthProp); // trigger for length change
     }
 
     if (key === 'pop') {
-        const prop = asObservedProp(reactive, (oldLength - 1).toString())
+        const prop = getObservedProp(reactive, (oldLength - 1).toString())
         if (prop) trigger(prop);
-        const op = asTrackedOp(reactive, 'at', - 1)
+        const op = getTrackedOp(reactive, 'at', - 1)
         if (op) triggerReactiveAtom(op);
     }
 
@@ -288,6 +275,8 @@ function mutatingArrayOp(
 
     return output;
 }
+
+
 
 export function isReactiveArray(target: any): target is ReactiveModel<any[]> {
     if (!isReactiveModel(target)) return false;

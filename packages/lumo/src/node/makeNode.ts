@@ -5,7 +5,7 @@ import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/m
 import { getNodeRef, InternalNodeRef, NodeReferent, NodeSignal } from "./$Node";
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
-import { getCurrentItemAndIndex, ListRenderKit } from "../list/ListRenderKit";
+import { getCurrentIndex, ListRenderKit } from "../list/ListRenderKit";
 import { isSettingUpList, onListUpdated } from "../list/listStack";
 
 export function Fragment() {
@@ -56,7 +56,7 @@ export function makeNode(
     childNodes: NodeEntity[] | InferSlot,
     config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent {
-    const [_, $index] = getCurrentItemAndIndex(); //TODO: I need to understand $index and whether it needs to be a signal or if rerenders will take care of it
+    const $index = getCurrentIndex(); //TODO: I need to understand $index and whether it needs to be a signal or if rerenders will take care of it
     if (typeof nodeType === "string")
         return makeElement(
             nodeType,
@@ -76,7 +76,7 @@ export function makeNode(
 //     if (ref) {
 //         const config = getNodeConfig(ref);
 //         if (config instanceof Function) {
-//             const [item, $index] = getCurrentItemAndIndex();
+//             const [item, $index] = getCurrentIndex();
 //             const _config = config(item, $index!)
 //             return _config
 //         }

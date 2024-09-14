@@ -3,36 +3,31 @@ import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { META } from "../ReactiveEntity";
 import { trigger, triggerReactiveAtom } from "../trigger";
-import { asObservedProp } from "./ObservedProp";
-import { isNonTrackable, maybeReactivize, ReactiveModelContainer, storeSnapshot } from "./Reactive$";
+import { asObservedProp, getObservedProp } from "./ObservedProp";
+import { asDeepReactive, asShallowReactive, createReactiveTraps, isNonTrackable, maybeAsDeepReactive, maybeUnreactivize, ReactiveModel, ReactiveTraps, registerReactive, storeSnapshot } from "./ReactiveModel";
 import { triggerReactiveWithMutationOp, useGetOp } from "./ReactiveCapsule";
-import { Collection, MetaReactiveCollection } from "./ReactiveCollection";
-import { MetaReactiveModel } from "./ReactiveModel";
-import { asTrackedOp } from "./TrackedOp";
-import { createReactiveArrayItems } from "./ReactiveArray";
+import { asTrackedOp, getTrackedOp } from "./TrackedOp";
+import { Collection, MetaReactiveCollection, MetaReactiveModel } from "./MetaReactiveModel";
 
 
 export function createReactiveSet(
     target: Set<any>,
-    deep: boolean = false
+    deep: boolean = false,
+    existingMeta?: MetaReactiveCollection
 ) {
-    let sampleValue: any;
-
-    const container = new ReactiveModelContainer(target, deep);
-    const metaReactive = container[META]
-
-    const reactive = new Proxy(container, {
-        get: (_, key) => {
+    const traps = createReactiveTraps(target,
+        function get(target, key, receiver) {
             if (__DEV__) emitSignal()
-            const value = target[<keyof Set<any>>key] as any
+            const value = Reflect.get(target, key, receiver)
             if (typeof key === 'symbol' && key.description === 'Symbol.iterator') {
                 return value;
             }
+            if (isNonTrackable(key, Set)) return value;
 
             switch (key) {
                 case 'has':
                     return useGetOp(
-                        metaReactive,
+                        reactive,
                         target,
                         key,
                         value
@@ -43,12 +38,14 @@ export function createReactiveSet(
 
                 case 'clear':
                     return useClearOp(
+                        reactive,
                         metaReactive,
                         target
                     )
 
                 case 'delete':
                     return useDeleteOp(
+                        reactive,
                         metaReactive,
                         target
                     )
@@ -56,68 +53,39 @@ export function createReactiveSet(
                 case META:
                     return metaReactive
 
-                default:
-                    const tracker = getActiveTracker()
-                    if (!tracker || isNonTrackable(key, Set))
-                        return value;
-                    tracker.track(asObservedProp(metaReactive.o, key))
-                    return value;
-            }
-        },
-        getPrototypeOf() {
-            return Reflect.getPrototypeOf(target)
-        },
-        has(_: unknown, key: PropertyKey) {
-            return Reflect.has(target, key)
-        },
-        deleteProperty(_: unknown, key: any) {
-            return Reflect.deleteProperty(target, key)
-        },
-        ownKeys() {
-            return Reflect.ownKeys(target)
-        },
-        setPrototypeOf(_: unknown, proto: ReactiveModelContainer | null) {
-            return Reflect.setPrototypeOf(target, proto)
-        },
-        isExtensible() {
-            return Reflect.isExtensible(target)
-        },
-        preventExtensions() {
-            return Reflect.preventExtensions(target)
-        },
-        getOwnPropertyDescriptor(_: unknown, key: PropertyKey) {
-            return Reflect.getOwnPropertyDescriptor(target, key)
-        },
-        defineProperty(_: unknown, key: PropertyKey, attributes: PropertyDescriptor & ThisType<any>) {
-            return Reflect.defineProperty(target, key, attributes)
-        }
+                case '_$':
+                    if (deep) return asShallowReactive(target);
+                    return maybeAsDeepReactive(value, deep)
 
-    })
-    metaReactive.initReactiveModel(reactive)
-    const values = Array.from(target);
-    sampleValue = values[0];
+                default:
+                    const _value = maybeAsDeepReactive(value, deep)
+                    const tracker = getActiveTracker()
+                    if (!tracker)
+                        return _value;
+                    tracker.track(asObservedProp(reactive, key))
+                    return _value;
+            }
+        })
 
     function addOp(newValue: any) {
-
         const oldSize = target.size
-        const _newValue = maybeReactivize(newValue, metaReactive, sampleValue)
+        const _newValue = maybeUnreactivize(newValue)
         const output = target.add(_newValue); //perform op
         const newSize = target.size
-        const reactive = metaReactive.o
+
 
         if (oldSize === newSize) return;
-
         storeSnapshot(metaReactive)
 
-        const sizeProp = asObservedProp(reactive, 'size')
+        const sizeProp = getObservedProp(reactive, 'size')
         if (sizeProp)
             trigger(sizeProp);
 
-        const hasOp = asTrackedOp(reactive, 'has', _newValue)
+        const hasOp = getTrackedOp(reactive, 'has', _newValue)
         if (hasOp) triggerReactiveAtom(hasOp);
 
         triggerReactiveWithMutationOp(
-            metaReactive.o,
+            reactive,
             'add',
             [_newValue],
             output
@@ -127,23 +95,24 @@ export function createReactiveSet(
     }
 
 
-    if (deep) {
-        createReactiveArrayItems(values)
-        target.clear();
-        for (const value of values) {
-            target.add(value);
-        }
-    }
-    return reactive;
+    const metaReactive = existingMeta || new MetaReactiveCollection(target, traps)
+    const reactive = new Proxy(target, traps) as ReactiveModel<Set<any>>
+
+    return registerReactive(
+        target,
+        reactive,
+        metaReactive,
+        deep
+    )
 }
 
 
 export function useDeleteOp(
+    reactive: ReactiveModel<Collection>,
     metaReactive: MetaReactiveModel<Collection>,
     target: AnyObject
 ) {
     return function deleteOp(key: any) {
-        const reactive = metaReactive.o
         const oldSize = target.size
         const output = target.delete(key); //perform op
         const newSize = target.size
@@ -152,20 +121,20 @@ export function useDeleteOp(
 
         storeSnapshot(metaReactive)
 
-        const sizeProp = asObservedProp(reactive, 'size')
+        const sizeProp = getObservedProp(reactive, 'size')
         if (sizeProp)
             trigger(sizeProp);
 
-        const hasOp = asTrackedOp(reactive, 'has', key)
+        const hasOp = getTrackedOp(reactive, 'has', key)
         if (hasOp) triggerReactiveAtom(hasOp);
 
         if (target instanceof Map) {
-            const getOp = asTrackedOp(reactive, 'get', key)
+            const getOp = getTrackedOp(reactive, 'get', key)
             if (getOp) triggerReactiveAtom(getOp);
         }
 
         triggerReactiveWithMutationOp(
-            metaReactive.o,
+            reactive,
             'delete',
             [key],
             output
@@ -178,14 +147,13 @@ export function useDeleteOp(
 
 
 export function useClearOp(
+    reactive: ReactiveModel<Collection>,
     metaReactive: MetaReactiveCollection,
     target: AnyObject,
 ) {
-    return function clearOp(key: any) {
-        const reactive = metaReactive.o
-
+    return function clearOp() {
         const oldSize = target.size
-        const output = target.delete(key); //perform op
+        const output = target.clear(); //perform op
         const newSize = target.size
 
         if (oldSize === newSize) return;
@@ -195,32 +163,25 @@ export function useClearOp(
         const trackedEntries = metaReactive.observedEntryKeys
         if (trackedEntries) {
             for (const entryKey of trackedEntries) {
-                const hasOp = asTrackedOp(reactive, 'has', entryKey)
+                const hasOp = getTrackedOp(reactive, 'has', entryKey)
                 if (hasOp) triggerReactiveAtom(hasOp);
 
                 if (target instanceof Map) {
-                    const getOp = asTrackedOp(reactive, 'get', entryKey)
+                    const getOp = getTrackedOp(reactive, 'get', entryKey)
                     if (getOp) triggerReactiveAtom(getOp);
                 }
             }
         }
 
-        const sizeProp = asObservedProp(reactive, 'size')
+        const sizeProp = getObservedProp(reactive, 'size')
         if (sizeProp)
             trigger(sizeProp);
 
-        const hasOp = asTrackedOp(reactive, 'has', key)
-        if (hasOp) triggerReactiveAtom(hasOp);
-
-        if (target instanceof Map) {
-            const getOp = asTrackedOp(reactive, 'get', key)
-            if (getOp) triggerReactiveAtom(getOp);
-        }
 
         triggerReactiveWithMutationOp(
-            metaReactive.o,
-            'delete',
-            [key],
+            reactive,
+            'clear',
+            [],
             output
         )
 

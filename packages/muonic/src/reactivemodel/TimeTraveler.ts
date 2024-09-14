@@ -10,7 +10,7 @@ type Snapshot = AnyObject;
 type IndexedSnapshot = [number, Snapshot]
 type SnapshotStack = IndexedSnapshot[];
 
-export class SnapshotManager {
+class TimeTraveler {
     private snapshotMap: WeakMap<AnyObject, SnapshotStack> = new WeakMap();
     takeSnapshot(original: AnyObject, index: number, clone: undefined | AnyObject) {
         return; //TODO: temporarily disable
@@ -60,9 +60,11 @@ function findSnapshot(snapshots: SnapshotStack, index: number) {
     return snapshots[closestI][1];
 }
 
-export function shallowClone(data: AnyObject) {
-    if (data instanceof Array) return [...data];
-    if (data instanceof Set) return new Set(data);
-    if (data instanceof Map) return new Map(data);
+export function shallowClone<T extends object>(data: T): T {
+    if (data instanceof Array) return [...data] as T;
+    if (data instanceof Set) return new Set(data) as T;
+    if (data instanceof Map) return new Map(data) as T;
     return { ...data }
 }
+
+export const timeTraveler = new TimeTraveler()

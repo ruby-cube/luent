@@ -1,5 +1,5 @@
 import { $Node, mx } from "@rue/lumo";
-import {  $, $initializeEffect, DeepReactive$, $Signal } from "@rue/muonic";
+import {  $, $initializeEffect, o$$, $Signal } from "@rue/muonic";
 
 
 //tests:
@@ -7,7 +7,7 @@ import {  $, $initializeEffect, DeepReactive$, $Signal } from "@rue/muonic";
 
 export function TestBox() {
 
-    const box$ = DeepReactive$({
+    const box$ = o$$({
         position: {
             x: 0,
             y: 0

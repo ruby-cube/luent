@@ -6,7 +6,7 @@ class Counter {
     $: { count: number }
 
     constructor() {
-        this.$ = Reactive$({ count: 0 })
+        this.$ = o$({ count: 0 })
     }
 
     increment() {
