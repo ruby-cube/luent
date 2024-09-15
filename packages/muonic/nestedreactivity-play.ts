@@ -1,4 +1,6 @@
 //@ts-nocheck
+
+import ""
 const frog$ = o$({
     name: "sir robin",
     location: {

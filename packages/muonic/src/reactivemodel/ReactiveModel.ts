@@ -120,8 +120,8 @@ export function asDeepReactive<T extends AnyObject>(target: T): AsDeepReactiveMo
     const meta = reactivesMap.get(rawTarget)
     if (!meta) return _createReactiveModel(rawTarget, DEEP) as AsDeepReactiveModel<T>;
     const reactive = meta.deepReactive;
-    if (reactive) return reactive as AsDeepReactiveModel<T>;
-    return _createReactiveModel(rawTarget, DEEP, meta) as AsDeepReactiveModel<T>;
+    if (!reactive) return _createReactiveModel(rawTarget, DEEP, meta) as AsDeepReactiveModel<T>;
+    return reactive as AsDeepReactiveModel<T>;
 }
 
 //INTERNAL
@@ -131,8 +131,8 @@ export function asShallowReactive<T extends AnyObject>(target: T): AsReactiveMod
     const meta = reactivesMap.get(rawTarget)
     if (!meta) return _createReactiveModel(rawTarget) as AsReactiveModel<T>;
     const reactive = meta.shallowReactive;
-    if (reactive) return reactive as AsReactiveModel<T>;
-    return _createReactiveModel(rawTarget, !DEEP, meta) as AsReactiveModel<T>;
+    if (!reactive) return _createReactiveModel(rawTarget, !DEEP, meta) as AsReactiveModel<T>;
+    return reactive as AsReactiveModel<T>;
 }
 
 
@@ -197,7 +197,9 @@ export function toRaw<T>(target: T): AsRaw<T> {
 
 export function maybeUnreactivize(
     newValue: any,
+    key?: ProxyTargetKey
 ) {
+    if (typeof key === "string" && key.endsWith('$')) return newValue; // Assumes $ notation. Preserve reactivity if object property directly references a reactive model
     if (isReactiveModel(newValue)) return toRaw(newValue);
     return newValue;
     // const reactiveDepth = shouldUnreactivize(metaReactive, newValue);
@@ -433,7 +435,7 @@ export function reactiveSetter(
         return true;
     }
 
-    const _newValue = maybeUnreactivize(newValue)
+    const _newValue = maybeUnreactivize(newValue, key)
     target[key] = _newValue
 
     storeSnapshot(metaReactive)

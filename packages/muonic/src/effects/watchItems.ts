@@ -1,10 +1,11 @@
 import { ActiveListener } from "@rue/flask";
 import { isAnySignal, AnySignal } from "../derivations/DerivedSignal";
-import { DeepReactiveModel, isReactiveModel, o$$, ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
+import { DeepReactiveModel, isDeepReactive, isReactiveModel, isShallowReactive, o$, o$$, ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
 import { ChangeEffect, isMutationOp, MutationEffect, watch, WatchOptions } from "./watch";
 import { insertOps } from "../reactivemodel/ReactiveCapsule";
 import { isIntegerKey } from "../reactivemodel/ReactiveArray";
 import { AnyObject } from "@rue/types";
+import { shallowClone } from "../reactivemodel/TimeTraveler";
 
 type WatchersMap = Map<AnyObject | AnySignal, ActiveListener>
 
@@ -13,19 +14,20 @@ export type KeyPath = PropertyKey[]
 
 
 
-export function watchItems<T extends AnyObject>(
-    reactiveList: ReactiveModel<AnySignal<T>[]>,
-    effect: ChangeEffect<T>,
+
+export function watchItems<T extends AnySignal>(
+    reactiveList: ReactiveModel<T[]>,
+    effect: T extends () => infer R ? ChangeEffect<R> : never,
     options?: WatchOptions
 ): ActiveListener
-export function watchItems<T extends AnyObject>(
+export function watchItems<T extends ReactiveModel>(
     reactiveList: ReactiveModel<T[]>,
     effect: MutationEffect<T>,
     options?: WatchOptions
 ): ActiveListener
-export function watchItems<T extends AnyObject>(
-    reactiveList: DeepReactiveModel<T[]> | ReactiveModel<AnySignal<T>[]>,
-    effect: ChangeEffect<T> | MutationEffect<T>,
+export function watchItems<T extends AnySignal | ReactiveModel>(
+    reactiveList: ReactiveModel<T[]>,
+    effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>,
     options?: WatchOptions
 ) {
     const array = toRaw(reactiveList) as T[] | AnySignal<T>[]
@@ -33,12 +35,13 @@ export function watchItems<T extends AnyObject>(
     const _options = options || {}
 
     for (const item of array) {
-        const target = isAnySignal(item) ? item : o$$(item) as DeepReactiveModel<T>
-        watchers.set(item, watch(<AnySignal>target, effect, _options)) // typecasting one of the possibilities to quiet typescript
+        const target = maybeReactivize(item, reactiveList)
+        const watcher = watch(<AnySignal>target, effect, _options)
+        watchers.set(item, watcher) // typecasting one of the possibilities to quiet typescript. Typescript can't handle intersections that mixes overloads
     }
 
     // watch new items, unwatch deleted items
-    watchers.set(reactiveList, watch(reactiveList, (_, mutations) => {
+    const listWatcher = watch(reactiveList, (_, mutations) => {
         for (const mutation of mutations) {
             const op = mutation.op;
             if (isMutationOp(op)) {
@@ -47,7 +50,7 @@ export function watchItems<T extends AnyObject>(
                     case 'push':
                     case 'unshift':
                     case 'fill':
-                        watchNewItems(args, effect, _options, watchers)
+                        watchNewItems(args, effect, _options, watchers, reactiveList)
                         break;
 
                     case 'pop':
@@ -57,7 +60,7 @@ export function watchItems<T extends AnyObject>(
 
                     case 'splice':
                         unwatchItems(output, watchers)
-                        watchNewItems(args.slice(insertOps.splice.from), effect, _options, watchers)
+                        watchNewItems(args.slice(insertOps.splice.from), effect, _options, watchers, reactiveList)
                         break;
 
                     default:
@@ -70,12 +73,14 @@ export function watchItems<T extends AnyObject>(
                     unwatchAll(watchers)
                 }
                 else if (isIntegerKey(key)) {
-                    watchNewItem(newValue, effect, _options, watchers)
+                    watchNewItem(newValue, effect, _options, watchers, reactiveList)
                     unwatchItem(oldValue, watchers)
                 }
             }
         }
-    }))
+    })
+
+    watchers.set(reactiveList, listWatcher)
     return {
         stop() {
             unwatchAll(watchers)
@@ -83,15 +88,16 @@ export function watchItems<T extends AnyObject>(
     }
 }
 
-function watchNewItem(newItem: AnyObject | AnySignal, effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap) {
-    const target = isAnySignal(newItem) ? newItem : o$$(newItem)
-    watchers.set(newItem, watch(target, effect, options)) //TODO: must inherit original flask
+function watchNewItem(newItem: AnyObject | AnySignal, effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap, reactiveList: DeepReactiveModel | ReactiveModel) {
+    const target = maybeReactivize(newItem, reactiveList)
+    const watcher = watch(target, effect, options)
+    watchers.set(newItem, watcher) //TODO: must inherit original flask
     return watchers;
 }
 
-function watchNewItems(newItems: AnyObject[], effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap) {
+function watchNewItems(newItems: AnyObject[], effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap, reactiveList: DeepReactiveModel | ReactiveModel) {
     for (const item of newItems) {
-        watchNewItem(item, effect, options, watchers)
+        watchNewItem(item, effect, options, watchers, reactiveList)
     }
     return watchers;
 }
@@ -114,28 +120,47 @@ function unwatchAll(watchers: WatchersMap) {
     }
 }
 
+function maybeReactivize(item: AnySignal | AnyObject, reactiveList: DeepReactiveModel | ReactiveModel) {
+    return isDeepReactive(reactiveList) ? o$$(item) : item
+}
 
 
-export function watchEntries<T, V>(
-    reactive: DeepReactiveModel<Set<T>> | DeepReactiveModel<Map<T, V>>,
-    effect: ChangeEffect | MutationEffect,
-    options?: WatchOptions
-) {
-    const collection = toRaw(reactive) as Map<any, any> | Set<any>
+//TODO: Write overloads
+// export function watchCollectionValues<T extends AnyObject>(
+//     reactiveCollection: DeepReactiveModel<Set<T>> | DeepReactiveModel<Map<any, T>> | ReactiveModel<Set<ReactiveModel<T>>> | ReactiveModel<Set<AnySignal<T>>> | ReactiveModel<Map<any, ReactiveModel<T>>> | ReactiveModel<Map<any, AnySignal<T>>>,
+//     effect: ChangeEffect | MutationEffect,
+//     options?: WatchOptions
+// ) {
+
+    export function watchCollectionValues<T extends AnySignal>(
+        reactiveCollection: ReactiveModel<Map<any, T>> | ReactiveModel<Set<T>>,
+        effect: T extends () => infer R ? ChangeEffect<R> : never,
+        options?: WatchOptions
+    ): ActiveListener
+    export function watchCollectionValues<T extends ReactiveModel>(
+        reactiveCollection: ReactiveModel<Map<any, T>> | ReactiveModel<Set<T>>,
+        effect: MutationEffect<T>,
+        options?: WatchOptions
+    ): ActiveListener
+    export function watchCollectionValues<T extends AnySignal | ReactiveModel>(
+        reactiveCollection: ReactiveModel<Map<any, T>> | ReactiveModel<Set<T>>,
+        effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>,
+        options?: WatchOptions
+    ) {
+    const collection = toRaw(reactiveCollection) as Map<any, any> | Set<any>
     const watchers: WatchersMap = new Map()
     const _options = options || {}
 
     for (const entry of collection) {
-        if (collection instanceof Map) {
-            watchMapEntry(entry, effect, _options, watchers)
-        }
-        else {
-            watchers.set(entry, watch(entry, effect, _options))
-        }
+        const value = maybeReactivize(collection instanceof Map ? entry[1] : entry, reactiveCollection)
+        const watcher = watch(value, effect, _options)
+        watchers.set(value, watcher)
     }
 
+    const mapSnapshot = collection instanceof Map ? shallowClone(collection) : undefined
+
     // watch new items, unwatch deleted items
-    watchers.set(collection, watch(reactive, (_, mutations) => {
+    const collectionWatcher = watch(reactiveCollection, (_, mutations) => {
         for (const mutation of mutations) {
             const op = mutation.op;
             if (isMutationOp(op)) {
@@ -143,16 +168,18 @@ export function watchEntries<T, V>(
                 switch (type) {
                     case 'add':
                         if (collection instanceof Map) break;
-                        watchNewItems(args, effect, _options, watchers)
+                        watchNewItem(args[0], effect, _options, watchers, reactiveCollection)
                         break;
 
                     case 'set':
                         if (collection instanceof Set) break;
-                        watchMapEntry(args, effect, _options, watchers)
+                        watchNewItem(args[1], effect, _options, watchers, reactiveCollection)
                         break;
 
                     case 'delete':
-                        unwatchItems(args, watchers)
+                        const value = collection instanceof Map ? mapSnapshot!.get(args[0]) : args[0]
+                        mapSnapshot?.delete(args[0])
+                        unwatchItem(value, watchers)
                         break;
 
                     case 'clear':
@@ -164,7 +191,9 @@ export function watchEntries<T, V>(
                 }
             }
         }
-    }))
+    })
+
+    watchers.set(collection, collectionWatcher)
     return {
         stop() {
             unwatchAll(watchers)
@@ -172,12 +201,66 @@ export function watchEntries<T, V>(
     }
 }
 
-function watchMapEntry(entry: any[], effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap) {
-    const [key, value] = entry
-    if (isReactiveModel(key) || isAnySignal(key)) {
-        watchers.set(key, watch(key, effect, options))
+
+
+
+export function watchMapKeys<T extends AnySignal>(
+    reactiveMap: ReactiveModel<Map<T, any>>,
+    effect: T extends () => infer R ? ChangeEffect<R> : never,
+    options?: WatchOptions
+): ActiveListener
+export function watchMapKeys<T extends ReactiveModel>(
+    reactiveMap: ReactiveModel<Map<T, any>>,
+    effect: MutationEffect<T>,
+    options?: WatchOptions
+): ActiveListener
+export function watchMapKeys<T extends AnySignal | ReactiveModel>(
+    reactiveMap: ReactiveModel<Map<T, any>>,
+    effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>,
+    options?: WatchOptions
+) {
+    const map = toRaw(reactiveMap) as Map<any, any> | Set<any>
+    const watchers: WatchersMap = new Map()
+    const _options = options || {}
+
+    for (const entry of map) {
+        const key = maybeReactivize(entry[0], reactiveMap)
+        const watcher = watch(key, effect, _options)
+        watchers.set(key, watcher)
     }
-    else if (isReactiveModel(value) || isAnySignal(value)) {
-        watchers.set(value, watch(value, effect, options))
+
+
+    // watch new items, unwatch deleted items
+    const mapWatcher = watch(reactiveMap, (_, mutations) => {
+        for (const mutation of mutations) {
+            const op = mutation.op;
+            if (isMutationOp(op)) {
+                const { args, type } = op
+                switch (type) {
+
+                    case 'set':
+                        watchNewItem(args[0], effect, _options, watchers, reactiveMap)
+                        break;
+
+                    case 'delete':
+                        unwatchItem(args[0], watchers)
+                        break;
+
+                    case 'clear':
+                        unwatchAll(watchers)
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        }
+    })
+
+    watchers.set(map, mapWatcher)
+    return {
+        stop() {
+            unwatchAll(watchers)
+        }
     }
 }

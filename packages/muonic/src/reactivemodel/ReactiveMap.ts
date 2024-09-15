@@ -85,7 +85,7 @@ export function createReactiveMap(
     function setOp(key: any, newValue: any) {
         const oldSize = target.size
         const oldValue = target.get(key);
-        const _newValue = maybeUnreactivize(newValue) //FIX: I don't know if relying on oldValue to determine reactivize is reliable. What if user sets value to undefined?
+        const _newValue = maybeUnreactivize(newValue)
         const output = target.set(key, _newValue); //perform op
         const newSize = target.size
 

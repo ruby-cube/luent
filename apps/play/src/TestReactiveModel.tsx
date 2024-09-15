@@ -28,12 +28,15 @@ export function List() {
     const frog$ = o$({
         name: "Sir Robin"
     })
+    
+    const $frogName = $prop(frog$, "name")
 
     function changeFrogName() {
-        frog$.name = "Kermit"
+        $frogName.update(name => name+"kermito")
     }
 
-    watch($prop(frog$, "name"), (newVal, old) => {
+
+    watch($frogName, (newVal, old) => {
         console.log("changed", newVal, old)
     })
 
