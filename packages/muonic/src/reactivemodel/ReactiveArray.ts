@@ -18,7 +18,6 @@ export function createReactiveArray(
 ) {
     const traps = createReactiveTraps(target,
         function get(target, key, receiver) {
-            console.log("getting", key)
             return reactiveArrayGetter(
                 reactive,
                 metaReactive,
@@ -41,7 +40,6 @@ export function createReactiveArray(
             )
         },
         function set(target, key, value, receiver) {
-            console.log("setting", key, "to", value)
             return reactiveArraySetter(
                 reactive,
                 metaReactive,

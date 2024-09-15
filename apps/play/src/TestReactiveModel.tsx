@@ -21,7 +21,7 @@ export function List() {
         { id: 3, content: "swamp" }
     ])
 
-    list$$._$[0] = { id: 2, content: "fly" }
+    list$$._$[0] = { id: 0, content: "fly" }
 
     // console.log("is reactive?", isReactiveModel(list$$), list$$)
     // console.log("is deep", isDeepReactive(list$$))

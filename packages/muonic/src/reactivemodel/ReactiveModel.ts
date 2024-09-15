@@ -189,7 +189,6 @@ export function recordOp(reactive: ReactiveModel, op: MutationRecord) {
 type AsRaw<T> = T extends MetaReactiveModel<infer R> ? R : T extends ReactiveModel<infer R> ? R : T
 
 export function toRaw<T>(target: T): AsRaw<T> {
-    console.log("to Raw target", target)
     if (target instanceof MetaReactiveModel) return target.rawTarget;
     if (isReactiveModel(target)) return getMetaReactive(target).rawTarget as AsRaw<T>;
     return target as AsRaw<T>; // already raw target

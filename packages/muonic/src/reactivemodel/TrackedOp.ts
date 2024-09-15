@@ -14,7 +14,7 @@ type OpMap = Map<OpName, EntryKeyMap>
 type EntryKey = any
 type OpName = string
 
-const trackedOpMap: Map<ReactiveModel, OpMap> = new Map()
+// const trackedOpMap: Map<MetaReactiveModel, OpMap> = new Map()
 
 export class TrackedOp {
 
@@ -60,7 +60,7 @@ export function getTrackedOp(
     op: string,
     key: any
 ){
-    return trackedOpMap.get(model)?.get(op)?.get(key)
+    return getMetaReactive(model).getTrackedOp(op, key)
 }
 
 function createTrackedOp(
