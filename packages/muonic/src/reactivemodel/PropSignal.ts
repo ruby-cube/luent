@@ -1,8 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { getMetaReactive, isReactiveModel, o$, ReactiveModel, toRaw } from "./ReactiveModel";
 import { asObservedProp } from "./ObservedProp";
-import { asReactiveAtom } from "../derivations/ReactiveAtom";
-import { asWatchTarget } from "../effects/WatchTarget";
 import { $ } from "../derivations/DerivedSignal";
 
 // export function $Props<T extends AnyObject, K extends keyof T>(model: T, keys: K[]) {
@@ -11,6 +9,11 @@ import { $ } from "../derivations/DerivedSignal";
 //     if (propsSignal) return propsSignal;
 //     return $MultiPropsSignal(reactive, keys)
 // }
+
+export function isPropSignal(value: any): value is PropSignal {
+    if (!(value instanceof Function)) return false;
+    return value.name === "$propSignal"
+}
 
 export function $Props<T extends AnyObject, K extends keyof T>(reactive: ReactiveModel<T>, keys: K[]) {
     const propsSignal = $(() => {
@@ -60,26 +63,17 @@ function $Prop<T extends ReactiveModel, K extends keyof T, P extends T[K]>(react
     }
 
     meta.registerPropSignal(key, $propSignal)
+    const prop = asObservedProp(reactive, key)
+    prop.onDestroy(() => {
+        meta.unregisterPropSignal(key)
+    })
 
-    const atom = asReactiveAtom(asObservedProp(reactive, key))
-    const watchTarget = asWatchTarget($propSignal)
-
-    atom.onUntracked(unobserve)
-    watchTarget.onUnwatched(unobserve)
-
-    function unobserve() {
-        if (watchTarget.watchCount === 0 && atom.derivations.size === 0) {
-            meta.unregisterPropSignal(key)
-        }
-    }
-
-    function reregisterIfNeeded(){
+    function reregisterIfNeeded() {
         if (!meta.getPropSignal(key)) {
             if (__DEV__) console.warn(`I'm curious how often and in what cases this happens: $propSignal for ${key.toString()} in${JSON.stringify(rawTarget)} is no longer observed, but there's still an active reference to it`)
             meta.registerPropSignal(key, $propSignal) // This means $propSignal is not being watched and is not an atom anywhere, but it's still being used
         }
     }
-
     return $propSignal;
 }
 

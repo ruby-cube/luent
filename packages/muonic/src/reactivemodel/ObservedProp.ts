@@ -6,6 +6,7 @@ import { watch } from "fs";
 import { isIntegerKey } from "./ReactiveArray";
 import { MetaReactiveCollection, MetaReactiveModel } from "./MetaReactiveModel";
 import { AnyObject } from "@rue/types";
+import { PropSignal } from "./PropSignal";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
 
@@ -24,11 +25,21 @@ export class ObservedProp {
         metaReactive.registerObservedProp(key, this)
     }
 
-    destroy() {
-        this.metaReactive.unregisterObservedProp(this.key)
+    cleanUp?: () => void
+
+    onDestroy(cleanUp: () => void) {
+        if (__DEV__ && this.cleanUp) {
+            console.error('Overriding existing cleanup function. This may mean we need an array for onDestroy tasks')
+        }
+        this.cleanUp = cleanUp
     }
 
-    getValue(){
+    destroy() {
+        this.metaReactive.unregisterObservedProp(this.key)
+        this.cleanUp?.()
+    }
+
+    getValue() {
         return this.metaReactive.rawTarget[this.key];
     }
 }
@@ -102,4 +113,7 @@ function createObservedProp(
 //         observedPropMap.delete(metaReactive)
 //     }
 // }
-
+export function toPropSignal(value: any): PropSignal | undefined {
+    if (!(value instanceof ObservedProp)) return undefined;
+    return value.metaReactive.getPropSignal(value.key)
+}

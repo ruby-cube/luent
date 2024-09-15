@@ -3,6 +3,7 @@ import { READONLY_SIGNAL } from "../asReadonly";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 import { META, ReactiveEntity } from "../ReactiveEntity";
+import { isPropSignal } from "../reactivemodel/PropSignal";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -30,7 +31,7 @@ export function isDerivedSignal(maybeDerivedSignal: any): maybeDerivedSignal is 
 
 export function isAnySignal(maybeSignal: any): maybeSignal is DerivedSignal | AtomicSignal {
     if (!(maybeSignal instanceof Function)) return false;
-    if (isSignal(maybeSignal) || isDerivedSignal(maybeSignal) || READONLY_SIGNAL in maybeSignal) return true;
+    if (isSignal(maybeSignal) || isDerivedSignal(maybeSignal) || READONLY_SIGNAL in maybeSignal || isPropSignal(maybeSignal)) return true;
     return false;
 }
 

@@ -29,7 +29,7 @@ export function createReactiveObject(
             if (key === '_$' && deep) return asShallowReactive(target);
             const value = Reflect.get(target, key);
             if (isNonTrackable(key, Object)) return value;
-            if (value instanceof Function ) return value.bind(reactive)
+            if (value instanceof Function) return value.bind(reactive)
             const _value = maybeAsDeepReactive(value, deep)
             const tracker = getActiveTracker();
             if (!tracker || Reflect.getOwnPropertyDescriptor(target, key)?.writable === false
@@ -37,6 +37,7 @@ export function createReactiveObject(
                 return _value;
             }
             tracker.track(asObservedProp(reactive, key));
+            if (key === "name") console.log("tracked", key)
             return _value;
         },
         function set(target, key, value, receiver) {

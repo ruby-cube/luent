@@ -2,6 +2,8 @@ import { $Node, COMPONENT, ComponentSetup, create_if, else_create, else_mount, e
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { $Signal, __addDevName, DeepReactiveModel, isDeepReactive, isReactiveModel, ReactiveModel } from "@rue/muonic";
 import { $, o$$, o$ } from "@rue/muonic";
+import { $prop, $Props } from "../../../packages/muonic/src/reactivemodel/PropSignal";
+import { watch } from "../../../packages/lumo/src/watch/watchForRender";
 
 
 const randomColor = useRandomColorGenerator()
@@ -22,6 +24,18 @@ export function List() {
     ])
 
     list$$._$[0] = { id: 0, content: "fly" }
+
+    const frog$ = o$({
+        name: "Sir Robin"
+    })
+
+    function changeFrogName() {
+        frog$.name = "Kermit"
+    }
+
+    watch($prop(frog$, "name"), (newVal, old) => {
+        console.log("changed", newVal, old)
+    })
 
     // console.log("is reactive?", isReactiveModel(list$$), list$$)
     // console.log("is deep", isDeepReactive(list$$))
@@ -92,6 +106,7 @@ export function List() {
     }
 
     function removeItem(index: number) {
+        changeFrogName()
         selected$.delete(list$$[index])
         list$$.splice(index, 1);
     }

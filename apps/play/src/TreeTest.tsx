@@ -1,6 +1,6 @@
 import { $Signal } from "@rue/muonic"
 import { $await } from "../../../packages/lumo/src/component/$await"
-import { $if } from "@rue/lumo"
+import { create_if } from "@rue/lumo"
 
 export function Root() {
     const $active = $Signal(true)
@@ -11,7 +11,7 @@ export function Root() {
         <>
             <div>Root</div>
             <>
-                {$if($active, () => <div>I'm active</div>)}
+                {create_if($active, () => <div>I'm active</div>)}
             </>
             <button onclick={toggleActive}>click</button>
         </>
