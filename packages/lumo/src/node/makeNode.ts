@@ -1,5 +1,5 @@
 import { DerivedSignal, AnySignal, AtomicSignal } from "@rue/muonic";
-import { PublicComponent, ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
+import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
 import { getNodeRef, InternalNodeRef, NodeReferent, NodeSignal } from "./$Node";

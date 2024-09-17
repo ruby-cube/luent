@@ -3,12 +3,13 @@ import { ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
 import { isReactiveObject } from "../reactivemodel/ReactiveObject";
 
 export function areEqual(newValue: any, oldValue: any) { //TODO: this is really tricky.. do I do a shallow diff or a deep diff for arrays?? I think it should be shallow diff because if you are watching an array, you typically care about the order
-    const original = toRaw(newValue);
-    if (original instanceof Array) return areShallowEqualArrays(oldValue, newValue);
-    if (original instanceof Set) return areEqualSets(oldValue, newValue); // inherently shallow
-    if (original instanceof Map) return areEqualMaps(newValue, oldValue); // deep
-    if (isReactiveObject(newValue)) return reactivePropsAreEqual(oldValue, newValue); // partial deep
-    if (original instanceof Object) return isEqual(oldValue, newValue); // deep
+    const _newValue = toRaw(newValue)
+    const _oldValue = toRaw(oldValue)
+    if (newValue instanceof Array) return areShallowEqualArrays(_newValue, _oldValue);
+    if (newValue instanceof Set) return areEqualSets(_newValue, _oldValue); // inherently shallow
+    if (newValue instanceof Map) return areEqualMaps(_newValue, _oldValue); // deep
+    // if (isReactiveObject(newValue)) return reactivePropsAreEqual(_newValue, _oldValue); // partial deep
+    if (newValue instanceof Object) return isEqual(_newValue, _oldValue); // deep
     if (oldValue === newValue) return true;
     return false;
 }

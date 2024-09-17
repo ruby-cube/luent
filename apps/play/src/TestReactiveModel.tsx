@@ -1,9 +1,9 @@
-import { $Node, COMPONENT, ComponentSetup, create_if, else_create, else_mount, else_show, iterate_over, mount_if, mx, NodeEntity, preventDefault, show_if, teleportTo, useEventListener } from "@rue/lumo";
+import { $Node,  For, MountIf, mx, NodeEntity, preventDefault, ShowIf, teleportTo, useEventListener } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { $Signal, __addDevName, DeepReactiveModel, isDeepReactive, isReactiveModel, ReactiveModel } from "@rue/muonic";
-import { $, o$$, o$ } from "@rue/muonic";
+import { $Signal, __addDevName, $, o$$, o$, DeepReactiveModel } from "@rue/muonic";
 import { $prop, $Props } from "../../../packages/muonic/src/reactivemodel/PropSignal";
 import { watch } from "../../../packages/lumo/src/watch/watchForRender";
+import { AnyObject } from "@rue/types";
 
 
 const randomColor = useRandomColorGenerator()
@@ -12,6 +12,62 @@ let id = 4;
 function genId() {
     return id++;
 }
+type something = Object
+
+class Frog {
+    qualities = {
+        brave: true
+    }
+
+    getQualities<T extends Frog>(this: T): T['qualities'] {
+        return this.qualities;
+    }
+
+    getQualitiesB() {
+        return this.qualities;
+    }
+}
+
+type FrogB<T extends Frog = Frog> = TransformedType<T, {
+    getQualitiesB: T['qualities']
+}>
+
+type TransformedType<T, O extends { [key: string]: any }> = Omit<T, keyof O> & {
+    [K in keyof O]: K extends keyof T ? T[K] extends (...args: any[]) => any ? <X extends T>(this: X, ...args: Parameters<T[K]>) => O extends { [key: PropertyKey]: infer R } ? R : never : never : never
+    // getQualitiesB<T extends Frog>(this: T, ...args: Parameters<Frog['getQualitiesB']>): T["qualities"]
+}
+
+
+
+
+
+// type RedefineReturn <P, M extends string, R extends >= <T extends Frog>(this: T, ...args: Parameters<Frog['getQualitiesB']>) => T["qualities"]
+
+const blub = {
+    getQualities<T extends Frog>(this: T): T['qualities'] {
+        return this.qualities;
+    }
+}
+
+// type Star = {
+//     fish: () => DeepReactiveModel<Frog>['qualities']
+// } & ThisType<DeepReactiveModel<Frog>>
+
+// const star: Star = {
+//     fish() {
+//         return this.qualities
+//     }
+// }
+
+// const something = star.fish()
+
+
+const frog = new Frog() as FrogB
+const frog$$ = o$$(frog)
+
+const q = frog$$.qualities
+const qual$$ = frog$$.getQualitiesB()
+const qual = frog.getQualitiesB()
 
 
 export function List() {
@@ -23,16 +79,20 @@ export function List() {
         { id: 3, content: "swamp" }
     ])
 
-    list$$._$[0] = { id: 0, content: "fly" }
+    list$$[0] = { id: 0, content: "fly" }
+
+    const content = list$$[0]
+
+
 
     const frog$ = o$({
         name: "Sir Robin"
     })
-    
+
     const $frogName = $prop(frog$, "name")
 
     function changeFrogName() {
-        $frogName.update(name => name+"kermito")
+        $frogName.update(name => name + "kermito")
     }
 
 
@@ -76,7 +136,7 @@ export function List() {
 
 
     function insertItem(index: number) {
-        list$$.splice(index, 0, {
+        const removed = list$$.splice(index, 0, {
             id: genId(),
             content: (Math.random() * 100).toString(),
         })
@@ -132,14 +192,14 @@ export function List() {
     // }, 1)
 
     // return mx("hi")
-    return mx(
+    return (
         // <>
-        //     {create_if($alive, () => (
+        //     {CreateIf($alive, () => (
 
         //         <div>
         //             <button onclick={destroy}>destroy</button>
         <>
-            {/* //                 {create_if($(() => { console.log('reevaluate list length === 0'); return list$$.length === 0 }), () => ( */}
+            {/* //                 {CreateIf($(() => { console.log('reevaluate list length === 0'); return list$$.length === 0 }), () => ( */}
             <div
                 onclick={() => insertItem(0)}
                 style="background-color: gray; cursor: pointer"
@@ -147,9 +207,9 @@ export function List() {
                 insert
             </div>
             {/* //                 ))} */}
-            {/* //                 {else_create(() => */}
+            {/* //                 {ElseCreate(() => */}
 
-            {iterate_over(list$$, (item$, $index) => (
+            {For(list$$, (item$, $index) => (
                 <div
                     ref={$itemDiv}
                     onclick={(e) => toggleSelect(e, $index())}

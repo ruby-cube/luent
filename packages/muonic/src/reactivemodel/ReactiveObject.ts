@@ -6,12 +6,11 @@ import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asObservedProp } from "./ObservedProp";
 import { MetaReactiveModel, REACTIVE_MODEL } from "./MetaReactiveModel";
 
-export function isReactiveObject(obj: AnyObject): obj is ReactiveModel {
-    const raw = toRaw(obj);
-    if (raw instanceof Map) return false;
-    if (raw instanceof Array) return false;
-    if (raw instanceof Set) return false;
-    return obj[META]?.type === REACTIVE_MODEL;
+export function isReactiveObject(value: any): value is ReactiveModel {
+    if (!isReactiveModel(value)) return false;
+    const raw = toRaw(value);
+    if (raw instanceof Map || raw instanceof Array || raw instanceof Set || raw instanceof Function) return false;
+    return true;
 }
 
 

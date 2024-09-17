@@ -11,7 +11,7 @@ export type ReactiveFunction = {
 
 function trackReactiveFunction(derivation: ReactiveDerivation, fn: () => any) {
     const value = derivation.trackAtoms(fn);
-    derivation.forwardAtoms(derivation.atoms) //QUESTION: Not sure if reactive effects need to forward dependencies as well
+    derivation.forwardAtoms(derivation.atoms)
     return value;
 }
 
@@ -46,7 +46,7 @@ export function createReactiveFunction(fn: () => any, retrack: boolean) {
         }
         reactiveFunction.initialize = () => {
             trackReactiveFunction(derivation, fn);
-            return fn;
+            return reactiveFunction;
         }
         reactiveFunction[META] = derivation
         return reactiveFunction as ReactiveFunction;

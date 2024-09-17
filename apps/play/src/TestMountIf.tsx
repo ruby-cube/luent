@@ -1,4 +1,4 @@
-import { create_if, else_create, else_mount, mount_if, mx } from "@rue/lumo";
+import { CreateIf, ElseCreate, ElseMount, MountIf, mx } from "@rue/lumo";
 import { $, $Signal, isAnySignal } from "@rue/muonic";
 
 export function MountIf() {
@@ -28,15 +28,15 @@ export function MountIf() {
 
     // const $activeAndReady = $(() => $active() && $ready(), true)
 
-    return mx(
+    return (
         <>
             {/* {[
-                create_if($active, () =>
+                CreateIf($active, () =>
                     <>
                         <div>Hi</div>
                     </>
                 ),
-                else_create(() =>
+                ElseCreate(() =>
                     <p>bye</p>
                 )
             ]} */}

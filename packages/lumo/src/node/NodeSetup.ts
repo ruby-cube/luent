@@ -1,6 +1,6 @@
 import { PublicComponent, ComponentSetup, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag } from "../element/makeElement";
-import { ListData } from "../list/iterate_over";
+import { ListData } from "../list/For";
 import { DerivedSignal, AnySignal } from "@rue/muonic/DerivedSignal";
 import { ComponentConfig, ElementConfig, RenderFunction } from "./makeNode";
 import { AtomicSignal } from "@rue/muonic";

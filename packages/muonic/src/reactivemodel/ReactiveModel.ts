@@ -4,13 +4,10 @@ import { isPlainObject, isMutatingArrayMethod, isObject, ProxyTargetKey } from "
 import { isTuple } from "./tuple";
 import { asObservedProp, getObservedProp, ObservedProp } from "./ObservedProp";
 import { timeTraveler } from "./TimeTraveler";
-import { asTrackedOp, TrackedOp } from "./TrackedOp";
-import { getRootWatchedModelAndKeyPath, isNestedWatched } from "../effects/deepWatch";
 import { trigger, triggerReactiveAtom, triggerReactiveModel } from "../trigger";
 import { useUpdateCycle } from "../effects/UpdateCycle";
 import { MutationRecord } from "../effects/deepWatch";
 import { asWatchTarget, isWatched } from "../effects/WatchTarget";
-// import { Collection, isCollection, MetaReactiveCollection } from "./ReactiveCollection";
 import { META, ReactiveEntity } from "../ReactiveEntity";
 import { createReactiveArray, createReactiveTuple } from "./ReactiveArray";
 import { createReactiveSet } from "./ReactiveSet";
@@ -27,10 +24,16 @@ export const DEEP = true;
 
 export type ReactiveModel<T extends AnyObject = AnyObject> = T & { readonly [REACTIVE_MODEL]?: true }
 
-export type DeepReactiveModel<T extends AnyObject = AnyObject> = { [K in keyof T]: T[K] extends Function ? (this: DeepReactiveModel<T>, ...args: Parameters<T[K]>) => ReturnType<T[K]> : T[K] extends AnyObject ? DeepReactiveModel<T[K]> : T[K] } & {
-    readonly _$: ReactiveModel<T>,
+export type DeepReactiveModel<T extends AnyObject = AnyObject> = {
+    [K in keyof T]: T[K] extends Function ? 
+    T[K]
+    // (this: DeepReactiveModel<T>, ...args: Parameters<T[K]>) => ReturnType<DeepReactiveModel<T>[K] extends (...args: any)=>any ? DeepReactiveModel<T>[K] : never>
+    : T[K] extends AnyObject ? DeepReactiveModel<T[K]>
+    : T[K]
+} & {
+    readonly _$?: ReactiveModel<T>,
     readonly [REACTIVE_MODEL]?: true
-}
+} & ThisType<DeepReactiveModel<T>>
 
 export type Readonly<T extends AnyObject = AnyObject> = {
     readonly [K in keyof T]: T[K]
@@ -114,14 +117,14 @@ type AsDeepReactiveModel<T extends AnyObject> = T extends DeepReactiveModel ? T 
 type AsReactiveModel<T extends AnyObject> = T extends ReactiveModel ? T : ReactiveModel<T>;
 
 //INTERNAL
-export function asDeepReactive<T extends AnyObject>(target: T): AsDeepReactiveModel<T> {
-    if (isDeepReactive(target)) return target as AsDeepReactiveModel<T>;
+export function asDeepReactive<T extends AnyObject>(target: T): DeepReactiveModel<T> {
+    if (isDeepReactive(target)) return target as DeepReactiveModel<T>;
     const rawTarget = toRaw(target);
     const meta = reactivesMap.get(rawTarget)
-    if (!meta) return _createReactiveModel(rawTarget, DEEP) as AsDeepReactiveModel<T>;
+    if (!meta) return _createReactiveModel(rawTarget, DEEP) as DeepReactiveModel<T>;
     const reactive = meta.deepReactive;
-    if (!reactive) return _createReactiveModel(rawTarget, DEEP, meta) as AsDeepReactiveModel<T>;
-    return reactive as AsDeepReactiveModel<T>;
+    if (!reactive) return _createReactiveModel(rawTarget, DEEP, meta) as DeepReactiveModel<T>;
+    return reactive as DeepReactiveModel<T>;
 }
 
 //INTERNAL
@@ -166,7 +169,7 @@ function _createReactiveModel<T extends AnyObject>(
 }
 
 //API
-export function o$$<T extends AnyObject>(target: T): AsDeepReactiveModel<T> {
+export function o$$<T extends AnyObject>(target: T): DeepReactiveModel<T> {
     return asDeepReactive(target)
 }
 

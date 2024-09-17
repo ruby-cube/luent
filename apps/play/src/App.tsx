@@ -1,8 +1,10 @@
-import { $Node, COMPONENT, ComponentSetup, create_if, else_create, iterate_over, mx, teleportTo, useEventListener } from "@rue/lumo";
+import { $Node, Component, COMPONENT, ComponentSetup, CreateIf, ElseCreate, For, mx, Provide, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
-import { __addDevName, $Signal, o$$ } from "@rue/muonic";
+import { __addDevName, $Signal, o$$, AtomicSignal } from "@rue/muonic";
 import { $ } from "@rue/muonic";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
+import { ElseCreateIf } from "../../../packages/lumo/src/conditional/CreateIf";
+import { AnyObject } from "@rue/types";
 
 
 const randomColor = useRandomColorGenerator()
@@ -65,7 +67,8 @@ const onClick = useEventListener('click');
 // memo$()
 
 export function App() {
-    return mx(
+
+    return (
         <List></List>
     )
 }
@@ -117,10 +120,10 @@ export function List() {
         $showSideBlock.setTo(true)
     }
 
-    return mx(
+    return (
         <div>
             <>
-                {create_if($(() => $list().length === 0), () => (
+                {CreateIf($(() => $list().length === 0), () => (
                     <div
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
@@ -128,28 +131,34 @@ export function List() {
                         insert
                     </div>
                 ))}
-                {else_create(() =>
-                    iterate_over($list, (item$, $index) => (
-                        <div style={`background-color: ${randomColor.get()}`}>
-                            <p
-                                onclick={() => removeItem($index())}
-                                style="cursor: pointer"
-                            >
-                                X
-                            </p>
-                            <li onclick-v={() => changeContent($index())}>
-                                {$(() => item$.content)}
-                            </li>
-                            <p>{$index}</p>
-                            <div
-                                onclick={() => insertItem($index() + 1)}
-                                style="background-color: gray; cursor: pointer"
-                            >
-                                insert
-                            </div>
+                {ElseCreateIf($(() => $list().length === 0), () => (
+                    <div
+                        onclick={() => insertItem(0)}
+                        style="background-color: gray; cursor: pointer"
+                    >
+                        insert
+                    </div>
+                ))}
+                {For($list, (item$, $index) => (
+                    <div style={`background-color: ${randomColor.get()}`}>
+                        <p
+                            onclick={() => removeItem($index())}
+                            style="cursor: pointer"
+                        >
+                            X
+                        </p>
+                        <li onclick-v={() => changeContent($index())}>
+                            {$(() => item$.content)}
+                        </li>
+                        <p>{$index}</p>
+                        <div
+                            onclick={() => insertItem($index() + 1)}
+                            style="background-color: gray; cursor: pointer"
+                        >
+                            insert
                         </div>
-                    ), 'id')
-                )}
+                    </div>
+                ), 'id')}
             </>
             <button onclick={openModal}>open</button>
             {/* <>
@@ -183,7 +192,100 @@ function useModal() {
     }
 }
 
-function DialogBox() {
+function Component(...args: any[]) {
+
+}
+
+
+function Appo(
+    props: {},
+    provide: Provide
+) {
+    const $active = $Signal(true)
+    const $ready = $Signal(true)
+
+    const exposed = {
+        $active,
+        $ready
+    }
+
+    return Component(
+        <>
+            {CreateIf($active, () => ((dialogBox) => (
+                <>
+                    <DialogBox model={dialogBox}></DialogBox>
+                    <button onclick={dialogBox.open}>open</button>
+                </>
+            ))(useDialogBox({ initialState: 'open' })))} // state must be created within render function
+            {ElseCreateIf($ready, () =>
+                <button>click</button>
+            )}
+            {ElseCreateIf($active, () => {
+                const $dialogBox = fromContext(ALERT_DIALOG_BOX) || $Node()
+
+                return (
+                    <Wrapper title={() => $dialogBox().title}>
+                        {() => (
+                            <div>
+                                <DialogBox ref={$dialogBox} />
+                                <button onclick={() => $dialogBox().open}>open</button>
+                            </div>)
+                        }
+                    </Wrapper>
+                )
+            })}
+        </>,
+        exposed
+    )
+}
+
+function Wrapper({ title, Slot }: {
+    title: string,
+    Slot: () => any
+}) {
+
+    return (
+        <>
+            <h1>title</h1>
+            <PageHeader />
+            <Slot />
+        </>
+    )
+}
+
+function PageHeader() {
+
+}
+
+
+
+type DialogBoxState = ReturnType<typeof useDialogBox>
+
+function DialogBox({
+    model: { $open, close },
+    $button
+}: {
+    model: DialogBoxState
+    $button?: NodeRef
+}) {
+
+
+
+    return Component(
+        teleportTo('body', (
+            <dialog style="background-color: gray" open={$open}>
+                Stop
+                <button onclick={close} ref={$button}>close</button>
+            </dialog>
+        )),
+        {
+            $open,
+            open
+        }
+    )
+}
+
+function useDialogBox(config: { initialState: 'open' | 'closed' }) {
     const $open = $Signal(false)
     __addDevName($open, '$open')
 
@@ -195,15 +297,13 @@ function DialogBox() {
         $open.setTo(false)
     }
 
-    return mx(
-        {
-            open,
-            close
-        },
-
-        <dialog style="background-color: gray" open={$open}>
-            Stop
-            <button onclick={close}>close</button>
-        </dialog>
-    )
+    return {
+        title: "DialogBox",
+        $open,
+        open,
+        close,
+    }
 }
+
+
+

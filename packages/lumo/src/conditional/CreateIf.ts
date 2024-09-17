@@ -31,78 +31,78 @@ function resetCurrentNodePodIndex(index?: number) {
 
 
 
-export function create_if($condition: AnySignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
+export function CreateIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
     resetCurrentNodePodIndex()
     return new ConditionalRenderKit(
         'if',
         wrapToNormalize(renderConditional),
         'create',
-        getComponent(create_if.name),
+        getComponent(CreateIf.name),
         { $condition }
     )
 }
 
-export function else_create_if($condition: AnySignal<Booleanny>, renderConditional: RenderFunction) {
+export function ElseCreateIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction) {
     return new ConditionalRenderKit(
         'elseIf',
         wrapToNormalize(renderConditional),
         'create',
-        getComponent(else_create_if.name),
+        getComponent(ElseCreateIf.name),
         { $condition }
     )
 }
 
-export function else_create(renderConditional: RenderFunction) {
+export function ElseCreate(renderConditional: RenderFunction) {
     return new ConditionalRenderKit(
         'else',
         wrapToNormalize(renderConditional),
         'create',
-        getComponent(else_create.name),
+        getComponent(ElseCreate.name),
     )
 }
 
-export function mount_if($condition: AnySignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
+export function MountIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
     resetCurrentNodePodIndex()
     return new ConditionalRenderKit(
         'if',
         wrapToPreserve(renderConditional),
         'mount',
-        getComponent(mount_if.name),
+        getComponent(MountIf.name),
         { $condition }
     )
 }
 
-export function else_mount_if($condition: AnySignal<Booleanny>, renderConditional: RenderFunction) {
+export function ElseMountIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction) {
     return new ConditionalRenderKit(
         'elseIf',
         wrapToPreserve(renderConditional),
         'mount',
-        getComponent(else_mount_if.name),
+        getComponent(ElseMountIf.name),
         { $condition }
     )
 }
 
-export function else_mount(renderConditional: RenderFunction) {
+export function ElseMount(renderConditional: RenderFunction) {
     return new ConditionalRenderKit(
         'else',
         wrapToPreserve(renderConditional),
         'mount',
-        getComponent(else_mount.name),
+        getComponent(ElseMount.name),
     )
 }
 
-export function show_if($condition: AnySignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
+export function ShowIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
     resetCurrentNodePodIndex(0)
     return new ConditionalRenderKit(
         'if',
         wrapToNormalize(renderConditional),
         'show',
-        getComponent(show_if.name),
+        getComponent(ShowIf.name),
         { $condition }
     )
 }
 
-export function else_show_if($condition: AnySignal<Booleanny>, renderConditional: RenderFunction) {
+export function ElseShowIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction) {
     if (currentNodePodIndex === undefined)
         currentNodePodIndex = 0;
     else currentNodePodIndex++;
@@ -110,12 +110,12 @@ export function else_show_if($condition: AnySignal<Booleanny>, renderConditional
         'elseIf',
         wrapToNormalize(renderConditional),
         'show',
-        getComponent(else_show_if.name),
+        getComponent(ElseShowIf.name),
         { nodePodIndex: currentNodePodIndex, $condition }
     )
 }
 
-export function else_show(renderConditional: RenderFunction) {
+export function ElseShow(renderConditional: RenderFunction) {
     if (currentNodePodIndex === undefined)
         currentNodePodIndex = 0;
     else currentNodePodIndex++;
@@ -123,7 +123,7 @@ export function else_show(renderConditional: RenderFunction) {
         'else',
         wrapToNormalize(renderConditional),
         'show',
-        getComponent(else_show.name),
+        getComponent(ElseShow.name),
         { nodePodIndex: currentNodePodIndex }
     )
 }

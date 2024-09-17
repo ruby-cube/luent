@@ -37,8 +37,13 @@ export function initializeRootProvider(component: Component) {
     })
 }
 
+export const APPWIDE = true
+
+export type Provide = typeof provide
+
 // Public API
-export function provide<T>(key: TypedKey<T>, value: T) {
+export function provide<T>(key: TypedKey<T>, value: T, appwide?: boolean) {
+    if (appwide) return provideAppState(key, value)
     const component = getCurrentComponent();
     if (component === null) {
         if (__DEV__) console.warn("No component found. Providing as global state") //QUESTION: Should I throw an error instead?
@@ -101,7 +106,9 @@ export function letAppState<T>(key: TypedKey<T>, initialize: () => T): [() => T,
 }
 
 
-
+export function fromApp<T, OPT extends '?' | undefined = undefined>(key: TypedKey<T>, optional?: OPT): OPT extends '?' ? T | undefined : T {
+    return _fromContext(key, optional, 'root');
+}
 
 
 
@@ -135,7 +142,7 @@ export function _fromContext<T, OPT extends '?' | (() => T) | undefined>(key: Ty
         const entries = parent.entries
         if (entries.has(key)) {
             const value = entries.get(key);
-            return  __DEV__ && value instanceof Object ? encapsulate(value) : value;
+            return __DEV__ && value instanceof Object ? encapsulate(value) : value;
         }
         parent = parent.parent;
     }
@@ -171,9 +178,7 @@ function handleResourceNotFound<T, OPT extends '?' | undefined | (() => T)>(key:
 
 
 
-export function fromApp<T, OPT extends '?' | undefined = undefined>(key: TypedKey<T>, optional?: OPT): OPT extends '?' ? T | undefined : T {
-    return _fromContext(key, optional, 'root');
-}
+
 
 
 
@@ -215,7 +220,7 @@ export function fromGlobal<T, OPT extends '?' | undefined = undefined>(key: Type
     if (!optional && !globalEntries.has(key))
         throw new Error(`A value for '${key.toString()}' has not been provided globally`)
     const value = globalEntries.get(key)
-    return  __DEV__ && value instanceof Object ? encapsulate(value) : value;
+    return __DEV__ && value instanceof Object ? encapsulate(value) : value;
 }
 
 

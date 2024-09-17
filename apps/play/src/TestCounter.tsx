@@ -21,7 +21,7 @@ export function TestCounterSignals() {
         $count.update(count => count - 1)
     }
 
-    return mx(
+    return (
         <>
             <div>{$count}</div>
             <div>{$doubleCount}</div> 

@@ -28,7 +28,7 @@ function PrePhase(){
 
     
 
-    return mx(
+    return (
         <div id="outer">
             <div id="inner"></div>
         </div>

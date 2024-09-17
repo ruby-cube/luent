@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { longestCommonSubstring } from "./lcs";
 import { areShallowEqualArrays } from "@rue/muonic";
-import { UniqueItem } from "./iterate_over";
+import { UniqueItem } from "./For";
 
 
 // TODO: implementation for sets, objects, and maps

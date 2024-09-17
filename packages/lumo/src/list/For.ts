@@ -18,11 +18,11 @@ export type Collection<T> = T[]  //TODO: add sets and maps
 
 
 
-export function iterate_over<T>(data: Collection<T>, render: RenderItem<T>, idKey?: string): ListRenderKit // static list
-export function iterate_over<T>(data: ReactiveModel<Collection<T>> | AnySignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
-export function iterate_over<T>(data: ReactiveModel<Collection<T>> | AnySignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
-export function iterate_over<T>(data: ListData<T>, render: RenderItem<T>, idKey?: string): ListRenderKit {
-    return new ListRenderKit(render, data, getComponent(iterate_over.name), idKey)
+export function For<T>(data: Collection<T>, render: RenderItem<T>, idKey?: string): ListRenderKit // static list
+export function For<T>(data: ReactiveModel<Collection<T>> | AnySignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
+export function For<T>(data: ReactiveModel<Collection<T>> | AnySignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
+export function For<T>(data: ListData<T>, render: RenderItem<T>, idKey?: string): ListRenderKit {
+    return new ListRenderKit(render, data, getComponent(For.name), idKey)
 }
 
 

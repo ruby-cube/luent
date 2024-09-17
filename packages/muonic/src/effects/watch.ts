@@ -89,7 +89,6 @@ export function watch<T extends () => any | AnySignal | ReactiveModel>(target: T
     }
     const retrack = options?.retrack ?? false
     let isReactiveFunction = <any>target instanceof Function && !isAnySignal(target);
-
     const _target =
         isReactiveFunction ? createReactiveFunction(<() => any>target, retrack).initialize()
             : target as AnySignal;

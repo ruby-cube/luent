@@ -147,7 +147,7 @@ function reactiveArrayGetter(
             value
         )
     }
-    
+
     const _value = maybeAsDeepReactive(value, deep)
     const tracker = getActiveTracker()
     if (!tracker) return _value;
@@ -239,7 +239,7 @@ export function isIntegerKey(key: unknown) {
 function mutatingArrayOp(
     args: any[],
     reactive: ReactiveModel<any[]>,
-    metaReactive: MetaReactiveModel<any[]>,
+    metaReactive: MetaReactiveCollection<any[]>,
     target: AnyObject,
     key: string,
     fn: Function
@@ -248,20 +248,43 @@ function mutatingArrayOp(
     const oldLength = target.length;
     const output = fn.apply(reactive, _args); // perform mutation
     const newLength = target.length;
-
     if (oldLength === newLength) return output; //FIX: Some methods will mutate but not change the length, like fill
     storeSnapshot(metaReactive)
-
+    
     const lengthProp = getObservedProp(reactive, 'length')
     if (lengthProp) {
         trigger(lengthProp); // trigger for length change
     }
-
+    
     if (key === 'pop') {
         const prop = getObservedProp(reactive, (oldLength - 1).toString())
+        console.log("mutating array op", prop)
         if (prop) trigger(prop);
         const op = getTrackedOp(reactive, 'at', - 1)
         if (op) triggerReactiveAtom(op);
+    }
+
+    const trackedIndices = metaReactive.observedEntryKeys
+    if (trackedIndices && oldLength < newLength) {
+        for (const indexKey of trackedIndices) {
+            if (typeof indexKey !== 'string') {
+                console.warn(`index key is not string. May need to refactor code`)
+                continue;
+            }
+            const index = parseInt(indexKey)
+            if (index >= newLength) {
+                const prop = getObservedProp(reactive, indexKey)
+                if (prop) {
+                    trigger(prop)
+                }
+                const op = getTrackedOp(reactive, 'at', index)
+                if (op) {
+                    if (isReactiveAtom(op)) {
+                        triggerReactiveAtom(op)
+                    }
+                }
+            }
+        }
     }
 
     triggerReactiveWithMutationOp(

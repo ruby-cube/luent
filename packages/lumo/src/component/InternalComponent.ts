@@ -21,41 +21,44 @@ export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P 
 
 // export type Slot<T> = T extends AnyObject ? InternalComponent<T> : NodeEntity | NodeEntity[]
 export const COMPONENT = Symbol('publicComponent')
-export type PublicComponent<T extends undefined | AnyObject = undefined | AnyObject> = T extends undefined ? undefined : { [COMPONENT]: true } & T // contains anything in expose
+// export type PublicComponent<T extends undefined | AnyObject = undefined | AnyObject> = T extends undefined ? undefined :  T // contains anything in expose
 
 export interface Component<T extends undefined | AnyObject = undefined | AnyObject> {
-    component: PublicComponent<T>;
+    component?: T;
     initialNodeEntities: NodeEntity
 }
 
-export function mx<T extends AnyObject = AnyObject>(render: NodeEntity): Component<T>
-export function mx<T extends AnyObject = AnyObject>(exposedComponent: T | NodeEntity, render: NodeEntity): Component<T>
-export function mx<T extends AnyObject = AnyObject>(exposedComponentOrRender: T | NodeEntity, render?: NodeEntity): Component<T> {
-
-    const component = render ? { component: exposedComponentOrRender, initialNodeEntities: render } : {component: undefined, initialNodeEntities: exposedComponentOrRender}
-    const unnestedComponent = unnestComponent(component) 
+export function Component<T extends AnyObject = AnyObject>(render: NodeEntity, exposedComponent?: T): Component<T> {
+    //TODO: make this more efficient?
+    if (exposedComponent) {
+        return {
+            component: exposedComponent,
+            initialNodeEntities: render
+        }
+    }
+    const unnestedNodeEntities = unnestComponent(render)
 
     return {
-        component: arguments.length === 2 ? { [COMPONENT]: true as const, ...exposedComponentOrRender } : component !== unnestedComponent? unnestedComponent.component : undefined,
-        initialNodeEntities: unnestedComponent.initialNodeEntities
+        component: undefined,
+        initialNodeEntities: unnestedNodeEntities
     }
 }
 
 export class InternalComponent<T extends undefined | AnyObject = undefined | AnyObject> implements Component {
-    component: PublicComponent<T> | undefined = undefined;
+    component: T | undefined = undefined;
     initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
 
     tasks: {
         [LifecycleHook.ON_CREATED]: Set<() => void> | undefined;
         // [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
-        [LifecycleHook.ON_UPDATED]: Set<() => void> | undefined;
+        // [LifecycleHook.ON_UPDATED]: Set<() => void> | undefined;
     } = {
             [LifecycleHook.ON_CREATED]: undefined,
             // [LifecycleHook.BEFORE_UPDATE]: undefined,
-            [LifecycleHook.ON_UPDATED]: undefined,
+            // [LifecycleHook.ON_UPDATED]: undefined,
         };
 
-    hasUpdates: boolean = false;
+    hasUpdates: boolean = false; //TODO: Remove
 
     constructor(
         public parent: InternalComponent | null,
@@ -92,17 +95,17 @@ export class InternalComponent<T extends undefined | AnyObject = undefined | Any
 }
 
 
-function unnestComponent(component: Component) {
-    const nodeEntities = component.initialNodeEntities!;
+function unnestComponent(nodeEntities: NodeEntity[]) {
+    // const nodeEntities = component.initialNodeEntities!;
     if (nodeEntities.length > 1 || nodeEntities.length === 0)
-        return component;
+        return nodeEntities;
     if (nodeEntities[0] instanceof InternalComponent) {
         const component = nodeEntities[0]
-        if (!component.initialNodeEntities)
-            return component;
-        return unnestComponent(component)
+        if (!component.component || !component.initialNodeEntities)
+            return nodeEntities;
+        return unnestComponent(component.initialNodeEntities)
     }
-    return component
+    return nodeEntities
 }
 
 export function getComponent(functionName: string) {

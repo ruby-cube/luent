@@ -6,13 +6,13 @@ import { AnyObject } from "@rue/types"
 function ParentBlock() {
 
     function Title(render: (words) => any) {
-        return ({ words }) => mx({
+        return ({ words }) => ({
             title: 'sort'
         }, render(words))
     }
 
 
-    return mx({
+    return ({
         increment,
         decrement
     },
@@ -34,7 +34,7 @@ function FrameBlock({ Slot }: {
 }) {
     const page = $Node(Slot)
 
-    return mx(
+    return (
         <div>
             <Slot ref={page} />
         </div>
@@ -42,7 +42,7 @@ function FrameBlock({ Slot }: {
 }
 
 function SlottedBlock() {
-    return mx(
+    return (
         <div>hi</div>
     )
 }

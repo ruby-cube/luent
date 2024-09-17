@@ -13,6 +13,16 @@ export type AtomicSignal<T = any> = {
     setTo: (newValue: T) => T
 }
 
+export type $GetState<T = any> = {
+    (): T;
+    update: (toNewValue: (value: T) => T) => T
+    setTo: (newValue: T) => T
+}
+
+export type $Get<T = any> = () => T
+
+
+
 export const SIGNAL = Symbol('signal');
 
 export class MetaSignal<T = unknown> implements ReactiveEntity {

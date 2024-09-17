@@ -1,7 +1,7 @@
 import { $Signal, isAnySignal, isReactiveModel, AtomicSignal, ReactiveModel, toRaw, shallowClone, AnySignal, isDeepReactive, asDeepReactive, isSignal, ModelReactivityDepth, getMetaSignal } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
-import { Collection, ListData, RenderItem } from "./iterate_over";
+import { Collection, ListData, RenderItem } from "./For";
 import { popComponent, pushComponent } from "../component/componentStack";
 import { popList, pushList } from "./listStack";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";

@@ -1,6 +1,7 @@
 //@ts-nocheck
 
 import ""
+import { $initializeEffect } from "./src"
 const frog$ = o$({
     name: "sir robin",
     location: {
@@ -22,7 +23,7 @@ const position = frog$.location.position // .location is tracked, .position is n
 
 // (A) manual reactivizing
 
-o$(frog$.location).position // .location is tracked and .position
+o$(frog$$).location.position // .location is tracked and .position
 
 o$(o$(frog$.location).position).x
 
@@ -37,17 +38,53 @@ const location$ = location.$
 const position$ = o$(frog$.location.position)
 //TODO: Keep a WeakMap of reactives so if an object is already made into a reactive, return that reactive instead of creating a new one
 
-const $frog$ = $Signal(o$(new Frog()))
 
-const $frog$$ = $Signal(o$$(new Frog()))
+function ListBlock(attributes: {
+    list: string[], // initial value
+    color: string
+}) {
 
-const frog$$ = o$$(new Frog())
+    const $div = $Node()
+
+    const $count = $(0) // $SettableGet<number>
+
+    const list$ = o$(list);
+
+    const $doubleCount = $(() => $count * 2) // Get<number>
+
+    const frog$ = o$(frog)
+
+    const $frog$ = $(o$(frog))
+
+    const $frog$$ = $(o$$(frog))
+
+    const frog$$ = o$$(new Frog())
+
+    const $name = $prop(frog$, 'name') //$GetProp<string>
+
+    watch($Props(frog$, ['name', 'qualities'], () => {
+
+    }))
+
+    $initializeEffect(() => {
+
+    })
+
+    return Component({
+        list$,
+
+    },
+        <div>hello</div>
+    )
+}
+
+
 
 watch(o$(frog$.location.position), () => {
 
 })
 
-watch(frog$$.location.position, ()=>{
+watch(frog$$.location.position, () => {
 
 })
 
@@ -60,7 +97,7 @@ frog$$._$ // shallow reactive proxy that will not make any down stream objects r
 
 frog$$._o // raw
 
-const frog$ = frog$$.o$ 
+const frog$ = frog$$.o$
 
 
 
