@@ -5,6 +5,7 @@ import { DynamicNode, getActiveDynamicNode } from "./DynamicNode";
 type TaskQueue = Set<() => void>
 
 export enum LifecycleHook {
+    ON_CREATED = 'c',
     ON_ACTIVATED = 'a',
     ON_DEACTIVATE = 'bda',
     ON_DESTROY = 'bd',
@@ -23,7 +24,7 @@ function useTaskQueue(node: DynamicNode, hookName: LifecycleHook) {
 }
 
 
-function createLifecycleHook(name: LifecycleHook.ON_DESTROY) {
+function createLifecycleHook(name: LifecycleHook.ON_DESTROY | LifecycleHook.ON_CREATED) {
     return function on(handler: () => void, options?: SchedulerOptions, _node?: DynamicNode) {
         const node = _node || getActiveDynamicNode();
         if (!node) throw new Error("Lifecycle hooks cannot be called outside of component setup");
@@ -61,6 +62,6 @@ function createActivationHook(name: LifecycleHook.ON_ACTIVATED | LifecycleHook.O
 export const onDeactivate = createActivationHook(LifecycleHook.ON_DEACTIVATE)
 export const onActivated = createActivationHook(LifecycleHook.ON_ACTIVATED)
 export const onDestroy = createLifecycleHook(LifecycleHook.ON_DESTROY)
-
+export const onCreated = createLifecycleHook(LifecycleHook.ON_CREATED)
 
 

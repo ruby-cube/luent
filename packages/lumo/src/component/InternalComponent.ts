@@ -1,9 +1,8 @@
 import { AnyObject, MaybePromise } from "@rue/types";
-import { LifecycleHook } from "./lifecycle";
 import { EventHandler, NodeEntity, RenderFunction } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
-import { getCurrentComponent, popComponent, pushComponent } from "./componentStack";
 import { mountNodeEntity } from "../node/mountNodeEntity";
+import { Provide } from "./provide";
 
 
 export type DOMNode = CharacterData | Element
@@ -18,6 +17,7 @@ export type DOMNode = CharacterData | Element
 
 // export type Slot = NodeEntity | NodeEntity[]
 export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (props: P) => Component
+export type ProviderComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (props: P, provide: Provide) => Component
 
 // export type Slot<T> = T extends AnyObject ? InternalComponent<T> : NodeEntity | NodeEntity[]
 export const COMPONENT = Symbol('publicComponent')
@@ -26,9 +26,18 @@ export const COMPONENT = Symbol('publicComponent')
 export interface Component<T extends undefined | AnyObject = undefined | AnyObject> {
     component?: T;
     initialNodeEntities: NodeEntity
+    mount: (
+        parent: Element,
+        nodePod: _NodePod,
+        fragment?: DocumentFragment,
+    )=>void
 }
 
-export function Component<T extends AnyObject = AnyObject>(render: NodeEntity, exposedComponent?: T): Component<T> {
+export interface ComponentOutput<T extends undefined | AnyObject = undefined | AnyObject> {
+    component?: T;
+    initialNodeEntities: NodeEntity
+}
+export function Component<T extends AnyObject = AnyObject>(render: NodeEntity, exposedComponent?: T): ComponentOutput<T> {
     //TODO: make this more efficient?
     if (exposedComponent) {
         return {
@@ -48,34 +57,21 @@ export class InternalComponent<T extends undefined | AnyObject = undefined | Any
     component: T | undefined = undefined;
     initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
 
-    tasks: {
-        [LifecycleHook.ON_CREATED]: Set<() => void> | undefined;
-        // [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
-        // [LifecycleHook.ON_UPDATED]: Set<() => void> | undefined;
-    } = {
-            [LifecycleHook.ON_CREATED]: undefined,
-            // [LifecycleHook.BEFORE_UPDATE]: undefined,
-            // [LifecycleHook.ON_UPDATED]: undefined,
-        };
+    // tasks: {
+    //     [LifecycleHook.ON_CREATED]: Set<() => void> | undefined;
+    //     // [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
+    //     // [LifecycleHook.ON_UPDATED]: Set<() => void> | undefined;
+    // } = {
+    //         [LifecycleHook.ON_CREATED]: undefined,
+    //         // [LifecycleHook.BEFORE_UPDATE]: undefined,
+    //         // [LifecycleHook.ON_UPDATED]: undefined,
+    //     };
 
-    hasUpdates: boolean = false; //TODO: Remove
+    // hasUpdates: boolean = false; //TODO: Remove
 
     constructor(
-        public parent: InternalComponent | null,
+        // public parent: InternalComponent | null,
     ) {
-    }
-
-    private getTaskQueue(hookName: LifecycleHook) {
-        let taskQueue = this.tasks[hookName]
-        return taskQueue;
-    }
-
-    emit(hookName: LifecycleHook) {
-        const taskQueue = this.getTaskQueue(hookName);
-        if (!taskQueue) return;
-        for (const task of taskQueue) {
-            task();
-        }
     }
 
     mount(
@@ -86,11 +82,11 @@ export class InternalComponent<T extends undefined | AnyObject = undefined | Any
         const nodeEntities = this.initialNodeEntities!;
         if (!(parent instanceof Element))
             throw new Error("Parent cannot be a text node")
-        pushComponent(this)
+        // pushProvider(this)
         for (const nodeEntity of nodeEntities) {
             mountNodeEntity(parent, nodeEntity, nodePod, fragment)
         }
-        popComponent()
+        // popProvider()
     }
 }
 
@@ -108,13 +104,7 @@ function unnestComponent(nodeEntities: NodeEntity[]) {
     return nodeEntities
 }
 
-export function getComponent(functionName: string) {
-    const component = getCurrentComponent<InternalComponent>()
-    if (!component) {
-        throw new Error(`${functionName} can only be called from a component setup`)
-    }
-    return component
-}
+
 
 // export function expose<T extends AnyObject>(component: T) {
 //     const _component = getCurrentComponent<InternalComponent>();

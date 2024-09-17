@@ -1,4 +1,4 @@
-import { PublicComponent, ComponentSetup, DOMNode, InternalComponent, getComponent } from "../component/InternalComponent";
+import { DOMNode } from "../component/InternalComponent";
 import { DerivedSignal, isAnySignal, AnySignal, Hooks, getCurrentUpdateCycle } from "@rue/muonic";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
@@ -38,8 +38,6 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
     const { attributes, events } = analyzeAttributes(other)
 
-    const component = getComponent(makeElement.name)
-
     const domNode = isHydrating() ? getElement() : document.createElement(tagName);
 
     if (ref) {
@@ -60,8 +58,8 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
         }
     }
 
-    setUpClasses(component, domNode, normalizeToArray(classes))
-    setUpStyles(component, domNode, normalizeToArray(styles))
+    setUpClasses(domNode, normalizeToArray(classes))
+    setUpStyles(domNode, normalizeToArray(styles))
     setUpEvents(domNode, events);
     setUpAttributes(domNode, attributes);
     if (dynamicAttributes)
@@ -176,7 +174,7 @@ type DynamicClassesConfig = {
     [key: string]: AnySignal<Booleanny>;
 }
 
-function setUpClasses(component: InternalComponent, node: Element, classes: (((o: DOMTokenList) => void) | string | DynamicClassesConfig)[]) {
+function setUpClasses(node: Element, classes: (((o: DOMTokenList) => void) | string | DynamicClassesConfig)[]) {
     const classList = node.classList
     for (const entry of classes) {
         if (entry instanceof Function) {
@@ -210,7 +208,7 @@ function warnDuplicateClasses(classesA: string, classesB: string) {
     }
 }
 
-function setUpStyles(component: InternalComponent, node: Element, styles: (((o: CSSStyleDeclaration) => void) | string)[]) {
+function setUpStyles(node: Element, styles: (((o: CSSStyleDeclaration) => void) | string)[]) {
     const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
     for (const entry of styles) {
         if (entry instanceof Function) {

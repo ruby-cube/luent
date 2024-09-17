@@ -3,8 +3,8 @@ import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
-import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { AnySignal } from "@rue/muonic";
+import { getProviderComponent } from "../component/ProviderComponent";
 
 
 
@@ -37,7 +37,7 @@ export function CreateIf($condition: AnySignal<Booleanny>, renderConditional: Re
         'if',
         wrapToNormalize(renderConditional),
         'create',
-        getComponent(CreateIf.name),
+        getProviderComponent(CreateIf.name),
         { $condition }
     )
 }
@@ -47,7 +47,7 @@ export function ElseCreateIf($condition: AnySignal<Booleanny>, renderConditional
         'elseIf',
         wrapToNormalize(renderConditional),
         'create',
-        getComponent(ElseCreateIf.name),
+        getProviderComponent(ElseCreateIf.name),
         { $condition }
     )
 }
@@ -57,7 +57,7 @@ export function ElseCreate(renderConditional: RenderFunction) {
         'else',
         wrapToNormalize(renderConditional),
         'create',
-        getComponent(ElseCreate.name),
+        getProviderComponent(ElseCreate.name),
     )
 }
 
@@ -67,7 +67,7 @@ export function MountIf($condition: AnySignal<Booleanny>, renderConditional: Ren
         'if',
         wrapToPreserve(renderConditional),
         'mount',
-        getComponent(MountIf.name),
+        getProviderComponent(MountIf.name),
         { $condition }
     )
 }
@@ -77,7 +77,7 @@ export function ElseMountIf($condition: AnySignal<Booleanny>, renderConditional:
         'elseIf',
         wrapToPreserve(renderConditional),
         'mount',
-        getComponent(ElseMountIf.name),
+        getProviderComponent(ElseMountIf.name),
         { $condition }
     )
 }
@@ -87,7 +87,7 @@ export function ElseMount(renderConditional: RenderFunction) {
         'else',
         wrapToPreserve(renderConditional),
         'mount',
-        getComponent(ElseMount.name),
+        getProviderComponent(ElseMount.name),
     )
 }
 
@@ -97,7 +97,7 @@ export function ShowIf($condition: AnySignal<Booleanny>, renderConditional: Rend
         'if',
         wrapToNormalize(renderConditional),
         'show',
-        getComponent(ShowIf.name),
+        getProviderComponent(ShowIf.name),
         { $condition }
     )
 }
@@ -110,7 +110,7 @@ export function ElseShowIf($condition: AnySignal<Booleanny>, renderConditional: 
         'elseIf',
         wrapToNormalize(renderConditional),
         'show',
-        getComponent(ElseShowIf.name),
+        getProviderComponent(ElseShowIf.name),
         { nodePodIndex: currentNodePodIndex, $condition }
     )
 }
@@ -123,7 +123,7 @@ export function ElseShow(renderConditional: RenderFunction) {
         'else',
         wrapToNormalize(renderConditional),
         'show',
-        getComponent(ElseShow.name),
+        getProviderComponent(ElseShow.name),
         { nodePodIndex: currentNodePodIndex }
     )
 }

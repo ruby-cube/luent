@@ -8,10 +8,10 @@ import { _DynamicNodePod, _NodePod, NULLISH_NODE_POD } from "../node/NodePod";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { ConditionalSeries } from "./ConditionalSeries";
 import { hidePrevConditionalNodes, showConditionalNodes } from "./toggledisplay";
-import { setUpUpdateHooks, watchForRender } from "../watch/watchForRender";
+import { watchForRender } from "../watch/watchForRender";
 import { areShallowEqualArrays } from "@rue/muonic";
-import { popComponent, pushComponent } from "../component/componentStack";
-import { LifecycleHook } from "../component/lifecycle";
+import { popProvider, pushProvider } from "../component/provide";
+import { ProviderComponent } from "../component/ProviderComponent";
 
 
 
@@ -75,7 +75,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         return nodePodIndex;
     }
 
-    component: InternalComponent
+    component: ProviderComponent
 
     constructor(
         statements: ConditionalRenderKit[],
@@ -108,9 +108,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const dynamicNode = makeDynamicNode(preserve, _nodePod)
 
         dynamicNode.activate(function renderConditional() {
-            pushComponent(component)
+            pushProvider(component)
             series.appendConditional(activeIndex, parent, fragment)
-            popComponent()
+            popProvider()
 
         })
         this.storeDynamicNode(dynamicNode, activeIndex)
@@ -133,12 +133,12 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             const activeIndex = series.evaluateConditions();
 
             // (3)
-            pushComponent(component)
+            pushProvider(component)
             series.activateConditional(activeIndex, parent)
-            popComponent()
+            popProvider()
 
-            // (4)
-            setUpUpdateHooks(component)
+            // // (4)
+            // setUpUpdateHooks(component)
 
             popDynamicNode()
         }

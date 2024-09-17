@@ -1,12 +1,12 @@
-import { beforeRender, isAnySignal, $initializeEffect as _$initializeEffect, onRendered, AnySignal, shallowClone, watch as _watch, WatchOptions, ReactiveModel, ChangeEffect, MutationEffect } from "@rue/muonic";
-import { getComponent, InternalComponent } from "../component/InternalComponent";
+import { isAnySignal, $initializeEffect as _$initializeEffect, onRendered, AnySignal, shallowClone, watch as _watch, WatchOptions, ReactiveModel, ChangeEffect, MutationEffect } from "@rue/muonic";
+import { InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
-import { LifecycleHook } from "../component/lifecycle";
-import { getCurrentComponent, popComponent, pushComponent } from "../component/componentStack";
-import { DynamicNode, getActiveDynamicNode, isMountPhase } from "../dynamic/DynamicNode";
+import { getActiveDynamicNode, isMountPhase } from "../dynamic/DynamicNode";
 import { ActiveListener, ListenerOptions } from "@rue/flask";
-import { onActivated, onDeactivate, onDestroy } from "../dynamic/lifecycle";
+import { onActivated, onDeactivate } from "../dynamic/lifecycle";
 import { noop } from "@rue/utils";
+import { getCurrentProvider, popProvider, pushProvider } from "../component/provide";
+import { getProviderComponent, ProviderComponent } from "../component/ProviderComponent";
 
 type WatchForRenderOptions = {
     deep?: boolean;
@@ -16,7 +16,7 @@ type WatchForRenderOptions = {
 
 
 export function initializeRender(effect: () => void) {
-    const component = getCurrentComponent<InternalComponent>();
+    const component = getCurrentProvider();
     if (!component) throw new Error("initializeRender must be called within component setup")
 
     const dynamicNode = getActiveDynamicNode()
@@ -28,12 +28,11 @@ export function initializeRender(effect: () => void) {
 }
 
 function _initializeRender(effect: () => void) {
-    const component = getCurrentComponent<InternalComponent>()!;
-    const _handler = () => {
-        effect();
-        setUpUpdateHooks(component)
-    }
-    return _$initializeEffect(_handler, {
+    // const _handler = () => {
+    //     effect();
+    //     // setUpUpdateHooks(component)
+    // }
+    return _$initializeEffect(effect, {
         phase: 'render',
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
@@ -66,33 +65,33 @@ export function _watchForRender(target: () => any | AnySignal | ReactiveModel, e
     return _watch(target, effect, { phase: 'render', ...options || {} }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
-export function setUpUpdateHooks(component: InternalComponent) {
-    if (component.hasUpdates === true) return;
-    component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
+// export function setUpUpdateHooks(component: InternalComponent) {
+//     if (component.hasUpdates === true) return;
+//     component.hasUpdates = true; // makes sure component.emit() runs only once per cycle even if many changes happen
 
-    // beforeRender(() => { //NOTE: This causes a memory leak because the listener is registered AFTER beforeRender is emitted. Before update needs to be emitted elsewhere.
-    //     console.log("beforeRender cb: emit before update")
-    //     component.emit(LifecycleHook.BEFORE_UPDATE)
-    // }, { once: true })
+//     // beforeRender(() => { //NOTE: This causes a memory leak because the listener is registered AFTER beforeRender is emitted. Before update needs to be emitted elsewhere.
+//     //     console.log("beforeRender cb: emit before update")
+//     //     component.emit(LifecycleHook.BEFORE_UPDATE)
+//     // }, { once: true })
 
-    onRendered(() => {
-        component.emit(LifecycleHook.ON_UPDATED) //NOTE: I don't know if I even need an after update hook...
-        component.hasUpdates = false; // resets for the next cycle
-    }, { __devName: setUpUpdateHooks.name })
-}
+//     onRendered(() => {
+//         component.emit(LifecycleHook.ON_UPDATED) //NOTE: I don't know if I even need an after update hook...
+//         component.hasUpdates = false; // resets for the next cycle
+//     }, { __devName: setUpUpdateHooks.name })
+// }
 
-function bindWithComponent(fn: Function, component: InternalComponent) {
+function bindWithComponent(fn: Function, component: ProviderComponent) {
     return (...args: any[]) => {
-        pushComponent(component)
+        pushProvider(component) 
         const output = fn(...args)
-        popComponent()
+        popProvider()
         return output;
     }
 }
 
 function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveListener {
     const mountPhase = isMountPhase()
-    const component = getComponent(_initializeAndPreserve.name)
+    const component = getProviderComponent(_initializeAndPreserve.name)
     const initializeFn = bindWithComponent(renderPhase ? _initializeRender : _$initializeEffect, component);
     const dynamicNode = getActiveDynamicNode()!
     const watcher = { stop: noop }
@@ -139,7 +138,7 @@ export function watch<T extends () => any | AnySignal | ReactiveModel>(target: T
 
 function watchAndPreserve<T extends () => any | AnySignal | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions) {
     const mountPhase = isMountPhase()
-    // const component = getComponent(watchAndPreserve.name);
+    // const component = getProviderComponent(watchAndPreserve.name);
     const watchFn = options?.phase === 'render' ? _watchForRender : _watch
     const dynamicNode = getActiveDynamicNode()!
 
@@ -175,9 +174,9 @@ function watchAndPreserve<T extends () => any | AnySignal | ReactiveModel>(targe
     // }
 
     // function initializeWatcher() {
-    //     // pushComponent(component)
+    //     // pushProvider(component)
     //     watcher.stop = watchFn(target, effect, options).stop
-    //     // popComponent()
+    //     // popProvider()
     // }
 
     return watcher

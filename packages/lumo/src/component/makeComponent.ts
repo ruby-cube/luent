@@ -1,12 +1,12 @@
-import { PublicComponent, ComponentSetup, InternalComponent, COMPONENT, Component } from "./InternalComponent";
+import { ComponentSetup, InternalComponent, COMPONENT, Component, ProviderComponentSetup } from "./InternalComponent";
 import { InternalNodeRef, NodeSignal, getNodeRef, get$Node } from "../node/$Node";
 import { ComponentConfig, EventsConfig, initializeListRef, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { DerivedSignal, AtomicSignal } from "@rue/muonic";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
-import { getCurrentComponent, popComponent, pushComponent } from "./componentStack";
-import { LifecycleHook } from "./lifecycle";
 import { getCurrentIndex } from "../list/ListRenderKit";
+import { getCurrentProvider, popProvider, provide, pushProvider } from "./provide";
+import { ProviderComponent } from "./ProviderComponent";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
@@ -43,6 +43,7 @@ export function mO<T extends ComponentSetup>(
     config?: ComponentConfig<T>
 ): InternalComponent {
     const $index = getCurrentIndex()
+    if (Component.length === 2) return makeProviderComponent(Component, Slot, config || {}, $index)
     return makeComponent(Component, Slot, config || {}, $index)
 }
 
@@ -52,14 +53,27 @@ export function makeComponent(
     config: ComponentConfig,
     $index: AtomicSignal<number> | undefined
 ): InternalComponent {
-    const parent = getCurrentComponent<InternalComponent>();
-    const component = new InternalComponent(parent);
-    pushComponent(component)
-    runComponentSetup(Component, component, Slot, config, $index);
-    component.emit(LifecycleHook.ON_CREATED)
-    popComponent() // for sibling components to access parent, must be set AFTER `Component()`
+    const component = new InternalComponent();
+    const output = Component({ ...config, Slot })
+    initializeComponent(component, output, config.ref, $index)
     return component;
 }
+
+function makeProviderComponent(
+    Component: ComponentSetup,
+    Slot: InferSlot | undefined,
+    config: ComponentConfig,
+    $index: AtomicSignal<number> | undefined
+): ProviderComponent {
+    const parent = getCurrentProvider();
+    const component = new ProviderComponent(parent);
+    pushProvider(component)
+    runProviderComponentSetup(Component, component, Slot, config, $index);
+    popProvider() // for sibling components to access parent, must be set AFTER `Component()`
+    return component;
+}
+
+
 
 // on?: { [key: string]: ((e: Event, index: number) => void) | ((e: Event) => void) } //TODO: limit to web events
 // class?: string;
@@ -104,19 +118,18 @@ function extractNodeEntities(component: Component) {
     // return output;
 }
 
-export function runComponentSetup(
-    Component: ComponentSetup,
+export function runProviderComponentSetup(
+    Component: ProviderComponentSetup,
     component: InternalComponent,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
     $index: AtomicSignal<number> | undefined
 ) {
-    const output = Component({ ...config, Slot })
-    if (output instanceof Promise)
-        throw new Error("Components cannot return a promise. Use $Suspense and $await to handle promises within component setup")
-
+    const output = Component({ ...config, Slot }, provide)
     initializeComponent(component, output, config.ref, $index)
 }
+
+
 
 function initializeComponent(
     component: InternalComponent,
@@ -124,6 +137,8 @@ function initializeComponent(
     ref: NodeSignal | undefined,
     $index: AtomicSignal<number> | undefined,
 ) {
+    if (output instanceof Promise)
+        throw new Error("Components cannot return a promise. Use $Suspense and $await to handle promises within component setup")
     const nodeEntities = normalizeToFragmentArray(extractNodeEntities(output)); //TODO: Validate output and get publicComponent from output
 
     component.initialNodeEntities = nodeEntities;
@@ -133,7 +148,6 @@ function initializeComponent(
         if ($index) initializeListRef(ref, publicComponent, $index)
         else initializeRef(ref, publicComponent)
     }
-
 }
 
 

@@ -1,12 +1,7 @@
 import { collectEffects, EffectFlask } from "@rue/flask";
 import { _NodePod } from "../node/NodePod";
-// import { LifecycleHook } from "./lifecycle";
-// console.log(LifecycleHook)
-export enum LifecycleHook {
-    ON_ACTIVATED = 'a',
-    ON_DEACTIVATE = 'bda',
-    ON_DESTROY = 'bd',
-}
+import { LifecycleHook } from "./lifecycle";
+
 
 export class DynamicNode {
     flask: EffectFlask | undefined;
@@ -29,10 +24,12 @@ export class DynamicNode {
     }
 
     tasks: {
+        [LifecycleHook.ON_CREATED]: Set<() => void> | undefined;
         [LifecycleHook.ON_ACTIVATED]: Set<() => void> | undefined;
         [LifecycleHook.ON_DESTROY]: Set<() => void> | undefined;
         [LifecycleHook.ON_DEACTIVATE]: Set<() => void> | undefined;
     } = {
+            [LifecycleHook.ON_CREATED]: undefined,
             [LifecycleHook.ON_ACTIVATED]: undefined,
             [LifecycleHook.ON_DESTROY]: undefined,
             [LifecycleHook.ON_DEACTIVATE]: undefined,
@@ -44,12 +41,16 @@ export class DynamicNode {
         return taskQueue;
     }
 
-    emit(hookName: LifecycleHook) {
+    private emit(hookName: LifecycleHook) {
         const taskQueue = this.getTaskQueue(hookName);
         if (!taskQueue) return;
         for (const task of taskQueue) {
             task();
         }
+    }
+
+    emitOnCreated() {
+        this.emit(LifecycleHook.ON_CREATED)
     }
 
     activate(render: () => void) {

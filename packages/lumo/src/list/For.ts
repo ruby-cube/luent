@@ -4,9 +4,9 @@ import { normalizeToArray } from "@rue/utils";
 import { $listen, Callback, collectEffects, EffectFlask, ListenerOptions } from "@rue/flask";
 import {  makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { DynamicNode } from "../dynamic/DynamicNode";
-import { getComponent, InternalComponent } from "../component/InternalComponent";
 import { ListRenderKit } from "./ListRenderKit";
 import { AtomicSignal, ReactiveModel, AnySignal } from "@rue/muonic";
+import { getProviderComponent } from "../component/ProviderComponent";
 
 
 export type RenderItem<T = any> = (item: T, $index: AtomicSignal<number>) => NodeEntity[] | NodeEntity
@@ -22,7 +22,7 @@ export function For<T>(data: Collection<T>, render: RenderItem<T>, idKey?: strin
 export function For<T>(data: ReactiveModel<Collection<T>> | AnySignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
 export function For<T>(data: ReactiveModel<Collection<T>> | AnySignal<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
 export function For<T>(data: ListData<T>, render: RenderItem<T>, idKey?: string): ListRenderKit {
-    return new ListRenderKit(render, data, getComponent(For.name), idKey)
+    return new ListRenderKit(render, data, getProviderComponent(For.name), idKey)
 }
 
 

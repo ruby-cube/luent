@@ -1,4 +1,4 @@
-import { COMPONENT, ComponentConfig, getCurrentIndex, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeSignal, PublicComponent, pushComponent, popComponent } from "@rue/lumo";
+import { COMPONENT, ComponentConfig, getCurrentIndex, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeSignal, PublicComponent, pushProvider, popProvider } from "@rue/lumo";
 import { Literate } from "./Literate.js";
 import { AtomicSignal } from "@rue/muonic";
 import { AnyObject, MaybePromise } from "@rue/types";
@@ -41,10 +41,10 @@ export function makeComponent(
 ): SSRComponent {
     const parent = getCurrentComponent<SSRComponent>()
     const component = new SSRComponent(parent);
-    pushComponent(component)
+    pushProvider(component)
     runComponentSetup(Component, component, Slot, config, $index);
     component.emit(LifecycleHook.ON_CREATED)
-    popComponent() // for sibling components to access parent, must be set AFTER `Component()`
+    popProvider() // for sibling components to access parent, must be set AFTER `Component()`
 
     return component;
 }

@@ -1,41 +1,45 @@
 import { AnyObject } from "@rue/types";
-import { onCreated } from "./lifecycle";
-import { getCurrentComponent } from "./componentStack";
 import { encapsulate } from "@rue/utils";
+import { onCreated } from "../dynamic/lifecycle";
+import { ProviderComponent } from "./ProviderComponent";
 
 type Component = AnyObject
 
-class Provider {
-    entries: Map<Symbol | string, any> = new Map();
+// class Provider {
+//     entries: Map<Symbol | string, any> = new Map();
 
-    constructor(
-        public component: Component,
-        public parent: Provider | null,
-        public root: Provider = this
-    ) { }
-}
+//     constructor(
+//         public component: Component,
+//         public parent: Provider | null,
+//         public root: Provider = this
+//     ) { }
+// }
 
 // manage provider stack
-let currentProvider: Provider | null = null;
-let previousProvider: Provider | null = null;
+let currentProvider: ProviderComponent | null = null;
+let previousProvider: ProviderComponent | null = null;
 
-function pushProvider(provider: Provider) {
+export function getCurrentProvider() {
+    return currentProvider;
+}
+
+export function pushProvider(provider: ProviderComponent) {
     previousProvider = currentProvider;
     currentProvider = provider;
 }
 
-function popProvider() {
+export function popProvider() {
     currentProvider = previousProvider;
     previousProvider = previousProvider?.parent || null
 }
 
-export function initializeRootProvider(component: Component) {
-    const provider = new Provider(component, null);
-    pushProvider(provider);
-    onCreated(() => {
-        popProvider()
-    })
-}
+// export function initializeRootProvider(component: Component) {
+//     const provider = new Provider(component, null);
+//     pushProvider(provider);
+//     onCreated(() => {
+//         popProvider()
+//     })
+// }
 
 export const APPWIDE = true
 
@@ -44,30 +48,30 @@ export type Provide = typeof provide
 // Public API
 export function provide<T>(key: TypedKey<T>, value: T, appwide?: boolean) {
     if (appwide) return provideAppState(key, value)
-    const component = getCurrentComponent();
-    if (component === null) {
-        if (__DEV__) console.warn("No component found. Providing as global state") //QUESTION: Should I throw an error instead?
-        provideGlobal(key, value);
-        return;
-    }
-    let provider = currentProvider;
-    if (!provider || provider.component !== component) {
-        provider = new Provider(component, provider, provider?.root);
-        pushProvider(provider);
-        onCreated(() => {
-            popProvider()
-        })
-    }
-    provider.entries.set(key, value);
+    // const component = getCurrentComponent();
+    // if (component === null) {
+    //     if (__DEV__) console.warn("No component found. Providing as global state") //QUESTION: Should I throw an error instead?
+    //     provideGlobal(key, value);
+    //     return;
+    // }
+    if (!currentProvider) throw new Error("No provider component. This should never happen")
+    // if (!provider || provider.component !== component) {
+    //     provider = new Provider(component, provider, provider?.root);
+    //     pushProvider(provider);
+    //     onCreated(() => {
+    //         popProvider()
+    //     })
+    // }
+    currentProvider.entries.set(key, value);
 }
 
 export function provideAppState<T>(key: TypedKey<T>, value: T) {
-    const component = getCurrentComponent();
-    if (component === null) {
-        if (__DEV__) console.warn("No component found. Providing as global state") //QUESTION: Should I throw an error instead?
-        provideGlobal(key, value);
-        return value;
-    }
+    // const component = getCurrentComponent();
+    // if (component === null) {
+    //     if (__DEV__) console.warn("No component found. Providing as global state") //QUESTION: Should I throw an error instead?
+    //     provideGlobal(key, value);
+    //     return value;
+    // }
     let provider = currentProvider;
     if (!provider)
         throw new Error("Must call initializeRootProvider in root component setup in order to provideAppState outside of root component")
@@ -118,7 +122,7 @@ export function fromContext<T, OPT extends '?' | undefined = undefined>(key: Typ
 
 
 export function _fromContext<T, OPT extends '?' | (() => T) | undefined>(key: TypedKey<T>, initializeOrOptional: OPT, root?: 'root'): OPT extends '?' ? T | undefined : T {
-    const component = getCurrentComponent();
+    // const component = getCurrentComponent();
     let provider = currentProvider;
     if (!provider) {
         return handleResourceNotFound(key, initializeOrOptional, root)
@@ -137,7 +141,7 @@ export function _fromContext<T, OPT extends '?' | (() => T) | undefined>(key: Ty
     }
 
     // climb provider tree
-    let parent = provider.component === component ? provider.parent : provider;
+    let parent: ProviderComponent | null = provider;
     while (parent !== null) {
         const entries = parent.entries
         if (entries.has(key)) {

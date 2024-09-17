@@ -12,10 +12,10 @@ import { onDestroy, LifecycleHook, onActivated, onDeactivate } from "./lifecycle
 // ): InternalComponent {
 //     const parent = getCurrentComponent<InternalComponent>();
 //     const component = new InternalComponent(parent);
-//     pushComponent(component)
+//     pushProvider(component)
 //     runComponentSetup(Component, component, Slot, config, $index);
 //     component.emit(LifecycleHook.ON_CREATED)
-//     popComponent() // for sibling components to access parent, must be set AFTER `Component()`
+//     popProvider() // for sibling components to access parent, must be set AFTER `Component()`
 //     return component;
 // }
 

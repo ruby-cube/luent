@@ -1,4 +1,4 @@
-import { initializeRootProvider, popComponent, provide, pushComponent } from "@rue/lumo";
+import { initializeRootProvider, popProvider, provide, pushProvider } from "@rue/lumo";
 import { buildHTML, Literate } from "./Literate.js";
 import { runComponentSetup } from "./makeComponent.js";
 import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
@@ -52,11 +52,10 @@ function templateLiteralIsReady(templateLiteral: Literate) {
 
 function makeRootComponent(Root: SSRComponentSetup, timer: ResponseTimer | undefined) {
     const component = new SSRComponent(null);
-    pushComponent(component)
-    initializeRootProvider(component);
+    pushProvider(component)
     if (timer) provide(RESPONSE_TIMER, timer)
     runComponentSetup(Root, component, undefined, undefined, undefined);
     component.emit(LifecycleHook.ON_CREATED)
-    popComponent() // for sibling components to access parent, must be set AFTER `Component()`
+    popProvider() // for sibling components to access parent, must be set AFTER `Component()`
     return component
 }
