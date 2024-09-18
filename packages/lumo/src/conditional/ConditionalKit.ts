@@ -8,6 +8,6 @@ export class ConditionalKit<T = any> {
     constructor(
         public statementType: 'if' | 'elseIf' | 'else',
         public consequent: T,
-        public $condition?: AnySignal<Booleanny>,
+        public $condition?: ReactiveGet<Booleanny>,
     ) { }
 }

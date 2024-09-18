@@ -164,12 +164,12 @@ function _createReactiveModel<T extends AnyObject>(
     deep?: boolean,
     existingMeta?: MetaReactiveModel
 ): ReactiveModel | T {
-    if (!isObject(target)) throw new Error(`INVALID INPUT: o$ or o$$ must receive a reference-type primitive (object)`)
+    if (!isObject(target)) throw new Error(`INVALID INPUT: o$ or $Model must receive a reference-type primitive (object)`)
     return createReactive(target, deep, existingMeta)
 }
 
 //API
-export function o$$<T extends AnyObject>(target: T): DeepReactiveModel<T> {
+export function $Model<T extends AnyObject>(target: T): DeepReactiveModel<T> {
     return asDeepReactive(target)
 }
 

@@ -10,8 +10,9 @@ import './style.css'
 // import { TestConditional } from './TestConditional';
 import { configureFlask } from '../../../packages/flask/initFlask';
 import { List } from './TestReactiveModel';
-import { o$, o$$ } from '@rue/muonic';
-// import { DeepReactiveModel, getMetaReactive, o$, o$$ } from '@rue/muonic';
+import { MountIf } from './TestMountIf';
+// import { o$, $Model } from '@rue/muonic';
+// import { DeepReactiveModel, getMetaReactive, o$, $Model } from '@rue/muonic';
 // import { MountIf } from './TestMountIf';
 // import { queueTask } from '@rue/thread';
 // import { UpdateCycle } from '@rue/muonic';
@@ -20,32 +21,32 @@ import { o$, o$$ } from '@rue/muonic';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-class Frog {
-    qualities = { a: "brave" }
-    setQualities(qualities: { a: string }) {
-        console.log("setting qualities", this)
-        this.qualities = qualities
-        return this.qualities
-    }
-    getQualities() {
-        return [this.qualities, 1]
-    }
-}
+// class Frog {
+//     qualities = { a: "brave" }
+//     setQualities(qualities: { a: string }) {
+//         console.log("setting qualities", this)
+//         this.qualities = qualities
+//         return this.qualities
+//     }
+//     getQualities() {
+//         return [this.qualities, 1]
+//     }
+// }
 
 
 // const frog$$ = o$(new Frog())
 // console.log("qualiites", frog$$.getQualities())
 
-const list$ = o$$([{
-    id: 'dkjl',
-    content: "hi"
-}])
+// const list$ = $Model([{
+//     id: 'dkjl',
+//     content: "hi"
+// }])
 
-watch(() => list$[0], (newValue, oldValue) => {
-    console.log("changed", newValue, oldValue)
-})
+// watch(() => list$[0], (newValue, oldValue) => {
+//     console.log("changed", newValue, oldValue)
+// })
 
-const item = list$.pop()
+// const item = list$.pop()
 // console.log(item)
 
 // watch(frog$$, (val, old) => {
@@ -58,13 +59,13 @@ const item = list$.pop()
 // console.log("qualities", frog$$.qualities)
 //   msg.value = isReactive(frog.getQualities()[0])
 
-// const app = createApp(List)
+const app = createApp(List)
 
-// if (__DEV__) configureFlask({
-//     warnNoCleanup: false
-// })
+if (__DEV__) configureFlask({
+    warnNoCleanup: false
+})
 
-// app.mount('#app')
+app.mount('#app')
 
 // queueTask(()=>{
 //     console.log("hi")

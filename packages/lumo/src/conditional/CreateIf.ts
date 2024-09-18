@@ -3,7 +3,7 @@ import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
-import { AnySignal } from "@rue/muonic";
+import { ReactiveGet, AnySignal } from "@rue/muonic";
 import { getProviderComponent } from "../component/ProviderComponent";
 
 
@@ -18,9 +18,9 @@ function resetCurrentNodePodIndex(index?: number) {
     currentNodePodIndex = index ?? undefined;
 }
 
-// export function $if($condition: AnySignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit
-// export function $if($condition: AnySignal<Booleanny>, type: 'create' | 'show' | 'mount', renderConditional: RenderFunction,): ConditionalRenderKit
-// export function $if($condition: AnySignal<Booleanny>, param2: 'create' | 'show' | 'mount' | RenderFunction, renderConditional?: RenderFunction,): ConditionalRenderKit {
+// export function $if($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit
+// export function $if($condition: ReactiveGet<Booleanny>, type: 'create' | 'show' | 'mount', renderConditional: RenderFunction,): ConditionalRenderKit
+// export function $if($condition: ReactiveGet<Booleanny>, param2: 'create' | 'show' | 'mount' | RenderFunction, renderConditional?: RenderFunction,): ConditionalRenderKit {
 //     const typeSpecified = typeof param2 === "string";
 //     const renderFunction = typeSpecified ? renderConditional : param2;
 //     const type = typeSpecified ? param2 : 'create';
@@ -31,7 +31,7 @@ function resetCurrentNodePodIndex(index?: number) {
 
 
 
-export function CreateIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
+export function CreateIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
     resetCurrentNodePodIndex()
     return new ConditionalRenderKit(
         'if',
@@ -42,7 +42,7 @@ export function CreateIf($condition: AnySignal<Booleanny>, renderConditional: Re
     )
 }
 
-export function ElseCreateIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction) {
+export function ElseCreateIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction) {
     return new ConditionalRenderKit(
         'elseIf',
         wrapToNormalize(renderConditional),
@@ -61,7 +61,7 @@ export function ElseCreate(renderConditional: RenderFunction) {
     )
 }
 
-export function MountIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
+export function MountIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
     resetCurrentNodePodIndex()
     return new ConditionalRenderKit(
         'if',
@@ -72,7 +72,7 @@ export function MountIf($condition: AnySignal<Booleanny>, renderConditional: Ren
     )
 }
 
-export function ElseMountIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction) {
+export function ElseMountIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction) {
     return new ConditionalRenderKit(
         'elseIf',
         wrapToPreserve(renderConditional),
@@ -91,7 +91,7 @@ export function ElseMount(renderConditional: RenderFunction) {
     )
 }
 
-export function ShowIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
+export function ShowIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
     resetCurrentNodePodIndex(0)
     return new ConditionalRenderKit(
         'if',
@@ -102,7 +102,7 @@ export function ShowIf($condition: AnySignal<Booleanny>, renderConditional: Rend
     )
 }
 
-export function ElseShowIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction) {
+export function ElseShowIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction) {
     if (currentNodePodIndex === undefined)
         currentNodePodIndex = 0;
     else currentNodePodIndex++;
@@ -128,12 +128,12 @@ export function ElseShow(renderConditional: RenderFunction) {
     )
 }
 
-// function _if($condition: AnySignal<Booleanny>, renderConditional: RenderFunction, statementType: 'if' | 'elseIf' = 'if', type: 'create' | 'show' | 'mount' = currentRenderType) {
+// function _if($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction, statementType: 'if' | 'elseIf' = 'if', type: 'create' | 'show' | 'mount' = currentRenderType) {
 //     const _renderConditional = type === 'mount' ? wrapToPreserve(renderConditional) : wrapToNormalize(renderConditional)
 //     return new ConditionalRenderKit(statementType, _renderConditional, type, $condition)
 // }
 
-// export function $elseIf($condition: AnySignal<Booleanny>, renderConditional: RenderFunction) {
+// export function $elseIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction) {
 //     return _if($condition, renderConditional, 'elseIf')
 // }
 

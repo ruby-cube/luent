@@ -1,6 +1,6 @@
 import { InternalComponent } from "../component/InternalComponent";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
-import { DynamicNode, getActiveDynamicNode, isMountPhase, markMountPhase, NULLISH_DYNAMIC_NODE, popDynamicNode, pushDynamicNode, unmarkMountPhase } from "../dynamic/DynamicNode";
+import { DynamicNode, isMountPhase, markMountPhase, NULLISH_DYNAMIC_NODE, unmarkMountPhase } from "../dynamic/DynamicNode";
 import { LifecycleHook as DynamicLifecycleHook } from "../dynamic/lifecycle";
 import { NodeEntity } from "../node/makeNode";
 import { mountNodeEntity } from "../node/mountNodeEntity";
@@ -12,6 +12,7 @@ import { watchForRender } from "../watch/watchForRender";
 import { areShallowEqualArrays } from "@rue/muonic";
 import { popProvider, pushProvider } from "../component/provide";
 import { ProviderComponent } from "../component/ProviderComponent";
+import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 
 
 
@@ -122,8 +123,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         })
 
         function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-            if (areShallowEqualArrays(newValue, oldValue)) return;
             console.log("update conditional")
+            if (areShallowEqualArrays(newValue, oldValue)) return;
             pushDynamicNode(parentDynamicNode!)
 
             // (1)

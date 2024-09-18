@@ -1,9 +1,8 @@
 import { emitSignal } from "./debug";
-import { isDeepReactive, isReactiveModel, o$$, o$, ModelReactivityDepth } from "./reactivemodel/ReactiveModel";
+import { isDeepReactive, isReactiveModel, $Model, o$, ModelReactivityDepth } from "./reactivemodel/ReactiveModel";
 import { getActiveTracker } from "./derivations/DependencyTracker";
 import { trigger } from "./trigger";
 import { META, ReactiveEntity } from "./ReactiveEntity";
-import { sign } from "crypto";
 import { isFunctionWithProps } from "@rue/utils";
 
 export type AtomicSignal<T = any> = {
@@ -13,13 +12,8 @@ export type AtomicSignal<T = any> = {
     setTo: (newValue: T) => T
 }
 
-export type $GetState<T = any> = {
-    (): T;
-    update: (toNewValue: (value: T) => T) => T
-    setTo: (newValue: T) => T
-}
-
-export type $Get<T = any> = () => T
+export type ReactiveGet<T = any> = () => T
+export type Get<T = any> = () => T
 
 
 
@@ -93,7 +87,7 @@ function setValue(signal: MetaSignal, newValue: unknown, oldValue: unknown) {
 
 function maybeReactivizeValue(newValue: unknown, signal: MetaSignal) {
     return newValue instanceof Object ?
-        signal.depth === ModelReactivityDepth.DEEP ? o$$(newValue) :
+        signal.depth === ModelReactivityDepth.DEEP ? $Model(newValue) :
             signal.depth === ModelReactivityDepth.SHALLOW ? o$(newValue) :
                 newValue : newValue
 }

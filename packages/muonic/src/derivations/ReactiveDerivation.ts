@@ -28,7 +28,6 @@ export class ReactiveDerivation<T = any> implements ReactiveEntity {
         // @ts-expect-error readonly
         this.dirty = true;
         const o = this.o
-        console.log("derivation!!", o)
         if (isWatched(o)) {
             asWatchTarget(o).triggerEffects();
         }

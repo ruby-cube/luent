@@ -8,7 +8,7 @@ export class ConditionalWatchKit extends ConditionalKit<Callback> {
     constructor(
         statementType: 'if' | 'elseIf' | 'else',
         public update: Callback,
-        $condition?: AnySignal<Booleanny>,
+        $condition?: ReactiveGet<Booleanny>,
     ) {
         super(statementType, update, $condition)
     }

@@ -50,13 +50,17 @@ class MetaDerivedSignal<T extends DerivedSignal = DerivedSignal> extends Reactiv
     }
 }
 
+export const $ = $Derived
 
-export function $<T extends any>(pureGetter: () => T, retrack: boolean = false): DerivedSignal<T> {
+
+export function $Derived<T extends any>(pureGetter: () => T, retrack: boolean = true): DerivedSignal<T> {
     let initialized = false;
     const derived = new MetaDerivedSignal(<DerivedSignal><unknown>$derivedSignal, retrack);
     function $derivedSignal() {
+        console.log("calling", pureGetter)
         if (!initialized || derived.dirty && retrack) {
             const value = derived.trackAtoms(pureGetter);
+            console.log("initializing", pureGetter, derived.atoms)
             derived.forwardAtoms(derived.atoms)
             derived.updateValue(value)
             derived.undirty()

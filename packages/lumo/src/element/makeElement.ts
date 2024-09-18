@@ -171,7 +171,7 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
 
 
 type DynamicClassesConfig = {
-    [key: string]: AnySignal<Booleanny>;
+    [key: string]: ReactiveGet<Booleanny>;
 }
 
 function setUpClasses(node: Element, classes: (((o: DOMTokenList) => void) | string | DynamicClassesConfig)[]) {

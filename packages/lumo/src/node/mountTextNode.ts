@@ -1,7 +1,6 @@
 import { getWithoutTracking, isAnySignal, AnySignal } from "@rue/muonic";
 import { _NodePod } from "./NodePod";
 import { watchForRender } from "../watch/watchForRender";
-import { getActiveDynamicNode } from "../dynamic/DynamicNode";
 
 export function mountTextNode(parent: Element, text: AnySignal | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
 

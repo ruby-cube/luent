@@ -1,5 +1,6 @@
 import { $listen, $schedule, ListenerOptions, SchedulerOptions } from "@rue/flask";
-import { DynamicNode, getActiveDynamicNode } from "./DynamicNode";
+import type { DynamicNode } from "./DynamicNode";
+import { getActiveDynamicNode } from "./nodestack";
 
 
 type TaskQueue = Set<() => void>

@@ -126,7 +126,7 @@ export function triggerReactiveWithMutationOp(
 
 // const frog = new Frog()
 
-// const frog$$ = o$$([])
+// const frog$$ = $Model([])
 
 // type TransformMap = typeof transformMap
 // type GetTransforms<T extends { returnTransforms: AnyObject }> = T['returnTransforms']
@@ -173,7 +173,7 @@ export function triggerReactiveWithMutationOp(
 
 //     outputTransforms = {
 //         getSomething(output: Brew['something']) {
-//             return [o$$(output)]
+//             return [$Model(output)]
 //         }
 //     }
 // }
@@ -201,7 +201,7 @@ export function triggerReactiveWithMutationOp(
 // // const transformMap = registerReactiveCapsules({
 // //     Brew: {
 // //         getSomething<T extends AnyObject>(arg: T) {
-// //             return o$$(arg) as unknown as [DeepReactiveModelO<T>];
+// //             return $Model(arg) as unknown as [DeepReactiveModelO<T>];
 // //         }
 // //     }
 // // })

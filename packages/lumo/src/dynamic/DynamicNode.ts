@@ -1,6 +1,7 @@
 import { collectEffects, EffectFlask } from "@rue/flask";
 import { _NodePod } from "../node/NodePod";
 import { LifecycleHook } from "./lifecycle";
+import { popDynamicNode, pushDynamicNode } from "./nodestack";
 
 
 export class DynamicNode {
@@ -41,7 +42,7 @@ export class DynamicNode {
         return taskQueue;
     }
 
-    private emit(hookName: LifecycleHook) {
+    emit(hookName: LifecycleHook) {
         const taskQueue = this.getTaskQueue(hookName);
         if (!taskQueue) return;
         for (const task of taskQueue) {
@@ -105,24 +106,6 @@ export class DynamicNode {
 export const NULLISH_DYNAMIC_NODE = new DynamicNode(null)
 
 
-let activeDynamicNode: DynamicNode | null = null
-let parent: DynamicNode | null = null;
-
-export function getActiveDynamicNode() {
-    return activeDynamicNode;
-}
-
-export function pushDynamicNode(dynamicNode: DynamicNode) {
-    parent = activeDynamicNode;
-    activeDynamicNode = dynamicNode;
-    dynamicNode.flask?.reactivate()
-}
-
-export function popDynamicNode() {
-    activeDynamicNode?.flask?.deactivate();
-    activeDynamicNode = parent;
-    parent = parent?.parent || null;
-}
 
 
 let mounting = false;

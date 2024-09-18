@@ -4,7 +4,7 @@ import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
 import { ReactiveDerivation } from "../derivations/ReactiveDerivation";
 import { getCurrentUpdateCycle, getFlushingUpdateCycle, Phase, useUpdateCycle } from "./UpdateCycle";
 import { WatchDebugOptions } from "./debug";
-import { $, isAnySignal, AnySignal } from "../derivations/DerivedSignal";
+import { $, isAnySignal, AnySignal, $Derived } from "../derivations/DerivedSignal";
 import { DeepReactiveModel, getMetaReactive, isReactiveModel, ReactiveModel, toRaw, } from "../reactivemodel/ReactiveModel";
 import { areEqual } from "./areEqual";
 import { createReactiveFunction, ReactiveFunction } from "../derivations/ReactiveFunction";
@@ -84,25 +84,23 @@ export type RawEffect = (a: any, b: any) => void
 export function watch<T extends ReactiveModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
 export function watch<T extends () => any | AnySignal>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
 export function watch<T extends () => any | AnySignal | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
-    if (isReactiveModel(target)) {
+    if (!(target instanceof Function) && isReactiveModel(target)) {
         return watchReactiveModel(target, effect, options || {})
     }
-    const retrack = options?.retrack ?? false
-    let isReactiveFunction = <any>target instanceof Function && !isAnySignal(target);
-    const _target =
-        isReactiveFunction ? createReactiveFunction(<() => any>target, retrack).initialize()
-            : target as AnySignal;
-
+    // const retrack = options?.retrack ?? true
+    const _target = !isAnySignal(target) ? $Derived(target) : target as AnySignal;
+    // createReactiveFunction(<() => any>target, retrack).initialize()
     const eager = options?.eager
     const phase = options?.phase || 'pre'
 
     const watchTarget = asWatchTarget(_target);
 
-    let oldValue = (<AnySignal | ReactiveFunction>target)()
+    let oldValue = _target()
 
     function changeEffect() {
         const newValue = _target() // This is when retracking happens
         if (areEqual(toRaw(newValue), toRaw(oldValue))) return;
+        console.log("change effect!", target)
         effect(newValue, oldValue)
         oldValue = newValue;
     }
@@ -115,8 +113,8 @@ export function watch<T extends () => any | AnySignal | ReactiveModel>(target: T
         watchTarget,
         changeEffect,
         phase,
-        options || {},
-        isReactiveFunction ? (<ReactiveFunction>_target)[META] : undefined
+        options || {}
+        // isReactiveGet ? (<ReactiveFunction>_target)[META] : undefined
     )
 }
 

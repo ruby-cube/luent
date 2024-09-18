@@ -1,6 +1,6 @@
 import { $Node, Component, COMPONENT, ComponentSetup, CreateIf, ElseCreate, For, mx, Provide, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
-import { __addDevName, $Signal, o$$, AtomicSignal } from "@rue/muonic";
+import { __addDevName, $Signal, $Model, AtomicSignal } from "@rue/muonic";
 import { $ } from "@rue/muonic";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { ElseCreateIf } from "../../../packages/lumo/src/conditional/CreateIf";
@@ -78,7 +78,7 @@ export function List() {
     const $active = $Signal(true)
     if (__DEV__) __addDevName($active, '$active')
 
-    const $list = $Signal(o$$([
+    const $list = $Signal($Model([
         { id: 0, content: "frog" },
         { id: 1, content: "dog" },
         { id: 2, content: "fly" },
@@ -120,10 +120,12 @@ export function List() {
         $showSideBlock.setTo(true)
     }
 
+    const $listLengthIsZero = () => $list().length === 0
+
     return (
         <div>
             <>
-                {CreateIf($(() => $list().length === 0), () => (
+                {CreateIf($listLengthIsZero, () => (
                     <div
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
@@ -192,13 +194,18 @@ function useModal() {
     }
 }
 
-function Component(...args: any[]) {
 
+
+function Glo() {
+    return (
+        <Appo kdj="kjk"></Appo>
+    )
 }
 
-
 function Appo(
-    props: {},
+    props: {
+        kdj: string
+    },
     provide: Provide
 ) {
     const $active = $Signal(true)

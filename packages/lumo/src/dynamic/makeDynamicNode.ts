@@ -1,7 +1,7 @@
-import { collectEffects, EffectFlask } from "@rue/flask";
-import { DynamicNode, getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "./DynamicNode";
+import { DynamicNode} from "./DynamicNode";
 import { _NodePod } from "../node/NodePod";
 import { onDestroy, LifecycleHook, onActivated, onDeactivate } from "./lifecycle";
+import { getActiveDynamicNode } from "./nodestack";
 
 
 // export function activateDynamicNode(

@@ -1,12 +1,12 @@
-import { CreateIf, ElseCreate, ElseMount, MountIf, mx } from "@rue/lumo";
-import { $, $Signal, isAnySignal } from "@rue/muonic";
+import { Component, CreateIf, ElseCreate } from "@rue/lumo";
+import { $, $Derived, $Signal, isAnySignal, watch } from "@rue/muonic";
 
 export function MountIf() {
-    // const $count = $Signal(0)
-    // const $doubleCount = $(() => $count() * 2)
-    // function increment() {
-    //     $count.update(count => count + 1)
-    // }
+    const $count = $Signal(0)
+    // const $doubleCount = $Derived(() => $count() * 2)
+    function increment() {
+        $count.update(count => count + 1)
+    }
 
     // const $count2 = $Signal(0)
     // const $sum = $(() => $count() + $count2())
@@ -25,12 +25,15 @@ export function MountIf() {
     //     $ready.update(ready => !ready)
     // }
 
+    // watch(() => $count() * 2, (double) => {
+    //     console.log("double count!", double)
+    // })
 
     // const $activeAndReady = $(() => $active() && $ready(), true)
 
-    return (
+    return Component(
         <>
-            {/* {[
+            {[
                 CreateIf($active, () =>
                     <>
                         <div>Hi</div>
@@ -39,12 +42,12 @@ export function MountIf() {
                 ElseCreate(() =>
                     <p>bye</p>
                 )
-            ]} */}
+            ]}
             {/* <div>Both: {$activeAndReady}</div> */}
             <button onclick={toggleActive}>toggle active {$active}</button>
+            {/* <button onclick={increment}>increment {$count}</button> */}
             {/* <button onclick={toggleReady}>toggle ready {$ready}</button> */}
             {/* <div>{$sum}</div>
-            <button onclick={increment}>increment {$count}</button>
             <button onclick={increment2}>increment {$count2}</button> */}
         </>
     )

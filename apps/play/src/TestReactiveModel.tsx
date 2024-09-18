@@ -1,6 +1,6 @@
-import { $Node,  For, MountIf, mx, NodeEntity, preventDefault, ShowIf, teleportTo, useEventListener } from "@rue/lumo";
+import { $Node, Component, CreateIf, ElseCreate, For, NodeEntity, preventDefault, ShowIf, teleportTo, useEventListener } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { $Signal, __addDevName, $, o$$, o$, DeepReactiveModel } from "@rue/muonic";
+import { $Signal, __addDevName, $, $Model, o$, DeepReactiveModel, $Derived } from "@rue/muonic";
 import { $prop, $Props } from "../../../packages/muonic/src/reactivemodel/PropSignal";
 import { watch } from "../../../packages/lumo/src/watch/watchForRender";
 import { AnyObject } from "@rue/types";
@@ -12,42 +12,21 @@ let id = 4;
 function genId() {
     return id++;
 }
-type something = Object
-
-class Frog {
-    qualities = {
-        brave: true
-    }
-
-    getQualities<T extends Frog>(this: T): T['qualities'] {
-        return this.qualities;
-    }
-
-    getQualitiesB() {
-        return this.qualities;
-    }
-}
-
-type FrogB<T extends Frog = Frog> = TransformedType<T, {
-    getQualitiesB: T['qualities']
-}>
-
-type TransformedType<T, O extends { [key: string]: any }> = Omit<T, keyof O> & {
-    [K in keyof O]: K extends keyof T ? T[K] extends (...args: any[]) => any ? <X extends T>(this: X, ...args: Parameters<T[K]>) => O extends { [key: PropertyKey]: infer R } ? R : never : never : never
-    // getQualitiesB<T extends Frog>(this: T, ...args: Parameters<Frog['getQualitiesB']>): T["qualities"]
-}
 
 
+// const $count = $Signal(0)
+// watch($(doubleCount => $count() + 2), () => {  
 
+// })
 
 
 // type RedefineReturn <P, M extends string, R extends >= <T extends Frog>(this: T, ...args: Parameters<Frog['getQualitiesB']>) => T["qualities"]
 
-const blub = {
-    getQualities<T extends Frog>(this: T): T['qualities'] {
-        return this.qualities;
-    }
-}
+// const blub = {
+//     getQualities<T extends Frog>(this: T): T['qualities'] {
+//         return this.qualities;
+//     }
+// }
 
 // type Star = {
 //     fish: () => DeepReactiveModel<Frog>['qualities']
@@ -62,66 +41,66 @@ const blub = {
 // const something = star.fish()
 
 
-const frog = new Frog() as FrogB
-const frog$$ = o$$(frog)
+// const frog = new Frog() as FrogB
+// const frog$$ = $Model(frog)
 
-const q = frog$$.qualities
-const qual$$ = frog$$.getQualitiesB()
-const qual = frog.getQualitiesB()
+// const q = frog$$.qualities
+// const qual$$ = frog$$.getQualitiesB()
+// const qual = frog.getQualitiesB()
 
 
 export function List() {
 
-    const list$$ = o$$([
+    const $list = $Model([
         { id: 0, content: "frog" },
         { id: 1, content: "robin" },
         { id: 2, content: "fly" },
         { id: 3, content: "swamp" }
     ])
 
-    list$$[0] = { id: 0, content: "fly" }
+    // $list[0] = { id: 0, content: "fly" }
 
-    const content = list$$[0]
-
-
-
-    const frog$ = o$({
-        name: "Sir Robin"
-    })
-
-    const $frogName = $prop(frog$, "name")
-
-    function changeFrogName() {
-        $frogName.update(name => name + "kermito")
-    }
+    // const content = $list[0]
 
 
-    watch($frogName, (newVal, old) => {
-        console.log("changed", newVal, old)
-    })
 
-    // console.log("is reactive?", isReactiveModel(list$$), list$$)
-    // console.log("is deep", isDeepReactive(list$$))
-    // console.log("isReactive //true", isReactiveModel(list$$[0]))
-    // console.log("isShallowReactive // true", isReactiveModel(list$$._), list$$._[0])
-    // console.log("isreactive //false", isReactiveModel(list$$._[0]))
+    // const frog$ = o$({
+    //     name: "Sir Robin"
+    // })
 
-    // watch($(() => list$$[3]), (newValue, old) => {
+    // const $frogName = $prop(frog$, "name")
+
+    // function changeFrogName() {
+    //     $frogName.update(name => name + "kermito")
+    // }
+
+
+    // watch($frogName, (newVal, old) => {
+    //     console.log("changed", newVal, old)
+    // })
+
+    // console.log("is reactive?", isReactiveModel($list), $list)
+    // console.log("is deep", isDeepReactive($list))
+    // console.log("isReactive //true", isReactiveModel($list[0]))
+    // console.log("isShallowReactive // true", isReactiveModel($list._), $list._[0])
+    // console.log("isreactive //false", isReactiveModel($list._[0]))
+
+    // watch($(() => $list[3]), (newValue, old) => {
     //     console.log("index 3", newValue, old)
     // })
 
-    // console.log("works?", list$$ instanceof Array)
+    // console.log("works?", $list instanceof Array)
 
-    // watch(list$$, (list, mutations) => {
+    // watch($list, (list, mutations) => {
     //     // console.log("mutations", mutations)
     // })
 
     // $initializeEffect(() => {
-    //     console.log("some starts with f", list$$.some((item) => item.content.startsWith('f')))
+    //     console.log("some starts with f", $list.some((item) => item.content.startsWith('f')))
     // })
 
     // function changeItem(index: number) {
-    //     list$$._$[index] = {
+    //     $list._$[index] = {
     //         id: genId(),
     //         content: (Math.random() * 100).toString(),
     //     }
@@ -130,13 +109,13 @@ export function List() {
 
     function changeContent(index: number) {
         console.log("changing content")
-        const item$ = list$$[index];
-        item$.content = 'something else'
+        const $item = $list[index];
+        $item.content = 'something else'
     }
 
 
     function insertItem(index: number) {
-        const removed = list$$.splice(index, 0, {
+        const removed = $list.splice(index, 0, {
             id: genId(),
             content: (Math.random() * 100).toString(),
         })
@@ -147,31 +126,30 @@ export function List() {
     // }
 
     function moveSelectedItems(index: number) {
-        moveMultipleUniqueItems(selected$, list$$, index)
+        moveMultipleUniqueItems($selected, $list, index)
     }
 
-    const selected$ = o$(new Set())
+    const $selected = $Model(new Set())
 
 
     function clearSelection() {
-        selected$.clear()
+        $selected.clear()
     }
 
     function toggleSelect(e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) {
         if (e.target instanceof HTMLElement && e.target.style.cursor === 'pointer') return;
-        const item$ = list$$[index]
-        if (selected$.has(item$)) {
-            selected$.delete(item$)
+        const $item = $list[index]
+        if ($selected.has($item)) {
+            $selected.delete($item)
         }
         else {
-            selected$.add(item$)
+            $selected.add($item)
         }
     }
 
     function removeItem(index: number) {
-        changeFrogName()
-        selected$.delete(list$$[index])
-        list$$.splice(index, 1);
+        $selected.delete($list[index])
+        $list.splice(index, 1);
     }
 
     const $itemDiv = $Node<'div'>()
@@ -181,8 +159,8 @@ export function List() {
     function destroy() {
         $alive.setTo(false)
     }
-    // const item$ = list$$[0]
-    //     watch($(() => item$.content), (newValue, oldValue) => {
+    // const $item = $list[0]
+    //     watch($(() => $item.content), (newValue, oldValue) => {
     //         console.log("changed", newValue, oldValue)
     //     }, { phase: 'render' })
     //     console.log("------------")
@@ -191,63 +169,63 @@ export function List() {
     //     changeContent(0)
     // }, 1)
 
+    const $listIsEmpty = $Derived(() => $list.length === 0)
+    watch($listIsEmpty, () => {
+        console.log("list is empty!")
+    })
+
     // return mx("hi")
-    return (
-        // <>
-        //     {CreateIf($alive, () => (
-
-        //         <div>
-        //             <button onclick={destroy}>destroy</button>
+    return Component(
         <>
-            {/* //                 {CreateIf($(() => { console.log('reevaluate list length === 0'); return list$$.length === 0 }), () => ( */}
-            <div
-                onclick={() => insertItem(0)}
-                style="background-color: gray; cursor: pointer"
-            >
-                insert
-            </div>
-            {/* //                 ))} */}
-            {/* //                 {ElseCreate(() => */}
-
-            {For(list$$, (item$, $index) => (
-                <div
-                    ref={$itemDiv}
-                    onclick={(e) => toggleSelect(e, $index())}
-                    style={[
-                        `background-color: ${randomColor.get()}`,
-                        o => {
-                            o.outline = selected$.has(item$) ? 'thick solid blue' : '';
-                        }
-                    ]}>
-                    <p
-                        onclick={(e) => removeItem($index())}
-                        style="cursor: pointer"
-                    >
-                        X
-                    </p>
-
-                    <li onclick={() => changeContent($index())}>
-                        {$(() => item$.content)}
-                    </li>
-                    <p>{$index}</p>
+            <>
+                {CreateIf($listIsEmpty, () => (
                     <div
-                        onclick={() => insertItem($index() + 1)}
+                        onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
                     </div>
-                    <div
-                        onclick={() => moveSelectedItems($index() + 1)}
-                        style="background-color: white; cursor: pointer"
-                    >
-                        insert
-                    </div>
-                </div>
-            ), 'id')}
+                ))}
+                {ElseCreate(() =>
+                    For($list, ($item, $index) => (
+                        <div
+                            ref={$itemDiv}
+                            onclick={(e) => toggleSelect(e, $index())}
+                            style={[
+                                `background-color: ${randomColor.get()}`,
+                                o => {
+                                    o.outline = $selected.has($item) ? 'thick solid blue' : '';
+                                }
+                            ]}>
+                            <p
+                                onclick={(e) => removeItem($index())}
+                                style="cursor: pointer"
+                            >
+                                X
+                            </p>
+
+                            <li onclick={() => changeContent($index())}>
+                                {$(() => $item.content)}
+                            </li>
+                            <p>{$index}</p>
+                            <div
+                                onclick={() => insertItem($index() + 1)}
+                                style="background-color: gray; cursor: pointer"
+                            >
+                                insert
+                            </div>
+                            <div
+                                onclick={() => moveSelectedItems($index() + 1)}
+                                style="background-color: white; cursor: pointer"
+                            >
+                                insert
+                            </div>
+                        </div>
+                    ), 'id')
+                )}
+            </>
             <button onclick={clearSelection}>clear</button>
         </>
-        //                 )}
-        //             </>
         //             {/* <button onclick={$if($active, capture.once(clearSelection))}>clear</button>
 
         //     <button
@@ -271,7 +249,7 @@ export function List() {
         //     >
         //         clear
         //     </button> */}
-        //         </div>
+        //         </div >
         //     ))}
         // </>
     )

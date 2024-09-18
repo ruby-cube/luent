@@ -6,13 +6,14 @@ import { popList, pushList } from "./listStack";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { normalizeToArray } from "@rue/utils";
 import { mountNodeEntity } from "../node/mountNodeEntity";
-import { DynamicNode, getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/DynamicNode";
+import { DynamicNode } from "../dynamic/DynamicNode";
 import { watchForRender } from "../watch/watchForRender";
 import { diff, InsertAndMoveKit } from "./diff";
 import { Sign } from "crypto";
 import { META } from "../../../muonic/src/ReactiveEntity";
 import { popProvider, pushProvider } from "../component/provide";
 import { ProviderComponent } from "../component/ProviderComponent";
+import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 
 
 type Index = number

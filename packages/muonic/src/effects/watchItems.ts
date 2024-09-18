@@ -1,6 +1,6 @@
 import { ActiveListener } from "@rue/flask";
 import { isAnySignal, AnySignal } from "../derivations/DerivedSignal";
-import { DeepReactiveModel, isDeepReactive, isReactiveModel, isShallowReactive, o$, o$$, ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
+import { DeepReactiveModel, isDeepReactive, isReactiveModel, isShallowReactive, o$, $Model, ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
 import { ChangeEffect, isMutationOp, MutationEffect, watch, WatchOptions } from "./watch";
 import { insertOps } from "../reactivemodel/ReactiveCapsule";
 import { isIntegerKey } from "../reactivemodel/ReactiveArray";
@@ -121,7 +121,7 @@ function unwatchAll(watchers: WatchersMap) {
 }
 
 function maybeReactivize(item: AnySignal | AnyObject, reactiveList: DeepReactiveModel | ReactiveModel) {
-    return isDeepReactive(reactiveList) ? o$$(item) : item
+    return isDeepReactive(reactiveList) ? $Model(item) : item
 }
 
 

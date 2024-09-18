@@ -1,12 +1,13 @@
 import { isAnySignal, $initializeEffect as _$initializeEffect, onRendered, AnySignal, shallowClone, watch as _watch, WatchOptions, ReactiveModel, ChangeEffect, MutationEffect } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
-import { getActiveDynamicNode, isMountPhase } from "../dynamic/DynamicNode";
+import { isMountPhase } from "../dynamic/DynamicNode";
 import { ActiveListener, ListenerOptions } from "@rue/flask";
 import { onActivated, onDeactivate } from "../dynamic/lifecycle";
 import { noop } from "@rue/utils";
 import { getCurrentProvider, popProvider, pushProvider } from "../component/provide";
 import { getProviderComponent, ProviderComponent } from "../component/ProviderComponent";
+import { getActiveDynamicNode } from "../dynamic/nodestack";
 
 type WatchForRenderOptions = {
     deep?: boolean;

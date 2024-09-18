@@ -16,8 +16,8 @@ export type DOMNode = CharacterData | Element
 //     : (props: P) => NodeEntity | NodeEntity[]
 
 // export type Slot = NodeEntity | NodeEntity[]
-export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (props: P) => Component
-export type ProviderComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (props: P, provide: Provide) => Component
+export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => ComponentOutput : (props: P) => ComponentOutput
+export type ProviderComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => ComponentOutput : (props: P, provide: Provide) => ComponentOutput
 
 // export type Slot<T> = T extends AnyObject ? InternalComponent<T> : NodeEntity | NodeEntity[]
 export const COMPONENT = Symbol('publicComponent')
@@ -30,7 +30,7 @@ export interface Component<T extends undefined | AnyObject = undefined | AnyObje
         parent: Element,
         nodePod: _NodePod,
         fragment?: DocumentFragment,
-    )=>void
+    ) => void
 }
 
 export interface ComponentOutput<T extends undefined | AnyObject = undefined | AnyObject> {

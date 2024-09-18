@@ -19,8 +19,8 @@ export function trigger(target: AtomicSignal | ObservedProp) {
 }
 
 export function triggerReactiveAtom(target: ReactivePrimitive) {
+    console.log("is atom", asReactiveAtom(target).derivations)
     if (isReactiveAtom(target)) {
-        console.log("is atom", asReactiveAtom(target).derivations)
         asReactiveAtom(target).triggerDerivations()
     }
 }

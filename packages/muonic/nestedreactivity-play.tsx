@@ -1,20 +1,51 @@
 //@ts-nocheck
 
+
+
+
+
 import ""
 import { $initializeEffect } from "./src"
-const frog$ = o$({
+
+const $frog = $Model({
     name: "sir robin",
     location: {
         type: "water",
         name: "well",
-        position$: O$({
+        position: {
             x: 1,
             y: 2
-        })
+        }
     }
 })
 
+const $count = $Signal(0)
 
+const $tripleCount = () => $count() * 3 // derived without memoization
+
+const $doubleCount = $Derived(() => $count() * 2) // memoized derived with option to retrack and method to untrack .. should retrack just be the default behavior?
+
+const $frogName = $Prop(frog, 'name')
+
+
+watch(() => $count() * 2, (doubleCount, prev) => {   // if retrack is the default, why not just pass functions? it looks cleaner
+
+})
+
+watch($(() => $count() * 2), (doubleCount, prev) => { // this seems extraneous
+
+})
+
+
+function App() {
+    return (
+        <>
+            <div>the count is {$count * 2}</div>
+
+            <div>the count is {() => $count() * 2}</div>
+        </>
+    )
+}
 
 // lazy nested B--location and position are made reactive on access
 frog$.location.position.x
@@ -23,9 +54,12 @@ const position = frog$.location.position // .location is tracked, .position is n
 
 // (A) manual reactivizing
 
-o$(frog$$).location.position // .location is tracked and .position
+$(frog).location.position // impromptu $Model
+// $(() => $count() + 1) // impromptu memoized derived
+// $(frog, 'name') // impromptu prop
 
-o$(o$(frog$.location).position).x
+
+$($(frog.location).position).x
 
 // (B) inert proxy
 
@@ -56,9 +90,9 @@ function ListBlock(attributes: {
 
     const $frog$ = $(o$(frog))
 
-    const $frog$$ = $(o$$(frog))
+    const $frog$$ = $($Model(frog))
 
-    const frog$$ = o$$(new Frog())
+    const frog$$ = $Model(new Frog())
 
     const $name = $prop(frog$, 'name') //$GetProp<string>
 

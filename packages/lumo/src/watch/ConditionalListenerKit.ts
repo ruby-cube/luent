@@ -36,7 +36,7 @@ export class ConditionalListenerKit extends ConditionalKit<EventHandler<EventLis
     constructor(
         statementType: 'if' | 'elseIf' | 'else',
         public eventHandler: EventHandler<EventListener>,
-        $condition?: AnySignal<Booleanny>,
+        $condition?: ReactiveGet<Booleanny>,
     ) {
         super(statementType, eventHandler, $condition)
     }

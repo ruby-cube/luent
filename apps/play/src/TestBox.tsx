@@ -1,5 +1,5 @@
 import { $Node, mx } from "@rue/lumo";
-import {  $, $initializeEffect, o$$, $Signal } from "@rue/muonic";
+import {  $, $initializeEffect, $Model, $Signal } from "@rue/muonic";
 
 
 //tests:
@@ -7,7 +7,7 @@ import {  $, $initializeEffect, o$$, $Signal } from "@rue/muonic";
 
 export function TestBox() {
 
-    const box$ = o$$({
+    const box$ = $Model({
         position: {
             x: 0,
             y: 0
