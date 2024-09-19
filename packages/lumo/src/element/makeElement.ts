@@ -1,9 +1,9 @@
 import { DOMNode } from "../component/InternalComponent";
-import { DerivedSignal, isAnySignal, AnySignal, Hooks, getCurrentUpdateCycle } from "@rue/muonic";
+import { DerivedSignal, isAnySignal, AnySignal, Hooks, getCurrentRenderCycle, ReactiveGet, Phase } from "@rue/muonic";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
-import { initializeRender, watchForRender } from "../watch/watchForRender";
+import { initializeRender, watch } from "../watch/watchAndPreserve";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
@@ -127,9 +127,9 @@ function setUpAttributes(node: Element, attributes: { [key: string]: any | Deriv
     for (const key in attributes) {
         const value = attributes[key]
         if (isAnySignal(value)) {
-            watchForRender(value, (newValue) => { //TODO: only attributes that affect layout should be scheduled for render
+            watch(value, (newValue) => { //TODO: only attributes that affect layout should be scheduled for render
                 setAttribute(node, key, newValue)
-            }, { eager: true })
+            }, { eager: true, phase: Phase.RENDER })
         }
         else if (!isHydrating()) {
             node.setAttribute(key, toString(value))
@@ -183,10 +183,10 @@ function setUpClasses(node: Element, classes: (((o: DOMTokenList) => void) | str
         else if (entry instanceof Object) {
             for (const key in entry) {
                 const $signal = entry[key];
-                watchForRender($signal, (value) => { //QUESTION: should this have a preserve version?
+                watch($signal, (value) => { //QUESTION: should this have a preserve version?
                     if (value) classList.add(key);
                     else classList.remove(key);
-                }, { eager: true })
+                }, { eager: true, phase: Phase.RENDER })
             }
         }
         else if (!isHydrating()) {

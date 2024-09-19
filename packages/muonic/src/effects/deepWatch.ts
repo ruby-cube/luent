@@ -1,6 +1,5 @@
 import {  isReactiveModel, ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
 import { isReactiveObject } from "../reactivemodel/ReactiveObject";
-import { getCurrentUpdateCycle } from "./UpdateCycle";
 import { AnyObject } from "@rue/types";
 
 export type KeyPath = PropertyKey[]
@@ -156,8 +155,8 @@ export function watchProps<N extends NestedModel[] | undefined>(target: Reactive
 
 // function composeOps(target: ReactiveModel, ops: MutationRecord[] | undefined) {
 //     if (!ops) return;
-//     const updateCycle = getCurrentUpdateCycle();
-//     if (!updateCycle) throw new Error("No update cycle :(")
-//     updateCycle.composeOps(target, ops)
+//     const renderCycle = getCurrentRenderCycle();
+//     if (!renderCycle) throw new Error("No update cycle :(")
+//     renderCycle.composeOps(target, ops)
 // }
 

@@ -36,7 +36,6 @@ export function createReactiveObject(
                 return _value;
             }
             tracker.track(asObservedProp(reactive, key));
-            if (key === "name") console.log("tracked", key)
             return _value;
         },
         function set(target, key, value, receiver) {

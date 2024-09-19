@@ -1,8 +1,8 @@
-import { ComponentSetup, InternalComponent, COMPONENT, Component, ProviderComponentSetup } from "./InternalComponent";
-import { InternalNodeRef, NodeSignal, getNodeRef, get$Node } from "../node/$Node";
-import { ComponentConfig, EventsConfig, initializeListRef, initializeRef, makeNode, NodeEntity, RenderFunction } from "../node/makeNode";
+import { ComponentSetup, InternalComponent, Component, ProviderComponentSetup, ComponentOutput } from "./InternalComponent";
+import { NodeSignal } from "../node/$Node";
+import { ComponentConfig, initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { DerivedSignal, AtomicSignal } from "@rue/muonic";
+import { AtomicSignal } from "@rue/muonic";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex } from "../list/ListRenderKit";
 import { getCurrentProvider, popProvider, provide, pushProvider } from "./provide";
@@ -66,7 +66,9 @@ function makeProviderComponent(
     $index: AtomicSignal<number> | undefined
 ): ProviderComponent {
     const parent = getCurrentProvider();
-    const component = new ProviderComponent(parent);
+    if (!parent) throw new Error("Component tree has no root")
+    if (!parent.global) throw new Error("Global provider was not instantiated in root component")
+    const component = new ProviderComponent(parent, parent.global!, parent.root);
     pushProvider(component)
     runProviderComponentSetup(Component, component, Slot, config, $index);
     popProvider() // for sibling components to access parent, must be set AFTER `Component()`
@@ -104,9 +106,9 @@ function normalizeToFragmentArray(entity: any) { // distinguish conditional seri
     return normalizeToArray(entity);
 }
 
-function extractNodeEntities(component: Component) {
+function extractNodeEntities(component: ComponentOutput) {
     if (!('initialNodeEntities' in component))
-        throw new Error('Component setup must return a Component. Pass jsx into `mx` function')
+        throw new Error('Component setup must return a Component. Pass jsx into `Component` function')
     return component.initialNodeEntities;
     // if (!(output instanceof Array)) return output;
     // if (output.length === 2
@@ -133,7 +135,7 @@ export function runProviderComponentSetup(
 
 function initializeComponent(
     component: InternalComponent,
-    output: Component,
+    output: ComponentOutput,
     ref: NodeSignal | undefined,
     $index: AtomicSignal<number> | undefined,
 ) {

@@ -1,4 +1,4 @@
-import { isAnySignal, $initializeEffect as _$initializeEffect, onRendered, AnySignal, shallowClone, watch as _watch, WatchOptions, ReactiveModel, ChangeEffect, MutationEffect } from "@rue/muonic";
+import { isAnySignal, $initializeEffect as _$initializeEffect, onRendered, AnySignal, shallowClone, watch as _watch, WatchOptions, ReactiveModel, ChangeEffect, MutationEffect, Phase } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { isMountPhase } from "../dynamic/DynamicNode";
@@ -34,37 +34,37 @@ function _initializeRender(effect: () => void) {
     //     // setUpUpdateHooks(component)
     // }
     return _$initializeEffect(effect, {
-        phase: 'render',
+        phase: Phase.RENDER,
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
 type Effect<T = any> = MutationEffect<T extends AnyObject ? T : never> | ChangeEffect<T>
 
 
-export function watchForRender<T extends ReactiveModel>(target: T, effect: MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener
-export function watchForRender<T extends () => any | AnySignal>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchForRenderOptions): ActiveListener
-export function watchForRender<T extends () => any | AnySignal | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener {
-    // const component = getCurrentComponent<InternalComponent>();
-    // if (!component) throw Error("watchForRender must be called within component setup")
+// export function watchForRender<T extends () => any | AnySignal>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchForRenderOptions): ActiveListener
+// export function watchForRender<T extends ReactiveModel>(target: T, effect: MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener
+// export function watchForRender<T extends () => any | AnySignal | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener {
+//     // const component = getCurrentComponent<InternalComponent>();
+//     // if (!component) throw Error("watchForRender must be called within component setup")
 
-    const dynamicNode = getActiveDynamicNode()
-    if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
+//     const dynamicNode = getActiveDynamicNode()
+//     if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
 
 
-    if (dynamicNode.preserve)
-        return watchAndPreserve(target, effect, { phase: 'render', ...options || {} })
+//     if (dynamicNode.preserve)
+//         return watchAndPreserve(target, effect, { phase: Phase.RENDER, ...options || {} })
 
-    return _watchForRender(target, effect, options)
-}
+//     return _watchForRender(target, effect, options)
+// }
 
-export function _watchForRender(target: () => any | AnySignal | ReactiveModel, effect: Effect, options?: WatchForRenderOptions) {
-    // const component = getCurrentComponent<InternalComponent>()!;
-    // const _handler = (newValue: any, oldValue: any) => {
-    // handler(newValue, oldValue);
-    // setUpUpdateHooks(component)
-    // }
-    return _watch(target, effect, { phase: 'render', ...options || {} }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
-}
+// export function _watchForRender(target: () => any | AnySignal | ReactiveModel, effect: Effect, options?: WatchForRenderOptions) {
+//     // const component = getCurrentComponent<InternalComponent>()!;
+//     // const _handler = (newValue: any, oldValue: any) => {
+//     // handler(newValue, oldValue);
+//     // setUpUpdateHooks(component)
+//     // }
+//     return _watch(target, effect, { phase: Phase.RENDER, ...options || {} }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
+// }
 
 // export function setUpUpdateHooks(component: InternalComponent) {
 //     if (component.hasUpdates === true) return;
@@ -140,7 +140,7 @@ export function watch<T extends () => any | AnySignal | ReactiveModel>(target: T
 function watchAndPreserve<T extends () => any | AnySignal | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions) {
     const mountPhase = isMountPhase()
     // const component = getProviderComponent(watchAndPreserve.name);
-    const watchFn = options?.phase === 'render' ? _watchForRender : _watch
+    // const watchFn = options?.phase === Phase.RENDER ? _watchForRender : _watch
     const dynamicNode = getActiveDynamicNode()!
 
     const watcher = { stop: noop }

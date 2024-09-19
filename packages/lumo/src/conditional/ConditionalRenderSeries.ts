@@ -8,8 +8,8 @@ import { _DynamicNodePod, _NodePod, NULLISH_NODE_POD } from "../node/NodePod";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { ConditionalSeries } from "./ConditionalSeries";
 import { hidePrevConditionalNodes, showConditionalNodes } from "./toggledisplay";
-import { watchForRender } from "../watch/watchForRender";
-import { areShallowEqualArrays } from "@rue/muonic";
+import { watch } from "../watch/watchAndPreserve";
+import { areShallowEqualArrays, Phase } from "@rue/muonic";
 import { popProvider, pushProvider } from "../component/provide";
 import { ProviderComponent } from "../component/ProviderComponent";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
@@ -94,7 +94,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
     ) {
         const parentDynamicNode = getActiveDynamicNode()
         if (!parentDynamicNode) throw new Error('No dynamicNode :( This should never happen since root component is a dynamic node')
-        
+
         // evaluate conditions and render
         const $conditions = this.genConditionsSignal()
         const activeIndex = this.evaluateConditions()
@@ -108,17 +108,20 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const preserve = activationType === 'create' ? false : true;
         const dynamicNode = makeDynamicNode(preserve, _nodePod)
 
+
+
         dynamicNode.activate(function renderConditional() {
             pushProvider(component)
             series.appendConditional(activeIndex, parent, fragment)
             popProvider()
-
         })
         this.storeDynamicNode(dynamicNode, activeIndex)
-        
+        dynamicNode.emitOnCreated()
+
         // set up watcher for updates
-        watchForRender($conditions, updateConditional, {
-            retrack: true,
+        watch($conditions, updateConditional, {
+            // retrack: true,
+            phase: Phase.RENDER,
             __devName: 'mount conditional'
         })
 
@@ -246,6 +249,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                 if (preserve) unmarkMountPhase()
             })
             series.storeDynamicNode(dynamicNode, activeIndex)
+            dynamicNode.emitOnCreated()
         }
         else {
             dynamicNode.reactivate(function updateConditional() {

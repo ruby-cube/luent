@@ -5,14 +5,28 @@ import { NodeEntity } from "../node/makeNode";
 import { Component } from "./InternalComponent";
 import { getCurrentProvider, popProvider, pushProvider } from "./provide";
 
-export class ProviderComponent<T extends undefined | AnyObject = undefined | AnyObject> implements Component {
+export class Provider {
+    entries: Map<Symbol | string, any> = new Map();
+
+    constructor(
+        public parent: ProviderComponent | null = null,
+        public global: Provider = this
+    ) {
+
+    }
+}
+
+export class ProviderComponent<T extends undefined | AnyObject = undefined | AnyObject> extends Provider implements Component {
     component: T | undefined = undefined;
     initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
-    entries: Map<Symbol | string, any> = new Map();
+    // entries: Map<Symbol | string, any> = new Map();
     constructor(
         public parent: ProviderComponent | null,
-        public root: ProviderComponent = this
+        public global: Provider,
+        public root?: ProviderComponent,
     ) {
+        super(parent, global)
+        this.root = root || this
     }
 
     mount(

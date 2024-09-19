@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { $Signal, AtomicSignal, watch } from "@rue/muonic"
-import { watchForRender } from "../../../packages/lumo/src/watch/watchForRender";
+import { watchForRender } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { $Node } from "@rue/lumo";
 
 export function MainBlock() {
@@ -35,7 +35,7 @@ export function MainBlock() {
 
     return (
         <main>
-            <$main_content as={$hello}/>
+            <$main_content as={$hello} />
             <$records_list />
             <button onclick={changeMainContent}>click</button>
         </main>
@@ -46,8 +46,8 @@ function $portable(render: (() => any) | AtomicSignal<PortableNode>, $ref: Atomi
     return render;
 }
 
-function $MorphicNode(){
-    
+function $MorphicNode() {
+
 }
 
 function $MorphicPort(initialKey: string | AtomicSignal<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; setTo: (key: string) => any } {
@@ -97,7 +97,7 @@ class MorphlingKit {
 
 function setUpMorphling(morphlingKit: MorphlingKit) {
     const $render = morphlingKit.$render
-    watchForRender($render, (render) => {
+    watch($render, (render) => {
         const output = render()
-    })
+    }, { phase: Phase.RENDER })
 }

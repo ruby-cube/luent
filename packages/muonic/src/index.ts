@@ -6,6 +6,6 @@ export * from "./derivations/DependencyTracker" //TODO: limit exports to public 
 export * from "./effects/watch" //TODO: limit exports to public api
 export * from "./asReadonly" //TODO: limit exports to public api
 export * from "./effects/debug" //TODO: limit exports to public api
-export * from "./effects/UpdateCycle" //TODO: limit exports to public api
+export * from "./effects/RenderCycle" //TODO: limit exports to public api
 export * from "./reactivemodel/TimeTraveler" //TODO: limit exports to public api
 export * from "./effects/areEqual" //TODO: limit exports to public api

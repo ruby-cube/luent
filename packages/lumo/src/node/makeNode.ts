@@ -1,4 +1,4 @@
-import { DerivedSignal, AnySignal, AtomicSignal } from "@rue/muonic";
+import { DerivedSignal, AnySignal, AtomicSignal, getWithoutTracking, $Derived } from "@rue/muonic";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
@@ -7,6 +7,8 @@ import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../list/ListRenderKit";
 import { isSettingUpList, onListUpdated } from "../list/listStack";
+import { watch } from "../watch/watchAndPreserve";
+import { WatchOptions } from "vite";
 
 export function Fragment() {
     // for jsx-runtime
@@ -48,7 +50,7 @@ type NodeSetup<T extends HTMLTag | ComponentSetup> = {
 }
 
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
-    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends ()=>any ? NodeSetup<T> : never
+    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
 
 export function makeNode(
@@ -91,6 +93,8 @@ export function initializeListRef( // should this be initialize ref?
     $index: AtomicSignal<number>
     // options?: ElementOptions
 ) {
+    if (getWithoutTracking($index) === 0 && getWithoutTracking(ref)) //QUESTION: Not sure if get without tracking is necessary
+        throw new Error('This node list ref has already be initialized. A node list ref cannot be used multiple times')
     const _ref = useInternalNodeRef(ref)
     _ref.assignValue(value, $index);
     if (_ref.initialized === true) return; // to prevent registering multiple watchers for lists
@@ -113,6 +117,8 @@ export function initializeListRef( // should this be initialize ref?
 }
 
 export function initializeRef(ref: NodeSignal, value: NodeReferent | null) {
+    if (getWithoutTracking(ref)) //QUESTION: Not sure if get without tracking is necessary
+        throw new Error("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")
     const _ref = useInternalNodeRef(ref);
     _ref.assignValue(value)
     const flask = getFlask()
@@ -125,3 +131,26 @@ export function useInternalNodeRef(ref: NodeSignal) {
     const refValue = ref()
     return refValue instanceof Array ? getNodeRef(refValue) || new InternalNodeRef(ref) : new InternalNodeRef(ref)
 }
+
+export function awaitNodes<T>($nodes: NodeSignal<T>[], task: (nodes: T[]) => void, options: WatchOptions) {
+    const _$nodes = $Derived(() => {
+        const nodes = []
+        for (const $node of $nodes) {
+            nodes.push($node())
+        }
+        return nodes;
+    })
+    return watch(_$nodes, task, { ...options || {}, once: true })
+}
+//     [$button, $countDiv],
+//     ([button, countDiv]) => {
+
+//     }
+// )
+
+// watch(() => [$button(), $countDiv()], ([button, countDiv]) => {
+//     console.log("node ref", button, countDiv)
+// }, {
+//     phase: Phase.RENDER,
+//     once: true
+// })

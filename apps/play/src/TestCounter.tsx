@@ -6,7 +6,6 @@
 // - derived signal in template
 // - derived signal with memo
 
-import { mx } from "@rue/lumo"
 import { $, o$, $Signal } from "@rue/muonic"
 
 export function TestCounterSignals() {

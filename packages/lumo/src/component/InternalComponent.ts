@@ -92,14 +92,13 @@ export class InternalComponent<T extends undefined | AnyObject = undefined | Any
 
 
 function unnestComponent(nodeEntities: NodeEntity[]) {
-    // const nodeEntities = component.initialNodeEntities!;
-    if (nodeEntities.length > 1 || nodeEntities.length === 0)
+    if (nodeEntities.length !== 1)
         return nodeEntities;
     if (nodeEntities[0] instanceof InternalComponent) {
         const component = nodeEntities[0]
         if (!component.component || !component.initialNodeEntities)
             return nodeEntities;
-        return unnestComponent(component.initialNodeEntities)
+        return component.initialNodeEntities;
     }
     return nodeEntities
 }

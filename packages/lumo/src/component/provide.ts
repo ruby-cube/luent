@@ -130,12 +130,14 @@ export function _fromContext<T, OPT extends '?' | (() => T) | undefined>(key: Ty
 
     if (root) {
         const rootProvider = provider.root;
+        if (!rootProvider) throw new Error("No root provider found :( This should never happen")
         if (!rootProvider.entries.has(key)) {
             if (initializeOrOptional instanceof Function) {
                 return initializeOrOptional();
             }
             return handleResourceNotFound(key, initializeOrOptional, root)
         }
+        if (!provider.root) throw new Error("No root provider found :( This should never happen")
         const value = provider.root.entries.get(key)
         return __DEV__ && value instanceof Object ? encapsulate(value) : value;
     }

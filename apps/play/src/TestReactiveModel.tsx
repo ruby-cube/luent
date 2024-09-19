@@ -2,8 +2,9 @@ import { $Node, Component, CreateIf, ElseCreate, For, NodeEntity, preventDefault
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { $Signal, __addDevName, $, $Model, o$, DeepReactiveModel, $Derived } from "@rue/muonic";
 import { $prop, $Props } from "../../../packages/muonic/src/reactivemodel/PropSignal";
-import { watch } from "../../../packages/lumo/src/watch/watchForRender";
+import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { AnyObject } from "@rue/types";
+import { onActivated, onCreated } from "../../../packages/lumo/src/dynamic/lifecycle";
 
 
 const randomColor = useRandomColorGenerator()
@@ -57,6 +58,7 @@ export function List() {
         { id: 2, content: "fly" },
         { id: 3, content: "swamp" }
     ])
+
 
     // $list[0] = { id: 0, content: "fly" }
 
@@ -162,7 +164,7 @@ export function List() {
     // const $item = $list[0]
     //     watch($(() => $item.content), (newValue, oldValue) => {
     //         console.log("changed", newValue, oldValue)
-    //     }, { phase: 'render' })
+    //     }, { phase: Phase.RENDER })
     //     console.log("------------")
 
     // setTimeout(()=>{
@@ -174,7 +176,6 @@ export function List() {
         console.log("list is empty!")
     })
 
-    // return mx("hi")
     return Component(
         <>
             <>

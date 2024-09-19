@@ -2,7 +2,7 @@ import { createApp } from '@rue/lumo';
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import { watch } from '../../../packages/lumo/src/watch/watchForRender';
+import { watch } from '../../../packages/lumo/src/watch/watchAndPreserve';
 import './style.css'
 // import { TestCounter } from './TestCounter';
 // import { TestBox } from './TestBox';
@@ -15,7 +15,7 @@ import { MountIf } from './TestMountIf';
 // import { DeepReactiveModel, getMetaReactive, o$, $Model } from '@rue/muonic';
 // import { MountIf } from './TestMountIf';
 // import { queueTask } from '@rue/thread';
-// import { UpdateCycle } from '@rue/muonic';
+// import { RenderCycle } from '@rue/muonic';
 // import { MainSite } from './AwaitTest';
 // import { ConditionalFlaskTest } from './ConditionalFlaskTest';
 // import { Root } from './TreeTest';
@@ -118,7 +118,7 @@ let end = false;
 
 
 
-let updateCycle;
+let renderCycle;
 
 // function clickOuterDivA() {
 //     console.log("CLICK outer A")
@@ -186,9 +186,9 @@ let updateCycle;
 // }
 
 // function que(msg: string) {
-//     if (!updateCycle) {
+//     if (!renderCycle) {
 //         queueTask(() => {
-//             updateCycle = null
+//             renderCycle = null
 //             console.log(msg, "TASK PRE")
 //            requestAnimationFrame(() => {
 //                 console.log(msg, "RENDER")
@@ -198,7 +198,7 @@ let updateCycle;
 //                 })
 //             })
 //         })
-//         updateCycle = true;
+//         renderCycle = true;
 //     }
 // }
 

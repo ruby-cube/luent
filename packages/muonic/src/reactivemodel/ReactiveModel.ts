@@ -5,7 +5,7 @@ import { isTuple } from "./tuple";
 import { asObservedProp, getObservedProp, ObservedProp } from "./ObservedProp";
 import { timeTraveler } from "./TimeTraveler";
 import { trigger, triggerReactiveAtom, triggerReactiveModel } from "../trigger";
-import { useUpdateCycle } from "../effects/UpdateCycle";
+import { useRenderCycle } from "../effects/RenderCycle";
 import { MutationRecord } from "../effects/deepWatch";
 import { asWatchTarget, isWatched } from "../effects/WatchTarget";
 import { META, ReactiveEntity } from "../ReactiveEntity";
@@ -181,11 +181,11 @@ export function o$<T extends AnyObject>(target: T): AsReactiveModel<T> {
 
 
 export function storeSnapshot(metaReactive: MetaReactiveModel, clone?: AnyObject) {
-    timeTraveler.takeSnapshot(toRaw(metaReactive), useUpdateCycle().count, clone)
+    timeTraveler.takeSnapshot(toRaw(metaReactive), useRenderCycle().count, clone)
 }
 
 export function recordOp(reactive: ReactiveModel, op: MutationRecord) {
-    useUpdateCycle().recordOp(reactive, op)
+    useRenderCycle().recordOp(reactive, op)
 }
 
 

@@ -1,5 +1,5 @@
 import { SetMap } from "@rue/utils";
-import { Effect, onPhaseCompleted, Phase, useUpdateCycle } from "./UpdateCycle";
+import { Effect, onRenderCycleComplete, Phase, useRenderCycle } from "./RenderCycle";
 // import { runEffect } from "./watch";
 import { getDependencyTracker } from "../derivations/DependencyTracker";
 
@@ -16,29 +16,29 @@ export class WatchTarget<T extends Watchable = Watchable> {
     }
 
     watchCount = 0
-    // private nextCycleEffects: SetMap<Phase, Effect> | undefined;
+    private nextCycleEffects: SetMap<Phase, Effect> | undefined;
     private effects: SetMap<Phase, Effect>;
 
-    // private initializeNextCycleEffects() {
-    //     this.nextCycleEffects = new SetMap()
-    // }
+    private initializeNextCycleEffects() {
+        this.nextCycleEffects = new SetMap()
+    }
 
-    // private queueForNextCycle(effect: Effect, phase: Phase) {
-    //     if (!this.nextCycleEffects) this.initializeNextCycleEffects()
-    //     this.nextCycleEffects!.addToSet(effect, phase)
-    //     const toBeQueued = this.nextCycleEffects?.get(phase);
-    //     if (!toBeQueued) return;
-    //     const mustSetUpQueueTransfer = toBeQueued.size > 0;
+    private queueForNextCycle(effect: Effect, phase: Phase) {
+        if (!this.nextCycleEffects) this.initializeNextCycleEffects()
+        this.nextCycleEffects!.addToSet(effect, phase)
+        const toBeQueued = this.nextCycleEffects?.get(phase);
+        if (!toBeQueued) return;
+        const mustSetUpQueueTransfer = toBeQueued.size > 0;
 
-    //     if (mustSetUpQueueTransfer) {
-    //         onPhaseCompleted(phase, () => {
-    //             for (const effect of toBeQueued!) {
-    //                 this.effects.addToSet(effect, phase)
-    //             }
-    //             toBeQueued.clear()
-    //         })
-    //     }
-    // }
+        if (mustSetUpQueueTransfer) {
+            onRenderCycleComplete(() => {
+                for (const effect of toBeQueued!) {
+                    this.effects.addToSet(effect, phase)
+                }
+                toBeQueued.clear()
+            })
+        }
+    }
 
     private queueEffect(effect: Effect, phase: Phase) {
         this.effects.addToSet(effect, phase)
@@ -49,12 +49,12 @@ export class WatchTarget<T extends Watchable = Watchable> {
     }
 
     watch(effect: Effect, phase: Phase, forNextCycle?: boolean) {
-        // if (forNextCycle) {
-        //     this.queueForNextCycle(effect, phase)
-        // }
-        // else {
+        if (forNextCycle) {
+            this.queueForNextCycle(effect, phase)
+        }
+        else {
             this.queueEffect(effect, phase)
-        // }
+        }
         this.watchCount++;
     }
 
@@ -70,7 +70,7 @@ export class WatchTarget<T extends Watchable = Watchable> {
 
     triggerEffects() {
         for (const [phase, effects] of this.effects) {
-            if (phase === 'sync') {
+            if (phase === Phase.SYNC) {
                 this.runSyncEffects(effects);
             }
             else {
@@ -89,10 +89,10 @@ export class WatchTarget<T extends Watchable = Watchable> {
         tracker?.restore();
     }
 
-    private scheduleEffects(effects: Set<Effect>, phase: Phase) {
-        const updateCycle = useUpdateCycle()
+    private scheduleEffects(effects: Set<Effect>, phase: Exclude<Phase, Phase.SYNC>) {
+        const renderCycle = useRenderCycle()
         for (const effect of effects) {
-            updateCycle.scheduleEffect(this.target, effect, phase)
+            renderCycle.scheduleEffect(this.target, effect, phase)
         }
     }
 

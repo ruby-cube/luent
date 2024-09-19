@@ -1,4 +1,4 @@
-import { $Node, mx } from "@rue/lumo";
+import { $Node, } from "@rue/lumo";
 import {  $, $initializeEffect, $Model, $Signal } from "@rue/muonic";
 
 
@@ -34,7 +34,7 @@ export function TestBox() {
     //     $initializeEffect(() => {
     //         divRef.o.style.transform = `translate(${box$.position.x}px)`
     //         console.log("running effect!!!", divRef.o.style.transform)
-    //     }, {phase: 'render'})
+    //     }, {phase: Phase.RENDER})
     // })
 
     // const $positionX = $(() => box$.position.x)

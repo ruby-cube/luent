@@ -1,5 +1,6 @@
-import { Component, CreateIf, ElseCreate } from "@rue/lumo";
+import { $Node, Component, CreateIf, ElseCreate } from "@rue/lumo";
 import { $, $Derived, $Signal, isAnySignal, watch } from "@rue/muonic";
+import { onActivated, onCreated, onDeactivate, onDestroy } from "../../../packages/lumo/src/dynamic/lifecycle";
 
 export function MountIf() {
     const $count = $Signal(0)
@@ -15,7 +16,7 @@ export function MountIf() {
     // }
 
 
-    const $active = $Signal(false)
+    const $active = $Signal(true)
     function toggleActive() {
         $active.update(active => !active)
     }
@@ -35,9 +36,7 @@ export function MountIf() {
         <>
             {[
                 CreateIf($active, () =>
-                    <>
-                        <div>Hi</div>
-                    </>
+                    <Counter></Counter>
                 ),
                 ElseCreate(() =>
                     <p>bye</p>
@@ -52,3 +51,66 @@ export function MountIf() {
         </>
     )
 }
+
+function Counter() {
+    const $count = $Signal(0)
+
+    const $button = $Node()
+    const $countDiv = $Node()
+
+    // onNodesCreated(
+    //     [$button, $countDiv],
+    //     ([button, countDiv]) => {
+
+    //     }
+    // )
+
+    watch(() => [$button(), $countDiv()], ([button, countDiv]) => {
+        console.log("node ref", button, countDiv)
+    }, {
+        phase: Phase.RENDER,
+        once: true
+    })
+
+    watch($count, () => {
+        console.log("sync phase")
+    }, { phase: Phase.SYNC })
+
+    watch($count, () => {
+        console.log("pre-render phase")
+    }, { phase: Phase.BEFORE_RENDER })
+
+    watch($count, () => {
+        console.log("render phase")
+    }, { phase: Phase.RENDER })
+
+    watch($count, () => {
+        console.log("post-render phase")
+    }, { phase: Phase.AFTER_RENDER })
+
+    onCreated(() => {
+        console.log("created")
+    })
+
+    onActivated(() => {
+        console.log("activated yo")
+    })
+
+    onDeactivate(() => {
+        console.log("deactivate")
+    })
+
+    onDestroy(() => {
+        console.log("destroyd")
+    })
+
+    $count.setTo(1)
+
+    return Component(
+        <>
+            <div ref={$countDiv}>{$count}</div>
+            <button onclick={() => $count.update(count => count + 1)} ref={$button}>increment</button>
+        </>
+    )
+}
+

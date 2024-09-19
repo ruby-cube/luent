@@ -1,4 +1,4 @@
-import { $Signal, isAnySignal, isReactiveModel, AtomicSignal, ReactiveModel, toRaw, shallowClone, AnySignal, isDeepReactive, asDeepReactive, isSignal, ModelReactivityDepth, getMetaSignal } from "@rue/muonic";
+import { $Signal, isAnySignal, isReactiveModel, AtomicSignal, ReactiveModel, toRaw, shallowClone, AnySignal, isDeepReactive, asDeepReactive, isSignal, ModelReactivityDepth, getMetaSignal, Phase } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
@@ -7,7 +7,7 @@ import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { normalizeToArray } from "@rue/utils";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { DynamicNode } from "../dynamic/DynamicNode";
-import { watchForRender } from "../watch/watchForRender";
+import { watch } from "../watch/watchAndPreserve";
 import { diff, InsertAndMoveKit } from "./diff";
 import { Sign } from "crypto";
 import { META } from "../../../muonic/src/ReactiveEntity";
@@ -115,12 +115,12 @@ export class ListRenderKit<T = any> {
             const dynamicIndices = new DynamicIndices(indices)
 
             // set up watcher for updates
-            // const updateCycle = getCurrentUpdateCycle();
+            // const renderCycle = getCurrentRenderCycle();
             const parentDynamicNode = getActiveDynamicNode()
             pushProvider(provider)
             const rawData = isReactiveModel(data) ? toRaw(data) : undefined
             let clone = isReactiveModel(data) ? shallowClone(rawData!) : undefined
-            watchForRender(data, (newValue: any[], oldValue: any[]) => {
+            watch(data, (newValue: any[], oldValue: any[]) => {
                 const _oldValue = clone || oldValue;
                 if (_isReactiveModel) clone = shallowClone(rawData!) as any[]
                 const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || newValue, _oldValue, idKey)
@@ -137,7 +137,7 @@ export class ListRenderKit<T = any> {
                     popProvider()
                     popDynamicNode()
                 })
-            })
+            }, { phase: Phase.RENDER })
             popProvider()
         }
         // currentItem = undefined;

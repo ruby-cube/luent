@@ -1,4 +1,4 @@
-import { $Node, Component, COMPONENT, ComponentSetup, CreateIf, ElseCreate, For, mx, Provide, teleportTo, useEventListener } from "@rue/lumo";
+import { $Node, Component, COMPONENT, ComponentSetup, CreateIf, ElseCreate, For,  Provide, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, $Signal, $Model, AtomicSignal } from "@rue/muonic";
 import { $ } from "@rue/muonic";

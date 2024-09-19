@@ -3,12 +3,16 @@ import { getMetaReactive, ReactiveModel, toRaw } from "./reactivemodel/ReactiveM
 import { AtomicSignal, MetaSignal } from "./Signal";
 import { ObservedProp, toPropSignal } from "./reactivemodel/ObservedProp";
 import { asWatchTarget, isWatched } from "./effects/WatchTarget";
+import { getCurrentRenderCycle } from "./effects/RenderCycle";
+import { getWithoutTracking } from "./derivations/DependencyTracker";
 
 
 export function trigger(target: AtomicSignal | ObservedProp) {
+    if (__DEV__ && getCurrentRenderCycle() && getCurrentRenderCycle()!.phase > 1) 
+        console.warn(`CASE RESEARCH: Reactive entity triggered during phase ${getCurrentRenderCycle()!.phase}:`, target, getWithoutTracking(target))
     const propSignal = toPropSignal(target)
 
-    if (propSignal && isWatched(target)){
+    if (propSignal && isWatched(target)) {
         asWatchTarget(propSignal).triggerEffects()
     }
 
@@ -19,7 +23,6 @@ export function trigger(target: AtomicSignal | ObservedProp) {
 }
 
 export function triggerReactiveAtom(target: ReactivePrimitive) {
-    console.log("is atom", asReactiveAtom(target).derivations)
     if (isReactiveAtom(target)) {
         asReactiveAtom(target).triggerDerivations()
     }

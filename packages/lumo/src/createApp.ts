@@ -3,7 +3,7 @@ import { _NodePod } from "./node/NodePod";
 import { DynamicNode, markMountPhase, unmarkMountPhase } from "./dynamic/DynamicNode";
 import { popProvider, pushProvider } from "./component/provide";
 import { runProviderComponentSetup } from "./component/makeComponent";
-import { ProviderComponent } from "./component/ProviderComponent";
+import { Provider, ProviderComponent } from "./component/ProviderComponent";
 
 let appRoot: Element;
 
@@ -21,10 +21,10 @@ export function getAppRoot() {
 //     )
 // }
 
-export function createApp(App: ComponentSetup, config?: { remountable: boolean }) {
+export function createApp(App: ComponentSetup, config?: { remountable: boolean, globalProvider: Provider }) {
 
     // (1) instantiate developer's root component
-    const component = new ProviderComponent(null);
+    const component = new ProviderComponent(null, config?.globalProvider || new Provider());
     const nodePod = new _NodePod()
     const remountable = config?.remountable
     const preserve = remountable ? true : false

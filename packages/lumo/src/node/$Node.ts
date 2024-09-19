@@ -1,4 +1,4 @@
-import { PublicComponent, ComponentSetup } from "../component/InternalComponent"
+import {  ComponentSetup } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
@@ -43,7 +43,7 @@ export function $Node<
     T extends RefSource
     = RefSource
 >() {
-    let $node = $Signal<NodeReferent<T> | undefined | null>();
+    let $node = $Signal<NodeReferent<T> | undefined | null>(undefined);
     if (__DEV__) {
         const $nodeAsReadonly = asReadonly($node) as ReadonlySignal<NodeReferent<T> | undefined | null>;
         $nodeMap.set($nodeAsReadonly, $node)

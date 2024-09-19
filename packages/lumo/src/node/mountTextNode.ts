@@ -1,6 +1,6 @@
-import { getWithoutTracking, isAnySignal, AnySignal } from "@rue/muonic";
+import { getWithoutTracking, isAnySignal, AnySignal, Phase } from "@rue/muonic";
 import { _NodePod } from "./NodePod";
-import { watchForRender } from "../watch/watchForRender";
+import { watch} from "../watch/watchAndPreserve";
 
 export function mountTextNode(parent: Element, text: AnySignal | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
 
@@ -18,9 +18,9 @@ export function mountTextNode(parent: Element, text: AnySignal | any, nodePod?: 
 }
 
 function keepTextNodeUpdated($text: AnySignal<any>, textNode: CharacterData) {
-    watchForRender($text, (newValue: any) => {
+    watch($text, (newValue: any) => {
         textNode.data = toString(newValue);
-    }, { __devName: keepTextNodeUpdated.name });
+    }, { phase: Phase.RENDER, __devName: keepTextNodeUpdated.name });
 }
 
 
