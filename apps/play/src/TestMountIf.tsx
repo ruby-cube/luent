@@ -1,27 +1,27 @@
 import { $Node, Component, CreateIf, ElseCreate } from "@rue/lumo";
-import { $, $Derived, $Signal, isAnySignal, watch } from "@rue/muonic";
+import { $, $Derived, $State, isReactiveGet, watch } from "@rue/muonic";
 import { onActivated, onCreated, onDeactivate, onDestroy } from "../../../packages/lumo/src/dynamic/lifecycle";
 
 export function MountIf() {
-    const $count = $Signal(0)
+    const $count = $State(0)
     // const $doubleCount = $Derived(() => $count() * 2)
     function increment() {
         $count.update(count => count + 1)
     }
 
-    // const $count2 = $Signal(0)
+    // const $count2 = $State(0)
     // const $sum = $(() => $count() + $count2())
     // function increment2() {
     //     $count2.update(count => count + 1)
     // }
 
 
-    const $active = $Signal(true)
+    const $active = $State(true)
     function toggleActive() {
         $active.update(active => !active)
     }
 
-    // const $ready = $Signal(true)
+    // const $ready = $State(true)
     // function toggleReady() {
     //     $ready.update(ready => !ready)
     // }
@@ -53,7 +53,7 @@ export function MountIf() {
 }
 
 function Counter() {
-    const $count = $Signal(0)
+    const $count = $State(0)
 
     const $button = $Node()
     const $countDiv = $Node()

@@ -1,8 +1,8 @@
-import { AnySignal } from "@rue/muonic";
+import { ReactiveGet } from "@rue/muonic";
 import { NodeEntity } from "../node/makeNode";
 import { ConditionalKit } from "../conditional/ConditionalKit";
 import { ListenOptions } from "net";
-import { NodeSignal } from "../node/$Node";
+import { NodeIon } from "../node/$Node";
 import { Booleanny } from "@rue/types";
 
 
@@ -11,7 +11,7 @@ type ListenerLifespan = ListenOptions;
 const THIS_NODE = 0 as const;
 const CHILD_NODES = 1 as const;
 
-type EventTarget = string | NodeSignal | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
+type EventTarget = string | NodeIon | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
 
 type EventTargetOptions = {
     targets: EventTarget[]

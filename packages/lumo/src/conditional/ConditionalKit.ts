@@ -1,4 +1,4 @@
-import { AnySignal } from "@rue/muonic";
+import { ReactiveGet } from "@rue/muonic";
 import { Booleanny } from "@rue/types";
 
 

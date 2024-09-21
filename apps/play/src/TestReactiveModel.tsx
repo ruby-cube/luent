@@ -1,7 +1,6 @@
-import { $Node, Component, CreateIf, ElseCreate, For, NodeEntity, preventDefault, ShowIf, teleportTo, useEventListener } from "@rue/lumo";
+import { $Node, $Nodes, Component, CreateIf, ElseCreate, For, NodeEntity, preventDefault, ShowIf, teleportTo, useEventListener } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { $Signal, __addDevName, $, $Model, o$, DeepReactiveModel, $Derived } from "@rue/muonic";
-import { $prop, $Props } from "../../../packages/muonic/src/reactivemodel/PropSignal";
+import { $State, __addDevName, $, $Model, $Model, DeepReactiveModel, $Derived, $Deep } from "@rue/muonic";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { AnyObject } from "@rue/types";
 import { onActivated, onCreated } from "../../../packages/lumo/src/dynamic/lifecycle";
@@ -15,7 +14,7 @@ function genId() {
 }
 
 
-// const $count = $Signal(0)
+// const $count = $State(0)
 // watch($(doubleCount => $count() + 2), () => {  
 
 // })
@@ -52,7 +51,7 @@ function genId() {
 
 export function List() {
 
-    const $list = $Model([
+    const $list = $Deep([
         { id: 0, content: "frog" },
         { id: 1, content: "robin" },
         { id: 2, content: "fly" },
@@ -66,7 +65,7 @@ export function List() {
 
 
 
-    // const frog$ = o$({
+    // const frog$ = $Model({
     //     name: "Sir Robin"
     // })
 
@@ -154,9 +153,9 @@ export function List() {
         $list.splice(index, 1);
     }
 
-    const $itemDiv = $Node<'div'>()
+    const $itemDiv = $Nodes('div')
 
-    const $alive = $Signal(true)
+    const $alive = $State(true)
 
     function destroy() {
         $alive.setTo(false)

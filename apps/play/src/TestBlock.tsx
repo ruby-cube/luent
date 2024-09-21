@@ -1,10 +1,10 @@
-import { $elseIf, $if, $Node } from "@rue/lumo";
-import { AtomicSignal, $Signal } from "@rue/muonic";
+import {  $Node } from "@rue/lumo";
+import { AtomicIon, $State } from "@rue/muonic";
 
 
-export function TestBlockA(props: { $active: AtomicSignal<boolean> }) {
+export function TestBlockA(props: { $active: AtomicIon<boolean> }) {
     const { $active } = props
-    const $black = $Signal(true);
+    const $black = $State(true);
 
     expose({
         dog: "hi"
@@ -16,8 +16,8 @@ export function TestBlockA(props: { $active: AtomicSignal<boolean> }) {
 }
 
 function Lap(){
-    const $testBlock = $Node<typeof TestBlockA>()
-    const $active = $Signal(false)
+    const $testBlock = $Node(TestBlockA)
+    const $active = $State(false)
 
     onMounted(()=>{
         const hey = $testBlock()
@@ -31,9 +31,9 @@ function Lap(){
 }
 
 
-export function TestBlockB(props: { $active: AtomicSignal<boolean> }) {
+export function TestBlockB(props: { $active: AtomicIon<boolean> }) {
     const { $active } = props
-    const $black = $Signal(true);
+    const $black = $State(true);
 
     return (
         <>

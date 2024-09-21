@@ -1,6 +1,6 @@
 import { $Node, Component, COMPONENT, ComponentSetup, CreateIf, ElseCreate, For,  Provide, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
-import { __addDevName, $Signal, $Model, AtomicSignal } from "@rue/muonic";
+import { __addDevName, $State, $Model, AtomicIon, $Deep } from "@rue/muonic";
 import { $ } from "@rue/muonic";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { ElseCreateIf } from "../../../packages/lumo/src/conditional/CreateIf";
@@ -60,7 +60,7 @@ function genId() {
 
 const onClick = useEventListener('click');
 
-// shallow reactive model o$
+// shallow reactive model $Model
 // deep reactive model o$$$
 // shallow signal $ (also derived signal)
 // deep signal $$$
@@ -75,10 +75,10 @@ export function App() {
 
 export function List() {
 
-    const $active = $Signal(true)
+    const $active = $State(true)
     if (__DEV__) __addDevName($active, '$active')
 
-    const $list = $Signal($Model([
+    const $list = $State($Deep([
         { id: 0, content: "frog" },
         { id: 1, content: "dog" },
         { id: 2, content: "fly" },
@@ -114,7 +114,7 @@ export function List() {
 
     const { openModal } = useModal();
 
-    const $showSideBlock = $Signal(false)
+    const $showSideBlock = $State(false)
 
     function showSideBlock() {
         $showSideBlock.setTo(true)
@@ -179,7 +179,7 @@ export function List() {
 
 
 function useModal() {
-    const $dialogBox = $Node<typeof DialogBox>()
+    const $dialogBox = $Node(DialogBox)
 
     function openModal() {
         $dialogBox()!.open()
@@ -203,13 +203,13 @@ function Glo() {
 }
 
 function Appo(
-    props: {
+    setup: {
         kdj: string
     },
     provide: Provide
 ) {
-    const $active = $Signal(true)
-    const $ready = $Signal(true)
+    const $active = $State(true)
+    const $ready = $State(true)
 
     const exposed = {
         $active,
@@ -293,7 +293,7 @@ function DialogBox({
 }
 
 function useDialogBox(config: { initialState: 'open' | 'closed' }) {
-    const $open = $Signal(false)
+    const $open = $State(false)
     __addDevName($open, '$open')
 
     function open() {

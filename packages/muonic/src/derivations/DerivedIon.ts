@@ -1,9 +1,9 @@
-import { isSignal, AtomicSignal } from "../Signal";
-import { READONLY_SIGNAL } from "../asReadonly";
+import { isIon, AtomicIon } from "../Ion";
+import { READONLY_ION } from "../asReadonly";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
-import { META, ReactiveEntity } from "../ReactiveEntity";
-import { isPropSignal } from "../reactivemodel/PropSignal";
+import { META } from "../ReactiveEntity";
+import { isPropIon } from "../reactivemodel/PropIon";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -13,34 +13,34 @@ import { isPropSignal } from "../reactivemodel/PropSignal";
 // Note that siganl with only one dependency could still be a derived signal.
 
 
-export const DERIVED_SIGNAL = Symbol('derivedSignal')
+export const DERIVED_ION = Symbol('derivedIon')
 
-export type DerivedSignal<T = any> = {
+export type DerivedIon<T = any> = {
     (): T
-    [META]: MetaDerivedSignal
+    [META]: MetaDerivedIon
     untrack: () => void
 }
 
-export type AnySignal<T = any> = DerivedSignal<T> | AtomicSignal<T>;
+export type ReactiveGet<T = any> = DerivedIon<T> | AtomicIon<T>;
 
-export function isDerivedSignal(maybeDerivedSignal: any): maybeDerivedSignal is DerivedSignal {
-    if (!(maybeDerivedSignal instanceof Function)) return false
-    return maybeDerivedSignal[META]?.type === DERIVED_SIGNAL;
+export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIon {
+    if (!(maybeDerivedIon instanceof Function)) return false
+    return maybeDerivedIon[META]?.type === DERIVED_ION;
 }
 
 
-export function isAnySignal(maybeSignal: any): maybeSignal is DerivedSignal | AtomicSignal {
-    if (!(maybeSignal instanceof Function)) return false;
-    if (isSignal(maybeSignal) || isDerivedSignal(maybeSignal) || READONLY_SIGNAL in maybeSignal || isPropSignal(maybeSignal)) return true;
+export function isReactiveGet(maybeIon: any): maybeIon is DerivedIon | AtomicIon {
+    if (!(maybeIon instanceof Function)) return false;
+    if (isIon(maybeIon) || isDerivedIon(maybeIon) || READONLY_ION in maybeIon || isPropIon(maybeIon)) return true;
     return false;
 }
 
-class MetaDerivedSignal<T extends DerivedSignal = DerivedSignal> extends ReactiveDerivation {
+class MetaDerivedIon<T extends DerivedIon = DerivedIon> extends ReactiveDerivation {
 
-    override type = DERIVED_SIGNAL
+    override type = DERIVED_ION
 
     constructor(override readonly o: T, retrack: boolean) {
-        super(o, DERIVED_SIGNAL, retrack);
+        super(o, DERIVED_ION, retrack);
     }
 
     value: any;
@@ -53,10 +53,10 @@ class MetaDerivedSignal<T extends DerivedSignal = DerivedSignal> extends Reactiv
 export const $ = $Derived
 
 
-export function $Derived<T extends any>(pureGetter: () => T, retrack: boolean = true): DerivedSignal<T> {
+export function $Derived<T extends any>(pureGetter: () => T, retrack: boolean = true): DerivedIon<T> {
     let initialized = false;
-    const derived = new MetaDerivedSignal(<DerivedSignal><unknown>$derivedSignal, retrack);
-    function $derivedSignal() {
+    const derived = new MetaDerivedIon(<DerivedIon><unknown>$derivedIon, retrack);
+    function $derivedIon() {
         if (!initialized || derived.dirty && retrack) {
             const value = derived.trackAtoms(pureGetter);
             derived.forwardAtoms(derived.atoms)
@@ -78,13 +78,13 @@ export function $Derived<T extends any>(pureGetter: () => T, retrack: boolean = 
 
         return derived.value; // memoized value
     }
-    $derivedSignal[META] = derived;
-    $derivedSignal.untrack = () => {
+    $derivedIon[META] = derived;
+    $derivedIon.untrack = () => {
         derived.untrackAtoms()
     }
     onDestroy(() => {
         derived.untrackAtoms()
     })
 
-    return <DerivedSignal><unknown>$derivedSignal;
+    return <DerivedIon><unknown>$derivedIon;
 }

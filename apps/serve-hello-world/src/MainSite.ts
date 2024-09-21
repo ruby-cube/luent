@@ -1,13 +1,13 @@
 import { html, Literate, mO, SSRComponent, SSRComponentSetup } from "@rue/literate";
 import { $Node, ComponentSetup, InternalComponent, PublicComponent } from "@rue/lumo";
-import { AtomicSignal } from "@rue/muonic";
+import { AtomicIon } from "@rue/muonic";
 
 export function MainSite({
     Slot
 }: {
     Slot: () => [PublicComponent & {title: string}, Literate] 
 }) {
-    const $page = $Node<() => SSRComponent<{ title: string }>>() as unknown as AtomicSignal<{ title: string }>;
+    const $page = $Node<() => SSRComponent<{ title: string }>>() as unknown as AtomicIon<{ title: string }>;
 
     return html`
         <!DOCTYPE html>

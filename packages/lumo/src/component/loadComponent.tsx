@@ -1,7 +1,7 @@
 import { ComponentSetup } from "./InternalComponent";
 import { $else, $elseIf, $if } from "../conditional/CreateIf";
 import { noop } from "@rue/utils";
-import { $Signal } from "@rue/muonic";
+import { $State } from "@rue/muonic";
 
 const lazyComponents: Map<() => Promise<ComponentSetup>, ComponentSetup> = new Map()
 
@@ -13,9 +13,9 @@ export function lazyLoadComponent<P>(config: {
     ErrorView?: ComponentSetup<{ error: any }>,
 }) { //TODO: Idle load priorities
     const { load, ErrorView, Placeholder, timeout, onIdle } = config;
-    const $loading = $Signal(true);
-    const $error = $Signal("");
-    const $loaded = $Signal(false);
+    const $loading = $State(true);
+    const $error = $State("");
+    const $loaded = $State(false);
     let idleID: number | undefined;
     if (onIdle) {
         idleID = requestIdleCallback(() => {

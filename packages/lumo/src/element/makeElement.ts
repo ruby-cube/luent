@@ -1,13 +1,12 @@
 import { DOMNode } from "../component/InternalComponent";
-import { DerivedSignal, isAnySignal, AnySignal, Hooks, getCurrentRenderCycle, ReactiveGet, Phase } from "@rue/muonic";
+import { DerivedIon, isReactiveGet, ReactiveGet, Hooks, getCurrentRenderCycle, Phase, isIon } from "@rue/muonic";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
-import { InternalNodeRef, get$Node, getNodeRef } from "../node/$Node";
 import { initializeRender, watch } from "../watch/watchAndPreserve";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
-import { AtomicSignal } from "@rue/muonic";
+import { AtomicIon } from "@rue/muonic";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
@@ -16,6 +15,7 @@ import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
 import { onActivated, onDeactivate } from "../dynamic/lifecycle";
+import { isReactiveArray } from "../../../muonic/src/reactivemodel/ReactiveArray";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -32,7 +32,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     tagName: T,
     childNodes: NodeEntity[] | undefined,
     config: ElementConfig,
-    $index: AtomicSignal<number> | undefined
+    $index: AtomicIon<number> | undefined
 ): DOMNode {
     const { class: classes, style: styles, ref, attributes: dynamicAttributes, ...other } = config;
 
@@ -41,8 +41,13 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     const domNode = isHydrating() ? getElement() : document.createElement(tagName);
 
     if (ref) {
-        if ($index) initializeListRef(ref, domNode, $index)
-        else initializeRef(ref, domNode)
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use $Node or $Nodes ion as ref")
+        if ($index) {
+            initializeListRef(ref, domNode, $index)
+        }
+        else {
+            initializeRef(ref, domNode)
+        }
     }
 
     if (childNodes) {
@@ -123,10 +128,10 @@ function analyzeAttributes(entries: AnyObject) {
     }
 }
 
-function setUpAttributes(node: Element, attributes: { [key: string]: any | DerivedSignal<any> }) {
+function setUpAttributes(node: Element, attributes: { [key: string]: any | DerivedIon<any> }) {
     for (const key in attributes) {
         const value = attributes[key]
-        if (isAnySignal(value)) {
+        if (isReactiveGet(value)) {
             watch(value, (newValue) => { //TODO: only attributes that affect layout should be scheduled for render
                 setAttribute(node, key, newValue)
             }, { eager: true, phase: Phase.RENDER })
@@ -182,8 +187,8 @@ function setUpClasses(node: Element, classes: (((o: DOMTokenList) => void) | str
         }
         else if (entry instanceof Object) {
             for (const key in entry) {
-                const $signal = entry[key];
-                watch($signal, (value) => { //QUESTION: should this have a preserve version?
+                const $ion = entry[key];
+                watch($ion, (value) => { //QUESTION: should this have a preserve version?
                     if (value) classList.add(key);
                     else classList.remove(key);
                 }, { eager: true, phase: Phase.RENDER })
@@ -249,7 +254,7 @@ function setUpDynamicAttributes(node: Element, changes: ((o: Element) => void)[]
     }
 }
 
-function setUpRefNulling(ref: _NodePod, $index: AtomicSignal<number>) {
+function setUpRefNulling(ref: _NodePod, $index: AtomicIon<number>) {
     if ($index && $index() === 0) {
 
     }

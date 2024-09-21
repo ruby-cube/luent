@@ -1,9 +1,9 @@
-import { $Signal } from "@rue/muonic"
+import { $State } from "@rue/muonic"
 import { $await } from "../../../packages/lumo/src/component/$await"
 import { CreateIf } from "@rue/lumo"
 
 export function Root() {
-    const $active = $Signal(true)
+    const $active = $State(true)
     function toggleActive() {
         $active.update(value => !value)
     }
@@ -28,7 +28,7 @@ export function Root() {
 // }
 
 // function GrandChild() {
-//     const $count = $Signal(0)
+//     const $count = $State(0)
 
 //     const promise = new Promise((resolve) => {
 //         setTimeout(() => {

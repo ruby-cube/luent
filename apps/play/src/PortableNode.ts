@@ -1,5 +1,5 @@
 import { Collection, For } from "@rue/lumo"
-import { ReactiveModel, AtomicSignal } from "@rue/muonic"
+import { ReactiveModel, AtomicIon } from "@rue/muonic"
 
 class PortableNode {
 
@@ -20,7 +20,7 @@ class PortableNode {
 
 class ListPort<L extends any[] = any[]> {
 
-    constructor(list: AtomicSignal<L> | ReactiveModel<L>, renderItem: RenderListItem<L>) {
+    constructor(list: AtomicIon<L> | ReactiveModel<L>, renderItem: RenderListItem<L>) {
 
     }
 
@@ -29,7 +29,7 @@ class ListPort<L extends any[] = any[]> {
     // }
 }
 
-type RenderListItem<L extends any[]> = (item: L extends (infer I)[] ? I : never, $index: AtomicSignal<number>) => any
+type RenderListItem<L extends any[]> = (item: L extends (infer I)[] ? I : never, $index: AtomicIon<number>) => any
 
 type ListPortType = string
 type UID = string | number | symbol
@@ -38,7 +38,7 @@ const portableItemKeyMap: Map<ListPortType, UID> = new Map()
 
 const renderPortableItemMap: Map<UID, () => any> = new Map()
 
-function $ListPort<L extends any[] = any[]>(listData: AtomicSignal<L> | ReactiveModel<L>, renderItem: RenderListItem<L>, UIDKey: string, config: { type: string, ref?: AtomicSignal<PortableNode> }) {
+function $ListPort<L extends any[] = any[]>(listData: AtomicIon<L> | ReactiveModel<L>, renderItem: RenderListItem<L>, UIDKey: string, config: { type: string, ref?: AtomicIon<PortableNode> }) {
     const listRenderKit = For(listData as Collection<L extends (infer I)[] ? I : never>, renderItem, UIDKey)
 
     return listRenderKit;

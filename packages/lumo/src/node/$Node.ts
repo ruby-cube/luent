@@ -1,17 +1,17 @@
-import {  ComponentSetup } from "../component/InternalComponent"
+import { ComponentOutput, ComponentSetup, PublicComponent } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
-import { $Signal, AtomicSignal, asReadonly, ReadonlySignal } from "@rue/muonic"
+import { $State, AtomicIon, asReadonly, ReadonlyIon, $Model, ReactiveModel } from "@rue/muonic"
 import { HTMLTag } from "../element/makeElement"
 import { isUpdatingList } from "../list/listStack"
 
 
 
-type Task = ((item: Element | PublicComponent) => void) | ((item: Element | PublicComponent, $index?: AtomicSignal<number>) => void)
-const hookMap: WeakMap<NodeSignal, Set<Task>> = new WeakMap()
+// type Task = ((item: Element | PublicComponent) => void) | ((item: Element | PublicComponent, $index?: AtomicIon<number>) => void)
+// const hookMap: WeakMap<NodeIon, Set<Task>> = new WeakMap()
 
-type RefSource = HTMLTag | ComponentSetup | HTMLTag[] | ComponentSetup[]
+type RefSource = HTMLTag | ComponentSetup
 
 
 /* 
@@ -26,14 +26,17 @@ type RefSource = HTMLTag | ComponentSetup | HTMLTag[] | ComponentSetup[]
 //     readonly o: NodeReferent<T> | undefined; // o stands for object (as in target) of reference 
 // }
 
+// export type ViewNodePod<>
 
-export type NodeSignal<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
-export type _NodeSignal<T extends RefSource = RefSource> = AtomicSignal<NodeReferent<T> | undefined>
+export type NodesIon<T extends RefSource = RefSource> = () => NodeReferent<T>[]
+export type NodeIon<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
+export type _NodeIon<T extends RefSource = RefSource> = AtomicIon<NodeReferent<T> | undefined>
+export type _NodesIon<T extends RefSource = RefSource> = AtomicIon<NodeReferent<T>[]>
 
 // map readonly $node to $node
-const $nodeMap: WeakMap<NodeSignal, _NodeSignal> = new WeakMap()
+const $nodeMap: WeakMap<NodeIon | NodesIon, _NodeIon | _NodesIon> = new WeakMap()
 
-export function get$Node($nodeAsReadonly: NodeSignal) {
+export function getNodeIon($nodeAsReadonly: NodeIon) {
     const $node = $nodeMap.get($nodeAsReadonly);
     if (!$node) throw new Error("No $node :(. This should never happen")
     return $node;
@@ -42,93 +45,107 @@ export function get$Node($nodeAsReadonly: NodeSignal) {
 export function $Node<
     T extends RefSource
     = RefSource
->() {
-    let $node = $Signal<NodeReferent<T> | undefined | null>(undefined);
+>(source: T) {
+    let $node = $State(undefined) as NodeIon<T>;
     if (__DEV__) {
-        const $nodeAsReadonly = asReadonly($node) as ReadonlySignal<NodeReferent<T> | undefined | null>;
-        $nodeMap.set($nodeAsReadonly, $node)
-        $node = $nodeAsReadonly as unknown as AtomicSignal<NodeReferent<T> | undefined | null>;
+        $node = asReadonlyNodeIon($node) as NodeIon<T>
     }
-    return $node;
+    return $node as NodeIon<T>;
 }
 
+export function $Nodes<T extends RefSource = RefSource>(source: T): NodesIon<T> {
+    let $nodes = $State([]) as NodesIon<T>
+    if (__DEV__) {
+        $nodes = asReadonlyNodeIon($nodes) as NodesIon<T>
+    }
+    return $nodes
+}
+
+function asReadonlyNodeIon($node: NodeIon | NodesIon) {
+    const $nodeAsReadonly = asReadonly($node);
+    $nodeMap.set($nodeAsReadonly, <_NodeIon | _NodesIon>$node)
+    return $nodeAsReadonly
+}
 
 
 export type NodeReferent<
     T extends RefSource = RefSource
 > =
     T extends HTMLTag ? HTMLElementTagNameMap[T] : //TODO: SVGs and Math elements
-    T extends HTMLTag[] ? T extends (infer H)[] ? H extends HTMLTag ? HTMLElementTagNameMap[H][] : never : never :
     T extends (...args: any[]) => infer R ?
-    R extends (infer I)[] ?
-    I extends PublicComponent | JSX.Element ?
-    Exclude<I, JSX.Element>
-    : I extends PublicComponent | ConditionalRenderKit ?
-    Exclude<I, ConditionalRenderKit> :
-    T extends ((...args: any[]) => infer R)[] ?
-    R extends (infer I)[] ?
-    I extends PublicComponent | JSX.Element ?
-    Exclude<I, JSX.Element>[]
-    : I extends PublicComponent | ConditionalRenderKit ?
-    Exclude<I, ConditionalRenderKit>[]
-    : [] // component that doesn't expose anything
-    : []
-    : null
-    : null // component that doesn't expose anything
-    : null
+    R extends ComponentOutput<infer I> ?
+    I extends PublicComponent ? I
+    : undefined : undefined : undefined
 
 
-type NodeArray<T extends RefSource = RefSource> = Exclude<NodeReferent<Exclude<T, HTMLTag | null | ComponentSetup>>, null>;
 
-type ListUpdates = any[]
-const listUpdateMap: WeakMap<InternalNodeRef, ListUpdates> = new WeakMap()
 
 export class InternalNodeRef<
     T extends RefSource
     = RefSource> {
-    // preserve: boolean = false;
-    // preserved: T | undefined = undefined;
-    initialized: boolean = false; // prevent multiple initializations for arrays
-    o: _NodeSignal<RefSource>
+    o: _NodeIon
     constructor(
-        ref: NodeSignal<RefSource>
+        ref: NodeIon
     ) {
-        this.o = __DEV__ ? get$Node(ref) : ref as _NodeSignal<RefSource>
+        this.o = __DEV__ ? getNodeIon(ref) as _NodeIon : ref as _NodeIon
     }
 
-    setValue(value: NodeReferent<T> | null | undefined) {
+    setValue(value: NodeReferent<T> | undefined) {
         this.o.setTo(value)
         return value;
     }
 
-    insertNode(node: Element, index: number) {
-        const pod = this.setValue(this.o() || [] as unknown as NodeReferent<T>)! as NodeArray<T>
-        pod.splice(index, 0, <ArrayItem<NodeArray<T>>>node); //TODO: should this be splice?
+    assignValue(value: NodeReferent<T>) {
+        this.setValue(value) // will never change for static entities
+    }
+}
+
+// type NodeArray<T extends RefSource = RefSource> = Exclude<NodeReferent<Exclude<T, HTMLTag | null | ComponentSetup>>, null>;
+
+type ListUpdates = any[]
+const listUpdateMap: WeakMap<InternalNodeArrayRef, ListUpdates> = new WeakMap()
+
+const nodeArrayRefMap: WeakMap<NodeReferent[], InternalNodeArrayRef> = new WeakMap()
+
+export function getNodeArrayRef(nodes: NodeReferent[]) {
+    return nodeArrayRefMap.get(nodes)
+}
+
+export class InternalNodeArrayRef{
+    // preserve: boolean = false;
+    // preserved: T | undefined = undefined;
+    initialized: boolean = false; // prevent multiple initializations for arrays
+    o: _NodesIon
+    constructor(
+        ref: NodesIon
+    ) {
+        this.o = __DEV__ ? getNodeIon(ref) as _NodesIon : ref as _NodesIon
+    }
+
+    setValue(value: NodeReferent[]) {
+        this.o.setTo(value)
+        return value;
+    }
+
+    insertNode(node: NodeReferent, index: number) {
+        const pod = this.setValue(this.o())
+        pod.splice(index, 0, node); //TODO: should this be splice?
     }
 
     removeNode(index: number) {
-        const pod = this.o() as NodeArray<T>
-        pod.splice(index, 1);
+        const pod = this.o()
+        pod?.splice(index, 1);
     }
 
     markInitialized() {
         this.initialized = true;
     }
 
-    assignValue(value: NodeReferent<T>, $index?: AtomicSignal<number> | undefined) {
-        if ($index != null) {
-            let nodes = !__SSR__ && isUpdatingList() ? this.getNewListNodes()
-                : this.o.setTo((this.o() || []) as NodeArray<T>)
-            nodes[$index()] = value as ArrayItem<NodeArray<T>>;
-            refMap.set(nodes, this);
-        }
-        else {
-            this.setValue(value) // will never change for static entities
-        }
-
-        if (value) {
-            refMap.set(value, this);
-        }
+    assignValue(value: NodeReferent, $index: AtomicIon<number>) {
+        let nodes = !__SSR__ && isUpdatingList() ? this.getNewListNodes()
+            : this.o.setTo(this.o())
+        nodes[$index()] = value;
+        nodeArrayRefMap.set(nodes, this);
     }
 
     getNewListNodes() {
@@ -141,7 +158,7 @@ export class InternalNodeRef<
     }
 
     updateListRef(toFromIndices: [number, number][]) {
-        const prevNodes: NodeReferent[] = this.o() || [];
+        const prevNodes: NodeReferent[] = this.o();
         const newNodes = listUpdateMap.get(this) || [];
         for (const indices of toFromIndices) {
             const [to, from] = indices
@@ -150,19 +167,15 @@ export class InternalNodeRef<
         }
         this.o.setTo(newNodes);
         listUpdateMap.delete(this)
-        refMap.set(newNodes, this);
+        nodeArrayRefMap.set(newNodes, this);
     }
 }
 
 
 
-const refMap: WeakMap<Exclude<NodeReferent, null>, InternalNodeRef> = new WeakMap()
 
-export function getNodeRef(referent: any) { // AnyObject is component's exposed methods and state
-    return refMap.get(referent)
-}
 
-// export function assignNodeRef(ref: InternalNodeRef, value: Element | PublicComponent, $index: AtomicSignal<number> | undefined) {
+// export function assignNodeRef(ref: InternalNodeRef, value: Element | PublicComponent, $index: AtomicIon<number> | undefined) {
 //     if ($index != null) {
 //         let nodes = <(Element | PublicComponent)[]>ref.o.value || []
 //         nodes[$index()] = value;
@@ -171,12 +184,12 @@ export function getNodeRef(referent: any) { // AnyObject is component's exposed 
 //         //@ts-ignore readonly
 //         ref.o.value = value // will never change for static entities
 //     }
-//     refMap.set(value, ref);
+//     nodeArrayRefMap.set(value, ref);
 // }
 
 
 
-// function assignNodeRef(ref: InternalNodeRef<InternalComponent>, component: AnyObject, $index: AtomicSignal<number> | undefined) {
+// function assignNodeRef(ref: InternalNodeRef<InternalComponent>, component: AnyObject, $index: AtomicIon<number> | undefined) {
 //     if ($index != null) {
 //         let nodes = ref.components ? ref.components! : []
 //         nodes[$index()] = component;

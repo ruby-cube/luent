@@ -1,5 +1,5 @@
 import { $else, $elseIf, $if } from "@rue/lumo"
-import { $Signal } from "@rue/muonic"
+import { $State } from "@rue/muonic"
 
 export function ConditionalFlaskTest() {
     return (
@@ -11,7 +11,7 @@ export function ConditionalFlaskTest() {
 }
 
 function ComponentA() {
-    const $pending = $Signal(true);
+    const $pending = $State(true);
 
     setTimeout(() => {
         $pending.setTo(false)
@@ -26,8 +26,8 @@ function ComponentA() {
 }
 
 function ComponentB() {
-    const $pending = $Signal(true);
-    const $error = $Signal(false);
+    const $pending = $State(true);
+    const $error = $State(false);
 
     setTimeout(() => {
         $pending.setTo(false)

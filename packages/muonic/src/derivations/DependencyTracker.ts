@@ -49,14 +49,14 @@ export class DependencyTracker {
         this.shouldTrack = this.prevTrackState;
     }
 
-    callToCollectDependencies(signalOrEffect: Function) {
+    callToCollectDependencies(ionOrEffect: Function) {
         pushDepTracker(this);
         this.start();
-        const value = signalOrEffect();
+        const value = ionOrEffect();
         this.stop();
         popDepTracker();
         if (__DEV__ && this.deps.size === 0) {
-            throw new Error('Watch target or derived signal has no dependencies (and therefore no reactivity')
+            throw new Error('Watch target or derived ion has no dependencies (and therefore no reactivity')
         }
         return [this.deps, value];
     }
@@ -93,13 +93,13 @@ export function getWithoutTracking(reactiveRef: (() => any) | ObservedProp | Tra
     return value;
 }
 
-// export function track(target: AtomicSignal): boolean
+// export function track(target: AtomicIon): boolean
 // export function track(target: ReactiveModel, key: string | symbol): boolean
 // export function track(target: ReactiveModel, key: string | symbol, arg: any): boolean
-// export function track(target: AtomicSignal | ReactiveModel, key: string | symbol = UNDEFINED, arg: any = UNDEFINED) {
+// export function track(target: AtomicIon | ReactiveModel, key: string | symbol = UNDEFINED, arg: any = UNDEFINED) {
 //     const _target = arg !== UNDEFINED ? asTrackedOp(<ReactiveModel>target, <string>key, arg)
 //         : key !== UNDEFINED ? asObservedProp(<ReactiveModel>target, key)
-//             : <AtomicSignal>target
+//             : <AtomicIon>target
 //     this.addDep(_target)
 //     return true;
 

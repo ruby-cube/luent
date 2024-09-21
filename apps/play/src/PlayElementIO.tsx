@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { $Node } from "@rue/lumo"
-import { $, $Signal } from "@rue/muonic"
+import { $, $State } from "@rue/muonic"
 
 
 
@@ -65,7 +65,7 @@ function ParentBlockB() {
 function ChildBlock({ initialCount }: {
     initialCount?: number
 }) {
-    const $count = $Signal(initialCount || 0)
+    const $count = $State(initialCount || 0)
 
     function increment() {
         $count.update(c => c + 1)

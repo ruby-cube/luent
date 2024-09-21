@@ -1,12 +1,12 @@
 //@ts-nocheck
 import { $Node } from "@rue/lumo"
-import { $, $Signal } from "@rue/muonic"
+import { $, $State } from "@rue/muonic"
 
 
 
 function ParentBlock() {
 
-    const $count = $Signal(4);
+    const $count = $State(4);
 
     function increment() {
         $count.update(c => c + 1)
@@ -38,7 +38,7 @@ function ParentBlock() {
 
 
 function ChildBlock({ $count }: {
-    $count?: AtomicSignal<number>;
+    $count?: AtomicIon<number>;
     increment: () => void
     decrement: () => void
 }) {
@@ -54,7 +54,7 @@ function ChildBlock({ $count }: {
 
 
 function SiblingBlock({ $count }: {
-    $count?: AtomicSignal<number>
+    $count?: AtomicIon<number>
 }) {
 
     return (

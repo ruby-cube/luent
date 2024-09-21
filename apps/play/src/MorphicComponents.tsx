@@ -1,12 +1,12 @@
 //@ts-nocheck
-import { $Signal, AtomicSignal, watch } from "@rue/muonic"
+import { $State, AtomicIon, watch } from "@rue/muonic"
 import { watchForRender } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { $Node } from "@rue/lumo";
 
 export function MainBlock() {
 
-    const $hello = $PortableNode() as unknown as AtomicSignal<PortableNode>
-    const $bye = $PortableNode() as unknown as AtomicSignal<PortableNode>
+    const $hello = $PortableNode() as unknown as AtomicIon<PortableNode>
+    const $bye = $PortableNode() as unknown as AtomicIon<PortableNode>
 
     const helloView = $hello()
     helloView.remove()
@@ -22,7 +22,7 @@ export function MainBlock() {
         ]
     ], $hello) // if using directly in template
 
-    const $list = $Signal(['ho'])
+    const $list = $State(['ho'])
 
     const $records_list = $ListPort($records, (record) => (
         <h1>{record.content}</h1>
@@ -42,7 +42,7 @@ export function MainBlock() {
     )
 }
 
-function $portable(render: (() => any) | AtomicSignal<PortableNode>, $ref: AtomicSignal<PortableNode> | (() => any)) {
+function $portable(render: (() => any) | AtomicIon<PortableNode>, $ref: AtomicIon<PortableNode> | (() => any)) {
     return render;
 }
 
@@ -50,10 +50,10 @@ function $MorphicNode() {
 
 }
 
-function $MorphicPort(initialKey: string | AtomicSignal<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; setTo: (key: string) => any } {
+function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; setTo: (key: string) => any } {
 
-    const $key = $Signal(initialKey)
-    const $render = $Signal(switchMap[$key()])
+    const $key = $State(initialKey)
+    const $render = $State(switchMap[$key()])
 
     watch($key, (key) => {
         $render.update(switchMap[key])
@@ -70,7 +70,7 @@ function $MorphicPort(initialKey: string | AtomicSignal<any>, switchMap: { [key:
 
 function MainContent() {
 
-    const $mainContent = $Signal(() =>
+    const $mainContent = $State(() =>
         <div>hello</div>)
 
     function changeMainContent() {
@@ -87,12 +87,12 @@ function MainContent() {
     )
 }
 
-function $morphling($render: AtomicSignal<() => any>) {
+function $morphling($render: AtomicIon<() => any>) {
     return new MorphlingKit($render)
 }
 
 class MorphlingKit {
-    constructor(public $render: AtomicSignal<() => any>) { }
+    constructor(public $render: AtomicIon<() => any>) { }
 }
 
 function setUpMorphling(morphlingKit: MorphlingKit) {

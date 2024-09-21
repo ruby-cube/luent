@@ -96,7 +96,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         if (!parentDynamicNode) throw new Error('No dynamicNode :( This should never happen since root component is a dynamic node')
 
         // evaluate conditions and render
-        const $conditions = this.genConditionsSignal()
+        const $conditions = this.getConditionsIon()
         const activeIndex = this.evaluateConditions()
         const dynamicPod = nodePod.appendDynamicPod();
         const series = this;

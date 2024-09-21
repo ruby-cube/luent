@@ -1,12 +1,12 @@
 //@ts-nocheck
 import { $Node } from "@rue/lumo"
-import { $, $Signal } from "@rue/muonic"
+import { $, $State } from "@rue/muonic"
 
 class Counter {
     $: { count: number }
 
     constructor() {
-        this.$ = o$({ count: 0 })
+        this.$ = $Model({ count: 0 })
     }
 
     increment() {
@@ -54,7 +54,7 @@ function ChildBlock() {
 
 
 function SiblingBlock({ $count }: {
-    $count?: AtomicSignal<number>
+    $count?: AtomicIon<number>
 }) {
 
     return (

@@ -1,5 +1,5 @@
 import { $Node, } from "@rue/lumo";
-import {  $, $initializeEffect, $Model, $Signal } from "@rue/muonic";
+import {  $, $Deep, $initializeEffect, $Model, $State } from "@rue/muonic";
 
 
 //tests:
@@ -7,14 +7,14 @@ import {  $, $initializeEffect, $Model, $Signal } from "@rue/muonic";
 
 export function TestBox() {
 
-    const box$ = $Model({
+    const box$ = $Deep({
         position: {
             x: 0,
             y: 0
         }
     })
 
-    const $count = $Signal(0);
+    const $count = $State(0);
     
     function moveRight() {
             box$.position.x = box$.position.x + 10;
@@ -24,7 +24,7 @@ export function TestBox() {
             box$.position.x = box$.position.x - 10;
     }
 
-    const $div = $Node()
+    const $div = $Node('div')
     const $anotherCount = $(() => $count())
     $initializeEffect(() => {
         $anotherCount()

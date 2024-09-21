@@ -1,5 +1,5 @@
 import { Callback } from "@rue/flask";
-import { AnySignal } from "@rue/muonic";
+import { ReactiveGet } from "@rue/muonic";
 import { ConditionalKit } from "../conditional/ConditionalKit";
 import { Booleanny } from "@rue/types";
 

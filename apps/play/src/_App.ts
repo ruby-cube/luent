@@ -1,11 +1,11 @@
 import { ifCase, For, setUpNode, setUpNodesIn, onActivated, beforeMount, beforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../../../packages/lumo/src";
-import { useReactivity, AtomicSignal, watch, AnySignal } from "@rue/muonic";
+import { useReactivity, AtomicIon, watch, ReactiveGet } from "@rue/muonic";
 
-const { $, mu, o$, set } = useReactivity()
+const { $, mu, $Model, set } = useReactivity()
 
 export function App() {
     // const $list = $(['one', 'two', 'three'])
-    // const list$ = o$(['one', 'two', 'three'])
+    // const list$ = $Model(['one', 'two', 'three'])
     const $count = $(0);
     // const $another = $(2);
     // const $doubleCount = $(() => {
@@ -36,7 +36,7 @@ export function App() {
     //     })
     // }
 
-    // const frog$ = o$({
+    // const frog$ = $Model({
     //     name: 'kermit',
     //     sound: 'ribbit',
     //     character: 'silly'
@@ -236,7 +236,7 @@ function List() {
     //     }
     // })
 
-    const list$ = o$(['oned', 'tdwo', 'thrdee', 'four'])
+    const list$ = $Model(['oned', 'tdwo', 'thrdee', 'four'])
     // const oItems = setUpNodesIn(list$, ListItem, (item, i)=>({
     //     props: {
     //         text: i

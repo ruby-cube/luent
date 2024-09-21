@@ -1,4 +1,4 @@
-import { getWithoutTracking, $, AnySignal, ReactiveGet, $Derived } from "@rue/muonic";
+import { getWithoutTracking, $, ReactiveGet, $Derived } from "@rue/muonic";
 import { ConditionalKit } from "./ConditionalKit";
 import { Booleanny } from "@rue/types";
 
@@ -54,7 +54,7 @@ export class ConditionalSeries {
         return conditions.length;
     }
 
-    genConditionsSignal() {
+    getConditionsIon() {
         const conditions = this.conditions
         return () => {
             const values: boolean[] = [];

@@ -3,8 +3,8 @@ import type { ReactiveModel, ReactiveTraps } from "./ReactiveModel"
 import type { TrackedOp } from "./TrackedOp"
 import type { ReactiveEntity } from "../ReactiveEntity"
 import { ObservedProp } from "./ObservedProp"
-import { PropSignal } from "./PropSignal"
-import { DerivedSignal } from "../derivations/DerivedSignal"
+import { PropIon } from "./PropIon"
+import { DerivedIon } from "../derivations/DerivedIon"
 
 
 
@@ -54,39 +54,39 @@ export class MetaReactiveModel<T extends AnyObject = AnyObject> implements React
 
 
 
-    propSignals?: Map<PropertyKey, PropSignal>
+    propIons?: Map<PropertyKey, PropIon>
 
-    registerPropSignal(key: PropertyKey, signal: PropSignal) {
-        if (!this.propSignals) this.propSignals = new Map()
-        this.propSignals.set(key, signal)
+    registerPropIon(key: PropertyKey, ion: PropIon) {
+        if (!this.propIons) this.propIons = new Map()
+        this.propIons.set(key, ion)
     }
 
-    unregisterPropSignal(key: PropertyKey) { //QUESTION: When to unregister?  when watchcount === 0 and observedProps atom size === 0?
-        if (!this.propSignals) return;
-        this.propSignals.delete(key)
+    unregisterPropIon(key: PropertyKey) { //QUESTION: When to unregister?  when watchcount === 0 and observedProps atom size === 0?
+        if (!this.propIons) return;
+        this.propIons.delete(key)
     }
 
-    getPropSignal(key: PropertyKey) {
-        if (!this.propSignals) return;
-        return this.propSignals.get(key)
+    getPropIon(key: PropertyKey) {
+        if (!this.propIons) return;
+        return this.propIons.get(key)
     }
 
 
-    multiPropSignals?: Map<string, DerivedSignal>
+    multiPropIons?: Map<string, DerivedIon>
 
-    registerMultiPropSignal(key: string, signal: DerivedSignal) {
-        if (!this.multiPropSignals) this.multiPropSignals = new Map()
-        this.multiPropSignals.set(key, signal)
+    registerMultiPropIon(key: string, ion: DerivedIon) {
+        if (!this.multiPropIons) this.multiPropIons = new Map()
+        this.multiPropIons.set(key, ion)
     }
 
-    unregisterMultiPropSignal(key: string) { //QUESTION: When to unregister?
-        if (!this.multiPropSignals) return;
-        this.multiPropSignals.delete(key)
+    unregisterMultiPropIon(key: string) { //QUESTION: When to unregister?
+        if (!this.multiPropIons) return;
+        this.multiPropIons.delete(key)
     }
 
-    getMultiPropSignal(key: string) {
-        if (!this.multiPropSignals) return;
-        return this.multiPropSignals.get(key)
+    getMultiPropIon(key: string) {
+        if (!this.multiPropIons) return;
+        return this.multiPropIons.get(key)
     }
 
 

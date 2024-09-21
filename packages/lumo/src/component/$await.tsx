@@ -1,4 +1,4 @@
-import { $Signal, __addDevName } from "@rue/muonic";
+import { $State, __addDevName } from "@rue/muonic";
 import { $else, $elseIf, $if } from "../conditional/CreateIf";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { ComponentSetup } from "./InternalComponent";
@@ -32,9 +32,9 @@ export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | 
     const _config = config || promiseValueOrConfig as PendConfig
     const promise = config ? promiseValueOrConfig as Promise<any> : undefined;
     const { Pending, ErrorView, Placeholder, timeout } = _config;
-    const $pending = $Signal(true);
-    const $error = $Signal("");
-    const $ready = $Signal(false);
+    const $pending = $State(true);
+    const $error = $State("");
+    const $ready = $State(false);
     if (__DEV__) __addDevName($pending, "$pending");
 
     function collectPromises(props: AnyObject) {

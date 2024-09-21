@@ -1,25 +1,22 @@
 //@ts-nocheck
 
-
-
-
-
 import ""
-import { $initializeEffect } from "./src"
+import { $initializeEffect, $Model, onRenderCycleComplete, onRendered } from "./src"
 
-const $frog = $Model({
+const $frog = $Deep({
     name: "sir robin",
     location: {
         type: "water",
         name: "well",
-        position: {
+        position: inert({
             x: 1,
             y: 2
-        }
+        })
     }
 })
 
-const $count = $Signal(0)
+
+const $count = $State(0)
 
 const $tripleCount = () => $count() * 3 // derived without memoization
 
@@ -69,26 +66,41 @@ const location = frog$.location // returns an inert proxy with a $ property
 
 const location$ = location.$
 
-const position$ = o$(frog$.location.position)
+const position$ = $Model(frog$.location.position)
 //TODO: Keep a WeakMap of reactives so if an object is already made into a reactive, return that reactive instead of creating a new one
+
+
 
 
 function ListBlock(attributes: {
     list: string[], // initial value
     color: string
 }) {
-
     const $div = $Node()
+    const $divs = $Nodes()
+
+    onCreated(() => {
+        const div = $div()
+        const divs = toRaw($divs)
+    })
+
+    onRendered(() => {
+
+    })
+
+    onRenderCycleComplete(() => {
+
+    })
 
     const $count = $(0) // $SettableGet<number>
 
-    const list$ = o$(list);
+    const list$ = $Model(list);
 
     const $doubleCount = $(() => $count * 2) // Get<number>
 
-    const frog$ = o$(frog)
+    const frog$ = $Model(frog)
 
-    const $frog$ = $(o$(frog))
+    const $frog$ = $($Model(frog))
 
     const $frog$$ = $($Model(frog))
 
@@ -96,9 +108,15 @@ function ListBlock(attributes: {
 
     const $name = $prop(frog$, 'name') //$GetProp<string>
 
-    watch($Props(frog$, ['name', 'qualities'], () => {
+    watch($Props(frog$, [
+        'name',
+        'qualities'
+    ]), ([
+        name,
+        qualities
+    ]) => {
 
-    }))
+    })
 
     $initializeEffect(() => {
 
@@ -106,15 +124,14 @@ function ListBlock(attributes: {
 
     return Component({
         list$,
-
     },
-        <div>hello</div>
+        <div ref={$div}>hello</div>
     )
 }
 
 
 
-watch(o$(frog$.location.position), () => {
+watch($Model(frog$.location.position), () => {
 
 })
 
@@ -131,11 +148,11 @@ frog$$._$ // shallow reactive proxy that will not make any down stream objects r
 
 frog$$._o // raw
 
-const frog$ = frog$$.o$
+const frog$ = frog$$.$Model
 
 
 
-const todos$ = o$([{
+const todos$ = $Model([{
     content: "hi"
 }])
 

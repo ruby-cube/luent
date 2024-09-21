@@ -6,10 +6,10 @@
 // - derived signal in template
 // - derived signal with memo
 
-import { $, o$, $Signal } from "@rue/muonic"
+import { $, $Model, $State } from "@rue/muonic"
 
 export function TestCounterSignals() {
-    const $count = $Signal(0)
+    const $count = $State(0)
     const $doubleCount = $(() => $count() * 2)
 
     function increment() {
@@ -46,7 +46,7 @@ export function TestCounter() {
 }
 
 function useCounter() {
-    const counter$ = o$({
+    const counter$ = $Model({
         count: 0
     })
 

@@ -1,9 +1,8 @@
-import { PublicComponent, ComponentSetup, InternalComponent } from "../component/InternalComponent";
+import {  ComponentSetup, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag } from "../element/makeElement";
 import { ListData } from "../list/For";
-import { DerivedSignal, AnySignal } from "@rue/muonic/DerivedSignal";
 import { ComponentConfig, ElementConfig, RenderFunction } from "./makeNode";
-import { AtomicSignal } from "@rue/muonic";
+import { ReactiveGet, AtomicIon } from "@rue/muonic";
 
 
 export type NodeSetup<T extends HTMLTag | ComponentSetup> =
@@ -17,7 +16,7 @@ export type ItemNodeConfig<
     L extends ListData
 > =
     L extends (infer I)[] ?
-    ((item?: I, $index?: AtomicSignal<number>) => NodeSetup<T>)
-    : L extends AnySignal<(infer I)[]> ?
-    (item?: I, $index?: AtomicSignal<number>) => NodeSetup<T>
+    ((item?: I, $index?: AtomicIon<number>) => NodeSetup<T>)
+    : L extends ReactiveGet<(infer I)[]> ?
+    (item?: I, $index?: AtomicIon<number>) => NodeSetup<T>
     : never

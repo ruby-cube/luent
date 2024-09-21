@@ -21,9 +21,9 @@ export type ProviderComponentSetup<P extends never | AnyObject = never | AnyObje
 
 // export type Slot<T> = T extends AnyObject ? InternalComponent<T> : NodeEntity | NodeEntity[]
 export const COMPONENT = Symbol('publicComponent')
-// export type PublicComponent<T extends undefined | AnyObject = undefined | AnyObject> = T extends undefined ? undefined :  T // contains anything in expose
+export type PublicComponent<T extends AnyObject = AnyObject> = T // contains anything in expose
 
-export interface Component<T extends undefined | AnyObject = undefined | AnyObject> {
+export interface Component<T extends AnyObject = AnyObject> {
     component?: T;
     initialNodeEntities: NodeEntity
     mount: (
@@ -33,8 +33,8 @@ export interface Component<T extends undefined | AnyObject = undefined | AnyObje
     ) => void
 }
 
-export interface ComponentOutput<T extends undefined | AnyObject = undefined | AnyObject> {
-    component?: T;
+export interface ComponentOutput<T extends AnyObject = AnyObject> {
+    component?: PublicComponent<T>;
     initialNodeEntities: NodeEntity
 }
 export function Component<T extends AnyObject = AnyObject>(render: NodeEntity, exposedComponent?: T): ComponentOutput<T> {
@@ -53,7 +53,7 @@ export function Component<T extends AnyObject = AnyObject>(render: NodeEntity, e
     }
 }
 
-export class InternalComponent<T extends undefined | AnyObject = undefined | AnyObject> implements Component {
+export class InternalComponent<T extends AnyObject = AnyObject> implements Component {
     component: T | undefined = undefined;
     initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
 

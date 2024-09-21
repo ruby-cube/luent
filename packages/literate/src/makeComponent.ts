@@ -1,10 +1,11 @@
-import { COMPONENT, ComponentConfig, getCurrentIndex, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeSignal, PublicComponent, pushProvider, popProvider } from "@rue/lumo";
+import { COMPONENT, ComponentConfig, getCurrentIndex, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeIon, PublicComponent, pushProvider, popProvider } from "@rue/lumo";
 import { Literate } from "./Literate.js";
-import { AtomicSignal } from "@rue/muonic";
+import { AtomicIon, isIon } from "@rue/muonic";
 import { AnyObject, MaybePromise } from "@rue/types";
 import { collectEffects, getFlask } from "@rue/flask";
 import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
 import { getCurrentComponent } from "../../lumo/src/component/componentStack.js";
+import { isReactiveArray } from "../../muonic/src/reactivemodel/ReactiveArray.js";
 
 
 // const allPromises: Promise<any>[] = [] // collect promises from $Suspense
@@ -37,7 +38,7 @@ export function makeComponent(
     Component: SSRComponentSetup,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: AtomicSignal<number> | undefined
+    $index: AtomicIon<number> | undefined
 ): SSRComponent {
     const parent = getCurrentComponent<SSRComponent>()
     const component = new SSRComponent(parent);
@@ -55,7 +56,7 @@ export function runComponentSetup(
     component: SSRComponent,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: AtomicSignal<number> | undefined
+    $index: AtomicIon<number> | undefined
 ) {
     collectEffects((flask, outerFlask) => {
         component.setFlask(flask);
@@ -73,17 +74,22 @@ export function runComponentSetup(
 function initializeComponent(
     component: SSRComponent,
     output: Literate | Promise<SSRComponent> | [PublicComponent, Literate],
-    ref: NodeSignal | undefined,
-    $index: AtomicSignal<number> | undefined,
+    ref: NodeIon | undefined,
+    $index: AtomicIon<number> | undefined,
 ) {
     const _output = output instanceof Array ? output[1] : output;
-    const publicComponent = output instanceof Array ? output[0] : null;
+    const publicComponent = output instanceof Array ? output[0] : undefined;
 
     component.output = _output;
 
     if (ref) {
-        if ($index) initializeListRef(ref, publicComponent, $index)
-        else initializeRef(ref, publicComponent)
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use $Node or $Nodes ion as ref")
+        if ($index) {
+            initializeListRef(ref, publicComponent, $index)
+        }
+        else {
+            initializeRef(ref, publicComponent)
+        }
     }
 
     // const flask = component.flask!;

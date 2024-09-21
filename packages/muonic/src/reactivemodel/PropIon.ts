@@ -1,42 +1,42 @@
 import { AnyObject } from "@rue/types";
-import { getMetaReactive, isReactiveModel, o$, ReactiveModel, toRaw } from "./ReactiveModel";
+import { getMetaReactive, isReactiveModel, $Model, ReactiveModel, toRaw } from "./ReactiveModel";
 import { asObservedProp } from "./ObservedProp";
-import { $ } from "../derivations/DerivedSignal";
+import { $ } from "../derivations/DerivedIon";
 
 // export function $Props<T extends AnyObject, K extends keyof T>(model: T, keys: K[]) {
-//     const reactive = isReactiveModel(model) ? model : o$(model)
-//     const propsSignal = getMetaReactive(reactive).getMultiPropSignal(keys.toString())
+//     const reactive = isReactiveModel(model) ? model : $Model(model)
+//     const propsSignal = getMetaReactive(reactive).getMultiPropIon(keys.toString())
 //     if (propsSignal) return propsSignal;
 //     return $MultiPropsSignal(reactive, keys)
 // }
 
-export function isPropSignal(value: any): value is PropSignal {
+export function isPropIon(value: any): value is PropIon {
     if (!(value instanceof Function)) return false;
-    return value.name === "$propSignal"
+    return value.name === "__$propIon"
 }
 
 export function $Props<T extends AnyObject, K extends keyof T>(reactive: ReactiveModel<T>, keys: K[]) {
-    const propsSignal = $(() => {
+    const multiPropIon = $(() => {
         const values = []
         for (const key of keys) {
             values.push(reactive[key])
         }
         return values;
     })
-    // getMetaReactive(reactive).registerMultiPropSignal(keys.toString(), propsSignal)
-    return propsSignal
+    // getMetaReactive(reactive).registerMultiPropIon(keys.toString(), propsSignal)
+    return multiPropIon
 }
 
-export type PropSignal<T = any> = {
+export type PropIon<T = any> = {
     (): T;
     update: (toNewValue: (value: T) => T) => T
     setTo: (newValue: T) => T
 }
 
 export function $prop<T extends AnyObject, K extends keyof T>(model: T, key: K) {
-    const reactive = isReactiveModel(model) ? model : o$(model)
-    const propSignal = getMetaReactive(reactive).getPropSignal(key)
-    if (propSignal) return propSignal;
+    const reactive = isReactiveModel(model) ? model : $Model(model)
+    const propPod = getMetaReactive(reactive).getPropIon(key)
+    if (propPod) return propPod;
     return $Prop(reactive, key)
 }
 
@@ -44,37 +44,37 @@ function $Prop<T extends ReactiveModel, K extends keyof T, P extends T[K]>(react
     const rawTarget = toRaw(reactive)
     const meta = getMetaReactive(reactive);
 
-    function $propSignal() {
+    function __$propIon() {
         reregisterIfNeeded()
         return reactive[key];
     }
 
-    $propSignal.setTo = (newValue: P) => {
+    __$propIon.setTo = (newValue: P) => {
         reregisterIfNeeded()
         const value = rawTarget[key];
         return setValue(reactive, key, newValue, value)
     }
 
-    $propSignal.update = (toNewValue: (value: P) => P) => {
+    __$propIon.update = (toNewValue: (value: P) => P) => {
         reregisterIfNeeded()
         const value = rawTarget[key];
         const newValue = toNewValue(value)
         return setValue(reactive, key, newValue, value)
     }
 
-    meta.registerPropSignal(key, $propSignal)
+    meta.registerPropIon(key, __$propIon)
     const prop = asObservedProp(reactive, key)
     prop.onDestroy(() => {
-        meta.unregisterPropSignal(key)
+        meta.unregisterPropIon(key)
     })
 
     function reregisterIfNeeded() {
-        if (!meta.getPropSignal(key)) {
-            if (__DEV__) console.warn(`I'm curious how often and in what cases this happens: $propSignal for ${key.toString()} in${JSON.stringify(rawTarget)} is no longer observed, but there's still an active reference to it`)
-            meta.registerPropSignal(key, $propSignal) // This means $propSignal is not being watched and is not an atom anywhere, but it's still being used
+        if (!meta.getPropIon(key)) {
+            if (__DEV__) console.warn(`I'm curious how often and in what cases this happens: $propPod for ${key.toString()} in${JSON.stringify(rawTarget)} is no longer observed, but there's still an active reference to it`)
+            meta.registerPropIon(key, __$propIon) // This means $propPod is not being watched and is not an atom anywhere, but it's still being used
         }
     }
-    return $propSignal;
+    return __$propIon;
 }
 
 function setValue<T>(reactive: ReactiveModel, key: PropertyKey, newValue: T, oldValue: T) {

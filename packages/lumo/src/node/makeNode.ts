@@ -1,8 +1,8 @@
-import { DerivedSignal, AnySignal, AtomicSignal, getWithoutTracking, $Derived } from "@rue/muonic";
+import { DerivedIon, ReactiveGet, AtomicIon, getWithoutTracking, $Derived, ReactiveModel } from "@rue/muonic";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
-import { getNodeRef, InternalNodeRef, NodeReferent, NodeSignal } from "./$Node";
+import { getNodeArrayRef, InternalNodeRef, NodeReferent, NodeIon, InternalNodeArrayRef, NodesIon, getNodeIon } from "./$Node";
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../list/ListRenderKit";
@@ -18,7 +18,7 @@ export function jsx(tag: any, config: any, ...children: any[]) {
     return makeNode(tag, children, config || {})
 }
 
-export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | AnySignal<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
+export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveGet<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
 
 export type RenderFunction<Params = unknown> = Params extends [] ?
     (...args: Params) => NodeEntity[] | NodeEntity :
@@ -31,10 +31,10 @@ export type EventsConfig = {
 }
 
 // export type AssignedAttributes = {
-//     events: { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] };
+//     events: { [key: string]: (EventListener | DerivedIon<EventListener | null>)[] };
 //     classes: (((o: DOMTokenList) => void) | string)[],
 //     styles: (((o: CSSStyleDeclaration) => void) | string)[],
-//     other: { [key: string]: (any | DerivedSignal<any>)[] }
+//     other: { [key: string]: (any | DerivedIon<any>)[] }
 // }
 
 export type ElementConfig<K extends HTMLTag = HTMLTag> = {
@@ -46,7 +46,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 } & NodeSetup<K>
 
 type NodeSetup<T extends HTMLTag | ComponentSetup> = {
-    ref?: NodeSignal<T>,
+    ref?: NodeIon<T>,
 }
 
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
@@ -58,7 +58,7 @@ export function makeNode(
     childNodes: NodeEntity[] | InferSlot,
     config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent {
-    const $index = getCurrentIndex(); //TODO: I need to understand $index and whether it needs to be a signal or if rerenders will take care of it
+    const $index = getCurrentIndex(); //TODO: I need to understand $index and whether it needs to be an ion or if rerenders will take care of it
     if (typeof nodeType === "string")
         return makeElement(
             nodeType,
@@ -74,7 +74,7 @@ export function makeNode(
     )
 }
 
-// export function _getNodeConfig(ref: NodeSignal | undefined) {
+// export function _getNodeConfig(ref: NodeIon | undefined) {
 //     if (ref) {
 //         const config = getNodeConfig(ref);
 //         if (config instanceof Function) {
@@ -88,69 +88,51 @@ export function makeNode(
 // }
 
 export function initializeListRef( // should this be initialize ref?
-    ref: NodeSignal,
-    value: NodeReferent,
-    $index: AtomicSignal<number>
+    ref: NodesIon,
+    value: NodeReferent | undefined,
+    $index: AtomicIon<number>
     // options?: ElementOptions
 ) {
-    if (getWithoutTracking($index) === 0 && getWithoutTracking(ref)) //QUESTION: Not sure if get without tracking is necessary
+    const array = ref()!
+    const _existingRef = getNodeArrayRef(array)
+    if (getWithoutTracking($index) === 0 && _existingRef) //QUESTION: Not sure if get without tracking is necessary
         throw new Error('This node list ref has already be initialized. A node list ref cannot be used multiple times')
-    const _ref = useInternalNodeRef(ref)
-    _ref.assignValue(value, $index);
+    const _ref = _existingRef || new InternalNodeArrayRef(ref)
+    if (value) {
+        _ref.assignValue(value, $index);
+    }
     if (_ref.initialized === true) return; // to prevent registering multiple watchers for lists
 
     // dispose with outer flask because we don't want to dispose when first item is removed
     const outerFlask = getFlask()?.outer
     outerFlask?.onDisposal(() => {
-        _ref.setValue(undefined);
+        _ref.setValue([]);
         _ref.initialized = false;
     })
 
     if (isSettingUpList() && !__SSR__) {
-        const listUpdatedListener =
-            onListUpdated((toFromIndices) => {
-                _ref.updateListRef(toFromIndices)
-            }, { flask: outerFlask })
+        onListUpdated((toFromIndices) => {
+            _ref.updateListRef(toFromIndices)
+        }, { flask: outerFlask })
     }
 
     _ref.markInitialized()
 }
 
-export function initializeRef(ref: NodeSignal, value: NodeReferent | null) {
+export function initializeRef(ref: NodeIon, value: NodeReferent | undefined) {
     if (getWithoutTracking(ref)) //QUESTION: Not sure if get without tracking is necessary
         throw new Error("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")
-    const _ref = useInternalNodeRef(ref);
-    _ref.assignValue(value)
-    const flask = getFlask()
-    flask?.onDisposal(() => {
-        _ref.setValue(undefined);
-    })
+    const _ref = new InternalNodeRef(ref)
+    if (value) {
+        _ref.assignValue(value)
+        const flask = getFlask()
+        flask?.onDisposal(() => {
+            _ref.setValue(undefined);
+        })
+    }
 }
 
-export function useInternalNodeRef(ref: NodeSignal) {
-    const refValue = ref()
-    return refValue instanceof Array ? getNodeRef(refValue) || new InternalNodeRef(ref) : new InternalNodeRef(ref)
-}
-
-export function awaitNodes<T>($nodes: NodeSignal<T>[], task: (nodes: T[]) => void, options: WatchOptions) {
-    const _$nodes = $Derived(() => {
-        const nodes = []
-        for (const $node of $nodes) {
-            nodes.push($node())
-        }
-        return nodes;
-    })
-    return watch(_$nodes, task, { ...options || {}, once: true })
-}
-//     [$button, $countDiv],
-//     ([button, countDiv]) => {
-
-//     }
-// )
-
-// watch(() => [$button(), $countDiv()], ([button, countDiv]) => {
-//     console.log("node ref", button, countDiv)
-// }, {
-//     phase: Phase.RENDER,
-//     once: true
-// })
+// export function useInternalNodeRef(ref: NodeIon | ReactiveModel<any[]>) {
+//     const refValue = ref()
+//     return refValue instanceof Array ? getNodeArrayRef(refValue) || new InternalNodeArrayRef(ref) : new InternalNodeRef(ref)
+// }

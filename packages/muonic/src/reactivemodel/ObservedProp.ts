@@ -6,7 +6,7 @@ import { watch } from "fs";
 import { isIntegerKey } from "./ReactiveArray";
 import { MetaReactiveCollection, MetaReactiveModel } from "./MetaReactiveModel";
 import { AnyObject } from "@rue/types";
-import { PropSignal } from "./PropSignal";
+import { PropIon } from "./PropIon";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
 
@@ -113,7 +113,7 @@ function createObservedProp(
 //         observedPropMap.delete(metaReactive)
 //     }
 // }
-export function toPropSignal(value: any): PropSignal | undefined {
+export function toPropIon(value: any): PropIon | undefined {
     if (!(value instanceof ObservedProp)) return undefined;
-    return value.metaReactive.getPropSignal(value.key)
+    return value.metaReactive.getPropIon(value.key)
 }

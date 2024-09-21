@@ -1,13 +1,13 @@
 import { ActiveListener } from "@rue/flask";
-import { isAnySignal, AnySignal } from "../derivations/DerivedSignal";
-import { DeepReactiveModel, isDeepReactive, isReactiveModel, isShallowReactive, o$, $Model, ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
+import { isReactiveGet, ReactiveGet } from "../derivations/DerivedIon";
+import { DeepReactiveModel, isDeepReactive, isReactiveModel, isShallowReactive, $Model, ReactiveModel, toRaw, $Deep } from "../reactivemodel/ReactiveModel";
 import { ChangeEffect, isMutationOp, MutationEffect, watch, WatchOptions } from "./watch";
 import { insertOps } from "../reactivemodel/ReactiveCapsule";
 import { isIntegerKey } from "../reactivemodel/ReactiveArray";
 import { AnyObject } from "@rue/types";
 import { shallowClone } from "../reactivemodel/TimeTraveler";
 
-type WatchersMap = Map<AnyObject | AnySignal, ActiveListener>
+type WatchersMap = Map<AnyObject | ReactiveGet, ActiveListener>
 
 
 export type KeyPath = PropertyKey[]
@@ -15,7 +15,7 @@ export type KeyPath = PropertyKey[]
 
 
 
-export function watchItems<T extends AnySignal>(
+export function watchItems<T extends ReactiveGet>(
     reactiveList: ReactiveModel<T[]>,
     effect: T extends () => infer R ? ChangeEffect<R> : never,
     options?: WatchOptions
@@ -25,18 +25,18 @@ export function watchItems<T extends ReactiveModel>(
     effect: MutationEffect<T>,
     options?: WatchOptions
 ): ActiveListener
-export function watchItems<T extends AnySignal | ReactiveModel>(
+export function watchItems<T extends ReactiveGet | ReactiveModel>(
     reactiveList: ReactiveModel<T[]>,
     effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>,
     options?: WatchOptions
 ) {
-    const array = toRaw(reactiveList) as T[] | AnySignal<T>[]
+    const array = toRaw(reactiveList) as T[] | ReactiveGet<T>[]
     const watchers: WatchersMap = new Map()
     const _options = options || {}
 
     for (const item of array) {
         const target = maybeReactivize(item, reactiveList)
-        const watcher = watch(<AnySignal>target, effect, _options)
+        const watcher = watch(<ReactiveGet>target, effect, _options)
         watchers.set(item, watcher) // typecasting one of the possibilities to quiet typescript. Typescript can't handle intersections that mixes overloads
     }
 
@@ -88,7 +88,7 @@ export function watchItems<T extends AnySignal | ReactiveModel>(
     }
 }
 
-function watchNewItem(newItem: AnyObject | AnySignal, effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap, reactiveList: DeepReactiveModel | ReactiveModel) {
+function watchNewItem(newItem: AnyObject | ReactiveGet, effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap, reactiveList: DeepReactiveModel | ReactiveModel) {
     const target = maybeReactivize(newItem, reactiveList)
     const watcher = watch(target, effect, options)
     watchers.set(newItem, watcher) //TODO: must inherit original flask
@@ -102,7 +102,7 @@ function watchNewItems(newItems: AnyObject[], effect: ChangeEffect | MutationEff
     return watchers;
 }
 
-function unwatchItem(item: AnyObject | AnySignal, watchers: WatchersMap) {
+function unwatchItem(item: AnyObject | ReactiveGet, watchers: WatchersMap) {
     const watcher = watchers.get(item)
     if (!watcher) throw new Error("No watcher that corresponds with this item :( This should never happen")
     watcher.stop()
@@ -120,19 +120,19 @@ function unwatchAll(watchers: WatchersMap) {
     }
 }
 
-function maybeReactivize(item: AnySignal | AnyObject, reactiveList: DeepReactiveModel | ReactiveModel) {
-    return isDeepReactive(reactiveList) ? $Model(item) : item
+function maybeReactivize(item: ReactiveGet | AnyObject, reactiveList: DeepReactiveModel | ReactiveModel) {
+    return isDeepReactive(reactiveList) ? $Deep(item) : item
 }
 
 
 //TODO: Write overloads
 // export function watchCollectionValues<T extends AnyObject>(
-//     reactiveCollection: DeepReactiveModel<Set<T>> | DeepReactiveModel<Map<any, T>> | ReactiveModel<Set<ReactiveModel<T>>> | ReactiveModel<Set<AnySignal<T>>> | ReactiveModel<Map<any, ReactiveModel<T>>> | ReactiveModel<Map<any, AnySignal<T>>>,
+//     reactiveCollection: DeepReactiveModel<Set<T>> | DeepReactiveModel<Map<any, T>> | ReactiveModel<Set<ReactiveModel<T>>> | ReactiveModel<Set<ReactiveGet<T>>> | ReactiveModel<Map<any, ReactiveModel<T>>> | ReactiveModel<Map<any, ReactiveGet<T>>>,
 //     effect: ChangeEffect | MutationEffect,
 //     options?: WatchOptions
 // ) {
 
-    export function watchCollectionValues<T extends AnySignal>(
+    export function watchCollectionValues<T extends ReactiveGet>(
         reactiveCollection: ReactiveModel<Map<any, T>> | ReactiveModel<Set<T>>,
         effect: T extends () => infer R ? ChangeEffect<R> : never,
         options?: WatchOptions
@@ -142,7 +142,7 @@ function maybeReactivize(item: AnySignal | AnyObject, reactiveList: DeepReactive
         effect: MutationEffect<T>,
         options?: WatchOptions
     ): ActiveListener
-    export function watchCollectionValues<T extends AnySignal | ReactiveModel>(
+    export function watchCollectionValues<T extends ReactiveGet | ReactiveModel>(
         reactiveCollection: ReactiveModel<Map<any, T>> | ReactiveModel<Set<T>>,
         effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>,
         options?: WatchOptions
@@ -204,7 +204,7 @@ function maybeReactivize(item: AnySignal | AnyObject, reactiveList: DeepReactive
 
 
 
-export function watchMapKeys<T extends AnySignal>(
+export function watchMapKeys<T extends ReactiveGet>(
     reactiveMap: ReactiveModel<Map<T, any>>,
     effect: T extends () => infer R ? ChangeEffect<R> : never,
     options?: WatchOptions
@@ -214,7 +214,7 @@ export function watchMapKeys<T extends ReactiveModel>(
     effect: MutationEffect<T>,
     options?: WatchOptions
 ): ActiveListener
-export function watchMapKeys<T extends AnySignal | ReactiveModel>(
+export function watchMapKeys<T extends ReactiveGet | ReactiveModel>(
     reactiveMap: ReactiveModel<Map<T, any>>,
     effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>,
     options?: WatchOptions

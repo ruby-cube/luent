@@ -7,8 +7,8 @@
 import * as CSS from "csstype";
 import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
-import { AnySignal } from "@rue/muonic";
-import { NodeSignal } from "../../src/node/$Node";
+import { ReactiveGet } from "@rue/muonic";
+import { NodeIon } from "../../src/node/$Node";
 
 export function jsxDEV(): "frog"
 export function jsx(): "frog"
@@ -2390,7 +2390,7 @@ declare namespace React {
 
     namespace L {
         type ReactivizeProps<P extends { [key: string]: any }> = {
-            [K in keyof P]: P[K] | AnySignal<P[K]>
+            [K in keyof P]: P[K] | ReactiveGet<P[K]>
         }
 
         type ListenerLifespan = ListenOptions;
@@ -2398,7 +2398,7 @@ declare namespace React {
         const THIS_NODE = 0 as const;
         const CHILD_NODES = 1 as const;
 
-        type EventTarget = string | NodeSignal | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
+        type EventTarget = string | NodeIon | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
 
         type EventTargetOptions = {
             targets: EventTarget[]
@@ -4264,7 +4264,7 @@ declare global {
 
     namespace Lumo {
         type ReactivizeProps<P extends { [key: string]: any }> = {
-            [K in keyof P]: Exclude<P[K], undefined> | AnySignal<Exclude<P[K], undefined>> // exclude undefined because undefined comes from optional props
+            [K in keyof P]: Exclude<P[K], undefined> | ReactiveGet<Exclude<P[K], undefined>> // exclude undefined because undefined comes from optional props
         }
     }
 
@@ -4315,8 +4315,8 @@ declare global {
 
         type IntrinsicElements = {
             [K in keyof JSX._IntrinsicElements]: Lumo.ReactivizeProps<JSX._IntrinsicElements[K]> & {
-                class?: string | AnySignal<string | undefined> | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[];
-                style?: CSSProperties | AnySignal<CSSProperties | undefined> | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[];
+                class?: string | ReactiveGet<string | undefined> | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[];
+                style?: CSSProperties | ReactiveGet<CSSProperties | undefined> | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[];
                 attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
             }
         }

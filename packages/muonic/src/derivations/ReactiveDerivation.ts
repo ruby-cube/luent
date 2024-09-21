@@ -1,9 +1,6 @@
 import { DependencyTracker, getActiveTracker, getDependencyTracker } from "./DependencyTracker";
 import { asReactiveAtom, ReactiveAtom, ReactivePrimitive } from "./ReactiveAtom";
-import { AnyObject } from "@rue/types";
 import { asWatchTarget, isWatched, WatchTarget } from "../effects/WatchTarget";
-import { ReactiveFunction } from "./ReactiveFunction";
-import { DerivedSignal } from "./DerivedSignal";
 import { ReactiveEntity } from "../ReactiveEntity";
 
 

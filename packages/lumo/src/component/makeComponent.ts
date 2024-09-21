@@ -1,12 +1,13 @@
 import { ComponentSetup, InternalComponent, Component, ProviderComponentSetup, ComponentOutput } from "./InternalComponent";
-import { NodeSignal } from "../node/$Node";
+import { NodeIon } from "../node/$Node";
 import { ComponentConfig, initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { AtomicSignal } from "@rue/muonic";
+import { AtomicIon, isIon, ReactiveModel } from "@rue/muonic";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex } from "../list/ListRenderKit";
 import { getCurrentProvider, popProvider, provide, pushProvider } from "./provide";
 import { ProviderComponent } from "./ProviderComponent";
+import { isReactiveArray } from "../../../muonic/src/reactivemodel/ReactiveArray";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
@@ -51,7 +52,7 @@ export function makeComponent(
     Component: ComponentSetup,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: AtomicSignal<number> | undefined
+    $index: AtomicIon<number> | undefined
 ): InternalComponent {
     const component = new InternalComponent();
     const output = Component({ ...config, Slot })
@@ -63,7 +64,7 @@ function makeProviderComponent(
     Component: ComponentSetup,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: AtomicSignal<number> | undefined
+    $index: AtomicIon<number> | undefined
 ): ProviderComponent {
     const parent = getCurrentProvider();
     if (!parent) throw new Error("Component tree has no root")
@@ -82,8 +83,8 @@ function makeProviderComponent(
 // style?: { [K in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[K] };
 // $class?: ((o: DOMTokenList) => void)[],
 // $style?: ((o: CSSStyleDeclaration) => void)[],
-// ref?: NodeSignal,
-// $index?: AtomicSignal<number>
+// ref?: NodeIon,
+// $index?: AtomicIon<number>
 
 
 
@@ -125,7 +126,7 @@ export function runProviderComponentSetup(
     component: InternalComponent,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: AtomicSignal<number> | undefined
+    $index: AtomicIon<number> | undefined
 ) {
     const output = Component({ ...config, Slot }, provide)
     initializeComponent(component, output, config.ref, $index)
@@ -136,8 +137,8 @@ export function runProviderComponentSetup(
 function initializeComponent(
     component: InternalComponent,
     output: ComponentOutput,
-    ref: NodeSignal | undefined,
-    $index: AtomicSignal<number> | undefined,
+    ref: NodeIon | ReactiveModel<any[]> | undefined,
+    $index: AtomicIon<number> | undefined,
 ) {
     if (output instanceof Promise)
         throw new Error("Components cannot return a promise. Use $Suspense and $await to handle promises within component setup")
@@ -146,9 +147,14 @@ function initializeComponent(
     component.initialNodeEntities = nodeEntities;
 
     if (ref) {
-        const publicComponent = output.component || null;
-        if ($index) initializeListRef(ref, publicComponent, $index)
-        else initializeRef(ref, publicComponent)
+        const publicComponent = output.component || undefined;
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use $Node or $Nodes ion as ref")
+        if ($index) {
+            initializeListRef(ref, publicComponent, $index)
+        }
+        else {
+            initializeRef(ref, publicComponent)
+        }
     }
 }
 
@@ -179,7 +185,7 @@ function initializeComponent(
 //             }
 //         }
 //     }
-//     return target as { [key: string]: (EventListener | DerivedSignal<EventListener | null>)[] };
+//     return target as { [key: string]: (EventListener | DerivedIon<EventListener | null>)[] };
 // }
 
 // function assignAttributes(nodeEntity: NodeEntity, attributes: AssignedAttributes) {
@@ -221,7 +227,7 @@ function initializeComponent(
 
 
 
-// function setUpRefUpdates(ref: InternalNodeRef, component: Component, $index: AtomicSignal<number> | undefined, preserve: boolean) {
+// function setUpRefUpdates(ref: InternalNodeRef, component: Component, $index: AtomicIon<number> | undefined, preserve: boolean) {
 //     if (ref.initialized === true) return;
 //     // if ($index) { // only initiate once per list
 //     //     const components = ref.components;

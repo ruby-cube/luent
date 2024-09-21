@@ -4,7 +4,7 @@ import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
 import { ReactiveDerivation } from "../derivations/ReactiveDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
-import { $, isAnySignal, AnySignal, $Derived } from "../derivations/DerivedSignal";
+import { $, isReactiveGet, ReactiveGet, $Derived } from "../derivations/DerivedIon";
 import { DeepReactiveModel, getMetaReactive, isReactiveModel, ReactiveModel, toRaw, } from "../reactivemodel/ReactiveModel";
 import { areEqual } from "./areEqual";
 import { createReactiveFunction, ReactiveFunction } from "../derivations/ReactiveFunction";
@@ -58,7 +58,7 @@ export function isSetOp(op: AnyObject): op is SetOp {
 
 
 export type MutationEffect<T extends ReactiveModel = ReactiveModel> = (newValue: T, mutations: MutationRecord[]) => void
-export type ChangeEffect<T = any> = (newValue: T, oldValue?: T) => void
+export type ChangeEffect<T = any> = (newValue: T, oldValue: T) => void
 export type ReactiveEffect = {
     (): void;
     [META]: ReactiveDerivation;
@@ -83,14 +83,14 @@ type Effect = () => void
 
 export type RawEffect = (a: any, b: any) => void
 
-export function watch<T extends () => any | AnySignal>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
+export function watch<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
 export function watch<T extends ReactiveModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
-export function watch<T extends () => any | AnySignal | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
+export function watch<T extends () => any | ReactiveGet | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
     if (!(target instanceof Function) && isReactiveModel(target)) {
         return watchReactiveModel(target, effect, options || {})
     }
     // const retrack = options?.retrack ?? true
-    const _target = !isAnySignal(target) ? $Derived(target) : target as AnySignal;
+    const _target = !isReactiveGet(target) ? $Derived(target) : target as ReactiveGet;
     // createReactiveFunction(<() => any>target, retrack).initialize()
     const eager = options?.eager
     const phase = options?.phase || Phase.BEFORE_RENDER
@@ -160,10 +160,9 @@ function scheduleEffectEagerly(effect: Effect, phase: Phase, target?: any) {
     else useRenderCycle().scheduleEffect(target || effect, effect, phase)
 }
 
-export function $initializeEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived signal and effect combined into one function
+export function $initializeEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
     const phase = options?.phase || Phase.BEFORE_RENDER;
     const retrack = options?.retrack || false;
-    const forNextCycle = options?.cycle === 'next' ? true : false;
     const reactiveEffect = createReactiveFunction(effect, retrack)
     const watchTarget = asWatchTarget(reactiveEffect);
 
@@ -186,7 +185,7 @@ function setUpWatcher(
     options: ListenerOptions & RenderCycleOptions,
     metaReactiveFunction?: ReactiveDerivation
 ) {
-    const forNextCycle = options?.cycle === 'next';
+    const forNextCycle = options?.cycle === 'next' ? true : false;
 
     return $listen(effect, options || {}, {
         enroll(_effect) {

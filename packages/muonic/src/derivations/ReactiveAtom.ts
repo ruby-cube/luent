@@ -1,11 +1,11 @@
-import { AtomicSignal, MetaSignal } from "../Signal";
+import { AtomicIon, MetaIon } from "../Ion";
 import { ObservedProp } from "../reactivemodel/ObservedProp";
 import { TrackedOp } from "../reactivemodel/TrackedOp";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 
 export const CLEAN_UP = 'x__cleanUp'
 
-export type ReactivePrimitive = AtomicSignal | ObservedProp | TrackedOp
+export type ReactivePrimitive = AtomicIon | ObservedProp | TrackedOp
 
 
 const reactiveAtomMap: WeakMap<ReactivePrimitive, ReactiveAtom> = new WeakMap()

@@ -1,6 +1,6 @@
 import { EffectFlask } from "@rue/flask";
 import { DOMNode, InternalComponent } from "../component/InternalComponent";
-import { NodeSignal } from "./$Node";
+import { NodeIon } from "./$Node";
 
 // Node Pods represent groups of nodes created by `mXsFor` and `mXIf`.
 // 
@@ -43,7 +43,7 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
     index?: number;
     pod?: _DynamicNodePod;
     // componentsToUnmount: InternalComponent[] = [];
-    refs: NodeSignal[] = [];
+    refs: NodeIon[] = [];
 
     // flask?: EffectFlask // for dynamic lists to dispose of effects
 

@@ -1,4 +1,4 @@
-import { $Signal, isAnySignal, isReactiveModel, AtomicSignal, ReactiveModel, toRaw, shallowClone, AnySignal, isDeepReactive, asDeepReactive, isSignal, ModelReactivityDepth, getMetaSignal, Phase } from "@rue/muonic";
+import { $State, isReactiveGet, isReactiveModel, AtomicIon, ReactiveModel, toRaw, shallowClone, ReactiveGet, isDeepReactive, asDeepReactive, isIon, ModelReactivityDepth, getMetaIon, Phase } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
@@ -22,13 +22,13 @@ type Count = number
 const dynamicNodeMap: WeakMap<_NodePod, DynamicNode> = new WeakMap()
 
 // let currentItem: any;
-let $currentIndex: AtomicSignal<number> | undefined;
+let $currentIndex: AtomicIon<number> | undefined;
 
-export function getCurrentIndex(): AtomicSignal<number> | undefined {
+export function getCurrentIndex(): AtomicIon<number> | undefined {
     return $currentIndex
 }
 
-export function setCurrentIndex($index: AtomicSignal<number> | undefined) {
+export function setCurrentIndex($index: AtomicIon<number> | undefined) {
     // currentItem = item;
     $currentIndex = $index;
 }
@@ -36,7 +36,7 @@ export function setCurrentIndex($index: AtomicSignal<number> | undefined) {
 export class ListRenderKit<T = any> {
     constructor(
         public renderItem: RenderItem<T>, //QUESTION: Does this need the context object?
-        public data: Collection<T> | ReactiveModel<Collection<T>> | AnySignal<Collection<T>>,
+        public data: Collection<T> | ReactiveModel<Collection<T>> | ReactiveGet<Collection<T>>,
         public provider: ProviderComponent,
         public idKey: string | undefined
     ) { }
@@ -69,17 +69,17 @@ export class ListRenderKit<T = any> {
         const renderItem = this.renderItem
         const idKey = this.idKey
         const provider = this.provider
-        const list = isAnySignal(data) ? data() : <Collection<any>>data;
+        const list = isReactiveGet(data) ? data() : <Collection<any>>data;
         const _list = list instanceof Array ? list : list //TODO: need to implement for sets, maps, and objects
         const _isReactiveModel = isReactiveModel(data)
-        const isDynamic = _isReactiveModel || isAnySignal(data);
+        const isDynamic = _isReactiveModel || isReactiveGet(data);
         const dynamicNodePod = this.dynamicNodePod = isDynamic ? nodePod.appendDynamicPod() : undefined;
-        const indices: AtomicSignal<number>[] = []
+        const indices: AtomicIon<number>[] = []
 
 
         pushList(this);
         for (let i = 0; i < _list.length; i++) {
-            const $index = $Signal(i)
+            const $index = $State(i)
             const item = _list[i]
             // currentItem = item;
             $currentIndex = $index;
@@ -167,7 +167,7 @@ export class ListRenderKit<T = any> {
         const indicesAndFragments: [number, DocumentFragment][] = []
         let fragment = new DocumentFragment();
 
-        const newIndices: AtomicSignal<number>[] = [];
+        const newIndices: AtomicIon<number>[] = [];
         const toFromIndices: [number, number][] = []
 
         for (let i = 0; i < newUArray.length; i++) {
@@ -202,7 +202,7 @@ export class ListRenderKit<T = any> {
 
             if (isNewItem(uItem)) {
                 const item = getOriginalItem(uItem, newUArray)
-                const $index = $Signal(i)
+                const $index = $State(i)
                 setCurrentIndex($index); // to retreive config
                 newIndices.push($index);
                 // create and collect consecutive new items onto the same fragment
@@ -212,7 +212,7 @@ export class ListRenderKit<T = any> {
                 pushProvider(this.provider)
                 pushList(this)
                 const list = this.data;
-                const _item = isDeepReactive(list) || isSignal(list) && getMetaSignal(list).depth === ModelReactivityDepth.DEEP ? asDeepReactive(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
+                const _item = isDeepReactive(list) || isIon(list) && getMetaIon(list).depth === ModelReactivityDepth.DEEP ? asDeepReactive(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
                 dynamicNode.activate(function renderNewListItem() {
                     const nodeEntities = normalizeToArray(renderItem(_item, $index));
                     for (const nodeEntity of nodeEntities!) {
@@ -276,7 +276,7 @@ export class ListRenderKit<T = any> {
         //     console.log('nodePods',nodePods)
         //     for (const nodePod of nodePods) {
         //         nodePod.forEachNode((node, index) => {
-        //             const ref = getNodeRef(node); //FIX: THis is broken .. this only assigns a ref to the root nodes of a list
+        //             const ref = getNodeArrayRef(node); //FIX: THis is broken .. this only assigns a ref to the root nodes of a list
         //             console.log("inserting node into ref!", ref)
         //             if (ref) ref.insertNode(<Element>node, index!)
         //                 if (ref) console.log(ref.o)
@@ -287,11 +287,11 @@ export class ListRenderKit<T = any> {
 }
 
 export class DynamicIndices {
-    current: AtomicSignal<number>[];
-    constructor(indices: AtomicSignal<number>[]) {
+    current: AtomicIon<number>[];
+    constructor(indices: AtomicIon<number>[]) {
         this.current = indices
     }
-    update(newIndices: AtomicSignal<number>[]) {
+    update(newIndices: AtomicIon<number>[]) {
         this.current = newIndices
     }
 }
@@ -303,7 +303,7 @@ export class DynamicIndices {
 
 // function removeNodesFromRef(nodePod: _NodePod) {
 //     nodePod.forEachNode((node, index) => {
-//         const ref = getNodeRef(node)
+//         const ref = getNodeArrayRef(node)
 //         if (ref) ref.removeNode(index!) //TODO: This
 //     })
 // }

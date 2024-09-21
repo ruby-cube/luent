@@ -1,8 +1,8 @@
-import { getWithoutTracking, isAnySignal, AnySignal, Phase } from "@rue/muonic";
+import { getWithoutTracking, isReactiveGet, ReactiveGet, Phase } from "@rue/muonic";
 import { _NodePod } from "./NodePod";
 import { watch} from "../watch/watchAndPreserve";
 
-export function mountTextNode(parent: Element, text: AnySignal | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
+export function mountTextNode(parent: Element, text: ReactiveGet | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
 
     const textNode = createTextNode(text); //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
     if (nodePod) {
@@ -12,12 +12,12 @@ export function mountTextNode(parent: Element, text: AnySignal | any, nodePod?: 
     const root = fragment ? fragment : parent;
     root.appendChild(textNode)
 
-    if (isAnySignal(text)) {
+    if (isReactiveGet(text)) {
         keepTextNodeUpdated(text, textNode)
     }
 }
 
-function keepTextNodeUpdated($text: AnySignal<any>, textNode: CharacterData) {
+function keepTextNodeUpdated($text: ReactiveGet<any>, textNode: CharacterData) {
     watch($text, (newValue: any) => {
         textNode.data = toString(newValue);
     }, { phase: Phase.RENDER, __devName: keepTextNodeUpdated.name });
@@ -25,8 +25,8 @@ function keepTextNodeUpdated($text: AnySignal<any>, textNode: CharacterData) {
 
 
 
-function createTextNode(value: AnySignal | any) {
-    const _value = isAnySignal(value) ? getWithoutTracking(value) : value;
+function createTextNode(value: ReactiveGet | any) {
+    const _value = isReactiveGet(value) ? getWithoutTracking(value) : value;
     const text = toString(_value)
     const textNode = document.createTextNode(text);
     return textNode;

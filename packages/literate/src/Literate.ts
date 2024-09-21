@@ -2,20 +2,20 @@ import { EffectFlask } from "@rue/flask";
 import { PublicComponent } from "@rue/lumo";
 import { SSRComponent } from "./SSRComponent.js";
 import { getResolvedComponent, isResolved } from "./PendingComponentMap.js";
-import { isAnySignal, AtomicSignal } from "@rue/muonic";
+import { isReactiveGet, AtomicIon } from "@rue/muonic";
 
 type AnyObject = { [key: string | symbol | number]: any }
 // export type SSRComponent<T extends AnyObject = AnyObject> = { render: () => string } & T;
 
 // export type MaybePromise<T extends AnyObject = AnyObject> = T | Promise<T>
 
-export function fromEntries<T>(list: T[] | AtomicSignal<T[]>, render: (item: T, index: number) => string) {
-    if (isAnySignal(list)) {
+export function fromEntries<T>(list: T[] | AtomicIon<T[]>, render: (item: T, index: number) => string) {
+    if (isReactiveGet(list)) {
         return () => buildList(list)
     }
 
-    function buildList(list: T[] | AtomicSignal<T[]>) {
-        const _list = isAnySignal(list) ? list() : list
+    function buildList(list: T[] | AtomicIon<T[]>) {
+        const _list = isReactiveGet(list) ? list() : list
         let result = ''
         for (let i = 0; i < _list.length; i++) {
             const item = _list[i];
@@ -36,7 +36,7 @@ export function html(...args: any[]) {
 
     // for (let i = 1; i < args.length; i++) {
     //     const value = args[i]
-    //     // if (isAnySignal(value)) {
+    //     // if (isReactiveGet(value)) {
     //     //     const pendingValue = new Promise((resolve) => {
     //     //         watch(value, (newValue) => {
     //     //             resolve(newValue)

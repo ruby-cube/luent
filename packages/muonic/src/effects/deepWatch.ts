@@ -52,7 +52,7 @@ export function isSetOp(op: AnyObject): op is SetOp {
 
 // }, { deep: true })
 
-// const state$ = o$({
+// const state$ = $Model({
 //     a: {
 //         b: {
 //             pet: "cat"

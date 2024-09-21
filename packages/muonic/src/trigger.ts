@@ -1,19 +1,19 @@
 import { asReactiveAtom, isReactiveAtom, ReactivePrimitive } from "./derivations/ReactiveAtom";
 import { getMetaReactive, ReactiveModel, toRaw } from "./reactivemodel/ReactiveModel";
-import { AtomicSignal, MetaSignal } from "./Signal";
-import { ObservedProp, toPropSignal } from "./reactivemodel/ObservedProp";
+import { AtomicIon, MetaIon } from "./Ion";
+import { ObservedProp, toPropIon } from "./reactivemodel/ObservedProp";
 import { asWatchTarget, isWatched } from "./effects/WatchTarget";
 import { getCurrentRenderCycle } from "./effects/RenderCycle";
 import { getWithoutTracking } from "./derivations/DependencyTracker";
 
 
-export function trigger(target: AtomicSignal | ObservedProp) {
+export function trigger(target: AtomicIon | ObservedProp) {
     if (__DEV__ && getCurrentRenderCycle() && getCurrentRenderCycle()!.phase > 1) 
         console.warn(`CASE RESEARCH: Reactive entity triggered during phase ${getCurrentRenderCycle()!.phase}:`, target, getWithoutTracking(target))
-    const propSignal = toPropSignal(target)
+    const propPod = toPropIon(target)
 
-    if (propSignal && isWatched(target)) {
-        asWatchTarget(propSignal).triggerEffects()
+    if (propPod && isWatched(target)) {
+        asWatchTarget(propPod).triggerEffects()
     }
 
     if (isWatched(target)) {

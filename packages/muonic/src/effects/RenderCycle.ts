@@ -7,7 +7,7 @@ import { MetaReactiveModel } from "../reactivemodel/MetaReactiveModel";
 // import { runEffect } from "./watch";
 
 export type Watchable = any
-// AtomicSignal | DerivedSignal | ReactiveFunction  | ReactiveModel | ObservedProp
+// AtomicIon | DerivedIon | ReactiveFunction  | ReactiveModel | ObservedProp
 export type Effect = (...args: any[]) => void;
 
 // export type Phase = Phase.BEFORE_RENDER | Phase.RENDER | Phase.AFTER_RENDER | Phase.SYNC
