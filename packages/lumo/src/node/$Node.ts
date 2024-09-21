@@ -2,7 +2,7 @@ import { ComponentOutput, ComponentSetup, PublicComponent } from "../component/I
 import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
-import { $State, AtomicIon, asReadonly, ReadonlyIon, $Model, ReactiveModel } from "@rue/muonic"
+import { $State, AtomicIon, asReadonly, ReadonlyIon, ionic, ReactiveModel } from "@rue/muonic"
 import { HTMLTag } from "../element/makeElement"
 import { isUpdatingList } from "../list/listStack"
 

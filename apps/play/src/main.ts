@@ -11,8 +11,8 @@ import './style.css'
 import { configureFlask } from '../../../packages/flask/initFlask';
 import { List } from './TestReactiveModel';
 import { MountIf } from './TestMountIf';
-// import { $Model, $Model } from '@rue/muonic';
-// import { DeepReactiveModel, getMetaReactive, $Model, $Model } from '@rue/muonic';
+// import { ionic, ionic } from '@rue/muonic';
+// import { DeepReactiveModel, getMetaReactive, ionic, ionic } from '@rue/muonic';
 // import { MountIf } from './TestMountIf';
 // import { queueTask } from '@rue/thread';
 // import { RenderCycle } from '@rue/muonic';
@@ -34,10 +34,10 @@ import { MountIf } from './TestMountIf';
 // }
 
 
-// const frog$$ = $Model(new Frog())
+// const frog$$ = ionic(new Frog())
 // console.log("qualiites", frog$$.getQualities())
 
-// const list$ = $Model([{
+// const list$ = ionic([{
 //     id: 'dkjl',
 //     content: "hi"
 // }])

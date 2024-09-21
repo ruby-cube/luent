@@ -1,7 +1,7 @@
 import { asReactiveAtom, isReactiveAtom, ReactivePrimitive } from "./derivations/ReactiveAtom";
-import { getMetaReactive, ReactiveModel, toRaw } from "./reactivemodel/ReactiveModel";
+import { getMetaReactive, ReactiveModel, toRaw } from "./ionic/ReactiveModel";
 import { AtomicIon, MetaIon } from "./Ion";
-import { ObservedProp, toPropIon } from "./reactivemodel/ObservedProp";
+import { ObservedProp, toPropIon } from "./ionic/ObservedProp";
 import { asWatchTarget, isWatched } from "./effects/WatchTarget";
 import { getCurrentRenderCycle } from "./effects/RenderCycle";
 import { getWithoutTracking } from "./derivations/DependencyTracker";

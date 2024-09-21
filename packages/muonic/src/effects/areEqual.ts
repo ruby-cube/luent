@@ -1,6 +1,6 @@
 import { isEqual } from "@rue/utils";
-import { ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
-import { isReactiveObject } from "../reactivemodel/ReactiveObject";
+import { ReactiveModel, toRaw } from "../ionic/ReactiveModel";
+import { isReactiveObject } from "../ionic/ReactiveObject";
 
 export function areEqual(newValue: any, oldValue: any) { //TODO: this is really tricky.. do I do a shallow diff or a deep diff for arrays?? I think it should be shallow diff because if you are watching an array, you typically care about the order
     const _newValue = toRaw(newValue)

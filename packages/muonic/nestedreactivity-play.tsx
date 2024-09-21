@@ -1,9 +1,9 @@
 //@ts-nocheck
 
 import ""
-import { $initializeEffect, $Model, onRenderCycleComplete, onRendered } from "./src"
+import { $initializeEffect, ionic, onRenderCycleComplete, onRendered } from "./src"
 
-const $frog = $Deep({
+const $frog = ionic({
     name: "sir robin",
     location: {
         type: "water",
@@ -51,7 +51,7 @@ const position = frog$.location.position // .location is tracked, .position is n
 
 // (A) manual reactivizing
 
-$(frog).location.position // impromptu $Model
+$(frog).location.position // impromptu ionic
 // $(() => $count() + 1) // impromptu memoized derived
 // $(frog, 'name') // impromptu prop
 
@@ -66,7 +66,7 @@ const location = frog$.location // returns an inert proxy with a $ property
 
 const location$ = location.$
 
-const position$ = $Model(frog$.location.position)
+const position$ = ionic(frog$.location.position)
 //TODO: Keep a WeakMap of reactives so if an object is already made into a reactive, return that reactive instead of creating a new one
 
 
@@ -92,23 +92,25 @@ function ListBlock(attributes: {
 
     })
 
-    const $count = $(0) // $SettableGet<number>
+    const $count = Ion(0) // $SettableGet<number>
 
-    const list$ = $Model(list);
+    const list$ = IonicModel([1, 2, 3]);
 
-    const $doubleCount = $(() => $count * 2) // Get<number>
+    const $doubleCount = DerivedIon(() => $count * 2) // Get<number>
 
-    const frog$ = $Model(frog)
+    const $frog = DeepIonicModel(frog)
 
-    const $frog$ = $($Model(frog))
+    const $frog = Ion(IonicModel(frog))
 
-    const $frog$$ = $($Model(frog))
+    const $frog = Ion(DeepIonicModel(frog))
 
-    const frog$$ = $Model(new Frog())
+    const $frog = IonicModel(new Frog())
 
-    const $name = $prop(frog$, 'name') //$GetProp<string>
+    const $name = asIon(frog$, 'name') //$GetProp<string>
 
-    watch($Props(frog$, [
+    const $div = NodeIon('div')
+
+    watch(PropsIon(frog$, [
         'name',
         'qualities'
     ]), ([
@@ -122,16 +124,69 @@ function ListBlock(attributes: {
 
     })
 
-    return Component({
-        list$,
-    },
+    //-----
+
+    const $count = ion(0) // $SettableGet<number>
+
+    quarky.registerIonizableClass(Frog)
+
+    // plain objects, arrays, sets, maps are default ionizable. Must be marked inert to prevent ionization
+    // classes must be registered as ionizable to be reactive
+
+    function Foo(num: number) {
+        return inert({
+            foo: num
+        })
+    }
+
+    const list$ = ionic([
+        Foo(3),
+        Foo(4),
+        Foo(5)
+    ]);
+
+    const list$ = ionic([1, 2, 3]);
+
+    const $doubleCount = derivedIon(() => $count * 2) // Get<number>
+
+    const $frog = ionic(frog)
+
+    const $frog = ion(ionic(frog))
+
+    const $frog = ion(ionic(frog))
+
+    const $frog = ionic(new Frog())
+
+    const $name = asIon(frog$, 'name') //$GetProp<string>
+
+    const $div = nodeIon('div')
+
+    watch(propsIon(frog$, [
+        'name',
+        'qualities'
+    ]), ([
+        name,
+        qualities
+    ]) => {
+
+    })
+
+    initializeIonicEffect(() => {
+
+    })
+
+    return Component(
         <div ref={$div}>hello</div>
+        ,
+        {
+            list$,
+        }
     )
 }
 
 
 
-watch($Model(frog$.location.position), () => {
+watch(ionic(frog$.location.position), () => {
 
 })
 
@@ -148,11 +203,11 @@ frog$$._$ // shallow reactive proxy that will not make any down stream objects r
 
 frog$$._o // raw
 
-const frog$ = frog$$.$Model
+const frog$ = frog$$.ionic
 
 
 
-const todos$ = $Model([{
+const todos$ = ionic([{
     content: "hi"
 }])
 

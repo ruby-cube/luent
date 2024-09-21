@@ -72,22 +72,22 @@ export class MetaReactiveModel<T extends AnyObject = AnyObject> implements React
     }
 
 
-    multiPropIons?: Map<string, DerivedIon>
+    // multiPropIons?: Map<string, DerivedIon>
 
-    registerMultiPropIon(key: string, ion: DerivedIon) {
-        if (!this.multiPropIons) this.multiPropIons = new Map()
-        this.multiPropIons.set(key, ion)
-    }
+    // registerMultiPropIon(key: string, ion: DerivedIon) {
+    //     if (!this.multiPropIons) this.multiPropIons = new Map()
+    //     this.multiPropIons.set(key, ion)
+    // }
 
-    unregisterMultiPropIon(key: string) { //QUESTION: When to unregister?
-        if (!this.multiPropIons) return;
-        this.multiPropIons.delete(key)
-    }
+    // unregisterMultiPropIon(key: string) { //QUESTION: When to unregister?
+    //     if (!this.multiPropIons) return;
+    //     this.multiPropIons.delete(key)
+    // }
 
-    getMultiPropIon(key: string) {
-        if (!this.multiPropIons) return;
-        return this.multiPropIons.get(key)
-    }
+    // getMultiPropIon(key: string) {
+    //     if (!this.multiPropIons) return;
+    //     return this.multiPropIons.get(key)
+    // }
 
 
 

@@ -1,5 +1,5 @@
 import { isIon, AtomicIon } from "./Ion";
-import { isReactiveModel, ReactiveModel } from "./reactivemodel/ReactiveModel";
+import { isReactiveModel, ReactiveModel } from "./ionic/ReactiveModel";
 import { META, ReactiveEntity } from "./ReactiveEntity";
 
 

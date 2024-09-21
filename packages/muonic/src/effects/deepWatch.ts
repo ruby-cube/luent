@@ -1,5 +1,5 @@
-import {  isReactiveModel, ReactiveModel, toRaw } from "../reactivemodel/ReactiveModel";
-import { isReactiveObject } from "../reactivemodel/ReactiveObject";
+import {  isReactiveModel, ReactiveModel, toRaw } from "../ionic/ReactiveModel";
+import { isReactiveObject } from "../ionic/ReactiveObject";
 import { AnyObject } from "@rue/types";
 
 export type KeyPath = PropertyKey[]
@@ -52,7 +52,7 @@ export function isSetOp(op: AnyObject): op is SetOp {
 
 // }, { deep: true })
 
-// const state$ = $Model({
+// const state$ = ionic({
 //     a: {
 //         b: {
 //             pet: "cat"

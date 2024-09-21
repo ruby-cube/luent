@@ -1,12 +1,12 @@
 import { $else, $if } from "@rue/lumo";
-import { $, $Model, $State } from "@rue/muonic";
+import { $, ionic, $State } from "@rue/muonic";
 
 
 export function TestConditional() {
 
     const $active = $State(true)
 
-    const list$ = $Model([1, 2, 3])
+    const list$ = ionic([1, 2, 3])
 
     function insert() {
         list$.push(list$.length + 1)

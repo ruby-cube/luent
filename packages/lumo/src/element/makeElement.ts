@@ -15,7 +15,7 @@ import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
 import { onActivated, onDeactivate } from "../dynamic/lifecycle";
-import { isReactiveArray } from "../../../muonic/src/reactivemodel/ReactiveArray";
+import { isReactiveArray } from "../../../muonic/src/ionic/ReactiveArray";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap

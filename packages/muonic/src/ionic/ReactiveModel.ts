@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { emitSignal } from "../debug";
-import { isPlainObject, isMutatingArrayMethod, isObject, ProxyTargetKey } from "@rue/utils";
+import { isObjectLiteral, isMutatingArrayMethod, isObject, ProxyTargetKey } from "@rue/utils";
 import { isTuple } from "./tuple";
 import { asObservedProp, getObservedProp, ObservedProp } from "./ObservedProp";
 import { timeTraveler } from "./TimeTraveler";
@@ -164,17 +164,17 @@ function _createReactiveModel<T extends AnyObject>(
     deep?: boolean,
     existingMeta?: MetaReactiveModel
 ): ReactiveModel | T {
-    if (!isObject(target)) throw new Error(`INVALID INPUT: $Model or $Model must receive a reference-type primitive (object)`)
+    if (!isObject(target)) throw new Error(`INVALID INPUT: ionic or ionic must receive a reference-type primitive (object)`)
     return createReactive(target, deep, existingMeta)
 }
 
 //API
-export function $Deep<T extends AnyObject>(target: T): DeepReactiveModel<T> {
+export function ionic<T extends AnyObject>(target: T): DeepReactiveModel<T> {
     return asDeepReactive(target)
 }
 
-//API
-export function $Model<T extends AnyObject>(target: T): AsReactiveModel<T> {
+//API deprecated maybe
+export function shallowIonic<T extends AnyObject>(target: T): AsReactiveModel<T> {
     return asShallowReactive(target)
 }
 
@@ -234,7 +234,7 @@ export function createReactive(
 }
 
 // function isReactiveCapsule(value: any): value is { $: AnyObject } {
-//     if (!(value instanceof Object) || isPlainObject(value)) return false;
+//     if (!(value instanceof Object) || isObjectLiteral(value)) return false;
 //     if (!('$' in value)) return false;
 //     if (!(value.$ instanceof Object)) return false;
 //     return true;

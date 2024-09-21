@@ -1,6 +1,6 @@
 import { AtomicIon, MetaIon } from "../Ion";
-import { ObservedProp } from "../reactivemodel/ObservedProp";
-import { TrackedOp } from "../reactivemodel/TrackedOp";
+import { ObservedProp } from "../ionic/ObservedProp";
+import { TrackedOp } from "../ionic/TrackedOp";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 
 export const CLEAN_UP = 'x__cleanUp'

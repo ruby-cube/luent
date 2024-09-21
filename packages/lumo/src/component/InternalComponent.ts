@@ -3,6 +3,7 @@ import { EventHandler, NodeEntity, RenderFunction } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { Provide } from "./provide";
+import { ComponentOptions } from "./makeComponent";
 
 
 export type DOMNode = CharacterData | Element
@@ -16,8 +17,8 @@ export type DOMNode = CharacterData | Element
 //     : (props: P) => NodeEntity | NodeEntity[]
 
 // export type Slot = NodeEntity | NodeEntity[]
-export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => ComponentOutput : (props: P) => ComponentOutput
-export type ProviderComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => ComponentOutput : (props: P, provide: Provide) => ComponentOutput
+export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => ComponentOutput : (setup: P) => ComponentOutput
+export type ProviderComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => ComponentOutput : (setup: P, provide: Provide) => ComponentOutput
 
 // export type Slot<T> = T extends AnyObject ? InternalComponent<T> : NodeEntity | NodeEntity[]
 export const COMPONENT = Symbol('publicComponent')
@@ -33,17 +34,17 @@ export interface Component<T extends AnyObject = AnyObject> {
     ) => void
 }
 
-export interface ComponentOutput<T extends AnyObject = AnyObject> {
-    component?: PublicComponent<T>;
+export interface ComponentOutput<T = undefined> {
+    component?: T extends AnyObject ? PublicComponent<T> : undefined;
     initialNodeEntities: NodeEntity
 }
-export function Component<T extends AnyObject = AnyObject>(render: NodeEntity, exposedComponent?: T): ComponentOutput<T> {
+export function Component<T = undefined>(render: NodeEntity, exposedComponent?: T): ComponentOutput<T> {
     //TODO: make this more efficient?
-    if (exposedComponent) {
+    if (exposedComponent instanceof Object) {
         return {
             component: exposedComponent,
             initialNodeEntities: render
-        }
+        } as ComponentOutput<T>
     }
     const unnestedNodeEntities = unnestComponent(render)
 

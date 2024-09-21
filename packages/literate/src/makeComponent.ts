@@ -5,7 +5,7 @@ import { AnyObject, MaybePromise } from "@rue/types";
 import { collectEffects, getFlask } from "@rue/flask";
 import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
 import { getCurrentComponent } from "../../lumo/src/component/componentStack.js";
-import { isReactiveArray } from "../../muonic/src/reactivemodel/ReactiveArray.js";
+import { isReactiveArray } from "../../muonic/src/ionic/ReactiveArray.js";
 
 
 // const allPromises: Promise<any>[] = [] // collect promises from $Suspense

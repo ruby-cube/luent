@@ -1,11 +1,11 @@
 import { ActiveListener } from "@rue/flask";
 import { isReactiveGet, ReactiveGet } from "../derivations/DerivedIon";
-import { DeepReactiveModel, isDeepReactive, isReactiveModel, isShallowReactive, $Model, ReactiveModel, toRaw, $Deep } from "../reactivemodel/ReactiveModel";
+import { DeepReactiveModel, isDeepReactive, isReactiveModel, isShallowReactive, ionic, ReactiveModel, toRaw } from "../ionic/ReactiveModel";
 import { ChangeEffect, isMutationOp, MutationEffect, watch, WatchOptions } from "./watch";
-import { insertOps } from "../reactivemodel/ReactiveCapsule";
-import { isIntegerKey } from "../reactivemodel/ReactiveArray";
+import { insertOps } from "../ionic/ReactiveCapsule";
+import { isIntegerKey } from "../ionic/ReactiveArray";
 import { AnyObject } from "@rue/types";
-import { shallowClone } from "../reactivemodel/TimeTraveler";
+import { shallowClone } from "../ionic/TimeTraveler";
 
 type WatchersMap = Map<AnyObject | ReactiveGet, ActiveListener>
 
@@ -121,7 +121,7 @@ function unwatchAll(watchers: WatchersMap) {
 }
 
 function maybeReactivize(item: ReactiveGet | AnyObject, reactiveList: DeepReactiveModel | ReactiveModel) {
-    return isDeepReactive(reactiveList) ? $Deep(item) : item
+    return isDeepReactive(reactiveList) ? ionic(item) : item
 }
 
 

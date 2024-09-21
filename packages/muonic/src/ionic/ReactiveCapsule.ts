@@ -5,7 +5,7 @@ import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asTrackedOp } from "./TrackedOp";
 import { ReactiveModel, recordOp, storeSnapshot } from "./ReactiveModel";
 import { isWatched } from "../effects/WatchTarget";
-import { trigger, triggerReactiveAtom, triggerReactiveModel } from "../trigger";
+import { triggerReactiveModel } from "../trigger";
 import { Collection, MetaReactiveCollection } from "./MetaReactiveModel";
 
 
@@ -126,7 +126,7 @@ export function triggerReactiveWithMutationOp(
 
 // const frog = new Frog()
 
-// const frog$$ = $Model([])
+// const frog$$ = ionic([])
 
 // type TransformMap = typeof transformMap
 // type GetTransforms<T extends { returnTransforms: AnyObject }> = T['returnTransforms']
@@ -173,7 +173,7 @@ export function triggerReactiveWithMutationOp(
 
 //     outputTransforms = {
 //         getSomething(output: Brew['something']) {
-//             return [$Model(output)]
+//             return [ionic(output)]
 //         }
 //     }
 // }
@@ -201,7 +201,7 @@ export function triggerReactiveWithMutationOp(
 // // const transformMap = registerReactiveCapsules({
 // //     Brew: {
 // //         getSomething<T extends AnyObject>(arg: T) {
-// //             return $Model(arg) as unknown as [DeepReactiveModelO<T>];
+// //             return ionic(arg) as unknown as [DeepReactiveModelO<T>];
 // //         }
 // //     }
 // // })

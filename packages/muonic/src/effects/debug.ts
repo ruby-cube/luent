@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
-import { asObservedProp, ObservedProp } from "../reactivemodel/ObservedProp";
-import { isReactiveModel, ReactiveModel } from "../reactivemodel/ReactiveModel";
+import { asObservedProp, ObservedProp } from "../ionic/ObservedProp";
+import { isReactiveModel, ReactiveModel } from "../ionic/ReactiveModel";
 import { AtomicIon } from "../Ion";
 
 //TODO: onTrigger works as desired. onTrack needs to be rethunk.

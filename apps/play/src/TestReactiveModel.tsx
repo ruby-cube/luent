@@ -1,9 +1,7 @@
-import { $Node, $Nodes, Component, CreateIf, ElseCreate, For, NodeEntity, preventDefault, ShowIf, teleportTo, useEventListener } from "@rue/lumo";
+import { $Node, $Nodes, Component, CreateIf, ElseCreate, For} from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { $State, __addDevName, $, $Model, $Model, DeepReactiveModel, $Derived, $Deep } from "@rue/muonic";
+import { $State, __addDevName, $, $Derived, ionic } from "@rue/muonic";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
-import { AnyObject } from "@rue/types";
-import { onActivated, onCreated } from "../../../packages/lumo/src/dynamic/lifecycle";
 
 
 const randomColor = useRandomColorGenerator()
@@ -42,16 +40,29 @@ function genId() {
 
 
 // const frog = new Frog() as FrogB
-// const frog$$ = $Model(frog)
+// const frog$$ = ionic(frog)
 
 // const q = frog$$.qualities
 // const qual$$ = frog$$.getQualitiesB()
 // const qual = frog.getQualitiesB()
 
+function App(){
+    return Component(
+        <List dog="kjk"></List>,
+        {
+            frog: "kermit"
+        }
+    )
+}
 
-export function List() {
 
-    const $list = $Deep([
+export function List(
+    setup: {
+        dog: string
+    }
+) {
+
+    const $list = ionic([
         { id: 0, content: "frog" },
         { id: 1, content: "robin" },
         { id: 2, content: "fly" },
@@ -65,11 +76,11 @@ export function List() {
 
 
 
-    // const frog$ = $Model({
+    // const frog$ = ionic({
     //     name: "Sir Robin"
     // })
 
-    // const $frogName = $prop(frog$, "name")
+    // const $frogName = asIon(frog$, "name")
 
     // function changeFrogName() {
     //     $frogName.update(name => name + "kermito")
@@ -130,7 +141,7 @@ export function List() {
         moveMultipleUniqueItems($selected, $list, index)
     }
 
-    const $selected = $Model(new Set())
+    const $selected = ionic(new Set())
 
 
     function clearSelection() {

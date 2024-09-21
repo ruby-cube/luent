@@ -1,5 +1,5 @@
 import { $Node, } from "@rue/lumo";
-import {  $, $Deep, $initializeEffect, $Model, $State } from "@rue/muonic";
+import {  $, ionic, $initializeEffect, ionic, $State } from "@rue/muonic";
 
 
 //tests:
@@ -7,7 +7,7 @@ import {  $, $Deep, $initializeEffect, $Model, $State } from "@rue/muonic";
 
 export function TestBox() {
 
-    const box$ = $Deep({
+    const box$ = ionic({
         position: {
             x: 0,
             y: 0

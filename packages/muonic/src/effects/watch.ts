@@ -5,7 +5,7 @@ import { ReactiveDerivation } from "../derivations/ReactiveDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
 import { $, isReactiveGet, ReactiveGet, $Derived } from "../derivations/DerivedIon";
-import { DeepReactiveModel, getMetaReactive, isReactiveModel, ReactiveModel, toRaw, } from "../reactivemodel/ReactiveModel";
+import { DeepReactiveModel, getMetaReactive, isReactiveModel, ReactiveModel, toRaw, } from "../ionic/ReactiveModel";
 import { areEqual } from "./areEqual";
 import { createReactiveFunction, ReactiveFunction } from "../derivations/ReactiveFunction";
 import { META } from "../ReactiveEntity";

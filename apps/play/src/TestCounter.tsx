@@ -6,7 +6,7 @@
 // - derived signal in template
 // - derived signal with memo
 
-import { $, $Model, $State } from "@rue/muonic"
+import { $, ionic, $State } from "@rue/muonic"
 
 export function TestCounterSignals() {
     const $count = $State(0)
@@ -46,7 +46,7 @@ export function TestCounter() {
 }
 
 function useCounter() {
-    const counter$ = $Model({
+    const counter$ = ionic({
         count: 0
     })
 

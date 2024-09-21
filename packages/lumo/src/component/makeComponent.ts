@@ -7,25 +7,24 @@ import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex } from "../list/ListRenderKit";
 import { getCurrentProvider, popProvider, provide, pushProvider } from "./provide";
 import { ProviderComponent } from "./ProviderComponent";
-import { isReactiveArray } from "../../../muonic/src/reactivemodel/ReactiveArray";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
 export type ComponentOptions = { preserve?: true }
 
 export type InferSlot<T extends ComponentSetup = ComponentSetup> =
-    T extends (props: infer P) => any ?
+    T extends (setup: infer P) => any ?
     P extends { Slot: infer S } ?
     S
     : undefined
     : undefined
 
-export type PropsWithSlot = {
+export type SetupWithSlot = {
     Slot: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
 }
 
-export type ComponentSetupWithSlot<P extends PropsWithSlot = PropsWithSlot> =
-    (props: P) => NodeEntity[] | NodeEntity
+export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
+    (setup: P) => NodeEntity[] | NodeEntity
 
 
 // export function mO<T extends ComponentSetupWithSlot>(

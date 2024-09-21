@@ -175,7 +175,7 @@ type StringOrNumber = string | number
     function doSomething<T>(argA: Object) { }
 }
 
-type DeepReactiveModel<T extends AnyObject = AnyObject> = T & {$Model: any};
+type DeepReactiveModel<T extends AnyObject = AnyObject> = T & {ionic: any};
 {
     function something<T extends AnyObject>(){
         doSomething(<DeepReactiveModel<T>>TYPE)  // GOOD

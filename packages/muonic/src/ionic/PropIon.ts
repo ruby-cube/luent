@@ -1,10 +1,10 @@
 import { AnyObject } from "@rue/types";
-import { getMetaReactive, isReactiveModel, $Model, ReactiveModel, toRaw } from "./ReactiveModel";
+import { getMetaReactive, isReactiveModel, ionic, ReactiveModel, toRaw } from "./ReactiveModel";
 import { asObservedProp } from "./ObservedProp";
 import { $ } from "../derivations/DerivedIon";
 
 // export function $Props<T extends AnyObject, K extends keyof T>(model: T, keys: K[]) {
-//     const reactive = isReactiveModel(model) ? model : $Model(model)
+//     const reactive = isReactiveModel(model) ? model : ionic(model)
 //     const propsSignal = getMetaReactive(reactive).getMultiPropIon(keys.toString())
 //     if (propsSignal) return propsSignal;
 //     return $MultiPropsSignal(reactive, keys)
@@ -33,8 +33,8 @@ export type PropIon<T = any> = {
     setTo: (newValue: T) => T
 }
 
-export function $prop<T extends AnyObject, K extends keyof T>(model: T, key: K) {
-    const reactive = isReactiveModel(model) ? model : $Model(model)
+export function asIon<T extends AnyObject, K extends keyof T>(model: T, key: K) {
+    const reactive = isReactiveModel(model) ? model : ionic(model)
     const propPod = getMetaReactive(reactive).getPropIon(key)
     if (propPod) return propPod;
     return $Prop(reactive, key)

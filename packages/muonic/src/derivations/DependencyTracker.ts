@@ -1,5 +1,5 @@
-import { isObservedProp, ObservedProp } from "../reactivemodel/ObservedProp";
-import { isTrackedOp, TrackedOp } from "../reactivemodel/TrackedOp";
+import { isObservedProp, ObservedProp } from "../ionic/ObservedProp";
+import { isTrackedOp, TrackedOp } from "../ionic/TrackedOp";
 import { asReactiveAtom, ReactiveAtom, ReactivePrimitive } from "./ReactiveAtom";
 
 
@@ -22,6 +22,10 @@ export function getActiveTracker() {
     const tracker = getDependencyTracker()
     if (!tracker || !tracker.shouldTrack) return null;
     return tracker
+}
+
+export function tracked(){
+    return Boolean(getActiveTracker())
 }
 
 

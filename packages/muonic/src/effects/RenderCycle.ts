@@ -2,8 +2,8 @@ import { setImmediate, clearImmediate } from "@rue/thread";
 import { $schedule, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
 import { SetMap } from "@rue/utils";
 import { MutationRecord } from "./deepWatch";
-import { getMetaReactive, ReactiveModel } from "../reactivemodel/ReactiveModel";
-import { MetaReactiveModel } from "../reactivemodel/MetaReactiveModel";
+import { getMetaReactive, ReactiveModel } from "../ionic/ReactiveModel";
+import { MetaReactiveModel } from "../ionic/MetaReactiveModel";
 // import { runEffect } from "./watch";
 
 export type Watchable = any

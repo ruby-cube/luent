@@ -1,5 +1,5 @@
 import { emitSignal } from "./debug";
-import { isDeepReactive, isReactiveModel, $Model, $Model, ModelReactivityDepth, $Deep } from "./reactivemodel/ReactiveModel";
+import { isDeepReactive, isReactiveModel, ionic, ModelReactivityDepth } from "./ionic/ReactiveModel";
 import { getActiveTracker } from "./derivations/DependencyTracker";
 import { trigger } from "./trigger";
 import { META, ReactiveEntity } from "./ReactiveEntity";
@@ -95,8 +95,8 @@ function setValue(metaIon: MetaIon, newValue: unknown, oldValue: unknown) {
 
 function maybeReactivizeValue(newValue: unknown, metaIon: MetaIon) {
     return newValue instanceof Object ?
-        metaIon.depth === ModelReactivityDepth.DEEP ? $Deep(newValue) :
-            metaIon.depth === ModelReactivityDepth.SHALLOW ? $Model(newValue) :
+        metaIon.depth === ModelReactivityDepth.DEEP ? ionic(newValue) :
+            metaIon.depth === ModelReactivityDepth.SHALLOW ? ionic(newValue) :
                 newValue : newValue
 }
 

@@ -98,7 +98,7 @@ function swapKeysAndValues(source: { [key: string]: string }) {
 }
 
 
-export function isPlainObject(obj: AnyObject) {
+export function isObjectLiteral(obj: AnyObject) {
     return obj.constructor === Object;
 }
 

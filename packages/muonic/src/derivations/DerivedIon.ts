@@ -3,7 +3,7 @@ import { READONLY_ION } from "../asReadonly";
 import { ReactiveDerivation } from "./ReactiveDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 import { META } from "../ReactiveEntity";
-import { isPropIon } from "../reactivemodel/PropIon";
+import { isPropIon } from "../ionic/PropIon";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions

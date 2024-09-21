@@ -6,7 +6,7 @@ class Counter {
     $: { count: number }
 
     constructor() {
-        this.$ = $Model({ count: 0 })
+        this.$ = ionic({ count: 0 })
     }
 
     increment() {
