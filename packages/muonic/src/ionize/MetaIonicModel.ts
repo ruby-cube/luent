@@ -1,5 +1,5 @@
 import type { AnyObject } from "@rue/types"
-import type { ReactiveModel, ReactiveTraps } from "./ReactiveModel"
+import type { IonicModel, ReactiveTraps } from "./IonicModel"
 import type { TrackedOp } from "./TrackedOp"
 import type { ReactiveEntity } from "../ReactiveEntity"
 import { ObservedProp } from "./ObservedProp"
@@ -13,27 +13,29 @@ type OpMap = Map<EntryKey, TrackedOp>
 type OpName = string
 type EntryKey = any
 
-export const REACTIVE_MODEL = Symbol('reactiveModel')
+export const IONIC_MODEL = Symbol('ionicModel')
 
-export class MetaReactiveModel<T extends AnyObject = AnyObject> implements ReactiveEntity {
-    deepReactive?: ReactiveModel<T>
-    shallowReactive?: ReactiveModel<T>
-    readonly type = REACTIVE_MODEL
+export class MetaIonicModel<T extends AnyObject = AnyObject> implements ReactiveEntity {
+    ionicModel?: IonicModel<T>
+    // shallowReactive?: IonicModel<T>
+    readonly type = IONIC_MODEL
 
-    initDeepReactive(reactiveModel: ReactiveModel) {
-        if (this.deepReactive) return;
-        this.deepReactive = reactiveModel as ReactiveModel<T>;
+    initIonicModel(ionicModel: IonicModel) {
+        if (this.ionicModel) return;
+        this.ionicModel = ionicModel as IonicModel<T>;
     }
 
-    initShallowReactive(reactiveModel: ReactiveModel) {
-        if (this.deepReactive) return;
-        this.deepReactive = reactiveModel as ReactiveModel<T>;
-    }
+    // initShallowReactive(ionicModel: IonicModel) {
+    //     if (this.deepReactive) return;
+    //     this.deepReactive = ionicModel as IonicModel<T>;
+    // }
 
     constructor(
         public rawTarget: T,
-        public traps?: ReactiveTraps<T>
-    ) { }
+        // public reactive: T
+        // public traps?: ReactiveTraps<T>
+    ) {
+     }
 
     observedProps?: Map<PropertyKey, ObservedProp>
 
@@ -56,9 +58,9 @@ export class MetaReactiveModel<T extends AnyObject = AnyObject> implements React
 
     propIons?: Map<PropertyKey, PropIon>
 
-    registerPropIon(key: PropertyKey, ion: PropIon) {
+    registerPropIon(key: PropertyKey, Ion: PropIon) {
         if (!this.propIons) this.propIons = new Map()
-        this.propIons.set(key, ion)
+        this.propIons.set(key, Ion)
     }
 
     unregisterPropIon(key: PropertyKey) { //QUESTION: When to unregister?  when watchcount === 0 and observedProps atom size === 0?
@@ -74,9 +76,9 @@ export class MetaReactiveModel<T extends AnyObject = AnyObject> implements React
 
     // multiPropIons?: Map<string, DerivedIon>
 
-    // registerMultiPropIon(key: string, ion: DerivedIon) {
+    // registerMultiPropIon(key: string, Ion: DerivedIon) {
     //     if (!this.multiPropIons) this.multiPropIons = new Map()
-    //     this.multiPropIons.set(key, ion)
+    //     this.multiPropIons.set(key, Ion)
     // }
 
     // unregisterMultiPropIon(key: string) { //QUESTION: When to unregister?
@@ -122,9 +124,9 @@ export class MetaReactiveModel<T extends AnyObject = AnyObject> implements React
 
 export type Collection<K = any, V = any> = Set<K> | Array<K> | Map<K, V>
 
-export class MetaReactiveCollection<T extends Collection = Collection> extends MetaReactiveModel<T> {
-    constructor(rawTarget: T, traps: ReactiveTraps) {
-        super(rawTarget, traps)
+export class MetaIonicCollection<T extends Collection = Collection> extends MetaIonicModel<T> {
+    constructor(rawTarget: T) {
+        super(rawTarget)
     }
 
     observedEntryKeys = new Set()

@@ -1,9 +1,10 @@
 import { emitSignal } from "./debug";
-import { isDeepReactive, isReactiveModel, ionic, ModelReactivityDepth } from "./ionic/ReactiveModel";
+import { isIonicModel, ionize } from "./ionize/IonicModel";
 import { getActiveTracker } from "./derivations/DependencyTracker";
 import { trigger } from "./trigger";
 import { META, ReactiveEntity } from "./ReactiveEntity";
 import { isFunctionWithProps } from "@rue/utils";
+import { AnyObject } from "@rue/types";
 
 export type AtomicSignal<T = any> = {
     (): T;
@@ -34,12 +35,12 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
     constructor(
         readonly o: AtomicIon<T>,
         public value: T,
-        readonly depth?: ModelReactivityDepth
+        readonly hasIonicValue: boolean = false
     ) { }
 }
 
 
-export function $State<T>(value: T) {
+export function Ion<T>(value: T) {
     let metaIon: MetaIon
 
     function $ion() {
@@ -50,15 +51,7 @@ export function $State<T>(value: T) {
         return metaIon.value;
     }
 
-    // mark reactive depth of value if value is ReactiveModel
-    const depth =
-        value instanceof Object ?
-            isDeepReactive(value) ? ModelReactivityDepth.DEEP
-                : isReactiveModel(value) ? ModelReactivityDepth.SHALLOW
-                    : undefined
-            : undefined
-
-    metaIon = new MetaIon($ion, value, depth)
+    metaIon = new MetaIon($ion, value, isIonicModel(value))
 
     $ion[META] = metaIon;
     $ion.setTo = setTo.bind(metaIon);
@@ -87,17 +80,15 @@ function update(this: MetaIon, toNewValue: (value: unknown) => unknown) {
 function setValue(metaIon: MetaIon, newValue: unknown, oldValue: unknown) {
     if (oldValue === newValue) return oldValue;
     const $ion = metaIon.o;
-    const _newValue = maybeReactivizeValue(newValue, metaIon)
+    const _newValue = shouldMakeIonic(newValue, metaIon) ? ionize(newValue)  : newValue
+    // toIonicModelIfMust(newValue, metaIon)
     metaIon.value = _newValue;
     trigger($ion);
     return _newValue;
 }
 
-function maybeReactivizeValue(newValue: unknown, metaIon: MetaIon) {
-    return newValue instanceof Object ?
-        metaIon.depth === ModelReactivityDepth.DEEP ? ionic(newValue) :
-            metaIon.depth === ModelReactivityDepth.SHALLOW ? ionic(newValue) :
-                newValue : newValue
+function shouldMakeIonic(newValue: unknown, metaIon: MetaIon): newValue is AnyObject{
+    return newValue instanceof Object && metaIon.hasIonicValue;
 }
 
 

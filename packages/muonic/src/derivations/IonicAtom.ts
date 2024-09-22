@@ -1,28 +1,28 @@
 import { AtomicIon, MetaIon } from "../Ion";
-import { ObservedProp } from "../ionic/ObservedProp";
-import { TrackedOp } from "../ionic/TrackedOp";
-import { ReactiveDerivation } from "./ReactiveDerivation";
+import { ObservedProp } from "../ionize/ObservedProp";
+import { TrackedOp } from "../ionize/TrackedOp";
+import { IonicDerivation } from "./IonicDerivation";
 
 export const CLEAN_UP = 'x__cleanUp'
 
 export type ReactivePrimitive = AtomicIon | ObservedProp | TrackedOp
 
 
-const reactiveAtomMap: WeakMap<ReactivePrimitive, ReactiveAtom> = new WeakMap()
+const reactiveAtomMap: WeakMap<ReactivePrimitive, IonicAtom> = new WeakMap()
 
-export class ReactiveAtom {
+export class IonicAtom {
 
     constructor(public primitive: ReactivePrimitive) { 
         reactiveAtomMap.set(primitive, this)
     }
 
-    derivations: Set<ReactiveDerivation> = new Set() // replaces depMap and flagging of reactive atoms
+    derivations: Set<IonicDerivation> = new Set() // replaces depMap and flagging of reactive atoms
 
-    addDerivation(derivation: ReactiveDerivation) {
+    addDerivation(derivation: IonicDerivation) {
         this.derivations.add(derivation)
     }
 
-    deleteDerivation(derivation: ReactiveDerivation) {
+    deleteDerivation(derivation: IonicDerivation) {
         this.derivations.delete(derivation)
         if (this.derivations.size === 0) {
             reactiveAtomMap.delete(this.primitive)
@@ -47,15 +47,15 @@ export class ReactiveAtom {
 }
 
 
-export function isReactiveAtom(primitive: ReactivePrimitive | null | undefined) {
+export function isIonicAtom(primitive: ReactivePrimitive | null | undefined) {
     if (!primitive) return false;
     return Boolean(reactiveAtomMap.get(primitive));
 }
 
-export function asReactiveAtom(primitive: ReactivePrimitive) {
+export function asIonicAtom(primitive: ReactivePrimitive) {
     let atom = reactiveAtomMap.get(primitive)
     if (!atom) {
-        atom = new ReactiveAtom(primitive)
+        atom = new IonicAtom(primitive)
     }
     return atom;
 }

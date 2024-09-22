@@ -1,4 +1,4 @@
-import { getWithoutTracking, $, ReactiveGet, $Derived } from "@rue/muonic";
+import { getWithoutTracking, $, ReactiveGet, DerivedIon, __devCheckIfTracked, __devCheckIfNotTracked } from "@rue/muonic";
 import { ConditionalKit } from "./ConditionalKit";
 import { Booleanny } from "@rue/types";
 
@@ -14,7 +14,7 @@ export class ConditionalSeries {
         for (let i = 0; i < statements.length; i++) {
             const kit = statements[i]
             const $condition = kit.$condition
-            if ($condition){
+            if ($condition) {
                 this.conditions.push($condition)
             }
             if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
@@ -40,10 +40,12 @@ export class ConditionalSeries {
     }
 
     evaluateConditions() {
+        // if (__DEV__) __devCheckIfNotTracked()
+        if (__DEV__) __devCheckIfTracked()
         const conditions = this.conditions
         for (let i = 0; i < conditions.length; i++) {
             const $condition = conditions[i]
-            if (getWithoutTracking($condition)) {
+            if ($condition()) {
                 this.prevActiveIndex = this.activeIndex;
                 this.activeIndex = i;
                 return i;

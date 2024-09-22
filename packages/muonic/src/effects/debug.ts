@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
-import { asObservedProp, ObservedProp } from "../ionic/ObservedProp";
-import { isReactiveModel, ReactiveModel } from "../ionic/ReactiveModel";
+import { asObservedProp, ObservedProp } from "../ionize/ObservedProp";
+import { isIonicModel, IonicModel } from "../ionize/IonicModel";
 import { AtomicIon } from "../Ion";
 
 //TODO: onTrigger works as desired. onTrack needs to be rethunk.
@@ -10,15 +10,15 @@ export type WatchDebugOptions = {
     onTrigger?: OnTrigger;
 }
 
-type OnTrack = (target?: AtomicIon | ObservedProp | ReactiveModel) => void
+type OnTrack = (target?: AtomicIon | ObservedProp | IonicModel) => void
 type OnTrigger = () => void
 
-const onTrackMap: Map<AtomicIon | ObservedProp | ReactiveModel, OnTrack> = new Map();
-const onTriggerMap: Map<AtomicIon | ObservedProp | ReactiveModel, OnTrigger> = new Map();
+const onTrackMap: Map<AtomicIon | ObservedProp | IonicModel, OnTrack> = new Map();
+const onTriggerMap: Map<AtomicIon | ObservedProp | IonicModel, OnTrigger> = new Map();
 
-export function registerDebuggers(targets: (AtomicIon | ObservedProp)[] | ReactiveModel, options: WatchDebugOptions | undefined){
+export function registerDebuggers(targets: (AtomicIon | ObservedProp)[] | IonicModel, options: WatchDebugOptions | undefined){
     const {onTrack, onTrigger} = options ?? {}
-    const _targets = isReactiveModel(targets) ? [targets] : targets
+    const _targets = isIonicModel(targets) ? [targets] : targets
     if (onTrack){
         for (const target of _targets){
             onTrack(target) //TODO: THis works for watch, but derivedIon and reactiveEffects will be tracked per re-eval
@@ -31,18 +31,18 @@ export function registerDebuggers(targets: (AtomicIon | ObservedProp)[] | Reacti
     }
 }
 
-export function runTrackDebugger(target: AtomicIon | ObservedProp | ReactiveModel){
+export function runTrackDebugger(target: AtomicIon | ObservedProp | IonicModel){
     const onTrack = onTrackMap.get(target);
     if (onTrack) onTrack();
 }
 
-export function runTriggerDebugger(target: AtomicIon | ObservedProp | ReactiveModel){
+export function runTriggerDebugger(target: AtomicIon | ObservedProp | IonicModel){
     const onTrigger = onTriggerMap.get(target);
     if (onTrigger) onTrigger();
 }
 
-export function collectReactiveProps(target: ReactiveModel, deps?: ObservedProp[]) {
-    if (!isReactiveModel(target)) return [];
+export function collectReactiveProps(target: IonicModel, deps?: ObservedProp[]) {
+    if (!isIonicModel(target)) return [];
     const _deps = deps || [];
     // for (const key in target) {
     //     _deps.push(asObservedProp(target, key));

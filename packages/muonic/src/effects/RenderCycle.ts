@@ -2,12 +2,12 @@ import { setImmediate, clearImmediate } from "@rue/thread";
 import { $schedule, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
 import { SetMap } from "@rue/utils";
 import { MutationRecord } from "./deepWatch";
-import { getMetaReactive, ReactiveModel } from "../ionic/ReactiveModel";
-import { MetaReactiveModel } from "../ionic/MetaReactiveModel";
+import { getMetaReactive, IonicModel } from "../ionize/IonicModel";
+import { MetaIonicModel } from "../ionize/MetaIonicModel";
 // import { runEffect } from "./watch";
 
 export type Watchable = any
-// AtomicIon | DerivedIon | ReactiveFunction  | ReactiveModel | ObservedProp
+// AtomicIon | DerivedIon | IonicEffect  | IonicModel | ObservedProp
 export type Effect = (...args: any[]) => void;
 
 // export type Phase = Phase.BEFORE_RENDER | Phase.RENDER | Phase.AFTER_RENDER | Phase.SYNC
@@ -105,9 +105,9 @@ export class RenderCycle {
         return renderCycleCount;
     }
 
-    // snapshotMap: Map<ReactiveModel, AnyObject> | undefined;
+    // snapshotMap: Map<IonicModel, AnyObject> | undefined;
 
-    // takeSnapshot(reactive: ReactiveModel, target: AnyObject, clone?: AnyObject) {
+    // takeSnapshot(reactive: IonicModel, target: AnyObject, clone?: AnyObject) {
     //     let snapshotMap = this.snapshotMap;
     //     if (!snapshotMap) {
     //         snapshotMap = new Map();
@@ -120,7 +120,7 @@ export class RenderCycle {
     //     return _snapshot;
     // }
 
-    // getSnapshot(reactive: ReactiveModel) {
+    // getSnapshot(reactive: IonicModel) {
     //     const snapshotMap = this.snapshotMap;
     //     if (!snapshotMap) return null;
     //     const snapshot = snapshotMap.get(reactive)
@@ -128,9 +128,9 @@ export class RenderCycle {
     //     return snapshot
     // }
 
-    opsMap: WeakMap<MetaReactiveModel, MutationRecord[]> = new WeakMap();
+    opsMap: WeakMap<MetaIonicModel, MutationRecord[]> = new WeakMap();
 
-    // composeOps(target: ReactiveModel, ops: MutationRecord[]) {
+    // composeOps(target: IonicModel, ops: MutationRecord[]) {
     //     const meta = getMetaReactive(target)
     //     let existingOps = this.opsMap.get(meta);
     //     if (existingOps) {
@@ -141,7 +141,7 @@ export class RenderCycle {
     //     }
     // }
 
-    recordOp(target: ReactiveModel, op: MutationRecord) {
+    recordOp(target: IonicModel, op: MutationRecord) {
         const meta = getMetaReactive(target)
         let existingOps = this.opsMap.get(meta);
         if (existingOps) {
@@ -152,7 +152,7 @@ export class RenderCycle {
         }
     }
 
-    getOps(target: ReactiveModel) {
+    getOps(target: IonicModel) {
         const meta = getMetaReactive(target)
         return this.opsMap.get(meta)
     }
@@ -220,7 +220,7 @@ export class RenderCycle {
 //     if (target instanceof Function) {
 //         return target()
 //     }
-//     else if (isReactiveModel(target)) {
+//     else if (isIonicModel(target)) {
 //         return target;
 //     }
 // }

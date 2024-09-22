@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { $State, AtomicIon, watch } from "@rue/muonic"
+import { Ion, AtomicIon, watch } from "@rue/muonic"
 import { watchForRender } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { $Node } from "@rue/lumo";
 
@@ -22,7 +22,7 @@ export function MainBlock() {
         ]
     ], $hello) // if using directly in template
 
-    const $list = $State(['ho'])
+    const $list = Ion(['ho'])
 
     const $records_list = $ListPort($records, (record) => (
         <h1>{record.content}</h1>
@@ -52,8 +52,8 @@ function $MorphicNode() {
 
 function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; setTo: (key: string) => any } {
 
-    const $key = $State(initialKey)
-    const $render = $State(switchMap[$key()])
+    const $key = Ion(initialKey)
+    const $render = Ion(switchMap[$key()])
 
     watch($key, (key) => {
         $render.update(switchMap[key])
@@ -70,7 +70,7 @@ function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: st
 
 function MainContent() {
 
-    const $mainContent = $State(() =>
+    const $mainContent = Ion(() =>
         <div>hello</div>)
 
     function changeMainContent() {

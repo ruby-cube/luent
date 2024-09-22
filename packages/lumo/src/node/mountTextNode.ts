@@ -1,6 +1,6 @@
-import { getWithoutTracking, isReactiveGet, ReactiveGet, Phase } from "@rue/muonic";
+import { isAnyIon, ReactiveGet, Phase, tracked, __devCheckIfTracked } from "@rue/muonic";
 import { _NodePod } from "./NodePod";
-import { watch} from "../watch/watchAndPreserve";
+import { watch } from "../watch/watchAndPreserve";
 
 export function mountTextNode(parent: Element, text: ReactiveGet | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
 
@@ -12,13 +12,13 @@ export function mountTextNode(parent: Element, text: ReactiveGet | any, nodePod?
     const root = fragment ? fragment : parent;
     root.appendChild(textNode)
 
-    if (isReactiveGet(text)) {
+    if (text instanceof Function) {
         keepTextNodeUpdated(text, textNode)
     }
 }
 
-function keepTextNodeUpdated($text: ReactiveGet<any>, textNode: CharacterData) {
-    watch($text, (newValue: any) => {
+function keepTextNodeUpdated(text: ReactiveGet<any>, textNode: CharacterData) {
+    watch(text, (newValue: any) => {
         textNode.data = toString(newValue);
     }, { phase: Phase.RENDER, __devName: keepTextNodeUpdated.name });
 }
@@ -26,7 +26,8 @@ function keepTextNodeUpdated($text: ReactiveGet<any>, textNode: CharacterData) {
 
 
 function createTextNode(value: ReactiveGet | any) {
-    const _value = isReactiveGet(value) ? getWithoutTracking(value) : value;
+    if (__DEV__) __devCheckIfTracked()
+    const _value = value instanceof Function ? value() : value;
     const text = toString(_value)
     const textNode = document.createTextNode(text);
     return textNode;

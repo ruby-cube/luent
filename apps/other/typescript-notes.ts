@@ -1,4 +1,4 @@
-import { ReactiveModel, ReactiveGet } from "@rue/muonic"
+import { IonicModel, ReactiveGet } from "@rue/muonic"
 
 const TYPE = null as unknown
 
@@ -175,7 +175,7 @@ type StringOrNumber = string | number
     function doSomething<T>(argA: Object) { }
 }
 
-type DeepReactiveModel<T extends AnyObject = AnyObject> = T & {ionic: any};
+type DeepReactiveModel<T extends AnyObject = AnyObject> = T & {ionize: any};
 {
     function something<T extends AnyObject>(){
         doSomething(<DeepReactiveModel<T>>TYPE)  // GOOD
@@ -184,11 +184,11 @@ type DeepReactiveModel<T extends AnyObject = AnyObject> = T & {ionic: any};
     function doSomething<T>(argA: DeepReactiveModel<T extends AnyObject ? T : never>) { }
 }
 
-export type RawWatchTarget<T = any | AnyObject> = T extends AnyObject ? () => T | ReactiveGet<T> | ReactiveModel<T> | DeepReactiveModel<T> : () => T | ReactiveGet<T> 
+export type RawWatchTarget<T = any | AnyObject> = T extends AnyObject ? () => T | ReactiveGet<T> | IonicModel<T> | DeepReactiveModel<T> : () => T | ReactiveGet<T> 
 {
     function something<T extends AnyObject>(){
-        doSomething(<ReactiveModel<T>>TYPE)  // GOOD
+        doSomething(<IonicModel<T>>TYPE)  // GOOD
     }
 
-    function doSomething<T>(argA: T extends AnyObject ? () => T | ReactiveGet<T> | ReactiveModel<T> | DeepReactiveModel<T> : () => T | ReactiveGet<T> ) { }
+    function doSomething<T>(argA: T extends AnyObject ? () => T | ReactiveGet<T> | IonicModel<T> | DeepReactiveModel<T> : () => T | ReactiveGet<T> ) { }
 }

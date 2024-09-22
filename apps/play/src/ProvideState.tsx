@@ -1,12 +1,12 @@
 //@ts-nocheck
 import { $Node } from "@rue/lumo"
-import { $, $State } from "@rue/muonic"
+import { $, Ion } from "@rue/muonic"
 
 class Counter {
     $: { count: number }
 
     constructor() {
-        this.$ = ionic({ count: 0 })
+        this.$ = ionize({ count: 0 })
     }
 
     increment() {

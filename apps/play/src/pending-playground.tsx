@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { $if, expose, NodeEntity, onMounted, RenderFunction } from "@rue/lumo"
 import { $, watch } from "@rue/muonic"
-import { $State } from "@rue/muonic/$State";
+import { Ion } from "@rue/muonic/Ion";
 
 function App() {
 
@@ -9,10 +9,10 @@ function App() {
 
 function ListBlock() {
 
-    const $itemBlock = $State<typeof ItemBlock>()
+    const $itemBlock = Ion<typeof ItemBlock>()
 
-    const $data = $State();
-    const $ready = $State(false)
+    const $data = Ion();
+    const $ready = Ion(false)
     const $allReady = $(() => $ready() && $itemBlock().$ready())
 
     fetch("").then((response) => {
@@ -38,8 +38,8 @@ function ListBlock() {
 
 function ItemBlock() {
 
-    const $data = $State({ content: "" });
-    const $ready = $State(false)
+    const $data = Ion({ content: "" });
+    const $ready = Ion(false)
 
     fetch("").then((response) => {
         response.json().then((data) => {
@@ -63,7 +63,7 @@ function ItemBlock() {
 
 function ListBlockB() {
 
-    const $data = $State();
+    const $data = Ion();
 
     const pendingData = fetch("").then((response) => {
         return response.json()
@@ -80,7 +80,7 @@ function ListBlockB() {
 
 function ItemBlockB() {
 
-    const $content = $State('');
+    const $content = Ion('');
 
     $await(fetch(""))
         .then(async (response) => {

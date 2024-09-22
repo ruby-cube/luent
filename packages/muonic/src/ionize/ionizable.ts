@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 
 type Constructor = Function
 
-const ionizableClasses: Set<Constructor> = new Set([Array, Map, Set])
+const ionizableClasses: Set<Constructor> = new Set([Array, Map, Set, Object])
 
 export function registerIonizableClass(constructor: Constructor) {
     if (!(constructor instanceof Function)) throw new Error(`INVALID INPUT`)

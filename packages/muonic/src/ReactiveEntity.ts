@@ -1,4 +1,4 @@
-import { ReactiveAtom } from "./derivations/ReactiveAtom"
+import { IonicAtom } from "./derivations/IonicAtom"
 
 export const META = Symbol('metaReactiveEntity')
 
@@ -8,12 +8,12 @@ export interface ReactiveEntity<T = any> {
 }
 
 // export interface ReactivePrimitive {
-//     asAtom?: ReactiveAtom
-//     initializeAsAtom: (atom: ReactiveAtom) => void
+//     asAtom?: IonicAtom
+//     initializeAsAtom: (atom: IonicAtom) => void
 //     destroyAsAtom: () => void
 // }
 
-// export function initializeAsAtom(this: ReactivePrimitive, atom: ReactiveAtom) {
+// export function initializeAsAtom(this: ReactivePrimitive, atom: IonicAtom) {
 //     this.asAtom = atom
 // }
 

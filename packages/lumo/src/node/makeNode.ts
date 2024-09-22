@@ -1,4 +1,4 @@
-import { DerivedIon, ReactiveGet, AtomicIon, getWithoutTracking, $Derived, ReactiveModel } from "@rue/muonic";
+import { DerivedIon, ReactiveGet, AtomicIon, getWithoutTracking, DerivedIon, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked } from "@rue/muonic";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
@@ -58,7 +58,7 @@ export function makeNode(
     childNodes: NodeEntity[] | InferSlot,
     config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent {
-    const $index = getCurrentIndex(); //TODO: I need to understand $index and whether it needs to be an ion or if rerenders will take care of it
+    const $index = getCurrentIndex(); //TODO: I need to understand $index and whether it needs to be an Ion or if rerenders will take care of it
     if (typeof nodeType === "string")
         return makeElement(
             nodeType,
@@ -93,9 +93,11 @@ export function initializeListRef( // should this be initialize ref?
     $index: AtomicIon<number>
     // options?: ElementOptions
 ) {
+    // if (__DEV__) __devCheckIfNotTracked()
+    if (__DEV__) __devCheckIfTracked()
     const array = ref()!
     const _existingRef = getNodeArrayRef(array)
-    if (getWithoutTracking($index) === 0 && _existingRef) //QUESTION: Not sure if get without tracking is necessary
+    if ($index() === 0 && _existingRef)
         throw new Error('This node list ref has already be initialized. A node list ref cannot be used multiple times')
     const _ref = _existingRef || new InternalNodeArrayRef(ref)
     if (value) {
@@ -120,7 +122,9 @@ export function initializeListRef( // should this be initialize ref?
 }
 
 export function initializeRef(ref: NodeIon, value: NodeReferent | undefined) {
-    if (getWithoutTracking(ref)) //QUESTION: Not sure if get without tracking is necessary
+    // if (__DEV__) __devCheckIfNotTracked()
+    if (__DEV__) __devCheckIfTracked()
+    if (ref())
         throw new Error("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")
     const _ref = new InternalNodeRef(ref)
     if (value) {
@@ -132,7 +136,7 @@ export function initializeRef(ref: NodeIon, value: NodeReferent | undefined) {
     }
 }
 
-// export function useInternalNodeRef(ref: NodeIon | ReactiveModel<any[]>) {
+// export function useInternalNodeRef(ref: NodeIon | IonicModel<any[]>) {
 //     const refValue = ref()
 //     return refValue instanceof Array ? getNodeArrayRef(refValue) || new InternalNodeArrayRef(ref) : new InternalNodeRef(ref)
 // }

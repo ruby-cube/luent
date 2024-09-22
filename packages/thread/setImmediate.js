@@ -102,7 +102,6 @@ const _global = typeof self === "undefined"
   }
 
   function installPostMessageImplementation() {
-    console.log("post message yes")
     // Installs an event handler on `_global` for the `message` event: see
     // * https://developer.mozilla.org/en/DOM/window.postMessage
     // * http://www.whatwg.org/specs/web-apps/current-work/multipage/comms.html#crossDocumentMessages
@@ -169,23 +168,18 @@ const _global = typeof self === "undefined"
 
   // Don't get fooled by e.g. browserify environments.
   if ({}.toString.call(_global.process) === "[object process]") {
-    console.log("next tick")
     // For Node.js before 0.9
     installNextTickImplementation();
   } else if (canUsePostMessage()) {
-    console.log("post")
     // For non-IE10 modern browsers
     installPostMessageImplementation();
   } else if (_global.MessageChannel) {
-    console.log("message channel")
     // For web workers, where supported
     installMessageChannelImplementation();
   } else if (doc && "onreadystatechange" in doc.createElement("script")) {
-    console.log("state change")
     // For IE 6–8
     installReadyStateChangeImplementation();
   } else {
-    console.log("set time out")
     // For older browsers
     installSetTimeoutImplementation();
   }

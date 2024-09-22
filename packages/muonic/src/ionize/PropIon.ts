@@ -1,10 +1,10 @@
 import { AnyObject } from "@rue/types";
-import { getMetaReactive, isReactiveModel, ionic, ReactiveModel, toRaw } from "./ReactiveModel";
+import { getMetaReactive, isIonicModel, ionize, IonicModel, toRaw } from "./IonicModel";
 import { asObservedProp } from "./ObservedProp";
-import { $ } from "../derivations/DerivedIon";
+import { $, DerivedIon } from "../derivations/DerivedIon";
 
 // export function $Props<T extends AnyObject, K extends keyof T>(model: T, keys: K[]) {
-//     const reactive = isReactiveModel(model) ? model : ionic(model)
+//     const reactive = isIonicModel(model) ? model : ionize(model)
 //     const propsSignal = getMetaReactive(reactive).getMultiPropIon(keys.toString())
 //     if (propsSignal) return propsSignal;
 //     return $MultiPropsSignal(reactive, keys)
@@ -15,8 +15,8 @@ export function isPropIon(value: any): value is PropIon {
     return value.name === "__$propIon"
 }
 
-export function $Props<T extends AnyObject, K extends keyof T>(reactive: ReactiveModel<T>, keys: K[]) {
-    const multiPropIon = $(() => {
+export function $Props<T extends AnyObject, K extends keyof T>(reactive: IonicModel<T>, keys: K[]) {
+    const multiPropIon = DerivedIon(() => {
         const values = []
         for (const key of keys) {
             values.push(reactive[key])
@@ -34,13 +34,13 @@ export type PropIon<T = any> = {
 }
 
 export function asIon<T extends AnyObject, K extends keyof T>(model: T, key: K) {
-    const reactive = isReactiveModel(model) ? model : ionic(model)
+    const reactive = isIonicModel(model) ? model : ionize(model)
     const propPod = getMetaReactive(reactive).getPropIon(key)
     if (propPod) return propPod;
     return $Prop(reactive, key)
 }
 
-function $Prop<T extends ReactiveModel, K extends keyof T, P extends T[K]>(reactive: T, key: K) {
+function $Prop<T extends IonicModel, K extends keyof T, P extends T[K]>(reactive: T, key: K) {
     const rawTarget = toRaw(reactive)
     const meta = getMetaReactive(reactive);
 
@@ -77,7 +77,7 @@ function $Prop<T extends ReactiveModel, K extends keyof T, P extends T[K]>(react
     return __$propIon;
 }
 
-function setValue<T>(reactive: ReactiveModel, key: PropertyKey, newValue: T, oldValue: T) {
+function setValue<T>(reactive: IonicModel, key: PropertyKey, newValue: T, oldValue: T) {
     if (oldValue === newValue) return oldValue;
     reactive[key] = newValue;
     return newValue;

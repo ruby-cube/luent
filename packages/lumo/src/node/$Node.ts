@@ -2,7 +2,7 @@ import { ComponentOutput, ComponentSetup, PublicComponent } from "../component/I
 import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
-import { $State, AtomicIon, asReadonly, ReadonlyIon, ionic, ReactiveModel } from "@rue/muonic"
+import { Ion, AtomicIon, asReadonly, ReadonlyIon, ionize, IonicModel } from "@rue/muonic"
 import { HTMLTag } from "../element/makeElement"
 import { isUpdatingList } from "../list/listStack"
 
@@ -36,7 +36,7 @@ export type _NodesIon<T extends RefSource = RefSource> = AtomicIon<NodeReferent<
 // map readonly $node to $node
 const $nodeMap: WeakMap<NodeIon | NodesIon, _NodeIon | _NodesIon> = new WeakMap()
 
-export function getNodeIon($nodeAsReadonly: NodeIon) {
+export function getNodeIon($nodeAsReadonly: NodeIon | NodesIon) {
     const $node = $nodeMap.get($nodeAsReadonly);
     if (!$node) throw new Error("No $node :(. This should never happen")
     return $node;
@@ -46,7 +46,7 @@ export function $Node<
     T extends RefSource
     = RefSource
 >(source: T) {
-    let $node = $State(undefined) as NodeIon<T>;
+    let $node = Ion(undefined) as NodeIon<T>;
     if (__DEV__) {
         $node = asReadonlyNodeIon($node) as NodeIon<T>
     }
@@ -54,7 +54,7 @@ export function $Node<
 }
 
 export function $Nodes<T extends RefSource = RefSource>(source: T): NodesIon<T> {
-    let $nodes = $State([]) as NodesIon<T>
+    let $nodes = Ion([]) as NodesIon<T>
     if (__DEV__) {
         $nodes = asReadonlyNodeIon($nodes) as NodesIon<T>
     }
@@ -76,9 +76,6 @@ export type NodeReferent<
     R extends ComponentOutput<infer I> ?
     I extends PublicComponent ? I
     : undefined : undefined : undefined
-
-
-
 
 export class InternalNodeRef<
     T extends RefSource

@@ -1,12 +1,12 @@
 //@ts-nocheck
 import { $Node } from "@rue/lumo"
-import { $, $State } from "@rue/muonic"
+import { $, Ion } from "@rue/muonic"
 
 
 
 function ParentBlock() {
 
-    const $count = $State(4);
+    const $count = Ion(4);
 
     function increment() {
         $count.update(c => c + 1)

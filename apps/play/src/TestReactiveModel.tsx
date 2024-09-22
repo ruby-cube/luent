@@ -1,7 +1,8 @@
-import { $Node, $Nodes, Component, CreateIf, ElseCreate, For} from "@rue/lumo";
+import { $Node, $Nodes, Component, CreateIf, ElseCreate, For } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { $State, __addDevName, $, $Derived, ionic } from "@rue/muonic";
+import { Ion, __addDevName, $, DerivedIon, ionize, isIonicModel } from "@rue/muonic";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
+import { META } from "../../../packages/muonic/src/ReactiveEntity";
 
 
 const randomColor = useRandomColorGenerator()
@@ -12,7 +13,7 @@ function genId() {
 }
 
 
-// const $count = $State(0)
+// const $count = Ion(0)
 // watch($(doubleCount => $count() + 2), () => {  
 
 // })
@@ -40,13 +41,13 @@ function genId() {
 
 
 // const frog = new Frog() as FrogB
-// const frog$$ = ionic(frog)
+// const frog$$ = ionize(frog)
 
 // const q = frog$$.qualities
 // const qual$$ = frog$$.getQualitiesB()
 // const qual = frog.getQualitiesB()
 
-function App(){
+function App() {
     return Component(
         <List dog="kjk"></List>,
         {
@@ -62,7 +63,7 @@ export function List(
     }
 ) {
 
-    const $list = ionic([
+    const $list = ionize([
         { id: 0, content: "frog" },
         { id: 1, content: "robin" },
         { id: 2, content: "fly" },
@@ -70,13 +71,7 @@ export function List(
     ])
 
 
-    // $list[0] = { id: 0, content: "fly" }
-
-    // const content = $list[0]
-
-
-
-    // const frog$ = ionic({
+    // const frog$ = ionize({
     //     name: "Sir Robin"
     // })
 
@@ -91,11 +86,11 @@ export function List(
     //     console.log("changed", newVal, old)
     // })
 
-    // console.log("is reactive?", isReactiveModel($list), $list)
+    // console.log("is reactive?", isIonicModel($list), $list)
     // console.log("is deep", isDeepReactive($list))
-    // console.log("isReactive //true", isReactiveModel($list[0]))
-    // console.log("isShallowReactive // true", isReactiveModel($list._), $list._[0])
-    // console.log("isreactive //false", isReactiveModel($list._[0]))
+    // console.log("isReactive //true", isIonicModel($list[0]))
+    // console.log("isShallowReactive // true", isIonicModel($list._), $list._[0])
+    // console.log("isreactive //false", isIonicModel($list._[0]))
 
     // watch($(() => $list[3]), (newValue, old) => {
     //     console.log("index 3", newValue, old)
@@ -141,7 +136,7 @@ export function List(
         moveMultipleUniqueItems($selected, $list, index)
     }
 
-    const $selected = ionic(new Set())
+    const $selected = ionize(new Set())
 
 
     function clearSelection() {
@@ -166,7 +161,7 @@ export function List(
 
     const $itemDiv = $Nodes('div')
 
-    const $alive = $State(true)
+    const $alive = Ion(true)
 
     function destroy() {
         $alive.setTo(false)
@@ -181,22 +176,19 @@ export function List(
     //     changeContent(0)
     // }, 1)
 
-    const $listIsEmpty = $Derived(() => $list.length === 0)
-    watch($listIsEmpty, () => {
-        console.log("list is empty!")
-    })
+    // const $listIsEmpty = DerivedIon(() => $list.length === 0)
 
     return Component(
         <>
             <>
-                {CreateIf($listIsEmpty, () => (
+                {CreateIf(() => $list.length === 0, () =>
                     <div
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
                     </div>
-                ))}
+                )}
                 {ElseCreate(() =>
                     For($list, ($item, $index) => (
                         <div
@@ -216,7 +208,7 @@ export function List(
                             </p>
 
                             <li onclick={() => changeContent($index())}>
-                                {$(() => $item.content)}
+                                {() => $item.content}
                             </li>
                             <p>{$index}</p>
                             <div

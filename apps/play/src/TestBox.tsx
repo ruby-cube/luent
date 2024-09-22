@@ -1,5 +1,5 @@
 import { $Node, } from "@rue/lumo";
-import {  $, ionic, $initializeEffect, ionic, $State } from "@rue/muonic";
+import {  $, ionize, $initializeEffect, ionize, Ion } from "@rue/muonic";
 
 
 //tests:
@@ -7,14 +7,14 @@ import {  $, ionic, $initializeEffect, ionic, $State } from "@rue/muonic";
 
 export function TestBox() {
 
-    const box$ = ionic({
+    const box$ = ionize({
         position: {
             x: 0,
             y: 0
         }
     })
 
-    const $count = $State(0);
+    const $count = Ion(0);
     
     function moveRight() {
             box$.position.x = box$.position.x + 10;

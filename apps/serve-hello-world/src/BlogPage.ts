@@ -2,10 +2,10 @@ import { blogPosts } from "./data.js";
 import { fromEntries, html } from "../../../packages/literate/src/Literate.js";
 import { BlogPost, PostPreview } from "./PostPreview.js";
 import { $await, mO, $Suspense } from "@rue/literate";
-import { $State } from "@rue/muonic";
+import { Ion } from "@rue/muonic";
 
 export function BlogPage() {
-    const $blogPosts = $State([])
+    const $blogPosts = Ion([])
     const pendingBlogPosts = $await(import('./data.js'))
         .then((posts)=>{
             $blogPosts.setTo(posts)

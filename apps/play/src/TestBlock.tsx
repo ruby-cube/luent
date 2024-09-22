@@ -1,10 +1,10 @@
 import {  $Node } from "@rue/lumo";
-import { AtomicIon, $State } from "@rue/muonic";
+import { AtomicIon, Ion } from "@rue/muonic";
 
 
 export function TestBlockA(props: { $active: AtomicIon<boolean> }) {
     const { $active } = props
-    const $black = $State(true);
+    const $black = Ion(true);
 
     expose({
         dog: "hi"
@@ -17,7 +17,7 @@ export function TestBlockA(props: { $active: AtomicIon<boolean> }) {
 
 function Lap(){
     const $testBlock = $Node(TestBlockA)
-    const $active = $State(false)
+    const $active = Ion(false)
 
     onMounted(()=>{
         const hey = $testBlock()
@@ -33,7 +33,7 @@ function Lap(){
 
 export function TestBlockB(props: { $active: AtomicIon<boolean> }) {
     const { $active } = props
-    const $black = $State(true);
+    const $black = Ion(true);
 
     return (
         <>

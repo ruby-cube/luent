@@ -1,12 +1,12 @@
 import { $else, $if } from "@rue/lumo";
-import { $, ionic, $State } from "@rue/muonic";
+import { $, ionize, Ion } from "@rue/muonic";
 
 
 export function TestConditional() {
 
-    const $active = $State(true)
+    const $active = Ion(true)
 
-    const list$ = ionic([1, 2, 3])
+    const list$ = ionize([1, 2, 3])
 
     function insert() {
         list$.push(list$.length + 1)

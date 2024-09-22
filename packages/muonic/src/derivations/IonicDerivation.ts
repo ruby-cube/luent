@@ -1,11 +1,11 @@
 import { DependencyTracker, getActiveTracker, getDependencyTracker } from "./DependencyTracker";
-import { asReactiveAtom, ReactiveAtom, ReactivePrimitive } from "./ReactiveAtom";
+import { asIonicAtom, IonicAtom, ReactivePrimitive } from "./IonicAtom";
 import { asWatchTarget, isWatched, WatchTarget } from "../effects/WatchTarget";
 import { ReactiveEntity } from "../ReactiveEntity";
 
 
 
-export class ReactiveDerivation<T = any> implements ReactiveEntity {
+export class IonicDerivation<T = any> implements ReactiveEntity {
 
     constructor(
         readonly o: T,
@@ -30,23 +30,23 @@ export class ReactiveDerivation<T = any> implements ReactiveEntity {
         }
     }
 
-    atoms: Set<ReactiveAtom> = new Set()
+    atoms: Set<IonicAtom> = new Set()
 
-    trackAtoms(reactiveDerivation: () => any) {
+    trackAtoms(ionicDerivation: () => any) {
         const tracker = new DependencyTracker();
-        const [_, value] = tracker.callToCollectDependencies(reactiveDerivation);
+        const [_, value] = tracker.callToCollectDependencies(ionicDerivation);
         const deps = this.atoms = tracker.deps;
         this.initializeAtoms(deps)
         return value;
     }
 
-    private initializeAtoms(atoms: Set<ReactiveAtom>) {
+    private initializeAtoms(atoms: Set<IonicAtom>) {
         for (const atom of atoms) {
             atom.addDerivation(this)
         }
     }
 
-    forwardAtoms(atoms: Set<ReactiveAtom>) {
+    forwardAtoms(atoms: Set<IonicAtom>) {
         const tracker = getActiveTracker()
         if (tracker) {
             for (const atom of atoms){

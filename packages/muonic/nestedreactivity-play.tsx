@@ -1,9 +1,9 @@
 //@ts-nocheck
 
 import ""
-import { $initializeEffect, ionic, onRenderCycleComplete, onRendered } from "./src"
+import { $initializeEffect, ionize, onRenderCycleComplete, onRendered } from "./src"
 
-const $frog = ionic({
+const $frog = ionize({
     name: "sir robin",
     location: {
         type: "water",
@@ -16,16 +16,17 @@ const $frog = ionic({
 })
 
 
-const $count = $State(0)
 
 const $tripleCount = () => $count() * 3 // derived without memoization
 
-const $doubleCount = $Derived(() => $count() * 2) // memoized derived with option to retrack and method to untrack .. should retrack just be the default behavior?
+const $count = Ion(0)
+const $doubleCount = Ion(() => $count() * 2) // memoized derived with option to retrack and method to untrack .. should retrack just be the default behavior?
 
-const $frogName = $Prop(frog, 'name')
+const $frogName = asIon($frog, 'name')
 
+watch(PropsIon($frog, ['name', 'store']))
 
-watch(() => $count() * 2, (doubleCount, prev) => {   // if retrack is the default, why not just pass functions? it looks cleaner
+watch(Ion(() => $count() * 2), (doubleCount, prev) => {   // if retrack is the default, why not just pass functions? it looks cleaner
 
 })
 
@@ -51,7 +52,7 @@ const position = frog$.location.position // .location is tracked, .position is n
 
 // (A) manual reactivizing
 
-$(frog).location.position // impromptu ionic
+$(frog).location.position // impromptu ionize
 // $(() => $count() + 1) // impromptu memoized derived
 // $(frog, 'name') // impromptu prop
 
@@ -66,7 +67,7 @@ const location = frog$.location // returns an inert proxy with a $ property
 
 const location$ = location.$
 
-const position$ = ionic(frog$.location.position)
+const position$ = ionize(frog$.location.position)
 //TODO: Keep a WeakMap of reactives so if an object is already made into a reactive, return that reactive instead of creating a new one
 
 
@@ -94,15 +95,26 @@ function ListBlock(attributes: {
 
     const $count = Ion(0) // $SettableGet<number>
 
-    const list$ = IonicModel([1, 2, 3]);
+    const $list = IonicModel([1, 2, 3]);
 
-    const $doubleCount = DerivedIon(() => $count * 2) // Get<number>
+    const $doubleCount = DerivedIon(() => $count() * 2) // Get<number>
 
-    const $frog = DeepIonicModel(frog)
+    const $div = NodeIon('div')
 
-    const $frog = Ion(IonicModel(frog))
+    const $frog = IonicModel(frog)
 
-    const $frog = Ion(DeepIonicModel(frog))
+    const $frog = Ion(IonicModel({
+        a: "djjf",
+        bouat: 0,
+        cucumber
+    }))
+
+    const $frog = Ion(ionicModel({
+        a: "djjf",
+        bouat: 0,
+        cucumber
+    }))
+
 
     const $frog = IonicModel(new Frog())
 
@@ -120,13 +132,13 @@ function ListBlock(attributes: {
 
     })
 
-    $initializeEffect(() => {
+    initializeIonicEffect(() => {
 
     })
 
     //-----
 
-    const $count = ion(0) // $SettableGet<number>
+    const $count = Ion(0) // $SettableGet<number>
 
     quarky.registerIonizableClass(Frog)
 
@@ -139,23 +151,23 @@ function ListBlock(attributes: {
         })
     }
 
-    const list$ = ionic([
+    const list$ = ionize([
         Foo(3),
         Foo(4),
         Foo(5)
     ]);
 
-    const list$ = ionic([1, 2, 3]);
+    const list$ = ionize([1, 2, 3]);
 
     const $doubleCount = derivedIon(() => $count * 2) // Get<number>
 
-    const $frog = ionic(frog)
+    const $frog = ionize(frog)
 
-    const $frog = ion(ionic(frog))
+    const $frog = Ion(ionize(frog))
 
-    const $frog = ion(ionic(frog))
+    const $frog = Ion(ionize(frog))
 
-    const $frog = ionic(new Frog())
+    const $frog = ionize(new Frog())
 
     const $name = asIon(frog$, 'name') //$GetProp<string>
 
@@ -186,7 +198,7 @@ function ListBlock(attributes: {
 
 
 
-watch(ionic(frog$.location.position), () => {
+watch(ionize(frog$.location.position), () => {
 
 })
 
@@ -195,19 +207,17 @@ watch(frog$$.location.position, () => {
 })
 
 // reactive property access vs reactive creation...
-frog$$._$.location // what if I want to track when location prop changeds but I don't want the location to be made reactive?? it's different.
 
 frog$$ // deep reactive proxy that will make any downstream objects reactive
 
-frog$$._$ // shallow reactive proxy that will not make any down stream objects reactive
 
 frog$$._o // raw
 
-const frog$ = frog$$.ionic
+const frog$ = frog$$.ionize
 
 
 
-const todos$ = ionic([{
+const todos$ = ionize([{
     content: "hi"
 }])
 

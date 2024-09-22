@@ -5,7 +5,7 @@ import { AnyObject, MaybePromise } from "@rue/types";
 import { collectEffects, getFlask } from "@rue/flask";
 import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
 import { getCurrentComponent } from "../../lumo/src/component/componentStack.js";
-import { isReactiveArray } from "../../muonic/src/ionic/ReactiveArray.js";
+import { isReactiveArray } from "../../muonic/src/ionize/IonicArray.js";
 
 
 // const allPromises: Promise<any>[] = [] // collect promises from $Suspense
@@ -83,7 +83,7 @@ function initializeComponent(
     component.output = _output;
 
     if (ref) {
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use $Node or $Nodes ion as ref")
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use $Node or $Nodes Ion as ref")
         if ($index) {
             initializeListRef(ref, publicComponent, $index)
         }

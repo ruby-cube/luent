@@ -1,28 +1,28 @@
-import { asReactiveAtom, ReactiveAtom } from "../derivations/ReactiveAtom";
+import { asIonicAtom, IonicAtom } from "../derivations/IonicAtom";
 import { asWatchTarget, WatchTarget } from "../effects/WatchTarget";
-import { getMetaReactive, ReactiveModel, toRaw } from "./ReactiveModel";
+import { getMetaReactive, IonicModel, toRaw } from "./IonicModel";
 import { META } from "../ReactiveEntity";
 import { watch } from "fs";
-import { isIntegerKey } from "./ReactiveArray";
-import { MetaReactiveCollection, MetaReactiveModel } from "./MetaReactiveModel";
+import { isIntegerKey } from "./IonicArray";
+import { MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
 import { AnyObject } from "@rue/types";
 import { PropIon } from "./PropIon";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
 
-// const observedPropMap: Map<MetaReactiveModel, Map<PropertyKey, ObservedProp>> = new Map()
+// const observedPropMap: Map<MetaIonicModel, Map<PropertyKey, ObservedProp>> = new Map()
 // const KEY = '1'
 // const MODEL = '0'
 
-// export type ObservedProp = [ReactiveModel, PropertyKey]
+// export type ObservedProp = [IonicModel, PropertyKey]
 
 export class ObservedProp {
 
     constructor(
-        public metaReactive: MetaReactiveModel, // because reactives can be deep or shallow, must map to metaReactive instead of reactive
+        public metaIonicModel: MetaIonicModel, // because reactives can be deep or shallow, must map to metaIonicModel instead of reactive
         public key: PropertyKey,
     ) {
-        metaReactive.registerObservedProp(key, this)
+        metaIonicModel.registerObservedProp(key, this)
     }
 
     cleanUp?: () => void
@@ -35,12 +35,12 @@ export class ObservedProp {
     }
 
     destroy() {
-        this.metaReactive.unregisterObservedProp(this.key)
+        this.metaIonicModel.unregisterObservedProp(this.key)
         this.cleanUp?.()
     }
 
     getValue() {
-        return this.metaReactive.rawTarget[this.key];
+        return this.metaIonicModel.rawTarget[this.key];
     }
 }
 
@@ -50,7 +50,7 @@ export function isObservedProp(value: any): value is ObservedProp {
 }
 
 export function asObservedProp(
-    reactive: ReactiveModel,
+    reactive: IonicModel,
     key: PropertyKey
 ): ObservedProp {
     const observedProp = getObservedProp(reactive, key)
@@ -59,23 +59,23 @@ export function asObservedProp(
 }
 
 export function getObservedProp(
-    reactive: ReactiveModel,
+    reactive: IonicModel,
     key: PropertyKey
 ) {
     return getMetaReactive(reactive).getObservedProp(key)
 }
 
 function createObservedProp(
-    reactive: ReactiveModel,
+    reactive: IonicModel,
     key: PropertyKey
 ) {
-    const metaReactive = getMetaReactive(reactive);
-    const prop = new ObservedProp(metaReactive, key);
-    const isIndex = toRaw(metaReactive) instanceof Array && isIntegerKey(key)
+    const metaIonicModel = getMetaReactive(reactive);
+    const prop = new ObservedProp(metaIonicModel, key);
+    const isIndex = toRaw(metaIonicModel) instanceof Array && isIntegerKey(key)
     if (isIndex) {
-        (<MetaReactiveCollection>metaReactive).addObservedEntryKey(key);
+        (<MetaIonicCollection>metaIonicModel).addObservedEntryKey(key);
     }
-    const atom = asReactiveAtom(prop)
+    const atom = asIonicAtom(prop)
     const watchTarget = asWatchTarget(prop)
 
     atom.onUntracked(unobserve)
@@ -83,7 +83,7 @@ function createObservedProp(
 
     function unobserve() {
         if (watchTarget.watchCount === 0 && atom.derivations.size === 0) {
-            if (isIndex) (<MetaReactiveCollection>metaReactive).deleteObservedEntryKey(key)
+            if (isIndex) (<MetaIonicCollection>metaIonicModel).deleteObservedEntryKey(key)
             prop.destroy()
         }
     }
@@ -92,28 +92,28 @@ function createObservedProp(
 
 
 // export function getObservedPropValue(prop: ObservedProp) {
-//     return prop.metaReactive.rawTarget[prop.key];
+//     return prop.metaIonicModel.rawTarget[prop.key];
 // }
 
 
-// function registerObservedProp(prop: ObservedProp, metaReactive: MetaReactiveModel, key: PropertyKey,) {
-//     let propMap = observedPropMap.get(metaReactive)
+// function registerObservedProp(prop: ObservedProp, metaIonicModel: MetaIonicModel, key: PropertyKey,) {
+//     let propMap = observedPropMap.get(metaIonicModel)
 //     if (!propMap) {
 //         propMap = new Map()
-//         observedPropMap.set(metaReactive, propMap)
+//         observedPropMap.set(metaIonicModel, propMap)
 //     }
 //     propMap.set(key, prop) // propMap should always exist because new ObservedProp is called after new Map() is called
 // }
 
-// function unregisterObservedProp(metaReactive: MetaReactiveModel, key: PropertyKey) {
-//     const propMap = observedPropMap.get(metaReactive)!
+// function unregisterObservedProp(metaIonicModel: MetaIonicModel, key: PropertyKey) {
+//     const propMap = observedPropMap.get(metaIonicModel)!
 //     if (__DEV__ && !propMap) throw new Error("No propMap :( this should never happen")
 //     propMap.delete(key)
 //     if (propMap.size === 0) {
-//         observedPropMap.delete(metaReactive)
+//         observedPropMap.delete(metaIonicModel)
 //     }
 // }
 export function toPropIon(value: any): PropIon | undefined {
     if (!(value instanceof ObservedProp)) return undefined;
-    return value.metaReactive.getPropIon(value.key)
+    return value.metaIonicModel.getPropIon(value.key)
 }

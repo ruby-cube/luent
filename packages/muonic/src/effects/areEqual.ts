@@ -1,6 +1,6 @@
 import { isEqual } from "@rue/utils";
-import { ReactiveModel, toRaw } from "../ionic/ReactiveModel";
-import { isReactiveObject } from "../ionic/ReactiveObject";
+import { IonicModel, toRaw } from "../ionize/IonicModel";
+import { isReactiveObject } from "../ionize/IonicObject";
 
 export function areEqual(newValue: any, oldValue: any) { //TODO: this is really tricky.. do I do a shallow diff or a deep diff for arrays?? I think it should be shallow diff because if you are watching an array, you typically care about the order
     const _newValue = toRaw(newValue)
@@ -38,7 +38,7 @@ export function areShallowEqualArrays(arrayA: any[], arrayB: any[]) {
 }
 
 
-function reactivePropsAreEqual(reactiveA: ReactiveModel, reactiveB: ReactiveModel) {
+function reactivePropsAreEqual(reactiveA: IonicModel, reactiveB: IonicModel) {
     if (!isReactiveObject(reactiveA) || !isReactiveObject(reactiveB)) throw new Error("Invalid input type");
     const rawA = toRaw(reactiveA)
     const rawB = toRaw(reactiveB)

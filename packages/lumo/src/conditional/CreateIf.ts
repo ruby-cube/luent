@@ -3,7 +3,7 @@ import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
-import { ReactiveGet, ReactiveGet } from "@rue/muonic";
+import { ReactiveGet } from "@rue/muonic";
 import { getProviderComponent } from "../component/ProviderComponent";
 
 

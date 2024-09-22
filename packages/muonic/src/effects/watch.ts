@@ -1,14 +1,16 @@
 import { AnyObject } from "@rue/types";
 import { asWatchTarget, WatchTarget } from "./WatchTarget";
 import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
-import { ReactiveDerivation } from "../derivations/ReactiveDerivation";
+import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
-import { $, isReactiveGet, ReactiveGet, $Derived } from "../derivations/DerivedIon";
-import { DeepReactiveModel, getMetaReactive, isReactiveModel, ReactiveModel, toRaw, } from "../ionic/ReactiveModel";
+import { $, isAnyIon, ReactiveGet, DerivedIon } from "../derivations/DerivedIon";
+import { getMetaReactive, isIonicModel, IonicModel, toRaw, } from "../ionize/IonicModel";
 import { areEqual } from "./areEqual";
-import { createReactiveFunction, ReactiveFunction } from "../derivations/ReactiveFunction";
+import { createIonicEffect, IonicEffect } from "../derivations/IonicEffect";
 import { META } from "../ReactiveEntity";
+import { noop } from "@rue/utils";
+import { __devCheckIfTracked } from "../derivations/DependencyTracker";
 
 
 type RenderCycleOptions = {
@@ -29,8 +31,8 @@ export type EffectOptions = {
 
 
 export type MutationRecord = {
-    target: ReactiveModel,
-    // root?: ReactiveModel,
+    target: IonicModel,
+    // root?: IonicModel,
     // targetPath?: KeyPath, // undefined means the target is the root watched model
     op: MutationOp | SetOp
 }
@@ -57,11 +59,11 @@ export function isSetOp(op: AnyObject): op is SetOp {
 }
 
 
-export type MutationEffect<T extends ReactiveModel = ReactiveModel> = (newValue: T, mutations: MutationRecord[]) => void
+export type MutationEffect<T extends IonicModel = IonicModel> = (newValue: T, mutations: MutationRecord[]) => void
 export type ChangeEffect<T = any> = (newValue: T, oldValue: T) => void
 export type ReactiveEffect = {
     (): void;
-    [META]: ReactiveDerivation;
+    [META]: IonicDerivation;
 }
 type Effect = () => void
 
@@ -84,20 +86,20 @@ type Effect = () => void
 export type RawEffect = (a: any, b: any) => void
 
 export function watch<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
-export function watch<T extends ReactiveModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
-export function watch<T extends () => any | ReactiveGet | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
-    if (!(target instanceof Function) && isReactiveModel(target)) {
+export function watch<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
+export function watch<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
+    if (!(target instanceof Function)) {
         return watchReactiveModel(target, effect, options || {})
     }
     // const retrack = options?.retrack ?? true
-    const _target = !isReactiveGet(target) ? $Derived(target) : target as ReactiveGet;
-    // createReactiveFunction(<() => any>target, retrack).initialize()
+    const _target = !isAnyIon(target) ? DerivedIon(target) : target as ReactiveGet;
+    // createIonicEffect(<() => any>target, retrack).initialize()
     const eager = options?.eager
     const phase = options?.phase || Phase.BEFORE_RENDER
 
     const watchTarget = asWatchTarget(_target);
 
-    let oldValue = _target()
+    let oldValue = _target() // This is when derived is initialized if not already
 
     function changeEffect() {
         const newValue = _target() // This is when retracking happens
@@ -114,12 +116,16 @@ export function watch<T extends () => any | ReactiveGet | ReactiveModel>(target:
         watchTarget,
         changeEffect,
         phase,
-        options || {}
-        // isReactiveGet ? (<ReactiveFunction>_target)[META] : undefined
+        options || {},
+        !isAnyIon(target) ? (<DerivedIon>_target)[META] : undefined
     )
 }
 
-function watchReactiveModel<T extends ReactiveModel>(target: T, effect: MutationEffect<T>, options: WatchOptions) {
+function watchReactiveModel<T extends IonicModel>(target: T, effect: MutationEffect<T>, options: WatchOptions) {
+    if (!isIonicModel(target)) {
+        console.warn(`Watching non-reactive object. Is this intentional?`)
+        return { stop: noop };
+    }
     const eager = options?.eager
     const phase = options?.phase || Phase.BEFORE_RENDER
     // const deep = options?.deep
@@ -160,10 +166,10 @@ function scheduleEffectEagerly(effect: Effect, phase: Phase, target?: any) {
     else useRenderCycle().scheduleEffect(target || effect, effect, phase)
 }
 
-export function $initializeEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
+export function $initializeEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived Ion and effect combined into one function
     const phase = options?.phase || Phase.BEFORE_RENDER;
     const retrack = options?.retrack || false;
-    const reactiveEffect = createReactiveFunction(effect, retrack)
+    const reactiveEffect = createIonicEffect(effect, retrack)
     const watchTarget = asWatchTarget(reactiveEffect);
 
     scheduleEffectEagerly(reactiveEffect.initialize, phase);
@@ -183,7 +189,7 @@ function setUpWatcher(
     effect: Effect,
     phase: Phase,
     options: ListenerOptions & RenderCycleOptions,
-    metaReactiveFunction?: ReactiveDerivation
+    metaReactiveFunction?: IonicDerivation
 ) {
     const forNextCycle = options?.cycle === 'next' ? true : false;
 

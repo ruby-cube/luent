@@ -1,6 +1,6 @@
 import { $Node, Component, COMPONENT, ComponentSetup, CreateIf, ElseCreate, For,  Provide, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
-import { __addDevName, $State, ionic, AtomicIon, ionic } from "@rue/muonic";
+import { __addDevName, Ion, ionize } from "@rue/muonic";
 import { $ } from "@rue/muonic";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { ElseCreateIf } from "../../../packages/lumo/src/conditional/CreateIf";
@@ -60,7 +60,7 @@ function genId() {
 
 const onClick = useEventListener('click');
 
-// shallow reactive model ionic
+// shallow reactive model ionize
 // deep reactive model o$$$
 // shallow signal $ (also derived signal)
 // deep signal $$$
@@ -75,10 +75,10 @@ export function App() {
 
 export function List() {
 
-    const $active = $State(true)
+    const $active = Ion(true)
     if (__DEV__) __addDevName($active, '$active')
 
-    const $list = $State(ionic([
+    const $list = Ion(ionize([
         { id: 0, content: "frog" },
         { id: 1, content: "dog" },
         { id: 2, content: "fly" },
@@ -86,7 +86,6 @@ export function List() {
     ]))
 
     if (__DEV__) __addDevName($list, '$list')
-
 
     function changeContent(index: number) {
         const item$ = $list()[index];
@@ -114,7 +113,7 @@ export function List() {
 
     const { openModal } = useModal();
 
-    const $showSideBlock = $State(false)
+    const $showSideBlock = Ion(false)
 
     function showSideBlock() {
         $showSideBlock.setTo(true)
@@ -208,8 +207,8 @@ function Appo(
     },
     provide: Provide
 ) {
-    const $active = $State(true)
-    const $ready = $State(true)
+    const $active = Ion(true)
+    const $ready = Ion(true)
 
     const exposed = {
         $active,
@@ -293,7 +292,7 @@ function DialogBox({
 }
 
 function useDialogBox(config: { initialState: 'open' | 'closed' }) {
-    const $open = $State(false)
+    const $open = Ion(false)
     __addDevName($open, '$open')
 
     function open() {

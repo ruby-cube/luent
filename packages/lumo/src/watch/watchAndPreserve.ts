@@ -1,4 +1,4 @@
-import { isReactiveGet, $initializeEffect as _$initializeEffect, onRendered, ReactiveGet, shallowClone, watch as _watch, WatchOptions, ReactiveModel, ChangeEffect, MutationEffect, Phase } from "@rue/muonic";
+import { isAnyIon, $initializeEffect as _$initializeEffect, onRendered, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, ChangeEffect, MutationEffect, Phase, __devCheckIfTracked } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { isMountPhase } from "../dynamic/DynamicNode";
@@ -10,7 +10,6 @@ import { getProviderComponent, ProviderComponent } from "../component/ProviderCo
 import { getActiveDynamicNode } from "../dynamic/nodestack";
 
 type WatchForRenderOptions = {
-    deep?: boolean;
     eager?: true;
     retrack?: boolean;
 } & ListenerOptions
@@ -42,8 +41,8 @@ type Effect<T = any> = MutationEffect<T extends AnyObject ? T : never> | ChangeE
 
 
 // export function watchForRender<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchForRenderOptions): ActiveListener
-// export function watchForRender<T extends ReactiveModel>(target: T, effect: MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener
-// export function watchForRender<T extends () => any | ReactiveGet | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener {
+// export function watchForRender<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener
+// export function watchForRender<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener {
 //     // const component = getCurrentComponent<InternalComponent>();
 //     // if (!component) throw Error("watchForRender must be called within component setup")
 
@@ -57,7 +56,7 @@ type Effect<T = any> = MutationEffect<T extends AnyObject ? T : never> | ChangeE
 //     return _watchForRender(target, effect, options)
 // }
 
-// export function _watchForRender(target: () => any | ReactiveGet | ReactiveModel, effect: Effect, options?: WatchForRenderOptions) {
+// export function _watchForRender(target: () => any | ReactiveGet | IonicModel, effect: Effect, options?: WatchForRenderOptions) {
 //     // const component = getCurrentComponent<InternalComponent>()!;
 //     // const _handler = (newValue: any, oldValue: any) => {
 //     // handler(newValue, oldValue);
@@ -127,8 +126,8 @@ export function $initializeEffect(effect: () => void) {
 
 
 export function watch<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
-export function watch<T extends ReactiveModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
-export function watch<T extends () => any | ReactiveGet | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
+export function watch<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
+export function watch<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
     const dynamicNode = getActiveDynamicNode()
     // if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
 
@@ -137,7 +136,7 @@ export function watch<T extends () => any | ReactiveGet | ReactiveModel>(target:
     return _watch(target, effect, options)
 }
 
-function watchAndPreserve<T extends () => any | ReactiveGet | ReactiveModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions) {
+function watchAndPreserve<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions) {
     const mountPhase = isMountPhase()
     // const component = getProviderComponent(watchAndPreserve.name);
     // const watchFn = options?.phase === Phase.RENDER ? _watchForRender : _watch
@@ -150,7 +149,8 @@ function watchAndPreserve<T extends () => any | ReactiveGet | ReactiveModel>(tar
     onDeactivate(deactivateAndReactivate, { once: true }, dynamicNode)
 
     function deactivateAndReactivate() {
-        oldValue = isReactiveGet(target) ? target() : shallowClone(target)
+        if (__DEV__) __devCheckIfTracked()
+        oldValue = isAnyIon(target) ? target() : shallowClone(target)
         reactivation = true;
         watcher.stop()
         if (!mountPhase) {
@@ -160,7 +160,7 @@ function watchAndPreserve<T extends () => any | ReactiveGet | ReactiveModel>(tar
 
     //FIX: Needs major fixing, temporarily commented out to quiet ts
     // function initializeOnActivated() {
-    //     if (isReactiveGet(target)) {
+    //     if (isAnyIon(target)) {
     //         onActivated(() => {
     //             if (reactivation) effect(target(), oldValue)
     //             initializeWatcher()
@@ -168,7 +168,7 @@ function watchAndPreserve<T extends () => any | ReactiveGet | ReactiveModel>(tar
     //     }
     //     else {
     //         onActivated(() => {
-    //             if (reactivation) effect(<ReactiveModel<T extends AnyObject ? T : never>>target, oldValue)
+    //             if (reactivation) effect(<IonicModel<T extends AnyObject ? T : never>>target, oldValue)
     //             initializeWatcher()
     //         }, { once: true }, dynamicNode)
     //     }
@@ -183,7 +183,7 @@ function watchAndPreserve<T extends () => any | ReactiveGet | ReactiveModel>(tar
     return watcher
 }
 
-// export function watchForRender<T>(target: ReactiveGet<T> | ReactiveModel<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: { once?: true }) {
+// export function watchForRender<T>(target: ReactiveGet<T> | IonicModel<T extends AnyObject ? T : never>, handler: (newValue: T, oldValue: T) => void, options?: { once?: true }) {
 //     const component = getCurrentComponent();
 //     if (!component || component === "root") throw Error("watchForRender must be called within component setup")
 

@@ -1,4 +1,4 @@
-import { $State } from "@rue/muonic"
+import { Ion } from "@rue/muonic"
 import { $await, $Suspense } from "../../../packages/lumo/src/component/$await"
 
 
@@ -21,7 +21,7 @@ const PendingTextArea = $Suspense({
 })
 
 export function MainSite() {
-    const $count = $State(0)
+    const $count = Ion(0)
     return (
         <>
             <h1>Hello World</h1>
@@ -50,7 +50,7 @@ function ListBlock() {
 }
 
 function TextArea() {
-    const $word = $State("not ready")
+    const $word = Ion("not ready")
 
     $await(simFetchC("pomp"))
         .then(word => $word.setTo(word))
@@ -66,7 +66,7 @@ function TextArea() {
 
 
 function ItemBlockA() {
-    const $word = $State("not ready")
+    const $word = Ion("not ready")
 
     $await(simFetch("calico"))
         .then(word => $word.setTo(word))
@@ -77,7 +77,7 @@ function ItemBlockA() {
 }
 
 function ItemBlockB() {
-    const $word = $State("not ready")
+    const $word = Ion("not ready")
 
     $await(simLongFetch("basset"))
         .then(word => $word.setTo(word))
@@ -88,7 +88,7 @@ function ItemBlockB() {
 }
 
 function ItemBlockC() {
-    const $word = $State("not ready")
+    const $word = Ion("not ready")
 
     $await(simFetchB("cerulean"))
         .then(word => $word.setTo(word))
@@ -99,7 +99,7 @@ function ItemBlockC() {
 }
 
 function ItemBlockD() {
-    const $word = $State("not ready")
+    const $word = Ion("not ready")
 
     $await(simLongFetchB("tilted"))              // [promise]
         .then(word => $word.setTo(word))

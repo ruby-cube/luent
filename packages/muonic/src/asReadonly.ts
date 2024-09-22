@@ -1,5 +1,5 @@
 import { isIon, AtomicIon } from "./Ion";
-import { isReactiveModel, ReactiveModel } from "./ionic/ReactiveModel";
+import { isIonicModel, IonicModel } from "./ionize/IonicModel";
 import { META, ReactiveEntity } from "./ReactiveEntity";
 
 
@@ -11,14 +11,14 @@ export type ReadonlyIon<T = any> = {
 
 export const READONLY_ION = Symbol('readonlySignal');
 
-export function asReadonly<R extends AtomicIon<T> | ReactiveModel, T>(reactiveRef: R): R extends AtomicIon ? ReadonlyIon<T> : R {
+export function asReadonly<R extends AtomicIon<T> | IonicModel, T>(reactiveRef: R): R extends AtomicIon ? ReadonlyIon<T> : R {
     if (isIon(reactiveRef)) {
         const readonlySignal = () => reactiveRef()
         readonlySignal[META] = reactiveRef[META]
         readonlySignal[READONLY_ION] = true;
         return readonlySignal as R extends AtomicIon ? ReadonlyIon<T> : R
     }
-    if (isReactiveModel(reactiveRef)) {
+    if (isIonicModel(reactiveRef)) {
         //TODO: 
         return reactiveRef as R extends AtomicIon ? ReadonlyIon<T> : R;
     }

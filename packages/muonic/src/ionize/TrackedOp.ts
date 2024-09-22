@@ -2,10 +2,10 @@
 
 
 
-import { asReactiveAtom } from "../derivations/ReactiveAtom";
+import { asIonicAtom } from "../derivations/IonicAtom";
 import { META } from "../ReactiveEntity";
-import { Collection, MetaReactiveCollection, MetaReactiveModel } from "./MetaReactiveModel";
-import { getMetaReactive, ReactiveModel } from "./ReactiveModel";
+import { Collection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
+import { getMetaReactive, IonicModel } from "./IonicModel";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
 
@@ -14,30 +14,30 @@ type OpMap = Map<OpName, EntryKeyMap>
 type EntryKey = any
 type OpName = string
 
-// const trackedOpMap: Map<MetaReactiveModel, OpMap> = new Map()
+// const trackedOpMap: Map<MetaIonicModel, OpMap> = new Map()
 
 export class TrackedOp {
 
     constructor(
-        public metaReactive: MetaReactiveModel,
+        public metaIonicModel: MetaIonicModel,
         public op: string,
         public entryKey: any,
     ) {
-        metaReactive.registerTrackedOp(op, entryKey, this)
+        metaIonicModel.registerTrackedOp(op, entryKey, this)
     }
 
     destroy() {
-        this.metaReactive.unregisterTrackedOp(this.op, this.entryKey)
+        this.metaIonicModel.unregisterTrackedOp(this.op, this.entryKey)
     }
 
     getOutput(){
-        return this.metaReactive.rawTarget[this.op](this.entryKey)
+        return this.metaIonicModel.rawTarget[this.op](this.entryKey)
     }
 }
 
 
 // export function getOpOutput(op: TrackedOp) {
-//     return op.metaReactive.rawTarget[op.op](op.entryKey);
+//     return op.metaIonicModel.rawTarget[op.op](op.entryKey);
 // }
 
 export function isTrackedOp(value: any): value is TrackedOp {
@@ -46,7 +46,7 @@ export function isTrackedOp(value: any): value is TrackedOp {
 }
 
 export function asTrackedOp(
-    model: ReactiveModel<Collection>,
+    model: IonicModel<Collection>,
     op: string,
     key: any
 ): TrackedOp {
@@ -56,7 +56,7 @@ export function asTrackedOp(
 }
 
 export function getTrackedOp(
-    model: ReactiveModel,
+    model: IonicModel,
     op: string,
     key: any
 ){
@@ -64,17 +64,17 @@ export function getTrackedOp(
 }
 
 function createTrackedOp(
-    model: ReactiveModel<Collection>,
+    model: IonicModel<Collection>,
     op: string,
     key: any
 ){
-    const metaReactive = getMetaReactive(model);
-    const trackedOp = new TrackedOp(metaReactive, op, key)
-    metaReactive.addObservedEntryKey(key)
-    const atom = asReactiveAtom(trackedOp);
+    const metaIonicModel = getMetaReactive(model);
+    const trackedOp = new TrackedOp(metaIonicModel, op, key)
+    metaIonicModel.addObservedEntryKey(key)
+    const atom = asIonicAtom(trackedOp);
     atom.onUntracked(() => {
         if (atom.derivations.size === 0) {
-            metaReactive.deleteObservedEntryKey(key)
+            metaIonicModel.deleteObservedEntryKey(key)
             trackedOp.destroy()
         }
     })
@@ -83,7 +83,7 @@ function createTrackedOp(
 
 
 
-// function registerTrackedOp(trackedOp: TrackedOp, model: ReactiveModel, op: string, key: any) {
+// function registerTrackedOp(trackedOp: TrackedOp, model: IonicModel, op: string, key: any) {
 //     let opMap = trackedOpMap.get(model)
 //     if (!opMap) {
 //         opMap = new Map()
@@ -97,7 +97,7 @@ function createTrackedOp(
 //     entryKeyMap.set(key, trackedOp);
 // }
 
-// function unregisterTrackedOp(reactive: ReactiveModel, op: string, entryKey: any) {
+// function unregisterTrackedOp(reactive: IonicModel, op: string, entryKey: any) {
 //     const opMap = trackedOpMap.get(reactive)!
 //     const entryKeyMap = opMap.get(op)!
 //     if (__DEV__ && !entryKeyMap) throw new Error("No entryKeyMap :( this should never happen")
@@ -111,7 +111,7 @@ function createTrackedOp(
 // }
 
 // export function getTrackableOps(
-//     model: ReactiveModel,
+//     model: IonicModel,
 //     triggerOp: TriggerOp,
 //     key: any
 // ): TrackedOp[] | null {
@@ -149,7 +149,7 @@ function createTrackedOp(
 // }
 
 
-// function getCorrespondingOps(reactive: ReactiveModel, triggerOp: TriggerOp) {
+// function getCorrespondingOps(reactive: IonicModel, triggerOp: TriggerOp) {
 //     const model = toRaw(reactive);
 //     if (model instanceof Array && triggerOp in arrayTriggerOpsMap) {
 //         return arrayTriggerOpsMap[<keyof typeof arrayTriggerOpsMap>triggerOp];

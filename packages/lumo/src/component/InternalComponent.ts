@@ -39,15 +39,13 @@ export interface ComponentOutput<T = undefined> {
     initialNodeEntities: NodeEntity
 }
 export function Component<T = undefined>(render: NodeEntity, exposedComponent?: T): ComponentOutput<T> {
-    //TODO: make this more efficient?
+    const unnestedNodeEntities = unnestComponent(render)
     if (exposedComponent instanceof Object) {
         return {
             component: exposedComponent,
-            initialNodeEntities: render
+            initialNodeEntities: unnestedNodeEntities
         } as ComponentOutput<T>
     }
-    const unnestedNodeEntities = unnestComponent(render)
-
     return {
         component: undefined,
         initialNodeEntities: unnestedNodeEntities

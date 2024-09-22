@@ -1,12 +1,12 @@
 import { AnyObject } from "@rue/types";
-import { getMetaReactive, maybeUnreactivize } from "./ReactiveModel";
+import { getMetaReactive, toRawIfNeeded } from "./IonicModel";
 import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asTrackedOp } from "./TrackedOp";
-import { ReactiveModel, recordOp, storeSnapshot } from "./ReactiveModel";
+import { IonicModel, recordOp, storeSnapshot } from "./IonicModel";
 import { isWatched } from "../effects/WatchTarget";
-import { triggerReactiveModel } from "../trigger";
-import { Collection, MetaReactiveCollection } from "./MetaReactiveModel";
+import { triggerIonicModel } from "../trigger";
+import { Collection, MetaIonicCollection } from "./MetaIonicModel";
 
 
 
@@ -21,7 +21,7 @@ export const insertOps = {
 
 // A 'get op' is a o(1) get-like operation like set.has() or array.at()
 export function useGetOp(
-    reactive: ReactiveModel<Collection>,
+    reactive: IonicModel<Collection>,
     target: AnyObject,
     op: string,
     fn: (key: any) => any,
@@ -29,7 +29,7 @@ export function useGetOp(
     return function getOp(arg: any) {
         if (__DEV__) emitSignal();
         const tracker = getActiveTracker()
-        const _arg = maybeUnreactivize(arg)
+        const _arg = toRawIfNeeded(arg)
         if (!tracker)
             return fn.call(target, _arg);
         tracker.track(asTrackedOp(reactive, op, _arg))
@@ -49,7 +49,7 @@ export function maybeUnreactivizeArgs(
     const newItems = hasSingleItem ? [args[itemPosition.at]] : args.slice(itemPosition.from);
     const _newItems: any[] = [];
     for (const newItem of newItems) {
-        _newItems.push(maybeUnreactivize(newItem))
+        _newItems.push(toRawIfNeeded(newItem))
     }
     if (hasSingleItem) {
         args[itemPosition.at] = _newItems[0];
@@ -70,14 +70,14 @@ export function maybeUnreactivizeArgs(
 
 
 export function triggerReactiveWithMutationOp(
-    reactive: ReactiveModel,
+    reactive: IonicModel,
     key: string,
     args: any[],
     output: any
 ) {
     if (isWatched(getMetaReactive(reactive))) {
 
-        triggerReactiveModel(reactive)
+        triggerIonicModel(reactive)
         recordOp(reactive, {
             target: reactive,
             op: {
@@ -100,7 +100,7 @@ export function triggerReactiveWithMutationOp(
     //             args
     //         }
     //     })
-    //     triggerReactiveModel(rootWatchedModel)
+    //     triggerIonicModel(rootWatchedModel)
     // }
 }
 
@@ -126,7 +126,7 @@ export function triggerReactiveWithMutationOp(
 
 // const frog = new Frog()
 
-// const frog$$ = ionic([])
+// const frog$$ = ionize([])
 
 // type TransformMap = typeof transformMap
 // type GetTransforms<T extends { returnTransforms: AnyObject }> = T['returnTransforms']
@@ -158,7 +158,7 @@ export function triggerReactiveWithMutationOp(
 // }
 
 // type DeepReactiveModel<T extends AnyObject> = (T extends CapsuleWithOutputTransformers<T> ? ReactiveCapsuleWithOutputTransformers<T> : T) & {
-//     _$: ReactiveModel<T>
+//     _$: IonicModel<T>
 // }
 
 // const ar: Brew[] = []
@@ -173,7 +173,7 @@ export function triggerReactiveWithMutationOp(
 
 //     outputTransforms = {
 //         getSomething(output: Brew['something']) {
-//             return [ionic(output)]
+//             return [ionize(output)]
 //         }
 //     }
 // }
@@ -201,7 +201,7 @@ export function triggerReactiveWithMutationOp(
 // // const transformMap = registerReactiveCapsules({
 // //     Brew: {
 // //         getSomething<T extends AnyObject>(arg: T) {
-// //             return ionic(arg) as unknown as [DeepReactiveModelO<T>];
+// //             return ionize(arg) as unknown as [DeepReactiveModelO<T>];
 // //         }
 // //     }
 // // })

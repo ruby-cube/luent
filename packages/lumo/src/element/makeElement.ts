@@ -1,5 +1,5 @@
 import { DOMNode } from "../component/InternalComponent";
-import { DerivedIon, isReactiveGet, ReactiveGet, Hooks, getCurrentRenderCycle, Phase, isIon } from "@rue/muonic";
+import { DerivedIon, isAnyIon, ReactiveGet, Hooks, getCurrentRenderCycle, Phase, isIon } from "@rue/muonic";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { initializeRender, watch } from "../watch/watchAndPreserve";
@@ -15,7 +15,7 @@ import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
 import { onActivated, onDeactivate } from "../dynamic/lifecycle";
-import { isReactiveArray } from "../../../muonic/src/ionic/ReactiveArray";
+import { isReactiveArray } from "../../../muonic/src/ionize/IonicArray";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -41,7 +41,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     const domNode = isHydrating() ? getElement() : document.createElement(tagName);
 
     if (ref) {
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use $Node or $Nodes ion as ref")
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use $Node or $Nodes Ion as ref")
         if ($index) {
             initializeListRef(ref, domNode, $index)
         }
@@ -131,7 +131,7 @@ function analyzeAttributes(entries: AnyObject) {
 function setUpAttributes(node: Element, attributes: { [key: string]: any | DerivedIon<any> }) {
     for (const key in attributes) {
         const value = attributes[key]
-        if (isReactiveGet(value)) {
+        if (isAnyIon(value)) {
             watch(value, (newValue) => { //TODO: only attributes that affect layout should be scheduled for render
                 setAttribute(node, key, newValue)
             }, { eager: true, phase: Phase.RENDER })
@@ -187,8 +187,8 @@ function setUpClasses(node: Element, classes: (((o: DOMTokenList) => void) | str
         }
         else if (entry instanceof Object) {
             for (const key in entry) {
-                const $ion = entry[key];
-                watch($ion, (value) => { //QUESTION: should this have a preserve version?
+                const $Ion = entry[key];
+                watch($Ion, (value) => { //QUESTION: should this have a preserve version?
                     if (value) classList.add(key);
                     else classList.remove(key);
                 }, { eager: true, phase: Phase.RENDER })

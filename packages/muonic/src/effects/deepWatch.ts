@@ -1,13 +1,13 @@
-import {  isReactiveModel, ReactiveModel, toRaw } from "../ionic/ReactiveModel";
-import { isReactiveObject } from "../ionic/ReactiveObject";
+import {  isIonicModel, IonicModel, toRaw } from "../ionize/IonicModel";
+import { isReactiveObject } from "../ionize/IonicObject";
 import { AnyObject } from "@rue/types";
 
 export type KeyPath = PropertyKey[]
 
 
 export type MutationRecord = {
-    target: ReactiveModel,
-    // root?: ReactiveModel,
+    target: IonicModel,
+    // root?: IonicModel,
     // targetPath?: KeyPath, // undefined means the target is the root watched model
     op: MutationOp | SetOp
 }
@@ -52,7 +52,7 @@ export function isSetOp(op: AnyObject): op is SetOp {
 
 // }, { deep: true })
 
-// const state$ = ionic({
+// const state$ = ionize({
 //     a: {
 //         b: {
 //             pet: "cat"
@@ -75,30 +75,30 @@ export function isSetOp(op: AnyObject): op is SetOp {
 // })
 
 
-type NestedModel = ReactiveModel;
-type RootModel = ReactiveModel;
+type NestedModel = IonicModel;
+type RootModel = IonicModel;
 
 const deepWatchMap: WeakMap<NestedModel, [RootModel, KeyPath]> = new WeakMap()
 
-export function isNestedWatched(reactive: ReactiveModel) {
+export function isNestedWatched(reactive: IonicModel) {
     return deepWatchMap.has(reactive);
 }
 
-export function getRootWatchedModelAndKeyPath(reactive: ReactiveModel) {
+export function getRootWatchedModelAndKeyPath(reactive: IonicModel) {
     if (!isNestedWatched(reactive)) throw new Error('INVALID INPUT: Must be nested watched model. Check with `isNestedWatched`')
     return deepWatchMap.get(reactive)!;
 }
 
 type NestedWatcher<T> = T extends NestedModel[] ? { unwatch: () => void } : void
 
-export function watchProps<N extends NestedModel[] | undefined>(target: ReactiveModel, rootTarget: ReactiveModel, keyPath: KeyPath, nestedModels?: N): NestedWatcher<N> {
+export function watchProps<N extends NestedModel[] | undefined>(target: IonicModel, rootTarget: IonicModel, keyPath: KeyPath, nestedModels?: N): NestedWatcher<N> {
     const _nestedModels: NestedModel[] = nestedModels || [];
     const raw = toRaw(target)
     if (raw instanceof Array){
         for (let i = 0; i < raw.length; i++){
             const value = raw[i]
             const _keyPath = [...keyPath, i];
-            if (isReactiveModel(value)) { // excludes  maps, and sets in deep watch
+            if (isIonicModel(value)) { // excludes  maps, and sets in deep watch
                 deepWatchMap.set(value, [rootTarget, _keyPath])
                 watchProps(value, rootTarget, keyPath, _nestedModels)
             }
@@ -108,7 +108,7 @@ export function watchProps<N extends NestedModel[] | undefined>(target: Reactive
         for (const key in raw) {
             const value = raw[key]
             const _keyPath = [...keyPath, key];
-            if (isReactiveModel(value)) { // excludes  maps, and sets in deep watch
+            if (isIonicModel(value)) { // excludes  maps, and sets in deep watch
                 deepWatchMap.set(value, [rootTarget, _keyPath])
                 watchProps(value, rootTarget, keyPath, _nestedModels)
             }
@@ -131,7 +131,7 @@ export function watchProps<N extends NestedModel[] | undefined>(target: Reactive
 
 
 
-// function deepWatch(target: ReactiveModel, keyPath: KeyPath, options: WatchOptions) {
+// function deepWatch(target: IonicModel, keyPath: KeyPath, options: WatchOptions) {
 //     const watcher =
 //         watch(target, (_, __, ops) => {
 //             if (ops && isSetOp(ops)) {
@@ -153,7 +153,7 @@ export function watchProps<N extends NestedModel[] | undefined>(target: Reactive
 //     return watchers;
 // }
 
-// function composeOps(target: ReactiveModel, ops: MutationRecord[] | undefined) {
+// function composeOps(target: IonicModel, ops: MutationRecord[] | undefined) {
 //     if (!ops) return;
 //     const renderCycle = getCurrentRenderCycle();
 //     if (!renderCycle) throw new Error("No update cycle :(")

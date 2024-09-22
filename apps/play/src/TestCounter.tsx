@@ -6,10 +6,10 @@
 // - derived signal in template
 // - derived signal with memo
 
-import { $, ionic, $State } from "@rue/muonic"
+import { $, ionize, Ion } from "@rue/muonic"
 
 export function TestCounterSignals() {
-    const $count = $State(0)
+    const $count = Ion(0)
     const $doubleCount = $(() => $count() * 2)
 
     function increment() {
@@ -46,7 +46,7 @@ export function TestCounter() {
 }
 
 function useCounter() {
-    const counter$ = ionic({
+    const counter$ = ionize({
         count: 0
     })
 

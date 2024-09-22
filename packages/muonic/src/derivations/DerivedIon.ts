@@ -1,9 +1,9 @@
 import { isIon, AtomicIon } from "../Ion";
 import { READONLY_ION } from "../asReadonly";
-import { ReactiveDerivation } from "./ReactiveDerivation";
+import { IonicDerivation } from "./IonicDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 import { META } from "../ReactiveEntity";
-import { isPropIon } from "../ionic/PropIon";
+import { isPropIon } from "../ionize/PropIon";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -21,7 +21,7 @@ export type DerivedIon<T = any> = {
     untrack: () => void
 }
 
-export type ReactiveGet<T = any> = DerivedIon<T> | AtomicIon<T>;
+export type ReactiveGet<T = any> = DerivedIon<T> | AtomicIon<T> | (()=>T);
 
 export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIon {
     if (!(maybeDerivedIon instanceof Function)) return false
@@ -29,13 +29,13 @@ export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIo
 }
 
 
-export function isReactiveGet(maybeIon: any): maybeIon is DerivedIon | AtomicIon {
+export function isAnyIon(maybeIon: any): maybeIon is DerivedIon | AtomicIon {
     if (!(maybeIon instanceof Function)) return false;
     if (isIon(maybeIon) || isDerivedIon(maybeIon) || READONLY_ION in maybeIon || isPropIon(maybeIon)) return true;
     return false;
 }
 
-class MetaDerivedIon<T extends DerivedIon = DerivedIon> extends ReactiveDerivation {
+class MetaDerivedIon<T extends DerivedIon = DerivedIon> extends IonicDerivation {
 
     override type = DERIVED_ION
 
@@ -50,13 +50,13 @@ class MetaDerivedIon<T extends DerivedIon = DerivedIon> extends ReactiveDerivati
     }
 }
 
-export const $ = $Derived
+export const $ = DerivedIon
 
 
-export function $Derived<T extends any>(pureGetter: () => T, retrack: boolean = true): DerivedIon<T> {
+export function DerivedIon<T extends any>(pureGetter: () => T, retrack: boolean = true): DerivedIon<T> {
     let initialized = false;
-    const derived = new MetaDerivedIon(<DerivedIon><unknown>$derivedIon, retrack);
-    function $derivedIon() {
+    const derived = new MetaDerivedIon(<DerivedIon><unknown>DerivedIonIon, retrack);
+    function DerivedIonIon() {
         if (!initialized || derived.dirty && retrack) {
             const value = derived.trackAtoms(pureGetter);
             derived.forwardAtoms(derived.atoms)
@@ -78,13 +78,13 @@ export function $Derived<T extends any>(pureGetter: () => T, retrack: boolean = 
 
         return derived.value; // memoized value
     }
-    $derivedIon[META] = derived;
-    $derivedIon.untrack = () => {
+    DerivedIonIon[META] = derived;
+    DerivedIonIon.untrack = () => {
         derived.untrackAtoms()
     }
     onDestroy(() => {
         derived.untrackAtoms()
     })
 
-    return <DerivedIon><unknown>$derivedIon;
+    return <DerivedIon><unknown>DerivedIonIon;
 }

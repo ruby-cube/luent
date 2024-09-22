@@ -1,7 +1,7 @@
-import { asReactiveAtom, isReactiveAtom, ReactivePrimitive } from "./derivations/ReactiveAtom";
-import { getMetaReactive, ReactiveModel, toRaw } from "./ionic/ReactiveModel";
+import { asIonicAtom, isIonicAtom, ReactivePrimitive } from "./derivations/IonicAtom";
+import { getMetaReactive, IonicModel, toRaw } from "./ionize/IonicModel";
 import { AtomicIon, MetaIon } from "./Ion";
-import { ObservedProp, toPropIon } from "./ionic/ObservedProp";
+import { ObservedProp, toPropIon } from "./ionize/ObservedProp";
 import { asWatchTarget, isWatched } from "./effects/WatchTarget";
 import { getCurrentRenderCycle } from "./effects/RenderCycle";
 import { getWithoutTracking } from "./derivations/DependencyTracker";
@@ -19,15 +19,15 @@ export function trigger(target: AtomicIon | ObservedProp) {
     if (isWatched(target)) {
         asWatchTarget(target).triggerEffects()
     }
-    triggerReactiveAtom(target)
+    triggerIonicAtom(target)
 }
 
-export function triggerReactiveAtom(target: ReactivePrimitive) {
-    if (isReactiveAtom(target)) {
-        asReactiveAtom(target).triggerDerivations()
+export function triggerIonicAtom(target: ReactivePrimitive) {
+    if (isIonicAtom(target)) {
+        asIonicAtom(target).triggerDerivations()
     }
 }
 
-export function triggerReactiveModel(reactive: ReactiveModel) {
+export function triggerIonicModel(reactive: IonicModel) {
     asWatchTarget(getMetaReactive(reactive)).triggerEffects()
 }

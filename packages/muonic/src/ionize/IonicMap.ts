@@ -1,23 +1,22 @@
 import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { META } from "../ReactiveEntity";
-import { trigger, triggerReactiveAtom } from "../trigger";
+import { trigger, triggerIonicAtom } from "../trigger";
 import { asObservedProp, getObservedProp } from "./ObservedProp";
-import { asDeepReactive, asShallowReactive, createReactiveTraps, isNonTrackable, maybeAsDeepReactive, maybeUnreactivize, ReactiveModel, reactiveSetter, ReactiveTraps, registerReactive, storeSnapshot } from "./ReactiveModel";
-import { triggerReactiveWithMutationOp, useGetOp } from "./ReactiveCapsule";
-import { useClearOp, useDeleteOp } from "./ReactiveSet";
+import { createReactiveTraps, isNonTrackable, toRawIfNeeded, IonicModel, reactiveSetter, storeSnapshot, ionize, registerIonicModel } from "./IonicModel";
+import { triggerReactiveWithMutationOp, useGetOp } from "./IonicCapsule";
+import { useClearOp, useDeleteOp } from "./IonicSet";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
-import { MetaReactiveCollection, MetaReactiveModel } from "./MetaReactiveModel";
+import { MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
 
 
 
-export function createReactiveMap(
+export function createIonicMap(
     target: Map<any, any>,
-    deep: boolean = false,
-    existingMeta?: MetaReactiveCollection
 ) {
-    const traps = createReactiveTraps(target,
-        function get(target, key) {
+    const metaIonicModel = new MetaIonicCollection(target)
+    const reactive = new Proxy(target, {
+        get(target, key) {
             if (__DEV__) emitSignal()
             const value = target[<keyof Map<any, any>>key] as any
             if (typeof key === 'symbol' && key.description === 'Symbol.iterator') {
@@ -42,26 +41,26 @@ export function createReactiveMap(
                 case 'clear':
                     return useClearOp(
                         reactive,
-                        metaReactive,
+                        metaIonicModel,
                         target
                     )
 
                 case 'delete':
                     return useDeleteOp(
                         reactive,
-                        metaReactive,
+                        metaIonicModel,
                         target
                     )
 
-                case '_$':
-                    if (deep) return asShallowReactive(target);
-                    return maybeAsDeepReactive(value, deep)
+                // case '_$':
+                //     if (deep) return asShallowReactive(target);
+                //     return maybeAsDeepReactive(value, deep)
 
                 case META:
-                    return metaReactive
+                    return metaIonicModel
 
                 default:
-                    const _value = maybeAsDeepReactive(value, deep)
+                    const _value = value instanceof Object ? ionize(value) : value
                     const tracker = getActiveTracker()
                     if (!tracker)
                         return _value;
@@ -69,31 +68,32 @@ export function createReactiveMap(
                     return _value;
             }
         },
-        function set(target, key, value, receiver) {
+        set(target, key, value, receiver) {
             return reactiveSetter(
                 Map,
                 reactive,
-                metaReactive,
+                metaIonicModel,
                 target,
                 key,
                 value,
                 receiver
             )
         }
-    )
+    }) as IonicModel<Map<any, any>>
+
 
     function setOp(key: any, newValue: any) {
         const oldSize = target.size
         const oldValue = target.get(key);
-        const _newValue = maybeUnreactivize(newValue)
+        const _newValue = toRawIfNeeded(newValue)
         const output = target.set(key, _newValue); //perform op
         const newSize = target.size
 
         if (oldValue === _newValue) return;
 
-        storeSnapshot(metaReactive)
+        storeSnapshot(metaIonicModel)
 
-        const reactive = deep ? metaReactive.deepReactive! : metaReactive.shallowReactive!
+        const reactive = metaIonicModel.ionicModel!
         if (oldSize !== newSize) {
             const sizeProp = getObservedProp(reactive, 'size')
             if (sizeProp)
@@ -101,9 +101,9 @@ export function createReactiveMap(
         }
 
         const hasOp = getTrackedOp(reactive, 'has', key)
-        if (hasOp) triggerReactiveAtom(hasOp);
+        if (hasOp) triggerIonicAtom(hasOp);
         const getOp = getTrackedOp(reactive, 'get', key)
-        if (getOp) triggerReactiveAtom(getOp);
+        if (getOp) triggerIonicAtom(getOp);
 
         triggerReactiveWithMutationOp(
             reactive,
@@ -114,16 +114,9 @@ export function createReactiveMap(
 
         return output;
     }
-
-    const metaReactive = existingMeta || new MetaReactiveCollection(target, traps)
-    const reactive = new Proxy(target, traps) as ReactiveModel<Map<any, any>>
-
-    return registerReactive(
-        target,
-        reactive,
-        metaReactive,
-        deep
-    )
+    metaIonicModel.initIonicModel(reactive)
+    registerIonicModel(reactive, target)
+    return reactive
 }
 
 

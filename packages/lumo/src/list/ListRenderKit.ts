@@ -1,4 +1,4 @@
-import { $State, isReactiveGet, isReactiveModel, AtomicIon, ReactiveModel, toRaw, shallowClone, ReactiveGet, isDeepReactive, asDeepReactive, isIon, ModelReactivityDepth, getMetaIon, Phase } from "@rue/muonic";
+import { Ion, isAnyIon, isIonicModel, AtomicIon, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, getMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "@rue/muonic";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
@@ -36,7 +36,7 @@ export function setCurrentIndex($index: AtomicIon<number> | undefined) {
 export class ListRenderKit<T = any> {
     constructor(
         public renderItem: RenderItem<T>, //QUESTION: Does this need the context object?
-        public data: Collection<T> | ReactiveModel<Collection<T>> | ReactiveGet<Collection<T>>,
+        public data: Collection<T> | IonicModel<Collection<T>> | ReactiveGet<Collection<T>>,
         public provider: ProviderComponent,
         public idKey: string | undefined
     ) { }
@@ -69,17 +69,18 @@ export class ListRenderKit<T = any> {
         const renderItem = this.renderItem
         const idKey = this.idKey
         const provider = this.provider
-        const list = isReactiveGet(data) ? data() : <Collection<any>>data;
+        if (__DEV__) __devCheckIfTracked()
+        const list = isAnyIon(data) ? data() : <Collection<any>>data;
         const _list = list instanceof Array ? list : list //TODO: need to implement for sets, maps, and objects
-        const _isReactiveModel = isReactiveModel(data)
-        const isDynamic = _isReactiveModel || isReactiveGet(data);
+        const _isIonicModel = isIonicModel(data)
+        const isDynamic = _isIonicModel || isAnyIon(data);
         const dynamicNodePod = this.dynamicNodePod = isDynamic ? nodePod.appendDynamicPod() : undefined;
         const indices: AtomicIon<number>[] = []
 
 
         pushList(this);
         for (let i = 0; i < _list.length; i++) {
-            const $index = $State(i)
+            const $index = Ion(i)
             const item = _list[i]
             // currentItem = item;
             $currentIndex = $index;
@@ -111,18 +112,18 @@ export class ListRenderKit<T = any> {
 
         // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
 
+        data
         if (isDynamic) {
             const dynamicIndices = new DynamicIndices(indices)
-
             // set up watcher for updates
             // const renderCycle = getCurrentRenderCycle();
             const parentDynamicNode = getActiveDynamicNode()
             pushProvider(provider)
-            const rawData = isReactiveModel(data) ? toRaw(data) : undefined
-            let clone = isReactiveModel(data) ? shallowClone(rawData!) : undefined
-            watch(data, (newValue: any[], oldValue: any[]) => {
+            const rawData = isIonicModel(data) ? toRaw(data) : undefined
+            let clone = isIonicModel(data) ? shallowClone(rawData!) : undefined
+            watch(<DerivedIon>data, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
                 const _oldValue = clone || oldValue;
-                if (_isReactiveModel) clone = shallowClone(rawData!) as any[]
+                if (_isIonicModel) clone = shallowClone(rawData!) as any[]
                 const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || newValue, _oldValue, idKey)
                 if (noChange) return;
                 if (dynamicNodePod!.length !== _oldValue.length)
@@ -202,7 +203,7 @@ export class ListRenderKit<T = any> {
 
             if (isNewItem(uItem)) {
                 const item = getOriginalItem(uItem, newUArray)
-                const $index = $State(i)
+                const $index = Ion(i)
                 setCurrentIndex($index); // to retreive config
                 newIndices.push($index);
                 // create and collect consecutive new items onto the same fragment
@@ -212,7 +213,7 @@ export class ListRenderKit<T = any> {
                 pushProvider(this.provider)
                 pushList(this)
                 const list = this.data;
-                const _item = isDeepReactive(list) || isIon(list) && getMetaIon(list).depth === ModelReactivityDepth.DEEP ? asDeepReactive(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
+                const _item = isIonicModel(list) || isIon(list) && getMetaIon(list).hasIonicValue ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
                 dynamicNode.activate(function renderNewListItem() {
                     const nodeEntities = normalizeToArray(renderItem(_item, $index));
                     for (const nodeEntity of nodeEntities!) {
