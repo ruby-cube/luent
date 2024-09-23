@@ -45,7 +45,7 @@ export class WatchTarget<T extends Watchable = Watchable> {
     }
 
     private removeEffect(effect: Task, phase: Phase) {
-        this.effects.removeFromSet(effect, phase)
+        this.effects.deleteFromSet(effect, phase)
     }
 
     watch(effect: Task, phase: Phase, forNextCycle?: boolean) {

@@ -17,7 +17,7 @@ export class SetMap<K, V> extends Map<K, Set<V>> {
         set.add(value);
     }
 
-    removeFromSet(value: V, key: K) {
+    deleteFromSet(value: V, key: K) {
         let set = this.get(key)
         set?.delete(value);
     }

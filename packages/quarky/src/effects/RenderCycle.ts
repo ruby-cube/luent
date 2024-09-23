@@ -4,6 +4,7 @@ import { SetMap } from "@rue/utils";
 import { MutationRecord } from "./deepWatch";
 import { getMetaReactive, IonicModel } from "../ionize/IonicModel";
 import { MetaIonicModel } from "../ionize/MetaIonicModel";
+import { PendingCancelOp } from "../../../flask/PendingCancelOp";
 // import { runEffect } from "./watch";
 
 export type Watchable = any
@@ -19,6 +20,11 @@ export enum Phase {
     AFTER_RENDER,
     CYCLE_COMPLETE,
 }
+
+export const SYNC = Phase.SYNC
+export const BEFORE_RENDER = Phase.BEFORE_RENDER
+export const ON_RENDER = Phase.RENDER
+export const AFTER_RENDER = Phase.AFTER_RENDER
 
 // const COMPLETE: 4 = Phase.AFTER_RENDER + 1 as 4
 
@@ -105,41 +111,7 @@ export class RenderCycle {
         return renderCycleCount;
     }
 
-    // snapshotMap: Map<IonicModel, AnyObject> | undefined;
-
-    // takeSnapshot(reactive: IonicModel, target: AnyObject, clone?: AnyObject) {
-    //     let snapshotMap = this.snapshotMap;
-    //     if (!snapshotMap) {
-    //         snapshotMap = new Map();
-    //         this.snapshotMap = snapshotMap;
-    //     }
-    //     if (snapshotMap.has(reactive))
-    //         return snapshotMap.get(reactive)!; // snapshot of original state already taken for this cycle, no need to take another
-    //     const _snapshot = snapshotManager.takeSnapshot(target, renderCycleCount, clone)
-    //     snapshotMap.set(reactive, _snapshot) // snapshots are shallow clones!
-    //     return _snapshot;
-    // }
-
-    // getSnapshot(reactive: IonicModel) {
-    //     const snapshotMap = this.snapshotMap;
-    //     if (!snapshotMap) return null;
-    //     const snapshot = snapshotMap.get(reactive)
-    //     if (!snapshot) return null;
-    //     return snapshot
-    // }
-
     opsMap: WeakMap<MetaIonicModel, MutationRecord[]> = new WeakMap();
-
-    // composeOps(target: IonicModel, ops: MutationRecord[]) {
-    //     const meta = getMetaReactive(target)
-    //     let existingOps = this.opsMap.get(meta);
-    //     if (existingOps) {
-    //         existingOps.push(...ops)
-    //     }
-    //     else {
-    //         this.opsMap.set(meta, ops);
-    //     }
-    // }
 
     recordOp(target: IonicModel, op: MutationRecord) {
         const meta = getMetaReactive(target)
@@ -158,10 +130,9 @@ export class RenderCycle {
     }
 
 
-    // EFFECTS
+    // TASKS:
 
     tasks: SetMap<Phase, Task> = new SetMap();
-    // reactiveEffects: SetMap<Phase, Task> = new SetMap();
 
     scheduleTask(task: Task, phase: Exclude<Phase, Phase.SYNC>) {
         if (phase <= this.completedPhase) {
@@ -174,6 +145,11 @@ export class RenderCycle {
         // else {
         this.tasks.addToSet(task, phase)
         // }
+        return {
+            cancel: () => {
+                this.tasks.deleteFromSet(task, phase)
+            }
+        }
     }
 
     runTasks(phase: Phase) {
@@ -241,14 +217,13 @@ function createRenderCycleHook(phase: Phase) {
     return (task: () => void, options?: { cancel?: ScheduleCancel; __devName?: string }) => {
         const _options = <SchedulerOptions>options || { flask: '' }
         _options.flask = 'outlive'
+        const renderCycle = useRenderCycle()
         return $schedule(task, _options, {
             enroll(task) {
-                const tasks = useRenderCycle().tasks;
-                tasks.get(phase)?.add(task)
+                renderCycle.tasks.addToSet(task, phase)
             },
             remove(task) {
-                const tasks = currentRenderCycle?.tasks;
-                tasks?.get(phase)?.delete(task)
+                renderCycle.tasks.deleteFromSet(task, phase)
             }
         })
     }
@@ -256,7 +231,7 @@ function createRenderCycleHook(phase: Phase) {
 
 export const beforeRender = createRenderCycleHook(Phase.BEFORE_RENDER)
 export const onRender = createRenderCycleHook(Phase.RENDER)
-export const onRendered = createRenderCycleHook(Phase.AFTER_RENDER)
+export const afterRender = createRenderCycleHook(Phase.AFTER_RENDER)
 export const onRenderCycleComplete = createRenderCycleHook(Phase.CYCLE_COMPLETE)
 
 
@@ -265,7 +240,7 @@ export const onRenderCycleComplete = createRenderCycleHook(Phase.CYCLE_COMPLETE)
 //         afterPrerenderPhase(handler)
 //     }
 //     else if (phase === Phase.RENDER) {
-//         onRendered(handler)
+//         afterRender(handler)
 //     }
 //     else if (phase === Phase.AFTER_RENDER) {
 //         onRenderCycleComplete(handler)

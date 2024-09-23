@@ -1,7 +1,7 @@
 //@ts-nocheck
 
 import ""
-import { $initializeEffect, ionize, onRenderCycleComplete, onRendered } from "./src"
+import { $initializeEffect, ionize, onRenderCycleComplete, afterRender } from "./src"
 
 const $frog = ionize({
     name: "sir robin",
@@ -93,7 +93,7 @@ function ListBlock(attributes: {
         const divs = toRaw($divs)
     })
 
-    onRendered(() => {
+    afterRender(() => {
 
     })
 

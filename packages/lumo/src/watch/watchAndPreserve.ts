@@ -1,4 +1,4 @@
-import { isAnyIon, $initializeEffect as _$initializeEffect, onRendered, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, ChangeEffect, MutationEffect, Phase, __devCheckIfTracked } from "../../../quarky/src";
+import { isAnyIon, $initializeEffect as _$initializeEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, ChangeEffect, MutationEffect, Phase, __devCheckIfTracked } from "../../../quarky/src";
 import { InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { isMountPhase } from "../dynamic/DynamicNode";
@@ -74,7 +74,7 @@ type Effect<T = any> = MutationEffect<T extends AnyObject ? T : never> | ChangeE
 //     //     component.emit(LifecycleHook.BEFORE_UPDATE)
 //     // }, { once: true })
 
-//     onRendered(() => {
+//     afterRender(() => {
 //         component.emit(LifecycleHook.ON_UPDATED) //NOTE: I don't know if I even need an after update hook...
 //         component.hasUpdates = false; // resets for the next cycle
 //     }, { __devName: setUpUpdateHooks.name })
@@ -209,7 +209,7 @@ function watchAndPreserve<T extends () => any | ReactiveGet | IonicModel>(target
 //             component.emit(LifecycleHook.BEFORE_UPDATE)
 //         }, { once: true }) // assuming cleanup flask is set up
 
-//         onRendered(() => {
+//         afterRender(() => {
 //             component.emit(LifecycleHook.ON_UPDATED)
 //             component.hasUpdates = false; // resets for the next cycle
 //         }, { once: true })

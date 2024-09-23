@@ -131,7 +131,7 @@ export class ListRenderKit<T = any> {
                 this.runUpdate(() => {
                     pushDynamicNode(parentDynamicNode!)
                     pushProvider(provider)
-                    // component.emit(LifecycleHook.BEFORE_UPDATE) //FIX: this should be called in before render and onRendered hooks
+                    // component.emit(LifecycleHook.BEFORE_UPDATE) //FIX: this should be called in before render and afterRender hooks
                     this.removeItems(indicesToRemove!);
                     this.insertAndMoveItems(insertAndMoveKit!, parent, dynamicIndices)
                     // component.emit(LifecycleHook.ON_UPDATED)
