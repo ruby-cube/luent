@@ -4,10 +4,11 @@ import { getActiveTracker } from "../derivations/DependencyTracker";
 import { META } from "../ReactiveEntity";
 import { trigger, triggerIonicAtom } from "../trigger";
 import { asObservedProp, getObservedProp } from "./ObservedProp";
-import {  createReactiveTraps, isNonTrackable, toRawIfNeeded, IonicModel, storeSnapshot, ionize, registerIonicModel } from "./IonicModel";
+import { createReactiveTraps, isNonTrackable, toRawIfNeeded, IonicModel, storeSnapshot, ionize, registerIonicModel, reactiveSetter } from "./IonicModel";
 import { triggerReactiveWithMutationOp, useGetOp } from "./IonicCapsule";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { Collection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
+import { isAnyIon } from "../ion/AnyIon";
 
 
 export function createIonicSet(
@@ -52,6 +53,7 @@ export function createIonicSet(
                 return value;
             }
             if (isNonTrackable(key, Set)) return value;
+            if (isAnyIon(value)) return value();
 
             switch (key) {
                 case 'has':
@@ -82,18 +84,26 @@ export function createIonicSet(
                 case META:
                     return metaIonicModel
 
-                // case '_$':
-                //     if (deep) return asShallowReactive(target);
-                //     return maybeAsDeepReactive(value, deep)
-
                 default:
-                    const _value = value instanceof Object ? ionize(value)  : value
+                    if (value instanceof Function) return value.bind(reactive)
+                    const _value = value instanceof Object ? ionize(value) : value
                     const tracker = getActiveTracker()
                     if (!tracker)
                         return _value;
                     tracker.track(asObservedProp(reactive, key))
                     return _value;
             }
+        },
+        set(target, key, value, receiver) {
+            return reactiveSetter(
+                Set,
+                reactive,
+                metaIonicModel,
+                target,
+                key,
+                value,
+                receiver
+            )
         }
     }) as IonicModel<Set<any>>
 

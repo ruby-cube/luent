@@ -7,6 +7,7 @@ import { IonicModel, recordOp, storeSnapshot } from "./IonicModel";
 import { isWatched } from "../effects/WatchTarget";
 import { triggerIonicModel } from "../trigger";
 import { Collection, MetaIonicCollection } from "./MetaIonicModel";
+import { isAnyIon } from "../ion/AnyIon";
 
 
 

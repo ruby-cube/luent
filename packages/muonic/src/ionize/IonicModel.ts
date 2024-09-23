@@ -15,6 +15,10 @@ import { createIonicObject } from "./IonicObject";
 import { Collection, MetaIonicCollection, MetaIonicModel, IONIC_MODEL } from "./MetaIonicModel";
 import { isInert } from "./inert";
 import { isIonizable } from "./ionizable";
+import { isAnyIon } from "../ion/AnyIon";
+import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
+import { AtomicIon } from "../ion/AtomicIon";
+import { PropIon } from "./PropIon";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -42,7 +46,7 @@ type Ionizable = object | any[] | Set<unknown> | Map<any, any>
 
 const ionicModels: WeakMap<AnyObject, IonicModel> = new WeakMap()
 
-export function registerIonicModel(ionicModel: IonicModel, target: AnyObject){
+export function registerIonicModel(ionicModel: IonicModel, target: AnyObject) {
     ionicModels.set(target, ionicModel)
 }
 
@@ -82,7 +86,6 @@ export function toRawIfNeeded(
     newValue: any,
     key?: ProxyTargetKey
 ) {
-    if (typeof key === "string" && key.startsWith('$')) return newValue; // Assumes $ notation. Preserve reactivity if object property directly references a reactive model
     if (isIonicModel(newValue)) return toRaw(newValue);
     return newValue;
 }
@@ -276,7 +279,7 @@ const trackableSetOps = {
 
 
 export function reactiveSetter(
-    DataStructure: typeof Array | typeof Object | typeof Map, // and Tuple
+    DataStructure: typeof Array | typeof Object | typeof Map | typeof Set, // and Tuple
     reactive: IonicModel,
     metaIonicModel: MetaIonicModel,
     target: AnyObject,
@@ -285,6 +288,7 @@ export function reactiveSetter(
     receiver: AnyObject
 ) {
     const oldValue = Reflect.get(target, key, receiver);
+    if (isAnyIon(oldValue)) return setIonProp(oldValue, newValue)
     if (oldValue === newValue
         || isNonTrackable(key, DataStructure)
         || isNonSettable(<string>key, DataStructure)
@@ -311,6 +315,13 @@ export function reactiveSetter(
     return true;
 }
 
+export function setIonProp(ion: AtomicIon | PropIon | DerivedIon | WritableDerivedIon, value: any) {
+    if ('setTo' in ion) {
+        ion.setTo(value);
+        return true;
+    }
+    return false;
+}
 
 
 function isWritable(target: Object, key: PropertyKey) {

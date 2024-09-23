@@ -4,13 +4,14 @@ import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
 import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
-import { $, isAnyIon, ReactiveGet, DerivedIon } from "../derivations/DerivedIon";
+import { $, ReactiveGet, DerivedIon } from "../derivations/DerivedIon";
 import { getMetaReactive, isIonicModel, IonicModel, toRaw, } from "../ionize/IonicModel";
 import { areEqual } from "./areEqual";
 import { createIonicEffect, IonicEffect } from "../derivations/IonicEffect";
 import { META } from "../ReactiveEntity";
 import { noop } from "@rue/utils";
 import { __devCheckIfTracked } from "../derivations/DependencyTracker";
+import { isAnyIon } from "../ion/AnyIon";
 
 
 type RenderCycleOptions = {

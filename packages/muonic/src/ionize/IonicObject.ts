@@ -1,10 +1,12 @@
 import { AnyObject } from "@rue/types";
-import { createReactiveTraps, isNonTrackable, isIonicModel, IonicModel, reactiveSetter,  toRaw, ionize, registerIonicModel } from "./IonicModel";
+import { createReactiveTraps, isNonTrackable, isIonicModel, IonicModel, reactiveSetter, toRaw, ionize, registerIonicModel } from "./IonicModel";
 import { META } from "../ReactiveEntity";
 import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asObservedProp } from "./ObservedProp";
 import { MetaIonicModel, IONIC_MODEL } from "./MetaIonicModel";
+import { isIon } from "../ion/AtomicIon";
+import { isAnyIon } from "../ion/AnyIon";
 
 export function isReactiveObject(value: any): value is IonicModel {
     if (!isIonicModel(value)) return false;
@@ -20,12 +22,12 @@ export function createIonicObject(
 ) {
     const metaIonicModel = new MetaIonicModel(target)
     const reactive = new Proxy(target, {
-        get(target, key) {
+        get(target, key, receiver) {
             if (__DEV__) emitSignal();
             if (key === META) return metaIonicModel;
-            // if (key === '_$' && deep) return asShallowReactive(target);
-            const value = Reflect.get(target, key);
+            const value = Reflect.get(target, key, receiver);
             if (isNonTrackable(key, Object)) return value;
+            if (isAnyIon(value)) return value();
             if (value instanceof Function) return value.bind(reactive)
             const _value = value instanceof Object ? ionize(value) : value
             const tracker = getActiveTracker();

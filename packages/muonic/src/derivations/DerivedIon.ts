@@ -1,9 +1,10 @@
-import { isIon, AtomicIon } from "../Ion";
+import { isIon, AtomicIon } from "../ion/AtomicIon";
 import { READONLY_ION } from "../asReadonly";
 import { IonicDerivation } from "./IonicDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 import { META } from "../ReactiveEntity";
 import { isPropIon } from "../ionize/PropIon";
+import { __devCheckIfTracked } from "./DependencyTracker";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -21,7 +22,7 @@ export type DerivedIon<T = any> = {
     untrack: () => void
 }
 
-export type ReactiveGet<T = any> = DerivedIon<T> | AtomicIon<T> | (()=>T);
+export type ReactiveGet<T = any> = DerivedIon<T> | AtomicIon<T> | (() => T);
 
 export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIon {
     if (!(maybeDerivedIon instanceof Function)) return false
@@ -29,11 +30,7 @@ export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIo
 }
 
 
-export function isAnyIon(maybeIon: any): maybeIon is DerivedIon | AtomicIon {
-    if (!(maybeIon instanceof Function)) return false;
-    if (isIon(maybeIon) || isDerivedIon(maybeIon) || READONLY_ION in maybeIon || isPropIon(maybeIon)) return true;
-    return false;
-}
+
 
 class MetaDerivedIon<T extends DerivedIon = DerivedIon> extends IonicDerivation {
 
@@ -87,4 +84,23 @@ export function DerivedIon<T extends any>(pureGetter: () => T, retrack: boolean 
     })
 
     return <DerivedIon><unknown>DerivedIonIon;
+}
+
+
+
+export type WritableDerivedIon<T = any> = {
+    setTo: (newValue: T) => T;
+    set: (toNewValue: (value: T) => T) => T
+} & DerivedIon<T>
+
+
+export function WritableDerivedIon<T>(config: { get: () => T, set: (value: T) => T }) {
+    const writable = DerivedIon(config.get) as WritableDerivedIon<T>;
+    const set = config.set;
+    writable.setTo = set
+    writable.set = (toNewValue) => {
+        if (__DEV__) __devCheckIfTracked()
+        return set(toNewValue(writable()));
+    }
+    return writable;
 }

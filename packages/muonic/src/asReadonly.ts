@@ -1,4 +1,4 @@
-import { isIon, AtomicIon } from "./Ion";
+import { isIon, AtomicIon } from "./ion/AtomicIon";
 import { isIonicModel, IonicModel } from "./ionize/IonicModel";
 import { META, ReactiveEntity } from "./ReactiveEntity";
 

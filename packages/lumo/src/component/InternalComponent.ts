@@ -38,7 +38,7 @@ export interface ComponentOutput<T = undefined> {
     component?: T extends AnyObject ? PublicComponent<T> : undefined;
     initialNodeEntities: NodeEntity
 }
-export function Component<T = undefined>(render: NodeEntity, exposedComponent?: T): ComponentOutput<T> {
+export function Component<T>(render: NodeEntity, exposedComponent?: T): ComponentOutput<T> {
     const unnestedNodeEntities = unnestComponent(render)
     if (exposedComponent instanceof Object) {
         return {

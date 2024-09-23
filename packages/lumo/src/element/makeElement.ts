@@ -1,5 +1,5 @@
 import { DOMNode } from "../component/InternalComponent";
-import { DerivedIon, isAnyIon, ReactiveGet, Hooks, getCurrentRenderCycle, Phase, isIon } from "@rue/muonic";
+import { DerivedIon, ReactiveGet, isAnyIon, getCurrentRenderCycle, Phase, isIon } from "@rue/muonic";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { initializeRender, watch } from "../watch/watchAndPreserve";

@@ -1,7 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { getMetaReactive, isIonicModel, ionize, IonicModel, toRaw } from "./IonicModel";
 import { asObservedProp } from "./ObservedProp";
-import { $, DerivedIon } from "../derivations/DerivedIon";
 
 // export function $Props<T extends AnyObject, K extends keyof T>(model: T, keys: K[]) {
 //     const reactive = isIonicModel(model) ? model : ionize(model)
@@ -15,22 +14,10 @@ export function isPropIon(value: any): value is PropIon {
     return value.name === "__$propIon"
 }
 
-export function $Props<T extends AnyObject, K extends keyof T>(reactive: IonicModel<T>, keys: K[]) {
-    const multiPropIon = DerivedIon(() => {
-        const values = []
-        for (const key of keys) {
-            values.push(reactive[key])
-        }
-        return values;
-    })
-    // getMetaReactive(reactive).registerMultiPropIon(keys.toString(), propsSignal)
-    return multiPropIon
-}
-
 export type PropIon<T = any> = {
     (): T;
-    update: (toNewValue: (value: T) => T) => T
     setTo: (newValue: T) => T
+    set: (toNewValue: (value: T) => T) => T
 }
 
 export function asIon<T extends AnyObject, K extends keyof T>(model: T, key: K) {
@@ -49,17 +36,14 @@ function $Prop<T extends IonicModel, K extends keyof T, P extends T[K]>(reactive
         return reactive[key];
     }
 
-    __$propIon.setTo = (newValue: P) => {
+    __$propIon.setTo = (newValue: T) => {
         reregisterIfNeeded()
-        const value = rawTarget[key];
-        return setValue(reactive, key, newValue, value)
+        return setValue(reactive, key, newValue, rawTarget[key])
     }
-
-    __$propIon.update = (toNewValue: (value: P) => P) => {
+    __$propIon.set = (toNewValue:(value: T) => T) => {
         reregisterIfNeeded()
         const value = rawTarget[key];
-        const newValue = toNewValue(value)
-        return setValue(reactive, key, newValue, value)
+        return setValue(reactive, key, toNewValue(value), value)
     }
 
     meta.registerPropIon(key, __$propIon)

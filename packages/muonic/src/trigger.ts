@@ -1,6 +1,6 @@
 import { asIonicAtom, isIonicAtom, ReactivePrimitive } from "./derivations/IonicAtom";
 import { getMetaReactive, IonicModel, toRaw } from "./ionize/IonicModel";
-import { AtomicIon, MetaIon } from "./Ion";
+import { AtomicIon, MetaIon } from "./ion/AtomicIon";
 import { ObservedProp, toPropIon } from "./ionize/ObservedProp";
 import { asWatchTarget, isWatched } from "./effects/WatchTarget";
 import { getCurrentRenderCycle } from "./effects/RenderCycle";

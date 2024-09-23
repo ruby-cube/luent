@@ -1,6 +1,6 @@
 import { SSRComponent } from "./SSRComponent.js";
 import { getResolvedComponent, isResolved } from "./PendingComponentMap.js";
-import { isAnyIon, AtomicIon } from "@rue/muonic";
+import { AtomicIon, isAnyIon } from "@rue/muonic";
 
 type AnyObject = { [key: string | symbol | number]: any }
 // export type SSRComponent<T extends AnyObject = AnyObject> = { render: () => string } & T;

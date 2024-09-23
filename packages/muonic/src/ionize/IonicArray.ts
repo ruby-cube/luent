@@ -3,13 +3,14 @@ import { isIonicAtom } from "../derivations/IonicAtom";
 import { META } from "../ReactiveEntity";
 import { trigger, triggerIonicAtom } from "../trigger";
 import { asObservedProp, getObservedProp } from "./ObservedProp";
-import { createReactiveModel, createReactiveTraps, isNonTrackable, isIonicModel, toRawIfNeeded, IonicModel, storeSnapshot, toRaw, triggerIonicModelWithSetOp, ionize, registerIonicModel } from "./IonicModel";
+import { createReactiveModel, createReactiveTraps, isNonTrackable, isIonicModel, toRawIfNeeded, IonicModel, storeSnapshot, toRaw, triggerIonicModelWithSetOp, ionize, registerIonicModel, setIonProp } from "./IonicModel";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { maybeUnreactivizeArgs, triggerReactiveWithMutationOp, useGetOp } from "./IonicCapsule";
 import { emitSignal } from "../debug";
 import { isMutatingArrayMethod } from "@rue/utils";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { Collection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
+import { isAnyIon } from "../ion/AnyIon";
 
 export function createIonicArray(
     target: any[],
@@ -118,9 +119,11 @@ function reactiveArrayGetter(
         return value;
     }
     if (isNonTrackable(key, Array)) return value;
+    if (isAnyIon(value) && !isIntegerKey(key)) return value();
     if (isMutatingArrayMethod(key)) {
         return handleMutatingMethod(<string>key, value);
     }
+    if (value instanceof Function) return value.bind(reactive)
     if (key === 'at') {
         return useGetOp(
             reactive,
@@ -157,6 +160,8 @@ function reactiveArraySetter(
         return true;
     }
     const oldValue = Reflect.get(target, key, receiver);
+    if (isAnyIon(oldValue) && !isIntegerKey(key))
+        return setIonProp(oldValue, _newValue)
     if (oldValue === _newValue || isNonTrackable(key, Array)) {
         // Reflect.set(target, key, newValue, receiver);
         target[key] = _newValue
@@ -165,7 +170,7 @@ function reactiveArraySetter(
 
 
     // Reflect.set(target, key, _newValue, receiver);
-    target[key] = _newValue
+    target[key] = _newValue // cannot use Reflect.set because it does not set the property synchronously
 
     storeSnapshot(metaIonicModel)
 

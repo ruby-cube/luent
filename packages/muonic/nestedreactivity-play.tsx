@@ -22,6 +22,14 @@ const $tripleCount = () => $count() * 3 // derived without memoization
 const $count = Ion(0)
 const $doubleCount = Ion(() => $count() * 2) // memoized derived with option to retrack and method to untrack .. should retrack just be the default behavior?
 
+const counter = ionize({
+    $count,
+    $doubleCount,
+    increment
+})
+
+
+
 const $frogName = asIon($frog, 'name')
 
 watch(PropsIon($frog, ['name', 'store']))

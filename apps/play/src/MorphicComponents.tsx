@@ -33,9 +33,23 @@ export function MainBlock() {
         $main_content.setTo($recordsNodes, 9)
     }
 
+
+
+    const $mainContent = NodeIon($MainContent)
+
+    const $MainContent = MorphicNode({
+        hello: () =>
+            <div>hellow</div>
+        ,
+        bye: () =>
+            <div>bey</div>
+    })
+
+    $mainContent.setTo('bye')
+
     return (
         <main>
-            <$main_content as={$hello} />
+            <$MainContent as='hello' ref={$mainContent} />
             <$records_list />
             <button onclick={changeMainContent}>click</button>
         </main>

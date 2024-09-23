@@ -47,20 +47,10 @@ function genId() {
 // const qual$$ = frog$$.getQualitiesB()
 // const qual = frog.getQualitiesB()
 
-function App() {
-    return Component(
-        <List dog="kjk"></List>,
-        {
-            frog: "kermit"
-        }
-    )
-}
 
 
 export function List(
-    setup: {
-        dog: string
-    }
+
 ) {
 
     const $list = ionize([
@@ -69,7 +59,6 @@ export function List(
         { id: 2, content: "fly" },
         { id: 3, content: "swamp" }
     ])
-
 
     // const frog$ = ionize({
     //     name: "Sir Robin"

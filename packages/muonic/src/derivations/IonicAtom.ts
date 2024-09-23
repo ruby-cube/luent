@@ -1,4 +1,4 @@
-import { AtomicIon, MetaIon } from "../Ion";
+import { AtomicIon, MetaIon } from "../ion/AtomicIon";
 import { ObservedProp } from "../ionize/ObservedProp";
 import { TrackedOp } from "../ionize/TrackedOp";
 import { IonicDerivation } from "./IonicDerivation";

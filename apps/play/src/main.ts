@@ -11,6 +11,7 @@ import './style.css'
 import { configureFlask } from '../../../packages/flask/initFlask';
 import { List } from './TestReactiveModel';
 import { MountIf } from './TestMountIf';
+import { TestIonProp } from './TestIonProp';
 // import { ionize, ionize } from '@rue/muonic';
 // import { DeepReactiveModel, getMetaReactive, ionize, ionize } from '@rue/muonic';
 // import { MountIf } from './TestMountIf';
@@ -59,7 +60,7 @@ import { MountIf } from './TestMountIf';
 // console.log("qualities", frog$$.qualities)
 //   msg.value = isReactive(frog.getQualities()[0])
 
-const app = createApp(List)
+const app = createApp(TestIonProp)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: false

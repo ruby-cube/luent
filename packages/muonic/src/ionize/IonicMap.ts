@@ -8,6 +8,7 @@ import { triggerReactiveWithMutationOp, useGetOp } from "./IonicCapsule";
 import { useClearOp, useDeleteOp } from "./IonicSet";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
+import { isAnyIon } from "../ion/AnyIon";
 
 
 
@@ -16,14 +17,15 @@ export function createIonicMap(
 ) {
     const metaIonicModel = new MetaIonicCollection(target)
     const reactive = new Proxy(target, {
-        get(target, key) {
+        get(target, key, receiver) {
             if (__DEV__) emitSignal()
-            const value = target[<keyof Map<any, any>>key] as any
+                const value = Reflect.get(target, key, receiver)
             if (typeof key === 'symbol' && key.description === 'Symbol.iterator') {
                 return value;
             }
             if (isNonTrackable(key, Map))
                 return value;
+            if (isAnyIon(value)) return value();
 
             switch (key) {
                 case 'get':
@@ -60,6 +62,7 @@ export function createIonicMap(
                     return metaIonicModel
 
                 default:
+                    if (value instanceof Function) return value.bind(reactive)
                     const _value = value instanceof Object ? ionize(value) : value
                     const tracker = getActiveTracker()
                     if (!tracker)

@@ -1,24 +1,17 @@
-import { emitSignal } from "./debug";
-import { isIonicModel, ionize } from "./ionize/IonicModel";
-import { getActiveTracker } from "./derivations/DependencyTracker";
-import { trigger } from "./trigger";
-import { META, ReactiveEntity } from "./ReactiveEntity";
+import { emitSignal } from "../debug";
+import { isIonicModel, ionize } from "../ionize/IonicModel";
+import { getActiveTracker } from "../derivations/DependencyTracker";
+import { trigger } from "../trigger";
+import { META, ReactiveEntity } from "../ReactiveEntity";
 import { isFunctionWithProps } from "@rue/utils";
 import { AnyObject } from "@rue/types";
-
-export type AtomicSignal<T = any> = {
-    (): T;
-    [META]: MetaIon<T>;
-    update: (toNewValue: (value: T) => T) => T
-    setTo: (newValue: T) => T
-}
 
 
 export type AtomicIon<T = any> = {
     (): T;
     [META]: MetaIon<T>;
-    update: (toNewValue: (value: T) => T) => T
     setTo: (newValue: T) => T
+    set: (toNewValue: (value: T) => T) => T
 }
 
 // export type ReactiveGet<T = any> = () => T
@@ -40,7 +33,7 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
 }
 
 
-export function Ion<T>(value: T) {
+export function AtomicIon<T>(value: T) {
     let metaIon: MetaIon
 
     function $ion() {
@@ -55,21 +48,19 @@ export function Ion<T>(value: T) {
 
     $ion[META] = metaIon;
     $ion.setTo = setTo.bind(metaIon);
-    $ion.update = update.bind(metaIon);
+    $ion.set = set.bind(metaIon);
 
     return $ion as AtomicIon<T>;
 }
 
 
-function setTo(this: MetaIon, newValue: unknown) {
-    const value = this.value;
-    return setValue(this, newValue, value);
+function setTo<T>(this: MetaIon, newValue: T) {
+    return setValue(this, newValue, this.value);
 }
 
-function update(this: MetaIon, toNewValue: (value: unknown) => unknown) {
-    const value = this.value;
-    const newValue = toNewValue(value)
-    return setValue(this, newValue, value);
+function set<T>(this: MetaIon, toNewValue: (value: T) => T) {
+    const value = this.value as T;
+    return setValue(this, toNewValue(value), value);
 }
 
 // ORDER:
@@ -80,14 +71,14 @@ function update(this: MetaIon, toNewValue: (value: unknown) => unknown) {
 function setValue(metaIon: MetaIon, newValue: unknown, oldValue: unknown) {
     if (oldValue === newValue) return oldValue;
     const $ion = metaIon.o;
-    const _newValue = shouldMakeIonic(newValue, metaIon) ? ionize(newValue)  : newValue
+    const _newValue = shouldMakeIonic(newValue, metaIon) ? ionize(newValue) : newValue
     // toIonicModelIfMust(newValue, metaIon)
     metaIon.value = _newValue;
     trigger($ion);
     return _newValue;
 }
 
-function shouldMakeIonic(newValue: unknown, metaIon: MetaIon): newValue is AnyObject{
+function shouldMakeIonic(newValue: unknown, metaIon: MetaIon): newValue is AnyObject {
     return newValue instanceof Object && metaIon.hasIonicValue;
 }
 
