@@ -1,9 +1,8 @@
-import { AnyObject, MaybePromise } from "@rue/types";
-import { EventHandler, NodeEntity, RenderFunction } from "../node/makeNode";
+import { AnyObject } from "@rue/types";
+import { NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { Provide } from "./provide";
-import { ComponentOptions } from "./makeComponent";
 
 
 export type DOMNode = CharacterData | Element
@@ -17,31 +16,23 @@ export type DOMNode = CharacterData | Element
 //     : (props: P) => NodeEntity | NodeEntity[]
 
 // export type Slot = NodeEntity | NodeEntity[]
-export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => ComponentOutput : (setup: P) => ComponentOutput
-export type ProviderComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => ComponentOutput : (setup: P, provide: Provide) => ComponentOutput
+export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup: P) => Component
+export type ProviderComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup: P, provide: Provide) => Component
 
 // export type Slot<T> = T extends AnyObject ? InternalComponent<T> : NodeEntity | NodeEntity[]
 export const COMPONENT = Symbol('publicComponent')
 export type PublicComponent<T extends AnyObject = AnyObject> = T // contains anything in expose
 
-export interface Component<T> {
-    component?: T;
-    initialNodeEntities: NodeEntity
-    mount: (
-        parent: Element,
-        nodePod: _NodePod,
-        fragment?: DocumentFragment,
-    ) => void
-}
 
-export interface ComponentOutput<T = undefined> {
+
+export interface Component<T extends AnyObject | undefined = AnyObject | undefined> {
     component?: T extends AnyObject ? PublicComponent<T> : undefined;
     initialNodeEntities: NodeEntity
 }
 
-export function Component<T>(exposedComponent: T, render: NodeEntity | NodeEntity[]): ComponentOutput<T>
-export function Component<T>(render: NodeEntity | NodeEntity[]): ComponentOutput<T>
-export function Component<T>(renderOrComponent: T | (NodeEntity | NodeEntity[]), render?: NodeEntity | NodeEntity[]): ComponentOutput<T> {
+export function Component<T extends AnyObject | undefined = undefined>(exposedComponent: T, render: NodeEntity | NodeEntity[]): Component<T> 
+export function Component<T extends AnyObject | undefined = undefined>(render: NodeEntity | NodeEntity[]): Component<T> 
+export function Component<T extends AnyObject | undefined = undefined>(renderOrComponent: T | (NodeEntity | NodeEntity[]), render?: NodeEntity | NodeEntity[]): Component<T> {
     const _render = arguments.length === 2 ? render : renderOrComponent;
     const exposedComponent = arguments.length === 2 ? renderOrComponent : undefined;
     const unnestedNodeEntities = unnestComponent(_render)
@@ -49,7 +40,7 @@ export function Component<T>(renderOrComponent: T | (NodeEntity | NodeEntity[]),
         return {
             component: exposedComponent,
             initialNodeEntities: unnestedNodeEntities
-        } as ComponentOutput<T>
+        } as Component<T>
     }
     return {
         component: undefined,
@@ -57,8 +48,8 @@ export function Component<T>(renderOrComponent: T | (NodeEntity | NodeEntity[]),
     }
 }
 
-export class InternalComponent<T extends AnyObject = AnyObject> implements Component<T> {
-    component: T | undefined = undefined;
+export class InternalComponent<T extends AnyObject | undefined = AnyObject | undefined> implements Component<T> {
+    component?: T extends AnyObject ? PublicComponent<T> : undefined = undefined;
     initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
 
     // tasks: {

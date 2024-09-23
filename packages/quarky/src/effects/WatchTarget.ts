@@ -1,5 +1,5 @@
 import { SetMap } from "@rue/utils";
-import { Effect, onRenderCycleComplete, Phase, useRenderCycle } from "./RenderCycle";
+import { Task, onRenderCycleComplete, Phase, useRenderCycle } from "./RenderCycle";
 // import { runEffect } from "./watch";
 import { getDependencyTracker } from "../derivations/DependencyTracker";
 
@@ -16,14 +16,14 @@ export class WatchTarget<T extends Watchable = Watchable> {
     }
 
     watchCount = 0
-    private nextCycleEffects: SetMap<Phase, Effect> | undefined;
-    private effects: SetMap<Phase, Effect>;
+    private nextCycleEffects: SetMap<Phase, Task> | undefined;
+    private effects: SetMap<Phase, Task>;
 
     private initializeNextCycleEffects() {
         this.nextCycleEffects = new SetMap()
     }
 
-    private queueForNextCycle(effect: Effect, phase: Phase) {
+    private queueForNextCycle(effect: Task, phase: Phase) {
         if (!this.nextCycleEffects) this.initializeNextCycleEffects()
         this.nextCycleEffects!.addToSet(effect, phase)
         const toBeQueued = this.nextCycleEffects?.get(phase);
@@ -40,15 +40,15 @@ export class WatchTarget<T extends Watchable = Watchable> {
         }
     }
 
-    private queueEffect(effect: Effect, phase: Phase) {
+    private queueEffect(effect: Task, phase: Phase) {
         this.effects.addToSet(effect, phase)
     }
 
-    private removeEffect(effect: Effect, phase: Phase) {
+    private removeEffect(effect: Task, phase: Phase) {
         this.effects.removeFromSet(effect, phase)
     }
 
-    watch(effect: Effect, phase: Phase, forNextCycle?: boolean) {
+    watch(effect: Task, phase: Phase, forNextCycle?: boolean) {
         if (forNextCycle) {
             this.queueForNextCycle(effect, phase)
         }
@@ -58,7 +58,7 @@ export class WatchTarget<T extends Watchable = Watchable> {
         this.watchCount++;
     }
 
-    unwatch(effect: Effect, phase: Phase) {
+    unwatch(effect: Task, phase: Phase) {
         this.removeEffect(effect, phase)
         this.watchCount--
         if (this.watchCount === 0) {
@@ -79,7 +79,7 @@ export class WatchTarget<T extends Watchable = Watchable> {
         }
     }
 
-    private runSyncEffects(effects: Set<Effect>) {
+    private runSyncEffects(effects: Set<Task>) {
         const tracker = getDependencyTracker();
         tracker?.stop(); // in case reactive refs are triggered during a reactiveEffect
         for (const effect of effects) {
@@ -89,10 +89,10 @@ export class WatchTarget<T extends Watchable = Watchable> {
         tracker?.restore();
     }
 
-    private scheduleEffects(effects: Set<Effect>, phase: Exclude<Phase, Phase.SYNC>) {
+    private scheduleEffects(effects: Set<Task>, phase: Exclude<Phase, Phase.SYNC>) {
         const renderCycle = useRenderCycle()
         for (const effect of effects) {
-            renderCycle.scheduleEffect(this.target, effect, phase)
+            renderCycle.scheduleTask(effect, phase)
         }
     }
 

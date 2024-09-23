@@ -8,7 +8,7 @@ import { MetaIonicModel } from "../ionize/MetaIonicModel";
 
 export type Watchable = any
 // AtomicIon | DerivedIon | IonicEffect  | IonicModel | ObservedProp
-export type Effect = (...args: any[]) => void;
+export type Task = (...args: any[]) => void;
 
 // export type Phase = Phase.BEFORE_RENDER | Phase.RENDER | Phase.AFTER_RENDER | Phase.SYNC
 
@@ -16,10 +16,11 @@ export enum Phase {
     SYNC = 1,
     BEFORE_RENDER,
     RENDER,
-    AFTER_RENDER
+    AFTER_RENDER,
+    CYCLE_COMPLETE,
 }
 
-const COMPLETE: 4 = Phase.AFTER_RENDER + 1 as 4
+// const COMPLETE: 4 = Phase.AFTER_RENDER + 1 as 4
 
 let renderCycleCount = -1;
 
@@ -82,21 +83,20 @@ export class RenderCycle {
         startCollectingEffects(this)
         queueTask(() => { //QUESTION: Should I wrap in a flask??
             this.setPhase(Phase.BEFORE_RENDER)
-            this.runEffects(Phase.BEFORE_RENDER);
+            this.runTasks(Phase.BEFORE_RENDER);
             this.setCompletedPhase(Phase.BEFORE_RENDER)
-            this.runTasks(Hooks.BEFORE_RENDER)
             beforeRepaint(() => {
                 queueTask(() => { // queue this BEFORE running render so that it will run as soon after render as possible
                     this.setPhase(Phase.AFTER_RENDER)
-                    this.runEffects(Phase.AFTER_RENDER);
+                    this.runTasks(Phase.AFTER_RENDER);
                     this.setCompletedPhase(Phase.AFTER_RENDER)
-                    this.runTasks(Hooks.ON_RENDER_CYCLE_COMPLETE)
+                    this.runTasks(Phase.CYCLE_COMPLETE)
+                    this.setCompletedPhase(Phase.CYCLE_COMPLETE)
                     endCollectingEffects(); // Any set ops after this point will be scheduled for the NEXT render cycle
                 })
                 this.setPhase(Phase.RENDER)
-                this.runEffects(Phase.RENDER);
+                this.runTasks(Phase.RENDER);
                 this.setCompletedPhase(Phase.RENDER)
-                this.runTasks(Hooks.ON_RENDERED)
             })
         })
     }
@@ -160,60 +160,60 @@ export class RenderCycle {
 
     // EFFECTS
 
-    effects: SetMap<Phase, Effect> = new SetMap();
-    reactiveEffects: SetMap<Phase, Effect> = new SetMap();
+    tasks: SetMap<Phase, Task> = new SetMap();
+    // reactiveEffects: SetMap<Phase, Task> = new SetMap();
 
-    scheduleEffect(target: Watchable, effect: Effect, phase: Exclude<Phase, Phase.SYNC>) {
+    scheduleTask(task: Task, phase: Exclude<Phase, Phase.SYNC>) {
         if (phase <= this.completedPhase) {
-            if (__DEV__) console.warn(`CASE RESEARCH: Effect was triggered after render cycle phase ${phase}. Effect will not run. Potentially implement a way to schedule for next cycle instead if needed?`)
+            if (__DEV__) console.warn(`CASE RESEARCH: Effect was triggered after render cycle phase ${phase}. Task will not run. Potentially implement a way to schedule for next cycle instead if needed?`)
             return;
         }
-        if (target === unwrap(effect)) {
-            this.reactiveEffects.addToSet(effect, phase)
-        }
-        else {
-            this.effects.addToSet(effect, phase)
-        }
+        // if (target === unwrap(effect)) {
+        //     this.reactiveEffects.addToSet(effect, phase)
+        // }
+        // else {
+        this.tasks.addToSet(task, phase)
+        // }
     }
 
-    runEffects(phase: Phase) {
-        const effects = this.effects.get(phase);
-        if (effects) {
-            for (const effect of effects) {
+    runTasks(phase: Phase) {
+        const tasks = this.tasks.get(phase);
+        if (tasks) {
+            for (const task of tasks) {
                 // runEffect(effect)
-                effect()
+                task()
             }
         }
-        const reactiveEffects = this.reactiveEffects.get(phase)
-        if (reactiveEffects) {
-            for (const effect of reactiveEffects) {
-                // runEffect(effect);
-                effect()
-            }
-        }
+        // const reactiveEffects = this.reactiveEffects.get(phase)
+        // if (reactiveEffects) {
+        //     for (const effect of reactiveEffects) {
+        //         // runEffect(effect);
+        //         effect()
+        //     }
+        // }
     }
 
     // TASKS
 
-    tasks: {
-        [Hooks.BEFORE_RENDER]: Set<Function>,
-        [Hooks.ON_RENDERED]: Set<Function>,
-        [Hooks.ON_RENDER_CYCLE_COMPLETE]: Set<Function>,
-    } = {
-            [Hooks.BEFORE_RENDER]: new Set(),
-            [Hooks.ON_RENDERED]: new Set(),
-            [Hooks.ON_RENDER_CYCLE_COMPLETE]: new Set(),
-        }
+    // tasks: {
+    //     [Hooks.BEFORE_RENDER]: Set<Function>,
+    //     [Hooks.ON_RENDERED]: Set<Function>,
+    //     [Hooks.ON_RENDER_CYCLE_COMPLETE]: Set<Function>,
+    // } = {
+    //         [Hooks.BEFORE_RENDER]: new Set(),
+    //         [Hooks.ON_RENDERED]: new Set(),
+    //         [Hooks.ON_RENDER_CYCLE_COMPLETE]: new Set(),
+    //     }
 
 
-    runTasks(hookName: Hooks) {
-        const tasks = currentRenderCycle?.tasks;
-        if (!tasks) return;
-        const _tasks = tasks[hookName]
-        for (const task of _tasks) {
-            task();
-        }
-    }
+    // runTasks(hookName: Hooks) {
+    //     const tasks = currentRenderCycle?.tasks;
+    //     if (!tasks) return;
+    //     const _tasks = tasks[hookName]
+    //     for (const task of _tasks) {
+    //         task();
+    //     }
+    // }
 }
 
 // function getCurrentValue(target: ReactiveTarget) {
@@ -227,38 +227,38 @@ export class RenderCycle {
 
 
 
-export enum Hooks {
-    BEFORE_RENDER = "br",
-    ON_RENDERED = "or",
-    ON_RENDER_CYCLE_COMPLETE = "uc"
-}
+// export enum Hooks {
+//     BEFORE_RENDER = "br",
+//     ON_RENDERED = "or",
+//     ON_RENDER_CYCLE_COMPLETE = "uc"
+// }
 
 
 // const updateCompletedTasks: (() => void)[] = [];
 
 
-function createRenderCycleHook(hookName: Hooks) {
+function createRenderCycleHook(phase: Phase) {
     return (task: () => void, options?: { cancel?: ScheduleCancel; __devName?: string }) => {
         const _options = <SchedulerOptions>options || { flask: '' }
         _options.flask = 'outlive'
         return $schedule(task, _options, {
             enroll(task) {
-                const tasks = currentRenderCycle?.tasks;
-                if (!tasks) throw new Error('No update cycle :(. This should never happen')
-                tasks[hookName].add(task)
+                const tasks = useRenderCycle().tasks;
+                tasks.get(phase)?.add(task)
             },
             remove(task) {
                 const tasks = currentRenderCycle?.tasks;
-                if (!tasks) throw new Error('No update cycle :(. This should never happen')
-                tasks[hookName].delete(task)
+                tasks?.get(phase)?.delete(task)
             }
         })
     }
 }
 
-export const beforeRender = createRenderCycleHook(Hooks.BEFORE_RENDER)
-export const onRendered = createRenderCycleHook(Hooks.ON_RENDERED)
-export const onRenderCycleComplete = createRenderCycleHook(Hooks.ON_RENDER_CYCLE_COMPLETE)
+export const beforeRender = createRenderCycleHook(Phase.BEFORE_RENDER)
+export const onRender = createRenderCycleHook(Phase.RENDER)
+export const onRendered = createRenderCycleHook(Phase.AFTER_RENDER)
+export const onRenderCycleComplete = createRenderCycleHook(Phase.CYCLE_COMPLETE)
+
 
 // export function onPhaseCompleted(phase: Phase, handler: () => void) {
 //     if (phase === Phase.BEFORE_RENDER) {
@@ -280,7 +280,7 @@ export const onRenderCycleComplete = createRenderCycleHook(Hooks.ON_RENDER_CYCLE
 // export function runPrerenderEffectsAndTasks() {
 //     const renderCycle = getCurrentRenderCycle()
 //     if (renderCycle) {
-//         renderCycle.runEffects(Phase.BEFORE_RENDER);
+//         renderCycle.runTasks(Phase.BEFORE_RENDER);
 //         renderCycle.runTasks(Hooks.AFTER_PRERENDER_PHASE)
 //     }
 // }

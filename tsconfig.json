@@ -46,7 +46,7 @@
         "./packages/lumo/jsx-runtime/src/index.ts"
       ],
       "@rue/quarky": [
-        "packages/quarky/src/index.ts"
+        "./packages/quarky/src/index.ts"
       ],
       "@rue/archer": [
         "./packages/archer/index.ts"

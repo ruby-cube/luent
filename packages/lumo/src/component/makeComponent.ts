@@ -1,4 +1,4 @@
-import { ComponentSetup, InternalComponent, Component, ProviderComponentSetup, ComponentOutput } from "./InternalComponent";
+import { ComponentSetup, InternalComponent, Component, ProviderComponentSetup } from "./InternalComponent";
 import { NodeIon } from "../node/$Node";
 import { ComponentConfig, initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
@@ -106,7 +106,7 @@ function normalizeToFragmentArray(entity: any) { // distinguish conditional seri
     return normalizeToArray(entity);
 }
 
-function extractNodeEntities(component: ComponentOutput) {
+function extractNodeEntities(component: Component) {
     if (!('initialNodeEntities' in component))
         throw new Error('Component setup must return a Component. Pass jsx into `Component` function')
     return component.initialNodeEntities;
@@ -135,7 +135,7 @@ export function runProviderComponentSetup(
 
 function initializeComponent(
     component: InternalComponent,
-    output: ComponentOutput,
+    output: Component,
     ref: NodeIon | IonicModel<any[]> | undefined,
     $index: AtomicIon<number> | undefined,
 ) {

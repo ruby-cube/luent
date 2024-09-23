@@ -110,7 +110,7 @@ export function watch<T extends () => any | ReactiveGet | IonicModel>(target: T,
     }
 
     if (eager) {
-        scheduleEffectEagerly(changeEffect, phase, _target)
+        scheduleEffectEagerly(changeEffect, phase)
     }
 
     return setUpWatcher(
@@ -142,7 +142,7 @@ function watchReactiveModel<T extends IonicModel>(target: T, effect: MutationEff
     }
 
     if (eager) {
-        scheduleEffectEagerly(mutationEffect, phase, target)
+        scheduleEffectEagerly(mutationEffect, phase)
     }
 
     const forNextCycle = options?.cycle === 'next';
@@ -159,12 +159,12 @@ function watchReactiveModel<T extends IonicModel>(target: T, effect: MutationEff
 }
 
 
-function scheduleEffectEagerly(effect: Effect, phase: Phase, target?: any) {
+function scheduleEffectEagerly(effect: Effect, phase: Phase) {
     if (phase === Phase.SYNC) {
         // runEffect(effect)
         effect()
     }
-    else useRenderCycle().scheduleEffect(target || effect, effect, phase)
+    else useRenderCycle().scheduleTask(effect, phase)
 }
 
 export function $initializeEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived Ion and effect combined into one function

@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { _NodePod } from "../node/NodePod";
 import { NodeEntity } from "../node/makeNode";
-import { Component } from "./InternalComponent";
+import { Component, PublicComponent } from "./InternalComponent";
 import { getCurrentProvider, popProvider, pushProvider } from "./provide";
 
 export class Provider {
@@ -16,8 +16,8 @@ export class Provider {
     }
 }
 
-export class ProviderComponent<T extends undefined | AnyObject = undefined | AnyObject> extends Provider implements Component {
-    component: T | undefined = undefined;
+export class ProviderComponent<T extends AnyObject | undefined = undefined | AnyObject> extends Provider implements Component<T> {
+    component?: T extends AnyObject ? PublicComponent<T> : undefined = undefined
     initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
     // entries: Map<Symbol | string, any> = new Map();
     constructor(

@@ -1,4 +1,4 @@
-import { ComponentOutput, ComponentSetup, PublicComponent } from "../component/InternalComponent"
+import { Component, ComponentSetup, PublicComponent } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
@@ -73,7 +73,7 @@ export type NodeReferent<
 > =
     T extends HTMLTag ? HTMLElementTagNameMap[T] : //TODO: SVGs and Math elements
     T extends (...args: any[]) => infer R ?
-    R extends ComponentOutput<infer I> ?
+    R extends Component<infer I> ?
     I extends PublicComponent ? I
     : undefined : undefined : undefined
 
