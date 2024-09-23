@@ -2,7 +2,7 @@ import { ComponentOutput, ComponentSetup, PublicComponent } from "../component/I
 import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
-import { Ion, AtomicIon, asReadonly, ReadonlyIon, ionize, IonicModel } from "@rue/muonic"
+import { Ion, AtomicIon, asReadonly, ReadonlyIon, ionize, IonicModel } from "../../../quarky/src"
 import { HTMLTag } from "../element/makeElement"
 import { isUpdatingList } from "../list/listStack"
 

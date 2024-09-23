@@ -1,6 +1,6 @@
 import { SSRComponent } from "./SSRComponent.js";
 import { getResolvedComponent, isResolved } from "./PendingComponentMap.js";
-import { AtomicIon, isAnyIon } from "@rue/muonic";
+import { AtomicIon, isAnyIon } from "../../quarky/src/index.js";
 
 type AnyObject = { [key: string | symbol | number]: any }
 // export type SSRComponent<T extends AnyObject = AnyObject> = { render: () => string } & T;

@@ -1,4 +1,4 @@
-import { isAnyIon, ReactiveGet, Phase, tracked, __devCheckIfTracked } from "@rue/muonic";
+import { isAnyIon, ReactiveGet, Phase, tracked, __devCheckIfTracked } from "../../../quarky/src";
 import { _NodePod } from "./NodePod";
 import { watch } from "../watch/watchAndPreserve";
 

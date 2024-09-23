@@ -1,4 +1,4 @@
-import { Ion, isAnyIon, isIonicModel, AtomicIon, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, getMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "@rue/muonic";
+import { Ion, isAnyIon, isIonicModel, AtomicIon, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, getMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "../../../quarky/src";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
@@ -10,7 +10,7 @@ import { DynamicNode } from "../dynamic/DynamicNode";
 import { watch } from "../watch/watchAndPreserve";
 import { diff, InsertAndMoveKit } from "./diff";
 import { Sign } from "crypto";
-import { META } from "../../../muonic/src/ReactiveEntity";
+import { META } from "../../../quarky/src/ReactiveEntity";
 import { popProvider, pushProvider } from "../component/provide";
 import { ProviderComponent } from "../component/ProviderComponent";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";

@@ -1,5 +1,5 @@
 import { $else, $elseIf, $if } from "@rue/lumo"
-import { Ion } from "@rue/muonic"
+import { Ion } from "../../../packages/quarky/src"
 
 export function ConditionalFlaskTest() {
     return (

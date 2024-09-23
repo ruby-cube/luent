@@ -1,4 +1,4 @@
-import { DerivedIon, ReactiveGet, AtomicIon, getWithoutTracking, DerivedIon, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked } from "@rue/muonic";
+import { DerivedIon, ReactiveGet, AtomicIon, getWithoutTracking, DerivedIon, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked } from "../../../quarky/src";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";

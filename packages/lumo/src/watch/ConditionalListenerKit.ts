@@ -1,4 +1,4 @@
-import { ReactiveGet } from "@rue/muonic";
+import { ReactiveGet } from "../../../quarky/src";
 import { NodeEntity } from "../node/makeNode";
 import { ConditionalKit } from "../conditional/ConditionalKit";
 import { ListenOptions } from "net";

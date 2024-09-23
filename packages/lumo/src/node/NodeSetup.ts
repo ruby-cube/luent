@@ -2,7 +2,7 @@ import {  ComponentSetup, InternalComponent } from "../component/InternalCompone
 import { HTMLTag } from "../element/makeElement";
 import { ListData } from "../list/For";
 import { ComponentConfig, ElementConfig, RenderFunction } from "./makeNode";
-import { ReactiveGet, AtomicIon } from "@rue/muonic";
+import { ReactiveGet, AtomicIon } from "../../../quarky/src";
 
 
 export type NodeSetup<T extends HTMLTag | ComponentSetup> =

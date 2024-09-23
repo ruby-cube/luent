@@ -7,7 +7,7 @@
 import * as CSS from "csstype";
 import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
-import { ReactiveGet } from "@rue/muonic";
+import { ReactiveGet } from "../../../quarky/src";
 import { NodeIon } from "../../src/node/$Node";
 
 export function jsxDEV(): "frog"

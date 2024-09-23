@@ -4,6 +4,7 @@ import { DynamicNode, markMountPhase, unmarkMountPhase } from "./dynamic/Dynamic
 import { popProvider, pushProvider } from "./component/provide";
 import { runProviderComponentSetup } from "./component/makeComponent";
 import { Provider, ProviderComponent } from "./component/ProviderComponent";
+import { AnyObject } from "@rue/types";
 
 let appRoot: Element;
 
@@ -21,7 +22,7 @@ export function getAppRoot() {
 //     )
 // }
 
-export function createApp(App: ComponentSetup, config?: { remountable: boolean, globalProvider: Provider }) {
+export function createApp<T extends AnyObject>(App: ComponentSetup<T>, config?: { remountable: boolean, globalProvider: Provider }) {
 
     // (1) instantiate developer's root component
     const component = new ProviderComponent(null, config?.globalProvider || new Provider());

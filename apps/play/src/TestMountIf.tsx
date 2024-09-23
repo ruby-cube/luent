@@ -1,5 +1,5 @@
 import { $Node, Component, CreateIf, ElseCreate } from "@rue/lumo";
-import { $, DerivedIon, Ion, watch } from "@rue/muonic";
+import { $, DerivedIon, Ion, watch } from "../../../packages/quarky/src";
 import { onActivated, onCreated, onDeactivate, onDestroy } from "../../../packages/lumo/src/dynamic/lifecycle";
 
 export function MountIf() {

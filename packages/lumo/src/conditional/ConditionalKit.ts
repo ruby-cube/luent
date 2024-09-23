@@ -1,4 +1,4 @@
-import { ReactiveGet } from "@rue/muonic";
+import { ReactiveGet } from "../../../quarky/src";
 import { Booleanny } from "@rue/types";
 
 

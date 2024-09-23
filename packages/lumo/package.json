@@ -5,7 +5,7 @@
     "module": "./src/index",
     "dependencies": {
         "@rue/flask": "workspace:*",
-        "@rue/muonic": "workspace:*",
+        "@rue/quarky": "workspace:*",
         "@rue/utils": "workspace:*"
     },
     "devDependencies": {

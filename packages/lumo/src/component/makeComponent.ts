@@ -2,7 +2,7 @@ import { ComponentSetup, InternalComponent, Component, ProviderComponentSetup, C
 import { NodeIon } from "../node/$Node";
 import { ComponentConfig, initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { AtomicIon, isIon, IonicModel } from "@rue/muonic";
+import { AtomicIon, isIon, IonicModel } from "../../../quarky/src";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex } from "../list/ListRenderKit";
 import { getCurrentProvider, popProvider, provide, pushProvider } from "./provide";

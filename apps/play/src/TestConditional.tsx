@@ -1,5 +1,5 @@
 import { $else, $if } from "@rue/lumo";
-import { $, ionize, Ion } from "@rue/muonic";
+import { $, ionize, Ion } from "../../../packages/quarky/src";
 
 
 export function TestConditional() {

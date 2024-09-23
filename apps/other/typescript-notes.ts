@@ -1,4 +1,4 @@
-import { IonicModel, ReactiveGet } from "@rue/muonic"
+import { IonicModel, ReactiveGet } from "../../packages/quarky/src"
 
 const TYPE = null as unknown
 

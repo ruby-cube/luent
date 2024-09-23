@@ -6,7 +6,7 @@
 // - derived signal in template
 // - derived signal with memo
 
-import { $, ionize, Ion } from "@rue/muonic"
+import { $, ionize, Ion } from "../../../packages/quarky/src"
 
 export function TestCounterSignals() {
     const $count = Ion(0)

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Ion, AtomicIon, watch } from "@rue/muonic"
+import { Ion, AtomicIon, watch } from "../../../packages/quarky/src"
 import { watchForRender } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { $Node } from "@rue/lumo";
 

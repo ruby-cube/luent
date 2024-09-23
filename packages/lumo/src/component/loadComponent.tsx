@@ -1,7 +1,7 @@
 import { ComponentSetup } from "./InternalComponent";
 import { $else, $elseIf, $if } from "../conditional/CreateIf";
 import { noop } from "@rue/utils";
-import { Ion } from "@rue/muonic";
+import { Ion } from "../../../quarky/src";
 
 const lazyComponents: Map<() => Promise<ComponentSetup>, ComponentSetup> = new Map()
 

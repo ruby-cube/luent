@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { longestCommonSubstring } from "./lcs";
-import { areShallowEqualArrays } from "@rue/muonic";
+import { areShallowEqualArrays } from "../../../quarky/src";
 import { UniqueItem } from "./For";
 
 

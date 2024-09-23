@@ -35,9 +35,9 @@ importers:
       '@rue/lumo':
         specifier: workspace:*
         version: link:../../packages/lumo
-      '@rue/muonic':
+      '@rue/quarky':
         specifier: workspace:*
-        version: link:../../packages/muonic
+        version: link:../../packages/quarky
       '@rue/thread':
         specifier: workspace:*
         version: link:../../packages/thread
@@ -69,9 +69,9 @@ importers:
       '@rue/lumo':
         specifier: workspace:*
         version: link:../../packages/lumo
-      '@rue/muonic':
+      '@rue/quarky':
         specifier: workspace:*
-        version: link:../../packages/muonic
+        version: link:../../packages/quarky
       express:
         specifier: ^4.19.2
         version: 4.19.2
@@ -148,9 +148,9 @@ importers:
       '@rue/flask':
         specifier: workspace:*
         version: link:../flask
-      '@rue/muonic':
+      '@rue/quarky':
         specifier: workspace:*
-        version: link:../muonic
+        version: link:../quarky
       '@rue/utils':
         specifier: workspace:*
         version: link:../utils
@@ -169,7 +169,7 @@ importers:
         specifier: workspace:*
         version: link:../../types
 
-  packages/muonic:
+  packages/quarky:
     dependencies:
       '@rue/flask':
         specifier: workspace:*

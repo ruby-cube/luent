@@ -1,4 +1,4 @@
-import { Ion } from "@rue/muonic"
+import { Ion } from "../../../packages/quarky/src"
 import { $await, $Suspense } from "../../../packages/lumo/src/component/$await"
 
 

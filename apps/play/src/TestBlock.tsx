@@ -1,5 +1,5 @@
 import {  $Node } from "@rue/lumo";
-import { AtomicIon, Ion } from "@rue/muonic";
+import { AtomicIon, Ion } from "../../../packages/quarky/src";
 
 
 export function TestBlockA(props: { $active: AtomicIon<boolean> }) {

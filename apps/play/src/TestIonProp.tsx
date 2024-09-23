@@ -1,5 +1,5 @@
 import { Component } from "@rue/lumo";
-import { Ion, ionize } from "@rue/muonic";
+import { Ion, ionize } from "../../../packages/quarky/src";
 
 export function TestIonProp() {
     const $count = Ion(0)

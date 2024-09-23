@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { $if, expose, NodeEntity, onMounted, RenderFunction } from "@rue/lumo"
-import { $, watch } from "@rue/muonic"
-import { Ion } from "@rue/muonic/Ion";
+import { $, watch } from "../../../packages/quarky/src"
+import { Ion } from "@rue/quarky/Ion";
 
 function App() {
 

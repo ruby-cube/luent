@@ -29,7 +29,7 @@
     "ni:play": "pnpm -F @rue/play install",
     "dev": "pnpm -F @rue/play dev",
     "build-babel": "pnpm -F @rue/play build-babel",
-    "ni:muonic": "pnpm -F @rue/muonic install"
+    "ni:quarky": "pnpm -F @rue/quarky install"
   },
   "devDependencies": {
     "@types/node": "^22.5.4",

@@ -1,4 +1,4 @@
-import { __addDevName } from "@rue/muonic";
+import { __addDevName } from "../../quarky/src/index.js";
 import { AnyObject } from "@rue/types";
 import { html } from "./Literate.js";
 import { makeComponent } from "./makeComponent.js";

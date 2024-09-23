@@ -1,4 +1,4 @@
-import { Ion } from "@rue/muonic"
+import { Ion } from "../../../packages/quarky/src"
 
 export function ChildOne() {
 

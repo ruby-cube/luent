@@ -1,5 +1,5 @@
 import { Collection, For } from "@rue/lumo"
-import { IonicModel, AtomicIon } from "@rue/muonic"
+import { IonicModel, AtomicIon } from "../../../packages/quarky/src"
 
 class PortableNode {
 

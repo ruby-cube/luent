@@ -1,4 +1,4 @@
-import { Ion, __addDevName } from "@rue/muonic";
+import { Ion, __addDevName } from "../../../quarky/src";
 import { $else, $elseIf, $if } from "../conditional/CreateIf";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { ComponentSetup } from "./InternalComponent";

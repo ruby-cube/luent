@@ -1,4 +1,4 @@
-import { ReactiveGet, ReactiveGet } from "@rue/muonic";
+import { ReactiveGet, ReactiveGet } from "../../../quarky/src";
 import { NodeEntity } from "../node/makeNode";
 import { ConditionalKit } from "./ConditionalKit";
 import { Booleanny } from "@rue/types";

@@ -1,5 +1,5 @@
 {
-    "name": "@rue/muonic",
+    "name": "@rue/quarky",
     "private": true,
     "description": "",
     "module": "./src/index",

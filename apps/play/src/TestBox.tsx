@@ -1,5 +1,5 @@
 import { $Node, } from "@rue/lumo";
-import {  $, ionize, $initializeEffect, ionize, Ion } from "@rue/muonic";
+import {  $, ionize, $initializeEffect, ionize, Ion } from "../../../packages/quarky/src";
 
 
 //tests:

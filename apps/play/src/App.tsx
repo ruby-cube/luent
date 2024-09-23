@@ -1,7 +1,7 @@
 import { $Node, Component, COMPONENT, ComponentSetup, CreateIf, ElseCreate, For,  Provide, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
-import { __addDevName, Ion, ionize } from "@rue/muonic";
-import { $ } from "@rue/muonic";
+import { __addDevName, Ion, ionize } from "../../../packages/quarky/src";
+import { $ } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { ElseCreateIf } from "../../../packages/lumo/src/conditional/CreateIf";
 import { AnyObject } from "@rue/types";

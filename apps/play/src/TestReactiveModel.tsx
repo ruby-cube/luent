@@ -1,8 +1,8 @@
 import { $Node, $Nodes, Component, CreateIf, ElseCreate, For } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { Ion, __addDevName, $, DerivedIon, ionize, isIonicModel } from "@rue/muonic";
+import { Ion, __addDevName, $, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
-import { META } from "../../../packages/muonic/src/ReactiveEntity";
+import { META } from "../../../packages/quarky/src/ReactiveEntity";
 
 
 const randomColor = useRandomColorGenerator()

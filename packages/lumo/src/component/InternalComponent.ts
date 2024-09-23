@@ -24,7 +24,7 @@ export type ProviderComponentSetup<P extends never | AnyObject = never | AnyObje
 export const COMPONENT = Symbol('publicComponent')
 export type PublicComponent<T extends AnyObject = AnyObject> = T // contains anything in expose
 
-export interface Component<T extends AnyObject = AnyObject> {
+export interface Component<T> {
     component?: T;
     initialNodeEntities: NodeEntity
     mount: (
@@ -38,8 +38,13 @@ export interface ComponentOutput<T = undefined> {
     component?: T extends AnyObject ? PublicComponent<T> : undefined;
     initialNodeEntities: NodeEntity
 }
-export function Component<T>(render: NodeEntity, exposedComponent?: T): ComponentOutput<T> {
-    const unnestedNodeEntities = unnestComponent(render)
+
+export function Component<T>(exposedComponent: T, render: NodeEntity | NodeEntity[]): ComponentOutput<T>
+export function Component<T>(render: NodeEntity | NodeEntity[]): ComponentOutput<T>
+export function Component<T>(renderOrComponent: T | (NodeEntity | NodeEntity[]), render?: NodeEntity | NodeEntity[]): ComponentOutput<T> {
+    const _render = arguments.length === 2 ? render : renderOrComponent;
+    const exposedComponent = arguments.length === 2 ? renderOrComponent : undefined;
+    const unnestedNodeEntities = unnestComponent(_render)
     if (exposedComponent instanceof Object) {
         return {
             component: exposedComponent,
@@ -52,7 +57,7 @@ export function Component<T>(render: NodeEntity, exposedComponent?: T): Componen
     }
 }
 
-export class InternalComponent<T extends AnyObject = AnyObject> implements Component {
+export class InternalComponent<T extends AnyObject = AnyObject> implements Component<T> {
     component: T | undefined = undefined;
     initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
 

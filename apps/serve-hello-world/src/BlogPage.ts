@@ -2,7 +2,7 @@ import { blogPosts } from "./data.js";
 import { fromEntries, html } from "../../../packages/literate/src/Literate.js";
 import { BlogPost, PostPreview } from "./PostPreview.js";
 import { $await, mO, $Suspense } from "@rue/literate";
-import { Ion } from "@rue/muonic";
+import { Ion } from "../../../packages/quarky/src/index.js";
 
 export function BlogPage() {
     const $blogPosts = Ion([])

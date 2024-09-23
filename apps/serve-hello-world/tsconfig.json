@@ -27,8 +27,8 @@
       "@rue/literate": [
         "../../packages/literate/src/index.js"
       ],
-      "@rue/muonic": [
-        "../../packages/muonic/src/index.js"
+      "@rue/quarky": [
+        "../../packages/quarky/src/index.js"
       ]
     },
     "include": [

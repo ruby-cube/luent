@@ -1,5 +1,5 @@
 import { Callback } from "@rue/flask";
-import { ReactiveGet } from "@rue/muonic";
+import { ReactiveGet } from "../../../quarky/src";
 import { ConditionalKit } from "../conditional/ConditionalKit";
 import { Booleanny } from "@rue/types";
 

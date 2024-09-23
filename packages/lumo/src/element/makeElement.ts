@@ -1,12 +1,12 @@
 import { DOMNode } from "../component/InternalComponent";
-import { DerivedIon, ReactiveGet, isAnyIon, getCurrentRenderCycle, Phase, isIon } from "@rue/muonic";
+import { DerivedIon, ReactiveGet, isAnyIon, getCurrentRenderCycle, Phase, isIon } from "../../../quarky/src";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { initializeRender, watch } from "../watch/watchAndPreserve";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
 import { useEventTick } from "./EventTick";
-import { AtomicIon } from "@rue/muonic";
+import { AtomicIon } from "../../../quarky/src";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
@@ -15,7 +15,7 @@ import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
 import { onActivated, onDeactivate } from "../dynamic/lifecycle";
-import { isReactiveArray } from "../../../muonic/src/ionize/IonicArray";
+import { isReactiveArray } from "../../../quarky/src/ionize/IonicArray";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap

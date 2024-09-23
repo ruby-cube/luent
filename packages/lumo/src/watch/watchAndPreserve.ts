@@ -1,4 +1,4 @@
-import { isAnyIon, $initializeEffect as _$initializeEffect, onRendered, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, ChangeEffect, MutationEffect, Phase, __devCheckIfTracked } from "@rue/muonic";
+import { isAnyIon, $initializeEffect as _$initializeEffect, onRendered, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, ChangeEffect, MutationEffect, Phase, __devCheckIfTracked } from "../../../quarky/src";
 import { InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { isMountPhase } from "../dynamic/DynamicNode";

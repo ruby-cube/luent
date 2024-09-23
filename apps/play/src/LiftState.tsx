@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { $Node } from "@rue/lumo"
-import { $, Ion } from "@rue/muonic"
+import { $, Ion } from "../../../packages/quarky/src"
 
 
 

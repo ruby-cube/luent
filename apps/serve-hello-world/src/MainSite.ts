@@ -1,6 +1,6 @@
 import { html, Literate, mO, SSRComponent, SSRComponentSetup } from "@rue/literate";
 import { $Node, ComponentSetup, InternalComponent, PublicComponent } from "@rue/lumo";
-import { AtomicIon } from "@rue/muonic";
+import { AtomicIon } from "../../../packages/quarky/src";
 
 export function MainSite({
     Slot
