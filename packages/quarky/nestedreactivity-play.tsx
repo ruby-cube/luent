@@ -85,7 +85,7 @@ function ListBlock(attributes: {
     list: string[], // initial value
     color: string
 }) {
-    const $div = $Node()
+    const $div = NodeIon()
     const $divs = $Nodes()
 
     onCreated(() => {

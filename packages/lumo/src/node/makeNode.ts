@@ -2,7 +2,7 @@ import { DerivedIon, ReactiveGet, AtomicIon, getWithoutTracking, DerivedIon, Ion
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
-import { getNodeArrayRef, InternalNodeRef, NodeReferent, NodeIon, InternalNodeArrayRef, NodesIon, getNodeIon } from "./$Node";
+import { getNodeArrayRef, InternalNodeRef, NodeReferent, NodeIon, InternalNodeArrayRef, NodesIon, getNodeIon } from "./NodeIon";
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../list/ListRenderKit";

@@ -1,5 +1,5 @@
 import { html, Literate, mO, SSRComponent, SSRComponentSetup } from "@rue/literate";
-import { $Node, ComponentSetup, InternalComponent, PublicComponent } from "@rue/lumo";
+import { NodeIon, ComponentSetup, InternalComponent, PublicComponent } from "@rue/lumo";
 import { AtomicIon } from "../../../packages/quarky/src";
 
 export function MainSite({
@@ -7,7 +7,7 @@ export function MainSite({
 }: {
     Slot: () => [PublicComponent & {title: string}, Literate] 
 }) {
-    const $page = $Node<() => SSRComponent<{ title: string }>>() as unknown as AtomicIon<{ title: string }>;
+    const $page = NodeIon<() => SSRComponent<{ title: string }>>() as unknown as AtomicIon<{ title: string }>;
 
     return html`
         <!DOCTYPE html>

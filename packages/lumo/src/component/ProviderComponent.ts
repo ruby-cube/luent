@@ -45,10 +45,10 @@ export class ProviderComponent<T extends AnyObject | undefined = undefined | Any
     }
 }
 
-export function getProviderComponent(functionName: string) {
+export function getProviderComponent() {
     const component = getCurrentProvider()
     if (!component) {
-        throw new Error(`${functionName} can only be called from a component setup`)
+        throw new Error(`getProviderComponent can only be called from a component setup`)
     }
     return component
 }

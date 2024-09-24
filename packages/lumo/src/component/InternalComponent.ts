@@ -30,9 +30,9 @@ export interface Component<T extends AnyObject | undefined = AnyObject | undefin
     initialNodeEntities: NodeEntity
 }
 
-export function Component<T extends AnyObject | undefined = undefined>(exposedComponent: T, render: NodeEntity | NodeEntity[]): Component<T> 
-export function Component<T extends AnyObject | undefined = undefined>(render: NodeEntity | NodeEntity[]): Component<T> 
-export function Component<T extends AnyObject | undefined = undefined>(renderOrComponent: T | (NodeEntity | NodeEntity[]), render?: NodeEntity | NodeEntity[]): Component<T> {
+export function Component<T extends AnyObject | undefined = AnyObject | undefined>(exposedComponent: T, render: NodeEntity | NodeEntity[]): Component<T> 
+export function Component<T extends AnyObject | undefined = AnyObject | undefined>(render: NodeEntity | NodeEntity[]): Component<undefined> 
+export function Component<T extends AnyObject | undefined = AnyObject | undefined>(renderOrComponent: T | (NodeEntity | NodeEntity[]), render?: NodeEntity | NodeEntity[]): Component<T extends AnyObject ? T  : undefined>  {
     const _render = arguments.length === 2 ? render : renderOrComponent;
     const exposedComponent = arguments.length === 2 ? renderOrComponent : undefined;
     const unnestedNodeEntities = unnestComponent(_render)
@@ -40,12 +40,12 @@ export function Component<T extends AnyObject | undefined = undefined>(renderOrC
         return {
             component: exposedComponent,
             initialNodeEntities: unnestedNodeEntities
-        } as Component<T>
+        } as Component<T extends AnyObject ? T  : undefined> 
     }
     return {
         component: undefined,
         initialNodeEntities: unnestedNodeEntities
-    }
+    } as Component<T extends AnyObject ? T  : undefined> 
 }
 
 export class InternalComponent<T extends AnyObject | undefined = AnyObject | undefined> implements Component<T> {

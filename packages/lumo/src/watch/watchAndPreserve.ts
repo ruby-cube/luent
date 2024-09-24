@@ -20,7 +20,6 @@ export function initializeRender(effect: () => void) {
     if (!component) throw new Error("initializeRender must be called within component setup")
 
     const dynamicNode = getActiveDynamicNode()
-    if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
     if (dynamicNode.preserve)
         return _initializeAndPreserve(effect, true)
 
@@ -91,7 +90,7 @@ function bindWithComponent(fn: Function, component: ProviderComponent) {
 
 function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveListener {
     const mountPhase = isMountPhase()
-    const component = getProviderComponent(_initializeAndPreserve.name)
+    const component = getProviderComponent()
     const initializeFn = bindWithComponent(renderPhase ? _initializeRender : _$initializeEffect, component);
     const dynamicNode = getActiveDynamicNode()!
     const watcher = { stop: noop }
@@ -117,7 +116,6 @@ function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveL
 
 export function $initializeEffect(effect: () => void) {
     const dynamicNode = getActiveDynamicNode()
-    if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
 
     if (dynamicNode.preserve)
         return _initializeAndPreserve(effect)
@@ -129,7 +127,6 @@ export function watch<T extends () => any | ReactiveGet>(target: T, effect: T ex
 export function watch<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
 export function watch<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
     const dynamicNode = getActiveDynamicNode()
-    // if (!dynamicNode) throw new Error(`No dynamic node found. This should never happen after root component is set up since the root component is a dynamic node`)
 
     if (dynamicNode && dynamicNode.preserve)
         return watchAndPreserve(target, effect, options)

@@ -1,4 +1,4 @@
-import { $Node, Component, COMPONENT, ComponentSetup, CreateIf, ElseCreate, For,  Provide, teleportTo, useEventListener } from "@rue/lumo";
+import { NodeIon, Component, COMPONENT, ComponentSetup, CreateIf, ElseCreate, For,  Provide, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, Ion, ionize } from "../../../packages/quarky/src";
 import { $ } from "../../../packages/quarky/src";
@@ -178,7 +178,7 @@ export function List() {
 
 
 function useModal() {
-    const $dialogBox = $Node(DialogBox)
+    const $dialogBox = NodeIon(DialogBox)
 
     function openModal() {
         $dialogBox()!.open()
@@ -227,7 +227,7 @@ function Appo(
                 <button>click</button>
             )}
             {ElseCreateIf($active, () => {
-                const $dialogBox = fromContext(ALERT_DIALOG_BOX) || $Node()
+                const $dialogBox = fromContext(ALERT_DIALOG_BOX) || NodeIon()
 
                 return (
                     <Wrapper title={() => $dialogBox().title}>

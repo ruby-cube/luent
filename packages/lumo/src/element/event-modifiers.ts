@@ -1,5 +1,5 @@
 import { ListenOptions } from "net";
-import { NodeIon } from "../node/$Node";
+import { NodeIon } from "../node/NodeIon";
 
 type ListenerLifespan = ListenOptions;
 

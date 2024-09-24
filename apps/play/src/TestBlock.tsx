@@ -1,4 +1,4 @@
-import {  $Node } from "@rue/lumo";
+import {  NodeIon } from "@rue/lumo";
 import { AtomicIon, Ion } from "../../../packages/quarky/src";
 
 
@@ -16,7 +16,7 @@ export function TestBlockA(props: { $active: AtomicIon<boolean> }) {
 }
 
 function Lap(){
-    const $testBlock = $Node(TestBlockA)
+    const $testBlock = NodeIon(TestBlockA)
     const $active = Ion(false)
 
     onMounted(()=>{

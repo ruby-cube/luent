@@ -93,8 +93,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         fragment?: DocumentFragment,
     ) {
         const parentDynamicNode = getActiveDynamicNode()
-        if (!parentDynamicNode) throw new Error('No dynamicNode :( This should never happen since root component is a dynamic node')
-
+        
         // evaluate conditions and render
         const $conditions = this.getConditionsIon()
         const activeIndex = this.evaluateConditions()
@@ -116,7 +115,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             popProvider()
         })
         this.storeDynamicNode(dynamicNode, activeIndex)
-        dynamicNode.emitOnCreated()
 
         // set up watcher for updates
         watch($conditions, updateConditional, {
@@ -249,7 +247,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                 if (preserve) unmarkMountPhase()
             })
             series.storeDynamicNode(dynamicNode, activeIndex)
-            dynamicNode.emitOnCreated()
         }
         else {
             dynamicNode.reactivate(function updateConditional() {

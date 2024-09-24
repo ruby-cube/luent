@@ -15,28 +15,20 @@ export enum LifecycleHook {
 
 
 
-function useTaskQueue(node: DynamicNode, hookName: LifecycleHook) {
-    let taskQueue = node.tasks[hookName]
-    if (!taskQueue) {
-        taskQueue = new Set();
-        node.tasks[hookName] = taskQueue;
-    }
-    return taskQueue;
-}
+
 
 
 function createLifecycleHook(name: LifecycleHook.ON_DESTROY | LifecycleHook.ON_CREATED) {
     return function on(handler: () => void, options?: SchedulerOptions, _node?: DynamicNode) {
         const node = _node || getActiveDynamicNode();
-        if (!node) throw new Error("Lifecycle hooks cannot be called outside of component setup");
-        const taskQueue = useTaskQueue(node, name)
+        const tasks = node.tasks
 
         return $schedule(handler, options || {}, {
             enroll(handler) {
-                taskQueue.add(handler)
+                tasks.addToSet(handler, name)
             },
             remove(handler) {
-                taskQueue.delete(handler)
+                tasks.deleteFromSet(handler, name)
             }
         });
     }
@@ -45,15 +37,13 @@ function createLifecycleHook(name: LifecycleHook.ON_DESTROY | LifecycleHook.ON_C
 function createActivationHook(name: LifecycleHook.ON_ACTIVATED | LifecycleHook.ON_DEACTIVATE) {
     return function on(handler: () => void, options: ListenerOptions = {}, _node?: DynamicNode) {
         const node = _node || getActiveDynamicNode();
-        if (!node) throw new Error("Lifecycle hooks cannot be called outside of component setup");
-        const taskQueue = useTaskQueue(node, name)
-
+        const tasks = node.tasks
         return $listen(handler, { until: (cleanUp) => onDestroy(cleanUp, {}, node), flask: 'outlive', ...options }, {
             enroll(handler) {
-                taskQueue.add(handler)
+                tasks.addToSet(handler, name)
             },
             remove(handler) {
-                taskQueue.delete(handler)
+                tasks.deleteFromSet(handler, name)
             }
         });
     }

@@ -37,7 +37,7 @@ export function CreateIf($condition: ReactiveGet<Booleanny>, renderConditional: 
         'if',
         wrapToNormalize(renderConditional),
         'create',
-        getProviderComponent(CreateIf.name),
+        getProviderComponent(),
         { $condition }
     )
 }
@@ -47,7 +47,7 @@ export function ElseCreateIf($condition: ReactiveGet<Booleanny>, renderCondition
         'elseIf',
         wrapToNormalize(renderConditional),
         'create',
-        getProviderComponent(ElseCreateIf.name),
+        getProviderComponent(),
         { $condition }
     )
 }
@@ -57,7 +57,7 @@ export function ElseCreate(renderConditional: RenderFunction) {
         'else',
         wrapToNormalize(renderConditional),
         'create',
-        getProviderComponent(ElseCreate.name),
+        getProviderComponent(),
     )
 }
 
@@ -67,7 +67,7 @@ export function MountIf($condition: ReactiveGet<Booleanny>, renderConditional: R
         'if',
         wrapToPreserve(renderConditional),
         'mount',
-        getProviderComponent(MountIf.name),
+        getProviderComponent(),
         { $condition }
     )
 }
@@ -77,7 +77,7 @@ export function ElseMountIf($condition: ReactiveGet<Booleanny>, renderConditiona
         'elseIf',
         wrapToPreserve(renderConditional),
         'mount',
-        getProviderComponent(ElseMountIf.name),
+        getProviderComponent(),
         { $condition }
     )
 }
@@ -87,7 +87,7 @@ export function ElseMount(renderConditional: RenderFunction) {
         'else',
         wrapToPreserve(renderConditional),
         'mount',
-        getProviderComponent(ElseMount.name),
+        getProviderComponent(),
     )
 }
 
@@ -97,7 +97,7 @@ export function ShowIf($condition: ReactiveGet<Booleanny>, renderConditional: Re
         'if',
         wrapToNormalize(renderConditional),
         'show',
-        getProviderComponent(ShowIf.name),
+        getProviderComponent(),
         { $condition }
     )
 }
@@ -110,7 +110,7 @@ export function ElseShowIf($condition: ReactiveGet<Booleanny>, renderConditional
         'elseIf',
         wrapToNormalize(renderConditional),
         'show',
-        getProviderComponent(ElseShowIf.name),
+        getProviderComponent(),
         { nodePodIndex: currentNodePodIndex, $condition }
     )
 }
@@ -123,7 +123,7 @@ export function ElseShow(renderConditional: RenderFunction) {
         'else',
         wrapToNormalize(renderConditional),
         'show',
-        getProviderComponent(ElseShow.name),
+        getProviderComponent(),
         { nodePodIndex: currentNodePodIndex }
     )
 }

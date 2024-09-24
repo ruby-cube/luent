@@ -1,4 +1,4 @@
-import { $Node, $Nodes, Component, CreateIf, ElseCreate, For } from "@rue/lumo";
+import { NodeIon, Component, CreateIf, ElseCreate, For } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { Ion, __addDevName, $, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
@@ -148,7 +148,7 @@ export function List(
         $list.splice(index, 1);
     }
 
-    const $itemDiv = $Nodes('div')
+    const $itemDiv = NodeIon('div')
 
     const $alive = Ion(true)
 

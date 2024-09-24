@@ -88,7 +88,7 @@ export class ListRenderKit<T = any> {
 
             nodePod = isDynamic ? dynamicNodePod!.appendNodePod() : nodePod;
             if (isDynamic) {
-                const dynamicNode = makeDynamicNode(false)
+                const dynamicNode = makeDynamicNode(false, nodePod)
                 dynamicNode.activate(function mountDynamicItem() {
                     pushProvider(provider)
                     const nodeEntities = normalizeToArray(renderItem(item, $index))
@@ -97,7 +97,7 @@ export class ListRenderKit<T = any> {
                     }
                     popProvider()
                 })
-                dynamicNode.setNodePod(nodePod)
+                // dynamicNode.setNodePod(nodePod)
                 dynamicNodeMap.set(nodePod, dynamicNode)
             }
             else {

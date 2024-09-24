@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { Ion, AtomicIon, watch } from "../../../packages/quarky/src"
 import { watchForRender } from "../../../packages/lumo/src/watch/watchAndPreserve";
-import { $Node } from "@rue/lumo";
+import { NodeIon } from "@rue/lumo";
 
 export function MainBlock() {
 
@@ -45,11 +45,11 @@ export function MainBlock() {
             <div>bey</div>
     })
 
-    $mainContent.setTo('bye')
+    $mainContent.render('bye')
 
     return (
         <main>
-            <$MainContent as='hello' ref={$mainContent} />
+            <$MainContent createAs='hello' ref={$mainContent}  />
             <$records_list />
             <button onclick={changeMainContent}>click</button>
         </main>

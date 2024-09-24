@@ -8,7 +8,7 @@ import * as CSS from "csstype";
 import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
 import { ReactiveGet } from "../../../quarky/src";
-import { NodeIon } from "../../src/node/$Node";
+import { NodeIon } from "../../src/node/NodeIon";
 
 export function jsxDEV(): "frog"
 export function jsx(): "frog"

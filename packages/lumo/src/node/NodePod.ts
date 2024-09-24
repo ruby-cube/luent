@@ -1,6 +1,6 @@
 import { EffectFlask } from "@rue/flask";
 import { DOMNode, InternalComponent } from "../component/InternalComponent";
-import { NodeIon } from "./$Node";
+import { NodeIon } from "./NodeIon";
 
 // Node Pods represent groups of nodes created by `mXsFor` and `mXIf`.
 // 

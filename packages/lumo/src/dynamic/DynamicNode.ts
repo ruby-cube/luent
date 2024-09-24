@@ -2,7 +2,9 @@ import { collectEffects, EffectFlask } from "@rue/flask";
 import { _NodePod } from "../node/NodePod";
 import { LifecycleHook } from "./lifecycle";
 import { popDynamicNode, pushDynamicNode } from "./nodestack";
+import { SetMap } from "@rue/utils";
 
+type Task = ()=>void
 
 export class DynamicNode {
     flask: EffectFlask | undefined;
@@ -14,46 +16,26 @@ export class DynamicNode {
 
     constructor(
         public parent: DynamicNode | null,
+        public nodePod?: _NodePod,
         public preserve?: boolean,
-        public nodePod?: _NodePod
     ) {
         this.preserve = !!parent && parent.preserve || preserve || false
     }
 
-    setNodePod(nodePod: _NodePod) {
-        this.nodePod = nodePod;
-    }
+    // setNodePod(nodePod: _NodePod) {
+    //     this.nodePod = nodePod;
+    // }
 
-    tasks: {
-        [LifecycleHook.ON_CREATED]: Set<() => void> | undefined;
-        [LifecycleHook.ON_ACTIVATED]: Set<() => void> | undefined;
-        [LifecycleHook.ON_DESTROY]: Set<() => void> | undefined;
-        [LifecycleHook.ON_DEACTIVATE]: Set<() => void> | undefined;
-    } = {
-            [LifecycleHook.ON_CREATED]: undefined,
-            [LifecycleHook.ON_ACTIVATED]: undefined,
-            [LifecycleHook.ON_DESTROY]: undefined,
-            [LifecycleHook.ON_DEACTIVATE]: undefined,
-        };
-
-    private getTaskQueue(hookName: LifecycleHook) {
-        let taskQueue = this.tasks[hookName]
-        // if (!taskQueue) throw new Error("taskQueue not found")
-        return taskQueue;
-    }
+    tasks: SetMap<LifecycleHook, Task> = new SetMap();
 
     emit(hookName: LifecycleHook) {
-        const taskQueue = this.getTaskQueue(hookName);
+        const taskQueue = this.tasks.get(hookName);
         if (!taskQueue) return;
         for (const task of taskQueue) {
             task();
         }
     }
-
-    emitOnCreated() {
-        this.emit(LifecycleHook.ON_CREATED)
-    }
-
+    
     activate(render: () => void) {
         pushDynamicNode(this);
         collectEffects((flask) => {
@@ -61,6 +43,7 @@ export class DynamicNode {
             render()
         }, render.name)
         popDynamicNode();
+        this.emit(LifecycleHook.ON_CREATED)
         this.emit(LifecycleHook.ON_ACTIVATED)
     }
 

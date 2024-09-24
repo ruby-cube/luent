@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { $Node } from "@rue/lumo"
+import { NodeIon } from "@rue/lumo"
 import { $, Ion } from "../../../packages/quarky/src"
 
 
@@ -10,7 +10,7 @@ import { $, Ion } from "../../../packages/quarky/src"
 
 function ParentBlock() {
 
-    const childBlock = $Node(ChildBlock);
+    const childBlock = NodeIon(ChildBlock);
 
     function increment() {
         childBlock.increment()
@@ -36,7 +36,7 @@ function ParentBlock() {
 
 function ParentBlockB() {
 
-    const child = $Node(ChildBlock);
+    const child = NodeIon(ChildBlock);
 
     function increment() {
         child.increment()

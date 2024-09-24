@@ -2,7 +2,7 @@ import { ReactiveGet } from "../../../quarky/src";
 import { NodeEntity } from "../node/makeNode";
 import { ConditionalKit } from "../conditional/ConditionalKit";
 import { ListenOptions } from "net";
-import { NodeIon } from "../node/$Node";
+import { NodeIon } from "../node/NodeIon";
 import { Booleanny } from "@rue/types";
 
 

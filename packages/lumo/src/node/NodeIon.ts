@@ -42,7 +42,7 @@ export function getNodeIon($nodeAsReadonly: NodeIon | NodesIon) {
     return $node;
 }
 
-export function $Node<
+export function NodeIon<
     T extends RefSource
     = RefSource
 >(source: T) {

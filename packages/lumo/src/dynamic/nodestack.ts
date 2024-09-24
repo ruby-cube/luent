@@ -4,6 +4,7 @@ let activeDynamicNode: DynamicNode | null = null
 let parent: DynamicNode | null = null;
 
 export function getActiveDynamicNode() {
+    if (!activeDynamicNode) throw new Error('Cannot call getActiveDynamicNode outside of component tree')
     return activeDynamicNode;
 }
 

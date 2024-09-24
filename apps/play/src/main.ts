@@ -12,6 +12,7 @@ import { configureFlask } from '../../../packages/flask/initFlask';
 import { List } from './TestReactiveModel';
 import { MountIf } from './TestMountIf';
 import { TestIonProp } from './TestIonProp';
+import { TestMorphic } from './TestMorphic';
 // import { ionize, ionize } from '@rue/quarky';
 // import { DeepReactiveModel, getMetaReactive, ionize, ionize } from '@rue/quarky';
 // import { MountIf } from './TestMountIf';
@@ -60,7 +61,7 @@ import { TestIonProp } from './TestIonProp';
 // console.log("qualities", frog$$.qualities)
 //   msg.value = isReactive(frog.getQualities()[0])
 
-const app = createApp(List)
+const app = createApp(TestMorphic)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: false

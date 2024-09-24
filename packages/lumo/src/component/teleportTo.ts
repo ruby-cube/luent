@@ -6,7 +6,7 @@ import { popProvider, pushProvider } from "./provide";
 import { getProviderComponent } from "./ProviderComponent";
 
 export function teleportTo(container: string | Element, nodeEntities: NodeEntity | NodeEntity[]) {
-    const component = getProviderComponent(teleportTo.name)
+    const component = getProviderComponent()
     const _container = typeof container === "string" ? document.querySelector(container) : container;
     if (!_container) throw new Error('teleportTo container not found. Please check selector')
     const nodePod = new _NodePod();

@@ -1,4 +1,4 @@
-import { $Node, } from "@rue/lumo";
+import { NodeIon, } from "@rue/lumo";
 import {  $, ionize, $initializeEffect, ionize, Ion } from "../../../packages/quarky/src";
 
 
@@ -24,7 +24,7 @@ export function TestBox() {
             box$.position.x = box$.position.x - 10;
     }
 
-    const $div = $Node('div')
+    const $div = NodeIon('div')
     const $anotherCount = $(() => $count())
     $initializeEffect(() => {
         $anotherCount()

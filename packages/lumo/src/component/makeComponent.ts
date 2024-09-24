@@ -1,5 +1,5 @@
 import { ComponentSetup, InternalComponent, Component, ProviderComponentSetup } from "./InternalComponent";
-import { NodeIon } from "../node/$Node";
+import { NodeIon } from "../node/NodeIon";
 import { ComponentConfig, initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { AtomicIon, isIon, IonicModel } from "../../../quarky/src";
@@ -7,6 +7,7 @@ import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex } from "../list/ListRenderKit";
 import { getCurrentProvider, popProvider, provide, pushProvider } from "./provide";
 import { ProviderComponent } from "./ProviderComponent";
+import { MorphicRenderKit } from "../morphic/MorphicComponent";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
@@ -53,8 +54,8 @@ export function makeComponent(
     config: ComponentConfig,
     $index: AtomicIon<number> | undefined
 ): InternalComponent {
-    const component = new InternalComponent();
     const output = Component({ ...config, Slot })
+    const component = 'morphicRenderKit' in output ? output.morphicRenderKit as MorphicRenderKit : new InternalComponent();
     initializeComponent(component, output, config.ref, $index)
     return component;
 }
@@ -134,7 +135,7 @@ export function runProviderComponentSetup(
 
 
 function initializeComponent(
-    component: InternalComponent,
+    component: InternalComponent | MorphicRenderKit,
     output: Component,
     ref: NodeIon | IonicModel<any[]> | undefined,
     $index: AtomicIon<number> | undefined,
@@ -147,7 +148,7 @@ function initializeComponent(
 
     if (ref) {
         const publicComponent = output.component || undefined;
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use $Node or $Nodes Ion as ref")
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeIon or $Nodes Ion as ref")
         if ($index) {
             initializeListRef(ref, publicComponent, $index)
         }

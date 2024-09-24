@@ -29,7 +29,7 @@ export function createApp<T extends AnyObject>(App: ComponentSetup<T>, config?: 
     const nodePod = new _NodePod()
     const remountable = config?.remountable
     const preserve = remountable ? true : false
-    const dynamicNode = new DynamicNode(null, preserve, nodePod);
+    const dynamicNode = new DynamicNode(null, nodePod, preserve);
 
     return {
         component,

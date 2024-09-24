@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { $Node } from "@rue/lumo"
+import { NodeIon } from "@rue/lumo"
 import { $, Ion } from "../../../packages/quarky/src"
 
 
@@ -8,8 +8,8 @@ function ParentBlock() {
 
     const initialCount = 4;
 
-    const child = $Node(ChildBlock);
-    const sibling = $Node(SiblingBlock);
+    const child = NodeIon(ChildBlock);
+    const sibling = NodeIon(SiblingBlock);
 
     function increment() {
         child.increment()

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { $Node } from "@rue/lumo"
+import { NodeIon } from "@rue/lumo"
 import { $, Ion } from "../../../packages/quarky/src"
 
 

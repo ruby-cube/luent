@@ -1,12 +1,12 @@
-import { $Node, Component, CreateIf, ElseCreate } from "@rue/lumo";
-import { $, DerivedIon, Ion, watch } from "../../../packages/quarky/src";
+import { NodeIon, Component, CreateIf, ElseCreate } from "@rue/lumo";
+import { $, AFTER_RENDER, BEFORE_RENDER, DerivedIon, Ion, ON_RENDER, SYNC, watch } from "../../../packages/quarky/src";
 import { onActivated, onCreated, onDeactivate, onDestroy } from "../../../packages/lumo/src/dynamic/lifecycle";
 
 export function MountIf() {
     const $count = Ion(0)
     // const $doubleCount = DerivedIon(() => $count() * 2)
     function increment() {
-        $count.update(count => count + 1)
+        $count.set(count => count + 1)
     }
 
     // const $count2 = Ion(0)
@@ -18,7 +18,7 @@ export function MountIf() {
 
     const $active = Ion(true)
     function toggleActive() {
-        $active.update(active => !active)
+        $active.set(active => !active)
     }
 
     // const $ready = Ion(true)
@@ -55,8 +55,8 @@ export function MountIf() {
 function Counter() {
     const $count = Ion(0)
 
-    const $button = $Node()
-    const $countDiv = $Node()
+    const $button = NodeIon()
+    const $countDiv = NodeIon()
 
     // onNodesCreated(
     //     [$button, $countDiv],
@@ -68,25 +68,25 @@ function Counter() {
     watch(() => [$button(), $countDiv()], ([button, countDiv]) => {
         console.log("node ref", button, countDiv)
     }, {
-        phase: Phase.RENDER,
+        run: ON_RENDER,
         once: true
     })
 
     watch($count, () => {
         console.log("sync phase")
-    }, { phase: Phase.SYNC })
+    }, { phase: SYNC })
 
     watch($count, () => {
         console.log("pre-render phase")
-    }, { phase: Phase.BEFORE_RENDER })
+    }, { phase: BEFORE_RENDER })
 
     watch($count, () => {
         console.log("render phase")
-    }, { phase: Phase.RENDER })
+    }, { phase: ON_RENDER })
 
     watch($count, () => {
         console.log("post-render phase")
-    }, { phase: Phase.AFTER_RENDER })
+    }, { phase: AFTER_RENDER })
 
     onCreated(() => {
         console.log("created")
@@ -109,7 +109,7 @@ function Counter() {
     return Component(
         <>
             <div ref={$countDiv}>{$count}</div>
-            <button onclick={() => $count.update(count => count + 1)} ref={$button}>increment</button>
+            <button onclick={() => $count.set(count => count + 1)} ref={$button}>increment</button>
         </>
     )
 }

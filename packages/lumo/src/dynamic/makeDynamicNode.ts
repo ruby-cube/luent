@@ -19,9 +19,9 @@ import { getActiveDynamicNode } from "./nodestack";
 //     return component;
 // }
 
-export function makeDynamicNode(preserve: boolean, nodePod?: _NodePod) {
+export function makeDynamicNode(preserve: boolean, nodePod: _NodePod) {
     const parent = getActiveDynamicNode();
-    const dynamicNode = new DynamicNode(parent, preserve, nodePod);
+    const dynamicNode = new DynamicNode(parent, nodePod, preserve);
     if (parent instanceof DynamicNode) {
         onActivated(() => { dynamicNode.emit(LifecycleHook.ON_ACTIVATED) }, { //FIX: This makes on activated run twice when it is first activated
             until: onDestroyDynamicNode,

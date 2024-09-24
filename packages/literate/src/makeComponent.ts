@@ -83,7 +83,7 @@ function initializeComponent(
     component.output = _output;
 
     if (ref) {
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use $Node or $Nodes Ion as ref")
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeIon or $Nodes Ion as ref")
         if ($index) {
             initializeListRef(ref, publicComponent, $index)
         }
