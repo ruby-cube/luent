@@ -114,18 +114,19 @@ export class MorphicRenderKit {
 
     activateForm(key: string, parent: Element, nodePod: _NodePod) {
         const dynamicNode = this.dynamicNode = makeDynamicNode(this.preserve, nodePod)
+        const _this = this
         if (this.preserve && this.renderedKeys?.has(key)) {
-            dynamicNode.reactivate(() => {
-                const nodeEntities = normalizeToArray(this.switchMap[key]())
+            dynamicNode.reactivate(function activateMorphicForm() {
+                const nodeEntities = normalizeToArray(_this.switchMap[key]())
                 for (const nodeEntity of nodeEntities) {
-                    mountConditional(nodePod, parent, this.dynamicNodePod, nodeEntities)
+                    mountConditional(nodePod, parent, _this.dynamicNodePod, nodeEntities)
                 }
             })
         } else {
-            dynamicNode.activate(() => {
-                const nodeEntities = normalizeToArray(this.switchMap[key]())
+            dynamicNode.activate(function reactivateMorphicForm(){
+                const nodeEntities = normalizeToArray(_this.switchMap[key]())
                 for (const nodeEntity of nodeEntities) {
-                    mountConditional(nodePod, parent, this.dynamicNodePod, nodeEntities)
+                    mountConditional(nodePod, parent, _this.dynamicNodePod, nodeEntities)
                 }
             })
         }

@@ -27,7 +27,7 @@ export function asIon<T extends AnyObject, K extends keyof T>(model: T, key: K) 
     return $Prop(reactive, key)
 }
 
-function $Prop<T extends IonicModel, K extends keyof T, P extends T[K]>(reactive: T, key: K) {
+function $Prop<T extends IonicModel, K extends keyof T, P extends T[K]>(reactive: T, key: K): PropIon<P> {
     const rawTarget = toRaw(reactive)
     const meta = getMetaReactive(reactive);
 
@@ -36,11 +36,11 @@ function $Prop<T extends IonicModel, K extends keyof T, P extends T[K]>(reactive
         return reactive[key];
     }
 
-    __$propIon.setTo = (newValue: T) => {
+    __$propIon.setTo = (newValue: P) => {
         reregisterIfNeeded()
         return setValue(reactive, key, newValue, rawTarget[key])
     }
-    __$propIon.set = (toNewValue:(value: T) => T) => {
+    __$propIon.set = (toNewValue:(value: P) => P) => {
         reregisterIfNeeded()
         const value = rawTarget[key];
         return setValue(reactive, key, toNewValue(value), value)
@@ -58,7 +58,7 @@ function $Prop<T extends IonicModel, K extends keyof T, P extends T[K]>(reactive
             meta.registerPropIon(key, __$propIon) // This means $propPod is not being watched and is not an atom anywhere, but it's still being used
         }
     }
-    return __$propIon;
+    return __$propIon
 }
 
 function setValue<T>(reactive: IonicModel, key: PropertyKey, newValue: T, oldValue: T) {

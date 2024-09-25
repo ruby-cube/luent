@@ -13,7 +13,6 @@ export function mountTextNode(parent: Element, text: ReactiveGet | any, nodePod?
     root.appendChild(textNode)
 
     if (text instanceof Function) {
-        console.log("text?", text)
         keepTextNodeUpdated(text, textNode)
     }
 }

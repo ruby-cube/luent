@@ -65,7 +65,7 @@ export function encapsulate<T extends AnyObject>(target: T): T {
             return value instanceof Object ? encapsulate(value) : value;
         },
         set(target, key, value, receiver) {
-            if (__DEV__)
+            if (__DEV__ && key !== ENCAPSULATED)
                 throw new Error(`This object has be encapsulated and can only be mutated by its provided methods`)
             Reflect.set(target, key, value, receiver)
             return true;

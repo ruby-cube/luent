@@ -1,6 +1,23 @@
-//@ts-nocheck
-import { NodeIon } from "@rue/lumo"
-import { $, Ion } from "../../../packages/quarky/src"
+import { Component, fromContext, Provide, TypedKey } from "@rue/lumo"
+import { $, AtomicIon, DerivedIon, Ion, ionize } from "../../../packages/quarky/src"
+import { asIon } from "../../../packages/quarky/src/ionize/PropIon"
+
+const COUNTER = Symbol("Counter") as TypedKey<Counter>
+const DOUBLE_COUNT = Symbol("DerivedIon<number>") as TypedKey<DerivedIon<number>>
+const NAME = Symbol(`{
+    $: string;
+    makeKermit: () => void;
+}`) as TypedKey<{
+    $: string;
+    makeKermit: () => void;
+}>
+
+// Cases
+// - Read-only ion
+// - Read-only writable derived ion
+// - ion or derived ion that can only be set with provided methods
+// - ionic model that only exposes some methods
+// - readonly props ion when object is encapsulated
 
 class Counter {
     $: { count: number }
@@ -19,48 +36,110 @@ class Counter {
 }
 
 
-function ParentBlock() {
+export function ParentBlock(
+    setup: {},
+    provide: Provide
+) {
 
     const counter = provide(COUNTER, new Counter());
+    const $doubleCount = provide(DOUBLE_COUNT, Ion(() => counter.$.count * 2));
 
-    const $doubleCount = $(() => counter.$.count * 2)
+    const $name = Ion("Sir Robin")
 
-
-    return {
-        render:
-            <>
-                <h1>Hey</h1>
-                <div>{$doubleCount}</div>
-                <ChildBlock />
-                <SiblingBlock />
-                <button onclick={() => counter.increment()}>increment</button>
-                <button onclick={() => decrement.decrement()}>decrement</button>
-            </>
+    function makeBrave() {
+        $name.setTo('The brave')
     }
+
+    function makeKermit() {
+        console.log("make kermit")
+        $name.setTo('Kermit')
+    }
+
+    const frog = ionize({
+        qualities: 'brave',
+        setQualities() {
+            this.qualities = 'valiant'
+        }
+    })
+
+    const $qualities = asIon(frog, 'qualities')
+
+    function setQualities() {
+        $qualities.setTo('gallant')
+    }
+
+
+
+    provide(NAME, ionize({
+        $: $name,
+        makeKermit
+    }))
+
+    return Component(
+        <>
+            <h1>Parent</h1>
+            <div onclick={setQualities}>{() => frog.qualities}</div>
+            <div onclick={() => frog.setQualities()}>{$qualities}</div>
+            <div>{$doubleCount}</div>
+            <ChildBlock />
+            <SiblingBlock />
+            <button onclick={() => counter.increment()}>increment</button>
+            <button onclick={() => counter.decrement()}>decrement</button>
+        </>
+    )
 }
 
 
 function ChildBlock() {
     const counter = fromContext(COUNTER)
 
-    return (
-        <p>
-            {$(() => counter.$.count)}
+    return Component(
+        <div style='outline: solid 1px gray; background-color: #C0CAAD; padding: 15px'>
+            <h1>Child</h1>
+            <p>
+                {() => counter.$.count}
+            </p>
+            <GrandChildBlock></GrandChildBlock>
             <button onclick={() => counter.increment()}>increment</button>
             <button onclick={() => counter.decrement()}>decrement</button>
-        </p>
+        </div>
     )
 }
 
 
-function SiblingBlock({ $count }: {
-    $count?: AtomicIon<number>
-}) {
+function SiblingBlock() {
+    const counter = fromContext(COUNTER)
 
-    return (
-        <p>
-            {$(() => counter.$.count)}
-        </p>
+    return Component(
+        <div style='outline: solid 1px gray; background-color: #B26E63'>
+            <h1>Sibling</h1>
+            <p>
+                {() => counter.$.count}
+            </p>
+        </div>
+    )
+}
+
+function GrandChildBlock() {
+    const counter = fromContext(COUNTER)
+    const $doubleCount = fromContext(DOUBLE_COUNT)
+    const name = fromContext(NAME)
+    const $name = asIon(name, '$')
+    const $count = asIon(counter.$, 'count')
+
+
+
+    console.log("$double count", $doubleCount)
+
+    return Component(
+        <div style='outline: solid 1px gray; background-color: #B26E63'>
+            <h1 onclick={() => name.makeKermit()}>Grandchild: {$name}</h1>
+            <h1 onclick={() => name.makeKermit()}>Grandchild: {() => name.$}</h1>
+            <p>
+                {$count}
+            </p>
+            <p>double: {$doubleCount}</p>
+        </div>
     )
 }
 

@@ -55,8 +55,12 @@ export function isIonicModel(value: any): value is IonicModel {
     return value[META]?.type === IONIC_MODEL;
 }
 
+type Ionized<T extends AnyObject> = {
+    [K in keyof T]: T[K] extends AtomicIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V: T[K]
+}
+
 //API
-export function ionize<T extends AnyObject>(target: T): T {
+export function ionize<T extends AnyObject>(target: T): Ionized<T> {
     const existingIonicModel = ionicModels.get(target)
     if (existingIonicModel) return existingIonicModel as T;
     return createReactiveModel(target) as T

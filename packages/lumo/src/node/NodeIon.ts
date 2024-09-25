@@ -1,4 +1,4 @@
-import { Component, ComponentSetup, PublicComponent } from "../component/InternalComponent"
+import { Component, PublicComponent } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
@@ -11,7 +11,7 @@ import { isUpdatingList } from "../list/listStack"
 // type Task = ((item: Element | PublicComponent) => void) | ((item: Element | PublicComponent, $index?: AtomicIon<number>) => void)
 // const hookMap: WeakMap<NodeIon, Set<Task>> = new WeakMap()
 
-type RefSource = HTMLTag | ComponentSetup
+type RefSource = HTMLTag | ((...args: any[]) => Component)
 
 
 /* 
@@ -108,7 +108,7 @@ export function getNodeArrayRef(nodes: NodeReferent[]) {
     return nodeArrayRefMap.get(nodes)
 }
 
-export class InternalNodeArrayRef{
+export class InternalNodeArrayRef {
     // preserve: boolean = false;
     // preserved: T | undefined = undefined;
     initialized: boolean = false; // prevent multiple initializations for arrays

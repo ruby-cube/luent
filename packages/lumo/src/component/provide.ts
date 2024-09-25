@@ -63,6 +63,7 @@ export function provide<T>(key: TypedKey<T>, value: T, appwide?: boolean) {
     //     })
     // }
     currentProvider.entries.set(key, value);
+    return value;
 }
 
 export function provideAppState<T>(key: TypedKey<T>, value: T) {
@@ -139,7 +140,7 @@ export function _fromContext<T, OPT extends '?' | (() => T) | undefined>(key: Ty
         }
         if (!provider.root) throw new Error("No root provider found :( This should never happen")
         const value = provider.root.entries.get(key)
-        return __DEV__ && value instanceof Object ? encapsulate(value) : value;
+        return __DEV__ && shouldEncapsulate(value) ? encapsulate(value) : value;
     }
 
     // climb provider tree
@@ -148,7 +149,7 @@ export function _fromContext<T, OPT extends '?' | (() => T) | undefined>(key: Ty
         const entries = parent.entries
         if (entries.has(key)) {
             const value = entries.get(key);
-            return __DEV__ && value instanceof Object ? encapsulate(value) : value;
+            return __DEV__ && shouldEncapsulate(value) ? encapsulate(value) : value;
         }
         parent = parent.parent;
     }
@@ -169,6 +170,10 @@ function handleResourceNotFound<T, OPT extends '?' | undefined | (() => T)>(key:
     throw new Error(`A value for '${key.toString()}' has not been provided in this component's ancestry`)
 }
 
+
+function shouldEncapsulate(value: any) {
+    return !(value instanceof Function) && value instanceof Object;
+}
 
 // class RootStore {
 //     rootEntries: Map<symbol | string, any> = new Map();

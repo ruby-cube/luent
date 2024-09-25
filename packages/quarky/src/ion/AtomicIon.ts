@@ -1,18 +1,18 @@
 import { emitSignal } from "../debug";
 import { isIonicModel, ionize } from "../ionize/IonicModel";
-import { getActiveTracker } from "../derivations/DependencyTracker";
+import { getActiveTracker, getDependencyTracker, getWithoutTracking } from "../derivations/DependencyTracker";
 import { trigger } from "../trigger";
 import { META, ReactiveEntity } from "../ReactiveEntity";
 import { isFunctionWithProps } from "@rue/utils";
 import { AnyObject } from "@rue/types";
 
 
-export type AtomicIon<T = any> = {
+export type AtomicIon<T = any, M extends AnyObject = { setTo: (newValue: T) => T }> = {
     (): T;
     [META]: MetaIon<T>;
-    setTo: (newValue: T) => T
-    set: (toNewValue: (value: T) => T) => T
-}
+    // setTo: (newValue: T) => T
+    // set: (toNewValue: (value: T) => T) => T
+} & M
 
 // export type ReactiveGet<T = any> = () => T
 export type Get<T = any> = () => T
@@ -33,35 +33,79 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
 }
 
 
-export function AtomicIon<T>(value: T) {
+export function AtomicIon<
+    T,
+    S extends { [key: string]: (...args: any[]) => T } = { setTo: (newValue: T) => T },
+    M extends { [key: string]: (...args: any[]) => T } = { setTo: (newValue: T) => T }
+>(
+    value: T,
+    methodsOrSetter?: { set?: S, methods?: M } | ((...args: any[]) => any)
+) {
     let metaIon: MetaIon
+    let setterKey: keyof S | 'setTo' = ""
+    const setter = methodsOrSetter instanceof Function ? methodsOrSetter : (value: T) => value;
+    const _setters = methodsOrSetter && !(methodsOrSetter instanceof Function) && methodsOrSetter.set ? methodsOrSetter.set : {
+        setTo: setter,
+    } as S & { setTo: (value: T) => T }
+    const _methods = !(methodsOrSetter instanceof Function) ? methodsOrSetter?.methods : undefined
+    const $ionProxy = new Proxy($ion, {
+        get(target, key, receiver) {
+            if (key === META) return metaIon;
+            if (_setters && key in _setters) {
+                setterKey = key as keyof S;
+                return mutate;
+            }
+            if (_methods && key in _methods) {
+                return _methods[<keyof M>key]
+            }
+            return Reflect.get(target, key, receiver)
+        },
+        apply(target) {
+            return target()
+        },
+    }) as AtomicIon
 
     function $ion() {
         if (__DEV__) emitSignal();
         const tracker = getActiveTracker()
-        if (!tracker) return metaIon.value
-        tracker.track($ion)
-        return metaIon.value;
+        if (!tracker) return metaIon.value as T
+        tracker.track($ionProxy)
+        return metaIon.value as T;
     }
 
-    metaIon = new MetaIon($ion, value, isIonicModel(value))
+    metaIon = new MetaIon($ionProxy, value, isIonicModel(value))
 
-    $ion[META] = metaIon;
-    $ion.setTo = setTo.bind(metaIon);
-    $ion.set = set.bind(metaIon);
+    // $ion[META] = metaIon;
+    // $ion.setTo = setTo.bind(metaIon);
+    // $ion.set = set.bind(metaIon);
 
-    return $ion as AtomicIon<T>;
+
+    function mutate(...args: any[]) {
+        const tracker = getDependencyTracker();
+        tracker?.stop();
+        const newValue = setValue(metaIon, _setters[setterKey](...args), metaIon.value);
+        tracker?.restore();
+        setterKey = "";
+        return newValue;
+    }
+
+    // return $ion as AtomicIon<T>;
+
+
+    return $ionProxy as unknown as AtomicIon<T, S & M>
 }
 
 
-function setTo<T>(this: MetaIon, newValue: T) {
-    return setValue(this, newValue, this.value);
-}
 
-function set<T>(this: MetaIon, toNewValue: (value: T) => T) {
-    const value = this.value as T;
-    return setValue(this, toNewValue(value), value);
-}
+
+// function setTo<T>(this: MetaIon, newValue: T) {
+//     return setValue(this, newValue, this.value);
+// }
+
+// function set<T>(this: MetaIon, toNewValue: (value: T) => T) {
+//     const value = this.value as T;
+//     return setValue(this, toNewValue(value), value);
+// }
 
 // ORDER:
 // - set value

@@ -1,4 +1,4 @@
-import { ComponentSetup, InternalComponent } from "./component/InternalComponent";
+import { ComponentSetup, InternalComponent, ProviderComponentSetup } from "./component/InternalComponent";
 import { _NodePod } from "./node/NodePod";
 import { DynamicNode, markMountPhase, unmarkMountPhase } from "./dynamic/DynamicNode";
 import { popProvider, pushProvider } from "./component/provide";
@@ -22,7 +22,7 @@ export function getAppRoot() {
 //     )
 // }
 
-export function createApp<T extends AnyObject>(App: ComponentSetup<T>, config?: { remountable: boolean, globalProvider: Provider }) {
+export function createApp<T extends AnyObject>(App: ComponentSetup<T> | ProviderComponentSetup<T>, config?: { remountable: boolean, globalProvider: Provider }) {
 
     // (1) instantiate developer's root component
     const component = new ProviderComponent(null, config?.globalProvider || new Provider());
