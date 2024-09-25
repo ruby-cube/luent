@@ -5,13 +5,16 @@ import { trigger } from "../trigger";
 import { META, ReactiveEntity } from "../ReactiveEntity";
 import { isFunctionWithProps } from "@rue/utils";
 import { AnyObject } from "@rue/types";
+import { AnyIon } from "./AnyIon";
 
 
-export type AtomicIon<T = any, M extends AnyObject = { setTo: (newValue: T) => T }> = {
+export type AtomicIon<T = any, M extends AnyObject = {}> = {
     (): T;
+} & IonPrototype<T, M>
+
+type IonPrototype<T, M> = {
     [META]: MetaIon<T>;
-    // setTo: (newValue: T) => T
-    // set: (toNewValue: (value: T) => T) => T
+    set: (value: T) => T
 } & M
 
 // export type ReactiveGet<T = any> = () => T
@@ -35,72 +38,79 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
 
 export function AtomicIon<
     T,
-    S extends { [key: string]: (...args: any[]) => T } = { setTo: (newValue: T) => T },
-    M extends { [key: string]: (...args: any[]) => T } = { setTo: (newValue: T) => T }
+    M extends { [key: string]: (...args: any[]) => any }
 >(
     value: T,
-    methodsOrSetter?: { set?: S, methods?: M } | ((...args: any[]) => any)
+    methods?: M
 ) {
     let metaIon: MetaIon
-    let setterKey: keyof S | 'setTo' = ""
-    const setter = methodsOrSetter instanceof Function ? methodsOrSetter : (value: T) => value;
-    const _setters = methodsOrSetter && !(methodsOrSetter instanceof Function) && methodsOrSetter.set ? methodsOrSetter.set : {
-        setTo: setter,
-    } as S & { setTo: (value: T) => T }
-    const _methods = !(methodsOrSetter instanceof Function) ? methodsOrSetter?.methods : undefined
-    const $ionProxy = new Proxy($ion, {
-        get(target, key, receiver) {
-            if (key === META) return metaIon;
-            if (_setters && key in _setters) {
-                setterKey = key as keyof S;
-                return mutate;
-            }
-            if (_methods && key in _methods) {
-                return _methods[<keyof M>key]
-            }
-            return Reflect.get(target, key, receiver)
-        },
-        apply(target) {
-            return target()
-        },
-    }) as AtomicIon
+    // let methodKey: keyof M = ""
+
+    // const $ionProxy = new Proxy($ion, {
+    //     get(target, key, receiver) {
+    //         if (key === META) return metaIon;
+    //         if (methods && key in methods) {
+    //             return mutate;
+    //         }
+    //         return Reflect.get(target, key, receiver)
+    //     },
+    //     apply(target) {
+    //         return target()
+    //     },
+    // }) as AtomicIon
+
 
     function $ion() {
         if (__DEV__) emitSignal();
         const tracker = getActiveTracker()
         if (!tracker) return metaIon.value as T
-        tracker.track($ionProxy)
+        tracker.track(<AtomicIon>$ion)
         return metaIon.value as T;
     }
 
-    metaIon = new MetaIon($ionProxy, value, isIonicModel(value))
+    metaIon = new MetaIon(<AtomicIon>$ion, value, isIonicModel(value))
 
-    // $ion[META] = metaIon;
-    // $ion.setTo = setTo.bind(metaIon);
-    // $ion.set = set.bind(metaIon);
-
-
-    function mutate(...args: any[]) {
-        const tracker = getDependencyTracker();
-        tracker?.stop();
-        const newValue = setValue(metaIon, _setters[setterKey](...args), metaIon.value);
-        tracker?.restore();
-        setterKey = "";
-        return newValue;
+    const proto = {
+        [META]: metaIon,
+        set: set.bind(metaIon),
+        ...methods || {}
     }
 
-    // return $ion as AtomicIon<T>;
+    // if (methods) {
+    //     wrapIonMethods(proto, methods, mutate) // prevents infinite loops if ion is set in an ionic effect and calls itself. But what if it doesn't mutate and needs to be tracked? Are there cases like this? Yes, e.g. a method that is isEqualToZero()
+    // }
 
+    Object.setPrototypeOf(proto, Object.getPrototypeOf($ion)) //QUESTION: Not sure if I should consider $ion a function or not, but this allows `$ion instanceof Function` to evaluate to true
+    Object.setPrototypeOf($ion, proto)
 
-    return $ionProxy as unknown as AtomicIon<T, S & M>
+    // function mutate(...args: any[]) {
+    //     const tracker = getDependencyTracker();
+    //     tracker?.stop();
+    //     const output = methods![methodKey](...args)
+    //     tracker?.restore();
+    //     methodKey = "";
+    //     return output;
+    // }
+
+    return $ion as AtomicIon<T, M>
 }
 
-
-
-
-// function setTo<T>(this: MetaIon, newValue: T) {
-//     return setValue(this, newValue, this.value);
+// function wrapIonMethods(
+//     proto: IonPrototype<any, any>,
+//     methods: { [key: string]: (...args: any[]) => any },
+//     mutate: (...args: any[]) => any
+// ) {
+//     for (const key in methods) {
+//         proto[key] = mutate
+//     }
 // }
+
+
+
+
+function set<T>(this: MetaIon, newValue: T) {
+    return setValue(this, newValue, this.value);
+}
 
 // function set<T>(this: MetaIon, toNewValue: (value: T) => T) {
 //     const value = this.value as T;
@@ -132,6 +142,7 @@ export function isIon<T>(maybeIon: T): maybeIon is T extends AtomicIon ? T : nev
     return false;
 }
 
-export function getMetaIon<T>($ion: AtomicIon<T>): MetaIon<T> {
-    return $ion[META]
+export function getMetaIon<T extends object>(ionicEntity: T): T extends { [META]: infer M } ? M : never { 
+    if (!(META in ionicEntity)) throw new Error("INVALID INPUT. Must have a META property")
+    return ionicEntity[META] as T extends { [META]: infer M } ? M : never
 }

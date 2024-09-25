@@ -1,7 +1,7 @@
 //@ts-nocheck
 
 import ""
-import { $initializeEffect, ionize, onRenderCycleComplete, afterRender } from "./src"
+import { initializeIonicEffect, ionize, onRenderCycleComplete, afterRender } from "./src"
 
 const $frog = ionize({
     name: "sir robin",

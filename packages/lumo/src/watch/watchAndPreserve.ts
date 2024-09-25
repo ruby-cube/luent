@@ -1,4 +1,4 @@
-import { isAnyIon, $initializeEffect as _$initializeEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, ChangeEffect, MutationEffect, Phase, __devCheckIfTracked } from "../../../quarky/src";
+import { isAnyIon, initializeIonicEffect as _initializeIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, ChangeEffect, MutationEffect, Phase, __devCheckIfTracked } from "../../../quarky/src";
 import { InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { isMountPhase } from "../dynamic/DynamicNode";
@@ -31,7 +31,7 @@ function _initializeRender(effect: () => void) {
     //     effect();
     //     // setUpUpdateHooks(component)
     // }
-    return _$initializeEffect(effect, {
+    return _initializeIonicEffect(effect, {
         phase: Phase.RENDER,
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
@@ -91,7 +91,7 @@ function bindWithComponent(fn: Function, component: ProviderComponent) {
 function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveListener {
     const mountPhase = isMountPhase()
     const component = getProviderComponent()
-    const initializeFn = bindWithComponent(renderPhase ? _initializeRender : _$initializeEffect, component);
+    const initializeFn = bindWithComponent(renderPhase ? _initializeRender : _initializeIonicEffect, component);
     const dynamicNode = getActiveDynamicNode()!
     const watcher = { stop: noop }
 
@@ -114,12 +114,12 @@ function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveL
     return watcher;
 }
 
-export function $initializeEffect(effect: () => void) {
+export function initializeIonicEffect(effect: () => void) {
     const dynamicNode = getActiveDynamicNode()
 
     if (dynamicNode.preserve)
         return _initializeAndPreserve(effect)
-    return _$initializeEffect(effect)
+    return _initializeIonicEffect(effect)
 }
 
 

@@ -15,7 +15,7 @@ import { createIonicObject } from "./IonicObject";
 import { Collection, MetaIonicCollection, MetaIonicModel, IONIC_MODEL } from "./MetaIonicModel";
 import { isInert } from "./inert";
 import { isIonizable } from "./ionizable";
-import { isAnyIon } from "../ion/AnyIon";
+import { AnyIon, isAnyIon } from "../ion/AnyIon";
 import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
 import { AtomicIon } from "../ion/AtomicIon";
 import { PropIon } from "./PropIon";
@@ -60,7 +60,7 @@ type Ionized<T extends AnyObject> = {
 }
 
 //API
-export function ionize<T extends AnyObject>(target: T): Ionized<T> {
+export function ionize<T extends AnyObject>(target: T): {[K in keyof Ionized<T>]: Ionized<T>[K]} {
     const existingIonicModel = ionicModels.get(target)
     if (existingIonicModel) return existingIonicModel as T;
     return createReactiveModel(target) as T
@@ -292,7 +292,7 @@ export function reactiveSetter(
     receiver: AnyObject
 ) {
     const oldValue = Reflect.get(target, key, receiver);
-    if (isAnyIon(oldValue)) return setIonProp(oldValue, newValue)
+    if (isAnyIon(oldValue)) return setAbsorbedIon(oldValue, newValue)
     if (oldValue === newValue
         || isNonTrackable(key, DataStructure)
         || isNonSettable(<string>key, DataStructure)
@@ -319,9 +319,9 @@ export function reactiveSetter(
     return true;
 }
 
-export function setIonProp(ion: AtomicIon | PropIon | DerivedIon | WritableDerivedIon, value: any) {
-    if ('setTo' in ion) {
-        ion.setTo(value);
+export function setAbsorbedIon(ion: AnyIon, value: any) {
+    if ('set' in ion) {
+        ion.set(value);
         return true;
     }
     return false;

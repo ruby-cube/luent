@@ -16,8 +16,7 @@ export function isPropIon(value: any): value is PropIon {
 
 export type PropIon<T = any> = {
     (): T;
-    setTo: (newValue: T) => T
-    set: (toNewValue: (value: T) => T) => T
+    set: (newValue: T) => T
 }
 
 export function asIon<T extends AnyObject, K extends keyof T>(model: T, key: K) {
@@ -36,15 +35,15 @@ function $Prop<T extends IonicModel, K extends keyof T, P extends T[K]>(reactive
         return reactive[key];
     }
 
-    __$propIon.setTo = (newValue: P) => {
+    __$propIon.set = (newValue: P) => {
         reregisterIfNeeded()
         return setValue(reactive, key, newValue, rawTarget[key])
     }
-    __$propIon.set = (toNewValue:(value: P) => P) => {
-        reregisterIfNeeded()
-        const value = rawTarget[key];
-        return setValue(reactive, key, toNewValue(value), value)
-    }
+    // __$propIon.set = (toNewValue:(value: P) => P) => {
+    //     reregisterIfNeeded()
+    //     const value = rawTarget[key];
+    //     return setValue(reactive, key, toNewValue(value), value)
+    // }
 
     meta.registerPropIon(key, __$propIon)
     const prop = asObservedProp(reactive, key)

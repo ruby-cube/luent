@@ -1,17 +1,25 @@
 import { Component } from "@rue/lumo";
 import { Ion, ionize } from "../../../packages/quarky/src";
+import { AnyObject } from "@rue/types";
+
+
 
 export function TestIonProp() {
-    const $count = Ion(0)
+    const $count = Ion(0, {
+        increment() {
+            $count.set($count() + 1)
+        }
+    })
     const $doubleCount = Ion(() => $count() * 2)
 
     const $counter = ionize({
         count: $count,
         doubleCount: $doubleCount,
-        increment
+        incrementCount: $count.increment
     })
 
     const $firstName = Ion('Kermit')
+
     const $lastName = Ion('The Frog')
 
     const $fullName = Ion({
@@ -20,21 +28,16 @@ export function TestIonProp() {
         },
         set(name: string) {
             const splitName = name.split(" ");
-            $firstName.setTo(splitName[0])
-            $lastName.setTo(splitName[1])
+            $firstName.set(splitName[0])
+            $lastName.set(splitName[1])
             return name;
         }
     })
 
     function setFullName() {
-        $fullName.setTo('SirRobin theBrave')
+        $fullName.set('SirRobin theBrave')
     }
 
-
-
-    function increment() {
-        $count.set(count => count + 1)
-    }
     return Component(
         <>
             <div>{$firstName}</div>
@@ -43,11 +46,11 @@ export function TestIonProp() {
             <button onclick={setFullName}>Sir robin</button>
             <div>{$count}</div>
             <div>{$doubleCount}</div>
-            <button onclick={increment}>increment</button>
+            <button onclick={$count.increment}>increment</button>
             <hr></hr>
             <div>{() => $counter.count}</div>
             <div>{() => $counter.doubleCount}</div>
-            <button onclick={$counter.increment}>increment</button>
+            <button onclick={$counter.incrementCount}>increment</button>
         </>
     )
 }

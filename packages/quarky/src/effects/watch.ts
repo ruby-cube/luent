@@ -4,14 +4,17 @@ import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
 import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
-import { $, ReactiveGet, DerivedIon } from "../derivations/DerivedIon";
+import { ReactiveGet, DerivedIon, isDerivedIon } from "../derivations/DerivedIon";
 import { getMetaReactive, isIonicModel, IonicModel, toRaw, } from "../ionize/IonicModel";
 import { areEqual } from "./areEqual";
 import { createIonicEffect, IonicEffect } from "../derivations/IonicEffect";
 import { META } from "../ReactiveEntity";
 import { noop } from "@rue/utils";
 import { __devCheckIfTracked } from "../derivations/DependencyTracker";
-import { isAnyIon } from "../ion/AnyIon";
+import { AnyIon, isAnyIon } from "../ion/AnyIon";
+import { AtomicIon, getMetaIon, isIon } from "../ion/AtomicIon";
+import { isObservedProp, ObservedProp } from "../ionize/ObservedProp";
+import { asIonicAtom } from "../derivations/IonicAtom";
 
 
 type RenderCycleOptions = {
@@ -86,14 +89,34 @@ type Effect = () => void
 
 export type RawEffect = (a: any, b: any) => void
 
-export function watch<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
+
+let currentWatchTarget: DerivedIon | AtomicIon | IonicModel | undefined // prevents infinite loops for phase: SYNC + effect that sets ion
+
+export function isCurrentWatchTarget(atom: AtomicIon | ObservedProp) {
+    if (!currentWatchTarget) return false;
+    if (currentWatchTarget === atom) return true;
+    if (isDerivedIon(currentWatchTarget)) {
+        return getMetaIon(currentWatchTarget).atoms.has(asIonicAtom(atom))
+    }
+    if (isIonicModel(currentWatchTarget)) {
+        const meta = getMetaReactive(currentWatchTarget)
+        if (isObservedProp(atom)){
+            return atom.metaIonicModel === meta;
+        }
+        //TODO: what about absorbed ions?
+    }
+
+}
+
+//TODO: What about Prop Ions?
+export function watch<T extends AnyIon | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
 export function watch<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
-export function watch<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
+export function watch<T extends AnyIon | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
     if (!(target instanceof Function)) {
         return watchReactiveModel(target, effect, options || {})
     }
     // const retrack = options?.retrack ?? true
-    const _target = !isAnyIon(target) ? DerivedIon(target) : target as ReactiveGet;
+    const _target = !isAnyIon(target) ? DerivedIon(target) : target as DerivedIon | AtomicIon;
     // createIonicEffect(<() => any>target, retrack).initialize()
     const eager = options?.eager
     const phase = options?.phase || Phase.BEFORE_RENDER
@@ -105,7 +128,10 @@ export function watch<T extends () => any | ReactiveGet | IonicModel>(target: T,
     function changeEffect() {
         const newValue = _target() // This is when retracking happens
         if (areEqual(toRaw(newValue), toRaw(oldValue))) return;
+        let prevTarget = currentWatchTarget;
+        currentWatchTarget = _target
         effect(newValue, oldValue)
+        currentWatchTarget = prevTarget;
         oldValue = newValue;
     }
 
@@ -167,7 +193,9 @@ function scheduleEffectEagerly(effect: Effect, phase: Phase) {
     else useRenderCycle().scheduleTask(effect, phase)
 }
 
-export function $initializeEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived Ion and effect combined into one function
+
+
+export function initializeIonicEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived Ion and effect combined into one function
     const phase = options?.phase || Phase.BEFORE_RENDER;
     const retrack = options?.retrack || false;
     const reactiveEffect = createIonicEffect(effect, retrack)

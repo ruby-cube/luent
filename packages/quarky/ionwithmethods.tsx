@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Component } from "@rue/lumo";
 import { AtomicIon, Ion, ionize } from "./src";
 
@@ -23,16 +24,17 @@ function Counter() {
     // })
 
     const $count = Ion(0, {
-        set: {
-            increment() {
-                return $count() + 1;
-            },
-            decrement() {
-                return $count() - 1;
-            },
-            set(count: number) {
-                return count;
-            }
+        increment() {
+            $count.set(count => count + 1);
+
+            //@ts-expect-error
+            $count.set($count() + 1)
+        },
+        decrement() {
+            $count.set(count => count--);
+        },
+        isEqualToZero() {
+            return $count() === 0;
         }
     })
 
@@ -70,7 +72,7 @@ function Mouse(
     }
 ) {
 
-    const $position = ionize({
+    const $position = ionize({ //TODO: How to prevent infinite lopp if mutated in ionic effect? And what if a method both gets and mutates?
         x: 0,
         y: 0,
 
@@ -105,6 +107,6 @@ class Frog {
 
 markIonizable(Frog)
 
-export function IonicFrog(){
+export function IonicFrog() {
     return ionize(new Frog())
 }

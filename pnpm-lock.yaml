@@ -193,9 +193,6 @@ importers:
       '@rue/utils':
         specifier: workspace:*
         version: link:../utils
-      setimmediate:
-        specifier: ^1.0.5
-        version: 1.0.5
     devDependencies:
       '@types/node':
         specifier: ^22.5.4
@@ -2070,10 +2067,6 @@ packages:
       get-intrinsic: 1.2.4
       gopd: 1.0.1
       has-property-descriptors: 1.0.2
-    dev: false
-
-  /setimmediate@1.0.5:
-    resolution: {integrity: sha512-MATJdZp8sLqDl/68LfQmbP8zKPLQNV6BIZoIgrscFDQ+RsvK/BxeDQOgyxKKoh0y/8h3BqVFnCqQ/gd+reiIXA==}
     dev: false
 
   /setprototypeof@1.2.0:

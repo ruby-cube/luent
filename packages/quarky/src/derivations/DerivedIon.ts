@@ -47,7 +47,7 @@ class MetaDerivedIon<T extends DerivedIon = DerivedIon> extends IonicDerivation 
     }
 }
 
-export const $ = DerivedIon
+// export const $ = DerivedIon
 
 
 export function DerivedIon<T extends any>(pureGetter: () => T, retrack: boolean = true): DerivedIon<T> {
@@ -89,18 +89,13 @@ export function DerivedIon<T extends any>(pureGetter: () => T, retrack: boolean 
 
 
 export type WritableDerivedIon<T = any> = {
-    setTo: (newValue: T) => T;
-    set: (toNewValue: (value: T) => T) => T
+    set: (newValue: T) => T;
 } & DerivedIon<T>
 
 
 export function WritableDerivedIon<T>(config: { get: () => T, set: (value: T) => T }) {
     const writable = DerivedIon(config.get) as WritableDerivedIon<T>;
     const set = config.set;
-    writable.setTo = set
-    writable.set = (toNewValue) => {
-        if (__DEV__) __devCheckIfTracked()
-        return set(toNewValue(writable()));
-    }
+    writable.set = set
     return writable;
 }

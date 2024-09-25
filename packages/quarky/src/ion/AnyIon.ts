@@ -1,22 +1,27 @@
 import { isObjectLiteral } from "@rue/utils";
 import { READONLY_ION } from "../asReadonly";
 import { DerivedIon, isDerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
-import { isPropIon } from "../ionize/PropIon";
+import { isPropIon, PropIon } from "../ionize/PropIon";
 import { AtomicIon, isIon } from "./AtomicIon";
+import { AnyObject } from "@rue/types";
 
-export function isAnyIon(maybeIon: any): maybeIon is DerivedIon | AtomicIon {
+export type AnyIon<T = any> = DerivedIon<T> | AtomicIon<T> | WritableDerivedIon<T> | PropIon<T>
+
+export function isAnyIon(maybeIon: any): maybeIon is AnyIon {
     if (!(maybeIon instanceof Function)) return false;
-    if (isIon(maybeIon) || isDerivedIon(maybeIon) || READONLY_ION in maybeIon || isPropIon(maybeIon)) return true;
+    if (isIon(maybeIon) || isDerivedIon(maybeIon) || READONLY_ION in maybeIon || isPropIon(maybeIon)) return true; //TODO: Add WritableIon
     return false;
 }
 
+type _AtomicIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? AtomicIon<T, M> : AtomicIon<T>
+
 export function Ion<T>(def: { get: () => T, set: (value: T) => T }): WritableDerivedIon<T>
 export function Ion<T>(derivation: () => T): DerivedIon<T>
-export function Ion<T, S extends { [key: string]: (...args: any) => any }, M extends { [key: string]: (...args: any) => any }>(value: T, methodsOrSetter?: { set?: S, methods?: M } | ((...args: any[]) => any)): AtomicIon<T, S & M>
-export function Ion<T, S extends { [key: string]: (...args: any) => any }, M extends { [key: string]: (...args: any) => any }>(def: T | (() => T) | { get: () => T, set: (value: T) => T }, methodsOrSetter?: { set?: S, methods?: M }| ((...args: any[]) => any)): AtomicIon<T, S & M> | DerivedIon<T> | WritableDerivedIon<T> {
+export function Ion<T, M>(value: T, methods?: M & { [key: string]: (...args: any[]) => any }): _AtomicIon<T, M>
+export function Ion<T, M>(def: T | (() => T) | { get: () => T, set: (value: T) => T }, methods?: M & { [key: string]: (...args: any[]) => any }): _AtomicIon<T, M>  | DerivedIon<T> | WritableDerivedIon<T> {
     if (def instanceof Function) return DerivedIon(def);
     if (isWritableDef(def)) return WritableDerivedIon(def);
-    return AtomicIon(def, methodsOrSetter) as AtomicIon<T, S & M>
+    return AtomicIon(def, methods) as _AtomicIon<T, M>
 }
 
 function isWritableDef(def: any): def is { get: () => any, set: (value: any) => any } {

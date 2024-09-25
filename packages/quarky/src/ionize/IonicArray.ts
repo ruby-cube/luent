@@ -3,7 +3,7 @@ import { isIonicAtom } from "../derivations/IonicAtom";
 import { META } from "../ReactiveEntity";
 import { trigger, triggerIonicAtom } from "../trigger";
 import { asObservedProp, getObservedProp } from "./ObservedProp";
-import { createReactiveModel, createReactiveTraps, isNonTrackable, isIonicModel, toRawIfNeeded, IonicModel, storeSnapshot, toRaw, triggerIonicModelWithSetOp, ionize, registerIonicModel, setIonProp } from "./IonicModel";
+import { createReactiveModel, createReactiveTraps, isNonTrackable, isIonicModel, toRawIfNeeded, IonicModel, storeSnapshot, toRaw, triggerIonicModelWithSetOp, ionize, registerIonicModel, setAbsorbedIon } from "./IonicModel";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { maybeUnreactivizeArgs, triggerReactiveWithMutationOp, useGetOp } from "./IonicCapsule";
 import { emitSignal } from "../debug";
@@ -161,7 +161,7 @@ function reactiveArraySetter(
     }
     const oldValue = Reflect.get(target, key, receiver);
     if (isAnyIon(oldValue) && !isIntegerKey(key))
-        return setIonProp(oldValue, _newValue)
+        return setAbsorbedIon(oldValue, _newValue)
     if (oldValue === _newValue || isNonTrackable(key, Array)) {
         // Reflect.set(target, key, newValue, receiver);
         target[key] = _newValue

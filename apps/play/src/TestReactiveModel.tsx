@@ -91,7 +91,7 @@ export function List(
     //     // console.log("mutations", mutations)
     // })
 
-    // $initializeEffect(() => {
+    // initializeIonicEffect(() => {
     //     console.log("some starts with f", $list.some((item) => item.content.startsWith('f')))
     // })
 

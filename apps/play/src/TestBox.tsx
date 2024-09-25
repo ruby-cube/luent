@@ -1,5 +1,5 @@
 import { NodeIon, } from "@rue/lumo";
-import {  $, ionize, $initializeEffect, ionize, Ion } from "../../../packages/quarky/src";
+import {  $, ionize, initializeIonicEffect, ionize, Ion } from "../../../packages/quarky/src";
 
 
 //tests:
@@ -26,12 +26,12 @@ export function TestBox() {
 
     const $div = NodeIon('div')
     const $anotherCount = $(() => $count())
-    $initializeEffect(() => {
+    initializeIonicEffect(() => {
         $anotherCount()
     })
 
     // beforeMount(()=>{
-    //     $initializeEffect(() => {
+    //     initializeIonicEffect(() => {
     //         divRef.o.style.transform = `translate(${box$.position.x}px)`
     //         console.log("running effect!!!", divRef.o.style.transform)
     //     }, {phase: Phase.RENDER})

@@ -14,6 +14,8 @@ import { MountIf } from './TestMountIf';
 import { TestIonProp } from './TestIonProp';
 import { TestMorphic } from './TestMorphic';
 import { ParentBlock } from './ProvideState';
+import { initializeIonicEffect, Ion } from '@rue/quarky';
+import { TestIonicEffect } from './TestIonicEffect';
 // import { ionize, ionize } from '@rue/quarky';
 // import { DeepReactiveModel, getMetaReactive, ionize, ionize } from '@rue/quarky';
 // import { MountIf } from './TestMountIf';
@@ -24,45 +26,8 @@ import { ParentBlock } from './ProvideState';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-// class Frog {
-//     qualities = { a: "brave" }
-//     setQualities(qualities: { a: string }) {
-//         console.log("setting qualities", this)
-//         this.qualities = qualities
-//         return this.qualities
-//     }
-//     getQualities() {
-//         return [this.qualities, 1]
-//     }
-// }
 
-
-// const frog$$ = ionize(new Frog())
-// console.log("qualiites", frog$$.getQualities())
-
-// const list$ = ionize([{
-//     id: 'dkjl',
-//     content: "hi"
-// }])
-
-// watch(() => list$[0], (newValue, oldValue) => {
-//     console.log("changed", newValue, oldValue)
-// })
-
-// const item = list$.pop()
-// console.log(item)
-
-// watch(frog$$, (val, old) => {
-//     console.log("new", val)
-//     console.log("old", old)
-// })
-// frog$$._$.setQualities({ a: "gallant" })
-//   frog$$._$.qualities = {a: "gallant"} 
-
-// console.log("qualities", frog$$.qualities)
-//   msg.value = isReactive(frog.getQualities()[0])
-
-const app = createApp(ParentBlock)
+const app = createApp(TestIonicEffect)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: false

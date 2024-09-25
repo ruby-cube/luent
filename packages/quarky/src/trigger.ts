@@ -5,11 +5,16 @@ import { ObservedProp, toPropIon } from "./ionize/ObservedProp";
 import { asWatchTarget, isWatched } from "./effects/WatchTarget";
 import { getCurrentRenderCycle } from "./effects/RenderCycle";
 import { getWithoutTracking } from "./derivations/DependencyTracker";
+import { isIonicEffectAtom } from "./derivations/IonicEffect";
+import { META } from "./ReactiveEntity";
 
 
 export function trigger(target: AtomicIon | ObservedProp) {
-    if (__DEV__ && getCurrentRenderCycle() && getCurrentRenderCycle()!.phase > 1) 
+    if (__DEV__ && getCurrentRenderCycle() && getCurrentRenderCycle()!.phase > 1)
         console.warn(`CASE RESEARCH: Reactive entity triggered during phase ${getCurrentRenderCycle()!.phase}:`, target, getWithoutTracking(target))
+
+    if (isIonicEffectAtom(target)) return;
+
     const propPod = toPropIon(target)
 
     if (propPod && isWatched(target)) {
@@ -29,5 +34,5 @@ export function triggerIonicAtom(target: ReactivePrimitive) {
 }
 
 export function triggerIonicModel(reactive: IonicModel) {
-    asWatchTarget(getMetaReactive(reactive)).triggerEffects()
+    asWatchTarget(reactive[META]).triggerEffects()
 }
