@@ -18,6 +18,8 @@ export function TestIonProp() {
         }
     })
 
+    
+
     const $bigBirdSleep = asIon($bigBird, 'sleep')
     console.log($bigBirdSleep)
 

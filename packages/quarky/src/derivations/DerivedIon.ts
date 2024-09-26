@@ -5,6 +5,7 @@ import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 import { META } from "../ReactiveEntity";
 import { isPropIon } from "../ionize/PropIon";
 import { __devCheckIfTracked } from "./DependencyTracker";
+import { AnyObject } from "@rue/types";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -50,10 +51,10 @@ class MetaDerivedIon<T extends DerivedIon = DerivedIon> extends IonicDerivation 
 // export const $ = DerivedIon
 
 
-export function DerivedIon<T extends any>(pureGetter: () => T, retrack: boolean = true): DerivedIon<T> {
+export function DerivedIon<T extends any>(pureGetter: () => T, methods?: AnyObject, retrack: boolean = true): DerivedIon<T> {
     let initialized = false;
-    const derived = new MetaDerivedIon(<DerivedIon><unknown>DerivedIonIon, retrack);
-    function DerivedIonIon() {
+    const derived = new MetaDerivedIon(<DerivedIon><unknown>$derivedIon, retrack);
+    function $derivedIon() {
         if (!initialized || derived.dirty && retrack) {
             const value = derived.trackAtoms(pureGetter);
             derived.forwardAtoms(derived.atoms)
@@ -75,27 +76,39 @@ export function DerivedIon<T extends any>(pureGetter: () => T, retrack: boolean 
 
         return derived.value; // memoized value
     }
-    DerivedIonIon[META] = derived;
-    DerivedIonIon.untrack = () => {
-        derived.untrackAtoms()
+
+    const proto = {
+        [META]: derived,
+        ...methods || {},
+        untrack() {
+            derived.untrackAtoms()
+        }
     }
+
+    // if (methods) {
+    //     wrapIonMethods(proto, methods, mutate) // prevents infinite loops if ion is set in an ionic effect and calls itself. But what if it doesn't mutate and needs to be tracked? Are there cases like this? Yes, e.g. a method that is isEqualToZero()
+    // }
+
+    Object.setPrototypeOf(proto, Object.getPrototypeOf($derivedIon)) //QUESTION: Not sure if I should consider $ion a function or not, but this allows `$ion instanceof Function` to evaluate to true
+    Object.setPrototypeOf($derivedIon, proto)
+
     onDestroy(() => {
         derived.untrackAtoms()
     })
 
-    return <DerivedIon><unknown>DerivedIonIon;
+    return <DerivedIon><unknown>$derivedIon;
 }
 
 
 
-export type WritableDerivedIon<T = any> = {
+export type WritableDerivedIon<T = any, M extends AnyObject = {}> = {
     set: (newValue: T) => T;
-} & DerivedIon<T>
+} & DerivedIon<T> & M
 
 
-export function WritableDerivedIon<T>(config: { get: () => T, set: (value: T) => T }) {
-    const writable = DerivedIon(config.get) as WritableDerivedIon<T>;
-    const set = config.set;
-    writable.set = set
+export function WritableDerivedIon<T, M>(config: { get: () => T, set: (value: T) => T }, methods?: M & { [key: string]: (...args: any[]) => any }) {
+    const _methods = methods || { set: config.set }
+    if (methods) _methods.set = config.set
+    const writable = DerivedIon(config.get, _methods);
     return writable;
 }
