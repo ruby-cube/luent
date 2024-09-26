@@ -10,6 +10,6 @@ export function $Props<T extends AnyObject, K extends keyof T>(reactive: IonicMo
         }
         return values;
     })
-    // getMetaReactive(reactive).registerMultiPropIon(keys.toString(), propsSignal)
+    // asMetaIonicModel(reactive).registerMultiPropIon(keys.toString(), propsSignal)
     return multiPropIon
 }

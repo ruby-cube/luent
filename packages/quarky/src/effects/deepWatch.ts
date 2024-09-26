@@ -1,12 +1,14 @@
+import { AtomicIon } from "../ion/AtomicIon";
 import {  isIonicModel, IonicModel, toRaw } from "../ionize/IonicModel";
 import { isReactiveObject } from "../ionize/IonicObject";
 import { AnyObject } from "@rue/types";
+import { PropIon } from "../ionize/PropIon";
 
 export type KeyPath = PropertyKey[]
 
 
 export type MutationRecord = {
-    target: IonicModel,
+    target: IonicModel | AtomicIon | PropIon,
     // root?: IonicModel,
     // targetPath?: KeyPath, // undefined means the target is the root watched model
     op: MutationOp | SetOp
@@ -20,7 +22,7 @@ export type MutationOp = {
 
 export type SetOp = {
     type: '[[set]]' | 'set' | 'add' | 'delete',
-    key: string | symbol,
+    key?: string | symbol,
     newValue: any,
     oldValue: any
 }

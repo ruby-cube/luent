@@ -1,5 +1,7 @@
+import { useRenderCycle } from "../effects/RenderCycle";
 import { AtomicIon, MetaIon } from "../ion/AtomicIon";
-import { ObservedProp } from "../ionize/ObservedProp";
+import { asMetaIonicModel, isIonicModel } from "../ionize/IonicModel";
+import { isObservedProp, ObservedProp } from "../ionize/ObservedProp";
 import { TrackedOp } from "../ionize/TrackedOp";
 import { IonicDerivation } from "./IonicDerivation";
 
@@ -12,7 +14,7 @@ const reactiveAtomMap: WeakMap<ReactivePrimitive, IonicAtom> = new WeakMap()
 
 export class IonicAtom {
 
-    constructor(public primitive: ReactivePrimitive) { 
+    constructor(public primitive: ReactivePrimitive) {
         reactiveAtomMap.set(primitive, this)
     }
 
@@ -30,8 +32,20 @@ export class IonicAtom {
         this.cleanUp?.(this.primitive)
     }
 
-    triggerDerivations() {
+    triggerDerivations(newValue: any, oldValue: any) {
         for (const derivation of this.derivations) {
+            if (isIonicModel(derivation.o)) {
+                const reactive = derivation.o
+                const atom = this.primitive;
+                useRenderCycle().recordOp(reactive, {
+                    target: isObservedProp(atom) ? atom.metaIonicModel.getPropIon(atom.key)! : atom,
+                    op: {
+                        type: 'set',
+                        newValue,
+                        oldValue
+                    }
+                })
+            }
             derivation.trigger();
         }
     }

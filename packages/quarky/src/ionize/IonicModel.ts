@@ -55,15 +55,15 @@ export function isIonicModel(value: any): value is IonicModel {
     return value[META]?.type === IONIC_MODEL;
 }
 
-type Ionized<T extends AnyObject> = {
-    [K in keyof T]: T[K] extends AtomicIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V: T[K]
-}
+type Ionized<T extends AnyObject, M> = {
+    [K in keyof T]: T[K] extends AtomicIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
+} & M
 
 //API
-export function ionize<T extends AnyObject>(target: T): {[K in keyof Ionized<T>]: Ionized<T>[K]} {
+export function ionize<T extends AnyObject, M extends AnyObject>(target: T, methods?: M): { [K in keyof Ionized<T, M>]: Ionized<T, M>[K] } {
     const existingIonicModel = ionicModels.get(target)
-    if (existingIonicModel) return existingIonicModel as T;
-    return createReactiveModel(target) as T
+    if (existingIonicModel) return existingIonicModel as T & M;
+    return createReactiveModel(target, methods) as T & M
 }
 
 
@@ -81,7 +81,7 @@ type AsRaw<T> = T extends MetaIonicModel<infer R> ? R : T extends IonicModel<inf
 
 export function toRaw<T>(target: T): AsRaw<T> {
     if (target instanceof MetaIonicModel) return target.rawTarget;
-    if (isIonicModel(target)) return getMetaReactive(target).rawTarget as AsRaw<T>;
+    if (isIonicModel(target)) return asMetaIonicModel(target).rawTarget as AsRaw<T>;
     return target as AsRaw<T>; // already raw target
 }
 
@@ -97,15 +97,16 @@ export function toRawIfNeeded(
 
 export function createReactiveModel(
     target: object,
+    methods: object | undefined
 ): object {
     if (isInert(target)) return target;
     if (!isIonizable(target)) return target;
     if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
-    return isTuple(target) ? createIonicTuple(target)
-        : target instanceof Array ? createIonicArray(target)
-            : target instanceof Set ? createIonicSet(target)
-                : target instanceof Map ? createIonicMap(target)
-                    : createIonicObject(target)
+    return isTuple(target) ? createIonicTuple(target, methods)
+        : target instanceof Array ? createIonicArray(target, methods)
+            : target instanceof Set ? createIonicSet(target, methods)
+                : target instanceof Map ? createIonicMap(target, methods)
+                    : createIonicObject(target, methods)
 }
 
 
@@ -291,6 +292,7 @@ export function reactiveSetter(
     newValue: any,
     receiver: AnyObject
 ) {
+    if (metaIonicModel.isNewProperty(key)) metaIonicModel.registerNewProperty(key)
     const oldValue = Reflect.get(target, key, receiver);
     if (isAnyIon(oldValue)) return setAbsorbedIon(oldValue, newValue)
     if (oldValue === newValue
@@ -305,10 +307,12 @@ export function reactiveSetter(
     target[key] = _newValue
 
     storeSnapshot(metaIonicModel)
+
     const prop = getObservedProp(reactive, key);
     if (prop) {
-        trigger(prop)
+        trigger(prop, _newValue, oldValue)
     }
+
     triggerIonicModelWithSetOp(
         reactive,
         key,
@@ -324,6 +328,7 @@ export function setAbsorbedIon(ion: AnyIon, value: any) {
         ion.set(value);
         return true;
     }
+    if (__DEV__) throw new Error("Absorbed Ion is read only")
     return false;
 }
 
@@ -351,7 +356,7 @@ export function triggerIonicModelWithSetOp(
     newValue: any,
     oldValue: any,
 ) {
-    if (isWatched(getMetaReactive(reactive))) {
+    if (isWatched(reactive)) {
         recordOp(reactive, {
             target: reactive,
             op: {
@@ -383,7 +388,7 @@ export function triggerIonicModelWithSetOp(
     // }
 }
 
-export function getMetaReactive<T extends AnyObject>(reactive: IonicModel<T>): T extends Collection ? MetaIonicCollection<T> : MetaIonicModel<T> {
+export function asMetaIonicModel<T extends AnyObject>(reactive: IonicModel<T>): T extends Collection ? MetaIonicCollection<T> : MetaIonicModel<T> {
     return reactive[META];
 }
 

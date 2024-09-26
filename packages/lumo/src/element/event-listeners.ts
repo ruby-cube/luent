@@ -1,5 +1,4 @@
 import { $listen, Callback, ListenerOptions, SustainedTargetedListener } from '@rue/flask';
-import { useEventTick } from './EventTick';
 
 const listenerMap: Map<string, SustainedTargetedListener> = new Map();
 

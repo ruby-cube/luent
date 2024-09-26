@@ -1,6 +1,6 @@
 import { asIonicAtom, IonicAtom } from "../derivations/IonicAtom";
 import { asWatchTarget, WatchTarget } from "../effects/WatchTarget";
-import { getMetaReactive, IonicModel, toRaw } from "./IonicModel";
+import { asMetaIonicModel, IonicModel, toRaw } from "./IonicModel";
 import { META } from "../ReactiveEntity";
 import { watch } from "fs";
 import { isIntegerKey } from "./IonicArray";
@@ -62,14 +62,14 @@ export function getObservedProp(
     reactive: IonicModel,
     key: PropertyKey
 ) {
-    return getMetaReactive(reactive).getObservedProp(key)
+    return asMetaIonicModel(reactive).getObservedProp(key)
 }
 
 function createObservedProp(
     reactive: IonicModel,
     key: PropertyKey
 ) {
-    const metaIonicModel = getMetaReactive(reactive);
+    const metaIonicModel = asMetaIonicModel(reactive);
     const prop = new ObservedProp(metaIonicModel, key);
     const isIndex = toRaw(metaIonicModel) instanceof Array && isIntegerKey(key)
     if (isIndex) {

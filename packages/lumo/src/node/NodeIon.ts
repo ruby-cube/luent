@@ -88,7 +88,7 @@ export class InternalNodeRef<
     }
 
     setValue(value: NodeReferent<T> | undefined) {
-        this.o.setTo(value)
+        this.o.set(value)
         return value;
     }
 
@@ -120,7 +120,7 @@ export class InternalNodeArrayRef {
     }
 
     setValue(value: NodeReferent[]) {
-        this.o.setTo(value)
+        this.o.set(value)
         return value;
     }
 
@@ -140,7 +140,7 @@ export class InternalNodeArrayRef {
 
     assignValue(value: NodeReferent, $index: AtomicIon<number>) {
         let nodes = !__SSR__ && isUpdatingList() ? this.getNewListNodes()
-            : this.o.setTo(this.o())
+            : this.o.set(this.o())
         nodes[$index()] = value;
         nodeArrayRefMap.set(nodes, this);
     }
@@ -162,7 +162,7 @@ export class InternalNodeArrayRef {
             const node = prevNodes[from];
             newNodes[to] = node;
         }
-        this.o.setTo(newNodes);
+        this.o.set(newNodes);
         listUpdateMap.delete(this)
         nodeArrayRefMap.set(newNodes, this);
     }

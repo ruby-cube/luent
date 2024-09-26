@@ -2,7 +2,7 @@ import { setImmediate, clearImmediate } from "@rue/thread";
 import { $schedule, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
 import { SetMap } from "@rue/utils";
 import { MutationRecord } from "./deepWatch";
-import { getMetaReactive, IonicModel } from "../ionize/IonicModel";
+import { asMetaIonicModel, IonicModel } from "../ionize/IonicModel";
 import { MetaIonicModel } from "../ionize/MetaIonicModel";
 import { PendingCancelOp } from "../../../flask/PendingCancelOp";
 // import { runEffect } from "./watch";
@@ -114,7 +114,7 @@ export class RenderCycle {
     opsMap: WeakMap<MetaIonicModel, MutationRecord[]> = new WeakMap();
 
     recordOp(target: IonicModel, op: MutationRecord) {
-        const meta = getMetaReactive(target)
+        const meta = asMetaIonicModel(target)
         let existingOps = this.opsMap.get(meta);
         if (existingOps) {
             existingOps.push(op)
@@ -125,7 +125,7 @@ export class RenderCycle {
     }
 
     getOps(target: IonicModel) {
-        const meta = getMetaReactive(target)
+        const meta = asMetaIonicModel(target)
         return this.opsMap.get(meta)
     }
 

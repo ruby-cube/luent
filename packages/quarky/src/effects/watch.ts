@@ -5,7 +5,7 @@ import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
 import { ReactiveGet, DerivedIon, isDerivedIon } from "../derivations/DerivedIon";
-import { getMetaReactive, isIonicModel, IonicModel, toRaw, } from "../ionize/IonicModel";
+import { asMetaIonicModel, isIonicModel, IonicModel, toRaw, } from "../ionize/IonicModel";
 import { areEqual } from "./areEqual";
 import { createIonicEffect, IonicEffect } from "../derivations/IonicEffect";
 import { META } from "../ReactiveEntity";
@@ -15,6 +15,7 @@ import { AnyIon, isAnyIon } from "../ion/AnyIon";
 import { AtomicIon, getMetaIon, isIon } from "../ion/AtomicIon";
 import { isObservedProp, ObservedProp } from "../ionize/ObservedProp";
 import { asIonicAtom } from "../derivations/IonicAtom";
+import { PropIon } from "../ionize/PropIon";
 
 
 type RenderCycleOptions = {
@@ -35,7 +36,7 @@ export type EffectOptions = {
 
 
 export type MutationRecord = {
-    target: IonicModel,
+    target: IonicModel | AtomicIon | PropIon,
     // root?: IonicModel,
     // targetPath?: KeyPath, // undefined means the target is the root watched model
     op: MutationOp | SetOp
@@ -49,7 +50,7 @@ export type MutationOp = {
 
 export type SetOp = {
     type: '[[set]]' | 'set' | 'add' | 'delete',
-    key: string | symbol,
+    key?: string | symbol,
     newValue: any,
     oldValue: any
 }
@@ -99,7 +100,7 @@ export function isCurrentWatchTarget(atom: AtomicIon | ObservedProp) {
         return getMetaIon(currentWatchTarget).atoms.has(asIonicAtom(atom))
     }
     if (isIonicModel(currentWatchTarget)) {
-        const meta = getMetaReactive(currentWatchTarget)
+        const meta = asMetaIonicModel(currentWatchTarget)
         if (isObservedProp(atom)){
             return atom.metaIonicModel === meta;
         }
@@ -157,9 +158,9 @@ function watchReactiveModel<T extends IonicModel>(target: T, effect: MutationEff
     const phase = options?.phase || Phase.BEFORE_RENDER
     // const deep = options?.deep
 
-    const watchTarget = asWatchTarget(getMetaReactive(target));
+    const watchTarget = asWatchTarget(target);
 
-    // const nestedWatcher = deep ? watchProps(target, target, []) : undefined;
+    asMetaIonicModel(target).trackAbsorbedIons()
 
     function mutationEffect() {
         const mutations = getCurrentRenderCycle()?.getOps(target)

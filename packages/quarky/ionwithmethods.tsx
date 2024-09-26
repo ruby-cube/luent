@@ -14,7 +14,7 @@ function Counter() {
     //     decrement() {
     //         return $count() - 1;
     //     },
-    //     setTo(num: number) {
+    //     set(num: number) {
     //         return num;
     //     }
     // }, {
@@ -47,7 +47,7 @@ function Counter() {
         }
     })
 
-    provide(COUNT, protect($count, { allow: ['increment', 'setTo'] }))
+    provide(COUNT, protect($count, { allow: ['increment', 'set'] }))
     provide(COUNT, protect($count, { exclude: 'decrement' }))
     provide(COUNT, protect($count)) // read-only
     provide(COUNT, $count) // all methods

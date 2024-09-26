@@ -8,7 +8,7 @@ export function BlogPage() {
     const $blogPosts = Ion([])
     const pendingBlogPosts = $await(import('./data.js'))
         .then((posts)=>{
-            $blogPosts.setTo(posts)
+            $blogPosts.set(posts)
         })
 
     const PendingPostPreviews = $Suspense(pendingBlogPosts, {

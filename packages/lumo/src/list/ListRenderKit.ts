@@ -184,7 +184,7 @@ export class ListRenderKit<T = any> {
                 // update $index value
                 const $index = dynamicIndices.current[prevIndex];
                 newIndices.push($index);
-                $index.setTo(i)
+                $index.set(i)
 
                 // to update refs
                 toFromIndices.push([i, prevIndex]);

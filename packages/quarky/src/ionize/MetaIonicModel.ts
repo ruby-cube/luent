@@ -5,6 +5,8 @@ import type { ReactiveEntity } from "../ReactiveEntity"
 import { ObservedProp } from "./ObservedProp"
 import { PropIon } from "./PropIon"
 import { DerivedIon } from "../derivations/DerivedIon"
+import { IonicDerivation } from "../derivations/IonicDerivation"
+import { Ion } from "../ion/AnyIon"
 
 
 
@@ -32,10 +34,38 @@ export class MetaIonicModel<T extends AnyObject = AnyObject> implements Reactive
 
     constructor(
         public rawTarget: T,
+        public methods: AnyObject = {}
         // public reactive: T
         // public traps?: ReactiveTraps<T>
     ) {
-     }
+    }
+
+    private appendedProperties: Set<PropertyKey> = new Set()
+
+    isNewProperty(key: PropertyKey) {
+        return !(key in this.rawTarget) && !(key in this.methods) && !this.appendedProperties.has(key)
+    }
+
+    registerNewProperty(key: PropertyKey) {
+        this.appendedProperties.add(key)
+        this.markDirty()
+    }
+
+    private hasNewAbsorbedIons: boolean = true;
+    private markDirty() {
+        this.hasNewAbsorbedIons = true
+    }
+    private undirty() {
+        this.hasNewAbsorbedIons = false;
+    }
+
+    private asDerivation?: IonicDerivation
+    trackAbsorbedIons() {
+        if (this.asDerivation && this.hasNewAbsorbedIons === false) return;
+        const derivation = this.asDerivation || (this.asDerivation = new IonicDerivation(this.ionicModel, IONIC_MODEL, false))
+        derivation.trackAtoms(this.ionicModel!)
+        this.undirty()
+    }
 
     observedProps?: Map<PropertyKey, ObservedProp>
 
@@ -125,8 +155,8 @@ export class MetaIonicModel<T extends AnyObject = AnyObject> implements Reactive
 export type Collection<K = any, V = any> = Set<K> | Array<K> | Map<K, V>
 
 export class MetaIonicCollection<T extends Collection = Collection> extends MetaIonicModel<T> {
-    constructor(rawTarget: T) {
-        super(rawTarget)
+    constructor(rawTarget: T, methods: AnyObject = {}) {
+        super(rawTarget, methods)
     }
 
     observedEntryKeys = new Set()

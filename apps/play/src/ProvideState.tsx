@@ -47,12 +47,12 @@ export function ParentBlock(
     const $name = Ion("Sir Robin")
 
     function makeBrave() {
-        $name.setTo('The brave')
+        $name.set('The brave')
     }
 
     function makeKermit() {
         console.log("make kermit")
-        $name.setTo('Kermit')
+        $name.set('Kermit')
     }
 
     const frog = ionize({
@@ -65,7 +65,7 @@ export function ParentBlock(
     const $qualities = asIon(frog, 'qualities')
 
     function setQualities() {
-        $qualities.setTo('gallant')
+        $qualities.set('gallant')
     }
 
 

@@ -128,7 +128,7 @@ function setValue(metaIon: MetaIon, newValue: unknown, oldValue: unknown) {
     const _newValue = shouldMakeIonic(newValue, metaIon) ? ionize(newValue) : newValue
     // toIonicModelIfMust(newValue, metaIon)
     metaIon.value = _newValue;
-    trigger($ion);
+    trigger($ion, _newValue, oldValue);
     return _newValue;
 }
 
@@ -137,7 +137,7 @@ function shouldMakeIonic(newValue: unknown, metaIon: MetaIon): newValue is AnyOb
 }
 
 
-export function isIon<T>(maybeIon: T): maybeIon is T extends AtomicIon ? T : never {
+export function isIon(maybeIon: any): maybeIon is AtomicIon {
     if (isFunctionWithProps(maybeIon)) return maybeIon[META]?.type === ATOMIC_ION;
     return false;
 }

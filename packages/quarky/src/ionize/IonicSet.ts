@@ -4,15 +4,16 @@ import { getActiveTracker } from "../derivations/DependencyTracker";
 import { META } from "../ReactiveEntity";
 import { trigger, triggerIonicAtom } from "../trigger";
 import { asObservedProp, getObservedProp } from "./ObservedProp";
-import { createReactiveTraps, isNonTrackable, toRawIfNeeded, IonicModel, storeSnapshot, ionize, registerIonicModel, reactiveSetter } from "./IonicModel";
+import { isNonTrackable, toRawIfNeeded, IonicModel, storeSnapshot, ionize, registerIonicModel, reactiveSetter } from "./IonicModel";
 import { triggerReactiveWithMutationOp, useGetOp } from "./IonicCapsule";
-import { asTrackedOp, getTrackedOp } from "./TrackedOp";
+import { getTrackedOp } from "./TrackedOp";
 import { Collection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
 import { isAnyIon } from "../ion/AnyIon";
 
 
 export function createIonicSet(
     target: Set<any>,
+    methods: AnyObject | undefined
 ) {
 
 
@@ -28,7 +29,7 @@ export function createIonicSet(
 
         const sizeProp = getObservedProp(reactive, 'size')
         if (sizeProp)
-            trigger(sizeProp);
+            trigger(sizeProp, newSize, oldSize);
 
         const hasOp = getTrackedOp(reactive, 'has', _newValue)
         if (hasOp) triggerIonicAtom(hasOp);
@@ -44,10 +45,13 @@ export function createIonicSet(
     }
 
 
-    const metaIonicModel = new MetaIonicCollection(target)
+    const metaIonicModel = new MetaIonicCollection(target, methods)
     const reactive = new Proxy(target, {
         get(target, key, receiver) {
             if (__DEV__) emitSignal()
+            if (methods && key in methods) {
+                return methods[key];
+            }
             const value = Reflect.get(target, key, receiver)
             if (typeof key === 'symbol' && key.description === 'Symbol.iterator') {
                 return value;
@@ -129,7 +133,7 @@ export function useDeleteOp(
 
         const sizeProp = getObservedProp(reactive, 'size')
         if (sizeProp)
-            trigger(sizeProp);
+            trigger(sizeProp, newSize, oldSize);
 
         const hasOp = getTrackedOp(reactive, 'has', key)
         if (hasOp) triggerIonicAtom(hasOp);
@@ -181,7 +185,7 @@ export function useClearOp(
 
         const sizeProp = getObservedProp(reactive, 'size')
         if (sizeProp)
-            trigger(sizeProp);
+            trigger(sizeProp, newSize, oldSize);
 
 
         triggerReactiveWithMutationOp(

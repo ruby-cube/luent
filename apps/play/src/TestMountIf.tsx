@@ -104,7 +104,7 @@ function Counter() {
         console.log("destroyd")
     })
 
-    $count.setTo(1)
+    $count.set(1)
 
     return Component(
         <>

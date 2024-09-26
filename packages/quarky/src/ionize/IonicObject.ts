@@ -19,12 +19,16 @@ export function isReactiveObject(value: any): value is IonicModel {
 
 export function createIonicObject(
     target: AnyObject,
+    methods: AnyObject | undefined
 ) {
-    const metaIonicModel = new MetaIonicModel(target)
+    const metaIonicModel = new MetaIonicModel(target, methods)
     const reactive = new Proxy(target, {
         get(target, key, receiver) {
             if (__DEV__) emitSignal();
             if (key === META) return metaIonicModel;
+            if (methods && key in methods) {
+                return methods[key];
+            }
             const value = Reflect.get(target, key, receiver);
             if (isNonTrackable(key, Object)) return value;
             if (isAnyIon(value)) return value();
@@ -33,6 +37,7 @@ export function createIonicObject(
             const tracker = getActiveTracker();
             if (!tracker || Reflect.getOwnPropertyDescriptor(target, key)?.writable === false
             ) {
+                // if (isAnyIon(value)) return value();
                 return _value;
             }
             tracker.track(asObservedProp(reactive, key));

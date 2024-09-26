@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { getMetaReactive, toRawIfNeeded } from "./IonicModel";
+import { asMetaIonicModel, toRawIfNeeded } from "./IonicModel";
 import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asTrackedOp } from "./TrackedOp";
@@ -76,7 +76,7 @@ export function triggerReactiveWithMutationOp(
     args: any[],
     output: any
 ) {
-    if (isWatched(getMetaReactive(reactive))) {
+    if (isWatched(reactive)) {
 
         triggerIonicModel(reactive)
         recordOp(reactive, {

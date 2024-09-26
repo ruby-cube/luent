@@ -5,7 +5,7 @@
 import { asIonicAtom } from "../derivations/IonicAtom";
 import { META } from "../ReactiveEntity";
 import { Collection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
-import { getMetaReactive, IonicModel } from "./IonicModel";
+import { asMetaIonicModel, IonicModel } from "./IonicModel";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
 
@@ -60,7 +60,7 @@ export function getTrackedOp(
     op: string,
     key: any
 ){
-    return getMetaReactive(model).getTrackedOp(op, key)
+    return asMetaIonicModel(model).getTrackedOp(op, key)
 }
 
 function createTrackedOp(
@@ -68,7 +68,7 @@ function createTrackedOp(
     op: string,
     key: any
 ){
-    const metaIonicModel = getMetaReactive(model);
+    const metaIonicModel = asMetaIonicModel(model);
     const trackedOp = new TrackedOp(metaIonicModel, op, key)
     metaIonicModel.addObservedEntryKey(key)
     const atom = asIonicAtom(trackedOp);

@@ -1,6 +1,6 @@
 import { NodeIon, Component, CreateIf, ElseCreate, For } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { Ion, __addDevName, $, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
+import { Ion, __addDevName, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { META } from "../../../packages/quarky/src/ReactiveEntity";
 
@@ -153,7 +153,7 @@ export function List(
     const $alive = Ion(true)
 
     function destroy() {
-        $alive.setTo(false)
+        $alive.set(false)
     }
     // const $item = $list[0]
     //     watch($(() => $item.content), (newValue, oldValue) => {

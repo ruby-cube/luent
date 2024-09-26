@@ -17,7 +17,7 @@ import { ParentBlock } from './ProvideState';
 import { initializeIonicEffect, Ion } from '@rue/quarky';
 import { TestIonicEffect } from './TestIonicEffect';
 // import { ionize, ionize } from '@rue/quarky';
-// import { DeepReactiveModel, getMetaReactive, ionize, ionize } from '@rue/quarky';
+// import { DeepReactiveModel, asMetaIonicModel, ionize, ionize } from '@rue/quarky';
 // import { MountIf } from './TestMountIf';
 // import { queueTask } from '@rue/thread';
 // import { RenderCycle } from '@rue/quarky';
@@ -27,7 +27,7 @@ import { TestIonicEffect } from './TestIonicEffect';
 // import { NestedPend } from './NestedPend';
 
 
-const app = createApp(TestIonicEffect)
+const app = createApp(TestIonProp)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: false

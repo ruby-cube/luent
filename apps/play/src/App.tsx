@@ -116,7 +116,7 @@ export function List() {
     const $showSideBlock = Ion(false)
 
     function showSideBlock() {
-        $showSideBlock.setTo(true)
+        $showSideBlock.set(true)
     }
 
     const $listLengthIsZero = () => $list().length === 0
@@ -296,11 +296,11 @@ function useDialogBox(config: { initialState: 'open' | 'closed' }) {
     __addDevName($open, '$open')
 
     function open() {
-        $open.setTo(true)
+        $open.set(true)
     }
 
     function close() {
-        $open.setTo(false)
+        $open.set(false)
     }
 
     return {

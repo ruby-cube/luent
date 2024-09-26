@@ -1,10 +1,11 @@
 import { AnyObject } from "@rue/types";
-import { getMetaReactive, isIonicModel, ionize, IonicModel, toRaw } from "./IonicModel";
-import { asObservedProp } from "./ObservedProp";
+import { asMetaIonicModel, isIonicModel, ionize, IonicModel, toRaw } from "./IonicModel";
+import { asObservedProp, ObservedProp } from "./ObservedProp";
+import { META } from "../ReactiveEntity";
 
 // export function $Props<T extends AnyObject, K extends keyof T>(model: T, keys: K[]) {
 //     const reactive = isIonicModel(model) ? model : ionize(model)
-//     const propsSignal = getMetaReactive(reactive).getMultiPropIon(keys.toString())
+//     const propsSignal = asMetaIonicModel(reactive).getMultiPropIon(keys.toString())
 //     if (propsSignal) return propsSignal;
 //     return $MultiPropsSignal(reactive, keys)
 // }
@@ -17,18 +18,19 @@ export function isPropIon(value: any): value is PropIon {
 export type PropIon<T = any> = {
     (): T;
     set: (newValue: T) => T
+    [META]: ObservedProp
 }
 
-export function asIon<T extends AnyObject, K extends keyof T>(model: T, key: K) {
+export function asIon<T extends AnyObject, K extends keyof T>(model: T, key: K): PropIon<T[K]> {
     const reactive = isIonicModel(model) ? model : ionize(model)
-    const propPod = getMetaReactive(reactive).getPropIon(key)
-    if (propPod) return propPod;
+    const propIon = asMetaIonicModel(reactive).getPropIon(key)
+    if (propIon) return propIon;
     return $Prop(reactive, key)
 }
 
 function $Prop<T extends IonicModel, K extends keyof T, P extends T[K]>(reactive: T, key: K): PropIon<P> {
     const rawTarget = toRaw(reactive)
-    const meta = getMetaReactive(reactive);
+    const meta = asMetaIonicModel(reactive);
 
     function __$propIon() {
         reregisterIfNeeded()
@@ -39,6 +41,8 @@ function $Prop<T extends IonicModel, K extends keyof T, P extends T[K]>(reactive
         reregisterIfNeeded()
         return setValue(reactive, key, newValue, rawTarget[key])
     }
+    const prop = asObservedProp(reactive, key)
+    __$propIon[META] = prop;
     // __$propIon.set = (toNewValue:(value: P) => P) => {
     //     reregisterIfNeeded()
     //     const value = rawTarget[key];
@@ -46,7 +50,6 @@ function $Prop<T extends IonicModel, K extends keyof T, P extends T[K]>(reactive
     // }
 
     meta.registerPropIon(key, __$propIon)
-    const prop = asObservedProp(reactive, key)
     prop.onDestroy(() => {
         meta.unregisterPropIon(key)
     })

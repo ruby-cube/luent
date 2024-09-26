@@ -50,7 +50,7 @@ const $records_list = $ListPort($records, (record) => (
 ), 'id', { type: 'records', ref: $recordNodes }) // uid is required // ref is only needed if you want to be able to mount a morphic port, unmount, or destory
 
 function changeMainContent(index) {
-    $main_content.setTo($bye)
+    $main_content.set($bye)
 }
 
 function asData<T>(portableItem: PortableItem<T>) {

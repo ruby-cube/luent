@@ -1,5 +1,5 @@
 import { asIonicAtom, isIonicAtom, ReactivePrimitive } from "./derivations/IonicAtom";
-import { getMetaReactive, IonicModel, toRaw } from "./ionize/IonicModel";
+import { asMetaIonicModel, IonicModel, toRaw } from "./ionize/IonicModel";
 import { AtomicIon, MetaIon } from "./ion/AtomicIon";
 import { ObservedProp, toPropIon } from "./ionize/ObservedProp";
 import { asWatchTarget, isWatched } from "./effects/WatchTarget";
@@ -9,7 +9,7 @@ import { isIonicEffectAtom } from "./derivations/IonicEffect";
 import { META } from "./ReactiveEntity";
 
 
-export function trigger(target: AtomicIon | ObservedProp) {
+export function trigger(target: AtomicIon | ObservedProp, newValue?: any, oldValue?: any) {
     if (__DEV__ && getCurrentRenderCycle() && getCurrentRenderCycle()!.phase > 1)
         console.warn(`CASE RESEARCH: Reactive entity triggered during phase ${getCurrentRenderCycle()!.phase}:`, target, getWithoutTracking(target))
 
@@ -24,15 +24,15 @@ export function trigger(target: AtomicIon | ObservedProp) {
     if (isWatched(target)) {
         asWatchTarget(target).triggerEffects()
     }
-    triggerIonicAtom(target)
+    triggerIonicAtom(target, newValue, oldValue)
 }
 
-export function triggerIonicAtom(target: ReactivePrimitive) {
+export function triggerIonicAtom(target: ReactivePrimitive, newValue?: any, oldValue?: any) {
     if (isIonicAtom(target)) {
-        asIonicAtom(target).triggerDerivations()
+        asIonicAtom(target).triggerDerivations(newValue, oldValue)
     }
 }
 
 export function triggerIonicModel(reactive: IonicModel) {
-    asWatchTarget(reactive[META]).triggerEffects()
+    asWatchTarget(reactive).triggerEffects()
 }

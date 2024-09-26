@@ -14,12 +14,14 @@ import { isAnyIon } from "../ion/AnyIon";
 
 export function createIonicArray(
     target: any[],
+    methods: AnyObject | undefined
 ) {
-    const metaIonicModel = new MetaIonicCollection(target)
+    const metaIonicModel = new MetaIonicCollection(target, methods)
     const reactive = new Proxy(target, {
         get(target, key, receiver) {
             return reactiveArrayGetter(
                 reactive,
+                methods,
                 metaIonicModel,
                 function handleMutatingMethod(key: string, fn) {
                     return (...args: any[]) => {
@@ -57,13 +59,15 @@ export function createIonicArray(
 
 export function createIonicTuple<T extends any[]>(
     target: T,
+    methods: AnyObject | undefined
 ) {
 
-    const metaIonicModel = new MetaIonicCollection(target)
+    const metaIonicModel = new MetaIonicCollection(target, methods)
     const reactive = new Proxy(target, {
         get(target, key, receiver) {
             return reactiveArrayGetter(
                 reactive,
+                methods,
                 metaIonicModel,
                 function handleMutatingMethod() {
                     throw new Error("Tuples can only be mutated by index")
@@ -105,6 +109,7 @@ export function createIonicTuple<T extends any[]>(
 
 function reactiveArrayGetter(
     reactive: IonicModel<Collection>,
+    methods: AnyObject | undefined,
     metaIonicModel: MetaIonicCollection,
     handleMutatingMethod: (key: string, fn: Function) => (...args: any[]) => any,
     target: any[],
@@ -113,6 +118,9 @@ function reactiveArrayGetter(
 ) {
     if (__DEV__) emitSignal();
     if (key === META) return metaIonicModel;
+    if (methods && key in methods) {
+        return methods[key];
+    }
     // if (key === '_$' && deep) return asShallowReactive(target);
     const value = Reflect.get(target, key, receiver);
     if (typeof key === 'symbol' && key.description === 'Symbol.iterator') {
@@ -151,6 +159,7 @@ function reactiveArraySetter(
     newValue: any,
     receiver: AnyObject
 ) {
+    if (metaIonicModel.isNewProperty(key)) metaIonicModel.registerNewProperty(key)
     const _newValue = toRawIfNeeded(newValue)
     const op = target instanceof Array && isIntegerKey(key) ? getTrackedOp(reactive, 'at', key) : null;
     const prop = getObservedProp(reactive, key);
@@ -175,7 +184,7 @@ function reactiveArraySetter(
     storeSnapshot(metaIonicModel)
 
     if (prop) {
-        trigger(prop)
+        trigger(prop, _newValue, oldValue)
     }
 
     if (op) {
@@ -193,7 +202,7 @@ function reactiveArraySetter(
             if (index > _newValue || index > oldValue) {
                 const prop = getObservedProp(reactive, indexKey)
                 if (prop) {
-                    trigger(prop)
+                    trigger(prop, _newValue, oldValue)
                 }
                 const op = getTrackedOp(reactive, 'at', index)
                 if (op) {
@@ -240,7 +249,7 @@ function mutatingArrayOp(
 
     const lengthProp = getObservedProp(reactive, 'length')
     if (lengthProp) {
-        trigger(lengthProp); // trigger for length change
+        trigger(lengthProp, newLength, oldLength); // trigger for length change
     }
 
     if (key === 'pop') {

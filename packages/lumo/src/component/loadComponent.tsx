@@ -35,8 +35,8 @@ export function lazyLoadComponent<P>(config: {
             const pendingComponent = load();
             if (timeout) {
                 timeoutID = setTimeout(() => {
-                    $error.setTo("Timed out");
-                    $loading.setTo(false)
+                    $error.set("Timed out");
+                    $loading.set(false)
                 }, timeout)
             }
             pendingComponent
@@ -44,17 +44,17 @@ export function lazyLoadComponent<P>(config: {
                 clearTimeout(timeoutID)
                 lazyComponents.set(load, _Component)
                 Component = _Component;
-                $loading.setTo(false)
-                $loaded.setTo(true)
+                $loading.set(false)
+                $loaded.set(true)
             })
             .catch(err => {
-                $error.setTo(err); //TODO: Normalize error type
-                $loading.setTo(false)
+                $error.set(err); //TODO: Normalize error type
+                $loading.set(false)
             })
         }
         else {
-            $loaded.setTo(true)
-            $loading.setTo(false)
+            $loaded.set(true)
+            $loading.set(false)
         }
     }
 

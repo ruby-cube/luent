@@ -29,8 +29,8 @@ export function MainBlock() {
     ), { ref: $recordNodes, IDKey: 'id' })
 
     function changeMainContent(index) {
-        $main_content.setTo($bye)
-        $main_content.setTo($recordsNodes, 9)
+        $main_content.set($bye)
+        $main_content.set($recordsNodes, 9)
     }
 
 
@@ -64,7 +64,7 @@ function $MorphicNode() {
 
 }
 
-function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; setTo: (key: string) => any } {
+function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; set: (key: string) => any } {
 
     const $key = Ion(initialKey)
     const $render = Ion(switchMap[$key()])
@@ -77,9 +77,9 @@ function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: st
         return $morphling($render)
     }
 
-    $Morphable.setTo = $key.set
+    $Morphable.set = $key.set
 
-    return $Morphable as unknown as { (): any; setTo: (key: string) => any }
+    return $Morphable as unknown as { (): any; set: (key: string) => any }
 }
 
 function MainContent() {
@@ -88,7 +88,7 @@ function MainContent() {
         <div>hello</div>)
 
     function changeMainContent() {
-        $mainContent.setTo(() =>
+        $mainContent.set(() =>
             <div>bye</div>
         )
     }

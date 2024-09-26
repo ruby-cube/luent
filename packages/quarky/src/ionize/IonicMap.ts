@@ -9,17 +9,22 @@ import { useClearOp, useDeleteOp } from "./IonicSet";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
 import { isAnyIon } from "../ion/AnyIon";
+import { AnyObject } from "@rue/types";
 
 
 
 export function createIonicMap(
     target: Map<any, any>,
+    methods: AnyObject | undefined
 ) {
-    const metaIonicModel = new MetaIonicCollection(target)
+    const metaIonicModel = new MetaIonicCollection(target, methods)
     const reactive = new Proxy(target, {
         get(target, key, receiver) {
             if (__DEV__) emitSignal()
-                const value = Reflect.get(target, key, receiver)
+            if (methods && key in methods) {
+                return methods[key];
+            }
+            const value = Reflect.get(target, key, receiver)
             if (typeof key === 'symbol' && key.description === 'Symbol.iterator') {
                 return value;
             }
@@ -100,7 +105,7 @@ export function createIonicMap(
         if (oldSize !== newSize) {
             const sizeProp = getObservedProp(reactive, 'size')
             if (sizeProp)
-                trigger(sizeProp);
+                trigger(sizeProp, newSize, oldSize);
         }
 
         const hasOp = getTrackedOp(reactive, 'has', key)

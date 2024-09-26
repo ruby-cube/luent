@@ -52,7 +52,7 @@ function TextArea() {
     const $word = Ion("not ready")
 
     $await(simFetchC("pomp"))
-        .then(word => $word.setTo(word))
+        .then(word => $word.set(word))
 
     return (
         <div>
@@ -68,7 +68,7 @@ function ItemBlockA() {
     const $word = Ion("not ready")
 
     $await(simFetch("calico"))
-        .then(word => $word.setTo(word))
+        .then(word => $word.set(word))
 
     return (
         <div>{$word}</div>
@@ -79,7 +79,7 @@ function ItemBlockB() {
     const $word = Ion("not ready")
 
     $await(simLongFetch("basset"))
-        .then(word => $word.setTo(word))
+        .then(word => $word.set(word))
 
     return (
         <div>{$word}</div>
@@ -90,7 +90,7 @@ function ItemBlockC() {
     const $word = Ion("not ready")
 
     $await(simFetchB("cerulean"))
-        .then(word => $word.setTo(word))
+        .then(word => $word.set(word))
 
     return (
         <div>{$word}</div>
@@ -101,7 +101,7 @@ function ItemBlockD() {
     const $word = Ion("not ready")
 
     $await(simLongFetchB("tilted"))
-        .then(word => $word.setTo(word))
+        .then(word => $word.set(word))
 
     return (
         <div>{$word}</div>
