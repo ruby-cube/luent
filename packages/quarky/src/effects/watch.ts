@@ -12,7 +12,7 @@ import { META } from "../ReactiveEntity";
 import { noop } from "@rue/utils";
 import { __devCheckIfTracked } from "../derivations/DependencyTracker";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
-import { AtomicIon, getMetaIon, isIon } from "../ion/AtomicIon";
+import { AtomicIon, asMetaIon, isIon } from "../ion/AtomicIon";
 import { isObservedProp, ObservedProp } from "../ionize/ObservedProp";
 import { asIonicAtom } from "../derivations/IonicAtom";
 import { PropIon } from "../ionize/PropIon";
@@ -91,13 +91,13 @@ type Effect = () => void
 export type RawEffect = (a: any, b: any) => void
 
 
-let currentWatchTarget: DerivedIon | AtomicIon | IonicModel | undefined // prevents infinite loops for phase: SYNC + effect that sets ion
+let currentWatchTarget: DerivedIon | AtomicIon | IonicModel | undefined // prevents infinite loops for synchronous effects that set ions
 
 export function isCurrentWatchTarget(atom: AtomicIon | ObservedProp) {
     if (!currentWatchTarget) return false;
     if (currentWatchTarget === atom) return true;
     if (isDerivedIon(currentWatchTarget)) {
-        return getMetaIon(currentWatchTarget).atoms.has(asIonicAtom(atom))
+        return asMetaIon(currentWatchTarget).atoms.has(asIonicAtom(atom))
     }
     if (isIonicModel(currentWatchTarget)) {
         const meta = asMetaIonicModel(currentWatchTarget)
@@ -113,7 +113,7 @@ export function isCurrentWatchTarget(atom: AtomicIon | ObservedProp) {
 export function watch<T extends AnyIon | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
 export function watch<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
 export function watch<T extends AnyIon | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
-    if (!(target instanceof Function)) {
+    if (!isAnyIon(target) && !(target instanceof Function)) {
         return watchReactiveModel(target, effect, options || {})
     }
     // const retrack = options?.retrack ?? true
@@ -130,7 +130,7 @@ export function watch<T extends AnyIon | ReactiveGet | IonicModel>(target: T, ef
         const newValue = _target() // This is when retracking happens
         if (areEqual(toRaw(newValue), toRaw(oldValue))) return;
         let prevTarget = currentWatchTarget;
-        currentWatchTarget = _target
+        currentWatchTarget = _target // prevents infinite loops for synchronous effects
         effect(newValue, oldValue)
         currentWatchTarget = prevTarget;
         oldValue = newValue;

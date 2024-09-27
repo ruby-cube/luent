@@ -1,18 +1,12 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject, ReadonlyKeys } from "@rue/types";
 import { asMetaIonicModel, isIonicModel, ionize, IonicModel, toRaw } from "./IonicModel";
 import { asObservedProp, ObservedProp } from "./ObservedProp";
 import { META } from "../ReactiveEntity";
 
-// export function $Props<T extends AnyObject, K extends keyof T>(model: T, keys: K[]) {
-//     const reactive = isIonicModel(model) ? model : ionize(model)
-//     const propsSignal = asMetaIonicModel(reactive).getMultiPropIon(keys.toString())
-//     if (propsSignal) return propsSignal;
-//     return $MultiPropsSignal(reactive, keys)
-// }
+
 
 export function isPropIon(value: any): value is PropIon {
-    if (!(value instanceof Function)) return false;
-    return value.name === "__$propIon"
+    return value[META] instanceof ObservedProp;
 }
 
 export type PropIon<T = any> = {
@@ -21,11 +15,26 @@ export type PropIon<T = any> = {
     [META]: ObservedProp
 }
 
-export function asIon<T extends AnyObject, K extends keyof T>(model: T, key: K): PropIon<T[K]> {
+export type ReadonlyPropIon<T = any> = {
+    (): T;
+    [META]: ObservedProp
+}
+
+type Protected = {
+    readonly frog: string,
+    fluffy: boolean
+}
+
+
+
+
+type AsPropIon<T, K extends keyof T> = K extends ReadonlyKeys<T> ? ReadonlyPropIon<T[K]> : PropIon<T[K]>
+
+export function asIon<T extends AnyObject, K extends keyof T>(model: T, key: K): AsPropIon<T, K> {
     const reactive = isIonicModel(model) ? model : ionize(model)
-    const propIon = asMetaIonicModel(reactive).getPropIon(key)
-    if (propIon) return propIon;
-    return $Prop(reactive, key)
+    const propIon = asMetaIonicModel(reactive).getPropIon(key) //TODO: need a map for readonly prop ions too...
+    if (propIon) return propIon as AsPropIon<T, K>
+    return $Prop(reactive, key) as AsPropIon<T, K>
 }
 
 function $Prop<T extends IonicModel, K extends keyof T, P extends T[K]>(reactive: T, key: K): PropIon<P> {
@@ -37,11 +46,11 @@ function $Prop<T extends IonicModel, K extends keyof T, P extends T[K]>(reactive
         return reactive[key];
     }
 
+    const prop = asObservedProp(reactive, key)
     __$propIon.set = (newValue: P) => {
         reregisterIfNeeded()
         return setValue(reactive, key, newValue, rawTarget[key])
     }
-    const prop = asObservedProp(reactive, key)
     __$propIon[META] = prop;
     // __$propIon.set = (toNewValue:(value: P) => P) => {
     //     reregisterIfNeeded()

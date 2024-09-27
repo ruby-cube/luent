@@ -41,46 +41,38 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
     }
 
     function _remove() {
-        try {
-            remove(returnVal ?? _callback);
-            if (__DEV__) unmarkNoCleanup(pendingOp);
-        }
-        finally {
-            if (pendingCancelOp) pendingCancelOp.cancel();
-            if (pendingFlaskCleanup) pendingFlaskCleanup.cancel();
-        }
+        remove(returnVal ?? _callback);
+        if (__DEV__) unmarkNoCleanup(pendingOp);
+        if (pendingCancelOp) pendingCancelOp.cancel();
+        if (pendingFlaskCleanup) pendingFlaskCleanup.cancel();
     }
 
-    try {
-        returnVal = enroll(_callback);
-    }
-    finally {
-        pendingOp = new Promise((resolve) => {
-            _resolve = resolve;
-        }) as PendingOp<ReturnType<CB>>
+    returnVal = enroll(_callback);
+    pendingOp = new Promise((resolve) => {
+        _resolve = resolve;
+    }) as PendingOp<ReturnType<CB>>
 
-        let called = false;
-        const cancel = (() => {
-            if (called) return;
-            _remove();
-            _resolve(new Cancellation("Pending op canceled."))
-            called = true;
-        }) as CallbackRemover;
-        cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.
-        //@ts-expect-error
-        cancel.__devName = options?.__devName;
+    let called = false;
+    const cancel = (() => {
+        if (called) return;
+        _remove();
+        _resolve(new Cancellation("Pending op canceled."))
+        called = true;
+    }) as CallbackRemover;
+    cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.
+    //@ts-expect-error
+    cancel.__devName = options?.__devName;
 
-        pendingOp.cancel = cancel;
+    pendingOp.cancel = cancel;
 
-        pendingFlaskCleanup =
-            flask && flask !== 'outlive' ? flask.onDisposal(cancel)
-                : flask === 'outlive' ? undefined
-                    : onFlaskDisposal(cancel)
+    pendingFlaskCleanup =
+        flask && flask !== 'outlive' ? flask.onDisposal(cancel)
+            : flask === 'outlive' ? undefined
+                : onFlaskDisposal(cancel)
 
-        pendingCancelOp = scheduleCancellation ? scheduleCancellation(cancel) : null;
+    pendingCancelOp = scheduleCancellation ? scheduleCancellation(cancel) : null;
 
-        if (__DEV__ && flask !== 'outlive') setUpCleanupWarning!(pendingOp, scheduleCancellation, flask || getFlask())
+    if (__DEV__ && flask !== 'outlive') setUpCleanupWarning!(pendingOp, scheduleCancellation, flask || getFlask())
 
-        return pendingOp;
-    }
+    return pendingOp;
 }

@@ -1,9 +1,7 @@
 import { isIon, AtomicIon } from "../ion/AtomicIon";
-import { READONLY_ION } from "../asReadonly";
 import { IonicDerivation } from "./IonicDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 import { META } from "../ReactiveEntity";
-import { isPropIon } from "../ionize/PropIon";
 import { __devCheckIfTracked } from "./DependencyTracker";
 import { AnyObject } from "@rue/types";
 
@@ -26,7 +24,6 @@ export type DerivedIon<T = any> = {
 export type ReactiveGet<T = any> = DerivedIon<T> | AtomicIon<T> | (() => T);
 
 export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIon {
-    if (!(maybeDerivedIon instanceof Function)) return false
     return maybeDerivedIon[META]?.type === DERIVED_ION;
 }
 
@@ -89,7 +86,6 @@ export function DerivedIon<T extends any>(pureGetter: () => T, methods?: AnyObje
     //     wrapIonMethods(proto, methods, mutate) // prevents infinite loops if ion is set in an ionic effect and calls itself. But what if it doesn't mutate and needs to be tracked? Are there cases like this? Yes, e.g. a method that is isEqualToZero()
     // }
 
-    Object.setPrototypeOf(proto, Object.getPrototypeOf($derivedIon)) //QUESTION: Not sure if I should consider $ion a function or not, but this allows `$ion instanceof Function` to evaluate to true
     Object.setPrototypeOf($derivedIon, proto)
 
     onDestroy(() => {

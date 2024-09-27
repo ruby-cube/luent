@@ -5,28 +5,31 @@ import { trigger } from "../trigger";
 import { META, ReactiveEntity } from "../ReactiveEntity";
 import { isFunctionWithProps } from "@rue/utils";
 import { AnyObject } from "@rue/types";
-import { AnyIon } from "./AnyIon";
+import { AnyIon, isAnyIon } from "./AnyIon";
 
 
 export type AtomicIon<T = any, M extends AnyObject = {}> = {
     (): T;
-} & IonPrototype<T, M>
-
-type IonPrototype<T, M> = {
     [META]: MetaIon<T>;
     set: (value: T) => T
 } & M
 
+export type ProtectedIon<T = any, M extends AnyObject = {}> = {
+    (): T;
+    [META]: MetaIon<T>;
+} & M
+
 // export type ReactiveGet<T = any> = () => T
 export type Get<T = any> = () => T
-
-
 
 export const ATOMIC_ION = Symbol('atomicIon');
 
 export class MetaIon<T = unknown> implements ReactiveEntity {
 
     type = ATOMIC_ION
+
+    asProtected?: ProtectedIon
+    asReadonly?: ProtectedIon
 
     constructor(
         readonly o: AtomicIon<T>,
@@ -43,22 +46,20 @@ export function AtomicIon<
     value: T,
     methods?: M
 ) {
-    let metaIon: MetaIon
-    // let methodKey: keyof M = ""
+    const metaIon = new MetaIon(<AtomicIon>$ion, value, isIonicModel(value))
 
-    // const $ionProxy = new Proxy($ion, {
-    //     get(target, key, receiver) {
-    //         if (key === META) return metaIon;
-    //         if (methods && key in methods) {
-    //             return mutate;
-    //         }
-    //         return Reflect.get(target, key, receiver)
-    //     },
-    //     apply(target) {
-    //         return target()
-    //     },
-    // }) as AtomicIon
+    const proto = {
+        [META]: metaIon,
+        set(newValue: any) {
+            return setValue(metaIon, newValue, metaIon.value);
+        }
+    } as AnyObject
 
+    if (methods) {
+        for (const key in methods) {
+            proto[key] = methods[key].bind(proto) // This makes set function available to `this` even after protected
+        }
+    }
 
     function $ion() {
         if (__DEV__) emitSignal();
@@ -68,32 +69,146 @@ export function AtomicIon<
         return metaIon.value as T;
     }
 
-    metaIon = new MetaIon(<AtomicIon>$ion, value, isIonicModel(value))
-
-    const proto = {
-        [META]: metaIon,
-        set: set.bind(metaIon),
-        ...methods || {}
-    }
-
-    // if (methods) {
-    //     wrapIonMethods(proto, methods, mutate) // prevents infinite loops if ion is set in an ionic effect and calls itself. But what if it doesn't mutate and needs to be tracked? Are there cases like this? Yes, e.g. a method that is isEqualToZero()
-    // }
-
-    Object.setPrototypeOf(proto, Object.getPrototypeOf($ion)) //QUESTION: Not sure if I should consider $ion a function or not, but this allows `$ion instanceof Function` to evaluate to true
     Object.setPrototypeOf($ion, proto)
-
-    // function mutate(...args: any[]) {
-    //     const tracker = getDependencyTracker();
-    //     tracker?.stop();
-    //     const output = methods![methodKey](...args)
-    //     tracker?.restore();
-    //     methodKey = "";
-    //     return output;
-    // }
 
     return $ion as AtomicIon<T, M>
 }
+
+const READONLY = 'ro'
+
+// protected ion: no set function 
+// readonly ion: no methods
+// custom protected ion: no set function and only select properties and methods 
+
+/**
+ * methodKeys: methodKeys to include in protected ion
+ */
+function protectIon($ion: AtomicIon, methodKeys?: string[] | typeof READONLY) {
+    if (!methodKeys) {
+        return asProtectedIon($ion);
+    }
+
+    if (methodKeys === READONLY) {
+        return asReadonlyIon($ion)
+    }
+
+    return asCustomProtectedIon($ion, methodKeys)
+}
+
+//@ts-expect-error
+protect($count, [
+    'increment',
+    'decrement'
+])
+
+function asCustomProtectedIon($ion: AtomicIon, propertyKeys: string[]) {
+    if (isReadonlyIon($ion)) return $ion;
+    return createCustomProtectedIon($ion, propertyKeys)
+}
+
+function createCustomProtectedIon($ion: AtomicIon, methodKeys: string[]) {
+    const meta = asMetaIon($ion);
+    const $coreIon = meta.o;
+    const proto = Object.getPrototypeOf($coreIon)
+    function $customIon() {
+        return $coreIon()
+    }
+
+    const _methodKeys = new Set(methodKeys)
+    if (__DEV__ && _methodKeys.has('set')) {
+        console.warn(`'set' function cannot be included in a protected ion.`)
+    }
+
+    const customProto = Object.create(proto)
+    customProto.set = protectedMethod;
+    for (const key in proto) {
+        if (!_methodKeys.has(key)) {
+            customProto[key] = protectedMethod
+        }
+    }
+
+    Object.setPrototypeOf($customIon, customProto)
+
+    return $customIon;
+}
+
+function protectedMethod() {
+    if (__DEV__) console.warn(`[PROTECTED METHOD] Operation failed.`)
+}
+
+function asReadonlyIon($ion: AtomicIon) {
+    if (isReadonlyIon($ion)) return $ion;
+    const meta = asMetaIon($ion);
+    const existing = meta.asReadonly;
+    if (existing) return existing;
+    return createReadonlyIon(meta);
+}
+
+function createReadonlyIon(meta: MetaIon) {
+    const $coreIon = meta.o
+
+    function $readonlyIon() {
+        return $coreIon()
+    }
+    $readonlyIon[META] = meta;
+
+    meta.asReadonly = $readonlyIon;
+    return $readonlyIon;
+}
+
+
+function asProtectedIon($ion: AtomicIon) {
+    if (isProtectedIon($ion) || isReadonlyIon($ion)) {
+        return $ion
+    }
+    const meta = asMetaIon($ion)
+    const existing = meta.asProtected
+    if (existing) {
+        return existing;
+    }
+    return createProtectedIon(meta);
+}
+
+function createProtectedIon(meta: MetaIon) {
+    const $coreIon = meta.o
+
+    const proto = Object.create(Object.getPrototypeOf($coreIon))
+    proto.set = () => {
+        console.warn(`Set operation failed. Ions cannot be set outside of their own methods`)
+    }
+
+    function $protectedIon() {
+        return $coreIon()
+    }
+
+    Object.setPrototypeOf($protectedIon, proto)
+
+    meta.asProtected = $protectedIon as ProtectedIon
+    return $protectedIon
+}
+
+function isProtectedIon($ion: ProtectedIon) {
+    const meta = asMetaIon($ion)
+    return meta.asProtected === $ion
+}
+
+function isReadonlyIon($ion: ProtectedIon) {
+    const meta = asMetaIon($ion)
+    return meta.asReadonly === $ion
+}
+
+// function attachMethods(methods: { [key: string]: Function }, proto: AnyObject) {
+//     for (const key in methods) {
+//         proto[key] = function performMethod(...args: any[]) {
+//             if (!methodAllowed()) throw new Error("Object is protected from this method")
+//             setAllowed = true;
+//             const output = methods![methodKey](...args)
+//             setAllowed = false;
+//             methodKey = "";
+//             return output;
+//         }
+//     }
+// }
 
 // function wrapIonMethods(
 //     proto: IonPrototype<any, any>,
@@ -101,16 +216,25 @@ export function AtomicIon<
 //     mutate: (...args: any[]) => any
 // ) {
 //     for (const key in methods) {
-//         proto[key] = mutate
+//         proto[key] = wrapIonMethod(methods[key])
+//     }
+// }
+
+// function wrapIonMethod(method: Function, key: string) {
+//     return function performMethod(...args: any[]) {
+//         if (!methodAllowed()) throw new Error("Object is protected from this method")
+//         setAllowed = true;
+//         const output = methods![methodKey](...args)
+//         setAllowed = false;
+//         methodKey = "";
+//         return output;
 //     }
 // }
 
 
 
 
-function set<T>(this: MetaIon, newValue: T) {
-    return setValue(this, newValue, this.value);
-}
+
 
 // function set<T>(this: MetaIon, toNewValue: (value: T) => T) {
 //     const value = this.value as T;
@@ -138,11 +262,11 @@ function shouldMakeIonic(newValue: unknown, metaIon: MetaIon): newValue is AnyOb
 
 
 export function isIon(maybeIon: any): maybeIon is AtomicIon {
-    if (isFunctionWithProps(maybeIon)) return maybeIon[META]?.type === ATOMIC_ION;
+    if (maybeIon instanceof Object) return maybeIon[META]?.type === ATOMIC_ION;
     return false;
 }
 
-export function getMetaIon<T extends object>(ionicEntity: T): T extends { [META]: infer M } ? M : never { 
-    if (!(META in ionicEntity)) throw new Error("INVALID INPUT. Must have a META property")
+export function asMetaIon<T extends AnyIon>(ionicEntity: T): T extends { [META]: infer M } ? M : never {
+    if (!isAnyIon(ionicEntity)) throw new Error("INVALID INPUT. Must be an ion")
     return ionicEntity[META] as T extends { [META]: infer M } ? M : never
 }

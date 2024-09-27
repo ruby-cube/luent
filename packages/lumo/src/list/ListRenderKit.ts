@@ -1,4 +1,4 @@
-import { Ion, isAnyIon, isIonicModel, AtomicIon, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, getMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "../../../quarky/src";
+import { Ion, isAnyIon, isIonicModel, AtomicIon, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "../../../quarky/src";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
@@ -213,7 +213,7 @@ export class ListRenderKit<T = any> {
                 pushProvider(this.provider)
                 pushList(this)
                 const list = this.data;
-                const _item = isIonicModel(list) || isIon(list) && getMetaIon(list).hasIonicValue ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
+                const _item = isIonicModel(list) || isIon(list) && asMetaIon(list).hasIonicValue ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
                 dynamicNode.activate(function renderNewListItem() {
                     const nodeEntities = normalizeToArray(renderItem(_item, $index));
                     for (const nodeEntity of nodeEntities!) {

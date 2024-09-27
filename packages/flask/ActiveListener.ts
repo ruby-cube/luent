@@ -49,29 +49,21 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
     mapHandlers(_callback, callback);
 
     function oneTimeCallback(...args: any[]) {
-        try {
-            callback(...args);
-        }
-        finally {
-            _remove()
-        }
+        callback(...args);
+        _remove()
     }
 
     let called = false;
     function _remove() {
         if (called) return;
-        try {
-            remove(returnVal ?? _callback);
-            called = true;
-            if (__DEV__) unmarkNoCleanup(activeListener);
+        remove(returnVal ?? _callback);
+        called = true;
+        if (__DEV__) unmarkNoCleanup(activeListener);
+        if (pendingStop && 'cancel' in pendingStop) pendingStop.cancel();
+        if (pendingFlaskCleanup && 'cancel' in pendingFlaskCleanup) {
+            pendingFlaskCleanup.cancel();
         }
-        finally {
-            if (pendingStop && 'cancel' in pendingStop) pendingStop.cancel();
-            if (pendingFlaskCleanup && 'cancel' in pendingFlaskCleanup) {
-                pendingFlaskCleanup.cancel();
-            }
-            // console.log('remove done', pendingFlaskCleanup)
-        }
+        // console.log('remove done', pendingFlaskCleanup)
     }
     _remove.isRemover = true as const;
     _remove.__devName = options?.__devName;
@@ -92,10 +84,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 
     if (__DEV__ && flask !== "outlive") setUpCleanupWarning!(activeListener, until, flask || getFlask())
 
-    try {
-        returnVal = enroll(_callback);
-    }
-    finally {
-        return activeListener as ActiveListener;
-    }
+    returnVal = enroll(_callback);
+    
+    return activeListener as ActiveListener;
 }

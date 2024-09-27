@@ -6,7 +6,7 @@ import { IonicModel, isIonicModel, toRaw } from "../ionize/IonicModel";
 import { isAnyIon } from "../ion/AnyIon";
 import { isDerivedIon } from "./DerivedIon";
 import { isPropIon } from "../ionize/PropIon";
-import { getMetaIon, isIon } from "../ion/AtomicIon";
+import { asMetaIon, isIon } from "../ion/AtomicIon";
 
 
 
@@ -91,7 +91,7 @@ function collectAbsorbedIons(ionicModel: IonicModel, tracker: DependencyTracker)
             tracker.callToCollectDependencies(value)
         }
         else if (isPropIon(value)) {
-            tracker.track(getMetaIon(value))
+            tracker.track(asMetaIon(value))
         }
     }
     return tracker.deps

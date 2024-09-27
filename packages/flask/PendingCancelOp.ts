@@ -22,8 +22,8 @@ export function makePendingCancelOp(config: {
     function _remove() {
         if (called) return;
         // try {
-            remove(returnVal ?? _callback);
-            called = true;
+        remove(returnVal ?? _callback);
+        called = true;
         // }
         // finally {
         //     if (pendingFlaskCleanup) pendingFlaskCleanup.cancel()
@@ -33,12 +33,9 @@ export function makePendingCancelOp(config: {
 
     // pendingFlaskCleanup = onFlaskDisposal(_remove)
 
-    try {
-        returnVal = enroll(_callback);
-    }
-    finally {
-        return {
-            cancel: _remove
-        }
+    returnVal = enroll(_callback);
+    
+    return {
+        cancel: _remove
     }
 }

@@ -1,3 +1,4 @@
+import { isAnyIon } from "../ion/AnyIon";
 import { isObservedProp, ObservedProp } from "../ionize/ObservedProp";
 import { isTrackedOp, TrackedOp } from "../ionize/TrackedOp";
 import { asIonicAtom, IonicAtom, ReactivePrimitive } from "./IonicAtom";
@@ -87,7 +88,7 @@ export function getWithoutTracking(reactiveRef: (() => any) | ObservedProp | Tra
     const tracker = getDependencyTracker();
     tracker?.stop();
     let value;
-    if (reactiveRef instanceof Function)
+    if (isAnyIon(reactiveRef) || reactiveRef instanceof Function)
         value = reactiveRef();
     else if (isObservedProp(reactiveRef))
         value = reactiveRef.getValue();

@@ -70,13 +70,10 @@ export class EffectFlask {
     }
 
     collectEffects<T>(run: (outerFlask: EffectFlask | null) => T) {
-        try {
-            pushFlask(this);
-            return run(this.outer);
-        } finally {
-            popFlask();
-
-        }
+        pushFlask(this);
+        const output = run(this.outer);
+        popFlask();
+        return output;
     }
 }
 
@@ -85,12 +82,10 @@ export class EffectFlask {
 
 export function collectEffects<T>(run: (flask: EffectFlask, outerFlask: EffectFlask | null) => T, __devName: string) {
     const flask = new EffectFlask(__devName);
-    try {
-        pushFlask(flask);
-        return run(flask, flask.outer || null);
-    } finally {
-        popFlask();
-    }
+    pushFlask(flask);
+    const output = run(flask, flask.outer || null);
+    popFlask();
+    return output;
 }
 
 
@@ -102,7 +97,7 @@ export function bindFlask(callback: Callback, flask: EffectFlask | null = getFla
             popFlask();
         }
         return callbackBoundToFlask
-    } 
+    }
     return callback;
 }
 

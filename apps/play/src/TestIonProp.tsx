@@ -41,7 +41,11 @@ export function TestIonProp() {
         console.log('$counter mutated', mutations)
     })
 
-    const $firstName = Ion('Kermit')
+    const $firstName = Ion('Kermit', {
+        set(name: string){
+            this.set(name)
+        }
+    })
     const $lastName = Ion('The Frog')
 
     const $fullName = Ion({

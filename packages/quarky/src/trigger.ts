@@ -6,14 +6,14 @@ import { asWatchTarget, isWatched } from "./effects/WatchTarget";
 import { getCurrentRenderCycle } from "./effects/RenderCycle";
 import { getWithoutTracking } from "./derivations/DependencyTracker";
 import { isIonicEffectAtom } from "./derivations/IonicEffect";
-import { META } from "./ReactiveEntity";
+import { isCurrentWatchTarget } from "./effects/watch";
 
 
 export function trigger(target: AtomicIon | ObservedProp, newValue?: any, oldValue?: any) {
     if (__DEV__ && getCurrentRenderCycle() && getCurrentRenderCycle()!.phase > 1)
         console.warn(`CASE RESEARCH: Reactive entity triggered during phase ${getCurrentRenderCycle()!.phase}:`, target, getWithoutTracking(target))
 
-    if (isIonicEffectAtom(target)) return;
+    if (isIonicEffectAtom(target) || isCurrentWatchTarget(target)) return; // prevents infinite loops for synchronous effects
 
     const propPod = toPropIon(target)
 
