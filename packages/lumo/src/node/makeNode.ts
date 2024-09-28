@@ -1,4 +1,4 @@
-import { DerivedIon, ReactiveGet, AtomicIon, getWithoutTracking, DerivedIon, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked } from "../../../quarky/src";
+import { DerivedIon, ReactiveGet, ReactiveIon, getWithoutTracking, DerivedIon, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked } from "../../../quarky/src";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
@@ -90,7 +90,7 @@ export function makeNode(
 export function initializeListRef( // should this be initialize ref?
     ref: NodesIon,
     value: NodeReferent | undefined,
-    $index: AtomicIon<number>
+    $index: ReactiveIon<number>
     // options?: ElementOptions
 ) {
     // if (__DEV__) __devCheckIfNotTracked()

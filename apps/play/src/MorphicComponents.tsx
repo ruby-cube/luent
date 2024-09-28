@@ -1,12 +1,12 @@
 //@ts-nocheck
-import { Ion, AtomicIon, watch } from "../../../packages/quarky/src"
+import { Ion, ReactiveIon, watch } from "../../../packages/quarky/src"
 import { watchForRender } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { NodeIon } from "@rue/lumo";
 
 export function MainBlock() {
 
-    const $hello = $PortableNode() as unknown as AtomicIon<PortableNode>
-    const $bye = $PortableNode() as unknown as AtomicIon<PortableNode>
+    const $hello = $PortableNode() as unknown as ReactiveIon<PortableNode>
+    const $bye = $PortableNode() as unknown as ReactiveIon<PortableNode>
 
     const helloView = $hello()
     helloView.remove()
@@ -56,7 +56,7 @@ export function MainBlock() {
     )
 }
 
-function $portable(render: (() => any) | AtomicIon<PortableNode>, $ref: AtomicIon<PortableNode> | (() => any)) {
+function $portable(render: (() => any) | ReactiveIon<PortableNode>, $ref: ReactiveIon<PortableNode> | (() => any)) {
     return render;
 }
 
@@ -64,7 +64,7 @@ function $MorphicNode() {
 
 }
 
-function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; set: (key: string) => any } {
+function $MorphicPort(initialKey: string | ReactiveIon<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; set: (key: string) => any } {
 
     const $key = Ion(initialKey)
     const $render = Ion(switchMap[$key()])
@@ -101,12 +101,12 @@ function MainContent() {
     )
 }
 
-function $morphling($render: AtomicIon<() => any>) {
+function $morphling($render: ReactiveIon<() => any>) {
     return new MorphlingKit($render)
 }
 
 class MorphlingKit {
-    constructor(public $render: AtomicIon<() => any>) { }
+    constructor(public $render: ReactiveIon<() => any>) { }
 }
 
 function setUpMorphling(morphlingKit: MorphlingKit) {

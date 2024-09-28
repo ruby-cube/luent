@@ -169,7 +169,7 @@ function reactiveArraySetter(
         return true;
     }
     const oldValue = Reflect.get(target, key, receiver);
-    if (isAnyIon(oldValue) && !isIntegerKey(key))
+    if (isAnyIon(oldValue) && !isIntegerKey(key)) //TODO: replaceAbsorbedIon. //QUESTION: Should Indices absorb ions? Vue doesn't
         return setAbsorbedIon(oldValue, _newValue)
     if (oldValue === _newValue || isNonTrackable(key, Array)) {
         // Reflect.set(target, key, newValue, receiver);

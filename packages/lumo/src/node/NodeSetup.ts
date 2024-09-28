@@ -2,7 +2,7 @@ import {  ComponentSetup, InternalComponent } from "../component/InternalCompone
 import { HTMLTag } from "../element/makeElement";
 import { ListData } from "../list/For";
 import { ComponentConfig, ElementConfig, RenderFunction } from "./makeNode";
-import { ReactiveGet, AtomicIon } from "../../../quarky/src";
+import { ReactiveGet, ReactiveIon } from "../../../quarky/src";
 
 
 export type NodeSetup<T extends HTMLTag | ComponentSetup> =
@@ -16,7 +16,7 @@ export type ItemNodeConfig<
     L extends ListData
 > =
     L extends (infer I)[] ?
-    ((item?: I, $index?: AtomicIon<number>) => NodeSetup<T>)
+    ((item?: I, $index?: ReactiveIon<number>) => NodeSetup<T>)
     : L extends ReactiveGet<(infer I)[]> ?
-    (item?: I, $index?: AtomicIon<number>) => NodeSetup<T>
+    (item?: I, $index?: ReactiveIon<number>) => NodeSetup<T>
     : never

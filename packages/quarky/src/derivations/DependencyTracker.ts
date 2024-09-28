@@ -98,13 +98,13 @@ export function getWithoutTracking(reactiveRef: (() => any) | ObservedProp | Tra
     return value;
 }
 
-// export function track(target: AtomicIon): boolean
+// export function track(target: ReactiveIon): boolean
 // export function track(target: IonicModel, key: string | symbol): boolean
 // export function track(target: IonicModel, key: string | symbol, arg: any): boolean
-// export function track(target: AtomicIon | IonicModel, key: string | symbol = UNDEFINED, arg: any = UNDEFINED) {
+// export function track(target: ReactiveIon | IonicModel, key: string | symbol = UNDEFINED, arg: any = UNDEFINED) {
 //     const _target = arg !== UNDEFINED ? asTrackedOp(<IonicModel>target, <string>key, arg)
 //         : key !== UNDEFINED ? asObservedProp(<IonicModel>target, key)
-//             : <AtomicIon>target
+//             : <ReactiveIon>target
 //     this.addDep(_target)
 //     return true;
 

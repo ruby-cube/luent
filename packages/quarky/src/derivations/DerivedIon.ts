@@ -1,9 +1,10 @@
-import { isIon, AtomicIon } from "../ion/AtomicIon";
+import { isIon, ReactiveIon } from "../ion/ReactiveIon";
 import { IonicDerivation } from "./IonicDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 import { META } from "../ReactiveEntity";
 import { __devCheckIfTracked } from "./DependencyTracker";
 import { AnyObject } from "@rue/types";
+import { ProtectedIon } from "../ion/ProtectedIon";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -21,7 +22,7 @@ export type DerivedIon<T = any> = {
     untrack: () => void
 }
 
-export type ReactiveGet<T = any> = DerivedIon<T> | AtomicIon<T> | (() => T);
+export type ReactiveGet<T = any> = DerivedIon<T> | ReactiveIon<T> | (() => T);
 
 export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIon {
     return maybeDerivedIon[META]?.type === DERIVED_ION;
@@ -30,11 +31,17 @@ export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIo
 
 
 
-class MetaDerivedIon<T extends DerivedIon = DerivedIon> extends IonicDerivation {
+export class MetaDerivedIon extends IonicDerivation {
 
     override type = DERIVED_ION
+    asProtected?: ProtectedIon
+    asReadonly?: ProtectedIon
 
-    constructor(override readonly o: T, retrack: boolean) {
+    constructor(
+        override readonly o: DerivedIon, 
+        retrack: boolean,
+        public hasMethods: boolean = false
+    ) {
         super(o, DERIVED_ION, retrack);
     }
 
@@ -45,12 +52,13 @@ class MetaDerivedIon<T extends DerivedIon = DerivedIon> extends IonicDerivation 
     }
 }
 
+
 // export const $ = DerivedIon
 
 
 export function DerivedIon<T extends any>(pureGetter: () => T, methods?: AnyObject, retrack: boolean = true): DerivedIon<T> {
     let initialized = false;
-    const derived = new MetaDerivedIon(<DerivedIon><unknown>$derivedIon, retrack);
+    const derived = new MetaDerivedIon(<DerivedIon>$derivedIon, retrack, !!methods);
     function $derivedIon() {
         if (!initialized || derived.dirty && retrack) {
             const value = derived.trackAtoms(pureGetter);
@@ -76,15 +84,16 @@ export function DerivedIon<T extends any>(pureGetter: () => T, methods?: AnyObje
 
     const proto = {
         [META]: derived,
-        ...methods || {},
         untrack() {
             derived.untrackAtoms()
         }
-    }
+    } as AnyObject
 
-    // if (methods) {
-    //     wrapIonMethods(proto, methods, mutate) // prevents infinite loops if ion is set in an ionic effect and calls itself. But what if it doesn't mutate and needs to be tracked? Are there cases like this? Yes, e.g. a method that is isEqualToZero()
-    // }
+    if (methods) {
+        for (const key in methods) {
+            proto[key] = methods[key].bind(proto) // This makes set function available to `this` even after protected
+        }
+    }
 
     Object.setPrototypeOf($derivedIon, proto)
 
@@ -95,12 +104,12 @@ export function DerivedIon<T extends any>(pureGetter: () => T, methods?: AnyObje
     return <DerivedIon><unknown>$derivedIon;
 }
 
-
-
 export type WritableDerivedIon<T = any, M extends AnyObject = {}> = {
+    ():T;
     set: (newValue: T) => T;
-} & DerivedIon<T> & M
-
+    [META]: MetaDerivedIon;
+    untrack: () => void;
+} & M
 
 export function WritableDerivedIon<T, M>(config: { get: () => T, set: (value: T) => T }, methods?: M & { [key: string]: (...args: any[]) => any }) {
     const _methods = methods || { set: config.set }

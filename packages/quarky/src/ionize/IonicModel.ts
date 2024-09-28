@@ -17,7 +17,7 @@ import { isInert } from "./inert";
 import { isIonizable } from "./ionizable";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
 import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
-import { AtomicIon } from "../ion/AtomicIon";
+import { ReactiveIon } from "../ion/ReactiveIon";
 import { PropIon } from "./PropIon";
 
 
@@ -56,11 +56,18 @@ export function isIonicModel(value: any): value is IonicModel {
 }
 
 type Ionized<T extends AnyObject, M> = {
-    [K in keyof T]: T[K] extends AtomicIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
+    [K in keyof T]: T[K] extends ReactiveIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
 } & M
+
+
+
+//TODO: should return T if not ionizable or is an ion
+//QUESTION: Can methods be added to existing ions this way?
 
 //API
 export function ionize<T extends AnyObject, M extends AnyObject>(target: T, methods?: M): { [K in keyof Ionized<T, M>]: Ionized<T, M>[K] } {
+    if (isAnyIon(target) || isInert(target) || !isIonizable(target)) return target as T;
+    if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
     const existingIonicModel = ionicModels.get(target)
     if (existingIonicModel) return existingIonicModel as T & M;
     return createReactiveModel(target, methods) as T & M
@@ -99,9 +106,6 @@ export function createReactiveModel(
     target: object,
     methods: object | undefined
 ): object {
-    if (isInert(target)) return target;
-    if (!isIonizable(target)) return target;
-    if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
     return isTuple(target) ? createIonicTuple(target, methods)
         : target instanceof Array ? createIonicArray(target, methods)
             : target instanceof Set ? createIonicSet(target, methods)
@@ -294,7 +298,9 @@ export function reactiveSetter(
 ) {
     if (metaIonicModel.isNewProperty(key)) metaIonicModel.registerNewProperty(key)
     const oldValue = Reflect.get(target, key, receiver);
-    if (isAnyIon(oldValue)) return setAbsorbedIon(oldValue, newValue)
+    if (isAnyIon(oldValue) && !isAnyIon(newValue)) {
+        return setAbsorbedIon(oldValue, newValue)
+    }
     if (oldValue === newValue
         || isNonTrackable(key, DataStructure)
         || isNonSettable(<string>key, DataStructure)
@@ -303,21 +309,23 @@ export function reactiveSetter(
         return true;
     }
 
-    const _newValue = toRawIfNeeded(newValue, key)
-    target[key] = _newValue
+    const _newValue = toRawIfNeeded(isAnyIon(newValue) ? newValue() : newValue, key)
+    const _oldValue = isAnyIon(oldValue) ? oldValue() : oldValue
+
+    target[key] = isAnyIon(newValue) ? newValue : _newValue
 
     storeSnapshot(metaIonicModel)
 
     const prop = getObservedProp(reactive, key);
     if (prop) {
-        trigger(prop, _newValue, oldValue)
+        trigger(prop, _newValue, _oldValue)
     }
 
     triggerIonicModelWithSetOp(
         reactive,
         key,
         _newValue,
-        oldValue,
+        _oldValue,
     )
 
     return true;

@@ -5,7 +5,7 @@ import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asObservedProp } from "./ObservedProp";
 import { MetaIonicModel, IONIC_MODEL } from "./MetaIonicModel";
-import { isIon } from "../ion/AtomicIon";
+import { isIon } from "../ion/ReactiveIon";
 import { isAnyIon } from "../ion/AnyIon";
 
 export function isReactiveObject(value: any): value is IonicModel {

@@ -12,7 +12,7 @@ import { META } from "../ReactiveEntity";
 import { noop } from "@rue/utils";
 import { __devCheckIfTracked } from "../derivations/DependencyTracker";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
-import { AtomicIon, asMetaIon, isIon } from "../ion/AtomicIon";
+import { ReactiveIon, asMetaIon, isIon } from "../ion/ReactiveIon";
 import { isObservedProp, ObservedProp } from "../ionize/ObservedProp";
 import { asIonicAtom } from "../derivations/IonicAtom";
 import { PropIon } from "../ionize/PropIon";
@@ -36,7 +36,7 @@ export type EffectOptions = {
 
 
 export type MutationRecord = {
-    target: IonicModel | AtomicIon | PropIon,
+    target: IonicModel | ReactiveIon | PropIon,
     // root?: IonicModel,
     // targetPath?: KeyPath, // undefined means the target is the root watched model
     op: MutationOp | SetOp
@@ -91,9 +91,9 @@ type Effect = () => void
 export type RawEffect = (a: any, b: any) => void
 
 
-let currentWatchTarget: DerivedIon | AtomicIon | IonicModel | undefined // prevents infinite loops for synchronous effects that set ions
+let currentWatchTarget: DerivedIon | ReactiveIon | IonicModel | undefined // prevents infinite loops for synchronous effects that set ions
 
-export function isCurrentWatchTarget(atom: AtomicIon | ObservedProp) {
+export function isCurrentWatchTarget(atom: ReactiveIon | ObservedProp) {
     if (!currentWatchTarget) return false;
     if (currentWatchTarget === atom) return true;
     if (isDerivedIon(currentWatchTarget)) {
@@ -117,7 +117,7 @@ export function watch<T extends AnyIon | ReactiveGet | IonicModel>(target: T, ef
         return watchReactiveModel(target, effect, options || {})
     }
     // const retrack = options?.retrack ?? true
-    const _target = !isAnyIon(target) ? DerivedIon(target) : target as DerivedIon | AtomicIon;
+    const _target = !isAnyIon(target) ? DerivedIon(target) : target as DerivedIon | ReactiveIon;
     // createIonicEffect(<() => any>target, retrack).initialize()
     const eager = options?.eager
     const phase = options?.phase || Phase.BEFORE_RENDER

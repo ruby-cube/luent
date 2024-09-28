@@ -1,6 +1,6 @@
 import { Component, fromContext, Provide, TypedKey } from "@rue/lumo"
-import { $, AtomicIon, DerivedIon, Ion, ionize } from "../../../packages/quarky/src"
-import { asIon } from "../../../packages/quarky/src/ionize/PropIon"
+import { $, ReactiveIon, DerivedIon, Ion, ionize } from "../../../packages/quarky/src"
+import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon"
 
 const COUNTER = Symbol("Counter") as TypedKey<Counter>
 const DOUBLE_COUNT = Symbol("DerivedIon<number>") as TypedKey<DerivedIon<number>>
@@ -62,7 +62,7 @@ export function ParentBlock(
         }
     })
 
-    const $qualities = asIon(frog, 'qualities')
+    const $qualities = asPropIon(frog, 'qualities')
 
     function setQualities() {
         $qualities.set('gallant')
@@ -124,8 +124,8 @@ function GrandChildBlock() {
     const counter = fromContext(COUNTER)
     const $doubleCount = fromContext(DOUBLE_COUNT)
     const name = fromContext(NAME)
-    const $name = asIon(name, '$')
-    const $count = asIon(counter.$, 'count')
+    const $name = asPropIon(name, '$')
+    const $count = asPropIon(counter.$, 'count')
 
 
 

@@ -5,7 +5,7 @@ import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { initializeRender, watch } from "../watch/watchAndPreserve";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
-import { AtomicIon } from "../../../quarky/src";
+import { ReactiveIon } from "../../../quarky/src";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
@@ -30,7 +30,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     tagName: T,
     childNodes: NodeEntity[] | undefined,
     config: ElementConfig,
-    $index: AtomicIon<number> | undefined
+    $index: ReactiveIon<number> | undefined
 ): DOMNode {
     const { class: classes, style: styles, ref, attributes: dynamicAttributes, ...other } = config;
 
@@ -252,7 +252,7 @@ function setUpDynamicAttributes(node: Element, changes: ((o: Element) => void)[]
     }
 }
 
-function setUpRefNulling(ref: _NodePod, $index: AtomicIon<number>) {
+function setUpRefNulling(ref: _NodePod, $index: ReactiveIon<number>) {
     if ($index && $index() === 0) {
 
     }

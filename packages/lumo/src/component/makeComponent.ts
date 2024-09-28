@@ -2,12 +2,13 @@ import { ComponentSetup, InternalComponent, Component, ProviderComponentSetup } 
 import { NodeIon } from "../node/NodeIon";
 import { ComponentConfig, initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
-import { AtomicIon, isIon, IonicModel } from "../../../quarky/src";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex } from "../list/ListRenderKit";
 import { getCurrentProvider, popProvider, provide, pushProvider } from "./provide";
 import { ProviderComponent } from "./ProviderComponent";
 import { MorphicRenderKit } from "../morphic/MorphicComponent";
+import { IonicModel, isIon, protect, ReactiveIon } from "@rue/quarky";
+import { AnyObject } from "@rue/types";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
@@ -52,19 +53,28 @@ export function makeComponent(
     Component: ComponentSetup,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: AtomicIon<number> | undefined
+    $index: ReactiveIon<number> | undefined
 ): InternalComponent {
-    const output = Component({ ...config, Slot })
+    const output = Component(createSetupProps(config, Slot))
     const component = 'morphicRenderKit' in output ? output.morphicRenderKit as MorphicRenderKit : new InternalComponent();
     initializeComponent(component, output, config.ref, $index)
     return component;
+}
+
+function createSetupProps(config: ComponentConfig, Slot: InferSlot | undefined) {
+    const setupProps = { Slot } as AnyObject
+    for (const key in config) {
+        const value = config[key]
+        setupProps[key] = protect(value)
+    }
+    return setupProps
 }
 
 function makeProviderComponent(
     Component: ComponentSetup,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: AtomicIon<number> | undefined
+    $index: ReactiveIon<number> | undefined
 ): ProviderComponent {
     const parent = getCurrentProvider();
     if (!parent) throw new Error("Component tree has no root")
@@ -84,7 +94,7 @@ function makeProviderComponent(
 // $class?: ((o: DOMTokenList) => void)[],
 // $style?: ((o: CSSStyleDeclaration) => void)[],
 // ref?: NodeIon,
-// $index?: AtomicIon<number>
+// $index?: ReactiveIon<number>
 
 
 
@@ -126,9 +136,9 @@ export function runProviderComponentSetup(
     component: InternalComponent,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: AtomicIon<number> | undefined
+    $index: ReactiveIon<number> | undefined
 ) {
-    const output = Component({ ...config, Slot }, provide)
+    const output = Component(createSetupProps(config, Slot), provide)
     initializeComponent(component, output, config.ref, $index)
 }
 
@@ -138,7 +148,7 @@ function initializeComponent(
     component: InternalComponent | MorphicRenderKit,
     output: Component,
     ref: NodeIon | IonicModel<any[]> | undefined,
-    $index: AtomicIon<number> | undefined,
+    $index: ReactiveIon<number> | undefined,
 ) {
     if (output instanceof Promise)
         throw new Error("Components cannot return a promise. Use $Suspense and $await to handle promises within component setup")
@@ -227,7 +237,7 @@ function initializeComponent(
 
 
 
-// function setUpRefUpdates(ref: InternalNodeRef, component: Component, $index: AtomicIon<number> | undefined, preserve: boolean) {
+// function setUpRefUpdates(ref: InternalNodeRef, component: Component, $index: ReactiveIon<number> | undefined, preserve: boolean) {
 //     if (ref.initialized === true) return;
 //     // if ($index) { // only initiate once per list
 //     //     const components = ref.components;

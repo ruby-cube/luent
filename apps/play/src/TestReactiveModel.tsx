@@ -64,7 +64,7 @@ export function List(
     //     name: "Sir Robin"
     // })
 
-    // const $frogName = asIon(frog$, "name")
+    // const $frogName = asPropIon(frog$, "name")
 
     // function changeFrogName() {
     //     $frogName.update(name => name + "kermito")

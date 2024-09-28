@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { Component } from "@rue/lumo";
-import { AtomicIon, Ion, ionize } from "./src";
+import { ReactiveIon, Ion, ionize } from "./src";
 
 
 

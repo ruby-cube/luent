@@ -1,11 +1,8 @@
 import { asIonicAtom, IonicAtom } from "../derivations/IonicAtom";
 import { asWatchTarget, WatchTarget } from "../effects/WatchTarget";
 import { asMetaIonicModel, IonicModel, toRaw } from "./IonicModel";
-import { META } from "../ReactiveEntity";
-import { watch } from "fs";
 import { isIntegerKey } from "./IonicArray";
 import { MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
-import { AnyObject } from "@rue/types";
 import { PropIon } from "./PropIon";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps

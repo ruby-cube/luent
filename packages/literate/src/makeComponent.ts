@@ -1,6 +1,6 @@
 import { COMPONENT, ComponentConfig, getCurrentIndex, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeIon, PublicComponent, pushProvider, popProvider } from "@rue/lumo";
 import { Literate } from "./Literate.js";
-import { AtomicIon, isIon } from "../../quarky/src/index.js";
+import { ReactiveIon, isIon } from "../../quarky/src/index.js";
 import { AnyObject, MaybePromise } from "@rue/types";
 import { collectEffects, getFlask } from "@rue/flask";
 import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
@@ -38,7 +38,7 @@ export function makeComponent(
     Component: SSRComponentSetup,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: AtomicIon<number> | undefined
+    $index: ReactiveIon<number> | undefined
 ): SSRComponent {
     const parent = getCurrentComponent<SSRComponent>()
     const component = new SSRComponent(parent);
@@ -56,7 +56,7 @@ export function runComponentSetup(
     component: SSRComponent,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: AtomicIon<number> | undefined
+    $index: ReactiveIon<number> | undefined
 ) {
     collectEffects((flask, outerFlask) => {
         component.setFlask(flask);
@@ -75,7 +75,7 @@ function initializeComponent(
     component: SSRComponent,
     output: Literate | Promise<SSRComponent> | [PublicComponent, Literate],
     ref: NodeIon | undefined,
-    $index: AtomicIon<number> | undefined,
+    $index: ReactiveIon<number> | undefined,
 ) {
     const _output = output instanceof Array ? output[1] : output;
     const publicComponent = output instanceof Array ? output[0] : undefined;

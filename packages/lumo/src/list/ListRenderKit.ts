@@ -1,4 +1,4 @@
-import { Ion, isAnyIon, isIonicModel, AtomicIon, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "../../../quarky/src";
+import { Ion, isAnyIon, isIonicModel, ReactiveIon, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "../../../quarky/src";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
@@ -22,13 +22,13 @@ type Count = number
 const dynamicNodeMap: WeakMap<_NodePod, DynamicNode> = new WeakMap()
 
 // let currentItem: any;
-let $currentIndex: AtomicIon<number> | undefined;
+let $currentIndex: ReactiveIon<number> | undefined;
 
-export function getCurrentIndex(): AtomicIon<number> | undefined {
+export function getCurrentIndex(): ReactiveIon<number> | undefined {
     return $currentIndex
 }
 
-export function setCurrentIndex($index: AtomicIon<number> | undefined) {
+export function setCurrentIndex($index: ReactiveIon<number> | undefined) {
     // currentItem = item;
     $currentIndex = $index;
 }
@@ -75,7 +75,7 @@ export class ListRenderKit<T = any> {
         const _isIonicModel = isIonicModel(data)
         const isDynamic = _isIonicModel || isAnyIon(data);
         const dynamicNodePod = this.dynamicNodePod = isDynamic ? nodePod.appendDynamicPod() : undefined;
-        const indices: AtomicIon<number>[] = []
+        const indices: ReactiveIon<number>[] = []
 
 
         pushList(this);
@@ -168,7 +168,7 @@ export class ListRenderKit<T = any> {
         const indicesAndFragments: [number, DocumentFragment][] = []
         let fragment = new DocumentFragment();
 
-        const newIndices: AtomicIon<number>[] = [];
+        const newIndices: ReactiveIon<number>[] = [];
         const toFromIndices: [number, number][] = []
 
         for (let i = 0; i < newUArray.length; i++) {
@@ -288,11 +288,11 @@ export class ListRenderKit<T = any> {
 }
 
 export class DynamicIndices {
-    current: AtomicIon<number>[];
-    constructor(indices: AtomicIon<number>[]) {
+    current: ReactiveIon<number>[];
+    constructor(indices: ReactiveIon<number>[]) {
         this.current = indices
     }
-    update(newIndices: AtomicIon<number>[]) {
+    update(newIndices: ReactiveIon<number>[]) {
         this.current = newIndices
     }
 }

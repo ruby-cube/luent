@@ -38,7 +38,7 @@ function ParentBlock() {
 
 
 function ChildBlock({ $count }: {
-    $count?: AtomicIon<number>;
+    $count?: ReactiveIon<number>;
     increment: () => void
     decrement: () => void
 }) {
@@ -54,7 +54,7 @@ function ChildBlock({ $count }: {
 
 
 function SiblingBlock({ $count }: {
-    $count?: AtomicIon<number>
+    $count?: ReactiveIon<number>
 }) {
 
     return (

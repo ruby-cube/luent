@@ -1,4 +1,4 @@
-import { AtomicIon } from "../ion/AtomicIon";
+import { ReactiveIon } from "../ion/ReactiveIon";
 import { ObservedProp } from "../ionize/ObservedProp";
 import { META } from "../ReactiveEntity";
 import { asIonicAtom } from "./IonicAtom";
@@ -23,7 +23,7 @@ const IONIC_EFFECT = Symbol('ionicEffect')
 // prevent infinite loop if ionic effect sets ion or ionic property synchronously
 let currentMetaIonicEffect: IonicDerivation | undefined
 
-export function isIonicEffectAtom(atom: AtomicIon | ObservedProp) {
+export function isIonicEffectAtom(atom: ReactiveIon | ObservedProp) {
     if (!currentMetaIonicEffect) return false;
     return currentMetaIonicEffect.atoms.has(asIonicAtom(atom));
 }
