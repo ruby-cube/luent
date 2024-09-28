@@ -110,11 +110,22 @@ function setValue<T>(reactive: IonicModel, key: PropertyKey, newValue: T, oldVal
     return newValue;
 }
 
+
 const PROP_ION_WITH_METHODS = Symbol('propIonWithMethods')
 const AS_PROTECTED = Symbol('asProtected')
-// propIon with methods
+/**
+ * Creates a prop ion with methods.  
+ * 
+ * @example
+ * ```js
+ * const count = PropIon($product, 'count', {
+ *   increment: $product.incrementCount,
+ *   decrement: $product.decrementCount,
+ * })
+ * ```
+*/
 function PropIon<T extends IonicModel, K extends keyof T>(ionicModel: T, key: K, methods: {
-    [K in keyof T]: (...args: any[]) => any
+    [key: string]: (...args: any[]) => any
 }) {
     const coreIon = asPropIon(ionicModel, key)
     function $propIonWithMethods() {
@@ -165,9 +176,4 @@ function createProtectedPropIonWithMethods($ion: PropIon, methodKeys?: { [key: s
     return $protectedPropIonWithMethods
 }
 
-// //@ts-expect-error
-// PropIon($frog, 'name', {
-//     setName(){
 
-//     }
-// })
