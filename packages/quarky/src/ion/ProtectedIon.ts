@@ -35,7 +35,7 @@ export function isWritableIon(value: any):value is WritableIon {
 /**
  * methodKeys: methodKeys to include in protected ion
  */
-export function protectIon($ion: WritableIon, methodKeys?: string[] | typeof READONLY) {
+export function protectIon($ion: WritableIon, methodKeys?: { [key: string]: true } | typeof READONLY) {
     if (!methodKeys && isCustomProtectedIon($ion)) {
         return $ion;
     }
@@ -51,12 +51,12 @@ export function protectIon($ion: WritableIon, methodKeys?: string[] | typeof REA
 }
 
 
-function asCustomProtectedIon($ion: WritableIon, propertyKeys: string[]) {
+function asCustomProtectedIon($ion: WritableIon, methodKeys: { [key: string]: true }) {
     if (isReadonlyIon($ion)) return $ion;
-    return createCustomProtectedIon($ion, propertyKeys)
+    return createCustomProtectedIon($ion, methodKeys)
 }
 
-function createCustomProtectedIon($ion: WritableIon, methodKeys: string[]) {
+function createCustomProtectedIon($ion: WritableIon, methodKeys: { [key: string]: true }) {
     const meta = asMetaIon($ion);
     const $coreIon = meta.o;
     const proto = Object.getPrototypeOf($coreIon)
@@ -64,15 +64,14 @@ function createCustomProtectedIon($ion: WritableIon, methodKeys: string[]) {
         return $coreIon()
     }
 
-    const _methodKeys = new Set(methodKeys)
-    if (__DEV__ && _methodKeys.has('set')) {
+    if (__DEV__ && 'set' in methodKeys) {
         console.warn(`'set' function cannot be included in a protected ion.`)
     }
 
     const customProto = Object.create(proto)
     customProto.set = protectedMethod;
     for (const key in proto) {
-        if (!_methodKeys.has(key)) {
+        if (!(key in methodKeys)) {
             customProto[key] = protectedMethod
         }
     }

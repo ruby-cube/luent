@@ -9,6 +9,7 @@ import { triggerReactiveWithMutationOp, useGetOp } from "./IonicCapsule";
 import { getTrackedOp } from "./TrackedOp";
 import { Collection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
 import { isAnyIon } from "../ion/AnyIon";
+import { accessMethod } from "./IonicObject";
 
 
 export function createIonicSet(
@@ -50,7 +51,13 @@ export function createIonicSet(
         get(target, key, receiver) {
             if (__DEV__) emitSignal()
             if (methods && key in methods) {
-                return methods[key];
+                return accessMethod(
+                    methods[key],
+                    target,
+                    reactive,
+                    receiver,
+                    key
+                )
             }
             const value = Reflect.get(target, key, receiver)
             if (typeof key === 'symbol' && key.description === 'Symbol.iterator') {
@@ -58,7 +65,7 @@ export function createIonicSet(
             }
             if (isNonTrackable(key, Set)) return value;
             if (isAnyIon(value)) return value();
-
+            //TODO: readonly and protected method access
             switch (key) {
                 case 'has':
                     return useGetOp(

@@ -7,6 +7,7 @@ import { asObservedProp } from "./ObservedProp";
 import { MetaIonicModel, IONIC_MODEL } from "./MetaIonicModel";
 import { isIon } from "../ion/ReactiveIon";
 import { isAnyIon } from "../ion/AnyIon";
+import { getProtectedModelValue, isReadonlyProxy } from "./ProtectedIonicModel";
 
 export function isReactiveObject(value: any): value is IonicModel {
     if (!isIonicModel(value)) return false;
@@ -15,6 +16,24 @@ export function isReactiveObject(value: any): value is IonicModel {
     return true;
 }
 
+export function accessMethod(
+    method: Function,
+    target: AnyObject,
+    proxy: AnyObject,
+    receiver: AnyObject,
+    key: PropertyKey
+){
+    if (isReadonlyProxy(target, proxy, receiver)) {
+        if (__DEV__) console.warn('Object is readonly. Cannot access methods')
+        return undefined;
+    }
+    const keys = getProtectedModelValue(target, proxy, receiver)
+    if (keys instanceof Object && !(key in keys)) {
+        if (__DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}' method`)
+        return undefined;
+    }
+    return method.bind(proxy);
+}
 
 
 export function createIonicObject(
@@ -27,12 +46,26 @@ export function createIonicObject(
             if (__DEV__) emitSignal();
             if (key === META) return metaIonicModel;
             if (methods && key in methods) {
-                return methods[key];
+                return accessMethod(
+                    methods[key],
+                    target,
+                    reactive,
+                    receiver,
+                    key
+                )
             }
             const value = Reflect.get(target, key, receiver);
             if (isNonTrackable(key, Object)) return value;
             if (isAnyIon(value)) return value();
-            if (value instanceof Function) return value.bind(reactive)
+            if (value instanceof Function) {
+                return accessMethod(
+                    value,
+                    target,
+                    reactive,
+                    receiver,
+                    key
+                )
+            }
             const _value = value instanceof Object ? ionize(value) : value
             const tracker = getActiveTracker();
             if (!tracker || Reflect.getOwnPropertyDescriptor(target, key)?.writable === false

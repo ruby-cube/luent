@@ -10,6 +10,7 @@ import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
 import { isAnyIon } from "../ion/AnyIon";
 import { AnyObject } from "@rue/types";
+import { accessMethod } from "./IonicObject";
 
 
 
@@ -22,8 +23,15 @@ export function createIonicMap(
         get(target, key, receiver) {
             if (__DEV__) emitSignal()
             if (methods && key in methods) {
-                return methods[key];
+                return accessMethod(
+                    methods[key],
+                    target,
+                    reactive,
+                    receiver,
+                    key
+                )
             }
+            //TODO: readonly and protected method access
             const value = Reflect.get(target, key, receiver)
             if (typeof key === 'symbol' && key.description === 'Symbol.iterator') {
                 return value;

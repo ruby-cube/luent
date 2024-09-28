@@ -11,6 +11,7 @@ import { isMutatingArrayMethod } from "@rue/utils";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { Collection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
 import { isAnyIon } from "../ion/AnyIon";
+import { accessMethod } from "./IonicObject";
 
 export function createIonicArray(
     target: any[],
@@ -119,7 +120,13 @@ function reactiveArrayGetter(
     if (__DEV__) emitSignal();
     if (key === META) return metaIonicModel;
     if (methods && key in methods) {
-        return methods[key];
+        return accessMethod(
+            methods[key],
+            target,
+            reactive,
+            receiver,
+            key
+        )
     }
     // if (key === '_$' && deep) return asShallowReactive(target);
     const value = Reflect.get(target, key, receiver);
@@ -129,6 +136,7 @@ function reactiveArrayGetter(
     if (isNonTrackable(key, Array)) return value;
     if (isAnyIon(value) && !isIntegerKey(key)) return value();
     if (isMutatingArrayMethod(key)) {
+        //TODO: accessMethod for readonly and protected
         return handleMutatingMethod(<string>key, value);
     }
     if (value instanceof Function) return value.bind(reactive)

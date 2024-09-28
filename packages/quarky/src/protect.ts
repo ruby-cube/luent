@@ -11,7 +11,7 @@ import { protectIonicModel } from "./ionize/ProtectedIonicModel";
 // }
 
 // export const READONLY_ION = Symbol('readonlySignal');
-export function protect($entity: any, methodKeys?: string[] | typeof READONLY) {
+export function protect<T>($entity: T, methodKeys?: (T extends AnyObject ? { [K in keyof T]: true } : never) | typeof READONLY) {
     if (isWritableIon($entity)) {
         return protectIon($entity, methodKeys)
     }

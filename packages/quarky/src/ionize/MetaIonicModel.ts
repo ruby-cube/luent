@@ -22,6 +22,9 @@ export class MetaIonicModel<T extends AnyObject = AnyObject> implements Reactive
     // shallowReactive?: IonicModel<T>
     readonly type = IONIC_MODEL
 
+    asProtected?: IonicModel<T>
+    asReadonly?: IonicModel<T>
+
     initIonicModel(ionicModel: IonicModel) {
         if (this.ionicModel) return;
         this.ionicModel = ionicModel as IonicModel<T>;

@@ -19,6 +19,7 @@ import { AnyIon, isAnyIon } from "../ion/AnyIon";
 import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
 import { ReactiveIon } from "../ion/ReactiveIon";
 import { PropIon } from "./PropIon";
+import { isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -296,6 +297,10 @@ export function reactiveSetter(
     newValue: any,
     receiver: AnyObject
 ) {
+    if (isProtectedProxy(target, reactive, receiver)) {
+        if (__DEV__) console.warn('Set operation failed. Property is readonly')
+        return false;
+    }
     if (metaIonicModel.isNewProperty(key)) metaIonicModel.registerNewProperty(key)
     const oldValue = Reflect.get(target, key, receiver);
     if (isAnyIon(oldValue) && !isAnyIon(newValue)) {
