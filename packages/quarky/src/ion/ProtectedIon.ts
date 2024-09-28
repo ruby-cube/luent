@@ -81,7 +81,7 @@ function createCustomProtectedIon($ion: WritableIon, methodKeys: { [key: string]
     return $customIon;
 }
 
-function protectedMethod() {
+export function protectedMethod() {
     if (__DEV__) console.warn(`[PROTECTED METHOD] Operation failed.`)
 }
 
