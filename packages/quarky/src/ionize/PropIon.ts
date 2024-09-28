@@ -25,6 +25,11 @@ export type ReadonlyPropIon<T = any> = {
     [META]: MetaPropIon
 }
 
+export type PropIonCapsule<T = any, M extends AnyObject = AnyObject> = {
+    (): T;
+    [META]: MetaPropIon
+} & M
+
 
 type AsPropIon<T, K extends keyof T> = K extends ReadonlyKeys<T> ? ReadonlyPropIon<T[K]> : PropIon<T[K]>
 
@@ -111,10 +116,9 @@ function setValue<T>(reactive: IonicModel, key: PropertyKey, newValue: T, oldVal
 }
 
 
-const PROP_ION_WITH_METHODS = Symbol('propIonWithMethods')
-const AS_PROTECTED = Symbol('asProtected')
+const PROP_ION_CAPSULE = Symbol('propIonWithMethods')
 /**
- * Creates a prop ion with methods.  
+ * Creates a prop ion capsule--a prop ion encapsulated with methods.  
  * 
  * @example
  * ```js
@@ -128,52 +132,43 @@ function PropIon<T extends IonicModel, K extends keyof T>(ionicModel: T, key: K,
     [key: string]: (...args: any[]) => any
 }) {
     const coreIon = asPropIon(ionicModel, key)
-    function $propIonWithMethods() {
+    function $propIonCapsule() {
         return coreIon()
     }
 
-    $propIonWithMethods[META] = coreIon[META]
-    $propIonWithMethods[PROP_ION_WITH_METHODS] = true
-    if (!isProtectedIonicModel(ionicModel)) {
-        $propIonWithMethods.set = coreIon[META].o.set
-    }
-    Object.setPrototypeOf($propIonWithMethods, methods)
+    $propIonCapsule[META] = coreIon[META]
+    $propIonCapsule[PROP_ION_CAPSULE] = true
+    Object.setPrototypeOf($propIonCapsule, methods)
 
-    return $propIonWithMethods;
+    return $propIonCapsule;
 }
 
-export function protectPropIonWithMethods($ion: PropIon, methodKeys?: { [key: string]: true } | typeof READONLY) {
+export function protectPropIonCapsule($ion: PropIon, methodKeys?: { [key: string]: true } | typeof READONLY) {
     if (methodKeys === READONLY) {
         const coreIon = $ion[META].o
         return protect(coreIon, READONLY)
     }
     if (methodKeys) {
-        return createProtectedPropIonWithMethods($ion, methodKeys)
+        return createCustomProtectedPropIonCapsule($ion, methodKeys)
     }
-    if ('set' in $ion) return $ion;
-    const existing = $ion[AS_PROTECTED]
-    if (existing) return existing;
-    return createProtectedPropIonWithMethods($ion)
+    return $ion; // since prop ion capsule are inherently protected, return original
 }
 
-function createProtectedPropIonWithMethods($ion: PropIon, methodKeys?: { [key: string]: true }) {
+function createCustomProtectedPropIonCapsule($ion: PropIon, methodKeys: { [key: string]: true }) {
     const coreIon = $ion[META].o
     const methods = Object.getPrototypeOf($ion)
-    function $protectedPropIonWithMethods() {
+    function $customProtected() {
         return coreIon();
     }
-    $protectedPropIonWithMethods[META] = coreIon[META]
-    $protectedPropIonWithMethods[PROP_ION_WITH_METHODS] = true
-    $protectedPropIonWithMethods.set = protectedMethod;
-    if (methodKeys) {
-        for (const key in methods) {
-            if (!(key in methodKeys)) {
-                (<AnyObject>$protectedPropIonWithMethods)[key] = protectedMethod
-            }
+    $customProtected[META] = coreIon[META]
+    $customProtected[PROP_ION_CAPSULE] = true
+    for (const key in methods) {
+        if (!(key in methodKeys)) {
+            (<AnyObject>$customProtected)[key] = protectedMethod
         }
     }
-    Object.setPrototypeOf($protectedPropIonWithMethods, methods)
-    return $protectedPropIonWithMethods
+    Object.setPrototypeOf($customProtected, methods)
+    return $customProtected
 }
 
 
