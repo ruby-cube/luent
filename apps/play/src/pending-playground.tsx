@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { $if, expose, NodeEntity, onMounted, RenderFunction } from "@rue/lumo"
+import { If, expose, NodeEntity, onMounted, RenderFunction } from "@rue/lumo"
 import { $, watch } from "../../../packages/quarky/src"
 import { Ion } from "@rue/quarky/Ion";
 
@@ -27,7 +27,7 @@ function ListBlock() {
             $ready
         }),
         <>
-            {$if($allReady, 'show', () =>
+            {If($allReady, 'show', () =>
                 <div>
                     <ItemBlock ref={$itemBlock} />
                 </div>
@@ -54,7 +54,7 @@ function ItemBlock() {
         }),
 
         <>
-            {$if($ready, 'show', () =>
+            {If($ready, 'show', () =>
                 <div>{$(() => $data().content)}</div>
             )}
         </>

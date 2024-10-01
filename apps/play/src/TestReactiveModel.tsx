@@ -1,4 +1,4 @@
-import { NodeIon, Component, CreateIf, ElseCreate, For } from "@rue/lumo";
+import { NodeIon, Component, If, Else, For } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { Ion, __addDevName, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
@@ -170,19 +170,19 @@ export function List(
     return Component(
         <>
             <>
-                {CreateIf(() => $list.length === 0, () =>
+                {If(() => $list.length === 0, () =>
                     <div
-                        onclick={() => insertItem(0)}
+                        onClick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
                     </div>
                 )}
-                {ElseCreate(() =>
+                {Else(() =>
                     For($list, ($item, $index) => (
                         <div
                             ref={$itemDiv}
-                            onclick={(e) => toggleSelect(e, $index())}
+                            onClick={(e) => toggleSelect(e, $index())}
                             style={[
                                 `background-color: ${randomColor.get()}`,
                                 o => {
@@ -190,24 +190,24 @@ export function List(
                                 }
                             ]}>
                             <p
-                                onclick={(e) => removeItem($index())}
+                                onClick={(e) => removeItem($index())}
                                 style="cursor: pointer"
                             >
                                 X
                             </p>
 
-                            <li onclick={() => changeContent($index())}>
+                            <li onClick={() => changeContent($index())}>
                                 {() => $item.content}
                             </li>
                             <p>{$index}</p>
                             <div
-                                onclick={() => insertItem($index() + 1)}
+                                onClick={() => insertItem($index() + 1)}
                                 style="background-color: gray; cursor: pointer"
                             >
                                 insert
                             </div>
                             <div
-                                onclick={() => moveSelectedItems($index() + 1)}
+                                onClick={() => moveSelectedItems($index() + 1)}
                                 style="background-color: white; cursor: pointer"
                             >
                                 insert
@@ -216,27 +216,27 @@ export function List(
                     ), 'id')
                 )}
             </>
-            <button onclick={clearSelection}>clear</button>
+            <button onClick={clearSelection}>clear</button>
         </>
-        //             {/* <button onclick={$if($active, capture.once(clearSelection))}>clear</button>
+        //             {/* <button onClick={If($active, capture.once(clearSelection))}>clear</button>
 
         //     <button
-        //         onclick={[() => increment($index()), preventDefault.endHere, target(THIS_NODE), { once: true }]}
+        //         onClick={[() => increment($index()), preventDefault.endHere, target(THIS_NODE), { once: true }]}
         //     >
         //         clear
         //     </button>
 
         //     <button
-        //         onclick={[increment, { until: onMounted }]}
+        //         onClick={[increment, { until: onMounted }]}
         //     >
         //         clear
         //     </button>
         //     <button
-        //         onclick={[
-        //             $if($active, [
+        //         onClick={[
+        //             If($active, [
         //                 increment, runOnce.preventDefault, target(THIS_NODE)
         //             ]),
-        //             $else(decrement)
+        //             Else(decrement)
         //         ]}
         //     >
         //         clear

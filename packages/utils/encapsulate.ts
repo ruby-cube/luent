@@ -119,13 +119,13 @@ const mutatingArrayOps = {
     copyWithin: true, // may or may not change array (no change if items all the same or length === 0)
 };
 
-const mutatingSetOps = {
+export const mutatingSetOps = {
     add: true,
     delete: true,
     clear: true
 }
 
-const mutatingMapOps = {
+export const mutatingMapOps = {
     set: true,
     delete: true,
     clear: true

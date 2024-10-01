@@ -1,4 +1,4 @@
-import { $else, $if } from "@rue/lumo";
+import { Else, If } from "@rue/lumo";
 import { $, ionize, Ion } from "../../../packages/quarky/src";
 
 
@@ -26,15 +26,15 @@ export function TestConditional() {
     return (
         <>
             <>
-                {$if($(() => $active()), 'create', () => (
+                {If($(() => $active()), 'create', () => (
                     <div>hi</div>
                 )
                 )}
-                {$else(() => (
+                {Else(() => (
                     <div>ho</div>
                 ))}
             </>
-            <button onclick={toggleActiveState}>click</button>
+            <button onClick={toggleActiveState}>click</button>
         </>
     )
 }

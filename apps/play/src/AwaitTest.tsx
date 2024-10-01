@@ -28,7 +28,7 @@ export function MainSite() {
             <PendingListBlock></PendingListBlock>
             <PendingTextArea></PendingTextArea>
             <p>{$count}</p>
-            <button onclick={() => $count.update(count => count + 1)}>click</button>
+            <button onClick={() => $count.update(count => count + 1)}>click</button>
         </>
     )
 }

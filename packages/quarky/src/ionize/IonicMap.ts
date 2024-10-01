@@ -4,13 +4,15 @@ import { META } from "../ReactiveEntity";
 import { trigger, triggerIonicAtom } from "../trigger";
 import { asObservedProp, getObservedProp } from "./ObservedProp";
 import { createReactiveTraps, isNonTrackable, toRawIfNeeded, IonicModel, reactiveSetter, storeSnapshot, ionize, registerIonicModel } from "./IonicModel";
-import { triggerReactiveWithMutationOp, useGetOp } from "./IonicCapsule";
+import { triggerReactiveWithMutationOp, UNDEFINED_OP, useGetOp } from "./IonicCapsule";
 import { useClearOp, useDeleteOp } from "./IonicSet";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
 import { isAnyIon } from "../ion/AnyIon";
 import { AnyObject } from "@rue/types";
-import { accessMethod } from "./IonicObject";
+import { accessMethod, maybeIonize } from "./IonicObject";
+import { mutatingMapOps, noop } from "@rue/utils";
+import { getProtectedModelMeta } from "./ProtectedIonicModel";
 
 
 
@@ -19,19 +21,44 @@ export function createIonicMap(
     methods: AnyObject | undefined
 ) {
     const metaIonicModel = new MetaIonicCollection(target, methods)
-    const reactive = new Proxy(target, {
+    const ionicModel = new Proxy(target, {
         get(target, key, receiver) {
             if (__DEV__) emitSignal()
+            if (key === META) return metaIonicModel
+            const protectedMeta = getProtectedModelMeta(target, ionicModel, receiver)
+            if (protectedMeta) {
+                const keys = protectedMeta.propertyKeys
+                if (keys && !(key in keys)) {
+                    if (__DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}'`)
+                    return undefined;
+                }
+            }
             if (methods && key in methods) {
                 return accessMethod(
-                    methods[key],
                     target,
-                    reactive,
+                    ionicModel,
                     receiver,
-                    key
+                    key,
+                    boundMethodMap,
+                    methods[key]
                 )
             }
-            //TODO: readonly and protected method access
+            if (key in mutatingMapOps) {
+                if (protectedMeta) {
+                    const keys = protectedMeta.propertyKeys
+                    if (keys && key in keys) {
+                        return accessMethod(
+                            target,
+                            ionicModel,
+                            receiver,
+                            key,
+                            boundMethodMap
+                        )
+                    }
+                    return undefined;
+                }
+            }
+
             const value = Reflect.get(target, key, receiver)
             if (typeof key === 'symbol' && key.description === 'Symbol.iterator') {
                 return value;
@@ -40,54 +67,26 @@ export function createIonicMap(
                 return value;
             if (isAnyIon(value)) return value();
 
-            switch (key) {
-                case 'get':
-                case 'has':
-                    return useGetOp(
-                        reactive,
-                        target,
-                        key,
-                        value
-                    );
-
-                case 'set':
-                    return setOp
-
-                case 'clear':
-                    return useClearOp(
-                        reactive,
-                        metaIonicModel,
-                        target
-                    )
-
-                case 'delete':
-                    return useDeleteOp(
-                        reactive,
-                        metaIonicModel,
-                        target
-                    )
-
-                // case '_$':
-                //     if (deep) return asShallowReactive(target);
-                //     return maybeAsDeepReactive(value, deep)
-
-                case META:
-                    return metaIonicModel
-
-                default:
-                    if (value instanceof Function) return value.bind(reactive)
-                    const _value = value instanceof Object ? ionize(value) : value
-                    const tracker = getActiveTracker()
-                    if (!tracker)
-                        return _value;
-                    tracker.track(asObservedProp(reactive, key))
-                    return _value;
-            }
+            if (value instanceof Function)
+                return accessMethod(
+                    target,
+                    ionicModel,
+                    receiver,
+                    key,
+                    boundMethodMap,
+                    value
+                )
+            const _value = maybeIonize(value, target, ionicModel, receiver)
+            const tracker = getActiveTracker()
+            if (!tracker)
+                return _value;
+            tracker.track(asObservedProp(ionicModel, key))
+            return _value;
         },
         set(target, key, value, receiver) {
             return reactiveSetter(
                 Map,
-                reactive,
+                ionicModel,
                 metaIonicModel,
                 target,
                 key,
@@ -97,6 +96,32 @@ export function createIonicMap(
         }
     }) as IonicModel<Map<any, any>>
 
+
+    const boundMethodMap: Map<string | symbol, (...arg: any[]) => any> = new Map([
+        ['set', setOp],
+        ['has', useGetOp(
+            ionicModel,
+            target,
+            'has',
+            target.has
+        )],
+        ['get', useGetOp(
+            ionicModel,
+            target,
+            'get',
+            target.get
+        )],
+        ['clear', useClearOp(
+            ionicModel,
+            metaIonicModel,
+            target
+        )],
+        ['delete', useDeleteOp(
+            ionicModel,
+            metaIonicModel,
+            target
+        )]
+    ])
 
     function setOp(key: any, newValue: any) {
         const oldSize = target.size
@@ -109,20 +134,20 @@ export function createIonicMap(
 
         storeSnapshot(metaIonicModel)
 
-        const reactive = metaIonicModel.ionicModel!
+        const ionicModel = metaIonicModel.ionicModel!
         if (oldSize !== newSize) {
-            const sizeProp = getObservedProp(reactive, 'size')
+            const sizeProp = getObservedProp(ionicModel, 'size')
             if (sizeProp)
                 trigger(sizeProp, newSize, oldSize);
         }
 
-        const hasOp = getTrackedOp(reactive, 'has', key)
+        const hasOp = getTrackedOp(ionicModel, 'has', key)
         if (hasOp) triggerIonicAtom(hasOp);
-        const getOp = getTrackedOp(reactive, 'get', key)
+        const getOp = getTrackedOp(ionicModel, 'get', key)
         if (getOp) triggerIonicAtom(getOp);
 
         triggerReactiveWithMutationOp(
-            reactive,
+            ionicModel,
             'set',
             [key, _newValue],
             output
@@ -130,9 +155,10 @@ export function createIonicMap(
 
         return output;
     }
-    metaIonicModel.initIonicModel(reactive)
-    registerIonicModel(reactive, target)
-    return reactive
+
+    metaIonicModel.initIonicModel(ionicModel)
+    registerIonicModel(ionicModel, target)
+    return ionicModel
 }
 
 

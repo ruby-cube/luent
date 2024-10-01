@@ -1,6 +1,6 @@
 import { Ion } from "../../../packages/quarky/src"
 import { $await } from "../../../packages/lumo/src/component/$await"
-import { CreateIf } from "@rue/lumo"
+import { If } from "@rue/lumo"
 
 export function Root() {
     const $active = Ion(true)
@@ -11,9 +11,9 @@ export function Root() {
         <>
             <div>Root</div>
             <>
-                {CreateIf($active, () => <div>I'm active</div>)}
+                {If($active, () => <div>I'm active</div>)}
             </>
-            <button onclick={toggleActive}>click</button>
+            <button onClick={toggleActive}>click</button>
         </>
     )
 }

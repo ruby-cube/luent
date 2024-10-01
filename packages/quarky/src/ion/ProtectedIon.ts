@@ -1,9 +1,8 @@
 import { AnyObject } from "@rue/types";
-import { WritableDerivedIon } from "../derivations/DerivedIon";
 import { META } from "../ReactiveEntity";
 import { asMetaIon, ReactiveIon, MetaIon } from "./ReactiveIon";
-import { AnyIon, isAnyIon } from "./AnyIon";
-import { PropIon } from "../ionize/PropIon";
+import { isIonicModel } from "../ionize/IonicModel";
+import { protectIonicModel } from "../ionize/ProtectedIonicModel";
 
 export type ProtectedIon<T = any, M extends AnyObject = {}> = {
     (): T;
@@ -27,7 +26,7 @@ type MetaWritableIon = {
     hasMethods: boolean
 }
 
-export function isWritableIon(value: any):value is WritableIon {
+export function isWritableIon(value: any): value is WritableIon {
     if (!(value instanceof Object)) return false;
     return META in value && 'asReadonly' in value[META]
 }
@@ -61,22 +60,24 @@ function createCustomProtectedIon($ion: WritableIon, methodKeys: { [key: string]
     const $coreIon = meta.o;
     const proto = Object.getPrototypeOf($coreIon)
     function $customIon() {
-        return $coreIon()
+        const value = $coreIon()
+        if (isIonicModel(value)) {
+            return protectIonicModel(value)
+        }
     }
 
     if (__DEV__ && 'set' in methodKeys) {
         console.warn(`'set' function cannot be included in a protected ion.`)
     }
 
-    const customProto = Object.create(proto)
-    customProto.set = protectedMethod;
+    $customIon.set = protectedMethod;
     for (const key in proto) {
         if (!(key in methodKeys)) {
-            customProto[key] = protectedMethod
+            (<AnyObject>$customIon)[key] = protectedMethod
         }
     }
 
-    Object.setPrototypeOf($customIon, customProto)
+    Object.setPrototypeOf($customIon, proto)
 
     return $customIon;
 }
@@ -101,7 +102,10 @@ function createReadonlyIon(meta: MetaWritableIon) {
     const $coreIon = meta.o
 
     function $readonlyIon() {
-        return $coreIon()
+        const value = $coreIon()
+        if (isIonicModel(value))
+            return protectIonicModel(value, READONLY)
+        return value;
     }
     $readonlyIon[META] = meta;
 
@@ -125,18 +129,21 @@ function asProtectedIon($ion: WritableIon) {
 function createProtectedIon(meta: MetaWritableIon) {
     const $coreIon = meta.o
 
-    const proto = Object.create(Object.getPrototypeOf($coreIon))
-    proto.set = () => {
-        console.warn(`Set operation failed. Ions cannot be set outside of their own methods`)
-    }
+    const proto = Object.getPrototypeOf($coreIon)
 
     function $protectedIon() {
-        return $coreIon()
+        const value = $coreIon()
+        if (isIonicModel(value)) {
+            return protectIonicModel(value)
+        }
+    }
+    $protectedIon.set = () => {
+        console.warn(`Set operation failed. Ions cannot be set outside of their own methods`)
     }
 
     Object.setPrototypeOf($protectedIon, proto)
 
-    meta.asProtected = $protectedIon as ProtectedIon
+    meta.asProtected = $protectedIon
     return $protectedIon
 }
 

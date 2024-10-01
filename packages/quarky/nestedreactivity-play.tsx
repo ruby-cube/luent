@@ -101,13 +101,25 @@ function ListBlock(attributes: {
 
     })
 
-    const $count = Ion(0) // $SettableGet<number>
+    function initDrag() {
+        describeScene((dragging) => {
 
-    const $list = IonicModel([1, 2, 3]);
+            listen(document, 'mousemove', () => {
+
+            })
+
+            listen(document, 'mouseup', dragging.end)
+        })
+    }
+
+
+    const $count = ion(0) // $SettableGet<number>
+
+    const $list = ionize([1, 2, 3]);
 
     const $doubleCount = DerivedIon(() => $count() * 2) // Get<number>
 
-    const $div = NodeIon('div')
+    const $div = ViewIon('div')
 
     const $frog = IonicModel(frog)
 

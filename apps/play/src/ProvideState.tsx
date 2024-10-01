@@ -78,13 +78,13 @@ export function ParentBlock(
     return Component(
         <>
             <h1>Parent</h1>
-            <div onclick={setQualities}>{() => frog.qualities}</div>
-            <div onclick={() => frog.setQualities()}>{$qualities}</div>
+            <div onClick={setQualities}>{() => frog.qualities}</div>
+            <div onClick={() => frog.setQualities()}>{$qualities}</div>
             <div>{$doubleCount}</div>
             <ChildBlock />
             <SiblingBlock />
-            <button onclick={() => counter.increment()}>increment</button>
-            <button onclick={() => counter.decrement()}>decrement</button>
+            <button onClick={() => counter.increment()}>increment</button>
+            <button onClick={() => counter.decrement()}>decrement</button>
         </>
     )
 }
@@ -100,8 +100,8 @@ function ChildBlock() {
                 {() => counter.$.count}
             </p>
             <GrandChildBlock></GrandChildBlock>
-            <button onclick={() => counter.increment()}>increment</button>
-            <button onclick={() => counter.decrement()}>decrement</button>
+            <button onClick={() => counter.increment()}>increment</button>
+            <button onClick={() => counter.decrement()}>decrement</button>
         </div>
     )
 }
@@ -133,8 +133,8 @@ function GrandChildBlock() {
 
     return Component(
         <div style='outline: solid 1px gray; background-color: #B26E63'>
-            <h1 onclick={() => name.makeKermit()}>Grandchild: {$name}</h1>
-            <h1 onclick={() => name.makeKermit()}>Grandchild: {() => name.$}</h1>
+            <h1 onClick={() => name.makeKermit()}>Grandchild: {$name}</h1>
+            <h1 onClick={() => name.makeKermit()}>Grandchild: {() => name.$}</h1>
             <p>
                 {$count}
             </p>

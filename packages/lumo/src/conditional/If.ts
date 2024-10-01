@@ -18,9 +18,9 @@ function resetCurrentNodePodIndex(index?: number) {
     currentNodePodIndex = index ?? undefined;
 }
 
-// export function $if($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit
-// export function $if($condition: ReactiveGet<Booleanny>, type: 'create' | 'show' | 'mount', renderConditional: RenderFunction,): ConditionalRenderKit
-// export function $if($condition: ReactiveGet<Booleanny>, param2: 'create' | 'show' | 'mount' | RenderFunction, renderConditional?: RenderFunction,): ConditionalRenderKit {
+// export function If($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit
+// export function If($condition: ReactiveGet<Booleanny>, type: 'create' | 'show' | 'mount', renderConditional: RenderFunction,): ConditionalRenderKit
+// export function If($condition: ReactiveGet<Booleanny>, param2: 'create' | 'show' | 'mount' | RenderFunction, renderConditional?: RenderFunction,): ConditionalRenderKit {
 //     const typeSpecified = typeof param2 === "string";
 //     const renderFunction = typeSpecified ? renderConditional : param2;
 //     const type = typeSpecified ? param2 : 'create';
@@ -31,7 +31,7 @@ function resetCurrentNodePodIndex(index?: number) {
 
 
 
-export function CreateIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit {
+export function If($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction): ConditionalRenderKit {
     resetCurrentNodePodIndex()
     return new ConditionalRenderKit(
         'if',
@@ -42,7 +42,7 @@ export function CreateIf($condition: ReactiveGet<Booleanny>, renderConditional: 
     )
 }
 
-export function ElseCreateIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction) {
+export function ElseIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction) {
     return new ConditionalRenderKit(
         'elseIf',
         wrapToNormalize(renderConditional),
@@ -52,7 +52,7 @@ export function ElseCreateIf($condition: ReactiveGet<Booleanny>, renderCondition
     )
 }
 
-export function ElseCreate(renderConditional: RenderFunction) {
+export function Else(renderConditional: RenderFunction) {
     return new ConditionalRenderKit(
         'else',
         wrapToNormalize(renderConditional),
@@ -133,11 +133,11 @@ export function ElseShow(renderConditional: RenderFunction) {
 //     return new ConditionalRenderKit(statementType, _renderConditional, type, $condition)
 // }
 
-// export function $elseIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction) {
+// export function ElseIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction) {
 //     return _if($condition, renderConditional, 'elseIf')
 // }
 
-// export function $else(renderConditional: RenderFunction) {
+// export function Else(renderConditional: RenderFunction) {
 //     const type = currentRenderType;
 //     const _renderConditional = type === 'mount' ? wrapToPreserve(renderConditional) : wrapToNormalize(renderConditional)
 //     return new ConditionalRenderKit('else', _renderConditional, currentRenderType)

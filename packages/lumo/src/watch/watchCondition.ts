@@ -1,8 +1,8 @@
 // watchCondition([
-//     $if($active, () => {
+//     If($active, () => {
 
 //     }),
-//     $else(() => {
+//     Else(() => {
 
 //     })
 // ])

@@ -30,8 +30,8 @@ function ParentBlock() {
                     decrement={decrement}
                 />
                 <SiblingBlock $count={$count}></SiblingBlock>
-                <button onclick={increment}>increment</button>
-                <button onclick={decrement}>decrement</button>
+                <button onClick={increment}>increment</button>
+                <button onClick={decrement}>decrement</button>
             </>
     }
 }
@@ -46,8 +46,8 @@ function ChildBlock({ $count }: {
     return (
         <p>
             {$count}
-            <button onclick={increment}>increment</button>
-            <button onclick={decrement}>decrement</button>
+            <button onClick={increment}>increment</button>
+            <button onClick={decrement}>decrement</button>
         </p>
     )
 }

@@ -28,13 +28,15 @@ export function protectIonicModel<T extends IonicModel>(model: T, propertyKeys?:
 }
 
 const READONLY_IONIC_MODEL = Symbol('readonlyIonicModel')
-const PROTECTED_IONIC_MODEL = Symbol('protectedIonicModel')
+// const PROPERTY_KEYS = Symbol('protectedIonicModel')
 
-
+const PROTECTED_META = Symbol('protectedMeta')
 
 function createProtectedIonicModel(model: IonicModel, propertyKeys?: { [key: string]: true }) {
     const protectedModel = Object.create(model);
-    protectedModel[PROTECTED_IONIC_MODEL] = propertyKeys || true;
+    protectedModel[PROTECTED_META] = {
+        propertyKeys
+    }
     return protectedModel
 }
 
@@ -71,8 +73,8 @@ function createReadonlyIonicModel(model: IonicModel) {
 
 export function isProtectedProxy(target: AnyObject, proxy: AnyObject, receiver: AnyObject) {
     if (receiver !== proxy)
-        return receiver[READONLY_IONIC_MODEL] || receiver[PROTECTED_IONIC_MODEL];
-    return Reflect.get(target, READONLY_IONIC_MODEL, receiver) || Reflect.get(target, PROTECTED_IONIC_MODEL, receiver)
+        return receiver[READONLY_IONIC_MODEL] || receiver[PROTECTED_META];
+    return Reflect.get(target, READONLY_IONIC_MODEL, receiver) || Reflect.get(target, PROTECTED_META, receiver)
 }
 
 export function isReadonlyProxy(target: AnyObject, proxy: AnyObject, receiver: AnyObject) {
@@ -81,10 +83,10 @@ export function isReadonlyProxy(target: AnyObject, proxy: AnyObject, receiver: A
     return Reflect.get(target, READONLY_IONIC_MODEL, receiver)
 }
 
-export function getProtectedModelValue(target: AnyObject, proxy: AnyObject, receiver: AnyObject): true | {[key: string]: true} | undefined {
+export function getProtectedModelMeta(target: AnyObject, proxy: AnyObject, receiver: AnyObject): {propertyKeys: {[key: string]: true} | undefined} | undefined {
     if (receiver !== proxy)
-        return receiver[PROTECTED_IONIC_MODEL];
-    return Reflect.get(target, PROTECTED_IONIC_MODEL, receiver)
+        return receiver[PROTECTED_META];
+    return Reflect.get(target, PROTECTED_META, receiver)
 }
 
 // export function getCustomProtectedModelKeys(target: AnyObject, proxy: AnyObject, receiver: AnyObject){

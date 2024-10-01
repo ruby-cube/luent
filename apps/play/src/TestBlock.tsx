@@ -10,7 +10,7 @@ export function TestBlockA(props: { $active: ReactiveIon<boolean> }) {
         dog: "hi"
     })
     
-    return $if($active, 'create', () => (
+    return If($active, 'create', () => (
                 <div>TestBlockA!!</div>
             ))
 }
@@ -37,7 +37,7 @@ export function TestBlockB(props: { $active: ReactiveIon<boolean> }) {
 
     return (
         <>
-            {$if($active, 'create', () => (
+            {If($active, 'create', () => (
                 <div>TestBlockA!!</div>
             ))}
         </>

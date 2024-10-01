@@ -1,9 +1,9 @@
-import { NodeIon, Component, COMPONENT, ComponentSetup, CreateIf, ElseCreate, For,  Provide, teleportTo, useEventListener } from "@rue/lumo";
+import { NodeIon, Component, COMPONENT, ComponentSetup, If, Else, For,  Provide, teleportTo, useEventListener } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, Ion, ionize } from "../../../packages/quarky/src";
 import { $ } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
-import { ElseCreateIf } from "../../../packages/lumo/src/conditional/CreateIf";
+import { ElseIf } from "../../../packages/lumo/src/conditional/If";
 import { AnyObject } from "@rue/types";
 
 
@@ -58,7 +58,6 @@ function genId() {
 //     },
 // });
 
-const onClick = useEventListener('click');
 
 // shallow reactive model ionize
 // deep reactive model o$$$
@@ -124,17 +123,17 @@ export function List() {
     return (
         <div>
             <>
-                {CreateIf($listLengthIsZero, () => (
+                {If($listLengthIsZero, () => (
                     <div
-                        onclick={() => insertItem(0)}
+                        onClick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
                     </div>
                 ))}
-                {ElseCreateIf($(() => $list().length === 0), () => (
+                {ElseIf($(() => $list().length === 0), () => (
                     <div
-                        onclick={() => insertItem(0)}
+                        onClick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
@@ -143,17 +142,17 @@ export function List() {
                 {For($list, (item$, $index) => (
                     <div style={`background-color: ${randomColor.get()}`}>
                         <p
-                            onclick={() => removeItem($index())}
+                            onClick={() => removeItem($index())}
                             style="cursor: pointer"
                         >
                             X
                         </p>
-                        <li onclick-v={() => changeContent($index())}>
+                        <li onClick-v={() => changeContent($index())}>
                             {$(() => item$.content)}
                         </li>
                         <p>{$index}</p>
                         <div
-                            onclick={() => insertItem($index() + 1)}
+                            onClick={() => insertItem($index() + 1)}
                             style="background-color: gray; cursor: pointer"
                         >
                             insert
@@ -161,16 +160,16 @@ export function List() {
                     </div>
                 ), 'id')}
             </>
-            <button onclick={openModal}>open</button>
+            <button onClick={openModal}>open</button>
             {/* <>
-                {$if($showSideBlock, 'create', () =>
+                {If($showSideBlock, 'create', () =>
                     <>
                         <TestBox />
                         <SideBlock frog="sir robin" />
                     </>
                 )}
             </> */}
-            <button onclick={showSideBlock}>show Side Block</button>
+            <button onClick={showSideBlock}>show Side Block</button>
         </div>
     )
 }
@@ -217,16 +216,16 @@ function Appo(
 
     return Component(
         <>
-            {CreateIf($active, () => ((dialogBox) => (
+            {If($active, () => ((dialogBox) => (
                 <>
                     <DialogBox model={dialogBox}></DialogBox>
-                    <button onclick={dialogBox.open}>open</button>
+                    <button onClick={dialogBox.open}>open</button>
                 </>
             ))(useDialogBox({ initialState: 'open' })))} // state must be created within render function
-            {ElseCreateIf($ready, () =>
+            {ElseIf($ready, () =>
                 <button>click</button>
             )}
-            {ElseCreateIf($active, () => {
+            {ElseIf($active, () => {
                 const $dialogBox = fromContext(ALERT_DIALOG_BOX) || NodeIon()
 
                 return (
@@ -234,7 +233,7 @@ function Appo(
                         {() => (
                             <div>
                                 <DialogBox ref={$dialogBox} />
-                                <button onclick={() => $dialogBox().open}>open</button>
+                                <button onClick={() => $dialogBox().open}>open</button>
                             </div>)
                         }
                     </Wrapper>
@@ -281,7 +280,7 @@ function DialogBox({
         teleportTo('body', (
             <dialog style="background-color: gray" open={$open}>
                 Stop
-                <button onclick={close} ref={$button}>close</button>
+                <button onClick={close} ref={$button}>close</button>
             </dialog>
         )),
         {

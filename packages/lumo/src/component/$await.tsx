@@ -1,5 +1,5 @@
 import { Ion, __addDevName } from "../../../quarky/src";
-import { $else, $elseIf, $if } from "../conditional/CreateIf";
+import { Else, ElseIf, If } from "../conditional/If";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { ComponentSetup } from "./InternalComponent";
 import { AnyObject } from "@rue/types";
@@ -70,9 +70,9 @@ export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | 
             const internalComponent = collectPromises(props)
             //QUESTION: Do I have to set up an entire component? or can I just pass in the props? if a ref is used, you need to set up component
             return [
-                $if($pending, 'create', () => mO(Placeholder, props.Slot, props)),
-                $elseIf($error, () => mO(ErrorView, undefined, { ...props, error: $error() })),
-                $else(() => internalComponent)
+                If($pending, () => mO(Placeholder, props.Slot, props)),
+                ElseIf($error, () => mO(ErrorView, undefined, { ...props, error: $error() })),
+                Else(() => internalComponent)
             ]
         }
     }
@@ -80,8 +80,8 @@ export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | 
         return function PendingComponent(props: AnyObject) {
             const internalComponent = collectPromises(props)
             return [
-                $if($pending, 'create', () => mO(Placeholder, props.Slot, props)),
-                $else(() => internalComponent)
+                If($pending, () => mO(Placeholder, props.Slot, props)),
+                Else(() => internalComponent)
             ]
         }
     }
@@ -89,8 +89,8 @@ export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | 
         return (props: AnyObject) => {
             const internalComponent = collectPromises(props)
             return [
-                $elseIf($error, () => mO(ErrorView, undefined, { ...props, error: $error() })),
-                $elseIf($ready, () => internalComponent)
+                ElseIf($error, () => mO(ErrorView, undefined, { ...props, error: $error() })),
+                ElseIf($ready, () => internalComponent)
             ]
 
         }
@@ -98,8 +98,7 @@ export function $Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | 
     return (props: AnyObject) => {
         const internalComponent = collectPromises(props)
         return [
-            $if($ready, 'create', () => internalComponent)
+            If($ready, 'create', () => internalComponent)
         ]
-
     }
 }

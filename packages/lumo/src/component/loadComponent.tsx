@@ -1,5 +1,5 @@
 import { ComponentSetup } from "./InternalComponent";
-import { $else, $elseIf, $if } from "../conditional/CreateIf";
+import { Else, ElseIf, If } from "../conditional/If";
 import { noop } from "@rue/utils";
 import { Ion } from "../../../quarky/src";
 
@@ -63,13 +63,13 @@ export function lazyLoadComponent<P>(config: {
             loadComponent();
             return (
                 <>
-                    {$if($loading, 'create', () =>
+                    {If($loading, 'create', () =>
                         <Placeholder {...props}></Placeholder>
                     )}
-                    {$elseIf($error, () =>
+                    {ElseIf($error, () =>
                         <ErrorView {...props} error={$error()}></ErrorView>
                     )}
-                    {$else(() =>
+                    {Else(() =>
                         <Component {...props}></Component>
                     )}
                 </>
@@ -82,10 +82,10 @@ export function lazyLoadComponent<P>(config: {
 
             return (
                 <>
-                    {$if($loading, 'create', () =>
+                    {If($loading, 'create', () =>
                         <Placeholder {...props}></Placeholder>
                     )}
-                    {$elseIf($loaded, () =>
+                    {ElseIf($loaded, () =>
                         <Component {...props}></Component>
                     )}
                 </>
@@ -98,10 +98,10 @@ export function lazyLoadComponent<P>(config: {
 
             return (
                 <>
-                    {$if($error, 'create', () =>
+                    {If($error, 'create', () =>
                         <ErrorView {...props} error={$error()}></ErrorView>
                     )}
-                    {$elseIf($loaded, () =>
+                    {ElseIf($loaded, () =>
                         <Component {...props}></Component>
                     )}
                 </>
@@ -113,7 +113,7 @@ export function lazyLoadComponent<P>(config: {
 
         return (
             <>
-                {$if($loaded, 'create', () => {
+                {If($loaded, 'create', () => {
                     return <Component {...props}></Component>
                 }
                 )}

@@ -27,7 +27,7 @@ export function NestedPend() {
             <h1>Hello World</h1>
             <PendingListBlock></PendingListBlock>
             <p>{$count}</p>
-            <button onclick={() => $count.update(c => c + 1)}>click</button>
+            <button onClick={() => $count.update(c => c + 1)}>click</button>
         </>
     )
 }

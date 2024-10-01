@@ -1,5 +1,6 @@
-import { NodeIon, } from "@rue/lumo";
-import {  $, ionize, initializeIonicEffect, ionize, Ion } from "../../../packages/quarky/src";
+//@ts-nocheck
+import { NodeIon, Try, } from "@rue/lumo";
+import { initializeIonicEffect, ionize, Ion } from "../../../packages/quarky/src";
 
 
 //tests:
@@ -15,17 +16,17 @@ export function TestBox() {
     })
 
     const $count = Ion(0);
-    
+
     function moveRight() {
-            box$.position.x = box$.position.x + 10;
+        box$.position.x = box$.position.x + 10;
     }
 
     function moveLeft() {
-            box$.position.x = box$.position.x - 10;
+        box$.position.x = box$.position.x - 10;
     }
 
     const $div = NodeIon('div')
-    const $anotherCount = $(() => $count())
+    const $anotherCount = Ion(() => $count())
     initializeIonicEffect(() => {
         $anotherCount()
     })
@@ -48,8 +49,21 @@ export function TestBox() {
                     o.transform = `translate(${box$.position.x}px)`
                 }
             ]}>I'm a box</div>
-            <button onclick={moveLeft}>moveLeft</button>
-            <button onclick={moveRight}>moveRight</button>
+            <button onClick={moveLeft}>moveLeft</button>
+            <button onClick={moveRight}>moveRight</button>
         </>
+    )
+}
+
+function Hello() {
+    return (
+        <div>
+            {Try(_ =>
+                <div>hello</div>
+
+            ).Catch(err =>
+                <div>error!</div>
+            )}
+        </div>
     )
 }

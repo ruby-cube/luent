@@ -52,14 +52,14 @@ function ReactiveBlock() {
     return html` // jsx-ish
         <div>
             <>
-                ${$if($active, () => html`
+                ${If($active, () => html`
                     <p>I'm Active</p>
                 ` )} 
-                ${$else(() => html`
+                ${Else(() => html`
                     <p>I'm Not Active</p>
                 ` )}
             </>
-            <button onclick={toggleActive}>click</button>
+            <button onClick={toggleActive}>click</button>
             <p>${$count}</p>
             <ListBlock>
                 ${() => html`<li>hi</li>`}

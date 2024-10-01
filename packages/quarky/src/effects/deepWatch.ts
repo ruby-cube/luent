@@ -1,6 +1,6 @@
 import { ReactiveIon } from "../ion/ReactiveIon";
 import {  isIonicModel, IonicModel, toRaw } from "../ionize/IonicModel";
-import { isReactiveObject } from "../ionize/IonicObject";
+import { isIonicObject } from "../ionize/IonicObject";
 import { AnyObject } from "@rue/types";
 import { PropIon } from "../ionize/PropIon";
 
@@ -106,7 +106,7 @@ export function watchProps<N extends NestedModel[] | undefined>(target: IonicMod
             }
         }
     }
-    else if (isReactiveObject(target)){
+    else if (isIonicObject(target)){
         for (const key in raw) {
             const value = raw[key]
             const _keyPath = [...keyPath, key];

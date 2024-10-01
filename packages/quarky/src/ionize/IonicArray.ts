@@ -11,24 +11,26 @@ import { isMutatingArrayMethod } from "@rue/utils";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { Collection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
 import { isAnyIon } from "../ion/AnyIon";
-import { accessMethod } from "./IonicObject";
+import { accessMethod, maybeIonize } from "./IonicObject";
+import { getProtectedModelMeta, isReadonlyProxy } from "./ProtectedIonicModel";
 
 export function createIonicArray(
     target: any[],
     methods: AnyObject | undefined
 ) {
+    const boundMethodMap: Map<string | symbol, Function> = new Map()
     const metaIonicModel = new MetaIonicCollection(target, methods)
-    const reactive = new Proxy(target, {
+    const ionicModel = new Proxy(target, {
         get(target, key, receiver) {
             return reactiveArrayGetter(
-                reactive,
+                ionicModel,
                 methods,
                 metaIonicModel,
                 function handleMutatingMethod(key: string, fn) {
                     return (...args: any[]) => {
                         return mutatingArrayOp(
                             args,
-                            reactive,
+                            ionicModel,
                             metaIonicModel,
                             target,
                             key,
@@ -38,12 +40,13 @@ export function createIonicArray(
                 },
                 <any[]>target,
                 key,
-                receiver
+                receiver,
+                boundMethodMap
             )
         },
         set(target, key, value, receiver) {
             return reactiveArraySetter(
-                reactive,
+                ionicModel,
                 metaIonicModel,
                 target,
                 key,
@@ -52,9 +55,9 @@ export function createIonicArray(
             )
         }
     }) as IonicModel<any[]>
-    metaIonicModel.initIonicModel(reactive)
-    registerIonicModel(reactive, target)
-    return reactive
+    metaIonicModel.initIonicModel(ionicModel)
+    registerIonicModel(ionicModel, target)
+    return ionicModel
 }
 
 
@@ -63,11 +66,12 @@ export function createIonicTuple<T extends any[]>(
     methods: AnyObject | undefined
 ) {
 
+    const boundMethodMap: Map<string | symbol, Function> = new Map()
     const metaIonicModel = new MetaIonicCollection(target, methods)
-    const reactive = new Proxy(target, {
+    const ionicModel = new Proxy(target, {
         get(target, key, receiver) {
             return reactiveArrayGetter(
-                reactive,
+                ionicModel,
                 methods,
                 metaIonicModel,
                 function handleMutatingMethod() {
@@ -75,12 +79,13 @@ export function createIonicTuple<T extends any[]>(
                 },
                 <any[]>target,
                 key,
-                receiver
+                receiver,
+                boundMethodMap
             )
         },
         set(target, key, value, receiver) {
             return reactiveArraySetter(
-                reactive,
+                ionicModel,
                 metaIonicModel,
                 target,
                 key,
@@ -89,9 +94,9 @@ export function createIonicTuple<T extends any[]>(
             )
         }
     }) as IonicModel<any[]>
-    metaIonicModel.initIonicModel(reactive)
-    registerIonicModel(reactive, target)
-    return reactive
+    metaIonicModel.initIonicModel(ionicModel)
+    registerIonicModel(ionicModel, target)
+    return ionicModel
 }
 
 // export function createReactiveArrayItems(
@@ -109,23 +114,33 @@ export function createIonicTuple<T extends any[]>(
 
 
 function reactiveArrayGetter(
-    reactive: IonicModel<Collection>,
+    ionicModel: IonicModel<Collection>,
     methods: AnyObject | undefined,
     metaIonicModel: MetaIonicCollection,
     handleMutatingMethod: (key: string, fn: Function) => (...args: any[]) => any,
     target: any[],
     key: string | symbol,
-    receiver: AnyObject
+    receiver: AnyObject,
+    boundMethodMap: Map<string | symbol, Function>
 ) {
     if (__DEV__) emitSignal();
     if (key === META) return metaIonicModel;
+    const protectedMeta = getProtectedModelMeta(target, ionicModel, receiver)
+    if (protectedMeta) {
+        const keys = protectedMeta.propertyKeys
+        if (keys && !(key in keys)) {
+            if (__DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}'`)
+            return undefined;
+        }
+    }
     if (methods && key in methods) {
         return accessMethod(
-            methods[key],
             target,
-            reactive,
+            ionicModel,
             receiver,
-            key
+            key,
+            boundMethodMap,
+            methods[key]
         )
     }
     // if (key === '_$' && deep) return asShallowReactive(target);
@@ -136,31 +151,48 @@ function reactiveArrayGetter(
     if (isNonTrackable(key, Array)) return value;
     if (isAnyIon(value) && !isIntegerKey(key)) return value();
     if (isMutatingArrayMethod(key)) {
-        //TODO: accessMethod for readonly and protected
+        if (isReadonlyProxy(target, ionicModel, receiver)) {
+            if (__DEV__) console.warn('Object is readonly. Cannot access methods')
+            return undefined;
+        }
+        if (protectedMeta) {
+            const keys = protectedMeta.propertyKeys
+            if (keys && key in keys) {
+                return handleMutatingMethod(<string>key, value);
+            }
+            return undefined;
+        }
         return handleMutatingMethod(<string>key, value);
     }
-    if (value instanceof Function) return value.bind(reactive)
+    if (value instanceof Function)
+        return accessMethod(
+            target,
+            ionicModel,
+            receiver,
+            key,
+            boundMethodMap,
+            value
+        )
     if (key === 'at') {
         return useGetOp(
-            reactive,
+            ionicModel,
             target,
             key,
             value
         )
     }
-
-    const _value = value instanceof Object ? ionize(value) : value
+    const _value = maybeIonize(value, target, ionicModel, receiver)
     const tracker = getActiveTracker()
     if (!tracker) return _value;
 
-    tracker.track(asObservedProp(reactive, key))
+    tracker.track(asObservedProp(ionicModel, key))
     return _value;
 }
 
 
 
 function reactiveArraySetter(
-    reactive: IonicModel,
+    ionicModel: IonicModel,
     metaIonicModel: MetaIonicCollection,
     target: AnyObject,
     key: string | symbol,
@@ -169,8 +201,8 @@ function reactiveArraySetter(
 ) {
     if (metaIonicModel.isNewProperty(key)) metaIonicModel.registerNewProperty(key)
     const _newValue = toRawIfNeeded(newValue)
-    const op = target instanceof Array && isIntegerKey(key) ? getTrackedOp(reactive, 'at', key) : null;
-    const prop = getObservedProp(reactive, key);
+    const op = target instanceof Array && isIntegerKey(key) ? getTrackedOp(ionicModel, 'at', key) : null;
+    const prop = getObservedProp(ionicModel, key);
     if (!prop && !op) {
         // Reflect.set(target, key, newValue, receiver);
         target[key] = _newValue
@@ -208,11 +240,11 @@ function reactiveArraySetter(
             }
             const index = parseInt(indexKey)
             if (index > _newValue || index > oldValue) {
-                const prop = getObservedProp(reactive, indexKey)
+                const prop = getObservedProp(ionicModel, indexKey)
                 if (prop) {
                     trigger(prop, _newValue, oldValue)
                 }
-                const op = getTrackedOp(reactive, 'at', index)
+                const op = getTrackedOp(ionicModel, 'at', index)
                 if (op) {
                     if (isIonicAtom(op)) {
                         triggerIonicAtom(op)
@@ -223,7 +255,7 @@ function reactiveArraySetter(
     }
 
     triggerIonicModelWithSetOp(
-        reactive,
+        ionicModel,
         key,
         _newValue,
         oldValue,
@@ -242,7 +274,7 @@ export function isIntegerKey(key: unknown) {
 
 function mutatingArrayOp(
     args: any[],
-    reactive: IonicModel<any[]>,
+    ionicModel: IonicModel<any[]>,
     metaIonicModel: MetaIonicCollection<any[]>,
     target: AnyObject,
     key: string,
@@ -250,20 +282,20 @@ function mutatingArrayOp(
 ) {
     const _args = maybeUnreactivizeArgs(key, args);
     const oldLength = target.length;
-    const output = fn.apply(reactive, _args); // perform mutation
+    const output = fn.apply(ionicModel, _args); // perform mutation
     const newLength = target.length;
     if (oldLength === newLength) return output; //FIX: Some methods will mutate but not change the length, like fill
     storeSnapshot(metaIonicModel)
 
-    const lengthProp = getObservedProp(reactive, 'length')
+    const lengthProp = getObservedProp(ionicModel, 'length')
     if (lengthProp) {
         trigger(lengthProp, newLength, oldLength); // trigger for length change
     }
 
     if (key === 'pop') {
-        const prop = getObservedProp(reactive, (oldLength - 1).toString())
+        const prop = getObservedProp(ionicModel, (oldLength - 1).toString())
         if (prop) trigger(prop);
-        const op = getTrackedOp(reactive, 'at', - 1)
+        const op = getTrackedOp(ionicModel, 'at', - 1)
         if (op) triggerIonicAtom(op);
     }
 
@@ -276,11 +308,11 @@ function mutatingArrayOp(
             }
             const index = parseInt(indexKey)
             if (index >= newLength) {
-                const prop = getObservedProp(reactive, indexKey)
+                const prop = getObservedProp(ionicModel, indexKey)
                 if (prop) {
                     trigger(prop)
                 }
-                const op = getTrackedOp(reactive, 'at', index)
+                const op = getTrackedOp(ionicModel, 'at', index)
                 if (op) {
                     if (isIonicAtom(op)) {
                         triggerIonicAtom(op)
@@ -291,7 +323,7 @@ function mutatingArrayOp(
     }
 
     triggerReactiveWithMutationOp(
-        reactive,
+        ionicModel,
         key,
         _args,
         output

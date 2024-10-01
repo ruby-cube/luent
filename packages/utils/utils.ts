@@ -77,7 +77,7 @@ export function normalizeToArray(value: any | any[]) {
 export const UNDEFINED = Symbol('undefined');
 
 
-export function moveMultipleUniqueItems(uniqueItemsToRemove: Set<any>, list: any[], reinsertionIndex: number){ // assumes items are unique
+export function moveMultipleUniqueItems(uniqueItemsToRemove: Set<any>, list: any[], reinsertionIndex: number) { // assumes items are unique
     const indicesAndRemoveCount: [number, number][] = [];
     const removedItems = [];
     let j = 0;
@@ -105,9 +105,10 @@ export function moveMultipleUniqueItems(uniqueItemsToRemove: Set<any>, list: any
 }
 
 
-export function useIncrementalID(){
+export function useIncrementalID() {
     let count = 0;
-    return function getIncrementalID(){
+    return function getIncrementalID() {
         return count++;
     }
 }
+

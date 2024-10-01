@@ -1,18 +1,18 @@
 //@ts-nocheck
 
-import { $else, $if } from "@rue/lumo";
+import { Else, If } from "@rue/lumo";
 
 function ListBlock() {
 
     // for if you don't want to track effect
     watchCases(
-        $if($active, () => {
+        If($active, () => {
             $height() // <-- Will not be tracked
         }),
-        $elseIf($bored, () => {
+        ElseIf($bored, () => {
 
         }),
-        $else(() => {
+        Else(() => {
 
         })
     )

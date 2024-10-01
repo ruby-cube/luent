@@ -7,9 +7,9 @@ import { IonicModel, recordOp, storeSnapshot } from "./IonicModel";
 import { isWatched } from "../effects/WatchTarget";
 import { triggerIonicModel } from "../trigger";
 import { Collection, MetaIonicCollection } from "./MetaIonicModel";
-import { isAnyIon } from "../ion/AnyIon";
+import { noop } from "@rue/utils";
 
-
+export const UNDEFINED_OP: Function = noop
 
 export const insertOps = {
     push: { from: 0 },

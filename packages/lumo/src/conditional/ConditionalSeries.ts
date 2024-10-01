@@ -18,15 +18,15 @@ export class ConditionalSeries {
                 this.conditions.push($condition)
             }
             if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
-                if (__DEV__) throw new Error('$if must be the first child of a conditional series (or extraneous use of fragment/array)')
+                if (__DEV__) throw new Error('If must be the first child of a conditional series (or extraneous use of fragment/array)')
                 else continue;
             }
             if (!(kit instanceof ConditionalKit)) {
-                if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the $if, $elseIf, and $else functions")
+                if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the If, ElseIf, and Else functions")
                 else continue;
             }
             if (i !== statements.length - 1 && kit.statementType === 'else') {
-                if (__DEV__) throw new Error("$else must be the very last statement of a conditional series");
+                if (__DEV__) throw new Error("Else must be the very last statement of a conditional series");
                 else continue;
             }
         }
@@ -75,15 +75,15 @@ export class ConditionalSeries {
 //     for (let i = 0; i < statements.length; i++) {
 //         const kit = statements[i]
 //         if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
-//             if (__DEV__) throw new Error('$if must be the first child of a conditional series (or extraneous use of fragment)')
+//             if (__DEV__) throw new Error('If must be the first child of a conditional series (or extraneous use of fragment)')
 //             else continue;
 //         }
 //         if (!(kit instanceof ConditionalKit)) {
-//             if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the $if, $elseIf, and $else functions")
+//             if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the If, ElseIf, and Else functions")
 //             else continue;
 //         }
 //         if (i !== statements.length - 1 && kit.statementType === 'else') {
-//             if (__DEV__) throw new Error("$else must be the very last statement of a conditional series");
+//             if (__DEV__) throw new Error("Else must be the very last statement of a conditional series");
 //             else continue;
 //         }
 //         series.addKit(kit);
@@ -102,7 +102,7 @@ function noElseBlock(statements: ConditionalKit[]) {
 
 export function validateStandAloneConditional(conditionalKit: ConditionalKit, series: any[], index: number) {
     if (conditionalKit.statementType !== 'if')
-        throw new Error(`$${conditionalKit.statementType} conditional must be contained in a fragment or array that begins with $if`)
+        throw new Error(`$${conditionalKit.statementType} conditional must be contained in a fragment or array that begins with If`)
     const nextEntity = series[index + 1];
     if (nextEntity instanceof ConditionalKit && nextEntity.statementType !== 'if')
         throw new Error(`A series of conditional statements must be enclosed in a fragment or array`)

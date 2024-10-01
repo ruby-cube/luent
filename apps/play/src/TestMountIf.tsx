@@ -1,4 +1,4 @@
-import { NodeIon, Component, CreateIf, ElseCreate } from "@rue/lumo";
+import { NodeIon, Component, If, Else } from "@rue/lumo";
 import { $, AFTER_RENDER, BEFORE_RENDER, DerivedIon, Ion, ON_RENDER, SYNC, watch } from "../../../packages/quarky/src";
 import { onActivated, onCreated, onDeactivate, onDestroy } from "../../../packages/lumo/src/dynamic/lifecycle";
 
@@ -35,19 +35,19 @@ export function MountIf() {
     return Component(
         <>
             {[
-                CreateIf($active, () =>
+                If($active, () =>
                     <Counter></Counter>
                 ),
-                ElseCreate(() =>
+                Else(() =>
                     <p>bye</p>
                 )
             ]}
             {/* <div>Both: {$activeAndReady}</div> */}
-            <button onclick={toggleActive}>toggle active {$active}</button>
-            {/* <button onclick={increment}>increment {$count}</button> */}
-            {/* <button onclick={toggleReady}>toggle ready {$ready}</button> */}
+            <button onClick={toggleActive}>toggle active {$active}</button>
+            {/* <button onClick={increment}>increment {$count}</button> */}
+            {/* <button onClick={toggleReady}>toggle ready {$ready}</button> */}
             {/* <div>{$sum}</div>
-            <button onclick={increment2}>increment {$count2}</button> */}
+            <button onClick={increment2}>increment {$count2}</button> */}
         </>
     )
 }
@@ -109,8 +109,11 @@ function Counter() {
     return Component(
         <>
             <div ref={$countDiv}>{$count}</div>
-            <button onclick={() => $count.set(count => count + 1)} ref={$button}>increment</button>
+            <button onClick={() => $count.set($count() + 1)} ref={$button}>increment</button>
+            <Counter>{$count()}</Counter>
         </>
     )
 }
 
+
+// slot: renderfunction, component, readonly ion, primitive value
