@@ -1,4 +1,4 @@
-import { COMPONENT, ComponentConfig, getCurrentIndex, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeIon, PublicComponent, pushProvider, popProvider } from "@rue/lumo";
+import { COMPONENT, ComponentConfig, getCurrentIndex, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeRef, PublicComponent, pushProvider, popProvider } from "@rue/lumo";
 import { Literate } from "./Literate.js";
 import { ReactiveIon, isIon } from "../../quarky/src/index.js";
 import { AnyObject, MaybePromise } from "@rue/types";
@@ -74,7 +74,7 @@ export function runComponentSetup(
 function initializeComponent(
     component: SSRComponent,
     output: Literate | Promise<SSRComponent> | [PublicComponent, Literate],
-    ref: NodeIon | undefined,
+    ref: NodeRef | undefined,
     $index: ReactiveIon<number> | undefined,
 ) {
     const _output = output instanceof Array ? output[1] : output;
@@ -83,7 +83,7 @@ function initializeComponent(
     component.output = _output;
 
     if (ref) {
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeIon or $Nodes Ion as ref")
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or $Nodes Ion as ref")
         if ($index) {
             initializeListRef(ref, publicComponent, $index)
         }

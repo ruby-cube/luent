@@ -1,7 +1,7 @@
 //@ts-nocheck
-import { Ion, ReactiveIon, watch } from "../../../packages/quarky/src"
+import { ion, ReactiveIon, watch } from "../../../packages/quarky/src"
 import { watchForRender } from "../../../packages/lumo/src/watch/watchAndPreserve";
-import { NodeIon } from "@rue/lumo";
+import { NodeRef } from "@rue/lumo";
 
 export function MainBlock() {
 
@@ -22,7 +22,7 @@ export function MainBlock() {
         ]
     ], $hello) // if using directly in template
 
-    const $list = Ion(['ho'])
+    const $list = ion(['ho'])
 
     const $records_list = $ListPort($records, (record) => (
         <h1>{record.content}</h1>
@@ -35,7 +35,7 @@ export function MainBlock() {
 
 
 
-    const $mainContent = NodeIon($MainContent)
+    const $mainContent = NodeRef($MainContent)
 
     const $MainContent = MorphicNode({
         hello: () =>
@@ -66,8 +66,8 @@ function $MorphicNode() {
 
 function $MorphicPort(initialKey: string | ReactiveIon<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; set: (key: string) => any } {
 
-    const $key = Ion(initialKey)
-    const $render = Ion(switchMap[$key()])
+    const $key = ion(initialKey)
+    const $render = ion(switchMap[$key()])
 
     watch($key, (key) => {
         $render.update(switchMap[key])
@@ -84,7 +84,7 @@ function $MorphicPort(initialKey: string | ReactiveIon<any>, switchMap: { [key: 
 
 function MainContent() {
 
-    const $mainContent = Ion(() =>
+    const $mainContent = ion(() =>
         <div>hello</div>)
 
     function changeMainContent() {

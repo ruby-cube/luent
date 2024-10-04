@@ -1,4 +1,4 @@
-import { isIon, ReactiveIon } from "../ion/ReactiveIon";
+import { isIon, ReactiveIon } from "../ion/Ion";
 import { IonicDerivation } from "./IonicDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 import { META } from "../ReactiveEntity";
@@ -22,6 +22,11 @@ export type DerivedIon<T = any> = {
     untrack: () => void
 }
 
+export type DerivedRef<T = any> = {
+    (): T
+    [META]: MetaDerivedIon
+}
+
 export type ReactiveGet<T = any> = DerivedIon<T> | ReactiveIon<T> | (() => T);
 
 export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIon {
@@ -38,9 +43,10 @@ export class MetaDerivedIon extends IonicDerivation {
     asReadonly?: ProtectedIon
 
     constructor(
-        override readonly o: DerivedIon, 
+        override readonly o: DerivedIon,
         retrack: boolean,
-        public hasMethods: boolean = false
+        public hasMethods: boolean = false,
+        public inert: boolean = false
     ) {
         super(o, DERIVED_ION, retrack);
     }
@@ -56,9 +62,23 @@ export class MetaDerivedIon extends IonicDerivation {
 // export const $ = DerivedIon
 
 
-export function DerivedIon<T extends any>(pureGetter: () => T, methods?: AnyObject, retrack: boolean = true): DerivedIon<T> {
+export function DerivedIon<T extends any>(pureGetter: () => T, methods?: AnyObject, retrack: boolean = true, inert: boolean = false): DerivedIon<T> | DerivedRef<T> {
+    const derived = new MetaDerivedIon(<DerivedIon>$derivedIon, retrack, !!methods, inert);
+    if (inert) {
+        const proto = {
+            [META]: derived
+        } as AnyObject
+
+        if (methods) {
+            for (const key in methods) {
+                proto[key] = methods[key].bind(proto) // This makes set function available to `this` even after protected
+            }
+        }
+        Object.setPrototypeOf(pureGetter, proto)
+
+        return pureGetter as DerivedRef;
+    }
     let initialized = false;
-    const derived = new MetaDerivedIon(<DerivedIon>$derivedIon, retrack, !!methods);
     function $derivedIon() {
         if (!initialized || derived.dirty && retrack) {
             const value = derived.trackAtoms(pureGetter);
@@ -105,15 +125,21 @@ export function DerivedIon<T extends any>(pureGetter: () => T, methods?: AnyObje
 }
 
 export type WritableDerivedIon<T = any, M extends AnyObject = {}> = {
-    ():T;
+    (): T;
     set: (newValue: T) => T;
     [META]: MetaDerivedIon;
     untrack: () => void;
 } & M
 
-export function WritableDerivedIon<T, M>(config: { get: () => T, set: (value: T) => T }, methods?: M & { [key: string]: (...args: any[]) => any }) {
+export type WritableDerivedRef<T = any, M extends AnyObject = {}> = {
+    (): T;
+    set: (newValue: T) => T;
+    [META]: MetaDerivedIon;
+} & M
+
+export function WritableDerivedIon<T, M>(config: { get: () => T, set: (value: T) => T }, methods?: M & { [key: string]: (...args: any[]) => any }, inert: boolean = false) {
     const _methods = methods || { set: config.set }
     if (methods) _methods.set = config.set
-    const writable = DerivedIon(config.get, _methods);
+    const writable = DerivedIon(config.get, _methods, inert);
     return writable;
 }

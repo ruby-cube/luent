@@ -1,6 +1,7 @@
-import { NodeIon, Component, If, Else, For } from "@rue/lumo";
+//@ts-nocheck
+import { NodeRef, Component, If, Else, For } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { Ion, __addDevName, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
+import { ion, __addDevName, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { META } from "../../../packages/quarky/src/ReactiveEntity";
 
@@ -13,7 +14,7 @@ function genId() {
 }
 
 
-// const $count = Ion(0)
+// const $count = ion(0)
 // watch($(doubleCount => $count() + 2), () => {  
 
 // })
@@ -148,9 +149,9 @@ export function List(
         $list.splice(index, 1);
     }
 
-    const $itemDiv = NodeIon('div')
+    const $itemDiv = NodeRef('div')
 
-    const $alive = Ion(true)
+    const $alive = ion(true)
 
     function destroy() {
         $alive.set(false)
@@ -166,13 +167,12 @@ export function List(
     // }, 1)
 
     // const $listIsEmpty = DerivedIon(() => $list.length === 0)
-
     return Component(
         <>
             <>
                 {If(() => $list.length === 0, () =>
                     <div
-                        onClick={() => insertItem(0)}
+                        onClick={insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
@@ -182,7 +182,7 @@ export function List(
                     For($list, ($item, $index) => (
                         <div
                             ref={$itemDiv}
-                            onClick={(e) => toggleSelect(e, $index())}
+                            onClick={toggleSelect($event, $index())}
                             style={[
                                 `background-color: ${randomColor.get()}`,
                                 o => {
@@ -190,24 +190,24 @@ export function List(
                                 }
                             ]}>
                             <p
-                                onClick={(e) => removeItem($index())}
+                                onClick={removeItem($index())}
                                 style="cursor: pointer"
                             >
                                 X
                             </p>
 
-                            <li onClick={() => changeContent($index())}>
+                            <li onClick={changeContent($index())}>
                                 {() => $item.content}
                             </li>
                             <p>{$index}</p>
                             <div
-                                onClick={() => insertItem($index() + 1)}
+                                onClick={insertItem($index() + 1)}
                                 style="background-color: gray; cursor: pointer"
                             >
                                 insert
                             </div>
                             <div
-                                onClick={() => moveSelectedItems($index() + 1)}
+                                onClick={moveSelectedItems($index() + 1)}
                                 style="background-color: white; cursor: pointer"
                             >
                                 insert
@@ -217,14 +217,17 @@ export function List(
                 )}
             </>
             <button onClick={clearSelection}>clear</button>
+            <button
+                onClick={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
+            >
+                clear
+            </button>
+            <ListBlock>
+                <ItemBlock content={$slot.$content()}></ItemBlock>
+            </ListBlock>
         </>
         //             {/* <button onClick={If($active, capture.once(clearSelection))}>clear</button>
 
-        //     <button
-        //         onClick={[() => increment($index()), preventDefault.endHere, target(THIS_NODE), { once: true }]}
-        //     >
-        //         clear
-        //     </button>
 
         //     <button
         //         onClick={[increment, { until: onMounted }]}

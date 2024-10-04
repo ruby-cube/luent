@@ -1,4 +1,4 @@
-import { useEventListener } from "@rue/lumo";
+import { listen } from "../../../packages/lumo/src/events/listen";
 
 const app = document.querySelector("#app");
 
@@ -18,9 +18,8 @@ app?.append(div, buttonA, answerDiv, buttonC)
 let backgroundColor = "red"
 
 buttonA.addEventListener("click", randomBehavior)
-const onMouseUp = useEventListener('mouseup')
 
-onMouseUp(buttonA, (e)=>{
+listen(buttonA, 'mouseup', (e)=>{
     
 })
 

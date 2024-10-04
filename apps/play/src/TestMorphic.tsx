@@ -1,4 +1,4 @@
-import { Component, NodeIon } from "@rue/lumo";
+import { Component, NodeRef } from "@rue/lumo";
 import { MorphicComponent } from "../../../packages/lumo/src/morphic/MorphicComponent";
 
 export function TestMorphic() {
@@ -11,8 +11,8 @@ export function TestMorphic() {
             <div>bye</div>
     })
 
-    const $morphicNode = NodeIon($Morphable)
-    const $comment = NodeIon(CommentBlock)
+    const $morphicNode = NodeRef($Morphable)
+    const $comment = NodeRef(CommentBlock)
 
     function morph(key: string) {
         // console.log("$morphic node", $morphicNode)

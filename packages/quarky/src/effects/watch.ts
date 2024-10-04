@@ -12,7 +12,7 @@ import { META } from "../ReactiveEntity";
 import { noop } from "@rue/utils";
 import { __devCheckIfTracked } from "../derivations/DependencyTracker";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
-import { ReactiveIon, asMetaIon, isIon } from "../ion/ReactiveIon";
+import { ReactiveIon, asMetaIon, isIon } from "../ion/Ion";
 import { isObservedProp, ObservedProp } from "../ionize/ObservedProp";
 import { asIonicAtom } from "../derivations/IonicAtom";
 import { PropIon } from "../ionize/PropIon";

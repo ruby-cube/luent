@@ -1,9 +1,9 @@
 import { ComponentSetup, InternalComponent, Component, ProviderComponentSetup } from "./InternalComponent";
-import { NodeIon } from "../node/NodeIon";
+import { NodeRef } from "../node/NodeRef";
 import { ComponentConfig, initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
-import { getCurrentIndex } from "../list/ListRenderKit";
+import { getCurrentIndex } from "../iteratives/ListRenderKit";
 import { getCurrentProvider, popProvider, provide, pushProvider } from "./provide";
 import { ProviderComponent } from "./ProviderComponent";
 import { MorphicRenderKit } from "../morphic/MorphicComponent";
@@ -93,7 +93,7 @@ function makeProviderComponent(
 // style?: { [K in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[K] };
 // $class?: ((o: DOMTokenList) => void)[],
 // $style?: ((o: CSSStyleDeclaration) => void)[],
-// ref?: NodeIon,
+// ref?: NodeRef,
 // $index?: ReactiveIon<number>
 
 
@@ -147,7 +147,7 @@ export function runProviderComponentSetup(
 function initializeComponent(
     component: InternalComponent | MorphicRenderKit,
     output: Component,
-    ref: NodeIon | IonicModel<any[]> | undefined,
+    ref: NodeRef | IonicModel<any[]> | undefined,
     $index: ReactiveIon<number> | undefined,
 ) {
     if (output instanceof Promise)
@@ -158,7 +158,7 @@ function initializeComponent(
 
     if (ref) {
         const publicComponent = output.component || undefined;
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeIon or $Nodes Ion as ref")
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or $Nodes Ion as ref")
         if ($index) {
             initializeListRef(ref, publicComponent, $index)
         }

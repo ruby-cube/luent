@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { NodeIon } from "@rue/lumo"
-import { $, Ion } from "../../../packages/quarky/src"
+import { NodeRef } from "@rue/lumo"
+import { $, ion } from "../../../packages/quarky/src"
 
 
 
@@ -8,8 +8,8 @@ function ParentBlock() {
 
     const initialCount = 4;
 
-    const child = NodeIon(ChildBlock);
-    const sibling = NodeIon(SiblingBlock);
+    const child = NodeRef(ChildBlock);
+    const sibling = NodeRef(SiblingBlock);
 
     function increment() {
         child.increment()
@@ -41,7 +41,7 @@ function ParentBlock() {
 function ChildBlock({ initialCount }: {
     initialCount?: number
 }) {
-    const $count = Ion(initialCount || 0)
+    const $count = ion(initialCount || 0)
 
     function increment() {
         $count.update(c => c + 1)
@@ -68,7 +68,7 @@ function ChildBlock({ initialCount }: {
 function SiblingBlock({ initialCount }: {
     initialCount?: number
 }) {
-    const $count = Ion(initialCount || 0)
+    const $count = ion(initialCount || 0)
 
     function increment() {
         $count.update(c => c + 1)

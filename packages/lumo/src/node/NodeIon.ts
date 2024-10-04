@@ -2,14 +2,14 @@ import { Component, PublicComponent } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
-import { Ion, ReactiveIon, asReadonly, ReadonlyIon, ionize, IonicModel } from "../../../quarky/src"
+import { ion, ReactiveIon, asReadonly, ReadonlyIon, ionize, IonicModel } from "../../../quarky/src"
 import { HTMLTag } from "../element/makeElement"
-import { isUpdatingList } from "../list/listStack"
+import { isUpdatingList } from "../iteratives/listStack"
 
 
 
 // type Task = ((item: Element | PublicComponent) => void) | ((item: Element | PublicComponent, $index?: ReactiveIon<number>) => void)
-// const hookMap: WeakMap<NodeIon, Set<Task>> = new WeakMap()
+// const hookMap: WeakMap<NodeRef, Set<Task>> = new WeakMap()
 
 type RefSource = HTMLTag | ((...args: any[]) => Component)
 
@@ -29,41 +29,41 @@ type RefSource = HTMLTag | ((...args: any[]) => Component)
 // export type ViewNodePod<>
 
 export type NodesIon<T extends RefSource = RefSource> = () => NodeReferent<T>[]
-export type NodeIon<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
-export type _NodeIon<T extends RefSource = RefSource> = ReactiveIon<NodeReferent<T> | undefined>
+export type NodeRef<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
+export type _NodeRef<T extends RefSource = RefSource> = ReactiveIon<NodeReferent<T> | undefined>
 export type _NodesIon<T extends RefSource = RefSource> = ReactiveIon<NodeReferent<T>[]>
 
 // map readonly $node to $node
-const $nodeMap: WeakMap<NodeIon | NodesIon, _NodeIon | _NodesIon> = new WeakMap()
+const $nodeMap: WeakMap<NodeRef | NodesIon, _NodeRef | _NodesIon> = new WeakMap()
 
-export function getNodeIon($nodeAsReadonly: NodeIon | NodesIon) {
+export function getNodeRef($nodeAsReadonly: NodeRef | NodesIon) {
     const $node = $nodeMap.get($nodeAsReadonly);
     if (!$node) throw new Error("No $node :(. This should never happen")
     return $node;
 }
 
-export function NodeIon<
+export function NodeRef<
     T extends RefSource
     = RefSource
 >(source: T) {
-    let $node = Ion(undefined) as NodeIon<T>;
+    let $node = ion(undefined) as NodeRef<T>;
     if (__DEV__) {
-        $node = asReadonlyNodeIon($node) as NodeIon<T>
+        $node = asReadonlyNodeRef($node) as NodeRef<T>
     }
-    return $node as NodeIon<T>;
+    return $node as NodeRef<T>;
 }
 
 export function $Nodes<T extends RefSource = RefSource>(source: T): NodesIon<T> {
-    let $nodes = Ion([]) as NodesIon<T>
+    let $nodes = ion([]) as NodesIon<T>
     if (__DEV__) {
-        $nodes = asReadonlyNodeIon($nodes) as NodesIon<T>
+        $nodes = asReadonlyNodeRef($nodes) as NodesIon<T>
     }
     return $nodes
 }
 
-function asReadonlyNodeIon($node: NodeIon | NodesIon) {
+function asReadonlyNodeRef($node: NodeRef | NodesIon) {
     const $nodeAsReadonly = asReadonly($node);
-    $nodeMap.set($nodeAsReadonly, <_NodeIon | _NodesIon>$node)
+    $nodeMap.set($nodeAsReadonly, <_NodeRef | _NodesIon>$node)
     return $nodeAsReadonly
 }
 
@@ -80,11 +80,11 @@ export type NodeReferent<
 export class InternalNodeRef<
     T extends RefSource
     = RefSource> {
-    o: _NodeIon
+    o: _NodeRef
     constructor(
-        ref: NodeIon
+        ref: NodeRef
     ) {
-        this.o = __DEV__ ? getNodeIon(ref) as _NodeIon : ref as _NodeIon
+        this.o = __DEV__ ? getNodeRef(ref) as _NodeRef : ref as _NodeRef
     }
 
     setValue(value: NodeReferent<T> | undefined) {
@@ -116,7 +116,7 @@ export class InternalNodeArrayRef {
     constructor(
         ref: NodesIon
     ) {
-        this.o = __DEV__ ? getNodeIon(ref) as _NodesIon : ref as _NodesIon
+        this.o = __DEV__ ? getNodeRef(ref) as _NodesIon : ref as _NodesIon
     }
 
     setValue(value: NodeReferent[]) {

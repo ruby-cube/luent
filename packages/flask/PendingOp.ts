@@ -36,8 +36,10 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
     mapHandlers(_callback, callback);
 
     function oneTimeCallback(...arg: any[]) {
-        _resolve(callback(...arg));
+        const output = callback(...arg)
+        _resolve(output);
         _remove()
+        return output;
     }
 
     function _remove() {

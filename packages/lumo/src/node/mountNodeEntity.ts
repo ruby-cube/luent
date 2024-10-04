@@ -5,7 +5,7 @@ import { mountElement } from "../element/mountElement";
 import { NodeEntity } from "./makeNode";
 import { _NodePod } from "./NodePod";
 import { mountTextNode } from "./mountTextNode";
-import { ListRenderKit } from "../list/ListRenderKit";
+import { ListRenderKit } from "../iteratives/ListRenderKit";
 import { getProviderComponent, ProviderComponent } from "../component/ProviderComponent";
 import { MorphicRenderKit } from "../morphic/MorphicComponent";
 

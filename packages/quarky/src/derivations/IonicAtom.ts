@@ -1,5 +1,5 @@
 import { useRenderCycle } from "../effects/RenderCycle";
-import { ReactiveIon, MetaIon } from "../ion/ReactiveIon";
+import { ReactiveIon, MetaIon } from "../ion/Ion";
 import { asMetaIonicModel, isIonicModel } from "../ionize/IonicModel";
 import { isObservedProp, ObservedProp } from "../ionize/ObservedProp";
 import { TrackedOp } from "../ionize/TrackedOp";

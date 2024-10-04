@@ -93,8 +93,9 @@ export function bindFlask(callback: Callback, flask: EffectFlask | null = getFla
     if (flask) {
         function callbackBoundToFlask(...args: any[]) {
             pushFlask(flask!)
-            callback(...args);
+            const output = callback(...args);
             popFlask();
+            return output;
         }
         return callbackBoundToFlask
     }

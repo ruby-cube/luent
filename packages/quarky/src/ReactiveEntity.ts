@@ -1,4 +1,6 @@
 import { IonicAtom } from "./derivations/IonicAtom"
+import { asMetaIon, isIon } from "./ion/Ion"
+import { isIonicModel } from "./ionize/IonicModel"
 
 export const META = Symbol('metaReactiveEntity')
 
@@ -20,3 +22,7 @@ export interface ReactiveEntity<T = any> {
 // export function destroyAsAtom(this: ReactivePrimitive){
 //     this.asAtom = undefined
 // }
+
+export function isReactive(value: any) {
+    return isIonicModel(value) || isIon(value) && !asMetaIon(value).inert
+}

@@ -19,11 +19,11 @@ export type ReactiveIon<T = any, M extends AnyObject = {}> = {
 // export type ReactiveGet<T = any> = () => T
 export type Get<T = any> = () => T
 
-export const REACTIVE_ION = Symbol('atomicIon');
+export const ION = Symbol('atomicIon');
 
 export class MetaIon<T = unknown> implements ReactiveEntity {
 
-    type = REACTIVE_ION
+    type = ION
 
     asProtected?: ProtectedIon
     asReadonly?: ProtectedIon
@@ -32,19 +32,21 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
         readonly o: ReactiveIon<T>,
         public value: T,
         readonly hasIonicValue: boolean = false,
-        public hasMethods: boolean = false
+        public hasMethods: boolean = false,
+        public inert = false
     ) { }
 }
 
 
-export function ReactiveIon<
+export function Ion<
     T,
     M extends { [key: string]: (...args: any[]) => any }
 >(
     value: T,
-    methods?: M
+    methods?: M,
+    inert?: boolean
 ) {
-    const metaIon = new MetaIon(<ReactiveIon>$ion, value, isIonicModel(value), !!methods)
+    const metaIon = new MetaIon(<ReactiveIon>$ion, value, isIonicModel(value), !!methods, !!inert)
 
     const proto = {
         [META]: metaIon,
@@ -60,6 +62,7 @@ export function ReactiveIon<
     }
 
     function $ion() {
+        if (inert) return metaIon.value;
         if (__DEV__) emitSignal();
         const tracker = getActiveTracker()
         if (!tracker) return metaIon.value as T
@@ -128,7 +131,7 @@ function setValue(metaIon: MetaIon, newValue: unknown, oldValue: unknown) {
     const _newValue = shouldIonize(newValue, metaIon) ? ionize(newValue) : newValue
     // toIonicModelIfMust(newValue, metaIon)
     metaIon.value = _newValue;
-    trigger($ion, _newValue, oldValue);
+    if (!metaIon.inert) trigger($ion, _newValue, oldValue);
     return _newValue;
 }
 
@@ -138,7 +141,7 @@ function shouldIonize(newValue: unknown, metaIon: MetaIon): newValue is AnyObjec
 
 
 export function isIon(maybeIon: any): maybeIon is ReactiveIon {
-    if (maybeIon instanceof Object) return maybeIon[META]?.type === REACTIVE_ION;
+    if (maybeIon instanceof Object) return maybeIon[META]?.type === ION;
     return false;
 }
 

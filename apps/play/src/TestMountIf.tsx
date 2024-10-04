@@ -1,27 +1,28 @@
-import { NodeIon, Component, If, Else } from "@rue/lumo";
-import { $, AFTER_RENDER, BEFORE_RENDER, DerivedIon, Ion, ON_RENDER, SYNC, watch } from "../../../packages/quarky/src";
+//@ts-nocheck
+import { NodeRef, Component, If, Else, stopPropagation } from "@rue/lumo";
+import { $, AFTER_RENDER, BEFORE_RENDER, DerivedIon, ion, ON_RENDER, SYNC, watch } from "../../../packages/quarky/src";
 import { onActivated, onCreated, onDeactivate, onDestroy } from "../../../packages/lumo/src/dynamic/lifecycle";
 
 export function MountIf() {
-    const $count = Ion(0)
+    const $count = ion(0)
     // const $doubleCount = DerivedIon(() => $count() * 2)
     function increment() {
         $count.set(count => count + 1)
     }
 
-    // const $count2 = Ion(0)
+    // const $count2 = ion(0)
     // const $sum = $(() => $count() + $count2())
     // function increment2() {
     //     $count2.update(count => count + 1)
     // }
 
 
-    const $active = Ion(true)
+    const $active = ion(true)
     function toggleActive() {
         $active.set(active => !active)
     }
 
-    // const $ready = Ion(true)
+    // const $ready = ion(true)
     // function toggleReady() {
     //     $ready.update(ready => !ready)
     // }
@@ -53,10 +54,10 @@ export function MountIf() {
 }
 
 function Counter() {
-    const $count = Ion(0)
+    const $count = ion(0)
 
-    const $button = NodeIon()
-    const $countDiv = NodeIon()
+    const $button = NodeRef()
+    const $countDiv = NodeRef()
 
     // onNodesCreated(
     //     [$button, $countDiv],
@@ -109,8 +110,8 @@ function Counter() {
     return Component(
         <>
             <div ref={$countDiv}>{$count}</div>
-            <button onClick={() => $count.set($count() + 1)} ref={$button}>increment</button>
-            <Counter>{$count()}</Counter>
+            <button onClick-this-$button-v={[$count.set($count() + 1), stopPropagation]} ref={$button}>increment</button >
+    {/* <Counter>{$count()}</Counter> */ }
         </>
     )
 }

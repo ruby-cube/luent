@@ -1,4 +1,4 @@
-import { ReactiveIon } from "../ion/ReactiveIon";
+import { ReactiveIon } from "../ion/Ion";
 import {  isIonicModel, IonicModel, toRaw } from "../ionize/IonicModel";
 import { isIonicObject } from "../ionize/IonicObject";
 import { AnyObject } from "@rue/types";

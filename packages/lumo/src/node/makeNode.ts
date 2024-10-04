@@ -2,11 +2,11 @@ import { DerivedIon, ReactiveGet, ReactiveIon, getWithoutTracking, DerivedIon, I
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
-import { getNodeArrayRef, InternalNodeRef, NodeReferent, NodeIon, InternalNodeArrayRef, NodesIon, getNodeIon } from "./NodeIon";
+import { getNodeArrayRef, InternalNodeRef, NodeReferent, NodeRef, InternalNodeArrayRef, NodesIon, getNodeRef } from "./NodeRef";
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
-import { getCurrentIndex, ListRenderKit } from "../list/ListRenderKit";
-import { isSettingUpList, onListUpdated } from "../list/listStack";
+import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
+import { isSettingUpList, onListUpdated } from "../iteratives/listStack";
 import { watch } from "../watch/watchAndPreserve";
 import { WatchOptions } from "vite";
 
@@ -46,7 +46,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 } & NodeSetup<K>
 
 type NodeSetup<T extends HTMLTag | ComponentSetup> = {
-    ref?: NodeIon<T>,
+    ref?: NodeRef<T>,
 }
 
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
@@ -74,7 +74,7 @@ export function makeNode(
     )
 }
 
-// export function _getNodeConfig(ref: NodeIon | undefined) {
+// export function _getNodeConfig(ref: NodeRef | undefined) {
 //     if (ref) {
 //         const config = getNodeConfig(ref);
 //         if (config instanceof Function) {
@@ -121,7 +121,7 @@ export function initializeListRef( // should this be initialize ref?
     _ref.markInitialized()
 }
 
-export function initializeRef(ref: NodeIon, value: NodeReferent | undefined) {
+export function initializeRef(ref: NodeRef, value: NodeReferent | undefined) {
     // if (__DEV__) __devCheckIfNotTracked()
     if (__DEV__) __devCheckIfTracked()
     if (ref())
@@ -136,7 +136,7 @@ export function initializeRef(ref: NodeIon, value: NodeReferent | undefined) {
     }
 }
 
-// export function useInternalNodeRef(ref: NodeIon | IonicModel<any[]>) {
+// export function useInternalNodeRef(ref: NodeRef | IonicModel<any[]>) {
 //     const refValue = ref()
 //     return refValue instanceof Array ? getNodeArrayRef(refValue) || new InternalNodeArrayRef(ref) : new InternalNodeRef(ref)
 // }

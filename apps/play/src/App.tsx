@@ -1,6 +1,6 @@
-import { NodeIon, Component, COMPONENT, ComponentSetup, If, Else, For,  Provide, teleportTo, useEventListener } from "@rue/lumo";
+import { NodeRef, Component, COMPONENT, ComponentSetup, If, Else, For,  Provide, teleportTo } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
-import { __addDevName, Ion, ionize } from "../../../packages/quarky/src";
+import { __addDevName, ion, ionize } from "../../../packages/quarky/src";
 import { $ } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { ElseIf } from "../../../packages/lumo/src/conditional/If";
@@ -74,10 +74,10 @@ export function App() {
 
 export function List() {
 
-    const $active = Ion(true)
+    const $active = ion(true)
     if (__DEV__) __addDevName($active, '$active')
 
-    const $list = Ion(ionize([
+    const $list = ion(ionize([
         { id: 0, content: "frog" },
         { id: 1, content: "dog" },
         { id: 2, content: "fly" },
@@ -112,7 +112,7 @@ export function List() {
 
     const { openModal } = useModal();
 
-    const $showSideBlock = Ion(false)
+    const $showSideBlock = ion(false)
 
     function showSideBlock() {
         $showSideBlock.set(true)
@@ -177,7 +177,7 @@ export function List() {
 
 
 function useModal() {
-    const $dialogBox = NodeIon(DialogBox)
+    const $dialogBox = NodeRef(DialogBox)
 
     function openModal() {
         $dialogBox()!.open()
@@ -206,8 +206,8 @@ function Appo(
     },
     provide: Provide
 ) {
-    const $active = Ion(true)
-    const $ready = Ion(true)
+    const $active = ion(true)
+    const $ready = ion(true)
 
     const exposed = {
         $active,
@@ -226,7 +226,7 @@ function Appo(
                 <button>click</button>
             )}
             {ElseIf($active, () => {
-                const $dialogBox = fromContext(ALERT_DIALOG_BOX) || NodeIon()
+                const $dialogBox = fromContext(ALERT_DIALOG_BOX) || NodeRef()
 
                 return (
                     <Wrapper title={() => $dialogBox().title}>
@@ -291,7 +291,7 @@ function DialogBox({
 }
 
 function useDialogBox(config: { initialState: 'open' | 'closed' }) {
-    const $open = Ion(false)
+    const $open = ion(false)
     __addDevName($open, '$open')
 
     function open() {

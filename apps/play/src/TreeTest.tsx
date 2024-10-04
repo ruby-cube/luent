@@ -1,9 +1,9 @@
-import { Ion } from "../../../packages/quarky/src"
+import { ion } from "../../../packages/quarky/src"
 import { $await } from "../../../packages/lumo/src/component/$await"
 import { If } from "@rue/lumo"
 
 export function Root() {
-    const $active = Ion(true)
+    const $active = ion(true)
     function toggleActive() {
         $active.update(value => !value)
     }
@@ -28,7 +28,7 @@ export function Root() {
 // }
 
 // function GrandChild() {
-//     const $count = Ion(0)
+//     const $count = ion(0)
 
 //     const promise = new Promise((resolve) => {
 //         setTimeout(() => {

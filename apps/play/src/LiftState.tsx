@@ -1,12 +1,12 @@
 //@ts-nocheck
-import { NodeIon } from "@rue/lumo"
-import { $, Ion } from "../../../packages/quarky/src"
+import { NodeRef } from "@rue/lumo"
+import { $, ion } from "../../../packages/quarky/src"
 
 
 
 function ParentBlock() {
 
-    const $count = Ion(4);
+    const $count = ion(4);
 
     function increment() {
         $count.update(c => c + 1)

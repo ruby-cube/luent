@@ -1,6 +1,6 @@
 //@ts-nocheck
-import { NodeIon, Try, } from "@rue/lumo";
-import { initializeIonicEffect, ionize, Ion } from "../../../packages/quarky/src";
+import { NodeRef, Try, } from "@rue/lumo";
+import { initializeIonicEffect, ionize, ion } from "../../../packages/quarky/src";
 
 
 //tests:
@@ -15,7 +15,7 @@ export function TestBox() {
         }
     })
 
-    const $count = Ion(0);
+    const $count = ion(0);
 
     function moveRight() {
         box$.position.x = box$.position.x + 10;
@@ -25,8 +25,8 @@ export function TestBox() {
         box$.position.x = box$.position.x - 10;
     }
 
-    const $div = NodeIon('div')
-    const $anotherCount = Ion(() => $count())
+    const $div = NodeRef('div')
+    const $anotherCount = ion(() => $count())
     initializeIonicEffect(() => {
         $anotherCount()
     })

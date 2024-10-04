@@ -2,7 +2,7 @@ import { ReactiveGet } from "../../../quarky/src";
 import { NodeEntity } from "../node/makeNode";
 import { ConditionalKit } from "../conditional/ConditionalKit";
 import { ListenOptions } from "net";
-import { NodeIon } from "../node/NodeIon";
+import { NodeRef } from "../node/NodeRef";
 import { Booleanny } from "@rue/types";
 
 
@@ -11,7 +11,7 @@ type ListenerLifespan = ListenOptions;
 const THIS_NODE = 0 as const;
 const CHILD_NODES = 1 as const;
 
-type EventTarget = string | NodeIon | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
+type EventTarget = string | NodeRef | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
 
 type EventTargetOptions = {
     targets: EventTarget[]

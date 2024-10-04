@@ -6,7 +6,6 @@ import { ObservedProp } from "./ObservedProp"
 import { PropIon } from "./PropIon"
 import { DerivedIon } from "../derivations/DerivedIon"
 import { IonicDerivation } from "../derivations/IonicDerivation"
-import { Ion } from "../ion/AnyIon"
 
 
 
@@ -111,7 +110,7 @@ export class MetaIonicModel<T extends AnyObject = AnyObject> implements Reactive
 
     // registerMultiPropIon(key: string, Ion: DerivedIon) {
     //     if (!this.multiPropIons) this.multiPropIons = new Map()
-    //     this.multiPropIons.set(key, Ion)
+    //     this.multiPropIons.set(key, ion)
     // }
 
     // unregisterMultiPropIon(key: string) { //QUESTION: When to unregister?

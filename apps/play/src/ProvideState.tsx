@@ -1,5 +1,5 @@
 import { Component, fromContext, Provide, TypedKey } from "@rue/lumo"
-import { $, ReactiveIon, DerivedIon, Ion, ionize } from "../../../packages/quarky/src"
+import { $, ReactiveIon, DerivedIon, ion ionize } from "../../../packages/quarky/src"
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon"
 
 const COUNTER = Symbol("Counter") as TypedKey<Counter>
@@ -35,16 +35,35 @@ class Counter {
     }
 }
 
+type Context = {
+    onCreated: (cb: Function) => void
+}
+function getContext() {
+    return {} as Context
+}
+function $this() {
+    return {} as Context
+}
 
 export function ParentBlock(
-    setup: {},
+    setup: {
+        content: string,
+    },
     provide: Provide
 ) {
+    const o = getContext()
+    const { content } = setup
+
+    const _this = $this()
+
+    _this.onCreated(() => {
+
+    })
 
     const counter = provide(COUNTER, new Counter());
-    const $doubleCount = provide(DOUBLE_COUNT, Ion(() => counter.$.count * 2));
+    const $doubleCount = provide(DOUBLE_COUNT, ion(() => counter.$.count * 2));
 
-    const $name = Ion("Sir Robin")
+    const $name = ion("Sir Robin")
 
     function makeBrave() {
         $name.set('The brave')

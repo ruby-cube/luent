@@ -1,13 +1,14 @@
-import {  ComponentSetup, InternalComponent } from "../component/InternalComponent";
+import { ComponentSetup, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag } from "../element/makeElement";
-import { ListData } from "../list/For";
-import { ComponentConfig, ElementConfig, RenderFunction } from "./makeNode";
+import { ListData } from "../iteratives/For";
+import { ComponentConfig, ElementConfig } from "./makeNode";
 import { ReactiveGet, ReactiveIon } from "../../../quarky/src";
 
 
+//NOTE: We use partial types so that we can split between spreading and directly passing values to template
 export type NodeSetup<T extends HTMLTag | ComponentSetup> =
-    T extends ComponentSetup ? ComponentConfig<T>
-    : T extends HTMLTag ? ElementConfig<T> 
+    T extends ComponentSetup ? Partial<ComponentConfig<T>>
+    : T extends HTMLTag ? Partial<ElementConfig<T>>
     : never
 
 // T extends HTMLTag ? NodeSetupConfig : ComponentConfig<T extends ComponentSetup ? T : never> & NodeSetupConfig
@@ -16,7 +17,18 @@ export type ItemNodeConfig<
     L extends ListData
 > =
     L extends (infer I)[] ?
-    ((item?: I, $index?: ReactiveIon<number>) => NodeSetup<T>)
+    ((item?: I, $index?: ReactiveIon<number>) => Partial<NodeSetup<T>>)
     : L extends ReactiveGet<(infer I)[]> ?
-    (item?: I, $index?: ReactiveIon<number>) => NodeSetup<T>
+    (item?: I, $index?: ReactiveIon<number>) => Partial<NodeSetup<T>>
     : never
+
+export function setUpNode<T extends HTMLTag | ComponentSetup>(node: HTMLTag | ComponentSetup, setup: NodeSetup<T>): NodeSetup<T> {
+    return setup
+}
+
+export function setUpNodes<
+    T extends HTMLTag | ComponentSetup,
+    L extends ListData
+>(listData: ListData, node: HTMLTag | ComponentSetup, setUpItem: ItemNodeConfig<T, L>): ItemNodeConfig<T, L> {
+    return setUpItem;
+}

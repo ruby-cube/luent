@@ -6,7 +6,7 @@ import { IonicModel, isIonicModel, toRaw } from "../ionize/IonicModel";
 import { isAnyIon } from "../ion/AnyIon";
 import { isDerivedIon } from "./DerivedIon";
 import { isPropIon } from "../ionize/PropIon";
-import { asMetaIon, isIon } from "../ion/ReactiveIon";
+import { asMetaIon, isIon } from "../ion/Ion";
 
 
 

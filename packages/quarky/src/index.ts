@@ -1,7 +1,7 @@
 export * from "./derivations/DerivedIon" //TODO: limit exports to public api
 export * from "./debug" //TODO: limit exports to public api
 export * from "./ionize/IonicModel" //TODO: limit exports to public api
-export * from "./ion/ReactiveIon" //TODO: limit exports to public api
+export * from "./ion/Ion" //TODO: limit exports to public api
 export * from "./ion/AnyIon" //TODO: limit exports to public api
 export * from "./derivations/DependencyTracker" //TODO: limit exports to public api
 export * from "./effects/watch" //TODO: limit exports to public api

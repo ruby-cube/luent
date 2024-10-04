@@ -17,7 +17,7 @@ import { isInert } from "./inert";
 import { isIonizable } from "./ionizable";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
 import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
-import { ReactiveIon } from "../ion/ReactiveIon";
+import { ReactiveIon } from "../ion/Ion";
 import { PropIon } from "./PropIon";
 import { isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
 

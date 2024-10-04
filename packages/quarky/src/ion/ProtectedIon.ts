@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { META } from "../ReactiveEntity";
-import { asMetaIon, ReactiveIon, MetaIon } from "./ReactiveIon";
+import { asMetaIon, ReactiveIon, MetaIon } from "./Ion";
 import { isIonicModel } from "../ionize/IonicModel";
 import { protectIonicModel } from "../ionize/ProtectedIonicModel";
 

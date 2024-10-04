@@ -1,12 +1,12 @@
 import { ListenOptions } from "net";
-import { NodeIon } from "../node/NodeIon";
+import { NodeRef } from "../node/NodeRef";
 
 type ListenerLifespan = ListenOptions;
 
 const THIS_NODE = 0 as const;
 const CHILD_NODES = 1 as const;
 
-type EventTarget = string | NodeIon | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
+type EventTarget = string | NodeRef | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
 
 type EventHandlerModifiers = {
     prevent?: true;

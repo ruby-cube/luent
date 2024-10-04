@@ -1,4 +1,4 @@
-import { ReactiveIon } from "../ion/ReactiveIon";
+import { ReactiveIon } from "../ion/Ion";
 import { ObservedProp } from "../ionize/ObservedProp";
 import { META } from "../ReactiveEntity";
 import { asIonicAtom } from "./IonicAtom";
@@ -14,7 +14,7 @@ export type IonicEffect = {
 
 function trackIonicEffect(derivation: IonicDerivation, fn: () => any) {
     const value = derivation.trackAtoms(() => runIonicEffect(fn, derivation));
-    derivation.forwardAtoms(derivation.atoms)
+    // derivation.forwardAtoms(derivation.atoms)
     return value;
 }
 

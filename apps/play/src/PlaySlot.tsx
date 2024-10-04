@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { NodeIon, InternalComponent, NodeEntity } from "@rue/lumo"
+import { NodeRef, InternalComponent, NodeEntity } from "@rue/lumo"
 import { AnyObject } from "@rue/types"
 
 
@@ -32,7 +32,7 @@ function FrameBlock({ Slot }: {
         SlottedBlock: () => SlotComponent
     }
 }) {
-    const page = NodeIon(Slot)
+    const page = NodeRef(Slot)
 
     return (
         <div>

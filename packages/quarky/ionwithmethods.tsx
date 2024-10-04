@@ -1,13 +1,13 @@
 //@ts-nocheck
 import { Component } from "@rue/lumo";
-import { ReactiveIon, Ion, ionize } from "./src";
+import { ReactiveIon, ion, ionize } from "./src";
 
 
 
 
 function Counter() {
 
-    // const $count = Ion(0, {
+    // const $count = ion(0, {
     //     increment() {
     //         return $count() + 1;
     //     },
@@ -23,7 +23,7 @@ function Counter() {
     //     }
     // })
 
-    const $count = Ion(0, {
+    const $count = ion(0, {
         increment() {
             $count.set(count => count + 1);
 
@@ -38,7 +38,7 @@ function Counter() {
         }
     })
 
-    const $fullName = Ion({
+    const $fullName = ion({
         get() {
             return $firstName() + $lastName()
         },

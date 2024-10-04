@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { toRaw } from "../ionize/IonicModel";
-import { AnyIon, isAnyIon } from "./AnyIon";
+import { AnyIon, isAnyIon, ref } from "./AnyIon";
 
 type MaybeIon<T> = ReadonlyIon<T> | T
 
@@ -17,7 +17,8 @@ type NormalizeKeysToIons<T extends AnyObject, K extends keyof T> = {
 /**
  * Normalizes properties of an object into inert ions (getters)
 */
-export function normalize<T extends AnyObject, K extends keyof T, O>(
+//TODO: validation and 
+export function validate<T extends AnyObject, K extends keyof T, O>(
     obj: T,
     normalizers?: { [key: keyof T]: ((value: any) => any) | ((value: any) => any)[] }
 ) {
@@ -35,8 +36,8 @@ export function normalize<T extends AnyObject, K extends keyof T, O>(
     return output;
 }
 
-function toIon(value: any) {
-    return isAnyIon(value) ? value : () => value  //TODO: needs to mock an ion
+export function toIon(value: any) {
+    return isAnyIon(value) ? value : ref(value)
 }
 
 function MovableBox(setup: {

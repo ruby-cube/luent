@@ -1,4 +1,4 @@
-import { Ion } from "../../../packages/quarky/src"
+import { ion } from "../../../packages/quarky/src"
 import { $await, $Suspense } from "../../../packages/lumo/src/component/$await"
 
 
@@ -21,7 +21,7 @@ const PendingTextArea = $Suspense({
 })
 
 export function NestedPend() {
-    const $count = Ion(0)
+    const $count = ion(0)
     return (
         <>
             <h1>Hello World</h1>
@@ -49,7 +49,7 @@ function ListBlock() {
 }
 
 function TextArea() {
-    const $word = Ion("not ready")
+    const $word = ion("not ready")
 
     $await(simFetchC("pomp"))
         .then(word => $word.set(word))
@@ -65,7 +65,7 @@ function TextArea() {
 
 
 function ItemBlockA() {
-    const $word = Ion("not ready")
+    const $word = ion("not ready")
 
     $await(simFetch("calico"))
         .then(word => $word.set(word))
@@ -76,7 +76,7 @@ function ItemBlockA() {
 }
 
 function ItemBlockB() {
-    const $word = Ion("not ready")
+    const $word = ion("not ready")
 
     $await(simLongFetch("basset"))
         .then(word => $word.set(word))
@@ -87,7 +87,7 @@ function ItemBlockB() {
 }
 
 function ItemBlockC() {
-    const $word = Ion("not ready")
+    const $word = ion("not ready")
 
     $await(simFetchB("cerulean"))
         .then(word => $word.set(word))
@@ -98,7 +98,7 @@ function ItemBlockC() {
 }
 
 function ItemBlockD() {
-    const $word = Ion("not ready")
+    const $word = ion("not ready")
 
     $await(simLongFetchB("tilted"))
         .then(word => $word.set(word))
