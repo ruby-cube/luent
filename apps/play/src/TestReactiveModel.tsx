@@ -1,5 +1,4 @@
-//@ts-nocheck
-import { NodeRef, Component, If, Else, For } from "@rue/lumo";
+import { NodeRefs, Component, If, Else, For } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { ion, __addDevName, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
@@ -149,7 +148,7 @@ export function List(
         $list.splice(index, 1);
     }
 
-    const $itemDiv = NodeRef('div')
+    const $itemDivs = NodeRefs('div')
 
     const $alive = ion(true)
 
@@ -172,7 +171,7 @@ export function List(
             <>
                 {If(() => $list.length === 0, () =>
                     <div
-                        onClick={insertItem(0)}
+                        onclick={()=>insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
@@ -181,8 +180,8 @@ export function List(
                 {Else(() =>
                     For($list, ($item, $index) => (
                         <div
-                            ref={$itemDiv}
-                            onClick={toggleSelect($event, $index())}
+                            ref={$itemDivs}
+                            onclick={(event)=>toggleSelect(event, $index())}
                             style={[
                                 `background-color: ${randomColor.get()}`,
                                 o => {
@@ -190,24 +189,24 @@ export function List(
                                 }
                             ]}>
                             <p
-                                onClick={removeItem($index())}
+                                onclick={()=>removeItem($index())}
                                 style="cursor: pointer"
                             >
                                 X
                             </p>
 
-                            <li onClick={changeContent($index())}>
+                            <li onclick={()=>changeContent($index())}>
                                 {() => $item.content}
                             </li>
                             <p>{$index}</p>
                             <div
-                                onClick={insertItem($index() + 1)}
+                                onclick={()=>insertItem($index() + 1)}
                                 style="background-color: gray; cursor: pointer"
                             >
                                 insert
                             </div>
                             <div
-                                onClick={moveSelectedItems($index() + 1)}
+                                onclick={()=>moveSelectedItems($index() + 1)}
                                 style="background-color: white; cursor: pointer"
                             >
                                 insert
@@ -216,26 +215,26 @@ export function List(
                     ), 'id')
                 )}
             </>
-            <button onClick={clearSelection}>clear</button>
-            <button
-                onClick={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
+            <button onclick={clearSelection}>clear</button>
+            {/* <button
+                onclick={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
             >
                 clear
-            </button>
-            <ListBlock>
+            </button> */}
+            {/* <ListBlock>
                 <ItemBlock content={$slot.$content()}></ItemBlock>
-            </ListBlock>
+            </ListBlock> */}
         </>
-        //             {/* <button onClick={If($active, capture.once(clearSelection))}>clear</button>
+        //             {/* <button onclick={If($active, capture.once(clearSelection))}>clear</button>
 
 
         //     <button
-        //         onClick={[increment, { until: onMounted }]}
+        //         onclick={[increment, { until: onMounted }]}
         //     >
         //         clear
         //     </button>
         //     <button
-        //         onClick={[
+        //         onclick={[
         //             If($active, [
         //                 increment, runOnce.preventDefault, target(THIS_NODE)
         //             ]),

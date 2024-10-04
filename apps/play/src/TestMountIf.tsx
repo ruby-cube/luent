@@ -44,11 +44,11 @@ export function MountIf() {
                 )
             ]}
             {/* <div>Both: {$activeAndReady}</div> */}
-            <button onClick={toggleActive}>toggle active {$active}</button>
-            {/* <button onClick={increment}>increment {$count}</button> */}
-            {/* <button onClick={toggleReady}>toggle ready {$ready}</button> */}
+            <button onclick={toggleActive}>toggle active {$active}</button>
+            {/* <button onclick={increment}>increment {$count}</button> */}
+            {/* <button onclick={toggleReady}>toggle ready {$ready}</button> */}
             {/* <div>{$sum}</div>
-            <button onClick={increment2}>increment {$count2}</button> */}
+            <button onclick={increment2}>increment {$count2}</button> */}
         </>
     )
 }
@@ -110,7 +110,7 @@ function Counter() {
     return Component(
         <>
             <div ref={$countDiv}>{$count}</div>
-            <button onClick-this-$button-v={[$count.set($count() + 1), stopPropagation]} ref={$button}>increment</button >
+            <button onclick-this-$button-v={[$count.set($count() + 1), stopPropagation]} ref={$button}>increment</button >
     {/* <Counter>{$count()}</Counter> */ }
         </>
     )

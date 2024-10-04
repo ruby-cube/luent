@@ -10,7 +10,8 @@ export * from './component/makeComponent' //TODO: Limit to public API
 export * from './conditional/If' //TODO: Limit to public API
 export * from './conditional/toggledisplay' //TODO: Limit to public API
 export * from './component/provide' //TODO: Limit to public API
-export * from './element/event-listeners' //TODO: Limit to public API
 export * from './events/event-modifiers' //TODO: Limit to public API
+export * from './events/listen' //TODO: Limit to public API
+export * from './events/Abortable' //TODO: Limit to public API
 export * from './component/teleportTo' //TODO: Limit to public API
 export * from './trycatch/TryCatch' //TODO: Limit to public API

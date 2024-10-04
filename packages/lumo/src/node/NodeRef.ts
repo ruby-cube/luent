@@ -2,9 +2,10 @@ import { Component, PublicComponent } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { ArrayItem } from "@rue/types"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
-import { ion, ReactiveIon, asReadonly, ReadonlyIon, ionize, IonicModel } from "../../../quarky/src"
 import { HTMLTag } from "../element/makeElement"
 import { isUpdatingList } from "../iteratives/listStack"
+import { protect, ReactiveIon, ref } from "@rue/quarky"
+import { READONLY } from "../../../quarky/src/ion/ProtectedIon"
 
 
 
@@ -46,15 +47,15 @@ export function NodeRef<
     T extends RefSource
     = RefSource
 >(source: T) {
-    let $node = ion(undefined) as NodeRef<T>;
+    let $node = ref(undefined) as NodeRef<T>;
     if (__DEV__) {
         $node = asReadonlyNodeRef($node) as NodeRef<T>
     }
     return $node as NodeRef<T>;
 }
 
-export function $Nodes<T extends RefSource = RefSource>(source: T): NodesIon<T> {
-    let $nodes = ion([]) as NodesIon<T>
+export function NodeRefs<T extends RefSource = RefSource>(source: T): NodesIon<T> {
+    let $nodes = ref([]) as NodesIon<T>
     if (__DEV__) {
         $nodes = asReadonlyNodeRef($nodes) as NodesIon<T>
     }
@@ -62,7 +63,7 @@ export function $Nodes<T extends RefSource = RefSource>(source: T): NodesIon<T> 
 }
 
 function asReadonlyNodeRef($node: NodeRef | NodesIon) {
-    const $nodeAsReadonly = asReadonly($node);
+    const $nodeAsReadonly = protect($node, READONLY);
     $nodeMap.set($nodeAsReadonly, <_NodeRef | _NodesIon>$node)
     return $nodeAsReadonly
 }

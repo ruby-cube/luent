@@ -21,7 +21,6 @@ export function ion<T, M>(def: T | (() => T) | { get: () => T, set: (value: T) =
     if (isAnyIon(def)) return def;
     if (def instanceof Function) return DerivedIon(def);
     if (isWritableDef(def)) return WritableDerivedIon(def, methods);
-    if (!methods) throw new Error('Ions must be provided methods for mutation')
     return Ion(def, methods) as _AtomicIon<T, M>
 }
 
@@ -39,6 +38,5 @@ export function ref<T, M>(def: T | (() => T) | { get: () => T, set: (value: T) =
     if (isAnyIon(def)) return def;
     if (def instanceof Function) return DerivedIon(def, undefined, INERT);
     if (isWritableDef(def)) return WritableDerivedIon(def, methods, INERT);
-    if (!methods) throw new Error('Ions must be provided methods for mutation')
     return Ion(def, methods, INERT) as _AtomicIon<T, M>
 }

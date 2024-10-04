@@ -27,7 +27,7 @@ import { TestIonicEffect } from './TestIonicEffect';
 // import { NestedPend } from './NestedPend';
 
 
-const app = createApp(TestIonProp)
+const app = createApp(List)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: false

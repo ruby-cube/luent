@@ -86,7 +86,7 @@ function ListBlock(attributes: {
     color: string
 }) {
     const $div = NodeRef()
-    const $divs = $Nodes()
+    const $divs = NodeRefs()
 
     onCreated(() => {
         const div = $div()

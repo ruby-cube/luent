@@ -125,7 +125,7 @@ export function List() {
             <>
                 {If($listLengthIsZero, () => (
                     <div
-                        onClick={() => insertItem(0)}
+                        onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
@@ -133,7 +133,7 @@ export function List() {
                 ))}
                 {ElseIf($(() => $list().length === 0), () => (
                     <div
-                        onClick={() => insertItem(0)}
+                        onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
@@ -142,17 +142,17 @@ export function List() {
                 {For($list, (item$, $index) => (
                     <div style={`background-color: ${randomColor.get()}`}>
                         <p
-                            onClick={() => removeItem($index())}
+                            onclick={() => removeItem($index())}
                             style="cursor: pointer"
                         >
                             X
                         </p>
-                        <li onClick-v={() => changeContent($index())}>
+                        <li onclick-v={() => changeContent($index())}>
                             {$(() => item$.content)}
                         </li>
                         <p>{$index}</p>
                         <div
-                            onClick={() => insertItem($index() + 1)}
+                            onclick={() => insertItem($index() + 1)}
                             style="background-color: gray; cursor: pointer"
                         >
                             insert
@@ -160,7 +160,7 @@ export function List() {
                     </div>
                 ), 'id')}
             </>
-            <button onClick={openModal}>open</button>
+            <button onclick={openModal}>open</button>
             {/* <>
                 {If($showSideBlock, 'create', () =>
                     <>
@@ -169,7 +169,7 @@ export function List() {
                     </>
                 )}
             </> */}
-            <button onClick={showSideBlock}>show Side Block</button>
+            <button onclick={showSideBlock}>show Side Block</button>
         </div>
     )
 }
@@ -219,7 +219,7 @@ function Appo(
             {If($active, () => ((dialogBox) => (
                 <>
                     <DialogBox model={dialogBox}></DialogBox>
-                    <button onClick={dialogBox.open}>open</button>
+                    <button onclick={dialogBox.open}>open</button>
                 </>
             ))(useDialogBox({ initialState: 'open' })))} // state must be created within render function
             {ElseIf($ready, () =>
@@ -233,7 +233,7 @@ function Appo(
                         {() => (
                             <div>
                                 <DialogBox ref={$dialogBox} />
-                                <button onClick={() => $dialogBox().open}>open</button>
+                                <button onclick={() => $dialogBox().open}>open</button>
                             </div>)
                         }
                     </Wrapper>
@@ -280,7 +280,7 @@ function DialogBox({
         teleportTo('body', (
             <dialog style="background-color: gray" open={$open}>
                 Stop
-                <button onClick={close} ref={$button}>close</button>
+                <button onclick={close} ref={$button}>close</button>
             </dialog>
         )),
         {

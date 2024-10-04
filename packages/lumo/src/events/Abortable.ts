@@ -1,4 +1,4 @@
-function Abortable() {
+export function Abortable() {
     const controller = new AbortController()
     return {
         abort() {

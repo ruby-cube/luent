@@ -11,7 +11,7 @@ import { __devCheckIfTracked } from "../derivations/DependencyTracker";
 
 
 export function isPropIon(value: any): value is PropIon {
-    return value[META] instanceof MetaPropIon;
+    return value?.[META] instanceof MetaPropIon;
 }
 
 export type PropIon<T = any> = {

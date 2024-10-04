@@ -49,8 +49,8 @@ export function TestBox() {
                     o.transform = `translate(${box$.position.x}px)`
                 }
             ]}>I'm a box</div>
-            <button onClick={moveLeft}>moveLeft</button>
-            <button onClick={moveRight}>moveRight</button>
+            <button onclick={moveLeft}>moveLeft</button>
+            <button onclick={moveRight}>moveRight</button>
         </>
     )
 }

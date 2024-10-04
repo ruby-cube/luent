@@ -51,7 +51,7 @@ export function MainBlock() {
         <main>
             <$MainContent createAs='hello' ref={$mainContent}  />
             <$records_list />
-            <button onClick={changeMainContent}>click</button>
+            <button onclick={changeMainContent}>click</button>
         </main>
     )
 }
@@ -96,7 +96,7 @@ function MainContent() {
     return (
         <>
             {$morphling($mainContent)}
-            <button onClick={changeMainContent}>click</button>
+            <button onclick={changeMainContent}>click</button>
         </>
     )
 }

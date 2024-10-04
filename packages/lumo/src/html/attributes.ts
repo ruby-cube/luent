@@ -1,6 +1,6 @@
 const htmlEvents = new Set([
   // Mouse Events
-  "onClick",
+  "onclick",
   "ondblclick",
   "onmousedown",
   "onmouseup",

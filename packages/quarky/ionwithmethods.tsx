@@ -53,13 +53,13 @@ function Counter() {
     provide(COUNT, $count) // all methods
 
     const incrementBtnSetup = {
-        onClick: $count.increment
+        onclick: $count.increment
     }
 
     return Component(
         <>
-            <button onClick={$count.increment}>{$count()}</button>
-            <button onClick={$count.decrement}>decrease</button>
+            <button onclick={$count.increment}>{$count()}</button>
+            <button onclick={$count.decrement}>decrease</button>
         </>
     )
 }
@@ -96,7 +96,7 @@ function Mouse(
     return Component(
         <>
             <div>mouse position: {$position.x}, {$position.y}</div>
-            <button onClick={$position.moveRight}>move right</button>
+            <button onclick={$position.moveRight}>move right</button>
         </>
     )
 }
