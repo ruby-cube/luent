@@ -8,7 +8,7 @@ import { AnyIon, isAnyIon } from "./AnyIon";
 import { ProtectedIon } from "./ProtectedIon";
 
 
-export type ReactiveIon<T = any, M extends AnyObject = {}> = {
+export type Ion<T = any, M extends AnyObject = {}> = {
     (): T;
     [META]: MetaIon<T>;
     set: (value: T) => T
@@ -29,7 +29,7 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
     asReadonly?: ProtectedIon
 
     constructor(
-        readonly o: ReactiveIon<T>,
+        readonly o: Ion<T>,
         public value: T,
         readonly hasIonicValue: boolean = false,
         public hasMethods: boolean = false,
@@ -46,7 +46,7 @@ export function Ion<
     methods?: M,
     inert?: boolean
 ) {
-    const metaIon = new MetaIon(<ReactiveIon>$ion, value, isIonicModel(value), !!methods, !!inert)
+    const metaIon = new MetaIon(<Ion>$ion, value, isIonicModel(value), !!methods, !!inert)
 
     const proto = {
         [META]: metaIon,
@@ -66,13 +66,13 @@ export function Ion<
         if (__DEV__) emitSignal();
         const tracker = getActiveTracker()
         if (!tracker) return metaIon.value as T
-        tracker.track(<ReactiveIon>$ion)
+        tracker.track(<Ion>$ion)
         return metaIon.value as T;
     }
 
     Object.setPrototypeOf($ion, proto)
 
-    return $ion as ReactiveIon<T, M>
+    return $ion as Ion<T, M>
 }
 
 
@@ -140,7 +140,7 @@ function shouldIonize(newValue: unknown, metaIon: MetaIon): newValue is AnyObjec
 }
 
 
-export function isIon(maybeIon: any): maybeIon is ReactiveIon {
+export function isIon(maybeIon: any): maybeIon is Ion {
     if (maybeIon instanceof Object) return maybeIon[META]?.type === ION;
     return false;
 }

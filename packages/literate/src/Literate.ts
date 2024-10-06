@@ -1,18 +1,18 @@
 import { SSRComponent } from "./SSRComponent.js";
 import { getResolvedComponent, isResolved } from "./PendingComponentMap.js";
-import { ReactiveIon, isAnyIon } from "../../quarky/src/index.js";
+import { Ion, isAnyIon } from "../../quarky/src/index.js";
 
 type AnyObject = { [key: string | symbol | number]: any }
 // export type SSRComponent<T extends AnyObject = AnyObject> = { render: () => string } & T;
 
 // export type MaybePromise<T extends AnyObject = AnyObject> = T | Promise<T>
 
-export function fromEntries<T>(list: T[] | ReactiveIon<T[]>, render: (item: T, index: number) => string) {
+export function fromEntries<T>(list: T[] | Ion<T[]>, render: (item: T, index: number) => string) {
     if (isAnyIon(list)) {
         return () => buildList(list)
     }
 
-    function buildList(list: T[] | ReactiveIon<T[]>) {
+    function buildList(list: T[] | Ion<T[]>) {
         const _list = isAnyIon(list) ? list() : list
         let result = ''
         for (let i = 0; i < _list.length; i++) {

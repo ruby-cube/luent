@@ -5,8 +5,7 @@ import { isMountPhase } from "../dynamic/DynamicNode";
 import { ActiveListener, ListenerOptions } from "@rue/flask";
 import { onActivated, onDeactivate } from "../dynamic/lifecycle";
 import { noop } from "@rue/utils";
-import { getCurrentProvider, popProvider, pushProvider } from "../component/provide";
-import { getProviderComponent, ProviderComponent } from "../component/ProviderComponent";
+import { getCurrentProvider, getProviderComponent, popProvider, pushProvider } from "../component/provide";
 import { getActiveDynamicNode } from "../dynamic/nodestack";
 
 type WatchForRenderOptions = {
@@ -79,7 +78,7 @@ type Effect<T = any> = MutationEffect<T extends AnyObject ? T : never> | ChangeE
 //     }, { __devName: setUpUpdateHooks.name })
 // }
 
-function bindWithComponent(fn: Function, component: ProviderComponent) {
+function bindWithComponent(fn: Function, component: InternalComponent) {
     return (...args: any[]) => {
         pushProvider(component) 
         const output = fn(...args)

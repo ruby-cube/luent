@@ -59,22 +59,6 @@ context.global.get()
 context.app.get()
 */
 
-function $this() {
-    return {} as ThisComponent
-}
-
-type ThisScope = {
-    // flask: EffectFlask; //?
-    // parent?: ThisComponent;
-    onCreated: () => void;
-    onDestroy: () => void;
-    defineCleanup: () => void;
-    // onActivated: () => void;
-    // onDeactivate: () => void;
-    fromContext: () => void;
-    fromGlobal: () => void;
-    fromApp: () => void;
-}
 
 const _this = $this()
 const { onCreated, fromContext } = _this;

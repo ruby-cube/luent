@@ -2,8 +2,17 @@ import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
 import { mountNodeEntity } from "../node/mountNodeEntity";
-import { Provide } from "./provide";
+import { popProvider, Provide, pushProvider } from "./provide";
+import { protect } from "@rue/quarky";
+import { MorphicRenderKit } from "../morphic/MorphicComponent";
 
+
+export interface Provider {
+    entries?: Map<Symbol | string, any>;
+    provider: Provider,
+    root: Provider,
+    global?: Provider
+}
 
 export type DOMNode = CharacterData | Element
 // export type Props = {
@@ -26,47 +35,58 @@ export type PublicComponent<T extends AnyObject = AnyObject> = T // contains any
 
 
 export interface Component<T extends AnyObject | undefined = AnyObject | undefined> {
-    component?: T extends AnyObject ? PublicComponent<T> : undefined;
-    initialNodeEntities: NodeEntity
+    publicComponent?: T extends AnyObject ? PublicComponent<T> : undefined;
+    render: () => NodeEntity | NodeEntity[];
+    morphicRenderKit?: MorphicRenderKit
 }
 
-export function Component<T extends AnyObject | undefined = AnyObject | undefined>(exposedComponent: T, render: NodeEntity | NodeEntity[]): Component<T> 
-export function Component<T extends AnyObject | undefined = AnyObject | undefined>(render: NodeEntity | NodeEntity[]): Component<undefined> 
-export function Component<T extends AnyObject | undefined = AnyObject | undefined>(renderOrComponent: T | (NodeEntity | NodeEntity[]), render?: NodeEntity | NodeEntity[]): Component<T extends AnyObject ? T  : undefined>  {
+export function expose<T>(publicComponent: T & Object): T {
+    return protect(publicComponent);
+}
+
+type JSXTemplate = NodeEntity | NodeEntity[] | (() => NodeEntity | NodeEntity[])
+
+//TODO: accept a third paramenter for mountTeleported
+// compiler macro to transform jsx template into render function
+export function Component<T extends AnyObject | undefined = AnyObject | undefined>(exposedComponent: T, render: JSXTemplate): Component<T>
+export function Component<T extends AnyObject | undefined = AnyObject | undefined>(render: JSXTemplate): Component<undefined>
+export function Component<T extends AnyObject | undefined = AnyObject | undefined>(renderOrComponent: T | JSXTemplate, render?: JSXTemplate): Component<T extends AnyObject ? T : undefined> {
     const _render = arguments.length === 2 ? render : renderOrComponent;
     const exposedComponent = arguments.length === 2 ? renderOrComponent : undefined;
-    const unnestedNodeEntities = unnestComponent(_render)
-    if (exposedComponent instanceof Object) {
-        return {
-            component: exposedComponent,
-            initialNodeEntities: unnestedNodeEntities
-        } as Component<T extends AnyObject ? T  : undefined> 
-    }
+    if (!(_render instanceof Function)) throw new Error('JSX template must be compiled into a render function')
+    // const mountTeleported = arguments.length === 3 ? mountTeleported
+    // const unnestedNodeEntities = unnestComponent(_render)
+    // if (exposedComponent instanceof Object) {
     return {
-        component: undefined,
-        initialNodeEntities: unnestedNodeEntities
-    } as Component<T extends AnyObject ? T  : undefined> 
+        publicComponent: exposedComponent,
+        render: _render
+    } as Component<T extends AnyObject ? T : undefined>
+    // }
+    // return {
+    //     component: undefined,
+    //     render: unnestedNodeEntities
+    // } as Component<T extends AnyObject ? T : undefined>
 }
 
-export class InternalComponent<T extends AnyObject | undefined = AnyObject | undefined> implements Component<T> {
+export class InternalComponent<T extends AnyObject | undefined = AnyObject | undefined> implements Provider {
     component?: T extends AnyObject ? PublicComponent<T> : undefined = undefined;
     initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
+    entries?: Map<Symbol | string, any>;
+    initializeAsProvider() {
+        if (this.entries) return;
+        this.entries = new Map()
+    }
 
-    // tasks: {
-    //     [LifecycleHook.ON_CREATED]: Set<() => void> | undefined;
-    //     // [LifecycleHook.BEFORE_UPDATE]: Set<() => void> | undefined;
-    //     // [LifecycleHook.ON_UPDATED]: Set<() => void> | undefined;
-    // } = {
-    //         [LifecycleHook.ON_CREATED]: undefined,
-    //         // [LifecycleHook.BEFORE_UPDATE]: undefined,
-    //         // [LifecycleHook.ON_UPDATED]: undefined,
-    //     };
-
-    // hasUpdates: boolean = false; //TODO: Remove
+    root!: InternalComponent
+    provider!: InternalComponent
 
     constructor(
-        // public parent: InternalComponent | null,
+        provider: InternalComponent | undefined,
+        public global?: Provider,
+        root?: InternalComponent,
     ) {
+        this.root = root || this
+        this.provider = provider || this
     }
 
     mount(
@@ -77,57 +97,13 @@ export class InternalComponent<T extends AnyObject | undefined = AnyObject | und
         const nodeEntities = this.initialNodeEntities!;
         if (!(parent instanceof Element))
             throw new Error("Parent cannot be a text node")
-        // pushProvider(this)
+        pushProvider(this.provider)
         for (const nodeEntity of nodeEntities) {
             mountNodeEntity(parent, nodeEntity, nodePod, fragment)
         }
-        // popProvider()
+        popProvider()
     }
 }
 
-
-function unnestComponent(nodeEntities: NodeEntity[]) {
-    if (nodeEntities.length !== 1)
-        return nodeEntities;
-    if (nodeEntities[0] instanceof InternalComponent) {
-        const component = nodeEntities[0]
-        if (!component.component || !component.initialNodeEntities)
-            return nodeEntities;
-        return component.initialNodeEntities;
-    }
-    return nodeEntities
-}
-
-
-
-// export function expose<T extends AnyObject>(component: T) {
-//     const _component = getCurrentComponent<InternalComponent>();
-//     if (_component === null) throw new Error("Cannot call `expose` outside of component setup")
-//     const publicComponent = _component.component = {
-//         [COMPONENT]: true as const,
-//         ...component
-//     };
-//     return publicComponent;
-// }
-
-
-
-// export function runUpdates(this: InternalComponent) {
-//     const taskQueue = usePhaseQueue(this);
-//     for (const task of taskQueue) {
-//         task();
-//     }
-//     taskQueue.clear();
-// }
-
-
-// function usePhaseQueue(component: InternalComponent) {
-//     let taskQueue = component.updates
-//     if (!taskQueue) {
-//         taskQueue = new Set();
-//         component.updates = taskQueue;
-//     }
-//     return taskQueue;
-// }
 
 

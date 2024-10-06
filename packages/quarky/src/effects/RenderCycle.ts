@@ -8,7 +8,7 @@ import { PendingCancelOp } from "../../../flask/PendingCancelOp";
 // import { runEffect } from "./watch";
 
 export type Watchable = any
-// ReactiveIon | DerivedIon | IonicEffect  | IonicModel | ObservedProp
+// Ion | DerivedIon | IonicEffect  | IonicModel | ObservedProp
 export type Task = (...args: any[]) => void;
 
 // export type Phase = Phase.BEFORE_RENDER | Phase.RENDER | Phase.AFTER_RENDER | Phase.SYNC

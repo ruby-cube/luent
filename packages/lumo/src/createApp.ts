@@ -1,10 +1,9 @@
-import { ComponentSetup, InternalComponent, ProviderComponentSetup } from "./component/InternalComponent";
+import { Component, ComponentSetup, InternalComponent, Provider, ProviderComponentSetup } from "./component/InternalComponent";
 import { _NodePod } from "./node/NodePod";
 import { DynamicNode, markMountPhase, unmarkMountPhase } from "./dynamic/DynamicNode";
 import { popProvider, pushProvider } from "./component/provide";
-import { runProviderComponentSetup } from "./component/makeComponent";
-import { Provider, ProviderComponent } from "./component/ProviderComponent";
 import { AnyObject } from "@rue/types";
+import { initializeComponent, protectSetupProps } from "./component/makeComponent";
 
 let appRoot: Element;
 
@@ -22,10 +21,11 @@ export function getAppRoot() {
 //     )
 // }
 
-export function createApp<T extends AnyObject>(App: ComponentSetup<T> | ProviderComponentSetup<T>, config?: { remountable: boolean, globalProvider: Provider }) {
+export function createApp<T extends AnyObject>(App: ComponentSetup<T>, config?: { remountable: boolean, globalProvider: Provider, setup: T }) {
 
     // (1) instantiate developer's root component
-    const component = new ProviderComponent(null, config?.globalProvider || new Provider());
+    const component = new InternalComponent(undefined, config?.globalProvider);
+    component.initializeAsProvider();
     const nodePod = new _NodePod()
     const remountable = config?.remountable
     const preserve = remountable ? true : false
@@ -43,7 +43,9 @@ export function createApp<T extends AnyObject>(App: ComponentSetup<T> | Provider
             // (2) attach developer's root component to root element
             dynamicNode.activate(function mountRootComponent() {
                 pushProvider(component)
-                runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
+                // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
+                const output = App(protectSetupProps(config?.setup || {}))
+                initializeComponent(component, output.publicComponent, output.render(), undefined, undefined)
                 if (remountable) markMountPhase()
                 component.mount(root, nodePod) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
                 if (remountable) unmarkMountPhase()
@@ -67,8 +69,5 @@ export function createApp<T extends AnyObject>(App: ComponentSetup<T> | Provider
         }
     }
 }
-
-
-
 
 

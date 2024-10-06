@@ -1,7 +1,7 @@
 function App() {
     return (
         <div>
-            {$Suspense(<ListBlock />, {
+            {Suspense(<ListBlock />, {
                 fallback: () =>
                     <div>loading...</div>
             })}
@@ -12,7 +12,7 @@ function App() {
 
 async function ListBlock() {
 
-    return $await(
+    return suspendRender(
         <div>
             <ItemBlock />
         </div>
@@ -27,13 +27,13 @@ async function ItemBlock() {
     return <div>{message}</div>
 }
 
-function $await<T>(Element: T): Promise<T> {
+function suspendRender<T>(Element: T): Promise<T> {
     return new Promise((resolve) => {
         resolve(Element)
     })
 }
 
-function $Suspense<T>(Element: T, config: {
+function Suspense<T>(Element: T, config: {
     fallback: () => any
 }) {
     return Element

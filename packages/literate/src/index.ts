@@ -23,7 +23,7 @@ export function fromEntries<T>(list: T[], render: (item: T) => string) {
 //     }
 // }
 
-export * from './$Suspense'
+export * from './Suspense'
 export * from './Literate'
 export * from './PendingComponentMap'
 export * from './ResponseTimer'

@@ -17,7 +17,7 @@ import { isInert } from "./inert";
 import { isIonizable } from "./ionizable";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
 import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
-import { ReactiveIon } from "../ion/Ion";
+import { Ion } from "../ion/Ion";
 import { PropIon } from "./PropIon";
 import { isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
 
@@ -57,7 +57,7 @@ export function isIonicModel(value: any): value is IonicModel {
 }
 
 type Ionized<T extends AnyObject, M> = {
-    [K in keyof T]: T[K] extends ReactiveIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
+    [K in keyof T]: T[K] extends Ion<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
 } & M
 
 

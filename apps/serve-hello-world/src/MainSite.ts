@@ -1,13 +1,13 @@
 import { html, Literate, mO, SSRComponent, SSRComponentSetup } from "@rue/literate";
 import { NodeRef, ComponentSetup, InternalComponent, PublicComponent } from "@rue/lumo";
-import { ReactiveIon } from "../../../packages/quarky/src";
+import { Ion } from "../../../packages/quarky/src";
 
 export function MainSite({
     Slot
 }: {
     Slot: () => [PublicComponent & {title: string}, Literate] 
 }) {
-    const $page = NodeRef<() => SSRComponent<{ title: string }>>() as unknown as ReactiveIon<{ title: string }>;
+    const $page = NodeRef<() => SSRComponent<{ title: string }>>() as unknown as Ion<{ title: string }>;
 
     return html`
         <!DOCTYPE html>

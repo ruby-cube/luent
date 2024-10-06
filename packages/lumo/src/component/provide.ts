@@ -1,36 +1,43 @@
 import { AnyObject } from "@rue/types";
 import { encapsulate } from "@rue/utils";
 import { onCreated } from "../dynamic/lifecycle";
-import { ProviderComponent } from "./ProviderComponent";
+import { InternalComponent } from "./InternalComponent";
+import { getActiveComponent } from "./makeComponent";
 
 type Component = AnyObject
 
-// class Provider {
-//     entries: Map<Symbol | string, any> = new Map();
-
-//     constructor(
-//         public component: Component,
-//         public parent: Provider | null,
-//         public root: Provider = this
-//     ) { }
-// }
-
+interface Provider {
+    entries: Map<Symbol | string, any>;
+    provider: InternalComponent,
+    root: InternalComponent,
+    global: Provider
+}
 // manage provider stack
-let currentProvider: ProviderComponent | null = null;
-let previousProvider: ProviderComponent | null = null;
+let currentProvider: InternalComponent | undefined;
+let previousProvider: InternalComponent | undefined;
 
 export function getCurrentProvider() {
     return currentProvider;
 }
 
-export function pushProvider(provider: ProviderComponent) {
+export function pushProvider(provider: InternalComponent | undefined) {
+    if (!provider) throw new Error(`Provider is undefined`)
     previousProvider = currentProvider;
     currentProvider = provider;
 }
 
 export function popProvider() {
     currentProvider = previousProvider;
-    previousProvider = previousProvider?.parent || null
+    previousProvider = previousProvider?.provider || undefined
+}
+
+
+export function getProviderComponent() {
+    const component = getCurrentProvider()
+    if (!component) {
+        throw new Error(`getProviderComponent can only be called from a component setup`)
+    }
+    return component
 }
 
 // export function initializeRootProvider(component: Component) {
@@ -46,23 +53,11 @@ export const APPWIDE = true
 export type Provide = typeof provide
 
 // Public API
-export function provide<T>(key: TypedKey<T>, value: T, appwide?: boolean) {
-    if (appwide) return provideAppState(key, value)
-    // const component = getCurrentComponent();
-    // if (component === null) {
-    //     if (__DEV__) console.warn("No component found. Providing as global state") //QUESTION: Should I throw an error instead?
-    //     provideGlobal(key, value);
-    //     return;
-    // }
-    if (!currentProvider) throw new Error("No provider component. This should never happen")
-    // if (!provider || provider.component !== component) {
-    //     provider = new Provider(component, provider, provider?.root);
-    //     pushProvider(provider);
-    //     onCreated(() => {
-    //         popProvider()
-    //     })
-    // }
-    currentProvider.entries.set(key, value);
+export function provide<T>(key: TypedKey<T>, value: T) {
+    const component = getActiveComponent();
+    if (!component) throw new Error(`The 'provide()' function can only be called synchronously within component setup`)
+    component.initializeAsProvider()
+    component.entries!.set(key, value);
     return value;
 }
 
@@ -76,7 +71,7 @@ export function provideAppState<T>(key: TypedKey<T>, value: T) {
     let provider = currentProvider;
     if (!provider)
         throw new Error("Must call initializeRootProvider in root component setup in order to provideAppState outside of root component")
-    const rootProviderEntries = provider.root?.entries || provider.entries
+    const rootProviderEntries = provider.root!.entries || provider.entries
     if (rootProviderEntries.has(key)) {
         if (__DEV__) {
             console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
@@ -144,14 +139,14 @@ export function _fromContext<T, OPT extends '?' | (() => T) | undefined>(key: Ty
     }
 
     // climb provider tree
-    let parent: ProviderComponent | null = provider;
+    let parent: InternalComponent | null = provider;
     while (parent !== null) {
         const entries = parent.entries
         if (entries.has(key)) {
             const value = entries.get(key);
             return __DEV__ && shouldEncapsulate(value) ? encapsulate(value) : value;
         }
-        parent = parent.parent;
+        parent = parent.provider;
     }
     try {
         if (__DEV__) console.warn(`No provider found for the key, ${key.toString()}. Checking global store...`) //TODO: Improve this error message

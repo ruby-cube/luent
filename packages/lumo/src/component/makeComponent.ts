@@ -1,13 +1,12 @@
-import { ComponentSetup, InternalComponent, Component, ProviderComponentSetup } from "./InternalComponent";
+import { ComponentSetup, InternalComponent, Component, ProviderComponentSetup, PublicComponent } from "./InternalComponent";
 import { NodeRef } from "../node/NodeRef";
 import { ComponentConfig, initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex } from "../iteratives/ListRenderKit";
-import { getCurrentProvider, popProvider, provide, pushProvider } from "./provide";
-import { ProviderComponent } from "./ProviderComponent";
+import { getProviderComponent, popProvider, provide, pushProvider } from "./provide";
 import { MorphicRenderKit } from "../morphic/MorphicComponent";
-import { IonicModel, isIon, protect, ReactiveIon } from "@rue/quarky";
+import { IonicModel, isIon, protect, Ion } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
@@ -43,25 +42,25 @@ export function mO<T extends ComponentSetup>(
     Component: T,
     Slot: InferSlot<T>,
     config?: ComponentConfig<T>
-): InternalComponent {
+): InternalComponent | MorphicRenderKit {
     const $index = getCurrentIndex()
-    if (Component.length === 2) return makeProviderComponent(Component, Slot, config || {}, $index)
+    // if (Component.length === 2) return makeProviderComponent(Component, Slot, config || {}, $index)
     return makeComponent(Component, Slot, config || {}, $index)
 }
 
-export function makeComponent(
-    Component: ComponentSetup,
-    Slot: InferSlot | undefined,
-    config: ComponentConfig,
-    $index: ReactiveIon<number> | undefined
-): InternalComponent {
-    const output = Component(createSetupProps(config, Slot))
-    const component = 'morphicRenderKit' in output ? output.morphicRenderKit as MorphicRenderKit : new InternalComponent();
-    initializeComponent(component, output, config.ref, $index)
-    return component;
-}
+// export function makeComponent(
+//     Component: ComponentSetup,
+//     Slot: InferSlot | undefined,
+//     config: ComponentConfig,
+//     $index: Ion<number> | undefined
+// ): InternalComponent {
+//     const output = Component(protectSetupProps(config, Slot))
+//     const component = 'morphicRenderKit' in output ? output.morphicRenderKit as MorphicRenderKit : new InternalComponent();
+//     initializeComponent(component, output, config.ref, $index)
+//     return component;
+// }
 
-function createSetupProps(config: ComponentConfig, Slot: InferSlot | undefined) {
+export function protectSetupProps(config: ComponentConfig, Slot?: InferSlot | undefined) {
     const setupProps = { Slot } as AnyObject
     for (const key in config) {
         const value = config[key]
@@ -70,20 +69,80 @@ function createSetupProps(config: ComponentConfig, Slot: InferSlot | undefined) 
     return setupProps
 }
 
-function makeProviderComponent(
+let activeComponent: InternalComponent | undefined;
+
+export function getActiveComponent() {
+    return activeComponent;
+}
+
+function makeComponent(
     Component: ComponentSetup,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: ReactiveIon<number> | undefined
-): ProviderComponent {
-    const parent = getCurrentProvider();
-    if (!parent) throw new Error("Component tree has no root")
-    if (!parent.global) throw new Error("Global provider was not instantiated in root component")
-    const component = new ProviderComponent(parent, parent.global!, parent.root);
-    pushProvider(component)
-    runProviderComponentSetup(Component, component, Slot, config, $index);
-    popProvider() // for sibling components to access parent, must be set AFTER `Component()`
-    return component;
+    $index: Ion<number> | undefined
+): InternalComponent | MorphicRenderKit {
+    const provider = getProviderComponent();
+    const component = new InternalComponent(provider, provider.global, provider.root);
+
+    activeComponent = component; // for `provide` to make component into provider
+    pushProvider(provider)
+    const output = Component(protectSetupProps(config, Slot))
+    popProvider()
+
+    if (output instanceof Promise)
+        throw new Error("Components cannot return a promise. Use Suspense and suspendRender to handle promises within component setup")
+
+    const { publicComponent, render, morphicRenderKit } = output
+    pushProvider(component.entries ? component : provider)
+    const rendered = unnestComponent(output.render())
+    popProvider()
+
+    activeComponent = undefined;
+    initializeComponent(component, publicComponent, rendered, config.ref, $index)
+    return morphicRenderKit ? morphicRenderKit : component
+}
+
+function unnestComponent(nodeEntities: NodeEntity[]) {
+    if (nodeEntities.length !== 1)
+        return nodeEntities;
+    if (nodeEntities[0] instanceof InternalComponent) {
+        const component = nodeEntities[0]
+        if (!component.component || !component.initialNodeEntities)
+            return nodeEntities;
+        return component.initialNodeEntities;
+    }
+    return nodeEntities
+}
+// export function runProviderComponentSetup(
+//     Component: ProviderComponentSetup,
+//     component: InternalComponent,
+//     Slot: InferSlot | undefined,
+//     config: ComponentConfig,
+//     $index: Ion<number> | undefined
+// ) {
+//     const output = Component(protectSetupProps(config, Slot), provide)
+//     initializeComponent(component, output, config.ref, $index)
+// }
+
+
+export function initializeComponent(
+    component: InternalComponent,
+    publicComponent: PublicComponent | undefined,
+    rendered: NodeEntity | NodeEntity[],
+    ref: NodeRef | IonicModel<any[]> | undefined,
+    $index: Ion<number> | undefined,
+) {
+    const nodeEntities = normalizeToFragmentArray(extractNodeEntities(rendered)); //TODO: Validate output and get publicComponent from out
+    component.initialNodeEntities = nodeEntities;
+    if (ref) {
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef Ion as ref")
+        if ($index) {
+            initializeListRef(ref, publicComponent, $index)
+        }
+        else {
+            initializeRef(ref, publicComponent)
+        }
+    }
 }
 
 
@@ -94,7 +153,7 @@ function makeProviderComponent(
 // $class?: ((o: DOMTokenList) => void)[],
 // $style?: ((o: CSSStyleDeclaration) => void)[],
 // ref?: NodeRef,
-// $index?: ReactiveIon<number>
+// $index?: Ion<number>
 
 
 
@@ -131,42 +190,9 @@ function extractNodeEntities(component: Component) {
     // return output;
 }
 
-export function runProviderComponentSetup(
-    Component: ProviderComponentSetup,
-    component: InternalComponent,
-    Slot: InferSlot | undefined,
-    config: ComponentConfig,
-    $index: ReactiveIon<number> | undefined
-) {
-    const output = Component(createSetupProps(config, Slot), provide)
-    initializeComponent(component, output, config.ref, $index)
-}
 
 
 
-function initializeComponent(
-    component: InternalComponent | MorphicRenderKit,
-    output: Component,
-    ref: NodeRef | IonicModel<any[]> | undefined,
-    $index: ReactiveIon<number> | undefined,
-) {
-    if (output instanceof Promise)
-        throw new Error("Components cannot return a promise. Use $Suspense and $await to handle promises within component setup")
-    const nodeEntities = normalizeToFragmentArray(extractNodeEntities(output)); //TODO: Validate output and get publicComponent from output
-
-    component.initialNodeEntities = nodeEntities;
-
-    if (ref) {
-        const publicComponent = output.component || undefined;
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodeRefs Ion as ref")
-        if ($index) {
-            initializeListRef(ref, publicComponent, $index)
-        }
-        else {
-            initializeRef(ref, publicComponent)
-        }
-    }
-}
 
 
 // export function composeEvents(
@@ -237,7 +263,7 @@ function initializeComponent(
 
 
 
-// function setUpRefUpdates(ref: InternalNodeRef, component: Component, $index: ReactiveIon<number> | undefined, preserve: boolean) {
+// function setUpRefUpdates(ref: InternalNodeRef, component: Component, $index: Ion<number> | undefined, preserve: boolean) {
 //     if (ref.initialized === true) return;
 //     // if ($index) { // only initiate once per list
 //     //     const components = ref.components;

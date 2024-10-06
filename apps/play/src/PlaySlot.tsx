@@ -63,3 +63,37 @@ function App() {
     });
 }
 
+function FooBar() {
+
+    const $foo = ion(0)
+
+    return Component(
+        expose({
+            $foo
+        }),
+
+        <div>
+            hi
+            {For($list, (item, $index) =>
+                <main>
+                    <div>{item} {$index()}</div>
+                </main>
+            )}
+            <>
+                {If($active,
+                    <div>Hello</div>
+                )}
+                {ElseIf($bar,
+                    <div>bye</div>
+                )}
+                {Else(
+                    <div>bye</div>
+                )}
+            </>
+        </div>,
+
+        teleportTo('body',
+            <div>bye </div>
+        )
+    )
+}

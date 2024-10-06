@@ -1,6 +1,5 @@
 import { Component, fromContext, Provide, TypedKey } from "@rue/lumo"
-import { $, ReactiveIon, DerivedIon, ion ionize } from "../../../packages/quarky/src"
-import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon"
+import { derivedIon, DerivedIon, ion, ionize } from "@rue/quarky";
 
 const COUNTER = Symbol("Counter") as TypedKey<Counter>
 const DOUBLE_COUNT = Symbol("DerivedIon<number>") as TypedKey<DerivedIon<number>>
@@ -61,7 +60,7 @@ export function ParentBlock(
     })
 
     const counter = provide(COUNTER, new Counter());
-    const $doubleCount = provide(DOUBLE_COUNT, ion(() => counter.$.count * 2));
+    const $doubleCount = provide(DOUBLE_COUNT, derivedIon(() => counter.$.count * 2));
 
     const $name = ion("Sir Robin")
 

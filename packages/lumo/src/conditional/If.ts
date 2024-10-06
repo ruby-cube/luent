@@ -4,7 +4,7 @@ import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { ReactiveGet } from "../../../quarky/src";
-import { getProviderComponent } from "../component/ProviderComponent";
+import { getProviderComponent } from "../component/provide";
 
 
 

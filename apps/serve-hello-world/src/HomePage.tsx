@@ -2,7 +2,7 @@
 // export function HomePage() {
 
 import { html } from "@rue/literate";
-import { expose } from "@rue/lumo";
+import { Component, expose } from "@rue/lumo";
 
 //     return {
 //         title: 'Home',
@@ -25,3 +25,4 @@ export function HomePage() {
         `
     ]
 }
+

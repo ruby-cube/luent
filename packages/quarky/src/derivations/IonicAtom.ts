@@ -1,5 +1,5 @@
 import { useRenderCycle } from "../effects/RenderCycle";
-import { ReactiveIon, MetaIon } from "../ion/Ion";
+import { Ion, MetaIon } from "../ion/Ion";
 import { asMetaIonicModel, isIonicModel } from "../ionize/IonicModel";
 import { isObservedProp, ObservedProp } from "../ionize/ObservedProp";
 import { TrackedOp } from "../ionize/TrackedOp";
@@ -7,7 +7,7 @@ import { IonicDerivation } from "./IonicDerivation";
 
 export const CLEAN_UP = 'x__cleanUp'
 
-export type ReactivePrimitive = ReactiveIon | ObservedProp | TrackedOp
+export type ReactivePrimitive = Ion | ObservedProp | TrackedOp
 
 
 const reactiveAtomMap: WeakMap<ReactivePrimitive, IonicAtom> = new WeakMap()

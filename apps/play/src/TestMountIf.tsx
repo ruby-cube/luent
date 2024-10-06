@@ -1,14 +1,13 @@
-//@ts-nocheck
-import { NodeRef, Component, If, Else, stopPropagation } from "@rue/lumo";
-import { $, AFTER_RENDER, BEFORE_RENDER, DerivedIon, ion, ON_RENDER, SYNC, watch } from "../../../packages/quarky/src";
-import { onActivated, onCreated, onDeactivate, onDestroy } from "../../../packages/lumo/src/dynamic/lifecycle";
+import { NodeRef, Component, If, Else, stopPropagation, watch } from "@rue/lumo";
+import { AFTER_RENDER, BEFORE_RENDER, ion, ON_RENDER, SYNC } from "@rue/quarky";
 
 export function MountIf() {
-    const $count = ion(0)
+    const $count = ion(0, {
+        increment() {
+            $count.set($count() + 1)
+        }
+    })
     // const $doubleCount = DerivedIon(() => $count() * 2)
-    function increment() {
-        $count.set(count => count + 1)
-    }
 
     // const $count2 = ion(0)
     // const $sum = $(() => $count() + $count2())
@@ -17,10 +16,11 @@ export function MountIf() {
     // }
 
 
-    const $active = ion(true)
-    function toggleActive() {
-        $active.set(active => !active)
-    }
+    const $active = ion(true, {
+        toggle() {
+            $active.set(!$active())
+        }
+    })
 
     // const $ready = ion(true)
     // function toggleReady() {
@@ -44,7 +44,7 @@ export function MountIf() {
                 )
             ]}
             {/* <div>Both: {$activeAndReady}</div> */}
-            <button onclick={toggleActive}>toggle active {$active}</button>
+            <button onclick={$active.toggle}>toggle active {$active}</button>
             {/* <button onclick={increment}>increment {$count}</button> */}
             {/* <button onclick={toggleReady}>toggle ready {$ready}</button> */}
             {/* <div>{$sum}</div>
@@ -54,10 +54,11 @@ export function MountIf() {
 }
 
 function Counter() {
+    const _this = $thisComponent()
     const $count = ion(0)
 
-    const $button = NodeRef()
-    const $countDiv = NodeRef()
+    const $button = NodeRef('button')
+    const $countDiv = NodeRef('div')
 
     // onNodesCreated(
     //     [$button, $countDiv],
@@ -65,13 +66,6 @@ function Counter() {
 
     //     }
     // )
-
-    watch(() => [$button(), $countDiv()], ([button, countDiv]) => {
-        console.log("node ref", button, countDiv)
-    }, {
-        run: ON_RENDER,
-        once: true
-    })
 
     watch($count, () => {
         console.log("sync phase")
@@ -89,19 +83,22 @@ function Counter() {
         console.log("post-render phase")
     }, { phase: AFTER_RENDER })
 
-    onCreated(() => {
+    _this.onCreated(() => {
         console.log("created")
+        const button = $button()
+        const countDiv = $countDiv()
+        console.log("node ref", button, countDiv)
     })
 
-    onActivated(() => {
-        console.log("activated yo")
-    })
+    // onActivated(() => {
+    //     console.log("activated yo")
+    // })
 
-    onDeactivate(() => {
-        console.log("deactivate")
-    })
+    // onDeactivate(() => {
+    //     console.log("deactivate")
+    // })
 
-    onDestroy(() => {
+    _this.onDestroy(() => {
         console.log("destroyd")
     })
 
@@ -111,7 +108,7 @@ function Counter() {
         <>
             <div ref={$countDiv}>{$count}</div>
             <button onclick-this-$button-v={[$count.set($count() + 1), stopPropagation]} ref={$button}>increment</button >
-    {/* <Counter>{$count()}</Counter> */ }
+            {/* <Counter>{$count()}</Counter> */}
         </>
     )
 }

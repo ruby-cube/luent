@@ -11,7 +11,6 @@ import { hidePrevConditionalNodes, showConditionalNodes } from "./toggledisplay"
 import { watch } from "../watch/watchAndPreserve";
 import { areShallowEqualArrays, Phase } from "../../../quarky/src";
 import { popProvider, pushProvider } from "../component/provide";
-import { ProviderComponent } from "../component/ProviderComponent";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 
 
@@ -76,7 +75,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         return nodePodIndex;
     }
 
-    component: ProviderComponent
+    component: InternalComponent
 
     constructor(
         statements: ConditionalRenderKit[],

@@ -20,7 +20,7 @@ const $frog = ionize({
 const $tripleCount = () => $count() * 3 // derived without memoization
 
 const $count = ion(0)
-const $doubleCount = ion(() => $count() * 2) // memoized derived with option to retrack and method to untrack .. should retrack just be the default behavior?
+const $doubleCount = derivedIon(() => $count() * 2) // memoized derived with option to retrack and method to untrack .. should retrack just be the default behavior?
 
 const counter = ionize({
     $count,
@@ -34,7 +34,7 @@ const $frogName = asPropIon($frog, 'name')
 
 watch(PropsIon($frog, ['name', 'store']))
 
-watch(ion(() => $count() * 2), (doubleCount, prev) => {   // if retrack is the default, why not just pass functions? it looks cleaner
+watch(derivedIon(() => $count() * 2), (doubleCount, prev) => {   // if retrack is the default, why not just pass functions? it looks cleaner
 
 })
 
@@ -86,7 +86,7 @@ function ListBlock(attributes: {
     color: string
 }) {
     const $div = NodeRef()
-    const $divs = NodeRefs()
+    const $divs = NodesRef()
 
     onCreated(() => {
         const div = $div()

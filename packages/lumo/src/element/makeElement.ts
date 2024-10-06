@@ -5,7 +5,7 @@ import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { initializeRender, watch } from "../watch/watchAndPreserve";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
-import { ReactiveIon } from "../../../quarky/src";
+import { Ion } from "../../../quarky/src";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
@@ -30,7 +30,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     tagName: T,
     childNodes: NodeEntity[] | undefined,
     config: ElementConfig,
-    $index: ReactiveIon<number> | undefined
+    $index: Ion<number> | undefined
 ): DOMNode {
     const { class: classes, style: styles, ref, attributes: dynamicAttributes, ...other } = config;
 
@@ -39,7 +39,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     const domNode = isHydrating() ? getElement() : document.createElement(tagName);
 
     if (ref) {
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodeRefs Ion as ref")
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef Ion as ref")
         if ($index) {
             initializeListRef(ref, domNode, $index)
         }
@@ -252,7 +252,7 @@ function setUpDynamicAttributes(node: Element, changes: ((o: Element) => void)[]
     }
 }
 
-function setUpRefNulling(ref: _NodePod, $index: ReactiveIon<number>) {
+function setUpRefNulling(ref: _NodePod, $index: Ion<number>) {
     if ($index && $index() === 0) {
 
     }

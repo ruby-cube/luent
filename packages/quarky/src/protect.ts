@@ -42,14 +42,14 @@ function createReadonlyObject(obj: AnyObject) { //TODO: what about Arrays, Maps,
 }
 
 
-// export function asReadonly<R extends () => T | IonicModel, T>($entity: R): R extends ReactiveIon ? ProtectedIon<T> : R {
+// export function asReadonly<R extends () => T | IonicModel, T>($entity: R): R extends Ion ? ProtectedIon<T> : R {
 //     if (isDerivedIon($entity)) return $entity as R;
 //     if (isIon($entity)) { //TODO: what about writeable and propIons?
-//         return protectIon($entity, 'ro') as R extends ReactiveIon ? ProtectedIon<T> : R;
+//         return protectIon($entity, 'ro') as R extends Ion ? ProtectedIon<T> : R;
 //     }
 //     if (isIonicModel($entity)) {
 //         //TODO: 
-//         return $entity as R extends ReactiveIon ? ProtectedIon<T> : R;
+//         return $entity as R extends Ion ? ProtectedIon<T> : R;
 //     }
-//     return $entity as R extends ReactiveIon ? ProtectedIon<T> : R;
+//     return $entity as R extends Ion ? ProtectedIon<T> : R;
 // }

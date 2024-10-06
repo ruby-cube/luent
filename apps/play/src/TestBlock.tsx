@@ -1,8 +1,8 @@
 import {  NodeRef } from "@rue/lumo";
-import { ReactiveIon, ion } from "../../../packages/quarky/src";
+import { Ion, ion } from "../../../packages/quarky/src";
 
 
-export function TestBlockA(props: { $active: ReactiveIon<boolean> }) {
+export function TestBlockA(props: { $active: Ion<boolean> }) {
     const { $active } = props
     const $black = ion(true);
 
@@ -31,7 +31,7 @@ function Lap(){
 }
 
 
-export function TestBlockB(props: { $active: ReactiveIon<boolean> }) {
+export function TestBlockB(props: { $active: Ion<boolean> }) {
     const { $active } = props
     const $black = ion(true);
 

@@ -1,12 +1,12 @@
 //@ts-nocheck
-import { ion, ReactiveIon, watch } from "../../../packages/quarky/src"
+import { ion, Ion } from "../../../packages/quarky/src"
 import { watchForRender } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { NodeRef } from "@rue/lumo";
 
 export function MainBlock() {
 
-    const $hello = $PortableNode() as unknown as ReactiveIon<PortableNode>
-    const $bye = $PortableNode() as unknown as ReactiveIon<PortableNode>
+    const $hello = $PortableNode() as unknown as Ion<PortableNode>
+    const $bye = $PortableNode() as unknown as Ion<PortableNode>
 
     const helloView = $hello()
     helloView.remove()
@@ -49,14 +49,14 @@ export function MainBlock() {
 
     return (
         <main>
-            <$MainContent createAs='hello' ref={$mainContent}  />
+            <$MainContent as='hello' ref={$mainContent}  />
             <$records_list />
             <button onclick={changeMainContent}>click</button>
         </main>
     )
 }
 
-function $portable(render: (() => any) | ReactiveIon<PortableNode>, $ref: ReactiveIon<PortableNode> | (() => any)) {
+function $portable(render: (() => any) | Ion<PortableNode>, $ref: Ion<PortableNode> | (() => any)) {
     return render;
 }
 
@@ -64,7 +64,7 @@ function $MorphicNode() {
 
 }
 
-function $MorphicPort(initialKey: string | ReactiveIon<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; set: (key: string) => any } {
+function $MorphicPort(initialKey: string | Ion<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; set: (key: string) => any } {
 
     const $key = ion(initialKey)
     const $render = ion(switchMap[$key()])
@@ -84,7 +84,7 @@ function $MorphicPort(initialKey: string | ReactiveIon<any>, switchMap: { [key: 
 
 function MainContent() {
 
-    const $mainContent = ion(() =>
+    const $mainContent = derivedIon(() =>
         <div>hello</div>)
 
     function changeMainContent() {
@@ -101,12 +101,12 @@ function MainContent() {
     )
 }
 
-function $morphling($render: ReactiveIon<() => any>) {
+function $morphling($render: Ion<() => any>) {
     return new MorphlingKit($render)
 }
 
 class MorphlingKit {
-    constructor(public $render: ReactiveIon<() => any>) { }
+    constructor(public $render: Ion<() => any>) { }
 }
 
 function setUpMorphling(morphlingKit: MorphlingKit) {

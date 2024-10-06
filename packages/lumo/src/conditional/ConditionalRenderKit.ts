@@ -2,7 +2,7 @@ import { ReactiveGet, ReactiveGet } from "../../../quarky/src";
 import { NodeEntity } from "../node/makeNode";
 import { ConditionalKit } from "./ConditionalKit";
 import { Booleanny } from "@rue/types";
-import { ProviderComponent } from "../component/ProviderComponent";
+import { InternalComponent } from "../component/InternalComponent";
 
 export type RenderConditional = () => NodeEntity[]
 
@@ -14,7 +14,7 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional>{
         statementType: 'if' | 'elseIf' | 'else',
         public renderConditional: RenderConditional,
         public type: 'create' | 'show' | 'mount' = 'create',
-        public component: ProviderComponent,
+        public component: InternalComponent,
         optionals?: {
             nodePodIndex?: number,
             $condition?: ReactiveGet<Booleanny>,

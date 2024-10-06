@@ -6,8 +6,8 @@ import { NodeEntity } from "./makeNode";
 import { _NodePod } from "./NodePod";
 import { mountTextNode } from "./mountTextNode";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
-import { getProviderComponent, ProviderComponent } from "../component/ProviderComponent";
 import { MorphicRenderKit } from "../morphic/MorphicComponent";
+import { getProviderComponent } from "../component/provide";
 
 export function mountNodeEntity(
     parent: Element, //TODO: parent is as optional as fragment I think...
@@ -18,7 +18,7 @@ export function mountNodeEntity(
     if (nodeEntity instanceof Element) { // Element type from Web API
         mountElement(parent, nodeEntity, nodePod, fragment)
     }
-    else if (nodeEntity instanceof InternalComponent || nodeEntity instanceof ProviderComponent || nodeEntity instanceof MorphicRenderKit || nodeEntity instanceof ListRenderKit) { //TODO: make a shared prototype
+    else if (nodeEntity instanceof InternalComponent || nodeEntity instanceof InternalComponent || nodeEntity instanceof MorphicRenderKit || nodeEntity instanceof ListRenderKit) { //TODO: make a shared prototype
         nodeEntity.mount(parent, nodePod, fragment)
     }
     // else if (nodeEntity instanceof ListRenderKit) { // may or may not be dynamic, depending on data

@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { META } from "../ReactiveEntity";
-import { asMetaIon, ReactiveIon, MetaIon } from "./Ion";
+import { asMetaIon, Ion, MetaIon } from "./Ion";
 import { isIonicModel } from "../ionize/IonicModel";
 import { protectIonicModel } from "../ionize/ProtectedIonicModel";
 
@@ -18,7 +18,7 @@ type WritableIon = {
     [META]: MetaWritableIon
 }
 
-// ReactiveIon | WritableDerivedIon | PropIon //TODO: make this into an interface instead
+// Ion | WritableDerivedIon | PropIon //TODO: make this into an interface instead
 type MetaWritableIon = {
     o: any;
     asReadonly?: any

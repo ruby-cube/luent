@@ -1,6 +1,6 @@
-//@ts-nocheck
+
 import { NodeRef, Try, } from "@rue/lumo";
-import { initializeIonicEffect, ionize, ion } from "../../../packages/quarky/src";
+import { derivedIon, initializeIonicEffect, ion, ionize } from "@rue/quarky";
 
 
 //tests:
@@ -26,7 +26,7 @@ export function TestBox() {
     }
 
     const $div = NodeRef('div')
-    const $anotherCount = ion(() => $count())
+    const $anotherCount = derivedIon(() => $count())
     initializeIonicEffect(() => {
         $anotherCount()
     })

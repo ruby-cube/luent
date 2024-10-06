@@ -1,32 +1,38 @@
-import { ion } from "../../../packages/quarky/src"
-import { $await, $Suspense } from "../../../packages/lumo/src/component/$await"
+import { Component, suspendRender, Suspense } from "@rue/lumo"
+import { ion } from "@rue/quarky"
 
 
 
-const PendingListBlock = $Suspense({
+const $ListBlock = Suspense({
     Pending: ListBlock,
     Placeholder() {
-        return (<div>I'm not ready...</div>)
+        return Component(
+            <div>I'm not ready...</div>
+        )
     },
     timeout: 9001,
-    ErrorView: ({ error }: { error: any }) => <div>Oops! {error}</div>
+    Error({ error }: { error: any }) {
+        return Component(
+            <div>Oops! {error}</div>
+        )
+    }
 })
 
-const PendingTextArea = $Suspense({
+const $TextArea = Suspense({
     Pending: TextArea,
     Placeholder() {
-        return (<div>loading...</div>)
+        return Component(<div>loading...</div>)
     },
-    // ErrorView: ({ error }: { error: any }) => <div>Ohh noes!! {error}</div>
+    // Error: ({ error }: { error: any }) => <div>Ohh noes!! {error}</div>
 })
 
 export function MainSite() {
     const $count = ion(0)
-    return (
+    return Component(
         <>
             <h1>Hello World</h1>
-            <PendingListBlock></PendingListBlock>
-            <PendingTextArea></PendingTextArea>
+            <$ListBlock></$ListBlock>
+            <$TextArea></$TextArea>
             <p>{$count}</p>
             <button onclick={() => $count.update(count => count + 1)}>click</button>
         </>
@@ -34,13 +40,13 @@ export function MainSite() {
 }
 
 function Something() {
-    return (
+    return Component(
         <p>hey</p>
     )
 }
 
 function ListBlock() {
-    return (
+    return Component(
         <div>
             <h2>list</h2>
             {/* <ItemBlockA></ItemBlockA> */}
@@ -52,10 +58,13 @@ function ListBlock() {
 function TextArea() {
     const $word = ion("not ready")
 
-    $await(simFetchC("pomp"))
+
+    suspendRender(simFetchC("pomp"))
         .then(word => $word.set(word))
 
-    return (
+    return Component({
+        $word
+    },
         <div>
             <h2>text area {$word}</h2>
             <ItemBlockC />
@@ -68,21 +77,48 @@ function TextArea() {
 function ItemBlockA() {
     const $word = ion("not ready")
 
-    $await(simFetch("calico"))
+    suspendRender(simFetch("calico"))
         .then(word => $word.set(word))
 
-    return (
+    return Component(
         <div>{$word}</div>
     )
 }
 
+function run(fn: Function) {
+    return new Promise(() => { })
+}
+
+
 function ItemBlockB() {
     const $word = ion("not ready")
 
-    $await(simLongFetch("basset"))
-        .then(word => $word.set(word))
+    suspendRender(fetch("basset"))
+        .then(word =>
+            $word.set(word)
+        )
+        .catch(err =>
+            console.log(err)
+        )
 
-    return (
+    suspendRender([
+        fetch('a'),
+        fetch('b')
+    ]).then(([a, b]) => $word.set(a))
+
+    run(async () => {
+        try {
+            const word = await suspendRender(
+                fetch('basset')
+            )
+            $word.set(word)
+        }
+        catch (error) {
+            console.log(error)
+        }
+    })
+
+    return Component(
         <div>{$word}</div>
     )
 }
@@ -90,10 +126,10 @@ function ItemBlockB() {
 function ItemBlockC() {
     const $word = ion("not ready")
 
-    $await(simFetchB("cerulean"))
+    suspendRender(simFetchB("cerulean"))
         .then(word => $word.set(word))
 
-    return (
+    return Component(
         <div>{$word}</div>
     )
 }
@@ -101,11 +137,11 @@ function ItemBlockC() {
 function ItemBlockD() {
     const $word = ion("not ready")
 
-    $await(simLongFetchB("tilted"))              // [promise]
+    suspendRender(simLongFetchB("tilted"))              // [promise]
         .then(word => $word.set(word))
 
-    return (
-        <div>{$word}</div> // {strings: ['<div>', '<div>'], values: [$word]}   (makeComponent should detect $await call and wrap component in promise) 
+    return Component(
+        <div>{$word}</div> // {strings: ['<div>', '<div>'], values: [$word]}   (makeComponent should detect suspendRender call and wrap component in promise) 
     )
 }
 
@@ -126,7 +162,7 @@ function simFetchC(word: string) {
     })
 }
 
-function simLongFetch(word: string) {
+function simLongFetch(word: string): Promise<string> {
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve(word);
@@ -148,5 +184,7 @@ function simLongFetchB(word: string) {
         }, 9000)
     })
 }
+
+
 
 

@@ -4,12 +4,12 @@ import { ArrayItem } from "@rue/types"
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
 import { HTMLTag } from "../element/makeElement"
 import { isUpdatingList } from "../iteratives/listStack"
-import { protect, ReactiveIon, ref } from "@rue/quarky"
+import { protect, Ion, ref } from "@rue/quarky"
 import { READONLY } from "../../../quarky/src/ion/ProtectedIon"
 
 
 
-// type Task = ((item: Element | PublicComponent) => void) | ((item: Element | PublicComponent, $index?: ReactiveIon<number>) => void)
+// type Task = ((item: Element | PublicComponent) => void) | ((item: Element | PublicComponent, $index?: Ion<number>) => void)
 // const hookMap: WeakMap<NodeRef, Set<Task>> = new WeakMap()
 
 type RefSource = HTMLTag | ((...args: any[]) => Component)
@@ -31,8 +31,8 @@ type RefSource = HTMLTag | ((...args: any[]) => Component)
 
 export type NodesIon<T extends RefSource = RefSource> = () => NodeReferent<T>[]
 export type NodeRef<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
-export type _NodeRef<T extends RefSource = RefSource> = ReactiveIon<NodeReferent<T> | undefined>
-export type _NodesIon<T extends RefSource = RefSource> = ReactiveIon<NodeReferent<T>[]>
+export type _NodeRef<T extends RefSource = RefSource> = Ion<NodeReferent<T> | undefined>
+export type _NodesIon<T extends RefSource = RefSource> = Ion<NodeReferent<T>[]>
 
 // map readonly $node to $node
 const $nodeMap: WeakMap<NodeRef | NodesIon, _NodeRef | _NodesIon> = new WeakMap()
@@ -54,7 +54,7 @@ export function NodeRef<
     return $node as NodeRef<T>;
 }
 
-export function NodeRefs<T extends RefSource = RefSource>(source: T): NodesIon<T> {
+export function NodesRef<T extends RefSource = RefSource>(source: T): NodesIon<T> {
     let $nodes = ref([]) as NodesIon<T>
     if (__DEV__) {
         $nodes = asReadonlyNodeRef($nodes) as NodesIon<T>
@@ -139,7 +139,7 @@ export class InternalNodeArrayRef {
         this.initialized = true;
     }
 
-    assignValue(value: NodeReferent, $index: ReactiveIon<number>) {
+    assignValue(value: NodeReferent, $index: Ion<number>) {
         let nodes = !__SSR__ && isUpdatingList() ? this.getNewListNodes()
             : this.o.set(this.o())
         nodes[$index()] = value;
@@ -173,7 +173,7 @@ export class InternalNodeArrayRef {
 
 
 
-// export function assignNodeRef(ref: InternalNodeRef, value: Element | PublicComponent, $index: ReactiveIon<number> | undefined) {
+// export function assignNodeRef(ref: InternalNodeRef, value: Element | PublicComponent, $index: Ion<number> | undefined) {
 //     if ($index != null) {
 //         let nodes = <(Element | PublicComponent)[]>ref.o.value || []
 //         nodes[$index()] = value;
@@ -187,7 +187,7 @@ export class InternalNodeArrayRef {
 
 
 
-// function assignNodeRef(ref: InternalNodeRef<InternalComponent>, component: AnyObject, $index: ReactiveIon<number> | undefined) {
+// function assignNodeRef(ref: InternalNodeRef<InternalComponent>, component: AnyObject, $index: Ion<number> | undefined) {
 //     if ($index != null) {
 //         let nodes = ref.components ? ref.components! : []
 //         nodes[$index()] = component;

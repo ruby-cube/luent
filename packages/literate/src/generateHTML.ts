@@ -8,7 +8,7 @@ import { getResolvedComponent } from "./PendingComponentMap.js";
 
 export async function generateHTML(Root: SSRComponentSetup, timeout: number) {
     const timer = timeout != null ? new ResponseTimer(timeout) : undefined;
-    const allPromises: Promise<Literate>[] = [] // collect $Suspense promises
+    const allPromises: Promise<Literate>[] = [] // collect Suspense promises
 
     const component = makeRootComponent(Root, timer)
 

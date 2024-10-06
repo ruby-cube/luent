@@ -1,34 +1,39 @@
-import { ion } from "../../../packages/quarky/src"
-import { $await, $Suspense } from "../../../packages/lumo/src/component/$await"
+//@ts-nocheck
+import { ion, protect } from "../../../packages/quarky/src"
+import { suspendRender, Suspense } from "../../../packages/lumo/src/componentSuspense"
+import { Component } from "@rue/lumo"
 
 
 
-const PendingListBlock = $Suspense({
+const PendingListBlock = Suspense({
     Pending: ListBlock,
     Placeholder() {
         return (<div>I'm not ready...</div>)
     },
     timeout: 9001,
-    ErrorView: ({ error }: { error: any }) => <div>Oops! {error}</div>
+    Error: ({ error }: { error: any }) => <div>Oops! {error}</div>
 })
 
-const PendingTextArea = $Suspense({
+const PendingTextArea = Suspense({
     Pending: TextArea,
     Placeholder() {
         return (<div>loading...</div>)
     },
-    // ErrorView: ({ error }: { error: any }) => <div>Ohh noes!! {error}</div>
+    // Error: ({ error }: { error: any }) => <div>Ohh noes!! {error}</div>
 })
+
 
 export function NestedPend() {
     const $count = ion(0)
-    return (
-        <>
-            <h1>Hello World</h1>
-            <PendingListBlock></PendingListBlock>
-            <p>{$count}</p>
-            <button onclick={() => $count.update(c => c + 1)}>click</button>
-        </>
+
+    return Component(
+        () =>
+            <>
+                <h1>Hello World</h1>
+                <PendingListBlock></PendingListBlock>
+                <p>{$count}</p>
+                <button onclick={() => $count.update(c => c + 1)}>click</button>
+            </>
     )
 }
 
@@ -51,7 +56,7 @@ function ListBlock() {
 function TextArea() {
     const $word = ion("not ready")
 
-    $await(simFetchC("pomp"))
+    suspendRender(simFetchC("pomp"))
         .then(word => $word.set(word))
 
     return (
@@ -67,7 +72,7 @@ function TextArea() {
 function ItemBlockA() {
     const $word = ion("not ready")
 
-    $await(simFetch("calico"))
+    suspendRender(simFetch("calico"))
         .then(word => $word.set(word))
 
     return (
@@ -78,7 +83,7 @@ function ItemBlockA() {
 function ItemBlockB() {
     const $word = ion("not ready")
 
-    $await(simLongFetch("basset"))
+    suspendRender(simLongFetch("basset"))
         .then(word => $word.set(word))
 
     return (
@@ -89,7 +94,7 @@ function ItemBlockB() {
 function ItemBlockC() {
     const $word = ion("not ready")
 
-    $await(simFetchB("cerulean"))
+    suspendRender(simFetchB("cerulean"))
         .then(word => $word.set(word))
 
     return (
@@ -100,7 +105,7 @@ function ItemBlockC() {
 function ItemBlockD() {
     const $word = ion("not ready")
 
-    $await(simLongFetchB("tilted"))
+    suspendRender(simLongFetchB("tilted"))
         .then(word => $word.set(word))
 
     return (

@@ -71,7 +71,7 @@ function ListBlockB() {
         $data.set(data)
     })
 
-    return $await(pendingData, () =>
+    return suspendRender(pendingData, () =>
         <div>
             <ItemBlock />
         </div>
@@ -82,7 +82,7 @@ function ItemBlockB() {
 
     const $content = ion('');
 
-    $await(fetch(""))
+    suspendRender(fetch(""))
         .then(async (response) => {
             const data = await response.json()
             $content.set(data.content)
@@ -108,7 +108,7 @@ function Something() {
 }
 
 function $pending(render) {
-    return $Suspense({
+    return Suspense({
         pending: render,
         placeholder: () => <div>loading...</div>,
         timeout: 100,

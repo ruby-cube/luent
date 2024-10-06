@@ -10,9 +10,9 @@ export function lazyLoadComponent<P>(config: {
     onIdle?: boolean
     Placeholder?: ComponentSetup,
     timeout?: number,
-    ErrorView?: ComponentSetup<{ error: any }>,
+    Error?: ComponentSetup<{ error: any }>,
 }) { //TODO: Idle load priorities
-    const { load, ErrorView, Placeholder, timeout, onIdle } = config;
+    const { load, Error, Placeholder, timeout, onIdle } = config;
     const $loading = ion(true);
     const $error = ion("");
     const $loaded = ion(false);
@@ -58,7 +58,7 @@ export function lazyLoadComponent<P>(config: {
         }
     }
 
-    if (Placeholder && ErrorView) {
+    if (Placeholder && Error) {
         return (props: P) => {
             loadComponent();
             return (
@@ -67,7 +67,7 @@ export function lazyLoadComponent<P>(config: {
                         <Placeholder {...props}></Placeholder>
                     )}
                     {ElseIf($error, () =>
-                        <ErrorView {...props} error={$error()}></ErrorView>
+                        <Error {...props} error={$error()}></Error>
                     )}
                     {Else(() =>
                         <Component {...props}></Component>
@@ -92,14 +92,14 @@ export function lazyLoadComponent<P>(config: {
             )
         }
     }
-    if (ErrorView) {
+    if (Error) {
         return (props: P) => {
             loadComponent();
 
             return (
                 <>
                     {If($error, 'create', () =>
-                        <ErrorView {...props} error={$error()}></ErrorView>
+                        <Error {...props} error={$error()}></Error>
                     )}
                     {ElseIf($loaded, () =>
                         <Component {...props}></Component>

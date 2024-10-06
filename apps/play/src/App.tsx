@@ -1,4 +1,4 @@
-import { NodeRef, Component, COMPONENT, ComponentSetup, If, Else, For,  Provide, teleportTo } from "@rue/lumo";
+import { NodeRef, Component, COMPONENT, ComponentSetup, If, Else, For, Provide, teleportTo } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, ion, ionize } from "../../../packages/quarky/src";
 import { $ } from "../../../packages/quarky/src";
@@ -32,7 +32,7 @@ function genId() {
 //         return <div>Eep! I'm not ready {props.frog}</div>
 //     },
 //     // timeout: 5000,
-//     ErrorView(props) {
+//     Error(props) {
 //         return <div>{props.error}</div>
 //     },
 // });
@@ -53,7 +53,7 @@ function genId() {
 //         return <div>loading test box...</div>
 //     },
 //     // timeout: 5000,
-//     ErrorView(props) {
+//     Error(props) {
 //         return <div>{props.error}</div>
 //     },
 // });
@@ -120,8 +120,11 @@ export function List() {
 
     const $listLengthIsZero = () => $list().length === 0
 
-    return (
-        <div>
+    return Component({
+        exposed: {
+            $listLengthIsZero
+        },
+        template: <div>
             <>
                 {If($listLengthIsZero, () => (
                     <div
@@ -171,6 +174,7 @@ export function List() {
             </> */}
             <button onclick={showSideBlock}>show Side Block</button>
         </div>
+    }
     )
 }
 
