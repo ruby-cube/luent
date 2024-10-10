@@ -99,7 +99,7 @@ export function isCurrentWatchSubject(atom: Ion | PropIon) {
         return asMetaIon(currentWatchSubject).atoms.has(asIonicAtom(atom))
     }
     if (isIonicModel(currentWatchSubject)) {
-        if (isPropIon(atom)){
+        if (isPropIon(atom)) {
             return asMetaIon(atom).model === currentWatchSubject;
         }
         //TODO: what about absorbed ions?
@@ -107,7 +107,6 @@ export function isCurrentWatchSubject(atom: Ion | PropIon) {
 
 }
 
-//TODO: What about Prop Ions?
 export function watch<T extends AnyIon | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
 export function watch<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
 export function watch<T extends AnyIon | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
@@ -121,6 +120,8 @@ export function watch<T extends AnyIon | ReactiveGet | IonicModel>(target: T, ef
     const phase = options?.phase || Phase.BEFORE_RENDER
 
     const watchSubject = asWatchSubject(_target);
+
+    if (isPropIon(target)) asMetaIon(target).watch()
 
     let oldValue = _target() // This is when derived is initialized if not already
 

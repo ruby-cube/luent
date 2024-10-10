@@ -2,6 +2,8 @@ import { SetMap } from "@rue/utils";
 import { Task, onRenderCycleComplete, Phase, useRenderCycle } from "./RenderCycle";
 // import { runEffect } from "./watch";
 import { getDependencyTracker } from "../derivations/DependencyTracker";
+import { isPropIon } from "../ionize/PropIon";
+import { asMetaIon } from "../ion/Ion";
 
 
 type Watchable = any
