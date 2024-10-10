@@ -4,7 +4,7 @@ import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asTrackedOp } from "./TrackedOp";
 import { IonicModel, recordOp, storeSnapshot } from "./IonicModel";
-import { isWatched } from "../effects/WatchTarget";
+import { isWatched } from "../effects/WatchSubject";
 import { triggerIonicModel } from "../trigger";
 import { Collection, MetaIonicCollection } from "./MetaIonicModel";
 import { noop } from "@rue/utils";

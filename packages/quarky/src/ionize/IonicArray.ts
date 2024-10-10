@@ -2,7 +2,6 @@ import { AnyObject } from "@rue/types";
 import { isIonicAtom } from "../derivations/IonicAtom";
 import { META } from "../ReactiveEntity";
 import { trigger, triggerIonicAtom } from "../trigger";
-import { asObservedProp, getObservedProp } from "./ObservedProp";
 import { createReactiveModel, createReactiveTraps, isNonTrackable, isIonicModel, toRawIfNeeded, IonicModel, storeSnapshot, toRaw, triggerIonicModelWithSetOp, ionize, registerIonicModel, setAbsorbedIon } from "./IonicModel";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { maybeUnreactivizeArgs, triggerReactiveWithMutationOp, useGetOp } from "./IonicCapsule";
@@ -13,6 +12,7 @@ import { Collection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicMode
 import { isAnyIon } from "../ion/AnyIon";
 import { accessMethod, maybeIonize } from "./IonicObject";
 import { getProtectedModelMeta, isReadonlyProxy } from "./ProtectedIonicModel";
+import { asTrackedProp, getObservedProp } from "./PropIon";
 
 export function createIonicArray(
     target: any[],
@@ -185,7 +185,7 @@ function reactiveArrayGetter(
     const tracker = getActiveTracker()
     if (!tracker) return _value;
 
-    tracker.track(asObservedProp(ionicModel, key))
+    tracker.track(asTrackedProp(ionicModel, key))
     return _value;
 }
 

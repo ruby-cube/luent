@@ -1,19 +1,14 @@
 import { AnyObject } from "@rue/types";
-import { ActiveListener, EnrollFunction, makeActiveListener, RemoveFunction } from "./ActiveListener";
+import { ActiveListener, EnrollFunction, ListenerOptions, makeActiveListener, RemoveFunction, ScheduleStop } from "./ActiveListener";
 import { makePendingCancelOp, PendingCancelOp } from "./PendingCancelOp";
-import { makePendingOp, PendingOp } from "./PendingOp";
+import { makePendingOp, PendingOp, ScheduleCancel, SchedulerOptions } from "./PendingOp";
 import { EffectFlask } from "./EffectFlask";
 
 export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O extends AnyObject = {}> = <
     OPT extends ListenerOptions & O,
 >(target: T, callback: CB, options?: OPT) => ActiveListener;
 
-export type ListenerOptions = {
-    once?: boolean;
-    until?: ScheduleStop;
-    flask?: EffectFlask | null | 'outlive';
-    __devName?: string;
-}
+
 
 export type CallbackRemover = {
     (): void;
@@ -23,8 +18,8 @@ export type CallbackRemover = {
 export type Callback = (...arg: any[]) => any;
 export type Callbacks = Set<Callback | CallbackRemover>;
 export type ScheduleRemoval = ScheduleCancel | ScheduleStop;
-export type ScheduleCancel = (cancel: CallbackRemover) => PendingCancelOp;
-export type ScheduleStop = (stop: CallbackRemover) => PendingCancelOp;
+
+
 
 
 export function $listen<
@@ -57,14 +52,6 @@ export function $listen<
     }) as CB extends CallbackRemover ? PendingCancelOp : ActiveListener
 }
 
-
-
-
-export type SchedulerOptions = {
-    cancel?: ScheduleCancel,
-    flask?: EffectFlask | null | 'outlive',
-    __devName?: string
-}
 
 export type ScheduledOp<CB extends Callback> = CB extends { isRemover: true } ? PendingCancelOp : PendingOp<ReturnType<CB>>
 

@@ -1,5 +1,5 @@
 import { Component, fromContext, Provide, TypedKey } from "@rue/lumo"
-import { derivedIon, DerivedIon, ion, ionize } from "@rue/quarky";
+import { DerivedIon, Ion, ionize } from "@rue/quarky";
 
 const COUNTER = Symbol("Counter") as TypedKey<Counter>
 const DOUBLE_COUNT = Symbol("DerivedIon<number>") as TypedKey<DerivedIon<number>>
@@ -60,9 +60,9 @@ export function ParentBlock(
     })
 
     const counter = provide(COUNTER, new Counter());
-    const $doubleCount = provide(DOUBLE_COUNT, derivedIon(() => counter.$.count * 2));
+    const $doubleCount = provide(DOUBLE_COUNT, DerivedIon(() => counter.$.count * 2));
 
-    const $name = ion("Sir Robin")
+    const $name = Ion("Sir Robin")
 
     function makeBrave() {
         $name.set('The brave')

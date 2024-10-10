@@ -46,13 +46,13 @@ export function protectIon($ion: WritableIon, methodKeys?: { [key: string]: true
         return asReadonlyIon($ion)
     }
 
-    return asCustomProtectedIon($ion, methodKeys)
+    return asCustomProtectedIon($Ion, methodKeys)
 }
 
 
 function asCustomProtectedIon($ion: WritableIon, methodKeys: { [key: string]: true }) {
     if (isReadonlyIon($ion)) return $ion;
-    return createCustomProtectedIon($ion, methodKeys)
+    return createCustomProtectedIon($Ion, methodKeys)
 }
 
 function createCustomProtectedIon($ion: WritableIon, methodKeys: { [key: string]: true }) {

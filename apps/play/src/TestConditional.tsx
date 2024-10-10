@@ -1,10 +1,10 @@
 import { Else, If } from "@rue/lumo";
-import { $, ionize, ion } from "../../../packages/quarky/src";
+import { $, ionize, Ion } from "../../../packages/quarky/src";
 
 
 export function TestConditional() {
 
-    const $active = ion(true)
+    const $active = Ion(true)
 
     const list$ = ionize([1, 2, 3])
 

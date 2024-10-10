@@ -1,54 +1,57 @@
 import { TypedKey } from "./component/provide";
 import { InternalComponent } from "./component/InternalComponent";
 import { DynamicNode } from "./dynamic/DynamicNode";
+import { getActiveComponent } from "./component/makeComponent";
+import { SchedulerOptions } from "@rue/flask";
 
-let activeScope: ThisScope | undefined
-let prevScope: ThisScope | undefined
-
-export function pushActiveScope(scope: ThisScope) {
-    prevScope = activeScope
-    activeScope = scope
+export function $thisComponent(){
+    const component = getActiveComponent();
+    if (!component) throw new Error('$thisComponent cannot be called outside of component setup')
+    if (component.instance) return component.instance;
+    return component.createInstance()
 }
 
-export function popActiveScope() {
-    activeScope = prevScope;
-    prevScope = undefined;
+export function $thisEffect(){
+
 }
 
-export function $this() {
-    return activeScope
+export type ThisComponent = {
+    onCreated: (cb: () => void, options?: SchedulerOptions) => void
+    onDestroy: (cb: () => void, options?: SchedulerOptions) => void
+
+    getFromContext?: <T, OPT extends "?" | undefined = undefined>(key: TypedKey<T>, optional?: "?")=> OPT extends "?" ? T | undefined : T
+    getFromGlobal?: <T, OPT extends "?" | undefined = undefined>(key: TypedKey<T>, optional?: "?")=> OPT extends "?" ? T | undefined : T
+    getFromApp?: <T, OPT extends "?" | undefined = undefined>(key: TypedKey<T>, optional?: "?")=> OPT extends "?" ? T | undefined : T
 }
 
+// class ThisScope {
 
+//     constructor(
+//         private dynamicNode: DynamicNode,
+//         private provider: InternalComponent,
+//         private effect?: EffectScope
+//     ) { }
+//     get onCreated() { // no reason to be called after await
+//         return this.dynamicNode.onCreated // bound to dynamic node
+//     }
+//     get onDestroy() {
+//         return this.dynamicNode.onDestroy // can be called after await
+//     }
 
-class ThisScope {
+//     defineCleanup(cleanUp: () => void) { // Must not be called after await
+//         if (this.effect) this.effect.setCleanup(cleanUp);
+//         this.dynamicNode.setCleanup(cleanUp);
+//     }
 
-    constructor(
-        private dynamicNode: DynamicNode,
-        private provider: InternalComponent,
-        private effect?: EffectScope
-    ) { }
-    get onCreated() { // no reason to be called after await
-        return this.dynamicNode.onCreated // bound to dynamic node
-    }
-    get onDestroy() {
-        return this.dynamicNode.onDestroy // can be called after await
-    }
+//     fromContext<T>(key: string | TypedKey<T>): T {
+//         return this.provider.fromContext(key)
+//     }
 
-    defineCleanup(cleanUp: () => void) { // Must not be called after await
-        if (this.effect) this.effect.setCleanup(cleanUp);
-        this.dynamicNode.setCleanup(cleanUp);
-    }
+//     fromGlobal<T>(key: string | TypedKey<T>): T {
+//         return this.provider.fromGlobal(key)
+//     }
 
-    fromContext<T>(key: string | TypedKey<T>): T {
-        return this.provider.fromContext(key)
-    }
-
-    fromGlobal<T>(key: string | TypedKey<T>): T {
-        return this.provider.fromGlobal(key)
-    }
-
-    fromApp<T>(key: string | TypedKey<T>): T {
-        return this.provider.fromApp(key)
-    }
-}
+//     fromApp<T>(key: string | TypedKey<T>): T {
+//         return this.provider.fromApp(key)
+//     }
+// }

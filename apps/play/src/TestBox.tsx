@@ -1,6 +1,6 @@
 
 import { NodeRef, Try, } from "@rue/lumo";
-import { derivedIon, initializeIonicEffect, ion, ionize } from "@rue/quarky";
+import { DerivedIon, initializeIonicEffect, Ion, ionize } from "@rue/quarky";
 
 
 //tests:
@@ -15,7 +15,7 @@ export function TestBox() {
         }
     })
 
-    const $count = ion(0);
+    const $count = Ion(0);
 
     function moveRight() {
         box$.position.x = box$.position.x + 10;
@@ -26,7 +26,7 @@ export function TestBox() {
     }
 
     const $div = NodeRef('div')
-    const $anotherCount = derivedIon(() => $count())
+    const $anotherCount = DerivedIon(() => $count())
     initializeIonicEffect(() => {
         $anotherCount()
     })

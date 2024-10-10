@@ -2,16 +2,19 @@ import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
 import { mountNodeEntity } from "../node/mountNodeEntity";
-import { popProvider, Provide, pushProvider } from "./provide";
+import { fromContext, popProvider, Provide, pushProvider, TypedKey } from "./provide";
 import { protect } from "@rue/quarky";
 import { MorphicRenderKit } from "../morphic/MorphicComponent";
+import { ThisComponent } from "../$this";
+import { getActiveDynamicNode } from "../dynamic/nodestack";
 
 
 export interface Provider {
     entries?: Map<Symbol | string, any>;
     provider: Provider,
     root: Provider,
-    global?: Provider
+    global?: Provider,
+    getFromGlobal?: <T, OPT extends "?" | undefined = undefined>(key: TypedKey<T>, optional?: "?")=> OPT extends "?" ? T | undefined : T
 }
 
 export type DOMNode = CharacterData | Element
@@ -72,9 +75,48 @@ export class InternalComponent<T extends AnyObject | undefined = AnyObject | und
     component?: T extends AnyObject ? PublicComponent<T> : undefined = undefined;
     initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
     entries?: Map<Symbol | string, any>;
+
     initializeAsProvider() {
         if (this.entries) return;
-        this.entries = new Map()
+        this.entries = new Map();
+        this.getFromContext = fromContext.bind(this);
+    }
+
+    addEntry(key: string | symbol, value: any) {
+        if (!this.entries) throw new Error('Entries must be initialized')
+        this.entries!.set(key, value)
+    }
+
+    getFromContext?: <T, OPT extends "?" | undefined = undefined>(key: TypedKey<T>, optional?: "?")=> OPT extends "?" ? T | undefined : T
+    getFromGlobal?: <T, OPT extends "?" | undefined = undefined>(key: TypedKey<T>, optional?: "?")=> OPT extends "?" ? T | undefined : T
+    getFromApp?: <T, OPT extends "?" | undefined = undefined>(key: TypedKey<T>, optional?: "?")=> OPT extends "?" ? T | undefined : T
+
+    instance?: ThisComponent
+
+    createInstance(){
+        const _this = this;
+        const instance = this.instance = {
+            get onCreated(){
+                const dynamicNode = getActiveDynamicNode()
+                if (dynamicNode.onCreated) return dynamicNode.onCreated;
+                return dynamicNode.initializeOnCreatedHook()
+            },
+            get onDestroy(){
+                const dynamicNode = getActiveDynamicNode()
+                if (dynamicNode.onDestroy) return dynamicNode.onDestroy;
+                return dynamicNode.initializeOnDestroyHook()
+            },
+            get getFromContext(){
+                return _this.getFromContext;
+            },
+            get getFromApp(){
+                return _this.root.getFromApp;
+            },
+            get getFromGlobal(){
+                return _this.getFromContext;
+            }
+        }
+        return instance;
     }
 
     root!: InternalComponent

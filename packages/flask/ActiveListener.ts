@@ -1,13 +1,23 @@
-import { Callback, ListenerOptions } from "./flaskableListeners";
-import { bindFlask, getFlask, onFlaskDisposal } from "./EffectFlask";
+import { Callback, CallbackRemover } from "./flaskableListeners";
+import { getFlask, onFlaskDisposal } from "./EffectFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
-import { genIncrementalId, markNoCleanup, setUpCleanupWarning, shouldWarnNoCleanup, unmarkNoCleanup } from "./initFlask";
+import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { mapHandlers } from "./handlerMap";
 
 export type ActiveListener = {
     stop(): void;
 }
 
+export type ScheduleStop = (stop: CallbackRemover) => PendingCancelOp;
+
+export const LIFETIME = null;
+
+export type ListenerOptions = {
+    once?: boolean;
+    until?: ScheduleStop | typeof LIFETIME;
+    // flask?: EffectFlask | null | 'outlive';
+    __devName?: string;
+}
 
 export type EnrollFunction = (wrappedCB: Callback) => any
 export type RemoveFunction<E extends EnrollFunction> =
@@ -24,6 +34,8 @@ type ActiveListenerConfig<E extends EnrollFunction = EnrollFunction> = {
     options: ListenerOptions | undefined
 }
 
+
+
 export function makeActiveListener<E extends (wrappedCB: Callback) => void | Callback>(
     config: ActiveListenerConfig<E>
 ): ActiveListener {
@@ -33,7 +45,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
         return { stop: () => { } };
     }
     const once = options?.once;
-    const flask = options?.flask;
+    // const flask = options?.flask;
 
 
     let returnVal: any;
@@ -44,7 +56,8 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
         stop: _remove
     }
 
-    const _callback = bindFlask(once ? oneTimeCallback : callback, flask === 'outlive' ? null : flask);
+    const _callback = once ? oneTimeCallback : callback;
+    // const _callback = bindFlask(once ? oneTimeCallback : callback, flask === 'outlive' ? null : flask);
 
     mapHandlers(_callback, callback);
 
@@ -60,7 +73,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
         called = true;
         if (__DEV__) unmarkNoCleanup(activeListener);
         if (pendingStop && 'cancel' in pendingStop) pendingStop.cancel();
-        if (pendingFlaskCleanup && 'cancel' in pendingFlaskCleanup) {
+        else if (pendingFlaskCleanup && 'cancel' in pendingFlaskCleanup) {
             pendingFlaskCleanup.cancel();
         }
         // console.log('remove done', pendingFlaskCleanup)
@@ -75,16 +88,19 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
         if (__DEV__ && (!pendingStop || pendingStop && !("cancel" in pendingStop)))
             console.warn('`until` function should be a flaskable scheduler that return a PendingCancelOp for cleanup. See @rue/flask')
     }
+    else if (until !== LIFETIME) {
+        pendingFlaskCleanup = onFlaskDisposal(_remove);
+    }
 
-    pendingFlaskCleanup =
-        flask && flask !== "outlive" ? flask.onDisposal(_remove)
-            : flask === 'outlive' ? undefined
-                : onFlaskDisposal(_remove);
+    // pendingFlaskCleanup =
+    //     flask && flask !== "outlive" ? flask.onDisposal(_remove)
+    //         : flask === 'outlive' ? undefined
+    //             : onFlaskDisposal(_remove);
     // console.log('pendingFlaskCleanup', pendingFlaskCleanup)
 
-    if (__DEV__ && flask !== "outlive") setUpCleanupWarning!(activeListener, until, flask || getFlask())
+    if (__DEV__ && until !== LIFETIME) setUpCleanupWarning!(activeListener, until, getFlask())
 
     returnVal = enroll(_callback);
-    
+
     return activeListener as ActiveListener;
 }

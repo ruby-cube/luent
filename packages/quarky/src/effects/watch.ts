@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { asWatchTarget, WatchTarget } from "./WatchTarget";
+import { asWatchSubject, WatchSubject } from "./WatchSubject";
 import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
 import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
@@ -13,9 +13,8 @@ import { noop } from "@rue/utils";
 import { __devCheckIfTracked } from "../derivations/DependencyTracker";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
 import { Ion, asMetaIon, isIon } from "../ion/Ion";
-import { isObservedProp, ObservedProp } from "../ionize/ObservedProp";
 import { asIonicAtom } from "../derivations/IonicAtom";
-import { PropIon } from "../ionize/PropIon";
+import { isPropIon, PropIon } from "../ionize/PropIon";
 
 
 type RenderCycleOptions = {
@@ -91,18 +90,17 @@ type Effect = () => void
 export type RawEffect = (a: any, b: any) => void
 
 
-let currentWatchTarget: DerivedIon | Ion | IonicModel | undefined // prevents infinite loops for synchronous effects that set ions
+let currentWatchSubject: DerivedIon | Ion | IonicModel | undefined // prevents infinite loops for synchronous effects that set ions
 
-export function isCurrentWatchTarget(atom: Ion | ObservedProp) {
-    if (!currentWatchTarget) return false;
-    if (currentWatchTarget === atom) return true;
-    if (isDerivedIon(currentWatchTarget)) {
-        return asMetaIon(currentWatchTarget).atoms.has(asIonicAtom(atom))
+export function isCurrentWatchSubject(atom: Ion | PropIon) {
+    if (!currentWatchSubject) return false;
+    if (currentWatchSubject === atom) return true;
+    if (isDerivedIon(currentWatchSubject)) {
+        return asMetaIon(currentWatchSubject).atoms.has(asIonicAtom(atom))
     }
-    if (isIonicModel(currentWatchTarget)) {
-        const meta = asMetaIonicModel(currentWatchTarget)
-        if (isObservedProp(atom)){
-            return atom.metaIonicModel === meta;
+    if (isIonicModel(currentWatchSubject)) {
+        if (isPropIon(atom)){
+            return asMetaIon(atom).model === currentWatchSubject;
         }
         //TODO: what about absorbed ions?
     }
@@ -122,17 +120,17 @@ export function watch<T extends AnyIon | ReactiveGet | IonicModel>(target: T, ef
     const eager = options?.eager
     const phase = options?.phase || Phase.BEFORE_RENDER
 
-    const watchTarget = asWatchTarget(_target);
+    const watchSubject = asWatchSubject(_target);
 
     let oldValue = _target() // This is when derived is initialized if not already
 
     function changeEffect() {
         const newValue = _target() // This is when retracking happens
         if (areEqual(toRaw(newValue), toRaw(oldValue))) return;
-        let prevTarget = currentWatchTarget;
-        currentWatchTarget = _target // prevents infinite loops for synchronous effects
+        let prevTarget = currentWatchSubject;
+        currentWatchSubject = _target // prevents infinite loops for synchronous effects
         effect(newValue, oldValue)
-        currentWatchTarget = prevTarget;
+        currentWatchSubject = prevTarget;
         oldValue = newValue;
     }
 
@@ -141,7 +139,7 @@ export function watch<T extends AnyIon | ReactiveGet | IonicModel>(target: T, ef
     }
 
     return setUpWatcher(
-        watchTarget,
+        watchSubject,
         changeEffect,
         phase,
         options || {},
@@ -158,7 +156,7 @@ function watchReactiveModel<T extends IonicModel>(target: T, effect: MutationEff
     const phase = options?.phase || Phase.BEFORE_RENDER
     // const deep = options?.deep
 
-    const watchTarget = asWatchTarget(target);
+    const watchSubject = asWatchSubject(target);
 
     asMetaIonicModel(target).trackAbsorbedIons()
 
@@ -176,10 +174,10 @@ function watchReactiveModel<T extends IonicModel>(target: T, effect: MutationEff
 
     return $listen(mutationEffect, options || {}, {
         enroll(_effect) {
-            watchTarget.watch(_effect, phase, forNextCycle)
+            watchSubject.watch(_effect, phase, forNextCycle)
         },
         remove(_effect) {
-            watchTarget.unwatch(_effect, phase)
+            watchSubject.unwatch(_effect, phase)
             // if (nestedWatcher) nestedWatcher.unwatch()
         }
     });
@@ -200,12 +198,12 @@ export function initializeIonicEffect(effect: () => void, options?: EffectOption
     const phase = options?.phase || Phase.BEFORE_RENDER;
     const retrack = options?.retrack || false;
     const reactiveEffect = createIonicEffect(effect, retrack)
-    const watchTarget = asWatchTarget(reactiveEffect);
+    const watchSubject = asWatchSubject(reactiveEffect);
 
     scheduleEffectEagerly(reactiveEffect.initialize, phase);
 
     return setUpWatcher(
-        watchTarget,
+        watchSubject,
         reactiveEffect,
         phase,
         options || {},
@@ -215,7 +213,7 @@ export function initializeIonicEffect(effect: () => void, options?: EffectOption
 
 
 function setUpWatcher(
-    watchTarget: WatchTarget,
+    watchSubject: WatchSubject,
     effect: Effect,
     phase: Phase,
     options: ListenerOptions & RenderCycleOptions,
@@ -225,10 +223,10 @@ function setUpWatcher(
 
     return $listen(effect, options || {}, {
         enroll(_effect) {
-            watchTarget.watch(_effect, phase, forNextCycle)
+            watchSubject.watch(_effect, phase, forNextCycle)
         },
         remove(_effect) {
-            watchTarget.unwatch(_effect, phase)
+            watchSubject.unwatch(_effect, phase)
             if (metaReactiveFunction) {
                 metaReactiveFunction.untrackAtoms()
             }

@@ -1,10 +1,10 @@
 import { Component, watch } from "@rue/lumo";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
-import { derivedIon, ion, ionize } from "@rue/quarky";
+import { DerivedIon, Ion, ionize } from "@rue/quarky";
 
 
 export function TestIonProp() {
-    const $count = ion(0, {
+    const $count = Ion(0, {
         increment() {
             $count.set($count() + 1)
         }
@@ -23,7 +23,7 @@ export function TestIonProp() {
     const $bigBirdSleep = asPropIon($bigBird, 'sleep')
     console.log($bigBirdSleep)
 
-    const $doubleCount = derivedIon(() => $count() * 2)
+    const $doubleCount = DerivedIon(() => $count() * 2)
 
     const $counter = ionize({
         frog: 'kermit',
@@ -41,14 +41,14 @@ export function TestIonProp() {
         console.log('$counter mutated', mutations)
     })
 
-    const $firstName = ion('Kermit', {
+    const $firstName = Ion('Kermit', {
         set(name: string) {
             this.set(name)
         }
     })
-    const $lastName = ion('The Frog')
+    const $lastName = Ion('The Frog')
 
-    const $fullName = derivedIon(() => $firstName() + " " + $lastName(), {
+    const $fullName = DerivedIon(() => $firstName() + " " + $lastName(), {
         set(name: string) {
             const splitName = name.split(" ");
             $firstName.set(splitName[0])

@@ -16,7 +16,7 @@ import { DerivedRef } from "../ion/Ref";
 // Note that siganl with only one dependency could still be a derived signal.
 
 
-export const DERIVED_ION = Symbol('derivedIon')
+export const DERIVED_ION = Symbol('DerivedIon')
 
 export type DerivedIon<T = any> = {
     (): T
@@ -61,10 +61,10 @@ export class MetaDerivedIon extends IonicDerivation {
 // export const $ = DerivedIon
 
 
-export function DerivedIon<T extends any>(
-    pureGetter: () => T, 
-    methods?: AnyObject, 
-    retrack: boolean = true, 
+export function createDerivedIon<T extends any>(
+    pureGetter: () => T,
+    methods?: AnyObject,
+    retrack: boolean = true,
     inert: boolean = false
 ): DerivedIon<T> | DerivedRef<T> {
     const derived = new MetaDerivedIon(<DerivedIon>$derivedIon, retrack, !!methods, inert);
@@ -83,7 +83,7 @@ export function DerivedIon<T extends any>(
 
         return pureGetter as DerivedRef;
     }
-    
+
     let initialized = false;
 
     function $derivedIon() {
@@ -137,17 +137,17 @@ export type WritableDerivedIon<T = any, M extends AnyObject = {}> = {
     untrack: () => void;
 } & M
 
-export function WritableDerivedIon<T, M>(pureGetter: () => T, methods: M & { [key: string]: (...args: any[]) => any }, inert: boolean = false) {
-    const writable = DerivedIon(pureGetter, methods, inert);
+export function createWritableDerivedIon<T, M>(pureGetter: () => T, methods: M & { [key: string]: (...args: any[]) => any }, inert: boolean = false) {
+    const writable = createDerivedIon(pureGetter, methods, inert);
     return writable;
 }
 
 
 type ReactiveDerivedIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? WritableDerivedIon<T, M> : DerivedIon<T>
 
-export function derivedIon<T, M, D>(derivation: D & (() => T), methods?: M & { [key: string]: (...args: any[]) => any }): D extends AnyIon ? D : ReactiveDerivedIon<T, M> {
-    if (isAnyIon(derivation)) return derivation as D extends AnyIon ? D : ReactiveDerivedIon<T, M>;
-    if (methods) return WritableDerivedIon(derivation, methods) as D extends AnyIon ? D : ReactiveDerivedIon<T, M>
-    return DerivedIon(derivation) as D extends AnyIon? D : ReactiveDerivedIon<T, M>
+export function DerivedIon<T, M>(derivation: () => T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveDerivedIon<T, M> {
+    if (isAnyIon(derivation)) throw new Error('INVALID INPUT: Ions cannot be made into ions')
+    if (methods) return createWritableDerivedIon(derivation, methods) as ReactiveDerivedIon<T, M>
+    return createDerivedIon(derivation) as ReactiveDerivedIon<T, M>
 }
 

@@ -69,22 +69,22 @@ export class MetaIonicModel<T extends AnyObject = AnyObject> implements Reactive
         this.undirty()
     }
 
-    observedProps?: Map<PropertyKey, ObservedProp>
+    // observedProps?: Map<PropertyKey, ObservedProp>
 
-    registerObservedProp(key: PropertyKey, prop: ObservedProp) {
-        if (!this.observedProps) this.observedProps = new Map()
-        this.observedProps.set(key, prop)
-    }
+    // registerObservedProp(key: PropertyKey, prop: ObservedProp) {
+    //     if (!this.observedProps) this.observedProps = new Map()
+    //     this.observedProps.set(key, prop)
+    // }
 
-    unregisterObservedProp(key: PropertyKey) {
-        if (!this.observedProps) return;
-        this.observedProps.delete(key)
-    }
+    // unregisterObservedProp(key: PropertyKey) {
+    //     if (!this.observedProps) return;
+    //     this.observedProps.delete(key)
+    // }
 
-    getObservedProp(key: PropertyKey) {
-        if (!this.observedProps) return;
-        return this.observedProps.get(key)
-    }
+    // getObservedProp(key: PropertyKey) {
+    //     if (!this.observedProps) return;
+    //     return this.observedProps.get(key)
+    // }
 
 
 
@@ -163,11 +163,11 @@ export class MetaIonicCollection<T extends Collection = Collection> extends Meta
 
     observedEntryKeys = new Set()
 
-    addObservedEntryKey(entryKey: any) {
+    addWatchedEntryKey(entryKey: any) {
         this.observedEntryKeys.add(entryKey)
     }
 
-    deleteObservedEntryKey(entryKey: any) {
+    deleteWatchedEntryKey(entryKey: any) {
         this.observedEntryKeys.delete(entryKey)
     }
 }

@@ -10,12 +10,6 @@ export function isAnyIon(maybeIon: any): maybeIon is AnyIon {
     return false;
 }
 
-type ReactiveIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? Ion<T, M> : Ion<T>
-
-export function ion<T, M>(value: T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveIon<T, M> {
-    if (isAnyIon(value)) return value as  ReactiveIon<T, M>
-    return Ion(value, methods) as  ReactiveIon<T, M>
-}
 
 
 

@@ -1,5 +1,5 @@
-import { bindFlask, getFlask, onFlaskDisposal } from "./EffectFlask";
-import { CallbackRemover, SchedulerOptions } from "./flaskableListeners";
+import { getFlask, onFlaskDisposal } from "./EffectFlask";
+import { CallbackRemover } from "./flaskableListeners";
 import { mapHandlers } from "./handlerMap";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
@@ -8,12 +8,26 @@ export type PendingOp<T = unknown> = Promise<T> & {
     cancel: () => void;
 }
 
+
+export const NEVER = null;
+
+export type SchedulerOptions = {
+    cancel?: ScheduleCancel | typeof NEVER,
+    // flask?: EffectFlask | null | 'outlive',
+    __devName?: string
+}
+
+export type ScheduleCancel = (cancel: CallbackRemover) => PendingCancelOp;
+
+
 export class Cancellation {
     reason: string | Error | undefined;
     constructor(reason?: string | Error) {
         this.reason = reason;
     }
 }
+
+
 
 export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
     callback: CB,
@@ -23,7 +37,7 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
 }): PendingOp<ReturnType<CB>> {
     const { callback, enroll, remove, options } = config;
     const scheduleCancellation = options?.cancel;
-    const flask = options?.flask
+    // const flask = options?.flask
 
     let returnVal: any;
     let _resolve: (result?: any) => void;
@@ -31,7 +45,8 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
     let pendingCancelOp: PendingCancelOp | null;
     let pendingFlaskCleanup: PendingCancelOp | undefined;
 
-    const _callback = bindFlask(oneTimeCallback, flask === 'outlive' ? null : flask) as CB
+    const _callback = oneTimeCallback as CB
+    // const _callback = bindFlask(oneTimeCallback, flask === 'outlive' ? null : flask) as CB
 
     mapHandlers(_callback, callback);
 
@@ -46,7 +61,7 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
         remove(returnVal ?? _callback);
         if (__DEV__) unmarkNoCleanup(pendingOp);
         if (pendingCancelOp) pendingCancelOp.cancel();
-        if (pendingFlaskCleanup) pendingFlaskCleanup.cancel();
+        else if (pendingFlaskCleanup) pendingFlaskCleanup.cancel();
     }
 
     returnVal = enroll(_callback);
@@ -67,14 +82,14 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
 
     pendingOp.cancel = cancel;
 
-    pendingFlaskCleanup =
-        flask && flask !== 'outlive' ? flask.onDisposal(cancel)
-            : flask === 'outlive' ? undefined
-                : onFlaskDisposal(cancel)
+    if (scheduleCancellation) {
+        pendingCancelOp = scheduleCancellation ? scheduleCancellation(cancel) : null;
+    }
+    else if (scheduleCancellation !== NEVER) {
+        pendingFlaskCleanup = onFlaskDisposal(cancel)
+    }
 
-    pendingCancelOp = scheduleCancellation ? scheduleCancellation(cancel) : null;
-
-    if (__DEV__ && flask !== 'outlive') setUpCleanupWarning!(pendingOp, scheduleCancellation, flask || getFlask())
+    if (__DEV__ && scheduleCancellation !== NEVER) setUpCleanupWarning!(pendingOp, scheduleCancellation, getFlask())
 
     return pendingOp;
 }

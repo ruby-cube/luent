@@ -2,7 +2,6 @@ import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { META } from "../ReactiveEntity";
 import { trigger, triggerIonicAtom } from "../trigger";
-import { asObservedProp, getObservedProp } from "./ObservedProp";
 import { createReactiveTraps, isNonTrackable, toRawIfNeeded, IonicModel, reactiveSetter, storeSnapshot, ionize, registerIonicModel } from "./IonicModel";
 import { triggerReactiveWithMutationOp, UNDEFINED_OP, useGetOp } from "./IonicCapsule";
 import { useClearOp, useDeleteOp } from "./IonicSet";
@@ -13,6 +12,7 @@ import { AnyObject } from "@rue/types";
 import { accessMethod, maybeIonize } from "./IonicObject";
 import { mutatingMapOps, noop } from "@rue/utils";
 import { getProtectedModelMeta } from "./ProtectedIonicModel";
+import { asTrackedProp, getObservedProp } from "./PropIon";
 
 
 
@@ -80,7 +80,7 @@ export function createIonicMap(
             const tracker = getActiveTracker()
             if (!tracker)
                 return _value;
-            tracker.track(asObservedProp(ionicModel, key))
+            tracker.track(asTrackedProp(ionicModel, key))
             return _value;
         },
         set(target, key, value, receiver) {

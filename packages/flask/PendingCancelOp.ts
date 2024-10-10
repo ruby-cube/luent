@@ -1,4 +1,4 @@
-import { bindFlask, getFlask, onFlaskDisposal } from "./EffectFlask";
+import {  getFlask, onFlaskDisposal } from "./EffectFlask";
 
 export type PendingCancelOp = {
     cancel: () => void;

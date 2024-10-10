@@ -1,5 +1,5 @@
 import { Component, suspendRender, Suspense } from "@rue/lumo"
-import { ion } from "@rue/quarky"
+import { Ion } from "@rue/quarky"
 
 
 
@@ -27,7 +27,7 @@ const $TextArea = Suspense({
 })
 
 export function MainSite() {
-    const $count = ion(0)
+    const $count = Ion(0)
     return Component(
         <>
             <h1>Hello World</h1>
@@ -56,7 +56,7 @@ function ListBlock() {
 }
 
 function TextArea() {
-    const $word = ion("not ready")
+    const $word = Ion("not ready")
 
 
     suspendRender(simFetchC("pomp"))
@@ -75,7 +75,7 @@ function TextArea() {
 
 
 function ItemBlockA() {
-    const $word = ion("not ready")
+    const $word = Ion("not ready")
 
     suspendRender(simFetch("calico"))
         .then(word => $word.set(word))
@@ -91,7 +91,7 @@ function run(fn: Function) {
 
 
 function ItemBlockB() {
-    const $word = ion("not ready")
+    const $word = Ion("not ready")
 
     suspendRender(fetch("basset"))
         .then(word =>
@@ -124,7 +124,7 @@ function ItemBlockB() {
 }
 
 function ItemBlockC() {
-    const $word = ion("not ready")
+    const $word = Ion("not ready")
 
     suspendRender(simFetchB("cerulean"))
         .then(word => $word.set(word))
@@ -135,7 +135,7 @@ function ItemBlockC() {
 }
 
 function ItemBlockD() {
-    const $word = ion("not ready")
+    const $word = Ion("not ready")
 
     suspendRender(simLongFetchB("tilted"))              // [promise]
         .then(word => $word.set(word))

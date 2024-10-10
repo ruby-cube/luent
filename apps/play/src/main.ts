@@ -14,7 +14,7 @@ import { MountIf } from './TestMountIf';
 import { TestIonProp } from './TestIonProp';
 import { TestMorphic } from './TestMorphic';
 import { ParentBlock } from './ProvideState';
-import { initializeIonicEffect, ion } from '@rue/quarky';
+import { initializeIonicEffect, Ion } from '@rue/quarky';
 import { TestIonicEffect } from './TestIonicEffect';
 // import { ionize, ionize } from '@rue/quarky';
 // import { DeepReactiveModel, asMetaIonicModel, ionize, ionize } from '@rue/quarky';
@@ -46,7 +46,7 @@ app.mount('#app')
 // function doSomething() {
 //     const dynamicNode = makeDynamicNode(false)
 //     const unrelated = true;
-//     const $count = ion(0)
+//     const $count = Ion(0)
 //     function increment() {
 //         $count.set(c => c + 1)
 //     }

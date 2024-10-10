@@ -70,11 +70,11 @@ function createTrackedOp(
 ){
     const metaIonicModel = asMetaIonicModel(model);
     const trackedOp = new TrackedOp(metaIonicModel, op, key)
-    metaIonicModel.addObservedEntryKey(key)
+    metaIonicModel.addWatchedEntryKey(key)
     const atom = asIonicAtom(trackedOp);
     atom.onUntracked(() => {
         if (atom.derivations.size === 0) {
-            metaIonicModel.deleteObservedEntryKey(key)
+            metaIonicModel.deleteWatchedEntryKey(key)
             trackedOp.destroy()
         }
     })

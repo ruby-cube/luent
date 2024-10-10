@@ -1,4 +1,4 @@
-import { ion, isAnyIon, isIonicModel, Ion, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "../../../quarky/src";
+import { Ion, isAnyIon, isIonicModel, Ion, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "../../../quarky/src";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
@@ -79,7 +79,7 @@ export class ListRenderKit<T = any> {
 
         pushList(this);
         for (let i = 0; i < _list.length; i++) {
-            const $index = ion(i)
+            const $index = Ion(i)
             const item = _list[i]
             // currentItem = item;
             $currentIndex = $index;
@@ -202,7 +202,7 @@ export class ListRenderKit<T = any> {
 
             if (isNewItem(uItem)) {
                 const item = getOriginalItem(uItem, newUArray)
-                const $index = ion(i)
+                const $index = Ion(i)
                 setCurrentIndex($index); // to retreive config
                 newIndices.push($index);
                 // create and collect consecutive new items onto the same fragment

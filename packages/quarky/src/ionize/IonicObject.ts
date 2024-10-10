@@ -3,12 +3,12 @@ import { isNonTrackable, isIonicModel, IonicModel, reactiveSetter, toRaw, ionize
 import { META } from "../ReactiveEntity";
 import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
-import { asObservedProp } from "./ObservedProp";
 import { MetaIonicModel, IONIC_MODEL } from "./MetaIonicModel";
 import { isAnyIon } from "../ion/AnyIon";
 import { getProtectedModelMeta, isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
 import { protect } from "../protect";
 import { READONLY } from "../ion/ProtectedIon";
+import { asTrackedProp } from "./PropIon";
 
 export function isIonicObject(value: any): value is IonicModel {
     if (!isIonicModel(value)) return false;
@@ -103,7 +103,7 @@ export function createIonicObject(
                 // if (isAnyIon(value)) return value();
                 return _value;
             }
-            tracker.track(asObservedProp(ionicModel, key));
+            tracker.track(asTrackedProp(ionicModel, key));
             return _value;
         },
         set(target, key, value, receiver) {

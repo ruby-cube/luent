@@ -1,6 +1,6 @@
 import { DependencyTracker, getActiveTracker, getDependencyTracker } from "./DependencyTracker";
 import { asIonicAtom, IonicAtom, ReactivePrimitive } from "./IonicAtom";
-import { asWatchTarget, isWatched, WatchTarget } from "../effects/WatchTarget";
+import { asWatchSubject, isWatched, WatchSubject } from "../effects/WatchSubject";
 import { ReactiveEntity } from "../ReactiveEntity";
 import { IonicModel, isIonicModel, toRaw } from "../ionize/IonicModel";
 import { isAnyIon } from "../ion/AnyIon";
@@ -35,7 +35,7 @@ export class IonicDerivation<T = any> implements ReactiveEntity {
         this.markDirty()
         const o = this.o
         if (isWatched(o)) {
-            asWatchTarget(o).triggerEffects();
+            asWatchSubject(o).triggerEffects();
         }
     }
 
@@ -84,14 +84,11 @@ function collectAbsorbedIons(ionicModel: IonicModel, tracker: DependencyTracker)
     const target = toRaw(ionicModel);
     for (const key in target) {
         const value = target[key]
-        if (isIon(value)) {
+        if (isIon(value) || isPropIon(value)) {
             tracker.track(value)
         }
         else if (isDerivedIon(value)) {
             tracker.callToCollectDependencies(value)
-        }
-        else if (isPropIon(value)) {
-            tracker.track(asMetaIon(value).asObservedProp)
         }
     }
     return tracker.deps

@@ -1,5 +1,5 @@
 import { setImmediate, clearImmediate } from "@rue/thread";
-import { $schedule, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
+import { $schedule, LIFETIME, NEVER, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
 import { SetMap } from "@rue/utils";
 import { MutationRecord } from "./deepWatch";
 import { asMetaIonicModel, IonicModel } from "../ionize/IonicModel";
@@ -214,9 +214,9 @@ export class RenderCycle {
 
 
 function createRenderCycleHook(phase: Phase) {
-    return (task: () => void, options?: { cancel?: ScheduleCancel; __devName?: string }) => {
-        const _options = <SchedulerOptions>options || { flask: '' }
-        _options.flask = 'outlive'
+    return (task: () => void, options?: SchedulerOptions) => {
+        const _options = options || { cancel: null }
+        _options.cancel = null
         const renderCycle = useRenderCycle()
         return $schedule(task, _options, {
             enroll(task) {

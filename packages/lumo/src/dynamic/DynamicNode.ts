@@ -1,10 +1,10 @@
-import { collectEffects, EffectFlask } from "@rue/flask";
+import { $schedule, collectEffects, EffectFlask, SchedulerOptions } from "@rue/flask";
 import { _NodePod } from "../node/NodePod";
-import { LifecycleHook } from "./lifecycle";
+import { createLifecycleHook, LifecycleHook } from "./lifecycle";
 import { popDynamicNode, pushDynamicNode } from "./nodestack";
 import { SetMap } from "@rue/utils";
 
-type Task = ()=>void
+type Task = () => void
 
 export class DynamicNode {
     flask: EffectFlask | undefined;
@@ -35,7 +35,7 @@ export class DynamicNode {
             task();
         }
     }
-    
+
     activate(render: () => void) {
         pushDynamicNode(this);
         collectEffects((flask) => {
@@ -84,6 +84,30 @@ export class DynamicNode {
         this.parent = null
         //TODO: clear or null all tasks??
     }
+
+    onCreated?: (cb: () => void, options?: SchedulerOptions) => void
+    onDestroy?: (cb: () => void, options?: SchedulerOptions) => void
+
+    initializeOnCreatedHook() {
+        return this.onCreated = (handler: () => void, options?: SchedulerOptions) => on(LifecycleHook.ON_CREATED, this, handler, options)
+    }
+
+    initializeOnDestroyHook() {
+        return this.onDestroy = (handler: () => void, options?: SchedulerOptions) => on(LifecycleHook.ON_DESTROY, this, handler, options)
+    }
+}
+
+function on(hookName: LifecycleHook, node: DynamicNode, handler: () => void, options?: SchedulerOptions) {
+    const tasks = node.tasks
+
+    return $schedule(handler, options || {}, {
+        enroll(handler) {
+            tasks.addToSet(handler, hookName)
+        },
+        remove(handler) {
+            tasks.deleteFromSet(handler, hookName)
+        }
+    });
 }
 
 export const NULLISH_DYNAMIC_NODE = new DynamicNode(null)

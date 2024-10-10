@@ -57,7 +57,7 @@ export function provide<T>(key: TypedKey<T>, value: T) {
     const component = getActiveComponent();
     if (!component) throw new Error(`The 'provide()' function can only be called synchronously within component setup`)
     component.initializeAsProvider()
-    component.entries!.set(key, value);
+    component.addEntry(key, value);
     return value;
 }
 

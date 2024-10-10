@@ -18,7 +18,7 @@ export enum LifecycleHook {
 
 
 
-function createLifecycleHook(name: LifecycleHook.ON_DESTROY | LifecycleHook.ON_CREATED) {
+export function createLifecycleHook(name: LifecycleHook.ON_DESTROY | LifecycleHook.ON_CREATED) {
     return function on(handler: () => void, options?: SchedulerOptions, _node?: DynamicNode) {
         const node = _node || getActiveDynamicNode();
         const tasks = node.tasks
@@ -38,7 +38,7 @@ function createActivationHook(name: LifecycleHook.ON_ACTIVATED | LifecycleHook.O
     return function on(handler: () => void, options: ListenerOptions = {}, _node?: DynamicNode) {
         const node = _node || getActiveDynamicNode();
         const tasks = node.tasks
-        return $listen(handler, { until: (cleanUp) => onDestroy(cleanUp, {}, node), flask: 'outlive', ...options }, {
+        return $listen(handler, { until: (cleanUp) => onDestroy(cleanUp, {}, node), ...options }, { //TODO: not sure about this
             enroll(handler) {
                 tasks.addToSet(handler, name)
             },

@@ -1,30 +1,30 @@
 import { asIonicAtom, isIonicAtom, ReactivePrimitive } from "./derivations/IonicAtom";
 import { asMetaIonicModel, IonicModel, toRaw } from "./ionize/IonicModel";
 import { Ion, MetaIon } from "./ion/Ion";
-import { ObservedProp, toPropIon } from "./ionize/ObservedProp";
-import { asWatchTarget, isWatched } from "./effects/WatchTarget";
+import { asWatchSubject, isWatched } from "./effects/WatchSubject";
 import { getCurrentRenderCycle } from "./effects/RenderCycle";
 import { getWithoutTracking } from "./derivations/DependencyTracker";
 import { isIonicEffectAtom } from "./derivations/IonicEffect";
-import { isCurrentWatchTarget } from "./effects/watch";
+import { isCurrentWatchSubject } from "./effects/watch";
+import { PropIon } from "./ionize/PropIon";
 
 
-export function trigger(target: Ion | ObservedProp, newValue?: any, oldValue?: any) {
+export function trigger(target: Ion | PropIon, newValue?: any, oldValue?: any) {
     if (__DEV__ && getCurrentRenderCycle() && getCurrentRenderCycle()!.phase > 1)
         console.warn(`CASE RESEARCH: Reactive entity triggered during phase ${getCurrentRenderCycle()!.phase}:`, target, getWithoutTracking(target))
 
     // prevent infinite loops for synchronous effects
-    if (isIonicEffectAtom(target) || isCurrentWatchTarget(target))
+    if (isIonicEffectAtom(target) || isCurrentWatchSubject(target))
         return;
 
-    const propPod = toPropIon(target)
+    // const propPod = toPropIon(target)
 
-    if (propPod && isWatched(target)) {
-        asWatchTarget(propPod).triggerEffects()
-    }
+    // if (propPod && isWatched(target)) {
+    //     asWatchSubject(propPod).triggerEffects()
+    // }
 
     if (isWatched(target)) {
-        asWatchTarget(target).triggerEffects()
+        asWatchSubject(target).triggerEffects()
     }
     triggerIonicAtom(target, newValue, oldValue)
 }
@@ -36,5 +36,5 @@ export function triggerIonicAtom(target: ReactivePrimitive, newValue?: any, oldV
 }
 
 export function triggerIonicModel(reactive: IonicModel) {
-    asWatchTarget(reactive).triggerEffects()
+    asWatchSubject(reactive).triggerEffects()
 }

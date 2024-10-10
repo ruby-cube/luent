@@ -1,5 +1,5 @@
 import { Else, ElseIf, If } from "@rue/lumo"
-import { ion } from "../../../packages/quarky/src"
+import { Ion } from "../../../packages/quarky/src"
 
 export function ConditionalFlaskTest() {
     return (
@@ -11,7 +11,7 @@ export function ConditionalFlaskTest() {
 }
 
 function ComponentA() {
-    const $pending = ion(true);
+    const $pending = Ion(true);
 
     setTimeout(() => {
         $pending.set(false)
@@ -26,8 +26,8 @@ function ComponentA() {
 }
 
 function ComponentB() {
-    const $pending = ion(true);
-    const $error = ion(false);
+    const $pending = Ion(true);
+    const $error = Ion(false);
 
     setTimeout(() => {
         $pending.set(false)

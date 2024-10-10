@@ -89,18 +89,18 @@ export function collectEffects<T>(run: (flask: EffectFlask, outerFlask: EffectFl
 }
 
 
-export function bindFlask(callback: Callback, flask: EffectFlask | null = getFlask()) {
-    if (flask) {
-        function callbackBoundToFlask(...args: any[]) {
-            pushFlask(flask!)
-            const output = callback(...args);
-            popFlask();
-            return output;
-        }
-        return callbackBoundToFlask
-    }
-    return callback;
-}
+// export function bindFlask(callback: Callback, flask: EffectFlask | null = getFlask()) {
+//     if (flask) {
+//         function callbackBoundToFlask(...args: any[]) {
+//             pushFlask(flask!)
+//             const output = callback(...args);
+//             popFlask();
+//             return output;
+//         }
+//         return callbackBoundToFlask
+//     }
+//     return callback;
+// }
 
 // USAGE: 
 // collectEffects((flask, outerFlask) => {

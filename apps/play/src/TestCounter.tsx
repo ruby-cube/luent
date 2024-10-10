@@ -6,10 +6,10 @@
 // - derived signal in template
 // - derived signal with memo
 
-import { $, ionize, ion } from "../../../packages/quarky/src"
+import { $, ionize, Ion } from "../../../packages/quarky/src"
 
 export function TestCounterSignals() {
-    const $count = ion(0)
+    const $count = Ion(0)
     const $doubleCount = $(() => $count() * 2)
 
     function increment() {

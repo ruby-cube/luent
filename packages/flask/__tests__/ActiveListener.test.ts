@@ -28,7 +28,7 @@ describe("ActiveListener", () => {
             options: {},
         };
         vi.mocked(onFlaskDisposal).mockImplementation(vi.fn());
-        vi.mocked(bindFlask).mockImplementation(cb => cb);
+        // vi.mocked(bindFlask).mockImplementation(cb => cb);
         vi.mocked(getFlask).mockImplementation(() => ({} as EffectFlask));
     });
 

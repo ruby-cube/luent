@@ -1,28 +1,28 @@
 import { NodeRef, Component, If, Else, stopPropagation, watch } from "@rue/lumo";
-import { AFTER_RENDER, BEFORE_RENDER, ion, ON_RENDER, SYNC } from "@rue/quarky";
+import { AFTER_RENDER, BEFORE_RENDER, Ion, ON_RENDER, SYNC } from "@rue/quarky";
 
 export function MountIf() {
-    const $count = ion(0, {
+    const $count = Ion(0, {
         increment() {
             $count.set($count() + 1)
         }
     })
     // const $doubleCount = DerivedIon(() => $count() * 2)
 
-    // const $count2 = ion(0)
+    // const $count2 = Ion(0)
     // const $sum = $(() => $count() + $count2())
     // function increment2() {
     //     $count2.update(count => count + 1)
     // }
 
 
-    const $active = ion(true, {
+    const $active = Ion(true, {
         toggle() {
             $active.set(!$active())
         }
     })
 
-    // const $ready = ion(true)
+    // const $ready = Ion(true)
     // function toggleReady() {
     //     $ready.update(ready => !ready)
     // }
@@ -55,7 +55,7 @@ export function MountIf() {
 
 function Counter() {
     const _this = $thisComponent()
-    const $count = ion(0)
+    const $count = Ion(0)
 
     const $button = NodeRef('button')
     const $countDiv = NodeRef('div')
@@ -114,4 +114,4 @@ function Counter() {
 }
 
 
-// slot: renderfunction, component, readonly ion, primitive value
+// slot: renderfunction, component, readonly Ion, primitive value

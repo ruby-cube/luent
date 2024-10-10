@@ -6,7 +6,7 @@ import { timeTraveler } from "./TimeTraveler";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
 import { useRenderCycle } from "../effects/RenderCycle";
 import { MutationRecord } from "../effects/deepWatch";
-import { isWatched } from "../effects/WatchTarget";
+import { isWatched } from "../effects/WatchSubject";
 import { META } from "../ReactiveEntity";
 import { createIonicArray, createIonicTuple } from "./IonicArray";
 import { createIonicSet } from "./IonicSet";
@@ -263,14 +263,14 @@ const trackableSetOps = {
 //     const metaIonicModel = reactive[META]
 //     const isIndex = toRaw(metaIonicModel) instanceof Array && isIntegerKey(key)
 //     if (isIndex) {
-//         (<MetaIonicCollection>metaIonicModel).addObservedEntryKey(key)
+//         (<MetaIonicCollection>metaIonicModel).addWatchedEntryKey(key)
 //     }
 //     // clean up
 //     const prop = asObservedProp(reactive, key)
-//     const watchTarget = asWatchTarget(prop)
-//     watchTarget.onUnwatched(() => {
+//     const watchSubject = asWatchSubject(prop)
+//     watchSubject.onUnwatched(() => {
 //         unobserve(prop, isIndex ? () => {
-//             (<MetaIonicCollection>metaIonicModel).deleteObservedEntryKey(key)
+//             (<MetaIonicCollection>metaIonicModel).deleteWatchedEntryKey(key)
 //         } : undefined)
 //     })
 //     return prop;
@@ -278,9 +278,9 @@ const trackableSetOps = {
 
 
 // function unobserve(prop: ObservedProp) {
-//     const watchTarget = asWatchTarget(prop)
+//     const watchSubject = asWatchSubject(prop)
 //     const atom = asIonicAtom(prop)
-//     if (watchTarget.watchCount === 0 && atom.derivations.size === 0) {
+//     if (watchSubject.watchCount === 0 && atom.derivations.size === 0) {
 //         prop.destroy()
 //     }
 // }

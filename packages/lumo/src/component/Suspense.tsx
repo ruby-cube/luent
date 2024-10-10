@@ -1,4 +1,4 @@
-import { ion, __addDevName } from "../../../quarky/src";
+import { Ion, __addDevName } from "../../../quarky/src";
 import { Else, ElseIf, If } from "../conditional/If";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { Component, ComponentSetup } from "./InternalComponent";
@@ -34,9 +34,9 @@ export function Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | P
     const _config = config || promiseValueOrConfig as PendConfig
     const promise = config ? promiseValueOrConfig as Promise<any> : undefined;
     const { Pending, Error, Placeholder, timeout } = _config;
-    const $pending = ion(true);
-    const $error = ion("");
-    const $ready = ion(false);
+    const $pending = Ion(true);
+    const $error = Ion("");
+    const $ready = Ion(false);
     if (__DEV__) __addDevName($pending, "$pending");
 
     function collectPromises(props: AnyObject) {

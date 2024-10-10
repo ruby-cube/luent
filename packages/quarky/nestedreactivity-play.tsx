@@ -19,8 +19,8 @@ const $frog = ionize({
 
 const $tripleCount = () => $count() * 3 // derived without memoization
 
-const $count = ion(0)
-const $doubleCount = derivedIon(() => $count() * 2) // memoized derived with option to retrack and method to untrack .. should retrack just be the default behavior?
+const $count = Ion(0)
+const $doubleCount = DerivedIon(() => $count() * 2) // memoized derived with option to retrack and method to untrack .. should retrack just be the default behavior?
 
 const counter = ionize({
     $count,
@@ -34,7 +34,7 @@ const $frogName = asPropIon($frog, 'name')
 
 watch(PropsIon($frog, ['name', 'store']))
 
-watch(derivedIon(() => $count() * 2), (doubleCount, prev) => {   // if retrack is the default, why not just pass functions? it looks cleaner
+watch(DerivedIon(() => $count() * 2), (doubleCount, prev) => {   // if retrack is the default, why not just pass functions? it looks cleaner
 
 })
 
@@ -113,7 +113,7 @@ function ListBlock(attributes: {
     }
 
 
-    const $count = ion(0) // $SettableGet<number>
+    const $count = Ion(0) // $SettableGet<number>
 
     const $list = ionize([1, 2, 3]);
 
@@ -123,13 +123,13 @@ function ListBlock(attributes: {
 
     const $frog = IonicModel(frog)
 
-    const $frog = ion(IonicModel({
+    const $frog = Ion(IonicModel({
         a: "djjf",
         bouat: 0,
         cucumber
     }))
 
-    const $frog = ion(ionicModel({
+    const $frog = Ion(ionicModel({
         a: "djjf",
         bouat: 0,
         cucumber
@@ -158,7 +158,7 @@ function ListBlock(attributes: {
 
     //-----
 
-    const $count = ion(0) // $SettableGet<number>
+    const $count = Ion(0) // $SettableGet<number>
 
     quarky.registerIonizableClass(Frog)
 
@@ -179,13 +179,13 @@ function ListBlock(attributes: {
 
     const list$ = ionize([1, 2, 3]);
 
-    const $doubleCount = derivedIon(() => $count * 2) // Get<number>
+    const $doubleCount = DerivedIon(() => $count * 2) // Get<number>
 
     const $frog = ionize(frog)
 
-    const $frog = ion(ionize(frog))
+    const $frog = Ion(ionize(frog))
 
-    const $frog = ion(ionize(frog))
+    const $frog = Ion(ionize(frog))
 
     const $frog = ionize(new Frog())
 

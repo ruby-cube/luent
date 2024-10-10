@@ -17,7 +17,16 @@ export type Ion<T = any, M extends AnyObject = {}> = {
 
 
 // export type ReactiveGet<T = any> = () => T
-export type Get<T = any> = () => T
+// export type Get<T = any> = () => T
+
+type ReactiveIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? Ion<T, M> : Ion<T>
+
+// API
+export function Ion<T, M>(value: T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveIon<T, M> {
+    if (isAnyIon(value)) throw new Error('INVALID INPUT: Ions cannot be made into ions')
+    return createIon(value, methods) as  ReactiveIon<T, M>
+}
+
 
 export const ION = Symbol('atomicIon');
 
@@ -38,7 +47,7 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
 }
 
 
-export function Ion<
+export function createIon<
     T,
     M extends { [key: string]: (...args: any[]) => any }
 >(

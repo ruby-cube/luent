@@ -3,7 +3,6 @@ import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { META } from "../ReactiveEntity";
 import { trigger, triggerIonicAtom } from "../trigger";
-import { asObservedProp, getObservedProp } from "./ObservedProp";
 import { isNonTrackable, toRawIfNeeded, IonicModel, storeSnapshot, ionize, registerIonicModel, reactiveSetter } from "./IonicModel";
 import { triggerReactiveWithMutationOp, useGetOp } from "./IonicCapsule";
 import { getTrackedOp } from "./TrackedOp";
@@ -12,6 +11,7 @@ import { isAnyIon } from "../ion/AnyIon";
 import { accessMethod, maybeIonize } from "./IonicObject";
 import { getProtectedModelMeta } from "./ProtectedIonicModel";
 import { mutatingSetOps } from "@rue/utils";
+import { asTrackedProp, getObservedProp } from "./PropIon";
 
 
 export function createIonicSet(
@@ -85,7 +85,7 @@ export function createIonicSet(
             const tracker = getActiveTracker()
             if (!tracker)
                 return _value;
-            tracker.track(asObservedProp(ionicModel, key))
+            tracker.track(asTrackedProp(ionicModel, key))
             return _value;
         },
         set(target, key, value, receiver) {

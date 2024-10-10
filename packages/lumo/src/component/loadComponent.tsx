@@ -1,7 +1,7 @@
 import { ComponentSetup } from "./InternalComponent";
 import { Else, ElseIf, If } from "../conditional/If";
 import { noop } from "@rue/utils";
-import { ion } from "../../../quarky/src";
+import { Ion } from "../../../quarky/src";
 
 const lazyComponents: Map<() => Promise<ComponentSetup>, ComponentSetup> = new Map()
 
@@ -13,9 +13,9 @@ export function lazyLoadComponent<P>(config: {
     Error?: ComponentSetup<{ error: any }>,
 }) { //TODO: Idle load priorities
     const { load, Error, Placeholder, timeout, onIdle } = config;
-    const $loading = ion(true);
-    const $error = ion("");
-    const $loaded = ion(false);
+    const $loading = Ion(true);
+    const $error = Ion("");
+    const $loaded = Ion(false);
     let idleID: number | undefined;
     if (onIdle) {
         idleID = requestIdleCallback(() => {

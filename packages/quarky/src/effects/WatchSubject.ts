@@ -6,9 +6,9 @@ import { getDependencyTracker } from "../derivations/DependencyTracker";
 
 type Watchable = any
 
-const watchTargetMap: WeakMap<Watchable, WatchTarget> = new WeakMap()
+const watchTargetMap: WeakMap<Watchable, WatchSubject> = new WeakMap()
 
-export class WatchTarget<T extends Watchable = Watchable> {
+export class WatchSubject<T extends Watchable = Watchable> {
 
     constructor(public target: T) {
         this.effects = new SetMap()
@@ -118,10 +118,10 @@ export function isWatched(target: Watchable | null | undefined) {
     return Boolean(watchTargetMap.get(target));
 }
 
-export function asWatchTarget(target: Watchable): WatchTarget {
-    let watchTarget = watchTargetMap.get(target)
-    if (!watchTarget) {
-        watchTarget = new WatchTarget(target)
+export function asWatchSubject(target: Watchable): WatchSubject {
+    let watchSubject = watchTargetMap.get(target)
+    if (!watchSubject) {
+        watchSubject = new WatchSubject(target)
     }
-    return watchTarget;
+    return watchSubject;
 }
