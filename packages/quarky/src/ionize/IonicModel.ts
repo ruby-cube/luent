@@ -5,7 +5,7 @@ import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { IonicModel, storeSnapshot } from "./ionize";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import {  MetaIonicModel } from "./MetaIonicModel";
+import { MetaIonicModel } from "./MetaIonicModel";
 import { noop } from "@rue/utils";
 import { getProtectedModelMeta, isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
 import { META } from "../ReactiveEntity";
@@ -37,7 +37,7 @@ export function useTrackableGetOp(
 
 
 // a `trackable op` is a method like 'find' or 'filter' that tracks the entire ionic model as a watch subject rather than a specific entry or property
-export function useTrackableOp(){
+export function useTrackableOp() {
     //TODO: see if people would find this useful
 }
 
@@ -280,12 +280,12 @@ function isMutatingOps(key: PropertyKey, structureKeys: any[]) {
 }
 
 
-function createBoundMethodMap(structureKeys: any[], target: AnyObject, ionicModel: IonicModel, meta: MetaIonicModel ) {
-
+function createBoundMethodMap(structureConfigs: CustomIonicModelConfig[], target: AnyObject, ionicModel: IonicModel, meta: MetaIonicModel) {
     const methodMap = new Map()
+    if (structureConfigs[0].structure === Object) return methodMap;
 
-    for (const key in structureKeys) {
-        const mutatingOps = customIonicStructureMap.get(key)?.mutatingOps
+    for (const config of structureConfigs) {
+        const mutatingOps = config.mutatingOps
         if (!mutatingOps) continue;
         for (const opKey in mutatingOps) {
             const createOp = mutatingOps[opKey].createOp
@@ -294,8 +294,8 @@ function createBoundMethodMap(structureKeys: any[], target: AnyObject, ionicMode
         }
     }
 
-    for (const key in structureKeys) {
-        const trackableOps = customIonicStructureMap.get(key)?.trackableOps
+    for (const config of structureConfigs) {
+        const trackableOps = config.trackableOps
         if (!trackableOps) continue;
         for (const opKey in trackableOps) {
             const createOp = trackableOps[opKey]
@@ -398,14 +398,7 @@ export function reactiveSetter(
     return true;
 }
 
-// function getTrackedOp(ionicModel: IonicModel, key: PropertyKey, structureConfigs: any[]) {
-//     for (const structures of structureConfigs) {
-//         const trackableOps = customIonicStructureMap.get(structures)?.trackableOps
-//         if (trackableOps) {
 
-//         }
-//     }
-// }
 
 export function setAbsorbedIon(ion: AnyIon, value: any, ionicModel: IonicModel, key: PropertyKey, oldValue: any, structureConfigs: CustomIonicModelConfig[]) {
     if ('set' in ion) {
