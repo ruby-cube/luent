@@ -1,5 +1,5 @@
 import { emitSignal } from "../debug";
-import { isIonicModel, ionize } from "../ionize/IonicModel";
+import { isIonicModel, ionize } from "../ionize/ionize";
 import { getActiveTracker, getDependencyTracker, getWithoutTracking } from "../derivations/DependencyTracker";
 import { trigger } from "../trigger";
 import { META, ReactiveEntity } from "../ReactiveEntity";

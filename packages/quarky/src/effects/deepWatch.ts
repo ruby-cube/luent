@@ -1,5 +1,5 @@
 import { Ion } from "../ion/Ion";
-import {  isIonicModel, IonicModel, toRaw } from "../ionize/IonicModel";
+import {  isIonicModel, IonicModel, toRaw } from "../ionize/ionize";
 import { isIonicObject } from "../ionize/IonicObject";
 import { AnyObject } from "@rue/types";
 import { PropIon } from "../ionize/PropIon";
@@ -7,33 +7,33 @@ import { PropIon } from "../ionize/PropIon";
 export type KeyPath = PropertyKey[]
 
 
-export type MutationRecord = {
-    target: IonicModel | Ion | PropIon,
-    // root?: IonicModel,
-    // targetPath?: KeyPath, // undefined means the target is the root watched model
-    op: MutationOp | SetOp
-}
+// export type MutationRecord = {
+//     target: IonicModel | Ion | PropIon,
+//     // root?: IonicModel,
+//     // targetPath?: KeyPath, // undefined means the target is the root watched model
+//     op: MutationOp | SetOp
+// }
 
-export type MutationOp = {
-    type: string,
-    args: any[],
-    output: any
-}
+// export type MutationOp = {
+//     type: string,
+//     args: any[],
+//     output: any
+// }
 
-export type SetOp = {
-    type: '[[set]]' | 'set' | 'add' | 'delete',
-    key?: string | symbol,
-    newValue: any,
-    oldValue: any
-}
+// export type SetOp = {
+//     type: '[[set]]' | 'set' | 'add' | 'delete',
+//     key?: string | symbol,
+//     newValue: any,
+//     oldValue: any
+// }
 
-export function isMutationOp(op: AnyObject): op is MutationOp {
-    return "op" in op;
-}
+// export function isMutationOp(op: AnyObject): op is MutationOp {
+//     return "op" in op;
+// }
 
-export function isSetOp(op: AnyObject): op is SetOp {
-    return 'key' in op;
-}
+// export function isSetOp(op: AnyObject): op is SetOp {
+//     return 'key' in op;
+// }
 
 // Watch API for mutations
 

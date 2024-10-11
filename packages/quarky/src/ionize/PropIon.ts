@@ -1,5 +1,5 @@
 import { AnyObject, ReadonlyKeys } from "@rue/types";
-import { asMetaIonicModel, isIonicModel, ionize, IonicModel, toRaw } from "./IonicModel";
+import { asMetaIonicModel, isIonicModel, ionize, IonicModel, toRaw } from "./ionize";
 import { META } from "../ReactiveEntity";
 import { isAnyIon } from "../ion/AnyIon";
 import { protectedMethod, protectIon, READONLY } from "../ion/ProtectedIon";

@@ -5,7 +5,7 @@
 import { asIonicAtom } from "../derivations/IonicAtom";
 import { META } from "../ReactiveEntity";
 import { Collection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
-import { asMetaIonicModel, IonicModel } from "./IonicModel";
+import { asMetaIonicModel, IonicModel } from "./ionize";
 
 // This module creates a unique tuple for reactive prop so that reactive props can be used as unique keys in maps
 

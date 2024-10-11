@@ -2,19 +2,17 @@ import { SetMap } from "@rue/utils";
 import { Task, onRenderCycleComplete, Phase, useRenderCycle } from "./RenderCycle";
 // import { runEffect } from "./watch";
 import { getDependencyTracker } from "../derivations/DependencyTracker";
-import { isPropIon } from "../ionize/PropIon";
-import { asMetaIon } from "../ion/Ion";
 
 
 type Watchable = any
 
-const watchTargetMap: WeakMap<Watchable, WatchSubject> = new WeakMap()
+const watchSubjectMap: WeakMap<Watchable, WatchSubject> = new WeakMap()
 
 export class WatchSubject<T extends Watchable = Watchable> {
 
     constructor(public target: T) {
         this.effects = new SetMap()
-        watchTargetMap.set(target, this)
+        watchSubjectMap.set(target, this)
     }
 
     watchCount = 0
@@ -64,7 +62,7 @@ export class WatchSubject<T extends Watchable = Watchable> {
         this.removeEffect(effect, phase)
         this.watchCount--
         if (this.watchCount === 0) {
-            watchTargetMap.delete(this.target)
+            watchSubjectMap.delete(this.target)
         }
 
         this.emitUnwatched()
@@ -117,11 +115,11 @@ export class WatchSubject<T extends Watchable = Watchable> {
 
 export function isWatched(target: Watchable | null | undefined) {
     if (!target) return false;
-    return Boolean(watchTargetMap.get(target));
+    return Boolean(watchSubjectMap.get(target));
 }
 
 export function asWatchSubject(target: Watchable): WatchSubject {
-    let watchSubject = watchTargetMap.get(target)
+    let watchSubject = watchSubjectMap.get(target)
     if (!watchSubject) {
         watchSubject = new WatchSubject(target)
     }

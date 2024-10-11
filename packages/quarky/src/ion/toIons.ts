@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { toRaw } from "../ionize/IonicModel";
+import { toRaw } from "../ionize/ionize";
 import { AnyIon, isAnyIon, ref } from "./AnyIon";
 
 type MaybeIon<T> = ReadonlyIon<T> | T

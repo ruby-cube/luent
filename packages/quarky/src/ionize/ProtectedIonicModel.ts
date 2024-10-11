@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { READONLY } from "../ion/ProtectedIon";
-import { asMetaIonicModel, IonicModel } from "./IonicModel";
+import { asMetaIonicModel, IonicModel } from "./ionize";
 import { mO } from "@rue/lumo";
 
 

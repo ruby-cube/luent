@@ -1,8 +1,8 @@
 import { ActiveListener } from "@rue/flask";
 import { ReactiveGet } from "../derivations/DerivedIon";
-import { ionize, IonicModel, isIonicModel, toRaw } from "../ionize/IonicModel";
+import { ionize, IonicModel, isIonicModel, toRaw } from "../ionize/ionize";
 import { ChangeEffect, isMutationOp, MutationEffect, watch, WatchOptions } from "./watch";
-import { insertOps } from "../ionize/IonicCapsule";
+import { insertOps } from "../ionize/IonicModel";
 import { isIntegerKey } from "../ionize/IonicArray";
 import { AnyObject } from "@rue/types";
 import { shallowClone } from "../ionize/TimeTraveler";
@@ -43,39 +43,37 @@ export function watchItems<T extends ReactiveGet | IonicModel>(
     // watch new items, unwatch deleted items
     const listWatcher = watch(reactiveList, (_, mutations) => {
         for (const mutation of mutations) {
-            const op = mutation.op;
-            if (isMutationOp(op)) {
-                const { args, type, output } = op
-                switch (type) {
-                    case 'push':
-                    case 'unshift':
-                    case 'fill':
-                        watchNewItems(args, effect, _options, watchers, reactiveList)
-                        break;
+            const { args, op, output, preopData } = mutation
+            switch (op) {
+                case 'push':
+                case 'unshift':
+                case 'fill':
+                    watchNewItems(args, effect, _options, watchers, reactiveList)
+                    break;
 
-                    case 'pop':
-                    case 'shift':
-                        unwatchItem(toRaw(output), watchers)
-                        break;
+                case 'pop':
+                case 'shift':
+                    unwatchItem(toRaw(output), watchers)
+                    break;
 
-                    case 'splice':
-                        unwatchItems(output, watchers)
-                        watchNewItems(args.slice(insertOps.splice.from), effect, _options, watchers, reactiveList)
-                        break;
+                case 'splice':
+                    unwatchItems(output, watchers)
+                    watchNewItems(args.slice(insertOps.splice.from), effect, _options, watchers, reactiveList)
+                    break;
 
-                    default:
-                        break;
-                }
-            }
-            else {
-                const { key, newValue, oldValue } = op
-                if (key === 'length' && newValue === 0) {
-                    unwatchAll(watchers)
-                }
-                else if (isIntegerKey(key)) {
-                    watchNewItem(newValue, effect, _options, watchers, reactiveList)
-                    unwatchItem(oldValue, watchers)
-                }
+                case '[[set]]':
+                    const [key, newValue] = args;
+                    const oldValue = preopData;
+                    if (key === 'length' && newValue === 0) {
+                        unwatchAll(watchers)
+                    }
+                    else if (isIntegerKey(key)) {
+                        watchNewItem(newValue, effect, _options, watchers, reactiveList)
+                        unwatchItem(oldValue, watchers)
+                    }
+
+                default:
+                    break;
             }
         }
     })
@@ -162,33 +160,30 @@ export function watchCollectionValues<T extends ReactiveGet | IonicModel>(
     // watch new items, unwatch deleted items
     const collectionWatcher = watch(reactiveCollection, (_, mutations) => {
         for (const mutation of mutations) {
-            const op = mutation.op;
-            if (isMutationOp(op)) {
-                const { args, type } = op
-                switch (type) {
-                    case 'add':
-                        if (collection instanceof Map) break;
-                        watchNewItem(args[0], effect, _options, watchers, reactiveCollection)
-                        break;
+            const { args, op } = mutation
+            switch (op) {
+                case 'add':
+                    if (collection instanceof Map) break;
+                    watchNewItem(args[0], effect, _options, watchers, reactiveCollection)
+                    break;
 
-                    case 'set':
-                        if (collection instanceof Set) break;
-                        watchNewItem(args[1], effect, _options, watchers, reactiveCollection)
-                        break;
+                case 'set':
+                    if (collection instanceof Set) break;
+                    watchNewItem(args[1], effect, _options, watchers, reactiveCollection)
+                    break;
 
-                    case 'delete':
-                        const value = collection instanceof Map ? mapSnapshot!.get(args[0]) : args[0]
-                        mapSnapshot?.delete(args[0])
-                        unwatchItem(value, watchers)
-                        break;
+                case 'delete':
+                    const value = collection instanceof Map ? mapSnapshot!.get(args[0]) : args[0]
+                    mapSnapshot?.delete(args[0])
+                    unwatchItem(value, watchers)
+                    break;
 
-                    case 'clear':
-                        unwatchAll(watchers)
-                        break;
+                case 'clear':
+                    unwatchAll(watchers)
+                    break;
 
-                    default:
-                        break;
-                }
+                default:
+                    break;
             }
         }
     })
@@ -233,26 +228,22 @@ export function watchMapKeys<T extends ReactiveGet | IonicModel>(
     // watch new items, unwatch deleted items
     const mapWatcher = watch(reactiveMap, (_, mutations) => {
         for (const mutation of mutations) {
-            const op = mutation.op;
-            if (isMutationOp(op)) {
-                const { args, type } = op
-                switch (type) {
+            const { args, op } = mutation
+            switch (op) {
+                case 'set':
+                    watchNewItem(args[0], effect, _options, watchers, reactiveMap)
+                    break;
 
-                    case 'set':
-                        watchNewItem(args[0], effect, _options, watchers, reactiveMap)
-                        break;
+                case 'delete':
+                    unwatchItem(args[0], watchers)
+                    break;
 
-                    case 'delete':
-                        unwatchItem(args[0], watchers)
-                        break;
+                case 'clear':
+                    unwatchAll(watchers)
+                    break;
 
-                    case 'clear':
-                        unwatchAll(watchers)
-                        break;
-
-                    default:
-                        break;
-                }
+                default:
+                    break;
             }
         }
     })

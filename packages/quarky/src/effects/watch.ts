@@ -5,7 +5,7 @@ import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
 import { ReactiveGet, DerivedIon, isDerivedIon } from "../derivations/DerivedIon";
-import { asMetaIonicModel, isIonicModel, IonicModel, toRaw, } from "../ionize/IonicModel";
+import { asMetaIonicModel, isIonicModel, IonicModel, toRaw, } from "../ionize/ionize";
 import { areEqual } from "./areEqual";
 import { createIonicEffect, IonicEffect } from "../derivations/IonicEffect";
 import { META } from "../ReactiveEntity";
@@ -36,30 +36,10 @@ export type EffectOptions = {
 
 export type MutationRecord = {
     target: IonicModel | Ion | PropIon,
-    // root?: IonicModel,
-    // targetPath?: KeyPath, // undefined means the target is the root watched model
-    op: MutationOp | SetOp
-}
-
-export type MutationOp = {
-    type: string,
+    op: string,
     args: any[],
-    output: any
-}
-
-export type SetOp = {
-    type: '[[set]]' | 'set' | 'add' | 'delete',
-    key?: string | symbol,
-    newValue: any,
-    oldValue: any
-}
-
-export function isMutationOp(op: AnyObject): op is MutationOp {
-    return "op" in op;
-}
-
-export function isSetOp(op: AnyObject): op is SetOp {
-    return 'key' in op;
+    output: any,
+    preopData?: any
 }
 
 

@@ -1,340 +1,381 @@
 import { AnyObject } from "@rue/types";
-import { isObject, ProxyTargetKey } from "@rue/utils";
-import { isTuple } from "./tuple";
-import { getObservedProp } from "./ObservedProp";
-import { timeTraveler } from "./TimeTraveler";
+import { asMetaIonicModel, ionize, registerIonicModel, toRaw } from "./ionize";
+import { emitSignal } from "../debug";
+import { getActiveTracker } from "../derivations/DependencyTracker";
+import { asTrackedOp, getTrackedOp } from "./TrackedOp";
+import { IonicModel, storeSnapshot } from "./ionize";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import { useRenderCycle } from "../effects/RenderCycle";
-import { MutationRecord } from "../effects/deepWatch";
-import { isWatched } from "../effects/WatchSubject";
+import { Collection, isCollection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
+import { noop } from "@rue/utils";
+import { getProtectedModelMeta, isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
 import { META } from "../ReactiveEntity";
-import { createIonicArray, createIonicTuple } from "./IonicArray";
-import { createIonicSet } from "./IonicSet";
-import { createIonicMap } from "./IonicMap";
-import { createIonicObject } from "./IonicObject";
-import { Collection, MetaIonicCollection, MetaIonicModel, IONIC_MODEL } from "./MetaIonicModel";
-import { isInert } from "./inert";
-import { isIonizable } from "./ionizable";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
-import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
-import { Ion } from "../ion/Ion";
-import { PropIon } from "./PropIon";
-import { isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
+import { asTrackedProp, getObservedProp } from "./PropIon";
+import { protect } from "../protect";
+import { READONLY } from "../ion/ProtectedIon";
+
+export const UNDEFINED_OP: Function = noop
 
 
-// The current approach to reactivity depth is that all models are deeply reactive.
-// However, reactivity is applied only to:
-// - object literals that have NOT been marked inert
-// - class instances whose DIRECT prototype has been registered as ionizable
-
-/**
- * Deep and shallow reactives have been deprecated: Since there's a lot of difficulty typing method outputs of deeply reactive objects 
- * (eg. getQualities() should output a reactive object, but typing that requires a lot of boilerplate 
- * by the developer), we cannot mark reactive objects.
- * This means developers must not depend on typescript to know if an object is reactive or not.
- */
-
-//INTERNAL
-export type IonicModel<T extends AnyObject = AnyObject> = T & { readonly [IONIC_MODEL]?: true }
-
-
-export type Readonly<T extends AnyObject = AnyObject> = {
-    readonly [K in keyof T]: T[K]
+// A 'get op' is a o(1) get-like operation like set.has() or array.at()
+export function useTrackableOp(
+    reactive: IonicModel<Collection>,
+    target: AnyObject,
+    op: string,
+    fn: (key: any) => any,
+) {
+    return function trackableOp(arg: any) {
+        if (__DEV__) emitSignal();
+        const tracker = getActiveTracker()
+        const _arg = toRaw(arg)
+        if (!tracker)
+            return fn.call(target, _arg);
+        tracker.track(asTrackedOp(reactive, op, _arg))
+        return fn.call(target, _arg)
+    }
 }
 
-type Ionizable = object | any[] | Set<unknown> | Map<any, any>
+// export const insertOps = {
+//     push: { from: 0 },
+//     unshift: { from: 0 },
+//     splice: { from: 2 },
+//     fill: { at: 0 },
+//     add: { at: 0 },
+//     set: { from: 0 }
+// }
+
+// export function maybeDeionizeArgs(
+//     op: string,
+//     args: any[],
+// ) {
+//     if (!(op in insertOps)) return args;
+
+//     const itemPosition = insertOps[<keyof typeof insertOps>op]
+//     const hasSingleItem = 'at' in itemPosition
+//     const newItems = hasSingleItem ? [args[itemPosition.at]] : args.slice(itemPosition.from);
+//     const _newItems: any[] = [];
+//     for (const newItem of newItems) {
+//         _newItems.push(toRaw(newItem))
+//     }
+//     if (hasSingleItem) {
+//         args[itemPosition.at] = _newItems[0];
+//     }
+//     else {
+//         args.splice(itemPosition.from, _newItems.length, ..._newItems)
+//     }
+//     return args;
+// }
 
 
-const ionicModels: WeakMap<AnyObject, IonicModel> = new WeakMap()
-
-export function registerIonicModel(ionicModel: IonicModel, target: AnyObject) {
-    ionicModels.set(target, ionicModel)
-}
-
-export function isIonicModel(value: any): value is IonicModel {
-    if (!isObject(value)) return false;
-    return value[META]?.type === IONIC_MODEL;
-}
-
-type Ionized<T extends AnyObject, M> = {
-    [K in keyof T]: T[K] extends Ion<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
-} & M
 
 
-
-//TODO: should return T if not ionizable or is an ion
-//QUESTION: Can methods be added to existing ions this way?
 
 //API
-export function ionize<T extends AnyObject, M extends AnyObject>(target: T, methods?: M): { [K in keyof Ionized<T, M>]: Ionized<T, M>[K] } {
-    if (isAnyIon(target) || isInert(target) || !isIonizable(target)) return target as T;
-    if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
-    const existingIonicModel = ionicModels.get(target)
-    if (existingIonicModel) return existingIonicModel as T & M;
-    return createReactiveModel(target, methods) as T & M
+export function defineIonicStructure(structureKey: any, config: CustomIonicModelConfig) {
+    const { isCollection } = config
+    if (isCollection) {
+        // register as collection
+    }
+
+    customIonicStructureMap.set(structureKey, config)
 }
 
 
 
-export function storeSnapshot(metaIonicModel: MetaIonicModel, clone?: AnyObject) {
-    timeTraveler.takeSnapshot(toRaw(metaIonicModel), useRenderCycle().count, clone)
+
+
+export function getStructureKeys(target: AnyObject) {
+    return getStructureKey(target, [])
 }
 
-export function recordOp(reactive: IonicModel, op: MutationRecord) {
-    useRenderCycle().recordOp(reactive, op)
+function getStructureKey(target: AnyObject, dataStructures: any[]) {
+    const proto = Object.getPrototypeOf(target); //TODO: custom get data structure for factory functions
+    if (!proto) return dataStructures;
+    const constructor = proto.constructor;
+    if (!isCustomIonicStructure(constructor)) {
+        return getStructureKey(proto, dataStructures)
+    }
+    dataStructures.push(constructor);
+    return getStructureKey(proto, dataStructures)
+}
+
+type CustomIonicModelConfig = {
+    isCollection?: boolean,
+    nonTrackableKeys?: { [key: PropertyKey]: boolean };
+    trackableOps?: { [key: PropertyKey]: CreateTrackableOp }
+    mutatingOps?: { [key: PropertyKey]: MutatingOpConfig };
+    // getStructureKeys: (model: AnyObject) => any[]
+}
+
+type CreateTrackableOp = (target: AnyObject, ionicModel: IonicModel<AnyObject>) => (...args: any[]) => any
+
+type MutatingOpConfig = {
+    createOp: (target: AnyObject, ionicModel: IonicModel<AnyObject>, meta: any, getPreopData: GetPreopData | undefined) => (...args: any[]) => any
+    preop?: GetPreopData
+    revert?: Revert
+}
+
+export type GetPreopData = (model: AnyObject, args?: any[]) => any;
+type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
+
+const customIonicStructureMap: Map<any, CustomIonicModelConfig> = new Map();
+
+function isCustomIonicStructure(value: any) {
+    return customIonicStructureMap.has(value);
+}
+
+// function getMutatingOps(DataStructure: any) {
+//     const config = customIonicStructureMap.get(DataStructure)
+//     if (!config) throw new Error(`Cannot find config for this data structure: ${DataStructure.toString()}`)
+//     return config.mutatingOps
+// }
+
+
+
+function getNonTrackableKeys(structureKey: any) {
+    return customIonicStructureMap.get(structureKey)?.nonTrackableKeys
 }
 
 
-type AsRaw<T> = T extends MetaIonicModel<infer R> ? R : T extends IonicModel<infer R> ? R : T
-
-export function toRaw<T>(target: T): AsRaw<T> {
-    if (target instanceof MetaIonicModel) return target.rawTarget;
-    if (isIonicModel(target)) return asMetaIonicModel(target).rawTarget as AsRaw<T>;
-    return target as AsRaw<T>; // already raw target
+export function isNonTrackable(key: PropertyKey, dataStructures: Function[]) {
+    for (const DataStructure of dataStructures) {
+        const nonTrackableKeys = getNonTrackableKeys(DataStructure)
+        if (nonTrackableKeys && key in nonTrackableKeys) return true;
+        if (typeof key === 'symbol' && key.description && nonTrackableKeys && key.description in nonTrackableKeys) return true;
+    }
+    return false;
 }
 
 
-export function toRawIfNeeded(
-    newValue: any,
-    key?: ProxyTargetKey
+export function createCustomIonicModel(
+    dataStructures: any[],
+    target: AnyObject,
+    methods: AnyObject | undefined
 ) {
-    if (isIonicModel(newValue)) return toRaw(newValue);
-    return newValue;
+    const metaIonicModel = isCollection(target) ? new MetaIonicCollection(target, methods) : new MetaIonicModel(target, methods)
+
+    const ionicModel = new Proxy(target, {
+        get(target, key, receiver) {
+            if (__DEV__) emitSignal()
+            if (key === META) return metaIonicModel
+            const protectedMeta = getProtectedModelMeta(target, ionicModel, receiver)
+            if (protectedMeta) {
+                const keys = protectedMeta.propertyKeys
+                if (keys && !(key in keys)) {
+                    if (__DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}'`)
+                    return undefined;
+                }
+            }
+            if (methods && key in methods) {
+                return accessMethod(
+                    target,
+                    ionicModel,
+                    receiver,
+                    key,
+                    boundMethodMap,
+                    methods[key]
+                )
+            }
+            if (isMutatingOps(key, dataStructures)) {
+                if (protectedMeta) {
+                    const keys = protectedMeta.propertyKeys
+                    if (keys && key in keys) {
+                        return accessMethod(
+                            target,
+                            ionicModel,
+                            receiver,
+                            key,
+                            boundMethodMap
+                        )
+                    }
+                    return undefined;
+                }
+            }
+
+            const value = Reflect.get(target, key, receiver)
+            // if (typeof key === 'symbol' && key.description === 'Symbol.iterator') { //TODO: make this part of isNonTrackable?
+            //     return value;
+            // }
+            if (isNonTrackable(key, dataStructures))
+                return value;
+            if (isAnyIon(value)) return value();
+
+            if (value instanceof Function)
+                return accessMethod(
+                    target,
+                    ionicModel,
+                    receiver,
+                    key,
+                    boundMethodMap,
+                    value
+                )
+            const _value = maybeIonize(value, target, ionicModel, receiver)
+            const tracker = getActiveTracker()
+            if (!tracker || Reflect.getOwnPropertyDescriptor(target, key)?.writable === false)
+                return _value;
+            tracker.track(asTrackedProp(ionicModel, key))
+            return _value;
+        },
+        set(target, key, value, receiver) {
+            return reactiveSetter(
+                dataStructures,
+                ionicModel,
+                metaIonicModel,
+                target,
+                key,
+                value,
+                receiver
+            )
+        }
+    }) as IonicModel<Map<any, any>>
+
+    const boundMethodMap = createBoundMethodMap(dataStructures, target, ionicModel, metaIonicModel)
+
+    metaIonicModel.initIonicModel(ionicModel)
+    registerIonicModel(ionicModel, target)
+    return ionicModel
+}
+
+function maybeIonize(value: any, target: AnyObject, proxy: AnyObject, receiver: AnyObject) {
+    if (!(value instanceof Object))
+        return value;
+    if (isReadonlyProxy(target, proxy, receiver)) {
+        return protect(ionize(value), READONLY)
+    }
+    const protectedMeta = getProtectedModelMeta(target, proxy, receiver)
+    if (protectedMeta) {
+        return protect(ionize(value))
+    }
+    return ionize(value)
+}
+
+function isMutatingOps(key: PropertyKey, structureKeys: any[]){
+    for (const structure in structureKeys){
+        const mutatingOps = customIonicStructureMap.get(structure)?.mutatingOps
+        if (!mutatingOps) continue;
+        if (key in mutatingOps) return true;
+    }
+    return false;
 }
 
 
-export function createReactiveModel(
-    target: object,
-    methods: object | undefined
-): object {
-    return isTuple(target) ? createIonicTuple(target, methods)
-        : target instanceof Array ? createIonicArray(target, methods)
-            : target instanceof Set ? createIonicSet(target, methods)
-                : target instanceof Map ? createIonicMap(target, methods)
-                    : createIonicObject(target, methods)
+function createBoundMethodMap(structureKeys: any[], target: AnyObject, ionicModel: IonicModel, meta: MetaIonicModel | MetaIonicCollection) {
+
+    const methodMap = new Map()
+
+    for (const key in structureKeys) {
+        const mutatingOps = customIonicStructureMap.get(key)?.mutatingOps
+        if (!mutatingOps) continue;
+        for (const opKey in mutatingOps){
+            const createOp = mutatingOps[opKey].createOp
+            const getPreopData = mutatingOps[opKey].preop
+            methodMap.set(opKey, createOp(target, ionicModel, meta, getPreopData)) //TODO: should I create these lazily?
+        }
+    }
+
+    for (const key in structureKeys) {
+        const trackableOps = customIonicStructureMap.get(key)?.trackableOps
+        if (!trackableOps) continue;
+        for (const opKey in trackableOps){
+            const createOp = trackableOps[opKey]
+            methodMap.set(opKey, createOp(target, ionicModel))
+        }
+    }
+
+    return methodMap;
 }
 
 
+export function accessMethod(
+    target: AnyObject,
+    proxy: AnyObject,
+    receiver: AnyObject,
+    key: PropertyKey,
+    boundMethodMap: Map<PropertyKey, Function>,
+    method?: Function
+) {
+    if (isReadonlyProxy(target, proxy, receiver)) {
+        if (__DEV__) console.warn('Object is readonly. Cannot access methods')
+        return undefined;
+    }
 
-
-
-export function isNonTrackable(key: PropertyKey, DataStructure: typeof Array | typeof Object | typeof Set | typeof Map) {
-    if (typeof key !== "string") return false;
-    if (DataStructure instanceof Array || DataStructure instanceof Set || DataStructure instanceof Map)
-        return key in nonTrackableCollectionKeys || key in nonTrackableObjectKeys;
-    return key in nonTrackableObjectKeys
+    return getBoundMethod(
+        proxy,
+        key,
+        boundMethodMap,
+        method
+    )
 }
 
-//TODO: actually, there are many methods that should be trackable! like array.find ... etc
-const nonTrackableObjectKeys = {
-    constructor: true,
-    __defineGetter__: true,
-    __defineSetter__: true,
-    hasOwnProperty: true,
-    __lookupGetter__: true,
-    __lookupSetter__: true,
-    isPrototypeOf: true,
-    propertyIsEnumerable: true,
-    toString: true,
-    valueOf: true,
-    __proto__: true,
-    toLocaleString: true
+function getBoundMethod(
+    proxy: AnyObject,
+    key: PropertyKey,
+    boundMethodMap: Map<PropertyKey, Function>,
+    method?: Function
+) {
+    let boundMethod = boundMethodMap.get(key)
+    if (boundMethod) return boundMethod;
+    if (method) {
+        boundMethod = method.bind(proxy);
+        boundMethodMap.set(key, boundMethod!)
+        return boundMethod;
+    }
+    throw new Error('No method provided')
 }
-
-const nonTrackableCollectionKeys = {
-    forEach: true
-}
-
-const trackableCollectionOps = {
-    keys: true,  // newIterable = keys()
-    entries: true, // newEntriesIterator = entries()
-    values: true, // newIterable = values()
-}
-
-const trackableArrayOps = {
-    // same as accessor
-    at: true, // item = at(index) //NOTE: trackable ops
-
-    // whole array, triggered by any change to array
-
-    toReversed: true, // newArray = toReversed()
-    flat: true, // newArray = flat(depth?)
-    toSorted: true, // newArray = toSorted(compareFn?)
-    flatMap: true, // newArray = flatMap(callbackFn, thisArg?)
-    map: true, // newArray = map(callbackFn, thisArg?)
-    reduce: true, // result = reduce(callbackFn, initialValue?)
-    reduceRight: true, // result = reduceRight(callbackFn, initialValue?)
-
-    join: true, // string = join(separator?)
-    toLocaleString: true, // string = toLocaleString() 
-    toString: true, // string = toString()
-
-
-    // check if result changed
-    lastIndexOf: true, // index = lastIndexOf(item, fromIndex)
-    indexOf: true, // index = indexOf(item, fromIndex)
-    includes: true, // boolean = includes(item, fromIndex?)
-
-    // args
-    find: true, // item = find(callbackFn, thisArg?)
-    findLast: true, // item = findLast(callbackFn, thisArg?)
-
-    findIndex: true, // index = findIndex(callbackFn, thisArg?)
-    findLastIndex: true, // index = findLastIndex(callbackFn, thisArg?)
-
-    filter: true, // newArray = filter(callbackFn, thisArg?)
-
-    every: true, // boolean = every(callbackFn, thisArg?)
-    some: true, // boolean = some(callbackFn, thisArg?)
-
-
-    // copyWithin: true,
-    // fill: true,
-    // pop: true,
-    // push: true,
-    // reverse: true,
-    // shift: true,
-    // unshift: true,
-    // sort: true,
-    // splice: true,
-
-    // keys: true,  // newIterable = keys()
-    // entries: true, // newEntriesIterator = entries()
-    // values: true, // newIterable = values()
-    // forEach: true,
-
-
-    slice: true, // newArray = slice(start?, end?)
-
-    concat: true, // newArray = concat(arrayB, arrayC, ...)
-    toSpliced: true, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
-
-    with: true, // newArray = arrayInstance.with(index, value)
-}
-
-const trackableMapOps = {
-    get: true, // value = get(key)  //NOTE: trackable ops
-    has: true, // boolean = has(key) //NOTE: trackable ops
-    // set: true,
-    // delete: true,
-    // clear: true,
-    // forEach: true,
-    // entries: true, // newEntriesIterator = entries()
-    // keys: true, // newIterable = keys()
-    // values: true, // newIterable = values()
-    // size: true,
-}
-
-const trackableSetOps = {
-    has: true, // boolean = has(item) //NOTE: trackable ops
-
-    // add: true,
-    // delete: true,
-    // clear: true,
-    // forEach: true,
-    // size: true,
-    // entries: true, // newEntriesIterator = entries()
-    // keys: true, // newIterable = keys()
-    // values: true, // newIterable = values()
-
-    difference: true, // newSet = difference(otherSet) 
-    union: true,
-    intersection: true,
-    symmetricDifference: true,
-
-    isSubsetOf: true, // boolean = isSubsetOf(otherSet)
-    isSupersetOf: true, // boolean = isSupersetOf(otherSet)
-    isDisjointFrom: true, // boolean = isDisjointFrom(otherSet)
-}
-
-// function getNonTrackableKeys(target: AnyObject) {
-//     return new Set(Object.getOwnPropertyNames(Object.getPrototypeOf(target)))
-// }
-
-
-
-
-
-
-
-
-
-// export function toWatchedProp(reactive: IonicModel, key: PropertyKey) {
-//     const metaIonicModel = reactive[META]
-//     const isIndex = toRaw(metaIonicModel) instanceof Array && isIntegerKey(key)
-//     if (isIndex) {
-//         (<MetaIonicCollection>metaIonicModel).addWatchedEntryKey(key)
-//     }
-//     // clean up
-//     const prop = asObservedProp(reactive, key)
-//     const watchSubject = asWatchSubject(prop)
-//     watchSubject.onUnwatched(() => {
-//         unobserve(prop, isIndex ? () => {
-//             (<MetaIonicCollection>metaIonicModel).deleteWatchedEntryKey(key)
-//         } : undefined)
-//     })
-//     return prop;
-// }
-
-
-// function unobserve(prop: ObservedProp) {
-//     const watchSubject = asWatchSubject(prop)
-//     const atom = asIonicAtom(prop)
-//     if (watchSubject.watchCount === 0 && atom.derivations.size === 0) {
-//         prop.destroy()
-//     }
-// }
 
 
 
 
 export function reactiveSetter(
-    DataStructure: typeof Array | typeof Object | typeof Map | typeof Set, // and Tuple
-    reactive: IonicModel,
+    dataStructures: any[], // and Tuple
+    ionicModel: IonicModel,
     metaIonicModel: MetaIonicModel,
     target: AnyObject,
     key: string | symbol,
     newValue: any,
     receiver: AnyObject
 ) {
-    if (isProtectedProxy(target, reactive, receiver)) {
+    if (isProtectedProxy(target, ionicModel, receiver)) {
         if (__DEV__) console.warn('Set operation failed. Property is readonly')
         return false;
     }
     if (metaIonicModel.isNewProperty(key)) metaIonicModel.registerNewProperty(key)
+
     const oldValue = Reflect.get(target, key, receiver);
     if (isAnyIon(oldValue) && !isAnyIon(newValue)) {
         return setAbsorbedIon(oldValue, newValue)
     }
     if (oldValue === newValue
-        || isNonTrackable(key, DataStructure)
-        || isNonSettable(<string>key, DataStructure)
-        || !isWritable(target, key)) { //QUESTION: Are these conditions redundant?
+        || isNonTrackable(key, dataStructures)
+        || !isWritable(target, key)) {
         target[key] = newValue
         return true;
     }
 
-    const _newValue = toRawIfNeeded(isAnyIon(newValue) ? newValue() : newValue, key)
+    const _newValue = toRaw(isAnyIon(newValue) ? newValue() : newValue)
     const _oldValue = isAnyIon(oldValue) ? oldValue() : oldValue
 
     target[key] = isAnyIon(newValue) ? newValue : _newValue
 
     storeSnapshot(metaIonicModel)
 
-    const prop = getObservedProp(reactive, key);
+    const prop = getObservedProp(ionicModel, key);
     if (prop) {
         trigger(prop, _newValue, _oldValue)
     }
 
-    triggerIonicModelWithSetOp(
-        reactive,
-        key,
-        _newValue,
-        _oldValue,
+    triggerIonicModel(
+        ionicModel,
+        with_op = '[[set]]',
+        with_args = [key, _newValue],
+        with_output = _newValue,
+        with_preopData = _oldValue,
     )
 
     return true;
 }
+
+
 
 export function setAbsorbedIon(ion: AnyIon, value: any) {
     if ('set' in ion) {
@@ -350,100 +391,4 @@ function isWritable(target: Object, key: PropertyKey) {
     const descriptor = Reflect.getOwnPropertyDescriptor(target, key);
     if (descriptor?.writable === true) return true;
     return false;
-}
-
-// Because insertion of values don't yield differing new and old values for size and length in the setter,
-// we need to manually check old and new values at time of mutation
-function isNonSettable(key: string, DataStructure: typeof Array | typeof Object | typeof Set | typeof Map) {
-    if ((DataStructure === Set || DataStructure === Map) && key === 'size') return true;
-    return false;
-}
-
-
-
-
-
-export function triggerIonicModelWithSetOp(
-    reactive: IonicModel,
-    key: string | symbol,
-    newValue: any,
-    oldValue: any,
-) {
-    if (isWatched(reactive)) {
-        recordOp(reactive, {
-            target: reactive,
-            op: {
-                type: '[[set]]',
-                key,
-                newValue: newValue,
-                oldValue
-            }
-        })
-
-        triggerIonicModel(reactive)
-    }
-
-    // if (isNestedWatched(reactive)) {
-    //     const [rootWatchedModel, keyPath] = getRootWatchedModelAndKeyPath(reactive)
-    //     recordOp(rootWatchedModel, {
-    //         target: reactive,
-    //         targetPath: keyPath,
-    //         root: rootWatchedModel,
-    //         op: {
-    //             type: '[[set]]',
-    //             key,
-    //             newValue: newValue,
-    //             oldValue
-    //         }
-    //     })
-
-    //     triggerIonicModel(rootWatchedModel)
-    // }
-}
-
-export function asMetaIonicModel<T extends AnyObject>(reactive: IonicModel<T>): T extends Collection ? MetaIonicCollection<T> : MetaIonicModel<T> {
-    return reactive[META];
-}
-
-
-export type ReactiveTraps<T extends Ionizable = Ionizable> = ProxyHandler<T>
-
-
-export function createReactiveTraps(
-    target: AnyObject,
-    get: (target: AnyObject, key: ProxyTargetKey, receiver: AnyObject) => any,
-    set?: (target: AnyObject, key: ProxyTargetKey, value: any, receiver: AnyObject) => boolean,
-    existingTraps?: ReactiveTraps,
-) {
-    return {
-        get,
-        set,
-        // getPrototypeOf: existingTraps ? existingTraps.getPrototypeOf : () => {
-        //     return Reflect.getPrototypeOf(target)
-        // },
-        // has: existingTraps ? existingTraps.has : (_: unknown, key: PropertyKey) => {
-        //     return Reflect.has(target, key)
-        // },
-        // deleteProperty: existingTraps ? existingTraps.deleteProperty : (_: unknown, key: any) => {
-        //     return Reflect.deleteProperty(target, key)
-        // },
-        // ownKeys: existingTraps ? existingTraps.ownKeys : () => {
-        //     return Reflect.ownKeys(target)
-        // },
-        // setPrototypeOf: existingTraps ? existingTraps.setPrototypeOf : (_: unknown, proto: ReactiveModelContainer | null) => {
-        //     return Reflect.setPrototypeOf(target, proto)
-        // },
-        // isExtensible: existingTraps ? existingTraps.isExtensible : () => {
-        //     return Reflect.isExtensible(target)
-        // },
-        // preventExtensions: existingTraps ? existingTraps.preventExtensions : () => {
-        //     return Reflect.preventExtensions(target)
-        // },
-        // getOwnPropertyDescriptor: existingTraps ? existingTraps.getOwnPropertyDescriptor : (_: unknown, key: PropertyKey) => {
-        //     return Reflect.getOwnPropertyDescriptor(target, key)
-        // },
-        // defineProperty: existingTraps ? existingTraps.defineProperty : (_: unknown, key: PropertyKey, attributes: PropertyDescriptor & ThisType<any>) => {
-        //     return Reflect.defineProperty(target, key, attributes)
-        // }
-    }
 }

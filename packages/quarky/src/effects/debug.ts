@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { isIonicModel, IonicModel } from "../ionize/IonicModel";
+import { isIonicModel, IonicModel } from "../ionize/ionize";
 import { Ion } from "../ion/Ion";
 import { PropIon } from "../ionize/PropIon";
 

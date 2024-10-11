@@ -1,6 +1,6 @@
 import { useRenderCycle } from "../effects/RenderCycle";
 import { Ion } from "../ion/Ion";
-import {isIonicModel } from "../ionize/IonicModel";
+import {isIonicModel } from "../ionize/ionize";
 import { PropIon } from "../ionize/PropIon";
 import { TrackedOp } from "../ionize/TrackedOp";
 import { IonicDerivation } from "./IonicDerivation";

@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { META } from "../ReactiveEntity";
 import { asMetaIon, Ion, MetaIon } from "./Ion";
-import { isIonicModel } from "../ionize/IonicModel";
+import { isIonicModel } from "../ionize/ionize";
 import { protectIonicModel } from "../ionize/ProtectedIonicModel";
 
 export type ProtectedIon<T = any, M extends AnyObject = {}> = {

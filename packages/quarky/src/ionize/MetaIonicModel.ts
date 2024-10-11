@@ -1,10 +1,8 @@
 import type { AnyObject } from "@rue/types"
-import type { IonicModel, ReactiveTraps } from "./IonicModel"
+import type { IonicModel } from "./ionize"
 import type { TrackedOp } from "./TrackedOp"
 import type { ReactiveEntity } from "../ReactiveEntity"
-import { ObservedProp } from "./ObservedProp"
 import { PropIon } from "./PropIon"
-import { DerivedIon } from "../derivations/DerivedIon"
 import { IonicDerivation } from "../derivations/IonicDerivation"
 
 

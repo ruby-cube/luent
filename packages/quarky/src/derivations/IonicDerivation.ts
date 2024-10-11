@@ -2,7 +2,7 @@ import { DependencyTracker, getActiveTracker, getDependencyTracker } from "./Dep
 import { asIonicAtom, IonicAtom, ReactivePrimitive } from "./IonicAtom";
 import { asWatchSubject, isWatched, WatchSubject } from "../effects/WatchSubject";
 import { ReactiveEntity } from "../ReactiveEntity";
-import { IonicModel, isIonicModel, toRaw } from "../ionize/IonicModel";
+import { IonicModel, isIonicModel, toRaw } from "../ionize/ionize";
 import { isAnyIon } from "../ion/AnyIon";
 import { isDerivedIon } from "./DerivedIon";
 import { isPropIon } from "../ionize/PropIon";

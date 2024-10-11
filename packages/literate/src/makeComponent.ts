@@ -1,11 +1,9 @@
-import { COMPONENT, ComponentConfig, getCurrentIndex, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeRef, PublicComponent, pushProvider, popProvider } from "@rue/lumo";
+import { COMPONENT, ComponentConfig, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeRef, PublicComponent, pushProvider, popProvider } from "@rue/lumo";
 import { Literate } from "./Literate.js";
 import { Ion, isIon } from "../../quarky/src/index.js";
 import { AnyObject, MaybePromise } from "@rue/types";
 import { collectEffects, getFlask } from "@rue/flask";
 import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
-import { getCurrentComponent } from "../../lumo/src/component/componentStack.js";
-import { isReactiveArray } from "../../quarky/src/ionize/IonicArray.js";
 
 
 // const allPromises: Promise<any>[] = [] // collect promises from Suspense

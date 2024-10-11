@@ -1,5 +1,5 @@
 import { isWritableIon, ProtectedIon, protectIon, READONLY } from "./ion/ProtectedIon";
-import { isIonicModel, IonicModel } from "./ionize/IonicModel";
+import { isIonicModel, IonicModel } from "./ionize/ionize";
 import { AnyObject } from "@rue/types";
 import { protectIonicModel } from "./ionize/ProtectedIonicModel";
 
