@@ -1,6 +1,4 @@
-import { AnyObject } from "@rue/types";
 import { isIonicModel, IonicModel, toRaw, ionize, registerIonicModel } from "./ionize";
-import { getProtectedModelMeta, isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
 import { defineIonicStructure } from "./IonicModel";
 
 export function isIonicObject(value: any): value is IonicModel {
@@ -12,8 +10,7 @@ export function isIonicObject(value: any): value is IonicModel {
 
 
 defineIonicStructure(Object, {
-    isCollection: false,
-    nonTrackableKeys: {
+    nontrackableKeys: {
         constructor: true,
         __defineGetter__: true,
         __defineSetter__: true,

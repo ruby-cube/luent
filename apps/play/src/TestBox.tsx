@@ -1,4 +1,4 @@
-
+//@ts-nocheck
 import { NodeRef, Try, } from "@rue/lumo";
 import { DerivedIon, initializeIonicEffect, Ion, ionize } from "@rue/quarky";
 
@@ -58,12 +58,15 @@ export function TestBox() {
 function Hello() {
     return (
         <div>
-            {Try(_ =>
+            {Try(
                 <div>hello</div>
-
-            ).Catch(err =>
+            ).Catch(
                 <div>error!</div>
             )}
         </div>
     )
+}
+
+function Catch(j: any) {
+
 }

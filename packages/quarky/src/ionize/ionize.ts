@@ -4,7 +4,7 @@ import { timeTraveler } from "./TimeTraveler";
 import { trigger, triggerIonicModel } from "../trigger";
 import { useRenderCycle } from "../effects/RenderCycle";
 import { META } from "../ReactiveEntity";
-import { Collection, MetaIonicCollection, MetaIonicModel, IONIC_MODEL } from "./MetaIonicModel";
+import { MetaIonicModel, IONIC_MODEL } from "./MetaIonicModel";
 import { isInert } from "./inert";
 import { isIonizable } from "./ionizable";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
@@ -12,7 +12,7 @@ import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
 import { Ion } from "../ion/Ion";
 import { getObservedProp, PropIon } from "./PropIon";
 import { isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
-import { createCustomIonicModel, getStructureKeys } from "./IonicModel";
+import { createCustomIonicModel, getStructureConfigs } from "./IonicModel";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -55,12 +55,12 @@ type Ionized<T extends AnyObject, M> = {
 
 
 
-//TODO: should return T if not ionizable or is an ion
-//QUESTION: Can methods be added to existing ions this way?
-
 //API
 export function ionize<T extends AnyObject, M extends AnyObject>(target: T, methods?: M): { [K in keyof Ionized<T, M>]: Ionized<T, M>[K] } {
-    if (isAnyIon(target) || isInert(target) || !isIonizable(target)) return target as T;
+    if (isAnyIon(target) || isInert(target) || !isIonizable(target)) {
+        if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
+        return target as T & M;
+    }
     if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
     const existingIonicModel = ionicModels.get(target)
     if (existingIonicModel) return existingIonicModel as T & M;
@@ -100,7 +100,7 @@ export function createIonicModel(
     target: object,
     methods: object | undefined
 ): object {
-    return createCustomIonicModel(getStructureKeys(target), target, methods)
+    return createCustomIonicModel(getStructureConfigs(target), target, methods)
     // return isTuple(target) ? createIonicTuple(target, methods)
     //     : target instanceof Array ? createIonicArray(target, methods)
     //         : target instanceof Set ? createIonicSet(target, methods)
@@ -111,111 +111,12 @@ export function createIonicModel(
 
 
 
-//TODO: actually, there are many methods that should be trackable! like array.find ... etc
 
 
 
-const trackableCollectionOps = {
-    keys: true,  // newIterable = keys()
-    entries: true, // newEntriesIterator = entries()
-    values: true, // newIterable = values()
-}
-
-const trackableArrayOps = {
-    // same as accessor
-    at: true, // item = at(index) //NOTE: trackable ops
-
-    // whole array, triggered by any change to array
-
-    toReversed: true, // newArray = toReversed()
-    flat: true, // newArray = flat(depth?)
-    toSorted: true, // newArray = toSorted(compareFn?)
-    flatMap: true, // newArray = flatMap(callbackFn, thisArg?)
-    map: true, // newArray = map(callbackFn, thisArg?)
-    reduce: true, // result = reduce(callbackFn, initialValue?)
-    reduceRight: true, // result = reduceRight(callbackFn, initialValue?)
-
-    join: true, // string = join(separator?)
-    toLocaleString: true, // string = toLocaleString() 
-    toString: true, // string = toString()
 
 
-    // check if result changed
-    lastIndexOf: true, // index = lastIndexOf(item, fromIndex)
-    indexOf: true, // index = indexOf(item, fromIndex)
-    includes: true, // boolean = includes(item, fromIndex?)
 
-    // args
-    find: true, // item = find(callbackFn, thisArg?)
-    findLast: true, // item = findLast(callbackFn, thisArg?)
-
-    findIndex: true, // index = findIndex(callbackFn, thisArg?)
-    findLastIndex: true, // index = findLastIndex(callbackFn, thisArg?)
-
-    filter: true, // newArray = filter(callbackFn, thisArg?)
-
-    every: true, // boolean = every(callbackFn, thisArg?)
-    some: true, // boolean = some(callbackFn, thisArg?)
-
-
-    // copyWithin: true,
-    // fill: true,
-    // pop: true,
-    // push: true,
-    // reverse: true,
-    // shift: true,
-    // unshift: true,
-    // sort: true,
-    // splice: true,
-
-    // keys: true,  // newIterable = keys()
-    // entries: true, // newEntriesIterator = entries()
-    // values: true, // newIterable = values()
-    // forEach: true,
-
-
-    slice: true, // newArray = slice(start?, end?)
-
-    concat: true, // newArray = concat(arrayB, arrayC, ...)
-    toSpliced: true, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
-
-    with: true, // newArray = arrayInstance.with(index, value)
-}
-
-const trackableMapOps = {
-    get: true, // value = get(key)  //NOTE: trackable ops
-    has: true, // boolean = has(key) //NOTE: trackable ops
-    // set: true,
-    // delete: true,
-    // clear: true,
-    // forEach: true,
-    // entries: true, // newEntriesIterator = entries()
-    // keys: true, // newIterable = keys()
-    // values: true, // newIterable = values()
-    // size: true,
-}
-
-const trackableSetOps = {
-    has: true, // boolean = has(item) //NOTE: trackable ops
-
-    // add: true,
-    // delete: true,
-    // clear: true,
-    // forEach: true,
-    // size: true,
-    // entries: true, // newEntriesIterator = entries()
-    // keys: true, // newIterable = keys()
-    // values: true, // newIterable = values()
-
-    difference: true, // newSet = difference(otherSet) 
-    union: true,
-    intersection: true,
-    symmetricDifference: true,
-
-    isSubsetOf: true, // boolean = isSubsetOf(otherSet)
-    isSupersetOf: true, // boolean = isSupersetOf(otherSet)
-    isDisjointFrom: true, // boolean = isDisjointFrom(otherSet)
-}
 
 // function getNonTrackableKeys(target: AnyObject) {
 //     return new Set(Object.getOwnPropertyNames(Object.getPrototypeOf(target)))
@@ -233,14 +134,14 @@ const trackableSetOps = {
 //     const metaIonicModel = reactive[META]
 //     const isIndex = toRaw(metaIonicModel) instanceof Array && isIntegerKey(key)
 //     if (isIndex) {
-//         (<MetaIonicCollection>metaIonicModel).addWatchedEntryKey(key)
+//         (<MetaIonicCollection>metaIonicModel).addObservedEntryKey(key)
 //     }
 //     // clean up
 //     const prop = asObservedProp(reactive, key)
 //     const watchSubject = asWatchSubject(prop)
 //     watchSubject.onUnwatched(() => {
 //         unobserve(prop, isIndex ? () => {
-//             (<MetaIonicCollection>metaIonicModel).deleteWatchedEntryKey(key)
+//             (<MetaIonicCollection>metaIonicModel).deleteObservedEntryKey(key)
 //         } : undefined)
 //     })
 //     return prop;
@@ -258,7 +159,7 @@ const trackableSetOps = {
 
 // Because insertion of values don't yield differing new and old values for size and length in the setter,
 // we need to manually check old and new values at time of mutation
-// function isNonSettable(key: string, dataStructures: any[]) {
+// function isNonSettable(key: string, structureConfigs: any[]) {
 //     if ((DataStructure === Set || DataStructure === Map) && key === 'size') return true;
 //     return false;
 // }
@@ -305,7 +206,7 @@ const trackableSetOps = {
 //     // }
 // }
 
-export function asMetaIonicModel<T extends AnyObject>(reactive: IonicModel<T>): T extends Collection ? MetaIonicCollection<T> : MetaIonicModel<T> {
+export function asMetaIonicModel<T extends AnyObject>(reactive: IonicModel<T>): MetaIonicModel<T> {
     return reactive[META];
 }
 

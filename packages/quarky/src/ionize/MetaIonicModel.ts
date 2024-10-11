@@ -148,28 +148,42 @@ export class MetaIonicModel<T extends AnyObject = AnyObject> implements Reactive
         if (!this.trackedOps) return;
         return this.trackedOps.get(op)?.get(entryKey)
     }
-}
 
 
+    // allows collections to efficiently trigger observed props/ops when a sweeping mutation like clear() or .length = 0 occurs
+    observedEntryKeys? : Set<PropertyKey>
 
-export type Collection<K = any, V = any> = Set<K> | Array<K> | Map<K, V>
-
-export class MetaIonicCollection<T extends Collection = Collection> extends MetaIonicModel<T> {
-    constructor(rawTarget: T, methods: AnyObject = {}) {
-        super(rawTarget, methods)
-    }
-
-    observedEntryKeys = new Set()
-
-    addWatchedEntryKey(entryKey: any) {
+    addObservedEntryKey(entryKey: any) {
+        if (!this.observedEntryKeys) this.observedEntryKeys = new Set()
         this.observedEntryKeys.add(entryKey)
     }
 
-    deleteWatchedEntryKey(entryKey: any) {
+    deleteObservedEntryKey(entryKey: any) {
+        if (!this.observedEntryKeys) return;
         this.observedEntryKeys.delete(entryKey)
     }
 }
 
-export function isCollection(target: unknown): target is Collection {
-    return target instanceof Array || target instanceof Set || target instanceof Map
-}
+
+
+// export type Collection<K = any, V = any> = Set<K> | Array<K> | Map<K, V>
+
+// export class MetaIonicCollection<T extends Collection = Collection> extends MetaIonicModel<T> {
+//     constructor(rawTarget: T, methods: AnyObject = {}) {
+//         super(rawTarget, methods)
+//     }
+
+//     observedEntryKeys = new Set()
+
+//     addObservedEntryKey(entryKey: any) {
+//         this.observedEntryKeys.add(entryKey)
+//     }
+
+//     deleteObservedEntryKey(entryKey: any) {
+//         this.observedEntryKeys.delete(entryKey)
+//     }
+// }
+
+// export function isCollection(target: unknown): target is Collection {
+//     return target instanceof Array || target instanceof Set || target instanceof Map
+// }

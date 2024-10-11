@@ -1,30 +1,88 @@
 import { AnyObject } from "@rue/types";
 import { isIonicAtom } from "../derivations/IonicAtom";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import {  isIonicModel, IonicModel, storeSnapshot, toRaw,  } from "./ionize";
+import { isIonicModel, IonicModel, storeSnapshot, toRaw, } from "./ionize";
 import { getTrackedOp } from "./TrackedOp";
-import { defineIonicStructure, GetPreopData, isNonTrackable, setAbsorbedIon, useTrackableOp } from "./IonicModel";
-import { Collection, isCollection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
-import { isAnyIon } from "../ion/AnyIon";
+import { defineIonicStructure, GetPreopData, isNonTrackable, setAbsorbedIon, useTrackableGetOp } from "./IonicModel";
 import { asTrackedProp, getObservedProp } from "./PropIon";
-import { nonTrackableCollectionKeys } from "./IonicMap";
-import { isProtectedProxy } from "./ProtectedIonicModel";
+import { MetaIonicModel } from "./MetaIonicModel";
+import { nontrackableIterableKeys } from "./IonicSet";
 
 
+const trackableArrayOps = {
+
+    // whole array, triggered by any change to array
+
+    toReversed: true, // newArray = toReversed()
+    flat: true, // newArray = flat(depth?)
+    toSorted: true, // newArray = toSorted(compareFn?)
+    flatMap: true, // newArray = flatMap(callbackFn, thisArg?)
+    map: true, // newArray = map(callbackFn, thisArg?)
+    reduce: true, // result = reduce(callbackFn, initialValue?)
+    reduceRight: true, // result = reduceRight(callbackFn, initialValue?)
+
+    join: true, // string = join(separator?)
+    toLocaleString: true, // string = toLocaleString() 
+    toString: true, // string = toString()
+
+
+    // check if result changed
+    lastIndexOf: true, // index = lastIndexOf(item, fromIndex)
+    indexOf: true, // index = indexOf(item, fromIndex)
+    includes: true, // boolean = includes(item, fromIndex?)
+
+    // args
+    find: true, // item = find(callbackFn, thisArg?)
+    findLast: true, // item = findLast(callbackFn, thisArg?)
+
+    findIndex: true, // index = findIndex(callbackFn, thisArg?)
+    findLastIndex: true, // index = findLastIndex(callbackFn, thisArg?)
+
+    filter: true, // newArray = filter(callbackFn, thisArg?)
+
+    every: true, // boolean = every(callbackFn, thisArg?)
+    some: true, // boolean = some(callbackFn, thisArg?)
+
+
+    // copyWithin: true,
+    // fill: true,
+    // pop: true,
+    // push: true,
+    // shift: true,
+    // unshift: true,
+    // reverse: true,
+    // sort: true,
+    // splice: true,
+
+    // keys: true,  // newIterable = keys()
+    // entries: true, // newEntriesIterator = entries()
+    // values: true, // newIterable = values()
+    // forEach: true,
+
+
+    slice: true, // newArray = slice(start?, end?)
+
+    concat: true, // newArray = concat(arrayB, arrayC, ...)
+    toSpliced: true, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
+
+    with: true, // newArray = arrayInstance.with(index, value)
+}
 
 defineIonicStructure(Array, {
-    isCollection: true,
-    nonTrackableKeys: nonTrackableCollectionKeys,
+    nontrackableKeys: nontrackableIterableKeys,
+
     trackableOps: {
         at(target, ionicModel) {
-            return useTrackableOp(
-                <IonicModel<any[]>>ionicModel,
+            return useTrackableGetOp(
+                ionicModel,
                 target,
                 'at',
                 target.at
             )
         }
+        //TODO: Trackable ops (as oppsed to get ops)?? not sure if necessary yet
     },
+
     mutatingOps: {
         push: {
             createOp: useMutatingArrayOpFactory('push', deionizeArgs),
@@ -35,18 +93,21 @@ defineIonicStructure(Array, {
                 model.splice(length, args.length)
             }
         },
+
         pop: {
             createOp: useMutatingArrayOpFactory('pop'),
             revert(model, { output }) {
                 model.push(output)
             }
         },
+
         unshift: {
             createOp: useMutatingArrayOpFactory('unshift', deionizeArgs),
             revert(model, { args }) {
                 model.splice(0, args.length)
             }
         },
+
         shift: {
             createOp: useMutatingArrayOpFactory('shift'),
             revert(model, { output }) {
@@ -93,6 +154,40 @@ defineIonicStructure(Array, {
                 }
             }
         },
+    },
+
+    afterSet(ionicModel, meta, key, newValue, oldValue) {
+        const op = isIntegerKey(key) ? getTrackedOp(ionicModel, 'at', key) : null
+        if (op) {
+            triggerIonicAtom(op)
+        }
+
+        const observedIndices = meta.observedEntryKeys
+        if (observedIndices && key === 'length') {
+            for (const indexKey of observedIndices) {
+                if (typeof indexKey !== 'string') {
+                    console.warn(`index key is not string. May need to refactor code`)
+                    continue;
+                }
+                const index = parseInt(indexKey)
+                if (index > newValue || index > oldValue) {
+                    const prop = getObservedProp(ionicModel, indexKey)
+                    if (prop) {
+                        trigger(prop, newValue, oldValue)
+                    }
+                    const op = getTrackedOp(ionicModel, 'at', index)
+                    if (op) {
+                        if (isIonicAtom(op)) {
+                            triggerIonicAtom(op)
+                        }
+                    }
+                }
+            }
+        }
+    },
+
+    isEntryKey(model, key){
+        return !!(model instanceof Array && isIntegerKey(key))
     },
 })
 
@@ -279,7 +374,7 @@ function deionizeArgs(args: any[]) {
 //             value
 //         )
 //     if (key === 'at') {
-//         return useTrackableOp(
+//         return useTrackableGetOp(
 //             ionicModel,
 //             target,
 //             key,
@@ -324,87 +419,87 @@ function deionizeArgs(args: any[]) {
 // }
 
 
-function reactiveArraySetter(
-    ionicModel: IonicModel,
-    metaIonicModel: MetaIonicCollection,
-    target: AnyObject,
-    key: string | symbol,
-    newValue: any,
-    receiver: AnyObject
-) {
-    if (isProtectedProxy(target, ionicModel, receiver)) {
-        if (__DEV__) console.warn('Set operation failed. Property is readonly')
-        return false;
-    }
-    if (metaIonicModel.isNewProperty(key)) metaIonicModel.registerNewProperty(key)
+// function reactiveArraySetter(
+//     ionicModel: IonicModel,
+//     metaIonicModel: MetaIonicModel,
+//     target: AnyObject,
+//     key: string | symbol,
+//     newValue: any,
+//     receiver: AnyObject
+// ) {
+//     if (isProtectedProxy(target, ionicModel, receiver)) {
+//         if (__DEV__) console.warn('Set operation failed. Property is readonly')
+//         return false;
+//     }
+//     if (metaIonicModel.isNewProperty(key)) metaIonicModel.registerNewProperty(key)
 
-    const _newValue = toRaw(newValue)
-    const op = target instanceof Array && isIntegerKey(key) ? getTrackedOp(ionicModel, 'at', key) : null;
-    const prop = getObservedProp(ionicModel, key);
-    if (!prop && !op) {
-        // Reflect.set(target, key, newValue, receiver);
-        target[key] = _newValue
-        return true;
-    }
+//     const _newValue = toRaw(newValue)
+//     const op = target instanceof Array && isIntegerKey(key) ? getTrackedOp(ionicModel, 'at', key) : null;
+//     const prop = getObservedProp(ionicModel, key);
+//     if (!prop && !op) {
+//         // Reflect.set(target, key, newValue, receiver);
+//         target[key] = _newValue
+//         return true;
+//     }
 
-    const oldValue = Reflect.get(target, key, receiver);
-    if (isAnyIon(oldValue) && !isIntegerKey(key)) //TODO: replaceAbsorbedIon. //QUESTION: Should Indices absorb ions? Vue doesn't
-        return setAbsorbedIon(oldValue, _newValue)
-    if (oldValue === _newValue
-        || isNonTrackable(key, [Array])
-        || !isWritable(target, key)) {
-        // Reflect.set(target, key, newValue, receiver);
-        target[key] = _newValue
-        return true;
-    }
+//     const oldValue = Reflect.get(target, key, receiver);
+//     if (isAnyIon(oldValue) && !isIntegerKey(key)) //TODO: replaceAbsorbedIon. //QUESTION: Should Indices absorb ions? Vue doesn't
+//         return setAbsorbedIon(oldValue, _newValue)
+//     if (oldValue === _newValue
+//         || isNonTrackable(key, [Array])
+//         || !isWritable(target, key)) {
+//         // Reflect.set(target, key, newValue, receiver);
+//         target[key] = _newValue
+//         return true;
+//     }
 
 
-    // Reflect.set(target, key, _newValue, receiver);
-    target[key] = _newValue // cannot use Reflect.set because it does not set the property synchronously
+//     // Reflect.set(target, key, _newValue, receiver);
+//     target[key] = _newValue // cannot use Reflect.set because it does not set the property synchronously
 
-    storeSnapshot(metaIonicModel)
+//     storeSnapshot(metaIonicModel)
 
-    if (prop) {
-        trigger(prop, _newValue, oldValue)
-    }
+//     if (prop) {
+//         trigger(prop, _newValue, oldValue)
+//     }
 
-    if (op) {
-        triggerIonicAtom(op)
-    }
+//     if (op) {
+//         triggerIonicAtom(op)
+//     }
 
-    const trackedIndices = metaIonicModel.observedEntryKeys
-    if (trackedIndices && key === 'length') {
-        for (const indexKey of trackedIndices) {
-            if (typeof indexKey !== 'string') {
-                console.warn(`index key is not string. May need to refactor code`)
-                continue;
-            }
-            const index = parseInt(indexKey)
-            if (index > _newValue || index > oldValue) {
-                const prop = getObservedProp(ionicModel, indexKey)
-                if (prop) {
-                    trigger(prop, _newValue, oldValue)
-                }
-                const op = getTrackedOp(ionicModel, 'at', index)
-                if (op) {
-                    if (isIonicAtom(op)) {
-                        triggerIonicAtom(op)
-                    }
-                }
-            }
-        }
-    }
+//     const trackedIndices = metaIonicModel.observedEntryKeys
+//     if (trackedIndices && key === 'length') {
+//         for (const indexKey of trackedIndices) {
+//             if (typeof indexKey !== 'string') {
+//                 console.warn(`index key is not string. May need to refactor code`)
+//                 continue;
+//             }
+//             const index = parseInt(indexKey)
+//             if (index > _newValue || index > oldValue) {
+//                 const prop = getObservedProp(ionicModel, indexKey)
+//                 if (prop) {
+//                     trigger(prop, _newValue, oldValue)
+//                 }
+//                 const op = getTrackedOp(ionicModel, 'at', index)
+//                 if (op) {
+//                     if (isIonicAtom(op)) {
+//                         triggerIonicAtom(op)
+//                     }
+//                 }
+//             }
+//         }
+//     }
 
-    triggerIonicModel(
-        ionicModel,
-        with_op = '[[set]]',
-        with_args = [key, _newValue],
-        with_output = _newValue,
-        with_preopData = oldValue,
-    )
+//     triggerIonicModel(
+//         ionicModel,
+//         with_op = '[[set]]',
+//         with_args = [key, _newValue],
+//         with_output = _newValue,
+//         with_preopData = oldValue,
+//     )
 
-    return true;
-}
+//     return true;
+// }
 
 
 
@@ -422,7 +517,7 @@ function useMutatingArrayOpFactory(
     opName: string,
     deionizeArgs?: (args: any[]) => any[]
 ) {
-    return function createOp(target: AnyObject, ionicModel: IonicModel<AnyObject>, meta: MetaIonicCollection<any[]>, getPreopData: GetPreopData | undefined) {
+    return function createOp(target: AnyObject, ionicModel: IonicModel<AnyObject>, meta: MetaIonicModel<any[]>, getPreopData: GetPreopData | undefined) {
         const fn = target[opName]
         return useMutatingArrayOp(
             <IonicModel<any[]>>ionicModel,
@@ -436,9 +531,16 @@ function useMutatingArrayOpFactory(
     }
 }
 
+const lengthMutatingOps = {
+    push: true,
+    pop: true,
+    shift: true,
+    unshift: true,
+}
+
 function useMutatingArrayOp(
     ionicModel: IonicModel<any[]>,
-    metaIonicModel: MetaIonicCollection<any[]>,
+    metaIonicModel: MetaIonicModel<any[]>,
     target: any[],
     key: string,
     fn: Function,
@@ -451,7 +553,7 @@ function useMutatingArrayOp(
         const oldLength = target.length;
         const output = fn.apply(ionicModel, _args); // perform mutation
         const newLength = target.length;
-        if (oldLength === newLength) return output; //FIX: Some methods will mutate but not change the length, like fill
+        if (key in lengthMutatingOps && oldLength === newLength) return output;
         storeSnapshot(metaIonicModel)
 
         const lengthProp = getObservedProp(ionicModel, 'length')
@@ -466,9 +568,9 @@ function useMutatingArrayOp(
             if (op) triggerIonicAtom(op);
         }
 
-        const trackedIndices = metaIonicModel.observedEntryKeys
-        if (trackedIndices && oldLength < newLength) {
-            for (const indexKey of trackedIndices) {
+        const observedIndices = metaIonicModel.observedEntryKeys
+        if (observedIndices && oldLength < newLength) {
+            for (const indexKey of observedIndices) {
                 if (typeof indexKey !== 'string') {
                     console.warn(`index key is not string. May need to refactor code`)
                     continue;

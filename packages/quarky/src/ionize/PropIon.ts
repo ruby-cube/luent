@@ -9,7 +9,6 @@ import { __devCheckIfTracked } from "../derivations/DependencyTracker";
 import { asWatchSubject, WatchSubject } from "../effects/WatchSubject";
 import { asIonicAtom, IonicAtom } from "../derivations/IonicAtom";
 import { isIntegerKey } from "./IonicArray";
-import { MetaIonicCollection } from "./MetaIonicModel";
 import { asMetaIon } from "../ion/Ion";
 
 
@@ -37,6 +36,20 @@ export type PropIonCapsule<T = any, M extends AnyObject = AnyObject> = {
 
 type AsPropIon<T, K extends keyof T> = K extends ReadonlyKeys<T> ? ReadonlyPropIon<T[K]> : PropIon<T[K]>
 
+const entryKeyValidators: ((model: AnyObject, key: PropertyKey) => boolean)[] = [];
+
+export function registerEntryKeyValidator(isEntryKey: (model: AnyObject, key: PropertyKey) => boolean) {
+    entryKeyValidators.push(isEntryKey);
+}
+
+
+function isEntryKey(rawModel: AnyObject, key: PropertyKey) {
+    for (const validator of entryKeyValidators) {
+        const is = validator(rawModel, key)
+        if (is) return true;
+    }
+    return false;
+}
 
 class MetaPropIon {
 
@@ -46,6 +59,7 @@ class MetaPropIon {
     //to fulfill MetaWritableIon interface
     asProtected = undefined
     hasMethods = false;
+    isEntryKey = false;
 
     constructor(
         public o: PropIon,
@@ -53,6 +67,7 @@ class MetaPropIon {
         public key: PropertyKey
     ) {
         asMetaIonicModel(model).registerPropIon(key, o)
+        this.isEntryKey = isEntryKey(toRaw(model), key)
     }
 
     asWatchSubject?: WatchSubject
@@ -62,11 +77,9 @@ class MetaPropIon {
     watch() {
         if (this.asWatchSubject) return;
         const metaModel = asMetaIonicModel(this.model)
-        const key = this.key
-        const isIndex = this.isIndex = !!(toRaw(metaModel) instanceof Array && isIntegerKey(key))
-        if (isIndex) {
-            (<MetaIonicCollection>metaModel).addWatchedEntryKey(key);
-        }
+        if (this.isEntryKey)
+            metaModel.addObservedEntryKey(this.key);
+
         const watchSubject = this.asWatchSubject = asWatchSubject(this.o)
 
         watchSubject.onUnwatched(() => {
@@ -80,6 +93,9 @@ class MetaPropIon {
         if (this.asAtom) return;
 
         const atom = this.asAtom = asIonicAtom(this.o)
+        
+        if (this.isEntryKey)
+            asMetaIonicModel(this.model).addObservedEntryKey(this.key)
 
         atom.onUntracked(() => {
             if (this.asWatchSubject?.watchCount === 0 && atom.derivations.size === 0) {
@@ -91,7 +107,7 @@ class MetaPropIon {
     destroy() {
         const metaModel = asMetaIonicModel(this.model)
         const key = this.key
-        if (this.isIndex) (<MetaIonicCollection>metaModel).deleteWatchedEntryKey(key)
+        if (this.isEntryKey) metaModel.deleteObservedEntryKey(key)
         metaModel.unregisterPropIon(key)
     }
 
@@ -159,7 +175,7 @@ function createPropIon<T extends IonicModel, K extends keyof T>(ionicModel: T, k
 export function asTrackedProp(
     ionicModel: IonicModel,
     key: PropertyKey
-){
+) {
     const prop = getPropIon(ionicModel, key) ?? createPropIon(ionicModel, key)
     const meta = asMetaIon(prop)
     meta.track()
@@ -169,7 +185,7 @@ export function asTrackedProp(
 export function asWatchedProp(
     ionicModel: IonicModel,
     key: PropertyKey
-){
+) {
     const prop = getPropIon(ionicModel, key) ?? createPropIon(ionicModel, key)
     const meta = asMetaIon(prop)
     meta.watch()
@@ -197,7 +213,7 @@ export function getObservedProp( // observed means watched and/or tracked
 
 //     const isIndex = toRaw(metaIonicModel) instanceof Array && isIntegerKey(key)
 //     if (isIndex) {
-//         (<MetaIonicCollection>metaIonicModel).addWatchedEntryKey(key);
+//         (<MetaIonicCollection>metaIonicModel).addObservedEntryKey(key);
 //     }
 //     const atom = asIonicAtom(prop)
 //     const watchSubject = asWatchSubject(prop)
@@ -207,7 +223,7 @@ export function getObservedProp( // observed means watched and/or tracked
 
 //     function unobserve() {
 //         if (watchSubject.watchCount === 0 && atom.derivations.size === 0) {
-//             if (isIndex) (<MetaIonicCollection>metaIonicModel).deleteWatchedEntryKey(key)
+//             if (isIndex) (<MetaIonicCollection>metaIonicModel).deleteObservedEntryKey(key)
 //             prop.destroy()
 //         }
 //     }

@@ -1,34 +1,42 @@
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import {  IonicModel, storeSnapshot, ionize, registerIonicModel, toRaw } from "./ionize";
-import { useClearOp, useDeleteOp } from "./IonicSet";
+import { IonicModel, storeSnapshot, ionize, registerIonicModel, toRaw } from "./ionize";
+import { nontrackableIterableKeys, useClearOp, useDeleteOp } from "./IonicSet";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
-import { Collection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
 import { asTrackedProp, getObservedProp } from "./PropIon";
-import { defineIonicStructure, useTrackableOp } from "./IonicModel";
+import { defineIonicStructure, useTrackableGetOp } from "./IonicModel";
 
-export const nonTrackableCollectionKeys = {
-    forEach: true,
-    'Symbol.iterator': true
+// Trackable keys vs trackable ops:
+// Trackable keys is about tracking the property
+// trackable ops is about tracking the get op or the whole ionic model (depending on the type of operation)
+
+const trackableMapGetOps = {
+    get: true, // value = get(key)  //NOTE: trackable ops
+    has: true, // boolean = has(key) //NOTE: trackable ops
+    // set: true,
+    // delete: true,
+    // clear: true,
+    // forEach: true,
+    // entries: true, // newEntriesIterator = entries()
+    // keys: true, // newIterable = keys()
+    // values: true, // newIterable = values()
+    // size: true,
 }
 
 
-
-
 defineIonicStructure(Map, {
-    isCollection: true,
-    nonTrackableKeys: nonTrackableCollectionKeys,
+    nontrackableKeys: nontrackableIterableKeys,
     trackableOps: {
         has(target, ionicModel) {
-            return useTrackableOp(
-                <IonicModel<Collection>>ionicModel,
+            return useTrackableGetOp(
+                ionicModel,
                 target,
                 'has',
                 target.has
             )
         },
         get(target, ionicModel) {
-            return useTrackableOp(
-                <IonicModel<Collection>>ionicModel,
+            return useTrackableGetOp(
+                ionicModel,
                 target,
                 'get',
                 target.get
@@ -82,7 +90,7 @@ defineIonicStructure(Map, {
             createOp(target, ionicModel, meta, getPreopData) {
 
                 return useClearOp(
-                    <IonicModel<Collection>>ionicModel,
+                    ionicModel,
                     meta,
                     target,
                     getPreopData!
@@ -103,7 +111,7 @@ defineIonicStructure(Map, {
             createOp(target, ionicModel, meta, getPreopData) {
 
                 return useDeleteOp(
-                    <IonicModel<Collection>>ionicModel,
+                    ionicModel,
                     meta,
                     target,
                     getPreopData!
@@ -206,13 +214,13 @@ defineIonicStructure(Map, {
 
 //     const boundMethodMap: Map<string | symbol, (...arg: any[]) => any> = new Map([
 //         ['set', setOp],
-//         ['has', useTrackableOp(
+//         ['has', useTrackableGetOp(
 //             ionicModel,
 //             target,
 //             'has',
 //             target.has
 //         )],
-//         ['get', useTrackableOp(
+//         ['get', useTrackableGetOp(
 //             ionicModel,
 //             target,
 //             'get',

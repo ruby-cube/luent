@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { NodeRef, Component, COMPONENT, ComponentSetup, If, Else, For, Provide, teleportTo } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, Ion, ionize } from "../../../packages/quarky/src";
@@ -124,25 +125,29 @@ export function List() {
         exposed: {
             $listLengthIsZero
         },
-        template: <div>
-            <>
-                {If($listLengthIsZero, () => (
+        template:
+            <div>
+                {If($listLengthIsZero, 'show',
+
                     <div
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
                     </div>
-                ))}
-                {ElseIf($(() => $list().length === 0), () => (
+
+                ).ElseIf(() => $list().length === 0,
+
                     <div
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
                     </div>
-                ))}
-                {For($list, (item$, $index) => (
+                )}
+
+                {For($list, (item$, $index) => 
+
                     <div style={`background-color: ${randomColor.get()}`}>
                         <p
                             onclick={() => removeItem($index())}
@@ -161,10 +166,9 @@ export function List() {
                             insert
                         </div>
                     </div>
-                ), 'id')}
-            </>
-            <button onclick={openModal}>open</button>
-            {/* <>
+                , 'id')}
+                <button onclick={openModal}>open</button>
+                {/* <>
                 {If($showSideBlock, 'create', () =>
                     <>
                         <TestBox />
@@ -172,8 +176,8 @@ export function List() {
                     </>
                 )}
             </> */}
-            <button onclick={showSideBlock}>show Side Block</button>
-        </div>
+                <button onclick={showSideBlock}>show Side Block</button>
+            </div>
     }
     )
 }

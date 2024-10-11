@@ -1,22 +1,56 @@
 import { AnyObject } from "@rue/types";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
 import {  IonicModel, storeSnapshot, toRaw } from "./ionize";
-import { defineIonicStructure, GetPreopData, useTrackableOp } from "./IonicModel";
+import { defineIonicStructure, GetPreopData, useTrackableGetOp } from "./IonicModel";
 import { getTrackedOp } from "./TrackedOp";
-import { Collection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
+import { MetaIonicModel } from "./MetaIonicModel";
 import { asTrackedProp, getObservedProp } from "./PropIon";
-import { nonTrackableCollectionKeys } from "./IonicMap";
+
+const trackableCollectionOps = {
+    keys: true,  // newIterable = keys()
+    entries: true, // newEntriesIterator = entries()
+    values: true, // newIterable = values()
+}
+
+export const trackableIterableOps = {
+    forEach: true,
+    'Symbol.iterator': true
+}
+
+export const nontrackableIterableKeys = {
+    forEach: true,
+    'Symbol.iterator': true
+}
 
 
+const trackableSetOps = {
+    has: true, // boolean = has(item) //NOTE: trackable ops
 
+    // add: true,
+    // delete: true,
+    // clear: true,
+    // forEach: true,
+    // size: true,
+    // entries: true, // newEntriesIterator = entries()
+    // keys: true, // newIterable = keys()
+    // values: true, // newIterable = values()
+
+    difference: true, // newSet = difference(otherSet) 
+    union: true,
+    intersection: true,
+    symmetricDifference: true,
+
+    isSubsetOf: true, // boolean = isSubsetOf(otherSet)
+    isSupersetOf: true, // boolean = isSupersetOf(otherSet)
+    isDisjointFrom: true, // boolean = isDisjointFrom(otherSet)
+}
 
 defineIonicStructure(Set, {
-    isCollection: true,
-    nonTrackableKeys: nonTrackableCollectionKeys,
+    nontrackableKeys: nontrackableIterableKeys,
     trackableOps: {
         has(target, ionicModel) {
-            return useTrackableOp(
-                <IonicModel<Collection>>ionicModel,
+            return useTrackableGetOp(
+                ionicModel,
                 target,
                 'has',
                 target.has
@@ -63,7 +97,7 @@ defineIonicStructure(Set, {
             createOp(target, ionicModel, meta, getPreopData) {
 
                 return useClearOp(
-                    <IonicModel<Collection>>ionicModel,
+                    ionicModel,
                     meta,
                     target,
                     getPreopData!
@@ -84,7 +118,7 @@ defineIonicStructure(Set, {
             createOp(target, ionicModel, meta, getPreopData) {
 
                 return useDeleteOp(
-                    <IonicModel<Collection>>ionicModel,
+                    ionicModel,
                     meta,
                     target,
                     getPreopData!
@@ -191,7 +225,7 @@ defineIonicStructure(Set, {
 //     }) as IonicModel<Set<any>>
 
 //     const boundMethodMap: Map<string | symbol, Function> = new Map([
-//         ['has', useTrackableOp(
+//         ['has', useTrackableGetOp(
 //             ionicModel,
 //             target,
 //             'has',
@@ -248,8 +282,8 @@ defineIonicStructure(Set, {
 
 
 export function useDeleteOp(
-    ionicModel: IonicModel<Collection>,
-    metaIonicModel: MetaIonicModel<Collection>,
+    ionicModel: IonicModel,
+    metaIonicModel: MetaIonicModel,
     target: AnyObject,
     getPreopData: GetPreopData
 ) {
@@ -290,8 +324,8 @@ export function useDeleteOp(
 
 
 export function useClearOp(
-    ionicModel: IonicModel<Collection>,
-    metaIonicModel: MetaIonicCollection,
+    ionicModel: IonicModel,
+    metaIonicModel: MetaIonicModel,
     target: AnyObject,
     getPreopData: (model: IonicModel) => any
 ) {

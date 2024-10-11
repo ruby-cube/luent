@@ -5,12 +5,12 @@ import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { IonicModel, storeSnapshot } from "./ionize";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import { Collection, isCollection, MetaIonicCollection, MetaIonicModel } from "./MetaIonicModel";
+import {  MetaIonicModel } from "./MetaIonicModel";
 import { noop } from "@rue/utils";
 import { getProtectedModelMeta, isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
 import { META } from "../ReactiveEntity";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
-import { asTrackedProp, getObservedProp } from "./PropIon";
+import { asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PropIon";
 import { protect } from "../protect";
 import { READONLY } from "../ion/ProtectedIon";
 
@@ -18,13 +18,13 @@ export const UNDEFINED_OP: Function = noop
 
 
 // A 'get op' is a o(1) get-like operation like set.has() or array.at()
-export function useTrackableOp(
-    reactive: IonicModel<Collection>,
+export function useTrackableGetOp(
+    reactive: IonicModel,
     target: AnyObject,
     op: string,
     fn: (key: any) => any,
 ) {
-    return function trackableOp(arg: any) {
+    return function trackableGetOp(arg: any) {
         if (__DEV__) emitSignal();
         const tracker = getActiveTracker()
         const _arg = toRaw(arg)
@@ -33,6 +33,12 @@ export function useTrackableOp(
         tracker.track(asTrackedOp(reactive, op, _arg))
         return fn.call(target, _arg)
     }
+}
+
+
+// a `trackable op` is a method like 'find' or 'filter' that tracks the entire ionic model as a watch subject rather than a specific entry or property
+export function useTrackableOp(){
+    //TODO: see if people would find this useful
 }
 
 // export const insertOps = {
@@ -72,9 +78,10 @@ export function useTrackableOp(
 
 //API
 export function defineIonicStructure(structureKey: any, config: CustomIonicModelConfig) {
-    const { isCollection } = config
-    if (isCollection) {
-        // register as collection
+    config.structure = structureKey;
+    const { isEntryKey } = config
+    if (isEntryKey) {
+        registerEntryKeyValidator(isEntryKey)
     }
 
     customIonicStructureMap.set(structureKey, config)
@@ -84,28 +91,35 @@ export function defineIonicStructure(structureKey: any, config: CustomIonicModel
 
 
 
-export function getStructureKeys(target: AnyObject) {
-    return getStructureKey(target, [])
+export function getStructureConfigs(target: AnyObject) {
+    return getStructureConfig(target, [])
 }
 
-function getStructureKey(target: AnyObject, dataStructures: any[]) {
+function getStructureConfig(target: AnyObject, configs: any[]) {
     const proto = Object.getPrototypeOf(target); //TODO: custom get data structure for factory functions
-    if (!proto) return dataStructures;
+    if (!proto) return configs;
     const constructor = proto.constructor;
     if (!isCustomIonicStructure(constructor)) {
-        return getStructureKey(proto, dataStructures)
+        return getStructureConfig(proto, configs)
     }
-    dataStructures.push(constructor);
-    return getStructureKey(proto, dataStructures)
+    const config = customIonicStructureMap.get(constructor)
+    if (config) configs.push(config);
+    return getStructureConfig(proto, configs)
 }
 
 type CustomIonicModelConfig = {
-    isCollection?: boolean,
-    nonTrackableKeys?: { [key: PropertyKey]: boolean };
+    structure?: any;
+    nontrackableKeys?: { [key: PropertyKey]: boolean };
     trackableOps?: { [key: PropertyKey]: CreateTrackableOp }
     mutatingOps?: { [key: PropertyKey]: MutatingOpConfig };
+    beforeSet?: BeforeSetCallback; //TODO:
+    afterSet?: AfterSetCallback;
+    isEntryKey?: (model: AnyObject, key: PropertyKey) => boolean
     // getStructureKeys: (model: AnyObject) => any[]
 }
+
+type BeforeSetCallback = (ionicModel: IonicModel, meta: MetaIonicModel, key: PropertyKey, oldValue: any) => void
+type AfterSetCallback = (ionicModel: IonicModel, meta: MetaIonicModel, key: PropertyKey, newValue: any, oldValue: any) => void
 
 type CreateTrackableOp = (target: AnyObject, ionicModel: IonicModel<AnyObject>) => (...args: any[]) => any
 
@@ -130,29 +144,36 @@ function isCustomIonicStructure(value: any) {
 //     return config.mutatingOps
 // }
 
-
-
-function getNonTrackableKeys(structureKey: any) {
-    return customIonicStructureMap.get(structureKey)?.nonTrackableKeys
+function emitAfterSet(structureConfigs: CustomIonicModelConfig[], ionicModel: IonicModel, meta: MetaIonicModel, key: PropertyKey, newValue: any, oldValue: any) {
+    if (structureConfigs[0].structure === Object) return;
+    for (const config of structureConfigs) {
+        const afterSet = config.afterSet
+        if (afterSet) afterSet(ionicModel, meta, key, newValue, oldValue)
+    }
 }
 
 
-export function isNonTrackable(key: PropertyKey, dataStructures: Function[]) {
-    for (const DataStructure of dataStructures) {
-        const nonTrackableKeys = getNonTrackableKeys(DataStructure)
-        if (nonTrackableKeys && key in nonTrackableKeys) return true;
-        if (typeof key === 'symbol' && key.description && nonTrackableKeys && key.description in nonTrackableKeys) return true;
+function getNonTrackableKeys(structureKey: any) {
+    return customIonicStructureMap.get(structureKey)?.nontrackableKeys
+}
+
+
+export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonicModelConfig[]) {
+    for (const config of structureConfigs) {
+        const nontrackableKeys = config.nontrackableKeys
+        if (nontrackableKeys && key in nontrackableKeys) return true;
+        if (typeof key === 'symbol' && key.description && nontrackableKeys && key.description in nontrackableKeys) return true;
     }
     return false;
 }
 
 
 export function createCustomIonicModel(
-    dataStructures: any[],
+    structureConfigs: CustomIonicModelConfig[],
     target: AnyObject,
     methods: AnyObject | undefined
 ) {
-    const metaIonicModel = isCollection(target) ? new MetaIonicCollection(target, methods) : new MetaIonicModel(target, methods)
+    const metaIonicModel = new MetaIonicModel(target, methods)
 
     const ionicModel = new Proxy(target, {
         get(target, key, receiver) {
@@ -176,7 +197,7 @@ export function createCustomIonicModel(
                     methods[key]
                 )
             }
-            if (isMutatingOps(key, dataStructures)) {
+            if (isMutatingOps(key, structureConfigs)) {
                 if (protectedMeta) {
                     const keys = protectedMeta.propertyKeys
                     if (keys && key in keys) {
@@ -196,7 +217,7 @@ export function createCustomIonicModel(
             // if (typeof key === 'symbol' && key.description === 'Symbol.iterator') { //TODO: make this part of isNonTrackable?
             //     return value;
             // }
-            if (isNonTrackable(key, dataStructures))
+            if (isNonTrackable(key, structureConfigs))
                 return value;
             if (isAnyIon(value)) return value();
 
@@ -218,7 +239,7 @@ export function createCustomIonicModel(
         },
         set(target, key, value, receiver) {
             return reactiveSetter(
-                dataStructures,
+                structureConfigs,
                 ionicModel,
                 metaIonicModel,
                 target,
@@ -229,7 +250,7 @@ export function createCustomIonicModel(
         }
     }) as IonicModel<Map<any, any>>
 
-    const boundMethodMap = createBoundMethodMap(dataStructures, target, ionicModel, metaIonicModel)
+    const boundMethodMap = createBoundMethodMap(structureConfigs, target, ionicModel, metaIonicModel)
 
     metaIonicModel.initIonicModel(ionicModel)
     registerIonicModel(ionicModel, target)
@@ -249,8 +270,8 @@ function maybeIonize(value: any, target: AnyObject, proxy: AnyObject, receiver: 
     return ionize(value)
 }
 
-function isMutatingOps(key: PropertyKey, structureKeys: any[]){
-    for (const structure in structureKeys){
+function isMutatingOps(key: PropertyKey, structureKeys: any[]) {
+    for (const structure in structureKeys) {
         const mutatingOps = customIonicStructureMap.get(structure)?.mutatingOps
         if (!mutatingOps) continue;
         if (key in mutatingOps) return true;
@@ -259,14 +280,14 @@ function isMutatingOps(key: PropertyKey, structureKeys: any[]){
 }
 
 
-function createBoundMethodMap(structureKeys: any[], target: AnyObject, ionicModel: IonicModel, meta: MetaIonicModel | MetaIonicCollection) {
+function createBoundMethodMap(structureKeys: any[], target: AnyObject, ionicModel: IonicModel, meta: MetaIonicModel ) {
 
     const methodMap = new Map()
 
     for (const key in structureKeys) {
         const mutatingOps = customIonicStructureMap.get(key)?.mutatingOps
         if (!mutatingOps) continue;
-        for (const opKey in mutatingOps){
+        for (const opKey in mutatingOps) {
             const createOp = mutatingOps[opKey].createOp
             const getPreopData = mutatingOps[opKey].preop
             methodMap.set(opKey, createOp(target, ionicModel, meta, getPreopData)) //TODO: should I create these lazily?
@@ -276,7 +297,7 @@ function createBoundMethodMap(structureKeys: any[], target: AnyObject, ionicMode
     for (const key in structureKeys) {
         const trackableOps = customIonicStructureMap.get(key)?.trackableOps
         if (!trackableOps) continue;
-        for (const opKey in trackableOps){
+        for (const opKey in trackableOps) {
             const createOp = trackableOps[opKey]
             methodMap.set(opKey, createOp(target, ionicModel))
         }
@@ -327,7 +348,7 @@ function getBoundMethod(
 
 
 export function reactiveSetter(
-    dataStructures: any[], // and Tuple
+    structureConfigs: CustomIonicModelConfig[], // and Tuple
     ionicModel: IonicModel,
     metaIonicModel: MetaIonicModel,
     target: AnyObject,
@@ -343,10 +364,10 @@ export function reactiveSetter(
 
     const oldValue = Reflect.get(target, key, receiver);
     if (isAnyIon(oldValue) && !isAnyIon(newValue)) {
-        return setAbsorbedIon(oldValue, newValue)
+        return setAbsorbedIon(oldValue, newValue, ionicModel, key, oldValue(), structureConfigs)
     }
     if (oldValue === newValue
-        || isNonTrackable(key, dataStructures)
+        || isNonTrackable(key, structureConfigs)
         || !isWritable(target, key)) {
         target[key] = newValue
         return true;
@@ -364,6 +385,8 @@ export function reactiveSetter(
         trigger(prop, _newValue, _oldValue)
     }
 
+    emitAfterSet(structureConfigs, ionicModel, metaIonicModel, key, _newValue, _oldValue)
+
     triggerIonicModel(
         ionicModel,
         with_op = '[[set]]',
@@ -375,11 +398,33 @@ export function reactiveSetter(
     return true;
 }
 
+// function getTrackedOp(ionicModel: IonicModel, key: PropertyKey, structureConfigs: any[]) {
+//     for (const structures of structureConfigs) {
+//         const trackableOps = customIonicStructureMap.get(structures)?.trackableOps
+//         if (trackableOps) {
 
+//         }
+//     }
+// }
 
-export function setAbsorbedIon(ion: AnyIon, value: any) {
+export function setAbsorbedIon(ion: AnyIon, value: any, ionicModel: IonicModel, key: PropertyKey, oldValue: any, structureConfigs: CustomIonicModelConfig[]) {
     if ('set' in ion) {
         ion.set(value);
+
+        const prop = getObservedProp(ionicModel, key);
+        if (prop) {
+            trigger(prop, value, oldValue)
+        }
+
+        emitAfterSet(structureConfigs, ionicModel, asMetaIonicModel(ionicModel), key, value, oldValue)
+
+        triggerIonicModel(
+            ionicModel,
+            with_op = '[[set]]',
+            with_args = [key, value],
+            with_output = value,
+            with_preopData = oldValue,
+        )
         return true;
     }
     if (__DEV__) throw new Error("Absorbed Ion is read only")
