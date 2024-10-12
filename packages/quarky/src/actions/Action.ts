@@ -105,7 +105,7 @@ function doAction(actionKey: string | TypedKey<(...args: unknown[]) => unknown>,
 }
 
 
-function trackAction(reactivePrimitive: Ion | ObservedProp) {
+function trackAction(reactivePrimitive: Ion | PropIon) {
     const action = getCurrentAction();
     if (!action) return;
     action.trackChange(reactivePrimitive)

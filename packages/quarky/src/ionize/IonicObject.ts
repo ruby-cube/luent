@@ -1,6 +1,8 @@
 import { isIonicModel, IonicModel, toRaw, ionize, registerIonicModel } from "./ionize";
 import { defineIonicStructure } from "./IonicModel";
 
+export const runningIonicObject = true;
+
 export function isIonicObject(value: any): value is IonicModel {
     if (!isIonicModel(value)) return false;
     const raw = toRaw(value);

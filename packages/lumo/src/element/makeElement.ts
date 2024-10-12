@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { DOMNode } from "../component/InternalComponent";
 import { DerivedIon, ReactiveGet, isAnyIon, getCurrentRenderCycle, Phase, isIon } from "../../../quarky/src";
 import { noop, normalizeToArray } from "@rue/utils";
@@ -129,8 +130,9 @@ function analyzeAttributes(entries: AnyObject) {
 function setUpAttributes(node: Element, attributes: { [key: string]: any | DerivedIon<any> }) {
     for (const key in attributes) {
         const value = attributes[key]
+        //TODO: only attributes that affect layout should be scheduled for render
         if (isAnyIon(value)) {
-            watch(value, (newValue) => { //TODO: only attributes that affect layout should be scheduled for render
+            watch(value, (newValue) => {
                 setAttribute(node, key, newValue)
             }, { eager: true, phase: Phase.RENDER })
         }

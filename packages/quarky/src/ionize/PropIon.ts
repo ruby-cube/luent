@@ -93,7 +93,7 @@ class MetaPropIon {
         if (this.asAtom) return;
 
         const atom = this.asAtom = asIonicAtom(this.o)
-        
+
         if (this.isEntryKey)
             asMetaIonicModel(this.model).addObservedEntryKey(this.key)
 
@@ -197,8 +197,9 @@ export function getObservedProp( // observed means watched and/or tracked
     key: PropertyKey
 ) {
     const prop = getPropIon(ionicModel, key);
+    if (!prop) return undefined;
     const meta = asMetaIon(prop);
-    if (prop && (meta.asWatchSubject || meta.asAtom)) return prop;
+    if (meta.asWatchSubject || meta.asAtom) return prop;
     return undefined;
 }
 

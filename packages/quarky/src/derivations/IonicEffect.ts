@@ -1,5 +1,4 @@
 import { Ion } from "../ion/Ion";
-import { ObservedProp } from "../ionize/ObservedProp";
 import { PropIon } from "../ionize/PropIon";
 import { META } from "../ReactiveEntity";
 import { asIonicAtom } from "./IonicAtom";

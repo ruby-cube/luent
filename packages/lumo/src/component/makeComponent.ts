@@ -75,7 +75,7 @@ export function getActiveComponent() {
     return activeComponent;
 }
 
-function makeComponent(
+export function makeComponent(
     Component: ComponentSetup,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
@@ -132,7 +132,7 @@ export function initializeComponent(
     ref: NodeRef | IonicModel<any[]> | undefined,
     $index: Ion<number> | undefined,
 ) {
-    const nodeEntities = normalizeToFragmentArray(extractNodeEntities(rendered)); //TODO: Validate output and get publicComponent from out
+    const nodeEntities = normalizeToFragmentArray(rendered); //TODO: Validate output and get publicComponent from out
     component.initialNodeEntities = nodeEntities;
     if (ref) {
         if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef Ion as ref")

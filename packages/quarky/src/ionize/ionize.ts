@@ -57,7 +57,7 @@ type Ionized<T extends AnyObject, M> = {
 
 //API
 export function ionize<T extends AnyObject, M extends AnyObject>(target: T, methods?: M): { [K in keyof Ionized<T, M>]: Ionized<T, M>[K] } {
-    if (isAnyIon(target) || isInert(target) || !isIonizable(target)) {
+    if (isIonicModel(target) || isAnyIon(target) || isInert(target) || !isIonizable(target)) {
         if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
         return target as T & M;
     }

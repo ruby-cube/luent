@@ -1,7 +1,7 @@
-import { DerivedIon, ReactiveGet, Ion, getWithoutTracking, DerivedIon, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked } from "../../../quarky/src";
+import { DerivedIon, ReactiveGet, Ion, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked } from "../../../quarky/src";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
-import { makeComponent, InferSlot, ComponentSetupWithSlot } from "../component/makeComponent";
+import { InferSlot, ComponentSetupWithSlot, makeComponent } from "../component/makeComponent";
 import { getNodeArrayRef, InternalNodeRef, NodeReferent, NodeRef, InternalNodeArrayRef, NodesIon, getNodeRef } from "./NodeRef";
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
@@ -108,6 +108,7 @@ export function initializeListRef( // should this be initialize ref?
     // dispose with outer flask because we don't want to dispose when first item is removed
     const outerFlask = getFlask()?.outer
     outerFlask?.onDisposal(() => {
+        console.log('outer flask dispolsal resetting ref')
         _ref.setValue([]);
         _ref.initialized = false;
     })
@@ -115,7 +116,7 @@ export function initializeListRef( // should this be initialize ref?
     if (isSettingUpList() && !__SSR__) {
         onListUpdated((toFromIndices) => {
             _ref.updateListRef(toFromIndices)
-        }, { flask: outerFlask })
+        }, { until: (cleanup) => outerFlask!.onDisposal(cleanup) }) //FIX:
     }
 
     _ref.markInitialized()

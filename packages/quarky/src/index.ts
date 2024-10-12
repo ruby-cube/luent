@@ -3,6 +3,7 @@ export * from "./debug" //TODO: limit exports to public api
 export * from "./ionize/ionize" //TODO: limit exports to public api
 export * from "./ion/Ion" //TODO: limit exports to public api
 export * from "./ion/AnyIon" //TODO: limit exports to public api
+export * from "./ion/Ref" //TODO: limit exports to public api
 export * from "./derivations/DependencyTracker" //TODO: limit exports to public api
 export * from "./effects/watch" //TODO: limit exports to public api
 export * from "./protect" //TODO: limit exports to public api

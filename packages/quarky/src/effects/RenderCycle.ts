@@ -1,11 +1,9 @@
 import { setImmediate, clearImmediate } from "@rue/thread";
 import { $schedule, LIFETIME, NEVER, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
 import { SetMap } from "@rue/utils";
-import { MutationRecord } from "./deepWatch";
 import { asMetaIonicModel, IonicModel } from "../ionize/ionize";
 import { MetaIonicModel } from "../ionize/MetaIonicModel";
-import { PendingCancelOp } from "../../../flask/PendingCancelOp";
-// import { runEffect } from "./watch";
+import { MutationRecord } from "./watch";
 
 export type Watchable = any
 // Ion | DerivedIon | IonicEffect  | IonicModel | ObservedProp

@@ -150,11 +150,11 @@ export function List(
 
     const $itemDivs = NodesRef('div')
 
-    const $alive = Ion(true)
+    // const $alive = Ion(true)
 
-    function destroy() {
-        $alive.set(false)
-    }
+    // function destroy() {
+    //     $alive.set(false)
+    // }
     // const $item = $list[0]
     //     watch($(() => $item.content), (newValue, oldValue) => {
     //         console.log("changed", newValue, oldValue)
@@ -166,7 +166,7 @@ export function List(
     // }, 1)
 
     // const $listIsEmpty = DerivedIon(() => $list.length === 0)
-    return Component(
+    return Component(()=>
         <>
             <>
                 {If(() => $list.length === 0, () =>

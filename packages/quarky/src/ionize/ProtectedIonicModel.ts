@@ -73,20 +73,24 @@ function createReadonlyIonicModel(model: IonicModel) {
 
 export function isProtectedProxy(target: AnyObject, proxy: AnyObject, receiver: AnyObject) {
     if (receiver !== proxy)
-        return receiver[READONLY_IONIC_MODEL] || receiver[PROTECTED_META];
-    return Reflect.get(target, READONLY_IONIC_MODEL, receiver) || Reflect.get(target, PROTECTED_META, receiver)
+        return !!receiver[READONLY_IONIC_MODEL] || !!receiver[PROTECTED_META];
+    // return Reflect.get(target, READONLY_IONIC_MODEL, receiver) || Reflect.get(target, PROTECTED_META, receiver)
+    return false;
 }
 
 export function isReadonlyProxy(target: AnyObject, proxy: AnyObject, receiver: AnyObject) {
     if (receiver !== proxy)
-        return receiver[READONLY_IONIC_MODEL]
-    return Reflect.get(target, READONLY_IONIC_MODEL, receiver)
+        return !!receiver[READONLY_IONIC_MODEL]
+    return false;
 }
 
 export function getProtectedModelMeta(target: AnyObject, proxy: AnyObject, receiver: AnyObject): {propertyKeys: {[key: string]: true} | undefined} | undefined {
-    if (receiver !== proxy)
+    if (receiver !== proxy){
+        console.log('receiver', receiver)
+        console.log('proxy', proxy)
         return receiver[PROTECTED_META];
-    return Reflect.get(target, PROTECTED_META, receiver)
+    }
+    return undefined;
 }
 
 // export function getCustomProtectedModelKeys(target: AnyObject, proxy: AnyObject, receiver: AnyObject){

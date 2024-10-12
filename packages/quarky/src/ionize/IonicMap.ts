@@ -5,6 +5,8 @@ import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { asTrackedProp, getObservedProp } from "./PropIon";
 import { defineIonicStructure, useTrackableGetOp } from "./IonicModel";
 
+export const runningIonicMap = true;
+
 // Trackable keys vs trackable ops:
 // Trackable keys is about tracking the property
 // trackable ops is about tracking the get op or the whole ionic model (depending on the type of operation)
@@ -72,10 +74,10 @@ defineIonicStructure(Map, {
 
                     triggerIonicModel(
                         ionicModel,
-                        with_op = 'set',
-                        with_args = [key, _newValue],
-                        with_output = output,
-                        with_preopData = oldValue
+                        'set',
+                        [key, _newValue],
+                        output,
+                        oldValue
                     )
 
                     return output;

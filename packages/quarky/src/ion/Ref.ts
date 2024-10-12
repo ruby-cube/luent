@@ -8,8 +8,8 @@ const INERT = true;
 
 type InertIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? Ion<T, M> : Ion<T>
 
-export function ref<T, M>(value: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends AnyIon ? T : InertIon<T, M> {
-    if (isAnyIon(value)) return value as T extends  AnyIon  ? T : InertIon<T, M>
+export function Ref<T, M>(value: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends AnyIon ? T : InertIon<T, M> {
+    if (isAnyIon(value)) return value as T extends  AnyIon  ? T : InertIon<T, M> //TODO: error message?
     return createIon(value, methods, INERT) as T extends  AnyIon  ? T : InertIon<T, M>
 }
 
@@ -25,8 +25,8 @@ export type DerivedRef<T = any> = {
 
 type InertDerivedIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? WritableDerivedIon<T, M> : DerivedIon<T>
 
-export function derivedRef<T, M, D>(derivation: D & (() => T), methods?: M & { [key: string]: (...args: any[]) => any }): D extends AnyIon? D : InertDerivedIon<T, M> {
-    if (isAnyIon(derivation)) return derivation as D extends AnyIon  ? D : InertDerivedIon<T, M>;
+export function DerivedRef<T, M, D>(derivation: D & (() => T), methods?: M & { [key: string]: (...args: any[]) => any }): D extends AnyIon? D : InertDerivedIon<T, M> {
+    if (isAnyIon(derivation)) return derivation as D extends AnyIon  ? D : InertDerivedIon<T, M>; //TODO: Error message?
     if (methods) return createWritableDerivedIon(derivation, methods, INERT) as D extends AnyIon ? D : InertDerivedIon<T, M>
     return createDerivedIon(derivation, undefined, INERT) as D extends AnyIon ? D : InertDerivedIon<T, M>
 }

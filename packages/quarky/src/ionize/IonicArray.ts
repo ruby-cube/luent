@@ -8,6 +8,7 @@ import { asTrackedProp, getObservedProp } from "./PropIon";
 import { MetaIonicModel } from "./MetaIonicModel";
 import { nontrackableIterableKeys } from "./IonicSet";
 
+export const runningIonicArray = true;
 
 const trackableArrayOps = {
 

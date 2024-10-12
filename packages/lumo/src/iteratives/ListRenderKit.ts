@@ -1,4 +1,4 @@
-import { Ion, isAnyIon, isIonicModel, Ion, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "../../../quarky/src";
+import {  isAnyIon, isIonicModel, Ion, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "../../../quarky/src";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
@@ -111,7 +111,6 @@ export class ListRenderKit<T = any> {
 
         // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
 
-        data
         if (isDynamic) {
             const dynamicIndices = new DynamicIndices(indices)
             // set up watcher for updates
@@ -121,6 +120,7 @@ export class ListRenderKit<T = any> {
             const rawData = isIonicModel(data) ? toRaw(data) : undefined
             let clone = isIonicModel(data) ? shallowClone(rawData!) : undefined
             watch(<DerivedIon>data, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
+                console.log('updating list')
                 const _oldValue = clone || oldValue;
                 if (_isIonicModel) clone = shallowClone(rawData!) as any[]
                 const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || newValue, _oldValue, idKey)

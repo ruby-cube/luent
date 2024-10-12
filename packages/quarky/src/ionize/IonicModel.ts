@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { asMetaIonicModel, ionize, registerIonicModel, toRaw } from "./ionize";
+import { asMetaIonicModel, ionize, isIonicModel, registerIonicModel, toRaw } from "./ionize";
 import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
@@ -14,8 +14,10 @@ import { asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./Pro
 import { protect } from "../protect";
 import { READONLY } from "../ion/ProtectedIon";
 
-export const UNDEFINED_OP: Function = noop
 
+
+
+export const UNDEFINED_OP: Function = noop
 
 // A 'get op' is a o(1) get-like operation like set.has() or array.at()
 export function useTrackableGetOp(
@@ -174,7 +176,7 @@ export function createCustomIonicModel(
     methods: AnyObject | undefined
 ) {
     const metaIonicModel = new MetaIonicModel(target, methods)
-
+    if (isIonicModel(target)) console.trace('already ionized')
     const ionicModel = new Proxy(target, {
         get(target, key, receiver) {
             if (__DEV__) emitSignal()
@@ -210,6 +212,15 @@ export function createCustomIonicModel(
                         )
                     }
                     return undefined;
+                }
+                else {
+                    return accessMethod(
+                        target,
+                        ionicModel,
+                        receiver,
+                        key,
+                        boundMethodMap
+                    )
                 }
             }
 
@@ -285,6 +296,7 @@ function createBoundMethodMap(structureConfigs: CustomIonicModelConfig[], target
     if (structureConfigs[0].structure === Object) return methodMap;
 
     for (const config of structureConfigs) {
+        console.log('config', config)
         const mutatingOps = config.mutatingOps
         if (!mutatingOps) continue;
         for (const opKey in mutatingOps) {
@@ -292,16 +304,16 @@ function createBoundMethodMap(structureConfigs: CustomIonicModelConfig[], target
             const getPreopData = mutatingOps[opKey].preop
             methodMap.set(opKey, createOp(target, ionicModel, meta, getPreopData)) //TODO: should I create these lazily?
         }
-    }
 
-    for (const config of structureConfigs) {
         const trackableOps = config.trackableOps
         if (!trackableOps) continue;
         for (const opKey in trackableOps) {
             const createOp = trackableOps[opKey]
+            console.log('opKey', opKey, createOp)
             methodMap.set(opKey, createOp(target, ionicModel))
         }
     }
+
 
     return methodMap;
 }
@@ -389,10 +401,10 @@ export function reactiveSetter(
 
     triggerIonicModel(
         ionicModel,
-        with_op = '[[set]]',
-        with_args = [key, _newValue],
-        with_output = _newValue,
-        with_preopData = _oldValue,
+        '[[set]]',
+        [key, _newValue],
+        _newValue,
+        _oldValue,
     )
 
     return true;
@@ -413,10 +425,10 @@ export function setAbsorbedIon(ion: AnyIon, value: any, ionicModel: IonicModel, 
 
         triggerIonicModel(
             ionicModel,
-            with_op = '[[set]]',
-            with_args = [key, value],
-            with_output = value,
-            with_preopData = oldValue,
+            '[[set]]',
+            [key, value],
+            value,
+            oldValue,
         )
         return true;
     }

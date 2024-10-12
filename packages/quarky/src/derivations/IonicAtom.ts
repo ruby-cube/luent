@@ -1,6 +1,6 @@
 import { useRenderCycle } from "../effects/RenderCycle";
 import { Ion } from "../ion/Ion";
-import {isIonicModel } from "../ionize/ionize";
+import { isIonicModel } from "../ionize/ionize";
 import { PropIon } from "../ionize/PropIon";
 import { TrackedOp } from "../ionize/TrackedOp";
 import { IonicDerivation } from "./IonicDerivation";
@@ -39,11 +39,10 @@ export class IonicAtom {
                 const atom = this.primitive;
                 useRenderCycle().recordOp(reactive, {
                     target: atom,
-                    op: {
-                        type: 'set',
-                        newValue,
-                        oldValue
-                    }
+                    op: 'set',
+                    args: [newValue],
+                    output: newValue,
+                    preopData: oldValue
                 })
             }
             derivation.trigger();

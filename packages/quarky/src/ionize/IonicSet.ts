@@ -4,7 +4,9 @@ import {  IonicModel, storeSnapshot, toRaw } from "./ionize";
 import { defineIonicStructure, GetPreopData, useTrackableGetOp } from "./IonicModel";
 import { getTrackedOp } from "./TrackedOp";
 import { MetaIonicModel } from "./MetaIonicModel";
-import { asTrackedProp, getObservedProp } from "./PropIon";
+import { getObservedProp } from "./PropIon";
+
+export const runningIonicSet = true;
 
 const trackableCollectionOps = {
     keys: true,  // newIterable = keys()
@@ -105,7 +107,7 @@ defineIonicStructure(Set, {
             },
 
             preop(model) {
-                return Array.from(<Set< any>>model)
+                return Array.from(<Set< any>>toRaw(model))
             },
 
             revert(ionicModel, { preopData }) {
@@ -224,25 +226,25 @@ defineIonicStructure(Set, {
 //         }
 //     }) as IonicModel<Set<any>>
 
-//     const boundMethodMap: Map<string | symbol, Function> = new Map([
-//         ['has', useTrackableGetOp(
-//             ionicModel,
-//             target,
-//             'has',
-//             target.has
-//         )],
-//         ['add', addOp],
-//         ['clear', useClearOp(
-//             ionicModel,
-//             metaIonicModel,
-//             target
-//         )],
-//         ['delete', useDeleteOp(
-//             ionicModel,
-//             metaIonicModel,
-//             target
-//         )]
-//     ])
+    // const boundMethodMap: Map<string | symbol, Function> = new Map([
+    //     ['has', useTrackableGetOp(
+    //         ionicModel,
+    //         target,
+    //         'has',
+    //         target.has
+    //     )],
+    //     ['add', addOp],
+    //     ['clear', useClearOp(
+    //         ionicModel,
+    //         metaIonicModel,
+    //         target
+    //     )],
+    //     ['delete', useDeleteOp(
+    //         ionicModel,
+    //         metaIonicModel,
+    //         target
+    //     )]
+    // ])
 
 //     function addOp(newValue: any) {
 //         const oldSize = target.size
