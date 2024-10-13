@@ -98,7 +98,8 @@ export function isCurrentWatchSubject(atom: Ion | PropIon) {
 }
 
 
-function normalizeWatchSubjects(subjects: (AnyIon | ReactiveGet | IonicModel)[]) {
+function normalizeWatchSubjects(subjects: ((AnyIon | ReactiveGet | IonicModel)[]) | undefined) {
+    if (!subjects) return;
     for (let i = 0; i < subjects.length; i++) {
         const subject = subjects[i]
         subjects[i] = normalizeWatchSubject(subject)
@@ -172,13 +173,15 @@ export function watch<T extends AnyIon | ReactiveGet | IonicModel | (AnyIon | Re
     if (!isMultiSubject && !isReactive(subject)) return { // inert watch subjects
         stop: noop
     }
+// if ('name' in subject && subject.name === '__$propIon') console.log(subject)
+
 
     const eager = options?.eager
     const phase = options?.phase ?? Phase.BEFORE_RENDER
 
-    const subjects = isMultiSubject ? normalizeWatchSubjects(subject) : [normalizeWatchSubject(subject)]
+    const subjects = isMultiSubject ? normalizeWatchSubjects(subject)! : [normalizeWatchSubject(subject)]
     const watchSubjects = asWatchSubjects(subjects)
-
+    if (isPropIon(subject)) console.log('change name', watchSubjects)
     const subject0 = subjects[0];
     // const _watchSubject = isMultiSubject ? watchSubjects : watchSubjects[0];
     const ionicDerivations = isMultiSubject ? getIonicDerivations(subject, subjects) : subject instanceof Function ? [asMetaIon(subject0) as IonicDerivation] : undefined
@@ -189,6 +192,7 @@ export function watch<T extends AnyIon | ReactiveGet | IonicModel | (AnyIon | Re
 
     function changeEffect() {
         const newValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when retracking happens
+
         if (isMultiSubject && noChanges(subjects, newValue, oldValue)
             || isAnyIon(subject0) && noChange(newValue, oldValue)
             || isIonicModel(subject) && noMutations(subject))
@@ -328,15 +332,19 @@ export function watchIonicEffect(effect: () => void, options?: EffectOptions) { 
     const retrack = options?.retrack || false;
     const selectiveSubjects = options?.only;
     const selector = selectiveSubjects?.[0] === true ? true : false;
-    const additionalSubjects = options?.also || selector ? selectiveSubjects!.slice(1) : selectiveSubjects;
-    if (selectiveSubjects && options?.also) throw Error(`INVALID OPTIONS: Cannot configure watchIonicEffect with both 'only' and 'also' options.`)
+    const additionalSubjects = normalizeWatchSubjects(options?.also || selector ? <any[]>selectiveSubjects!.slice(1) : selectiveSubjects);
+    const additionalWatchSubjects = additionalSubjects ? asWatchSubjects(additionalSubjects) : [];
     const $activeEffect = Ref<ThisEffect>()
     const reactiveEffect = createIonicEffect(effect, $activeEffect, selector, retrack)
     const watchSubject = asWatchSubject(reactiveEffect);
+
+    if (__DEV__ && selectiveSubjects && options?.also)
+        throw Error(`INVALID OPTIONS: Cannot configure watchIonicEffect with both 'only' and 'also' options.`)
+
     scheduleEffectEagerly(reactiveEffect.initialize, phase);
 
     return setUpWatcher(
-        [watchSubject],
+        [watchSubject, ...additionalWatchSubjects],
         reactiveEffect,
         $activeEffect,
         phase,

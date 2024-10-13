@@ -63,7 +63,8 @@ class MetaPropIon {
     constructor(
         public o: PropIon,
         public model: IonicModel,
-        public key: PropertyKey
+        public key: PropertyKey,
+        public inert: boolean = false
     ) {
         asMetaIonicModel(model).registerPropIon(key, o)
         this.isEntryKey = isEntryKey(toRaw(model), key)
@@ -156,22 +157,29 @@ function createPropIon<T extends IonicModel, K extends keyof T>(ionicModel: T, k
         return ionicModel[key];
     }
 
-    __$propIon[META] = new MetaPropIon(<PropIon>__$propIon, ionicModel, key)
-    __$propIon.set = (newValue: T[K]) => {
-        reregisterIfNeeded()
-        if (__DEV__) __devCheckIfTracked()
-        return setValue(ionicModel, key, newValue, ionicModel[key])
+    const proto = {
+        [META]: new MetaPropIon(<PropIon>__$propIon, ionicModel, key),
+        set: (newValue: T[K]) => {
+            reregisterIfNeeded()
+            if (__DEV__) __devCheckIfTracked()
+            return setValue(ionicModel, key, newValue, ionicModel[key])
+        }
     }
+
+    Object.setPrototypeOf(__$propIon, proto)
+
+    // __$propIon[META] = new MetaPropIon(<PropIon>__$propIon, ionicModel, key)
+    // __$propIon.set = 
 
     function reregisterIfNeeded() {
         const metaIonicModel = asMetaIonicModel(ionicModel);
         if (!metaIonicModel.getPropIon(key)) {
             if (__DEV__) console.warn(`[CASE RESEARCH] I'm curious how often and in what cases this happens: $propIon for ${key.toString()} in${JSON.stringify(rawTarget)} is no longer observed, but there's still an active reference to it`)
-            metaIonicModel.registerPropIon(key, __$propIon) // This means $propIon is not being watched and is not an atom anywhere, but it's still being used
+            metaIonicModel.registerPropIon(key, __$propIon as PropIon) // This means $propIon is not being watched and is not an atom anywhere, but it's still being used
         }
     }
 
-    return isProtectedIonicModel(ionicModel) || readonly ? protectIon(__$propIon, READONLY) : __$propIon
+    return isProtectedIonicModel(ionicModel) || readonly ? protectIon(__$propIon as PropIon, READONLY) : __$propIon
 }
 
 export function asTrackedProp(

@@ -22,7 +22,7 @@ export type Ion<T = any, M extends AnyObject = {}> = {
 type ReactiveIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? Ion<T, M> : Ion<T>
 
 // API
-export function Ion<T, M = undefined>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveIon<T, M> {
+export function Ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveIon<T, M> {
     if (isAnyIon(value)) throw new Error('INVALID INPUT: Ions cannot be made into ions')
     return createIon(value, methods) as  ReactiveIon<T, M>
 }

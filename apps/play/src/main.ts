@@ -16,6 +16,7 @@ import { TestMorphic } from './TestMorphic';
 import { ParentBlock } from './ProvideState';
 import { watchIonicEffect, Ion } from '@rue/quarky';
 import { TestIonicEffect } from './TestIonicEffect';
+import { TestSelectiveTracking } from './TestSelectiveTracking';
 // import { ionize, ionize } from '@rue/quarky';
 // import { DeepReactiveModel, asMetaIonicModel, ionize, ionize } from '@rue/quarky';
 // import { MountIf } from './TestMountIf';
@@ -28,7 +29,7 @@ import { TestIonicEffect } from './TestIonicEffect';
 
 
 
-const app = createApp(List)
+const app = createApp(TestSelectiveTracking)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true
