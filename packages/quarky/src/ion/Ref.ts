@@ -7,19 +7,20 @@ import { createIon, Ion, MetaIon } from "./Ion";
 const INERT = true;
 
 type InertIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? Ion<T, M> : Ion<T>
+export type Ref<T, M = undefined> = M extends { [key: string]: (...args: any[]) => any } ? Ion<T, M> : Ion<T>
 
-export function Ref<T, M>(value: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends AnyIon ? T : InertIon<T, M> {
+export function Ref<T, M = undefined>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends AnyIon ? T : InertIon<T, M> {
     if (isAnyIon(value)) return value as T extends  AnyIon  ? T : InertIon<T, M> //TODO: error message?
     return createIon(value, methods, INERT) as T extends  AnyIon  ? T : InertIon<T, M>
 }
 
 export type WritableDerivedRef<T = any, M extends AnyObject = {}> = {
-    (): T;
+    (selected?: true): T
     [META]: MetaDerivedIon;
 } & M
 
 export type DerivedRef<T = any> = {
-    (): T;
+    (selected?: true): T
     [META]: MetaDerivedIon;
 } 
 

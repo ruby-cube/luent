@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { asWatchSubject, WatchSubject } from "./WatchSubject";
-import { $listen, ActiveListener, ListenerOptions } from "@rue/flask";
+import { $listen, ActiveListener, getFlask, ListenerOptions } from "@rue/flask";
 import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
@@ -8,7 +8,7 @@ import { ReactiveGet, DerivedIon, isDerivedIon } from "../derivations/DerivedIon
 import { asMetaIonicModel, isIonicModel, IonicModel, toRaw, } from "../ionize/ionize";
 import { areEqual } from "./areEqual";
 import { createIonicEffect, IonicEffect } from "../derivations/IonicEffect";
-import { META } from "../ReactiveEntity";
+import { isReactive, META } from "../ReactiveEntity";
 import { noop } from "@rue/utils";
 import { __devCheckIfTracked } from "../derivations/DependencyTracker";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
@@ -32,6 +32,8 @@ export type WatchOptions = {
 
 export type EffectOptions = {
     retrack?: true;
+    only?: (boolean | IonicModel | AnyIon)[];
+    also?: (IonicModel)[]
 } & RenderCycleOptions & ListenerOptions & WatchDebugOptions
 
 
@@ -150,52 +152,50 @@ function getIonicDerivations(inputSubjects: (AnyIon | ReactiveGet | IonicModel)[
     if (derivations.length) return derivations;
 }
 
-//TODO: Figure out what is the best format to use. Should mutations be in order of mutation? or organized by mutation target?
-function getMutations(subjects: (AnyIon | IonicModel)[]) {
-    //FIX: Temporary
-    return []
-    for (const subject of subjects) {
-        const mutations = getCurrentRenderCycle()?.getOps(subject)
-        if (!mutations) throw new Error("No mutations :(")
-        return mutations //FIX: temporary
+
+
+function isMultiWatchSubject(subject: AnyObject | AnyIon | ReactiveGet | IonicModel | (AnyIon | AnyObject | ReactiveGet | IonicModel)[]): subject is (AnyIon | AnyObject | ReactiveGet | IonicModel)[] {
+    if (isAnyIon(subject)) return false;
+    if (!isIonicModel(subject) && subject instanceof Array) {
+        for (const item of subject) {
+            if (isReactive(item)) return true;
+        }
+        return false;
     }
-    return []
+    return false;
 }
 
 // export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
 // export function watch<T extends IonicModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
 export function watch<T extends AnyIon | ReactiveGet | IonicModel | (AnyIon | ReactiveGet | IonicModel)[]>(subject: T, effect: ChangeEffect<T>, options?: WatchOptions): ActiveListener {
-    const isMultiSubject = !isIonicModel(subject) && subject instanceof Array
-    // if (!isIonicModel(subject) && subject instanceof Array) {
-    //     return watchArray()
-    // }
+    const isMultiSubject = isMultiWatchSubject(subject);
+    if (!isMultiSubject && !isReactive(subject)) return { // inert watch subjects
+        stop: noop
+    }
 
-    // if (!isAnyIon(subject) && !(subject instanceof Function)) {
-    //     return watchReactiveModel(subject, effect, options || {})
-    // }
-    // const retrack = options?.retrack ?? true
-    // createIonicEffect(<() => any>subject, retrack).initialize()
     const eager = options?.eager
-    const phase = options?.phase || Phase.BEFORE_RENDER
+    const phase = options?.phase ?? Phase.BEFORE_RENDER
 
     const subjects = isMultiSubject ? normalizeWatchSubjects(subject) : [normalizeWatchSubject(subject)]
     const watchSubjects = asWatchSubjects(subjects)
 
     const subject0 = subjects[0];
-    const _watchSubject = isMultiSubject ? watchSubjects : watchSubjects[0];
+    // const _watchSubject = isMultiSubject ? watchSubjects : watchSubjects[0];
     const ionicDerivations = isMultiSubject ? getIonicDerivations(subject, subjects) : subject instanceof Function ? [asMetaIon(subject0) as IonicDerivation] : undefined
-
 
     let oldValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when derived is initialized if not already
 
-    const $activeEffect = Ref(undefined) as Ion<ThisEffect | undefined>
+    const $activeEffect = Ref<ThisEffect>()
 
     function changeEffect() {
         const newValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when retracking happens
-        if (!isIonicModel(subject) && areEqual(toRaw(newValue), toRaw(oldValue))) return; //TODO: need different approach for ionicModels
+        if (isMultiSubject && noChanges(subjects, newValue, oldValue)
+            || isAnyIon(subject0) && noChange(newValue, oldValue)
+            || isIonicModel(subject) && noMutations(subject))
+            return;
 
         runCleanups($activeEffect())
-        const _effect = new ThisEffect(_watchSubject, getMutations(subjects));
+        const _effect = new ThisEffect(getMutations(subjects));
         $activeEffect.set(_effect)
 
         let prevSubject = currentWatchSubject;
@@ -224,6 +224,46 @@ export function watch<T extends AnyIon | ReactiveGet | IonicModel | (AnyIon | Re
         ionicDerivations
     )
 }
+
+
+
+function noChange(newValue: any, oldValue: any) {
+    return areEqual(toRaw(newValue), toRaw(oldValue))
+}
+
+function noChanges(subjects: any[], newValues: any[], oldValues: any[]) {
+    for (let i = 0; i < subjects.length; i++) {
+        if (isAnyIon(subjects[i])) {
+            if (!noChange(newValues[i], newValues[i])) {
+                return false;
+            }
+        }
+        else if (isIonicModel(subjects[i])) {
+            if (!noMutations(subjects[i])) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function noMutations(model: IonicModel) {
+    //TODO: 
+    return false;
+}
+
+//TODO: Figure out what is the best format to use. Should mutations be in order of mutation? or organized by mutation target?
+function getMutations(subjects: (AnyIon | IonicModel)[]) {
+    //FIX: Temporary
+    return []
+    for (const subject of subjects) {
+        const mutations = getCurrentRenderCycle()?.getOps(subject)
+        if (!mutations) throw new Error("No mutations :(")
+        return mutations //FIX: temporary
+    }
+    return []
+}
+
 
 // function watchReactiveModel<T extends IonicModel>(subject: T, effect: MutationEffect<T>, options: WatchOptions) {
 //     if (!isIonicModel(subject)) {
@@ -283,13 +323,16 @@ function scheduleEffectEagerly(effect: Effect, phase: Phase) {
 }
 
 
-//FIX: add thisEffect
-export function initializeIonicEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived Ion and effect combined into one function
+export function watchIonicEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived Ion and effect combined into one function
     const phase = options?.phase || Phase.BEFORE_RENDER;
     const retrack = options?.retrack || false;
-    const reactiveEffect = createIonicEffect(effect, retrack)
+    const selectiveSubjects = options?.only;
+    const selector = selectiveSubjects?.[0] === true ? true : false;
+    const additionalSubjects = options?.also || selector ? selectiveSubjects!.slice(1) : selectiveSubjects;
+    if (selectiveSubjects && options?.also) throw Error(`INVALID OPTIONS: Cannot configure watchIonicEffect with both 'only' and 'also' options.`)
+    const $activeEffect = Ref<ThisEffect>()
+    const reactiveEffect = createIonicEffect(effect, $activeEffect, selector, retrack)
     const watchSubject = asWatchSubject(reactiveEffect);
-    const $activeEffect = Ref(undefined) as Ion<ThisEffect | undefined> //FIX: Temporary
     scheduleEffectEagerly(reactiveEffect.initialize, phase);
 
     return setUpWatcher(
@@ -306,13 +349,12 @@ export function initializeIonicEffect(effect: () => void, options?: EffectOption
 function setUpWatcher(
     watchSubjects: WatchSubject[],
     effect: Effect,
-    $activeEffect: Ion<ThisEffect | undefined>,
+    $activeEffect: Ref<ThisEffect>,
     phase: Phase,
     options: ListenerOptions & RenderCycleOptions,
     ionicDerivations?: IonicDerivation[]
 ) {
     const forNextCycle = options?.cycle === 'next';
-
     return $listen(effect, options || {}, {
         enroll(_effect) {
             for (const subject of watchSubjects) {

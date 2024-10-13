@@ -75,18 +75,23 @@ export function useTrackableOp() {
 // }
 
 
-
+export const OVERRIDE = true;
 
 
 //API
-export function defineIonicStructure(structureKey: any, config: CustomIonicModelConfig) {
+export function defineIonicStructure(structureKey: any, config: CustomIonicModelConfig, override?: boolean) {
+    const existing = ionicStructureMap.get(structureKey)
+    if (existing && !override) {
+        console.warn(`Ionic structure already defined for the structure key, ${structureKey.toString()}. To override, pass in override parameter as true.`)
+        return;
+    }
     config.structure = structureKey;
     const { isEntryKey } = config
     if (isEntryKey) {
         registerEntryKeyValidator(isEntryKey)
     }
 
-    customIonicStructureMap.set(structureKey, config)
+    ionicStructureMap.set(structureKey, config)
 }
 
 
@@ -104,7 +109,7 @@ function getStructureConfig(target: AnyObject, configs: any[]) {
     if (!isCustomIonicStructure(constructor)) {
         return getStructureConfig(proto, configs)
     }
-    const config = customIonicStructureMap.get(constructor)
+    const config = ionicStructureMap.get(constructor)
     if (config) configs.push(config);
     return getStructureConfig(proto, configs)
 }
@@ -134,14 +139,31 @@ type MutatingOpConfig = {
 export type GetPreopData = (model: AnyObject, args?: any[]) => any;
 type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
 
-const customIonicStructureMap: Map<any, CustomIonicModelConfig> = new Map();
+const ionicStructureMap: Map<any, CustomIonicModelConfig> = new Map([[
+    Object, {
+        nontrackableKeys: {
+            constructor: true,
+            __defineGetter__: true,
+            __defineSetter__: true,
+            // hasOwnProperty: true,
+            __lookupGetter__: true,
+            __lookupSetter__: true,
+            isPrototypeOf: true,
+            propertyIsEnumerable: true,
+            toString: true,
+            valueOf: true,
+            __proto__: true,
+            toLocaleString: true
+        }
+    }
+]]);
 
 function isCustomIonicStructure(value: any) {
-    return customIonicStructureMap.has(value);
+    return ionicStructureMap.has(value);
 }
 
 // function getMutatingOps(DataStructure: any) {
-//     const config = customIonicStructureMap.get(DataStructure)
+//     const config = ionicStructureMap.get(DataStructure)
 //     if (!config) throw new Error(`Cannot find config for this data structure: ${DataStructure.toString()}`)
 //     return config.mutatingOps
 // }
@@ -156,7 +178,7 @@ function emitAfterSet(structureConfigs: CustomIonicModelConfig[], ionicModel: Io
 
 
 function getNonTrackableKeys(structureKey: any) {
-    return customIonicStructureMap.get(structureKey)?.nontrackableKeys
+    return ionicStructureMap.get(structureKey)?.nontrackableKeys
 }
 
 
@@ -283,7 +305,7 @@ function maybeIonize(value: any, target: AnyObject, proxy: AnyObject, receiver: 
 
 function isMutatingOps(key: PropertyKey, structureKeys: any[]) {
     for (const structure in structureKeys) {
-        const mutatingOps = customIonicStructureMap.get(structure)?.mutatingOps
+        const mutatingOps = ionicStructureMap.get(structure)?.mutatingOps
         if (!mutatingOps) continue;
         if (key in mutatingOps) return true;
     }
@@ -296,7 +318,6 @@ function createBoundMethodMap(structureConfigs: CustomIonicModelConfig[], target
     if (structureConfigs[0].structure === Object) return methodMap;
 
     for (const config of structureConfigs) {
-        console.log('config', config)
         const mutatingOps = config.mutatingOps
         if (!mutatingOps) continue;
         for (const opKey in mutatingOps) {
@@ -309,7 +330,6 @@ function createBoundMethodMap(structureConfigs: CustomIonicModelConfig[], target
         if (!trackableOps) continue;
         for (const opKey in trackableOps) {
             const createOp = trackableOps[opKey]
-            console.log('opKey', opKey, createOp)
             methodMap.set(opKey, createOp(target, ionicModel))
         }
     }

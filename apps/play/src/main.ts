@@ -14,12 +14,8 @@ import { MountIf } from './TestMountIf';
 import { TestIonProp } from './TestIonProp';
 import { TestMorphic } from './TestMorphic';
 import { ParentBlock } from './ProvideState';
-import { initializeIonicEffect, Ion } from '@rue/quarky';
+import { watchIonicEffect, Ion } from '@rue/quarky';
 import { TestIonicEffect } from './TestIonicEffect';
-import { runningIonicSet } from '../../../packages/quarky/src/ionize/IonicSet';
-import { runningIonicArray } from '../../../packages/quarky/src/ionize/IonicArray';
-import { runningIonicMap } from '../../../packages/quarky/src/ionize/IonicMap';
-import { runningIonicObject } from '../../../packages/quarky/src/ionize/IonicObject';
 // import { ionize, ionize } from '@rue/quarky';
 // import { DeepReactiveModel, asMetaIonicModel, ionize, ionize } from '@rue/quarky';
 // import { MountIf } from './TestMountIf';
@@ -31,15 +27,11 @@ import { runningIonicObject } from '../../../packages/quarky/src/ionize/IonicObj
 // import { NestedPend } from './NestedPend';
 
 
-runningIonicSet; //FIX: temporary to trigger load
-runningIonicArray
-runningIonicMap;
-runningIonicObject
 
 const app = createApp(List)
 
 if (__DEV__) configureFlask({
-    warnNoCleanup: false
+    warnNoCleanup: true
 })
 
 app.mount('#app')

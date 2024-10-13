@@ -5,7 +5,7 @@ import { isIonicModel } from "../ionize/ionize";
 import { protectIonicModel } from "../ionize/ProtectedIonicModel";
 
 export type ProtectedIon<T = any, M extends AnyObject = {}> = {
-    (): T;
+    (selected?: true): T;
     [META]: { o: any, asReadonly?: ProtectedIon, asProtected?: ProtectedIon };
 } & M
 export const READONLY = 'ro'
@@ -46,21 +46,21 @@ export function protectIon($ion: WritableIon, methodKeys?: { [key: string]: true
         return asReadonlyIon($ion)
     }
 
-    return asCustomProtectedIon($Ion, methodKeys)
+    return asCustomProtectedIon($ion, methodKeys)
 }
 
 
 function asCustomProtectedIon($ion: WritableIon, methodKeys: { [key: string]: true }) {
     if (isReadonlyIon($ion)) return $ion;
-    return createCustomProtectedIon($Ion, methodKeys)
+    return createCustomProtectedIon($ion, methodKeys)
 }
 
 function createCustomProtectedIon($ion: WritableIon, methodKeys: { [key: string]: true }) {
     const meta = asMetaIon($ion);
     const $coreIon = meta.o;
     const proto = Object.getPrototypeOf($coreIon)
-    function $customIon() {
-        const value = $coreIon()
+    function $customIon(selected: boolean) {
+        const value = $coreIon(selected)
         if (isIonicModel(value)) {
             return protectIonicModel(value)
         }
@@ -101,8 +101,8 @@ function asReadonlyIon($ion: WritableIon) {
 function createReadonlyIon(meta: MetaWritableIon) {
     const $coreIon = meta.o
 
-    function $readonlyIon() {
-        const value = $coreIon()
+    function $readonlyIon(selected?: boolean) {
+        const value = $coreIon(selected)
         if (isIonicModel(value))
             return protectIonicModel(value, READONLY)
         return value;
@@ -131,8 +131,8 @@ function createProtectedIon(meta: MetaWritableIon) {
 
     const proto = Object.getPrototypeOf($coreIon)
 
-    function $protectedIon() {
-        const value = $coreIon()
+    function $protectedIon(selected?: boolean) {
+        const value = $coreIon(selected)
         if (isIonicModel(value)) {
             return protectIonicModel(value)
         }

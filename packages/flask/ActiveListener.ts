@@ -81,7 +81,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
     _remove.isRemover = true as const;
     _remove.__devName = options?.__devName;
 
-    const until = options?.until || null;
+    const until = options?.until;
 
     if (until) {
         pendingStop = until(_remove);

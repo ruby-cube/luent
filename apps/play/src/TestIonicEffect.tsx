@@ -1,5 +1,5 @@
 import { Component } from "@rue/lumo"
-import { BEFORE_RENDER, initializeIonicEffect, Ion, SYNC, watch } from "@rue/quarky"
+import { BEFORE_RENDER, watchIonicEffect, Ion, SYNC, watch } from "@rue/quarky"
 
 
 export function TestIonicEffect() {
@@ -10,7 +10,7 @@ export function TestIonicEffect() {
         }
     })
 
-    initializeIonicEffect(() => {
+    watchIonicEffect(() => {
         console.log("running effect")
         $count.increment()
     }, { phase: SYNC })

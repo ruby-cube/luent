@@ -3,6 +3,7 @@ import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { Ion, __addDevName, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { META } from "../../../packages/quarky/src/ReactiveEntity";
+import { getFlask } from "@rue/flask";
 
 
 const randomColor = useRandomColorGenerator()
@@ -91,7 +92,7 @@ export function List(
     //     // console.log("mutations", mutations)
     // })
 
-    // initializeIonicEffect(() => {
+    // watchIonicEffect(() => {
     //     console.log("some starts with f", $list.some((item) => item.content.startsWith('f')))
     // })
 
@@ -148,7 +149,7 @@ export function List(
         $list.splice(index, 1);
     }
 
-    const $itemDivs = NodesRef('div')
+    // const $itemDivs = NodesRef('div')
 
     // const $alive = Ion(true)
 
@@ -166,22 +167,22 @@ export function List(
     // }, 1)
 
     // const $listIsEmpty = DerivedIon(() => $list.length === 0)
-    return Component(()=>
+    return Component(() =>
         <>
             <>
                 {If(() => $list.length === 0, () =>
                     <div
-                        onclick={()=>insertItem(0)}
+                        onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
                     </div>
                 )}
                 {Else(() =>
-                    For($list, ($item, $index) => (
+                    For($list, ($item, $index) =>
                         <div
-                            ref={$itemDivs}
-                            onclick={(event)=>toggleSelect(event, $index())}
+                            // ref={$itemDivs}
+                            onclick={(event) => toggleSelect(event, $index())}
                             style={[
                                 `background-color: ${randomColor.get()}`,
                                 o => {
@@ -189,30 +190,30 @@ export function List(
                                 }
                             ]}>
                             <p
-                                onclick={()=>removeItem($index())}
+                                onclick={() => removeItem($index())}
                                 style="cursor: pointer"
                             >
                                 X
                             </p>
 
-                            <li onclick={()=>changeContent($index())}>
+                            <li onclick={() => changeContent($index())}>
                                 {() => $item.content}
                             </li>
                             <p>{$index}</p>
                             <div
-                                onclick={()=>insertItem($index() + 1)}
+                                onclick={() => insertItem($index() + 1)}
                                 style="background-color: gray; cursor: pointer"
                             >
                                 insert
                             </div>
                             <div
-                                onclick={()=>moveSelectedItems($index() + 1)}
+                                onclick={() => moveSelectedItems($index() + 1)}
                                 style="background-color: white; cursor: pointer"
                             >
                                 insert
                             </div>
                         </div>
-                    ), 'id')
+                        , 'id')
                 )}
             </>
             <button onclick={clearSelection}>clear</button>

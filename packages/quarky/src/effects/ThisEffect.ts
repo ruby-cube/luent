@@ -1,18 +1,14 @@
-import { AnyIon } from "../ion/AnyIon";
-import { IonicModel } from "../ionize/ionize";
 import { MutationRecord } from "./watch";
 
 export class ThisEffect {
 
-    
     constructor(
-        public watchSubject: IonicModel | AnyIon | (IonicModel | AnyIon)[],
-        public mutations: MutationRecord[]
+        public mutations?: MutationRecord[] //TODO: Make required?
     ) { }
 
     private cleanups?: (() => void)[]
 
-    onCleanup(cleanUp: () => void) {
+    onCleanup(cleanUp: () => void) { //TODO: should this return a pending cancel op?
         if (!this.cleanups) {
             this.cleanups = [cleanUp]
             return;

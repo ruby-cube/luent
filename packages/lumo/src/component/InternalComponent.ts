@@ -7,6 +7,7 @@ import { protect } from "@rue/quarky";
 import { MorphicRenderKit } from "../morphic/MorphicComponent";
 import { ThisComponent } from "../$this";
 import { getActiveDynamicNode } from "../dynamic/nodestack";
+import { getFlask } from "@rue/flask";
 
 
 export interface Provider {
@@ -62,7 +63,7 @@ export function Component<T extends AnyObject | undefined = AnyObject | undefine
     // if (exposedComponent instanceof Object) {
     return {
         publicComponent: exposedComponent,
-        render: _render
+        render: _render,
     } as Component<T extends AnyObject ? T : undefined>
     // }
     // return {

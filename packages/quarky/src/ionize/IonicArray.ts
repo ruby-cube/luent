@@ -8,7 +8,6 @@ import { asTrackedProp, getObservedProp } from "./PropIon";
 import { MetaIonicModel } from "./MetaIonicModel";
 import { nontrackableIterableKeys } from "./IonicSet";
 
-export const runningIonicArray = true;
 
 const trackableArrayOps = {
 
@@ -69,150 +68,247 @@ const trackableArrayOps = {
     with: true, // newArray = arrayInstance.with(index, value)
 }
 
-defineIonicStructure(Array, {
-    nontrackableKeys: nontrackableIterableKeys,
+export function installIonicArray() {
+    defineIonicStructure(Array, {
+        nontrackableKeys: nontrackableIterableKeys,
 
-    trackableOps: {
-        at(target, ionicModel) {
-            return useTrackableGetOp(
-                ionicModel,
-                target,
-                'at',
-                target.at
-            )
-        }
-        //TODO: Trackable ops (as oppsed to get ops)?? not sure if necessary yet
-    },
-
-    mutatingOps: {
-        push: {
-            createOp: useMutatingArrayOpFactory('push', deionizeArgs),
-            preop(model) {
-                return model.length
-            },
-            revert(model, { preopData: length, args }) {
-                model.splice(length, args.length)
+        trackableOps: {
+            at(target, ionicModel) {
+                return useTrackableGetOp(
+                    ionicModel,
+                    target,
+                    'at',
+                    target.at
+                )
             }
+            //TODO: Trackable ops (as oppsed to get ops)?? not sure if necessary yet
         },
 
-        pop: {
-            createOp: useMutatingArrayOpFactory('pop'),
-            revert(model, { output }) {
-                model.push(output)
-            }
-        },
-
-        unshift: {
-            createOp: useMutatingArrayOpFactory('unshift', deionizeArgs),
-            revert(model, { args }) {
-                model.splice(0, args.length)
-            }
-        },
-
-        shift: {
-            createOp: useMutatingArrayOpFactory('shift'),
-            revert(model, { output }) {
-                model.unshift(output)
-            }
-        },
-
-        splice: {
-            createOp: useMutatingArrayOpFactory('splice', deionizeArgs),
-            revert(model, { output, args }) {
-                const start = args[0];
-                const numItems = args.length - 2;
-                model.splice(start, numItems, ...output)
-            }
-        },
-
-        copyWithin: {
-            createOp: useMutatingArrayOpFactory('copyWithin'),
-            preop: fillOrCopyWithinPreop,
-            revert: fillOrCopyWithinRevert
-        },
-
-        fill: {
-            createOp: useMutatingArrayOpFactory('fill', (args: any) => toRaw(args[0])),
-            preop: fillOrCopyWithinPreop,
-            revert: fillOrCopyWithinRevert
-        },
-
-        reverse: {
-            createOp: useMutatingArrayOpFactory('reverse'),
-            revert(model) {
-                model.reverse()
-            }
-        },
-
-        sort: {
-            createOp: useMutatingArrayOpFactory('sort'),
-            preop(model) {
-                return model.slice()
-            },
-            revert(model, { preopData: snapshot }) {
-                for (let i = 0; i < model.length; i++) {
-                    model[i] = snapshot[i]
+        mutatingOps: {
+            push: {
+                createOp: useMutatingArrayOpFactory('push', deionizeArgs),
+                preop(model) {
+                    return model.length
+                },
+                revert(model, { preopData: length, args }) {
+                    model.splice(length, args.length)
                 }
-            }
-        },
-    },
+            },
 
-    afterSet(ionicModel, meta, key, newValue, oldValue) {
-        const op = isIntegerKey(key) ? getTrackedOp(ionicModel, 'at', key) : null
-        if (op) {
-            triggerIonicAtom(op)
-        }
-
-        const observedIndices = meta.observedEntryKeys
-        if (observedIndices && key === 'length') {
-            for (const indexKey of observedIndices) {
-                if (typeof indexKey !== 'string') {
-                    console.warn(`index key is not string. May need to refactor code`)
-                    continue;
+            pop: {
+                createOp: useMutatingArrayOpFactory('pop'),
+                revert(model, { output }) {
+                    model.push(output)
                 }
-                const index = parseInt(indexKey)
-                if (index > newValue || index > oldValue) {
-                    const prop = getObservedProp(ionicModel, indexKey)
-                    if (prop) {
-                        trigger(prop, newValue, oldValue)
+            },
+
+            unshift: {
+                createOp: useMutatingArrayOpFactory('unshift', deionizeArgs),
+                revert(model, { args }) {
+                    model.splice(0, args.length)
+                }
+            },
+
+            shift: {
+                createOp: useMutatingArrayOpFactory('shift'),
+                revert(model, { output }) {
+                    model.unshift(output)
+                }
+            },
+
+            splice: {
+                createOp: useMutatingArrayOpFactory('splice', deionizeArgs),
+                revert(model, { output, args }) {
+                    const start = args[0];
+                    const numItems = args.length - 2;
+                    model.splice(start, numItems, ...output)
+                }
+            },
+
+            copyWithin: {
+                createOp: useMutatingArrayOpFactory('copyWithin'),
+                preop: fillOrCopyWithinPreop,
+                revert: fillOrCopyWithinRevert
+            },
+
+            fill: {
+                createOp: useMutatingArrayOpFactory('fill', (args: any) => toRaw(args[0])),
+                preop: fillOrCopyWithinPreop,
+                revert: fillOrCopyWithinRevert
+            },
+
+            reverse: {
+                createOp: useMutatingArrayOpFactory('reverse'),
+                revert(model) {
+                    model.reverse()
+                }
+            },
+
+            sort: {
+                createOp: useMutatingArrayOpFactory('sort'),
+                preop(model) {
+                    return model.slice()
+                },
+                revert(model, { preopData: snapshot }) {
+                    for (let i = 0; i < model.length; i++) {
+                        model[i] = snapshot[i]
                     }
-                    const op = getTrackedOp(ionicModel, 'at', index)
-                    if (op) {
-                        if (isIonicAtom(op)) {
-                            triggerIonicAtom(op)
+                }
+            },
+        },
+
+        afterSet(ionicModel, meta, key, newValue, oldValue) {
+            const op = isIntegerKey(key) ? getTrackedOp(ionicModel, 'at', key) : null
+            if (op) {
+                triggerIonicAtom(op)
+            }
+
+            const observedIndices = meta.observedEntryKeys
+            if (observedIndices && key === 'length') {
+                for (const indexKey of observedIndices) {
+                    if (typeof indexKey !== 'string') {
+                        console.warn(`index key is not string. May need to refactor code`)
+                        continue;
+                    }
+                    const index = parseInt(indexKey)
+                    if (index > newValue || index > oldValue) {
+                        const prop = getObservedProp(ionicModel, indexKey)
+                        if (prop) {
+                            trigger(prop, newValue, oldValue)
+                        }
+                        const op = getTrackedOp(ionicModel, 'at', index)
+                        if (op) {
+                            if (isIonicAtom(op)) {
+                                triggerIonicAtom(op)
+                            }
                         }
                     }
                 }
             }
+        },
+
+        isEntryKey(model, key) {
+            return !!(model instanceof Array && isIntegerKey(key))
+        },
+    })
+
+
+
+    function useMutatingArrayOpFactory(
+        opName: string,
+        deionizeArgs?: (args: any[]) => any[]
+    ) {
+        return function createOp(target: AnyObject, ionicModel: IonicModel<AnyObject>, meta: MetaIonicModel<any[]>, getPreopData: GetPreopData | undefined) {
+            const fn = target[opName]
+            return useMutatingArrayOp(
+                <IonicModel<any[]>>ionicModel,
+                meta,
+                <any[]>target,
+                opName,
+                fn,
+                getPreopData,
+                deionizeArgs
+            )
         }
-    },
-
-    isEntryKey(model, key){
-        return !!(model instanceof Array && isIntegerKey(key))
-    },
-})
-
-function fillOrCopyWithinPreop(model: AnyObject, args: any[] | undefined) {
-    const start = args![1] ?? 0
-    const end = args![2]
-    return model.slice(start, end)
-}
-
-function fillOrCopyWithinRevert(model: AnyObject, data: { preopData: any[], args: any[] }) {
-    const { preopData: slice, args } = data
-    let index = args![1] ?? 0;
-    for (let i = 0; i < slice.length; i++) {
-        model[index] = slice[i];
-        index++;
     }
-}
 
-function deionizeArgs(args: any[]) {
-    const _args = []
-    for (const arg of args) {
-        _args.push(toRaw(arg))
+    const lengthMutatingOps = {
+        push: true,
+        pop: true,
+        shift: true,
+        unshift: true,
     }
-    return _args;
+
+    function useMutatingArrayOp(
+        ionicModel: IonicModel<any[]>,
+        metaIonicModel: MetaIonicModel<any[]>,
+        target: any[],
+        key: string,
+        fn: Function,
+        getPreopData?: ((target: any[], args: any[]) => any),
+        deionizeArgs?: (args: any[]) => any[]
+    ) {
+        return (...args: any[]) => {
+            const preopData = getPreopData ? getPreopData(target, args) : undefined
+            const _args = deionizeArgs ? deionizeArgs(args) : args
+            const oldLength = target.length;
+            const output = fn.apply(ionicModel, _args); // perform mutation
+            const newLength = target.length;
+            if (key in lengthMutatingOps && oldLength === newLength) return output;
+            storeSnapshot(metaIonicModel)
+
+            const lengthProp = getObservedProp(ionicModel, 'length')
+            if (lengthProp) {
+                trigger(lengthProp, newLength, oldLength); // trigger for length change
+            }
+
+            if (key === 'pop') {
+                const prop = getObservedProp(ionicModel, (oldLength - 1).toString())
+                if (prop) trigger(prop);
+                const op = getTrackedOp(ionicModel, 'at', - 1)
+                if (op) triggerIonicAtom(op);
+            }
+
+            const observedIndices = metaIonicModel.observedEntryKeys
+            if (observedIndices && oldLength < newLength) {
+                for (const indexKey of observedIndices) {
+                    if (typeof indexKey !== 'string') {
+                        console.warn(`index key is not string. May need to refactor code`)
+                        continue;
+                    }
+                    const index = parseInt(indexKey)
+                    if (index >= newLength) {
+                        const prop = getObservedProp(ionicModel, indexKey)
+                        if (prop) {
+                            trigger(prop)
+                        }
+                        const op = getTrackedOp(ionicModel, 'at', index)
+                        if (op) {
+                            if (isIonicAtom(op)) {
+                                triggerIonicAtom(op)
+                            }
+                        }
+                    }
+                }
+            }
+
+            triggerIonicModel(
+                ionicModel,
+                key,
+                _args,
+                output,
+                preopData
+            )
+
+            return output;
+        }
+    }
+
+
+    function fillOrCopyWithinPreop(model: AnyObject, args: any[] | undefined) {
+        const start = args![1] ?? 0
+        const end = args![2]
+        return model.slice(start, end)
+    }
+
+    function fillOrCopyWithinRevert(model: AnyObject, data: { preopData: any[], args: any[] }) {
+        const { preopData: slice, args } = data
+        let index = args![1] ?? 0;
+        for (let i = 0; i < slice.length; i++) {
+            model[index] = slice[i];
+            index++;
+        }
+    }
+
+    function deionizeArgs(args: any[]) {
+        const _args = []
+        for (const arg of args) {
+            _args.push(toRaw(arg))
+        }
+        return _args;
+    }
+
+
 }
 
 // export function createIonicArray(
@@ -504,106 +600,11 @@ function deionizeArgs(args: any[]) {
 
 
 
-
-
 export function isIntegerKey(key: unknown) {
     const keyAsNumber = Number(key);
     if (isNaN(keyAsNumber)) return false;
     if (Number.isInteger(keyAsNumber)) return true
 }
-
-
-
-function useMutatingArrayOpFactory(
-    opName: string,
-    deionizeArgs?: (args: any[]) => any[]
-) {
-    return function createOp(target: AnyObject, ionicModel: IonicModel<AnyObject>, meta: MetaIonicModel<any[]>, getPreopData: GetPreopData | undefined) {
-        const fn = target[opName]
-        return useMutatingArrayOp(
-            <IonicModel<any[]>>ionicModel,
-            meta,
-            <any[]>target,
-            opName,
-            fn,
-            getPreopData,
-            deionizeArgs
-        )
-    }
-}
-
-const lengthMutatingOps = {
-    push: true,
-    pop: true,
-    shift: true,
-    unshift: true,
-}
-
-function useMutatingArrayOp(
-    ionicModel: IonicModel<any[]>,
-    metaIonicModel: MetaIonicModel<any[]>,
-    target: any[],
-    key: string,
-    fn: Function,
-    getPreopData?: ((target: any[], args: any[]) => any),
-    deionizeArgs?: (args: any[]) => any[]
-) {
-    return (...args: any[]) => {
-        const preopData = getPreopData ? getPreopData(target, args) : undefined
-        const _args = deionizeArgs ? deionizeArgs(args) : args
-        const oldLength = target.length;
-        const output = fn.apply(ionicModel, _args); // perform mutation
-        const newLength = target.length;
-        if (key in lengthMutatingOps && oldLength === newLength) return output;
-        storeSnapshot(metaIonicModel)
-
-        const lengthProp = getObservedProp(ionicModel, 'length')
-        if (lengthProp) {
-            trigger(lengthProp, newLength, oldLength); // trigger for length change
-        }
-
-        if (key === 'pop') {
-            const prop = getObservedProp(ionicModel, (oldLength - 1).toString())
-            if (prop) trigger(prop);
-            const op = getTrackedOp(ionicModel, 'at', - 1)
-            if (op) triggerIonicAtom(op);
-        }
-
-        const observedIndices = metaIonicModel.observedEntryKeys
-        if (observedIndices && oldLength < newLength) {
-            for (const indexKey of observedIndices) {
-                if (typeof indexKey !== 'string') {
-                    console.warn(`index key is not string. May need to refactor code`)
-                    continue;
-                }
-                const index = parseInt(indexKey)
-                if (index >= newLength) {
-                    const prop = getObservedProp(ionicModel, indexKey)
-                    if (prop) {
-                        trigger(prop)
-                    }
-                    const op = getTrackedOp(ionicModel, 'at', index)
-                    if (op) {
-                        if (isIonicAtom(op)) {
-                            triggerIonicAtom(op)
-                        }
-                    }
-                }
-            }
-        }
-
-        triggerIonicModel(
-            ionicModel,
-            key,
-            _args,
-            output,
-            preopData
-        )
-
-        return output;
-    }
-}
-
 
 
 export function isIonicArray(target: any): target is IonicModel<any[]> {

@@ -1,3 +1,7 @@
+import { installIonicArray } from "./ionize/IonicArray"
+import { installIonicMap } from "./ionize/IonicMap"
+import { installIonicSet } from "./ionize/IonicSet"
+
 export * from "./derivations/DerivedIon" //TODO: limit exports to public api
 export * from "./debug" //TODO: limit exports to public api
 export * from "./ionize/ionize" //TODO: limit exports to public api
@@ -13,3 +17,7 @@ export * from "./ionize/TimeTraveler" //TODO: limit exports to public api
 export * from "./ionize/ionize" //TODO: limit exports to public api
 export * from "./effects/areEqual" //TODO: limit exports to public api
 export * from "./protect" //TODO: limit exports to public api
+
+installIonicArray()
+installIonicSet()
+installIonicMap()

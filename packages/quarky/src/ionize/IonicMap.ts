@@ -5,7 +5,6 @@ import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { asTrackedProp, getObservedProp } from "./PropIon";
 import { defineIonicStructure, useTrackableGetOp } from "./IonicModel";
 
-export const runningIonicMap = true;
 
 // Trackable keys vs trackable ops:
 // Trackable keys is about tracking the property
@@ -24,115 +23,117 @@ const trackableMapGetOps = {
     // size: true,
 }
 
-
-defineIonicStructure(Map, {
-    nontrackableKeys: nontrackableIterableKeys,
-    trackableOps: {
-        has(target, ionicModel) {
-            return useTrackableGetOp(
-                ionicModel,
-                target,
-                'has',
-                target.has
-            )
+export function installIonicMap(){
+    defineIonicStructure(Map, {
+        nontrackableKeys: nontrackableIterableKeys,
+        trackableOps: {
+            has(target, ionicModel) {
+                return useTrackableGetOp(
+                    ionicModel,
+                    target,
+                    'has',
+                    target.has
+                )
+            },
+            get(target, ionicModel) {
+                return useTrackableGetOp(
+                    ionicModel,
+                    target,
+                    'get',
+                    target.get
+                )
+            }
         },
-        get(target, ionicModel) {
-            return useTrackableGetOp(
-                ionicModel,
-                target,
-                'get',
-                target.get
-            )
-        }
-    },
-    mutatingOps: {
-        set: {
-            createOp(target, ionicModel, meta) {
-
-                return function set(key: any, newValue: any) {
-                    const oldSize = target.size
-                    const oldValue = target.get(key);
-                    const _newValue = toRaw(newValue)
-                    const output = target.set(key, _newValue); //perform op
-                    const newSize = target.size
-
-                    if (oldValue === _newValue) return;
-
-                    storeSnapshot(meta)
-
-                    if (oldSize !== newSize) {
-                        const sizeProp = getObservedProp(ionicModel, 'size')
-                        if (sizeProp)
-                            trigger(sizeProp, newSize, oldSize);
+        mutatingOps: {
+            set: {
+                createOp(target, ionicModel, meta) {
+    
+                    return function set(key: any, newValue: any) {
+                        const oldSize = target.size
+                        const oldValue = target.get(key);
+                        const _newValue = toRaw(newValue)
+                        const output = target.set(key, _newValue); //perform op
+                        const newSize = target.size
+    
+                        if (oldValue === _newValue) return;
+    
+                        storeSnapshot(meta)
+    
+                        if (oldSize !== newSize) {
+                            const sizeProp = getObservedProp(ionicModel, 'size')
+                            if (sizeProp)
+                                trigger(sizeProp, newSize, oldSize);
+                        }
+    
+                        const hasOp = getTrackedOp(ionicModel, 'has', key)
+                        if (hasOp) triggerIonicAtom(hasOp);
+    
+                        const getOp = getTrackedOp(ionicModel, 'get', key)
+                        if (getOp) triggerIonicAtom(getOp);
+    
+                        triggerIonicModel(
+                            ionicModel,
+                            'set',
+                            [key, _newValue],
+                            output,
+                            oldValue
+                        )
+    
+                        return output;
                     }
-
-                    const hasOp = getTrackedOp(ionicModel, 'has', key)
-                    if (hasOp) triggerIonicAtom(hasOp);
-
-                    const getOp = getTrackedOp(ionicModel, 'get', key)
-                    if (getOp) triggerIonicAtom(getOp);
-
-                    triggerIonicModel(
+                },
+    
+                revert(model, data) {
+                    model.delete(data.args[0])
+                }
+            },
+            clear: {
+                createOp(target, ionicModel, meta, getPreopData) {
+    
+                    return useClearOp(
                         ionicModel,
-                        'set',
-                        [key, _newValue],
-                        output,
-                        oldValue
+                        meta,
+                        target,
+                        getPreopData!
                     )
-
-                    return output;
+                },
+    
+                preop(model) {
+                    return Array.from(<Map<any, any>>model)
+                },
+    
+                revert(ionicModel, { preopData }) {
+                    for (const [key, value] of preopData) {
+                        ionicModel.set(key, value) //QUESTION: not sure if this should be the raw target or the ionic model
+                    }
                 }
             },
-
-            revert(model, data) {
-                model.delete(data.args[0])
-            }
-        },
-        clear: {
-            createOp(target, ionicModel, meta, getPreopData) {
-
-                return useClearOp(
-                    ionicModel,
-                    meta,
-                    target,
-                    getPreopData!
-                )
-            },
-
-            preop(model) {
-                return Array.from(<Map<any, any>>model)
-            },
-
-            revert(ionicModel, { preopData }) {
-                for (const [key, value] of preopData) {
-                    ionicModel.set(key, value) //QUESTION: not sure if this should be the raw target or the ionic model
+            delete: {
+                createOp(target, ionicModel, meta, getPreopData) {
+    
+                    return useDeleteOp(
+                        ionicModel,
+                        meta,
+                        target,
+                        getPreopData!
+                    )
+                },
+    
+                preop(model, args) {
+                    const key = args![0];
+                    const value = model.get(key)
+                    return { key, value }
+                },
+    
+                revert(ionicModel, { preopData }) {
+                    ionicModel.set(preopData.key, preopData.value)
                 }
-            }
-        },
-        delete: {
-            createOp(target, ionicModel, meta, getPreopData) {
-
-                return useDeleteOp(
-                    ionicModel,
-                    meta,
-                    target,
-                    getPreopData!
-                )
             },
+    
+        }
+    })
+}
 
-            preop(model, args) {
-                const key = args![0];
-                const value = model.get(key)
-                return { key, value }
-            },
-
-            revert(ionicModel, { preopData }) {
-                ionicModel.set(preopData.key, preopData.value)
-            }
-        },
-
-    }
-})
 // export function createIonicMap(
 //     target: Map<any, any>,
 //     methods: AnyObject | undefined

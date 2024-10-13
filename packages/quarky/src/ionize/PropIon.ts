@@ -5,10 +5,9 @@ import { isAnyIon } from "../ion/AnyIon";
 import { protectedMethod, protectIon, READONLY } from "../ion/ProtectedIon";
 import { isProtectedIonicModel } from "./ProtectedIonicModel";
 import { protect } from "../protect";
-import { __devCheckIfTracked } from "../derivations/DependencyTracker";
+import { __devCheckIfTracked, getActiveTracker } from "../derivations/DependencyTracker";
 import { asWatchSubject, WatchSubject } from "../effects/WatchSubject";
 import { asIonicAtom, IonicAtom } from "../derivations/IonicAtom";
-import { isIntegerKey } from "./IonicArray";
 import { asMetaIon } from "../ion/Ion";
 
 
@@ -18,18 +17,18 @@ export function isPropIon(value: any): value is PropIon {
 }
 
 export type PropIon<T = any> = {
-    (): T;
+    (selected?: true): T
     set: (newValue: T) => T
     [META]: MetaPropIon
 }
 
 export type ReadonlyPropIon<T = any> = {
-    (): T;
+    (selected?: true): T
     [META]: MetaPropIon
 }
 
 export type PropIonCapsule<T = any, M extends AnyObject = AnyObject> = {
-    (): T;
+    (selected?: true): T
     [META]: MetaPropIon
 } & M
 
@@ -149,8 +148,11 @@ function createPropIon<T extends IonicModel, K extends keyof T>(ionicModel: T, k
     const rawTarget = toRaw(ionicModel)
 
 
-    function __$propIon() {
+    function __$propIon(selected?: boolean) {
         reregisterIfNeeded()
+        const tracker = getActiveTracker()
+        if (tracker && tracker.selective && !selected)
+            return toRaw(ionicModel)[key]
         return ionicModel[key];
     }
 

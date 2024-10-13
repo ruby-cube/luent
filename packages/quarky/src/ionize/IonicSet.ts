@@ -6,7 +6,6 @@ import { getTrackedOp } from "./TrackedOp";
 import { MetaIonicModel } from "./MetaIonicModel";
 import { getObservedProp } from "./PropIon";
 
-export const runningIonicSet = true;
 
 const trackableCollectionOps = {
     keys: true,  // newIterable = keys()
@@ -47,97 +46,100 @@ const trackableSetOps = {
     isDisjointFrom: true, // boolean = isDisjointFrom(otherSet)
 }
 
-defineIonicStructure(Set, {
-    nontrackableKeys: nontrackableIterableKeys,
-    trackableOps: {
-        has(target, ionicModel) {
-            return useTrackableGetOp(
-                ionicModel,
-                target,
-                'has',
-                target.has
-            )
-        }
-    },
-    mutatingOps: {
-        add: {
-            createOp(target, ionicModel, meta) {
-
-                return function add(newValue: any) {
-                    const oldSize = target.size
-                    const _newValue = toRaw(newValue)
-                    const output = target.add(_newValue); //perform op
-                    const newSize = target.size
-
-
-                    if (oldSize === newSize) return;
-                    storeSnapshot(meta)
-
-                    const sizeProp = getObservedProp(ionicModel, 'size')
-                    if (sizeProp)
-                        trigger(sizeProp, newSize, oldSize);
-
-                    const hasOp = getTrackedOp(ionicModel, 'has', _newValue)
-                    if (hasOp) triggerIonicAtom(hasOp);
-
-                    triggerIonicModel(
+export function installIonicSet(){ 
+    defineIonicStructure(Set, {
+        nontrackableKeys: nontrackableIterableKeys,
+        trackableOps: {
+            has(target, ionicModel) {
+                return useTrackableGetOp(
+                    ionicModel,
+                    target,
+                    'has',
+                    target.has
+                )
+            }
+        },
+        mutatingOps: {
+            add: {
+                createOp(target, ionicModel, meta) {
+    
+                    return function add(newValue: any) {
+                        const oldSize = target.size
+                        const _newValue = toRaw(newValue)
+                        const output = target.add(_newValue); //perform op
+                        const newSize = target.size
+    
+    
+                        if (oldSize === newSize) return;
+                        storeSnapshot(meta)
+    
+                        const sizeProp = getObservedProp(ionicModel, 'size')
+                        if (sizeProp)
+                            trigger(sizeProp, newSize, oldSize);
+    
+                        const hasOp = getTrackedOp(ionicModel, 'has', _newValue)
+                        if (hasOp) triggerIonicAtom(hasOp);
+    
+                        triggerIonicModel(
+                            ionicModel,
+                            'add',
+                            [_newValue],
+                            output
+                        )
+    
+                        return output;
+                    }
+                },
+    
+                revert(model, data) {
+                    model.delete(data.args[0])
+                }
+            },
+            clear: {
+                createOp(target, ionicModel, meta, getPreopData) {
+    
+                    return useClearOp(
                         ionicModel,
-                        'add',
-                        [_newValue],
-                        output
+                        meta,
+                        target,
+                        getPreopData!
                     )
-
-                    return output;
+                },
+    
+                preop(model) {
+                    return Array.from(<Set< any>>toRaw(model))
+                },
+    
+                revert(ionicModel, { preopData }) {
+                    for (const value of preopData) {
+                        ionicModel.add(value) //QUESTION: not sure if this should be the raw target or the ionic model
+                    }
                 }
             },
-
-            revert(model, data) {
-                model.delete(data.args[0])
-            }
-        },
-        clear: {
-            createOp(target, ionicModel, meta, getPreopData) {
-
-                return useClearOp(
-                    ionicModel,
-                    meta,
-                    target,
-                    getPreopData!
-                )
-            },
-
-            preop(model) {
-                return Array.from(<Set< any>>toRaw(model))
-            },
-
-            revert(ionicModel, { preopData }) {
-                for (const value of preopData) {
-                    ionicModel.add(value) //QUESTION: not sure if this should be the raw target or the ionic model
+            delete: {
+                createOp(target, ionicModel, meta, getPreopData) {
+    
+                    return useDeleteOp(
+                        ionicModel,
+                        meta,
+                        target,
+                        getPreopData!
+                    )
+                },
+    
+                preop(model, args) {
+                    return model[args![0]]
+                },
+    
+                revert(ionicModel, { preopData }) {
+                    ionicModel.add(preopData)
                 }
-            }
-        },
-        delete: {
-            createOp(target, ionicModel, meta, getPreopData) {
-
-                return useDeleteOp(
-                    ionicModel,
-                    meta,
-                    target,
-                    getPreopData!
-                )
             },
+    
+        }
+    })
+}
 
-            preop(model, args) {
-                return model[args![0]]
-            },
-
-            revert(ionicModel, { preopData }) {
-                ionicModel.add(preopData)
-            }
-        },
-
-    }
-})
 
 // export function createIonicSet(
 //     target: Set<any>,

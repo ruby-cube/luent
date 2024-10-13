@@ -1,4 +1,4 @@
-import { isAnyIon, initializeIonicEffect as _initializeIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, ChangeEffect, MutationEffect, Phase, __devCheckIfTracked } from "../../../quarky/src";
+import { isAnyIon, watchIonicEffect as _initializeIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, ChangeEffect, Phase, __devCheckIfTracked } from "../../../quarky/src";
 import { InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { isMountPhase } from "../dynamic/DynamicNode";
@@ -35,7 +35,7 @@ function _initializeRender(effect: () => void) {
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
-type Effect<T = any> = MutationEffect<T extends AnyObject ? T : never> | ChangeEffect<T>
+// type Effect<T = any> = MutationEffect<T extends AnyObject ? T : never> | ChangeEffect<T>
 
 
 // export function watchForRender<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchForRenderOptions): ActiveListener
@@ -113,7 +113,7 @@ function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveL
     return watcher;
 }
 
-export function initializeIonicEffect(effect: () => void) {
+export function watchIonicEffect(effect: () => void) {
     const dynamicNode = getActiveDynamicNode()
 
     if (dynamicNode.preserve)
@@ -122,9 +122,9 @@ export function initializeIonicEffect(effect: () => void) {
 }
 
 
-export function watch<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
-export function watch<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
-export function watch<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions): ActiveListener {
+// export function watch<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
+// export function watch<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
+export function watch<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: ChangeEffect<T>, options?: WatchOptions): ActiveListener {
     const dynamicNode = getActiveDynamicNode()
 
     if (dynamicNode && dynamicNode.preserve)
@@ -132,7 +132,7 @@ export function watch<T extends () => any | ReactiveGet | IonicModel>(target: T,
     return _watch(target, effect, options)
 }
 
-function watchAndPreserve<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchOptions) {
+function watchAndPreserve<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: ChangeEffect<T>, options?: WatchOptions) {
     const mountPhase = isMountPhase()
     // const component = getProviderComponent(watchAndPreserve.name);
     // const watchFn = options?.phase === Phase.RENDER ? _watchForRender : _watch

@@ -8,6 +8,7 @@ import { getProviderComponent, popProvider, provide, pushProvider } from "./prov
 import { MorphicRenderKit } from "../morphic/MorphicComponent";
 import { IonicModel, isIon, protect, Ion } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
+import { getFlask } from "@rue/flask";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 

@@ -1,7 +1,7 @@
 import { isIonicModel, IonicModel, toRaw, ionize, registerIonicModel } from "./ionize";
 import { defineIonicStructure } from "./IonicModel";
 
-export const runningIonicObject = true;
+// export const runningIonicObject = true;
 
 export function isIonicObject(value: any): value is IonicModel {
     if (!isIonicModel(value)) return false;
@@ -11,22 +11,7 @@ export function isIonicObject(value: any): value is IonicModel {
 }
 
 
-defineIonicStructure(Object, {
-    nontrackableKeys: {
-        constructor: true,
-        __defineGetter__: true,
-        __defineSetter__: true,
-        // hasOwnProperty: true,
-        __lookupGetter__: true,
-        __lookupSetter__: true,
-        isPrototypeOf: true,
-        propertyIsEnumerable: true,
-        toString: true,
-        valueOf: true,
-        __proto__: true,
-        toLocaleString: true
-    }
-})
+// defineIonicStructure()
 
 // export function createIonicObject(
 //     target: AnyObject,

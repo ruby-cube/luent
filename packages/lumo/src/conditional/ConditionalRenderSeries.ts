@@ -92,7 +92,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         fragment?: DocumentFragment,
     ) {
         const parentDynamicNode = getActiveDynamicNode()
-        
+
         // evaluate conditions and render
         const $conditions = this.getConditionsIon()
         const activeIndex = this.evaluateConditions()
@@ -106,8 +106,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const preserve = activationType === 'create' ? false : true;
         const dynamicNode = makeDynamicNode(preserve, _nodePod)
 
-
-
         dynamicNode.activate(function renderConditional() {
             pushProvider(component)
             series.appendConditional(activeIndex, parent, fragment)
@@ -116,13 +114,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         this.storeDynamicNode(dynamicNode, activeIndex)
 
         // set up watcher for updates
-        watch($conditions, updateConditional, {
-            // retrack: true,
-            phase: Phase.RENDER,
-            __devName: 'mount conditional'
-        })
-
-        function updateConditional(newValue: boolean[], oldValue: boolean[]) {
+        watch($conditions, function updateConditional(newValue: boolean[], oldValue: boolean[]) {
             console.log("update conditional")
             if (areShallowEqualArrays(newValue, oldValue)) return;
             pushDynamicNode(parentDynamicNode!)
@@ -142,7 +134,11 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             // setUpUpdateHooks(component)
 
             popDynamicNode()
-        }
+        }, {
+            // retrack: true,
+            phase: Phase.RENDER,
+            __devName: 'mount conditional'
+        })
     }
 
     private render(index: number) {

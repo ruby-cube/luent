@@ -242,7 +242,7 @@ Flasked listeners are listeners that are hooked into the Flask event system, whe
 - [the Pecherie library](https://github.com/ruby-cube/rue/tree/main/packages/pecherie#readme-top), which creates flasked listeners for application events and process hooks
 - [the Archer library](https://github.com/ruby-cube/rue/tree/main/packages/archer#readme-top), which provides a flasked listener for targeted messages
 - [the Thread library](https://github.com/ruby-cube/rue/tree/main/packages/thread#readme-top), which provides flasked schedulers and flasked user event listeners from Web API
-- [the Watch library](https://github.com/ruby-cube/rue/tree/main/packages/watch#readme-top), which provides flasked versions of Vue’s watch, initializeIonicEffect, and computed
+- [the Watch library](https://github.com/ruby-cube/rue/tree/main/packages/watch#readme-top), which provides flasked versions of Vue’s watch, watchIonicEffect, and computed
 
 Note that in browser and Node.js API, the word “listener” refers to the callback passed into the `addListener` function. This to me is a misnomer and it pains me to follow this convention. For clarity, here is how terms are used within the Flask system:
 

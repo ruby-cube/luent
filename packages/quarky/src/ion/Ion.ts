@@ -9,7 +9,7 @@ import { ProtectedIon } from "./ProtectedIon";
 
 
 export type Ion<T = any, M extends AnyObject = {}> = {
-    (): T;
+    (selected?: true): T
     [META]: MetaIon<T>;
     set: (value: T) => T
 } & M
@@ -22,7 +22,7 @@ export type Ion<T = any, M extends AnyObject = {}> = {
 type ReactiveIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? Ion<T, M> : Ion<T>
 
 // API
-export function Ion<T, M>(value: T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveIon<T, M> {
+export function Ion<T, M = undefined>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveIon<T, M> {
     if (isAnyIon(value)) throw new Error('INVALID INPUT: Ions cannot be made into ions')
     return createIon(value, methods) as  ReactiveIon<T, M>
 }
@@ -70,11 +70,12 @@ export function createIon<
         }
     }
 
-    function $ion() {
+    function $ion(selected?: boolean) {
         if (inert) return metaIon.value;
         if (__DEV__) emitSignal();
         const tracker = getActiveTracker()
-        if (!tracker) return metaIon.value as T
+        if (!tracker || tracker.selective && !selected) 
+            return metaIon.value as T
         tracker.track(<Ion>$ion)
         return metaIon.value as T;
     }

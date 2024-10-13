@@ -2,7 +2,7 @@ import { isIon, Ion } from "../ion/Ion";
 import { IonicDerivation } from "./IonicDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 import { META } from "../ReactiveEntity";
-import { __devCheckIfTracked } from "./DependencyTracker";
+import { __devCheckIfTracked, getActiveTracker } from "./DependencyTracker";
 import { AnyObject } from "@rue/types";
 import { ProtectedIon } from "../ion/ProtectedIon";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
@@ -19,7 +19,7 @@ import { DerivedRef } from "../ion/Ref";
 export const DERIVED_ION = Symbol('DerivedIon')
 
 export type DerivedIon<T = any> = {
-    (): T
+    (selected?: true): T
     [META]: MetaDerivedIon
     untrack: () => void
 }
@@ -86,7 +86,11 @@ export function createDerivedIon<T extends any>(
 
     let initialized = false;
 
-    function $derivedIon() {
+    function $derivedIon(selected?: boolean) {
+        const tracker = getActiveTracker()
+        if (tracker && tracker.selective && !selected)
+            return pureGetter();
+
         if (!initialized || derived.dirty && retrack) {
             const value = derived.trackAtoms(pureGetter);
             derived.forwardAtoms(derived.atoms)
@@ -132,7 +136,7 @@ export function createDerivedIon<T extends any>(
 }
 
 export type WritableDerivedIon<T = any, M extends AnyObject = {}> = {
-    (): T;
+    (selected?: true): T
     [META]: MetaDerivedIon;
     untrack: () => void;
 } & M

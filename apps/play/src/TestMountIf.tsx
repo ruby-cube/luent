@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { NodeRef, Component, If, Else, stopPropagation, watch } from "@rue/lumo";
 import { AFTER_RENDER, BEFORE_RENDER, Ion, ON_RENDER, SYNC } from "@rue/quarky";
 
@@ -33,18 +34,19 @@ export function MountIf() {
 
     // const $activeAndReady = $(() => $active() && $ready(), true)
 
-    return Component(
+    return Component(() =>
         <>
+            <h1>Hello world</h1>
             {[
-                If($active, () =>
-                    <Counter></Counter>
+                If($active,
+                    <div>hi</div>
                 ),
-                Else(() =>
+                Else(
                     <p>bye</p>
                 )
             ]}
-            {/* <div>Both: {$activeAndReady}</div> */}
             <button onclick={$active.toggle}>toggle active {$active}</button>
+            {/* <div>Both: {$activeAndReady}</div> */}
             {/* <button onclick={increment}>increment {$count}</button> */}
             {/* <button onclick={toggleReady}>toggle ready {$ready}</button> */}
             {/* <div>{$sum}</div>
@@ -53,65 +55,65 @@ export function MountIf() {
     )
 }
 
-function Counter() {
-    const _this = $thisComponent()
-    const $count = Ion(0)
+// function Counter() {
+//     const _this = $thisComponent()
+//     const $count = Ion(0)
 
-    const $button = NodeRef('button')
-    const $countDiv = NodeRef('div')
+//     const $button = NodeRef('button')
+//     const $countDiv = NodeRef('div')
 
-    // onNodesCreated(
-    //     [$button, $countDiv],
-    //     ([button, countDiv]) => {
+//     // onNodesCreated(
+//     //     [$button, $countDiv],
+//     //     ([button, countDiv]) => {
 
-    //     }
-    // )
+//     //     }
+//     // )
 
-    watch($count, () => {
-        console.log("sync phase")
-    }, { phase: SYNC })
+//     watch($count, () => {
+//         console.log("sync phase")
+//     }, { phase: SYNC })
 
-    watch($count, () => {
-        console.log("pre-render phase")
-    }, { phase: BEFORE_RENDER })
+//     watch($count, () => {
+//         console.log("pre-render phase")
+//     }, { phase: BEFORE_RENDER })
 
-    watch($count, () => {
-        console.log("render phase")
-    }, { phase: ON_RENDER })
+//     watch($count, () => {
+//         console.log("render phase")
+//     }, { phase: ON_RENDER })
 
-    watch($count, () => {
-        console.log("post-render phase")
-    }, { phase: AFTER_RENDER })
+//     watch($count, () => {
+//         console.log("post-render phase")
+//     }, { phase: AFTER_RENDER })
 
-    _this.onCreated(() => {
-        console.log("created")
-        const button = $button()
-        const countDiv = $countDiv()
-        console.log("node ref", button, countDiv)
-    })
+//     _this.onCreated(() => {
+//         console.log("created")
+//         const button = $button()
+//         const countDiv = $countDiv()
+//         console.log("node ref", button, countDiv)
+//     })
 
-    // onActivated(() => {
-    //     console.log("activated yo")
-    // })
+//     // onActivated(() => {
+//     //     console.log("activated yo")
+//     // })
 
-    // onDeactivate(() => {
-    //     console.log("deactivate")
-    // })
+//     // onDeactivate(() => {
+//     //     console.log("deactivate")
+//     // })
 
-    _this.onDestroy(() => {
-        console.log("destroyd")
-    })
+//     _this.onDestroy(() => {
+//         console.log("destroyd")
+//     })
 
-    $count.set(1)
+//     $count.set(1)
 
-    return Component(
-        <>
-            <div ref={$countDiv}>{$count}</div>
-            <button onclick-this-$button-v={[$count.set($count() + 1), stopPropagation]} ref={$button}>increment</button >
-            {/* <Counter>{$count()}</Counter> */}
-        </>
-    )
-}
+//     return Component(
+//         <>
+//             <div ref={$countDiv}>{$count}</div>
+//             <button onclick-this-$button-v={[$count.set($count() + 1), stopPropagation]} ref={$button}>increment</button >
+//             {/* <Counter>{$count()}</Counter> */}
+//         </>
+//     )
+// }
 
 
 // slot: renderfunction, component, readonly Ion, primitive value

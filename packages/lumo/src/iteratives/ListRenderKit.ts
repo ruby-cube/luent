@@ -1,4 +1,4 @@
-import {  isAnyIon, isIonicModel, Ion, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "../../../quarky/src";
+import { isAnyIon, isIonicModel, Ion, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "../../../quarky/src";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
@@ -13,6 +13,7 @@ import { Sign } from "crypto";
 import { META } from "../../../quarky/src/ReactiveEntity";
 import { popProvider, pushProvider } from "../component/provide";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
+import { getFlask } from "@rue/flask";
 
 
 type Index = number
@@ -89,6 +90,7 @@ export class ListRenderKit<T = any> {
             if (isDynamic) {
                 const dynamicNode = makeDynamicNode(false, nodePod)
                 dynamicNode.activate(function mountDynamicItem() {
+                    console.log('mounting item')
                     pushProvider(provider)
                     const nodeEntities = normalizeToArray(renderItem(item, $index))
                     for (const nodeEntity of nodeEntities) {
@@ -138,6 +140,7 @@ export class ListRenderKit<T = any> {
                     popDynamicNode()
                 })
             }, { phase: Phase.RENDER })
+            // }, { phase: Phase.RENDER, until: (cleanUp) => parentDynamicNode.flask?.onDisposal(cleanUp) })
             popProvider()
         }
         // currentItem = undefined;
@@ -214,6 +217,7 @@ export class ListRenderKit<T = any> {
                 const list = this.data;
                 const _item = isIonicModel(list) || isIon(list) && asMetaIon(list).hasIonicValue ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
                 dynamicNode.activate(function renderNewListItem() {
+                    console.log('rendering new item')
                     const nodeEntities = normalizeToArray(renderItem(_item, $index));
                     for (const nodeEntity of nodeEntities!) {
                         mountNodeEntity(parent, nodeEntity, nodePod, fragment)
