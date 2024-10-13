@@ -61,6 +61,7 @@ export function ionize<T extends AnyObject, M extends AnyObject>(target: T, meth
         if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
         return target as T & M;
     }
+    //TODO: What about a readonly object that is not an ionic model?
     if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
     const existingIonicModel = ionicModels.get(target)
     if (existingIonicModel) return existingIonicModel as T & M;

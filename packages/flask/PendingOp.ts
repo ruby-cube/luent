@@ -1,5 +1,6 @@
+import { RegisterAbortSignal } from "./AbortSignal";
 import { getFlask, onFlaskDisposal } from "./EffectFlask";
-import { CallbackRemover } from "./flaskableListeners";
+import { CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
 import { mapHandlers } from "./handlerMap";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
@@ -12,7 +13,7 @@ export type PendingOp<T = unknown> = Promise<T> & {
 export const NEVER = null;
 
 export type SchedulerOptions = {
-    cancel?: ScheduleCancel | typeof NEVER,
+    cancel?: ScheduleCancel | AbortSignal | typeof NEVER,
     // flask?: EffectFlask | null | 'outlive',
     __devName?: string
 }
@@ -36,7 +37,11 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
     options: SchedulerOptions | undefined
 }): PendingOp<ReturnType<CB>> {
     const { callback, enroll, remove, options } = config;
-    const scheduleCancellation = options?.cancel;
+    let scheduleCancellation = options?.cancel as ScheduleCancel | RegisterAbortSignal | null | undefined | any[]
+
+    if (scheduleCancellation instanceof Array) {
+        scheduleCancellation = useCleanupScheduler(...scheduleCancellation)
+    }
     // const flask = options?.flask
 
     let returnVal: any;

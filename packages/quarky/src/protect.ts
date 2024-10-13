@@ -1,7 +1,7 @@
 import { isWritableIon, ProtectedIon, protectIon, READONLY } from "./ion/ProtectedIon";
 import { isIonicModel, IonicModel } from "./ionize/ionize";
 import { AnyObject } from "@rue/types";
-import { protectIonicModel } from "./ionize/ProtectedIonicModel";
+import { isProtectedIonicModel, isReadonlyIonicModel, protectIonicModel } from "./ionize/ProtectedIonicModel";
 
 
 // export type ReadonlyIon<T = any> = {
@@ -11,18 +11,26 @@ import { protectIonicModel } from "./ionize/ProtectedIonicModel";
 // }
 
 // export const READONLY_ION = Symbol('readonlySignal');
-export function protect<T>($entity: T, methodKeys?: (T extends AnyObject ? { [K in keyof T]: true } : never) | typeof READONLY) {
-    if (isWritableIon($entity)) {
-        return protectIon($entity, methodKeys)
+export function protect<T>(entity: T, methodKeys?: (T extends AnyObject ? { [K in keyof T]: true } : never) | typeof READONLY) {
+    if (entity instanceof Function || !methodKeys && isProtectedIonicModel(entity) || isReadonlyIonicModel(entity)) 
+        return entity;
+    if (isWritableIon(entity)) {
+        return protectIon(entity, methodKeys)
     }
-    if (isIonicModel($entity)) {
-        return protectIonicModel($entity, methodKeys)
+    const _entity = toUnprotected(entity);
+    if (isIonicModel(_entity)) {
+        return protectIonicModel(_entity, methodKeys)
     }
-    if ($entity instanceof Function)
-        return $entity;
-    if ($entity instanceof Object)
-        return __DEV__ ? createReadonlyObject($entity) : $entity
-    return $entity;
+    if (_entity instanceof Object) //TODO: 
+        return __DEV__ ? createReadonlyObject(_entity) : entity
+    return entity;
+}
+
+function toUnprotected(entity: any){
+    if (isProtectedIonicModel(entity)){
+        return Object.getPrototypeOf(entity)
+    }
+    return entity;
 }
 
 
@@ -41,15 +49,3 @@ function createReadonlyObject(obj: AnyObject) { //TODO: what about Arrays, Maps,
     })
 }
 
-
-// export function asReadonly<R extends () => T | IonicModel, T>($entity: R): R extends Ion ? ProtectedIon<T> : R {
-//     if (isDerivedIon($entity)) return $entity as R;
-//     if (isIon($entity)) { //TODO: what about writeable and propIons?
-//         return protectIon($entity, 'ro') as R extends Ion ? ProtectedIon<T> : R;
-//     }
-//     if (isIonicModel($entity)) {
-//         //TODO: 
-//         return $entity as R extends Ion ? ProtectedIon<T> : R;
-//     }
-//     return $entity as R extends Ion ? ProtectedIon<T> : R;
-// }

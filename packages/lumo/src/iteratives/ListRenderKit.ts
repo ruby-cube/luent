@@ -140,7 +140,6 @@ export class ListRenderKit<T = any> {
                     popDynamicNode()
                 })
             }, { phase: Phase.RENDER })
-            // }, { phase: Phase.RENDER, until: (cleanUp) => parentDynamicNode.flask?.onDisposal(cleanUp) })
             popProvider()
         }
         // currentItem = undefined;

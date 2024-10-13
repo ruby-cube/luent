@@ -29,15 +29,19 @@ export function onFlaskDisposal(cb: () => void) {
 
 
 export class EffectFlask {
-    #cleanups: Set<() => void>;
     dispose: () => void;
     outer: EffectFlask | null = null;
+    onDisposal: (cleanUp: () => void) => { cancel(): void; };
 
     constructor(public __devName: string) {
         this.outer = getFlask();
         const cleanups: Set<() => void> = new Set()
-        this.#cleanups = cleanups
         let called = false;
+
+        // defining dispose and onDisposal per instances makes it cleaner to 
+        // pass them into { until: flask.onDisposal } and flask.onDisposal(outer.dispose)
+        // without worrying about `this`
+
         this.dispose = () => {
             if (called) return;
             called = true;
@@ -45,20 +49,26 @@ export class EffectFlask {
                 cleanUp();
             }
         }
-    }
 
-    onDisposal(cleanUp: () => void) {
-        const devName = this.__devName
-        // console.trace('adding cleanup', this.__devName)
-        const cleanups = this.#cleanups;
-        cleanups.add(cleanUp);
-        return {
-            cancel() {
-                // console.trace('cancel cleanup', devName)
-                cleanups.delete(cleanUp)
+        this.onDisposal = (cleanUp: () => void) => {
+            cleanups.add(cleanUp);
+            return {
+                cancel() {
+                    cleanups.delete(cleanUp)
+                }
             }
         }
     }
+
+    // onDisposal(cleanUp: () => void) {
+    //     const cleanups = this.#cleanups;
+    //     cleanups.add(cleanUp);
+    //     return {
+    //         cancel() {
+    //             cleanups.delete(cleanUp)
+    //         }
+    //     }
+    // }
 
     reactivate() {
         pushFlask(this)
@@ -71,21 +81,25 @@ export class EffectFlask {
 
     collectEffects<T>(run: (outerFlask: EffectFlask | null) => T) {
         pushFlask(this);
-        const output = run(this.outer);
-        popFlask();
-        return output;
+        try {
+            return run(this.outer);
+        }
+        finally {
+            popFlask();
+        }
     }
 }
 
 
-
-
 export function collectEffects<T>(run: (flask: EffectFlask, outerFlask: EffectFlask | null) => T, __devName: string) {
-    const flask = new EffectFlask(__devName);
-    pushFlask(flask);
-    const output = run(flask, flask.outer || null);
-    popFlask();
-    return output;
+    try{
+        const flask = new EffectFlask(__devName);
+        pushFlask(flask);
+        return run(flask, flask.outer || null);
+    }
+    catch{
+        popFlask();
+    }
 }
 
 

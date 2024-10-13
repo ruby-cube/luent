@@ -127,12 +127,12 @@ function SideBar(
 
     watchIonicEffect(async () => {
 
-        const pendingFetch = Abortable()
+        const abort = AbortSignal()
 
         defineEffectCleanup(() => {
-            pendingFetch.abort()
+            abort()
         })
-        const result = await fetch('', { until: pendingFetch.abortSignal })
+        const result = await fetch('', { until: abort })
     })
 
 

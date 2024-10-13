@@ -1,9 +1,12 @@
-import { $listen, ListenerOptions, ScheduleStop } from '@rue/flask';
-import { PendingCancelOp } from '../../../flask/PendingCancelOp';
+import { $listen, ActiveListener, CallbackRemover, defineCustomCleanupScheduler, LIFETIME, ListenerOptions, PendingCancelOp, ScheduleStop } from '@rue/flask';
+import { isAnyIon, Ref } from '@rue/quarky';
+import { NodeRef } from '../node/NodeRef';
 
 
-type EventListenerOptions = Omit<AddEventListenerOptions, "signal"> & Omit<ListenerOptions, 'until'> & {
-    until?: [EventTarget, keyof DocumentEventMap | keyof HTMLElementEventMap | keyof WindowEventMap] | ScheduleStop
+type EventListenerOptions = Omit<AddEventListenerOptions, "signal"> & Omit<ListenerOptions, 'until'> & CustomCleanupSchedulerListenerOptions
+
+export type CustomCleanupSchedulerListenerOptions = {
+    until?: [EventTarget, keyof DocumentEventMap | keyof HTMLElementEventMap | keyof WindowEventMap] | ScheduleStop | typeof LIFETIME | AbortSignal
 }
 
 type EventName<T> = T extends Document ? keyof DocumentEventMap :
@@ -16,21 +19,14 @@ type EventHandler<T, K extends string> = T extends Document ? (event: K extends 
     : EventListener
 
 export function listen<
-    T extends EventTarget
+    T extends EventTarget,
+    CB
 >(
     element: T,
     event: EventName<T>,
-    handler: EventHandler<T, EventName<T>>,
+    handler: CB & EventHandler<T, EventName<T>>,
     options?: EventListenerOptions
-) {
-    const until = options?.until
-    if (until instanceof Array) {
-        const eventName = until[1]
-        if (typeof eventName !== 'string') {
-            throw new Error(`${eventName} is an invalid event name. Listener will not be registered.`)
-        }
-        options!.until = (cleanup) => listen(until[0], <keyof HTMLElementEventMap>until[1], cleanup) as unknown as PendingCancelOp
-    }
+): CB extends CallbackRemover ? PendingCancelOp : ActiveListener {
 
     return $listen(handler, <ListenerOptions>options || {}, {
         enroll(cb) {
@@ -41,3 +37,10 @@ export function listen<
         }
     })
 }
+
+defineCustomCleanupScheduler(
+    (target, event) =>
+        (cleanup: CallbackRemover) =>
+            listen(target, event, cleanup)
+)
+

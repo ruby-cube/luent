@@ -1,8 +1,9 @@
-import { Callback, CallbackRemover } from "./flaskableListeners";
+import { Callback, CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
 import { getFlask, onFlaskDisposal } from "./EffectFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { mapHandlers } from "./handlerMap";
+import { isAbortSignal, AbortSignal, RegisterAbortSignal } from "./AbortSignal";
 
 export type ActiveListener = {
     stop(): void;
@@ -14,7 +15,7 @@ export const LIFETIME = null;
 
 export type ListenerOptions = {
     once?: boolean;
-    until?: ScheduleStop | typeof LIFETIME;
+    until?: ScheduleStop | typeof LIFETIME | AbortSignal | any[]
     // flask?: EffectFlask | null | 'outlive';
     __devName?: string;
 }
@@ -33,6 +34,10 @@ type ActiveListenerConfig<E extends EnrollFunction = EnrollFunction> = {
     remove: RemoveFunction<E>,
     options: ListenerOptions | undefined
 }
+
+
+
+
 
 
 
@@ -81,7 +86,11 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
     _remove.isRemover = true as const;
     _remove.__devName = options?.__devName;
 
-    const until = options?.until;
+    let until = options?.until as ScheduleStop | RegisterAbortSignal | null | undefined | any[]
+
+    if (until instanceof Array) {
+        until = useCleanupScheduler(...until)
+    }
 
     if (until) {
         pendingStop = until(_remove);

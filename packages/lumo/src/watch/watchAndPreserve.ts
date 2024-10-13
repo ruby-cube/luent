@@ -7,12 +7,15 @@ import { onActivated, onDeactivate } from "../dynamic/lifecycle";
 import { noop } from "@rue/utils";
 import { getCurrentProvider, getProviderComponent, popProvider, pushProvider } from "../component/provide";
 import { getActiveDynamicNode } from "../dynamic/nodestack";
+import { CustomCleanupSchedulerListenerOptions } from "../events/listen";
 
 type WatchForRenderOptions = {
     eager?: true;
     retrack?: boolean;
 } & ListenerOptions
 
+
+type LumoWatchOptions =  CustomCleanupSchedulerListenerOptions & Omit<WatchOptions, 'until'>
 
 export function initializeRender(effect: () => void) {
     const component = getCurrentProvider();
@@ -80,7 +83,7 @@ function _initializeRender(effect: () => void) {
 
 function bindWithComponent(fn: Function, component: InternalComponent) {
     return (...args: any[]) => {
-        pushProvider(component) 
+        pushProvider(component)
         const output = fn(...args)
         popProvider()
         return output;
@@ -124,15 +127,17 @@ export function watchIonicEffect(effect: () => void) {
 
 // export function watch<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
 // export function watch<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
-export function watch<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: ChangeEffect<T>, options?: WatchOptions): ActiveListener {
-    const dynamicNode = getActiveDynamicNode()
+export function watch<T>(target: T & (() => any), effect: ChangeEffect<T>, options?: LumoWatchOptions): ActiveListener
+export function watch<T>(target: T & AnyObject, effect: ChangeEffect<T>, options?: LumoWatchOptions): ActiveListener
+export function watch<T extends () => any | ReactiveGet | AnyObject>(target: T, effect: ChangeEffect<T>, options?: LumoWatchOptions): ActiveListener {
+    // const dynamicNode = getActiveDynamicNode()
 
-    if (dynamicNode && dynamicNode.preserve)
-        return watchAndPreserve(target, effect, options)
+    // if (dynamicNode && dynamicNode.preserve)
+        // return watchAndPreserve(target, effect, options)
     return _watch(target, effect, options)
 }
 
-function watchAndPreserve<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: ChangeEffect<T>, options?: WatchOptions) {
+function watchAndPreserve<T extends () => any | ReactiveGet | AnyObject>(target: T, effect: ChangeEffect<T>, options?: LumoWatchOptions) {
     const mountPhase = isMountPhase()
     // const component = getProviderComponent(watchAndPreserve.name);
     // const watchFn = options?.phase === Phase.RENDER ? _watchForRender : _watch

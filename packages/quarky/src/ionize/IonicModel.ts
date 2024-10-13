@@ -7,7 +7,7 @@ import { IonicModel, storeSnapshot } from "./ionize";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
 import { MetaIonicModel } from "./MetaIonicModel";
 import { noop } from "@rue/utils";
-import { getProtectedModelMeta, isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
+import { getProtectedModelMeta, isProtectedProxy, isReadonlyProxy, PROTECTED_META } from "./ProtectedIonicModel";
 import { META } from "../ReactiveEntity";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
 import { asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PropIon";
@@ -198,7 +198,6 @@ export function createCustomIonicModel(
     methods: AnyObject | undefined
 ) {
     const metaIonicModel = new MetaIonicModel(target, methods)
-    if (isIonicModel(target)) console.trace('already ionized')
     const ionicModel = new Proxy(target, {
         get(target, key, receiver) {
             if (__DEV__) emitSignal()

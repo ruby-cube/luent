@@ -1,14 +1,18 @@
 import { AnyObject } from "@rue/types";
 import { READONLY } from "../ion/ProtectedIon";
 import { asMetaIonicModel, IonicModel } from "./ionize";
-import { mO } from "@rue/lumo";
 
 
-export const PROTECTED = Symbol('protectedIonicModel')
+// export const PROTECTED = Symbol('protectedIonicModel')
 
 export function isProtectedIonicModel(value: any) {
     if (!(value instanceof Object)) return false;
-    return PROTECTED in value;
+    return PROTECTED_META in value || READONLY_IONIC_MODEL in value;
+}
+
+export function isReadonlyIonicModel(value: any) {
+    if (!(value instanceof Object)) return false;
+    return READONLY_IONIC_MODEL in value;
 }
 
 export function protectIonicModel<T extends IonicModel>(model: T, propertyKeys?: { [key: string]: true } | typeof READONLY) {
@@ -30,20 +34,25 @@ export function protectIonicModel<T extends IonicModel>(model: T, propertyKeys?:
 const READONLY_IONIC_MODEL = Symbol('readonlyIonicModel')
 // const PROPERTY_KEYS = Symbol('protectedIonicModel')
 
-const PROTECTED_META = Symbol('protectedMeta')
+export const PROTECTED_META = Symbol('protectedMeta')
 
 function createProtectedIonicModel(model: IonicModel, propertyKeys?: { [key: string]: true }) {
     const protectedModel = Object.create(model);
-    protectedModel[PROTECTED_META] = {
-        propertyKeys
-    }
+    // protectedModel[PROTECTED_META] = {
+        //     propertyKeys
+        // }
+        Object.defineProperty(protectedModel, PROTECTED_META, {value: {
+            propertyKeys
+        }})
+ 
     return protectedModel
 }
 
 
 function createReadonlyIonicModel(model: IonicModel) {
     const readonlyModel = Object.create(model);
-    readonlyModel[READONLY_IONIC_MODEL] = true;
+    // readonlyModel[READONLY_IONIC_MODEL] = true;
+    Object.defineProperty(readonlyModel, READONLY_IONIC_MODEL, {value: true})
     return readonlyModel
 }
 
@@ -86,8 +95,9 @@ export function isReadonlyProxy(target: AnyObject, proxy: AnyObject, receiver: A
 
 export function getProtectedModelMeta(target: AnyObject, proxy: AnyObject, receiver: AnyObject): {propertyKeys: {[key: string]: true} | undefined} | undefined {
     if (receiver !== proxy){
-        console.log('receiver', receiver)
-        console.log('proxy', proxy)
+        // console.log('receiver', receiver)
+        // console.log('proxy', proxy)
+        // return Reflect.get(target, PROTECTED_META, receiver)
         return receiver[PROTECTED_META];
     }
     return undefined;

@@ -2,7 +2,6 @@ import { AnyObject } from "@rue/types";
 import { ActiveListener, EnrollFunction, ListenerOptions, makeActiveListener, RemoveFunction, ScheduleStop } from "./ActiveListener";
 import { makePendingCancelOp, PendingCancelOp } from "./PendingCancelOp";
 import { makePendingOp, PendingOp, ScheduleCancel, SchedulerOptions } from "./PendingOp";
-import { EffectFlask } from "./EffectFlask";
 
 export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O extends AnyObject = {}> = <
     OPT extends ListenerOptions & O,
@@ -20,6 +19,18 @@ export type Callbacks = Set<Callback | CallbackRemover>;
 export type ScheduleRemoval = ScheduleCancel | ScheduleStop;
 
 
+let _useCleanupScheduler: undefined | ((...args: any[]) => (cleanup: CallbackRemover) => PendingCancelOp)
+
+export function useCleanupScheduler(...args: any[]) {
+    if (_useCleanupScheduler) {
+        return _useCleanupScheduler(...args)
+    }
+}
+
+export function defineCustomCleanupScheduler(scheduler: (...args: any[]) => (cleanup: CallbackRemover) => PendingCancelOp) {
+    if (__DEV__ && _useCleanupScheduler) console.warn(`overriding custom cleanup scheduler`)
+    _useCleanupScheduler = scheduler;
+}
 
 
 export function $listen<

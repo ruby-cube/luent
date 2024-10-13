@@ -117,23 +117,24 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         watch($conditions, function updateConditional(newValue: boolean[], oldValue: boolean[]) {
             console.log("update conditional")
             if (areShallowEqualArrays(newValue, oldValue)) return;
-            pushDynamicNode(parentDynamicNode!)
+            try{
+                pushDynamicNode(parentDynamicNode!)
+    
+                // (1)
+                series.deactivateConditional()
+    
+                // (2)
+                const activeIndex = series.evaluateConditions();
+    
+                // (3)
+                pushProvider(component)
+                series.activateConditional(activeIndex, parent)
+            }
+            finally{
+                popProvider()
+                popDynamicNode()
+            }
 
-            // (1)
-            series.deactivateConditional()
-
-            // (2)
-            const activeIndex = series.evaluateConditions();
-
-            // (3)
-            pushProvider(component)
-            series.activateConditional(activeIndex, parent)
-            popProvider()
-
-            // // (4)
-            // setUpUpdateHooks(component)
-
-            popDynamicNode()
         }, {
             // retrack: true,
             phase: Phase.RENDER,
