@@ -4,7 +4,7 @@ import { $listen, ActiveListener, getFlask, ListenerOptions } from "@rue/flask";
 import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
-import { ReactiveGet, DerivedIon, isDerivedIon } from "../derivations/DerivedIon";
+import { ReactiveGet, DerivedIon, isDerivedIon, createDerivedIon } from "../derivations/DerivedIon";
 import { asMetaIonicModel, isIonicModel, IonicModel, toRaw, } from "../ionize/ionize";
 import { areEqual } from "./areEqual";
 import { createIonicEffect, IonicEffect } from "../derivations/IonicEffect";
@@ -12,11 +12,11 @@ import { isReactive, META } from "../ReactiveEntity";
 import { noop } from "@rue/utils";
 import { __devCheckIfTracked } from "../derivations/DependencyTracker";
 import { AnyIon, isAnyIon } from "../ion/AnyIon";
-import { Ion, asMetaIon, isIon } from "../ion/Ion";
+import { ion, asMetaIon, isIon, Ion } from "../ion/Ion";
 import { asIonicAtom } from "../derivations/IonicAtom";
 import { isPropIon, PropIon } from "../ionize/PropIon";
 import { popEffect, pushEffect, runCleanups, ThisEffect } from "./ThisEffect";
-import { Ref } from "../ion/Ref";
+import { ref, Ref } from "../ion/Ref";
 
 
 type RenderCycleOptions = {
@@ -109,7 +109,7 @@ function normalizeWatchSubjects(subjects: ((AnyIon | ReactiveGet | IonicModel)[]
 
 function normalizeWatchSubject(subject: AnyIon | ReactiveGet | IonicModel) {
     if (subject instanceof Function)
-        return DerivedIon(subject)
+        return createDerivedIon(subject)
     if (isPropIon(subject)) {
         asMetaIon(subject).watch()
         return subject;
@@ -173,7 +173,7 @@ export function watch<T extends AnyIon | ReactiveGet | IonicModel | (AnyIon | Re
     if (!isMultiSubject && !isReactive(subject)) return { // inert watch subjects
         stop: noop
     }
-// if ('name' in subject && subject.name === '__$propIon') console.log(subject)
+    // if ('name' in subject && subject.name === '__$propIon') console.log(subject)
 
 
     const eager = options?.eager
@@ -188,7 +188,7 @@ export function watch<T extends AnyIon | ReactiveGet | IonicModel | (AnyIon | Re
 
     let oldValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when derived is initialized if not already
 
-    const $activeEffect = Ref<ThisEffect>()
+    const $activeEffect = ref() as Ref<ThisEffect>
 
     function changeEffect() {
         const newValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when retracking happens
@@ -282,7 +282,7 @@ function getMutations(subjects: (AnyIon | IonicModel)[]) {
 
 //     asMetaIonicModel(subject).trackAbsorbedIons()
 
-//     const $activeEffect = Ref(undefined) as Ion<ThisEffect | undefined>
+//     const $activeEffect = ref(undefined) as Ion<ThisEffect | undefined>
 
 //     function mutationEffect() {
 //         const mutations = getCurrentRenderCycle()?.getOps(subject)
@@ -327,14 +327,14 @@ function scheduleEffectEagerly(effect: Effect, phase: Phase) {
 }
 
 
-export function watchIonicEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived Ion and effect combined into one function
+export function watchIonicEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
     const phase = options?.phase || Phase.BEFORE_RENDER;
     const retrack = options?.retrack || false;
     const selectiveSubjects = options?.only;
     const selector = selectiveSubjects?.[0] === true ? true : false;
     const additionalSubjects = normalizeWatchSubjects(options?.also || selector ? <any[]>selectiveSubjects!.slice(1) : selectiveSubjects);
     const additionalWatchSubjects = additionalSubjects ? asWatchSubjects(additionalSubjects) : [];
-    const $activeEffect = Ref<ThisEffect>()
+    const $activeEffect = ref() as Ref<ThisEffect>
     const reactiveEffect = createIonicEffect(effect, $activeEffect, selector, retrack)
     const watchSubject = asWatchSubject(reactiveEffect);
 

@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { createApp } from '@rue/lumo';
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
@@ -8,13 +9,13 @@ import './style.css'
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
-import { configureFlask } from '../../../packages/flask/initFlask';
+import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { List } from './TestReactiveModel';
 import { MountIf } from './TestMountIf';
 import { TestIonProp } from './TestIonProp';
 import { TestMorphic } from './TestMorphic';
 import { ParentBlock } from './ProvideState';
-import { watchIonicEffect, Ion, ionize, protect, isIonicModel } from '@rue/quarky';
+import { watchIonicEffect, ion, ionize, protect, isIonicModel } from '@rue/quarky';
 import { TestIonicEffect } from './TestIonicEffect';
 import { TestSelectiveTracking } from './TestSelectiveTracking';
 import { TestCleanupScheduler } from './TestCustomCleanupScheduler';
@@ -27,16 +28,27 @@ import { TestCleanupScheduler } from './TestCustomCleanupScheduler';
 // import { ConditionalFlaskTest } from './ConditionalFlaskTest';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
-
-
-
-const app = createApp(TestCleanupScheduler)
-
-if (__DEV__) configureFlask({
-    warnNoCleanup: true
+const $count = ion(0, {
+    set(count: number) {
+        $count.as(count)
+    },
+    increment() {
+        $count.as($count() + 1)
+    }
 })
 
-app.mount('#app')
+// $count.set(2)
+$count.increment()
+
+console.log("count", $count())
+
+// const app = createApp(TestCleanupScheduler)
+
+// if (__DEV__) configureFlask({
+//     warnNoCleanup: true
+// })
+
+// app.mount('#app')
 
 // queueTask(()=>{
 //     console.log("hi")
@@ -49,7 +61,7 @@ app.mount('#app')
 // function doSomething() {
 //     const dynamicNode = makeDynamicNode(false)
 //     const unrelated = true;
-//     const $count = Ion(0)
+//     const $count = ion(0)
 //     function increment() {
 //         $count.set(c => c + 1)
 //     }

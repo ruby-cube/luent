@@ -1,4 +1,4 @@
-import { DerivedIon, ReactiveGet, Ion, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked } from "../../../quarky/src";
+import { DerivedIon, ReactiveGet, ion, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked } from "../../../quarky/src";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { InferSlot, ComponentSetupWithSlot, makeComponent } from "../component/makeComponent";
@@ -58,7 +58,7 @@ export function makeNode(
     childNodes: NodeEntity[] | InferSlot,
     config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent {
-    const $index = getCurrentIndex(); //TODO: I need to understand $index and whether it needs to be an Ion or if rerenders will take care of it
+    const $index = getCurrentIndex(); //TODO: I need to understand $index and whether it needs to be an ion or if rerenders will take care of it
     if (typeof nodeType === "string")
         return makeElement(
             nodeType,

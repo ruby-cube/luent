@@ -5,7 +5,7 @@ import { $listen, Callback, collectEffects, EffectFlask, ListenerOptions } from 
 import {  makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { ListRenderKit } from "./ListRenderKit";
-import { Ion, IonicModel, ReactiveGet } from "../../../quarky/src";
+import { ion, IonicModel, ReactiveGet } from "../../../quarky/src";
 import { getProviderComponent } from "../component/provide";
 
 

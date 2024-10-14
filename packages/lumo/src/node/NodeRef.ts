@@ -1,10 +1,8 @@
 import { Component, PublicComponent } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
-import { ArrayItem } from "@rue/types"
-import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit"
 import { HTMLTag } from "../element/makeElement"
 import { isUpdatingList } from "../iteratives/listStack"
-import { protect, Ion, Ref } from "@rue/quarky"
+import { protect, Ion, ref } from "@rue/quarky"
 import { READONLY } from "../../../quarky/src/ion/ProtectedIon"
 
 
@@ -47,7 +45,7 @@ export function NodeRef<
     T extends RefSource
     = RefSource
 >(source: T) {
-    let $node = Ref(undefined) as NodeRef<T>;
+    let $node = ref(undefined) as NodeRef<T>;
     if (__DEV__) {
         $node = asReadonlyNodeRef($node) as NodeRef<T>
     }
@@ -55,7 +53,7 @@ export function NodeRef<
 }
 
 export function NodesRef<T extends RefSource = RefSource>(source: T): NodesIon<T> {
-    let $nodes = Ref([]) as NodesIon<T>
+    let $nodes = ref([]) as NodesIon<T>
     if (__DEV__) {
         $nodes = asReadonlyNodeRef($nodes) as NodesIon<T>
     }

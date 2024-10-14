@@ -65,7 +65,7 @@ function App() {
 
 function FooBar() {
 
-    const $foo = Ion(0)
+    const $foo = ion(0)
 
     return Component(
         expose({

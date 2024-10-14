@@ -6,6 +6,7 @@ import { META, ReactiveEntity } from "../ReactiveEntity";
 import { AnyObject } from "@rue/types";
 import { AnyIon, isAnyIon } from "./AnyIon";
 import { ProtectedIon } from "./ProtectedIon";
+import { createDerivedIon, createWritableDerivedIon, ReactiveDerivedIon } from "../derivations/DerivedIon";
 
 
 export type Ion<T = any, M extends AnyObject = {}> = {
@@ -21,12 +22,21 @@ export type Ion<T = any, M extends AnyObject = {}> = {
 
 type ReactiveIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? Ion<T, M> : Ion<T>
 
-// API
-export function Ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveIon<T, M> {
-    if (isAnyIon(value)) throw new Error('INVALID INPUT: Ions cannot be made into ions')
-    return createIon(value, methods) as  ReactiveIon<T, M>
-}
 
+// API
+export function ion<T, M>(value?: T & (() => unknown), methods?: M & { [key: string]: (...args: any[]) => any }): T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M> {
+    if (isAnyIon(value)) {
+        if (__DEV__ && methods) console.warn(`Cannot make an existing ion into an ion. Methods will not be attached`)
+        return value as T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+    }
+    if (value instanceof Function) {
+        if (methods) return createWritableDerivedIon(<()=>unknown>value, methods) as T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+        return createDerivedIon(<()=>unknown>value) as T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+    }
+    return createIon(value, methods) as T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+}
 
 export const ION = Symbol('atomicIon');
 
@@ -74,7 +84,7 @@ export function createIon<
         if (inert) return metaIon.value;
         if (__DEV__) emitSignal();
         const tracker = getActiveTracker()
-        if (!tracker || tracker.selective && !selected) 
+        if (!tracker || tracker.selective && !selected)
             return metaIon.value as T
         tracker.track(<Ion>$ion)
         return metaIon.value as T;

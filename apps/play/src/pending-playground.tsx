@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { If, expose, NodeEntity, onMounted, RenderFunction } from "@rue/lumo"
 import { $, watch } from "../../../packages/quarky/src"
-import { Ion } from "@rue/quarky/Ion";
+import { ion } from "@rue/quarky/ion";
 
 function App() {
 
@@ -11,8 +11,8 @@ function ListBlock() {
 
     const $itemBlock = Ion<typeof ItemBlock>()
 
-    const $data = Ion();
-    const $ready = Ion(false)
+    const $data = ion();
+    const $ready = ion(false)
     const $allReady = $(() => $ready() && $itemBlock().$ready())
 
     fetch("").then((response) => {
@@ -38,8 +38,8 @@ function ListBlock() {
 
 function ItemBlock() {
 
-    const $data = Ion({ content: "" });
-    const $ready = Ion(false)
+    const $data = ion({ content: "" });
+    const $ready = ion(false)
 
     fetch("").then((response) => {
         response.json().then((data) => {
@@ -63,7 +63,7 @@ function ItemBlock() {
 
 function ListBlockB() {
 
-    const $data = Ion();
+    const $data = ion();
 
     const pendingData = fetch("").then((response) => {
         return response.json()
@@ -80,7 +80,7 @@ function ListBlockB() {
 
 function ItemBlockB() {
 
-    const $content = Ion('');
+    const $content = ion('');
 
     suspendRender(fetch(""))
         .then(async (response) => {

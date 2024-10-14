@@ -1,5 +1,4 @@
-//@ts-nocheck
-import { Ion, Ion } from "../../../packages/quarky/src"
+import { ion } from "../../../packages/quarky/src"
 import { watchForRender } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { NodeRef } from "@rue/lumo";
 
@@ -22,7 +21,7 @@ export function MainBlock() {
         ]
     ], $hello) // if using directly in template
 
-    const $list = Ion(['ho'])
+    const $list = ion(['ho'])
 
     const $records_list = $ListPort($records, (record) => (
         <h1>{record.content}</h1>
@@ -66,8 +65,8 @@ function $MorphicNode() {
 
 function $MorphicPort(initialKey: string | Ion<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; set: (key: string) => any } {
 
-    const $key = Ion(initialKey)
-    const $render = Ion(switchMap[$key()])
+    const $key = ion(initialKey)
+    const $render = ion(switchMap[$key()])
 
     watch($key, (key) => {
         $render.update(switchMap[key])
@@ -84,7 +83,7 @@ function $MorphicPort(initialKey: string | Ion<any>, switchMap: { [key: string]:
 
 function MainContent() {
 
-    const $mainContent = DerivedIon(() =>
+    const $mainContent = ion(() =>
         <div>hello</div>)
 
     function changeMainContent() {

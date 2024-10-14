@@ -1,6 +1,6 @@
 import { NodesRef, Component, If, Else, For } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { Ion, __addDevName, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
+import { ion, __addDevName, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { META } from "../../../packages/quarky/src/ReactiveEntity";
 import { getFlask } from "@rue/flask";
@@ -14,7 +14,7 @@ function genId() {
 }
 
 
-// const $count = Ion(0)
+// const $count = ion(0)
 // watch($(doubleCount => $count() + 2), () => {  
 
 // })
@@ -151,7 +151,7 @@ export function List(
 
     // const $itemDivs = NodesRef('div')
 
-    // const $alive = Ion(true)
+    // const $alive = ion(true)
 
     // function destroy() {
     //     $alive.set(false)
@@ -166,7 +166,7 @@ export function List(
     //     changeContent(0)
     // }, 1)
 
-    // const $listIsEmpty = DerivedIon(() => $list.length === 0)
+    // const $listIsEmpty = ion(() => $list.length === 0)
     return Component(() =>
         <>
             <>

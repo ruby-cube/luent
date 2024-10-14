@@ -1,5 +1,5 @@
 import { ifCase, For, setUpNode, setUpNodesIn, onActivated, beforeMount, beforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../../../packages/lumo/src";
-import { useReactivity, Ion, watch, ReactiveGet } from "../../../packages/quarky/src";
+import { useReactivity, ion, watch, ReactiveGet } from "../../../packages/quarky/src";
 
 const { $, mu, ionize, set } = useReactivity()
 

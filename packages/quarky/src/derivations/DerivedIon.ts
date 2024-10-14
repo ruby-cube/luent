@@ -147,11 +147,11 @@ export function createWritableDerivedIon<T, M>(pureGetter: () => T, methods: M &
 }
 
 
-type ReactiveDerivedIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? WritableDerivedIon<T, M> : DerivedIon<T>
+export type ReactiveDerivedIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? WritableDerivedIon<T, M> : DerivedIon<T>
 
-export function DerivedIon<T, M>(derivation: () => T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveDerivedIon<T, M> {
-    if (isAnyIon(derivation)) throw new Error('INVALID INPUT: Ions cannot be made into ions')
-    if (methods) return createWritableDerivedIon(derivation, methods) as ReactiveDerivedIon<T, M>
-    return createDerivedIon(derivation) as ReactiveDerivedIon<T, M>
-}
+// export function DerivedIon<T, M>(derivation: () => T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveDerivedIon<T, M> {
+//     if (isAnyIon(derivation)) throw new Error('INVALID INPUT: Ions cannot be made into ions')
+//     if (methods) return createWritableDerivedIon(derivation, methods) as ReactiveDerivedIon<T, M>
+//     return createDerivedIon(derivation) as ReactiveDerivedIon<T, M>
+// }
 

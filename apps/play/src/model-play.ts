@@ -1,8 +1,7 @@
-//@ts-nocheck
 // normalize data
 // model factory receives data
 
-import { DerivedIon, ionize } from "@rue/quarky"
+import { ion, ionize } from "@rue/quarky"
 import { inert } from "../../../packages/quarky/src/ionize/inert"
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon"
 
@@ -30,7 +29,7 @@ const $frogWithGetter = ionize({
 })
 
 const $frogWithDerived = ionize({
-    name: DerivedIon(() => $asFroggy.name)
+    name: ion(() => $asFroggy.name)
 })
 
 const $frogWithPropIon = ionize({

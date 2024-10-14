@@ -136,7 +136,7 @@ export function initializeComponent(
     const nodeEntities = normalizeToFragmentArray(rendered); //TODO: Validate output and get publicComponent from out
     component.initialNodeEntities = nodeEntities;
     if (ref) {
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef Ion as ref")
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
         if ($index) {
             initializeListRef(ref, publicComponent, $index)
         }

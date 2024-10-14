@@ -88,9 +88,9 @@ export class MetaIonicModel<T extends AnyObject = AnyObject> implements Reactive
 
     propIons?: Map<PropertyKey, PropIon>
 
-    registerPropIon(key: PropertyKey, Ion: PropIon) {
+    registerPropIon(key: PropertyKey, ion: PropIon) {
         if (!this.propIons) this.propIons = new Map()
-        this.propIons.set(key, Ion)
+        this.propIons.set(key, ion)
     }
 
     unregisterPropIon(key: PropertyKey) { //QUESTION: When to unregister?  when watchcount === 0 and observedProps atom size === 0?
@@ -106,7 +106,7 @@ export class MetaIonicModel<T extends AnyObject = AnyObject> implements Reactive
 
     // multiPropIons?: Map<string, DerivedIon>
 
-    // registerMultiPropIon(key: string, Ion: DerivedIon) {
+    // registerMultiPropIon(key: string, ion: DerivedIon) {
     //     if (!this.multiPropIons) this.multiPropIons = new Map()
     //     this.multiPropIons.set(key, ion)
     // }

@@ -1,28 +1,28 @@
 import { Component } from "@rue/lumo";
-import { DerivedIon, Ion, ionize, isAnyIon, watch, watchIonicEffect } from "@rue/quarky";
+import { DerivedIon, ion, ionize, isAnyIon, watch, watchIonicEffect } from "@rue/quarky";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
 
 export function TestSelectiveTracking() {
 
-    const $active = Ion(false, {
+    const $active = ion(false, {
         toggle() {
             $active.set(!$active())
         }
     })
 
-    const $ready = Ion(true, {
+    const $ready = ion(true, {
         toggle() {
             $ready.set(!$ready())
         }
     })
 
-    const $count = Ion(0, {
+    const $count = ion(0, {
         increment() {
             $count.set($count() + 1)
         }
     })
 
-    const $doubleCount = DerivedIon(() => $count() * 2)
+    const $doubleCount = ion(() => $count() * 2)
 
     const $frog = ionize({
         name: 'kermit'
@@ -71,7 +71,7 @@ export function TestSelectiveTracking() {
                 <button onclick={$count.increment}>increment</button>
                 <button onclick={$active.toggle}>toggle active</button>
                 <button onclick={$ready.toggle}>toggle ready</button>
-                <input oninput={reInputChange}></input>
+                <input value={$frogName}></input>
             </>
     )
 }

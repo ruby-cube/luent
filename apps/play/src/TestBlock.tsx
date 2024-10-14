@@ -1,10 +1,10 @@
 import {  NodeRef } from "@rue/lumo";
-import { Ion, Ion } from "../../../packages/quarky/src";
+import { ion, ion } from "../../../packages/quarky/src";
 
 
 export function TestBlockA(props: { $active: Ion<boolean> }) {
     const { $active } = props
-    const $black = Ion(true);
+    const $black = ion(true);
 
     expose({
         dog: "hi"
@@ -17,7 +17,7 @@ export function TestBlockA(props: { $active: Ion<boolean> }) {
 
 function Lap(){
     const $testBlock = NodeRef(TestBlockA)
-    const $active = Ion(false)
+    const $active = ion(false)
 
     onMounted(()=>{
         const hey = $testBlock()
@@ -33,7 +33,7 @@ function Lap(){
 
 export function TestBlockB(props: { $active: Ion<boolean> }) {
     const { $active } = props
-    const $black = Ion(true);
+    const $black = ion(true);
 
     return (
         <>

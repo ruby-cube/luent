@@ -6,7 +6,7 @@ import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { initializeRender, watch } from "../watch/watchAndPreserve";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
-import { Ion } from "../../../quarky/src";
+import { ion } from "../../../quarky/src";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
@@ -40,7 +40,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     const domNode = isHydrating() ? getElement() : document.createElement(tagName);
 
     if (ref) {
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef Ion as ref")
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
         if ($index) {
             initializeListRef(ref, domNode, $index)
         }
@@ -187,8 +187,8 @@ function setUpClasses(node: Element, classes: (((o: DOMTokenList) => void) | str
         }
         else if (entry instanceof Object) {
             for (const key in entry) {
-                const $Ion = entry[key];
-                watch($Ion, (value) => { //QUESTION: should this have a preserve version?
+                const $ion = entry[key];
+                watch($ion, (value) => { //QUESTION: should this have a preserve version?
                     if (value) classList.add(key);
                     else classList.remove(key);
                 }, { eager: true, phase: Phase.RENDER })

@@ -1,6 +1,6 @@
 import { COMPONENT, ComponentConfig, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeRef, PublicComponent, pushProvider, popProvider } from "@rue/lumo";
 import { Literate } from "./Literate.js";
-import { Ion, isIon } from "../../quarky/src/index.js";
+import { ion, isIon } from "../../quarky/src/index.js";
 import { AnyObject, MaybePromise } from "@rue/types";
 import { collectEffects, getFlask } from "@rue/flask";
 import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
@@ -81,7 +81,7 @@ function initializeComponent(
     component.output = _output;
 
     if (ref) {
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef Ion as ref")
+        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
         if ($index) {
             initializeListRef(ref, publicComponent, $index)
         }
