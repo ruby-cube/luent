@@ -31,7 +31,7 @@ function resetCurrentNodePodIndex(index?: number) {
 
 
 
-export function If($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction): ConditionalRenderKit {
+export function If($condition: (_?: any) => Booleanny, renderConditional: RenderFunction): ConditionalRenderKit {
     resetCurrentNodePodIndex()
     return new ConditionalRenderKit(
         'if',

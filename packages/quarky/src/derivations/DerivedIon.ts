@@ -26,7 +26,7 @@ export type DerivedIon<T = any> = {
 
 
 
-export type ReactiveGet<T = any> = DerivedIon<T> | Ion<T> | (() => T);
+export type ReactiveGet<T = any> = ((_?: any) => T) | DerivedIon<T> | Ion<T>;
 
 export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIon {
     return maybeDerivedIon?.[META]?.type === DERIVED_ION;

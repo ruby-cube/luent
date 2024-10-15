@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { NodesRef, Component, If, Else, For } from "@rue/lumo";
 import { moveMultipleUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { ion, __addDevName, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
@@ -164,22 +165,23 @@ export function List(
 
     // setTimeout(()=>{
     //     changeContent(0)
-    // }, 1)
+    // }, 1)‹‹›
 
     // const $listIsEmpty = ion(() => $list.length === 0)
     return Component(() =>
         <>
-            {[
-                If(() => $list.length === 0, () =>
+            <>
+                {If($list.length === 0), show(
                     <div
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
                     </div>
-                ),
-                Else(() =>
-                    For($list, ($item, $index) =>
+                )}
+
+                {Else,
+                    For($list).key('id'), ($item, $index) =>
                         <div
                             // ref={$itemDivs}
                             onclick={(event) => toggleSelect(event, $index())}
@@ -213,9 +215,8 @@ export function List(
                                 insert
                             </div>
                         </div>
-                        , 'id')
-                )
-            ]}
+                }
+            </>
 
             <button onclick={clearSelection}>clear</button>
             {/* <button
