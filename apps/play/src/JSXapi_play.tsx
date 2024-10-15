@@ -24,7 +24,7 @@ export function ListBlock() {
         with: fade
     });
 
-    const $ItemBlock = SuspensefulNode({
+    const $ItemBlock = SuspenseNode({
         Component: ItemBlock,
         Temp(props) {
             return Component(
@@ -68,32 +68,33 @@ export function ListBlock() {
         <>
             <div>
                 <h1>Choose something</h1>
-                {If($active()), show.with(fade,
+                {If($active()), show.with(fade, useSelectionKit, o =>
                     <p>hello world</p>
                 )}
-                {ElseIf($broken()), mount(
-                    <p>bye world</p>
+                {ElseIf($broken()), mount.with(useSelectionKit, o =>
+                    <p value={o.$selection}>bye world</p>
                 )}
-                {Else(
+                {Else, create.with(fade,
                     <p>ok world</p>
                 )}
 
                 {With(fade, <>
-                    {If($active()), show(
+                    {If($list.length === 0), show(
                         <p>hello world</p>
                     )}
                     {ElseIf($broken()), mount(
                         <p>bye world</p>
                     )}
-                    {Else(
+                    {Else,
                         <p>ok world</p>
-                    )}
+                    }
                 </>)}
 
                 <h1>Do something</h1>
-                {For($list).key('id').with(fade), (item, $index) =>
-                    <p>[x] {item}</p>
-                }
+                {For($list).key('id').with(fade, useSelectionKit,
+                    (item, $index, o) =>
+                        <p>[x] {item}</p>
+                )}
 
                 <h1>Teleport something</h1>
                 {TeleportTo('body',
@@ -101,12 +102,12 @@ export function ListBlock() {
                 )}
 
                 <h1>Try something</h1>
-                {Try(render.with(fade,
+                {Try.with(fade, useSelectionKit, o =>
                     <p>trying</p>
-                ))}
-                {Catch(error => render.with(fade,
+                )}
+                {Catch.with(fade, error =>
                     <p>{error.message}</p>
-                ))}
+                )}
 
 
                 <h1>Await something</h1>
@@ -116,7 +117,7 @@ export function ListBlock() {
                 {Temp(
                     <p>Loading</p>
                 )}
-                {Catch(
+                {Catch(error =>
                     <p>{error.message}</p>
                 )}
 
