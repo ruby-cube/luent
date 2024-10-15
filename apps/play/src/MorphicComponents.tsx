@@ -1,5 +1,4 @@
 import { ion } from "../../../packages/quarky/src"
-import { watchForRender } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { NodeRef } from "@rue/lumo";
 
 export function MainBlock() {
@@ -28,8 +27,8 @@ export function MainBlock() {
     ), { ref: $recordNodes, IDKey: 'id' })
 
     function changeMainContent(index) {
-        $main_content.set($bye)
-        $main_content.set($recordsNodes, 9)
+        $main_content.as($bye)
+        $main_content.as($recordsNodes, 9)
     }
 
 
@@ -63,7 +62,7 @@ function $MorphicNode() {
 
 }
 
-function $MorphicPort(initialKey: string | Ion<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; set: (key: string) => any } {
+function $MorphicPort(initialKey: string | Ion<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; as: (key: string) => any } {
 
     const $key = ion(initialKey)
     const $render = ion(switchMap[$key()])
@@ -87,7 +86,7 @@ function MainContent() {
         <div>hello</div>)
 
     function changeMainContent() {
-        $mainContent.set(() =>
+        $mainContent.as(() =>
             <div>bye</div>
         )
     }

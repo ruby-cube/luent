@@ -1,8 +1,6 @@
-//@ts-nocheck
 import { NodeRef, Component, COMPONENT, ComponentSetup, If, Else, For, Provide, teleportTo } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, ion, ionize } from "../../../packages/quarky/src";
-import { $ } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
 import { ElseIf } from "../../../packages/lumo/src/conditional/If";
 import { AnyObject } from "@rue/types";
@@ -93,22 +91,18 @@ export function List() {
     }
 
     function insertItem(index: number) {
-        $list.update(list => {
-            const newList = [...list];
-            newList.splice(index, 0, {
-                id: genId(),
-                content: (Math.random() * 100).toString(),
-            });
-            return newList;
-        })
+        const newList = [...$list()];
+        newList.splice(index, 0, {
+            id: genId(),
+            content: (Math.random() * 100).toString(),
+        });
+        $list.as(newList)
     }
 
     function removeItem(index: number) {
-        $list.update(list => {
-            const _list = [...list]
-            _list.splice(index, 1);
-            return _list
-        })
+        const _list = [...$list()]
+        _list.splice(index, 1);
+        $list.as(_list)
     }
 
     const { openModal } = useModal();
@@ -116,7 +110,7 @@ export function List() {
     const $showSideBlock = ion(false)
 
     function showSideBlock() {
-        $showSideBlock.set(true)
+        $showSideBlock.as(true)
     }
 
     const $listLengthIsZero = () => $list().length === 0
@@ -146,7 +140,7 @@ export function List() {
                     </div>
                 )}
 
-                {For($list, (item$, $index) => 
+                {For($list, (item$, $index) =>
 
                     <div style={`background-color: ${randomColor.get()}`}>
                         <p
@@ -166,7 +160,7 @@ export function List() {
                             insert
                         </div>
                     </div>
-                , 'id')}
+                    , 'id')}
                 <button onclick={openModal}>open</button>
                 {/* <>
                 {If($showSideBlock, 'create', () =>
@@ -303,11 +297,11 @@ function useDialogBox(config: { initialState: 'open' | 'closed' }) {
     __addDevName($open, '$open')
 
     function open() {
-        $open.set(true)
+        $open.as(true)
     }
 
     function close() {
-        $open.set(false)
+        $open.as(false)
     }
 
     return {

@@ -7,12 +7,13 @@ import { AnyObject } from "@rue/types";
 import { AnyIon, isAnyIon } from "./AnyIon";
 import { ProtectedIon } from "./ProtectedIon";
 import { createDerivedIon, createWritableDerivedIon, ReactiveDerivedIon } from "../derivations/DerivedIon";
+import { asPropIon } from "../ionize/PropIon";
 
 
 export type Ion<T = any, M extends AnyObject = {}> = {
     (selected?: true): T
     [META]: MetaIon<T>;
-    set: (value: T) => T
+    as: (value: T) => T
 } & M
 
 
@@ -25,18 +26,20 @@ type ReactiveIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? 
 
 // API
 export function ion<T, M>(value?: T & (() => unknown), methods?: M & { [key: string]: (...args: any[]) => any }): T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M> {
+export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveIon<T, M>
+export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M> {
     if (isAnyIon(value)) {
         if (__DEV__ && methods) console.warn(`Cannot make an existing ion into an ion. Methods will not be attached`)
-        return value as T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+        return value as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
     }
     if (value instanceof Function) {
-        if (methods) return createWritableDerivedIon(<()=>unknown>value, methods) as T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-        return createDerivedIon(<()=>unknown>value) as T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+        if (methods) return createWritableDerivedIon(<()=>unknown>value, methods) as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+        return createDerivedIon(<()=>unknown>value) as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
     }
-    return createIon(value, methods) as T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+    return createIon(value, methods) as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
 }
+
+ion.from = asPropIon
 
 export const ION = Symbol('atomicIon');
 
@@ -69,13 +72,17 @@ export function createIon<
 
     const proto = {
         [META]: metaIon,
-        set(newValue: any) {
+        as(newValue: any) {
             return setValue(metaIon, newValue, metaIon.value);
         }
     } as AnyObject
 
     if (methods) {
         for (const key in methods) {
+            if (key === 'as') {
+                if(__DEV__) console.warn(`'as' is reserved for the native set method for ions. Choose different method name`)
+                continue;
+            } 
             proto[key] = methods[key].bind(proto) // This makes set function available to `this` even after protected
         }
     }

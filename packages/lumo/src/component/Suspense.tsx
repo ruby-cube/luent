@@ -43,8 +43,8 @@ export function Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | P
         let timeoutID: any;
         if (timeout) {
             timeoutID = setTimeout(() => {
-                $error.set("Timed out");
-                $pending.set(false)
+                $error.as("Timed out");
+                $pending.as(false)
             }, timeout)
         }
 
@@ -57,12 +57,12 @@ export function Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | P
         allPromises
             .then(() => {
                 clearTimeout(timeoutID)
-                $pending.set(false)
-                $ready.set(true)
+                $pending.as(false)
+                $ready.as(true)
             })
             .catch(err => {
-                $error.set(err); //TODO: Normalize error type
-                $pending.set(false)
+                $error.as(err); //TODO: Normalize error type
+                $pending.as(false)
             })
         return internalComponent;
     }

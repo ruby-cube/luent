@@ -4,7 +4,7 @@ export function ChildOne() {
 
     const $value = ion('hi')
     function updateValue(newValue: string) {
-        $value.set(newValue)
+        $value.as(newValue)
     }
 
     return (

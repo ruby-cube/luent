@@ -113,6 +113,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         })
         this.storeDynamicNode(dynamicNode, activeIndex)
 
+        console.log('setting conditional', $conditions)
         // set up watcher for updates
         watch($conditions, function updateConditional(newValue: boolean[], oldValue: boolean[]) {
             console.log("update conditional")

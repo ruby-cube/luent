@@ -1,5 +1,7 @@
+//@ts-nocheck
 import { Component, fromContext, Provide, TypedKey } from "@rue/lumo"
 import { DerivedIon, ion, ionize } from "@rue/quarky";
+import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
 
 const COUNTER = Symbol("Counter") as TypedKey<Counter>
 const DOUBLE_COUNT = Symbol("DerivedIon<number>") as TypedKey<DerivedIon<number>>
@@ -62,42 +64,41 @@ export function ParentBlock(
     const counter = provide(COUNTER, new Counter());
     const $doubleCount = provide(DOUBLE_COUNT, ion(() => counter.$.count * 2));
 
-    const $name = ion("Sir Robin")
+    const $name = ion("Sir Robin",
+        {
+            makeBrave() {
+                $name.as($name() + 'The Brave')
+            },
+            makeKermit() {
+                console.log("make kermit")
+                $name.as('Kermit')
+            }
+        })
 
-    function makeBrave() {
-        $name.set('The brave')
-    }
 
-    function makeKermit() {
-        console.log("make kermit")
-        $name.set('Kermit')
-    }
-
-    const frog = ionize({
-        qualities: 'brave',
+    const $frog = ionize({
+        qualities: 'brave'
+    }, {
         setQualities() {
-            this.qualities = 'valiant'
+            $frog.qualities = 'valiant'
         }
     })
 
-    const $qualities = asPropIon(frog, 'qualities')
-
-    function setQualities() {
-        $qualities.set('gallant')
-    }
-
-
+    const $qualities = ion.from($frog, 'qualities',
+        {
+            set: 'setQualities'
+        })
 
     provide(NAME, ionize({
         $: $name,
-        makeKermit
+        makeKermit: $name.makeKermit
     }))
 
     return Component(
         <>
             <h1>Parent</h1>
-            <div onclick={setQualities}>{() => frog.qualities}</div>
-            <div onclick={() => frog.setQualities()}>{$qualities}</div>
+            <div onclick={$qualities.set}>{() => $frog.qualities}</div>
+            <div onclick={() => $frog.setQualities()}>{$qualities}</div>
             <div>{$doubleCount}</div>
             <ChildBlock />
             <SiblingBlock />

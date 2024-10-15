@@ -60,7 +60,7 @@ function TextArea() {
 
 
     suspendRender(simFetchC("pomp"))
-        .then(word => $word.set(word))
+        .then(word => $word.as(word))
 
     return Component({
         $word
@@ -78,7 +78,7 @@ function ItemBlockA() {
     const $word = ion("not ready")
 
     suspendRender(simFetch("calico"))
-        .then(word => $word.set(word))
+        .then(word => $word.as(word))
 
     return Component(
         <div>{$word}</div>
@@ -95,7 +95,7 @@ function ItemBlockB() {
 
     suspendRender(fetch("basset"))
         .then(word =>
-            $word.set(word)
+            $word.as(word)
         )
         .catch(err =>
             console.log(err)
@@ -104,14 +104,14 @@ function ItemBlockB() {
     suspendRender([
         fetch('a'),
         fetch('b')
-    ]).then(([a, b]) => $word.set(a))
+    ]).then(([a, b]) => $word.as(a))
 
     run(async () => {
         try {
             const word = await suspendRender(
                 fetch('basset')
             )
-            $word.set(word)
+            $word.as(word)
         }
         catch (error) {
             console.log(error)
@@ -127,7 +127,7 @@ function ItemBlockC() {
     const $word = ion("not ready")
 
     suspendRender(simFetchB("cerulean"))
-        .then(word => $word.set(word))
+        .then(word => $word.as(word))
 
     return Component(
         <div>{$word}</div>
@@ -138,7 +138,7 @@ function ItemBlockD() {
     const $word = ion("not ready")
 
     suspendRender(simLongFetchB("tilted"))              // [promise]
-        .then(word => $word.set(word))
+        .then(word => $word.as(word))
 
     return Component(
         <div>{$word}</div> // {strings: ['<div>', '<div>'], values: [$word]}   (makeComponent should detect suspendRender call and wrap component in promise) 

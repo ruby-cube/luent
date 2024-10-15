@@ -154,7 +154,7 @@ export function List(
     // const $alive = ion(true)
 
     // function destroy() {
-    //     $alive.set(false)
+    //     $alive.as(false)
     // }
     // const $item = $list[0]
     //     watch($(() => $item.content), (newValue, oldValue) => {
@@ -169,16 +169,16 @@ export function List(
     // const $listIsEmpty = ion(() => $list.length === 0)
     return Component(() =>
         <>
-            <>
-                {If(() => $list.length === 0, () =>
+            {[
+                If(() => $list.length === 0, () =>
                     <div
                         onclick={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
                     </div>
-                )}
-                {Else(() =>
+                ),
+                Else(() =>
                     For($list, ($item, $index) =>
                         <div
                             // ref={$itemDivs}
@@ -214,8 +214,9 @@ export function List(
                             </div>
                         </div>
                         , 'id')
-                )}
-            </>
+                )
+            ]}
+
             <button onclick={clearSelection}>clear</button>
             {/* <button
                 onclick={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}

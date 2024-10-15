@@ -1,4 +1,4 @@
-import { getWithoutTracking, $, ReactiveGet, DerivedIon, __devCheckIfTracked, __devCheckIfNotTracked } from "../../../quarky/src";
+import { getWithoutTracking, ReactiveGet, DerivedIon, __devCheckIfTracked, __devCheckIfNotTracked } from "../../../quarky/src";
 import { ConditionalKit } from "./ConditionalKit";
 import { Booleanny } from "@rue/types";
 

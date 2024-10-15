@@ -17,8 +17,8 @@ function ListBlock() {
 
     fetch("").then((response) => {
         response.json().then((data) => {
-            $data.set(data)
-            $ready.set(true)
+            $data.as(data)
+            $ready.as(true)
         })
     })
 
@@ -43,8 +43,8 @@ function ItemBlock() {
 
     fetch("").then((response) => {
         response.json().then((data) => {
-            $data.set(data)
-            $ready.set(true)
+            $data.as(data)
+            $ready.as(true)
         })
     })
 
@@ -68,7 +68,7 @@ function ListBlockB() {
     const pendingData = fetch("").then((response) => {
         return response.json()
     }).then((data) => {
-        $data.set(data)
+        $data.as(data)
     })
 
     return suspendRender(pendingData, () =>
@@ -85,7 +85,7 @@ function ItemBlockB() {
     suspendRender(fetch(""))
         .then(async (response) => {
             const data = await response.json()
-            $content.set(data.content)
+            $content.as(data.content)
         })
 
     return (

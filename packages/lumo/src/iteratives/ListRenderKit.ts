@@ -1,4 +1,4 @@
-import { isAnyIon, isIonicModel, ion, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize } from "../../../quarky/src";
+import { isAnyIon, isIonicModel, ion, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize, Ion } from "@rue/quarky";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
@@ -121,7 +121,7 @@ export class ListRenderKit<T = any> {
             pushProvider(provider)
             const rawData = isIonicModel(data) ? toRaw(data) : undefined
             let clone = isIonicModel(data) ? shallowClone(rawData!) : undefined
-            watch(<DerivedIon>data, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
+            watch(data, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
                 console.log('updating list')
                 const _oldValue = clone || oldValue;
                 if (_isIonicModel) clone = shallowClone(rawData!) as any[]
@@ -185,7 +185,7 @@ export class ListRenderKit<T = any> {
                 // update $index value
                 const $index = dynamicIndices.current[prevIndex];
                 newIndices.push($index);
-                $index.set(i)
+                $index.as(i)
 
                 // to update refs
                 toFromIndices.push([i, prevIndex]);

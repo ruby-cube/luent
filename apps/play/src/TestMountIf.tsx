@@ -1,11 +1,10 @@
-//@ts-nocheck
 import { NodeRef, Component, If, Else, stopPropagation, watch } from "@rue/lumo";
 import { AFTER_RENDER, BEFORE_RENDER, ion, ON_RENDER, SYNC } from "@rue/quarky";
 
 export function MountIf() {
     const $count = ion(0, {
         increment() {
-            $count.set($count() + 1)
+            $count.as($count() + 1)
         }
     })
     // const $doubleCount = ion(() => $count() * 2)
@@ -19,7 +18,7 @@ export function MountIf() {
 
     const $active = ion(true, {
         toggle() {
-            $active.set(!$active())
+            $active.as(!$active())
         }
     })
 
@@ -38,10 +37,10 @@ export function MountIf() {
         <>
             <h1>Hello world</h1>
             {[
-                If($active,
+                If($active,()=>
                     <div>hi</div>
                 ),
-                Else(
+                Else(()=>
                     <p>bye</p>
                 )
             ]}
@@ -104,12 +103,12 @@ export function MountIf() {
 //         console.log("destroyd")
 //     })
 
-//     $count.set(1)
+//     $count.as(1)
 
 //     return Component(
 //         <>
 //             <div ref={$countDiv}>{$count}</div>
-//             <button onclick-this-$button-v={[$count.set($count() + 1), stopPropagation]} ref={$button}>increment</button >
+//             <button onclick-this-$button-v={[$count.as($count() + 1), stopPropagation]} ref={$button}>increment</button >
 //             {/* <Counter>{$count()}</Counter> */}
 //         </>
 //     )

@@ -87,7 +87,7 @@ export class InternalNodeRef<
     }
 
     setValue(value: NodeReferent<T> | undefined) {
-        this.o.set(value)
+        this.o.as(value)
         return value;
     }
 
@@ -119,7 +119,7 @@ export class InternalNodeArrayRef {
     }
 
     setValue(value: NodeReferent[]) {
-        this.o.set(value)
+        this.o.as(value)
         return value;
     }
 
@@ -139,7 +139,7 @@ export class InternalNodeArrayRef {
 
     assignValue(value: NodeReferent, $index: Ion<number>) {
         let nodes = !__SSR__ && isUpdatingList() ? this.getNewListNodes()
-            : this.o.set(this.o())
+            : this.o.as(this.o())
         nodes[$index()] = value;
         nodeArrayRefMap.set(nodes, this);
     }
@@ -161,7 +161,7 @@ export class InternalNodeArrayRef {
             const node = prevNodes[from];
             newNodes[to] = node;
         }
-        this.o.set(newNodes);
+        this.o.as(newNodes);
         listUpdateMap.delete(this)
         nodeArrayRefMap.set(newNodes, this);
     }

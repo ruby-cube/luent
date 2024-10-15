@@ -25,10 +25,7 @@ function Counter() {
 
     const $count = ion(0, {
         increment() {
-            $count.set(count => count + 1);
-
-            //@ts-expect-error
-            $count.set($count() + 1)
+            $count.as($count() + 1)
         },
         decrement() {
             $count.set(count => count--);

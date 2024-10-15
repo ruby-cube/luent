@@ -28,27 +28,27 @@ import { TestCleanupScheduler } from './TestCustomCleanupScheduler';
 // import { ConditionalFlaskTest } from './ConditionalFlaskTest';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
-const $count = ion(0, {
-    set(count: number) {
-        $count.as(count)
-    },
-    increment() {
-        $count.as($count() + 1)
-    }
-})
-
-// $count.set(2)
-$count.increment()
-
-console.log("count", $count())
-
-// const app = createApp(TestCleanupScheduler)
-
-// if (__DEV__) configureFlask({
-//     warnNoCleanup: true
+// const $count = ion(0, {
+//     set(count: number) {
+//         $count.as(count)
+//     },
+//     increment() {
+//         $count.as($count() + 1)
+//     }
 // })
 
-// app.mount('#app')
+// // $count.set(2)
+// $count.increment()
+
+// console.log("count", $count())
+
+const app = createApp(List)
+
+if (__DEV__) configureFlask({
+    warnNoCleanup: true
+})
+
+app.mount('#app')
 
 // queueTask(()=>{
 //     console.log("hi")

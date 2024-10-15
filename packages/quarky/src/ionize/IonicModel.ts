@@ -432,8 +432,8 @@ export function reactiveSetter(
 
 
 export function setAbsorbedIon(ion: AnyIon, value: any, ionicModel: IonicModel, key: PropertyKey, oldValue: any, structureConfigs: CustomIonicModelConfig[]) {
-    if ('set' in ion) {
-        ion.set(value);
+    if ('as' in ion) {
+        ion.as(value);
 
         const prop = getObservedProp(ionicModel, key);
         if (prop) {

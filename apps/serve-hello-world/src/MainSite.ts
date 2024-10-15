@@ -45,7 +45,7 @@ function AboutPage() {
 
 //     const awaitingData = fetch('/lkjkj')
 //     awaitingData.then((result) => {
-//         $data.set(data => result)
+//         $data.as(data => result)
 //     })
 
 //     return html`

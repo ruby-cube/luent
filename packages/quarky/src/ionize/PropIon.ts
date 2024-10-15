@@ -16,16 +16,27 @@ export function isPropIon(value: any): value is PropIon {
     return value?.[META] instanceof MetaPropIon;
 }
 
-export type PropIon<T = any> = {
+export type PropIon<T = any, M = undefined> = M extends undefined ? {
     (selected?: true): T
-    set: (newValue: T) => T
+    // set: (newValue: T) => T
+    [META]: MetaPropIon
+} : M & {
+    (selected?: true): T
+    // set: (newValue: T) => T
     [META]: MetaPropIon
 }
 
-export type ReadonlyPropIon<T = any> = {
-    (selected?: true): T
-    [META]: MetaPropIon
+type TransferredMethods<T, M> = {
+    [K in keyof M]: M[K] extends true ? T[K extends keyof T ? K : never] : T[M[K] extends keyof T ? M[K] : never]
 }
+
+// export type ReadonlyPropIon<T = any, M = undefined> = M extends undefined ? {
+//     (selected?: true): T
+//     [META]: MetaPropIon
+// } : M & {
+//     (selected?: true): T
+//     [META]: MetaPropIon
+// }
 
 export type PropIonCapsule<T = any, M extends AnyObject = AnyObject> = {
     (selected?: true): T
@@ -33,7 +44,7 @@ export type PropIonCapsule<T = any, M extends AnyObject = AnyObject> = {
 } & M
 
 
-type AsPropIon<T, K extends keyof T> = K extends ReadonlyKeys<T> ? ReadonlyPropIon<T[K]> : PropIon<T[K]>
+// type AsPropIon<T, K extends keyof T, M> = PropIon<T[K], M>
 
 const entryKeyValidators: ((model: AnyObject, key: PropertyKey) => boolean)[] = [];
 
@@ -113,15 +124,16 @@ class MetaPropIon {
 
 }
 
+type AsPropIon<T extends AnyObject, K extends keyof T, M> = PropIon<T[K], M extends AnyObject ? { [K in keyof TransferredMethods<T, M>]: TransferredMethods<T, M>[K] } : undefined>
 
-
-export function asPropIon<T extends AnyObject, K extends keyof T>(model: T, key: K, readonly?: typeof READONLY): AsPropIon<T, K> {
+export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, key: K, methods?: M & { [key: string]: `${keyof T extends string ? keyof T : never}` | true }): AsPropIon<T, K, M> {
     const ionicModel = isIonicModel(model) ? model : ionize(model)
     const rawTarget = toRaw(ionicModel)
     const value = rawTarget[key];
 
     // return absorbed ion
     if (isAnyIon(value)) {
+        if (methods && __DEV__) console.warn(`absorbed ions cannot have additional methods assigned to them`)
         if (isProtectedIonicModel(ionicModel))
             return protectIon(value);
         return value;
@@ -129,13 +141,13 @@ export function asPropIon<T extends AnyObject, K extends keyof T>(model: T, key:
 
     // return existing propIon
     const propIon = getPropIon(ionicModel, key) //TODO: need a map for readonly prop ions too...
-    if (propIon) {
-        if (isProtectedIonicModel(ionicModel) || readonly) {
+    if (propIon && !methods) {
+        if (isProtectedIonicModel(ionicModel)) {
             protect(propIon, READONLY)
         }
-        return propIon as AsPropIon<T, K>
+        return propIon as AsPropIon<T, K, M>
     }
-    return createPropIon(ionicModel, key, readonly) as AsPropIon<T, K>
+    return createPropIon(ionicModel, key, methods) as AsPropIon<T, K, M>
 }
 
 export function getPropIon(
@@ -145,7 +157,7 @@ export function getPropIon(
     return asMetaIonicModel(ionicModel).getPropIon(key)
 }
 
-function createPropIon<T extends IonicModel, K extends keyof T>(ionicModel: T, key: K, readonly?: typeof READONLY): PropIon<T[K]> {
+function createPropIon<T extends IonicModel, K extends keyof T, M>(ionicModel: T, key: K, methods?: M & { [key: string]: string | true }): PropIon<T[K], M> {
     const rawTarget = toRaw(ionicModel)
 
 
@@ -159,10 +171,23 @@ function createPropIon<T extends IonicModel, K extends keyof T>(ionicModel: T, k
 
     const proto = {
         [META]: new MetaPropIon(<PropIon>__$propIon, ionicModel, key),
-        set: (newValue: T[K]) => {
-            reregisterIfNeeded()
-            if (__DEV__) __devCheckIfTracked()
-            return setValue(ionicModel, key, newValue, ionicModel[key])
+        // set: (newValue: T[K]) => {
+        //     reregisterIfNeeded()
+        //     if (__DEV__) __devCheckIfTracked()
+        //     return setValue(ionicModel, key, newValue, ionicModel[key])
+        // }
+    } as AnyObject
+
+
+    if (methods) {
+        for (const key in methods) {
+            if (key === 'as') {
+                if (__DEV__) console.warn(`'as' is reserved for the native set method for ions. Choose different method name`)
+                continue;
+            }
+
+            const methodKey = methods[key] === true ? key : methods[key]
+            proto[key] = ionicModel[methodKey].bind(proto) // This makes set function available to `this` even after protected //QUESTION: is this necessary if dev does not use this??
         }
     }
 
@@ -179,7 +204,8 @@ function createPropIon<T extends IonicModel, K extends keyof T>(ionicModel: T, k
         }
     }
 
-    return isProtectedIonicModel(ionicModel) || readonly ? protectIon(__$propIon as PropIon, READONLY) : __$propIon
+    return __$propIon as PropIon<T[K], M>
+    // return isProtectedIonicModel(ionicModel) ? protectIon(__$propIon as PropIon, READONLY) : __$propIon //FIX: isn't it already protected?
 }
 
 export function asTrackedProp(

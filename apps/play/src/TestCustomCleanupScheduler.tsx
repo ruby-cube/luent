@@ -22,10 +22,10 @@ export function TestCleanupScheduler() {
     const $count = ion(0, {
         setTo(value: number) {
             if (value > 100) return value;
-            $count.set(value);
+            $count.as(value);
         },
         $$set(value: number) {
-            $count.set(value)
+            $count.as(value)
         }
     })
 

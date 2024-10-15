@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { ion, protect } from "../../../packages/quarky/src"
 import { suspendRender, Suspense } from "../../../packages/lumo/src/componentSuspense"
 import { Component } from "@rue/lumo"
@@ -32,7 +31,7 @@ export function NestedPend() {
                 <h1>Hello World</h1>
                 <PendingListBlock></PendingListBlock>
                 <p>{$count}</p>
-                <button onclick={() => $count.update(c => c + 1)}>click</button>
+                <button onclick={() => $count.as($count() + 1)}>click</button>
             </>
     )
 }
@@ -57,7 +56,7 @@ function TextArea() {
     const $word = ion("not ready")
 
     suspendRender(simFetchC("pomp"))
-        .then(word => $word.set(word))
+        .then(word => $word.as(word))
 
     return (
         <div>
@@ -73,7 +72,7 @@ function ItemBlockA() {
     const $word = ion("not ready")
 
     suspendRender(simFetch("calico"))
-        .then(word => $word.set(word))
+        .then(word => $word.as(word))
 
     return (
         <div>{$word}</div>
@@ -84,7 +83,7 @@ function ItemBlockB() {
     const $word = ion("not ready")
 
     suspendRender(simLongFetch("basset"))
-        .then(word => $word.set(word))
+        .then(word => $word.as(word))
 
     return (
         <div>{$word}</div>
@@ -95,7 +94,7 @@ function ItemBlockC() {
     const $word = ion("not ready")
 
     suspendRender(simFetchB("cerulean"))
-        .then(word => $word.set(word))
+        .then(word => $word.as(word))
 
     return (
         <div>{$word}</div>
@@ -106,7 +105,7 @@ function ItemBlockD() {
     const $word = ion("not ready")
 
     suspendRender(simLongFetchB("tilted"))
-        .then(word => $word.set(word))
+        .then(word => $word.as(word))
 
     return (
         <div>{$word}</div>

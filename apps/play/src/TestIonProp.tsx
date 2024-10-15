@@ -6,7 +6,7 @@ import { ion, ionize } from "@rue/quarky";
 export function TestIonProp() {
     const $count = ion(0, {
         increment() {
-            $count.set($count() + 1)
+            $count.as($count() + 1)
         }
     })
 
@@ -45,7 +45,7 @@ export function TestIonProp() {
 
     const $firstName = ion('Kermit', {
         set(name: string) {
-            this.set(name)
+            $firstName.as(name)
         }
     })
     const $lastName = ion('The Frog')
@@ -53,14 +53,14 @@ export function TestIonProp() {
     const $fullName = ion(() => $firstName() + " " + $lastName(), {
         set(name: string) {
             const splitName = name.split(" ");
-            $firstName.set(splitName[0])
-            $lastName.set(splitName[1])
+            $firstName.as(splitName[0])
+            $lastName.as(splitName[1])
             return name;
         }
     })
 
     function setFullName() {
-        $fullName.set('SirRobin theBrave')
+        $fullName.as('SirRobin theBrave')
     }
 
     return Component(

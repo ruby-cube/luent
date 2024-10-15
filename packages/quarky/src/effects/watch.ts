@@ -170,18 +170,16 @@ function isMultiWatchSubject(subject: AnyObject | AnyIon | ReactiveGet | IonicMo
 // export function watch<T extends IonicModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
 export function watch<T extends AnyIon | ReactiveGet | IonicModel | (AnyIon | ReactiveGet | IonicModel)[]>(subject: T, effect: ChangeEffect<T>, options?: WatchOptions): ActiveListener {
     const isMultiSubject = isMultiWatchSubject(subject);
-    if (!isMultiSubject && !isReactive(subject)) return { // inert watch subjects
+    if (!isMultiSubject && !(subject instanceof Function) && !isReactive(subject)) return { // inert watch subjects
         stop: noop
     }
     // if ('name' in subject && subject.name === '__$propIon') console.log(subject)
-
 
     const eager = options?.eager
     const phase = options?.phase ?? Phase.BEFORE_RENDER
 
     const subjects = isMultiSubject ? normalizeWatchSubjects(subject)! : [normalizeWatchSubject(subject)]
     const watchSubjects = asWatchSubjects(subjects)
-    if (isPropIon(subject)) console.log('change name', watchSubjects)
     const subject0 = subjects[0];
     // const _watchSubject = isMultiSubject ? watchSubjects : watchSubjects[0];
     const ionicDerivations = isMultiSubject ? getIonicDerivations(subject, subjects) : subject instanceof Function ? [asMetaIon(subject0) as IonicDerivation] : undefined
@@ -200,7 +198,7 @@ export function watch<T extends AnyIon | ReactiveGet | IonicModel | (AnyIon | Re
 
         runCleanups($activeEffect())
         const _effect = new ThisEffect(getMutations(subjects));
-        $activeEffect.set(_effect)
+        $activeEffect.as(_effect)
 
         let prevSubject = currentWatchSubject;
         try {
