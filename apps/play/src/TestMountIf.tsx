@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { NodeRef, Component, If, Else, stopPropagation, watch } from "@rue/lumo";
 import { AFTER_RENDER, BEFORE_RENDER, ion, ON_RENDER, SYNC } from "@rue/quarky";
 
@@ -37,14 +38,21 @@ export function MountIf() {
         <>
             <h1>Hello world</h1>
             {[
-                If($active,()=>
+                If($active, () =>
                     <div>hi</div>
                 ),
-                Else(()=>
+                Else(() =>
                     <p>bye</p>
                 )
             ]}
-            <button onclick={$active.toggle}>toggle active {$active}</button>
+
+            {If($active()),
+                <div>hi</div>
+            }
+            {Else,
+                <p>bye</p>
+            }
+            <button onclick={$active.toggle()}>toggle active {$active()}</button>
             {/* <div>Both: {$activeAndReady}</div> */}
             {/* <button onclick={increment}>increment {$count}</button> */}
             {/* <button onclick={toggleReady}>toggle ready {$ready}</button> */}

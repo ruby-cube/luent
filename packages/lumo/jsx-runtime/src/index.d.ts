@@ -2488,6 +2488,7 @@ declare namespace React {
         // MouseEvents
         onauxclick?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
         onclick?: MouseEventHandler<T> | [MouseEventHandler<T>, ...number[]] | [string, MouseEventHandler<T>, ...number[]];
+        ['on:click']?: MouseEventHandler<T> | [MouseEventHandler<T>, ...number[]] | [string, MouseEventHandler<T>, ...number[]];
         oncontextmenu?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
         ondoubleclick?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
         ondrag?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;

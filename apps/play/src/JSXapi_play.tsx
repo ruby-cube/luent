@@ -1,6 +1,5 @@
 //@ts-nocheck
 import { Component } from "@rue/lumo";
-
 export function ListBlock() {
     const $ItemBlock = LazyNode({
         load: () => {
@@ -24,9 +23,10 @@ export function ListBlock() {
         with: fade
     });
 
+
     const $ItemBlock = SuspenseNode({
-        Component: ItemBlock,
-        Temp(props) {
+        Pending: ItemBlock,
+        PlaceHolder(props) {
             return Component(
                 <div>Eep! I'm not ready {props.frog}</div>
             )
@@ -39,7 +39,7 @@ export function ListBlock() {
     });
 
     const $ItemBlock = TentativeNode({
-        Component: ItemBlock,
+        Tentative: ItemBlock,
         Error() {
             return Component(
                 <div>{props.error}</div>
@@ -47,83 +47,301 @@ export function ListBlock() {
         }
     })
 
-    const [$RouterView, RouterLink] = ViewNode({
+    const [$RouterView, RouterLink] = Router({
 
     })
 
     const [$MainContent, $mainContent] = MorphicNode({
         Hello(props) {
-            return Component(<div>hellow</div>)
+            return Component(
+                <div>hellow</div>
+            )
         },
         Bye(props) {
-            return Component(<div>hellow</div>)
+            return Component(
+                <div>hellow</div>
+            )
         }
-    }, render.with(fade))
+    }, { with: fade, type: 'mount/unmount' })
 
-    const fade = defineTransition({
+    const fade = Transition({
 
     })
+
+    const moveUpDown = Animation({
+
+    })
+
+
 
     return Component(
         <>
             <div>
                 <h1>Choose something</h1>
-                {If($active()), show.with(fade, useSelectionKit, o =>
+
+                <div>Stuff here</div>
+
+                {/* {If($active()),
+                    <p>hello world</p>
+                }
+                {ElseIf($broken()),
+                    <p value={o.$selection}>bye world</p>
+                }
+                {Else,
+                    <p>ok world</p>
+                } */}
+
+                {
+                    // compiled:
+                    // - transform sequence expression to array
+                    // - transofrm condition calls to functions $active() to $active and list.length === 0 to () => list.length === 0
+                }
+
+                <h1>Something Here</h1>
+                {[
+                    Morphs.with(fade),
+                    If($active, { type: 'show/hide' }, o =>
+                        <p>hello world</p>,
+                    ),
+                    If($broken, { use: SelectionKit }), o =>
+                        <p value={o.$selection}>bye world</p>,
+
+                    Else({ with: fade }), () =>
+                        <p>ok world</p>,
+
+                ]}
+
+
+                <h1>Something Here</h1>
+                {Morphs.with(fade),
+                    If($active(), { type: 'show/hide' },
+                        <p>hello world</p>
+                    ),
+                    If($broken(), { use: SelectionKit }, o =>
+                        <p value={o.$selection}>bye world</p>
+                    ),
+                    Else({ with: fade },
+                        <p>ok world</p>
+                    )
+                }
+
+
+                {/* {Morphs(
+                    If($list.length === 0, 'show', fade, SelectionKit, o =>
+                        <p>hello world</p>
+                    ),
+                    If($broken(),
+                        <p>bye world</p>
+                    ),
+                    Else(
+                        <p>ok world</p>
+                    )
+                )} */}
+                {/* , mount_unmount, create_destroy */}
+
+                {Morphs.with(fadeInOut),
+                    If($list.length === 0, { with: fadeInOut, use: SelectionKit }, o =>
+                        <p>hello world</p>
+                    ),
+                    If($broken(),
+                        <p>bye world</p>
+                    ),
+                    Else(
+                        <p>ok world</p>
+                    )
+                }
+
+                <button on:click={increment}>
+                    Clicked {count} {count === 1 ? 'time' : 'times'}
+                </button>
+
+                <h1>How is this?</h1>
+                {Morphs.with(fade),
+                    If($editable(),
+                        <p>
+                            Flies in and out
+                        </p>
+                    ),
+                    If($active(),
+                        <div>
+                            hi
+                        </div>
+                    ),
+                    Else(
+                        <article>
+                            le sigh.
+                        </article>
+                    )
+                }
+                <footer>(c) 2024</footer>
+
+                <h1>How is this?</h1>
+                {If($editable(),
+                    <p>
+                        Flies in and out
+                    </p>
+                )}
+                <footer>(c) 2024</footer>
+
+                <h1>How is this?</h1>
+                {Frozen,
+                    If($editable(),
+                        <p>
+                            Flies in and out
+                        </p>
+                    )}
+                <footer>(c) 2024</footer>
+
+                <h1>How is this?</h1>
+                {Morphs,
+                    If($editable(),
+                        <p>
+                            Flies in and out
+                        </p>
+                    )}
+                <footer>(c) 2024</footer>
+
+                <h1>How is this?</h1>
+                {If($editable(),
+                    <p>Flies in and out</p>
+                )}
+                <footer>(c) 2024</footer>
+
+                {Morphs,
+                    If($editable,
+                        <p>hello world</p>
+                    ),
+                    If($broken(),
+                        <p>bye world</p>
+                    ),
+                    Else(
+                        <p>ok world</p>
+                    )
+                }
+
+                {Morphs.with(fade, 'show/hide'),
+                    If($active,
+                        <div>hello</div>
+                    ),
+                    If($something, { in: fly({ duration: 10 }), out: fade },
+                        <div>bye</div>
+                    ),
+                    If($something,
+                        <div>bye</div>
+                    )
+                }
+
+                // winner
+                <h1>Do something</h1>
+                <div>
+                    <li>title</li>
+                    <input />
+                </div>
+                {Morphs.with(fade),
+                    Match(key,
+                        Case('hello',
+                            <p>hello world</p>
+                        ),
+                        Case('bye',
+                            <p>bye world</p>
+                        ),
+                        Else(
+                            <p>ok world</p>
+                        )
+                    )}
+                <footer>(c) 2024</footer>
+
+                // winner
+                <h1>Do something</h1>
+                <div>
+                    <li>title</li>
+                    <input />
+                </div>
+                {
+                    If($list.length === 0,
+                        <p>hello world</p>
+                    ),
+                    If($broken(),
+                        <p>bye world</p>
+                    ),
+                    Else(
+                        <p>ok world</p>
+                    )
+                }
+                <footer>(c) 2024</footer>
+
+                <h1>Choose something</h1>
+                {Frozen,
+                    If($list.length === 0,
+                        <p>hello world</p>
+                    ),
+                    If($broken(),
+                        <p>bye world</p>
+                    ),
+                    Else(
+                        <p>ok world</p>
+                    )
+                }
+
+                <h1>Choose something</h1>
+                {If($list.length === 0,
                     <p>hello world</p>
                 )}
-                {ElseIf($broken()), mount.with(useSelectionKit, o =>
-                    <p value={o.$selection}>bye world</p>
+                {If($broken(), // this is a new conditional series unrelated to the above
+                    <p>bye world</p>
                 )}
-                {Else, create.with(fade,
-                    <p>ok world</p>
-                )}
-
-                {With(fade, <>
-                    {If($list.length === 0), show(
-                        <p>hello world</p>
-                    )}
-                    {ElseIf($broken()), mount(
-                        <p>bye world</p>
-                    )}
-                    {Else,
-                        <p>ok world</p>
-                    }
-                </>)}
 
                 <h1>Do something</h1>
-                {For($list).key('id').with(fade, useSelectionKit,
-                    (item, $index, o) =>
+                {Frozen,
+                    For(list, (item, $index, o) =>
                         <p>[x] {item}</p>
+                    )
+                }
+
+                <h1>Do something</h1>
+                {Morphs.with(fade),
+                    For($list, { key: 'id', use: SelectionKit }, (item, $index, o) =>
+                        <p>[x] {item}</p>
+                    )
+                }
+
+                <h1>Do something</h1>
+                {For($list, { key: 'id', use: SelectionKit, }, (item, $index, o) =>
+                    <p>[x] {item}</p>
                 )}
+
+                <h1>Do something</h1>
+                <div>
+                    <li>title</li>
+                    <input />
+                </div>
+                {Morphs.with(fadeInOut),
+                    For($list,
+                        <p>[x] {item}</p>
+                    )
+                }
+                <footer>(c) 2024</footer>
+
+                <h1>Do something</h1>
+                <div>
+                    <li>title</li>
+                    <input />
+                </div>
+                {For($list,
+                    <p>[x] {item}</p>
+                )}
+                <footer>(c) 2024</footer>
 
                 <h1>Teleport something</h1>
                 {TeleportTo('body',
                     <p>Weee!</p>
                 )}
 
-                <h1>Try something</h1>
-                {Try.with(fade, useSelectionKit, o =>
-                    <p>trying</p>
-                )}
-                {Catch.with(fade, error =>
-                    <p>{error.message}</p>
-                )}
 
-
-                <h1>Await something</h1>
-                {Pend(
-                    <p>Loaded</p>
-                )}
-                {Temp(
-                    <p>Loading</p>
-                )}
-                {Catch(error =>
-                    <p>{error.message}</p>
-                )}
 
                 <$MainContent as='hello' ref={$mainContent} />
                 <button onclick={$mainContent.as('bye')}>bye</button>
-            </div>
+            </div >
         </>
     )
 }
