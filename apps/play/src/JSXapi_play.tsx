@@ -1,6 +1,7 @@
 //@ts-nocheck
 import { Component } from "@rue/lumo";
 export function ListBlock() {
+    
     const $ItemBlock = LazyNode({
         load: () => {
             const promise = import('./SideBlock').then(({ SideBlock }) => SideBlock)
@@ -13,38 +14,37 @@ export function ListBlock() {
             })
         },
         onIdle: true,
-        Temp(props) {
-            return <div>Eep! I'm not ready {props.frog}</div>
-        },
+        Temp: (props) =>
+            Component(<div>Eep! I'm not ready {props.frog}</div>)
+        ,
         // timeout: 5000,
-        Error(props) {
-            return <div>{props.error}</div>
-        },
+        Error: (props) =>
+            Component(<div>{props.error}</div>)
+        ,
         with: fade
     });
 
 
     const $ItemBlock = SuspenseNode({
         Pending: ItemBlock,
-        PlaceHolder(props) {
-            return Component(
+        PlaceHolder: (props) =>
+            Component(
                 <div>Eep! I'm not ready {props.frog}</div>
             )
-        },
-        Error(props) {
-            return Component(
+        ,
+        Error: (props) =>
+            Component(
                 <div>{props.error}</div>
             )
-        },
+        ,
     });
 
     const $ItemBlock = TentativeNode({
         Tentative: ItemBlock,
-        Error() {
-            return Component(
-                <div>{props.error}</div>
+        Error: ({error}) =>
+            Component(
+                <div>{error}</div>
             )
-        }
     })
 
     const [$RouterView, RouterLink] = Router({
