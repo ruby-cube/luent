@@ -10,11 +10,12 @@ import { createDerivedIon, createWritableDerivedIon, ReactiveDerivedIon } from "
 import { asPropIon } from "../ionize/PropIon";
 
 
-export type Ion<T = any, M extends AnyObject = {}> = {
-    (selected?: true): T
-    [META]: MetaIon<T>;
-    as: (value: T) => T
-} & M
+export type Ion<T = any, M extends AnyObject = {}> = (() => T)
+    & {
+        (selected?: true): T
+        [META]: MetaIon<T>;
+        as: (value: T) => T
+    } & M
 
 
 
@@ -33,8 +34,8 @@ export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: an
         return value as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
     }
     if (value instanceof Function) {
-        if (methods) return createWritableDerivedIon(<()=>unknown>value, methods) as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-        return createDerivedIon(<()=>unknown>value) as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+        if (methods) return createWritableDerivedIon(<() => unknown>value, methods) as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+        return createDerivedIon(<() => unknown>value) as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
     }
     return createIon(value, methods) as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
 }
@@ -80,9 +81,9 @@ export function createIon<
     if (methods) {
         for (const key in methods) {
             if (key === 'as') {
-                if(__DEV__) console.warn(`'as' is reserved for the native set method for ions. Choose different method name`)
+                if (__DEV__) console.warn(`'as' is reserved for the native set method for ions. Choose different method name`)
                 continue;
-            } 
+            }
             proto[key] = methods[key].bind(proto) // This makes set function available to `this` even after protected
         }
     }

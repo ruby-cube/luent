@@ -72,7 +72,7 @@ declare namespace React {
      *
      * Is a superset of {@link ComponentType}.
      *
-     * @template P The props to match against. If not passed, defaults to any.
+     * @template P The props to match against. If not passed, or to any.
      * @template Tag An optional tag to match against. If not passed, attempts to match against all possible tags.
      *
      * @example

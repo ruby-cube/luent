@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { Component, fromContext, Provide, TypedKey } from "@rue/lumo"
 import { DerivedIon, ion, ionize } from "@rue/quarky";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
@@ -100,7 +99,7 @@ export function ParentBlock(
             <div onclick={$qualities.set}>{() => $frog.qualities}</div>
             <div onclick={() => $frog.setQualities()}>{$qualities}</div>
             <div>{$doubleCount}</div>
-            <ChildBlock />
+            <ChildBlock hi={0} />
             <SiblingBlock />
             <button onclick={() => counter.increment()}>increment</button>
             <button onclick={() => counter.decrement()}>decrement</button>
@@ -109,7 +108,11 @@ export function ParentBlock(
 }
 
 
-function ChildBlock() {
+function ChildBlock(
+    setup: {
+        hi: string
+    }
+) {
     const counter = fromContext(COUNTER)
 
     return Component(

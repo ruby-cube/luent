@@ -1,7 +1,7 @@
-//@ts-nocheck
 import { Component } from "@rue/lumo";
-export function ListBlock() {
-    
+import { $setup } from "../../../packages/lumo/src/component/$setup";
+export function ListBlock(setup = $setup()) {
+
     const $ItemBlock = LazyNode({
         load: () => {
             const promise = import('./SideBlock').then(({ SideBlock }) => SideBlock)
@@ -41,7 +41,7 @@ export function ListBlock() {
 
     const $ItemBlock = TentativeNode({
         Tentative: ItemBlock,
-        Error: ({error}) =>
+        Error: ({ error }) =>
             Component(
                 <div>{error}</div>
             )
@@ -98,26 +98,25 @@ export function ListBlock() {
                 }
 
                 <h1>Something Here</h1>
-                {[
-                    Morphs.with(fade),
+                {Morphs.with(fade),
                     If($active, { type: 'show/hide' }, o =>
                         <p>hello world</p>,
                     ),
                     If($broken, { use: SelectionKit }), o =>
                         <p value={o.$selection}>bye world</p>,
 
-                    Else({ with: fade }), () =>
-                        <p>ok world</p>,
-
-                ]}
+                    Else({ with: fade }, () =>
+                        <p>ok world</p>
+                    )
+                }
 
 
                 <h1>Something Here</h1>
                 {Morphs.with(fade),
-                    If($active(), { type: 'show/hide' },
+                    If($active, { type: 'show/hide' },
                         <p>hello world</p>
                     ),
-                    If($broken(), { use: SelectionKit }, o =>
+                    If($broken, { use: SelectionKit }, o =>
                         <p value={o.$selection}>bye world</p>
                     ),
                     Else({ with: fade },
@@ -143,7 +142,7 @@ export function ListBlock() {
                     If($list.length === 0, { with: fadeInOut, use: SelectionKit }, o =>
                         <p>hello world</p>
                     ),
-                    If($broken(),
+                    If($broken,
                         <p>bye world</p>
                     ),
                     Else(
@@ -157,12 +156,12 @@ export function ListBlock() {
 
                 <h1>How is this?</h1>
                 {Morphs.with(fade),
-                    If($editable(),
+                    If($editable,
                         <p>
                             Flies in and out
                         </p>
                     ),
-                    If($active(),
+                    If($active,
                         <div>
                             hi
                         </div>
@@ -176,7 +175,7 @@ export function ListBlock() {
                 <footer>(c) 2024</footer>
 
                 <h1>How is this?</h1>
-                {If($editable(),
+                {If($editable,
                     <p>
                         Flies in and out
                     </p>
@@ -185,7 +184,7 @@ export function ListBlock() {
 
                 <h1>How is this?</h1>
                 {Frozen,
-                    If($editable(),
+                    If($editable,
                         <p>
                             Flies in and out
                         </p>
@@ -194,7 +193,7 @@ export function ListBlock() {
 
                 <h1>How is this?</h1>
                 {Morphs,
-                    If($editable(),
+                    If($editable,
                         <p>
                             Flies in and out
                         </p>
@@ -202,7 +201,7 @@ export function ListBlock() {
                 <footer>(c) 2024</footer>
 
                 <h1>How is this?</h1>
-                {If($editable(),
+                {If($editable,
                     <p>Flies in and out</p>
                 )}
                 <footer>(c) 2024</footer>
@@ -211,7 +210,7 @@ export function ListBlock() {
                     If($editable,
                         <p>hello world</p>
                     ),
-                    If($broken(),
+                    If($broken,
                         <p>bye world</p>
                     ),
                     Else(
@@ -287,7 +286,7 @@ export function ListBlock() {
                 {If($list.length === 0,
                     <p>hello world</p>
                 )}
-                {If($broken(), // this is a new conditional series unrelated to the above
+                {If($broken, // this is a new conditional series unrelated to the above
                     <p>bye world</p>
                 )}
 

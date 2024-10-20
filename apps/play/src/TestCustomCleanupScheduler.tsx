@@ -1,24 +1,159 @@
 //@ts-nocheck
 import { Component, NodeRef, watch } from "@rue/lumo"
-import { DerivedIon, ion, ionize, watchIonicEffect, } from "@rue/quarky"
+import { AnyIon, DerivedIon, Ion, ion, ionize, watchIonicEffect, } from "@rue/quarky"
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon"
+import { or, $setup, is, isDefined, isAny, not } from "../../../packages/lumo/src/component/$setup"
+import { toIon } from "../../../packages/quarky/src/ion/toIons"
+import { AnyObject } from "@rue/types"
 
 // optional and default
 // normalize
 // validate
 
+function type<T>(value: any): value is T {
+    return true
+}
+
+const eh = type<{
+    hi: 'hi'
+}>
+
+type MaybeIon<T> = T | Ion<T>
+
+type Huh = number | never
+
+const ALL = Symbol('normalize-all')
+
+const oh = toIon('hi' as MaybeIon<string>)
+
+
+export function Bog(setup: {
+    name?: MaybeIon<string>,
+    date: Date,
+    address: MaybeIonized<{ // must not have methods, will be auto-protected by Lumo
+        street: string,
+        zip: number
+    }>,
+    $frog: Ionized<{
+        name: string,
+        setName: (name: string) => void
+    }>
+}) {
+    // normalize and set defaults
+    setup.name = setup.name ?? 'sir robin'
+
+    const {
+        $name,
+        $date,
+        $address,
+        $frog
+    } = toIonicProps(setup, {
+        name: toIon,
+        date: toIonized,
+        address: false,
+        $frog: assertIonized
+    })
+
+    const $name = toIon(setup.name)
+
+    const {
+        $name,
+        $date,
+        $frog
+    } = toIons(setup, { address: false })
+
+    const $address = toIonized(setup.address);
+
+    const $street = ion.from($address, 'street')
+
+
+
+
+
+
+
+    // const {
+    //     name,
+    //     date,
+    //     address,
+    //     frog
+    // } = normalizeProps(setup, {
+    //     name: n => n ?? 'sir robin'
+    // }).all(toIon)
+
+    // const {
+    //     name,
+    //     date,
+    //     address,
+    //     frog
+    // } = normalizeProps(setup, { all: toIon })
+
+    // const { name } = setup;
+
+    // const _name = name ?? 'sir robin'
+
+    return Component(
+        <div>hi</div>
+    )
+}
+
+export function TestCleanupSchedulerJS(setup = $setup({
+    name: MaybeIon('?', String),
+    nameB: Ion(String, Number, undefined), // {nameB: Ion<string | number | undefined>} 
+    nameC: MaybeIon('?', String, Number), // {nameB: Ion<string | number> | undefined}
+    date: Date,
+    $frog: Ionized({
+        name: Type(String, Number),
+        setName: I('name', String).O(String),
+        doSomething: I('node', String, Rest(Any)).O(String),
+        qualities: [String, Number],
+        well: Tup(String, String)
+    })
+})) {
+
+    setup.name = setup.name ?? 'hi'
+
+    const { $name, $nameB, $nameC, date } = normalizeIonicProps(setup)
+
+}
+
+export function TestCleanupSchedulerTS(setup = $setup({
+    name: MaybeIon<'?' | string>,
+    nameB: Ion<string | number | undefined>, // {nameB: Ion<string | number | undefined>} 
+    nameC: MaybeIon<'?' | string | number>, // {nameB: Ion<string | number> | undefined}
+    date: Type<Date>,
+    $frog: Ionized<{
+        name: string,
+        setName: (name: string) => string
+    }>,
+    emitIncrementClicked: Type<() => void>
+})) {
+
+    setup.name = setup.name ?? 'hi'
+
+    const { $name, $nameB, $nameC, date } = normalizeIonicProps(setup, {
+        name: toIon,
+        nameC: toIon,
+        $frog: toIonized
+    })
+
+}
+
 export function TestCleanupScheduler({
     name,
+    $nameB,
     date,
     dateB,
     address,
-    town
 } = $setup({
-    name: [n => isString(n) || isNumber(n), toIon],
-    date: [d => is(Date)(d) || undefined],
-    dateB: [d => is(Date)(d) || useDefault(() => new Date()), toIon],
-    address: is(Address),
-    town: isAny
+    name: [type<string>, n => n ?? 'hi', toIon],
+    nameB: [type<string | number | undefined>, toIon], // {nameB: Ion<string | number | undefined>} 
+    nameC: [type<'?' | string | number>, toIon], // {nameB: Ion<string | number> | undefined}
+    date: [type<Date>],
+    $frog: [type<{
+        name: string,
+        setName: (name: string) => string
+    }>, isIonized]
 }, { all: toIon })) {
 
     const $stopButton = NodeRef('button')
@@ -87,8 +222,8 @@ export function TestCleanupScheduler({
     // simple style bindings
     style($div, div =>
         [{
-            backgroundColor: $mainColor(),
-            width: `${listItem$.width + 1} px`,
+            backgroundColor: $mainColor,
+            width: `${$listItem.width + 1} px`,
             height: `${$height()} px`
         },
         $dragging() ? (
@@ -122,7 +257,23 @@ export function TestCleanupScheduler({
         () =>
             <>
                 <textarea>{{ $: $frogName }}</textarea>
+
+                <input $value={i0, $frogName} />
+
+                <div>{$frog.name}</div>
+                <div>{$frogName() + '!'} </div>
+
+                <div>{$frogName}</div>
+
+                <div>{i0, $frogName()} </div>
+                <div>{i0, $frogName() + '!'} </div>
+
                 <input $value={$frogName} />
+
+                <input $value={i0, $frogName() + '!'} />
+
+                <input $value={$frogName} />
+
                 <button ref={$stopButton}>stop</button>
                 <button on:click={initWatcher}>start</button>
                 <div

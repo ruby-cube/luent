@@ -32,11 +32,11 @@
     "ni:quarky": "pnpm -F @rue/quarky install"
   },
   "devDependencies": {
-    "@types/node": "^22.5.4",
-    "typescript": "^5.5.4",
-    "vite": "^5.4.3",
+    "@types/node": "^22.7.7",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.9",
     "vite-plugin-babel": "^1.2.0",
-    "vitest": "^2.0.5"
+    "vitest": "^2.1.3"
   },
   "author": "Ruby Yi Wang",
   "license": "MIT"
