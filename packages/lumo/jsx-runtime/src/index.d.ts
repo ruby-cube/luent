@@ -7,7 +7,6 @@
 import * as CSS from "csstype";
 import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
-import { ReactiveGet } from "../../../quarky/src";
 import { NodeRef } from "../../src/node/NodeRef";
 
 export function jsxDEV(): "frog"
@@ -2388,38 +2387,8 @@ declare namespace React {
     interface SVGLineElementAttributes<T> extends SVGProps<T> { }
     interface SVGTextElementAttributes<T> extends SVGProps<T> { }
 
-    namespace L {
-        type ReactivizeProps<P extends { [key: string]: any }> = {
-            [K in keyof P]: P[K] | ReactiveGet<P[K]>
-        }
 
-        type ListenerLifespan = ListenOptions;
-
-        const THIS_NODE = 0 as const;
-        const CHILD_NODES = 1 as const;
-
-        type EventTarget = string | NodeRef | Node | typeof THIS_NODE | typeof CHILD_NODES // query string
-
-        type EventTargetOptions = {
-            targets: EventTarget[]
-        } | {
-            excluded: EventTarget[]
-        }
-
-        type EventHandlerModifiers = {
-            prevent?: true;
-            stop?: true;
-            end?: true;
-        }
-
-        type EventHandler<T> = T | [T, EventHandlerModifiers] | [T, EventTargetOptions] | [T, ListenerLifespan]
-            | [T, EventHandlerModifiers, EventTargetOptions] | [T, EventTargetOptions, ListenerLifespan] | [T, EventHandlerModifiers, ListenerLifespan]
-            | [T, EventHandlerModifiers, EventTargetOptions, ListenerLifespan]
-
-        type EventListenerValue<T> = T | ConditionalKit<T>[] | ConditionalKit<T>
-    }
-
-    type DOMAttributes<T> = _DOMAttributes<T> & L.ReactivizeProps<DOMEvents<T>>
+    type DOMAttributes<T> = _DOMAttributes<T> & DOMEvents<T>
 
     interface _DOMAttributes<T> {
         Slot?: Lumo.NodeEntity | undefined;
@@ -2431,116 +2400,340 @@ declare namespace React {
     }
 
     interface DOMEvents<T> {// Clipboard Events
-        oncopy?: ClipboardEventHandler<T> | Lumo.ClipboardEventHandlerWithElement<T>;
-        oncut?: ClipboardEventHandler<T> | Lumo.ClipboardEventHandlerWithElement<T>;
-        onpaste?: ClipboardEventHandler<T> | Lumo.ClipboardEventHandlerWithElement<T>;
+        'on:copy'?: ClipboardEventHandler<T>;
+        'on:cut'?: ClipboardEventHandler<T>;
+        'on:paste'?: ClipboardEventHandler<T>;
 
         // Composition Events
-        oncompositionend?: CompositionEventHandler<T> | Lumo.CompositionEventHandlerWithElement<T>;
-        oncompositionstart?: CompositionEventHandler<T> | Lumo.CompositionEventHandlerWithElement<T>;
-        oncompositionupdate?: CompositionEventHandler<T> | Lumo.CompositionEventHandlerWithElement<T>;
+        'on:compositionend'?: CompositionEventHandler<T>;
+        'on:compositionstart'?: CompositionEventHandler<T>;
+        'on:compositionupdate'?: CompositionEventHandler<T>;
 
         // Focus Events
-        onfocus?: FocusEventHandler<T> | Lumo.FocusEventHandlerWithElement<T>;
-        onblur?: FocusEventHandler<T> | Lumo.FocusEventHandlerWithElement<T>;
+        'on:focus'?: FocusEventHandler<T>;
+        'on:blur'?: FocusEventHandler<T>;
 
         // Form Events
-        onchange?: FormEventHandler<T> | Lumo.FormEventHandlerWithElement<T>;
-        onbeforeinput?: FormEventHandler<T> | Lumo.FormEventHandlerWithElement<T>;
-        oninput?: FormEventHandler<T> | Lumo.FormEventHandlerWithElement<T>;
-        onreset?: FormEventHandler<T> | Lumo.FormEventHandlerWithElement<T>;
-        onsubmit?: FormEventHandler<T> | Lumo.FormEventHandlerWithElement<T>;
-        oninvalid?: FormEventHandler<T> | Lumo.FormEventHandlerWithElement<T>;
+        'on:change'?: FormEventHandler<T>;
+        'on:beforeinput'?: FormEventHandler<T>;
+        'on:input'?: FormEventHandler<T>;
+        'on:reset'?: FormEventHandler<T>;
+        'on:submit'?: FormEventHandler<T>;
+        'on:invalid'?: FormEventHandler<T>;
 
         // Image Events
-        onload?: ReactEventHandler<T> | undefined;
-        onerror?: ReactEventHandler<T> | undefined; // also a Media Event
+        'on:load'?: ReactEventHandler<T> | undefined;
+        'on:error'?: ReactEventHandler<T> | undefined; // also a Media Event
 
         // Keyboard Events
-        onkeydown?: KeyboardEventHandler<T> | Lumo.KeyboardEventHandlerWithElement<T>;
-        onkeyup?: KeyboardEventHandler<T> | Lumo.KeyboardEventHandlerWithElement<T>;
+        'on:keydown'?: KeyboardEventHandler<T>;
+        'on:keyup'?: KeyboardEventHandler<T>;
 
         // Media Events
-        onabort?: ReactEventHandler<T> | undefined;
-        oncanplay?: ReactEventHandler<T> | undefined;
-        oncanplaythrough?: ReactEventHandler<T> | undefined;
-        ondurationchange?: ReactEventHandler<T> | undefined;
-        onemptied?: ReactEventHandler<T> | undefined;
-        onencrypted?: ReactEventHandler<T> | undefined;
-        onended?: ReactEventHandler<T> | undefined;
-        onloadeddata?: ReactEventHandler<T> | undefined;
-        onloadedmetadata?: ReactEventHandler<T> | undefined;
-        onloadstart?: ReactEventHandler<T> | undefined;
-        onpause?: ReactEventHandler<T> | undefined;
-        onplay?: ReactEventHandler<T> | undefined;
-        onplaying?: ReactEventHandler<T> | undefined;
-        onprogress?: ReactEventHandler<T> | undefined;
-        onratechange?: ReactEventHandler<T> | undefined;
-        onresize?: ReactEventHandler<T> | undefined;
-        onseeked?: ReactEventHandler<T> | undefined;
-        onseeking?: ReactEventHandler<T> | undefined;
-        onstalled?: ReactEventHandler<T> | undefined;
-        onsuspend?: ReactEventHandler<T> | undefined;
-        ontimeupdate?: ReactEventHandler<T> | undefined;
-        onvolumechange?: ReactEventHandler<T> | undefined;
-        onwaiting?: ReactEventHandler<T> | undefined;
+        'on:abort'?: ReactEventHandler<T> | undefined;
+        'on:canplay'?: ReactEventHandler<T> | undefined;
+        'on:canplaythrough'?: ReactEventHandler<T> | undefined;
+        'on:durationchange'?: ReactEventHandler<T> | undefined;
+        'on:emptied'?: ReactEventHandler<T> | undefined;
+        'on:encrypted'?: ReactEventHandler<T> | undefined;
+        'on:ended'?: ReactEventHandler<T> | undefined;
+        'on:loadeddata'?: ReactEventHandler<T> | undefined;
+        'on:loadedmetadata'?: ReactEventHandler<T> | undefined;
+        'on:loadstart'?: ReactEventHandler<T> | undefined;
+        'on:pause'?: ReactEventHandler<T> | undefined;
+        'on:play'?: ReactEventHandler<T> | undefined;
+        'on:playing'?: ReactEventHandler<T> | undefined;
+        'on:progress'?: ReactEventHandler<T> | undefined;
+        'on:ratechange'?: ReactEventHandler<T> | undefined;
+        'on:resize'?: ReactEventHandler<T> | undefined;
+        'on:seeked'?: ReactEventHandler<T> | undefined;
+        'on:seeking'?: ReactEventHandler<T> | undefined;
+        'on:stalled'?: ReactEventHandler<T> | undefined;
+        'on:suspend'?: ReactEventHandler<T> | undefined;
+        'on:timeupdate'?: ReactEventHandler<T> | undefined;
+        'on:volumechange'?: ReactEventHandler<T> | undefined;
+        'on:waiting'?: ReactEventHandler<T> | undefined;
 
         // MouseEvents
-        onauxclick?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
-        onclick?: MouseEventHandler<T> | [MouseEventHandler<T>, ...number[]] | [string, MouseEventHandler<T>, ...number[]];
-        ['on:click']?: MouseEventHandler<T> | [MouseEventHandler<T>, ...number[]] | [string, MouseEventHandler<T>, ...number[]];
-        oncontextmenu?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
-        ondoubleclick?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
-        ondrag?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
-        ondragend?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
-        ondragenter?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
-        ondragexit?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
-        ondragleave?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
-        ondragover?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
-        ondragstart?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
-        ondrop?: DragEventHandler<T> | Lumo.DragEventHandlerWithElement<T>;
-        onmousedown?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
-        onmouseenter?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
-        onmouseleave?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
-        onmousemove?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
-        onmouseout?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
-        onmouseover?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
-        onmouseup?: MouseEventHandler<T> | Lumo.MouseEventHandlerWithElement<T>;
+        'on:auxclick'?: MouseEventHandler<T>;
+        'on:click'?: MouseEventHandler<T>;
+        'on:contextmenu'?: MouseEventHandler<T>;
+        'on:doubleclick'?: MouseEventHandler<T>;
+        'on:drag'?: DragEventHandler<T>;
+        'on:dragend'?: DragEventHandler<T>;
+        'on:dragenter'?: DragEventHandler<T>;
+        'on:dragexit'?: DragEventHandler<T>;
+        'on:dragleave'?: DragEventHandler<T>;
+        'on:dragover'?: DragEventHandler<T>;
+        'on:dragstart'?: DragEventHandler<T>;
+        'on:drop'?: DragEventHandler<T>;
+        'on:mousedown'?: MouseEventHandler<T>;
+        'on:mouseenter'?: MouseEventHandler<T>;
+        'on:mouseleave'?: MouseEventHandler<T>;
+        'on:mousemove'?: MouseEventHandler<T>;
+        'on:mouseout'?: MouseEventHandler<T>;
+        'on:mouseover'?: MouseEventHandler<T>;
+        'on:mouseup'?: MouseEventHandler<T>;
 
         // Selection Events
-        onselect?: ReactEventHandler<T> | undefined;
+        'on:select'?: ReactEventHandler<T> | undefined;
 
         // Touch Events
-        ontouchcancel?: TouchEventHandler<T> | Lumo.TouchEventHandlerWithElement<T>;
-        ontouchend?: TouchEventHandler<T> | Lumo.TouchEventHandlerWithElement<T>;
-        ontouchmove?: TouchEventHandler<T> | Lumo.TouchEventHandlerWithElement<T>;
-        ontouchstart?: TouchEventHandler<T> | Lumo.TouchEventHandlerWithElement<T>;
+        'on:touchcancel'?: TouchEventHandler<T>;
+        'on:touchend'?: TouchEventHandler<T>;
+        'on:touchmove'?: TouchEventHandler<T>;
+        'on:touchstart'?: TouchEventHandler<T>;
 
         // Pointer Events
-        onpointerdown?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
-        onpointermove?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
-        onpointerup?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
-        onpointercancel?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
-        onpointerenter?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
-        onpointerleave?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
-        onpointerover?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
-        onpointerout?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
-        ongotpointercapture?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
-        onlostpointercapture?: PointerEventHandler<T> | Lumo.PointerEventHandlerWithElement<T>;
+        'on:pointerdown'?: PointerEventHandler<T>;
+        'on:pointermove'?: PointerEventHandler<T>;
+        'on:pointerup'?: PointerEventHandler<T>;
+        'on:pointercancel'?: PointerEventHandler<T>;
+        'on:pointerenter'?: PointerEventHandler<T>;
+        'on:pointerleave'?: PointerEventHandler<T>;
+        'on:pointerover'?: PointerEventHandler<T>;
+        'on:pointerout'?: PointerEventHandler<T>;
+        'on:gotpointercapture'?: PointerEventHandler<T>;
+        'on:lostpointercapture'?: PointerEventHandler<T>;
 
         // UI Events
-        onscroll?: UIEventHandler<T> | Lumo.UIEventHandlerWithElement<T>;
+        'on:scroll'?: UIEventHandler<T>;
 
         // Wheel Events
-        onwheel?: WheelEventHandler<T> | Lumo.WheelEventHandlerWithElement<T>;
+        'on:wheel'?: WheelEventHandler<T>;
 
         // Animation Events
-        onanimationstart?: AnimationEventHandler<T> | Lumo.AnimationEventHandlerWithElement<T>;
-        onanimationend?: AnimationEventHandler<T> | Lumo.AnimationEventHandlerWithElement<T>;
-        onanimationiteration?: AnimationEventHandler<T> | Lumo.AnimationEventHandlerWithElement<T>;
+        'on:animationstart'?: AnimationEventHandler<T>;
+        'on:animationend'?: AnimationEventHandler<T>;
+        'on:animationiteration'?: AnimationEventHandler<T>;
 
         // Transition Events
-        ontransitionend?: TransitionEventHandler<T> | Lumo.TransitionEventHandlerWithElement<T>;
+        'on:transitionend'?: TransitionEventHandler<T>;
+
+
+
+        // with capture
+        'onV:copy'?: ClipboardEventHandler<T>;
+        'onV:cut'?: ClipboardEventHandler<T>;
+        'onV:paste'?: ClipboardEventHandler<T>;
+
+        // Composition Events
+        'onV:compositionend'?: CompositionEventHandler<T>;
+        'onV:compositionstart'?: CompositionEventHandler<T>;
+        'onV:compositionupdate'?: CompositionEventHandler<T>;
+
+        // Focus Events
+        'onV:focus'?: FocusEventHandler<T>;
+        'onV:blur'?: FocusEventHandler<T>;
+
+        // Form Events
+        'onV:change'?: FormEventHandler<T>;
+        'onV:beforeinput'?: FormEventHandler<T>;
+        'onV:input'?: FormEventHandler<T>;
+        'onV:reset'?: FormEventHandler<T>;
+        'onV:submit'?: FormEventHandler<T>;
+        'onV:invalid'?: FormEventHandler<T>;
+
+        // Image Events
+        'onV:load'?: ReactEventHandler<T> | undefined;
+        'onV:error'?: ReactEventHandler<T> | undefined; // also a Media Event
+
+        // Keyboard Events
+        'onV:keydown'?: KeyboardEventHandler<T>;
+        'onV:keyup'?: KeyboardEventHandler<T>;
+
+        // Media Events
+        'onV:abort'?: ReactEventHandler<T> | undefined;
+        'onV:canplay'?: ReactEventHandler<T> | undefined;
+        'onV:canplaythrough'?: ReactEventHandler<T> | undefined;
+        'onV:durationchange'?: ReactEventHandler<T> | undefined;
+        'onV:emptied'?: ReactEventHandler<T> | undefined;
+        'onV:encrypted'?: ReactEventHandler<T> | undefined;
+        'onV:ended'?: ReactEventHandler<T> | undefined;
+        'onV:loadeddata'?: ReactEventHandler<T> | undefined;
+        'onV:loadedmetadata'?: ReactEventHandler<T> | undefined;
+        'onV:loadstart'?: ReactEventHandler<T> | undefined;
+        'onV:pause'?: ReactEventHandler<T> | undefined;
+        'onV:play'?: ReactEventHandler<T> | undefined;
+        'onV:playing'?: ReactEventHandler<T> | undefined;
+        'onV:progress'?: ReactEventHandler<T> | undefined;
+        'onV:ratechange'?: ReactEventHandler<T> | undefined;
+        'onV:resize'?: ReactEventHandler<T> | undefined;
+        'onV:seeked'?: ReactEventHandler<T> | undefined;
+        'onV:seeking'?: ReactEventHandler<T> | undefined;
+        'onV:stalled'?: ReactEventHandler<T> | undefined;
+        'onV:suspend'?: ReactEventHandler<T> | undefined;
+        'onV:timeupdate'?: ReactEventHandler<T> | undefined;
+        'onV:volumechange'?: ReactEventHandler<T> | undefined;
+        'onV:waiting'?: ReactEventHandler<T> | undefined;
+
+        // MouseEvents
+        'onV:auxclick'?: MouseEventHandler<T>;
+        'onV:click'?: MouseEventHandler<T>;
+        'onV:contextmenu'?: MouseEventHandler<T>;
+        'onV:doubleclick'?: MouseEventHandler<T>;
+        'onV:drag'?: DragEventHandler<T>;
+        'onV:dragend'?: DragEventHandler<T>;
+        'onV:dragenter'?: DragEventHandler<T>;
+        'onV:dragexit'?: DragEventHandler<T>;
+        'onV:dragleave'?: DragEventHandler<T>;
+        'onV:dragover'?: DragEventHandler<T>;
+        'onV:dragstart'?: DragEventHandler<T>;
+        'onV:drop'?: DragEventHandler<T>;
+        'onV:mousedown'?: MouseEventHandler<T>;
+        'onV:mouseenter'?: MouseEventHandler<T>;
+        'onV:mouseleave'?: MouseEventHandler<T>;
+        'onV:mousemove'?: MouseEventHandler<T>;
+        'onV:mouseout'?: MouseEventHandler<T>;
+        'onV:mouseover'?: MouseEventHandler<T>;
+        'onV:mouseup'?: MouseEventHandler<T>;
+
+        // Selection Events
+        'onV:select'?: ReactEventHandler<T> | undefined;
+
+        // Touch Events
+        'onV:touchcancel'?: TouchEventHandler<T>;
+        'onV:touchend'?: TouchEventHandler<T>;
+        'onV:touchmove'?: TouchEventHandler<T>;
+        'onV:touchstart'?: TouchEventHandler<T>;
+
+        // Pointer Events
+        'onV:pointerdown'?: PointerEventHandler<T>;
+        'onV:pointermove'?: PointerEventHandler<T>;
+        'onV:pointerup'?: PointerEventHandler<T>;
+        'onV:pointercancel'?: PointerEventHandler<T>;
+        'onV:pointerenter'?: PointerEventHandler<T>;
+        'onV:pointerleave'?: PointerEventHandler<T>;
+        'onV:pointerover'?: PointerEventHandler<T>;
+        'onV:pointerout'?: PointerEventHandler<T>;
+        'onV:gotpointercapture'?: PointerEventHandler<T>;
+        'onV:lostpointercapture'?: PointerEventHandler<T>;
+
+        // UI Events
+        'onV:scroll'?: UIEventHandler<T>;
+
+        // Wheel Events
+        'onV:wheel'?: WheelEventHandler<T>;
+
+        // Animation Events
+        'onV:animationstart'?: AnimationEventHandler<T>;
+        'onV:animationend'?: AnimationEventHandler<T>;
+        'onV:animationiteration'?: AnimationEventHandler<T>;
+
+        // Transition Events
+        'onV:transitionend'?: TransitionEventHandler<T>;
+
+
+        // with modifiers
+        [`on:copy-${string}`]?: ClipboardEventHandler<T>;
+        [`on:cut-${string}`]?: ClipboardEventHandler<T>;
+        [`on:paste-${string}`]?: ClipboardEventHandler<T>;
+
+        // Composition Events
+        [`on:compositionend-${string}`]?: CompositionEventHandler<T>;
+        [`on:compositionstart-${string}`]?: CompositionEventHandler<T>;
+        [`on:compositionupdate-${string}`]?: CompositionEventHandler<T>;
+
+        // Focus Events
+        [`on:focus-${string}`]?: FocusEventHandler<T>;
+        [`on:blur-${string}`]?: FocusEventHandler<T>;
+
+        // Form Events
+        [`on:change-${string}`]?: FormEventHandler<T>;
+        [`on:beforeinput-${string}`]?: FormEventHandler<T>;
+        [`on:input-${string}`]?: FormEventHandler<T>;
+        [`on:reset-${string}`]?: FormEventHandler<T>;
+        [`on:submit-${string}`]?: FormEventHandler<T>;
+        [`on:invalid-${string}`]?: FormEventHandler<T>;
+
+        // Image Events
+        [`on:load-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:error-${string}`]?: ReactEventHandler<T> | undefined; // also a Media Event
+
+        // Keyboard Events
+        [`on:keydown-${string}`]?: KeyboardEventHandler<T>;
+        [`on:keyup-${string}`]?: KeyboardEventHandler<T>;
+
+        // Media Events
+        [`on:abort-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:canplay-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:canplaythrough-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:durationchange-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:emptied-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:encrypted-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:ended-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:loadeddata-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:loadedmetadata-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:loadstart-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:pause-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:play-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:playing-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:progress-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:ratechange-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:resize-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:seeked-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:seeking-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:stalled-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:suspend-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:timeupdate-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:volumechange-${string}`]?: ReactEventHandler<T> | undefined;
+        [`on:waiting-${string}`]?: ReactEventHandler<T> | undefined;
+
+        // MouseEvents
+        [`on:auxclick-${string}`]?: MouseEventHandler<T>;
+        [`on:click-${string}`]?: MouseEventHandler<T>;
+        [`on:contextmenu-${string}`]?: MouseEventHandler<T>;
+        [`on:doubleclick-${string}`]?: MouseEventHandler<T>;
+        [`on:drag-${string}`]?: DragEventHandler<T>;
+        [`on:dragend-${string}`]?: DragEventHandler<T>;
+        [`on:dragenter-${string}`]?: DragEventHandler<T>;
+        [`on:dragexit-${string}`]?: DragEventHandler<T>;
+        [`on:dragleave-${string}`]?: DragEventHandler<T>;
+        [`on:dragover-${string}`]?: DragEventHandler<T>;
+        [`on:dragstart-${string}`]?: DragEventHandler<T>;
+        [`on:drop-${string}`]?: DragEventHandler<T>;
+        [`on:mousedown-${string}`]?: MouseEventHandler<T>;
+        [`on:mouseenter-${string}`]?: MouseEventHandler<T>;
+        [`on:mouseleave-${string}`]?: MouseEventHandler<T>;
+        [`on:mousemove-${string}`]?: MouseEventHandler<T>;
+        [`on:mouseout-${string}`]?: MouseEventHandler<T>;
+        [`on:mouseover-${string}`]?: MouseEventHandler<T>;
+        [`on:mouseup-${string}`]?: MouseEventHandler<T>;
+
+        // Selection Events
+        [`on:select-${string}`]?: ReactEventHandler<T> | undefined;
+
+        // Touch Events
+        [`on:touchcancel-${string}`]?: TouchEventHandler<T>;
+        [`on:touchend-${string}`]?: TouchEventHandler<T>;
+        [`on:touchmove-${string}`]?: TouchEventHandler<T>;
+        [`on:touchstart-${string}`]?: TouchEventHandler<T>;
+
+        // Pointer Events
+        [`on:pointerdown-${string}`]?: PointerEventHandler<T>;
+        [`on:pointermove-${string}`]?: PointerEventHandler<T>;
+        [`on:pointerup-${string}`]?: PointerEventHandler<T>;
+        [`on:pointercancel-${string}`]?: PointerEventHandler<T>;
+        [`on:pointerenter-${string}`]?: PointerEventHandler<T>;
+        [`on:pointerleave-${string}`]?: PointerEventHandler<T>;
+        [`on:pointerover-${string}`]?: PointerEventHandler<T>;
+        [`on:pointerout-${string}`]?: PointerEventHandler<T>;
+        [`on:gotpointercapture-${string}`]?: PointerEventHandler<T>;
+        [`on:lostpointercapture-${string}`]?: PointerEventHandler<T>;
+
+        // UI Events
+        [`on:scroll-${string}`]?: UIEventHandler<T>;
+
+        // Wheel Events
+        [`on:wheel-${string}`]?: WheelEventHandler<T>;
+
+        // Animation Events
+        [`on:animationstart-${string}`]?: AnimationEventHandler<T>;
+        [`on:animationend-${string}`]?: AnimationEventHandler<T>;
+        [`on:animationiteration-${string}`]?: AnimationEventHandler<T>;
+
+        // Transition Events
+        [`on:transitionend-${string}`]?: TransitionEventHandler<T>;
     }
 
     export interface CSSProperties extends CSS.Properties<string | number> {
@@ -2861,10 +3054,10 @@ declare namespace React {
         // Standard HTML Attributes
         // class?: string | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[]; // #LUMO-EDIT
         // style?: CSSProperties | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[]; // #LUMO-EDIT
-        accessKey?: string | undefined;
-        autoFocus?: boolean | undefined;
-        contentEditable?: Booleanish | "inherit" | "plaintext-only" | undefined;
-        contextMenu?: string | undefined;
+        accesskey?: string | undefined;
+        autofocus?: boolean | undefined;
+        contenteditable?: Booleanish | "inherit" | "plaintext-only" | undefined;
+        contextmenu?: string | undefined;
         dir?: string | undefined;
         draggable?: Booleanish | undefined;
         hidden?: boolean | undefined;
@@ -2872,13 +3065,13 @@ declare namespace React {
         lang?: string | undefined;
         nonce?: string | undefined;
         slot?: string | undefined;
-        spellCheck?: Booleanish | undefined;
-        tabIndex?: number | undefined;
+        spellcheck?: Booleanish | undefined;
+        tabindex?: number | undefined;
         title?: string | undefined;
         translate?: "yes" | "no" | undefined;
 
         // Unknown
-        radioGroup?: string | undefined; // <command>, <menuitem>
+        radiogroup?: string | undefined; // <command>, <menuitem>
 
         // WAI-ARIA
         role?: AriaRole | undefined;
@@ -2897,15 +3090,15 @@ declare namespace React {
         vocab?: string | undefined;
 
         // Non-standard Attributes
-        autoCapitalize?: string | undefined;
-        autoCorrect?: string | undefined;
-        autoSave?: string | undefined;
+        autocapitalize?: string | undefined;
+        autocorrect?: string | undefined;
+        autosave?: string | undefined;
         color?: string | undefined;
-        itemProp?: string | undefined;
-        itemScope?: boolean | undefined;
-        itemType?: string | undefined;
-        itemID?: string | undefined;
-        itemRef?: string | undefined;
+        itemprop?: string | undefined;
+        itemscope?: boolean | undefined;
+        itemtype?: string | undefined;
+        itemid?: string | undefined;
+        itemref?: string | undefined;
         results?: number | undefined;
         security?: string | undefined;
         unselectable?: "on" | "off" | undefined;
@@ -2915,7 +3108,7 @@ declare namespace React {
          * Hints at the type of data that might be entered by the user while editing the element or its contents
          * @see {@link https://html.spec.whatwg.org/multipage/interaction.html#input-modalities:-the-inputmode-attribute}
          */
-        inputMode?: "none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search" | undefined;
+        inputmode?: "none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search" | undefined;
         /**
          * Specify that a standard HTML element should behave like a defined custom built-in element
          * @see {@link https://html.spec.whatwg.org/multipage/custom-elements.html#attr-is}
@@ -2928,7 +3121,6 @@ declare namespace React {
      * Different release channels declare additional types of NodeEntity this particular release channel accepts.
      * App or library types should never augment this interface.
      */
-    interface DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS { }
 
     interface AllHTMLAttributes<T> extends HTMLAttributes<T> {
         // Standard HTML Attributes
@@ -2937,9 +3129,7 @@ declare namespace React {
         action?:
         | string
         | undefined
-        | DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS[
-        keyof DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS
-        ];
+        ;
         allowFullScreen?: boolean | undefined;
         allowTransparency?: boolean | undefined;
         alt?: string | undefined;
@@ -2970,10 +3160,7 @@ declare namespace React {
         form?: string | undefined;
         formAction?:
         | string
-        | undefined
-        | DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS[
-        keyof DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS
-        ];
+        | undefined;
         formEncType?: string | undefined;
         formMethod?: string | undefined;
         formNoValidate?: boolean | undefined;
@@ -4263,11 +4450,6 @@ type ReactManagedAttributes<C, P> = C extends { propTypes: infer T; defaultProps
 declare global {
 
 
-    namespace Lumo {
-        type ReactivizeProps<P extends { [key: string]: any }> = {
-            [K in keyof P]: Exclude<P[K], undefined> | ReactiveGet<Exclude<P[K], undefined>> // exclude undefined because undefined comes from optional props
-        }
-    }
 
 
     /**
@@ -4315,9 +4497,9 @@ declare global {
         type CSSProperties = React.CSSProperties
 
         type IntrinsicElements = {
-            [K in keyof JSX._IntrinsicElements]: Lumo.ReactivizeProps<JSX._IntrinsicElements[K]> & {
-                class?: string | ReactiveGet<string | undefined> | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[];
-                style?: CSSProperties | ReactiveGet<CSSProperties | undefined> | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[];
+            [K in keyof JSX._IntrinsicElements]: JSX._IntrinsicElements[K] & {
+                class?: string | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[];
+                style?: CSSProperties | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[];
                 attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
             }
         }

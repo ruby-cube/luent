@@ -1,6 +1,5 @@
-//@ts-nocheck
-import { NodeRef, Component, If, Else, stopPropagation, watch } from "@rue/lumo";
-import { AFTER_RENDER, BEFORE_RENDER, ion, ON_RENDER, SYNC } from "@rue/quarky";
+import { NodeRef, Component, If, Else, stopPropagation, watch, preventDefault } from "@rue/lumo";
+import { AFTER_RENDER, BEFORE_RENDER, Ion, ion, ON_RENDER, SYNC } from "@rue/quarky";
 
 export function MountIf() {
     const $count = ion(0, {
@@ -32,8 +31,11 @@ export function MountIf() {
     //     console.log("double count!", double)
     // })
 
-    // const $activeAndReady = $(() => $active() && $ready(), true)
+    function isTarget(n: any, e: any) {
+        return true;
+    }
 
+    // const $activeAndReady = $(() => $active() && $ready(), true)
     return Component(() =>
         <>
             <h1>Hello world</h1>
@@ -46,13 +48,24 @@ export function MountIf() {
                 )
             ]}
 
-            {If($active()),
+            {/* {If($active()),
                 <div>hi</div>
             }
             {Else,
                 <p>bye</p>
-            }
-            <button onclick={$active.toggle()}>toggle active {$active()}</button>
+            } */}
+            <button
+                data-frog={'hi'}
+                onV:click={e => console.log('hi')}
+                on:click={e => {
+                    if (e.targets('this', 'select')) {
+                        $active.toggle()
+                        e.preventDefault()
+                    }
+                }}
+            >
+                toggle active {$active()}
+            </button>
             {/* <div>Both: {$activeAndReady}</div> */}
             {/* <button onclick={increment}>increment {$count}</button> */}
             {/* <button onclick={toggleReady}>toggle ready {$ready}</button> */}
@@ -62,6 +75,36 @@ export function MountIf() {
     )
 }
 
+function DisplayCard({ id, title, description }) {
+    // setup logic here...
+    function select() {
+
+    }
+
+    return Component(
+        <div on:click={e => { if (e.targets('x-select')) select() }}>
+            <p x-select>{title}</p>
+            <p contenteditable>{description}</p>
+            <button on:click={e => open(id)}>open</button>
+            <ArticleBlock SlotKit={CounterKit}>{o =>
+                <p>{o.frog}</p>
+            }</ArticleBlock>
+        </div>
+    )
+}
+
+function CounterKit() {
+    return {
+        $count: ion(0)
+    }
+}
+
+function ArticleBlock(setup: {
+    Slot: (setup: { frog: string }) => any;
+    SlotKit: typeof CounterKit //TODO: auto add ReturnType of SlotKit to setup props
+}) {
+
+}
 // function Counter() {
 //     const _this = $thisComponent()
 //     const $count = ion(0)
