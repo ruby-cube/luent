@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { NodeRef, Component, COMPONENT, ComponentSetup, If, Else, For, Provide, teleportTo } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, ion, ionize } from "../../../packages/quarky/src";
@@ -245,6 +246,18 @@ function Appo(
         exposed
     )
 }
+
+<div>
+    {If(open, [
+        morphs.with(fade),
+        If(entering,
+            <p>Hi</p>
+        ),
+        Else(
+            <p>Bye</p>
+        )
+    ])}
+</div>
 
 function Wrapper({ title, Slot }: {
     title: string,

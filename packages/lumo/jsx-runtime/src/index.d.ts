@@ -2196,6 +2196,7 @@ declare namespace React {
         persist(): void;
         timeStamp: number;
         type: string;
+        targets(...args: (string | NodeRef)[]): boolean // Lumo edit
     }
 
     /**

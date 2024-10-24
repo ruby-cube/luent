@@ -1,4 +1,5 @@
-import { Component } from "@rue/lumo";
+//@ts-nocheck
+import { Component, fromContext } from "@rue/lumo";
 import { $setup } from "../../../packages/lumo/src/component/$setup";
 export function ListBlock(setup = $setup()) {
 
@@ -98,31 +99,68 @@ export function ListBlock(setup = $setup()) {
                 }
 
                 <h1>Something Here</h1>
-                {Morphs.with(fade),
+                {morphic({ with: fade },
                     If($active, { type: 'show/hide' }, o =>
                         <p>hello world</p>,
                     ),
-                    If($broken, { use: SelectionKit }), o =>
-                        <p value={o.$selection}>bye world</p>,
-
+                    ElseIf($broken, { use: SelectionKit }, o =>
+                        <p value={o.$selection}>bye world</p>
+                    ),
                     Else({ with: fade }, () =>
                         <p>ok world</p>
                     )
-                }
+                )}
 
+                <div freeze>{$count()}</div>
+                <div value={{ z: $active() }}>{{ z: $count() }}</div>
+
+                <div>
+                    {If(open,
+                        If(entering,
+                            <p>Hi</p>
+                        ),
+                        Else(
+                            <p>Bye</p>
+                        )
+                    )}
+                </div>
 
                 <h1>Something Here</h1>
-                {Morphs.with(fade),
-                    If($active, { type: 'show/hide' },
-                        <p>hello world</p>
-                    ),
+                {morphic(
+                    If($active, { type: 'show/hide', use: CounterKit }, o =>
+                        Context(
+                            w(COUNT, o.$count),
+                            w(FROG, ionize(Frog())),
+                            <p>
+                                hello world
+                                <button>click</button>
+                            </p>
+                        )
+                    )
+                )}
+                {(
                     If($broken, { use: SelectionKit }, o =>
-                        <p value={o.$selection}>bye world</p>
+                        Context(
+                            where(COUNT, o.$count),
+                            where(FROG, o.$frog),
+                            <p value={o.$selection}>bye world</p>
+                        )
                     ),
                     Else({ with: fade },
                         <p>ok world</p>
                     )
-                }
+                )}
+
+                {If($active,
+                    [
+                        If($broken,
+                            <p>brocken</p>
+                        ),
+                        Else(
+                            <div>help</div>
+                        )
+                    ]
+                )}
 
 
                 {/* {Morphs(
@@ -138,24 +176,39 @@ export function ListBlock(setup = $setup()) {
                 )} */}
                 {/* , mount_unmount, create_destroy */}
 
-                {Morphs.with(fadeInOut),
-                    If($list.length === 0, { with: fadeInOut, use: SelectionKit }, o =>
-                        <p>hello world</p>
-                    ),
-                    If($broken,
-                        <p>bye world</p>
-                    ),
-                    Else(
-                        <p>ok world</p>
+                <Frog.Provider value={new Frog()}>
+                    <Cat.Provider value={new Cat()}>
+                        <Article content={fromContext(Cat)}/>
+                    </Cat.Provider>
+                </Frog.Provider>
+
+                {Context(
+                    w(Frog, new Frog()),
+                    w(Cat, new Cat()),
+
+                    <Article content={fromContext(Cat)} />
+                )}
+
+                {Context(w(FROG, new Frog()), w(CAT, new Cat()),
+                    morphic({ in: fade, out: fly },
+                        If($list.length === 0, { with: fadeInOut, use: SelectionKit }, o =>
+                            <p>hello world</p>
+                        ),
+                        If($broken,
+                            <p>bye world</p>
+                        ),
+                        Else(
+                            <p>ok world</p>
+                        )
                     )
-                }
+                )}
 
                 <button on:click={increment}>
                     Clicked {count} {count === 1 ? 'time' : 'times'}
                 </button>
 
                 <h1>How is this?</h1>
-                {Morphs.with(fade),
+                {morphic(fadeInOut,
                     If($editable,
                         <p>
                             Flies in and out
@@ -171,7 +224,7 @@ export function ListBlock(setup = $setup()) {
                             le sigh.
                         </article>
                     )
-                }
+                )}
                 <footer>(c) 2024</footer>
 
                 <h1>How is this?</h1>
@@ -183,21 +236,23 @@ export function ListBlock(setup = $setup()) {
                 <footer>(c) 2024</footer>
 
                 <h1>How is this?</h1>
-                {Frozen,
+                {freeze(
                     If($editable,
                         <p>
                             Flies in and out
                         </p>
-                    )}
+                    )
+                )}
                 <footer>(c) 2024</footer>
 
                 <h1>How is this?</h1>
-                {Morphs,
+                {morphic(fadeInOut,
                     If($editable,
                         <p>
                             Flies in and out
                         </p>
-                    )}
+                    )
+                )}
                 <footer>(c) 2024</footer>
 
                 <h1>How is this?</h1>
@@ -206,29 +261,29 @@ export function ListBlock(setup = $setup()) {
                 )}
                 <footer>(c) 2024</footer>
 
-                {Morphs,
+                {morphic(
                     If($editable,
                         <p>hello world</p>
                     ),
-                    If($broken,
+                    ElseIf($broken,
                         <p>bye world</p>
                     ),
                     Else(
                         <p>ok world</p>
                     )
-                }
+                )}
 
-                {Morphs.with(fade, 'show/hide'),
+                {morphic(fade(10), 'show/hide',
                     If($active,
                         <div>hello</div>
                     ),
-                    If($something, { in: fly({ duration: 10 }), out: fade },
+                    ElseIf($something, { in: fly({ duration: 10 }), out: fade },
                         <div>bye</div>
                     ),
-                    If($something,
+                    ElseIf($something,
                         <div>bye</div>
                     )
-                }
+                )}
 
                 // winner
                 <h1>Do something</h1>
@@ -236,7 +291,8 @@ export function ListBlock(setup = $setup()) {
                     <li>title</li>
                     <input />
                 </div>
-                {Morphs.with(fade),
+
+                {morphic(fade,
                     Match(key,
                         Case('hello',
                             <p>hello world</p>
@@ -244,10 +300,11 @@ export function ListBlock(setup = $setup()) {
                         Case('bye',
                             <p>bye world</p>
                         ),
-                        Else(
+                        Default(
                             <p>ok world</p>
                         )
-                    )}
+                    )
+                )}
                 <footer>(c) 2024</footer>
 
                 // winner
@@ -256,7 +313,7 @@ export function ListBlock(setup = $setup()) {
                     <li>title</li>
                     <input />
                 </div>
-                {
+                {morphic(
                     If($list.length === 0,
                         <p>hello world</p>
                     ),
@@ -266,11 +323,11 @@ export function ListBlock(setup = $setup()) {
                     Else(
                         <p>ok world</p>
                     )
-                }
+                )}
                 <footer>(c) 2024</footer>
 
                 <h1>Choose something</h1>
-                {Frozen,
+                {(
                     If($list.length === 0,
                         <p>hello world</p>
                     ),
@@ -280,7 +337,7 @@ export function ListBlock(setup = $setup()) {
                     Else(
                         <p>ok world</p>
                     )
-                }
+                )}
 
                 <h1>Choose something</h1>
                 {If($list.length === 0,
@@ -291,18 +348,18 @@ export function ListBlock(setup = $setup()) {
                 )}
 
                 <h1>Do something</h1>
-                {Frozen,
+                {freeze(
                     For(list, (item, $index, o) =>
                         <p>[x] {item}</p>
                     )
-                }
+                )}
 
                 <h1>Do something</h1>
-                {Morphs.with(fade),
+                {morphic(fade,
                     For($list, { key: 'id', use: SelectionKit }, (item, $index, o) =>
                         <p>[x] {item}</p>
                     )
-                }
+                )}
 
                 <h1>Do something</h1>
                 {For($list, { key: 'id', use: SelectionKit, }, (item, $index, o) =>
@@ -314,11 +371,11 @@ export function ListBlock(setup = $setup()) {
                     <li>title</li>
                     <input />
                 </div>
-                {Morphs.with(fadeInOut),
+                {morph(fadeInOut,
                     For($list,
                         <p>[x] {item}</p>
                     )
-                }
+                )}
                 <footer>(c) 2024</footer>
 
                 <h1>Do something</h1>
@@ -345,3 +402,21 @@ export function ListBlock(setup = $setup()) {
     )
 }
 
+function Lolly() {
+    const $frog = ionize({ name: 'kermit' })
+
+    return Component(
+        <>
+            {Context(
+                set(FROG, $frog),
+                set(COUNT, 0),
+                <Dobby>Precioussss</Dobby>
+            )}
+        </>
+    )
+}
+
+
+function Dobby() {
+
+}

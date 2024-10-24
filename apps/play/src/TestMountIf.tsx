@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { NodeRef, Component, If, Else, stopPropagation, watch, preventDefault } from "@rue/lumo";
 import { AFTER_RENDER, BEFORE_RENDER, Ion, ion, ON_RENDER, SYNC } from "@rue/quarky";
 
@@ -54,18 +55,48 @@ export function MountIf() {
             {Else,
                 <p>bye</p>
             } */}
+
             <button
                 data-frog={'hi'}
                 onV:click={e => console.log('hi')}
-                on:click={e => {
-                    if (e.targets('this', 'select')) {
-                        $active.toggle()
-                        e.preventDefault()
-                    }
+                on:click={target('this', 'x-select', e =>
+                    console.log('hi')
+                )}
+            >
+                toggle active {$active()}
+            </button>
+            <button
+                data-frog={'hi'}
+                onV:click={e => console.log('hi')}
+                on:click={['x', 'x-select',
+                    incrementCount
+                ]}
+            >
+                toggle active {$active()}
+            </button>
+            <button
+                data-frog={'hi'}
+                onV:click={e => console.log('hi')}
+                on:click={'x', 'x-select', e => {
+                    $active.toggle()
+                    e.preventDefault()
                 }}
             >
                 toggle active {$active()}
             </button>
+            <button
+                data-frog={'hi'}
+                onV:click={e => console.log('hi')}
+                on:click={[
+                    target('this', 'select'), e => {
+                        $active.toggle
+                    },
+                    selectItem,
+                    target('this'), increment
+                ]}
+            >
+                toggle active {$active()}
+            </button >
             {/* <div>Both: {$activeAndReady}</div> */}
             {/* <button onclick={increment}>increment {$count}</button> */}
             {/* <button onclick={toggleReady}>toggle ready {$ready}</button> */}
@@ -83,6 +114,24 @@ function DisplayCard({ id, title, description }) {
 
     return Component(
         <div on:click={e => { if (e.targets('x-select')) select() }}>
+            <p x-select>{title}</p>
+            <p contenteditable>{description}</p>
+            <button on:click={e => open(id)}>open</button>
+            <ArticleBlock SlotKit={CounterKit}>{o =>
+                <p>{o.frog}</p>
+            }</ArticleBlock>
+        </div>
+    )
+}
+
+function DisplayCardB({ id, title, description }) {
+    // setup logic here...
+    function select() {
+
+    }
+
+    return Component(
+        <div on:click={'x-select', e => { if (e.targets('x-select')) select() }}>
             <p x-select>{title}</p>
             <p contenteditable>{description}</p>
             <button on:click={e => open(id)}>open</button>
