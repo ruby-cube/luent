@@ -6,7 +6,7 @@ import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex } from "../iteratives/ListRenderKit";
 import { getProviderComponent, popProvider, provide, pushProvider } from "./provide";
 import { MorphicRenderKit } from "../morphic/MorphicComponent";
-import { IonicModel, isIon, protect, Ion } from "@rue/quarky";
+import { IonicModel, isAtomicIon, protect, AtomicIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { getFlask } from "@rue/flask";
 
@@ -53,7 +53,7 @@ export function mO<T extends ComponentSetup>(
 //     Component: ComponentSetup,
 //     Slot: InferSlot | undefined,
 //     config: ComponentConfig,
-//     $index: Ion<number> | undefined
+//     $index: AtomicIon<number> | undefined
 // ): InternalComponent {
 //     const output = Component(protectSetupProps(config, Slot))
 //     const component = 'morphicRenderKit' in output ? output.morphicRenderKit as MorphicRenderKit : new InternalComponent();
@@ -80,7 +80,7 @@ export function makeComponent(
     Component: ComponentSetup,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: Ion<number> | undefined
+    $index: AtomicIon<number> | undefined
 ): InternalComponent | MorphicRenderKit {
     const provider = getProviderComponent();
     const component = new InternalComponent(provider, provider.global, provider.root);
@@ -119,7 +119,7 @@ function unnestComponent(nodeEntities: NodeEntity[]) {
 //     component: InternalComponent,
 //     Slot: InferSlot | undefined,
 //     config: ComponentConfig,
-//     $index: Ion<number> | undefined
+//     $index: AtomicIon<number> | undefined
 // ) {
 //     const output = Component(protectSetupProps(config, Slot), provide)
 //     initializeComponent(component, output, config.ref, $index)
@@ -131,12 +131,12 @@ export function initializeComponent(
     publicComponent: PublicComponent | undefined,
     rendered: NodeEntity | NodeEntity[],
     ref: NodeRef | IonicModel<any[]> | undefined,
-    $index: Ion<number> | undefined,
+    $index: AtomicIon<number> | undefined,
 ) {
     const nodeEntities = normalizeToFragmentArray(rendered); //TODO: Validate output and get publicComponent from out
     component.initialNodeEntities = nodeEntities;
     if (ref) {
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
+        if (!isAtomicIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
         if ($index) {
             initializeListRef(ref, publicComponent, $index)
         }
@@ -154,7 +154,7 @@ export function initializeComponent(
 // $class?: ((o: DOMTokenList) => void)[],
 // $style?: ((o: CSSStyleDeclaration) => void)[],
 // ref?: NodeRef,
-// $index?: Ion<number>
+// $index?: AtomicIon<number>
 
 
 
@@ -264,7 +264,7 @@ function extractNodeEntities(component: Component) {
 
 
 
-// function setUpRefUpdates(ref: InternalNodeRef, component: Component, $index: Ion<number> | undefined, preserve: boolean) {
+// function setUpRefUpdates(ref: InternalNodeRef, component: Component, $index: AtomicIon<number> | undefined, preserve: boolean) {
 //     if (ref.initialized === true) return;
 //     // if ($index) { // only initiate once per list
 //     //     const components = ref.components;

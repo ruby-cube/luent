@@ -11,8 +11,8 @@ import { createIonicEffect, IonicEffect } from "../derivations/IonicEffect";
 import { isReactive, META } from "../ReactiveEntity";
 import { noop } from "@rue/utils";
 import { __devCheckIfTracked } from "../derivations/DependencyTracker";
-import { AnyIon, isAnyIon } from "../ion/AnyIon";
-import { ion, asMetaIon, isIon, Ion } from "../ion/Ion";
+import { AnyIon, isIon } from "../ion/Ion";
+import { ion, asMetaIon, isAtomicIon, AtomicIon } from "../ion/Ion";
 import { asIonicAtom } from "../derivations/IonicAtom";
 import { isPropIon, PropIon } from "../ionize/PropIon";
 import { popEffect, pushEffect, runCleanups, ThisEffect } from "./ThisEffect";
@@ -39,7 +39,7 @@ export type EffectOptions = {
 
 
 export type MutationRecord = {
-    target: IonicModel | Ion | PropIon,
+    target: IonicModel | AtomicIon | PropIon,
     op: string,
     args: any[],
     output: any,
@@ -80,9 +80,9 @@ type Effect = () => void
 export type RawEffect = (a: any, b: any) => void
 
 
-let currentWatchSubject: DerivedIon | Ion | IonicModel | undefined // prevents infinite loops for synchronous effects that set ions
+let currentWatchSubject: DerivedIon | AtomicIon | IonicModel | undefined // prevents infinite loops for synchronous effects that set ions
 
-export function isCurrentWatchSubject(atom: Ion | PropIon) {
+export function isCurrentWatchSubject(atom: AtomicIon | PropIon) {
     if (!currentWatchSubject) return false;
     if (currentWatchSubject === atom) return true;
     if (isDerivedIon(currentWatchSubject)) {
@@ -138,7 +138,7 @@ function getValues(subjects: (AnyIon | IonicModel)[]) {
 }
 
 function getValue(subject: AnyIon | IonicModel) {
-    return isAnyIon(subject) ? subject() : subject;
+    return isIon(subject) ? subject() : subject;
 }
 
 // get ionic derivations for reactive getters
@@ -156,7 +156,7 @@ function getIonicDerivations(inputSubjects: (AnyIon | ReactiveGet | IonicModel)[
 
 
 function isMultiWatchSubject(subject: AnyObject | AnyIon | ReactiveGet | IonicModel | (AnyIon | AnyObject | ReactiveGet | IonicModel)[]): subject is (AnyIon | AnyObject | ReactiveGet | IonicModel)[] {
-    if (isAnyIon(subject)) return false;
+    if (isIon(subject)) return false;
     if (!isIonicModel(subject) && subject instanceof Array) {
         for (const item of subject) {
             if (isReactive(item)) return true;
@@ -192,7 +192,7 @@ export function watch<T extends AnyIon | ReactiveGet | IonicModel | (AnyIon | Re
         const newValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when retracking happens
 
         if (isMultiSubject && noChanges(subjects, newValue, oldValue)
-            || isAnyIon(subject0) && noChange(newValue, oldValue)
+            || isIon(subject0) && noChange(newValue, oldValue)
             || isIonicModel(subject) && noMutations(subject))
             return;
 
@@ -235,7 +235,7 @@ function noChange(newValue: any, oldValue: any) {
 
 function noChanges(subjects: any[], newValues: any[], oldValues: any[]) {
     for (let i = 0; i < subjects.length; i++) {
-        if (isAnyIon(subjects[i])) {
+        if (isIon(subjects[i])) {
             if (!noChange(newValues[i], newValues[i])) {
                 return false;
             }
@@ -280,7 +280,7 @@ function getMutations(subjects: (AnyIon | IonicModel)[]) {
 
 //     asMetaIonicModel(subject).trackAbsorbedIons()
 
-//     const $activeEffect = ref(undefined) as Ion<ThisEffect | undefined>
+//     const $activeEffect = ref(undefined) as AtomicIon<ThisEffect | undefined>
 
 //     function mutationEffect() {
 //         const mutations = getCurrentRenderCycle()?.getOps(subject)

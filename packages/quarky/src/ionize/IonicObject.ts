@@ -43,7 +43,7 @@ export function isIonicObject(value: any): value is IonicModel {
 //             }
 //             const value = Reflect.get(target, key, receiver);
 //             if (isNonTrackable(key, [Object])) return value;
-//             if (isAnyIon(value)) return value();
+//             if (isIon(value)) return value();
 //             if (value instanceof Function) {
 //                 return accessMethod(
 //                     target,
@@ -58,7 +58,7 @@ export function isIonicObject(value: any): value is IonicModel {
 //             const tracker = getActiveTracker();
 //             if (!tracker || Reflect.getOwnPropertyDescriptor(target, key)?.writable === false
 //             ) {
-//                 // if (isAnyIon(value)) return value();
+//                 // if (isIon(value)) return value();
 //                 return _value;
 //             }
 //             tracker.track(asTrackedProp(ionicModel, key));

@@ -1,4 +1,4 @@
-import { isAnyIon, isIonicModel, ion, IonicModel, toRaw, shallowClone, ReactiveGet, isIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize, Ion } from "@rue/quarky";
+import { isIon, isIonicModel, ion, IonicModel, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon } from "@rue/quarky";
 import { InternalComponent } from "../component/InternalComponent";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
@@ -22,13 +22,13 @@ type Count = number
 const dynamicNodeMap: WeakMap<_NodePod, DynamicNode> = new WeakMap()
 
 // let currentItem: any;
-let $currentIndex: Ion<number> | undefined;
+let $currentIndex: AtomicIon<number> | undefined;
 
-export function getCurrentIndex(): Ion<number> | undefined {
+export function getCurrentIndex(): AtomicIon<number> | undefined {
     return $currentIndex
 }
 
-export function setCurrentIndex($index: Ion<number> | undefined) {
+export function setCurrentIndex($index: AtomicIon<number> | undefined) {
     // currentItem = item;
     $currentIndex = $index;
 }
@@ -70,12 +70,12 @@ export class ListRenderKit<T = any> {
         const idKey = this.idKey
         const provider = this.provider
         if (__DEV__) __devCheckIfTracked()
-        const list = isAnyIon(data) ? data() : <Collection<any>>data;
+        const list = isIon(data) ? data() : <Collection<any>>data;
         const _list = list instanceof Array ? list : list //TODO: need to implement for sets, maps, and objects
         const _isIonicModel = isIonicModel(data)
-        const isDynamic = _isIonicModel || isAnyIon(data);
+        const isDynamic = _isIonicModel || isIon(data);
         const dynamicNodePod = this.dynamicNodePod = isDynamic ? nodePod.appendDynamicPod() : undefined;
-        const indices: Ion<number>[] = []
+        const indices: AtomicIon<number>[] = []
 
 
         pushList(this);
@@ -169,7 +169,7 @@ export class ListRenderKit<T = any> {
         const indicesAndFragments: [number, DocumentFragment][] = []
         let fragment = new DocumentFragment();
 
-        const newIndices: Ion<number>[] = [];
+        const newIndices: AtomicIon<number>[] = [];
         const toFromIndices: [number, number][] = []
 
         for (let i = 0; i < newUArray.length; i++) {
@@ -214,7 +214,7 @@ export class ListRenderKit<T = any> {
                 pushProvider(this.provider)
                 pushList(this)
                 const list = this.data;
-                const _item = isIonicModel(list) || isIon(list) && asMetaIon(list).hasIonicValue ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
+                const _item = isIonicModel(list) || isAtomicIon(list) && asMetaIon(list).hasIonicValue ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
                 dynamicNode.activate(function renderNewListItem() {
                     console.log('rendering new item')
                     const nodeEntities = normalizeToArray(renderItem(_item, $index));
@@ -290,11 +290,11 @@ export class ListRenderKit<T = any> {
 }
 
 export class DynamicIndices {
-    current: Ion<number>[];
-    constructor(indices: Ion<number>[]) {
+    current: AtomicIon<number>[];
+    constructor(indices: AtomicIon<number>[]) {
         this.current = indices
     }
-    update(newIndices: Ion<number>[]) {
+    update(newIndices: AtomicIon<number>[]) {
         this.current = newIndices
     }
 }

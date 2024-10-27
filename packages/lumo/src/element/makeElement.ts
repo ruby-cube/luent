@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { DOMNode } from "../component/InternalComponent";
-import { DerivedIon, ReactiveGet, isAnyIon, getCurrentRenderCycle, Phase, isIon } from "../../../quarky/src";
+import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon } from "../../../quarky/src";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { initializeRender, watch } from "../watch/watchAndPreserve";
@@ -31,7 +31,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     tagName: T,
     childNodes: NodeEntity[] | undefined,
     config: ElementConfig,
-    $index: Ion<number> | undefined
+    $index: AtomicIon<number> | undefined
 ): DOMNode {
     const { class: classes, style: styles, ref, attributes: dynamicAttributes, ...other } = config;
 
@@ -40,7 +40,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     const domNode = isHydrating() ? getElement() : document.createElement(tagName);
 
     if (ref) {
-        if (!isIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
+        if (!isAtomicIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
         if ($index) {
             initializeListRef(ref, domNode, $index)
         }
@@ -131,7 +131,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: any | Deriv
     for (const key in attributes) {
         const value = attributes[key]
         //TODO: only attributes that affect layout should be scheduled for render
-        if (isAnyIon(value)) {
+        if (isIon(value)) {
             watch(value, (newValue) => {
                 setAttribute(node, key, newValue)
             }, { eager: true, phase: Phase.RENDER })
@@ -254,7 +254,7 @@ function setUpDynamicAttributes(node: Element, changes: ((o: Element) => void)[]
     }
 }
 
-function setUpRefNulling(ref: _NodePod, $index: Ion<number>) {
+function setUpRefNulling(ref: _NodePod, $index: AtomicIon<number>) {
     if ($index && $index() === 0) {
 
     }

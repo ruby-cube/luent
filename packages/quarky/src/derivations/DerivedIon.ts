@@ -1,11 +1,11 @@
-import { isIon, Ion } from "../ion/Ion";
+import { isAtomicIon, AtomicIon } from "../ion/Ion";
 import { IonicDerivation } from "./IonicDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 import { META } from "../ReactiveEntity";
 import { __devCheckIfTracked, getActiveTracker } from "./DependencyTracker";
 import { AnyObject } from "@rue/types";
 import { ProtectedIon } from "../ion/ProtectedIon";
-import { AnyIon, isAnyIon } from "../ion/AnyIon";
+import { AnyIon, isIon } from "../ion/Ion";
 import { DerivedRef } from "../ion/Ref";
 
 // The $ function has various purposes
@@ -26,7 +26,7 @@ export type DerivedIon<T = any> = {
 
 
 
-export type ReactiveGet<T = any> = ((_?: any) => T) | DerivedIon<T> | Ion<T>;
+export type ReactiveGet<T = any> = ((_?: any) => T) | DerivedIon<T> | AtomicIon<T>;
 
 export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIon {
     return maybeDerivedIon?.[META]?.type === DERIVED_ION;
@@ -150,7 +150,7 @@ export function createWritableDerivedIon<T, M>(pureGetter: () => T, methods: M &
 export type ReactiveDerivedIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? WritableDerivedIon<T, M> : DerivedIon<T>
 
 // export function DerivedIon<T, M>(derivation: () => T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveDerivedIon<T, M> {
-//     if (isAnyIon(derivation)) throw new Error('INVALID INPUT: Ions cannot be made into ions')
+//     if (isIon(derivation)) throw new Error('INVALID INPUT: Ions cannot be made into ions')
 //     if (methods) return createWritableDerivedIon(derivation, methods) as ReactiveDerivedIon<T, M>
 //     return createDerivedIon(derivation) as ReactiveDerivedIon<T, M>
 // }

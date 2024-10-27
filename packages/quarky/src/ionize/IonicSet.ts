@@ -195,7 +195,7 @@ export function installIonicSet(){
 //             if (isNonTrackable(key, Set))
 //                 return value;
 
-//             if (isAnyIon(value))
+//             if (isIon(value))
 //                 return value();
 
 //             if (value instanceof Function) {

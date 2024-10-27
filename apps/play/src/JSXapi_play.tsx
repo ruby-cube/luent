@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, fromContext } from "@rue/lumo";
+import { Component, fromContext, teleportTo } from "@rue/lumo";
 import { $setup } from "../../../packages/lumo/src/component/$setup";
 export function ListBlock(setup = $setup()) {
 
@@ -138,6 +138,19 @@ export function ListBlock(setup = $setup()) {
                         )
                     )
                 )}
+
+                <h1>Something Here</h1>
+                {morphic(
+                    If($active, { type: 'show/hide', use: CounterKit }, o =>
+                        Context.with(COUNT, o.$count)
+                            .around(
+                                <p>
+                                    hello world
+                                    <button>click</button>
+                                </p>
+                            )
+                    )
+                )}
                 {(
                     If($broken, { use: SelectionKit }, o =>
                         Context(
@@ -163,7 +176,7 @@ export function ListBlock(setup = $setup()) {
                 )}
 
 
-                {/* {Morphs(
+                {/* {morphic(
                     If($list.length === 0, 'show', fade, SelectionKit, o =>
                         <p>hello world</p>
                     ),
@@ -177,33 +190,60 @@ export function ListBlock(setup = $setup()) {
                 {/* , mount_unmount, create_destroy */}
 
                 <Frog.Provider value={new Frog()}>
-                    <Cat.Provider value={new Cat()}>
-                        <Article content={fromContext(Cat)}/>
-                    </Cat.Provider>
+                    <Article content={fromContext(Cat)} />
                 </Frog.Provider>
 
-                {Context(
-                    w(Frog, new Frog()),
-                    w(Cat, new Cat()),
-
+                {Context.with(Frog, new Frog()).around(
                     <Article content={fromContext(Cat)} />
                 )}
+                {Context
+                    .with(Frog, new Frog())
+                    .with(Cat, new Cat())
+                    .around(
+                        <Article content={fromContext(Cat)} />
+                    )}
 
-                {Context(w(FROG, new Frog()), w(CAT, new Cat()),
-                    morphic({ in: fade, out: fly },
-                        If($list.length === 0, { with: fadeInOut, use: SelectionKit }, o =>
+                {Context
+                    .with(Frog, new Frog())
+                    .with(Cat, new Cat())
+                    .around(morphic(
+                        If($list.length === 0, {
+                            with: fadeInOut,
+                            use: SelectionKit
+                        }, o =>
                             <p>hello world</p>
                         ),
-                        If($broken,
+                        ElseIf($broken,
+                            <p>bye world</p>
+                        ),
+                        Else(
+                            <p>ok world</p>,
+                            teleportTo('body',
+                                <dialog></dialog>
+                            )
+                        )
+                    ), teleportTo('body',
+                        <dialog></dialog>
+                    ))}
+
+                {Context
+                    .with(Frog, new Frog())
+                    .with(Cat, new Cat())
+                    .around(
+                        If($list.length === 0, { 
+                            with: fadeInOut, use: SelectionKit 
+                        }, o =>
+                            <p>hello world</p>
+                        ),
+                        ElseIf($broken,
                             <p>bye world</p>
                         ),
                         Else(
                             <p>ok world</p>
                         )
-                    )
-                )}
+                    )}
 
-                <button on:click={increment}>
+                <button on:click={increment}                >
                     Clicked {count} {count === 1 ? 'time' : 'times'}
                 </button>
 
@@ -355,6 +395,16 @@ export function ListBlock(setup = $setup()) {
                 )}
 
                 <h1>Do something</h1>
+                {freeze(
+                    For(list, (item, $index, o) =>
+                        <p>[x] {item}</p>
+                    ),
+                    Empty(
+                        <p>Nothing here</p>
+                    )
+                )}
+
+                <h1>Do something</h1>
                 {morphic(fade,
                     For($list, { key: 'id', use: SelectionKit }, (item, $index, o) =>
                         <p>[x] {item}</p>
@@ -371,7 +421,7 @@ export function ListBlock(setup = $setup()) {
                     <li>title</li>
                     <input />
                 </div>
-                {morph(fadeInOut,
+                {morphic(fadeInOut,
                     For($list,
                         <p>[x] {item}</p>
                     )

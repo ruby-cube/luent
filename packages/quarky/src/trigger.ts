@@ -1,6 +1,6 @@
 import { asIonicAtom, isIonicAtom, ReactivePrimitive } from "./derivations/IonicAtom";
 import { asMetaIonicModel, IonicModel, toRaw } from "./ionize/ionize";
-import { Ion, MetaIon } from "./ion/Ion";
+import { AtomicIon } from "./ion/AtomicIon";
 import { asWatchSubject, isWatched } from "./effects/WatchSubject";
 import { getCurrentRenderCycle, useRenderCycle } from "./effects/RenderCycle";
 import { getWithoutTracking } from "./derivations/DependencyTracker";
@@ -9,7 +9,7 @@ import { isCurrentWatchSubject } from "./effects/watch";
 import { PropIon } from "./ionize/PropIon";
 
 
-export function trigger(target: Ion | PropIon, newValue?: any, oldValue?: any) {
+export function trigger(target: AtomicIon | PropIon, newValue?: any, oldValue?: any) {
     if (__DEV__ && getCurrentRenderCycle() && getCurrentRenderCycle()!.phase > 1)
         console.warn(`CASE RESEARCH: Reactive entity triggered during phase ${getCurrentRenderCycle()!.phase}:`, target, getWithoutTracking(target))
 

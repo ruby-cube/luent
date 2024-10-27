@@ -17,9 +17,9 @@ export type ItemNodeConfig<
     L extends ListData
 > =
     L extends (infer I)[] ?
-    ((item?: I, $index?: Ion<number>) => Partial<NodeSetup<T>>)
+    ((item?: I, $index?: AtomicIon<number>) => Partial<NodeSetup<T>>)
     : L extends ReactiveGet<(infer I)[]> ?
-    (item?: I, $index?: Ion<number>) => Partial<NodeSetup<T>>
+    (item?: I, $index?: AtomicIon<number>) => Partial<NodeSetup<T>>
     : never
 
 export function setUpNode<T extends HTMLTag | ComponentSetup>(node: HTMLTag | ComponentSetup, setup: NodeSetup<T>): NodeSetup<T> {

@@ -1,7 +1,7 @@
 import { AnyObject, ReadonlyKeys } from "@rue/types";
 import { asMetaIonicModel, isIonicModel, ionize, IonicModel, toRaw } from "./ionize";
 import { META } from "../ReactiveEntity";
-import { isAnyIon } from "../ion/AnyIon";
+import { isIon } from "../ion/Ion";
 import { protectedMethod, protectIon, READONLY } from "../ion/ProtectedIon";
 import { isProtectedIonicModel, isProtectedProxy } from "./ProtectedIonicModel";
 import { protect } from "../protect";
@@ -132,7 +132,7 @@ export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, k
     const value = rawTarget[key];
 
     // return absorbed ion
-    if (isAnyIon(value)) {
+    if (isIon(value)) {
         if (methods && __DEV__) console.warn(`absorbed ions cannot have additional methods assigned to them`)
         if (isProtectedIonicModel(ionicModel))
             return protectIon(value);

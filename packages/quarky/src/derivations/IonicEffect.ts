@@ -1,5 +1,5 @@
 import { popEffect, pushEffect, runCleanups, ThisEffect } from "../effects/ThisEffect";
-import { Ion } from "../ion/Ion";
+import { AtomicIon } from "../ion/AtomicIon";
 import { Ref } from "../ion/Ref";
 import { PropIon } from "../ionize/PropIon";
 import { META } from "../ReactiveEntity";
@@ -25,7 +25,7 @@ const IONIC_EFFECT = Symbol('ionicEffect')
 // prevent infinite loop if ionic effect sets ion or ionic property synchronously
 let currentMetaIonicEffect: IonicDerivation | undefined
 
-export function isIonicEffectAtom(atom: Ion | PropIon) {
+export function isIonicEffectAtom(atom: AtomicIon | PropIon) {
     if (!currentMetaIonicEffect) return false;
     return currentMetaIonicEffect.atoms.has(asIonicAtom(atom));
 }

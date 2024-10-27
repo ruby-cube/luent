@@ -1,5 +1,5 @@
 import { $listen, ActiveListener, CallbackRemover, defineCustomCleanupScheduler, LIFETIME, ListenerOptions, PendingCancelOp, ScheduleStop } from '@rue/flask';
-import { isAnyIon, Ref } from '@rue/quarky';
+import { isIon, Ref } from '@rue/quarky';
 import { NodeRef } from '../node/NodeRef';
 
 

@@ -9,7 +9,7 @@ import { MetaIonicModel } from "./MetaIonicModel";
 import { noop } from "@rue/utils";
 import { getProtectedModelMeta, isProtectedProxy, isReadonlyProxy, PROTECTED_META } from "./ProtectedIonicModel";
 import { META } from "../ReactiveEntity";
-import { AnyIon, isAnyIon } from "../ion/AnyIon";
+import { AnyIon, isIon } from "../ion/Ion";
 import { asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PropIon";
 import { protect } from "../protect";
 import { READONLY } from "../ion/ProtectedIon";
@@ -251,7 +251,7 @@ export function createCustomIonicModel(
             // }
             if (isNonTrackable(key, structureConfigs))
                 return value;
-            if (isAnyIon(value)) return value();
+            if (isIon(value)) return value();
 
             if (value instanceof Function)
                 return accessMethod(
@@ -394,7 +394,7 @@ export function reactiveSetter(
     if (metaIonicModel.isNewProperty(key)) metaIonicModel.registerNewProperty(key)
 
     const oldValue = Reflect.get(target, key, receiver);
-    if (isAnyIon(oldValue) && !isAnyIon(newValue)) {
+    if (isIon(oldValue) && !isIon(newValue)) {
         return setAbsorbedIon(oldValue, newValue, ionicModel, key, oldValue(), structureConfigs)
     }
     if (oldValue === newValue
@@ -404,10 +404,10 @@ export function reactiveSetter(
         return true;
     }
 
-    const _newValue = toRaw(isAnyIon(newValue) ? newValue() : newValue)
-    const _oldValue = isAnyIon(oldValue) ? oldValue() : oldValue
+    const _newValue = toRaw(isIon(newValue) ? newValue() : newValue)
+    const _oldValue = isIon(oldValue) ? oldValue() : oldValue
 
-    target[key] = isAnyIon(newValue) ? newValue : _newValue
+    target[key] = isIon(newValue) ? newValue : _newValue
 
     storeSnapshot(metaIonicModel)
 
@@ -451,7 +451,7 @@ export function setAbsorbedIon(ion: AnyIon, value: any, ionicModel: IonicModel, 
         )
         return true;
     }
-    if (__DEV__) throw new Error("Absorbed Ion is read only")
+    if (__DEV__) throw new Error("Absorbed AtomicIon is read only")
     return false;
 }
 

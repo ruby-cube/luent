@@ -1,4 +1,4 @@
-import { isAnyIon, ReactiveGet, Phase, tracked, __devCheckIfTracked } from "../../../quarky/src";
+import { isIon, ReactiveGet, Phase, tracked, __devCheckIfTracked } from "../../../quarky/src";
 import { _NodePod } from "./NodePod";
 import { watch } from "../watch/watchAndPreserve";
 
@@ -12,7 +12,7 @@ export function mountTextNode(parent: Element, text: ReactiveGet | any, nodePod?
     const root = fragment ? fragment : parent;
     root.appendChild(textNode)
 
-    if (isAnyIon(text) || text instanceof Function) {
+    if (isIon(text) || text instanceof Function) {
         keepTextNodeUpdated(text, textNode)
     }
 }
@@ -27,7 +27,7 @@ function keepTextNodeUpdated(text: ReactiveGet<any>, textNode: CharacterData) {
 
 function createTextNode(value: ReactiveGet | any) {
     if (__DEV__) __devCheckIfTracked()
-    const _value = isAnyIon(value) || value instanceof Function ? value() : value;
+    const _value = isIon(value) || value instanceof Function ? value() : value;
     const text = toString(_value)
     const textNode = document.createTextNode(text);
     return textNode;

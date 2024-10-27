@@ -9,7 +9,7 @@ import { ion, IonicModel, ReactiveGet } from "../../../quarky/src";
 import { getProviderComponent } from "../component/provide";
 
 
-export type RenderItem<T = any> = (item: T, $index: Ion<number>) => NodeEntity[] | NodeEntity
+export type RenderItem<T = any> = (item: T, $index: AtomicIon<number>) => NodeEntity[] | NodeEntity
 // type ListData = AnyObject | any[] | Set<any> | Map<any, any> | IonicModel<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
 export type ListData<T = any> = Collection<T> | IonicModel<Collection<T>> | ReactiveGet<Collection<T>>
 export type UniqueItem = any;

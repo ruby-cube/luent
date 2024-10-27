@@ -1,10 +1,11 @@
 //@ts-nocheck
 import { Component, NodeRef, watch } from "@rue/lumo"
-import { AnyIon, DerivedIon, Ion, ion, ionize, watchIonicEffect, } from "@rue/quarky"
+import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchIonicEffect, } from "@rue/quarky"
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon"
 import { or, $setup, is, isDefined, isAny, not } from "../../../packages/lumo/src/component/$setup"
 import { toIon } from "../../../packages/quarky/src/ion/toIons"
 import { AnyObject } from "@rue/types"
+import { toIonicProps } from "../../../packages/lumo/src/component/normalizeProps"
 
 // optional and default
 // normalize
@@ -18,7 +19,7 @@ const eh = type<{
     hi: 'hi'
 }>
 
-type MaybeIon<T> = T | Ion<T>
+type MaybeIon<T> = T | AtomicIon<T>
 
 type Huh = number | never
 
@@ -26,6 +27,17 @@ const ALL = Symbol('normalize-all')
 
 const oh = toIon('hi' as MaybeIon<string>)
 
+
+export function Article({ content } = input({
+    content: Type('?', String).default('hi')
+})) {
+
+    return Component(
+        <article>
+            <p>{content}</p>
+        </article>
+    )
+}
 
 export function Bog(setup: {
     name?: MaybeIon<string>,
@@ -97,47 +109,143 @@ export function Bog(setup: {
     )
 }
 
-export function TestCleanupSchedulerJS(setup = $setup({
-    name: MaybeIon('?', String),
-    nameB: Ion(String, Number, undefined), // {nameB: Ion<string | number | undefined>} 
-    nameC: MaybeIon('?', String, Number), // {nameB: Ion<string | number> | undefined}
-    date: Date,
-    $frog: Ionized({
-        name: Type(String, Number),
-        setName: I('name', String).O(String),
-        doSomething: I('node', String, Rest(Any)).O(String),
-        qualities: [String, Number],
-        well: Tup(String, String)
-    })
-})) {
+type LastFnReturnType<F extends Array<(...arg: any) => any>> = F extends [
+    ...any[],
+    (...arg: any) => infer R
+] ? R : never;
 
-    setup.name = setup.name ?? 'hi'
+function Tup<T extends unknown[]>(...args: T): T {
+    return args;
+}
 
-    const { $name, $nameB, $nameC, date } = normalizeIonicProps(setup)
+type Ch = LastFnReturnType<[(v: unknown) => string, (v: unknown) => number]>
+
+type MaybeIon<T> = T | AtomicIon<T>;
+
+function MaybeIon<T>(...args: T): MaybeIon<T> {
 
 }
 
+function declareType(constructor: Function) {
+    return (...args: any[]) => {
+
+    }
+}
+
+const MapOf = declareType(Map)
+
+const Void: void;
+
+
+export function Play({ cat, dog = 9 } = $input<{
+    cat: string,
+    dog?: number
+}>()) {
+
+}
+
+function Ionized<T>() {
+
+}
+
+function input<T>(value: T): T {
+    return null as T
+}
+
+export function Ho({ dog = 9, cat } = input({
+    dog: undefined,
+    cat: 'meow'
+})) {
+
+}
+
+function MaybeIon<T>() { }
+
+const cleanupPropTypes = {
+    name: MaybeIon<string>('?'),
+    name: $Ionized<string>,
+    idea: Val<string | number>,
+    $count: $Ion<string | number | undefined, {
+        isEven: () => boolean,
+        increment: () => void
+    }>, // {nameB: AtomicIon<string | number | undefined>} 
+    nameC: MaybeIon<string | number>, // {nameB: AtomicIon<string | number> | undefined}
+    date: Date,
+    chug: Ionized<{
+        name: string
+    }>,
+    $frog: Ionized<{
+        // name: string | number;
+        // qualities?: (string | number)[];
+        // qualitiesMap?: Map<string | number, any>;
+        // well: ['hi', 9];
+        // setNameB: (name: string, ...args: boolean[]) => string,
+    }>
+}
+
+
+export function TestCleanupSchedulerJS({ $count, $frog, date, idea, name, nameC } = input(cleanupPropTypes)) {
+
+    const obj: { cat?: string } = {}
+
+    const _setup = {
+        ...obj,
+
+    }
+
+    obj.cat = obj.cat ?? 'meo'
+
+    obj
+
+    setup.name = setup.name ?? 'hi'
+
+    const { $name, $nameB, $nameC, date } = toIonicProps({
+
+    })
+
+    const priceNum = ion(0);
+
+    const price = ion(() => '$' + priceNum)
+
+    const priceCurrency = asCurrency(priceNum, 'USD')
+
+    return Component(
+        <p>{asCurrency(price)}</p>
+    )
+}
+
+// MaybeIon
+// MaybeIonized
+// AtomicIon
+// Ionized
+// Val
+// Fn
+
+
 export function TestCleanupSchedulerTS(setup = $setup({
-    name: MaybeIon<'?' | string>,
-    nameB: Ion<string | number | undefined>, // {nameB: Ion<string | number | undefined>} 
-    nameC: MaybeIon<'?' | string | number>, // {nameB: Ion<string | number> | undefined}
-    date: Type<Date>,
+    name: ['?', MaybeIon<string>, defaultTo('hola'), recast(toString)],
+    nameB: AtomicIon<string | number | undefined>, // {nameB: AtomicIon<string | number | undefined>} 
+    nameC: ['?', MaybeIon<string | number>], // {nameB: AtomicIon<string | number> | undefined}
+    date: Date,
+    msg: Val<string>,
+    message: Val<string | number>,
     $frog: Ionized<{
         name: string,
         setName: (name: string) => string
     }>,
-    emitIncrementClicked: Type<() => void>
+    emitIncrementClicked: ['?', Fn<() => void>, defaultTo(noop)]
 })) {
 
     setup.name = setup.name ?? 'hi'
 
-    const { $name, $nameB, $nameC, date } = normalizeIonicProps(setup, {
+    const { $name, $nameB, $nameC, date } = normalizeProps(setup, {
         name: toIon,
         nameC: toIon,
         $frog: toIonized
     })
 
 }
+
 
 export function TestCleanupScheduler({
     name,
@@ -147,8 +255,8 @@ export function TestCleanupScheduler({
     address,
 } = $setup({
     name: [type<string>, n => n ?? 'hi', toIon],
-    nameB: [type<string | number | undefined>, toIon], // {nameB: Ion<string | number | undefined>} 
-    nameC: [type<'?' | string | number>, toIon], // {nameB: Ion<string | number> | undefined}
+    nameB: [type<string | number | undefined>, toIon], // {nameB: AtomicIon<string | number | undefined>} 
+    nameC: [type<'?' | string | number>, toIon], // {nameB: AtomicIon<string | number> | undefined}
     date: [type<Date>],
     $frog: [type<{
         name: string,

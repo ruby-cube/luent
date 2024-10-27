@@ -3,8 +3,8 @@ import { NodeRef } from "@rue/lumo";
 
 export function MainBlock() {
 
-    const $hello = $PortableNode() as unknown as Ion<PortableNode>
-    const $bye = $PortableNode() as unknown as Ion<PortableNode>
+    const $hello = $PortableNode() as unknown as AtomicIon<PortableNode>
+    const $bye = $PortableNode() as unknown as AtomicIon<PortableNode>
 
     const helloView = $hello()
     helloView.remove()
@@ -54,7 +54,7 @@ export function MainBlock() {
     )
 }
 
-function $portable(render: (() => any) | Ion<PortableNode>, $ref: Ion<PortableNode> | (() => any)) {
+function $portable(render: (() => any) | AtomicIon<PortableNode>, $ref: AtomicIon<PortableNode> | (() => any)) {
     return render;
 }
 
@@ -62,7 +62,7 @@ function $MorphicNode() {
 
 }
 
-function $MorphicPort(initialKey: string | Ion<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; as: (key: string) => any } {
+function $MorphicPort(initialKey: string | AtomicIon<any>, switchMap: { [key: string]: () => any } | any[]): { (): any; as: (key: string) => any } {
 
     const $key = ion(initialKey)
     const $render = ion(switchMap[$key()])
@@ -99,12 +99,12 @@ function MainContent() {
     )
 }
 
-function $morphling($render: Ion<() => any>) {
+function $morphling($render: AtomicIon<() => any>) {
     return new MorphlingKit($render)
 }
 
 class MorphlingKit {
-    constructor(public $render: Ion<() => any>) { }
+    constructor(public $render: AtomicIon<() => any>) { }
 }
 
 function setUpMorphling(morphlingKit: MorphlingKit) {

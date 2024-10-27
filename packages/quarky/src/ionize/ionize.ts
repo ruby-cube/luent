@@ -7,9 +7,9 @@ import { META } from "../ReactiveEntity";
 import { MetaIonicModel, IONIC_MODEL } from "./MetaIonicModel";
 import { isInert } from "./inert";
 import { isIonizable } from "./ionizable";
-import { AnyIon, isAnyIon } from "../ion/AnyIon";
+import { AnyIon, isIon } from "../ion/Ion";
 import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
-import { Ion } from "../ion/Ion";
+import { AtomicIon } from "../ion/AtomicIon";
 import { getObservedProp, PropIon } from "./PropIon";
 import { isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
 import { createCustomIonicModel, getStructureConfigs } from "./IonicModel";
@@ -49,23 +49,23 @@ export function isIonicModel(value: any): value is IonicModel {
     return value[META]?.type === IONIC_MODEL;
 }
 
-type Ionized<T extends AnyObject, M> = {
-    [K in keyof T]: T[K] extends Ion<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
-} & M
+export type Ionized<T extends AnyObject, M = {}> = {
+    [K in keyof T]: T[K] extends AtomicIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
+} & M & { [META]: MetaIonicModel }
 
 
 
 //API
-export function ionize<T extends AnyObject, M extends AnyObject>(target: T, methods?: M): { [K in keyof Ionized<T, M>]: Ionized<T, M>[K] } {
-    if (isIonicModel(target) || isAnyIon(target) || isInert(target) || !isIonizable(target)) {
+export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M): Ionized<T, M> {
+    if (isIonicModel(target) || isIon(target) || isInert(target) || !isIonizable(target)) {
         if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
-        return target as T & M;
+        return target as Ionized<T, M>;
     }
     //TODO: What about a readonly object that is not an ionic model?
     if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
     const existingIonicModel = ionicModels.get(target)
-    if (existingIonicModel) return existingIonicModel as T & M;
-    return createIonicModel(target, methods) as T & M
+    if (existingIonicModel) return existingIonicModel as Ionized<T, M>;
+    return createIonicModel(target, methods) as Ionized<T, M>
 }
 
 

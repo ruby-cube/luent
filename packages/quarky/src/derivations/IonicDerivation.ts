@@ -3,10 +3,10 @@ import { asIonicAtom, IonicAtom, ReactivePrimitive } from "./IonicAtom";
 import { asWatchSubject, isWatched, WatchSubject } from "../effects/WatchSubject";
 import { ReactiveEntity } from "../ReactiveEntity";
 import { IonicModel, isIonicModel, toRaw } from "../ionize/ionize";
-import { isAnyIon } from "../ion/AnyIon";
+import { isIon } from "../ion/Ion";
 import { isDerivedIon } from "./DerivedIon";
 import { isPropIon } from "../ionize/PropIon";
-import { asMetaIon, isIon } from "../ion/Ion";
+import { asMetaIon, isAtomicIon } from "../ion/Ion";
 
 
 
@@ -84,7 +84,7 @@ function collectAbsorbedIons(ionicModel: IonicModel, tracker: DependencyTracker)
     const target = toRaw(ionicModel);
     for (const key in target) {
         const value = target[key]
-        if (isIon(value) || isPropIon(value)) {
+        if (isAtomicIon(value) || isPropIon(value)) {
             tracker.track(value)
         }
         else if (isDerivedIon(value)) {

@@ -1,5 +1,5 @@
 import { Component } from "@rue/lumo";
-import { DerivedIon, ion, ionize, isAnyIon, watch, watchIonicEffect } from "@rue/quarky";
+import { DerivedIon, ion, ionize, isIon, watch, watchIonicEffect } from "@rue/quarky";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
 
 export function TestSelectiveTracking() {

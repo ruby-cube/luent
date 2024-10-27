@@ -1,4 +1,4 @@
-import { isAnyIon, watchIonicEffect as _initializeIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, ChangeEffect, Phase, __devCheckIfTracked } from "../../../quarky/src";
+import { isIon, watchIonicEffect as _initializeIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, ChangeEffect, Phase, __devCheckIfTracked } from "../../../quarky/src";
 import { InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { isMountPhase } from "../dynamic/DynamicNode";
@@ -151,7 +151,7 @@ function watchAndPreserve<T extends () => any | ReactiveGet | AnyObject>(target:
 
     function deactivateAndReactivate() {
         if (__DEV__) __devCheckIfTracked()
-        oldValue = isAnyIon(target) ? target() : shallowClone(target)
+        oldValue = isIon(target) ? target() : shallowClone(target)
         reactivation = true;
         watcher.stop()
         if (!mountPhase) {
@@ -161,7 +161,7 @@ function watchAndPreserve<T extends () => any | ReactiveGet | AnyObject>(target:
 
     //FIX: Needs major fixing, temporarily commented out to quiet ts
     // function initializeOnActivated() {
-    //     if (isAnyIon(target)) {
+    //     if (isIon(target)) {
     //         onActivated(() => {
     //             if (reactivation) effect(target(), oldValue)
     //             initializeWatcher()

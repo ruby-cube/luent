@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { TypedKey } from "@rue/lumo";
-import { Ion, isIon } from "../ion/Ion";
+import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
 import { ObservedProp } from "../ionize/ObservedProp";
 import { Phase, RenderCycle, useRenderCycle } from "../effects/RenderCycle";
 import { PropIon } from "../ionize/PropIon";
@@ -20,9 +20,9 @@ class ActionRecord {
 
     nestedActions?: ActionRecord[]
 
-    tracked: Set<Ion | PropIon> = new Set()
+    tracked: Set<AtomicIon | PropIon> = new Set()
 
-    trackChange(reactivePrimitive: Ion | PropIon) {
+    trackChange(reactivePrimitive: AtomicIon | PropIon) {
         if (this.tracked.has(reactivePrimitive)) return;
         this.tracked.add(reactivePrimitive);
         watch(subject, (newValue, oldValue) => {
@@ -105,7 +105,7 @@ function doAction(actionKey: string | TypedKey<(...args: unknown[]) => unknown>,
 }
 
 
-function trackAction(reactivePrimitive: Ion | PropIon) {
+function trackAction(reactivePrimitive: AtomicIon | PropIon) {
     const action = getCurrentAction();
     if (!action) return;
     action.trackChange(reactivePrimitive)

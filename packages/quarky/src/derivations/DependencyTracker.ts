@@ -1,4 +1,4 @@
-import { isAnyIon } from "../ion/AnyIon";
+import { isIon } from "../ion/Ion";
 import { isTrackedOp, TrackedOp } from "../ionize/TrackedOp";
 import { asIonicAtom, IonicAtom, ReactivePrimitive } from "./IonicAtom";
 
@@ -65,7 +65,7 @@ export class DependencyTracker {
         this.stop();
         popDepTracker();
         if (__DEV__ && this.deps.size === 0) {
-            throw new Error('Watch target or derived Ion has no dependencies (and therefore no reactivity')
+            throw new Error('Watch target or derived AtomicIon has no dependencies (and therefore no reactivity')
         }
         return [this.deps, value];
     }
@@ -92,7 +92,7 @@ export function getWithoutTracking(reactiveRef: (() => any) | TrackedOp) {
     const tracker = getDependencyTracker();
     tracker?.stop();
     let value;
-    if (isAnyIon(reactiveRef) || reactiveRef instanceof Function)
+    if (isIon(reactiveRef) || reactiveRef instanceof Function)
         value = reactiveRef();
     else if (isTrackedOp(reactiveRef))
         value = reactiveRef.getOutput()
@@ -100,13 +100,13 @@ export function getWithoutTracking(reactiveRef: (() => any) | TrackedOp) {
     return value;
 }
 
-// export function track(target: Ion): boolean
+// export function track(target: AtomicIon): boolean
 // export function track(target: IonicModel, key: string | symbol): boolean
 // export function track(target: IonicModel, key: string | symbol, arg: any): boolean
-// export function track(target: Ion | IonicModel, key: string | symbol = UNDEFINED, arg: any = UNDEFINED) {
+// export function track(target: AtomicIon | IonicModel, key: string | symbol = UNDEFINED, arg: any = UNDEFINED) {
 //     const _target = arg !== UNDEFINED ? asTrackedOp(<IonicModel>target, <string>key, arg)
 //         : key !== UNDEFINED ? asObservedProp(<IonicModel>target, key)
-//             : <Ion>target
+//             : <AtomicIon>target
 //     this.addDep(_target)
 //     return true;
 

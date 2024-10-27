@@ -6,7 +6,7 @@ import { MetaIonicModel } from "../ionize/MetaIonicModel";
 import { MutationRecord } from "./watch";
 
 export type Watchable = any
-// Ion | DerivedIon | IonicEffect  | IonicModel | ObservedProp
+// AtomicIon | DerivedIon | IonicEffect  | IonicModel | ObservedProp
 export type Task = (...args: any[]) => void;
 
 // export type Phase = Phase.BEFORE_RENDER | Phase.RENDER | Phase.AFTER_RENDER | Phase.SYNC

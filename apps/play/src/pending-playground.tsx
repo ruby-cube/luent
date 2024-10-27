@@ -9,7 +9,7 @@ function App() {
 
 function ListBlock() {
 
-    const $itemBlock = Ion<typeof ItemBlock>()
+    const $itemBlock = AtomicIon<typeof ItemBlock>()
 
     const $data = ion();
     const $ready = ion(false)

@@ -1,4 +1,4 @@
-import { ion, Ion } from "@rue/quarky";
+import { ion, AtomicIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { toIon } from "../../../quarky/src/ion/toIons";
 
@@ -10,8 +10,8 @@ export function setSetup(setup: AnyObject | undefined) {
 
 type SetupProps<T, N> = T extends AnyObject ? {
     [K in keyof TypedSetupProps<T, N>]:
-    `?` extends TypedSetupProps<T, N>[K] ? `ion` extends TypedSetupProps<T, N>[K] ? Ion<Exclude<TypedSetupProps<T, N>[K], '?' | 'ion'>> | undefined : Exclude<TypedSetupProps<T, N>[K], '?'> | undefined :
-    `ion` extends TypedSetupProps<T, N>[K] ? Ion<Exclude<TypedSetupProps<T, N>[K], 'ion'>>
+    `?` extends TypedSetupProps<T, N>[K] ? `ion` extends TypedSetupProps<T, N>[K] ? AtomicIon<Exclude<TypedSetupProps<T, N>[K], '?' | 'ion'>> | undefined : Exclude<TypedSetupProps<T, N>[K], '?'> | undefined :
+    `ion` extends TypedSetupProps<T, N>[K] ? AtomicIon<Exclude<TypedSetupProps<T, N>[K], 'ion'>>
     : TypedSetupProps<T, N>[K]
 }
     : T extends undefined ? AnyObject : AnyObject
@@ -22,7 +22,7 @@ type TypedSetupProps<T extends AnyObject, N> = {
     I extends undefined ? undefined :
     I extends (value: unknown) => value is infer T ? T :
     I extends { useDefault: () => infer T } ? T :
-    I extends ((value: unknown) => Ion<unknown>)[] ? `ion`
+    I extends ((value: unknown) => AtomicIon<unknown>)[] ? `ion`
     : never : never
 }
 // & {
@@ -216,11 +216,11 @@ export function isDefined(value: any): value is string | number | boolean | obje
 //     town
 // } = $setup({
 //     name: is(String),
-//     nameB: [is(String, Number), undefined, [toIon]], // {nameB: Ion<String | Number | undefined>} 
-//     nameB: ['?', is(String, Number), [toIon]], // {nameB?: Ion<String | Number>}
+//     nameB: [is(String, Number), undefined, [toIon]], // {nameB: AtomicIon<String | Number | undefined>} 
+//     nameB: ['?', is(String, Number), [toIon]], // {nameB?: AtomicIon<String | Number>}
 //     date: [is(Date, String, Number), isAntelop, undefined],
 //     dateB: [is(Date), or(() => new Date())],
 //     dateB: [isDefined, or(() => new Date())],
-//     address: [is(Address), not(isIon, is(Map))],
+//     address: [is(Address), not(isAtomicIon, is(Map))],
 //     message: isAny
 // }, { all: toIon })) {

@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { NodeRef, Component, If, Else, stopPropagation, watch, preventDefault } from "@rue/lumo";
-import { AFTER_RENDER, BEFORE_RENDER, Ion, ion, ON_RENDER, SYNC } from "@rue/quarky";
+import { AFTER_RENDER, BEFORE_RENDER, AtomicIon, ion, ON_RENDER, SYNC } from "@rue/quarky";
 
 export function MountIf() {
     const $count = ion(0, {

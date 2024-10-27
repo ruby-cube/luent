@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { isIonicModel, IonicModel } from "../ionize/ionize";
-import { Ion } from "../ion/Ion";
+import { AtomicIon } from "../ion/AtomicIon";
 import { PropIon } from "../ionize/PropIon";
 
 //TODO: onTrigger works as desired. onTrack needs to be rethunk.
@@ -10,13 +10,13 @@ export type WatchDebugOptions = {
     onTrigger?: OnTrigger;
 }
 
-type OnTrack = (target?: Ion | PropIon | IonicModel) => void
+type OnTrack = (target?: AtomicIon | PropIon | IonicModel) => void
 type OnTrigger = () => void
 
-const onTrackMap: Map<Ion | PropIon | IonicModel, OnTrack> = new Map();
-const onTriggerMap: Map<Ion | PropIon | IonicModel, OnTrigger> = new Map();
+const onTrackMap: Map<AtomicIon | PropIon | IonicModel, OnTrack> = new Map();
+const onTriggerMap: Map<AtomicIon | PropIon | IonicModel, OnTrigger> = new Map();
 
-export function registerDebuggers(targets: (Ion | PropIon)[] | IonicModel, options: WatchDebugOptions | undefined){
+export function registerDebuggers(targets: (AtomicIon | PropIon)[] | IonicModel, options: WatchDebugOptions | undefined){
     const {onTrack, onTrigger} = options ?? {}
     const _targets = isIonicModel(targets) ? [targets] : targets
     if (onTrack){
@@ -31,12 +31,12 @@ export function registerDebuggers(targets: (Ion | PropIon)[] | IonicModel, optio
     }
 }
 
-export function runTrackDebugger(target: Ion | PropIon | IonicModel){
+export function runTrackDebugger(target: AtomicIon | PropIon | IonicModel){
     const onTrack = onTrackMap.get(target);
     if (onTrack) onTrack();
 }
 
-export function runTriggerDebugger(target: Ion | PropIon | IonicModel){
+export function runTriggerDebugger(target: AtomicIon | PropIon | IonicModel){
     const onTrigger = onTriggerMap.get(target);
     if (onTrigger) onTrigger();
 }

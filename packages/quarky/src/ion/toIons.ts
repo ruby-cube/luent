@@ -1,7 +1,8 @@
 import { AnyObject } from "@rue/types";
 import { toRaw } from "../ionize/ionize";
-import { AnyIon, isAnyIon, ref } from "./AnyIon";
-import { Ion } from "./Ion";
+import { AnyIon, isIon} from "./Ion";
+import { AtomicIon } from "./AtomicIon";
+import { ref } from "./Ref";
 
 type MaybeIon<T> = ReadonlyIon<T> | T
 
@@ -37,8 +38,8 @@ export function validate<T extends AnyObject, K extends keyof T, O>(
     return output;
 }
 
-export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
-    return isAnyIon(value) ? value : ref(value)
+export function toIon<T>(value: T): T extends AtomicIon ? T : AtomicIon<T> {
+    return isIon(value) ? value : ref(value)
 }
 
 function MovableBox(setup: {

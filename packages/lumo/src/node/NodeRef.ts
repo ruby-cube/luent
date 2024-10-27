@@ -2,12 +2,12 @@ import { Component, PublicComponent } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { HTMLTag } from "../element/makeElement"
 import { isUpdatingList } from "../iteratives/listStack"
-import { protect, Ion, ref } from "@rue/quarky"
+import { protect, AtomicIon, ref } from "@rue/quarky"
 import { READONLY } from "../../../quarky/src/ion/ProtectedIon"
 
 
 
-// type Task = ((item: Element | PublicComponent) => void) | ((item: Element | PublicComponent, $index?: Ion<number>) => void)
+// type Task = ((item: Element | PublicComponent) => void) | ((item: Element | PublicComponent, $index?: AtomicIon<number>) => void)
 // const hookMap: WeakMap<NodeRef, Set<Task>> = new WeakMap()
 
 type RefSource = HTMLTag | ((...args: any[]) => Component)
@@ -29,8 +29,8 @@ type RefSource = HTMLTag | ((...args: any[]) => Component)
 
 export type NodesIon<T extends RefSource = RefSource> = () => NodeReferent<T>[]
 export type NodeRef<T extends RefSource = RefSource> = () => NodeReferent<T> | undefined
-export type _NodeRef<T extends RefSource = RefSource> = Ion<NodeReferent<T> | undefined>
-export type _NodesIon<T extends RefSource = RefSource> = Ion<NodeReferent<T>[]>
+export type _NodeRef<T extends RefSource = RefSource> = AtomicIon<NodeReferent<T> | undefined>
+export type _NodesIon<T extends RefSource = RefSource> = AtomicIon<NodeReferent<T>[]>
 
 // map readonly $node to $node
 const $nodeMap: WeakMap<NodeRef | NodesIon, _NodeRef | _NodesIon> = new WeakMap()
@@ -137,7 +137,7 @@ export class InternalNodeArrayRef {
         this.initialized = true;
     }
 
-    assignValue(value: NodeReferent, $index: Ion<number>) {
+    assignValue(value: NodeReferent, $index: AtomicIon<number>) {
         let nodes = !__SSR__ && isUpdatingList() ? this.getNewListNodes()
             : this.o.as(this.o())
         nodes[$index()] = value;
@@ -171,7 +171,7 @@ export class InternalNodeArrayRef {
 
 
 
-// export function assignNodeRef(ref: InternalNodeRef, value: Element | PublicComponent, $index: Ion<number> | undefined) {
+// export function assignNodeRef(ref: InternalNodeRef, value: Element | PublicComponent, $index: AtomicIon<number> | undefined) {
 //     if ($index != null) {
 //         let nodes = <(Element | PublicComponent)[]>ref.o.value || []
 //         nodes[$index()] = value;
@@ -185,7 +185,7 @@ export class InternalNodeArrayRef {
 
 
 
-// function assignNodeRef(ref: InternalNodeRef<InternalComponent>, component: AnyObject, $index: Ion<number> | undefined) {
+// function assignNodeRef(ref: InternalNodeRef<InternalComponent>, component: AnyObject, $index: AtomicIon<number> | undefined) {
 //     if ($index != null) {
 //         let nodes = ref.components ? ref.components! : []
 //         nodes[$index()] = component;

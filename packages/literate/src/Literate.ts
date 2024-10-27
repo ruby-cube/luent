@@ -1,19 +1,19 @@
 import { SSRComponent } from "./SSRComponent.js";
 import { getResolvedComponent, isResolved } from "./PendingComponentMap.js";
-import { Ion, isAnyIon } from "../../quarky/src/index.js";
+import { AtomicIon, isIon } from "@rue/quarky";
 
 type AnyObject = { [key: string | symbol | number]: any }
 // export type SSRComponent<T extends AnyObject = AnyObject> = { render: () => string } & T;
 
 // export type MaybePromise<T extends AnyObject = AnyObject> = T | Promise<T>
 
-export function fromEntries<T>(list: T[] | Ion<T[]>, render: (item: T, index: number) => string) {
-    if (isAnyIon(list)) {
+export function fromEntries<T>(list: T[] | AtomicIon<T[]>, render: (item: T, index: number) => string) {
+    if (isIon(list)) {
         return () => buildList(list)
     }
 
-    function buildList(list: T[] | Ion<T[]>) {
-        const _list = isAnyIon(list) ? list() : list
+    function buildList(list: T[] | AtomicIon<T[]>) {
+        const _list = isIon(list) ? list() : list
         let result = ''
         for (let i = 0; i < _list.length; i++) {
             const item = _list[i];
@@ -34,7 +34,7 @@ export function html(...args: any[]) {
 
     // for (let i = 1; i < args.length; i++) {
     //     const value = args[i]
-    //     // if (isAnyIon(value)) {
+    //     // if (isIon(value)) {
     //     //     const pendingValue = new Promise((resolve) => {
     //     //         watch(value, (newValue) => {
     //     //             resolve(newValue)

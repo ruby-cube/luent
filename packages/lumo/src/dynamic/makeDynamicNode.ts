@@ -8,7 +8,7 @@ import { getActiveDynamicNode } from "./nodestack";
 //     Component: ComponentSetup,
 //     Slot: InferSlot | undefined,
 //     config: ComponentConfig,
-//     $index: Ion<number> | undefined
+//     $index: AtomicIon<number> | undefined
 // ): InternalComponent {
 //     const parent = getCurrentComponent<InternalComponent>();
 //     const component = new InternalComponent(parent);

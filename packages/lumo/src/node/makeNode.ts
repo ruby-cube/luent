@@ -90,7 +90,7 @@ export function makeNode(
 export function initializeListRef( // should this be initialize ref?
     ref: NodesIon,
     value: NodeReferent | undefined,
-    $index: Ion<number>
+    $index: AtomicIon<number>
     // options?: ElementOptions
 ) {
     // if (__DEV__) __devCheckIfNotTracked()
