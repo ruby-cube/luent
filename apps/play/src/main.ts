@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { createApp } from '@rue/lumo';
+import { createApp, Ion } from '@rue/lumo';
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
@@ -41,6 +41,12 @@ import { TestCleanupScheduler } from './TestCustomCleanupScheduler';
 // $count.increment()
 
 // console.log("count", $count())
+
+Ion
+
+function seomthing(arg: Ion){
+    
+}
 
 const app = createApp(List)
 

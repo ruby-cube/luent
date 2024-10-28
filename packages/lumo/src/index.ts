@@ -3,6 +3,7 @@ export * from './node/NodeRef' //TODO: Limit to public API
 export * from './node/NodeSetup' //TODO: Limit to public API
 export * from './component/InternalComponent' //TODO: Limit to public API
 export * from './component/Suspense' //TODO: Limit to public API
+export * from './component/input' //TODO: Limit to public API
 export * from './createApp' //TODO: Limit to public API
 export * from './iteratives/For' //TODO: Limit to public API
 export * from './node/makeNode' //TODO: Limit to public API

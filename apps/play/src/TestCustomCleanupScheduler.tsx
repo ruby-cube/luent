@@ -38,10 +38,21 @@ export function Article({ content } = input({
         </article>
     )
 }
+// is
+// Is
+// I
+// Inert
+// Val
+
+// Ion
+// MaybeIon
+// Ionized
+// MaybeIonized
 
 export function Bog(setup: {
     name?: MaybeIon<string>,
-    date: Date,
+    date: v<Date>,
+    msg: v<string>,
     address: MaybeIonized<{ // must not have methods, will be auto-protected by Lumo
         street: string,
         zip: number
