@@ -28,8 +28,8 @@ function ParentBlock() {
             <h1>Hey</h1>
             <div>{$doubleCount}</div>
             <ChildBlock initialCount={4} ref={childBlock}></ChildBlock>
-            <button onclick={increment}>increment</button>
-            <button onclick={decrement}>decrement</button>
+            <button on:click={increment}>increment</button>
+            <button on:click={decrement}>decrement</button>
         </>
     )
 }
@@ -55,8 +55,8 @@ function ParentBlockB() {
                 <h1>Hey</h1>
                 <div>{$doubleCount}</div>
                 <ChildBlock initialCount={4} ref={child}></ChildBlock>
-                <button onclick={increment}>increment</button>
-                <button onclick={decrement}>decrement</button>
+                <button on:click={increment}>increment</button>
+                <button on:click={decrement}>decrement</button>
             </>
     }
 }

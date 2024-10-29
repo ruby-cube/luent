@@ -25,8 +25,8 @@ export function TestCounterSignals() {
             <div>{$count}</div>
             <div>{$doubleCount}</div> 
             <div>{$(() => `The count is: ${$count()}. Doubled: ${$doubleCount()}`)}</div> 
-            <button onclick={increment}>increment</button>
-            <button onclick={decrement}>decrement</button>
+            <button on:click={increment}>increment</button>
+            <button on:click={decrement}>decrement</button>
         </>
     )
 }
@@ -39,8 +39,8 @@ export function TestCounter() {
     return (
         <>
             <div>{$(() => counter$.count)}</div>
-            <button onclick={increment}>increment</button>
-            <button onclick={decrement}>decrement</button>
+            <button on:click={increment}>increment</button>
+            <button on:click={decrement}>decrement</button>
         </>
     )
 }

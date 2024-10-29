@@ -8,7 +8,7 @@ import { protect } from "../protect";
 import { __devCheckIfTracked, getActiveTracker } from "../derivations/DependencyTracker";
 import { asWatchSubject, WatchSubject } from "../effects/WatchSubject";
 import { asIonicAtom, IonicAtom } from "../derivations/IonicAtom";
-import { asMetaIon } from "../ion/Ion";
+import { asMetaIon } from "../ion/AtomicIon";
 
 
 
@@ -126,7 +126,7 @@ class MetaPropIon {
 
 type AsPropIon<T extends AnyObject, K extends keyof T, M> = PropIon<T[K], M extends AnyObject ? { [K in keyof TransferredMethods<T, M>]: TransferredMethods<T, M>[K] } : undefined>
 
-export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, key: K, methods?: M & { [key: string]: `${keyof T extends string ? keyof T : never}` | true }): AsPropIon<T, K, M> {
+export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, key: K, methods?: M & { [key: string]: keyof T | true }): AsPropIon<T, K, M> {
     const ionicModel = isIonicModel(model) ? model : ionize(model)
     const rawTarget = toRaw(ionicModel)
     const value = rawTarget[key];
@@ -157,7 +157,7 @@ export function getPropIon(
     return asMetaIonicModel(ionicModel).getPropIon(key)
 }
 
-function createPropIon<T extends IonicModel, K extends keyof T, M>(ionicModel: T, key: K, methods?: M & { [key: string]: string | true }): PropIon<T[K], M> {
+function createPropIon<T extends IonicModel, K extends keyof T, M>(ionicModel: T, key: K, methods?: M & { [key: string]: PropertyKey | true }): PropIon<T[K], M> {
     const rawTarget = toRaw(ionicModel)
 
 

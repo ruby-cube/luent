@@ -1,4 +1,4 @@
-import { Component, fromContext, Provide, TypedKey } from "@rue/lumo"
+import { Component, fromContext, getAttributes, prep, Provide, TypedKey, v } from "@rue/lumo"
 import { DerivedIon, ion, ionize } from "@rue/quarky";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
 
@@ -41,38 +41,39 @@ type Context = {
 function getContext() {
     return {} as Context
 }
-function $this() {
+function getThisComponent() {
     return {} as Context
 }
 
 export function ParentBlock(
-    setup: {
-        content: string,
-    },
-    provide: Provide
+    input = getAttributes({
+        content: v<string>,
+    })
 ) {
-    const o = getContext()
-    const { content } = setup
+    const { content } = prep(input)
 
-    const _this = $this()
+    const _this = getThisComponent();
 
     _this.onCreated(() => {
 
     })
 
-    const counter = provide(COUNTER, new Counter());
-    const $doubleCount = provide(DOUBLE_COUNT, ion(() => counter.$.count * 2));
 
-    const $name = ion("Sir Robin",
-        {
-            makeBrave() {
-                $name.as($name() + 'The Brave')
-            },
-            makeKermit() {
-                console.log("make kermit")
-                $name.as('Kermit')
-            }
-        })
+    // const counter = provide(COUNTER, new Counter());
+    // const $doubleCount = provide(DOUBLE_COUNT, ion(() => counter.$.count * 2));
+
+    const $name = ion("Sir Robin", {
+        set(name: string) {
+            this.as(name)
+        },
+        makeBrave() {
+            this.as($name() + 'The Brave')
+        },
+        makeKermit() {
+            console.log("make kermit")
+            this.as('Kermit')
+        }
+    })
 
 
     const $frog = ionize({
@@ -83,10 +84,9 @@ export function ParentBlock(
         }
     })
 
-    const $qualities = ion.from($frog, 'qualities',
-        {
-            set: 'setQualities'
-        })
+    const $qualities = ion.of($frog, 'qualities', {
+        set: "setQualities"
+    })
 
     provide(NAME, ionize({
         $: $name,
@@ -96,13 +96,13 @@ export function ParentBlock(
     return Component(
         <>
             <h1>Parent</h1>
-            <div onclick={$qualities.set}>{() => $frog.qualities}</div>
-            <div onclick={() => $frog.setQualities()}>{$qualities}</div>
+            <div on:click={$qualities.set}>{() => $frog.qualities}</div>
+            <div on:click={() => $frog.setQualities()}>{$qualities}</div>
             <div>{$doubleCount}</div>
             <ChildBlock hi={0} />
             <SiblingBlock />
-            <button onclick={() => counter.increment()}>increment</button>
-            <button onclick={() => counter.decrement()}>decrement</button>
+            <button on:click={() => counter.increment()}>increment</button>
+            <button on:click={() => counter.decrement()}>decrement</button>
         </>
     )
 }
@@ -122,8 +122,8 @@ function ChildBlock(
                 {() => counter.$.count}
             </p>
             <GrandChildBlock></GrandChildBlock>
-            <button onclick={() => counter.increment()}>increment</button>
-            <button onclick={() => counter.decrement()}>decrement</button>
+            <button on:click={() => counter.increment()}>increment</button>
+            <button on:click={() => counter.decrement()}>decrement</button>
         </div>
     )
 }
@@ -155,8 +155,8 @@ function GrandChildBlock() {
 
     return Component(
         <div style='outline: solid 1px gray; background-color: #B26E63'>
-            <h1 onclick={() => name.makeKermit()}>Grandchild: {$name}</h1>
-            <h1 onclick={() => name.makeKermit()}>Grandchild: {() => name.$}</h1>
+            <h1 on:click={() => name.makeKermit()}>Grandchild: {$name}</h1>
+            <h1 on:click={() => name.makeKermit()}>Grandchild: {() => name.$}</h1>
             <p>
                 {$count}
             </p>

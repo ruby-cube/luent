@@ -1,61 +1,65 @@
-//@ts-nocheck
-import { NodeRef } from "@rue/lumo"
-import { $, ion } from "../../../packages/quarky/src"
+import { getAttributes, $input, $Ion, Ion, NodeRef, v, prep } from "@rue/lumo"
+import { AtomicIon, ion } from "../../../packages/quarky/src"
 
 
 
 function ParentBlock() {
 
-    const $count = ion(4);
+    const $count = ion(4, {
+        increment() {
+            this.as($count() + 1)
+        },
+        decrement() {
+            this.as($count() - 1)
+        }
+    });
 
-    function increment() {
-        $count.update(c => c + 1)
-    }
 
-    function decrement() {
-        $count.update(c => c - 1)
-    }
-
-    const $doubleCount = $(() => $count() * 2)
+    const $doubleCount = ion(() => $count() * 2)
 
 
     return {
         render:
             <>
-                <h1>Hey</h1>
-                <div>{$doubleCount}</div>
-                <ChildBlock
-                    $count={$count}
-                    increment={increment}
-                    decrement={decrement}
-                />
-                <SiblingBlock $count={$count}></SiblingBlock>
-                <button onclick={increment}>increment</button>
-                <button onclick={decrement}>decrement</button>
+                <div>{$doubleCount()}</div>
+                <ChildBlock $count={$count}></ChildBlock>
+                <SiblingBlock count={$count() + 1}></SiblingBlock>
+                <button on:click={$count.increment}>increment</button>
+                <button on:click={$count.decrement}>decrement</button>
             </>
     }
 }
 
+function assertEvenNumber(value: any): asserts value is number {
+    if (value % 2 !== 0) throw 'invalid'
+}
 
-function ChildBlock({ $count }: {
-    $count?: AtomicIon<number>;
-    increment: () => void
-    decrement: () => void
-}) {
+
+
+function ChildBlock(
+    input = getAttributes({
+        count: $Ion<number, { increment: () => void; decrement: () => void; }>,
+    })
+) {
+    const { $count } = prep(input)
 
     return (
         <p>
             {$count}
-            <button onclick={increment}>increment</button>
-            <button onclick={decrement}>decrement</button>
+            <button on:click={$count.increment}>increment</button>
+            <button on:click={$count.decrement}>decrement</button>
         </p>
     )
 }
 
 
-function SiblingBlock({ $count }: {
-    $count?: AtomicIon<number>
-}) {
+
+function SiblingBlock(
+    input = getAttributes({
+        count: Ion<number>
+    })
+) {
+    const { $count } = prep(input)
 
     return (
         <p>

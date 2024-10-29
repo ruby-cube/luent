@@ -68,9 +68,9 @@ export function TestSelectiveTracking() {
             <>
                 <div>{$count}</div>
                 <p>{$frogName}</p>
-                <button onclick={$count.increment}>increment</button>
-                <button onclick={$active.toggle}>toggle active</button>
-                <button onclick={$ready.toggle}>toggle ready</button>
+                <button on:click={$count.increment}>increment</button>
+                <button on:click={$active.toggle}>toggle active</button>
+                <button on:click={$ready.toggle}>toggle ready</button>
                 <input value={$frogName}></input>
             </>
     )

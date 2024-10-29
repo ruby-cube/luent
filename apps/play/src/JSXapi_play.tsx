@@ -446,7 +446,7 @@ export function ListBlock(setup = $setup()) {
 
 
                 <$MainContent as='hello' ref={$mainContent} />
-                <button onclick={$mainContent.as('bye')}>bye</button>
+                <button on:click={$mainContent.as('bye')}>bye</button>
             </div >
         </>
     )

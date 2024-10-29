@@ -1,4 +1,4 @@
-import { ComponentSetup, InternalComponent, Component, ProviderComponentSetup, PublicComponent } from "./InternalComponent";
+import { ComponentSetup, InternalComponent, Component, PublicComponent } from "./InternalComponent";
 import { NodeRef } from "../node/NodeRef";
 import { ComponentConfig, initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
@@ -15,7 +15,7 @@ import { getFlask } from "@rue/flask";
 export type ComponentOptions = { preserve?: true }
 
 export type InferSlot<T extends ComponentSetup = ComponentSetup> =
-    T extends (setup: infer P) => any ?
+    T extends (setup?: infer P) => any ?
     P extends { Slot: infer S } ?
     S
     : undefined
@@ -26,7 +26,7 @@ export type SetupWithSlot = {
 }
 
 export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
-    (setup: P) => NodeEntity[] | NodeEntity
+    (setup?: P) => NodeEntity[] | NodeEntity
 
 
 // export function mO<T extends ComponentSetupWithSlot>(
@@ -61,19 +61,22 @@ export function mO<T extends ComponentSetup>(
 //     return component;
 // }
 
-export function protectSetupProps(config: ComponentConfig, Slot?: InferSlot | undefined) {
-    const setupProps = { Slot } as AnyObject
-    for (const key in config) {
-        const value = config[key]
-        setupProps[key] = protect(value)
-    }
-    return setupProps
-}
+
 
 let activeComponent: InternalComponent | undefined;
 
 export function getActiveComponent() {
     return activeComponent;
+}
+
+let componentAttributes: AnyObject | undefined
+
+export function getComponentAttributes() {
+    return componentAttributes;
+}
+
+export function setComponentAttributes(attributes: AnyObject | undefined){
+    componentAttributes = attributes
 }
 
 export function makeComponent(
@@ -87,7 +90,9 @@ export function makeComponent(
 
     activeComponent = component; // for `provide` to make component into provider
     pushProvider(provider)
-    const output = Component(protectSetupProps(config, Slot))
+    setComponentAttributes({ Slot, ...config })
+    const output = Component()
+    setComponentAttributes(undefined);
     popProvider()
 
     if (output instanceof Promise)

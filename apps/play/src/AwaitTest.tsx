@@ -34,7 +34,7 @@ export function MainSite() {
             <$ListBlock></$ListBlock>
             <$TextArea></$TextArea>
             <p>{$count}</p>
-            <button onclick={() => $count.update(count => count + 1)}>click</button>
+            <button on:click={() => $count.update(count => count + 1)}>click</button>
         </>
     )
 }

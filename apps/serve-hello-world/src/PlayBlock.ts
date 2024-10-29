@@ -59,7 +59,7 @@ function ReactiveBlock() {
                     <p>I'm Not Active</p>
                 ` )}
             </>
-            <button onclick={toggleActive}>click</button>
+            <button on:click={toggleActive}>click</button>
             <p>${$count}</p>
             <ListBlock>
                 ${() => html`<li>hi</li>`}

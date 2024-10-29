@@ -13,7 +13,7 @@ export function Root() {
             <>
                 {If($active, () => <div>I'm active</div>)}
             </>
-            <button onclick={toggleActive}>click</button>
+            <button on:click={toggleActive}>click</button>
         </>
     )
 }

@@ -98,10 +98,10 @@ export function MountIf() {
                 toggle active {$active()}
             </button >
             {/* <div>Both: {$activeAndReady}</div> */}
-            {/* <button onclick={increment}>increment {$count}</button> */}
-            {/* <button onclick={toggleReady}>toggle ready {$ready}</button> */}
+            {/* <button on:click={increment}>increment {$count}</button> */}
+            {/* <button on:click={toggleReady}>toggle ready {$ready}</button> */}
             {/* <div>{$sum}</div>
-            <button onclick={increment2}>increment {$count2}</button> */}
+            <button on:click={increment2}>increment {$count2}</button> */}
         </>
     )
 }
@@ -208,7 +208,7 @@ function ArticleBlock(setup: {
 //     return Component(
 //         <>
 //             <div ref={$countDiv}>{$count}</div>
-//             <button onclick-this-$button-v={[$count.as($count() + 1), stopPropagation]} ref={$button}>increment</button >
+//             <button on:click-this-$button-v={[$count.as($count() + 1), stopPropagation]} ref={$button}>increment</button >
 //             {/* <Counter>{$count()}</Counter> */}
 //         </>
 //     )

@@ -22,8 +22,8 @@ export function TestMorphic() {
     return Component(
         <>
             <$Morphable as='hi' ref={$morphicNode}></$Morphable>
-            <button onclick={() => morph('hi')}>change to hi</button>
-            <button onclick={() => morph('bye')}>change to bye</button>
+            <button on:click={() => morph('hi')}>change to hi</button>
+            <button on:click={() => morph('bye')}>change to bye</button>
         </>
     )
 }

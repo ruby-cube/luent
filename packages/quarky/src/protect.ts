@@ -11,6 +11,7 @@ import { isProtectedIonicModel, isReadonlyIonicModel, protectIonicModel } from "
 // }
 
 // export const READONLY_ION = Symbol('readonlySignal');
+
 export function protect<T>(entity: T, methodKeys?: (T extends AnyObject ? { [K in keyof T]: true } : never) | typeof READONLY) {
     if (entity instanceof Function || !methodKeys && isProtectedIonicModel(entity) || isReadonlyIonicModel(entity)) 
         return entity;

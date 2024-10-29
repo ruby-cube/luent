@@ -7,7 +7,6 @@ import { protect } from "@rue/quarky";
 import { MorphicRenderKit } from "../morphic/MorphicComponent";
 import { ThisComponent } from "../$this";
 import { getActiveDynamicNode } from "../dynamic/nodestack";
-import { getFlask } from "@rue/flask";
 
 
 export interface Provider {
@@ -29,8 +28,8 @@ export type DOMNode = CharacterData | Element
 //     : (props: P) => NodeEntity | NodeEntity[]
 
 // export type Slot = NodeEntity | NodeEntity[]
-export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup: P) => Component
-export type ProviderComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup: P, provide: Provide) => Component
+export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup?: P) => Component
+// export type ProviderComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup?: P, provide: Provide) => Component
 
 // export type Slot<T> = T extends AnyObject ? InternalComponent<T> : NodeEntity | NodeEntity[]
 export const COMPONENT = Symbol('publicComponent')

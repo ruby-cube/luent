@@ -5,9 +5,10 @@
 /// <reference path="global.d.ts" />
 
 import * as CSS from "csstype";
-import * as PropTypes from "prop-types";
+// import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
 import { NodeRef } from "../../src/node/NodeRef";
+import { COMPONENT_ATTRIBUTES } from "@rue/lumo";
 
 export function jsxDEV(): "frog"
 export function jsx(): "frog"
@@ -126,7 +127,7 @@ declare namespace React {
      */
     type JSXElementConstructor<P> =
         | ((
-            props: P,
+            props: P & {frog: true},
             /**
              * @deprecated
              *
@@ -268,7 +269,7 @@ declare namespace React {
      * const Component = (props: React.Attributes) => props.key;
      * ```
      */
-    interface Attributes {
+    interface Attributes { //NOTE: Important for components and elements
         key?: Key | null | undefined;
     }
     /**
@@ -303,7 +304,7 @@ declare namespace React {
      * const Component = (props: React.RefAttributes) => props.ref;
      * ```
      */
-    interface RefAttributes<T> extends Attributes {
+    interface RefAttributes<T> extends Attributes { //NOTE: Important
         /**
          * Allows getting a ref to the component instance.
          * Once the component unmounts, React will set `ref.current` to `null`
@@ -317,7 +318,7 @@ declare namespace React {
     /**
      * Represents the built-in attributes available to class components.
      */
-    interface ClassAttributes<T> extends RefAttributes<T> {
+    interface ClassAttributes<T> extends RefAttributes<T> { //NOTE: Important for elements
     }
 
     /**
@@ -392,7 +393,7 @@ declare namespace React {
     // Factories
     // ----------------------------------------------------------------------
 
-    type Factory<P> = (props?: Attributes & P, ...Slot: NodeEntity[]) => ReactElement<P>;
+    type Factory<P> = (props?: {frog: true} & Attributes , ...Slot: NodeEntity[]) => ReactElement<P> & {frog: true};
 
     /**
      * @deprecated Please use `FunctionComponentFactory`
@@ -400,32 +401,32 @@ declare namespace React {
     type SFCFactory<P> = FunctionComponentFactory<P>;
 
     type FunctionComponentFactory<P> = (
-        props?: Attributes & P,
+        props?: {frog: true} & Attributes & P,
         ...Slot: Lumo.InferSlot<(props?: P) => any>[] // #LUMO-EDIT
-    ) => FunctionComponentElement<P>;
+    ) => FunctionComponentElement<P> & {frog: true};
 
     type ComponentFactory<P, T extends Component<P, ComponentState>> = (
-        props?: ClassAttributes<T> & P,
+        props?:  {frog: true} & ClassAttributes<T> & P,
         ...Slot: Lumo.InferSlot<(props?: P) => any>[] //#LUMO-EDIT
-    ) => CElement<P, T>;
+    ) => CElement<P, T> & {frog: true};
 
-    type CFactory<P, T extends Component<P, ComponentState>> = ComponentFactory<P, T>;
+    type CFactory<P, T extends Component<P, ComponentState>> = ComponentFactory<P, T> & {frog: true};
     type ClassicFactory<P> = CFactory<P, ClassicComponent<P, ComponentState>>;
 
     type DOMFactory<P extends DOMAttributes<T>, T extends Element> = (
-        props?: ClassAttributes<T> & P | null,
+        props?: {frog: true} & ClassAttributes<T> & P | null,
         ...Slot: Lumo.NodeEntity[]
-    ) => DOMElement<P, T>;
+    ) => DOMElement<P, T> & {frog: true};
 
     interface HTMLFactory<T extends HTMLElement> extends DetailedHTMLFactory<AllHTMLAttributes<T>, T> { }
 
     interface DetailedHTMLFactory<P extends HTMLAttributes<T>, T extends HTMLElement> extends DOMFactory<P, T> {
-        (props?: ClassAttributes<T> & P | null, ...Slot: NodeEntity[]): DetailedReactHTMLElement<P, T>;
+        (props?: {frog: true} & ClassAttributes<T> & P | null, ...Slot: NodeEntity[]): DetailedReactHTMLElement<P, T> & {frog: true};
     }
 
     interface SVGFactory extends DOMFactory<SVGAttributes<SVGElement>, SVGElement> {
         (
-            props?: ClassAttributes<SVGElement> & SVGAttributes<SVGElement> | null,
+            props?: {frog: true} & ClassAttributes<SVGElement> & SVGAttributes<SVGElement> | null,
             ...Slot: Lumo.NodeEntity[]
         ): ReactSVGElement;
     }
@@ -537,17 +538,17 @@ declare namespace React {
     ): DetailedReactHTMLElement<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
     function createElement<P extends HTMLAttributes<T>, T extends HTMLElement>(
         type: keyof ReactHTML,
-        props?: ClassAttributes<T> & P | null,
+        props?: {frog: true} & ClassAttributes<T> & P | null,
         ...Slot: Lumo.NodeEntity[]
     ): DetailedReactHTMLElement<P, T>;
     function createElement<P extends SVGAttributes<T>, T extends SVGElement>(
         type: keyof ReactSVG,
-        props?: ClassAttributes<T> & P | null,
+        props?: {frog: true} & ClassAttributes<T> & P | null,
         ...Slot: Lumo.NodeEntity[]
     ): ReactSVGElement;
     function createElement<P extends DOMAttributes<T>, T extends Element>(
         type: string,
-        props?: ClassAttributes<T> & P | null,
+        props?: {frog: true} & ClassAttributes<T> & P | null,
         ...Slot: Lumo.NodeEntity[]
     ): DOMElement<P, T>;
 
@@ -555,17 +556,17 @@ declare namespace React {
 
     function createElement<P extends {}>(
         type: FunctionComponent<P>,
-        props?: Attributes & P | null,
+        props?: {frog: true} & Attributes & P | null,
         ...Slot: Lumo.NodeEntity[]
     ): FunctionComponentElement<P>;
     function createElement<P extends {}, T extends Component<P, ComponentState>, C extends ComponentClass<P>>(
         type: ClassType<P, T, C>,
-        props?: ClassAttributes<T> & P | null,
+        props?: {frog: true} & ClassAttributes<T> & P | null,
         ...Slot: Lumo.NodeEntity[]
     ): CElement<P, T>;
     function createElement<P extends {}>(
         type: FunctionComponent<P> | ComponentClass<P> | string,
-        props?: Attributes & P | null,
+        props?: {frog: true} & Attributes & P | null,
         ...Slot: Lumo.NodeEntity[]
     ): ReactElement<P>;
 
@@ -598,17 +599,17 @@ declare namespace React {
     // Custom components
     function cloneElement<P>(
         element: FunctionComponentElement<P>,
-        props?: Partial<P> & Attributes,
+        props?: {frog: true} & Partial<P> & Attributes,
         ...Slot: Lumo.NodeEntity[]
     ): FunctionComponentElement<P>;
     function cloneElement<P, T extends Component<P, ComponentState>>(
         element: CElement<P, T>,
-        props?: Partial<P> & ClassAttributes<T>,
+        props?: {frog: true} & Partial<P> & ClassAttributes<T>,
         ...Slot: Lumo.NodeEntity[]
     ): CElement<P, T>;
     function cloneElement<P>(
         element: ReactElement<P>,
-        props?: Partial<P> & Attributes,
+        props?: {frog: true} & Partial<P> & Attributes,
         ...Slot: Lumo.NodeEntity[]
     ): ReactElement<P>;
 
@@ -1122,16 +1123,16 @@ declare namespace React {
      * }
      * ```
      */
-    interface FunctionComponent<P = {}> {
+    interface FunctionComponent<P = {frog: true}> {
         (
-            props: P,
+            props: {frog: true} & P,
             /**
              * @deprecated
              *
              * @see {@link https://legacy.reactjs.org/docs/legacy-context.html#referencing-context-in-lifecycle-methods React Docs}
              */
             deprecatedLegacyContext?: any,
-        ): Lumo.NodeEntity;
+        ): {pie: 'hi'};
         /**
          * Used to declare the types of the props accepted by the
          * component. These types will be checked during rendering
@@ -1666,7 +1667,7 @@ declare namespace React {
     //     JSXElementConstructor<infer P> ? P
     //     : T extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[T]
     //     : {};
-    type ComponentProps<T extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>> = { froggo: number }
+    // type ComponentProps<T extends keyof JSX.IntrinsicElements | JSXElementConstructor<any>> = { froggo: number }
 
     /**
      * Used to retrieve the props a component accepts with its ref. Can either be
@@ -1691,9 +1692,9 @@ declare namespace React {
      * type MyComponentPropsWithRef = React.ComponentPropsWithRef<typeof MyComponent>;
      * ```
      */
-    type ComponentPropsWithRef<T extends ElementType> = T extends (new (props: infer P) => Component<any, any>)
-        ? PropsWithoutRef<P> & RefAttributes<InstanceType<T>>
-        : PropsWithRef<ComponentProps<T>>;
+    // type ComponentPropsWithRef<T extends ElementType> = T extends (new (props: infer P) => Component<any, any>)
+    //     ? PropsWithoutRef<P> & RefAttributes<InstanceType<T>>
+    //     : PropsWithRef<ComponentProps<T>>;
     /**
      * Used to retrieve the props a custom component accepts with its ref.
      *
@@ -1710,10 +1711,10 @@ declare namespace React {
      * type MyComponentPropsWithRef = React.CustomComponentPropsWithRef<typeof MyComponent>;
      * ```
      */
-    type CustomComponentPropsWithRef<T extends ComponentType> = T extends (new (props: infer P) => Component<any, any>)
-        ? (PropsWithoutRef<P> & RefAttributes<InstanceType<T>>)
-        : T extends ((props: infer P, legacyContext?: any) => Lumo.NodeEntity) ? PropsWithRef<P>
-        : never;
+    // type CustomComponentPropsWithRef<T extends ComponentType> = T extends (new (props: infer P) => Component<any, any>)
+    //     ? (PropsWithoutRef<P> & RefAttributes<InstanceType<T>>)
+    //     : T extends ((props: infer P, legacyContext?: any) => Lumo.NodeEntity) ? PropsWithRef<P>
+    //     : never;
 
     /**
      * Used to retrieve the props a component accepts without its ref. Can either be
@@ -4392,7 +4393,7 @@ declare namespace React {
     // Keep in sync with JSX namespace in ./jsx-runtime.d.ts and ./jsx-dev-runtime.d.ts
     namespace JSX {
         type ElementType = GlobalJSXElementType;
-        interface Element extends GlobalJSXElement { }
+        // interface Element extends GlobalJSXElement { }
         interface ElementClass extends GlobalJSXElementClass { }
         interface ElementAttributesProperty extends GlobalJSXElementAttributesProperty { }
         interface ElementChildrenAttribute extends GlobalJSXElementChildrenAttribute { }
@@ -4469,14 +4470,14 @@ declare global {
         //  reduce the work of the type-checker.
         // TODO: Check impact of making React.ElementType<P = any> = React.JSXElementConstructor<P>
         type ElementType = string | React.JSXElementConstructor<any>;
-        interface Element extends React.ReactElement<any, any> { }
-        interface ElementClass extends React.Component<any> {
-            render(): Lumo.NodeEntity;
-        }
+        interface Element extends React.ReactElement<any, any> { } //NOTE: *IMPORTANT*
+        // interface ElementClass extends React.Component<any> {
+        //     render(): Lumo.NodeEntity;
+        // }
         interface ElementAttributesProperty {
             props: {};
         }
-        interface ElementChildrenAttribute {
+        interface ElementChildrenAttribute { //NOTE: Important
             Slot: {};
         }
 
@@ -4695,13 +4696,13 @@ declare global {
 // React.JSX needs to point to global.JSX to keep global module augmentations intact.
 // But we can't access global.JSX so we need to create these aliases instead.
 // Once the global JSX namespace will be removed we replace React.JSX with the contents of global.JSX
-type GlobalJSXElementType = JSX.ElementType;
-interface GlobalJSXElement extends JSX.Element { }
-interface GlobalJSXElementClass extends JSX.ElementClass { }
-interface GlobalJSXElementAttributesProperty extends JSX.ElementAttributesProperty { }
-interface GlobalJSXElementChildrenAttribute extends JSX.ElementChildrenAttribute { }
+// type GlobalJSXElementType = JSX.ElementType;
+// interface GlobalJSXElement extends JSX.Element { }
+// interface GlobalJSXElementClass extends JSX.ElementClass { }
+// interface GlobalJSXElementAttributesProperty extends JSX.ElementAttributesProperty { }
+// interface GlobalJSXElementChildrenAttribute extends JSX.ElementChildrenAttribute { }
 
-type GlobalJSXLibraryManagedAttributes<C, P> = JSX.LibraryManagedAttributes<C, P>;
+// type GlobalJSXLibraryManagedAttributes<C, P> = JSX.LibraryManagedAttributes<C, P>;
 
 interface GlobalJSXIntrinsicAttributes extends JSX.IntrinsicAttributes { }
 interface GlobalJSXIntrinsicClassAttributes<T> extends JSX.IntrinsicClassAttributes<T> { }

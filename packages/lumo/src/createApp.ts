@@ -1,9 +1,9 @@
-import { Component, ComponentSetup, InternalComponent, Provider, ProviderComponentSetup } from "./component/InternalComponent";
+import { Component, ComponentSetup, InternalComponent, Provider } from "./component/InternalComponent";
 import { _NodePod } from "./node/NodePod";
 import { DynamicNode, markMountPhase, unmarkMountPhase } from "./dynamic/DynamicNode";
 import { popProvider, pushProvider } from "./component/provide";
 import { AnyObject } from "@rue/types";
-import { initializeComponent, protectSetupProps } from "./component/makeComponent";
+import { initializeComponent, setComponentAttributes } from "./component/makeComponent";
 
 let appRoot: Element;
 
@@ -44,7 +44,9 @@ export function createApp<T extends AnyObject>(App: ComponentSetup<T>, config?: 
             dynamicNode.activate(function mountRootComponent() {
                 pushProvider(component)
                 // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
-                const output = App(protectSetupProps(config?.setup || {}))
+                setComponentAttributes(config?.setup || {})
+                const output = App()
+                setComponentAttributes(undefined)
                 initializeComponent(component, output.publicComponent, output.render(), undefined, undefined)
                 if (remountable) markMountPhase()
                 component.mount(root, nodePod) //TODO: if this is a remount, how would it be different than a first mount? use fragment?

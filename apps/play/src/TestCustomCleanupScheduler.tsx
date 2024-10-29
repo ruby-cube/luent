@@ -87,7 +87,7 @@ export function Bog(setup: {
 
     const $address = toIonized(setup.address);
 
-    const $street = ion.from($address, 'street')
+    const $street = ion.of($address, 'street')
 
 
 

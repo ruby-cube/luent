@@ -68,16 +68,16 @@ export function TestIonProp() {
             <div>{$firstName}</div>
             <div>{$lastName}</div>
             <div>{$fullName}</div>
-            <button onclick={setFullName}>Sir robin</button>
+            <button on:click={setFullName}>Sir robin</button>
             <div>{$count}</div>
             <div>{$doubleCount}</div>
-            <button onclick={$count.increment}>increment</button>
+            <button on:click={$count.increment}>increment</button>
             <hr></hr>
             <div>{() => $counter.count}</div>
             <div>{() => $counter.doubleCount}</div>
-            <button onclick={$counter.incrementCount}>increment</button>
+            <button on:click={$counter.incrementCount}>increment</button>
             <div>{() => $counter.frog}</div>
-            <button onclick={$bigBird.changeSleep}>changeSleep</button>
+            <button on:click={$bigBird.changeSleep}>changeSleep</button>
         </>
     )
 }

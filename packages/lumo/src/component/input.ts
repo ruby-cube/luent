@@ -1,7 +1,10 @@
 import { AnyObject } from "@rue/types";
 import { MetaIonicModel } from "../../../quarky/src/ionize/MetaIonicModel";
-import { AtomicIon, DerivedIon, WritableDerivedIon } from "@rue/quarky";
+import { AtomicIon, DerivedIon, isIon, isIonicModel, protect, WritableDerivedIon } from "@rue/quarky";
 import { META } from "../../../quarky/src/ReactiveEntity";
+import { toIon } from "../../../quarky/src/ion/toIons";
+import { getComponentAttributes } from "./makeComponent";
+import { normalizeToArray } from "@rue/utils";
 
 //TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
 
@@ -33,7 +36,7 @@ const _Ion = ((optional: '?') => {
     <T>(optional: '?'): {
         name: '_Ion',
         inputType: Ion<T>;
-        attributeType: Ion<T>;
+        attributeType: Ion<T> | T;
         optional: true
     },
     name: '_Ion'
@@ -76,9 +79,9 @@ export const $Ion = ((optional: '?') => {
     name: '$Ion'
 }
 
-export const Maybe$Ion = ((optional: '?') => {
+export const $IonOrIon = ((optional: '?') => {
     return {
-        name: 'Maybe$Ion',
+        name: '$IonOrIon',
         inputType: null as unknown as Ion<any>,
         attributeType: null as unknown as Ion<any>,
         $attributeType: null as unknown as Ion<any>,
@@ -86,13 +89,13 @@ export const Maybe$Ion = ((optional: '?') => {
     }
 }) as {
     <T, M extends AnyObject>(optional: '?'): {
-        name: 'Maybe$Ion',
+        name: '$IonOrIon',
         inputType: Ion<T> | Ion<T, M>;
-        attributeType: Ion<T>;
+        attributeType: Ion<T> | T;
         $attributeType: Ion<T, M>;
         optional: true
     },
-    name: 'Maybe$Ion'
+    name: '$IonOrIon'
 }
 
 export type Ionized<T extends AnyObject, M = {}> = {
@@ -153,22 +156,22 @@ export const $Ionized = ((optional: '?') => {
     name: '$Ionized'
 }
 
-export const Maybe$Ionized = ((optional: '?') => {
+export const $IonizedOrIonized = ((optional: '?') => {
     return {
-        name: 'Maybe$Ionized',
+        name: '$IonizedOrIonized',
         inputType: null as unknown as Ionized<any>,
         attributeType: null as unknown as Ionized<any>,
         optional: optional as unknown as true,
     }
 }) as {
     <T extends AnyObject, M>(optional: '?'): {
-        name: 'Maybe$Ionized',
+        name: '$IonizedOrIonized',
         inputType: Ionized<T, M> | Ionized<T>;
         attributeType: Ionized<T>;
         $attributeType: Ionized<T, M>;
         optional: true
     },
-    name: 'Maybe$Ionized'
+    name: '$IonizedOrIonized'
 }
 
 class Bog {
@@ -180,7 +183,7 @@ const attrs = {
     num2: v<number>,
     messageB: MaybeIon<string | number>,
     // message: _Ion<string>,
-    message: Maybe$Ion<string, {
+    message: $IonOrIon<string, {
         set(): void
     }>('?'),
     bog: v<Bog>,
@@ -194,23 +197,19 @@ const attrs = {
 
 
 
-const COMPONENT_ATTRIBUTES = Symbol('component-attributes')
+export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
 
-const inp = input(attrs)
-const attribs = input(attrs)[COMPONENT_ATTRIBUTES]
+const attributes = $input(attrs)
+const input = prep(attributes)
 
-
-
-
+//TODO: optional input
 type ComponentInput<C> = {
     [K in keyof C as C[K] extends {
-        name: '_Ion' | '_Ionized' | 'MaybeIonized' | 'MaybeIon' | 'Maybe$Ion' | 'Maybe$Ionized' | '$Ion' | '$Ionized'
+        name: '_Ion' | '_Ionized' | 'MaybeIonized' | 'MaybeIon' | '$IonOrIon' | '$IonizedOrIonized' | '$Ion' | '$Ionized'
     } ? K extends string ? `$${K}` : K : K]:
 
     C[K] extends { inputType: infer I } | ((arg: any) => { inputType: infer I }) ? I
     : 'invalid typeConfig'
-} & {
-    [COMPONENT_ATTRIBUTES]: { [K in keyof ComponentAttributes<C>]: ComponentAttributes<C>[K] }
 }
 
 
@@ -218,29 +217,94 @@ type ComponentAttributes<C> = {
     [K in keyof C as C[K] extends (arg: any) => { attributeType: any } ? K : never]:
     C[K] extends ((arg: any) => { attributeType: infer I }) ? I : 'invalid typeConfig'
 } & {
-    [K in keyof C as C[K] extends { optional: true } ? K : never]?:
+    [K in keyof C as C[K] extends { optional: true, attributeType: any } ? K : never]?:
     C[K] extends { attributeType: infer I } ? I : 'invalid typeConfig'
 } & {
-    [K in keyof C as C[K] extends { name: 'Maybe$Ion' | 'Maybe$Ionized' | '$Ionized' | '$Ion' } & ((arg: any) => object) ? K extends string ? `$${K}` : never : never]:
+    [K in keyof C as C[K] extends { name: '$IonOrIon' | '$IonizedOrIonized' | '$Ionized' | '$Ion' } & ((arg: any) => object) ? K extends string ? `$${K}` : never : never]:
     C[K] extends (arg: any) => { $attributeType: infer I } ? I : 'invalid typeConfig'
 } & {
-    [K in keyof C as C[K] extends { name: 'Maybe$Ion' | 'Maybe$Ionized' | '$Ionized' | '$Ion' } & { optional: true } ? K extends string ? `$${K}` : never : never]?:
+    [K in keyof C as C[K] extends { name: '$IonOrIon' | '$IonizedOrIonized' | '$Ionized' | '$Ion' } & { optional: true } ? K extends string ? `$${K}` : never : never]?:
     C[K] extends { $attributeType: infer I } ? I : 'invalid typeConfig'
+} & {
+    [ATTRIBUTE_VALIDATION]?: C
 }
 
-export function input<C>(typeConfig?: C): { [K in keyof ComponentInput<C>]: ComponentInput<C>[K] } {
-    const attributes = getComponentAttributes() as ComponentInput<C>
+export const getAttributes = $input
 
-    if (typeConfig) {
+export function $input<C extends { [key: string]: { inputType: any } | ((arg: any) => { inputType: any }) }>(typeConfig?: C): { [K in keyof ComponentAttributes<C>]: ComponentAttributes<C>[K] } {
+    const attributes = getComponentAttributes()
+    if (!attributes) throw new Error(`input function must be called as default parameter of component factory`)
+    attributes[ATTRIBUTE_VALIDATION] = typeConfig;
+    return attributes as ComponentAttributes<C>
+}
+
+
+
+export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, assertions?: { [K in keyof C]?: ((value: any) => void) | ((value: any) => void)[] }): { [K in keyof ComponentInput<C>]: ComponentInput<C>[K] } {
+    const typeConfig = attributes[ATTRIBUTE_VALIDATION];
+    if (typeConfig || assertions) {
+        const validatedAttributes = {} as AnyObject;
+
         for (const key in attributes) {
+            let value = (<AnyObject>attributes)[key]
+            if (assertions && assertions[key]) {
+                const validation = assertions[key]
+                const _assertions = validation instanceof Array ? validation : [validation]
+                for (const assert of _assertions) {
+                    assert(isIon(value) ? value() : value);
+                }
+            }
+            if (typeConfig) {
+                const config = typeConfig[key];
 
+                if ('optional' in config && value === undefined && config.optional instanceof Function) {
+                    value = config.optional()
+                }
+                else if (!('optional' in config) && value === undefined) {
+                    throw new Error(`[INVALID INPUT] Required component attribute, ${key}, is undefined`)
+                }
+
+                switch (config.name) {
+                    case 'v':
+                        if (isIon(value)) {
+                            value = value()
+                        }
+                        validatedAttributes[key] = value; //TODO: make readonly
+                        break;
+
+                    case '_Ion':
+                    case '$Ion':
+                    case '$IonOrIon':
+                        if (!isIon(value)) {
+                            throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ion`)
+                        }
+                        validatedAttributes['$' + key] = value; //TODO: make Ion read-only, protect $Ion
+                        break;
+
+                    case 'MaybeIon':
+                        validatedAttributes['$' + key] = toIon(value) //TODO: make Ion read-only
+                        break;
+
+                    case '_Ionized':
+                    case '$Ionized':
+                    case '$IonizedOrIonized':
+                        if (!isIonicModel(value)) {
+                            throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ionized`)
+                        }
+                        validatedAttributes['$' + key] = value; //TODO: readonly, protect
+                        break;
+
+                    case 'MaybeIonized':
+                        validatedAttributes['$' + key] = value; //TODO: readonly
+                        break;
+
+                    default:
+                        break;
+                }
+            }
         }
+        return validatedAttributes as ComponentInput<C>
     }
-
-    return attributes;
+    return attributes as ComponentInput<C>
 }
 
-//TODO: move to makeComponent.ts and implement
-function getComponentAttributes() {
-    return {}
-}

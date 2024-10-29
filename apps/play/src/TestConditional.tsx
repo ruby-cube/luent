@@ -34,7 +34,7 @@ export function TestConditional() {
                     <div>ho</div>
                 ))}
             </>
-            <button onclick={toggleActiveState}>click</button>
+            <button on:click={toggleActiveState}>click</button>
         </>
     )
 }

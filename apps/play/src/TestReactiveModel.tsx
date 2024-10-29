@@ -173,7 +173,7 @@ export function List(
             <>
                 {If($list.length === 0), show(
                     <div
-                        onclick={() => insertItem(0)}
+                        on:click={() => insertItem(0)}
                         style="background-color: gray; cursor: pointer"
                     >
                         insert
@@ -184,7 +184,7 @@ export function List(
                     For($list).key('id'), ($item, $index) =>
                         <div
                             // ref={$itemDivs}
-                            onclick={(event) => toggleSelect(event, $index())}
+                            on:click={(event) => toggleSelect(event, $index())}
                             style={[
                                 `background-color: ${randomColor.get()}`,
                                 o => {
@@ -192,24 +192,24 @@ export function List(
                                 }
                             ]}>
                             <p
-                                onclick={() => removeItem($index())}
+                                on:click={() => removeItem($index())}
                                 style="cursor: pointer"
                             >
                                 X
                             </p>
 
-                            <li onclick={() => changeContent($index())}>
+                            <li on:click={() => changeContent($index())}>
                                 {() => $item.content}
                             </li>
                             <p>{$index}</p>
                             <div
-                                onclick={() => insertItem($index() + 1)}
+                                on:click={() => insertItem($index() + 1)}
                                 style="background-color: gray; cursor: pointer"
                             >
                                 insert
                             </div>
                             <div
-                                onclick={() => moveSelectedItems($index() + 1)}
+                                on:click={() => moveSelectedItems($index() + 1)}
                                 style="background-color: white; cursor: pointer"
                             >
                                 insert
@@ -218,9 +218,9 @@ export function List(
                 }
             </>
 
-            <button onclick={clearSelection}>clear</button>
+            <button on:click={clearSelection}>clear</button>
             {/* <button
-                onclick={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
+                on:click={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
             >
                 clear
             </button> */}
@@ -228,16 +228,16 @@ export function List(
                 <ItemBlock content={$slot.$content()}></ItemBlock>
             </ListBlock> */}
         </>
-        //             {/* <button onclick={If($active, capture.once(clearSelection))}>clear</button>
+        //             {/* <button on:click={If($active, capture.once(clearSelection))}>clear</button>
 
 
         //     <button
-        //         onclick={[increment, { until: onMounted }]}
+        //         on:click={[increment, { until: onMounted }]}
         //     >
         //         clear
         //     </button>
         //     <button
-        //         onclick={[
+        //         on:click={[
         //             If($active, [
         //                 increment, runOnce.preventDefault, target(THIS_NODE)
         //             ]),
