@@ -111,7 +111,7 @@ function analyzeAttributes(entries: AnyObject) {
             continue;
         }
         else if (isHTMLEvent(key)) {
-            events[key.slice(2)] = entries[key];
+            events[key.slice(3)] = entries[key];
         }
         // else if (isHTMLAttribute(key, tag)) {
         // }

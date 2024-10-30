@@ -1,6 +1,6 @@
 import { IonicAtom } from "./derivations/IonicAtom"
 import { isIon } from "./ion/Ion"
-import { asMetaIon, isAtomicIon } from "./ion/Ion"
+import { asMetaIon, isAtomicIon } from "./ion/AtomicIon"
 import { isIonicModel } from "./ionize/ionize"
 
 export const META = Symbol('metaReactiveEntity')

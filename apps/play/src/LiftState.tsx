@@ -1,4 +1,4 @@
-import { getAttributes, $input, $Ion, Ion, NodeRef, v, prep } from "@rue/lumo"
+import { getAttributes, $Ion, Ion, NodeRef, v, prep } from "@rue/lumo"
 import { AtomicIon, ion } from "../../../packages/quarky/src"
 
 

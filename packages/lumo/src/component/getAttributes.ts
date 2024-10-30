@@ -174,33 +174,33 @@ export const $IonizedOrIonized = ((optional: '?') => {
     name: '$IonizedOrIonized'
 }
 
-class Bog {
-    boo: true = true
-}
+// class Bog {
+//     boo: true = true
+// }
 
-const attrs = {
-    num: v<number>('?'),
-    num2: v<number>,
-    messageB: MaybeIon<string | number>,
-    // message: _Ion<string>,
-    message: $IonOrIon<string, {
-        set(): void
-    }>('?'),
-    bog: v<Bog>,
-    flora: $Ionized<{
-        petal: string
-    }, {
-        setPetals(): void
-    }>
-}
+// const attrs = {
+//     num: v<number>('?'),
+//     num2: v<number>,
+//     messageB: MaybeIon<string | number>,
+//     // message: _Ion<string>,
+//     message: $IonOrIon<string, {
+//         set(): void
+//     }>('?'),
+//     bog: v<Bog>,
+//     flora: $Ionized<{
+//         petal: string
+//     }, {
+//         setPetals(): void
+//     }>
+// }
 
 
 
 
 export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
 
-const attributes = $input(attrs)
-const input = prep(attributes)
+// const attributes = $input(attrs)
+// const input = prep(attributes)
 
 //TODO: optional input
 type ComponentInput<C> = {
@@ -229,9 +229,8 @@ type ComponentAttributes<C> = {
     [ATTRIBUTE_VALIDATION]?: C
 }
 
-export const getAttributes = $input
 
-export function $input<C extends { [key: string]: { inputType: any } | ((arg: any) => { inputType: any }) }>(typeConfig?: C): { [K in keyof ComponentAttributes<C>]: ComponentAttributes<C>[K] } {
+export function getAttributes<C extends { [key: string]: { inputType: any } | ((arg: any) => { inputType: any }) }>(typeConfig?: C): { [K in keyof ComponentAttributes<C>]: ComponentAttributes<C>[K] } {
     const attributes = getComponentAttributes()
     if (!attributes) throw new Error(`input function must be called as default parameter of component factory`)
     attributes[ATTRIBUTE_VALIDATION] = typeConfig;

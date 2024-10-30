@@ -77,7 +77,7 @@ export function normalizeToArray(value: any | any[]) {
 export const UNDEFINED = Symbol('undefined');
 
 
-export function moveMultipleUniqueItems(uniqueItemsToRemove: Set<any>, list: any[], reinsertionIndex: number) { // assumes items are unique
+export function moveUniqueItems(uniqueItemsToRemove: Set<any>, list: any[], reinsertionIndex: number) { // assumes items are unique
     const indicesAndRemoveCount: [number, number][] = [];
     const removedItems = [];
     let j = 0;

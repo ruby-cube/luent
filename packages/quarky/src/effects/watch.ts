@@ -12,7 +12,7 @@ import { isReactive, META } from "../ReactiveEntity";
 import { noop } from "@rue/utils";
 import { __devCheckIfTracked } from "../derivations/DependencyTracker";
 import { AnyIon, isIon } from "../ion/Ion";
-import { ion, asMetaIon, isAtomicIon, AtomicIon } from "../ion/Ion";
+import { asMetaIon, isAtomicIon, AtomicIon } from "../ion/AtomicIon";
 import { asIonicAtom } from "../derivations/IonicAtom";
 import { isPropIon, PropIon } from "../ionize/PropIon";
 import { popEffect, pushEffect, runCleanups, ThisEffect } from "./ThisEffect";
@@ -168,7 +168,7 @@ function isMultiWatchSubject(subject: AnyObject | AnyIon | ReactiveGet | IonicMo
 
 // export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
 // export function watch<T extends IonicModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
-export function watch<T extends AnyIon | ReactiveGet | IonicModel | (AnyIon | ReactiveGet | IonicModel)[]>(subject: T, effect: ChangeEffect<T>, options?: WatchOptions): ActiveListener {
+export function watch<T>(subject: T, effect: ChangeEffect<T>, options?: WatchOptions): ActiveListener {
     const isMultiSubject = isMultiWatchSubject(subject);
     if (!isMultiSubject && !(subject instanceof Function) && !isReactive(subject)) return { // inert watch subjects
         stop: noop

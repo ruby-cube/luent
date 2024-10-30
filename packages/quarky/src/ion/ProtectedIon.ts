@@ -1,12 +1,12 @@
 import { AnyObject } from "@rue/types";
 import { META } from "../ReactiveEntity";
-import { asMetaIon, ion, MetaIon } from "./Ion";
+import { asMetaIon, MetaIon } from "./AtomicIon";
 import { isIonicModel } from "../ionize/ionize";
 import { protectIonicModel } from "../ionize/ProtectedIonicModel";
 
 export type ProtectedIon<T = any, M extends AnyObject = {}> = {
     (selected?: true): T;
-    [META]: { o: any, asReadonly?: ProtectedIon, asProtected?: ProtectedIon };
+    [META]: { inert: boolean, o: any, asReadonly?: ProtectedIon, asProtected?: ProtectedIon };
 } & M
 export const READONLY = 'ro'
 
@@ -20,6 +20,7 @@ type WritableIon = {
 
 // ion | WritableDerivedIon | PropIon //TODO: make this into an interface instead
 type MetaWritableIon = {
+    inert: boolean;
     o: any;
     asReadonly?: any
     asProtected?: any

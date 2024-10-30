@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { createDerivedIon, createWritableDerivedIon, DerivedIon, MetaDerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
 import { META } from "../ReactiveEntity";
 import { AnyIon, isIon } from "./Ion";
-import { createIon, AtomicIon, MetaIon } from "./Ion";
+import { createAtomicIon, AtomicIon, MetaIon } from "./AtomicIon";
 
 const INERT = true;
 
@@ -20,7 +20,7 @@ export function ref<T, M>(value?: T, methods?: M & { [key: string]: (...args: an
         if (methods) return createWritableDerivedIon(<() => unknown>value, methods, INERT) as T extends AnyIon ? T : T extends ()=>unknown ? InertDerivedIon<T, M> : InertIon<T, M>
         return createDerivedIon(<() => unknown>value, undefined, INERT) as T extends AnyIon ? T : T extends ()=>unknown ? InertDerivedIon<T, M> : InertIon<T, M>
     }
-    return createIon(value, methods, INERT) as T extends AnyIon ? T : T extends ()=>unknown ? InertDerivedIon<T, M> : InertIon<T, M>
+    return createAtomicIon(value, methods, INERT) as T extends AnyIon ? T : T extends ()=>unknown ? InertDerivedIon<T, M> : InertIon<T, M>
 }
 
 export type WritableDerivedRef<T = any, M extends AnyObject = {}> = {

@@ -3,7 +3,7 @@ export * from './node/NodeRef' //TODO: Limit to public API
 export * from './node/NodeSetup' //TODO: Limit to public API
 export * from './component/InternalComponent' //TODO: Limit to public API
 export * from './component/Suspense' //TODO: Limit to public API
-export * from './component/input' //TODO: Limit to public API
+export * from './component/getAttributes' //TODO: Limit to public API
 export * from './createApp' //TODO: Limit to public API
 export * from './iteratives/For' //TODO: Limit to public API
 export * from './node/makeNode' //TODO: Limit to public API
@@ -12,7 +12,7 @@ export * from './component/makeComponent' //TODO: Limit to public API
 export * from './conditional/If' //TODO: Limit to public API
 export * from './conditional/toggledisplay' //TODO: Limit to public API
 export * from './component/provide' //TODO: Limit to public API
-export * from './events/event-modifiers' //TODO: Limit to public API
+export * from './events/target' //TODO: Limit to public API
 export * from './events/listen' //TODO: Limit to public API
 export * from './events/Abortable' //TODO: Limit to public API
 export * from './component/teleportTo' //TODO: Limit to public API

@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { Component, fromContext, teleportTo } from "@rue/lumo";
-import { $setup } from "../../../packages/lumo/src/component/$setup";
+import { $setup } from "../../../packages/lumo/src/component/X_$setup";
 export function ListBlock(setup = $setup()) {
 
     const $ItemBlock = LazyNode({

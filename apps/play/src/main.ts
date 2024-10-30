@@ -42,11 +42,7 @@ import { TestCleanupScheduler } from './TestCustomCleanupScheduler';
 
 // console.log("count", $count())
 
-Ion
 
-function seomthing(arg: Ion){
-    
-}
 
 const app = createApp(List)
 

@@ -121,13 +121,12 @@ class MetaPropIon {
         if (this.isEntryKey) metaModel.deleteObservedEntryKey(key)
         metaModel.unregisterPropIon(key)
     }
-
 }
 
 type AsPropIon<T extends AnyObject, K extends keyof T, M> = PropIon<T[K], M extends AnyObject ? { [K in keyof TransferredMethods<T, M>]: TransferredMethods<T, M>[K] } : undefined>
 
 export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, key: K, methods?: M & { [key: string]: keyof T | true }): AsPropIon<T, K, M> {
-    const ionicModel = isIonicModel(model) ? model : ionize(model)
+    const ionicModel = isIonicModel(model) ? model : ionize(model) //TODO: is there a more performant solution than ionizing non-reactive models? like mapping model to prop ions?
     const rawTarget = toRaw(ionicModel)
     const value = rawTarget[key];
 
