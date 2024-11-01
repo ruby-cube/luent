@@ -13,26 +13,28 @@ export const v = ((optional: '?' | '??') => {
             name: 'v',
             // inputType: null,
             // attributeType: null,
-            optional: true,
+            optional: 'withDefault',
             default: defaultValue
         }
     }
-    v.optional = optional as unknown as true
+    v.optional = optional
     return v
 }) as {
     <T>(optional?: '?' | '??'): {
         name: 'v',
         inputType: T;
         attributeType: T;
-        optional: true;
+        optional: '?';
+        default: undefined
     } & ((defaultValue: T) => {
         name: 'v',
         inputType: T;
         attributeType: T;
-        optional: true;
+        optional: 'withDefault';
         default: true;
     }),
-    name: 'v'
+    name: 'v';
+    required: true;
 }
 
 const _Ion = ((optional: '?') => {
@@ -40,16 +42,19 @@ const _Ion = ((optional: '?') => {
         name: '_Ion',
         // inputType: null as unknown as Ion<any>,
         // attributeType: null as unknown as Ion<any>,
-        optional: true,
+        optional,
+        default: undefined
     }
 }) as {
     <T>(optional: '?'): {
         name: '_Ion',
         inputType: Ion<T>;
         attributeType: Ion<T> | T;
-        optional: true
+        optional: '?';
+        default: undefined
     },
-    name: '_Ion'
+    name: '_Ion';
+    required: true;
 }
 export { _Ion as Ion }
 export type Ion<T = any, M extends AnyObject = {}> = (() => T) & ((selected?: true) => T) & M
@@ -79,26 +84,28 @@ export const MaybeIon = ((optional: '?' | '??') => {
             name: 'MaybeIon',
             // inputType: null as unknown as Ion<any>,
             // attributeType: null,
-            optional: true,
+            optional: 'withDefault',
             default: defaultValue
         }
     }
-    MaybeIon.optional = optional as unknown as true
+    MaybeIon.optional = optional
     return MaybeIon
 }) as {
     <T>(optional?: '?' | '??'): {
         name: 'MaybeIon',
         inputType: Ion<T>;
         attributeType: Ion<T> | T;
-        optional: true;
+        optional: '?';
+        default: undefined
     } & ((defaultValue: T) => {
         name: 'MaybeIon',
         inputType: Ion<T>;
         attributeType: Ion<T> | T;
-        optional: true;
+        optional: 'withDefault';
         default: true;
     }),
-    name: 'MaybeIon'
+    name: 'MaybeIon';
+    required: true;
 }
 
 export const $Ion = ((optional: '?') => {
@@ -106,16 +113,19 @@ export const $Ion = ((optional: '?') => {
         name: '$Ion',
         // inputType: null as unknown as Ion<any>,
         // $attributeType: null as unknown as Ion<any>,
-        optional: true,
+        optional,
+        default: undefined
     }
 }) as {
     <T, M extends AnyObject>(optional: '?'): {
         name: '$Ion',
         inputType: Ion<T, M>;
         $attributeType: Ion<T, M>;
-        optional: true
+        optional: '?'
+        default: undefined
     },
-    name: '$Ion'
+    name: '$Ion';
+    required: true;
 }
 
 export const $IonOrIon = ((optional: '?') => {
@@ -124,7 +134,8 @@ export const $IonOrIon = ((optional: '?') => {
         // inputType: null as unknown as Ion<any>,
         // attributeType: null as unknown as Ion<any>,
         // $attributeType: null as unknown as Ion<any>,
-        optional: true,
+        optional,
+        default: undefined
     }
 }) as {
     <T, M extends AnyObject>(optional: '?'): {
@@ -132,9 +143,11 @@ export const $IonOrIon = ((optional: '?') => {
         inputType: Ion<T> | Ion<T, M>;
         attributeType: Ion<T> | T;
         $attributeType: Ion<T, M>;
-        optional: true
+        optional: '?'
+        default: undefined
     },
-    name: '$IonOrIon'
+    name: '$IonOrIon';
+    required: true;
 }
 
 export type Ionized<T extends AnyObject, M = {}> = {
@@ -146,16 +159,19 @@ const _Ionized = ((optional: '?') => {
         name: '_Ionized',
         // inputType: null as unknown as Ionized<any>,
         // attributeType: null as unknown as Ionized<any>,
-        optional: true,
+        optional,
+        default: undefined
     }
 }) as {
     <T extends AnyObject>(optional: '?'): {
         name: '_Ionized',
         inputType: Ionized<T>;
         attributeType: Ionized<T>;
-        optional: true
+        optional: '?';
+        default: undefined
     },
-    name: '_Ionized'
+    name: '_Ionized';
+    required: true;
 }
 export { _Ionized as Ionized }
 
@@ -167,26 +183,28 @@ export const MaybeIonized = ((optional: '?' | '??') => {
             name: 'MaybeIonized',
             // inputType: null as unknown as Ionized<any>,
             // attributeType: null,
-            optional: true,
+            optional: 'withDefault',
             default: defaultValue
         }
     }
-    MaybeIonized.optional = optional as unknown as true
+    MaybeIonized.optional = optional
     return MaybeIonized
 }) as {
     <T extends AnyObject>(optional?: '?' | '??'): {
         name: 'MaybeIonized',
         inputType: Ionized<T>;
         attributeType: Ionized<T> | T;
-        optional: true;
+        optional: '?';
+        default: undefined
     } & ((defaultValue: T) => {
         name: 'MaybeIonized',
         inputType: Ionized<T>;
         attributeType: Ionized<T> | T;
-        optional: true;
+        optional: 'withDefault';
         default: true;
     }),
-    name: 'MaybeIonized'
+    name: 'MaybeIonized';
+    required: true;
 }
 
 export const $Ionized = ((optional: '?') => {
@@ -194,16 +212,19 @@ export const $Ionized = ((optional: '?') => {
         name: '$Ionized',
         // inputType: null as unknown as Ionized<any>,
         // $attributeType: null as unknown as Ionized<any>,
-        optional: optional as unknown as true,
+        optional,
+        default: undefined
     }
 }) as {
     <T extends AnyObject, M>(optional: '?'): {
         name: '$Ionized',
         inputType: Ionized<T, M>;
         $attributeType: Ionized<T, M>;
-        optional: true
+        optional: '?'
+        default: undefined
     },
-    name: '$Ionized'
+    name: '$Ionized';
+    required: true;
 }
 
 export const $IonizedOrIonized = ((optional: '?') => {
@@ -211,7 +232,7 @@ export const $IonizedOrIonized = ((optional: '?') => {
         name: '$IonizedOrIonized',
         // inputType: null as unknown as Ionized<any>,
         // attributeType: null as unknown as Ionized<any>,
-        optional: optional as unknown as true,
+        optional,
     }
 }) as {
     <T extends AnyObject, M>(optional: '?'): {
@@ -219,9 +240,11 @@ export const $IonizedOrIonized = ((optional: '?') => {
         inputType: Ionized<T, M> | Ionized<T>;
         attributeType: Ionized<T>;
         $attributeType: Ionized<T, M>;
-        optional: true
+        optional: '?'
+        default: undefined
     },
     name: '$IonizedOrIonized'
+    required: true;
 }
 
 // class Bog {
@@ -252,11 +275,19 @@ export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
 // const attributes = $input(attrs)
 // const input = prep(attributes)
 
-//TODO: optional input without default
+//TODO: transform slot render function to Slot component
+
 type ComponentInput<C> = {
-    [K in keyof C as K extends `on:${infer S}` ? `emit${S}` : C[K] extends {
+    [K in keyof C as C[K] extends { required: true } | { default: true } ? K extends `on:${infer S}` ? `emit${S}` : C[K] extends {
         name: '_Ion' | '_Ionized' | 'MaybeIonized' | 'MaybeIon' | '$IonOrIon' | '$IonizedOrIonized' | '$Ion' | '$Ionized'
-    } ? K extends string ? `$${K}` : K : K]:
+    } ? K extends string ? `$${K}` : K : K : never]:
+
+    C[K] extends { inputType: infer I } | ((arg: any) => { inputType: infer I }) ? I
+    : 'invalid typeConfig'
+} & {
+    [K in keyof C as C[K] extends { optional: '?' } ? K extends `on:${infer S}` ? `emit${S}` : C[K] extends {
+        name: '_Ion' | '_Ionized' | 'MaybeIonized' | 'MaybeIon' | '$IonOrIon' | '$IonizedOrIonized' | '$Ion' | '$Ionized'
+    } ? K extends string ? `$${K}` : K : K : never]?:
 
     C[K] extends { inputType: infer I } | ((arg: any) => { inputType: infer I }) ? I
     : 'invalid typeConfig'
@@ -264,16 +295,16 @@ type ComponentInput<C> = {
 
 
 type ComponentAttributes<C> = {
-    [K in keyof C as C[K] extends (arg: any) => { attributeType: any } ? K : never]:
+    [K in keyof C as C[K] extends { required: true } & ((arg: any) => { attributeType: any }) ? K : never]:
     C[K] extends ((arg: any) => { attributeType: infer I }) ? I : 'invalid typeConfig'
 } & {
-    [K in keyof C as C[K] extends { optional: true, attributeType: any } ? K : never]?:
+    [K in keyof C as C[K] extends { optional: '?' | 'withDefault', attributeType: any } ? K : never]?:
     C[K] extends { attributeType: infer I } ? I : 'invalid typeConfig'
 } & {
-    [K in keyof C as C[K] extends { name: '$IonOrIon' | '$IonizedOrIonized' | '$Ionized' | '$Ion' } & ((arg: any) => object) ? K extends string ? `$${K}` : never : never]:
+    [K in keyof C as C[K] extends { name: '$IonOrIon' | '$IonizedOrIonized' | '$Ionized' | '$Ion'; required: true } & ((arg: any) => { $attributeType: any }) ? K extends string ? `$${K}` : never : never]:
     C[K] extends (arg: any) => { $attributeType: infer I } ? I : 'invalid typeConfig'
 } & {
-    [K in keyof C as C[K] extends { name: '$IonOrIon' | '$IonizedOrIonized' | '$Ionized' | '$Ion' } & { optional: true } ? K extends string ? `$${K}` : never : never]?:
+    [K in keyof C as C[K] extends { name: '$IonOrIon' | '$IonizedOrIonized' | '$Ionized' | '$Ion'; optional: '?' | 'withDefault' } ? K extends string ? `$${K}` : never : never]?:
     C[K] extends { $attributeType: infer I } ? I : 'invalid typeConfig'
 } & {
     [ATTRIBUTE_VALIDATION]?: C
@@ -367,4 +398,4 @@ const inpu = getAttributes({
     dog: v<number>('?'),
 })
 
-const { emitIncrementClick, dog } = prep(inpu)
+const { emitIncrementClick, dog, car } = prep(inpu)
