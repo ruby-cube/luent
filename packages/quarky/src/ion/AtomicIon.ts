@@ -5,14 +5,14 @@ import { trigger } from "../trigger";
 import { META, ReactiveEntity } from "../ReactiveEntity";
 import { AnyObject } from "@rue/types";
 import { AnyIon, isIon } from "./Ion";
-import { ProtectedIon } from "./ProtectedIon";
+import { IS_PUBLIC, ProtectedIon } from "./ProtectedIon";
 
-export type AtomicIon<T = any, M extends AnyObject = {}> = (() => T)
+export type AtomicIon<T = any, M extends AnyObject = {}> = ((selected?: true) => T)
     & {
-        (selected?: true): T
         [META]: MetaIon<T>;
-        as: (value: T) => T
-    } & M
+    } & {[K in keyof UnmarkedMethods<M>]:UnmarkedMethods<M>[K]} & (UnmarkedMethods<M> extends { as: any } ? { _as: (value: T) => T } : { as: (value: T) => T })
+
+type UnmarkedMethods<M> = { [K in keyof M as K extends `XPO${infer S}` ? S : K]: M[K] }
 
 export const ION = Symbol('atomicIon');
 
@@ -43,21 +43,17 @@ export function createAtomicIon<
 ) {
     const metaIon = new MetaIon(<AtomicIon>$ion, value, isIonicModel(value), !!methods, !!inert)
 
+    const setterKey = methods && ('as' in methods || 'XPOas' in methods) ? "_as" : 'as'
+
     const proto = {
         [META]: metaIon,
-        as(newValue: any) {
+        [setterKey](newValue: any) {
             return setValue(metaIon, newValue, metaIon.value);
         }
     } as AnyObject
 
     if (methods) {
-        for (const key in methods) {
-            if (key === 'as') {
-                if (__DEV__) console.warn(`'as' is reserved for the native set method for ions. Choose different method name`)
-                continue;
-            }
-            proto[key] = methods[key].bind(proto) // This makes set function available to `this` even after protected
-        }
+        attachIonMethods(proto, methods)
     }
 
     function $ion(selected?: boolean) {
@@ -74,6 +70,38 @@ export function createAtomicIon<
 
     return $ion as AtomicIon<T, M>
 }
+
+export function attachIonMethods(proto: AnyObject, methods: AnyObject){
+    for (const key in methods) {
+        const isPublic = key.startsWith('XPO');
+        const method = proto[isPublic ? key.slice(3) : key] = methods[key]
+        if (isPublic) {
+            method[IS_PUBLIC] = true;
+        }
+        // .bind(proto) // This makes set function available to `this` even after protected //QUESTION: I don't think this is needed if `this` is not used...
+    }
+    return proto;
+}
+
+// ORDER:
+// - set value
+// - trigger effects (run sync effects, schedule effects)
+// - trigger derivations effects (run sync effects, schedule effects)
+
+function setValue(metaIon: MetaIon, newValue: unknown, oldValue: unknown) {
+    if (oldValue === newValue) return oldValue;
+    const $ion = metaIon.o;
+    const _newValue = shouldIonize(newValue, metaIon) ? ionize(newValue) : newValue
+    // toIonicModelIfMust(newValue, metaIon)
+    metaIon.value = _newValue;
+    if (!metaIon.inert) trigger($ion, _newValue, oldValue);
+    return _newValue;
+}
+
+function shouldIonize(newValue: unknown, metaIon: MetaIon): newValue is AnyObject {
+    return newValue instanceof Object && metaIon.hasIonicValue;
+}
+
 
 
 // function attachMethods(methods: { [key: string]: Function }, proto: AnyObject) {
@@ -119,25 +147,6 @@ export function createAtomicIon<
 //     const value = this.value as T;
 //     return setValue(this, toNewValue(value), value);
 // }
-
-// ORDER:
-// - set value
-// - trigger effects (run sync effects, schedule effects)
-// - trigger derivations effects (run sync effects, schedule effects)
-
-function setValue(metaIon: MetaIon, newValue: unknown, oldValue: unknown) {
-    if (oldValue === newValue) return oldValue;
-    const $ion = metaIon.o;
-    const _newValue = shouldIonize(newValue, metaIon) ? ionize(newValue) : newValue
-    // toIonicModelIfMust(newValue, metaIon)
-    metaIon.value = _newValue;
-    if (!metaIon.inert) trigger($ion, _newValue, oldValue);
-    return _newValue;
-}
-
-function shouldIonize(newValue: unknown, metaIon: MetaIon): newValue is AnyObject {
-    return newValue instanceof Object && metaIon.hasIonicValue;
-}
 
 
 export function isAtomicIon(maybeIon: any): maybeIon is AtomicIon {

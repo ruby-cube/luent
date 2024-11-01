@@ -5,7 +5,7 @@ import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex } from "../iteratives/ListRenderKit";
 import { getProviderComponent, popProvider, provide, pushProvider } from "./provide";
-import { MorphicRenderKit } from "../morphic/MorphicComponent";
+import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { IonicModel, isAtomicIon, protect, AtomicIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { getFlask } from "@rue/flask";

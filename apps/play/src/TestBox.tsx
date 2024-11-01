@@ -70,3 +70,11 @@ function Hello() {
 function Catch(j: any) {
 
 }
+
+const dog = {
+    frog: 'hi',
+    v_frog: 'bye'
+
+}
+
+dog.v_frog

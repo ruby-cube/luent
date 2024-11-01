@@ -9,7 +9,7 @@ import { mountNodeEntity } from "../node/mountNodeEntity";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { mountConditional } from "../conditional/ConditionalRenderSeries";
 
-export function MorphicComponent(switchMap: { [key: string]: RenderFunction }) {
+export function MorphicNode(switchMap: { [key: string]: RenderFunction }) {
     return function $MorphicNode({ as: initialKey, preserve }: {
         as: string,
         preserve?: true

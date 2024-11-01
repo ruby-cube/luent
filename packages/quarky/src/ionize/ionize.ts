@@ -50,7 +50,7 @@ export function isIonicModel(value: any): value is IonicModel {
 }
 
 export type Ionized<T extends AnyObject, M = {}> = {
-    [K in keyof T]: T[K] extends AtomicIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
+    [K in keyof T as K extends keyof M ? K extends string ? `_${K}` : K : K]: T[K] extends AtomicIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
 } & M & { [META]: MetaIonicModel }
 
 
@@ -59,7 +59,7 @@ export type Ionized<T extends AnyObject, M = {}> = {
 export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M): Ionized<T, M> {
     if (isIonicModel(target) || isIon(target) || isInert(target) || !isIonizable(target)) {
         if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
-        return target as Ionized<T, M>;
+        return target as unknown as Ionized<T, M>;
     }
     //TODO: What about a readonly object that is not an ionic model?
     if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)

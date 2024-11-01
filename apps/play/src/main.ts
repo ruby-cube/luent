@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { createApp, Ion } from '@rue/lumo';
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
@@ -19,6 +18,7 @@ import { watchIonicEffect, ion, ionize, protect, isIonicModel } from '@rue/quark
 import { TestIonicEffect } from './TestIonicEffect';
 import { TestSelectiveTracking } from './TestSelectiveTracking';
 import { TestCleanupScheduler } from './TestCustomCleanupScheduler';
+import { IS_PUBLIC, protectIon } from '../../../packages/quarky/src/ion/ProtectedIon';
 // import { ionize, ionize } from '@rue/quarky';
 // import { DeepReactiveModel, asMetaIonicModel, ionize, ionize } from '@rue/quarky';
 // import { MountIf } from './TestMountIf';
@@ -42,15 +42,64 @@ import { TestCleanupScheduler } from './TestCustomCleanupScheduler';
 
 // console.log("count", $count())
 
-
-
-const app = createApp(List)
-
-if (__DEV__) configureFlask({
-    warnNoCleanup: true
+// const $frog = ionize([1, 2, 3], {
+//     push(value: number) {
+//         console.log("pushing", value)
+//         $frog._push(value)
+//     },
+//     blah() {
+//         console.log('blah')
+//     }
+// })
+const atomicIon = ion(0, {
+    increment(this: Public) {
+        atomicIon.as(atomicIon() + 1)
+    }
+    // ,
+    // XPOas(value: number){
+    //     atomicIon._as(value)
+    // }
 })
 
-app.mount('#app')
+type Public = {
+    [IS_PUBLIC]: true
+}
+
+
+
+const $count = ion(0, {
+    xpo_increment() {
+        $count.as($count() + 1)
+    },
+    decrement() {
+
+    }
+})
+
+atomicIon.as(9)
+// atomicIon._as(9)
+
+const protectedIon = protectIon(atomicIon);
+console.log("protected", 'as' in protectedIon)
+
+// protectedIon.as(4)
+protectedIon.as(8)
+
+console.log(protectedIon(), 8)
+// $frog.push(5)
+// console.log('push?', $frog.push)
+// console.log('_push?', $frog._push)
+
+// console.log('i3', $frog[3])
+// console.log('i4', $frog[4])
+
+// const app = createApp(List)
+
+// if (__DEV__) configureFlask({
+//     warnNoCleanup: true
+// })
+
+// app.mount('#app')
 
 // queueTask(()=>{
 //     console.log("hi")

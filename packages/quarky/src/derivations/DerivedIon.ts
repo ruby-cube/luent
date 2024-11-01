@@ -1,4 +1,4 @@
-import { isAtomicIon, AtomicIon } from "../ion/Ion";
+import { isAtomicIon, AtomicIon, attachIonMethods } from "../ion/AtomicIon";
 import { IonicDerivation } from "./IonicDerivation";
 import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 import { META } from "../ReactiveEntity";
@@ -7,6 +7,7 @@ import { AnyObject } from "@rue/types";
 import { ProtectedIon } from "../ion/ProtectedIon";
 import { AnyIon, isIon } from "../ion/Ion";
 import { DerivedRef } from "../ion/Ref";
+import { getDynamicNode } from "../../../lumo/src/dynamic/nodestack";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -58,9 +59,6 @@ export class MetaDerivedIon extends IonicDerivation {
 }
 
 
-// export const $ = DerivedIon
-
-
 export function createDerivedIon<T extends any>(
     pureGetter: () => T,
     methods?: AnyObject,
@@ -76,7 +74,7 @@ export function createDerivedIon<T extends any>(
 
         if (methods) {
             for (const key in methods) {
-                proto[key] = methods[key].bind(proto) // This makes set function available to `this` even after protected
+                proto[key] = methods[key].bind(proto)
             }
         }
         Object.setPrototypeOf(pureGetter, proto)
@@ -121,16 +119,16 @@ export function createDerivedIon<T extends any>(
     } as AnyObject
 
     if (methods) {
-        for (const key in methods) {
-            proto[key] = methods[key].bind(proto) // This makes set function available to `this` even after protected
-        }
+        attachIonMethods(proto, methods)
     }
 
     Object.setPrototypeOf($derivedIon, proto)
 
-    onDestroy(() => {
-        derived.untrackAtoms()
-    })
+    if (getDynamicNode()) {
+        onDestroy(() => { //TODO: what about if a derived ion is created outside of a dynamic node??
+            derived.untrackAtoms()
+        })
+    }
 
     return <DerivedIon><unknown>$derivedIon;
 }

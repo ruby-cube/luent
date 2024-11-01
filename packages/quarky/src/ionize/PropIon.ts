@@ -180,13 +180,14 @@ function createPropIon<T extends IonicModel, K extends keyof T, M>(ionicModel: T
 
     if (methods) {
         for (const key in methods) {
-            if (key === 'as') {
-                if (__DEV__) console.warn(`'as' is reserved for the native set method for ions. Choose different method name`)
-                continue;
-            }
+            // if (key === 'as') {
+            //     if (__DEV__) console.warn(`'as' is reserved for the native set method for ions. Choose different method name`)
+            //     continue;
+            // }
 
             const methodKey = methods[key] === true ? key : methods[key]
-            proto[key] = ionicModel[methodKey].bind(proto) // This makes set function available to `this` even after protected //QUESTION: is this necessary if dev does not use this??
+            proto[key] = ionicModel[methodKey] //TODO: XPO?
+            // .bind(proto) // This makes set function available to `this` even after protected //QUESTION: is this necessary if dev does not use this??
         }
     }
 

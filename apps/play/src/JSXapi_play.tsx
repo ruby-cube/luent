@@ -80,7 +80,78 @@ export function ListBlock(setup = $setup()) {
             <div>
                 <h1>Choose something</h1>
 
+                <h1>hello</h1>
+                {If($active,
+                    <p>hey</p>
+                )}
+                <div>
+                    <p>hi ho</p>
+                    <p>hi ho</p>
+                </div>
+
+                <h1>hello</h1>
+                <Context provide={[w(FROG, frog), w(CAT, cat)]}>
+                    <Morphs with={fadeInOut}>{(
+                        If($active,
+                            <p>hey</p>
+                        )
+                    )}</Morphs>
+                </Context>
+                <div>
+                    <p>hi ho</p>
+                    <p>hi ho</p>
+                </div>
+
+                <h1>hello</h1>
+                {[frozen,
+                    If($active(),
+                        <p>hey</p>
+                    ),
+                    Else(
+                        <p>Bye</p>
+                    )
+                ]}
+                <div>
+                    <p>hi ho</p>
+                    <p>hi ho</p>
+                </div>
+
+                <h1>hello</h1>
+                <Morphs with={fadeInOut}>{
+                    setup(WeekKit, o => [
+                        If($active(),
+                            <p>hey</p>
+                        ),
+                        Else(
+                            <p>Bye</p>
+                        )
+                    ])
+                }</Morphs>
+                <div>
+                    <p>hi ho</p>
+                    <p>hi ho</p>
+                </div>
+
+                <Try catch={Error} setup={SelectionKit}>
+                    <h1>hello</h1>
+                    <div>
+                        <Item></Item>
+                        <p>hi ho</p>
+                        <p>hi ho</p>
+                    </div>
+                </Try>
+
+                <Suspense hold={Placeholder} catch={Error} setup={SelectionKit}>{o => [
+                    <h1>hello</h1>,
+                    <div>
+                        <p>hi ho</p>
+                        <p>hi ho</p>
+                    </div>
+                ]}</Suspense>
+
+
                 <div>Stuff here</div>
+
 
                 {/* {If($active()),
                     <p>hello world</p>
@@ -99,19 +170,62 @@ export function ListBlock(setup = $setup()) {
                 }
 
                 <h1>Something Here</h1>
-                {morphic({ with: fade },
-                    If($active, { type: 'show/hide' }, o =>
+
+                <Morphs type='create/destroy'>{[
+                    If($active(),
+                        <p>hello world</p>
+                    ),
+                    ElseIf($broken(), { use: SelectionKit }, o => [
+                        <p value={o.$selection}>bye world</p>,
+                        <hr />
+                    ]),
+                    Else(
+                        <p>ok world</p>,
+                        <p>bye world</p>
+                    )
+                ]}</Morphs>
+
+                <Morphs type='show/hide'>{(
+                    If($active(),
                         <p>hello world</p>,
                     ),
-                    ElseIf($broken, { use: SelectionKit }, o =>
-                        <p value={o.$selection}>bye world</p>
-                    ),
-                    Else({ with: fade }, () =>
-                        <p>ok world</p>
+                    ElseIf($broken(), { use: SelectionKit }, o => [
+                        <p value={o.$selection}>bye world</p>,
+                        <hr />
+                    ]),
+                    Else(
+                        <p>ok world</p>,
+                        <p>bye world</p>
                     )
-                )}
+                )}</Morphs >
 
-                <div freeze>{$count()}</div>
+                <$Node type='show/hide'>
+                    <If case={$active}>
+                        <p>hello world</p>
+                    </If>
+                    <ElseIf case={$broken}>
+                        <p value={o.$selection}>bye world</p>
+                    </ElseIf>
+                    <Else>
+                        <p>ok world</p>
+                        <p>bye world</p>
+                    </Else>
+                </$Node>
+
+
+                {
+                    morphic({ with: fade },
+                        If($active, { type: 'show/hide' }, o =>
+                            <p>hello world</p>,
+                        ),
+                        ElseIf($broken, { use: SelectionKit }, o =>
+                            <p value={o.$selection}>bye world</p>
+                        ),
+                        Else({ with: fade }, () =>
+                            <p>ok world</p>
+                        )
+                    )}
+
                 <div value={{ z: $active() }}>{{ z: $count() }}</div>
 
                 <div>
@@ -126,7 +240,7 @@ export function ListBlock(setup = $setup()) {
                 </div>
 
                 <h1>Something Here</h1>
-                {morphic(
+                {(
                     If($active, { type: 'show/hide', use: CounterKit }, o =>
                         Context(
                             w(COUNT, o.$count),
@@ -140,17 +254,6 @@ export function ListBlock(setup = $setup()) {
                 )}
 
                 <h1>Something Here</h1>
-                {morphic(
-                    If($active, { type: 'show/hide', use: CounterKit }, o =>
-                        Context.with(COUNT, o.$count)
-                            .around(
-                                <p>
-                                    hello world
-                                    <button>click</button>
-                                </p>
-                            )
-                    )
-                )}
                 {(
                     If($broken, { use: SelectionKit }, o =>
                         Context(
@@ -230,8 +333,8 @@ export function ListBlock(setup = $setup()) {
                     .with(Frog, new Frog())
                     .with(Cat, new Cat())
                     .around(
-                        If($list.length === 0, { 
-                            with: fadeInOut, use: SelectionKit 
+                        If($list.length === 0, {
+                            with: fadeInOut, use: SelectionKit
                         }, o =>
                             <p>hello world</p>
                         ),
@@ -297,11 +400,12 @@ export function ListBlock(setup = $setup()) {
 
                 <h1>How is this?</h1>
                 {If($editable,
-                    <p>Flies in and out</p>
+                    <p>Flies in and out</p>,
+                    <div>sldof</div>
                 )}
                 <footer>(c) 2024</footer>
 
-                {morphic(
+                {[
                     If($editable,
                         <p>hello world</p>
                     ),
@@ -311,11 +415,12 @@ export function ListBlock(setup = $setup()) {
                     Else(
                         <p>ok world</p>
                     )
-                )}
+                ]}
 
                 {morphic(fade(10), 'show/hide',
                     If($active,
-                        <div>hello</div>
+                        <div>hello</div>,
+                        <p>how</p>
                     ),
                     ElseIf($something, { in: fly({ duration: 10 }), out: fade },
                         <div>bye</div>
@@ -331,6 +436,20 @@ export function ListBlock(setup = $setup()) {
                     <li>title</li>
                     <input />
                 </div>
+
+                <Morphic with={fade}>
+                    {Match(key,
+                        Case('hello',
+                            <p>hello world</p>
+                        ),
+                        Case('bye',
+                            <p>bye world</p>
+                        ),
+                        Default(
+                            <p>ok world</p>
+                        )
+                    )}
+                </Morphic>
 
                 {morphic(fade,
                     Match(key,
@@ -367,7 +486,7 @@ export function ListBlock(setup = $setup()) {
                 <footer>(c) 2024</footer>
 
                 <h1>Choose something</h1>
-                {(
+                {Conditional({ setup: WeekKit }, o => [
                     If($list.length === 0,
                         <p>hello world</p>
                     ),
@@ -377,7 +496,20 @@ export function ListBlock(setup = $setup()) {
                     Else(
                         <p>ok world</p>
                     )
-                )}
+                ])}
+
+                <h1>Choose something</h1>
+                <Render setup={WeekKit}>{o => [
+                    If($list.length === 0,
+                        <p>hello world</p>
+                    ),
+                    If($broken(),
+                        <p>bye world</p>
+                    ),
+                    Else(
+                        <p>ok world</p>
+                    )
+                ]}</Render>
 
                 <h1>Choose something</h1>
                 {If($list.length === 0,
@@ -388,21 +520,26 @@ export function ListBlock(setup = $setup()) {
                 )}
 
                 <h1>Do something</h1>
-                {freeze(
-                    For(list, (item, $index, o) =>
+                <Morphs>{
+                    For($list, (item, $index, o) =>
                         <p>[x] {item}</p>
                     )
-                )}
+                }</Morphs>
 
                 <h1>Do something</h1>
-                {freeze(
+                {[freeze,
                     For(list, (item, $index, o) =>
                         <p>[x] {item}</p>
                     ),
-                    Empty(
+                    Or(
                         <p>Nothing here</p>
                     )
-                )}
+                ]}
+                {[
+                    For(list, (item, $index, o) =>
+                        <p>[x] {item}</p>
+                    )
+                ]}
 
                 <h1>Do something</h1>
                 {morphic(fade,
@@ -469,4 +606,20 @@ function Lolly() {
 
 function Dobby() {
 
+}
+
+export function NumberedBoxes(input = getAttributes({ num: v<number> })) {
+    const { num } = prep(input)
+
+    return Component(
+        <>
+            <div class='box'>{count}</div>
+            {[
+                Repeat(num, (count, index) =>
+                    <div class='box'>{count}</div>
+                )
+            ]}
+            <div class='box'>{count}</div>
+        </>
+    )
 }

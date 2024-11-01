@@ -1,5 +1,5 @@
 import { Component, NodeRef } from "@rue/lumo";
-import { MorphicComponent } from "../../../packages/lumo/src/morphic/MorphicComponent";
+import { MorphicComponent } from "../../../packages/lumo/src/morphic/MorphicNode";
 
 export function TestMorphic() {
 
@@ -37,3 +37,4 @@ function CommentBlock(setup: {
         <div>blah</div>
     )
 }  
+

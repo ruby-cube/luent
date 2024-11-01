@@ -211,6 +211,7 @@ export function createCustomIonicModel(
                 }
             }
             if (methods && key in methods) {
+                console.log('accesing from methods', key)
                 return accessMethod(
                     target,
                     ionicModel,
@@ -220,7 +221,9 @@ export function createCustomIonicModel(
                     methods[key]
                 )
             }
-            if (isMutatingOps(key, structureConfigs)) {
+            const _key = typeof key === 'string' && key.startsWith('_') ? key.slice(1) : key;
+            console.log('modified key', _key, key)
+            if (isMutatingOps(_key, structureConfigs)) {
                 if (protectedMeta) {
                     const keys = protectedMeta.propertyKeys
                     if (keys && key in keys) {
@@ -235,11 +238,12 @@ export function createCustomIonicModel(
                     return undefined;
                 }
                 else {
+                    console.log("accessing")
                     return accessMethod(
                         target,
                         ionicModel,
                         receiver,
-                        key,
+                        _key,
                         boundMethodMap
                     )
                 }
@@ -332,8 +336,6 @@ function createBoundMethodMap(structureConfigs: CustomIonicModelConfig[], target
             methodMap.set(opKey, createOp(target, ionicModel))
         }
     }
-
-
     return methodMap;
 }
 

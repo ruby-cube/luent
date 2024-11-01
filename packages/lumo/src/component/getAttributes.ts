@@ -4,7 +4,6 @@ import { AtomicIon, DerivedIon, isIon, isIonicModel, protect, WritableDerivedIon
 import { META } from "../../../quarky/src/ReactiveEntity";
 import { toIon } from "../../../quarky/src/ion/toIons";
 import { getComponentAttributes } from "./makeComponent";
-import { normalizeToArray } from "@rue/utils";
 
 //TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
 
@@ -16,12 +15,18 @@ export const v = ((optional: '?' | (() => any)) => {
         optional: optional as unknown as true,
     }
 }) as {
-    <T>(optional: '?' | (() => any)): {
+    <T>(optional?: '?' | '??'): {
         name: 'v',
         inputType: T;
         attributeType: T;
-        optional: true
-    },
+        optional: true;
+    } & ((defaultValue: T) => {
+        name: 'v',
+        inputType: T;
+        attributeType: T;
+        optional: true;
+        default: true;
+    }),
     name: 'v'
 }
 
@@ -202,9 +207,9 @@ export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
 // const attributes = $input(attrs)
 // const input = prep(attributes)
 
-//TODO: optional input
+//TODO: optional input without default
 type ComponentInput<C> = {
-    [K in keyof C as C[K] extends {
+    [K in keyof C as K extends `on:${infer S}` ? `emit${S}` : C[K] extends {
         name: '_Ion' | '_Ionized' | 'MaybeIonized' | 'MaybeIon' | '$IonOrIon' | '$IonizedOrIonized' | '$Ion' | '$Ionized'
     } ? K extends string ? `$${K}` : K : K]:
 
@@ -229,7 +234,7 @@ type ComponentAttributes<C> = {
     [ATTRIBUTE_VALIDATION]?: C
 }
 
-
+//API
 export function getAttributes<C extends { [key: string]: { inputType: any } | ((arg: any) => { inputType: any }) }>(typeConfig?: C): { [K in keyof ComponentAttributes<C>]: ComponentAttributes<C>[K] } {
     const attributes = getComponentAttributes()
     if (!attributes) throw new Error(`input function must be called as default parameter of component factory`)
@@ -238,7 +243,7 @@ export function getAttributes<C extends { [key: string]: { inputType: any } | ((
 }
 
 
-
+//API
 export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, assertions?: { [K in keyof C]?: ((value: any) => void) | ((value: any) => void)[] }): { [K in keyof ComponentInput<C>]: ComponentInput<C>[K] } {
     const typeConfig = attributes[ATTRIBUTE_VALIDATION];
     if (typeConfig || assertions) {
@@ -268,7 +273,10 @@ export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, as
                         if (isIon(value)) {
                             value = value()
                         }
-                        validatedAttributes[key] = value; //TODO: make readonly
+                        if (key.startsWith('on:') && value instanceof Function) {
+                            validatedAttributes['emit' + key.slice(3)] = value;
+                        }
+                        else validatedAttributes[key] = value; //TODO: make readonly
                         break;
 
                     case '_Ion':
@@ -307,3 +315,11 @@ export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, as
     return attributes as ComponentInput<C>
 }
 
+const inpu = getAttributes({
+    'on:IncrementClick': v<() => void>,
+    car: v<number>('??')(20),
+    frog: v<boolean>,
+    dog: v<number>('?'),
+})
+
+const { emitIncrementClick, dog } = prep(inpu)

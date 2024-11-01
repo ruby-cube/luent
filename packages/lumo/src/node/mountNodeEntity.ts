@@ -6,7 +6,7 @@ import { NodeEntity } from "./makeNode";
 import { _NodePod } from "./NodePod";
 import { mountTextNode } from "./mountTextNode";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
-import { MorphicRenderKit } from "../morphic/MorphicComponent";
+import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { getProviderComponent } from "../component/provide";
 
 export function mountNodeEntity(

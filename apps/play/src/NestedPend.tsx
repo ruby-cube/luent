@@ -55,8 +55,9 @@ function ListBlock() {
 function TextArea() {
     const $word = ion("not ready")
 
-    suspendRender(simFetchC("pomp"))
-        .then(word => $word.as(word))
+    suspendRender(
+        simFetchC("pomp")
+    ).then(word => $word.as(word))
 
     return (
         <div>

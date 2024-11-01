@@ -341,11 +341,28 @@ export function TestCleanupScheduler({
     // simple style bindings
     style($div, div =>
         [{
-            backgroundColor: $mainColor,
+            backgroundColor: $mainColor(),
             width: `${$listItem.width + 1} px`,
             height: `${$height()} px`
         },
         $dragging() ? (
+            div.backgroundColor = 'gray',
+            div.width = `${listItem$.width} px`,
+            div.height = `${$height()} px`
+        ) : (
+            div.backgroundColor = 'red',
+            div.width = `0 px`
+        )]
+    )
+
+    //compiles to:
+    style($div,
+        [{
+            backgroundColor: $mainColor,
+            width: () => `${$listItem.width + 1} px`,
+            height: () => `${$height()} px`
+        },
+        div => $dragging() ? (
             div.backgroundColor = 'gray',
             div.width = `${listItem$.width} px`,
             div.height = `${$height()} px`
@@ -397,13 +414,13 @@ export function TestCleanupScheduler({
                 <button on:click={initWatcher}>start</button>
                 <div
                     width={2}
-                    style={'width: 2px', {
+                    style={['width: 2px', {
                         lineHeight: 1.5, // only declare layout css in the template that depends on hierarchy
-                        background: $divBgColor,
+                        background: $divBgColor(),
                         border: '2px solid #e66465',
                         [text_color]: 'red',
-                        [background_image]: $image
-                    }}  // use ions for dynamic styles restricted to an element
+                        [background_image]: $image()
+                    }]}  // use ions for dynamic styles restricted to an element
                 >
                     <p style={{
                         margin: '15px',

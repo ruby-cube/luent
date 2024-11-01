@@ -76,6 +76,8 @@ export function List(
         }
     })
 
+
+
     const $selected = ionize(new Set(), {
         toggle(item: typeof $list[number]) {
             if ($selected.has(item)) {
@@ -126,8 +128,7 @@ export function List(
                             {() => $item.content}
                         </li>
                         <p>{$index}</p>
-                        <div
-                            on:click={e => $list.insert($index() + 1)}
+                        <div on:click={e => $list.insert($index() + 1)}
                             style="background-color: gray; cursor: pointer"
                         >
                             insert
@@ -138,7 +139,7 @@ export function List(
                             insert
                         </div>
                     </div>
-                , 'id')
+                    , 'id')
             )]}
 
             <button on:click={e => $selected.clear()}>clear</button>

@@ -1,8 +1,10 @@
 import { AnyObject } from "@rue/types";
 import { META } from "../ReactiveEntity";
-import { asMetaIon, MetaIon } from "./AtomicIon";
+import { asMetaIon, AtomicIon, MetaIon } from "./AtomicIon";
 import { isIonicModel } from "../ionize/ionize";
 import { protectIonicModel } from "../ionize/ProtectedIonicModel";
+
+export const IS_PUBLIC = Symbol('is_public')
 
 export type ProtectedIon<T = any, M extends AnyObject = {}> = {
     (selected?: true): T;
@@ -14,9 +16,9 @@ export const READONLY = 'ro'
 // readonly ion: no methods
 // custom protected ion: no set function and only select properties and methods 
 
-type WritableIon = {
+type WritableIon<T = any, M = AnyObject> = ((selected?: true) => T) & {
     [META]: MetaWritableIon
-}
+} & M
 
 // ion | WritableDerivedIon | PropIon //TODO: make this into an interface instead
 type MetaWritableIon = {
@@ -32,10 +34,16 @@ export function isWritableIon(value: any): value is WritableIon {
     return META in value && 'asReadonly' in value[META]
 }
 
+export type Public = {
+    [IS_PUBLIC]?: true
+} & (() => any)
+
+type _ProtectedIon<I> = I extends WritableIon<infer T, infer M> ? ProtectedIon<T, { [K in keyof M as M[K] extends (this: infer P, ...args: any[]) => any ? P extends Public ? K extends `XPO${infer S}` ? S : K : never: never]: M[K] }> : Omit<I, 'as'>
+// I & {[K in keyof M as M[K] extends (this: Public)=>any ? K : never]: M[K]}
 /**
  * methodKeys: methodKeys to include in protected ion
  */
-export function protectIon($ion: WritableIon, methodKeys?: { [key: string]: true } | typeof READONLY) {
+export function protectIon<I extends WritableIon>($ion: I, methodKeys?: { [key: string]: true } | typeof READONLY): _ProtectedIon<I> {
     if (!methodKeys && isCustomProtectedIon($ion)) {
         return $ion;
     }
@@ -65,13 +73,17 @@ function createCustomProtectedIon($ion: WritableIon, methodKeys: { [key: string]
         if (isIonicModel(value)) {
             return protectIonicModel(value)
         }
+        return value;
     }
 
-    if (__DEV__ && 'set' in methodKeys) {
-        console.warn(`'set' function cannot be included in a protected ion.`)
+    if (__DEV__ && 'as' in methodKeys && !('_as' in $coreIon)) {
+        console.warn(`'as' function cannot be included in a protected ion unless it is an override`)
     }
 
-    $customIon.set = protectedMethod;
+    const setterKey = '_as' in $coreIon ? '_as' : 'as'
+
+    //@ts-expect-error
+    $customIon[setterKey] = protectedMethod;
     for (const key in proto) {
         if (!(key in methodKeys)) {
             (<AnyObject>$customIon)[key] = protectedMethod
@@ -88,7 +100,7 @@ export function protectedMethod() {
 }
 
 function isCustomProtectedIon($ion: AnyObject) {
-    return $ion.set === protectedMethod;
+    return $ion.as === protectedMethod || $ion._as === protectedMethod
 }
 
 function asReadonlyIon($ion: WritableIon) {
@@ -137,9 +149,26 @@ function createProtectedIon(meta: MetaWritableIon) {
         if (isIonicModel(value)) {
             return protectIonicModel(value)
         }
+        return value;
     }
-    $protectedIon.set = () => {
-        console.warn(`Set operation failed. Ions cannot be set outside of their own methods`)
+
+    // const setterKey = '_as' in $coreIon ? '_as' : 'as'
+
+    // //@ts-expect-error
+    // $protectedIon[setterKey] = () => {
+    //     throw new Error(`Set operation failed. Ion is protected`)
+    //     console.warn(`Set operation failed. Ion is protected`)
+    // }
+
+    for (const key in proto) {
+        const method = proto[key];
+        if (!(IS_PUBLIC in method)) {
+            //@ts-expect-error
+            $protectedIon[key] = () => {
+                throw new Error(`'${key}()' method failed. Must be marked /* public */ to be used in protected ion`)
+                console.warn(`${key} method failed. Must be marked /* public */ to be used in protected ion`)
+            }
+        }
     }
 
     Object.setPrototypeOf($protectedIon, proto)

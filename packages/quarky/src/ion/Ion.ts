@@ -18,20 +18,13 @@ export type Ion<T = any, M extends AnyObject = {}> = (() => T)
         (selected?: true): T
     } & M
 
-
-
-
-
-// export type ReactiveGet<T = any> = () => T
-// export type Get<T = any> = () => T
-
 type ReactiveIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? AtomicIon<T, M> : AtomicIon<T>
 
 
 // API
-export function ion<T, M>(value?: T & (() => unknown), methods?: M & { [key: string]: (...args: any[]) => any }& ThisType<M & {as: (value: T)=>T}>): T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-export function ion<T, M>(value?: T, methods?: M & { [key: string]: ( ...args: any[]) => any }& ThisType<M & {as: (value: T)=>T}>): ReactiveIon<T, M>
-export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any } & ThisType<M & {as: (value: T)=>T}>): T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M> {
+export function ion<T, M>(value?: T & (() => unknown), methods?: M & { [key: string]: (...args: any[]) => any } & ThisType<M & { as: (value: T) => T }>): T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any } & ThisType<M & { as: (value: T) => T }>): ReactiveIon<T, M>
+export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any } & ThisType<M & { as: (value: T) => T }>): T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M> {
     if (isIon(value)) {
         if (__DEV__ && methods) console.warn(`Cannot make an existing ion into an ion. Methods will not be attached`)
         return value as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
@@ -44,4 +37,3 @@ export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: an
 }
 
 ion.of = asPropIon
-
