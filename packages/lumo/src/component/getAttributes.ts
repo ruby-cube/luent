@@ -7,13 +7,18 @@ import { getComponentAttributes } from "./makeComponent";
 
 //TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
 
-export const v = ((optional: '?' | (() => any)) => {
-    return {
-        name: 'v',
-        inputType: null,
-        attributeType: null,
-        optional: optional as unknown as true,
+export const v = ((optional: '?' | '??') => {
+    function v(defaultValue: any) {
+        return {
+            name: 'v',
+            // inputType: null,
+            // attributeType: null,
+            optional: true,
+            default: defaultValue
+        }
     }
+    v.optional = optional as unknown as true
+    return v
 }) as {
     <T>(optional?: '?' | '??'): {
         name: 'v',
@@ -33,9 +38,9 @@ export const v = ((optional: '?' | (() => any)) => {
 const _Ion = ((optional: '?') => {
     return {
         name: '_Ion',
-        inputType: null as unknown as Ion<any>,
-        attributeType: null as unknown as Ion<any>,
-        optional: optional as unknown as true,
+        // inputType: null as unknown as Ion<any>,
+        // attributeType: null as unknown as Ion<any>,
+        optional: true,
     }
 }) as {
     <T>(optional: '?'): {
@@ -50,32 +55,61 @@ export { _Ion as Ion }
 export type Ion<T = any, M extends AnyObject = {}> = (() => T) & ((selected?: true) => T) & M
 
 
-export const MaybeIon = ((optional: '?' | (() => any)) => {
-    return {
-        name: 'MaybeIon',
-        inputType: null as unknown as Ion<any>,
-        attributeType: null as unknown as Ion<any>,
-        optional: optional as unknown as true,
+// export const MaybeIon = ((optional: '?' | (() => any)) => {
+//     return {
+//         name: 'MaybeIon',
+//         inputType: null as unknown as Ion<any>,
+//         attributeType: null as unknown as Ion<any>,
+//         optional: optional as unknown as true,
+//     }
+// }) as {
+//     <T>(optional: '?' | (() => any)): {
+//         name: 'MaybeIon',
+//         inputType: Ion<T>;
+//         attributeType: Ion<T> | T;
+//         optional: true
+//     },
+//     name: 'MaybeIon'
+// }
+
+
+export const MaybeIon = ((optional: '?' | '??') => {
+    function MaybeIon(defaultValue: any) {
+        return {
+            name: 'MaybeIon',
+            // inputType: null as unknown as Ion<any>,
+            // attributeType: null,
+            optional: true,
+            default: defaultValue
+        }
     }
+    MaybeIon.optional = optional as unknown as true
+    return MaybeIon
 }) as {
-    <T>(optional: '?' | (() => any)): {
+    <T>(optional?: '?' | '??'): {
         name: 'MaybeIon',
         inputType: Ion<T>;
         attributeType: Ion<T> | T;
-        optional: true
-    },
+        optional: true;
+    } & ((defaultValue: T) => {
+        name: 'MaybeIon',
+        inputType: Ion<T>;
+        attributeType: Ion<T> | T;
+        optional: true;
+        default: true;
+    }),
     name: 'MaybeIon'
 }
 
 export const $Ion = ((optional: '?') => {
     return {
         name: '$Ion',
-        inputType: null as unknown as Ion<any>,
-        $attributeType: null as unknown as Ion<any>,
-        optional: optional as unknown as true,
+        // inputType: null as unknown as Ion<any>,
+        // $attributeType: null as unknown as Ion<any>,
+        optional: true,
     }
 }) as {
-    <T, M extends AnyObject>(optional: '?' | (() => any)): {
+    <T, M extends AnyObject>(optional: '?'): {
         name: '$Ion',
         inputType: Ion<T, M>;
         $attributeType: Ion<T, M>;
@@ -87,10 +121,10 @@ export const $Ion = ((optional: '?') => {
 export const $IonOrIon = ((optional: '?') => {
     return {
         name: '$IonOrIon',
-        inputType: null as unknown as Ion<any>,
-        attributeType: null as unknown as Ion<any>,
-        $attributeType: null as unknown as Ion<any>,
-        optional: optional as unknown as true,
+        // inputType: null as unknown as Ion<any>,
+        // attributeType: null as unknown as Ion<any>,
+        // $attributeType: null as unknown as Ion<any>,
+        optional: true,
     }
 }) as {
     <T, M extends AnyObject>(optional: '?'): {
@@ -110,9 +144,9 @@ export type Ionized<T extends AnyObject, M = {}> = {
 const _Ionized = ((optional: '?') => {
     return {
         name: '_Ionized',
-        inputType: null as unknown as Ionized<any>,
-        attributeType: null as unknown as Ionized<any>,
-        optional: optional as unknown as true,
+        // inputType: null as unknown as Ionized<any>,
+        // attributeType: null as unknown as Ionized<any>,
+        optional: true,
     }
 }) as {
     <T extends AnyObject>(optional: '?'): {
@@ -127,28 +161,39 @@ export { _Ionized as Ionized }
 
 
 
-export const MaybeIonized = ((optional: '?' | (() => any)) => {
-    return {
-        name: 'MaybeIonized',
-        inputType: null as unknown as Ionized<any>,
-        attributeType: null as unknown as Ionized<any>,
-        optional: optional as unknown as true,
+export const MaybeIonized = ((optional: '?' | '??') => {
+    function MaybeIonized(defaultValue: any) {
+        return {
+            name: 'MaybeIonized',
+            // inputType: null as unknown as Ionized<any>,
+            // attributeType: null,
+            optional: true,
+            default: defaultValue
+        }
     }
+    MaybeIonized.optional = optional as unknown as true
+    return MaybeIonized
 }) as {
-    <T extends AnyObject>(optional: '?' | (() => any)): {
+    <T extends AnyObject>(optional?: '?' | '??'): {
         name: 'MaybeIonized',
         inputType: Ionized<T>;
         attributeType: Ionized<T> | T;
-        optional: true
-    },
+        optional: true;
+    } & ((defaultValue: T) => {
+        name: 'MaybeIonized',
+        inputType: Ionized<T>;
+        attributeType: Ionized<T> | T;
+        optional: true;
+        default: true;
+    }),
     name: 'MaybeIonized'
 }
 
 export const $Ionized = ((optional: '?') => {
     return {
         name: '$Ionized',
-        inputType: null as unknown as Ionized<any>,
-        $attributeType: null as unknown as Ionized<any>,
+        // inputType: null as unknown as Ionized<any>,
+        // $attributeType: null as unknown as Ionized<any>,
         optional: optional as unknown as true,
     }
 }) as {
@@ -164,8 +209,8 @@ export const $Ionized = ((optional: '?') => {
 export const $IonizedOrIonized = ((optional: '?') => {
     return {
         name: '$IonizedOrIonized',
-        inputType: null as unknown as Ionized<any>,
-        attributeType: null as unknown as Ionized<any>,
+        // inputType: null as unknown as Ionized<any>,
+        // attributeType: null as unknown as Ionized<any>,
         optional: optional as unknown as true,
     }
 }) as {
@@ -261,8 +306,8 @@ export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, as
             if (typeConfig) {
                 const config = typeConfig[key];
 
-                if ('optional' in config && value === undefined && config.optional instanceof Function) {
-                    value = config.optional()
+                if ('optional' in config && value === undefined && 'default' in config && config.default instanceof Function) {
+                    value = config.default()
                 }
                 else if (!('optional' in config) && value === undefined) {
                     throw new Error(`[INVALID INPUT] Required component attribute, ${key}, is undefined`)
