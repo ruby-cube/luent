@@ -1,4 +1,4 @@
-import { DerivedIon, ReactiveGet, ion, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked } from "../../../quarky/src";
+import { DerivedIon, ReactiveGet, ion, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked, AtomicIon } from "../../../quarky/src";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { InferSlot, ComponentSetupWithSlot, makeComponent } from "../component/makeComponent";
@@ -95,30 +95,32 @@ export function initializeListRef( // should this be initialize ref?
 ) {
     // if (__DEV__) __devCheckIfNotTracked()
     if (__DEV__) __devCheckIfTracked()
-    const array = ref()!
-    const _existingRef = getNodeArrayRef(array)
-    if ($index() === 0 && _existingRef)
-        throw new Error('This node list ref has already be initialized. A node list ref cannot be used multiple times')
-    const _ref = _existingRef || new InternalNodeArrayRef(ref)
+    // const array = ref()!
+    const _ref = getNodeArrayRef(ref())
+    if (!_ref) throw new Error(`No internal node ref found. This should never happen`)
+    // if ($index() === 0 && _existingRef)
+        // throw new Error('This node list ref has already be initialized. A node list ref cannot be used multiple times')
+    // const _ref = _existingRef || new InternalNodeArrayRef(ref)
     if (value) {
         _ref.assignValue(value, $index);
     }
-    if (_ref.initialized === true) return; // to prevent registering multiple watchers for lists
 
-    // dispose with outer flask because we don't want to dispose when first item is removed
-    const outerFlask = getFlask()?.outer
-    outerFlask?.onDisposal(() => {
-        _ref.setValue([]);
-        _ref.initialized = false;
-    })
+    // if (_ref.initialized === true) return; // to prevent registering multiple watchers for lists
 
-    if (isSettingUpList() && !__SSR__) {
-        onListUpdated((toFromIndices) => {
-            _ref.updateListRef(toFromIndices)
-        }, { until: outerFlask!.onDisposal })
-    }
+    // // dispose with outer flask because we don't want to dispose when first item is removed
+    // const outerFlask = getFlask()?.outer
+    // outerFlask?.onDisposal(() => {
+    //     _ref.setValue([]);
+    //     _ref.initialized = false;
+    // })
 
-    _ref.markInitialized()
+    // if (isSettingUpList() && !__SSR__) {
+    //     onListUpdated((toFromIndices) => {
+    //         _ref.updateListRef(toFromIndices)
+    //     }, { until: outerFlask!.onDisposal })
+    // }
+
+    // _ref.markInitialized()
 }
 
 export function initializeRef(ref: NodeRef, value: NodeReferent | undefined) {

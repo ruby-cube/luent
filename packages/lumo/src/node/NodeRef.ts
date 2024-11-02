@@ -1,9 +1,10 @@
 import { Component, PublicComponent } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { HTMLTag } from "../element/makeElement"
-import { isUpdatingList } from "../iteratives/listStack"
+import { isSettingUpList, isUpdatingList, onListUpdated } from "../iteratives/listStack"
 import { protect, AtomicIon, ref } from "@rue/quarky"
 import { READONLY } from "../../../quarky/src/ion/ProtectedIon"
+import { getFlask } from "@rue/flask"
 
 
 
@@ -57,6 +58,19 @@ export function NodesRef<T extends RefSource = RefSource>(source: T): NodesIon<T
     if (__DEV__) {
         $nodes = asReadonlyNodeRef($nodes) as NodesIon<T>
     }
+    const _ref = new InternalNodeArrayRef($nodes)
+
+    const flask = getFlask()
+    flask?.onDisposal(() => {
+        _ref.setValue([]);
+    })
+
+    if (isSettingUpList() && !__SSR__) {
+        onListUpdated((toFromIndices) => {
+            _ref.updateListRef(toFromIndices)
+        }, { until: flask!.onDisposal })
+    }
+    nodeArrayRefMap.set($nodes, _ref);
     return $nodes
 }
 
@@ -101,16 +115,18 @@ export class InternalNodeRef<
 type ListUpdates = any[]
 const listUpdateMap: WeakMap<InternalNodeArrayRef, ListUpdates> = new WeakMap()
 
-const nodeArrayRefMap: WeakMap<NodeReferent[], InternalNodeArrayRef> = new WeakMap()
+const nodeArrayRefMap: Map<NodesIon, InternalNodeArrayRef> = new Map()
 
-export function getNodeArrayRef(nodes: NodeReferent[]) {
-    return nodeArrayRefMap.get(nodes)
+export function getNodeArrayRef(nodeRef: NodesIon) {
+    const listRef = nodeArrayRefMap.get(nodeRef)
+    nodeArrayRefMap.delete(nodeRef);
+    return listRef
 }
 
 export class InternalNodeArrayRef {
     // preserve: boolean = false;
     // preserved: T | undefined = undefined;
-    initialized: boolean = false; // prevent multiple initializations for arrays
+    // initialized: boolean = false; // prevent multiple initializations for arrays
     o: _NodesIon
     constructor(
         ref: NodesIon
@@ -124,7 +140,7 @@ export class InternalNodeArrayRef {
     }
 
     insertNode(node: NodeReferent, index: number) {
-        const pod = this.setValue(this.o())
+        const pod = this.setValue(this.o()) //QUESTION: Why am I setting the ref to its own value??
         pod.splice(index, 0, node); //TODO: should this be splice?
     }
 
@@ -133,15 +149,15 @@ export class InternalNodeArrayRef {
         pod?.splice(index, 1);
     }
 
-    markInitialized() {
-        this.initialized = true;
-    }
+    // markInitialized() {
+    //     this.initialized = true;
+    // }
 
     assignValue(value: NodeReferent, $index: AtomicIon<number>) {
         let nodes = !__SSR__ && isUpdatingList() ? this.getNewListNodes()
-            : this.o.as(this.o())
+            : this.o.as(this.o()) //QUESTION: why am i setting the ref to its own value? this makes no sense.
         nodes[$index()] = value;
-        nodeArrayRefMap.set(nodes, this);
+        // nodeArrayRefMap.set(nodes, this); 
     }
 
     getNewListNodes() {
@@ -163,7 +179,7 @@ export class InternalNodeArrayRef {
         }
         this.o.as(newNodes);
         listUpdateMap.delete(this)
-        nodeArrayRefMap.set(newNodes, this);
+        // nodeArrayRefMap.set(newNodes, this);
     }
 }
 
