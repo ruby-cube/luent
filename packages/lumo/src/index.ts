@@ -11,7 +11,8 @@ export * from './element/makeElement' //TODO: Limit to public API
 export * from './component/makeComponent' //TODO: Limit to public API
 export * from './conditional/If' //TODO: Limit to public API
 export * from './conditional/toggledisplay' //TODO: Limit to public API
-export * from './component/provide' //TODO: Limit to public API
+export * from './context/provide' //TODO: Limit to public API
+export * from './context/ContextKey' //TODO: Limit to public API
 export * from './events/target' //TODO: Limit to public API
 export * from './events/listen' //TODO: Limit to public API
 export * from './events/Abortable' //TODO: Limit to public API

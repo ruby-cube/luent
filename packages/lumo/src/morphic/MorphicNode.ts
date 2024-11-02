@@ -1,6 +1,6 @@
 import { normalizeToArray } from "@rue/utils";
 import { Component, ComponentSetup, InternalComponent } from "../component/InternalComponent";
-import { getProviderComponent, popProvider, pushProvider } from "../component/provide";
+import { getProviderComponent, popProvider, pushProvider } from "../context/provide";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";

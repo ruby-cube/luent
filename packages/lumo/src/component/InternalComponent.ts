@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
 import { mountNodeEntity } from "../node/mountNodeEntity";
-import { fromContext, popProvider, Provide, pushProvider, TypedKey } from "./provide";
+// import { fromContext, popProvider, Provide, pushProvider, TypedKey } from "./provide";
 import { protect } from "@rue/quarky";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { ThisComponent } from "../$this";
