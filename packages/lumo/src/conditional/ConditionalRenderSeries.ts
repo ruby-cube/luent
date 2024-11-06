@@ -10,8 +10,8 @@ import { ConditionalSeries } from "./ConditionalSeries";
 import { hidePrevConditionalNodes, showConditionalNodes } from "./toggledisplay";
 import { watch } from "../watch/watchAndPreserve";
 import { areShallowEqualArrays, Phase } from "../../../quarky/src";
-import { popProvider, pushProvider } from "../component/provide";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
+import { popContext, pushContext, Context } from "../context/context-stack";
 
 
 
@@ -75,7 +75,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         return nodePodIndex;
     }
 
-    component: InternalComponent
+    context: Context
 
     constructor(
         statements: ConditionalRenderKit[],
@@ -83,7 +83,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         makeElseKit: () => ConditionalRenderKit
     ) {
         super(statements, makeElseKit);
-        this.component = statements[0].component;
+        this.context = statements[0].context;
     }
 
     mount(
@@ -98,7 +98,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const activeIndex = this.evaluateConditions()
         const dynamicPod = nodePod.appendDynamicPod();
         const series = this;
-        const component = this.component
+        const context = this.context
         this.initDynamicNodePod(dynamicPod)
 
         const _nodePod = this.getNodePod(activeIndex)
@@ -107,9 +107,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const dynamicNode = makeDynamicNode(preserve, _nodePod)
 
         dynamicNode.activate(function renderConditional() {
-            pushProvider(component)
+            pushContext(context)
             series.appendConditional(activeIndex, parent, fragment)
-            popProvider()
+            popContext()
         })
         this.storeDynamicNode(dynamicNode, activeIndex)
 
@@ -128,11 +128,11 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                 const activeIndex = series.evaluateConditions();
     
                 // (3)
-                pushProvider(component)
+                pushContext(context)
                 series.activateConditional(activeIndex, parent)
             }
             finally{
-                popProvider()
+                popContext()
                 popDynamicNode()
             }
 

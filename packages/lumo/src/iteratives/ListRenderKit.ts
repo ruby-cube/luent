@@ -11,9 +11,9 @@ import { watch } from "../watch/watchAndPreserve";
 import { diff, InsertAndMoveKit } from "./diff";
 import { Sign } from "crypto";
 import { META } from "../../../quarky/src/ReactiveEntity";
-import { popProvider, pushProvider } from "../component/provide";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { getFlask } from "@rue/flask";
+import { Context, popContext, pushContext } from "../context/context-stack";
 
 
 type Index = number
@@ -37,7 +37,7 @@ export class ListRenderKit<T = any> {
     constructor(
         public renderItem: RenderItem<T>, //QUESTION: Does this need the context object?
         public data: Collection<T> | IonicModel<Collection<T>> | ReactiveGet<Collection<T>>,
-        public provider: InternalComponent,
+        public context: Context,
         public idKey: string | undefined
     ) { }
 
@@ -68,7 +68,7 @@ export class ListRenderKit<T = any> {
         const data = this.data
         const renderItem = this.renderItem
         const idKey = this.idKey
-        const provider = this.provider
+        const context = this.context
         if (__DEV__) __devCheckIfTracked()
         const list = isIon(data) ? data() : <Collection<any>>data;
         const _list = list instanceof Array ? list : list //TODO: need to implement for sets, maps, and objects
@@ -91,23 +91,23 @@ export class ListRenderKit<T = any> {
                 const dynamicNode = makeDynamicNode(false, nodePod)
                 dynamicNode.activate(function mountDynamicItem() {
                     console.log('mounting item')
-                    pushProvider(provider)
+                    pushContext(context)
                     const nodeEntities = normalizeToArray(renderItem(item, $index))
                     for (const nodeEntity of nodeEntities) {
                         mountNodeEntity(parent, nodeEntity, nodePod, fragment);
                     }
-                    popProvider()
+                    popContext()
                 })
                 // dynamicNode.setNodePod(nodePod)
                 dynamicNodeMap.set(nodePod, dynamicNode)
             }
             else {
-                pushProvider(provider)
+                pushContext(context)
                 const nodeEntities = normalizeToArray(renderItem(item, $index))
                 for (const nodeEntity of nodeEntities) {
                     mountNodeEntity(parent, nodeEntity, nodePod, fragment);
                 }
-                popProvider()
+                popContext()
             }
         }
 
@@ -118,7 +118,7 @@ export class ListRenderKit<T = any> {
             // set up watcher for updates
             // const renderCycle = getCurrentRenderCycle();
             const parentDynamicNode = getActiveDynamicNode()
-            pushProvider(provider)
+            pushContext(context)
             const rawData = isIonicModel(data) ? toRaw(data) : undefined
             let clone = isIonicModel(data) ? shallowClone(rawData!) : undefined
             watch(data, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
@@ -131,16 +131,16 @@ export class ListRenderKit<T = any> {
                     throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)
                 this.runUpdate(() => {
                     pushDynamicNode(parentDynamicNode!)
-                    pushProvider(provider)
+                    pushContext(context)
                     // component.emit(LifecycleHook.BEFORE_UPDATE) //FIX: this should be called in before render and afterRender hooks
                     this.removeItems(indicesToRemove!);
                     this.insertAndMoveItems(insertAndMoveKit!, parent, dynamicIndices)
                     // component.emit(LifecycleHook.ON_UPDATED)
-                    popProvider()
+                    popContext()
                     popDynamicNode()
                 })
             }, { phase: Phase.RENDER })
-            popProvider()
+            popContext()
         }
         // currentItem = undefined;
         $currentIndex = undefined;
@@ -211,7 +211,7 @@ export class ListRenderKit<T = any> {
 
                 const dynamicNode = makeDynamicNode(false, nodePod)
                 const renderItem = this.renderItem
-                pushProvider(this.provider)
+                pushContext(this.context)
                 pushList(this)
                 const list = this.data;
                 const _item = isIonicModel(list) || isAtomicIon(list) && asMetaIon(list).hasIonicValue ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
@@ -224,7 +224,7 @@ export class ListRenderKit<T = any> {
                 })
                 setCurrentIndex(undefined)
                 popList();
-                popProvider()
+                popContext()
                 dynamicNodeMap.set(nodePod, dynamicNode)
             }
             else if (hasMoved(uItem)) {

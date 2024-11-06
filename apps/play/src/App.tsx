@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { NodeRef, Component, COMPONENT, ComponentSetup, If, Else, For, Provide, teleportTo } from "@rue/lumo";
+import { NodeRef, Component, COMPONENT, ComponentSetup, If, Else, For, teleportTo } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, ion, ionize } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
@@ -206,8 +206,7 @@ function Glo() {
 function Appo(
     setup: {
         kdj: string
-    },
-    provide: Provide
+    }
 ) {
     const $active = ion(true)
     const $ready = ion(true)

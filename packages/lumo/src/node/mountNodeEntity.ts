@@ -7,7 +7,7 @@ import { _NodePod } from "./NodePod";
 import { mountTextNode } from "./mountTextNode";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
-import { getProviderComponent } from "../component/provide";
+import { getContext } from "../context/context-stack";
 
 export function mountNodeEntity(
     parent: Element, //TODO: parent is as optional as fragment I think...
@@ -28,7 +28,7 @@ export function mountNodeEntity(
         const series = new ConditionalRenderSeries(
             nodeEntity,
             nodeEntity[0].type,
-            () => new ConditionalRenderKit('else', () => [], 'create', getProviderComponent())
+            () => new ConditionalRenderKit('else', () => [], 'create', getContext())
         )
         series.mount(parent, nodePod, fragment)
     }

@@ -1,77 +1,23 @@
-import { AnyObject } from "@rue/types";
 import { encapsulate } from "@rue/utils";
-import { onCreated } from "../dynamic/lifecycle";
-import { InternalComponent } from "./InternalComponent";
-import { getActiveComponent } from "./makeComponent";
+import { getCurrentContext } from "./context-stack";
+import { NodeContext } from "./Context";
+import { contextTypeMap } from "./ContextKey";
 
-type Component = AnyObject
 
-interface Provider {
-    entries: Map<Symbol | string, any>;
-    provider: InternalComponent,
-    root: InternalComponent,
-    global: Provider
-}
-// manage provider stack
-let currentProvider: InternalComponent | undefined;
-let previousProvider: InternalComponent | undefined;
 
-export function getCurrentProvider() {
-    return currentProvider;
-}
-
-export function pushProvider(provider: InternalComponent | undefined) {
-    if (!provider) throw new Error(`Provider is undefined`)
-    previousProvider = currentProvider;
-    currentProvider = provider;
-}
-
-export function popProvider() {
-    currentProvider = previousProvider;
-    previousProvider = previousProvider?.provider || undefined
+export interface AppContext {
+    entries?: Map<symbol | string, any>;
+    parent?: AppContext,
+    root: AppContext,
+    global?: AppContext,
 }
 
 
-export function getProviderComponent() {
-    const component = getCurrentProvider()
-    if (!component) {
-        throw new Error(`getProviderComponent can only be called from a component setup`)
-    }
-    return component
-}
-
-// export function initializeRootProvider(component: Component) {
-//     const provider = new Provider(component, null);
-//     pushProvider(provider);
-//     onCreated(() => {
-//         popProvider()
-//     })
-// }
-
-export const APPWIDE = true
-
-export type Provide = typeof provide
-
-// Public API
-export function provide<T>(key: TypedKey<T>, value: T) {
-    const component = getActiveComponent();
-    if (!component) throw new Error(`The 'provide()' function can only be called synchronously within component setup`)
-    component.initializeAsProvider()
-    component.addEntry(key, value);
-    return value;
-}
-
-export function provideAppState<T>(key: TypedKey<T>, value: T) {
-    // const component = getCurrentComponent();
-    // if (component === null) {
-    //     if (__DEV__) console.warn("No component found. Providing as global state") //QUESTION: Should I throw an error instead?
-    //     provideGlobal(key, value);
-    //     return value;
-    // }
-    let provider = currentProvider;
-    if (!provider)
+export function provideAppwide<K extends string | string>(key: K, value: ContextType<K>) {
+    let context = getCurrentContext();
+    if (!context)
         throw new Error("Must call initializeRootProvider in root component setup in order to provideAppState outside of root component")
-    const rootProviderEntries = provider.root!.entries || provider.entries
+    const rootProviderEntries = context.root.entries || (context.root.entries = new Map());
     if (rootProviderEntries.has(key)) {
         if (__DEV__) {
             console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
@@ -87,59 +33,47 @@ export function provideAppState<T>(key: TypedKey<T>, value: T) {
 
 // type UseAppStateReturn<M, T> = M extends 'set' ? [() => T, (value: T) => T]: () => T
 
-export function constAppState<T>(key: TypedKey<T>, initialize: () => T) {
-    return function getState() {
-        return _fromContext(key, () => provideAppState(key, initialize()), 'root')
-    }
+// export function constAppState<T>(key: TypedKey<T>, initialize: () => T) {
+//     return function getState() {
+//         return _fromContext(key, () => provideAppState(key, initialize()), 'root')
+//     }
+// }
+
+// export function letAppState<T>(key: TypedKey<T>, initialize: () => T): [() => T, (value: T) => T] {
+//     function getState() {
+//         return _fromContext(key, () => provideAppState(key, initialize()), 'root')
+//     }
+//     return [
+//         getState,
+//         function setState(value: T) {
+//             return provideAppState(key, value)
+//         }
+//     ]
+// }
+
+
+export function fromApp<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ContextType<K> {
+    let _context = context || getCurrentContext();
+    if (!_context) throw new Error(``)
+    const rootProvider = _context.root;
+    if (!rootProvider) throw new Error("No root provider found :( This should never happen")
+    if (!rootProvider.entries || !rootProvider.entries.has(key)) return undefined;
+    return rootProvider.entries.get(key)
 }
 
-export function letAppState<T>(key: TypedKey<T>, initialize: () => T): [() => T, (value: T) => T] {
-    function getState() {
-        return _fromContext(key, () => provideAppState(key, initialize()), 'root')
-    }
-    return [
-        getState,
-        function setState(value: T) {
-            return provideAppState(key, value)
-        }
-    ]
-}
 
 
-export function fromApp<T, OPT extends '?' | undefined = undefined>(key: TypedKey<T>, optional?: OPT): OPT extends '?' ? T | undefined : T {
-    return _fromContext(key, optional, 'root');
-}
+// export function fromContext<T, OPT extends '?' | undefined = undefined>(key: TypedKey<T>, optional?: '?'): OPT extends '?' ? T | undefined : T {
+//     return _fromContext(key, optional) as OPT extends '?' ? T | undefined : T;
+// }
 
 
-
-export function fromContext<T, OPT extends '?' | undefined = undefined>(key: TypedKey<T>, optional?: '?'): OPT extends '?' ? T | undefined : T {
-    return _fromContext(key, optional) as OPT extends '?' ? T | undefined : T;
-}
-
-
-export function _fromContext<T, OPT extends '?' | (() => T) | undefined>(key: TypedKey<T>, initializeOrOptional: OPT, root?: 'root'): OPT extends '?' ? T | undefined : T {
-    // const component = getCurrentComponent();
-    let provider = currentProvider;
-    if (!provider) {
-        return handleResourceNotFound(key, initializeOrOptional, root)
-    }
-
-    if (root) {
-        const rootProvider = provider.root;
-        if (!rootProvider) throw new Error("No root provider found :( This should never happen")
-        if (!rootProvider.entries.has(key)) {
-            if (initializeOrOptional instanceof Function) {
-                return initializeOrOptional();
-            }
-            return handleResourceNotFound(key, initializeOrOptional, root)
-        }
-        if (!provider.root) throw new Error("No root provider found :( This should never happen")
-        const value = provider.root.entries.get(key)
-        return __DEV__ && shouldEncapsulate(value) ? encapsulate(value) : value;
-    }
+export function fromContext<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ContextType<K> {
+    let _context = context || getCurrentContext();
+    if (!_context) throw new Error(``)
 
     // climb provider tree
-    let parent: InternalComponent | null = provider;
+    let parent: NodeContext | AppContext | null = context;
     while (parent !== null) {
         const entries = parent.entries
         if (entries.has(key)) {
@@ -216,25 +150,43 @@ function shouldEncapsulate(value: any) {
 
 
 
-const globalEntries: Map<Key, any> = new Map();
 
-export function provideGlobal<T>(key: TypedKey<T>, value: T) {
+export function provideGlobal<K extends string | symbol>(key: K, value: ContextType<K>) {
+    let context = getCurrentContext();
+    if (!context)
+        throw new Error('')
+    const globalEntries = context.global?.entries || (context.global = { entries: new Map(), root: context.root, global: undefined }, context.global.entries!); //TODO: need to add global
+    if (globalEntries.has(key)) {
+        if (__DEV__) {
+            console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
+            console.trace();
+        }
+        return value; //TODO: Maybe allow overrides??
+    }
     globalEntries.set(key, value);
+    return value;
 }
 
-export function fromGlobal<T, OPT extends '?' | undefined = undefined>(key: TypedKey<T>, optional?: OPT): OPT extends '?' ? T | undefined : T {
-    if (!optional && !globalEntries.has(key))
-        throw new Error(`A value for '${key.toString()}' has not been provided globally`)
+export function fromGlobal<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ContextType<K> {
+    let _context = context || getCurrentContext();
+    if (!_context)
+        throw new Error('')
+    const globalEntries = context?.global?.entries
+    const typeConfig = contextTypeMap.get(key)
+    if (!globalEntries) return undefined
+    //TODO: optional and default
+
+
     const value = globalEntries.get(key)
-    return __DEV__ && value instanceof Object ? encapsulate(value) : value;
+    
 }
 
 
 // Symbol Key
 // export type TypedKey<T> = symbol & T;
 
-export type TypedKey<T> = (string | symbol) & T
-type Key = symbol | string
+// export type TypedKey<T> = (string | symbol) & T
+// type Key = symbol | string
 
 // Usage
 // const SELECTION = Symbol() as TypedKey<{ position: number }> // define keys in a keys file

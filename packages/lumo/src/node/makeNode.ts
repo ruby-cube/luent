@@ -6,16 +6,14 @@ import { getNodeArrayRef, InternalNodeRef, NodeReferent, NodeRef, InternalNodeAr
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
-import { isSettingUpList, onListUpdated } from "../iteratives/listStack";
-import { watch } from "../watch/watchAndPreserve";
-import { WatchOptions } from "vite";
+import { createContext } from "../context/Context";
 
 export function Fragment() {
     // for jsx-runtime
 }
 
 export function jsx(tag: any, config: any, ...children: any[]) {
-    return makeNode(tag, children, config || {})
+    return makeNode(tag, () => children, config || {})
 }
 
 export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveGet<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
@@ -55,22 +53,25 @@ export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
 
 export function makeNode(
     nodeType: HTMLTag | ComponentSetup,
-    childNodes: NodeEntity[] | InferSlot,
+    renderSlot: (() => NodeEntity[]) | InferSlot,
     config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent {
-    const $index = getCurrentIndex(); //TODO: I need to understand $index and whether it needs to be an ion or if rerenders will take care of it
     if (typeof nodeType === "string")
         return makeElement(
             nodeType,
-            <NodeEntity[]>childNodes,
+            <() => NodeEntity[]>renderSlot,
             <ElementConfig>config,
-            $index
+            getCurrentIndex()
         )
+    if (nodeType.name === 'Context') {
+        if (!renderSlot) throw new Error(`Extraneous <Context>`)
+        return createContext(nodeType, renderSlot, <ComponentConfig>config)
+    }
     return makeComponent(
         nodeType,
-        <InferSlot>childNodes,
+        <InferSlot>renderSlot,
         <ComponentConfig>config,
-        $index
+        getCurrentIndex()
     )
 }
 
@@ -99,7 +100,7 @@ export function initializeListRef( // should this be initialize ref?
     const _ref = getNodeArrayRef(ref())
     if (!_ref) throw new Error(`No internal node ref found. This should never happen`)
     // if ($index() === 0 && _existingRef)
-        // throw new Error('This node list ref has already be initialized. A node list ref cannot be used multiple times')
+    // throw new Error('This node list ref has already be initialized. A node list ref cannot be used multiple times')
     // const _ref = _existingRef || new InternalNodeArrayRef(ref)
     if (value) {
         _ref.assignValue(value, $index);

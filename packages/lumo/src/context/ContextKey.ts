@@ -1,16 +1,20 @@
-import { v } from "../InputTypes";
 import { fromApp } from "./provide";
 
-export function createContextKey<D extends InputDef>(typeDef: D) {
+export const contextTypeMap: Map<symbol | `${string}`, TypeConfig> = new Map();
 
-    return {
+export function defineContextProp<D extends TypeConfig, S extends symbol | `${string}`>(symbolKey: S, typeDef: D) {
+    const typeConfig = {
+        key: symbolKey,
         name: typeDef.name,
         optional: typeDef.optional,
         default: typeDef.default
-    } as D
+    } as { key: S } & D
+    contextTypeMap.set(symbolKey, typeConfig)
+    return typeConfig
 }
 
-type InputDef = {
+
+export type TypeConfig = {
     name: string,
     validatedType?: any,
     inputType?: any,
@@ -20,12 +24,16 @@ type InputDef = {
     optional?: '?'
 }
 
-export function createInjectedClass(classKey: InputDef, get: (key: InputDef) => any = fromApp) {
+export function createInjectedClass(classKey: TypeConfig, get: (key: TypeConfig) => any = fromApp) {
     return (...args: any[]) => new get(classKey)(...args)
 }
 
-export function createInjectedFactory(classKey: InputDef, get: (key: InputDef) => any = fromApp) {
+export function createInjectedFactory(classKey: TypeConfig, get: (key: TypeConfig) => any = fromApp) {
     return (...args: any[]) => get(classKey)(...args)
 }
 
-const DOG = createContextKey(v<string>)
+export interface ContextKeyMap {}
+
+
+
+

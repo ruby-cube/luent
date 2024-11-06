@@ -90,6 +90,26 @@ export function ListBlock(setup = $setup()) {
                 </div>
 
                 <h1>hello</h1>
+                <Context with={{
+                    [FROG]: new Frog(),
+                    [CAT]: cat
+                }}>
+                    <Morphs with={fadeInOut}>{(
+                        If($active,
+                            <p>hey</p>
+                        )
+                    )}</Morphs>
+                </Context>
+                <Context with={[
+                    [FROG, new Frog()],
+                    [CAT, cat]
+                ]}>
+                    <Morphs with={fadeInOut}>{(
+                        If($active,
+                            <p>hey</p>
+                        )
+                    )}</Morphs>
+                </Context>
                 <Context provide={[w(FROG, frog), w(CAT, cat)]}>
                     <Morphs with={fadeInOut}>{(
                         If($active,

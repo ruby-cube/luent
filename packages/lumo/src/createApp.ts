@@ -47,7 +47,7 @@ export function createApp<T extends AnyObject>(App: ComponentSetup<T>, config?: 
                 setComponentAttributes(config?.setup || {})
                 const output = App()
                 setComponentAttributes(undefined)
-                initializeComponent(component, output.publicComponent, output.render(), undefined, undefined)
+                initializeComponent(component, output.renderedTemplate)
                 if (remountable) markMountPhase()
                 component.mount(root, nodePod) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
                 if (remountable) unmarkMountPhase()

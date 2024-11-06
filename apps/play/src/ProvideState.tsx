@@ -1,4 +1,4 @@
-import { Component, fromContext, getAttributes, prep, Provide, TypedKey, v } from "@rue/lumo"
+import { Component, fromContext, getAttributes, prep, TypedKey } from "@rue/lumo"
 import { DerivedIon, ion, ionize } from "@rue/quarky";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
 
@@ -33,6 +33,17 @@ class Counter {
     decrement() {
         this.$.count--
     }
+}
+
+function Card() {
+
+    function renderSlot() { }
+
+    return Component(
+        <div>
+            {renderSlot()}
+        </div>
+    )
 }
 
 type Context = {

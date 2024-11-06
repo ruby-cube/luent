@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { DOMNode } from "../component/InternalComponent";
 import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon } from "../../../quarky/src";
 import { noop, normalizeToArray } from "@rue/utils";
@@ -21,15 +20,15 @@ export type HTMLTag = keyof HTMLElementTagNameMap
 
 export function mE(
     nodeType: HTMLTag,
-    childNodes?: NodeEntity[],
+    renderSlot?: () => NodeEntity[],
     config?: ElementConfig,
 ): DOMNode {
-    return makeNode(nodeType, childNodes, config) as DOMNode
+    return makeNode(nodeType, renderSlot, config) as DOMNode
 }
 
 export function makeElement<T extends keyof HTMLElementTagNameMap>(
     tagName: T,
-    childNodes: NodeEntity[] | undefined,
+    renderSlot: (() => NodeEntity[]) | undefined,
     config: ElementConfig,
     $index: AtomicIon<number> | undefined
 ): DOMNode {
@@ -49,19 +48,6 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
         }
     }
 
-    if (childNodes) {
-        const _childNodes = wrapIfConditionalSeries(childNodes)
-        const nodePod = new _NodePod();
-        for (let i = 0; i < _childNodes.length; i++) {
-            let childNodeEntity = _childNodes[i];
-            if (childNodeEntity instanceof ConditionalRenderKit) {
-                validateStandAloneConditional(childNodeEntity, _childNodes, i);
-                childNodeEntity = [childNodeEntity]
-            }
-            mountNodeEntity(domNode, childNodeEntity, nodePod, undefined)
-        }
-    }
-
     setUpClasses(domNode, normalizeToArray(classes))
     setUpStyles(domNode, normalizeToArray(styles))
     setUpEvents(domNode, events);
@@ -73,6 +59,18 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
             dynamicAttributes
         );
 
+    if (renderSlot) {
+        const _childNodes = wrapIfConditionalSeries(renderSlot())
+        const nodePod = new _NodePod();
+        for (let i = 0; i < _childNodes.length; i++) {
+            let childNodeEntity = _childNodes[i];
+            if (childNodeEntity instanceof ConditionalRenderKit) {
+                validateStandAloneConditional(childNodeEntity, _childNodes, i);
+                childNodeEntity = [childNodeEntity]
+            }
+            mountNodeEntity(domNode, childNodeEntity, nodePod, undefined)
+        }
+    }
     return domNode;
 }
 
