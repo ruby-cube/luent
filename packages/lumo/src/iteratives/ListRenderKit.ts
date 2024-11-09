@@ -39,6 +39,7 @@ export class ListRenderKit<T = any> {
         public data: Collection<T> | IonicModel<Collection<T>> | ReactiveGet<Collection<T>>,
         public context: Context,
         public idKey: string | undefined
+        public morphConfig: undefined | MorphConfig
     ) { }
 
     isUpdating = false;

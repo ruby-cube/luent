@@ -6,7 +6,7 @@ import { getNodeArrayRef, InternalNodeRef, NodeReferent, NodeRef, InternalNodeAr
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
-import { createContext } from "../context/Context";
+import { createNodeContext } from "../context/Context";
 
 export function Fragment() {
     // for jsx-runtime
@@ -65,7 +65,7 @@ export function makeNode(
         )
     if (nodeType.name === 'Context') {
         if (!renderSlot) throw new Error(`Extraneous <Context>`)
-        return createContext(nodeType, renderSlot, <ComponentConfig>config)
+        return createNodeContext(nodeType, renderSlot, <ComponentConfig>config)
     }
     return makeComponent(
         nodeType,

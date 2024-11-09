@@ -96,7 +96,7 @@ function initializeComponent(
 
 function validateOutput(output: any) {
     if (output instanceof Promise && !('pendingLiterateSSRComponent' in output))
-        throw new Error("Components cannot return a promise. Use Suspense and suspendRender to handle promises within component setup")
+        throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
     if (output instanceof Literate) return;
     if (isComponentTuple(output)) return;
     throw new Error("INVALID RETURN: Component setup must return either a Literate or a ComponentTuple ([PublicComponent, Literate])")

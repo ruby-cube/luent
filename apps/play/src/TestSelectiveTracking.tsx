@@ -32,15 +32,15 @@ export function TestSelectiveTracking() {
         }
     })
 
-    const X = true as const;
+    const $ = true as const;
 
     watchIonicEffect(() => {
-        console.log($doubleCount(X))
-        if ($active(X)) {
+        console.log($doubleCount($))
+        if ($active($)) {
             console.log($count())
             console.log('active')
         }
-        else if ($ready(X)) {
+        else if ($ready($)) {
             console.log($count())
             console.log('ready')
         }
@@ -48,7 +48,7 @@ export function TestSelectiveTracking() {
             console.log('neither')
         }
     }, {
-        only: [X]
+        only: [$]
     })
 
     function reInputChange(event: InputEvent) {

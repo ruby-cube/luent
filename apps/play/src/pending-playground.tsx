@@ -71,7 +71,7 @@ function ListBlockB() {
         $data.as(data)
     })
 
-    return suspendRender(pendingData, () =>
+    return pend(pendingData, () =>
         <div>
             <ItemBlock />
         </div>
@@ -82,7 +82,7 @@ function ItemBlockB() {
 
     const $content = ion('');
 
-    suspendRender(fetch(""))
+    pend(fetch(""))
         .then(async (response) => {
             const data = await response.json()
             $content.as(data.content)

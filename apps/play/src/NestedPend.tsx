@@ -1,5 +1,5 @@
 import { ion, protect } from "../../../packages/quarky/src"
-import { suspendRender, Suspense } from "../../../packages/lumo/src/componentSuspense"
+import { pend, Suspense } from "../../../packages/lumo/src/componentSuspense"
 import { Component } from "@rue/lumo"
 
 
@@ -55,7 +55,7 @@ function ListBlock() {
 function TextArea() {
     const $word = ion("not ready")
 
-    suspendRender(
+    pend(
         simFetchC("pomp")
     ).then(word => $word.as(word))
 
@@ -72,7 +72,7 @@ function TextArea() {
 function ItemBlockA() {
     const $word = ion("not ready")
 
-    suspendRender(simFetch("calico"))
+    pend(simFetch("calico"))
         .then(word => $word.as(word))
 
     return (
@@ -83,7 +83,7 @@ function ItemBlockA() {
 function ItemBlockB() {
     const $word = ion("not ready")
 
-    suspendRender(simLongFetch("basset"))
+    pend(simLongFetch("basset"))
         .then(word => $word.as(word))
 
     return (
@@ -94,7 +94,7 @@ function ItemBlockB() {
 function ItemBlockC() {
     const $word = ion("not ready")
 
-    suspendRender(simFetchB("cerulean"))
+    pend(simFetchB("cerulean"))
         .then(word => $word.as(word))
 
     return (
@@ -105,7 +105,7 @@ function ItemBlockC() {
 function ItemBlockD() {
     const $word = ion("not ready")
 
-    suspendRender(simLongFetchB("tilted"))
+    pend(simLongFetchB("tilted"))
         .then(word => $word.as(word))
 
     return (

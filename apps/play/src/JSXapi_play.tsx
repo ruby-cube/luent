@@ -94,62 +94,80 @@ export function ListBlock(setup = $setup()) {
                     [FROG]: new Frog(),
                     [CAT]: cat
                 }}>
-                    <Morphs with={fadeInOut}>{(
+                    <Morph with={fadeInOut}>{(
                         If($active,
                             <p>hey</p>
                         )
-                    )}</Morphs>
+                    )}</Morph>
                 </Context>
+
                 <Context with={[
                     [FROG, new Frog()],
                     [CAT, cat]
                 ]}>
-                    <Morphs with={fadeInOut}>{(
+                    <Transition {...tab_fade_slide} in={delay(30).fade()}>{(
+                        If($active,
+                            <p transition={fade(200)} onTransitionStart={e => console.log('hi')} class='frog'>
+                                hey
+                            </p>
+                        )
+                    )}</Transition>
+                    <Portal to='body'>
+                        <p>hi</p>
+                    </Portal>
+                </Context>
+
+                <Context with={{ [FROG]: frog, [CAT]: cat }}>
+                    <Morph with={fadeInOut}>{(
                         If($active,
                             <p>hey</p>
                         )
-                    )}</Morphs>
+                    )}</Morph>
+                    {teleportTo('body',
+                        <p>hi</p>
+                    )}
                 </Context>
-                <Context provide={[w(FROG, frog), w(CAT, cat)]}>
-                    <Morphs with={fadeInOut}>{(
-                        If($active,
-                            <p>hey</p>
-                        )
-                    )}</Morphs>
-                </Context>
+
                 <div>
                     <p>hi ho</p>
                     <p>hi ho</p>
                 </div>
 
                 <h1>hello</h1>
-                {[frozen,
+                <Frozen>{[
                     If($active(),
                         <p>hey</p>
                     ),
                     Else(
                         <p>Bye</p>
                     )
-                ]}
+                ]}</Frozen>
                 <div>
+                    <transition-in fade>
                     <p>hi ho</p>
+                    </transition-in>
                     <p>hi ho</p>
                 </div>
 
                 <h1>hello</h1>
-                <Morphs with={fadeInOut}>{
-                    setup(WeekKit, o => [
-                        If($active(),
-                            <p>hey</p>
-                        ),
-                        Else(
-                            <p>Bye</p>
-                        )
-                    ])
-                }</Morphs>
+                <fade-transition delay-30 spans-300 ease-in>{[
+                    If($active(),
+                        <p>hey</p>
+                    ),
+                    Else(
+                        <p>Bye</p>
+                    )
+                ]}</fade-transition>
                 <div>
+                    <fade-transition delay-30 spans-300 ease-in>
                     <p>hi ho</p>
-                    <p>hi ho</p>
+                    </fade-transition>
+                    <slide-left delay-30 spans-300 ease-in out:slide-right o:delay-30 o:spans-300>
+                        <p>hi ho</p>
+                    </slide-left>
+                    <slide-left delay-30 spans-300 ease-in out:slide-right o:delay-30 o:spans-300>
+                        <p>hi ho</p>
+                    </slide-left>
                 </div>
 
                 <Try catch={Error} setup={SelectionKit}>
@@ -169,6 +187,13 @@ export function ListBlock(setup = $setup()) {
                     </div>
                 ]}</Suspense>
 
+                {teleportTo('body',
+                    <p>hi</p>
+                )}
+
+                <Portal to='body'>
+                    <p>hi</p>
+                </Portal>
 
                 <div>Stuff here</div>
 
@@ -191,7 +216,7 @@ export function ListBlock(setup = $setup()) {
 
                 <h1>Something Here</h1>
 
-                <Morphs type='create/destroy'>{[
+                <Morph type='create/destroy'>{[
                     If($active(),
                         <p>hello world</p>
                     ),
@@ -203,9 +228,9 @@ export function ListBlock(setup = $setup()) {
                         <p>ok world</p>,
                         <p>bye world</p>
                     )
-                ]}</Morphs>
+                ]}</Morph>
 
-                <Morphs type='show/hide'>{(
+                <Morph type='show/hide'>{(
                     If($active(),
                         <p>hello world</p>,
                     ),
@@ -217,7 +242,7 @@ export function ListBlock(setup = $setup()) {
                         <p>ok world</p>,
                         <p>bye world</p>
                     )
-                )}</Morphs >
+                )}</Morph >
 
                 <$Node type='show/hide'>
                     <If case={$active}>
@@ -540,11 +565,11 @@ export function ListBlock(setup = $setup()) {
                 )}
 
                 <h1>Do something</h1>
-                <Morphs>{
+
+                <Port type='todos' welcome settle item='id' transport>{
                     For($list, (item, $index, o) =>
-                        <p>[x] {item}</p>
-                    )
-                }</Morphs>
+                        <p>[x] {item}</p>,
+                    )}</Port>
 
                 <h1>Do something</h1>
                 {[freeze,

@@ -27,7 +27,7 @@ export function Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | P
         const pendingPromises = promise ? [promise] : []
         pendingPromisesStack.push(pendingPromises);
 
-        const internalComponent = makeComponent(Pending, props.Slot, props, undefined); // any nested suspendRender calls will collect promises into the pendingPromises array
+        const internalComponent = makeComponent(Pending, props.Slot, props, undefined); // any nested pend calls will collect promises into the pendingPromises array
         if (pendingPromises.length === 0) return internalComponent.output;
         const allPromises = Promise.allSettled(pendingPromises);
         // if (__SSR__) trackPromise(allPromises)
@@ -63,10 +63,10 @@ export function Suspense(promiseValueOrConfig: Promise<any> | Promise<any>[] | P
     }
 }
 
-export function suspendRender(promiseValue: Promise<any> | Promise<any>[]) {
+export function pend(promiseValue: Promise<any> | Promise<any>[]) {
     const pendingPromisesStack = getPendingPromisesStack();
     if (pendingPromisesStack.length === 0)
-        throw new Error('suspendRender must eventually be handled by a Suspense call in a parent component. If you want to handle the promise with a placeholder and error view in this component, use Suspense instead');
+        throw new Error('pend must eventually be handled by a Suspense call in a parent component. If you want to handle the promise with a placeholder and error view in this component, use Suspense instead');
     const promise = promiseValue instanceof Array ?
         Promise.allSettled(promiseValue) // on the server we don't need everything to be resolved before sending TODO: I need a way for developer to forward unresolved fetches for client to deal with if they want to try again
         : promiseValue
@@ -75,8 +75,8 @@ export function suspendRender(promiseValue: Promise<any> | Promise<any>[]) {
     return promise;
 }
 
-// export function suspendRender(promiseValue: Promise<any> | Promise<any>[]) {
-//     return getAppState($AWAIT, () => initializeSuspense().suspendRender)(promiseValue)
+// export function pend(promiseValue: Promise<any> | Promise<any>[]) {
+//     return getAppState($AWAIT, () => initializeSuspense().pend)(promiseValue)
 // }
 
 // export function Suspense(promiseValueOrConfig: PendConfig): SSRComponentSetup

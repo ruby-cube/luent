@@ -71,7 +71,7 @@ export function makeComponent(
     setComponentAttributes(undefined);
 
     if (output instanceof Promise)
-        throw new Error("Components cannot return a promise. Use Suspense and suspendRender to handle promises within component setup")
+        throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
 
     const { exposedComponent, renderedTemplate } = output
 

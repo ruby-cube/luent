@@ -1,5 +1,5 @@
 import { ion } from "../../../packages/quarky/src"
-import { suspendRender } from "../../../packages/lumo/src/componentSuspense"
+import { pend } from "../../../packages/lumo/src/componentSuspense"
 import { If } from "@rue/lumo"
 
 export function Root() {

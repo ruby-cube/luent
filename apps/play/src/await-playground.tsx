@@ -12,7 +12,7 @@ function App() {
 
 async function ListBlock() {
 
-    return suspendRender(
+    return pend(
         <div>
             <ItemBlock />
         </div>
@@ -27,7 +27,7 @@ async function ItemBlock() {
     return <div>{message}</div>
 }
 
-function suspendRender<T>(Element: T): Promise<T> {
+function pend<T>(Element: T): Promise<T> {
     return new Promise((resolve) => {
         resolve(Element)
     })

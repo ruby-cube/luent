@@ -46,17 +46,17 @@ export function Context<T>(input: {
     pushContext(context)
     const nodeEntities = renderSlot()
     popContext()
-    return nodeEntities
+    return Component(nodeEntities)
 }
 
-export function createContext(
+export function createNodeContext(
     Context: ComponentSetup,
     renderSlot: () => NodeEntity | NodeEntity[],
     config: ComponentConfig,
 ): InternalComponent {
     const component = new InternalComponent();
-    const renderedTemplate = Context({ renderSlot, with: config.with })
-    initializeComponent(component, renderedTemplate)
+    const output = Context({ renderSlot, with: config.with })
+    initializeComponent(component, output.renderedTemplate)
     return component
 }
 

@@ -1,5 +1,6 @@
-import { Component, suspendRender, Suspense } from "@rue/lumo"
+import { Component, pend, Suspense } from "@rue/lumo"
 import { ion } from "@rue/quarky"
+
 
 
 
@@ -59,7 +60,7 @@ function TextArea() {
     const $word = ion("not ready")
 
 
-    suspendRender(simFetchC("pomp"))
+    pend(simFetchC("pomp"))
         .then(word => $word.as(word))
 
     return Component({
@@ -77,7 +78,7 @@ function TextArea() {
 function ItemBlockA() {
     const $word = ion("not ready")
 
-    suspendRender(simFetch("calico"))
+    pend(simFetch("calico"))
         .then(word => $word.as(word))
 
     return Component(
@@ -93,7 +94,7 @@ function run(fn: Function) {
 function ItemBlockB() {
     const $word = ion("not ready")
 
-    suspendRender(fetch("basset"))
+    pend(fetch("basset"))
         .then(word =>
             $word.as(word)
         )
@@ -101,14 +102,14 @@ function ItemBlockB() {
             console.log(err)
         )
 
-    suspendRender([
+    pend([
         fetch('a'),
         fetch('b')
     ]).then(([a, b]) => $word.as(a))
 
     run(async () => {
         try {
-            const word = await suspendRender(
+            const word = await pend(
                 fetch('basset')
             )
             $word.as(word)
@@ -126,7 +127,7 @@ function ItemBlockB() {
 function ItemBlockC() {
     const $word = ion("not ready")
 
-    suspendRender(simFetchB("cerulean"))
+    pend(simFetchB("cerulean"))
         .then(word => $word.as(word))
 
     return Component(
@@ -137,11 +138,11 @@ function ItemBlockC() {
 function ItemBlockD() {
     const $word = ion("not ready")
 
-    suspendRender(simLongFetchB("tilted"))              // [promise]
+    pend(simLongFetchB("tilted"))              // [promise]
         .then(word => $word.as(word))
 
     return Component(
-        <div>{$word}</div> // {strings: ['<div>', '<div>'], values: [$word]}   (makeComponent should detect suspendRender call and wrap component in promise) 
+        <div>{$word}</div> // {strings: ['<div>', '<div>'], values: [$word]}   (makeComponent should detect pend call and wrap component in promise) 
     )
 }
 

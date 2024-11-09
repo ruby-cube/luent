@@ -2624,118 +2624,6 @@ declare namespace React {
 
         // Transition Events
         'onV:transitionend'?: TransitionEventHandler<T>;
-
-
-        // with modifiers
-        [`on:copy-${string}`]?: ClipboardEventHandler<T>;
-        [`on:cut-${string}`]?: ClipboardEventHandler<T>;
-        [`on:paste-${string}`]?: ClipboardEventHandler<T>;
-
-        // Composition Events
-        [`on:compositionend-${string}`]?: CompositionEventHandler<T>;
-        [`on:compositionstart-${string}`]?: CompositionEventHandler<T>;
-        [`on:compositionupdate-${string}`]?: CompositionEventHandler<T>;
-
-        // Focus Events
-        [`on:focus-${string}`]?: FocusEventHandler<T>;
-        [`on:blur-${string}`]?: FocusEventHandler<T>;
-
-        // Form Events
-        [`on:change-${string}`]?: FormEventHandler<T>;
-        [`on:beforeinput-${string}`]?: FormEventHandler<T>;
-        [`on:input-${string}`]?: FormEventHandler<T>;
-        [`on:reset-${string}`]?: FormEventHandler<T>;
-        [`on:submit-${string}`]?: FormEventHandler<T>;
-        [`on:invalid-${string}`]?: FormEventHandler<T>;
-
-        // Image Events
-        [`on:load-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:error-${string}`]?: ReactEventHandler<T> | undefined; // also a Media Event
-
-        // Keyboard Events
-        [`on:keydown-${string}`]?: KeyboardEventHandler<T>;
-        [`on:keyup-${string}`]?: KeyboardEventHandler<T>;
-
-        // Media Events
-        [`on:abort-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:canplay-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:canplaythrough-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:durationchange-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:emptied-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:encrypted-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:ended-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:loadeddata-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:loadedmetadata-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:loadstart-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:pause-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:play-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:playing-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:progress-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:ratechange-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:resize-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:seeked-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:seeking-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:stalled-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:suspend-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:timeupdate-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:volumechange-${string}`]?: ReactEventHandler<T> | undefined;
-        [`on:waiting-${string}`]?: ReactEventHandler<T> | undefined;
-
-        // MouseEvents
-        [`on:auxclick-${string}`]?: MouseEventHandler<T>;
-        [`on:click-${string}`]?: MouseEventHandler<T>;
-        [`on:contextmenu-${string}`]?: MouseEventHandler<T>;
-        [`on:doubleclick-${string}`]?: MouseEventHandler<T>;
-        [`on:drag-${string}`]?: DragEventHandler<T>;
-        [`on:dragend-${string}`]?: DragEventHandler<T>;
-        [`on:dragenter-${string}`]?: DragEventHandler<T>;
-        [`on:dragexit-${string}`]?: DragEventHandler<T>;
-        [`on:dragleave-${string}`]?: DragEventHandler<T>;
-        [`on:dragover-${string}`]?: DragEventHandler<T>;
-        [`on:dragstart-${string}`]?: DragEventHandler<T>;
-        [`on:drop-${string}`]?: DragEventHandler<T>;
-        [`on:mousedown-${string}`]?: MouseEventHandler<T>;
-        [`on:mouseenter-${string}`]?: MouseEventHandler<T>;
-        [`on:mouseleave-${string}`]?: MouseEventHandler<T>;
-        [`on:mousemove-${string}`]?: MouseEventHandler<T>;
-        [`on:mouseout-${string}`]?: MouseEventHandler<T>;
-        [`on:mouseover-${string}`]?: MouseEventHandler<T>;
-        [`on:mouseup-${string}`]?: MouseEventHandler<T>;
-
-        // Selection Events
-        [`on:select-${string}`]?: ReactEventHandler<T> | undefined;
-
-        // Touch Events
-        [`on:touchcancel-${string}`]?: TouchEventHandler<T>;
-        [`on:touchend-${string}`]?: TouchEventHandler<T>;
-        [`on:touchmove-${string}`]?: TouchEventHandler<T>;
-        [`on:touchstart-${string}`]?: TouchEventHandler<T>;
-
-        // Pointer Events
-        [`on:pointerdown-${string}`]?: PointerEventHandler<T>;
-        [`on:pointermove-${string}`]?: PointerEventHandler<T>;
-        [`on:pointerup-${string}`]?: PointerEventHandler<T>;
-        [`on:pointercancel-${string}`]?: PointerEventHandler<T>;
-        [`on:pointerenter-${string}`]?: PointerEventHandler<T>;
-        [`on:pointerleave-${string}`]?: PointerEventHandler<T>;
-        [`on:pointerover-${string}`]?: PointerEventHandler<T>;
-        [`on:pointerout-${string}`]?: PointerEventHandler<T>;
-        [`on:gotpointercapture-${string}`]?: PointerEventHandler<T>;
-        [`on:lostpointercapture-${string}`]?: PointerEventHandler<T>;
-
-        // UI Events
-        [`on:scroll-${string}`]?: UIEventHandler<T>;
-
-        // Wheel Events
-        [`on:wheel-${string}`]?: WheelEventHandler<T>;
-
-        // Animation Events
-        [`on:animationstart-${string}`]?: AnimationEventHandler<T>;
-        [`on:animationend-${string}`]?: AnimationEventHandler<T>;
-        [`on:animationiteration-${string}`]?: AnimationEventHandler<T>;
-
-        // Transition Events
-        [`on:transitionend-${string}`]?: TransitionEventHandler<T>;
     }
 
     export interface CSSProperties extends CSS.Properties<string | number> {
@@ -3047,6 +2935,7 @@ declare namespace React {
         | (string & {});
 
     interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+        [`out:${string}`]: any;
         // React-specific Attributes
         defaultChecked?: boolean | undefined;
         defaultValue?: string | number | readonly string[] | undefined;
@@ -4101,126 +3990,126 @@ declare namespace React {
     // React.DOM
     // ----------------------------------------------------------------------
 
-    interface ReactHTML {
-        a: DetailedHTMLFactory<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
-        abbr: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        address: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        area: DetailedHTMLFactory<AreaHTMLAttributes<HTMLAreaElement>, HTMLAreaElement>;
-        article: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        aside: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        audio: DetailedHTMLFactory<AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement>;
-        b: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        base: DetailedHTMLFactory<BaseHTMLAttributes<HTMLBaseElement>, HTMLBaseElement>;
-        bdi: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        bdo: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        big: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        blockquote: DetailedHTMLFactory<BlockquoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
-        body: DetailedHTMLFactory<HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>;
-        br: DetailedHTMLFactory<HTMLAttributes<HTMLBRElement>, HTMLBRElement>;
-        button: DetailedHTMLFactory<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
-        canvas: DetailedHTMLFactory<CanvasHTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
-        caption: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        center: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        cite: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        code: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        col: DetailedHTMLFactory<ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
-        colgroup: DetailedHTMLFactory<ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
-        data: DetailedHTMLFactory<DataHTMLAttributes<HTMLDataElement>, HTMLDataElement>;
-        datalist: DetailedHTMLFactory<HTMLAttributes<HTMLDataListElement>, HTMLDataListElement>;
-        dd: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        del: DetailedHTMLFactory<DelHTMLAttributes<HTMLModElement>, HTMLModElement>;
-        details: DetailedHTMLFactory<DetailsHTMLAttributes<HTMLDetailsElement>, HTMLDetailsElement>;
-        dfn: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        dialog: DetailedHTMLFactory<DialogHTMLAttributes<HTMLDialogElement>, HTMLDialogElement>;
-        div: DetailedHTMLFactory<HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
-        dl: DetailedHTMLFactory<HTMLAttributes<HTMLDListElement>, HTMLDListElement>;
-        dt: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        em: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        embed: DetailedHTMLFactory<EmbedHTMLAttributes<HTMLEmbedElement>, HTMLEmbedElement>;
-        fieldset: DetailedHTMLFactory<FieldsetHTMLAttributes<HTMLFieldSetElement>, HTMLFieldSetElement>;
-        figcaption: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        figure: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        footer: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        form: DetailedHTMLFactory<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>;
-        h1: DetailedHTMLFactory<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-        h2: DetailedHTMLFactory<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-        h3: DetailedHTMLFactory<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-        h4: DetailedHTMLFactory<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-        h5: DetailedHTMLFactory<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-        h6: DetailedHTMLFactory<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
-        head: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLHeadElement>;
-        header: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        hgroup: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        hr: DetailedHTMLFactory<HTMLAttributes<HTMLHRElement>, HTMLHRElement>;
-        html: DetailedHTMLFactory<HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>;
-        i: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        iframe: DetailedHTMLFactory<IframeHTMLAttributes<HTMLIFrameElement>, HTMLIFrameElement>;
-        img: DetailedHTMLFactory<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
-        input: DetailedHTMLFactory<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
-        ins: DetailedHTMLFactory<InsHTMLAttributes<HTMLModElement>, HTMLModElement>;
-        kbd: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        keygen: DetailedHTMLFactory<KeygenHTMLAttributes<HTMLElement>, HTMLElement>;
-        label: DetailedHTMLFactory<LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>;
-        legend: DetailedHTMLFactory<HTMLAttributes<HTMLLegendElement>, HTMLLegendElement>;
-        li: DetailedHTMLFactory<LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>;
-        link: DetailedHTMLFactory<LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>;
-        main: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        map: DetailedHTMLFactory<MapHTMLAttributes<HTMLMapElement>, HTMLMapElement>;
-        mark: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        menu: DetailedHTMLFactory<MenuHTMLAttributes<HTMLElement>, HTMLElement>;
-        menuitem: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        meta: DetailedHTMLFactory<MetaHTMLAttributes<HTMLMetaElement>, HTMLMetaElement>;
-        meter: DetailedHTMLFactory<MeterHTMLAttributes<HTMLMeterElement>, HTMLMeterElement>;
-        nav: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        noscript: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        object: DetailedHTMLFactory<ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>;
-        ol: DetailedHTMLFactory<OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>;
-        optgroup: DetailedHTMLFactory<OptgroupHTMLAttributes<HTMLOptGroupElement>, HTMLOptGroupElement>;
-        option: DetailedHTMLFactory<OptionHTMLAttributes<HTMLOptionElement>, HTMLOptionElement>;
-        output: DetailedHTMLFactory<OutputHTMLAttributes<HTMLOutputElement>, HTMLOutputElement>;
-        p: DetailedHTMLFactory<HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
-        param: DetailedHTMLFactory<ParamHTMLAttributes<HTMLParamElement>, HTMLParamElement>;
-        picture: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        pre: DetailedHTMLFactory<HTMLAttributes<HTMLPreElement>, HTMLPreElement>;
-        progress: DetailedHTMLFactory<ProgressHTMLAttributes<HTMLProgressElement>, HTMLProgressElement>;
-        q: DetailedHTMLFactory<QuoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
-        rp: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        rt: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        ruby: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        s: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        samp: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        search: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        slot: DetailedHTMLFactory<SlotHTMLAttributes<HTMLSlotElement>, HTMLSlotElement>;
-        script: DetailedHTMLFactory<ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>;
-        section: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        select: DetailedHTMLFactory<SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
-        small: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        source: DetailedHTMLFactory<SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>;
-        span: DetailedHTMLFactory<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>;
-        strong: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        style: DetailedHTMLFactory<StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>;
-        sub: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        summary: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        sup: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        table: DetailedHTMLFactory<TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>;
-        template: DetailedHTMLFactory<HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
-        tbody: DetailedHTMLFactory<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
-        td: DetailedHTMLFactory<TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>;
-        textarea: DetailedHTMLFactory<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
-        tfoot: DetailedHTMLFactory<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
-        th: DetailedHTMLFactory<ThHTMLAttributes<HTMLTableHeaderCellElement>, HTMLTableHeaderCellElement>;
-        thead: DetailedHTMLFactory<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
-        time: DetailedHTMLFactory<TimeHTMLAttributes<HTMLTimeElement>, HTMLTimeElement>;
-        title: DetailedHTMLFactory<HTMLAttributes<HTMLTitleElement>, HTMLTitleElement>;
-        tr: DetailedHTMLFactory<HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>;
-        track: DetailedHTMLFactory<TrackHTMLAttributes<HTMLTrackElement>, HTMLTrackElement>;
-        u: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        ul: DetailedHTMLFactory<HTMLAttributes<HTMLUListElement>, HTMLUListElement>;
-        "var": DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        video: DetailedHTMLFactory<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>;
-        wbr: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
-        webview: DetailedHTMLFactory<WebViewHTMLAttributes<HTMLWebViewElement>, HTMLWebViewElement>;
-    }
+    // interface ReactHTML {
+    //     a: DetailedHTMLFactory<AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
+    //     abbr: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     address: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     area: DetailedHTMLFactory<AreaHTMLAttributes<HTMLAreaElement>, HTMLAreaElement>;
+    //     article: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     aside: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     audio: DetailedHTMLFactory<AudioHTMLAttributes<HTMLAudioElement>, HTMLAudioElement>;
+    //     b: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     base: DetailedHTMLFactory<BaseHTMLAttributes<HTMLBaseElement>, HTMLBaseElement>;
+    //     bdi: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     bdo: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     big: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     blockquote: DetailedHTMLFactory<BlockquoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
+    //     body: DetailedHTMLFactory<HTMLAttributes<HTMLBodyElement>, HTMLBodyElement>;
+    //     br: DetailedHTMLFactory<HTMLAttributes<HTMLBRElement>, HTMLBRElement>;
+    //     button: DetailedHTMLFactory<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
+    //     canvas: DetailedHTMLFactory<CanvasHTMLAttributes<HTMLCanvasElement>, HTMLCanvasElement>;
+    //     caption: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     center: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     cite: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     code: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     col: DetailedHTMLFactory<ColHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
+    //     colgroup: DetailedHTMLFactory<ColgroupHTMLAttributes<HTMLTableColElement>, HTMLTableColElement>;
+    //     data: DetailedHTMLFactory<DataHTMLAttributes<HTMLDataElement>, HTMLDataElement>;
+    //     datalist: DetailedHTMLFactory<HTMLAttributes<HTMLDataListElement>, HTMLDataListElement>;
+    //     dd: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     del: DetailedHTMLFactory<DelHTMLAttributes<HTMLModElement>, HTMLModElement>;
+    //     details: DetailedHTMLFactory<DetailsHTMLAttributes<HTMLDetailsElement>, HTMLDetailsElement>;
+    //     dfn: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     dialog: DetailedHTMLFactory<DialogHTMLAttributes<HTMLDialogElement>, HTMLDialogElement>;
+    //     div: DetailedHTMLFactory<HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+    //     dl: DetailedHTMLFactory<HTMLAttributes<HTMLDListElement>, HTMLDListElement>;
+    //     dt: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     em: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     embed: DetailedHTMLFactory<EmbedHTMLAttributes<HTMLEmbedElement>, HTMLEmbedElement>;
+    //     fieldset: DetailedHTMLFactory<FieldsetHTMLAttributes<HTMLFieldSetElement>, HTMLFieldSetElement>;
+    //     figcaption: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     figure: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     footer: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     form: DetailedHTMLFactory<FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>;
+    //     h1: DetailedHTMLFactory<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+    //     h2: DetailedHTMLFactory<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+    //     h3: DetailedHTMLFactory<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+    //     h4: DetailedHTMLFactory<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+    //     h5: DetailedHTMLFactory<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+    //     h6: DetailedHTMLFactory<HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+    //     head: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLHeadElement>;
+    //     header: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     hgroup: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     hr: DetailedHTMLFactory<HTMLAttributes<HTMLHRElement>, HTMLHRElement>;
+    //     html: DetailedHTMLFactory<HtmlHTMLAttributes<HTMLHtmlElement>, HTMLHtmlElement>;
+    //     i: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     iframe: DetailedHTMLFactory<IframeHTMLAttributes<HTMLIFrameElement>, HTMLIFrameElement>;
+    //     img: DetailedHTMLFactory<ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
+    //     input: DetailedHTMLFactory<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
+    //     ins: DetailedHTMLFactory<InsHTMLAttributes<HTMLModElement>, HTMLModElement>;
+    //     kbd: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     keygen: DetailedHTMLFactory<KeygenHTMLAttributes<HTMLElement>, HTMLElement>;
+    //     label: DetailedHTMLFactory<LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>;
+    //     legend: DetailedHTMLFactory<HTMLAttributes<HTMLLegendElement>, HTMLLegendElement>;
+    //     li: DetailedHTMLFactory<LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>;
+    //     link: DetailedHTMLFactory<LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>;
+    //     main: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     map: DetailedHTMLFactory<MapHTMLAttributes<HTMLMapElement>, HTMLMapElement>;
+    //     mark: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     menu: DetailedHTMLFactory<MenuHTMLAttributes<HTMLElement>, HTMLElement>;
+    //     menuitem: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     meta: DetailedHTMLFactory<MetaHTMLAttributes<HTMLMetaElement>, HTMLMetaElement>;
+    //     meter: DetailedHTMLFactory<MeterHTMLAttributes<HTMLMeterElement>, HTMLMeterElement>;
+    //     nav: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     noscript: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     object: DetailedHTMLFactory<ObjectHTMLAttributes<HTMLObjectElement>, HTMLObjectElement>;
+    //     ol: DetailedHTMLFactory<OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>;
+    //     optgroup: DetailedHTMLFactory<OptgroupHTMLAttributes<HTMLOptGroupElement>, HTMLOptGroupElement>;
+    //     option: DetailedHTMLFactory<OptionHTMLAttributes<HTMLOptionElement>, HTMLOptionElement>;
+    //     output: DetailedHTMLFactory<OutputHTMLAttributes<HTMLOutputElement>, HTMLOutputElement>;
+    //     p: DetailedHTMLFactory<HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
+    //     param: DetailedHTMLFactory<ParamHTMLAttributes<HTMLParamElement>, HTMLParamElement>;
+    //     picture: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     pre: DetailedHTMLFactory<HTMLAttributes<HTMLPreElement>, HTMLPreElement>;
+    //     progress: DetailedHTMLFactory<ProgressHTMLAttributes<HTMLProgressElement>, HTMLProgressElement>;
+    //     q: DetailedHTMLFactory<QuoteHTMLAttributes<HTMLQuoteElement>, HTMLQuoteElement>;
+    //     rp: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     rt: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     ruby: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     s: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     samp: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     search: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     slot: DetailedHTMLFactory<SlotHTMLAttributes<HTMLSlotElement>, HTMLSlotElement>;
+    //     script: DetailedHTMLFactory<ScriptHTMLAttributes<HTMLScriptElement>, HTMLScriptElement>;
+    //     section: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     select: DetailedHTMLFactory<SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
+    //     small: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     source: DetailedHTMLFactory<SourceHTMLAttributes<HTMLSourceElement>, HTMLSourceElement>;
+    //     span: DetailedHTMLFactory<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>;
+    //     strong: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     style: DetailedHTMLFactory<StyleHTMLAttributes<HTMLStyleElement>, HTMLStyleElement>;
+    //     sub: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     summary: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     sup: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     table: DetailedHTMLFactory<TableHTMLAttributes<HTMLTableElement>, HTMLTableElement>;
+    //     template: DetailedHTMLFactory<HTMLAttributes<HTMLTemplateElement>, HTMLTemplateElement>;
+    //     tbody: DetailedHTMLFactory<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
+    //     td: DetailedHTMLFactory<TdHTMLAttributes<HTMLTableDataCellElement>, HTMLTableDataCellElement>;
+    //     textarea: DetailedHTMLFactory<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
+    //     tfoot: DetailedHTMLFactory<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
+    //     th: DetailedHTMLFactory<ThHTMLAttributes<HTMLTableHeaderCellElement>, HTMLTableHeaderCellElement>;
+    //     thead: DetailedHTMLFactory<HTMLAttributes<HTMLTableSectionElement>, HTMLTableSectionElement>;
+    //     time: DetailedHTMLFactory<TimeHTMLAttributes<HTMLTimeElement>, HTMLTimeElement>;
+    //     title: DetailedHTMLFactory<HTMLAttributes<HTMLTitleElement>, HTMLTitleElement>;
+    //     tr: DetailedHTMLFactory<HTMLAttributes<HTMLTableRowElement>, HTMLTableRowElement>;
+    //     track: DetailedHTMLFactory<TrackHTMLAttributes<HTMLTrackElement>, HTMLTrackElement>;
+    //     u: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     ul: DetailedHTMLFactory<HTMLAttributes<HTMLUListElement>, HTMLUListElement>;
+    //     "var": DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     video: DetailedHTMLFactory<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>;
+    //     wbr: DetailedHTMLFactory<HTMLAttributes<HTMLElement>, HTMLElement>;
+    //     webview: DetailedHTMLFactory<WebViewHTMLAttributes<HTMLWebViewElement>, HTMLWebViewElement>;
+    // }
 
     interface ReactSVG {
         animate: SVGFactory;
@@ -4507,6 +4396,8 @@ declare global {
         }
 
         interface _IntrinsicElements {
+            'phase-change': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & {both?: TransitionConfig | TransitionConfig[], in?: TransitionConfig | TransitionConfig[], out?: TransitionConfig | TransitionConfig[]}, HTMLDivElement>
+            [key: `${string}-${string}`]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
             // HTML
             a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
             abbr: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
@@ -4689,6 +4580,7 @@ declare global {
             tspan: React.SVGProps<SVGTSpanElement>;
             use: React.SVGProps<SVGUseElement>;
             view: React.SVGProps<SVGViewElement>;
+            
         }
     }
 }

@@ -1,12 +1,12 @@
 import { blogPosts } from "./data.js";
 import { fromEntries, html } from "../../../packages/literate/src/Literate.js";
 import { BlogPost, PostPreview } from "./PostPreview.js";
-import { suspendRender, mO, Suspense } from "@rue/literate";
+import { pend, mO, Suspense } from "@rue/literate";
 import { ion } from "../../../packages/quarky/src/index.js";
 
 export function BlogPage() {
     const $blogPosts = ion([])
-    const pendingBlogPosts = suspendRender(import('./data.js'))
+    const pendingBlogPosts = pend(import('./data.js'))
         .then((posts)=>{
             $blogPosts.set(posts)
         })

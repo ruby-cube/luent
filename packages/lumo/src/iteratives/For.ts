@@ -1,12 +1,9 @@
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { NodeEntity } from "../node/makeNode";
-import { normalizeToArray } from "@rue/utils";
-import { $listen, Callback, collectEffects, EffectFlask, ListenerOptions } from "@rue/flask";
-import {  makeDynamicNode } from "../dynamic/makeDynamicNode";
-import { DynamicNode } from "../dynamic/DynamicNode";
 import { ListRenderKit } from "./ListRenderKit";
 import { AtomicIon, ion, IonicModel, ReactiveGet } from "@rue/quarky";
 import { getContext } from "../context/context-stack";
+import { getTransition } from "../transition/Transition";
 
 
 export type RenderItem<T = any> = (item: T, $index: AtomicIon<number>) => NodeEntity[] | NodeEntity
@@ -22,7 +19,7 @@ export function For<T>(data: Collection<T>, render: RenderItem<T>, idKey?: strin
 export function For<T>(data: IonicModel<Collection<T>> | ReactiveGet<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
 export function For<T>(data: IonicModel<Collection<T>> | ReactiveGet<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
 export function For<T>(data: ListData<T>, render: RenderItem<T>, idKey?: string): ListRenderKit {
-    return new ListRenderKit(render, data, getContext(), idKey)
+    return new ListRenderKit(render, data, getContext(), idKey, getTransition())
 }
 
 

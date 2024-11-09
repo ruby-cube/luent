@@ -1,5 +1,5 @@
 import { DOMNode } from "../component/InternalComponent";
-import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon } from "../../../quarky/src";
+import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon } from "../../../quarky/src";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { initializeRender, watch } from "../watch/watchAndPreserve";
@@ -23,7 +23,7 @@ export function mE(
     renderSlot?: () => NodeEntity[],
     config?: ElementConfig,
 ): DOMNode {
-    return makeNode(nodeType, renderSlot, config) as DOMNode
+    return makeNode(nodeType, renderSlot, config||{}) as DOMNode
 }
 
 export function makeElement<T extends keyof HTMLElementTagNameMap>(
@@ -253,7 +253,7 @@ function setUpDynamicAttributes(node: Element, changes: ((o: Element) => void)[]
 }
 
 function setUpRefNulling(ref: _NodePod, $index: AtomicIon<number>) {
-    if ($index && $index() === 0) {
+if ($index && $index() === 0) {
 
     }
     else {

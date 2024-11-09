@@ -1,9 +1,10 @@
-import { Component, ComponentSetup, InternalComponent, Provider } from "./component/InternalComponent";
+import { Component, ComponentSetup, InternalComponent } from "./component/InternalComponent";
 import { _NodePod } from "./node/NodePod";
 import { DynamicNode, markMountPhase, unmarkMountPhase } from "./dynamic/DynamicNode";
-import { popProvider, pushProvider } from "./component/provide";
 import { AnyObject } from "@rue/types";
 import { initializeComponent, setComponentAttributes } from "./component/makeComponent";
+import { AppContext } from "./context/provide";
+import { popContext, pushContext } from "./context/context-stack";
 
 let appRoot: Element;
 
@@ -21,11 +22,11 @@ export function getAppRoot() {
 //     )
 // }
 
-export function createApp<T extends AnyObject>(App: ComponentSetup<T>, config?: { remountable: boolean, globalProvider: Provider, setup: T }) {
+export function createApp<T extends AnyObject>(App: ComponentSetup<T>, config?: { provide?: Map<symbol | string, any>, remountable: boolean, globalContext: AppContext, setup: T }) {
 
     // (1) instantiate developer's root component
-    const component = new InternalComponent(undefined, config?.globalProvider);
-    component.initializeAsProvider();
+    const component = new InternalComponent();
+    const appContext = createAppContext(config?.provide, config?.globalContext)
     const nodePod = new _NodePod()
     const remountable = config?.remountable
     const preserve = remountable ? true : false
@@ -42,7 +43,7 @@ export function createApp<T extends AnyObject>(App: ComponentSetup<T>, config?: 
 
             // (2) attach developer's root component to root element
             dynamicNode.activate(function mountRootComponent() {
-                pushProvider(component)
+                pushContext(appContext)
                 // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
                 setComponentAttributes(config?.setup || {})
                 const output = App()
@@ -51,7 +52,7 @@ export function createApp<T extends AnyObject>(App: ComponentSetup<T>, config?: 
                 if (remountable) markMountPhase()
                 component.mount(root, nodePod) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
                 if (remountable) unmarkMountPhase()
-                popProvider() // for sibling components to access parent, must be set AFTER `Component()`
+                popContext() // for sibling components to access parent, must be set AFTER `Component()`
             })
 
             return component;
@@ -73,3 +74,13 @@ export function createApp<T extends AnyObject>(App: ComponentSetup<T>, config?: 
 }
 
 
+function createAppContext(entries: Map<symbol | string, any> | undefined, globalContext: AppContext | undefined){
+    const appContext = {
+            entries,
+            parent: globalContext,
+            root: undefined as unknown as AppContext,
+            global: globalContext,
+    }
+    appContext.root = appContext
+    return appContext;
+}
