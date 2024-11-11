@@ -1,13 +1,11 @@
 import { AnyObject } from "@rue/types";
-import { getAttributes, prep } from "../component/getAttributes";
 import { Component, ComponentSetup, InternalComponent } from "../component/InternalComponent";
-import { v } from "../InputTypes";
 import { InferSlot, initializeComponent, makeComponent } from "../component/makeComponent";
 import { getCurrentContext, popContext, pushContext } from "./context-stack";
 import { ContextKeyMap, TypeConfig } from "./ContextKey";
-import { DOG } from "./context-keys";
-import { CAT } from "./context-keysB";
-import { fromContext, AppContext } from "./provide";
+import { DOG } from "./x_context-keys";
+import { CAT } from "./x_context-keysB";
+import { fromContext, AppContext, _ContextInputType } from "./provide";
 import { ComponentConfig, NodeEntity } from "../node/makeNode";
 
 export interface NodeContext {
@@ -21,14 +19,15 @@ export interface NodeContext {
 type Slot = () => Component
 // | NodeEntity[] | NodeEntity
 
-type Entries<T> = {
-    [K in keyof T]: K extends keyof ContextKeyMap ? ContextKeyMap[K] extends { inputType: infer I } ? I : any : any
+
+
+type ContextEntries<T> = {
+    [K in keyof T]: K extends keyof ContextKeyMap ? _ContextInputType<ContextKeyMap[K]> : any;
 }
 
 
-
-export function Context<T>(input: {
-    with: { [K in keyof ContextEntries<T>]: ContextEntries<T>[K] },
+export function Context<T extends ContextEntries<T>>(input: {
+    with: T,
     renderSlot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
 }) {
     const { renderSlot } = input
@@ -50,7 +49,10 @@ export function Context<T>(input: {
 }
 
 export function createNodeContext(
-    Context: ComponentSetup,
+    Context: (input: {
+        with: AnyObject;
+        renderSlot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[];
+    }) => Component,
     renderSlot: () => NodeEntity | NodeEntity[],
     config: ComponentConfig,
 ): InternalComponent {
@@ -60,22 +62,5 @@ export function createNodeContext(
     return component
 }
 
-function List() {
-    return Component(
-        <>
-            <Context with={{ [DOG]: 'frog', [CAT]: 10 }}>
-                <p>hello</p>
-                <p>{appwide(DOG)}</p>
-            </Context>
 
-            <Context with={{ [DOG]: 'frog', [CAT]: 10 }}>
-                <p>hello</p>
-                <p>{fromContext(DOG)}</p>
-            </Context>
-        </>
-    )
-}
 
-type ContextEntries<T> = {
-    [K in keyof T]: K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType?: infer I } ? I : any : any
-}

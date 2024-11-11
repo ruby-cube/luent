@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 
-type OffstageProperties = {
+type OffscreenProperties = {
     // Opacity and Visibility
     opacity?: number;
     visibility?: 'visible' | 'hidden' | 'collapse';
@@ -113,7 +113,7 @@ type OffstageProperties = {
 }
 
 type TransitionConfig = {
-    offstage: OffstageProperties,
+    offscreen: OffscreenProperties,
     // delay?: number,
     duration?: number,
     timing?: TransitionTiming
@@ -133,51 +133,59 @@ type TransitionTiming =
     | 'initial'
     | 'unset';
 
-export type TransitionFunction = (durationOrTiming?: number | TransitionTiming, timing?: TransitionTiming) => TransitionVars
+export type TransitionFunction = (options?: TransitionOptions) => TransitionKit
 
-export type TransitionVars = {
-    // delay: number;
+export type TransitionKit = {
+    offscreenClass: string;
+    delay: number;
     duration: number;
     timing: TransitionTiming;
 }
 
+export type TransitionVars = {
+    offscreen: { [K in keyof OffscreenProperties]?: OffscreenProperties[K] }
+    delay?: number;
+    duration?: number;
+    timing?: TransitionTiming;
+}
+
+type TransitionOptions = {
+    delay?: number;
+    duration?: number;
+    timing?: TransitionTiming;
+} & { [K in keyof OffscreenProperties]?: OffscreenProperties[K] }
+
 /**
  * NOTE: delay in ms (default: 0), duration in ms (default: 250), timing (default: 'ease')
  */
-export function defineTransition<OPT extends (options?: AnyObject) => OffstageProperties>(name: string, getOffstageProperties: OPT, transition?: TransitionVars) {
-    const _name = name;//TODO: manage repeat names with global()
-    let transitionMounted = false;
-    return function configureTransition(durationOrTiming?: number | TransitionTiming, timing?: TransitionTiming) {
-        const duration = typeof durationOrTiming === 'number' ? durationOrTiming : undefined
-        const _timing = timing ? timing : typeof durationOrTiming === 'string' ? durationOrTiming : undefined
-
-        return (opts?: Parameters<OPT>) => {
-            let transitionClass: string = ''
-            if (!transitionMounted) {
-                transitionClass = mountOffstageClass(_name, getOffstageProperties(opts))
-            }
-            return {
-                transitionClass,
-                // delay: transition.delay ?? 0,
-                duration: duration ?? transition?.duration ?? 250,
-                timing: _timing ?? transition?.timing ?? 'ease'
-            }
+export function defineTransition<F extends (options?: TransitionOptions) => TransitionVars>(name: string, useTransition: F) {
+    const _name = name;
+    let transitionClass = '';
+    return function setupTransition(options?: Parameters<F>[0]) {
+        const transition = useTransition(options)
+        if (!transitionClass) {
+            transitionClass = mountOffscreenClass(_name, transition.offscreen)
+        }
+        return {
+            offscreenClass: transitionClass,
+            delay: transition.delay ?? 0,
+            duration: transition.duration ?? 250,
+            timing: transition.timing ?? 'ease'
         }
     }
 }
 
-let offstageStylesheet: CSSStyleSheet; //TODO: replace with global(OFFSTAGE_STYLESHEET) using global context
+let offscreenStylesheet: CSSStyleSheet
 
-function mountOffstageClass(name: string, offstage: OffstageProperties) {
-    const style = offstageStylesheet ?? createOffstageStylesheet()
-    //TODO: const style = global(OFFSTAGE_STYLESHEET) ?? createOffstageStylesheet()
-    const properties = compileCSSProperties(offstage)
-    const className = 'offstage-' + name;
+function mountOffscreenClass(name: string, offscreen: OffscreenProperties) {
+    const style = offscreenStylesheet ?? createOffscreenStylesheet()
+    const properties = compileCSSProperties(offscreen)
+    const className = 'offscreen-' + name;
     style.insertRule(`.${className} { ${properties} }`)
     return className;
 }
 
-function createOffstageStylesheet() {
+function createOffscreenStylesheet() {
     const stylesheets = document.styleSheets
     const index = stylesheets.length;
     const style = document.createElement('style');
@@ -186,7 +194,7 @@ function createOffstageStylesheet() {
     head.appendChild(style)
     const stylesheet = stylesheets.item(index)
     if (!stylesheet) throw new Error(`no stylesheet at this index!`)
-    offstageStylesheet = stylesheet //TODO: replace with provideGlobal(OFFSTAGE_STYLESHEET, stylesheet)
+    offscreenStylesheet = stylesheet //TODO: replace with provideGlobal(OFFSCREEN_STYLESHEET, stylesheet)
     return stylesheet;
 }
 

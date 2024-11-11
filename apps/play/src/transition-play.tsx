@@ -3,10 +3,6 @@ import { fade } from "../../../packages/lumo/src/transition/transitions";
 
 // fade-in-out with different transitions
 
-//NOTE: each sort of transition needs to be registered in the type definitions...
-// each colon attribute needs to be in type defs too...
-
-
 function TransitionTest() {
     return Component(
         <div>

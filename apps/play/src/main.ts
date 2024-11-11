@@ -1,4 +1,3 @@
-import { createApp, Ion } from '@rue/lumo';
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
@@ -19,6 +18,7 @@ import { TestIonicEffect } from './TestIonicEffect';
 import { TestSelectiveTracking } from './TestSelectiveTracking';
 import { TestCleanupScheduler } from './TestCustomCleanupScheduler';
 import { IS_PUBLIC, protectIon } from '../../../packages/quarky/src/ion/ProtectedIon';
+import { createApp } from '@rue/lumo';
 // import { ionize, ionize } from '@rue/quarky';
 // import { DeepReactiveModel, asMetaIonicModel, ionize, ionize } from '@rue/quarky';
 // import { MountIf } from './TestMountIf';
@@ -93,13 +93,15 @@ console.log(protectedIon(), 8)
 // console.log('i3', $frog[3])
 // console.log('i4', $frog[4])
 
-// const app = createApp(List)
+const globalContext = createGlobalContext()
 
-// if (__DEV__) configureFlask({
-//     warnNoCleanup: true
-// })
+const app = createApp(List)
 
-// app.mount('#app')
+if (__DEV__) configureFlask({
+    warnNoCleanup: true
+})
+
+app.mount('#app')
 
 // queueTask(()=>{
 //     console.log("hi")

@@ -1,8 +1,9 @@
-import { encapsulate } from "@rue/utils";
-import { getCurrentContext } from "./context-stack";
+import { Context, getCurrentContext } from "./context-stack";
 import { NodeContext } from "./Context";
-import { contextTypeMap } from "./ContextKey";
-
+import { ContextKeyMap, contextTypeMap, TypeConfig } from "./ContextKey";
+import { isIon, isIonicModel } from "@rue/quarky";
+import { toIon } from "../../../quarky/src/ion/toIons";
+import { AnyObject } from "@rue/types";
 
 
 export interface AppContext {
@@ -13,7 +14,58 @@ export interface AppContext {
 }
 
 
-export function provideAppwide<K extends string | string>(key: K, value: ContextType<K>) {
+type ContextType<K> = K extends keyof ContextKeyMap ? _ContextInputType<ContextKeyMap[K]> : any;
+
+export type _ContextInputType<C> =
+    C extends { name: '$IonOrIon' | '$IonizedOrIonized' | '$Ionized' | '$Ion' | '$Ref'; required: true } & ((arg: any) => { $inputType: infer I }) ? I
+    : C extends { name: '$IonOrIon' | '$IonizedOrIonized' | '$Ionized' | '$Ion' | '$Ref'; optional: '?' | 'withDefault'; $inputType: infer I } ? I | undefined
+    : C extends { required: true } & ((arg: any) => { inputType: infer I }) ? I
+    : C extends { optional: '?' | 'withDefault', inputType: infer I } ? I | undefined
+    : 'invalid typeConfig'
+
+
+export function contextual<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> | undefined {
+    let _context = context || getCurrentContext();
+    if (!_context) throw new Error(``)
+
+    // climb context tree
+    let parent: Context | undefined = context;
+    while (parent !== undefined) {
+        const entries = parent.entries
+        if (has(key, entries)) {
+            const value = get(key, entries);
+            const typeConfig = contextTypeMap.get(key)
+            if (!typeConfig) return value;
+            return validateContextEntry(key, value, typeConfig)
+        }
+        parent = parent.parent;
+    }
+    return undefined
+}
+
+function has(key: string | symbol, entries: Map<any, any> | Object | undefined) {
+    if (entries instanceof Map) {
+        return entries.has(key)
+    }
+    if (entries instanceof Object) {
+        return key in entries
+    }
+    return false;
+}
+
+function get(key: string | symbol, entries: Map<any, any> | AnyObject | undefined) {
+    if (entries instanceof Map) {
+        return entries.get(key)
+    }
+    if (entries instanceof Object) {
+        return entries[key]
+    }
+    return undefined;
+}
+
+
+
+export function provideAppwide<K extends string | symbol>(key: K, value: ContextType<K>) {
     let context = getCurrentContext();
     if (!context)
         throw new Error("Must call initializeRootProvider in root component setup in order to provideAppState outside of root component")
@@ -29,133 +81,34 @@ export function provideAppwide<K extends string | string>(key: K, value: Context
     return value;
 }
 
-
-
-// type UseAppStateReturn<M, T> = M extends 'set' ? [() => T, (value: T) => T]: () => T
-
-// export function constAppState<T>(key: TypedKey<T>, initialize: () => T) {
-//     return function getState() {
-//         return _fromContext(key, () => provideAppState(key, initialize()), 'root')
-//     }
-// }
-
-// export function letAppState<T>(key: TypedKey<T>, initialize: () => T): [() => T, (value: T) => T] {
-//     function getState() {
-//         return _fromContext(key, () => provideAppState(key, initialize()), 'root')
-//     }
-//     return [
-//         getState,
-//         function setState(value: T) {
-//             return provideAppState(key, value)
-//         }
-//     ]
-// }
-
-
-export function fromApp<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ContextType<K> {
+export function appwide<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> | undefined {
     let _context = context || getCurrentContext();
     if (!_context) throw new Error(``)
     const rootProvider = _context.root;
     if (!rootProvider) throw new Error("No root provider found :( This should never happen")
-    if (!rootProvider.entries || !rootProvider.entries.has(key)) return undefined;
-    return rootProvider.entries.get(key)
+    const typeConfig = contextTypeMap.get(key)
+    const value = rootProvider.entries?.get(key)
+    if (!typeConfig) return value;
+    return validateContextEntry(key, value, typeConfig)
 }
 
 
 
-// export function fromContext<T, OPT extends '?' | undefined = undefined>(key: TypedKey<T>, optional?: '?'): OPT extends '?' ? T | undefined : T {
-//     return _fromContext(key, optional) as OPT extends '?' ? T | undefined : T;
-// }
 
-
-export function fromContext<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ContextType<K> {
-    let _context = context || getCurrentContext();
-    if (!_context) throw new Error(``)
-
-    // climb provider tree
-    let parent: NodeContext | AppContext | null = context;
-    while (parent !== null) {
-        const entries = parent.entries
-        if (entries.has(key)) {
-            const value = entries.get(key);
-            return __DEV__ && shouldEncapsulate(value) ? encapsulate(value) : value;
-        }
-        parent = parent.provider;
-    }
-    try {
-        if (__DEV__) console.warn(`No provider found for the key, ${key.toString()}. Checking global store...`) //TODO: Improve this error message
-        return fromGlobal(key) as OPT extends "?" ? T | undefined : T;
-    }
-    catch (e) {
-        return handleResourceNotFound(key, initializeOrOptional, root)
-    }
+export function createGlobalContext() {
+    const global = { entries: new Map(), root: undefined, global: undefined } as unknown as AppContext
+    global.global = global;
+    return global
 }
-
-function handleResourceNotFound<T, OPT extends '?' | undefined | (() => T)>(key: TypedKey<T>, initializeOrOptional: OPT, root: 'root' | undefined): OPT extends '?' ? undefined | T : T {
-    if (initializeOrOptional instanceof Function && !root)
-        throw new Error('An initilizer can only be used if providing from root.');
-    if (initializeOrOptional === '?')
-        return undefined as OPT extends '?' ? undefined : T;
-    throw new Error(`A value for '${key.toString()}' has not been provided in this component's ancestry`)
-}
-
-
-function shouldEncapsulate(value: any) {
-    return !(value instanceof Function) && value instanceof Object;
-}
-
-// class RootStore {
-//     rootEntries: Map<symbol | string, any> = new Map();
-
-//     provide<T>(key: TypedKey<T> | symbol | string, value: T) {
-//         globalEntries.set(key, value);
-//     }
-// }
-
-// export function provideAppWide(){
-
-// }
-
-
-
-
-
-
-
-// export function provideLazyModule<T extends AnyObject>(config: { exports: (keyof T)[], initialize: () => T }) {
-//     const { initialize, exports } = config
-//     const symbolKeys = new Map();
-//     for (const key of exports) {
-//         symbolKeys.set(key, Symbol())
-//     }
-
-//     const module = new Proxy({}, {
-//         get(_, key: keyof T) {
-//             if (typeof key !== 'string')
-//                 return undefined;
-//             return getAppState(symbolKeys.get(key), () => {
-//                 const module = initialize();
-//                 for (const key of exports) {
-//                     provideAppState(symbolKeys.get(key), module[key])
-//                 }
-//                 return module[key]
-//             }
-//             )
-//         }
-//     })
-
-//     return module as T
-// }
-
-
-
-
 
 export function provideGlobal<K extends string | symbol>(key: K, value: ContextType<K>) {
     let context = getCurrentContext();
     if (!context)
         throw new Error('')
-    const globalEntries = context.global?.entries || (context.global = { entries: new Map(), root: context.root, global: undefined }, context.global.entries!); //TODO: need to add global
+    if (!context.global)
+        throw new Error('No global context found. Call createGlobalContext() and pass into createApp() via config')
+
+    const globalEntries = context.global.entries!
     if (globalEntries.has(key)) {
         if (__DEV__) {
             console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
@@ -167,28 +120,83 @@ export function provideGlobal<K extends string | symbol>(key: K, value: ContextT
     return value;
 }
 
-export function fromGlobal<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ContextType<K> {
+export function global<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> | undefined {
     let _context = context || getCurrentContext();
     if (!_context)
         throw new Error('')
     const globalEntries = context?.global?.entries
     const typeConfig = contextTypeMap.get(key)
-    if (!globalEntries) return undefined
-    //TODO: optional and default
-
-
-    const value = globalEntries.get(key)
-    
+    const value = globalEntries?.get(key)
+    if (!typeConfig) return value;
+    return validateContextEntry(key, value, typeConfig)
 }
 
 
-// Symbol Key
-// export type TypedKey<T> = symbol & T;
 
-// export type TypedKey<T> = (string | symbol) & T
-// type Key = symbol | string
 
-// Usage
-// const SELECTION = Symbol() as TypedKey<{ position: number }> // define keys in a keys file
-// provide(SELECTION, { position: 9 }) // in component
-// const selection = fromContext(SELECTION); // in component
+
+type ValidatedContextEntry<K> = K extends keyof ContextKeyMap ? _ValidatedContextEntry<ContextKeyMap[K]> : any;
+
+
+type _ValidatedContextEntry<C> =
+    C extends ({ required: true } | { default: Function }) & ({ validatedType: infer I } | ((arg: any) => { validatedType: infer I })) ? I
+    : C extends { optional: '?' } & ({ validatedType: infer I } | ((arg: any) => { validatedType: infer I })) ? I
+    : any
+
+function validateContextEntry(key: string | symbol, value: any, typeConfig: TypeConfig) {
+    const assertions = typeConfig;
+    if (assertions) {
+        const _assertions = assertions instanceof Array ? assertions : [assertions]
+        for (const assert of _assertions) {
+            assert(isIon(value) ? value() : value);
+        }
+    }
+
+    if ('optional' in typeConfig && value === undefined && 'default' in typeConfig && typeConfig.default instanceof Function) {
+        value = typeConfig.default()
+    }
+    else if (!('optional' in typeConfig) && value === undefined) {
+        throw new Error(`Required context entry for ${String(key)} is undefined or not found.`)
+    }
+
+    switch (typeConfig.name) {
+        case 'v':
+            if (isIon(value)) {
+                value = value()
+            }
+            return value; //TODO: make readonly
+
+        case '_Ion':
+        case '$Ion':
+        case '$Ref':
+        case '_Ref':
+        case '$IonOrIon':
+            if (!isIon(value)) {
+                throw new Error(`[INVALID INPUT] Value of context entry, '${String(key)}', must be an ion`)
+            }
+            return value; //TODO: make Ion read-only, protect $Ion
+
+        case 'MaybeIon':
+            return toIon(value) //TODO: make Ion read-only
+
+        case '_Ionized':
+        case '$Ionized':
+        case '$IonizedOrIonized':
+            if (!isIonicModel(value)) {
+                throw new Error(`[INVALID INPUT] Value of context entry, '${String(key)}', must be an ionized`)
+            }
+            return value; //TODO: readonly, protect
+
+        case 'MaybeIonized':
+            return value; //TODO: readonly
+
+        default:
+            return value;
+    }
+}
+
+
+
+function shouldEncapsulate(value: any) {
+    return !(value instanceof Function) && value instanceof Object;
+}

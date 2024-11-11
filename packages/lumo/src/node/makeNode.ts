@@ -7,6 +7,7 @@ import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
 import { createNodeContext } from "../context/Context";
+import { AnyObject } from "@rue/types";
 
 export function Fragment() {
     // for jsx-runtime
@@ -39,7 +40,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
     [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &
 {
     class?: string | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[],
-    style?: string | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[],
+    style?: AnyObject/* TODO: limit to css properties */ | string | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[],
     attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeSetup<K>
 

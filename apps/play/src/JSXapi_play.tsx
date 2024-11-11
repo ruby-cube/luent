@@ -143,32 +143,37 @@ export function ListBlock(setup = $setup()) {
                     )
                 ]}</Frozen>
                 <div>
-                    <transition-in fade>
-                    <p>hi ho</p>
-                    </transition-in>
+                    <i-o io={fade}>
+                        <p>hi ho</p>
+                    </i-o>
                     <p>hi ho</p>
                 </div>
 
                 <h1>hello</h1>
-                <fade-transition delay-30 spans-300 ease-in>{[
+                <phase-change io={fade}>{[
                     If($active(),
-                        <p>hey</p>
+                        <div>
+                            <p>hey</p>
+                            <i-o io={slideleft} on:start={doSomething}>
+                                <List />
+                                <h1>hello</h1>
+                                <div>
+                                    <Item></Item>
+                                    <p>hi ho</p>
+                                    <p>hi ho</p>
+                                </div>
+                            </i-o>
+                            <hr />
+                            <i-o io={slideright}>
+                                <Article />
+                            </i-o>
+                            <p>hi ho</p>
+                        </div>
                     ),
                     Else(
                         <p>Bye</p>
                     )
-                ]}</fade-transition>
-                <div>
-                    <fade-transition delay-30 spans-300 ease-in>
-                    <p>hi ho</p>
-                    </fade-transition>
-                    <slide-left delay-30 spans-300 ease-in out:slide-right o:delay-30 o:spans-300>
-                        <p>hi ho</p>
-                    </slide-left>
-                    <slide-left delay-30 spans-300 ease-in out:slide-right o:delay-30 o:spans-300>
-                        <p>hi ho</p>
-                    </slide-left>
-                </div>
+                ]}</phase-change>
 
                 <Try catch={Error} setup={SelectionKit}>
                     <h1>hello</h1>

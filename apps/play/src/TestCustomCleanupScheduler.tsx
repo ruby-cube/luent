@@ -406,7 +406,7 @@ export function TestCleanupScheduler({
 
                 <input $value={$frogName} />
 
-                <input $value={i0, $frogName() + '!'} />
+                <input value={{ z: $frogName() + '!' }} />
 
                 <input $value={$frogName} />
 
@@ -426,7 +426,7 @@ export function TestCleanupScheduler({
                         margin: '15px',
                         lineHeight: '1.5',
                         textAlign: 'center',
-                        color: text_color
+                        color: var_(text_color)
                     }}>
                         Well, I am the slime from your video<br />
                         Oozin' along on your livin' room floor.

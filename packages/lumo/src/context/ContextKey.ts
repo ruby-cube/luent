@@ -19,7 +19,7 @@ export type TypeConfig = {
     validatedType?: any,
     inputType?: any,
     $inputType?: any,
-    default?: true | undefined;
+    default?: Function | undefined;
     required?: true;
     optional?: '?'
 }
