@@ -14,6 +14,7 @@ import { META } from "../../../quarky/src/ReactiveEntity";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { getFlask } from "@rue/flask";
 import { Context, popContext, pushContext } from "../context/context-stack";
+import { MorphConfig } from "../boundaries/Portal";
 
 
 type Index = number
@@ -38,7 +39,7 @@ export class ListRenderKit<T = any> {
         public renderItem: RenderItem<T>, //QUESTION: Does this need the context object?
         public data: Collection<T> | IonicModel<Collection<T>> | ReactiveGet<Collection<T>>,
         public context: Context,
-        public idKey: string | undefined
+        public idKey: string | undefined,
         public morphConfig: undefined | MorphConfig
     ) { }
 

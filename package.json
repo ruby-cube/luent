@@ -32,6 +32,7 @@
     "ni:quarky": "pnpm -F @rue/quarky install"
   },
   "devDependencies": {
+    "@types/jsdom": "^21.1.7",
     "@types/node": "^22.7.7",
     "typescript": "^5.6.3",
     "vite": "^5.4.9",

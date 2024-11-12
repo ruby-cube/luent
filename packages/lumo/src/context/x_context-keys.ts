@@ -3,7 +3,7 @@ import { defineContextProp } from "./ContextKey"
 
 export const DOG = Symbol('dog')
 
-const dogType = defineContextProp(DOG, v<{ bark: 'woof', setDog(): number }>)
+const dogType = defineContextProp(DOG, v<string>('?'))
 
 declare module './ContextKey' {
     interface ContextKeyMap {

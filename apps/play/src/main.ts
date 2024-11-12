@@ -93,7 +93,7 @@ console.log(protectedIon(), 8)
 // console.log('i3', $frog[3])
 // console.log('i4', $frog[4])
 
-const globalContext = createGlobalContext()
+const globalContext = createTransappContext()
 
 const app = createApp(List)
 

@@ -9,7 +9,8 @@
         "@rue/utils": "workspace:*"
     },
     "devDependencies": {
-        "@rue/types": "workspace:*"
+        "@rue/types": "workspace:*",
+            "jsdom": "^25.0.1"
     },
     "author": "Ruby Yi Wang",
     "license": "MIT"

@@ -1,4 +1,4 @@
-import { fromApp } from "./provide";
+import { appwide } from "./provide";
 
 export const contextTypeMap: Map<symbol | `${string}`, TypeConfig> = new Map();
 
@@ -19,20 +19,35 @@ export type TypeConfig = {
     validatedType?: any,
     inputType?: any,
     $inputType?: any,
-    default?: Function | undefined;
+    default?: true | undefined;
     required?: true;
-    optional?: '?'
+    optional?: '?' | 'withDefault'
 }
 
-export function createInjectedClass(classKey: TypeConfig, get: (key: TypeConfig) => any = fromApp) {
-    return (...args: any[]) => new get(classKey)(...args)
+export function createInjectedClass(classKey: string | symbol, contextualGetter: (key: string | symbol) => any = appwide) {
+    return (...args: any[]) => new (contextualGetter(classKey))(...args)
 }
 
-export function createInjectedFactory(classKey: TypeConfig, get: (key: TypeConfig) => any = fromApp) {
-    return (...args: any[]) => get(classKey)(...args)
+export function createInjectedFactory(classKey: string | symbol, contextualGetter: (key: string | symbol) => any = appwide) {
+    return (...args: any[]) => contextualGetter(classKey)(...args)
 }
 
-export interface ContextKeyMap {}
+/**
+ *  App developers can extend ContextKeyMap interface like so:
+ *  
+ *  export const Frog = Symbol('frog')
+ * 
+ *  const frogType = defineContextProp(FROG, v<string>)
+ *  
+ *  declare module './ContextKey' {
+ *     interface ContextKeyMap {
+ *        [DOG]: typeof frogType
+ *     }
+ *  }
+ * 
+ */
+export interface ContextKeyMap { }
+
 
 
 

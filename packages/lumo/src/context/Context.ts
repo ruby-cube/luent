@@ -1,11 +1,9 @@
 import { AnyObject } from "@rue/types";
-import { Component, ComponentSetup, InternalComponent } from "../component/InternalComponent";
-import { InferSlot, initializeComponent, makeComponent } from "../component/makeComponent";
+import { Component, InternalComponent } from "../component/InternalComponent";
+import { initializeComponent } from "../component/makeComponent";
 import { getCurrentContext, popContext, pushContext } from "./context-stack";
-import { ContextKeyMap, TypeConfig } from "./ContextKey";
-import { DOG } from "./x_context-keys";
-import { CAT } from "./x_context-keysB";
-import { fromContext, AppContext, _ContextInputType } from "./provide";
+import { ContextKeyMap } from "./ContextKey";
+import { AppContext, _ContextInputType } from "./provide";
 import { ComponentConfig, NodeEntity } from "../node/makeNode";
 
 export interface NodeContext {
@@ -15,13 +13,7 @@ export interface NodeContext {
     global?: AppContext,
 }
 
-
-type Slot = () => Component
-// | NodeEntity[] | NodeEntity
-
-
-
-type ContextEntries<T> = {
+export type ContextEntries<T> = {
     [K in keyof T]: K extends keyof ContextKeyMap ? _ContextInputType<ContextKeyMap[K]> : any;
 }
 

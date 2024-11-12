@@ -7,52 +7,18 @@ import { AnyObject } from "@rue/types";
 import { MetaIonicModel } from "../../quarky/src/ionize/MetaIonicModel";
 import { META } from "../../quarky/src/ReactiveEntity";
 
-// type TypeDefWithDefault<N extends `${string}`> = {
-//     <T>(optional?: '?' | '??'): {
-//         name: N,
-//         validatedType: T;
-//         inputType: T;
-//         optional: '?';
-//         default: undefined
-//     } & ((defaultValue: T) => {
-//         name: N,
-//         validatedType: T;
-//         inputType: T;
-//         optional: 'withDefault';
-//         default: true;
-//     }),
-//     name: N;
-//     required: true;
-// }
-
-// type G = TypeDefWithDefault<'v'>
-
-// type Wrapper<T = any> = T;
-
-// type TypeDef<N extends `${string}`, W extends Wrapper<T>> = {
-//     <T>(optional: '?'): {
-//         name: N,
-//         validatedType: W<T>;
-//         inputType: W<T> | T;
-//         optional: '?';
-//         default: undefined
-//     },
-//     name: N;
-//     required: true;
-// }
-
-export const v = ((optional: '?' | '??') => {
-    function v(defaultValue: any) {
-        return {
-            name: 'v',
-            optional: 'withDefault',
-            default: defaultValue
+export const v = ((optional: '?') => {
+        function v(defaultValue: any) {
+            return {
+                name: 'v',
+                optional: 'withDefault',
+                default: defaultValue
+            }
         }
-    }
-    v.optional = optional
-    return v
+        v.optional = optional
+        return v
 }) as {
-    <T>(optional?: '?' | '??'): {
+    <T>(optional?: '?'): {
         name: 'v',
         validatedType: T;
         inputType: T;
@@ -72,8 +38,6 @@ export const v = ((optional: '?' | '??') => {
 const _Ion = ((optional: '?') => {
     return {
         name: '_Ion',
-        // validatedType: null as unknown as Ion<any>,
-        // inputType: null as unknown as Ion<any>,
         optional,
         default: undefined
     }
@@ -113,38 +77,18 @@ export { _Ref as Ref }
 export type Ref<T = any, M extends AnyObject = {}> = (() => T) & ((selected?: true) => T) & M
 
 
-// export const MaybeIon = ((optional: '?' | (() => any)) => {
-//     return {
-//         name: 'MaybeIon',
-//         validatedType: null as unknown as Ion<any>,
-//         inputType: null as unknown as Ion<any>,
-//         optional: optional as unknown as true,
-//     }
-// }) as {
-//     <T>(optional: '?' | (() => any)): {
-//         name: 'MaybeIon',
-//         validatedType: Ion<T>;
-//         inputType: Ion<T> | T;
-//         optional: true
-//     },
-//     name: 'MaybeIon'
-// }
-
-
-export const MaybeIon = ((optional: '?' | '??') => {
-    function MaybeIon(defaultValue: any) {
-        return {
-            name: 'MaybeIon',
-            // validatedType: null as unknown as Ion<any>,
-            // inputType: null,
-            optional: 'withDefault',
-            default: defaultValue
+export const MaybeIon = ((optional: '?') => {
+        function MaybeIon(defaultValue: any) {
+            return {
+                name: 'MaybeIon',
+                optional: 'withDefault',
+                default: defaultValue
+            }
         }
-    }
-    MaybeIon.optional = optional
-    return MaybeIon
+        MaybeIon.optional = optional
+        return MaybeIon
 }) as {
-    <T>(optional?: '?' | '??'): {
+    <T>(optional?: '?'): {
         name: 'MaybeIon',
         validatedType: Ion<T>;
         inputType: Ion<T> | T;
@@ -164,8 +108,6 @@ export const MaybeIon = ((optional: '?' | '??') => {
 export const $Ion = ((optional: '?') => {
     return {
         name: '$Ion',
-        // validatedType: null as unknown as Ion<any>,
-        // $attributeType: null as unknown as Ion<any>,
         optional,
         default: undefined
     }
@@ -203,9 +145,6 @@ export const $Ref = ((optional: '?') => {
 export const $IonOrIon = ((optional: '?') => {
     return {
         name: '$IonOrIon',
-        // validatedType: null as unknown as Ion<any>,
-        // inputType: null as unknown as Ion<any>,
-        // $attributeType: null as unknown as Ion<any>,
         optional,
         default: undefined
     }
@@ -229,8 +168,6 @@ export type Ionized<T extends AnyObject, M = {}> = {
 const _Ionized = ((optional: '?') => {
     return {
         name: '_Ionized',
-        // validatedType: null as unknown as Ionized<any>,
-        // inputType: null as unknown as Ionized<any>,
         optional,
         default: undefined
     }
@@ -249,20 +186,19 @@ export { _Ionized as Ionized }
 
 
 
-export const MaybeIonized = ((optional: '?' | '??') => {
-    function MaybeIonized(defaultValue: any) {
-        return {
-            name: 'MaybeIonized',
-            // validatedType: null as unknown as Ionized<any>,
-            // inputType: null,
-            optional: 'withDefault',
-            default: defaultValue
+export const MaybeIonized = ((optional: '?') => {
+        function MaybeIonized(defaultValue: any) {
+            if (optional === '?') throw new Error('Cannot provide default')
+            return {
+                name: 'MaybeIonized',
+                optional: 'withDefault',
+                default: defaultValue
+            }
         }
-    }
-    MaybeIonized.optional = optional
-    return MaybeIonized
+        MaybeIonized.optional = optional
+        return MaybeIonized
 }) as {
-    <T extends AnyObject>(optional?: '?' | '??'): {
+    <T extends AnyObject>(optional?: '?'): {
         name: 'MaybeIonized',
         validatedType: Ionized<T>;
         inputType: Ionized<T> | T;
@@ -282,8 +218,6 @@ export const MaybeIonized = ((optional: '?' | '??') => {
 export const $Ionized = ((optional: '?') => {
     return {
         name: '$Ionized',
-        // validatedType: null as unknown as Ionized<any>,
-        // $attributeType: null as unknown as Ionized<any>,
         optional,
         default: undefined
     }
@@ -302,8 +236,6 @@ export const $Ionized = ((optional: '?') => {
 export const $IonizedOrIonized = ((optional: '?') => {
     return {
         name: '$IonizedOrIonized',
-        // validatedType: null as unknown as Ionized<any>,
-        // inputType: null as unknown as Ionized<any>,
         optional,
     }
 }) as {
@@ -318,28 +250,4 @@ export const $IonizedOrIonized = ((optional: '?') => {
     name: '$IonizedOrIonized'
     required: true;
 }
-
-
-
-
-// class Bog {
-//     boo: true = true
-// }
-
-// const attrs = {
-//     num: v<number>('?'),
-//     num2: v<number>,
-//     messageB: MaybeIon<string | number>,
-//     // message: _Ion<string>,
-//     message: $IonOrIon<string, {
-//         set(): void
-//     }>('?'),
-//     bog: v<Bog>,
-//     flora: $Ionized<{
-//         petal: string
-//     }, {
-//         setPetals(): void
-//     }>
-// }
-
 

@@ -37,7 +37,7 @@ collectEffects(async () => {
 - provideIfNeeded
 
 - provideFromRoot
-- provideGlobal
+- provideTransapp
 - constAppState/Global
 - letAppState/Global
 

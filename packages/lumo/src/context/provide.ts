@@ -1,8 +1,7 @@
 import { Context, getCurrentContext } from "./context-stack";
-import { NodeContext } from "./Context";
+import { ContextEntries, NodeContext } from "./Context";
 import { ContextKeyMap, contextTypeMap, TypeConfig } from "./ContextKey";
-import { isIon, isIonicModel } from "@rue/quarky";
-import { toIon } from "../../../quarky/src/ion/toIons";
+import { isIon, isIonicModel, toIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
 
@@ -24,12 +23,12 @@ export type _ContextInputType<C> =
     : 'invalid typeConfig'
 
 
-export function contextual<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> | undefined {
+export function contextual<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
     let _context = context || getCurrentContext();
     if (!_context) throw new Error(``)
 
     // climb context tree
-    let parent: Context | undefined = context;
+    let parent: Context | undefined = _context;
     while (parent !== undefined) {
         const entries = parent.entries
         if (has(key, entries)) {
@@ -40,7 +39,7 @@ export function contextual<K extends string | symbol>(key: K, context?: NodeCont
         }
         parent = parent.parent;
     }
-    return undefined
+    return undefined as ValidatedContextEntry<K>
 }
 
 function has(key: string | symbol, entries: Map<any, any> | Object | undefined) {
@@ -65,6 +64,27 @@ function get(key: string | symbol, entries: Map<any, any> | AnyObject | undefine
 
 
 
+
+export function createAppContext(entries: AnyObject | undefined, globalContext: AppContext | undefined) {
+    const _entries = entries ? toMap(entries) : new Map()
+    const appContext = {
+        entries: _entries,
+        parent: globalContext,
+        root: undefined as unknown as AppContext,
+        global: globalContext,
+    }
+    appContext.root = appContext
+    return appContext;
+}
+
+function toMap(entries: AnyObject) {
+    const map = new Map()
+    for (const key in entries) {
+        map.set(key, entries[key])
+    }
+    return map;
+}
+
 export function provideAppwide<K extends string | symbol>(key: K, value: ContextType<K>) {
     let context = getCurrentContext();
     if (!context)
@@ -81,13 +101,15 @@ export function provideAppwide<K extends string | symbol>(key: K, value: Context
     return value;
 }
 
-export function appwide<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> | undefined {
+export function appwide<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
     let _context = context || getCurrentContext();
     if (!_context) throw new Error(``)
     const rootProvider = _context.root;
     if (!rootProvider) throw new Error("No root provider found :( This should never happen")
     const typeConfig = contextTypeMap.get(key)
     const value = rootProvider.entries?.get(key)
+
+    if (value === undefined) return transapp(key);
     if (!typeConfig) return value;
     return validateContextEntry(key, value, typeConfig)
 }
@@ -95,18 +117,19 @@ export function appwide<K extends string | symbol>(key: K, context?: NodeContext
 
 
 
-export function createGlobalContext() {
-    const global = { entries: new Map(), root: undefined, global: undefined } as unknown as AppContext
+export function createTransappContext<E extends ContextEntries<E>>(entries?: E) {
+    const _entries = entries ? toMap(entries) : new Map()
+    const global = { entries: _entries, root: undefined, global: undefined } as unknown as AppContext
     global.global = global;
     return global
 }
 
-export function provideGlobal<K extends string | symbol>(key: K, value: ContextType<K>) {
+export function provideTransapp<K extends string | symbol>(key: K, value: ContextType<K>) {
     let context = getCurrentContext();
     if (!context)
         throw new Error('')
     if (!context.global)
-        throw new Error('No global context found. Call createGlobalContext() and pass into createApp() via config')
+        throw new Error('No global context found. Call createTransappContext() and pass into createApp() via config')
 
     const globalEntries = context.global.entries!
     if (globalEntries.has(key)) {
@@ -120,11 +143,11 @@ export function provideGlobal<K extends string | symbol>(key: K, value: ContextT
     return value;
 }
 
-export function global<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> | undefined {
+export function transapp<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
     let _context = context || getCurrentContext();
     if (!_context)
         throw new Error('')
-    const globalEntries = context?.global?.entries
+    const globalEntries = _context?.global?.entries
     const typeConfig = contextTypeMap.get(key)
     const value = globalEntries?.get(key)
     if (!typeConfig) return value;
@@ -139,21 +162,21 @@ type ValidatedContextEntry<K> = K extends keyof ContextKeyMap ? _ValidatedContex
 
 
 type _ValidatedContextEntry<C> =
-    C extends ({ required: true } | { default: Function }) & ({ validatedType: infer I } | ((arg: any) => { validatedType: infer I })) ? I
-    : C extends { optional: '?' } & ({ validatedType: infer I } | ((arg: any) => { validatedType: infer I })) ? I
+    C extends ({ required: true } | { default: true }) & ({ validatedType: infer I } | ((arg: any) => { validatedType: infer I })) ? I
+    : C extends { optional: '?' } & ({ validatedType: infer I } | ((arg: any) => { validatedType: infer I })) ? I | undefined
     : any
 
 function validateContextEntry(key: string | symbol, value: any, typeConfig: TypeConfig) {
     const assertions = typeConfig;
-    if (assertions) {
+    if (assertions) { //TODO: add assertion parameter to defineContextProp or provide a registerAssertions function
         const _assertions = assertions instanceof Array ? assertions : [assertions]
         for (const assert of _assertions) {
             assert(isIon(value) ? value() : value);
         }
     }
 
-    if ('optional' in typeConfig && value === undefined && 'default' in typeConfig && typeConfig.default instanceof Function) {
-        value = typeConfig.default()
+    if ('optional' in typeConfig && value === undefined && 'default' in typeConfig && (typeConfig.default as any) instanceof Function) {
+        value = (<Function><unknown>typeConfig.default)()
     }
     else if (!('optional' in typeConfig) && value === undefined) {
         throw new Error(`Required context entry for ${String(key)} is undefined or not found.`)

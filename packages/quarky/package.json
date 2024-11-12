@@ -3,6 +3,7 @@
     "private": true,
     "description": "",
     "module": "./src/index",
+    "main": "./src/index",
     "dependencies": {
         "@rue/flask": "workspace:*",
         "@rue/thread": "workspace:*",

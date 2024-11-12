@@ -5,7 +5,6 @@ import { isMountPhase } from "../dynamic/DynamicNode";
 import { ActiveListener, ListenerOptions } from "@rue/flask";
 import { onActivated, onDeactivate } from "../dynamic/lifecycle";
 import { noop } from "@rue/utils";
-import { getCurrentProvider, getProviderComponent, popProvider, pushProvider } from "../component/provide";
 import { getActiveDynamicNode } from "../dynamic/nodestack";
 import { CustomCleanupSchedulerListenerOptions } from "../events/listen";
 
@@ -18,8 +17,8 @@ type WatchForRenderOptions = {
 type LumoWatchOptions =  CustomCleanupSchedulerListenerOptions & Omit<WatchOptions, 'until'>
 
 export function initializeRender(effect: () => void) {
-    const component = getCurrentProvider();
-    if (!component) throw new Error("initializeRender must be called within component setup")
+    // const component = getCurrentProvider();
+    // if (!component) throw new Error("initializeRender must be called within component setup")
 
     const dynamicNode = getActiveDynamicNode()
     if (dynamicNode.preserve)
@@ -83,16 +82,16 @@ function _initializeRender(effect: () => void) {
 
 function bindWithComponent(fn: Function, component: InternalComponent) {
     return (...args: any[]) => {
-        pushProvider(component)
+        // pushProvider(component)
         const output = fn(...args)
-        popProvider()
+        // popProvider()
         return output;
     }
 }
 
 function _initializeAndPreserve(effect: () => void, renderPhase?: true): ActiveListener {
     const mountPhase = isMountPhase()
-    const component = getProviderComponent()
+    // const component = getProviderComponent()
     const initializeFn = bindWithComponent(renderPhase ? _initializeRender : _initializeIonicEffect, component);
     const dynamicNode = getActiveDynamicNode()!
     const watcher = { stop: noop }

@@ -194,7 +194,7 @@ function createOffscreenStylesheet() {
     head.appendChild(style)
     const stylesheet = stylesheets.item(index)
     if (!stylesheet) throw new Error(`no stylesheet at this index!`)
-    offscreenStylesheet = stylesheet //TODO: replace with provideGlobal(OFFSCREEN_STYLESHEET, stylesheet)
+    offscreenStylesheet = stylesheet //TODO: replace with provideTransapp(OFFSCREEN_STYLESHEET, stylesheet)
     return stylesheet;
 }
 
