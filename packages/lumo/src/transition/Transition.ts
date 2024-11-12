@@ -1,8 +1,12 @@
+import { AtomicIon, ref } from "@rue/quarky";
 import { Component } from "../component/InternalComponent";
 import { Context, createNodeContext } from "../context/Context";
+import { defineContextProp } from "../context/ContextKey";
 import { makeElement } from "../element/makeElement";
+import { $Ion, Ion, v } from "../InputTypes";
 import { NodeEntity } from "../node/makeNode";
 import { TransitionFunction, TransitionKit, TransitionVars } from "./defineTransition";
+import { contextual } from "../context/provide";
 
 export type TransitionConfig = TransitionFunction | TransitionKit
 
@@ -10,11 +14,25 @@ type TransitionHook = {
     phase: 'in' | 'out'
 }
 
-export const OFFSCREEN_CLASSNAME = Symbol('offscreen_classname')
-export const SHOULD_TRANSITION_IN_AND_OUT = Symbol('offscreen_classname')
+// export const OFFSCREEN_CLASSNAME = Symbol('offscreen_classname')
+// export const SHOULD_TRANSITION_IN_AND_OUT = Symbol('offscreen_classname')
+export const USE_PHASE_CHANGE = Symbol('usePhaseChange')
+
+const phaseChangeKit = defineContextProp(USE_PHASE_CHANGE, v<() => PhaseChangeKit>('?'))
+
+declare module '@rue/lumo' {
+    interface ContextKeyMap {
+        [USE_PHASE_CHANGE]: typeof phaseChangeKit
+    }
+}
+
+export type PhaseChangeKit = {
+    offscreenClass: string,
+    both: boolean
+}
 
 //TODO: transition on load?
-export function Transition(input: {
+export function PhaseChange(input: {
     load?: TransitionConfig | TransitionConfig[];
     in?: TransitionConfig | TransitionConfig[],
     out?: TransitionConfig | TransitionConfig[],
@@ -35,6 +53,18 @@ export function Transition(input: {
 
     const renderedTemplate = renderSlot();
 
+    let phaseChange: null | PhaseChangeKit = {
+        offscreenClass,
+        both: true //FIX: temporary
+    }
+
+    function usePhaseChange() {
+        const _phaseChange = phaseChange
+        phaseChange = null;
+        return _phaseChange
+    }
+
+
     return Component(
         createNodeContext(Context, () => (
             makeElement('div', renderedTemplate, {
@@ -44,9 +74,13 @@ export function Transition(input: {
                     '--transition-timing': transition.timing
                 } : undefined
             }, undefined)
-        ), { with: { [OFFSCREEN_CLASSNAME]: offscreenClass, [TRANSITION_IN_OUT]: true } })
+        ), { with: { [USE_PHASE_CHANGE]: usePhaseChange } })
 
     )
+}
+
+export function getPhaseChange(){
+    return contextual(USE_PHASE_CHANGE)?.()
 }
 
 

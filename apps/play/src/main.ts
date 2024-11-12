@@ -1,7 +1,6 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import { watch } from '../../../packages/lumo/src/watch/watchAndPreserve';
 import './style.css'
 // import { TestCounter } from './TestCounter';
 // import { TestBox } from './TestBox';
@@ -9,91 +8,20 @@ import './style.css'
 // import { TestConditional } from './TestConditional';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { List } from './TestReactiveModel';
-import { MountIf } from './TestMountIf';
-import { TestIonProp } from './TestIonProp';
-import { TestMorphic } from './TestMorphic';
-import { ParentBlock } from './ProvideState';
-import { watchIonicEffect, ion, ionize, protect, isIonicModel } from '@rue/quarky';
-import { TestIonicEffect } from './TestIonicEffect';
-import { TestSelectiveTracking } from './TestSelectiveTracking';
-import { TestCleanupScheduler } from './TestCustomCleanupScheduler';
-import { IS_PUBLIC, protectIon } from '../../../packages/quarky/src/ion/ProtectedIon';
 import { createApp } from '@rue/lumo';
 // import { ionize, ionize } from '@rue/quarky';
 // import { DeepReactiveModel, asMetaIonicModel, ionize, ionize } from '@rue/quarky';
-// import { MountIf } from './TestMountIf';
+import { MountIf } from './TestMountIf';
+import { PlainList } from './TestList';
 // import { queueTask } from '@rue/thread';
 // import { RenderCycle } from '@rue/quarky';
 // import { MainSite } from './AwaitTest';
 // import { ConditionalFlaskTest } from './ConditionalFlaskTest';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
-// const $count = ion(0, {
-//     set(count: number) {
-//         $count.as(count)
-//     },
-//     increment() {
-//         $count.as($count() + 1)
-//     }
-// })
-
-// // $count.set(2)
-// $count.increment()
-
-// console.log("count", $count())
-
-// const $frog = ionize([1, 2, 3], {
-//     push(value: number) {
-//         console.log("pushing", value)
-//         $frog._push(value)
-//     },
-//     blah() {
-//         console.log('blah')
-//     }
-// })
-const atomicIon = ion(0, {
-    increment(this: Public) {
-        atomicIon.as(atomicIon() + 1)
-    }
-    // ,
-    // XPOas(value: number){
-    //     atomicIon._as(value)
-    // }
-})
-
-type Public = {
-    [IS_PUBLIC]: true
-}
 
 
-
-const $count = ion(0, {
-    xpo_increment() {
-        $count.as($count() + 1)
-    },
-    decrement() {
-
-    }
-})
-
-atomicIon.as(9)
-// atomicIon._as(9)
-
-const protectedIon = protectIon(atomicIon);
-console.log("protected", 'as' in protectedIon)
-
-// protectedIon.as(4)
-protectedIon.as(8)
-
-console.log(protectedIon(), 8)
-// $frog.push(5)
-// console.log('push?', $frog.push)
-// console.log('_push?', $frog._push)
-
-// console.log('i3', $frog[3])
-// console.log('i4', $frog[4])
-
-const globalContext = createTransappContext()
+// const rootContext = createTransappContext()
 
 const app = createApp(List)
 
@@ -103,13 +31,7 @@ if (__DEV__) configureFlask({
 
 app.mount('#app')
 
-// queueTask(()=>{
-//     console.log("hi")
-// })
 
-// window.addEventListener('beforeunload', () => {
-//     console.log("unloading...")
-// })
 
 // function doSomething() {
 //     const dynamicNode = makeDynamicNode(false)

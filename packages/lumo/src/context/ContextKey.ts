@@ -32,21 +32,6 @@ export function createInjectedFactory(classKey: string | symbol, contextualGette
     return (...args: any[]) => contextualGetter(classKey)(...args)
 }
 
-/**
- *  App developers can extend ContextKeyMap interface like so:
- *  
- *  export const Frog = Symbol('frog')
- * 
- *  const frogType = defineContextProp(FROG, v<string>)
- *  
- *  declare module './ContextKey' {
- *     interface ContextKeyMap {
- *        [DOG]: typeof frogType
- *     }
- *  }
- * 
- */
-export interface ContextKeyMap { }
 
 
 

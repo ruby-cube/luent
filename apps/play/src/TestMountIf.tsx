@@ -8,14 +8,6 @@ export function MountIf() {
             $count.as($count() + 1)
         }
     })
-    // const $doubleCount = ion(() => $count() * 2)
-
-    // const $count2 = ion(0)
-    // const $sum = $(() => $count() + $count2())
-    // function increment2() {
-    //     $count2.update(count => count + 1)
-    // }
-
 
     const $active = ion(true, {
         toggle() {
@@ -23,20 +15,6 @@ export function MountIf() {
         }
     })
 
-    // const $ready = ion(true)
-    // function toggleReady() {
-    //     $ready.update(ready => !ready)
-    // }
-
-    // watch(() => $count() * 2, (double) => {
-    //     console.log("double count!", double)
-    // })
-
-    function isTarget(n: any, e: any) {
-        return true;
-    }
-
-    // const $activeAndReady = $(() => $active() && $ready(), true)
     return Component(() =>
         <>
             <h1>Hello world</h1>
@@ -48,60 +26,7 @@ export function MountIf() {
                     <p>bye</p>
                 )
             ]}
-
-            {/* {If($active()),
-                <div>hi</div>
-            }
-            {Else,
-                <p>bye</p>
-            } */}
-
-            <button
-                data-frog={'hi'}
-                onV:click={e => console.log('hi')}
-                on:click={target('this', 'x-select', e =>
-                    console.log('hi')
-                )}
-            >
-                toggle active {$active()}
-            </button>
-            <button
-                data-frog={'hi'}
-                onV:click={e => console.log('hi')}
-                on:click={['x', 'x-select',
-                    incrementCount
-                ]}
-            >
-                toggle active {$active()}
-            </button>
-            <button
-                data-frog={'hi'}
-                onV:click={e => console.log('hi')}
-                on:click={'x', 'x-select', e => {
-                    $active.toggle()
-                    e.preventDefault()
-                }}
-            >
-                toggle active {$active()}
-            </button>
-            <button
-                data-frog={'hi'}
-                onV:click={e => console.log('hi')}
-                on:click={[
-                    target('this', 'select'), e => {
-                        $active.toggle
-                    },
-                    selectItem,
-                    target('this'), increment
-                ]}
-            >
-                toggle active {$active()}
-            </button >
-            {/* <div>Both: {$activeAndReady}</div> */}
-            {/* <button on:click={increment}>increment {$count}</button> */}
-            {/* <button on:click={toggleReady}>toggle ready {$ready}</button> */}
-            {/* <div>{$sum}</div>
-            <button on:click={increment2}>increment {$count2}</button> */}
+            <button on:click={$active.toggle}>toggle</button>
         </>
     )
 }

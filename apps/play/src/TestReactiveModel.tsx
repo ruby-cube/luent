@@ -53,7 +53,7 @@ function genId() {
 export function List(
 
 ) {
-
+    console.log('hey')
     const $list = ionize([
         { id: 0, content: "frog" },
         { id: 1, content: "robin" },
@@ -100,47 +100,49 @@ export function List(
 
 
 
-    return Component(() =>
+    return Component(
         <>
-            {[If(() => $list.length === 0, () =>
-                <div
-                    on:click={e => $list.insert(0)}
-                    style="background-color: gray; cursor: pointer"
-                >
-                    insert
-                </div>
-            ),
-
-            Else(() =>
-                For($list, ($item, $index) =>
-                    <div on:click={e => !target(e, 'style.cursor:pointer') && $selected.toggle($item)}
-                        style={[
-                            `background-color: ${randomColor.get()}`,
-                            o => { o.outline = $selected.has($item) ? 'thick solid blue' : '' }
-                        ]}>
-                        <p on:click={e => removeItem($index())}
-                            style="cursor: pointer"
-                        >
-                            X
-                        </p>
-
-                        <li on:click={e => $list.changeContent($index())}>
-                            {() => $item.content}
-                        </li>
-                        <p>{$index}</p>
-                        <div on:click={e => $list.insert($index() + 1)}
-                            style="background-color: gray; cursor: pointer"
-                        >
-                            insert
-                        </div>
-                        <div on:click={e => moveSelectedItems($index() + 1)}
-                            style="background-color: white; cursor: pointer"
-                        >
-                            insert
-                        </div>
+            {[
+                If(() => $list.length === 0, () =>
+                    <div
+                        on:click={e => $list.insert(0)}
+                        style="background-color: gray; cursor: pointer"
+                    >
+                        insert
                     </div>
-                    , 'id')
-            )]}
+                ),
+
+                Else(() =>
+                    For($list, ($item, $index) =>
+                        <div on:click={e => !target(e, 'style.cursor:pointer') && $selected.toggle($item)}
+                            style={[
+                                `background-color: ${randomColor.get()}`,
+                                o => { o.outline = $selected.has($item) ? 'thick solid blue' : '' }
+                            ]}>
+                            <p on:click={e => removeItem($index())}
+                                style="cursor: pointer"
+                            >
+                                X
+                            </p>
+
+                            <li on:click={e => $list.changeContent($index())}>
+                                {() => $item.content}
+                            </li>
+                            <p>{$index}</p>
+                            <div on:click={e => $list.insert($index() + 1)}
+                                style="background-color: gray; cursor: pointer"
+                            >
+                                insert
+                            </div>
+                            <div on:click={e => moveSelectedItems($index() + 1)}
+                                style="background-color: white; cursor: pointer"
+                            >
+                                insert
+                            </div>
+                        </div>
+                        , 'id')
+                )
+            ]}
 
             <button on:click={e => $selected.clear()}>clear</button>
             {/* <button

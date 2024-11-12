@@ -1,15 +1,16 @@
 import { Context, getCurrentContext } from "./context-stack";
 import { ContextEntries, NodeContext } from "./Context";
-import { ContextKeyMap, contextTypeMap, TypeConfig } from "./ContextKey";
+import { contextTypeMap, TypeConfig } from "./ContextKey";
 import { isIon, isIonicModel, toIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
+import { ContextKeyMap } from "@rue/lumo";
 
 
 export interface AppContext {
     entries?: Map<symbol | string, any>;
     parent?: AppContext,
-    root: AppContext,
-    global?: AppContext,
+    app: AppContext,
+    transapp?: AppContext,
 }
 
 
@@ -73,10 +74,10 @@ export function createAppContext(entries: AnyObject | undefined, globalContext: 
     const appContext = {
         entries: _entries,
         parent: globalContext,
-        root: undefined as unknown as AppContext,
-        global: globalContext,
+        app: undefined as unknown as AppContext,
+        transapp: globalContext,
     }
-    appContext.root = appContext
+    appContext.app = appContext
     return appContext;
 }
 
@@ -91,26 +92,26 @@ function toMap(entries: AnyObject) {
 export function provideAppwide<K extends string | symbol>(key: K, value: ContextType<K>) {
     let context = getCurrentContext();
     if (!context)
-        throw new Error("Must call initializeRootProvider in root component setup in order to provideAppState outside of root component")
-    const rootProviderEntries = context.root.entries || (context.root.entries = new Map());
-    if (rootProviderEntries.has(key)) {
+        throw new Error("No context found :(")
+    const appEntries = context.app.entries || (context.app.entries = new Map());
+    if (appEntries.has(key)) {
         if (__DEV__) {
             console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
             console.trace();
         }
         return value; //TODO: Maybe allow overrides??
     }
-    rootProviderEntries.set(key, value);
+    appEntries.set(key, value);
     return value;
 }
 
 export function appwide<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
     let _context = context || getCurrentContext();
     if (!_context) throw new Error(``)
-    const rootProvider = _context.root;
-    if (!rootProvider) throw new Error("No root provider found :( This should never happen")
+    const appContext = _context.app;
+    if (!appContext) throw new Error("No app context found :( This should never happen")
     const typeConfig = contextTypeMap.get(key)
-    const value = rootProvider.entries?.get(key)
+    const value = appContext.entries?.get(key)
 
     if (value === undefined) return transapp(key);
     if (!typeConfig) return value;
@@ -122,19 +123,19 @@ export function appwide<K extends string | symbol>(key: K, context?: NodeContext
 
 export function createTransappContext<E extends ContextEntries<E>>(entries?: E) {
     const _entries = entries ? toMap(entries) : new Map()
-    const global = { entries: _entries, root: undefined, global: undefined } as unknown as AppContext
-    global.global = global;
-    return global
+    const context = { entries: _entries, app: undefined, transapp: undefined } as unknown as AppContext
+    context.transapp = context;
+    return context
 }
 
 export function provideTransapp<K extends string | symbol>(key: K, value: ContextType<K>) {
     let context = getCurrentContext();
     if (!context)
         throw new Error('')
-    if (!context.global)
-        throw new Error('No global context found. Call createTransappContext() and pass into createApp() via config')
+    if (!context.transapp)
+        throw new Error('No transapp context found. Call createTransappContext() and pass into createApp() via config')
 
-    const globalEntries = context.global.entries!
+    const globalEntries = context.transapp.entries!
     if (globalEntries.has(key)) {
         if (__DEV__) {
             console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
@@ -150,7 +151,7 @@ export function transapp<K extends string | symbol>(key: K, context?: NodeContex
     let _context = context || getCurrentContext();
     if (!_context)
         throw new Error('')
-    const globalEntries = _context?.global?.entries
+    const globalEntries = _context?.transapp?.entries
     const typeConfig = contextTypeMap.get(key)
     const value = globalEntries?.get(key)
     if (!typeConfig) return value;

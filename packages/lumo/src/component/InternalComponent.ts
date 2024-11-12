@@ -36,7 +36,7 @@ export function expose<T>(publicComponent: T & Object): T {
     return protect(publicComponent);
 }
 
-type JSXTemplate = NodeEntity | NodeEntity[] | (() => NodeEntity | NodeEntity[])
+type JSXTemplate = NodeEntity | NodeEntity[]
 
 //TODO: accept a third paramenter for mountTeleported
 // compiler macro to transform jsx template into render function

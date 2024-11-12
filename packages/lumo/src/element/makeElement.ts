@@ -23,12 +23,12 @@ export function mE(
     renderSlot?: () => NodeEntity[],
     config?: ElementConfig,
 ): DOMNode {
-    return makeNode(nodeType, renderSlot, config||{}) as DOMNode
+    return makeNode(nodeType, renderSlot, config || {}) as DOMNode
 }
 
 export function makeElement<T extends keyof HTMLElementTagNameMap>(
     tagName: T,
-    renderSlot: (() => NodeEntity[]) | undefined,
+    Slot: [string] | (() => NodeEntity[]) | undefined,
     config: ElementConfig,
     $index: AtomicIon<number> | undefined
 ): DOMNode {
@@ -59,8 +59,8 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
             dynamicAttributes
         );
 
-    if (renderSlot) {
-        const _childNodes = wrapIfConditionalSeries(renderSlot())
+    if (Slot) {
+        const _childNodes = wrapIfConditionalSeries(Slot instanceof Function ? Slot() : Slot)
         const nodePod = new _NodePod();
         for (let i = 0; i < _childNodes.length; i++) {
             let childNodeEntity = _childNodes[i];
@@ -253,7 +253,7 @@ function setUpDynamicAttributes(node: Element, changes: ((o: Element) => void)[]
 }
 
 function setUpRefNulling(ref: _NodePod, $index: AtomicIon<number>) {
-if ($index && $index() === 0) {
+    if ($index && $index() === 0) {
 
     }
     else {

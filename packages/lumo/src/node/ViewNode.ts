@@ -2,8 +2,8 @@ import { SchedulerOptions } from "@rue/flask";
 import { getCurrentContext, Context } from "../context/context-stack";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { getActiveDynamicNode } from "../dynamic/nodestack";
-import { ContextKeyMap } from "../context/ContextKey";
-import { fromApp, fromContext, fromGlobal } from "../context/provide";
+import { appwide, contextual, transapp } from "../context/provide";
+import { ContextKeyMap } from "@rue/lumo";
 
 
 type ViewNode = {
@@ -11,7 +11,7 @@ type ViewNode = {
     readonly onDestroy: (handler: () => void, options?: SchedulerOptions) => void
     readonly contextual: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
     readonly appwide: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
-    readonly global: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
+    readonly transapp: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
 }
 
 const viewNodeMap: Map<DynamicNode, Map<Context, ViewNode>> = new Map()
@@ -33,13 +33,13 @@ export function getThis() {
 function createViewNode(context: Context): ViewNode {
     return {
         contextual(key: string | symbol) {
-            return fromContext(key, context)
+            return contextual(key, context)
         },
         appwide(key: string | symbol) {
-            return fromApp(key, context)
+            return appwide(key, context)
         },
-        global(key: string | symbol) {
-            return fromGlobal(key, context)
+        transapp(key: string | symbol) {
+            return transapp(key, context)
         },
         get onCreated() {
             const dynamicNode = getActiveDynamicNode()

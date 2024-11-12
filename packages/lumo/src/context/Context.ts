@@ -2,15 +2,15 @@ import { AnyObject } from "@rue/types";
 import { Component, InternalComponent } from "../component/InternalComponent";
 import { initializeComponent } from "../component/makeComponent";
 import { getCurrentContext, popContext, pushContext } from "./context-stack";
-import { ContextKeyMap } from "./ContextKey";
 import { AppContext, _ContextInputType } from "./provide";
 import { ComponentConfig, NodeEntity } from "../node/makeNode";
+import { ContextKeyMap } from "@rue/lumo";
 
 export interface NodeContext {
     entries: AnyObject;
     parent: NodeContext | AppContext,
-    root: AppContext,
-    global?: AppContext,
+    app: AppContext,
+    transapp?: AppContext,
 }
 
 export type ContextEntries<T> = {
@@ -30,8 +30,8 @@ export function Context<T extends ContextEntries<T>>(input: {
     const context: NodeContext = {
         entries: input.with,
         parent: parentContext,
-        root: parentContext?.root,
-        global: parentContext?.global
+        app: parentContext?.app,
+        transapp: parentContext?.transapp
     }
 
     pushContext(context)

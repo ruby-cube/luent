@@ -7,7 +7,7 @@ import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
 import { Context, createNodeContext } from '../Context';
 import { defineContextProp } from '../ContextKey';
-import { Ion, Ionized, Ionized, MaybeIon, v } from '../../InputTypes';
+import { Ion, Ionized, MaybeIon, v } from '../../InputTypes';
 import { ion, ionize, isIon, isIonicModel } from '@rue/quarky';
 
 
@@ -18,8 +18,6 @@ beforeEach(() => {
     vi.stubGlobal('Element', window.Element)
     vi.stubGlobal('Text', window.Text)
     vi.stubGlobal('document', dom.window.document)
-
-    // Reset application or global context as needed, e.g., creating a new instance or clearing registries
 });
 
 const FROG = 'frog'
@@ -133,7 +131,7 @@ describe('Integration tests the Context API', () => {
     });
 
     describe('createTransappContext()', () => {
-        it('should create a global context accessible across the application', () => {
+        it('should create a trans-app context accessible across the application', () => {
             const value = 'sir robin'
             const transappContext = createTransappContext({ [FROG]: value });
 
@@ -159,7 +157,7 @@ describe('Integration tests the Context API', () => {
 
         });
 
-        it('should create a global context accessible across the application', () => {
+        it('should create a trans-app context accessible across the application', () => {
             const globalContext = createTransappContext();
             expect(globalContext).toBeDefined();
         });

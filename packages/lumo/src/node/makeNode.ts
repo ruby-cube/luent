@@ -13,8 +13,9 @@ export function Fragment() {
     // for jsx-runtime
 }
 
-export function jsx(tag: any, config: any, ...children: any[]) {
-    return makeNode(tag, () => children, config || {})
+export function jsx(tag: any, config: any, ...children: any[]) { //TODO: transpiler should compile children to function
+    const _children = children.length === 1 && typeof children[0] === 'string' ? children : () => children
+    return makeNode(tag, _children, config || {})
 }
 
 export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveGet<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
@@ -54,23 +55,23 @@ export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
 
 export function makeNode(
     nodeType: HTMLTag | ComponentSetup,
-    renderSlot: (() => NodeEntity[]) | InferSlot,
+    slot: [string] | (() => NodeEntity[]) | InferSlot,
     config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent {
     if (typeof nodeType === "string")
         return makeElement(
             nodeType,
-            <() => NodeEntity[]>renderSlot,
+            <[string] | (() => NodeEntity[])>slot,
             <ElementConfig>config,
             getCurrentIndex()
         )
     if (nodeType.name === 'Context') {
-        if (!renderSlot) throw new Error(`Extraneous <Context>`)
-        return createNodeContext(nodeType, renderSlot, <ComponentConfig>config)
+        if (!slot || slot instanceof Array) throw new Error(`Extraneous <Context>`)
+        return createNodeContext(nodeType, slot, <ComponentConfig>config)
     }
     return makeComponent(
         nodeType,
-        <InferSlot>renderSlot,
+        <InferSlot>slot,
         <ComponentConfig>config,
         getCurrentIndex()
     )

@@ -4,7 +4,7 @@ import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { ReactiveGet } from "../../../quarky/src";
-import { getProviderComponent } from "../component/provide";
+import { getContext } from "../context/context-stack";
 
 
 
@@ -37,7 +37,7 @@ export function If($condition: (_?: any) => Booleanny, renderConditional: Render
         'if',
         wrapToNormalize(renderConditional),
         'create',
-        getProviderComponent(),
+        getContext(),
         { $condition }
     )
 }
@@ -47,7 +47,7 @@ export function ElseIf($condition: ReactiveGet<Booleanny>, renderConditional: Re
         'elseIf',
         wrapToNormalize(renderConditional),
         'create',
-        getProviderComponent(),
+        getContext(),
         { $condition }
     )
 }
@@ -57,7 +57,7 @@ export function Else(renderConditional: RenderFunction) {
         'else',
         wrapToNormalize(renderConditional),
         'create',
-        getProviderComponent(),
+        getContext(),
     )
 }
 
@@ -67,7 +67,7 @@ export function MountIf($condition: ReactiveGet<Booleanny>, renderConditional: R
         'if',
         wrapToPreserve(renderConditional),
         'mount',
-        getProviderComponent(),
+        getContext(),
         { $condition }
     )
 }
@@ -77,7 +77,7 @@ export function ElseMountIf($condition: ReactiveGet<Booleanny>, renderConditiona
         'elseIf',
         wrapToPreserve(renderConditional),
         'mount',
-        getProviderComponent(),
+        getContext(),
         { $condition }
     )
 }
@@ -87,7 +87,7 @@ export function ElseMount(renderConditional: RenderFunction) {
         'else',
         wrapToPreserve(renderConditional),
         'mount',
-        getProviderComponent(),
+        getContext(),
     )
 }
 
@@ -97,7 +97,7 @@ export function ShowIf($condition: ReactiveGet<Booleanny>, renderConditional: Re
         'if',
         wrapToNormalize(renderConditional),
         'show',
-        getProviderComponent(),
+        getContext(),
         { $condition }
     )
 }
@@ -110,7 +110,7 @@ export function ElseShowIf($condition: ReactiveGet<Booleanny>, renderConditional
         'elseIf',
         wrapToNormalize(renderConditional),
         'show',
-        getProviderComponent(),
+        getContext(),
         { nodePodIndex: currentNodePodIndex, $condition }
     )
 }
@@ -123,7 +123,7 @@ export function ElseShow(renderConditional: RenderFunction) {
         'else',
         wrapToNormalize(renderConditional),
         'show',
-        getProviderComponent(),
+        getContext(),
         { nodePodIndex: currentNodePodIndex }
     )
 }

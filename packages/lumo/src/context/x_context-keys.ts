@@ -5,7 +5,7 @@ export const DOG = Symbol('dog')
 
 const dogType = defineContextProp(DOG, v<string>('?'))
 
-declare module './ContextKey' {
+declare module '@rue/lumo' {
     interface ContextKeyMap {
         [DOG]: typeof dogType
     }
