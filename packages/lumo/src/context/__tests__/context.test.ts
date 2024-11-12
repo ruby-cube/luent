@@ -6,6 +6,9 @@ import { makeComponent } from '../../component/makeComponent';
 import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
 import { Context, createNodeContext } from '../Context';
+import { defineContextProp } from '../ContextKey';
+import { Ion, Ionized, Ionized, MaybeIon, v } from '../../InputTypes';
+import { ion, ionize, isIon, isIonicModel } from '@rue/quarky';
 
 
 // Common setup to reset the environment before each test
@@ -298,7 +301,7 @@ describe('Integration tests the Context API', () => {
             let frogF;
 
             function App() {
-    
+
                 return Component(
                     createNodeContext(Context, () => [
                         makeComponent(Parent, undefined, {}, undefined)
@@ -331,7 +334,7 @@ describe('Integration tests the Context API', () => {
                 )
             }
 
-            const transappContext = createTransappContext({  [GLOBAL_FROG]: globalValue })
+            const transappContext = createTransappContext({ [GLOBAL_FROG]: globalValue })
             const app = createApp(App, { with: { [APP_FROG]: appValue }, transappContext });
 
             app.mount(<HTMLElement>document.createElement('div'))
@@ -343,5 +346,344 @@ describe('Integration tests the Context API', () => {
             expect(frogE).toBe(appContextualValue)
             expect(frogF).toBe(contextualValue)
         });
+    });
+
+
+
+    // it should validate Ionized
+
+
+    describe('defineContextProp and validation', () => {
+        it('should throw an error if required context prop is not provided', () => {
+
+            const value = 0
+            const FROG = 'frog'
+            defineContextProp(FROG, v)
+            let frog;
+
+            const KERMIT = 'kermit'
+            defineContextProp(KERMIT, v)
+
+            function App() {
+                return Component(
+                    createNodeContext(Context, () => [
+                        makeComponent(Child, undefined, {}, undefined)
+                    ], { with: { [FROG]: value } })
+                )
+            }
+
+            let error;
+
+            function Child() {
+                frog = contextual(FROG)
+                try {
+                    contextual(KERMIT)
+                }
+                catch (err) {
+                    error = err
+                    console.error(err)
+                }
+                finally {
+                    return Component(
+                        makeElement('div', () => ['child'], {}, undefined)
+                    )
+                }
+            }
+
+            const app = createApp(App);
+
+            app.mount(<HTMLElement>document.createElement('div'))
+
+            expect(error).toBeDefined()
+            expect(frog).toBe(value)
+        });
+
+        it('should allow optional props to be undefined', () => {
+
+            const FROG = 'frog'
+            defineContextProp(FROG, v('?'))
+            let frog = 'hi'
+
+            function App() {
+                return Component(
+                    makeComponent(Child, undefined, {}, undefined)
+                )
+            }
+
+
+            function Child() {
+                frog = contextual(FROG)
+
+                return Component(
+                    makeElement('div', () => ['child'], {}, undefined)
+                )
+            }
+
+            const app = createApp(App);
+
+            app.mount(<HTMLElement>document.createElement('div'))
+
+            expect(frog).toBeUndefined()
+        });
+
+        it('should use default if provided and prop is undefined', () => {
+
+            const FROG = 'frog'
+            const defaultValue = 'kermit'
+            defineContextProp(FROG, v('?')(() => defaultValue))
+            let frog = 'hi'
+
+            function App() {
+                return Component(
+                    makeComponent(Child, undefined, {}, undefined)
+                )
+            }
+
+            function Child() {
+                frog = contextual(FROG)
+
+                return Component(
+                    makeElement('div', () => ['child'], {}, undefined)
+                )
+            }
+
+            const app = createApp(App);
+
+            app.mount(<HTMLElement>document.createElement('div'))
+
+            expect(frog).toBe(defaultValue)
+        });
+
+        it('should normalize MaybeIon', () => {
+
+            const FROG = 'frog'
+            const value = 'kermit'
+            defineContextProp(FROG, MaybeIon)
+            let frog = 'hi'
+
+            function App() {
+                return Component(
+                    createNodeContext(Context, () => [
+                        makeComponent(Child, undefined, {}, undefined)
+                    ], { with: { [FROG]: value } })
+                )
+            }
+
+            function Child() {
+                frog = contextual(FROG)
+
+                return Component(
+                    makeElement('div', () => ['child'], {}, undefined)
+                )
+            }
+
+            const app = createApp(App);
+
+            app.mount(<HTMLElement>document.createElement('div'))
+
+            expect(isIon(frog)).toBe(true)
+            expect((<Function><unknown>frog)()).toBe(value)
+        });
+
+        it('should validate Ion', () => {
+
+            const FROG = 'frog'
+            const value = 'kermit'
+            defineContextProp(FROG, Ion)
+            let frog = 'hi'
+
+            function App() {
+                return Component(
+                    createNodeContext(Context, () => [
+                        makeComponent(Child, undefined, {}, undefined)
+                    ], { with: { [FROG]: value } })
+                )
+            }
+
+            let error;
+
+            function Child() {
+                try {
+                    frog = contextual(FROG)
+
+                }
+                catch (err) {
+                    error = err
+                    console.error(err)
+                }
+                finally {
+                    return Component(
+                        makeElement('div', () => ['child'], {}, undefined)
+                    )
+                }
+            }
+
+            const app = createApp(App);
+
+            app.mount(<HTMLElement>document.createElement('div'))
+
+            expect(error).toBeDefined()
+        });
+
+        it('should validate Ionized', () => {
+
+            const FROG = 'frog'
+            const value = 'kermit'
+            defineContextProp(FROG, Ionized)
+            let frog = 'hi'
+
+            function App() {
+                return Component(
+                    createNodeContext(Context, () => [
+                        makeComponent(Child, undefined, {}, undefined)
+                    ], { with: { [FROG]: value } })
+                )
+            }
+
+            let error;
+
+            function Child() {
+                try {
+                    frog = contextual(FROG)
+                }
+                catch (err) {
+                    error = err
+                    console.error(err)
+                }
+                finally {
+                    return Component(
+                        makeElement('div', () => ['child'], {}, undefined)
+                    )
+                }
+            }
+
+            const app = createApp(App);
+
+            app.mount(<HTMLElement>document.createElement('div'))
+
+            expect(error).toBeDefined()
+        });
+
+
+        it('should provide Ion', () => {
+
+            const FROG = 'frog'
+            const value = 'kermit'
+            defineContextProp(FROG, Ion)
+            let frog = 'hi'
+
+            function App() {
+                return Component(
+                    createNodeContext(Context, () => [
+                        makeComponent(Child, undefined, {}, undefined)
+                    ], { with: { [FROG]: ion(value) } })
+                )
+            }
+
+            function Child() {
+                frog = contextual(FROG)
+
+                return Component(
+                    makeElement('div', () => ['child'], {}, undefined)
+                )
+            }
+
+            const app = createApp(App);
+
+            app.mount(<HTMLElement>document.createElement('div'))
+
+            expect(isIon(frog)).toBe(true)
+        });
+
+
+        it('should provide Ionized', () => {
+
+            const FROG = 'frog'
+            const value = { name: 'kermit' }
+            defineContextProp(FROG, Ionized)
+            let frog = 'hi'
+
+            function App() {
+                return Component(
+                    createNodeContext(Context, () => [
+                        makeComponent(Child, undefined, {}, undefined)
+                    ], { with: { [FROG]: ionize(value) } })
+                )
+            }
+
+            function Child() {
+                frog = contextual(FROG)
+
+                return Component(
+                    makeElement('div', () => ['child'], {}, undefined)
+                )
+            }
+
+            const app = createApp(App);
+
+            app.mount(<HTMLElement>document.createElement('div'))
+
+            expect(isIonicModel(frog)).toBe(true)
+        });
+
+
+        it('should allow MaybeIon to be undefined if optional', () => {
+
+            const FROG = 'frog'
+            defineContextProp(FROG, MaybeIon('?'))
+            let frog = 'hi'
+
+            function App() {
+                return Component(
+                    makeComponent(Child, undefined, {}, undefined)
+                )
+            }
+
+            function Child() {
+                frog = contextual(FROG)
+
+                return Component(
+                    makeElement('div', () => ['child'], {}, undefined)
+                )
+            }
+
+            const app = createApp(App);
+
+            app.mount(<HTMLElement>document.createElement('div'))
+
+            expect(frog).toBeUndefined()
+        });
+
+
+        it('should provide default for MaybeIon', () => {
+
+            const FROG = 'frog'
+            const defaultValue = 'kermit'
+            defineContextProp(FROG, MaybeIon('?')(() => defaultValue))
+            let frog = 'hi'
+
+            function App() {
+                return Component(
+                    makeComponent(Child, undefined, {}, undefined)
+                )
+            }
+
+            function Child() {
+                frog = contextual(FROG)
+
+                return Component(
+                    makeElement('div', () => ['child'], {}, undefined)
+                )
+            }
+
+            const app = createApp(App);
+
+            app.mount(<HTMLElement>document.createElement('div'))
+
+            expect(isIon(frog)).toBe(true)
+            expect((<Function><unknown>frog)()).toBe(defaultValue)
+
+        });
+
     });
 });

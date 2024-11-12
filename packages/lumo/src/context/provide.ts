@@ -29,17 +29,20 @@ export function contextual<K extends string | symbol>(key: K, context?: NodeCont
 
     // climb context tree
     let parent: Context | undefined = _context;
+    const typeConfig = contextTypeMap.get(key)
     while (parent !== undefined) {
         const entries = parent.entries
         if (has(key, entries)) {
             const value = get(key, entries);
-            const typeConfig = contextTypeMap.get(key)
             if (!typeConfig) return value;
             return validateContextEntry(key, value, typeConfig)
         }
         parent = parent.parent;
     }
-    return undefined as ValidatedContextEntry<K>
+    if (!typeConfig){
+        return undefined as ValidatedContextEntry<K>
+    }
+    return validateContextEntry(key, undefined, typeConfig)
 }
 
 function has(key: string | symbol, entries: Map<any, any> | Object | undefined) {
@@ -151,6 +154,7 @@ export function transapp<K extends string | symbol>(key: K, context?: NodeContex
     const typeConfig = contextTypeMap.get(key)
     const value = globalEntries?.get(key)
     if (!typeConfig) return value;
+    console.log('validate...', key)
     return validateContextEntry(key, value, typeConfig)
 }
 
@@ -167,18 +171,17 @@ type _ValidatedContextEntry<C> =
     : any
 
 function validateContextEntry(key: string | symbol, value: any, typeConfig: TypeConfig) {
-    const assertions = typeConfig;
-    if (assertions) { //TODO: add assertion parameter to defineContextProp or provide a registerAssertions function
-        const _assertions = assertions instanceof Array ? assertions : [assertions]
-        for (const assert of _assertions) {
-            assert(isIon(value) ? value() : value);
-        }
-    }
-
-    if ('optional' in typeConfig && value === undefined && 'default' in typeConfig && (typeConfig.default as any) instanceof Function) {
+    // const assertions = typeConfig;
+    // if (assertions) { //TODO: add assertion parameter to defineContextProp or provide a registerAssertions function
+    //     const _assertions = assertions instanceof Array ? assertions : [assertions]
+    //     for (const assert of _assertions) {
+    //         assert(isIon(value) ? value() : value);
+    //     }
+    // }
+    if (typeConfig.optional === 'withDefault' && value === undefined && (typeConfig.default as any) instanceof Function) {
         value = (<Function><unknown>typeConfig.default)()
     }
-    else if (!('optional' in typeConfig) && value === undefined) {
+    else if (!typeConfig.optional && value === undefined) {
         throw new Error(`Required context entry for ${String(key)} is undefined or not found.`)
     }
 
