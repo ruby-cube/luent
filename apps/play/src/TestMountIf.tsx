@@ -1,6 +1,5 @@
-//@ts-nocheck
-import { NodeRef, Component, If, Else, stopPropagation, watch, preventDefault } from "@rue/lumo";
-import { AFTER_RENDER, BEFORE_RENDER, AtomicIon, ion, ON_RENDER, SYNC } from "@rue/quarky";
+import { NodeRef, Component, If, Else, fade } from "@rue/lumo";
+import {  ion } from "@rue/quarky";
 
 export function MountIf() {
     const $count = ion(0, {
@@ -18,54 +17,54 @@ export function MountIf() {
     return Component(() =>
         <>
             <h1>Hello world</h1>
-            {[
+            <phase-change both={fade}>{[
                 If($active, () =>
                     <div>hi</div>
                 ),
                 Else(() =>
                     <p>bye</p>
                 )
-            ]}
+            ]}</phase-change>
             <button on:click={$active.toggle}>toggle</button>
         </>
     )
 }
 
-function DisplayCard({ id, title, description }) {
-    // setup logic here...
-    function select() {
+// function DisplayCard({ id, title, description }) {
+//     // setup logic here...
+//     function select() {
 
-    }
+//     }
 
-    return Component(
-        <div on:click={e => { if (e.targets('x-select')) select() }}>
-            <p x-select>{title}</p>
-            <p contenteditable>{description}</p>
-            <button on:click={e => open(id)}>open</button>
-            <ArticleBlock SlotKit={CounterKit}>{o =>
-                <p>{o.frog}</p>
-            }</ArticleBlock>
-        </div>
-    )
-}
+//     return Component(
+//         <div on:click={e => { if (e.targets('x-select')) select() }}>
+//             <p x-select>{title}</p>
+//             <p contenteditable>{description}</p>
+//             <button on:click={e => open(id)}>open</button>
+//             <ArticleBlock SlotKit={CounterKit}>{o =>
+//                 <p>{o.frog}</p>
+//             }</ArticleBlock>
+//         </div>
+//     )
+// }
 
-function DisplayCardB({ id, title, description }) {
-    // setup logic here...
-    function select() {
+// function DisplayCardB({ id, title, description }) {
+//     // setup logic here...
+//     function select() {
 
-    }
+//     }
 
-    return Component(
-        <div on:click={'x-select', e => { if (e.targets('x-select')) select() }}>
-            <p x-select>{title}</p>
-            <p contenteditable>{description}</p>
-            <button on:click={e => open(id)}>open</button>
-            <ArticleBlock SlotKit={CounterKit}>{o =>
-                <p>{o.frog}</p>
-            }</ArticleBlock>
-        </div>
-    )
-}
+//     return Component(
+//         <div on:click={'x-select', e => { if (e.targets('x-select')) select() }}>
+//             <p x-select>{title}</p>
+//             <p contenteditable>{description}</p>
+//             <button on:click={e => open(id)}>open</button>
+//             <ArticleBlock SlotKit={CounterKit}>{o =>
+//                 <p>{o.frog}</p>
+//             }</ArticleBlock>
+//         </div>
+//     )
+// }
 
 function CounterKit() {
     return {

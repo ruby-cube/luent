@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 
-type OffscreenProperties = {
+export type CSSTransitionProperties = {
     // Opacity and Visibility
     opacity?: number;
     visibility?: 'visible' | 'hidden' | 'collapse';
@@ -112,14 +112,7 @@ type OffscreenProperties = {
     mixBlendMode?: string;
 }
 
-type TransitionConfig = {
-    offscreen: OffscreenProperties,
-    // delay?: number,
-    duration?: number,
-    timing?: TransitionTiming
-}
-
-type TransitionTiming =
+export type TransitionTiming =
     | 'linear'
     | 'ease'
     | 'ease-in'
@@ -133,59 +126,92 @@ type TransitionTiming =
     | 'initial'
     | 'unset';
 
-export type TransitionFunction = (options?: TransitionOptions) => TransitionKit
+export type TransitionFunction = {
+    (options?: TransitionOptions): TransitionKit
+    defaultClass: string
+}
 
 export type TransitionKit = {
+    name: string;
+    properties: string[];
     offscreenClass: string;
     delay: number;
     duration: number;
     timing: TransitionTiming;
+} 
+
+export type TransitionClasses = {
+    offscreenClass: string;
+    transitionClass: string;
 }
 
-export type TransitionVars = {
-    offscreen: { [K in keyof OffscreenProperties]?: OffscreenProperties[K] }
+
+export type TransitionDef = {
+    offscreen: { [K in keyof CSSTransitionProperties]?: CSSTransitionProperties[K] } // provide class config or existing class name (separated by spaces if multiple classes)
     delay?: number;
     duration?: number;
     timing?: TransitionTiming;
+} | {
+    offscreenClass: string // provide class config or existing class name (separated by spaces if multiple classes)
+    properties: string | string[]
+    delay?: number;
+    duration?: number;
+    timing?: TransitionTiming;
+} | {
+    offscreenClass: string
+    transitionClass: string
 }
 
 type TransitionOptions = {
     delay?: number;
     duration?: number;
     timing?: TransitionTiming;
-} & { [K in keyof OffscreenProperties]?: OffscreenProperties[K] }
+} & { [K in keyof CSSTransitionProperties]?: CSSTransitionProperties[K] }
+    & { [key: string]: string | number | boolean }
 
-/**
- * NOTE: delay in ms (default: 0), duration in ms (default: 250), timing (default: 'ease')
+/* 
+note: delay in ms (default: 0), duration in ms (default: 250), timing (default: 'ease')
  */
-export function defineTransition<F extends (options?: TransitionOptions) => TransitionVars>(name: string, useTransition: F) {
-    const _name = name;
-    let transitionClass = '';
-    return function setupTransition(options?: Parameters<F>[0]) {
+export function defineTransition<F extends (options?: TransitionOptions) => TransitionDef>(name: string, useTransition: F) {
+    const _name = name; //manage name collisions
+    let offscreenClass = '';
+
+    function setupTransition(options?: Parameters<F>[0]) {
         const transition = useTransition(options)
-        if (!transitionClass) {
-            transitionClass = mountOffscreenClass(_name, transition.offscreen)
+        if (!offscreenClass) {
+            offscreenClass = mountOffscreenClass(_name, transition.offscreen)
         }
         return {
-            offscreenClass: transitionClass,
+            name: _name,
+            properties: transition.properties || Object.keys(transition.offscreen),
+            offscreenClass,
             delay: transition.delay ?? 0,
             duration: transition.duration ?? 250,
             timing: transition.timing ?? 'ease'
         }
     }
+    setupTransition.defaultClass = ''
+    return setupTransition;
 }
 
-let offscreenStylesheet: CSSStyleSheet
+let transitionStylesheet: CSSStyleSheet
 
-function mountOffscreenClass(name: string, offscreen: OffscreenProperties) {
-    const style = offscreenStylesheet ?? createOffscreenStylesheet()
+export function getTransitionStylesheet() {
+    return transitionStylesheet;
+}
+
+function mountOffscreenClass(name: string, offscreen: CSSTransitionProperties | string) {
+    if (typeof offscreen === 'string') {
+        return offscreen;
+    }
+    const style = transitionStylesheet ?? createTransitionStyleSheet()
     const properties = compileCSSProperties(offscreen)
     const className = 'offscreen-' + name;
     style.insertRule(`.${className} { ${properties} }`)
     return className;
 }
 
-function createOffscreenStylesheet() {
+export function createTransitionStyleSheet() {
     const stylesheets = document.styleSheets
     const index = stylesheets.length;
     const style = document.createElement('style');
@@ -194,7 +220,7 @@ function createOffscreenStylesheet() {
     head.appendChild(style)
     const stylesheet = stylesheets.item(index)
     if (!stylesheet) throw new Error(`no stylesheet at this index!`)
-    offscreenStylesheet = stylesheet //TODO: replace with provideTransapp(OFFSCREEN_STYLESHEET, stylesheet)
+    transitionStylesheet = stylesheet //TODO: replace with provideTransapp(OFFSCREEN_STYLESHEET, stylesheet)
     return stylesheet;
 }
 
@@ -204,10 +230,6 @@ function compileCSSProperties(properties: AnyObject) {
         props = props + key + ':' + properties[key] + ';'
     }
     return props;
-}
-
-function mountCSSTransitionClasses(node: HTMLElement,) {
-
 }
 
 

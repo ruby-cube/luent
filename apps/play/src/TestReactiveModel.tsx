@@ -104,10 +104,7 @@ export function List(
         <>
             {[
                 If(() => $list.length === 0, () =>
-                    <div
-                        on:click={e => $list.insert(0)}
-                        style="background-color: gray; cursor: pointer"
-                    >
+                    <div on:click={e => $list.insert(0)} style="background-color: gray; cursor: pointer">
                         insert
                     </div>
                 ),

@@ -14,7 +14,7 @@ import { META } from "../../../quarky/src/ReactiveEntity";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { getFlask } from "@rue/flask";
 import { Context, popContext, pushContext } from "../context/context-stack";
-import { PhaseChangeKit } from "../transition/Transition";
+import { PhaseChangeKit } from "../transition/PhaseChange";
 
 
 type Index = number

@@ -571,10 +571,11 @@ export function ListBlock(setup = $setup()) {
 
                 <h1>Do something</h1>
 
-                <Port type='todos' welcome settle item='id' transport>{
+                <Port type='todos' receive settle send key='id' item>{
                     For($list, (item, $index, o) =>
                         <p>[x] {item}</p>,
-                    )}</Port>
+                    )
+                }</Port>
 
                 <h1>Do something</h1>
                 {[freeze,

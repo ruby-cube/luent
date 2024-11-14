@@ -4,7 +4,7 @@ import { ListRenderKit } from "./ListRenderKit";
 import { AtomicIon, ion, IonicModel, ReactiveGet } from "@rue/quarky";
 import { getContext } from "../context/context-stack";
 import { contextual } from "../context/provide";
-import { getPhaseChange } from "../transition/Transition";
+import { getPhaseChange } from "../transition/PhaseChange";
 
 
 export type RenderItem<T = any> = (item: T, $index: AtomicIon<number>) => NodeEntity[] | NodeEntity

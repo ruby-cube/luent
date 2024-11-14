@@ -8,19 +8,20 @@ import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
 import { createNodeContext } from "../context/Context";
 import { AnyObject } from "@rue/types";
+import { createTransitionNode } from "../transition/TransitionNode";
 
 export function Fragment() {
     // for jsx-runtime
 }
 
 export function jsx(tag: any, config: any, ...children: any[]) { //TODO: transpiler should compile children to function
-    const _children = children.length === 1 && typeof children[0] === 'string' ? children : () => children
+    const _children = children.length === 1 && typeof children[0] === 'string' ? children as [string] : () => children
     return makeNode(tag, _children, config || {})
 }
 
 export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveGet<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
 
-export type RenderFunction<Params = unknown> = Params extends [] ?
+export type RenderFunction<Params = unknown> = Params extends any[] ?
     (...args: Params) => NodeEntity[] | NodeEntity :
     () => NodeEntity[] | NodeEntity
 
@@ -54,24 +55,29 @@ export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
 
 
 export function makeNode(
-    nodeType: HTMLTag | ComponentSetup,
-    slot: [string] | (() => NodeEntity[]) | InferSlot,
+    nodeType: HTMLTag | ComponentSetup | 'phase-change' | 'i-o',
+    Slot: [string] | (() => NodeEntity[]) | InferSlot,
     config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent {
-    if (typeof nodeType === "string")
+    if (typeof nodeType === "string"){
+        if (nodeType === 'phase-change' || nodeType === 'i-o'){
+            if (!Slot) throw new Error(`Extraneous transition node`)
+            return createTransitionNode(nodeType, Slot, config)
+        }
         return makeElement(
             nodeType,
-            <[string] | (() => NodeEntity[])>slot,
+            <[string] | (() => NodeEntity[])>Slot,
             <ElementConfig>config,
             getCurrentIndex()
         )
+    }
     if (nodeType.name === 'Context') {
-        if (!slot || slot instanceof Array) throw new Error(`Extraneous <Context>`)
-        return createNodeContext(nodeType, slot, <ComponentConfig>config)
+        if (!Slot || Slot instanceof Array) throw new Error(`Extraneous <Context>`)
+        return createNodeContext(nodeType, Slot, <ComponentConfig>config)
     }
     return makeComponent(
         nodeType,
-        <InferSlot>slot,
+        <InferSlot>Slot,
         <ComponentConfig>config,
         getCurrentIndex()
     )
@@ -99,7 +105,7 @@ export function initializeListRef( // should this be initialize ref?
     // if (__DEV__) __devCheckIfNotTracked()
     if (__DEV__) __devCheckIfTracked()
     // const array = ref()!
-    const _ref = getNodeArrayRef(ref())
+    const _ref = getNodeArrayRef(ref)
     if (!_ref) throw new Error(`No internal node ref found. This should never happen`)
     // if ($index() === 0 && _existingRef)
     // throw new Error('This node list ref has already be initialized. A node list ref cannot be used multiple times')
