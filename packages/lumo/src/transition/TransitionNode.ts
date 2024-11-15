@@ -4,9 +4,20 @@ import { TransitionFunction, TransitionKit } from "./defineTransition";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
 import { renderIONode } from "./I-O";
+import { AnyObject } from "@rue/types";
 
 export type TransitionHook = {
     phase: 'in' | 'out'
+}
+
+
+export type TransitionNode = {
+    transitionIn(endTransition: () => void): void,
+    transitionOut(endTransition: (cleanup?: () => void) => void): void,
+    transitioningOut: boolean,
+    animatingOut: boolean,
+    cancel(direction: "in" | "out"): void
+    pause(direction: "in" | "out", transitionStartTime: number): void
 }
 
 export function createTransitionNode(
@@ -31,9 +42,9 @@ export function createTransitionNode(
     if (__DEV__ && transitionIn && transitionBoth || transitionOut && transitionBoth)
         console.warn(`The transition for 'both' will override transition for either 'in' or 'out'`)
 
-    const transitionInProperties = ['']; //TODO: 
-    const transitionOutProperties = ['']; //TODO: 
-    const enterClasses = compileOffscreenClasses(transitionBoth || transitionIn)
+    const transitionInProperties = undefined; //TODO: 
+    const transitionOutProperties = undefined; //TODO: 
+    const enterFromClasses = compileOffscreenClasses(transitionBoth || transitionIn)
     const transition_in = mountTransitionClass(transitionBoth || transitionIn)
     const animate_in = mountAnimationClass(animateBoth || animateIn)
     const exitClasses = compileOffscreenClasses(transitionBoth || transitionOut)
@@ -42,21 +53,226 @@ export function createTransitionNode(
 
     //TODO: if no animation or transition provided, default to fade transition
 
+
+
+
+    let paused = false;
+    let frameID: number | undefined;
+    let controller: AbortController;
+
+    function unpause(transitionProperties: AnyObject) {
+        const div = $div()!
+        div.style.removeProperty('animation-play-state')
+        if (transitionInProperties) {
+            for (const key in transitionProperties) {
+                div.style.removeProperty(key)
+            }
+        }
+    }
+
+    function quickFade() {
+        const div = $div()
+    }
+
+    const transitionNode: TransitionNode = {
+        transitionIn(endTransition: () => void) {
+            if (!transition_in && !animate_in) {
+                endTransition();
+                return;
+            }
+
+            const div = $div()!
+
+            if (onStart) onStart({ phase: 'in' })
+            controller = new AbortController()
+
+            if (transition_in) {
+                if (type === 'i-o') {
+                    div.classList.add(...enterFromClasses!);
+                    div.classList.add(transition_in);
+                }
+
+                frameID =
+                    requestAnimationFrame(() => {
+                        frameID = undefined
+
+                        // unpause
+                        // if (paused) { //FIX:
+                        //     div.style.removeProperty('animation-play-state')
+                        //     for (const prop of transitionInProperties) {
+                        //         div.style.removeProperty(prop)
+                        //     }
+                        // }
+
+                        div.classList.remove(...enterFromClasses!); // triggers enter
+
+                        div.addEventListener(
+                            "transitionend",
+                            () => {
+                                div.classList.remove(transition_in); // enter prep
+                                afterTransition()
+                            },
+                            { once: true, signal: controller.signal }
+                        );
+                    });
+            }
+
+            if (animate_in) {
+                div.classList.add(animate_in);
+
+                div.addEventListener(
+                    "animationend",
+                    () => {
+                        div.classList.remove(animate_in);
+                        afterTransition()
+                    },
+                    { once: true, signal: controller.signal }
+                );
+            }
+
+            let endTransitionCount = (transition_in ? 1 : 0) + (animate_in ? 1 : 0);
+
+            function afterTransition() {
+                endTransitionCount--;
+                if (endTransitionCount === 0) {
+                    if (onEnd) onEnd({ phase: 'in' })
+                    endTransition() //transitioning = false 
+                }
+            }
+        },
+
+        transitionOut(endTransition: (cleanup?: () => void) => void) {
+            if (!transition_out && !animate_out) {
+                endTransition();
+                return;
+            }
+            const div = $div()!
+            controller = new AbortController();
+
+            if (onStart) onStart({ phase: 'out' })
+
+
+            if (transition_out) {
+                this.transitioningOut = true;
+                frameID =
+                    requestAnimationFrame(() => {
+                        frameID = undefined
+
+                        // unpause //TODO:
+                        // if (paused) {
+                        //     unpause(transitionInProperties)
+                        // }
+
+                        div.classList.add(transition_out);
+                        div.classList.add(...exitClasses!);
+
+                        div.addEventListener(
+                            "transitionend",
+                            () => afterTransition(() => {
+                                this.transitioningOut = false;
+                                div.classList.remove(transition_out);
+                                div.classList.remove(...exitClasses!);
+
+                                if (type === 'phase-change' && transition_in) {
+                                    div.classList.add(...enterFromClasses!);
+                                    div.classList.add(transition_in);
+                                }
+                            }),
+                            { once: true, signal: controller.signal }
+                        );
+                    })
+            }
+
+            if (animate_out) {
+                this.animatingOut = true;
+                div.classList.add(animate_out);
+
+                div.addEventListener(
+                    "animationend",
+                    () => afterTransition(() => {
+                        this.animatingOut = false;
+                        div.classList.remove(animate_out);
+                    }),
+                    { once: true, signal: controller.signal }
+                );
+            }
+
+            const transitionCleanups: (() => void)[] = []
+            let endTransitionCount = (transition_out ? 1 : 0) + (animate_out ? 1 : 0);
+
+            function afterTransition(cleanup: () => void) {
+                endTransitionCount--;
+                transitionCleanups.push(cleanup)
+                if (endTransitionCount === 0) {
+                    endTransition(() => {
+                        if (onEnd) onEnd({ phase: 'out' })
+                        for (const cleanup of transitionCleanups) {
+                            cleanup()
+                        }
+                    })
+                }
+            }
+        },
+
+        transitioningOut: false,
+        animatingOut: false,
+
+        cancel(direction: 'in' | 'out') {
+            const div = $div()!
+            controller.abort();
+            if (direction === 'in') {
+                //complete
+                if (transition_in) {
+                    if (frameID !== undefined)
+                        cancelAnimationFrame(frameID)
+
+                    div.classList.remove(transition_in);
+                }
+                if (animate_in) {
+                    div.classList.remove(animate_in);
+                }
+
+            }
+            else {
+                if (transition_out) {
+                    this.transitioningOut = false;
+                    if (frameID !== undefined)
+                        cancelAnimationFrame(frameID)
+
+                    div.classList.remove(transition_out);
+                    div.classList.remove(...exitClasses!);
+
+                    if (type === 'phase-change' && transition_in) {
+                        div.classList.add(...enterFromClasses!);
+                        div.classList.add(transition_in);
+                    }
+                }
+                if (animate_out) {
+                    this.animatingOut = false;
+                    div.classList.remove(animate_out);
+                }
+            }
+        },
+        pause(direction: 'in' | 'out', transitionStartTime: number) {
+            // pause state
+            // for (const key in transitionInProperties) {
+            //     //TODO: requires A LOT more information to compute transitional state...
+            //     const transitionalState = computeTransitionalState(transitionIn.duration, new Date().getTime() - transitionStartTime, 0, -100, '')
+
+            //     div.style.setProperty('transform', `translateX(${transitionalState}px)`);
+            // }
+            // if (animate_in) div.style.setProperty('animation-play-state', 'pause')
+            paused = true;
+        }
+    }
+
+
     const renderNode = type === 'i-o' ? renderIONode : renderPhaseChangeNode
 
     return renderNode(
         $div,
         Slot,
-        transitionInProperties,
-        transitionOutProperties,
-        transition_in,
-        enterClasses,
-        transition_out,
-        exitClasses,
-        animate_in,
-        animate_out,
-        onStart,
-        onEnd
+        transitionNode
     )
 }
 

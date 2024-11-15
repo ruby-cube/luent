@@ -1,7 +1,5 @@
-import { InternalComponent } from "../component/InternalComponent";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { DynamicNode, isMountPhase, markMountPhase, NULLISH_DYNAMIC_NODE, unmarkMountPhase } from "../dynamic/DynamicNode";
-import { LifecycleHook as DynamicLifecycleHook } from "../dynamic/lifecycle";
 import { NodeEntity } from "../node/makeNode";
 import { mountNodeEntity } from "../node/mountNodeEntity";
 import { _DynamicNodePod, _NodePod, NULLISH_NODE_POD } from "../node/NodePod";
@@ -13,6 +11,7 @@ import { areShallowEqualArrays, Phase } from "../../../quarky/src";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { popContext, pushContext, Context } from "../context/context-stack";
 import { getPhasicNode, PhasicNode } from "../transition/PhaseChange";
+import { TransitionNode } from "../transition/TransitionNode";
 
 
 
@@ -78,7 +77,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
     context: Context
 
-    phasicNode?: PhasicNode
+    phasicNode?: TransitionNode
 
     constructor(
         statements: ConditionalRenderKit[],
@@ -127,19 +126,35 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             console.log("update conditional")
             if (areShallowEqualArrays(newValue, oldValue)) return;
 
-            // (2)
-            const prevIndex = series.activeIndex;
+            const prevIndex = series.activeIndex!;
             const activeIndex = series.evaluateConditions();
             const transitionNodes = series.statements[activeIndex].transitionNodes
+            const shouldTransition = phasicNode || transitionNodes.length
+
+            function activateConditional() {
+                pushDynamicNode(parentDynamicNode!)
+                series.activateConditional(activeIndex, parent)
+                popDynamicNode()
+            }
+
+            if (!shouldTransition) {
+                // (1)
+                series.deactivateConditional(prevIndex)
+
+                // (2)
+                activateConditional()
+
+                return;
+            }
 
             // (0) Pause previous transition
             if (transitionInStartTime) {
                 if (phasicNode) {
-                    phasicNode.endPhaseIn()
+                    phasicNode.cancel('in');
                     phasicNode.pause('in', transitionInStartTime);
                 }
                 for (const node of transitionNodes) {
-                    node.cancelTransitionIn();
+                    node.cancel('in')
                     node.pause('in', transitionInStartTime)
                 }
                 transitionInStartTime = 0;
@@ -147,12 +162,12 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             } else if (transitionOutStartTime) {
                 if (activeIndex === transitioningOutIndex) {
                     if (phasicNode) {
-                        phasicNode.endPhaseOut()
-                        phasicNode.pause('out', transitionOutStartTime);
+                        phasicNode.cancel('out');
+                        phasicNode.pause('out', transitionInStartTime);
                     }
                     for (const node of transitionNodes) {
-                        node.cancelTransitionOut();
-                        node.pause('out', transitionOutStartTime)
+                        node.cancel('out')
+                        node.pause('out', transitionInStartTime)
                     }
                     transitionOutStartTime = 0;
                     transitioningOutIndex = undefined;
@@ -175,41 +190,53 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             // (1) Transition out
             transitionOutStartTime = new Date().getTime();
             transitioningOutIndex = prevIndex;
+            const cleanups: (() => void)[] = []
 
-            let nodeCount = transitionNodes.length + (phasicNode ? 1 : 0)
+            let nodeCount = transitionNodes.length
 
-            for (const node of transitionNodes) {
-                node.transitionOut(node => {
-                    if () node.remove() // QUESTION: should this be before or after deactivateConditional? //TODO: only remove if 'create/destroy'
-                    nodeCount--
-                    if (nodeCount === 0) afterTransitionOut()
-                });
+            if (phasicNode) {
+                phasicNode.transitionOut(afterTransitionOut)
             }
-            if (phasicNode) phasicNode.phaseOut(() => {
-                nodeCount--
-                if (nodeCount === 0) afterTransitionOut()
-            })
+            else {
+                for (const node of transitionNodes) {
+                    node.transitionOut(afterTransitionOut);
+                }
+            }
 
-            function afterTransitionOut() {
-                transitionOutStartTime = 0;
-                series.deactivateConditional()
-
-                if (!skipTransitionIn) {
-                    // (3)
-                    activateConditional()
-
-                    // (4)
-                    transitionConditionalIn()
+            function afterTransitionOut(cleanup?: () => void) {
+                if (phasicNode) {
+                    for (const node of transitionNodes) {
+                        if (node.animatingOut || node.transitioningOut) {
+                            node.cancel('out')
+                        }
+                    }
                 }
                 else {
-                    skipTransitionIn = false;
+                    nodeCount--;
                 }
-            }
 
-            function activateConditional() {
-                pushDynamicNode(parentDynamicNode!)
-                series.activateConditional(activeIndex, parent)
-                popDynamicNode()
+                if (cleanup) cleanups.push(cleanup)
+
+                if (phasicNode || nodeCount === 0) {
+                    transitionOutStartTime = 0;
+
+                    for (const cleanup of cleanups) {
+                        cleanup()
+                    }
+
+                    series.deactivateConditional(prevIndex)
+
+                    if (!skipTransitionIn) {
+                        // (3)
+                        activateConditional()
+
+                        // (4)
+                        transitionConditionalIn()
+                    }
+                    else {
+                        skipTransitionIn = false;
+                    }
+                }
             }
 
             function transitionConditionalIn() {
@@ -219,7 +246,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                     node.transitionIn(endTransition);
                 }
                 if (phasicNode) {
-                    phasicNode.phaseIn(endTransition)
+                    phasicNode.transitionIn(endTransition)
                 }
                 function endTransition() {
                     nodeCount--
@@ -286,19 +313,16 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         }
     }
 
-    private deactivateConditional() {
-        const activeIndex = this.activeIndex;
-        if (activeIndex == null)
-            throw new Error('Cannot deactivateConditional if there is no active conditional')
-        const activationType = this.statements[activeIndex].type
+    private deactivateConditional(index: number) {
+        const activationType = this.statements[index].type
         if (activationType === 'show') {
-            hidePrevConditionalNodes(this.dynamicNodePod, activeIndex);
+            hidePrevConditionalNodes(this.dynamicNodePod, index);
         }
         else {
-            const dynamicNode = this.dynamicNodes[activeIndex]
+            const dynamicNode = this.dynamicNodes[index]
             if (activationType === 'create') {
-                this.dynamicNodes[activeIndex] = NULLISH_DYNAMIC_NODE; // release reference
-                this.replaceNodePod(activeIndex, NULLISH_NODE_POD)
+                this.dynamicNodes[index] = NULLISH_DYNAMIC_NODE; // release reference
+                this.replaceNodePod(index, NULLISH_NODE_POD)
                 dynamicNode.destroy()
             }
             else if (activationType === 'mount') {

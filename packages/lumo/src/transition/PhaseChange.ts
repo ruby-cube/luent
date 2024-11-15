@@ -1,15 +1,14 @@
 import { Context, createNodeContext } from "../context/Context";
 import { defineContextProp } from "../context/ContextKey";
 import { makeElement } from "../element/makeElement";
-import { $Ion, Ion, v } from "../InputTypes";
 import { NodeEntity } from "../node/makeNode";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
 import { contextual } from "../context/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
-import { animateTransition, computeTransitionalState } from "./I-O";
-import { TransitionHook } from "./TransitionNode";
+import { TransitionHook, TransitionNode } from "./TransitionNode";
 import type { Context as ContextType } from "../context/context-stack";
+import { v } from "../InputTypes";
 
 export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | TransitionClasses | AnimationKit | AnimationClass
 
@@ -17,7 +16,7 @@ type AnimationClass = string;
 
 export const GET_PHASIC_NODE = Symbol('usePhaseChange')
 
-const getPhasicNodeDef = defineContextProp(GET_PHASIC_NODE, v<() => PhasicNode>('?'))
+const getPhasicNodeDef = defineContextProp(GET_PHASIC_NODE, v<() => TransitionNode>('?'))
 
 declare module '@rue/lumo' {
     interface ContextKeyMap {
@@ -29,138 +28,129 @@ declare module '@rue/lumo' {
 
 export type PhasicNode = {
     phaseIn(endTransition: () => void): void;
-    phaseOut(endTransition: () => void): void;
-    endPhaseIn(): void
-    endPhaseOut(): void
-    pause(direction: "in" | "out", transitionStartTime: number): void
+    phaseOut(endTransition: (cb: () => void) => void): void;
+    cancel(direction: "in" | "out", transitionStartTime: number): void
 }
 
 
 export function renderPhaseChangeNode(
     $div: NodeRef<'div'>,
     Slot: [string] | (() => NodeEntity | NodeEntity[]),
-    transitionInProperties: string[],
-    transitionOutProperties: string[],
-    transition_in: undefined | string,
-    enterClasses: undefined | string[],
-    transition_out: undefined | string,
-    exitClasses: undefined | string[],
-    animate_in: undefined | string,
-    animate_out: undefined | string,
-    onStart: undefined | ((hook: TransitionHook) => void),
-    onEnd: undefined | ((hook: TransitionHook) => void)
+    transitionNode: TransitionNode
 ) {
 
-    let controller = new AbortController()
+    // let controller = new AbortController()
 
-    let phaseChange: null | PhasicNode = {
+    let phasicNode: null | TransitionNode = transitionNode
 
-        phaseIn(endTransition: () => void) {
-            const div = $div()!
-            if (onStart) onStart({ phase: 'in' })
+    //     phaseIn(endTransition: () => void) {
+    //         const div = $div()!
+    //         if (onStart) onStart({ phase: 'in' })
 
-            let endTransitionCount = 0;
+    //         let endTransitionCount = 0;
 
-            if (transition_in) {
-                requestAnimationFrame(() => {
-                    div.classList.remove(...enterClasses!);
+    //         if (transition_in) {
+    //             requestAnimationFrame(() => {
+    //                 div.classList.remove(...enterFromClasses!);
 
-                    endTransitionCount++;
-                    div.addEventListener(
-                        "transitionend",
-                        () => {
-                            div.classList.remove(transition_in);
-                            endTransitionCount--;
-                            if (endTransitionCount === 0) {
-                                if (onEnd) onEnd({ phase: 'in' })
-                                endTransition() //transitioning = false 
-                            }
-                        },
-                        { once: true, signal: controller.signal }
-                    );
-                })
-            }
-            if (animate_in) {
-                endTransitionCount++
-                animateTransition(div, animate_in, () => {
-                    endTransitionCount--;
-                    if (endTransitionCount === 0) {
-                        if (onEnd) onEnd({ phase: 'in' })
-                        endTransition() //transitioning = false 
-                    }
-                })
-            }
-        },
+    //                 endTransitionCount++;
+    //                 div.addEventListener(
+    //                     "transitionend",
+    //                     () => {
+    //                         div.classList.remove(transition_in);
+    //                         endTransitionCount--;
+    //                         if (endTransitionCount === 0) {
+    //                             if (onEnd) onEnd({ phase: 'in' })
+    //                             endTransition() //transitioning = false 
+    //                         }
+    //                     },
+    //                     { once: true, signal: controller.signal }
+    //                 );
+    //             })
+    //         }
+    //         if (animate_in) {
+    //             endTransitionCount++
+    //             animateTransition(div, animate_in, () => {
+    //                 endTransitionCount--;
+    //                 if (endTransitionCount === 0) {
+    //                     if (onEnd) onEnd({ phase: 'in' })
+    //                     endTransition() //transitioning = false 
+    //                 }
+    //             })
+    //         }
+    //     },
 
-        endPhaseIn() {
-            controller.abort()
-            //TODO: abort requestAnimationFrame?
-            const div = $div()!
-            if (transition_in) {
-                div.classList.remove(transition_in);
-            }
-        },
+    //     phaseOut(endTransition: (cb?: () => void) => void) {
+    //         const div = $div()!
+    //         if (onStart) onStart({ phase: 'out' })
+    //         if (transition_out) {
+    //             requestAnimationFrame(() => {
+    //                 div.classList.add(transition_out);
+    //                 div.classList.add(...exitClasses!);
 
-        phaseOut(endTransition: () => void) {
-            const div = $div()!
-            if (onStart) onStart({ phase: 'out' })
-            if (transition_out) {
-                requestAnimationFrame(() => {
-                    div.classList.add(transition_out);
-                    div.classList.add(...exitClasses!);
+    //                 div.addEventListener(
+    //                     "transitionend",
+    //                     () => {
+    //                         endTransitionOut(div)
+    //                         endTransition(()=>{
+                                
+    //                         }) // transitioning = false; unmountNodes()
+    //                     },
+    //                     { once: true, signal: controller.signal }
+    //                 );
+    //             })
+    //         }
+    //         if (animate_out) {
+    //             animateTransition(div, animate_out, endTransition)
+    //         }
+    //     },
+        
+    //     cancel(direction: 'in' | 'out', transitionStartTime: number) {
+    //         const div = $div()!
+    //         controller.abort()
+    //         //TODO: abort requestAnimationFrame?
 
-                    div.addEventListener(
-                        "transitionend",
-                        () => {
-                            endTransitionOut(div)
-                            endTransition() // transitioning = false; unmountNodes()
-                        },
-                        { once: true, signal: controller.signal }
-                    );
-                })
-            }
-            if (animate_out) {
-                animateTransition(div, animate_out, endTransition)
-            }
-        },
-        endPhaseOut() {
-            controller.abort()
-            const div = $div()!;
-            if (transition_out) {
-                endTransitionOut(div)
-            }
-        },
-        pause(direction: 'in' | 'out', transitionStartTime: number) {
-            const div = $div()!
-            for (const key in transitionInProperties) {
-                //TODO: requires A LOT more information to compute transitional state...
-                const transitionalState = computeTransitionalState(transitionIn.duration, new Date().getTime() - transitionStartTime, 0, -100, '')
+    //         if (direction === 'in'){
+    //             if (transition_in) {
+    //                 div.classList.remove(transition_in);
+    //             }
+    
+    
+    //             for (const key in transitionInProperties) {
+    //                 //TODO: requires A LOT more information to compute transitional state...
+    //                 const transitionalState = computeTransitionalState(transitionIn.duration, new Date().getTime() - transitionStartTime, 0, -100, '')
+    
+    //                 div.style.setProperty('transform', `translateX(${transitionalState}px)`);
+    //             }
+    //         }
+    //         else {
+    //             if (transition_out) {
+    //                 endTransitionOut(div)
+    //             }
+    //         }
+    //     }
+    // }
 
-                div.style.setProperty('transform', `translateX(${transitionalState}px)`);
-            }
-        }
-    }
+    // function endTransitionOut(div: HTMLDivElement) {
+    //     div.classList.remove(...exitClasses!);
+    //     div.classList.remove(transition_out!);
 
-    function endTransitionOut(div: HTMLDivElement) {
-        div.classList.remove(...exitClasses!);
-        div.classList.remove(transition_out!);
+    //     if (transition_in) {
+    //         div.classList.add(...enterFromClasses!);
+    //         div.classList.add(transition_in);
+    //     }
+    // }
 
-        if (transition_in) {
-            div.classList.add(...enterClasses!);
-            div.classList.add(transition_in);
-        }
-    }
-
-    function getPhasicNode() {
-        const _phaseChange = phaseChange
-        phaseChange = null;
-        return _phaseChange
+    function _getPhasicNode() {
+        const _phaseNode = phasicNode
+        phasicNode = null;
+        return _phaseNode
     }
 
 
     return createNodeContext(Context, () => (
         makeElement('div', Slot, {}, undefined)
-    ), { with: { [GET_PHASIC_NODE]: getPhasicNode } })
+    ), { with: { [GET_PHASIC_NODE]: _getPhasicNode } })
 }
 
 export function getPhasicNode(context?: ContextType) {

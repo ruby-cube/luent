@@ -4,7 +4,7 @@ import { ConditionalKit } from "./ConditionalKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { Context } from "../context/context-stack";
 import { PhasicNode } from "../transition/PhaseChange";
-import { TransitionNode } from "../transition/I-O";
+import { TransitionNode } from "../transition/TransitionNode";
 
 export type RenderConditional = () => NodeEntity[]
 
@@ -22,7 +22,7 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
             nodePodIndex?: number,
             $condition?: ReactiveGet<Booleanny>,
             setup?: () => AnyObject,
-            phasicNode: PhasicNode | undefined,
+            phasicNode: TransitionNode | undefined,
         }
     ) {
         super(statementType, renderConditional, optionals?.$condition)
