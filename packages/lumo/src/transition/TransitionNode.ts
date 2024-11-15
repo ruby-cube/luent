@@ -31,6 +31,8 @@ export function createTransitionNode(
     if (__DEV__ && transitionIn && transitionBoth || transitionOut && transitionBoth)
         console.warn(`The transition for 'both' will override transition for either 'in' or 'out'`)
 
+    const transitionInProperties = ['']; //TODO: 
+    const transitionOutProperties = ['']; //TODO: 
     const enterClasses = compileOffscreenClasses(transitionBoth || transitionIn)
     const transition_in = mountTransitionClass(transitionBoth || transitionIn)
     const animate_in = mountAnimationClass(animateBoth || animateIn)
@@ -45,6 +47,8 @@ export function createTransitionNode(
     return renderNode(
         $div,
         Slot,
+        transitionInProperties,
+        transitionOutProperties,
         transition_in,
         enterClasses,
         transition_out,

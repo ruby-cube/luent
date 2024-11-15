@@ -12,6 +12,7 @@ import { watch } from "../watch/watchAndPreserve";
 import { areShallowEqualArrays, Phase } from "../../../quarky/src";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { popContext, pushContext, Context } from "../context/context-stack";
+import { getPhasicNode, PhasicNode } from "../transition/PhaseChange";
 
 
 
@@ -77,13 +78,16 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
     context: Context
 
+    phasicNode?: PhasicNode
+
     constructor(
         statements: ConditionalRenderKit[],
         public type: 'create' | 'show' | 'mount',
         makeElseKit: () => ConditionalRenderKit
     ) {
         super(statements, makeElseKit);
-        this.context = statements[0].context;
+        const context = this.context = statements[0].context;
+        this.phasicNode = getPhasicNode(context);
     }
 
     mount(
@@ -98,7 +102,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const activeIndex = this.evaluateConditions()
         const dynamicPod = nodePod.appendDynamicPod();
         const series = this;
-        const context = this.context
+        const phasicNode = this.phasicNode
+
         this.initDynamicNodePod(dynamicPod)
 
         const _nodePod = this.getNodePod(activeIndex)
@@ -107,40 +112,151 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const dynamicNode = makeDynamicNode(preserve, _nodePod)
 
         dynamicNode.activate(function renderConditional() {
-            pushContext(context)
             series.appendConditional(activeIndex, parent, fragment)
-            popContext()
         })
         this.storeDynamicNode(dynamicNode, activeIndex)
 
         console.log('setting conditional', $conditions)
+        let transitionInStartTime = 0;
+        let transitionOutStartTime = 0;
+        let transitioningOutIndex: number | undefined;
+        let skipTransitionIn = false;
+
         // set up watcher for updates
         watch($conditions, function updateConditional(newValue: boolean[], oldValue: boolean[]) {
             console.log("update conditional")
             if (areShallowEqualArrays(newValue, oldValue)) return;
-            try{
-                pushDynamicNode(parentDynamicNode!)
-    
-                // (1)
-                series.deactivateConditional()
-    
-                // (2)
-                const activeIndex = series.evaluateConditions();
-    
-                // (3)
-                pushContext(context)
-                series.activateConditional(activeIndex, parent)
+
+            // (2)
+            const prevIndex = series.activeIndex;
+            const activeIndex = series.evaluateConditions();
+            const transitionNodes = series.statements[activeIndex].transitionNodes
+
+            // (0) Pause previous transition
+            if (transitionInStartTime) {
+                if (phasicNode) {
+                    phasicNode.endPhaseIn()
+                    phasicNode.pause('in', transitionInStartTime);
+                }
+                for (const node of transitionNodes) {
+                    node.cancelTransitionIn();
+                    node.pause('in', transitionInStartTime)
+                }
+                transitionInStartTime = 0;
+
+            } else if (transitionOutStartTime) {
+                if (activeIndex === transitioningOutIndex) {
+                    if (phasicNode) {
+                        phasicNode.endPhaseOut()
+                        phasicNode.pause('out', transitionOutStartTime);
+                    }
+                    for (const node of transitionNodes) {
+                        node.cancelTransitionOut();
+                        node.pause('out', transitionOutStartTime)
+                    }
+                    transitionOutStartTime = 0;
+                    transitioningOutIndex = undefined;
+
+                    // transition in right away (since it doesn't need to be activated since it was never removed)
+                }
+                else {
+                    skipTransitionIn = true;
+
+                    // (3)
+                    activateConditional()
+                }
+
+                // (4)
+                transitionConditionalIn()
+
+                return;
             }
-            finally{
-                popContext()
+
+            // (1) Transition out
+            transitionOutStartTime = new Date().getTime();
+            transitioningOutIndex = prevIndex;
+
+            let nodeCount = transitionNodes.length + (phasicNode ? 1 : 0)
+
+            for (const node of transitionNodes) {
+                node.transitionOut(node => {
+                    if () node.remove() // QUESTION: should this be before or after deactivateConditional? //TODO: only remove if 'create/destroy'
+                    nodeCount--
+                    if (nodeCount === 0) afterTransitionOut()
+                });
+            }
+            if (phasicNode) phasicNode.phaseOut(() => {
+                nodeCount--
+                if (nodeCount === 0) afterTransitionOut()
+            })
+
+            function afterTransitionOut() {
+                transitionOutStartTime = 0;
+                series.deactivateConditional()
+
+                if (!skipTransitionIn) {
+                    // (3)
+                    activateConditional()
+
+                    // (4)
+                    transitionConditionalIn()
+                }
+                else {
+                    skipTransitionIn = false;
+                }
+            }
+
+            function activateConditional() {
+                pushDynamicNode(parentDynamicNode!)
+                series.activateConditional(activeIndex, parent)
                 popDynamicNode()
             }
 
+            function transitionConditionalIn() {
+                let nodeCount = transitionNodes.length + (phasicNode ? 1 : 0)
+                transitionInStartTime = new Date().getTime()
+                for (const node of transitionNodes) {
+                    node.transitionIn(endTransition);
+                }
+                if (phasicNode) {
+                    phasicNode.phaseIn(endTransition)
+                }
+                function endTransition() {
+                    nodeCount--
+                    if (nodeCount === 0) {
+                        transitionInStartTime = 0;
+                    }
+                }
+            }
         }, {
             // retrack: true,
             phase: Phase.RENDER,
             __devName: 'mount conditional'
         })
+
+
+
+        // // set up watcher for updates
+        // watch($conditions, function updateConditional(newValue: boolean[], oldValue: boolean[]) {
+        //     console.log("update conditional")
+        //     if (areShallowEqualArrays(newValue, oldValue)) return;
+
+        //     // (1)
+        //     series.deactivateConditional()
+
+        //     // (2)
+        //     const activeIndex = series.evaluateConditions();
+
+        //     // (3)
+        //     pushDynamicNode(parentDynamicNode!)
+        //     series.activateConditional(activeIndex, parent)
+        //     popDynamicNode()
+
+        // }, {
+        //     // retrack: true,
+        //     phase: Phase.RENDER,
+        //     __devName: 'mount conditional'
+        // })
     }
 
     private render(index: number) {
@@ -155,13 +271,19 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const nodePod = this.getNodePod(activeIndex)
         const activationType = this.statements[activeIndex].type
         const preserve = activationType === 'create' ? false : true;
-        const nodeEntities = this.render(activeIndex)
-        // append to dom (through existing fragment if any) and node pod
-        if (preserve) markMountPhase()
-        for (const nodeEntity of nodeEntities) {
-            mountNodeEntity(parent, nodeEntity, nodePod, fragment)
+        try {
+            pushContext(this.context)
+            const nodeEntities = this.render(activeIndex)
+            // append to dom (through existing fragment if any) and node pod
+            if (preserve) markMountPhase()
+            for (const nodeEntity of nodeEntities) {
+                mountNodeEntity(parent, nodeEntity, nodePod, fragment)
+            }
+            if (preserve) unmarkMountPhase()
         }
-        if (preserve) unmarkMountPhase()
+        finally {
+            popContext()
+        }
     }
 
     private deactivateConditional() {
@@ -238,25 +360,37 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         if (dynamicNode === undefined || dynamicNode === NULLISH_DYNAMIC_NODE) {
             dynamicNode = makeDynamicNode(preserve, nodePod);
             dynamicNode.activate(function renderConditionalUpdate() {
-                const nodeEntities = series.render(activeIndex)
-                if (preserve) markMountPhase()
-                mountConditional(nodePod, parent, dynamicNodePod, nodeEntities);
-                if (preserve) unmarkMountPhase()
+                try {
+                    pushContext(series.context)
+                    const nodeEntities = series.render(activeIndex)
+                    if (preserve) markMountPhase()
+                    mountConditional(nodePod, parent, dynamicNodePod, nodeEntities);
+                    if (preserve) unmarkMountPhase()
+                }
+                finally {
+                    popContext()
+                }
             })
             series.storeDynamicNode(dynamicNode, activeIndex)
         }
         else {
             dynamicNode.reactivate(function updateConditional() {
-                const nodeEntities = series.render(activeIndex);
-                if (preserve) markMountPhase()
-                if (activationType === 'show') {
-                    showConditionalNodes(parent, dynamicNodePod, activeIndex, nodeEntities)
+                try {
+                    pushContext(series.context)
+                    const nodeEntities = series.render(activeIndex);
+                    if (preserve) markMountPhase()
+                    if (activationType === 'show') {
+                        showConditionalNodes(parent, dynamicNodePod, activeIndex, nodeEntities)
+                    }
+                    else {
+                        series.replaceNodePod(activeIndex, nodePod);
+                        mountConditional(nodePod, parent, dynamicNodePod, nodeEntities)
+                    }
+                    if (preserve) unmarkMountPhase()
                 }
-                else {
-                    series.replaceNodePod(activeIndex, nodePod);
-                    mountConditional(nodePod, parent, dynamicNodePod, nodeEntities)
+                finally {
+                    popContext()
                 }
-                if (preserve) unmarkMountPhase()
             })
         }
     }

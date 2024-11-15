@@ -7,8 +7,9 @@ import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } f
 import { contextual } from "../context/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
-import { animateTransition } from "./I-O";
+import { animateTransition, computeTransitionalState } from "./I-O";
 import { TransitionHook } from "./TransitionNode";
+import type { Context as ContextType } from "../context/context-stack";
 
 export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | TransitionClasses | AnimationKit | AnimationClass
 
@@ -29,12 +30,17 @@ declare module '@rue/lumo' {
 export type PhasicNode = {
     phaseIn(endTransition: () => void): void;
     phaseOut(endTransition: () => void): void;
+    endPhaseIn(): void
+    endPhaseOut(): void
+    pause(direction: "in" | "out", transitionStartTime: number): void
 }
 
 
 export function renderPhaseChangeNode(
     $div: NodeRef<'div'>,
     Slot: [string] | (() => NodeEntity | NodeEntity[]),
+    transitionInProperties: string[],
+    transitionOutProperties: string[],
     transition_in: undefined | string,
     enterClasses: undefined | string[],
     transition_out: undefined | string,
@@ -44,6 +50,9 @@ export function renderPhaseChangeNode(
     onStart: undefined | ((hook: TransitionHook) => void),
     onEnd: undefined | ((hook: TransitionHook) => void)
 ) {
+
+    let controller = new AbortController()
+
     let phaseChange: null | PhasicNode = {
 
         phaseIn(endTransition: () => void) {
@@ -53,21 +62,23 @@ export function renderPhaseChangeNode(
             let endTransitionCount = 0;
 
             if (transition_in) {
-                div.classList.remove(...enterClasses!);
+                requestAnimationFrame(() => {
+                    div.classList.remove(...enterClasses!);
 
-                endTransitionCount++;
-                div.addEventListener(
-                    "transitionend",
-                    () => {
-                        if (transition_in) div.classList.remove(transition_in);
-                        endTransitionCount--;
-                        if (endTransitionCount === 0) {
-                            if (onEnd) onEnd({ phase: 'in' })
-                            endTransition() //transitioning = false 
-                        }
-                    },
-                    { once: true }
-                );
+                    endTransitionCount++;
+                    div.addEventListener(
+                        "transitionend",
+                        () => {
+                            div.classList.remove(transition_in);
+                            endTransitionCount--;
+                            if (endTransitionCount === 0) {
+                                if (onEnd) onEnd({ phase: 'in' })
+                                endTransition() //transitioning = false 
+                            }
+                        },
+                        { once: true, signal: controller.signal }
+                    );
+                })
             }
             if (animate_in) {
                 endTransitionCount++
@@ -81,32 +92,62 @@ export function renderPhaseChangeNode(
             }
         },
 
+        endPhaseIn() {
+            controller.abort()
+            //TODO: abort requestAnimationFrame?
+            const div = $div()!
+            if (transition_in) {
+                div.classList.remove(transition_in);
+            }
+        },
+
         phaseOut(endTransition: () => void) {
             const div = $div()!
             if (onStart) onStart({ phase: 'out' })
             if (transition_out) {
-                div.classList.add(transition_out);
-                div.classList.add(...exitClasses!);
+                requestAnimationFrame(() => {
+                    div.classList.add(transition_out);
+                    div.classList.add(...exitClasses!);
 
-                div.addEventListener(
-                    "transitionend",
-                    () => {
-                        div.classList.remove(...exitClasses!);
-                        div.classList.remove(transition_out);
-
-                        if (transition_in) {
-                            div.classList.add(...enterClasses!);
-                            div.classList.add(transition_in);
-                        }
-
-                        endTransition() // transitioning = false; unmountNodes()
-                    },
-                    { once: true }
-                );
+                    div.addEventListener(
+                        "transitionend",
+                        () => {
+                            endTransitionOut(div)
+                            endTransition() // transitioning = false; unmountNodes()
+                        },
+                        { once: true, signal: controller.signal }
+                    );
+                })
             }
             if (animate_out) {
                 animateTransition(div, animate_out, endTransition)
             }
+        },
+        endPhaseOut() {
+            controller.abort()
+            const div = $div()!;
+            if (transition_out) {
+                endTransitionOut(div)
+            }
+        },
+        pause(direction: 'in' | 'out', transitionStartTime: number) {
+            const div = $div()!
+            for (const key in transitionInProperties) {
+                //TODO: requires A LOT more information to compute transitional state...
+                const transitionalState = computeTransitionalState(transitionIn.duration, new Date().getTime() - transitionStartTime, 0, -100, '')
+
+                div.style.setProperty('transform', `translateX(${transitionalState}px)`);
+            }
+        }
+    }
+
+    function endTransitionOut(div: HTMLDivElement) {
+        div.classList.remove(...exitClasses!);
+        div.classList.remove(transition_out!);
+
+        if (transition_in) {
+            div.classList.add(...enterClasses!);
+            div.classList.add(transition_in);
         }
     }
 
@@ -122,7 +163,7 @@ export function renderPhaseChangeNode(
     ), { with: { [GET_PHASIC_NODE]: getPhasicNode } })
 }
 
-export function getPhasicNode() {
+export function getPhasicNode(context?: ContextType) {
     return contextual(GET_PHASIC_NODE)?.()
 }
 

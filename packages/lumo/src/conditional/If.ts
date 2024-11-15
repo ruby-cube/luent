@@ -5,6 +5,9 @@ import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { ReactiveGet } from "../../../quarky/src";
 import { getContext } from "../context/context-stack";
+import { getPhasicNode } from "../transition/PhaseChange";
+import { Context, createNodeContext } from "../context/Context";
+import { useTransitionNodes } from "../transition/I-O";
 
 
 
@@ -43,12 +46,14 @@ export function If<OPT extends ConditionalOptions>($condition: (_?: any) => Bool
     }
 
     resetCurrentNodePodIndex()
+    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
     return new ConditionalRenderKit(
         'if',
-        wrapToNormalize(_renderConditional),
+        wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),
         'create',
         getContext(),
-        { $condition, setup: options.setup }
+        transitionNodes,
+        { $condition, setup: options.setup, phasicNode: getPhasicNode() }
     )
 }
 
@@ -61,12 +66,14 @@ export function ElseIf<OPT extends ConditionalOptions>($condition: (_?: any) => 
     if (options.type === 'show/hide') {
         return ElseShowIf($condition, _renderConditional, options)
     }
+    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
     return new ConditionalRenderKit(
         'elseIf',
-        wrapToNormalize(_renderConditional),
+        wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),
         'create',
         getContext(),
-        { $condition, setup: options.setup }
+        transitionNodes,
+        { $condition, setup: options.setup, phasicNode: getPhasicNode() }
     )
 }
 
@@ -79,11 +86,14 @@ export function Else<OPT extends ConditionalOptions>(optionsOrRenderConditional:
     if (options.type === 'show/hide') {
         return ElseShow(_renderConditional, options)
     }
+    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
     return new ConditionalRenderKit(
         'else',
-        wrapToNormalize(_renderConditional),
+        wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),
         'create',
         getContext(),
+        transitionNodes,
+        { setup: options.setup, phasicNode: getPhasicNode() }
     )
 }
 
@@ -119,12 +129,14 @@ export function Else<OPT extends ConditionalOptions>(optionsOrRenderConditional:
 
 export function ShowIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction, options: ConditionalOptions): ConditionalRenderKit {
     resetCurrentNodePodIndex(0)
+    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
     return new ConditionalRenderKit(
         'if',
-        wrapToNormalize(renderConditional),
+        wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),
         'show',
         getContext(),
-        { $condition, setup: options.setup }
+        transitionNodes,
+        { $condition, setup: options.setup, phasicNode: getPhasicNode() }
     )
 }
 
@@ -132,12 +144,15 @@ export function ElseShowIf($condition: ReactiveGet<Booleanny>, renderConditional
     if (currentNodePodIndex === undefined)
         currentNodePodIndex = 0;
     else currentNodePodIndex++;
+    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
+
     return new ConditionalRenderKit(
         'elseIf',
-        wrapToNormalize(renderConditional),
+        wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),
         'show',
         getContext(),
-        { nodePodIndex: currentNodePodIndex, $condition, setup: options.setup }
+        transitionNodes,
+        { nodePodIndex: currentNodePodIndex, $condition, setup: options.setup, phasicNode: getPhasicNode() }
     )
 }
 
@@ -145,17 +160,20 @@ export function ElseShow(renderConditional: RenderFunction, options: Conditional
     if (currentNodePodIndex === undefined)
         currentNodePodIndex = 0;
     else currentNodePodIndex++;
+    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
+
     return new ConditionalRenderKit(
         'else',
-        wrapToNormalize(renderConditional),
+        wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),
         'show',
         getContext(),
-        { nodePodIndex: currentNodePodIndex, setup: options.setup }
+        transitionNodes,
+        { nodePodIndex: currentNodePodIndex, setup: options.setup, phasicNode: getPhasicNode() }
     )
 }
 
 // function _if($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction, statementType: 'if' | 'elseIf' = 'if', type: 'create' | 'show' | 'mount' = currentRenderType) {
-//     const _renderConditional = type === 'mount' ? wrapToPreserve(renderConditional) : wrapToNormalize(renderConditional)
+//     const _renderConditional = type === 'mount' ? wrapToPreserve(renderConditional) : wrapWithContext(renderConditional)
 //     return new ConditionalRenderKit(statementType, _renderConditional, type, $condition)
 // }
 
@@ -165,7 +183,7 @@ export function ElseShow(renderConditional: RenderFunction, options: Conditional
 
 // export function Else(renderConditional: RenderFunction) {
 //     const type = currentRenderType;
-//     const _renderConditional = type === 'mount' ? wrapToPreserve(renderConditional) : wrapToNormalize(renderConditional)
+//     const _renderConditional = type === 'mount' ? wrapToPreserve(renderConditional) : wrapWithContext(renderConditional)
 //     return new ConditionalRenderKit('else', _renderConditional, currentRenderType)
 // }
 
@@ -174,19 +192,15 @@ export function ElseShow(renderConditional: RenderFunction, options: Conditional
 
 
 
-function wrapToPreserve(renderConditional: RenderFunction) {
-    let nodeEntities: NodeEntity[];
-    return () => {
-        if (!nodeEntities) {
-            nodeEntities = normalizeToArray(renderConditional());
-            return nodeEntities;
-        }
-        return nodeEntities;
-    }
-}
 
-function wrapToNormalize(renderConditional: RenderFunction) {
-    return () => normalizeToArray(renderConditional())
+
+function wrapWithContext(renderConditional: RenderFunction, context: AnyObject) {
+
+    return () => normalizeToArray(
+        createNodeContext(Context, renderConditional, {
+            with: context
+        })
+    )
 }
 
 

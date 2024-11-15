@@ -3,6 +3,8 @@ import { NodeEntity } from "../node/makeNode";
 import { ConditionalKit } from "./ConditionalKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { Context } from "../context/context-stack";
+import { PhasicNode } from "../transition/PhaseChange";
+import { TransitionNode } from "../transition/I-O";
 
 export type RenderConditional = () => NodeEntity[]
 
@@ -15,10 +17,12 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
         public renderConditional: RenderConditional,
         public type: 'create' | 'show' | 'mount' = 'create',
         public context: Context,
+        public transitionNodes: TransitionNode[],
         optionals?: {
             nodePodIndex?: number,
             $condition?: ReactiveGet<Booleanny>,
-            setup?: () => AnyObject
+            setup?: () => AnyObject,
+            phasicNode: PhasicNode | undefined,
         }
     ) {
         super(statementType, renderConditional, optionals?.$condition)
