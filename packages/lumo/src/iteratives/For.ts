@@ -4,7 +4,7 @@ import { ListRenderKit } from "./ListRenderKit";
 import { AtomicIon, ion, IonicModel, ReactiveGet } from "@rue/quarky";
 import { getContext } from "../context/context-stack";
 import { contextual } from "../context/provide";
-import { getPhaseChange } from "../transition/PhaseChange";
+import { getPhasicNode } from "../transition/PhaseChange";
 
 
 export type RenderItem<T = any> = (item: T, $index: AtomicIon<number>) => NodeEntity[] | NodeEntity
@@ -20,7 +20,7 @@ export function For<T>(data: Collection<T>, render: RenderItem<T>, idKey?: strin
 export function For<T>(data: IonicModel<Collection<T>> | ReactiveGet<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
 export function For<T>(data: IonicModel<Collection<T>> | ReactiveGet<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
 export function For<T>(data: ListData<T>, render: RenderItem<T>, idKey?: string): ListRenderKit {
-    return new ListRenderKit(render, data, getContext(), idKey, getPhaseChange())
+    return new ListRenderKit(render, data, getContext(), idKey, getPhasicNode())
 }
 
 

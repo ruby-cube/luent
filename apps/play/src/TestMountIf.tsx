@@ -14,15 +14,15 @@ export function MountIf() {
         }
     })
 
-    return Component(() =>
+    return Component(
         <>
             <h1>Hello world</h1>
-            <phase-change both={fade}>{[
+            <phase-change>{[
                 If($active, () =>
-                    <div>hi</div>
+                    <h2>hi</h2>
                 ),
                 Else(() =>
-                    <p>bye</p>
+                    <h2>bye</h2>
                 )
             ]}</phase-change>
             <button on:click={$active.toggle}>toggle</button>

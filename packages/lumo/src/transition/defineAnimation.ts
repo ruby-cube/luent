@@ -14,7 +14,7 @@ export type AnimationKit = {
     direction: 'normal' | 'reverse' | 'alternate' | 'alternate-reverse'
 }
 
-
+export type AnimationClass = string;
 
 type AnimationOptions = {
     delay?: number;

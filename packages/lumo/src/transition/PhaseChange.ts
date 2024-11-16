@@ -10,9 +10,9 @@ import { TransitionHook, TransitionNode } from "./TransitionNode";
 import type { Context as ContextType } from "../context/context-stack";
 import { v } from "../InputTypes";
 
-export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | TransitionClasses | AnimationKit | AnimationClass
+export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | AnimationKit
 
-type AnimationClass = string;
+
 
 export const GET_PHASIC_NODE = Symbol('usePhaseChange')
 
@@ -93,7 +93,7 @@ export function renderPhaseChangeNode(
     //                     () => {
     //                         endTransitionOut(div)
     //                         endTransition(()=>{
-                                
+
     //                         }) // transitioning = false; unmountNodes()
     //                     },
     //                     { once: true, signal: controller.signal }
@@ -104,7 +104,7 @@ export function renderPhaseChangeNode(
     //             animateTransition(div, animate_out, endTransition)
     //         }
     //     },
-        
+
     //     cancel(direction: 'in' | 'out', transitionStartTime: number) {
     //         const div = $div()!
     //         controller.abort()
@@ -114,12 +114,12 @@ export function renderPhaseChangeNode(
     //             if (transition_in) {
     //                 div.classList.remove(transition_in);
     //             }
-    
-    
+
+
     //             for (const key in transitionInProperties) {
     //                 //TODO: requires A LOT more information to compute transitional state...
     //                 const transitionalState = computeTransitionalState(transitionIn.duration, new Date().getTime() - transitionStartTime, 0, -100, '')
-    
+
     //                 div.style.setProperty('transform', `translateX(${transitionalState}px)`);
     //             }
     //         }
@@ -149,7 +149,7 @@ export function renderPhaseChangeNode(
 
 
     return createNodeContext(Context, () => (
-        makeElement('div', Slot, {}, undefined)
+        makeElement('div', Slot, { ref: $div }, undefined)
     ), { with: { [GET_PHASIC_NODE]: _getPhasicNode } })
 }
 
