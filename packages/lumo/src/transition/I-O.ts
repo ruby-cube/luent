@@ -1,8 +1,5 @@
-import { TransitionHook, TransitionNode } from "./TransitionNode";
+import { TransitionNode } from "./TransitionNode";
 import { v } from "../InputTypes";
-import { noop } from "@rue/utils";
-import { AnyObject } from "@rue/types";
-import { c } from "vite/dist/node/types.d-aGj9QkWt";
 import { NodeRef } from "../node/NodeRef";
 import { NodeEntity } from "../node/makeNode";
 import { makeElement } from "../element/makeElement";
@@ -57,6 +54,7 @@ export function useTransitionNodes() {
         REGISTER_TRANSITION_NODE,
         transitionNodes,
         registerTransitionNode(transitionNode: TransitionNode) {
+            console.log('registering transition node')
             transitionNodes.push(transitionNode);
         }
     }

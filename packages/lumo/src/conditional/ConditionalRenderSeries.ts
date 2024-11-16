@@ -120,6 +120,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         let transitionOutStartTime = 0;
         let transitioningOutIndex: number | undefined;
         let skipTransitionIn = false;
+        let prevTransitionOutNodes: TransitionNode[];
+        let prevTransitionInNodes: TransitionNode[];
 
         // set up watcher for updates
         watch($conditions, function updateConditional(newValue: boolean[], oldValue: boolean[]) {
@@ -128,8 +130,10 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
             const prevIndex = series.activeIndex!;
             const activeIndex = series.evaluateConditions();
-            const transitionNodes = series.statements[activeIndex].transitionNodes
-            const shouldTransition = phasicNode || transitionNodes.length
+            const transitionOutNodes = series.statements[prevIndex].transitionNodes
+            const transitionInNodes = series.statements[activeIndex].transitionNodes
+            const shouldTransitionOut = phasicNode || transitionOutNodes.length
+            const shouldTransitionIn = phasicNode || transitionInNodes.length
 
             function activateConditional() {
                 pushDynamicNode(parentDynamicNode!)
@@ -137,7 +141,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                 popDynamicNode()
             }
 
-            if (!shouldTransition) {
+            if (!shouldTransitionIn && !shouldTransitionOut) {
                 // (1)
                 series.deactivateConditional(prevIndex)
 
@@ -153,7 +157,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                     phasicNode.cancel('in');
                     phasicNode.pause('in', transitionInStartTime);
                 }
-                for (const node of transitionNodes) {
+                for (const node of prevTransitionInNodes) {
                     node.cancel('in')
                     node.pause('in', transitionInStartTime)
                 }
@@ -165,7 +169,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                         phasicNode.cancel('out');
                         phasicNode.pause('out', transitionInStartTime);
                     }
-                    for (const node of transitionNodes) {
+                    for (const node of prevTransitionOutNodes) {
                         node.cancel('out')
                         node.pause('out', transitionInStartTime)
                     }
@@ -187,25 +191,29 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                 return;
             }
 
+
+            prevTransitionInNodes = transitionInNodes;
+            prevTransitionOutNodes = transitionOutNodes;
+
             // (1) Transition out
             transitionOutStartTime = new Date().getTime();
             transitioningOutIndex = prevIndex;
             const cleanups: (() => void)[] = []
 
-            let nodeCount = transitionNodes.length
+            let nodeCount = transitionOutNodes.length
 
             if (phasicNode) {
                 phasicNode.transitionOut(afterTransitionOut)
             }
             else {
-                for (const node of transitionNodes) {
+                for (const node of transitionOutNodes) {
                     node.transitionOut(afterTransitionOut);
                 }
             }
 
             function afterTransitionOut(cleanup?: () => void) {
                 if (phasicNode) {
-                    for (const node of transitionNodes) {
+                    for (const node of transitionOutNodes) {
                         if (node.animatingOut || node.transitioningOut) {
                             node.cancel('out')
                         }
@@ -231,18 +239,21 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                         activateConditional()
 
                         // (4)
-                        transitionConditionalIn()
+                        if (shouldTransitionIn)
+                            transitionConditionalIn()
                     }
                     else {
                         skipTransitionIn = false;
                     }
+
+                    transitionOutNodes.length = 0; // clear array for next transition nodes
                 }
             }
 
             function transitionConditionalIn() {
-                let nodeCount = transitionNodes.length + (phasicNode ? 1 : 0)
+                let nodeCount = transitionInNodes.length + (phasicNode ? 1 : 0)
                 transitionInStartTime = new Date().getTime()
-                for (const node of transitionNodes) {
+                for (const node of transitionInNodes) {
                     node.transitionIn(endTransition);
                 }
                 if (phasicNode) {
@@ -252,6 +263,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                     nodeCount--
                     if (nodeCount === 0) {
                         transitionInStartTime = 0;
+                        transitionInNodes.length = 0; // clear array for next transition nodes
                     }
                 }
             }

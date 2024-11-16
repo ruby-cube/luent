@@ -1,5 +1,5 @@
 import { NodeRef, Component, If, Else, fade } from "@rue/lumo";
-import {  ion } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 
 export function MountIf() {
     const $count = ion(0, {
@@ -17,14 +17,18 @@ export function MountIf() {
     return Component(
         <>
             <h1>Hello world</h1>
-            <phase-change>{[
+            {[
                 If($active, () =>
-                    <h2>hi</h2>
+                    <i-o>
+                        <h2>hi</h2>
+                    </i-o>
                 ),
                 Else(() =>
-                    <h2>bye</h2>
+                    <i-o>
+                        <h2>bye</h2>
+                    </i-o>
                 )
-            ]}</phase-change>
+            ]}
             <button on:click={$active.toggle}>toggle</button>
         </>
     )

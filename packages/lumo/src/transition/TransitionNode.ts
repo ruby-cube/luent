@@ -39,6 +39,7 @@ export function createTransitionNode(
 ) {
     const { in: inputIn, out: inputOut, both: inputBoth, "on-load": shouldTransitionLoad, onEnd, onStart } = input;
     const $div = NodeRef('div')
+    console.log('createTransitionNode')
 
     const [transitionIn, animateIn] = normalizeToKitArrays(inputIn)
     const [transitionOut, animateOut] = normalizeToKitArrays(inputOut)
@@ -57,24 +58,9 @@ export function createTransitionNode(
     const transition_out = transitionBoth ? transition_in : mountTransitionClass(transitionOut)
     const animate_out = transitionBoth ? animate_in : mountAnimationClass(animateOut)
 
-    let paused = false;
     let frameID: number | undefined;
     let controller: AbortController;
-
-    function unpause(transitionProperties: AnyObject) {
-        const div = $div()!
-        div.style.removeProperty('animation-play-state')
-        if (transitionInProperties) {
-            for (const key in transitionProperties) {
-                div.style.removeProperty(key)
-            }
-        }
-    }
-
-    function quickFade() {
-        const div = $div()
-    }
-
+    
     const transitionNode: TransitionNode = {
         transitionIn(endTransition: () => void) {
             if (!transition_in && !animate_in) {
@@ -265,6 +251,22 @@ export function createTransitionNode(
             // if (animate_in) div.style.setProperty('animation-play-state', 'pause')
             paused = true;
         }
+    }
+
+    let paused = false;
+
+    function unpause(transitionProperties: AnyObject) {
+        const div = $div()!
+        div.style.removeProperty('animation-play-state')
+        if (transitionInProperties) {
+            for (const key in transitionProperties) {
+                div.style.removeProperty(key)
+            }
+        }
+    }
+
+    function quickFade() {
+        const div = $div()
     }
 
 
