@@ -1,4 +1,4 @@
-import { NodeRef, Component, If, Else, fade } from "@rue/lumo";
+import { NodeRef, Component, If, Else, fade, ElseIf } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
 export function MountIf() {
@@ -14,22 +14,36 @@ export function MountIf() {
         }
     })
 
+    const $ready = ion(true, {
+        toggle() {
+            $ready.as(!$ready())
+        }
+    })
+
     return Component(
         <>
             <h1>Hello world</h1>
-            {[
-                If($active, () =>
-                    <i-o>
+            <phase-change>
+                {[
+                    If($active, () =>
+                        // <i-o>
                         <h2>hi</h2>
-                    </i-o>
-                ),
-                Else(() =>
-                    <i-o>
+                        // </i-o>
+                    ),
+                    ElseIf($ready, () =>
+                        // <i-o>
+                        <h2>balloon</h2>
+                        // </i-o>
+                    ),
+                    Else(() =>
+                        // <i-o>
                         <h2>bye</h2>
-                    </i-o>
-                )
-            ]}
-            <button on:click={$active.toggle}>toggle</button>
+                        // </i-o>
+                    )
+                ]}
+            </phase-change>
+            <button on:click={$active.toggle}>toggle active</button>
+            <button on:click={$ready.toggle}>toggle ready</button>
         </>
     )
 }

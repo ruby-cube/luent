@@ -65,9 +65,7 @@ export class DynamicNode {
     unmount() {
         const nodePod = this.nodePod;
         if (!nodePod) {
-            // throw new Error('No nodePod :( This should never happen')
-            console.warn("No nodePod :( nodePod was never set or already destroyed by hook cascade (not sure if this is problematic yet. It might be when differentiating create, mount, and show)")
-            return;
+            throw new Error("No nodePod :( nodePod was never set or already destroyed by hook cascade (not sure if this is problematic yet. It might be when differentiating create, mount, and show)")
         }
         nodePod.forEachNode((node) => {
             node.remove();

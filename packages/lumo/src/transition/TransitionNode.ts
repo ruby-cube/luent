@@ -60,9 +60,10 @@ export function createTransitionNode(
 
     let frameID: number | undefined;
     let controller: AbortController;
-    
+
     const transitionNode: TransitionNode = {
         transitionIn(endTransition: () => void) {
+            console.log('transition in')
             if (!transition_in && !animate_in) {
                 endTransition();
                 return;
@@ -82,25 +83,28 @@ export function createTransitionNode(
                 frameID =
                     requestAnimationFrame(() => {
                         frameID = undefined
-
+                        
                         // unpause
                         // if (paused) { //FIX:
                         //     div.style.removeProperty('animation-play-state')
                         //     for (const prop of transitionInProperties) {
-                        //         div.style.removeProperty(prop)
-                        //     }
-                        // }
+                            //         div.style.removeProperty(prop)
+                            //     }
+                            // }
+                        requestAnimationFrame(()=>{
+                            div.classList.remove(...enterFromClasses!); // triggers enter
+    
+                            div.addEventListener(
+                                "transitionend",
+                                () => {
+                                    console.log('end transition in')
+                                    div.classList.remove(transition_in); // enter prep
+                                    afterTransition()
+                                },
+                                { once: true, signal: controller.signal }
+                            );
+                        })
 
-                        div.classList.remove(...enterFromClasses!); // triggers enter
-
-                        div.addEventListener(
-                            "transitionend",
-                            () => {
-                                div.classList.remove(transition_in); // enter prep
-                                afterTransition()
-                            },
-                            { once: true, signal: controller.signal }
-                        );
                     });
             }
 
@@ -121,6 +125,7 @@ export function createTransitionNode(
 
             function afterTransition() {
                 endTransitionCount--;
+                console.log('afterTransition (in)', endTransitionCount)
                 if (endTransitionCount === 0) {
                     if (onEnd) onEnd({ phase: 'in' })
                     endTransition() //transitioning = false 

@@ -116,144 +116,173 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         this.storeDynamicNode(dynamicNode, activeIndex)
 
         console.log('setting conditional', $conditions)
-        let transitionInStartTime = 0;
-        let transitionOutStartTime = 0;
-        let transitioningOutIndex: number | undefined;
-        let skipTransitionIn = false;
-        let prevTransitionOutNodes: TransitionNode[];
-        let prevTransitionInNodes: TransitionNode[];
+        let entranceStateTime = 0;
+        let exitStateTime = 0;
+        let outgoingIndex: number | undefined;
+        let newTransitionIn: (() => void) | undefined;
+        let prevOutgoingNodes: TransitionNode[];
+        let prevIncomingNodes: TransitionNode[];
 
         // set up watcher for updates
         watch($conditions, function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-            console.log("update conditional")
+            console.log("update conditional==================", newValue, oldValue)
             if (areShallowEqualArrays(newValue, oldValue)) return;
 
             const prevIndex = series.activeIndex!;
             const activeIndex = series.evaluateConditions();
-            const transitionOutNodes = series.statements[prevIndex].transitionNodes
-            const transitionInNodes = series.statements[activeIndex].transitionNodes
-            const shouldTransitionOut = phasicNode || transitionOutNodes.length
-            const shouldTransitionIn = phasicNode || transitionInNodes.length
+            if (prevIndex === activeIndex) {
+                return;
+            }
+            const outgoingNodes = series.statements[prevIndex].transitionNodes
+            const incomingNodes = series.statements[activeIndex].transitionNodes
+            const shouldTransitionOut = phasicNode || outgoingNodes.length
+
+            // (0) Pause previous transition
+            if (entranceStateTime) {
+                if (phasicNode) {
+                    phasicNode.cancel('in');
+                    phasicNode.pause('in', entranceStateTime);
+                }
+                for (const node of prevIncomingNodes) {
+                    node.cancel('in')
+                    node.pause('in', entranceStateTime)
+                }
+                entranceStateTime = 0;
+                prevIncomingNodes = [...incomingNodes];
+                prevOutgoingNodes = [...outgoingNodes]
+            } else if (exitStateTime) {
+                if (activeIndex === outgoingIndex) {
+                    if (phasicNode) {
+                        phasicNode.cancel('out');
+                        phasicNode.pause('out', entranceStateTime);
+                    }
+                    for (const node of prevOutgoingNodes) {
+                        node.cancel('out')
+                        node.pause('out', entranceStateTime)
+                    }
+                    exitStateTime = 0;
+                    outgoingIndex = undefined;
+
+                    // (4)
+                    // transition in right away (since it doesn't need to be activated since it was never removed)
+                    if (phasicNode || incomingNodes.length)
+                        transitionConditionalIn()
+
+                    prevIncomingNodes = [...incomingNodes];
+                    prevOutgoingNodes = [];
+                }
+                else {
+                    newTransitionIn = () => {
+                        // (3)
+                        activateConditional() //TODO: this shouldn't happen until after transitionend
+
+                        // (4)
+                        if (phasicNode || incomingNodes.length)
+                            transitionConditionalIn()
+                    }
+                    prevIncomingNodes = [...incomingNodes]
+                }
+                return;
+            }
+            else {
+                prevIncomingNodes = [...incomingNodes]
+                prevOutgoingNodes = [...outgoingNodes]
+            }
+
+
+            if (!shouldTransitionOut) {
+                try {
+                    series.deactivateConditional(prevIndex)
+                }
+                catch (err) {
+                    if (__DEV__) console.error(err)
+                    // if deactivate fails, we don't activate the new conditional
+                    return;
+                }
+
+                // (3)
+                activateConditional()
+
+                // (4)
+                if (phasicNode || incomingNodes.length) {
+                    transitionConditionalIn()
+                }
+            }
+            else { // (1) Transition out
+                exitStateTime = new Date().getTime();
+                outgoingIndex = prevIndex;
+                const cleanups: (() => void)[] = []
+
+                let nodeCount = outgoingNodes.length
+
+                if (phasicNode) {
+                    phasicNode.transitionOut(afterTransitionOut)
+                }
+                else {
+                    for (const node of outgoingNodes) {
+                        node.transitionOut(afterTransitionOut);
+                    }
+                }
+
+                function afterTransitionOut(cleanup?: () => void) {
+                    if (phasicNode) {
+                        for (const node of outgoingNodes) {
+                            if (node.animatingOut || node.transitioningOut) {
+                                node.cancel('out')
+                            }
+                        }
+                    }
+                    else {
+                        nodeCount--;
+                    }
+
+                    if (cleanup) cleanups.push(cleanup)
+
+                    if (phasicNode || nodeCount === 0) {
+                        exitStateTime = 0;
+
+                        for (const cleanup of cleanups) {
+                            cleanup()
+                        }
+                        console.log('unmount:', prevIndex)
+                        series.deactivateConditional(prevIndex)
+
+                        if (!newTransitionIn) {
+                            // (3)
+                            console.log('mount (after transition out)')
+                            activateConditional()
+
+                            // (4)
+                            if (phasicNode || incomingNodes.length) {
+                                console.log('transition IN')
+                                transitionConditionalIn()
+                            }
+
+                            // prevIncomingNodes = [...incomingNodes];
+                        }
+                        else {
+                            console.log('replace transition IN')
+                            newTransitionIn();
+                            newTransitionIn = undefined;
+                        }
+
+                        outgoingNodes.length = 0; // clear array for next transition nodes
+                    }
+                }
+            }
 
             function activateConditional() {
+                incomingNodes.length = 0; // clear array for next transition nodes
                 pushDynamicNode(parentDynamicNode!)
+                console.log('MOUNT:', activeIndex)
                 series.activateConditional(activeIndex, parent)
                 popDynamicNode()
             }
 
-            if (!shouldTransitionIn && !shouldTransitionOut) {
-                // (1)
-                series.deactivateConditional(prevIndex)
-
-                // (2)
-                activateConditional()
-
-                return;
-            }
-
-            // (0) Pause previous transition
-            if (transitionInStartTime) {
-                if (phasicNode) {
-                    phasicNode.cancel('in');
-                    phasicNode.pause('in', transitionInStartTime);
-                }
-                for (const node of prevTransitionInNodes) {
-                    node.cancel('in')
-                    node.pause('in', transitionInStartTime)
-                }
-                transitionInStartTime = 0;
-
-            } else if (transitionOutStartTime) {
-                if (activeIndex === transitioningOutIndex) {
-                    if (phasicNode) {
-                        phasicNode.cancel('out');
-                        phasicNode.pause('out', transitionInStartTime);
-                    }
-                    for (const node of prevTransitionOutNodes) {
-                        node.cancel('out')
-                        node.pause('out', transitionInStartTime)
-                    }
-                    transitionOutStartTime = 0;
-                    transitioningOutIndex = undefined;
-
-                    // transition in right away (since it doesn't need to be activated since it was never removed)
-                }
-                else {
-                    skipTransitionIn = true;
-
-                    // (3)
-                    activateConditional()
-                }
-
-                // (4)
-                transitionConditionalIn()
-
-                return;
-            }
-
-
-            prevTransitionInNodes = transitionInNodes;
-            prevTransitionOutNodes = transitionOutNodes;
-
-            // (1) Transition out
-            transitionOutStartTime = new Date().getTime();
-            transitioningOutIndex = prevIndex;
-            const cleanups: (() => void)[] = []
-
-            let nodeCount = transitionOutNodes.length
-
-            if (phasicNode) {
-                phasicNode.transitionOut(afterTransitionOut)
-            }
-            else {
-                for (const node of transitionOutNodes) {
-                    node.transitionOut(afterTransitionOut);
-                }
-            }
-
-            function afterTransitionOut(cleanup?: () => void) {
-                if (phasicNode) {
-                    for (const node of transitionOutNodes) {
-                        if (node.animatingOut || node.transitioningOut) {
-                            node.cancel('out')
-                        }
-                    }
-                }
-                else {
-                    nodeCount--;
-                }
-
-                if (cleanup) cleanups.push(cleanup)
-
-                if (phasicNode || nodeCount === 0) {
-                    transitionOutStartTime = 0;
-
-                    for (const cleanup of cleanups) {
-                        cleanup()
-                    }
-
-                    series.deactivateConditional(prevIndex)
-
-                    if (!skipTransitionIn) {
-                        // (3)
-                        activateConditional()
-
-                        // (4)
-                        if (shouldTransitionIn)
-                            transitionConditionalIn()
-                    }
-                    else {
-                        skipTransitionIn = false;
-                    }
-
-                    transitionOutNodes.length = 0; // clear array for next transition nodes
-                }
-            }
-
             function transitionConditionalIn() {
-                let nodeCount = transitionInNodes.length + (phasicNode ? 1 : 0)
-                transitionInStartTime = new Date().getTime()
-                for (const node of transitionInNodes) {
+                let nodeCount = incomingNodes.length + (phasicNode ? 1 : 0)
+                entranceStateTime = new Date().getTime()
+                for (const node of incomingNodes) {
                     node.transitionIn(endTransition);
                 }
                 if (phasicNode) {
@@ -261,9 +290,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                 }
                 function endTransition() {
                     nodeCount--
+                    console.log('nodeCount', nodeCount)
                     if (nodeCount === 0) {
-                        transitionInStartTime = 0;
-                        transitionInNodes.length = 0; // clear array for next transition nodes
+                        entranceStateTime = 0;
                     }
                 }
             }
