@@ -7,9 +7,9 @@ function TransitionTest() {
     return Component(
         <div>
             <div on:copy={() => { }}>
-                <phase-change both={fade}>
+                <phasic-node both={fade}>
                     <p>hi</p>
-                </phase-change>
+                </phasic-node>
             </div>
         </div>
     )

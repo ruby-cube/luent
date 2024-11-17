@@ -104,9 +104,8 @@ button:focus-visible {
 
 .offscreen-default-fade {
   opacity: 0;
-  transform: translateY(-10px);
 }
 
 .transition-default-fade {
-  transition: opacity 1000ms ease, transform 1000ms ease
+  transition: opacity 1000ms ease
 }

@@ -1,6 +1,7 @@
 import { defineTransition } from "./defineTransition";
 
-// slide, scale, fade
+// slide, fade
+
 /* 
 function scale(
     node: Element,
@@ -39,19 +40,22 @@ export const fade = defineTransition(
 )
 
 export const slide = defineTransition(
-    'slide', ({ delay = 0, duration = 250, timing = 'ease', x = 0, y = 20, opacity = 0 } = {}) => ({
-        offscreen: {
-            opacity,
-            transform: `translate(${x}px, ${y}px)`
-        },
-        delay,
-        duration,
-        timing
-    })
+    'slide', ({ delay = 0, duration = 250, timing = 'ease', x = 0, y = 0, opacity = undefined } = {}) => {
+        const _y = x === 0 && y === 0 ? 20 : 0;
+        return {
+            offscreen: opacity === undefined ? { transform: `translate(${x}px, ${_y}px)` } : {
+                opacity,
+                transform: `translate(${x}px, ${_y}px)`
+            },
+            delay,
+            duration,
+            timing
+        }
+    }
 )
 
 
-slide({ duration: 300, y: -25 })
+// slide({ duration: 300, y: -25 })
 
 
 // bounce({ direction: 'reverse', times: 2, })

@@ -1,6 +1,6 @@
 import { NodeEntity } from "../node/makeNode";
 import { renderPhaseChangeNode, TransitionConfig } from "./PhaseChange";
-import { TransitionClasses, TransitionFunction, TransitionKit } from "./defineTransition";
+import { createTransitionStyleSheet, getTransitionStylesheet, TransitionClasses, TransitionFunction, TransitionKit } from "./defineTransition";
 import { AnimationClass, AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
 import { renderIONode } from "./I-O";
@@ -26,7 +26,7 @@ const defaultFade: TransitionClasses = {
 }
 
 export function createTransitionNode(
-    type: 'phase-change' | 'i-o',
+    type: 'phasic-node' | 'i-o',
     Slot: [string] | (() => NodeEntity | NodeEntity[]),
     input: {
         'on-load'?: boolean;
@@ -43,7 +43,7 @@ export function createTransitionNode(
 
     const [transitionIn, animateIn] = normalizeToKitArrays(inputIn)
     const [transitionOut, animateOut] = normalizeToKitArrays(inputOut)
-    const [transitionBoth, animateBoth] = normalizeToKitArrays(inputBoth ?? (!inputIn && !inputOut) ? defaultFade : undefined)
+    const [transitionBoth, animateBoth] = normalizeToKitArrays(inputBoth ? inputBoth : (!inputIn && !inputOut) ? defaultFade : undefined)
 
     if (__DEV__ && transitionIn && transitionBoth || transitionOut && transitionBoth)
         console.warn(`The transition for 'both' will override transition for either 'in' or 'out'`)
@@ -51,10 +51,10 @@ export function createTransitionNode(
     const transitionInProperties = undefined; //TODO: 
     const transitionOutProperties = undefined; //TODO: 
 
-    const enterFromClasses = compileOffscreenClasses(transitionBoth || transitionIn)
+    const enterFromClasses = collectOffscreenClasses(transitionBoth || transitionIn)
     const transition_in = mountTransitionClass(transitionBoth || transitionIn)
     const animate_in = mountAnimationClass(animateBoth || animateIn)
-    const exitClasses = compileOffscreenClasses(transitionBoth || transitionOut)
+    const exitClasses = collectOffscreenClasses(transitionBoth || transitionOut)
     const transition_out = transitionBoth ? transition_in : mountTransitionClass(transitionOut)
     const animate_out = transitionBoth ? animate_in : mountAnimationClass(animateOut)
 
@@ -83,17 +83,17 @@ export function createTransitionNode(
                 frameID =
                     requestAnimationFrame(() => {
                         frameID = undefined
-                        
+
                         // unpause
                         // if (paused) { //FIX:
                         //     div.style.removeProperty('animation-play-state')
                         //     for (const prop of transitionInProperties) {
-                            //         div.style.removeProperty(prop)
-                            //     }
-                            // }
-                        requestAnimationFrame(()=>{
+                        //         div.style.removeProperty(prop)
+                        //     }
+                        // }
+                        requestAnimationFrame(() => {
                             div.classList.remove(...enterFromClasses!); // triggers enter
-    
+
                             div.addEventListener(
                                 "transitionend",
                                 () => {
@@ -165,7 +165,7 @@ export function createTransitionNode(
                                 div.classList.remove(transition_out);
                                 div.classList.remove(...exitClasses!);
 
-                                if (type === 'phase-change' && transition_in) {
+                                if (type === 'phasic-node' && transition_in) {
                                     div.classList.add(...enterFromClasses!);
                                     div.classList.add(transition_in);
                                 }
@@ -234,7 +234,7 @@ export function createTransitionNode(
                     div.classList.remove(transition_out);
                     div.classList.remove(...exitClasses!);
 
-                    if (type === 'phase-change' && transition_in) {
+                    if (type === 'phasic-node' && transition_in) {
                         div.classList.add(...enterFromClasses!);
                         div.classList.add(transition_in);
                     }
@@ -286,7 +286,12 @@ export function createTransitionNode(
 
 
 
-function normalizeToKitArrays(input: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[] | undefined): [(TransitionKit | TransitionFunction)[] | undefined | TransitionClasses, (AnimationKit | AnimationFunction)[] | undefined | AnimationClass] {
+function normalizeToKitArrays(
+    input: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[] | undefined
+): [
+        (TransitionKit | TransitionFunction)[] | undefined | TransitionClasses,
+        (AnimationKit | AnimationFunction)[] | undefined | AnimationClass
+    ] {
     if (typeof input === 'string')
         return [undefined, input];
     if (input && 'transitionClass' in input) {
@@ -300,7 +305,7 @@ function normalizeToKitArrays(input: AnimationClass | TransitionClasses | Transi
             return [undefined, [transition, <AnimationFunction>input]]
         }
         return [
-            [transition, input],
+            [transition, <TransitionFunction>input],
             undefined
         ]
     }
@@ -320,7 +325,7 @@ function normalizeToKitArrays(input: AnimationClass | TransitionClasses | Transi
             }
             else if (kits.length === 1 && config instanceof Function) {
                 if (isAnimationKit) defaultAnimation = <AnimationFunction>config;
-                else defaultTransition = config;
+                else defaultTransition = <TransitionFunction>config;
             }
         }
         if (defaultTransition) {
@@ -344,7 +349,7 @@ function normalizeToKitArrays(input: AnimationClass | TransitionClasses | Transi
     return [[input], undefined]
 }
 
-function compileOffscreenClasses(transitions: (TransitionKit | TransitionFunction)[] | undefined | TransitionClasses) {
+function collectOffscreenClasses(transitions: (TransitionKit | TransitionFunction)[] | undefined | TransitionClasses) {
     if (!transitions) return undefined;
     if ('transitionClass' in transitions) return [transitions.offscreenClass];
     const classes: string[] = []
@@ -368,7 +373,7 @@ function mountTransitionClass(transitions: (TransitionKit | TransitionFunction)[
     }
 
     const transitionClass = compileTransitionClassName(transitions)
-    if (!existingTransitions.has(transitionClass)) _mountTransitionClass(transitions)
+    if (!existingTransitions.has(transitionClass)) _mountTransitionClass(transitionClass, transitions)
 
     if (shouldUseDefaultClass) {
         maybeSetupFunction.defaultClass = transitionClass!;
@@ -377,13 +382,33 @@ function mountTransitionClass(transitions: (TransitionKit | TransitionFunction)[
     return transitionClass!
 }
 
+const existingTransitions: Set<string> = new Set();
 
-function _mountTransitionClass(transitions: (TransitionKit | TransitionFunction)[]) {
+function _mountTransitionClass(className: string, transitions: (TransitionKit | TransitionFunction)[]) {
+    existingTransitions.add(className);
+    const style = getTransitionStylesheet() ?? createTransitionStyleSheet()
+    const transition = compileCSSTransition(transitions);
+    style.insertRule(`.${className} { transition: ${transition}}`)
+    console.log('transition', transition)
+}
+
+function compileCSSTransition(transitions: (TransitionKit | TransitionFunction)[]) {
+    let cssString = '';
     for (const kit of transitions) {
         if (kit instanceof Function) break;
 
+        const { delay, duration, properties, timing } = kit;
+
+        for (const property of properties) {
+            const comma = cssString ? ',' : ''
+            cssString = cssString + comma + property + ' ' + duration + 'ms' + ' ' + timing + (delay ? delay + 'ms' : '')
+        }
     }
+
+    return cssString;
 }
+
+
 
 // name: string;
 // delay?: number;

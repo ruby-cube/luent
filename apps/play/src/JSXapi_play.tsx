@@ -150,7 +150,7 @@ export function ListBlock(setup = $setup()) {
                 </div>
 
                 <h1>hello</h1>
-                <phase-change io={fade}>{[
+                <phasic-node io={fade}>{[
                     If($active(),
                         <div>
                             <p>hey</p>
@@ -173,7 +173,7 @@ export function ListBlock(setup = $setup()) {
                     Else(
                         <p>Bye</p>
                     )
-                ]}</phase-change>
+                ]}</phasic-node>
 
                 <Try catch={Error} setup={SelectionKit}>
                     <h1>hello</h1>
@@ -576,6 +576,12 @@ export function ListBlock(setup = $setup()) {
                         <p>[x] {item}</p>,
                     )
                 }</Port>
+
+                <item-port type='todos' receive settle send key='id' item>{
+                    For($list, (item, $index, o) =>
+                        <p>[x] {item}</p>,
+                    )
+                }</item-port>
 
                 <h1>Do something</h1>
                 {[freeze,

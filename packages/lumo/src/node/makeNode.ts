@@ -55,12 +55,12 @@ export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
 
 
 export function makeNode(
-    nodeType: HTMLTag | ComponentSetup | 'phase-change' | 'i-o',
+    nodeType: HTMLTag | ComponentSetup | 'phasic-node' | 'i-o',
     Slot: [string] | (() => NodeEntity[]) | InferSlot,
     config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent {
     if (typeof nodeType === "string"){
-        if (nodeType === 'phase-change' || nodeType === 'i-o'){
+        if (nodeType === 'phasic-node' || nodeType === 'i-o'){
             if (!Slot) throw new Error(`Extraneous transition node`)
             return createTransitionNode(nodeType, Slot, config)
         }

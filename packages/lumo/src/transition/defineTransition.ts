@@ -138,7 +138,7 @@ export type TransitionKit = {
     delay: number;
     duration: number;
     timing: TransitionTiming;
-} 
+}
 
 export type TransitionClasses = {
     offscreenClass: string;
@@ -152,14 +152,11 @@ export type TransitionDef = {
     duration?: number;
     timing?: TransitionTiming;
 } | {
-    offscreenClass: string // provide class config or existing class name (separated by spaces if multiple classes)
+    offscreen: string // provide class config or existing class name (separated by spaces if multiple classes)
     properties: string | string[]
     delay?: number;
     duration?: number;
     timing?: TransitionTiming;
-} | {
-    offscreenClass: string
-    transitionClass: string
 }
 
 type TransitionOptions = {
@@ -169,21 +166,23 @@ type TransitionOptions = {
 } & { [K in keyof CSSTransitionProperties]?: CSSTransitionProperties[K] }
     & { [key: string]: string | number | boolean }
 
+
+
+
 /* 
 note: delay in ms (default: 0), duration in ms (default: 250), timing (default: 'ease')
  */
 export function defineTransition<F extends (options?: TransitionOptions) => TransitionDef>(name: string, useTransition: F) {
     const _name = name; //manage name collisions
-    let offscreenClass = '';
+    let classCount = 0; //FIX: Temporary solution. use transition to compile class name
 
     function setupTransition(options?: Parameters<F>[0]) {
         const transition = useTransition(options)
-        if (!offscreenClass) {
-            offscreenClass = mountOffscreenClass(_name, transition.offscreen)
-        }
+        const offscreenClass = mountOffscreenClass(_name + (classCount === 0 ? '' : classCount), transition.offscreen)
+        classCount++;
         return {
             name: _name,
-            properties: transition.properties || Object.keys(transition.offscreen),
+            properties: 'properties' in transition ? transition.properties : Object.keys(transition.offscreen),
             offscreenClass,
             delay: transition.delay ?? 0,
             duration: transition.duration ?? 250,
@@ -193,6 +192,7 @@ export function defineTransition<F extends (options?: TransitionOptions) => Tran
     setupTransition.defaultClass = ''
     return setupTransition;
 }
+
 
 let transitionStylesheet: CSSStyleSheet
 
@@ -207,11 +207,14 @@ function mountOffscreenClass(name: string, offscreen: CSSTransitionProperties | 
     const style = transitionStylesheet ?? createTransitionStyleSheet()
     const properties = compileCSSProperties(offscreen)
     const className = 'offscreen-' + name;
+    console.log('style', style)
     style.insertRule(`.${className} { ${properties} }`)
+    console.log('rule inserted', `.${className} { ${properties} }`)
     return className;
 }
 
 export function createTransitionStyleSheet() {
+    console.log('createTransitionStyleSheet')
     const stylesheets = document.styleSheets
     const index = stylesheets.length;
     const style = document.createElement('style');

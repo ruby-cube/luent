@@ -218,22 +218,18 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                 if (phasicNode) {
                     phasicNode.transitionOut(afterTransitionOut)
                 }
-                else {
-                    for (const node of outgoingNodes) {
-                        node.transitionOut(afterTransitionOut);
-                    }
+                for (const node of outgoingNodes) {
+                    node.transitionOut(phasicNode ? (cleanup?: () => void) => {
+                        nodeCount--;
+                        if (cleanup) cleanups.push(cleanup)
+                    } : afterTransitionOut);
                 }
 
                 function afterTransitionOut(cleanup?: () => void) {
-                    if (phasicNode) {
-                        for (const node of outgoingNodes) {
-                            if (node.animatingOut || node.transitioningOut) {
-                                node.cancel('out')
-                            }
+                    for (const node of outgoingNodes) {
+                        if (node.animatingOut || node.transitioningOut) {
+                            node.cancel('out')
                         }
-                    }
-                    else {
-                        nodeCount--;
                     }
 
                     if (cleanup) cleanups.push(cleanup)
@@ -244,9 +240,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                         for (const cleanup of cleanups) {
                             cleanup()
                         }
-                        console.log('unmount:', prevIndex)
                         series.deactivateConditional(prevIndex)
 
+                        console.log('!!!!')
                         if (!newTransitionIn) {
                             // (3)
                             console.log('mount (after transition out)')
@@ -267,6 +263,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                         }
 
                         outgoingNodes.length = 0; // clear array for next transition nodes
+
                     }
                 }
             }

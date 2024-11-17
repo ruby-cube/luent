@@ -4396,7 +4396,8 @@ declare global {
         }
 
         interface _IntrinsicElements {
-            'phase-change': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & {both?: TransitionConfig | TransitionConfig[], in?: TransitionConfig | TransitionConfig[], out?: TransitionConfig | TransitionConfig[]}, HTMLDivElement>
+            'i-o': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & {both?: TransitionConfig | TransitionConfig[], in?: TransitionConfig | TransitionConfig[], out?: TransitionConfig | TransitionConfig[]}, HTMLDivElement>
+            'phasic-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & {both?: TransitionConfig | TransitionConfig[], in?: TransitionConfig | TransitionConfig[], out?: TransitionConfig | TransitionConfig[]}, HTMLDivElement>
             [key: `${string}-${string}`]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
             // HTML
             a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
