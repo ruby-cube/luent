@@ -26,24 +26,24 @@ export function MountIf() {
             <phasic-node>
                 {[If($active, <>
                     oh
-                    <i-o with:in={slide({ x: -50, duration: 1000 })}>
+                    <transit-node with:in={slide({ x: -50, duration: 1000 })}>
                         <h2>hi</h2>
-                    </i-o>
-                    <i-o with={slide({ x: 50, duration: 1000 })}>
+                    </transit-node>
+                    <transit-node with={slide({ x: 50, duration: 1000 })}>
                         <h2>ho</h2>
-                    </i-o>
+                    </transit-node>
                 </>),
                 ElseIf($ready, () => <>
-                    <i-o>
+                    <transit-node>
                         low
                         <h2>balloon</h2>
-                    </i-o>
+                    </transit-node>
                 </>),
                 Else(() => <>
-                    <i-o>
+                    <transit-node>
                         so
                         <h2>bye</h2>
-                    </i-o>
+                    </transit-node>
                 </>)]}
             </phasic-node>
             <button on:click={$active.toggle}>toggle active</button>
