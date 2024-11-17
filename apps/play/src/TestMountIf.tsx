@@ -34,16 +34,16 @@ export function MountIf() {
                     </i-o>
                 </>),
                 ElseIf($ready, () => <>
-                    {/* <i-o> */}
-                    low
-                    <h2>balloon</h2>
-                    {/* </i-o> */}
+                    <i-o>
+                        low
+                        <h2>balloon</h2>
+                    </i-o>
                 </>),
                 Else(() => <>
-                    {/* <i-o> */}
-                    so
-                    <h2>bye</h2>
-                    {/* </i-o> */}
+                    <i-o>
+                        so
+                        <h2>bye</h2>
+                    </i-o>
                 </>)]}
             </phasic-node>
             <button on:click={$active.toggle}>toggle active</button>
