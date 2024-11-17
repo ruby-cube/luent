@@ -24,36 +24,27 @@ export function MountIf() {
         <>
             <h1>Hello world</h1>
             <phasic-node>
-                {[
-                    If($active, () =>
-                        <>
-                            oh
-                            <i-o both={slide({ x: -50, duration: 1000 })}>
-                                <h2>hi</h2>
-                            </i-o>
-                            <i-o both={slide({ x: 50, duration: 1000 })}>
-                                <h2>ho</h2>
-                            </i-o>
-                        </>
-
-                    ),
-                    ElseIf($ready, () =>
-                        // <i-o>
-                        <>
-                            low
-                            <h2>balloon</h2>
-                        </>
-                        // </i-o>
-                    ),
-                    Else(() =>
-                        // <i-o>
-                        <>
-                            so
-                            <h2>bye</h2>
-                        </>
-                        // </i-o>
-                    )
-                ]}
+                {[If($active, <>
+                    oh
+                    <i-o with:in={slide({ x: -50, duration: 1000 })}>
+                        <h2>hi</h2>
+                    </i-o>
+                    <i-o with={slide({ x: 50, duration: 1000 })}>
+                        <h2>ho</h2>
+                    </i-o>
+                </>),
+                ElseIf($ready, () => <>
+                    {/* <i-o> */}
+                    low
+                    <h2>balloon</h2>
+                    {/* </i-o> */}
+                </>),
+                Else(() => <>
+                    {/* <i-o> */}
+                    so
+                    <h2>bye</h2>
+                    {/* </i-o> */}
+                </>)]}
             </phasic-node>
             <button on:click={$active.toggle}>toggle active</button>
             <button on:click={$ready.toggle}>toggle ready</button>

@@ -30,14 +30,14 @@ export function createTransitionNode(
     Slot: [string] | (() => NodeEntity | NodeEntity[]),
     input: {
         'on-load'?: boolean;
-        in?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        out?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        both?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        'with:in'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        'with:out'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         onStart?: (hook: TransitionHook) => void;
         onEnd?: (hook: TransitionHook) => void;
     }
 ) {
-    const { in: inputIn, out: inputOut, both: inputBoth, "on-load": shouldTransitionLoad, onEnd, onStart } = input;
+    const { 'with:in': inputIn, 'with:out': inputOut, with: inputBoth, "on-load": shouldTransitionLoad, onEnd, onStart } = input;
     const $div = NodeRef('div')
     console.log('createTransitionNode')
 

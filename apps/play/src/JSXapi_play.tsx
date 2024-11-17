@@ -549,17 +549,77 @@ export function ListBlock(setup = $setup()) {
                 ])}
 
                 <h1>Choose something</h1>
-                <Render setup={WeekKit}>{o => [
-                    If($list.length === 0,
+
+                <phasic-node>{[
+                    If($list.length === 0, { setup: MouseKit }, o => [
+                        <p>hello world</p>,
                         <p>hello world</p>
-                    ),
-                    If($broken(),
+                    ]),
+                    ElseIf($broken(), [
+                        <p>bye world</p>,
                         <p>bye world</p>
-                    ),
-                    Else(
+                    ]),
+                    Else([
+                        <p>ok world</p>,
                         <p>ok world</p>
+                    ])
+                ]}</phasic-node>
+
+                <phasic-node>{[
+                    If($list.length === 0, o => <>
+                        <p>hello world</p>
+                        <p>hello world</p>
+                    </>),
+                    ElseIf($broken(), <>
+                        <p>bye world</p>
+                        <p>bye world</p>
+                    </>),
+                    Else(<>
+                        <p>ok world</p>
+                        <p>ok world</p>
+                    </>)
+                ]}</phasic-node>
+
+                <phasic-node>
+                    <If case={$list.length === 0} setup={MouseKit}>{o => <>
+                        <p>hello world</p>
+                        <p>hello world</p>
+                    </>}</If>
+                    <ElseIf case={$broken()}>
+                        <p>bye world</p>
+                        <p>bye world</p>
+                    </ElseIf>
+                    <Else>
+                        <p>bye world</p>
+                        <p>bye world</p>
+                    </Else>
+                </phasic-node>
+
+                <item-port type='todos'>
+                    <For>
+
+                    For($list, (item, $index, o) =>
+                        <p>[x] {item}</p>,
+                        )
+                    </For>
+                </item-port>
+
+                <item-port type='todos'>{
+                    For($list, (item, $index, o) =>
+                        <p>[x] {item}</p>
                     )
-                ]}</Render>
+                }</item-port>
+
+                <phasic-node>
+                    {If($list.length === 0)}
+                    <p>hello world</p>
+                    <$ else if={$broken()}>
+                        <p>bye world</p>
+                    </$>
+                    <$ else>
+                        <p>bye world</p>
+                    </$>
+                </phasic-node>
 
                 <h1>Choose something</h1>
                 {If($list.length === 0,
@@ -636,6 +696,8 @@ export function ListBlock(setup = $setup()) {
                 {TeleportTo('body',
                     <p>Weee!</p>
                 )}
+
+
 
 
 

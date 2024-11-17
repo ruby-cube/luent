@@ -127,7 +127,7 @@ declare namespace React {
      */
     type JSXElementConstructor<P> =
         | ((
-            props: P & {frog: true},
+            props: P & { frog: true },
             /**
              * @deprecated
              *
@@ -393,7 +393,7 @@ declare namespace React {
     // Factories
     // ----------------------------------------------------------------------
 
-    type Factory<P> = (props?: {frog: true} & Attributes , ...renderSlot: NodeEntity[]) => ReactElement<P> & {frog: true};
+    type Factory<P> = (props?: { frog: true } & Attributes, ...renderSlot: NodeEntity[]) => ReactElement<P> & { frog: true };
 
     /**
      * @deprecated Please use `FunctionComponentFactory`
@@ -401,32 +401,32 @@ declare namespace React {
     type SFCFactory<P> = FunctionComponentFactory<P>;
 
     type FunctionComponentFactory<P> = (
-        props?: {frog: true} & Attributes & P,
+        props?: { frog: true } & Attributes & P,
         ...renderSlot: Lumo.InferSlot<(props?: P) => any>[] // #LUMO-EDIT
-    ) => FunctionComponentElement<P> & {frog: true};
+    ) => FunctionComponentElement<P> & { frog: true };
 
     type ComponentFactory<P, T extends Component<P, ComponentState>> = (
-        props?:  {frog: true} & ClassAttributes<T> & P,
+        props?: { frog: true } & ClassAttributes<T> & P,
         ...renderSlot: Lumo.InferSlot<(props?: P) => any>[] //#LUMO-EDIT
-    ) => CElement<P, T> & {frog: true};
+    ) => CElement<P, T> & { frog: true };
 
-    type CFactory<P, T extends Component<P, ComponentState>> = ComponentFactory<P, T> & {frog: true};
+    type CFactory<P, T extends Component<P, ComponentState>> = ComponentFactory<P, T> & { frog: true };
     type ClassicFactory<P> = CFactory<P, ClassicComponent<P, ComponentState>>;
 
     type DOMFactory<P extends DOMAttributes<T>, T extends Element> = (
-        props?: {frog: true} & ClassAttributes<T> & P | null,
+        props?: { frog: true } & ClassAttributes<T> & P | null,
         ...renderSlot: Lumo.NodeEntity[]
-    ) => DOMElement<P, T> & {frog: true};
+    ) => DOMElement<P, T> & { frog: true };
 
     interface HTMLFactory<T extends HTMLElement> extends DetailedHTMLFactory<AllHTMLAttributes<T>, T> { }
 
     interface DetailedHTMLFactory<P extends HTMLAttributes<T>, T extends HTMLElement> extends DOMFactory<P, T> {
-        (props?: {frog: true} & ClassAttributes<T> & P | null, ...renderSlot: NodeEntity[]): DetailedReactHTMLElement<P, T> & {frog: true};
+        (props?: { frog: true } & ClassAttributes<T> & P | null, ...renderSlot: NodeEntity[]): DetailedReactHTMLElement<P, T> & { frog: true };
     }
 
     interface SVGFactory extends DOMFactory<SVGAttributes<SVGElement>, SVGElement> {
         (
-            props?: {frog: true} & ClassAttributes<SVGElement> & SVGAttributes<SVGElement> | null,
+            props?: { frog: true } & ClassAttributes<SVGElement> & SVGAttributes<SVGElement> | null,
             ...renderSlot: Lumo.NodeEntity[]
         ): ReactSVGElement;
     }
@@ -538,17 +538,17 @@ declare namespace React {
     ): DetailedReactHTMLElement<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
     function createElement<P extends HTMLAttributes<T>, T extends HTMLElement>(
         type: keyof ReactHTML,
-        props?: {frog: true} & ClassAttributes<T> & P | null,
+        props?: { frog: true } & ClassAttributes<T> & P | null,
         ...renderSlot: Lumo.NodeEntity[]
     ): DetailedReactHTMLElement<P, T>;
     function createElement<P extends SVGAttributes<T>, T extends SVGElement>(
         type: keyof ReactSVG,
-        props?: {frog: true} & ClassAttributes<T> & P | null,
+        props?: { frog: true } & ClassAttributes<T> & P | null,
         ...renderSlot: Lumo.NodeEntity[]
     ): ReactSVGElement;
     function createElement<P extends DOMAttributes<T>, T extends Element>(
         type: string,
-        props?: {frog: true} & ClassAttributes<T> & P | null,
+        props?: { frog: true } & ClassAttributes<T> & P | null,
         ...renderSlot: Lumo.NodeEntity[]
     ): DOMElement<P, T>;
 
@@ -556,17 +556,17 @@ declare namespace React {
 
     function createElement<P extends {}>(
         type: FunctionComponent<P>,
-        props?: {frog: true} & Attributes & P | null,
+        props?: { frog: true } & Attributes & P | null,
         ...renderSlot: Lumo.NodeEntity[]
     ): FunctionComponentElement<P>;
     function createElement<P extends {}, T extends Component<P, ComponentState>, C extends ComponentClass<P>>(
         type: ClassType<P, T, C>,
-        props?: {frog: true} & ClassAttributes<T> & P | null,
+        props?: { frog: true } & ClassAttributes<T> & P | null,
         ...renderSlot: Lumo.NodeEntity[]
     ): CElement<P, T>;
     function createElement<P extends {}>(
         type: FunctionComponent<P> | ComponentClass<P> | string,
-        props?: {frog: true} & Attributes & P | null,
+        props?: { frog: true } & Attributes & P | null,
         ...renderSlot: Lumo.NodeEntity[]
     ): ReactElement<P>;
 
@@ -599,17 +599,17 @@ declare namespace React {
     // Custom components
     function cloneElement<P>(
         element: FunctionComponentElement<P>,
-        props?: {frog: true} & Partial<P> & Attributes,
+        props?: { frog: true } & Partial<P> & Attributes,
         ...renderSlot: Lumo.NodeEntity[]
     ): FunctionComponentElement<P>;
     function cloneElement<P, T extends Component<P, ComponentState>>(
         element: CElement<P, T>,
-        props?: {frog: true} & Partial<P> & ClassAttributes<T>,
+        props?: { frog: true } & Partial<P> & ClassAttributes<T>,
         ...renderSlot: Lumo.NodeEntity[]
     ): CElement<P, T>;
     function cloneElement<P>(
         element: ReactElement<P>,
-        props?: {frog: true} & Partial<P> & Attributes,
+        props?: { frog: true } & Partial<P> & Attributes,
         ...renderSlot: Lumo.NodeEntity[]
     ): ReactElement<P>;
 
@@ -1123,16 +1123,16 @@ declare namespace React {
      * }
      * ```
      */
-    interface FunctionComponent<P = {frog: true}> {
+    interface FunctionComponent<P = { frog: true }> {
         (
-            props: {frog: true} & P,
+            props: { frog: true } & P,
             /**
              * @deprecated
              *
              * @see {@link https://legacy.reactjs.org/docs/legacy-context.html#referencing-context-in-lifecycle-methods React Docs}
              */
             deprecatedLegacyContext?: any,
-        ): {pie: 'hi'};
+        ): { pie: 'hi' };
         /**
          * Used to declare the types of the props accepted by the
          * component. These types will be checked during rendering
@@ -4395,10 +4395,20 @@ declare global {
             }
         }
 
+        type TransitionNodeInput = {
+            with?: TransitionConfig | TransitionConfig[],
+            'with:in'?: TransitionConfig | TransitionConfig[],
+            'with:out'?: TransitionConfig | TransitionConfig[],
+            onStart?: (hook: TransitionHook) => void;
+            onEnd?: (hook: TransitionHook) => void;
+            'on-load'?: boolean
+        }
+
         interface _IntrinsicElements {
-            'i-o': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & {both?: TransitionConfig | TransitionConfig[], in?: TransitionConfig | TransitionConfig[], out?: TransitionConfig | TransitionConfig[]}, HTMLDivElement>
-            'phasic-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & {both?: TransitionConfig | TransitionConfig[], in?: TransitionConfig | TransitionConfig[], out?: TransitionConfig | TransitionConfig[]}, HTMLDivElement>
-            [key: `${string}-${string}`]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
+            'i-o': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+            'phasic-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+            'port-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+            // [key: `${string}-${string}`]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
             // HTML
             a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
             abbr: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
@@ -4581,7 +4591,7 @@ declare global {
             tspan: React.SVGProps<SVGTSpanElement>;
             use: React.SVGProps<SVGUseElement>;
             view: React.SVGProps<SVGViewElement>;
-            
+
         }
     }
 }
