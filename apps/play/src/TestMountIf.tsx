@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { NodeRef, Component, If, Else, fade, ElseIf, slide } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
@@ -24,27 +25,29 @@ export function MountIf() {
         <>
             <h1>Hello world</h1>
             <phasic-node>
-                {[If($active, <>
-                    oh
-                    <transit-node with:in={slide({ x: -50, duration: 1000 })}>
-                        <h2>hi</h2>
-                    </transit-node>
-                    <transit-node with={slide({ x: 50, duration: 1000 })}>
-                        <h2>ho</h2>
-                    </transit-node>
-                </>),
-                ElseIf($ready, () => <>
-                    <transit-node>
+                {[If($active, () =>
+                    <>
+                        oh
+                        <transit-node with:in={slide({ x: -50, duration: 1000 })}>
+                            <h2>hi</h2>
+                        </transit-node>
+                        <transit-node with={slide({ x: 50, duration: 1000 })}>
+                            <h2>ho</h2>
+                        </transit-node>
+                    </>
+                ),
+                ElseIf($ready, () =>
+                    <>
                         low
                         <h2>balloon</h2>
-                    </transit-node>
-                </>),
-                Else(() => <>
-                    <transit-node>
+                    </>
+                ),
+                Else(() =>
+                    <>
                         so
                         <h2>bye</h2>
-                    </transit-node>
-                </>)]}
+                    </>
+                )]}
             </phasic-node>
             <button on:click={$active.toggle}>toggle active</button>
             <button on:click={$ready.toggle}>toggle ready</button>

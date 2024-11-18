@@ -143,9 +143,9 @@ export function ListBlock(setup = $setup()) {
                     )
                 ]}</Frozen>
                 <div>
-                    <i-o io={fade}>
+                    <transit-node io={fade}>
                         <p>hi ho</p>
-                    </i-o>
+                    </transit-node>
                     <p>hi ho</p>
                 </div>
 
@@ -154,7 +154,7 @@ export function ListBlock(setup = $setup()) {
                     If($active(),
                         <div>
                             <p>hey</p>
-                            <i-o io={slideleft} on:start={doSomething}>
+                            <transit-node io={slideleft} on:start={doSomething}>
                                 <List />
                                 <h1>hello</h1>
                                 <div>
@@ -162,11 +162,11 @@ export function ListBlock(setup = $setup()) {
                                     <p>hi ho</p>
                                     <p>hi ho</p>
                                 </div>
-                            </i-o>
+                            </transit-node>
                             <hr />
-                            <i-o io={slideright}>
+                            <transit-node io={slideright}>
                                 <Article />
-                            </i-o>
+                            </transit-node>
                             <p>hi ho</p>
                         </div>
                     ),

@@ -1,116 +1,6 @@
 import { AnyObject } from "@rue/types";
+import { CSSTransitionProperties } from "./types";
 
-export type CSSTransitionProperties = {
-    // Opacity and Visibility
-    opacity?: number;
-    visibility?: 'visible' | 'hidden' | 'collapse';
-
-    // Transformations
-    translateX?: number;
-    translateY?: number;
-    translateZ?: number;
-    scaleX?: number;
-    scaleY?: number;
-    scaleZ?: number;
-    rotateX?: number;
-    rotateY?: number;
-    rotateZ?: number;
-    skewX?: number;
-    skewY?: number;
-    perspectiveTransform?: number;
-
-    // Positioning and Layout
-    top?: number | string;
-    right?: number | string;
-    bottom?: number | string;
-    left?: number | string;
-    zIndex?: number;
-
-    // Dimensions and Sizing
-    width?: number | string;
-    height?: number | string;
-    minWidth?: number | string;
-    minHeight?: number | string;
-    maxWidth?: number | string;
-    maxHeight?: number | string;
-
-    // Margins, Padding, and Borders
-    margin?: number | string;
-    marginTop?: number | string;
-    marginRight?: number | string;
-    marginBottom?: number | string;
-    marginLeft?: number | string;
-    padding?: number | string;
-    paddingTop?: number | string;
-    paddingRight?: number | string;
-    paddingBottom?: number | string;
-    paddingLeft?: number | string;
-    borderWidth?: number | string;
-    borderTopWidth?: number | string;
-    borderRightWidth?: number | string;
-    borderBottomWidth?: number | string;
-    borderLeftWidth?: number | string;
-    borderSpacing?: number | string;
-
-    // Background and Foreground
-    backgroundColor?: string;
-    backgroundPosition?: string;
-    backgroundSize?: string;
-    backgroundBlendMode?: string;
-    backgroundImage?: string;
-    color?: string;
-
-    // Font and Text Properties
-    fontSize?: number | string;
-    fontWeight?: number | string;
-    lineHeight?: number | string;
-    letterSpacing?: number | string;
-    textIndent?: number | string;
-    textShadow?: string;
-
-    // Border Styles and Effects
-    borderColor?: string;
-    borderRadius?: number | string;
-    borderStyle?: string;
-    borderImageOutset?: number | string;
-    borderImageSlice?: number | string;
-    borderImageWidth?: number | string;
-    outlineColor?: string;
-    outlineWidth?: number | string;
-    outlineOffset?: number | string;
-
-    // Box Shadow and Outline
-    boxShadow?: string;
-    outline?: string;
-
-    // Clip and Masking
-    clipPath?: string;
-    mask?: string;
-    maskPosition?: string;
-    maskSize?: string;
-
-    // Filter Effects
-    filter?: string;
-    blur?: number;
-    brightness?: number;
-    contrast?: number;
-    grayscale?: number;
-    hueRotate?: number;
-    invert?: number;
-    saturate?: number;
-    sepia?: number;
-
-    // Flex and Grid Properties
-    flexGrow?: number;
-    flexShrink?: number;
-    flexBasis?: number | string;
-    order?: number;
-
-    // Miscellaneous
-    cursor?: string;
-    perspective?: number;
-    mixBlendMode?: string;
-}
 
 export type TransitionTiming =
     | 'linear'
@@ -134,14 +24,14 @@ export type TransitionFunction = {
 export type TransitionKit = {
     name: string;
     properties: string[];
-    offscreenClass: string;
+    offscreenClasses: string[];
     delay: number;
     duration: number;
     timing: TransitionTiming;
 }
 
 export type TransitionClasses = {
-    offscreenClass: string;
+    offscreenClass: string | string[];
     transitionClass: string;
 }
 
@@ -152,7 +42,7 @@ export type TransitionDef = {
     duration?: number;
     timing?: TransitionTiming;
 } | {
-    offscreen: string // provide class config or existing class name (separated by spaces if multiple classes)
+    offscreen: string | string[] // provide class config or existing class name (separated by spaces if multiple classes)
     properties: string | string[]
     delay?: number;
     duration?: number;
@@ -167,23 +57,35 @@ type TransitionOptions = {
     & { [key: string]: string | number | boolean }
 
 
-
+const transitionNames: Map<string, number> = new Map()
 
 /* 
 note: delay in ms (default: 0), duration in ms (default: 250), timing (default: 'ease')
  */
 export function defineTransition<F extends (options?: TransitionOptions) => TransitionDef>(name: string, useTransition: F) {
-    const _name = name; //manage name collisions
-    let classCount = 0; //FIX: Temporary solution. use transition to compile class name
+    let _name = ''
+    let nameCount = transitionNames.get(name);
+    if (nameCount === undefined) {
+        transitionNames.set(name, 0)
+        _name = name;
+    }
+    else {
+        transitionNames.set(name, ++nameCount)
+        _name = name + nameCount
+    }
 
     function setupTransition(options?: Parameters<F>[0]) {
         const transition = useTransition(options)
-        const offscreenClass = mountOffscreenClass(_name + (classCount === 0 ? '' : classCount), transition.offscreen)
-        classCount++;
+        const classNames = compileOffscreenClasses(transition.offscreen)
+        if (typeof transition.offscreen !== 'string') {
+            for (const className of classNames) {
+                mountOffscreenClass(className)
+            }
+        }
         return {
             name: _name,
-            properties: 'properties' in transition ? transition.properties : Object.keys(transition.offscreen),
-            offscreenClass,
+            // properties: 'properties' in transition ? transition.properties : Object.keys(transition.offscreen), //This is only needed to implement pause, which I'm not sure we need in the first place...
+            offscreenClasses: classNames,
             delay: transition.delay ?? 0,
             duration: transition.duration ?? 250,
             timing: transition.timing ?? 'ease'
@@ -200,17 +102,14 @@ export function getTransitionStylesheet() {
     return transitionStylesheet;
 }
 
-function mountOffscreenClass(name: string, offscreen: CSSTransitionProperties | string) {
-    if (typeof offscreen === 'string') {
-        return offscreen;
-    }
+const existingOffscreenClasses: Set<string> = new Set()
+
+function mountOffscreenClass(name: string) {
+    if (existingOffscreenClasses.has(name)) return;
     const style = transitionStylesheet ?? createTransitionStyleSheet()
-    const properties = compileCSSProperties(offscreen)
-    const className = 'offscreen-' + name;
-    console.log('style', style)
-    style.insertRule(`.${className} { ${properties} }`)
-    console.log('rule inserted', `.${className} { ${properties} }`)
-    return className;
+    const property = compileCSSProperty(name)
+    style.insertRule(`.${name} { ${property} }`)
+    console.log('rule inserted', `.${name} { ${property} }`)
 }
 
 export function createTransitionStyleSheet() {
@@ -227,12 +126,71 @@ export function createTransitionStyleSheet() {
     return stylesheet;
 }
 
-function compileCSSProperties(properties: AnyObject) {
-    let props = ''
-    for (const key in properties) {
-        props = props + key + ':' + properties[key] + ';'
-    }
-    return props;
+function compileCSSProperty(className: string) {
+    const [key, valueString] = className.split('-', 2);
+    if (key === 'transform')
+        return key + ': ' + parseTransformValue(valueString);
+    return key + ': ' + valueString;
 }
 
+function parseTransformValue(shorthand: string) {
+    return shorthand + ')' //TODO:
+}
+
+//transform
+// translateX?: number;
+// translateY?: number;
+// translateZ?: number;
+// scaleX?: number;
+// scaleY?: number;
+// scaleZ?: number;
+// rotateX?: number;
+// rotateY?: number;
+// rotateZ?: number;
+// skewX?: number;
+// skewY?: number;
+// perspectiveTransform?: number;
+
+
+function compileOffscreenClasses(properties: string | string[] | { [K in keyof CSSTransitionProperties]?: CSSTransitionProperties[K] }) {
+    if (typeof properties === 'string' || properties instanceof Array) return properties;
+    const classes: string[] = [];
+    for (const key in properties) {
+        if (key === 'transform') {
+            classes.push(...parseTransform(properties[key as keyof { transform: string }]))
+        }
+        else {
+            const value = properties[key as keyof CSSTransitionProperties] //TODO: remove spaces?
+            classes.push(key + '-' + value);
+        }
+    }
+    return classes
+}
+
+
+// from chatGPT
+function parseTransform(transform: string | undefined): string[] {
+    if (!transform) return [];
+    return transform
+        .match(/(\w+\([^)]+\))/g) // Match each function with its arguments
+        ?.flatMap(entry => {
+            const [fn, values] = entry.slice(0, -1).split('('); // Separate function name and arguments
+            const args = values.split(',').map(arg => arg.trim()); // Split arguments by commas
+
+            // Process values for specific functions with axis decomposition
+            if (['translate', 'scale', 'skew'].includes(fn) && args.length > 1) {
+                const axes = ['X', 'Y', 'Z']; // Possible axes
+                return args.map((value, index) => {
+                    let processedValue = value
+                        .replace(/%/g, 'pc'); // Convert '%' to 'pc'
+                    return `transform-${fn}${axes[index] || ''}${processedValue}`;
+                });
+            }
+
+            // For all other functions or single arguments
+            let processedValue = values
+                .replace(/%/g, 'pc'); // Convert '%' to 'pc'
+            return [`transform-${fn}${processedValue}`];
+        }) || []; // Return an empty array if no matches
+}
 

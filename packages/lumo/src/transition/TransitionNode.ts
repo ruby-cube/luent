@@ -26,7 +26,7 @@ const defaultFade: TransitionClasses = {
 }
 
 export function createTransitionNode(
-    type: 'phasic-node' | 'i-o',
+    type: 'phasic-node' | 'transit-node',
     Slot: [string] | (() => NodeEntity | NodeEntity[]),
     input: {
         'on-load'?: boolean;
@@ -75,7 +75,7 @@ export function createTransitionNode(
             controller = new AbortController()
 
             if (transition_in) {
-                if (type === 'i-o') {
+                if (type === 'transit-node') {
                     div.classList.add(...enterFromClasses!);
                     div.classList.add(transition_in);
                 }
@@ -275,7 +275,7 @@ export function createTransitionNode(
     }
 
 
-    const renderNode = type === 'i-o' ? renderIONode : renderPhaseChangeNode
+    const renderNode = type === 'transit-node' ? renderIONode : renderPhaseChangeNode
 
     return renderNode(
         $div,
@@ -351,11 +351,15 @@ function normalizeToKitArrays(
 
 function collectOffscreenClasses(transitions: (TransitionKit | TransitionFunction)[] | undefined | TransitionClasses) {
     if (!transitions) return undefined;
-    if ('transitionClass' in transitions) return [transitions.offscreenClass];
+    if ('transitionClass' in transitions) {
+        if (transitions.offscreenClass instanceof Array)
+            return [...transitions.offscreenClass];
+        return [transitions.offscreenClass]
+    };
     const classes: string[] = []
     for (const transition of transitions) {
         if (transition instanceof Function) break;
-        classes.push(transition.offscreenClass)
+        classes.push(...transition.offscreenClasses)
     }
     return classes;
 }
