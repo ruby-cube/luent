@@ -166,12 +166,16 @@ function isMultiWatchSubject(subject: AnyObject | AnyIon | ReactiveGet | IonicMo
     return false;
 }
 
+
+
 // export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
 // export function watch<T extends IonicModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
 export function watch<T>(subject: T, effect: ChangeEffect<T>, options?: WatchOptions): ActiveListener {
     const isMultiSubject = isMultiWatchSubject(subject);
     if (!isMultiSubject && !(subject instanceof Function) && !isReactive(subject)) return { // inert watch subjects
-        stop: noop
+        stop: noop,
+        pause: noop,
+        resume: noop,
     }
     // if ('name' in subject && subject.name === '__$propIon') console.log(subject)
 

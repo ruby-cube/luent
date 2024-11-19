@@ -4,9 +4,12 @@ import { PendingCancelOp } from "./PendingCancelOp";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { mapHandlers } from "./handlerMap";
 import { isAbortSignal, AbortSignal, RegisterAbortSignal } from "./AbortSignal";
+import { noop } from "@rue/utils";
 
 export type ActiveListener = {
     stop(): void;
+    pause(): void;
+    resume(): void;
 }
 
 export type ScheduleStop = (stop: CallbackRemover) => PendingCancelOp;
@@ -47,44 +50,60 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
     const { enroll, remove, callback, options } = config;
     if (!callback) {
         if (__DEV__) console.warn("No callback was passed into makeActiveListener")
-        return { stop: () => { } };
+        return {
+            stop: noop,
+            pause: noop,
+            resume: noop
+        };
     }
     const once = options?.once;
-    // const flask = options?.flask;
-
 
     let returnVal: any;
     let pendingStop: PendingCancelOp | undefined
     let pendingFlaskCleanup: PendingCancelOp | undefined
+    
 
     const activeListener = {
-        stop: _remove
+        stop: _remove,
+        pause: _remove,
+        resume() {
+            if (!paused) return;
+            paused = false;
+            returnVal = enroll(_callback);
+        }
     }
 
-    const _callback = once ? oneTimeCallback : callback;
+    const _callback = once ? (...args: any[]) => {
+        callback(...args);
+        _remove()
+    } : callback;
     // const _callback = bindFlask(once ? oneTimeCallback : callback, flask === 'outlive' ? null : flask);
 
     mapHandlers(_callback, callback);
 
-    function oneTimeCallback(...args: any[]) {
-        callback(...args);
-        _remove()
-    }
-
-    let called = false;
+    let stopped = false;
     function _remove() {
-        if (called) return;
+        if (stopped) return;
+        stopped = true;
+        if (paused) return;
         remove(returnVal ?? _callback);
-        called = true;
         if (__DEV__) unmarkNoCleanup(activeListener);
         if (pendingStop && 'cancel' in pendingStop) pendingStop.cancel();
         else if (pendingFlaskCleanup && 'cancel' in pendingFlaskCleanup) {
             pendingFlaskCleanup.cancel();
         }
-        // console.log('remove done', pendingFlaskCleanup)
     }
     _remove.isRemover = true as const;
     _remove.__devName = options?.__devName;
+
+    let paused = false;
+    function pause() {
+        if (stopped || paused) return;
+        remove(returnVal ?? _callback);
+        paused = true;
+    }
+    pause.isRemover = true as const;
+    pause.__devName = options?.__devName;
 
     let until = options?.until as ScheduleStop | RegisterAbortSignal | null | undefined | any[]
 
@@ -100,12 +119,6 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
     else if (until !== LIFETIME) {
         pendingFlaskCleanup = onFlaskDisposal(_remove);
     }
-
-    // pendingFlaskCleanup =
-    //     flask && flask !== "outlive" ? flask.onDisposal(_remove)
-    //         : flask === 'outlive' ? undefined
-    //             : onFlaskDisposal(_remove);
-    // console.log('pendingFlaskCleanup', pendingFlaskCleanup)
 
     if (__DEV__ && until !== LIFETIME) setUpCleanupWarning!(activeListener, until, getFlask())
 

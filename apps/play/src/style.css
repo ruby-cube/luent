@@ -102,6 +102,8 @@ button:focus-visible {
   }
 }
 
+
+/* TODO: figure out how to get the default transition css classes in the app (besides manually typing it in) */
 .offscreen-default-fade {
   opacity: 0;
 }
