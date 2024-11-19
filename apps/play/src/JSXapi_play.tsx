@@ -26,44 +26,40 @@ export function ListBlock(setup = $setup()) {
     });
 
 
-    const $ItemBlock = SuspenseNode({
-        Pending: ItemBlock,
-        PlaceHolder: (props) =>
-            Component(
-                <div>Eep! I'm not ready {props.frog}</div>
-            )
-        ,
-        Error: (props) =>
-            Component(
-                <div>{props.error}</div>
-            )
-        ,
-    });
+    // const $ItemBlock = SuspenseNode({
+    //     Pending: ItemBlock,
+    //     PlaceHolder: (props) =>
+    //         Component(
+    //             <div>Eep! I'm not ready {props.frog}</div>
+    //         )
+    //     ,
+    //     Error: (props) =>
+    //         Component(
+    //             <div>{props.error}</div>
+    //         )
+    //     ,
+    // });
 
-    const $ItemBlock = TentativeNode({
-        Tentative: ItemBlock,
-        Error: ({ error }) =>
-            Component(
-                <div>{error}</div>
-            )
-    })
+    // const $ItemBlock = TentativeNode({
+    //     Tentative: ItemBlock,
+    //     Error: ({ error }) =>
+    //         Component(
+    //             <div>{error}</div>
+    //         )
+    // })
 
     const [$RouterView, RouterLink] = Router({
 
     })
 
     const [$MainContent, $mainContent] = MorphicNode({
-        Hello(props) {
-            return Component(
-                <div>hellow</div>
-            )
-        },
-        Bye(props) {
-            return Component(
-                <div>hellow</div>
-            )
-        }
-    }, { with: fade, type: 'mount/unmount' })
+        hello: input =>
+            <div>hellow</div>
+        ,
+        bye: input =>
+            <div>good bye</div>
+
+    }, { type: 'mount/unmount' })
 
     const fade = Transition({
 
@@ -175,25 +171,46 @@ export function ListBlock(setup = $setup()) {
                     )
                 ]}</phasic-node>
 
-                <Try catch={Error} setup={SelectionKit}>
-                    <h1>hello</h1>
-                    <div>
-                        <Item></Item>
-                        <p>hi ho</p>
-                        <p>hi ho</p>
-                    </div>
-                </Try>
+                {/* <Try catch={Error} setup={SelectionKit}>{o =>
+                    <>
+                        <h1>hello</h1>
+                        <div>
+                            <Item></Item>
+                            <p>hi ho</p>
+                            <p>hi ho</p>
+                        </div>
+                    </>
+                }</Try> */}
 
-                <Suspense hold={Placeholder} catch={Error} setup={SelectionKit}>{o => [
-                    <h1>hello</h1>,
-                    <div>
-                        <p>hi ho</p>
-                        <p>hi ho</p>
-                    </div>
-                ]}</Suspense>
+                {Try({ catch: Error, setup: SelectionKit },
+                    <>
+                        <h1>hello</h1>
+                        <div>
+                            <Item></Item>
+                            <p>hi ho</p>
+                            <p>hi ho</p>
+                        </div>
+                    </>
+                )}
 
-                {teleportTo('body',
-                    <p>hi</p>
+                {/* <Suspense hold={Placeholder} catch={Error} setup={SelectionKit}>{o =>
+                    <>
+                        <h1>hello</h1>
+                        <div>
+                            <p>hi ho</p>
+                            <p>hi ho</p>
+                        </div>
+                    </>
+                }</Suspense> */}
+
+                {Await({ with: <p>loading...</p>, catch: Error, setup: SelectionKit }, o =>
+                    <>
+                        <h1>hello</h1>
+                        <div>
+                            <p>hi ho</p>
+                            <p>hi ho</p>
+                        </div>
+                    </>
                 )}
 
                 <Portal to='body'>
@@ -429,11 +446,14 @@ export function ListBlock(setup = $setup()) {
                 <footer>(c) 2024</footer>
 
                 <h1>How is this?</h1>
-                {freeze(
+                {Freeze(
                     If($editable,
                         <p>
                             Flies in and out
                         </p>
+                    ),
+                    Else(
+
                     )
                 )}
                 <footer>(c) 2024</footer>
@@ -637,11 +657,11 @@ export function ListBlock(setup = $setup()) {
                     )
                 }</Port>
 
-                <item-port type='todos' receive settle send key='id' item>{
+                <port-node type='todos' receive settle send key='id' item>{
                     For($list, (item, $index, o) =>
                         <p>[x] {item}</p>,
                     )
-                }</item-port>
+                }</port-node>
 
                 <h1>Do something</h1>
                 {[freeze,

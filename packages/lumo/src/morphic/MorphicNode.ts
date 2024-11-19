@@ -26,9 +26,9 @@ export function MorphicNode(switchMap: { [key: string]: RenderFunction }) {
 
         return {
             exposedComponent: {
-                render(key: string) {
+                as(key: string) {
                     if (morphicRenderKit.activeKey === key) return;
-                    morphicRenderKit.morph(key)
+                    morphicRenderKit.render(key)
                 }
             },
             renderedTemplate: morphicRenderKit
@@ -54,7 +54,7 @@ export class MorphicRenderKit {
         }
     }
 
-    morph!: (key: string) => void
+    render!: (key: string) => void
 
     renderedKeys?: Set<string>;
 
@@ -80,7 +80,7 @@ export class MorphicRenderKit {
         })
         popContext()
 
-        this.morph = function updateMorphicComponent(key: string) {
+        this.render = function updateMorphicComponent(key: string) {
             this.activeKey = key;
 
             pushDynamicNode(this.parentDynamicNode)

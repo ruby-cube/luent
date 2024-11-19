@@ -84,7 +84,7 @@ export function defineTransition<F extends (options?: TransitionOptions) => Tran
         }
         return {
             name: _name,
-            // properties: 'properties' in transition ? transition.properties : Object.keys(transition.offscreen), //This is only needed to implement pause, which I'm not sure we need in the first place...
+            properties: 'properties' in transition ? transition.properties : Object.keys(transition.offscreen),
             offscreenClasses: classNames,
             delay: transition.delay ?? 0,
             duration: transition.duration ?? 250,
@@ -128,29 +128,20 @@ export function createTransitionStyleSheet() {
 
 function compileCSSProperty(className: string) {
     const [key, valueString] = className.split('-', 2);
-    if (key === 'transform')
-        return key + ': ' + parseTransformValue(valueString);
-    return key + ': ' + valueString;
+    const value = key === 'transform' ? toCssTransformValue(valueString) : valueString;
+    return key + ':' + value;
 }
 
-function parseTransformValue(shorthand: string) {
-    return shorthand + ')' //TODO:
+function toCssTransformValue(shorthand: string) {
+    const match = shorthand.match(/^(\w+?)([XYZ]?)(-?\d*\.?\d+)([a-z%]*)?$/);
+    if (!match) {
+        throw new Error(`Invalid transform value: ${shorthand}`);
+    }
+
+    const [, fn, axis, value, unit] = match;
+    const cssValue = unit === 'pc' ? `${value}%` : `${value}${unit || ''}`; // Convert 'pc' to '%', handle missing units
+    return `${fn}${axis}(${cssValue})`;
 }
-
-//transform
-// translateX?: number;
-// translateY?: number;
-// translateZ?: number;
-// scaleX?: number;
-// scaleY?: number;
-// scaleZ?: number;
-// rotateX?: number;
-// rotateY?: number;
-// rotateZ?: number;
-// skewX?: number;
-// skewY?: number;
-// perspectiveTransform?: number;
-
 
 function compileOffscreenClasses(properties: string | string[] | { [K in keyof CSSTransitionProperties]?: CSSTransitionProperties[K] }) {
     if (typeof properties === 'string' || properties instanceof Array) return properties;

@@ -44,14 +44,15 @@ export function createTransitionNode(
     const [transitionIn, animateIn] = normalizeToKitArrays(inputIn)
     const [transitionOut, animateOut] = normalizeToKitArrays(inputOut)
     const [transitionBoth, animateBoth] = normalizeToKitArrays(inputBoth ? inputBoth : (!inputIn && !inputOut) ? defaultFade : undefined)
-
+    
     if (__DEV__ && transitionIn && transitionBoth || transitionOut && transitionBoth)
         console.warn(`The transition for 'both' will override transition for either 'in' or 'out'`)
-
+    
     const transitionInProperties = undefined; //TODO: 
     const transitionOutProperties = undefined; //TODO: 
-
+    
     const enterFromClasses = collectOffscreenClasses(transitionBoth || transitionIn)
+    console.log('transitionIn', enterFromClasses)
     const transition_in = mountTransitionClass(transitionBoth || transitionIn)
     const animate_in = mountAnimationClass(animateBoth || animateIn)
     const exitClasses = collectOffscreenClasses(transitionBoth || transitionOut)
@@ -104,7 +105,6 @@ export function createTransitionNode(
                                 { once: true, signal: controller.signal }
                             );
                         })
-
                     });
             }
 
@@ -350,7 +350,8 @@ function normalizeToKitArrays(
 }
 
 function collectOffscreenClasses(transitions: (TransitionKit | TransitionFunction)[] | undefined | TransitionClasses) {
-    if (!transitions) return undefined;
+    if (!transitions) 
+        return undefined;
     if ('transitionClass' in transitions) {
         if (transitions.offscreenClass instanceof Array)
             return [...transitions.offscreenClass];
@@ -367,17 +368,20 @@ function collectOffscreenClasses(transitions: (TransitionKit | TransitionFunctio
 
 //TODO: unmount when component unmounted
 function mountTransitionClass(transitions: (TransitionKit | TransitionFunction)[] | undefined | TransitionClasses) {
-    if (!transitions) return undefined;
-    if ('transitionClass' in transitions) return transitions.transitionClass;
-
+    if (!transitions)
+        return undefined;
+    if ('transitionClass' in transitions)
+        return transitions.transitionClass;
+    
     const maybeSetupFunction = transitions.at(-1);
     const shouldUseDefaultClass = maybeSetupFunction instanceof Function
     if (shouldUseDefaultClass && maybeSetupFunction.defaultClass) {
         return maybeSetupFunction.defaultClass;
     }
-
+    
     const transitionClass = compileTransitionClassName(transitions)
     if (!existingTransitions.has(transitionClass)) _mountTransitionClass(transitionClass, transitions)
+        console.log('made it', transitionClass)
 
     if (shouldUseDefaultClass) {
         maybeSetupFunction.defaultClass = transitionClass!;
@@ -392,18 +396,19 @@ function _mountTransitionClass(className: string, transitions: (TransitionKit | 
     existingTransitions.add(className);
     const style = getTransitionStylesheet() ?? createTransitionStyleSheet()
     const transition = compileCSSTransition(transitions);
-    style.insertRule(`.${className} { transition: ${transition}}`)
     console.log('transition', transition)
+    style.insertRule(`.${className} { transition: ${transition}}`)
 }
 
 function compileCSSTransition(transitions: (TransitionKit | TransitionFunction)[]) {
     let cssString = '';
     for (const kit of transitions) {
         if (kit instanceof Function) break;
-
+        
         const { delay, duration, properties, timing } = kit;
-
+        
         for (const property of properties) {
+            console.log('compile', kit)
             const comma = cssString ? ',' : ''
             cssString = cssString + comma + property + ' ' + duration + 'ms' + ' ' + timing + (delay ? delay + 'ms' : '')
         }
