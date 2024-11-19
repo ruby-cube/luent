@@ -1,7 +1,7 @@
 import { ActiveListener } from "@rue/flask";
 import { ReactiveGet } from "../derivations/DerivedIon";
 import { ionize, IonicModel, isIonicModel, toRaw } from "../ionize/ionize";
-import { ChangeEffect, isMutationOp, MutationEffect, watch, WatchOptions } from "./watch";
+import { OnChangeHandler, isMutationOp, MutationEffect, watch, WatchOptions } from "./watch";
 import { insertOps } from "../ionize/IonicModel";
 import { isIntegerKey } from "../ionize/IonicArray";
 import { AnyObject } from "@rue/types";
@@ -17,7 +17,7 @@ export type KeyPath = PropertyKey[]
 
 export function watchItems<T extends ReactiveGet>(
     reactiveList: IonicModel<T[]>,
-    effect: T extends () => infer R ? ChangeEffect<R> : never,
+    effect: T extends () => infer R ? OnChangeHandler<R> : never,
     options?: WatchOptions
 ): ActiveListener
 export function watchItems<T extends IonicModel>(
@@ -27,7 +27,7 @@ export function watchItems<T extends IonicModel>(
 ): ActiveListener
 export function watchItems<T extends ReactiveGet | IonicModel>(
     reactiveList: IonicModel<T[]>,
-    effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>,
+    effect: T extends () => infer R ? OnChangeHandler<R> : MutationEffect<T>,
     options?: WatchOptions
 ) {
     const array = toRaw(reactiveList) as T[] | ReactiveGet<T>[]
@@ -86,14 +86,14 @@ export function watchItems<T extends ReactiveGet | IonicModel>(
     }
 }
 
-function watchNewItem(newItem: AnyObject | ReactiveGet, effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap, reactiveList: IonicModel) {
+function watchNewItem(newItem: AnyObject | ReactiveGet, effect: OnChangeHandler | MutationEffect, options: WatchOptions, watchers: WatchersMap, reactiveList: IonicModel) {
     const target = maybeReactivize(newItem, reactiveList)
     const watcher = watch(target, effect, options)
     watchers.set(newItem, watcher) //TODO: must inherit original flask
     return watchers;
 }
 
-function watchNewItems(newItems: AnyObject[], effect: ChangeEffect | MutationEffect, options: WatchOptions, watchers: WatchersMap, reactiveList: IonicModel) {
+function watchNewItems(newItems: AnyObject[], effect: OnChangeHandler | MutationEffect, options: WatchOptions, watchers: WatchersMap, reactiveList: IonicModel) {
     for (const item of newItems) {
         watchNewItem(item, effect, options, watchers, reactiveList)
     }
@@ -126,13 +126,13 @@ function maybeReactivize(item: ReactiveGet | AnyObject, reactiveList: IonicModel
 //TODO: Write overloads
 // export function watchCollectionValues<T extends AnyObject>(
 //     reactiveCollection: DeepReactiveModel<Set<T>> | DeepReactiveModel<Map<any, T>> | IonicModel<Set<IonicModel<T>>> | IonicModel<Set<ReactiveGet<T>>> | IonicModel<Map<any, IonicModel<T>>> | IonicModel<Map<any, ReactiveGet<T>>>,
-//     effect: ChangeEffect | MutationEffect,
+//     effect: OnChangeHandler | MutationEffect,
 //     options?: WatchOptions
 // ) {
 
 export function watchCollectionValues<T extends ReactiveGet>(
     reactiveCollection: IonicModel<Map<any, T>> | IonicModel<Set<T>>,
-    effect: T extends () => infer R ? ChangeEffect<R> : never,
+    effect: T extends () => infer R ? OnChangeHandler<R> : never,
     options?: WatchOptions
 ): ActiveListener
 export function watchCollectionValues<T extends IonicModel>(
@@ -142,7 +142,7 @@ export function watchCollectionValues<T extends IonicModel>(
 ): ActiveListener
 export function watchCollectionValues<T extends ReactiveGet | IonicModel>(
     reactiveCollection: IonicModel<Map<any, T>> | IonicModel<Set<T>>,
-    effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>,
+    effect: T extends () => infer R ? OnChangeHandler<R> : MutationEffect<T>,
     options?: WatchOptions
 ) {
     const collection = toRaw(reactiveCollection) as Map<any, any> | Set<any>
@@ -201,7 +201,7 @@ export function watchCollectionValues<T extends ReactiveGet | IonicModel>(
 
 export function watchMapKeys<T extends ReactiveGet>(
     reactiveMap: IonicModel<Map<T, any>>,
-    effect: T extends () => infer R ? ChangeEffect<R> : never,
+    effect: T extends () => infer R ? OnChangeHandler<R> : never,
     options?: WatchOptions
 ): ActiveListener
 export function watchMapKeys<T extends IonicModel>(
@@ -211,7 +211,7 @@ export function watchMapKeys<T extends IonicModel>(
 ): ActiveListener
 export function watchMapKeys<T extends ReactiveGet | IonicModel>(
     reactiveMap: IonicModel<Map<T, any>>,
-    effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>,
+    effect: T extends () => infer R ? OnChangeHandler<R> : MutationEffect<T>,
     options?: WatchOptions
 ) {
     const map = toRaw(reactiveMap) as Map<any, any> | Set<any>

@@ -1,4 +1,4 @@
-import { isIon, watchIonicEffect as _initializeIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, ChangeEffect, Phase, __devCheckIfTracked } from "../../../quarky/src";
+import { isIon, watchIonicEffect as _initializeIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, OnChangeHandler, Phase, __devCheckIfTracked } from "../../../quarky/src";
 import { InternalComponent } from "../component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { isMountPhase } from "../dynamic/DynamicNode";
@@ -37,12 +37,12 @@ function _initializeRender(effect: () => void) {
     }) //TODO: need to make sure handlers are removed onUnmounted.. through a covert flask
 }
 
-// type Effect<T = any> = MutationEffect<T extends AnyObject ? T : never> | ChangeEffect<T>
+// type Effect<T = any> = MutationEffect<T extends AnyObject ? T : never> | OnChangeHandler<T>
 
 
-// export function watchForRender<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchForRenderOptions): ActiveListener
+// export function watchForRender<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? OnChangeHandler<R> : never, options?: WatchForRenderOptions): ActiveListener
 // export function watchForRender<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener
-// export function watchForRender<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener {
+// export function watchForRender<T extends () => any | ReactiveGet | IonicModel>(target: T, effect: T extends () => infer R ? OnChangeHandler<R> : MutationEffect<T>, options?: WatchForRenderOptions): ActiveListener {
 //     // const component = getCurrentComponent<InternalComponent>();
 //     // if (!component) throw Error("watchForRender must be called within component setup")
 
@@ -124,11 +124,11 @@ export function watchIonicEffect(effect: () => void) {
 }
 
 
-// export function watch<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
+// export function watch<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? OnChangeHandler<R> : never, options?: WatchOptions): ActiveListener
 // export function watch<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
-export function watch<T>(target: T & (() => any), effect: ChangeEffect<T>, options?: LumoWatchOptions): ActiveListener
-export function watch<T>(target: T & AnyObject, effect: ChangeEffect<T>, options?: LumoWatchOptions): ActiveListener
-export function watch<T extends () => any | ReactiveGet | AnyObject>(target: T, effect: ChangeEffect<T>, options?: LumoWatchOptions): ActiveListener {
+export function watch<T>(target: T & (() => any), effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
+export function watch<T>(target: T & AnyObject, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
+export function watch<T extends () => any | ReactiveGet | AnyObject>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener {
     // const dynamicNode = getActiveDynamicNode()
 
     // if (dynamicNode && dynamicNode.preserve)
@@ -136,7 +136,7 @@ export function watch<T extends () => any | ReactiveGet | AnyObject>(target: T, 
     return _watch(target, effect, options)
 }
 
-function watchAndPreserve<T extends () => any | ReactiveGet | AnyObject>(target: T, effect: ChangeEffect<T>, options?: LumoWatchOptions) {
+function watchAndPreserve<T extends () => any | ReactiveGet | AnyObject>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions) {
     const mountPhase = isMountPhase()
     // const component = getProviderComponent(watchAndPreserve.name);
     // const watchFn = options?.phase === Phase.RENDER ? _watchForRender : _watch

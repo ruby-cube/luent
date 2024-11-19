@@ -48,7 +48,7 @@ export type MutationRecord = {
 
 
 // export type MutationEffect<T extends IonicModel = IonicModel> = (newValue: T, mutations: MutationRecord[]) => void
-export type ChangeEffect<T = any> = T extends () => infer R ? (newValue: R, oldValue: R) => void
+export type OnChangeHandler<T = any> = T extends () => infer R ? (newValue: R, oldValue: R) => void
     : T extends any[] ? (newValue: { [K in keyof T]: T[K] extends () => infer R ? R : T[K] }, oldValue: { [K in keyof T]: T[K] extends () => infer R ? R : T[K] }) => void
     : (newValue: T, oldValue: T) => void
 
@@ -168,14 +168,19 @@ function isMultiWatchSubject(subject: AnyObject | AnyIon | ReactiveGet | IonicMo
 
 
 
-// export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? ChangeEffect<R> : never, options?: WatchOptions): ActiveListener
+// export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? OnChangeHandler<R> : never, options?: WatchOptions): ActiveListener
 // export function watch<T extends IonicModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
-export function watch<T>(subject: T, effect: ChangeEffect<T>, options?: WatchOptions): ActiveListener {
+export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: WatchOptions): ActiveListener {
     const isMultiSubject = isMultiWatchSubject(subject);
-    if (!isMultiSubject && !(subject instanceof Function) && !isReactive(subject)) return { // inert watch subjects
-        stop: noop,
-        pause: noop,
-        resume: noop,
+    if (!isMultiSubject && !(subject instanceof Function) && !isReactive(subject)) {
+        function noOp() {
+            return false;
+        }
+        return { // inert watch subjects
+            stop: noOp,
+            pause: noOp,
+            resume: noOp,
+        }
     }
     // if ('name' in subject && subject.name === '__$propIon') console.log(subject)
 
@@ -192,7 +197,7 @@ export function watch<T>(subject: T, effect: ChangeEffect<T>, options?: WatchOpt
 
     const $activeEffect = ref() as Ref<ThisEffect>
 
-    function changeEffect() {
+    function changeHandler() {
         const newValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when retracking happens
 
         if (isMultiSubject && noChanges(subjects, newValue, oldValue)
@@ -218,12 +223,12 @@ export function watch<T>(subject: T, effect: ChangeEffect<T>, options?: WatchOpt
     }
 
     if (eager) {
-        scheduleEffectEagerly(changeEffect, phase)
+        scheduleEffectEagerly(changeHandler, phase)
     }
 
     return setUpWatcher(
         watchSubjects,
-        changeEffect,
+        changeHandler,
         $activeEffect,
         phase,
         options || {},
@@ -365,8 +370,9 @@ function setUpWatcher(
     ionicDerivations?: IonicDerivation[]
 ) {
     const forNextCycle = options?.cycle === 'next';
-    return $listen(effect, options || {}, {
+    const { pause, resume, stop } = $listen(effect, options || {}, {
         enroll(_effect) {
+            wrappedEffect = _effect;
             for (const subject of watchSubjects) {
                 subject.watch(_effect, phase, forNextCycle)
             }
@@ -383,5 +389,30 @@ function setUpWatcher(
             }
         }
     });
+
+    let dirty = false;
+    let wrappedEffect: () => void;
+
+    return {
+        stop,
+        pause() {
+            const success = pause()
+            if (!success) return false;
+            for (const subject of watchSubjects) {
+                subject.watch(markDirty, phase)
+            }
+            function markDirty() {
+                dirty = true;
+            }
+            return true;
+        },
+        resume() {
+            const success = resume()
+            if (!success) return false;
+            if (dirty) wrappedEffect()
+            dirty = false;
+            return true;
+        }
+    }
 }
 

@@ -7,9 +7,9 @@ import { isAbortSignal, AbortSignal, RegisterAbortSignal } from "./AbortSignal";
 import { noop } from "@rue/utils";
 
 export type ActiveListener = {
-    stop(): void;
-    pause(): void;
-    resume(): void;
+    stop(): boolean;
+    pause(): boolean;
+    resume(): boolean;
 }
 
 export type ScheduleStop = (stop: CallbackRemover) => PendingCancelOp;
@@ -50,10 +50,13 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
     const { enroll, remove, callback, options } = config;
     if (!callback) {
         if (__DEV__) console.warn("No callback was passed into makeActiveListener")
-        return {
-            stop: noop,
-            pause: noop,
-            resume: noop
+            function noOp(){
+                return false;
+            }
+            return {
+            stop: noOp,
+            pause: noOp,
+            resume: noOp
         };
     }
     const once = options?.once;
@@ -61,15 +64,16 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
     let returnVal: any;
     let pendingStop: PendingCancelOp | undefined
     let pendingFlaskCleanup: PendingCancelOp | undefined
-    
+
 
     const activeListener = {
         stop: _remove,
-        pause: _remove,
+        pause,
         resume() {
-            if (!paused) return;
+            if (stopped || !paused) return false;
             paused = false;
             returnVal = enroll(_callback);
+            return true;
         }
     }
 
@@ -83,24 +87,25 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 
     let stopped = false;
     function _remove() {
-        if (stopped) return;
+        if (stopped) return false;
         stopped = true;
-        if (paused) return;
         remove(returnVal ?? _callback);
         if (__DEV__) unmarkNoCleanup(activeListener);
         if (pendingStop && 'cancel' in pendingStop) pendingStop.cancel();
         else if (pendingFlaskCleanup && 'cancel' in pendingFlaskCleanup) {
             pendingFlaskCleanup.cancel();
         }
+        return true;
     }
     _remove.isRemover = true as const;
     _remove.__devName = options?.__devName;
 
     let paused = false;
     function pause() {
-        if (stopped || paused) return;
+        if (stopped || paused) return false;
         remove(returnVal ?? _callback);
         paused = true;
+        return true;
     }
     pause.isRemover = true as const;
     pause.__devName = options?.__devName;
