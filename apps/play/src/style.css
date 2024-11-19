@@ -107,5 +107,5 @@ button:focus-visible {
 }
 
 .transition-default-fade {
-  transition: opacity 1000ms ease
+  transition: opacity 300ms ease
 }

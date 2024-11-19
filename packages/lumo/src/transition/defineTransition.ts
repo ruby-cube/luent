@@ -91,6 +91,7 @@ export function defineTransition<F extends (options?: TransitionOptions) => Tran
             timing: transition.timing ?? 'ease'
         }
     }
+
     setupTransition.defaultClass = ''
     return setupTransition;
 }
@@ -105,15 +106,15 @@ export function getTransitionStylesheet() {
 const existingOffscreenClasses: Set<string> = new Set()
 
 function mountOffscreenClass(name: string) {
-    if (existingOffscreenClasses.has(name)) return;
+    if (existingOffscreenClasses.has(name) || name === 'offscreen-transform') return;
+    existingOffscreenClasses.add(name)
     const style = transitionStylesheet ?? createTransitionStyleSheet()
     const property = compileCSSProperty(name)
-    style.insertRule(`.${name} { ${property} }`)
-    console.log('rule inserted', `.${name} { ${property} }`)
+
+    style.insertRule(`.${name} { ${property} }`, style.cssRules.length)
 }
 
 export function createTransitionStyleSheet() {
-    console.log('createTransitionStyleSheet')
     const stylesheets = document.styleSheets
     const index = stylesheets.length;
     const style = document.createElement('style');
@@ -127,9 +128,14 @@ export function createTransitionStyleSheet() {
 }
 
 function compileCSSProperty(className: string) {
-    const [key, valueString] = className.split('-', 2);
-    const value = key === 'transform' ? toCssTransformValue(valueString) : valueString;
-    return key + ':' + value;
+    const index = className.indexOf('-'); // Find the position of the first hyphen
+    if (index === -1) throw new Error(`Invalid classname: ${className}`)
+    const key = className.slice(0, index)
+    const valueString = className.slice(index + 1)
+    if (key === 'transform'){
+        return toCssTransformValue(valueString);
+    }
+    return key + ':' + valueString;
 }
 
 function toCssTransformValue(shorthand: string) {
@@ -140,14 +146,20 @@ function toCssTransformValue(shorthand: string) {
 
     const [, fn, axis, value, unit] = match;
     const cssValue = unit === 'pc' ? `${value}%` : `${value}${unit || ''}`; // Convert 'pc' to '%', handle missing units
-    return `${fn}${axis}(${cssValue})`;
+    return `--offscreen-${fn}-${axis.toLowerCase()}:${cssValue}`;
 }
 
 function compileOffscreenClasses(properties: string | string[] | { [K in keyof CSSTransitionProperties]?: CSSTransitionProperties[K] }) {
     if (typeof properties === 'string' || properties instanceof Array) return properties;
     const classes: string[] = [];
+    let offscreenTransformAdded = false;
     for (const key in properties) {
         if (key === 'transform') {
+            mountOffscreenTransformClass()
+            if (!offscreenTransformAdded) {
+                classes.push('offscreen-transform')
+                offscreenTransformAdded = true;
+            }
             classes.push(...parseTransform(properties[key as keyof { transform: string }]))
         }
         else {
@@ -185,3 +197,20 @@ function parseTransform(transform: string | undefined): string[] {
         }) || []; // Return an empty array if no matches
 }
 
+let transformClassMounted = false;
+
+function mountOffscreenTransformClass() {
+    if (transformClassMounted) return;
+    transformClassMounted = true;
+    const style = transitionStylesheet ?? createTransitionStyleSheet()
+    style.insertRule(`.offscreen-transform { 
+        --offscreen-translate-x: 0px;
+        --offscreen-translate-y: 0px;
+        --offscreen-rotate: 0deg;
+        --offscreen-skew-x: 0;
+        --offscreen-skew-y: 0;
+        --offscreen-scale-x: 1;
+        --offscreen-scale-y: 1;
+        transform: translate(var(--offscreen-translate-x), var(--offscreen-translate-y)) rotate(var(--offscreen-rotate)) skewX(var(--offscreen-skew-x)) skewY(var(--offscreen-skew-y)) scaleX(var(--offscreen-scale-x)) scaleY(var(--offscreen-scale-y)); }
+  `, style.cssRules.length)
+}

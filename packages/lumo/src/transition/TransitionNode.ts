@@ -39,7 +39,6 @@ export function createTransitionNode(
 ) {
     const { 'with:in': inputIn, 'with:out': inputOut, with: inputBoth, "on-load": shouldTransitionLoad, onEnd, onStart } = input;
     const $div = NodeRef('div')
-    console.log('createTransitionNode')
 
     const [transitionIn, animateIn] = normalizeToKitArrays(inputIn)
     const [transitionOut, animateOut] = normalizeToKitArrays(inputOut)
@@ -52,7 +51,6 @@ export function createTransitionNode(
     const transitionOutProperties = undefined; //TODO: 
     
     const enterFromClasses = collectOffscreenClasses(transitionBoth || transitionIn)
-    console.log('transitionIn', enterFromClasses)
     const transition_in = mountTransitionClass(transitionBoth || transitionIn)
     const animate_in = mountAnimationClass(animateBoth || animateIn)
     const exitClasses = collectOffscreenClasses(transitionBoth || transitionOut)
@@ -64,7 +62,6 @@ export function createTransitionNode(
 
     const transitionNode: TransitionNode = {
         transitionIn(endTransition: () => void) {
-            console.log('transition in')
             if (!transition_in && !animate_in) {
                 endTransition();
                 return;
@@ -98,7 +95,6 @@ export function createTransitionNode(
                             div.addEventListener(
                                 "transitionend",
                                 () => {
-                                    console.log('end transition in')
                                     div.classList.remove(transition_in); // enter prep
                                     afterTransition()
                                 },
@@ -125,7 +121,6 @@ export function createTransitionNode(
 
             function afterTransition() {
                 endTransitionCount--;
-                console.log('afterTransition (in)', endTransitionCount)
                 if (endTransitionCount === 0) {
                     if (onEnd) onEnd({ phase: 'in' })
                     endTransition() //transitioning = false 
@@ -381,7 +376,6 @@ function mountTransitionClass(transitions: (TransitionKit | TransitionFunction)[
     
     const transitionClass = compileTransitionClassName(transitions)
     if (!existingTransitions.has(transitionClass)) _mountTransitionClass(transitionClass, transitions)
-        console.log('made it', transitionClass)
 
     if (shouldUseDefaultClass) {
         maybeSetupFunction.defaultClass = transitionClass!;
@@ -396,8 +390,7 @@ function _mountTransitionClass(className: string, transitions: (TransitionKit | 
     existingTransitions.add(className);
     const style = getTransitionStylesheet() ?? createTransitionStyleSheet()
     const transition = compileCSSTransition(transitions);
-    console.log('transition', transition)
-    style.insertRule(`.${className} { transition: ${transition}}`)
+    style.insertRule(`.${className} { transition: ${transition}}`, style.cssRules.length)
 }
 
 function compileCSSTransition(transitions: (TransitionKit | TransitionFunction)[]) {
@@ -408,7 +401,6 @@ function compileCSSTransition(transitions: (TransitionKit | TransitionFunction)[
         const { delay, duration, properties, timing } = kit;
         
         for (const property of properties) {
-            console.log('compile', kit)
             const comma = cssString ? ',' : ''
             cssString = cssString + comma + property + ' ' + duration + 'ms' + ' ' + timing + (delay ? delay + 'ms' : '')
         }

@@ -73,7 +73,7 @@ function mountKeyframes(name: string, keyframes: Keyframes | string) {
     const style = getTransitionStylesheet() ?? createTransitionStyleSheet()
     const keyframesCSS = compileKeyframes(keyframes)
     const keyframesID = name; //TODO: manage namespace collisions
-    style.insertRule(`@keyframes ${keyframesID} { ${keyframesCSS} }`)
+    style.insertRule(`@keyframes ${keyframesID} { ${keyframesCSS} }`, style.cssRules.length)
     return keyframesID;
 }
 
