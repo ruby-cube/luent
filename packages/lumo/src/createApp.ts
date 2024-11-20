@@ -1,6 +1,6 @@
 import { Component, ComponentSetup, DOMNode, InternalComponent } from "./component/InternalComponent";
 import { _NodePod } from "./node/NodePod";
-import { DynamicNode, markMountPhase, unmarkMountPhase } from "./dynamic/DynamicNode";
+import { DynamicNode} from "./dynamic/DynamicNode";
 import { AnyObject } from "@rue/types";
 import { initializeComponent, setComponentAttributes } from "./component/makeComponent";
 import { AppContext, createAppContext } from "./context/provide";
@@ -45,7 +45,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
             appRoot = root!;
 
             // (2) attach developer's root component to root element
-            dynamicNode.activate(function mountRootComponent() {
+            dynamicNode.mount(function mountRootComponent() {
                 pushContext(appContext)
                 // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
                 setComponentAttributes(config?.setup || {})
@@ -58,9 +58,9 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
                 }
                 finally {
                     setComponentAttributes(undefined)
-                    if (remountable) markMountPhase()
+                    // if (remountable) markMountPhase()
                     component.mount(root!, nodePod) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
-                    if (remountable) unmarkMountPhase()
+                    // if (remountable) unmarkMountPhase()
                     popContext() // for sibling components to access parent, must be set AFTER `Component()`
                 }
             })

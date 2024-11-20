@@ -6,14 +6,15 @@ import { initializeRender, watch } from "../watch/watchAndPreserve";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
 import { ion } from "../../../quarky/src";
-import { mountNodeEntity } from "../node/mountNodeEntity";
+import { mountNodeEntities, mountNodeEntity } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
-import { onActivated, onDeactivate } from "../dynamic/lifecycle";
+import { processNodeEntities } from "../node/processNodeEntities";
+
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -60,19 +61,15 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
         );
 
     if (Slot) {
-        const _childNodes = wrapIfConditionalSeries(Slot instanceof Function ? Slot() : Slot)
+        const rawOutput = wrapIfConditionalSeries(Slot instanceof Function ? Slot() : Slot) //TODO: Slot needs semaphores to provide parent to nested dynamic nodes
         const nodePod = new _NodePod();
-        for (let i = 0; i < _childNodes.length; i++) {
-            let childNodeEntity = _childNodes[i];
-            if (childNodeEntity instanceof ConditionalRenderKit) {
-                validateStandAloneConditional(childNodeEntity, _childNodes, i);
-                childNodeEntity = [childNodeEntity]
-            }
-            mountNodeEntity(domNode, childNodeEntity, nodePod, undefined)
-        }
+        const nodeEntities = processNodeEntities(rawOutput, domNode, nodePod)
+        mountNodeEntities(nodeEntities, domNode)
     }
     return domNode;
 }
+
+
 
 function wrapIfConditionalSeries(nodeEntities: NodeEntity[]) {
     if (isNotConditionalSeries(nodeEntities)) {
@@ -252,16 +249,16 @@ function setUpDynamicAttributes(node: Element, changes: ((o: Element) => void)[]
     }
 }
 
-function setUpRefNulling(ref: _NodePod, $index: AtomicIon<number>) {
-    if ($index && $index() === 0) {
+// function setUpRefNulling(ref: _NodePod, $index: AtomicIon<number>) {
+//     if ($index && $index() === 0) {
 
-    }
-    else {
-        onDeactivate(() => {
+//     }
+//     else {
+//         onDeactivate(() => {
 
-        })
-    }
-}
+//         })
+//     }
+// }
 
 
 

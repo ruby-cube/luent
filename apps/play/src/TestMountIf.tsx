@@ -24,15 +24,18 @@ export function MountIf() {
         <>
             <h1>Hello world</h1>
             <phasic-node>
-                {[If($active, () =>
+                {[If($active, { type: 'mount' }, () =>
                     <>
                         oh
-                        <transit-node with={slide({ x: -50, duration: 300 })}>
-                            <h2>hi</h2>
-                        </transit-node>
-                        <transit-node with={slide({ x: 100, duration: 300 })}>
-                            <h2>ho</h2>
-                        </transit-node>
+                        {/* <transit-node with={slide({ x: -50, duration: 300 })}> */}
+                        <h2>hi</h2>
+                        {/* </transit-node> */}
+                        {/* <transit-node with={slide({ x: 100, duration: 300 })}> */}
+                        <h2>ho</h2>
+                        {/* </transit-node> */}
+                        {[If($ready, () =>
+                            <p>ready</p>
+                        )]}
                     </>
                 ),
                 ElseIf($ready, () =>
@@ -139,7 +142,7 @@ function ArticleBlock(setup: {
 //         console.log("node ref", button, countDiv)
 //     })
 
-//     // onActivated(() => {
+//     // onReactivate(() => {
 //     //     console.log("activated yo")
 //     // })
 

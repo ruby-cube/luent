@@ -238,7 +238,7 @@ export function ListBlock(setup = $setup()) {
 
                 <h1>Something Here</h1>
 
-                <Morph type='create/destroy'>{[
+                <Morph type='create'>{[
                     If($active(),
                         <p>hello world</p>
                     ),
@@ -252,7 +252,7 @@ export function ListBlock(setup = $setup()) {
                     )
                 ]}</Morph>
 
-                <Morph type='show/hide'>{(
+                <Morph type='show'>{(
                     If($active(),
                         <p>hello world</p>,
                     ),
@@ -266,7 +266,7 @@ export function ListBlock(setup = $setup()) {
                     )
                 )}</Morph >
 
-                <$Node type='show/hide'>
+                <$Node type='show'>
                     <If case={$active}>
                         <p>hello world</p>
                     </If>
@@ -282,7 +282,7 @@ export function ListBlock(setup = $setup()) {
 
                 {
                     morphic({ with: fade },
-                        If($active, { type: 'show/hide' }, o =>
+                        If($active, { type: 'show' }, o =>
                             <p>hello world</p>,
                         ),
                         ElseIf($broken, { use: SelectionKit }, o =>
@@ -308,7 +308,7 @@ export function ListBlock(setup = $setup()) {
 
                 <h1>Something Here</h1>
                 {(
-                    If($active, { type: 'show/hide', use: CounterKit }, o =>
+                    If($active, { type: 'show', use: CounterKit }, o =>
                         Context(
                             w(COUNT, o.$count),
                             w(FROG, ionize(Frog())),
@@ -487,7 +487,7 @@ export function ListBlock(setup = $setup()) {
                     )
                 ]}
 
-                {morphic(fade(10), 'show/hide',
+                {morphic(fade(10), 'show',
                     If($active,
                         <div>hello</div>,
                         <p>how</p>

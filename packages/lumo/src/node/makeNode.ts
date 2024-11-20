@@ -19,7 +19,7 @@ export function jsx(tag: any, config: any, ...children: any[]) { //TODO: transpi
     return makeNode(tag, _children, config || {})
 }
 
-export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveGet<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
+export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveGet<any> | ReactElement<any, any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
 
 export type RenderFunction<Params = unknown> = Params extends any[] ?
     (...args: Params) => NodeEntity[] | NodeEntity :

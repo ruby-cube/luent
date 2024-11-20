@@ -4,12 +4,13 @@ import { DynamicNode } from "../dynamic/DynamicNode";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
-import { mountNodeEntity } from "../node/mountNodeEntity";
+import { mountNodeEntities, mountNodeEntity } from "../node/mountNodeEntity";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { mountConditional } from "../conditional/ConditionalRenderSeries";
 import { getContext, getCurrentContext, popContext, pushContext } from "../context/context-stack";
 import { NodeContext } from "../context/Context";
 import { AppContext } from "../context/provide";
+import { processNodeEntities } from "../node/processNodeEntities";
 
 export function MorphicNode(switchMap: { [key: string]: RenderFunction }) {
     return function $MorphicNode({ as: initialKey, preserve }: {
@@ -68,15 +69,13 @@ export class MorphicRenderKit {
         nodePod: _NodePod,
         fragment?: DocumentFragment,
     ) {
-        const nodeEntities = normalizeToArray(unnestComponent(this.switchMap[this.activeKey]()));
+        const nodeEntities = processNodeEntities(normalizeToArray(unnestComponent(this.switchMap[this.activeKey]())), parent, nodePod);
         const dynamicPod = this.dynamicNodePod = nodePod.appendDynamicPod();
         const _nodePod = dynamicPod.appendNodePod()
-        const dynamicNode = this.dynamicNode = makeDynamicNode(this.preserve, _nodePod)
+        const dynamicNode = this.dynamicNode = makeDynamicNode(_nodePod)
         pushContext(this.context)
-        dynamicNode.activate(function renderMorphicNode() {
-            for (const nodeEntity of nodeEntities) {
-                mountNodeEntity(parent, nodeEntity, _nodePod, fragment)
-            }
+        dynamicNode.mount(function renderMorphicNode() {
+            mountNodeEntities(nodeEntities, parent, fragment)
         })
         popContext()
 
@@ -108,7 +107,7 @@ export class MorphicRenderKit {
     }
 
     activateForm(key: string, parent: Element, nodePod: _NodePod) {
-        const dynamicNode = this.dynamicNode = makeDynamicNode(this.preserve, nodePod)
+        const dynamicNode = this.dynamicNode = makeDynamicNode(nodePod)
         const _this = this
         if (this.preserve && this.renderedKeys?.has(key)) {
             dynamicNode.reactivate(function activateMorphicForm() {
@@ -116,7 +115,7 @@ export class MorphicRenderKit {
                 mountConditional(nodePod, parent, _this.dynamicNodePod, nodeEntities)
             })
         } else {
-            dynamicNode.activate(function reactivateMorphicForm() {
+            dynamicNode.mount(function reactivateMorphicForm() {
                 const nodeEntities = normalizeToArray(unnestComponent(_this.switchMap[key]()))
                 mountConditional(nodePod, parent, _this.dynamicNodePod, nodeEntities)
             })

@@ -42,7 +42,7 @@ app.mount('#app')
 //     }
 //     const $doubleCount = $(() => $count() * 2)
 //     let prevDoubleCount = $doubleCount;
-//     dynamicNode.activate(() => {
+//     dynamicNode.mount(() => {
 //         watchForRender($doubleCount, function $stubbornHandler() {
 //             console.log("tada")
 //             destroyDerivedSignal(prevDoubleCount)

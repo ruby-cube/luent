@@ -41,7 +41,7 @@ function createViewNode(context: Context): ViewNode {
         transapp(key: string | symbol) {
             return transapp(key, context)
         },
-        get onCreated() {
+        get onCreated() { 
             const dynamicNode = getActiveDynamicNode()
             if (dynamicNode.onCreated) return dynamicNode.onCreated;
             return dynamicNode.initializeOnCreatedHook()
@@ -53,3 +53,38 @@ function createViewNode(context: Context): ViewNode {
         }
     }
 }
+
+
+// setup...
+
+// renderTemplate...
+
+
+// created: setup completed, DOM nodes created, but not yet mounted (this distinction isn't really useful since you can manipulate the DOM any number of times before render and it should be fine)
+
+// mounted
+
+// deactivated
+
+// reactivated
+
+// unmounted
+
+// destroyed
+
+
+
+// view node
+// onMount   if (isInitialMount)
+// - onCreated
+// - onReactivated
+// onUnmount if (isFinalUnmount)
+// - onDeactivated
+// - onDestroyed
+
+
+// dynamic node
+// - onCreated (rendered)
+// - onReactivated
+// - onDeactivated
+// - onDestroyed

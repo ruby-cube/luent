@@ -196,7 +196,7 @@ function normalizeToFragmentArray(entity: any) { // distinguish conditional seri
 //     //         onDeactivated(() => {
 //     //             ref.components = null;
 //     //         })
-//     //         onActivated(() => {
+//     //         onReactivate(() => {
 //     //             ref.components = components
 //     //         })
 //     //     }
@@ -209,7 +209,7 @@ function normalizeToFragmentArray(entity: any) { // distinguish conditional seri
 //         onDeactivated(() => {
 //             ref.setValue(null)
 //         })
-//         onActivated(() => {
+//         onReactivate(() => {
 //             ref.setValue(component)
 //         })
 //     }

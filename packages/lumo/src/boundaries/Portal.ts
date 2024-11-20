@@ -2,8 +2,9 @@ import { Component, unnestComponent } from "../component/InternalComponent";
 import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { _NodePod } from "../node/NodePod";
-import { mountNodeEntity } from "../node/mountNodeEntity";
+import { mountNodeEntities, mountNodeEntity } from "../node/mountNodeEntity";
 import { getContext, popContext, pushContext } from "../context/context-stack";
+import { processNodeEntities } from "../node/processNodeEntities";
 
 export type MorphConfig = {}
 
@@ -28,10 +29,8 @@ export function Portal(input: {
     const nodePod = new _NodePod();
     nodePod.appendStaticNode(element) // serves as an indicator to append instead of prepend for dynamic updates
 
-    const _nodeEntities = normalizeToArray(unnestComponent(renderSlot()))
-    for (const nodeEntity of _nodeEntities) {
-        mountNodeEntity(element, nodeEntity, nodePod)
-    }
+    const _nodeEntities = processNodeEntities(normalizeToArray(unnestComponent(renderSlot())), element, nodePod)
+    mountNodeEntities(_nodeEntities, element)
     return Component(undefined);
 }
 

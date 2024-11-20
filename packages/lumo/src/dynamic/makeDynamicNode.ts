@@ -1,6 +1,5 @@
-import { DynamicNode} from "./DynamicNode";
+import { DynamicNode, LifecycleHook} from "./DynamicNode";
 import { _NodePod } from "../node/NodePod";
-import { onDestroy, LifecycleHook, onActivated, onDeactivate } from "./lifecycle";
 import { getActiveDynamicNode } from "./nodestack";
 
 
@@ -19,24 +18,20 @@ import { getActiveDynamicNode } from "./nodestack";
 //     return component;
 // }
 
-export function makeDynamicNode(preserve: boolean, nodePod: _NodePod) {
+export function makeDynamicNode(nodePod: _NodePod) {
     const parent = getActiveDynamicNode();
-    const dynamicNode = new DynamicNode(parent, nodePod, preserve);
+    const dynamicNode = new DynamicNode(parent, nodePod);
     if (parent instanceof DynamicNode) {
-        onActivated(() => { dynamicNode.emit(LifecycleHook.ON_ACTIVATED) }, { //FIX: This makes on activated run twice when it is first activated
-            until: onDestroyDynamicNode,
+        parent.onReactivate(() => { dynamicNode.emit(LifecycleHook.ON_REACTIVATE) }, { //FIX: This makes on activated run twice when it is first activated (see if this has been fixed)
+            until: dynamicNode.onDestroy,
         })
-        onDeactivate(() => { dynamicNode.deactivate() }, {
-            until: onDestroyDynamicNode,
+        parent.onDeactivate(() => { dynamicNode.emit(LifecycleHook.ON_DEACTIVATE) }, {
+            until: dynamicNode.onDestroy,
         })
-        onDestroy(() => { dynamicNode.destroy() }, {
-            cancel: onDestroyDynamicNode,
+        parent.onDestroy(() => { dynamicNode.destroy() }, {
+            cancel: dynamicNode.onDestroy,
             __devName: 'makeDynamicNode, onDestroy'
         })
-    }
-
-    function onDestroyDynamicNode(cleanUp: ()=>void){
-        return onDestroy(cleanUp, {}, dynamicNode)
     }
     return dynamicNode;
 }

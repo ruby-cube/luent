@@ -1,6 +1,5 @@
 import { isAtomicIon, AtomicIon, attachIonMethods } from "../ion/AtomicIon";
 import { IonicDerivation } from "./IonicDerivation";
-import { onDestroy } from "../../../lumo/src/dynamic/lifecycle";
 import { META } from "../ReactiveEntity";
 import { __devCheckIfTracked, getActiveTracker } from "./DependencyTracker";
 import { AnyObject } from "@rue/types";
@@ -123,9 +122,9 @@ export function createDerivedIon<T extends any>(
     }
 
     Object.setPrototypeOf($derivedIon, proto)
-
-    if (getDynamicNode()) {
-        onDestroy(() => { //TODO: what about if a derived ion is created outside of a dynamic node??
+    const dynamicNode = getDynamicNode()
+    if (dynamicNode) {
+        dynamicNode.onDestroy(() => { //TODO: what about if a derived ion is created outside of a dynamic node??
             derived.untrackAtoms()
         })
     }

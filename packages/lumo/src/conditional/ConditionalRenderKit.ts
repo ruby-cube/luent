@@ -1,12 +1,12 @@
 import { ReactiveGet } from "../../../quarky/src";
-import { NodeEntity } from "../node/makeNode";
 import { ConditionalKit } from "./ConditionalKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { Context } from "../context/context-stack";
-import { PhasicNode } from "../transition/PhaseChange";
 import { TransitionNode } from "../transition/TransitionNode";
+import { _NodePod } from "../node/NodePod";
+import { NodeKit } from "../node/processNodeEntities";
 
-export type RenderConditional = () => NodeEntity[]
+export type RenderConditional = (parent: Element, nodePod: _NodePod, input: AnyObject | undefined) => NodeKit[]
 
 export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
 
@@ -18,7 +18,7 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
         public type: 'create' | 'show' | 'mount' = 'create',
         public context: Context,
         public transitionNodes: TransitionNode[],
-        optionals?: {
+        public optionals?: {
             nodePodIndex?: number,
             $condition?: ReactiveGet<Booleanny>,
             setup?: () => AnyObject,

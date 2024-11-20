@@ -1,9 +1,10 @@
 import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
-import { mountNodeEntity } from "../node/mountNodeEntity";
+import { mountNodeEntities, mountNodeEntity } from "../node/mountNodeEntity";
 import { protect } from "@rue/quarky";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
+import { processNodeEntities } from "../node/processNodeEntities";
 
 
 
@@ -65,15 +66,19 @@ export class InternalComponent<T extends AnyObject | undefined = AnyObject | und
 
     mount(
         parent: Element,
-        nodePod: _NodePod,
         fragment?: DocumentFragment,
     ) { //TODO: what if a component's root elements is conditional or a dynamic list??
         const nodeEntities = this.initialNodeEntities!;
         if (!(parent instanceof Element))
             throw new Error("Parent cannot be a text node")
-        for (const nodeEntity of nodeEntities) {
-            mountNodeEntity(parent, nodeEntity, nodePod, fragment)
-        }
+        mountNodeEntities(nodeEntities, parent, fragment)
+    }
+
+    setUp(
+        parent: Element,
+        nodePod: _NodePod
+    ) {
+        this.initialNodeEntities = processNodeEntities(this.initialNodeEntities!, parent, nodePod)
     }
 }
 

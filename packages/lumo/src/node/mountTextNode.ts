@@ -2,19 +2,24 @@ import { isIon, ReactiveGet, Phase, tracked, __devCheckIfTracked } from "../../.
 import { _NodePod } from "./NodePod";
 import { watch } from "../watch/watchAndPreserve";
 
-export function mountTextNode(parent: Element, text: ReactiveGet | any, nodePod?: _NodePod, fragment?: DocumentFragment) {
+
+
+export function setUpTextNode(text: ReactiveGet | any, nodePod?: _NodePod) {
     const textNode = createTextNode(text); //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
    
     if (nodePod) {
         nodePod.appendStaticNode(textNode)
     }
 
-    const root = fragment ? fragment : parent;
-    root.appendChild(textNode)
-
     if (isIon(text) || text instanceof Function) {
         keepTextNodeUpdated(text, textNode)
     }
+    return textNode;
+}
+
+export function mountTextNode(textNode: CharacterData, parent: Element, fragment?: DocumentFragment) {
+    const root = fragment ? fragment : parent;
+    root.appendChild(textNode)
 }
 
 function keepTextNodeUpdated(text: ReactiveGet<any>, textNode: CharacterData) {
@@ -22,7 +27,6 @@ function keepTextNodeUpdated(text: ReactiveGet<any>, textNode: CharacterData) {
         textNode.data = toString(newValue);
     }, { phase: Phase.RENDER, __devName: keepTextNodeUpdated.name });
 }
-
 
 
 function createTextNode(value: ReactiveGet | any) {

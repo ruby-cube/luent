@@ -1,8 +1,7 @@
 import { ActiveListener } from "@rue/flask";
 import { ReactiveGet } from "../derivations/DerivedIon";
 import { ionize, IonicModel, isIonicModel, toRaw } from "../ionize/ionize";
-import { OnChangeHandler, isMutationOp, MutationEffect, watch, WatchOptions } from "./watch";
-import { insertOps } from "../ionize/IonicModel";
+import { OnChangeHandler, watch, WatchOptions } from "./watch";
 import { isIntegerKey } from "../ionize/IonicArray";
 import { AnyObject } from "@rue/types";
 import { shallowClone } from "../ionize/TimeTraveler";
@@ -13,7 +12,14 @@ type WatchersMap = Map<AnyObject | ReactiveGet, ActiveListener>
 export type KeyPath = PropertyKey[]
 
 
-
+export const insertOps = {
+    push: { from: 0 },
+    unshift: { from: 0 },
+    splice: { from: 2 },
+    fill: { at: 0 },
+    add: { at: 0 },
+    set: { from: 0 }
+}
 
 export function watchItems<T extends ReactiveGet>(
     reactiveList: IonicModel<T[]>,

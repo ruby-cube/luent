@@ -5,7 +5,7 @@ import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { normalizeToArray } from "@rue/utils";
-import { mountNodeEntity } from "../node/mountNodeEntity";
+import { mountNodeEntities, mountNodeEntity } from "../node/mountNodeEntity";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { watch } from "../watch/watchAndPreserve";
 import { diff, InsertAndMoveKit } from "./diff";
@@ -15,6 +15,7 @@ import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynami
 import { getFlask } from "@rue/flask";
 import { Context, popContext, pushContext } from "../context/context-stack";
 import { PhaseChangeKit } from "../transition/PhaseChange";
+import { processNodeEntities } from "../node/processNodeEntities";
 
 
 type Index = number
@@ -90,14 +91,12 @@ export class ListRenderKit<T = any> {
 
             nodePod = isDynamic ? dynamicNodePod!.appendNodePod() : nodePod;
             if (isDynamic) {
-                const dynamicNode = makeDynamicNode(false, nodePod)
-                dynamicNode.activate(function mountDynamicItem() {
+                const dynamicNode = makeDynamicNode(nodePod)
+                dynamicNode.mount(function mountDynamicItem() {
                     console.log('mounting item')
                     pushContext(context)
-                    const nodeEntities = normalizeToArray(renderItem(item, $index))
-                    for (const nodeEntity of nodeEntities) {
-                        mountNodeEntity(parent, nodeEntity, nodePod, fragment);
-                    }
+                    const nodeEntities = processNodeEntities(normalizeToArray(renderItem(item, $index)), parent, nodePod)
+                    mountNodeEntities(nodeEntities, parent, fragment);
                     popContext()
                 })
                 // dynamicNode.setNodePod(nodePod)
@@ -105,10 +104,8 @@ export class ListRenderKit<T = any> {
             }
             else {
                 pushContext(context)
-                const nodeEntities = normalizeToArray(renderItem(item, $index))
-                for (const nodeEntity of nodeEntities) {
-                    mountNodeEntity(parent, nodeEntity, nodePod, fragment);
-                }
+                const nodeEntities = processNodeEntities(normalizeToArray(renderItem(item, $index)), parent, nodePod)
+                mountNodeEntities(nodeEntities, parent, fragment);
                 popContext()
             }
         }
@@ -211,18 +208,16 @@ export class ListRenderKit<T = any> {
                 newIndices.push($index);
                 // create and collect consecutive new items onto the same fragment
 
-                const dynamicNode = makeDynamicNode(false, nodePod)
+                const dynamicNode = makeDynamicNode(nodePod)
                 const renderItem = this.renderItem
                 pushContext(this.context)
                 pushList(this)
                 const list = this.data;
                 const _item = isIonicModel(list) || isAtomicIon(list) && asMetaIon(list).hasIonicValue ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
-                dynamicNode.activate(function renderNewListItem() {
+                dynamicNode.mount(function renderNewListItem() {
                     console.log('rendering new item')
-                    const nodeEntities = normalizeToArray(renderItem(_item, $index));
-                    for (const nodeEntity of nodeEntities!) {
-                        mountNodeEntity(parent, nodeEntity, nodePod, fragment)
-                    }
+                    const nodeEntities = processNodeEntities(normalizeToArray(renderItem(_item, $index)), parent, nodePod);
+                    mountNodeEntities(nodeEntities, parent, fragment)
                 })
                 setCurrentIndex(undefined)
                 popList();

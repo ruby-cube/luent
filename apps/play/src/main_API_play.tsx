@@ -50,7 +50,7 @@ Dynamic node
 - context
 - onCreated
 - onDestroy
-- onActivated
+- onReactivate
 - onDeactivate
 
 context.get()
