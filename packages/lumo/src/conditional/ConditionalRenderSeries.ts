@@ -20,8 +20,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
     private dynamicNodes: DynamicNode[] = []
     private storeDynamicNode(dynamicNode: DynamicNode, index: number) {
-        if (__DEV__ && this.dynamicNodes[index] !== NULLISH_DYNAMIC_NODE && this.dynamicNodes[index] !== undefined)
-            throw new Error('Dynamic Node already exists at this index')
+        // if (__DEV__ && this.dynamicNodes[index] !== NULLISH_DYNAMIC_NODE && this.dynamicNodes[index] !== undefined)
+            // throw new Error('Dynamic Node already exists at this index')
         this.dynamicNodes[index] = dynamicNode;
     }
 
@@ -459,13 +459,11 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                     const nodeEntities = series.render(activeIndex, parent);
                     showConditionalNodes(parent, dynamicNodePod, activeIndex, nodeEntities)
                 }
-                else if (activationType === 'create') {
+                else {
                     const nodeEntities = series.render(activeIndex, parent);
                     mountConditional(parent, dynamicNodePod, nodeEntities)
                 }
-                else {
-                    // do nothing... reactive effects should remount conditional
-                }
+             
             })
         }
     }

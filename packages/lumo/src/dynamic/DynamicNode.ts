@@ -41,6 +41,7 @@ export class DynamicNode {
 
     emit(hookName: LifecycleHook) {
         const taskQueue = this.tasks.get(hookName);
+    if (hookName === LifecycleHook.ON_REACTIVATE) console.log('emit', taskQueue)
         if (!taskQueue) return;
         for (const task of taskQueue) {
             task();

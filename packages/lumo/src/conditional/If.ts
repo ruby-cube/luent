@@ -61,7 +61,7 @@ export function If<OPT extends ConditionalOptions>($condition: (_?: any) => Bool
 
 
 export function ElseIf($condition: (_?: any) => Booleanny, renderConditional: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit
-export function ElseIf<OPT extends ConditionalOptions>($condition: (_?: any) => Booleanny, options: OPT, renderConditional: RenderConditional<OPT>): ConditionalRenderKit
+export function ElseIf<OPT extends ConditionalOptions>($condition: (_?: any) => Booleanny, options: OPT, renderConditional: RenderConditional<OPT>| NodeEntity | NodeEntity[]): ConditionalRenderKit
 export function ElseIf<OPT extends ConditionalOptions>($condition: (_?: any) => Booleanny, optionsOrRenderConditional: NodeEntity | NodeEntity[] | RenderFunction | OPT, renderConditional?: RenderConditional<OPT>): ConditionalRenderKit {
     const _renderConditional = renderConditional ? renderConditional : optionsOrRenderConditional as RenderFunction
     const options = renderConditional ? optionsOrRenderConditional as ConditionalOptions : { type: 'create' as const, setup: undefined };
@@ -84,7 +84,7 @@ export function ElseIf<OPT extends ConditionalOptions>($condition: (_?: any) => 
 
 
 export function Else(renderConditional: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit
-export function Else<OPT extends ConditionalOptions>(options: OPT, renderConditional: RenderConditional<OPT>): ConditionalRenderKit
+export function Else<OPT extends ConditionalOptions>(options: OPT, renderConditional: RenderConditional<OPT>| NodeEntity | NodeEntity[]): ConditionalRenderKit
 export function Else<OPT extends ConditionalOptions>(optionsOrRenderConditional: NodeEntity | NodeEntity[] | RenderFunction | OPT, renderConditional?: RenderConditional<OPT>): ConditionalRenderKit {
     const _renderConditional = renderConditional ? renderConditional : optionsOrRenderConditional as RenderFunction
     const options = renderConditional ? optionsOrRenderConditional as ConditionalOptions : { type: 'create' as const, setup: undefined };
