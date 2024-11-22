@@ -17,6 +17,7 @@ export function processNodeEntities(
     parent: Element, //TODO: parent is as optional as fragment I think...
     nodePod: _NodePod,
 ) {
+    console.log('PROCESS NODE ENTITIES', nodeEntities)
     const nodeKits: NodeKit[] = []
     for (let i = 0; i < nodeEntities.length; i++) {
         let nodeEntity = nodeEntities[i];
@@ -37,21 +38,21 @@ export function setUpNodeEntity(
     if (nodeEntity instanceof Element) { // Element type from Web API
         return setUpElement(nodeEntity, nodePod)
     }
-    else if (nodeEntity instanceof InternalComponent) {
-        return nodeEntity;
+    if (
+        nodeEntity instanceof InternalComponent
+        || nodeEntity instanceof ListRenderKit
+        || nodeEntity instanceof MorphicRenderKit
+    ) { // may or may not be dynamic, depending on data
+        return nodeEntity.setUp(parent, nodePod);
+        // return nodeEntity
     }
-    else if (nodeEntity instanceof ListRenderKit || nodeEntity instanceof MorphicRenderKit) { // may or may not be dynamic, depending on data
-        nodeEntity.setUp(parent, nodePod);
-    }
-    else if (nodeEntity instanceof Array) {
+    if (nodeEntity instanceof Array) {
         const series = new ConditionalRenderSeries(
             nodeEntity,
             () => new ConditionalRenderKit('else', () => [], 'create', getContext(), [])
         )
-        series.setUp(parent, nodePod)
+        return series.setUp(parent, nodePod)
+        // return series;
     }
-    else {
-        return setUpTextNode(nodeEntity, nodePod)
-    }
-    throw new Error('Invalid nodeEntity')
+    return setUpTextNode(nodeEntity, nodePod)
 }

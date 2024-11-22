@@ -1,8 +1,8 @@
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { DynamicNode, NULLISH_DYNAMIC_NODE } from "../dynamic/DynamicNode";
 import { NodeEntity } from "../node/makeNode";
-import { mountNodeEntities, mountNodeEntity } from "../node/mountNodeEntity";
-import { _DynamicNodePod, _NodePod, NULLISH_NODE_POD } from "../node/NodePod";
+import { mountNodeEntities } from "../node/mountNodeEntity";
+import { _DynamicNodePod, _NodePod, NodePod, NULLISH_NODE_POD } from "../node/NodePod";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { ConditionalSeries } from "./ConditionalSeries";
 import { hidePrevConditionalNodes, showConditionalNodes } from "./toggledisplay";
@@ -12,8 +12,6 @@ import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynami
 import { popContext, pushContext, Context } from "../context/context-stack";
 import { getPhasicNode, PhasicNode } from "../transition/PhaseChange";
 import { TransitionNode } from "../transition/TransitionNode";
-import { AnyObject } from "@rue/types";
-import { act } from "react-dom/src";
 
 
 
@@ -62,12 +60,15 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
     private getNodePod(index: number) {
         const nodePodIndex = this.toNodePodIndex(index)
+        console.log('getNodePod', index, this.dynamicNodePod[nodePodIndex])
         return this.dynamicNodePod[nodePodIndex]
     }
 
-    private replaceNodePod(index: number, nodePod: _NodePod) {
+    private setNodePod(index: number, nodePod: _NodePod) {
+        console.log('index', index)
         const nodePodIndex = this.toNodePodIndex(index)
-        this.dynamicNodePod.replaceNodePod(nodePodIndex, nodePod)
+        console.log('nodePodIndex', nodePodIndex)
+        this.dynamicNodePod.setNodePod(nodePodIndex, nodePod)
     }
 
     private toNodePodIndex(index: number) {
@@ -92,29 +93,32 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         this.phasicNode = getPhasicNode(context);
     }
 
-    mount( //TODO: this needs to work for both first time mount and subsequent re-mounts
+    mount( // the initial mount after setup
         parent: Element,
         fragment?: DocumentFragment
     ) {
         // evaluate conditions and render
         const activeIndex = this.evaluateConditions()
-
+        
         const series = this;
-
+        
         const _nodePod = this.getNodePod(activeIndex)
+        
         const dynamicNode = makeDynamicNode(_nodePod)
         dynamicNode.mount(function renderConditional() {
-            series.appendConditional(activeIndex, parent, fragment)
+            const nodeEntities = series.render(activeIndex, parent)
+            console.log('initial mount of conditional')
+            mountConditional(parent, series.dynamicNodePod, nodeEntities, fragment);
         })
         this.storeDynamicNode(dynamicNode, activeIndex)
     }
 
     setUp(
         parent: Element,
-        nodePod: _NodePod,
+        outerNodePod: _NodePod,
     ) {
         const parentDynamicNode = getActiveDynamicNode()
-        const dynamicPod = nodePod.appendDynamicPod();
+        const dynamicPod = outerNodePod.appendDynamicPod();
         this.initDynamicNodePod(dynamicPod)
         const $conditions = this.getConditionsIon()
         const phasicNode = this.phasicNode
@@ -328,35 +332,35 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         //     phase: Phase.RENDER,
         //     __devName: 'mount conditional'
         // })
+        return this;
     }
 
-    private render(index: number, parent: Element, nodePod: _NodePod) {
+    private render(index: number, parent: Element) {
         const kit = this.statements[index]
-        return kit.renderConditional(parent, nodePod, kit.optionals?.setup?.())
+        return kit.renderConditional(parent, this.getNodePod(index), kit.optionals?.setup?.())
     }
 
-    private appendConditional(
-        activeIndex: number,
-        parent: Element,
-        fragment?: DocumentFragment,
-    ) {
-        const nodePod = this.getNodePod(activeIndex)
-        // const activationType = this.statements[activeIndex].type
-        // const preserve = activationType === 'mount' ? true : false;
-        try {
-            pushContext(this.context)
+    // private appendConditional(
+    //     activeIndex: number,
+    //     parent: Element,
+    //     fragment?: DocumentFragment,
+    // ) {
+    //     // const activationType = this.statements[activeIndex].type
+    //     // const preserve = activationType === 'mount' ? true : false;
+    //     try {
+    //         pushContext(this.context)
 
-            const nodeEntities = this.render(activeIndex, parent, nodePod)
-            // this.render(activeIndex, parent, nodePod, this.statements) //TODO: input from setupKit
-            // append to dom (through existing fragment if any) and node pod
-            // if (preserve) markMountPhase()
-            mountNodeEntities(nodeEntities, parent, fragment)
-            // if (preserve) unmarkMountPhase()
-        }
-        finally {
-            popContext()
-        }
-    }
+    //         const nodeEntities = this.render(activeIndex, parent)
+    //         // this.render(activeIndex, parent, nodePod, this.statements) //TODO: input from setupKit
+    //         // append to dom (through existing fragment if any) and node pod
+    //         // if (preserve) markMountPhase()
+    //         mountNodeEntities(nodeEntities, parent, fragment)
+    //         // if (preserve) unmarkMountPhase()
+    //     }
+    //     finally {
+    //         popContext()
+    //     }
+    // }
 
     private deactivateConditional(index: number) {
         const activationType = this.statements[index].type
@@ -366,8 +370,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         else {
             const dynamicNode = this.dynamicNodes[index]
             if (activationType === 'create') {
+                console.log('deactivate conditional', index, dynamicNode.nodePod)
                 this.dynamicNodes[index] = NULLISH_DYNAMIC_NODE; // release reference
-                this.replaceNodePod(index, NULLISH_NODE_POD)
+                this.setNodePod(index, NULLISH_NODE_POD)
                 dynamicNode.destroy()
             }
             else if (activationType === 'mount') {
@@ -376,7 +381,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         }
     }
 
-    private activateConditional(
+    private activateConditional( // mount conditional from effect
         activeIndex: number,
         parent: Element
     ) {
@@ -415,6 +420,17 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         //     })
         // }
 
+        // const activeIndex = this.evaluateConditions()
+
+        // const series = this;
+
+        // const _nodePod = this.getNodePod(activeIndex)
+        // const dynamicNode = makeDynamicNode(_nodePod)
+        // dynamicNode.mount(function renderConditional() {
+        //     series.appendConditional(activeIndex, parent, fragment)
+        // })
+        // this.storeDynamicNode(dynamicNode, activeIndex)
+
         //---------
 
         const activationType = this.statements[activeIndex].type
@@ -422,45 +438,33 @@ export class ConditionalRenderSeries extends ConditionalSeries {
         const series = this;
         const dynamicNodePod = this.dynamicNodePod
         // set up new conditional pod if needed
-        const _nodePod = dynamicNodePod[activeIndex]
-        const nodePod = _nodePod === NULLISH_NODE_POD || !_nodePod ? new _NodePod() : _nodePod;
+        const _nodePod = this.getNodePod(activeIndex)
+        const nodePod = (_nodePod === NULLISH_NODE_POD || !_nodePod) ? new _NodePod() : _nodePod;
+        this.setNodePod(activeIndex, nodePod)
 
         let dynamicNode = this.dynamicNodes[activeIndex]
         if (dynamicNode === undefined || dynamicNode === NULLISH_DYNAMIC_NODE) {
             dynamicNode = makeDynamicNode(nodePod);
-            dynamicNode.mount(function renderConditionalUpdate() {
-                try {
-                    pushContext(series.context)
-                    const nodeEntities = series.render(activeIndex, parent, nodePod)
-                    // if (preserve) markMountPhase()
-                    mountConditional(nodePod, parent, dynamicNodePod, nodeEntities);
-                    // if (preserve) unmarkMountPhase()
-                }
-                finally {
-                    popContext()
-                }
-            })
             series.storeDynamicNode(dynamicNode, activeIndex)
+            dynamicNode.mount(function renderConditionalUpdate() {
+                const nodeEntities = series.render(activeIndex, parent)
+                mountConditional(parent, dynamicNodePod, nodeEntities);
+            })
         }
         else {
             console.log('reactivating conditional')
             // reactivate preserved nodes
             dynamicNode.reactivate(function updateConditional() {
-                try {
-                    const nodeEntities = series.render(activeIndex, parent, nodePod);
-                    if (activationType === 'show') {
-                        showConditionalNodes(parent, dynamicNodePod, activeIndex, nodeEntities)
-                    }
-                    else {
-                        // series.replaceNodePod(activeIndex, nodePod);
-                        const nodePod = dynamicNode.nodePod
-                        if (!nodePod) throw new Error('dynamic node is missing node pod :(')
-                        mountConditional(nodePod, parent, dynamicNodePod, nodeEntities)
-                    }
-                    // if (preserve) unmarkMountPhase()
+                if (activationType === 'show') {
+                    const nodeEntities = series.render(activeIndex, parent);
+                    showConditionalNodes(parent, dynamicNodePod, activeIndex, nodeEntities)
                 }
-                finally {
-                    // popContext()
+                else if (activationType === 'create') {
+                    const nodeEntities = series.render(activeIndex, parent);
+                    mountConditional(parent, dynamicNodePod, nodeEntities)
+                }
+                else {
+                    // do nothing... reactive effects should remount conditional
                 }
             })
         }
@@ -469,37 +473,48 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
 
 
-export function remountConditional(
-    nodePod: _NodePod,
-    parent: Element,
-    dynamicPod: _DynamicNodePod,
-) {
-    const fragment = new DocumentFragment();
+// export function remountConditional(
+//     nodePod: _NodePod,
+//     parent: Element,
+//     dynamicPod: _DynamicNodePod,
+// ) {
+//     const fragment = new DocumentFragment();
 
-    nodePod.forEachNode(node => {
-        fragment.appendChild(node)
-    })
+//     nodePod.forEachNode(node => {
+//         fragment.appendChild(node)
+//     })
 
-    let prevSibling = dynamicPod.prevNode;
-    if (prevSibling && prevSibling === parent) parent.append(fragment) //for teleport
-    else if (prevSibling) prevSibling.after(fragment)
-    else parent.prepend(fragment)
-}
+//     let prevSibling = dynamicPod.prevNode;
+//     if (prevSibling && prevSibling === parent) parent.append(fragment) //for teleport
+//     else if (prevSibling) prevSibling.after(fragment)
+//     else parent.prepend(fragment)
+// }
 
 export function mountConditional(
-    nodePod: _NodePod,
     parent: Element,
     dynamicPod: _DynamicNodePod,
-    nodeEntities: NodeEntity[]
+    nodeEntities: NodeEntity[],
+    fragment?: DocumentFragment
 ) {
-    const fragment = new DocumentFragment();
+    const _fragment = fragment || new DocumentFragment();
 
-    mountNodeEntities(nodeEntities, parent, fragment) //TODO: pass in index in case it's in a list?
-
+    // console.log('mount conditional: parent', parent)
+    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
+    // console.log('mount conditional: parent', parent)
     let prevSibling = dynamicPod.prevNode;
-    if (prevSibling && prevSibling === parent) parent.append(fragment) //for teleport
-    else if (prevSibling) prevSibling.after(fragment)
-    else parent.prepend(fragment)
+    if (prevSibling && prevSibling === parent) {
+        // console.log('append', _fragment)
+        parent.append(_fragment) //for teleport
+    }
+    else if (prevSibling) {
+        // console.log('after', prevSibling, _fragment)
+        prevSibling.after(_fragment)
+    }
+    else {
+        // console.log('prepend', _fragment)
+        parent.prepend(_fragment)
+    }
+    // console.log('none')
 }
 
 

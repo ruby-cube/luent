@@ -61,7 +61,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
         );
 
     if (Slot) {
-        const rawOutput = wrapIfConditionalSeries(Slot instanceof Function ? Slot() : Slot) //TODO: Slot needs semaphores to provide parent to nested dynamic nodes
+        const rawOutput = wrapIfConditionalSeries(Slot instanceof Function ? Slot() : Slot)
         const nodePod = new _NodePod();
         const nodeEntities = processNodeEntities(rawOutput, domNode, nodePod)
         mountNodeEntities(nodeEntities, domNode)

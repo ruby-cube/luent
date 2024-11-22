@@ -8,6 +8,7 @@ import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { IonicModel, isAtomicIon, protect, AtomicIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { getFlask } from "@rue/flask";
+import { processNodeEntities } from "../node/processNodeEntities";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 

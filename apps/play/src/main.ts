@@ -8,11 +8,12 @@ import './style.css'
 // import { TestConditional } from './TestConditional';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { List } from './TestReactiveModel';
-import { createApp } from '@rue/lumo';
+import { Component, createApp } from '@rue/lumo';
 // import { ionize, ionize } from '@rue/quarky';
 // import { DeepReactiveModel, asMetaIonicModel, ionize, ionize } from '@rue/quarky';
 import { MountIf } from './TestMountIf';
 import { PlainList } from './TestList';
+import { HelloWorld } from './HelloWorld';
 // import { queueTask } from '@rue/thread';
 // import { RenderCycle } from '@rue/quarky';
 // import { MainSite } from './AwaitTest';
@@ -22,6 +23,7 @@ import { PlainList } from './TestList';
 
 
 // const rootContext = createTransappContext()
+
 
 const app = createApp(MountIf)
 

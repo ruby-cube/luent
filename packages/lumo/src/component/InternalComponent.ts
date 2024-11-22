@@ -79,6 +79,7 @@ export class InternalComponent<T extends AnyObject | undefined = AnyObject | und
         nodePod: _NodePod
     ) {
         this.initialNodeEntities = processNodeEntities(this.initialNodeEntities!, parent, nodePod)
+        return this;
     }
 }
 

@@ -66,18 +66,25 @@ export class MorphicRenderKit {
 
     mount(
         parent: Element,
-        nodePod: _NodePod,
-        fragment?: DocumentFragment,
+        fragment?: DocumentFragment
     ) {
+        const nodePod = this.dynamicNodePod[0]
+        //TODO: 
         const nodeEntities = processNodeEntities(normalizeToArray(unnestComponent(this.switchMap[this.activeKey]())), parent, nodePod);
-        const dynamicPod = this.dynamicNodePod = nodePod.appendDynamicPod();
-        const _nodePod = dynamicPod.appendNodePod()
-        const dynamicNode = this.dynamicNode = makeDynamicNode(_nodePod)
         pushContext(this.context)
-        dynamicNode.mount(function renderMorphicNode() {
+        this.dynamicNode.mount(function renderMorphicNode() {
             mountNodeEntities(nodeEntities, parent, fragment)
         })
         popContext()
+    }
+
+    setUp(
+        parent: Element,
+        nodePod: _NodePod,
+    ) {
+        const dynamicPod = this.dynamicNodePod = nodePod.appendDynamicPod();
+        const _nodePod = dynamicPod.appendNodePod()
+        this.dynamicNode = makeDynamicNode(_nodePod)
 
         this.render = function updateMorphicComponent(key: string) {
             this.activeKey = key;
@@ -93,6 +100,7 @@ export class MorphicRenderKit {
 
             popDynamicNode()
         }
+        return this;
     }
 
     deactivateForm() {

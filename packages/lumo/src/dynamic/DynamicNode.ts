@@ -11,8 +11,11 @@ export enum LifecycleHook {
     ON_DESTROY = 'bd',
 }
 
+// let count = 0;
+
 export class DynamicNode {
     flask: EffectFlask | undefined;
+    // count: number;
 
     setFlask(flask: EffectFlask) {
         this.flask = flask;
@@ -23,6 +26,8 @@ export class DynamicNode {
         public nodePod?: _NodePod,
         public preserve?: boolean,
     ) {
+        // this.count = count++;
+        // console.trace('new dynamic node', this.count)
         this.onDestroy = (handler: () => void, options?: SchedulerOptions) => at(LifecycleHook.ON_DESTROY, this, handler, options)
         this.onDeactivate = (handler: () => void, options?: SchedulerOptions) => on(LifecycleHook.ON_DEACTIVATE, this, handler, options)
         this.onReactivate = (handler: () => void, options?: SchedulerOptions) => on(LifecycleHook.ON_REACTIVATE, this, handler, options)

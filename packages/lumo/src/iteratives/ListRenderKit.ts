@@ -65,6 +65,13 @@ export class ListRenderKit<T = any> {
 
     mount(
         parent: Element,
+        fragment?: DocumentFragment
+    ){
+
+    }
+
+    setUp(
+        parent: Element,
         nodePod: _NodePod,
         fragment?: DocumentFragment,
     ) {
@@ -144,7 +151,7 @@ export class ListRenderKit<T = any> {
         // currentItem = undefined;
         $currentIndex = undefined;
         popList();
-
+        return this;
     }
 
     private removeItems(indicesToRemove: number[]) {

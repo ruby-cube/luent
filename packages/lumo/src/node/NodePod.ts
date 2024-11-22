@@ -2,14 +2,15 @@ import { EffectFlask } from "@rue/flask";
 import { DOMNode, InternalComponent } from "../component/InternalComponent";
 import { NodeRef } from "./NodeRef";
 
-// Node Pods represent groups of nodes created by `mXsFor` and `mXIf`.
+// Node Pods represent groups of nodes created by `For` and `If`.
 // 
-// A root node pod represents the child nodes NodeList of a parent DOMNode, NOT the root node(s) of a component.
+// A root node pod represents the child nodes NodeList of a parent DOMNode or the nodes of a dynamic node (which may be removed from or inserted into the view tree), NOT the root node(s) of a component.
 // They are ignorant of component boundaries and care only about:
-// - the distinguishing static nodes from dynamic pods
+// - distinguishing static nodes from dynamic pods
 // - the boundary between parent and child in the DOM (given that a root node pod represents a child nodes NodeList)
+// - distinguishing dynamic nodes within a dynamic node pod.
 // 
-// The main purpose of node pods is to aid in node insertions when updates are triggered by dynamic `mXsFor` and `mXIf`
+// The main purpose of node pods is to aid in node insertions when updates are triggered by dynamic `For` and `If`
 // _DynamicNodePod supports in emitting Update and Unmounted hooks by collecting components in the `activeComponents` property
 // For Unmounting: activeComponents should collect the highest component of a branch, then let the unmount cascade unmount any descendant components.
 // For Updates: call emit(ON_UPDATED) for the PARENT component not the components within via getCurrentComponent();
@@ -171,7 +172,7 @@ export class _DynamicNodePod extends Array<_NodePod> {
         return nodePod.lastNode;
     }
 
-    replaceNodePod(index: number, nodePod: _NodePod) {
+    setNodePod(index: number, nodePod: _NodePod) {
         this[index] = nodePod;
         nodePod.connect(this, index)
     }

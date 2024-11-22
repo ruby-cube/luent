@@ -4,12 +4,13 @@ import { watch } from "../watch/watchAndPreserve";
 
 
 
-export function setUpTextNode(text: ReactiveGet | any, nodePod?: _NodePod) {
+export function setUpTextNode(text: ReactiveGet | any, nodePod: _NodePod) {
     const textNode = createTextNode(text); //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
-   
-    if (nodePod) {
-        nodePod.appendStaticNode(textNode)
-    }
+
+    // if (nodePod) {
+    nodePod.appendStaticNode(textNode)
+    console.log('nodePod', nodePod, textNode)
+    // }
 
     if (isIon(text) || text instanceof Function) {
         keepTextNodeUpdated(text, textNode)
@@ -31,7 +32,7 @@ function keepTextNodeUpdated(text: ReactiveGet<any>, textNode: CharacterData) {
 
 function createTextNode(value: ReactiveGet | any) {
     if (__DEV__) __devCheckIfTracked()
-        const _value = isIon(value) || value instanceof Function ? value() : value;
+    const _value = isIon(value) || value instanceof Function ? value() : value;
     const text = toString(_value)
     const textNode = document.createTextNode(text);
     return textNode;
