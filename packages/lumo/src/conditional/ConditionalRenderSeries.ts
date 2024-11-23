@@ -21,7 +21,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
     private dynamicNodes: DynamicNode[] = []
     private storeDynamicNode(dynamicNode: DynamicNode, index: number) {
         // if (__DEV__ && this.dynamicNodes[index] !== NULLISH_DYNAMIC_NODE && this.dynamicNodes[index] !== undefined)
-            // throw new Error('Dynamic Node already exists at this index')
+        // throw new Error('Dynamic Node already exists at this index')
         this.dynamicNodes[index] = dynamicNode;
     }
 
@@ -99,11 +99,11 @@ export class ConditionalRenderSeries extends ConditionalSeries {
     ) {
         // evaluate conditions and render
         const activeIndex = this.evaluateConditions()
-        
+
         const series = this;
-        
+
         const _nodePod = this.getNodePod(activeIndex)
-        
+
         const dynamicNode = makeDynamicNode(_nodePod)
         dynamicNode.mount(function renderConditional() {
             const nodeEntities = series.render(activeIndex, parent)
@@ -144,7 +144,10 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             }
             const outgoingNodes = series.statements[prevIndex].transitionNodes
             const incomingNodes = series.statements[activeIndex].transitionNodes
+            const activationType = series.statements[activeIndex].type; //TODO: make this a prop of series not the statement
             const shouldTransitionOut = phasicNode || outgoingNodes.length
+            console.log('incomingNodes', incomingNodes)
+            console.log('outgoingNodes', outgoingNodes)
 
             // (0) Pause previous transition
             if (entranceStateTime) {
@@ -272,14 +275,14 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                             newTransitionIn = undefined;
                         }
 
-                        outgoingNodes.length = 0; // clear array for next transition nodes
+                        if (activationType === 'create') outgoingNodes.length = 0; // clear array for next transition nodes
 
                     }
                 }
             }
 
             function activateConditional() {
-                incomingNodes.length = 0; // clear array for next transition nodes
+                if (activationType === 'create') incomingNodes.length = 0; // clear array for next transition nodes
                 pushDynamicNode(parentDynamicNode!)
                 console.log('MOUNT:', activeIndex)
                 series.activateConditional(activeIndex, parent)
@@ -463,7 +466,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                     const nodeEntities = series.render(activeIndex, parent);
                     mountConditional(parent, dynamicNodePod, nodeEntities)
                 }
-             
+
             })
         }
     }

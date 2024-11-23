@@ -49,6 +49,7 @@ function registerTransitionNode(transitionNode: TransitionNode) {
 }
 
 export function useTransitionNodes() {
+    console.log('useTransitionNodes')
     const transitionNodes: TransitionNode[] = [];
     return {
         REGISTER_TRANSITION_NODE,
