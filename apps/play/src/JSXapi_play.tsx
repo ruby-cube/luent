@@ -25,6 +25,18 @@ export function ListBlock(setup = $setup()) {
         with: fade
     });
 
+    { type: 'show' }
+    { type: 'create' }
+    { type: 'mount' }
+
+
+    const $List = PortNode({ send: true, settle: true, receive: 300 },
+        For($list, o => o, (item, $index) =>
+            <transit.node>
+                <p>[x] {item}</p>,
+            </transit.node>
+        )
+    )
 
     // const $ItemBlock = SuspenseNode({
     //     Pending: ItemBlock,
@@ -47,6 +59,9 @@ export function ListBlock(setup = $setup()) {
     //             <div>{error}</div>
     //         )
     // })
+    class Frog {
+        name = 'sir robin'
+    }
 
     const [$RouterView, RouterLink] = Router({
 
@@ -54,12 +69,12 @@ export function ListBlock(setup = $setup()) {
 
     const [$MainContent, $mainContent] = MorphicNode({
         hello: input =>
-            <div>hellow</div>
+            <div>hello</div>
         ,
         bye: input =>
             <div>good bye</div>
 
-    }, { type: 'mount/unmount' })
+    }, { type: 'mount' })
 
     const fade = Transition({
 
@@ -84,6 +99,8 @@ export function ListBlock(setup = $setup()) {
                     <p>hi ho</p>
                     <p>hi ho</p>
                 </div>
+
+                <$List/>
 
                 <h1>hello</h1>
                 <Context with={{
@@ -113,16 +130,15 @@ export function ListBlock(setup = $setup()) {
                     </Portal>
                 </Context>
 
-                <Context with={{ [FROG]: frog, [CAT]: cat }}>
-                    <Morph with={fadeInOut}>{(
-                        If($active,
-                            <p>hey</p>
-                        )
-                    )}</Morph>
-                    {teleportTo('body',
-                        <p>hi</p>
-                    )}
-                </Context>
+                <context.node with={{ [FROG]: frog, [CAT]: cat }}>
+                    <List />
+                    <h1>hello</h1>
+                    <div>
+                        <Item></Item>
+                        <p>hi ho</p>
+                        <p>hi ho</p>
+                    </div>
+                </context.node>
 
                 <div>
                     <p>hi ho</p>
@@ -130,48 +146,48 @@ export function ListBlock(setup = $setup()) {
                 </div>
 
                 <h1>hello</h1>
-                <Frozen>{[
+                {freeze([
                     If($active(),
                         <p>hey</p>
                     ),
                     Else(
                         <p>Bye</p>
                     )
-                ]}</Frozen>
+                ])}
                 <div>
-                    <transit-node io={fade}>
+                    <transit.node io={fade}>
                         <p>hi ho</p>
-                    </transit-node>
+                    </transit.node>
                     <p>hi ho</p>
                 </div>
 
                 <h1>hello</h1>
-                <phasic-node io={fade}>{[
-                    If($active(),
+                <phasic.node with={fade}>
+                    {[If($active(), { type: 'mount' },
                         <div>
                             <p>hey</p>
-                            <transit-node io={slideleft} on:start={doSomething}>
-                                <List />
-                                <h1>hello</h1>
-                                <div>
-                                    <Item></Item>
-                                    <p>hi ho</p>
-                                    <p>hi ho</p>
-                                </div>
-                            </transit-node>
-                            <hr />
-                            <transit-node io={slideright}>
-                                <Article />
-                            </transit-node>
-                            <p>hi ho</p>
                         </div>
-                    ),
-                    Else(
-                        <p>Bye</p>
-                    )
-                ]}</phasic-node>
 
-                {/* <Try catch={Error} setup={SelectionKit}>{o =>
+                    ),
+                    ElseIf($ready(),
+                        <div>
+                            <p>hey</p>
+                        </div>
+                    )]}
+                </phasic.node>
+
+                {/* 
+
+                // should preserve type be applied to the entire series or eachs statement?
+
+                // show
+                // create
+                // remount
+
+                // match/case
+                // if
+                // morphic node
+                <Try catch={Error} setup={SelectionKit}>{o =>
                     <>
                         <h1>hello</h1>
                         <div>
@@ -182,7 +198,7 @@ export function ListBlock(setup = $setup()) {
                     </>
                 }</Try> */}
 
-                {Try({ catch: Error, setup: SelectionKit },
+                {Try({ catch: Error },
                     <>
                         <h1>hello</h1>
                         <div>
@@ -203,19 +219,21 @@ export function ListBlock(setup = $setup()) {
                     </>
                 }</Suspense> */}
 
-                {Await({ with: <p>loading...</p>, catch: Error, setup: SelectionKit }, o =>
-                    <>
-                        <h1>hello</h1>
-                        <div>
-                            <p>hi ho</p>
-                            <p>hi ho</p>
-                        </div>
-                    </>
+                {Await({ hold: <p>loading...</p>, catch: Error },
+                    (o = SelectionKit(),
+                        <>
+                            <h1>hello</h1>
+                            <div>
+                                <p>hi ho</p>
+                                <p>{o.name}</p>
+                            </div>
+                        </>
+                    )
                 )}
 
-                <Portal to='body'>
+                <portal.node to='body'>
                     <p>hi</p>
-                </Portal>
+                </portal.node>
 
                 <div>Stuff here</div>
 
@@ -508,7 +526,7 @@ export function ListBlock(setup = $setup()) {
                 </div>
 
                 <Morphic with={fade}>
-                    {Match(key,
+                    {Match(key, { type: 'show' },
                         Case('hello',
                             <p>hello world</p>
                         ),
@@ -585,20 +603,48 @@ export function ListBlock(setup = $setup()) {
                     ])
                 ]}</phasic-node>
 
-                <phasic-node>{[
-                    If($list.length === 0, o => <>
-                        <p>hello world</p>
-                        <p>hello world</p>
-                    </>),
-                    ElseIf($broken(), <>
-                        <p>bye world</p>
-                        <p>bye world</p>
-                    </>),
-                    Else(<>
-                        <p>ok world</p>
-                        <p>ok world</p>
-                    </>)
-                ]}</phasic-node>
+                <phasic.node with={fade}>
+                    {[If($active(), { type: 'show' }, (o = 9,
+                        <>
+                            <transit.node>
+                                <p>hello world</p>
+                            </transit.node>
+                            <transit.node>
+                                <p>hello world</p>
+                            </transit.node>
+                        </>
+                    )),
+                    ElseIf($broken(),
+                        <>
+                            <p>bye world</p>
+                            <p>bye world</p>
+                        </>
+                    ),
+                    Else(
+                        <>
+                            <p>ok world</p>
+                            <p>ok world</p>
+                            <portal.node to='#body'>
+
+                            </portal.node>
+                        </>
+                    )]}
+                </phasic.node>
+
+
+                <phasic.node with={fade}>
+                    {Match(key, { type: 'show' },
+                        Case('hello',
+                            <p>hello world</p>
+                        ),
+                        Case('bye',
+                            <p>bye world</p>
+                        ),
+                        Default(
+                            <p>ok world</p>
+                        )
+                    )}
+                </phasic.node>
 
                 <phasic-node>
                     <If case={$list.length === 0} setup={MouseKit}>{o => <>
@@ -616,12 +662,10 @@ export function ListBlock(setup = $setup()) {
                 </phasic-node>
 
                 <item-port type='todos'>
-                    <For>
 
-                    For($list, (item, $index, o) =>
+                    {For($list, (item, $index, o) =>
                         <p>[x] {item}</p>,
-                        )
-                    </For>
+                    )}
                 </item-port>
 
                 <item-port type='todos'>{
@@ -651,27 +695,29 @@ export function ListBlock(setup = $setup()) {
 
                 <h1>Do something</h1>
 
-                <Port type='todos' receive settle send key='id' item>{
-                    For($list, (item, $index, o) =>
-                        <p>[x] {item}</p>,
-                    )
-                }</Port>
+                <port.node type='todos' send='200' settle='200' receive='30'>
+                    {For($list, o => o, (item, $index) =>
+                        <transit.node>
+                            <p>[x] {item}</p>,
+                        </transit.node>
+                    )}
+                </port.node>
 
-                <port-node type='todos' receive settle send key='id' item>{
-                    For($list, (item, $index, o) =>
+                <port.node type='todos' receive settle send>
+                    {For($list, (item, $index) =>
                         <p>[x] {item}</p>,
-                    )
-                }</port-node>
+                    )}
+                </port.node>
 
                 <h1>Do something</h1>
-                {[freeze,
-                    For(list, (item, $index, o) =>
+                {freeze(
+                    For(list, (item, $index) =>
                         <p>[x] {item}</p>
                     ),
                     Or(
                         <p>Nothing here</p>
                     )
-                ]}
+                )}
                 {[
                     For(list, (item, $index, o) =>
                         <p>[x] {item}</p>

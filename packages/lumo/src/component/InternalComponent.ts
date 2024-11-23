@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
-import { mountNodeEntities, mountNodeEntity } from "../node/mountNodeEntity";
+import { mountNodeEntities } from "../node/mountNodeEntity";
 import { protect } from "@rue/quarky";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { processNodeEntities } from "../node/processNodeEntities";

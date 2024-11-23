@@ -5,7 +5,7 @@ import { createApp } from '../../createApp';
 import { makeComponent } from '../../component/makeComponent';
 import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
-import { Context, createNodeContext } from '../Context';
+import { createNodeContext } from '../Context';
 import { defineContextProp } from '../ContextKey';
 import { Ion, Ionized, MaybeIon, v } from '../../InputTypes';
 import { ion, ionize, isIon, isIonicModel } from '@rue/quarky';
@@ -193,7 +193,7 @@ describe('Integration tests the Context API', () => {
             function App() {
                 frogA = appwide(FROG)
                 return Component(
-                    createNodeContext(Context, () => [
+                    createNodeContext(() => [
                         makeComponent(Parent, undefined, {}, undefined)
                     ], { with: { [FROG]: value } })
                 )
@@ -248,7 +248,7 @@ describe('Integration tests the Context API', () => {
 
                 return Component(
                     makeElement('div', () => [
-                        createNodeContext(Context, () => [
+                        createNodeContext(() => [
                             makeComponent(Child, undefined, {}, undefined),
                         ], { with: { [FROG]: value } }),
                         makeComponent(Sibling, undefined, {}, undefined)
@@ -301,7 +301,7 @@ describe('Integration tests the Context API', () => {
             function App() {
 
                 return Component(
-                    createNodeContext(Context, () => [
+                    createNodeContext(() => [
                         makeComponent(Parent, undefined, {}, undefined)
                     ], { with: { [APP_CONTEXTUAL_FROG]: appContextualValue } })
                 )
@@ -311,7 +311,7 @@ describe('Integration tests the Context API', () => {
 
                 return Component(
                     makeElement('div', () => [
-                        createNodeContext(Context, () => [
+                        createNodeContext(() => [
                             makeComponent(Child, undefined, {}, undefined),
                         ], { with: { [CONTEXTUAL_FROG]: contextualValue } })
                     ], {}, undefined)
@@ -364,7 +364,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return Component(
-                    createNodeContext(Context, () => [
+                    createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { with: { [FROG]: value } })
                 )
@@ -461,7 +461,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return Component(
-                    createNodeContext(Context, () => [
+                    createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { with: { [FROG]: value } })
                 )
@@ -492,7 +492,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return Component(
-                    createNodeContext(Context, () => [
+                    createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { with: { [FROG]: value } })
                 )
@@ -532,7 +532,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return Component(
-                    createNodeContext(Context, () => [
+                    createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { with: { [FROG]: value } })
                 )
@@ -572,7 +572,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return Component(
-                    createNodeContext(Context, () => [
+                    createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { with: { [FROG]: ion(value) } })
                 )
@@ -603,7 +603,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return Component(
-                    createNodeContext(Context, () => [
+                    createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { with: { [FROG]: ionize(value) } })
                 )

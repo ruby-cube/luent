@@ -17,6 +17,10 @@ export type ContextEntries<T> = {
     [K in keyof T]: K extends keyof ContextKeyMap ? _ContextInputType<ContextKeyMap[K]> : any;
 }
 
+//API
+export const context = {
+    node: Context
+}
 
 export function Context<T extends ContextEntries<T>>(input: {
     with: T,
@@ -41,10 +45,6 @@ export function Context<T extends ContextEntries<T>>(input: {
 }
 
 export function createNodeContext(
-    Context: (input: {
-        with: AnyObject;
-        renderSlot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[];
-    }) => Component,
     renderSlot: () => NodeEntity | NodeEntity[],
     config: ComponentConfig,
 ): InternalComponent {

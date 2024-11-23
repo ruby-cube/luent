@@ -5,7 +5,7 @@ import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { normalizeToArray } from "@rue/utils";
-import { mountNodeEntities, mountNodeEntity } from "../node/mountNodeEntity";
+import { mountNodeEntities } from "../node/mountNodeEntity";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { watch } from "../watch/watchAndPreserve";
 import { diff, InsertAndMoveKit } from "./diff";
@@ -14,8 +14,8 @@ import { META } from "../../../quarky/src/ReactiveEntity";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { getFlask } from "@rue/flask";
 import { Context, popContext, pushContext } from "../context/context-stack";
-import { PhaseChangeKit } from "../transition/PhaseChange";
 import { processNodeEntities } from "../node/processNodeEntities";
+import { TransitionNode } from "../transition/TransitionNode";
 
 
 type Index = number
@@ -40,8 +40,8 @@ export class ListRenderKit<T = any> {
         public renderItem: RenderItem<T>, //QUESTION: Does this need the context object?
         public data: Collection<T> | IonicModel<Collection<T>> | ReactiveGet<Collection<T>>,
         public context: Context,
-        public idKey: string | undefined,
-        public phaseChange: undefined | PhaseChangeKit | null
+        public getUID: ((item: unknown) => unknown) | undefined,
+        public phasicNode: undefined | TransitionNode | null
     ) { }
 
     isUpdating = false;
@@ -66,7 +66,7 @@ export class ListRenderKit<T = any> {
     mount(
         parent: Element,
         fragment?: DocumentFragment
-    ){
+    ) {
 
     }
 
@@ -77,7 +77,7 @@ export class ListRenderKit<T = any> {
     ) {
         const data = this.data
         const renderItem = this.renderItem
-        const idKey = this.idKey
+        const getUID = this.getUID
         const context = this.context
         if (__DEV__) __devCheckIfTracked()
         const list = isIon(data) ? data() : <Collection<any>>data;
@@ -131,7 +131,7 @@ export class ListRenderKit<T = any> {
                 console.log('updating list')
                 const _oldValue = clone || oldValue;
                 if (_isIonicModel) clone = shallowClone(rawData!) as any[]
-                const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || newValue, _oldValue, idKey)
+                const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || newValue, _oldValue, getUID)
                 if (noChange) return;
                 if (dynamicNodePod!.length !== _oldValue.length)
                     throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)

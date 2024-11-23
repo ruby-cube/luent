@@ -8,7 +8,8 @@ import * as CSS from "csstype";
 // import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
 import { NodeRef } from "../../src/node/NodeRef";
-import { COMPONENT_ATTRIBUTES } from "@rue/lumo";
+import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType } from "@rue/lumo";
+import { AnyObject } from "@rue/types";
 
 export function jsxDEV(): "frog"
 export function jsx(): "frog"
@@ -4404,8 +4405,17 @@ declare global {
             'on-load'?: boolean
         }
 
+        type ContextEntries<T> = {
+            [K in keyof T]: K extends keyof ContextKeyMap ? _ContextInputType<ContextKeyMap[K]> : any;
+        }
+
+        type ContextNodeInput<T> = {
+            with: T & ContextEntries<T>,
+            renderSlot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
+        }
+
         interface _IntrinsicElements {
-            'transit-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>;
+            'context-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & ContextNodeInput, HTMLDivElement>;
             'transit-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
             'phasic-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
             'port-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>

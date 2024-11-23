@@ -48,8 +48,7 @@ function createViewNode(context: Context): ViewNode {
         },
         get onDestroy() {
             const dynamicNode = getActiveDynamicNode()
-            if (dynamicNode.onDestroy) return dynamicNode.onDestroy;
-            return dynamicNode.initializeOnDestroyHook()
+            return dynamicNode.onDestroy;
         }
     }
 }

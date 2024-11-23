@@ -25,31 +25,58 @@ const defaultFade: TransitionClasses = {
     transitionClass: 'transition-default-fade'
 }
 
+export const phasic = {
+    node: 'phasic-node' as unknown as (input: {
+        Slot: [string] | (() => NodeEntity | NodeEntity[]),
+        with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        onStart?: (hook: TransitionHook) => void;
+        onEnd?: (hook: TransitionHook) => void;
+    }) => NodeEntity[]
+}
+
+export const transit = {
+    node: 'transit-node' as unknown as (input: {
+        Slot: [string] | (() => NodeEntity | NodeEntity[]),
+        with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        onStart?: (hook: TransitionHook) => void;
+        onEnd?: (hook: TransitionHook) => void;
+    }) => NodeEntity[]
+}
+
 export function createTransitionNode(
     type: 'phasic-node' | 'transit-node',
     Slot: [string] | (() => NodeEntity | NodeEntity[]),
     input: {
-        'on-load'?: boolean;
-        'with:in'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        'with:out'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+        'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         onStart?: (hook: TransitionHook) => void;
         onEnd?: (hook: TransitionHook) => void;
     }
 ) {
-    const { 'with:in': inputIn, 'with:out': inputOut, with: inputBoth, "on-load": shouldTransitionLoad, onEnd, onStart } = input;
+    const { 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "init:with": inputInit, onEnd, onStart } = input;
     const $div = NodeRef('div')
 
+    //TODO: init with
+
+    const [transitionInit, animateInit] = inputInit === true ? normalizeToKitArrays(inputBoth ? inputBoth : inputIn ?? defaultFade) : normalizeToKitArrays(inputInit)
     const [transitionIn, animateIn] = normalizeToKitArrays(inputIn)
     const [transitionOut, animateOut] = normalizeToKitArrays(inputOut)
     const [transitionBoth, animateBoth] = normalizeToKitArrays(inputBoth ? inputBoth : (!inputIn && !inputOut) ? defaultFade : undefined)
-    
+
     if (__DEV__ && transitionIn && transitionBoth || transitionOut && transitionBoth)
         console.warn(`The transition for 'both' will override transition for either 'in' or 'out'`)
-    
+
     const transitionInProperties = undefined; //TODO: 
     const transitionOutProperties = undefined; //TODO: 
-    
+
     const enterFromClasses = collectOffscreenClasses(transitionBoth || transitionIn)
     const transition_in = mountTransitionClass(transitionBoth || transitionIn)
     const animate_in = mountAnimationClass(animateBoth || animateIn)
@@ -345,7 +372,7 @@ function normalizeToKitArrays(
 }
 
 function collectOffscreenClasses(transitions: (TransitionKit | TransitionFunction)[] | undefined | TransitionClasses) {
-    if (!transitions) 
+    if (!transitions)
         return undefined;
     if ('transitionClass' in transitions) {
         if (transitions.offscreenClass instanceof Array)
@@ -367,13 +394,13 @@ function mountTransitionClass(transitions: (TransitionKit | TransitionFunction)[
         return undefined;
     if ('transitionClass' in transitions)
         return transitions.transitionClass;
-    
+
     const maybeSetupFunction = transitions.at(-1);
     const shouldUseDefaultClass = maybeSetupFunction instanceof Function
     if (shouldUseDefaultClass && maybeSetupFunction.defaultClass) {
         return maybeSetupFunction.defaultClass;
     }
-    
+
     const transitionClass = compileTransitionClassName(transitions)
     if (!existingTransitions.has(transitionClass)) _mountTransitionClass(transitionClass, transitions)
 
@@ -397,9 +424,9 @@ function compileCSSTransition(transitions: (TransitionKit | TransitionFunction)[
     let cssString = '';
     for (const kit of transitions) {
         if (kit instanceof Function) break;
-        
+
         const { delay, duration, properties, timing } = kit;
-        
+
         for (const property of properties) {
             const comma = cssString ? ',' : ''
             cssString = cssString + comma + property + ' ' + duration + 'ms' + ' ' + timing + (delay ? delay + 'ms' : '')

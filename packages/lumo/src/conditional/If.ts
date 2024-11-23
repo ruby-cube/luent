@@ -6,7 +6,7 @@ import { AnyObject, Booleanny } from "@rue/types";
 import { ReactiveGet } from "../../../quarky/src";
 import { getContext, popContext, pushContext } from "../context/context-stack";
 import { getPhasicNode } from "../transition/PhaseChange";
-import { Context, createNodeContext } from "../context/Context";
+import { createNodeContext } from "../context/Context";
 import { useTransitionNodes } from "../transition/I-O";
 import { NodeKit, processNodeEntities } from "../node/processNodeEntities";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
@@ -207,7 +207,7 @@ function wrapWithContext(renderConditional: RenderFunction<[any]>, context: AnyO
         try {
             pushContext(outerContext)
             const nodeEntities = processNodeEntities(normalizeToArray(
-                createNodeContext(Context, () => renderConditional(input), {
+                createNodeContext(() => renderConditional(input), {
                     with: context
                 })
             ), parent, nodePod)
@@ -231,7 +231,7 @@ function wrapToPreserve(renderConditional: RenderFunction<[any]>, context: AnyOb
         try {
             pushContext(outerContext)
             nodeEntities = processNodeEntities(normalizeToArray(
-                createNodeContext(Context, () => renderConditional(input), {
+                createNodeContext(() => renderConditional(input), {
                     with: context
                 })), parent, nodePod)
             return nodeEntities;

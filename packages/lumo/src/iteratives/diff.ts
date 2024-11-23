@@ -5,9 +5,9 @@ import { UniqueItem } from "./For";
 
 
 // TODO: implementation for sets, objects, and maps
-export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | UniqueItem[], idKey: string | undefined) {
-    const { uniqueItemArrays: [_newArr, _oldArr], getOriginalItem } = makeItemsUnique(newArr, oldArr, idKey);
-    
+export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | UniqueItem[], getUID: ((item: unknown) => unknown) | undefined) {
+    const { uniqueItemArrays: [_newArr, _oldArr], getOriginalItem } = makeItemsUnique(newArr, oldArr, getUID);
+
     if (areShallowEqualArrays(_newArr, _oldArr)) return { noChange: true };
 
     const newSet = new Set(_newArr);
@@ -66,12 +66,12 @@ export type InsertAndMoveKit = {
     getOriginalItem: (uniqueItem: any, uniqueArray: any[]) => any
 }
 
-function toIdArray(target: AnyObject[], idKey: string | symbol) {
+function toIdArray(target: AnyObject[], getUID: (item: unknown) => unknown) {
     const idArray = new UniqueArray();
     const itemMap: Map<any, any> = new Map();
     for (const item of target) {
-        idArray.push(item[idKey])
-        itemMap.set(item[idKey], item)
+        idArray.push(getUID(item))
+        itemMap.set(getUID(item), item)
     }
 
     idArray.getItem = (id: any) => {
@@ -87,12 +87,12 @@ class UniqueArray extends Array {
 }
 
 
-function makeItemsUnique(arr1: any[], arr2: any[], idKey: string | undefined): {
+function makeItemsUnique(arr1: any[], arr2: any[], getUID: ((item: unknown) => unknown) | undefined): {
     uniqueItemArrays: [any[], any[]];
     getOriginalItem: (uniqueItem: any, uniqueArray: any[]) => any;
 } {
-    if (idKey) return {
-        uniqueItemArrays: [toIdArray(arr1, idKey), toIdArray(arr2, idKey)],
+    if (getUID) return {
+        uniqueItemArrays: [toIdArray(arr1, getUID), toIdArray(arr2, getUID)],
         getOriginalItem: (id: any, uArray: any[]) => (<UniqueArray>uArray).getItem(id)
     }
     const uniqueArr1 = [];

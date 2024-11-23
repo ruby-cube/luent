@@ -1,10 +1,10 @@
 import { normalizeToArray } from "@rue/utils";
-import { Component, ComponentSetup, InternalComponent, unnestComponent } from "../component/InternalComponent";
+import { Component, unnestComponent } from "../component/InternalComponent";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
-import { mountNodeEntities, mountNodeEntity } from "../node/mountNodeEntity";
+import { mountNodeEntities } from "../node/mountNodeEntity";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { mountConditional } from "../conditional/ConditionalRenderSeries";
 import { getContext, getCurrentContext, popContext, pushContext } from "../context/context-stack";
@@ -120,12 +120,12 @@ export class MorphicRenderKit {
         if (this.preserve && this.renderedKeys?.has(key)) {
             dynamicNode.reactivate(function activateMorphicForm() {
                 const nodeEntities = normalizeToArray(unnestComponent(_this.switchMap[key]()))
-                mountConditional(nodePod, parent, _this.dynamicNodePod, nodeEntities)
+                mountConditional(parent, _this.dynamicNodePod, nodeEntities)
             })
         } else {
             dynamicNode.mount(function reactivateMorphicForm() {
                 const nodeEntities = normalizeToArray(unnestComponent(_this.switchMap[key]()))
-                mountConditional(nodePod, parent, _this.dynamicNodePod, nodeEntities)
+                mountConditional(parent, _this.dynamicNodePod, nodeEntities)
             })
         }
     }

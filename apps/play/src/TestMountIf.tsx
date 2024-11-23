@@ -22,9 +22,10 @@ export function MountIf() {
 
     return Component(
         <>
+   
             <h1>Hello world</h1>
             <phasic-node>
-                {[If($active, { type: 'mount' },()=>
+                {[If($active, { type: 'mount' }, () =>
                     <>
                         oh
                         {/* <transit-node with={slide({ x: -50, duration: 300 })}> */}
@@ -38,13 +39,13 @@ export function MountIf() {
                         )]}
                     </>
                 ),
-                ElseIf($ready, { type: 'mount' },()=>
+                ElseIf($ready, { type: 'mount' }, () =>
                     <>
                         low
                         <h2>balloon</h2>
                     </>
                 ),
-                Else({ type: 'mount' },()=>
+                Else({ type: 'mount' }, () =>
                     <>
                         so
                         <h2>bye</h2>

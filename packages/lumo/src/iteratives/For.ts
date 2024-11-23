@@ -16,11 +16,13 @@ export type Collection<T> = T[]  //TODO: add sets and maps
 
 
 
-export function For<T>(data: Collection<T>, render: RenderItem<T>, idKey?: string): ListRenderKit // static list
-export function For<T>(data: IonicModel<Collection<T>> | ReactiveGet<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
-export function For<T>(data: IonicModel<Collection<T>> | ReactiveGet<Collection<T>>, render: RenderItem<T>, idKey?: string): ListRenderKit // dynamic list
-export function For<T>(data: ListData<T>, render: RenderItem<T>, idKey?: string): ListRenderKit {
-    return new ListRenderKit(render, data, getContext(), idKey, getPhasicNode())
+export function For<T>(data: ListData<T>, render: RenderItem<T>): ListRenderKit
+export function For<T>(data: ListData<T>, getUID: (item: T) => unknown, render: RenderItem<T>): ListRenderKit
+export function For<T>(data: ListData<T>, renderOrGetUID: RenderItem<T> | ((item: T) => unknown), render?: RenderItem<T>): ListRenderKit {
+    const uidProvided = arguments.length === 2
+    const _render = uidProvided ? render! : renderOrGetUID;
+    const getUID = uidProvided ? <(item: unknown) => unknown>renderOrGetUID : undefined;
+    return new ListRenderKit(_render, data, getContext(), getUID, getPhasicNode())
 }
 
 

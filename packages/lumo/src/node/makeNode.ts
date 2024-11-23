@@ -6,7 +6,7 @@ import { getNodeArrayRef, InternalNodeRef, NodeReferent, NodeRef, InternalNodeAr
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
-import { createNodeContext } from "../context/Context";
+import { Context, createNodeContext } from "../context/Context";
 import { AnyObject } from "@rue/types";
 import { createTransitionNode } from "../transition/TransitionNode";
 
@@ -55,32 +55,37 @@ export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
 
 
 export function makeNode(
-    nodeType: HTMLTag | ComponentSetup | 'phasic-node' | 'transit-node',
+    nodeType: HTMLTag | ComponentSetup | 'transit-node' | 'phasic-node',
     Slot: [string] | (() => NodeEntity[]) | InferSlot,
     config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent {
-    if (typeof nodeType === "string"){
-        if (nodeType === 'phasic-node' || nodeType === 'transit-node'){
+
+    switch (nodeType) {
+        case Context:
+            if (!Slot || Slot instanceof Array) throw new Error(`Extraneous <Context>`)
+            return createNodeContext(Slot, <ComponentConfig>config)
+
+        case 'transit-node':
+        case 'phasic-node':
             if (!Slot) throw new Error(`Extraneous transition node`)
             return createTransitionNode(nodeType, Slot, config)
-        }
-        return makeElement(
-            nodeType,
-            <[string] | (() => NodeEntity[])>Slot,
-            <ElementConfig>config,
-            getCurrentIndex()
-        )
+
+        default:
+            if (typeof nodeType === 'string') {
+                return makeElement(
+                    nodeType,
+                    <[string] | (() => NodeEntity[])>Slot,
+                    <ElementConfig>config,
+                    getCurrentIndex()
+                )
+            }
+            return makeComponent(
+                nodeType,
+                <InferSlot>Slot,
+                <ComponentConfig>config,
+                getCurrentIndex()
+            )
     }
-    if (nodeType.name === 'Context') {
-        if (!Slot || Slot instanceof Array) throw new Error(`Extraneous <Context>`)
-        return createNodeContext(nodeType, Slot, <ComponentConfig>config)
-    }
-    return makeComponent(
-        nodeType,
-        <InferSlot>Slot,
-        <ComponentConfig>config,
-        getCurrentIndex()
-    )
 }
 
 // export function _getNodeConfig(ref: NodeRef | undefined) {

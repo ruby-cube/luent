@@ -1,4 +1,4 @@
-import { Context, createNodeContext } from "../context/Context";
+import {  createNodeContext } from "../context/Context";
 import { defineContextProp } from "../context/ContextKey";
 import { makeElement } from "../element/makeElement";
 import { NodeEntity } from "../node/makeNode";
@@ -148,7 +148,7 @@ export function renderPhaseChangeNode(
     }
 
 
-    return createNodeContext(Context, () => (
+    return createNodeContext(() => (
         makeElement('div', Slot, { ref: $div }, undefined)
     ), { with: { [GET_PHASIC_NODE]: _getPhasicNode } })
 }
