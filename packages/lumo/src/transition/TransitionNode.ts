@@ -27,7 +27,7 @@ const defaultFade: TransitionClasses = {
 
 export const phasic = {
     node: 'phasic-node' as unknown as (input: {
-        Slot: [string] | (() => NodeEntity | NodeEntity[]),
+        renderSlot: [string] | (() => NodeEntity | NodeEntity[]) | NodeEntity[],
         with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
@@ -39,7 +39,7 @@ export const phasic = {
 
 export const transit = {
     node: 'transit-node' as unknown as (input: {
-        Slot: [string] | (() => NodeEntity | NodeEntity[]),
+        renderSlot: [string] | (() => NodeEntity | NodeEntity[]) | NodeEntity[],
         with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];

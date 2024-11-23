@@ -1,5 +1,6 @@
 import { NodeRef, Component, If, Else, fade, ElseIf, slide } from "@rue/lumo";
 import { ion } from "@rue/quarky";
+import { phasic } from "../../../packages/lumo/src/transition/TransitionNode";
 
 export function MountIf() {
     const $count = ion(0, {
@@ -24,7 +25,7 @@ export function MountIf() {
         <>
    
             <h1>Hello world</h1>
-            <phasic-node>
+            <phasic.node>
                 {[If($active, { type: 'mount' }, () =>
                     <>
                         oh
@@ -51,7 +52,7 @@ export function MountIf() {
                         <h2>bye</h2>
                     </>
                 )]}
-            </phasic-node>
+            </phasic.node>
             <button on:click={$active.toggle}>toggle active</button>
             <button on:click={$ready.toggle}>toggle ready</button>
         </>
