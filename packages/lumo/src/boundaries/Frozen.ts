@@ -12,13 +12,13 @@ export function getFrozenState() {
 }
 
 export function Frozen(input: {
-    renderSlot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
+    Slot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
 }) {
-    const { renderSlot } = input
-    if (!(renderSlot instanceof Function)) throw new Error('')
+    const { Slot } = input
+    if (!(Slot instanceof Function)) throw new Error('')
 
     isFrozen = true;
-    const renderedTemplate = renderSlot();
+    const renderedTemplate = Slot();
     isFrozen = false;
 
     return Component(

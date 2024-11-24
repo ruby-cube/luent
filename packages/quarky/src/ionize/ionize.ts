@@ -10,8 +10,6 @@ import { isIonizable } from "./ionizable";
 import { AnyIon, isIon } from "../ion/Ion";
 import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
 import { AtomicIon } from "../ion/AtomicIon";
-import { getObservedProp, PropIon } from "./PropIon";
-import { isProtectedProxy, isReadonlyProxy } from "./ProtectedIonicModel";
 import { createCustomIonicModel, getStructureConfigs } from "./IonicModel";
 
 
@@ -20,15 +18,9 @@ import { createCustomIonicModel, getStructureConfigs } from "./IonicModel";
 // - object literals that have NOT been marked inert
 // - class instances whose DIRECT prototype has been registered as ionizable
 
-/**
- * Deep and shallow reactives have been deprecated: Since there's a lot of difficulty typing method outputs of deeply reactive objects 
- * (eg. getQualities() should output a reactive object, but typing that requires a lot of boilerplate 
- * by the developer), we cannot mark reactive objects.
- * This means developers must not depend on typescript to know if an object is reactive or not.
- */
+//TODO: figure out the simplest way developers can add types to custom data strucures
 
-//INTERNAL
-export type IonicModel<T extends AnyObject = AnyObject> = T & { readonly [IONIC_MODEL]?: true }
+export type IonicModel<T extends AnyObject = AnyObject> = T & { readonly [IONIC_MODEL]: true } //TODO: add ion properties $
 
 
 export type Readonly<T extends AnyObject = AnyObject> = {

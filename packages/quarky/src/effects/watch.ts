@@ -49,7 +49,6 @@ export type MutationRecord = {
 
 // export type MutationEffect<T extends IonicModel = IonicModel> = (newValue: T, mutations: MutationRecord[]) => void
 export type OnChangeHandler<T = any> = T extends () => infer R ? (newValue: R, oldValue: R) => void 
-    : T extends any[] ? (newValue: any, oldValue: any) => void 
     // :  (newValue: 'frog', oldValue: 'frog') => void
     // (newValue: { [K in keyof T]: T[K] extends () => infer R ? R : T[K] }, oldValue: { [K in keyof T]: T[K] extends () => infer R ? R : T[K] }) => void
     : (newValue: T, oldValue: T) => void

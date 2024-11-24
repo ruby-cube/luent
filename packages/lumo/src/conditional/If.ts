@@ -30,7 +30,6 @@ function resetCurrentNodePodIndex(index?: number) {
 
 type ConditionalOptions = {
     type?: 'show' | 'create' | 'mount',
-    setup?: () => AnyObject,
 }
 
 type RenderConditional<OPT> = OPT extends { setup: infer S } ? S extends (...args: any) => any ? RenderFunction<[ReturnType<S>]> : RenderFunction : RenderFunction
@@ -39,7 +38,7 @@ export function If($condition: (_?: any) => Booleanny, renderConditional: Render
 export function If<OPT extends ConditionalOptions>($condition: (_?: any) => Booleanny, options: OPT, renderConditional: RenderConditional<OPT> | NodeEntity | NodeEntity[]): ConditionalRenderKit
 export function If<OPT extends ConditionalOptions>($condition: (_?: any) => Booleanny, optionsOrRenderConditional: NodeEntity | NodeEntity[] | RenderFunction | OPT, renderConditional?: RenderConditional<OPT>): ConditionalRenderKit {
     const _renderConditional = renderConditional ? renderConditional : optionsOrRenderConditional as RenderFunction
-    const options = renderConditional ? optionsOrRenderConditional as ConditionalOptions : { type: 'create' as const, setup: undefined };
+    const options = renderConditional ? optionsOrRenderConditional as ConditionalOptions : { type: 'create' as const };
     const activationType = options.type;
     if (activationType === 'show') {
         return ShowIf($condition, _renderConditional, options)
@@ -55,13 +54,13 @@ export function If<OPT extends ConditionalOptions>($condition: (_?: any) => Bool
         // 'create',
         getContext(),
         transitionNodes,
-        { $condition, setup: options.setup, phasicNode: getPhasicNode() }
+        { $condition, phasicNode: getPhasicNode() }
     )
 }
 
 
 export function ElseIf($condition: (_?: any) => Booleanny, renderConditional: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit
-export function ElseIf<OPT extends ConditionalOptions>($condition: (_?: any) => Booleanny, options: OPT, renderConditional: RenderConditional<OPT>| NodeEntity | NodeEntity[]): ConditionalRenderKit
+export function ElseIf<OPT extends ConditionalOptions>($condition: (_?: any) => Booleanny, options: OPT, renderConditional: RenderConditional<OPT> | NodeEntity | NodeEntity[]): ConditionalRenderKit
 export function ElseIf<OPT extends ConditionalOptions>($condition: (_?: any) => Booleanny, optionsOrRenderConditional: NodeEntity | NodeEntity[] | RenderFunction | OPT, renderConditional?: RenderConditional<OPT>): ConditionalRenderKit {
     const _renderConditional = renderConditional ? renderConditional : optionsOrRenderConditional as RenderFunction
     const options = renderConditional ? optionsOrRenderConditional as ConditionalOptions : { type: 'create' as const, setup: undefined };
@@ -78,13 +77,13 @@ export function ElseIf<OPT extends ConditionalOptions>($condition: (_?: any) => 
         // 'create',
         getContext(),
         transitionNodes,
-        { $condition, setup: options.setup, phasicNode: getPhasicNode() }
+        { $condition, phasicNode: getPhasicNode() }
     )
 }
 
 
 export function Else(renderConditional: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit
-export function Else<OPT extends ConditionalOptions>(options: OPT, renderConditional: RenderConditional<OPT>| NodeEntity | NodeEntity[]): ConditionalRenderKit
+export function Else<OPT extends ConditionalOptions>(options: OPT, renderConditional: RenderConditional<OPT> | NodeEntity | NodeEntity[]): ConditionalRenderKit
 export function Else<OPT extends ConditionalOptions>(optionsOrRenderConditional: NodeEntity | NodeEntity[] | RenderFunction | OPT, renderConditional?: RenderConditional<OPT>): ConditionalRenderKit {
     const _renderConditional = renderConditional ? renderConditional : optionsOrRenderConditional as RenderFunction
     const options = renderConditional ? optionsOrRenderConditional as ConditionalOptions : { type: 'create' as const, setup: undefined };
@@ -101,7 +100,7 @@ export function Else<OPT extends ConditionalOptions>(optionsOrRenderConditional:
         activationType,
         getContext(),
         transitionNodes,
-        { setup: options.setup, phasicNode: getPhasicNode() }
+        { phasicNode: getPhasicNode() }
     )
 }
 
@@ -149,7 +148,7 @@ export function ShowIf($condition: ReactiveGet<Booleanny>, renderConditional: Re
         'show',
         getContext(),
         transitionNodes,
-        { $condition, setup: options.setup, phasicNode: getPhasicNode() }
+        { $condition,  phasicNode: getPhasicNode() }
     )
 }
 
@@ -165,7 +164,7 @@ export function ElseShowIf($condition: ReactiveGet<Booleanny>, renderConditional
         'show',
         getContext(),
         transitionNodes,
-        { nodePodIndex: currentNodePodIndex, $condition, setup: options.setup, phasicNode: getPhasicNode() }
+        { nodePodIndex: currentNodePodIndex, $condition,  phasicNode: getPhasicNode() }
     )
 }
 
@@ -181,7 +180,7 @@ export function ElseShow(renderConditional: RenderFunction, options: Conditional
         'show',
         getContext(),
         transitionNodes,
-        { nodePodIndex: currentNodePodIndex, setup: options.setup, phasicNode: getPhasicNode() }
+        { nodePodIndex: currentNodePodIndex,  phasicNode: getPhasicNode() }
     )
 }
 
@@ -201,19 +200,19 @@ export function ElseShow(renderConditional: RenderFunction, options: Conditional
 // }
 
 
-function wrapWithContext(renderConditional: RenderFunction<[any]>, context: AnyObject) {
+function wrapWithContext(renderConditional: RenderFunction, context: AnyObject) {
     const outerContext = getContext();
-    return (parent: Element, nodePod: _NodePod, input: AnyObject | undefined) => {
+    return (parent: Element, nodePod: _NodePod) => {
         try {
             pushContext(outerContext)
             const nodeEntities = processNodeEntities(normalizeToArray(
-                createNodeContext(() => renderConditional(input), {
+                createNodeContext(renderConditional, {
                     with: context
                 })
             ), parent, nodePod)
             return nodeEntities;
         }
-        catch(err){
+        catch (err) {
             console.error(err)
             throw new Error('')
         }
@@ -223,20 +222,20 @@ function wrapWithContext(renderConditional: RenderFunction<[any]>, context: AnyO
     }
 }
 
-function wrapToPreserve(renderConditional: RenderFunction<[any]>, context: AnyObject) {
+function wrapToPreserve(renderConditional: RenderFunction, context: AnyObject) {
     const outerContext = getContext();
     let nodeEntities: NodeKit[];
-    return (parent: Element, nodePod: _NodePod, input: AnyObject | undefined) => {
+    return (parent: Element, nodePod: _NodePod) => {
         if (nodeEntities) return nodeEntities;
         try {
             pushContext(outerContext)
             nodeEntities = processNodeEntities(normalizeToArray(
-                createNodeContext(() => renderConditional(input), {
+                createNodeContext(renderConditional, {
                     with: context
                 })), parent, nodePod)
             return nodeEntities;
         }
-        catch(err){
+        catch (err) {
             console.error(err)
             throw new Error('')
         }

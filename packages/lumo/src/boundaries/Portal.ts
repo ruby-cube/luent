@@ -20,16 +20,16 @@ export function getTransition() {
 
 export function Portal(input: {
     to: string | Element,
-    renderSlot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
+    Slot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
 }) {
-    const { renderSlot, to: container } = input
-    if (!(renderSlot instanceof Function)) throw new Error('')
+    const { Slot, to: container } = input
+    if (!(Slot instanceof Function)) throw new Error('')
     const element = typeof container === "string" ? document.querySelector(container) : container;
     if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')
     const nodePod = new _NodePod();
     nodePod.appendStaticNode(element) // serves as an indicator to append instead of prepend for dynamic updates
 
-    const _nodeEntities = processNodeEntities(normalizeToArray(unnestComponent(renderSlot())), element, nodePod)
+    const _nodeEntities = processNodeEntities(normalizeToArray(unnestComponent(Slot())), element, nodePod)
     mountNodeEntities(_nodeEntities, element)
     return Component(undefined);
 }

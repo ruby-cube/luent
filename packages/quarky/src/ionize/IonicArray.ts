@@ -3,8 +3,8 @@ import { isIonicAtom } from "../derivations/IonicAtom";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
 import { isIonicModel, IonicModel, storeSnapshot, toRaw, } from "./ionize";
 import { getTrackedOp } from "./TrackedOp";
-import { defineIonicStructure, GetPreopData, isNonTrackable, setAbsorbedIon, useTrackableGetOp } from "./IonicModel";
-import { asTrackedProp, getObservedProp } from "./PropIon";
+import { defineIonicStructure, GetPreopData, useTrackableGetOp } from "./IonicModel";
+import { getObservedProp } from "./PropIon";
 import { MetaIonicModel } from "./MetaIonicModel";
 import { nontrackableIterableKeys } from "./IonicSet";
 

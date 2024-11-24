@@ -43,7 +43,7 @@ export type TransitionDef = {
     timing?: TransitionTiming;
 } | {
     offscreen: string | string[] // provide class config or existing class name (separated by spaces if multiple classes)
-    properties: string | string[]
+    properties: string[]
     delay?: number;
     duration?: number;
     timing?: TransitionTiming;
@@ -132,7 +132,7 @@ function compileCSSProperty(className: string) {
     if (index === -1) throw new Error(`Invalid classname: ${className}`)
     const key = className.slice(0, index)
     const valueString = className.slice(index + 1)
-    if (key === 'transform'){
+    if (key === 'transform') {
         return toCssTransformValue(valueString);
     }
     return key + ':' + valueString;
@@ -149,8 +149,9 @@ function toCssTransformValue(shorthand: string) {
     return `--offscreen-${fn}-${axis.toLowerCase()}:${cssValue}`;
 }
 
-function compileOffscreenClasses(properties: string | string[] | { [K in keyof CSSTransitionProperties]?: CSSTransitionProperties[K] }) {
-    if (typeof properties === 'string' || properties instanceof Array) return properties;
+function compileOffscreenClasses(properties: string[] | { [K in keyof CSSTransitionProperties]?: CSSTransitionProperties[K] }) {
+    if (typeof properties === 'string') return [properties];
+    if (properties instanceof Array) return properties;
     const classes: string[] = [];
     let offscreenTransformAdded = false;
     for (const key in properties) {

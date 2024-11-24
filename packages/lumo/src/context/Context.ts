@@ -24,9 +24,9 @@ export const context = {
 
 export function Context<T extends ContextEntries<T>>(input: {
     with: T,
-    renderSlot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
+    Slot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
 }) {
-    const { renderSlot } = input
+    const { Slot } = input
 
     const parentContext = getCurrentContext()
     if (!parentContext) throw new Error(`no context found :( This should never happen`)
@@ -39,17 +39,17 @@ export function Context<T extends ContextEntries<T>>(input: {
     }
 
     pushContext(context)
-    const nodeEntities = renderSlot()
+    const nodeEntities = Slot()
     popContext()
     return Component(nodeEntities)
 }
 
 export function createNodeContext(
-    renderSlot: () => NodeEntity | NodeEntity[],
+    Slot: () => NodeEntity | NodeEntity[],
     config: ComponentConfig,
 ): InternalComponent {
     const component = new InternalComponent();
-    const output = Context({ renderSlot, with: config.with })
+    const output = Context({ Slot, with: config.with })
     initializeComponent(component, output.renderedTemplate)
     return component
 }

@@ -340,7 +340,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
     private render(index: number, parent: Element) {
         const kit = this.statements[index]
-        return kit.renderConditional(parent, this.getNodePod(index), kit.optionals?.setup?.())
+        return kit.renderConditional(parent, this.getNodePod(index))
     }
 
     // private appendConditional(

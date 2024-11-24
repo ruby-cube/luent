@@ -6,13 +6,13 @@ import { Component } from "../component/InternalComponent";
 export function Try<T extends AnyObject>(input: {
     catch?: (error: Error) => NodeEntity | NodeEntity[]
     setup?: () => T
-    renderSlot: (o?: T) => NodeEntity | NodeEntity[]
+    Slot: (o?: T) => NodeEntity | NodeEntity[]
 }) {
-    const { setup, renderSlot } = input;
+    const { setup, Slot } = input;
 
     let output;
     try {
-        output = renderSlot(setup?.())
+        output = Slot(setup?.())
     }
     catch (err) {
         output = input.catch?.(err instanceof Error ? err : new Error(<string>err))

@@ -60,12 +60,17 @@ function asPreservedWatcher({ pause, resume, stop }: ActiveListener, dynamicNode
     }
 }
 
+// T extends () => infer R ? (newValue: R, oldValue: R) => void : (newValue: T, oldValue: T) => void
 
-// export function watch<T extends () => any | ReactiveGet>(target: T, effect: T extends () => infer R ? OnChangeHandler<R> : never, options?: WatchOptions): ActiveListener
-// export function watch<T extends IonicModel>(target: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
+type MultiWatchSubjectValues<T> = {[K in keyof T]: T[K] extends (...args: any[])=>infer R ? R : T[K]}
+
+export function watch<T extends () => any>(target: T, effect: T extends () => infer R ? (newValue: R, oldValue: R) => void : never, options?: LumoWatchOptions): ActiveListener
+export function watch<T extends IonicModel>(target: T, effect: (newValue: T, oldValue: T)=>void, options?: LumoWatchOptions): ActiveListener
+export function watch<T extends any[]>(target: [...T], effect: (newValue: MultiWatchSubjectValues<T>, oldValue: MultiWatchSubjectValues<T>)=>void, options?: LumoWatchOptions): ActiveListener
+export function watch<T>(target: T, effect: (newValue: T, oldValue: T)=>void, options?: LumoWatchOptions): ActiveListener
 // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
 // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
-export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener {
+export function watch<T>(target: T, effect: T extends () => infer R ? (newValue: R, oldValue: R) => void : (newValue: T, oldValue: T)=>void, options?: LumoWatchOptions): ActiveListener {
     const dynamicNode = getDynamicNode()
     if (!dynamicNode)
         return _watch(target, effect, options)

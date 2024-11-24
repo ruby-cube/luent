@@ -6,7 +6,7 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { _NodePod } from "../node/NodePod";
 import { NodeKit } from "../node/processNodeEntities";
 
-export type RenderConditional = (parent: Element, nodePod: _NodePod, input: AnyObject | undefined) => NodeKit[]
+export type RenderConditional = (parent: Element, nodePod: _NodePod) => NodeKit[]
 
 export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
 
@@ -21,7 +21,7 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
         public optionals?: {
             nodePodIndex?: number,
             $condition?: ReactiveGet<Booleanny>,
-            setup?: () => AnyObject,
+            // setup?: () => AnyObject,
             phasicNode: TransitionNode | undefined,
         }
     ) {

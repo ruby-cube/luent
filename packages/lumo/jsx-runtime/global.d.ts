@@ -27,9 +27,11 @@ interface Document {}
 interface DataTransfer {}
 interface StyleMedia {}
 
+//$$$
 interface Element {}
 interface DocumentFragment {}
 
+//$$$ (all)
 interface HTMLElement extends Element {}
 interface HTMLAnchorElement extends HTMLElement {}
 interface HTMLAreaElement extends HTMLElement {}

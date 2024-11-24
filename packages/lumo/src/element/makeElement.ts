@@ -21,10 +21,10 @@ export type HTMLTag = keyof HTMLElementTagNameMap
 
 export function mE(
     nodeType: HTMLTag,
-    renderSlot?: () => NodeEntity[],
+    Slot?: () => NodeEntity[],
     config?: ElementConfig,
 ): DOMNode {
-    return makeNode(nodeType, renderSlot, config || {}) as DOMNode
+    return makeNode(nodeType, Slot, config || {}) as DOMNode
 }
 
 export function makeElement<T extends keyof HTMLElementTagNameMap>(

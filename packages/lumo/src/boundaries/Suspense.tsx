@@ -23,9 +23,9 @@ export function Suspense<T extends AnyObject>(input: {
     hold?: () => NodeEntity | NodeEntity[]
     catch?: (error: Error) => NodeEntity | NodeEntity[]
     setup?: () => T
-    renderSlot: (o?: T) => NodeEntity | NodeEntity[]
+    Slot: (o?: T) => NodeEntity | NodeEntity[]
 }) {
-    const { renderSlot, hold: renderPlaceholder = () => undefined, timeout, setup, catch: renderError = () => undefined } = input;
+    const { Slot, hold: renderPlaceholder = () => undefined, timeout, setup, catch: renderError = () => undefined } = input;
     const $pending = ion(true);
     const $error: AtomicIon<Error> = ion();
     const $ready = ion(false);
@@ -42,7 +42,7 @@ export function Suspense<T extends AnyObject>(input: {
     // collect promises
     const pendingPromises: Promise<unknown>[] = []
     pendingPromisesStack.push(pendingPromises);
-    const output = renderSlot(setup?.()); // any nested pend calls will collect promises into the pendingPromises array
+    const output = Slot(setup?.()); // any nested pend calls will collect promises into the pendingPromises array
     const allPromises = Promise.all(pendingPromises);
     pendingPromisesStack.pop();
     allPromises

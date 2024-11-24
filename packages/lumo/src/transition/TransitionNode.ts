@@ -5,6 +5,7 @@ import { AnimationClass, AnimationFunction, AnimationKit } from "./defineAnimati
 import { NodeRef } from "../node/NodeRef";
 import { renderIONode } from "./I-O";
 import { AnyObject } from "@rue/types";
+import { Component } from "../component/InternalComponent";
 
 export type TransitionHook = {
     phase: 'in' | 'out'
@@ -27,26 +28,26 @@ const defaultFade: TransitionClasses = {
 
 export const phasic = {
     node: 'phasic-node' as unknown as (input: {
-        renderSlot: [string] | (() => NodeEntity | NodeEntity[]) | NodeEntity[],
+        Slot: [string] | (() => NodeEntity | NodeEntity[]) | NodeEntity[],
         with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         onStart?: (hook: TransitionHook) => void;
         onEnd?: (hook: TransitionHook) => void;
-    }) => NodeEntity[]
+    }) => Component
 }
 
 export const transit = {
     node: 'transit-node' as unknown as (input: {
-        renderSlot: [string] | (() => NodeEntity | NodeEntity[]) | NodeEntity[],
+        Slot: [string] | (() => NodeEntity | NodeEntity[]) | NodeEntity[] | NodeEntity,
         with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         onStart?: (hook: TransitionHook) => void;
         onEnd?: (hook: TransitionHook) => void;
-    }) => NodeEntity[]
+    }) => Component
 }
 
 export function createTransitionNode(
