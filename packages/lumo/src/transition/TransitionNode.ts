@@ -5,7 +5,8 @@ import { AnimationClass, AnimationFunction, AnimationKit } from "./defineAnimati
 import { NodeRef } from "../node/NodeRef";
 import { renderIONode } from "./I-O";
 import { AnyObject } from "@rue/types";
-import { Component } from "../component/InternalComponent";
+import { Component, ComponentSetup } from "../component/InternalComponent";
+import { Ion } from "@rue/quarky";
 
 export type TransitionHook = {
     phase: 'in' | 'out'
@@ -27,7 +28,7 @@ const defaultFade: TransitionClasses = {
 }
 
 export const phasic = {
-    node: 'phasic-node' as unknown as (input: {
+    node: 'phasic-node' as unknown as ComponentSetup<{
         Slot: [string] | (() => NodeEntity | NodeEntity[]) | NodeEntity[],
         with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
@@ -35,11 +36,12 @@ export const phasic = {
         'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         onStart?: (hook: TransitionHook) => void;
         onEnd?: (hook: TransitionHook) => void;
-    }) => Component
+        disable?: boolean | Ion<boolean>
+    }>
 }
 
 export const transit = {
-    node: 'transit-node' as unknown as (input: {
+    node: 'transit-node' as unknown as ComponentSetup<{
         Slot: [string] | (() => NodeEntity | NodeEntity[]) | NodeEntity[] | NodeEntity,
         with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
@@ -47,7 +49,8 @@ export const transit = {
         'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         onStart?: (hook: TransitionHook) => void;
         onEnd?: (hook: TransitionHook) => void;
-    }) => Component
+        disable?: boolean | Ion<boolean>;
+    }>
 }
 
 export function createTransitionNode(
@@ -60,9 +63,17 @@ export function createTransitionNode(
         'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
         onStart?: (hook: TransitionHook) => void;
         onEnd?: (hook: TransitionHook) => void;
+        disable?: boolean | Ion<boolean>
     }
 ) {
-    const { 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "init:with": inputInit, onEnd, onStart } = input;
+    const { 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "init:with": inputInit, onEnd, onStart, disable } = input;
+
+    if (disable === true) {
+        return Component(
+            Slot instanceof Function ? Slot() : Slot
+        )
+    }
+
     const $div = NodeRef('div')
 
     //TODO: init with
@@ -303,7 +314,8 @@ export function createTransitionNode(
     return renderNode(
         $div,
         Slot,
-        transitionNode
+        transitionNode,
+        disable
     )
 }
 

@@ -23,9 +23,8 @@ export function MountIf() {
 
     return Component(
         <>
-
             <h1>Hello world</h1>
-            <phasic.node>
+            <phasic.node disable={$isMobile}>
                 {[If($active, { type: 'mount' }, () =>
                     <>
                         oh

@@ -5,14 +5,30 @@ import { NodeEntity } from "../node/makeNode";
 import { makeElement } from "../element/makeElement";
 import { defineContextProp } from "../context/ContextKey";
 import { contextual } from "../context/provide";
-
-
+import { Ion } from "@rue/quarky";
+import { Component } from "../component/InternalComponent";
+import { Else, If } from "../conditional/If";
 
 export function renderIONode(
     $div: NodeRef<'div'>,
     Slot: [string] | (() => NodeEntity | NodeEntity[]),
-    transitionNode: TransitionNode
+    transitionNode: TransitionNode,
+    $disable: false | undefined | Ion<boolean>
 ) {
+    if ($disable) {
+        const output = Slot instanceof Function ? Slot() : Slot
+        return Component(
+            [
+                If($disable, () =>
+                    output
+                ),
+                Else(() => {
+                    registerTransitionNode(transitionNode)
+                    return makeElement('div', output, { ref: $div }, undefined)
+                })
+            ]
+        )
+    }
     registerTransitionNode(transitionNode)
     return makeElement('div', Slot, { ref: $div }, undefined)
 }

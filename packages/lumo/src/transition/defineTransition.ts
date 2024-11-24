@@ -1,5 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { CSSTransitionProperties } from "./types";
+import { normalizeToArray } from "@rue/utils";
 
 
 export type TransitionTiming =
@@ -76,7 +77,8 @@ export function defineTransition<F extends (options?: TransitionOptions) => Tran
 
     function setupTransition(options?: Parameters<F>[0]) {
         const transition = useTransition(options)
-        const classNames = compileOffscreenClasses(transition.offscreen)
+        const offscreen = transition.offscreen;
+        const classNames = compileOffscreenClasses(typeof offscreen === 'string' ? [offscreen] : offscreen)
         if (typeof transition.offscreen !== 'string') {
             for (const className of classNames) {
                 mountOffscreenClass(className)
