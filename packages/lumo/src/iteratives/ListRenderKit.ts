@@ -21,6 +21,8 @@ import { TransitionNode } from "../transition/TransitionNode";
 type Index = number
 type Count = number
 
+type DynamicList<T = any> = IonicModel<Collection<T>> | ReactiveGet<Collection<T>>
+
 const dynamicNodeMap: WeakMap<_NodePod, DynamicNode> = new WeakMap()
 
 // let currentItem: any;
@@ -127,6 +129,7 @@ export class ListRenderKit<T = any> {
             pushContext(context)
             const rawData = isIonicModel(data) ? toRaw(data) : undefined
             let clone = isIonicModel(data) ? shallowClone(rawData!) : undefined
+            //TODO: figure out typing for Set, Map, Object vs Array
             watch(data, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
                 console.log('updating list')
                 const _oldValue = clone || oldValue;

@@ -2,8 +2,7 @@ import { Component, unnestComponent } from "../component/InternalComponent";
 import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { _NodePod } from "../node/NodePod";
-import { mountNodeEntities, mountNodeEntity } from "../node/mountNodeEntity";
-import { getContext, popContext, pushContext } from "../context/context-stack";
+import { mountNodeEntities } from "../node/mountNodeEntity";
 import { processNodeEntities } from "../node/processNodeEntities";
 
 export type MorphConfig = {}
@@ -16,12 +15,12 @@ export function getTransition() {
     return _morphConfig
 }
 
+export type PortalNodeInput = {
+   to: string | Element,
+   Slot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
+}
 
-
-export function Portal(input: {
-    to: string | Element,
-    Slot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
-}) {
+export function Portal(input: PortalNodeInput) {
     const { Slot, to: container } = input
     if (!(Slot instanceof Function)) throw new Error('')
     const element = typeof container === "string" ? document.querySelector(container) : container;

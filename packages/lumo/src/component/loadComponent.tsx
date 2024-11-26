@@ -2,10 +2,11 @@ import { ComponentSetup } from "./InternalComponent";
 import { Else, ElseIf, If } from "../conditional/If";
 import { noop } from "@rue/utils";
 import { ion } from "../../../quarky/src";
+import { AnyObject } from "@rue/types";
 
 const lazyComponents: Map<() => Promise<ComponentSetup>, ComponentSetup> = new Map()
 
-export function lazyLoadComponent<P>(config: {
+export function lazyLoadComponent<P extends AnyObject>(config: {
     load: () => Promise<ComponentSetup<P>>,
     onIdle?: boolean
     Placeholder?: ComponentSetup,
@@ -30,7 +31,7 @@ export function lazyLoadComponent<P>(config: {
             cancelIdleCallback(idleID);
             idleID = undefined;
         }
-        Component = lazyComponents.get(load) || noop // if already loaded on idle, get from lazyComponents map
+        Component = lazyComponents.get(load) || noop as ComponentSetup // if already loaded on idle, get from lazyComponents map
         if (Component === noop) {
             const pendingComponent = load();
             if (timeout) {
@@ -40,17 +41,17 @@ export function lazyLoadComponent<P>(config: {
                 }, timeout)
             }
             pendingComponent
-            .then((_Component) => {
-                clearTimeout(timeoutID)
-                lazyComponents.set(load, _Component)
-                Component = _Component;
-                $loading.as(false)
-                $loaded.as(true)
-            })
-            .catch(err => {
-                $error.as(err); //TODO: Normalize error type
-                $loading.as(false)
-            })
+                .then((_Component) => {
+                    clearTimeout(timeoutID)
+                    lazyComponents.set(load, _Component)
+                    Component = _Component;
+                    $loading.as(false)
+                    $loaded.as(true)
+                })
+                .catch(err => {
+                    $error.as(err); //TODO: Normalize error type
+                    $loading.as(false)
+                })
         }
         else {
             $loaded.as(true)
@@ -63,7 +64,7 @@ export function lazyLoadComponent<P>(config: {
             loadComponent();
             return (
                 <>
-                    {If($loading, 'create', () =>
+                    {If($loading, () =>
                         <Placeholder {...props}></Placeholder>
                     )}
                     {ElseIf($error, () =>
@@ -82,7 +83,7 @@ export function lazyLoadComponent<P>(config: {
 
             return (
                 <>
-                    {If($loading, 'create', () =>
+                    {If($loading, () =>
                         <Placeholder {...props}></Placeholder>
                     )}
                     {ElseIf($loaded, () =>
@@ -98,7 +99,7 @@ export function lazyLoadComponent<P>(config: {
 
             return (
                 <>
-                    {If($error, 'create', () =>
+                    {If($error, () =>
                         <Error {...props} error={$error()}></Error>
                     )}
                     {ElseIf($loaded, () =>
@@ -113,7 +114,7 @@ export function lazyLoadComponent<P>(config: {
 
         return (
             <>
-                {If($loaded, 'create', () => {
+                {If($loaded, () => {
                     return <Component {...props}></Component>
                 }
                 )}

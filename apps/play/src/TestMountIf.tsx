@@ -1,4 +1,4 @@
-import { NodeRef, Component, If, Else, fade, ElseIf, slide } from "@rue/lumo";
+import { Component, If, Else, fade, ElseIf, slide } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 import { phasic, transit } from "../../../packages/lumo/src/transition/TransitionNode";
 
@@ -18,6 +18,12 @@ export function MountIf() {
     const $ready = ion(true, {
         toggle() {
             $ready.as(!$ready())
+        }
+    })
+
+    const $isMobile = ion(false, {
+        toggle() {
+            $isMobile.as(!$isMobile())
         }
     })
 

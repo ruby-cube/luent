@@ -1,6 +1,6 @@
-import { TypedKey } from "@rue/lumo";
 import { AnyObject } from "@rue/types";
 
+type TypedKey<T> = (string | symbol) & T
 
 type DispatchConfig = {
     GET?: (specifiers?: AnyObject) => Promise<any> //TODO: understand specifiers
@@ -21,23 +21,23 @@ export function defineDispatch(key: TypedKey<any>, config: DispatchConfig) { //T
 }
 
 
-export function dispatchPUT<T>(key: TypedKey<T>, value: T, specifiers: AnyObject): Promise<T> {
+export function dispatchPUT<T>(key: TypedKey<T>, value: T, specifiers?: AnyObject): Promise<T> {
     return _dispatch('PUT', key, specifiers, value)
 }
 
-export function dispatchPATCH<T>(key: TypedKey<T>, patch: AnyObject, specifiers: AnyObject): Promise<T> {
+export function dispatchPATCH<T>(key: TypedKey<T>, patch: AnyObject, specifiers?: AnyObject): Promise<T> {
     return _dispatch('PATCH', key, specifiers, patch)
 }
 
-export function dispatchPOST<T>(key: TypedKey<T>, value: T, specifiers: AnyObject): Promise<T> {
+export function dispatchPOST<T>(key: TypedKey<T>, value: T, specifiers?: AnyObject): Promise<T> {
     return _dispatch('POST', key, specifiers, value)
 }
 
-export function dispatchGET<T>(key: TypedKey<T>, specifiers: AnyObject): Promise<T> {
+export function dispatchGET<T>(key: TypedKey<T>, specifiers?: AnyObject): Promise<T> {
     return _dispatch('GET', key, specifiers)
 }
 
-export function dispatchDELETE<T>(key: TypedKey<T>, specifiers: AnyObject): Promise<T> {
+export function dispatchDELETE<T>(key: TypedKey<T>, specifiers?: AnyObject): Promise<T> {
     return _dispatch('DELETE', key, specifiers)
 }
 

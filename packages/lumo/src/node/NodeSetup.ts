@@ -2,7 +2,7 @@ import { ComponentSetup, InternalComponent } from "../component/InternalComponen
 import { HTMLTag } from "../element/makeElement";
 import { ListData } from "../iteratives/For";
 import { ComponentConfig, ElementConfig } from "./makeNode";
-import { ReactiveGet, ion } from "../../../quarky/src";
+import { AtomicIon, ReactiveGet, ion } from "@rue/quarky";
 
 
 //NOTE: We use partial types so that we can split between spreading and directly passing values to template

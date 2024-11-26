@@ -79,14 +79,14 @@ export function defineTransition<F extends (options?: TransitionOptions) => Tran
         const transition = useTransition(options)
         const offscreen = transition.offscreen;
         const classNames = compileOffscreenClasses(typeof offscreen === 'string' ? [offscreen] : offscreen)
-        if (typeof transition.offscreen !== 'string') {
+        if (!(offscreen instanceof Array) || typeof offscreen !== 'string') {
             for (const className of classNames) {
                 mountOffscreenClass(className)
             }
         }
         return {
             name: _name,
-            properties: 'properties' in transition ? transition.properties : Object.keys(transition.offscreen),
+            properties: 'properties' in transition ? transition.properties : Object.keys(offscreen),
             offscreenClasses: classNames,
             delay: transition.delay ?? 0,
             duration: transition.duration ?? 250,

@@ -1,4 +1,5 @@
-import { createTransitionStyleSheet, CSSTransitionProperties, getTransitionStylesheet, TransitionTiming } from "./defineTransition";
+import { createTransitionStyleSheet, getTransitionStylesheet, TransitionTiming } from "./defineTransition";
+import { CSSTransitionProperties } from "./types";
 
 export type AnimationFunction = {
     (options?: AnimationOptions) : AnimationKit

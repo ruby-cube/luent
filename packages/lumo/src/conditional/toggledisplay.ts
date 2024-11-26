@@ -13,7 +13,7 @@ export function hidePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeInde
 export function showConditionalNodes(parent: Element, dynamicPod: _DynamicNodePod, activeIndex: number, nodeEntities: NodeEntity[]) {
     const nodePod = dynamicPod[activeIndex];
     if (nodePod.length === 0) { // lazy render
-        mountConditional(nodePod, parent, dynamicPod, nodeEntities)
+        mountConditional(parent, dynamicPod, nodeEntities)
     }
     showDOMNodes(nodePod) //QUESTION: Not sure if this should be in an else block... is it necessary to set display on newly rendered nodes?
 }

@@ -3,8 +3,8 @@ import { NodeEntity } from "../node/makeNode";
 import { Component } from "../component/InternalComponent";
 
 
-export function Try<T extends AnyObject>(input: {
-    catch?: (error: Error) => NodeEntity | NodeEntity[]
+export function createDubiousNode<T extends AnyObject>(input: {
+    standby?: (error: Error) => NodeEntity | NodeEntity[]
     setup?: () => T
     Slot: (o?: T) => NodeEntity | NodeEntity[]
 }) {
@@ -15,7 +15,12 @@ export function Try<T extends AnyObject>(input: {
         output = Slot(setup?.())
     }
     catch (err) {
-        output = input.catch?.(err instanceof Error ? err : new Error(<string>err))
+        if (input.standby){
+            output = input.standby(err instanceof Error ? err : new Error(<string>err))
+        }
+        else {
+            return undefined;
+        }
     }
     finally {
         return Component(
