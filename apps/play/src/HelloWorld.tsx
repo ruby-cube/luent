@@ -1,4 +1,4 @@
-import { Component, Else, ElseIf, expose, getAttributes, If, prep, v } from "@rue/lumo";
+import { Component, Else, ElseIf, expose, For, getAttributes, If, prep, v } from "@rue/lumo";
 
 function Swap() {
    return Component('')
@@ -12,9 +12,10 @@ function Svelte() {
    return Component(
       <>
          <swap:mount />
-         {If($x() > 10,
+         {If($x() > 10, <>
+            <SvelteB></SvelteB>
             <p>{$x()} is greater than 10</p>
-         )}
+         </>)}
          {ElseIf(5 > $x(),
             <p>{$x()} is less than 5</p>
          )}
@@ -25,14 +26,6 @@ function Svelte() {
    )
 }
 
-switch (key) {
-   case value:
-
-      break;
-
-   default:
-      break;
-}
 
 
 function SvelteB() {
@@ -67,17 +60,17 @@ const $list: any[] = []
 let $item;
 let $index;
 
-function ListA() {
+// function ListA() {
 
-   return (
-      <div>
-         <For const={[$item, $index] = of($list)} key={o => o.id}>
-            <SomeComponent name={$item} />
-            <SomeComponent />
-         </For>
-      </div>
-   )
-}
+//    return (
+//       <div>
+//          <For const={[$item, $index] = of($list)} key={o => o.id}>
+//             <SomeComponent name={$item} />
+//             <SomeComponent />
+//          </For>
+//       </div>
+//    )
+// }
 
 function ListB() {
 
@@ -104,11 +97,11 @@ function Column() {
 function of(list: any) {
    return ['', 9] as [string, number]
 }
-function For(input: { [key: string]: any, Slot: any[] }) {
-   return Component(
-      ''
-   )
-}
+// function For(input: { [key: string]: any, Slot: any[] }) {
+//    return Component(
+//       ''
+//    )
+// }
 
 function ColumnB() {
 
@@ -147,7 +140,7 @@ function ColumnBlock(
    })
 ) {
    const { name } = prep(input)
- 
+
    return Component(
       <div>{name}</div>
    )

@@ -1,10 +1,13 @@
 import { AnyObject } from "@rue/types";
-import { NodeEntity } from "../node/makeNode";
+import { initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
 import { mountNodeEntities } from "../node/mountNodeEntity";
-import { protect } from "@rue/quarky";
+import { AtomicIon, Ion, IonicModel, isAtomicIon, protect } from "@rue/quarky";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { processNodeEntities } from "../node/processNodeEntities";
+import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
+import { normalizeToArray } from "@rue/utils";
+import { NodeRef } from "../node/NodeRef";
 
 
 
@@ -28,13 +31,13 @@ export type PublicComponent<T extends AnyObject = AnyObject> = T // contains any
 
 
 export interface Component<T extends AnyObject | undefined = AnyObject | undefined> {
-    exposedComponent?: T extends AnyObject ? PublicComponent<T> : undefined;
-    renderedTemplate: NodeEntity | NodeEntity[];
-    // morphicRenderKit?: MorphicRenderKit
+   exposedComponent?: T extends AnyObject ? PublicComponent<T> : undefined;
+   renderedTemplate: NodeEntity | NodeEntity[];
+   // morphicRenderKit?: MorphicRenderKit
 }
 
 export function expose<T>(publicComponent: T & Object): T {
-    return protect(publicComponent);
+   return protect(publicComponent);
 }
 
 type JSXTemplate = NodeEntity | NodeEntity[]
@@ -44,54 +47,93 @@ type JSXTemplate = NodeEntity | NodeEntity[]
 export function Component<T extends AnyObject | undefined = AnyObject | undefined>(exposedComponent: T, template: JSXTemplate): Component<T>
 export function Component<T extends AnyObject | undefined = AnyObject | undefined>(template: JSXTemplate): Component<undefined>
 export function Component<T extends AnyObject | undefined = AnyObject | undefined>(templateOrComponent: T | JSXTemplate, template?: JSXTemplate): Component<T extends AnyObject ? T : undefined> {
-    const renderedTemplate = arguments.length === 2 ? template : templateOrComponent;
-    const exposedComponent = arguments.length === 2 ? templateOrComponent : undefined;
-    // const mountTeleported = arguments.length === 3 ? mountTeleported
-    // const unnestedNodeEntities = unnestComponent(_render)
-    // if (exposedComponent instanceof Object) {
-    return {
-        exposedComponent,
-        renderedTemplate: unnestComponent(renderedTemplate),
-    } as Component<T extends AnyObject ? T : undefined>
-    // }
-    // return {
-    //     component: undefined,
-    //     render: unnestedNodeEntities
-    // } as Component<T extends AnyObject ? T : undefined>
+   const renderedTemplate = arguments.length === 2 ? template : templateOrComponent;
+   const exposedComponent = arguments.length === 2 ? templateOrComponent : undefined;
+   // const mountTeleported = arguments.length === 3 ? mountTeleported
+   // const unnestedNodeEntities = unnestComponent(_render)
+   // if (exposedComponent instanceof Object) {
+   return {
+      exposedComponent,
+      renderedTemplate: unnestComponent(renderedTemplate),
+   } as Component<T extends AnyObject ? T : undefined>
+   // }
+   // return {
+   //     component: undefined,
+   //     render: unnestedNodeEntities
+   // } as Component<T extends AnyObject ? T : undefined>
 }
 
 export class InternalComponent<T extends AnyObject | undefined = AnyObject | undefined> {
-    exposed?: T extends AnyObject ? PublicComponent<T> : undefined = undefined;
-    initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
+   //  exposed?: T extends AnyObject ? PublicComponent<T> : undefined = undefined;
+   initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
+   exposed: AnyObject | undefined;
 
-    mount(
-        parent: Element,
-        fragment?: DocumentFragment,
-    ) { //TODO: what if a component's root elements is conditional or a dynamic list??
-        const nodeEntities = this.initialNodeEntities!;
-        if (!(parent instanceof Element))
-            throw new Error("Parent cannot be a text node")
-        mountNodeEntities(nodeEntities, parent, fragment)
-    }
+   constructor(
+      component: Component,
+      ref: NodeRef | undefined,
+      $index: AtomicIon<number> | undefined
+   ) {
+      const exposed = this.exposed = component.exposedComponent;
+      if (ref) initializeComponentRef(ref, exposed, $index)
+      this.initialNodeEntities = normalizeToFragmentArray(component.renderedTemplate)
+   }
 
-    setUp(
-        parent: Element,
-        nodePod: _NodePod
-    ) {
-        this.initialNodeEntities = processNodeEntities(this.initialNodeEntities!, parent, nodePod)
-        return this;
-    }
+   mount(
+      parent: Element,
+      fragment?: DocumentFragment,
+   ) { //TODO: what if a component's root elements is conditional or a dynamic list??
+      const nodeEntities = this.initialNodeEntities!;
+      if (!(parent instanceof Element))
+         throw new Error("Parent cannot be a text node")
+      mountNodeEntities(nodeEntities, parent, fragment)
+   }
+
+   setUp(
+      parent: Element,
+      nodePod: _NodePod
+   ) {
+      this.initialNodeEntities = processNodeEntities(this.initialNodeEntities!, parent, nodePod)
+      return this;
+   }
 }
 
 
+export function initializeComponentRef(
+   ref: NodeRef | IonicModel<any[]> | undefined,
+   publicComponent: PublicComponent | undefined,
+   $index: AtomicIon<number> | undefined,
+) {
+   if (!isAtomicIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
+   if ($index) {
+      initializeListRef(ref, publicComponent, $index)
+   }
+   else {
+      initializeRef(ref, publicComponent)
+   }
+}
+
+
+
+
+
+
 export function unnestComponent(nodeEntities: NodeEntity[]) {
-    if (nodeEntities.length !== 1)
-        return nodeEntities;
-    if (nodeEntities[0] instanceof InternalComponent) {
-        const component = nodeEntities[0]
-        if (!component.exposed || !component.initialNodeEntities)
-            return nodeEntities;
-        return component.initialNodeEntities;
-    }
-    return nodeEntities
+   if (nodeEntities.length !== 1)
+      return nodeEntities;
+   if (nodeEntities[0] instanceof InternalComponent) {
+      const component = nodeEntities[0]
+      if (!component.exposed || !component.initialNodeEntities)
+         return nodeEntities;
+      return component.initialNodeEntities;
+   }
+   return nodeEntities
+}
+
+function normalizeToFragmentArray(entity: any) { // distinguish conditional series from 
+   if (entity instanceof ConditionalRenderKit) return [[entity]];
+   if (entity instanceof Array) { // check if conditional series
+      if (entity[0] instanceof ConditionalRenderKit) return [entity];
+      return entity;
+   }
+   return normalizeToArray(entity);
 }

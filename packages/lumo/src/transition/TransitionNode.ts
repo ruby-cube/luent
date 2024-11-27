@@ -69,9 +69,7 @@ export function createTransitionNode(
     const { 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "init:with": inputInit, onEnd, onStart, disable } = input;
 
     if (disable === true) {
-        return Component(
-            Slot instanceof Function ? Slot() : Slot
-        )
+        return Slot instanceof Function ? Slot() : Slot
     }
 
     const $div = NodeRef('div')

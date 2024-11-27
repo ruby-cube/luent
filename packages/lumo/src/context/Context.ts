@@ -48,10 +48,8 @@ export function createNodeContext(
     Slot: () => NodeEntity | NodeEntity[],
     config: ComponentConfig,
 ): InternalComponent {
-    const component = new InternalComponent();
-    const output = Context({ Slot, with: config.with })
-    initializeComponent(component, output.renderedTemplate)
-    return component
+   const output = Context({ Slot, with: config.with })
+   return new InternalComponent(output, undefined, undefined);
 }
 
 

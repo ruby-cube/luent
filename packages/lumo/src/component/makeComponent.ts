@@ -15,18 +15,18 @@ import { processNodeEntities } from "../node/processNodeEntities";
 export type ComponentOptions = { preserve?: true }
 
 export type InferSlot<T extends ComponentSetup = ComponentSetup> =
-    T extends (setup?: infer P) => any ?
-    P extends { Slot: infer S } ?
-    S
-    : undefined
-    : undefined
+   T extends (setup?: infer P) => any ?
+   P extends { Slot: infer S } ?
+   S
+   : undefined
+   : undefined
 
 export type SetupWithSlot = {
-    Slot: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
+   Slot: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
 }
 
 export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
-    (setup?: P) => NodeEntity[] | NodeEntity
+   (setup?: P) => NodeEntity[] | NodeEntity
 
 
 // export function mO<T extends ComponentSetupWithSlot>(
@@ -40,81 +40,50 @@ export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
 //     config?: ComponentConfig<T>
 // ): InternalComponent
 export function mO<T extends ComponentSetup>(
-    Component: T,
-    Slot: InferSlot<T>,
-    config?: ComponentConfig<T>
+   Component: T,
+   Slot: InferSlot<T>,
+   config?: ComponentConfig<T>
 ): InternalComponent | MorphicRenderKit {
-    const $index = getCurrentIndex()
-    return makeComponent(Component, Slot, config || {}, $index)
+   const $index = getCurrentIndex()
+   return makeComponent(Component, Slot, config || {}, $index)
 }
 
 
 let componentAttributes: AnyObject | undefined
 
 export function getComponentAttributes() {
-    return componentAttributes;
+   return componentAttributes;
 }
 
 export function setComponentAttributes(attributes: AnyObject | undefined) {
-    componentAttributes = attributes
+   componentAttributes = attributes
 }
 
 export function makeComponent(
-    Component: ComponentSetup,
-    Slot: InferSlot | undefined,
-    config: ComponentConfig,
-    $index: AtomicIon<number> | undefined
+   Component: ComponentSetup,
+   Slot: InferSlot | undefined,
+   config: ComponentConfig,
+   $index: AtomicIon<number> | undefined
 ): InternalComponent {
-    const component = new InternalComponent();
 
-    setComponentAttributes({ Slot, ...config })
-    const output = Component()
-    setComponentAttributes(undefined);
-
-    if (output instanceof Promise)
-        throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
-
-    const { exposedComponent, renderedTemplate } = output
-
-    initializeComponent(component, renderedTemplate)
-    if (config.ref) initializeComponentRef(config.ref, exposedComponent, $index)
-    return component
+   setComponentAttributes({ Slot, ...config })
+   const output = Component()
+   if (output instanceof Promise)
+      throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
+   setComponentAttributes(undefined);
+   return new InternalComponent(output, config.ref, $index);
 }
 
 
 
 
-export function initializeComponent(
-    component: InternalComponent,
-    rendered: NodeEntity | NodeEntity[],
-) {
-    const nodeEntities = normalizeToFragmentArray(rendered); //TODO: Validate output and get publicComponent from out
-    component.initialNodeEntities = nodeEntities;
-}
-
-export function initializeComponentRef(
-    ref: NodeRef | IonicModel<any[]> | undefined,
-    publicComponent: PublicComponent | undefined,
-    $index: AtomicIon<number> | undefined,
-) {
-    if (!isAtomicIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
-    if ($index) {
-        initializeListRef(ref, publicComponent, $index)
-    }
-    else {
-        initializeRef(ref, publicComponent)
-    }
-}
-
-
-function normalizeToFragmentArray(entity: any) { // distinguish conditional series from 
-    if (entity instanceof ConditionalRenderKit) return [[entity]];
-    if (entity instanceof Array) { // check if conditional series
-        if (entity[0] instanceof ConditionalRenderKit) return [entity];
-        return entity;
-    }
-    return normalizeToArray(entity);
-}
+// export function initializeComponent(
+//     component: InternalComponent,
+//     rendered: NodeEntity | NodeEntity[],
+// ) {
+//     const nodeEntities = normalizeToFragmentArray(rendered); //TODO: Validate output and get publicComponent from out
+//     component.initialNodeEntities = nodeEntities;
+// }
 
 
 
