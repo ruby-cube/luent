@@ -11,24 +11,24 @@ import { AnyObject } from "@rue/types";
 import { createTransitionNode } from "../transition/TransitionNode";
 
 export function Fragment() {
-    // for jsx-runtime
+   // for jsx-runtime
 }
 
 export function jsx(tag: any, config: any, ...children: any[]) { //TODO: transpiler should compile children to function
-    const _children = children.length === 1 && typeof children[0] === 'string' ? children as [string] : () => children
-    return makeNode(tag, _children, config || {})
+   const _children = children.length === 1 && typeof children[0] === 'string' ? children as [string] : () => children
+   return makeNode(tag, _children, config || {})
 }
 
-export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveGet<any> | ReactElement<any, any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
+export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveGet<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
 
 export type RenderFunction<Params = unknown> = Params extends any[] ?
-    (...args: Params) => NodeEntity[] | NodeEntity :
-    () => NodeEntity[] | NodeEntity
+   (...args: Params) => NodeEntity[] | NodeEntity :
+   () => NodeEntity[] | NodeEntity
 
 export type EventHandler<K extends keyof HTMLElementEventMap> = (event: HTMLElementEventMap[K]) => void
 
 export type EventsConfig = {
-    [K in keyof HTMLElementEventMap]?: EventHandler<K> | EventHandler<K>[]
+   [K in keyof HTMLElementEventMap]?: EventHandler<K> | EventHandler<K>[]
 }
 
 // export type AssignedAttributes = {
@@ -39,53 +39,71 @@ export type EventsConfig = {
 // }
 
 export type ElementConfig<K extends HTMLTag = HTMLTag> = {
-    [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &
+   [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &
 {
-    class?: string | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[],
-    style?: AnyObject/* TODO: limit to css properties */ | string | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[],
-    attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
+   class?: string | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[],
+   style?: AnyObject/* TODO: limit to css properties */ | string | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[],
+   attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeSetup<K>
 
 type NodeSetup<T extends HTMLTag | ComponentSetup> = {
-    ref?: NodeRef<T>,
+   ref?: NodeRef<T>,
 }
 
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
-    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
+   T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
+
+export type SwapType = 'mount' | 'instance' | 'display'
+
+export class SwapConfig {
+   constructor(
+      public swap: SwapType
+   ) { }
+}
 
 export function makeNode(
-    nodeType: HTMLTag | ComponentSetup | 'transit-node' | 'phasic-node',
-    Slot: [string] | (() => NodeEntity[]) | InferSlot,
-    config: ElementConfig | ComponentConfig,
-): DOMNode | InternalComponent {
+   nodeType: HTMLTag | ComponentSetup | 'transit-node' | 'phasic-node' | 'context-node' | 'swap:mount' | 'swap:instance' | 'swap:display',
+   Slot: [string] | (() => NodeEntity[]) | InferSlot,
+   config: ElementConfig | ComponentConfig,
+): DOMNode | InternalComponent | SwapConfig {
 
-    switch (nodeType) {
-        case Context:
-            if (!Slot || Slot instanceof Array) throw new Error(`Extraneous <Context>`)
-            return createNodeContext(Slot, <ComponentConfig>config)
+   switch (nodeType) {
+      case 'context-node':
+         if (!Slot || Slot instanceof Array) throw new Error(`Extraneous <Context>`)
+         return createNodeContext(Slot, <ComponentConfig>config)
 
-        case 'transit-node':
-        case 'phasic-node':
-            if (!Slot) throw new Error(`Extraneous transition node`)
-            return createTransitionNode(nodeType, Slot, config)
+      case 'swap:display':
+         return new SwapConfig('display')
 
-        default:
-            if (typeof nodeType === 'string') {
-                return makeElement(
-                    nodeType,
-                    <[string] | (() => NodeEntity[])>Slot,
-                    <ElementConfig>config,
-                    getCurrentIndex()
-                )
-            }
-            return makeComponent(
-                nodeType,
-                <InferSlot>Slot,
-                <ComponentConfig>config,
-                getCurrentIndex()
+      case 'swap:mount':
+
+         return new SwapConfig('mount')
+
+      case 'swap:instance':
+         return new SwapConfig('instance')
+
+      case 'transit-node':
+      case 'phasic-node':
+         if (!Slot) throw new Error(`Extraneous transition node`)
+         return createTransitionNode(nodeType, Slot, config)
+
+      default:
+         if (typeof nodeType === 'string') {
+            return makeElement(
+               nodeType,
+               <[string] | (() => NodeEntity[])>Slot,
+               <ElementConfig>config,
+               getCurrentIndex()
             )
-    }
+         }
+         return makeComponent(
+            nodeType,
+            <InferSlot>Slot,
+            <ComponentConfig>config,
+            getCurrentIndex()
+         )
+   }
 }
 
 // export function _getNodeConfig(ref: NodeRef | undefined) {
@@ -102,54 +120,54 @@ export function makeNode(
 // }
 
 export function initializeListRef( // should this be initialize ref?
-    ref: NodesIon,
-    value: NodeReferent | undefined,
-    $index: AtomicIon<number>
-    // options?: ElementOptions
+   ref: NodesIon,
+   value: NodeReferent | undefined,
+   $index: AtomicIon<number>
+   // options?: ElementOptions
 ) {
-    // if (__DEV__) __devCheckIfNotTracked()
-    if (__DEV__) __devCheckIfTracked()
-    // const array = ref()!
-    const _ref = getNodeArrayRef(ref)
-    if (!_ref) throw new Error(`No internal node ref found. This should never happen`)
-    // if ($index() === 0 && _existingRef)
-    // throw new Error('This node list ref has already be initialized. A node list ref cannot be used multiple times')
-    // const _ref = _existingRef || new InternalNodeArrayRef(ref)
-    if (value) {
-        _ref.assignValue(value, $index);
-    }
+   // if (__DEV__) __devCheckIfNotTracked()
+   if (__DEV__) __devCheckIfTracked()
+   // const array = ref()!
+   const _ref = getNodeArrayRef(ref)
+   if (!_ref) throw new Error(`No internal node ref found. This should never happen`)
+   // if ($index() === 0 && _existingRef)
+   // throw new Error('This node list ref has already be initialized. A node list ref cannot be used multiple times')
+   // const _ref = _existingRef || new InternalNodeArrayRef(ref)
+   if (value) {
+      _ref.assignValue(value, $index);
+   }
 
-    // if (_ref.initialized === true) return; // to prevent registering multiple watchers for lists
+   // if (_ref.initialized === true) return; // to prevent registering multiple watchers for lists
 
-    // // dispose with outer flask because we don't want to dispose when first item is removed
-    // const outerFlask = getFlask()?.outer
-    // outerFlask?.onDisposal(() => {
-    //     _ref.setValue([]);
-    //     _ref.initialized = false;
-    // })
+   // // dispose with outer flask because we don't want to dispose when first item is removed
+   // const outerFlask = getFlask()?.outer
+   // outerFlask?.onDisposal(() => {
+   //     _ref.setValue([]);
+   //     _ref.initialized = false;
+   // })
 
-    // if (isSettingUpList() && !__SSR__) {
-    //     onListUpdated((toFromIndices) => {
-    //         _ref.updateListRef(toFromIndices)
-    //     }, { until: outerFlask!.onDisposal })
-    // }
+   // if (isSettingUpList() && !__SSR__) {
+   //     onListUpdated((toFromIndices) => {
+   //         _ref.updateListRef(toFromIndices)
+   //     }, { until: outerFlask!.onDisposal })
+   // }
 
-    // _ref.markInitialized()
+   // _ref.markInitialized()
 }
 
 export function initializeRef(ref: NodeRef, value: NodeReferent | undefined) {
-    // if (__DEV__) __devCheckIfNotTracked()
-    if (__DEV__) __devCheckIfTracked()
-    if (ref())
-        throw new Error("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")
-    const _ref = new InternalNodeRef(ref)
-    if (value) {
-        _ref.assignValue(value)
-        const flask = getFlask()
-        flask?.onDisposal(() => {
-            _ref.setValue(undefined);
-        })
-    }
+   // if (__DEV__) __devCheckIfNotTracked()
+   if (__DEV__) __devCheckIfTracked()
+   if (ref())
+      throw new Error("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")
+   const _ref = new InternalNodeRef(ref)
+   if (value) {
+      _ref.assignValue(value)
+      const flask = getFlask()
+      flask?.onDisposal(() => {
+         _ref.setValue(undefined);
+      })
+   }
 }
 
 // export function useInternalNodeRef(ref: NodeRef | IonicModel<any[]>) {

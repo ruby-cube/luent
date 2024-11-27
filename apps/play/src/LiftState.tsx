@@ -1,4 +1,4 @@
-import { getAttributes, $Ion, Ion, NodeRef, v, prep } from "@rue/lumo"
+import { fromTag, $Ion, Ion, NodeRef, v, prep } from "@rue/lumo"
 import { AtomicIon, ion } from "../../../packages/quarky/src"
 
 
@@ -37,7 +37,7 @@ function assertEvenNumber(value: any): asserts value is number {
 
 
 function ChildBlock(
-    input = getAttributes({
+    input = fromTag({
         count: $Ion<number, { increment: () => void; decrement: () => void; }>,
     })
 ) {
@@ -55,7 +55,7 @@ function ChildBlock(
 
 
 function SiblingBlock(
-    input = getAttributes({
+    input = fromTag({
         count: Ion<number>
     })
 ) {

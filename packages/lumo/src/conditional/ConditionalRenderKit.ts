@@ -4,7 +4,7 @@ import { AnyObject, Booleanny } from "@rue/types";
 import { Context } from "../context/context-stack";
 import { TransitionNode } from "../transition/TransitionNode";
 import { _NodePod } from "../node/NodePod";
-import { NodeKit } from "../node/processNodeEntities";
+import { NodeKit } from "../node/setUpNodeEntities";
 
 export type RenderConditional = (parent: Element, nodePod: _NodePod) => NodeKit[]
 

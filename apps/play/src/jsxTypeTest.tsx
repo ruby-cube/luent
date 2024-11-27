@@ -1,4 +1,4 @@
-import { Component, getAttributes, NodeRef } from "@rue/lumo";
+import { Component, fromTag, NodeRef } from "@rue/lumo";
 import { v } from "../../../packages/lumo/src/InputTypes";
 
 function App() {
@@ -14,7 +14,7 @@ function App() {
 }
 
 function List(
-    input = getAttributes({
+    input = fromTag({
         cat: v<string>,
         Slot: v<(() => any) | any>('?')
     })

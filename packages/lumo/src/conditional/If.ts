@@ -8,8 +8,7 @@ import { getContext, popContext, pushContext } from "../context/context-stack";
 import { getPhasicNode } from "../transition/PhaseChange";
 import { createNodeContext } from "../context/Context";
 import { useTransitionNodes } from "../transition/I-O";
-import { NodeKit, processNodeEntities } from "../node/processNodeEntities";
-import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
+import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 
 
 let currentNodePodIndex: number | undefined = undefined
@@ -205,7 +204,7 @@ function wrapWithContext(renderConditional: RenderFunction, context: AnyObject) 
    return (parent: Element, nodePod: _NodePod) => {
       try {
          pushContext(outerContext)
-         const nodeEntities = processNodeEntities(normalizeToArray(
+         const nodeEntities = setUpNodeEntities(normalizeToArray(
             createNodeContext(renderConditional, {
                with: context
             })
@@ -229,7 +228,7 @@ function wrapToPreserve(renderConditional: RenderFunction, context: AnyObject) {
       if (nodeEntities) return nodeEntities;
       try {
          pushContext(outerContext)
-         nodeEntities = processNodeEntities(normalizeToArray(
+         nodeEntities = setUpNodeEntities(normalizeToArray(
             createNodeContext(renderConditional, {
                with: context
             })), parent, nodePod)

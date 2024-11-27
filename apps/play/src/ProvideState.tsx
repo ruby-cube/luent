@@ -1,4 +1,4 @@
-import { Component, fromContext, getAttributes, prep, TypedKey } from "@rue/lumo"
+import { Component, fromContext, fromTag, prep, TypedKey } from "@rue/lumo"
 import { DerivedIon, ion, ionize } from "@rue/quarky";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
 
@@ -57,7 +57,7 @@ function getThisComponent() {
 }
 
 export function ParentBlock(
-    input = getAttributes({
+    input = fromTag({
         content: v<string>,
     })
 ) {

@@ -14,7 +14,7 @@ import { META } from "../../../quarky/src/ReactiveEntity";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { getFlask } from "@rue/flask";
 import { Context, popContext, pushContext } from "../context/context-stack";
-import { processNodeEntities } from "../node/processNodeEntities";
+import { setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
 
 
@@ -104,7 +104,7 @@ export class ListRenderKit<T = any> {
                 dynamicNode.mount(function mountDynamicItem() {
                     console.log('mounting item')
                     pushContext(context)
-                    const nodeEntities = processNodeEntities(normalizeToArray(renderItem(item, $index)), parent, nodePod)
+                    const nodeEntities = setUpNodeEntities(normalizeToArray(renderItem(item, $index)), parent, nodePod)
                     mountNodeEntities(nodeEntities, parent, fragment);
                     popContext()
                 })
@@ -113,7 +113,7 @@ export class ListRenderKit<T = any> {
             }
             else {
                 pushContext(context)
-                const nodeEntities = processNodeEntities(normalizeToArray(renderItem(item, $index)), parent, nodePod)
+                const nodeEntities = setUpNodeEntities(normalizeToArray(renderItem(item, $index)), parent, nodePod)
                 mountNodeEntities(nodeEntities, parent, fragment);
                 popContext()
             }
@@ -226,7 +226,7 @@ export class ListRenderKit<T = any> {
                 const _item = isIonicModel(list) || isAtomicIon(list) && asMetaIon(list).hasIonicValue ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
                 dynamicNode.mount(function renderNewListItem() {
                     console.log('rendering new item')
-                    const nodeEntities = processNodeEntities(normalizeToArray(renderItem(_item, $index)), parent, nodePod);
+                    const nodeEntities = setUpNodeEntities(normalizeToArray(renderItem(_item, $index)), parent, nodePod);
                     mountNodeEntities(nodeEntities, parent, fragment)
                 })
                 setCurrentIndex(undefined)

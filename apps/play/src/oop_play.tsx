@@ -1,4 +1,4 @@
-import { Component, expose, getAttributes, prep } from "@rue/lumo";
+import { Component, expose, fromTag, prep } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 import { Article } from "./TestCustomCleanupScheduler";
 
@@ -93,7 +93,7 @@ function List() {
 }
 
 function Item(
-    input = getAttributes({
+    input = fromTag({
         countKit: v<{ $count: Ion<number>; incrementCount: () => void }>
     })
 ) {

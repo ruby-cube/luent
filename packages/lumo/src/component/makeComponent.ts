@@ -1,14 +1,7 @@
 import { ComponentSetup, InternalComponent, Component, PublicComponent } from "./InternalComponent";
-import { NodeRef } from "../node/NodeRef";
 import { ComponentConfig, initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
-import { normalizeToArray } from "@rue/utils";
-import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
-import { getCurrentIndex } from "../iteratives/ListRenderKit";
-import { MorphicRenderKit } from "../morphic/MorphicNode";
-import { IonicModel, isAtomicIon, protect, AtomicIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
-import { getFlask } from "@rue/flask";
-import { processNodeEntities } from "../node/processNodeEntities";
+import { AtomicIon } from "@rue/quarky";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
@@ -39,14 +32,14 @@ export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
 //     Slot?: undefined,
 //     config?: ComponentConfig<T>
 // ): InternalComponent
-export function mO<T extends ComponentSetup>(
-   Component: T,
-   Slot: InferSlot<T>,
-   config?: ComponentConfig<T>
-): InternalComponent | MorphicRenderKit {
-   const $index = getCurrentIndex()
-   return makeComponent(Component, Slot, config || {}, $index)
-}
+// export function mO<T extends ComponentSetup>(
+//    Component: T,
+//    Slot: InferSlot<T>,
+//    config?: ComponentConfig<T>
+// ): InternalComponent | MorphicRenderKit {
+//    const $index = getCurrentIndex()
+//    return makeComponent(Component, Slot, config || {}, $index)
+// }
 
 
 let componentAttributes: AnyObject | undefined

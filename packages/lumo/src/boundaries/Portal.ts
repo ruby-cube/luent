@@ -3,7 +3,7 @@ import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { _NodePod } from "../node/NodePod";
 import { mountNodeEntities } from "../node/mountNodeEntity";
-import { processNodeEntities } from "../node/processNodeEntities";
+import { setUpNodeEntities } from "../node/setUpNodeEntities";
 
 export type MorphConfig = {}
 
@@ -28,7 +28,7 @@ export function Portal(input: PortalNodeInput) {
     const nodePod = new _NodePod();
     nodePod.appendStaticNode(element) // serves as an indicator to append instead of prepend for dynamic updates
 
-    const _nodeEntities = processNodeEntities(normalizeToArray(unnestComponent(Slot())), element, nodePod)
+    const _nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(Slot())), element, nodePod)
     mountNodeEntities(_nodeEntities, element)
     return Component(undefined);
 }

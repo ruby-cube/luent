@@ -10,7 +10,7 @@ import { mountConditional } from "../conditional/ConditionalRenderSeries";
 import { getContext, getCurrentContext, popContext, pushContext } from "../context/context-stack";
 import { NodeContext } from "../context/Context";
 import { AppContext } from "../context/provide";
-import { processNodeEntities } from "../node/processNodeEntities";
+import { setUpNodeEntities } from "../node/setUpNodeEntities";
 
 export function MorphicNode(switchMap: { [key: string]: RenderFunction }) {
     return function $MorphicNode({ as: initialKey, preserve }: {
@@ -70,7 +70,7 @@ export class MorphicRenderKit {
     ) {
         const nodePod = this.dynamicNodePod[0]
         //TODO: 
-        const nodeEntities = processNodeEntities(normalizeToArray(unnestComponent(this.switchMap[this.activeKey]())), parent, nodePod);
+        const nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(this.switchMap[this.activeKey]())), parent, nodePod);
         pushContext(this.context)
         this.dynamicNode.mount(function renderMorphicNode() {
             mountNodeEntities(nodeEntities, parent, fragment)

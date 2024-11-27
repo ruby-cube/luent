@@ -8,7 +8,7 @@ import { mountTextNode, setUpTextNode } from "./mountTextNode";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { getContext } from "../context/context-stack";
-import { NodeKit } from "./processNodeEntities";
+import { NodeKit } from "./setUpNodeEntities";
 
 // node kits:
 // - text ion

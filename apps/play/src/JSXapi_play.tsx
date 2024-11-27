@@ -970,7 +970,7 @@ function Dobby() {
 
 }
 
-export function NumberedBoxes(input = getAttributes({ num: v<number> })) {
+export function NumberedBoxes(input = fromTag({ num: v<number> })) {
    const { num } = prep(input)
 
    return Component(

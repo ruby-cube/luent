@@ -1,4 +1,4 @@
-import { Component, Else, ElseIf, expose, For, getAttributes, If, prep, v } from "@rue/lumo";
+import { Component, Else, ElseIf, expose, For, fromTag, If, prep, v } from "@rue/lumo";
 
 function Swap() {
    return Component('')
@@ -122,16 +122,16 @@ const comp = Component;
 const compo = Component;
 const cm$ = Component;
 const $cm = Component;
-const att = getAttributes
-const $input = getAttributes
-const fromTag = getAttributes
-const fromJSX = getAttributes
-const inputType = getAttributes
-const attrs = getAttributes
-const attributes = getAttributes
-const attris = getAttributes
-const attribs = getAttributes
-const $attributes = getAttributes
+const att = fromTag
+const $input = fromTag
+const fromTag = fromTag
+const fromJSX = fromTag
+const inputType = fromTag
+const attrs = fromTag
+const attributes = fromTag
+const attris = fromTag
+const attribs = fromTag
+const $attributes = fromTag
 
 
 function ColumnBlock(

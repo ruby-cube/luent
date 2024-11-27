@@ -4,7 +4,7 @@ import { _NodePod } from "../node/NodePod";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { AtomicIon, Ion, IonicModel, isAtomicIon, protect } from "@rue/quarky";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
-import { processNodeEntities } from "../node/processNodeEntities";
+import { setUpNodeEntities } from "../node/setUpNodeEntities";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { normalizeToArray } from "@rue/utils";
 import { NodeRef } from "../node/NodeRef";
@@ -92,7 +92,7 @@ export class InternalComponent<T extends AnyObject | undefined = AnyObject | und
       parent: Element,
       nodePod: _NodePod
    ) {
-      this.initialNodeEntities = processNodeEntities(this.initialNodeEntities!, parent, nodePod)
+      this.initialNodeEntities = setUpNodeEntities(this.initialNodeEntities!, parent, nodePod)
       return this;
    }
 }

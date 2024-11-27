@@ -1,6 +1,6 @@
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { DynamicNode, NULLISH_DYNAMIC_NODE } from "../dynamic/DynamicNode";
-import { NodeEntity } from "../node/makeNode";
+import { NodeEntity, SwapType } from "../node/makeNode";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { _DynamicNodePod, _NodePod, NodePod, NULLISH_NODE_POD } from "../node/NodePod";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
@@ -86,7 +86,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
     constructor(
         statements: ConditionalRenderKit[],
         // public type: 'create' | 'show' | 'mount',
-        makeElseKit: () => ConditionalRenderKit
+        makeElseKit: () => ConditionalRenderKit,
+        swap: SwapType = 'instance'
     ) {
         super(statements, makeElseKit);
         const context = this.context = statements[0].context;

@@ -50,7 +50,7 @@ type ComponentAttributes<C> = {
 }
 
 //API
-export function getAttributes<C extends { [key: string]: { validatedType: any } | ((arg: any) => { validatedType: any }) }>(typeConfig?: C): { [K in keyof ComponentAttributes<C>]: ComponentAttributes<C>[K] } {
+export function fromTag<C extends { [key: string]: { validatedType: any } | ((arg: any) => { validatedType: any }) }>(typeConfig?: C): { [K in keyof ComponentAttributes<C>]: ComponentAttributes<C>[K] } {
     const attributes = getComponentAttributes()
     if (!attributes) throw new Error(`input function must be called as default parameter of component factory`)
     attributes[ATTRIBUTE_VALIDATION] = typeConfig;
@@ -134,7 +134,7 @@ export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, as
 
 
 // example:
-// const input = getAttributes({
+// const input = fromTag({
 //     'on:IncrementClick': v<() => void>,
 //     car: v<number>('??')(20),
 //     frog: v<boolean>,

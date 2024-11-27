@@ -100,10 +100,10 @@ function noElseBlock(statements: ConditionalKit[]) {
     return false;
 }
 
-export function validateStandAloneConditional(conditionalKit: ConditionalKit, series: any[], index: number) {
-    if (conditionalKit.statementType !== 'if')
-        throw new Error(`$${conditionalKit.statementType} conditional must be contained in a fragment or array that begins with If`)
-    const nextEntity = series[index + 1];
-    if (nextEntity instanceof ConditionalKit && nextEntity.statementType !== 'if')
-        throw new Error(`A series of conditional statements must be enclosed in a fragment or array`)
-}
+// export function validateStandAloneConditional(conditionalKit: ConditionalKit, series: any[], index: number) {
+//     if (conditionalKit.statementType !== 'if')
+//         throw new Error(`$${conditionalKit.statementType} conditional must be contained in a fragment or array that begins with If`)
+//     const nextEntity = series[index + 1];
+//     if (nextEntity instanceof ConditionalKit && nextEntity.statementType !== 'if')
+//         throw new Error(`A series of conditional statements must be enclosed in a fragment or array`)
+// }

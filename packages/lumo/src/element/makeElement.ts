@@ -13,7 +13,7 @@ import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
-import { processNodeEntities } from "../node/processNodeEntities";
+import { setUpNodeEntities } from "../node/setUpNodeEntities";
 
 
 
@@ -63,7 +63,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     if (Slot) {
         const rawOutput = wrapIfConditionalSeries(Slot instanceof Function ? Slot() : Slot)
         const nodePod = new _NodePod();
-        const nodeEntities = processNodeEntities(rawOutput, domNode, nodePod)
+        const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodePod)
         mountNodeEntities(nodeEntities, domNode)
     }
     return domNode;
