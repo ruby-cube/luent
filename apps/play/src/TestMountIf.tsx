@@ -1,6 +1,5 @@
-import { Component, If, Else, fade, ElseIf, slide } from "@rue/lumo";
+import { Component, If, Else, fade, ElseIf, slide, fromTag, v } from "@rue/lumo";
 import { ion } from "@rue/quarky";
-import { phasic, transit } from "../../../packages/lumo/src/transition/TransitionNode";
 
 export function MountIf() {
    const $count = ion(0, {
@@ -29,32 +28,44 @@ export function MountIf() {
 
    return Component(
       <>
+         {/* <context-node with={{ dog: 'hi' }}>{()=>
+            <div>hi</div>
+         }</context-node> */}
          <h1>Hello world</h1>
-         {/* <phasic-node disable={$isMobile}> */}
-            {If($active, { type: 'mount' }, () => <>
-               oh
-               {/* <transit-node with={slide({ x: -50, duration: 300 })}> */}
-                  <h2>hi</h2>
-               {/* </transit-node> */}
-               {/* <transit-node with={slide({ x: 100, duration: 300 })}> */}
-                  <h2>ho</h2>
-               {/* </transit-node> */}
-               {If($ready, () =>
-                  <p>ready</p>
-               )}
-            </>)}
-            {ElseIf($ready, { type: 'mount' }, () => <>
-               low
-               <h2>balloon</h2>
-            </>)}
-            {Else({ type: 'mount' }, () => <>
-               so
-               <h2>bye</h2>
-            </>)}
-         {/* </phasic-node> */}
+         <phasic-node>
+         {If($active, () => <>
+            oh
+            <transit-node with={slide({ x: -100, duration: 300 })}>
+               <h2>hi</h2>
+            </transit-node>
+            <transit-node with={slide({ x: 100, duration: 300 })}>
+            <h2>ho</h2>
+            </transit-node>
+            {If($ready, () =>
+               <p>ready</p>
+            )}
+         </>)}
+         {ElseIf($ready, () => <>
+            low
+            <h2>balloon</h2>
+         </>)}
+         {Else(() => <>
+            so
+            <h2>bye</h2>
+         </>)}
+         </phasic-node>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>
       </>
+   )
+}
+
+function Div(input = fromTag({
+   Slot: v<() => any>
+})) {
+   const { Slot } = input;
+   return Component(
+      Slot()
    )
 }
 

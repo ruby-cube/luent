@@ -59,7 +59,7 @@ export class MorphicRenderKit {
 
     renderedKeys?: Set<string>;
 
-    // initialNodeEntities!: NodeEntity[]
+    // nodeEntities!: NodeEntity[]
 
     dynamicNode!: DynamicNode
     dynamicNodePod!: _DynamicNodePod

@@ -1,4 +1,4 @@
-import { DerivedIon, ReactiveGet, ion, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked, AtomicIon } from "../../../quarky/src";
+import { DerivedIon, ReactiveGet, ion, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked, AtomicIon, Ion } from "../../../quarky/src";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { InferSlot, ComponentSetupWithSlot, makeComponent } from "../component/makeComponent";
@@ -8,18 +8,34 @@ import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
 import { Context, createNodeContext } from "../context/Context";
 import { AnyObject } from "@rue/types";
-import { createTransitionNode } from "../transition/TransitionNode";
+import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
+import { MorphicRenderKit } from "../morphic/MorphicNode";
+import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
+import { isObjectLiteral } from "@rue/utils";
 
-export function Fragment() {
-   // for jsx-runtime
-}
+// export function Fragment() {
+//    // for jsx-runtime
+// }
 
-export function jsx(tag: any, config: any, ...children: any[]) { //TODO: transpiler should compile children to function
-   const _children = children.length === 1 && typeof children[0] === 'string' ? children as [string] : () => children
-   return makeNode(tag, _children, config || {})
-}
+// export function jsx(tag: any, config: any, ...children: any[]) { //TODO: transpiler should compile children to function
+//    console.log("JSX!!!")
+//    const _children = children.length === 1 && typeof children[0] === 'string' ? children as [string] : () => children
+//    return makeNode(tag, _children, config || {})
+// }
 
-export type NodeEntity = NodeEntity[] | DOMNode | InternalComponent | ListRenderKit | ConditionalRenderKit[] | ConditionalRenderKit | any | ReactiveGet<any> // TODO: Attach context (needs) to DOMNode, InternalComponent, ListRenderKit, and ConditionalKit
+export type NodeEntity =
+   NodeEntity[]
+   | DOMNode
+   | JSX.Element
+   | string
+   | (() => any) // derived getter
+   | Ion
+   | InternalComponent
+   | ListRenderKit
+   | MorphicRenderKit
+   | SwapConfig
+   | ConditionalRenderKit
+   | ConditionalRenderSeries
 
 export type RenderFunction<Params = unknown> = Params extends any[] ?
    (...args: Params) => NodeEntity[] | NodeEntity :
@@ -62,15 +78,23 @@ export class SwapConfig {
    ) { }
 }
 
+// TODO: how to distinguish render function from derived getter 
+export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]) {
+   if (slot instanceof Function) return slot as (...args: any[]) => NodeEntity | NodeEntity[];
+   if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
+   return () => slot;
+}
+
 export function makeNode(
    nodeType: HTMLTag | ComponentSetup | 'transit-node' | 'phasic-node' | 'context-node' | 'swap:mount' | 'swap:instance' | 'swap:display',
-   Slot: [string] | (() => NodeEntity[]) | InferSlot,
+   Slot: (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
-): DOMNode | InternalComponent | SwapConfig {
+): DOMNode | InternalComponent | SwapConfig | JSX.Element {
 
    switch (nodeType) {
       case 'context-node':
-         if (!Slot || Slot instanceof Array) throw new Error(`Extraneous <Context>`)
+         console.log('Slot', Slot)
+         if (!Slot) throw new Error(`Extraneous <Context>`)
          return createNodeContext(Slot, <ComponentConfig>config)
 
       case 'swap:display':
@@ -86,7 +110,7 @@ export function makeNode(
       case 'transit-node':
       case 'phasic-node':
          if (!Slot) throw new Error(`Extraneous transition node`)
-         return createTransitionNode(nodeType, Slot, config)
+         return createTransitionNode(nodeType, Slot, <TransitionNodeInput>config)
 
       default:
          if (typeof nodeType === 'string') {

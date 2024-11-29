@@ -8,7 +8,7 @@ import * as CSS from "csstype";
 // import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
 import { NodeRef } from "../../src/node/NodeRef";
-import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, DubiousNodeInput } from "@rue/lumo";
+import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, DubiousNodeInput, TransitionNodeInput } from "@rue/lumo";
 import { AnyObject } from "@rue/types";
 
 // export function jsxDEV(): "frog"
@@ -2533,14 +2533,7 @@ declare global {
          }
       }
 
-      // type TransitionNodeInput = {
-      //     with?: TransitionConfig | TransitionConfig[],
-      //     'with:in'?: TransitionConfig | TransitionConfig[],
-      //     'with:out'?: TransitionConfig | TransitionConfig[],
-      //     onStart?: (hook: TransitionHook) => void;
-      //     onEnd?: (hook: TransitionHook) => void;
-      //     'on-load'?: boolean
-      // }
+
 
       // type ContextEntries<T> = {
       //     [K in keyof T]: K extends keyof ContextKeyMap ? _ContextInputType<ContextKeyMap[K]> : any;

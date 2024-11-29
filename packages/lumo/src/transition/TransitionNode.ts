@@ -1,17 +1,26 @@
 import { NodeEntity } from "../node/makeNode";
-import { renderPhaseChangeNode, TransitionConfig } from "./PhaseChange";
+import { renderPhasicNode, TransitionConfig } from "./PhasicNode";
 import { createTransitionStyleSheet, getTransitionStylesheet, TransitionClasses, TransitionFunction, TransitionKit } from "./defineTransition";
 import { AnimationClass, AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
-import { renderIONode } from "./I-O";
+import { renderTransitNode } from "./TransitNode";
 import { AnyObject } from "@rue/types";
-import { Component, ComponentSetup } from "../component/InternalComponent";
 import { Ion } from "@rue/quarky";
 
 export type TransitionHook = {
     phase: 'in' | 'out'
 }
 
+export type TransitionNodeInput = {
+      Slot: (() => NodeEntity | NodeEntity[]) | NodeEntity[] | NodeEntity,
+      with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+      'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+      'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+      'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+      onStart?: (hook: TransitionHook) => void;
+      onEnd?: (hook: TransitionHook) => void;
+      disable?: boolean | Ion<boolean>
+}
 
 export type TransitionNode = {
     transitionIn(endTransition: () => void): void,
@@ -27,50 +36,18 @@ const defaultFade: TransitionClasses = {
     transitionClass: 'transition-default-fade'
 }
 
-export const phasic = {
-    node: 'phasic-node' as unknown as ComponentSetup<{
-        Slot: [string] | (() => NodeEntity | NodeEntity[]) | NodeEntity[],
-        with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        onStart?: (hook: TransitionHook) => void;
-        onEnd?: (hook: TransitionHook) => void;
-        disable?: boolean | Ion<boolean>
-    }>
-}
-
-export const transit = {
-    node: 'transit-node' as unknown as ComponentSetup<{
-        Slot: [string] | (() => NodeEntity | NodeEntity[]) | NodeEntity[] | NodeEntity,
-        with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        onStart?: (hook: TransitionHook) => void;
-        onEnd?: (hook: TransitionHook) => void;
-        disable?: boolean | Ion<boolean>;
-    }>
-}
 
 export function createTransitionNode(
     type: 'phasic-node' | 'transit-node',
-    Slot: [string] | (() => NodeEntity | NodeEntity[]),
-    input: {
-        with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-        onStart?: (hook: TransitionHook) => void;
-        onEnd?: (hook: TransitionHook) => void;
-        disable?: boolean | Ion<boolean>
-    }
+    Slot: (() => NodeEntity | NodeEntity[]),
+    input: TransitionNodeInput
 ) {
     const { 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "init:with": inputInit, onEnd, onStart, disable } = input;
 
     if (disable === true) {
         return Slot instanceof Function ? Slot() : Slot
     }
+    console.log('made it')
 
     const $div = NodeRef('div')
 
@@ -306,8 +283,7 @@ export function createTransitionNode(
         const div = $div()
     }
 
-
-    const renderNode = type === 'transit-node' ? renderIONode : renderPhaseChangeNode
+    const renderNode = type === 'transit-node' ? renderTransitNode : renderPhasicNode
 
     return renderNode(
         $div,

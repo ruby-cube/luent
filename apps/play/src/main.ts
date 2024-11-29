@@ -14,6 +14,7 @@ import { Component, createApp } from '@rue/lumo';
 import { MountIf } from './TestMountIf';
 import { PlainList } from './TestList';
 import { HelloWorld } from './HelloWorld';
+import { Check } from './childrenTest';
 // import { queueTask } from '@rue/thread';
 // import { RenderCycle } from '@rue/quarky';
 // import { MainSite } from './AwaitTest';
@@ -32,7 +33,6 @@ if (__DEV__) configureFlask({
 })
 
 app.mount('#app')
-
 
 
 // function doSomething() {

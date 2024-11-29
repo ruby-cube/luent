@@ -2,17 +2,17 @@ import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
 import { Component } from "../component/InternalComponent";
 
+export type DubiousNodeInput = {
+   standby?: (error: Error) => NodeEntity | NodeEntity[]
+   Slot: () => NodeEntity | NodeEntity[]
+}
 
-export function createDubiousNode<T extends AnyObject>(input: {
-    standby?: (error: Error) => NodeEntity | NodeEntity[]
-    setup?: () => T
-    Slot: (o?: T) => NodeEntity | NodeEntity[]
-}) {
-    const { setup, Slot } = input;
+export function createDubiousNode<T extends AnyObject>(input: DubiousNodeInput) {
+    const { Slot } = input;
 
     let output;
     try {
-        output = Slot(setup?.())
+        output = Slot()
     }
     catch (err) {
         if (input.standby){

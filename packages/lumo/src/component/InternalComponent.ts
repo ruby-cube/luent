@@ -4,7 +4,7 @@ import { _NodePod } from "../node/NodePod";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { AtomicIon, Ion, IonicModel, isAtomicIon, protect } from "@rue/quarky";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
-import { setUpNodeEntities } from "../node/setUpNodeEntities";
+import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { normalizeToArray } from "@rue/utils";
 import { NodeRef } from "../node/NodeRef";
@@ -17,14 +17,14 @@ export type DOMNode = CharacterData | Element
 //     Slot?: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
 // }
 
-// export type RenderSlot<P extends any = undefined> =
-//     P extends undefined ? () => NodeEntity | NodeEntity[]
-//     : (props: P) => NodeEntity | NodeEntity[]
+export type Slot<P = undefined> =
+   P extends undefined ? (() => NodeEntity | NodeEntity[]) | NodeEntity[] | NodeEntity
+   : (props: P) => NodeEntity | NodeEntity[]
+
 
 // export type Slot = NodeEntity | NodeEntity[]
 export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup?: P) => Component
 
-// export type Slot<T> = T extends AnyObject ? InternalComponent<T> : NodeEntity | NodeEntity[]
 export const COMPONENT = Symbol('publicComponent')
 export type PublicComponent<T extends AnyObject = AnyObject> = T // contains anything in expose
 
@@ -47,26 +47,19 @@ type JSXTemplate = NodeEntity | NodeEntity[]
 export function Component<T extends AnyObject | undefined = AnyObject | undefined>(exposedComponent: T, template: JSXTemplate): Component<T>
 export function Component<T extends AnyObject | undefined = AnyObject | undefined>(template: JSXTemplate): Component<undefined>
 export function Component<T extends AnyObject | undefined = AnyObject | undefined>(templateOrComponent: T | JSXTemplate, template?: JSXTemplate): Component<T extends AnyObject ? T : undefined> {
-   const renderedTemplate = arguments.length === 2 ? template : templateOrComponent;
-   const exposedComponent = arguments.length === 2 ? templateOrComponent : undefined;
-   // const mountTeleported = arguments.length === 3 ? mountTeleported
-   // const unnestedNodeEntities = unnestComponent(_render)
-   // if (exposedComponent instanceof Object) {
+   const renderedTemplate = arguments.length === 2 ? template : templateOrComponent as JSXTemplate;
+   const exposedComponent = arguments.length === 2 ? templateOrComponent as AnyObject : undefined;
    return {
       exposedComponent,
-      renderedTemplate: unnestComponent(renderedTemplate),
+      renderedTemplate: renderedTemplate ? unnestComponent(renderedTemplate) : undefined,
    } as Component<T extends AnyObject ? T : undefined>
-   // }
-   // return {
-   //     component: undefined,
-   //     render: unnestedNodeEntities
-   // } as Component<T extends AnyObject ? T : undefined>
 }
 
 export class InternalComponent<T extends AnyObject | undefined = AnyObject | undefined> {
    //  exposed?: T extends AnyObject ? PublicComponent<T> : undefined = undefined;
-   initialNodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
+   nodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
    exposed: AnyObject | undefined;
+   nodeKits?: NodeKit[]
 
    constructor(
       component: Component,
@@ -75,14 +68,14 @@ export class InternalComponent<T extends AnyObject | undefined = AnyObject | und
    ) {
       const exposed = this.exposed = component.exposedComponent;
       if (ref) initializeComponentRef(ref, exposed, $index)
-      this.initialNodeEntities = normalizeToFragmentArray(component.renderedTemplate)
+      this.nodeEntities = normalizeToArray(component.renderedTemplate)
    }
 
    mount(
       parent: Element,
       fragment?: DocumentFragment,
    ) { //TODO: what if a component's root elements is conditional or a dynamic list??
-      const nodeEntities = this.initialNodeEntities!;
+      const nodeEntities = this.nodeKits!;
       if (!(parent instanceof Element))
          throw new Error("Parent cannot be a text node")
       mountNodeEntities(nodeEntities, parent, fragment)
@@ -92,7 +85,7 @@ export class InternalComponent<T extends AnyObject | undefined = AnyObject | und
       parent: Element,
       nodePod: _NodePod
    ) {
-      this.initialNodeEntities = setUpNodeEntities(this.initialNodeEntities!, parent, nodePod)
+      this.nodeKits = setUpNodeEntities(this.nodeEntities!, parent, nodePod)
       return this;
    }
 }
@@ -112,28 +105,23 @@ export function initializeComponentRef(
    }
 }
 
-
-
-
-
-
-export function unnestComponent(nodeEntities: NodeEntity[]) {
-   if (nodeEntities.length !== 1)
-      return nodeEntities;
-   if (nodeEntities[0] instanceof InternalComponent) {
-      const component = nodeEntities[0]
-      if (!component.exposed || !component.initialNodeEntities)
+export function unnestComponent(nodeEntities: NodeEntity | NodeEntity[]) {
+   const isArray = nodeEntities instanceof Array;
+   if (isArray && nodeEntities.length > 1) return nodeEntities;
+   const entity = isArray ? nodeEntities[0] : nodeEntities;
+   if (entity instanceof InternalComponent) {
+      if (entity.exposed)
          return nodeEntities;
-      return component.initialNodeEntities;
+      return entity.nodeEntities;
    }
    return nodeEntities
 }
 
-function normalizeToFragmentArray(entity: any) { // distinguish conditional series from 
-   if (entity instanceof ConditionalRenderKit) return [[entity]];
-   if (entity instanceof Array) { // check if conditional series
-      if (entity[0] instanceof ConditionalRenderKit) return [entity];
-      return entity;
-   }
-   return normalizeToArray(entity);
-}
+// function normalizeToFragmentArray(entity: any) { // distinguish conditional series from 
+//    if (entity instanceof ConditionalRenderKit) return [[entity]];
+//    if (entity instanceof Array) { // check if conditional series
+//       if (entity[0] instanceof ConditionalRenderKit) return [entity];
+//       return entity;
+//    }
+//    return normalizeToArray(entity);
+// }

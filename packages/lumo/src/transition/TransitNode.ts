@@ -9,9 +9,9 @@ import { Ion } from "@rue/quarky";
 import { Component } from "../component/InternalComponent";
 import { Else, If } from "../conditional/If";
 
-export function renderIONode(
+export function renderTransitNode(
     $div: NodeRef<'div'>,
-    Slot: [string] | (() => NodeEntity | NodeEntity[]),
+    Slot: () => NodeEntity | NodeEntity[],
     transitionNode: TransitionNode,
     $disable: false | undefined | Ion<boolean>
 ) {
@@ -29,6 +29,7 @@ export function renderIONode(
             ]
         )
     }
+    console.log('render transit node')
     registerTransitionNode(transitionNode)
     return makeElement('div', Slot, { ref: $div }, undefined)
 }

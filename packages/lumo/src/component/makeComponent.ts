@@ -75,7 +75,7 @@ export function makeComponent(
 //     rendered: NodeEntity | NodeEntity[],
 // ) {
 //     const nodeEntities = normalizeToFragmentArray(rendered); //TODO: Validate output and get publicComponent from out
-//     component.initialNodeEntities = nodeEntities;
+//     component.nodeEntities = nodeEntities;
 // }
 
 

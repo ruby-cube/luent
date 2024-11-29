@@ -1,10 +1,9 @@
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
-import { NodeEntity } from "../node/makeNode";
+import { NodeEntity, normalizeToRenderFunction } from "../node/makeNode";
 import { ListRenderKit } from "./ListRenderKit";
 import { AtomicIon, ion, IonicModel, ReactiveGet } from "@rue/quarky";
 import { getContext } from "../context/context-stack";
-import { contextual } from "../context/provide";
-import { getPhasicNode } from "../transition/PhaseChange";
+import { getPhasicNode } from "../transition/PhasicNode";
 
 
 export type RenderItem<T = any> = (item: T, $index: AtomicIon<number>) => NodeEntity[] | NodeEntity
@@ -16,13 +15,13 @@ export type Collection<T> = T[]  //TODO: add sets and maps
 
 
 
-export function For<T>(data: ListData<T>, render: RenderItem<T>): ListRenderKit
-export function For<T>(data: ListData<T>, getUID: (item: T) => unknown, render: RenderItem<T>): ListRenderKit
-export function For<T>(data: ListData<T>, renderOrGetUID: RenderItem<T> | ((item: T) => unknown), render?: RenderItem<T>): ListRenderKit {
-    const uidProvided = arguments.length === 2
-    const _render = uidProvided ? render! : renderOrGetUID;
-    const getUID = uidProvided ? <(item: unknown) => unknown>renderOrGetUID : undefined;
-    return new ListRenderKit(_render, data, getContext(), getUID, getPhasicNode())
+export function For<T>(data: ListData<T>, render: RenderItem<T> | NodeEntity | NodeEntity[]): ListRenderKit
+export function For<T>(data: ListData<T>, getUID: (item: T) => unknown, render: RenderItem<T> | NodeEntity | NodeEntity[]): ListRenderKit
+export function For<T>(data: ListData<T>, renderOrGetUID: RenderItem<T> | NodeEntity | NodeEntity[] | ((item: T) => unknown), render?: RenderItem<T> | NodeEntity | NodeEntity[]): ListRenderKit {
+   const uidProvided = arguments.length === 2
+   const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID as RenderItem<T>);
+   const getUID = uidProvided ? <(item: unknown) => unknown>renderOrGetUID : undefined;
+   return new ListRenderKit(_render, data, getContext(), getUID, getPhasicNode())
 }
 
 

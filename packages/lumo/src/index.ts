@@ -20,6 +20,7 @@ export * from './events/Abortable' //TODO: Limit to public API
 export * from './boundaries/Dubious' //TODO: Limit to public API
 export * from './watch/watchAndPreserve' //TODO: Limit to public API
 export * from './transition/transitions' //TODO: Limit to public API
+export * from './transition/TransitionNode' //TODO: Limit to public API
 
 
 

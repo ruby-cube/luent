@@ -1,26 +1,43 @@
-import { ComponentSetup, HTMLTag, makeNode, NodeEntity } from "@rue/lumo";
-import { normalizeToArray } from "@rue/utils";
+import { ComponentSetup, HTMLTag, makeNode, NodeEntity, normalizeToRenderFunction, Slot } from "@rue/lumo";
+import { Ion, IonicModel, isIon } from "@rue/quarky";
+import { isObjectLiteral, normalizeToArray } from "@rue/utils";
 
+// without custom jsx compiler
+// - nodeEntity | nodeEntity[]
+// - () => nodeEntity | nodeEntity[]
+// with custom jsx compiler
 
 export const jsxDEV = jsx;
 
-export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: NodeEntity }) {
-    const children = config.children;
-    if (nodeType instanceof Function && nodeType !== Fragment) {
-        return makeNode(
-            nodeType,
-            children,
-            config
-        );
-    }
-    if (nodeType === Fragment) {
-        return normalizeToArray(children)
-    }
-    return makeNode(
-        nodeType,
-        normalizeToArray(children),
-        config
-    );
+export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Slot }) {
+   const Slot = processSlot(config.children);
+   console.log('children', Slot, 'for', nodeType)
+   if (nodeType instanceof Function && nodeType !== Fragment) {
+      return makeNode(
+         nodeType,
+         Slot,
+         config
+      );
+   }
+   if (nodeType === Fragment) {
+      return normalizeToArray(config.children)
+   }
+   return makeNode(
+      nodeType,
+      Slot,
+      config
+   );
+}
+
+function processSlot(Slot: Slot | { z: Ion } | { [key: string]: Slot }) {
+   if (isObjectLiteral(Slot)) {
+      if ('z' in Slot && isIon(Slot.z)) {
+         return Slot.z();
+      }
+      // named slots
+      return Slot;
+   }
+   return normalizeToRenderFunction(<Slot>Slot)
 }
 
 

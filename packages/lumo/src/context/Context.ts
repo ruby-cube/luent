@@ -1,6 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { Component, InternalComponent } from "../component/InternalComponent";
-import { initializeComponent } from "../component/makeComponent";
+import { Component, InternalComponent, Slot } from "../component/InternalComponent";
 import { getCurrentContext, popContext, pushContext } from "./context-stack";
 import { AppContext, _ContextInputType } from "./provide";
 import { ComponentConfig, NodeEntity } from "../node/makeNode";
@@ -22,9 +21,10 @@ export const context = {
     node: Context
 }
 
+
 export function Context<T extends ContextEntries<T>>(input: {
     with: T,
-    Slot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
+    Slot: Slot
 }) {
     const { Slot } = input
 

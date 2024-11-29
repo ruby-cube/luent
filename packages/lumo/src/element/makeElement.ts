@@ -1,14 +1,11 @@
-import { DOMNode } from "../component/InternalComponent";
+import { DOMNode, Slot } from "../component/InternalComponent";
 import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon } from "../../../quarky/src";
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { initializeRender, watch } from "../watch/watchAndPreserve";
 import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
-import { ion } from "../../../quarky/src";
 import { mountNodeEntities } from "../node/mountNodeEntity";
-import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
-import { validateStandAloneConditional } from "../conditional/ConditionalSeries";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
@@ -29,7 +26,7 @@ export function mE(
 
 export function makeElement<T extends keyof HTMLElementTagNameMap>(
     tagName: T,
-    Slot: [string] | (() => NodeEntity[]) | undefined,
+    Slot: Slot | undefined,
     config: ElementConfig,
     $index: AtomicIon<number> | undefined
 ): DOMNode {
@@ -61,7 +58,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
         );
 
     if (Slot) {
-        const rawOutput = wrapIfConditionalSeries(Slot instanceof Function ? Slot() : Slot)
+        const rawOutput = normalizeToArray(Slot instanceof Function ? Slot() : Slot)
         const nodePod = new _NodePod();
         const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodePod)
         mountNodeEntities(nodeEntities, domNode)
@@ -71,31 +68,31 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
 
 
-function wrapIfConditionalSeries(nodeEntities: NodeEntity[]) {
-    if (isNotConditionalSeries(nodeEntities)) {
-        return nodeEntities;
-    }
-    validateConditionalSeries(nodeEntities, false)
-    return [nodeEntities];
-}
+// function wrapIfConditionalSeries(nodeEntities: NodeEntity[]) {
+//     if (isNotConditionalSeries(nodeEntities)) {
+//         return nodeEntities;
+//     }
+//     validateConditionalSeries(nodeEntities, false)
+//     return [nodeEntities];
+// }
 
 
-function isNotConditionalSeries(nodeEntities: NodeEntity[]) {
-    return !(nodeEntities[0] instanceof ConditionalRenderKit) ||
-        !(nodeEntities[nodeEntities.length - 1] instanceof ConditionalRenderKit)
-}
+// function isNotConditionalSeries(nodeEntities: NodeEntity[]) {
+//     return !(nodeEntities[0] instanceof ConditionalRenderKit) ||
+//         !(nodeEntities[nodeEntities.length - 1] instanceof ConditionalRenderKit)
+// }
 
-function validateConditionalSeries(nodeEntities: ConditionalRenderKit[], isNotConditionalSeries: false) {
-    if (isNotConditionalSeries !== false)
-        throw new Error(`validateConditionalSeries must be called after isNotConditionalSeries`)
-    if (nodeEntities[0].statementType !== 'if' || nodeEntities[nodeEntities.length - 1].statementType === 'if')
-        throw new Error("Invalid conditional series")
-    for (let i = 1; i < nodeEntities.length - 1; i++) {
-        const nodeEntity = nodeEntities[i];
-        if (!(nodeEntity instanceof ConditionalRenderKit) || nodeEntity.statementType === 'if' || nodeEntity.statementType == 'else')
-            throw new Error("Invalid conditional series")
-    }
-}
+// function validateConditionalSeries(nodeEntities: ConditionalRenderKit[], isNotConditionalSeries: false) {
+//     if (isNotConditionalSeries !== false)
+//         throw new Error(`validateConditionalSeries must be called after isNotConditionalSeries`)
+//     if (nodeEntities[0].statementType !== 'if' || nodeEntities[nodeEntities.length - 1].statementType === 'if')
+//         throw new Error("Invalid conditional series")
+//     for (let i = 1; i < nodeEntities.length - 1; i++) {
+//         const nodeEntity = nodeEntities[i];
+//         if (!(nodeEntity instanceof ConditionalRenderKit) || nodeEntity.statementType === 'if' || nodeEntity.statementType == 'else')
+//             throw new Error("Invalid conditional series")
+//     }
+// }
 
 function analyzeAttributes(entries: AnyObject) {
     const events: AnyObject = {};

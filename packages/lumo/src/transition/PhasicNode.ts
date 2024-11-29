@@ -10,7 +10,7 @@ import { TransitionHook, TransitionNode } from "./TransitionNode";
 import type { Context as ContextType } from "../context/context-stack";
 import { v } from "../InputTypes";
 import { Ion } from "@rue/quarky";
-import { Component } from "../component/InternalComponent";
+import { Component, Slot } from "../component/InternalComponent";
 import { Else, If } from "../conditional/If";
 
 export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | AnimationKit
@@ -36,7 +36,7 @@ export type PhasicNode = {
 }
 
 
-export function renderPhaseChangeNode(
+export function renderPhasicNode(
     $div: NodeRef<'div'>,
     Slot: [string] | (() => NodeEntity | NodeEntity[]),
     transitionNode: TransitionNode,
@@ -66,7 +66,7 @@ export function renderPhaseChangeNode(
 
 function createPhasicNode(
     $div: NodeRef<'div'>,
-    Slot: [string] | (() => NodeEntity | NodeEntity[]),
+    Slot: Slot,
     transitionNode: TransitionNode,
 ) {
     let phasicNode: null | TransitionNode = transitionNode
