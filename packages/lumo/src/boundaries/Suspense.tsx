@@ -19,13 +19,13 @@ export function pend(promiseValue: Promise<any> | Promise<any>[]) {
 
 export type SuspenseNodeInput = {
    timeout?: number,
+   await?: Promise<any> | Promise<any>[],
    standin?: () => NodeEntity | NodeEntity[]
    standby?: (error: Error) => NodeEntity | NodeEntity[]
-   Slot: () => NodeEntity | NodeEntity[]
 }
 
-export function Suspense(input: SuspenseNodeInput) {
-   const { Slot, standin: renderPlaceholder = () => undefined, timeout, standby: renderError = () => undefined } = input;
+export function createSuspenseNode(Slot: ()=>NodeEntity | NodeEntity[], input: SuspenseNodeInput) {
+   const { standin: renderPlaceholder = () => undefined, timeout, standby: renderError = () => undefined } = input;
    const $pending = ion(true);
    const $error: AtomicIon<Error> = ion();
    const $ready = ion(false);

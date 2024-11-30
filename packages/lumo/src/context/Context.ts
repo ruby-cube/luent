@@ -24,7 +24,7 @@ export const context = {
 
 export function Context<T extends ContextEntries<T>>(input: {
     with: T,
-    Slot: Slot
+    Slot: ()=>NodeEntity | NodeEntity[]
 }) {
     const { Slot } = input
 
@@ -37,7 +37,6 @@ export function Context<T extends ContextEntries<T>>(input: {
         app: parentContext?.app,
         transapp: parentContext?.transapp
     }
-
     pushContext(context)
     const nodeEntities = Slot()
     popContext()

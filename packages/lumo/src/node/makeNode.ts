@@ -12,6 +12,8 @@ import { createTransitionNode, TransitionNodeInput } from "../transition/Transit
 import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
 import { isObjectLiteral } from "@rue/utils";
+import { createDubiousNode, DubiousNodeInput } from "../boundaries/Dubious";
+import { createSuspenseNode, SuspenseNodeInput } from "../boundaries/Suspense";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -86,14 +88,25 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity 
 }
 
 export function makeNode(
-   nodeType: HTMLTag | ComponentSetup | 'transit-node' | 'phasic-node' | 'context-node' | 'swap:mount' | 'swap:instance' | 'swap:display',
+   nodeType: HTMLTag | ComponentSetup | 'transit-node' | 'phasic-node' | 'context-node' | 'swap:mount' | 'swap:instance' | 'swap:display' | 'dubious-node' | 'suspense-node' | 'portal-node',
    Slot: (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
-): DOMNode | InternalComponent | SwapConfig | JSX.Element {
+): DOMNode | InternalComponent | SwapConfig | JSX.Element | undefined {
 
    switch (nodeType) {
       case 'context-node':
-         console.log('Slot', Slot)
+         if (!Slot) throw new Error(`Extraneous <Context>`)
+         return createNodeContext(Slot, <ComponentConfig>config)
+
+      case 'dubious-node':
+         if (!Slot) throw new Error(`Extraneous <Context>`)
+         return createDubiousNode(Slot, <DubiousNodeInput>config)
+
+      case 'suspense-node':
+         if (!Slot) throw new Error(`Extraneous <Context>`)
+         return createSuspenseNode(Slot, <SuspenseNodeInput>config)
+
+      case 'portal-node':
          if (!Slot) throw new Error(`Extraneous <Context>`)
          return createNodeContext(Slot, <ComponentConfig>config)
 

@@ -33,26 +33,29 @@ export function MountIf() {
          }</context-node> */}
          <h1>Hello world</h1>
          <phasic-node>
-         {If($active, () => <>
-            oh
-            <transit-node with={slide({ x: -100, duration: 300 })}>
-               <h2>hi</h2>
-            </transit-node>
-            <transit-node with={slide({ x: 100, duration: 300 })}>
-            <h2>ho</h2>
-            </transit-node>
-            {If($ready, () =>
-               <p>ready</p>
+            {If($active, () => <>
+               oh
+               <transit-node with={slide({ x: -100, duration: 300 })}>
+                  <h2>hi</h2>
+               </transit-node>
+               <transit-node with={slide({ x: 100, duration: 300 })}>
+                  <h2>ho</h2>
+               </transit-node>
+               {If($ready, () =>
+                  <p>ready</p>
+               )}
+            </>
             )}
-         </>)}
-         {ElseIf($ready, () => <>
-            low
-            <h2>balloon</h2>
-         </>)}
-         {Else(() => <>
-            so
-            <h2>bye</h2>
-         </>)}
+            {ElseIf($ready, () => <>
+               low
+               <h2>balloon</h2>
+            </>
+            )}
+            {Else(() => <>
+               so
+               <h2>bye</h2>
+            </>
+            )}
          </phasic-node>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>
