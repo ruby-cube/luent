@@ -17,11 +17,10 @@ export function getTransition() {
 
 export type PortalNodeInput = {
    to: string | Element,
-   Slot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
 }
 
-export function Portal(input: PortalNodeInput) {
-    const { Slot, to: container } = input
+export function createPortalNode(Slot: ()=>NodeEntity | NodeEntity[], input: PortalNodeInput) {
+    const { to: container } = input
     if (!(Slot instanceof Function)) throw new Error('')
     const element = typeof container === "string" ? document.querySelector(container) : container;
     if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')

@@ -10,6 +10,7 @@ import * as Lumo from "@rue/lumo";
 import { NodeRef } from "../../src/node/NodeRef";
 import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, DubiousNodeInput, TransitionNodeInput } from "@rue/lumo";
 import { AnyObject } from "@rue/types";
+import { PortalNodeInput } from "../../src/boundaries/Portal";
 
 // export function jsxDEV(): "frog"
 // export function jsx(): "frog"
@@ -2548,10 +2549,10 @@ declare global {
          'swap:display': {};
          'swap:mount': {};
          'swap:instance': {};
-         'portal-node': { to: string | Element; Slot: () => Lumo.NodeEntity | Lumo.NodeEntity[]}
-         'context-node': ContextNodeInput;
-         'suspense-node': SuspenseNodeInput;
-         'dubious-node': DubiousNodeInput;
+         'portal-node': PortalNodeInput & { Slot: Lumo.Slot }
+         'context-node': ContextNodeInput & { Slot: Lumo.Slot };
+         'suspense-node': SuspenseNodeInput & { Slot: Lumo.Slot };
+         'dubious-node': DubiousNodeInput & { Slot: Lumo.Slot };
          'transit-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
          'phasic-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
          'port-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>

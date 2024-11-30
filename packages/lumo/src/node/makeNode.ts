@@ -14,6 +14,7 @@ import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries"
 import { isObjectLiteral } from "@rue/utils";
 import { createDubiousNode, DubiousNodeInput } from "../boundaries/Dubious";
 import { createSuspenseNode, SuspenseNodeInput } from "../boundaries/Suspense";
+import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -108,7 +109,7 @@ export function makeNode(
 
       case 'portal-node':
          if (!Slot) throw new Error(`Extraneous <Context>`)
-         return createNodeContext(Slot, <ComponentConfig>config)
+         return createPortalNode(Slot, <PortalNodeInput>config)
 
       case 'swap:display':
          return new SwapConfig('display')
