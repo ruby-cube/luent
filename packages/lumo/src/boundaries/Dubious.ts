@@ -3,10 +3,10 @@ import { NodeEntity } from "../node/makeNode";
 import { Component } from "../component/InternalComponent";
 
 export type DubiousNodeInput = {
-   standby?: (error: Error) => NodeEntity | NodeEntity[]
+   standby?: (error: Error) => NodeEntity
 }
 
-export function createDubiousNode<T extends AnyObject>(Slot: () => NodeEntity | NodeEntity[], input: DubiousNodeInput) {
+export function createDubiousNode<T extends AnyObject>(Slot: () => NodeEntity, input: DubiousNodeInput) {
    const { standby } = input;
    if (!(Slot instanceof Function)) throw new Error('Slot must be a function')
 

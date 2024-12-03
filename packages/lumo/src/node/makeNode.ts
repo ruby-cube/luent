@@ -1,4 +1,4 @@
-import { DerivedIon, ReactiveGet, ion, IonicModel, __devCheckIfTracked, __devCheckIfNotTracked, AtomicIon, Ion } from "../../../quarky/src";
+import {  __devCheckIfTracked, __devCheckIfNotTracked, AtomicIon, Ion } from "../../../quarky/src";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { InferSlot, ComponentSetupWithSlot, makeComponent } from "../component/makeComponent";
@@ -11,7 +11,6 @@ import { AnyObject } from "@rue/types";
 import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
-import { isObjectLiteral } from "@rue/utils";
 import { createDubiousNode, DubiousNodeInput } from "../boundaries/Dubious";
 import { createSuspenseNode, SuspenseNodeInput } from "../boundaries/Suspense";
 import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
@@ -28,9 +27,10 @@ import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
 
 export type NodeEntity =
    NodeEntity[]
-   | DOMNode
    | JSX.Element
+   | DOMNode
    | string
+   | undefined
    | (() => any) // derived getter
    | Ion
    | InternalComponent
@@ -41,8 +41,8 @@ export type NodeEntity =
    | ConditionalRenderSeries
 
 export type RenderFunction<Params = unknown> = Params extends any[] ?
-   (...args: Params) => NodeEntity[] | NodeEntity :
-   () => NodeEntity[] | NodeEntity
+   (...args: Params) => NodeEntity :
+   () => NodeEntity
 
 export type EventHandler<K extends keyof HTMLElementEventMap> = (event: HTMLElementEventMap[K]) => void
 
@@ -82,8 +82,8 @@ export class SwapConfig {
 }
 
 // TODO: how to distinguish render function from derived getter 
-export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]) {
-   if (slot instanceof Function) return slot as (...args: any[]) => NodeEntity | NodeEntity[];
+export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity) | NodeEntity) {
+   if (slot instanceof Function) return slot as (...args: any[]) => NodeEntity;
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
    return () => slot;
 }

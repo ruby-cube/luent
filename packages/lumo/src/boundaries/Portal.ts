@@ -19,7 +19,7 @@ export type PortalNodeInput = {
    to: string | Element,
 }
 
-export function createPortalNode(Slot: ()=>NodeEntity | NodeEntity[], input: PortalNodeInput) {
+export function createPortalNode(Slot: ()=>NodeEntity, input: PortalNodeInput) {
     const { to: container } = input
     if (!(Slot instanceof Function)) throw new Error('')
     const element = typeof container === "string" ? document.querySelector(container) : container;

@@ -1,13 +1,10 @@
 import { InternalComponent } from "../component/InternalComponent";
-import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
 import { mountElement } from "../element/mountElement";
-import { NodeEntity } from "./makeNode";
 import { _NodePod } from "./NodePod";
 import { mountTextNode, setUpTextNode } from "./mountTextNode";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
-import { getContext } from "../context/context-stack";
 import { NodeKit } from "./setUpNodeEntities";
 
 // node kits:
@@ -29,7 +26,6 @@ export function mountNodeEntities(
 ){
     // console.log('start--------------', nodeEntities)
     for (const nodeEntity of nodeEntities){
-        // console.log('mounting', nodeEntity)
         mountNodeEntity(nodeEntity, parent, fragment)
     }
     // console.log('end--------------', nodeEntities)

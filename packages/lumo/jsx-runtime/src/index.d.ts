@@ -2542,7 +2542,7 @@ declare global {
 
       // type ContextNodeInput<T> = {
       //     with: T & ContextEntries<T>,
-      //     Slot: (() => NodeEntity | NodeEntity[]) | NodeEntity | NodeEntity[]
+      //     Slot: (() => NodeEntity) | NodeEntity
       // }
 
       interface _IntrinsicElements {

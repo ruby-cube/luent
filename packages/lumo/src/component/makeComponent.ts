@@ -19,7 +19,7 @@ export type SetupWithSlot = {
 }
 
 export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
-   (setup?: P) => NodeEntity[] | NodeEntity
+   (setup?: P) => NodeEntity
 
 
 // export function mO<T extends ComponentSetupWithSlot>(
@@ -72,7 +72,7 @@ export function makeComponent(
 
 // export function initializeComponent(
 //     component: InternalComponent,
-//     rendered: NodeEntity | NodeEntity[],
+//     rendered: NodeEntity,
 // ) {
 //     const nodeEntities = normalizeToFragmentArray(rendered); //TODO: Validate output and get publicComponent from out
 //     component.nodeEntities = nodeEntities;

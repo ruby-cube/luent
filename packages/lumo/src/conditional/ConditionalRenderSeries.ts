@@ -88,7 +88,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       statements: ConditionalRenderKit[],
       // public type: 'create' | 'show' | 'mount',
       makeElseKit: () => ConditionalRenderKit,
-      swap: SwapType = 'instance'
+      public swap: SwapType = 'instance'
    ) {
       super(statements, makeElseKit);
       const context = this.context = statements[0].context;
@@ -144,12 +144,11 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          if (prevIndex === activeIndex) {
             return;
          }
+
          const outgoingNodes = series.statements[prevIndex].transitionNodes
          const incomingNodes = series.statements[activeIndex].transitionNodes
-         const activationType = series.statements[activeIndex].type; //TODO: make this a prop of series not the statement
+         const activationType = series.statements[activeIndex].type || toActivationType(series.swap); //TODO: make this a prop of series not the statement
          const shouldTransitionOut = phasicNode || outgoingNodes.length
-         console.log('incomingNodes', incomingNodes)
-         console.log('outgoingNodes', outgoingNodes)
 
          // (0) Pause previous transition
          if (entranceStateTime) {
@@ -313,8 +312,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          __devName: 'mount conditional'
       })
 
-
-
       // // set up watcher for updates
       // watch($conditions, function updateConditional(newValue: boolean[], oldValue: boolean[]) {
       //     console.log("update conditional")
@@ -473,6 +470,19 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    }
 }
 
+function toActivationType(swap: SwapType) {
+   switch (swap) {
+      case 'instance':
+         return 'create'
+      case 'mount':
+         return 'mount'
+      case 'display':
+         return 'show'
+
+      default:
+         break;
+   }
+}
 
 
 // export function remountConditional(

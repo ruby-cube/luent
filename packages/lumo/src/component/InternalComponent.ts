@@ -18,11 +18,11 @@ export type DOMNode = CharacterData | Element
 // }
 
 export type Slot<P = undefined> =
-   P extends undefined ? (() => NodeEntity | NodeEntity[]) | NodeEntity[] | NodeEntity
-   : (props: P) => NodeEntity | NodeEntity[]
+   P extends undefined ? (() => NodeEntity) | NodeEntity
+   : (props: P) => NodeEntity
 
 
-// export type Slot = NodeEntity | NodeEntity[]
+// export type Slot = NodeEntity
 export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup?: P) => Component
 
 export const COMPONENT = Symbol('publicComponent')
@@ -32,7 +32,7 @@ export type PublicComponent<T extends AnyObject = AnyObject> = T // contains any
 
 export interface Component<T extends AnyObject | undefined = AnyObject | undefined> {
    exposedComponent?: T extends AnyObject ? PublicComponent<T> : undefined;
-   renderedTemplate: NodeEntity | NodeEntity[];
+   renderedTemplate: NodeEntity;
    // morphicRenderKit?: MorphicRenderKit
 }
 
@@ -40,7 +40,7 @@ export function expose<T>(publicComponent: T & Object): T {
    return protect(publicComponent);
 }
 
-type JSXTemplate = NodeEntity | NodeEntity[]
+type JSXTemplate = NodeEntity
 
 //TODO: accept a third paramenter for mountTeleported
 // compiler macro to transform jsx template into render function
@@ -105,7 +105,7 @@ export function initializeComponentRef(
    }
 }
 
-export function unnestComponent(nodeEntities: NodeEntity | NodeEntity[]) {
+export function unnestComponent(nodeEntities: NodeEntity) {
    const isArray = nodeEntities instanceof Array;
    if (isArray && nodeEntities.length > 1) return nodeEntities;
    const entity = isArray ? nodeEntities[0] : nodeEntities;

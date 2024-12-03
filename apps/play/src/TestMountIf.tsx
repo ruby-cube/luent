@@ -1,5 +1,5 @@
 import { Component, If, Else, fade, ElseIf, slide, fromTag, v } from "@rue/lumo";
-import { ion } from "@rue/quarky";
+import { ion, ionize } from "@rue/quarky";
 
 export function MountIf() {
    const $count = ion(0, {
@@ -26,12 +26,18 @@ export function MountIf() {
       }
    })
 
+   const todos = ionize([] as { hi: string }[])
+
+   const removed = todos.splice(0, 2)
+
    return Component(
       <>
          {/* <context-node with={{ dog: 'hi' }}>{()=>
             <div>hi</div>
          }</context-node> */}
-         <h1>Hello world</h1>
+         {undefined}
+         
+         <h1>Hello {undefined}</h1>
          <phasic-node>
             {If($active, () => <>
                oh

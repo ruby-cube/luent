@@ -11,7 +11,7 @@ import { Else, If } from "../conditional/If";
 
 export function renderTransitNode(
     $div: NodeRef<'div'>,
-    Slot: () => NodeEntity | NodeEntity[],
+    Slot: () => NodeEntity,
     transitionNode: TransitionNode,
     $disable: false | undefined | Ion<boolean>
 ) {

@@ -26,6 +26,7 @@ export function setUpNodeEntities(
    nodePod: _NodePod,
    nodeKits: NodeKit[] = []
 ) {
+   console.log('nodeEntities', nodeEntities)
    for (let i = 0; i < nodeEntities.length; i++) {
       let nodeEntity = nodeEntities[i];
       if (nodeEntity instanceof Array) {
@@ -66,6 +67,9 @@ export function setUpNodeEntities(
          else if (__DEV__) {
             console.warn('extraneous swap tag')
          }
+      }
+      else if (nodeEntity === undefined) {
+         continue;
       }
       else {
          nodeKits.push(setUpNodeEntity(nodeEntity, parent, nodePod))

@@ -24,7 +24,7 @@ export const context = {
 
 export function Context<T extends ContextEntries<T>>(input: {
     with: T,
-    Slot: ()=>NodeEntity | NodeEntity[]
+    Slot: ()=>NodeEntity
 }) {
     const { Slot } = input
 
@@ -44,7 +44,7 @@ export function Context<T extends ContextEntries<T>>(input: {
 }
 
 export function createNodeContext(
-    Slot: () => NodeEntity | NodeEntity[],
+    Slot: () => NodeEntity,
     config: ComponentConfig,
 ): InternalComponent {
    const output = Context({ Slot, with: config.with })

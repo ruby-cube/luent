@@ -12,9 +12,9 @@ export type TransitionHook = {
 }
 
 export type TransitionNodeInput = {
-      Slot: (() => NodeEntity | NodeEntity[]) | NodeEntity[] | NodeEntity,
+      Slot: (() => NodeEntity) | NodeEntity,
       with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
-      'init:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
+      'load:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
       'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
       'out:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
       onStart?: (hook: TransitionHook) => void;
@@ -39,10 +39,10 @@ const defaultFade: TransitionClasses = {
 
 export function createTransitionNode(
     type: 'phasic-node' | 'transit-node',
-    Slot: (() => NodeEntity | NodeEntity[]),
+    Slot: (() => NodeEntity),
     input: TransitionNodeInput
 ) {
-    const { 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "init:with": inputInit, onEnd, onStart, disable } = input;
+    const { 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "load:with": inputLoad, onEnd, onStart, disable } = input;
 
     if (disable === true) {
         return Slot instanceof Function ? Slot() : Slot
@@ -53,7 +53,7 @@ export function createTransitionNode(
 
     //TODO: init with
 
-    const [transitionInit, animateInit] = inputInit === true ? normalizeToKitArrays(inputBoth ? inputBoth : inputIn ?? defaultFade) : normalizeToKitArrays(inputInit)
+    const [transitionLoad, animateLoad] = inputLoad === true ? normalizeToKitArrays(inputBoth ? inputBoth : inputIn ?? defaultFade) : normalizeToKitArrays(inputLoad)
     const [transitionIn, animateIn] = normalizeToKitArrays(inputIn)
     const [transitionOut, animateOut] = normalizeToKitArrays(inputOut)
     const [transitionBoth, animateBoth] = normalizeToKitArrays(inputBoth ? inputBoth : (!inputIn && !inputOut) ? defaultFade : undefined)

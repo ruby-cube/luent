@@ -6,7 +6,7 @@ import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } f
 import { contextual } from "../context/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
-import { TransitionHook, TransitionNode } from "./TransitionNode";
+import { TransitionNode } from "./TransitionNode";
 import type { Context as ContextType } from "../context/context-stack";
 import { v } from "../InputTypes";
 import { Ion } from "@rue/quarky";
@@ -38,7 +38,7 @@ export type PhasicNode = {
 
 export function renderPhasicNode(
     $div: NodeRef<'div'>,
-    Slot: [string] | (() => NodeEntity | NodeEntity[]),
+    Slot: () => NodeEntity,
     transitionNode: TransitionNode,
     $disable: false | undefined | Ion<boolean>
 ) {

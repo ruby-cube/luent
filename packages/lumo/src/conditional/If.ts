@@ -32,9 +32,9 @@ function resetCurrentNodePodIndex(index?: number) {
 type ActivationType = 'show' | 'create' | 'mount'
 
 
-export function If($condition: Booleanny | ((_?: any) => Booleanny), renderConditional: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit
-export function If($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit
-export function If($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: NodeEntity | NodeEntity[] | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit {
+export function If($condition: Booleanny | ((_?: any) => Booleanny), renderConditional: RenderFunction | NodeEntity): ConditionalRenderKit
+export function If($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderFunction | NodeEntity): ConditionalRenderKit
+export function If($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalRenderKit {
    const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional)
    const activationType = renderConditional ? typeOrRenderConditional as ActivationType : 'create' as const
    if (activationType === 'show') {
@@ -56,9 +56,9 @@ export function If($condition: Booleanny | ((_?: any) => Booleanny), typeOrRende
 }
 
 
-export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), renderConditional: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit
-export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit
-export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: NodeEntity | NodeEntity[] | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit {
+export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), renderConditional: RenderFunction | NodeEntity): ConditionalRenderKit
+export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderFunction | NodeEntity): ConditionalRenderKit
+export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalRenderKit {
    const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional)
    const activationType = renderConditional ? typeOrRenderConditional as ActivationType : 'create';
    if (activationType === 'show') {
@@ -80,9 +80,9 @@ export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), typeOrR
 
 
 
-export function Else(renderConditional: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit
-export function Else(activationType: ActivationType, renderConditional: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit
-export function Else(typeOrRenderConditional: NodeEntity | NodeEntity[] | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity | NodeEntity[]): ConditionalRenderKit {
+export function Else(renderConditional: RenderFunction | NodeEntity): ConditionalRenderKit
+export function Else(activationType: ActivationType, renderConditional: RenderFunction | NodeEntity): ConditionalRenderKit
+export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalRenderKit {
    const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional)
    const activationType = renderConditional ? typeOrRenderConditional as ActivationType : 'create';
    if (activationType === 'show') {

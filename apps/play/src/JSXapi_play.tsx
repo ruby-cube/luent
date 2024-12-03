@@ -5,6 +5,16 @@ import { noop } from "@rue/utils";
 import { M } from "vite/dist/node/types.d-aGj9QkWt";
 export function ListBlock(setup = $setup()) {
 
+   const $List = PortNode({ send: true, settle: true, receive: 300 }, $list =>      
+         For($list, o => o, (item, $index) =>
+         <transit.node>
+            <p>[x] {item}</p>,
+         </transit.node>
+      )
+   )
+const hi = () =>
+   <$List for={$list}/>
+
    const $ItemBlock = LazyNode({
       load: () => {
          const promise = import('./SideBlock').then(({ SideBlock }) => SideBlock)
@@ -20,18 +30,6 @@ export function ListBlock(setup = $setup()) {
       with: fade
    });
 
-   { type: 'show' }
-   { type: 'create' }
-   { type: 'mount' }
-
-
-   const $List = PortNode({ send: true, settle: true, receive: 300 },
-      For($list, o => o, (item, $index) =>
-         <transit.node>
-            <p>[x] {item}</p>,
-         </transit.node>
-      )
-   )
 
    // const $ItemBlock = SuspenseNode({
    //     Pending: ItemBlock,
@@ -221,8 +219,6 @@ export function ListBlock(setup = $setup()) {
                   )
                ]}
             </div>
-
-
 
             <div>
                <$ Match={$key}>
