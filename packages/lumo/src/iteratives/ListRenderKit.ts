@@ -19,6 +19,7 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { RenderFunction } from "../node/makeNode";
 import { AnyObject } from "@rue/types";
 import { createNodeContext } from "../context/Context";
+import { useTransitionNodes } from "../transition/TransitNode";
 
 
 type Index = number
@@ -40,15 +41,17 @@ export function setCurrentIndex($index: AtomicIon<number> | undefined) {
    $currentIndex = $index;
 }
 
-function wrapWithContext(renderItem: RenderItem, context: AnyObject, list: ListRenderKit) {
+function wrapWithContext(renderItem: RenderItem, list: ListRenderKit) {
    const outerContext = getContext();
    return (item: any, $index: AtomicIon<number>, parent: Element, nodePod: _NodePod) => {
+      const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
+      list.transitions.set($index, transitionNodes)
       try {
          pushList(list)
          pushContext(outerContext)
          const nodeEntities = setUpNodeEntities(normalizeToArray(
             createNodeContext(() => renderItem(item, $index), {
-               with: context
+               with: { [REGISTER_TRANSITION_NODE]: registerTransitionNode }
             })
          ), parent, nodePod)
          return nodeEntities;
@@ -66,26 +69,23 @@ function wrapWithContext(renderItem: RenderItem, context: AnyObject, list: ListR
 
 export class ListRenderKit<T = any> {
    renderItem: (item: any, $index: AtomicIon<number>, parent: Element, nodePod: _NodePod) => NodeKit[]
+
    constructor(
       renderItem: RenderItem<T>, //QUESTION: Does this need the context object?
       public data: Collection<T> | IonicModel<Collection<T>> | ReactiveGet<Collection<T>>,
-      public context: Context,
       public getUID: ((item: unknown) => unknown) | undefined,
-      public phasicNode: undefined | TransitionNode | null
    ) {
-      this.renderItem = wrapWithContext(renderItem, getContext(), this);
+      this.renderItem = wrapWithContext(renderItem, this);
    }
 
-   isUpdating = false;
-
-   runUpdate(update: () => void) {
-      this.isUpdating = true;
-      update();
-      this.isUpdating = false;
-   }
-
-
+   beforeUpdateTasks: Set<Function> = new Set()
    afterUpdateTasks: Set<Function> = new Set()
+
+   castBeforeUpdate() {
+      for (const task of this.beforeUpdateTasks) {
+         task()
+      }
+   }
 
    castUpdated(toFromIndices: [number, number][]) {
       for (const task of this.afterUpdateTasks) {
@@ -96,43 +96,13 @@ export class ListRenderKit<T = any> {
    private outerNodePod!: _NodePod;
    private dynamicNodePod: _DynamicNodePod | undefined
    indices: AtomicIon<number>[] = [];
-
-   mount(
-      parent: Element,
-      fragment?: DocumentFragment
-   ) {
-      const data = this.data
-      const list = isIon(data) ? data() : <Collection<any>>data;
-      const _list = list instanceof Array ? list : list //TODO: need to implement for sets, maps, and objects
-      const listKit = this;
-      const isDynamic = this.isDynamic;
-      const dynamicNodePod = this.dynamicNodePod;
-
-      for (let i = 0; i < _list.length; i++) {
-         const $index = ion(i)
-         const item = _list[i]
-         $currentIndex = $index;
-         this.indices.push($index)
-
-         const  nodePod = isDynamic ? dynamicNodePod!.appendNodePod() : this.outerNodePod;
-
-         if (isDynamic) {
-            const dynamicNode = makeDynamicNode(nodePod)
-            dynamicNode.mount(function mountDynamicItem() {
-               console.log('mounting item')
-               const nodeEntities = listKit.renderItem(item, $index, parent, nodePod)
-               mountNodeEntities(nodeEntities, parent, fragment);
-            })
-            dynamicNodeMap.set(nodePod, dynamicNode)
-         }
-         else {
-            const nodeEntities = this.renderItem(item, $index, parent, nodePod)
-            mountNodeEntities(nodeEntities, parent, fragment);
-         }
-      }
-   }
-
    isDynamic: boolean = false;
+
+   _transitions?: Map<AtomicIon<number>, TransitionNode[]>
+   get transitions(){
+      if (this._transitions) return this._transitions;
+      return this._transitions = new Map();
+   }
 
    setUp(
       parent: Element,
@@ -151,14 +121,13 @@ export class ListRenderKit<T = any> {
       // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
 
       if (isDynamic) {
-         const dynamicIndices = new DynamicIndices(this.indices)
          // set up watcher for updates
          // const renderCycle = getCurrentRenderCycle();
          const parentDynamicNode = getActiveDynamicNode()
          const rawData = isIonicModel(data) ? toRaw(data) : undefined
          let clone = isIonicModel(data) ? shallowClone(rawData!) : undefined
          //TODO: figure out typing for Set, Map, Object vs Array
-         watch(data, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
+         watch(data as any/* FIX: type error*/, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
             console.log('updating list')
             const _oldValue = clone || oldValue;
             if (_isIonicModel) clone = shallowClone(rawData!) as any[]
@@ -166,20 +135,52 @@ export class ListRenderKit<T = any> {
             if (noChange) return;
             if (dynamicNodePod!.length !== _oldValue.length)
                throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)
-            this.runUpdate(() => {
-               pushDynamicNode(parentDynamicNode!)
-               // component.emit(LifecycleHook.BEFORE_UPDATE) //FIX: this should be called in before render and afterRender hooks
-               this.removeItems(indicesToRemove!);
-               this.insertAndMoveItems(insertAndMoveKit!, parent, dynamicIndices)
-               // component.emit(LifecycleHook.ON_UPDATED)
-               popDynamicNode()
-            })
+
+            this.castBeforeUpdate();
+            this.removeItems(indicesToRemove!);
+            this.insertAndMoveItems(insertAndMoveKit!, parent, parentDynamicNode);
          }, { phase: Phase.RENDER })
       }
       // currentItem = undefined;
       $currentIndex = undefined;
       //   popList();
       return this;
+   }
+
+
+   mount(
+      parent: Element,
+      fragment?: DocumentFragment
+   ) {
+      const data = this.data
+      const list = isIon(data) ? data() : <Collection<any>>data;
+      const _list = list instanceof Array ? list : list //TODO: need to implement for sets, maps, and objects
+      const listKit = this;
+      const isDynamic = this.isDynamic;
+      const dynamicNodePod = this.dynamicNodePod;
+
+      for (let i = 0; i < _list.length; i++) {
+         const $index = ion(i)
+         const item = _list[i]
+         $currentIndex = $index;
+         this.indices.push($index)
+
+         const nodePod = isDynamic ? dynamicNodePod!.appendNodePod() : this.outerNodePod;
+
+         if (isDynamic) {
+            const dynamicNode = makeDynamicNode(nodePod)
+            dynamicNode.mount(function mountDynamicItem() {
+               console.log('mounting item')
+               const nodeEntities = listKit.renderItem(item, $index, parent, nodePod)
+               mountNodeEntities(nodeEntities, parent, fragment);
+            })
+            dynamicNodeMap.set(nodePod, dynamicNode)
+         }
+         else {
+            const nodeEntities = this.renderItem(item, $index, parent, nodePod)
+            mountNodeEntities(nodeEntities, parent, fragment);
+         }
+      }
    }
 
    private removeItems(indicesToRemove: number[]) {
@@ -189,16 +190,19 @@ export class ListRenderKit<T = any> {
          const dynamicNode = dynamicNodeMap.get(nodePod)
          dynamicNode?.destroy()
       }
+      //TODO: how do I handle items that have been moved to another port?
    }
 
    private insertAndMoveItems(
       insertAndMoveKit: InsertAndMoveKit,
       parent: Element,
-      dynamicIndices: DynamicIndices,
+      parentDynamicNode: DynamicNode
    ) {
       const { getOriginalItem, isNewItem, hasMoved, newUArray, oldUArray, isRemoved } = insertAndMoveKit;
       const dynamicNodePod = this.dynamicNodePod!
-      if (dynamicNodePod.length !== oldUArray.length) throw new Error("dynamicPod and data length are mismatched")
+      if (dynamicNodePod.length !== oldUArray.length)
+         throw new Error("dynamicPod and data length are mismatched")
+
       const indicesAndNodePods: [number, _NodePod[]][] = []
       const indicesAndFragments: [number, DocumentFragment][] = []
       let fragment = new DocumentFragment();
@@ -217,7 +221,7 @@ export class ListRenderKit<T = any> {
 
          if (!_isNewItem) {
             // update $index value
-            const $index = dynamicIndices.current[prevIndex];
+            const $index = this.indices[prevIndex];
             newIndices.push($index);
             $index.as(i)
 
@@ -243,6 +247,7 @@ export class ListRenderKit<T = any> {
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
 
+            pushDynamicNode(parentDynamicNode)
             const dynamicNode = makeDynamicNode(nodePod)
             const renderItem = this.renderItem
             const list = this.data;
@@ -254,13 +259,14 @@ export class ListRenderKit<T = any> {
             })
             setCurrentIndex(undefined)
             dynamicNodeMap.set(nodePod, dynamicNode)
+            popDynamicNode()
          }
          else if (hasMoved(uItem)) {
             // move node to fragment (DOM will auto-remove node from DOM)
             appendNodes(fragment, nodePod);
          }
       }
-      dynamicIndices.update(newIndices)
+      this.indices = newIndices;
 
       // queue nodePod removal
       const indicesAndRemoveCount: [Index, Count][] = [];
@@ -301,31 +307,9 @@ export class ListRenderKit<T = any> {
       }
 
       this.castUpdated(toFromIndices)
-
-      // (4) update node refs
-      // for (const [_, nodePods] of indicesAndNodePods) {
-      //     console.log('nodePods',nodePods)
-      //     for (const nodePod of nodePods) {
-      //         nodePod.forEachNode((node, index) => {
-      //             const ref = getNodeArrayRef(node); //FIX: THis is broken .. this only assigns a ref to the root nodes of a list
-      //             console.log("inserting node into ref!", ref)
-      //             if (ref) ref.insertNode(<Element>node, index!)
-      //                 if (ref) console.log(ref.o)
-      //         })
-      //     }
-      // }
    }
 }
 
-export class DynamicIndices {
-   current: AtomicIon<number>[];
-   constructor(indices: AtomicIon<number>[]) {
-      this.current = indices
-   }
-   update(newIndices: AtomicIon<number>[]) {
-      this.current = newIndices
-   }
-}
 
 
 

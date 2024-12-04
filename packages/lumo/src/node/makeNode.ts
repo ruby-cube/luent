@@ -186,7 +186,7 @@ export function initializeListRef( // should this be initialize ref?
 
    // if (isSettingUpList() && !__SSR__) {
    //     onListUpdated((toFromIndices) => {
-   //         _ref.updateListRef(toFromIndices)
+   //         _ref.update(toFromIndices)
    //     }, { until: outerFlask!.onDisposal })
    // }
 

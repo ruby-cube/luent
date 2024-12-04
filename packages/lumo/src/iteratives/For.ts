@@ -21,7 +21,7 @@ export function For<T>(data: ListData<T>, renderOrGetUID: RenderItem<T> | NodeEn
    const uidProvided = arguments.length === 3
    const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID as RenderItem<T>);
    const getUID = uidProvided ? <(item: unknown) => unknown>renderOrGetUID : undefined;
-   return new ListRenderKit(_render, data, getContext(), getUID, getPhasicNode())
+   return new ListRenderKit(_render, data, getUID)
 }
 
 

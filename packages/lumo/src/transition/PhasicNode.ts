@@ -78,7 +78,7 @@ function createPhasicNode(
     }
 
     return createNodeContext(() => (
-        makeElement('div', Slot, { ref: $div }, undefined)
+        makeElement('div', Slot, { ref: $div, class: 'phasic' }, undefined)
     ), { with: { [GET_PHASIC_NODE]: _getPhasicNode } })
 }
 

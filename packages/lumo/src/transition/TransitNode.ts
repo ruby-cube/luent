@@ -31,8 +31,9 @@ export function renderTransitNode(
     }
     console.log('render transit node')
     registerTransitionNode(transitionNode)
-    return makeElement('div', Slot, { ref: $div }, undefined)
+    return makeElement('div', Slot, { ref: $div, class: 'transit' }, undefined)
 }
+
 
 
 // export function animateTransition(div: HTMLDivElement, className: string, endTransition: (cb: () => void) => void) {

@@ -1,4 +1,4 @@
-//move
+//move: apply final state, then transform to initial state and animate back to final state
 
 const a = document.querySelector('#a')!
 
@@ -32,3 +32,27 @@ btn.addEventListener('click', () => {
    });
 })
 
+// simple move: apply final state, then transform to initial state and animate back to final state
+// crossover - original: transform from initial state to final state, apply final state
+// crossover - final: apply final state, then transform to initial state and animate back to final state
+// simple remove: transform from initial state to final state, apply final state
+// simple insert: apply final state, then transform from initial state and animate back to final state
+
+/*
+* - a
+* - o
+* - b
+* - c
+*/
+
+/* initial state
+* - a
+* - b // opacity 1 - 0, then remove
+* - c
+*/
+
+/* final state
+* - a
+* - o
+* - c
+*/

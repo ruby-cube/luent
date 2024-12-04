@@ -119,6 +119,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       parent: Element,
       outerNodePod: _NodePod,
    ) {
+      //TODO: static conditional
       const parentDynamicNode = getActiveDynamicNode()
       const dynamicPod = outerNodePod.appendDynamicPod();
       this.initDynamicNodePod(dynamicPod)
@@ -186,6 +187,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             }
             else {
                newTransitionIn = () => {
+                  //TODO: Morph?
                   // (3)
                   activateConditional() //TODO: this shouldn't happen until after transitionend
 
@@ -198,7 +200,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             return;
          }
          else {
-            console.log('incomingNodes', incomingNodes)
             prevIncomingNodes = [...incomingNodes]
             prevOutgoingNodes = [...outgoingNodes]
          }
@@ -210,8 +211,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             }
             catch (err) {
                if (__DEV__) console.error(err)
-               // if deactivate fails, we don't activate the new conditional
-               return;
+               return; // if deactivate fails, we don't activate the new conditional
             }
 
             // (3)
@@ -233,7 +233,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                phasicNode.transitionOut(afterTransitionOut)
             }
 
-            console.log('transition out: outgoing nodes', outgoingNodes)
             for (const node of outgoingNodes) {
                node.transitionOut(afterTransitionOut);
             }
@@ -254,29 +253,27 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                   for (const cleanup of cleanups) {
                      cleanup()
                   }
+                  const initialPosition = phasicNode?.getDimsAndPosition();
                   series.deactivateConditional(prevIndex)
 
-                  console.log('!!!!')
                   if (!newTransitionIn) {
+           
                      // (3)
-                     console.log('mount (after transition out)')
                      activateConditional()
+                     const finalPosition = phasicNode?.getDimsAndPosition();
 
                      // (4)
                      if (phasicNode || incomingNodes.length) {
-                        console.log('transition IN')
-                        transitionConditionalIn()
+                        transitionConditionalIn(initialPosition, finalPosition)
                      }
-
-                     // prevIncomingNodes = [...incomingNodes];
                   }
                   else {
-                     console.log('replace transition IN')
                      newTransitionIn();
                      newTransitionIn = undefined;
                   }
 
-                  if (activationType === 'create') outgoingNodes.length = 0; // clear array for next transition nodes
+                  if (activationType === 'create')
+                     outgoingNodes.length = 0; // clear array for next transition nodes
                }
             }
          }
@@ -289,18 +286,20 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             popDynamicNode()
          }
 
-         function transitionConditionalIn() {
+         function transitionConditionalIn(initialPosition?: DOMRect, finalPosition?: DOMRect) {
             let nodeCount = incomingNodes.length + (phasicNode ? 1 : 0)
+            // console.log('nodeCount', incomingNodes.length)
             entranceStateTime = new Date().getTime()
             for (const node of incomingNodes) {
                node.transitionIn(endTransition);
             }
             if (phasicNode) {
+               if (initialPosition && finalPosition) 
+                  phasicNode.morph(initialPosition, finalPosition)
                phasicNode.transitionIn(endTransition)
             }
             function endTransition() {
                nodeCount--
-               console.log('nodeCount', nodeCount)
                if (nodeCount === 0) {
                   entranceStateTime = 0;
                }

@@ -26,7 +26,7 @@ import { Check } from './childrenTest';
 // const rootContext = createTransappContext()
 
 
-const app = createApp(List)
+const app = createApp(MountIf)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

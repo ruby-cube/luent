@@ -1,7 +1,7 @@
 import { Component, PublicComponent } from "../component/InternalComponent"
 import { _NodePod } from "./NodePod"
 import { HTMLTag } from "../element/makeElement"
-import { isSettingUpList, isUpdatingList, onListUpdated } from "../iteratives/listStack"
+import { isSettingUpList, onBeforeListUpdate, onListUpdated } from "../iteratives/listStack"
 import { protect, AtomicIon, ref } from "@rue/quarky"
 import { READONLY } from "../../../quarky/src/ion/ProtectedIon"
 import { getFlask } from "@rue/flask"
@@ -37,176 +37,137 @@ export type _NodesIon<T extends RefSource = RefSource> = AtomicIon<NodeReferent<
 const $nodeMap: WeakMap<NodeRef | NodesIon, _NodeRef | _NodesIon> = new WeakMap()
 
 export function getNodeRef($nodeAsReadonly: NodeRef | NodesIon) {
-    const $node = $nodeMap.get($nodeAsReadonly);
-    if (!$node) throw new Error("No $node :(. This should never happen")
-    return $node;
+   const $node = $nodeMap.get($nodeAsReadonly);
+   if (!$node) throw new Error("No $node :(. This should never happen")
+   return $node;
 }
 
 export function NodeRef<
-    T extends RefSource
-    = RefSource
+   T extends RefSource
+   = RefSource
 >(source: T) {
-    let $node = ref(undefined) as NodeRef<T>;
-    if (__DEV__) {
-        $node = asReadonlyNodeRef($node) as NodeRef<T>
-    }
-    return $node as NodeRef<T>;
+   let $node = ref(undefined) as NodeRef<T>;
+   if (__DEV__) {
+      $node = asReadonlyNodeRef($node) as NodeRef<T>
+   }
+   return $node as NodeRef<T>;
 }
 
 export function NodesRef<T extends RefSource = RefSource>(source: T): NodesIon<T> {
-    let $nodes = ref([]) as NodesIon<T>
-    if (__DEV__) {
-        $nodes = asReadonlyNodeRef($nodes) as NodesIon<T>
-    }
-    const _ref = new InternalNodeArrayRef($nodes)
+   let $nodes = ref([]) as NodesIon<T>
+   if (__DEV__) {
+      $nodes = asReadonlyNodeRef($nodes) as NodesIon<T>
+   }
+   const _ref = new InternalNodeArrayRef($nodes)
 
-    const flask = getFlask()
-    flask?.onDisposal(() => {
-        _ref.setValue([]);
-    })
+   const flask = getFlask()
+   flask?.onDisposal(() => {
+      _ref.setValue([]); // clear nodes
+   })
 
-    if (isSettingUpList() && !__SSR__) {
-        onListUpdated((toFromIndices) => {
-            _ref.updateListRef(toFromIndices)
-        }, { until: flask!.onDisposal })
-    }
-    nodeArrayRefMap.set($nodes, _ref);
-    return $nodes
+   if (isSettingUpList()) {
+      onBeforeListUpdate(() => {
+            _ref.prepUpdate();
+      }, {until: flask!.onDisposal})
+
+      onListUpdated((toFromIndices) => {
+         _ref.update(toFromIndices)
+      }, { until: flask!.onDisposal })
+   }
+   nodeArrayRefMap.set($nodes, _ref);
+   return $nodes
 }
 
 function asReadonlyNodeRef($node: NodeRef | NodesIon) {
-    const $nodeAsReadonly = protect($node, READONLY);
-    $nodeMap.set($nodeAsReadonly, <_NodeRef | _NodesIon>$node)
-    return $nodeAsReadonly
+   const $nodeAsReadonly = protect($node, READONLY);
+   $nodeMap.set($nodeAsReadonly, <_NodeRef | _NodesIon>$node)
+   return $nodeAsReadonly
 }
 
 
 export type NodeReferent<
-    T extends RefSource = RefSource
+   T extends RefSource = RefSource
 > =
-    T extends HTMLTag ? HTMLElementTagNameMap[T] : //TODO: SVGs and Math elements
-    T extends (...args: any[]) => infer R ?
-    R extends Component<infer I> ?
-    I extends PublicComponent ? I
-    : undefined : undefined : undefined
+   T extends HTMLTag ? HTMLElementTagNameMap[T] : //TODO: SVGs and Math elements
+   T extends (...args: any[]) => infer R ?
+   R extends Component<infer I> ?
+   I extends PublicComponent ? I
+   : undefined : undefined : undefined
 
 export class InternalNodeRef<
-    T extends RefSource
-    = RefSource> {
-    o: _NodeRef
-    constructor(
-        ref: NodeRef
-    ) {
-        this.o = __DEV__ ? getNodeRef(ref) as _NodeRef : ref as _NodeRef
-    }
+   T extends RefSource
+   = RefSource> {
+   o: _NodeRef
+   constructor(
+      ref: NodeRef
+   ) {
+      this.o = __DEV__ ? getNodeRef(ref) as _NodeRef : ref as _NodeRef
+   }
 
-    setValue(value: NodeReferent<T> | undefined) {
-        this.o.as(value)
-        return value;
-    }
+   setValue(value: NodeReferent<T> | undefined) {
+      this.o.as(value)
+      return value;
+   }
 
-    assignValue(value: NodeReferent<T>) {
-        this.setValue(value) // will never change for static entities
-    }
+   assignValue(value: NodeReferent<T>) {
+      this.setValue(value) // will never change for static entities
+   }
 }
 
 // type NodeArray<T extends RefSource = RefSource> = Exclude<NodeReferent<Exclude<T, HTMLTag | null | ComponentSetup>>, null>;
 
-type ListUpdates = any[]
-const listUpdateMap: WeakMap<InternalNodeArrayRef, ListUpdates> = new WeakMap()
-
 const nodeArrayRefMap: Map<NodesIon, InternalNodeArrayRef> = new Map()
 
 export function getNodeArrayRef(nodeRef: NodesIon) {
-    const listRef = nodeArrayRefMap.get(nodeRef)
-    nodeArrayRefMap.delete(nodeRef);
-    return listRef
+   const listRef = nodeArrayRefMap.get(nodeRef)
+   nodeArrayRefMap.delete(nodeRef);
+   return listRef
 }
 
 export class InternalNodeArrayRef {
-    // preserve: boolean = false;
-    // preserved: T | undefined = undefined;
-    // initialized: boolean = false; // prevent multiple initializations for arrays
-    o: _NodesIon
-    constructor(
-        ref: NodesIon
-    ) {
-        this.o = __DEV__ ? getNodeRef(ref) as _NodesIon : ref as _NodesIon
-    }
+   o: _NodesIon
+   constructor(
+      ref: NodesIon
+   ) {
+      this.o = __DEV__ ? getNodeRef(ref/* readonly ref */) as _NodesIon : ref as _NodesIon
+   }
 
-    setValue(value: NodeReferent[]) {
-        this.o.as(value)
-        return value;
-    }
+   setValue(value: NodeReferent[]) {
+      this.o.as(value)
+      return value;
+   }
 
-    insertNode(node: NodeReferent, index: number) {
-        const pod = this.setValue(this.o()) //QUESTION: Why am I setting the ref to its own value??
-        pod.splice(index, 0, node); //TODO: should this be splice?
-    }
+   insertNode(node: NodeReferent, index: number) {
+      const pod = this.setValue(this.o()) //QUESTION: Why am I setting the ref to its own value??
+      pod.splice(index, 0, node); //TODO: should this be splice?
+   }
 
-    removeNode(index: number) {
-        const pod = this.o()
-        pod?.splice(index, 1);
-    }
+   removeNode(index: number) {
+      const pod = this.o()
+      pod?.splice(index, 1);
+   }
 
-    // markInitialized() {
-    //     this.initialized = true;
-    // }
+   assignValue(value: NodeReferent, $index: AtomicIon<number>) {
+      const nodes = this.o()
+      nodes[$index()] = value;
+   }
 
-    assignValue(value: NodeReferent, $index: AtomicIon<number>) {
-        let nodes = !__SSR__ && isUpdatingList() ? this.getNewListNodes()
-            : this.o.as(this.o()) //QUESTION: why am i setting the ref to its own value? this makes no sense.
-        nodes[$index()] = value;
-        // nodeArrayRefMap.set(nodes, this); 
-    }
+   prevNodes?: NodeReferent[]
 
-    getNewListNodes() {
-        let nodes = listUpdateMap.get(this);
-        if (!nodes) {
-            nodes = []
-            listUpdateMap.set(this, nodes)
-        }
-        return nodes;
-    }
+   prepUpdate(){
+      this.prevNodes = this.o();
+      this.o.as([])
+   }
 
-    updateListRef(toFromIndices: [number, number][]) {
-        const prevNodes: NodeReferent[] = this.o();
-        const newNodes = listUpdateMap.get(this) || [];
-        for (const indices of toFromIndices) {
-            const [to, from] = indices
-            const node = prevNodes[from];
-            newNodes[to] = node;
-        }
-        this.o.as(newNodes);
-        listUpdateMap.delete(this)
-        // nodeArrayRefMap.set(newNodes, this);
-    }
+   update(toFromIndices: [number, number][]) {
+      const prevNodes = this.prevNodes;
+      if (!prevNodes) throw new Error('prevNodes were not store, must call prepUpdate before list update')
+      const newNodes = this.o();
+      for (const indices of toFromIndices) {
+         const [to, from] = indices
+         const node = prevNodes[from];
+         newNodes[to] = node;
+      }
+      this.prevNodes = undefined;
+   }
 }
-
-
-
-
-
-// export function assignNodeRef(ref: InternalNodeRef, value: Element | PublicComponent, $index: AtomicIon<number> | undefined) {
-//     if ($index != null) {
-//         let nodes = <(Element | PublicComponent)[]>ref.o.value || []
-//         nodes[$index()] = value;
-//     }
-//     else {
-//         //@ts-ignore readonly
-//         ref.o.value = value // will never change for static entities
-//     }
-//     nodeArrayRefMap.set(value, ref);
-// }
-
-
-
-// function assignNodeRef(ref: InternalNodeRef<InternalComponent>, component: AnyObject, $index: AtomicIon<number> | undefined) {
-//     if ($index != null) {
-//         let nodes = ref.components ? ref.components! : []
-//         nodes[$index()] = component;
-//     }
-//     else {
-//         ref.component = component
-//     }
-// }

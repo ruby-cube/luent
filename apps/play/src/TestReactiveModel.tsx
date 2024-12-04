@@ -70,8 +70,8 @@ export function List(
          $list.splice(index, 1);
       },
       changeContent(index: number) {
-         console.log("changing content")
          const $item = $list[index];
+         console.log("changing content", $item)
          $item.content = 'something else'
       }
    })
@@ -106,31 +106,25 @@ export function List(
          <div on:click={e => $list.insert(0)} style="background-color: gray; cursor: pointer">
             insert!
          </div>
-    
+
          {For($list, o => o.id, ($item, $index) =>
             <div on:click={e => !target(e, 'style.cursor:pointer') && $selected.toggle($item)}
                style={[
                   `background-color: ${randomColor.get()}`,
                   o => { o.outline = $selected.has($item) ? 'thick solid blue' : '' }
                ]}>
-               <p on:click={e => removeItem($index())}
-                  style="cursor: pointer"
-               >
+               <p on:click={e => removeItem($index())} style="cursor: pointer">
                   X
                </p>
 
                <li on:click={e => $list.changeContent($index())}>
-                  {() => $item.content}
+                  {ion(() => $item.content)}
                </li>
                <p>{$index}</p>
-               <div on:click={e => $list.insert($index() + 1)}
-                  style="background-color: gray; cursor: pointer"
-               >
+               <div on:click={e => $list.insert($index() + 1)} style="background-color: gray; cursor: pointer">
                   insert
                </div>
-               <div on:click={e => moveSelectedItems($index() + 1)}
-                  style="background-color: white; cursor: pointer"
-               >
+               <div on:click={e => moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">
                   insert
                </div>
             </div>

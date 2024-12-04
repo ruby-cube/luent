@@ -2554,7 +2554,7 @@ declare global {
          'suspense-node': SuspenseNodeInput & { Slot: Lumo.Slot };
          'dubious-node': DubiousNodeInput & { Slot: Lumo.Slot };
          'transit-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
-         'phasic-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+         'phasic-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
          'port-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
          // HTML
          a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
