@@ -12,6 +12,8 @@ export function TestDerived() {
       }
    });
 
+   const $doubleCount = ion(() => $count() * 2)
+
    const $accumulate = ion((prev?: number) =>
       (prev ?? 0) + $count()
    )
