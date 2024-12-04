@@ -15,6 +15,7 @@ import { MountIf } from './TestMountIf';
 import { PlainList } from './TestList';
 import { HelloWorld } from './HelloWorld';
 import { Check } from './childrenTest';
+import { TestDerived } from './testDerivedIon';
 // import { queueTask } from '@rue/thread';
 // import { RenderCycle } from '@rue/quarky';
 // import { MainSite } from './AwaitTest';
@@ -26,7 +27,7 @@ import { Check } from './childrenTest';
 // const rootContext = createTransappContext()
 
 
-const app = createApp(MountIf)
+const app = createApp(TestDerived)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

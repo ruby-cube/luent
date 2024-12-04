@@ -118,7 +118,7 @@ export function List(
                </p>
 
                <li on:click={e => $list.changeContent($index())}>
-                  {ion(() => $item.content)}
+                  {function $content() { return $item.content }}
                </li>
                <p>{$index}</p>
                <div on:click={e => $list.insert($index() + 1)} style="background-color: gray; cursor: pointer">

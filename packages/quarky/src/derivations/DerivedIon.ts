@@ -19,9 +19,9 @@ import { getDynamicNode } from "../../../lumo/src/dynamic/nodestack";
 export const DERIVED_ION = Symbol('DerivedIon')
 
 export type DerivedIon<T = any> = {
-    (selected?: true): T
-    [META]: MetaDerivedIon
-    untrack: () => void
+   (selected?: true): T
+   [META]: MetaDerivedIon
+   untrack: () => void
 }
 
 
@@ -29,7 +29,7 @@ export type DerivedIon<T = any> = {
 export type ReactiveGet<T = any> = ((_?: any) => T) | DerivedIon<T> | AtomicIon<T>;
 
 export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIon {
-    return maybeDerivedIon?.[META]?.type === DERIVED_ION;
+   return maybeDerivedIon?.[META]?.type === DERIVED_ION;
 }
 
 
@@ -37,110 +37,117 @@ export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIo
 
 export class MetaDerivedIon extends IonicDerivation {
 
-    override type = DERIVED_ION
-    asProtected?: ProtectedIon
-    asReadonly?: ProtectedIon
+   override type = DERIVED_ION
+   asProtected?: ProtectedIon
+   asReadonly?: ProtectedIon
 
-    constructor(
-        override readonly o: DerivedIon,
-        retrack: boolean,
-        public hasMethods: boolean = false,
-        public inert: boolean = false
-    ) {
-        super(o, DERIVED_ION, retrack);
-    }
+   constructor(
+      override readonly o: DerivedIon,
+      retrack: boolean,
+      public hasMethods: boolean = false,
+      public inert: boolean = false
+   ) {
+      super(o, DERIVED_ION, retrack);
+   }
 
-    value: any;
+   value: any;
 
-    updateValue(value: any) {
-        this.value = value;
-    }
+   updateValue(value: any) {
+      this.value = value;
+   }
 }
 
 
 export function createDerivedIon<T extends any>(
-    pureGetter: () => T,
-    methods?: AnyObject,
-    retrack: boolean = true,
-    inert: boolean = false
+   pureGetter: (previousValue?: T) => T,
+   methods?: AnyObject,
+   retrack: boolean = true,
+   inert: boolean = false
 ): DerivedIon<T> | DerivedRef<T> {
-    const derived = new MetaDerivedIon(<DerivedIon>$derivedIon, retrack, !!methods, inert);
+   const derived = new MetaDerivedIon(<DerivedIon>$derivedIon, retrack, !!methods, inert);
 
-    if (inert) {
-        const proto = {
-            [META]: derived
-        } as AnyObject
+   if (inert) {
+      const proto = {
+         [META]: derived
+      } as AnyObject
 
-        if (methods) {
-            for (const key in methods) {
-                proto[key] = methods[key].bind(proto)
-            }
-        }
-        Object.setPrototypeOf(pureGetter, proto)
+      if (methods) {
+         for (const key in methods) {
+            proto[key] = methods[key].bind(proto)
+         }
+      }
+      Object.setPrototypeOf(pureGetter, proto)
 
-        return pureGetter as DerivedRef;
-    }
+      return pureGetter as DerivedRef;
+   }
 
-    let initialized = false;
+   let initialized = false;
 
-    function $derivedIon(selected?: boolean) {
-        const tracker = getActiveTracker()
-        if (tracker && tracker.selective && !selected)
-            return pureGetter();
-
-        if (!initialized || derived.dirty && retrack) {
-            const value = derived.trackAtoms(pureGetter);
-            derived.forwardAtoms(derived.atoms)
-            derived.updateValue(value)
-            derived.undirty()
-            initialized = true;
-            return value;
-        }
-
-        if (derived.dirty) {
-            const newValue = pureGetter();
-            derived.forwardAtoms(derived.atoms)
-            derived.updateValue(newValue)
-            derived.undirty()
+   function $derivedIon(selected?: boolean) {
+      const tracker = getActiveTracker()
+      if (tracker && tracker.selective && !selected) {
+         if (derived.dirty) {
+            const newValue = pureGetter(derived.value);
+            derived.updateValue(newValue);
+            if (!retrack) derived.undirty()
             return newValue;
-        }
+         }
+         return derived.value;
+      }
 
-        derived.forwardAtoms(derived.atoms)
+      if (!initialized || derived.dirty && retrack) {
+         const value = derived.trackAtoms(!initialized ? pureGetter : () => pureGetter(derived.value));
+         derived.forwardAtoms(derived.atoms)
+         derived.updateValue(value)
+         derived.undirty()
+         initialized = true;
+         return value;
+      }
 
-        return derived.value; // memoized value
-    }
+      if (derived.dirty) {
+         const newValue = pureGetter(derived.value);
+         derived.forwardAtoms(derived.atoms)
+         derived.updateValue(newValue)
+         derived.undirty()
+         return newValue;
+      }
 
-    const proto = {
-        [META]: derived,
-        untrack() {
-            derived.untrackAtoms()
-        }
-    } as AnyObject
+      derived.forwardAtoms(derived.atoms)
 
-    if (methods) {
-        attachIonMethods(proto, methods)
-    }
+      return derived.value; // memoized value
+   }
 
-    Object.setPrototypeOf($derivedIon, proto)
-    const dynamicNode = getDynamicNode()
-    if (dynamicNode) {
-        dynamicNode.onDestroy(() => { //TODO: what about if a derived ion is created outside of a dynamic node??
-            derived.untrackAtoms()
-        })
-    }
+   const proto = {
+      [META]: derived,
+      untrack() {
+         derived.untrackAtoms()
+      }
+   } as AnyObject
 
-    return <DerivedIon><unknown>$derivedIon;
+   if (methods) {
+      attachIonMethods(proto, methods)
+   }
+
+   Object.setPrototypeOf($derivedIon, proto)
+   const dynamicNode = getDynamicNode()
+   if (dynamicNode) {
+      dynamicNode.onDestroy(() => { //TODO: what about if a derived ion is created outside of a dynamic node??
+         derived.untrackAtoms()
+      })
+   }
+
+   return <DerivedIon><unknown>$derivedIon;
 }
 
 export type WritableDerivedIon<T = any, M extends AnyObject = {}> = {
-    (selected?: true): T
-    [META]: MetaDerivedIon;
-    untrack: () => void;
+   (selected?: true): T
+   [META]: MetaDerivedIon;
+   untrack: () => void;
 } & M
 
 export function createWritableDerivedIon<T, M>(pureGetter: () => T, methods: M & { [key: string]: (...args: any[]) => any }, inert: boolean = false) {
-    const writable = createDerivedIon(pureGetter, methods, inert);
-    return writable;
+   const writable = createDerivedIon(pureGetter, methods, inert);
+   return writable;
 }
 
 

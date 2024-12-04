@@ -22,18 +22,18 @@ type ReactiveIon<T, M> = M extends { [key: string]: (...args: any[]) => any } ? 
 
 
 // API
-export function ion<T, M>(value?: T & (() => unknown), methods?: M & { [key: string]: (...args: any[]) => any } & ThisType<M & { as: (value: T) => T }>): T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any } & ThisType<M & { as: (value: T) => T }>): ReactiveIon<T, M>
-export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any } & ThisType<M & { as: (value: T) => T }>): T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M> {
+// export function ion<T extends (arg: ReturnType<T>)=>ReturnType<T>, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any } & ThisType<M & { as: (value: T) => T }>): T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any } & ThisType<M & { as: (value: T) => T }>): T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+export function ion<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any } & ThisType<M & { as: (value: T) => T }>): T extends AnyIon ? T : T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M> {
     if (isIon(value)) {
         if (__DEV__ && methods) console.warn(`Cannot make an existing ion into an ion. Methods will not be attached`)
-        return value as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+        return value as T extends AnyIon ? T : T extends (args?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
     }
     if (value instanceof Function) {
-        if (methods) return createWritableDerivedIon(<() => unknown>value, methods) as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-        return createDerivedIon(<() => unknown>value) as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+        if (methods) return createWritableDerivedIon(<(prev?: any) => unknown>value, methods) as T extends AnyIon ? T : T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+        return createDerivedIon(<(prev?: any) => unknown>value) as T extends AnyIon ? T : T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
     }
-    return createAtomicIon(value, methods) as T extends AnyIon ? T : T extends () => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+    return createAtomicIon(value, methods) as T extends AnyIon ? T : T extends (args?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
 }
 
 ion.of = asPropIon

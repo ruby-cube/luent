@@ -87,10 +87,10 @@ function ListB() {
 function Column() {
 
    return Component(
-      <SomeComponent name='' let={o = $(SomeComponent)}        >
-         <div>{o.name}</div>
-         <div>{o.name}</div>
-      </SomeComponent>
+      <div>
+         <div>{function butterfly(){}}</div>
+         <div>{0}</div>
+      </div>
    )
 }
 

@@ -3,7 +3,6 @@ import { asIonicAtom, IonicAtom, ReactivePrimitive } from "./IonicAtom";
 import { asWatchSubject, isWatched, WatchSubject } from "../effects/WatchSubject";
 import { ReactiveEntity } from "../ReactiveEntity";
 import { IonicModel, isIonicModel, toRaw } from "../ionize/ionize";
-import { isIon } from "../ion/Ion";
 import { isDerivedIon } from "./DerivedIon";
 import { isPropIon } from "../ionize/PropIon";
 import { isAtomicIon } from "../ion/AtomicIon";
