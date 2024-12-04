@@ -30,6 +30,7 @@ export function MountIf() {
 
    const removed = todos.splice(0, 2)
 
+   //NOTE: if transit-node duration is shorter than phasic-node duration, it will disable phasic-node transition
    return Component(
       <>
          {/* <context-node with={{ dog: 'hi' }}>{()=>
@@ -41,10 +42,10 @@ export function MountIf() {
          <phasic-node>
             {If($active, () => <>
                oh
-               <transit-node with={slide({ x: -100, duration: 300 })}>
+               <transit-node with={slide({ x: -100, duration: 2200 })}>
                   <h2>hi</h2>
                </transit-node>
-               <transit-node with={slide({ x: 100, duration: 300 })}>
+               <transit-node with={slide({ x: 100, duration: 2200 })}>
                   <h2>ho</h2>
                </transit-node>
                {If($ready, () =>

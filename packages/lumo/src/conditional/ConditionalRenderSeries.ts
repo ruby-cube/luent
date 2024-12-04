@@ -253,18 +253,19 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                   for (const cleanup of cleanups) {
                      cleanup()
                   }
-                  const initialPosition = phasicNode?.getDimsAndPosition();
+                  // const initialPosition = phasicNode?.getDimsAndPosition();
                   series.deactivateConditional(prevIndex)
 
                   if (!newTransitionIn) {
            
                      // (3)
                      activateConditional()
-                     const finalPosition = phasicNode?.getDimsAndPosition();
+                     // const finalPosition = phasicNode?.getDimsAndPosition();
 
                      // (4)
                      if (phasicNode || incomingNodes.length) {
-                        transitionConditionalIn(initialPosition, finalPosition)
+                        transitionConditionalIn()
+                        // transitionConditionalIn(initialPosition, finalPosition)
                      }
                   }
                   else {
