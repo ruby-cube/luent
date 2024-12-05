@@ -1,7 +1,6 @@
-import { COMPONENT, ComponentConfig, getNodeRef, InferSlot, initializeListRef, initializeRef, InternalNodeRef, NodeRef, PublicComponent, pushProvider, popProvider } from "@rue/lumo";
+import { COMPONENT, ComponentConfig, InferSlot, initializeListRef, initializeRef, NodeRef, NodesRef, PublicComponent } from "@rue/lumo";
 import { Literate } from "./Literate.js";
-import { ion, isAtomicIon } from "../../quarky/src/index.js";
-import { AnyObject, MaybePromise } from "@rue/types";
+import { AtomicIon, ion, isAtomicIon } from "../../quarky/src/index.js";
 import { collectEffects, getFlask } from "@rue/flask";
 import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
 
@@ -72,7 +71,7 @@ export function runComponentSetup(
 function initializeComponent(
     component: SSRComponent,
     output: Literate | Promise<SSRComponent> | [PublicComponent, Literate],
-    ref: NodeRef | undefined,
+    ref: NodeRef | NodesRef | undefined,
     $index: AtomicIon<number> | undefined,
 ) {
     const _output = output instanceof Array ? output[1] : output;

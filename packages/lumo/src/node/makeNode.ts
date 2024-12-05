@@ -1,12 +1,12 @@
-import {  __devCheckIfTracked, __devCheckIfNotTracked, AtomicIon, Ion } from "../../../quarky/src";
+import { __devCheckIfTracked, __devCheckIfNotTracked, AtomicIon, Ion } from "../../../quarky/src";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
-import { InferSlot, ComponentSetupWithSlot, makeComponent } from "../component/makeComponent";
-import { getNodeArrayRef, InternalNodeRef, NodeReferent, NodeRef, InternalNodeArrayRef, NodesIon, getNodeRef } from "./NodeRef";
+import { InferSlot, makeComponent } from "../component/makeComponent";
+import { NodeReferent, NodeRef, NodesRef } from "./NodeRef";
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
-import { Context, createNodeContext } from "../context/Context";
+import { createNodeContext } from "../context/Context";
 import { AnyObject } from "@rue/types";
 import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
@@ -14,6 +14,7 @@ import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries"
 import { createDubiousNode, DubiousNodeInput } from "../boundaries/Dubious";
 import { createSuspenseNode, SuspenseNodeInput } from "../boundaries/Suspense";
 import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
+import { META } from "../../../quarky/src/ReactiveEntity";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -66,7 +67,7 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 } & NodeSetup<K>
 
 type NodeSetup<T extends HTMLTag | ComponentSetup> = {
-   ref?: NodeRef<T>,
+   ref?: NodeRef<T> | NodesRef<T>,
 }
 
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
@@ -84,7 +85,7 @@ export class SwapConfig {
 // TODO: how to distinguish render function from derived getter 
 export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity) | NodeEntity) {
    if (slot instanceof Function && slot.name === '') { // distinguishes derivation functions from render functions
-      return slot as (...args: any[]) => NodeEntity; 
+      return slot as (...args: any[]) => NodeEntity;
    }
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
    return () => slot;
@@ -159,58 +160,4 @@ export function makeNode(
 //     return undefined;
 // }
 
-export function initializeListRef( // should this be initialize ref?
-   ref: NodesIon,
-   value: NodeReferent | undefined,
-   $index: AtomicIon<number>
-   // options?: ElementOptions
-) {
-   // if (__DEV__) __devCheckIfNotTracked()
-   if (__DEV__) __devCheckIfTracked()
-   // const array = ref()!
-   const _ref = getNodeArrayRef(ref)
-   if (!_ref) throw new Error(`No internal node ref found. This should never happen`)
-   // if ($index() === 0 && _existingRef)
-   // throw new Error('This node list ref has already be initialized. A node list ref cannot be used multiple times')
-   // const _ref = _existingRef || new InternalNodeArrayRef(ref)
-   if (value) {
-      _ref.assignValue(value, $index);
-   }
 
-   // if (_ref.initialized === true) return; // to prevent registering multiple watchers for lists
-
-   // // dispose with outer flask because we don't want to dispose when first item is removed
-   // const outerFlask = getFlask()?.outer
-   // outerFlask?.onDisposal(() => {
-   //     _ref.setValue([]);
-   //     _ref.initialized = false;
-   // })
-
-   // if (isSettingUpList() && !__SSR__) {
-   //     onListUpdated((toFromIndices) => {
-   //         _ref.update(toFromIndices)
-   //     }, { until: outerFlask!.onDisposal })
-   // }
-
-   // _ref.markInitialized()
-}
-
-export function initializeRef(ref: NodeRef, value: NodeReferent | undefined) {
-   // if (__DEV__) __devCheckIfNotTracked()
-   if (__DEV__) __devCheckIfTracked()
-   if (ref())
-      throw new Error("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")
-   const _ref = new InternalNodeRef(ref)
-   if (value) {
-      _ref.assignValue(value)
-      const flask = getFlask()
-      flask?.onDisposal(() => {
-         _ref.setValue(undefined);
-      })
-   }
-}
-
-// export function useInternalNodeRef(ref: NodeRef | IonicModel<any[]>) {
-//     const refValue = ref()
-//     return refValue instanceof Array ? getNodeArrayRef(refValue) || new InternalNodeArrayRef(ref) : new InternalNodeRef(ref)
-// }

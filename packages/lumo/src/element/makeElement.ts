@@ -3,7 +3,7 @@ import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicI
 import { noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { initializeRender, watch } from "../watch/watchAndPreserve";
-import { ElementConfig, initializeListRef, initializeRef, makeNode, NodeEntity } from "../node/makeNode";
+import { ElementConfig,  makeNode, NodeEntity } from "../node/makeNode";
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { isHydrating } from "../hydration/hydration";
@@ -11,6 +11,7 @@ import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
+import { initializeListRef, initializeRef, NodesRef } from "../node/NodeRef";
 
 
 
@@ -39,7 +40,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     if (ref) {
         if (!isAtomicIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
         if ($index) {
-            initializeListRef(ref, domNode, $index)
+            initializeListRef(<NodesRef>ref, domNode, $index)
         }
         else {
             initializeRef(ref, domNode)

@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
+import { NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { AtomicIon, Ion, IonicModel, isAtomicIon, protect } from "@rue/quarky";
@@ -7,7 +7,7 @@ import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { normalizeToArray } from "@rue/utils";
-import { NodeRef } from "../node/NodeRef";
+import { initializeListRef, initializeRef, NodeRef, NodesRef } from "../node/NodeRef";
 
 
 
@@ -67,7 +67,7 @@ export class InternalComponent<T extends AnyObject | undefined = AnyObject | und
       $index: AtomicIon<number> | undefined
    ) {
       const exposed = this.exposed = component.exposedComponent;
-      if (ref) initializeComponentRef(ref, exposed, $index)
+      if (ref) initializeComponentRef(ref, exposed || {}, $index)
       this.nodeEntities = normalizeToArray(component.renderedTemplate)
    }
 
@@ -92,13 +92,13 @@ export class InternalComponent<T extends AnyObject | undefined = AnyObject | und
 
 
 export function initializeComponentRef(
-   ref: NodeRef | IonicModel<any[]> | undefined,
-   publicComponent: PublicComponent | undefined,
+   ref: NodeRef | NodesRef,
+   publicComponent: PublicComponent,
    $index: AtomicIon<number> | undefined,
 ) {
    if (!isAtomicIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
    if ($index) {
-      initializeListRef(ref, publicComponent, $index)
+      initializeListRef(<NodesRef>ref, publicComponent, $index)
    }
    else {
       initializeRef(ref, publicComponent)

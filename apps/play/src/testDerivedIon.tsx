@@ -18,7 +18,7 @@ export function TestDerived() {
       (prev ?? 0) + $count()
    )
 
-   function nextFib() {
+   function nextNumber() {
       $count.increment();
       $counts.push($count())
       $sequence.push($accumulate())
@@ -48,7 +48,7 @@ export function TestDerived() {
             }]}>{n}</div>
          )}
          <div>{$accumulate}</div>
-         <button on:click={nextFib}>next fib</button>
+         <button on:click={nextNumber}>next fib</button>
       </>
    )
 }
