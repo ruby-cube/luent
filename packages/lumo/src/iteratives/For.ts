@@ -1,12 +1,12 @@
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { NodeEntity, normalizeToRenderFunction } from "../node/makeNode";
 import { ListRenderKit } from "./ListRenderKit";
-import { AtomicIon, ion, IonicModel, ReactiveGet } from "@rue/quarky";
+import { AtomicIon, ion, Ionized,  ReactiveGet } from "@rue/quarky";
 
 
 export type RenderItem<T> = ((item: T) => NodeEntity) | ((item: T, $index: AtomicIon<number>) => NodeEntity)
-// type ListData = AnyObject | any[] | Set<any> | Map<any, any> | IonicModel<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
-export type ListData<T = any> = Collection<T> | IonicModel<Collection<T>> | ReactiveGet<Collection<T>>
+// type ListData = AnyObject | any[] | Set<any> | Map<any, any> | Ionized<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
+export type ListData<T = any> = Collection<T> | Ionized<Collection<T>> | ReactiveGet<Collection<T>>
 export type UniqueItem = any;
 export type Collection<T> = T[]  //TODO: add sets and maps
 // | Set<T>

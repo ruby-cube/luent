@@ -76,7 +76,7 @@ function ListB() {
 
    return (
       <div>
-         {For($list, o => o.id, (item, $index) => <>
+         {For($list, m => m.id, (item, $index) => <>
             <SomeComponent name={$item} />
             <SomeComponent />
          </>)}

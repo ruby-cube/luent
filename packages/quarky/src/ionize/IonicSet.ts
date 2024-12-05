@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import {  IonicModel, storeSnapshot, toRaw } from "./ionize";
-import { defineIonicStructure, GetPreopData, useTrackableGetOp } from "./IonicModel";
+import {  IonizedModel, storeSnapshot, toRaw } from "./ionize";
+import { defineIonizedModel, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getTrackedOp } from "./TrackedOp";
 import { MetaIonicModel } from "./MetaIonicModel";
 import { getObservedProp } from "./PropIon";
@@ -47,7 +47,7 @@ const trackableSetOps = {
 }
 
 export function installIonicSet(){ 
-    defineIonicStructure(Set, {
+    defineIonizedModel(Set, {
         nontrackableKeys: nontrackableIterableKeys,
         trackableOps: {
             has(target, ionicModel) {
@@ -226,7 +226,7 @@ export function installIonicSet(){
 //                 receiver
 //             )
 //         }
-//     }) as IonicModel<Set<any>>
+//     }) as IonizedModel<Set<any>>
 
     // const boundMethodMap: Map<string | symbol, Function> = new Map([
     //     ['has', useTrackableGetOp(
@@ -278,7 +278,7 @@ export function installIonicSet(){
 //     }
 
 //     metaIonicModel.initIonicModel(ionicModel)
-//     registerIonicModel(ionicModel, target)
+//     registerIonizedModel(ionicModel, target)
 //     return ionicModel
 // }
 
@@ -286,7 +286,7 @@ export function installIonicSet(){
 
 
 export function useDeleteOp(
-    ionicModel: IonicModel,
+    ionicModel: IonizedModel,
     metaIonicModel: MetaIonicModel,
     target: AnyObject,
     getPreopData: GetPreopData
@@ -328,10 +328,10 @@ export function useDeleteOp(
 
 
 export function useClearOp(
-    ionicModel: IonicModel,
+    ionicModel: IonizedModel,
     metaIonicModel: MetaIonicModel,
     target: AnyObject,
-    getPreopData: (model: IonicModel) => any
+    getPreopData: (model: IonizedModel) => any
 ) {
     return function clearOp() {
         const preopData = getPreopData(ionicModel)

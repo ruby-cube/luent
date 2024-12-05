@@ -1,12 +1,13 @@
 import { setImmediate, clearImmediate } from "@rue/thread";
 import { $schedule, LIFETIME, NEVER, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
 import { SetMap } from "@rue/utils";
-import { asMetaIonicModel, IonicModel } from "../ionize/ionize";
+import { asMetaIonicModel, Ionized, IonizedModel } from "../ionize/ionize";
 import { MetaIonicModel } from "../ionize/MetaIonicModel";
 import { MutationRecord } from "./watch";
+import { AnyObject } from "@rue/types";
 
 export type Watchable = any
-// AtomicIon | DerivedIon | IonicEffect  | IonicModel | ObservedProp
+// AtomicIon | DerivedIon | IonicEffect  | IonizedModel | ObservedProp
 export type Task = (...args: any[]) => void;
 
 // export type Phase = Phase.BEFORE_RENDER | Phase.RENDER | Phase.AFTER_RENDER | Phase.SYNC
@@ -111,7 +112,7 @@ export class RenderCycle {
 
     opsMap: WeakMap<MetaIonicModel, MutationRecord[]> = new WeakMap();
 
-    recordOp(target: IonicModel, op: MutationRecord) {
+    recordOp(target: Ionized<AnyObject>, op: MutationRecord) {
         const meta = asMetaIonicModel(target)
         let existingOps = this.opsMap.get(meta);
         if (existingOps) {
@@ -122,7 +123,7 @@ export class RenderCycle {
         }
     }
 
-    getOps(target: IonicModel) {
+    getOps(target: Ionized<AnyObject>) {
         const meta = asMetaIonicModel(target)
         return this.opsMap.get(meta)
     }
@@ -194,7 +195,7 @@ export class RenderCycle {
 //     if (target instanceof Function) {
 //         return target()
 //     }
-//     else if (isIonicModel(target)) {
+//     else if (isIonizedModel(target)) {
 //         return target;
 //     }
 // }

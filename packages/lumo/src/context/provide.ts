@@ -1,7 +1,7 @@
 import { Context, getCurrentContext } from "./context-stack";
 import { ContextEntries, NodeContext } from "./Context";
 import { contextTypeMap, TypeConfig } from "./ContextKey";
-import { isIon, isIonicModel, toIon } from "@rue/quarky";
+import { isIon, isIonizedModel, toIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { ContextKeyMap } from "@rue/lumo";
 
@@ -209,7 +209,7 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
         case '_Ionized':
         case '$Ionized':
         case '$IonizedOrIonized':
-            if (!isIonicModel(value)) {
+            if (!isIonizedModel(value)) {
                 throw new Error(`[INVALID INPUT] Value of context entry, '${String(key)}', must be an ionized`)
             }
             return value; //TODO: readonly, protect

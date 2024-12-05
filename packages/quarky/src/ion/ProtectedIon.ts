@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { META } from "../ReactiveEntity";
 import { asMetaIon, AtomicIon, MetaIon } from "./AtomicIon";
-import { isIonicModel } from "../ionize/ionize";
+import { isIonizedModel } from "../ionize/ionize";
 import { protectIonicModel } from "../ionize/ProtectedIonicModel";
 
 export const IS_PUBLIC = Symbol('is_public')
@@ -70,7 +70,7 @@ function createCustomProtectedIon($ion: WritableIon, methodKeys: { [key: string]
     const proto = Object.getPrototypeOf($coreIon)
     function $customIon(selected: boolean) {
         const value = $coreIon(selected)
-        if (isIonicModel(value)) {
+        if (isIonizedModel(value)) {
             return protectIonicModel(value)
         }
         return value;
@@ -116,7 +116,7 @@ function createReadonlyIon(meta: MetaWritableIon) {
 
     function $readonlyIon(selected?: boolean) {
         const value = $coreIon(selected)
-        if (isIonicModel(value))
+        if (isIonizedModel(value))
             return protectIonicModel(value, READONLY)
         return value;
     }
@@ -146,7 +146,7 @@ function createProtectedIon(meta: MetaWritableIon) {
 
     function $protectedIon(selected?: boolean) {
         const value = $coreIon(selected)
-        if (isIonicModel(value)) {
+        if (isIonizedModel(value)) {
             return protectIonicModel(value)
         }
         return value;

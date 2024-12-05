@@ -1,5 +1,5 @@
 import { isWritableIon, ProtectedIon, protectIon, READONLY } from "./ion/ProtectedIon";
-import { isIonicModel, IonicModel } from "./ionize/ionize";
+import { isIonizedModel } from "./ionize/ionize";
 import { AnyObject } from "@rue/types";
 import { isProtectedIonicModel, isReadonlyIonicModel, protectIonicModel } from "./ionize/ProtectedIonicModel";
 
@@ -19,7 +19,7 @@ export function protect<T>(entity: T, methodKeys?: (T extends AnyObject ? { [K i
         return protectIon(entity, methodKeys)
     }
     const _entity = toUnprotected(entity);
-    if (isIonicModel(_entity)) {
+    if (isIonizedModel(_entity)) {
         return protectIonicModel(_entity, methodKeys)
     }
     if (_entity instanceof Object) //TODO: 

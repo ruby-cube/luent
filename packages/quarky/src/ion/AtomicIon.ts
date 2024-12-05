@@ -1,5 +1,5 @@
 import { emitSignal } from "../debug";
-import { isIonicModel, ionize } from "../ionize/ionize";
+import { isIonizedModel, ionize } from "../ionize/ionize";
 import { getActiveTracker, getDependencyTracker, getWithoutTracking } from "../derivations/DependencyTracker";
 import { trigger } from "../trigger";
 import { META, ReactiveEntity } from "../ReactiveEntity";
@@ -41,7 +41,7 @@ export function createAtomicIon<
     methods?: M,
     inert?: boolean
 ) {
-    const metaIon = new MetaIon(<AtomicIon>$ion, value, isIonicModel(value), !!methods, !!inert)
+    const metaIon = new MetaIon(<AtomicIon>$ion, value, isIonizedModel(value), !!methods, !!inert)
 
     const setterKey = methods && ('as' in methods || 'XPOas' in methods) ? "_as" : 'as'
 

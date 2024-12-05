@@ -1,5 +1,5 @@
 import { Collection, For } from "@rue/lumo"
-import { IonicModel, ion } from "../../../packages/quarky/src"
+import { AtomicIon, Ionized, ion } from "../../../packages/quarky/src"
 
 class PortableNode {
 
@@ -20,7 +20,7 @@ class PortableNode {
 
 class ListPort<L extends any[] = any[]> {
 
-    constructor(list: AtomicIon<L> | IonicModel<L>, renderItem: RenderListItem<L>) {
+    constructor(list: AtomicIon<L> | Ionized<L>, renderItem: RenderListItem<L>) {
 
     }
 
@@ -38,7 +38,7 @@ const portableItemKeyMap: Map<ListPortType, UID> = new Map()
 
 const renderPortableItemMap: Map<UID, () => any> = new Map()
 
-function $ListPort<L extends any[] = any[]>(listData: AtomicIon<L> | IonicModel<L>, renderItem: RenderListItem<L>, UIDKey: string, config: { type: string, ref?: AtomicIon<PortableNode> }) {
+function $ListPort<L extends any[] = any[]>(listData: AtomicIon<L> | Ionized<L>, renderItem: RenderListItem<L>, UIDKey: string, config: { type: string, ref?: AtomicIon<PortableNode> }) {
     const listRenderKit = For(listData as Collection<L extends (infer I)[] ? I : never>, renderItem, UIDKey)
 
     return listRenderKit;

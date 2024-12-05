@@ -2,9 +2,10 @@
 
 
 
+import { AnyObject } from "@rue/types";
 import { asIonicAtom } from "../derivations/IonicAtom";
 import { MetaIonicModel } from "./MetaIonicModel";
-import { asMetaIonicModel, IonicModel } from "./ionize";
+import { asMetaIonicModel, Ionized, IonizedModel } from "./ionize";
 
 
 
@@ -35,7 +36,7 @@ export function isTrackedOp(value: any): value is TrackedOp {
 }
 
 export function asTrackedOp(
-    model: IonicModel,
+    model: Ionized<AnyObject>,
     op: string,
     key: any
 ): TrackedOp {
@@ -45,7 +46,7 @@ export function asTrackedOp(
 }
 
 export function getTrackedOp(
-    model: IonicModel,
+    model: IonizedModel,
     op: string,
     key: any
 ){
@@ -53,7 +54,7 @@ export function getTrackedOp(
 }
 
 function createTrackedOp(
-    model: IonicModel,
+    model: IonizedModel,
     op: string,
     key: any
 ){

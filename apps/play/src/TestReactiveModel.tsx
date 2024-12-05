@@ -1,6 +1,6 @@
 import { NodesRef, Component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { ion, __addDevName, DerivedIon, ionize, isIonicModel } from "../../../packages/quarky/src";
+import { ion, __addDevName, DerivedIon, ionize, isIonizedModel } from "../../../packages/quarky/src";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
 import { META } from "../../../packages/quarky/src/ReactiveEntity";
 import { getFlask } from "@rue/flask";

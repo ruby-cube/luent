@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { READONLY } from "../ion/ProtectedIon";
-import { asMetaIonicModel, IonicModel } from "./ionize";
+import { asMetaIonicModel, IonizedModel } from "./ionize";
 
 
 // export const PROTECTED = Symbol('protectedIonicModel')
@@ -15,7 +15,7 @@ export function isReadonlyIonicModel(value: any) {
     return READONLY_IONIC_MODEL in value;
 }
 
-export function protectIonicModel<T extends IonicModel>(model: T, propertyKeys?: { [key: string]: true } | typeof READONLY) {
+export function protectIonicModel<T extends IonizedModel>(model: T, propertyKeys?: { [key: string]: true } | typeof READONLY) {
     if (propertyKeys === READONLY) {
         const existing = asMetaIonicModel(model).asReadonly
         if (existing) return existing;
@@ -36,7 +36,7 @@ const READONLY_IONIC_MODEL = Symbol('readonlyIonicModel')
 
 export const PROTECTED_META = Symbol('protectedMeta')
 
-function createProtectedIonicModel(model: IonicModel, propertyKeys?: { [key: string]: true }) {
+function createProtectedIonicModel(model: IonizedModel, propertyKeys?: { [key: string]: true }) {
     const protectedModel = Object.create(model);
     // protectedModel[PROTECTED_META] = {
         //     propertyKeys
@@ -49,7 +49,7 @@ function createProtectedIonicModel(model: IonicModel, propertyKeys?: { [key: str
 }
 
 
-function createReadonlyIonicModel(model: IonicModel) {
+function createReadonlyIonicModel(model: IonizedModel) {
     const readonlyModel = Object.create(model);
     // readonlyModel[READONLY_IONIC_MODEL] = true;
     Object.defineProperty(readonlyModel, READONLY_IONIC_MODEL, {value: true})

@@ -1,5 +1,5 @@
 import { ComponentSetup, HTMLTag, makeNode, NodeEntity, normalizeToRenderFunction, Slot } from "@rue/lumo";
-import { Ion, IonicModel, isIon } from "@rue/quarky";
+import { Ion, isIon } from "@rue/quarky";
 import { isObjectLiteral, normalizeToArray } from "@rue/utils";
 
 // without custom jsx compiler

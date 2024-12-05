@@ -1,5 +1,4 @@
-import { isIon, isIonicModel, ion, IonicModel, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon } from "@rue/quarky";
-import { InternalComponent } from "../component/InternalComponent";
+import { isIon, isIonizedModel, ion, Ionized, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon } from "@rue/quarky";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
@@ -9,15 +8,10 @@ import { mountNodeEntities } from "../node/mountNodeEntity";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { watch } from "../watch/watchAndPreserve";
 import { diff, InsertAndMoveKit } from "./diff";
-import { Sign } from "crypto";
-import { META } from "../../../quarky/src/ReactiveEntity";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
-import { getFlask } from "@rue/flask";
 import { Context, getContext, popContext, pushContext } from "../context/context-stack";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
-import { RenderFunction } from "../node/makeNode";
-import { AnyObject } from "@rue/types";
 import { createNodeContext } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 
@@ -25,7 +19,7 @@ import { useTransitionNodes } from "../transition/TransitNode";
 type Index = number
 type Count = number
 
-type DynamicList<T = any> = IonicModel<Collection<T>> | ReactiveGet<Collection<T>>
+type DynamicList<T = any> = Ionized<Collection<T>> | ReactiveGet<Collection<T>>
 
 const dynamicNodeMap: WeakMap<_NodePod, DynamicNode> = new WeakMap()
 
@@ -72,7 +66,7 @@ export class ListRenderKit<T = any> {
 
    constructor(
       renderItem: RenderItem<T>, //QUESTION: Does this need the context object?
-      public data: Collection<T> | IonicModel<Collection<T>> | ReactiveGet<Collection<T>>,
+      public data: Collection<T> | Ionized<Collection<T>> | ReactiveGet<Collection<T>>,
       public getUID: ((item: unknown) => unknown) | undefined,
    ) {
       this.renderItem = wrapWithContext(renderItem, this);
@@ -113,7 +107,7 @@ export class ListRenderKit<T = any> {
       if (__DEV__) __devCheckIfTracked()
 
 
-      const _isIonicModel = isIonicModel(data)
+      const _isIonicModel = isIonizedModel(data)
       const isDynamic = this.isDynamic = _isIonicModel || isIon(data);
       this.outerNodePod = outerNodePod;
       const dynamicNodePod = this.dynamicNodePod = isDynamic ? outerNodePod.appendDynamicPod() : undefined;
@@ -124,8 +118,8 @@ export class ListRenderKit<T = any> {
          // set up watcher for updates
          // const renderCycle = getCurrentRenderCycle();
          const parentDynamicNode = getActiveDynamicNode()
-         const rawData = isIonicModel(data) ? toRaw(data) : undefined
-         let clone = isIonicModel(data) ? shallowClone(rawData!) : undefined
+         const rawData = isIonizedModel(data) ? toRaw(data) : undefined
+         let clone = isIonizedModel(data) ? shallowClone(rawData!) : undefined
          //TODO: figure out typing for Set, Map, Object vs Array
          watch(data as any/* FIX: type error*/, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
             console.log('updating list')
@@ -251,7 +245,7 @@ export class ListRenderKit<T = any> {
             const dynamicNode = makeDynamicNode(nodePod)
             const renderItem = this.renderItem
             const list = this.data;
-            const _item = isIonicModel(list) || isAtomicIon(list) && asMetaIon(list).hasIonicValue ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
+            const _item = isIonizedModel(list) || isAtomicIon(list) && asMetaIon(list).hasIonicValue ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             dynamicNode.mount(function renderNewListItem() {
                console.log('rendering new item')
                const nodeEntities = renderItem(_item, $index, parent, nodePod);

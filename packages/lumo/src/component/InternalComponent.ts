@@ -2,10 +2,8 @@ import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
 import { mountNodeEntities } from "../node/mountNodeEntity";
-import { AtomicIon, Ion, IonicModel, isAtomicIon, protect } from "@rue/quarky";
-import { MorphicRenderKit } from "../morphic/MorphicNode";
+import { AtomicIon, isAtomicIon, protect } from "@rue/quarky";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
-import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { normalizeToArray } from "@rue/utils";
 import { initializeListRef, initializeRef, NodeRef, NodesRef } from "../node/NodeRef";
 
@@ -55,8 +53,7 @@ export function Component<T extends AnyObject | undefined = AnyObject | undefine
    } as Component<T extends AnyObject ? T : undefined>
 }
 
-export class InternalComponent<T extends AnyObject | undefined = AnyObject | undefined> {
-   //  exposed?: T extends AnyObject ? PublicComponent<T> : undefined = undefined;
+export class InternalComponent {
    nodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
    exposed: AnyObject | undefined;
    nodeKits?: NodeKit[]

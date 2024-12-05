@@ -1,9 +1,9 @@
 import { AnyObject } from "@rue/types";
-import { asMetaIonicModel, ionize, isIonicModel, registerIonicModel, toRaw } from "./ionize";
+import { asMetaIonicModel, ionize, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
 import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
-import { IonicModel, storeSnapshot } from "./ionize";
+import { IonizedModel, storeSnapshot } from "./ionize";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
 import { MetaIonicModel } from "./MetaIonicModel";
 import { noop } from "@rue/utils";
@@ -21,7 +21,7 @@ export const UNDEFINED_OP: Function = noop
 
 // A 'get op' is a o(1) get-like operation like set.has() or array.at()
 export function useTrackableGetOp(
-    reactive: IonicModel,
+    reactive: IonizedModel,
     target: AnyObject,
     op: string,
     fn: (key: any) => any,
@@ -79,7 +79,7 @@ export const OVERRIDE = true;
 
 
 //API
-export function defineIonicStructure(structureKey: any, config: CustomIonicModelConfig, override?: boolean) {
+export function defineIonizedModel(structureKey: any, config: CustomIonicModelConfig, override?: boolean) {
     const existing = ionicStructureMap.get(structureKey)
     if (existing && !override) {
         console.warn(`Ionic structure already defined for the structure key, ${structureKey.toString()}. To override, pass in override parameter as true.`)
@@ -125,13 +125,13 @@ type CustomIonicModelConfig = {
     // getStructureKeys: (model: AnyObject) => any[]
 }
 
-type BeforeSetCallback = (ionicModel: IonicModel, meta: MetaIonicModel, key: PropertyKey, oldValue: any) => void
-type AfterSetCallback = (ionicModel: IonicModel, meta: MetaIonicModel, key: PropertyKey, newValue: any, oldValue: any) => void
+type BeforeSetCallback = (ionicModel: IonizedModel, meta: MetaIonicModel, key: PropertyKey, oldValue: any) => void
+type AfterSetCallback = (ionicModel: IonizedModel, meta: MetaIonicModel, key: PropertyKey, newValue: any, oldValue: any) => void
 
-type CreateTrackableOp = (target: AnyObject, ionicModel: IonicModel<AnyObject>) => (...args: any[]) => any
+type CreateTrackableOp = (target: AnyObject, ionicModel: IonizedModel<AnyObject>) => (...args: any[]) => any
 
 type MutatingOpConfig = {
-    createOp: (target: AnyObject, ionicModel: IonicModel<AnyObject>, meta: any, getPreopData: GetPreopData | undefined) => (...args: any[]) => any
+    createOp: (target: AnyObject, ionicModel: IonizedModel<AnyObject>, meta: any, getPreopData: GetPreopData | undefined) => (...args: any[]) => any
     preop?: GetPreopData
     revert?: Revert
 }
@@ -168,7 +168,7 @@ function isCustomIonicStructure(value: any) {
 //     return config.mutatingOps
 // }
 
-function emitAfterSet(structureConfigs: CustomIonicModelConfig[], ionicModel: IonicModel, meta: MetaIonicModel, key: PropertyKey, newValue: any, oldValue: any) {
+function emitAfterSet(structureConfigs: CustomIonicModelConfig[], ionicModel: IonizedModel, meta: MetaIonicModel, key: PropertyKey, newValue: any, oldValue: any) {
     if (structureConfigs[0].structure === Object) return;
     for (const config of structureConfigs) {
         const afterSet = config.afterSet
@@ -284,12 +284,12 @@ export function createCustomIonicModel(
                 receiver
             )
         }
-    }) as IonicModel<Map<any, any>>
+    }) as IonizedModel<Map<any, any>>
 
     const boundMethodMap = createBoundMethodMap(structureConfigs, target, ionicModel, metaIonicModel)
 
     metaIonicModel.initIonicModel(ionicModel)
-    registerIonicModel(ionicModel, target)
+    registerIonizedModel(ionicModel, target)
     return ionicModel
 }
 
@@ -316,7 +316,7 @@ function isMutatingOps(key: PropertyKey, structureKeys: any[]) {
 }
 
 
-function createBoundMethodMap(structureConfigs: CustomIonicModelConfig[], target: AnyObject, ionicModel: IonicModel, meta: MetaIonicModel) {
+function createBoundMethodMap(structureConfigs: CustomIonicModelConfig[], target: AnyObject, ionicModel: IonizedModel, meta: MetaIonicModel) {
     const methodMap = new Map()
     if (structureConfigs[0].structure === Object) return methodMap;
 
@@ -382,7 +382,7 @@ function getBoundMethod(
 
 export function reactiveSetter(
     structureConfigs: CustomIonicModelConfig[], // and Tuple
-    ionicModel: IonicModel,
+    ionicModel: IonizedModel,
     metaIonicModel: MetaIonicModel,
     target: AnyObject,
     key: string | symbol,
@@ -433,7 +433,7 @@ export function reactiveSetter(
 
 
 
-export function setAbsorbedIon(ion: AnyIon, value: any, ionicModel: IonicModel, key: PropertyKey, oldValue: any, structureConfigs: CustomIonicModelConfig[]) {
+export function setAbsorbedIon(ion: AnyIon, value: any, ionicModel: IonizedModel, key: PropertyKey, oldValue: any, structureConfigs: CustomIonicModelConfig[]) {
     if ('as' in ion) {
         ion.as(value);
 

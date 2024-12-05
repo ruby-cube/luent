@@ -1,5 +1,5 @@
 import { AnyObject, ReadonlyKeys } from "@rue/types";
-import { asMetaIonicModel, isIonicModel, ionize, IonicModel, toRaw } from "./ionize";
+import { asMetaIonicModel, isIonizedModel, ionize, IonizedModel, toRaw } from "./ionize";
 import { META } from "../ReactiveEntity";
 import { isIon } from "../ion/Ion";
 import { protectedMethod, protectIon, READONLY } from "../ion/ProtectedIon";
@@ -73,7 +73,7 @@ class MetaPropIon {
 
     constructor(
         public o: PropIon,
-        public model: IonicModel,
+        public model: IonizedModel,
         public key: PropertyKey,
         public inert: boolean = false
     ) {
@@ -126,7 +126,7 @@ class MetaPropIon {
 type AsPropIon<T extends AnyObject, K extends keyof T, M> = PropIon<T[K], M extends AnyObject ? { [K in keyof TransferredMethods<T, M>]: TransferredMethods<T, M>[K] } : undefined>
 
 export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, key: K, methods?: M & { [key: string]: keyof T | true }): AsPropIon<T, K, M> {
-    const ionicModel = isIonicModel(model) ? model : ionize(model) //TODO: is there a more performant solution than ionizing non-reactive models? like mapping model to prop ions?
+    const ionicModel = isIonizedModel(model) ? model : ionize(model) //TODO: is there a more performant solution than ionizing non-reactive models? like mapping model to prop ions?
     const rawTarget = toRaw(ionicModel)
     const value = rawTarget[key];
 
@@ -150,13 +150,13 @@ export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, k
 }
 
 export function getPropIon(
-    ionicModel: IonicModel,
+    ionicModel: IonizedModel,
     key: PropertyKey
 ) {
     return asMetaIonicModel(ionicModel).getPropIon(key)
 }
 
-function createPropIon<T extends IonicModel, K extends keyof T, M>(ionicModel: T, key: K, methods?: M & { [key: string]: PropertyKey | true }): PropIon<T[K], M> {
+function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel: T, key: K, methods?: M & { [key: string]: PropertyKey | true }): PropIon<T[K], M> {
     const rawTarget = toRaw(ionicModel)
 
 
@@ -209,7 +209,7 @@ function createPropIon<T extends IonicModel, K extends keyof T, M>(ionicModel: T
 }
 
 export function asTrackedProp(
-    ionicModel: IonicModel,
+    ionicModel: IonizedModel,
     key: PropertyKey
 ) {
     const prop = getPropIon(ionicModel, key) ?? createPropIon(ionicModel, key)
@@ -219,7 +219,7 @@ export function asTrackedProp(
 }
 
 export function asWatchedProp(
-    ionicModel: IonicModel,
+    ionicModel: IonizedModel,
     key: PropertyKey
 ) {
     const prop = getPropIon(ionicModel, key) ?? createPropIon(ionicModel, key)
@@ -229,7 +229,7 @@ export function asWatchedProp(
 }
 
 export function getObservedProp( // observed means watched and/or tracked
-    ionicModel: IonicModel,
+    ionicModel: IonizedModel,
     key: PropertyKey
 ) {
     const prop = getPropIon(ionicModel, key);
@@ -241,7 +241,7 @@ export function getObservedProp( // observed means watched and/or tracked
 
 
 // function createObservedProp(
-//     reactive: IonicModel,
+//     reactive: IonizedModel,
 //     key: PropertyKey
 // ) {
 //     const metaIonicModel = asMetaIonicModel(reactive);
@@ -270,7 +270,7 @@ export function getObservedProp( // observed means watched and/or tracked
 // }
 
 
-function setValue<T>(reactive: IonicModel, key: PropertyKey, newValue: T, oldValue: T) {
+function setValue<T>(reactive: IonizedModel, key: PropertyKey, newValue: T, oldValue: T) {
     if (oldValue === newValue) return oldValue;
     reactive[key] = newValue;
     return newValue;
@@ -289,7 +289,7 @@ const PROP_ION_CAPSULE = Symbol('propIonWithMethods')
  * })
  * ```
 */
-function PropIon<T extends IonicModel, K extends keyof T>(ionicModel: T, key: K, methods: {
+function PropIon<T extends IonizedModel, K extends keyof T>(ionicModel: T, key: K, methods: {
     [key: string]: (...args: any[]) => any
 }) {
     const coreIon = asPropIon(ionicModel, key)

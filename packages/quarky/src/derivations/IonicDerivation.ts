@@ -2,10 +2,11 @@ import { DependencyTracker, getActiveTracker, getDependencyTracker } from "./Dep
 import { asIonicAtom, IonicAtom, ReactivePrimitive } from "./IonicAtom";
 import { asWatchSubject, isWatched, WatchSubject } from "../effects/WatchSubject";
 import { ReactiveEntity } from "../ReactiveEntity";
-import { IonicModel, isIonicModel, toRaw } from "../ionize/ionize";
+import {  Ionized, isIonizedModel, toRaw } from "../ionize/ionize";
 import { isDerivedIon } from "./DerivedIon";
 import { isPropIon } from "../ionize/PropIon";
 import { isAtomicIon } from "../ion/AtomicIon";
+import { AnyObject } from "@rue/types";
 
 
 
@@ -40,11 +41,11 @@ export class IonicDerivation<T = any> implements ReactiveEntity {
 
     atoms: Set<IonicAtom> = new Set()
 
-    trackAtoms(ionicDerivation: (() => any) | IonicModel, selective?: boolean) {
+    trackAtoms(ionicDerivation: (() => any) | Ionized<AnyObject>, selective?: boolean) {
         const tracker = new DependencyTracker(selective);
         let value;
         let deps;
-        if (isIonicModel(ionicDerivation)) {
+        if (isIonizedModel(ionicDerivation)) {
             deps = collectAbsorbedIons(ionicDerivation, tracker);
         }
         else {
@@ -79,7 +80,7 @@ export class IonicDerivation<T = any> implements ReactiveEntity {
 }
 
 
-function collectAbsorbedIons(ionicModel: IonicModel, tracker: DependencyTracker) {
+function collectAbsorbedIons(ionicModel: Ionized<AnyObject>, tracker: DependencyTracker) {
     const target = toRaw(ionicModel);
     for (const key in target) {
         const value = target[key]

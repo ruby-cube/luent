@@ -1,9 +1,9 @@
 import { AnyObject } from "@rue/types";
 import { isIonicAtom } from "../derivations/IonicAtom";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import { isIonicModel, IonicModel, storeSnapshot, toRaw, } from "./ionize";
+import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, } from "./ionize";
 import { getTrackedOp } from "./TrackedOp";
-import { defineIonicStructure, GetPreopData, useTrackableGetOp } from "./IonicModel";
+import { defineIonizedModel, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getObservedProp } from "./PropIon";
 import { MetaIonicModel } from "./MetaIonicModel";
 import { nontrackableIterableKeys } from "./IonicSet";
@@ -69,7 +69,7 @@ const trackableArrayOps = {
 }
 
 export function installIonicArray() {
-    defineIonicStructure(Array, {
+    defineIonizedModel(Array, {
         nontrackableKeys: nontrackableIterableKeys,
 
         trackableOps: {
@@ -198,10 +198,10 @@ export function installIonicArray() {
         opName: string,
         deionizeArgs?: (args: any[]) => any[]
     ) {
-        return function createOp(target: AnyObject, ionicModel: IonicModel<AnyObject>, meta: MetaIonicModel<any[]>, getPreopData: GetPreopData | undefined) {
+        return function createOp(target: AnyObject, ionicModel: IonizedModel<AnyObject>, meta: MetaIonicModel<any[]>, getPreopData: GetPreopData | undefined) {
             const fn = target[opName]
             return useMutatingArrayOp(
-                <IonicModel<any[]>>ionicModel,
+                <IonizedModel<any[]>>ionicModel,
                 meta,
                 <any[]>target,
                 opName,
@@ -220,7 +220,7 @@ export function installIonicArray() {
     }
 
     function useMutatingArrayOp(
-        ionicModel: IonicModel<any[]>,
+        ionicModel: IonizedModel<any[]>,
         metaIonicModel: MetaIonicModel<any[]>,
         target: any[],
         key: string,
@@ -351,9 +351,9 @@ export function installIonicArray() {
 //                 receiver
 //             )
 //         }
-//     }) as IonicModel<any[]>
+//     }) as IonizedModel<any[]>
 //     metaIonicModel.initIonicModel(ionicModel)
-//     registerIonicModel(ionicModel, target)
+//     registerIonizedModel(ionicModel, target)
 //     return ionicModel
 // }
 
@@ -390,9 +390,9 @@ export function installIonicArray() {
 //                 receiver
 //             )
 //         }
-//     }) as IonicModel<any[]>
+//     }) as IonizedModel<any[]>
 //     metaIonicModel.initIonicModel(ionicModel)
-//     registerIonicModel(ionicModel, target)
+//     registerIonizedModel(ionicModel, target)
 //     return ionicModel
 // }
 
@@ -401,7 +401,7 @@ export function installIonicArray() {
 // ) {
 //     for (let i = 0; i < target.length; i++) {
 //         const item = target[i]
-//         if (isIonicModel(item)) continue;
+//         if (isIonizedModel(item)) continue;
 //         if (!(item instanceof Object)) continue;
 //         const item$ = createIonicModel(item, DEEP)
 //         if (item$ === null) continue;
@@ -411,7 +411,7 @@ export function installIonicArray() {
 
 
 // function reactiveArrayGetter(
-//     ionicModel: IonicModel<Collection>,
+//     ionicModel: IonizedModel<Collection>,
 //     methods: AnyObject | undefined,
 //     metaIonicModel: MetaIonicCollection,
 //     handleMutatingMethod: (key: string, fn: Function) => (...args: any[]) => any,
@@ -490,7 +490,7 @@ export function installIonicArray() {
 // function deionizeArgs(args: any[]) { // This is a generic deionize args function that will only deionize two layers down
 //     const _args: any[] = []
 //     for (const arg of args) {
-//         if (isIonicModel(arg)) _args.push(toRaw(arg));
+//         if (isIonizedModel(arg)) _args.push(toRaw(arg));
 //         else if (arg instanceof Object) {
 //             _args.push(deionizeProps(arg))
 //         }
@@ -517,7 +517,7 @@ export function installIonicArray() {
 
 
 // function reactiveArraySetter(
-//     ionicModel: IonicModel,
+//     ionicModel: IonizedModel,
 //     metaIonicModel: MetaIonicModel,
 //     target: AnyObject,
 //     key: string | symbol,
@@ -607,8 +607,8 @@ export function isIntegerKey(key: unknown) {
 }
 
 
-export function isIonicArray(target: any): target is IonicModel<any[]> {
-    if (!isIonicModel(target)) return false;
+export function isIonicArray(target: any): target is IonizedModel<any[]> {
+    if (!isIonizedModel(target)) return false;
     if (toRaw(target) instanceof Array) return true;
     return false;
 }

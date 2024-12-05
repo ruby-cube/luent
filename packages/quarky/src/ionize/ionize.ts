@@ -1,16 +1,16 @@
 import { AnyObject } from "@rue/types";
-import { isObject, ProxyTargetKey } from "@rue/utils";
+import { isObject } from "@rue/utils";
 import { timeTraveler } from "./TimeTraveler";
-import { trigger, triggerIonicModel } from "../trigger";
 import { useRenderCycle } from "../effects/RenderCycle";
 import { META } from "../ReactiveEntity";
-import { MetaIonicModel, IONIC_MODEL } from "./MetaIonicModel";
+import { MetaIonicModel, IONIZED_MODEL } from "./MetaIonicModel";
 import { isInert } from "./inert";
 import { isIonizable } from "./ionizable";
-import { AnyIon, isIon } from "../ion/Ion";
+import { AnyIon, ion, isIon } from "../ion/Ion";
 import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
-import { AtomicIon } from "../ion/AtomicIon";
-import { createCustomIonicModel, getStructureConfigs } from "./IonicModel";
+import { AtomicIon, MetaIon } from "../ion/AtomicIon";
+import { createCustomIonicModel, getStructureConfigs } from "./IonizedModel";
+import { PropIon } from "./PropIon";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -20,63 +20,100 @@ import { createCustomIonicModel, getStructureConfigs } from "./IonicModel";
 
 //TODO: figure out the simplest way developers can add types to custom data strucures
 
-export type IonicModel<T extends AnyObject = AnyObject> = T & { readonly [IONIC_MODEL]: true } //TODO: add ion properties $
+export type IonizedModel<T extends AnyObject = AnyObject> = Ionized<T> //TODO: add ion properties $
 
 
 export type Readonly<T extends AnyObject = AnyObject> = {
-    readonly [K in keyof T]: T[K]
+   readonly [K in keyof T]: T[K]
 }
 
 type Ionizable = object | any[] | Set<unknown> | Map<any, any>
 
 
-const ionicModels: WeakMap<AnyObject, IonicModel> = new WeakMap()
+const ionizedModels: WeakMap<AnyObject, IonizedModel> = new WeakMap()
 
-export function registerIonicModel(ionicModel: IonicModel, target: AnyObject) {
-    ionicModels.set(target, ionicModel)
+export function registerIonizedModel(ionicModel: IonizedModel, target: AnyObject) {
+   ionizedModels.set(target, ionicModel)
 }
 
-export function isIonicModel(value: any): value is IonicModel {
-    if (!isObject(value)) return false;
-    return value[META]?.type === IONIC_MODEL;
+export function isIonizedModel(value: any): value is Ionized<AnyObject> {
+   if (!isObject(value)) return false;
+   return value[META]?.type === IONIZED_MODEL;
 }
+
+type AbsorbedIon<T> = {
+   (...args: any[]): T;
+   [META]: any;
+}
+
+function test_isAnyIon<T>(arg: AbsorbedIon<T>): T {
+   return null as unknown as T
+}
+
 
 export type Ionized<T extends AnyObject, M = {}> = {
-    [K in keyof T as K extends keyof M ? K extends string ? `_${K}` : K : K]: T[K] extends AtomicIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
-} & M & { [META]: MetaIonicModel }
+   [K in keyof T as (K extends keyof M ? K extends string ? `_${K}` : K : K)]:
+   T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? T[K] : V :
+   T[K] extends { [META]: any } | ((...args: any[]) => any) ? T[K]
+   : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]> // Deep Ionization //TODO: make exceptions for inert and non-ionizable
+   : T[K]
+} & InvertIons<T, M> & M & { [META]: MetaIonicModel }
 
+type ReadonlyIon<T> = {
+   (selected?: true): T
+   [META]: MetaIon;
+}
+
+type InvertIons<T extends AnyObject, M = {}> = {
+   [K in keyof T as (K extends keyof M ? never : T[K] extends AbsorbedIon<any> ? K extends `$${infer S}` ? S : K extends string ? `$${K}` : never : T[K] extends (...args: any[]) => any ? never : K extends `$${string}` ? never : K extends string ? `$${K}` : never)]:
+   T[K] extends AbsorbedIon<infer V> ? K extends `$${string}`? V: T[K] : ReadonlyIon<T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]> // Deep Ionization //TODO: make exceptions for inert and non-ionizable
+      : T[K]>
+}
+
+const $count = ion(0, { doSomething() { } })
+
+const cat = ionize({
+   count: $count,
+   chow: {
+      blog: 9
+   },
+   flower: 'hi',
+   doSomething() {
+
+   }
+}, { doOther() { }, doSomething() { } })
 
 
 //API
 export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M): Ionized<T, M> {
-    if (isIonicModel(target) || isIon(target) || isInert(target) || !isIonizable(target)) {
-        if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
-        return target as unknown as Ionized<T, M>;
-    }
-    //TODO: What about a readonly object that is not an ionic model?
-    if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
-    const existingIonicModel = ionicModels.get(target)
-    if (existingIonicModel) return existingIonicModel as Ionized<T, M>;
-    return createIonicModel(target, methods) as Ionized<T, M>
+   if (isIonizedModel(target) || isIon(target) || isInert(target) || !isIonizable(target)) {
+      if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
+      return target as unknown as Ionized<T, M>;
+   }
+   //TODO: What about a readonly object that is not an ionic model?
+   if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
+   const existingIonicModel = ionizedModels.get(target)
+   if (existingIonicModel) return existingIonicModel as Ionized<T, M>;
+   return createIonicModel(target, methods) as Ionized<T, M>
 }
 
 
 
 export function storeSnapshot(metaIonicModel: MetaIonicModel, clone?: AnyObject) {
-    timeTraveler.takeSnapshot(toRaw(metaIonicModel), useRenderCycle().count, clone)
+   timeTraveler.takeSnapshot(toRaw(metaIonicModel), useRenderCycle().count, clone)
 }
 
-// export function recordOp(reactive: IonicModel, op: MutationRecord) {
+// export function recordOp(reactive: IonizedModel, op: MutationRecord) {
 //     useRenderCycle().recordOp(reactive, op)
 // }
 
 
-type AsRaw<T> = T extends MetaIonicModel<infer R> ? R : T extends IonicModel<infer R> ? R : T
+type AsRaw<T> = T extends MetaIonicModel<infer R> ? R : T extends IonizedModel<infer R> ? R : T
 
 export function toRaw<T>(target: T): AsRaw<T> {
-    if (target instanceof MetaIonicModel) return target.rawTarget;
-    if (isIonicModel(target)) return asMetaIonicModel(target).rawTarget as AsRaw<T>;
-    return target as AsRaw<T>; // already raw target
+   if (target instanceof MetaIonicModel) return target.rawTarget;
+   if (isIonizedModel(target)) return asMetaIonicModel(target).rawTarget as AsRaw<T>;
+   return target as AsRaw<T>; // already raw target
 }
 
 
@@ -84,21 +121,21 @@ export function toRaw<T>(target: T): AsRaw<T> {
 //     newValue: any,
 //     key?: ProxyTargetKey
 // ) {
-//     if (isIonicModel(newValue)) return toRaw(newValue);
+//     if (isIonizedModel(newValue)) return toRaw(newValue);
 //     return newValue;
 // }
 
 
 export function createIonicModel(
-    target: object,
-    methods: object | undefined
+   target: object,
+   methods: object | undefined
 ): object {
-    return createCustomIonicModel(getStructureConfigs(target), target, methods)
-    // return isTuple(target) ? createIonicTuple(target, methods)
-    //     : target instanceof Array ? createIonicArray(target, methods)
-    //         : target instanceof Set ? createIonicSet(target, methods)
-    //             : target instanceof Map ? createIonicMap(target, methods)
-    //                 : createIonicObject(target, methods)
+   return createCustomIonicModel(getStructureConfigs(target), target, methods)
+   // return isTuple(target) ? createIonicTuple(target, methods)
+   //     : target instanceof Array ? createIonicArray(target, methods)
+   //         : target instanceof Set ? createIonicSet(target, methods)
+   //             : target instanceof Map ? createIonicMap(target, methods)
+   //                 : createIonicObject(target, methods)
 }
 
 
@@ -123,7 +160,7 @@ export function createIonicModel(
 
 
 
-// export function toWatchedProp(reactive: IonicModel, key: PropertyKey) {
+// export function toWatchedProp(reactive: IonizedModel, key: PropertyKey) {
 //     const metaIonicModel = reactive[META]
 //     const isIndex = toRaw(metaIonicModel) instanceof Array && isIntegerKey(key)
 //     if (isIndex) {
@@ -162,7 +199,7 @@ export function createIonicModel(
 
 
 // export function triggerIonicModelWithSetOp(
-//     reactive: IonicModel,
+//     reactive: IonizedModel,
 //     key: string | symbol,
 //     newValue: any,
 //     oldValue: any,
@@ -199,8 +236,8 @@ export function createIonicModel(
 //     // }
 // }
 
-export function asMetaIonicModel<T extends AnyObject>(reactive: IonicModel<T>): MetaIonicModel<T> {
-    return reactive[META];
+export function asMetaIonicModel<T extends AnyObject>(reactive: Ionized<T>): MetaIonicModel<T> {
+   return reactive[META] as MetaIonicModel<T>;
 }
 
 

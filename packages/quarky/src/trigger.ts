@@ -1,5 +1,4 @@
 import { asIonicAtom, isIonicAtom, ReactivePrimitive } from "./derivations/IonicAtom";
-import { asMetaIonicModel, IonicModel, toRaw } from "./ionize/ionize";
 import { AtomicIon } from "./ion/AtomicIon";
 import { asWatchSubject, isWatched } from "./effects/WatchSubject";
 import { getCurrentRenderCycle, useRenderCycle } from "./effects/RenderCycle";
@@ -7,6 +6,8 @@ import { getWithoutTracking } from "./derivations/DependencyTracker";
 import { isIonicEffectAtom } from "./derivations/IonicEffect";
 import { isCurrentWatchSubject } from "./effects/watch";
 import { PropIon } from "./ionize/PropIon";
+import { Ionized } from "./ionize/ionize";
+import { AnyObject } from "@rue/types";
 
 
 export function trigger(target: AtomicIon | PropIon, newValue?: any, oldValue?: any) {
@@ -35,13 +36,13 @@ export function triggerIonicAtom(target: ReactivePrimitive, newValue?: any, oldV
     }
 }
 
-// export function triggerIonicModel(reactive: IonicModel) {
+// export function triggerIonicModel(reactive: IonizedModel) {
 //     asWatchSubject(reactive).triggerEffects()
 // }
 
 
 export function triggerIonicModel(
-    model: IonicModel,
+    model: Ionized<AnyObject>,
     op: string,
     args: any[],
     output: any,

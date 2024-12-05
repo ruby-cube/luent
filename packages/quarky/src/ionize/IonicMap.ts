@@ -1,9 +1,9 @@
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import { IonicModel, storeSnapshot, ionize, registerIonicModel, toRaw } from "./ionize";
+import { IonizedModel, storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
 import { nontrackableIterableKeys, useClearOp, useDeleteOp } from "./IonicSet";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { asTrackedProp, getObservedProp } from "./PropIon";
-import { defineIonicStructure, useTrackableGetOp } from "./IonicModel";
+import { defineIonizedModel, useTrackableGetOp } from "./IonizedModel";
 
 
 // Trackable keys vs trackable ops:
@@ -24,7 +24,7 @@ const trackableMapGetOps = {
 }
 
 export function installIonicMap(){
-    defineIonicStructure(Map, {
+    defineIonizedModel(Map, {
         nontrackableKeys: nontrackableIterableKeys,
         trackableOps: {
             has(target, ionicModel) {
@@ -212,7 +212,7 @@ export function installIonicMap(){
 //                 receiver
 //             )
 //         }
-//     }) as IonicModel<Map<any, any>>
+//     }) as IonizedModel<Map<any, any>>
 
 
 //     const boundMethodMap: Map<string | symbol, (...arg: any[]) => any> = new Map([
@@ -276,7 +276,7 @@ export function installIonicMap(){
 //     }
 
 //     metaIonicModel.initIonicModel(ionicModel)
-//     registerIonicModel(ionicModel, target)
+//     registerIonizedModel(ionicModel, target)
 //     return ionicModel
 // }
 

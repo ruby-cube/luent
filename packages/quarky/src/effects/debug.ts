@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { isIonicModel, IonicModel } from "../ionize/ionize";
+import { isIonizedModel, Ionized } from "../ionize/ionize";
 import { AtomicIon } from "../ion/AtomicIon";
 import { PropIon } from "../ionize/PropIon";
 
@@ -10,15 +10,15 @@ export type WatchDebugOptions = {
     onTrigger?: OnTrigger;
 }
 
-type OnTrack = (target?: AtomicIon | PropIon | IonicModel) => void
+type OnTrack = (target?: AtomicIon | PropIon | Ionized<AnyObject>) => void
 type OnTrigger = () => void
 
-const onTrackMap: Map<AtomicIon | PropIon | IonicModel, OnTrack> = new Map();
-const onTriggerMap: Map<AtomicIon | PropIon | IonicModel, OnTrigger> = new Map();
+const onTrackMap: Map<AtomicIon | PropIon | Ionized<AnyObject>, OnTrack> = new Map();
+const onTriggerMap: Map<AtomicIon | PropIon | Ionized<AnyObject>, OnTrigger> = new Map();
 
-export function registerDebuggers(targets: (AtomicIon | PropIon)[] | IonicModel, options: WatchDebugOptions | undefined){
+export function registerDebuggers(targets: (AtomicIon | PropIon)[] | Ionized<AnyObject>, options: WatchDebugOptions | undefined){
     const {onTrack, onTrigger} = options ?? {}
-    const _targets = isIonicModel(targets) ? [targets] : targets
+    const _targets = isIonizedModel(targets) ? [targets] : targets
     if (onTrack){
         for (const target of _targets){
             onTrack(target) //TODO: THis works for watch, but DerivedIon and reactiveEffects will be tracked per re-eval
@@ -31,18 +31,18 @@ export function registerDebuggers(targets: (AtomicIon | PropIon)[] | IonicModel,
     }
 }
 
-export function runTrackDebugger(target: AtomicIon | PropIon | IonicModel){
+export function runTrackDebugger(target: AtomicIon | PropIon | Ionized<AnyObject>){
     const onTrack = onTrackMap.get(target);
     if (onTrack) onTrack();
 }
 
-export function runTriggerDebugger(target: AtomicIon | PropIon | IonicModel){
+export function runTriggerDebugger(target: AtomicIon | PropIon | Ionized<AnyObject>){
     const onTrigger = onTriggerMap.get(target);
     if (onTrigger) onTrigger();
 }
 
-export function collectReactiveProps(target: IonicModel, deps?: PropIon[]) {
-    if (!isIonicModel(target)) return [];
+export function collectReactiveProps(target: Ionized<AnyObject>, deps?: PropIon[]) {
+    if (!isIonizedModel(target)) return [];
     const _deps = deps || [];
     // for (const key in target) {
     //     _deps.push(asObservedProp(target, key));

@@ -8,7 +8,7 @@ import { JSDOM } from 'jsdom'
 import { createNodeContext } from '../Context';
 import { defineContextProp } from '../ContextKey';
 import { Ion, Ionized, MaybeIon, v } from '../../InputTypes';
-import { ion, ionize, isIon, isIonicModel } from '@rue/quarky';
+import { ion, ionize, isIon, isIonizedModel } from '@rue/quarky';
 
 
 // Common setup to reset the environment before each test
@@ -621,7 +621,7 @@ describe('Integration tests the Context API', () => {
 
             app.mount(<HTMLElement>document.createElement('div'))
 
-            expect(isIonicModel(frog)).toBe(true)
+            expect(isIonizedModel(frog)).toBe(true)
         });
 
 

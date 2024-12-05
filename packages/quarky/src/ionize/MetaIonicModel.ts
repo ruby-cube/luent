@@ -1,5 +1,5 @@
 import type { AnyObject } from "@rue/types"
-import type { IonicModel } from "./ionize"
+import type { Ionized, IonizedModel } from "./ionize"
 import type { TrackedOp } from "./TrackedOp"
 import type { ReactiveEntity } from "../ReactiveEntity"
 import { PropIon } from "./PropIon"
@@ -12,24 +12,24 @@ type OpMap = Map<EntryKey, TrackedOp>
 type OpName = string
 type EntryKey = any
 
-export const IONIC_MODEL = Symbol('ionicModel')
+export const IONIZED_MODEL = Symbol('ionicModel')
 
 export class MetaIonicModel<T extends AnyObject = AnyObject> implements ReactiveEntity {
-    ionicModel?: IonicModel<T>
-    // shallowReactive?: IonicModel<T>
-    readonly type = IONIC_MODEL
+    ionicModel?: Ionized<T>
+    // shallowReactive?: IonizedModel<T>
+    readonly type = IONIZED_MODEL
 
-    asProtected?: IonicModel<T>
-    asReadonly?: IonicModel<T>
+    asProtected?: Ionized<T>
+    asReadonly?: Ionized<T>
 
-    initIonicModel(ionicModel: IonicModel) {
+    initIonicModel(ionicModel: Ionized<T>) {
         if (this.ionicModel) return;
-        this.ionicModel = ionicModel as IonicModel<T>;
+        this.ionicModel = ionicModel as Ionized<T>;
     }
 
-    // initShallowReactive(ionicModel: IonicModel) {
+    // initShallowReactive(ionicModel: IonizedModel) {
     //     if (this.deepReactive) return;
-    //     this.deepReactive = ionicModel as IonicModel<T>;
+    //     this.deepReactive = ionicModel as IonizedModel<T>;
     // }
 
     constructor(
@@ -62,7 +62,7 @@ export class MetaIonicModel<T extends AnyObject = AnyObject> implements Reactive
     private asDerivation?: IonicDerivation
     trackAbsorbedIons() {
         if (this.asDerivation && this.hasNewAbsorbedIons === false) return;
-        const derivation = this.asDerivation || (this.asDerivation = new IonicDerivation(this.ionicModel, IONIC_MODEL, false))
+        const derivation = this.asDerivation || (this.asDerivation = new IonicDerivation(this.ionicModel, IONIZED_MODEL, false))
         derivation.trackAtoms(this.ionicModel!)
         this.undirty()
     }

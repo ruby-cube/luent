@@ -1,17 +1,17 @@
-import { isIonicModel, IonicModel, toRaw, ionize, registerIonicModel } from "./ionize";
-import { defineIonicStructure } from "./IonicModel";
+import { isIonizedModel, IonizedModel, toRaw, ionize, registerIonizedModel } from "./ionize";
+import { defineIonizedModel } from "./IonizedModel";
 
 // export const runningIonicObject = true;
 
-export function isIonicObject(value: any): value is IonicModel {
-    if (!isIonicModel(value)) return false;
+export function isIonicObject(value: any): value is IonizedModel {
+    if (!isIonizedModel(value)) return false;
     const raw = toRaw(value);
     if (raw instanceof Map || raw instanceof Array || raw instanceof Set || raw instanceof Function) return false;
     return true;
 }
 
 
-// defineIonicStructure()
+// defineIonizedModel()
 
 // export function createIonicObject(
 //     target: AnyObject,
@@ -75,10 +75,10 @@ export function isIonicObject(value: any): value is IonicModel {
 //                 receiver
 //             )
 //         }
-//     }) as IonicModel<AnyObject>
+//     }) as IonizedModel<AnyObject>
 
 //     metaIonicModel.initIonicModel(ionicModel)
-//     registerIonicModel(ionicModel, target)
+//     registerIonizedModel(ionicModel, target)
 //     return ionicModel
 // }
 

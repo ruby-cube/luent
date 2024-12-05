@@ -121,9 +121,9 @@ function ListBlock(attributes: {
 
     const $div = ViewIon('div')
 
-    const $frog = IonicModel(frog)
+    const $frog = IonizedModel(frog)
 
-    const $frog = ion(IonicModel({
+    const $frog = ion(IonizedModel({
         a: "djjf",
         bouat: 0,
         cucumber
@@ -136,7 +136,7 @@ function ListBlock(attributes: {
     }))
 
 
-    const $frog = IonicModel(new Frog())
+    const $frog = IonizedModel(new Frog())
 
     const $name = asPropIon(frog$, 'name') //$GetProp<string>
 

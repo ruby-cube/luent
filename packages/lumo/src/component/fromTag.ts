@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { MetaIonicModel } from "../../../quarky/src/ionize/MetaIonicModel";
-import { AtomicIon, DerivedIon, isIon, isIonicModel, protect, WritableDerivedIon } from "@rue/quarky";
+import { AtomicIon, DerivedIon, isIon, isIonizedModel, protect, WritableDerivedIon } from "@rue/quarky";
 import { META } from "../../../quarky/src/ReactiveEntity";
 import { toIon } from "../../../quarky/src/ion/toIons";
 import { getComponentAttributes } from "./makeComponent";
@@ -112,7 +112,7 @@ export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, as
                     case '_Ionized':
                     case '$Ionized':
                     case '$IonizedOrIonized':
-                        if (!isIonicModel(value)) {
+                        if (!isIonizedModel(value)) {
                             throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ionized`)
                         }
                         validatedAttributes['$' + key] = value; //TODO: readonly, protect

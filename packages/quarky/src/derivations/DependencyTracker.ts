@@ -100,18 +100,7 @@ export function getWithoutTracking(reactiveRef: (() => any) | TrackedOp) {
     return value;
 }
 
-// export function track(target: AtomicIon): boolean
-// export function track(target: IonicModel, key: string | symbol): boolean
-// export function track(target: IonicModel, key: string | symbol, arg: any): boolean
-// export function track(target: AtomicIon | IonicModel, key: string | symbol = UNDEFINED, arg: any = UNDEFINED) {
-//     const _target = arg !== UNDEFINED ? asTrackedOp(<IonicModel>target, <string>key, arg)
-//         : key !== UNDEFINED ? asObservedProp(<IonicModel>target, key)
-//             : <AtomicIon>target
-//     this.addDep(_target)
-//     return true;
 
-//     return false;
-// }
 
 export function __devCheckIfTracked() {
     if (tracked()) console.warn(`RESEARCH: This is currently a tracked context. May need to use getWithoutTracking`)

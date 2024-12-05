@@ -1,4 +1,4 @@
-import { IonicModel, ReactiveGet } from "../../packages/quarky/src"
+import { IonizedModel, ReactiveGet } from "../../packages/quarky/src"
 
 const TYPE = null as unknown
 
@@ -184,11 +184,11 @@ type DeepReactiveModel<T extends AnyObject = AnyObject> = T & {ionize: any};
     function doSomething<T>(argA: DeepReactiveModel<T extends AnyObject ? T : never>) { }
 }
 
-export type RawWatchTarget<T = any | AnyObject> = T extends AnyObject ? () => T | ReactiveGet<T> | IonicModel<T> | DeepReactiveModel<T> : () => T | ReactiveGet<T> 
+export type RawWatchTarget<T = any | AnyObject> = T extends AnyObject ? () => T | ReactiveGet<T> | IonizedModel<T> | DeepReactiveModel<T> : () => T | ReactiveGet<T> 
 {
     function something<T extends AnyObject>(){
-        doSomething(<IonicModel<T>>TYPE)  // GOOD
+        doSomething(<IonizedModel<T>>TYPE)  // GOOD
     }
 
-    function doSomething<T>(argA: T extends AnyObject ? () => T | ReactiveGet<T> | IonicModel<T> | DeepReactiveModel<T> : () => T | ReactiveGet<T> ) { }
+    function doSomething<T>(argA: T extends AnyObject ? () => T | ReactiveGet<T> | IonizedModel<T> | DeepReactiveModel<T> : () => T | ReactiveGet<T> ) { }
 }

@@ -1,9 +1,9 @@
-import { isIon, watchIonicEffect as _watchIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, IonicModel, OnChangeHandler, Phase, __devCheckIfTracked } from "../../../quarky/src";
+import { isIon, watchIonicEffect as _watchIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, Ionized, OnChangeHandler, Phase, __devCheckIfTracked } from "../../../quarky/src";
 import { ActiveListener, ListenerOptions } from "@rue/flask";
-import { noop } from "@rue/utils";
 import { getActiveDynamicNode, getDynamicNode } from "../dynamic/nodestack";
 import { CustomCleanupSchedulerListenerOptions } from "../events/listen";
 import { DynamicNode } from "../dynamic/DynamicNode";
+import { AnyObject } from "@rue/types";
 
 type WatchForRenderOptions = {
     eager?: true;
@@ -65,7 +65,7 @@ function asPreservedWatcher({ pause, resume, stop }: ActiveListener, dynamicNode
 type MultiWatchSubjectValues<T> = {[K in keyof T]: T[K] extends (...args: any[])=>infer R ? R : T[K]}
 
 export function watch<T extends () => any>(target: T, effect: T extends () => infer R ? (newValue: R, oldValue: R) => void : never, options?: LumoWatchOptions): ActiveListener
-export function watch<T extends IonicModel>(target: T, effect: (newValue: T, oldValue: T)=>void, options?: LumoWatchOptions): ActiveListener
+export function watch<T extends Ionized<AnyObject>>(target: T, effect: (newValue: T, oldValue: T)=>void, options?: LumoWatchOptions): ActiveListener
 export function watch<T extends any[]>(target: [...T], effect: (newValue: MultiWatchSubjectValues<T>, oldValue: MultiWatchSubjectValues<T>)=>void, options?: LumoWatchOptions): ActiveListener
 export function watch<T>(target: T, effect: (newValue: T, oldValue: T)=>void, options?: LumoWatchOptions): ActiveListener
 // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
