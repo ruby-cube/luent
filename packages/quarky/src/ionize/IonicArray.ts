@@ -12,7 +12,7 @@ const dogs = [0]
 
 declare global {
    interface Array<T> {
-      $getters: {
+      '~$methods': {
          // Accessor methods
          at(index: number): T extends AnyObject ? Ionized<T> : T | undefined;
          concat(...items: (T | T[])[]): (T extends AnyObject ? Ionized<T> : T)[];

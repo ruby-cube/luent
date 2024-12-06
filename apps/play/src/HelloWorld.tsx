@@ -9,7 +9,7 @@ function Swap() {
 
 declare module './Well' {
    interface Wellerman {
-      $getters: {
+      '~$methods': {
          getBoat: () => Ionized<Wellerman['boat']>
       }
       addition: 'hi'
@@ -69,15 +69,15 @@ export function IonAccess() {
 
    const wellerman = new Wellerman()
 
+   const recs = [0]
+
+
    //@ts-expect-error
    const well$ = ionize.withInertProps(new Well(), {
       water: inert
    })
 
-   //@ts-expect-error
-   const wellerman$ = ionize(new Well(), withMarks({
-      water: inert
-   }))
+   const wellerman$ = ionize(new Wellerman())
 
    //@ts-expect-error
    const well$ = ionize.withMarks(new Well(), {
@@ -92,6 +92,8 @@ export function IonAccess() {
 
    wella$.waterB
 
+ 
+
    class AnotherArray<T> extends Array<T> {
       // constructor(...args: T[]){
       //    super(...args);
@@ -99,6 +101,33 @@ export function IonAccess() {
       doSomething(){}
    }
    
+   const blah = {
+      '1': 0,
+      '~': 0,
+      '@': 0,
+      'z': 0,
+      '_': 0,
+      '-': 0,
+      '0': 0,
+      '9': 0,
+      '*': 0,
+      '&': 0,
+      '%': 0,
+      '#': 0,
+      '$': 0,
+      '^': 0,
+      '+': 0,
+      '=': 0,
+      '|': 0,
+      '/': 0,
+      '?': 0,
+      '>': 0,
+      ',': 0,
+      '.': 0,
+      '`': 0,
+      '!': 0,
+   }
+
 
    const boat$ = wellerman$.getBoat()
 
@@ -106,11 +135,15 @@ export function IonAccess() {
 
    const list$ = ionize(new AnotherArray({name: 9}, undefined))
 
+   for (const item of list$){
+      
+   }
+
    const num = list$[0]
 
    const removed = list$.splice(0, 1)
 
-   const res = list$.map((item, index, array)=>item.name)
+   const res = list$.map((item, index, array)=>item!.name)
 
    return Component(
       <>

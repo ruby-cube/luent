@@ -50,7 +50,7 @@ function test_isAnyIon<T>(arg: AbsorbedIon<T>): T {
 
 
 export type Ionized<T extends AnyObject, M = {}> = {
-   [K in keyof T as (K extends '$getters' ? never : K extends keyof M ? K extends string ? `_${K}` : K : K)]:
+   [K in keyof T as (K extends '~$methods' ? never : K extends keyof M ? K extends string ? `_${K}` : K : K)]:
    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? T[K] : V :
    T[K] extends { [META]: any } | Inert ? T[K]
    : T[K] extends (...args: any[]) => any ? IonizedGetter<T, K>
@@ -65,14 +65,14 @@ type ReadonlyIon<T> = {
 }
 
 type InvertIons<T extends AnyObject, M = {}> = {
-   [K in keyof T as (K extends '$getters' ? never : K extends keyof M ? never : T[K] extends AbsorbedIon<any> ? K extends `$${infer S}` ? S : K extends string ? `$${K}` : never : T[K] extends (...args: any[]) => any ? never : K extends `$${string}` ? never : K extends string ? `$${K}` : never)]:
+   [K in keyof T as (K extends '~$methods' ? never : K extends keyof M ? never : T[K] extends AbsorbedIon<any> ? K extends `$${infer S}` ? S : K extends string ? `$${K}` : never : T[K] extends (...args: any[]) => any ? never : K extends `$${string}` ? never : K extends string ? `$${K}` : never)]:
    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? V : T[K] : ReadonlyIon<T[K] extends { [META]: any } | ((...args: any[]) => any) | Inert ? T[K]
       : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
       : T[K] extends { [key: PropertyKey]: any } | undefined ? Ionized<Exclude<T[K], undefined>> | undefined
       : T[K]>
 }
 
-type IonizedGetter<T, K extends keyof T> = T extends { $getters: AnyObject } ? K extends keyof T['$getters'] ? T['$getters'][K] : T[K] : T[K]
+type IonizedGetter<T, K extends keyof T> = T extends { '~$methods': AnyObject } ? K extends keyof T['~$methods'] ? T['~$methods'][K] : T[K] : T[K]
 
 const $count = ion(0, { doSomething() { } })
 
