@@ -13,6 +13,7 @@ import { AnyIon, isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PropIon";
 import { protect } from "../protect";
 import { READONLY } from "../ion/ProtectedIon";
+import { inert } from "./inert";
 
 
 
@@ -195,7 +196,8 @@ export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonicMo
 export function createCustomIonicModel(
    structureConfigs: CustomIonicModelConfig[],
    target: AnyObject,
-   methods: AnyObject | undefined
+   methods: AnyObject | undefined,
+   inertProps: AnyObject | undefined
 ) {
    const metaIonicModel = new MetaIonicModel(target, methods)
    const ionicModel = new Proxy(target, {
@@ -270,7 +272,7 @@ export function createCustomIonicModel(
          }
 
          if (isIon(value)) {
-            return maybeIonize(value(), target, ionicModel, receiver); // { count: $count } get value case
+            return maybeIonize(value(), target, ionicModel, receiver, key, inertProps); // { count: $count } get value case
          }
 
          if (value instanceof Function)
@@ -282,7 +284,7 @@ export function createCustomIonicModel(
                boundMethodMap,
                value
             )
-         const _value = maybeIonize(value, target, ionicModel, receiver)
+         const _value = maybeIonize(value, target, ionicModel, receiver, key, inertProps)
          const tracker = getActiveTracker()
          if (!tracker || Reflect.getOwnPropertyDescriptor(target, key)?.writable === false)
             return _value;
@@ -309,7 +311,10 @@ export function createCustomIonicModel(
    return ionicModel
 }
 
-function maybeIonize(value: any, target: AnyObject, proxy: AnyObject, receiver: AnyObject) {
+function maybeIonize(value: any, target: AnyObject, proxy: AnyObject, receiver: AnyObject, key: PropertyKey, inertProps: AnyObject | undefined) {
+   if (inertProps && key in inertProps) {
+      return value;
+   }
    if (!(value instanceof Object))
       return value;
    if (isReadonlyProxy(target, proxy, receiver)) {

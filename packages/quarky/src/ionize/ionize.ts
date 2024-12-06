@@ -131,9 +131,10 @@ export function toRaw<T>(target: T): AsRaw<T> {
 
 export function createIonicModel(
    target: object,
-   methods: object | undefined
+   methods: object | undefined,
+   inertProps: object | undefined
 ): object {
-   return createCustomIonicModel(getStructureConfigs(target), target, methods)
+   return createCustomIonicModel(getStructureConfigs(target), target, methods, inertProps)
    // return isTuple(target) ? createIonicTuple(target, methods)
    //     : target instanceof Array ? createIonicArray(target, methods)
    //         : target instanceof Set ? createIonicSet(target, methods)
