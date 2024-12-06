@@ -12,7 +12,7 @@ export type AtomicIon<T = any, M extends AnyObject = {}> = ((selected?: true) =>
         [META]: MetaIon<T>;
     } & {[K in keyof UnmarkedMethods<M>]:UnmarkedMethods<M>[K]} & (UnmarkedMethods<M> extends { as: any } ? { _as: (value: T) => T } : { as: (value: T) => T })
 
-type UnmarkedMethods<M> = { [K in keyof M as K extends `XPO${infer S}` ? S : K]: M[K] }
+type UnmarkedMethods<M> = { [K in keyof M as K extends `${infer S}XPO` ? S : K]: M[K] }
 
 export const ION = Symbol('atomicIon');
 
@@ -43,7 +43,7 @@ export function createAtomicIon<
 ) {
     const metaIon = new MetaIon(<AtomicIon>$ion, value, isIonizedModel(value), !!methods, !!inert)
 
-    const setterKey = methods && ('as' in methods || 'XPOas' in methods) ? "_as" : 'as'
+    const setterKey = methods && ('as' in methods || 'asXPO' in methods) ? "_as" : 'as'
 
     const proto = {
         [META]: metaIon,
@@ -73,8 +73,8 @@ export function createAtomicIon<
 
 export function attachIonMethods(proto: AnyObject, methods: AnyObject){
     for (const key in methods) {
-        const isPublic = key.startsWith('XPO');
-        const method = proto[isPublic ? key.slice(3) : key] = methods[key]
+        const isPublic = key.endsWith('XPO');
+        const method = proto[isPublic ? key.slice(0, -3) : key] = methods[key]
         if (isPublic) {
             method[IS_PUBLIC] = true;
         }

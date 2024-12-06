@@ -1,21 +1,92 @@
-import { Component, Else, ElseIf, expose, For, fromTag, If, prep, v } from "@rue/lumo";
+import { Component, Else, ElseIf, expose, For, fromTag, If, prep, v, watch } from "@rue/lumo";
+import { ion, ionize, Ionized } from "@rue/quarky";
+import { Inert, inert } from "../../../packages/quarky/src/ionize/inert";
+import { Well, Wellerman } from "./Well";
 
 function Swap() {
    return Component('')
 }
 
+declare module './Well' {
+   interface Wellerman {
+      $getters: {
+         getBoat: () => Ionized<Wellerman['boat']>
+      }
+      addition: 'hi'
+   }
+}
 
-function Svelte() {
-   //@ts-ignore
-   const $x = ion(7)
+export function IonAccess() {
+
+   const $x = ion(7, {
+      increment() {
+         $x._as($x() + 1)
+      }, 
+      as(){
+
+      }
+   })
+
+   const frog$ = ionize({
+      name: 'sir robin',
+      quality: inert({
+         gallant: true
+      }),
+      songs: {
+         theyCallMe: 'sir robin the brave'
+      }
+   })
+
+   const $songs = frog$.$songs
+
+
+   const songs$ = $songs()
+
+
+   watch(() => $x() > 10, () => {
+
+   })
+
+   watch(frog$.$name, () => {
+
+   })
+
+   watch(() => frog$.name, () => {
+
+   })
+
+   watch(frog$.songs.$theyCallMe, () => { // Will not track change in quality
+
+   })
+
+   watch(() => frog$.songs.theyCallMe, () => { // will track all changes
+
+   })
+
+   function ionizeWithMods(obj: any, keys: any) {
+      return {}
+   }
+
+   const wellerman = new Wellerman()
+
+   const wellerman$ = ionize(new Wellerman())
+
+   const boat$ = wellerman$.getBoat()
+
+   const well$ = ionizeWithMods(new Well(), { water: inert })
+
+   const list$ = ionize([{ name: '' }])
+
+   const num = list$[0]
+
+   const removed = list$.pop()
 
    return Component(
       <>
          <swap:mount />
-         {If($x() > 10, <>
-            <SvelteB></SvelteB>
+         {If($x() > 10,
             <p>{$x()} is greater than 10</p>
-         </>)}
+         )}
          {ElseIf(5 > $x(),
             <p>{$x()} is less than 5</p>
          )}
@@ -74,6 +145,8 @@ let $index;
 
 function ListB() {
 
+
+
    return (
       <div>
          {For($list, m => m.id, (item, $index) => <>
@@ -88,7 +161,7 @@ function Column() {
 
    return Component(
       <div>
-         <div>{function butterfly(){}}</div>
+         <div>{function butterfly() { }}</div>
          <div>{0}</div>
       </div>
    )
@@ -115,6 +188,12 @@ function ColumnB() {
    )
 }
 
+function SomeComponent(input = fromTag({ name: v<string> })) {
+   return Component(
+      <></>
+   )
+}
+
 let o;
 const cmp = Component;
 const component = Component;
@@ -124,7 +203,6 @@ const cm$ = Component;
 const $cm = Component;
 const att = fromTag
 const $input = fromTag
-const fromTag = fromTag
 const fromJSX = fromTag
 const inputType = fromTag
 const attrs = fromTag

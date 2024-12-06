@@ -3,7 +3,7 @@ import { IonizedModel, storeSnapshot, ionize, registerIonizedModel, toRaw } from
 import { nontrackableIterableKeys, useClearOp, useDeleteOp } from "./IonicSet";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { asTrackedProp, getObservedProp } from "./PropIon";
-import { defineIonizedModel, useTrackableGetOp } from "./IonizedModel";
+import { defineIonizedStructure, useTrackableGetOp } from "./IonizedModel";
 
 
 // Trackable keys vs trackable ops:
@@ -24,7 +24,7 @@ const trackableMapGetOps = {
 }
 
 export function installIonicMap(){
-    defineIonizedModel(Map, {
+    defineIonizedStructure(Map, {
         nontrackableKeys: nontrackableIterableKeys,
         trackableOps: {
             has(target, ionicModel) {

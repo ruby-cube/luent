@@ -34,9 +34,9 @@ describe('ion function', () => {
         expect($count[META]).toBeInstanceOf(MetaIon);
     });
  
-    it('should remove XPO prefix in methods', () => {
+    it('should remove XPO suffix in methods', () => {
         const $count = ion(5, {
-            XPOdouble() {
+            doubleXPO() {
                 $count.as($count() * 2)
             }
         });

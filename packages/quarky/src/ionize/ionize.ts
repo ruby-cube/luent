@@ -4,9 +4,8 @@ import { timeTraveler } from "./TimeTraveler";
 import { useRenderCycle } from "../effects/RenderCycle";
 import { META } from "../ReactiveEntity";
 import { MetaIonicModel, IONIZED_MODEL } from "./MetaIonicModel";
-import { isInert } from "./inert";
-import { isIonizable } from "./ionizable";
-import { AnyIon, ion, isIon } from "../ion/Ion";
+import { Inert, isInert } from "./inert";
+import { AnyIon, Ion, ion, isIon } from "../ion/Ion";
 import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
 import { AtomicIon, MetaIon } from "../ion/AtomicIon";
 import { createCustomIonicModel, getStructureConfigs } from "./IonizedModel";
@@ -52,10 +51,11 @@ function test_isAnyIon<T>(arg: AbsorbedIon<T>): T {
 
 
 export type Ionized<T extends AnyObject, M = {}> = {
-   [K in keyof T as (K extends keyof M ? K extends string ? `_${K}` : K : K)]:
+   [K in keyof T as (K extends '$getters' ? never : K extends keyof M ? K extends string ? `_${K}` : K : K)]:
    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? T[K] : V :
-   T[K] extends { [META]: any } | ((...args: any[]) => any) ? T[K]
-   : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]> // Deep Ionization //TODO: make exceptions for inert and non-ionizable
+   T[K] extends { [META]: any } | Inert ? T[K]
+   : T[K] extends (...args: any[]) => any ? IonizedGetter<T, K>
+   : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
    : T[K]
 } & InvertIons<T, M> & M & { [META]: MetaIonicModel }
 
@@ -65,10 +65,13 @@ type ReadonlyIon<T> = {
 }
 
 type InvertIons<T extends AnyObject, M = {}> = {
-   [K in keyof T as (K extends keyof M ? never : T[K] extends AbsorbedIon<any> ? K extends `$${infer S}` ? S : K extends string ? `$${K}` : never : T[K] extends (...args: any[]) => any ? never : K extends `$${string}` ? never : K extends string ? `$${K}` : never)]:
-   T[K] extends AbsorbedIon<infer V> ? K extends `$${string}`? V: T[K] : ReadonlyIon<T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]> // Deep Ionization //TODO: make exceptions for inert and non-ionizable
+   [K in keyof T as (K extends '$getters' ? never : K extends keyof M ? never : T[K] extends AbsorbedIon<any> ? K extends `$${infer S}` ? S : K extends string ? `$${K}` : never : T[K] extends (...args: any[]) => any ? never : K extends `$${string}` ? never : K extends string ? `$${K}` : never)]:
+   T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? V : T[K] : ReadonlyIon<T[K] extends { [META]: any } | ((...args: any[]) => any) | Inert ? T[K]
+      : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
       : T[K]>
 }
+
+type IonizedGetter<T, K extends keyof T> = T extends { $getters: AnyObject } ? K extends keyof T['$getters'] ? T['$getters'][K] : T[K] : T[K]
 
 const $count = ion(0, { doSomething() { } })
 
@@ -85,16 +88,16 @@ const cat = ionize({
 
 
 //API
-export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M): Ionized<T, M> {
-   if (isIonizedModel(target) || isIon(target) || isInert(target) || !isIonizable(target)) {
+export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M): T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M> {
+   if (isIonizedModel(target) || isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
-      return target as unknown as Ionized<T, M>;
+      return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
    }
    //TODO: What about a readonly object that is not an ionic model?
    if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
    const existingIonicModel = ionizedModels.get(target)
-   if (existingIonicModel) return existingIonicModel as Ionized<T, M>;
-   return createIonicModel(target, methods) as Ionized<T, M>
+   if (existingIonicModel) return existingIonicModel as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
+   return createIonicModel(target, methods) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
 }
 
 

@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
 import {  IonizedModel, storeSnapshot, toRaw } from "./ionize";
-import { defineIonizedModel, GetPreopData, useTrackableGetOp } from "./IonizedModel";
+import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getTrackedOp } from "./TrackedOp";
 import { MetaIonicModel } from "./MetaIonicModel";
 import { getObservedProp } from "./PropIon";
@@ -47,7 +47,7 @@ const trackableSetOps = {
 }
 
 export function installIonicSet(){ 
-    defineIonizedModel(Set, {
+    defineIonizedStructure(Set, {
         nontrackableKeys: nontrackableIterableKeys,
         trackableOps: {
             has(target, ionicModel) {

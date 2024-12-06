@@ -1,5 +1,5 @@
 import { isIonizedModel, IonizedModel, toRaw, ionize, registerIonizedModel } from "./ionize";
-import { defineIonizedModel } from "./IonizedModel";
+import { defineIonizedStructure } from "./IonizedModel";
 
 // export const runningIonicObject = true;
 
@@ -11,7 +11,7 @@ export function isIonicObject(value: any): value is IonizedModel {
 }
 
 
-// defineIonizedModel()
+// defineIonizedStructure()
 
 // export function createIonicObject(
 //     target: AnyObject,

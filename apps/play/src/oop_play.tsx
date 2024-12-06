@@ -28,11 +28,11 @@ import { Article } from "./TestCustomCleanupScheduler";
 function ListA() {
 
     const $count = ion(0, {
-        XPOincrement() { /* public */ 
+        incrementXPO() { /*public*/ 
             $count.as($count() + 1)
         },
 
-        decrement() { /* public */
+        decrement() { /*public*/
             $count.as($count() - 1)
         }
     })

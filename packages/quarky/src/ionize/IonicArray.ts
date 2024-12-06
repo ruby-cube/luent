@@ -1,312 +1,370 @@
 import { AnyObject } from "@rue/types";
 import { isIonicAtom } from "../derivations/IonicAtom";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, } from "./ionize";
+import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, Ionized, } from "./ionize";
 import { getTrackedOp } from "./TrackedOp";
-import { defineIonizedModel, GetPreopData, useTrackableGetOp } from "./IonizedModel";
+import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getObservedProp } from "./PropIon";
 import { MetaIonicModel } from "./MetaIonicModel";
 import { nontrackableIterableKeys } from "./IonicSet";
 
+const dogs = [0]
+
+dogs.map
+
+declare global {
+   interface Array<T> {
+      $getters: {
+         // Accessor methods
+         at(index: number): T extends AnyObject ? Ionized<T> : T | undefined;
+         concat(...items: (T | T[])[]): (T extends AnyObject ? Ionized<T> : T)[];
+         slice(start?: number, end?: number): (T extends AnyObject ? Ionized<T> : T)[];
+
+         // Mutator methods
+         copyWithin(target: number, start: number, end?: number): (T extends AnyObject ? Ionized<T> : T)[];
+         fill(value: T, start?: number, end?: number): (T extends AnyObject ? Ionized<T> : T)[];
+         pop(): T extends AnyObject ? Ionized<T> : T | undefined;
+         reverse(): (T extends AnyObject ? Ionized<T> : T)[];
+         shift(): T extends AnyObject ? Ionized<T> : T | undefined;
+         sort(compareFn?: (a: T, b: T) => number): (T extends AnyObject ? Ionized<T> : T)[];
+         splice(start: number, deleteCount?: number, ...items: T[]): (T extends AnyObject ? Ionized<T> : T)[];
+
+
+         map<U, H>(
+            this: H,
+            callback: (value: T, index: number, array: H) => U, //QUESTION: should the array be ionized?
+            thisArg?: any
+         ): U[];
+         filter<H>(
+            this: H,
+            predicate: (value: T, index: number, array: H) => boolean,
+            thisArg?: any
+         ): (T extends AnyObject ? Ionized<T> : T)[];
+         find<H>(
+            this: H,
+            predicate: (value: T, index: number, array: H) => boolean,
+            thisArg?: any
+         ): T extends AnyObject ? Ionized<T> : T | undefined;
+
+         reduce<U, H>(
+            this: H,
+            callback: (accumulator: U, currentValue: T, index: number, array: H) => U,
+            initialValue: U
+         ): U;
+         reduceRight<U, H>(
+            this: H,
+            callback: (accumulator: U, currentValue: T, index: number, array: H) => U,
+            initialValue: U
+         ): U;
+
+         // Methods introduced in ES2023
+         toSorted(compareFn?: (a: T, b: T) => number): (T extends AnyObject ? Ionized<T> : T)[];
+         toReversed(): (T extends AnyObject ? Ionized<T> : T)[];
+         with(index: number, value: T): (T extends AnyObject ? Ionized<T> : T)[];
+
+         [Symbol.iterator](): IterableIterator<T extends AnyObject ? Ionized<T> : T>;
+      }
+   }
+}
 
 const trackableArrayOps = {
 
-    // whole array, triggered by any change to array
+   // whole array, triggered by any change to array
 
-    toReversed: true, // newArray = toReversed()
-    flat: true, // newArray = flat(depth?)
-    toSorted: true, // newArray = toSorted(compareFn?)
-    flatMap: true, // newArray = flatMap(callbackFn, thisArg?)
-    map: true, // newArray = map(callbackFn, thisArg?)
-    reduce: true, // result = reduce(callbackFn, initialValue?)
-    reduceRight: true, // result = reduceRight(callbackFn, initialValue?)
+   toReversed: true, // newArray = toReversed()
+   flat: true, // newArray = flat(depth?)
+   toSorted: true, // newArray = toSorted(compareFn?)
+   flatMap: true, // newArray = flatMap(callbackFn, thisArg?)
+   map: true, // newArray = map(callbackFn, thisArg?)
+   reduce: true, // result = reduce(callbackFn, initialValue?)
+   reduceRight: true, // result = reduceRight(callbackFn, initialValue?)
 
-    join: true, // string = join(separator?)
-    toLocaleString: true, // string = toLocaleString() 
-    toString: true, // string = toString()
-
-
-    // check if result changed
-    lastIndexOf: true, // index = lastIndexOf(item, fromIndex)
-    indexOf: true, // index = indexOf(item, fromIndex)
-    includes: true, // boolean = includes(item, fromIndex?)
-
-    // args
-    find: true, // item = find(callbackFn, thisArg?)
-    findLast: true, // item = findLast(callbackFn, thisArg?)
-
-    findIndex: true, // index = findIndex(callbackFn, thisArg?)
-    findLastIndex: true, // index = findLastIndex(callbackFn, thisArg?)
-
-    filter: true, // newArray = filter(callbackFn, thisArg?)
-
-    every: true, // boolean = every(callbackFn, thisArg?)
-    some: true, // boolean = some(callbackFn, thisArg?)
+   join: true, // string = join(separator?)
+   toLocaleString: true, // string = toLocaleString() 
+   toString: true, // string = toString()
 
 
-    // copyWithin: true,
-    // fill: true,
-    // pop: true,
-    // push: true,
-    // shift: true,
-    // unshift: true,
-    // reverse: true,
-    // sort: true,
-    // splice: true,
+   // check if result changed
+   lastIndexOf: true, // index = lastIndexOf(item, fromIndex)
+   indexOf: true, // index = indexOf(item, fromIndex)
+   includes: true, // boolean = includes(item, fromIndex?)
 
-    // keys: true,  // newIterable = keys()
-    // entries: true, // newEntriesIterator = entries()
-    // values: true, // newIterable = values()
-    // forEach: true,
+   // args
+   find: true, // item = find(callbackFn, thisArg?)
+   findLast: true, // item = findLast(callbackFn, thisArg?)
+
+   findIndex: true, // index = findIndex(callbackFn, thisArg?)
+   findLastIndex: true, // index = findLastIndex(callbackFn, thisArg?)
+
+   filter: true, // newArray = filter(callbackFn, thisArg?)
+
+   every: true, // boolean = every(callbackFn, thisArg?)
+   some: true, // boolean = some(callbackFn, thisArg?)
 
 
-    slice: true, // newArray = slice(start?, end?)
+   // copyWithin: true,
+   // fill: true,
+   // pop: true,
+   // push: true,
+   // shift: true,
+   // unshift: true,
+   // reverse: true,
+   // sort: true,
+   // splice: true,
 
-    concat: true, // newArray = concat(arrayB, arrayC, ...)
-    toSpliced: true, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
+   // keys: true,  // newIterable = keys()
+   // entries: true, // newEntriesIterator = entries()
+   // values: true, // newIterable = values()
+   // forEach: true,
 
-    with: true, // newArray = arrayInstance.with(index, value)
+
+   slice: true, // newArray = slice(start?, end?)
+
+   concat: true, // newArray = concat(arrayB, arrayC, ...)
+   toSpliced: true, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
+
+   with: true, // newArray = arrayInstance.with(index, value)
 }
 
 export function installIonicArray() {
-    defineIonizedModel(Array, {
-        nontrackableKeys: nontrackableIterableKeys,
+   defineIonizedStructure(Array, {
+      nontrackableKeys: nontrackableIterableKeys,
 
-        trackableOps: {
-            at(target, ionicModel) {
-                return useTrackableGetOp(
-                    ionicModel,
-                    target,
-                    'at',
-                    target.at
-                )
-            }
-            //TODO: Trackable ops (as oppsed to get ops)?? not sure if necessary yet
-        },
-
-        mutatingOps: {
-            push: {
-                createOp: useMutatingArrayOpFactory('push', deionizeArgs),
-                preop(model) {
-                    return model.length
-                },
-                revert(model, { preopData: length, args }) {
-                    model.splice(length, args.length)
-                }
-            },
-
-            pop: {
-                createOp: useMutatingArrayOpFactory('pop'),
-                revert(model, { output }) {
-                    model.push(output)
-                }
-            },
-
-            unshift: {
-                createOp: useMutatingArrayOpFactory('unshift', deionizeArgs),
-                revert(model, { args }) {
-                    model.splice(0, args.length)
-                }
-            },
-
-            shift: {
-                createOp: useMutatingArrayOpFactory('shift'),
-                revert(model, { output }) {
-                    model.unshift(output)
-                }
-            },
-
-            splice: {
-                createOp: useMutatingArrayOpFactory('splice', deionizeArgs),
-                revert(model, { output, args }) {
-                    const start = args[0];
-                    const numItems = args.length - 2;
-                    model.splice(start, numItems, ...output)
-                }
-            },
-
-            copyWithin: {
-                createOp: useMutatingArrayOpFactory('copyWithin'),
-                preop: fillOrCopyWithinPreop,
-                revert: fillOrCopyWithinRevert
-            },
-
-            fill: {
-                createOp: useMutatingArrayOpFactory('fill', (args: any) => toRaw(args[0])),
-                preop: fillOrCopyWithinPreop,
-                revert: fillOrCopyWithinRevert
-            },
-
-            reverse: {
-                createOp: useMutatingArrayOpFactory('reverse'),
-                revert(model) {
-                    model.reverse()
-                }
-            },
-
-            sort: {
-                createOp: useMutatingArrayOpFactory('sort'),
-                preop(model) {
-                    return model.slice()
-                },
-                revert(model, { preopData: snapshot }) {
-                    for (let i = 0; i < model.length; i++) {
-                        model[i] = snapshot[i]
-                    }
-                }
-            },
-        },
-
-        afterSet(ionicModel, meta, key, newValue, oldValue) {
-            const op = isIntegerKey(key) ? getTrackedOp(ionicModel, 'at', key) : null
-            if (op) {
-                triggerIonicAtom(op)
-            }
-
-            const observedIndices = meta.observedEntryKeys
-            if (observedIndices && key === 'length') {
-                for (const indexKey of observedIndices) {
-                    if (typeof indexKey !== 'string') {
-                        console.warn(`index key is not string. May need to refactor code`)
-                        continue;
-                    }
-                    const index = parseInt(indexKey)
-                    if (index > newValue || index > oldValue) {
-                        const prop = getObservedProp(ionicModel, indexKey)
-                        if (prop) {
-                            trigger(prop, newValue, oldValue)
-                        }
-                        const op = getTrackedOp(ionicModel, 'at', index)
-                        if (op) {
-                            if (isIonicAtom(op)) {
-                                triggerIonicAtom(op)
-                            }
-                        }
-                    }
-                }
-            }
-        },
-
-        isEntryKey(model, key) {
-            return !!(model instanceof Array && isIntegerKey(key))
-        },
-    })
-
-
-
-    function useMutatingArrayOpFactory(
-        opName: string,
-        deionizeArgs?: (args: any[]) => any[]
-    ) {
-        return function createOp(target: AnyObject, ionicModel: IonizedModel<AnyObject>, meta: MetaIonicModel<any[]>, getPreopData: GetPreopData | undefined) {
-            const fn = target[opName]
-            return useMutatingArrayOp(
-                <IonizedModel<any[]>>ionicModel,
-                meta,
-                <any[]>target,
-                opName,
-                fn,
-                getPreopData,
-                deionizeArgs
+      trackableOps: {
+         at(target, ionicModel) {
+            return useTrackableGetOp(
+               ionicModel,
+               target,
+               'at',
+               target.at
             )
-        }
-    }
+         }
+         //TODO: Trackable ops (as oppsed to get ops)?? not sure if necessary yet
+      },
 
-    const lengthMutatingOps = {
-        push: true,
-        pop: true,
-        shift: true,
-        unshift: true,
-    }
-
-    function useMutatingArrayOp(
-        ionicModel: IonizedModel<any[]>,
-        metaIonicModel: MetaIonicModel<any[]>,
-        target: any[],
-        key: string,
-        fn: Function,
-        getPreopData?: ((target: any[], args: any[]) => any),
-        deionizeArgs?: (args: any[]) => any[]
-    ) {
-        return (...args: any[]) => {
-            const preopData = getPreopData ? getPreopData(target, args) : undefined
-            const _args = deionizeArgs ? deionizeArgs(args) : args
-            const oldLength = target.length;
-            const output = fn.apply(ionicModel, _args); // perform mutation
-            const newLength = target.length;
-            if (key in lengthMutatingOps && oldLength === newLength) return output;
-            storeSnapshot(metaIonicModel)
-
-            const lengthProp = getObservedProp(ionicModel, 'length')
-            if (lengthProp) {
-                trigger(lengthProp, newLength, oldLength); // trigger for length change
+      mutatingOps: {
+         push: {
+            createOp: useMutatingArrayOpFactory('push', deionizeArgs),
+            preop(model) {
+               return model.length
+            },
+            revert(model, { preopData: length, args }) {
+               model.splice(length, args.length)
             }
+         },
 
-            if (key === 'pop') {
-                const prop = getObservedProp(ionicModel, (oldLength - 1).toString())
-                if (prop) trigger(prop);
-                const op = getTrackedOp(ionicModel, 'at', - 1)
-                if (op) triggerIonicAtom(op);
+         pop: {
+            createOp: useMutatingArrayOpFactory('pop'),
+            revert(model, { output }) {
+               model.push(output)
             }
+         },
 
-            const observedIndices = metaIonicModel.observedEntryKeys
-            if (observedIndices && oldLength < newLength) {
-                for (const indexKey of observedIndices) {
-                    if (typeof indexKey !== 'string') {
-                        console.warn(`index key is not string. May need to refactor code`)
-                        continue;
-                    }
-                    const index = parseInt(indexKey)
-                    if (index >= newLength) {
-                        const prop = getObservedProp(ionicModel, indexKey)
-                        if (prop) {
-                            trigger(prop)
-                        }
-                        const op = getTrackedOp(ionicModel, 'at', index)
-                        if (op) {
-                            if (isIonicAtom(op)) {
-                                triggerIonicAtom(op)
-                            }
-                        }
-                    }
-                }
+         unshift: {
+            createOp: useMutatingArrayOpFactory('unshift', deionizeArgs),
+            revert(model, { args }) {
+               model.splice(0, args.length)
             }
+         },
 
-            triggerIonicModel(
-                ionicModel,
-                key,
-                _args,
-                output,
-                preopData
-            )
+         shift: {
+            createOp: useMutatingArrayOpFactory('shift'),
+            revert(model, { output }) {
+               model.unshift(output)
+            }
+         },
 
-            return output;
-        }
-    }
+         splice: {
+            createOp: useMutatingArrayOpFactory('splice', deionizeArgs),
+            revert(model, { output, args }) {
+               const start = args[0];
+               const numItems = args.length - 2;
+               model.splice(start, numItems, ...output)
+            }
+         },
+
+         copyWithin: {
+            createOp: useMutatingArrayOpFactory('copyWithin'),
+            preop: fillOrCopyWithinPreop,
+            revert: fillOrCopyWithinRevert
+         },
+
+         fill: {
+            createOp: useMutatingArrayOpFactory('fill', (args: any) => toRaw(args[0])),
+            preop: fillOrCopyWithinPreop,
+            revert: fillOrCopyWithinRevert
+         },
+
+         reverse: {
+            createOp: useMutatingArrayOpFactory('reverse'),
+            revert(model) {
+               model.reverse()
+            }
+         },
+
+         sort: {
+            createOp: useMutatingArrayOpFactory('sort'),
+            preop(model) {
+               return model.slice()
+            },
+            revert(model, { preopData: snapshot }) {
+               for (let i = 0; i < model.length; i++) {
+                  model[i] = snapshot[i]
+               }
+            }
+         },
+      },
+
+      afterSet(ionicModel, meta, key, newValue, oldValue) {
+         const op = isIntegerKey(key) ? getTrackedOp(ionicModel, 'at', key) : null
+         if (op) {
+            triggerIonicAtom(op)
+         }
+
+         const observedIndices = meta.observedEntryKeys
+         if (observedIndices && key === 'length') {
+            for (const indexKey of observedIndices) {
+               if (typeof indexKey !== 'string') {
+                  console.warn(`index key is not string. May need to refactor code`)
+                  continue;
+               }
+               const index = parseInt(indexKey)
+               if (index > newValue || index > oldValue) {
+                  const prop = getObservedProp(ionicModel, indexKey)
+                  if (prop) {
+                     trigger(prop, newValue, oldValue)
+                  }
+                  const op = getTrackedOp(ionicModel, 'at', index)
+                  if (op) {
+                     if (isIonicAtom(op)) {
+                        triggerIonicAtom(op)
+                     }
+                  }
+               }
+            }
+         }
+      },
+
+      isEntryKey(model, key) {
+         return !!(model instanceof Array && isIntegerKey(key))
+      },
+   })
 
 
-    function fillOrCopyWithinPreop(model: AnyObject, args: any[] | undefined) {
-        const start = args![1] ?? 0
-        const end = args![2]
-        return model.slice(start, end)
-    }
 
-    function fillOrCopyWithinRevert(model: AnyObject, data: { preopData: any[], args: any[] }) {
-        const { preopData: slice, args } = data
-        let index = args![1] ?? 0;
-        for (let i = 0; i < slice.length; i++) {
-            model[index] = slice[i];
-            index++;
-        }
-    }
+   function useMutatingArrayOpFactory(
+      opName: string,
+      deionizeArgs?: (args: any[]) => any[]
+   ) {
+      return function createOp(target: AnyObject, ionicModel: IonizedModel<AnyObject>, meta: MetaIonicModel<any[]>, getPreopData: GetPreopData | undefined) {
+         const fn = target[opName]
+         return useMutatingArrayOp(
+            <IonizedModel<any[]>>ionicModel,
+            meta,
+            <any[]>target,
+            opName,
+            fn,
+            getPreopData,
+            deionizeArgs
+         )
+      }
+   }
 
-    function deionizeArgs(args: any[]) {
-        const _args = []
-        for (const arg of args) {
-            _args.push(toRaw(arg))
-        }
-        return _args;
-    }
+   const lengthMutatingOps = {
+      push: true,
+      pop: true,
+      shift: true,
+      unshift: true,
+   }
+
+   function useMutatingArrayOp(
+      ionicModel: IonizedModel<any[]>,
+      metaIonicModel: MetaIonicModel<any[]>,
+      target: any[],
+      key: string,
+      fn: Function,
+      getPreopData?: ((target: any[], args: any[]) => any),
+      deionizeArgs?: (args: any[]) => any[]
+   ) {
+      return (...args: any[]) => {
+         const preopData = getPreopData ? getPreopData(target, args) : undefined
+         const _args = deionizeArgs ? deionizeArgs(args) : args
+         const oldLength = target.length;
+         const output = fn.apply(ionicModel, _args); // perform mutation
+         const newLength = target.length;
+         if (key in lengthMutatingOps && oldLength === newLength) return output;
+         storeSnapshot(metaIonicModel)
+
+         const lengthProp = getObservedProp(ionicModel, 'length')
+         if (lengthProp) {
+            trigger(lengthProp, newLength, oldLength); // trigger for length change
+         }
+
+         if (key === 'pop') {
+            const prop = getObservedProp(ionicModel, (oldLength - 1).toString())
+            if (prop) trigger(prop);
+            const op = getTrackedOp(ionicModel, 'at', - 1)
+            if (op) triggerIonicAtom(op);
+         }
+
+         const observedIndices = metaIonicModel.observedEntryKeys
+         if (observedIndices && oldLength < newLength) {
+            for (const indexKey of observedIndices) {
+               if (typeof indexKey !== 'string') {
+                  console.warn(`index key is not string. May need to refactor code`)
+                  continue;
+               }
+               const index = parseInt(indexKey)
+               if (index >= newLength) {
+                  const prop = getObservedProp(ionicModel, indexKey)
+                  if (prop) {
+                     trigger(prop)
+                  }
+                  const op = getTrackedOp(ionicModel, 'at', index)
+                  if (op) {
+                     if (isIonicAtom(op)) {
+                        triggerIonicAtom(op)
+                     }
+                  }
+               }
+            }
+         }
+
+         triggerIonicModel(
+            ionicModel,
+            key,
+            _args,
+            output,
+            preopData
+         )
+
+         return output;
+      }
+   }
+
+
+   function fillOrCopyWithinPreop(model: AnyObject, args: any[] | undefined) {
+      const start = args![1] ?? 0
+      const end = args![2]
+      return model.slice(start, end)
+   }
+
+   function fillOrCopyWithinRevert(model: AnyObject, data: { preopData: any[], args: any[] }) {
+      const { preopData: slice, args } = data
+      let index = args![1] ?? 0;
+      for (let i = 0; i < slice.length; i++) {
+         model[index] = slice[i];
+         index++;
+      }
+   }
+
+   function deionizeArgs(args: any[]) {
+      const _args = []
+      for (const arg of args) {
+         _args.push(toRaw(arg))
+      }
+      return _args;
+   }
 
 
 }
@@ -601,14 +659,14 @@ export function installIonicArray() {
 
 
 export function isIntegerKey(key: unknown) {
-    const keyAsNumber = Number(key);
-    if (isNaN(keyAsNumber)) return false;
-    if (Number.isInteger(keyAsNumber)) return true
+   const keyAsNumber = Number(key);
+   if (isNaN(keyAsNumber)) return false;
+   if (Number.isInteger(keyAsNumber)) return true
 }
 
 
 export function isIonicArray(target: any): target is IonizedModel<any[]> {
-    if (!isIonizedModel(target)) return false;
-    if (toRaw(target) instanceof Array) return true;
-    return false;
+   if (!isIonizedModel(target)) return false;
+   if (toRaw(target) instanceof Array) return true;
+   return false;
 }
