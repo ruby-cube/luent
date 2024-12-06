@@ -7,14 +7,7 @@ function Swap() {
    return Component('')
 }
 
-declare module './Well' {
-   interface Wellerman {
-      '~$methods': {
-         getBoat: () => Ionized<Wellerman['boat']>
-      }
-      addition: 'hi'
-   }
-}
+
 
 export function IonAccess() {
 
@@ -127,7 +120,6 @@ export function IonAccess() {
       '`': 0,
       '!': 0,
    }
-
 
    const boat$ = wellerman$.getBoat()
 

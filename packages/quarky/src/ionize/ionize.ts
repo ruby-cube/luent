@@ -74,18 +74,18 @@ type InvertIons<T extends AnyObject, M = {}> = {
 
 type IonizedGetter<T, K extends keyof T> = T extends { '~$methods': AnyObject } ? K extends keyof T['~$methods'] ? T['~$methods'][K] : T[K] : T[K]
 
-const $count = ion(0, { doSomething() { } })
+// const $count = ion(0, { doSomething() { } })
 
-const cat = ionize({
-   count: $count,
-   chow: {
-      blog: 9
-   },
-   flower: 'hi',
-   doSomething() {
+// const cat = ionize({
+//    count: $count,
+//    chow: {
+//       blog: 9
+//    },
+//    flower: 'hi',
+//    doSomething() {
 
-   }
-}, { doOther() { }, doSomething() { } })
+//    }
+// }, { doOther() { }, doSomething() { } })
 
 
 //API

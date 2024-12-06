@@ -1,3 +1,4 @@
+import { Ionized } from "@rue/quarky"
 
 export class Well {
    water: {
@@ -36,5 +37,14 @@ export class Wellerman {
 
    getBoat() {
       return this.boat
+   }
+}
+
+declare module './Well' {
+   interface Wellerman {
+      '~$methods': {
+         getBoat: () => Ionized<Wellerman['boat']>
+      }
+      addition: 'hi'
    }
 }
