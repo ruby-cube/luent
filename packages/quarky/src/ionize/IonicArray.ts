@@ -10,8 +10,6 @@ import { nontrackableIterableKeys } from "./IonicSet";
 
 const dogs = [0]
 
-dogs.map
-
 declare global {
    interface Array<T> {
       $getters: {
@@ -32,17 +30,17 @@ declare global {
 
          map<U, H>(
             this: H,
-            callback: (value: T, index: number, array: H) => U, //QUESTION: should the array be ionized?
+            callback: (value: T extends AnyObject ? Ionized<T> : T, index: number, array: H) => U, //QUESTION: should the array be ionized?
             thisArg?: any
          ): U[];
          filter<H>(
             this: H,
-            predicate: (value: T, index: number, array: H) => boolean,
+            predicate: (value: T extends AnyObject ? Ionized<T> : T, index: number, array: H) => boolean,
             thisArg?: any
          ): (T extends AnyObject ? Ionized<T> : T)[];
          find<H>(
             this: H,
-            predicate: (value: T, index: number, array: H) => boolean,
+            predicate: (value: T extends AnyObject ? Ionized<T> : T, index: number, array: H) => boolean,
             thisArg?: any
          ): T extends AnyObject ? Ionized<T> : T | undefined;
 
@@ -58,7 +56,7 @@ declare global {
          ): U;
 
          // Methods introduced in ES2023
-         toSorted(compareFn?: (a: T, b: T) => number): (T extends AnyObject ? Ionized<T> : T)[];
+         toSorted(compareFn?: (a: T extends AnyObject ? Ionized<T> : T, b: T extends AnyObject ? Ionized<T> : T) => number): (T extends AnyObject ? Ionized<T> : T)[];
          toReversed(): (T extends AnyObject ? Ionized<T> : T)[];
          with(index: number, value: T): (T extends AnyObject ? Ionized<T> : T)[];
 

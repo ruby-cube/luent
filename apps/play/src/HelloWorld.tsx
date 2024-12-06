@@ -91,19 +91,30 @@ export function IonAccess() {
    })
 
    wella$.waterB
+
+   class AnotherArray<T> extends Array<T> {
+      // constructor(...args: T[]){
+      //    super(...args);
+      // }
+      doSomething(){}
+   }
    
 
    const boat$ = wellerman$.getBoat()
 
-   const list$ = ionize([{ name: '' }])
+   // const list$ = ionize([{name: 9}])
+
+   const list$ = ionize(new AnotherArray({name: 9}, undefined))
 
    const num = list$[0]
 
-   const removed = list$.pop()
+   const removed = list$.splice(0, 1)
+
+   const res = list$.map((item, index, array)=>item.name)
 
    return Component(
       <>
-         <swap:mount />
+         <swap:mount/>
          {If($x() > 10,
             <p>{$x()} is greater than 10</p>
          )}
