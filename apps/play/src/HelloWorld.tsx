@@ -1,5 +1,5 @@
 import { Component, Else, ElseIf, expose, For, fromTag, If, prep, v, watch } from "@rue/lumo";
-import { ion, ionize, Ionized } from "@rue/quarky";
+import { ion, ionize, Ionized, ionizeWithMarks } from "@rue/quarky";
 import { Inert, inert } from "../../../packages/quarky/src/ionize/inert";
 import { Well, Wellerman } from "./Well";
 
@@ -21,8 +21,8 @@ export function IonAccess() {
    const $x = ion(7, {
       increment() {
          $x._as($x() + 1)
-      }, 
-      as(){
+      },
+      as() {
 
       }
    })
@@ -69,11 +69,31 @@ export function IonAccess() {
 
    const wellerman = new Wellerman()
 
-   const wellerman$ = ionize(new Wellerman())
+   //@ts-expect-error
+   const well$ = ionize.withInertProps(new Well(), {
+      water: inert
+   })
+
+   //@ts-expect-error
+   const wellerman$ = ionize(new Well(), withMarks({
+      water: inert
+   }))
+
+   //@ts-expect-error
+   const well$ = ionize.withMarks(new Well(), {
+      water: inert,
+      getBoat: 'public'
+   })
+
+   const wella$ = ionizeWithMarks(new Well(), {
+      water: inert,
+      doThat: 'public',
+   })
+
+   wella$.waterB
+   
 
    const boat$ = wellerman$.getBoat()
-
-   const well$ = ionizeWithMods(new Well(), { water: inert })
 
    const list$ = ionize([{ name: '' }])
 

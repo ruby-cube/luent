@@ -3,11 +3,24 @@ export class Well {
    water: {
       clear: true
    }
+   waterB?: {
+      clear: true
+   } 
+
+   swell: boolean = true
 
    constructor() {
       this.water = {
          clear: true
       }
+   }
+
+   doThis(){
+
+   }
+
+   doThat(){
+
    }
 }
 

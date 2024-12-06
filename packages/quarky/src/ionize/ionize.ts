@@ -4,9 +4,8 @@ import { timeTraveler } from "./TimeTraveler";
 import { useRenderCycle } from "../effects/RenderCycle";
 import { META } from "../ReactiveEntity";
 import { MetaIonicModel, IONIZED_MODEL } from "./MetaIonicModel";
-import { Inert, isInert } from "./inert";
+import { inert, Inert, isInert } from "./inert";
 import { AnyIon, Ion, ion, isIon } from "../ion/Ion";
-import { DerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
 import { AtomicIon, MetaIon } from "../ion/AtomicIon";
 import { createCustomIonicModel, getStructureConfigs } from "./IonizedModel";
 import { PropIon } from "./PropIon";
@@ -56,6 +55,7 @@ export type Ionized<T extends AnyObject, M = {}> = {
    T[K] extends { [META]: any } | Inert ? T[K]
    : T[K] extends (...args: any[]) => any ? IonizedGetter<T, K>
    : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
+   : T[K] extends { [key: PropertyKey]: any } | undefined ? Ionized<Exclude<T[K], undefined>> | undefined
    : T[K]
 } & InvertIons<T, M> & M & { [META]: MetaIonicModel }
 
@@ -68,6 +68,7 @@ type InvertIons<T extends AnyObject, M = {}> = {
    [K in keyof T as (K extends '$getters' ? never : K extends keyof M ? never : T[K] extends AbsorbedIon<any> ? K extends `$${infer S}` ? S : K extends string ? `$${K}` : never : T[K] extends (...args: any[]) => any ? never : K extends `$${string}` ? never : K extends string ? `$${K}` : never)]:
    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? V : T[K] : ReadonlyIon<T[K] extends { [META]: any } | ((...args: any[]) => any) | Inert ? T[K]
       : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
+      : T[K] extends { [key: PropertyKey]: any } | undefined ? Ionized<Exclude<T[K], undefined>> | undefined
       : T[K]>
 }
 
@@ -88,7 +89,7 @@ const cat = ionize({
 
 
 //API
-export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M): T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M> {
+export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M, publicMethods?: { [K in keyof Partial<M>]: 'public' }, inertProps?: AnyObject | undefined): T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M> {
    if (isIonizedModel(target) || isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
@@ -97,10 +98,25 @@ export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M
    if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
    const existingIonicModel = ionizedModels.get(target)
    if (existingIonicModel) return existingIonicModel as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
-   return createIonicModel(target, methods) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
+   return createIonicModel(target, methods, inertProps) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
 }
 
+export function ionizeWithMarks<
+   T extends AnyObject,
+   M extends { [K in keyof Partial<T>]: 'public' | typeof inert }
+>(target: T, marks: M): T extends Inert | Ion | Ionized<T> ? T : Ionized<Marked<T, M>> {
+   const publicMethods: AnyObject = {};
+   const inertProps: AnyObject = {}
+   for (const key in marks) {
+      if (marks[key] === 'public') {
+         publicMethods[key] = true
+      }
+      inertProps[key] = inert;
+   }
+   return ionize(target, undefined, publicMethods, inertProps)
+}
 
+type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | typeof inert }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends typeof inert ? T[K] & Inert : T[K] } //TODO: Mark public
 
 export function storeSnapshot(metaIonicModel: MetaIonicModel, clone?: AnyObject) {
    timeTraveler.takeSnapshot(toRaw(metaIonicModel), useRenderCycle().count, clone)
