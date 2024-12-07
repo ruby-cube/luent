@@ -6,6 +6,7 @@ import { AtomicIon, isAtomicIon, protect } from "@rue/quarky";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { normalizeToArray } from "@rue/utils";
 import { initializeListRef, initializeRef, NodeRef, NodesRef } from "../node/NodeRef";
+import exp from "constants";
 
 
 
@@ -34,9 +35,9 @@ export interface Component<T extends AnyObject | undefined = AnyObject | undefin
    // morphicRenderKit?: MorphicRenderKit
 }
 
-export function expose<T>(publicComponent: T & Object): T {
-   return protect(publicComponent);
-}
+// export function expose<T>(publicComponent: T & Object): T {
+//    return protect(publicComponent);
+// }
 
 type JSXTemplate = NodeEntity
 
@@ -48,7 +49,7 @@ export function Component<T extends AnyObject | undefined = AnyObject | undefine
    const renderedTemplate = arguments.length === 2 ? template : templateOrComponent as JSXTemplate;
    const exposedComponent = arguments.length === 2 ? templateOrComponent as AnyObject : undefined;
    return {
-      exposedComponent,
+      exposedComponent: protect(exposedComponent),
       renderedTemplate: renderedTemplate ? unnestComponent(renderedTemplate) : undefined,
    } as Component<T extends AnyObject ? T : undefined>
 }

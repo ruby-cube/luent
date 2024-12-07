@@ -109,14 +109,3 @@ describe('markInertProps', () => {
    });
 });
 
-const obj = {
-   a: 1,
-   b: { x: 2 },
-};
-
-const result = markInertProps(obj, {
-   a: true,
-   b: {
-      x: true,
-   },
-});

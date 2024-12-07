@@ -119,6 +119,7 @@ export function IonAccess() {
       '.': 0,
       '`': 0,
       '!': 0,
+      '(': 0,
    }
 
    const boat$ = wellerman$.getBoat()

@@ -23,9 +23,9 @@ function ListBlock() {
     })
 
     return [
-        expose({
+        {
             $ready
-        }),
+        },
         <>
             {If($allReady, 'show', () =>
                 <div>

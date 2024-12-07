@@ -89,7 +89,7 @@ type IonizedGetter<T, K extends keyof T> = T extends { '~$methods': AnyObject } 
 
 
 //API
-export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M, publicMethods?: { [K in keyof Partial<M>]: 'public' }, inertProps?: AnyObject | undefined): T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M> {
+export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M, publicMethods?: { [K in keyof Partial<M>]: 'public' }): T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M> {
    if (isIonizedModel(target) || isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
@@ -98,25 +98,25 @@ export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M
    if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
    const existingIonicModel = ionizedModels.get(target)
    if (existingIonicModel) return existingIonicModel as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
-   return createIonicModel(target, methods, inertProps) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
+   return createIonicModel(target, methods) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
 }
 
-export function ionizeWithMarks<
-   T extends AnyObject,
-   M extends { [K in keyof Partial<T>]: 'public' | typeof inert }
->(target: T, marks: M): T extends Inert | Ion | Ionized<T> ? T : Ionized<Marked<T, M>> {
-   const publicMethods: AnyObject = {};
-   const inertProps: AnyObject = {}
-   for (const key in marks) {
-      if (marks[key] === 'public') {
-         publicMethods[key] = true
-      }
-      inertProps[key] = inert;
-   }
-   return ionize(target, undefined, publicMethods, inertProps)
-}
+// export function ionizeWithMarks<
+//    T extends AnyObject,
+//    M extends { [K in keyof Partial<T>]: 'public' | typeof inert }
+// >(target: T, marks: M): T extends Inert | Ion | Ionized<T> ? T : Ionized<Marked<T, M>> {
+//    const publicMethods: AnyObject = {};
+//    const inertProps: AnyObject = {}
+//    for (const key in marks) {
+//       if (marks[key] === 'public') {
+//          publicMethods[key] = true
+//       }
+//       inertProps[key] = inert;
+//    }
+//    return ionize(target, undefined, publicMethods)
+// }
 
-type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | typeof inert }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends typeof inert ? T[K] & Inert : T[K] } //TODO: Mark public
+// type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | typeof inert }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends typeof inert ? T[K] & Inert : T[K] } //TODO: Mark public
 
 export function storeSnapshot(metaIonicModel: MetaIonicModel, clone?: AnyObject) {
    timeTraveler.takeSnapshot(toRaw(metaIonicModel), useRenderCycle().count, clone)
@@ -148,9 +148,8 @@ export function toRaw<T>(target: T): AsRaw<T> {
 export function createIonicModel(
    target: object,
    methods: object | undefined,
-   inertProps: object | undefined
 ): object {
-   return createCustomIonicModel(getStructureConfigs(target), target, methods, inertProps)
+   return createCustomIonicModel(getStructureConfigs(target), target, methods)
    // return isTuple(target) ? createIonicTuple(target, methods)
    //     : target instanceof Array ? createIonicArray(target, methods)
    //         : target instanceof Set ? createIonicSet(target, methods)

@@ -68,9 +68,9 @@ function FooBar() {
     const $foo = ion(0)
 
     return Component(
-        expose({
+        {
             $foo
-        }),
+        },
 
         <div>
             hi
