@@ -33,7 +33,7 @@ export * from './transition/TransitionNode' //TODO: Limit to public API
  *  
  *  declare module '@rue/lumo' {
  *     interface ContextKeyMap {
- *        [DOG]: typeof frogType
+ *        [_dog_]: typeof frogType
  *     }
  *  }
  * 

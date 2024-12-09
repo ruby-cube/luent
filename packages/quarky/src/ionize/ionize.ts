@@ -19,7 +19,7 @@ import { PropIon } from "./PropIon";
 //TODO: figure out the simplest way developers can add types to custom data strucures
 
 export type IonizedModel<T extends AnyObject = AnyObject> = Ionized<T> //TODO: add ion properties $
-
+export type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 
 export type Readonly<T extends AnyObject = AnyObject> = {
    readonly [K in keyof T]: T[K]

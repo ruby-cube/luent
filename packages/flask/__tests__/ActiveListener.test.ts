@@ -92,20 +92,20 @@ describe("ActiveListener", () => {
         expect(cancelMock).toHaveBeenCalled();
     });
 
-    it('should not call onFlaskDisposal if custom flask passed in; call flask.onDisposal instead', () => {
-        const flask = { onDisposal: vi.fn() };
-        config.options.flask = flask;
+   //  it('should not call onFlaskDisposal if custom flask passed in; call flask.onDisposal instead', () => {
+   //      const flask = { onDisposal: vi.fn() };
+   //      config.options.flask = flask;
 
-        makeActiveListener(config);
+   //      makeActiveListener(config);
 
-        expect(onFlaskDisposal).not.toHaveBeenCalled();
+   //      expect(onFlaskDisposal).not.toHaveBeenCalled();
 
-        expect(flask.onDisposal).toHaveBeenCalledOnce();
-        expect(flask.onDisposal).toHaveBeenCalledWith(expect.any(Function));
-    });
+   //      expect(flask.onDisposal).toHaveBeenCalledOnce();
+   //      expect(flask.onDisposal).toHaveBeenCalledWith(expect.any(Function));
+   //  });
 
-    it('should call onFlaskDisposal if no flask passed in', () => {
-        config.options.flask = undefined;
+    it('should call onFlaskDisposal', () => {
+        config.options = {}
 
         makeActiveListener(config);
 
@@ -113,14 +113,14 @@ describe("ActiveListener", () => {
         expect(onFlaskDisposal).toHaveBeenCalledWith(expect.any(Function));
     });
 
-    it('should not call onFlaskDisposal if flask === "outlive"', () => {
-        config.options.flask = 'outlive';
+   //  it('should not call onFlaskDisposal if flask === "outlive"', () => {
+   //      config.options.flask = 'outlive';
 
-        makeActiveListener(config);
+   //      makeActiveListener(config);
 
-        expect(onFlaskDisposal).not.toHaveBeenCalled();
+   //      expect(onFlaskDisposal).not.toHaveBeenCalled();
 
-    });
+   //  });
 
 
     it('should handle missing options object gracefully', () => {

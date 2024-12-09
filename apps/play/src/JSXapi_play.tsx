@@ -309,7 +309,7 @@ const hi = () =>
             <$List />
 
             <h1>hello</h1>
-            <context-node with={{ [FROG]: new Frog(), [CAT]: cat }}>
+            <context-node with={{ [FROG]: new Frog(), [_cat_]: cat }}>
                {If($active,
                   <p>hey</p>
                )}
@@ -317,7 +317,7 @@ const hi = () =>
 
 
 
-            <context-node with={{ [FROG]: frog, [CAT]: cat }}>
+            <context-node with={{ [FROG]: frog, [_cat_]: cat }}>
                <List />
                <h1>hello</h1>
                <div>

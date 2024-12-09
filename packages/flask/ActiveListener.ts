@@ -78,8 +78,12 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
     }
 
     const _callback = once ? (...args: any[]) => {
-        callback(...args);
-        _remove()
+      try{
+         callback(...args);
+      }
+      finally{
+         _remove()
+      }
     } : callback;
     // const _callback = bindFlask(once ? oneTimeCallback : callback, flask === 'outlive' ? null : flask);
 

@@ -8,79 +8,73 @@ import { AnyIon, isIon } from "./Ion";
 import { IS_PUBLIC, ProtectedIon } from "./ProtectedIon";
 
 export type AtomicIon<T = any, M extends AnyObject = {}> = ((selected?: true) => T)
-    & {
-        [META]: MetaIon<T>;
-    } & {[K in keyof UnmarkedMethods<M>]:UnmarkedMethods<M>[K]} & (UnmarkedMethods<M> extends { as: any } ? { _as: (value: T) => T } : { as: (value: T) => T })
+   & {
+      [META]: MetaIon<T>;
+   } & { [K in keyof M]: M[K] } & (M extends { as: any } ? { _as: (value: T) => T } : { as: (value: T) => T })
 
-type UnmarkedMethods<M> = { [K in keyof M as K extends `${infer S}XPO` ? S : K]: M[K] }
 
 export const ION = Symbol('atomicIon');
 
 export class MetaIon<T = unknown> implements ReactiveEntity {
 
-    type = ION
+   type = ION
 
-    asProtected?: ProtectedIon
-    asReadonly?: ProtectedIon
+   asProtected?: ProtectedIon
+   asReadonly?: ProtectedIon
 
-    constructor(
-        readonly o: AtomicIon<T>,
-        public value: T,
-        readonly hasIonicValue: boolean = false,
-        public hasMethods: boolean = false,
-        public inert = false
-    ) { }
+   constructor(
+      readonly o: AtomicIon<T>,
+      public value: T,
+      readonly hasIonicValue: boolean = false,
+      public hasMethods: boolean = false,
+      public inert = false
+   ) { }
 }
 
 
 export function createAtomicIon<
-    T,
-    M extends { [key: string]: (...args: any[]) => any }
+   T,
+   M extends { [key: string]: (...args: any[]) => any }
 >(
-    value: T,
-    methods?: M,
-    inert?: boolean
+   value: T,
+   methods?: M,
+   inert?: boolean
 ) {
-    const metaIon = new MetaIon(<AtomicIon>$ion, value, isIonizedModel(value), !!methods, !!inert)
+   const metaIon = new MetaIon(<AtomicIon>$ion, value, isIonizedModel(value), !!methods, !!inert)
 
-    const setterKey = methods && ('as' in methods || 'asXPO' in methods) ? "_as" : 'as'
+   const setterKey = methods && ('as' in methods) ? "_as" : 'as'
 
-    const proto = {
-        [META]: metaIon,
-        [setterKey](newValue: any) {
-            return setValue(metaIon, newValue, metaIon.value);
-        }
-    } as AnyObject
+   const proto = {
+      [META]: metaIon,
+      [setterKey](newValue: any) {
+         return setValue(metaIon, newValue, metaIon.value);
+      }
+   } as AnyObject
 
-    if (methods) {
-        attachIonMethods(proto, methods)
-    }
+   if (methods) {
+      attachIonMethods(proto, methods)
+   }
 
-    function $ion(selected?: boolean) {
-        if (inert) return metaIon.value;
-        if (__DEV__) emitSignal();
-        const tracker = getActiveTracker()
-        if (!tracker || tracker.selective && !selected)
-            return metaIon.value as T
-        tracker.track(<AtomicIon>$ion)
-        return metaIon.value as T;
-    }
+   function $ion(selected?: boolean) {
+      if (inert) return metaIon.value;
+      if (__DEV__) emitSignal();
+      const tracker = getActiveTracker()
+      if (!tracker || tracker.selective && !selected)
+         return metaIon.value as T
+      tracker.track(<AtomicIon>$ion)
+      return metaIon.value as T;
+   }
 
-    Object.setPrototypeOf($ion, proto)
+   Object.setPrototypeOf($ion, proto)
 
-    return $ion as AtomicIon<T, M>
+   return $ion as AtomicIon<T, M>
 }
 
-export function attachIonMethods(proto: AnyObject, methods: AnyObject){
-    for (const key in methods) {
-        const isPublic = key.endsWith('XPO');
-        const method = proto[isPublic ? key.slice(0, -3) : key] = methods[key]
-        if (isPublic) {
-            method[IS_PUBLIC] = true;
-        }
-        // .bind(proto) // This makes set function available to `this` even after protected //QUESTION: I don't think this is needed if `this` is not used...
-    }
-    return proto;
+export function attachIonMethods(proto: AnyObject, methods: AnyObject) {
+   for (const key in methods) {
+      proto[key] = methods[key]
+   }
+   return proto;
 }
 
 // ORDER:
@@ -89,17 +83,17 @@ export function attachIonMethods(proto: AnyObject, methods: AnyObject){
 // - trigger derivations effects (run sync effects, schedule effects)
 
 function setValue(metaIon: MetaIon, newValue: unknown, oldValue: unknown) {
-    if (oldValue === newValue) return oldValue;
-    const $ion = metaIon.o;
-    const _newValue = shouldIonize(newValue, metaIon) ? ionize(newValue) : newValue
-    // toIonicModelIfMust(newValue, metaIon)
-    metaIon.value = _newValue;
-    if (!metaIon.inert) trigger($ion, _newValue, oldValue);
-    return _newValue;
+   if (oldValue === newValue) return oldValue;
+   const $ion = metaIon.o;
+   const _newValue = shouldIonize(newValue, metaIon) ? ionize(newValue) : newValue
+   // toIonicModelIfMust(newValue, metaIon)
+   metaIon.value = _newValue;
+   if (!metaIon.inert) trigger($ion, _newValue, oldValue);
+   return _newValue;
 }
 
 function shouldIonize(newValue: unknown, metaIon: MetaIon): newValue is AnyObject {
-    return newValue instanceof Object && metaIon.hasIonicValue;
+   return newValue instanceof Object && metaIon.hasIonicValue;
 }
 
 
@@ -150,11 +144,11 @@ function shouldIonize(newValue: unknown, metaIon: MetaIon): newValue is AnyObjec
 
 
 export function isAtomicIon(maybeIon: any): maybeIon is AtomicIon {
-    if (maybeIon instanceof Object) return maybeIon[META]?.type === ION;
-    return false;
+   if (maybeIon instanceof Object) return maybeIon[META]?.type === ION;
+   return false;
 }
 
 export function asMetaIon<T>(ionicEntity: T): T extends { [META]: infer M } ? M : never {
-    if (!isIon(ionicEntity)) throw new Error("INVALID INPUT. Must be an ion")
-    return ionicEntity[META] as T extends { [META]: infer M } ? M : never
+   if (!isIon(ionicEntity)) throw new Error("INVALID INPUT. Must be an ion")
+   return ionicEntity[META] as T extends { [META]: infer M } ? M : never
 }

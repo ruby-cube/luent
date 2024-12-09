@@ -63,7 +63,7 @@ context.app.get()
 const _this = $this()
 const { onCreated, fromContext } = _this;
 
-const dog = _this.fromGlobal(DOG)
+const dog = _this.fromGlobal(_dog_)
 
 watch($list, async () => {
 
@@ -138,7 +138,7 @@ function SideBar(
 
     return Component(
         <ProviderBlock> // dog is provided here...
-            <ChildBlock dog={slot.fromContext(DOG)}>hi</ChildBlock>
+            <ChildBlock dog={slot.fromContext(_dog_)}>hi</ChildBlock>
         </ProviderBlock>
     )
 }

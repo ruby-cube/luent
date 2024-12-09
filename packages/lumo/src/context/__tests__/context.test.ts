@@ -20,7 +20,7 @@ beforeEach(() => {
     vi.stubGlobal('document', dom.window.document)
 });
 
-const FROG = 'frog'
+const _frog_ = 'frog'
 
 describe('Integration tests the Context API', () => {
     describe('createApp() with appwide context', () => {
@@ -35,12 +35,12 @@ describe('Integration tests the Context API', () => {
             let frogE;
 
             function App() {
-                frogA = appwide(FROG)
+                frogA = appwide(_frog_)
                 return Component(makeComponent(Parent, undefined, {}, undefined))
             }
 
             function Parent() {
-                frogB = appwide(FROG)
+                frogB = appwide(_frog_)
 
                 return Component(
                     makeElement('div', () => [
@@ -51,8 +51,8 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frogC = appwide(FROG)
-                frogD = contextual(FROG)
+                frogC = appwide(_frog_)
+                frogD = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -60,13 +60,13 @@ describe('Integration tests the Context API', () => {
             }
 
             function Sibling() {
-                frogE = appwide(FROG)
+                frogE = appwide(_frog_)
 
                 return Component(
                     makeElement('div', () => ['sibling'], {}, undefined)
                 )
             }
-            const app = createApp(App, { with: { [FROG]: value } });
+            const app = createApp(App, { with: { [_frog_]: value } });
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -83,20 +83,20 @@ describe('Integration tests the Context API', () => {
             let frogB;
 
             function App() {
-                frog = appwide(FROG)
-                frogB = transapp(FROG)
+                frog = appwide(_frog_)
+                frogB = transapp(_frog_)
 
                 return Component(
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
             }
-            const app = createApp(App, { with: { [FROG]: value } });
+            const app = createApp(App, { with: { [_frog_]: value } });
 
             app.mount(<HTMLElement>document.createElement('div'))
 
             expect(frog).toBe(value)
             expect(frogB).toBeUndefined()
-            expect(() => appwide(FROG)).toThrow()
+            expect(() => appwide(_frog_)).toThrow()
         })
 
         it('should return undefined if value not provided', () => {
@@ -108,7 +108,7 @@ describe('Integration tests the Context API', () => {
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
             }
-            const app = createApp(App, { with: { [FROG]: value } });
+            const app = createApp(App, { with: { [_frog_]: value } });
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -118,7 +118,7 @@ describe('Integration tests the Context API', () => {
         it('should return undefined if no entries provided', () => {
             let frog;
             function App() {
-                frog = appwide(FROG)
+                frog = appwide(_frog_)
                 return Component(
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
@@ -133,14 +133,14 @@ describe('Integration tests the Context API', () => {
     describe('createTransappContext()', () => {
         it('should create a trans-app context accessible across the application', () => {
             const value = 'sir robin'
-            const transappContext = createTransappContext({ [FROG]: value });
+            const transappContext = createTransappContext({ [_frog_]: value });
 
             let frog;
             let frogB;
 
             function App() {
-                frog = appwide(FROG)
-                frogB = transapp(FROG)
+                frog = appwide(_frog_)
+                frogB = transapp(_frog_)
 
                 return Component(
                     makeElement('div', () => ['hi'], {}, undefined)
@@ -153,7 +153,7 @@ describe('Integration tests the Context API', () => {
             expect(transappContext).toBeDefined();
             expect(frog).toBe(value)
             expect(frogB).toBe(value)
-            expect(() => transapp(FROG)).toThrow()
+            expect(() => transapp(_frog_)).toThrow()
 
         });
 
@@ -191,17 +191,17 @@ describe('Integration tests the Context API', () => {
             let frogE;
 
             function App() {
-                frogA = appwide(FROG)
+                frogA = appwide(_frog_)
                 return Component(
                     createNodeContext(() => [
                         makeComponent(Parent, undefined, {}, undefined)
-                    ], { with: { [FROG]: value } })
+                    ], { with: { [_frog_]: value } })
                 )
             }
 
             function Parent() {
-                frogB = appwide(FROG)
-                frogC = contextual(FROG)
+                frogB = appwide(_frog_)
+                frogC = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => [
@@ -212,7 +212,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frogD = contextual(FROG)
+                frogD = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -220,7 +220,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Sibling() {
-                frogE = contextual(FROG)
+                frogE = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => ['sibling'], {}, undefined)
@@ -250,14 +250,14 @@ describe('Integration tests the Context API', () => {
                     makeElement('div', () => [
                         createNodeContext(() => [
                             makeComponent(Child, undefined, {}, undefined),
-                        ], { with: { [FROG]: value } }),
+                        ], { with: { [_frog_]: value } }),
                         makeComponent(Sibling, undefined, {}, undefined)
                     ], {}, undefined)
                 )
             }
 
             function Child() {
-                frogD = contextual(FROG)
+                frogD = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -265,7 +265,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Sibling() {
-                frogE = contextual(FROG)
+                frogE = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => ['sibling'], {}, undefined)
@@ -355,8 +355,8 @@ describe('Integration tests the Context API', () => {
         it('should throw an error if required context prop is not provided', () => {
 
             const value = 0
-            const FROG = 'frog'
-            defineContextProp(FROG, v)
+            const _frog_ = 'frog'
+            defineContextProp(_frog_, v)
             let frog;
 
             const KERMIT = 'kermit'
@@ -366,14 +366,14 @@ describe('Integration tests the Context API', () => {
                 return Component(
                     createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { with: { [FROG]: value } })
+                    ], { with: { [_frog_]: value } })
                 )
             }
 
             let error;
 
             function Child() {
-                frog = contextual(FROG)
+                frog = contextual(_frog_)
                 try {
                     contextual(KERMIT)
                 }
@@ -398,8 +398,8 @@ describe('Integration tests the Context API', () => {
 
         it('should allow optional props to be undefined', () => {
 
-            const FROG = 'frog'
-            defineContextProp(FROG, v('?'))
+            const _frog_ = 'frog'
+            defineContextProp(_frog_, v('?'))
             let frog = 'hi'
 
             function App() {
@@ -410,7 +410,7 @@ describe('Integration tests the Context API', () => {
 
 
             function Child() {
-                frog = contextual(FROG)
+                frog = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -426,9 +426,9 @@ describe('Integration tests the Context API', () => {
 
         it('should use default if provided and prop is undefined', () => {
 
-            const FROG = 'frog'
+            const _frog_ = 'frog'
             const defaultValue = 'kermit'
-            defineContextProp(FROG, v('?')(() => defaultValue))
+            defineContextProp(_frog_, v('?')(() => defaultValue))
             let frog = 'hi'
 
             function App() {
@@ -438,7 +438,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frog = contextual(FROG)
+                frog = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -454,21 +454,21 @@ describe('Integration tests the Context API', () => {
 
         it('should normalize MaybeIon', () => {
 
-            const FROG = 'frog'
+            const _frog_ = 'frog'
             const value = 'kermit'
-            defineContextProp(FROG, MaybeIon)
+            defineContextProp(_frog_, MaybeIon)
             let frog = 'hi'
 
             function App() {
                 return Component(
                     createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { with: { [FROG]: value } })
+                    ], { with: { [_frog_]: value } })
                 )
             }
 
             function Child() {
-                frog = contextual(FROG)
+                frog = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -485,16 +485,16 @@ describe('Integration tests the Context API', () => {
 
         it('should validate Ion', () => {
 
-            const FROG = 'frog'
+            const _frog_ = 'frog'
             const value = 'kermit'
-            defineContextProp(FROG, Ion)
+            defineContextProp(_frog_, Ion)
             let frog = 'hi'
 
             function App() {
                 return Component(
                     createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { with: { [FROG]: value } })
+                    ], { with: { [_frog_]: value } })
                 )
             }
 
@@ -502,7 +502,7 @@ describe('Integration tests the Context API', () => {
 
             function Child() {
                 try {
-                    frog = contextual(FROG)
+                    frog = contextual(_frog_)
 
                 }
                 catch (err) {
@@ -525,16 +525,16 @@ describe('Integration tests the Context API', () => {
 
         it('should validate Ionized', () => {
 
-            const FROG = 'frog'
+            const _frog_ = 'frog'
             const value = 'kermit'
-            defineContextProp(FROG, Ionized)
+            defineContextProp(_frog_, Ionized)
             let frog = 'hi'
 
             function App() {
                 return Component(
                     createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { with: { [FROG]: value } })
+                    ], { with: { [_frog_]: value } })
                 )
             }
 
@@ -542,7 +542,7 @@ describe('Integration tests the Context API', () => {
 
             function Child() {
                 try {
-                    frog = contextual(FROG)
+                    frog = contextual(_frog_)
                 }
                 catch (err) {
                     error = err
@@ -565,21 +565,21 @@ describe('Integration tests the Context API', () => {
 
         it('should provide Ion', () => {
 
-            const FROG = 'frog'
+            const _frog_ = 'frog'
             const value = 'kermit'
-            defineContextProp(FROG, Ion)
+            defineContextProp(_frog_, Ion)
             let frog = 'hi'
 
             function App() {
                 return Component(
                     createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { with: { [FROG]: ion(value) } })
+                    ], { with: { [_frog_]: ion(value) } })
                 )
             }
 
             function Child() {
-                frog = contextual(FROG)
+                frog = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -596,21 +596,21 @@ describe('Integration tests the Context API', () => {
 
         it('should provide Ionized', () => {
 
-            const FROG = 'frog'
+            const _frog_ = 'frog'
             const value = { name: 'kermit' }
-            defineContextProp(FROG, Ionized)
+            defineContextProp(_frog_, Ionized)
             let frog = 'hi'
 
             function App() {
                 return Component(
                     createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { with: { [FROG]: ionize(value) } })
+                    ], { with: { [_frog_]: ionize(value) } })
                 )
             }
 
             function Child() {
-                frog = contextual(FROG)
+                frog = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -627,8 +627,8 @@ describe('Integration tests the Context API', () => {
 
         it('should allow MaybeIon to be undefined if optional', () => {
 
-            const FROG = 'frog'
-            defineContextProp(FROG, MaybeIon('?'))
+            const _frog_ = 'frog'
+            defineContextProp(_frog_, MaybeIon('?'))
             let frog = 'hi'
 
             function App() {
@@ -638,7 +638,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frog = contextual(FROG)
+                frog = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -655,9 +655,9 @@ describe('Integration tests the Context API', () => {
 
         it('should provide default for MaybeIon', () => {
 
-            const FROG = 'frog'
+            const _frog_ = 'frog'
             const defaultValue = 'kermit'
-            defineContextProp(FROG, MaybeIon('?')(() => defaultValue))
+            defineContextProp(_frog_, MaybeIon('?')(() => defaultValue))
             let frog = 'hi'
 
             function App() {
@@ -667,7 +667,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frog = contextual(FROG)
+                frog = contextual(_frog_)
 
                 return Component(
                     makeElement('div', () => ['child'], {}, undefined)

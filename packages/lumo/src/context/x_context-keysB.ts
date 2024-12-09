@@ -1,12 +1,12 @@
 import { v } from "../InputTypes"
 import { defineContextProp } from "./ContextKey"
 
-export const CAT = Symbol('cat')
+export const _cat_ = Symbol('cat')
 
-const catType = defineContextProp(CAT, v<number>)
+const catType = defineContextProp(_cat_, v<number>)
 
 declare module '@rue/lumo' {
     interface ContextKeyMap {
-        [CAT]: typeof catType
+        [_cat_]: typeof catType
     }
 }

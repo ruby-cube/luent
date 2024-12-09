@@ -34,17 +34,6 @@ describe('ion function', () => {
         expect($count[META]).toBeInstanceOf(MetaIon);
     });
  
-    it('should remove XPO suffix in methods', () => {
-        const $count = ion(5, {
-            doubleXPO() {
-                $count.as($count() * 2)
-            }
-        });
-
-        $count.double()
-        expect($count()).toBe(10);
-        expect($count[META]).toBeInstanceOf(MetaIon);
-    });
 
     it('should replace `as` method with `_as` if provided with `as` method', () => {
         const $count = ion(15, {

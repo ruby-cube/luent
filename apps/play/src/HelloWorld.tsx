@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Component, Else, ElseIf, expose, For, fromTag, If, prep, v, watch } from "@rue/lumo";
 import { ion, ionize, Ionized, ionizeWithMarks } from "@rue/quarky";
 import { Inert, inert } from "../../../packages/quarky/src/ionize/inert";
@@ -85,15 +86,15 @@ export function IonAccess() {
 
    wella$.waterB
 
- 
+
 
    class AnotherArray<T> extends Array<T> {
       // constructor(...args: T[]){
       //    super(...args);
       // }
-      doSomething(){}
+      doSomething() { }
    }
-   
+
    const blah = {
       '1': 0,
       '~': 0,
@@ -126,37 +127,39 @@ export function IonAccess() {
 
    // const list$ = ionize([{name: 9}])
 
-   const list$ = ionize(new AnotherArray({name: 9}, undefined))
+   const list$ = ionize(new AnotherArray({ name: 9 }, undefined))
 
-   for (const item of list$){
-      
+   for (const item of list$) {
+
    }
 
    const num = list$[0]
 
    const removed = list$.splice(0, 1)
 
-   const res = list$.map((item, index, array)=>item!.name)
+   const res = list$.map((item, index, array) => item!.name)
 
    return Component(
       <>
-         <swap:mount/>
+         <swap:mount />
          {If($x() > 10,
-            <p>{$x()} is greater than 10</p>
+            <p>{$x} is greater than 10</p>
          )}
          {ElseIf(5 > $x(),
-            <p>{$x()} is less than 5</p>
+            <p>{$x} is less than 5</p>
          )}
          {Else(
-            <p>{$x()} is between 5 and 10</p>
+            <p>{$x} is between 5 and 10</p>
          )}
       </>
    )
 }
 
+if (x === true) {
 
+}
 
-function SvelteB() {
+function SvelteA() {
    //@ts-ignore
    const $x = ion(7)
 
@@ -164,13 +167,16 @@ function SvelteB() {
       <>
          <swap:mount />
          {If($x() > 10,
-            <p>{$x()} is greater than 10</p>
+            <p>{$x} is greater than 10</p>
          )}
          {ElseIf(5 > $x(),
-            <p>{$x()} is less than 5</p>
+            <p>{$x} is less than 5</p>
+         )}
+         {ElseIf($x,
+            <p>{$x} is less than 5</p>
          )}
          {Else(
-            <p>{$x()} is between 5 and 10</p>
+            <p>{$x} is between 5 and 10</p>
          )}
       </>
    )

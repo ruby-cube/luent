@@ -186,7 +186,7 @@ function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel:
             // }
 
             const methodKey = methods[key] === true ? key : methods[key]
-            proto[key] = ionicModel[methodKey] //TODO: XPO?
+            proto[key] = ionicModel[methodKey] //TODO: 
             // .bind(proto) // This makes set function available to `this` even after protected //QUESTION: is this necessary if dev does not use this??
         }
     }

@@ -38,7 +38,7 @@ export type Public = {
     [IS_PUBLIC]?: true
 } & (() => any)
 
-type _ProtectedIon<I> = I extends WritableIon<infer T, infer M> ? ProtectedIon<T, { [K in keyof M as M[K] extends (this: infer P, ...args: any[]) => any ? P extends Public ? K extends `${infer S}XPO` ? S : K : never: never]: M[K] }> : Omit<I, 'as'>
+type _ProtectedIon<I> = I extends WritableIon<infer T, infer M> ? ProtectedIon<T, { [K in keyof M as M[K] extends (this: infer P, ...args: any[]) => any ? P extends Public ?  K : never: never]: M[K] }> : Omit<I, 'as'>
 // I & {[K in keyof M as M[K] extends (this: Public)=>any ? K : never]: M[K]}
 /**
  * methodKeys: methodKeys to include in protected ion

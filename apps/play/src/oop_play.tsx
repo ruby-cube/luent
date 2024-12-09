@@ -30,7 +30,7 @@ import { Article } from "./TestCustomCleanupScheduler";
 function ListA() {
 
    const $count = ion(0, {
-      incrementXPO() { /*public*/
+      increment() { /*public*/
          $count.as($count() + 1)
       },
 
@@ -63,8 +63,8 @@ function ListA() {
 
    // const { $target } = ions(selection$)
 
-   const $target = ionOf(selection$, 'target', { 
-      setTarget: 'set' 
+   const $target = ionOf(selection$, 'target', {
+      setTarget: 'set'
    })
 
    const $target = ionsOf(selection$).$target
@@ -113,7 +113,7 @@ function ListA() {
 
    const $target = ion.of(selection$, '$target', { setTarget: 'set' })
 
-   
+
 
    return Component(
       {
@@ -122,15 +122,19 @@ function ListA() {
       <>
          <h1>Hello World</h1>
 
+         <p>{{ $: $count() + 1 }}</p>
+
          <p>{$count}</p>
+         <p>{$count() + 1}</p>
+         <p>{$ => $count() + 1}</p>
          <button on:click={$count.increment}>increment</button>
 
          <Item count={$count} />
          <Item $count={exo($count, 'increment')} ref={dog$.$collar} $selection={exo(selection$, 'setTarget')} />
-         <Context with={{ [COUNT]: $count }}> {/* non-explicit exposure by type; vulnerable decrement function */}
+         <context-node with={{ [_count_]: $count }}> {/* non-explicit exposure by type; vulnerable decrement function */}
             <Article />
             <Footer />
-         </Context>
+         </context-node>
       </>
    )
 }

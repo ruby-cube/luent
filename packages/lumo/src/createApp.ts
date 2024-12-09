@@ -6,7 +6,7 @@ import { initializeComponent, setComponentAttributes } from "./component/makeCom
 import { AppContext, createAppContext } from "./context/provide";
 import { popContext, pushContext } from "./context/context-stack";
 import { ContextEntries } from "./context/Context";
-import { DOG } from "./context/x_context-keys";
+import { _dog_ } from "./context/x_context-keys";
 
 let appRoot: Element;
 

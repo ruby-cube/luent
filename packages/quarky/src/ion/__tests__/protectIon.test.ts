@@ -35,18 +35,6 @@ describe('protectIon function', () => {
         expect($protected[META].o).toBe(atomicIon[META].o);
     });
 
-    it('should call allow `as` method marked with XPO prefix', () => {
-        const atomicIon = ion(0, {
-            XPOas(this: Public, value) {
-                atomicIon._as(value)
-            }
-        })
-        const $protected = protectIon(atomicIon);
-        $protected.as(10)
-        expect($protected()).toBe(10)
-        expect(() => $protected._as(10)).toThrowError()
-        expect($protected[META].o).toBe(atomicIon[META].o);
-    });
 
     //   it('should create a custom protected ion with only specified methods accessible', () => {
     //     const writableIon = { [META]: { inert: false, o: vi.fn(), hasMethods: true } };
@@ -67,20 +55,6 @@ describe('protectIon function', () => {
         const protectedIon = protectIon(atomicIon);
 
         expect(() => protectedIon.increment()).toThrowError(/failed/)
-    });
-
-    it('should call allow methods marked with XPO prefix', () => {
-        const $count = ion(0, {
-            XPOincrement(this: Public) {
-                $count.as($count() + 1)
-            },
-            decrement() {
-
-            }
-        })
-        const $protected = protectIon($count);
-        $protected.increment()
-        expect($protected()).toBe(1)
     });
 
     it('should reuse the existing protected ion if already created', () => {
