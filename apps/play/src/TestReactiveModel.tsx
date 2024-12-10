@@ -67,7 +67,7 @@ export function List(
          })
       },
       remove(index: number) {
-         $list.splice(index, 1);
+         const rem = $list.splice(index, 1);
       },
       changeContent(index: number) {
          const $item = $list[index];

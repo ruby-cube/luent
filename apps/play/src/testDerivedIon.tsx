@@ -3,8 +3,8 @@ import { ion, ionize } from "@rue/quarky";
 
 export function TestDerived() {
 
-   const $counts = ionize([0])
-   const $sequence = ionize([0])
+   const counts$ = ionize([0])
+   const sequence$ = ionize([0])
 
    const $count = ion(0, {
       increment() {
@@ -20,35 +20,30 @@ export function TestDerived() {
 
    function nextNumber() {
       $count.increment();
-      $counts.push($count())
-      $sequence.push($accumulate())
+      counts$.push($count()) //23:7
+      sequence$.push($accumulate())
+   }
+
+   function beigeHighlight(o: CSSStyleDeclaration, index: number) {
+      if ($count() === index) {
+         o.backgroundColor = 'beige'
+      }
+      else {
+         o.backgroundColor = 'unset'
+      }
    }
 
    return Component(
       <>
-         {For($counts, (n, $index) =>
-            <div style={['display: inline-block; padding: 10px', o => {
-               if ($count() === $index()) {
-                  o.backgroundColor = 'beige'
-               }
-               else {
-                  o.backgroundColor = 'unset'
-               }
-            }]}>{n}</div>
+         {For(counts$, (n, $index) =>
+            <div style={['display: inline-block; padding: 10px', o => beigeHighlight(o, $index())]}>{n}</div>
          )}
          <hr></hr>
-         {For($sequence, (n, $index) =>
-            <div style={['display: inline-block; padding: 10px', o => {
-               if ($count() === $index()) {
-                  o.backgroundColor = 'beige'
-               }
-               else {
-                  o.backgroundColor = 'unset'
-               }
-            }]}>{n}</div>
+         {For(sequence$, (n, $index) =>
+            <div style={['display: inline-block; padding: 10px', o => beigeHighlight(o, $index())]}>{n}</div>
          )}
          <div>{$accumulate}</div>
-         <button on:click={nextNumber}>next fib</button>
+         <button on:click={nextNumber}>next cumulative</button>
       </>
    )
 }

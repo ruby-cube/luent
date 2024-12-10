@@ -11,7 +11,7 @@ import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
-import { initializeListRef, initializeRef, NodesRef } from "../node/NodeRef";
+import { initializeListRef, initializeRef, isNodeRef, NodesRef } from "../node/NodeRef";
 
 
 
@@ -38,7 +38,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
     const domNode = isHydrating() ? getElement() : document.createElement(tagName);
 
     if (ref) {
-        if (!isAtomicIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
+        if (!isNodeRef(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef as ref")
         if ($index) {
             initializeListRef(<NodesRef>ref, domNode, $index)
         }

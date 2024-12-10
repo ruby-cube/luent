@@ -27,7 +27,7 @@ import { TestDerived } from './testDerivedIon';
 // const rootContext = createTransappContext()
 
 
-const app = createApp(TestDerived)
+const app = createApp(List)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

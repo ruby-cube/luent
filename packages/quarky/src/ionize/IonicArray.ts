@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isIonicAtom } from "../derivations/IonicAtom";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, Ionized, MaybeIonized, } from "./ionize";
+import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, Ionized, } from "./ionize";
 import { getTrackedOp } from "./TrackedOp";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getObservedProp } from "./PropIon";
@@ -12,20 +12,20 @@ const dogs = [0]
 
 declare global {
    interface Array<T> {
-      '~$methods': {
+      '~$methods'?: {
          // Accessor methods
-         at(index: number): MaybeIonized<T> | undefined;
-         concat(...items: (T | T[])[]): (MaybeIonized<T>)[];
-         slice(start?: number, end?: number): (MaybeIonized<T>)[];
+         at(index: number): T extends AnyObject ? Ionized<T> : T | undefined;
+         concat(...items: (T | T[])[]): (T extends AnyObject ? Ionized<T> : T)[];
+         slice(start?: number, end?: number): (T extends AnyObject ? Ionized<T> : T)[];
 
          // Mutator methods
-         copyWithin(target: number, start: number, end?: number): (MaybeIonized<T>)[];
-         fill(value: T, start?: number, end?: number): (MaybeIonized<T>)[];
-         pop(): MaybeIonized<T> | undefined;
-         reverse(): (MaybeIonized<T>)[];
-         shift(): MaybeIonized<T> | undefined;
-         sort(compareFn?: (a: T, b: T) => number): (MaybeIonized<T>)[];
-         splice(start: number, deleteCount?: number, ...items: T[]): (MaybeIonized<T>)[];
+         copyWithin(target: number, start: number, end?: number): (T extends AnyObject ? Ionized<T> : T)[];
+         fill(value: T, start?: number, end?: number): (T extends AnyObject ? Ionized<T> : T)[];
+         pop(): T extends AnyObject ? Ionized<T> : T | undefined;
+         reverse(): (T extends AnyObject ? Ionized<T> : T)[];
+         shift(): T extends AnyObject ? Ionized<T> : T | undefined;
+         sort(compareFn?: (a: T, b: T) => number): (T extends AnyObject ? Ionized<T> : T)[];
+         splice(start: number, deleteCount?: number, ...items: T[]): (T extends AnyObject ? Ionized<T> : T)[];
 
          forEach<H, O>(
             this: H,
@@ -34,19 +34,19 @@ declare global {
           ): void;
          map<U, H, O>(
             this: H,
-            callback: (this: O, value: MaybeIonized<T>, index: number, array: H) => U, //QUESTION: should the array be ionized?
+            callback: (this: O, value: T extends AnyObject ? Ionized<T> : T, index: number, array: H) => U, //QUESTION: should the array be ionized?
             thisArg?: O
          ): U[];
          filter<H, O>(
             this: H,
-            predicate: (this: O, value: MaybeIonized<T>, index: number, array: H) => boolean,
+            predicate: (this: O, value: T extends AnyObject ? Ionized<T> : T, index: number, array: H) => boolean,
             thisArg?: O
-         ): (MaybeIonized<T>)[];
+         ): (T extends AnyObject ? Ionized<T> : T)[];
          find<H, O>(
             this: H,
-            predicate: (this: O, value: MaybeIonized<T>, index: number, array: H) => boolean,
+            predicate: (this: O,value: T extends AnyObject ? Ionized<T> : T, index: number, array: H) => boolean,
             thisArg?: O
-         ): MaybeIonized<T> | undefined;
+         ): T extends AnyObject ? Ionized<T> : T | undefined;
 
          reduce<U, H>(
             this: H,
@@ -60,11 +60,11 @@ declare global {
          ): U;
 
          // Methods introduced in ES2023
-         toSorted(compareFn?: (a: MaybeIonized<T>, b: MaybeIonized<T>) => number): (MaybeIonized<T>)[];
-         toReversed(): (MaybeIonized<T>)[];
-         with(index: number, value: T): (MaybeIonized<T>)[];
+         toSorted(compareFn?: (a: T extends AnyObject ? Ionized<T> : T, b: T extends AnyObject ? Ionized<T> : T) => number): (T extends AnyObject ? Ionized<T> : T)[];
+         toReversed(): (T extends AnyObject ? Ionized<T> : T)[];
+         with(index: number, value: T): (T extends AnyObject ? Ionized<T> : T)[];
 
-         [Symbol.iterator](): IterableIterator<MaybeIonized<T>>;
+         [Symbol.iterator](): IterableIterator<T extends AnyObject ? Ionized<T> : T>;
       }
    }
 }

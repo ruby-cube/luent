@@ -13,7 +13,6 @@ import { AnyIon, isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PropIon";
 import { protect } from "../protect";
 import { READONLY } from "../ion/ProtectedIon";
-import { inert } from "./inert";
 
 
 
@@ -140,7 +139,10 @@ type MutatingOpConfig = {
 export type GetPreopData = (model: AnyObject, args?: any[]) => any;
 type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
 
-const ionicStructureMap: Map<any, CustomIonicModelConfig> = new Map([[
+const something: Map<any, { dog?: number }> = new Map([[Object, { dog: 9 }]])
+
+
+const ionicStructureMap = new Map([[
    Object, {
       nontrackableKeys: {
          constructor: true,
@@ -157,7 +159,7 @@ const ionicStructureMap: Map<any, CustomIonicModelConfig> = new Map([[
          toLocaleString: true
       }
    }
-]]);
+]]) as Map<any, CustomIonicModelConfig>
 
 function isCustomIonicStructure(value: any) {
    return ionicStructureMap.has(value);

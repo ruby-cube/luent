@@ -36,7 +36,7 @@ export function registerIonizedModel(ionicModel: IonizedModel, target: AnyObject
 
 export function isIonizedModel(value: any): value is Ionized<AnyObject> {
    if (!isObject(value)) return false;
-   return value[META]?.type === IONIZED_MODEL;
+   return Boolean(value[META]?.type === IONIZED_MODEL);
 }
 
 type AbsorbedIon<T> = {
@@ -66,10 +66,13 @@ type ReadonlyIon<T> = {
 
 type InvertIons<T extends AnyObject, M = {}> = {
    [K in keyof T as (K extends '~$methods' ? never : K extends keyof M ? never : T[K] extends AbsorbedIon<any> ? K extends `$${infer S}` ? S : K extends string ? `$${K}` : never : T[K] extends (...args: any[]) => any ? never : K extends `$${string}` ? never : K extends string ? `$${K}` : never)]:
-   T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? V : T[K] : ReadonlyIon<T[K] extends { [META]: any } | ((...args: any[]) => any) | Inert ? T[K]
+   T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? V : T[K]
+   : ReadonlyIon<
+      T[K] extends { [META]: any } | ((...args: any[]) => any) | Inert ? T[K]
       : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
       : T[K] extends { [key: PropertyKey]: any } | undefined ? Ionized<Exclude<T[K], undefined>> | undefined
-      : T[K]>
+      : T[K]
+   >
 }
 
 type IonizedGetter<T, K extends keyof T> = T extends { '~$methods': AnyObject } ? K extends keyof T['~$methods'] ? T['~$methods'][K] : T[K] : T[K]
@@ -95,7 +98,7 @@ export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
    }
    //TODO: What about a readonly object that is not an ionic model?
-   if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference-type primitive (object)`)
+   if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
    const existingIonicModel = ionizedModels.get(target)
    if (existingIonicModel) return existingIonicModel as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
    return createIonicModel(target, methods) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>

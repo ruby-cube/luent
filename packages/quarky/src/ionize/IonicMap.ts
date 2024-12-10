@@ -8,7 +8,7 @@ import { AnyObject } from "@rue/types";
 
 declare global {
    interface Map<K, V> {
-      '~$methods': {
+      '~$methods'?: undefined | {
          // Core methods
          delete(key: K): boolean;
          get(key: K): MaybeIonized<V> | undefined;
@@ -27,6 +27,7 @@ declare global {
       }
    }
 }
+
 
 // Trackable keys vs trackable ops:
 // Trackable keys is about tracking the property

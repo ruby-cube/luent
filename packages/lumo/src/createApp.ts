@@ -2,7 +2,7 @@ import { Component, ComponentSetup, DOMNode, InternalComponent } from "./compone
 import { _NodePod } from "./node/NodePod";
 import { DynamicNode } from "./dynamic/DynamicNode";
 import { AnyObject } from "@rue/types";
-import { initializeComponent, setComponentAttributes } from "./component/makeComponent";
+import { setComponentAttributes } from "./component/makeComponent";
 import { AppContext, createAppContext } from "./context/provide";
 import { popContext, pushContext } from "./context/context-stack";
 import { ContextEntries } from "./context/Context";

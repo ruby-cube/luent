@@ -14,6 +14,7 @@ import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
 import { createNodeContext } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
+import { getTrace } from "../../../utils/debug";
 
 
 type Index = number
@@ -35,7 +36,7 @@ export function setCurrentIndex($index: AtomicIon<number> | undefined) {
    $currentIndex = $index;
 }
 
-function wrapWithContext(renderItem: RenderItem, list: ListRenderKit) {
+function wrapWithContext(renderItem: RenderItem<Ionized<any[]>>, list: ListRenderKit) {
    const outerContext = getContext();
    return (item: any, $index: AtomicIon<number>, parent: Element, nodePod: _NodePod) => {
       const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
@@ -61,15 +62,17 @@ function wrapWithContext(renderItem: RenderItem, list: ListRenderKit) {
    }
 }
 
-export class ListRenderKit<T = any> {
+export class ListRenderKit {
    renderItem: (item: any, $index: AtomicIon<number>, parent: Element, nodePod: _NodePod) => NodeKit[]
+   trace: unknown;
 
    constructor(
-      renderItem: RenderItem<T>, //QUESTION: Does this need the context object?
-      public data: Collection<T> | Ionized<Collection<T>> | ReactiveGet<Collection<T>>,
+      renderItem: RenderItem<Ionized<any[]>>, //QUESTION: Does this need the context object?
+      public data: ListData,
       public getUID: ((item: unknown) => unknown) | undefined,
    ) {
       this.renderItem = wrapWithContext(renderItem, this);
+      this.trace = getTrace()
    }
 
    beforeUpdateTasks: Set<Function> = new Set()
@@ -93,7 +96,7 @@ export class ListRenderKit<T = any> {
    isDynamic: boolean = false;
 
    _transitions?: Map<AtomicIon<number>, TransitionNode[]>
-   get transitions(){
+   get transitions() {
       if (this._transitions) return this._transitions;
       return this._transitions = new Map();
    }
@@ -118,9 +121,10 @@ export class ListRenderKit<T = any> {
          // set up watcher for updates
          // const renderCycle = getCurrentRenderCycle();
          const parentDynamicNode = getActiveDynamicNode()
-         const rawData = isIonizedModel(data) ? toRaw(data) : undefined
+         const rawData = isIonizedModel(data) ? toRaw(data) as Collection<any> : undefined
          let clone = isIonizedModel(data) ? shallowClone(rawData!) : undefined
          //TODO: figure out typing for Set, Map, Object vs Array
+         
          watch(data as any/* FIX: type error*/, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
             console.log('updating list')
             const _oldValue = clone || oldValue;
@@ -132,7 +136,12 @@ export class ListRenderKit<T = any> {
 
             this.castBeforeUpdate();
             this.removeItems(indicesToRemove!);
-            this.insertAndMoveItems(insertAndMoveKit!, parent, parentDynamicNode);
+            try {
+               this.insertAndMoveItems(insertAndMoveKit!, parent, parentDynamicNode);
+            }
+            catch (err) {
+               console.error(err, this.trace)
+            }
          }, { phase: Phase.RENDER })
       }
       // currentItem = undefined;
@@ -245,7 +254,7 @@ export class ListRenderKit<T = any> {
             const dynamicNode = makeDynamicNode(nodePod)
             const renderItem = this.renderItem
             const list = this.data;
-            const _item = isIonizedModel(list) || isAtomicIon(list) && asMetaIon(list).hasIonicValue ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
+            const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             dynamicNode.mount(function renderNewListItem() {
                console.log('rendering new item')
                const nodeEntities = renderItem(_item, $index, parent, nodePod);

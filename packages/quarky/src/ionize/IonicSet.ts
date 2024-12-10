@@ -1,30 +1,30 @@
 import { AnyObject } from "@rue/types";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import { Ionized, IonizedModel, MaybeIonized, storeSnapshot, toRaw } from "./ionize";
+import { Ionized, IonizedModel, storeSnapshot, toRaw } from "./ionize";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getTrackedOp } from "./TrackedOp";
 import { MetaIonicModel } from "./MetaIonicModel";
 import { getObservedProp } from "./PropIon";
 
-
+type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 
 declare global {
    interface Set<T> {
-      '~$methods': {
+      '~$methods'?: {
          // Core methods
          add<H>(this: H, value: T): H,
 
          // Iteration methods
          forEach<H, O>(
             this: H,
-            callback: (this: O, valueA: MaybeIonized<T>, valueB: MaybeIonized<T>, set: H) => void,
+            callback: (this: O, valueA: T extends AnyObject ? Ionized<T> : T, valueB: T extends AnyObject ? Ionized<T> : T, set: H) => void,
             thisArg: O
          ): void;
 
-         keys(): IterableIterator<MaybeIonized<T>>;
-         values(): IterableIterator<MaybeIonized<T>>;
-         entries(): IterableIterator<[MaybeIonized<T>, MaybeIonized<T>]>;
-         [Symbol.iterator](): IterableIterator<MaybeIonized<T>>;
+         keys(): IterableIterator<T extends AnyObject ? Ionized<T> : T>;
+         values(): IterableIterator<T extends AnyObject ? Ionized<T> : T>;
+         entries(): IterableIterator<[T extends AnyObject ? Ionized<T> : T, T extends AnyObject ? Ionized<T> : T]>;
+         [Symbol.iterator](): IterableIterator<T extends AnyObject ? Ionized<T> : T>;
       }
    }
 }
