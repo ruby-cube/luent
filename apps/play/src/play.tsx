@@ -18,7 +18,7 @@ function ListBlock() {
     )
 
     // for if you want to track all reactives 
-    watchIonicEffect(() => {
+    watchEffect(() => {
         if ($active() && $bored()) {
             $height() // tracked
         }

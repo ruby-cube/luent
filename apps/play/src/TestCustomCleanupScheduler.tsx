@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { Component, NodeRef, watch } from "@rue/lumo"
-import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchIonicEffect, } from "@rue/quarky"
+import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchEffect, } from "@rue/quarky"
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon"
 import { or, $setup, is, isDefined, isAny, not } from "../../../packages/lumo/src/component/X_$setup"
 import { toIon } from "../../../packages/quarky/src/ion/toIons"

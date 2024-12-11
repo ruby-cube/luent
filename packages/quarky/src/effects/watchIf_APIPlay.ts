@@ -46,7 +46,7 @@ watch([$active, $ready, $frogName], () => {
 
 const $frogName = asIon($frog, 'name')
 
-watchIonicEffect(() => {
+watchEffect(() => {
     if ($active(X) && $frogName(X)) {
 
     }

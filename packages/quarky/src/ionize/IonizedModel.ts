@@ -199,8 +199,9 @@ export function createCustomIonicModel(
    structureConfigs: CustomIonicModelConfig[],
    target: AnyObject,
    methods: AnyObject | undefined,
+   exposeAllMethods: boolean
 ) {
-   const metaIonicModel = new MetaIonicModel(target, methods)
+   const metaIonicModel = new MetaIonicModel(target, methods, exposeAllMethods || methods || false)
    const ionicModel = new Proxy(target, {
       get(target, key, receiver) {
          if (__DEV__) emitSignal()
@@ -213,45 +214,47 @@ export function createCustomIonicModel(
                return undefined;
             }
          }
+
          if (methods && key in methods) {
-            console.log('accesing from methods', key)
-            return accessMethod(
-               target,
-               ionicModel,
-               receiver,
-               key,
-               boundMethodMap,
-               methods[key]
-            )
+            const method = methods[key]
+            if (method instanceof Function){
+               return accessMethod(
+                  target,
+                  ionicModel,
+                  receiver,
+                  key,
+                  boundMethodMap,
+                  method
+               )
+            }
          }
          const _key = typeof key === 'string' && key.startsWith('_') ? key.slice(1) : key;
-         console.log('modified key', _key, key)
-         if (isMutatingOps(_key, structureConfigs)) {
+         if (isNativeMethod(_key, structureConfigs)) {
             if (protectedMeta) {
                const keys = protectedMeta.propertyKeys
-               if (keys && key in keys) {
-                  return accessMethod(
+               if (keys && _key in keys) {
+                  return getNativeMethod(
+                     _key,
+                     structureConfigs,
                      target,
                      ionicModel,
-                     receiver,
-                     key,
-                     boundMethodMap
+                     metaIonicModel,
+                     boundMethodMap,
                   )
                }
                return undefined;
             }
             else {
-               console.log("accessing")
-               return accessMethod(
+               return getNativeMethod(
+                  _key,
+                  structureConfigs,
                   target,
                   ionicModel,
-                  receiver,
-                  _key,
-                  boundMethodMap
+                  metaIonicModel,
+                  boundMethodMap,
                )
             }
          }
-
          const value = Reflect.get(target, key, receiver)
          // if (typeof key === 'symbol' && key.description === 'Symbol.iterator') { //TODO: make this part of isNonTrackable?
          //     return value;
@@ -281,7 +284,7 @@ export function createCustomIonicModel(
                target,
                ionicModel,
                receiver,
-               key,
+               typeof _key === 'string' ? '_' + _key : key,
                boundMethodMap,
                value
             )
@@ -305,7 +308,7 @@ export function createCustomIonicModel(
       }
    }) as IonizedModel
 
-   const boundMethodMap = createBoundMethodMap(structureConfigs, target, ionicModel, metaIonicModel)
+   const boundMethodMap = new Map()
 
    metaIonicModel.initIonicModel(ionicModel)
    registerIonizedModel(ionicModel, target)
@@ -325,38 +328,20 @@ function maybeIonize(value: any, target: AnyObject, proxy: AnyObject, receiver: 
    return ionize(value)
 }
 
-function isMutatingOps(key: PropertyKey, structureKeys: any[]) {
-   for (const structure in structureKeys) {
-      const mutatingOps = ionicStructureMap.get(structure)?.mutatingOps
-      if (!mutatingOps) continue;
-      if (key in mutatingOps) return true;
+function isNativeMethod(key: PropertyKey, structureConfigs: CustomIonicModelConfig[]) {
+   for (const structure of structureConfigs) {
+      const mutatingOps = structure.mutatingOps
+      if (mutatingOps && key in mutatingOps)
+         return true;
+      const trackableOps = structure.mutatingOps
+      if (trackableOps && key in trackableOps)
+         return true;
    }
    return false;
 }
 
 
-function createBoundMethodMap(structureConfigs: CustomIonicModelConfig[], target: AnyObject, ionicModel: IonizedModel, meta: MetaIonicModel) {
-   const methodMap = new Map()
-   if (structureConfigs[0].structure === Object) return methodMap;
 
-   for (const config of structureConfigs) {
-      const mutatingOps = config.mutatingOps
-      if (!mutatingOps) continue;
-      for (const opKey in mutatingOps) {
-         const createOp = mutatingOps[opKey].createOp
-         const getPreopData = mutatingOps[opKey].preop
-         methodMap.set(opKey, createOp(target, ionicModel, meta, getPreopData)) //TODO: should I create these lazily?
-      }
-
-      const trackableOps = config.trackableOps
-      if (!trackableOps) continue;
-      for (const opKey in trackableOps) {
-         const createOp = trackableOps[opKey]
-         methodMap.set(opKey, createOp(target, ionicModel))
-      }
-   }
-   return methodMap;
-}
 
 
 export function accessMethod(
@@ -395,6 +380,39 @@ function getBoundMethod(
    }
    throw new Error('No method provided')
 }
+
+function getNativeMethod(
+   key: string | symbol,
+   structureConfigs: CustomIonicModelConfig[],
+   target: AnyObject,
+   ionicModel: IonizedModel,
+   meta: MetaIonicModel,
+   boundMethodMap: Map<PropertyKey, Function>,
+) {
+   const _key = typeof key === 'string' ? '_' + key : key
+   let boundMethod = boundMethodMap.get(_key)
+   if (boundMethod) return boundMethod;
+
+   for (const config of structureConfigs) {
+      const mutatingOps = config.mutatingOps
+      if (mutatingOps && key in mutatingOps) {
+         const createOp = mutatingOps[key].createOp
+         const getPreopData = mutatingOps[key].preop
+         const op = createOp(target, ionicModel, meta, getPreopData)
+         boundMethodMap.set(_key, op)
+         return op;
+      }
+      const trackableOps = config.trackableOps
+      if (trackableOps && key in trackableOps) {
+         const createOp = trackableOps[key]
+         const op = createOp(target, ionicModel)
+         boundMethodMap.set(_key, op)
+         return op;
+      }
+   }
+}
+
+
 
 
 

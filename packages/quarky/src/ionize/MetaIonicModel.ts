@@ -34,7 +34,8 @@ export class MetaIonicModel<T extends AnyObject = AnyObject> implements Reactive
 
     constructor(
         public rawTarget: T,
-        public methods: AnyObject = {}
+        public methods: AnyObject = {},
+        public exposedMethods: AnyObject | boolean
         // public reactive: T
         // public traps?: ReactiveTraps<T>
     ) {

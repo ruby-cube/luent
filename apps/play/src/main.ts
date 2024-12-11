@@ -16,6 +16,7 @@ import { PlainList } from './TestList';
 import { HelloWorld } from './HelloWorld';
 import { Check } from './childrenTest';
 import { TestDerived } from './testDerivedIon';
+import { OverrideMethods } from './TestOverrideMethods';
 // import { queueTask } from '@rue/thread';
 // import { RenderCycle } from '@rue/quarky';
 // import { MainSite } from './AwaitTest';
@@ -27,7 +28,7 @@ import { TestDerived } from './testDerivedIon';
 // const rootContext = createTransappContext()
 
 
-const app = createApp(List)
+const app = createApp(OverrideMethods)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { collectEffects, EffectFlask, getFlask } from "@rue/flask";
 import { flaskablePromise } from "../../../packages/flask/flaskablePromises";
-import { watchIonicEffect } from "@rue/quarky";
+import { watchEffect } from "@rue/quarky";
 import { abort } from "process";
 import { Component } from "@rue/lumo";
 
@@ -125,7 +125,7 @@ function SideBar(
 
     const { '$--color': color } = setup
 
-    watchIonicEffect(async () => {
+    watchEffect(async () => {
 
         const abort = AbortSignal()
 

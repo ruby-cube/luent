@@ -335,7 +335,7 @@ function scheduleEffectEagerly(effect: Effect, phase: Phase) {
 }
 
 
-export function watchIonicEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
+export function watchEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
     const phase = options?.phase || Phase.BEFORE_RENDER;
     const retrack = options?.retrack || false;
     const selectiveSubjects = options?.only;
@@ -347,7 +347,7 @@ export function watchIonicEffect(effect: () => void, options?: EffectOptions) { 
     const watchSubject = asWatchSubject(reactiveEffect);
 
     if (__DEV__ && selectiveSubjects && options?.also)
-        throw Error(`INVALID OPTIONS: Cannot configure watchIonicEffect with both 'only' and 'also' options.`)
+        throw Error(`INVALID OPTIONS: Cannot configure watchEffect with both 'only' and 'also' options.`)
 
     scheduleEffectEagerly(reactiveEffect.initialize, phase);
 

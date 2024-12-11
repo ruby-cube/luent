@@ -1,4 +1,4 @@
-import { isIon, watchIonicEffect as _watchIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, Ionized, OnChangeHandler, Phase, __devCheckIfTracked } from "../../../quarky/src";
+import { isIon, watchEffect as _watchIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, Ionized, OnChangeHandler, Phase, __devCheckIfTracked } from "../../../quarky/src";
 import { ActiveListener, ListenerOptions } from "@rue/flask";
 import { getActiveDynamicNode, getDynamicNode } from "../dynamic/nodestack";
 import { CustomCleanupSchedulerListenerOptions } from "../events/listen";
@@ -38,7 +38,7 @@ function _initializeRender(effect: () => void) {
 
 
 
-export function watchIonicEffect(effect: () => void) {
+export function watchEffect(effect: () => void) {
     const dynamicNode = getDynamicNode()
     if (!dynamicNode)
         return _watchIonicEffect(effect)

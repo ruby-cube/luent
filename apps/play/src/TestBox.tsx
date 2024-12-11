@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { NodeRef, Try, } from "@rue/lumo";
-import { DerivedIon, watchIonicEffect, ion, ionize } from "@rue/quarky";
+import { DerivedIon, watchEffect, ion, ionize } from "@rue/quarky";
 
 
 //tests:
@@ -27,12 +27,12 @@ export function TestBox() {
 
     const $div = NodeRef('div')
     const $anotherCount = ion(() => $count())
-    watchIonicEffect(() => {
+    watchEffect(() => {
         $anotherCount()
     })
 
     // beforeMount(()=>{
-    //     watchIonicEffect(() => {
+    //     watchEffect(() => {
     //         divRef.o.style.transform = `translate(${box$.position.x}px)`
     //         console.log("running effect!!!", divRef.o.style.transform)
     //     }, {phase: Phase.RENDER})

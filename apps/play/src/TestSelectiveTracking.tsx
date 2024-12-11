@@ -1,5 +1,5 @@
 import { Component } from "@rue/lumo";
-import { DerivedIon, ion, ionize, isIon, watch, watchIonicEffect } from "@rue/quarky";
+import { DerivedIon, ion, ionize, isIon, watch, watchEffect } from "@rue/quarky";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
 
 export function TestSelectiveTracking() {
@@ -34,7 +34,7 @@ export function TestSelectiveTracking() {
 
     const $ = true as const;
 
-    watchIonicEffect(() => {
+    watchEffect(() => {
         console.log($doubleCount($))
         if ($active($)) {
             console.log($count())

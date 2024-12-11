@@ -121,7 +121,6 @@ function ListA() {
       },
       <>
          <h1>Hello World</h1>
-
          <p>{{ $: $count() + 1 }}</p>
 
          <p>{$count}</p>
@@ -130,7 +129,7 @@ function ListA() {
          <button on:click={$count.increment}>increment</button>
 
          <Item count={$count} />
-         <Item $count={exo($count, 'increment')} ref={dog$.$collar} $selection={exo(selection$, 'setTarget')} />
+         <Item $count={rein($count, 'increment')} ref={dog$.$collar} $selection={rein(selection$, 'setTarget')} />
          <context-node with={{ [_count_]: $count }}> {/* non-explicit exposure by type; vulnerable decrement function */}
             <Article />
             <Footer />

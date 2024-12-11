@@ -92,7 +92,7 @@ type IonizedGetter<T, K extends keyof T> = T extends { '~$methods': AnyObject } 
 
 
 //API
-export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M, publicMethods?: { [K in keyof Partial<M>]: 'public' }): T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M> {
+export function ionize<T extends AnyObject, M extends {[key: string]: true | ((...args: any) => any)}>(target: T, methods?: M): T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M> {
    if (isIonizedModel(target) || isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
@@ -150,9 +150,11 @@ export function toRaw<T>(target: T): AsRaw<T> {
 
 export function createIonicModel(
    target: object,
-   methods: object | undefined,
+   methods: { 'all methods'?: true } | undefined | 'all methods',
 ): object {
-   return createCustomIonicModel(getStructureConfigs(target), target, methods)
+   const _methods = methods === 'all methods' ? undefined : methods;
+   const exposeAllMethods = methods === 'all methods' ? true : methods?.['all methods']
+   return createCustomIonicModel(getStructureConfigs(target), target, _methods, exposeAllMethods || false)
    // return isTuple(target) ? createIonicTuple(target, methods)
    //     : target instanceof Array ? createIonicArray(target, methods)
    //         : target instanceof Set ? createIonicSet(target, methods)
