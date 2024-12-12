@@ -44,9 +44,9 @@ function Counter() {
         }
     })
 
-    provide(COUNT, protect($count, { allow: ['increment', 'set'] }))
-    provide(COUNT, protect($count, { exclude: 'decrement' }))
-    provide(COUNT, protect($count)) // read-only
+    provide(COUNT, rein($count, { allow: ['increment', 'set'] }))
+    provide(COUNT, rein($count, { exclude: 'decrement' }))
+    provide(COUNT, rein($count)) // read-only
     provide(COUNT, $count) // all methods
 
     const incrementBtnSetup = {

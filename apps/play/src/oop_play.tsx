@@ -129,7 +129,7 @@ function ListA() {
          <button on:click={$count.increment}>increment</button>
 
          <Item count={$count} />
-         <Item $count={rein($count, 'increment')} ref={dog$.$collar} $selection={rein(selection$, 'setTarget')} />
+         <Item $count={rein($count, { increment: true })} ref={dog$.$collar} $selection={rein(selection$, { setTarget: true, })} />
          <context-node with={{ [_count_]: $count }}> {/* non-explicit exposure by type; vulnerable decrement function */}
             <Article />
             <Footer />

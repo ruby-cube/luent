@@ -1,4 +1,4 @@
-import { ion, protect } from "../../../packages/quarky/src"
+import { ion, rein } from "../../../packages/quarky/src"
 import { pend, Suspense } from "../../../packages/lumo/src/componentSuspense"
 import { Component } from "@rue/lumo"
 

@@ -4,7 +4,7 @@ import { META } from "../ReactiveEntity";
 import { isIon } from "../ion/Ion";
 import { protectedMethod, protectIon, READONLY } from "../ion/ProtectedIon";
 import { isProtectedIonicModel, isProtectedProxy } from "./ProtectedIonicModel";
-import { protect } from "../protect";
+import { rein } from "../rein";
 import { __devCheckIfTracked, getActiveTracker } from "../derivations/DependencyTracker";
 import { asWatchSubject, WatchSubject } from "../effects/WatchSubject";
 import { asIonicAtom, IonicAtom } from "../derivations/IonicAtom";
@@ -142,7 +142,7 @@ export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, k
     const propIon = getPropIon(ionicModel, key) //TODO: need a map for readonly prop ions too...
     if (propIon && !methods) {
         if (isProtectedIonicModel(ionicModel)) {
-            protect(propIon, READONLY)
+            rein(propIon, READONLY)
         }
         return propIon as AsPropIon<T, K, M>
     }
@@ -307,7 +307,7 @@ function PropIon<T extends IonizedModel, K extends keyof T>(ionicModel: T, key: 
 export function protectPropIonCapsule($ion: PropIon, methodKeys?: { [key: string]: true } | typeof READONLY) {
     if (methodKeys === READONLY) {
         const coreIon = $ion[META].o
-        return protect(coreIon, READONLY)
+        return rein(coreIon, READONLY)
     }
     if (methodKeys) {
         return createCustomProtectedPropIonCapsule($ion, methodKeys)

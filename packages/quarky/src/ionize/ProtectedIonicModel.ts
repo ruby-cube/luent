@@ -15,7 +15,7 @@ export function isReadonlyIonicModel(value: any) {
     return READONLY_IONIC_MODEL in value;
 }
 
-export function protectIonicModel<T extends IonizedModel>(model: T, propertyKeys?: { [key: string]: true } | typeof READONLY) {
+export function protectIonicModel<T extends IonizedModel>(model: T, propertyKeys: (PropertyKey| typeof READONLY)[]) {
     if (propertyKeys === READONLY) {
         const existing = asMetaIonicModel(model).asReadonly
         if (existing) return existing;

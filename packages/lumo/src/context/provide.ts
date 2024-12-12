@@ -201,7 +201,7 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
             if (!isIon(value)) {
                 throw new Error(`[INVALID INPUT] Value of context entry, '${String(key)}', must be an ion`)
             }
-            return value; //TODO: make Ion read-only, protect $Ion
+            return value; //TODO: make Ion read-only, rein $Ion
 
         case 'MaybeIon':
             return toIon(value) //TODO: make Ion read-only
@@ -212,7 +212,7 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
             if (!isIonizedModel(value)) {
                 throw new Error(`[INVALID INPUT] Value of context entry, '${String(key)}', must be an ionized`)
             }
-            return value; //TODO: readonly, protect
+            return value; //TODO: readonly, rein
 
         case 'MaybeIonized':
             return value; //TODO: readonly

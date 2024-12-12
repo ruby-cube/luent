@@ -11,7 +11,7 @@ import { getProtectedModelMeta, isProtectedProxy, isReadonlyProxy, PROTECTED_MET
 import { META } from "../ReactiveEntity";
 import { AnyIon, isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PropIon";
-import { protect } from "../protect";
+import { rein } from "../rein";
 import { READONLY } from "../ion/ProtectedIon";
 
 
@@ -319,11 +319,11 @@ function maybeIonize(value: any, target: AnyObject, proxy: AnyObject, receiver: 
    if (!(value instanceof Object))
       return value;
    if (isReadonlyProxy(target, proxy, receiver)) {
-      return protect(ionize(value), READONLY)
+      return rein(ionize(value), READONLY)
    }
    const protectedMeta = getProtectedModelMeta(target, proxy, receiver)
    if (protectedMeta) {
-      return protect(ionize(value))
+      return rein(ionize(value))
    }
    return ionize(value)
 }
