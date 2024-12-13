@@ -10,7 +10,7 @@ import { configureFlask, genIncrementalId } from '../../../packages/flask/initFl
 import { List } from './TestReactiveModel';
 import { Component, createApp } from '@rue/lumo';
 // import { ionize, ionize } from '@rue/quarky';
-// import { DeepReactiveModel, asMetaIonicModel, ionize, ionize } from '@rue/quarky';
+// import { DeepReactiveModel, asMetaIonizedModel, ionize, ionize } from '@rue/quarky';
 import { MountIf } from './TestMountIf';
 import { PlainList } from './TestList';
 import { HelloWorld } from './HelloWorld';

@@ -18,14 +18,14 @@ export function isIonicObject(value: any): value is IonizedModel {
 //     methods: AnyObject | undefined
 // ) {
 //     const boundMethodMap: Map<string | symbol, Function> = new Map()
-//     const metaIonicModel = new MetaIonicModel(target, methods)
+//     const metaIonicModel = new MetaIonizedModel(target, methods)
 //     const ionicModel = new Proxy(target, {
 //         get(target, key, receiver) {
 //             if (__DEV__) emitSignal();
 //             if (key === META) return metaIonicModel;
-//             const protectedMeta = getProtectedModelMeta(target, ionicModel, receiver)
-//             if (protectedMeta) {
-//                 const keys = protectedMeta.propertyKeys
+//             const reinedMeta = getProtectedModelMeta(target, ionicModel, receiver)
+//             if (reinedMeta) {
+//                 const keys = reinedMeta.propertyKeys
 //                 if (keys && !(key in keys)) {
 //                     if (__DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}'`)
 //                     return undefined;

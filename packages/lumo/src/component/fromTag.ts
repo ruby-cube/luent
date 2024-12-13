@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { MetaIonicModel } from "../../../quarky/src/ionize/MetaIonicModel";
+import { MetaIonizedModel } from "../../../quarky/src/ionize/MetaIonizedModel";
 import { AtomicIon, DerivedIon, isIon, isIonizedModel, rein, WritableDerivedIon } from "@rue/quarky";
 import { META } from "../../../quarky/src/ReactiveEntity";
 import { toIon } from "../../../quarky/src/ion/toIons";

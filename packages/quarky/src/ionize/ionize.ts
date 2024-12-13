@@ -3,11 +3,11 @@ import { isObject } from "@rue/utils";
 import { timeTraveler } from "./TimeTraveler";
 import { useRenderCycle } from "../effects/RenderCycle";
 import { META } from "../ReactiveEntity";
-import { MetaIonicModel, IONIZED_MODEL } from "./MetaIonicModel";
+import { MetaIonizedModel, IONIZED_MODEL } from "./MetaIonizedModel";
 import { inert, Inert, isInert } from "./inert";
 import { AnyIon, Ion, ion, isIon } from "../ion/Ion";
 import { AtomicIon, MetaIon } from "../ion/AtomicIon";
-import { createCustomIonicModel, getStructureConfigs } from "./IonizedModel";
+import { createIonizedModel, getStructureConfigs } from "./IonizedModel";
 import { PropIon } from "./PropIon";
 
 
@@ -49,7 +49,7 @@ function test_isAnyIon<T>(arg: AbsorbedIon<T>): T {
 }
 
 
-export type Ionized<T extends AnyObject, M = {}> = {
+export type Ionized<T extends AnyObject, M extends {} = {}> = {
    [K in keyof T as (K extends '~$methods' ? never : K extends keyof M ? K extends string ? `_${K}` : K : K)]:
    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? T[K] : V :
    T[K] extends { [META]: any } | Inert ? T[K]
@@ -57,7 +57,9 @@ export type Ionized<T extends AnyObject, M = {}> = {
    : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
    : T[K] extends { [key: PropertyKey]: any } | undefined ? Ionized<Exclude<T[K], undefined>> | undefined
    : T[K]
-} & InvertIons<T, M> & M & { [META]: MetaIonicModel }
+} & InvertIons<T, OmitTrue<M>> & OmitTrue<M> & { [META]: MetaIonizedModel }
+
+type OmitTrue<M extends {}> = { [K in keyof M as M[K] extends true ? never : K]: Exclude<M[K], true> }
 
 type ReadonlyIon<T> = {
    (selected?: true): T
@@ -92,7 +94,7 @@ type IonizedGetter<T, K extends keyof T> = T extends { '~$methods': AnyObject } 
 
 
 //API
-export function ionize<T extends AnyObject, M extends {[key: string]: true | ((...args: any) => any)}>(target: T, methods?: M): T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M> {
+export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M & { [K in keyof Partial<T> | PropertyKey]: K extends keyof T ? true : (...args: any[]) => any }): T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M> {
    if (isIonizedModel(target) || isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
@@ -101,7 +103,7 @@ export function ionize<T extends AnyObject, M extends {[key: string]: true | ((.
    if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
    const existingIonicModel = ionizedModels.get(target)
    if (existingIonicModel) return existingIonicModel as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
-   return createIonicModel(target, methods) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
+   return createIonizedModel(target, methods) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
 }
 
 // export function ionizeWithMarks<
@@ -121,7 +123,7 @@ export function ionize<T extends AnyObject, M extends {[key: string]: true | ((.
 
 // type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | typeof inert }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends typeof inert ? T[K] & Inert : T[K] } //TODO: Mark public
 
-export function storeSnapshot(metaIonicModel: MetaIonicModel, clone?: AnyObject) {
+export function storeSnapshot(metaIonicModel: MetaIonizedModel, clone?: AnyObject) {
    timeTraveler.takeSnapshot(toRaw(metaIonicModel), useRenderCycle().count, clone)
 }
 
@@ -130,11 +132,11 @@ export function storeSnapshot(metaIonicModel: MetaIonicModel, clone?: AnyObject)
 // }
 
 
-type AsRaw<T> = T extends MetaIonicModel<infer R> ? R : T extends IonizedModel<infer R> ? R : T
+type AsRaw<T> = T extends MetaIonizedModel<infer R> ? R : T extends IonizedModel<infer R> ? R : T
 
 export function toRaw<T>(target: T): AsRaw<T> {
-   if (target instanceof MetaIonicModel) return target.rawTarget;
-   if (isIonizedModel(target)) return asMetaIonicModel(target).rawTarget as AsRaw<T>;
+   if (target instanceof MetaIonizedModel) return target.rawTarget;
+   if (isIonizedModel(target)) return asMetaIonizedModel(target).rawTarget as AsRaw<T>;
    return target as AsRaw<T>; // already raw target
 }
 
@@ -148,19 +150,14 @@ export function toRaw<T>(target: T): AsRaw<T> {
 // }
 
 
-export function createIonicModel(
-   target: object,
-   methods: { 'all methods'?: true } | undefined | 'all methods',
-): object {
-   const _methods = methods === 'all methods' ? undefined : methods;
-   const exposeAllMethods = methods === 'all methods' ? true : methods?.['all methods']
-   return createCustomIonicModel(getStructureConfigs(target), target, _methods, exposeAllMethods || false)
-   // return isTuple(target) ? createIonicTuple(target, methods)
-   //     : target instanceof Array ? createIonicArray(target, methods)
-   //         : target instanceof Set ? createIonicSet(target, methods)
-   //             : target instanceof Map ? createIonicMap(target, methods)
-   //                 : createIonicObject(target, methods)
-}
+// export function createIonicModel( //TODO: combine with createIonizedModel
+//    target: object,
+//    methods: { 'all methods'?: true } | undefined | 'all methods',
+// ): object {
+//    const _methods = methods === 'all methods' ? undefined : methods;
+//    const exposeAllMethods = methods === 'all methods' ? true : methods?.['all methods']
+//    return createIonizedModel(getStructureConfigs(target), target, _methods, exposeAllMethods || false)
+// }
 
 
 
@@ -260,8 +257,8 @@ export function createIonicModel(
 //     // }
 // }
 
-export function asMetaIonicModel<T extends AnyObject>(reactive: Ionized<T>): MetaIonicModel<T> {
-   return reactive[META] as MetaIonicModel<T>;
+export function asMetaIonizedModel<T extends AnyObject>(reactive: Ionized<T>): MetaIonizedModel<T> {
+   return reactive[META] as MetaIonizedModel<T>;
 }
 
 

@@ -1,18 +1,18 @@
 import { AnyObject } from "@rue/types";
-import { asMetaIonicModel, ionize, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
+import { asMetaIonizedModel, ionize, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
 import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { IonizedModel, storeSnapshot } from "./ionize";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import { MetaIonicModel } from "./MetaIonicModel";
+import { MetaIonizedModel } from "./MetaIonizedModel";
 import { noop } from "@rue/utils";
-import { getProtectedModelMeta, isProtectedProxy, isReadonlyProxy, PROTECTED_META } from "./ProtectedIonicModel";
+import { getProtectedModelMeta, isProtectedProxy, isReadonlyProxy, REINED_META } from "./ReinedIonizedModel";
 import { META } from "../ReactiveEntity";
 import { AnyIon, isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PropIon";
 import { rein } from "../rein";
-import { READONLY } from "../ion/ProtectedIon";
+import { READONLY } from "../ion/ReinedIon";
 
 
 
@@ -125,8 +125,8 @@ type CustomIonicModelConfig = {
    // getStructureKeys: (model: AnyObject) => any[]
 }
 
-type BeforeSetCallback = (ionicModel: IonizedModel, meta: MetaIonicModel, key: PropertyKey, oldValue: any) => void
-type AfterSetCallback = (ionicModel: IonizedModel, meta: MetaIonicModel, key: PropertyKey, newValue: any, oldValue: any) => void
+type BeforeSetCallback = (ionicModel: IonizedModel, meta: MetaIonizedModel, key: PropertyKey, oldValue: any) => void
+type AfterSetCallback = (ionicModel: IonizedModel, meta: MetaIonizedModel, key: PropertyKey, newValue: any, oldValue: any) => void
 
 type CreateTrackableOp = (target: AnyObject, ionicModel: IonizedModel<AnyObject>) => (...args: any[]) => any
 
@@ -171,7 +171,7 @@ function isCustomIonicStructure(value: any) {
 //     return config.mutatingOps
 // }
 
-function emitAfterSet(structureConfigs: CustomIonicModelConfig[], ionicModel: IonizedModel, meta: MetaIonicModel, key: PropertyKey, newValue: any, oldValue: any) {
+function emitAfterSet(structureConfigs: CustomIonicModelConfig[], ionicModel: IonizedModel, meta: MetaIonizedModel, key: PropertyKey, newValue: any, oldValue: any) {
    if (structureConfigs[0].structure === Object) return;
    for (const config of structureConfigs) {
       const afterSet = config.afterSet
@@ -195,21 +195,24 @@ export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonicMo
 }
 
 
-export function createCustomIonicModel(
-   structureConfigs: CustomIonicModelConfig[],
-   target: AnyObject,
-   methods: AnyObject | undefined,
-   exposeAllMethods: boolean
+export function createIonizedModel(
+   target: object,
+   _methods: { 'all methods'?: true } & AnyObject | undefined | 'all methods',
 ) {
-   const metaIonicModel = new MetaIonicModel(target, methods, exposeAllMethods || methods || false)
+   const structureConfigs = getStructureConfigs(target);
+   const methods = _methods === 'all methods' ? undefined : _methods;
+   const exposedMethods = _methods === 'all methods' ? target
+      : methods && 'all methods' in methods ? Object.setPrototypeOf(methods, target)
+         : undefined;
+   // const exposeAllMethods = methods === 'all methods' ? true : methods?.['all methods']
+   const metaIonicModel = new MetaIonizedModel(target, methods, exposedMethods)
    const ionicModel = new Proxy(target, {
       get(target, key, receiver) {
          if (__DEV__) emitSignal()
          if (key === META) return metaIonicModel
-         const protectedMeta = getProtectedModelMeta(target, ionicModel, receiver)
-         if (protectedMeta) {
-            const keys = protectedMeta.propertyKeys
-            if (keys && !(key in keys)) {
+         const reinedMeta = getProtectedModelMeta(target, ionicModel, receiver)
+         if (reinedMeta) {
+            if (reinedMeta.isExposedKey(key)) {
                if (__DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}'`)
                return undefined;
             }
@@ -217,7 +220,7 @@ export function createCustomIonicModel(
 
          if (methods && key in methods) {
             const method = methods[key]
-            if (method instanceof Function){
+            if (method instanceof Function) {
                return accessMethod(
                   target,
                   ionicModel,
@@ -230,9 +233,8 @@ export function createCustomIonicModel(
          }
          const _key = typeof key === 'string' && key.startsWith('_') ? key.slice(1) : key;
          if (isNativeMethod(_key, structureConfigs)) {
-            if (protectedMeta) {
-               const keys = protectedMeta.propertyKeys
-               if (keys && _key in keys) {
+            if (reinedMeta) {
+               if (reinedMeta.isExposedKey(_key)) {
                   return getNativeMethod(
                      _key,
                      structureConfigs,
@@ -321,8 +323,8 @@ function maybeIonize(value: any, target: AnyObject, proxy: AnyObject, receiver: 
    if (isReadonlyProxy(target, proxy, receiver)) {
       return rein(ionize(value), READONLY)
    }
-   const protectedMeta = getProtectedModelMeta(target, proxy, receiver)
-   if (protectedMeta) {
+   const reinedMeta = getProtectedModelMeta(target, proxy, receiver)
+   if (reinedMeta) {
       return rein(ionize(value))
    }
    return ionize(value)
@@ -386,7 +388,7 @@ function getNativeMethod(
    structureConfigs: CustomIonicModelConfig[],
    target: AnyObject,
    ionicModel: IonizedModel,
-   meta: MetaIonicModel,
+   meta: MetaIonizedModel,
    boundMethodMap: Map<PropertyKey, Function>,
 ) {
    const _key = typeof key === 'string' ? '_' + key : key
@@ -420,7 +422,7 @@ function getNativeMethod(
 export function reactiveSetter(
    structureConfigs: CustomIonicModelConfig[], // and Tuple
    ionicModel: IonizedModel,
-   metaIonicModel: MetaIonicModel,
+   metaIonicModel: MetaIonizedModel,
    target: AnyObject,
    key: string | symbol,
    newValue: any,
@@ -479,7 +481,7 @@ export function setAbsorbedIon(ion: AnyIon, value: any, ionicModel: IonizedModel
          trigger(prop, value, oldValue)
       }
 
-      emitAfterSet(structureConfigs, ionicModel, asMetaIonicModel(ionicModel), key, value, oldValue)
+      emitAfterSet(structureConfigs, ionicModel, asMetaIonizedModel(ionicModel), key, value, oldValue)
 
       triggerIonicModel(
          ionicModel,

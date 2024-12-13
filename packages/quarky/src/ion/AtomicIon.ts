@@ -5,7 +5,7 @@ import { trigger } from "../trigger";
 import { META, ReactiveEntity } from "../ReactiveEntity";
 import { AnyObject } from "@rue/types";
 import { AnyIon, isIon } from "./Ion";
-import { IS_PUBLIC, ProtectedIon } from "./ProtectedIon";
+import { ProtectedIon } from "./ReinedIon";
 
 export type AtomicIon<T = any, M extends AnyObject = {}> = ((selected?: true) => T)
    & {
@@ -19,7 +19,7 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
 
    type = ION
 
-   asProtected?: ProtectedIon
+   asDefaultReined?: ProtectedIon
    asReadonly?: ProtectedIon
 
    constructor(
@@ -34,7 +34,7 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
 
 export function createAtomicIon<
    T,
-   M extends { [key: string]: (...args: any[]) => any }
+   M extends { [key: string]: (...args: any[]) => any } & { as?: true }
 >(
    value: T,
    methods?: M,
@@ -46,13 +46,18 @@ export function createAtomicIon<
 
    const proto = {
       [META]: metaIon,
-      [setterKey](newValue: any) {
-         return setValue(metaIon, newValue, metaIon.value);
-      }
+      [setterKey]: setIonValue
    } as AnyObject
 
    if (methods) {
       attachIonMethods(proto, methods)
+      if ('as' in methods && methods.as === true) {
+         proto.as = setIonValue
+      }
+   }
+
+   function setIonValue(newValue: any) {
+      return setValue(metaIon, newValue, metaIon.value);
    }
 
    function $ion(selected?: boolean) {

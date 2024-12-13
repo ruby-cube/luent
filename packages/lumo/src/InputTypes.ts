@@ -4,7 +4,7 @@
 
 import { AtomicIon, DerivedIon, WritableDerivedIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
-import { MetaIonicModel } from "../../quarky/src/ionize/MetaIonicModel";
+import { MetaIonizedModel } from "../../quarky/src/ionize/MetaIonizedModel";
 import { META } from "../../quarky/src/ReactiveEntity";
 
 export const v = ((optional: '?') => {
@@ -163,7 +163,7 @@ export const $IonOrIon = ((optional: '?') => {
 
 export type Ionized<T extends AnyObject, M = {}> = {
     [K in keyof T]: T[K] extends AtomicIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
-} & M & { [META]: MetaIonicModel }
+} & M & { [META]: MetaIonizedModel }
 
 const _Ionized = ((optional: '?') => {
     return {

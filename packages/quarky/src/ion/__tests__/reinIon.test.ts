@@ -1,13 +1,13 @@
 import { describe, it, expect, vi } from 'vitest';
 import { META } from '../../ReactiveEntity';
-import { IS_PUBLIC, protectIon, Public } from '../ProtectedIon';
+import { IS_PUBLIC, reinIon, Public } from '../ReinedIon';
 import { ion } from '../Ion';
 import { AnyObject } from '@rue/types';
 
-describe('protectIon function', () => {
+describe('reinIon function', () => {
     //   it('should return a readonly ion when READONLY is passed', () => {
     //     const writableIon = { [META]: { inert: false, o: vi.fn(), hasMethods: true } };
-    //     const readonlyIon = protectIon(writableIon, READONLY);
+    //     const readonlyIon = reinIon(writableIon, READONLY);
 
     //     expect(readonlyIon[META]).toHaveProperty('inert', false);
     //     expect(readonlyIon[META].asReadonly).toBe(readonlyIon);
@@ -16,7 +16,7 @@ describe('protectIon function', () => {
 
     it('should return a protected ion with methods protected when no methodKeys are provided', () => {
         const atomicIon = ion(0)
-        const $protected = protectIon(atomicIon);
+        const $protected = reinIon(atomicIon);
 
         expect(() => $protected.as(10)).toThrowError()
         expect($protected[META].o).toBe(atomicIon[META].o);
@@ -28,7 +28,7 @@ describe('protectIon function', () => {
 
             }
         })
-        const $protected = protectIon(atomicIon);
+        const $protected = reinIon(atomicIon);
 
         expect(() => $protected.as(10)).toThrowError()
         expect(() => $protected._as(10)).toThrowError()
@@ -39,7 +39,7 @@ describe('protectIon function', () => {
     //   it('should create a custom protected ion with only specified methods accessible', () => {
     //     const writableIon = { [META]: { inert: false, o: vi.fn(), hasMethods: true } };
     //     const methodKeys = { allowedMethod: true };
-    //     const customProtectedIon = protectIon(writableIon, methodKeys);
+    //     const customProtectedIon = reinIon(writableIon, methodKeys);
 
     //     expect(typeof customProtectedIon.allowedMethod).toBe('function');
     //     expect(customProtectedIon[META]).toBe(writableIon[META]);
@@ -52,15 +52,15 @@ describe('protectIon function', () => {
         const atomicIon = ion(0, {
             increment() { }
         })
-        const protectedIon = protectIon(atomicIon);
+        const protectedIon = reinIon(atomicIon);
 
         expect(() => protectedIon.increment()).toThrowError(/failed/)
     });
 
     it('should reuse the existing protected ion if already created', () => {
         const atomicIon = ion(0)
-        const protectedIon1 = protectIon(atomicIon);
-        const protectedIon2 = protectIon(atomicIon);
+        const protectedIon1 = reinIon(atomicIon);
+        const protectedIon2 = reinIon(atomicIon);
 
         expect(protectedIon1).toBe(protectedIon2);
     });

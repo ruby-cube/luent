@@ -4,8 +4,8 @@
 
 import { AnyObject } from "@rue/types";
 import { asIonicAtom } from "../derivations/IonicAtom";
-import { MetaIonicModel } from "./MetaIonicModel";
-import { asMetaIonicModel, Ionized, IonizedModel } from "./ionize";
+import { MetaIonizedModel } from "./MetaIonizedModel";
+import { asMetaIonizedModel, Ionized, IonizedModel } from "./ionize";
 
 
 
@@ -13,7 +13,7 @@ import { asMetaIonicModel, Ionized, IonizedModel } from "./ionize";
 export class TrackedOp {
 
     constructor(
-        public metaIonicModel: MetaIonicModel,
+        public metaIonicModel: MetaIonizedModel,
         public op: string,
         public entryKey: any,
     ) {
@@ -50,7 +50,7 @@ export function getTrackedOp(
     op: string,
     key: any
 ){
-    return asMetaIonicModel(model).getTrackedOp(op, key)
+    return asMetaIonizedModel(model).getTrackedOp(op, key)
 }
 
 function createTrackedOp(
@@ -58,7 +58,7 @@ function createTrackedOp(
     op: string,
     key: any
 ){
-    const metaIonicModel = asMetaIonicModel(model);
+    const metaIonicModel = asMetaIonizedModel(model);
     const trackedOp = new TrackedOp(metaIonicModel, op, key)
     metaIonicModel.addObservedEntryKey(key)
     const atom = asIonicAtom(trackedOp);

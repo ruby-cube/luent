@@ -3,7 +3,7 @@ import { IonicDerivation } from "./IonicDerivation";
 import { META } from "../ReactiveEntity";
 import { __devCheckIfTracked, getActiveTracker } from "./DependencyTracker";
 import { AnyObject } from "@rue/types";
-import { ProtectedIon } from "../ion/ProtectedIon";
+import { ProtectedIon } from "../ion/ReinedIon";
 import { AnyIon, isIon } from "../ion/Ion";
 import { DerivedRef } from "../ion/Ref";
 import { getDynamicNode } from "../../../lumo/src/dynamic/nodestack";
@@ -38,7 +38,7 @@ export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIo
 export class MetaDerivedIon extends IonicDerivation {
 
    override type = DERIVED_ION
-   asProtected?: ProtectedIon
+   asDefaultReined?: ProtectedIon
    asReadonly?: ProtectedIon
 
    constructor(

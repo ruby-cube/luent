@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { createDerivedIon, createWritableDerivedIon, DerivedIon, isDerivedIon, ReactiveDerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
 import { asPropIon, isPropIon, PropIon } from "../ionize/PropIon";
 import { AtomicIon, createAtomicIon, isAtomicIon } from "./AtomicIon";
-import { ProtectedIon } from "./ProtectedIon";
+import { ProtectedIon } from "./ReinedIon";
 
 export type AnyIon<T = any> = DerivedIon<T> | AtomicIon<T> | ProtectedIon<T> | WritableDerivedIon<T> | PropIon<T>
 

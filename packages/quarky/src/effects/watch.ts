@@ -5,7 +5,7 @@ import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
 import { ReactiveGet, DerivedIon, isDerivedIon, createDerivedIon } from "../derivations/DerivedIon";
-import { asMetaIonicModel, Ionized, isIonizedModel, toRaw, } from "../ionize/ionize";
+import { asMetaIonizedModel, Ionized, isIonizedModel, toRaw, } from "../ionize/ionize";
 import { areEqual } from "./areEqual";
 import { createIonicEffect, IonicEffect } from "../derivations/IonicEffect";
 import { isReactive, META } from "../ReactiveEntity";
@@ -116,7 +116,7 @@ function normalizeWatchSubject(subject: AnyIon | ReactiveGet | Ionized<AnyObject
         return subject;
     }
     if (isIonizedModel(subject)) {
-        asMetaIonicModel(subject).trackAbsorbedIons()
+        asMetaIonizedModel(subject).trackAbsorbedIons()
         return subject;
     }
     return subject;
@@ -288,7 +288,7 @@ function getMutations(subjects: (AnyIon | Ionized<AnyObject>)[]) {
 
 //     const watchSubject = asWatchSubject(subject);
 
-//     asMetaIonicModel(subject).trackAbsorbedIons()
+//     asMetaIonizedModel(subject).trackAbsorbedIons()
 
 //     const $activeEffect = ref(undefined) as AtomicIon<ThisEffect | undefined>
 

@@ -14,12 +14,12 @@ type EntryKey = any
 
 export const IONIZED_MODEL = Symbol('ionicModel')
 
-export class MetaIonicModel<T extends AnyObject = AnyObject> implements ReactiveEntity {
+export class MetaIonizedModel<T extends AnyObject = AnyObject> implements ReactiveEntity {
     ionicModel?: Ionized<T>
     // shallowReactive?: IonizedModel<T>
     readonly type = IONIZED_MODEL
 
-    asProtected?: Ionized<T>
+    asDefaultReined?: Ionized<T>
     asReadonly?: Ionized<T>
 
     initIonicModel(ionicModel: Ionized<T>) {
@@ -35,7 +35,7 @@ export class MetaIonicModel<T extends AnyObject = AnyObject> implements Reactive
     constructor(
         public rawTarget: T,
         public methods: AnyObject = {},
-        public exposedMethods: AnyObject | boolean
+        public exposedMethods: AnyObject | undefined
         // public reactive: T
         // public traps?: ReactiveTraps<T>
     ) {
@@ -169,7 +169,7 @@ export class MetaIonicModel<T extends AnyObject = AnyObject> implements Reactive
 
 // export type Collection<K = any, V = any> = Set<K> | Array<K> | Map<K, V>
 
-// export class MetaIonicCollection<T extends Collection = Collection> extends MetaIonicModel<T> {
+// export class MetaIonicCollection<T extends Collection = Collection> extends MetaIonizedModel<T> {
 //     constructor(rawTarget: T, methods: AnyObject = {}) {
 //         super(rawTarget, methods)
 //     }

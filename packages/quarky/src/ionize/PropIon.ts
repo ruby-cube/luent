@@ -1,9 +1,9 @@
 import { AnyObject, ReadonlyKeys } from "@rue/types";
-import { asMetaIonicModel, isIonizedModel, ionize, IonizedModel, toRaw } from "./ionize";
+import { asMetaIonizedModel, isIonizedModel, ionize, IonizedModel, toRaw } from "./ionize";
 import { META } from "../ReactiveEntity";
 import { isIon } from "../ion/Ion";
-import { protectedMethod, protectIon, READONLY } from "../ion/ProtectedIon";
-import { isProtectedIonicModel, isProtectedProxy } from "./ProtectedIonicModel";
+import { protectedMethod, reinIon, READONLY } from "../ion/ReinedIon";
+import { isReinedIonizedModel, isProtectedProxy } from "./ReinedIonizedModel";
 import { rein } from "../rein";
 import { __devCheckIfTracked, getActiveTracker } from "../derivations/DependencyTracker";
 import { asWatchSubject, WatchSubject } from "../effects/WatchSubject";
@@ -67,7 +67,7 @@ class MetaPropIon {
     // asObservedProp!: ObservedProp
 
     //to fulfill MetaWritableIon interface
-    asProtected = undefined
+    asDefaultReined = undefined
     hasMethods = false;
     isEntryKey = false;
 
@@ -77,7 +77,7 @@ class MetaPropIon {
         public key: PropertyKey,
         public inert: boolean = false
     ) {
-        asMetaIonicModel(model).registerPropIon(key, o)
+        asMetaIonizedModel(model).registerPropIon(key, o)
         this.isEntryKey = isEntryKey(toRaw(model), key)
     }
 
@@ -87,7 +87,7 @@ class MetaPropIon {
 
     watch() {
         if (this.asWatchSubject) return;
-        const metaModel = asMetaIonicModel(this.model)
+        const metaModel = asMetaIonizedModel(this.model)
         if (this.isEntryKey)
             metaModel.addObservedEntryKey(this.key);
 
@@ -106,7 +106,7 @@ class MetaPropIon {
         const atom = this.asAtom = asIonicAtom(this.o)
 
         if (this.isEntryKey)
-            asMetaIonicModel(this.model).addObservedEntryKey(this.key)
+            asMetaIonizedModel(this.model).addObservedEntryKey(this.key)
 
         atom.onUntracked(() => {
             if (this.asWatchSubject?.watchCount === 0 && atom.derivations.size === 0) {
@@ -116,7 +116,7 @@ class MetaPropIon {
     }
 
     destroy() {
-        const metaModel = asMetaIonicModel(this.model)
+        const metaModel = asMetaIonizedModel(this.model)
         const key = this.key
         if (this.isEntryKey) metaModel.deleteObservedEntryKey(key)
         metaModel.unregisterPropIon(key)
@@ -133,15 +133,15 @@ export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, k
     // return absorbed ion
     if (isIon(value)) {
         if (methods && __DEV__) console.warn(`absorbed ions cannot have additional methods assigned to them`)
-        if (isProtectedIonicModel(ionicModel))
-            return protectIon(value);
+        if (isReinedIonizedModel(ionicModel))
+            return reinIon(value);
         return value;
     }
 
     // return existing propIon
     const propIon = getPropIon(ionicModel, key) //TODO: need a map for readonly prop ions too...
     if (propIon && !methods) {
-        if (isProtectedIonicModel(ionicModel)) {
+        if (isReinedIonizedModel(ionicModel)) {
             rein(propIon, READONLY)
         }
         return propIon as AsPropIon<T, K, M>
@@ -153,7 +153,7 @@ export function getPropIon(
     ionicModel: IonizedModel,
     key: PropertyKey
 ) {
-    return asMetaIonicModel(ionicModel).getPropIon(key)
+    return asMetaIonizedModel(ionicModel).getPropIon(key)
 }
 
 function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel: T, key: K, methods?: M & { [key: string]: PropertyKey | true }): PropIon<T[K], M> {
@@ -197,7 +197,7 @@ function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel:
     // __$propIon.set = 
 
     function reregisterIfNeeded() {
-        const metaIonicModel = asMetaIonicModel(ionicModel);
+        const metaIonicModel = asMetaIonizedModel(ionicModel);
         if (!metaIonicModel.getPropIon(key)) {
             if (__DEV__) console.warn(`[CASE RESEARCH] I'm curious how often and in what cases this happens: $propIon for ${key.toString()} in${JSON.stringify(rawTarget)} is no longer observed, but there's still an active reference to it`)
             metaIonicModel.registerPropIon(key, __$propIon as PropIon) // This means $propIon is not being watched and is not an atom anywhere, but it's still being used
@@ -205,7 +205,7 @@ function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel:
     }
 
     return __$propIon as PropIon<T[K], M>
-    // return isProtectedIonicModel(ionicModel) ? protectIon(__$propIon as PropIon, READONLY) : __$propIon //FIX: isn't it already protected?
+    // return isReinedIonizedModel(ionicModel) ? reinIon(__$propIon as PropIon, READONLY) : __$propIon //FIX: isn't it already protected?
 }
 
 export function asTrackedProp(
@@ -244,7 +244,7 @@ export function getObservedProp( // observed means watched and/or tracked
 //     reactive: IonizedModel,
 //     key: PropertyKey
 // ) {
-//     const metaIonicModel = asMetaIonicModel(reactive);
+//     const metaIonicModel = asMetaIonizedModel(reactive);
 //     const prop = new ObservedProp(metaIonicModel, key);
 
 

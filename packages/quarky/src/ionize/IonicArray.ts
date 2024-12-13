@@ -5,7 +5,7 @@ import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, Ionized, } from "./
 import { getTrackedOp } from "./TrackedOp";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getObservedProp } from "./PropIon";
-import { MetaIonicModel } from "./MetaIonicModel";
+import { MetaIonizedModel } from "./MetaIonizedModel";
 import { nontrackableIterableKeys } from "./IonicSet";
 
 const dogs = [0]
@@ -258,7 +258,7 @@ export function installIonicArray() {
       opName: string,
       deionizeArgs?: (args: any[]) => any[]
    ) {
-      return function createOp(target: AnyObject, ionicModel: IonizedModel<AnyObject>, meta: MetaIonicModel<any[]>, getPreopData: GetPreopData | undefined) {
+      return function createOp(target: AnyObject, ionicModel: IonizedModel<AnyObject>, meta: MetaIonizedModel<any[]>, getPreopData: GetPreopData | undefined) {
          const fn = target[opName]
          return useMutatingArrayOp(
             <IonizedModel<any[]>>ionicModel,
@@ -281,7 +281,7 @@ export function installIonicArray() {
 
    function useMutatingArrayOp(
       ionicModel: IonizedModel<any[]>,
-      metaIonicModel: MetaIonicModel<any[]>,
+      metaIonicModel: MetaIonizedModel<any[]>,
       target: any[],
       key: string,
       fn: Function,
@@ -482,9 +482,9 @@ export function installIonicArray() {
 // ) {
 //     if (__DEV__) emitSignal();
 //     if (key === META) return metaIonicModel;
-//     const protectedMeta = getProtectedModelMeta(target, ionicModel, receiver)
-//     if (protectedMeta) {
-//         const keys = protectedMeta.propertyKeys
+//     const reinedMeta = getProtectedModelMeta(target, ionicModel, receiver)
+//     if (reinedMeta) {
+//         const keys = reinedMeta.propertyKeys
 //         if (keys && !(key in keys)) {
 //             if (__DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}'`)
 //             return undefined;
@@ -512,8 +512,8 @@ export function installIonicArray() {
 //             if (__DEV__) console.warn('Object is readonly. Cannot access methods')
 //             return undefined;
 //         }
-//         if (protectedMeta) {
-//             const keys = protectedMeta.propertyKeys
+//         if (reinedMeta) {
+//             const keys = reinedMeta.propertyKeys
 //             if (keys && key in keys) {
 //                 return handleMutatingMethod(<string>key, value);
 //             }
@@ -578,7 +578,7 @@ export function installIonicArray() {
 
 // function reactiveArraySetter(
 //     ionicModel: IonizedModel,
-//     metaIonicModel: MetaIonicModel,
+//     metaIonicModel: MetaIonizedModel,
 //     target: AnyObject,
 //     key: string | symbol,
 //     newValue: any,

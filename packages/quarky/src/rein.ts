@@ -1,8 +1,9 @@
-import { isWritableIon, ProtectedIon, protectIon, READONLY } from "./ion/ProtectedIon";
+import { isWritableIon, ProtectedIon, reinIon, READONLY } from "./ion/ReinedIon";
 import { Ionized, isIonizedModel } from "./ionize/ionize";
 import { AnyObject } from "@rue/types";
-import { isProtectedIonicModel, isReadonlyIonicModel, protectIonicModel } from "./ionize/ProtectedIonicModel";
+import { isReinedIonizedModel, isReadonlyIonizedModel, reinIonizedModel } from "./ionize/ReinedIonizedModel";
 import { Ion } from "./ion/Ion";
+import { createReadonlyObject } from "./readonly";
 
 
 // export type ReadonlyIon<T = any> = {
@@ -20,9 +21,9 @@ type RemoveArrayRepeats<T extends readonly any[]> = {
    )
 }
 
-type Reined<T, X extends any[]> = T extends Ionized<infer O, infer M> ? IsReadonly<X> extends true ? ReadonlyIonized<O> : ReinedIonized<O, M, TupleToUnion<X>>
-   : T extends Ion<infer S, infer M> ? IsReadonly<X> extends true ? Ion<S> : ReinedIon<S, M, TupleToUnion<X>>
-   : T extends AnyObject ? IsReadonly<X> extends true ? Readonly<T> : ReinedObject<T, TupleToUnion<X>>
+type Reined<T, X extends any[]> = T extends Ionized<infer O, infer M> ? ReinedIonized<O, M, TupleToUnion<X>>
+   : T extends Ion<infer S, infer M> ?  ReinedIon<S, M, TupleToUnion<X>>
+   : T extends AnyObject ? ReinedObject<T, TupleToUnion<X>>
    : T
 
 
@@ -34,7 +35,7 @@ type ReinedIonized<O extends AnyObject, M, X extends keyof Partial<O & M>> =
       [K in X as K extends keyof M ? K : never]: K extends keyof M ? M[K] : never
    }>
 
-type ReadonlyIonized<T extends AnyObject> = Ionized<Readonly<T>>
+// type ReadonlyIonized<T extends AnyObject> = Ionized<Readonly<T>>
 
 
 type Readonly<O extends AnyObject> = {
@@ -46,46 +47,29 @@ type IncludesProps<O, X extends keyof O | PropertyKey> = {
 } extends { [key: string]: never } ? false : true;
 
 
-type IsReadonly<M> = M extends (typeof READONLY)[] ? true : false;
+// type IsReadonly<M> = M extends (typeof READONLY)[] ? true : false;
 
 
-export function rein<T, M extends ((keyof T) | typeof READONLY)[]>(entity: T, ...methodKeys: M & RemoveArrayRepeats<M>): Reined<T, M> {
-   if (entity instanceof Function || methodKeys.length === 0 && isProtectedIonicModel(entity) || isReadonlyIonicModel(entity))
+export function rein<T, M extends (keyof T)[]>(entity: T, ...methodKeys: M & RemoveArrayRepeats<M>): Reined<T, M> {
+   //TODO: how to handle reined and readonly entities passed into rein
+   if (entity instanceof Function || methodKeys.length === 0 && isReinedIonizedModel(entity) || isReadonlyIonizedModel(entity))
       return entity as Reined<T, M>;
    if (isWritableIon(entity)) {
-      return protectIon(entity, methodKeys) as Reined<T, M>
+      return reinIon(entity, methodKeys) as Reined<T, M>
    }
-   const _entity = toUnprotected(entity);
-   if (isIonizedModel(_entity)) {
-      return protectIonicModel(_entity, methodKeys) as Reined<T, M>
+   if (isIonizedModel(entity)) {
+      return reinIonizedModel(entity, methodKeys) as Reined<T, M>
    }
-   if (_entity instanceof Object) //TODO: 
-      return (__DEV__ ? createReadonlyObject(_entity) : entity) as Reined<T, M>
+   if (entity instanceof Object) //TODO: 
+      return (__DEV__ ? createReadonlyObject(entity) : entity) as Reined<T, M>
    return entity as Reined<T, M>
 }
 
-function toUnprotected(entity: any) {
-   if (isProtectedIonicModel(entity)) {
+function toUnreined(entity: any) {
+   if (isReinedIonizedModel(entity)) {
       return Object.getPrototypeOf(entity)
    }
    return entity;
 }
 
-export function readonly<T>(entity: T) {
-   return rein(entity, READONLY)
-}
-
-
-
-function createReadonlyObject(obj: AnyObject) { //TODO: what about Arrays, Maps, and Sets?
-   return new Proxy(obj, {
-      get(target, key, receiver) {
-         return Reflect.get(target, key, receiver);
-      },
-      set() {
-         console.warn('Set operation failed. Object is readonly.')
-         return false;
-      }
-   })
-}
 

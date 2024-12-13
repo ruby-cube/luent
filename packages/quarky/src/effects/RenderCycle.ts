@@ -1,8 +1,8 @@
 import { setImmediate, clearImmediate } from "@rue/thread";
 import { $schedule, LIFETIME, NEVER, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
 import { SetMap } from "@rue/utils";
-import { asMetaIonicModel, Ionized, IonizedModel } from "../ionize/ionize";
-import { MetaIonicModel } from "../ionize/MetaIonicModel";
+import { asMetaIonizedModel, Ionized, IonizedModel } from "../ionize/ionize";
+import { MetaIonizedModel } from "../ionize/MetaIonizedModel";
 import { MutationRecord } from "./watch";
 import { AnyObject } from "@rue/types";
 
@@ -110,10 +110,10 @@ export class RenderCycle {
         return renderCycleCount;
     }
 
-    opsMap: WeakMap<MetaIonicModel, MutationRecord[]> = new WeakMap();
+    opsMap: WeakMap<MetaIonizedModel, MutationRecord[]> = new WeakMap();
 
     recordOp(target: Ionized<AnyObject>, op: MutationRecord) {
-        const meta = asMetaIonicModel(target)
+        const meta = asMetaIonizedModel(target)
         let existingOps = this.opsMap.get(meta);
         if (existingOps) {
             existingOps.push(op)
@@ -124,7 +124,7 @@ export class RenderCycle {
     }
 
     getOps(target: Ionized<AnyObject>) {
-        const meta = asMetaIonicModel(target)
+        const meta = asMetaIonizedModel(target)
         return this.opsMap.get(meta)
     }
 

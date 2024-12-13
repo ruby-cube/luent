@@ -3,7 +3,7 @@ import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
 import { Ionized, IonizedModel, storeSnapshot, toRaw } from "./ionize";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getTrackedOp } from "./TrackedOp";
-import { MetaIonicModel } from "./MetaIonicModel";
+import { MetaIonizedModel } from "./MetaIonizedModel";
 import { getObservedProp } from "./PropIon";
 
 type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
@@ -173,9 +173,9 @@ export function installIonicSet() {
 //         get(target, key, receiver) {
 //             if (__DEV__) emitSignal()
 //             if (key === META) return metaIonicModel
-//             const protectedMeta = getProtectedModelMeta(target, ionicModel, receiver)
-//             if (protectedMeta) {
-//                 const keys = protectedMeta.propertyKeys
+//             const reinedMeta = getProtectedModelMeta(target, ionicModel, receiver)
+//             if (reinedMeta) {
+//                 const keys = reinedMeta.propertyKeys
 //                 if (keys && !(key in keys)) {
 //                     if (__DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}'`)
 //                     return undefined;
@@ -193,8 +193,8 @@ export function installIonicSet() {
 //             }
 
 //             if (key in mutatingSetOps) {
-//                 if (protectedMeta) {
-//                     const keys = protectedMeta.propertyKeys
+//                 if (reinedMeta) {
+//                     const keys = reinedMeta.propertyKeys
 //                     if (keys && key in keys) {
 //                         return accessMethod(
 //                             target,
@@ -309,7 +309,7 @@ export function installIonicSet() {
 
 export function useDeleteOp(
    ionicModel: IonizedModel,
-   metaIonicModel: MetaIonicModel,
+   metaIonicModel: MetaIonizedModel,
    target: AnyObject,
    getPreopData: GetPreopData
 ) {
@@ -351,7 +351,7 @@ export function useDeleteOp(
 
 export function useClearOp(
    ionicModel: IonizedModel,
-   metaIonicModel: MetaIonicModel,
+   metaIonicModel: MetaIonizedModel,
    target: AnyObject,
    getPreopData: (model: IonizedModel) => any
 ) {
