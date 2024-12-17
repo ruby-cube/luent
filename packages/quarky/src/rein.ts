@@ -1,9 +1,9 @@
 import { isWritableIon, ProtectedIon, reinIon, READONLY } from "./ion/ReinedIon";
 import { Ionized, isIonizedModel } from "./ionize/ionize";
 import { AnyObject } from "@rue/types";
-import { isReinedIonizedModel, reinIonizedModel } from "./ionize/ReinedIonizedModel";
+import { reinIonizedModel } from "./ionize/ReinedIonizedModel";
 import { Ion } from "./ion/Ion";
-import { createReadonlyObject } from "./readonly";
+import { createReadonlyObject, isReadonlyObject, READONLY_TARGET } from "./readonly";
 
 
 // export type ReadonlyIon<T = any> = {
@@ -55,15 +55,7 @@ type IncludesProps<O, X extends keyof O | PropertyKey> = {
    [K in X]: K extends keyof O ? O[K] extends (...args: any[]) => any ? never : true : never
 } extends { [key: string]: never } ? false : true;
 
-
-// type IsReadonly<M> = M extends (typeof READONLY)[] ? true : false;
-
-
 export function rein<T, M extends (keyof T)[] | []>(entity: T, ...exposedKeys: M & RemoveArrayRepeats<M>): Reined<T, M> {
-   // //TODO: how to handle reined and readonly entities passed into rein
-   // if (entity instanceof Function || exposedKeys.length === 0 && isReinedIonizedModel(entity) || isReadonlyIonizedModel(entity))
-   //    return entity as Reined<T, M>;
-
    if (isWritableIon(entity)) {
       return reinIon(entity, exposedKeys) as Reined<T, M>
    }
@@ -72,16 +64,9 @@ export function rein<T, M extends (keyof T)[] | []>(entity: T, ...exposedKeys: M
    }
    if (entity instanceof Function)
       return entity as Reined<T, M>
-   if (entity instanceof Object) //TODO: 
+   if (entity instanceof Object)
       return reinObject(entity, exposedKeys) as Reined<T, M>
    return entity as Reined<T, M>
-}
-
-function toUnreined(entity: any) {
-   if (isReinedIonizedModel(entity)) {
-      return Object.getPrototypeOf(entity)
-   }
-   return entity;
 }
 
 function reinObject(entity: AnyObject, exposedKeys: PropertyKey[]) {
@@ -91,12 +76,13 @@ function reinObject(entity: AnyObject, exposedKeys: PropertyKey[]) {
 }
 
 function createReinedObject(obj: AnyObject, exposedKeys: PropertyKey[]) {
+   const target = isReinedObject(obj) ? obj[REINED_TARGET] : isReadonlyObject(obj) ? obj[READONLY_TARGET] : obj
+   const _exposedKeys = new Set(exposedKeys)
 
-   const publicProperties = new Set(exposedKeys)
-
-   return new Proxy(obj, {
+   return new Proxy(target, {
       get(target, key, receiver) {
-         if (publicProperties.has(key))
+         if (key === REINED_TARGET) return target;
+         if (_exposedKeys.has(key))
             return Reflect.get(target, key, receiver);
          return undefined;
       },
@@ -107,3 +93,8 @@ function createReinedObject(obj: AnyObject, exposedKeys: PropertyKey[]) {
    })
 }
 
+export const REINED_TARGET = Symbol('reined target')
+
+export function isReinedObject(value: any) {
+   return value instanceof Object && REINED_TARGET in value;
+}

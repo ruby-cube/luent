@@ -257,10 +257,8 @@ export function createIonizedModel(
                )
             }
          }
-         const value = Reflect.get(target, key, receiver)
-         // if (typeof key === 'symbol' && key.description === 'Symbol.iterator') { //TODO: make this part of isNonTrackable?
-         //     return value;
-         // }
+         const value = Reflect.get(target, key, receiver) // TODO: deep readonly and reined
+
          if (isNonTrackable(key, structureConfigs))
             return value;
 

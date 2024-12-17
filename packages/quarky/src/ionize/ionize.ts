@@ -25,8 +25,6 @@ export type Readonly<T extends AnyObject = AnyObject> = {
    readonly [K in keyof T]: T[K]
 }
 
-type Ionizable = object | any[] | Set<unknown> | Map<any, any>
-
 
 const ionizedModels: WeakMap<AnyObject, IonizedModel> = new WeakMap()
 
@@ -77,7 +75,7 @@ type InvertIons<T extends AnyObject, M = {}> = {
    >
 }
 
-type IonizedGetter<T, K extends keyof T> = T extends { '~$methods': AnyObject } ? K extends keyof T['~$methods'] ? T['~$methods'][K] : T[K] : T[K]
+type IonizedGetter<T, K extends keyof T> = T extends { '~$methods'?: AnyObject } ? K extends keyof Exclude<T['~$methods'], undefined> ? Exclude<T['~$methods'], undefined>[K] : T[K] : T[K]
 
 // const $count = ion(0, { doSomething() { } })
 

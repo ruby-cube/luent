@@ -123,7 +123,7 @@ function createReadonlyIon(meta: MetaWritableIon) {
 
 
 function asReinedIon($ion: WritableIon) {
-   if (isProtectedIon($ion) || isReadonlyIon($ion)) {
+   if (isReinedIon($ion) || isReadonlyIon($ion)) {
       return $ion
    }
    const meta = asMetaIon($ion)
@@ -162,7 +162,7 @@ function createReinedIon(meta: MetaWritableIon) {
 
 
 
-function isProtectedIon($ion: WritableIon) {
+function isReinedIon($ion: WritableIon) {
    const meta = asMetaIon($ion)
    return meta.asDefaultReined === $ion
 }

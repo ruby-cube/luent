@@ -1,7 +1,6 @@
 import { AnyObject } from "@rue/types";
-import { READONLY } from "../ion/ReinedIon";
 import { asMetaIonizedModel, IonizedModel, toRaw } from "./ionize";
-import { READONLY_IONIC_MODEL } from "./ReadonlyIonizedModel";
+import { isReadonlyIonizedModel, READONLY_IONIC_MODEL } from "./ReadonlyIonizedModel";
 
 
 export const REINED_META = Symbol('reinedMeta')
@@ -14,6 +13,8 @@ export function isReinedIonizedModel(value: any) {
 export function reinIonizedModel<T extends IonizedModel>(model: T, exposedKeys: PropertyKey[]) {
    if (exposedKeys.length)
       return createCustomReinedIonizedModel(model, exposedKeys)
+   if (isReadonlyIonizedModel(model))
+      return model;
    return asReinedIonizedModel(model)
 }
 
@@ -25,7 +26,7 @@ export function asReinedIonizedModel(model: IonizedModel) {
 
 
 function createCustomReinedIonizedModel(model: IonizedModel, exposedKeys: PropertyKey[]) {
-   const proto = isReinedIonizedModel(model) ? asMetaIonizedModel(model).ionicModel! : model;
+   const proto = isReinedIonizedModel(model) || isReadonlyIonizedModel(model) ? asMetaIonizedModel(model).ionicModel! : model;
    const reinedModel = Object.create(proto);
    const _exposedKeys = composeExposedKeys(exposedKeys, model)
 
