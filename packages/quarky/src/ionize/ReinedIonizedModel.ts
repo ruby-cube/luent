@@ -28,6 +28,7 @@ export function asReinedIonizedModel(model: IonizedModel) {
 export const REINED_META = Symbol('reinedMeta')
 
 function createCustomReinedIonizedModel(model: IonizedModel, exposedKeys: PropertyKey[]) {
+   //TODO: allow all props if no props included in exposed keys
    const reinedModel = Object.create(model);
    const _exposedKeys = new Set(exposedKeys);
    Object.defineProperty(reinedModel, REINED_META, {
@@ -47,6 +48,7 @@ function createReinedIonizedModel(model: IonizedModel) {
    Object.defineProperty(reinedModel, REINED_META, {
       value: {
          isExposedKey(key: PropertyKey) {
+
             const exposedMethods = meta.exposedMethods;
             return Boolean(exposedMethods && key in exposedMethods)
          }
