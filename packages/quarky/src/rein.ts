@@ -59,7 +59,7 @@ type IncludesProps<O, X extends keyof O | PropertyKey> = {
 // type IsReadonly<M> = M extends (typeof READONLY)[] ? true : false;
 
 
-export function rein<T, M extends (keyof T)[]| []>(entity: T, ...exposedKeys: M & RemoveArrayRepeats<M>): Reined<T, M> {
+export function rein<T, M extends (keyof T)[] | []>(entity: T, ...exposedKeys: M & RemoveArrayRepeats<M>): Reined<T, M> {
    // //TODO: how to handle reined and readonly entities passed into rein
    // if (entity instanceof Function || exposedKeys.length === 0 && isReinedIonizedModel(entity) || isReadonlyIonizedModel(entity))
    //    return entity as Reined<T, M>;
@@ -70,6 +70,8 @@ export function rein<T, M extends (keyof T)[]| []>(entity: T, ...exposedKeys: M 
    if (isIonizedModel(entity)) {
       return reinIonizedModel(entity, exposedKeys) as Reined<T, M>
    }
+   if (entity instanceof Function)
+      return entity as Reined<T, M>
    if (entity instanceof Object) //TODO: 
       return reinObject(entity, exposedKeys) as Reined<T, M>
    return entity as Reined<T, M>

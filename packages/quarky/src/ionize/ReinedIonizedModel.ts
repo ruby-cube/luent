@@ -1,17 +1,15 @@
 import { AnyObject } from "@rue/types";
 import { READONLY } from "../ion/ReinedIon";
-import { asMetaIonizedModel, IonizedModel } from "./ionize";
+import { asMetaIonizedModel, IonizedModel, toRaw } from "./ionize";
 import { READONLY_IONIC_MODEL } from "./ReadonlyIonizedModel";
 
 
-// export const PROTECTED = Symbol('protectedIonicModel')
+export const REINED_META = Symbol('reinedMeta')
 
 export function isReinedIonizedModel(value: any) {
    if (!(value instanceof Object)) return false;
    return REINED_META in value
 }
-
-
 
 export function reinIonizedModel<T extends IonizedModel>(model: T, exposedKeys: PropertyKey[]) {
    if (exposedKeys.length)
@@ -25,12 +23,12 @@ export function asReinedIonizedModel(model: IonizedModel) {
    return createReinedIonizedModel(model)
 }
 
-export const REINED_META = Symbol('reinedMeta')
 
 function createCustomReinedIonizedModel(model: IonizedModel, exposedKeys: PropertyKey[]) {
-   //TODO: allow all props if no props included in exposed keys
-   const reinedModel = Object.create(model);
-   const _exposedKeys = new Set(exposedKeys);
+   const proto = isReinedIonizedModel(model) ? asMetaIonizedModel(model).ionicModel! : model;
+   const reinedModel = Object.create(proto);
+   const _exposedKeys = composeExposedKeys(exposedKeys, model)
+
    Object.defineProperty(reinedModel, REINED_META, {
       value: {
          isExposedKey(key: PropertyKey) {
@@ -42,13 +40,43 @@ function createCustomReinedIonizedModel(model: IonizedModel, exposedKeys: Proper
    return reinedModel
 }
 
+function composeExposedKeys(exposedKeys: PropertyKey[], model: IonizedModel) {
+   const rawModel = toRaw(model);
+   const _exposedKeys = new Set(exposedKeys)
+   let noProps = true;
+   for (const key of exposedKeys) {
+      if (rawModel[key] instanceof Function) continue;
+      noProps = false;
+      break;
+   }
+   if (noProps) {
+      if (isReinedIonizedModel(model)) {
+         const reinedMeta = model[REINED_META];
+         for (const key in rawModel) {
+            if (rawModel[key] instanceof Function)
+               continue;
+            if (reinedMeta.isExposedKey(key)) {
+               _exposedKeys.add(key)
+            }
+         }
+      }
+      else {
+         for (const key in rawModel) {
+            if (rawModel[key] instanceof Function)
+               continue;
+            _exposedKeys.add(key)
+         }
+      }
+   }
+   return _exposedKeys;
+}
+
 function createReinedIonizedModel(model: IonizedModel) {
    const meta = asMetaIonizedModel(model)
    const reinedModel = Object.create(model);
    Object.defineProperty(reinedModel, REINED_META, {
       value: {
          isExposedKey(key: PropertyKey) {
-
             const exposedMethods = meta.exposedMethods;
             return Boolean(exposedMethods && key in exposedMethods)
          }
