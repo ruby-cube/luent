@@ -28,7 +28,7 @@ import { OverrideMethods } from './TestOverrideMethods';
 // const rootContext = createTransappContext()
 
 
-const app = createApp(OverrideMethods)
+const app = createApp(MountIf)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

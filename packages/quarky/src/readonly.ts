@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { asReadonlyIon, isWritableIon } from "./ion/ReinedIon";
 import { isIonizedModel } from "./ionize/ionize";
-import { asReadonlyIonizedModel } from "./ionize/ReadonlyIonizedModel";
+import { asReadonlyIonizedModel, isReadonlyIonizedModel } from "./ionize/ReadonlyIonizedModel";
 import { isReinedObject, REINED_TARGET } from "./rein";
 
 export function readonly<T>(entity: T) {
@@ -40,4 +40,8 @@ export const READONLY_TARGET = Symbol('read-only target')
 
 export function isReadonlyObject(value: any) {
    return value instanceof Object && READONLY_TARGET in value
+}
+
+export function isReadonly(value: any){
+   return isReadonlyObject(value) || isReadonlyIonizedModel(value)
 }

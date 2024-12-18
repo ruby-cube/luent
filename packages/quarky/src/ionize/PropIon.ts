@@ -3,7 +3,7 @@ import { asMetaIonizedModel, isIonizedModel, ionize, IonizedModel, toRaw } from 
 import { META } from "../ReactiveEntity";
 import { isIon } from "../ion/Ion";
 import { protectedMethod, reinIon, READONLY } from "../ion/ReinedIon";
-import { isReinedIonizedModel, isProtectedProxy } from "./ReinedIonizedModel";
+import { isReinedIonizedModel, isRestricted } from "./ReinedIonizedModel";
 import { rein } from "../rein";
 import { __devCheckIfTracked, getActiveTracker } from "../derivations/DependencyTracker";
 import { asWatchSubject, WatchSubject } from "../effects/WatchSubject";

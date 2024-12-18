@@ -23,7 +23,7 @@ export function isIonicObject(value: any): value is IonizedModel {
 //         get(target, key, receiver) {
 //             if (__DEV__) emitSignal();
 //             if (key === META) return metaIonicModel;
-//             const reinedMeta = getProtectedModelMeta(target, ionicModel, receiver)
+//             const reinedMeta = getReinedMeta(target, ionicModel, receiver)
 //             if (reinedMeta) {
 //                 const keys = reinedMeta.propertyKeys
 //                 if (keys && !(key in keys)) {

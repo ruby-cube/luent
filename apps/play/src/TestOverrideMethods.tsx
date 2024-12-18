@@ -1,19 +1,21 @@
 import { Component, For, fromTag, v, watchEffect } from "@rue/lumo";
-import { ionize, rein } from "@rue/quarky";
+import { ion, ionize, rein } from "@rue/quarky";
 
 
 
 export function OverrideMethods() {
 
-   const list$ = ionize([{ num: 1 }, { num: 2 }, { num: 3 }, { num: 4 }, { num: 5 }], {
-      addItem(item: { num: number }) {
+   const list$ = ionize([{ num: 1, increment(){} }, { num: 2, increment(){} }], {
+      // pop: true,
+      addItem(item: { num: number, increment: ()=>void }) {
          list$.push(item);
       },
-      pop() {
-         console.log("what's popping")
-         list$._pop()
+      pop(){
+         return list$._pop()
       }
    })
+
+   const something = list$.pop()
 
    const forest$ = ionize({
       leaves: [0],
@@ -35,6 +37,20 @@ export function OverrideMethods() {
          console.log('item', item)
       }
    })
+
+   const $count = ion({count: 0})
+
+   const $reinedCount = rein($count)
+
+   const reinedObj = rein({
+      count: 0,
+      setCount(){}
+   })
+
+
+   const sd = rein({sol: {count: 0}}, 'sol')
+
+   const c = $reinedCount()
 
    const all_props = true
 

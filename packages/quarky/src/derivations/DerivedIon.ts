@@ -4,7 +4,7 @@ import { META } from "../ReactiveEntity";
 import { __devCheckIfTracked, getActiveTracker } from "./DependencyTracker";
 import { AnyObject } from "@rue/types";
 import { ProtectedIon } from "../ion/ReinedIon";
-import { AnyIon, isIon } from "../ion/Ion";
+import { AnyIon, IonMethods, isIon } from "../ion/Ion";
 import { DerivedRef } from "../ion/Ref";
 import { getDynamicNode } from "../../../lumo/src/dynamic/nodestack";
 
@@ -145,7 +145,7 @@ export type WritableDerivedIon<T = any, M extends AnyObject = {}> = {
    untrack: () => void;
 } & M
 
-export function createWritableDerivedIon<T, M>(pureGetter: () => T, methods: M & { [key: string]: (...args: any[]) => any }, inert: boolean = false) {
+export function createWritableDerivedIon<T, M>(pureGetter: () => T, methods: M & IonMethods, inert: boolean = false) {
    const writable = createDerivedIon(pureGetter, methods, inert);
    return writable;
 }

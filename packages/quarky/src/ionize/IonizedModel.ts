@@ -7,7 +7,7 @@ import { IonizedModel, storeSnapshot } from "./ionize";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
 import { MetaIonizedModel } from "./MetaIonizedModel";
 import { noop } from "@rue/utils";
-import { getProtectedModelMeta, isProtectedProxy, isReadonlyProxy, REINED_META } from "./ReinedIonizedModel";
+import { getReinedMeta, isRestricted, isReadonlyProxy, REINED_META } from "./ReinedIonizedModel";
 import { META } from "../ReactiveEntity";
 import { AnyIon, isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PropIon";
@@ -204,16 +204,20 @@ export function createIonizedModel(
    const exposedMethods = _methods === 'all methods' ? target
       : methods && 'all methods' in methods ? Object.setPrototypeOf(methods, target)
          : undefined;
-   // const exposeAllMethods = methods === 'all methods' ? true : methods?.['all methods']
    const metaIonicModel = new MetaIonizedModel(target, methods, exposedMethods)
    const ionicModel = new Proxy(target, {
       get(target, key, receiver) {
          if (__DEV__) emitSignal()
          if (key === META) return metaIonicModel
-         const reinedMeta = getProtectedModelMeta(target, ionicModel, receiver)
+         if (isNonTrackable(key, structureConfigs))
+            return Reflect.get(target, key, receiver);
+         
+         const isIonAccessKey = typeof key === 'string' && key[0] === '$'
+         const reinedMeta = getReinedMeta(target, ionicModel, receiver)
          if (reinedMeta) {
-            if (reinedMeta.isExposedKey(key)) {
-               if (__DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}'`)
+            const _key = isIonAccessKey ? key.slice(1) : key;
+            if (reinedMeta.isExposedKey(_key)) {
+               if (__DEV__) console.warn(`Property is restricted. Cannot access '${key.toString()}'`)
                return undefined;
             }
          }
@@ -259,24 +263,20 @@ export function createIonizedModel(
          }
          const value = Reflect.get(target, key, receiver) // TODO: deep readonly and reined
 
-         if (isNonTrackable(key, structureConfigs))
-            return value;
-
-         const isIonAccessKey = typeof key === 'string' && key[0] === '$'
          if (isIonAccessKey) {
             if (isIon(value))
-               return value; // { $count: $count } get ion case
+               return maybeReined(value, reinedMeta); // { $count: $count } get ion case
             if (value === undefined) {
                const _key = key.slice(1);
                const _value = Reflect.get(target, _key, receiver);
                if (isIon(_value))
-                  return _value;  // { count: $count } get ion case
+                  return maybeReined(_value, reinedMeta);  // { count: $count } get ion case
             }
-            return asPropIon(ionicModel, _key) // { count: 0}  and { $count: 0 } get ion case
+            return maybeReined(asPropIon(ionicModel, _key), reinedMeta) // { count: 0}  and { $count: 0 } get ion case
          }
 
          if (isIon(value)) {
-            return maybeIonize(value(), target, ionicModel, receiver); // { count: $count } get value case
+            return maybeReined(maybeIonize(value(), target, ionicModel, receiver), reinedMeta); // { count: $count } get value case
          }
 
          if (value instanceof Function)
@@ -288,7 +288,7 @@ export function createIonizedModel(
                boundMethodMap,
                value
             )
-         const _value = maybeIonize(value, target, ionicModel, receiver)
+         const _value = maybeReined(maybeIonize(value, target, ionicModel, receiver), reinedMeta)
          const tracker = getActiveTracker()
          if (!tracker || Reflect.getOwnPropertyDescriptor(target, key)?.writable === false)
             return _value;
@@ -296,6 +296,9 @@ export function createIonizedModel(
          return _value;
       },
       set(target, key, value, receiver) {
+         if (isRestricted(target, ionicModel, receiver)) {
+            return false;
+         }
          return reactiveSetter(
             structureConfigs,
             ionicModel,
@@ -321,7 +324,7 @@ function maybeIonize(value: any, target: AnyObject, proxy: AnyObject, receiver: 
    if (isReadonlyProxy(target, proxy, receiver)) {
       return rein(ionize(value), READONLY)
    }
-   const reinedMeta = getProtectedModelMeta(target, proxy, receiver)
+   const reinedMeta = getReinedMeta(target, proxy, receiver)
    if (reinedMeta) {
       return rein(ionize(value))
    }
@@ -397,6 +400,7 @@ function getNativeMethod(
       const mutatingOps = config.mutatingOps
       if (mutatingOps && key in mutatingOps) {
          const createOp = mutatingOps[key].createOp
+         console.log(mutatingOps, key, createOp)
          const getPreopData = mutatingOps[key].preop
          const op = createOp(target, ionicModel, meta, getPreopData)
          boundMethodMap.set(_key, op)
@@ -413,7 +417,14 @@ function getNativeMethod(
 }
 
 
-
+function maybeReined(
+   value: any,
+   reinedMeta: {
+      isExposedKey: (key: PropertyKey) => boolean;
+   } | undefined
+) {
+   return reinedMeta && value instanceof Object ? rein(value) : value
+}
 
 
 
@@ -426,7 +437,7 @@ export function reactiveSetter(
    newValue: any,
    receiver: AnyObject
 ) {
-   if (isProtectedProxy(target, ionicModel, receiver)) {
+   if (isRestricted(target, ionicModel, receiver)) {
       if (__DEV__) console.warn('Set operation failed. Property is readonly')
       return false;
    }

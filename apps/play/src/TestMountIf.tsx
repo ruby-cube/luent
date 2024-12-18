@@ -46,7 +46,7 @@ export function MountIf() {
                   <h2>hi</h2>
                </transit-node>
                <transit-node with={slide({ x: 100, duration: 2200 })}>
-                  <h2>ho</h2>
+                  <h2>hope</h2>
                </transit-node>
                {If($ready, () =>
                   <p>ready</p>

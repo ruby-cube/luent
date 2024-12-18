@@ -4,7 +4,7 @@ import { getActiveTracker, getDependencyTracker, getWithoutTracking } from "../d
 import { trigger } from "../trigger";
 import { META, ReactiveEntity } from "../ReactiveEntity";
 import { AnyObject } from "@rue/types";
-import { AnyIon, isIon } from "./Ion";
+import { AnyIon, IonMethods, isIon } from "./Ion";
 import { ProtectedIon } from "./ReinedIon";
 
 export type AtomicIon<T = any, M extends AnyObject = {}> = ((selected?: true) => T)
@@ -34,7 +34,7 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
 
 export function createAtomicIon<
    T,
-   M extends { [key: string]: (...args: any[]) => any } & { as?: true }
+   M extends IonMethods
 >(
    value: T,
    methods?: M,

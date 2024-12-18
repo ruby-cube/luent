@@ -1,6 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { asMetaIonizedModel, IonizedModel, toRaw } from "./ionize";
 import { isReadonlyIonizedModel, READONLY_IONIC_MODEL } from "./ReadonlyIonizedModel";
+import { isReadonly } from "../readonly";
 
 
 export const REINED_META = Symbol('reinedMeta')
@@ -29,6 +30,7 @@ function createCustomReinedIonizedModel(model: IonizedModel, exposedKeys: Proper
    const proto = isReinedIonizedModel(model) || isReadonlyIonizedModel(model) ? asMetaIonizedModel(model).ionicModel! : model;
    const reinedModel = Object.create(proto);
    const _exposedKeys = composeExposedKeys(exposedKeys, model)
+   if (!_exposedKeys) return model;
 
    Object.defineProperty(reinedModel, REINED_META, {
       value: {
@@ -41,17 +43,20 @@ function createCustomReinedIonizedModel(model: IonizedModel, exposedKeys: Proper
    return reinedModel
 }
 
-function composeExposedKeys(exposedKeys: PropertyKey[], model: IonizedModel) {
+export function composeExposedKeys(exposedKeys: PropertyKey[], model: AnyObject) {
    const rawModel = toRaw(model);
    const _exposedKeys = new Set(exposedKeys)
    let noProps = true;
    for (const key of exposedKeys) {
-      if (rawModel[key] instanceof Function) continue;
+      if (rawModel[key] instanceof Function)
+         continue;
       noProps = false;
       break;
    }
    if (noProps) {
-      if (isReinedIonizedModel(model)) {
+      if (isReadonly(model))
+         return undefined;
+      if (REINED_META in model) {
          const reinedMeta = model[REINED_META];
          for (const key in rawModel) {
             if (rawModel[key] instanceof Function)
@@ -112,7 +117,7 @@ function createReinedIonizedModel(model: IonizedModel) {
 //     }
 // })
 
-export function isProtectedProxy(target: AnyObject, proxy: AnyObject, receiver: AnyObject) {
+export function isRestricted(target: AnyObject, proxy: AnyObject, receiver: AnyObject) {
    if (receiver !== proxy)
       return !!receiver[READONLY_IONIC_MODEL] || !!receiver[REINED_META];
    // return Reflect.get(target, READONLY_IONIC_MODEL, receiver) || Reflect.get(target, REINED_META, receiver)
@@ -125,7 +130,7 @@ export function isReadonlyProxy(target: AnyObject, proxy: AnyObject, receiver: A
    return false;
 }
 
-export function getProtectedModelMeta(target: AnyObject, proxy: AnyObject, receiver: AnyObject): { isExposedKey: (key: PropertyKey) => boolean } | undefined {
+export function getReinedMeta(target: AnyObject, proxy: AnyObject, receiver: AnyObject): { isExposedKey: (key: PropertyKey) => boolean } | undefined {
    if (receiver !== proxy) {
       // console.log('receiver', receiver)
       // console.log('proxy', proxy)

@@ -486,7 +486,7 @@ export function installIonicArray() {
 // ) {
 //     if (__DEV__) emitSignal();
 //     if (key === META) return metaIonicModel;
-//     const reinedMeta = getProtectedModelMeta(target, ionicModel, receiver)
+//     const reinedMeta = getReinedMeta(target, ionicModel, receiver)
 //     if (reinedMeta) {
 //         const keys = reinedMeta.propertyKeys
 //         if (keys && !(key in keys)) {
@@ -588,7 +588,7 @@ export function installIonicArray() {
 //     newValue: any,
 //     receiver: AnyObject
 // ) {
-//     if (isProtectedProxy(target, ionicModel, receiver)) {
+//     if (isRestricted(target, ionicModel, receiver)) {
 //         if (__DEV__) console.warn('Set operation failed. Property is readonly')
 //         return false;
 //     }

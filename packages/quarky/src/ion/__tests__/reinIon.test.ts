@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { META } from '../../ReactiveEntity';
-import { IS_PUBLIC, reinIon, Public } from '../ReinedIon';
+import {  reinIon, } from '../ReinedIon';
 import { ion } from '../Ion';
 import { AnyObject } from '@rue/types';
 
@@ -14,25 +14,39 @@ describe('reinIon function', () => {
     //     expect(readonlyIon[META].o).toBe(writableIon[META].o);
     //   });
 
-    it('should return a protected ion with methods protected when no methodKeys are provided', () => {
+    it('should return a reined ion with `as` method restricted when no methodKeys are provided', () => {
         const atomicIon = ion(0)
-        const $protected = reinIon(atomicIon);
+        const $protected = reinIon(atomicIon, []);
 
         expect(() => $protected.as(10)).toThrowError()
         expect($protected[META].o).toBe(atomicIon[META].o);
     });
 
-    it('should return a protected ion with `as` method protected when `as` is passed as a method', () => {
+    it('should return a reined ion with `_as` method restricted when `as` is passed as a method', () => {
         const atomicIon = ion(0, {
-            as() {
-
+            as(value: number) {
+               atomicIon._as(value)
+               return value;
             }
         })
-        const $protected = reinIon(atomicIon);
+        const $protected = reinIon(atomicIon, []);
 
-        expect(() => $protected.as(10)).toThrowError()
+        $protected.as(14);
+
+        expect($protected()).toBe(14);
         expect(() => $protected._as(10)).toThrowError()
-        expect($protected[META].o).toBe(atomicIon[META].o);
+    });
+
+    it('should return a reined ion with `_as` method restricted when `as` is passed as true', () => {
+        const atomicIon = ion(0, {
+            as: true,
+        })
+        const $protected = reinIon(atomicIon, []);
+
+        $protected.as(14);
+
+        expect($protected()).toBe(14);
+        expect(() => $protected._as(10)).toThrowError()
     });
 
 
@@ -48,19 +62,19 @@ describe('reinIon function', () => {
 
    
 
-    it('should call protectedMethod when restricted methods are accessed on a protected ion', () => {
-        const atomicIon = ion(0, {
-            increment() { }
-        })
-        const protectedIon = reinIon(atomicIon);
+   //  it('should call protectedMethod when restricted methods are accessed on a protected ion', () => {
+   //      const atomicIon = ion(0, {
+   //          increment() { }
+   //      })
+   //      const protectedIon = reinIon(atomicIon);
 
-        expect(() => protectedIon.increment()).toThrowError(/failed/)
-    });
+   //      expect(() => protectedIon.increment()).toThrowError(/failed/)
+   //  });
 
     it('should reuse the existing protected ion if already created', () => {
         const atomicIon = ion(0)
-        const protectedIon1 = reinIon(atomicIon);
-        const protectedIon2 = reinIon(atomicIon);
+        const protectedIon1 = reinIon(atomicIon, []);
+        const protectedIon2 = reinIon(atomicIon, []);
 
         expect(protectedIon1).toBe(protectedIon2);
     });

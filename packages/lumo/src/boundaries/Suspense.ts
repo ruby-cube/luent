@@ -1,7 +1,6 @@
 import { ion, __addDevName, AtomicIon } from "../../../quarky/src";
 import { Else, ElseIf, If } from "../conditional/If";
 import { Component, ComponentSetup } from "../component/InternalComponent";
-import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
 
 
@@ -24,7 +23,7 @@ export type SuspenseNodeInput = {
    standby?: (error: Error) => NodeEntity
 }
 
-export function createSuspenseNode(Slot: ()=>NodeEntity, input: SuspenseNodeInput) {
+export function createSuspenseNode(Slot: () => NodeEntity, input: SuspenseNodeInput) {
    const { standin: renderPlaceholder = () => undefined, timeout, standby: renderError = () => undefined } = input;
    const $pending = ion(true);
    const $error: AtomicIon<Error> = ion();
@@ -58,12 +57,10 @@ export function createSuspenseNode(Slot: ()=>NodeEntity, input: SuspenseNodeInpu
       })
 
    return Component(
-      <>
-         {[
-            If($pending, renderPlaceholder),
-            ElseIf($error, () => renderError($error())),
-            Else(() => output)
-         ]}
-      </>
+      [
+         If($pending, renderPlaceholder),
+         ElseIf($error, () => renderError($error())),
+         Else(() => output)
+      ]
    )
 }

@@ -90,9 +90,11 @@ type IonizedGetter<T, K extends keyof T> = T extends { '~$methods'?: AnyObject }
 //    }
 // }, { doOther() { }, doSomething() { } })
 
+export type IonicMethods<T> = { [K in keyof Partial<T> | PropertyKey]: K extends keyof T ? true|  ((...args: any[]) => any): (...args: any[]) => any }
+
 
 //API
-export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M & { [K in keyof Partial<T> | PropertyKey]: K extends keyof T ? true|  ((...args: any[]) => any): (...args: any[]) => any }): T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M> {
+export function ionize<T extends AnyObject, M extends {}>(target: T, methods?: M & IonicMethods<T>): T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M> {
    if (isIonizedModel(target) || isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
