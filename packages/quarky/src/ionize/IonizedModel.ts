@@ -194,32 +194,29 @@ export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonicMo
    return false;
 }
 
-
 export function createIonizedModel(
    target: object,
-   _methods: { 'all methods'?: true } & AnyObject | undefined | 'all methods',
+   methods: AnyObject | undefined,
 ) {
    const structureConfigs = getStructureConfigs(target);
-   const methods = _methods === 'all methods' ? undefined : _methods;
-   const exposedMethods = _methods === 'all methods' ? target
-      : methods && 'all methods' in methods ? Object.setPrototypeOf(methods, target)
-         : undefined;
-   const metaIonicModel = new MetaIonizedModel(target, methods, exposedMethods)
+   const metaIonicModel = new MetaIonizedModel(target, methods)
    const ionicModel = new Proxy(target, {
+      has(target, key) {
+         if (key === META)
+            return true;
+         return key in target || !!methods && key in methods
+      },
       get(target, key, receiver) {
          if (__DEV__) emitSignal()
          if (key === META) return metaIonicModel
          if (isNonTrackable(key, structureConfigs))
             return Reflect.get(target, key, receiver);
-         
+
          const isIonAccessKey = typeof key === 'string' && key[0] === '$'
          const reinedMeta = getReinedMeta(target, ionicModel, receiver)
-         if (reinedMeta) {
-            const _key = isIonAccessKey ? key.slice(1) : key;
-            if (reinedMeta.isExposedKey(_key)) {
-               if (__DEV__) console.warn(`Property is restricted. Cannot access '${key.toString()}'`)
-               return undefined;
-            }
+         if (reinedMeta && !reinedMeta.isExposedKey(isIonAccessKey ? key.slice(1) : key)) {
+            if (__DEV__) console.warn(`Property is restricted. Cannot access '${key.toString()}'`)
+            return undefined;
          }
 
          if (methods && key in methods) {

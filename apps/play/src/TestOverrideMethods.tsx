@@ -5,17 +5,17 @@ import { ion, ionize, rein } from "@rue/quarky";
 
 export function OverrideMethods() {
 
-   const list$ = ionize([{ num: 1, increment(){} }, { num: 2, increment(){} }], {
-      // pop: true,
-      addItem(item: { num: number, increment: ()=>void }) {
+   const list$ = ionize([{ num: 1, increment() { } }, { num: 2, increment() { } }], {
+      addItem(item: { num: number, increment: () => void }) {
          list$.push(item);
       },
-      pop(){
-         return list$._pop()
-      }
+      splice(...args: Parameters<Array<any>['splice']>) {
+         return list$._splice(...args)
+      },
    })
 
    const something = list$.pop()
+
 
    const forest$ = ionize({
       leaves: [0],
@@ -38,17 +38,17 @@ export function OverrideMethods() {
       }
    })
 
-   const $count = ion({count: 0})
+   const $count = ion({ count: 0 })
 
    const $reinedCount = rein($count)
 
    const reinedObj = rein({
       count: 0,
-      setCount(){}
+      setCount() { }
    })
 
 
-   const sd = rein({sol: {count: 0}}, 'sol')
+   const sd = rein({ sol: { count: 0 } }, 'sol')
 
    const c = $reinedCount()
 
@@ -56,7 +56,15 @@ export function OverrideMethods() {
 
    console.log(list$)
 
-   const res = rein(forest$)
+   const res = rein(list$)
+   const popped = res.splice(0, 1)
+
+   res.filter((val, index)=>{
+      return true;
+   })
+   list$.filter
+   list$.filter((val) => true)
+
 
    return Component(
       <>
@@ -65,7 +73,7 @@ export function OverrideMethods() {
          )}
          <PotterBlock count={rein(forest$, 'select')}></PotterBlock>
          <button on:click={() => list$.pop()}>pop</button>
-         <button on:click={() => list$._pop()}>pop</button>
+         <button on:click={() => list$.pop()}>pop</button>
       </>
    )
 }

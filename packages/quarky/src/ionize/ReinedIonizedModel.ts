@@ -83,8 +83,9 @@ function createReinedIonizedModel(model: IonizedModel) {
    Object.defineProperty(reinedModel, REINED_META, {
       value: {
          isExposedKey(key: PropertyKey) {
-            const exposedMethods = meta.exposedMethods;
-            return Boolean(exposedMethods && key in exposedMethods)
+            if (typeof key === 'string' && key[0] === '_')
+               return false;
+            return key in model;
          }
       }
    })

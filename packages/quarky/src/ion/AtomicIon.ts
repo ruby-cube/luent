@@ -1,10 +1,10 @@
 import { emitSignal } from "../debug";
 import { isIonizedModel, ionize } from "../ionize/ionize";
-import { getActiveTracker, getDependencyTracker, getWithoutTracking } from "../derivations/DependencyTracker";
+import { getActiveTracker } from "../derivations/DependencyTracker";
 import { trigger } from "../trigger";
 import { META, ReactiveEntity } from "../ReactiveEntity";
 import { AnyObject } from "@rue/types";
-import { AnyIon, IonMethods, isIon } from "./Ion";
+import { IonMethods, isIon } from "./Ion";
 import { ProtectedIon } from "./ReinedIon";
 
 export type AtomicIon<T = any, M extends AnyObject = {}> = ((selected?: true) => T)
@@ -51,9 +51,6 @@ export function createAtomicIon<
 
    if (methods) {
       attachIonMethods(proto, methods)
-      if ('as' in methods && methods.as === true) {
-         proto.as = setIonValue
-      }
    }
 
    function setIonValue(newValue: any) {

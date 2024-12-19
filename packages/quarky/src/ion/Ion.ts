@@ -22,7 +22,7 @@ export type Ion<T = any, M extends AnyObject = {}> = (() => T)
 
 type ReactiveIon<T, M> = M extends AnyObject ? AtomicIon<T, M> : AtomicIon<T>
 
-export type IonMethods = { as: true | ((...args: any[]) => any) } | { as?: true | ((...args: any[]) => any) } & { [key: PropertyKey]: (...args: any[]) => any }
+export type IonMethods = { [key: PropertyKey]: (...args: any[]) => any }
 
 // API
 export function ion<T, M>(value?: T & (() => any), methods?: M & IonMethods): T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>

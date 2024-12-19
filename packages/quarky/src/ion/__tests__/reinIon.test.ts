@@ -37,17 +37,17 @@ describe('reinIon function', () => {
         expect(() => $protected._as(10)).toThrowError()
     });
 
-    it('should return a reined ion with `_as` method restricted when `as` is passed as true', () => {
-        const atomicIon = ion(0, {
-            as: true,
-        })
-        const $protected = reinIon(atomicIon, []);
+   //  it('should return a reined ion with `_as` method restricted when `as` is passed as true', () => {
+   //      const atomicIon = ion(0, {
+   //          as: true,
+   //      })
+   //      const $protected = reinIon(atomicIon, []);
 
-        $protected.as(14);
+   //      $protected.as(14);
 
-        expect($protected()).toBe(14);
-        expect(() => $protected._as(10)).toThrowError()
-    });
+   //      expect($protected()).toBe(14);
+   //      expect(() => $protected._as(10)).toThrowError()
+   //  });
 
 
     //   it('should create a custom protected ion with only specified methods accessible', () => {

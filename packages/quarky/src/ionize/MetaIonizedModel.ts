@@ -35,7 +35,7 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
     constructor(
         public rawTarget: T,
         public methods: AnyObject = {},
-        public exposedMethods: AnyObject | undefined
+      //   public exposedMethods: AnyObject | undefined
         // public reactive: T
         // public traps?: ReactiveTraps<T>
     ) {

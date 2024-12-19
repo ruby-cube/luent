@@ -27,7 +27,7 @@ type Reined<T, X extends any[] = never[]> = T extends Ionized<infer O, infer M> 
    : T extends AnyObject ? ReinedObject<T, X>
    : T
 
-type MaybeReined<T> = T extends { [META]: any } ? Reined<T> : T extends (...args: any[]) => any ? T : T extends {} ? Reined<T> : T;
+type MaybeReined<T> = T extends { [META]: any } ? Reined<T> : T extends (...args: any[]) => any ? ReinedMethod<T> : T extends {} ? Reined<T> : T;
 
 type TupleToUnion<T extends any[]> = T[number]
 
@@ -41,24 +41,30 @@ type ReinedObject<O, X extends any[]> =
    }
 
 type ReinedIonized<O extends AnyObject, M, X extends any[]> =
-   X extends never[] ? Ionized<{ // Default Reined
-      readonly [K in keyof O as O[K] extends (...args: any[]) => any ? never : K]: MaybeReined<O[K]>;
-   }, { readonly [K in keyof M]: M[K] extends true ? K extends keyof O ? ReinedMethod<O[K]> : never : ReinedMethod<M[K]> }>
-   : IncludesProps<O, TupleToUnion<X>> extends true ? Ionized<{
-      readonly [K in keyof O as K extends TupleToUnion<X> ? O[K] extends (...args: any[]) => any ? never : K : O[K] extends (...args: any[]) => any ? never : never]: MaybeReined<O[K]>
+   X extends never[] ?
+   // Default Reined (all props and all methods except prefixed with underscore)
+   Ionized<{
+      readonly [K in keyof O as K extends `_${string}` ? never : K]: MaybeReined<O[K]>;
+   }, { readonly [K in keyof M as K extends `_${string}` ? never : K]: ReinedMethod<M[K]> }>
+   : IncludesProps<O, TupleToUnion<X>> extends true ?
+   // Reined with selected props & methods
+   Ionized<{
+      readonly [K in keyof O as K extends TupleToUnion<X> ? K : never]: MaybeReined<O[K]>
    }, {
-         readonly [K in TupleToUnion<X> as K extends keyof M ? K : never]: K extends keyof M ? M[K] extends true ? K extends keyof O ? ReinedMethod<O[K]> : never : ReinedMethod<M[K]> : never
+         readonly [K in TupleToUnion<X> as K extends keyof M ? K : never]: ReinedMethod<M[K]>
       }>
+   // Reined with all props and selected methods
    : Ionized<{
-      readonly [K in keyof O as O[K] extends (...args: any[]) => any ? never : K]: MaybeReined<O[K]>
+      readonly [K in keyof O as K extends TupleToUnion<X> ? K : O[K] extends (...args: any[]) => any ? never : K]: MaybeReined<O[K]>
    }, {
-         readonly [K in TupleToUnion<X> as K extends keyof M ? K : never]: K extends keyof M ? M[K] extends true ? K extends keyof O ? ReinedMethod<O[K]> : never : ReinedMethod<M[K]> : never
+         readonly [K in TupleToUnion<X> as K extends keyof M ? K : never]: ReinedMethod<M[K]>
       }>
 
-type ReinedMethod<M> = M extends (...args: infer P) => infer R ? (...args: P) => Reined<R> : M
+type ReinedMethod<M> = M extends (...args: infer P) => infer R ? (...args: ReinedParams<P>) => MaybeReined<R> : M
 
+type ReinedParams<P extends any[]> = { [K in keyof P]: P[K] extends (...args: infer CBP) => infer R ? (...args: ReinedCBParams<CBP>) => R : P[K] }
+type ReinedCBParams<P extends any[]> = { [K in keyof P]: P[K] extends Ionized<any> ? Reined<P[K]> : P[K] }
 
-type ReinedReturn<R> = R extends Ionized<any> ? Reined<R> : R
 
 type Readonly<O extends AnyObject> = {
    readonly [K in keyof O as O[K] extends (...args: any[]) => any ? never : K]: O[K]
