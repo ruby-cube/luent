@@ -84,7 +84,7 @@ export class SwapConfig {
 
 // TODO: how to distinguish render function from derived getter 
 export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity) | NodeEntity) {
-   if (slot instanceof Function && slot.name === '') { // distinguishes derivation functions from render functions
+   if (slot instanceof Function && slot.name[0] !== '$') { // distinguishes derivation functions from render functions
       return slot as (...args: any[]) => NodeEntity;
    }
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')

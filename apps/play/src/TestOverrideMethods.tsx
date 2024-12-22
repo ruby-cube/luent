@@ -5,16 +5,16 @@ import { ion, ionize, rein } from "@rue/quarky";
 
 export function OverrideMethods() {
 
-   const list$ = ionize([{ num: 1, increment() { } }, { num: 2, increment() { } }], {
+   const list = ionize([{ num: 1, increment() { } }, { num: 2, increment() { } }], {
       addItem(item: { num: number, increment: () => void }) {
-         list$.push(item);
+         list.push(item);
       },
       splice(...args: Parameters<Array<any>['splice']>) {
-         return list$._splice(...args)
+         return list._splice(...args)
       },
    })
 
-   const something = list$.pop()
+   const something = list.pop()
 
 
    const forest$ = ionize({
@@ -33,7 +33,7 @@ export function OverrideMethods() {
    })
 
    watchEffect(() => {
-      for (const item of list$) {
+      for (const item of list) {
          console.log('item', item)
       }
    })
@@ -52,28 +52,35 @@ export function OverrideMethods() {
 
    const c = $reinedCount()
 
-   const all_props = true
+   console.log(list)
 
-   console.log(list$)
-
-   const res = rein(list$)
+   const res = rein(list)
    const popped = res.splice(0, 1)
 
-   res.filter((val, index)=>{
+   res.filter((val, index) => {
       return true;
    })
-   list$.filter
-   list$.filter((val) => true)
+   list.filter
+   list.filter((val) => true)
+
+   const $_list_ = '$:list'
+
+   const $_dog_ = Symbol('$:dog')
+
 
 
    return Component(
       <>
-         {For(list$, (item, $index) =>
+         {For(list, (item, $index) =>
             <p>{item!.num}</p>
          )}
+         
          <PotterBlock count={rein(forest$, 'select')}></PotterBlock>
-         <button on:click={() => list$.pop()}>pop</button>
-         <button on:click={() => list$.pop()}>pop</button>
+         <context-node with={{ [$_list_]: list }}>
+
+         </context-node>
+         <button on:click={() => list.pop()}>pop</button>
+         <button on:click={() => list.pop()}>pop</button>
       </>
    )
 }

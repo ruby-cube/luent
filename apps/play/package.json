@@ -7,6 +7,7 @@
         "build-babel": "tsc --jsx react-jsx && babel src -d dist"
     },
     "dependencies": {
+        "@babel/traverse": "^7.26.4",
         "@rue/flask": "workspace:*",
         "@rue/jsx-runtime": "workspace:*",
         "@rue/lumo": "workspace:*",
@@ -15,11 +16,14 @@
         "@rue/utils": "workspace:*"
     },
     "devDependencies": {
-        "vite": "^5.4.3",
         "@babel/cli": "^7.25.6",
         "@babel/core": "^7.25.2",
         "@babel/plugin-transform-react-jsx": "^7.25.2",
-        "@rue/types": "workspace:*"
+        "@babel/types": "^7.26.3",
+        "@rue/types": "workspace:*",
+        "@types/babel__core": "^7.20.5",
+        "@types/babel__traverse": "^7.20.6",
+        "vite": "^5.4.3"
     },
     "author": "Ruby Yi Wang",
     "license": "MIT"
