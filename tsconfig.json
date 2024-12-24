@@ -27,6 +27,7 @@
       "react/jsx-runtime": ["./packages/lumo/jsx-runtime"],
       "react-dom": ["./packages/lumo/jsx-runtime"],
       "react-dom/*": ["./packages/lumo/jsx-runtime/*"],
+
       "@rue/utils": [
         "./packages/utils/index.ts"
       ],

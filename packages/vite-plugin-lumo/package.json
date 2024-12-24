@@ -1,0 +1,15 @@
+{
+   "name": "@rue/vite-plugin-lumo",
+   "private": true,
+   "description": "",
+   "type": "module",
+   "module": "./index",
+   "dependencies": {
+       "@rue/lumo": "workspace:*"
+   },
+   "devDependencies": {
+      "@babel/core": "^7.25.2"
+   },
+   "author": "Ruby Yi Wang",
+   "license": "MIT"
+}

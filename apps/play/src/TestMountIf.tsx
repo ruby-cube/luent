@@ -26,7 +26,7 @@ export function MountIf() {
       }
    })
 
-   const todos = ionize([] as { hi: string }[])
+   const todos = ionize([{name: 'bubby'}] as { name: string }[])
 
    const removed = todos.splice(0, 2)
 
@@ -37,31 +37,34 @@ export function MountIf() {
             <div>hi</div>
          }</context-node> */}
          {undefined}
-         
-         <h1>Hello {undefined}</h1>
+
+         <h1>Hello {todos[0]}</h1>
          <phasic-node>
-            {If($active, () => <>
-               oh
-               <transit-node with={slide({ x: -100, duration: 2200 })}>
-                  <h2>hi</h2>
-               </transit-node>
-               <transit-node with={slide({ x: 100, duration: 2200 })}>
-                  <h2>hope</h2>
-               </transit-node>
-               {If($ready, () =>
-                  <p>ready</p>
-               )}
-            </>
+            {If($active,
+               <>
+                  oh
+                  <transit-node with={slide({ x: -100, duration: 2200 })}>
+                     <h2>hi</h2>
+                  </transit-node>
+                  <transit-node with={slide({ x: 100, duration: 2200 })}>
+                     <h2>hope</h2>
+                  </transit-node>
+                  {If($ready,
+                     <p>ready</p>
+                  )}
+               </>
             )}
-            {ElseIf($ready, () => <>
-               low
-               <h2>balloon</h2>
-            </>
+            {ElseIf($ready,
+               <>
+                  low
+                  <h2>balloon</h2>
+               </>
             )}
-            {Else(() => <>
-               so
-               <h2>bye</h2>
-            </>
+            {Else(
+               <>
+                  so
+                  <h2>bye</h2>
+               </>
             )}
          </phasic-node>
          <button on:click={$active.toggle}>toggle active</button>

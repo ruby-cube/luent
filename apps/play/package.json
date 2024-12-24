@@ -9,15 +9,16 @@
     "dependencies": {
         "@babel/traverse": "^7.26.4",
         "@rue/flask": "workspace:*",
-        "@rue/jsx-runtime": "workspace:*",
         "@rue/lumo": "workspace:*",
         "@rue/quarky": "workspace:*",
         "@rue/thread": "workspace:*",
+        "@rue/jsx-runtime": "workspace:*",
         "@rue/utils": "workspace:*"
-    },
-    "devDependencies": {
-        "@babel/cli": "^7.25.6",
-        "@babel/core": "^7.25.2",
+      },
+      "devDependencies": {
+         "@rue/vite-plugin-lumo": "workspace:*",
+         "@babel/cli": "^7.25.6",
+         "@babel/core": "^7.25.2",
         "@babel/plugin-transform-react-jsx": "^7.25.2",
         "@babel/types": "^7.26.3",
         "@rue/types": "workspace:*",

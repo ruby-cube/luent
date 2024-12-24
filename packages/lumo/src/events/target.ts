@@ -1,7 +1,7 @@
 import { NodeRef } from "../node/NodeRef";
 
 export function target(...args: [...(string | ((x: HTMLElement) => boolean) | NodeRef)[]]) {
-   const e = args.at(-1) as object
+   const e = args.pop() as object
    if (!e || !('target' in e)) throw new Error('JSX transform failed to add event object to target() call')
    const targ = e.target
    for (const arg of args) {

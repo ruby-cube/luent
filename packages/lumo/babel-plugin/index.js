@@ -1,8 +1,11 @@
-export default function (babel) {
-   const { types: t } = babel;
 
+let t;
+
+export default function lumoTransform({ types }) {
+   t = types;
+console.log('running lumoTransform!!!!!!!!!!!!!!!')
    return {
-      name: "ast-transform",
+      name: "lumo-transform",
       visitor: {
          CallExpression(path) {
             const functionName = path.node.callee.name
@@ -20,8 +23,10 @@ const TemplateFunctions = new Map([
    ['ElseIf', transformIfCall],
    ['Else', transformElseCall],
    ['For', true],
+   ['jsxDEV', transformJSXCall],
    ['jsx', transformJSXCall],
    ['_jsx', transformJSXCall],
+   ['jsxsDEV', transformJSXCall],
    ['jsxs', transformJSXCall],
    ['_jsxs', transformJSXCall],
 ])
@@ -52,9 +57,11 @@ function transformTemplateArgToRenderFunction(args) {
    }
 }
 
+let derivationCount = 0;
+
 function toDerivationFunction(value) {
    return t.functionExpression(
-      t.identifier('$'), // Function name ($) //TODO: add unique count id to prevent name collisions
+      t.identifier('$$' + ++derivationCount),
       [], // No parameters
       t.blockStatement([
          t.returnStatement(value) // Return the original expression
@@ -104,16 +111,21 @@ function transformJSXAttributes(properties) {
    for (let i = 0; i < properties.length; i++) {
       const property = properties[i];
       const propertyNode = property.node;
-      const key = propertyNode.key;
-      const name = t.isStringLiteral(key) ? key.value : key.name;
-      if (name === 'children') {
+      const keyNode = propertyNode.key;
+      const value = propertyNode.value;
+      const key = t.isStringLiteral(keyNode) ? keyNode.value : keyNode.name;
+      if (key === 'children') {
          transformJSXChildren(propertyNode)
       }
-      else if (hasTargetedEvent(name, propertyNode.value)) {
-         propertyNode.value.body.left.arguments.push(t.identifier('e'))
+      else if (hasTargetedEvent(key, value)) {
+         const eventListenerNode = propertyNode.value;
+         const paramNode = eventListenerNode.params[0]
+         const eventParameter = paramNode && paramNode.name || 'e';
+         if (!paramNode) eventListenerNode.params.push(t.identifier('e'))
+         eventListenerNode.body.left.arguments.push(t.identifier(eventParameter))
       }
       else if (isDerivation(property.get('value'))) {
-         propertyNode.value = toDerivationFunction(propertyNode.value)
+         propertyNode.value = toDerivationFunction(value)
       }
    }
 }
@@ -121,12 +133,13 @@ function transformJSXAttributes(properties) {
 function hasTargetedEvent(key, value) {
    return key.startsWith('on:') &&
       t.isArrowFunctionExpression(value) &&
-      t.isLogicalExpression(value.body, { operator: '&&' }) &&
+      t.isLogicalExpression(value.body) &&
       t.isCallExpression(value.body.left) &&
       value.body.left.callee.name === 'target'
 }
 
 function toRenderFunction(node) {
+   console.log('toRender function')
    return t.arrowFunctionExpression(
       [], // No parameters
       t.isSequenceExpression(node) ? node : normalizeToArrayExpression(node) //TODO: normalizeToArrayExpression for last argument in sequence expression
@@ -161,6 +174,12 @@ function normalizeToArrayExpression(node) {
 // }
 
 function isDerivation(path) {
+   //TODO: need a better algorithm 
+   // - X <transition-node with={slide({})}>  
+   // - ? <context-node with={{[_dog_]: ???}}>
+   // - O property access from ionized model: item.name 
+   
+
    const node = path.node;
    if (t.isLiteral(node) || t.isIdentifier(node) || !node) {
       return false;

@@ -1,6 +1,7 @@
 import { resolve } from "path"
 import { defineConfig } from 'vite'
-import babel from "vite-plugin-babel"
+import babelLumoTransform from '../../packages/lumo/babel-plugin/index.js'
+import * as babel from '@babel/core';
 
 export default defineConfig({
   server: {
@@ -8,8 +9,25 @@ export default defineConfig({
       cachedChecks: false
     }
   },
-  plugins: [
-    babel()
+  plugins: [ //TODO: replace with proper vite lumo plugin
+    {
+          name: 'vite-lumo-plugin',
+          async transform(code, id) {
+             if (!id.endsWith('.jsx') && !id.endsWith('.tsx')) return;
+    
+             const result = await babel.transformAsync(code, {
+                plugins: [babelLumoTransform],
+               //  presets: [['@babel/preset-env', { targets: 'defaults' }]],
+                filename: id,
+                sourceMaps: true, // Optional, useful for debugging
+             });
+    
+             return {
+                code: result.code,
+                map: result.map, // Include source maps
+             };
+          },
+       }
   ],
   resolve: {
     alias: {
