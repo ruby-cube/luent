@@ -167,10 +167,10 @@ function SvelteA() {
       <>
          <swap:mount />
          {If($x() > 10,
-            <p>{$x} is greater than 10</p>
+            $x
          )}
          {ElseIf(5 > $x(),
-            <p>{$x} is less than 5</p>
+            <>{$x} is less than 5</>
          )}
          {ElseIf($x,
             <p>{$x} is less than 5</p>
@@ -182,6 +182,28 @@ function SvelteA() {
    )
 }
 
+
+function SvelteA() {
+   //@ts-ignore
+   const $count = ion(7)
+
+   return Component(
+      <div>
+         {If($count, $count)}
+      </div>
+   )
+}
+
+function SvelteA() {
+   //@ts-ignore
+   const $count = ion(7)
+
+   return Component(
+      <div>
+         {If($count, <>{$count}</>)}
+      </div>
+   )
+}
 
 export function HelloWorld() {
    return Component(

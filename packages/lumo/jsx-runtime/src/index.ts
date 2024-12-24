@@ -1,4 +1,4 @@
-import { ComponentSetup, HTMLTag, makeNode, NodeEntity, normalizeToRenderFunction, Slot } from "@rue/lumo";
+import { ComponentSetup, HTMLTag, makeNode, normalizeToRenderFunction, Slot } from "@rue/lumo";
 import { Ion, isIon } from "@rue/quarky";
 import { isObjectLiteral, normalizeToArray } from "@rue/utils";
 
@@ -8,6 +8,8 @@ import { isObjectLiteral, normalizeToArray } from "@rue/utils";
 // with custom jsx compiler
 
 export const jsxDEV = jsx;
+
+export const jsxs = jsx;
 
 export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Slot }) {
    const Slot = processSlot(config.children);
