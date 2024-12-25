@@ -57,7 +57,7 @@ export function createTransitionNode(
    input: TransitionNodeInput
 ) {
    const { 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "load:with": inputLoad, onEnd, onStart, disable } = input;
-
+console.log('phasic node slot', Slot)
    if (disable === true) {
       return Slot instanceof Function ? Slot() : Slot
    }

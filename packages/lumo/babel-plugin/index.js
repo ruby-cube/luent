@@ -1,9 +1,8 @@
 
-let t;
+let t; //TODO: import from @babel/types
 
 export default function lumoTransform({ types }) {
    t = types;
-console.log('running lumoTransform!!!!!!!!!!!!!!!')
    return {
       name: "lumo-transform",
       visitor: {
@@ -17,12 +16,23 @@ console.log('running lumoTransform!!!!!!!!!!!!!!!')
    };
 }
 
+//TODO: 
+/*
+- `jsxAttributes()`
+
+- `jsxStyle()`
+
+- `jsxClass()`
+
+- `jsxObject()`
+*/
+
 
 const TemplateFunctions = new Map([
    ['If', transformIfCall],
    ['ElseIf', transformIfCall],
    ['Else', transformElseCall],
-   ['For', true],
+   ['For', true], //TODO:
    ['jsxDEV', transformJSXCall],
    ['jsx', transformJSXCall],
    ['_jsx', transformJSXCall],
@@ -46,13 +56,14 @@ function transformIfCall(path) {
       args[0] = toDerivationFunction(args[0])
    }
 
+   console.log('if arg', args)
    transformTemplateArgToRenderFunction(args)
 }
 
 function transformTemplateArgToRenderFunction(args) {
    const lastIndex = args.length - 1;
    const templateArg = args[lastIndex]
-   if (t.isCallExpression(templateArg) && isTemplateFunction(templateArg.callee.name)) {
+   if (t.isCallExpression(templateArg) && isTemplateFunction(templateArg.callee.name)) { //TODO: what if fragment is transformed to ArrayExpression before this transformation?
       args[lastIndex] = toRenderFunction(templateArg)
    }
 }
@@ -74,13 +85,17 @@ function transformElseCall(path) {
    transformTemplateArgToRenderFunction(path.node.arguments)
 }
 
-function isJSXFragment(name) {
+function isJSXFragment(node) {
+   console.log('node', node)
+   if (!t.isCallExpression(node) || !isTemplateFunction(node.callee.name)) return false;
+   const name = node.arguments[0].name;
    return !!name && (name === '_Fragment' || name === 'Fragment')
 }
 
 function transformJSXCall(path) {
    const args = path.node.arguments
-   if (isJSXFragment(args[0].name)) {
+   if (isJSXFragment(path.node)) {
+      // console.log('fragment', args[1].properties[0].value)
       path.replaceWith(normalizeToArrayExpression(args[1].properties[0].value))
       return;
    }
@@ -124,11 +139,52 @@ function transformJSXAttributes(properties) {
          if (!paramNode) eventListenerNode.params.push(t.identifier('e'))
          eventListenerNode.body.left.arguments.push(t.identifier(eventParameter))
       }
-      else if (isDerivation(property.get('value'))) {
+      else if (t.isObjectExpression(value)){
+         transformObjectProperties(property.get('value.properties'))
+      }
+      else if (t.isArrayExpression(value)){
+         transformArrayElements(property.get('value.elements'))
+      }
+      else if (!key.startsWith('on:') && isDerivation(property.get('value'))) { //TODO: need a way to mark attributes that request callback functions
          propertyNode.value = toDerivationFunction(value)
       }
    }
 }
+
+
+function transformArrayElements(elements) {
+   for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      const elementNode = element.node;
+      if (t.isObjectExpression(elementNode)){
+         transformObjectProperties(property.get(`element.${i}.properties`))
+      }
+      else if (t.isArrayExpression(elementNode)){
+         transformArrayElements(property.get(`element.${i}.elements`))
+      }
+      else if (isDerivation(element)) {
+         element.replaceWith(toDerivationFunction(elementNode))
+      }
+   }
+}
+
+function transformObjectProperties(properties) {
+   for (let i = 0; i < properties.length; i++) {
+      const property = properties[i];
+      const propertyNode = property.node;
+      if (t.isObjectExpression(propertyNode.value)){
+         transformObjectProperties(property.get('value.properties'))
+      }
+      else if (t.isArrayExpression(propertyNode.value)){
+         transformArrayElements(property.get('value.elements'))
+      }
+      else if (isDerivation(property.get('value'))) {
+         propertyNode.value = toDerivationFunction(propertyNode.value)
+      }
+   }
+}
+
+
 
 function hasTargetedEvent(key, value) {
    return key.startsWith('on:') &&
@@ -139,7 +195,6 @@ function hasTargetedEvent(key, value) {
 }
 
 function toRenderFunction(node) {
-   console.log('toRender function')
    return t.arrowFunctionExpression(
       [], // No parameters
       t.isSequenceExpression(node) ? node : normalizeToArrayExpression(node) //TODO: normalizeToArrayExpression for last argument in sequence expression
@@ -148,6 +203,7 @@ function toRenderFunction(node) {
 
 function normalizeToArrayExpression(node) {
    if (t.isArrayExpression(node)) return node;
+   if (isJSXFragment(node)) return node;
    return t.arrayExpression([node])
 }
 
@@ -178,25 +234,57 @@ function isDerivation(path) {
    // - X <transition-node with={slide({})}>  
    // - ? <context-node with={{[_dog_]: ???}}>
    // - O property access from ionized model: item.name 
+
+   // template impromptu derivation contexts
+   // - conditions
+   // - dynamic list
+   // - jsx element children
+   // - style/class object property value
+   // - 
+
+   // non-derivation contexts
+   // - transition-node 'with' attribute
+   // - context-node 'with' attribute
    
 
    const node = path.node;
    if (t.isLiteral(node) || t.isIdentifier(node) || !node) {
       return false;
    }
-   if (t.isExpression(node) && hasCallExpression(path)) {
+   if (t.isExpression(node) && (hasIonicCallExpression(path) || hasNonIonMemberExpression(path))) {
       return true;
    }
    return false;
 }
 
+const nonIonicCalls = new Set(['rein', 'readonly', 'slide', 'fade'])
 
-function hasCallExpression(path) {
-   if (t.isCallExpression(path.node))
+function isPotentiallyIonicCall(callExpression){
+   return !nonIonicCalls.has(callExpression.callee.name)
+}
+
+//TODO: exclude rein() and readonly() and slide() etc...  should I require a $ prefix on calls?? 
+function hasIonicCallExpression(path) {
+   if (t.isCallExpression(path.node) && isPotentiallyIonicCall(path.node))
       return true;
    let found = false;
    path.traverse({
       CallExpression() {
+         found = true;
+         path.stop()
+      }
+   })
+   return found;
+}
+
+function hasNonIonMemberExpression(path){
+   const node = path.node
+   if (t.isMemberExpression(node) && !node.property.name.startsWith('$'))
+      return true;
+   let found = false;
+   path.traverse({
+      MemberExpression(path) {
+         if (node.property.name.startsWith('$')) return;
          found = true;
          path.stop()
       }

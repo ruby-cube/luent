@@ -22,7 +22,7 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
             nodePodIndex?: number,
             $condition?: ReactiveGet<Booleanny>,
             // setup?: () => AnyObject,
-            phasicNode: TransitionNode | undefined,
+            // phasicNode: TransitionNode | undefined,
         }
     ) {
         super(statementType, renderConditional, optionals?.$condition)

@@ -88,7 +88,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
       return slot as (...args: any[]) => NodeEntity;
    }
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
-   return () => slot;
+      return () => slot;
 }
 
 export function makeNode(
@@ -118,7 +118,6 @@ export function makeNode(
          return new SwapConfig('display')
 
       case 'swap:mount':
-
          return new SwapConfig('mount')
 
       case 'swap:instance':

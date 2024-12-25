@@ -33,11 +33,6 @@ export function MountIf() {
    //NOTE: if transit-node duration is shorter than phasic-node duration, it will disable phasic-node transition
    return Component(
       <>
-         {/* <context-node with={{ dog: 'hi' }}>{()=>
-            <div>hi</div>
-         }</context-node> */}
-         {undefined}
-
          <h1>Hello {todos[0]}</h1>
          <phasic-node>
             {If($active,

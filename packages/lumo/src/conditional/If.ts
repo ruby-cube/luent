@@ -5,11 +5,10 @@ import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { ReactiveGet } from "../../../quarky/src";
 import { getContext, popContext, pushContext } from "../context/context-stack";
-import { getPhasicNode } from "../transition/PhasicNode";
+// import { getPhasicNode } from "../transition/PhasicNode";
 import { createNodeContext } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
-
 
 let currentNodePodIndex: number | undefined = undefined
 function resetCurrentNodePodIndex(index?: number) {
@@ -51,7 +50,7 @@ export function If($condition: Booleanny | ((_?: any) => Booleanny), typeOrRende
       // 'create',
       getContext(),
       transitionNodes,
-      { $condition, phasicNode: getPhasicNode() }
+      { $condition }
    )
 }
 
@@ -73,7 +72,7 @@ export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), typeOrR
       // 'create',
       getContext(),
       transitionNodes,
-      { $condition, phasicNode: getPhasicNode() }
+      { $condition }
    )
 }
 
@@ -97,7 +96,6 @@ export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | Acti
       activationType,
       getContext(),
       transitionNodes,
-      { phasicNode: getPhasicNode() }
    )
 }
 
@@ -145,7 +143,7 @@ export function ShowIf($condition: ReactiveGet<Booleanny>, renderConditional: Re
       'show',
       getContext(),
       transitionNodes,
-      { $condition, phasicNode: getPhasicNode() }
+      { $condition }
    )
 }
 
@@ -161,7 +159,7 @@ export function ElseShowIf($condition: ReactiveGet<Booleanny>, renderConditional
       'show',
       getContext(),
       transitionNodes,
-      { nodePodIndex: currentNodePodIndex, $condition, phasicNode: getPhasicNode() }
+      { nodePodIndex: currentNodePodIndex, $condition }
    )
 }
 
@@ -177,7 +175,7 @@ export function ElseShow(renderConditional: RenderFunction) {
       'show',
       getContext(),
       transitionNodes,
-      { nodePodIndex: currentNodePodIndex, phasicNode: getPhasicNode() }
+      { nodePodIndex: currentNodePodIndex }
    )
 }
 

@@ -92,7 +92,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    ) {
       super(statements, makeElseKit);
       const context = this.context = statements[0].context;
-      this.phasicNode = getPhasicNode(context);
+      this.phasicNode =       getPhasicNode(context);
+      // statements[0].optionals?.phasicNode
    }
 
    mount( // the initial mount after setup

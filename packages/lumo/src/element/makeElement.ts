@@ -47,6 +47,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
         }
     }
 
+    if (tagName === 'div') console.log('hey', classes)
     setUpClasses(domNode, normalizeToArray(classes))
     setUpStyles(domNode, normalizeToArray(styles))
     setUpEvents(domNode, events);
@@ -174,6 +175,9 @@ type DynamicClassesConfig = {
 
 function setUpClasses(node: Element, classes: (((o: DOMTokenList) => void) | string | DynamicClassesConfig)[]) {
     const classList = node.classList
+
+    console.log('classList', classList)
+    console.log('classes', classes)
     for (const entry of classes) {
         if (entry instanceof Function) {
             initializeRender(() => entry(classList))
@@ -189,7 +193,7 @@ function setUpClasses(node: Element, classes: (((o: DOMTokenList) => void) | str
         }
         else if (!isHydrating()) {
             if (__DEV__ && entry) warnDuplicateClasses(node.className, entry);
-            node.className = node.className + " " + entry
+            node.className = node.className ? node.className + " " + entry : entry;
         }
     }
 }
