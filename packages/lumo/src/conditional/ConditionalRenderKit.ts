@@ -16,11 +16,11 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
         statementType: 'if' | 'elseIf' | 'else',
         public renderConditional: RenderConditional,
         public type: 'create' | 'show' | 'mount' = 'create',
-        public context: Context,
         public transitionNodes: TransitionNode[],
         public optionals?: {
             nodePodIndex?: number,
             $condition?: ReactiveGet<Booleanny>,
+            context?: Context
             // setup?: () => AnyObject,
             // phasicNode: TransitionNode | undefined,
         }

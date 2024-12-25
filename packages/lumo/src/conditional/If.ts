@@ -48,9 +48,8 @@ export function If($condition: Booleanny | ((_?: any) => Booleanny), typeOrRende
       _wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),
       activationType,
       // 'create',
-      getContext(),
       transitionNodes,
-      { $condition }
+      { $condition, context: getContext() }
    )
 }
 
@@ -70,7 +69,6 @@ export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), typeOrR
       _wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),
       activationType,
       // 'create',
-      getContext(),
       transitionNodes,
       { $condition }
    )
@@ -94,7 +92,6 @@ export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | Acti
       _wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),
       // 'create',
       activationType,
-      getContext(),
       transitionNodes,
    )
 }
@@ -141,9 +138,8 @@ export function ShowIf($condition: ReactiveGet<Booleanny>, renderConditional: Re
       'if',
       wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),
       'show',
-      getContext(),
       transitionNodes,
-      { $condition }
+      { $condition, context: getContext() }
    )
 }
 
@@ -157,7 +153,6 @@ export function ElseShowIf($condition: ReactiveGet<Booleanny>, renderConditional
       'elseIf',
       wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),
       'show',
-      getContext(),
       transitionNodes,
       { nodePodIndex: currentNodePodIndex, $condition }
    )
@@ -173,7 +168,6 @@ export function ElseShow(renderConditional: RenderFunction) {
       'else',
       wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),
       'show',
-      getContext(),
       transitionNodes,
       { nodePodIndex: currentNodePodIndex }
    )

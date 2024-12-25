@@ -91,8 +91,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       public swap: SwapType = 'instance'
    ) {
       super(statements, makeElseKit);
-      const context = this.context = statements[0].context;
-      this.phasicNode =       getPhasicNode(context);
+      this.context = statements[0].optionals!.context!;
+      this.phasicNode = getPhasicNode();
       // statements[0].optionals?.phasicNode
    }
 
@@ -258,7 +258,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                   series.deactivateConditional(prevIndex)
 
                   if (!newTransitionIn) {
-           
+
                      // (3)
                      activateConditional()
                      // const finalPosition = phasicNode?.getDimsAndPosition();
@@ -296,7 +296,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                node.transitionIn(endTransition);
             }
             if (phasicNode) {
-               if (initialPosition && finalPosition) 
+               if (initialPosition && finalPosition)
                   phasicNode.morph(initialPosition, finalPosition)
                phasicNode.transitionIn(endTransition)
             }

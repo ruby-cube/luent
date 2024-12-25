@@ -26,7 +26,7 @@ export function MountIf() {
       }
    })
 
-   const todos = ionize([{name: 'bubby'}] as { name: string }[])
+   const todos = ionize([{ name: 'bubby' }] as { name: string }[])
 
    const removed = todos.splice(0, 2)
 
@@ -64,18 +64,21 @@ export function MountIf() {
          </phasic-node>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>
+         {/* <CounterButton $:increment={$count.increment} /> */}
       </>
    )
 }
 
-function Div(input = fromTag({
-   Slot: v<() => any>
-})) {
-   const { Slot } = input;
-   return Component(
-      Slot()
-   )
-}
+// function CounterButton(input = fromTag({
+//    // Slot: v<() => any>,
+//    '$:increment': v<() => void>
+// })) {
+//    // const { Slot } = input;
+//    return Component(
+//       ''
+//       // Slot()
+//    )
+// }
 
 // function DisplayCard({ id, title, description }) {
 //     // setup logic here...
