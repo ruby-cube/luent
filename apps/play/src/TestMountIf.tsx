@@ -1,4 +1,4 @@
-import { component, If, Else, fade, ElseIf, slide, fromTag, v } from "@rue/lumo";
+import { component, If, Else, fade, ElseIf, slide, fromTag, v, target } from "@rue/lumo";
 import { ion, ionize } from "@rue/quarky";
 
 export function MountIf() {
@@ -34,9 +34,9 @@ export function MountIf() {
    //NOTE: if transit-node duration is shorter than phasic-node duration, it will disable phasic-node transition
    return component(
       <>
-      <button on:click={()=>todos[0].name += '!'}>shout</button>
+         <button on:click={() => (todos[0].name += '!')}>shout</button>
          <h1>Hello {(todos[0].name)}</h1>
-         <div>{()=>'hi'}</div>
+         <div>{() => 'hi'}</div>
          <phasic-node>
             {If($active,
                <>
