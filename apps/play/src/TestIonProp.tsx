@@ -1,4 +1,4 @@
-import { Component, watch } from "@rue/lumo";
+import { component, watch } from "@rue/lumo";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
 import { ion, ionize } from "@rue/quarky";
 
@@ -63,7 +63,7 @@ export function TestIonProp() {
         $fullName.as('SirRobin theBrave')
     }
 
-    return Component(
+    return component(
         <>
             <div>{$firstName}</div>
             <div>{$lastName}</div>

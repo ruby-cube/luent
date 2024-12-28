@@ -1,5 +1,5 @@
 import {Fragment, jsxDEV} from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/jsx-runtime/src/index.ts";
-import {Component, If, Else, ElseIf, slide, fromTag, v} from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
+import {component, If, Else, ElseIf, slide, fromTag, v} from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
 import {ion, ionize} from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/quarky/src/index.ts";
 export function MountIf() {
     const $count = ion(0, {
@@ -24,7 +24,7 @@ export function MountIf() {
     });
     const todos = ionize([]);
     const removed = todos.splice(0, 2);
-    return Component(/* @__PURE__ */
+    return component(/* @__PURE__ */
     jsxDEV(Fragment, {
         children: [void 0, /* @__PURE__ */
         jsxDEV("h1", {
@@ -145,7 +145,7 @@ function Div(input=fromTag({
     Slot: v
 })) {
     const {Slot} = input;
-    return Component(Slot());
+    return component(Slot());
 }
 function CounterKit() {
     return {

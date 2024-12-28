@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, expose, fromTag, prep } from "@rue/lumo";
+import { component, expose, fromTag, prep } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 import { Article } from "./TestCustomCleanupScheduler";
 
@@ -115,7 +115,7 @@ function ListA() {
 
 
 
-   return Component(
+   return component(
       {
          incrementCount: $count.increment
       },
@@ -152,7 +152,7 @@ function List() {
    }
 
 
-   return Component(
+   return component(
       {
          incrementCount
       },

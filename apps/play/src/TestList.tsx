@@ -1,4 +1,4 @@
-import { Component, For } from "@rue/lumo";
+import { component, For } from "@rue/lumo";
 import { ionize } from "@rue/quarky";
 
 export function PlainList() {
@@ -9,7 +9,7 @@ export function PlainList() {
         { name: 'plums' },
     ])
 
-    return Component(
+    return component(
         <>
             {For($list, ($item, $index) =>
                 <p>{()=>$item.name}</p>

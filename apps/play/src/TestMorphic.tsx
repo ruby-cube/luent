@@ -1,4 +1,4 @@
-import { Component, NodeRef } from "@rue/lumo";
+import { component, NodeRef } from "@rue/lumo";
 import { MorphicComponent } from "../../../packages/lumo/src/morphic/MorphicNode";
 
 export function TestMorphic() {
@@ -19,7 +19,7 @@ export function TestMorphic() {
         $morphicNode()!.render(key)
     }
 
-    return Component(
+    return component(
         <>
             <$Morphable as='hi' ref={$morphicNode}></$Morphable>
             <button on:click={() => morph('hi')}>change to hi</button>
@@ -31,7 +31,7 @@ export function TestMorphic() {
 function CommentBlock(setup: {
     blue: string
 }) {
-    return Component({
+    return component({
         frog: true
     },
         <div>blah</div>

@@ -1,4 +1,4 @@
-import { Component, fromContext, fromTag, prep, TypedKey } from "@rue/lumo"
+import { component, fromContext, fromTag, prep, TypedKey } from "@rue/lumo"
 import { DerivedIon, ion, ionize } from "@rue/quarky";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
 
@@ -39,7 +39,7 @@ function Card() {
 
     function renderSlot() { }
 
-    return Component(
+    return component(
         <div>
             {renderSlot()}
         </div>
@@ -104,7 +104,7 @@ export function ParentBlock(
         makeKermit: $name.makeKermit
     }))
 
-    return Component(
+    return component(
         <>
             <h1>Parent</h1>
             <div on:click={$qualities.set}>{() => $frog.qualities}</div>
@@ -126,7 +126,7 @@ function ChildBlock(
 ) {
     const counter = fromContext(COUNTER)
 
-    return Component(
+    return component(
         <div style='outline: solid 1px gray; background-color: #C0CAAD; padding: 15px'>
             <h1>Child</h1>
             <p>
@@ -143,7 +143,7 @@ function ChildBlock(
 function SiblingBlock() {
     const counter = fromContext(COUNTER)
 
-    return Component(
+    return component(
         <div style='outline: solid 1px gray; background-color: #B26E63'>
             <h1>Sibling</h1>
             <p>
@@ -164,7 +164,7 @@ function GrandChildBlock() {
 
     console.log("$double count", $doubleCount)
 
-    return Component(
+    return component(
         <div style='outline: solid 1px gray; background-color: #B26E63'>
             <h1 on:click={() => name.makeKermit()}>Grandchild: {$name}</h1>
             <h1 on:click={() => name.makeKermit()}>Grandchild: {() => name.$}</h1>

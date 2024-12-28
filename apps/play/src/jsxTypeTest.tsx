@@ -1,10 +1,10 @@
-import { Component, fromTag, NodeRef } from "@rue/lumo";
+import { component, fromTag, NodeRef } from "@rue/lumo";
 import { v } from "../../../packages/lumo/src/InputTypes";
 
 function App() {
     const $list = NodeRef(List)
     const b = <List cat='' />
-    return Component(
+    return component(
         <>
             <div class='' ref={$list}>hi</div>
             <List cat='' ref={$list} frog=''>{() => { }}</List>
@@ -20,7 +20,7 @@ function List(
     })
 ) {
     const a = <div />
-    return Component(
+    return component(
         <>
             <div>
                 <>

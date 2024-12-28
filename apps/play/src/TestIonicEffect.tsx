@@ -1,4 +1,4 @@
-import { Component } from "@rue/lumo"
+import { component } from "@rue/lumo"
 import { BEFORE_RENDER, watchEffect, ion, SYNC, watch } from "@rue/quarky"
 
 
@@ -15,7 +15,7 @@ export function TestIonicEffect() {
         $count.increment()
     }, { phase: SYNC })
 
-    return Component(
+    return component(
         <button on:click={$count.increment}>click for effect</button>
     )
 }

@@ -1,4 +1,4 @@
-import { NodesRef, Component, If, Else, For, NodeRef, target } from "@rue/lumo";
+import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { ion, __addDevName, DerivedIon, ionize, isIonizedModel } from "../../../packages/quarky/src";
 import { watch } from "../../../packages/lumo/src/watch/watchAndPreserve";
@@ -100,7 +100,7 @@ export function List(
 
 
 
-   return Component(
+   return component(
       <>
          <h1>hello world</h1>
          <div on:click={e => $list.insert(0)} style="background-color: gray; cursor: pointer">

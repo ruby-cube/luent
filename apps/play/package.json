@@ -9,19 +9,24 @@
     "dependencies": {
         "@babel/traverse": "^7.26.4",
         "@rue/flask": "workspace:*",
+        "@rue/jsx-runtime": "workspace:*",
         "@rue/lumo": "workspace:*",
         "@rue/quarky": "workspace:*",
         "@rue/thread": "workspace:*",
-        "@rue/jsx-runtime": "workspace:*",
         "@rue/utils": "workspace:*"
-      },
-      "devDependencies": {
-         "@rue/vite-plugin-lumo": "workspace:*",
-         "@babel/cli": "^7.25.6",
-         "@babel/core": "^7.25.2",
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.25.6",
+        "@babel/core": "^7.25.2",
+        "@babel/plugin-syntax-jsx": "^7.25.9",
+        "@babel/plugin-syntax-typescript": "^7.25.9",
         "@babel/plugin-transform-react-jsx": "^7.25.2",
+        "@babel/preset-env": "^7.26.0",
+        "@babel/preset-react": "^7.26.3",
+        "@babel/preset-typescript": "^7.26.0",
         "@babel/types": "^7.26.3",
         "@rue/types": "workspace:*",
+        "@rue/vite-plugin-lumo": "workspace:*",
         "@types/babel__core": "^7.20.5",
         "@types/babel__traverse": "^7.20.6",
         "vite": "^5.4.3"

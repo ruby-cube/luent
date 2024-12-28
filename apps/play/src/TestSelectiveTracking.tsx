@@ -1,4 +1,4 @@
-import { Component } from "@rue/lumo";
+import { component } from "@rue/lumo";
 import { DerivedIon, ion, ionize, isIon, watch, watchEffect } from "@rue/quarky";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
 
@@ -63,7 +63,7 @@ export function TestSelectiveTracking() {
         console.log('frog name changed', name)
     })
 
-    return Component(
+    return component(
         () =>
             <>
                 <div>{$count}</div>

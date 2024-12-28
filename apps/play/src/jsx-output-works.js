@@ -1,5 +1,5 @@
 import { Fragment, jsx } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/jsx-runtime/src/index.ts";
-import { Component, If, Else, ElseIf, slide, fromTag, v } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
+import { component, If, Else, ElseIf, slide, fromTag, v } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
 import { ion, ionize } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/quarky/src/index.ts";
 export function MountIf() {
    const $count = ion(0, {
@@ -26,7 +26,7 @@ export function MountIf() {
       name: "bubby"
    }]);
    const removed = todos.splice(0, 2);
-   return Component(
+   return component(
       jsx(Fragment, {
          children: [
             jsx("h1", {
@@ -89,5 +89,5 @@ function Div(input = fromTag({
    Slot: v
 })) {
    const { Slot } = input;
-   return Component(Slot());
+   return component(Slot());
 }

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, NodeRef, watch } from "@rue/lumo"
+import { component, NodeRef, watch } from "@rue/lumo"
 import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchEffect, } from "@rue/quarky"
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon"
 import { or, $setup, is, isDefined, isAny, not } from "../../../packages/lumo/src/component/X_$setup"
@@ -32,7 +32,7 @@ export function Article({ content } = input({
    content: Type('?', String).default('hi')
 })) {
 
-   return Component(
+   return component(
       <article>
          <p>{content}</p>
       </article>
@@ -115,7 +115,7 @@ export function Bog(setup: {
 
    // const _name = name ?? 'sir robin'
 
-   return Component(
+   return component(
       <div>hi</div>
    )
 }
@@ -220,7 +220,7 @@ export function TestCleanupSchedulerJS({ $count, $frog, date, idea, name, nameC 
 
    const priceCurrency = asCurrency(priceNum, 'USD')
 
-   return Component(
+   return component(
       <p>{asCurrency(price)}</p>
    )
 }
@@ -389,7 +389,7 @@ export function TestCleanupScheduler({
 
 
 
-   return Component(
+   return component(
       () =>
          <>
             <textarea $content={exo($text, { setText: 'setContent' })}></textarea>
@@ -441,7 +441,7 @@ function ChildBlock() {
 
 
 
-   return Component(
+   return component(
       <div style color={text_color}></div>
    )
 }

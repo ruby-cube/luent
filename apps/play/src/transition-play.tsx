@@ -1,10 +1,10 @@
-import { Component } from "@rue/lumo";
+import { component } from "@rue/lumo";
 import { fade } from "../../../packages/lumo/src/transition/transitions";
 
 // fade-in-out with different transitions
 
 function TransitionTest() {
-    return Component(
+    return component(
         <div>
             <div on:copy={() => { }}>
                 <phasic-node both={fade}>

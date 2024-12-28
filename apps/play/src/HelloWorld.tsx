@@ -1,11 +1,10 @@
-//@ts-nocheck
-import { Component, Else, ElseIf, expose, For, fromTag, If, prep, v, watch } from "@rue/lumo";
+import { Component, Else, ElseIf, expose, For, fromTag, If, Ion, prep, v, watch } from "@rue/lumo";
 import { ion, ionize, Ionized, ionizeWithMarks } from "@rue/quarky";
 import { Inert, inert } from "../../../packages/quarky/src/ionize/inert";
 import { Well, Wellerman } from "./Well";
 
 function Swap() {
-   return Component('')
+   return component('')
 }
 
 
@@ -139,7 +138,7 @@ export function IonAccess() {
 
    const res = list$.map((item, index, array) => item!.name)
 
-   return Component(
+   return component(
       <>
          <swap:mount />
          {If($x() > 10,
@@ -163,7 +162,7 @@ function SvelteA() {
    //@ts-ignore
    const $x = ion(7)
 
-   return Component(
+   return component(
       <>
          <swap:mount />
          {If($x() > 10,
@@ -187,7 +186,7 @@ function SvelteA() {
    //@ts-ignore
    const $count = ion(7)
 
-   return Component(
+   return component(
       <div>
          {If($count, $count)}
       </div>
@@ -198,16 +197,27 @@ function SvelteA() {
    //@ts-ignore
    const $count = ion(7)
 
-   return Component(
+   return component(
       <div>
          {If($count, <>{$count}</>)}
       </div>
    )
 }
 
+function ColumnB() {
+
+   return component(
+      <SomeComponent name=''>
+         {(o = SelectionKit()) =>
+            <div>{o.name}</div>}
+      </SomeComponent>
+   )
+}
+
 export function HelloWorld() {
-   return Component(
-      <h1>hello world</h1>
+   return component(
+      // <h1>hello world</h1>
+      <input m:value={$value}></input>
 
    )
 }
@@ -244,7 +254,7 @@ function ListB() {
 
 function Column() {
 
-   return Component(
+   return component(
       <div>
          <div>{function butterfly() { }}</div>
          <div>{0}</div>
@@ -256,14 +266,14 @@ function of(list: any) {
    return ['', 9] as [string, number]
 }
 // function For(input: { [key: string]: any, Slot: any[] }) {
-//    return Component(
+//    return component(
 //       ''
 //    )
 // }
 
 function ColumnB() {
 
-   return Component(
+   return component(
       <SomeComponent name=''>
          {(o = SelectionKit()) => <>
             <div>{o.name}</div>
@@ -274,7 +284,7 @@ function ColumnB() {
 }
 
 function SomeComponent(input = fromTag({ name: v<string> })) {
-   return Component(
+   return component(
       <></>
    )
 }
@@ -304,7 +314,7 @@ function ColumnBlock(
 ) {
    const { name } = prep(input)
 
-   return Component(
+   return component(
       <div>{name}</div>
    )
 }
@@ -324,7 +334,7 @@ function ColumnBlock(
 
 
 function SomeBlock(input: { name?: string | number, Slot?: ((input: any) => any | any[]) | any, let?: any }) {
-   return Component(
+   return component(
       ''
    )
 }
@@ -336,8 +346,10 @@ function SelectionKit() {
 }
 
 function J(input: { for: any, Slot: any, params: any }) {
-   return Component(
-      ''
+   const dog = { name: 9 }
+
+   return component(
+      <Comp m:value={[dog, 'name']}></Comp>
    )
 }
 
@@ -345,4 +357,24 @@ function MouseKit() {
    return {
       bug: 0
    }
+}
+
+function Comp(input = fromTag({
+   'm:value': Ion<{}>
+})) {
+
+   const frog = ionize({
+      firstName: 'sir',
+      lastName: 'robin',
+      get fullname() {
+         return frog.firstName + ' ' + frog.lastName
+      }
+   })
+   return component(
+      <>
+         <h1>{frog.fullname}</h1>
+         <input v-model="frog.firstName" />
+         <input v-model="frog.lastName" />
+      </>
+   )
 }

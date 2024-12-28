@@ -1,7 +1,7 @@
-import { Component } from "@rue/lumo";
+import { component } from "@rue/lumo";
 
 export function Check(){
-   return Component(
+   return component(
       <>
          <h1>Hello WOrld</h1>
          <p>star</p>
@@ -10,5 +10,5 @@ export function Check(){
 }
 
 function List(){
-   return Component('')
+   return component('')
 }

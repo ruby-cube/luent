@@ -1,4 +1,4 @@
-import { Component } from "@rue/lumo";
+import { component } from "@rue/lumo";
 import { ionize, watch } from "@rue/quarky";
 
 
@@ -15,7 +15,7 @@ function ToDos() {
 
 
 
-    return Component(
+    return component(
         <div>hi</div>
     )
 }

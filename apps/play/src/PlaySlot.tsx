@@ -67,7 +67,7 @@ function FooBar() {
 
     const $foo = ion(0)
 
-    return Component(
+    return component(
         {
             $foo
         },

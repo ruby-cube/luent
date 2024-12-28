@@ -1,4 +1,4 @@
-import { Component, For } from "@rue/lumo";
+import { component, For } from "@rue/lumo";
 import { ion, ionize } from "@rue/quarky";
 
 export function TestDerived() {
@@ -33,7 +33,7 @@ export function TestDerived() {
       }
    }
 
-   return Component(
+   return component(
       <>
          {For(counts$, (n, $index) =>
             <div style={['display: inline-block; padding: 10px', o => beigeHighlight(o, $index())]}>{n}</div>

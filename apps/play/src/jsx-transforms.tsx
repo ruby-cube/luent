@@ -1,5 +1,5 @@
 
-import { Component, fromTag, If, NodeEntity, prep, v } from "@rue/lumo";
+import { component, fromTag, If, NodeEntity, prep, v } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
 // - [ ]  transform slot to render function for:
@@ -8,7 +8,7 @@ import { ion } from "@rue/quarky";
 
 // text
 function CompA() {
-   return Component(
+   return component(
       <div>Hello</div>
    )
 }
@@ -17,7 +17,7 @@ function CompA() {
 function CompB() {
    const $hello = ion('hi')
 
-   return Component(
+   return component(
       <div>{$hello}</div>
    )
 }
@@ -26,7 +26,7 @@ function CompB() {
 function CompC() {
    const $hello = ion('hi')
 
-   return Component(
+   return component(
       <div>greeting: {$hello}</div>
    )
 }
@@ -37,7 +37,7 @@ function CompC() {
 function CompD() {
    const $hello = ion('hi')
 
-   return Component(
+   return component(
       <div>{$hello() + '!'}</div>
    )
 }
@@ -46,7 +46,7 @@ function CompD() {
 function CompDTransform() {
    const $hello = ion('hi')
 
-   return Component(
+   return component(
       <div>{() => function $() { return $hello() + '!' }}</div>
    )
 }
@@ -55,7 +55,7 @@ function CompDTransform() {
 function CompE() {
    const $hello = ion('hi')
 
-   return Component(
+   return component(
       <div><p>{$hello() + '!'}</p></div>
    )
 }
@@ -63,7 +63,7 @@ function CompE() {
 // a component
 function CompG() {
 
-   return Component(
+   return component(
       <div><CompA /></div>
    )
 }
@@ -72,7 +72,7 @@ function CompG() {
 function CompF() {
    const $hello = ion('hi')
 
-   return Component(
+   return component(
       <div>
          <h1>Hello World</h1>
          <p>{$hello() + '!'}</p>
@@ -80,18 +80,18 @@ function CompF() {
    )
 }
 
-// Component with slot: single child
+// component with slot: single child
 function Parent() {
-   return Component(
+   return component(
       <Child>
          <div>hi</div>
       </Child>
    )
 }
 
-// Component with slot: multi childs
+// component with slot: multi childs
 function ParentB() {
-   return Component(
+   return component(
       <Child>
          <div>hi</div>
          <div>bye</div>
@@ -103,9 +103,9 @@ function kit() {
    return {}
 }
 let o: any;
-// Component with sequence expression
+// component with sequence expression
 function ParentD() {
-   return Component(
+   return component(
       <Child>
          {(o = kit(),
             <div>
@@ -115,9 +115,9 @@ function ParentD() {
       </Child>
    )
 }
-// Component with sequence expression: fragment
+// component with sequence expression: fragment
 function ParentD2() {
-   return Component(
+   return component(
       <Child>
          {(o = kit(), <>
             <div>hi</div>
@@ -127,18 +127,18 @@ function ParentD2() {
    )
 }
 
-// Component with slot input
+// component with slot input
 function ParentE() {
-   return Component(
+   return component(
       <Child> {o =>
          <div>hi</div>}
       </Child>
    )
 }
 
-// Component with slot input with fragment
+// component with slot input with fragment
 function ParentE3() {
-   return Component(
+   return component(
       <Child>
          {o => <>
             <div>hi</div>
@@ -147,18 +147,18 @@ function ParentE3() {
    )
 }
 
-// Component with slot input with parentheses
+// component with slot input with parentheses
 function ParentE2() {
-   return Component(
+   return component(
       <Child> {(o) =>
          <div>hi</div>}
       </Child>
    )
 }
 
-// Component with named slot
+// component with named slot
 function ParentC() {
-   return Component(
+   return component(
       <Child>
          {{
             title:
@@ -170,9 +170,9 @@ function ParentC() {
    )
 }
 
-// Component with named slot: with slot input or render function
+// component with named slot: with slot input or render function
 function ParentF() {
-   return Component(
+   return component(
       <Child>
          {{
             title: (o) =>
@@ -188,7 +188,7 @@ function ParentF() {
 function ParentG() {
    const $active = ion(true);
 
-   return Component(
+   return component(
       <div>
          {If($active,
             <p>yay</p>
@@ -201,7 +201,7 @@ function ParentG() {
 function ParentG3() {
    const $active = ion(true);
 
-   return Component(
+   return component(
       <div>
          {If($active, <>
             <p>yay</p>
@@ -216,7 +216,7 @@ function ParentG3() {
 function ParentG2() {
    const $active = ion(true);
 
-   return Component(
+   return component(
       <div>
          {If($active, (o = kit(),
             <p>yay</p>
@@ -232,7 +232,7 @@ function Child(input = fromTag({
 
    const { Slot } = prep(input)
 
-   return Component(
+   return component(
       ''
    )
 }

@@ -1,4 +1,4 @@
-import { Component, If, Else, fade, ElseIf, slide, fromTag, v } from "@rue/lumo";
+import { component, If, Else, fade, ElseIf, slide, fromTag, v } from "@rue/lumo";
 import { ion, ionize } from "@rue/quarky";
 
 export function MountIf() {
@@ -28,12 +28,14 @@ export function MountIf() {
 
    const todos = ionize([{ name: 'bubby' }] as { name: string }[])
 
-   const removed = todos.splice(0, 2)
+   // const removed = todos.splice(0, 2)
+
 
    //NOTE: if transit-node duration is shorter than phasic-node duration, it will disable phasic-node transition
-   return Component(
+   return component(
       <>
-         <h1>Hello {todos[0]}</h1>
+      <button on:click={()=>todos[0].name += '!'}>shout</button>
+         <h1>Hello {(todos[0].name)}</h1>
          <phasic-node>
             {If($active,
                <>
@@ -74,7 +76,7 @@ export function MountIf() {
 //    '$:increment': v<() => void>
 // })) {
 //    // const { Slot } = input;
-//    return Component(
+//    return component(
 //       ''
 //       // Slot()
 //    )
@@ -86,7 +88,7 @@ export function MountIf() {
 
 //     }
 
-//     return Component(
+//     return component(
 //         <div on:click={e => { if (e.targets('x-select')) select() }}>
 //             <p x-select>{title}</p>
 //             <p contenteditable>{description}</p>
@@ -104,7 +106,7 @@ export function MountIf() {
 
 //     }
 
-//     return Component(
+//     return component(
 //         <div on:click={'x-select', e => { if (e.targets('x-select')) select() }}>
 //             <p x-select>{title}</p>
 //             <p contenteditable>{description}</p>
@@ -179,7 +181,7 @@ function ArticleBlock(setup: {
 
 //     $count.as(1)
 
-//     return Component(
+//     return component(
 //         <>
 //             <div ref={$countDiv}>{$count}</div>
 //             <button on:click-this-$button-v={[$count.as($count() + 1), stopPropagation]} ref={$button}>increment</button >

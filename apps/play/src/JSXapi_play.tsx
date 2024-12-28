@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, fromContext, Suspense, teleportTo } from "@rue/lumo";
+import { component, fromContext, Suspense, teleportTo } from "@rue/lumo";
 import { $setup } from "../../../packages/lumo/src/component/X_$setup";
 import { noop } from "@rue/utils";
 import { M } from "vite/dist/node/types.d-aGj9QkWt";
@@ -30,16 +30,46 @@ const hi = () =>
       with: fade
    });
 
+   {If($active).mount(
+      <p>{$count}</p>
+   )}
+   
+   {If ($count() > $max()) (
+      <p>{$count}</p>
+   )}
+   
+   {If ($active) (
+      <p>{$count}</p>
+   )}
+   {ElseIf ($lateShift) (
+      <p>do this {$count}</p>
+   )}
+   
+   {If ($count() > $max()) (
+      <p>{$count}</p>
+   )}
+
+   {If($active,
+      <p>{$count}</p>
+   )}
+   
+   {If($count() > $max(),
+      <p>{$count}</p>
+   )}
+
+   {For(list, (item, index) =>
+      <p>hi</p>
+   )}
 
    // const $ItemBlock = SuspenseNode({
    //     Pending: ItemBlock,
    //     PlaceHolder: (props) =>
-   //         Component(
+   //         component(
    //             <div>Eep! I'm not ready {props.frog}</div>
    //         )
    //     ,
    //     Error: (props) =>
-   //         Component(
+   //         component(
    //             <div>{props.error}</div>
    //         )
    //     ,
@@ -48,7 +78,7 @@ const hi = () =>
    // const $ItemBlock = TentativeNode({
    //     Tentative: ItemBlock,
    //     Error: ({ error }) =>
-   //         Component(
+   //         component(
    //             <div>{error}</div>
    //         )
    // })
@@ -93,7 +123,7 @@ const hi = () =>
 
    }
 
-   return Component(
+   return component(
       <>
          <div>
             <div>
@@ -950,7 +980,7 @@ const hi = () =>
 function Lolly() {
    const $frog = ionize({ name: 'kermit' })
 
-   return Component(
+   return component(
       <>
          {Context(
             set(FROG, $frog),
@@ -969,7 +999,7 @@ function Dobby() {
 export function NumberedBoxes(input = fromTag({ num: v<number> })) {
    const { num } = prep(input)
 
-   return Component(
+   return component(
       <>
          <div class='box'>{count}</div>
          {[

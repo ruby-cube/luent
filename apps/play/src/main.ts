@@ -8,10 +8,11 @@ import './style.css'
 // import { TestConditional } from './TestConditional';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 // import { List } from './TestReactiveModel';
-import { Component, createApp } from '@rue/lumo';
+import { component, createApp } from '@rue/lumo';
 // import { ionize, ionize } from '@rue/quarky';
 // import { DeepReactiveModel, asMetaIonizedModel, ionize, ionize } from '@rue/quarky';
 import { MountIf } from './TestMountIf';
+import { ionize } from '@rue/quarky';
 // import { PlainList } from './TestList';
 // import { HelloWorld } from './HelloWorld';
 // import { Check } from './childrenTest';
@@ -35,6 +36,8 @@ if (__DEV__) configureFlask({
 })
 
 app.mount('#app')
+
+
 
 
 // function doSomething() {

@@ -1,4 +1,4 @@
-import { Component, For, fromTag, v, watchEffect } from "@rue/lumo";
+import { component, For, fromTag, v, watchEffect } from "@rue/lumo";
 import { ion, ionize, rein } from "@rue/quarky";
 
 
@@ -69,7 +69,7 @@ export function OverrideMethods() {
 
 
 
-   return Component(
+   return component(
       <>
          {For(list, (item, $index) =>
             <p>{item!.num}</p>
@@ -86,7 +86,7 @@ export function OverrideMethods() {
 }
 
 function PotterBlock(input = fromTag({ count: v<any> })) {
-   return Component(
+   return component(
       'hi'
    )
 }
