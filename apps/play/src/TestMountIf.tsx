@@ -36,6 +36,7 @@ export function MountIf() {
       <>
       <button on:click={()=>todos[0].name += '!'}>shout</button>
          <h1>Hello {(todos[0].name)}</h1>
+         <div>{()=>'hi'}</div>
          <phasic-node>
             {If($active,
                <>

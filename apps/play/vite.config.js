@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 import babelLumoTransform from '../../packages/lumo/babel-plugin/index.js'
 import * as babel from '@babel/core';
 
+
 export default defineConfig({
    server: {
       fs: {
@@ -15,56 +16,26 @@ export default defineConfig({
          enforce: 'pre',
          async transform(code, id) {
             if (!id.endsWith('.jsx') && !id.endsWith('.tsx')) return;
-            function annotateCodeParentheses(sourceCode) {
-               const blockCommentRegex = /\/\*[\s\S]*?\*\//g; // Matches block comments
-               let result = "";
-               let lastIndex = 0;
-             
-               // Process each block comment and annotate only outside them
-               for (const match of sourceCode.matchAll(blockCommentRegex)) {
-                 const [comment] = match;
-                 const start = match.index;
-                 const end = start + comment.length;
-             
-                 // Annotate the code before the block comment
-                 result += annotateParentheses(sourceCode.slice(lastIndex, start));
-             
-                 // Add the block comment as-is
-                 result += comment;
-             
-                 // Update the last processed index
-                 lastIndex = end;
-               }
-             
-               // Annotate the remaining code after the last block comment
-               result += annotateParentheses(sourceCode.slice(lastIndex));
-             
-               return result;
-             }
-            function annotateParentheses(sourceCode) {
-               return sourceCode
-                  .replace(/\(/g, '/*PARENS::OPEN*/(')
-                  .replace(/\)/g, ')/*PARENS::CLOSE*/');
-            }
 
-            // const result = await babel.transformAsync(code, {
-            //             // ['@babel/plugin-transform-react-jsx', { 
-            //             //    throwIfNamespace: false, 
-            //             //    runtime: 'automatic',
-            //             //    importSource: '@rue'
-            //             // }], 
-            //             plugins: [
-            //                // ['@babel/plugin-syntax-jsx', {throwIfNamespace: false}], 
-            //                babelLumoTransform,
-            //                ['@babel/plugin-syntax-typescript', {isTSX: true}]
-            //             ],
-            //             // presets: ['@babel/preset-typescript'],
-            //             filename: id,
-            //             sourceMaps: true, // Optional, useful for debugging
-            //          });
+            const result = await babel.transformAsync(code, {
+               // ['@babel/plugin-transform-react-jsx', { 
+               //    throwIfNamespace: false, 
+               //    runtime: 'automatic',
+               //    importSource: '@rue'
+               // }], 
+               plugins: [
+                  // ['@babel/plugin-syntax-jsx', {throwIfNamespace: false}], 
+                  babelLumoTransform.pre,
+                  ['@babel/plugin-syntax-typescript', { isTSX: true }]
+               ],
+               // presets: ['@babel/preset-typescript'],
+               filename: id,
+               sourceMaps: true, // Optional, useful for debugging
+            });
 
             return {
-               code: annotateCodeParentheses(code),
+               code: result.code,
+               map: result.map
             };
          },
       },
@@ -81,7 +52,7 @@ export default defineConfig({
                // }], 
                plugins: [
                   // ['@babel/plugin-syntax-jsx', {throwIfNamespace: false}], 
-                  babelLumoTransform,
+                  babelLumoTransform.post,
                   // ['@babel/plugin-syntax-typescript', {isTSX: true}]
                ],
                // presets: ['@babel/preset-typescript'],
@@ -89,13 +60,8 @@ export default defineConfig({
                sourceMaps: true, // Optional, useful for debugging
             });
 
-            function removeParenthesesAnnotation(sourceCode) {
-               return sourceCode
-                  .replace('/*PARENS::OPEN*/', '')
-                  .replace('/*PARENS::CLOSE*/', '');
-            }
             return {
-               code: removeParenthesesAnnotation(result.code),
+               code: result.code,
                map: result.map, // Include source maps
             };
          },
