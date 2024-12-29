@@ -43,9 +43,9 @@ type JSXTemplate = NodeEntity
 
 //TODO: accept a third paramenter for mountTeleported
 // compiler macro to transform jsx template into render function
-export function Component<T extends AnyObject | undefined = AnyObject | undefined>(exposedComponent: T, template: JSXTemplate): Component<T>
-export function Component<T extends AnyObject | undefined = AnyObject | undefined>(template: JSXTemplate): Component<undefined>
-export function Component<T extends AnyObject | undefined = AnyObject | undefined>(templateOrComponent: T | JSXTemplate, template?: JSXTemplate): Component<T extends AnyObject ? T : undefined> {
+export function component<T extends AnyObject | undefined = AnyObject | undefined>(exposedComponent: T, template: JSXTemplate): Component<T>
+export function component<T extends AnyObject | undefined = AnyObject | undefined>(template: JSXTemplate): Component<undefined>
+export function component<T extends AnyObject | undefined = AnyObject | undefined>(templateOrComponent: T | JSXTemplate, template?: JSXTemplate): Component<T extends AnyObject ? T : undefined> {
    const renderedTemplate = arguments.length === 2 ? template : templateOrComponent as JSXTemplate;
    const exposedComponent = arguments.length === 2 ? templateOrComponent as AnyObject : undefined;
    return {

@@ -6,7 +6,7 @@ import { makeElement } from "../element/makeElement";
 import { defineContextProp } from "../context/ContextKey";
 import { contextual } from "../context/provide";
 import { Ion } from "@rue/quarky";
-import { Component } from "../component/InternalComponent";
+import { component } from "../component/InternalComponent";
 import { Else, If } from "../conditional/If";
 
 export function renderTransitNode(
@@ -17,7 +17,7 @@ export function renderTransitNode(
 ) {
     if ($disable) {
         const output = Slot instanceof Function ? Slot() : Slot
-        return Component(
+        return component(
             [
                 If($disable, () =>
                     output

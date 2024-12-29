@@ -1,4 +1,4 @@
-import { Component } from "../component/InternalComponent"
+import { component } from "../component/InternalComponent"
 import { appwide, contextual, provideAppwide } from "./provide"
 import { _dog_ } from "./x_context-keys"
 import { _cat_ } from "./x_context-keysB"
@@ -8,7 +8,7 @@ const dog = provideAppwide(_dog_, undefined)
 const cat = provideAppwide(_cat_, 0)
 
 function List() {
-    return Component(
+    return component(
         <>
             <context-node with={{ [_dog_]: 0 }}>
                 <p>hello</p>

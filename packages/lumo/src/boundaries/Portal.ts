@@ -1,4 +1,4 @@
-import { Component, unnestComponent } from "../component/InternalComponent";
+import { component, unnestComponent } from "../component/InternalComponent";
 import { NodeEntity } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { _NodePod } from "../node/NodePod";
@@ -29,7 +29,7 @@ export function createPortalNode(Slot: ()=>NodeEntity, input: PortalNodeInput) {
 
     const _nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(Slot())), element, nodePod)
     mountNodeEntities(_nodeEntities, element)
-    return Component(undefined);
+    return component(undefined);
 }
 
 

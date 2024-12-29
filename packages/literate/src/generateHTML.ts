@@ -56,6 +56,6 @@ function makeRootComponent(Root: SSRComponentSetup, timer: ResponseTimer | undef
     if (timer) provide(RESPONSE_TIMER, timer)
     runComponentSetup(Root, component, undefined, undefined, undefined);
     component.emit(LifecycleHook.ON_CREATED)
-    popProvider() // for sibling components to access parent, must be set AFTER `Component()`
+    popProvider() // for sibling components to access parent, must be set AFTER `component()`
     return component
 }

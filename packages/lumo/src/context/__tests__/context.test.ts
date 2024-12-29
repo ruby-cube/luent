@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { appwide, contextual, createTransappContext, transapp } from '../provide';
-import { Component } from '../../component/InternalComponent';
+import { component } from '../../component/InternalComponent';
 import { createApp } from '../../createApp';
 import { makeComponent } from '../../component/makeComponent';
 import { makeElement } from '../../element/makeElement';
@@ -36,13 +36,13 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 frogA = appwide(_frog_)
-                return Component(makeComponent(Parent, undefined, {}, undefined))
+                return component(makeComponent(Parent, undefined, {}, undefined))
             }
 
             function Parent() {
                 frogB = appwide(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => [
                         makeComponent(Child, undefined, {}, undefined),
                         makeComponent(Sibling, undefined, {}, undefined)
@@ -54,7 +54,7 @@ describe('Integration tests the Context API', () => {
                 frogC = appwide(_frog_)
                 frogD = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['child'], {}, undefined)
                 )
             }
@@ -62,7 +62,7 @@ describe('Integration tests the Context API', () => {
             function Sibling() {
                 frogE = appwide(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['sibling'], {}, undefined)
                 )
             }
@@ -86,7 +86,7 @@ describe('Integration tests the Context API', () => {
                 frog = appwide(_frog_)
                 frogB = transapp(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
             }
@@ -104,7 +104,7 @@ describe('Integration tests the Context API', () => {
             let cat;
             function App() {
                 cat = appwide('cat')
-                return Component(
+                return component(
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
             }
@@ -119,7 +119,7 @@ describe('Integration tests the Context API', () => {
             let frog;
             function App() {
                 frog = appwide(_frog_)
-                return Component(
+                return component(
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
             }
@@ -142,7 +142,7 @@ describe('Integration tests the Context API', () => {
                 frog = appwide(_frog_)
                 frogB = transapp(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
             }
@@ -192,7 +192,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 frogA = appwide(_frog_)
-                return Component(
+                return component(
                     createNodeContext(() => [
                         makeComponent(Parent, undefined, {}, undefined)
                     ], { with: { [_frog_]: value } })
@@ -203,7 +203,7 @@ describe('Integration tests the Context API', () => {
                 frogB = appwide(_frog_)
                 frogC = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => [
                         makeComponent(Child, undefined, {}, undefined),
                         makeComponent(Sibling, undefined, {}, undefined)
@@ -214,7 +214,7 @@ describe('Integration tests the Context API', () => {
             function Child() {
                 frogD = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['child'], {}, undefined)
                 )
             }
@@ -222,7 +222,7 @@ describe('Integration tests the Context API', () => {
             function Sibling() {
                 frogE = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['sibling'], {}, undefined)
                 )
             }
@@ -246,7 +246,7 @@ describe('Integration tests the Context API', () => {
 
             function Parent() {
 
-                return Component(
+                return component(
                     makeElement('div', () => [
                         createNodeContext(() => [
                             makeComponent(Child, undefined, {}, undefined),
@@ -259,7 +259,7 @@ describe('Integration tests the Context API', () => {
             function Child() {
                 frogD = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['child'], {}, undefined)
                 )
             }
@@ -267,7 +267,7 @@ describe('Integration tests the Context API', () => {
             function Sibling() {
                 frogE = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['sibling'], {}, undefined)
                 )
             }
@@ -300,7 +300,7 @@ describe('Integration tests the Context API', () => {
 
             function App() {
 
-                return Component(
+                return component(
                     createNodeContext(() => [
                         makeComponent(Parent, undefined, {}, undefined)
                     ], { with: { [APP_CONTEXTUAL_FROG]: appContextualValue } })
@@ -309,7 +309,7 @@ describe('Integration tests the Context API', () => {
 
             function Parent() {
 
-                return Component(
+                return component(
                     makeElement('div', () => [
                         createNodeContext(() => [
                             makeComponent(Child, undefined, {}, undefined),
@@ -327,7 +327,7 @@ describe('Integration tests the Context API', () => {
                 frogE = contextual(APP_CONTEXTUAL_FROG)
                 frogF = contextual(CONTEXTUAL_FROG)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['child'], {}, undefined)
                 )
             }
@@ -363,7 +363,7 @@ describe('Integration tests the Context API', () => {
             defineContextProp(KERMIT, v)
 
             function App() {
-                return Component(
+                return component(
                     createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { with: { [_frog_]: value } })
@@ -382,7 +382,7 @@ describe('Integration tests the Context API', () => {
                     console.error(err)
                 }
                 finally {
-                    return Component(
+                    return component(
                         makeElement('div', () => ['child'], {}, undefined)
                     )
                 }
@@ -403,7 +403,7 @@ describe('Integration tests the Context API', () => {
             let frog = 'hi'
 
             function App() {
-                return Component(
+                return component(
                     makeComponent(Child, undefined, {}, undefined)
                 )
             }
@@ -412,7 +412,7 @@ describe('Integration tests the Context API', () => {
             function Child() {
                 frog = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['child'], {}, undefined)
                 )
             }
@@ -432,7 +432,7 @@ describe('Integration tests the Context API', () => {
             let frog = 'hi'
 
             function App() {
-                return Component(
+                return component(
                     makeComponent(Child, undefined, {}, undefined)
                 )
             }
@@ -440,7 +440,7 @@ describe('Integration tests the Context API', () => {
             function Child() {
                 frog = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['child'], {}, undefined)
                 )
             }
@@ -460,7 +460,7 @@ describe('Integration tests the Context API', () => {
             let frog = 'hi'
 
             function App() {
-                return Component(
+                return component(
                     createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { with: { [_frog_]: value } })
@@ -470,7 +470,7 @@ describe('Integration tests the Context API', () => {
             function Child() {
                 frog = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['child'], {}, undefined)
                 )
             }
@@ -491,7 +491,7 @@ describe('Integration tests the Context API', () => {
             let frog = 'hi'
 
             function App() {
-                return Component(
+                return component(
                     createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { with: { [_frog_]: value } })
@@ -510,7 +510,7 @@ describe('Integration tests the Context API', () => {
                     console.error(err)
                 }
                 finally {
-                    return Component(
+                    return component(
                         makeElement('div', () => ['child'], {}, undefined)
                     )
                 }
@@ -531,7 +531,7 @@ describe('Integration tests the Context API', () => {
             let frog = 'hi'
 
             function App() {
-                return Component(
+                return component(
                     createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { with: { [_frog_]: value } })
@@ -549,7 +549,7 @@ describe('Integration tests the Context API', () => {
                     console.error(err)
                 }
                 finally {
-                    return Component(
+                    return component(
                         makeElement('div', () => ['child'], {}, undefined)
                     )
                 }
@@ -571,7 +571,7 @@ describe('Integration tests the Context API', () => {
             let frog = 'hi'
 
             function App() {
-                return Component(
+                return component(
                     createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { with: { [_frog_]: ion(value) } })
@@ -581,7 +581,7 @@ describe('Integration tests the Context API', () => {
             function Child() {
                 frog = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['child'], {}, undefined)
                 )
             }
@@ -602,7 +602,7 @@ describe('Integration tests the Context API', () => {
             let frog = 'hi'
 
             function App() {
-                return Component(
+                return component(
                     createNodeContext(() => [
                         makeComponent(Child, undefined, {}, undefined)
                     ], { with: { [_frog_]: ionize(value) } })
@@ -612,7 +612,7 @@ describe('Integration tests the Context API', () => {
             function Child() {
                 frog = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['child'], {}, undefined)
                 )
             }
@@ -632,7 +632,7 @@ describe('Integration tests the Context API', () => {
             let frog = 'hi'
 
             function App() {
-                return Component(
+                return component(
                     makeComponent(Child, undefined, {}, undefined)
                 )
             }
@@ -640,7 +640,7 @@ describe('Integration tests the Context API', () => {
             function Child() {
                 frog = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['child'], {}, undefined)
                 )
             }
@@ -661,7 +661,7 @@ describe('Integration tests the Context API', () => {
             let frog = 'hi'
 
             function App() {
-                return Component(
+                return component(
                     makeComponent(Child, undefined, {}, undefined)
                 )
             }
@@ -669,7 +669,7 @@ describe('Integration tests the Context API', () => {
             function Child() {
                 frog = contextual(_frog_)
 
-                return Component(
+                return component(
                     makeElement('div', () => ['child'], {}, undefined)
                 )
             }

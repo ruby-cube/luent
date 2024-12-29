@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { AnyObject } from "@rue/types";
 import { html } from "../../../packages/literate/src/Literate.js";
-import { Component, fromTag, v } from "@rue/lumo";
+import { component, fromTag, v } from "@rue/lumo";
 
 export function AboutPageB() {
    return [
@@ -35,7 +35,7 @@ export function AboutPage() {
 function Something(input = fromTag({
    cat: v<string>
 })) {
-   return Component(
+   return component(
       <div>
          'hello'
       </div>

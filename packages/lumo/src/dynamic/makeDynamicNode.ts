@@ -14,7 +14,7 @@ import { getActiveDynamicNode } from "./nodestack";
 //     pushProvider(component)
 //     runComponentSetup(Component, component, Slot, config, $index);
 //     component.emit(LifecycleHook.ON_CREATED)
-//     popProvider() // for sibling components to access parent, must be set AFTER `Component()`
+//     popProvider() // for sibling components to access parent, must be set AFTER `component()`
 //     return component;
 // }
 

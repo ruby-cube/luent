@@ -60,7 +60,7 @@ export function makeComponent(
 ): InternalComponent {
 
    setComponentAttributes({ Slot, ...config })
-   const output = Component()
+   const output = component()
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    setComponentAttributes(undefined);

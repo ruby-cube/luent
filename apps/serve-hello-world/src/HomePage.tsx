@@ -2,7 +2,7 @@
 // export function HomePage() {
 
 import { html } from "@rue/literate";
-import { Component, expose } from "@rue/lumo";
+import { component, expose } from "@rue/lumo";
 
 //     return {
 //         title: 'Home',

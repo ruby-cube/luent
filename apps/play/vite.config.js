@@ -25,7 +25,7 @@ export default defineConfig({
                // }], 
                plugins: [
                   // ['@babel/plugin-syntax-jsx', {throwIfNamespace: false}], 
-                  babelLumoTransform.pre,
+                  babelLumoTransform,
                   ['@babel/plugin-syntax-typescript', { isTSX: true }]
                ],
                // presets: ['@babel/preset-typescript'],
@@ -39,33 +39,33 @@ export default defineConfig({
             };
          },
       },
-      {
-         name: 'vite-lumo-plugin-post',
-         async transform(code, id) {
-            if (!id.endsWith('.jsx') && !id.endsWith('.tsx')) return;
+      // {
+      //    name: 'vite-lumo-plugin-post',
+      //    async transform(code, id) {
+      //       if (!id.endsWith('.jsx') && !id.endsWith('.tsx')) return;
 
-            const result = await babel.transformAsync(code, {
-               // ['@babel/plugin-transform-react-jsx', { 
-               //    throwIfNamespace: false, 
-               //    runtime: 'automatic',
-               //    importSource: '@rue'
-               // }], 
-               plugins: [
-                  // ['@babel/plugin-syntax-jsx', {throwIfNamespace: false}], 
-                  babelLumoTransform.post,
-                  // ['@babel/plugin-syntax-typescript', {isTSX: true}]
-               ],
-               // presets: ['@babel/preset-typescript'],
-               filename: id,
-               sourceMaps: true, // Optional, useful for debugging
-            });
+      //       const result = await babel.transformAsync(code, {
+      //          // ['@babel/plugin-transform-react-jsx', { 
+      //          //    throwIfNamespace: false, 
+      //          //    runtime: 'automatic',
+      //          //    importSource: '@rue'
+      //          // }], 
+      //          plugins: [
+      //             // ['@babel/plugin-syntax-jsx', {throwIfNamespace: false}], 
+      //             babelLumoTransform.post,
+      //             // ['@babel/plugin-syntax-typescript', {isTSX: true}]
+      //          ],
+      //          // presets: ['@babel/preset-typescript'],
+      //          filename: id,
+      //          sourceMaps: true, // Optional, useful for debugging
+      //       });
 
-            return {
-               code: result.code,
-               map: result.map, // Include source maps
-            };
-         },
-      }
+      //       return {
+      //          code: result.code,
+      //          map: result.map, // Include source maps
+      //       };
+      //    },
+      // }
    ],
    resolve: {
       alias: {

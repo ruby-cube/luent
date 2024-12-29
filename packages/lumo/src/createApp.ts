@@ -59,7 +59,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
                component.setUp(root, nodePod)
                component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
                // if (remountable) unmarkMountPhase()
-               popContext() // for sibling components to access parent, must be set AFTER `Component()`
+               popContext() // for sibling components to access parent, must be set AFTER `component()`
             }
          })
 

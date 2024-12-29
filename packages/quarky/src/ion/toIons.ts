@@ -59,7 +59,7 @@ export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
 //         $yShift: toIon
 //     });
 
-//     return Component(
+//     return component(
 //         <div style={/* dynamic styles */ } > </div>
 
 //     )

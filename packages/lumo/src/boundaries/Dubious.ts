@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
-import { Component } from "../component/InternalComponent";
+import { component } from "../component/InternalComponent";
 
 export type DubiousNodeInput = {
    standby?: (error: Error) => NodeEntity

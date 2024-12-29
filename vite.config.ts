@@ -9,7 +9,7 @@ export default defineConfig({
     }
   },
   plugins: [
-    babel()
+   //  babel()
   ],
   resolve: {
     alias: 

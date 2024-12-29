@@ -1,5 +1,5 @@
 // //@ts-nocheck
-// import { Component } from "@rue/lumo";
+// import { component } from "@rue/lumo";
 // import { ion, AtomicIon, ionize } from "./src";
 
 
@@ -53,7 +53,7 @@
 //         on:click: $count.increment
 //     }
 
-//     return Component(
+//     return component(
 //         <>
 //             <button on:click={$count.increment}>{$count()}</button>
 //             <button on:click={$count.decrement}>decrease</button>
@@ -90,7 +90,7 @@
 //         }
 //     })
 
-//     return Component(
+//     return component(
 //         <>
 //             <div>mouse position: {$position.x}, {$position.y}</div>
 //             <button on:click={$position.moveRight}>move right</button>

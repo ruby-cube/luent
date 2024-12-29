@@ -42,7 +42,7 @@ export function makeComponent(
     pushProvider(component)
     runComponentSetup(Component, component, Slot, config, $index);
     component.emit(LifecycleHook.ON_CREATED)
-    popProvider() // for sibling components to access parent, must be set AFTER `Component()`
+    popProvider() // for sibling components to access parent, must be set AFTER `component()`
 
     return component;
 }
@@ -57,7 +57,7 @@ export function runComponentSetup(
 ) {
     collectEffects((flask, outerFlask) => {
         component.setFlask(flask);
-        const output = Component({ ...config, Slot })
+        const output = component({ ...config, Slot })
         try {
             validateOutput(output);
             initializeComponent(component, output, config.ref, $index)
