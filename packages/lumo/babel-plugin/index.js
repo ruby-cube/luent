@@ -59,29 +59,6 @@ function transformTemplateCallExpressions(path) {
    })
 }
 
-function lumoPostTransform({ types }) {
-   console.log('lumo post transform')
-   t = types;
-   return {
-      name: "lumo-post-transform",
-      visitor: {
-         CallExpression(path) {
-            const functionName = path.node.callee.name
-            if (isJSXFragment(path.node)) {
-               transformTemplateFnCall(functionName, path)
-            }
-         }
-      }
-   };
-}
-
-
-// function transformJSXFragment(path) {
-//    console.log('frag', path.node)
-//    const children = path.node.children;
-//    if (children.length === 0) return;
-//    path.replaceWith(t.arrayExpression(children))
-// }
 
 function normalizeSlotToRenderFunction(children) { // returns jsxExpressionContainer with arrowFunctionExpression
    if (slotIsRenderFunction(children)) return children[0]; //TODO: still need to transform return of renderfunction if is derivation 
@@ -109,12 +86,6 @@ function transformJSXChildren(childrenPath) {
    return childrenPath;
 }
 
-//FIX: simplify
-function transformJSXExpressionContainer(path) {
-   const expression = path.get('expression')
-   const transformedExpression = transformDerivationExpression(expression)
-
-}
 
 function transformSingleChildToRenderFunction(child) {
    const expression = t.isJSXExpressionContainer(child) ? child.expression : child
@@ -337,36 +308,6 @@ function normalizeToRenderFunction(node) {
    return toRenderFunction(node)
 }
 
-function transformJSXCallAttributes(properties) {
-   for (let i = 0; i < properties.length; i++) {
-      const property = properties[i];
-      const propertyNode = property.node;
-      const keyNode = propertyNode.key;
-      const value = propertyNode.value;
-      const key = t.isStringLiteral(keyNode) ? keyNode.value : keyNode.name;
-      if (key === 'children') {
-         transformJSXCallChildren(property)
-      }
-      else if (key.startsWith('on:') && hasTargetedEvent(value)) {
-         const eventListenerNode = propertyNode.value;
-         const paramNode = eventListenerNode.params[0]
-         const eventParameter = paramNode && paramNode.name || 'e';
-         if (!paramNode) eventListenerNode.params.push(t.identifier('e'))
-         eventListenerNode.body.left.arguments.push(t.identifier(eventParameter))
-      }
-      else if (t.isObjectExpression(value)) {
-         transformObjectProperties(property.get('value.properties'))
-      }
-      else if (t.isArrayExpression(value)) {
-         transformArrayElements(property.get('value.elements'))
-      }
-      else if (!key.startsWith('on:') && isDerivation(property.get('value'))) { //TODO: need a way to mark attributes that request callback functions
-         propertyNode.value = toDerivationFunction(value)
-      }
-   }
-}
-
-
 function transformArrayElements(elements) {
    for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
@@ -377,7 +318,7 @@ function transformArrayElements(elements) {
       else if (t.isArrayExpression(elementNode)) {
          transformArrayElements(property.get(`element.${i}.elements`))
       }
-      else if (isDerivation(element)) {
+      else if (isDerivation(element) && isParenthesized(elementNode)) {
          element.replaceWith(toDerivationFunction(elementNode))
       }
    }
@@ -393,7 +334,7 @@ function transformObjectProperties(properties) {
       else if (t.isArrayExpression(propertyNode.value)) {
          transformArrayElements(property.get('value.elements'))
       }
-      else if (isDerivation(property.get('value'))) {
+      else if (isDerivation(property.get('value')) && isParenthesized(propertyNode.value)) {
          propertyNode.value = toDerivationFunction(propertyNode.value)
       }
    }
@@ -421,45 +362,7 @@ function normalizeToArrayExpression(node) {
    return t.arrayExpression([node])
 }
 
-// function isFunctionNode(path) {
-//    const node = path.node;
-//    if (t.isFunctionDeclaration(node) || t.isFunctionExpression(node) || t.isArrowFunctionExpression(node)) {
-//       return true; // It's a function definition
-//    }
-
-//    if (t.isIdentifier(node)) {
-//       // Check if the identifier refers to a function
-//       const binding = path.scope.getBinding(node.name);
-//       if (binding) {
-//          const bindingNode = binding.path.node;
-//          return (
-//             t.isFunctionDeclaration(bindingNode) ||
-//             t.isFunctionExpression(bindingNode) ||
-//             t.isArrowFunctionExpression(bindingNode)
-//          );
-//       }
-//    }
-
-//    return false; // Not a function
-// }
-
 function isDerivation(path) {
-   //TODO: need a better algorithm 
-   // - X <transition-node with={slide({})}>  
-   // - ? <context-node with={{[_dog_]: ???}}>
-   // - O property access from ionized model: item.name 
-
-   // template impromptu derivation contexts
-   // - conditions
-   // - dynamic list
-   // - jsx element children
-   // - style/class object property value
-   // - 
-
-   // non-derivation contexts
-   // - transition-node 'with' attribute
-   // - context-node 'with' attribute
-
 
    const node = path.node;
    if (t.isLiteral(node) || t.isIdentifier(node) || !node) {
