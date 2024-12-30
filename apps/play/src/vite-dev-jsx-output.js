@@ -34,11 +34,11 @@ export function MountIf() {
             lineNumber: 41,
             columnNumber: 10
         }, this), /* @__PURE__ */
-        jsxDEV("phasic-node", {
+        jsxDEV("$--transition", {
             children: [If($active, () => /* @__PURE__ */
             jsxDEV(Fragment, {
                 children: ["oh", /* @__PURE__ */
-                jsxDEV("transit-node", {
+                jsxDEV("$--transit", {
                     with: slide({
                         x: -100,
                         duration: 2200
@@ -56,7 +56,7 @@ export function MountIf() {
                     lineNumber: 45,
                     columnNumber: 16
                 }, this), /* @__PURE__ */
-                jsxDEV("transit-node", {
+                jsxDEV("$--transit", {
                     with: slide({
                         x: 100,
                         duration: 2200

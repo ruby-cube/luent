@@ -11,7 +11,7 @@ import { AnyObject } from "@rue/types";
 import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
-import { createDubiousNode, DubiousNodeInput } from "../boundaries/Dubious";
+import { createTryNode, TryNodeInput } from "../boundaries/Try";
 import { createSuspenseNode, SuspenseNodeInput } from "../boundaries/Suspense";
 import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
 import { META } from "../../../quarky/src/ReactiveEntity";
@@ -92,25 +92,25 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 }
 
 export function makeNode(
-   nodeType: HTMLTag | ComponentSetup | 'transit-node' | 'phasic-node' | 'context-node' | 'swap:mount' | 'swap:instance' | 'swap:display' | 'dubious-node' | 'suspense-node' | 'portal-node',
+   nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--context' | 'swap:mount' | 'swap:instance' | 'swap:display' | '$--try' | '$--suspense' | '$--portal',
    Slot: (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent | SwapConfig | JSX.Element | undefined {
 
    switch (nodeType) {
-      case 'context-node':
+      case '$--context':
          if (!Slot) throw new Error(`Extraneous <Context>`)
          return createNodeContext(Slot, <ComponentConfig>config)
 
-      case 'dubious-node':
+      case '$--try':
          if (!Slot) throw new Error(`Extraneous <Context>`)
-         return createDubiousNode(Slot, <DubiousNodeInput>config)
+         return createTryNode(Slot, <TryNodeInput>config)
 
-      case 'suspense-node':
+      case '$--suspense':
          if (!Slot) throw new Error(`Extraneous <Context>`)
          return createSuspenseNode(Slot, <SuspenseNodeInput>config)
 
-      case 'portal-node':
+      case '$--portal':
          if (!Slot) throw new Error(`Extraneous <Context>`)
          return createPortalNode(Slot, <PortalNodeInput>config)
 
@@ -123,8 +123,8 @@ export function makeNode(
       case 'swap:instance':
          return new SwapConfig('instance')
 
-      case 'transit-node':
-      case 'phasic-node':
+      case '$--transit':
+      case '$--transition':
          if (!Slot) throw new Error(`Extraneous transition node`)
          return createTransitionNode(nodeType, Slot, <TransitionNodeInput>config)
 

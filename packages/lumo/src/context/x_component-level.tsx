@@ -10,15 +10,15 @@ const cat = provideAppwide(_cat_, 0)
 function List() {
     return component(
         <>
-            <context-node with={{ [_dog_]: 0 }}>
+            <$--context with={{ [_dog_]: 0 }}>
                 <p>hello</p>
                 <p>{appwide(_dog_)}</p>
-            </context-node>
+            </$--context>
 
-            <context-node with={{ [_dog_]: 'mom' }}>
+            <$--context with={{ [_dog_]: 'mom' }}>
                 <p>hello</p>
                 <p>{contextual(_dog_)}</p>
-            </context-node>
+            </$--context>
         </>
     )
 }

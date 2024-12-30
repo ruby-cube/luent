@@ -2,12 +2,12 @@ import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
 import { component } from "../component/InternalComponent";
 
-export type DubiousNodeInput = {
-   standby?: (error: Error) => NodeEntity
+export type TryNodeInput = {
+   catch?: (error: Error) => NodeEntity
 }
 
-export function createDubiousNode<T extends AnyObject>(Slot: () => NodeEntity, input: DubiousNodeInput) {
-   const { standby } = input;
+export function createTryNode<T extends AnyObject>(Slot: () => NodeEntity, input: TryNodeInput) {
+   const { catch: _catch } = input;
    if (!(Slot instanceof Function)) throw new Error('Slot must be a function')
 
    let output;
@@ -15,8 +15,8 @@ export function createDubiousNode<T extends AnyObject>(Slot: () => NodeEntity, i
       output = Slot()
    }
    catch (err) {
-      if (standby) {
-         output = standby(err instanceof Error ? err : new Error(<string>err))
+      if (_catch) {
+         output = _catch(err instanceof Error ? err : new Error(<string>err))
       }
       else {
          return undefined;

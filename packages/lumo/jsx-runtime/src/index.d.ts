@@ -8,7 +8,7 @@ import * as CSS from "csstype";
 // import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
 import { NodeRef } from "../../src/node/NodeRef";
-import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, DubiousNodeInput, TransitionNodeInput } from "@rue/lumo";
+import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/lumo";
 import { AnyObject } from "@rue/types";
 import { PortalNodeInput } from "../../src/boundaries/Portal";
 
@@ -2549,13 +2549,14 @@ declare global {
          'swap:display': {};
          'swap:mount': {};
          'swap:instance': {};
-         'portal-node': PortalNodeInput & { Slot: Lumo.Slot }
-         'context-node': ContextNodeInput & { Slot: Lumo.Slot };
-         'suspense-node': SuspenseNodeInput & { Slot: Lumo.Slot };
-         'dubious-node': DubiousNodeInput & { Slot: Lumo.Slot };
-         'transit-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
-         'phasic-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
-         'port-node': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+         'i--i': {};
+         '$--portal': PortalNodeInput & { Slot: Lumo.Slot }
+         '$--context': ContextNodeInput & { Slot: Lumo.Slot };
+         '$--suspense': SuspenseNodeInput & { Slot: Lumo.Slot };
+         '$--try': TryNodeInput & { Slot: Lumo.Slot };
+         '$--transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+         '$--transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
+         '$--dock': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
          // HTML
          a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
          abbr: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;

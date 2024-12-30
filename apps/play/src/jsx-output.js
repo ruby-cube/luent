@@ -31,11 +31,11 @@ export function MountIf() {
          jsx("h1", {
             children: () => ["Hello ", todos[0]]
          }),
-         jsx("phasic-node", {
+         jsx("$--transition", {
             children: () => [
                If($active, () =>
                   ["oh",
-                     jsx("transit-node", {
+                     jsx("$--transit", {
                         with: slide({
                            x: -100,
                            duration: 2200
@@ -45,7 +45,7 @@ export function MountIf() {
                               children: () => ["hi"]
                            })]
                      }),
-                     jsx("transit-node", {
+                     jsx("$--transit", {
                         with: slide({
                            x: 100,
                            duration: 2200

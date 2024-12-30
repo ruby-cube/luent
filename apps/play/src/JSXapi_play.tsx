@@ -7,9 +7,9 @@ export function ListBlock(setup = $setup()) {
 
    const $List = PortNode({ send: true, settle: true, receive: 300 }, $list =>      
          For($list, o => o, (item, $index) =>
-         <transit.node>
+         <$--transit>
             <p>[x] {item}</p>,
-         </transit.node>
+         </$--transit>
       )
    )
 const hi = () =>
@@ -267,21 +267,21 @@ const hi = () =>
                </$>
             </div>
 
-            <port-node type='todos' send='200' settle='200' receive='30'>
+            <$--dock type='todos' send='200' settle='200' receive='30'>
                {For($list, o => o, (item, $index) =>
-                  <transit-node>
+                  <$--transit>
                      <p>[x] {item}</p>,
-                  </transit-node>
+                  </$--transit>
                )}
-            </port-node>
+            </$--dock>
   
-            <$--port type='todos' send='200' settle='200' receive='30'>
+            <$--dock type='todos' send='200' settle='200' receive='30'>
                {For(list, o => o, (item, $index) =>
                   <$--transit>
                      <p>[x] {item}</p>,
                   </$--transit>
                )}
-            </$--port>
+            </$--dock>
 
             <div>
                <Column class='some-thing active' width={$width}>
@@ -367,7 +367,7 @@ const hi = () =>
 
 
 
-            <context-node with={{ [_frog_]: frog, [_cat_]: cat }}>
+            <$--context with={{ [_frog_]: frog, [_cat_]: cat }}>
                <List />
                <h1>hello</h1>
                <div>
@@ -375,7 +375,7 @@ const hi = () =>
                   <p>hi ho</p>
                   <p>hi ho</p>
                </div>
-            </context-node>
+            </$--context>
 
             <div>
                <p>hi ho</p>
@@ -392,15 +392,15 @@ const hi = () =>
                )
             ]}
             <div>
-               <transit-node io={fade}>
+               <$--transit io={fade}>
                   <p>hi ho</p>
-               </transit-node>
+               </$--transit>
                <p>hi ho</p>
             </div>
 
             <h1>hello</h1>
             <div>
-               <phasic-node with={fade}>
+               <$--transition with={fade}>
                   {[If($active(), { type: 'mount' },
                      <div>
                         <p>hey</p>
@@ -411,7 +411,7 @@ const hi = () =>
                         <p>hey</p>
                      </div>
                   )]}
-               </phasic-node>
+               </$--transition>
             </div>
 
             <div>
@@ -444,7 +444,7 @@ const hi = () =>
                )}
             </div>
             <div>
-               <phasic-node with={fade({ duration: 30 })}>
+               <$--transition with={fade({ duration: 30 })}>
                   {{ swap: 'show/hide' }}
                   {[If($active, 'mount',
                      <div>
@@ -457,10 +457,10 @@ const hi = () =>
                         <p>hey</p>
                      </div>
                   )]}
-               </phasic-node>
+               </$--transition>
             </div>
             <div>
-               <phasic-node with={fade({ duration: 30 })}>
+               <$--transition with={fade({ duration: 30 })}>
                   <swap:show-hide/>
                   {If($active, 'mount',
                      <div>
@@ -472,10 +472,10 @@ const hi = () =>
                         <p>hey</p>
                      </div>
                   )}
-               </phasic-node>
+               </$--transition>
             </div>
             <div>
-               <phasic-node swap='show-hide' with={fade({ duration: 30 })}>
+               <$--transition swap='show-hide' with={fade({ duration: 30 })}>
                   {If($active, 'mount',
                      <div>
                         <p>hey</p>
@@ -486,7 +486,7 @@ const hi = () =>
                         <p>hey</p>
                      </div>
                   )}
-               </phasic-node>
+               </$--transition>
             </div>
 
             {/* 
@@ -534,9 +534,9 @@ const hi = () =>
                )
             )}
 
-            <portal-node to='body'>
+            <$--portal to='body'>
                <p>hi</p>
-            </portal-node>
+            </$--portal>
 
             <div>Stuff here</div>
 
@@ -731,7 +731,7 @@ const hi = () =>
             </div>
 
             <div>
-               <phasic.node with={fade}>
+               <$--transition with={fade}>
                <swap />
                   {Match(key,
                      Case('hello',
@@ -744,7 +744,7 @@ const hi = () =>
                         <p>ok world</p>
                      )
                   )}
-               </phasic.node>
+               </$--transition>
             </div>
 
             <div>
@@ -810,7 +810,7 @@ const hi = () =>
 
             <h1>Choose something</h1>
 
-            <phasic-node>{[
+            <$--transition>{[
                If($list.length === 0, { setup: MouseKit }, o => [
                   <p>hello world</p>,
                   <p>hello world</p>
@@ -823,38 +823,39 @@ const hi = () =>
                   <p>ok world</p>,
                   <p>ok world</p>
                ])
-            ]}</phasic-node>
+            ]}</$--transition>
 
-            <phasic.node with={fade}>
-               {[If({ z: $active }, (o = 9,
+            <$--transition with={fade}>
+               <swap:display />
+               {If($active, (o = 9)=>
                   <>
-                     <transit.node>
+                     <$--transit>
                         <p>hello world</p>
-                     </transit.node>
-                     <transit.node>
+                     </$--transit>
+                     <$--transit>
                         <p>hello world</p>
-                     </transit.node>
+                     </$--transit>
                   </>
-               )),
-               ElseIf($broken,
+               )}
+               {ElseIf($broken,
                   <>
                      <p>bye world</p>
                      <p>bye world</p>
                   </>
-               ),
-               Else(
+               )}
+               {Else(
                   <>
                      <p>ok world</p>
                      <p>ok world</p>
-                     <portal.node to='#body'>
-
-                     </portal.node>
+                     <$--portal to='#body'>
+                        <div>hi</div>
+                     </$--portal>
                   </>
-               )]}
-            </phasic.node>
+               )}
+            </$--transition>
 
 
-            <phasic.node with={fade}>
+            <$--transition with={fade}>
                {Match(key, { type: 'show' },
                   Case('hello',
                      <p>hello world</p>
@@ -866,9 +867,9 @@ const hi = () =>
                      <p>ok world</p>
                   )
                )}
-            </phasic.node>
+            </$--transition>
 
-            <phasic-node>
+            <$--transition>
                <If case={$list.length === 0} setup={MouseKit}>{o => <>
                   <p>hello world</p>
                   <p>hello world</p>
@@ -881,23 +882,23 @@ const hi = () =>
                   <p>bye world</p>
                   <p>bye world</p>
                </Else>
-            </phasic-node>
+            </$--transition>
 
-            <item-port type='todos'>
+            <$--dock type='todos'>
 
                {For({ z: $list }, o => o.id, (item, $index, o) =>
                   <p>[x] {item}</p>,
 
                )}
-            </item-port>
+            </$--dock>
 
-            <item-port type='todos'>{
+            <$--dock type='todos'>{
                For($list, (item, $index, o) =>
                   <p>[x] {item}</p>
                )
-            }</item-port>
+            }</$--dock>
 
-            <phasic-node>
+            <$--transition>
                {If($list.length === 0)}
                <p>hello world</p>
                <$ else if={$broken()}>
@@ -906,7 +907,7 @@ const hi = () =>
                <$ else>
                   <p>bye world</p>
                </$>
-            </phasic-node>
+            </$--transition>
 
             <h1>Choose something</h1>
             {If($list.length === 0,
@@ -920,9 +921,9 @@ const hi = () =>
 
             <port.node type='todos' send='200' settle='200' receive='30'>
                {For($list, o => o, (item, $index) =>
-                  <transit.node>
+                  <$--transit>
                      <p>[x] {item}</p>,
-                  </transit.node>
+                  </$--transit>
                )}
             </port.node>
 

@@ -33,22 +33,22 @@ export function MountIf() {
 function $hi(){
    return ""
 }
-   //NOTE: if transit-node duration is shorter than phasic-node duration, it will disable phasic-node transition
+   //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
    return component(
       <>
          <button on:click={() => (todos[0].name += '!')} style={{ color: ('re' + 'd' + $hi()) }}>shout</button>
          <h1>Hello {(todos[0].name)}</h1>
          <div>{() => 'hi'}</div>
-         <phasic-node>
+         <$--transition>
             {If($active,
                <>
                   oh
-                  <transit-node with={slide({ x: -100, duration: 2200 })}>
+                  <$--transit with={slide({ x: -100, duration: 2200 })}>
                      <h2>hi</h2>
-                  </transit-node>
-                  <transit-node with={slide({ x: 100, duration: 2200 })}>
+                  </$--transit>
+                  <$--transit with={slide({ x: 100, duration: 2200 })}>
                      <h2>hope</h2>
-                  </transit-node>
+                  </$--transit>
                   {If($ready,
                      <p>ready</p>
                   )}
@@ -66,7 +66,7 @@ function $hi(){
                   <h2>bye</h2>
                </>
             )}
-         </phasic-node>
+         </$--transition>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>
          {/* <CounterButton $:increment={$count.increment} /> */}

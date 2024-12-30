@@ -52,7 +52,7 @@ const defaultFade: TransitionClasses = {
 
 
 export function createTransitionNode(
-   type: 'phasic-node' | 'transit-node',
+   type: '$--transition' | '$--transit',
    Slot: (() => NodeEntity),
    input: TransitionNodeInput
 ) {
@@ -101,7 +101,7 @@ console.log('phasic node slot', Slot)
             controller = new AbortController()
          
          if (transition_in) {
-            if (type === 'transit-node') {
+            if (type === '$--transit') {
                console.log('transitioning in :)', enterFromClasses, transition_in)
                div.classList.add(...enterFromClasses!);
                div.classList.add(transition_in);
@@ -272,7 +272,7 @@ console.log('phasic node slot', Slot)
                         div.classList.remove(transition_out);
                         div.classList.remove(...exitClasses!);
 
-                        if (type === 'phasic-node' && transition_in) {
+                        if (type === '$--transition' && transition_in) {
                            div.classList.add(...enterFromClasses!);
                            div.classList.add(transition_in);
                         }
@@ -341,7 +341,7 @@ console.log('phasic node slot', Slot)
                div.classList.remove(transition_out);
                div.classList.remove(...exitClasses!);
 
-               if (type === 'phasic-node' && transition_in) {
+               if (type === '$--transition' && transition_in) {
                   div.classList.add(...enterFromClasses!);
                   div.classList.add(transition_in);
                }
@@ -381,7 +381,7 @@ console.log('phasic node slot', Slot)
       const div = $div()
    }
 
-   const renderNode = type === 'transit-node' ? renderTransitNode : renderPhasicNode
+   const renderNode = type === '$--transit' ? renderTransitNode : renderPhasicNode
 
    return renderNode(
       $div,

@@ -10,9 +10,13 @@ import { watch } from "../watch/watchAndPreserve";
 import { areShallowEqualArrays, Phase } from "../../../quarky/src";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { popContext, pushContext, Context } from "../context/context-stack";
-import { getPhasicNode, PhasicNode } from "../transition/PhasicNode";
+import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { NodeKit } from "../node/setUpNodeEntities";
+
+//TODO: rename 'phasic node' to 'transition node'
+//TODO: rename transitionNodes to 'transitNodes'
+//TODO: rename TransitionNode to ???
 
 
 

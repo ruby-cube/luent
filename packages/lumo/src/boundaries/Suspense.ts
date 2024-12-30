@@ -20,11 +20,11 @@ export type SuspenseNodeInput = {
    timeout?: number,
    await?: Promise<any> | Promise<any>[],
    standin?: () => NodeEntity
-   standby?: (error: Error) => NodeEntity
+   catch?: (error: Error) => NodeEntity
 }
 
 export function createSuspenseNode(Slot: () => NodeEntity, input: SuspenseNodeInput) {
-   const { standin: renderPlaceholder = () => undefined, timeout, standby: renderError = () => undefined } = input;
+   const { standin: renderPlaceholder = () => undefined, timeout, catch: renderError = () => undefined } = input;
    const $pending = ion(true);
    const $error: AtomicIon<Error> = ion();
    const $ready = ion(false);
@@ -51,7 +51,7 @@ export function createSuspenseNode(Slot: () => NodeEntity, input: SuspenseNodeIn
          $ready.as(true)
       })
       .catch(err => {
-         if (input.standby === undefined) throw typeof err === 'string' ? new Error(err) : err;
+         if (input.catch === undefined) throw typeof err === 'string' ? new Error(err) : err;
          $error.as(typeof err === 'string' ? new Error(err) : err);
          $pending.as(false)
       })
