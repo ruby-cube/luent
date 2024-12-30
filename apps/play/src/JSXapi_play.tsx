@@ -274,6 +274,14 @@ const hi = () =>
                   </transit-node>
                )}
             </port-node>
+  
+            <$--port type='todos' send='200' settle='200' receive='30'>
+               {For(list, o => o, (item, $index) =>
+                  <$--transit>
+                     <p>[x] {item}</p>,
+                  </$--transit>
+               )}
+            </$--port>
 
             <div>
                <Column class='some-thing active' width={$width}>
@@ -298,24 +306,31 @@ const hi = () =>
                </Column>
             </div>
             <div>
-               <suspense-node await={$data} standin={renderLoadingView}>
-                  {(o = SelectionKit(), <>
+               <$--suspense await={$data} standin={LoadingView} slot-kit={SelectionKit}>
+                  {o => <>
                      <SomeComponent/>
                      login: {o.fullname}
                      <SomeComponent/>
-                  </>)}
-               </suspense-node>
+                  </>}
+               </$--suspense>
+
+               <$--suspense await={$data} standin={LoadingView}>
+                  {(o = SelectionKit()) => <>
+                     <SomeComponent/>
+                     login: {o.fullname}
+                     <SomeComponent/>
+                  </>}
+               </$--suspense>
             </div>
             <div>
-               <dubious-node standby={renderError}>
+               <$--try catch={ErrorView}> 
                   <SomeComponent />
                   <SomeComponent />
-               </dubious-node>
+               </$--try>
             </div>
 
             <h1>Choose something</h1>
 
-            <phasic-node>
                {For({ hold: Loading, catch: Error },
                   <>
                      <Item dog={$dog} />
@@ -325,12 +340,17 @@ const hi = () =>
                      </div>
                   </>
                )}
-            </phasic-node>
+
+            <i--i>say something</i--i>
 
             <h1>hello</h1>
+
+            <$--transition>
+            <$--swap display/>
             {If($active,
                <p>hey</p>
             )}
+            </$--transition>
             <div>
                <p>hi ho</p>
                <p>hi ho</p>
@@ -339,15 +359,15 @@ const hi = () =>
             <$List />
 
             <h1>hello</h1>
-            <context-node with={{ [FROG]: new Frog(), [_cat_]: cat }}>
+            <$--context with={{ [_frog_]: new Frog(), [_cat_]: cat }}>
                {If($active,
                   <p>hey</p>
                )}
-            </context-node>
+            </$--context>
 
 
 
-            <context-node with={{ [FROG]: frog, [_cat_]: cat }}>
+            <context-node with={{ [_frog_]: frog, [_cat_]: cat }}>
                <List />
                <h1>hello</h1>
                <div>

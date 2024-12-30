@@ -20,6 +20,17 @@ export default function lumoPreTransform({ types }) {
    };
 }
 
+//TODO: 
+/*
+- `jsxAttributes()`
+
+- `jsxStyle()`
+
+- `jsxClass()`
+
+- `jsxObject()`
+*/
+
 function transformJSXText(node) {
    const value = node.value.replace(/\n\s*/g, '')
    return value === '' ? null : t.stringLiteral(value)
@@ -136,16 +147,7 @@ function isJSXRoot(node) {
    return t.isJSXFragment(node) || t.isJSXElement(node)
 }
 
-//TODO: 
-/*
-- `jsxAttributes()`
 
-- `jsxStyle()`
-
-- `jsxClass()`
-
-- `jsxObject()`
-*/
 
 
 const TemplateFunctions = new Map([
@@ -153,12 +155,12 @@ const TemplateFunctions = new Map([
    ['ElseIf', transformIfCall],
    ['Else', transformElseCall],
    ['For', true], //TODO:
-   ['jsxDEV', transformJSXFragmentCall],
-   ['jsx', transformJSXFragmentCall],
-   ['_jsx', transformJSXFragmentCall],
-   ['jsxsDEV', transformJSXFragmentCall],
-   ['jsxs', transformJSXFragmentCall],
-   ['_jsxs', transformJSXFragmentCall],
+   // ['jsxDEV', transformJSXFragmentCall],
+   // ['jsx', transformJSXFragmentCall],
+   // ['_jsx', transformJSXFragmentCall],
+   // ['jsxsDEV', transformJSXFragmentCall],
+   // ['jsxs', transformJSXFragmentCall],
+   // ['_jsxs', transformJSXFragmentCall],
 ])
 
 
@@ -260,53 +262,12 @@ function transformJSXSlot(path) {
    node.children = [normalizeSlotToRenderFunction(children)]
 }
 
-
-function transformJSXFragmentCall(path) {
-   const args = path.node.arguments
-   if (isJSXFragment(path.node)) {
-      path.replaceWith(normalizeToArrayExpression(args[1].properties[0].value))
-      return;
-   }
-
-   // transformJSXCallAttributes(path.get('arguments.1.properties'))
-}
-
-function transformJSXCallChildren(childrenPath) {
-   //TODO: transform derivations
-   const childrenNode = childrenPath.node;
-   if (t.isObjectExpression(childrenNode.value)) { // named slots
-      const properties = childrenNode.value.properties;
-      for (const property of properties) {
-         property.value = normalizeToRenderFunction(property.value)
-      }
-   }
-   else {
-      childrenNode.value = normalizeToRenderFunction(
-         transformJSXChildrenElements(childrenPath)
-      )
-   }
-}
-
-function transformJSXChildrenElements(path) {
-   const node = path.node;
-   if (t.isArrayExpression(node)) {
-
-   }
-   const elements = path.get('elements');
-   for (let i = 0; i < elements.length; i++) {
-      const element = elements;
-      if (isDerivation(element) && isMarkedParenthesized(element.node)) {
-
-      }
-   }
-}
-
-function normalizeToRenderFunction(node) {
-   if (t.isFunction(node)) {
-      return node;
-   }
-   return toRenderFunction(node)
-}
+// function normalizeToRenderFunction(node) {
+//    if (t.isFunction(node)) {
+//       return node;
+//    }
+//    return toRenderFunction(node)
+// }
 
 function transformArrayElements(elements) {
    for (let i = 0; i < elements.length; i++) {

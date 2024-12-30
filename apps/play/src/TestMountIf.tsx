@@ -30,11 +30,13 @@ export function MountIf() {
 
    // const removed = todos.splice(0, 2)
 
-
+function $hi(){
+   return ""
+}
    //NOTE: if transit-node duration is shorter than phasic-node duration, it will disable phasic-node transition
    return component(
       <>
-         <button on:click={() => (todos[0].name += '!')}>shout</button>
+         <button on:click={() => (todos[0].name += '!')} style={{ color: ('re' + 'd' + $hi()) }}>shout</button>
          <h1>Hello {(todos[0].name)}</h1>
          <div>{() => 'hi'}</div>
          <phasic-node>
