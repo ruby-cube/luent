@@ -155,6 +155,7 @@ export class RenderCycle {
         const tasks = this.tasks.get(phase);
         if (tasks) {
             for (const task of tasks) {
+               console.log('running tasks')
                 // runEffect(effect)
                 task()
             }

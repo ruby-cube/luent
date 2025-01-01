@@ -10,25 +10,12 @@ export default function lumoPreTransform({ types }) {
       name: "lumo-pre-transform",
       visitor: {
          JSXFragment(path) {
-            if (path.visited) {
-               console.log('REPEAT DIVERTED fragment')
-               return;
-            }
-            path.visited = true;
-            // console.log('=======fragment!!')
             transformTemplateCallExpressions(path)
-            transformJSXChildren(path.get('children'))
             transformJSXFragment(path)
          },
          JSXElement(path) {
-            if (path.visited) {
-               console.log('REPEAT DIVERTED element')
-               return;
-            }
-            path.visited = true;
-            // console.log('========element!!')
-            transformJSXElement(path)
             transformTemplateCallExpressions(path)
+            transformJSXElement(path)
          }
       }
    };
@@ -52,8 +39,13 @@ function transformJSXText(node) {
 
 function transformJSXFragment(path) {
    const children = path.get('children')
+   transformJSXChildren(children)
+   path.replaceWith(transformJSXChildrenToArrayExpression(children))
+}
+
+function transformJSXChildrenToArrayExpression(paths){
    const array = []
-   for (const child of children) {
+   for (const child of paths) {
       if (t.isJSXText(child)) {
          const stringLiteral = transformJSXText(child.node)
          if (stringLiteral)
@@ -69,7 +61,7 @@ function transformJSXFragment(path) {
          array.push(child.node)
       }
    }
-   path.replaceWith(t.arrayExpression(array))
+   return t.arrayExpression(array)
 }
 
 
@@ -88,19 +80,16 @@ function transformTemplateCallExpressions(path) {
 }
 
 
-function normalizeSlotToRenderFunction(children) { // returns jsxExpressionContainer with arrowFunctionExpression
-   if (slotIsRenderFunction(children)) return children[0]; //TODO: still need to transform return of renderfunction if is derivation 
-   return transformChildrenToRenderFunction(children)
+function normalizeSlotToRenderFunction(paths) { // returns jsxExpressionContainer with arrowFunctionExpression
+   if (slotIsRenderFunction(paths)) return paths[0]; //TODO: still need to transform return of renderfunction if is derivation 
+   return transformChildrenToRenderFunction(paths)
 }
 
-function transformChildrenToRenderFunction(children) {
-   if (children.length === 1) {
-      return transformSingleChildToRenderFunction(children[0])
-   }
+function transformChildrenToRenderFunction(paths) {
    return t.jsxExpressionContainer(
       t.arrowFunctionExpression(
          [],
-         t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), children)
+         transformJSXChildrenToArrayExpression(paths)
       ));
 }
 
@@ -119,19 +108,7 @@ function transformIfDerivationExpression(path) {
       path.replaceWith(toDerivationFunction(path.node))
 }
 
-
-function transformSingleChildToRenderFunction(child) {
-   const expression = t.isJSXExpressionContainer(child) ? child.expression : child
-   return t.jsxExpressionContainer(
-      t.arrowFunctionExpression(
-         [],
-         t.jsxFragment(t.jsxOpeningFragment(), t.jsxClosingFragment(), [expression])
-      )
-   );
-}
-
 function isDerivationShorthand(expression) {
-   console.log('isDerivationshorthand?', expression.node)
    const node = expression.node;
    if (t.isAssignmentExpression(node, { operator: '=' }) && node.left.name === '$' && isDerivation(expression.get('right'))) {
       return true;
@@ -161,13 +138,11 @@ function isDerivationShorthand(expression) {
 //    }
 // }
 
-function isParenthesized(expression) {
-   return expression.extra && expression.extra.parenthesized === true;
-}
 
-function slotIsRenderFunction(children) {
-   if (children.length !== 1) return false;
-   const child = children[0];
+
+function slotIsRenderFunction(paths) {
+   if (paths.length !== 1) return false;
+   const child = paths[0].node;
    if (!t.isJSXExpressionContainer(child)) return false;
    const expression = child.expression
    if (t.isArrowFunctionExpression(expression) || t.isFunctionExpression(expression)) return true;
@@ -285,11 +260,10 @@ function transformJSXAttributes(jsxElementPath) {
 }
 
 function transformJSXSlot(path) {
-   const node = path.node
-   const children = node.children;
+   const children = path.get('children')
    if (children.length === 0) return;
-   transformJSXChildren(path.get('children'))
-   node.children = [normalizeSlotToRenderFunction(children)]
+   transformJSXChildren(children)
+   path.node.children = [normalizeSlotToRenderFunction(children)]
 }
 
 

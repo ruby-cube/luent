@@ -186,7 +186,7 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
    }
    // if ('name' in subject && subject.name === '__$propIon') console.log(subject)
 
-   const eager = options?.eager
+   let eager: boolean | undefined = options?.eager
    const phase = options?.phase ?? Phase.BEFORE_RENDER
 
    const subjects = isMultiSubject ? normalizeWatchSubjects(subject)! : [normalizeWatchSubject(subject)]
@@ -211,11 +211,11 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
    function changeHandler() {
       const newValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when retracking happens
 
-      if (isMultiSubject && noChanges(subjects, newValue, oldValue)
+      if (!eager && (isMultiSubject && noChanges(subjects, newValue, oldValue)
          || isIon(subject0) && noChange(newValue, oldValue)
-         || isIonizedModel(subject) && noMutations(subject))
+         || isIonizedModel(subject) && noMutations(subject)))
          return;
-
+      eager = false;
       runCleanups($activeEffect())
       const _effect = new ThisEffect(getMutations(subjects));
       $activeEffect.value = _effect
@@ -224,6 +224,7 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
       try {
          currentWatchSubject = subjects // prevents infinite loops for synchronous effects //TODO: do we need this in watchModel and initialize effect?
          pushEffect(_effect)
+         console.log('running effect with', _effect)
          effect(newValue, oldValue)
       }
       finally {
@@ -234,7 +235,6 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
    }
 
    if (eager) {
-      console.log("EAGER")
       scheduleEffectEagerly(changeHandler, phase)
    }
 

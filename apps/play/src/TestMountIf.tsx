@@ -43,11 +43,18 @@ export function MountIf() {
    // function $hi() {
    // return ""
    // }
-   const $color = ion('re')
+   const $color = ion('lim', {
+      change() {
+         if ($color() === 'lim')
+            $color.value = 'blu'
+         else
+            $color.value = 'lim'
+      }
+   })
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
    return component(
       <>
-         <button on:click={() => todos[0].name += '!'} style={[{ color: $=$color() + 'd' }]} class={[$=$color()]}>shout</button>
+         <button on:click={() => ($color.change(), todos[0].name += '!')} style={[{ color: $=$color() + 'e' }]}>shout</button>
          <h1>Hello {todos[0].name}</h1>
          <div>{() => 'hi'}</div>
          <$--transition>
@@ -80,16 +87,18 @@ export function MountIf() {
          </$--transition>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>
-         <Child dog={$color()+'d'}></Child>
+         <Child dog={$color() + 'd'}></Child>
       </>
    )
 }
 
 
+
+
 function Child(input = fromTag({
    dog: v<string>
 })) {
-   const {dog} = prep(input)
+   const { dog } = prep(input)
    console.log('preped', dog)
    return component(
       <div>child</div>

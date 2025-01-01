@@ -13,7 +13,7 @@ import { isHTMLEvent } from "../html/attributes";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
 import { initializeListRef, initializeRef, isNodeRef, NodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
-import { $thisEffect } from "../../../quarky/src/effects/ThisEffect";
+import { $thisEffect, ThisEffect } from "../../../quarky/src/effects/ThisEffect";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -219,7 +219,7 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    for (const entry of styles) {
       if (isIon(entry) || entry instanceof Function) {
          watch(entry, (value: string | AnyObject | Falsey) => {
-            setUpStyleEntry(style, value);
+            setUpStyleEntry(style, value, $thisEffect());
          }, { eager: true, phase: Phase.RENDER })
       }
       else {
@@ -228,18 +228,18 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    }
 }
 
-function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey) {
+function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey, outerEffect?: ThisEffect) {
    if (entry instanceof Object) {
-      const outerEffect = $thisEffect()
       for (const key in entry) {
          const value = entry[key];
          if (isIon(value) || value instanceof Function) {
             watch(value, (value: string | number | Falsey) => {
+               console.log('isIon red')
                assignStyleProperty(style, toStylePropertyName(key), value)
             }, {
                eager: true,
                phase: Phase.RENDER,
-               until: outerEffect.onCleanup
+               until: outerEffect?.onCleanup
             })
          }
          else {
