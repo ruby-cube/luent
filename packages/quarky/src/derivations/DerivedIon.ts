@@ -19,7 +19,7 @@ import { getDynamicNode } from "../../../lumo/src/dynamic/nodestack";
 export const DERIVED_ION = Symbol('DerivedIon')
 
 export type DerivedIon<T = any> = {
-   (selected?: true): T
+   (): T
    [META]: MetaDerivedIon
    untrack: () => void
 }
@@ -83,9 +83,9 @@ export function createDerivedIon<T extends any>(
 
    let initialized = false;
 
-   function $derivedIon(selected?: boolean) {
+   function $derivedIon() {
       const tracker = getActiveTracker()
-      if (tracker && tracker.selective && !selected) {
+      if (tracker) {
          if (derived.dirty) {
             const newValue = pureGetter(derived.value);
             derived.updateValue(newValue);
@@ -140,7 +140,7 @@ export function createDerivedIon<T extends any>(
 }
 
 export type WritableDerivedIon<T = any, M extends AnyObject = {}> = {
-   (selected?: true): T
+   (): T
    [META]: MetaDerivedIon;
    untrack: () => void;
 } & M

@@ -7,7 +7,7 @@ import { AnyObject } from "@rue/types";
 import { IonMethods, isIon } from "./Ion";
 import { ProtectedIon } from "./ReinedIon";
 
-export type AtomicIon<T = any, M extends AnyObject = {}> = ((selected?: true) => T)
+export type AtomicIon<T = any, M extends AnyObject = {}> = (() => T)
    & {
       [META]: MetaIon<T>;
       value: T;
@@ -64,11 +64,11 @@ export function createAtomicIon<
       return setValue(metaIon, newValue, metaIon.value);
    }
 
-   function $ion(selected?: boolean) {
+   function $ion() {
       if (inert) return metaIon.value;
       if (__DEV__) emitSignal();
       const tracker = getActiveTracker()
-      if (!tracker || tracker.selective && !selected)
+      if (!tracker)
          return metaIon.value as T
       tracker.track(<AtomicIon>$ion)
       return metaIon.value as T;

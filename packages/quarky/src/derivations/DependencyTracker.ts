@@ -31,7 +31,6 @@ export function tracked() {
 
 export class DependencyTracker {
     constructor(
-        public selective: boolean = false
     ) {
 
     }

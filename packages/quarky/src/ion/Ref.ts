@@ -24,12 +24,12 @@ export function ref<T, M>(value?: T, methods?: M & { [key: string]: (...args: an
 }
 
 export type WritableDerivedRef<T = any, M extends AnyObject = {}> = {
-    (selected?: true): T
+    (): T
     [META]: MetaDerivedIon;
 } & M
 
 export type DerivedRef<T = any> = {
-    (selected?: true): T
+    (): T
     [META]: MetaDerivedIon;
 }
 

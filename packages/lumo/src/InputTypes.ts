@@ -55,7 +55,7 @@ const _Ion = ((optional: '?') => {
    required: true;
 }
 export { _Ion as Ion }
-export type Ion<T = any, M extends AnyObject = {}> = (() => T) & ((selected?: true) => T) & M
+export type Ion<T = any, M extends AnyObject = {}> = (() => T) & M
 
 
 const _Ref = ((optional: '?') => {
@@ -76,7 +76,7 @@ const _Ref = ((optional: '?') => {
    required: true;
 }
 export { _Ref as Ref }
-export type Ref<T = any, M extends AnyObject = {}> = (() => T) & ((selected?: true) => T) & M
+export type Ref<T = any, M extends AnyObject = {}> = (() => T)  & M
 
 
 export const MaybeIon = ((optional: '?') => {

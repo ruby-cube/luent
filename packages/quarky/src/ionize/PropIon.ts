@@ -18,11 +18,11 @@ export function isPropIon(value: any): value is PropIon {
 }
 
 export type PropIon<T = any, M = undefined> = M extends undefined ? {
-    (selected?: true): T
+    (): T
     // set: (newValue: T) => T
     [META]: MetaPropIon
 } : M & {
-    (selected?: true): T
+    (): T
     // set: (newValue: T) => T
     [META]: MetaPropIon
 }
@@ -40,7 +40,7 @@ type TransferredMethods<T, M> = {
 // }
 
 export type PropIonCapsule<T = any, M extends AnyObject = AnyObject> = {
-    (selected?: true): T
+    (): T
     [META]: MetaPropIon
 } & M
 
@@ -161,10 +161,10 @@ function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel:
     const rawTarget = toRaw(ionicModel)
 
 
-    function __$propIon(selected?: boolean) {
+    function __$propIon() {
         reregisterIfNeeded()
         const tracker = getActiveTracker()
-        if (tracker && tracker.selective && !selected)
+        if (tracker)
             return toRaw(ionicModel)[key]
         return ionicModel[key];
     }

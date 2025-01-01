@@ -16,7 +16,6 @@ export function isIon(maybeIon: any): maybeIon is AnyIon {
 
 export type Ion<T = any, M extends AnyObject = {}> = (() => T)
    & {
-      (selected?: true): T
       [META]: any
    } & M
 

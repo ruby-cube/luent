@@ -6,7 +6,7 @@ import { asReinedIonizedModel } from "../ionize/ReinedIonizedModel";
 
 
 export type ProtectedIon<T = any, M extends AnyObject = {}> = {
-   (selected?: true): T;
+   (): T;
    [META]: { inert: boolean, o: any, asReadonly?: ProtectedIon, asDefaultReined?: ProtectedIon };
 } & M
 export const READONLY = Symbol('readonly')
@@ -15,7 +15,7 @@ export const READONLY = Symbol('readonly')
 // readonly ion: no methods
 // custom protected ion: no set function and only select properties and methods 
 
-type WritableIon<T = any, M = AnyObject> = ((selected?: true) => T) & {
+type WritableIon<T = any, M = AnyObject> = (() => T) & {
    [META]: MetaWritableIon
 } & M
 
@@ -63,8 +63,8 @@ function createCustomReinedIon($ion: WritableIon, exposedKeys: PropertyKey[]) {
    const meta = asMetaIon($ion);
    const $coreIon = meta.o;
    const proto = Object.getPrototypeOf($coreIon)
-   function $customIon(selected: boolean) {
-      const value = $coreIon(selected)
+   function $customIon() {
+      const value = $coreIon()
       if (isIonizedModel(value)) {
          return asReinedIonizedModel(value)
       }
@@ -112,8 +112,8 @@ export function asReadonlyIon($ion: WritableIon) {
 function createReadonlyIon(meta: MetaWritableIon) {
    const $coreIon = meta.o
 
-   function $readonlyIon(selected?: boolean) {
-      const value = $coreIon(selected)
+   function $readonlyIon() {
+      const value = $coreIon()
       if (isIonizedModel(value))
          return asReinedIonizedModel(value)
       return value;
@@ -151,8 +151,8 @@ function createReinedIon(meta: MetaWritableIon) {
 
    const proto = Object.getPrototypeOf($coreIon)
 
-   function $protectedIon(selected?: boolean) {
-      const value = $coreIon(selected)
+   function $protectedIon() {
+      const value = $coreIon()
       if (isIonizedModel(value)) {
          return asReinedIonizedModel(value)
       }
