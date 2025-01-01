@@ -31,7 +31,8 @@ export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Slot
    );
 }
 
-function processSlot(Slot: Slot | { z: Ion } | { [key: string]: Slot }) {
+function processSlot(Slot: Slot | { z: Ion } | { [key: string]: Slot } | undefined) {
+   if (Slot === undefined) return undefined;
    if (isObjectLiteral(Slot)) {
       if ('z' in Slot && isIon(Slot.z)) {
          return Slot.z();

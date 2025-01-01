@@ -2,6 +2,7 @@ import { component, If, Else, fade, ElseIf, slide, fromTag, v, target } from "@r
 import { ion, ionize } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
+
 export function MountIf() {
    const $count = ion(0, {
       increment() {
@@ -47,13 +48,13 @@ export function MountIf() {
    // function $hi() {
    // return ""
    // }
-   const $color = ()=>'re'
+   const $color = ion('re')
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
    return component(
       <>
-         <button on:click={() => todos[0].name += '!'} style={[{ color: $=$color() + 'd' }]} class={[$=$color()]}>shout</button>
+         <button on:click={() => todos[0].name += '!'} style={[{ color: $color() }]} class={[$=$color()]}>shout</button>
          <h1>Hello {todos[0].name}</h1>
-         <div>{()=>'hi'}</div>
+         <div>{() => 'hi'}</div>
          <$--transition>
             {If($active,
                <>
@@ -89,10 +90,12 @@ export function MountIf() {
    )
 }
 
-function Child(input=fromTag()){
-return component(
-   <div>child</div>
-)
+
+function Child(input = fromTag()) {
+   console.log('input', input)
+   return component(
+      <div>child</div>
+   )
 }
 
 // function CounterButton(input = fromTag({

@@ -102,7 +102,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 
 export function makeNode(
    nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--context' | 'swap:mount' | 'swap:instance' | 'swap:display' | '$--try' | '$--suspense' | '$--portal',
-   Slot: (() => NodeEntity[]) | InferSlot,
+   Slot: undefined | (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent | SwapConfig | JSX.Element | undefined {
 

@@ -133,7 +133,7 @@ function transformSingleChildToRenderFunction(child) {
 function isDerivationShorthand(expression) {
    console.log('isDerivationshorthand?', expression.node)
    const node = expression.node;
-   if (t.isAssignmentExpression(node, { operator: '=' } && node.left.name === '$') && isDerivation(expression.get('right'))) {
+   if (t.isAssignmentExpression(node, { operator: '=' }) && node.left.name === '$' && isDerivation(expression.get('right'))) {
       return true;
    }
    return false;

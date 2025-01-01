@@ -70,17 +70,6 @@ export function makeComponent(
 
 
 
-// export function initializeComponent(
-//     component: InternalComponent,
-//     rendered: NodeEntity,
-// ) {
-//     const nodeEntities = normalizeToFragmentArray(rendered); //TODO: Validate output and get publicComponent from out
-//     component.nodeEntities = nodeEntities;
-// }
-
-
-
-
 
 
 // export function composeEvents(
