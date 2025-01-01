@@ -14,7 +14,7 @@ function ComponentA() {
     const $pending = ion(true);
 
     setTimeout(() => {
-        $pending.as(false)
+        $pending.value = false
     }, 500)
 
     return (
@@ -30,7 +30,7 @@ function ComponentB() {
     const $error = ion(false);
 
     setTimeout(() => {
-        $pending.as(false)
+        $pending.value = false
     }, 5000)
 
     return (

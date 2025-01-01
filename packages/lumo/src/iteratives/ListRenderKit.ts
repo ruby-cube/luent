@@ -226,7 +226,7 @@ export class ListRenderKit {
             // update $index value
             const $index = this.indices[prevIndex];
             newIndices.push($index);
-            $index.as(i)
+            $index.value = i
 
             // to update refs
             toFromIndices.push([i, prevIndex]);

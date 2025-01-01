@@ -13,6 +13,7 @@ import { isHTMLEvent } from "../html/attributes";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
 import { initializeListRef, initializeRef, isNodeRef, NodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
+import { $thisEffect } from "../../../quarky/src/effects/ThisEffect";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -219,7 +220,7 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
       if (isIon(entry) || entry instanceof Function) {
          watch(entry, (value: string | AnyObject | Falsey) => {
             setUpStyleEntry(style, value);
-         },{eager: true, phase: Phase.RENDER})
+         }, { eager: true, phase: Phase.RENDER })
       }
       else {
          setUpStyleEntry(style, entry)
@@ -229,12 +230,17 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
 
 function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey) {
    if (entry instanceof Object) {
+      const outerEffect = $thisEffect()
       for (const key in entry) {
          const value = entry[key];
          if (isIon(value) || value instanceof Function) {
             watch(value, (value: string | number | Falsey) => {
                assignStyleProperty(style, toStylePropertyName(key), value)
-            }, {eager: true, phase: Phase.RENDER})
+            }, {
+               eager: true,
+               phase: Phase.RENDER,
+               until: outerEffect.onCleanup
+            })
          }
          else {
             assignStyleProperty(style, toStylePropertyName(key), value)
@@ -246,8 +252,8 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
    }
 }
 
-function toStylePropertyName(key: string){
-   return key.startsWith('$')? key.slice(1) : key;
+function toStylePropertyName(key: string) {
+   return key.startsWith('$') ? key.slice(1) : key;
 }
 
 function assignStyleProperty(style: AnyObject, property: string, value: string | number | Falsey) {

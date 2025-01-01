@@ -14,10 +14,10 @@ describe('ion function', () => {
         expect(atomicIon[META]).toBeInstanceOf(MetaIon);
     });
 
-    it('should invoke setValue when `as` method is called', () => {
+    it('should invoke setValue when `value` is set', () => {
         const atomicIon = ion(15);
         const newValue = 25;
-        atomicIon.as(newValue);
+        atomicIon.value = newValue;
 
         expect(atomicIon()).toBe(newValue);
     });
@@ -25,7 +25,7 @@ describe('ion function', () => {
     it('should attach methods to the ion when methods are provided', () => {
         const $count = ion(5, {
             double() {
-                $count.as($count() * 2)
+                $count.value = $count() * 2
             }
         });
 
@@ -33,28 +33,39 @@ describe('ion function', () => {
         expect($count()).toBe(10);
         expect($count[META]).toBeInstanceOf(MetaIon);
     });
- 
 
-    it('should replace `as` method with `_as` if provided with `as` method', () => {
-        const $count = ion(15, {
-            as(value: number){
-                $count._as(value);
-            },
+    it('should throw an error if .value is read', () => {
+        const $count = ion(5, {
             double() {
-                $count._as($count() * 2)
+                $count.value = $count() * 2
             }
         });
 
-        const newValue = 25;
-        $count.as(newValue);
-        expect($count()).toBe(newValue);
-
-        $count.double()
-        expect($count()).toBe(50);
-
-        $count._as(2)
-        expect($count()).toBe(2);
+        expect(()=>$count.value).toThrowError();
+        expect($count[META]).toBeInstanceOf(MetaIon);
     });
+ 
+
+   //  it('should replace `as` method with `_as` if provided with `as` method', () => {
+   //      const $count = ion(15, {
+   //          as(value: number){
+   //              $count.value = value;
+   //          },
+   //          double() {
+   //              $count.value = $count() * 2
+   //          }
+   //      });
+
+   //      const newValue = 25;
+   //      $count.value = newValue;
+   //      expect($count()).toBe(newValue);
+
+   //      $count.double()
+   //      expect($count()).toBe(50);
+
+   //      $count.value = 2
+   //      expect($count()).toBe(2);
+   //  });
 
       it('should create a ReactiveDerivedIon when given a function', () => {
         const $count = ion(1)
@@ -63,7 +74,7 @@ describe('ion function', () => {
         expect(typeof $doubleCount).toBe('function');
         expect($doubleCount instanceof Function).toBe(false)
         expect($doubleCount()).toBe(2);
-        $count.as(4)
+        $count.value = 4
         expect($doubleCount()).toBe(8);
         expect($doubleCount[META].type).toBe(DERIVED_ION);
       });
@@ -71,7 +82,7 @@ describe('ion function', () => {
       it('should create a derived ion that tracks dependencies correctly', () => {
         const depIon = ion(1);
         const derivedIon = ion(() => depIon() + 10);
-        depIon.as(2);  // update dependency
+        depIon.value = 2;  // update dependency
 
         expect(derivedIon()).toBe(12);
       });

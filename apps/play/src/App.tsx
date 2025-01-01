@@ -97,13 +97,13 @@ export function List() {
             id: genId(),
             content: (Math.random() * 100).toString(),
         });
-        $list.as(newList)
+        $list.value = newList
     }
 
     function removeItem(index: number) {
         const _list = [...$list()]
         _list.splice(index, 1);
-        $list.as(_list)
+        $list.value = _list
     }
 
     const { openModal } = useModal();
@@ -111,7 +111,7 @@ export function List() {
     const $showSideBlock = ion(false)
 
     function showSideBlock() {
-        $showSideBlock.as(true)
+        $showSideBlock.value = true
     }
 
     const $listLengthIsZero = () => $list().length === 0
@@ -309,11 +309,11 @@ function useDialogBox(config: { initialState: 'open' | 'closed' }) {
     __addDevName($open, '$open')
 
     function open() {
-        $open.as(true)
+        $open.value = true
     }
 
     function close() {
-        $open.as(false)
+        $open.value = false
     }
 
     return {

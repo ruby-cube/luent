@@ -293,10 +293,10 @@ export function TestCleanupScheduler({
    const $count = ion(0, {
       setTo(value: number) {
          if (value > 100) return value;
-         $count.as(value);
+         $count.value = value;
       },
       set(value: number) {
-         $count.as(value)
+         $count.value = value
       }
    })
 
@@ -392,23 +392,23 @@ export function TestCleanupScheduler({
 
    return component(
       <>
-         <div class={['storm active', $=$editable() && 'editable']}
+         <div class={['storm active', $ = $editable() && 'editable']}
             style={[
                {
-                  backgroundColor: $=$mainColor() + 'px',
+                  backgroundColor: $ = $mainColor() + 'px',
                },
                dragging ? {
                   backgroundColor: 'gray',
-                  width: $=`${listItem.width}px !important`,
-                  height: $=`${$height()}px`
+                  width: $ = `${listItem.width}px !important`,
+                  height: $ = `${$height()}px`
                } : {
                   backgroundColor: $color,
                   width: `0px`
                },
-               $=$dragging() ? {
+               $ = $dragging() ? {
                   backgroundColor: 'gray',
-                  width: $=`${listItem.width}px !important`,
-                  height: $=`${$height()}px`
+                  width: $ = `${listItem.width}px !important`,
+                  height: $ = `${$height()}px`
                } : {
                   $color,
                   width: `0px`
@@ -432,7 +432,7 @@ export function TestCleanupScheduler({
 
          <input $value={$frogName} />
 
-         <input value={$=$frogName() + '!'} />
+         <input value={$ = $frogName() + '!'} />
 
          <input $value={$frogName} />
 

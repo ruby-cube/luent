@@ -71,11 +71,6 @@ function createCustomReinedIon($ion: WritableIon, exposedKeys: PropertyKey[]) {
       return value;
    }
 
-   const setterKey = '_as' in proto ? '_as' : 'as'
-
-   //@ts-expect-error
-   $customIon[setterKey] = protectedMethod;
-
    const publicMethods = new Set(exposedKeys);
    for (const key in proto) {
       if (!publicMethods.has(key)) {
@@ -83,6 +78,15 @@ function createCustomReinedIon($ion: WritableIon, exposedKeys: PropertyKey[]) {
          $customIon[key] = protectedMethod
       }
    }
+
+   Object.defineProperty($customIon, 'value', {
+      get(){
+         throw new Error('The `value` property of an ion is private. Call the ion to access its value')
+      },
+      set(){
+         throw new Error(`'value' has been made private by rein()`)
+      }
+   })
 
    Object.setPrototypeOf($customIon, proto)
 
@@ -105,7 +109,6 @@ export function asReadonlyIon($ion: WritableIon) {
    return createReadonlyIon(meta);
 }
 
-//TODO: deep readonly
 function createReadonlyIon(meta: MetaWritableIon) {
    const $coreIon = meta.o
 
@@ -116,6 +119,15 @@ function createReadonlyIon(meta: MetaWritableIon) {
       return value;
    }
    $readonlyIon[META] = meta;
+
+   Object.defineProperty($readonlyIon, 'value', {
+      get(){
+         throw new Error('The `value` property of an ion is private. Call the ion to access its value')
+      },
+      set(){
+         throw new Error(`'value' has been made private by rein()`)
+      }
+   })
 
    meta.asReadonly = $readonlyIon;
    return $readonlyIon;
@@ -147,12 +159,14 @@ function createReinedIon(meta: MetaWritableIon) {
       return value;
    }
 
-   const setterKey = '_as' in proto ? '_as' : 'as'
-
-   //@ts-expect-error
-   $protectedIon[setterKey] = () => {
-      throw new Error(`'${setterKey}()' method has been made private by rein()`)
-   }
+   Object.defineProperty($protectedIon, 'value', {
+      get(){
+         throw new Error('The `value` property of an ion is private. Call the ion to access its value')
+      },
+      set(){
+         throw new Error(`'value' has been made private by rein()`)
+      }
+   })
 
    Object.setPrototypeOf($protectedIon, proto)
 

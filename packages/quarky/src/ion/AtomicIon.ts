@@ -10,7 +10,8 @@ import { ProtectedIon } from "./ReinedIon";
 export type AtomicIon<T = any, M extends AnyObject = {}> = ((selected?: true) => T)
    & {
       [META]: MetaIon<T>;
-   } & { [K in keyof M]: M[K] } & (M extends { as: any } ? { _as: (value: T) => T } : { as: (value: T) => T })
+      value: T;
+   } & { [K in keyof M]: M[K] }
 
 
 export const ION = Symbol('atomicIon');
@@ -42,11 +43,17 @@ export function createAtomicIon<
 ) {
    const metaIon = new MetaIon(<AtomicIon>$ion, value, isIonizedModel(value), !!methods, !!inert)
 
-   const setterKey = methods && ('as' in methods) ? "_as" : 'as'
+   // const setterKey = methods && ('as' in methods) ? "_as" : 'as'
 
    const proto = {
       [META]: metaIon,
-      [setterKey]: setIonValue
+      get value(){
+         throw new Error('The `value` property of an ion is private. Call the ion to access its value')
+      },
+      set value(value: T) {
+         setIonValue(value)
+      }
+      // [setterKey]: setIonValue
    } as AnyObject
 
    if (methods) {

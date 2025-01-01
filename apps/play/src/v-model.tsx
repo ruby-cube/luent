@@ -4,7 +4,7 @@ export function ChildOne() {
 
     const $value = ion('hi')
     function updateValue(newValue: string) {
-        $value.as(newValue)
+        $value.value = newValue
     }
 
     return (
@@ -20,7 +20,7 @@ export function ChildTwo() {
 
     return (
         <input value="props.modelValue"
-            oninput="()=>emit('update:modelValue', $event.target.value)"
+            on:input={()=>emit('update:modelValue', $event.target.value)}
         />
     )
 }

@@ -6,7 +6,7 @@ export function TestIonicEffect() {
     const $count = ion(0, {
         increment() {
             console.log("incrementing")
-            $count.as($count() + 1)
+            $count.value = $count() + 1
         }
     })
 

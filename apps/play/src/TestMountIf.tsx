@@ -1,4 +1,4 @@
-import { component, If, Else, fade, ElseIf, slide, fromTag, v, target } from "@rue/lumo";
+import { component, If, Else, fade, ElseIf, slide, fromTag, v, target, prep } from "@rue/lumo";
 import { ion, ionize } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
@@ -6,9 +6,6 @@ import { AnyObject } from "@rue/types";
 export function MountIf() {
    const $count = ion(0, {
       increment() {
-         $count.as($count() + 1)
-
-         //@ts-expect-error
          $count.value = $count() + 1
       }
    })
@@ -23,21 +20,19 @@ export function MountIf() {
 
    const $active = ion(true, {
       toggle() {
-         $active.as(!$active())
+         $active.value = !$active()
       }
    })
 
    const $ready = ion(true, {
       toggle() {
-         $ready.as(!$ready())
+         $ready.value = !$ready()
       }
    })
 
    const $isMobile = ion(false, {
       toggle() {
-         //@ts-expect-error
          $isMobile.value = !$isMobile()
-         // $isMobile.as(!$isMobile())
       }
    })
 
@@ -52,7 +47,7 @@ export function MountIf() {
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
    return component(
       <>
-         <button on:click={() => todos[0].name += '!'} style={[{ color: $color() }]} class={[$=$color()]}>shout</button>
+         <button on:click={() => todos[0].name += '!'} style={[{ color: $=$color() + 'd' }]} class={[$=$color()]}>shout</button>
          <h1>Hello {todos[0].name}</h1>
          <div>{() => 'hi'}</div>
          <$--transition>
@@ -85,14 +80,17 @@ export function MountIf() {
          </$--transition>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>
-         <Child dog='hi'></Child>
+         <Child dog={$color()+'d'}></Child>
       </>
    )
 }
 
 
-function Child(input = fromTag()) {
-   console.log('input', input)
+function Child(input = fromTag({
+   dog: v<string>
+})) {
+   const {dog} = prep(input)
+   console.log('preped', dog)
    return component(
       <div>child</div>
    )
@@ -206,12 +204,12 @@ function ArticleBlock(setup: {
 //         console.log("destroyd")
 //     })
 
-//     $count.as(1)
+//     $count.value = 1)
 
 //     return component(
 //         <>
 //             <div ref={$countDiv}>{$count}</div>
-//             <button on:click-this-$button-v={[$count.as($count() + 1), stopPropagation]} ref={$button}>increment</button >
+//             <button on:click-this-$button-v={[$count.value = $count() + 1), stopPropagation]} ref={$button}>increment</button >
 //             {/* <Counter>{$count()}</Counter> */}
 //         </>
 //     )

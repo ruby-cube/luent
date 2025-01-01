@@ -14,7 +14,7 @@ export function IonAccess() {
 
    const $x = ion(7, {
       increment() {
-         $x._as($x() + 1)
+         $x.value = $x() + 1
       },
       as() {
 
@@ -180,7 +180,7 @@ function SvelteA() {
          )}
 
          <div>
-            {$>$x() + 10}
+            {$ > $x() + 10}
          </div>
       </>
    )

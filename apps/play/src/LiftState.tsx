@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { fromTag, $Ion, Ion, NodeRef, v, prep } from "@rue/lumo"
 import { AtomicIon, ion } from "../../../packages/quarky/src"
 
@@ -8,10 +7,10 @@ function ParentBlock() {
 
    const $count = ion(4, {
       increment() {
-         this.as($count() + 1)
+         $count.value = $count() + 1
       },
       decrement() {
-         this.as($count() - 1)
+         $count.value = $count() - 1
       }
    });
 

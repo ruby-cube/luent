@@ -479,8 +479,14 @@ export function reactiveSetter(
 
 
 export function setAbsorbedIon(ion: AnyIon, value: any, ionicModel: IonizedModel, key: PropertyKey, oldValue: any, structureConfigs: CustomIonicModelConfig[]) {
-   if ('as' in ion) {
-      ion.as(value);
+   if ('value' in ion) {
+      try {
+         ion.value = value;
+      }
+      catch (err) {
+         if (__DEV__) throw new Error("Absorbed AtomicIon is read only")
+         return false;
+      }
 
       const prop = getObservedProp(ionicModel, key);
       if (prop) {

@@ -27,7 +27,7 @@ class ActionRecord {
         this.tracked.add(reactivePrimitive);
         watch(subject, (newValue, oldValue) => {
             if (!action.success) {
-                subject.as(oldValue)
+                subject.value = oldValue
             }
         })
     }

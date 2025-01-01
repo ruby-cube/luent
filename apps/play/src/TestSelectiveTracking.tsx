@@ -6,19 +6,19 @@ export function TestSelectiveTracking() {
 
     const $active = ion(false, {
         toggle() {
-            $active.as(!$active())
+            $active.value = !$active()
         }
     })
 
     const $ready = ion(true, {
         toggle() {
-            $ready.as(!$ready())
+            $ready.value = !$ready()
         }
     })
 
     const $count = ion(0, {
         increment() {
-            $count.as($count() + 1)
+            $count.value = $count() + 1
         }
     })
 
@@ -34,26 +34,25 @@ export function TestSelectiveTracking() {
 
     const $ = true as const;
 
-    watchEffect(() => {
-        console.log($doubleCount($))
-        if ($active($)) {
+    watchEffect((tracker) => {
+        if ($active()) {
+            tracker.stop()
             console.log($count())
             console.log('active')
-        }
-        else if ($ready($)) {
+         }
+         else if ($ready()) {
+           tracker.stop()
             console.log($count())
             console.log('ready')
         }
         else {
             console.log('neither')
         }
-    }, {
-        only: [$]
     })
 
     function reInputChange(event: InputEvent) {
         // $frog.changeName(event.target?.value)
-        $frogName.as(event.target.value)
+        $frogName.value = event.target.value
         // console.log($frog.name)
     }
 

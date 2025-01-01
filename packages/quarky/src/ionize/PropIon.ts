@@ -9,6 +9,7 @@ import { __devCheckIfTracked, getActiveTracker } from "../derivations/Dependency
 import { asWatchSubject, WatchSubject } from "../effects/WatchSubject";
 import { asIonicAtom, IonicAtom } from "../derivations/IonicAtom";
 import { asMetaIon } from "../ion/AtomicIon";
+import { readonly } from "../readonly";
 
 
 
@@ -134,7 +135,7 @@ export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, k
     if (isIon(value)) {
         if (methods && __DEV__) console.warn(`absorbed ions cannot have additional methods assigned to them`)
         if (isReinedIonizedModel(ionicModel))
-            return reinIon(value);
+            return reinIon(value, []);
         return value;
     }
 
@@ -142,7 +143,7 @@ export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, k
     const propIon = getPropIon(ionicModel, key) //TODO: need a map for readonly prop ions too...
     if (propIon && !methods) {
         if (isReinedIonizedModel(ionicModel)) {
-            rein(propIon, READONLY)
+            readonly(propIon)
         }
         return propIon as AsPropIon<T, K, M>
     }

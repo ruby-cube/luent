@@ -57,6 +57,9 @@ export function fromTag<C extends undefined | { [key: string]: { validatedType: 
    return attributes as C extends undefined ? AnyObject : ComponentAttributes<C>
 }
 
+export function is$$Derivation(value: any) {
+   return value instanceof Function && value.name.startsWith('$$')
+}
 
 //API
 export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, assertions?: { [K in keyof C]?: ((value: any) => void) | ((value: any) => void)[] }): { [K in keyof ComponentValidatedInput<C>]: ComponentValidatedInput<C>[K] } {
@@ -74,8 +77,9 @@ export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, as
             }
          }
          if (typeConfig) {
+            console.log('typeConfig', typeConfig, key)
             const config = typeConfig[key];
-
+            if (config === undefined) continue;
             if ('optional' in config && value === undefined && 'default' in config && config.default instanceof Function) {
                value = config.default()
             }
@@ -85,7 +89,7 @@ export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, as
 
             switch (config.name) {
                case 'v':
-                  if (isIon(value)) {
+                  if (isIon(value) || is$$Derivation(value)) {
                      value = value()
                   }
                   if (key.startsWith('on:') && value instanceof Function) {
@@ -99,14 +103,14 @@ export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, as
                case '$Ref':
                case '_Ref':
                case '$IonOrIon':
-                  if (!isIon(value)) {
+                  if (!isIon(value) || !is$$Derivation(value)) {
                      throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ion`)
                   }
                   validatedAttributes['$' + key] = value; //TODO: make Ion read-only, rein $Ion
                   break;
 
                case 'MaybeIon':
-                  validatedAttributes['$' + key] = toIon(value) //TODO: make Ion read-only
+                  validatedAttributes['$' + key] = is$$Derivation(value) ? value : toIon(value) //TODO: make Ion read-only
                   break;
 
                case '_Ionized':

@@ -218,7 +218,7 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
 
       runCleanups($activeEffect())
       const _effect = new ThisEffect(getMutations(subjects));
-      $activeEffect.as(_effect)
+      $activeEffect.value = _effect
 
       let prevSubject = currentWatchSubject;
       try {

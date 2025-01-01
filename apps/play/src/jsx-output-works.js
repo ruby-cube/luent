@@ -4,22 +4,22 @@ import { ion, ionize } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/quar
 export function MountIf() {
    const $count = ion(0, {
       increment() {
-         $count.as($count() + 1);
+         $count.value = $count() + 1;
       }
    });
    const $active = ion(true, {
       toggle() {
-         $active.as(!$active());
+         $active.value = !$active();
       }
    });
    const $ready = ion(true, {
       toggle() {
-         $ready.as(!$ready());
+         $ready.value = !$ready();
       }
    });
    const $isMobile = ion(false, {
       toggle() {
-         $isMobile.as(!$isMobile());
+         $isMobile.value = !$isMobile();
       }
    });
    const todos = ionize([{
