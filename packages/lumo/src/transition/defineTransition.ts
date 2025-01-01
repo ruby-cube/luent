@@ -125,7 +125,7 @@ export function createTransitionStyleSheet() {
     head.appendChild(style)
     const stylesheet = stylesheets.item(index)
     if (!stylesheet) throw new Error(`no stylesheet at this index!`)
-    transitionStylesheet = stylesheet //TODO: replace with provideTransapp(OFFSCREEN_STYLESHEET, stylesheet)
+    transitionStylesheet = stylesheet //TODO: replace with provideGlobal(OFFSCREEN_STYLESHEET, stylesheet)
     return stylesheet;
 }
 

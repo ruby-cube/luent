@@ -10,7 +10,7 @@ export interface AppContext {
     entries?: Map<symbol | string, any>;
     parent?: AppContext,
     app: AppContext,
-    transapp?: AppContext,
+    global?: AppContext,
 }
 
 
@@ -24,7 +24,7 @@ export type _ContextInputType<C> =
     : 'invalid typeConfig'
 
 
-export function contextual<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
+export function fromContext<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
     let _context = context || getCurrentContext();
     if (!_context) throw new Error(``)
 
@@ -75,7 +75,7 @@ export function createAppContext(entries: AnyObject | undefined, globalContext: 
         entries: _entries,
         parent: globalContext,
         app: undefined as unknown as AppContext,
-        transapp: globalContext,
+        global: globalContext,
     }
     appContext.app = appContext
     return appContext;
@@ -105,15 +105,14 @@ export function provideAppwide<K extends string | symbol>(key: K, value: Context
     return value;
 }
 
-export function appwide<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
+export function fromApp<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
     let _context = context || getCurrentContext();
     if (!_context) throw new Error(``)
     const appContext = _context.app;
     if (!appContext) throw new Error("No app context found :( This should never happen")
     const typeConfig = contextTypeMap.get(key)
     const value = appContext.entries?.get(key)
-
-    if (value === undefined) return transapp(key);
+    if (value === undefined) return fromGlobal(key);
     if (!typeConfig) return value;
     return validateContextEntry(key, value, typeConfig)
 }
@@ -121,21 +120,21 @@ export function appwide<K extends string | symbol>(key: K, context?: NodeContext
 
 
 
-export function createTransappContext<E extends ContextEntries<E>>(entries?: E) {
+export function createGlobalContext<E extends ContextEntries<E>>(entries?: E) {
     const _entries = entries ? toMap(entries) : new Map()
-    const context = { entries: _entries, app: undefined, transapp: undefined } as unknown as AppContext
-    context.transapp = context;
+    const context = { entries: _entries, app: undefined, global: undefined } as unknown as AppContext
+    context.global = context;
     return context
 }
 
-export function provideTransapp<K extends string | symbol>(key: K, value: ContextType<K>) {
+export function provideGlobal<K extends string | symbol>(key: K, value: ContextType<K>) {
     let context = getCurrentContext();
     if (!context)
         throw new Error('')
-    if (!context.transapp)
-        throw new Error('No transapp context found. Call createTransappContext() and pass into createApp() via config')
+    if (!context.global)
+        throw new Error('No global context found. Call createGlobalContext() and pass into createApp() via config')
 
-    const globalEntries = context.transapp.entries!
+    const globalEntries = context.global.entries!
     if (globalEntries.has(key)) {
         if (__DEV__) {
             console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
@@ -147,11 +146,11 @@ export function provideTransapp<K extends string | symbol>(key: K, value: Contex
     return value;
 }
 
-export function transapp<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
+export function fromGlobal<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
     let _context = context || getCurrentContext();
     if (!_context)
         throw new Error('')
-    const globalEntries = _context?.transapp?.entries
+    const globalEntries = _context?.global?.entries
     const typeConfig = contextTypeMap.get(key)
     const value = globalEntries?.get(key)
     if (!typeConfig) return value;

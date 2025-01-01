@@ -355,6 +355,9 @@ export function TestCleanupScheduler({
       )]
    )
 
+
+
+
    //compiles to:
    style($div,
       [{
@@ -390,50 +393,75 @@ export function TestCleanupScheduler({
 
 
    return component(
-      () =>
-         <>
-            <textarea $content={exo($text, { setText: 'setContent' })}></textarea>
+      <>
+         <div class={['storm active', $=$editable() && 'editable']}
+            style={[
+               {
+                  backgroundColor: $=$mainColor() + 'px',
+               },
+               dragging ? {
+                  backgroundColor: 'gray',
+                  width: $=`${listItem.width}px !important`,
+                  height: $=`${$height()}px`
+               } : {
+                  backgroundColor: $color,
+                  width: `0px`
+               },
+               $=$dragging() ? {
+                  backgroundColor: 'gray',
+                  width: $=`${listItem.width}px !important`,
+                  height: $=`${$height()}px`
+               } : {
+                  $color,
+                  width: `0px`
+               },
+            ]}>
+            hi
+         </div>
 
-            <input $value={i0, $frogName} />
+         <textarea content={exo($text, { setText: 'setContent' })}></textarea>
 
-            <div>{$frog.name}</div>
-            <div>{$frogName() + '!'} </div>
+         <input m:value={$frogName} />
 
-            <div>{$frogName}</div>
+         <div>{$editable() ? frog.name : frog.song}</div>
 
-            <div>{i0, $frogName()} </div>
-            <div>{i0, $frogName() + '!'} </div>
+         <div>{`${$frogName()}!`} </div>
 
-            <input $value={$frogName} />
+         <div>{$frogName}</div>
 
-            <input value={{ z: $frogName() + '!' }} />
+         <div>{i0, $frogName()} </div>
+         <div>{i0, $frogName() + '!'} </div>
 
-            <input $value={$frogName} />
+         <input $value={$frogName} />
 
-            <button ref={$stopButton}>stop</button>
-            <button on:click={initWatcher}>start</button>
-            <div
-               width={2}
-               style={['width: 2px', {
-                  lineHeight: 1.5, // only declare layout css in the template that depends on hierarchy
-                  background: $divBgColor(),
-                  border: '2px solid #e66465',
-                  [text_color]: 'red',
-                  [background_image]: $image()
-               }]}  // use ions for dynamic styles restricted to an element
-            >
-               <p style={{
-                  margin: '15px',
-                  lineHeight: '1.5',
-                  textAlign: 'center',
-                  color: var_(text_color)
-               }}>
-                  Well, I am the slime from your video<br />
-                  Oozin' along on your livin' room floor.
-               </p>
-               <ChildBlock></ChildBlock>
-            </div>
-         </>
+         <input value={$=$frogName() + '!'} />
+
+         <input $value={$frogName} />
+
+         <button ref={$stopButton}>stop</button>
+         <button on:click={initWatcher}>start</button>
+         <div
+            width={2}
+            style={['width: 2px', {
+               lineHeight: 1.5, // only declare layout css in the template that depends on hierarchy
+               background: $divBgColor,
+               border: '2px solid #e66465',
+               [text_color]: 'red',
+               [background_image]: $image
+            }]}  // use ions for dynamic styles restricted to an element
+         >
+            <p style={{
+               margin: '15px',
+               lineHeight: '1.5',
+               textAlign: 'center',
+               color: $var(text_color)
+            }}>
+               Well, I am the slime from your video<br />
+               Oozin' along on your livin' room floor.
+            </p>
+            <ChildBlock></ChildBlock>
+         </div>
+      </>
    )
 }
 

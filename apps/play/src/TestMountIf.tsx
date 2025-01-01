@@ -1,10 +1,22 @@
 import { component, If, Else, fade, ElseIf, slide, fromTag, v, target } from "@rue/lumo";
 import { ion, ionize } from "@rue/quarky";
+import { AnyObject } from "@rue/types";
 
 export function MountIf() {
    const $count = ion(0, {
       increment() {
          $count.as($count() + 1)
+
+         //@ts-expect-error
+         $count.value = $count() + 1
+      }
+   })
+
+   const list = ionize({
+      count: 0,
+   }, {
+      increment(value: number) {
+         return list.count = list.count + value
       }
    })
 
@@ -22,22 +34,25 @@ export function MountIf() {
 
    const $isMobile = ion(false, {
       toggle() {
-         $isMobile.as(!$isMobile())
+         //@ts-expect-error
+         $isMobile.value = !$isMobile()
+         // $isMobile.as(!$isMobile())
       }
    })
 
-   const todos = ionize([{ name: 'bubby' }] as { name: string }[])
+   const todos = ionize([{ name: 'bubby', date: 0 }] as { name: string, date: number }[])
 
    // const removed = todos.splice(0, 2)
 
-function $hi(){
-   return ""
-}
+   // function $hi() {
+   // return ""
+   // }
+   const $color = ion('red')
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
    return component(
       <>
-         <button on:click={() => (todos[0].name += '!')} style={{ color: ('re' + 'd' + $hi()) }}>shout</button>
-         <h1>Hello {(todos[0].name)}</h1>
+         <button on:click={() => todos[0].name += '!'} style={{ $color }}>shout</button>
+         <h1>Hello {todos[0].name}</h1>
          <div>{() => 'hi'}</div>
          <$--transition>
             {If($active,

@@ -2,16 +2,16 @@ import { SchedulerOptions } from "@rue/flask";
 import { getCurrentContext, Context } from "../context/context-stack";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { getActiveDynamicNode } from "../dynamic/nodestack";
-import { appwide, contextual, transapp } from "../context/provide";
+import { fromApp, fromContext, global } from "../context/provide";
 import { ContextKeyMap } from "@rue/lumo";
 
 
 type ViewNode = {
     readonly onCreated: (handler: () => void, options?: SchedulerOptions) => void
     readonly onDestroy: (handler: () => void, options?: SchedulerOptions) => void
-    readonly contextual: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
-    readonly appwide: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
-    readonly transapp: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
+    readonly fromContext: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
+    readonly fromApp: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
+    readonly global: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
 }
 
 const viewNodeMap: Map<DynamicNode, Map<Context, ViewNode>> = new Map()
@@ -32,14 +32,14 @@ export function getThis() {
 
 function createViewNode(context: Context): ViewNode {
     return {
-        contextual(key: string | symbol) {
-            return contextual(key, context)
+        fromContext(key: string | symbol) {
+            return fromContext(key, context)
         },
-        appwide(key: string | symbol) {
-            return appwide(key, context)
+        fromApp(key: string | symbol) {
+            return fromApp(key, context)
         },
-        transapp(key: string | symbol) {
-            return transapp(key, context)
+        fromGlobal(key: string | symbol) {
+            return fromGlobal(key, context)
         },
         get onCreated() { 
             const dynamicNode = getActiveDynamicNode()

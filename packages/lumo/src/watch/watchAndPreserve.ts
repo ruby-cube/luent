@@ -13,9 +13,9 @@ type WatchForRenderOptions = {
 
 type LumoWatchOptions = CustomCleanupSchedulerListenerOptions & Omit<WatchOptions, 'until'>
 
-export function initializeRender(effect: () => void) {
+export function watchRenderEffect(effect: () => void) {
     // const component = getCurrentProvider();
-    // if (!component) throw new Error("initializeRender must be called within component setup")
+    // if (!component) throw new Error("watchRenderEffect must be called within component setup")
 
     const dynamicNode = getDynamicNode()
     if (!dynamicNode)

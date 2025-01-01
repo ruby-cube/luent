@@ -2,7 +2,6 @@ import { AnyIon, Ion, isIon} from "./Ion";
 import { AtomicIon } from "./AtomicIon";
 import { ref } from "./Ref";
 
-// type MaybeIon<T> = ReadonlyIon<T> | T
 
 // type NormalizeAllKeysToIons<T extends AnyObject> = {
 //     [K in keyof T]: T[K] extends AnyIon ? T[K] : () => T[K]

@@ -2483,6 +2483,7 @@ type ReactManagedAttributes<C, P> = C extends { propTypes: infer T; defaultProps
    : P;
 
 declare global {
+   let $;
    /**
     * @deprecated Use `React.JSX` instead of the global `JSX` namespace.
     */
@@ -2526,10 +2527,14 @@ declare global {
 
       type CSSProperties = React.CSSProperties
 
+      type Falsey = undefined | null | false;
+
+      type StyleInput = Lumo.MaybeGetter<string> | Lumo.MaybeGetter<{ [K in keyof Partial<CSSProperties>]: Lumo.MaybeGetter<CSSProperties[K]> }> | Falsey
+
       type IntrinsicElements = {
          [K in keyof JSX._IntrinsicElements]: JSX._IntrinsicElements[K] & {
-            class?: string | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[];
-            style?: CSSProperties | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[];
+            class?: Lumo.MaybeGetter<string> | Falsey | (Lumo.MaybeGetter<string> | Falsey)[];
+            style?: StyleInput | StyleInput[];
             attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
          }
       }

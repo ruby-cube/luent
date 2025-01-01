@@ -25,10 +25,10 @@ export function getAppRoot() {
 // }
 
 
-export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App: ComponentSetup<T>, config?: { with?: E, remountable?: boolean, transappContext?: AppContext, setup?: T }) {
+export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App: ComponentSetup<T>, config?: { with?: E, remountable?: boolean, globalContext?: AppContext, setup?: T }) {
 
    // (1) instantiate developer's root component
-   const appContext = createAppContext(config?.with, config?.transappContext)
+   const appContext = createAppContext(config?.with, config?.globalContext)
    const nodePod = new _NodePod()
    const remountable = config?.remountable
    const preserve = remountable ? true : false

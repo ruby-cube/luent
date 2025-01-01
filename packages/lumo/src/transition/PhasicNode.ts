@@ -3,7 +3,7 @@ import { defineContextProp } from "../context/ContextKey";
 import { makeElement } from "../element/makeElement";
 import { NodeEntity } from "../node/makeNode";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
-import { contextual } from "../context/provide";
+import { fromContext } from "../context/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
@@ -83,7 +83,7 @@ function createPhasicNode(
 }
 
 export function getPhasicNode(context?: ContextType) {
-    const phasicNode = contextual(GET_PHASIC_NODE, context)?.()
+    const phasicNode = fromContext(GET_PHASIC_NODE, context)?.()
     console.log('phasicNode', phasicNode)
     return phasicNode
 }

@@ -1,5 +1,5 @@
 import { ComponentSetup, InternalComponent, Component, PublicComponent } from "./InternalComponent";
-import { ComponentConfig, initializeListRef, initializeRef, NodeEntity } from "../node/makeNode";
+import { ComponentConfig,  NodeEntity } from "../node/makeNode";
 import { AnyObject } from "@rue/types";
 import { AtomicIon } from "@rue/quarky";
 
@@ -60,7 +60,7 @@ export function makeComponent(
 ): InternalComponent {
 
    setComponentAttributes({ Slot, ...config })
-   const output = component()
+   const output = Component()
    if (output instanceof Promise)
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    setComponentAttributes(undefined);

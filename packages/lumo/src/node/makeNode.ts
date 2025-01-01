@@ -15,6 +15,7 @@ import { createTryNode, TryNodeInput } from "../boundaries/Try";
 import { createSuspenseNode, SuspenseNodeInput } from "../boundaries/Suspense";
 import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
 import { META } from "../../../quarky/src/ReactiveEntity";
+import { MaybeGetter } from "../InputTypes";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -58,13 +59,21 @@ export type EventsConfig = {
 //     other: { [key: string]: (any | DerivedIon<any>)[] }
 // }
 
+type Falsey = undefined | null | false
+export type StyleInput = MaybeGetter<string | Falsey> | MaybeGetter<{ [key: string]: MaybeGetter<string | number | Falsey> }> | Falsey
+export type ClassInput = MaybeGetter<string> | Falsey
+
 export type ElementConfig<K extends HTMLTag = HTMLTag> = {
    [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &
 {
-   class?: string | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[],
-   style?: AnyObject/* TODO: limit to css properties */ | string | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[],
-   attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
+   class?: ClassInput | ClassInput[],
+   style?: StyleInput | StyleInput[],
+   // attributes?: K extends HTMLTag ? ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[] : never,
 } & NodeSetup<K>
+
+// class?: string | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[];
+// style?: CSSProperties | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[];
+// attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
 
 type NodeSetup<T extends HTMLTag | ComponentSetup> = {
    ref?: NodeRef<T> | NodesRef<T>,
@@ -88,7 +97,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
       return slot as (...args: any[]) => NodeEntity;
    }
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
-      return () => slot;
+   return () => slot;
 }
 
 export function makeNode(

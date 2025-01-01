@@ -9,7 +9,7 @@ export interface NodeContext {
     entries: AnyObject;
     parent: NodeContext | AppContext,
     app: AppContext,
-    transapp?: AppContext,
+    global?: AppContext,
 }
 
 export type ContextEntries<T> = {
@@ -35,7 +35,7 @@ export function Context<T extends ContextEntries<T>>(input: {
         entries: input.with,
         parent: parentContext,
         app: parentContext?.app,
-        transapp: parentContext?.transapp
+        global: parentContext?.global
     }
     pushContext(context)
     const nodeEntities = Slot()

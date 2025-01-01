@@ -53,7 +53,7 @@ describe("ActiveListener", () => {
 
 
     it('should call the callback when the wrapped callback is invoked', () => {
-        const listener = makeActiveListener(config);
+        makeActiveListener(config);
         const wrappedCallback = enroll.mock.calls[0][0];
 
         wrappedCallback();
@@ -64,7 +64,7 @@ describe("ActiveListener", () => {
 
     it('should remove the listener after callback if `once` is set to true', () => {
         config.options.once = true;
-        const listener = makeActiveListener(config);
+        makeActiveListener(config);
         const wrappedCallback = enroll.mock.calls[0][0];
 
         wrappedCallback();

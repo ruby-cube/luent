@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { Component, Else, ElseIf, expose, For, fromTag, If, Ion, prep, v, watch } from "@rue/lumo";
 import { ion, ionize, Ionized, ionizeWithMarks } from "@rue/quarky";
 import { Inert, inert } from "../../../packages/quarky/src/ionize/inert";
@@ -161,7 +162,7 @@ if (x === true) {
 function SvelteA() {
    //@ts-ignore
    const $x = ion(7)
-
+   let $: any;
    return component(
       <>
          <swap:mount />
@@ -177,6 +178,10 @@ function SvelteA() {
          {Else(
             <p>{$x} is between 5 and 10</p>
          )}
+
+         <div>
+            {$>$x() + 10}
+         </div>
       </>
    )
 }

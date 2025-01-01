@@ -26,7 +26,7 @@ import { ionize } from '@rue/quarky';
 // import { NestedPend } from './NestedPend';
 
 
-// const rootContext = createTransappContext()
+// const rootContext = createGlobalContext()
 
 
 const app = createApp(MountIf)

@@ -1,4 +1,4 @@
-import { appwide } from "./provide";
+import { fromApp } from "./provide";
 
 export const contextTypeMap: Map<symbol | `${string}`, TypeConfig> = new Map();
 
@@ -24,11 +24,11 @@ export type TypeConfig = {
     optional?: '?' | 'withDefault'
 }
 
-export function createInjectedClass(classKey: string | symbol, contextualGetter: (key: string | symbol) => any = appwide) {
+export function createInjectedClass(classKey: string | symbol, contextualGetter: (key: string | symbol) => any = fromApp) {
     return (...args: any[]) => new (contextualGetter(classKey))(...args)
 }
 
-export function createInjectedFactory(classKey: string | symbol, contextualGetter: (key: string | symbol) => any = appwide) {
+export function createInjectedFactory(classKey: string | symbol, contextualGetter: (key: string | symbol) => any = fromApp) {
     return (...args: any[]) => contextualGetter(classKey)(...args)
 }
 
