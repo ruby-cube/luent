@@ -65,7 +65,7 @@ export class DependencyTracker {
         this.stop();
         popDepTracker();
         if (__DEV__ && this.deps.size === 0) {
-            throw new Error('Watch target or derived AtomicIon has no dependencies (and therefore no reactivity')
+            throw new Error('Watch target or derived AtomicIon has no dependencies (and therefore no reactivity', {cause: 'no dependencies'})
         }
         return [this.deps, value];
     }

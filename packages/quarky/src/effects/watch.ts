@@ -167,21 +167,22 @@ function isMultiWatchSubject(subject: AnyObject | AnyIon | ReactiveGet | Ionized
    return false;
 }
 
-
-
+function InertWatcher() {
+   function noOp() {
+      return false;
+   }
+   return { // inert watch subjects
+      stop: noOp,
+      pause: noOp,
+      resume: noOp,
+   }
+}
 // export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? OnChangeHandler<R> : never, options?: WatchOptions): ActiveListener
 // export function watch<T extends IonizedModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
 export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: WatchOptions): ActiveListener {
    const isMultiSubject = isMultiWatchSubject(subject);
    if (!isMultiSubject && !(subject instanceof Function) && !isReactive(subject)) {
-      function noOp() {
-         return false;
-      }
-      return { // inert watch subjects
-         stop: noOp,
-         pause: noOp,
-         resume: noOp,
-      }
+      return InertWatcher()
    }
    // if ('name' in subject && subject.name === '__$propIon') console.log(subject)
 
@@ -194,7 +195,16 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
    // const _watchSubject = isMultiSubject ? watchSubjects : watchSubjects[0];
    const ionicDerivations = isMultiSubject ? getIonicDerivations(subject, subjects) : subject instanceof Function ? [asMetaIon(subject0) as IonicDerivation] : undefined
 
-   let oldValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when derived is initialized if not already
+   let oldValue: T;
+   try {
+      oldValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when derived is initialized if not already
+   }
+   catch (err) {
+      if (err instanceof Object && 'cause' in err && err.cause === 'no dependencies') {
+         if (__DEV__) console.warn('inert watcher')
+         return InertWatcher()
+      }
+   }
 
    const $activeEffect = ref() as Ref<ThisEffect>
 

@@ -1,3 +1,5 @@
+import exp from "constants";
+
 let t; //TODO: import from @babel/types
 
 
@@ -8,11 +10,23 @@ export default function lumoPreTransform({ types }) {
       name: "lumo-pre-transform",
       visitor: {
          JSXFragment(path) {
+            if (path.visited) {
+               console.log('REPEAT DIVERTED fragment')
+               return;
+            }
+            path.visited = true;
+            // console.log('=======fragment!!')
             transformTemplateCallExpressions(path)
             transformJSXChildren(path.get('children'))
             transformJSXFragment(path)
          },
          JSXElement(path) {
+            if (path.visited) {
+               console.log('REPEAT DIVERTED element')
+               return;
+            }
+            path.visited = true;
+            // console.log('========element!!')
             transformJSXElement(path)
             transformTemplateCallExpressions(path)
          }
@@ -47,7 +61,8 @@ function transformJSXFragment(path) {
       }
       else if (t.isJSXExpressionContainer(child.node)) {
          const expression = child.node.expression;
-         if (t.isJSXEmptyExpression(expression)) continue;
+         if (t.isJSXEmptyExpression(expression))
+            continue;
          array.push(expression)
       }
       else {
@@ -57,10 +72,12 @@ function transformJSXFragment(path) {
    path.replaceWith(t.arrayExpression(array))
 }
 
+
 function transformTemplateCallExpressions(path) {
    path.traverse({
       CallExpression(path) {
          if (path.visited) return;
+         console.log('=======template func')
          path.visited = true;
          const functionName = path.node.callee.name
          if (isTemplateFunction(functionName)) {
@@ -90,11 +107,16 @@ function transformChildrenToRenderFunction(children) {
 function transformJSXChildren(childrenPath) {
    for (let i = 0; i < childrenPath.length; i++) {
       const child = childrenPath[i]
-      if (t.isJSXExpressionContainer(child.node)) {
-         transformDerivationExpression(child.get('expression'))
+      if (t.isJSXExpressionContainer(child.node) && !t.isJSXEmptyExpression(child.node.expression)) {
+         transformIfDerivationExpression(child.get('expression'))
       }
    }
    return childrenPath;
+}
+
+function transformIfDerivationExpression(path) {
+   if (isDerivation(path))
+      path.replaceWith(toDerivationFunction(path.node))
 }
 
 
@@ -108,27 +130,36 @@ function transformSingleChildToRenderFunction(child) {
    );
 }
 
-function transformDerivationExpression(expression) {
+function isDerivationShorthand(expression) {
+   console.log('isDerivationshorthand?', expression.node)
    const node = expression.node;
-   if (t.isConditionalExpression(node)) {
-      if (isDerivation(expression.get('consequent')) && isParenthesized(node.consequent)) {
-         node.consequent = toDerivationFunction(node.consequent);
-      }
-      if (isDerivation(expression.get('alternate')) && isParenthesized(node.alternate)) {
-         node.alternate = toDerivationFunction(node.alternate);
-      }
+   if (t.isAssignmentExpression(node, { operator: '=' } && node.left.name === '$') && isDerivation(expression.get('right'))) {
+      return true;
    }
-   if (t.isSequenceExpression(node)) {
-      const expressions = expression.get('expressions')
-      const finalExpression = expressions.at(-1);
-      if (isDerivation(finalExpression) && isParenthesized(finalExpression.node)) {
-         expressions[expressions.length] = toDerivationFunction(finalExpression.node);
-      }
-   }
-   if (isParenthesized(node)) {
-      expression.replaceWith(toDerivationFunction(node))
-   }
+   return false;
 }
+
+// function transformIfDerivationExpression(expression) {
+//    const node = expression.node;
+//    if (t.isConditionalExpression(node)) {
+//       if (isDerivation(expression.get('consequent')) && isParenthesized(node.consequent)) {
+//          node.consequent = toDerivationFunction(node.consequent);
+//       }
+//       if (isDerivation(expression.get('alternate')) && isParenthesized(node.alternate)) {
+//          node.alternate = toDerivationFunction(node.alternate);
+//       }
+//    }
+//    if (t.isSequenceExpression(node)) {
+//       const expressions = expression.get('expressions')
+//       const finalExpression = expressions.at(-1);
+//       if (isDerivation(finalExpression) && isParenthesized(finalExpression.node)) {
+//          expressions[expressions.length] = toDerivationFunction(finalExpression.node);
+//       }
+//    }
+//    if (isDerivation(expression) && isParenthesized(node)) {
+//       expression.replaceWith(toDerivationFunction(node))
+//    }
+// }
 
 function isParenthesized(expression) {
    return expression.extra && expression.extra.parenthesized === true;
@@ -198,12 +229,12 @@ function transformTemplateArgToRenderFunction(args) {
 
 let derivationCount = 0;
 
-function toDerivationFunction(value) {
+function toDerivationFunction(node) {
    return t.functionExpression(
       t.identifier('$$' + ++derivationCount),
       [], // No parameters
       t.blockStatement([
-         t.returnStatement(value) // Return the original expression
+         t.returnStatement(node) // Return the original expression
       ])
    )
 }
@@ -216,7 +247,6 @@ function transformElseCall(path) {
 
 function isJSXFragment(node) {
    if (t.isJSXFragment(node)) return true;
-   // console.log('node', node)
    if (!t.isCallExpression(node) || !isTemplateFunction(node.callee.name)) return false;
    const name = node.arguments[0].name;
    return !!name && (name === '_Fragment' || name === 'Fragment')
@@ -249,7 +279,7 @@ function transformJSXAttributes(jsxElementPath) {
          eventListenerNode.body.left.arguments.push(t.identifier(eventParameter))
       }
       else if (namespaceName !== 'on' && namespaceName !== 'm') {
-         transformDerivationExpression(attribute.get('value.expression'))
+         transformIfDerivationExpression(attribute.get('value.expression'))
       }
    }
 }
@@ -262,41 +292,39 @@ function transformJSXSlot(path) {
    node.children = [normalizeSlotToRenderFunction(children)]
 }
 
-// function normalizeToRenderFunction(node) {
-//    if (t.isFunction(node)) {
-//       return node;
-//    }
-//    return toRenderFunction(node)
-// }
+
 
 function transformArrayElements(elements) {
    for (let i = 0; i < elements.length; i++) {
       const element = elements[i];
       const elementNode = element.node;
       if (t.isObjectExpression(elementNode)) {
-         transformObjectProperties(property.get(`element.${i}.properties`))
+         transformObjectProperties(element.get(`properties`))
       }
       else if (t.isArrayExpression(elementNode)) {
-         transformArrayElements(property.get(`element.${i}.elements`))
+         transformArrayElements(element.get(`elements`))
       }
-      else if (isDerivation(element) && isParenthesized(elementNode)) {
-         element.replaceWith(toDerivationFunction(elementNode))
+      else if (isDerivationShorthand(element)) {
+         transformDerivationShorthand(element)
       }
    }
 }
 
+function transformDerivationShorthand(path){
+   path.replaceWith(toDerivationFunction(path.node.right))
+}
+
 function transformObjectProperties(properties) {
    for (let i = 0; i < properties.length; i++) {
-      const property = properties[i];
-      const propertyNode = property.node;
-      if (t.isObjectExpression(propertyNode.value)) {
-         transformObjectProperties(property.get('value.properties'))
+      const value = properties[i].get('value')
+      if (t.isObjectExpression(value.node)) {
+         transformObjectProperties(value.get('properties'))
       }
-      else if (t.isArrayExpression(propertyNode.value)) {
-         transformArrayElements(property.get('value.elements'))
+      else if (t.isArrayExpression(value.node)) {
+         transformArrayElements(value.get('elements'))
       }
-      else if (isDerivation(property.get('value')) && isParenthesized(propertyNode.value)) {
-         propertyNode.value = toDerivationFunction(propertyNode.value)
+      else if (isDerivationShorthand(value)) {
+         transformDerivationShorthand(value)
       }
    }
 }
@@ -324,9 +352,8 @@ function normalizeToArrayExpression(node) {
 }
 
 function isDerivation(path) {
-
    const node = path.node;
-   if (t.isLiteral(node) || t.isIdentifier(node) || !node) {
+   if (t.isArrowFunctionExpression(node) || t.isFunctionExpression(node) || t.isLiteral(node) || t.isIdentifier(node) || !node || t.isCallExpression(node) && isTemplateFunction(node.callee.name)) {
       return false;
    }
    if (t.isExpression(node) && (hasIonicCallExpression(path) || hasNonIonMemberExpression(path))) {
@@ -348,6 +375,7 @@ function hasIonicCallExpression(path) {
    let found = false;
    path.traverse({
       CallExpression() {
+         console.log('==========CALL EXPRESSION')
          found = true;
          path.stop()
       }
@@ -362,7 +390,8 @@ function hasNonIonMemberExpression(path) {
    let found = false;
    path.traverse({
       MemberExpression(path) {
-         if (node.property.name.startsWith('$')) return;
+         console.log('==========MEMBER EXPRESSION', node.property)
+         if (path.node.property.name.startsWith('$')) return;
          found = true;
          path.stop()
       }

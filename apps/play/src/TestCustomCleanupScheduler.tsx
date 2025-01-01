@@ -390,8 +390,6 @@ export function TestCleanupScheduler({
       )
    )
 
-
-
    return component(
       <>
          <div class={['storm active', $=$editable() && 'editable']}
