@@ -248,6 +248,7 @@ export function createIonizedModel(
                return undefined;
             }
             else {
+               console.log('getting', _key)
                return getNativeMethod(
                   _key,
                   structureConfigs,
@@ -333,7 +334,7 @@ function isNativeMethod(key: PropertyKey, structureConfigs: CustomIonicModelConf
       const mutatingOps = structure.mutatingOps
       if (mutatingOps && key in mutatingOps)
          return true;
-      const trackableOps = structure.mutatingOps
+      const trackableOps = structure.trackableOps
       if (trackableOps && key in trackableOps)
          return true;
    }
@@ -397,9 +398,9 @@ function getNativeMethod(
       const mutatingOps = config.mutatingOps
       if (mutatingOps && key in mutatingOps) {
          const createOp = mutatingOps[key].createOp
-         console.log(mutatingOps, key, createOp)
          const getPreopData = mutatingOps[key].preop
          const op = createOp(target, ionicModel, meta, getPreopData)
+         console.log(mutatingOps, key, op)
          boundMethodMap.set(_key, op)
          return op;
       }

@@ -43,7 +43,7 @@ function transformJSXFragment(path) {
    path.replaceWith(transformJSXChildrenToArrayExpression(children))
 }
 
-function transformJSXChildrenToArrayExpression(paths){
+function transformJSXChildrenToArrayExpression(paths) {
    const array = []
    for (const child of paths) {
       if (t.isJSXText(child)) {
@@ -247,16 +247,22 @@ function transformJSXAttributes(jsxElementPath) {
          transformArrayElements(attribute.get('value.expression.elements'))
       }
       else if (namespaceName === 'on' && hasTargetedEvent(value.expression)) {
-         const eventListenerNode = value.expression;
-         const paramNode = eventListenerNode.params[0]
-         const eventParameter = paramNode && paramNode.name || 'e';
-         if (!paramNode) eventListenerNode.params.push(t.identifier('e'))
-         eventListenerNode.body.left.arguments.push(t.identifier(eventParameter))
+         transformTargetCall(value.expression);
+
       }
       else if (namespaceName !== 'on' && namespaceName !== 'm') {
          transformIfDerivationExpression(attribute.get('value.expression'))
       }
    }
+}
+
+function transformTargetCall(eventListenerNode) {
+   const paramNode = eventListenerNode.params[0]
+   const eventParameter = paramNode && paramNode.name || 'e';
+   if (!paramNode) eventListenerNode.params.push(t.identifier('e'))
+   const left = eventListenerNode.body.left
+   const targetCallArgs = t.isCallExpression(left) ? left.arguments : left.argument.arguments;
+   targetCallArgs.push(t.identifier(eventParameter))
 }
 
 function transformJSXSlot(path) {
@@ -284,7 +290,7 @@ function transformArrayElements(elements) {
    }
 }
 
-function transformDerivationShorthand(path){
+function transformDerivationShorthand(path) {
    path.replaceWith(toDerivationFunction(path.node.right))
 }
 
@@ -308,8 +314,13 @@ function transformObjectProperties(properties) {
 function hasTargetedEvent(value) {
    return t.isArrowFunctionExpression(value) &&
       t.isLogicalExpression(value.body) &&
-      t.isCallExpression(value.body.left) &&
-      value.body.left.callee.name === 'target'
+      (isTargetCall(value.body.left) ||
+         t.isUnaryExpression(value.body.left, { operator: '!' }) &&
+         isTargetCall(value.body.left.argument))
+}
+
+function isTargetCall(node) {
+   return t.isCallExpression(node) && node.callee.name === 'target'
 }
 
 function toRenderFunction(node) {

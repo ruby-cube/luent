@@ -313,12 +313,12 @@ export function useDeleteOp(
    target: AnyObject,
    getPreopData: GetPreopData
 ) {
-   return function deleteOp(key: any) {
+   return function deleteOp(_key: any) {
+      const key = toRaw(_key)
       const oldSize = target.size
       const preopData = getPreopData(target, [key])
       const output = target.delete(key); //perform op
       const newSize = target.size
-
       if (oldSize === newSize) return;
 
       storeSnapshot(metaIonicModel)

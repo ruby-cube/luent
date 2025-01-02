@@ -71,7 +71,7 @@ export function installIonicMap() {
          set: {
             createOp(target, ionicModel, meta) {
 
-               return function set(key: any, newValue: any) {
+               return function set(key: any, newValue: any) { //QUESTION: do we need to toRaw the key?
                   const oldSize = target.size
                   const oldValue = target.get(key);
                   const _newValue = toRaw(newValue)

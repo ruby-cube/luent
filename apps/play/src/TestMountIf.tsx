@@ -87,19 +87,19 @@ export function MountIf() {
          </$--transition>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>
-         <Child dog={$color() + 'd'}></Child>
+         <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child>
       </>
    )
 }
 
 
-
-
 function Child(input = fromTag({
-   dog: Ion<string>,
-   Slot: v<string>('?')
+   'm:frogWell': Ion<string>,
+   'dog-sled': Ion<string>,
+   Slot: v<string>('?'),
+   'on:incrementclick': OnEvent
 })) {
-   const { $dog, Slot } = input
+   const {Slot, emit } = input
 
    return component(
       <div>child</div>

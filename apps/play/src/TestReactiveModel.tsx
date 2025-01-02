@@ -75,24 +75,26 @@ export function List(
 
 
 
-   // const selected = ionize(new Set(), {
-   //    toggle(item: typeof list[number]) {
-   //       if (selected.has(item)) {
-   //          selected.delete(item)
-   //       }
-   //       else {
-   //          selected.add(item)
-   //       }
-   //    }
-   // })
+   const selected = ionize(new Set(), {
+      toggle(item: typeof list[number]) {
+         if (selected.has(item)) {
+            selected.delete(item)
+            console.log('toggle', selected)
+         }
+         else {
+            selected.add(item)
+         }
+      }
+   })
 
-   // function moveSelectedItems(index: number) {
-   //    moveUniqueItems(selected, list, index)
-   // }
+   function moveSelectedItems(index: number) {
+      moveUniqueItems(selected, list, index)
+   }
 
    function removeItem(index: number) {
-      // selected.delete(list[index])
+      selected.delete(list[index])
       list.remove(index);
+      console.log('success?', selected)
    }
 
 
@@ -105,11 +107,11 @@ export function List(
          </div>
 
          {For(list, o => o.id, (item, $index) =>
-            // <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
-            <div
+            <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
+            // <div
                style={{
                   backgroundColor: randomColor.get(),
-                  // outline: selected.has(item) ? 'thick solid blue' : 'unset'
+                  outline: $=selected.has(item) ? 'thick solid blue' : 'unset'
                }}>
                <p on:click={e => removeItem($index())} style="cursor: pointer">
                   X
@@ -122,13 +124,13 @@ export function List(
                <div on:click={e => list.insert($index() + 1)} style="background-color: gray; cursor: pointer">
                   insert
                </div>
-               {/* <div on:click={e => moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">
+               <div on:click={e => moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">
                   insert
-               </div> */}
+               </div>
             </div>
          )}
 
-         {/* <button on:click={e => selected.clear()}>clear</button> */}
+         <button on:click={e => selected.clear()}>clear</button>
          {/* <button
                 on:click={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
             >
