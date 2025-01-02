@@ -259,7 +259,16 @@ export function createIonizedModel(
                )
             }
          }
-         const value = Reflect.get(target, key, receiver) // TODO: deep readonly and reined
+         let value;
+         try { //TODO: decide whether to use Reflect.get or target[key], or when to use which
+            // console.warn('Reflect.get failed with error, switched to target[key]:', err)
+            //@ts-expect-error
+            value = target[key]
+         }
+         catch (err) {
+            console.warn('target[key] failed with error, switched to Reflect.get:', err)
+            value = Reflect.get(target, key, receiver) // TODO: deep readonly and reined
+         }
 
          if (isIonAccessKey) {
             if (isIon(value))

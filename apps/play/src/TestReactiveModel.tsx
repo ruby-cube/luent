@@ -1,6 +1,6 @@
 import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { ion, __addDevName, DerivedIon, ionize, isIonizedModel } from "../../../packages/quarky/src";
+import { ion, __addDevName, DerivedIon, ionize, isIonizedModel, rein } from "../../../packages/quarky/src";
 
 
 const randomColor = useRandomColorGenerator()
@@ -74,7 +74,6 @@ export function List(
    })
 
 
-
    const selected = ionize(new Set(), {
       toggle(item: typeof list[number]) {
          if (selected.has(item)) {
@@ -86,6 +85,8 @@ export function List(
          }
       }
    })
+   const _selected = rein(selected)
+   _selected.size
 
    function moveSelectedItems(index: number) {
       moveUniqueItems(selected, list, index)

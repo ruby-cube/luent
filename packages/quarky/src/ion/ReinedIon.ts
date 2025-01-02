@@ -3,6 +3,7 @@ import { META } from "../ReactiveEntity";
 import { asMetaIon } from "./AtomicIon";
 import { isIonizedModel } from "../ionize/ionize";
 import { asReinedIonizedModel } from "../ionize/ReinedIonizedModel";
+import { isIon } from "./Ion";
 
 
 export type ProtectedIon<T = any, M extends AnyObject = {}> = {
@@ -29,7 +30,7 @@ type MetaWritableIon = {
 }
 
 export function isWritableIon(value: any): value is WritableIon {
-   if (!(value instanceof Object)) return false;
+   if (!(value instanceof Object) || !isIon(value)) return false;
    return META in value && 'asReadonly' in value[META]
 }
 
