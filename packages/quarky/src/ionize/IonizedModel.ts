@@ -268,6 +268,10 @@ export function createIonizedModel(
          catch (err) {
             console.warn('target[key] failed with error, switched to Reflect.get:', err)
             value = Reflect.get(target, key, receiver) // TODO: deep readonly and reined
+            /* 
+            https://stackoverflow.com/questions/37199019/method-set-prototype-add-called-on-incompatible-receiver-undefined
+            set.size causes incompatible reciever error. It may be because its a getter that uses 'this'
+            */
          }
 
          if (isIonAccessKey) {

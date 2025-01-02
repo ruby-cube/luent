@@ -80,6 +80,10 @@ function createCustomReinedIon($ion: WritableIon, exposedKeys: PropertyKey[]) {
       }
    }
 
+   const setterKey = '_set' in proto ? '_set' : 'set'
+   //@ts-expect-error
+   $customIon[setterKey] = protectedMethod;
+
    Object.defineProperty($customIon, 'value', {
       get(){
          throw new Error('The `value` property of an ion is private. Call the ion to access its value')
@@ -159,6 +163,10 @@ function createReinedIon(meta: MetaWritableIon) {
       }
       return value;
    }
+
+   const setterKey = '_as' in proto ? '_as' : 'as'
+   //@ts-expect-error
+   $customIon[setterKey] = protectedMethod;
 
    Object.defineProperty($protectedIon, 'value', {
       get(){

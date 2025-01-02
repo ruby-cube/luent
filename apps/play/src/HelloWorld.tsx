@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, Else, ElseIf, expose, For, fromTag, If, Ion, prep, v, watch } from "@rue/lumo";
+import { Component, Else, ElseIf, expose, For, fromTag, If, Ion, prep, provideAppwide, v, watch } from "@rue/lumo";
 import { ion, ionize, Ionized, ionizeWithMarks } from "@rue/quarky";
 import { Inert, inert } from "../../../packages/quarky/src/ionize/inert";
 import { Well, Wellerman } from "./Well";
@@ -351,10 +351,24 @@ function SelectionKit() {
 }
 
 function J(input: { for: any, Slot: any, params: any }) {
-   const dog = { name: 9 }
+   const $msg = ion('hi')
 
-   return component(
-      <Comp m:value={[dog, 'name']}></Comp>
+   provideAppwide(_appwide_dog_, mu(dog, 'set::setValue')) // auto-readonly unless marked with m
+   provideGlobal(_global_dog_, dog) // auto-readonly unless marked with 
+
+   // [ ] should mu() allow setting values? ... there's no way to indicate from the child component that you want to be writable...
+   // also there's no way to write a setter to trace the set
+
+   return component({
+      dog, // auto-reined
+      door: 0
+   },
+      <>
+         <$--context with={{ [_dog_]: mu(dog) }}> //auto-readonly unless marked with m:
+            <input value={mu($msg, 'set', '+trace')}></input> // auto-readonly unless marked with m: .. then it's reined
+            <input value={$msg} on:input={e => { $msg.value = e.target.value }}></input> // auto-readonly unless marked with m: .. then it's reined
+         </$--context>
+      </>
    )
 }
 
@@ -365,7 +379,7 @@ function MouseKit() {
 }
 
 function Comp(input = fromTag({
-   'm:value': Ion<{}>
+   value: XIon<{}>
 })) {
 
    const frog = ionize({
