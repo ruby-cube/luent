@@ -60,7 +60,7 @@ export type Ionized<T extends AnyObject, M extends {} = {}> = {
 type OmitTrue<M extends {}> = { [K in keyof M as M[K] extends true ? never : K]: Exclude<M[K], true> }
 
 type ReadonlyIon<T> = {
-   (selected?: true): T
+   (): T
    [META]: MetaIon;
 }
 

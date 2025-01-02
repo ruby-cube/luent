@@ -3,7 +3,7 @@ import { ContextEntries, NodeContext } from "./Context";
 import { contextTypeMap, TypeConfig } from "./ContextKey";
 import { isIon, isIonizedModel, toIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
-import { is$$Derivation } from "../component/fromTag";
+import { isDerivation } from "../component/fromTag";
 import { ContextKeyMap } from "@rue/lumo";
 
 
@@ -190,7 +190,7 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
 
    switch (typeConfig.name) {
       case 'v':
-         if (isIon(value) || is$$Derivation(value)) {
+         if (isIon(value) || isDerivation(value)) {
             value = value()
          }
          return value; //TODO: make readonly
@@ -200,13 +200,13 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
       case '$Ref':
       case '_Ref':
       case '$IonOrIon':
-         if (!isIon(value) || !is$$Derivation(value)) {
+         if (!isIon(value) || !isDerivation(value)) {
             throw new Error(`[INVALID INPUT] Value of context entry, '${String(key)}', must be an ion`)
          }
          return value; //TODO: make Ion read-only, rein $Ion
 
       case 'MaybeIon':
-         return is$$Derivation(value) ? value : toIon(value) //TODO: make Ion read-only
+         return isDerivation(value) ? value : toIon(value) //TODO: make Ion read-only
 
       case '_Ionized':
       case '$Ionized':

@@ -1,4 +1,4 @@
-import { component, If, Else, fade, ElseIf, slide, fromTag, v, target, prep } from "@rue/lumo";
+import { component, If, Else, fade, ElseIf, slide, fromTag, v, target, prep, Ion } from "@rue/lumo";
 import { ion, ionize } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
@@ -54,7 +54,7 @@ export function MountIf() {
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
    return component(
       <>
-         <button on:click={() => ($color.change(), todos[0].name += '!')} style={[{ color: $=$color() + 'e' }]}>shout</button>
+         <button on:click={() => ($color.change(), todos[0].name += '!')} style={[{ color: $ = $color() + 'e' }]}>shout</button>
          <h1>Hello {todos[0].name}</h1>
          <div>{() => 'hi'}</div>
          <$--transition>
@@ -87,7 +87,7 @@ export function MountIf() {
          </$--transition>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>
-         <Child dog={$color() + 'd'}></Child>
+         <Child dog={$color() + 'd'}>hi</Child>
       </>
    )
 }
@@ -96,10 +96,11 @@ export function MountIf() {
 
 
 function Child(input = fromTag({
-   dog: v<string>
+   dog: Ion<string>,
+   Slot: v<string>
 })) {
-   const { dog } = prep(input)
-   console.log('preped', dog)
+   const { $dog, Slot } = input
+   
    return component(
       <div>child</div>
    )

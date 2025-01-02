@@ -7,12 +7,12 @@ import './style.css'
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-// import { List } from './TestReactiveModel';
 import { component, createApp } from '@rue/lumo';
 // import { ionize, ionize } from '@rue/quarky';
 // import { DeepReactiveModel, asMetaIonizedModel, ionize, ionize } from '@rue/quarky';
 import { MountIf } from './TestMountIf';
 import { ionize } from '@rue/quarky';
+import { List } from './TestReactiveModel';
 // import { PlainList } from './TestList';
 // import { HelloWorld } from './HelloWorld';
 // import { Check } from './childrenTest';
@@ -29,7 +29,7 @@ import { ionize } from '@rue/quarky';
 // const rootContext = createGlobalContext()
 
 
-const app = createApp(MountIf)
+const app = createApp(List)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

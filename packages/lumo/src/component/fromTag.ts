@@ -45,37 +45,43 @@ type ComponentAttributes<C> = {
 } & {
    [K in keyof C as C[K] extends { name: '$IonOrIon' | '$IonizedOrIonized' | '$Ionized' | '$Ion' | '$Ref'; optional: '?' | 'withDefault' } ? K extends string ? `$${K}` : never : never]?:
    C[K] extends { $inputType: infer I } ? I : 'invalid typeConfig'
-} & {
-   [ATTRIBUTE_VALIDATION]?: C
-}
+} 
+// & {
+//    [ATTRIBUTE_VALIDATION]?: C
+// }
+
 
 //API
-export function fromTag<C extends undefined | { [key: string]: { validatedType: any } | ((arg: any) => { validatedType: any }) }>(typeConfig?: C): C extends undefined ? AnyObject : { [K in keyof ComponentAttributes<C>]: ComponentAttributes<C>[K] } {
+export function fromTag<C extends undefined | { [key: string]: { validatedType: any } | ((arg: any) => { validatedType: any }) }>(typeConfig?: C): { [K in keyof ComponentValidatedInput<C>]: ComponentValidatedInput<C>[K] } & { [ATTRIBUTES]: C extends undefined ? AnyObject : { [K in keyof ComponentAttributes<C>]: ComponentAttributes<C>[K] }} {
    const attributes = getComponentAttributes()
    if (!attributes) throw new Error(`input function must be called as default parameter of component factory`)
-   attributes[ATTRIBUTE_VALIDATION] = typeConfig;
-   return attributes as C extends undefined ? AnyObject : ComponentAttributes<C>
+   return prep(attributes, typeConfig) as ComponentValidatedInput<C> & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> }
 }
 
-export function is$$Derivation(value: any) {
-   return value instanceof Function && value.name.startsWith('$$')
+export function isDerivation(value: any) {
+   return value instanceof Function && value.name.startsWith('$')
 }
+
+function isStateGetter(value: any): value is () => any {
+   return isDerivation(value) || isIon(value)
+}
+
+// assertions?: { [K in keyof C]?: ((value: any) => void) | ((value: any) => void)[] }
 
 //API
-export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, assertions?: { [K in keyof C]?: ((value: any) => void) | ((value: any) => void)[] }): { [K in keyof ComponentValidatedInput<C>]: ComponentValidatedInput<C>[K] } {
-   const typeConfig = attributes[ATTRIBUTE_VALIDATION];
-   if (typeConfig || assertions) {
+export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typeConfig: C) {
+   if (typeConfig) {
       const validatedAttributes = {} as AnyObject;
 
       for (const key in attributes) {
          let value = (<AnyObject>attributes)[key]
-         if (assertions && assertions[key]) {
-            const validation = assertions[key]
-            const _assertions = validation instanceof Array ? validation : [validation]
-            for (const assert of _assertions) {
-               assert(isIon(value) ? value() : value);
-            }
-         }
+         // if (assertions && assertions[key]) {
+         //    const validation = assertions[key]
+         //    const _assertions = validation instanceof Array ? validation : [validation]
+         //    for (const assert of _assertions) {
+         //       assert(isIon(value) ? value() : value);
+         //    }
+         // }
          if (typeConfig) {
             console.log('typeConfig', typeConfig, key)
             const config = typeConfig[key];
@@ -89,41 +95,42 @@ export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, as
 
             switch (config.name) {
                case 'v':
-                  if (isIon(value) || is$$Derivation(value)) {
+                  if (key.startsWith('m:')) {
+                     validatedAttributes[key.slice(2)] = value;
+                  }
+                  else if (isStateGetter(value)) { //TODO: I don't know if the conditional structure is correct
                      value = value()
                   }
-                  if (key.startsWith('on:') && value instanceof Function) {
+                  else if (key.startsWith('on:') && value instanceof Function) {
                      validatedAttributes['emit' + key.slice(3)] = value;
                   }
                   else validatedAttributes[key] = value; //TODO: make readonly
                   break;
 
                case '_Ion':
-               case '$Ion':
-               case '$Ref':
                case '_Ref':
-               case '$IonOrIon':
-                  if (!isIon(value) || !is$$Derivation(value)) {
+                  if (!isStateGetter(value)) {
                      throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ion`)
                   }
-                  validatedAttributes['$' + key] = value; //TODO: make Ion read-only, rein $Ion
+                  const ionkey = key.startsWith('m:') ? key.slice(2) : key
+                  validatedAttributes['$' + ionkey] = value; //TODO: make Ion read-only, rein $Ion
                   break;
 
                case 'MaybeIon':
-                  validatedAttributes['$' + key] = is$$Derivation(value) ? value : toIon(value) //TODO: make Ion read-only
+                  validatedAttributes['$' + key] = isDerivation(value) ? value : toIon(value) //TODO: make Ion read-only
                   break;
 
                case '_Ionized':
-               case '$Ionized':
-               case '$IonizedOrIonized':
                   if (!isIonizedModel(value)) {
                      throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ionized`)
                   }
-                  validatedAttributes['$' + key] = value; //TODO: readonly, rein
+                  const ionizedKey = key.startsWith('m:') ? key.slice(2) : key
+                  validatedAttributes['$' + ionizedKey] = value; //TODO: readonly, rein
                   break;
 
                case 'MaybeIonized':
-                  validatedAttributes['$' + key] = value; //TODO: readonly
+                  const maybeIonizedKey = key.startsWith('m:') ? key.slice(2) : key
+                  validatedAttributes['$' + maybeIonizedKey] = value; //TODO: readonly
                   break;
 
                default:
@@ -133,7 +140,8 @@ export function prep<C extends AnyObject>(attributes: ComponentAttributes<C>, as
       }
       return validatedAttributes as ComponentValidatedInput<C>
    }
-   return attributes as ComponentValidatedInput<C>
+   return attributes 
+   // as ComponentValidatedInput<C>
 }
 
 

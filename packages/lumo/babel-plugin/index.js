@@ -160,7 +160,7 @@ const TemplateFunctions = new Map([
    ['If', transformIfCall],
    ['ElseIf', transformIfCall],
    ['Else', transformElseCall],
-   ['For', true], //TODO:
+   ['For', transformIfCall], //TODO:
    // ['jsxDEV', transformJSXFragmentCall],
    // ['jsx', transformJSXFragmentCall],
    // ['_jsx', transformJSXFragmentCall],

@@ -360,7 +360,7 @@ declare namespace React {
     */
    //$$$
    interface ExoticComponent<P = {}> {
-      (props: P): Lumo.NodeEntity;
+      (props: P & { frog: 'blog' }): Lumo.NodeEntity;
       readonly $$typeof: symbol;
    }
 
@@ -2423,6 +2423,7 @@ declare namespace React {
       digest?: string | null;
    }
 
+   //$$$
    // Keep in sync with JSX namespace in ./jsx-runtime.d.ts and ./jsx-dev-runtime.d.ts
    namespace JSX {
       type ElementType = GlobalJSXElementType;
@@ -2476,13 +2477,16 @@ type Defaultize<P, D> = P extends any ? string extends keyof P ? P
    & InexactPartial<Pick<D, Exclude<keyof D, keyof P>>>
    : never;
 
-type ReactManagedAttributes<C, P> = C extends { propTypes: infer T; defaultProps: infer D }
-   ? Defaultize<MergePropTypes<P, PropTypes.InferProps<T>>, D>
-   : C extends { propTypes: infer T } ? MergePropTypes<P, PropTypes.InferProps<T>>
-   : C extends { defaultProps: infer D } ? Defaultize<P, D>
-   : P;
-
-declare global {
+   
+   type LumoAttributes<C, P> = P extends { [ATTRIBUTES]: infer A } ? A : Omit<P, ATTRIBUTES>
+   // C extends { propTypes: infer T; defaultProps: infer D } ? Defaultize<MergePropTypes<P, PropTypes.InferProps<T>>, D> 
+   // : C extends { propTypes: infer T } ? MergePropTypes<P, PropTypes.InferProps<T>>
+   // : C extends { defaultProps: infer D } ? Defaultize<P, D>
+   // : P;
+   
+   
+   declare global {
+   const ATTRIBUTES = Symbol('component attributes')
    let $;
    /**
     * @deprecated Use `React.JSX` instead of the global `JSX` namespace.
@@ -2509,14 +2513,15 @@ declare global {
          Slot: {};
       }
 
+      //$$$ important for converting component input types to attribute types
       // We can't recurse forever because `type` can't be self-referential;
       // let's assume it's reasonable to do a single React.lazy() around a single React.memo() / vice-versa
-      type LibraryManagedAttributes<C, P> = C extends
-         React.MemoExoticComponent<infer T> | React.LazyExoticComponent<infer T>
-         ? T extends React.MemoExoticComponent<infer U> | React.LazyExoticComponent<infer U>
-         ? ReactManagedAttributes<U, P>
-         : ReactManagedAttributes<T, P>
-         : ReactManagedAttributes<C, P>;
+      type LibraryManagedAttributes<C, P> =
+         C extends React.MemoExoticComponent<infer T> | React.LazyExoticComponent<infer T> ?
+         T extends React.MemoExoticComponent<infer U> | React.LazyExoticComponent<infer U> ?
+         LumoAttributes<U, P>
+         : LumoAttributes<T, P>
+         : LumoAttributes<C, P>;
 
       //$$$
       interface IntrinsicAttributes extends React.Attributes {
@@ -2749,6 +2754,7 @@ declare global {
    }
 }
 
+//$$$
 // React.JSX needs to point to global.JSX to keep global module augmentations intact.
 // But we can't access global.JSX so we need to create these aliases instead.
 // Once the global JSX namespace will be removed we replace React.JSX with the contents of global.JSX
