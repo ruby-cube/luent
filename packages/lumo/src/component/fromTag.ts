@@ -52,10 +52,10 @@ type ComponentAttributes<C> = {
 
 
 //API
-export function fromTag<C extends undefined | { [key: string]: { validatedType: any } | ((arg: any) => { validatedType: any }) }>(typeConfig?: C): { [K in keyof ComponentValidatedInput<C>]: ComponentValidatedInput<C>[K] } & { [ATTRIBUTES]: C extends undefined ? AnyObject : { [K in keyof ComponentAttributes<C>]: ComponentAttributes<C>[K] }} {
+export function fromTag<C>(typeConfig?: C & { [key: string]: { validatedType: any } | ((arg: any) => { validatedType: any }) }): C extends {} ? { [K in keyof ComponentValidatedInput<C>]: ComponentValidatedInput<C>[K] } & { [ATTRIBUTES]: C extends undefined ? AnyObject : { [K in keyof ComponentAttributes<C>]: ComponentAttributes<C>[K] }}:AnyObject  {
    const attributes = getComponentAttributes()
    if (!attributes) throw new Error(`input function must be called as default parameter of component factory`)
-   return prep(attributes, typeConfig) as ComponentValidatedInput<C> & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> }
+   return prep(attributes, typeConfig) as C extends {} ?  ComponentValidatedInput<C> & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> }: AnyObject
 }
 
 export function isDerivation(value: any) {

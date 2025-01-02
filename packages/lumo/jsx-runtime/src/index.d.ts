@@ -2478,7 +2478,7 @@ type Defaultize<P, D> = P extends any ? string extends keyof P ? P
    : never;
 
    
-   type LumoAttributes<C, P> = P extends { [ATTRIBUTES]: infer A } ? A : Omit<P, ATTRIBUTES>
+   type LumoAttributes<C, P> = P extends { [ATTRIBUTES]: infer A } ? A : P
    // C extends { propTypes: infer T; defaultProps: infer D } ? Defaultize<MergePropTypes<P, PropTypes.InferProps<T>>, D> 
    // : C extends { propTypes: infer T } ? MergePropTypes<P, PropTypes.InferProps<T>>
    // : C extends { defaultProps: infer D } ? Defaultize<P, D>
