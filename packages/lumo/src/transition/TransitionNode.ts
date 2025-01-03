@@ -6,6 +6,7 @@ import { NodeRef } from "../node/NodeRef";
 import { renderTransitNode } from "./TransitNode";
 import { AnyObject } from "@rue/types";
 import { Ion } from "@rue/quarky";
+import { isFunction } from "@rue/utils";
 
 export type TransitionHook = {
    phase: 'in' | 'out'
@@ -59,7 +60,7 @@ export function createTransitionNode(
    const { 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "load:with": inputLoad, onEnd, onStart, disable } = input;
 console.log('phasic node slot', Slot)
    if (disable === true) {
-      return Slot instanceof Function ? Slot() : Slot
+      return isFunction(Slot) ? Slot() : Slot
    }
    console.log('made it')
 
@@ -406,7 +407,7 @@ function normalizeToKitArrays(
    }
 
    if (!input) return [undefined, undefined];
-   if (input instanceof Function) {
+   if (isFunction(input)) {
       const transition = input();
       if ('animation' in transition) {
          return [undefined, [transition, <AnimationFunction>input]]
@@ -422,7 +423,7 @@ function normalizeToKitArrays(
       let defaultTransition: TransitionFunction | undefined;
       let defaultAnimation: AnimationFunction | undefined;
       for (const config of input) {
-         const kit = config instanceof Function ? config() : config
+         const kit = isFunction(config) ? config() : config
          const isAnimationKit = 'animation' in kit;
          const kits = (isAnimationKit ? animationKits : transitionKits) as (AnimationKit | TransitionKit)[]
          kits.push(kit)
@@ -430,7 +431,7 @@ function normalizeToKitArrays(
             if (isAnimationKit && defaultAnimation) defaultAnimation = undefined;
             else if (defaultTransition) defaultTransition = undefined;
          }
-         else if (kits.length === 1 && config instanceof Function) {
+         else if (kits.length === 1 && isFunction(config)) {
             if (isAnimationKit) defaultAnimation = <AnimationFunction>config;
             else defaultTransition = <TransitionFunction>config;
          }
@@ -466,7 +467,7 @@ function collectOffscreenClasses(transitions: (TransitionKit | TransitionFunctio
    };
    const classes: string[] = []
    for (const transition of transitions) {
-      if (transition instanceof Function) break;
+      if (isFunction(transition)) break;
       classes.push(...transition.offscreenClasses)
    }
    return classes;
@@ -481,7 +482,7 @@ function mountTransitionClass(transitions: (TransitionKit | TransitionFunction)[
       return transitions.transitionClass;
 
    const maybeSetupFunction = transitions.at(-1);
-   const shouldUseDefaultClass = maybeSetupFunction instanceof Function
+   const shouldUseDefaultClass = isFunction(maybeSetupFunction)
    if (shouldUseDefaultClass && maybeSetupFunction.defaultClass) {
       return maybeSetupFunction.defaultClass;
    }
@@ -508,7 +509,7 @@ function _mountTransitionClass(className: string, transitions: (TransitionKit | 
 function compileCSSTransition(transitions: (TransitionKit | TransitionFunction)[]) {
    let cssString = '';
    for (const kit of transitions) {
-      if (kit instanceof Function) break;
+      if (isFunction(kit)) break;
 
       const { delay, duration, properties, timing } = kit;
 
@@ -540,7 +541,7 @@ function compileTransitionClassName(transitions: (TransitionKit | TransitionFunc
    transitions.sort((a, b) => a.name.localeCompare(b.name))
    let className = ''
    for (const kit of transitions) {
-      if (kit instanceof Function) break;
+      if (isFunction(kit)) break;
       const transition = `${kit.name}-${kit.duration}-${kit.timing}-d${kit.delay}`
       if (className) {
          className = className + '_' + transition

@@ -1,3 +1,4 @@
+import { isFunction } from "@rue/utils";
 import { isIonizedModel, IonizedModel, toRaw, ionize, registerIonizedModel } from "./ionize";
 import { defineIonizedStructure } from "./IonizedModel";
 
@@ -6,8 +7,7 @@ import { defineIonizedStructure } from "./IonizedModel";
 export function isIonicObject(value: any): value is IonizedModel {
     if (!isIonizedModel(value)) return false;
     const raw = toRaw(value);
-    if (raw instanceof Map || raw instanceof Array || raw instanceof Set || raw instanceof Function) return false;
-    return true;
+    return !(raw instanceof Map || raw instanceof Array || raw instanceof Set || isFunction(raw))
 }
 
 
@@ -44,7 +44,7 @@ export function isIonicObject(value: any): value is IonizedModel {
 //             const value = Reflect.get(target, key, receiver);
 //             if (isNonTrackable(key, [Object])) return value;
 //             if (isIon(value)) return value();
-//             if (value instanceof Function) {
+//             if (isFunction(value)) {
 //                 return accessMethod(
 //                     target,
 //                     ionicModel,

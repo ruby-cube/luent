@@ -8,7 +8,7 @@ export type TryNodeInput = {
 
 export function createTryNode<T extends AnyObject>(Slot: () => NodeEntity, input: TryNodeInput) {
    const { catch: _catch } = input;
-   if (!(Slot instanceof Function)) throw new Error('Slot must be a function')
+   if (!(isFunction(Slot))) throw new Error('Slot must be a function')
 
    let output;
    try {

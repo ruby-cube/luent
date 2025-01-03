@@ -104,12 +104,4 @@ export function isObjectLiteral(obj: any): obj is AnyObject{
    return false;
 }
 
-export function isObject<T>(value: T): value is T extends AnyObject ? T : never {
-   return value instanceof Object;
-}
-
-export function isFunctionWithProps<T>(value: T): value is T extends Function ? T & AnyObject : never {
-   return value instanceof Function;
-}
-
 export type ProxyTargetKey = string | symbol

@@ -16,6 +16,8 @@ import { createSuspenseNode, SuspenseNodeInput } from "../boundaries/Suspense";
 import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
 import { META } from "../../../quarky/src/ReactiveEntity";
 import { MaybeGetter } from "../InputTypes";
+import { isFunction } from "@rue/utils";
+import { isNamedDerivation } from "../component/fromTag";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -93,7 +95,7 @@ export class SwapConfig {
 
 // TODO: how to distinguish render function from derived getter 
 export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity) | NodeEntity) {
-   if (slot instanceof Function && slot.name[0] !== '$') { // distinguishes derivation functions from render functions
+   if (slot instanceof Function && !isNamedDerivation(slot)) { // distinguishes derivation functions from render functions
       return slot as (...args: any[]) => NodeEntity;
    }
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
@@ -158,7 +160,7 @@ export function makeNode(
 // export function _getNodeConfig(ref: NodeRef | undefined) {
 //     if (ref) {
 //         const config = getNodeConfig(ref);
-//         if (config instanceof Function) {
+//         if (isFunction(config)) {
 //             const [item, $index] = getCurrentIndex();
 //             const _config = config(item, $index!)
 //             return _config

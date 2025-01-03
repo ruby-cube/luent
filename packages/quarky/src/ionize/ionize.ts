@@ -42,9 +42,6 @@ type AbsorbedIon<T> = {
    [META]: any;
 }
 
-function test_isAnyIon<T>(arg: AbsorbedIon<T>): T {
-   return null as unknown as T
-}
 
 
 export type Ionized<T extends AnyObject, M extends {} = {}> = {

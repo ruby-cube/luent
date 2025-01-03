@@ -2,6 +2,7 @@ import { AnyObject } from "@rue/types";
 import { asMetaIonizedModel, IonizedModel, toRaw } from "./ionize";
 import { isReadonlyIonizedModel, READONLY_IONIC_MODEL } from "./ReadonlyIonizedModel";
 import { isReadonly } from "../readonly";
+import { isMethod } from "./IonizedModel";
 
 
 export const REINED_META = Symbol('reinedMeta')
@@ -48,7 +49,7 @@ export function composeExposedKeys(exposedKeys: PropertyKey[], model: AnyObject)
    const _exposedKeys = new Set(exposedKeys)
    let noProps = true;
    for (const key of exposedKeys) {
-      if (rawModel[key] instanceof Function)
+      if (isMethod(rawModel[key]))
          continue;
       noProps = false;
       break;
@@ -59,7 +60,7 @@ export function composeExposedKeys(exposedKeys: PropertyKey[], model: AnyObject)
       if (REINED_META in model) {
          const reinedMeta = model[REINED_META];
          for (const key in rawModel) {
-            if (rawModel[key] instanceof Function)
+            if (isMethod(rawModel[key]))
                continue;
             if (reinedMeta.isExposedKey(key)) {
                _exposedKeys.add(key)
@@ -68,7 +69,7 @@ export function composeExposedKeys(exposedKeys: PropertyKey[], model: AnyObject)
       }
       else {
          for (const key in rawModel) {
-            if (rawModel[key] instanceof Function)
+            if (isMethod(rawModel[key]))
                continue;
             _exposedKeys.add(key)
          }
@@ -92,7 +93,6 @@ function createReinedIonizedModel(model: IonizedModel) {
    meta.asDefaultReined = reinedModel
    return reinedModel
 }
-
 
 
 

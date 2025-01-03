@@ -1,6 +1,6 @@
 import { DOMNode, Slot } from "../component/InternalComponent";
 import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon } from "../../../quarky/src";
-import { noop, normalizeToArray } from "@rue/utils";
+import { isFunction, noop, normalizeToArray } from "@rue/utils";
 import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { watchRenderEffect, watch } from "../watch/watchAndPreserve";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
@@ -60,7 +60,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
    //      );
 
    if (Slot) {
-      const rawOutput = normalizeToArray(Slot instanceof Function ? Slot() : Slot)
+      const rawOutput = normalizeToArray(isFunction(Slot) ? Slot() : Slot)
       const nodePod = new _NodePod();
       const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodePod)
       mountNodeEntities(nodeEntities, domNode)
@@ -179,7 +179,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
    const classList = node.classList
 
    for (const entry of classes) {
-      if (isIon(entry) || entry instanceof Function) {
+      if (isIon(entry)) {
          watch(entry, (value: string | Falsey, prevValue: string | Falsey) => {
             const classes = value && value.split(' ')
             const prevClasses = prevValue && prevValue.split(' ')
@@ -217,7 +217,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
 function setUpStyles(node: Element, styles: StyleInput[]) {
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {
-      if (isIon(entry) || entry instanceof Function) {
+      if (isIon(entry)) {
          watch(entry, (value: string | AnyObject | Falsey) => {
             setUpStyleEntry(style, value, $thisEffect());
          }, { eager: true, phase: Phase.RENDER })
@@ -232,7 +232,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
    if (entry instanceof Object) {
       for (const key in entry) {
          const value = entry[key];
-         if (isIon(value) || value instanceof Function) {
+         if (isIon(value)) {
             watch(value, (value: string | number | Falsey) => {
                console.log('isIon red')
                assignStyleProperty(style, toStylePropertyName(key), value)
@@ -297,7 +297,7 @@ function warnOverlappingStyles(stylesA: string, stylesB: string) {
 }
 
 // function setUpDynamicAttributes(node: Element, changes: ((o: Element) => void)[] | ((o: Element) => void)) {
-//    if (changes instanceof Function) {
+//    if (isFunction(changes)) {
 //       watchRenderEffect(() => changes(node)) // watchAndPreserve?
 //    }
 //    else {

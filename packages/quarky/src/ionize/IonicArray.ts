@@ -525,7 +525,7 @@ export function installIonicArray() {
 //         }
 //         return handleMutatingMethod(<string>key, value);
 //     }
-//     if (value instanceof Function)
+//     if (isFunction(value))
 //         return accessMethod(
 //             target,
 //             ionicModel,

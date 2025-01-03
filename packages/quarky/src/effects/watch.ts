@@ -9,7 +9,6 @@ import { asMetaIonizedModel, Ionized, isIonizedModel, toRaw, } from "../ionize/i
 import { areEqual } from "./areEqual";
 import { createIonicEffect, IonicEffect } from "../derivations/IonicEffect";
 import { isReactive, META } from "../ReactiveEntity";
-import { noop } from "@rue/utils";
 import { __devCheckIfTracked } from "../derivations/DependencyTracker";
 import { AnyIon, isIon } from "../ion/Ion";
 import { asMetaIon, isAtomicIon, AtomicIon } from "../ion/AtomicIon";

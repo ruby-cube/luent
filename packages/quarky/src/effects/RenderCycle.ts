@@ -193,7 +193,7 @@ export class RenderCycle {
 }
 
 // function getCurrentValue(target: ReactiveTarget) {
-//     if (target instanceof Function) {
+//     if (isFunction(target)) {
 //         return target()
 //     }
 //     else if (isIonizedModel(target)) {

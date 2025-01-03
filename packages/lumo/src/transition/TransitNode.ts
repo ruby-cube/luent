@@ -8,6 +8,7 @@ import { fromContext } from "../context/provide";
 import { Ion } from "@rue/quarky";
 import { component } from "../component/InternalComponent";
 import { Else, If } from "../conditional/If";
+import { isFunction } from "@rue/utils";
 
 export function renderTransitNode(
     $div: NodeRef<'div'>,
@@ -16,7 +17,7 @@ export function renderTransitNode(
     $disable: false | undefined | Ion<boolean>
 ) {
     if ($disable) {
-        const output = Slot instanceof Function ? Slot() : Slot
+        const output = isFunction(Slot) ? Slot() : Slot
         return component(
             [
                 If($disable, () =>

@@ -87,24 +87,24 @@ export function MountIf() {
          </$--transition>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>
-         <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child>
+         {/* <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child> */}
       </>
    )
 }
 
 
-function Child(input = fromTag({
-   'm:frogWell': Ion<string>,
-   'dog-sled': Ion<string>,
-   Slot: v<string>('?'),
-   'on:incrementclick': OnEvent
-})) {
-   const {Slot, emit } = input
+// function Child(input = fromTag({
+//    'm:frogWell': Ion<string>,
+//    'dog-sled': Ion<string>,
+//    Slot: v<string>('?'),
+//    'on:incrementclick': OnEvent
+// })) {
+//    const {Slot, emit } = input
 
-   return component(
-      <div>child</div>
-   )
-}
+//    return component(
+//       <div>child</div>
+//    )
+// }
 
 // function CounterButton(input = fromTag({
 //    // Slot: v<() => any>,

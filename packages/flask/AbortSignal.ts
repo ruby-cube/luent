@@ -1,3 +1,4 @@
+import { isFunction } from "@rue/utils";
 import { PendingCancelOp } from "./PendingCancelOp";
 
 
@@ -31,5 +32,5 @@ export function AbortSignal(): () => void {
 }
 
 export function isAbortSignal(value: any): value is AbortSignal {
-    return value instanceof Function && value.name === 'abort'
+    return  isFunction(value) && value.name === 'abort'
 }

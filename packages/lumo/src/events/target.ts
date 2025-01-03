@@ -12,7 +12,7 @@ export function target(...args: [...(string | ((x: HTMLElement) => boolean) | No
       // else if (isNodeRef(arg)){ //TODO:
 
       // }
-      else if (arg instanceof Function && arg(targ as HTMLElement)) {
+      else if (isFunction(arg) && arg(targ as HTMLElement)) {
          return true;
       }
    }

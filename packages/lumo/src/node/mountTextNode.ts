@@ -12,7 +12,7 @@ export function setUpTextNode(text: ReactiveGet | any, nodePod: _NodePod) {
     console.log('nodePod', nodePod, textNode)
     // }
 
-    if (isIon(text) || text instanceof Function) {
+    if (isIon(text)) {
         keepTextNodeUpdated(text, textNode)
     }
     return textNode;
@@ -32,7 +32,7 @@ function keepTextNodeUpdated(text: ReactiveGet<any>, textNode: CharacterData) {
 
 function createTextNode(value: ReactiveGet | any) {
     if (__DEV__) __devCheckIfTracked()
-    const _value = isIon(value) || value instanceof Function ? value() : value;
+    const _value = isIon(value) ? value() : value;
     const text = toString(_value)
     const textNode = document.createTextNode(text);
     return textNode;

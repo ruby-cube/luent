@@ -208,7 +208,7 @@ export function installIonicMap() {
 //                 return value;
 //             if (isIon(value)) return value();
 
-//             if (value instanceof Function)
+//             if (isFunction(value))
 //                 return accessMethod(
 //                     target,
 //                     ionicModel,

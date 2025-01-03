@@ -21,7 +21,7 @@ export type PortalNodeInput = {
 
 export function createPortalNode(Slot: ()=>NodeEntity, input: PortalNodeInput) {
     const { to: container } = input
-    if (!(Slot instanceof Function)) throw new Error('')
+    if (!(isFunction(Slot))) throw new Error('')
     const element = typeof container === "string" ? document.querySelector(container) : container;
     if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')
     const nodePod = new _NodePod();

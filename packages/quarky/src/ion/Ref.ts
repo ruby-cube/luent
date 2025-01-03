@@ -3,6 +3,7 @@ import { createDerivedIon, createWritableDerivedIon, DerivedIon, MetaDerivedIon,
 import { META } from "../ReactiveEntity";
 import { AnyIon, isIon } from "./Ion";
 import { createAtomicIon, AtomicIon, MetaIon } from "./AtomicIon";
+import { isFunction } from "@rue/utils";
 
 const INERT = true;
 
@@ -16,7 +17,7 @@ export function ref<T, M>(value?: T, methods?: M & { [key: string]: (...args: an
         if (__DEV__ && methods) console.warn(`Cannot make a ref from existing ion. Methods will not be attached`)
         return value as T extends AnyIon ? T : T extends ()=>unknown ? InertDerivedIon<T, M> : InertIon<T, M>
     }
-    if (value instanceof Function) {
+    if (isFunction(value)) {
         if (methods) return createWritableDerivedIon(<() => unknown>value, methods, INERT) as T extends AnyIon ? T : T extends ()=>unknown ? InertDerivedIon<T, M> : InertIon<T, M>
         return createDerivedIon(<() => unknown>value, undefined, INERT) as T extends AnyIon ? T : T extends ()=>unknown ? InertDerivedIon<T, M> : InertIon<T, M>
     }

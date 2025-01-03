@@ -17,14 +17,14 @@ declare global {
          // Iteration methods
          forEach<H, O>(
             this: H,
-            callback: (this: O, valueA: T extends AnyObject ? Ionized<T> : T, valueB: T extends AnyObject ? Ionized<T> : T, set: H) => void,
+            callback: (this: O, valueA: MaybeIonized<T>, valueB: MaybeIonized<T>, set: H) => void,
             thisArg: O
          ): void;
 
-         keys(): IterableIterator<T extends AnyObject ? Ionized<T> : T>;
-         values(): IterableIterator<T extends AnyObject ? Ionized<T> : T>;
-         entries(): IterableIterator<[T extends AnyObject ? Ionized<T> : T, T extends AnyObject ? Ionized<T> : T]>;
-         [Symbol.iterator](): IterableIterator<T extends AnyObject ? Ionized<T> : T>;
+         keys(): IterableIterator<MaybeIonized<T>>;
+         values(): IterableIterator<MaybeIonized<T>>;
+         entries(): IterableIterator<[MaybeIonized<T>, MaybeIonized<T>]>;
+         [Symbol.iterator](): IterableIterator<MaybeIonized<T>>;
       }
    }
 }
@@ -220,7 +220,7 @@ export function installIonicSet() {
 //             if (isIon(value))
 //                 return value();
 
-//             if (value instanceof Function) {
+//             if (isFunction(value)) {
 //                 return accessMethod(
 //                     target,
 //                     ionicModel,

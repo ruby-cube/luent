@@ -97,7 +97,7 @@
 //             else if (process === undefined) {
 //                 canBeUndefined = true;
 //             }
-//             else if (!valid && process instanceof Function) {
+//             else if (!valid && isFunction(process)) {
 //                 if (process(value))
 //                     valid = true;
 //             }

@@ -49,14 +49,14 @@ export function encapsulate<T extends AnyObject>(target: T): T {
             const value: any = Reflect.get(target, key, receiver)
             const DataStructure = getBaseDataStructure(target);
             if (inheritsFrom(DataStructure, target) && hasOwnPropertyOrMethod(target, key)) {
-                if (value instanceof Function) {
+                if (isFunction(value)) {
                     return (...args: any) => {
                         return value.call(target, ...args)
                     }
                 }
                 return value instanceof Object ? encapsulate(value) : value;
             }
-            if (value instanceof Function && isMutatingMethod(DataStructure, key)) {
+            if (isFunction(value) && isMutatingMethod(DataStructure, key)) {
                 return (...args: any[]) => {
                     if (__DEV__)
                         throw new Error(`This object has be encapsulated and can only be mutated by its provided methods`)

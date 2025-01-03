@@ -9,7 +9,7 @@ describe('ion function', () => {
     it('should create an AtomicIon when given a non-function value', () => {
         const atomicIon = ion(10);
         expect(typeof atomicIon).toBe('function');
-        expect(atomicIon instanceof Function).toBe(false)
+        expect(isFunction(atomicIon)).toBe(false)
         expect(atomicIon()).toBe(10);
         expect(atomicIon[META]).toBeInstanceOf(MetaIon);
     });
@@ -72,7 +72,7 @@ describe('ion function', () => {
 
         const $doubleCount = ion(() => $count() * 2);
         expect(typeof $doubleCount).toBe('function');
-        expect($doubleCount instanceof Function).toBe(false)
+        expect(isFunction($doubleCount)).toBe(false)
         expect($doubleCount()).toBe(2);
         $count.value = 4
         expect($doubleCount()).toBe(8);

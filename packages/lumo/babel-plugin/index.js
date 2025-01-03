@@ -206,7 +206,7 @@ let derivationCount = 0;
 
 function toDerivationFunction(node) {
    return t.functionExpression(
-      t.identifier('$$' + ++derivationCount),
+      t.identifier('$drv' + ++derivationCount),
       [], // No parameters
       t.blockStatement([
          t.returnStatement(node) // Return the original expression

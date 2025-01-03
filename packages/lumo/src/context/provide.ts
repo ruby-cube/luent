@@ -3,8 +3,9 @@ import { ContextEntries, NodeContext } from "./Context";
 import { contextTypeMap, TypeConfig } from "./ContextKey";
 import { isIon, isIonizedModel, toIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
-import { isDerivation } from "../component/fromTag";
+import { isNamedDerivation } from "../component/fromTag";
 import { ContextKeyMap } from "@rue/lumo";
+import { isFunction } from "@rue/utils";
 
 
 export interface AppContext {
@@ -179,7 +180,7 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
    //         assert(isIon(value) ? value() : value);
    //     }
    // }
-   if (typeConfig.optional === 'withDefault' && value === undefined && (typeConfig.default as any) instanceof Function) {
+   if (typeConfig.optional === 'withDefault' && value === undefined && isFunction(typeConfig.default as any)) {
       value = (<Function><unknown>typeConfig.default)()
    }
    else if (!typeConfig.optional && value === undefined) {
@@ -190,27 +191,21 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
 
    switch (typeConfig.name) {
       case 'v':
-         if (isIon(value) || isDerivation(value)) {
+         if (isIon(value)) {
             value = value()
          }
          return value; //TODO: make readonly
 
       case '_Ion':
-      case '$Ion':
-      case '$Ref':
-      case '_Ref':
-      case '$IonOrIon':
-         if (!isIon(value) || !isDerivation(value)) {
+         if (!isIon(value)) {
             throw new Error(`[INVALID INPUT] Value of context entry, '${String(key)}', must be an ion`)
          }
          return value; //TODO: make Ion read-only, rein $Ion
 
       case 'MaybeIon':
-         return isDerivation(value) ? value : toIon(value) //TODO: make Ion read-only
+         return isNamedDerivation(value) ? value : toIon(value) //TODO: make Ion read-only
 
       case '_Ionized':
-      case '$Ionized':
-      case '$IonizedOrIonized':
          if (!isIonizedModel(value)) {
             throw new Error(`[INVALID INPUT] Value of context entry, '${String(key)}', must be an ionized`)
          }
@@ -227,5 +222,5 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
 
 
 function shouldEncapsulate(value: any) {
-   return !(value instanceof Function) && value instanceof Object;
+   return !(isFunction(value)) && value instanceof Object;
 }

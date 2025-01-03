@@ -1,6 +1,6 @@
 import { ComponentSetup, HTMLTag, makeNode, normalizeToRenderFunction, Slot } from "@rue/lumo";
 import { Ion, isIon } from "@rue/quarky";
-import { isObjectLiteral, normalizeToArray } from "@rue/utils";
+import { isFunction, isObjectLiteral, normalizeToArray } from "@rue/utils";
 
 // without custom jsx compiler
 // - nodeEntity | nodeEntity[]
@@ -14,7 +14,7 @@ export const jsxs = jsx;
 export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Slot }) {
    const Slot = processSlot(config.children);
    console.log('children', Slot, 'for', nodeType)
-   if (nodeType instanceof Function && nodeType !== Fragment) {
+   if (isFunction(nodeType) && nodeType !== Fragment) {
       return makeNode(
          nodeType,
          Slot,

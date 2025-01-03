@@ -12,6 +12,7 @@ import { v } from "../InputTypes";
 import { Ion } from "@rue/quarky";
 import { component, Slot } from "../component/InternalComponent";
 import { Else, If } from "../conditional/If";
+import { isFunction } from "@rue/utils";
 
 export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | AnimationKit
 
@@ -43,7 +44,7 @@ export function renderPhasicNode(
     $disable: false | undefined | Ion<boolean>
 ) {
     if ($disable) {
-        const output = Slot instanceof Function ? Slot() : Slot
+        const output = isFunction(Slot) ? Slot() : Slot
         return component([
             If($disable, () =>
                 output

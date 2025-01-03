@@ -91,7 +91,7 @@ export function getWithoutTracking(reactiveRef: (() => any) | TrackedOp) {
     const tracker = getDependencyTracker();
     tracker?.stop();
     let value;
-    if (isIon(reactiveRef) || reactiveRef instanceof Function)
+    if (isIon(reactiveRef))
         value = reactiveRef();
     else if (isTrackedOp(reactiveRef))
         value = reactiveRef.getOutput()

@@ -221,7 +221,7 @@ export function createIonizedModel(
 
          if (methods && key in methods) {
             const method = methods[key]
-            if (method instanceof Function) {
+            if (isMethod(method)) {
                return accessMethod(
                   target,
                   ionicModel,
@@ -290,7 +290,7 @@ export function createIonizedModel(
             return maybeReined(maybeIonize(value(), target, ionicModel, receiver), reinedMeta); // { count: $count } get value case
          }
 
-         if (value instanceof Function)
+         if (isMethod(value))
             return accessMethod(
                target,
                ionicModel,
@@ -354,7 +354,9 @@ function isNativeMethod(key: PropertyKey, structureConfigs: CustomIonicModelConf
    return false;
 }
 
-
+export function isMethod(value: any): value is Function{
+   return value instanceof Function && !isIon(value)
+}
 
 
 

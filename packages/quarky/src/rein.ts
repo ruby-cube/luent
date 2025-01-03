@@ -1,10 +1,11 @@
-import { isWritableIon, ProtectedIon, reinIon, READONLY } from "./ion/ReinedIon";
+import { isWritableIon, ProtectedIon, reinIon, READONLY, isReinedIon } from "./ion/ReinedIon";
 import { Ionized, isIonizedModel } from "./ionize/ionize";
 import { AnyObject } from "@rue/types";
-import { composeExposedKeys, REINED_META, reinIonizedModel } from "./ionize/ReinedIonizedModel";
+import { composeExposedKeys, isReinedIonizedModel, REINED_META, reinIonizedModel } from "./ionize/ReinedIonizedModel";
 import { Ion } from "./ion/Ion";
 import { createReadonlyObject, isReadonlyObject, READONLY_TARGET } from "./readonly";
 import { META } from "./ReactiveEntity";
+import { isFunction, isObject } from "@rue/utils";
 
 
 // export type ReadonlyIon<T = any> = {
@@ -81,10 +82,10 @@ export function rein<T, M extends (keyof T)[] | []>(entity: T, ...exposedKeys: M
    if (isIonizedModel(entity)) {
       return reinIonizedModel(entity, exposedKeys) as Reined<T, M>
    }
-   if (entity instanceof Function)
-      return entity as Reined<T, M>
-   if (entity instanceof Object)
+   if (isObject(entity))
       return reinObject(entity, exposedKeys) as Reined<T, M>
+   if (isFunction(entity))
+      return entity as Reined<T, M>
    return entity as Reined<T, M>
 }
 
@@ -141,4 +142,8 @@ export const REINED_TARGET = Symbol('reined target')
 
 export function isReinedObject(value: any) {
    return value instanceof Object && REINED_TARGET in value;
+}
+
+export function isReined(value: any) {
+   return isReinedIon(value) || isReadonlyObject(value) || isReinedIonizedModel(value)
 }

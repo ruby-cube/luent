@@ -84,7 +84,7 @@ function processValue(value: any, string: string, resultStrings: string[], resul
     else if (value instanceof SSRComponent) {
         processSSRComponent(value, string, resultStrings, resultValues)
     }
-    else if (value instanceof Function) {
+    else if (isFunction(value)) {
         const output = value();
         processValue(output, string, resultStrings, resultValues)
     }

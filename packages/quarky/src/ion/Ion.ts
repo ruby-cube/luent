@@ -4,12 +4,14 @@ import { asPropIon, isPropIon, PropIon } from "../ionize/PropIon";
 import { AtomicIon, createAtomicIon, isAtomicIon } from "./AtomicIon";
 import { ProtectedIon } from "./ReinedIon";
 import { META } from "../ReactiveEntity";
+import { isFunction } from "@rue/utils";
 
 export type AnyIon<T = any> = DerivedIon<T> | AtomicIon<T> | ProtectedIon<T> | WritableDerivedIon<T> | PropIon<T>
 
 export function isIon(maybeIon: any): maybeIon is AnyIon {
-   if (isAtomicIon(maybeIon) || isDerivedIon(maybeIon) || isPropIon(maybeIon)) return true; //TODO: Add WritableIon
-   return false;
+   return isFunction(maybeIon) && /^\$[a-z]/.test(maybeIon.name)
+   // if (isAtomicIon(maybeIon) || isDerivedIon(maybeIon) || isPropIon(maybeIon)) return true; //TODO: Add WritableIon
+   // return false;
 }
 
 
@@ -31,7 +33,7 @@ export function ion<T, M>(value?: T, methods?: M & IonMethods): T extends AnyIon
       if (__DEV__ && methods) console.warn(`Cannot make an existing ion into an ion. Methods will not be attached`)
       return value as T extends AnyIon ? T : T extends (args?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
    }
-   if (value instanceof Function) {
+   if (isFunction(value)) {
       if (methods)
          return createWritableDerivedIon(
             <(prev?: any) => unknown>value,

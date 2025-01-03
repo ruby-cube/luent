@@ -48,7 +48,7 @@ export function reinIon($ion: WritableIon, exposedKeys: PropertyKey[]) {
    if (exposedKeys.length) {
       return createCustomReinedIon($ion, exposedKeys)
    }
-   if (isCustomReinedIon($ion)) {
+   if (isReinedIon($ion)) {
       return $ion;
    }
 
@@ -102,8 +102,8 @@ export function protectedMethod() {
    if (__DEV__) console.warn(`[REINED METHOD] Operation failed.`)
 }
 
-function isCustomReinedIon($ion: AnyObject) {
-   return $ion.as === protectedMethod || $ion._as === protectedMethod
+export function isReinedIon($ion: AnyObject) {
+   return $ion.set === protectedMethod || $ion._set === protectedMethod
 }
 
 export function asReadonlyIon($ion: WritableIon) {
@@ -185,7 +185,7 @@ function createReinedIon(meta: MetaWritableIon) {
 
 
 
-function isReinedIon($ion: WritableIon) {
+function isDefaultReinedIon($ion: WritableIon) {
    const meta = asMetaIon($ion)
    return meta.asDefaultReined === $ion
 }

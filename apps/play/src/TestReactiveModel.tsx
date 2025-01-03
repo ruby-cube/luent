@@ -85,8 +85,6 @@ export function List(
          }
       }
    })
-   const _selected = rein(selected)
-   _selected.size
 
    function moveSelectedItems(index: number) {
       moveUniqueItems(selected, list, index)
