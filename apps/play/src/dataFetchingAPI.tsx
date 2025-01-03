@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, Else, If, v } from "@rue/lumo";
+import { component, $else, $if, v } from "@rue/lumo";
 import { ion, Ion } from "@rue/quarky";
 
 

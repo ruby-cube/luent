@@ -1,4 +1,4 @@
-import { component, For, fromTag, v, watchEffect } from "@rue/lumo";
+import { component, $for, fromTag, v, watchEffect } from "@rue/lumo";
 import { ion, ionize, rein } from "@rue/quarky";
 
 
@@ -71,7 +71,7 @@ export function OverrideMethods() {
 
    return component(
       <>
-         {For(list, (item, $index) =>
+         {$for(list, (item, $index) =>
             <p>{item!.num}</p>
          )}
          

@@ -1,4 +1,4 @@
-import { Else, If } from "@rue/lumo";
+import { $else, $if } from "@rue/lumo";
 import { $, ionize, ion } from "../../../packages/quarky/src";
 
 
@@ -26,11 +26,11 @@ export function TestConditional() {
     return (
         <>
             <>
-                {If($(() => $active()), 'create', () => (
+                {$if($(() => $active()), 'create', () => (
                     <div>hi</div>
                 )
                 )}
-                {Else(() => (
+                {$else(() => (
                     <div>ho</div>
                 ))}
             </>

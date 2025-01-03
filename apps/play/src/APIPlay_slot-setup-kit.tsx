@@ -14,7 +14,7 @@ function ColumnB() {
 function ColumnB() {
    // NOTE: slotSetup is only needed if the slot is used in a conditional... 
    // [ ] how do you pass both slot input and slot setup??
-   // [ ] what is the syntax for passing setup kit to a conditional render function? I want to avoid passing an options object to If() or For(). optional parameter + jsx transform
+   // [ ] what is the syntax for passing setup kit to a conditional render function? I want to avoid passing an options object to $if() or $for(). optional parameter + jsx transform
    return component(
       <SomeComponent>
          {({ name }) => (o = SelectionKit(),

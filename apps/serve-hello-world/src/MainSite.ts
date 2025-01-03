@@ -55,8 +55,8 @@ function AboutPage() {
 //             <a href="/blog">Blog</a>
 //             <p>
 //                 ${cases([
-//                     If($loading, 'loading'),
-//                     Else($data)
+//                     $if($loading, 'loading'),
+//                     $else($data)
 //                 ])}
 //             </p>
 //         </nav>

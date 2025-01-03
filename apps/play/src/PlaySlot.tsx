@@ -74,19 +74,19 @@ function FooBar() {
 
         <div>
             hi
-            {For($list, (item, $index) =>
+            {$for($list, (item, $index) =>
                 <main>
                     <div>{item} {$index()}</div>
                 </main>
             )}
             <>
-                {If($active,
+                {$if($active,
                     <div>Hello</div>
                 )}
-                {ElseIf($bar,
+                {$elseif($bar,
                     <div>bye</div>
                 )}
-                {Else(
+                {$else(
                     <div>bye</div>
                 )}
             </>

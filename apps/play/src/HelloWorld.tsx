@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, Else, ElseIf, expose, For, fromTag, If, Ion, prep, provideAppwide, v, watch } from "@rue/lumo";
+import { Component, $else, $elseif, expose, $for, fromTag, $if, Ion, prep, provideAppwide, v, watch } from "@rue/lumo";
 import { ion, ionize, Ionized, ionizeWithMarks } from "@rue/quarky";
 import { Inert, inert } from "../../../packages/quarky/src/ionize/inert";
 import { Well, Wellerman } from "./Well";
@@ -142,13 +142,13 @@ export function IonAccess() {
    return component(
       <>
          <swap:mount />
-         {If($x() > 10,
+         {$if($x() > 10,
             <p>{$x} is greater than 10</p>
          )}
-         {ElseIf(5 > $x(),
+         {$elseif(5 > $x(),
             <p>{$x} is less than 5</p>
          )}
-         {Else(
+         {$else(
             <p>{$x} is between 5 and 10</p>
          )}
       </>
@@ -166,16 +166,16 @@ function SvelteA() {
    return component(
       <>
          <swap:mount />
-         {If($x() > 10,
+         {$if($x() > 10,
             $x
          )}
-         {ElseIf(5 > $x(),
+         {$elseif(5 > $x(),
             <>{$x} is less than 5</>
          )}
-         {ElseIf($x,
+         {$elseif($x,
             <p>{$x} is less than 5</p>
          )}
-         {Else(
+         {$else(
             <p>{$x} is between 5 and 10</p>
          )}
 
@@ -193,7 +193,7 @@ function SvelteA() {
 
    return component(
       <div>
-         {If($count, $count)}
+         {$if($count, $count)}
       </div>
    )
 }
@@ -204,7 +204,7 @@ function SvelteA() {
 
    return component(
       <div>
-         {If($count, <>{$count}</>)}
+         {$if($count, <>{$count}</>)}
       </div>
    )
 }
@@ -249,7 +249,7 @@ function ListB() {
 
    return (
       <div>
-         {For($list, m => m.id, (item, $index) => <>
+         {$for($list, m => m.id, (item, $index) => <>
             <SomeComponent name={$item} />
             <SomeComponent />
          </>)}
@@ -270,7 +270,7 @@ function Column() {
 function of(list: any) {
    return ['', 9] as [string, number]
 }
-// function For(input: { [key: string]: any, Slot: any[] }) {
+// function $for(input: { [key: string]: any, Slot: any[] }) {
 //    return component(
 //       ''
 //    )

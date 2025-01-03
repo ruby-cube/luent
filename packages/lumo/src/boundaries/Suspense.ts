@@ -1,5 +1,5 @@
 import { ion, __addDevName, AtomicIon } from "../../../quarky/src";
-import { Else, ElseIf, If } from "../conditional/If";
+import { $else, $elseif, $if } from "../conditional/If";
 import { component, ComponentSetup } from "../component/InternalComponent";
 import { NodeEntity } from "../node/makeNode";
 
@@ -58,9 +58,9 @@ export function createSuspenseNode(Slot: () => NodeEntity, input: SuspenseNodeIn
 
    return component(
       [
-         If($pending, renderPlaceholder),
-         ElseIf($error, () => renderError($error())),
-         Else(() => output)
+         $if($pending, renderPlaceholder),
+         $elseif($error, () => renderError($error())),
+         $else(() => output)
       ]
    )
 }

@@ -11,7 +11,7 @@ import type { Context as ContextType } from "../context/context-stack";
 import { v } from "../InputTypes";
 import { Ion } from "@rue/quarky";
 import { component, Slot } from "../component/InternalComponent";
-import { Else, If } from "../conditional/If";
+import { $else, $if } from "../conditional/If";
 import { isFunction } from "@rue/utils";
 
 export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | AnimationKit
@@ -46,10 +46,10 @@ export function renderPhasicNode(
     if ($disable) {
         const output = isFunction(Slot) ? Slot() : Slot
         return component([
-            If($disable, () =>
+            $if($disable, () =>
                 output
             ),
-            Else(() => {
+            $else(() => {
                 return createPhasicNode(
                     $div,
                     output,

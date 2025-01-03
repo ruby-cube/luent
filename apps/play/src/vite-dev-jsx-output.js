@@ -1,5 +1,5 @@
 import {Fragment, jsxDEV} from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/jsx-runtime/src/index.ts";
-import {component, If, Else, ElseIf, slide, fromTag, v} from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
+import {component, $if, $else, $elseif, slide, fromTag, v} from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
 import {ion, ionize} from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/quarky/src/index.ts";
 export function MountIf() {
     const $count = ion(0, {
@@ -35,7 +35,7 @@ export function MountIf() {
             columnNumber: 10
         }, this), /* @__PURE__ */
         jsxDEV("$--transition", {
-            children: [If($active, () => /* @__PURE__ */
+            children: [$if($active, () => /* @__PURE__ */
             jsxDEV(Fragment, {
                 children: ["oh", /* @__PURE__ */
                 jsxDEV("$--transit", {
@@ -73,7 +73,7 @@ export function MountIf() {
                     fileName: "/Users/Ruby/Desktop/ruby-cube/rue/apps/play/src/TestMountIf.tsx",
                     lineNumber: 48,
                     columnNumber: 16
-                }, this), If($ready, () => /* @__PURE__ */
+                }, this), $if($ready, () => /* @__PURE__ */
                 jsxDEV("p", {
                     children: "ready"
                 }, void 0, false, {
@@ -85,7 +85,7 @@ export function MountIf() {
                 fileName: "/Users/Ruby/Desktop/ruby-cube/rue/apps/play/src/TestMountIf.tsx",
                 lineNumber: 43,
                 columnNumber: 32
-            }, this)), ElseIf($ready, () => /* @__PURE__ */
+            }, this)), $elseif($ready, () => /* @__PURE__ */
             jsxDEV(Fragment, {
                 children: ["low", /* @__PURE__ */
                 jsxDEV("h2", {
@@ -99,7 +99,7 @@ export function MountIf() {
                 fileName: "/Users/Ruby/Desktop/ruby-cube/rue/apps/play/src/TestMountIf.tsx",
                 lineNumber: 56,
                 columnNumber: 35
-            }, this)), Else( () => /* @__PURE__ */
+            }, this)), $else( () => /* @__PURE__ */
             jsxDEV(Fragment, {
                 children: ["so", /* @__PURE__ */
                 jsxDEV("h2", {

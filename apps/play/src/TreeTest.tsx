@@ -1,6 +1,6 @@
 import { ion } from "../../../packages/quarky/src"
 import { pend } from "../../../packages/lumo/src/componentSuspense"
-import { If } from "@rue/lumo"
+import { $if } from "@rue/lumo"
 
 export function Root() {
     const $active = ion(true)
@@ -11,7 +11,7 @@ export function Root() {
         <>
             <div>Root</div>
             <>
-                {If($active, () => <div>I'm active</div>)}
+                {$if($active, () => <div>I'm active</div>)}
             </>
             <button on:click={toggleActive}>click</button>
         </>

@@ -52,10 +52,10 @@ function ReactiveBlock() {
     return html` // jsx-ish
         <div>
             <>
-                ${If($active, () => html`
+                ${$if($active, () => html`
                     <p>I'm Active</p>
                 ` )} 
-                ${Else(() => html`
+                ${$else(() => html`
                     <p>I'm Not Active</p>
                 ` )}
             </>

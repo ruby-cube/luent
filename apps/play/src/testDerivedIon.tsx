@@ -1,4 +1,4 @@
-import { component, For } from "@rue/lumo";
+import { component, $for } from "@rue/lumo";
 import { ion, ionize } from "@rue/quarky";
 
 export function TestDerived() {
@@ -35,11 +35,11 @@ export function TestDerived() {
 
    return component(
       <>
-         {For(counts$, (n, $index) =>
+         {$for(counts$, (n, $index) =>
             <div style={['display: inline-block; padding: 10px', o => beigeHighlight(o, $index())]}>{n}</div>
          )}
          <hr></hr>
-         {For(sequence$, (n, $index) =>
+         {$for(sequence$, (n, $index) =>
             <div style={['display: inline-block; padding: 10px', o => beigeHighlight(o, $index())]}>{n}</div>
          )}
          <div>{$accumulate}</div>

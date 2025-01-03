@@ -9,7 +9,7 @@ import { isFunction } from "@rue/utils";
 export type AnyIon<T = any> = DerivedIon<T> | AtomicIon<T> | ProtectedIon<T> | WritableDerivedIon<T> | PropIon<T>
 
 export function isIon(maybeIon: any): maybeIon is AnyIon {
-   return isFunction(maybeIon) && /^\$[a-z]/.test(maybeIon.name)
+   return isFunction(maybeIon) && /^\$[a-z]/.test(maybeIon.name) && maybeIon.length === 0
    // if (isAtomicIon(maybeIon) || isDerivedIon(maybeIon) || isPropIon(maybeIon)) return true; //TODO: Add WritableIon
    // return false;
 }

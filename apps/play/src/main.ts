@@ -8,8 +8,6 @@ import './style.css'
 // import { TestConditional } from './TestConditional';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { component, createApp } from '@rue/lumo';
-// import { ionize, ionize } from '@rue/quarky';
-// import { DeepReactiveModel, asMetaIonizedModel, ionize, ionize } from '@rue/quarky';
 import { MountIf } from './TestMountIf';
 import { List } from './TestReactiveModel';
 import { TestCounterModel } from './TestCounter';
