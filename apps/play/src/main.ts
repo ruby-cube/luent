@@ -12,6 +12,7 @@ import { component, createApp } from '@rue/lumo';
 // import { DeepReactiveModel, asMetaIonizedModel, ionize, ionize } from '@rue/quarky';
 import { MountIf } from './TestMountIf';
 import { List } from './TestReactiveModel';
+import { TestCounterModel } from './TestCounter';
 // import { PlainList } from './TestList';
 // import { HelloWorld } from './HelloWorld';
 // import { Check } from './childrenTest';
@@ -27,7 +28,7 @@ import { List } from './TestReactiveModel';
 
 // const rootContext = createGlobalContext()
 
-const app = createApp(MountIf)
+const app = createApp(List)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

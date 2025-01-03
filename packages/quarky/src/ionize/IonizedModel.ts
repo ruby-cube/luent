@@ -277,8 +277,8 @@ export function createIonizedModel(
          if (isIonAccessKey) {
             if (isIon(value))
                return maybeReined(value, reinedMeta); // { $count: $count } get ion case
+            const _key = key.slice(1);
             if (value === undefined) {
-               const _key = key.slice(1);
                const _value = Reflect.get(target, _key, receiver);
                if (isIon(_value))
                   return maybeReined(_value, reinedMeta);  // { count: $count } get ion case

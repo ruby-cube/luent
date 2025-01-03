@@ -6,57 +6,50 @@
 // - derived signal in template
 // - derived signal with memo
 
-import { $, ionize, ion } from "../../../packages/quarky/src"
+import { component } from "@rue/lumo"
+import { ionize, ion, isIon } from "../../../packages/quarky/src"
 
-export function TestCounterSignals() {
-    const $count = ion(0)
-    const $doubleCount = $(() => $count() * 2)
+// export function TestCounter() {
+//    const $count = ion(0, {
+//       increment(){
+//          $count.value++
+//       },
+//       decrement(){
+//          $count.value--
+//       }
+//    })
+//    const $doubleCount = ion(() => $count() * 2)
 
-    function increment() {
-        $count.update(count => count + 1)
-    }
-
-    function decrement() {
-        $count.update(count => count - 1)
-    }
-
-    return (
-        <>
-            <div>{$count}</div>
-            <div>{$doubleCount}</div> 
-            <div>{$(() => `The count is: ${$count()}. Doubled: ${$doubleCount()}`)}</div> 
-            <button on:click={increment}>increment</button>
-            <button on:click={decrement}>decrement</button>
-        </>
-    )
-}
+//    return component(
+//       <>
+//          <div>{$count}</div>
+//          <div>{$doubleCount}</div>
+//          <div>The count is: {$count}. Doubled: {$doubleCount}</div>
+//          <button on:click={$count.increment}>increment</button>
+//          <button on:click={$count.decrement}>decrement</button>
+//       </>
+//    )
+// }
 
 
-export function TestCounter() {
+export function TestCounterModel() {
 
-    const { counter$, decrement, increment } = useCounter()
+   const counter = ionize({
+      count: 0
+   }, {
+      increment(){
+         counter.count++
+      },
+      decrement(){
+         counter.count--
+      }
+   })
 
-    return (
-        <>
-            <div>{$(() => counter$.count)}</div>
-            <button on:click={increment}>increment</button>
-            <button on:click={decrement}>decrement</button>
-        </>
-    )
-}
-
-function useCounter() {
-    const counter$ = ionize({
-        count: 0
-    })
-
-    return {
-        counter$,
-        increment() {
-            counter$.count = counter$.count + 1;
-        },
-        decrement() {
-            counter$.count = counter$.count - 1
-        }
-    }
+   return component(
+      <>
+         <div>{counter.$count}</div>
+         <button on:click={counter.increment}>increment</button>
+         <button on:click={counter.decrement}>decrement</button>
+      </>
+   )
 }

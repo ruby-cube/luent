@@ -61,7 +61,9 @@ function transformJSXChildrenToArrayExpression(paths) {
          array.push(child.node)
       }
    }
-   return t.arrayExpression(array)
+   const arrayExpression = t.arrayExpression(array)
+   console.log('erray', arrayExpression)
+   return arrayExpression
 }
 
 
@@ -82,10 +84,12 @@ function transformTemplateCallExpressions(path) {
 
 function normalizeSlotToRenderFunction(paths) { // returns jsxExpressionContainer with arrowFunctionExpression
    if (slotIsRenderFunction(paths)) return paths[0]; //TODO: still need to transform return of renderfunction if is derivation 
+   console.log('child', paths[0].node)
    return transformChildrenToRenderFunction(paths)
 }
 
 function transformChildrenToRenderFunction(paths) {
+   console.log('transforming children to render function', paths.length)
    return t.jsxExpressionContainer(
       t.arrowFunctionExpression(
          [],
@@ -143,9 +147,12 @@ function isDerivationShorthand(expression) {
 function slotIsRenderFunction(paths) {
    if (paths.length !== 1) return false;
    const child = paths[0].node;
+   console.log('slotisrenderfunction')
    if (!t.isJSXExpressionContainer(child)) return false;
    const expression = child.expression
-   if (t.isArrowFunctionExpression(expression) || t.isFunctionExpression(expression)) return true;
+   if (t.isArrowFunctionExpression(expression)
+      || t.isFunctionExpression(expression) && !expression.id.name.startsWith('$drv'))
+      return true;
    return false;
 }
 
@@ -342,6 +349,7 @@ function isDerivation(path) {
       return false;
    }
    if (t.isExpression(node) && (hasIonicCallExpression(path) || hasNonIonMemberExpression(path))) {
+      console.log('checking if isDerivation?', node)
       return true;
    }
    return false;

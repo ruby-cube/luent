@@ -161,7 +161,7 @@ function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel:
     const rawTarget = toRaw(ionicModel)
 
 
-    function __$propIon() {
+    function $propIon() {
         reregisterIfNeeded()
         const tracker = getActiveTracker()
         if (tracker)
@@ -170,7 +170,7 @@ function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel:
     }
 
     const proto = {
-        [META]: new MetaPropIon(<PropIon>__$propIon, ionicModel, key),
+        [META]: new MetaPropIon(<PropIon>$propIon, ionicModel, key),
         // set: (newValue: T[K]) => {
         //     reregisterIfNeeded()
         //     if (__DEV__) __devCheckIfTracked()
@@ -192,21 +192,21 @@ function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel:
         }
     }
 
-    Object.setPrototypeOf(__$propIon, proto)
+    Object.setPrototypeOf($propIon, proto)
 
-    // __$propIon[META] = new MetaPropIon(<PropIon>__$propIon, ionicModel, key)
-    // __$propIon.set = 
+    // $propIon[META] = new MetaPropIon(<PropIon>$propIon, ionicModel, key)
+    // $propIon.set = 
 
     function reregisterIfNeeded() {
         const metaIonicModel = asMetaIonizedModel(ionicModel);
         if (!metaIonicModel.getPropIon(key)) {
             if (__DEV__) console.warn(`[CASE RESEARCH] I'm curious how often and in what cases this happens: $propIon for ${key.toString()} in${JSON.stringify(rawTarget)} is no longer observed, but there's still an active reference to it`)
-            metaIonicModel.registerPropIon(key, __$propIon as PropIon) // This means $propIon is not being watched and is not an atom anywhere, but it's still being used
+            metaIonicModel.registerPropIon(key, $propIon as PropIon) // This means $propIon is not being watched and is not an atom anywhere, but it's still being used
         }
     }
 
-    return __$propIon as PropIon<T[K], M>
-    // return isReinedIonizedModel(ionicModel) ? reinIon(__$propIon as PropIon, READONLY) : __$propIon //FIX: isn't it already protected?
+    return $propIon as PropIon<T[K], M>
+    // return isReinedIonizedModel(ionicModel) ? reinIon($propIon as PropIon, READONLY) : $propIon //FIX: isn't it already protected?
 }
 
 export function asTrackedProp(
