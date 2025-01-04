@@ -2,8 +2,8 @@
 // // console.log(jsx)
 // // import { App } from './App';
 import './style.css'
-import './demos/markdown-app.css'
-import {MarkdownApp} from './demos/markdown-app'
+import './demos/tree-view.css'
+import {TreeApp} from './demos/tree-view'
 // import { TestCounter } from './TestCounter';
 // import { TestBox } from './TestBox';
 // import { App } from './App';
@@ -13,6 +13,8 @@ import { component, createApp } from '@rue/lumo';
 import { MountIf } from './TestMountIf';
 import { List } from './TestReactiveModel';
 import { TestCounterModel } from './TestCounter';
+import { TestDerived } from './testDerivedIon';
+import { TestDerivedConditional } from './testDerived';
 // import { PlainList } from './TestList';
 // import { HelloWorld } from './HelloWorld';
 // import { Check } from './childrenTest';
@@ -28,7 +30,7 @@ import { TestCounterModel } from './TestCounter';
 
 // const rootContext = createGlobalContext()
 
-const app = createApp(MarkdownApp)
+const app = createApp(TreeApp)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

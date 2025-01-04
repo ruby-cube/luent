@@ -18,13 +18,13 @@ export function MountIf() {
       }
    })
 
-   const $active = ion(true, {
+   const $active = ion(false, {
       toggle() {
          $active.value = !$active()
       }
    })
 
-   const $ready = ion(true, {
+   const $ready = ion(false, {
       toggle() {
          $ready.value = !$ready()
       }

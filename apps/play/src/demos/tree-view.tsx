@@ -1,0 +1,129 @@
+import { component, fromTag, Ion, Ionized, $if, $else, $for, watch, } from "@rue/lumo";
+import { ion, ionize, Phase, toRaw } from "@rue/quarky";
+
+
+
+export function TreeApp() {
+
+   const treeData = {
+      name: 'My Tree',
+      children: [
+         { name: 'hello' },
+         { name: 'world' },
+         {
+            name: 'child folder',
+            children: [
+               {
+                  name: 'child folder',
+                  children: [{ name: 'hello' }, { name: 'world' }]
+               },
+               { name: 'hello' },
+               { name: 'world' },
+               {
+                  name: 'child folder',
+                  children: [{ name: 'hello' }, { name: 'world' }]
+               }
+            ]
+         }
+      ]
+   }
+
+   const treeItem = ionize(createTreeItem(treeData))
+
+
+   return component((
+      TreeItem = TreeItemView
+   ) =>
+      <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
+         <TreeItem item={treeItem}></TreeItem>
+      </ul>
+   )
+}
+
+type ItemData = {
+   name: string,
+   children?: ItemData[]
+}
+
+class TreeItem {
+   name: string;
+   children?: TreeItem[];
+   constructor(data: ItemData) {
+      this.name = data.name;
+      this.children = data.children?.map(child => new TreeItem(child));
+   }
+
+   addChild() {
+      const children = this.children || (this.children = [])
+      children?.push(new TreeItem({ name: 'new stuff' }))
+   }
+}
+
+function createTreeItem(data: ItemData) {
+   return new TreeItem(data)
+}
+
+// function createTreeItem(data: ItemData) { 
+//    return {
+//       name: data.name,
+//       children: data.children?.map(child => createTreeItem(child)), //NOTE: THIS PRODUCES CIRCULAR TYPE ERRORS, and requires writing the type, therefore prefer class syntax
+//       addChild() {
+//          const children = this.children || (this.children = [])
+//          children?.push(new TreeItem({ name: 'new stuff' }))
+//       }
+//    }
+// }
+
+
+function TreeItemView(input = fromTag({
+   item: Ionized<TreeItem>
+})) {
+   const { item } = input
+
+   const $isOpen = ion(!!item.children?.length, {
+      toggle() {
+         $isOpen.value = !$isOpen.value
+      }
+   })
+
+   const $isFolder = ion(!!item.children?.length)
+
+   watch(() => item.children, () => {
+      $isFolder.value = !!item.children?.length
+   })
+
+   function changeType() {
+      if (!$isFolder()) {
+         item.addChild()
+         $isOpen.value = true
+      }
+   }
+
+   return component((
+      TreeItem = TreeItemView
+   ) =>
+      <$--context with={{}}>
+         <li class='item'>
+            <div
+               class={[$s = $isFolder() && 'bold']}
+               on:click={$isOpen.toggle} on:dblclick={changeType}
+            >
+               {item.name}
+               {$if($isFolder,
+                  <span>[{$isOpen() ? '-' : '+'}]</span>
+               )}
+            </div>
+            {$if($isFolder(), 'create', $if($isOpen(), 'create',
+               <ul>
+                  {$for(item.children!, item => item, (item: Ionized<TreeItem>) => (
+                     <TreeItem item={item}></TreeItem>
+                  ))}
+                  <li class='add' on:click={() => item.addChild()}>+</li>
+               </ul>
+            ))}
+         </li>
+      </$--context>
+   )
+}
+
+

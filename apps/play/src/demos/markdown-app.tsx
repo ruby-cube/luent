@@ -6,7 +6,7 @@ import { component } from '@rue/lumo'
 
 export function MarkdownApp() {
 
-   const $input = ion('# hello')
+   const $input = ion('# Hello World')
    const $output = ion(() => marked($input()))
 
    const update = debounce(e => {
