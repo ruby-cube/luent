@@ -2,6 +2,8 @@
 // // console.log(jsx)
 // // import { App } from './App';
 import './style.css'
+import './demos/markdown-app.css'
+import {MarkdownApp} from './demos/markdown-app'
 // import { TestCounter } from './TestCounter';
 // import { TestBox } from './TestBox';
 // import { App } from './App';
@@ -26,7 +28,7 @@ import { TestCounterModel } from './TestCounter';
 
 // const rootContext = createGlobalContext()
 
-const app = createApp(List)
+const app = createApp(MarkdownApp)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

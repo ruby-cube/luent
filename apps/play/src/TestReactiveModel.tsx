@@ -96,8 +96,6 @@ export function List(
       console.log('success?', selected)
    }
 
-
-
    return component(
       <>
          <h1>hello world</h1>
@@ -105,12 +103,12 @@ export function List(
             insert!
          </div>
 
-         {$for(list, o => o.id, (item, $index) =>
+         {$for(list, item => item.id, (item, $index) =>
             <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
-            // <div
+               // <div
                style={{
-                  backgroundColor: randomColor.get(),
-                  outline: $=selected.has(item) ? 'thick solid blue' : 'unset'
+                  backgroundColor: $s=randomColor.get(),
+                  outline: $s=selected.has(item) ? 'thick solid blue' : 'unset',
                }}>
                <p on:click={e => removeItem($index())} style="cursor: pointer">
                   X

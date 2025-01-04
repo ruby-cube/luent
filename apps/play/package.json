@@ -13,7 +13,9 @@
         "@rue/lumo": "workspace:*",
         "@rue/quarky": "workspace:*",
         "@rue/thread": "workspace:*",
-        "@rue/utils": "workspace:*"
+        "@rue/utils": "workspace:*",
+        "lodash-es": "^4.17.21",
+        "marked": "^15.0.5"
     },
     "devDependencies": {
         "@babel/cli": "^7.25.6",

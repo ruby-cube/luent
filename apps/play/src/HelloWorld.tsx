@@ -162,7 +162,7 @@ if (x === true) {
 function SvelteA() {
    //@ts-ignore
    const $x = ion(7)
-   let $: any;
+   let $s: any;
    return component(
       <>
          <swap:mount />

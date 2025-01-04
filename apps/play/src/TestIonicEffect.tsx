@@ -11,7 +11,6 @@ export function TestIonicEffect() {
     })
 
     watchEffect(() => {
-        console.log("running effect")
         $count.increment()
     }, { phase: SYNC })
 
