@@ -28,8 +28,7 @@ export function TreeApp() {
       ]
    }
 
-   const treeItem = ionize(createTreeItem(treeData))
-
+   const treeItem = ionize(createTreeItem(treeData), {})
 
    return component((
       TreeItem = TreeItemView
@@ -46,21 +45,24 @@ type ItemData = {
 }
 
 class TreeItem {
-   name: string;
-   children?: TreeItem[];
-   constructor(data: ItemData) {
-      this.name = data.name;
-      this.children = data.children?.map(child => new TreeItem(child));
-   }
+   constructor(
+      public name: string,
+      public children: TreeItem[] =[]
+   ) {   }
 
    addChild() {
+      console.log('adding child')
       const children = this.children || (this.children = [])
-      children?.push(new TreeItem({ name: 'new stuff' }))
+      console.log(this, children)
+      children.push(new TreeItem('new stuff'))
    }
 }
 
-function createTreeItem(data: ItemData) {
-   return new TreeItem(data)
+function createTreeItem(data: ItemData): TreeItem {
+   return new TreeItem(
+      data.name,
+      data.children?.map(child => createTreeItem(child))
+   )
 }
 
 // function createTreeItem(data: ItemData) { 
@@ -86,11 +88,11 @@ function TreeItemView(input = fromTag({
       }
    })
 
-   const $isFolder = ion(!!item.children?.length)
+   const $isFolder = ion(()=>!!item.children?.length)
 
-   watch(() => item.children, () => {
-      $isFolder.value = !!item.children?.length
-   })
+   // watch(() => item.children, () => {
+   //    $isFolder.value = !!item.children?.length
+   // })
 
    function changeType() {
       if (!$isFolder()) {
@@ -98,6 +100,9 @@ function TreeItemView(input = fromTag({
          $isOpen.value = true
       }
    }
+   // watch(()=>item.children, ()=>{
+   //    console.log('changed!')
+   // })
 
    return component((
       TreeItem = TreeItemView
@@ -105,7 +110,7 @@ function TreeItemView(input = fromTag({
       <$--context with={{}}>
          <li class='item'>
             <div
-               class={[$s = $isFolder() && 'bold']}
+               class={[$s=$isFolder() && 'bold']}
                on:click={$isOpen.toggle} on:dblclick={changeType}
             >
                {item.name}
@@ -115,7 +120,7 @@ function TreeItemView(input = fromTag({
             </div>
             {$if($isFolder(), 'create', $if($isOpen(), 'create',
                <ul>
-                  {$for(item.children!, item => item, (item: Ionized<TreeItem>) => (
+                  {$for(item.children, item => item, (item: Ionized<TreeItem>) => (console.log('list item', item),
                      <TreeItem item={item}></TreeItem>
                   ))}
                   <li class='add' on:click={() => item.addChild()}>+</li>

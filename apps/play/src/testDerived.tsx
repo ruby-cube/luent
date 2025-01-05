@@ -23,18 +23,18 @@ export function TestDerivedConditional() {
          <div>{$doubleCount}</div>
          <button on:click={$count.increment}>+</button>
          <button on:click={$count.decrement}>-</button>
-         {/* {$if($count,
+         {$if($count,
             <p>count is greater than 0!</p>
          )}
          {$if($doubleCount,
             <p>doublecount is greater than 0!</p>
          )}
+         {$if($doubleCount() > 3,
+            <p>doublecount is greater than 3!</p>
+         )}
          {$if($count() > 3,
             <p>count is greater than 3!</p>
          )}
-         {$if($doubleCount() > 3,
-            <p>doublecount is greater than 3!</p>
-         )} */}
       </>
    )
 }

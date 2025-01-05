@@ -17,7 +17,7 @@ export function TestCounterModel() {
          <div>{counter.$count}</div>
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
-         <swap:mount />
+         <v:mount />
          {$if($active)} {
             <>
                <List></List>
@@ -63,7 +63,7 @@ export function TestCounterModel() {
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
 
-         <swap:mount />
+         <v:mount />
          {$if($active)} {
             <p>hello {$userName}</p>
          }

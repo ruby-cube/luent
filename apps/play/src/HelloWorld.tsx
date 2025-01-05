@@ -141,7 +141,7 @@ export function IonAccess() {
 
    return component(
       <>
-         <swap:mount />
+         <v:mount />
          {$if($x() > 10,
             <p>{$x} is greater than 10</p>
          )}
@@ -165,7 +165,7 @@ function SvelteA() {
    let $s: any;
    return component(
       <>
-         <swap:mount />
+         <v:mount />
          {$if($x() > 10,
             $x
          )}
