@@ -18,6 +18,7 @@ import { META } from "../../../quarky/src/ReactiveEntity";
 import { MaybeGetter } from "../InputTypes";
 import { isFunction } from "@rue/utils";
 import { isNamedDerivation } from "../component/fromTag";
+import { InnerHTMLKit } from "./mountInnerHTML";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -43,6 +44,10 @@ export type NodeEntity =
    | SwapConfig
    | ConditionalRenderKit
    | ConditionalRenderSeries
+   | InnerHTMLKit
+
+
+
 
 export type RenderFunction<Params = unknown> = Params extends any[] ?
    (...args: Params) => NodeEntity :
@@ -103,7 +108,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 }
 
 export function makeNode(
-   nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--context' | 'swap:mount' | 'swap:instance' | 'swap:display' | '$--try' | '$--suspense' | '$--portal',
+   nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--context' | 'v:mount' | 'v:create' | 'v:show' | '$--try' | '$--suspense' | '$--portal',
    Slot: undefined | (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent | SwapConfig | JSX.Element | undefined {
@@ -125,13 +130,13 @@ export function makeNode(
          if (!Slot) throw new Error(`Extraneous <Context>`)
          return createPortalNode(Slot, <PortalNodeInput>config)
 
-      case 'swap:display':
+      case 'v:show':
          return new SwapConfig('display')
 
-      case 'swap:mount':
+      case 'v:mount':
          return new SwapConfig('mount')
 
-      case 'swap:instance':
+      case 'v:create':
          return new SwapConfig('instance')
 
       case '$--transit':

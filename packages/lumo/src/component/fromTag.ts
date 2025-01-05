@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { isIon, isIonizedModel, isReined, readonly } from "@rue/quarky";
-import { toIon } from "../../../quarky/src/ion/toIons";
+import { toIon, toValue } from "../../../quarky/src/ion/toIons";
 import { getComponentAttributes } from "./makeComponent";
 import { isFunction } from "@rue/utils";
 
@@ -20,14 +20,14 @@ export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
 
 type ComponentValidatedInput<C> = {
    [K in keyof C as C[K] extends { required: true } | { default: true } ? K extends `on:${infer S}` ? `emit${S}` : C[K] extends {
-      name: '_Ion' | '_Ionized' | 'MaybeIonized' | 'MaybeIon'
+      name: '_Ion' | 'MaybeIon'
    } ? K extends string ? `$${K}` : K : K : never]:
 
    C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? I
    : 'invalid typeConfig'
 } & {
    [K in keyof C as C[K] extends { optional: '?' } ? K extends `on:${infer S}` ? `emit${S}` : C[K] extends {
-      name: '_Ion' | '_Ionized' | 'MaybeIonized' | 'MaybeIon'
+      name: '_Ion' | 'MaybeIon'
    } ? K extends string ? `$${K}` : K : K : never]?:
 
    C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? I
@@ -110,7 +110,8 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                   if (!isIon(value)) {
                      throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ion`)
                   }
-                  validatedAttributes['$' + key] = isReined(value) ? value : readonly(value);
+                  validatedAttributes['$' + key] = value;
+                  // validatedAttributes['$' + key] = isReined(value) ? value : readonly(value);
                   break;
 
                case 'MaybeIon':
@@ -118,14 +119,17 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                   break;
 
                case '_Ionized':
-                  if (!isIonizedModel(value)) {
+                  const model = toValue(value)
+                  if (!isIonizedModel(model)) {
                      throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ionized`)
                   }
-                  validatedAttributes['$' + key] = isReined(value) ? value : readonly(value);
+                  // validatedAttributes[key] = isReined(value) ? value : readonly(value);
+                  validatedAttributes[key] = model //TODO:
                   break;
 
                case 'MaybeIonized':
-                  validatedAttributes['$' + key] = isReined(value) ? value : readonly(value);
+                  const _value = toValue(value)
+                  validatedAttributes[key] = isReined(value) ? _value : readonly(_value);
                   break;
 
                default:

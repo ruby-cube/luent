@@ -15,7 +15,7 @@ export class IonicDerivation<T = any> implements ReactiveEntity {
     constructor(
         readonly o: T,
         readonly type: symbol,
-        public readonly retrack: boolean = false
+        public readonly retrack: boolean = true
     ) {
     }
 
@@ -41,8 +41,9 @@ export class IonicDerivation<T = any> implements ReactiveEntity {
 
     atoms: Set<IonicAtom> = new Set()
 
-    trackAtoms(ionicDerivation: (() => any) | Ionized<AnyObject>, selective?: boolean) {
-        const tracker = new DependencyTracker(selective);
+    trackAtoms(ionicDerivation: (() => any) | Ionized<AnyObject>) {
+      console.log('trackAtoms', ionicDerivation)
+        const tracker = new DependencyTracker();
         let value;
         let deps;
         if (isIonizedModel(ionicDerivation)) {

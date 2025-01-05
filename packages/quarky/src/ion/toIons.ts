@@ -1,6 +1,7 @@
 import { AnyIon, Ion, isIon} from "./Ion";
 import { AtomicIon } from "./AtomicIon";
-import { ref } from "./Ref";
+import { neutron } from "./Neutron";
+import { isFunction } from "@rue/utils";
 
 
 // type NormalizeAllKeysToIons<T extends AnyObject> = {
@@ -35,9 +36,13 @@ import { ref } from "./Ref";
 // }
 
 export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
-    return isIon(value) ? value : ref(value) as T extends Ion ? T : Ion<T>
+    return isIon(value) ? value : neutron(value) as T extends Ion ? T : Ion<T>
 }
 
+
+export function toValue(maybeFn: any){
+   return isFunction(maybeFn)? maybeFn(): maybeFn;
+}
 
 
 // function MovableBox(setup: {

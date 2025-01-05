@@ -213,11 +213,13 @@ export function createIonizedModel(
             return Reflect.get(target, key, receiver);
 
          const isIonAccessKey = typeof key === 'string' && key[0] === '$'
-         const reinedMeta = getReinedMeta(target, ionicModel, receiver)
-         if (reinedMeta && !reinedMeta.isExposedKey(isIonAccessKey ? key.slice(1) : key)) {
-            if (__DEV__) console.warn(`Property is restricted. Cannot access '${key.toString()}'`)
-            return undefined;
-         }
+         //NOTE: Temporarily hidden rein because of issues
+         // const reinedMeta = getReinedMeta(target, ionicModel, receiver)
+         // if (reinedMeta && !reinedMeta.isExposedKey(isIonAccessKey ? key.slice(1) : key)) {
+         //    if (__DEV__) console.warn(`Property is restricted. Cannot access '${key.toString()}'`)
+         //    return undefined;
+         // }
+         const reinedMeta = false //NOTE: TEMPORARY
 
          if (methods && key in methods) {
             const method = methods[key]
@@ -415,7 +417,6 @@ function getNativeMethod(
          const createOp = mutatingOps[key].createOp
          const getPreopData = mutatingOps[key].preop
          const op = createOp(target, ionicModel, meta, getPreopData)
-         console.log(mutatingOps, key, op)
          boundMethodMap.set(_key, op)
          return op;
       }

@@ -114,7 +114,7 @@ function transformIfDerivationExpression(path) {
 
 function isDerivationShorthand(expression) {
    const node = expression.node;
-   if (t.isAssignmentExpression(node, { operator: '=' }) && node.left.name === '$' && isDerivation(expression.get('right'))) {
+   if (t.isAssignmentExpression(node, { operator: '=' }) && node.left.name === '$s' && isDerivation(expression.get('right'))) {
       return true;
    }
    return false;
@@ -355,7 +355,7 @@ function isDerivation(path) {
    return false;
 }
 
-const nonIonicCalls = new Set(['rein', 'readonly', 'slide', 'fade'])
+const nonIonicCalls = new Set(['rein', 'readonly', 'slide', 'fade', '$elseif', '$if', '$else', '$for'])
 
 function isPotentiallyIonicCall(callExpression) {
    return !nonIonicCalls.has(callExpression.callee.name)

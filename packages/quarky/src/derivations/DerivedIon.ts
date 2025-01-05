@@ -5,7 +5,7 @@ import { __devCheckIfTracked, getActiveTracker } from "./DependencyTracker";
 import { AnyObject } from "@rue/types";
 import { ProtectedIon } from "../ion/ReinedIon";
 import { AnyIon, IonMethods, isIon } from "../ion/Ion";
-import { DerivedRef } from "../ion/Ref";
+import { DerivedRef } from "../ion/Neutron";
 import { getDynamicNode } from "../../../lumo/src/dynamic/nodestack";
 
 // The $ function has various purposes
@@ -84,37 +84,42 @@ export function createDerivedIon<T extends any>(
    let initialized = false;
 
    function $derivedIon() {
-      const tracker = getActiveTracker()
-      if (tracker) {
-         if (derived.dirty) {
-            const newValue = pureGetter(derived.value);
-            derived.updateValue(newValue);
-            if (!retrack) derived.undirty()
-            return newValue;
-         }
-         return derived.value;
-      }
+      // const tracker = getActiveTracker()
+      // if (tracker) {
+      //    if (derived.dirty) {
+      //       const newValue = pureGetter(derived.value);
+      //       derived.forwardAtoms(derived.atoms) //NOTE: Added this mindlessly trying to get nested derivations to work
+      //       derived.updateValue(newValue);
+      //       if (!retrack) derived.undirty()
+      //       return newValue;
+      //    }
+      //    derived.forwardAtoms(derived.atoms) //NOTE: Added this mindlessly trying to get nested derivations to work
+      //    return derived.value;
+      // }
 
-      if (!initialized || derived.dirty && retrack) {
-         const value = derived.trackAtoms(!initialized ? pureGetter : () => pureGetter(derived.value));
+      // if (!initialized || derived.dirty && retrack) {
+         console.log('not initialized')
+         const value = !initialized ? derived.trackAtoms(pureGetter)
+            : (derived.dirty && retrack) ? derived.trackAtoms(() => pureGetter(derived.value))
+               : derived.dirty ? pureGetter(derived.value) : derived.value;
          derived.forwardAtoms(derived.atoms)
-         derived.updateValue(value)
-         derived.undirty()
+         if (!initialized || derived.dirty)
+            derived.updateValue(value)
+         if (!retrack) derived.undirty()
          initialized = true;
          return value;
-      }
+      // }
 
-      if (derived.dirty) {
-         const newValue = pureGetter(derived.value);
-         derived.forwardAtoms(derived.atoms)
-         derived.updateValue(newValue)
-         derived.undirty()
-         return newValue;
-      }
+      // if (derived.dirty) {
+      //    const newValue = pureGetter(derived.value);
+      //    derived.forwardAtoms(derived.atoms)
+      //    derived.updateValue(newValue)
+      //    derived.undirty()
+      //    return newValue;
+      // }
 
-      derived.forwardAtoms(derived.atoms)
-
-      return derived.value; // memoized value
+      // derived.forwardAtoms(derived.atoms)
+      // return derived.value; // memoized value
    }
 
    const proto = {

@@ -2,9 +2,9 @@ import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
 import { _NodePod } from "../node/NodePod";
 import { mountNodeEntities } from "../node/mountNodeEntity";
-import { AtomicIon, isAtomicIon, rein } from "@rue/quarky";
+import { AtomicIon, isAtomicIon, rein, toValue } from "@rue/quarky";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
-import { normalizeToArray } from "@rue/utils";
+import { isFunction, normalizeToArray } from "@rue/utils";
 import { initializeListRef, initializeRef, NodeRef, NodesRef } from "../node/NodeRef";
 import exp from "constants";
 
@@ -50,7 +50,7 @@ export function component<T extends AnyObject | undefined = AnyObject | undefine
    const exposedComponent = arguments.length === 2 ? templateOrComponent as AnyObject : undefined;
    return {
       exposedComponent: rein(exposedComponent),
-      renderedTemplate: renderedTemplate ? unnestComponent(renderedTemplate) : undefined,
+      renderedTemplate: toValue(renderedTemplate ? unnestComponent(renderedTemplate) : undefined),
    } as Component<T extends AnyObject ? T : undefined>
 }
 

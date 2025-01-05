@@ -155,8 +155,9 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
    for (const key in events) {
       const handlers = normalizeToArray(events[key]);
       for (const handler of handlers) {
-         return $listen(handler, options || {}, {
+         $listen(handler, options || {}, {
             enroll: (cb) => {
+               console.log('adding event',key)
                node.addEventListener(key, cb, options);
             },
             remove: (cb) => {

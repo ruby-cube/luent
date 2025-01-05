@@ -5,17 +5,18 @@ import { asReadonlyIonizedModel, isReadonlyIonizedModel } from "./ionize/Readonl
 import { isReinedObject, REINED_TARGET } from "./rein";
 
 export function readonly<T>(entity: T) {
-   if (isWritableIon(entity)) {
-      return asReadonlyIon(entity)
-   }
-   if (isIonizedModel(entity)) {
-      return asReadonlyIonizedModel(entity)
-   }
-   if (isReadonlyObject(entity))
-      return entity;
-   if (entity instanceof Object) {
-      return createReadonlyObject(entity)
-   }
+   //NOTE: temporarily disabiling readonly
+   // if (isWritableIon(entity)) {
+   //    return asReadonlyIon(entity)
+   // }
+   // if (isIonizedModel(entity)) {
+   //    return asReadonlyIonizedModel(entity)
+   // }
+   // if (isReadonlyObject(entity))
+   //    return entity;
+   // if (entity instanceof Object) {
+   //    return createReadonlyObject(entity)
+   // }
    return entity
 }
 

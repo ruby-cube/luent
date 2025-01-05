@@ -76,16 +76,17 @@ type IncludesProps<O, X extends keyof O | PropertyKey> = {
 } extends { [key: string]: never } ? false : true;
 
 export function rein<T, M extends (keyof T)[] | []>(entity: T, ...exposedKeys: M & RemoveArrayRepeats<M>): Reined<T, M> {
-   if (isWritableIon(entity)) {
-      return reinIon(entity, exposedKeys) as Reined<T, M>
-   }
-   if (isIonizedModel(entity)) {
-      return reinIonizedModel(entity, exposedKeys) as Reined<T, M>
-   }
-   if (isObject(entity))
-      return reinObject(entity, exposedKeys) as Reined<T, M>
-   if (isFunction(entity))
-      return entity as Reined<T, M>
+   //NOTE: Temporarily disabling rein
+   // if (isWritableIon(entity)) {
+   //    return reinIon(entity, exposedKeys) as Reined<T, M>
+   // }
+   // if (isIonizedModel(entity)) {
+   //    return reinIonizedModel(entity, exposedKeys) as Reined<T, M>
+   // }
+   // if (isObject(entity))
+   //    return reinObject(entity, exposedKeys) as Reined<T, M>
+   // if (isFunction(entity))
+   //    return entity as Reined<T, M>
    return entity as Reined<T, M>
 }
 

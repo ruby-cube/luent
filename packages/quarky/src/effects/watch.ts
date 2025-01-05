@@ -15,7 +15,7 @@ import { asMetaIon, isAtomicIon, AtomicIon } from "../ion/AtomicIon";
 import { asIonicAtom } from "../derivations/IonicAtom";
 import { isPropIon, PropIon } from "../ionize/PropIon";
 import { popEffect, pushEffect, runCleanups, ThisEffect } from "./ThisEffect";
-import { ref, Ref } from "../ion/Ref";
+import { neutron, Neutron } from "../ion/Neutron";
 
 
 type RenderCycleOptions = {
@@ -138,6 +138,7 @@ function getValues(subjects: (AnyIon | Ionized<AnyObject>)[]) {
 }
 
 function getValue(subject: AnyIon | Ionized<AnyObject>) {
+   console.log('get value', subject)
    return isIon(subject) ? subject() : subject;
 }
 
@@ -200,14 +201,19 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
    }
    catch (err) {
       if (err instanceof Object && 'cause' in err && err.cause === 'no dependencies') {
-         if (__DEV__) console.warn('inert watcher')
+         if (__DEV__) console.warn('inert watcher', effect)
          return InertWatcher()
       }
    }
 
-   const $activeEffect = ref() as Ref<ThisEffect>
+   if (isIonizedModel(oldValue) && oldValue !== subject){
+      watch(oldValue, effect, options)
+   }
+
+   const $activeEffect = neutron() as Neutron<ThisEffect>
 
    function changeHandler() {
+      console.log('running change handler!')
       const newValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when retracking happens
 
       if (!eager && (isMultiSubject && noChanges(subjects, newValue, oldValue)
@@ -223,7 +229,6 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
       try {
          currentWatchSubject = subjects // prevents infinite loops for synchronous effects //TODO: do we need this in watchModel and initialize effect?
          pushEffect(_effect)
-         console.log('running effect with', _effect)
          effect(newValue, oldValue)
       }
       finally {
@@ -348,21 +353,21 @@ function scheduleEffectEagerly(effect: Effect, phase: Phase) {
 export function watchEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
    const phase = options?.phase || Phase.BEFORE_RENDER;
    const retrack = options?.retrack || false;
-   const selectiveSubjects = options?.only;
-   const selector = selectiveSubjects?.[0] === true ? true : false;
-   const additionalSubjects = normalizeWatchSubjects(options?.also || selector ? <any[]>selectiveSubjects!.slice(1) : selectiveSubjects);
-   const additionalWatchSubjects = additionalSubjects ? asWatchSubjects(additionalSubjects) : [];
-   const $activeEffect = ref() as Ref<ThisEffect>
-   const reactiveEffect = createIonicEffect(effect, $activeEffect, selector, retrack)
+   // const selectiveSubjects = options?.only;
+   // const selector = selectiveSubjects?.[0] === true ? true : false;
+   // const additionalSubjects = normalizeWatchSubjects(options?.also || selector ? <any[]>selectiveSubjects!.slice(1) : selectiveSubjects);
+   // const additionalWatchSubjects = additionalSubjects ? asWatchSubjects(additionalSubjects) : [];
+   const $activeEffect = neutron() as Neutron<ThisEffect>
+   const reactiveEffect = createIonicEffect(effect, $activeEffect, retrack)
    const watchSubject = asWatchSubject(reactiveEffect);
 
-   if (__DEV__ && selectiveSubjects && options?.also)
-      throw Error(`INVALID OPTIONS: Cannot configure watchEffect with both 'only' and 'also' options.`)
+   // if (__DEV__ && selectiveSubjects && options?.also)
+      // throw Error(`INVALID OPTIONS: Cannot configure watchEffect with both 'only' and 'also' options.`)
 
    scheduleEffectEagerly(reactiveEffect.initialize, phase);
 
    return setUpWatcher(
-      [watchSubject, ...additionalWatchSubjects],
+      [watchSubject],
       reactiveEffect,
       $activeEffect,
       phase,
@@ -375,7 +380,7 @@ export function watchEffect(effect: () => void, options?: EffectOptions) { //NOT
 function setUpWatcher(
    watchSubjects: WatchSubject[],
    effect: Effect,
-   $activeEffect: Ref<ThisEffect>,
+   $activeEffect: Neutron<ThisEffect>,
    phase: Phase,
    options: ListenerOptions & RenderCycleOptions,
    ionicDerivations?: IonicDerivation[]

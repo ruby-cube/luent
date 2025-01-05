@@ -1,3 +1,4 @@
+import { isObjectLiteral } from "@rue/utils";
 import { DOMNode, InternalComponent } from "../component/InternalComponent";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
@@ -8,13 +9,15 @@ import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { NodeEntity, SwapConfig } from "./makeNode";
 import { setUpTextNode } from "./mountTextNode";
 import { _NodePod } from "./NodePod";
+import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./mountInnerHTML";
 
 // [ ] validate and apply swap tag
 // [ ] validate and compose conditional series
 // [V] spread arrays and nested array
 
-export type NodeKit = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderSeries | MorphicRenderKit
+export type NodeKit = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderSeries | MorphicRenderKit | InnerHTMLKit
 
+type HTMLString = string;
 
 export function setUpNodeEntities(
    nodeEntities: NodeEntity[],
@@ -64,12 +67,16 @@ export function setUpNodeEntities(
          // if (series.isOpen) series.close()
          continue;
       }
+      else if (isInnerHTMLKit(nodeEntity)){
+         nodeKits.push(setUpInnerHTML(nodeEntity, parent))
+      }
       else {
          if (series.isOpen) series.close()
          nodeKits.push(setUpNodeEntity(nodeEntity, parent, nodePod))
       }
    }
    if (series.isOpen) series.close()
+      console.log('nodeKits', nodeKits)
    return nodeKits;
 }
 

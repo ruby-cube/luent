@@ -1,6 +1,6 @@
 import { popEffect, pushEffect, runCleanups, ThisEffect } from "../effects/ThisEffect";
 import { AtomicIon } from "../ion/AtomicIon";
-import { Ref } from "../ion/Ref";
+import { Ref } from "../ion/Neutron";
 import { PropIon } from "../ionize/PropIon";
 import { META } from "../ReactiveEntity";
 import { asIonicAtom } from "./IonicAtom";
@@ -14,8 +14,8 @@ export type IonicEffect = {
     initialize: () => IonicEffect;
 }
 
-function trackIonicEffect(derivation: IonicDerivation, fn: () => any, $activeEffect: Ref<ThisEffect>, selector: boolean) {
-    const value = derivation.trackAtoms(() => runIonicEffect(fn, derivation, $activeEffect), selector);
+function trackIonicEffect(derivation: IonicDerivation, fn: () => any, $activeEffect: Ref<ThisEffect>) {
+    const value = derivation.trackAtoms(() => runIonicEffect(fn, derivation, $activeEffect));
     // derivation.forwardAtoms(derivation.atoms)
     return value;
 }
@@ -48,13 +48,13 @@ function runIonicEffect(effect: () => void, meta: IonicDerivation, $activeEffect
     }
 }
 
-export function createIonicEffect(fn: () => any, $activeEffect: Ref<ThisEffect>, selectiveTracking: boolean, retrack: boolean) {
+export function createIonicEffect(fn: () => any, $activeEffect: Ref<ThisEffect>, retrack: boolean) {
     if (retrack) {
         const derivation = new IonicDerivation(ionicEffect, IONIC_EFFECT, retrack)
 
         function ionicEffect() {
             if (derivation.dirty) {
-                trackIonicEffect(derivation, fn, $activeEffect, selectiveTracking)
+                trackIonicEffect(derivation, fn, $activeEffect)
                 derivation.undirty()
             }
             else {
@@ -63,7 +63,7 @@ export function createIonicEffect(fn: () => any, $activeEffect: Ref<ThisEffect>,
         }
         ionicEffect[META] = derivation
         ionicEffect.initialize = () => {
-            trackIonicEffect(derivation, fn, $activeEffect, selectiveTracking);
+            trackIonicEffect(derivation, fn, $activeEffect);
             return ionicEffect;
         }
 
@@ -75,7 +75,7 @@ export function createIonicEffect(fn: () => any, $activeEffect: Ref<ThisEffect>,
             runIonicEffect(fn, derivation, $activeEffect)
         }
         ionicEffect.initialize = () => {
-            trackIonicEffect(derivation, fn, $activeEffect, selectiveTracking);
+            trackIonicEffect(derivation, fn, $activeEffect);
             return ionicEffect;
         }
         ionicEffect[META] = derivation

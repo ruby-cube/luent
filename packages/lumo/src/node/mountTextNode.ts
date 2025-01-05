@@ -19,18 +19,19 @@ export function setUpTextNode(text: ReactiveGet | any, nodePod: _NodePod) {
 }
 
 export function mountTextNode(textNode: CharacterData, parent: Element, fragment?: DocumentFragment) {
-    const root = fragment ? fragment : parent;
-    root.appendChild(textNode)
+   const root = fragment ? fragment : parent;
+   root.appendChild(textNode)
 }
 
 function keepTextNodeUpdated(text: ReactiveGet<any>, textNode: CharacterData) {
-    watch(text, (newValue: any) => {
-        textNode.data = toString(newValue);
-    }, { phase: Phase.RENDER, __devName: keepTextNodeUpdated.name });
+   watch(text, (newValue: any) => {
+      textNode.data = toString(newValue);
+   }, { phase: Phase.RENDER, __devName: keepTextNodeUpdated.name });
 }
 
 
 function createTextNode(value: ReactiveGet | any) {
+   console.log(value, 'textnode')
     if (__DEV__) __devCheckIfTracked()
     const _value = isIon(value) ? value() : value;
     const text = toString(_value)

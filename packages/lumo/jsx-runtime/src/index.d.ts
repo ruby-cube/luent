@@ -2487,7 +2487,7 @@ type Defaultize<P, D> = P extends any ? string extends keyof P ? P
    
    declare global {
    const ATTRIBUTES = Symbol('component attributes')
-   let $;
+   let $s;
    /**
     * @deprecated Use `React.JSX` instead of the global `JSX` namespace.
     */
@@ -2556,9 +2556,9 @@ type Defaultize<P, D> = P extends any ? string extends keyof P ? P
       // }
 
       interface _IntrinsicElements {
-         'swap:display': {};
-         'swap:mount': {};
-         'swap:instance': {};
+         'v:show': {};
+         'v:mount': {};
+         'v:create': {};
          'i--i': {};
          '$--portal': PortalNodeInput & { Slot: Lumo.Slot }
          '$--context': ContextNodeInput & { Slot: Lumo.Slot };

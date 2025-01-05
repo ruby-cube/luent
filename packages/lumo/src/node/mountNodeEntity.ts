@@ -6,6 +6,8 @@ import { mountTextNode, setUpTextNode } from "./mountTextNode";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { NodeKit } from "./setUpNodeEntities";
+import { isObjectLiteral } from "@rue/utils";
+import { isInnerHTMLKit, mountInnerHTML } from "./mountInnerHTML";
 
 // node kits:
 // - text ion
@@ -47,6 +49,9 @@ function mountNodeEntity(
     ) { //TODO: make a shared prototype
        
         nodeEntity.mount(parent,fragment)
+    }
+    else if (isInnerHTMLKit(nodeEntity)){
+      mountInnerHTML(nodeEntity, parent)
     }
     // else if (nodeEntity instanceof ListRenderKit) { // may or may not be dynamic, depending on data
     //     nodeEntity.mount(parent, nodePod, fragment);

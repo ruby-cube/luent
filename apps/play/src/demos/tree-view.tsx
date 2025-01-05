@@ -34,10 +34,12 @@ export function TreeApp() {
       TreeItem = TreeItemView
    ) =>
       <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
-         <TreeItem item={treeItem}></TreeItem>
+         <TreeItem item={mutable(treeItem)}></TreeItem>
       </ul>
    )
 }
+
+function mutable(arg: any) { return arg }
 
 type ItemData = {
    name: string,
@@ -47,8 +49,8 @@ type ItemData = {
 class TreeItem {
    constructor(
       public name: string,
-      public children: TreeItem[] =[]
-   ) {   }
+      public children: TreeItem[] = []
+   ) { }
 
    addChild() {
       console.log('adding child')
@@ -88,7 +90,7 @@ function TreeItemView(input = fromTag({
       }
    })
 
-   const $isFolder = ion(()=>!!item.children?.length)
+   const $isFolder = ion(() => !!item.children?.length)
 
    // watch(() => item.children, () => {
    //    $isFolder.value = !!item.children?.length
@@ -110,7 +112,7 @@ function TreeItemView(input = fromTag({
       <$--context with={{}}>
          <li class='item'>
             <div
-               class={[$s=$isFolder() && 'bold']}
+               class={[$s = $isFolder() && 'bold']}
                on:click={$isOpen.toggle} on:dblclick={changeType}
             >
                {item.name}
@@ -118,9 +120,9 @@ function TreeItemView(input = fromTag({
                   <span>[{$isOpen() ? '-' : '+'}]</span>
                )}
             </div>
-            {$if($isFolder(), 'create', $if($isOpen(), 'create',
+            {$if($isFolder(), 'create', $if($isOpen(), 'mount',
                <ul>
-                  {$for(item.children, item => item, (item: Ionized<TreeItem>) => (console.log('list item', item),
+                  {$for(item.children, item => item, (item) => (
                      <TreeItem item={item}></TreeItem>
                   ))}
                   <li class='add' on:click={() => item.addChild()}>+</li>

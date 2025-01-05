@@ -1,4 +1,4 @@
-import { isIon, isIonizedModel, ion, Ionized, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, Ionized, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon, toValue, getWithoutTracking } from "@rue/quarky";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
@@ -121,15 +121,16 @@ export class ListRenderKit {
          // set up watcher for updates
          // const renderCycle = getCurrentRenderCycle();
          const parentDynamicNode = getActiveDynamicNode()
-         const rawData = isIonizedModel(data) ? toRaw(data) as Collection<any> : undefined
-         let clone = isIonizedModel(data) ? shallowClone(rawData!) : undefined
+         const _data = isIon(data) ? getWithoutTracking(data):data // unwrap potentially nested ionized model
+         const rawData = isIonizedModel(_data) ? toRaw(_data) as Collection<any> : undefined
+         let clone = isIonizedModel(_data) ? shallowClone(rawData!) : undefined //TODO: need to handle cases when ionizedModel is nested in ion
          //TODO: figure out typing for Set, Map, Object vs Array
          
          watch(data as any/* FIX: type error*/, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
-            console.log('updating list')
             const _oldValue = clone || oldValue;
-            if (_isIonicModel) clone = shallowClone(rawData!) as any[]
+            if (isIonizedModel(_data)) clone = shallowClone(rawData!) as any[]
             const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || newValue, _oldValue, getUID)
+            console.log('updating list, noChange', newValue.length, _oldValue.length)
             if (noChange) return;
             if (dynamicNodePod!.length !== _oldValue.length)
                throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)
@@ -254,10 +255,10 @@ export class ListRenderKit {
             const dynamicNode = makeDynamicNode(nodePod)
             const renderItem = this.renderItem
             const list = this.data;
-            const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
+            // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             dynamicNode.mount(function renderNewListItem() {
                console.log('rendering new item')
-               const nodeEntities = renderItem(_item, $index, parent, nodePod);
+               const nodeEntities = renderItem(toValue(list)[$index()], $index, parent, nodePod);
                mountNodeEntities(nodeEntities, parent, fragment)
             })
             setCurrentIndex(undefined)

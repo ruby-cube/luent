@@ -22,6 +22,7 @@ declare global {
          copyWithin(target: number, start: number, end?: number): MaybeIonized<T>[];
          fill(value: T, start?: number, end?: number): MaybeIonized<T>[];
          pop(): MaybeIonized<T> | undefined;
+         push(...items: MaybeIonized<T>[]): number;
          reverse(): MaybeIonized<T>[];
          shift(): MaybeIonized<T> | undefined;
          sort(compareFn?: (a: T, b: T) => number): MaybeIonized<T>[];
