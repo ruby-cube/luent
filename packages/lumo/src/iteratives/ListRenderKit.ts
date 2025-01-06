@@ -1,4 +1,4 @@
-import { isIon, isIonizedModel, ion, Ionized, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon, toValue, getWithoutTracking } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon, toValue, getWithoutTracking } from "@rue/quarky";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
@@ -36,14 +36,16 @@ export function setCurrentIndex($index: AtomicIon<number> | undefined) {
    $currentIndex = $index;
 }
 
-function wrapWithContext(renderItem: RenderItem<Ionized<any[]>>, list: ListRenderKit) {
+function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
    const outerContext = getContext();
-   return (item: any, $index: AtomicIon<number>, parent: Element, nodePod: _NodePod) => {
+   return (item: any, $index: AtomicIon<number>, parent: Element, nodePod: _NodePod, initialRender: boolean = false) => {
       const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
       list.transitions.set($index, transitionNodes)
       try {
-         pushList(list)
-         pushContext(outerContext)
+         if (!initialRender) {
+            pushList(list) //QUESTION: dunno if pushList needs to be in this conditional block
+            pushContext(outerContext)
+         }
          const nodeEntities = setUpNodeEntities(normalizeToArray(
             createNodeContext(() => renderItem(item, $index), {
                with: { [REGISTER_TRANSITION_NODE]: registerTransitionNode }
@@ -51,23 +53,21 @@ function wrapWithContext(renderItem: RenderItem<Ionized<any[]>>, list: ListRende
          ), parent, nodePod)
          return nodeEntities;
       }
-      catch (err) {
-         console.error(err)
-         throw new Error('')
-      }
       finally {
-         popContext()
-         popList()
+         if (!initialRender) {
+            popContext()
+            popList()
+         }
       }
    }
 }
 
 export class ListRenderKit {
-   renderItem: (item: any, $index: AtomicIon<number>, parent: Element, nodePod: _NodePod) => NodeKit[]
+   renderItem: (item: any, $index: AtomicIon<number>, parent: Element, nodePod: _NodePod, initialRender: boolean) => NodeKit[]
    trace: unknown;
 
    constructor(
-      renderItem: RenderItem<Ionized<any[]>>, //QUESTION: Does this need the context object?
+      renderItem: RenderItem<any[]>, //QUESTION: Does this need the context object?
       public data: ListData,
       public getUID: ((item: unknown) => unknown) | undefined,
    ) {
@@ -121,11 +121,11 @@ export class ListRenderKit {
          // set up watcher for updates
          // const renderCycle = getCurrentRenderCycle();
          const parentDynamicNode = getActiveDynamicNode()
-         const _data = isIon(data) ? getWithoutTracking(data):data // unwrap potentially nested ionized model
+         const _data = isIon(data) ? getWithoutTracking(data) : data // unwrap potentially nested ionized model
          const rawData = isIonizedModel(_data) ? toRaw(_data) as Collection<any> : undefined
          let clone = isIonizedModel(_data) ? shallowClone(rawData!) : undefined //TODO: need to handle cases when ionizedModel is nested in ion
          //TODO: figure out typing for Set, Map, Object vs Array
-         
+
          watch(data as any/* FIX: type error*/, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
             const _oldValue = clone || oldValue;
             if (isIonizedModel(_data)) clone = shallowClone(rawData!) as any[]
@@ -174,13 +174,13 @@ export class ListRenderKit {
          if (isDynamic) {
             const dynamicNode = makeDynamicNode(nodePod)
             dynamicNode.mount(function mountDynamicItem() {
-               const nodeEntities = listKit.renderItem(item, $index, parent, nodePod)
+               const nodeEntities = listKit.renderItem(item, $index, parent, nodePod, true)
                mountNodeEntities(nodeEntities, parent, fragment);
             })
             dynamicNodeMap.set(nodePod, dynamicNode)
          }
          else {
-            const nodeEntities = this.renderItem(item, $index, parent, nodePod)
+            const nodeEntities = this.renderItem(item, $index, parent, nodePod, true)
             mountNodeEntities(nodeEntities, parent, fragment);
          }
       }
@@ -256,7 +256,7 @@ export class ListRenderKit {
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             dynamicNode.mount(function renderNewListItem() {
-               const nodeEntities = renderItem(toValue(list)[$index()], $index, parent, nodePod);
+               const nodeEntities = renderItem(toValue(list)[$index()], $index, parent, nodePod, false);
                mountNodeEntities(nodeEntities, parent, fragment)
             })
             setCurrentIndex(undefined)
