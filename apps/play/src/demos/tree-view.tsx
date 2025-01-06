@@ -78,6 +78,7 @@ function createTreeItem(data: ItemData): TreeItem {
 //    }
 // }
 
+const textarea = document.createElement('textarea')
 
 function TreeItemView(input = fromTag({
    item: Ionized<TreeItem>
@@ -91,10 +92,6 @@ function TreeItemView(input = fromTag({
    })
 
    const $isFolder = ion(() => !!item.children?.length)
-
-   // watch(() => item.children, () => {
-   //    $isFolder.value = !!item.children?.length
-   // })
 
    function changeType() {
       if (!$isFolder()) {

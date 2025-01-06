@@ -726,7 +726,7 @@ declare namespace React {
       'on:auxclick'?: MouseEventHandler<T>;
       'on:click'?: MouseEventHandler<T>;
       'on:contextmenu'?: MouseEventHandler<T>;
-      'on:doubleclick'?: MouseEventHandler<T>;
+      'on:dblclick'?: MouseEventHandler<T>;
       'on:drag'?: DragEventHandler<T>;
       'on:dragend'?: DragEventHandler<T>;
       'on:dragenter'?: DragEventHandler<T>;
@@ -1213,24 +1213,43 @@ declare namespace React {
       // Standard HTML Attributes
       // class?: string | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[]; // #LUMO-EDIT
       // style?: CSSProperties | undefined | ((o: CSSStyleDeclaration) => void) | (((o: CSSStyleDeclaration) => void) | string)[]; // #LUMO-EDIT
-      accesskey?: string | undefined;
-      autofocus?: boolean | undefined;
       contenteditable?: Booleanish | "inherit" | "plaintext-only" | undefined;
       contextmenu?: string | undefined;
-      dir?: string | undefined;
       draggable?: Booleanish | undefined;
-      hidden?: boolean | undefined;
       id?: string | undefined;
-      lang?: string | undefined;
-      nonce?: string | undefined;
+      is?: string | undefined;
       slot?: string | undefined;
       spellcheck?: Booleanish | undefined;
-      tabindex?: number | undefined;
-      title?: string | undefined;
       translate?: "yes" | "no" | undefined;
+      lang?: string | undefined; // Specifies the language of the element's content
+      nonce?: string | undefined; // A cryptographic nonce for inline scripts
+      part?: string | undefined; // Specifies parts of the element for styling
+      tabindex?: number | undefined; // Defines the tab order of the element
+      title?: string | undefined; // Additional information displayed as a tooltip
+      inert?: boolean | undefined; // Prevents user interaction with the element
+      itemid?: string | undefined; // Defines the item's ID in microdata
+      itemprop?: string | undefined; // Specifies the item's property in microdata
+      itemref?: string | undefined; // References additional microdata items
+      itemscope?: boolean | undefined; // Declares the scope of an item
+      itemtype?: string | undefined; // Specifies the type of an item in microdata
+
+      accesskey?: string | undefined; // Defines a keyboard shortcut to activate/focus an element
+      autocapitalize?: "off" | "none" | "on" | "sentences" | "words" | "characters" | undefined; // Controls capitalization behavior
+      autofocus?: boolean | undefined; // Automatically focuses the element
+      dir?: "ltr" | "rtl" | "auto" | undefined; // Specifies the text direction
+      enterkeyhint?:
+      "enter"
+      | "done"
+      | "go"
+      | "next"
+      | "previous"
+      | "search"
+      | "send"
+      | undefined; // Hint for virtual keyboards
+      hidden?: boolean | "until-found" | undefined; // Hides the element
 
       // Unknown
-      radiogroup?: string | undefined; // <command>, <menuitem>
+      // radiogroup?: string | undefined; // <command>, <menuitem>
 
       // WAI-ARIA
       role?: AriaRole | undefined;
@@ -1249,15 +1268,9 @@ declare namespace React {
       vocab?: string | undefined;
 
       // Non-standard Attributes
-      autocapitalize?: string | undefined;
       autocorrect?: string | undefined;
       autosave?: string | undefined;
       color?: string | undefined;
-      itemprop?: string | undefined;
-      itemscope?: boolean | undefined;
-      itemtype?: string | undefined;
-      itemid?: string | undefined;
-      itemref?: string | undefined;
       results?: number | undefined;
       security?: string | undefined;
       unselectable?: "on" | "off" | undefined;
@@ -1272,7 +1285,9 @@ declare namespace React {
        * Specify that a standard HTML element should behave like a defined custom built-in element
        * @see {@link https://html.spec.whatwg.org/multipage/custom-elements.html#attr-is}
        */
-      is?: string | undefined;
+ 
+
+
    }
 
    /**
@@ -1669,12 +1684,7 @@ declare namespace React {
       disabled?: boolean | undefined;
       enterKeyHint?: "enter" | "done" | "go" | "next" | "previous" | "search" | "send" | undefined;
       form?: string | undefined;
-      formAction?:
-      | string
-      | DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS[
-      keyof DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_FORM_ACTIONS
-      ]
-      | undefined;
+      formAction?: string | undefined;
       formEncType?: string | undefined;
       formMethod?: string | undefined;
       formNoValidate?: boolean | undefined;
@@ -2477,15 +2487,15 @@ type Defaultize<P, D> = P extends any ? string extends keyof P ? P
    & InexactPartial<Pick<D, Exclude<keyof D, keyof P>>>
    : never;
 
-   
-   type LumoAttributes<C, P> = P extends { [ATTRIBUTES]: infer A } ? A : P
-   // C extends { propTypes: infer T; defaultProps: infer D } ? Defaultize<MergePropTypes<P, PropTypes.InferProps<T>>, D> 
-   // : C extends { propTypes: infer T } ? MergePropTypes<P, PropTypes.InferProps<T>>
-   // : C extends { defaultProps: infer D } ? Defaultize<P, D>
-   // : P;
-   
-   
-   declare global {
+
+type LumoAttributes<C, P> = P extends { [ATTRIBUTES]: infer A } ? A : P
+// C extends { propTypes: infer T; defaultProps: infer D } ? Defaultize<MergePropTypes<P, PropTypes.InferProps<T>>, D> 
+// : C extends { propTypes: infer T } ? MergePropTypes<P, PropTypes.InferProps<T>>
+// : C extends { defaultProps: infer D } ? Defaultize<P, D>
+// : P;
+
+
+declare global {
    const ATTRIBUTES = Symbol('component attributes')
    let $s;
    /**
