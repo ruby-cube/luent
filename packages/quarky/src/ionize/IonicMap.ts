@@ -6,27 +6,27 @@ import { asTrackedProp, getObservedProp } from "./PropIon";
 import { defineIonizedStructure, useTrackableGetOp } from "./IonizedModel";
 import { AnyObject } from "@rue/types";
 
-declare global {
-   interface Map<K, V> {
-      '~$methods'?: undefined | {
-         // Core methods
-         delete(key: K): boolean;
-         get(key: K): MaybeIonized<V> | undefined;
-         has(key: K): boolean;
-         set<H>(this: H, key: K, value: V): H;
+// declare global {
+//    interface Map<K, V> {
+//       '~$methods'?: undefined | {
+//          // Core methods
+//          delete(key: K): boolean;
+//          get(key: K): MaybeIonized<V> | undefined;
+//          has(key: K): boolean;
+//          set<H>(this: H, key: K, value: V): H;
 
-         // Iteration methods
-         forEach<H, O>(
-            callback: (this: O, value: MaybeIonized<V>, key: K, map: H) => void,
-            thisArg?: O
-         ): void;
-         keys(): IterableIterator<K>;
-         values(): IterableIterator<MaybeIonized<V>>;
-         entries(): IterableIterator<[K, MaybeIonized<V>]>;
-         [Symbol.iterator](): IterableIterator<[K, MaybeIonized<V>]>;
-      }
-   }
-}
+//          // Iteration methods
+//          forEach<H, O>(
+//             callback: (this: O, value: MaybeIonized<V>, key: K, map: H) => void,
+//             thisArg?: O
+//          ): void;
+//          keys(): IterableIterator<K>;
+//          values(): IterableIterator<MaybeIonized<V>>;
+//          entries(): IterableIterator<[K, MaybeIonized<V>]>;
+//          [Symbol.iterator](): IterableIterator<[K, MaybeIonized<V>]>;
+//       }
+//    }
+// }
 
 
 // Trackable keys vs trackable ops:

@@ -8,26 +8,26 @@ import { getObservedProp } from "./PropIon";
 
 type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 
-declare global {
-   interface Set<T> {
-      '~$methods'?: {
-         // Core methods
-         add<H>(this: H, value: T): H,
+// declare global {
+//    interface Set<T> {
+//       '~$methods'?: {
+//          // Core methods
+//          add<H>(this: H, value: T): H,
 
-         // Iteration methods
-         forEach<H, O>(
-            this: H,
-            callback: (this: O, valueA: MaybeIonized<T>, valueB: MaybeIonized<T>, set: H) => void,
-            thisArg: O
-         ): void;
+//          // Iteration methods
+//          forEach<H, O>(
+//             this: H,
+//             callback: (this: O, valueA: MaybeIonized<T>, valueB: MaybeIonized<T>, set: H) => void,
+//             thisArg: O
+//          ): void;
 
-         keys(): IterableIterator<MaybeIonized<T>>;
-         values(): IterableIterator<MaybeIonized<T>>;
-         entries(): IterableIterator<[MaybeIonized<T>, MaybeIonized<T>]>;
-         [Symbol.iterator](): IterableIterator<MaybeIonized<T>>;
-      }
-   }
-}
+//          keys(): IterableIterator<MaybeIonized<T>>;
+//          values(): IterableIterator<MaybeIonized<T>>;
+//          entries(): IterableIterator<[MaybeIonized<T>, MaybeIonized<T>]>;
+//          [Symbol.iterator](): IterableIterator<MaybeIonized<T>>;
+//       }
+//    }
+// }
 
 const trackableCollectionOps = {
    keys: true,  // newIterable = keys()

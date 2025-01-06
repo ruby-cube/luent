@@ -32,7 +32,7 @@ export function registerIonizedModel(ionicModel: IonizedModel, target: AnyObject
    ionizedModels.set(target, ionicModel)
 }
 
-export function isIonizedModel(value: any): value is Ionized<AnyObject> {
+export function isIonizedModel(value: any): value is AnyObject {
    if (!isObject(value)) return false;
    return Boolean(value[META]?.type === IONIZED_MODEL);
 }
@@ -44,15 +44,15 @@ type AbsorbedIon<T> = {
 
 
 
-export type Ionized<T extends AnyObject, M extends {} = {}> = {
-   [K in keyof T as (K extends '~$methods' ? never : K extends keyof M ? M[K] extends boolean ? K : K extends string ? `_${K}` : K : K)]:
-   T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? T[K] : V :
-   T[K] extends { [META]: any } | Inert ? T[K]
-   : T[K] extends (...args: any[]) => any ? IonizedGetter<T, K>
-   : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
-   : T[K] extends { [key: PropertyKey]: any } | undefined ? Ionized<Exclude<T[K], undefined>> | undefined
-   : T[K]
-} & InvertIons<T, OmitTrue<M>> & OmitTrue<M> & { [META]: MetaIonizedModel }
+// export type Ionized<T extends AnyObject, M extends {} = {}> = {
+//    [K in keyof T as (K extends '~$methods' ? never : K extends keyof M ? M[K] extends boolean ? K : K extends string ? `_${K}` : K : K)]:
+//    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? T[K] : V :
+//    T[K] extends { [META]: any } | Inert ? T[K]
+//    : T[K] extends (...args: any[]) => any ? IonizedGetter<T, K>
+//    : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
+//    : T[K] extends { [key: PropertyKey]: any } | undefined ? Ionized<Exclude<T[K], undefined>> | undefined
+//    : T[K]
+// } & InvertIons<T, OmitTrue<M>> & OmitTrue<M> & { [META]: MetaIonizedModel }
 
 type OmitTrue<M extends {}> = { [K in keyof M as M[K] extends true ? never : K]: Exclude<M[K], true> }
 
@@ -98,7 +98,7 @@ type IonizedGetter<T, K extends keyof T> =
 // { as: true | ((...args: any[]) => any) } | { as?: true | ((...args: any[]) => any) } & { [key: PropertyKey]: (...args: any[]) => any }
 
 //API
-export function ionize<T extends AnyObject, M extends { [key: string]: (...args: any[]) => any}>(target: T, methods?: M): T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M> {
+export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: string]: (...args: any[]) => any}): M extends AnyObject ? T & M : T {
    if (isIonizedModel(target) || isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;

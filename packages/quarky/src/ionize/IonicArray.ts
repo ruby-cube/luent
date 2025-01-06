@@ -10,65 +10,65 @@ import { nontrackableIterableKeys } from "./IonicSet";
 
 type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 
-declare global {
-   interface Array<T> {
-      '~$methods'?: {
-         // Accessor methods
-         at(index: number): MaybeIonized<T> | undefined;
-         concat(...items: (T | T[])[]): MaybeIonized<T>[];
-         slice(start?: number, end?: number): MaybeIonized<T>[];
+// declare global {
+//    interface Array<T> {
+//       '~$methods'?: {
+//          // Accessor methods
+//          at(index: number): MaybeIonized<T> | undefined;
+//          concat(...items: (T | T[])[]): MaybeIonized<T>[];
+//          slice(start?: number, end?: number): MaybeIonized<T>[];
 
-         // Mutator methods
-         copyWithin(target: number, start: number, end?: number): MaybeIonized<T>[];
-         fill(value: T, start?: number, end?: number): MaybeIonized<T>[];
-         pop(): MaybeIonized<T> | undefined;
-         push(...items: MaybeIonized<T>[]): number;
-         reverse(): MaybeIonized<T>[];
-         shift(): MaybeIonized<T> | undefined;
-         sort(compareFn?: (a: T, b: T) => number): MaybeIonized<T>[];
-         splice(start: number, deleteCount?: number, ...items: T[]): MaybeIonized<T>[];
+//          // Mutator methods
+//          copyWithin(target: number, start: number, end?: number): MaybeIonized<T>[];
+//          fill(value: T, start?: number, end?: number): MaybeIonized<T>[];
+//          pop(): MaybeIonized<T> | undefined;
+//          push(...items: MaybeIonized<T>[]): number;
+//          reverse(): MaybeIonized<T>[];
+//          shift(): MaybeIonized<T> | undefined;
+//          sort(compareFn?: (a: T, b: T) => number): MaybeIonized<T>[];
+//          splice(start: number, deleteCount?: number, ...items: T[]): MaybeIonized<T>[];
 
-         forEach<H, O>(
-            this: H,
-            callback: (this: O, value: T, index: number, array: H) => void,
-            thisArg?: O
-          ): void;
-         map<U, H, O>(
-            this: H,
-            callback: (this: O, value: MaybeIonized<T>, index: number, array: H) => U, //QUESTION: should the array be ionized?
-            thisArg?: O
-         ): U[];
-         filter<H, O>(
-            this: H,
-            predicate: (this: O, value: MaybeIonized<T>, index: number, array: H) => boolean,
-            thisArg?: O
-         ): MaybeIonized<T>[];
-         find<H, O>(
-            this: H,
-            predicate: (this: O,value: MaybeIonized<T>, index: number, array: H) => boolean,
-            thisArg?: O
-         ): MaybeIonized<T> | undefined;
+//          forEach<H, O>(
+//             this: H,
+//             callback: (this: O, value: T, index: number, array: H) => void,
+//             thisArg?: O
+//           ): void;
+//          map<U, H, O>(
+//             this: H,
+//             callback: (this: O, value: MaybeIonized<T>, index: number, array: H) => U, //QUESTION: should the array be ionized?
+//             thisArg?: O
+//          ): U[];
+//          filter<H, O>(
+//             this: H,
+//             predicate: (this: O, value: MaybeIonized<T>, index: number, array: H) => boolean,
+//             thisArg?: O
+//          ): MaybeIonized<T>[];
+//          find<H, O>(
+//             this: H,
+//             predicate: (this: O,value: MaybeIonized<T>, index: number, array: H) => boolean,
+//             thisArg?: O
+//          ): MaybeIonized<T> | undefined;
 
-         reduce<U, H>(
-            this: H,
-            callback: (accumulator: U, currentValue: T, index: number, array: H) => U,
-            initialValue: U
-         ): U;
-         reduceRight<U, H>(
-            this: H,
-            callback: (accumulator: U, currentValue: T, index: number, array: H) => U,
-            initialValue: U
-         ): U;
+//          reduce<U, H>(
+//             this: H,
+//             callback: (accumulator: U, currentValue: T, index: number, array: H) => U,
+//             initialValue: U
+//          ): U;
+//          reduceRight<U, H>(
+//             this: H,
+//             callback: (accumulator: U, currentValue: T, index: number, array: H) => U,
+//             initialValue: U
+//          ): U;
 
-         // Methods introduced in ES2023
-         toSorted(compareFn?: (a: MaybeIonized<T>, b: MaybeIonized<T>) => number): MaybeIonized<T>[];
-         toReversed(): MaybeIonized<T>[];
-         with(index: number, value: T): MaybeIonized<T>[];
+//          // Methods introduced in ES2023
+//          toSorted(compareFn?: (a: MaybeIonized<T>, b: MaybeIonized<T>) => number): MaybeIonized<T>[];
+//          toReversed(): MaybeIonized<T>[];
+//          with(index: number, value: T): MaybeIonized<T>[];
 
-         [Symbol.iterator](): IterableIterator<MaybeIonized<T>>;
-      }
-   }
-}
+//          [Symbol.iterator](): IterableIterator<MaybeIonized<T>>;
+//       }
+//    }
+// }
 
 const dogs = ionize([{name: 'lo'}])
 
