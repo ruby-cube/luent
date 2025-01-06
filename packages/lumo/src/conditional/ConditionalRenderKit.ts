@@ -6,7 +6,7 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { _NodePod } from "../node/NodePod";
 import { NodeKit } from "../node/setUpNodeEntities";
 
-export type RenderConditional = (parent: Element, nodePod: _NodePod) => NodeKit[]
+export type RenderConditional = (parent: Element, nodePod: _NodePod, initialRender?: boolean) => NodeKit[]
 
 export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
 

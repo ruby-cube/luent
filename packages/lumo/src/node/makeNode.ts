@@ -19,6 +19,7 @@ import { MaybeGetter } from "../InputTypes";
 import { isFunction } from "@rue/utils";
 import { isNamedDerivation } from "../component/fromTag";
 import { InnerHTMLKit } from "./mountInnerHTML";
+import { getContext, popContext, pushContext } from "../context/context-stack";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -106,6 +107,18 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
    return () => slot;
 }
+
+// function wrapWithContext(slot: Function) {
+//    const outerContext = getContext()
+//    return () => {
+//       pushContext(outerContext)
+//       try {
+//          return slot()
+//       } finally {
+//          popContext()
+//       }
+//    }
+// }
 
 export function makeNode(
    nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--context' | 'v:mount' | 'v:create' | 'v:show' | '$--try' | '$--suspense' | '$--portal',

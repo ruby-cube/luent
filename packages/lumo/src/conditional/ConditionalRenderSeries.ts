@@ -113,7 +113,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       const dynamicNode = makeDynamicNode(_nodePod)
       dynamicNode.mount(function renderConditional() {
-         const nodeEntities = series.render(activeIndex, parent)
+         const nodeEntities = series.render(activeIndex, parent, true)
          console.log('initial mount of conditional')
          mountConditional(parent, series.dynamicNodePod, nodeEntities, fragment);
       })
@@ -341,9 +341,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       return this;
    }
 
-   private render(index: number, parent: Element) {
+   private render(index: number, parent: Element, initialRender: boolean = false) {
       const kit = this.statements[index]
-      return kit.renderConditional(parent, this.getNodePod(index))
+      return kit.renderConditional(parent, this.getNodePod(index), initialRender)
    }
 
    // private appendConditional(

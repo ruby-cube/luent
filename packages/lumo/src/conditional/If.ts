@@ -192,9 +192,9 @@ export function ElseShow(renderConditional: RenderFunction) {
 
 function wrapWithContext(renderConditional: RenderFunction, context: AnyObject) {
    const outerContext = getContext();
-   return (parent: Element, nodePod: _NodePod) => {
+   return (parent: Element, nodePod: _NodePod, initialRender: boolean = false) => {
       try {
-         pushContext(outerContext)
+         if (!initialRender) pushContext(outerContext)
          const nodeEntities = setUpNodeEntities(normalizeToArray(
             createNodeContext(renderConditional, {
                with: context
@@ -207,7 +207,7 @@ function wrapWithContext(renderConditional: RenderFunction, context: AnyObject) 
          throw new Error('')
       }
       finally {
-         popContext()
+         if (!initialRender) popContext()
       }
    }
 }
@@ -215,10 +215,10 @@ function wrapWithContext(renderConditional: RenderFunction, context: AnyObject) 
 function wrapToPreserve(renderConditional: RenderFunction, context: AnyObject) {
    const outerContext = getContext();
    let nodeEntities: NodeKit[];
-   return (parent: Element, nodePod: _NodePod) => {
+   return (parent: Element, nodePod: _NodePod, initialRender: boolean = false) => {
       if (nodeEntities) return nodeEntities;
       try {
-         pushContext(outerContext)
+         if (!initialRender) pushContext(outerContext)
          nodeEntities = setUpNodeEntities(normalizeToArray(
             createNodeContext(renderConditional, {
                with: context
@@ -230,7 +230,7 @@ function wrapToPreserve(renderConditional: RenderFunction, context: AnyObject) {
          throw new Error('')
       }
       finally {
-         popContext()
+         if (!initialRender) popContext()
       }
    }
 }
