@@ -19,14 +19,16 @@ export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
 // Ion <Ionized<{}>> // object will not be validated as ionized...
 
 type ComponentValidatedInput<C> = {
-   [K in keyof C as C[K] extends { required: true } | { default: true } ? K extends `on:${infer S}` ? `emit${S}` : C[K] extends {
+   [K in keyof C as C[K] extends { required: true } | { default: true } ? K extends `on:${infer S}` ? never : C[K] extends {
       name: '_Ion' | 'MaybeIon'
    } ? K extends string ? `$${K}` : K : K : never]:
 
    C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? I
    : 'invalid typeConfig'
-} & {
-   [K in keyof C as C[K] extends { optional: '?' } ? K extends `on:${infer S}` ? `emit${S}` : C[K] extends {
+} & WithIons<C> & WithEmit<C>
+
+type WithIons<C> = {
+   [K in keyof C as C[K] extends { optional: '?' } ? K extends `on:${infer S}` ? never : C[K] extends {
       name: '_Ion' | 'MaybeIon'
    } ? K extends string ? `$${K}` : K : K : never]?:
 
@@ -34,6 +36,13 @@ type ComponentValidatedInput<C> = {
    : 'invalid typeConfig'
 }
 
+type WithEmit<C> = C extends { [key: `on:${string}`]: any } ? { emit: <K extends EventNames<C>>(eventName: K, event: EventObj<C, `on:${K}`>) => void } : {}
+
+type EventObj<C extends AnyObject, K extends string> = C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? Parameters<I extends (...args: any) => any ? I : never>[0]
+   : 'invalid typeConfig'
+type EventNames<C> = keyof _EventsOnly<C>
+
+type _EventsOnly<C> = { [K in keyof C as K extends `on:${infer S}` ? S : never]: C[K] }
 
 type ComponentAttributes<C> = {
    [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K : never]:
@@ -77,6 +86,7 @@ export function unnestValue(value: any) {
 
 //API
 export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typeConfig: C) {
+   let eventHandlers: AnyObject | undefined;
    if (typeConfig) {
       const validatedAttributes = {} as AnyObject;
 
@@ -104,7 +114,8 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                case 'v':
                   if (key.startsWith('on:')) {
                      if (!isFunction(value) || isIon(value)) throw new Error('event handler must be a function')
-                     validatedAttributes['emit' + key.slice(3)] = value; //TODO: emit(key.slice(3))
+                     const handlers = eventHandlers || (validatedAttributes.emit = (event: string) => { eventHandlers![event]() }, eventHandlers = {})
+                     handlers['emit' + key.slice(3)] = value;
                   }
                   // else validatedAttributes[key] = (isFunction(value) || isReined(value)) ? value : value instanceof Object ? readonly(value) : value;
                   else validatedAttributes[key] = unnestValue(value);

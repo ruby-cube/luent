@@ -1,4 +1,4 @@
-import { component, fromTag, Ion, Ionized, $if, $else, $for, watch, } from "@rue/lumo";
+import { component, fromTag, Ion, Ionized, $if, $else, $for, watch, v, } from "@rue/lumo";
 import { ion, ionize, Phase, toRaw } from "@rue/quarky";
 import { MountIf } from "../TestMountIf";
 
@@ -90,9 +90,11 @@ function createTreeItem(data: ItemData): TreeItem {
 const textarea = document.createElement('textarea')
 
 function TreeItemView(input = fromTag({
-   item: Ionized<TreeItem>
+   item: Ionized<TreeItem>,
+   'on:click': v<(e: { pen: string }) => void>
 })) {
-   const { item } = input
+   const { item, emit } = input
+   emit('click', { pen: 'hi' })
 
    const $isOpen = ion(!!item.children?.length, {
       toggle() {
