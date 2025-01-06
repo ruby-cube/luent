@@ -195,11 +195,12 @@ export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonicMo
 }
 
 export function createIonizedModel(
-   target: object,
+   _target: object,
    methods: AnyObject | undefined,
 ) {
+   const target = methods ? Object.setPrototypeOf({ ...methods }, _target) : _target; //NOTE: If methods and target has overlapping methods, it will overwrite the original target's method
    const structureConfigs = getStructureConfigs(target);
-   const metaIonicModel = new MetaIonizedModel(target, methods)
+   const metaIonicModel = new MetaIonizedModel(target)
    const ionicModel = new Proxy(target, {
       has(target, key) {
          if (key === META)
@@ -263,7 +264,6 @@ export function createIonizedModel(
          let value;
          try { //TODO: decide whether to use Reflect.get or target[key], or when to use which
             // console.warn('Reflect.get failed with error, switched to target[key]:', err)
-            //@ts-expect-error
             value = target[key]
          }
          catch (err) {
@@ -355,7 +355,7 @@ function isNativeMethod(key: PropertyKey, structureConfigs: CustomIonicModelConf
    return false;
 }
 
-export function isMethod(value: any): value is Function{
+export function isMethod(value: any): value is Function {
    return value instanceof Function && !isIon(value)
 }
 

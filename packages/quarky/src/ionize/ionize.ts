@@ -18,8 +18,8 @@ import { PropIon } from "./PropIon";
 
 //TODO: figure out the simplest way developers can add types to custom data strucures
 
-export type IonizedModel<T extends AnyObject = AnyObject> = Ionized<T> //TODO: add ion properties $
-export type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
+export type IonizedModel<T extends AnyObject = AnyObject> = T //TODO: add ion properties $
+// export type MaybeIonized<T> = T extends AnyObject ? <T> : T;
 
 export type Readonly<T extends AnyObject = AnyObject> = {
    readonly [K in keyof T]: T[K]
@@ -98,16 +98,17 @@ type IonizedGetter<T, K extends keyof T> =
 // { as: true | ((...args: any[]) => any) } | { as?: true | ((...args: any[]) => any) } & { [key: PropertyKey]: (...args: any[]) => any }
 
 //API
-export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: string]: (...args: any[]) => any}): M extends AnyObject ? T & M : T {
-   if (isIonizedModel(target) || isIon(target) || isInert(target)) {
+export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: string]: (...args: any[]) => any }): M extends AnyObject ? T & M : T {
+   if (isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
    }
    //TODO: What about a readonly object that is not an ionic model?
    if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
-   const existingIonicModel = ionizedModels.get(target)
-   if (existingIonicModel) return existingIonicModel as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
-   return createIonizedModel(target, methods) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
+      const rawTarget = toRaw(target)
+   const existingIonicModel = ionizedModels.get(rawTarget)
+   if (existingIonicModel && !methods) return existingIonicModel as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
+   return createIonizedModel(rawTarget, methods) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
 }
 
 // export function ionizeWithMarks<

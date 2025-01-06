@@ -34,7 +34,6 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
 
     constructor(
         public rawTarget: T,
-        public methods: AnyObject = {},
       //   public exposedMethods: AnyObject | undefined
         // public reactive: T
         // public traps?: ReactiveTraps<T>
@@ -44,7 +43,7 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
     private appendedProperties: Set<PropertyKey> = new Set()
 
     isNewProperty(key: PropertyKey) {
-        return !(key in this.rawTarget) && !(key in this.methods) && !this.appendedProperties.has(key)
+        return !(key in this.rawTarget)  && !this.appendedProperties.has(key)
     }
 
     registerNewProperty(key: PropertyKey) {

@@ -64,11 +64,16 @@ export function isNamedDerivation(value: any) {
    return value instanceof Function && isIon(value)
 }
 
-// function isStateGetter(value: any): value is () => any {
-//    return isNamedDerivation(value) || isIon(value)
-// }
-
 // assertions?: { [K in keyof C]?: ((value: any) => void) | ((value: any) => void)[] }
+
+export function unnestValue(value: any) {
+   if (isIon(value)) {
+      if (__DEV__) console.warn('RESEARCH: Had to unnest value from ion... you may be writing inefficient code')
+      return unnestValue(value());
+   }
+   return value;
+
+}
 
 //API
 export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typeConfig: C) {
@@ -97,13 +102,12 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
 
             switch (config.name) {
                case 'v':
-                  if (isIon(value)) { //TODO: I don't know if the conditional structure is correct
-                     value = value()
+                  if (key.startsWith('on:')) {
+                     if (!isFunction(value) || isIon(value)) throw new Error('event handler must be a function')
+                     validatedAttributes['emit' + key.slice(3)] = value; //TODO: emit(key.slice(3))
                   }
-                  else if (key.startsWith('on:') && isFunction(value)) {
-                     validatedAttributes['emit' + key.slice(3)] = value; //TODO: 
-                  }
-                  else validatedAttributes[key] = (isFunction(value) || isReined(value)) ? value : value instanceof Object ? readonly(value) : value;
+                  // else validatedAttributes[key] = (isFunction(value) || isReined(value)) ? value : value instanceof Object ? readonly(value) : value;
+                  else validatedAttributes[key] = unnestValue(value);
                   break;
 
                case '_Ion':
@@ -115,21 +119,23 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                   break;
 
                case 'MaybeIon':
-                  validatedAttributes['$' + key] = isNamedDerivation(value) ? value : isIon(value) ? isReined(value) ? value : readonly(value) : readonly(toIon(value))
+                  // validatedAttributes['$' + key] = isNamedDerivation(value) ? value : isIon(value) ? isReined(value) ? value : readonly(value) : readonly(toIon(value))
+                  validatedAttributes['$' + key] = toIon(value) //QUESTION: We don't unnest value here... there may be deeply nested ions
                   break;
 
                case '_Ionized':
-                  const model = toValue(value)
+                  const model = unnestValue(value)
                   if (!isIonizedModel(model)) {
                      throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ionized`)
                   }
                   // validatedAttributes[key] = isReined(value) ? value : readonly(value);
-                  validatedAttributes[key] = model //TODO:
+                  validatedAttributes[key] = model
                   break;
 
                case 'MaybeIonized':
-                  const _value = toValue(value)
-                  validatedAttributes[key] = isReined(value) ? _value : readonly(_value);
+                  // const _value = unnestValue(value)
+                  // validatedAttributes[key] = isReined(value) ? _value : readonly(_value);
+                  validatedAttributes[key] = unnestValue(value);
                   break;
 
                default:

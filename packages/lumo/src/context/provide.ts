@@ -3,7 +3,7 @@ import { ContextEntries, NodeContext } from "./Context";
 import { contextTypeMap, TypeConfig } from "./ContextKey";
 import { isIon, isIonizedModel, toIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
-import { isNamedDerivation } from "../component/fromTag";
+import { isNamedDerivation, unnestValue } from "../component/fromTag";
 import { ContextKeyMap } from "@rue/lumo";
 import { isFunction } from "@rue/utils";
 
@@ -186,14 +186,11 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
       throw new Error(`Required context entry for ${String(key)} is undefined or not found.`)
    }
 
-   //TODO: extract to shared function with prep()?
+   //TODO: extract to shared function with prep() to reuse logic?
 
    switch (typeConfig.name) {
       case 'v':
-         if (isIon(value)) {
-            value = value()
-         }
-         return value; //TODO: make readonly
+         return unnestValue(value)
 
       case '_Ion':
          if (!isIon(value)) {
@@ -202,16 +199,16 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
          return value; //TODO: make Ion read-only, rein $Ion
 
       case 'MaybeIon':
-         return isNamedDerivation(value) ? value : toIon(value) //TODO: make Ion read-only
+         return toIon(value) //TODO: make Ion read-only
 
       case '_Ionized':
          if (!isIonizedModel(value)) {
             throw new Error(`[INVALID INPUT] Value of context entry, '${String(key)}', must be an ionized`)
          }
-         return value; //TODO: readonly, rein
+         return unnestValue(value); //TODO: readonly, rein
 
       case 'MaybeIonized':
-         return value; //TODO: readonly
+         return unnestValue(value); //TODO: readonly
 
       default:
          return value;
