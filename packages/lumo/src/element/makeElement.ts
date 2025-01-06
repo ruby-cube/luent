@@ -157,7 +157,7 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
       for (const handler of handlers) {
          $listen(handler, options || {}, {
             enroll: (cb) => {
-               console.log('adding event',key)
+               console.log('adding event', key)
                node.addEventListener(key, cb, options);
             },
             remove: (cb) => {
@@ -258,20 +258,19 @@ function toStylePropertyName(key: string) {
 }
 
 function assignStyleProperty(style: AnyObject, property: string, value: string | number | Falsey) {
-   if (typeof value === 'string') {
-      const _value = value.split('!importan')
-      if (_value.length === 1) {
-         style[property] = _value[0]
+   const key = camelToKebabCase(property)
+   if (value != null) {
+      const splitValue = typeof value === 'string' ? value.split(' !importan') : ''; // ['red', 't'] 
+      const _value = typeof value === 'string' ? splitValue[0] : value;
+      if (splitValue.length === 1) {
+         style.setProperty(key, _value)
       }
       else {
-         style.setProperty(camelToKebabCase(property), _value[0], { priority: 'important' })
+         style.setProperty(key, _value, { priority: 'important' })
       }
    }
-   else if (typeof value === 'number') {
-      style[property] = value;
-   }
    else {
-      style.removeProperty(camelToKebabCase(property))
+      style.removeProperty(key)
    }
 }
 

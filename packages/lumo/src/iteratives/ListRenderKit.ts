@@ -20,7 +20,7 @@ import { getTrace } from "../../../utils/debug";
 type Index = number
 type Count = number
 
-type DynamicList<T = any> = Ionized<Collection<T>> | ReactiveGet<Collection<T>>
+type DynamicList<T = any> = Collection<T> | ReactiveGet<Collection<T>>
 
 const dynamicNodeMap: WeakMap<_NodePod, DynamicNode> = new WeakMap()
 
@@ -37,14 +37,13 @@ export function setCurrentIndex($index: AtomicIon<number> | undefined) {
 }
 
 function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
-   const outerContext = getContext();
    return (item: any, $index: AtomicIon<number>, parent: Element, nodePod: _NodePod, initialRender: boolean = false) => {
       const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
       list.transitions.set($index, transitionNodes)
       try {
          if (!initialRender) {
             pushList(list) //QUESTION: dunno if pushList needs to be in this conditional block
-            pushContext(outerContext)
+            pushContext(list.context)
          }
          const nodeEntities = setUpNodeEntities(normalizeToArray(
             createNodeContext(() => renderItem(item, $index), {
@@ -70,6 +69,7 @@ export class ListRenderKit {
       renderItem: RenderItem<any[]>, //QUESTION: Does this need the context object?
       public data: ListData,
       public getUID: ((item: unknown) => unknown) | undefined,
+      public context: Context
    ) {
       this.renderItem = wrapWithContext(renderItem, this);
       this.trace = getTrace()

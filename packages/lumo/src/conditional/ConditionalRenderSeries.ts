@@ -84,7 +84,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       return nodePodIndex;
    }
 
-   context: Context
 
    phasicNode?: TransitionNode
 
@@ -95,7 +94,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       public swap: SwapType = 'instance'
    ) {
       super(statements, makeElseKit);
-      this.context = statements[0].optionals!.context!;
       this.phasicNode = getPhasicNode();
       // statements[0].optionals?.phasicNode
    }

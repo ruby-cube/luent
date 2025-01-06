@@ -30,6 +30,7 @@ export function TreeApp() {
    }
 
    const treeItem = ionize(createTreeItem(treeData), {})
+   const testList = ionize([1, 2, 3, 4])
 
    return component((
       TreeItem = TreeItemView
@@ -37,6 +38,12 @@ export function TreeApp() {
       <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
          {/* <MountIf></MountIf> */}
          <TreeItem item={mutable(treeItem)}></TreeItem>
+         {$for(testList, item => (
+            <p>{item}</p>
+         ))}
+         {$for(testList, item => (
+            <p>{item}</p>
+         ))}
       </ul>
    )
 }
@@ -105,28 +112,30 @@ function TreeItemView(input = fromTag({
    //    console.log('changed!')
    // })
 
+
+
    return component((
       TreeItem = TreeItemView
    ) =>
-         <li class='item'>
-            <div
-               class={[$s = $isFolder() && 'bold']}
-               on:click={$isOpen.toggle} on:dblclick={changeType}
-            >
-               {item.name}
-               {$if($isFolder,
-                  <span>[{$isOpen() ? '-' : '+'}]</span>
-               )}
-            </div>
-            {$if($isFolder, 'create', $if($isOpen, 'mount',
-               <ul>
-                  {$for(item.children, item => item, (item) => (
-                     <TreeItem item={item}></TreeItem>
-                  ))}
-                  <li class='add' on:click={() => item.addChild()}>+</li>
-               </ul>
-            ))}
-         </li>
+      <li class='item'>
+         <div
+            class={[$s = $isFolder() && 'bold']}
+            on:click={$isOpen.toggle} on:dblclick={changeType}
+         >
+            {item.name}
+            {$if($isFolder,
+               <span>[{$isOpen() ? '-' : '+'}]</span>
+            )}
+         </div>
+         {$if($isFolder, 'create', $if($isOpen, 'mount',
+            <ul>
+               {$for(item.children, item => item, (item) => (
+                  <TreeItem item={item}></TreeItem>
+               ))}
+               <li class='add' on:click={() => item.addChild()}>+</li>
+            </ul>
+         ))}
+      </li>
    )
 }
 
