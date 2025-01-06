@@ -9,7 +9,6 @@ export function mountElement(parent: Element, node: DOMNode, fragment?: Document
 
 export function setUpElement(node: DOMNode, nodePod: _NodePod) {
     nodePod.appendStaticNode(node)
-    console.log('nodePod', nodePod, node)
     return node;
 }
 

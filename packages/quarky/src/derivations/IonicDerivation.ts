@@ -42,7 +42,6 @@ export class IonicDerivation<T = any> implements ReactiveEntity {
     atoms: Set<IonicAtom> = new Set()
 
     trackAtoms(ionicDerivation: (() => any) | Ionized<AnyObject>) {
-      console.log('trackAtoms', ionicDerivation)
         const tracker = new DependencyTracker();
         let value;
         let deps;

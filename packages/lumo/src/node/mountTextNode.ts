@@ -9,7 +9,6 @@ export function setUpTextNode(text: ReactiveGet | any, nodePod: _NodePod) {
 
     // if (nodePod) {
     nodePod.appendStaticNode(textNode)
-    console.log('nodePod', nodePod, textNode)
     // }
 
     if (isIon(text)) {
@@ -31,7 +30,6 @@ function keepTextNodeUpdated(text: ReactiveGet<any>, textNode: CharacterData) {
 
 
 function createTextNode(value: ReactiveGet | any) {
-   console.log(value, 'textnode')
     if (__DEV__) __devCheckIfTracked()
     const _value = isIon(value) ? value() : value;
     const text = toString(_value)

@@ -8,6 +8,7 @@ import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { NodeKit } from "./setUpNodeEntities";
 import { isObjectLiteral } from "@rue/utils";
 import { isInnerHTMLKit, mountInnerHTML } from "./mountInnerHTML";
+import { getCurrentContext } from "../context/context-stack";
 
 // node kits:
 // - text ion
@@ -26,6 +27,7 @@ export function mountNodeEntities(
     parent: Element, //TODO: parent is as optional as fragment I think...
     fragment?: DocumentFragment,
 ){
+   console.log('mount node entities', getCurrentContext())
     // console.log('start--------------', nodeEntities)
     for (const nodeEntity of nodeEntities){
         mountNodeEntity(nodeEntity, parent, fragment)

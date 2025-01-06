@@ -174,7 +174,6 @@ export class ListRenderKit {
          if (isDynamic) {
             const dynamicNode = makeDynamicNode(nodePod)
             dynamicNode.mount(function mountDynamicItem() {
-               console.log('mounting item')
                const nodeEntities = listKit.renderItem(item, $index, parent, nodePod)
                mountNodeEntities(nodeEntities, parent, fragment);
             })
@@ -257,7 +256,6 @@ export class ListRenderKit {
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             dynamicNode.mount(function renderNewListItem() {
-               console.log('rendering new item')
                const nodeEntities = renderItem(toValue(list)[$index()], $index, parent, nodePod);
                mountNodeEntities(nodeEntities, parent, fragment)
             })

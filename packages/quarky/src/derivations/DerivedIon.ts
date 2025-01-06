@@ -98,7 +98,6 @@ export function createDerivedIon<T extends any>(
       // }
 
       // if (!initialized || derived.dirty && retrack) {
-         console.log('not initialized')
          const value = !initialized ? derived.trackAtoms(pureGetter)
             : (derived.dirty && retrack) ? derived.trackAtoms(() => pureGetter(derived.value))
                : derived.dirty ? pureGetter(derived.value) : derived.value;

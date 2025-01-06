@@ -10,6 +10,7 @@ import { NodeEntity, SwapConfig } from "./makeNode";
 import { setUpTextNode } from "./mountTextNode";
 import { _NodePod } from "./NodePod";
 import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./mountInnerHTML";
+import { getCurrentContext } from "../context/context-stack";
 
 // [ ] validate and apply swap tag
 // [ ] validate and compose conditional series
@@ -25,7 +26,7 @@ export function setUpNodeEntities(
    nodePod: _NodePod,
    nodeKits: NodeKit[] = []
 ) {
-
+   console.log('setupnode entities', getCurrentContext())
    const series = new ConditionalSeriesBuilder(parent, nodePod, nodeKits)
 
    for (let i = 0; i < nodeEntities.length; i++) {
@@ -67,7 +68,7 @@ export function setUpNodeEntities(
          // if (series.isOpen) series.close()
          continue;
       }
-      else if (isInnerHTMLKit(nodeEntity)){
+      else if (isInnerHTMLKit(nodeEntity)) {
          nodeKits.push(setUpInnerHTML(nodeEntity, parent))
       }
       else {
@@ -76,7 +77,6 @@ export function setUpNodeEntities(
       }
    }
    if (series.isOpen) series.close()
-      console.log('nodeKits', nodeKits)
    return nodeKits;
 }
 

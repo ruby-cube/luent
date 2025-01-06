@@ -31,7 +31,6 @@ export function isIonicEffectAtom(atom: AtomicIon | PropIon) {
 }
 
 function runIonicEffect(effect: () => void, meta: IonicDerivation, $activeEffect: Ref<ThisEffect>) {
-   console.log('running ionic effect')
     let prevMeta = currentMetaIonicEffect
     try {
         runCleanups($activeEffect())

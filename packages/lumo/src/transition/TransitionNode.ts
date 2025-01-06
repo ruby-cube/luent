@@ -58,11 +58,9 @@ export function createTransitionNode(
    input: TransitionNodeInput
 ) {
    const { 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "load:with": inputLoad, onEnd, onStart, disable } = input;
-console.log('phasic node slot', Slot)
    if (disable === true) {
       return isFunction(Slot) ? Slot() : Slot
    }
-   console.log('made it')
 
    const $div = NodeRef('div')
 
@@ -81,7 +79,6 @@ console.log('phasic node slot', Slot)
 
    const enterFromClasses = collectOffscreenClasses(transitionBoth || transitionIn)
    const transition_in = mountTransitionClass(transitionBoth || transitionIn)
-   console.log('transition_in', transition_in)
    const animate_in = mountAnimationClass(animateBoth || animateIn)
    const exitClasses = collectOffscreenClasses(transitionBoth || transitionOut)
    const transition_out = transitionBoth ? transition_in : mountTransitionClass(transitionOut)
@@ -103,7 +100,6 @@ console.log('phasic node slot', Slot)
          
          if (transition_in) {
             if (type === '$--transit') {
-               console.log('transitioning in :)', enterFromClasses, transition_in)
                div.classList.add(...enterFromClasses!);
                div.classList.add(transition_in);
             }

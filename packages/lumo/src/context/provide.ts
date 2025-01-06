@@ -156,7 +156,6 @@ export function fromGlobal<K extends string | symbol>(key: K, context?: NodeCont
    const typeConfig = contextTypeMap.get(key)
    const value = globalEntries?.get(key)
    if (!typeConfig) return value;
-   console.log('validate...', key)
    return validateContextEntry(key, value, typeConfig)
 }
 

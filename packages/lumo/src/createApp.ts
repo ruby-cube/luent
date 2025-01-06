@@ -4,7 +4,7 @@ import { DynamicNode } from "./dynamic/DynamicNode";
 import { AnyObject } from "@rue/types";
 import { setComponentAttributes } from "./component/makeComponent";
 import { AppContext, createAppContext } from "./context/provide";
-import { popContext, pushContext } from "./context/context-stack";
+import { getContext, popContext, pushContext } from "./context/context-stack";
 import { ContextEntries } from "./context/Context";
 import { _dog_ } from "./context/x_context-keys";
 
@@ -50,7 +50,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
                output = App()
             }
             catch (err) {
-               console.error(err)
+               console.error('uhoh', err)
             }
             finally {
                setComponentAttributes(undefined)

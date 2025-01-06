@@ -16,6 +16,7 @@ import { asIonicAtom } from "../derivations/IonicAtom";
 import { isPropIon, PropIon } from "../ionize/PropIon";
 import { popEffect, pushEffect, runCleanups, ThisEffect } from "./ThisEffect";
 import { neutron, Neutron } from "../ion/Neutron";
+import { toValue } from "../ion/toIons";
 
 
 type RenderCycleOptions = {
@@ -132,15 +133,12 @@ function asWatchSubjects(subjects: (AnyIon | Ionized<AnyObject>)[]) {
 function getValues(subjects: (AnyIon | Ionized<AnyObject>)[]) {
    const values = [];
    for (const subject of subjects) {
-      values.push(getValue(subject))
+      values.push(toValue(subject))
    }
    return values;
 }
 
-function getValue(subject: AnyIon | Ionized<AnyObject>) {
-   console.log('get value', subject)
-   return isIon(subject) ? subject() : subject;
-}
+
 
 // get ionic derivations for reactive getters
 function getIonicDerivations(inputSubjects: (AnyIon | ReactiveGet | Ionized<AnyObject>)[], subjects: (AnyIon | Ionized<AnyObject>)[]) {
@@ -197,7 +195,7 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
 
    let oldValue: T;
    try {
-      oldValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when derived is initialized if not already
+      oldValue = isMultiSubject ? getValues(subjects) : toValue(subject0) // This is when derived is initialized if not already
    }
    catch (err) {
       if (err instanceof Object && 'cause' in err && err.cause === 'no dependencies') {
@@ -213,8 +211,7 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
    const $activeEffect = neutron() as Neutron<ThisEffect>
 
    function changeHandler() {
-      console.log('running change handler!')
-      const newValue = isMultiSubject ? getValues(subjects) : getValue(subject0) // This is when retracking happens
+      const newValue = isMultiSubject ? getValues(subjects) : toValue(subject0) // This is when retracking happens
 
       if (!eager && (isMultiSubject && noChanges(subjects, newValue, oldValue)
          || isIon(subject0) && noChange(newValue, oldValue)

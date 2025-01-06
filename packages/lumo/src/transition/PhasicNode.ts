@@ -85,7 +85,6 @@ function createPhasicNode(
 
 export function getPhasicNode(context?: ContextType) {
     const phasicNode = fromContext(GET_PHASIC_NODE, context)?.()
-    console.log('phasicNode', phasicNode)
     return phasicNode
 }
 

@@ -4,7 +4,7 @@ import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { ReactiveGet } from "../../../quarky/src";
-import { getContext, popContext, pushContext } from "../context/context-stack";
+import { getContext, getCurrentContext, popContext, pushContext } from "../context/context-stack";
 // import { getPhasicNode } from "../transition/PhasicNode";
 import { createNodeContext } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
@@ -43,6 +43,7 @@ export function $if($condition: Booleanny | ((_?: any) => Booleanny), typeOrRend
 
    resetCurrentNodePodIndex()
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
+   console.log('context?', getCurrentContext())
    return new ConditionalRenderKit(
       'if',
       _wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }),

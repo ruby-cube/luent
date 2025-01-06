@@ -30,7 +30,6 @@ export function renderTransitNode(
             ]
         )
     }
-    console.log('render transit node')
     registerTransitionNode(transitionNode)
     return makeElement('div', Slot, { ref: $div, class: 'transit' }, undefined)
 }
@@ -68,13 +67,11 @@ function registerTransitionNode(transitionNode: TransitionNode) {
 }
 
 export function useTransitionNodes() {
-    console.log('useTransitionNodes')
     const transitionNodes: TransitionNode[] = [];
     return {
         REGISTER_TRANSITION_NODE,
         transitionNodes,
         registerTransitionNode(transitionNode: TransitionNode) {
-            console.log('registering transition node')
             transitionNodes.push(transitionNode);
         }
     }

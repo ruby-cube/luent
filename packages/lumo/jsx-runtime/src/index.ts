@@ -13,7 +13,6 @@ export const jsxs = jsx;
 
 export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Slot }) {
    const Slot = processSlot(config.children);
-   console.log('children', Slot, 'for', nodeType)
    if (isFunction(nodeType) && nodeType !== Fragment) {
       return makeNode(
          nodeType,

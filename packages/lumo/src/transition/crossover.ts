@@ -95,7 +95,6 @@ btn.addEventListener("click", () => {
    const deltaY = initialPosition.y - finalPosition.y;
    const deltaScaleX = initialPosition.width / finalPosition.width;
    const deltaScaleY = initialPosition.height / finalPosition.height;
-   console.log(deltaScaleY, 'scale')
 
    // ANIMATE
    var player = mover.animate(
@@ -128,7 +127,6 @@ btn.addEventListener("click", () => {
 
    player.addEventListener("finish", () => {
       mover.remove();
-      console.log('done!')
    });
 });
 

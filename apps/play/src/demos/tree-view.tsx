@@ -1,5 +1,6 @@
 import { component, fromTag, Ion, Ionized, $if, $else, $for, watch, } from "@rue/lumo";
 import { ion, ionize, Phase, toRaw } from "@rue/quarky";
+import { MountIf } from "../TestMountIf";
 
 
 
@@ -34,6 +35,7 @@ export function TreeApp() {
       TreeItem = TreeItemView
    ) =>
       <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
+         {/* <MountIf></MountIf> */}
          <TreeItem item={mutable(treeItem)}></TreeItem>
       </ul>
    )
@@ -106,7 +108,6 @@ function TreeItemView(input = fromTag({
    return component((
       TreeItem = TreeItemView
    ) =>
-      <$--context with={{}}>
          <li class='item'>
             <div
                class={[$s = $isFolder() && 'bold']}
@@ -117,7 +118,7 @@ function TreeItemView(input = fromTag({
                   <span>[{$isOpen() ? '-' : '+'}]</span>
                )}
             </div>
-            {$if($isFolder(), 'create', $if($isOpen(), 'mount',
+            {$if($isFolder, 'create', $if($isOpen, 'mount',
                <ul>
                   {$for(item.children, item => item, (item) => (
                      <TreeItem item={item}></TreeItem>
@@ -126,7 +127,6 @@ function TreeItemView(input = fromTag({
                </ul>
             ))}
          </li>
-      </$--context>
    )
 }
 

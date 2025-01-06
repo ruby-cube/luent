@@ -250,7 +250,6 @@ export function createIonizedModel(
                return undefined;
             }
             else {
-               console.log('getting', _key)
                return getNativeMethod(
                   _key,
                   structureConfigs,

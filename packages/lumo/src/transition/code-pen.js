@@ -37,10 +37,8 @@ btn.addEventListener("click", () => {
 
 
     if (mount) {
-        console.log("mounting");
 
         if (canceled) {
-            console.log('this one')
             const transitionalState = computeTransitionalState(1300, new Date().getTime() - transitioning, 0, -100, '')
             divIO.style.setProperty('transform', `translateX(${transitionalState}px)`);
             canceled = false;
