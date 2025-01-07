@@ -6,6 +6,7 @@ import { mountConditional } from "./ConditionalRenderSeries"
 
 export function hidePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeIndex: number) {
     const nodePod = dynamicPod[activeIndex];
+    console.log('hide nodePod', nodePod, dynamicPod)
     hideDOMNodes(nodePod)
 }
 

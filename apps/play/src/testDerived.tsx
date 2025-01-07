@@ -1,4 +1,4 @@
-import { $if, component, watch } from "@rue/lumo";
+import { $if, component, watch, $else } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
 export function TestDerivedConditional() {
@@ -18,23 +18,27 @@ export function TestDerivedConditional() {
    })
 
    return component(
-      <>
+      <article>
          <div>{$count}</div>
          <div>{$doubleCount}</div>
          <button on:click={$count.increment}>+</button>
          <button on:click={$count.decrement}>-</button>
-         {$if($count,
-            <p>count is greater than 0!</p>
-         )}
-         {$if($doubleCount,
-            <p>doublecount is greater than 0!</p>
-         )}
-         {$if($doubleCount() > 3,
+         {$if($doubleCount() > 3, 'mount',
             <p>doublecount is greater than 3!</p>
          )}
-         {$if($count() > 3,
+         {$if($doubleCount,'mount',
+            <p>doublecount is greater than 0!</p>
+         )}
+         {/* {$else('show',
+            <p>nothing here</p>
+         )} */}
+         {/* {$if($count() > 3,'mount',
             <p>count is greater than 3!</p>
          )}
-      </>
+         {$if($count,'show',
+            <p>count is greater than 0!</p>
+         )} */}
+   
+      </article>
    )
 }

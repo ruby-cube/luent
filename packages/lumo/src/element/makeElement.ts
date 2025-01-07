@@ -64,6 +64,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
       const nodePod = new _NodePod();
       const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodePod)
       mountNodeEntities(nodeEntities, domNode)
+      if (tagName === 'article') console.log('nodePod', nodePod)
    }
    return domNode;
 }

@@ -140,7 +140,7 @@ export function ShowIf($condition: ReactiveGet<Booleanny>, renderConditional: Re
       wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
       'show',
       transitionNodes,
-      { $condition }
+      { nodePodIndex: 0, $condition }
    )
 }
 

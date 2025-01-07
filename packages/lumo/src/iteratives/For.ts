@@ -12,10 +12,8 @@ export type RenderItem<L> = L extends Collection<infer I> ? (item: I, $i: AnyIon
 // type ListData = AnyObject | any[] | Set<any> | Map<any, any> | Ionized<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
 export type ListData<T = any> = Collection<T> | AnyIon<Collection<T>>
 export type UniqueItem = any;
-export type Collection<T> = T[] | readonly T[]  //TODO: add sets and maps
+export type Collection<T> = T[] | readonly T[] | Set<T> //TODO: add maps
 
-
-// | Set<T>
 
 //TODO: Ionized item depending on if data is reactive
 //TODO: $index: number | AtomicIon<number> based on whether list data is reactive
@@ -29,8 +27,6 @@ export function $for<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> 
    return new ListRenderKit(_render, data, getUID, getContext())
 }
 
-// any[]
-// () => any[]
 
 
 

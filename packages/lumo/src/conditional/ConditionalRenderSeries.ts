@@ -124,7 +124,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    ) {
       //TODO: static conditional
       const parentDynamicNode = getActiveDynamicNode()
-      const dynamicPod = outerNodePod.appendDynamicPod();
+      const dynamicPod = outerNodePod.appendDynamicPod(); //TODO: only create dynamic pod if reactive
       this.initDynamicNodePod(dynamicPod)
       const $conditions = this.getConditionsIon()
       const phasicNode = this.phasicNode
@@ -285,7 +285,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          function activateConditional() {
             if (activationType === 'create') incomingNodes.length = 0; // clear array for next transition nodes
             pushDynamicNode(parentDynamicNode!)
-            console.log('MOUNT:', activeIndex)
             series.activateConditional(activeIndex, parent)
             popDynamicNode()
          }
@@ -368,8 +367,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
    private deactivateConditional(index: number) {
       const activationType = this.statements[index].type
-      console.log('deactivate conditional', index)
       if (activationType === 'show') {
+         console.log('deactivate conditional', index)
          hidePrevConditionalNodes(this.dynamicNodePod, index);
       }
       else {
@@ -517,16 +516,17 @@ export function mountConditional(
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
    // console.log('mount conditional: parent', parent)
    let prevSibling = dynamicPod.prevNode;
+   console.log('DYNAMIC NODE POD', dynamicPod, prevSibling)
    if (prevSibling && prevSibling === parent) {
-      // console.log('append', _fragment)
+      console.log('-----append', _fragment)
       parent.append(_fragment) //for teleport
    }
    else if (prevSibling) {
-      // console.log('after', prevSibling, _fragment)
+      console.log('------after', prevSibling, _fragment)
       prevSibling.after(_fragment)
    }
    else {
-      // console.log('prepend', _fragment)
+      console.log('-----prepend', _fragment)
       parent.prepend(_fragment)
    }
    // console.log('none')

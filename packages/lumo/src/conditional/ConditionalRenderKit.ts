@@ -1,4 +1,4 @@
-import { ReactiveGet } from "../../../quarky/src";
+import { AnyIon, ReactiveGet } from "../../../quarky/src";
 import { ConditionalKit } from "./ConditionalKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { Context } from "../context/context-stack";
@@ -19,7 +19,7 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
         public transitionNodes: TransitionNode[],
         public optionals?: {
             nodePodIndex?: number,
-            $condition?: ReactiveGet<Booleanny>,
+            $condition?: AnyIon<Booleanny>,
             // setup?: () => AnyObject,
             // phasicNode: TransitionNode | undefined,
         }
