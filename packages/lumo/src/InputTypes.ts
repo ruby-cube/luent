@@ -7,49 +7,53 @@ import { AnyObject } from "@rue/types";
 import { MetaIonizedModel } from "../../quarky/src/ionize/MetaIonizedModel";
 import { META } from "../../quarky/src/ReactiveEntity";
 
-export type Nonlocal<T> =
+
+export type Nonlocal<T, DepthTracker extends any[] = []> = T extends (...args: any[]) => void ? T :
    T extends () => infer V ? () => Nonlocal<V> & {
-      readonly [K in keyof T]: Nonlocal<T[K]>
+      readonly [K in keyof T]: LimitedNonlocal<T[K], DepthTracker>
    } :
-   T extends PropertyValuesOf<NonLocalDataStructures<T>>['structure'] ? PropertyValuesOf<NonLocalDataStructures<T>>['nonLocal'] :
+   T extends PropertyValuesOf<NonLocalDataStructures<T, DepthTracker>>['structure'] ? PropertyValuesOf<NonLocalDataStructures<T, DepthTracker>>['nonLocal'] :
    T extends Object ? {
-      readonly [K in keyof T]: Nonlocal<T[K]>
+      readonly [K in keyof T]: LimitedNonlocal<T[K], DepthTracker>
    }
    : T
 
 //ARRAY ONLY
-type WithMethods<S> = { readonly [K in keyof S as S[K] extends number ? never : K]: S[K] extends (...arg: any) => any ? S[K] : Nonlocal<S[K]> }
+type WithMethods<S, DepthTracker extends any[] = []> = { readonly [K in keyof S as S[K] extends number ? never : K]: S[K] extends (...arg: any) => any ? S[K] : LimitedNonlocal<S[K], DepthTracker> }
 
-type ToNonlocal<T> = {
-   readonly [K in keyof T]: T[K] extends (...args: any) => any ? T[K] : Nonlocal<T[K]>
+type ToNonlocal<T, DepthTracker extends any[] = []> = {
+   readonly [K in keyof T]: T[K] extends (...args: any) => any ? T[K] : LimitedNonlocal<T[K], DepthTracker>
 }
 
 type Readonly<T> = T extends (infer E)[] ? readonly E[] : {
    readonly [K in keyof T]: T[K]
 }
 
-
-interface NonLocalDataStructures<T> {
+type LimitedNonlocal<T, DepthTracker extends any[] = []> = DepthTracker['length'] extends 8 ? T : Nonlocal<T, [...DepthTracker, any]>
+ 
+interface NonLocalDataStructures<T, DepthTracker extends any[] = []> {
    Array: {
       structure: Array<any>,
-      nonLocal: T extends Array<infer E> ? readonly Nonlocal<E>[] & WithMethods<Array<Nonlocal<E>>> : never
+      nonLocal: T extends Array<infer E> ? readonly (LimitedNonlocal<E, DepthTracker>)[] & WithMethods<Array<LimitedNonlocal<E, DepthTracker>>> : never
    }
 }
 
-interface NonLocalDataStructures<T> {
+interface NonLocalDataStructures<T, DepthTracker extends any[] = []> {
    Set: {
       structure: Set<any>,
-      nonLocal: T extends Set<infer E> ? ToNonlocal<Set<Nonlocal<E>>> : never
+      nonLocal: T extends Set<infer E> ? ToNonlocal<Set<LimitedNonlocal<E, DepthTracker>>, DepthTracker> : never
    }
 }
-interface NonLocalDataStructures<T> {
+interface NonLocalDataStructures<T, DepthTracker extends any[] = []> {
    Map: {
       structure: Map<any, any>,
-      nonLocal: T extends Map<infer E, infer V> ? ToNonlocal<Map<Nonlocal<E>, Nonlocal<V>>> : never
+      nonLocal: T extends Map<infer E, infer V> ? ToNonlocal<Map<LimitedNonlocal<E, DepthTracker>, LimitedNonlocal<V, DepthTracker>>> : never
    }
 }
 
 type PropertyValuesOf<T> = T[keyof T];
+
+
 
 //EXAMPLES
 // const mySet = new Set([{ pi: 0 }])

@@ -91,10 +91,10 @@ const textarea = document.createElement('textarea')
 
 function TreeItemView(input = fromTag({
    item: Ionized<TreeItem>,
-   'on:click': v<(e: { pen: string }) => void>
+   'on:click': v<(e: { pen: string }) => void>('?')
 })) {
    const { item, emit } = input
-   emit('click', { pen: 'hi' })
+   // emit('click', { pen: 'hi' })
 
    const $isOpen = ion(!!item.children?.length, {
       toggle() {
@@ -110,11 +110,6 @@ function TreeItemView(input = fromTag({
          $isOpen.value = true
       }
    }
-   // watch(()=>item.children, ()=>{
-   //    console.log('changed!')
-   // })
-
-
 
    return component((
       TreeItem = TreeItemView
@@ -131,8 +126,8 @@ function TreeItemView(input = fromTag({
          </div>
          {$if($isFolder, 'create', $if($isOpen, 'mount',
             <ul>
-               {$for(item.children, item => item, (item) => (
-                  <TreeItem item={item}></TreeItem>
+               {$for(item.children, m=>m, (m) => (
+                  <TreeItem item={m}></TreeItem>
                ))}
                <li class='add' on:click={() => item.addChild()}>+</li>
             </ul>

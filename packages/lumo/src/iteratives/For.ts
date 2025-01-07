@@ -2,7 +2,7 @@ import { getContext } from "../context/context-stack";
 import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { NodeEntity, normalizeToRenderFunction } from "../node/makeNode";
 import { ListRenderKit } from "./ListRenderKit";
-import { AtomicIon, ion, MaybeIonized, ReactiveGet } from "@rue/quarky";
+import { AtomicIon, Ion, ion, ReactiveGet } from "@rue/quarky";
 
 
 export type RenderItem<L = ListData> = L extends Collection<infer I> | ReactiveGet<Collection<infer I>> ? ((item: MaybeIonized<I>) => NodeEntity) | ((item: MaybeIonized<I>, $index: AtomicIon<number>) => NodeEntity) : L extends Collection<infer I> ? ((item: I) => NodeEntity) | ((item: I, index: number) => NodeEntity) : never
@@ -12,12 +12,12 @@ export type UniqueItem = any;
 export type Collection<T> = T[]  //TODO: add sets and maps
 
 
-
 // | Set<T>
 
 //TODO: Ionized item depending on if data is reactive
 //TODO: $index: number | AtomicIon<number> based on whether list data is reactive
-export function $for<L extends ListData>(data: L, render: RenderItem<L> | NodeEntity): ListRenderKit
+// export function $for<L extends any[]>(data: L, render: ((item: L extends (infer I)[]? I : never, $index: Ion<number>)=>NodeEntity) | NodeEntity): ListRenderKit {
+export function $for<L extends ListData>(data: L, render: RenderItem<L> | NodeEntity): ListRenderKit 
 export function $for<L extends ListData>(data: L, getUID: L extends Collection<infer T> ? (item: T) => unknown : (item: any)=>unknown, render: RenderItem<L>| NodeEntity): ListRenderKit
 export function $for<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> | NodeEntity| (L extends Collection<infer T> ? (item: T) => unknown : never), render?: RenderItem<L>| NodeEntity): ListRenderKit {
    const uidProvided = arguments.length === 3
