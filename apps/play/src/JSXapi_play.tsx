@@ -826,7 +826,7 @@ const hi = () =>
             ]}</$--transition>
 
             <$--transition with={fade}>
-               <v:show />
+               <$v:show />
                {$if($active, (o = 9)=>
                   <>
                      <$--transit>

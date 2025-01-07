@@ -91,7 +91,7 @@ export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
 
-export type SwapType = 'mount' | 'instance' | 'display'
+export type SwapType = 'mount' | 'create' | 'show'
 
 export class SwapConfig {
    constructor(
@@ -121,7 +121,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 // }
 
 export function makeNode(
-   nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--context' | 'v:mount' | 'v:create' | 'v:show' | '$--try' | '$--suspense' | '$--portal',
+   nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--context' | '$v:mount' | '$v:create' | '$v:show' | '$--try' | '$--suspense' | '$--portal',
    Slot: undefined | (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent | SwapConfig | JSX.Element | undefined {
@@ -143,14 +143,14 @@ export function makeNode(
          if (!Slot) throw new Error(`Extraneous <Context>`)
          return createPortalNode(Slot, <PortalNodeInput>config)
 
-      case 'v:show':
-         return new SwapConfig('display')
+      case '$v:show':
+         return new SwapConfig('show')
 
-      case 'v:mount':
+      case '$v:mount':
          return new SwapConfig('mount')
 
-      case 'v:create':
-         return new SwapConfig('instance')
+      case '$v:create':
+         return new SwapConfig('create')
 
       case '$--transit':
       case '$--transition':

@@ -2566,9 +2566,9 @@ declare global {
       // }
 
       interface _IntrinsicElements {
-         'v:show': {};
-         'v:mount': {};
-         'v:create': {};
+         '$v:show': {};
+         '$v:mount': {};
+         '$v:create': {};
          'i--i': {};
          '$--portal': PortalNodeInput & { Slot: Lumo.Slot }
          '$--context': ContextNodeInput & { Slot: Lumo.Slot };
