@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { isIon, isIonizedModel, isReined, readonly } from "@rue/quarky";
 import { toIon, toValue } from "../../../quarky/src/ion/toIons";
 import { getComponentAttributes } from "./makeComponent";
-import { isFunction } from "@rue/utils";
+import { isFunction, isObject } from "@rue/utils";
 
 //TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
 
@@ -17,6 +17,9 @@ export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
 // Ion<string, { set: () => void }, 'mu?'>('?')
 // Ionized<{}> => Ionized<{}>
 // Ion <Ionized<{}>> // object will not be validated as ionized...
+
+
+
 
 type ComponentValidatedInput<C> = {
    [K in keyof C as C[K] extends { required: true } | { default: true } ? K extends `on:${infer S}` ? never : C[K] extends {
@@ -146,7 +149,9 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                case 'MaybeIonized':
                   // const _value = unnestValue(value)
                   // validatedAttributes[key] = isReined(value) ? _value : readonly(_value);
-                  validatedAttributes[key] = unnestValue(value);
+                  const _value = unnestValue(value)
+                  if (!isObject(_value)) throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an object`)
+                  validatedAttributes[key] = _value;
                   break;
 
                default:
