@@ -8,7 +8,8 @@ import { isFunction } from "@rue/utils";
 
 export type MaybeIon<T> = Ion<T> | T;
 
-export type AnyIon<T = any> = DerivedIon<T> | AtomicIon<T> | ProtectedIon<T> | WritableDerivedIon<T> | PropIon<T>
+export type AnyIon<T = any> = ()=>T
+// DerivedIon<T> | AtomicIon<T> | ProtectedIon<T> | WritableDerivedIon<T> | PropIon<T>
 
 export function isIon(maybeIon: any): maybeIon is AnyIon {
    return isFunction(maybeIon) && /^\$[a-z]/.test(maybeIon.name) && maybeIon.length === 0

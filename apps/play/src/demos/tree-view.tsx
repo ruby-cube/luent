@@ -1,4 +1,4 @@
-import { component, fromTag, Ion, Ionized, $if, $else, $for, watch, v, } from "@rue/lumo";
+import { component, fromTag, Ion, Ionized, $if, $else, $for, watch, v, Nonlocal, _Nonlocal, } from "@rue/lumo";
 import { ion, ionize, Phase, toRaw } from "@rue/quarky";
 import { MountIf } from "../TestMountIf";
 
@@ -50,15 +50,56 @@ export function TreeApp() {
 
 function mutable(arg: any) { return arg }
 
+
+// type DeepReadonly<T> = T extends object
+//   ? T extends Function
+//     ? T
+//     : NestedDeepReadonly<T>
+//   : T;
+
+// type NestedDeepReadonly<T> = {
+//   readonly [P in keyof T]: DeepReadonly<T[P]>;
+// };
+
+// type DeepReadonly<T> = T extends Object ? {
+//    readonly [P in keyof T]: DeepReadonly<T[P]>;
+// } : T
+
 type ItemData = {
    name: string,
-   children?: ItemData[]
+   children?: ItemData[],
+   child?: ItemData,
 }
+
+// const iven: DeepReadonly<ItemData> = {name: 'iven'}
+// const iven2: _Nonlocal<ItemData> = { name: 'iven' }
+
+// const chi = iven.children
+// const ch2 = chi!.children
+
+// type ItemData2 = {
+//    readonly name: string,
+//    readonly children?: DeepReadonly<ItemData[]>
+// }
+
+// type ItemData = {
+//    readonly name: string;
+//    readonly children?: readonly {
+//        readonly name: string;
+//        readonly children?: readonly {
+//            readonly name: string;
+//            readonly children?: readonly {
+//                readonly name: string;
+//                readonly children?: readonly {
+//                    readonly name: string;
+//                    readonly children?: readonly {
+//                        readonly name: string;
+//                        ...
 
 class TreeItem {
    constructor(
       public name: string,
-      public children: TreeItem[] = []
+      public children: TreeItem[] = [],
    ) { }
 
    addChild() {
@@ -110,7 +151,6 @@ function TreeItemView(input = fromTag({
          $isOpen.value = true
       }
    }
-
    return component((
       TreeItem = TreeItemView
    ) =>
@@ -126,7 +166,7 @@ function TreeItemView(input = fromTag({
          </div>
          {$if($isFolder, 'create', $if($isOpen, 'mount',
             <ul>
-               {$for(item.children, m=>m, (m) => (
+               {$for(item.children, m => m, m => (
                   <TreeItem item={m}></TreeItem>
                ))}
                <li class='add' on:click={() => item.addChild()}>+</li>

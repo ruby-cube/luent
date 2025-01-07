@@ -7,47 +7,64 @@ import { AnyObject } from "@rue/types";
 import { MetaIonizedModel } from "../../quarky/src/ionize/MetaIonizedModel";
 import { META } from "../../quarky/src/ReactiveEntity";
 
+// export type _Nonlocal<T> = T extends object
+//   ? T extends Function
+//     ? T
+//     : Nonlocal<T>
+//   : T;
+export type _Nonlocal<T> = T extends (...args: any[]) => void ? T :
+   T extends () => infer V ? (V extends Object ? (() => Nonlocal<V>) : () => V) & Nonlocal<T> :
+   // T extends PropertyValuesOf<NonLocalDataStructures<T>>['structure'] ? PropertyValuesOf<NonLocalDataStructures<T>>['nonLocal'] :
+   T extends Object ? Nonlocal<T>
+   : T
 
-export type Nonlocal<T, DepthTracker extends any[] = []> = T extends (...args: any[]) => void ? T :
-   T extends () => infer V ? () => Nonlocal<V> & {
-      readonly [K in keyof T]: LimitedNonlocal<T[K], DepthTracker>
-   } :
-   T extends PropertyValuesOf<NonLocalDataStructures<T, DepthTracker>>['structure'] ? PropertyValuesOf<NonLocalDataStructures<T, DepthTracker>>['nonLocal'] :
+// export type _Nonlocal<T> = T extends Function ? T : T extends object ? Nonlocal<T> : T
+
+export type Nonlocal<T> =
+   // T extends () => infer V ? () => _Nonlocal<V> & {
+   //    readonly [K in keyof T]: _Nonlocal<T[K]>
+   // } :
+   T extends PropertyValuesOf<NonLocalDataStructures<T>>['structure'] ? PropertyValuesOf<NonLocalDataStructures<T>>['nonLocal'] :
    T extends Object ? {
-      readonly [K in keyof T]: LimitedNonlocal<T[K], DepthTracker>
+      readonly [K in keyof T]: _Nonlocal<T[K]>
    }
    : T
 
 //ARRAY ONLY
-type WithMethods<S, DepthTracker extends any[] = []> = { readonly [K in keyof S as S[K] extends number ? never : K]: S[K] extends (...arg: any) => any ? S[K] : LimitedNonlocal<S[K], DepthTracker> }
+// type WithMethods<S, DepthTracker extends any[] = []> = 
+// { readonly [K in keyof S as S[K] extends number ? never : K]: S[K] extends Function ? S[K] : LimitedNonlocal<S[K], DepthTracker> }
 
-type ToNonlocal<T, DepthTracker extends any[] = []> = {
-   readonly [K in keyof T]: T[K] extends (...args: any) => any ? T[K] : LimitedNonlocal<T[K], DepthTracker>
+type AsNonlocal<T> = {
+   readonly [K in keyof T]: T[K] extends Function ? T[K] : _Nonlocal<T[K]>
 }
 
 type Readonly<T> = T extends (infer E)[] ? readonly E[] : {
    readonly [K in keyof T]: T[K]
 }
 
-type LimitedNonlocal<T, DepthTracker extends any[] = []> = DepthTracker['length'] extends 8 ? T : Nonlocal<T, [...DepthTracker, any]>
- 
-interface NonLocalDataStructures<T, DepthTracker extends any[] = []> {
+// type LimitedNonlocal<T, DepthTracker extends any[] = []> = DepthTracker['length'] extends 8 ? T : _Nonlocal<T, [...DepthTracker, any]>
+
+interface NonLocalDataStructures<T> {
    Array: {
       structure: Array<any>,
-      nonLocal: T extends Array<infer E> ? readonly (LimitedNonlocal<E, DepthTracker>)[] & WithMethods<Array<LimitedNonlocal<E, DepthTracker>>> : never
+      nonLocal: T extends Array<infer E> ? readonly (_Nonlocal<E>)[]
+      // :never
+      & ArrayMethods<Array<_Nonlocal<E>>> : never
    }
 }
 
-interface NonLocalDataStructures<T, DepthTracker extends any[] = []> {
+type ArrayMethods<T> = Omit<T, number>
+
+interface NonLocalDataStructures<T> {
    Set: {
       structure: Set<any>,
-      nonLocal: T extends Set<infer E> ? ToNonlocal<Set<LimitedNonlocal<E, DepthTracker>>, DepthTracker> : never
+      nonLocal: T extends Set<infer E> ? AsNonlocal<Set<_Nonlocal<E>>> : never
    }
 }
-interface NonLocalDataStructures<T, DepthTracker extends any[] = []> {
+interface NonLocalDataStructures<T> {
    Map: {
       structure: Map<any, any>,
-      nonLocal: T extends Map<infer E, infer V> ? ToNonlocal<Map<LimitedNonlocal<E, DepthTracker>, LimitedNonlocal<V, DepthTracker>>> : never
+      nonLocal: T extends Map<infer E, infer V> ? AsNonlocal<Map<_Nonlocal<E>, _Nonlocal<V>>> : never
    }
 }
 
@@ -85,13 +102,13 @@ export const v = ((optional: '?') => {
 }) as {
    <T>(optional?: '?'): {
       name: 'v',
-      validatedType: Nonlocal<T>;
+      validatedType: _Nonlocal<T>;
       inputType: T;
       optional: '?';
       default: undefined
    } & ((defaultValue: T) => {
       name: 'v',
-      validatedType: Nonlocal<T>;
+      validatedType: _Nonlocal<T>;
       inputType: T;
       optional: 'withDefault';
       default: true;
@@ -109,7 +126,7 @@ const _Ion = ((optional: '?') => {
 }) as {
    <T, M extends AnyObject = {}>(optional: '?'): {
       name: '_Ion',
-      validatedType: Nonlocal<Ion<T, M>>; //TODO: need a way to indicate methods are required...
+      validatedType: _Nonlocal<Ion<T, M>>; //TODO: need a way to indicate methods are required...
       inputType: Ion<T, M> | T;
       optional: '?';
       default: undefined
@@ -155,13 +172,13 @@ export const MaybeIon = ((optional: '?') => {
 }) as {
    <T>(optional?: '?'): {
       name: 'MaybeIon',
-      validatedType: Nonlocal<Ion<T>>;
+      validatedType: _Nonlocal<Ion<T>>;
       inputType: Ion<T> | T;
       optional: '?';
       default: undefined
    } & ((defaultValue: T) => {
       name: 'MaybeIon',
-      validatedType: Nonlocal<Ion<T>>;
+      validatedType: _Nonlocal<Ion<T>>;
       inputType: Ion<T> | T;
       optional: 'withDefault';
       default: true;
@@ -239,7 +256,7 @@ const _Ionized = ((optional: '?') => {
 }) as {
    <T extends AnyObject>(optional: '?'): {
       name: '_Ionized',
-      validatedType: Nonlocal<T>;
+      validatedType: _Nonlocal<T>;
       inputType: T;
       optional: '?';
       default: undefined
@@ -265,13 +282,13 @@ export const MaybeIonized = ((optional: '?') => {
 }) as {
    <T extends AnyObject>(optional?: '?'): {
       name: 'MaybeIonized',
-      validatedType: Nonlocal<T>;
+      validatedType: _Nonlocal<T>;
       inputType: T;
       optional: '?';
       default: undefined
    } & ((defaultValue: T) => {
       name: 'MaybeIonized',
-      validatedType: Nonlocal<T>;
+      validatedType: _Nonlocal<T>;
       inputType: T;
       optional: 'withDefault';
       default: true;
