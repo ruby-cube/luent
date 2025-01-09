@@ -14,10 +14,11 @@ export function TestCounterModel() {
 
    return component(
       <>
+         {/* <$v:mount /> */}
          <div>{counter.$count}</div>
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
-         <$v:mount />
+         <$v:mount/>
          {$if($active)} {
             <>
                <List></List>
@@ -27,7 +28,7 @@ export function TestCounterModel() {
          {$elseif($broken)} {
             <div>do something</div>
          }
-         {Else} {
+         {$else} {
             <div>bleh</div>
          }
          <div>{counter.$count}</div>
@@ -39,14 +40,15 @@ export function TestCounterModel() {
          <div>{counter.$count}</div>
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
-         {Match(key)}:
-         {Case('hello')} {
+         <$v:mount/>
+         {$match(key)}:
+         {$case('hello')} {
             <p>hello world</p>
          }
-         {Case('bye')} {
+         {$case('bye')} {
             <p>hello world</p>
          }
-         {Default('hello')} {
+         {$default('hello')} {
             <p>hello world</p>
          }
          <div>{counter.$count}</div>

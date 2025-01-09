@@ -46,6 +46,8 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
    // componentsToUnmount: InternalComponent[] = [];
    refs: NodeRef[] = [];
 
+   active: boolean = true; // for 'mount' activation types
+
    // flask?: EffectFlask // for dynamic lists to dispose of effects
 
    // setFlask(flask: EffectFlask) {
@@ -69,8 +71,40 @@ export class _NodePod extends Array<DOMNode | _DynamicNodePod> {
    get lastNode(): DOMNode | null {
       const entity = super.at(- 1);
       if (!entity) return null;
-      if (entity instanceof _DynamicNodePod) return entity.lastNode;
+      if (entity instanceof _DynamicNodePod)
+         return entity.lastNode;
       return entity;
+   }
+
+   get prevActiveSibling(): _NodePod | null {
+      if (this.index === 0) return null; //TODO:Should I keep looking for an active cousin?
+      const sibling = this.pod?.[this.index! - 1]
+      if (sibling?.active) return sibling;
+      if (sibling) return sibling.prevActiveSibling
+      return null;
+   }
+   get prevAunt(): DOMNode | _DynamicNodePod | null {
+      const podIndex = this.pod?.index
+      if (podIndex === undefined || this.pod?.pod === undefined) {
+         return null;
+      }
+      const prevAunt = this.pod[podIndex]
+      if (!prevAunt)
+         return this.closestPrevAunt
+      prevAunt
+   }
+
+   get prevNode(): DOMNode | null {
+      const prevAunt = this.prevAunt
+      if (!prevAunt) {
+         return null;//TODO:NOT SURE ABOUT THIS should we look at siblings?
+      }
+      if (prevAunt instanceof _DynamicNodePod){
+         const lastNode = prevAunt.lastNode;
+         if (lastNode) return lastNode;
+         return prevAunt.prevNode;
+      }
+      return prevAunt;
    }
 
    appendStaticNode(node: DOMNode) {
@@ -156,32 +190,49 @@ export class _DynamicNodePod extends Array<_NodePod> {
       return nodePod;
    }
 
-   get prevAunt(): _NodePod | null {
+   get prevActiveAunt(): _NodePod | null {
       const podIndex = this.pod.index
       if (podIndex === undefined || this.pod.pod === undefined) {
          return null;
       }
-      const prevAunt = this.pod.pod[podIndex - 1]
+      const prevAunt = this.pod.prevActiveSibling
       if (!prevAunt)
-         return null;
+         return null; //TODO: keep searching until no more
       return prevAunt
    }
 
-   get prevNode(): DOMNode | null {
-      const item = this.pod[this.index - 1];
-      if (!item) {
-         return this.prevAunt?.lastNode || null;
-      };
-      if (item instanceof _DynamicNodePod) {
-         const lastNode = item.lastNode;
-         if (lastNode) return lastNode;
-         return item.prevNode
+   get lastActiveNodePod(): _NodePod | null {
+      let index = this.length;
+      while (index--) {
+         const lastNodePod = this[index];
+         if (!lastNodePod) return null;
+         if (lastNodePod.active)
+            return lastNodePod;
       }
-      return item;
+      return null;
+   }
+
+   get prevNode(): DOMNode | null {
+      const prevSib = this.pod[this.index - 1];
+      if (!prevSib) {
+         const prevAunt = this.prevActiveAunt
+         if (prevAunt){
+            const lastNode = prevAunt.lastNode
+            if (lastNode) return lastNode;
+            return prevAunt.prevNode
+         }
+         return this.prevActiveAunt?.lastNode || null;  //TODO: fix... I need to keep searching until prevNode found.. use while loop?
+      };
+      if (prevSib instanceof _DynamicNodePod) {
+         const lastNode = prevSib.lastNode;
+         if (lastNode) return lastNode;
+         return prevSib.prevNode;
+      }
+      return prevSib;
    }
 
    get lastNode(): DOMNode | null {
-      const nodePod = super.at(- 1);
+      const nodePod = this.lastActiveNodePod;
       if (!nodePod) return null;
       return nodePod.lastNode;
    }

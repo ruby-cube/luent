@@ -40,19 +40,19 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       this._dynamicNodePod = dynamicNodePod;
 
       // populate dynamic node pod
-      // 'show' node pods are aggregated to the front of the dynamicNodePod
-      // 'create' and 'mount' node pods share the last node pod of dynamicNodePod
-      // This way, we can mount 'create' and 'mount' efficiently without having 
-      // to traverse empty 'create' and 'mount' node pods when looking for previous sibling
-      let hasCreateOrMount = false;
+      // 'show' and 'mount' node pods are aggregated to the front of the dynamicNodePod
+      // 'create' node pods share the last node pod of dynamicNodePod
+      // This way, we can mount 'create' efficiently without having 
+      // to traverse empty 'create' node pods when looking for previous sibling
+      let hasCreate = false;
       for (const kit of this.statements) {
-         if (kit.type === 'show')
+         if (kit.type === 'show' || kit.type === 'mount')
             dynamicNodePod.appendNodePod()
          else
-            hasCreateOrMount = true;
+            hasCreate = true;
       }
 
-      if (hasCreateOrMount) {
+      if (hasCreate) {
          dynamicNodePod.appendNodePod()
       }
    }
@@ -369,18 +369,20 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const activationType = this.statements[index].type
       if (activationType === 'show') {
          console.log('deactivate conditional', index)
+         // preserve dynamic node and node pod
          hidePrevConditionalNodes(this.dynamicNodePod, index);
       }
-      else {
+      else if (activationType === 'create') {
          const dynamicNode = this.dynamicNodes[index]
-         if (activationType === 'create') {
-            this.dynamicNodes[index] = NULLISH_DYNAMIC_NODE; // release reference
-            this.setNodePod(index, NULLISH_NODE_POD)
-            dynamicNode.destroy()
-         }
-         else if (activationType === 'mount') {
-            dynamicNode.unmount()
-         }
+         this.dynamicNodes[index] = NULLISH_DYNAMIC_NODE; // release reference
+         this.setNodePod(index, NULLISH_NODE_POD)
+         dynamicNode.destroy()
+      }
+      else if (activationType === 'mount') {
+         // preserve dynamic node and node pod
+         const dynamicNode = this.dynamicNodes[index]
+         dynamicNode.unmount()
+         this.getNodePod(index).active = false;
       }
    }
 
@@ -388,60 +390,12 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       activeIndex: number,
       parent: Element
    ) {
-
-      // const activationType = this.statements[activeIndex].type
-      // const preserve = activationType === 'create' ? false : true;
-      // const series = this;
-      // const dynamicNodePod = this.dynamicNodePod
-      // // set up new conditional pod if needed
-      // const _nodePod = dynamicNodePod[activeIndex]
-      // const nodePod = _nodePod === NULLISH_NODE_POD || !_nodePod ? new _NodePod() : _nodePod;
-
-      // let dynamicNode = this.dynamicNodes[activeIndex]
-      // if (dynamicNode === undefined || dynamicNode === NULLISH_DYNAMIC_NODE) {
-      //     dynamicNode = makeDynamicNode(preserve, nodePod);
-      //     dynamicNode.mount(function renderConditionalUpdate() {
-      //         const nodeEntities = series.render(activeIndex)
-      //         if (preserve) markMountPhase()
-      //         mountConditional(nodePod, parent, dynamicNodePod, nodeEntities);
-      //         if (preserve) unmarkMountPhase()
-      //     })
-      //     series.storeDynamicNode(dynamicNode, activeIndex)
-      // }
-      // else {
-      //     dynamicNode.reactivate(function updateConditional() {
-      //         const nodeEntities = series.render(activeIndex);
-      //         if (preserve) markMountPhase()
-      //         if (activationType === 'show') {
-      //             showConditionalNodes(parent, dynamicNodePod, activeIndex, nodeEntities)
-      //         }
-      //         else {
-      //             series.replaceNodePod(activeIndex, nodePod);
-      //             mountConditional(nodePod, parent, dynamicNodePod, nodeEntities)
-      //         }
-      //         if (preserve) unmarkMountPhase()
-      //     })
-      // }
-
-      // const activeIndex = this.evaluateConditions()
-
-      // const series = this;
-
-      // const _nodePod = this.getNodePod(activeIndex)
-      // const dynamicNode = makeDynamicNode(_nodePod)
-      // dynamicNode.mount(function renderConditional() {
-      //     series.appendConditional(activeIndex, parent, fragment)
-      // })
-      // this.storeDynamicNode(dynamicNode, activeIndex)
-
-      //---------
-
       const activationType = this.statements[activeIndex].type
-      // const preserve = activationType === 'mount' ? true : false;
       const series = this;
       const dynamicNodePod = this.dynamicNodePod
       // set up new conditional pod if needed
       const _nodePod = this.getNodePod(activeIndex)
+      console.log('activating Conditional with nodePod:', _nodePod, '...is NULLISH?', _nodePod === NULLISH_NODE_POD)
       const nodePod = (_nodePod === NULLISH_NODE_POD || !_nodePod) ? new _NodePod() : _nodePod;
       this.setNodePod(activeIndex, nodePod)
 
@@ -463,6 +417,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                showConditionalNodes(parent, dynamicNodePod, activeIndex, nodeEntities)
             }
             else {
+               nodePod.active = true;
                const nodeEntities = series.render(activeIndex, parent);
                mountConditional(parent, dynamicNodePod, nodeEntities)
             }

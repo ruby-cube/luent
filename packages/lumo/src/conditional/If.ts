@@ -36,17 +36,17 @@ export function $if($condition: Booleanny | ((_?: any) => Booleanny), activation
 export function $if($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalRenderKit {
    const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional)
    const activationType = renderConditional ? typeOrRenderConditional as ActivationType : 'create' as const
-   if (activationType === 'show') {
-      return ShowIf($condition, _renderConditional)
+   if (activationType === 'show' || activationType === 'mount') {
+      return ShowIf($condition, activationType, _renderConditional)
    }
-   const _wrapWithContext = activationType === 'mount' ? wrapToPreserve : wrapWithContext
+   // const _wrapWithContext = activationType === 'mount' ? wrapToPreserve : wrapWithContext
 
    resetCurrentNodePodIndex()
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
-   console.log('context?', getCurrentContext())
+   // console.log('context?', getCurrentContext())
    return new ConditionalRenderKit(
       'if',
-      _wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
+      wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
       activationType,
       // 'create',
       transitionNodes,
@@ -60,14 +60,14 @@ export function $elseif($condition: Booleanny | ((_?: any) => Booleanny), activa
 export function $elseif($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalRenderKit {
    const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional)
    const activationType = renderConditional ? typeOrRenderConditional as ActivationType : 'create';
-   if (activationType === 'show') {
-      return ElseShowIf($condition, _renderConditional)
+   if (activationType === 'show' || activationType === 'mount') {
+      return ElseShowIf($condition, activationType, _renderConditional)
    }
-   const _wrapWithContext = activationType === 'mount' ? wrapToPreserve : wrapWithContext
+   // const _wrapWithContext = activationType === 'mount' ? wrapToPreserve : wrapWithContext
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
       'elseIf',
-      _wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
+      wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
       activationType,
       // 'create',
       transitionNodes,
@@ -83,14 +83,14 @@ export function $else(activationType: ActivationType, renderConditional: RenderF
 export function $else(typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalRenderKit {
    const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional)
    const activationType = renderConditional ? typeOrRenderConditional as ActivationType : 'create';
-   if (activationType === 'show') {
-      return ElseShow(_renderConditional)
+   if (activationType === 'show' || activationType === 'mount') {
+      return ElseShow(activationType, _renderConditional)
    }
-   const _wrapWithContext = activationType === 'mount' ? wrapToPreserve : wrapWithContext
+  
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
       'else',
-      _wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
+      wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
       // 'create',
       activationType,
       transitionNodes,
@@ -132,19 +132,20 @@ export function $else(typeOrRenderConditional: NodeEntity | RenderFunction | Act
 //     )
 // }
 
-export function ShowIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction): ConditionalRenderKit {
+export function ShowIf($condition: ReactiveGet<Booleanny>, activationType: 'show' | 'mount', renderConditional: RenderFunction): ConditionalRenderKit {
    resetCurrentNodePodIndex(0)
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
+   const _wrapWithContext = activationType === 'mount' ? wrapToPreserve : wrapWithContext
    return new ConditionalRenderKit(
       'if',
-      wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
-      'show',
+      _wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
+      activationType,
       transitionNodes,
       { nodePodIndex: 0, $condition }
    )
 }
 
-export function ElseShowIf($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction) {
+export function ElseShowIf($condition: ReactiveGet<Booleanny>, activationType: 'show' | 'mount', renderConditional: RenderFunction) {
    if (currentNodePodIndex === undefined)
       currentNodePodIndex = 0;
    else currentNodePodIndex++;
@@ -153,13 +154,13 @@ export function ElseShowIf($condition: ReactiveGet<Booleanny>, renderConditional
    return new ConditionalRenderKit(
       'elseIf',
       wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
-      'show',
+      activationType,
       transitionNodes,
       { nodePodIndex: currentNodePodIndex, $condition }
    )
 }
 
-export function ElseShow(renderConditional: RenderFunction) {
+export function ElseShow(activationType: 'show' | 'mount', renderConditional: RenderFunction) {
    if (currentNodePodIndex === undefined)
       currentNodePodIndex = 0;
    else currentNodePodIndex++;
@@ -168,7 +169,7 @@ export function ElseShow(renderConditional: RenderFunction) {
    return new ConditionalRenderKit(
       'else',
       wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
-      'show',
+      activationType,
       transitionNodes,
       { nodePodIndex: currentNodePodIndex }
    )

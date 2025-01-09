@@ -6,7 +6,7 @@ import { MatchCaseKit } from "../conditional/MatchCaseKit";
 import { setUpElement } from "../element/mountElement";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
-import { NodeEntity, SwapConfig } from "./makeNode";
+import { NodeEntity, SwapConfig, SwapType } from "./makeNode";
 import { setUpTextNode } from "./mountTextNode";
 import { _NodePod } from "./NodePod";
 import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./mountInnerHTML";
@@ -89,7 +89,7 @@ export function setUpNodeEntities(
 
 class ConditionalSeriesBuilder {
    private conditionalArray: ConditionalRenderKit[] | null = null;
-   private swap: 'mount' | 'display' | 'instance' | undefined;
+   private swap: SwapType | undefined;
 
    constructor(
       private parent: Element,
@@ -104,7 +104,7 @@ class ConditionalSeriesBuilder {
    }
 
    open(
-      kitOrSwap: ConditionalRenderKit | 'mount' | 'display' | 'instance'
+      kitOrSwap: ConditionalRenderKit | SwapType
    ) {
       if (this.isOpen) {
          // complete previous conditional array

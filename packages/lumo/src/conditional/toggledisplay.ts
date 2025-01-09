@@ -1,6 +1,7 @@
 import { DOMNode } from "../component/InternalComponent"
 import { _DynamicNodePod, _NodePod } from "../node/NodePod"
 import { NodeEntity } from "../node/makeNode"
+import { NodeKit } from "../node/setUpNodeEntities";
 import { mountConditional } from "./ConditionalRenderSeries"
 
 
@@ -11,7 +12,7 @@ export function hidePrevConditionalNodes(dynamicPod: _DynamicNodePod, activeInde
 }
 
 
-export function showConditionalNodes(parent: Element, dynamicPod: _DynamicNodePod, activeIndex: number, nodeEntities: NodeEntity[]) {
+export function showConditionalNodes(parent: Element, dynamicPod: _DynamicNodePod, activeIndex: number, nodeEntities: NodeKit[]) {
     const nodePod = dynamicPod[activeIndex];
     if (nodePod.length === 0) { // lazy render
         mountConditional(parent, dynamicPod, nodeEntities)

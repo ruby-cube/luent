@@ -153,21 +153,6 @@ export const NULLISH_DYNAMIC_NODE = new DynamicNode(null)
 
 
 
-// let mounting = false;
-
-// export function markMountPhase() {
-//     mounting = true;
-// }
-
-// export function unmarkMountPhase() {
-//     mounting = false;
-// }
-
-
-// export function isMountPhase() {
-//     return mounting;
-// }
-
 
 
 
