@@ -1,12 +1,12 @@
 import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
-import { _NodePod } from "../node/NodePod";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { AtomicIon, isAtomicIon, rein, toValue } from "@rue/quarky";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { isFunction, normalizeToArray } from "@rue/utils";
 import { initializeListRef, initializeRef, NodeRef, NodesRef } from "../node/NodeRef";
 import exp from "constants";
+import { NodeVine } from "../dynamic/NodeVine";
 
 
 
@@ -81,9 +81,9 @@ export class InternalComponent {
 
    setUp(
       parent: Element,
-      nodePod: _NodePod
+      nodeVine: NodeVine
    ) {
-      this.nodeKits = setUpNodeEntities(this.nodeEntities!, parent, nodePod)
+      this.nodeKits = setUpNodeEntities(this.nodeEntities!, parent, nodeVine)
       return this;
    }
 }

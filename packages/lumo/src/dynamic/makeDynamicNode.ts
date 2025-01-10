@@ -1,6 +1,7 @@
 import { DynamicNode, LifecycleHook} from "./DynamicNode";
 import { _NodePod } from "../node/NodePod";
 import { getActiveDynamicNode } from "./nodestack";
+import { NodeVine } from "./NodeVine";
 
 
 // export function activateDynamicNode(
@@ -18,9 +19,9 @@ import { getActiveDynamicNode } from "./nodestack";
 //     return component;
 // }
 
-export function makeDynamicNode(nodePod: _NodePod) {
+export function makeDynamicNode() {
     const parent = getActiveDynamicNode();
-    const dynamicNode = new DynamicNode(parent, nodePod);
+    const dynamicNode = new DynamicNode(parent);
     if (parent instanceof DynamicNode) {
         parent.onReactivate(() => { dynamicNode.emit(LifecycleHook.ON_REACTIVATE) }, { //FIX: This makes on activated run twice when it is first activated (see if this has been fixed)
             until: dynamicNode.onDestroy,

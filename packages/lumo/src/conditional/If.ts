@@ -9,6 +9,7 @@ import { Context, getContext, getCurrentContext, popContext, pushContext } from 
 import { createNodeContext } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
+import { NodeVine } from "../dynamic/NodeVine";
 
 let currentNodePodIndex: number | undefined = undefined
 function resetCurrentNodePodIndex(index?: number) {
@@ -36,9 +37,9 @@ export function $if($condition: Booleanny | ((_?: any) => Booleanny), activation
 export function $if($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalRenderKit {
    const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional)
    const activationType = renderConditional ? typeOrRenderConditional as ActivationType : 'create' as const
-   if (activationType === 'show' || activationType === 'mount') {
-      return ShowIf($condition, activationType, _renderConditional)
-   }
+   // if (activationType === 'show' || activationType === 'mount') {
+      // return ShowIf($condition, activationType, _renderConditional)
+   // }
    // const _wrapWithContext = activationType === 'mount' ? wrapToPreserve : wrapWithContext
 
    resetCurrentNodePodIndex()
@@ -48,7 +49,6 @@ export function $if($condition: Booleanny | ((_?: any) => Booleanny), typeOrRend
       'if',
       wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
       activationType,
-      // 'create',
       transitionNodes,
       { $condition }
    )
@@ -60,9 +60,9 @@ export function $elseif($condition: Booleanny | ((_?: any) => Booleanny), activa
 export function $elseif($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalRenderKit {
    const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional)
    const activationType = renderConditional ? typeOrRenderConditional as ActivationType : 'create';
-   if (activationType === 'show' || activationType === 'mount') {
-      return ElseShowIf($condition, activationType, _renderConditional)
-   }
+   // if (activationType === 'show' || activationType === 'mount') {
+   //    return ElseShowIf($condition, activationType, _renderConditional)
+   // }
    // const _wrapWithContext = activationType === 'mount' ? wrapToPreserve : wrapWithContext
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
@@ -83,10 +83,10 @@ export function $else(activationType: ActivationType, renderConditional: RenderF
 export function $else(typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalRenderKit {
    const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional)
    const activationType = renderConditional ? typeOrRenderConditional as ActivationType : 'create';
-   if (activationType === 'show' || activationType === 'mount') {
-      return ElseShow(activationType, _renderConditional)
-   }
-  
+   // if (activationType === 'show' || activationType === 'mount') {
+   //    return ElseShow(activationType, _renderConditional)
+   // }
+
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
       'else',
@@ -141,7 +141,10 @@ export function ShowIf($condition: ReactiveGet<Booleanny>, activationType: 'show
       _wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
       activationType,
       transitionNodes,
-      { nodePodIndex: 0, $condition }
+      {
+         // nodePodIndex: 0, 
+         $condition
+      }
    )
 }
 
@@ -156,7 +159,10 @@ export function ElseShowIf($condition: ReactiveGet<Booleanny>, activationType: '
       wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
       activationType,
       transitionNodes,
-      { nodePodIndex: currentNodePodIndex, $condition }
+      {
+         // nodePodIndex: currentNodePodIndex, 
+         $condition
+      }
    )
 }
 
@@ -171,7 +177,9 @@ export function ElseShow(activationType: 'show' | 'mount', renderConditional: Re
       wrapWithContext(renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
       activationType,
       transitionNodes,
-      { nodePodIndex: currentNodePodIndex }
+      {
+         // nodePodIndex: currentNodePodIndex 
+      }
    )
 }
 
@@ -192,14 +200,13 @@ export function ElseShow(activationType: 'show' | 'mount', renderConditional: Re
 
 
 function wrapWithContext(renderConditional: RenderFunction, context: AnyObject, outerContext: Context) {
-   return (parent: Element, nodePod: _NodePod, initialRender?: boolean) => {
+   return (parent: Element, nodeVine: NodeVine, initialRender?: boolean) => {
       try {
          if (!initialRender) pushContext(outerContext)
          const nodeEntities = setUpNodeEntities(normalizeToArray(
             createNodeContext(renderConditional, {
                with: context
-            })
-         ), parent, nodePod)
+            })), parent, nodeVine)
          return nodeEntities;
       }
       catch (err) {
@@ -214,14 +221,14 @@ function wrapWithContext(renderConditional: RenderFunction, context: AnyObject, 
 
 function wrapToPreserve(renderConditional: RenderFunction, context: AnyObject, outerContext: Context) {
    let nodeEntities: NodeKit[];
-   return (parent: Element, nodePod: _NodePod, initialRender?: boolean) => {
+   return (parent: Element, nodeVine: NodeVine, initialRender?: boolean) => {
       if (nodeEntities) return nodeEntities;
       try {
          if (!initialRender) pushContext(outerContext)
          nodeEntities = setUpNodeEntities(normalizeToArray(
             createNodeContext(renderConditional, {
                with: context
-            })), parent, nodePod)
+            })), parent, nodeVine)
          return nodeEntities;
       }
       catch (err) {

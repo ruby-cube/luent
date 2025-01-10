@@ -14,6 +14,7 @@ import { setUpNodeEntities } from "../node/setUpNodeEntities";
 import { initializeListRef, initializeRef, isNodeRef, NodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
 import { $thisEffect, ThisEffect } from "../../../quarky/src/effects/ThisEffect";
+import { NodeVine } from "../dynamic/NodeVine";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -61,10 +62,10 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
    if (Slot) {
       const rawOutput = normalizeToArray(isFunction(Slot) ? Slot() : Slot)
-      const nodePod = new _NodePod();
-      const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodePod)
+      const nodeVine = new NodeVine();
+      const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodeVine)
       mountNodeEntities(nodeEntities, domNode)
-      if (tagName === 'article') console.log('nodePod', nodePod)
+      if (tagName === 'article') console.log('article children', nodeVine)
    }
    return domNode;
 }

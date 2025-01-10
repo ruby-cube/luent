@@ -1,15 +1,13 @@
 import { isIon, ReactiveGet, Phase, tracked, __devCheckIfTracked } from "../../../quarky/src";
-import { _NodePod } from "./NodePod";
 import { watch } from "../watch/watchAndPreserve";
+import { NodeVine } from "../dynamic/NodeVine";
 
 
 
-export function setUpTextNode(text: ReactiveGet | any, nodePod: _NodePod) {
+export function setUpTextNode(text: ReactiveGet | any, nodeVine: NodeVine) {
     const textNode = createTextNode(text); //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
 
-    // if (nodePod) {
-    nodePod.appendStaticNode(textNode)
-    // }
+    nodeVine.push(textNode)
 
     if (isIon(text)) {
         keepTextNodeUpdated(text, textNode)

@@ -1,4 +1,4 @@
-import { $if, component, watch, $else } from "@rue/lumo";
+import { $if, component, watch, $else, $elseif } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
 export function TestDerivedConditional() {
@@ -17,7 +17,7 @@ export function TestDerivedConditional() {
       console.log('yes'!)
    })
 
-   const $aActive = ion(false, {
+   const $aActive = ion(true, {
       toggle() {
          $aActive.value = !$aActive.value
       }
@@ -25,7 +25,7 @@ export function TestDerivedConditional() {
 
 
 
-   const $bActive = ion(false, {
+   const $bActive = ion(true, {
       toggle() {
          $bActive.value = !$bActive.value
       }
@@ -73,11 +73,20 @@ export function TestDerivedConditional() {
          {/* <button on:click={$cActive.toggle}>toggle C (mount)</button>
          <button on:click={$dActive.toggle}>toggle D (show)</button> */}
          {/* <button on:click={$count.decrement}>-</button> */}
-         {$if($aActive, 'mount',
+         {$if($aActive, 'show',
             <p>A ACTIVE</p>
+         )}
+         {$elseif($bActive, 'mount',
+            <p>A GONE f</p>
+         )}
+         {$else('show',
+            <p>A GONE</p>
          )}
          {$if($bActive, 'create',
             <p>B ACTIVE</p>
+         )}
+         {$else('create',
+            <p>B GONE</p>
          )}
          {/* {$if($cActive, 'mount',
             <p>C ACTIVE</p>

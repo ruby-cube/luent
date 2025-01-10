@@ -15,6 +15,7 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { createNodeContext } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { getTrace } from "../../../utils/debug";
+import { NodeVine } from "../dynamic/NodeVine";
 
 
 type Index = number
@@ -103,7 +104,7 @@ export class ListRenderKit {
 
    setUp(
       parent: Element,
-      outerNodePod: _NodePod,
+      outerNodePod: NodeVine,
    ) {
       const data = this.data
       const getUID = this.getUID
@@ -218,7 +219,7 @@ export class ListRenderKit {
          const _isNewItem = isNewItem(uItem);
          const _itemHasMoved = hasMoved(uItem);
          const prevIndex = oldUArray.indexOf(uItem)
-         const nodePod = _isNewItem ? new _NodePod()
+         const nodePod = _isNewItem ? new NodeVine()
             : _itemHasMoved ? dynamicNodePod[prevIndex] // dynamicNodePod[index]
                : null;
 

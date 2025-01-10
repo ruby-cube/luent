@@ -5,7 +5,7 @@ import { mountNodeEntities } from "../node/mountNodeEntity";
 import { _DynamicNodePod, _NodePod, NodePod, NULLISH_NODE_POD } from "../node/NodePod";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { ConditionalSeries } from "./ConditionalSeries";
-import { hidePrevConditionalNodes, showConditionalNodes } from "./toggledisplay";
+import { hideDOMNodes, showDOMNodes } from "./toggledisplay";
 import { watch } from "../watch/watchAndPreserve";
 import { areShallowEqualArrays, Phase } from "../../../quarky/src";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
@@ -13,6 +13,8 @@ import { popContext, pushContext, Context } from "../context/context-stack";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { NodeKit } from "../node/setUpNodeEntities";
+import { NodeVine } from "../dynamic/NodeVine";
+import { stat } from "fs";
 
 //TODO: rename 'phasic node' to 'transition node'
 //TODO: rename transitionNodes to 'transitNodes'
@@ -23,69 +25,72 @@ import { NodeKit } from "../node/setUpNodeEntities";
 export class ConditionalRenderSeries extends ConditionalSeries {
    declare statements: ConditionalRenderKit[];
 
-   private dynamicNodes: DynamicNode[] = []
-   private storeDynamicNode(dynamicNode: DynamicNode, index: number) {
-      // if (__DEV__ && this.dynamicNodes[index] !== NULLISH_DYNAMIC_NODE && this.dynamicNodes[index] !== undefined)
-      // throw new Error('Dynamic Node already exists at this index')
-      this.dynamicNodes[index] = dynamicNode;
-   }
+   // private dynamicNodes: DynamicNode[] = []
+   // private storeDynamicNode(dynamicNode: DynamicNode, index: number) {
+   //    // if (__DEV__ && this.dynamicNodes[index] !== NULLISH_DYNAMIC_NODE && this.dynamicNodes[index] !== undefined)
+   //    // throw new Error('Dynamic Node already exists at this index')
+   //    this.dynamicNodes[index] = dynamicNode;
+   // }
 
-   private _dynamicNodePod!: _DynamicNodePod;
+   // private _dynamicNodePod!: _DynamicNodePod;
 
-   private initDynamicNodePod(dynamicNodePod: _DynamicNodePod) {
-      if (this._dynamicNodePod) {
-         if (__DEV__) throw new Error('dynamicNodePod can only be initialized once')
-         return;
-      }
-      this._dynamicNodePod = dynamicNodePod;
+   // private initDynamicNodePod(dynamicNodePod: _DynamicNodePod) {
+   //    if (this._dynamicNodePod) {
+   //       if (__DEV__) throw new Error('dynamicNodePod can only be initialized once')
+   //       return;
+   //    }
+   //    this._dynamicNodePod = dynamicNodePod;
 
-      // populate dynamic node pod
-      // 'show' and 'mount' node pods are aggregated to the front of the dynamicNodePod
-      // 'create' node pods share the last node pod of dynamicNodePod
-      // This way, we can mount 'create' efficiently without having 
-      // to traverse empty 'create' node pods when looking for previous sibling
-      let hasCreate = false;
-      for (const kit of this.statements) {
-         if (kit.type === 'show' || kit.type === 'mount')
-            dynamicNodePod.appendNodePod()
-         else
-            hasCreate = true;
-      }
+   //    // populate dynamic node pod
+   //    // 'show' and 'mount' node pods are aggregated to the front of the dynamicNodePod
+   //    // 'create' node pods share the last node pod of dynamicNodePod
+   //    // This way, we can mount 'create' efficiently without having 
+   //    // to traverse empty 'create' node pods when looking for previous sibling
+   //    let hasCreate = false;
+   //    for (const kit of this.statements) {
+   //       if (kit.type === 'show' || kit.type === 'mount')
+   //          dynamicNodePod.appendNodePod()
+   //       else
+   //          hasCreate = true;
+   //    }
 
-      if (hasCreate) {
-         dynamicNodePod.appendNodePod()
-      }
-   }
+   //    if (hasCreate) {
+   //       dynamicNodePod.appendNodePod()
+   //    }
+   // }
 
-   private get dynamicNodePod() {
-      if (__DEV__ && !this._dynamicNodePod)
-         throw new Error('Dynamic Node Pod has not been initialized')
-      return this._dynamicNodePod;
-   }
+   // private get dynamicNodePod() {
+   //    if (__DEV__ && !this._dynamicNodePod)
+   //       throw new Error('Dynamic Node Pod has not been initialized')
+   //    return this._dynamicNodePod;
+   // }
 
-   private getNodePod(index: number) {
-      const nodePodIndex = this.toNodePodIndex(index)
-      console.log('getNodePod', index, this.dynamicNodePod[nodePodIndex])
-      return this.dynamicNodePod[nodePodIndex]
-   }
+   // private getNodePod(index: number) {
+   //    const nodePodIndex = this.toNodePodIndex(index)
+   //    console.log('getNodePod', index, this.dynamicNodePod[nodePodIndex])
+   //    return this.dynamicNodePod[nodePodIndex]
+   // }
 
-   private setNodePod(index: number, nodePod: _NodePod) {
-      console.log('index', index)
-      const nodePodIndex = this.toNodePodIndex(index)
-      console.log('nodePodIndex', nodePodIndex)
-      this.dynamicNodePod.setNodePod(nodePodIndex, nodePod)
-   }
+   // private setNodePod(index: number, nodePod: _NodePod) {
+   //    console.log('index', index)
+   //    const nodePodIndex = this.toNodePodIndex(index)
+   //    console.log('nodePodIndex', nodePodIndex)
+   //    this.dynamicNodePod.setNodePod(nodePodIndex, nodePod)
+   // }
 
-   private toNodePodIndex(index: number) {
-      const kit = this.statements[index]
-      const nodePodIndex = kit.nodePodIndex;
-      if (nodePodIndex === undefined)
-         return this.dynamicNodePod.length - 1
-      return nodePodIndex;
-   }
+   // private toNodePodIndex(index: number) {
+   //    const kit = this.statements[index]
+   //    const nodePodIndex = kit.nodePodIndex;
+   //    if (nodePodIndex === undefined)
+   //       return this.dynamicNodePod.length - 1
+   //    return nodePodIndex;
+   // }
 
+   nodeVine!: NodeVine;
 
    phasicNode?: TransitionNode
+
+   showKits: ConditionalRenderKit[] | undefined
 
    constructor(
       statements: ConditionalRenderKit[],
@@ -94,38 +99,94 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       public swap: SwapType = 'create'
    ) {
       super(statements, makeElseKit);
+      this.activeIndex = this.evaluateConditions()
+      if (!this.isDynamic) {
+         return;
+      };
+      console.log('statements', statements)
       this.phasicNode = getPhasicNode();
-      // statements[0].optionals?.phasicNode
+      const dynamicVine = this.nodeVine = new NodeVine('dynamic vine' + this.statements[0].type)
+      console.log('conditionals dynamic vine', dynamicVine)
+      dynamicVine.activate()
+      // populate dynamic node pod
+      // 'show' and 'mount' node pods are aggregated to the front of the dynamicNodePod
+      // 'create' node pods share the last node pod of dynamicNodePod
+      // This way, we can mount 'create' efficiently without having 
+      // to traverse empty 'create' node pods when looking for previous sibling
+      let sharedVine: NodeVine | undefined;
+      let showKits: ConditionalRenderKit[] | undefined
+
+      for (const kit of statements) {
+         if (kit.type === 'show') {
+            showKits = showKits || (showKits = this.showKits = [])
+            showKits.push(kit);
+            dynamicVine.push(kit.nodeVine = new NodeVine('show' + kit.statementType)) //QUESTION: Does the order of the nodeVines in the dynamicVine need to match the order of rendering?
+         }
+         else if (kit.type === 'mount') {
+            dynamicVine.push(kit.nodeVine = new NodeVine())
+         }
+         else {
+            sharedVine = sharedVine || (sharedVine = new NodeVine())
+            kit.nodeVine = sharedVine;
+         }
+      }
+      if (sharedVine) {
+         dynamicVine.push(sharedVine)
+      }
    }
+
+   activeIndex: number;
+   isDynamic: boolean = true;
+
 
    mount( // the initial mount after setup
       parent: Element,
       fragment?: DocumentFragment
    ) {
-      // evaluate conditions and render
-      const activeIndex = this.evaluateConditions()
-
       const series = this;
+      // evaluate conditions and render
+      const activeIndex = this.activeIndex
 
-      const _nodePod = this.getNodePod(activeIndex)
+      const kit = this.statements[activeIndex]
+      kit.nodeVine!.activate()
 
-      const dynamicNode = makeDynamicNode(_nodePod)
-      dynamicNode.mount(function renderConditional() {
-         const nodeEntities = series.render(activeIndex, parent, true)
-         console.log('initial mount of conditional')
-         mountConditional(parent, series.dynamicNodePod, nodeEntities, fragment);
-      })
-      this.storeDynamicNode(dynamicNode, activeIndex)
+      if (this.isDynamic && kit.type === 'create') {
+         const dynamicNode = kit.dynamicNode = makeDynamicNode()
+         dynamicNode.mount(renderConditional)
+      }
+      else if (kit.type !== 'show') {
+         renderConditional()
+      }
+
+      const showKits = this.showKits
+      console.log('showKits', showKits)
+      if (showKits)
+         for (const showKit of showKits) {
+            const vine = showKit.nodeVine!
+            const nodeEntities = series.render(showKit, parent, true)
+            mountConditional(parent, vine, nodeEntities, fragment);
+            vine.activate()
+            if (showKit !== kit) hideDOMNodes(vine)
+         }
+
+      function renderConditional() {
+         const nodeEntities = series.render(kit, parent, true)
+         mountConditional(parent, kit.nodeVine!, nodeEntities, fragment);
+      }
    }
 
    setUp(
       parent: Element,
-      outerNodePod: _NodePod,
+      outerNodeVine: NodeVine,
    ) {
-      //TODO: static conditional
+      if (!this.isDynamic) {
+         this.nodeVine = outerNodeVine;
+         //TODO: static conditional
+         return this;
+      }
       const parentDynamicNode = getActiveDynamicNode()
-      const dynamicPod = outerNodePod.appendDynamicPod(); //TODO: only create dynamic pod if reactive
-      this.initDynamicNodePod(dynamicPod)
+      const dynamicVine = this.nodeVine!;
+      outerNodeVine.push(dynamicVine)
       const $conditions = this.getConditionsIon()
       const phasicNode = this.phasicNode
       const series = this;
@@ -338,9 +399,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       return this;
    }
 
-   private render(index: number, parent: Element, initialRender: boolean = false) {
-      const kit = this.statements[index]
-      return kit.renderConditional(parent, this.getNodePod(index), initialRender)
+   private render(kit: ConditionalRenderKit, parent: Element, initialRender: boolean = false) {
+      console.log("RENDERING", kit)
+      return kit.renderConditional(parent, kit.nodeVine || (console.log('no kit vine :('), this.nodeVine), initialRender)
    }
 
    // private appendConditional(
@@ -366,23 +427,29 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    // }
 
    private deactivateConditional(index: number) {
-      const activationType = this.statements[index].type
+      const kit = this.statements[index]
+      const vine = kit.nodeVine!
+      const activationType = kit.type
       if (activationType === 'show') {
          console.log('deactivate conditional', index)
          // preserve dynamic node and node pod
-         hidePrevConditionalNodes(this.dynamicNodePod, index);
+         hideDOMNodes(vine);
       }
       else if (activationType === 'create') {
-         const dynamicNode = this.dynamicNodes[index]
-         this.dynamicNodes[index] = NULLISH_DYNAMIC_NODE; // release reference
-         this.setNodePod(index, NULLISH_NODE_POD)
+         console.log('deactivate')
+         // remove from 
+         removeDOMNodes(vine)
+         vine.clear()
+
+         // dispose of flask
+         const dynamicNode = kit.dynamicNode!
+         kit.dynamicNode = undefined;
          dynamicNode.destroy()
+         console.log('end deactivate')
       }
       else if (activationType === 'mount') {
-         // preserve dynamic node and node pod
-         const dynamicNode = this.dynamicNodes[index]
-         dynamicNode.unmount()
-         this.getNodePod(index).active = false;
+         removeDOMNodes(vine);
+         // TODO: maybe deactivate dynamic node so that effects won't run?
       }
    }
 
@@ -390,38 +457,39 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       activeIndex: number,
       parent: Element
    ) {
-      const activationType = this.statements[activeIndex].type
-      const series = this;
-      const dynamicNodePod = this.dynamicNodePod
+      const kit = this.statements[activeIndex]
+      const activationType = kit.type
       // set up new conditional pod if needed
-      const _nodePod = this.getNodePod(activeIndex)
-      console.log('activating Conditional with nodePod:', _nodePod, '...is NULLISH?', _nodePod === NULLISH_NODE_POD)
-      const nodePod = (_nodePod === NULLISH_NODE_POD || !_nodePod) ? new _NodePod() : _nodePod;
-      this.setNodePod(activeIndex, nodePod)
+      const vine = kit.nodeVine!
 
-      let dynamicNode = this.dynamicNodes[activeIndex]
+      if (activationType === 'show') {
+         showDOMNodes(vine)
+         return;
+      }
+      vine.activate()
+      const series = this;
+      // const dynamicVine = this.nodeVine
+
+      let dynamicNode = kit.dynamicNode
       if (dynamicNode === undefined || dynamicNode === NULLISH_DYNAMIC_NODE) {
-         dynamicNode = makeDynamicNode(nodePod);
-         series.storeDynamicNode(dynamicNode, activeIndex)
+         dynamicNode = kit.dynamicNode = makeDynamicNode();
          dynamicNode.mount(function renderConditionalUpdate() {
-            const nodeEntities = series.render(activeIndex, parent)
-            mountConditional(parent, dynamicNodePod, nodeEntities);
+            const nodeEntities = series.render(kit, parent)
+            mountConditional(parent, vine, nodeEntities);
          })
       }
       else {
          console.log('reactivating conditional')
          // reactivate preserved nodes
          dynamicNode.reactivate(function updateConditional() {
-            if (activationType === 'show') {
-               const nodeEntities = series.render(activeIndex, parent);
-               showConditionalNodes(parent, dynamicNodePod, activeIndex, nodeEntities)
-            }
-            else {
-               nodePod.active = true;
-               const nodeEntities = series.render(activeIndex, parent);
-               mountConditional(parent, dynamicNodePod, nodeEntities)
-            }
-
+            // if (activationType === 'show') {
+            //    const nodeEntities = series.render(kit, parent);
+            //    showConditionalNodes(parent, dynamicVine, vine, nodeEntities)
+            // }
+            // else {
+            const nodeEntities = series.render(kit, parent);
+            mountConditional(parent, vine, nodeEntities)
+            // }
          })
       }
    }
@@ -461,7 +529,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
 export function mountConditional(
    parent: Element,
-   dynamicPod: _DynamicNodePod,
+   vine: NodeVine,
    nodeEntities: NodeKit[],
    fragment?: DocumentFragment
 ) {
@@ -470,8 +538,7 @@ export function mountConditional(
    // console.log('mount conditional: parent', parent)
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
    // console.log('mount conditional: parent', parent)
-   let prevSibling = dynamicPod.prevNode;
-   console.log('DYNAMIC NODE POD', dynamicPod, prevSibling)
+   let prevSibling = vine.prevViewNode;
    if (prevSibling && prevSibling === parent) {
       console.log('-----append', _fragment)
       parent.append(_fragment) //for teleport
@@ -487,7 +554,14 @@ export function mountConditional(
    // console.log('none')
 }
 
-
+function removeDOMNodes(vine: NodeVine) {
+   console.log('remove')
+   vine.forEach(node => {
+      node.remove()
+   })
+   console.log('end remove')
+   vine.deactivate()
+}
 
 // function nullNodeRefValues(nodePod: _NodePod, components: InternalComponent[]) {
 //     nodePod.forEachNode(node => {

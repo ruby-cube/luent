@@ -39,6 +39,8 @@ export class ConditionalSeries {
         this.statements.push(kit);
     }
 
+    isDynamic: boolean = true; //TODO: evaluate conditions should determine if conditional is dynamic
+
     evaluateConditions() {
         // if (__DEV__) __devCheckIfNotTracked()
         if (__DEV__) __devCheckIfTracked()

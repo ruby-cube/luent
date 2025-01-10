@@ -2,6 +2,7 @@ import { $listen, $schedule, ActiveListener, collectEffects, EffectFlask, Listen
 import { _NodePod } from "../node/NodePod";
 import { popDynamicNode, pushDynamicNode } from "./nodestack";
 import { SetMap } from "@rue/utils";
+import { NodeVine } from "./NodeVine";
 
 type Task = () => void
 export enum LifecycleHook {
@@ -23,7 +24,7 @@ export class DynamicNode {
 
     constructor(
         public parent: DynamicNode | null,
-        public nodePod?: _NodePod,
+      //   public nodeVine?: NodeVine,
         public preserve?: boolean,
     ) {
         // this.count = count++;
@@ -69,26 +70,24 @@ export class DynamicNode {
     }
 
     deactivate() {
-
         this.emit(LifecycleHook.ON_DEACTIVATE)
     }
 
-
-    unmount() {
-        const nodePod = this.nodePod;
-        if (!nodePod) {
-            throw new Error("No nodePod :( nodePod was never set or already destroyed by hook cascade (not sure if this is problematic yet. It might be when differentiating create, mount, and show)")
-        }
-        nodePod.forEachNode((node) => {
-            node.remove();
-        })
-    }
+   //  unmount() {
+   //      const nodeVine = this.nodeVine;
+   //      if (!nodeVine) {
+   //          throw new Error("No nodeVine :( nodeVine was never set or already destroyed by hook cascade (not sure if this is problematic yet. It might be when differentiating create, mount, and show)")
+   //      }
+   //      nodeVine.forEach((node) => {
+   //          node.remove();
+   //      })
+   //  }
 
     destroy() {
-        this.unmount();
+      //   this.unmount();
         this.emit(LifecycleHook.ON_DESTROY) // this stops all onReactivate and onDeactivate listeners that are set to go until destroy
         this.flask?.dispose()
-        this.nodePod = undefined
+      //   this.nodeVine = undefined
         this.flask = undefined
         this.parent = null
         //TODO: clear or null all tasks??

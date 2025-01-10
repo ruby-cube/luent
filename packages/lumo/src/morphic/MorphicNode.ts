@@ -11,6 +11,7 @@ import { getContext, getCurrentContext, popContext, pushContext } from "../conte
 import { NodeContext } from "../context/Context";
 import { AppContext } from "../context/provide";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
+import { NodeVine } from "../dynamic/NodeVine";
 
 export function MorphicNode(switchMap: { [key: string]: RenderFunction }) {
     return function $MorphicNode({ as: initialKey, preserve }: {
@@ -80,7 +81,7 @@ export class MorphicRenderKit {
 
     setUp(
         parent: Element,
-        nodePod: _NodePod,
+        nodePod: NodeVine,
     ) {
         const dynamicPod = this.dynamicNodePod = nodePod.appendDynamicPod();
         const _nodePod = dynamicPod.appendNodePod()

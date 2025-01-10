@@ -1,5 +1,5 @@
 import { DOMNode } from "../component/InternalComponent";
-import { _NodePod } from "../node/NodePod";
+import { NodeVine } from "../dynamic/NodeVine";
 
 export function mountElement(parent: Element, node: DOMNode, fragment?: DocumentFragment) {
     // console.log('mount element', fragment, parent, node)
@@ -7,8 +7,8 @@ export function mountElement(parent: Element, node: DOMNode, fragment?: Document
     root.appendChild(node)
 }
 
-export function setUpElement(node: DOMNode, nodePod: _NodePod) {
-    nodePod.appendStaticNode(node)
+export function setUpElement(node: DOMNode, nodeVine: NodeVine) {
+    nodeVine.push(node)
     return node;
 }
 

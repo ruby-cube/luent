@@ -1,295 +1,214 @@
 import { DOMNode } from "../component/InternalComponent";
 
-// type AnyVineNode = VineNode | NodeVine | NodePod
-
-export class VineNode implements IVineNode {
-   active = true;
-   prev: IVineNode | undefined;
-   // next: IVineNode | undefined;
-   constructor(
-      public node: DOMNode | undefined,
-   ) { }
-
-   deactivate(preserveNode?: boolean) {
-      this.node?.remove()
-      if (!preserveNode) this.node = undefined;
-      this.active = false;
-   }
-
-   activate(node?: DOMNode) {
-      if (node) this.node = node
-      this.active = true;
-   }
-}
-
-
-type IVineNode = {
-   next: IVineNode | undefined;
-   prev: IVineNode | undefined;
-
-   active: boolean;
-   deactivate: Function;
-   activate: Function;
-}
-
-type INodeVine = {
-   head: IVineNode | undefined;
-   tail: IVineNode | undefined;
-   headNode: DOMNode | undefined;
-   tailNode: DOMNode | undefined;
-   prevNode: DOMNode | undefined
-   push: Function
-   forActive: Function
-   clear: Function
-}
-
-
-
-export const PRESERVE_NODE = true;
-
-
-function detach(node: IVineNode | undefined, key: 'prev' | 'next') {
-   if (node)
-      node[key] = undefined
-}
-
-function bestow(vine: NodeVine, key: 'prev' | 'next', newNode: IVineNode | undefined) {
-   if (newNode && vine[key]) {
-      newNode[key] = vine[key] // node inherts `prev` if NodeVine is a nested VineNode
-   }
-}
-
-function setHead(vine: NodeVine, newHead: IVineNode | undefined) {
-   const old = vine._head;
-   if (newHead === old) return;
-   vine._head = newHead;
-   detach(old, 'prev')
-   bestow(vine, 'prev', newHead)
-}
-
-function setTail(vine: NodeVine, newTail: IVineNode | undefined) {
-   const old = vine._tail;
-   if (newTail === old) return;
-   vine._tail = newTail;
-   detach(old, 'next')
-   bestow(vine, 'next', newTail)
-}
-
-export class NodeVine implements IVineNode, INodeVine {
-   active = true;
-   _head: IVineNode | undefined;
-   _tail: IVineNode | undefined;
-
-   get head(): IVineNode | undefined {
-      return this._head;
-   }
-
-   set head(newHead: IVineNode | undefined) {
-      setHead(this, newHead)
-   }
-
-   get tail(): IVineNode | undefined {
-      return this._tail;
-   }
-
-   set tail(newTail: IVineNode | undefined) {
-      setTail(this, newTail)
-   }
-
-   get headNode(): DOMNode | undefined {
-      if (this.head instanceof NodeVine && this.head.active) {
-         return this.head.headNode;
-      }
-      if (this.head instanceof VineNode && this.head.active) {
-         return this.head.node
-      }
-   }
-
-   get tailNode(): DOMNode | undefined {
-      if (this.tail instanceof NodeVine && this.tail.active) {
-         return this.tail.tailNode;
-      }
-      if (this.tail instanceof VineNode && this.tail.active) {
-         return this.tail.node
-      }
-   }
-
-   private _prev: IVineNode | undefined;
-   get prev() {
+class AbstractVineNode {
+   protected _prev: AbstractVineNode | undefined;
+   public get prev(): AbstractVineNode | undefined {
       return this._prev;
    }
-   set prev(node: IVineNode | undefined) {
-      this._prev = node;
-      if (this.head)
-         this.head.prev = node;
+   public set prev(value: AbstractVineNode | undefined) {
+      this._prev = value;
    }
-   private _next: IVineNode | undefined;
-   get next() {
-      return this._next;
-   }
-   set next(node: IVineNode | undefined) {
-      this._next = node;
-      if (this.tail)
-         this.tail.next = node;
+   vine: NodeVine | undefined
+   // get vine() {
+   //    return this._vine
+   // }
+   // set vine(value: NodeVine | undefined) {
+   //    console.trace('setting vine', this)
+   //    this._vine = value;
+   // }
+   // TEST CASE: this is head
+   // TEST CASE: this is tail
+   // TEST CASE: this is body
+   insertPrev(value: AbstractVineNode | any) {
+      const node = value instanceof AbstractVineNode ? value : new StaticNode(value);
+
+      node.vine = this.vine;
+      node.prev = this.prev;
+      this.prev = node;
+
+      if (this.isHead())
+         this.vine.head = node;
    }
 
-   get prevNode(): DOMNode | undefined {
-      let prevNode = this.prev;
-      while (prevNode) {
-         if (prevNode.active) {
-            return prevNode.node
+   // TEST CASE: this is head
+   // TEST CASE: this is tail
+   // TEST CASE: this is body
+   remove() {
+      const vine = this.vine;
+      const prev = this.prev;
+      const isHead = this.isHead()
+      if (!vine) return;
+      this.prev = undefined
+      this.vine = undefined;
+
+      if (this.isTail())
+         vine.tail = prev;
+
+      const timeout = setTimeout(() => {
+         throw new Error(`.relink() must be called `)
+      }, 1)
+
+      return {
+         relink: (next: AbstractVineNode | undefined) => {
+            clearTimeout(timeout)
+            if (next && next.prev !== this) throw new Error(`The provided 'next' is not this node's next`)
+            if (next) next.prev = vine.prev;
+            if (isHead)
+               vine.head = next;
          }
-         prevNode = prevNode.prev;
       }
-      return prevNode
    }
 
-   push(node: IVineNode) {
-      const tail = this.tail;
-      this.tail = node;
-      if (!this.head) {
-         this.head = node;
+   private isHead(): this is { vine: NodeVine } {
+      return !!this.vine && this.vine.head === this
+   }
+   private isTail(): this is { vine: NodeVine } {
+      return !!this.vine && this.vine.tail === this
+   }
+}
+
+class StaticNode extends AbstractVineNode {
+   constructor(
+      public value: DOMNode
+   ) {
+      super()
+   }
+}
+
+// type INode = {
+//    prev: INode | undefined
+// }
+
+export class NodeVine extends AbstractVineNode {
+   head: AbstractVineNode | undefined
+   tail: AbstractVineNode | undefined
+
+   constructor(
+      public name?: string
+   ) {
+      super()
+   }
+
+   public get prev(): AbstractVineNode | undefined {
+      return this._prev;
+   }
+   public set prev(value: AbstractVineNode | undefined) {
+      this._prev = value;
+      if (this.head)
+         this.head.prev = value; // descendent head(s) inherit .prev value through chain reaction
+   }
+
+   push(value: DOMNode | NodeVine) {
+      if (value instanceof NodeVine) {
+         assertUnlinked(value as NodeVine)
       }
-      else if (tail) {
-         tail.next = node;
-         node.prev = tail;
+      const newNode = value instanceof AbstractVineNode ? value : new StaticNode(value);
+      const oldTail = this.tail;
+      this.tail = newNode;
+      newNode.vine = this as NodeVine;
+      if (!this.head) {
+         this.head = newNode;
+      }
+      else if (oldTail) {
+         newNode.prev = oldTail;
       }
    }
 
    clear() {
+      console.log('clear')
+      this.forEachChild(node => {
+         node.vine = undefined
+      })
       this.head = undefined;
       this.tail = undefined;
+      console.log('end clear')
    }
 
-   insert() {
-
+   get leafTail(): StaticNode | undefined {
+      const tail = this.tail
+      if (tail instanceof NodeVine)
+         return tail.leafTail;
+      return tail as StaticNode | undefined;
    }
 
-   remove() {
-
+   get activeLeafTail(): StaticNode | undefined {
+      let tail = this.tail
+      while (tail instanceof NodeVine && !tail.active) {
+         tail = tail.prev
+      }
+      if (tail instanceof NodeVine)
+         return tail.leafTail;
+      return tail as StaticNode | undefined;
    }
 
-   deactivate(preserveNodes?: boolean) {
-      this.forEach((node) => {
-         node.deactivate(preserveNodes)
-      })
+   forEachChild(task: (node: AbstractVineNode) => void) {
+      let current = this.tail;
+      while (current) {
+         task(current)
+         current = current.prev;
+      }
+   }
+
+   forEach(task: (value: DOMNode) => void) {
+      let current: StaticNode | NodeVine | undefined = this.leafTail;
+      while (current) {
+         if (current instanceof NodeVine) {
+            current = current.leafTail
+            continue;
+         }
+         task(current.value)
+         current = current.prev as StaticNode | NodeVine | undefined;
+      }
+   }
+
+   get prevLeaf(): StaticNode | undefined {
+      let prev = this.prev;
+      console.log('prevLeaf')
+      while (prev instanceof NodeVine && !prev.active) {
+         prev = prev.prev;
+      }
+      console.log('exit prevLeaf while')
+      return prev instanceof NodeVine ? (prev.activeLeafTail || prev.prevLeaf) : (prev as StaticNode | undefined);
+   }
+
+   get prevViewNode(): DOMNode | undefined {
+     console.log('name', this.name)
+      return this.prevLeaf?.value;
+   }
+
+   // forActive(task: (node: StaticNode) => void) {
+   //    let current: StaticNode | undefined = this.leafTail;
+   //    while (current) {
+   //       task(current)
+   //       current = current.prevLeaf
+   //    }
+   // }
+
+   active: boolean = false;
+   deactivate() {
+      console.trace('deactivated')
       this.active = false;
    }
-
-   activate(node?: DOMNode) {
-      if (node) this.node = node
+   activate() {
       this.active = true;
    }
 
-   forActive(task: (node: IVineNode) => void) {
-      let current: IVineNode | undefined = this.head
-      while (current) {
-         if (current.active) {
-            task(current)
-         }
-         if (current === this.tail)
-            return;
-         current = current.next
-      }
+   get isEmpty() {
+      return this.head === undefined
+   }
+
+   get asArray(){
+      const array: AbstractVineNode[] = [];
+      this.forEachChild(node=>
+         array.push(node)
+      )
+      return array.reverse();
    }
 }
 
+function assertUnlinked(vine: NodeVine) {
+   console.log('assert', vine, vine.prev, vine.vine)
+   if (vine.prev) throw new Error('DEV RESEARCH: Vine is already linked! This means it wasn not properly removed previously')
+   if (vine.vine) throw new Error('DEV RESEARCH: Vine is the child of another vine! This should never happen...')
+}
 
-
-// export class NodePod extends Array implements IVineNode, INodeVine {
-//    head: IVineNode | undefined;
-//    tail: IVineNode | undefined;
-
-//    get headNode(): DOMNode | undefined {
-//       if (this.head instanceof NodeVine && this.head.active) {
-//          return this.head.headNode;
-//       }
-//       if (this.head instanceof VineNode && this.head.active) {
-//          return this.head.node
-//       }
-//    }
-
-//    get tailNode(): DOMNode | undefined {
-//       if (this.tail instanceof NodeVine && this.tail.active) {
-//          return this.tail.tailNode;
-//       }
-//       if (this.tail instanceof VineNode && this.tail.active) {
-//          return this.tail.node
-//       }
-//    }
-
-//    active = true;
-
-//    deactivate(preserveNodes?: boolean) {
-//       this.forEach((node) => {
-//          node.deactivate(preserveNodes)
-//       })
-//       this.active = false;
-//    }
-
-//    activate(node?: DOMNode) {
-//       if (node) this.node = node
-//       this.active = true;
-//    }
-
-//    get prevNode(): DOMNode | undefined {
-//       let prevNode = this.prev;
-//       while (prevNode) {
-//          if (prevNode.active) {
-//             return prevNode.node
-//          }
-//          prevNode = prevNode.prev;
-//       }
-//       return prevNode
-//    }
-
-//    private _prev: IVineNode | undefined;
-//    get prev() {
-//       return this._prev;
-//    }
-//    set prev(node: IVineNode | undefined) {
-//       this._prev = node;
-//       if (this.head)
-//          this.head.prev = node;
-//    }
-//    private _next: IVineNode | undefined;
-//    get next() {
-//       return this._next;
-//    }
-//    set next(node: IVineNode | undefined) {
-//       this._next = node;
-//       if (this.tail)
-//          this.tail.next = node;
-//    }
-
-//    push(node: IVineNode) {
-//       const result = super.push(node)
-//       NodeVine.prototype.push.call(this, node)
-//       return result;
-//    }
-
-//    splice(start: number, deleteCount: number, ...rest: unknown[]): any[] {
-//       return super.splice(start, deleteCount, ...rest)
-//    }
-
-//    private insert() {
-
-//    }
-
-//    private remove() {
-
-//    }
-
-//    clear() {
-//       this.length = 0;
-//       this.head = undefined; //Need to break links down the tree
-//       this.tail = undefined;
-//    }
-
-//    forActive() {
-
-//    }
-// }
-
-
-// dynamicNodeVine.deactivate() // replace nodes with a placeholder
