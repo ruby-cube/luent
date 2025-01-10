@@ -19,7 +19,7 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
     constructor(
         statementType: 'if' | 'elseIf' | 'else',
         public renderConditional: RenderConditional,
-        public type: 'create' | 'show' | 'mount' = 'create',
+        public type: 'create' | 'show' | 'mount' | undefined = undefined,
         public transitionNodes: TransitionNode[],
         public optionals?: {
             // nodePodIndex?: number,

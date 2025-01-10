@@ -27,12 +27,9 @@ export function mountNodeEntities(
     parent: Element, //TODO: parent is as optional as fragment I think...
     fragment?: DocumentFragment,
 ){
-   console.log('mount node entities', getCurrentContext())
-    // console.log('start--------------', nodeEntities)
     for (const nodeEntity of nodeEntities){
         mountNodeEntity(nodeEntity, parent, fragment)
     }
-    // console.log('end--------------', nodeEntities)
 }
 
 

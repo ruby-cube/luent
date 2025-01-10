@@ -65,7 +65,6 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
       const nodeVine = new NodeVine();
       const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodeVine)
       mountNodeEntities(nodeEntities, domNode)
-      if (tagName === 'article') console.log('article children', nodeVine)
    }
    return domNode;
 }

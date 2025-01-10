@@ -27,7 +27,6 @@ export function setUpNodeEntities(
    nodeVine: NodeVine,
    nodeKits: NodeKit[] = []
 ) {
-   console.log('setupnode entities', getCurrentContext())
    const series = new ConditionalSeriesBuilder(parent, nodeVine, nodeKits)
 
    for (let i = 0; i < nodeEntities.length; i++) {

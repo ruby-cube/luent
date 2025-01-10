@@ -7,8 +7,10 @@ import { mountConditional } from "./ConditionalRenderSeries"
 
 
 
-// export function showConditionalNodes(parent: Element, dynamicVine: NodeVine, vine: NodeVine, nodeEntities: NodeKit[]) {
-
+// export function showConditionalNodes(parent: Element, vine: NodeVine, nodeEntities: NodeKit[]) {
+//     if (vine.isEmpty) { // lazy render
+//         mountConditional(parent, vine, nodeEntities)
+//     }
 //     showDOMNodes(vine) //QUESTION: Not sure if this should be in an else block... is it necessary to set display on newly rendered nodes?
 // }
 

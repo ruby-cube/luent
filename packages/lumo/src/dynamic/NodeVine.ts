@@ -115,13 +115,11 @@ export class NodeVine extends AbstractVineNode {
    }
 
    clear() {
-      console.log('clear')
       this.forEachChild(node => {
          node.vine = undefined
       })
       this.head = undefined;
       this.tail = undefined;
-      console.log('end clear')
    }
 
    get leafTail(): StaticNode | undefined {
@@ -163,16 +161,13 @@ export class NodeVine extends AbstractVineNode {
 
    get prevLeaf(): StaticNode | undefined {
       let prev = this.prev;
-      console.log('prevLeaf')
       while (prev instanceof NodeVine && !prev.active) {
          prev = prev.prev;
       }
-      console.log('exit prevLeaf while')
       return prev instanceof NodeVine ? (prev.activeLeafTail || prev.prevLeaf) : (prev as StaticNode | undefined);
    }
 
    get prevViewNode(): DOMNode | undefined {
-     console.log('name', this.name)
       return this.prevLeaf?.value;
    }
 
@@ -186,7 +181,6 @@ export class NodeVine extends AbstractVineNode {
 
    active: boolean = false;
    deactivate() {
-      console.trace('deactivated')
       this.active = false;
    }
    activate() {
@@ -197,9 +191,9 @@ export class NodeVine extends AbstractVineNode {
       return this.head === undefined
    }
 
-   get asArray(){
+   get asArray() {
       const array: AbstractVineNode[] = [];
-      this.forEachChild(node=>
+      this.forEachChild(node =>
          array.push(node)
       )
       return array.reverse();
@@ -207,7 +201,6 @@ export class NodeVine extends AbstractVineNode {
 }
 
 function assertUnlinked(vine: NodeVine) {
-   console.log('assert', vine, vine.prev, vine.vine)
    if (vine.prev) throw new Error('DEV RESEARCH: Vine is already linked! This means it wasn not properly removed previously')
    if (vine.vine) throw new Error('DEV RESEARCH: Vine is the child of another vine! This should never happen...')
 }
