@@ -1,5 +1,4 @@
 import { Component, PublicComponent } from "../component/InternalComponent"
-import { _NodePod } from "./NodePod"
 import { HTMLTag } from "../element/makeElement"
 import { isSettingUpList, onBeforeListUpdate, onListUpdated } from "../iteratives/listStack"
 import { AtomicIon } from "@rue/quarky"

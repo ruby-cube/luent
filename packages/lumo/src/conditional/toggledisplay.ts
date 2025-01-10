@@ -1,6 +1,5 @@
 import { DOMNode } from "../component/InternalComponent"
-import { NodeVine } from "../dynamic/NodeVine";
-import { _DynamicNodePod, _NodePod } from "../node/NodePod"
+import { NodePod } from "../node/NodePod";
 import { NodeKit } from "../node/setUpNodeEntities";
 import { mountConditional } from "./ConditionalRenderSeries"
 
@@ -18,8 +17,8 @@ import { mountConditional } from "./ConditionalRenderSeries"
 
 const showIfMap: WeakMap<DOMNode, string> = new WeakMap()
 
-export function hideDOMNodes(vine: NodeVine) {
-   vine.forEach((node) => {
+export function hideDOMNodes(nodePod: NodePod) {
+   nodePod.forEachNode(node => {
       if (node instanceof HTMLElement) {
          showIfMap.set(node, node.style.display)
          node.style.display = 'none'
@@ -40,8 +39,8 @@ export function hideDOMNodes(vine: NodeVine) {
       })
 }
 
-export function showDOMNodes(vine: NodeVine) {
-   vine.forEach(node => {
+export function showDOMNodes(nodePod: NodePod) {
+   nodePod.forEachNode(node => {
         if (node instanceof HTMLElement) {
             const display = showIfMap.get(node)
             if (display === undefined) {

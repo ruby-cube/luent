@@ -8,10 +8,9 @@ import { ListRenderKit } from "../iteratives/ListRenderKit";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { NodeEntity, SwapConfig, SwapType } from "./makeNode";
 import { setUpTextNode } from "./mountTextNode";
-import { _NodePod } from "./NodePod";
 import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./mountInnerHTML";
 import { getCurrentContext } from "../context/context-stack";
-import { NodeVine } from "../dynamic/NodeVine";
+import { NodePod } from "./NodePod";
 
 // [ ] validate and apply swap tag
 // [ ] validate and compose conditional series
@@ -24,16 +23,16 @@ type HTMLString = string;
 export function setUpNodeEntities(
    nodeEntities: NodeEntity[],
    parent: Element, //TODO: parent is as optional as fragment I think...
-   nodeVine: NodeVine,
+   nodePod: NodePod,
    nodeKits: NodeKit[] = []
 ) {
-   const series = new ConditionalSeriesBuilder(parent, nodeVine, nodeKits)
+   const series = new ConditionalSeriesBuilder(parent, nodePod, nodeKits)
 
    for (let i = 0; i < nodeEntities.length; i++) {
       let nodeEntity = nodeEntities[i];
       if (nodeEntity instanceof Array) {
          if (series.isOpen) series.close()
-         setUpNodeEntities(nodeEntities, parent, nodeVine, nodeKits) //QUESTION: should swap and conditionalArray be inherited by this setup scope?
+         setUpNodeEntities(nodeEntities, parent, nodePod, nodeKits) //QUESTION: should swap and conditionalArray be inherited by this setup scope?
       }
       else if (nodeEntity instanceof ConditionalRenderKit) {
          const statementType = nodeEntity.statementType
@@ -73,14 +72,14 @@ export function setUpNodeEntities(
       }
       else {
          if (series.isOpen) series.close()
-         nodeKits.push(setUpNodeEntity(nodeEntity, parent, nodeVine))
+         nodeKits.push(setUpNodeEntity(nodeEntity, parent, nodePod))
       }
    }
    if (series.isOpen) series.close()
    return nodeKits;
 }
 
-// function closeConditionalSeries(conditionalArray: ConditionalRenderKit[], swap: 'mount' | 'display' | 'instance' | undefined, parent: Element, nodeVine: _NodePod, nodeKits: NodeKit[]) {
+// function closeConditionalSeries(conditionalArray: ConditionalRenderKit[], swap: 'mount' | 'display' | 'instance' | undefined, parent: Element, nodeVine: NodePod, nodeKits: NodeKit[]) {
 //    const series = createConditionalSeries(conditionalArray, swap)
 //    conditionalArray = null
 //    swap = undefined;
@@ -93,7 +92,7 @@ class ConditionalSeriesBuilder {
 
    constructor(
       private parent: Element,
-      private nodeVine: NodeVine,
+      private nodePod: NodePod,
       private nodeKits: NodeKit[],
    ) {
 
@@ -129,7 +128,7 @@ class ConditionalSeriesBuilder {
          ) : undefined
       this.conditionalArray = null
       this.swap = undefined;
-      if (series) this.nodeKits.push(setUpNodeEntity(series, this.parent, this.nodeVine));
+      if (series) this.nodeKits.push(setUpNodeEntity(series, this.parent, this.nodePod));
    }
 }
 
@@ -141,10 +140,10 @@ function makeElseKit() {
 export function setUpNodeEntity(
    nodeEntity: NodeEntity,
    parent: Element, //TODO: parent is as optional as fragment I think...
-   nodeVine: NodeVine,
+   nodePod: NodePod,
 ) {
    if (nodeEntity instanceof Element) { // Element type from Web API
-      return setUpElement(nodeEntity, nodeVine)
+      return setUpElement(nodeEntity, nodePod)
    }
    if (
       nodeEntity instanceof InternalComponent
@@ -152,7 +151,7 @@ export function setUpNodeEntity(
       || nodeEntity instanceof ListRenderKit
       || nodeEntity instanceof MorphicRenderKit
    ) {
-      return nodeEntity.setUp(parent, nodeVine);
+      return nodeEntity.setUp(parent, nodePod);
    }
-   return setUpTextNode(nodeEntity, nodeVine)
+   return setUpTextNode(nodeEntity, nodePod)
 }

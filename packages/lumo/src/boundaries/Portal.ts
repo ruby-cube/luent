@@ -3,7 +3,7 @@ import { NodeEntity } from "../node/makeNode";
 import { isFunction, normalizeToArray } from "@rue/utils";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
-import { NodeVine } from "../dynamic/NodeVine";
+import { NodePod } from "../node/NodePod";
 
 export type MorphConfig = {}
 
@@ -24,10 +24,10 @@ export function createPortalNode(Slot: ()=>NodeEntity, input: PortalNodeInput) {
     if (!(isFunction(Slot))) throw new Error('')
     const element = typeof container === "string" ? document.querySelector(container) : container;
     if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')
-    const nodeVine = new NodeVine();
-    nodeVine.push(element) // serves as an indicator to append instead of prepend for dynamic updates
+    const nodePod = new NodePod(); //TODO: do I append to outer node pod?? how does this work?
+    nodePod.push(element) // serves as an indicator to append instead of prepend for dynamic updates
 
-    const _nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(Slot())), element, nodeVine)
+    const _nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(Slot())), element, nodePod)
     mountNodeEntities(_nodeEntities, element)
     return component(undefined);
 }

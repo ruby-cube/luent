@@ -1,4 +1,3 @@
-import { _NodePod } from "../node/NodePod";
 import { NodeEntity, normalizeToRenderFunction, RenderFunction } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
@@ -9,7 +8,7 @@ import { Context, getContext, getCurrentContext, popContext, pushContext } from 
 import { createNodeContext } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
-import { NodeVine } from "../dynamic/NodeVine";
+import { NodePod } from "../node/NodePod";
 
 let currentNodePodIndex: number | undefined = undefined
 function resetCurrentNodePodIndex(index?: number) {
@@ -85,13 +84,13 @@ export function $else(typeOrRenderConditional: NodeEntity | RenderFunction | Act
 
 
 function wrapWithContext(renderConditional: RenderFunction, context: AnyObject, outerContext: Context) {
-   return (parent: Element, nodeVine: NodeVine, initialRender?: boolean) => {
+   return (parent: Element, nodePod: NodePod, initialRender?: boolean) => {
       try {
          if (!initialRender) pushContext(outerContext)
          const nodeEntities = setUpNodeEntities(normalizeToArray(
             createNodeContext(renderConditional, {
                with: context
-            })), parent, nodeVine)
+            })), parent, nodePod)
          return nodeEntities;
       }
       catch (err) {

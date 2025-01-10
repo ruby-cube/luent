@@ -5,13 +5,12 @@ import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { mountNodeEntities } from "../node/mountNodeEntity";
-import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { mountConditional } from "../conditional/ConditionalRenderSeries";
 import { getContext, getCurrentContext, popContext, pushContext } from "../context/context-stack";
 import { NodeContext } from "../context/Context";
 import { AppContext } from "../context/provide";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
-import { NodeVine } from "../dynamic/NodeVine";
+import { NodePod } from "../node/NodePod";
 
 export function MorphicNode(switchMap: { [key: string]: RenderFunction }) {
     return function $MorphicNode({ as: initialKey, preserve }: {
@@ -41,7 +40,7 @@ export function MorphicNode(switchMap: { [key: string]: RenderFunction }) {
 
 export class MorphicRenderKit {
 
-    // nodePodSwitchMap: Map<string, _NodePod> = new Map()
+    // nodePodSwitchMap: Map<string, NodePod> = new Map()
 
     constructor(
         public switchMap: { [key: string]: RenderFunction },
@@ -63,7 +62,7 @@ export class MorphicRenderKit {
     // nodeEntities!: NodeEntity[]
 
     dynamicNode!: DynamicNode
-    dynamicNodePod!: _DynamicNodePod
+    dynamicNodePod!: NodePod
 
     mount(
         parent: Element,
@@ -81,11 +80,11 @@ export class MorphicRenderKit {
 
     setUp(
         parent: Element,
-        nodePod: NodeVine,
+        nodePod: NodePod,
     ) {
-        const dynamicPod = this.dynamicNodePod = nodePod.appendDynamicPod();
+        const dynamicPod = this.dynamicNodePod = nodePod.appendNodePod()
         const _nodePod = dynamicPod.appendNodePod()
-        this.dynamicNode = makeDynamicNode(_nodePod)
+        this.dynamicNode = makeDynamicNode()
 
         this.render = function updateMorphicComponent(key: string) {
             this.activeKey = key;
@@ -115,8 +114,8 @@ export class MorphicRenderKit {
         }
     }
 
-    activateForm(key: string, parent: Element, nodePod: _NodePod) {
-        const dynamicNode = this.dynamicNode = makeDynamicNode(nodePod)
+    activateForm(key: string, parent: Element, nodePod: NodePod) {
+        const dynamicNode = this.dynamicNode = makeDynamicNode()
         const _this = this
         if (this.preserve && this.renderedKeys?.has(key)) {
             dynamicNode.reactivate(function activateMorphicForm() {

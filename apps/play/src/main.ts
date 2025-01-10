@@ -30,7 +30,7 @@ import { TestDerivedConditional } from './testDerived';
 
 // const rootContext = createGlobalContext()
 
-const app = createApp(TestDerivedConditional)
+const app = createApp(TreeApp)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

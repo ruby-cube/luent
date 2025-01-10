@@ -1,5 +1,4 @@
 import { isIon, isIonizedModel, ion, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon, toValue, getWithoutTracking } from "@rue/quarky";
-import { _DynamicNodePod, _NodePod } from "../node/NodePod";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
@@ -15,7 +14,7 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { createNodeContext } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { getTrace } from "../../../utils/debug";
-import { NodeVine } from "../dynamic/NodeVine";
+import { NodePod } from "../node/NodePod";
 
 
 type Index = number
@@ -23,7 +22,7 @@ type Count = number
 
 type DynamicList<T = any> = Collection<T> | ReactiveGet<Collection<T>>
 
-const dynamicNodeMap: WeakMap<_NodePod, DynamicNode> = new WeakMap()
+const dynamicNodeMap: WeakMap<NodePod, DynamicNode> = new WeakMap()
 
 // let currentItem: any;
 let $currentIndex: AtomicIon<number> | undefined;
@@ -38,7 +37,7 @@ export function setCurrentIndex($index: AtomicIon<number> | undefined) {
 }
 
 function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
-   return (item: any, $index: AtomicIon<number>, parent: Element, nodePod: _NodePod, initialRender: boolean = false) => {
+   return (item: any, $index: AtomicIon<number>, parent: Element, nodePod: NodePod, initialRender: boolean = false) => {
       const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
       list.transitions.set($index, transitionNodes)
       try {
@@ -63,7 +62,7 @@ function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
 }
 
 export class ListRenderKit {
-   renderItem: (item: any, $index: AtomicIon<number>, parent: Element, nodePod: _NodePod, initialRender: boolean) => NodeKit[]
+   renderItem: (item: any, $index: AtomicIon<number>, parent: Element, nodePod: NodePod, initialRender: boolean) => NodeKit[]
    trace: unknown;
 
    constructor(
@@ -91,8 +90,8 @@ export class ListRenderKit {
       }
    }
 
-   private outerNodePod!: _NodePod;
-   private dynamicNodePod: _DynamicNodePod | undefined
+   private outerNodePod!: NodePod;
+   private dynamicNodePod: NodePod | undefined
    indices: AtomicIon<number>[] = [];
    isDynamic: boolean = false;
 
@@ -104,7 +103,7 @@ export class ListRenderKit {
 
    setUp(
       parent: Element,
-      outerNodePod: NodeVine,
+      outerNodePod: NodePod,
    ) {
       const data = this.data
       const getUID = this.getUID
@@ -114,7 +113,7 @@ export class ListRenderKit {
       const _isIonicModel = isIonizedModel(data)
       const isDynamic = this.isDynamic = _isIonicModel || isIon(data);
       this.outerNodePod = outerNodePod;
-      const dynamicNodePod = this.dynamicNodePod = isDynamic ? outerNodePod.appendDynamicPod() : undefined;
+      const dynamicNodePod = this.dynamicNodePod = isDynamic ? outerNodePod.appendNodePod() : undefined;
 
       // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
 
@@ -170,10 +169,10 @@ export class ListRenderKit {
          $currentIndex = $index;
          this.indices.push($index)
 
-         const nodePod = isDynamic ? dynamicNodePod!.appendNodePod() : this.outerNodePod;
+         const nodePod = isDynamic ? dynamicNodePod?.appendNodePod() : this.outerNodePod;
 
          if (isDynamic) {
-            const dynamicNode = makeDynamicNode(nodePod)
+            const dynamicNode = makeDynamicNode()
             dynamicNode.mount(function mountDynamicItem() {
                const nodeEntities = listKit.renderItem(item, $index, parent, nodePod, true)
                mountNodeEntities(nodeEntities, parent, fragment);
@@ -207,7 +206,7 @@ export class ListRenderKit {
       if (dynamicNodePod.length !== oldUArray.length)
          throw new Error("dynamicPod and data length are mismatched")
 
-      const indicesAndNodePods: [number, _NodePod[]][] = []
+      const indicesAndNodePods: [number, NodePod[]][] = []
       const indicesAndFragments: [number, DocumentFragment][] = []
       let fragment = new DocumentFragment();
 
@@ -219,8 +218,8 @@ export class ListRenderKit {
          const _isNewItem = isNewItem(uItem);
          const _itemHasMoved = hasMoved(uItem);
          const prevIndex = oldUArray.indexOf(uItem)
-         const nodePod = _isNewItem ? new NodeVine()
-            : _itemHasMoved ? dynamicNodePod[prevIndex] // dynamicNodePod[index]
+         const nodePod = _isNewItem ? new NodePod()
+            : _itemHasMoved ? (dynamicNodePod[prevIndex] as unknown as NodePod) // dynamicNodePod[index]
                : null;
 
          if (!_isNewItem) {
@@ -252,7 +251,7 @@ export class ListRenderKit {
             // create and collect consecutive new items onto the same fragment
 
             pushDynamicNode(parentDynamicNode)
-            const dynamicNode = makeDynamicNode(nodePod)
+            const dynamicNode = makeDynamicNode()
             const renderItem = this.renderItem
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
@@ -303,7 +302,7 @@ export class ListRenderKit {
 
       // (3) insert nodes into DOM
       for (const [index, fragment] of indicesAndFragments) {
-         const prevNode = dynamicNodePod[index].prevNode
+         const prevNode = (<NodePod>dynamicNodePod[index]).prevNode
          if (prevNode && prevNode === parent) parent.append(fragment) // for teleport
          else if (prevNode) prevNode.after(fragment);
          else parent.prepend(fragment);
@@ -319,7 +318,7 @@ export class ListRenderKit {
 
 
 
-// function removeNodesFromRef(nodePod: _NodePod) {
+// function removeNodesFromRef(nodePod: NodePod) {
 //     nodePod.forEachNode((node, index) => {
 //         const ref = getNodeArrayRef(node)
 //         if (ref) ref.removeNode(index!) //TODO: This
@@ -328,7 +327,7 @@ export class ListRenderKit {
 
 
 
-function appendNodes(fragment: DocumentFragment, nodePod: _NodePod) {
+function appendNodes(fragment: DocumentFragment, nodePod: NodePod) {
    for (const nodeOrPod of nodePod) {
       if (nodeOrPod instanceof Node) {
          fragment.appendChild(nodeOrPod)

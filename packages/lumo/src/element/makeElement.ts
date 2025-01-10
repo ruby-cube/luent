@@ -1,7 +1,6 @@
 import { DOMNode, Slot } from "../component/InternalComponent";
 import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon } from "../../../quarky/src";
 import { isFunction, noop, normalizeToArray } from "@rue/utils";
-import { _DynamicNodePod, _NodePod, NodePod } from "../node/NodePod";
 import { watchRenderEffect, watch } from "../watch/watchAndPreserve";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
@@ -14,7 +13,7 @@ import { setUpNodeEntities } from "../node/setUpNodeEntities";
 import { initializeListRef, initializeRef, isNodeRef, NodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
 import { $thisEffect, ThisEffect } from "../../../quarky/src/effects/ThisEffect";
-import { NodeVine } from "../dynamic/NodeVine";
+import { NodePod } from "../node/NodePod";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -62,8 +61,8 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
    if (Slot) {
       const rawOutput = normalizeToArray(isFunction(Slot) ? Slot() : Slot)
-      const nodeVine = new NodeVine();
-      const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodeVine)
+      const nodePod = new NodePod();
+      const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodePod)
       mountNodeEntities(nodeEntities, domNode)
    }
    return domNode;
@@ -158,7 +157,6 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
       for (const handler of handlers) {
          $listen(handler, options || {}, {
             enroll: (cb) => {
-               console.log('adding event', key)
                node.addEventListener(key, cb, options);
             },
             remove: (cb) => {
@@ -308,7 +306,7 @@ function warnOverlappingStyles(stylesA: string, stylesB: string) {
 //    }
 // }
 
-// function setUpRefNulling(ref: _NodePod, $index: AtomicIon<number>) {
+// function setUpRefNulling(ref: NodePod, $index: AtomicIon<number>) {
 //     if ($index && $index() === 0) {
 
 //     }

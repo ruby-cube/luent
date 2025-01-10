@@ -1,5 +1,4 @@
 import { isIon, ReactiveGet, Phase, tracked, __devCheckIfTracked, MaybeIon } from "@rue/quarky";
-import { _NodePod } from "./NodePod";
 import { watch } from "../watch/watchAndPreserve";
 import { isObjectLiteral } from "@rue/utils";
 import { NodeEntity } from "./makeNode";

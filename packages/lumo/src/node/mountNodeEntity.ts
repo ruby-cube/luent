@@ -1,7 +1,6 @@
 import { InternalComponent } from "../component/InternalComponent";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
 import { mountElement } from "../element/mountElement";
-import { _NodePod } from "./NodePod";
 import { mountTextNode, setUpTextNode } from "./mountTextNode";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
 import { MorphicRenderKit } from "../morphic/MorphicNode";

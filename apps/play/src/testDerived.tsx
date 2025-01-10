@@ -49,7 +49,7 @@ export function TestDerivedConditional() {
 
    return component(
       <article>
-         {/* <div>{$count}</div>
+         <div>{$count}</div>
          <div>{$doubleCount}</div>
          <button on:click={$count.increment}>+</button>
          <button on:click={$count.decrement}>-</button>
@@ -64,7 +64,7 @@ export function TestDerivedConditional() {
          )}
          {$if($count,'show',
             <p>count is greater than 0!</p>
-         )} */}
+         )}
 
          {/* <div>{$count}</div> */}
          {/* <div>{$doubleCount}</div> */}
@@ -73,7 +73,7 @@ export function TestDerivedConditional() {
          {/* <button on:click={$cActive.toggle}>toggle C (mount)</button>
          <button on:click={$dActive.toggle}>toggle D (show)</button> */}
          {/* <button on:click={$count.decrement}>-</button> */}
-         {$if($aActive, 'show',
+         {$if($aActive, 'create',
             <p>A ACTIVE</p>
          )}
          {$elseif($bActive, 'mount',

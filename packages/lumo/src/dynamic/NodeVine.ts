@@ -89,14 +89,7 @@ export class NodeVine extends AbstractVineNode {
       super()
    }
 
-   public get prev(): AbstractVineNode | undefined {
-      return this._prev;
-   }
-   public set prev(value: AbstractVineNode | undefined) {
-      this._prev = value;
-      if (this.head)
-         this.head.prev = value; // descendent head(s) inherit .prev value through chain reaction
-   }
+   // MUTATION
 
    push(value: DOMNode | NodeVine) {
       if (value instanceof NodeVine) {
@@ -122,6 +115,18 @@ export class NodeVine extends AbstractVineNode {
       this.tail = undefined;
    }
 
+
+   // TRAVERSAL
+
+   public get prev(): AbstractVineNode | undefined {
+      return this._prev;
+   }
+   public set prev(value: AbstractVineNode | undefined) {
+      this._prev = value;
+      if (this.head)
+         this.head.prev = value; // descendent head(s) inherit .prev value through chain reaction
+   }
+
    get leafTail(): StaticNode | undefined {
       const tail = this.tail
       if (tail instanceof NodeVine)
@@ -138,6 +143,21 @@ export class NodeVine extends AbstractVineNode {
          return tail.leafTail;
       return tail as StaticNode | undefined;
    }
+
+   get prevLeaf(): StaticNode | undefined {
+      let prev = this.prev;
+      while (prev instanceof NodeVine && !prev.active) {
+         prev = prev.prev;
+      }
+      return prev instanceof NodeVine ? (prev.activeLeafTail || prev.prevLeaf) : (prev as StaticNode | undefined);
+   }
+
+   get prevViewNode(): DOMNode | undefined {
+      return this.prevLeaf?.value;
+   }
+
+
+   // LOOPS
 
    forEachChild(task: (node: AbstractVineNode) => void) {
       let current = this.tail;
@@ -159,17 +179,7 @@ export class NodeVine extends AbstractVineNode {
       }
    }
 
-   get prevLeaf(): StaticNode | undefined {
-      let prev = this.prev;
-      while (prev instanceof NodeVine && !prev.active) {
-         prev = prev.prev;
-      }
-      return prev instanceof NodeVine ? (prev.activeLeafTail || prev.prevLeaf) : (prev as StaticNode | undefined);
-   }
 
-   get prevViewNode(): DOMNode | undefined {
-      return this.prevLeaf?.value;
-   }
 
    // forActive(task: (node: StaticNode) => void) {
    //    let current: StaticNode | undefined = this.leafTail;
@@ -178,6 +188,8 @@ export class NodeVine extends AbstractVineNode {
    //       current = current.prevLeaf
    //    }
    // }
+
+   
 
    active: boolean = false;
    deactivate() {

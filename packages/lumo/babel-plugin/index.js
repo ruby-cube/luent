@@ -165,7 +165,7 @@ function isJSXRoot(node) {
 
 const TemplateFunctions = new Map([
    ['$if', transformIfCall],
-   ['$elseIf', transformIfCall],
+   ['$elseif', transformIfCall],
    ['$else', transformElseCall],
    ['$for', transformIfCall], //TODO:
    // ['jsxDEV', transformJSXFragmentCall],

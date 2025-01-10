@@ -1,5 +1,4 @@
 import { Component, ComponentSetup, DOMNode, InternalComponent } from "./component/InternalComponent";
-// import { _NodePod } from "./node/NodePod";
 import { DynamicNode } from "./dynamic/DynamicNode";
 import { AnyObject } from "@rue/types";
 import { setComponentAttributes } from "./component/makeComponent";
@@ -7,7 +6,8 @@ import { AppContext, createAppContext } from "./context/provide";
 import { getContext, popContext, pushContext } from "./context/context-stack";
 import { ContextEntries } from "./context/Context";
 import { _dog_ } from "./context/x_context-keys";
-import { NodeVine } from "./dynamic/NodeVine";
+import { NodePod } from "./node/NodePod";
+import { removeDOMNodes } from "./conditional/ConditionalRenderSeries";
 
 let appRoot: Element;
 
@@ -30,10 +30,10 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
 
    // (1) instantiate developer's root component
    const appContext = createAppContext(config?.with, config?.globalContext)
-   const nodeVine = new NodeVine()
+   const nodePod = new NodePod()
    const remountable = config?.remountable
    const preserve = remountable ? true : false
-   const dynamicNode = new DynamicNode(null, nodeVine, preserve);
+   const dynamicNode = new DynamicNode(null, preserve);
 
    return {
       mount(element: string | HTMLElement | SVGAElement) {
@@ -57,7 +57,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
                setComponentAttributes(undefined)
                const component = new InternalComponent(output, undefined, undefined); //TODO: allow ref for root component?
                // if (remountable) markMountPhase()
-               component.setUp(root, nodeVine)
+               component.setUp(root, nodePod)
                component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
                // if (remountable) unmarkMountPhase()
                popContext() // for sibling components to access parent, must be set AFTER `component()`
@@ -72,7 +72,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
             if (__DEV__) throw new Error('App cannot be unmounted. Did you mean to call `destroy`? To enable unmount and remount, set `remountable` to true in config.')
             return;
          }
-         dynamicNode.unmount()
+         removeDOMNodes(nodePod);
       },
 
       destroy() {

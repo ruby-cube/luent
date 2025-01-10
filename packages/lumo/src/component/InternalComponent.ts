@@ -5,8 +5,7 @@ import { AtomicIon, isAtomicIon, rein, toValue } from "@rue/quarky";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { isFunction, normalizeToArray } from "@rue/utils";
 import { initializeListRef, initializeRef, NodeRef, NodesRef } from "../node/NodeRef";
-import exp from "constants";
-import { NodeVine } from "../dynamic/NodeVine";
+import { NodePod } from "../node/NodePod";
 
 
 
@@ -81,9 +80,9 @@ export class InternalComponent {
 
    setUp(
       parent: Element,
-      nodeVine: NodeVine
+      nodePod: NodePod
    ) {
-      this.nodeKits = setUpNodeEntities(this.nodeEntities!, parent, nodeVine)
+      this.nodeKits = setUpNodeEntities(this.nodeEntities!, parent, nodePod)
       return this;
    }
 }

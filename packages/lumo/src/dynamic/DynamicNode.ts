@@ -1,8 +1,6 @@
 import { $listen, $schedule, ActiveListener, collectEffects, EffectFlask, ListenerOptions, PendingOp, SchedulerOptions } from "@rue/flask";
-import { _NodePod } from "../node/NodePod";
 import { popDynamicNode, pushDynamicNode } from "./nodestack";
 import { SetMap } from "@rue/utils";
-import { NodeVine } from "./NodeVine";
 
 type Task = () => void
 export enum LifecycleHook {
@@ -24,7 +22,6 @@ export class DynamicNode {
 
     constructor(
         public parent: DynamicNode | null,
-      //   public nodeVine?: NodeVine,
         public preserve?: boolean,
     ) {
         // this.count = count++;
@@ -33,10 +30,6 @@ export class DynamicNode {
         this.onDeactivate = (handler: () => void, options?: SchedulerOptions) => on(LifecycleHook.ON_DEACTIVATE, this, handler, options)
         this.onReactivate = (handler: () => void, options?: SchedulerOptions) => on(LifecycleHook.ON_REACTIVATE, this, handler, options)
     }
-
-    // setNodePod(nodePod: _NodePod) {
-    //     this.nodePod = nodePod;
-    // }
 
     tasks: SetMap<LifecycleHook, Task> = new SetMap();
 
