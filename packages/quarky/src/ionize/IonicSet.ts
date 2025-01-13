@@ -119,7 +119,6 @@ export function installIonicSet() {
          },
          clear: {
             createOp(target, ionicModel, meta, getPreopData) {
-
                return useClearOp(
                   ionicModel,
                   meta,
@@ -149,8 +148,8 @@ export function installIonicSet() {
                )
             },
 
-            preop(model, args) {
-               return model[args![0]]
+            preop(target, args) {
+               return target[args![0]]
             },
 
             revert(ionicModel, { preopData }) {
@@ -353,10 +352,10 @@ export function useClearOp(
    ionicModel: IonizedModel,
    metaIonicModel: MetaIonizedModel,
    target: AnyObject,
-   getPreopData: (model: IonizedModel) => any
+   getPreopData: GetPreopData
 ) {
    return function clearOp() {
-      const preopData = getPreopData(ionicModel)
+      const preopData = getPreopData(target)
       const oldSize = target.size
       const output = target.clear(); //perform op
       const newSize = target.size

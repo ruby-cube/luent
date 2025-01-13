@@ -5,34 +5,32 @@ import { UniqueItem } from "./For";
 
 
 // TODO: implementation for sets, objects, and maps
-export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | UniqueItem[], getUID: ((item: unknown) => unknown) | undefined) {
-   const [_newArr, _oldArr] = makeItemsUnique(newArr, oldArr, getUID);
+export function diff(newArray: AnyObject[] | UniqueItem[], oldArray: AnyObject[] | UniqueItem[], getUID: ((item: unknown) => unknown) | undefined) {
+   const [newArr, oldArr] = makeItemsUnique(newArray, oldArray, getUID);
 
-   if (areShallowEqualArrays(_newArr, _oldArr)) return { noChange: true };
+   if (areShallowEqualArrays(newArr, oldArr)) return { noChange: true };
 
-   const newSet = new Set(_newArr);
-   const oldSet = new Set(_oldArr);
+   const newSet = new Set(newArr);
+   const oldSet = new Set(oldArr);
    const newArrCommonItems = [];
    const oldArrCommonItems = [];
    const newItems = new Set();
    const indicesToRemove: number[] = [];
    // const indicesAndRemoveCount: [Index, Count][] = [];
 
-
    // find items to insert
    let i = 0;
-   while (i < _newArr.length) {
-      const item = _newArr[i];
+   while (i < newArr.length) {
+      const item = newArr[i];
       if (oldSet.has(item)) newArrCommonItems.push(item);
       else newItems.add(item)
-
       i++;
    }
 
    // find items to remove
    let j = 0;
-   while (j < _oldArr.length) {
-      const item = _oldArr[j];
+   while (j < oldArr.length) {
+      const item = oldArr[j];
       if (newSet.has(item)) oldArrCommonItems.push(item);
       else {
          indicesToRemove.push(j)
@@ -49,8 +47,8 @@ export function diff(newArr: AnyObject[] | UniqueItem[], oldArr: AnyObject[] | U
          isNewItem: (item: any) => newItems.has(item),
          hasMoved: (item: any) => lcs.indexOf(item) === -1,
          isRemoved: (item: any) => !newSet.has(item),
-         newUArray: _newArr,
-         oldUArray: _oldArr,
+         newUArray: newArr,
+         oldUArray: oldArr,
          // getOriginalItem
       },
       indicesToRemove,

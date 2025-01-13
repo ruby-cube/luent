@@ -136,7 +136,7 @@ type MutatingOpConfig = {
    revert?: Revert
 }
 
-export type GetPreopData = (model: AnyObject, args?: any[]) => any;
+export type GetPreopData = (target: AnyObject, args?: any[]) => any;
 type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
 
 const something: Map<any, { dog?: number }> = new Map([[Object, { dog: 9 }]])
@@ -220,7 +220,7 @@ export function createIonizedModel(
          //    if (__DEV__) console.warn(`Property is restricted. Cannot access '${key.toString()}'`)
          //    return undefined;
          // }
-         const reinedMeta = false //NOTE: TEMPORARY
+         const reinedMeta = {isExposedKey: ()=>true} //NOTE: TEMPORARY
 
          if (methods && key in methods) {
             const method = methods[key]
@@ -237,29 +237,29 @@ export function createIonizedModel(
          }
          const _key = typeof key === 'string' && key.startsWith('_') ? key.slice(1) : key;
          if (isNativeMethod(_key, structureConfigs)) {
-            if (reinedMeta) {
-               if (reinedMeta.isExposedKey(_key)) {
-                  return getNativeMethod(
-                     _key,
-                     structureConfigs,
-                     target,
-                     ionicModel,
-                     metaIonicModel,
-                     boundMethodMap,
-                  )
-               }
-               return undefined;
-            }
-            else {
+            // if (reinedMeta) {
+            //    if (reinedMeta.isExposedKey(_key)) {
+            //       return getNativeMethod(
+            //          _key,
+            //          structureConfigs,
+            //          _target,
+            //          ionicModel,
+            //          metaIonicModel,
+            //          boundMethodMap,
+            //       )
+            //    }
+            //    return undefined;
+            // }
+            // else {
                return getNativeMethod(
                   _key,
                   structureConfigs,
-                  target,
+                  _target,
                   ionicModel,
                   metaIonicModel,
                   boundMethodMap,
                )
-            }
+            // }
          }
          let value;
          try { //TODO: decide whether to use Reflect.get or target[key], or when to use which
