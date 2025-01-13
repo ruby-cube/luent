@@ -204,7 +204,7 @@ export class ListRenderKit {
       parent: Element,
       parentDynamicNode: DynamicNode
    ) {
-      const { getOriginalItem, isNewItem, hasMoved, newUArray, oldUArray, isRemoved } = insertAndMoveKit;
+      const { isNewItem, hasMoved, newUArray, oldUArray, isRemoved } = insertAndMoveKit;
       const dynamicNodePod = this.dynamicNodePod!
       if (dynamicNodePod.length !== oldUArray.length)
          throw new Error("dynamicPod and data length are mismatched")
@@ -219,10 +219,10 @@ export class ListRenderKit {
       for (let i = 0; i < newUArray.length; i++) {
          const uItem = newUArray[i];
          const _isNewItem = isNewItem(uItem);
-         const _itemHasMoved = hasMoved(uItem);
+         const itemHasMoved = hasMoved(uItem);
          const prevIndex = oldUArray.indexOf(uItem)
          const nodePod = _isNewItem ? new NodePod()
-            : _itemHasMoved ? (dynamicNodePod[prevIndex] as unknown as NodePod) // dynamicNodePod[index]
+            : itemHasMoved ? (dynamicNodePod[prevIndex] as unknown as NodePod) // dynamicNodePod[index]
                : null;
 
          if (!_isNewItem) {
