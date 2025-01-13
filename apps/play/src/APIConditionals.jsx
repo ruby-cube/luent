@@ -109,7 +109,7 @@ import { AnyObject } from "@rue/types";
 export function MountIf() {
    const $count = ion(0, {
       increment() {
-         $count.value = $count() + 1
+         $count.state++
       }
    })
 
@@ -123,19 +123,19 @@ export function MountIf() {
 
    const $active = ion(true, {
       toggle() {
-         $active.value = !$active()
+         $active.state = !$active()
       }
    })
 
    const $ready = ion(true, {
       toggle() {
-         $ready.value = !$ready()
+         $ready.state = !$ready()
       }
    })
 
    const $isMobile = ion(false, {
       toggle() {
-         $isMobile.value = !$isMobile()
+         $isMobile.state = !$isMobile()
       }
    })
 
@@ -149,9 +149,9 @@ export function MountIf() {
    const $color = ion('lim', {
       change() {
          if ($color() === 'lim')
-            $color.value = 'blu'
+            $color.state = 'blu'
          else
-            $color.value = 'lim'
+            $color.state = 'lim'
       }
    })
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition

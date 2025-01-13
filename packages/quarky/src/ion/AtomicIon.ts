@@ -10,8 +10,8 @@ import { ProtectedIon } from "./ReinedIon";
 export type AtomicIon<T = any, M extends AnyObject = {}> = (() => T)
    & {
       [META]: MetaIon<T>;
-      value: T;
-   } & { [K in keyof M]: M[K] } & (M extends { set: any } ? { _set: (value: T) => T } : { set: (value: T) => T })
+      state: T;
+   } & { [K in keyof M]: M[K] } 
 
 
 export const ION = Symbol('atomicIon');
@@ -43,17 +43,14 @@ export function createAtomicIon<
 ) {
    const metaIon = new MetaIon(<AtomicIon>$ion, value, isIonizedModel(value), !!methods, !!inert)
 
-   const setterKey = methods && ('set' in methods) ? "_set" : 'set'
-
    const proto = {
       [META]: metaIon,
-      get value() {
+      get state() {
          return metaIon.value //TODO: not sure if this should allow tracking or not by calling $ion()
       },
-      set value(value: T) {
+      set state(value: T) {
          setIonValue(value)
       },
-      [setterKey]: setIonValue
 
    } as AnyObject
 

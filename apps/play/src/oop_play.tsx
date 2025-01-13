@@ -31,11 +31,11 @@ function ListA() {
 
    const $count = ion(0, {
       increment() { /*public*/
-         $count.value = $count() + 1
+         $count.state = $count() + 1
       },
 
       decrement() { /*public*/
-         $count.value = $count() - 1
+         $count.state = $count() - 1
       }
    })
 
@@ -144,11 +144,11 @@ function List() {
    const $count = ion(0)
 
    function incrementCount() {
-      $count.value = $count() + 1
+      $count.state = $count() + 1
    }
 
    function decrementCount() {
-      $count.value = $count() - 1
+      $count.state = $count() - 1
    }
 
 

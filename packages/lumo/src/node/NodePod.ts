@@ -52,7 +52,7 @@ export class NodePod extends Array<AnyNode> {
    }
 
    // ACTIVE STATE for mount activation types
-   active: boolean = false;
+   active: boolean = true;
    deactivate() {
       this.active = false;
    }
@@ -61,8 +61,9 @@ export class NodePod extends Array<AnyNode> {
    }
 
    // MUTATION
-   appendNodePod() {
+   appendNodePod(active: boolean = true) {
       const pod = new NodePod(this, this.length)
+      pod.active = active
       this.push(pod);
       return pod;
    }

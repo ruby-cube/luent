@@ -12,10 +12,10 @@ import { ionize, ion, isIon } from "../../../packages/quarky/src"
 // export function TestCounter() {
 //    const $count = ion(0, {
 //       increment(){
-//          $count.value++
+//          $count.state++
 //       },
 //       decrement(){
-//          $count.value--
+//          $count.state--
 //       }
 //    })
 //    const $doubleCount = ion(() => $count() * 2)

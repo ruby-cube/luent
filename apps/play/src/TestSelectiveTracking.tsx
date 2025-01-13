@@ -6,19 +6,19 @@ export function TestSelectiveTracking() {
 
     const $active = ion(false, {
         toggle() {
-            $active.value = !$active()
+            $active.state = !$active()
         }
     })
 
     const $ready = ion(true, {
         toggle() {
-            $ready.value = !$ready()
+            $ready.state = !$ready()
         }
     })
 
     const $count = ion(0, {
         increment() {
-            $count.value = $count() + 1
+            $count.state = $count() + 1
         }
     })
 
@@ -52,7 +52,7 @@ export function TestSelectiveTracking() {
 
     function reInputChange(event: InputEvent) {
         // $frog.changeName(event.target?.value)
-        $frogName.value = event.target.value
+        $frogName.state = event.target.value
         // console.log($frog.name)
     }
 

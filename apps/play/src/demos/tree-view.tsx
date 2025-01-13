@@ -30,20 +30,12 @@ export function TreeApp() {
    }
 
    const treeItem = ionize(createTreeItem(treeData), {})
-   const testList = ionize([1, 2, 3, 4])
 
    return component((
       TreeItem = TreeItemView
    ) =>
       <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
-         {/* <MountIf></MountIf> */}
-         <TreeItem item={mutable(treeItem)}></TreeItem>
-         {$for(testList, item => (
-            <p>{item}</p>
-         ))}
-         {$for(testList, item => (
-            <p>{item}</p>
-         ))}
+         <TreeItem item={treeItem}></TreeItem>
       </ul>
    )
 }
@@ -131,15 +123,23 @@ function createTreeItem(data: ItemData): TreeItem {
 const textarea = document.createElement('textarea')
 
 function TreeItemView(input = fromTag({
-   item: Ionized<TreeItem>,
+   item: v<TreeItem>,
    'on:click': v<(e: { pen: string }) => void>('?')
 })) {
    const { item, emit } = input
    // emit('click', { pen: 'hi' })
+   // const item = ionize({...data}, {
+   //    addChild() {
+   //       console.log('adding child')
+   //       const children = item.children || (item.children = [])
+   //       console.log(item, children)
+   //       children.push({name: 'new stuff'})
+   //    }
+   // })
 
    const $isOpen = ion(!!item.children?.length, {
       toggle() {
-         $isOpen.value = !$isOpen.value
+         $isOpen.state = !$isOpen.state
       }
    })
 
@@ -148,7 +148,7 @@ function TreeItemView(input = fromTag({
    function changeType() {
       if (!$isFolder()) {
          item.addChild()
-         $isOpen.value = true
+         $isOpen.state = true
       }
    }
    return component((
@@ -166,7 +166,7 @@ function TreeItemView(input = fromTag({
          </div>
          {$if($isFolder, 'create', $if($isOpen, 'mount',
             <ul>
-               {$for(item.children, m => m, m => (
+               {$for(item.children!, m => m, m => (
                   <TreeItem item={m}></TreeItem>
                ))}
                <li class='add' on:click={() => item.addChild()}>+</li>

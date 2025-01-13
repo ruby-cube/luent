@@ -18,8 +18,8 @@ describe('reinIon function', () => {
    it('should return a readonly ion with `value` restricted when no methodKeys are provided', () => {
       const atomicIon = ion(0)
       const $protected = reinIon(atomicIon, []);
-      expect(()=>$protected.value =10).toThrowError()
-      expect(()=>$protected.value).toThrowError();
+      expect(()=>$protected.state =10).toThrowError()
+      expect(()=>$protected.state).toThrowError();
       expect($protected()).toBe(0)
       atomicIon.value = 15
       expect($protected()).toBe(15)
@@ -39,8 +39,8 @@ describe('reinIon function', () => {
       $protected.as(14);
       
       expect($protected()).toBe(14);
-      expect(()=>$protected.value).toThrowError();
-      expect(() => $protected.value = 10).toThrowError()
+      expect(()=>$protected.state).toThrowError();
+      expect(() => $protected.state = 10).toThrowError()
    });
 
    //  it('should return a reined ion with `_as` method restricted when `as` is passed as true', () => {

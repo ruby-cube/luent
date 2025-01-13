@@ -75,14 +75,14 @@ export function ParentBlock(
 
    const $name = ion("Sir Robin", {
       set(name: string) {
-         $name.value = name
+         $name.state = name
       },
       makeBrave() {
-         $name.value = $name() + 'The Brave'
+         $name.state = $name() + 'The Brave'
       },
       makeKermit() {
          console.log("make kermit")
-         $name.value = 'Kermit'
+         $name.state = 'Kermit'
       }
    })
 

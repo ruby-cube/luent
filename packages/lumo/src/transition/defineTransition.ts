@@ -147,7 +147,7 @@ function toCssTransformValue(shorthand: string) {
     }
 
     const [, fn, axis, value, unit] = match;
-    const cssValue = unit === 'pc' ? `${value}%` : `${value}${unit || ''}`; // Convert 'pc' to '%', handle missing units
+    const cssValue = unit === 'pc' ? `$.state}%` : `$.state}${unit || ''}`; // Convert 'pc' to '%', handle missing units
     return `--offscreen-${fn}-${axis.toLowerCase()}:${cssValue}`;
 }
 

@@ -7,10 +7,10 @@ function ParentBlock() {
 
    const $count = ion(4, {
       increment() {
-         $count.value = $count() + 1
+         $count.state = $count() + 1
       },
       decrement() {
-         $count.value = $count() - 1
+         $count.state = $count() - 1
       }
    });
 

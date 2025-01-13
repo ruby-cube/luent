@@ -15,6 +15,7 @@ import { createNodeContext } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { getTrace } from "../../../utils/debug";
 import { NodePod } from "../node/NodePod";
+import { mountConditional } from "../conditional/ConditionalRenderSeries";
 
 
 type Index = number
@@ -156,20 +157,19 @@ export class ListRenderKit {
       parent: Element,
       fragment?: DocumentFragment
    ) {
-      const data = this.data
-      const list = isIon(data) ? data() : <Collection<any>>data;
-      const _list = list instanceof Array ? list : list //TODO: need to implement for sets, maps, and objects
+      const data = toValue(this.data);
+      const list = data instanceof Array ? data : data //TODO: need to implement for sets, maps, and objects
       const listKit = this;
       const isDynamic = this.isDynamic;
-      const dynamicNodePod = this.dynamicNodePod;
+      const dynamicNodePod = this.dynamicNodePod!;
 
-      for (let i = 0; i < _list.length; i++) {
+      for (let i = 0; i < list.length; i++) {
          const $index = ion(i)
-         const item = _list[i]
+         const item = list[i]
          $currentIndex = $index;
          this.indices.push($index)
 
-         const nodePod = isDynamic ? dynamicNodePod?.appendNodePod() : this.outerNodePod;
+         const nodePod = isDynamic ? dynamicNodePod.appendNodePod() : this.outerNodePod;
 
          if (isDynamic) {
             const dynamicNode = makeDynamicNode()
@@ -189,9 +189,12 @@ export class ListRenderKit {
    private removeItems(indicesToRemove: number[]) {
       // remove from DOM
       for (const index of indicesToRemove) {
-         const nodePod = this.dynamicNodePod![index];
+         const nodePod = this.dynamicNodePod![index] as NodePod;
          const dynamicNode = dynamicNodeMap.get(nodePod)
          dynamicNode?.destroy()
+         nodePod.forEachNode(node =>
+            node.remove()
+         )
       }
       //TODO: how do I handle items that have been moved to another port?
    }
@@ -223,10 +226,10 @@ export class ListRenderKit {
                : null;
 
          if (!_isNewItem) {
-            // update $index value
+            // update $index.state
             const $index = this.indices[prevIndex];
             newIndices.push($index);
-            $index.value = i
+            $index.state = i
 
             // to update refs
             toFromIndices.push([i, prevIndex]);
@@ -244,7 +247,7 @@ export class ListRenderKit {
          }
 
          if (isNewItem(uItem)) {
-            const item = getOriginalItem(uItem, newUArray)
+            // const item = getOriginalItem(uItem, newUArray)
             const $index = ion(i)
             setCurrentIndex($index); // to retreive config
             newIndices.push($index);
@@ -256,7 +259,8 @@ export class ListRenderKit {
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             dynamicNode.mount(function renderNewListItem() {
-               const nodeEntities = renderItem(toValue(list)[$index()], $index, parent, nodePod, false);
+               const nodeEntities = renderItem(toValue(list)[i], $index, parent, nodePod, false);
+               // mountConditional(parent, nodePod, nodeEntities, fragment)
                mountNodeEntities(nodeEntities, parent, fragment)
             })
             setCurrentIndex(undefined)
@@ -303,6 +307,8 @@ export class ListRenderKit {
       // (3) insert nodes into DOM
       for (const [index, fragment] of indicesAndFragments) {
          const prevNode = (<NodePod>dynamicNodePod[index]).prevNode
+         console.log('list dynamic node pod', dynamicNodePod)
+         console.log('item dynamic node pod', dynamicNodePod[index])
          if (prevNode && prevNode === parent) parent.append(fragment) // for teleport
          else if (prevNode) prevNode.after(fragment);
          else parent.prepend(fragment);

@@ -17,8 +17,8 @@ function ListBlock() {
 
     fetch("").then((response) => {
         response.json().then((data) => {
-            $data.value = data
-            $ready.value = true
+            $data.state = data
+            $ready.state = true
         })
     })
 
@@ -43,8 +43,8 @@ function ItemBlock() {
 
     fetch("").then((response) => {
         response.json().then((data) => {
-            $data.value = data
-            $ready.value = true
+            $data.state = data
+            $ready.state = true
         })
     })
 
@@ -68,7 +68,7 @@ function ListBlockB() {
     const pendingData = fetch("").then((response) => {
         return response.json()
     }).then((data) => {
-        $data.value = data
+        $data.state = data
     })
 
     return pend(pendingData, () =>
@@ -85,7 +85,7 @@ function ItemBlockB() {
     pend(fetch(""))
         .then(async (response) => {
             const data = await response.json()
-            $content.value = data.content
+            $content.state = data.content
         })
 
     return (

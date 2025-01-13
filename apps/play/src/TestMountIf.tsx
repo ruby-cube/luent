@@ -6,7 +6,7 @@ import { AnyObject } from "@rue/types";
 export function MountIf() {
    const $count = ion(0, {
       increment() {
-         $count.value = $count() + 1
+         $count.state = $count() + 1
       }
    })
 
@@ -20,19 +20,19 @@ export function MountIf() {
 
    const $active = ion(false, {
       toggle() {
-         $active.value = !$active()
+         $active.state = !$active()
       }
    })
 
    const $ready = ion(false, {
       toggle() {
-         $ready.value = !$ready()
+         $ready.state = !$ready()
       }
    })
 
    const $isMobile = ion(false, {
       toggle() {
-         $isMobile.value = !$isMobile()
+         $isMobile.state = !$isMobile()
       }
    })
 
@@ -46,9 +46,9 @@ export function MountIf() {
    const $color = ion('lim', {
       change() {
          if ($color() === 'lim')
-            $color.value = 'blu'
+            $color.state = 'blu'
          else
-            $color.value = 'lim'
+            $color.state = 'lim'
       }
    })
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
@@ -214,12 +214,12 @@ function ArticleBlock(setup: {
 //         console.log("destroyd")
 //     })
 
-//     $count.value = 1)
+//     $count.state = 1)
 
 //     return component(
 //         <>
 //             <div ref={$countDiv}>{$count}</div>
-//             <button on:click-this-$button-v={[$count.value = $count() + 1), stopPropagation]} ref={$button}>increment</button >
+//             <button on:click-this-$button-v={[$count.state = $count() + 1), stopPropagation]} ref={$button}>increment</button >
 //             {/* <Counter>{$count()}</Counter> */}
 //         </>
 //     )

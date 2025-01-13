@@ -55,15 +55,15 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          if (kit.type === 'show') {
             showKits = showKits || (showKits = this.showKits = [])
             showKits.push(kit);
-            kit.nodePod = dynamicPod.appendNodePod()
+            kit.nodePod = dynamicPod.appendNodePod(false)
             //QUESTION: Does the order of the nodeVines in the dynamicPod need to match the order of rendering? so far there's no problemt
          }
          else if (kit.type === 'mount') {
-            kit.nodePod = dynamicPod.appendNodePod()
+            kit.nodePod = dynamicPod.appendNodePod(false)
             kit.renderConditional = wrapToPreserve(kit.renderConditional)
          }
          else {
-            sharedPod = sharedPod || (sharedPod = dynamicPod.appendNodePod())
+            sharedPod = sharedPod || (sharedPod = dynamicPod.appendNodePod(false))
             kit.nodePod = sharedPod;
          }
       }

@@ -35,7 +35,7 @@ function runIonicEffect(effect: () => void, meta: IonicDerivation, $activeEffect
     try {
         runCleanups($activeEffect())
         const _effect = new ThisEffect();
-        $activeEffect.value = _effect
+        $activeEffect.state = _effect
         
         pushEffect(_effect)
         currentMetaIonicEffect = meta

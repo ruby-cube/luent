@@ -4,22 +4,22 @@ import {ion, ionize} from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/quarky
 export function MountIf() {
     const $count = ion(0, {
         increment() {
-            $count.value = $count() + 1;
+            $count.state = $count() + 1;
         }
     });
     const $active = ion(true, {
         toggle() {
-            $active.value = !$active();
+            $active.state = !$active();
         }
     });
     const $ready = ion(true, {
         toggle() {
-            $ready.value = !$ready();
+            $ready.state = !$ready();
         }
     });
     const $isMobile = ion(false, {
         toggle() {
-            $isMobile.value = !$isMobile();
+            $isMobile.state = !$isMobile();
         }
     });
     const todos = ionize([]);

@@ -33,8 +33,8 @@ export function createSuspenseNode(Slot: () => NodeEntity, input: SuspenseNodeIn
    let timeoutID: any;
    if (timeout) {
       timeoutID = setTimeout(() => {
-         $error.value = new Error("Timed out");
-         $pending.value = false
+         $error.state = new Error("Timed out");
+         $pending.state = false
       }, timeout)
    }
 
@@ -47,13 +47,13 @@ export function createSuspenseNode(Slot: () => NodeEntity, input: SuspenseNodeIn
    allPromises
       .then(() => {
          clearTimeout(timeoutID)
-         $pending.value = false
-         $ready.value = true
+         $pending.state = false
+         $ready.state = true
       })
       .catch(err => {
          if (input.catch === undefined) throw typeof err === 'string' ? new Error(err) : err;
-         $error.value = typeof err === 'string' ? new Error(err) : err;
-         $pending.value = false
+         $error.state = typeof err === 'string' ? new Error(err) : err;
+         $pending.state = false
       })
 
    return component(

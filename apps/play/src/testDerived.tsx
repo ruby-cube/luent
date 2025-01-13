@@ -4,10 +4,10 @@ import { ion } from "@rue/quarky";
 export function TestDerivedConditional() {
    const $count = ion(0, {
       increment() {
-         $count.value++
+         $count.state++
       },
       decrement() {
-         $count.value--
+         $count.state--
       }
 
    })
@@ -19,7 +19,7 @@ export function TestDerivedConditional() {
 
    const $aActive = ion(true, {
       toggle() {
-         $aActive.value = !$aActive.value
+         $aActive.state = !$aActive.state
       }
    })
 
@@ -27,21 +27,21 @@ export function TestDerivedConditional() {
 
    const $bActive = ion(true, {
       toggle() {
-         $bActive.value = !$bActive.value
+         $bActive.state = !$bActive.state
       }
    })
 
 
    const $cActive = ion(false, {
       toggle() {
-         $cActive.value = !$cActive.value
+         $cActive.state = !$cActive.state
       }
    })
 
 
    const $dActive = ion(false, {
       toggle() {
-         $dActive.value = !$dActive.value
+         $dActive.state = !$dActive.state
       }
    })
 
@@ -56,13 +56,13 @@ export function TestDerivedConditional() {
          {$if($doubleCount() > 3, 'create',
             <p>doublecount is greater than 3!</p>
          )}
-         {$if($doubleCount,'mount',
+         {$if($doubleCount() > 0, 'mount',
             <p>doublecount is greater than 0!</p>
          )}
-         {$if($count() > 3,'mount',
+         {$if($count() > 3, 'mount',
             <p>count is greater than 3!</p>
          )}
-         {$if($count,'show',
+         {$if($count() > 0, 'show',
             <p>count is greater than 0!</p>
          )}
 

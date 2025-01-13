@@ -10,7 +10,7 @@ export function MarkdownApp() {
    const $output = ion(() => marked($input()))
 
    const update = debounce(e => {
-      $input.value = e.target.value
+      $input.state = e.target.value
    }, 100)
 
    return component(
