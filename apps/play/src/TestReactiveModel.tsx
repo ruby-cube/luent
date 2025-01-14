@@ -83,7 +83,11 @@ export function List(
             selected.add(item)
          }
       }
-   })
+   }
+   )
+
+   // const vals = selected.values()
+   Array.from(selected)
 
    function moveSelectedItems(index: number) {
       moveUniqueItems(selected, list, index)
@@ -107,7 +111,7 @@ export function List(
                // <div
                style={{
                   backgroundColor: randomColor.get(),
-                  outline: $s=selected.has(item) ? 'thick solid blue' : 'unset',
+                  outline: $s = selected.has(item) ? 'thick solid blue' : 'unset',
                }}>
                <p on:click={e => removeItem($index())} style="cursor: pointer">
                   X

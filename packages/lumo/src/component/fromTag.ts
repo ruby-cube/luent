@@ -1,8 +1,9 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject, UnionToIntersection } from "@rue/types";
 import { isIon, isIonizedModel, isReined, readonly } from "@rue/quarky";
 import { toIon, toValue } from "../../../quarky/src/ion/toIons";
 import { getComponentAttributes } from "./makeComponent";
 import { isFunction, isObject } from "@rue/utils";
+import { DeepReadonly, v } from "../InputTypes";
 
 //TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
 
@@ -18,24 +19,23 @@ export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
 // Ionized<{}> => Ionized<{}>
 // Ion <Ionized<{}>> // object will not be validated as ionized...
 
-
-
+/**
+ * Component Validated Input
+ */
 
 type ComponentValidatedInput<C> = {
-   [K in keyof C as C[K] extends { required: true } | { default: true } ? K extends `on:${infer S}` ? never : C[K] extends {
-      name: '_Ion' | 'MaybeIon'
-   } ? K extends string ? `$${K}` : K : K : never]:
+   [K in keyof C as C[K] extends { required: true } | { default: true } ? K extends `on:${string}` ? never : K extends `mu:${infer S}` | `mu?:${infer S}` | `m:${infer S}` ? S
+   : K : never/* exclude optionals */]:
 
-   C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? I
+   C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? K extends `mu:${string}` ? I : K extends `mu?:${string}` ? I | DeepReadonly<I> : DeepReadonly<I>
    : 'invalid typeConfig'
-} & WithIons<C> & WithEmit<C>
+} & WithOptionals<C> & WithEmit<C>
 
-type WithIons<C> = {
-   [K in keyof C as C[K] extends { optional: '?' } ? K extends `on:${infer S}` ? never : C[K] extends {
-      name: '_Ion' | 'MaybeIon'
-   } ? K extends string ? `$${K}` : K : K : never]?:
+type WithOptionals<C> = {
+   [K in keyof C as C[K] extends { optional: '?' } ? K extends `on:${string}` ? never
+   : K : never/* exclude required */]?:
 
-   C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? I
+   C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? DeepReadonly<I>
    : 'invalid typeConfig'
 }
 
@@ -47,26 +47,103 @@ type EventNames<C> = keyof _EventsOnly<C>
 
 type _EventsOnly<C> = { [K in keyof C as K extends `on:${infer S}` ? S : never]: C[K] }
 
+
+
+
+const exampleConfig = {
+   dove: v<Dove>,
+   'mu?:frog': v<Frog>,
+   'mu?:well': v<Well>
+}
+
+type Frog = { name: string }
+type Well = { depth: number }
+type Dove = { distance: number }
+
+type ExampleRequired = {
+   'mu:frog': Frog
+} | {
+   frog: Frog
+}
+
+type ExampleOptional = {
+   'mu:frog'?: Frog
+} | {
+   frog?: Frog
+}
+
+type Res = ComponentAttributes<typeof exampleConfig>
+
+function tryIt(input: Res) {
+
+}
+
+const f = null as unknown as Frog
+const w = null as unknown as Well
+const d = null as unknown as Dove
+
+tryIt({ "mu:frog": f, dove: d, "mu:well": w })
+tryIt({ frog: f, dove: d, "mu:well": w })
+tryIt({ "mu:frog": f, dove: d, well: w })
+tryIt({ frog: f, dove: d, well: w })
+
+//@ts-expect-error
+tryIt({ "mu:frog": f, dove: d })
+
+//@ts-expect-error
+tryIt({ dove: d, "mu:well": w })
+
+//@ts-expect-error
+tryIt({ frog: f, dove: d })
+
+//@ts-expect-error
+tryIt({ dove: d, well: w })
+
+/**
+ * Component Tag Attributes
+ */
+
 type ComponentAttributes<C> = {
-   [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K : never]:
+   [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `mu?:${string}` ? never : K : never]:
    C[K] extends ((arg: any) => { inputType: infer I }) ? I : 'invalid typeConfig'
 } & {
-   [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K : never]?:
+   [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `mu?:${string}` ? never : K : never]?:
    C[K] extends { inputType: infer I } ? I : 'invalid typeConfig'
-} & {
-   [K in keyof C as C[K] extends { name: '$IonOrIon' | '$IonizedOrIonized' | '$Ionized' | '$Ion' | '$Ref'; required: true } & ((arg: any) => { $inputType: any }) ? K extends string ? `$${K}` : never : never]:
-   C[K] extends (arg: any) => { $inputType: infer I } ? I : 'invalid typeConfig'
-} & {
-   [K in keyof C as C[K] extends { name: '$IonOrIon' | '$IonizedOrIonized' | '$Ionized' | '$Ion' | '$Ref'; optional: '?' | 'withDefault' } ? K extends string ? `$${K}` : never : never]?:
-   C[K] extends { $inputType: infer I } ? I : 'invalid typeConfig'
-}
+} & (WithMaybeMutables<C> extends never ? {} : WithMaybeMutables<C>)
 // & {
-//    [ATTRIBUTE_VALIDATION]?: C
+//    [K in keyof C as K extends `mu?:${infer S}` ? `mu:${K}` : never]:
+//    C[K] extends (arg: any) => { $inputType: infer I } ? I : 'invalid typeConfig'
+// } & {
+//    [K in keyof C as C[K] extends { name: '$Ionized' | '$Ion'; optional: '?' | 'withDefault' } ? K extends string ? `$${K}` : never : never]?:
+//    C[K] extends { $inputType: infer I } ? I : 'invalid typeConfig'
 // }
+
+type WithMaybeMutables<C> = IntersectionOfUnions<UnionToIntersection<(keyof RequiredMaybeMutables<C> extends never ? {} : RequiredMaybeMutables<C>[keyof RequiredMaybeMutables<C>])
+   & (keyof OptionalMaybeMutables<C> extends never ? {} : OptionalMaybeMutables<C>[keyof OptionalMaybeMutables<C>])>>
+
+type Eh = WithMaybeMutables<typeof exampleConfig>
+
+type IntersectionOfUnions<T> =
+   // Convert each intersected tuple to a union using distributive conditional types
+   (T extends any[] ? TupleToUnion<T> : never);
+
+type TupleToUnion<T extends any[]> = T[number];
+
+
+type RequiredMaybeMutables<C> = {
+   [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `mu?:${infer S}` ? S : never : never]:
+   C[K] extends ((arg: any) => { inputType: infer I }) ? K extends `mu?:${infer S}` ? [{ [K in `mu:${S}`]: I }, { [K in S]: I }] : never : 'invalid typeConfig'
+}
+
+type OptionalMaybeMutables<C> = {
+   [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `mu?:${infer S}` ? S : never : never]:
+   C[K] extends { inputType: infer I } ? K extends `mu?:${infer S}` ? [{ [K in `mu:${S}`]?: I }, { [K in S]?: I }] : never : 'invalid typeConfig'
+}
+
 
 
 //API
-export function fromTag<C>(typeConfig?: C & { [key: string]: { validatedType: any } | ((arg: any) => { validatedType: any }) }): C extends {} ? { [K in keyof ComponentValidatedInput<C>]: ComponentValidatedInput<C>[K] } & { [ATTRIBUTES]: C extends undefined ? AnyObject : { [K in keyof ComponentAttributes<C>]: ComponentAttributes<C>[K] } } : AnyObject {
+export function fromTag<C>(typeConfig?: C & { [key: string]: { validatedType: any } | ((arg: any) => { validatedType: any }) }): C extends {} ? { [K in keyof ComponentValidatedInput<C>]: ComponentValidatedInput<C>[K] } & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject {
    const attributes = getComponentAttributes()
    if (!attributes) throw new Error(`input function must be called as default parameter of component factory`)
    return prep(attributes, typeConfig) as C extends {} ? ComponentValidatedInput<C> & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject

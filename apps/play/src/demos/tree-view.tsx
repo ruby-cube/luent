@@ -1,6 +1,5 @@
-import { component, fromTag, Ion, Ionized, $if, $else, $for, watch, v, Nonlocal, _Nonlocal, } from "@rue/lumo";
+import { component, fromTag, Ionized, $if, $else, $for, watch, v, Nonlocal, _Nonlocal, pure, Pure, NonVoidMethods } from "@rue/lumo";
 import { ion, ionize, Phase, toRaw } from "@rue/quarky";
-import { MountIf } from "../TestMountIf";
 
 
 
@@ -35,7 +34,7 @@ export function TreeApp() {
       TreeItem = TreeItemView
    ) =>
       <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
-         <TreeItem item={treeItem}></TreeItem>
+         <TreeItem mu:item={treeItem}></TreeItem>
       </ul>
    )
 }
@@ -94,6 +93,13 @@ class TreeItem {
       public children: TreeItem[] = [],
    ) { }
 
+   hop() {
+      return true
+   }
+   bop() {
+      return true
+   }
+
    addChild() {
       console.log('adding child')
       const children = this.children || (this.children = [])
@@ -101,6 +107,12 @@ class TreeItem {
       children.push(new TreeItem('new stuff'))
    }
 }
+
+interface TreeItem {
+   '~pure': NonVoidMethods<TreeItem, 'hop' | 'bop'>
+}
+
+
 
 function createTreeItem(data: ItemData): TreeItem {
    return new TreeItem(
@@ -120,13 +132,17 @@ function createTreeItem(data: ItemData): TreeItem {
 //    }
 // }
 
+
 const textarea = document.createElement('textarea')
 
 function TreeItemView(input = fromTag({
-   item: v<TreeItem>,
-   'on:click': v<(e: { pen: string }) => void>('?')
+   'mu:item': v<TreeItem>,
+   // list: v<string[]>,
+   // 'on:click': v<(e: { pen: string }) => void>('?')
 })) {
    const { item, emit } = input
+
+   item.children
    // emit('click', { pen: 'hi' })
    // const item = ionize({...data}, {
    //    addChild() {
@@ -156,7 +172,7 @@ function TreeItemView(input = fromTag({
    ) =>
       <li class='item'>
          <div
-            class={[$s = $isFolder() && 'bold']}
+            class={[$s=$isFolder() && 'bold']}
             on:click={$isOpen.toggle} on:dblclick={changeType}
          >
             {item.name}
@@ -166,8 +182,8 @@ function TreeItemView(input = fromTag({
          </div>
          {$if($isFolder, 'create', $if($isOpen, 'mount',
             <ul>
-               {$for(item.children!, m => m, m => (
-                  <TreeItem item={m}></TreeItem>
+               {$for(item.children!, m => m, item => (
+                  <TreeItem mu:item={item}></TreeItem>
                ))}
                <li class='add' on:click={() => item.addChild()}>+</li>
             </ul>

@@ -30,8 +30,9 @@ export function useTrackableGetOp(
       if (__DEV__) emitSignal();
       const tracker = getActiveTracker()
       const _arg = toRaw(arg)
+      // const value = Reflect.apply(fn, target, _arg)
       if (!tracker)
-         return fn.call(target, _arg);
+         return fn.call(target, _arg)
       tracker.track(asTrackedOp(reactive, op, _arg))
       return fn.call(target, _arg)
    }
@@ -198,6 +199,7 @@ export function createIonizedModel(
    _target: object,
    methods: AnyObject | undefined,
 ) {
+
    const target = methods ? Object.setPrototypeOf({ ...methods }, _target) : _target; //NOTE: If methods and target has overlapping methods, it will overwrite the original target's method
    const structureConfigs = getStructureConfigs(target);
    const metaIonicModel = new MetaIonizedModel(target)
@@ -210,8 +212,14 @@ export function createIonizedModel(
       get(target, key, receiver) {
          if (__DEV__) emitSignal()
          if (key === META) return metaIonicModel
-         if (isNonTrackable(key, structureConfigs))
-            return Reflect.get(target, key, receiver);
+         if (isNonTrackable(key, structureConfigs)) {
+            const value = Reflect.get(_target, key, receiver);
+            if (value instanceof Function) {
+               return (...args: any[]) =>
+                  value.call(_target, ...args) //TODO: Simplify... a bound method needs to be created and stored
+            }
+            return value;
+         }
 
          const isIonAccessKey = typeof key === 'string' && key[0] === '$'
          //NOTE: Temporarily hidden rein because of issues
@@ -220,7 +228,7 @@ export function createIonizedModel(
          //    if (__DEV__) console.warn(`Property is restricted. Cannot access '${key.toString()}'`)
          //    return undefined;
          // }
-         const reinedMeta = {isExposedKey: ()=>true} //NOTE: TEMPORARY
+         const reinedMeta = { isExposedKey: () => true } //NOTE: TEMPORARY
 
          if (methods && key in methods) {
             const method = methods[key]
@@ -237,6 +245,7 @@ export function createIonizedModel(
          }
          const _key = typeof key === 'string' && key.startsWith('_') ? key.slice(1) : key;
          if (isNativeMethod(_key, structureConfigs)) {
+            console.log('isNative Method', _key)
             // if (reinedMeta) {
             //    if (reinedMeta.isExposedKey(_key)) {
             //       return getNativeMethod(
@@ -251,14 +260,14 @@ export function createIonizedModel(
             //    return undefined;
             // }
             // else {
-               return getNativeMethod(
-                  _key,
-                  structureConfigs,
-                  _target,
-                  ionicModel,
-                  metaIonicModel,
-                  boundMethodMap,
-               )
+            return getNativeMethod(
+               _key,
+               structureConfigs,
+               _target,
+               ionicModel,
+               metaIonicModel,
+               boundMethodMap,
+            )
             // }
          }
          let value;

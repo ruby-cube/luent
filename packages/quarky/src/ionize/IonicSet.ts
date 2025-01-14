@@ -1,12 +1,10 @@
 import { AnyObject } from "@rue/types";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
-import { Ionized, IonizedModel, storeSnapshot, toRaw } from "./ionize";
+import { IonizedModel, storeSnapshot, toRaw } from "./ionize";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getTrackedOp } from "./TrackedOp";
 import { MetaIonizedModel } from "./MetaIonizedModel";
 import { getObservedProp } from "./PropIon";
-
-type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 
 // declare global {
 //    interface Set<T> {
@@ -70,7 +68,7 @@ const trackableSetOps = {
 
 export function installIonicSet() {
    defineIonizedStructure(Set, {
-      nontrackableKeys: nontrackableIterableKeys,
+      nontrackableKeys: nontrackableIterableKeys, //FIX: I don't think this is correct
       trackableOps: {
          has(target, ionicModel) {
             return useTrackableGetOp(
@@ -78,6 +76,22 @@ export function installIonicSet() {
                target,
                'has',
                target.has
+            )
+         },
+         values(target, ionicModel){
+            return useTrackableGetOp(
+               ionicModel,
+               target,
+               'values',
+               target.values
+            )
+         },
+         entries(target, ionicModel){
+            return useTrackableGetOp(
+               ionicModel,
+               target,
+               'entries',
+               target.entries
             )
          }
       },
