@@ -1,5 +1,5 @@
 import { ComponentSetup } from "./InternalComponent";
-import { $else, $elseif, $if } from "../conditional/If";
+import { Else, ElseIf, If } from "../conditional/If";
 import { noop } from "@rue/utils";
 import { ion } from "../../../quarky/src";
 import { AnyObject } from "@rue/types";
@@ -64,13 +64,13 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
             loadComponent();
             return (
                 <>
-                    {$if($loading, () =>
+                    {If($loading, () =>
                         <Placeholder {...props}></Placeholder>
                     )}
-                    {$elseif($error, () =>
+                    {ElseIf($error, () =>
                         <Error {...props} error={$error()}></Error>
                     )}
-                    {$else(() =>
+                    {Else(() =>
                         <Component {...props}></Component>
                     )}
                 </>
@@ -83,10 +83,10 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
 
             return (
                 <>
-                    {$if($loading, () =>
+                    {If($loading, () =>
                         <Placeholder {...props}></Placeholder>
                     )}
-                    {$elseif($loaded, () =>
+                    {ElseIf($loaded, () =>
                         <Component {...props}></Component>
                     )}
                 </>
@@ -99,10 +99,10 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
 
             return (
                 <>
-                    {$if($error, () =>
+                    {If($error, () =>
                         <Error {...props} error={$error()}></Error>
                     )}
-                    {$elseif($loaded, () =>
+                    {ElseIf($loaded, () =>
                         <Component {...props}></Component>
                     )}
                 </>
@@ -114,7 +114,7 @@ export function lazyLoadComponent<P extends AnyObject>(config: {
 
         return (
             <>
-                {$if($loaded, () => {
+                {If($loaded, () => {
                     return <Component {...props}></Component>
                 }
                 )}

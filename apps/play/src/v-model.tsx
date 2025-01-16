@@ -2,21 +2,21 @@ import { ion } from "../../../packages/quarky/src"
 
 export function ChildOne() {
 
-    const $value = ion('hi')
+    const vvvalue = ion('hi')
     function updateValue(newValue: string) {
-        $value.state = newValue
+        vvvalue.state = newValue
     }
 
     return (
         <input
-            bind-value={$value}
+            bind-value={vvvalue}
         />
     )
 }
 
 export function ChildTwo() {
 
-    const $value = ion('hi')
+    const vvvalue = ion('hi')
 
     return (
         <input value="props.modelValue"

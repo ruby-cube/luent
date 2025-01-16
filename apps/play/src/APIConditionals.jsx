@@ -14,33 +14,33 @@ export function TestCounterModel() {
 
    return component(
       <>
-         {/* <$v:mount /> */}
+         {/* <vvv:mount /> */}
          <div>{counter.$count}</div>
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
-         <$v:mount/>
-         {$if($active)} {
+         <vvv:mount />
+         {If($active)} {
             <>
                <List></List>
                <p>hello</p>
             </>
          }
-         {$elseif($broken)} {
+         {ElseIf($broken)} {
             <div>do something</div>
          }
-         {$else} {
+         {Else} {
             <div>bleh</div>
          }
          <div>{counter.$count}</div>
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
-         {$for(list, (item, $index) =>
+         {For(list, (item, $index) =>
             <p>hello {$index()}</p>
          )}
          <div>{counter.$count}</div>
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
-         <$v:mount/>
+         <vvv:mount />
          {$match(key)}:
          {$case('hello')} {
             <p>hello world</p>
@@ -54,31 +54,31 @@ export function TestCounterModel() {
          <div>{counter.$count}</div>
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
-         {$if($active)} hello
+         {If($active)} hello
          <div>{counter.$count}</div>
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
-         {$if($active)} {
+         {If($active)} {
             <>hello</>
          }
          <div>{counter.$count}</div>
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
 
-         <$v:mount />
-         {$if($active)} {
+         <vvv:mount />
+         {If($active)} {
             <p>hello {$userName}</p>
          }
-         {$elseif($broken)} {
+         {ElseIf($broken)} {
             <div>do something</div>
          }
-         {$else} {
+         {Else} {
             <div>bleh</div>
          }
          <div>{counter.$count}</div>
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
-         {$for(list, (item, $index) =>
+         {For(list, (item, $index) =>
             <p>hello {$index()}</p>
          )}
          <div>{counter.$count}</div>
@@ -94,14 +94,14 @@ export function TestCounterModel() {
          {$default} {
             <p>hello world</p>
          }
-         {$if($active)} hello
+         {If($active)} hello
          <div>{counter.$count}</div>
 
       </>
    )
 }
 
-import { component, $if, $else, fade, $elseif, slide, fromTag, v, target, prep, Ion } from "@rue/lumo";
+import { component, If, Else, fade, ElseIf, slide, fromTag, v, target, prep, Ion } from "@rue/lumo";
 import { ion, ionize } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
@@ -157,11 +157,11 @@ export function MountIf() {
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
    return component(
       <>
-         <button on:click={() => ($color.change(), todos[0].name += '!')} style={[{ color: $ = $color() + 'e' }]}>shout</button>
+         <button on:click={() => ($color.change(), todos[0].name += '!')} style={[{ color: $= $color() + 'e' }]}>shout</button>
          <h1>Hello {todos[0].name}</h1>
          <div>{() => 'hi'}</div>
          <$--transition>
-            {$if($active)}{
+            {If($active)}{
                <>
                   oh
                   <$--transit with={slide({ x: -100, duration: 2200 })}>
@@ -170,18 +170,18 @@ export function MountIf() {
                   <$--transit with={slide({ x: 100, duration: 2200 })}>
                      <h2>hope</h2>
                   </$--transit>
-                  {$if($ready,
+                  {If($ready,
                      <p>ready</p>
                   )}
                </>
             }
-            {$elseif($ready)}{
+            {ElseIf($ready)}{
                <>
                   low
                   <h2>balloon</h2>
                </>
             }
-            {$else}{
+            {Else}{
                <>
                   so
                   <h2>bye</h2>

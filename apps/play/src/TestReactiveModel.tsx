@@ -1,4 +1,4 @@
-import { NodesRef, component, $if, $else, $for, NodeRef, target } from "@rue/lumo";
+import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { ion, __addDevName, DerivedIon, ionize, isIonizedModel, rein } from "../../../packages/quarky/src";
 
@@ -106,7 +106,7 @@ export function List(
             insert!
          </div>
 
-         {$for(list, item => item.id, (item, $index) =>
+         {For(list, item => item.id, (item, $index) =>
             <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
                // <div
                style={{
@@ -140,7 +140,7 @@ export function List(
                 <ItemBlock content={$slot.$content()}></ItemBlock>
             </ListBlock> */}
       </>
-      //             {/* <button on:click={$if($active, capture.once(clearSelection))}>clear</button>
+      //             {/* <button on:click={If($active, capture.once(clearSelection))}>clear</button>
 
 
       //     <button
@@ -150,10 +150,10 @@ export function List(
       //     </button>
       //     <button
       //         on:click={[
-      //             $if($active, [
+      //             if($active, [
       //                 increment, runOnce.preventDefault, target(THIS_NODE)
       //             ]),
-      //             $else(decrement)
+      //             Else(decrement)
       //         ]}
       //     >
       //         clear

@@ -164,10 +164,10 @@ function isJSXRoot(node) {
 
 
 const TemplateFunctions = new Map([
-   ['$if', transformIfCall],
-   ['$elseif', transformIfCall],
-   ['$else', transformElseCall],
-   ['$for', transformIfCall], //TODO:
+   ['If', transformIfCall],
+   ['ElseIf', transformIfCall],
+   ['Else', transformElseCall],
+   ['For', transformIfCall], //TODO:
    // ['jsxDEV', transformJSXFragmentCall],
    // ['jsx', transformJSXFragmentCall],
    // ['_jsx', transformJSXFragmentCall],
@@ -355,7 +355,7 @@ function isDerivation(path) {
    return false;
 }
 
-const nonIonicCalls = new Set(['rein', 'readonly', 'slide', 'fade', '$elseif', '$if', '$else', '$for'])
+const nonIonicCalls = new Set(['rein', 'readonly', 'slide', 'fade', 'ElseIf', 'if', 'Else', 'For'])
 
 function isPotentiallyIonicCall(callExpression) {
    return !nonIonicCalls.has(callExpression.callee.name)

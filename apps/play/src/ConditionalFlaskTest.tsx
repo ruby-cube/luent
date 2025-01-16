@@ -1,4 +1,4 @@
-import { $else, $elseif, $if } from "@rue/lumo"
+import { Else, ElseIf, If } from "@rue/lumo"
 import { ion } from "../../../packages/quarky/src"
 
 export function ConditionalFlaskTest() {
@@ -19,8 +19,8 @@ function ComponentA() {
 
     return (
         <>
-            {$if($pending, 'create', () => <div>loading...</div>)}
-            {$else(() => <div>Main componentA</div>)}
+            {If($pending, 'create', () => <div>loading...</div>)}
+            {Else(() => <div>Main componentA</div>)}
         </>
     )
 }
@@ -35,9 +35,9 @@ function ComponentB() {
 
     return (
         <>
-            {$if($pending, 'create', () => <div>loadingB...</div>)}
-            {$elseif($error, () => <div>errorB</div>)}
-            {$else(() => <div>Main componentB</div>)}
+            {If($pending, 'create', () => <div>loadingB...</div>)}
+            {ElseIf($error, () => <div>errorB</div>)}
+            {Else(() => <div>Main componentB</div>)}
         </>
     )
 }

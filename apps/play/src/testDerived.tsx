@@ -1,4 +1,5 @@
-import { $if, component, watch, $else, $elseif } from "@rue/lumo";
+//@ts-nocheck
+import { If, component, watch, Else, ElseIf } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
 export function TestDerivedConditional() {
@@ -49,20 +50,68 @@ export function TestDerivedConditional() {
 
    return component(
       <article>
-         <div>{$count}</div>
+         <div>{$=>$count() + 1}</div>
+
+         <div>{{ z: $count() + 1 }}</div>
+
+         <div>{$doubleCount()}</div>
          <div>{$doubleCount}</div>
-         <button on:click={$count.increment}>+</button>
+         <div>{$=>frog.name}</div>
+         <button on:click={$count.increment} class={$=>pref + $activeState()}>+</button>
          <button on:click={$count.decrement}>-</button>
-         {$if($doubleCount() > 3, 'create',
+         {If($=>$doubleCount() > 3, 'create',
             <p>doublecount is greater than 3!</p>
          )}
-         {$if($doubleCount() > 0, 'mount',
+         {If($doubleCount() > 0, 'mount',
             <p>doublecount is greater than 0!</p>
          )}
-         {$if($count() > 3, 'mount',
+         {If($=>$count() > 3, 'mount',
             <p>count is greater than 3!</p>
          )}
-         {$if($count() > 0, 'show',
+         {If($=>$count() > 0, 'show',
+            <p>count is greater than 0!</p>
+         )}
+
+         {If($active,
+            <p>doublecount is greater than 3!</p>
+         )}
+         {If($=>$doubleCount() > 3,
+            <p>doublecount is greater than 3!</p>
+         )}
+         {If($=>$doubleCount() > 0, 'mount',
+            <p>doublecount is greater than 0!</p>
+         )}
+         {If($=>$count() > 3, 'mount',
+            <p>count is greater than 3!</p>
+         )}
+         {If($=>$count() > 0, 'show',
+            <p>count is greater than 0!</p>
+         )}
+
+         {If(($doubleCount() > 3), 'create',
+            <p>doublecount is greater than 3!</p>
+         )}
+         {If(($doubleCount() > 0), 'mount',
+            <p>doublecount is greater than 0!</p>
+         )}
+         {If(($count() > 3), 'mount',
+            <p>count is greater than 3!</p>
+         )}
+         {If(($count() > 0), 'show',
+            <p>count is greater than 0!</p>
+         )}
+
+         <vvv:mount />
+         {If($doubleCount() > 3, 'create',
+            <p>doublecount is greater than 3!</p>
+         )}
+         {If($doubleCount() > 0, 'mount',
+            <p>doublecount is greater than 0!</p>
+         )}
+         {If($count() > 3, 'mount',
+            <p>count is greater than 3!</p>
+         )}
+         {If($count() > 0, 'show',
             <p>count is greater than 0!</p>
          )}
 
@@ -73,25 +122,25 @@ export function TestDerivedConditional() {
          {/* <button on:click={$cActive.toggle}>toggle C (mount)</button>
          <button on:click={$dActive.toggle}>toggle D (show)</button> */}
          {/* <button on:click={$count.decrement}>-</button> */}
-         {$if($aActive, 'create',
+         {If($aActive, 'create',
             <p>A ACTIVE</p>
          )}
-         {$elseif($bActive, 'mount',
+         {ElseIf($bActive, 'mount',
             <p>A GONE f</p>
          )}
-         {$else('show',
+         {Else('show',
             <p>A GONE</p>
          )}
-         {$if($bActive, 'create',
+         {If($bActive, 'create',
             <p>B ACTIVE</p>
          )}
-         {$else('create',
+         {Else('create',
             <p>B GONE</p>
          )}
-         {/* {$if($cActive, 'mount',
+         {/* {If($cActive, 'mount',
             <p>C ACTIVE</p>
          )}
-         {$if($dActive, 'show',
+         {If($dActive, 'show',
             <p>D ACTIVE</p>
          )} */}
 

@@ -430,11 +430,11 @@ export function TestCleanupScheduler({
          <div>{i0, $frogName()} </div>
          <div>{i0, $frogName() + '!'} </div>
 
-         <input $value={$frogName} />
+         <input vvvalue={$frogName} />
 
          <input value={$ = $frogName() + '!'} />
 
-         <input $value={$frogName} />
+         <input vvvalue={$frogName} />
 
          <button ref={$stopButton}>stop</button>
          <button on:click={initWatcher}>start</button>
@@ -452,7 +452,7 @@ export function TestCleanupScheduler({
                margin: '15px',
                lineHeight: '1.5',
                textAlign: 'center',
-               color: $var(text_color)
+               color: vvvar(text_color)
             }}>
                Well, I am the slime from your video<br />
                Oozin' along on your livin' room floor.

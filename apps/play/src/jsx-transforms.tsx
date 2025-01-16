@@ -1,5 +1,5 @@
 
-import { component, fromTag, $if, NodeEntity, prep, v } from "@rue/lumo";
+import { component, fromTag, If, NodeEntity, prep, v } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
 // - [ ]  transform slot to render function for:
@@ -190,7 +190,7 @@ function ParentG() {
 
    return component(
       <div>
-         {$if($active,
+         {If($active,
             <p>yay</p>
          )}
       </div>
@@ -203,7 +203,7 @@ function ParentG3() {
 
    return component(
       <div>
-         {$if($active, <>
+         {If($active, <>
             <p>yay</p>
             <p>yay</p>
          </>)}
@@ -218,7 +218,7 @@ function ParentG2() {
 
    return component(
       <div>
-         {$if($active, (o = kit(),
+         {If($active, (o = kit(),
             <p>yay</p>
          ))}
       </div>

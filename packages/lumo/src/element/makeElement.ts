@@ -1,6 +1,6 @@
 import { DOMNode, Slot } from "../component/InternalComponent";
 import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon } from "../../../quarky/src";
-import { isFunction, noop, normalizeToArray } from "@rue/utils";
+import { isFunction, isObject, isString, noop, normalizeToArray } from "@rue/utils";
 import { watchRenderEffect, watch } from "../watch/watchAndPreserve";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
@@ -14,6 +14,8 @@ import { initializeListRef, initializeRef, isNodeRef, NodesRef } from "../node/N
 import { camelToKebabCase } from "@rue/utils";
 import { $thisEffect, ThisEffect } from "../../../quarky/src/effects/ThisEffect";
 import { NodePod } from "../node/NodePod";
+import { _dog_ } from "../context/x_context-keys";
+import { MaybeIon } from "../InputTypes";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -171,7 +173,7 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
 
 
 type DynamicClassesConfig = {
-   [key: string]: ReactiveGet<Booleanny>;
+   [key: string]: MaybeIon<Booleanny>;
 }
 
 type Falsey = undefined | null | false | ''
@@ -180,25 +182,79 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
 
    for (const entry of classes) {
       if (isIon(entry)) {
-         watch(entry, (value: string | Falsey, prevValue: string | Falsey) => {
-            const classes = value && value.split(' ')
-            const prevClasses = prevValue && prevValue.split(' ')
-            if (prevClasses)
-               for (const prevClass of prevClasses) {
-                  classList.remove(prevClass);
-               }
-            if (classes)
-               for (const activeClass of classes) {
-                  classList.add(activeClass);
-               }
+         watch(entry, (value: DynamicClassesConfig | string | Falsey, prevValue: DynamicClassesConfig | string | Falsey) => {
+            if (prevValue) removePreviousClasses(prevValue, classList)
+            if (value) addClasses(value, classList)
          }, { eager: true, phase: Phase.RENDER })
       }
       else if (entry) {
-         const classes = entry.split(' ')
-         for (const activeClass of classes) {
-            classList.add(activeClass)
+         addClasses(entry, classList)
+      }
+   }
+}
+
+function removePreviousClasses(prevValue: string | AnyObject, classList: DOMTokenList) {
+   if (isString(prevValue)) {
+      const prevClasses = prevValue && prevValue.split(' ')
+      if (prevClasses)
+         for (const prevClass of prevClasses) {
+            classList.remove(prevClass);
+         }
+   }
+   else if (isObject(prevValue)) {
+      for (const key in prevValue) {
+         const value = prevValue[key]
+         if (value) {
+            classList.remove(key)
          }
       }
+   }
+   else if (__DEV__) {
+      console.warn('DEV RESEARCH: Reactive class input has not been handled for', prevValue)
+   }
+}
+
+
+function addClasses(value: string | AnyObject, classList: DOMTokenList) {
+   if (isString(value)) {
+      setUpClassesFromString(value, classList)
+   }
+   else if (isObject(value)) {
+      setUpClassesFromObject(value, classList)
+   }
+   else {
+      if (__DEV__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
+   }
+}
+
+
+function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList) {
+   const outerEffect = $thisEffect()
+   for (const key in entry) {
+      const value = entry[key]
+      if (value && isIon(value)) {
+         watch(value, (value, prevValue) => {
+            if (prevValue) classList.remove(key)
+            if (value) classList.add(key)
+         }, {
+            eager: true,
+            phase: Phase.RENDER,
+            until: outerEffect?.onCleanup
+         })
+      }
+      else if (value) {
+         classList.add(key)
+      }
+      else {
+         classList.remove(key)
+      }
+   }
+}
+
+function setUpClassesFromString(classString: string, classList: DOMTokenList) {
+   const classes = classString.split(' ')
+   for (const activeClass of classes) {
+      classList.add(activeClass)
    }
 }
 
@@ -219,7 +275,7 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    for (const entry of styles) {
       if (isIon(entry)) {
          watch(entry, (value: string | AnyObject | Falsey) => {
-            setUpStyleEntry(style, value, $thisEffect());
+            setUpStyleEntry(style, value);
          }, { eager: true, phase: Phase.RENDER })
       }
       else {
@@ -228,8 +284,9 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    }
 }
 
-function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey, outerEffect?: ThisEffect) {
+function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey) {
    if (entry instanceof Object) {
+      const outerEffect = $thisEffect()
       for (const key in entry) {
          const value = entry[key];
          if (isIon(value)) {

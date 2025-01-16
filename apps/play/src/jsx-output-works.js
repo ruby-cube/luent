@@ -1,5 +1,5 @@
 import { Fragment, jsx } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/jsx-runtime/src/index.ts";
-import { component, $if, $else, $elseif, slide, fromTag, v } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
+import { component, If, Else, ElseIf, slide, fromTag, v } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
 import { ion, ionize } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/quarky/src/index.ts";
 export function MountIf() {
    const $count = ion(0, {
@@ -34,7 +34,7 @@ export function MountIf() {
             }),
             jsx("$--transition", {
                children: [
-                  $if($active, () =>
+                  if($active, () =>
                      jsx(Fragment, {
                         children: [
                            "oh",
@@ -57,17 +57,17 @@ export function MountIf() {
                                  jsx("h2", {
                                     children: "hope"
                                  })
-                           }), $if($ready,
+                           }), if($ready,
                               jsx("p", {
                                  children: "ready"
                               }))]
-                     })), $elseif($ready, () =>
+                     })), ElseIf($ready, () =>
                         jsx(Fragment, {
                            children: ["low",
                               jsx("h2", {
                                  children: "balloon"
                               })]
-                        })), $else(() =>
+                        })), Else(() =>
                            jsx(Fragment, {
                               children: ["so",
                                  jsx("h2", {

@@ -6,7 +6,7 @@ import { M } from "vite/dist/node/types.d-aGj9QkWt";
 export function ListBlock(setup = $setup()) {
 
    const $List = PortNode({ send: true, settle: true, receive: 300 }, $list =>      
-         $for($list, o => o, (item, $index) =>
+         For($list, o => o, (item, $index) =>
          <$--transit>
             <p>[x] {item}</p>,
          </$--transit>
@@ -30,7 +30,7 @@ const hi = () =>
       with: fade
    });
 
-   {$if($active).mount(
+   {If($active).mount(
       <p>{$count}</p>
    )}
    
@@ -49,15 +49,15 @@ const hi = () =>
       <p>{$count}</p>
    )}
 
-   {$if($active,
+   {If($active,
       <p>{$count}</p>
    )}
    
-   {$if($count() > $max(),
+   {If($count() > $max(),
       <p>{$count}</p>
    )}
 
-   {$for(list, (item, index) =>
+   {For(list, (item, index) =>
       <p>hi</p>
    )}
 
@@ -139,36 +139,36 @@ const hi = () =>
             </div>
             <div>
             <swap:show-hide/>
-               {[$if($active,
+               {[if($active,
                   <SomeComponent />
                ),
-               $elseif($ready,
+               ElseIf($ready,
                   <div>hi ho</div>
                ),
-               $else(
+               Else(
                   <SomeComponent />
                )]}
             </div>
             <div>
-               {$if($active,
+               {If($active,
                   <SomeComponent />
                )}
-               {$elseif($ready,
+               {ElseIf($ready,
                   <div>hi ho</div>
                )}
-               {$else(
+               {Else(
                   <SomeComponent />
                )}
             </div>
             <div>
                {[
-                  $if($active,
+                  if($active,
                      <SomeComponent />
                   ),
-                  $elseif($ready,
+                  ElseIf($ready,
                      <SomeComponent />
                   ),
-                  $else(
+                  Else(
                      <SomeComponent />
                   )
                ]}
@@ -186,13 +186,13 @@ const hi = () =>
             </div>
             <div>
                {[
-                  $if($active,
+                  if($active,
                      <div>hi ho</div>
                   ),
-                  $elseif($ready,
+                  ElseIf($ready,
                      <div>hi ho</div>
                   ),
-                  $else(
+                  Else(
                      <div>hi ho</div>
                   )
                ]}
@@ -213,17 +213,17 @@ const hi = () =>
             </div>
 
             <div>
-               {[$if($active, <>
+               {[if($active, <>
                   <SomeComponent />
                   <div>hi ho</div>
                </>
                ),
-               $elseif($ready, <>
+               ElseIf($ready, <>
                   <div>hi ho</div>
                   <div>hi ho</div>
                </>
                ),
-               $else(<>
+               Else(<>
                   <div>hi ho</div>
                   <div>hi ho</div>
                </>
@@ -232,17 +232,17 @@ const hi = () =>
 
             <div>
                {[
-                  $if($active, <>
+                  if($active, <>
                      <SomeComponent />
                      <div>hi ho</div>
                   </>
                   ),
-                  $elseif($ready, <>
+                  ElseIf($ready, <>
                      <div>hi ho</div>
                      <div>hi ho</div>
                   </>
                   ),
-                  $else(<>
+                  Else(<>
                      <div>hi ho</div>
                      <div>hi ho</div>
                   </>
@@ -268,7 +268,7 @@ const hi = () =>
             </div>
 
             <$--dock type='todos' send='200' settle='200' receive='30'>
-               {$for($list, o => o, (item, $index) =>
+               {For($list, o => o, (item, $index) =>
                   <$--transit>
                      <p>[x] {item}</p>,
                   </$--transit>
@@ -276,7 +276,7 @@ const hi = () =>
             </$--dock>
   
             <$--dock type='todos' send='200' settle='200' receive='30'>
-               {$for(list, o => o, (item, $index) =>
+               {For(list, o => o, (item, $index) =>
                   <$--transit>
                      <p>[x] {item}</p>,
                   </$--transit>
@@ -331,7 +331,7 @@ const hi = () =>
 
             <h1>Choose something</h1>
 
-               {$for({ hold: Loading, catch: Error },
+               {For({ hold: Loading, catch: Error },
                   <>
                      <Item dog={$dog} />
                      <div>
@@ -347,7 +347,7 @@ const hi = () =>
 
             <$--transition>
             <$--swap display/>
-            {$if($active,
+            {If($active,
                <p>hey</p>
             )}
             </$--transition>
@@ -360,7 +360,7 @@ const hi = () =>
 
             <h1>hello</h1>
             <$--context with={{ [_frog_]: new Frog(), [_cat_]: cat }}>
-               {$if($active,
+               {If($active,
                   <p>hey</p>
                )}
             </$--context>
@@ -384,10 +384,10 @@ const hi = () =>
 
             <h1>hello</h1>
             {[
-               $if($active(),
+               if($active(),
                   <p>hey</p>
                ),
-               $else(
+               Else(
                   <p>Bye</p>
                )
             ]}
@@ -401,12 +401,12 @@ const hi = () =>
             <h1>hello</h1>
             <div>
                <$--transition with={fade}>
-                  {[$if($active(), { type: 'mount' },
+                  {[if($active(), { type: 'mount' },
                      <div>
                         <p>hey</p>
                      </div>
                   ),
-                  $elseif($ready(),
+                  ElseIf($ready(),
                      <div>
                         <p>hey</p>
                      </div>
@@ -415,13 +415,13 @@ const hi = () =>
             </div>
 
             <div>
-               {[$if($active(), { 'with': fade, type: 'mount' },
+               {[if($active(), { 'with': fade, type: 'mount' },
                   <div>
                      <p>hey</p>
                   </div>
 
                ),
-               $elseif($ready(),
+               ElseIf($ready(),
                   <div>
                      <p>hey</p>
                   </div>
@@ -430,13 +430,13 @@ const hi = () =>
 
             <div>
                {swap({ 'with': fade, type: 'mount' },
-                  $if($active(),
+                  if($active(),
                      <div>
                         <p>hey</p>
                      </div>
 
                   ),
-                  $elseif($ready(),
+                  ElseIf($ready(),
                      <div>
                         <p>hey</p>
                      </div>
@@ -446,13 +446,13 @@ const hi = () =>
             <div>
                <$--transition with={fade({ duration: 30 })}>
                   {{ swap: 'show/hide' }}
-                  {[$if($active, 'mount',
+                  {[if($active, 'mount',
                      <div>
                         <p>hey</p>
                      </div>
 
                   ),
-                  $elseif($ready,
+                  ElseIf($ready,
                      <div>
                         <p>hey</p>
                      </div>
@@ -462,12 +462,12 @@ const hi = () =>
             <div>
                <$--transition with={fade({ duration: 30 })}>
                   <swap:show-hide/>
-                  {$if($active, 'mount',
+                  {If($active, 'mount',
                      <div>
                         <p>hey</p>
                      </div>
                   )}
-                  {$elseif($ready,
+                  {ElseIf($ready,
                      <div>
                         <p>hey</p>
                      </div>
@@ -476,12 +476,12 @@ const hi = () =>
             </div>
             <div>
                <$--transition swap='show-hide' with={fade({ duration: 30 })}>
-                  {$if($active, 'mount',
+                  {If($active, 'mount',
                      <div>
                         <p>hey</p>
                      </div>
                   )}
-                  {$elseif($ready,
+                  {ElseIf($ready,
                      <div>
                         <p>hey</p>
                      </div>
@@ -541,13 +541,13 @@ const hi = () =>
             <div>Stuff here</div>
 
 
-            {/* {$if($active()),
+            {/* {If($active()),
                     <p>hello world</p>
                 }
-                {$elseif($broken()),
+                {ElseIf($broken()),
                     <p value={o.$selection}>bye world</p>
                 }
-                {$else,
+                {Else,
                     <p>ok world</p>
                 } */}
 
@@ -560,28 +560,28 @@ const hi = () =>
             <h1>Something Here</h1>
 
             {[
-               $if($active, <>
+               if($active, <>
                   <p>hello world</p>
                </>),
-               $elseif($broken, { setup: SelectionKit }, m => <>
+               ElseIf($broken, { setup: SelectionKit }, m => <>
                   <p value={m.$selection}>bye world</p>
                   <p>bye world</p>
                </>),
-               $else(<>
+               Else(<>
                   <p>ok world</p>
                   <p>bye world</p>
                </>)
             ]}
 
             {[
-               $if($active,
+               if($active,
                   <p>hello world</p>
                ),
-               $elseif($broken, m => <>
+               ElseIf($broken, m => <>
                   <p value={m.$selection}>bye world</p>
                   <p>bye world</p>
                </>),
-               $else(<>
+               Else(<>
                   <p>ok world</p>
                   <p>bye world</p>
                </>)
@@ -603,13 +603,13 @@ const hi = () =>
 
             {
                morphic({ with: fade },
-                  $if($active, { type: 'show' }, o =>
+                  if($active, { type: 'show' }, o =>
                      <p>hello world</p>,
                   ),
-                  $elseif($broken, (o = SelectionKit(),
+                  ElseIf($broken, (o = SelectionKit(),
                      <p value={o.$selection}>bye world</p>
                   )),
-                  $else({ with: fade }, () =>
+                  Else({ with: fade }, () =>
                      <p>ok world</p>
                   )
                )}
@@ -617,11 +617,11 @@ const hi = () =>
             <div value={{ z: $active() }}>{{ z: $count() }}</div>
 
             <div>
-               {$if(open,
-                  $if(entering,
+               {If(open,
+                  if(entering,
                      <p>Hi</p>
                   ),
-                  $else(
+                  Else(
                      <p>Bye</p>
                   )
                )}
@@ -629,7 +629,7 @@ const hi = () =>
 
             <h1>Something Here</h1>
             {(
-               $if($active, { type: 'show' }, o =>
+               if($active, { type: 'show' }, o =>
                   Context(
                      w(COUNT, o.$count),
                      w(FROG, ionize(Frog())),
@@ -643,24 +643,24 @@ const hi = () =>
 
             <h1>Something Here</h1>
             {(
-               $if($broken, { use: SelectionKit }, o =>
+               if($broken, { use: SelectionKit }, o =>
                   Context(
                      where(COUNT, o.$count),
                      where(FROG, o.$frog),
                      <p value={o.$selection}>bye world</p>
                   )
                ),
-               $else({ with: fade },
+               Else({ with: fade },
                   <p>ok world</p>
                )
             )}
 
-            {$if($active,
+            {If($active,
                [
-                  $if($broken,
+                  if($broken,
                      <p>brocken</p>
                   ),
-                  $else(
+                  Else(
                      <div>help</div>
                   )
                ]
@@ -668,13 +668,13 @@ const hi = () =>
 
 
             {/* {morphic(
-                    $if($list.length === 0, 'show', fade, SelectionKit, o =>
+                    if($list.length === 0, 'show', fade, SelectionKit, o =>
                         <p>hello world</p>
                     ),
-                    $if($broken(),
+                    if($broken(),
                         <p>bye world</p>
                     ),
-                    $else(
+                    Else(
                         <p>ok world</p>
                     )
                 )} */}
@@ -689,7 +689,7 @@ const hi = () =>
             <footer>(c) 2024</footer>
 
             <h1>How is this?</h1>
-            {$if($editable,
+            {If($editable,
                <p>
                   Flies in and out
                </p>
@@ -705,20 +705,20 @@ const hi = () =>
             <footer>(c) 2024</footer>
 
             <h1>How is this?</h1>
-            {$if($editable,
+            {If($editable,
                <p>Flies in and out</p>,
                <div>sldof</div>
             )}
             <footer>(c) 2024</footer>
 
             {[
-               $if($editable,
+               if($editable,
                   <p>hello world</p>
                ),
-               $elseif($broken,
+               ElseIf($broken,
                   <p>bye world</p>
                ),
-               $else(
+               Else(
                   <p>ok world</p>
                )
             ]}
@@ -783,13 +783,13 @@ const hi = () =>
                <input />
             </div>
             {morphic(
-               $if($list.length === 0,
+               if($list.length === 0,
                   <p>hello world</p>
                ),
-               $if($broken(),
+               if($broken(),
                   <p>bye world</p>
                ),
-               $else(
+               Else(
                   <p>ok world</p>
                )
             )}
@@ -797,13 +797,13 @@ const hi = () =>
 
             <h1>Choose something</h1>
             {Conditional({ setup: WeekKit }, o => [
-               $if($list.length === 0,
+               if($list.length === 0,
                   <p>hello world</p>
                ),
-               $if($broken(),
+               if($broken(),
                   <p>bye world</p>
                ),
-               $else(
+               Else(
                   <p>ok world</p>
                )
             ])}
@@ -811,23 +811,23 @@ const hi = () =>
             <h1>Choose something</h1>
 
             <$--transition>{[
-               $if($list.length === 0, { setup: MouseKit }, o => [
+               if($list.length === 0, { setup: MouseKit }, o => [
                   <p>hello world</p>,
                   <p>hello world</p>
                ]),
-               $elseif($broken(), [
+               ElseIf($broken(), [
                   <p>bye world</p>,
                   <p>bye world</p>
                ]),
-               $else([
+               Else([
                   <p>ok world</p>,
                   <p>ok world</p>
                ])
             ]}</$--transition>
 
             <$--transition with={fade}>
-               <$v:show />
-               {$if($active, (o = 9)=>
+               <vvv:show />
+               {If($active, (o = 9)=>
                   <>
                      <$--transit>
                         <p>hello world</p>
@@ -837,13 +837,13 @@ const hi = () =>
                      </$--transit>
                   </>
                )}
-               {$elseif($broken,
+               {ElseIf($broken,
                   <>
                      <p>bye world</p>
                      <p>bye world</p>
                   </>
                )}
-               {$else(
+               {Else(
                   <>
                      <p>ok world</p>
                      <p>ok world</p>
@@ -886,20 +886,20 @@ const hi = () =>
 
             <$--dock type='todos'>
 
-               {$for({ z: $list }, o => o.id, (item, $index, o) =>
+               {For({ z: $list }, o => o.id, (item, $index, o) =>
                   <p>[x] {item}</p>,
 
                )}
             </$--dock>
 
             <$--dock type='todos'>{
-               $for($list, (item, $index, o) =>
+               For($list, (item, $index, o) =>
                   <p>[x] {item}</p>
                )
             }</$--dock>
 
             <$--transition>
-               {$if($list.length === 0)}
+               {If($list.length === 0)}
                <p>hello world</p>
                <$ else if={$broken()}>
                   <p>bye world</p>
@@ -910,17 +910,17 @@ const hi = () =>
             </$--transition>
 
             <h1>Choose something</h1>
-            {$if($list.length === 0,
+            {If($list.length === 0,
                <p>hello world</p>
             )}
-            {$if($broken, // this is a new conditional series unrelated to the above
+            {If($broken, // this is a new conditional series unrelated to the above
                <p>bye world</p>
             )}
 
             <h1>Do something</h1>
 
             <port.node type='todos' send='200' settle='200' receive='30'>
-               {$for($list, o => o, (item, $index) =>
+               {For($list, o => o, (item, $index) =>
                   <$--transit>
                      <p>[x] {item}</p>,
                   </$--transit>
@@ -928,14 +928,14 @@ const hi = () =>
             </port.node>
 
             <port.node type='todos' receive settle send>
-               {$for($list, (item, $index) =>
+               {For($list, (item, $index) =>
                   <p>[x] {item}</p>,
                )}
             </port.node>
 
             <h1>Do something</h1>
             {freeze(
-               $for(list, (item, $index) =>
+               For(list, (item, $index) =>
                   <p>[x] {item}</p>
                ),
                Or(
@@ -943,20 +943,20 @@ const hi = () =>
                )
             )}
             {[
-               $for(list, (item, $index, o) =>
+               For(list, (item, $index, o) =>
                   <p>[x] {item}</p>
                )
             ]}
 
             <h1>Do something</h1>
             {morphic(fade,
-               $for($list, { key: 'id', use: SelectionKit }, (item, $index, o) =>
+               For($list, { key: 'id', use: SelectionKit }, (item, $index, o) =>
                   <p>[x] {item}</p>
                )
             )}
 
             <h1>Do something</h1>
-            {$for($list, { key: 'id', use: SelectionKit, }, (item, $index, o) =>
+            {For($list, { key: 'id', use: SelectionKit, }, (item, $index, o) =>
                <p>[x] {item}</p>
             )}
 
@@ -966,7 +966,7 @@ const hi = () =>
                <input />
             </div>
             {morphic(fadeInOut,
-               $for($list,
+               For($list,
                   <p>[x] {item}</p>
                )
             )}
@@ -977,7 +977,7 @@ const hi = () =>
                <li>title</li>
                <input />
             </div>
-            {$for($list,
+            {For($list,
                <p>[x] {item}</p>
             )}
             <footer>(c) 2024</footer>

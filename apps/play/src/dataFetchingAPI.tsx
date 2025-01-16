@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, $else, $if, v } from "@rue/lumo";
+import { component, Else, If, v } from "@rue/lumo";
 import { ion, Ion } from "@rue/quarky";
 
 
@@ -10,7 +10,7 @@ export function List() {
 
    const $userPosts = dispatch({ get: POSTS, with: $userId, overlap: 'pile | overwrite | block', suspense: true }); // returns an ion and collects promises for suspense, will rerun if $userId changes
 
-   const $value = resolve(fetch(''), { suspense: true }) // returns an ion and collects promises for suspense
+   const vvvalue = resolve(fetch(''), { suspense: true }) // returns an ion and collects promises for suspense
 
 
    async function submit() {

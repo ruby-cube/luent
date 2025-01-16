@@ -7,7 +7,7 @@ import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
 import { createNodeContext } from "../context/Context";
-import { AnyObject } from "@rue/types";
+import { AnyObject, Booleanny } from "@rue/types";
 import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
@@ -15,7 +15,7 @@ import { createTryNode, TryNodeInput } from "../boundaries/Try";
 import { createSuspenseNode, SuspenseNodeInput } from "../boundaries/Suspense";
 import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
 import { META } from "../../../quarky/src/ReactiveEntity";
-import { MaybeGetter } from "../InputTypes";
+import { MaybeIon } from "../InputTypes";
 import { isFunction } from "@rue/utils";
 import { isNamedDerivation } from "../component/fromTag";
 import { InnerHTMLKit } from "./mountInnerHTML";
@@ -68,8 +68,9 @@ export type EventsConfig = {
 // }
 
 type Falsey = undefined | null | false
-export type StyleInput = MaybeGetter<string | Falsey> | MaybeGetter<{ [key: string]: MaybeGetter<string | number | Falsey> }> | Falsey
-export type ClassInput = MaybeGetter<string> | Falsey
+export type StyleInput = MaybeIon<string | Falsey> | MaybeIon<{ [key: string]: MaybeIon<string | number | Falsey> }>
+export type ClassInput = MaybeIon<string | Falsey> | MaybeIon<{[key: string]: MaybeIon<Booleanny>}>
+
 
 export type ElementConfig<K extends HTMLTag = HTMLTag> = {
    [K in keyof HTMLElementEventMap as `on${K}`]?: (event: HTMLElementEventMap[K]) => void; } &
@@ -121,7 +122,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 // }
 
 export function makeNode(
-   nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--context' | '$v:mount' | '$v:create' | '$v:show' | '$--try' | '$--suspense' | '$--portal',
+   nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--context' | 'vvv:mount' | 'vvv:create' | 'vvv:show' | '$--try' | '$--suspense' | '$--portal',
    Slot: undefined | (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent | SwapConfig | JSX.Element | undefined {
@@ -143,13 +144,13 @@ export function makeNode(
          if (!Slot) throw new Error(`Extraneous <Context>`)
          return createPortalNode(Slot, <PortalNodeInput>config)
 
-      case '$v:show':
+      case 'vvv:show':
          return new SwapConfig('show')
 
-      case '$v:mount':
+      case 'vvv:mount':
          return new SwapConfig('mount')
 
-      case '$v:create':
+      case 'vvv:create':
          return new SwapConfig('create')
 
       case '$--transit':

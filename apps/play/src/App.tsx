@@ -1,9 +1,9 @@
 //@ts-nocheck
-import { NodeRef, component, COMPONENT, ComponentSetup, $if, $else, $for, teleportTo } from "@rue/lumo";
+import { NodeRef, component, COMPONENT, ComponentSetup, If, Else, For, teleportTo } from "@rue/lumo";
 import { useRandomColorGenerator } from "@rue/utils";
 import { __addDevName, ion, ionize } from "../../../packages/quarky/src";
 import { lazyLoadComponent } from "../../../packages/lumo/src/component/loadComponent";
-import { $elseif } from "../../../packages/lumo/src/conditional/If";
+import { ElseIf } from "../../../packages/lumo/src/conditional/If";
 import { AnyObject } from "@rue/types";
 
 
@@ -122,7 +122,7 @@ export function List() {
         },
         template:
             <div>
-                {$if($listLengthIsZero, 'show',
+                {If($listLengthIsZero, 'show',
 
                     <div
                         on:click={() => insertItem(0)}
@@ -131,7 +131,7 @@ export function List() {
                         insert
                     </div>
 
-                ).$elseif(() => $list().length === 0,
+                ).ElseIf(() => $list().length === 0,
 
                     <div
                         on:click={() => insertItem(0)}
@@ -141,7 +141,7 @@ export function List() {
                     </div>
                 )}
 
-                {$for($list, (item$, $index) =>
+                {For($list, (item$, $index) =>
 
                     <div style={`background-color: ${randomColor.get()}`}>
                         <p
@@ -164,7 +164,7 @@ export function List() {
                     , 'id')}
                 <button on:click={openModal}>open</button>
                 {/* <>
-                {$if($showSideBlock, 'create', () =>
+                {If($showSideBlock, 'create', () =>
                     <>
                         <TestBox />
                         <SideBlock frog="sir robin" />
@@ -218,16 +218,16 @@ function Appo(
 
     return component(
         <>
-            {$if($active, () => ((dialogBox) => (
+            {If($active, () => ((dialogBox) => (
                 <>
                     <DialogBox model={dialogBox}></DialogBox>
                     <button on:click={dialogBox.open}>open</button>
                 </>
             ))(useDialogBox({ initialState: 'open' })))} // state must be created within render function
-            {$elseif($ready, () =>
+            {ElseIf($ready, () =>
                 <button>click</button>
             )}
-            {$elseif($active, () => {
+            {ElseIf($active, () => {
                 const $dialogBox = fromContext(ALERT_DIALOG_BOX) || NodeRef()
 
                 return (
@@ -247,12 +247,12 @@ function Appo(
 }
 
 <div>
-    {$if(open, [
+    {If(open, [
         morphs.with(fade),
-        $if(entering,
+        if(entering,
             <p>Hi</p>
         ),
-        $else(
+        Else(
             <p>Bye</p>
         )
     ])}

@@ -82,7 +82,7 @@ type PropertyValuesOf<T> = T[keyof T];
 // const el = array.splice(0, 1)
 
 
-export type MaybeGetter<T> = (() => T) | T
+export type MaybeIon<T> = (($?: any) => T) | T
 
 export const v = ((optional?: '?' | '??') => {
    if (optional === '??')

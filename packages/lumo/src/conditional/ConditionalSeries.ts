@@ -22,7 +22,7 @@ export class ConditionalSeries {
                 else continue;
             }
             if (!(kit instanceof ConditionalKit)) {
-                if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the $if, $elseif, and Else functions")
+                if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the If, ElseIf, and Else functions")
                 else continue;
             }
             if (i !== statements.length - 1 && kit.statementType === 'else') {
@@ -81,7 +81,7 @@ export class ConditionalSeries {
 //             else continue;
 //         }
 //         if (!(kit instanceof ConditionalKit)) {
-//             if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the $if, $elseif, and Else functions")
+//             if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the If, ElseIf, and Else functions")
 //             else continue;
 //         }
 //         if (i !== statements.length - 1 && kit.statementType === 'else') {

@@ -40,7 +40,7 @@ export function TestMorphic() {
 
          <$--transition>
             <$--swap display />
-            {$if($active,
+            {If($active,
                <p>hey</p>
             )}
          </$--transition>

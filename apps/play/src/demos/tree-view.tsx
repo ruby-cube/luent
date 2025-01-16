@@ -1,4 +1,4 @@
-import { component, fromTag, Ionized, $if, $else, $for, watch, v, Nonlocal, _Nonlocal, pure, Pure, NonVoidMethods } from "@rue/lumo";
+import { component, fromTag, Ionized, If, Else, For, watch, v, Nonlocal, _Nonlocal, pure, Pure, NonVoidMethods } from "@rue/lumo";
 import { ion, ionize, Phase, toRaw } from "@rue/quarky";
 
 
@@ -34,7 +34,7 @@ export function TreeApp() {
       TreeItem = TreeItemView
    ) =>
       <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
-         <TreeItem mu:item={treeItem}></TreeItem>
+         <TreeItem nu:item={treeItem}></TreeItem>
       </ul>
    )
 }
@@ -136,7 +136,7 @@ function createTreeItem(data: ItemData): TreeItem {
 const textarea = document.createElement('textarea')
 
 function TreeItemView(input = fromTag({
-   'mu:item': v<TreeItem>,
+   'nu:item': v<TreeItem>,
    // list: v<string[]>,
    // 'on:click': v<(e: { pen: string }) => void>('?')
 })) {
@@ -172,18 +172,18 @@ function TreeItemView(input = fromTag({
    ) =>
       <li class='item'>
          <div
-            class={[$s=$isFolder() && 'bold']}
+            class={{ 'bold': $isFolder }}
             on:click={$isOpen.toggle} on:dblclick={changeType}
          >
             {item.name}
-            {$if($isFolder,
+            {If($isFolder,
                <span>[{$isOpen() ? '-' : '+'}]</span>
             )}
          </div>
-         {$if($isFolder, 'create', $if($isOpen, 'mount',
+         {If($isFolder, 'create', If($isOpen, 'mount',
             <ul>
-               {$for(item.children!, m => m, item => (
-                  <TreeItem mu:item={item}></TreeItem>
+               {For(item.children!, m => m, item => (
+                  <TreeItem nu:item={item}></TreeItem>
                ))}
                <li class='add' on:click={() => item.addChild()}>+</li>
             </ul>

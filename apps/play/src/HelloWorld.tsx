@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { Component, $else, $elseif, expose, $for, fromTag, $if, Ion, prep, provideAppwide, v, watch } from "@rue/lumo";
+import { Component, Else, ElseIf, expose, For, fromTag, If, Ion, prep, provideAppwide, v, watch } from "@rue/lumo";
 import { ion, ionize, Ionized, ionizeWithMarks } from "@rue/quarky";
 import { Inert, inert } from "../../../packages/quarky/src/ionize/inert";
 import { Well, Wellerman } from "./Well";
@@ -141,14 +141,14 @@ export function IonAccess() {
 
    return component(
       <>
-         <$v:mount />
-         {$if($x() > 10,
+         <vvv:mount />
+         {If($x() > 10,
             <p>{$x} is greater than 10</p>
          )}
-         {$elseif(5 > $x(),
+         {ElseIf(5 > $x(),
             <p>{$x} is less than 5</p>
          )}
-         {$else(
+         {Else(
             <p>{$x} is between 5 and 10</p>
          )}
       </>
@@ -165,17 +165,17 @@ function SvelteA() {
    let $s: any;
    return component(
       <>
-         <$v:mount />
-         {$if($x() > 10,
+         <vvv:mount />
+         {If($x() > 10,
             $x
          )}
-         {$elseif(5 > $x(),
+         {ElseIf(5 > $x(),
             <>{$x} is less than 5</>
          )}
-         {$elseif($x,
+         {ElseIf($x,
             <p>{$x} is less than 5</p>
          )}
-         {$else(
+         {Else(
             <p>{$x} is between 5 and 10</p>
          )}
 
@@ -193,7 +193,7 @@ function SvelteA() {
 
    return component(
       <div>
-         {$if($count, $count)}
+         {If($count, $count)}
       </div>
    )
 }
@@ -204,7 +204,7 @@ function SvelteA() {
 
    return component(
       <div>
-         {$if($count, <>{$count}</>)}
+         {If($count, <>{$count}</>)}
       </div>
    )
 }
@@ -222,7 +222,7 @@ function ColumnB() {
 export function HelloWorld() {
    return component(
       // <h1>hello world</h1>
-      <input m:value={$value}></input>
+      <input m:value={vvvalue}></input>
 
    )
 }
@@ -249,7 +249,7 @@ function ListB() {
 
    return (
       <div>
-         {$for($list, m => m.id, (item, $index) => <>
+         {For($list, m => m.id, (item, $index) => <>
             <SomeComponent name={$item} />
             <SomeComponent />
          </>)}
@@ -270,7 +270,7 @@ function Column() {
 function of(list: any) {
    return ['', 9] as [string, number]
 }
-// function $for(input: { [key: string]: any, Slot: any[] }) {
+// function For(input: { [key: string]: any, Slot: any[] }) {
 //    return component(
 //       ''
 //    )

@@ -1,4 +1,4 @@
-import { component, $if, $else, $elseif, slide } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
+import { component, If, Else, ElseIf, slide } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/src/index.ts";
 import { ion, ionize } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/quarky/src/index.ts";
 import { jsxs as jsx, jsx as jsx } from "/@fs/Users/Ruby/Desktop/ruby-cube/rue/packages/lumo/jsx-runtime/src/index.ts";
 export function MountIf() {
@@ -31,7 +31,7 @@ export function MountIf() {
       }),
       jsx("$--transition", {
          children: () => [
-            $if($active, //FIX: () =>
+            if($active, //FIX: () =>
                ["oh",
                   jsx("$--transit", {
                      with: slide({
@@ -52,16 +52,16 @@ export function MountIf() {
                         jsx("h2", {
                            children: () => ["hope"]
                         })]
-                  }), $if($ready, () => [
+                  }), if($ready, () => [
                      jsx("p", {
                         children: () => ["ready"]
                      })])]),
-            $elseif($ready, //FIX: () =>
+            ElseIf($ready, //FIX: () =>
                ["low",
                   jsx("h2", {
                      children: () => ["balloon"]
                   })]),
-            $else(//FIX: () =>
+            Else(//FIX: () =>
                ["so",
                   jsx("h2", {
                      children: () => ["bye"]

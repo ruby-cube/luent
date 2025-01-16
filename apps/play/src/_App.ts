@@ -1,4 +1,4 @@
-import { ifCase, $for, setUpNode, setUpNodesIn, onReactivate, beforeMount, beforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../../../packages/lumo/src";
+import { ifCase, For, setUpNode, setUpNodesIn, onReactivate, beforeMount, beforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../../../packages/lumo/src";
 import { useReactivity, ion, watch, ReactiveGet } from "../../../packages/quarky/src";
 
 const { $, mu, ionize, set } = useReactivity()
@@ -261,12 +261,12 @@ function List() {
             // mE('blockquote', [$count]),
             // mE('button', ['increment'], xButton),
             mE('ul', [
-                $for(list$, (item) => [
+                For(list$, (item) => [
                     mE('li', [item]),
                     // mE('li', [item + ' copy'])
                 ])
             ], 'ul'),
-            $for(list$, () =>
+            For(list$, () =>
                 mE(ListItem)
             )
             // ])

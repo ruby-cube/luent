@@ -9,8 +9,9 @@ import * as CSS from "csstype";
 import * as Lumo from "@rue/lumo";
 import { NodeRef } from "../../src/node/NodeRef";
 import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/lumo";
-import { AnyObject } from "@rue/types";
+import { AnyObject, Booleanny } from "@rue/types";
 import { PortalNodeInput } from "../../src/boundaries/Portal";
+import { MaybeIon } from "@rue/quarky";
 
 // export function jsxDEV(): "frog"
 // export function jsx(): "frog"
@@ -2498,6 +2499,7 @@ type LumoAttributes<C, P> = P extends { [ATTRIBUTES]: infer A } ? A : P
 declare global {
    const ATTRIBUTES = Symbol('component attributes')
    let $s;
+   let $;
    /**
     * @deprecated Use `React.JSX` instead of the global `JSX` namespace.
     */
@@ -2544,11 +2546,13 @@ declare global {
 
       type Falsey = undefined | null | false;
 
-      type StyleInput = Lumo.MaybeGetter<string> | Lumo.MaybeGetter<{ [K in keyof Partial<CSSProperties>]: Lumo.MaybeGetter<CSSProperties[K]> }> | Falsey
+      type StyleInput = Lumo.MaybeIon<string | Falsey> | Lumo.MaybeIon<{ [K in keyof Partial<CSSProperties>]: Lumo.MaybeIon<CSSProperties[K]> }>
+
+      type ClassInput = Lumo.MaybeIon<{[key: string]: Lumo.MaybeIon<Booleanny>}>
 
       type IntrinsicElements = {
          [K in keyof JSX._IntrinsicElements]: JSX._IntrinsicElements[K] & {
-            class?: Lumo.MaybeGetter<string> | Falsey | (Lumo.MaybeGetter<string> | Falsey)[];
+            class?: ClassInput | Lumo.MaybeIon<string | Falsey> | (Lumo.MaybeIon<string | Falsey> | ClassInput)[];
             style?: StyleInput | StyleInput[];
             attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
          }
@@ -2566,9 +2570,9 @@ declare global {
       // }
 
       interface _IntrinsicElements {
-         '$v:show': {};
-         '$v:mount': {};
-         '$v:create': {};
+         'vvv:show': {};
+         'vvv:mount': {};
+         'vvv:create': {};
          'i--i': {};
          '$--portal': PortalNodeInput & { Slot: Lumo.Slot }
          '$--context': ContextNodeInput & { Slot: Lumo.Slot };

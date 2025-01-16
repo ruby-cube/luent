@@ -24,10 +24,10 @@ export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
  */
 
 type ComponentValidatedInput<C> = {
-   [K in keyof C as C[K] extends { required: true } | { default: true } ? K extends `on:${string}` ? never : K extends `mu:${infer S}` | `mu?:${infer S}` | `m:${infer S}` ? S
+   [K in keyof C as C[K] extends { required: true } | { default: true } ? K extends `on:${string}` ? never : K extends `nu:${infer S}` | `nu?:${infer S}` | `m:${infer S}` ? S
    : K : never/* exclude optionals */]:
 
-   C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? K extends `mu:${string}` ? I : K extends `mu?:${string}` ? I | DeepReadonly<I> : DeepReadonly<I>
+   C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? K extends `nu:${string}` ? I : K extends `nu?:${string}` ? I | DeepReadonly<I> : DeepReadonly<I>
    : 'invalid typeConfig'
 } & WithOptionals<C> & WithEmit<C>
 
@@ -52,8 +52,8 @@ type _EventsOnly<C> = { [K in keyof C as K extends `on:${infer S}` ? S : never]:
 
 const exampleConfig = {
    dove: v<Dove>,
-   'mu?:frog': v<Frog>,
-   'mu?:well': v<Well>
+   'nu?:frog': v<Frog>,
+   'nu?:well': v<Well>
 }
 
 type Frog = { name: string }
@@ -61,13 +61,13 @@ type Well = { depth: number }
 type Dove = { distance: number }
 
 type ExampleRequired = {
-   'mu:frog': Frog
+   'nu:frog': Frog
 } | {
    frog: Frog
 }
 
 type ExampleOptional = {
-   'mu:frog'?: Frog
+   'nu:frog'?: Frog
 } | {
    frog?: Frog
 }
@@ -82,16 +82,16 @@ const f = null as unknown as Frog
 const w = null as unknown as Well
 const d = null as unknown as Dove
 
-tryIt({ "mu:frog": f, dove: d, "mu:well": w })
-tryIt({ frog: f, dove: d, "mu:well": w })
-tryIt({ "mu:frog": f, dove: d, well: w })
+tryIt({ "nu:frog": f, dove: d, "nu:well": w })
+tryIt({ frog: f, dove: d, "nu:well": w })
+tryIt({ "nu:frog": f, dove: d, well: w })
 tryIt({ frog: f, dove: d, well: w })
 
 //@ts-expect-error
-tryIt({ "mu:frog": f, dove: d })
+tryIt({ "nu:frog": f, dove: d })
 
 //@ts-expect-error
-tryIt({ dove: d, "mu:well": w })
+tryIt({ dove: d, "nu:well": w })
 
 //@ts-expect-error
 tryIt({ frog: f, dove: d })
@@ -104,14 +104,14 @@ tryIt({ dove: d, well: w })
  */
 
 type ComponentAttributes<C> = {
-   [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `mu?:${string}` ? never : K : never]:
+   [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `nu?:${string}` ? never : K : never]:
    C[K] extends ((arg: any) => { inputType: infer I }) ? I : 'invalid typeConfig'
 } & {
-   [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `mu?:${string}` ? never : K : never]?:
+   [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `nu?:${string}` ? never : K : never]?:
    C[K] extends { inputType: infer I } ? I : 'invalid typeConfig'
 } & (WithMaybeMutables<C> extends never ? {} : WithMaybeMutables<C>)
 // & {
-//    [K in keyof C as K extends `mu?:${infer S}` ? `mu:${K}` : never]:
+//    [K in keyof C as K extends `nu?:${infer S}` ? `nu:${K}` : never]:
 //    C[K] extends (arg: any) => { $inputType: infer I } ? I : 'invalid typeConfig'
 // } & {
 //    [K in keyof C as C[K] extends { name: '$Ionized' | '$Ion'; optional: '?' | 'withDefault' } ? K extends string ? `$${K}` : never : never]?:
@@ -131,13 +131,13 @@ type TupleToUnion<T extends any[]> = T[number];
 
 
 type RequiredMaybeMutables<C> = {
-   [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `mu?:${infer S}` ? S : never : never]:
-   C[K] extends ((arg: any) => { inputType: infer I }) ? K extends `mu?:${infer S}` ? [{ [K in `mu:${S}`]: I }, { [K in S]: I }] : never : 'invalid typeConfig'
+   [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `nu?:${infer S}` ? S : never : never]:
+   C[K] extends ((arg: any) => { inputType: infer I }) ? K extends `nu?:${infer S}` ? [{ [K in `nu:${S}`]: I }, { [K in S]: I }] : never : 'invalid typeConfig'
 }
 
 type OptionalMaybeMutables<C> = {
-   [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `mu?:${infer S}` ? S : never : never]:
-   C[K] extends { inputType: infer I } ? K extends `mu?:${infer S}` ? [{ [K in `mu:${S}`]?: I }, { [K in S]?: I }] : never : 'invalid typeConfig'
+   [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `nu?:${infer S}` ? S : never : never]:
+   C[K] extends { inputType: infer I } ? K extends `nu?:${infer S}` ? [{ [K in `nu:${S}`]?: I }, { [K in S]?: I }] : never : 'invalid typeConfig'
 }
 
 

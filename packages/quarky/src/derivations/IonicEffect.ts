@@ -1,6 +1,6 @@
 import { popEffect, pushEffect, runCleanups, ThisEffect } from "../effects/ThisEffect";
 import { AtomicIon } from "../ion/AtomicIon";
-import { Ref } from "../ion/Neutron";
+import { Neutron } from "../ion/Neutron";
 import { PropIon } from "../ionize/PropIon";
 import { META } from "../ReactiveEntity";
 import { asIonicAtom } from "./IonicAtom";
@@ -14,7 +14,7 @@ export type IonicEffect = {
     initialize: () => IonicEffect;
 }
 
-function trackIonicEffect(derivation: IonicDerivation, fn: () => any, $activeEffect: Ref<ThisEffect>) {
+function trackIonicEffect(derivation: IonicDerivation, fn: () => any, $activeEffect: Neutron<ThisEffect>) {
     const value = derivation.trackAtoms(() => runIonicEffect(fn, derivation, $activeEffect));
     // derivation.forwardAtoms(derivation.atoms)
     return value;
@@ -30,7 +30,7 @@ export function isIonicEffectAtom(atom: AtomicIon | PropIon) {
     return currentMetaIonicEffect.atoms.has(asIonicAtom(atom));
 }
 
-function runIonicEffect(effect: () => void, meta: IonicDerivation, $activeEffect: Ref<ThisEffect>) {
+function runIonicEffect(effect: () => void, meta: IonicDerivation, $activeEffect: Neutron<ThisEffect>) {
     let prevMeta = currentMetaIonicEffect
     try {
         runCleanups($activeEffect())
@@ -47,7 +47,7 @@ function runIonicEffect(effect: () => void, meta: IonicDerivation, $activeEffect
     }
 }
 
-export function createIonicEffect(fn: () => any, $activeEffect: Ref<ThisEffect>, retrack: boolean) {
+export function createIonicEffect(fn: () => any, $activeEffect: Neutron<ThisEffect>, retrack: boolean) {
     if (retrack) {
         const derivation = new IonicDerivation(ionicEffect, IONIC_EFFECT, retrack)
 

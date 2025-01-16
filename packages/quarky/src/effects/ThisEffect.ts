@@ -1,4 +1,4 @@
-import { $schedule } from "@rue/flask";
+import { $schedule, PendingCancelOp } from "@rue/flask";
 import { MutationRecord } from "./watch";
 
 export class ThisEffect {
@@ -9,18 +9,21 @@ export class ThisEffect {
 
    private cleanups?: Set<(() => void)>
 
-   onCleanup(cleanUp: () => void) { //TODO: return pending cancel op
+   get onCleanup() {
       const cleanups = this.cleanups || (this.cleanups = new Set())
-
-      return $schedule(cleanUp, {}, {
-         enroll(cb) {
-            cleanups.add(cb)
-         },
-         remove(cb) {
-            cleanups.delete(cb)
-         }
+      return this._onCleanup || (this._onCleanup = (cleanUp: () => void) => {
+         return $schedule(cleanUp, {}, {
+            enroll(cb) {
+               cleanups.add(cb)
+            },
+            remove(cb) {
+               cleanups.delete(cb)
+            }
+         })
       })
    }
+
+   private _onCleanup?: (cleanUp: () => void) => PendingCancelOp
 }
 
 let currentEffect: ThisEffect | undefined;
@@ -37,7 +40,7 @@ export function popEffect() {
 }
 
 export function $thisEffect() {
-   if (!currentEffect) throw new Error('$thisEffect can only be called synchronously within a reactive effect')
+   // if (!currentEffect) throw new Error('$thisEffect can only be called synchronously within a reactive effect')
    return currentEffect;
 }
 

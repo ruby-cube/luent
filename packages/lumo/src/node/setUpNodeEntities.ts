@@ -41,14 +41,14 @@ export function setUpNodeEntities(
          }
          else if (statementType === 'elseIf') {
             if (series.isOpen) series.add(nodeEntity)
-            else if (__DEV__) console.warn('extraneous $elseif()')
+            else if (__DEV__) console.warn('extraneous ElseIf()')
          }
          else { //else 
             if (series.isOpen) {
                series.add(nodeEntity)
                series.close()
             }
-            else if (__DEV__) console.warn('extraneous $else()')
+            else if (__DEV__) console.warn('extraneous Else()')
          }
       }
       else if (nodeEntity instanceof SwapConfig) {

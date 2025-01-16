@@ -7,7 +7,7 @@ import { defineContextProp } from "../context/ContextKey";
 import { fromContext } from "../context/provide";
 import { Ion } from "@rue/quarky";
 import { component } from "../component/InternalComponent";
-import { $else, $if } from "../conditional/If";
+import { Else, If } from "../conditional/If";
 import { isFunction } from "@rue/utils";
 
 export function renderTransitNode(
@@ -20,10 +20,10 @@ export function renderTransitNode(
         const output = isFunction(Slot) ? Slot() : Slot
         return component(
             [
-                $if($disable, () =>
+                if($disable, () =>
                     output
                 ),
-                $else(() => {
+                Else(() => {
                     registerTransitionNode(transitionNode)
                     return makeElement('div', output, { ref: $div }, undefined)
                 })

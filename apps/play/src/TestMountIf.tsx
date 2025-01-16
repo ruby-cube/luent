@@ -1,4 +1,4 @@
-import { component, $if, $else, fade, $elseif, slide, fromTag, v, target, prep, Ion } from "@rue/lumo";
+import { component, If, Else, fade, ElseIf, slide, fromTag, v, target, prep, Ion } from "@rue/lumo";
 import { ion, ionize } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
@@ -58,7 +58,7 @@ export function MountIf() {
          <h1>Hello {todos[0].name}</h1>
          <div>{() => 'hi'}</div>
          <$--transition>
-            {$if($active,
+            {If($active,
                <>
                   oh
                   <$--transit with={slide({ x: -100, duration: 2200 })}>
@@ -67,18 +67,18 @@ export function MountIf() {
                   <$--transit with={slide({ x: 100, duration: 2200 })}>
                      <h2>hope</h2>
                   </$--transit>
-                  {$if($ready,
+                  {If($ready,
                      <p>ready</p>
                   )}
                </>
             )}
-            {$elseif($ready,
+            {ElseIf($ready,
                <>
                   low
                   <h2>balloon</h2>
                </>
             )}
-            {$else(
+            {Else(
                <>
                   so
                   <h2>bye</h2>
