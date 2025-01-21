@@ -37,7 +37,7 @@ export function TestDebugApp() {
    }
 
    watch(frog, () => {
-      watch($count, () => {
+      watch($count, (effect) => {
 
       }, { until: $thisEffect()?.onCleanup })
    })
@@ -45,8 +45,8 @@ export function TestDebugApp() {
    return component(
       <>
          <div>{$count}</div>
-         <button on:click={() => $count.increment()}>increment</button>
-         <button on:click={() => $count.decrement()}>decrement</button>
+         <button on:click={e => $count.increment()}>increment</button>
+         <button on:click={e => $count.decrement()}>decrement</button>
          <button on:click={refreshCounter}>set same</button>
       </>
    )

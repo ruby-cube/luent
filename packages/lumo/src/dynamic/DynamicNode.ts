@@ -20,9 +20,12 @@ export class DynamicNode {
         this.flask = flask;
     }
 
+    get onDismantle(){
+      return this.flask?.onDisposal
+    }
+
     constructor(
         public parent: DynamicNode | null,
-        public preserve?: boolean,
     ) {
         // this.count = count++;
         // console.trace('new dynamic node', this.count)

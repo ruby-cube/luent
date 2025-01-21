@@ -1,29 +1,23 @@
 import { $schedule, PendingCancelOp } from "@rue/flask";
-import { MutationRecord } from "./watch";
 
 export class ThisEffect {
+   private tasks?: Set<(() => void)>
 
-   constructor(
-      public mutations?: MutationRecord[] //TODO: Make required?
-   ) { }
-
-   private cleanups?: Set<(() => void)>
-
-   get onCleanup() {
-      const cleanups = this.cleanups || (this.cleanups = new Set())
-      return this._onCleanup || (this._onCleanup = (cleanUp: () => void) => {
+   get onDismantle() {
+      const tasks = this.tasks || (this.tasks = new Set())
+      return this._onDismantle || (this._onDismantle = (cleanUp: () => void) => {
          return $schedule(cleanUp, {}, {
-            enroll(cb) {
-               cleanups.add(cb)
+            enroll(_cleanUp) {
+               tasks.add(_cleanUp)
             },
-            remove(cb) {
-               cleanups.delete(cb)
+            remove(_cleanUp) {
+               tasks.delete(_cleanUp)
             }
          })
       })
    }
 
-   private _onCleanup?: (cleanUp: () => void) => PendingCancelOp
+   private _onDismantle?: (cleanUp: () => void) => PendingCancelOp
 }
 
 let currentEffect: ThisEffect | undefined;
@@ -47,7 +41,7 @@ export function $thisEffect() {
 export function runCleanups(effect: ThisEffect | undefined) {
    if (!effect) return;
    //@ts-expect-error readonly
-   const cleanups = effect.cleanups
+   const cleanups = effect.tasks
    if (!cleanups) return;
    for (const cleanUp of cleanups) {
       cleanUp()
