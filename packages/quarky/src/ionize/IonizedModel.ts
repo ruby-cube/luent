@@ -254,7 +254,7 @@ export function createIonizedModel(
          }
          const _key = typeof key === 'string' && key.startsWith('_') ? key.slice(1) : key;
          if (isNativeMethod(_key, structureConfigs)) {
-            console.log('isNativeMethod', _key)
+            // console.log('isNativeMethod', _key)
             // if (reinedMeta) {
             //    if (reinedMeta.isExposedKey(_key)) {
             //       return getNativeMethod(

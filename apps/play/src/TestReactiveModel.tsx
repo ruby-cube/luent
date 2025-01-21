@@ -1,4 +1,4 @@
-import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
+import { NodesRef, component, If, Else, For, NodeRef, target, watch } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { ion, __addDevName, DerivedIon, ionize, isIonizedModel, rein, toRaw } from "../../../packages/quarky/src";
 
@@ -88,13 +88,13 @@ export function List(
       }
    }
    )
-try{
+   try {
 
-   console.log('has it?', selected.has(0))
-}
-catch(err){
-   console.error('EEP', err)
-}
+      console.log('has it?', selected.has(0))
+   }
+   catch (err) {
+      console.error('EEP', err)
+   }
 
    // toRaw(selected).add({id: '', content: ''})
 
@@ -110,6 +110,10 @@ catch(err){
       list.remove(index);
    }
 
+   watch(selected, ()=>{
+      console.log('selected changed', selected.size)
+   })
+
    return component(
       <>
          <h1>hello world</h1>
@@ -117,31 +121,31 @@ catch(err){
             insert!
          </div>
 
-         {For(list, item => item.id, (item, $index) =>
-            <div on:click={e=>!target('style.cursor:pointer') && selected.toggle(item)}
+         {For(list, item => item.id, (item, $index) => (console.log('rendering', item),
+            <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
                // <div
                style={{
                   backgroundColor: randomColor.get(),
-                  outline: $=(console.log('change outline'), selected.has(item) ? 'thick solid blue' : 'unset'),
+                  outline: $=(console.log('change outline', item), selected.has(item) ? 'thick solid blue' : 'unset'),
                }}>
-               <p on:click={e=>removeItem($index())} style="cursor: pointer">
+               <p on:click={e => removeItem($index())} style="cursor: pointer">
                   X
                </p>
 
-               <li on:click={e=>list.changeContent($index())}>
+               <li on:click={e => list.changeContent($index())}>
                   {$=item.content}
                </li>
                <p>{$index}</p>
-               <div on:click={e=>list.insert($index() + 1)} style="background-color: gray; cursor: pointer">
+               <div on:click={e => list.insert($index() + 1)} style="background-color: gray; cursor: pointer">
                   insert
                </div>
-               <div on:click={e=>moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">
+               <div on:click={e => moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">
                   insert
                </div>
             </div>
-         )}
+         ))}
 
-         <button on:click={e=>selected.clear()}>clear</button>
+         <button on:click={e => selected.clear()}>clear</button>
          {/* <button
                 on:click={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
             >

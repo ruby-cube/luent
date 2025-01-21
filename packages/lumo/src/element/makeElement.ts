@@ -184,7 +184,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
       if (isIon(entry)) {
          watch(entry, (value: DynamicClassesConfig | string | Falsey, prevValue: DynamicClassesConfig | string | Falsey) => {
             if (prevValue) removePreviousClasses(prevValue, classList)
-            if (value) addClasses(value, classList)
+            if (value) addClasses(value, classList, $thisEffect())
          }, { eager: true, phase: Phase.RENDER })
       }
       else if (entry) {
@@ -215,12 +215,12 @@ function removePreviousClasses(prevValue: string | AnyObject, classList: DOMToke
 }
 
 
-function addClasses(value: string | AnyObject, classList: DOMTokenList) {
+function addClasses(value: string | AnyObject, classList: DOMTokenList, outerEffect?: ThisEffect) {
    if (isString(value)) {
       setUpClassesFromString(value, classList)
    }
    else if (isObject(value)) {
-      setUpClassesFromObject(value, classList)
+      setUpClassesFromObject(value, classList, outerEffect)
    }
    else {
       if (__DEV__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
@@ -228,8 +228,7 @@ function addClasses(value: string | AnyObject, classList: DOMTokenList) {
 }
 
 
-function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList) {
-   const outerEffect = $thisEffect()
+function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList, outerEffect: ThisEffect | undefined) {
    for (const key in entry) {
       const value = entry[key]
       if (value && isIon(value)) {
@@ -275,7 +274,7 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    for (const entry of styles) {
       if (isIon(entry)) {
          watch(entry, (value: string | AnyObject | Falsey) => {
-            setUpStyleEntry(style, value);
+            setUpStyleEntry(style, value, $thisEffect());
          }, { eager: true, phase: Phase.RENDER })
       }
       else {
@@ -284,9 +283,8 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    }
 }
 
-function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey) {
+function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey, outerEffect?: ThisEffect) {
    if (entry instanceof Object) {
-      const outerEffect = $thisEffect()
       for (const key in entry) {
          const value = entry[key];
          if (isIon(value)) {

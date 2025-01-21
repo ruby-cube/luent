@@ -398,6 +398,7 @@ function setUpWatcher(
       remove(_effect) {
          runCleanups($activeEffect())
          for (const subject of watchSubjects) {
+            console.trace('byebye', subject)
             subject.unwatch(_effect, phase)
          }
          if (ionicDerivations) {
