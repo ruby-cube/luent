@@ -1,6 +1,6 @@
 import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { ion, __addDevName, DerivedIon, ionize, isIonizedModel, rein } from "../../../packages/quarky/src";
+import { ion, __addDevName, DerivedIon, ionize, isIonizedModel, rein, toRaw } from "../../../packages/quarky/src";
 
 
 const randomColor = useRandomColorGenerator()
@@ -12,7 +12,7 @@ function genId() {
 
 
 // const $count = ion(0)
-// watch($(doubleCount => $count() + 2), () => {  
+// watch($=(doubleCount => $count() + 2), () => {  
 
 // })
 
@@ -73,18 +73,30 @@ export function List(
    })
 
 
-   const selected = ionize(new Set(), {
+   const mySet = new Set()
+   const selected = ionize(mySet, {
       toggle(item: typeof list[number]) {
+         console.log(toRaw(selected))
+         const prevSize = toRaw(selected).size;
          if (selected.has(item)) {
             selected.delete(item)
-            console.log('toggle', selected)
          }
          else {
             selected.add(item)
          }
+         console.log('toggle', toRaw(selected), prevSize, 'to', toRaw(selected).size)
       }
    }
    )
+try{
+
+   console.log('has it?', selected.has(0))
+}
+catch(err){
+   console.error('EEP', err)
+}
+
+   // toRaw(selected).add({id: '', content: ''})
 
    // const vals = selected.values()
    Array.from(selected)
@@ -96,7 +108,6 @@ export function List(
    function removeItem(index: number) {
       selected.delete(list[index])
       list.remove(index);
-      // console.log('success?', selected)
    }
 
    return component(
@@ -107,30 +118,30 @@ export function List(
          </div>
 
          {For(list, item => item.id, (item, $index) =>
-            <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
+            <div on:click={e=>!target('style.cursor:pointer') && selected.toggle(item)}
                // <div
                style={{
                   backgroundColor: randomColor.get(),
-                  outline: $s = selected.has(item) ? 'thick solid blue' : 'unset',
+                  outline: $=(console.log('change outline'), selected.has(item) ? 'thick solid blue' : 'unset'),
                }}>
-               <p on:click={e => removeItem($index())} style="cursor: pointer">
+               <p on:click={e=>removeItem($index())} style="cursor: pointer">
                   X
                </p>
 
-               <li on:click={e => list.changeContent($index())}>
-                  {item.content}
+               <li on:click={e=>list.changeContent($index())}>
+                  {$=item.content}
                </li>
                <p>{$index}</p>
-               <div on:click={e => list.insert($index() + 1)} style="background-color: gray; cursor: pointer">
+               <div on:click={e=>list.insert($index() + 1)} style="background-color: gray; cursor: pointer">
                   insert
                </div>
-               <div on:click={e => moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">
+               <div on:click={e=>moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">
                   insert
                </div>
             </div>
          )}
 
-         <button on:click={e => selected.clear()}>clear</button>
+         <button on:click={e=>selected.clear()}>clear</button>
          {/* <button
                 on:click={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
             >
@@ -150,7 +161,7 @@ export function List(
       //     </button>
       //     <button
       //         on:click={[
-      //             if($active, [
+      //             If($active, [
       //                 increment, runOnce.preventDefault, target(THIS_NODE)
       //             ]),
       //             Else(decrement)

@@ -195,14 +195,23 @@ export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonicMo
    return false;
 }
 
+function extendTarget(target: AnyObject, methods: AnyObject){
+   const proto = {...methods}
+   Object.setPrototypeOf(proto, Object.getPrototypeOf(target))
+   Object.setPrototypeOf(target, proto)
+   return target
+}
+
 export function createIonizedModel(
    _target: object,
    methods: AnyObject | undefined,
+   devTrace: string | undefined
 ) {
 
-   const target = methods ? Object.setPrototypeOf({ ...methods }, _target) : _target; //NOTE: If methods and target has overlapping methods, it will overwrite the original target's method
+
+   const target = methods ? extendTarget(_target, methods) : _target; //NOTE: If methods and target has overlapping methods, it will overwrite the original target's method
    const structureConfigs = getStructureConfigs(target);
-   const metaIonicModel = new MetaIonizedModel(target)
+   const metaIonicModel = new MetaIonizedModel(target, devTrace)
    const ionicModel = new Proxy(target, {
       has(target, key) {
          if (key === META)
@@ -211,26 +220,26 @@ export function createIonizedModel(
       },
       get(target, key, receiver) {
          if (__DEV__) emitSignal()
-         if (key === META) return metaIonicModel
+            if (key === META) return metaIonicModel
          if (isNonTrackable(key, structureConfigs)) {
-            const value = Reflect.get(_target, key, receiver);
+            const value = Reflect.get(target, key, receiver); //_target
             if (value instanceof Function) {
                return (...args: any[]) =>
-                  value.call(_target, ...args) //TODO: Simplify... a bound method needs to be created and stored
+                  value.call(target/* _target */, ...args) //TODO: Simplify... a bound method needs to be created and stored
             }
             return value;
          }
-
+         
          const isIonAccessKey = typeof key === 'string' && key[0] === '$'
          //NOTE: Temporarily hidden rein because of issues
          // const reinedMeta = getReinedMeta(target, ionicModel, receiver)
          // if (reinedMeta && !reinedMeta.isExposedKey(isIonAccessKey ? key.slice(1) : key)) {
-         //    if (__DEV__) console.warn(`Property is restricted. Cannot access '${key.toString()}'`)
-         //    return undefined;
-         // }
-         const reinedMeta = { isExposedKey: () => true } //NOTE: TEMPORARY
-
-         if (methods && key in methods) {
+            //    if (__DEV__) console.warn(`Property is restricted. Cannot access '${key.toString()}'`)
+            //    return undefined;
+            // }
+            const reinedMeta = { isExposedKey: () => true } //NOTE: TEMPORARY
+            
+            if (methods && key in methods && key !== 'has') {
             const method = methods[key]
             if (isMethod(method)) {
                return accessMethod(
@@ -245,7 +254,7 @@ export function createIonizedModel(
          }
          const _key = typeof key === 'string' && key.startsWith('_') ? key.slice(1) : key;
          if (isNativeMethod(_key, structureConfigs)) {
-            console.log('isNative Method', _key)
+            console.log('isNativeMethod', _key)
             // if (reinedMeta) {
             //    if (reinedMeta.isExposedKey(_key)) {
             //       return getNativeMethod(
@@ -263,7 +272,7 @@ export function createIonizedModel(
             return getNativeMethod(
                _key,
                structureConfigs,
-               _target,
+               _target, //_target?
                ionicModel,
                metaIonicModel,
                boundMethodMap,
@@ -472,6 +481,8 @@ export function reactiveSetter(
    if (oldValue === newValue
       || isNonTrackable(key, structureConfigs)
       || !isWritable(target, key)) {
+      const prop = getObservedProp(ionicModel, key)
+      if (prop) trigger(prop, newValue, oldValue)
       target[key] = newValue
       return true;
    }
@@ -504,12 +515,12 @@ export function reactiveSetter(
 
 
 export function setAbsorbedIon(ion: AnyIon, value: any, ionicModel: IonizedModel, key: PropertyKey, oldValue: any, structureConfigs: CustomIonicModelConfig[]) {
-   if ('value' in ion) {
+   if ('state' in ion) {
       try {
-         ion.value = value;
+         ion.state = value;
       }
       catch (err) {
-         if (__DEV__) throw new Error("Absorbed AtomicIon is read only")
+         if (__DEV__) throw new Error("Absorbed AtomicIon is read only") //TODO: since readonly is only being enforced at the typescript level, make sure typescript prevents mutation of readonly absorbed ions
          return false;
       }
 

@@ -4,6 +4,7 @@ import { getActiveDynamicNode, getDynamicNode } from "../dynamic/nodestack";
 import { CustomCleanupSchedulerListenerOptions } from "../events/listen";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { AnyObject } from "@rue/types";
+import { getTrace } from "./debug";
 
 type WatchForRenderOptions = {
     eager?: true;
@@ -71,7 +72,8 @@ export function watch<T>(target: T, effect: (newValue: T, oldValue: T)=>void, op
 // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
 // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
 export function watch<T>(target: T, effect: T extends () => infer R ? (newValue: R, oldValue: R) => void : (newValue: T, oldValue: T)=>void, options?: LumoWatchOptions): ActiveListener {
-    const dynamicNode = getDynamicNode()
+   // console.log(getTrace()) 
+   const dynamicNode = getDynamicNode()
     if (!dynamicNode)
         return _watch(target, effect, options)
     return asPreservedWatcher(_watch(target, effect, options), dynamicNode);

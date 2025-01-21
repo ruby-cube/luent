@@ -15,6 +15,8 @@ import { List } from './TestReactiveModel';
 import { TestCounterModel } from './TestCounter';
 import { TestDerived } from './testDerivedIon';
 import { TestDerivedConditional } from './testDerived';
+import { TestDebugApp } from './TestDebugTools';
+import { Transformers } from './jsx-$transform';
 // import { PlainList } from './TestList';
 // import { HelloWorld } from './HelloWorld';
 // import { Check } from './childrenTest';

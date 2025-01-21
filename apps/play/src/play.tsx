@@ -6,7 +6,7 @@ function ListBlock() {
 
     // for if you don't want to track effect
     watchCases(
-        if($active, () => {
+        If($active, () => {
             $height() // <-- Will not be tracked
         }),
         ElseIf($bored, () => {

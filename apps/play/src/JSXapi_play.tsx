@@ -139,7 +139,7 @@ const hi = () =>
             </div>
             <div>
             <swap:show-hide/>
-               {[if($active,
+               {[If($active,
                   <SomeComponent />
                ),
                ElseIf($ready,
@@ -162,7 +162,7 @@ const hi = () =>
             </div>
             <div>
                {[
-                  if($active,
+                  If($active,
                      <SomeComponent />
                   ),
                   ElseIf($ready,
@@ -186,7 +186,7 @@ const hi = () =>
             </div>
             <div>
                {[
-                  if($active,
+                  If($active,
                      <div>hi ho</div>
                   ),
                   ElseIf($ready,
@@ -213,7 +213,7 @@ const hi = () =>
             </div>
 
             <div>
-               {[if($active, <>
+               {[If($active, <>
                   <SomeComponent />
                   <div>hi ho</div>
                </>
@@ -232,7 +232,7 @@ const hi = () =>
 
             <div>
                {[
-                  if($active, <>
+                  If($active, <>
                      <SomeComponent />
                      <div>hi ho</div>
                   </>
@@ -384,7 +384,7 @@ const hi = () =>
 
             <h1>hello</h1>
             {[
-               if($active(),
+               If($active(),
                   <p>hey</p>
                ),
                Else(
@@ -401,7 +401,7 @@ const hi = () =>
             <h1>hello</h1>
             <div>
                <$--transition with={fade}>
-                  {[if($active(), { type: 'mount' },
+                  {[If($active(), { type: 'mount' },
                      <div>
                         <p>hey</p>
                      </div>
@@ -415,7 +415,7 @@ const hi = () =>
             </div>
 
             <div>
-               {[if($active(), { 'with': fade, type: 'mount' },
+               {[If($active(), { 'with': fade, type: 'mount' },
                   <div>
                      <p>hey</p>
                   </div>
@@ -430,7 +430,7 @@ const hi = () =>
 
             <div>
                {swap({ 'with': fade, type: 'mount' },
-                  if($active(),
+                  If($active(),
                      <div>
                         <p>hey</p>
                      </div>
@@ -446,7 +446,7 @@ const hi = () =>
             <div>
                <$--transition with={fade({ duration: 30 })}>
                   {{ swap: 'show/hide' }}
-                  {[if($active, 'mount',
+                  {[If($active, 'mount',
                      <div>
                         <p>hey</p>
                      </div>
@@ -560,7 +560,7 @@ const hi = () =>
             <h1>Something Here</h1>
 
             {[
-               if($active, <>
+               If($active, <>
                   <p>hello world</p>
                </>),
                ElseIf($broken, { setup: SelectionKit }, m => <>
@@ -574,7 +574,7 @@ const hi = () =>
             ]}
 
             {[
-               if($active,
+               If($active,
                   <p>hello world</p>
                ),
                ElseIf($broken, m => <>
@@ -603,7 +603,7 @@ const hi = () =>
 
             {
                morphic({ with: fade },
-                  if($active, { type: 'show' }, o =>
+                  If($active, { type: 'show' }, o =>
                      <p>hello world</p>,
                   ),
                   ElseIf($broken, (o = SelectionKit(),
@@ -618,7 +618,7 @@ const hi = () =>
 
             <div>
                {If(open,
-                  if(entering,
+                  If(entering,
                      <p>Hi</p>
                   ),
                   Else(
@@ -629,7 +629,7 @@ const hi = () =>
 
             <h1>Something Here</h1>
             {(
-               if($active, { type: 'show' }, o =>
+               If($active, { type: 'show' }, o =>
                   Context(
                      w(COUNT, o.$count),
                      w(FROG, ionize(Frog())),
@@ -643,7 +643,7 @@ const hi = () =>
 
             <h1>Something Here</h1>
             {(
-               if($broken, { use: SelectionKit }, o =>
+               If($broken, { use: SelectionKit }, o =>
                   Context(
                      where(COUNT, o.$count),
                      where(FROG, o.$frog),
@@ -657,7 +657,7 @@ const hi = () =>
 
             {If($active,
                [
-                  if($broken,
+                  If($broken,
                      <p>brocken</p>
                   ),
                   Else(
@@ -668,10 +668,10 @@ const hi = () =>
 
 
             {/* {morphic(
-                    if($list.length === 0, 'show', fade, SelectionKit, o =>
+                    If($list.length === 0, 'show', fade, SelectionKit, o =>
                         <p>hello world</p>
                     ),
-                    if($broken(),
+                    If($broken(),
                         <p>bye world</p>
                     ),
                     Else(
@@ -712,7 +712,7 @@ const hi = () =>
             <footer>(c) 2024</footer>
 
             {[
-               if($editable,
+               If($editable,
                   <p>hello world</p>
                ),
                ElseIf($broken,
@@ -783,10 +783,10 @@ const hi = () =>
                <input />
             </div>
             {morphic(
-               if($list.length === 0,
+               If($list.length === 0,
                   <p>hello world</p>
                ),
-               if($broken(),
+               If($broken(),
                   <p>bye world</p>
                ),
                Else(
@@ -797,10 +797,10 @@ const hi = () =>
 
             <h1>Choose something</h1>
             {Conditional({ setup: WeekKit }, o => [
-               if($list.length === 0,
+               If($list.length === 0,
                   <p>hello world</p>
                ),
-               if($broken(),
+               If($broken(),
                   <p>bye world</p>
                ),
                Else(
@@ -811,7 +811,7 @@ const hi = () =>
             <h1>Choose something</h1>
 
             <$--transition>{[
-               if($list.length === 0, { setup: MouseKit }, o => [
+               If($list.length === 0, { setup: MouseKit }, o => [
                   <p>hello world</p>,
                   <p>hello world</p>
                ]),

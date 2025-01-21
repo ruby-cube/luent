@@ -6,7 +6,6 @@ import { getWithoutTracking } from "./derivations/DependencyTracker";
 import { isIonicEffectAtom } from "./derivations/IonicEffect";
 import { isCurrentWatchSubject } from "./effects/watch";
 import { PropIon } from "./ionize/PropIon";
-import { Ionized } from "./ionize/ionize";
 import { AnyObject } from "@rue/types";
 
 
@@ -42,7 +41,7 @@ export function triggerIonicAtom(target: ReactivePrimitive, newValue?: any, oldV
 
 
 export function triggerIonicModel(
-    model: Ionized<AnyObject>,
+    model: AnyObject,
     op: string,
     args: any[],
     output: any,

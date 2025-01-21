@@ -58,7 +58,7 @@ export function createSuspenseNode(Slot: () => NodeEntity, input: SuspenseNodeIn
 
    return component(
       [
-         if($pending, renderPlaceholder),
+         If($pending, renderPlaceholder),
          ElseIf($error, () => renderError($error())),
          Else(() => output)
       ]

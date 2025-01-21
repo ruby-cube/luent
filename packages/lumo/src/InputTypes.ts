@@ -167,38 +167,38 @@ export const z = ((optional?: '?' | '??') => {
 // }
 
 
-export const _Ion = ((optional: '?' | '??') => {
+export const MaybeIon = ((optional: '?' | '??') => {
    if (optional === '??')
-      return function Ion(defaultValue: any) {
+      return function MaybeIon(defaultValue: any) {
          return {
-            name: 'Ion',
+            name: 'MaybeIon',
             optional: 'withDefault',
             default: defaultValue
          }
       }
    return {
-      name: 'Ion',
+      name: 'MaybeIon',
       optional
    }
 }) as {
    <T, M extends AnyObject = {}>(optional?: '?'): {
-      name: 'Ion',
+      name: 'MaybeIon',
       validatedType: Ion<T, M>;
       inputType: Ion<T, M> | T;
       optional: '?';
       default: undefined
    } & ((defaultValue: T) => {
-      name: 'Ion',
+      name: 'MaybeIon',
       validatedType: Ion<T, M>;
       inputType: Ion<T, M> | T;
       optional: 'withDefault';
       default: true;
    }),
-   name: 'Ion';
+   name: 'MaybeIon';
    required: true;
 }
-export { _Ion as Ion }
-export type Ion<T = any, M extends AnyObject = {}> = (() => T) & M
+export { MaybeIon as Ion }
+type Ion<T = any, M extends AnyObject = {}> = (() => T) & M
 // export const $Ion = ((optional: '?') => {
 //    return {
 //       name: '$Ion',
@@ -280,38 +280,38 @@ export type Ion<T = any, M extends AnyObject = {}> = (() => T) & M
 
 
 
-export const Ionized = ((optional?: '?' | '??') => {
+export const MaybeIonized = ((optional?: '?' | '??') => {
    if (optional === '??')
-      return function Ionized(defaultValue: any) {
+      return function MaybeIonized(defaultValue: any) {
          return {
-            name: 'Ionized',
+            name: 'MaybeIonized',
             optional: 'withDefault',
             default: defaultValue
          }
       }
    return {
-      name: 'Ionized',
+      name: 'MaybeIonized',
       optional,
    }
 }) as {
    <T extends AnyObject>(optional?: '?' | '??'): {
-      name: 'Ionized',
+      name: 'MaybeIonized',
       validatedType: T;
       inputType: T;
       optional: '?';
       default: undefined
    } & ((defaultValue: T) => {
-      name: 'Ionized',
+      name: 'MaybeIonized',
       validatedType: T;
       inputType: T;
       optional: 'withDefault';
       default: true;
    }),
-   name: 'Ionized';
+   name: 'MaybeIonized';
    required: true;
 }
 
-
+export { MaybeIonized as Ionized }
 // export const $Ionized = ((optional: '?') => {
 //    return {
 //       name: '$Ionized',

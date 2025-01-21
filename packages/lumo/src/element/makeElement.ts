@@ -291,7 +291,6 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          const value = entry[key];
          if (isIon(value)) {
             watch(value, (value: string | number | Falsey) => {
-               console.log('isIon red')
                assignStyleProperty(style, toStylePropertyName(key), value)
             }, {
                eager: true,

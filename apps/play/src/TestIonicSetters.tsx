@@ -10,7 +10,7 @@ const frog = ionize({
 })
 
 if (__DEV__) {
-   onSetState(frog, 'name', () => { // value set, may or may not have changed
+   onTriggered(frog, 'name', () => { // value set, may or may not have changed
    
    })
    onTriggered() // value changed

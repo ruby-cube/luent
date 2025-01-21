@@ -35,7 +35,7 @@ export function MountIf() {
             columnNumber: 10
         }, this), /* @__PURE__ */
         jsxDEV("$--transition", {
-            children: [if($active, () => /* @__PURE__ */
+            children: [If($active, () => /* @__PURE__ */
             jsxDEV(Fragment, {
                 children: ["oh", /* @__PURE__ */
                 jsxDEV("$--transit", {
@@ -73,7 +73,7 @@ export function MountIf() {
                     fileName: "/Users/Ruby/Desktop/ruby-cube/rue/apps/play/src/TestMountIf.tsx",
                     lineNumber: 48,
                     columnNumber: 16
-                }, this), if($ready, () => /* @__PURE__ */
+                }, this), If($ready, () => /* @__PURE__ */
                 jsxDEV("p", {
                     children: "ready"
                 }, void 0, false, {

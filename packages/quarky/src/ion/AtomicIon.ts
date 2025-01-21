@@ -90,7 +90,10 @@ export function attachIonMethods(proto: AnyObject, methods: AnyObject) {
 // - trigger derivations effects (run sync effects, schedule effects)
 
 function setValue(metaIon: MetaIon, newValue: unknown, oldValue: unknown) {
-   if (oldValue === newValue) return oldValue;
+   if (oldValue === newValue) {
+      trigger(metaIon.o, newValue, oldValue) // for onTriggered
+      return oldValue;
+   }
    const $ion = metaIon.o;
    const _newValue = shouldIonize(newValue, metaIon) ? ionize(newValue) : newValue
    // toIonicModelIfMust(newValue, metaIon)

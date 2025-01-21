@@ -249,7 +249,7 @@ function Appo(
 <div>
     {If(open, [
         morphs.with(fade),
-        if(entering,
+        If(entering,
             <p>Hi</p>
         ),
         Else(

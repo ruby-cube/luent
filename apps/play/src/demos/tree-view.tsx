@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { component, fromTag, Ionized, If, Else, For, watch, v, Nonlocal, _Nonlocal, pure, Pure, NonVoidMethods } from "@rue/lumo";
 import { ion, ionize, Phase, toRaw } from "@rue/quarky";
 
@@ -90,27 +91,20 @@ type ItemData = {
 class TreeItem {
    constructor(
       public name: string,
-      public children: TreeItem[] = [],
+      public children?: TreeItem[],
    ) { }
 
-   hop() {
-      return true
-   }
-   bop() {
-      return true
-   }
-
    addChild() {
-      console.log('adding child')
+      console.trace('adding child')
       const children = this.children || (this.children = [])
       console.log(this, children)
       children.push(new TreeItem('new stuff'))
    }
 }
 
-interface TreeItem {
-   '~pure': NonVoidMethods<TreeItem, 'hop' | 'bop'>
-}
+// interface TreeItem {
+//    '~pure': NonVoidMethods<TreeItem, 'hop' | 'bop'>
+// }
 
 
 
@@ -136,13 +130,13 @@ function createTreeItem(data: ItemData): TreeItem {
 const textarea = document.createElement('textarea')
 
 function TreeItemView(input = fromTag({
-   'nu:item': v<TreeItem>,
+   'nu:item': Ionized<TreeItem>,
    // list: v<string[]>,
    // 'on:click': v<(e: { pen: string }) => void>('?')
 })) {
    const { item, emit } = input
 
-   item.children
+   // item.children
    // emit('click', { pen: 'hi' })
    // const item = ionize({...data}, {
    //    addChild() {
@@ -172,7 +166,7 @@ function TreeItemView(input = fromTag({
    ) =>
       <li class='item'>
          <div
-            class={{ 'bold': $isFolder }}
+            class={{ 'bold': $=$isFolder() && $isOpen() }}
             on:click={$isOpen.toggle} on:dblclick={changeType}
          >
             {item.name}
@@ -185,7 +179,7 @@ function TreeItemView(input = fromTag({
                {For(item.children!, m => m, item => (
                   <TreeItem nu:item={item}></TreeItem>
                ))}
-               <li class='add' on:click={() => item.addChild()}>+</li>
+               <li class='add' on:click={e => item.addChild()}>+</li>
             </ul>
          ))}
       </li>

@@ -192,44 +192,47 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
 
             switch (config.name) {
                case 'v':
+                  const vKey = key.startsWith('nu:') || key.startsWith('on:') ? key.slice(3) : key;
                   if (key.startsWith('on:')) {
                      if (!isFunction(value) || isIon(value)) throw new Error('event handler must be a function')
                      const handlers = eventHandlers || (validatedAttributes.emit = (event: string) => { eventHandlers![event]() }, eventHandlers = {})
-                     handlers['emit' + key.slice(3)] = value;
+                     handlers['emit' + vKey] = value;
                   }
                   // else validatedAttributes[key] = (isFunction(value) || isReined(value)) ? value : value instanceof Object ? readonly(value) : value;
-                  else validatedAttributes[key] = unnestValue(value);
-                  break;
-
-               case '_Ion':
-                  if (!isIon(value)) {
-                     throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ion`)
-                  }
-                  validatedAttributes['$' + key] = value;
-                  // validatedAttributes['$' + key] = isReined(value) ? value : readonly(value);
+                  else validatedAttributes[vKey] = unnestValue(value);
                   break;
 
                case 'MaybeIon':
-                  // validatedAttributes['$' + key] = isNamedDerivation(value) ? value : isIon(value) ? isReined(value) ? value : readonly(value) : readonly(toIon(value))
-                  validatedAttributes['$' + key] = toIon(value) //QUESTION: We don't unnest value here... there may be deeply nested ions
+                  const ionKey = key.startsWith('nu:') ? key.slice(3) : key;
+                  // if (!isIon(value)) {
+                  //    throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ion`)
+                  // }
+                  // validatedAttributes['$' + key] = value;
+                  // validatedAttributes['$' + key] = isReined(value) ? value : readonly(value);
+                  validatedAttributes['$' + ionKey] = toIon(value) //QUESTION: We don't unnest value here... there may be deeply nested ions
                   break;
 
-               case '_Ionized':
-                  const model = unnestValue(value)
-                  if (!isIonizedModel(model)) {
-                     throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ionized`)
-                  }
-                  // validatedAttributes[key] = isReined(value) ? value : readonly(value);
-                  validatedAttributes[key] = model
-                  break;
+               // case 'MaybeIon':
+               //    // validatedAttributes['$' + key] = isNamedDerivation(value) ? value : isIon(value) ? isReined(value) ? value : readonly(value) : readonly(toIon(value))
+               //    break;
 
                case 'MaybeIonized':
-                  // const _value = unnestValue(value)
-                  // validatedAttributes[key] = isReined(value) ? _value : readonly(_value);
+                  const modelKey = key.startsWith('nu:') ? key.slice(3) : key;
+                  // const model = unnestValue(value)
+                  // if (!isIonizedModel(model)) {
+                  //    throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ionized`)
+                  // }
+                  // // validatedAttributes[key] = isReined(value) ? value : readonly(value);
+                  // validatedAttributes[key] = model
                   const _value = unnestValue(value)
                   if (!isObject(_value)) throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an object`)
-                  validatedAttributes[key] = _value;
+                  validatedAttributes[modelKey] = _value;
                   break;
+
+               // case 'MaybeIonized':
+               //    // const _value = unnestValue(value)
+               //    // validatedAttributes[key] = isReined(value) ? _value : readonly(_value);
+               //    break;
 
                default:
                   break;

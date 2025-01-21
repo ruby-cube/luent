@@ -33,7 +33,7 @@ export function MountIf() {
          }),
          jsx("$--transition", {
             children: () => [
-               if($active, () =>
+               If($active, () =>
                   ["oh",
                      jsx("$--transit", {
                         with: slide({
@@ -54,7 +54,7 @@ export function MountIf() {
                            jsx("h2", {
                               children: () => ["hope"]
                            })]
-                     }), if($ready, () => [
+                     }), If($ready, () => [
                         jsx("p", {
                            children: () => ["ready"]
                         })])]),

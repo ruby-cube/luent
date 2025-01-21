@@ -13,7 +13,7 @@ import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
 import { createNodeContext } from "../context/Context";
 import { useTransitionNodes } from "../transition/TransitNode";
-import { getTrace } from "../../../utils/debug";
+import { getTrace } from "../watch/debug";
 import { NodePod } from "../node/NodePod";
 import { mountConditional } from "../conditional/ConditionalRenderSeries";
 

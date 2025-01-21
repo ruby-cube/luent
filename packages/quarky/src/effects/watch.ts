@@ -5,7 +5,7 @@ import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
 import { ReactiveGet, DerivedIon, isDerivedIon, createDerivedIon } from "../derivations/DerivedIon";
-import { asMetaIonizedModel, Ionized, isIonizedModel, toRaw, } from "../ionize/ionize";
+import { asMetaIonizedModel, isIonizedModel, toRaw, } from "../ionize/ionize";
 import { areEqual } from "./areEqual";
 import { createIonicEffect, IonicEffect } from "../derivations/IonicEffect";
 import { isReactive, META } from "../ReactiveEntity";
@@ -27,19 +27,21 @@ type RenderCycleOptions = {
 export type WatchOptions = {
    // deep?: boolean;
    eager?: true;
+   stateChange?: boolean;
+   // isEqual?: (oldValue?: any, newValue?: any) => boolean;
    // retrack?: boolean;
 } & RenderCycleOptions & ListenerOptions & WatchDebugOptions
 
 export type EffectOptions = {
    retrack?: true;
-   only?: (boolean | Ionized<AnyObject> | AnyIon)[];
-   also?: (Ionized<AnyObject>)[]
+   only?: (boolean | AnyObject | AnyIon)[];
+   also?: AnyObject[]
 } & RenderCycleOptions & ListenerOptions & WatchDebugOptions
 
 
 
 export type MutationRecord = {
-   target: Ionized<AnyObject> | AtomicIon | PropIon,
+   target: AnyObject | AtomicIon | PropIon,
    op: string,
    args: any[],
    output: any,
@@ -81,7 +83,7 @@ type Effect = () => void
 export type RawEffect = (a: any, b: any) => void
 
 
-let currentWatchSubject: DerivedIon | AtomicIon | Ionized<AnyObject> | undefined // prevents infinite loops for synchronous effects that set ions
+let currentWatchSubject: DerivedIon | AtomicIon | AnyObject | undefined // prevents infinite loops for synchronous effects that set ions
 
 export function isCurrentWatchSubject(atom: AtomicIon | PropIon) {
    if (!currentWatchSubject) return false;
@@ -99,7 +101,7 @@ export function isCurrentWatchSubject(atom: AtomicIon | PropIon) {
 }
 
 
-function normalizeWatchSubjects(subjects: ((AnyIon | ReactiveGet | Ionized<AnyObject>)[]) | undefined) {
+function normalizeWatchSubjects(subjects: ((AnyIon | AnyObject)[]) | undefined) {
    if (!subjects) return;
    for (let i = 0; i < subjects.length; i++) {
       const subject = subjects[i]
@@ -108,7 +110,7 @@ function normalizeWatchSubjects(subjects: ((AnyIon | ReactiveGet | Ionized<AnyOb
    return subjects;
 }
 
-function normalizeWatchSubject(subject: AnyIon | ReactiveGet | Ionized<AnyObject>) {
+function normalizeWatchSubject(subject: AnyIon | AnyObject) {
    if (subject instanceof Function)
       return createDerivedIon(subject)
    if (isPropIon(subject)) {
@@ -122,7 +124,7 @@ function normalizeWatchSubject(subject: AnyIon | ReactiveGet | Ionized<AnyObject
    return subject;
 }
 
-function asWatchSubjects(subjects: (AnyIon | Ionized<AnyObject>)[]) {
+function asWatchSubjects(subjects: (AnyIon | AnyObject)[]) {
    const watchSubjects: WatchSubject[] = []
    for (const subject of subjects) {
       watchSubjects.push(asWatchSubject(subject))
@@ -130,7 +132,7 @@ function asWatchSubjects(subjects: (AnyIon | Ionized<AnyObject>)[]) {
    return watchSubjects
 }
 
-function getValues(subjects: (AnyIon | Ionized<AnyObject>)[]) {
+function getValues(subjects: (AnyIon | AnyObject)[]) {
    const values = [];
    for (const subject of subjects) {
       values.push(toValue(subject))
@@ -141,7 +143,7 @@ function getValues(subjects: (AnyIon | Ionized<AnyObject>)[]) {
 
 
 // get ionic derivations for reactive getters
-function getIonicDerivations(inputSubjects: (AnyIon | ReactiveGet | Ionized<AnyObject>)[], subjects: (AnyIon | Ionized<AnyObject>)[]) {
+function getIonicDerivations(inputSubjects: (AnyIon | AnyObject)[], subjects: (AnyIon | AnyObject)[]) {
    const derivations: IonicDerivation[] = []
    for (let i = 0; i < inputSubjects.length; i++) {
       const inputSubject = inputSubjects[i]
@@ -154,7 +156,7 @@ function getIonicDerivations(inputSubjects: (AnyIon | ReactiveGet | Ionized<AnyO
 
 
 
-function isMultiWatchSubject(subject: AnyObject | AnyIon | ReactiveGet | Ionized<AnyObject> | (AnyIon | AnyObject | ReactiveGet | Ionized<AnyObject>)[]): subject is (AnyIon | AnyObject | ReactiveGet | Ionized<AnyObject>)[] {
+function isMultiWatchSubject(subject: AnyObject | AnyIon | (AnyIon | AnyObject)[]): subject is (AnyIon | AnyObject)[] {
    if (isIon(subject)) return false;
    if (!isIonizedModel(subject) && subject instanceof Array) {
       for (const item of subject) {
@@ -185,6 +187,7 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
    // if ('name' in subject && subject.name === '__$propIon') console.log(subject)
 
    let eager: boolean | undefined = options?.eager
+   const watchStateChange = options?.stateChange === false ? false : true;
    const phase = options?.phase ?? Phase.BEFORE_RENDER
 
    const subjects = isMultiSubject ? normalizeWatchSubjects(subject)! : [normalizeWatchSubject(subject)]
@@ -204,7 +207,7 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
       }
    }
 
-   if (isIonizedModel(oldValue) && oldValue !== subject){
+   if (isIonizedModel(oldValue) && oldValue !== subject) {
       watch(oldValue, effect, options)
    }
 
@@ -213,9 +216,10 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
    function changeHandler() {
       const newValue = isMultiSubject ? getValues(subjects) : toValue(subject0) // This is when retracking happens
 
-      if (!eager && (isMultiSubject && noChanges(subjects, newValue, oldValue)
+      if (watchStateChange && (!eager && (isMultiSubject && noChanges(subjects, newValue, oldValue)
          || isIon(subject0) && noChange(newValue, oldValue)
          || isIonizedModel(subject) && noMutations(subject)))
+      )
          return;
       eager = false;
       runCleanups($activeEffect())
@@ -271,13 +275,13 @@ function noChanges(subjects: any[], newValues: any[], oldValues: any[]) {
    return true;
 }
 
-function noMutations(model: Ionized<AnyObject>) {
+function noMutations(model: AnyObject) {
    //TODO: 
    return false;
 }
 
 //TODO: Figure out what is the best format to use. Should mutations be in order of mutation? or organized by mutation target?
-function getMutations(subjects: (AnyIon | Ionized<AnyObject>)[]) {
+function getMutations(subjects: (AnyIon | AnyObject)[]) {
    //FIX: Temporary
    return []
    for (const subject of subjects) {
@@ -359,7 +363,7 @@ export function watchEffect(effect: () => void, options?: EffectOptions) { //NOT
    const watchSubject = asWatchSubject(reactiveEffect);
 
    // if (__DEV__ && selectiveSubjects && options?.also)
-      // throw Error(`INVALID OPTIONS: Cannot configure watchEffect with both 'only' and 'also' options.`)
+   // throw Error(`INVALID OPTIONS: Cannot configure watchEffect with both 'only' and 'also' options.`)
 
    scheduleEffectEagerly(reactiveEffect.initialize, phase);
 

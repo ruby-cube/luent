@@ -46,7 +46,7 @@ export function renderPhasicNode(
     if ($disable) {
         const output = isFunction(Slot) ? Slot() : Slot
         return component([
-            if($disable, () =>
+            If($disable, () =>
                 output
             ),
             Else(() => {

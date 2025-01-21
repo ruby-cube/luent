@@ -34,7 +34,7 @@ export function MountIf() {
             }),
             jsx("$--transition", {
                children: [
-                  if($active, () =>
+                  If($active, () =>
                      jsx(Fragment, {
                         children: [
                            "oh",
@@ -57,7 +57,7 @@ export function MountIf() {
                                  jsx("h2", {
                                     children: "hope"
                                  })
-                           }), if($ready,
+                           }), If($ready,
                               jsx("p", {
                                  children: "ready"
                               }))]

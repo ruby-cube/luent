@@ -15,9 +15,9 @@ function resetCurrentNodePodIndex(index?: number) {
    currentNodePodIndex = index ?? undefined;
 }
 
-// export function if($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit
-// export function if($condition: ReactiveGet<Booleanny>, type: 'create' | 'show' | 'mount', renderConditional: RenderFunction,): ConditionalRenderKit
-// export function if($condition: ReactiveGet<Booleanny>, param2: 'create' | 'show' | 'mount' | RenderFunction, renderConditional?: RenderFunction,): ConditionalRenderKit {
+// export function If($condition: ReactiveGet<Booleanny>, renderConditional: RenderFunction,): ConditionalRenderKit
+// export function If($condition: ReactiveGet<Booleanny>, type: 'create' | 'show' | 'mount', renderConditional: RenderFunction,): ConditionalRenderKit
+// export function If($condition: ReactiveGet<Booleanny>, param2: 'create' | 'show' | 'mount' | RenderFunction, renderConditional?: RenderFunction,): ConditionalRenderKit {
 //     const typeSpecified = typeof param2 === "string";
 //     const renderFunction = typeSpecified ? renderConditional : param2;
 //     const type = typeSpecified ? param2 : 'create';

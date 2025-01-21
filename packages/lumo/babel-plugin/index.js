@@ -9,13 +9,23 @@ export default function lumoPreTransform({ types }) {
    return {
       name: "lumo-pre-transform",
       visitor: {
-         JSXFragment(path) {
-            transformTemplateCallExpressions(path)
-            transformJSXFragment(path)
+         JSXFragment: {
+            enter(path) {
+               transformLiterals(path)
+               transformTemplateCallExpressions(path)
+               transformJSXFragment(path)
+            },
+            exit(path) {
+            }
          },
-         JSXElement(path) {
-            transformTemplateCallExpressions(path)
-            transformJSXElement(path)
+         JSXElement: {
+            enter(path) {
+               transformLiterals(path)
+               transformTemplateCallExpressions(path)
+               transformJSXElement(path)
+            },
+            exit(path) {
+            }
          }
       }
    };
@@ -62,7 +72,7 @@ function transformJSXChildrenToArrayExpression(paths) {
       }
    }
    const arrayExpression = t.arrayExpression(array)
-   console.log('erray', arrayExpression)
+   arrayExpression.visited = true;
    return arrayExpression
 }
 
@@ -71,7 +81,6 @@ function transformTemplateCallExpressions(path) {
    path.traverse({
       CallExpression(path) {
          if (path.visited) return;
-         console.log('=======template func')
          path.visited = true;
          const functionName = path.node.callee.name
          if (isTemplateFunction(functionName)) {
@@ -84,12 +93,10 @@ function transformTemplateCallExpressions(path) {
 
 function normalizeSlotToRenderFunction(paths) { // returns jsxExpressionContainer with arrowFunctionExpression
    if (slotIsRenderFunction(paths)) return paths[0]; //TODO: still need to transform return of renderfunction if is derivation 
-   console.log('child', paths[0].node)
    return transformChildrenToRenderFunction(paths)
 }
 
 function transformChildrenToRenderFunction(paths) {
-   console.log('transforming children to render function', paths.length)
    return t.jsxExpressionContainer(
       t.arrowFunctionExpression(
          [],
@@ -108,46 +115,52 @@ function transformJSXChildren(childrenPath) {
 }
 
 function transformIfDerivationExpression(path) {
-   if (isDerivation(path))
+   if (isDerivationShorthand(path)) {
+      // transformLiterals(path.get('right'))
+      path.replaceWith(toDerivationFunction(path.node.right))
+   }
+   else if (isDerivation(path)) {
+      // console.log('isDerivation', path.node)
+      // transformLiterals(path)
       path.replaceWith(toDerivationFunction(path.node))
+   }
 }
 
-function isDerivationShorthand(expression) {
-   const node = expression.node;
-   if (t.isAssignmentExpression(node, { operator: '=' }) && node.left.name === '$s' && isDerivation(expression.get('right'))) {
+function transformLiterals(path) {
+   path.traverse({
+      ObjectExpression(path) {
+         if (path.visited || path.node.visited) {
+            console.log('visited!')
+            return;
+         }
+         path.visited = true;
+         transformObjectProperties(path.get('properties'))
+      },
+      ArrayExpression(path) {
+         if (path.visited || path.node.visited) {
+            console.log('array visited!')
+            return;
+         }
+         path.visited = true;
+         transformArrayElements(path.get('elements'))
+      }
+   })
+}
+
+function isDerivationShorthand(path) {
+   const node = path.node;
+   if (t.isAssignmentExpression(node, { operator: '=' }) && node.left.name === '$' && t.isExpression(node.right)) {
       return true;
    }
    return false;
 }
 
-// function transformIfDerivationExpression(expression) {
-//    const node = expression.node;
-//    if (t.isConditionalExpression(node)) {
-//       if (isDerivation(expression.get('consequent')) && isParenthesized(node.consequent)) {
-//          node.consequent = toDerivationFunction(node.consequent);
-//       }
-//       if (isDerivation(expression.get('alternate')) && isParenthesized(node.alternate)) {
-//          node.alternate = toDerivationFunction(node.alternate);
-//       }
-//    }
-//    if (t.isSequenceExpression(node)) {
-//       const expressions = expression.get('expressions')
-//       const finalExpression = expressions.at(-1);
-//       if (isDerivation(finalExpression) && isParenthesized(finalExpression.node)) {
-//          expressions[expressions.length] = toDerivationFunction(finalExpression.node);
-//       }
-//    }
-//    if (isDerivation(expression) && isParenthesized(node)) {
-//       expression.replaceWith(toDerivationFunction(node))
-//    }
-// }
 
 
 
 function slotIsRenderFunction(paths) {
    if (paths.length !== 1) return false;
    const child = paths[0].node;
-   console.log('slotisrenderfunction')
    if (!t.isJSXExpressionContainer(child)) return false;
    const expression = child.expression
    if (t.isArrowFunctionExpression(expression)
@@ -186,14 +199,8 @@ function transformTemplateFnCall(name, path) {
 }
 
 function transformIfCall(path) {
-   console.log('if call')
-   const args = path.node.arguments
-   if (isDerivation(path.get('arguments.0'))) {
-      args[0] = toDerivationFunction(args[0])
-   }
-
-   // console.log('if arg', args)
-   transformTemplateArgToRenderFunction(args)
+   transformIfDerivationExpression(path.get('arguments.0'))
+   transformTemplateArgToRenderFunction(path.node.arguments)
 }
 
 function transformTemplateArgToRenderFunction(args) {
@@ -247,13 +254,14 @@ function transformJSXAttributes(jsxElementPath) {
       const namespaceName = node.name.namespace && node.name.namespace.name
       const value = node.value;
       if (!t.isJSXExpressionContainer(value)) continue;
-      if (t.isObjectExpression(value.expression)) {
-         transformObjectProperties(attribute.get('value.expression.properties'))
-      }
-      else if (t.isArrayExpression(value.expression)) {
-         transformArrayElements(attribute.get('value.expression.elements'))
-      }
-      else if (namespaceName === 'on' && hasTargetedEvent(value.expression)) {
+      // if (t.isObjectExpression(value.expression)) {
+      //    transformObjectProperties(attribute.get('value.expression.properties'))
+      // }
+      // else if (t.isArrayExpression(value.expression)) {
+      //    transformArrayElements(attribute.get('value.expression.elements'))
+      // }
+      // else 
+      if (namespaceName === 'on' && hasTargetedEvent(value.expression)) {
          transformTargetCall(value.expression);
 
       }
@@ -281,9 +289,9 @@ function transformJSXSlot(path) {
 
 
 
-function transformArrayElements(elements) {
-   for (let i = 0; i < elements.length; i++) {
-      const element = elements[i];
+function transformArrayElements(paths) {
+   for (let i = 0; i < paths.length; i++) {
+      const element = paths[i];
       const elementNode = element.node;
       if (t.isObjectExpression(elementNode)) {
          transformObjectProperties(element.get(`properties`))
@@ -291,27 +299,25 @@ function transformArrayElements(elements) {
       else if (t.isArrayExpression(elementNode)) {
          transformArrayElements(element.get(`elements`))
       }
-      else if (isDerivationShorthand(element)) {
-         transformDerivationShorthand(element)
+      else {
+         transformIfDerivationExpression(element)
       }
    }
 }
 
-function transformDerivationShorthand(path) {
-   path.replaceWith(toDerivationFunction(path.node.right))
-}
 
-function transformObjectProperties(properties) {
-   for (let i = 0; i < properties.length; i++) {
-      const value = properties[i].get('value')
+
+function transformObjectProperties(paths) {
+   for (let i = 0; i < paths.length; i++) {
+      const value = paths[i].get('value')
       if (t.isObjectExpression(value.node)) {
          transformObjectProperties(value.get('properties'))
       }
       else if (t.isArrayExpression(value.node)) {
          transformArrayElements(value.get('elements'))
       }
-      else if (isDerivationShorthand(value)) {
-         transformDerivationShorthand(value)
+      else {
+         transformIfDerivationExpression(value)
       }
    }
 }
@@ -340,40 +346,45 @@ function toRenderFunction(node) {
 function normalizeToArrayExpression(node) {
    if (t.isArrayExpression(node)) return node;
    if (isJSXFragment(node)) return node;
-   return t.arrayExpression([node])
+   const arrayExpression = t.arrayExpression([node])
+   arrayExpression.visited = true;
+   return arrayExpression
 }
 
 function isDerivation(path) {
    const node = path.node;
-   if (t.isArrowFunctionExpression(node) || t.isFunctionExpression(node) || t.isLiteral(node) || t.isIdentifier(node) || !node || t.isCallExpression(node) && isTemplateFunction(node.callee.name)) {
+   if (!node || !t.isExpression(node))
+      return false;
+   if (t.isArrowFunctionExpression(node)
+      || t.isFunctionExpression(node)
+      || t.isLiteral(node)
+      || t.isIdentifier(node)
+      || t.isCallExpression(node) && isTemplateFunction(node.callee.name)) {
       return false;
    }
-   if (t.isExpression(node) && (hasIonicCallExpression(path) || hasNonIonMemberExpression(path))) {
-      console.log('checking if isDerivation?', node)
+   if (hasIonicCallExpression(path)) {
       return true;
    }
    return false;
 }
 
-const nonIonicCalls = new Set(['rein', 'readonly', 'slide', 'fade', 'ElseIf', 'if', 'Else', 'For'])
-
-function isPotentiallyIonicCall(callExpression) {
-   return !nonIonicCalls.has(callExpression.callee.name)
-}
-
-//TODO: exclude rein() and readonly() and slide() etc...  should I require a $ prefix on calls?? 
 function hasIonicCallExpression(path) {
-   if (t.isCallExpression(path.node) && isPotentiallyIonicCall(path.node))
+   if (isIonicCallExpression(path.node))
       return true;
    let found = false;
    path.traverse({
-      CallExpression() {
-         console.log('==========CALL EXPRESSION')
-         found = true;
-         path.stop()
+      CallExpression(path) {
+         if (isIonicCallExpression(path.node)) {
+            found = true;
+            path.stop()
+         }
       }
    })
    return found;
+}
+
+function isIonicCallExpression(node) {
+   return t.isCallExpression(node) && /^\$[a-z]/.test(node.callee.name) && node.arguments.length === 0
 }
 
 function hasNonIonMemberExpression(path) {
