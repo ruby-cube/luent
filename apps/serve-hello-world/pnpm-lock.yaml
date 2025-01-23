@@ -195,7 +195,7 @@ packages:
       content-type: 1.0.5
       debug: 2.6.9
       depd: 2.0.0
-      destroy: 1.2.0
+      discard: 1.2.0
       http-errors: 2.0.0
       iconv-lite: 0.4.24
       on-finished: 2.4.1
@@ -319,7 +319,7 @@ packages:
     engines: {node: '>= 0.8'}
     dev: false
 
-  /destroy@1.2.0:
+  /discard@1.2.0:
     resolution: {integrity: sha512-2sJGJTaXIIaR1w4iJSNoN0hnMY7Gpc/n8D4qSCJw8QqFWXf7cuAgnEHxBpweaVcPevC2l3KpjYCx3NypQQgaJg==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
     dev: false
@@ -717,7 +717,7 @@ packages:
     dependencies:
       debug: 2.6.9
       depd: 2.0.0
-      destroy: 1.2.0
+      discard: 1.2.0
       encodeurl: 1.0.2
       escape-html: 1.0.3
       etag: 1.8.1

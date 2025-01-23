@@ -96,7 +96,7 @@ class MetaPropIon {
 
         watchSubject.onUnwatched(() => {
             if (watchSubject.watchCount === 0 && this.asAtom?.derivations.size === 0) {
-                this.destroy()
+                this.discard()
             }
         })
     }
@@ -111,12 +111,12 @@ class MetaPropIon {
 
         atom.onUntracked(() => {
             if (this.asWatchSubject?.watchCount === 0 && atom.derivations.size === 0) {
-                this.destroy()
+                this.discard()
             }
         })
     }
 
-    destroy() {
+    discard() {
         const metaModel = asMetaIonizedModel(this.model)
         const key = this.key
         if (this.isEntryKey) metaModel.deleteObservedEntryKey(key)
@@ -262,7 +262,7 @@ export function getObservedProp( // observed means watched and/or tracked
 //     function unobserve() {
 //         if (watchSubject.watchCount === 0 && atom.derivations.size === 0) {
 //             if (isIndex) (<MetaIonicCollection>metaIonicModel).deleteObservedEntryKey(key)
-//             prop.destroy()
+//             prop.discard()
 //         }
 //     }
 

@@ -1,8 +1,7 @@
 import { normalizeToArray } from "@rue/utils";
 import { Component, unnestComponent } from "../component/InternalComponent";
-import { DynamicNode } from "../dynamic/DynamicNode";
+import { DynamicNode, getDynamicNode } from "../dynamic/DynamicNode";
 import { makeDynamicNode } from "../dynamic/makeDynamicNode";
-import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { mountConditional } from "../conditional/ConditionalRenderSeries";
@@ -22,7 +21,7 @@ export function MorphicNode(switchMap: { [key: string]: RenderFunction }) {
             initialKey,
             !!preserve,
             getCommons(),
-            getActiveDynamicNode()
+            getDynamicNode()
         )
 
         return {
@@ -84,12 +83,12 @@ export class MorphicRenderKit {
     ) {
         const dynamicPod = this.dynamicNodePod = nodePod.appendNodePod()
         const _nodePod = dynamicPod.appendNodePod()
-        this.dynamicNode = makeDynamicNode()
+        this.dynamicNode = this.parentDynamicNode.fork()
 
         this.render = function updateMorphicComponent(key: string) {
             this.activeKey = key;
 
-            pushDynamicNode(this.parentDynamicNode)
+            // pushDynamicNode(this.parentDynamicNode)
             // remove previous
             this.deactivateForm()
 
@@ -98,7 +97,7 @@ export class MorphicRenderKit {
             this.activateForm(key, parent, _nodePod)
             popCommons()
 
-            popDynamicNode()
+            // popDynamicNode()
         }
         return this;
     }
@@ -107,18 +106,18 @@ export class MorphicRenderKit {
         const dynamicNode = this.dynamicNode
         if (this.preserve) {
             //TODO:
-            dynamicNode.destroy()
+            dynamicNode.discard()
         }
         else {
-            dynamicNode.destroy()
+            dynamicNode.discard()
         }
     }
 
     activateForm(key: string, parent: Element, nodePod: NodePod) {
-        const dynamicNode = this.dynamicNode = makeDynamicNode()
+        const dynamicNode = this.dynamicNode = this.parentDynamicNode.fork()
         const _this = this
         if (this.preserve && this.renderedKeys?.has(key)) {
-            dynamicNode.reactivate(function activateMorphicForm() {
+            dynamicNode.remount(function activateMorphicForm() {
                 const nodeEntities = normalizeToArray(unnestComponent(_this.switchMap[key]()))
                 mountConditional(parent, _this.dynamicNodePod, nodeEntities)
             })

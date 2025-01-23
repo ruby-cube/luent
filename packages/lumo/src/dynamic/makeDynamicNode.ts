@@ -1,5 +1,5 @@
 import { DynamicNode, LifecycleHook} from "./DynamicNode";
-import { getActiveDynamicNode } from "./nodestack";
+import { _getDynamicNode } from "./nodestack";
 
 
 // export function activateDynamicNode(
@@ -18,18 +18,18 @@ import { getActiveDynamicNode } from "./nodestack";
 // }
 
 export function makeDynamicNode() {
-    const parent = getActiveDynamicNode();
+    const parent = _getDynamicNode();
     const dynamicNode = new DynamicNode(parent);
     if (parent instanceof DynamicNode) {
         parent.onReactivate(() => { dynamicNode.emit(LifecycleHook.ON_REACTIVATE) }, { //FIX: This makes on activated run twice when it is first activated (see if this has been fixed)
-            until: dynamicNode.onDestroy,
+            until: dynamicNode.onDiscard,
         })
         parent.onDeactivate(() => { dynamicNode.emit(LifecycleHook.ON_DEACTIVATE) }, {
-            until: dynamicNode.onDestroy,
+            until: dynamicNode.onDiscard,
         })
-        parent.onDestroy(() => { dynamicNode.destroy() }, {
-            cancel: dynamicNode.onDestroy,
-            __devName: 'makeDynamicNode, onDestroy'
+        parent.onDiscard(() => { dynamicNode.discard() }, {
+            cancel: dynamicNode.onDiscard,
+            __devName: 'makeDynamicNode, onDiscard'
         })
     }
     return dynamicNode;
@@ -43,6 +43,6 @@ export function makeDynamicNode() {
 //     const parent = node.parent;
 //     if (parent instanceof DynamicNode) {
 //         beforeUnmount(() => node.unmount(), undefined, parent) //TODO: how do these get cleaned up?
-//         onDestroy(() => node.destroy(), parent)
+//         onDiscard(() => node.discard(), parent)
 //     }
 // }

@@ -237,7 +237,7 @@ export function toRaw<T>(target: T): AsRaw<T> {
 //     const watchSubject = asWatchSubject(prop)
 //     const atom = asIonicAtom(prop)
 //     if (watchSubject.watchCount === 0 && atom.derivations.size === 0) {
-//         prop.destroy()
+//         prop.discard()
 //     }
 // }
 

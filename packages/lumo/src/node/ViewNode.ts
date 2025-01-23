@@ -1,7 +1,7 @@
 import { ListenerOptions, SchedulerOptions } from "@rue/flask";
 import { getActiveCommons, Context } from "../context/context-stack";
 import { DynamicNode } from "../dynamic/DynamicNode";
-import { getActiveDynamicNode } from "../dynamic/nodestack";
+import { _getDynamicNode } from "../dynamic/nodestack";
 import { fromApp, fromCommons, fromGlobal } from "../context/provide";
 import { ContextKeyMap } from "@rue/lumo";
 
@@ -10,7 +10,7 @@ type ViewNode = {
    readonly onCreated: (handler: () => void, options?: SchedulerOptions) => void
    readonly onDeactivate: (handler: () => void, options?: ListenerOptions) => void
    readonly onReactivate: (handler: () => void, options?: ListenerOptions) => void
-   readonly onDestroy: (handler: () => void, options?: SchedulerOptions) => void
+   readonly onDiscard: (handler: () => void, options?: SchedulerOptions) => void
    readonly fromCommons: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
    readonly fromApp: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
    readonly fromGlobal: <K extends string | symbol>(key: K) => K extends keyof ContextKeyMap ? ContextKeyMap[K] extends () => { inputType: infer I } ? I : any : any
@@ -19,7 +19,7 @@ type ViewNode = {
 const viewNodeMap: Map<DynamicNode, Map<Context, ViewNode>> = new Map()
 
 export function $thisNode() {
-   const dynamicNode = getActiveDynamicNode();
+   const dynamicNode = _getDynamicNode();
    const context = getActiveCommons();
    if (!context) throw new Error(`no context node. This should never happen`)
    let contextMapCreated = false;
@@ -44,20 +44,20 @@ function createViewNode(context: Context): ViewNode {
          return fromGlobal(key, context)
       },
       get onCreated() {
-         const dynamicNode = getActiveDynamicNode()
+         const dynamicNode = _getDynamicNode()
          if (dynamicNode.onCreated) return dynamicNode.onCreated;
          return dynamicNode.initializeOnCreatedHook()
       },
-      get onDestroy() {
-         const dynamicNode = getActiveDynamicNode()
-         return dynamicNode.onDestroy;
+      get onDiscard() {
+         const dynamicNode = _getDynamicNode()
+         return dynamicNode.onDiscard;
       },
       get onDeactivate() {
-         const dynamicNode = getActiveDynamicNode()
+         const dynamicNode = _getDynamicNode()
          return dynamicNode.onDeactivate;
       },
       get onReactivate() {
-         const dynamicNode = getActiveDynamicNode()
+         const dynamicNode = _getDynamicNode()
          return dynamicNode.onReactivate;
       }
    }
@@ -86,7 +86,7 @@ function createViewNode(context: Context): ViewNode {
 // view node
 // onMount   if (isInitialMount)
 // - onCreated
-// - onReactivated
+// - onReactivate
 // onUnmount if (isFinalUnmount)
 // - onDeactivated
 // - onDestroyed
@@ -94,6 +94,6 @@ function createViewNode(context: Context): ViewNode {
 
 // dynamic node
 // - onCreated (rendered)
-// - onReactivated
+// - onReactivate
 // - onDeactivated
 // - onDestroyed

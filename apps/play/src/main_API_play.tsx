@@ -49,7 +49,7 @@ Dynamic node
 - flask?
 - context
 - onCreated
-- onDestroy
+- onDiscard
 - onReactivate
 - onDeactivate
 
@@ -83,15 +83,15 @@ function reClick(_this: ThisComponent) {
 
     watch($frog, () => {
 
-    }, { until: _this.onDestroy }) // manual cleanup //include info about preservation on _this.onDestroy
+    }, { until: _this.onDiscard }) // manual cleanup //include info about preservation on _this.onDiscard
 }
-// what if I don't want to destroy until parent is destroyed? Expose a stop function?
+// what if I don't want to discard until parent is destroyed? Expose a stop function?
 
 
 listen(document, 'click', () => {
 
     listen(button, 'click', reClick, {
-        until: _this.onDestroy
+        until: _this.onDiscard
     }) //manual clean up required
 }) //auto clean up
 
@@ -109,7 +109,7 @@ function useMouse(flask) {
 
 
     return {
-        destroy() {
+        discard() {
             flask.discard()
         }
     }

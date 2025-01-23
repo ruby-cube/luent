@@ -42,7 +42,7 @@ export const asyncContextStack = new AsyncContextStack()
 export type Stack<T = any> = {
    pop(): void;
    push(node: T): void;
-   getActiveNode(): T | undefined;
+   getCurrent(): T | undefined;
 }
 
 export function createStack<T>(config: { name: string | symbol, getParent?: (node: T | undefined) => T | undefined }): Stack<T> {
@@ -68,7 +68,7 @@ export function createStack<T>(config: { name: string | symbol, getParent?: (nod
                asyncContextStack.activeNodes.delete(name)
             }
          },
-         getActiveNode() {
+         getCurrent() {
             return activeNode;
          }
       }
@@ -92,7 +92,7 @@ export function createStack<T>(config: { name: string | symbol, getParent?: (nod
             asyncContextStack.activeNodes.delete(name)
 
       },
-      getActiveNode() {
+      getCurrent() {
          return _stack.at(-1)
       }
    }

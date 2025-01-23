@@ -5,8 +5,8 @@ import { __devCheckIfTracked, getActiveTracker } from "./DependencyTracker";
 import { AnyObject } from "@rue/types";
 import { ProtectedIon } from "../ion/ReinedIon";
 import { AnyIon, IonMethods, isIon } from "../ion/Ion";
-import { DerivedRef } from "../ion/Neutron";
-import { getDynamicNode } from "../../../lumo/src/dynamic/nodestack";
+import { DerivedNeutron } from "../ion/Neutron";
+import { getActiveFlask } from "@rue/flask";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -63,7 +63,7 @@ export function createDerivedIon<T extends any>(
    methods?: AnyObject,
    retrack: boolean = true,
    inert: boolean = false
-): DerivedIon<T> | DerivedRef<T> {
+): DerivedIon<T> | DerivedNeutron<T> {
    const derived = new MetaDerivedIon(<DerivedIon>$derivedIon, retrack, !!methods, inert);
 
    if (inert) {
@@ -78,7 +78,7 @@ export function createDerivedIon<T extends any>(
       }
       Object.setPrototypeOf(pureGetter, proto)
 
-      return pureGetter as DerivedRef;
+      return pureGetter as DerivedNeutron;
    }
 
    let initialized = false;
@@ -133,9 +133,9 @@ export function createDerivedIon<T extends any>(
    }
 
    Object.setPrototypeOf($derivedIon, proto)
-   const dynamicNode = getDynamicNode()
-   if (dynamicNode) {
-      dynamicNode.onDestroy(() => { //TODO: what about if a derived ion is created outside of a dynamic node??
+   const flask = getActiveFlask()
+   if (flask) {
+      flask.onDiscard(() => { //TODO: what about if a derived ion is created outside of a flask?? or if you want to bind the derived ion to an outer flask?
          derived.untrackAtoms()
       })
    }

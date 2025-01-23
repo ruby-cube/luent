@@ -1,13 +1,11 @@
 import { isIon, isIonizedModel, ion, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon, toValue, getWithoutTracking } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
-import { makeDynamicNode } from "../dynamic/makeDynamicNode";
 import { normalizeToArray } from "@rue/utils";
 import { mountNodeEntities } from "../node/mountNodeEntity";
-import { DynamicNode } from "../dynamic/DynamicNode";
+import { DynamicNode, getDynamicNode } from "../dynamic/DynamicNode";
 import { watch } from "../watch/watchAndPreserve";
 import { diff, InsertAndMoveKit } from "./diff";
-import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
 import { Context, getCommons, popCommons, pushCommons } from "../context/context-stack";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
@@ -122,7 +120,7 @@ export class ListRenderKit {
       if (isDynamic) {
          // set up watcher for updates
          // const renderCycle = getCurrentRenderCycle();
-         const parentDynamicNode = getActiveDynamicNode()
+         const parentDynamicNode = getDynamicNode()
          const _data = isIon(data) ? getWithoutTracking(data) : data // unwrap potentially nested ionized model
          const rawData = isIonizedModel(_data) ? toRaw(_data) as Collection<any> : undefined
          let clone = isIonizedModel(_data) ? shallowClone(rawData!) : undefined //TODO: need to handle cases when ionizedModel is nested in ion
@@ -173,7 +171,7 @@ export class ListRenderKit {
          const nodePod = isDynamic ? dynamicNodePod.appendNodePod() : this.outerNodePod;
 
          if (isDynamic) {
-            const dynamicNode = makeDynamicNode()
+            const dynamicNode = getDynamicNode().fork()
             dynamicNode.mount(function mountDynamicItem() {
                const nodeEntities = listKit.renderItem(item, $index, parent, nodePod, true)
                mountNodeEntities(nodeEntities, parent, fragment);
@@ -192,7 +190,7 @@ export class ListRenderKit {
       for (const index of indicesToRemove) {
          const nodePod = this.dynamicNodePod![index] as NodePod;
          const dynamicNode = dynamicNodeMap.get(nodePod)
-         dynamicNode?.destroy()
+         dynamicNode?.discard()
          nodePod.forEachNode(node =>
             node.remove()
          )
@@ -254,8 +252,7 @@ export class ListRenderKit {
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
 
-            pushDynamicNode(parentDynamicNode)
-            const dynamicNode = makeDynamicNode()
+            const dynamicNode = parentDynamicNode.fork()
             const renderItem = this.renderItem
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
@@ -266,7 +263,6 @@ export class ListRenderKit {
             })
             setCurrentIndex(undefined)
             dynamicNodeMap.set(nodePod, dynamicNode)
-            popDynamicNode()
          }
          else if (hasMoved(uItem)) {
             // move node to fragment (DOM will auto-remove node from DOM)

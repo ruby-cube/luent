@@ -67,17 +67,17 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
          // return component;
       },
 
-      unmount() { //TODO: should I call dynamicNode.unmount() instead of emit?? same for destroy?
+      unmount() { //TODO: should I call dynamicNode.unmount() instead of emit?? same for discard?
          if (!remountable) {
-            if (__DEV__) throw new Error('App cannot be unmounted. Did you mean to call `destroy`? To enable unmount and remount, set `remountable` to true in config.')
+            if (__DEV__) throw new Error('App cannot be unmounted. Did you mean to call `discard`? To enable unmount and remount, set `remountable` to true in config.')
             return;
          }
          removeDOMNodes(nodePod);
       },
 
-      destroy() {
+      discard() {
          this.unmount()
-         dynamicNode.destroy()
+         dynamicNode.discard()
       }
    }
 }

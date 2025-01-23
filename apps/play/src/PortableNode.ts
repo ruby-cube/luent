@@ -3,7 +3,7 @@ import { AtomicIon, Ionized, ion } from "../../../packages/quarky/src"
 
 class PortableNode {
 
-    destroy() {
+    discard() {
 
     }
 
@@ -63,7 +63,7 @@ const renderPortableItemMap: Map<UID, () => any> = new Map()
 
 // onCreated()
 
-// onDestroy()
+// onDiscard()
 
 // onMounted()
 

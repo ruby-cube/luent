@@ -1,5 +1,4 @@
-import { makeDynamicNode } from "../dynamic/makeDynamicNode";
-import { DynamicNode, NULLISH_DYNAMIC_NODE } from "../dynamic/DynamicNode";
+import { DynamicNode, getDynamicNode, NULLISH_DYNAMIC_NODE } from "../dynamic/DynamicNode";
 import { NodeEntity, SwapType } from "../node/makeNode";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
@@ -7,8 +6,6 @@ import { ConditionalSeries } from "./ConditionalSeries";
 import { hideDOMNodes, showDOMNodes } from "./toggledisplay";
 import { watch } from "../watch/watchAndPreserve";
 import { areShallowEqualArrays, Phase } from "../../../quarky/src";
-import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
-import { popCommons, pushCommons, Context } from "../context/context-stack";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { NodeKit } from "../node/setUpNodeEntities";
@@ -36,6 +33,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       swap: SwapType = 'create'
    ) {
       super(statements, makeElseKit);
+      this.parentDynamicNode = getDynamicNode()
       this.activeIndex = this.evaluateConditions()
       if (!this.isDynamic) {
          return;
@@ -85,7 +83,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       kit.nodePod!.activate()
 
       if (this.isDynamic && kit.type === 'create') {
-         const dynamicNode = kit.dynamicNode = makeDynamicNode()
+         const dynamicNode = kit.dynamicNode = getDynamicNode().fork()
          dynamicNode.mount(renderConditional)
       }
       else if (kit.type !== 'show') {
@@ -108,6 +106,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       }
    }
 
+   parentDynamicNode: DynamicNode
+
    setUp(
       parent: Element,
       outerNodeVine: NodePod,
@@ -117,7 +117,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          //TODO: static conditional
          return this;
       }
-      const parentDynamicNode = getActiveDynamicNode()
+
       outerNodeVine.append(this.nodePod!)
       const $conditions = this.getConditionsIon()
       const phasicNode = this.phasicNode
@@ -276,9 +276,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
          function activateConditional() {
             if (activationType === 'create') incomingNodes.length = 0; // clear array for next transition nodes
-            pushDynamicNode(parentDynamicNode!)
             series.activateConditional(activeIndex, parent)
-            popDynamicNode()
          }
 
          function transitionConditionalIn(initialPosition?: DOMRect, finalPosition?: DOMRect) {
@@ -351,7 +349,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          // discard of flask
          const dynamicNode = kit.dynamicNode!
          kit.dynamicNode = undefined;
-         dynamicNode.destroy()
+         dynamicNode.discard()
       }
       else if (activationType === 'mount') {
          removeDOMNodes(pod);
@@ -376,7 +374,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       let dynamicNode = kit.dynamicNode
       if (dynamicNode === undefined || dynamicNode === NULLISH_DYNAMIC_NODE) {
-         dynamicNode = kit.dynamicNode = makeDynamicNode();
+         dynamicNode = kit.dynamicNode = this.parentDynamicNode.fork();
          dynamicNode.mount(function renderConditionalUpdate() {
             const nodeEntities = series.render(kit, parent)
             mountConditional(parent, pod, nodeEntities);
@@ -384,7 +382,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       }
       else {
          // reactivate preserved nodes
-         dynamicNode.reactivate(function updateConditional() {
+         dynamicNode.remount(function updateConditional() {
             const nodeEntities = series.render(kit, parent);
             mountConditional(parent, pod, nodeEntities)
          })

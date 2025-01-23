@@ -16,7 +16,7 @@ watchIf($active, () => {
 }).else(() => {
 
 
-}, { until: _this.onDestroy })
+}, { until: _this.onDiscard })
 
 watchConditional([
     if_($active, () => {
@@ -28,7 +28,7 @@ watchConditional([
     else_(() => {
 
     })
-], { until: _this.onDestroy })
+], { until: _this.onDiscard })
 
 const $frogName = asIon($frog, 'name')
 
@@ -42,7 +42,7 @@ watch([$active, $ready, $frogName], () => {
     else {
 
     }
-}, { until: _this.onDestroy })
+}, { until: _this.onDiscard })
 
 const $frogName = asIon($frog, 'name')
 
@@ -59,5 +59,5 @@ watchEffect(() => {
 }, {
     only: [X, $frog],
     // also: [$frog],
-    until: _this.onDestroy
+    until: _this.onDiscard
 })

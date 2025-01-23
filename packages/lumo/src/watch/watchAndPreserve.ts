@@ -1,8 +1,7 @@
 import { isIon, watchEffect as _watchIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, Ionized, OnChangeHandler, Phase, __devCheckIfTracked } from "../../../quarky/src";
 import { ActiveListener, ListenerOptions } from "@rue/flask";
-import { getActiveDynamicNode, getDynamicNode } from "../dynamic/nodestack";
 import { CustomCleanupSchedulerListenerOptions } from "../events/listen";
-import { DynamicNode } from "../dynamic/DynamicNode";
+import { DynamicNode, getActiveDynamicNode } from "../dynamic/DynamicNode";
 import { AnyObject } from "@rue/types";
 import { getTrace } from "./debug";
 
@@ -18,12 +17,12 @@ export function watchRenderEffect(effect: () => void) {
     // const component = getCurrentProvider();
     // if (!component) throw new Error("watchRenderEffect must be called within component setup")
 
-    const dynamicNode = getDynamicNode()
+    const dynamicNode = getActiveDynamicNode() //TODO: dynamic node or flask?
     if (!dynamicNode)
         return _initializeRender(effect)
     return asPreservedWatcher(_watchIonicEffect(effect, {
         phase: Phase.RENDER,
-        until: dynamicNode.onDestroy
+        until: dynamicNode.onDiscard
     }), dynamicNode)
 }
 
@@ -40,7 +39,7 @@ function _initializeRender(effect: () => void) {
 
 
 export function watchEffect(effect: () => void) {
-    const dynamicNode = getDynamicNode()
+    const dynamicNode = getActiveDynamicNode() // TODO: dynamic node or flask??
     if (!dynamicNode)
         return _watchIonicEffect(effect)
     return asPreservedWatcher(_watchIonicEffect(effect), dynamicNode);
@@ -73,7 +72,7 @@ export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWa
 // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
 export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener {
    // console.log(getTrace()) 
-   const dynamicNode = getDynamicNode()
+   const dynamicNode = getActiveDynamicNode() //TODO: dynamic node or flask?
     if (!dynamicNode)
         return _watch(target, effect, options)
     return asPreservedWatcher(_watch(target, effect, options), dynamicNode);

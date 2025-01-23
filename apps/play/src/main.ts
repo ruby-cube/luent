@@ -68,7 +68,7 @@ app.mount('#app')
 // const number = $doubleCount();
 // console.log(number)
 // $doubleCount = null;
-// dynamicNode.destroy()
+// dynamicNode.discard()
 
 // const outerDiv = document.querySelector("#outer")
 // const innerButton = document.querySelector("#inner")

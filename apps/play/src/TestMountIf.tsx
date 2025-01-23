@@ -210,7 +210,7 @@ function ArticleBlock(setup: {
 //     //     console.log("deactivate")
 //     // })
 
-//     _this.onDestroy(() => {
+//     _this.onDiscard(() => {
 //         console.log("destroyd")
 //     })
 

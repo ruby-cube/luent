@@ -4,7 +4,7 @@ import { createStack, Stack } from "./context/AsyncContext";
 export const asyncTraceStack: Stack<string> | undefined = __DEV__ ? createStack<string>({ name: 'trace' }) : undefined;
 
 function getActiveTrace() {
-   return asyncTraceStack?.getActiveNode()
+   return asyncTraceStack?.getCurrent()
 }
 
 export function buildTrace() {
@@ -15,5 +15,5 @@ export function buildTrace() {
 
 export function asyncTrace(){
    const trace = getAppOnlyTrace()
-   console.log('NonError Async Trace\n    ' + (trace ? trace + '\n    ' : '') + 'at async ' + asyncTraceStack?.getActiveNode()?.slice(3))
+   console.log('NonError Async Trace\n    ' + (trace ? trace + '\n    ' : '') + 'at async ' + asyncTraceStack?.getCurrent()?.slice(3))
 }

@@ -20,7 +20,7 @@ export class TrackedOp {
         metaIonicModel.registerTrackedOp(op, entryKey, this)
     }
 
-    destroy() {
+    discard() {
         this.metaIonicModel.unregisterTrackedOp(this.op, this.entryKey)
     }
 
@@ -65,7 +65,7 @@ function createTrackedOp(
     atom.onUntracked(() => {
         if (atom.derivations.size === 0) {
             metaIonicModel.deleteObservedEntryKey(key)
-            trackedOp.destroy()
+            trackedOp.discard()
         }
     })
     return trackedOp;

@@ -44,7 +44,7 @@ const commonsStack = createStack<Context>({
 })
 
 export function getActiveCommons() {
-   return commonsStack.getActiveNode();
+   return commonsStack.getCurrent();
 }
 
 
