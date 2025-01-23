@@ -7,7 +7,7 @@ import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { mountConditional } from "../conditional/ConditionalRenderSeries";
 import { getContext, getCurrentContext, popContext, pushContext } from "../context/context-stack";
-import { NodeContext } from "../context/Context";
+import { NodeContext } from "../context/Commons";
 import { AppContext } from "../context/provide";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";

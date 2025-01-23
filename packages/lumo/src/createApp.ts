@@ -4,7 +4,7 @@ import { AnyObject } from "@rue/types";
 import { setComponentAttributes } from "./component/makeComponent";
 import { AppContext, createAppContext } from "./context/provide";
 import { getContext, popContext, pushContext } from "./context/context-stack";
-import { ContextEntries } from "./context/Context";
+import { ContextEntries } from "./context/Commons";
 import { _dog_ } from "./context/x_context-keys";
 import { NodePod } from "./node/NodePod";
 import { removeDOMNodes } from "./conditional/ConditionalRenderSeries";

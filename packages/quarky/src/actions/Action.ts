@@ -25,9 +25,9 @@ class ActionRecord {
     trackChange(reactivePrimitive: AtomicIon | PropIon) {
         if (this.tracked.has(reactivePrimitive)) return;
         this.tracked.add(reactivePrimitive);
-        watch(subject, (newValue, oldValue) => {
+        watch(subject, ({newState, oldState}) => {
             if (!action.success) {
-                subject.value = oldValue
+                subject.value = oldState
             }
         })
     }

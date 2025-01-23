@@ -1,8 +1,11 @@
 //@ts-nocheck
-import { component, fromContext, Suspense, teleportTo } from "@rue/lumo";
+import { component, fromCommons, Suspense, teleportTo } from "@rue/lumo";
 import { $setup } from "../../../packages/lumo/src/component/X_$setup";
 import { noop } from "@rue/utils";
-import { M } from "vite/dist/node/types.d-aGj9QkWt";
+
+
+
+
 export function ListBlock(setup = $setup()) {
 
    const $List = PortNode({ send: true, settle: true, receive: 300 }, $list =>      
@@ -346,7 +349,7 @@ const hi = () =>
             <h1>hello</h1>
 
             <$--transition>
-            <$--swap display/>
+            <vvv:show/>
             {If($active,
                <p>hey</p>
             )}
@@ -359,15 +362,13 @@ const hi = () =>
             <$List />
 
             <h1>hello</h1>
-            <$--context with={{ [_frog_]: new Frog(), [_cat_]: cat }}>
+            <$--commons provide={{ [_frog_]: new Frog(), [_cat_]: cat }}>
                {If($active,
                   <p>hey</p>
                )}
-            </$--context>
+            </$--commons>
 
-
-
-            <$--context with={{ [_frog_]: frog, [_cat_]: cat }}>
+            <$--commons provide={{ [_frog_]: frog, [_cat_]: cat }}>
                <List />
                <h1>hello</h1>
                <div>
@@ -375,7 +376,7 @@ const hi = () =>
                   <p>hi ho</p>
                   <p>hi ho</p>
                </div>
-            </$--context>
+            </$--commons>
 
             <div>
                <p>hi ho</p>

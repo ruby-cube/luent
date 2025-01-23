@@ -1,0 +1,19 @@
+import { getAppOnlyTrace } from "../lumo/src/watch/debug";
+import { createStack, Stack } from "./context/AsyncContext";
+
+export const asyncTraceStack: Stack<string> | undefined = __DEV__ ? createStack<string>({ name: 'trace' }) : undefined;
+
+function getActiveTrace() {
+   return asyncTraceStack?.getActiveNode()
+}
+
+export function buildTrace() {
+   const currentTrace = getActiveTrace()
+   const trace = getAppOnlyTrace()
+   return (trace ? trace + '\n' : '') + (currentTrace ? '    at async ' + currentTrace?.slice(3) : '')
+}
+
+export function asyncTrace(){
+   const trace = getAppOnlyTrace()
+   console.log('NonError Async Trace\n    ' + (trace ? trace + '\n    ' : '') + 'at async ' + asyncTraceStack?.getActiveNode()?.slice(3))
+}

@@ -364,10 +364,10 @@ function J(input: { for: any, Slot: any, params: any }) {
       door: 0
    },
       <>
-         <$--context with={{ [_dog_]: mu(dog) }}> //auto-readonly unless marked with m:
+         <$--commons provide={{ [_dog_]: mu(dog) }}> //auto-readonly unless marked with m:
             <input value={mu($msg, 'set', '+trace')}></input> // auto-readonly unless marked with m: .. then it's reined
             <input value={$msg} on:input={e => { $msg.state = e.target.value }}></input> // auto-readonly unless marked with m: .. then it's reined
-         </$--context>
+         </$--commons>
       </>
    )
 }

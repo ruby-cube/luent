@@ -5,7 +5,7 @@ import { AnyObject, Booleanny } from "@rue/types";
 import { ReactiveGet } from "../../../quarky/src";
 import { Context, getContext, getCurrentContext, popContext, pushContext } from "../context/context-stack";
 // import { getPhasicNode } from "../transition/PhasicNode";
-import { createNodeContext } from "../context/Context";
+import { createCommons } from "../context/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
@@ -88,8 +88,8 @@ function wrapWithContext(renderConditional: RenderFunction, context: AnyObject, 
       try {
          if (!initialRender) pushContext(outerContext)
          const nodeEntities = setUpNodeEntities(normalizeToArray(
-            createNodeContext(renderConditional, {
-               with: context
+            createCommons(renderConditional, {
+               provide: context
             })), parent, nodePod)
          return nodeEntities;
       }

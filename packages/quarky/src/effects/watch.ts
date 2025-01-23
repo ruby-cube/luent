@@ -17,6 +17,7 @@ import { isPropIon, PropIon } from "../ionize/PropIon";
 import { popEffect, pushEffect, runCleanups, ThisEffect } from "./ThisEffect";
 import { neutron, Neutron } from "../ion/Neutron";
 import { toValue } from "../ion/toIons";
+import { StateChangeEvent } from "./StateChangeEvent";
 
 
 type RenderCycleOptions = {
@@ -50,10 +51,10 @@ export type MutationRecord = {
 
 
 // export type MutationEffect<T extends IonizedModel = IonizedModel> = (newValue: T, mutations: MutationRecord[]) => void
-export type OnChangeHandler<T = any> = T extends () => infer R ? (newValue: R, oldValue: R) => void
+export type OnChangeHandler<T = any> =  (event: StateChangeEvent<T>) => void
    // :  (newValue: 'frog', oldValue: 'frog') => void
    // (newValue: { [K in keyof T]: T[K] extends () => infer R ? R : T[K] }, oldValue: { [K in keyof T]: T[K] extends () => infer R ? R : T[K] }) => void
-   : (newValue: T, oldValue: T) => void
+   // : (newValue: T, oldValue: T) => void
 
 export type ReactiveEffect = {
    (): void;
@@ -186,6 +187,7 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
    }
    // if ('name' in subject && subject.name === '__$propIon') console.log(subject)
 
+
    let eager: boolean | undefined = options?.eager
    const watchStateChange = options?.stateChange === false ? false : true;
    const phase = options?.phase ?? Phase.BEFORE_RENDER
@@ -223,14 +225,14 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
          return;
       eager = false;
       runCleanups($activeEffect())
-      const _effect = new ThisEffect(getMutations(subjects));
+      const _effect = new ThisEffect();
       $activeEffect.state = _effect
 
       let prevSubject = currentWatchSubject;
       try {
          currentWatchSubject = subjects // prevents infinite loops for synchronous effects //TODO: do we need this in watchModel and initialize effect?
          pushEffect(_effect)
-         effect(newValue, oldValue)
+         effect(new StateChangeEvent(subject, newValue, oldValue, getMutations(subjects)))
       }
       finally {
          popEffect()
@@ -390,15 +392,16 @@ function setUpWatcher(
    const forNextCycle = options?.cycle === 'next';
    const { pause, resume, stop } = $listen(effect, options || {}, {
       enroll(_effect) {
+         if (options?.__devName === 'setUpStyles') console.log('ADD: style watcher')
          wrappedEffect = _effect;
          for (const subject of watchSubjects) {
             subject.watch(_effect, phase, forNextCycle)
          }
       },
       remove(_effect) {
+         if (options?.__devName === 'setUpStyles') console.trace('REMOVE: style watcher')
          runCleanups($activeEffect())
          for (const subject of watchSubjects) {
-            console.trace('byebye', subject)
             subject.unwatch(_effect, phase)
          }
          if (ionicDerivations) {

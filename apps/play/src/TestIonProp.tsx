@@ -39,7 +39,7 @@ export function TestIonProp() {
         }
     })
 
-    watch($counter, (_, mutations) => {
+    watch($counter, ({mutations}) => {
         console.log('$counter mutated', mutations)
     })
 

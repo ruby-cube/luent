@@ -110,10 +110,6 @@ export function List(
       list.remove(index);
    }
 
-   watch(selected, ()=>{
-      console.log('selected changed', selected.size)
-   })
-
    return component(
       <>
          <h1>hello world</h1>
@@ -121,12 +117,12 @@ export function List(
             insert!
          </div>
 
-         {For(list, item => item.id, (item, $index) => (console.log('rendering', item),
+         {For(list, item => item.id, (item, $index) => (
             <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
                // <div
                style={{
                   backgroundColor: randomColor.get(),
-                  outline: $=(console.log('change outline', item), selected.has(item) ? 'thick solid blue' : 'unset'),
+                  outline: $=(selected.has(item) ? 'thick solid blue' : 'unset'),
                }}>
                <p on:click={e => removeItem($index())} style="cursor: pointer">
                   X

@@ -1,9 +1,9 @@
-import { createNodeContext } from "../context/Context";
+import { createCommons } from "../context/Commons";
 import { defineContextProp } from "../context/ContextKey";
 import { makeElement } from "../element/makeElement";
 import { NodeEntity } from "../node/makeNode";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
-import { fromContext } from "../context/provide";
+import { fromCommons } from "../context/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
@@ -78,13 +78,13 @@ function createPhasicNode(
         return _phaseNode
     }
 
-    return createNodeContext(() => (
+    return createCommons(() => (
         makeElement('div', Slot, { ref: $div, class: 'phasic' }, undefined)
-    ), { with: { [GET_PHASIC_NODE]: _getPhasicNode } })
+    ), { provide: { [GET_PHASIC_NODE]: _getPhasicNode } })
 }
 
 export function getPhasicNode(context?: ContextType) {
-    const phasicNode = fromContext(GET_PHASIC_NODE, context)?.()
+    const phasicNode = fromCommons(GET_PHASIC_NODE, context)?.()
     return phasicNode
 }
 

@@ -4,7 +4,7 @@ import { NodeRef } from "../node/NodeRef";
 import { NodeEntity } from "../node/makeNode";
 import { makeElement } from "../element/makeElement";
 import { defineContextProp } from "../context/ContextKey";
-import { fromContext } from "../context/provide";
+import { fromCommons } from "../context/provide";
 import { Ion } from "@rue/quarky";
 import { component } from "../component/InternalComponent";
 import { Else, If } from "../conditional/If";
@@ -63,7 +63,7 @@ declare module '@rue/lumo' {
 }
 
 function registerTransitionNode(transitionNode: TransitionNode) {
-    fromContext(REGISTER_TRANSITION_NODE)(transitionNode)
+    fromCommons(REGISTER_TRANSITION_NODE)(transitionNode)
 }
 
 export function useTransitionNodes() {

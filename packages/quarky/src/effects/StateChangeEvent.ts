@@ -1,45 +1,11 @@
-import { ThisEffect } from "./ThisEffect"
 import { MutationRecord } from "./watch"
-import { AnyObject } from "@rue/types"
-import { AnyIon } from "../ion/Ion"
 
-class StateChangeEvent {
+export class StateChangeEvent<S> {
    trace?: string;
    constructor(
-      public subject: AnyIon | AnyObject,
-      public effect: ThisEffect,
-      public watcher: ThisWatcher
+      public subject: S,
+      public newState?: S extends () => infer T ? T : S,
+      public oldState?: S extends () => infer T ? T : S,
+      public mutations?: MutationRecord[]
    ) { }
-   atoms?: Atom[]
-   triggeredAtoms?: Atom[]
-   newState?: any
-   oldState?: any
-   mutations?: MutationRecord[]
-}
-
-class ContextualizedNode {
-   getFromContext() {
-
-   }
-   getFromApp() {
-
-   }
-
-   getFromGlobal() {
-
-   }
-}
-
-class ThisWatcher extends {
-   onDismantle() {
-
-   }
-
-   onDeactivate() {
-
-   }
-
-   onReactivate() {
-
-   }
 }

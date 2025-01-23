@@ -60,25 +60,6 @@ export class EffectFlask {
         }
     }
 
-    // onDisposal(cleanUp: () => void) {
-    //     const cleanups = this.#cleanups;
-    //     cleanups.add(cleanUp);
-    //     return {
-    //         cancel() {
-    //             cleanups.delete(cleanUp)
-    //         }
-    //     }
-    // }
-
-    reactivate() {
-        pushFlask(this)
-    }
-
-    deactivate() {
-        if (getFlask() === this)
-            popFlask()
-    }
-
     collectEffects<T>(run: (outerFlask: EffectFlask | null) => T) {
         pushFlask(this);
         try {
@@ -129,14 +110,3 @@ export function collectEffects<T>(run: (flask: EffectFlask, outerFlask: EffectFl
 //     outerFlask?.onDisposal(flask.dispose)
 // })
 // flask.outer.onDisposal(flask.dispose)
-
-
-
-
-
-
-
-
-
-
-

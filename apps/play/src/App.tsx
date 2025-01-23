@@ -228,7 +228,7 @@ function Appo(
                 <button>click</button>
             )}
             {ElseIf($active, () => {
-                const $dialogBox = fromContext(ALERT_DIALOG_BOX) || NodeRef()
+                const $dialogBox = fromCommons(ALERT_DIALOG_BOX) || NodeRef()
 
                 return (
                     <Wrapper title={() => $dialogBox().title}>

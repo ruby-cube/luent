@@ -1,4 +1,4 @@
-import { component, fromContext, fromTag, prep, TypedKey, v } from "@rue/lumo"
+import { component, fromCommons, fromTag, prep, TypedKey, v } from "@rue/lumo"
 import { DerivedIon, ion, ionize } from "@rue/quarky";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
 
@@ -124,7 +124,7 @@ function ChildBlock(
       hi: string
    }
 ) {
-   const counter = fromContext(COUNTER)
+   const counter = fromCommons(COUNTER)
 
    return component(
       <div style='outline: solid 1px gray; background-color: #C0CAAD; padding: 15px'>
@@ -141,7 +141,7 @@ function ChildBlock(
 
 
 function SiblingBlock() {
-   const counter = fromContext(COUNTER)
+   const counter = fromCommons(COUNTER)
 
    return component(
       <div style='outline: solid 1px gray; background-color: #B26E63'>
@@ -154,9 +154,9 @@ function SiblingBlock() {
 }
 
 function GrandChildBlock() {
-   const counter = fromContext(COUNTER)
-   const $doubleCount = fromContext(DOUBLE_COUNT)
-   const name = fromContext(NAME)
+   const counter = fromCommons(COUNTER)
+   const $doubleCount = fromCommons(DOUBLE_COUNT)
+   const name = fromCommons(NAME)
    const $name = asPropIon(name, '$')
    const $count = asPropIon(counter.$, 'count')
 

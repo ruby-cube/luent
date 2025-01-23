@@ -1,11 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { fromApp, fromContext, createGlobalContext, fromGlobal } from '../provide';
+import { fromApp, fromCommons, createGlobalContext, fromGlobal } from '../provide';
 import { component } from '../../component/InternalComponent';
 import { createApp } from '../../createApp';
 import { makeComponent } from '../../component/makeComponent';
 import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
-import { createNodeContext } from '../Context';
+import { createCommons } from '../Commons';
 import { defineContextProp } from '../ContextKey';
 import { Ion, Ionized, MaybeIon, v } from '../../InputTypes';
 import { ion, ionize, isIon, isIonizedModel } from '@rue/quarky';
@@ -54,7 +54,7 @@ describe('Integration tests the Context API', () => {
 
             function Child() {
                 frogC = fromApp(_frog_)
-                frogD = fromContext(_frog_)
+                frogD = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -182,7 +182,7 @@ describe('Integration tests the Context API', () => {
     //     });
     // });
 
-    describe('Context() and fromContext()', () => {
+    describe('Context() and fromCommons()', () => {
         it('should provide all child components with context entries', () => {
 
             const value = 'sir robin'
@@ -195,15 +195,15 @@ describe('Integration tests the Context API', () => {
             function App() {
                 frogA = fromApp(_frog_)
                 return component(
-                    createNodeContext(() => [
+                    createCommons(() => [
                         makeComponent(Parent, undefined, {}, undefined)
-                    ], { with: { [_frog_]: value } })
+                    ], { provide: { [_frog_]: value } })
                 )
             }
 
             function Parent() {
                 frogB = fromApp(_frog_)
-                frogC = fromContext(_frog_)
+                frogC = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => [
@@ -214,7 +214,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frogD = fromContext(_frog_)
+                frogD = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -222,7 +222,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Sibling() {
-                frogE = fromContext(_frog_)
+                frogE = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => ['sibling'], {}, undefined)
@@ -250,16 +250,16 @@ describe('Integration tests the Context API', () => {
 
                 return component(
                     makeElement('div', () => [
-                        createNodeContext(() => [
+                        createCommons(() => [
                             makeComponent(Child, undefined, {}, undefined),
-                        ], { with: { [_frog_]: value } }),
+                        ], { provide: { [_frog_]: value } }),
                         makeComponent(Sibling, undefined, {}, undefined)
                     ], {}, undefined)
                 )
             }
 
             function Child() {
-                frogD = fromContext(_frog_)
+                frogD = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -267,7 +267,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Sibling() {
-                frogE = fromContext(_frog_)
+                frogE = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => ['sibling'], {}, undefined)
@@ -303,9 +303,9 @@ describe('Integration tests the Context API', () => {
             function App() {
 
                 return component(
-                    createNodeContext(() => [
+                    createCommons(() => [
                         makeComponent(Parent, undefined, {}, undefined)
-                    ], { with: { [APP_CONTEXTUAL_FROG]: appContextualValue } })
+                    ], { provide: { [APP_CONTEXTUAL_FROG]: appContextualValue } })
                 )
             }
 
@@ -313,9 +313,9 @@ describe('Integration tests the Context API', () => {
 
                 return component(
                     makeElement('div', () => [
-                        createNodeContext(() => [
+                        createCommons(() => [
                             makeComponent(Child, undefined, {}, undefined),
-                        ], { with: { [CONTEXTUAL_FROG]: contextualValue } })
+                        ], { provide: { [CONTEXTUAL_FROG]: contextualValue } })
                     ], {}, undefined)
                 )
             }
@@ -324,10 +324,10 @@ describe('Integration tests the Context API', () => {
                 frogA = fromGlobal(GLOBAL_FROG)
                 frogB = fromApp(APP_FROG)
 
-                frogC = fromContext(GLOBAL_FROG)
-                frogD = fromContext(APP_FROG)
-                frogE = fromContext(APP_CONTEXTUAL_FROG)
-                frogF = fromContext(CONTEXTUAL_FROG)
+                frogC = fromCommons(GLOBAL_FROG)
+                frogD = fromCommons(APP_FROG)
+                frogE = fromCommons(APP_CONTEXTUAL_FROG)
+                frogF = fromCommons(CONTEXTUAL_FROG)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -366,18 +366,18 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return component(
-                    createNodeContext(() => [
+                    createCommons(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { with: { [_frog_]: value } })
+                    ], { provide: { [_frog_]: value } })
                 )
             }
 
             let error;
 
             function Child() {
-                frog = fromContext(_frog_)
+                frog = fromCommons(_frog_)
                 try {
-                    fromContext(KERMIT)
+                    fromCommons(KERMIT)
                 }
                 catch (err) {
                     error = err
@@ -412,7 +412,7 @@ describe('Integration tests the Context API', () => {
 
 
             function Child() {
-                frog = fromContext(_frog_)
+                frog = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -440,7 +440,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frog = fromContext(_frog_)
+                frog = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -463,14 +463,14 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return component(
-                    createNodeContext(() => [
+                    createCommons(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { with: { [_frog_]: value } })
+                    ], { provide: { [_frog_]: value } })
                 )
             }
 
             function Child() {
-                frog = fromContext(_frog_)
+                frog = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -494,9 +494,9 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return component(
-                    createNodeContext(() => [
+                    createCommons(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { with: { [_frog_]: value } })
+                    ], { provide: { [_frog_]: value } })
                 )
             }
 
@@ -504,7 +504,7 @@ describe('Integration tests the Context API', () => {
 
             function Child() {
                 try {
-                    frog = fromContext(_frog_)
+                    frog = fromCommons(_frog_)
 
                 }
                 catch (err) {
@@ -534,9 +534,9 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return component(
-                    createNodeContext(() => [
+                    createCommons(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { with: { [_frog_]: value } })
+                    ], { provide: { [_frog_]: value } })
                 )
             }
 
@@ -544,7 +544,7 @@ describe('Integration tests the Context API', () => {
 
             function Child() {
                 try {
-                    frog = fromContext(_frog_)
+                    frog = fromCommons(_frog_)
                 }
                 catch (err) {
                     error = err
@@ -574,14 +574,14 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return component(
-                    createNodeContext(() => [
+                    createCommons(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { with: { [_frog_]: ion(value) } })
+                    ], { provide: { [_frog_]: ion(value) } })
                 )
             }
 
             function Child() {
-                frog = fromContext(_frog_)
+                frog = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -605,14 +605,14 @@ describe('Integration tests the Context API', () => {
 
             function App() {
                 return component(
-                    createNodeContext(() => [
+                    createCommons(() => [
                         makeComponent(Child, undefined, {}, undefined)
-                    ], { with: { [_frog_]: ionize(value) } })
+                    ], { provide: { [_frog_]: ionize(value) } })
                 )
             }
 
             function Child() {
-                frog = fromContext(_frog_)
+                frog = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -640,7 +640,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frog = fromContext(_frog_)
+                frog = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)
@@ -669,7 +669,7 @@ describe('Integration tests the Context API', () => {
             }
 
             function Child() {
-                frog = fromContext(_frog_)
+                frog = fromCommons(_frog_)
 
                 return component(
                     makeElement('div', () => ['child'], {}, undefined)

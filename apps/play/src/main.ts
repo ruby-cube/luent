@@ -32,7 +32,7 @@ import { Transformers } from './jsx-$transform';
 
 // const rootContext = createGlobalContext()
 
-const app = createApp(List)
+const app = createApp(TestDebugApp)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

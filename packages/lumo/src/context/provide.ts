@@ -1,5 +1,5 @@
 import { Context, getCurrentContext } from "./context-stack";
-import { ContextEntries, NodeContext } from "./Context";
+import { ContextEntries, NodeContext } from "./Commons";
 import { contextTypeMap, TypeConfig } from "./ContextKey";
 import { isIon, isIonizedModel, toIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
@@ -26,7 +26,7 @@ export type _ContextInputType<C> =
    : 'invalid typeConfig'
 
 
-export function fromContext<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
+export function fromCommons<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
    let _context = context || getCurrentContext();
    if (!_context) throw new Error(``)
 

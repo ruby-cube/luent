@@ -7,9 +7,10 @@ import { isTrackedOp, TrackedOp } from "../../../quarky/src/ionize/TrackedOp";
 import { isPropIon, PropIon } from "../../../quarky/src/ionize/PropIon";
 import { META } from "../../../quarky/src/ReactiveEntity";
 import { trace } from "console";
+import { asyncTraceStack } from "../../../flask/debug";
 
 export function getTrace() {
-   Error.stackTraceLimit = 50;
+   Error.stackTraceLimit = Infinity;
    try {
       throw new Error('Trace')
    }
@@ -68,11 +69,13 @@ export function traceTriggers<T>(subject: T) {
 
 
 
+
+
 function traceTrigger() {
    const rawTrace = getTrace() as string;
    const cutOff = rawTrace.indexOf('at set state') > -1 ? 'at set state' : 'at Object.set'
    const rawTraceTail = rawTrace.split(cutOff).at(-1)!
-   return rawTraceTail.slice(rawTraceTail.indexOf('at'))
+   return rawTraceTail.slice(rawTraceTail.indexOf('at '))
 }
 
 function __logTriggeredAtom(atom: Atom) {
@@ -117,4 +120,22 @@ function logTrackedOpTrace(atom: TrackedOp) {
    const originTrace = atom.originTrace //TODO: add property
    console.log(`\n[TRIGGER TRACE] for ionic op "${String(atom.op)}"`) //QUESTION: should i provide entryKey?
    console.log('NonError origin trace\n    ' + originTrace)
+}
+
+
+
+
+const libraryPaths = ['/packages/'] //TODO: make this configurable
+
+export function getAppOnlyTrace() {
+   const rawTrace = getTrace() as string;
+   const traceLines = rawTrace.split('\n');
+   traceLines.shift()
+   let appLines = traceLines;
+   for (const path of libraryPaths) {
+      appLines = appLines.filter((line) => !line.includes(path))
+   }
+   if (appLines.length)
+      return appLines.reduce((prev, line) => prev + '\n' + line).trim()
+   return undefined
 }

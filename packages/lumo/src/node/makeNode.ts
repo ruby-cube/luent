@@ -6,7 +6,7 @@ import { NodeReferent, NodeRef, NodesRef } from "./NodeRef";
 import { getFlask, onFlaskDisposal } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
-import { createNodeContext } from "../context/Context";
+import { createCommons } from "../context/Commons";
 import { AnyObject, Booleanny } from "@rue/types";
 import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
@@ -122,15 +122,15 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 // }
 
 export function makeNode(
-   nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--context' | 'vvv:mount' | 'vvv:create' | 'vvv:show' | '$--try' | '$--suspense' | '$--portal',
+   nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--commons' | 'vvv:mount' | 'vvv:create' | 'vvv:show' | '$--try' | '$--suspense' | '$--portal',
    Slot: undefined | (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent | SwapConfig | JSX.Element | undefined {
 
    switch (nodeType) {
-      case '$--context':
+      case '$--commons':
          if (!Slot) throw new Error(`Extraneous <Context>`)
-         return createNodeContext(Slot, <ComponentConfig>config)
+         return createCommons(Slot, <ComponentConfig>config)
 
       case '$--try':
          if (!Slot) throw new Error(`Extraneous <Context>`)

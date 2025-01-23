@@ -1,4 +1,4 @@
-import { NodeContext } from "./Context";
+import { NodeContext } from "./Commons";
 import { AppContext } from "./provide";
 
 export type Context = NodeContext | AppContext

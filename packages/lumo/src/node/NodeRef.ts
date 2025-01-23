@@ -47,19 +47,18 @@ export function NodesRef<T extends RefSource = RefSource>(source: T): NodesRef<T
    let $nodes = createNodeRef([]) as NodesRef<T>
    const _ref = $nodes[INTERNAL]
 
-   const flask = getFlask()
-   flask?.onDisposal(() => {
+   getFlask()?.onDisposal(() => {
       _ref.setValue([]); // clear nodes
    })
 
    if (isSettingUpList()) {
       onBeforeListUpdate(() => {
          _ref.prepUpdate();
-      }, { until: flask!.onDisposal })
+      })
 
       onListUpdated((toFromIndices) => {
          _ref.update(toFromIndices)
-      }, { until: flask!.onDisposal })
+      })
    }
    return $nodes
 }

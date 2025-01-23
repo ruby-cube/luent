@@ -47,8 +47,8 @@ export function watchItems<T extends ReactiveGet | IonizedModel>(
     }
 
     // watch new items, unwatch deleted items
-    const listWatcher = watch(reactiveList, (_, mutations) => {
-        for (const mutation of mutations) {
+    const listWatcher = watch(reactiveList, ({mutations}) => {
+        for (const mutation of mutations!) {
             const { args, op, output, preopData } = mutation
             switch (op) {
                 case 'push':
@@ -164,8 +164,8 @@ export function watchCollectionValues<T extends ReactiveGet | IonizedModel>(
     const mapSnapshot = collection instanceof Map ? shallowClone(collection) : undefined
 
     // watch new items, unwatch deleted items
-    const collectionWatcher = watch(reactiveCollection, (_, mutations) => {
-        for (const mutation of mutations) {
+    const collectionWatcher = watch(reactiveCollection, ({mutations}) => {
+        for (const mutation of mutations!) {
             const { args, op } = mutation
             switch (op) {
                 case 'add':
@@ -232,8 +232,8 @@ export function watchMapKeys<T extends ReactiveGet | IonizedModel>(
 
 
     // watch new items, unwatch deleted items
-    const mapWatcher = watch(reactiveMap, (_, mutations) => {
-        for (const mutation of mutations) {
+    const mapWatcher = watch(reactiveMap, ({mutations}) => {
+        for (const mutation of mutations!) {
             const { args, op } = mutation
             switch (op) {
                 case 'set':

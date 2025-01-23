@@ -4,11 +4,12 @@ import { SetMap } from "@rue/utils";
 
 type Task = () => void
 export enum LifecycleHook {
-    ON_CREATED = 'c',
-    ON_REACTIVATE = 'a',
-    ON_DEACTIVATE = 'bda',
-    ON_DESTROY = 'bd',
+   CREATION = 'c',
+   REACTIVATION = 'a',
+   DEACTIVATION = 'bda',
+   DISPOSAL = 'bd',
 }
+
 
 // let count = 0;
 
@@ -20,30 +21,25 @@ export class DynamicNode {
         this.flask = flask;
     }
 
-    get onDismantle(){
-      return this.flask?.onDisposal
-    }
-
     constructor(
         public parent: DynamicNode | null,
     ) {
         // this.count = count++;
         // console.trace('new dynamic node', this.count)
-        this.onDestroy = (handler: () => void, options?: SchedulerOptions) => at(LifecycleHook.ON_DESTROY, this, handler, options)
-        this.onDeactivate = (handler: () => void, options?: SchedulerOptions) => on(LifecycleHook.ON_DEACTIVATE, this, handler, options)
-        this.onReactivate = (handler: () => void, options?: SchedulerOptions) => on(LifecycleHook.ON_REACTIVATE, this, handler, options)
+        this.onDestroy = (handler: () => void, options?: SchedulerOptions) => at(LifecycleHook.DISPOSAL, this, handler, options)
+        this.onDeactivate = (handler: () => void, options?: SchedulerOptions) => on(LifecycleHook.DEACTIVATION, this, handler, options)
+        this.onReactivate = (handler: () => void, options?: SchedulerOptions) => on(LifecycleHook.REACTIVATION, this, handler, options)
     }
 
     tasks: SetMap<LifecycleHook, Task> = new SetMap();
 
-    emit(hookName: LifecycleHook) {
-        const taskQueue = this.tasks.get(hookName);
-    if (hookName === LifecycleHook.ON_REACTIVATE) console.log('emit', taskQueue)
-        if (!taskQueue) return;
-        for (const task of taskQueue) {
-            task();
-        }
-    }
+    private emit(hookName: LifecycleHook) {
+      const taskQueue = this.tasks.get(hookName);
+      if (!taskQueue) return;
+      for (const task of taskQueue) {
+         task();
+      }
+   }
 
     mount(render: () => void) {
         pushDynamicNode(this);
@@ -52,21 +48,16 @@ export class DynamicNode {
             render()
         }, render.name)
         popDynamicNode();
-        this.emit(LifecycleHook.ON_CREATED)
+        this.emit(LifecycleHook.CREATION)
     }
 
     reactivate(remount: () => void) {
-        this.emit(LifecycleHook.ON_REACTIVATE)
+        this.emit(LifecycleHook.REACTIVATION)
         remount();
-        // pushDynamicNode(this);
-        // this.flask?.reactivate()
-        // render()
-        // this.flask?.deactivate()
-        // popDynamicNode();
     }
 
     deactivate() {
-        this.emit(LifecycleHook.ON_DEACTIVATE)
+        this.emit(LifecycleHook.DEACTIVATION)
     }
 
    //  unmount() {
@@ -81,7 +72,7 @@ export class DynamicNode {
 
     destroy() {
       //   this.unmount();
-        this.emit(LifecycleHook.ON_DESTROY) // this stops all onReactivate and onDeactivate listeners that are set to go until destroy
+        this.emit(LifecycleHook.DISPOSAL) // this stops all onReactivate and onDeactivate listeners that are set to go until destroy
         this.flask?.dispose()
       //   this.nodeVine = undefined
         this.flask = undefined
@@ -96,7 +87,7 @@ export class DynamicNode {
 
     initializeOnCreatedHook() {
         if (this.onCreated) return this.onCreated;
-        return this.onCreated = (handler: () => void, options?: SchedulerOptions) => at(LifecycleHook.ON_CREATED, this, handler, options)
+        return this.onCreated = (handler: () => void, options?: SchedulerOptions) => at(LifecycleHook.CREATION, this, handler, options)
     }
 
     // initializeOnDestroyHook() {
@@ -115,6 +106,37 @@ export class DynamicNode {
     //     this.initializeOnDestroyHook()
     //     return this.onReactivate = (handler: () => void, options?: SchedulerOptions) => on(LifecycleHook.ON_REACTIVATE, this, handler, options)
     // }
+
+
+       // private tasks: SetMap<LifecycleHook, Task> = new SetMap();
+    
+
+    
+      //  private at(hookName: LifecycleHook, handler: () => void, options: SchedulerOptions = {}) {
+      //     const tasks = this.tasks
+    
+      //     return $schedule(handler, options, {
+      //        enroll(handler) {
+      //           tasks.addToSet(handler, hookName)
+      //        },
+      //        remove(handler) {
+      //           tasks.deleteFromSet(handler, hookName)
+      //        }
+      //     });
+      //  }
+    
+      //  private on(hookName: LifecycleHook, handler: () => void, options: ListenerOptions = {}) {
+      //     const tasks = this.tasks
+    
+      //     return $listen(handler, { until: this.onDisposal, ...options }, {
+      //        enroll(handler) {
+      //           tasks.addToSet(handler, hookName)
+      //        },
+      //        remove(handler) {
+      //           tasks.deleteFromSet(handler, hookName)
+      //        }
+      //     });
+      //  }
 }
 
 function at(hookName: LifecycleHook, node: DynamicNode, handler: () => void, options: SchedulerOptions = {}) {

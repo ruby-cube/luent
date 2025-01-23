@@ -11,11 +11,12 @@ import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynami
 import { Context, getContext, popContext, pushContext } from "../context/context-stack";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
-import { createNodeContext } from "../context/Context";
+import { createCommons } from "../context/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { getTrace } from "../watch/debug";
 import { NodePod } from "../node/NodePod";
 import { mountConditional } from "../conditional/ConditionalRenderSeries";
+import { getFlask } from "@rue/flask";
 
 
 type Index = number
@@ -47,8 +48,8 @@ function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
             pushContext(list.context)
          }
          const nodeEntities = setUpNodeEntities(normalizeToArray(
-            createNodeContext(() => renderItem(item, $index), {
-               with: { [REGISTER_TRANSITION_NODE]: registerTransitionNode }
+            createCommons(() => renderItem(item, $index), {
+               provide: { [REGISTER_TRANSITION_NODE]: registerTransitionNode }
             })
          ), parent, nodePod)
          return nodeEntities;
@@ -127,14 +128,14 @@ export class ListRenderKit {
          let clone = isIonizedModel(_data) ? shallowClone(rawData!) : undefined //TODO: need to handle cases when ionizedModel is nested in ion
          //TODO: figure out typing for Set, Map, Object vs Array
 
-         watch(data as any/* FIX: type error*/, (newValue: any[], oldValue: any[]) => { // typecast as one of the options so that typescript won't complain
-            const _oldValue = clone || oldValue;
+         watch(data as any/* FIX: type error*/, ({newState, oldState}) => { // typecast as one of the options so that typescript won't complain
+            const _oldValue = clone || oldState;
             if (isIonizedModel(_data)) clone = shallowClone(rawData!) as any[]
-            const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || newValue, _oldValue, getUID)
-            console.log('updating list, noChange', newValue.length, _oldValue.length)
+            const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || newState, _oldValue, getUID)
+            console.log('updating list, noChange', newState.length, _oldValue.length)
             if (noChange) return;
             if (dynamicNodePod!.length !== _oldValue.length)
-               throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${oldValue.length} are mismatched. This should never happen.`)
+               throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${oldState.length} are mismatched. This should never happen.`)
 
             this.castBeforeUpdate();
             this.removeItems(indicesToRemove!);

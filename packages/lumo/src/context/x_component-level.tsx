@@ -1,5 +1,5 @@
 import { component } from "../component/InternalComponent"
-import { fromApp, fromContext, provideAppwide } from "./provide"
+import { fromApp, fromCommons, provideAppwide } from "./provide"
 import { _dog_ } from "./x_context-keys"
 import { _cat_ } from "./x_context-keysB"
 
@@ -10,15 +10,15 @@ const cat = provideAppwide(_cat_, 0)
 function List() {
     return component(
         <>
-            <$--context with={{ [_dog_]: 0 }}>
+            <$--commons provide={{ [_dog_]: 0 }}>
                 <p>hello</p>
                 <p>{fromApp(_dog_)}</p>
-            </$--context>
+            </$--commons>
 
-            <$--context with={{ [_dog_]: 'mom' }}>
+            <$--commons provide={{ [_dog_]: 'mom' }}>
                 <p>hello</p>
-                <p>{fromContext(_dog_)}</p>
-            </$--context>
+                <p>{fromCommons(_dog_)}</p>
+            </$--commons>
         </>
     )
 }

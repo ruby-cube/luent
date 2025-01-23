@@ -1,11 +1,13 @@
 import { $schedule, PendingCancelOp } from "@rue/flask";
 
+export const INTERNAL = Symbol('internal')
+
 export class ThisEffect {
    private tasks?: Set<(() => void)>
 
-   get onDismantle() {
+   get onCleanup() {
       const tasks = this.tasks || (this.tasks = new Set())
-      return this._onDismantle || (this._onDismantle = (cleanUp: () => void) => {
+      return this._onCleanup || (this._onCleanup = (cleanUp: () => void) => {
          return $schedule(cleanUp, {}, {
             enroll(_cleanUp) {
                tasks.add(_cleanUp)
@@ -17,8 +19,14 @@ export class ThisEffect {
       })
    }
 
-   private _onDismantle?: (cleanUp: () => void) => PendingCancelOp
+   private _onCleanup?: (cleanUp: () => void) => PendingCancelOp
+
+   [INTERNAL]?: {
+      asyncTrace: string
+   }
 }
+
+
 
 let currentEffect: ThisEffect | undefined;
 let prevEffect: ThisEffect | undefined;

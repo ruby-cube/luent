@@ -21,8 +21,8 @@ export function mountTextNode(textNode: CharacterData, parent: Element, fragment
 }
 
 function keepTextNodeUpdated(text: ReactiveGet<any>, textNode: CharacterData) {
-   watch(text, (newValue: any) => {
-      textNode.data = toString(newValue);
+   watch(text, ({newState}) => {
+      textNode.data = toString(newState);
    }, { phase: Phase.RENDER, __devName: keepTextNodeUpdated.name });
 }
 

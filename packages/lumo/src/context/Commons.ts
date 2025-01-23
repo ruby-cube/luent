@@ -23,7 +23,7 @@ export const context = {
 
 
 export function Context<T extends ContextEntries<T>>(input: {
-    with: T,
+    provide: T,
     Slot: ()=>NodeEntity
 }) {
     const { Slot } = input
@@ -32,7 +32,7 @@ export function Context<T extends ContextEntries<T>>(input: {
     if (!parentContext) throw new Error(`no context found :( This should never happen`)
 
     const context: NodeContext = {
-        entries: input.with,
+        entries: input.provide,
         parent: parentContext,
         app: parentContext?.app,
         global: parentContext?.global
@@ -43,11 +43,11 @@ export function Context<T extends ContextEntries<T>>(input: {
     return component(nodeEntities)
 }
 
-export function createNodeContext(
+export function createCommons(
     Slot: () => NodeEntity,
     config: ComponentConfig,
 ): InternalComponent {
-   const output = Context({ Slot, with: config.with })
+   const output = Context({ Slot, provide: config.provide })
    return new InternalComponent(output, undefined, undefined);
 }
 

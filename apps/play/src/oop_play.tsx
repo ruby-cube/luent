@@ -130,10 +130,10 @@ function ListA() {
 
          <Item count={$count} />
          <Item $count={rein($count, { increment: true })} ref={dog$.$collar} $selection={rein(selection$, { setTarget: true, })} />
-         <$--context with={{ [_count_]: $count }}> {/* non-explicit exposure by type; vulnerable decrement function */}
+         <$--commons provide={{ [_count_]: $count }}> {/* non-explicit exposure by type; vulnerable decrement function */}
             <Article />
             <Footer />
-         </$--context>
+         </$--commons>
       </>
    )
 }

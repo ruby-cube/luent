@@ -76,9 +76,9 @@ export function OverrideMethods() {
          )}
          
          <PotterBlock count={rein(forest$, 'select')}></PotterBlock>
-         <$--context with={{ [$_list_]: list }}>
+         <$--commons provide={{ [$_list_]: list }}>
 
-         </$--context>
+         </$--commons>
          <button on:click={() => list.pop()}>pop</button>
          <button on:click={() => list.pop()}>pop</button>
       </>
