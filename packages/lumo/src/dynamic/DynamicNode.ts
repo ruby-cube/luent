@@ -73,7 +73,7 @@ export class DynamicNode {
     destroy() {
       //   this.unmount();
         this.emit(LifecycleHook.DISPOSAL) // this stops all onReactivate and onDeactivate listeners that are set to go until destroy
-        this.flask?.dispose()
+        this.flask?.discard()
       //   this.nodeVine = undefined
         this.flask = undefined
         this.parent = null
@@ -128,7 +128,7 @@ export class DynamicNode {
       //  private on(hookName: LifecycleHook, handler: () => void, options: ListenerOptions = {}) {
       //     const tasks = this.tasks
     
-      //     return $listen(handler, { until: this.onDisposal, ...options }, {
+      //     return $listen(handler, { until: this.onDiscard, ...options }, {
       //        enroll(handler) {
       //           tasks.addToSet(handler, hookName)
       //        },

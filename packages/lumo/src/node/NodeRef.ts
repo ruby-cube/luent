@@ -2,7 +2,7 @@ import { Component, PublicComponent } from "../component/InternalComponent"
 import { HTMLTag } from "../element/makeElement"
 import { isSettingUpList, onBeforeListUpdate, onListUpdated } from "../iteratives/listStack"
 import { AtomicIon } from "@rue/quarky"
-import { getFlask } from "@rue/flask"
+import { getActiveFlask } from "@rue/flask"
 
 const INTERNAL = Symbol('internal')
 
@@ -47,7 +47,7 @@ export function NodesRef<T extends RefSource = RefSource>(source: T): NodesRef<T
    let $nodes = createNodeRef([]) as NodesRef<T>
    const _ref = $nodes[INTERNAL]
 
-   getFlask()?.onDisposal(() => {
+   getActiveFlask()?.onDiscard(() => {
       _ref.setValue([]); // clear nodes
    })
 
@@ -161,8 +161,8 @@ export function initializeRef(ref: NodeRef, value: NodeReferent | undefined) {
    const _ref = ref[INTERNAL]
    if (value) {
       _ref.setValue(value)
-      const flask = getFlask()
-      flask?.onDisposal(() => {
+      const flask = getActiveFlask()
+      flask?.onDiscard(() => {
          _ref.setValue(undefined);
       })
    }

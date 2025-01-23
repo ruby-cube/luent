@@ -1,5 +1,5 @@
 import { RegisterAbortSignal } from "./AbortSignal";
-import { getFlask, onFlaskDisposal } from "./EffectFlask";
+import { getActiveFlask, onFlaskDiscard } from "./EffectFlask";
 import { CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
 import { mapHandlers } from "./handlerMap";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
@@ -96,10 +96,10 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
       pendingCancelOp = scheduleCancellation ? scheduleCancellation(cancel) : null;
    }
    else if (scheduleCancellation !== NEVER) {
-      pendingFlaskCleanup = onFlaskDisposal(cancel)
+      pendingFlaskCleanup = onFlaskDiscard(cancel)
    }
 
-   if (__DEV__ && scheduleCancellation !== NEVER) setUpCleanupWarning!(pendingOp, scheduleCancellation, getFlask())
+   if (__DEV__ && scheduleCancellation !== NEVER) setUpCleanupWarning!(pendingOp, scheduleCancellation, getActiveFlask())
 
    return pendingOp;
 }

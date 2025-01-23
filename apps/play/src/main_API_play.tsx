@@ -1,12 +1,12 @@
 //@ts-nocheck
-import { collectEffects, EffectFlask, getFlask } from "@rue/flask";
+import { collectEffects, EffectFlask, getActiveFlask } from "@rue/flask";
 import { flaskablePromise } from "../../../packages/flask/flaskablePromises";
 import { watchEffect } from "@rue/quarky";
 import { abort } from "process";
 import { component } from "@rue/lumo";
 
 collectEffects(async () => {
-    console.log(getFlask())
+    console.log(getActiveFlask())
     const promise = flaskablePromise(new Promise((resolve, reject) => {
         setTimeout(() => {
             resolve('resolved')
@@ -17,16 +17,16 @@ collectEffects(async () => {
 
     const awaitedResult = await promise.then((result) => {
         console.log("then result", result)
-        console.log(getFlask())
+        console.log(getActiveFlask())
         return 'yay';
     }).then((result) => {
-        console.log(getFlask())
+        console.log(getActiveFlask())
         console.log("next then", result)
         return result
     })
 
 
-    console.log(getFlask())
+    console.log(getActiveFlask())
     console.log("awaitedResult", awaitedResult)
 }, 'promise test')
 
@@ -110,7 +110,7 @@ function useMouse(flask) {
 
     return {
         destroy() {
-            flask.dispose()
+            flask.discard()
         }
     }
 }

@@ -36,9 +36,11 @@ export function getCommons() {
    return commons;
 }
 
-const commonsStack = createStack({
+const commonsStack = createStack<Context>({
    name: 'commons',
-   parentKey: 'parent'
+   getParent(node) {
+      return node?.parent
+   }
 })
 
 export function getActiveCommons() {

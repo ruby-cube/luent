@@ -45,9 +45,9 @@ export type Stack<T = any> = {
    getActiveNode(): T | undefined;
 }
 
-export function createStack<T>(config: { name: string | symbol, parentKey?: keyof T }): Stack {
-   const { name, parentKey } = config;
-   if (parentKey) {
+export function createStack<T>(config: { name: string | symbol, getParent?: (node: T | undefined) => T | undefined }): Stack<T> {
+   const { name, getParent } = config;
+   if (getParent) {
       let prevNode: T | undefined;
       let activeNode: T | undefined;
 
@@ -61,7 +61,7 @@ export function createStack<T>(config: { name: string | symbol, parentKey?: keyo
          },
          pop() {
             activeNode = prevNode
-            prevNode = (prevNode ? prevNode[parentKey] : undefined) as T
+            prevNode = getParent(prevNode)
             if (activeNode)
                asyncContextStack.activeNodes.set(name, activeNode)
             else {

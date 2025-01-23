@@ -3,7 +3,7 @@ import { ComponentSetup, DOMNode, InternalComponent } from "../component/Interna
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { InferSlot, makeComponent } from "../component/makeComponent";
 import { NodeReferent, NodeRef, NodesRef } from "./NodeRef";
-import { getFlask, onFlaskDisposal } from "@rue/flask";
+import { getActiveFlask, onFlaskDiscard } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
 import { createCommons } from "../context/Commons";

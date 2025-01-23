@@ -16,7 +16,7 @@ import { useTransitionNodes } from "../transition/TransitNode";
 import { getTrace } from "../watch/debug";
 import { NodePod } from "../node/NodePod";
 import { mountConditional } from "../conditional/ConditionalRenderSeries";
-import { getFlask } from "@rue/flask";
+import { getActiveFlask } from "@rue/flask";
 
 
 type Index = number

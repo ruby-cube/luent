@@ -156,7 +156,7 @@ function useTable() {
 
         onExited(() => {
             // do work
-            flask.dispose();
+            flask.discard();
         });
         
         return { /* ... */ };
@@ -182,7 +182,7 @@ function useTable() {
 
         onExited(() => {
             // do work
-            flask.dispose();
+            flask.discard();
         });
 
         outerFlask.onDisposed(() => {
@@ -511,7 +511,7 @@ function useTable() {
 
         onExited(() => {
             // do work
-            flask.dispose();
+            flask.discard();
         });
 
         outerFlask.onDisposed(() => {
@@ -547,7 +547,7 @@ const useTable = enflask((flask) => {
 
     onExited(() => {
         // do work
-        flask.dispose();
+        flask.discard();
     });
 
     return { /* ... */ };
@@ -593,7 +593,7 @@ function useTable() {
 
         onExited(() => {
             // do work
-            flask.dispose();
+            flask.discard();
         });
 
         const data = await fetchData(/* ... */);
@@ -619,7 +619,7 @@ function useTable() {
 
         onExited(() => {
             // do work
-            flask.dispose();
+            flask.discard();
         });
 
         const [data, error] = await flask.after(
@@ -840,7 +840,7 @@ type SetUpFlask = (flask: NestableFlask, outerFlask: Flask) => R
 
 type NestableFlask = {
     outlivesOuter: boolean;
-    dispose: () => void;
+    discard: () => void;
     onDisposed: (cb: () => void) => PendingOp<void>;
     after: (Promise<any>) => Promise<any>;
 }
@@ -870,7 +870,7 @@ function useTable() {
 
         onExited(() => {
             // do work
-            flask.dispose();
+            flask.discard();
         });
 
         outerFlask.onDisposed(() => {
@@ -903,7 +903,7 @@ type EnflaskedFunction = (...args: any[]) => void;
 
 type NestableFlask = {
     outlivesOuter: boolean;
-    dispose: () => void;
+    discard: () => void;
     onDisposed: (cb: () => void) => PendingOp<void>;
     after: (Promise<any>) => Promise<any>;
 }
@@ -934,7 +934,7 @@ const useTable = enflask((flask) => {
 
     onExited(() => {
         // do work
-        flask.dispose();
+        flask.discard();
     });
 
     return { /* ... */ };

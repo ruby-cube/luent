@@ -1,4 +1,4 @@
-import {  getFlask, onFlaskDisposal } from "./EffectFlask";
+import {  getActiveFlask, onFlaskDiscard } from "./EffectFlask";
 
 export type PendingCancelOp = {
     cancel: () => void;
@@ -31,7 +31,7 @@ export function makePendingCancelOp(config: {
     }
     _remove.isRemover = true as const;
 
-    // pendingFlaskCleanup = onFlaskDisposal(_remove)
+    // pendingFlaskCleanup = onFlaskDiscard(_remove)
 
     returnVal = enroll(_callback);
     

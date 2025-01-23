@@ -1,11 +1,11 @@
 import { describe, test, expect, vi, beforeEach, it } from "vitest";
 import { makeActiveListener } from "../ActiveListener";
-import { onFlaskDisposal, getFlask, EffectFlask } from "../EffectFlask";
+import { onFlaskDiscard, getActiveFlask, EffectFlask } from "../EffectFlask";
 
 vi.mock('../EffectFlask', () => ({
-    onFlaskDisposal: vi.fn(),
+    onFlaskDiscard: vi.fn(),
     // bindFlask: vi.fn(),
-    getFlask: vi.fn()
+    getActiveFlask: vi.fn()
 }));
 
 describe("ActiveListener", () => {
@@ -27,9 +27,9 @@ describe("ActiveListener", () => {
             callback,
             options: {},
         };
-        vi.mocked(onFlaskDisposal).mockImplementation(vi.fn());
+        vi.mocked(onFlaskDiscard).mockImplementation(vi.fn());
         // vi.mocked(bindFlask).mockImplementation(cb => cb);
-        vi.mocked(getFlask).mockImplementation(() => ({} as EffectFlask));
+        vi.mocked(getActiveFlask).mockImplementation(() => ({} as EffectFlask));
     });
 
 
@@ -92,33 +92,33 @@ describe("ActiveListener", () => {
         expect(cancelMock).toHaveBeenCalled();
     });
 
-   //  it('should not call onFlaskDisposal if custom flask passed in; call flask.onDisposal instead', () => {
-   //      const flask = { onDisposal: vi.fn() };
+   //  it('should not call onFlaskDiscard if custom flask passed in; call flask.onDiscard instead', () => {
+   //      const flask = { onDiscard: vi.fn() };
    //      config.options.flask = flask;
 
    //      makeActiveListener(config);
 
-   //      expect(onFlaskDisposal).not.toHaveBeenCalled();
+   //      expect(onFlaskDiscard).not.toHaveBeenCalled();
 
-   //      expect(flask.onDisposal).toHaveBeenCalledOnce();
-   //      expect(flask.onDisposal).toHaveBeenCalledWith(expect.any(Function));
+   //      expect(flask.onDiscard).toHaveBeenCalledOnce();
+   //      expect(flask.onDiscard).toHaveBeenCalledWith(expect.any(Function));
    //  });
 
-    it('should call onFlaskDisposal', () => {
+    it('should call onFlaskDiscard', () => {
         config.options = {}
 
         makeActiveListener(config);
 
-        expect(onFlaskDisposal).toHaveBeenCalledOnce();
-        expect(onFlaskDisposal).toHaveBeenCalledWith(expect.any(Function));
+        expect(onFlaskDiscard).toHaveBeenCalledOnce();
+        expect(onFlaskDiscard).toHaveBeenCalledWith(expect.any(Function));
     });
 
-   //  it('should not call onFlaskDisposal if flask === "outlive"', () => {
+   //  it('should not call onFlaskDiscard if flask === "outlive"', () => {
    //      config.options.flask = 'outlive';
 
    //      makeActiveListener(config);
 
-   //      expect(onFlaskDisposal).not.toHaveBeenCalled();
+   //      expect(onFlaskDiscard).not.toHaveBeenCalled();
 
    //  });
 

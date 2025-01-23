@@ -1,7 +1,7 @@
 import { useIncrementalID } from "@rue/utils";
 import { ActiveListener } from "./ActiveListener";
 import { PendingOp } from "./PendingOp";
-import { EffectFlask, getFlask } from "./EffectFlask";
+import { EffectFlask, getActiveFlask } from "./EffectFlask";
 
 export let shouldWarnNoCleanup = false;
 

@@ -3,7 +3,7 @@ import { ion, ionize } from "@rue/quarky";
 import { $thisEffect } from "../../../packages/quarky/src/effects/ThisEffect";
 import { asyncTrace } from "../../../packages/flask/debug";
 import {  $_run_with_, $_snap_context } from "../../../packages/flask/context/AsyncContext";
-import { getFlask } from "@rue/flask";
+import { getActiveFlask } from "@rue/flask";
 
 
 

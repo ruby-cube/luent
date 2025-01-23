@@ -348,7 +348,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          removeDOMNodes(pod)
          kit.nodePod!.length = 0;
 
-         // dispose of flask
+         // discard of flask
          const dynamicNode = kit.dynamicNode!
          kit.dynamicNode = undefined;
          dynamicNode.destroy()

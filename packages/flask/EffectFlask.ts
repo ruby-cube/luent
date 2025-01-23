@@ -16,33 +16,33 @@ export function popFlask() {
     previousFlask = previousFlask?.outer || null;
 }
 
-export function getFlask() {
+export function getActiveFlask() {
     return activeFlask;
 }
 
-export function onFlaskDisposal(cb: () => void) {
-    const flask = getFlask();
+export function onFlaskDiscard(cb: () => void) {
+    const flask = getActiveFlask();
     if (!flask) return;
-    return flask.onDisposal(cb);
+    return flask.onDiscard(cb);
 }
 
 
 
 export class EffectFlask {
-    dispose: () => void;
+    discard: () => void;
     outer: EffectFlask | null = null;
-    onDisposal: (cleanUp: () => void) => { cancel(): void; };
+    onDiscard: (cleanUp: () => void) => { cancel(): void; };
 
     constructor(public __devName: string) {
-        this.outer = getFlask();
+        this.outer = getActiveFlask();
         const cleanups: Set<() => void> = new Set()
         let called = false;
 
-        // defining dispose and onDisposal per instances makes it cleaner to 
-        // pass them into { until: flask.onDisposal } and flask.onDisposal(outer.dispose)
+        // defining discard and onDiscard per instances makes it cleaner to 
+        // pass them into { until: flask.onDiscard } and flask.onDiscard(outer.discard)
         // without worrying about `this`
 
-        this.dispose = () => {
+        this.discard = () => {
             if (called) return;
             called = true;
             for (const cleanUp of cleanups) {
@@ -50,7 +50,7 @@ export class EffectFlask {
             }
         }
 
-        this.onDisposal = (cleanUp: () => void) => {
+        this.onDiscard = (cleanUp: () => void) => {
             cleanups.add(cleanUp);
             return {
                 cancel() {
@@ -84,7 +84,7 @@ export function collectEffects<T>(run: (flask: EffectFlask, outerFlask: EffectFl
 }
 
 
-// export function bindFlask(callback: Callback, flask: EffectFlask | null = getFlask()) {
+// export function bindFlask(callback: Callback, flask: EffectFlask | null = getActiveFlask()) {
 //     if (flask) {
 //         function callbackBoundToFlask(...args: any[]) {
 //             pushFlask(flask!)
@@ -100,13 +100,13 @@ export function collectEffects<T>(run: (flask: EffectFlask, outerFlask: EffectFl
 // USAGE: 
 // collectEffects((flask, outerFlask) => {
 //     watch($item, () => { /* do something */ })
-//     outerFlask?.onDisposal(flask.dispose)
+//     outerFlask?.onDiscard(flask.discard)
 // })
 
 // const flask = new EffectFlask(NESTABLE);
 
 // flask.collectEffects((outerFlask) => {
 
-//     outerFlask?.onDisposal(flask.dispose)
+//     outerFlask?.onDiscard(flask.discard)
 // })
-// flask.outer.onDisposal(flask.dispose)
+// flask.outer.onDiscard(flask.discard)

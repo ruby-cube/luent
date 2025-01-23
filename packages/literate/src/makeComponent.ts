@@ -1,7 +1,7 @@
 import { COMPONENT, ComponentConfig, InferSlot, initializeListRef, initializeRef, NodeRef, NodesRef, PublicComponent } from "@rue/lumo";
 import { Literate } from "./Literate.js";
 import { AtomicIon, ion, isAtomicIon } from "../../quarky/src/index.js";
-import { collectEffects, getFlask } from "@rue/flask";
+import { collectEffects, getActiveFlask } from "@rue/flask";
 import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
 
 
@@ -90,7 +90,7 @@ function initializeComponent(
     }
 
     // const flask = component.flask!;
-    // flask.outer?.onDisposal(flask.dispose) // no outer flask means it's the root component
+    // flask.outer?.onDiscard(flask.discard) // no outer flask means it's the root component
 }
 
 function validateOutput(output: any) {

@@ -8,7 +8,7 @@ export function TestCommons() {
    return component(
       <>
          <h1>Something</h1>
-         <$--commons provide={{ message: $message }}>
+         <$--commons provide={{ $message }}>
             <Child></Child>
          </$--commons>
          <input value={$message} on:input={e => $message.state = e.target.value}></input>
@@ -17,7 +17,7 @@ export function TestCommons() {
 }
 
 function Child() {
-   const $message = fromCommons('message')
+   const $message = fromCommons('$message')
 
    const $count = ion(0, {
       increment() {
@@ -26,7 +26,7 @@ function Child() {
    })
 
    watch($count, () => {
-      console.log(fromCommons('message').state)
+      console.log(fromCommons('$message')())
    })
 
    return component(

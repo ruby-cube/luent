@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { asWatchSubject, WatchSubject } from "./WatchSubject";
-import { $listen, ActiveListener, getFlask, ListenerOptions } from "@rue/flask";
+import { $listen, ActiveListener, getActiveFlask, ListenerOptions } from "@rue/flask";
 import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";

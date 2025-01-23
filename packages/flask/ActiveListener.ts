@@ -1,5 +1,5 @@
 import { Callback, CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
-import { getFlask, onFlaskDisposal } from "./EffectFlask";
+import { getActiveFlask, onFlaskDiscard } from "./EffectFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { mapHandlers } from "./handlerMap";
@@ -154,10 +154,10 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
          console.warn('`until` function should be a flaskable scheduler that return a PendingCancelOp for cleanup. See @rue/flask')
    }
    else if (until !== LIFETIME) {
-      pendingFlaskCleanup = onFlaskDisposal(_remove);
+      pendingFlaskCleanup = onFlaskDiscard(_remove);
    }
 
-   if (__DEV__ && until !== LIFETIME) setUpCleanupWarning!(activeListener, until, getFlask())
+   if (__DEV__ && until !== LIFETIME) setUpCleanupWarning!(activeListener, until, getActiveFlask())
 
    returnVal = enroll(_callback);
 

@@ -1,4 +1,4 @@
-import { getFlask, popFlask, pushFlask } from "@rue/flask";
+import { getActiveFlask, popFlask, pushFlask } from "@rue/flask";
 import type { DynamicNode } from "./DynamicNode";
 
 let activeDynamicNode: DynamicNode | null = null
@@ -20,7 +20,7 @@ export function pushDynamicNode(dynamicNode: DynamicNode) {
 }
 
 export function popDynamicNode() {
-   if (activeDynamicNode?.flask === getFlask()) popFlask()
+   if (activeDynamicNode?.flask === getActiveFlask()) popFlask()
    activeDynamicNode = parent;
    parent = parent?.parent || null;
 }
