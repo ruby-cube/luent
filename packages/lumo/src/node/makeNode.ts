@@ -19,7 +19,7 @@ import { MaybeIon } from "../InputTypes";
 import { isFunction } from "@rue/utils";
 import { isNamedDerivation } from "../component/fromTag";
 import { InnerHTMLKit } from "./mountInnerHTML";
-import { getContext, popContext, pushContext } from "../context/context-stack";
+import { getCommons, popCommons, pushCommons } from "../context/context-stack";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -110,13 +110,13 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 }
 
 // function wrapWithContext(slot: Function) {
-//    const outerContext = getContext()
+//    const outerContext = getCommons()
 //    return () => {
-//       pushContext(outerContext)
+//       pushCommons(outerContext)
 //       try {
 //          return slot()
 //       } finally {
-//          popContext()
+//          popCommons()
 //       }
 //    }
 // }

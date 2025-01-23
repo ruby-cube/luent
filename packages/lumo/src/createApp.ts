@@ -3,7 +3,7 @@ import { DynamicNode } from "./dynamic/DynamicNode";
 import { AnyObject } from "@rue/types";
 import { setComponentAttributes } from "./component/makeComponent";
 import { AppContext, createAppContext } from "./context/provide";
-import { getContext, popContext, pushContext } from "./context/context-stack";
+import { getCommons, popCommons, pushCommons } from "./context/context-stack";
 import { ContextEntries } from "./context/Commons";
 import { _dog_ } from "./context/x_context-keys";
 import { NodePod } from "./node/NodePod";
@@ -44,7 +44,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
          // (2) attach developer's root component to root element
          dynamicNode.mount(function mountRootComponent() {
             let output: Component = { renderedTemplate: undefined }
-            pushContext(appContext)
+            pushCommons(appContext)
             // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
             setComponentAttributes(config?.setup || {})
             try {
@@ -60,7 +60,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
                component.setUp(root, nodePod)
                component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
                // if (remountable) unmarkMountPhase()
-               popContext() // for sibling components to access parent, must be set AFTER `component()`
+               popCommons() // for sibling components to access parent, must be set AFTER `component()`
             }
          })
 

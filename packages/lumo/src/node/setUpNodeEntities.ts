@@ -9,7 +9,7 @@ import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { NodeEntity, SwapConfig, SwapType } from "./makeNode";
 import { setUpTextNode } from "./mountTextNode";
 import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./mountInnerHTML";
-import { getCurrentContext } from "../context/context-stack";
+import { getActiveCommons } from "../context/context-stack";
 import { NodePod } from "./NodePod";
 
 // [ ] validate and apply swap tag

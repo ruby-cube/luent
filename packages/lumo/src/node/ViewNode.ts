@@ -1,5 +1,5 @@
 import { ListenerOptions, SchedulerOptions } from "@rue/flask";
-import { getCurrentContext, Context } from "../context/context-stack";
+import { getActiveCommons, Context } from "../context/context-stack";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { getActiveDynamicNode } from "../dynamic/nodestack";
 import { fromApp, fromCommons, fromGlobal } from "../context/provide";
@@ -20,7 +20,7 @@ const viewNodeMap: Map<DynamicNode, Map<Context, ViewNode>> = new Map()
 
 export function $thisNode() {
    const dynamicNode = getActiveDynamicNode();
-   const context = getCurrentContext();
+   const context = getActiveCommons();
    if (!context) throw new Error(`no context node. This should never happen`)
    let contextMapCreated = false;
    let viewNodeCreated = false;

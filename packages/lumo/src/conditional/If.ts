@@ -3,7 +3,7 @@ import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { ReactiveGet } from "../../../quarky/src";
-import { Context, getContext, getCurrentContext, popContext, pushContext } from "../context/context-stack";
+import { Context, getCommons, getActiveCommons, popCommons, pushCommons } from "../context/context-stack";
 // import { getPhasicNode } from "../transition/PhasicNode";
 import { createCommons } from "../context/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
@@ -41,7 +41,7 @@ export function If($condition: Booleanny | ((_?: any) => Booleanny), typeOrRende
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
       'if',
-      wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
+      wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getCommons()),
       activationType,
       transitionNodes,
       { $condition }
@@ -58,7 +58,7 @@ export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), typeOrR
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
       'elseIf',
-      wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
+      wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getCommons()),
       activationType,
       transitionNodes,
       { $condition }
@@ -75,7 +75,7 @@ export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | Acti
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
       'else',
-      wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getContext()),
+      wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getCommons()),
       activationType,
       transitionNodes,
    )
@@ -86,7 +86,7 @@ export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | Acti
 function wrapWithContext(renderConditional: RenderFunction, context: AnyObject, outerContext: Context) {
    return (parent: Element, nodePod: NodePod, initialRender?: boolean) => {
       try {
-         if (!initialRender) pushContext(outerContext)
+         if (!initialRender) pushCommons(outerContext)
          const nodeEntities = setUpNodeEntities(normalizeToArray(
             createCommons(renderConditional, {
                provide: context
@@ -98,7 +98,7 @@ function wrapWithContext(renderConditional: RenderFunction, context: AnyObject, 
          throw new Error('')
       }
       finally {
-         if (!initialRender) popContext()
+         if (!initialRender) popCommons()
       }
    }
 }

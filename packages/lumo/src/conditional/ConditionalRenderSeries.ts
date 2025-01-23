@@ -8,7 +8,7 @@ import { hideDOMNodes, showDOMNodes } from "./toggledisplay";
 import { watch } from "../watch/watchAndPreserve";
 import { areShallowEqualArrays, Phase } from "../../../quarky/src";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
-import { popContext, pushContext, Context } from "../context/context-stack";
+import { popCommons, pushCommons, Context } from "../context/context-stack";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { NodeKit } from "../node/setUpNodeEntities";

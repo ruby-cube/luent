@@ -1,4 +1,4 @@
-import { Context, getCurrentContext } from "./context-stack";
+import { Context, getActiveCommons } from "./context-stack";
 import { ContextEntries, NodeContext } from "./Commons";
 import { contextTypeMap, TypeConfig } from "./ContextKey";
 import { isIon, isIonizedModel, toIon } from "@rue/quarky";
@@ -27,7 +27,7 @@ export type _ContextInputType<C> =
 
 
 export function fromCommons<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
-   let _context = context || getCurrentContext();
+   let _context = context || getActiveCommons();
    if (!_context) throw new Error(``)
 
    // climb context tree
@@ -92,7 +92,7 @@ function toMap(entries: AnyObject) {
 }
 
 export function provideAppwide<K extends string | symbol>(key: K, value: ContextType<K>) {
-   let context = getCurrentContext();
+   let context = getActiveCommons();
    if (!context)
       throw new Error("No context found :(")
    const appEntries = context.app.entries || (context.app.entries = new Map());
@@ -108,7 +108,7 @@ export function provideAppwide<K extends string | symbol>(key: K, value: Context
 }
 
 export function fromApp<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
-   let _context = context || getCurrentContext();
+   let _context = context || getActiveCommons();
    if (!_context) throw new Error(``)
    const appContext = _context.app;
    if (!appContext) throw new Error("No app context found :( This should never happen")
@@ -130,7 +130,7 @@ export function createGlobalContext<E extends ContextEntries<E>>(entries?: E) {
 }
 
 export function provideGlobal<K extends string | symbol>(key: K, value: ContextType<K>) {
-   let context = getCurrentContext();
+   let context = getActiveCommons();
    if (!context)
       throw new Error('')
    if (!context.global)
@@ -149,7 +149,7 @@ export function provideGlobal<K extends string | symbol>(key: K, value: ContextT
 }
 
 export function fromGlobal<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
-   let _context = context || getCurrentContext();
+   let _context = context || getActiveCommons();
    if (!_context)
       throw new Error('')
    const globalEntries = _context?.global?.entries

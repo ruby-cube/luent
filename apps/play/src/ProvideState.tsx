@@ -49,7 +49,7 @@ function Card() {
 type Context = {
    onCreated: (cb: Function) => void
 }
-function getContext() {
+function getCommons() {
    return {} as Context
 }
 function getThisComponent() {

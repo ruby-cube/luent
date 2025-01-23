@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { component, InternalComponent, Slot } from "../component/InternalComponent";
-import { getCurrentContext, popContext, pushContext } from "./context-stack";
+import { getActiveCommons, popCommons, pushCommons } from "./context-stack";
 import { AppContext, _ContextInputType } from "./provide";
 import { ComponentConfig, NodeEntity } from "../node/makeNode";
 import { ContextKeyMap } from "@rue/lumo";
@@ -28,7 +28,7 @@ export function Context<T extends ContextEntries<T>>(input: {
 }) {
     const { Slot } = input
 
-    const parentContext = getCurrentContext()
+    const parentContext = getActiveCommons()
     if (!parentContext) throw new Error(`no context found :( This should never happen`)
 
     const context: NodeContext = {
@@ -37,9 +37,9 @@ export function Context<T extends ContextEntries<T>>(input: {
         app: parentContext?.app,
         global: parentContext?.global
     }
-    pushContext(context)
+    pushCommons(context)
     const nodeEntities = Slot()
-    popContext()
+    popCommons()
     return component(nodeEntities)
 }
 

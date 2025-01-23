@@ -80,28 +80,28 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
    }
 
    const context = $_snap_context()
-   
+
    const _callback = once ? (...args: any[]) => {
       try {
          asyncContextStack.push(context);
-      if (__DEV__) asyncTraceStack?.push(trace_DEV!)
-         callback(...args);
-   }
-   finally {
-      asyncContextStack.pop()
-      _remove()
-   }
-} : 
-(...args: any[]) => {
-   try {
-      asyncContextStack.push(context);
-      if (__DEV__) asyncTraceStack?.push(trace_DEV!)
+         if (__DEV__) asyncTraceStack?.push(trace_DEV!)
          callback(...args);
       }
       finally {
          asyncContextStack.pop()
+         _remove()
       }
-   }
+   } :
+      (...args: any[]) => {
+         try {
+            asyncContextStack.push(context);
+            if (__DEV__) asyncTraceStack?.push(trace_DEV!)
+            callback(...args);
+         }
+         finally {
+            asyncContextStack.pop()
+         }
+      }
    // (...args: any[]) => {
    //    try {
    //       if (__DEV__) asyncTraceStack?.push(trace_DEV!);
@@ -111,7 +111,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
    //      if(__DEV__) asyncTraceStack?.pop()
    //    }
    // }
-   
+
    // $_wrap_with_(context, callback);
    // const _callback = bindFlask(once ? oneTimeCallback : callback, flask === 'outlive' ? null : flask);
 

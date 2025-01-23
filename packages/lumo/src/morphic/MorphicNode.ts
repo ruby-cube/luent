@@ -6,7 +6,7 @@ import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynami
 import { NodeEntity, RenderFunction } from "../node/makeNode";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { mountConditional } from "../conditional/ConditionalRenderSeries";
-import { getContext, getCurrentContext, popContext, pushContext } from "../context/context-stack";
+import { getCommons, getActiveCommons, popCommons, pushCommons } from "../context/context-stack";
 import { NodeContext } from "../context/Commons";
 import { AppContext } from "../context/provide";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
@@ -21,7 +21,7 @@ export function MorphicNode(switchMap: { [key: string]: RenderFunction }) {
             switchMap,
             initialKey,
             !!preserve,
-            getContext(),
+            getCommons(),
             getActiveDynamicNode()
         )
 
@@ -71,11 +71,11 @@ export class MorphicRenderKit {
         const nodePod = this.dynamicNodePod[0]
         //TODO: 
         const nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(this.switchMap[this.activeKey]())), parent, nodePod);
-        pushContext(this.context)
+        pushCommons(this.context)
         this.dynamicNode.mount(function renderMorphicNode() {
             mountNodeEntities(nodeEntities, parent, fragment)
         })
-        popContext()
+        popCommons()
     }
 
     setUp(
@@ -94,9 +94,9 @@ export class MorphicRenderKit {
             this.deactivateForm()
 
             // render new form
-            pushContext(this.context)
+            pushCommons(this.context)
             this.activateForm(key, parent, _nodePod)
-            popContext()
+            popCommons()
 
             popDynamicNode()
         }

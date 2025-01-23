@@ -8,7 +8,7 @@ import { DynamicNode } from "../dynamic/DynamicNode";
 import { watch } from "../watch/watchAndPreserve";
 import { diff, InsertAndMoveKit } from "./diff";
 import { getActiveDynamicNode, popDynamicNode, pushDynamicNode } from "../dynamic/nodestack";
-import { Context, getContext, popContext, pushContext } from "../context/context-stack";
+import { Context, getCommons, popCommons, pushCommons } from "../context/context-stack";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
 import { createCommons } from "../context/Commons";
@@ -45,7 +45,7 @@ function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
       try {
          if (!initialRender) {
             pushList(list) //QUESTION: dunno if pushList needs to be in this conditional block
-            pushContext(list.context)
+            pushCommons(list.context)
          }
          const nodeEntities = setUpNodeEntities(normalizeToArray(
             createCommons(() => renderItem(item, $index), {
@@ -56,7 +56,7 @@ function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
       }
       finally {
          if (!initialRender) {
-            popContext()
+            popCommons()
             popList()
          }
       }

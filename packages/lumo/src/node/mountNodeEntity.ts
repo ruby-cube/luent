@@ -7,7 +7,7 @@ import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { NodeKit } from "./setUpNodeEntities";
 import { isObjectLiteral } from "@rue/utils";
 import { isInnerHTMLKit, mountInnerHTML } from "./mountInnerHTML";
-import { getCurrentContext } from "../context/context-stack";
+import { getActiveCommons } from "../context/context-stack";
 
 // node kits:
 // - text ion

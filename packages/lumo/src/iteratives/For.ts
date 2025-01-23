@@ -1,4 +1,4 @@
-import { getContext } from "../context/context-stack";
+import { getCommons } from "../context/context-stack";
 import { NodeEntity, normalizeToRenderFunction } from "../node/makeNode";
 import { ListRenderKit } from "./ListRenderKit";
 import { AnyIon, AtomicIon, Ion, ion, ReactiveGet } from "@rue/quarky";
@@ -23,7 +23,7 @@ export function For<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> |
    const uidProvided = arguments.length === 3
    const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID) as RenderItem<any[]>;
    const getUID = uidProvided ? <(item: unknown) => unknown>renderOrGetUID : undefined;
-   return new ListRenderKit(_render, data, getUID, getContext())
+   return new ListRenderKit(_render, data, getUID, getCommons())
 }
 
 
