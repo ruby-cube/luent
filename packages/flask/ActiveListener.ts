@@ -1,11 +1,12 @@
 import { Callback, CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
-import { getActiveFlask, onFlaskDiscard } from "./EffectFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { mapHandlers } from "./handlerMap";
 import { isAbortSignal, AbortSignal, RegisterAbortSignal } from "./AbortSignal";
 import { asyncTraceStack } from "./debug";
 import { $_snap_context, $_wrap_with_, asyncContextStack } from "./context/AsyncContext";
+import { Flask, getActiveFlask, ThisFlask } from "./Flask";
+import { listen } from "@rue/lumo";
 
 export type ActiveListener = {
    stop(): boolean;
@@ -19,8 +20,8 @@ export const LIFETIME = null;
 
 export type ListenerOptions = {
    once?: boolean;
-   until?: ScheduleStop | typeof LIFETIME | AbortSignal | any[]
-   // flask?: EffectFlask | null | 'outlive';
+   until?: ScheduleStop | AbortSignal | any[]
+   flask?: ThisFlask | null //| 'outlive';
    __devName?: string;
 }
 
@@ -64,8 +65,8 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
    const once = options?.once;
 
    let returnVal: any;
-   let pendingStop: PendingCancelOp | undefined
-   let pendingFlaskCleanup: PendingCancelOp | undefined
+   let cancelPendingStop: (() => void) | undefined
+   let unbind: (() => void) | undefined
 
 
    const activeListener = {
@@ -123,10 +124,9 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
       stopped = true;
       remove(returnVal ?? _callback);
       if (__DEV__) unmarkNoCleanup(activeListener);
-      if (pendingStop && 'cancel' in pendingStop) pendingStop.cancel();
-      else if (pendingFlaskCleanup && 'cancel' in pendingFlaskCleanup) {
-         pendingFlaskCleanup.cancel();
-      }
+      if (cancelPendingStop) cancelPendingStop();
+      if (unbind) unbind();
+
       return true;
    }
    _remove.isRemover = true as const;
@@ -145,21 +145,46 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
    let until = options?.until as ScheduleStop | RegisterAbortSignal | null | undefined | any[]
 
    if (until instanceof Array) {
-      until = useCleanupScheduler(...until)
+      until = useCleanupScheduler(...until) // for custom cleanup, like [document, 'mouseup']
    }
 
    if (until) {
-      pendingStop = until(_remove);
+      const pendingStop = until(_remove);
+      if (pendingStop) cancelPendingStop = pendingStop.cancel;
       if (__DEV__ && (!pendingStop || pendingStop && !("cancel" in pendingStop)))
          console.warn('`until` function should be a flaskable scheduler that return a PendingCancelOp for cleanup. See @rue/flask')
    }
-   else if (until !== LIFETIME) {
-      pendingFlaskCleanup = onFlaskDiscard(_remove);
+
+   const flask = options?.flask;
+   if (flask !== null) {
+      unbind = bindToFlask(activeListener, flask)
    }
 
-   if (__DEV__ && until !== LIFETIME) setUpCleanupWarning!(activeListener, until, getActiveFlask())
+   if (__DEV__ && flask !== null) setUpCleanupWarning!(activeListener, until, getActiveFlask())
 
    returnVal = enroll(_callback);
 
    return activeListener as ActiveListener;
 }
+
+
+function bindToFlask(listener: ActiveListener, flask: ThisFlask | undefined) {
+   flask = flask || getActiveFlask()
+   if (!flask) {
+      if (__DEV__) console.warn('listener has not been bound to any flask')
+      return;
+   }
+   const { cancel: cancelStop } = flask.onDiscard(listener.stop);
+   const { stop: stopPausing } = flask.onDeactivate(() => listener.pause());
+   const { stop: stopResuming } = flask.onReactivate(listener.resume);
+
+   return function unbind() {
+      cancelStop()
+      stopPausing()
+      stopResuming()
+   }
+}
+
+// currentFlask
+// until
+// flask

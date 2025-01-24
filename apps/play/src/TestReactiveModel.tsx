@@ -1,6 +1,6 @@
-import { NodesRef, component, If, Else, For, NodeRef, target, watch } from "@rue/lumo";
+import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { ion, __addDevName, DerivedIon, ionize, isIonizedModel, rein, toRaw } from "../../../packages/quarky/src";
+import { ion, __addDevName, DerivedIon, ionize, isIonizedModel, rein, toRaw, watch } from "@rue/quarky";
 
 
 const randomColor = useRandomColorGenerator()
@@ -67,7 +67,7 @@ export function List(
       },
       changeContent(index: number) {
          const item = list[index];
-         console.log("changing content", item)
+         console.log("changing content", item, 'index:', index)
          item.content = 'something else'
       }
    })

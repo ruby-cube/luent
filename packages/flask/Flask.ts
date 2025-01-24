@@ -15,7 +15,7 @@ export function getActiveFlask() {
    return flaskStack.getCurrent()
 }
 
-type ThisFlask = {
+export type ThisFlask = {
    [K in keyof Pick<Flask, 'discard'| 'onDiscard' | 'onActivate' | 'onDeactivate' | 'onReactivate'>]: Pick<Flask, 'discard'| 'onDiscard' | 'onActivate' | 'onDeactivate' | 'onReactivate'>[K]
 }
 
@@ -153,7 +153,7 @@ export class Flask {
 function at(hookName: LifecycleHook, flask: Flask, task: Task, options: SchedulerOptions = {}) {
    const tasks = flask.tasks
 
-   return $schedule(task, options, {
+   return $schedule(task, {...options, flask: null}, { //QUESTION: I don't know if binding to a flask will cause an infinite loop of cleanup or if not binding will cause memory leak
       enroll(task) {
          tasks.addToSet(task, hookName)
       },
@@ -166,7 +166,7 @@ function at(hookName: LifecycleHook, flask: Flask, task: Task, options: Schedule
 function on(hookName: LifecycleHook, flask: Flask, task: Task, options: ListenerOptions = {}) {
    const tasks = flask.tasks
 
-   return $listen(task, { until: flask.onDiscard, ...options }, {
+   return $listen(task, { /* until: flask.onDiscard,  */...options, flask: null }, {
       enroll(handler) {
          tasks.addToSet(handler, hookName)
       },

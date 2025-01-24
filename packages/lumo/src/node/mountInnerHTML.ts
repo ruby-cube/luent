@@ -1,5 +1,4 @@
-import { isIon, ReactiveGet, Phase, tracked, __devCheckIfTracked, MaybeIon } from "@rue/quarky";
-import { watch } from "../watch/watchAndPreserve";
+import { isIon, ReactiveGet, Phase, tracked, __devCheckIfTracked, MaybeIon, watch } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
 import { NodeEntity } from "./makeNode";
 

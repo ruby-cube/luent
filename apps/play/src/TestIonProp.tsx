@@ -1,6 +1,6 @@
-import { component, watch } from "@rue/lumo";
+import { component } from "@rue/lumo";
 import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
-import { ion, ionize } from "@rue/quarky";
+import { ion, ionize, watch } from "@rue/quarky";
 
 
 export function TestIonProp() {

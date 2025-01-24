@@ -33,7 +33,7 @@ import { TestCommons } from './TestCommons';
 
 // const rootContext = createGlobalContext()
 
-const app = createApp(TestCommons)
+const app = createApp(List)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

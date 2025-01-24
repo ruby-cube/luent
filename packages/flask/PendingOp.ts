@@ -1,21 +1,22 @@
 import { RegisterAbortSignal } from "./AbortSignal";
-import { getActiveFlask, onFlaskDiscard } from "./EffectFlask";
+import { getActiveFlask, onFlaskDiscard, ThisFlask } from "./Flask";
 import { CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
 import { mapHandlers } from "./handlerMap";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { PendingCancelOp } from "./PendingCancelOp";
 
 export type PendingOp<T = unknown> = Promise<T> & {
-   cancel: () => void;
+   cancel(): void;
+   // pause(): boolean;
+   // resume(): boolean; //TODO: add pause and resume??
 }
 
 
-export const NEVER = null;
+// export const NEVER = null;
 
 export type SchedulerOptions = {
-   cancel?: ScheduleCancel | AbortSignal | typeof NEVER,
-   // flask?: EffectFlask | null | 'outlive',
-   __devName?: string
+   cancel?: ScheduleCancel | AbortSignal,
+   flask?: ThisFlask | null //| 'outlive',
 }
 
 export type ScheduleCancel = (cancel: CallbackRemover) => PendingCancelOp;
@@ -71,7 +72,7 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
       remove(returnVal ?? _callback);
       if (__DEV__) unmarkNoCleanup(pendingOp);
       if (pendingCancelOp) pendingCancelOp.cancel();
-      else if (pendingFlaskCleanup) pendingFlaskCleanup.cancel();
+      if (pendingFlaskCleanup) pendingFlaskCleanup.cancel();
    }
 
    returnVal = enroll(_callback);
@@ -87,19 +88,20 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
       called = true;
    }) as CallbackRemover;
    cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.
-   //@ts-expect-error
-   cancel.__devName = options?.__devName;
 
    pendingOp.cancel = cancel;
 
    if (scheduleCancellation) {
       pendingCancelOp = scheduleCancellation ? scheduleCancellation(cancel) : null;
    }
-   else if (scheduleCancellation !== NEVER) {
+
+   const flask = options?.flask
+   if (flask !== null) {
       pendingFlaskCleanup = onFlaskDiscard(cancel)
    }
 
-   if (__DEV__ && scheduleCancellation !== NEVER) setUpCleanupWarning!(pendingOp, scheduleCancellation, getActiveFlask())
+   if (__DEV__ && flask !== null) setUpCleanupWarning!(pendingOp, scheduleCancellation, getActiveFlask())
 
    return pendingOp;
 }
+

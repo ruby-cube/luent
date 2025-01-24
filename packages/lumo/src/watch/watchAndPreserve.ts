@@ -38,44 +38,44 @@ function _initializeRender(effect: () => void) {
 
 
 
-export function watchEffect(effect: () => void) {
-    const dynamicNode = getActiveDynamicNode() // TODO: dynamic node or flask??
-    if (!dynamicNode)
-        return _watchIonicEffect(effect)
-    return asPreservedWatcher(_watchIonicEffect(effect), dynamicNode);
-}
+// export function watchEffect(effect: () => void) {
+//     const dynamicNode = getActiveDynamicNode() // TODO: dynamic node or flask??
+//     if (!dynamicNode)
+//         return _watchIonicEffect(effect)
+//     return asPreservedWatcher(_watchIonicEffect(effect), dynamicNode);
+// }
 
-function asPreservedWatcher({ pause, resume, stop }: ActiveListener, dynamicNode: DynamicNode) {
-    const deactivationHook = dynamicNode.onDeactivate(pause)
-    const activationHook = dynamicNode.onReactivate(resume)
+// function asPreservedWatcher({ pause, resume, stop }: ActiveListener, dynamicNode: DynamicNode) {
+//     const deactivationHook = dynamicNode.onDeactivate(pause)
+//     const activationHook = dynamicNode.onReactivate(resume)
 
-    return {
-        stop() {
-            deactivationHook.stop();
-            activationHook.stop();
-            return stop();
-        },
-        pause,
-        resume
-    }
-}
+//     return {
+//         stop() {
+//             deactivationHook.stop();
+//             activationHook.stop();
+//             return stop();
+//         },
+//         pause,
+//         resume
+//     }
+// }
 
-// T extends () => infer R ? (newValue: R, oldValue: R) => void : (newValue: T, oldValue: T) => void
+// // T extends () => infer R ? (newValue: R, oldValue: R) => void : (newValue: T, oldValue: T) => void
 
-type MultiWatchSubjectValues<T> = {[K in keyof T]: T[K] extends (...args: any[])=>infer R ? R : T[K]}
+// type MultiWatchSubjectValues<T> = {[K in keyof T]: T[K] extends (...args: any[])=>infer R ? R : T[K]}
 
-export function watch<T extends () => any>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
-export function watch<T extends Ionized<AnyObject>>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
-export function watch<T extends any[]>(target: [...T], effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
-export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
+// export function watch<T extends () => any>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
+// export function watch<T extends Ionized<AnyObject>>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
+// export function watch<T extends any[]>(target: [...T], effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
 // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
-// export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
-export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener {
-   // console.log(getTrace()) 
-   const dynamicNode = getActiveDynamicNode() //TODO: dynamic node or flask?
-    if (!dynamicNode)
-        return _watch(target, effect, options)
-    return asPreservedWatcher(_watch(target, effect, options), dynamicNode);
-}
+// // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
+// // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener
+// export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ActiveListener {
+//    // console.log(getTrace()) 
+//    const dynamicNode = getActiveDynamicNode() //TODO: dynamic node or flask?
+//     if (!dynamicNode)
+//         return _watch(target, effect, options)
+//     return asPreservedWatcher(_watch(target, effect, options), dynamicNode);
+// }
 
 

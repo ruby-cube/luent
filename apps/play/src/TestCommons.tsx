@@ -1,5 +1,5 @@
-import { component, fromCommons, watch } from "@rue/lumo";
-import { ion } from "@rue/quarky";
+import { component, fromCommons } from "@rue/lumo";
+import { ion, watch } from "@rue/quarky";
 
 export function TestCommons() {
 

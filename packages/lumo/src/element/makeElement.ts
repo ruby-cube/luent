@@ -1,7 +1,6 @@
 import { DOMNode, Slot } from "../component/InternalComponent";
-import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon } from "../../../quarky/src";
+import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon, watch } from "@rue/quarky";
 import { isFunction, isObject, isString, noop, normalizeToArray } from "@rue/utils";
-import { watchRenderEffect, watch } from "../watch/watchAndPreserve";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
 import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
 import { mountNodeEntities } from "../node/mountNodeEntity";
@@ -293,7 +292,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
             }, {
                eager: true,
                phase: Phase.RENDER,
-               __devName: 'setUpStyles', 
+               // __devName: 'setUpStyles', 
                until: outerEffect?.onCleanup
             })
          }

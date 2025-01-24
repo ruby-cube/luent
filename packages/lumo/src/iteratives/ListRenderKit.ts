@@ -1,10 +1,9 @@
-import { isIon, isIonizedModel, ion, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon, toValue, getWithoutTracking } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, watch, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon, toValue, getWithoutTracking } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { DynamicNode, getDynamicNode } from "../dynamic/DynamicNode";
-import { watch } from "../watch/watchAndPreserve";
 import { diff, InsertAndMoveKit } from "./diff";
 import { Context, getCommons, popCommons, pushCommons } from "../context/context-stack";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
@@ -130,7 +129,6 @@ export class ListRenderKit {
             const _oldValue = clone || oldState;
             if (isIonizedModel(_data)) clone = shallowClone(rawData!) as any[]
             const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || newState, _oldValue, getUID)
-            console.log('updating list, noChange', newState.length, _oldValue.length)
             if (noChange) return;
             if (dynamicNodePod!.length !== _oldValue.length)
                throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${oldState.length} are mismatched. This should never happen.`)
@@ -143,6 +141,7 @@ export class ListRenderKit {
             catch (err) {
                console.error(err, this.trace)
             }
+            console.log('updating list', newState.length, _oldValue.length)
          }, { phase: Phase.RENDER })
       }
       // currentItem = undefined;
@@ -207,23 +206,23 @@ export class ListRenderKit {
       const dynamicNodePod = this.dynamicNodePod!
       if (dynamicNodePod.length !== oldUArray.length)
          throw new Error("dynamicPod and data length are mismatched")
-
+      
       const indicesAndNodePods: [number, NodePod[]][] = []
       const indicesAndFragments: [number, DocumentFragment][] = []
       let fragment = new DocumentFragment();
-
+      
       const newIndices: AtomicIon<number>[] = [];
       const toFromIndices: [number, number][] = []
-
+      
       for (let i = 0; i < newUArray.length; i++) {
          const uItem = newUArray[i];
          const _isNewItem = isNewItem(uItem);
          const itemHasMoved = hasMoved(uItem);
          const prevIndex = oldUArray.indexOf(uItem)
          const nodePod = _isNewItem ? new NodePod()
-            : itemHasMoved ? (dynamicNodePod[prevIndex] as unknown as NodePod) // dynamicNodePod[index]
-               : null;
-
+         : itemHasMoved ? (dynamicNodePod[prevIndex] as unknown as NodePod) // dynamicNodePod[index]
+         : null;
+         
          if (!_isNewItem) {
             // update $index.state
             const $index = this.indices[prevIndex];
@@ -293,7 +292,6 @@ export class ListRenderKit {
       while (k--) {
          const [index, count] = indicesAndRemoveCount[k];
          dynamicNodePod!.removeNodePods(index, count);
-
       }
 
       // (2) insert node pods into dynamic list
@@ -304,8 +302,6 @@ export class ListRenderKit {
       // (3) insert nodes into DOM
       for (const [index, fragment] of indicesAndFragments) {
          const prevNode = (<NodePod>dynamicNodePod[index]).prevNode
-         console.log('list dynamic node pod', dynamicNodePod)
-         console.log('item dynamic node pod', dynamicNodePod[index])
          if (prevNode && prevNode === parent) parent.append(fragment) // for teleport
          else if (prevNode) prevNode.after(fragment);
          else parent.prepend(fragment);

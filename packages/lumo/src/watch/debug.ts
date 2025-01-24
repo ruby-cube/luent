@@ -1,7 +1,6 @@
 import { ActiveListener } from "@rue/flask"
 import { AnyObject } from "@rue/types"
-import { watch } from "./watchAndPreserve"
-import { AnyIon, asMetaIon, AtomicIon, ionize, isAtomicIon, Phase } from "@rue/quarky"
+import { AnyIon, asMetaIon, AtomicIon, ionize, isAtomicIon, Phase, watch } from "@rue/quarky"
 import { $thisEffect } from "../../../quarky/src/effects/ThisEffect";
 import { isTrackedOp, TrackedOp } from "../../../quarky/src/ionize/TrackedOp";
 import { isPropIon, PropIon } from "../../../quarky/src/ionize/PropIon";
