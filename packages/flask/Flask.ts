@@ -41,6 +41,25 @@ export enum LifecycleHook {
    DISCARD = 'bd',
 }
 
+// export function makeDynamicNode() {
+//    const parent = getActiveDynamicNode();
+//    const dynamicNode = new DynamicNode(parent);
+//    if (parent instanceof DynamicNode) {
+//        parent.onReactivate(() => { dynamicNode.emit(LifecycleHook.ON_REACTIVATE) }, { //FIX: This makes on activated run twice when it is first activated (see if this has been fixed)
+//            until: dynamicNode.onDestroy,
+//        })
+//        parent.onDeactivate(() => { dynamicNode.emit(LifecycleHook.ON_DEACTIVATE) }, {
+//            until: dynamicNode.onDestroy,
+//        })
+//        parent.onDestroy(() => { dynamicNode.destroy() }, {
+//            cancel: dynamicNode.onDestroy,
+//            __devName: 'makeDynamicNode, onDestroy'
+//        })
+//    }
+//    return dynamicNode;
+// }
+
+
 export class Flask {
    constructor(public outer?: Flask) {
       if (outer) {
@@ -125,7 +144,7 @@ export class Flask {
          flaskStack.push(this);
          return fn();
       }
-      catch {
+      finally {
          flaskStack.pop();
       }
    }
