@@ -136,12 +136,12 @@ function compileCSSProperty(className: string) {
     const key = className.slice(0, index)
     const valueString = className.slice(index + 1)
     if (key === 'transform') {
-        return toCssTransformValue(valueString);
+        return toCSSTransformValue(valueString);
     }
     return key + ':' + valueString;
 }
 
-function toCssTransformValue(shorthand: string) {
+function toCSSTransformValue(shorthand: string) {
     const match = shorthand.match(/^(\w+?)([XYZ]?)(-?\d*\.?\d+)([a-z%]*)?$/);
     if (!match) {
         throw new Error(`Invalid transform value: ${shorthand}`);
