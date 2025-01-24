@@ -58,16 +58,16 @@ export function MountIf() {
          {/* <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: $color() + 'e' }}>shout</button> */}
          <h1>Hello {$=todos[0].name}</h1>
          <div>hi</div>
-         {/* <$--transition> */}
+         <$--transition>
             {If($active,
                <>
                   oh
-                  {/* <$--transit with={slide({ x: -100, duration: 2200 })}> */}
+                  <$--transit with={slide({ x: -100, duration: 2200 })}>
                      <h2>hi</h2>
-                  {/* </$--transit> */}
-                  {/* <$--transit with={slide({ x: 100, duration: 2200 })}> */}
+                  </$--transit>
+                  <$--transit with={slide({ x: 100, duration: 2200 })}>
                      <h2>hope</h2>
-                  {/* </$--transit> */}
+                  </$--transit>
                   {If($ready,
                      <p>ready</p>
                   )}
@@ -85,7 +85,7 @@ export function MountIf() {
                   <h2>bye</h2>
                </>
             )}
-         {/* </$--transition> */}
+         </$--transition>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>
          {/* <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child> */}

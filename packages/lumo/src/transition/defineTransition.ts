@@ -112,7 +112,8 @@ function mountOffscreenClass(name: string) {
     existingOffscreenClasses.add(name)
     const style = transitionStylesheet ?? createTransitionStyleSheet()
     const property = compileCSSProperty(name)
-
+   console.log('name', name)
+   console.log('property', property)
     style.insertRule(`.${name} { ${property} }`, style.cssRules.length)
 }
 
@@ -147,7 +148,7 @@ function toCssTransformValue(shorthand: string) {
     }
 
     const [, fn, axis, value, unit] = match;
-    const cssValue = unit === 'pc' ? `$.state}%` : `$.state}${unit || ''}`; // Convert 'pc' to '%', handle missing units
+    const cssValue = unit === 'pc' ? `${value}%` : `${value}${unit || ''}`; // Convert 'pc' to '%', handle missing units
     return `--offscreen-${fn}-${axis.toLowerCase()}:${cssValue}`;
 }
 
