@@ -4,6 +4,7 @@ import { getActiveCommons, popCommons, pushCommons } from "./context-stack";
 import { AppContext, _ContextInputType } from "./provide";
 import { ComponentConfig, NodeEntity } from "../node/makeNode";
 import { ContextKeyMap } from "@rue/lumo";
+import { asyncTrace } from "../../../flask/debug";
 
 export interface NodeContext {
     entries: AnyObject;
@@ -29,7 +30,10 @@ export function Context<T extends ContextEntries<T>>(input: {
     const { Slot } = input
 
     const parentContext = getActiveCommons()
-    if (!parentContext) throw new Error(`no context found :( This should never happen`)
+    if (!parentContext) {
+       asyncTrace()
+      throw new Error(`no context found :( This should never happen`)
+    }
 
     const context: NodeContext = {
         entries: input.provide,

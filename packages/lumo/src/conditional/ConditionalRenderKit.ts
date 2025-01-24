@@ -6,7 +6,7 @@ import { NodeKit } from "../node/setUpNodeEntities";
 import { DynamicNode } from "../dynamic/DynamicNode";
 import { NodePod } from "../node/NodePod";
 
-export type RenderConditional = (parent: Element, nodePod: NodePod, initialRender?: boolean) => NodeKit[]
+export type RenderConditional = (parent: Element, nodePod: NodePod) => NodeKit[]
 
 export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
 

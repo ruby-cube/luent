@@ -84,9 +84,10 @@ export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | Acti
 
 
 function wrapWithContext(renderConditional: RenderFunction, context: AnyObject, outerContext: Context) {
-   return (parent: Element, nodePod: NodePod, initialRender?: boolean) => {
+   return (parent: Element, nodePod: NodePod) => {
+      const isInitialLoad = getActiveCommons() === outerContext
       try {
-         if (!initialRender) pushCommons(outerContext)
+         if (!isInitialLoad) pushCommons(outerContext)
          const nodeEntities = setUpNodeEntities(normalizeToArray(
             createCommons(renderConditional, {
                provide: context
@@ -95,10 +96,10 @@ function wrapWithContext(renderConditional: RenderFunction, context: AnyObject, 
       }
       catch (err) {
          console.error(err)
-         throw new Error('')
+         throw err // TODO: Why am I just passing the error on?
       }
       finally {
-         if (!initialRender) popCommons()
+         if (!isInitialLoad) popCommons()
       }
    }
 }

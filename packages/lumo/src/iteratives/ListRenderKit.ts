@@ -5,7 +5,7 @@ import { normalizeToArray } from "@rue/utils";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { DynamicNode, getDynamicNode } from "../dynamic/DynamicNode";
 import { diff, InsertAndMoveKit } from "./diff";
-import { Context, getCommons, popCommons, pushCommons } from "../context/context-stack";
+import { Context, getActiveCommons, getCommons, popCommons, pushCommons } from "../context/context-stack";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
 import { createCommons } from "../context/Commons";
@@ -36,11 +36,12 @@ export function setCurrentIndex($index: AtomicIon<number> | undefined) {
 }
 
 function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
-   return (item: any, $index: AtomicIon<number>, parent: Element, nodePod: NodePod, initialRender: boolean = false) => {
+   return (item: any, $index: AtomicIon<number>, parent: Element, nodePod: NodePod) => {
       const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
       list.transitions.set($index, transitionNodes)
+      const isInitialLoad = list.context === getActiveCommons()
       try {
-         if (!initialRender) {
+         if (!isInitialLoad) {
             pushList(list) //QUESTION: dunno if pushList needs to be in this conditional block
             pushCommons(list.context)
          }
@@ -52,7 +53,7 @@ function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
          return nodeEntities;
       }
       finally {
-         if (!initialRender) {
+         if (!isInitialLoad) {
             popCommons()
             popList()
          }
@@ -61,7 +62,7 @@ function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
 }
 
 export class ListRenderKit {
-   renderItem: (item: any, $index: AtomicIon<number>, parent: Element, nodePod: NodePod, initialRender: boolean) => NodeKit[]
+   renderItem: (item: any, $index: AtomicIon<number>, parent: Element, nodePod: NodePod) => NodeKit[]
    trace: unknown;
 
    constructor(
@@ -174,13 +175,13 @@ export class ListRenderKit {
          if (isDynamic) {
             const dynamicNode = getDynamicNode().fork()
             dynamicNode.mount(function mountDynamicItem() {
-               const nodeEntities = listKit.renderItem(item, $index, parent, nodePod, true)
+               const nodeEntities = listKit.renderItem(item, $index, parent, nodePod)
                mountNodeEntities(nodeEntities, parent, fragment);
             })
             dynamicNodeMap.set(nodePod, dynamicNode)
          }
          else {
-            const nodeEntities = this.renderItem(item, $index, parent, nodePod, true)
+            const nodeEntities = this.renderItem(item, $index, parent, nodePod)
             mountNodeEntities(nodeEntities, parent, fragment);
          }
       }
@@ -257,7 +258,7 @@ export class ListRenderKit {
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             dynamicNode.mount(function renderNewListItem() {
-               const nodeEntities = renderItem(toValue(list)[i], $index, parent, nodePod, false);
+               const nodeEntities = renderItem(toValue(list)[i], $index, parent, nodePod);
                // mountConditional(parent, nodePod, nodeEntities, fragment)
                mountNodeEntities(nodeEntities, parent, fragment)
             })

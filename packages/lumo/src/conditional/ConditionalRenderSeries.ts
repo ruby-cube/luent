@@ -93,14 +93,14 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       if (showKits)
          for (const showKit of showKits) {
             const pod = showKit.nodePod!
-            const nodeEntities = series.render(showKit, parent, true)
+            const nodeEntities = series.render(showKit, parent)
             mountConditional(parent, pod, nodeEntities, fragment);
             pod.activate()
             if (showKit !== kit) hideDOMNodes(pod)
          }
 
       function renderConditional() {
-         const nodeEntities = series.render(kit, parent, true)
+         const nodeEntities = series.render(kit, parent)
          mountConditional(parent, kit.nodePod!, nodeEntities, fragment);
       }
    }
@@ -130,7 +130,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       let prevIncomingNodes: TransitionNode[];
 
       // set up watcher for updates
-      watch($conditions, function updateConditional({newState, oldState}) {
+      watch($conditions, function updateConditional({ newState, oldState }) {
          console.log("update conditional==================", newState, oldState)
          if (areShallowEqualArrays(newState!, oldState!)) return;
 
@@ -327,8 +327,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       return this;
    }
 
-   private render(kit: ConditionalRenderKit, parent: Element, initialRender: boolean = false) {
-      return kit.renderConditional(parent, kit.nodePod || (console.log('no kit pod :('), this.nodePod), initialRender)
+   private render(kit: ConditionalRenderKit, parent: Element) {
+      return kit.renderConditional(parent, kit.nodePod || (console.log('no kit pod :('), this.nodePod))
    }
 
    private deactivateConditional(index: number) {
@@ -400,14 +400,8 @@ export function mountConditional(
    const _fragment = fragment || new DocumentFragment();
 
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
-
-   console.log('START search for prev Node -----------------')
+   if (fragment) return; // no need to mount to DOM yet since fragment originates higher up
    let prevNode = pod.prevNode;
-   console.log('END search for prev Node -----------------')
-   console.log('outer node pod', pod.pod!.pod)
-   console.log('dynamic node pod', pod.pod)
-   console.log('nodePod', pod)
-   console.log('prevNode', prevNode)
    if (prevNode && prevNode === parent) {
       parent.append(_fragment) //for teleport
    }
@@ -438,10 +432,10 @@ export function removeDOMNodes(pod: NodePod) {
 // }
 
 
-function wrapToPreserve(renderConditional: (parent: Element, nodePod: NodePod, initialRender?: boolean) => NodeKit[]) {
+function wrapToPreserve(renderConditional: (parent: Element, nodePod: NodePod) => NodeKit[]) {
    let nodeEntities: NodeKit[];
-   return (parent: Element, nodePod: NodePod, initialRender?: boolean) => {
+   return (parent: Element, nodePod: NodePod) => {
       if (nodeEntities) return nodeEntities;
-      return nodeEntities = renderConditional(parent, nodePod, initialRender)
+      return nodeEntities = renderConditional(parent, nodePod)
    }
 }
