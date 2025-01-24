@@ -218,19 +218,19 @@ export class ListRenderKit {
          const uItem = newUArray[i];
          const _isNewItem = isNewItem(uItem);
          const itemHasMoved = hasMoved(uItem);
-         const prevIndex = oldUArray.indexOf(uItem)
+         const oldIndex = oldUArray.indexOf(uItem)
          const nodePod = _isNewItem ? new NodePod()
-         : itemHasMoved ? (dynamicNodePod[prevIndex] as unknown as NodePod) // dynamicNodePod[index]
+         : itemHasMoved ? (dynamicNodePod[oldIndex] as unknown as NodePod) // dynamicNodePod[index]
          : null;
          
          if (!_isNewItem) {
             // update $index.state
-            const $index = this.indices[prevIndex];
+            const $index = this.indices[oldIndex];
             newIndices.push($index);
             $index.state = i
 
             // to update refs
-            toFromIndices.push([i, prevIndex]);
+            toFromIndices.push([i, oldIndex]);
          };
 
          if (!nodePod) continue;
@@ -250,7 +250,6 @@ export class ListRenderKit {
             setCurrentIndex($index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
-
             const dynamicNode = parentDynamicNode.fork()
             const renderItem = this.renderItem
             const list = this.data;
