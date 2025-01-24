@@ -82,24 +82,22 @@ export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | Acti
 }
 
 
-
+//TODO: wrap with asyncContext instead of pushing commons?
 function wrapWithContext(renderConditional: RenderFunction, context: AnyObject, outerContext: Context) {
    return (parent: Element, nodePod: NodePod) => {
-      const isInitialLoad = getActiveCommons() === outerContext
+      // const isInitialLoad = getActiveCommons() === outerContext
       try {
-         if (!isInitialLoad) pushCommons(outerContext)
+         // if (!isInitialLoad) 
+            pushCommons(outerContext)
          const nodeEntities = setUpNodeEntities(normalizeToArray(
             createCommons(renderConditional, {
                provide: context
             })), parent, nodePod)
          return nodeEntities;
       }
-      catch (err) {
-         console.error(err)
-         throw err // TODO: Why am I just passing the error on?
-      }
       finally {
-         if (!isInitialLoad) popCommons()
+         // if (!isInitialLoad) 
+            popCommons()
       }
    }
 }

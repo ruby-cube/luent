@@ -4,12 +4,7 @@ import { PendingOp, SchedulerOptions } from "./PendingOp";
 import { ActiveListener, ListenerOptions } from "./ActiveListener";
 import { $listen, $schedule } from "./flaskableListeners";
 
-const flaskStack = createStack<Flask>({
-   name: 'flask',
-   getParent(node) {
-      return node?.outer;
-   }
-})
+const flaskStack = createStack<Flask>('flask')
 
 export function getActiveFlask() {
    return flaskStack.getCurrent()
@@ -75,7 +70,7 @@ export class Flask {
       }
    }
 
-   fork() {
+   spawn() {
       return new Flask(this);
    }
 

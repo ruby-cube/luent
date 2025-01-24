@@ -45,36 +45,36 @@ export type Stack<T = any> = {
    getCurrent(): T | undefined;
 }
 
-export function createStack<T>(config: { name: string | symbol, getParent?: (node: T | undefined) => T | undefined }): Stack<T> {
-   const { name, getParent } = config;
-   if (getParent) {
-      let prevNode: T | undefined;
-      let activeNode: T | undefined;
+export function createStack<T>(name: string): Stack<T> {
+   // const { name, getParent } = config;
+   // if (getParent) {
+   //    let prevNode: T | undefined;
+   //    let activeNode: T | undefined;
 
-      const stack = {
-         push(node: T) {
-            prevNode = activeNode;
-            activeNode = node;
-            if (activeNode) {
-               asyncContextStack.activeNodes.set(name, activeNode)
-            }
-         },
-         pop() {
-            activeNode = prevNode
-            prevNode = getParent(prevNode)
-            if (activeNode)
-               asyncContextStack.activeNodes.set(name, activeNode)
-            else {
-               asyncContextStack.activeNodes.delete(name)
-            }
-         },
-         getCurrent() {
-            return activeNode;
-         }
-      }
-      asyncContextStack.stacks.set(name, stack)
-      return stack;
-   }
+   //    const stack = {
+   //       push(node: T) {
+   //          prevNode = activeNode;
+   //          activeNode = node;
+   //          if (activeNode) {
+   //             asyncContextStack.activeNodes.set(name, activeNode)
+   //          }
+   //       },
+   //       pop() {
+   //          activeNode = prevNode
+   //          prevNode = getParent(prevNode)
+   //          if (activeNode)
+   //             asyncContextStack.activeNodes.set(name, activeNode)
+   //          else {
+   //             asyncContextStack.activeNodes.delete(name)
+   //          }
+   //       },
+   //       getCurrent() {
+   //          return activeNode;
+   //       }
+   //    }
+   //    asyncContextStack.stacks.set(name, stack)
+   //    return stack;
+   // }
 
    const _stack: T[] = [];
    const stack = {

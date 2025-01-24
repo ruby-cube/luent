@@ -237,7 +237,7 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
          }, {
             eager: true,
             phase: Phase.RENDER,
-            until: outerEffect?.onCleanup
+            // until: outerEffect?.onCleanup
          })
       }
       else if (value) {
@@ -293,7 +293,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
                eager: true,
                phase: Phase.RENDER,
                // __devName: 'setUpStyles', 
-               until: outerEffect?.onCleanup
+               // until: outerEffect?.onCleanup
             })
          }
          else {

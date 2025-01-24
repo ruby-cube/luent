@@ -25,7 +25,7 @@ export class DynamicNode extends Flask {
       super(parent)
    }
 
-   override fork() {
+   fork() {
       return new DynamicNode(this)
    }
 

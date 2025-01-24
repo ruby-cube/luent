@@ -39,12 +39,12 @@ function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
    return (item: any, $index: AtomicIon<number>, parent: Element, nodePod: NodePod) => {
       const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
       list.transitions.set($index, transitionNodes)
-      const isInitialLoad = list.context === getActiveCommons()
+      // const isInitialLoad = list.context === getActiveCommons()
       try {
-         if (!isInitialLoad) {
+         // if (!isInitialLoad) {
             pushList(list) //QUESTION: dunno if pushList needs to be in this conditional block
             pushCommons(list.context)
-         }
+         // }
          const nodeEntities = setUpNodeEntities(normalizeToArray(
             createCommons(() => renderItem(item, $index), {
                provide: { [REGISTER_TRANSITION_NODE]: registerTransitionNode }
@@ -53,10 +53,10 @@ function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
          return nodeEntities;
       }
       finally {
-         if (!isInitialLoad) {
+         // if (!isInitialLoad) {
             popCommons()
             popList()
-         }
+         // }
       }
    }
 }

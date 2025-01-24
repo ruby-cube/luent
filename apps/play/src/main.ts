@@ -18,6 +18,7 @@ import { TestDerivedConditional } from './testDerived';
 import { TestDebugApp } from './TestDebugTools';
 import { Transformers } from './jsx-$transform';
 import { TestCommons } from './TestCommons';
+import { TestApp } from './TestApp';
 // import { PlainList } from './TestList';
 // import { HelloWorld } from './HelloWorld';
 // import { Check } from './childrenTest';
@@ -33,7 +34,7 @@ import { TestCommons } from './TestCommons';
 
 // const rootContext = createGlobalContext()
 
-const app = createApp(MountIf)
+const app = createApp(TestApp)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

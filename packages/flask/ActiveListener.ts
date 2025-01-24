@@ -63,11 +63,11 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
       };
    }
    const once = options?.once;
+   const flask = options?.flask;
 
    let returnVal: any;
    let cancelPendingStop: (() => void) | undefined
    let unbind: (() => void) | undefined
-
 
    const activeListener = {
       stop: _remove,
@@ -80,41 +80,39 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
       }
    }
 
-   const context = $_snap_context()
+   const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask()) as Flask | undefined
 
-   const _callback = once ? (...args: any[]) => {
-      try {
-         asyncContextStack.push(context);
-         if (__DEV__) asyncTraceStack?.push(trace_DEV!)
-         callback(...args);
-      }
-      finally {
-         asyncContextStack.pop()
-         _remove()
-      }
-   } :
-      (...args: any[]) => {
-         try {
-            asyncContextStack.push(context);
-            if (__DEV__) asyncTraceStack?.push(trace_DEV!)
-            callback(...args);
-         }
-         finally {
-            asyncContextStack.pop()
-         }
-      }
-   // (...args: any[]) => {
+   const _callback = wrapWithContextAndFlask(callback, {
+      afterCall: once ? _remove : undefined,
+      enclosingFlask,
+      trace_DEV
+   })
+
+   // once ? (...args: any[]) => {
+   //    if (taskFlask) taskFlask.discard()
+   //    taskFlask = enclosingFlask?.spawn() || new Flask()
    //    try {
-   //       if (__DEV__) asyncTraceStack?.push(trace_DEV!);
-   //       callback(...args);
+   //       asyncContextStack.push(context);
+   //       if (__DEV__) asyncTraceStack?.push(trace_DEV!)
+   //       taskFlask.collectTasks(() => callback(...args))
    //    }
    //    finally {
-   //      if(__DEV__) asyncTraceStack?.pop()
+   //       _remove()
+   //       asyncContextStack.pop()
    //    }
-   // }
-
-   // $_wrap_with_(context, callback);
-   // const _callback = bindFlask(once ? oneTimeCallback : callback, flask === 'outlive' ? null : flask);
+   // } :
+   //    (...args: any[]) => {
+   //       if (taskFlask) taskFlask.discard()
+   //       taskFlask = enclosingFlask?.spawn() || new Flask()
+   //       try {
+   //          asyncContextStack.push(context);
+   //          if (__DEV__) asyncTraceStack?.push(trace_DEV!)
+   //          taskFlask.collectTasks(() => callback(...args))
+   //       }
+   //       finally {
+   //          asyncContextStack.pop()
+   //       }
+   //    }
 
    mapHandlers(_callback, callback);
 
@@ -126,7 +124,6 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
       if (__DEV__) unmarkNoCleanup(activeListener);
       if (cancelPendingStop) cancelPendingStop();
       if (unbind) unbind();
-
       return true;
    }
    _remove.isRemover = true as const;
@@ -151,16 +148,15 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
    if (until) {
       const pendingStop = until(_remove);
       if (pendingStop) cancelPendingStop = pendingStop.cancel;
-      if (__DEV__ && (!pendingStop || pendingStop && !("cancel" in pendingStop)))
+      if (__DEV__ && !cancelPendingStop)
          console.warn('`until` function should be a flaskable scheduler that return a PendingCancelOp for cleanup. See @rue/flask')
    }
 
-   const flask = options?.flask;
-   if (flask !== null) {
-      unbind = bindToFlask(activeListener, flask)
+   if (enclosingFlask) {
+      unbind = bindToFlask(activeListener, enclosingFlask)
    }
 
-   if (__DEV__ && flask !== null) setUpCleanupWarning!(activeListener, until, getActiveFlask())
+   if (__DEV__ && flask !== null) setUpCleanupWarning!(activeListener, until, enclosingFlask)
 
    returnVal = enroll(_callback);
 
@@ -168,12 +164,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 }
 
 
-function bindToFlask(listener: ActiveListener, flask: ThisFlask | undefined) {
-   flask = flask || getActiveFlask()
-   if (!flask) {
-      if (__DEV__) console.warn('listener has not been bound to any flask')
-      return;
-   }
+function bindToFlask(listener: ActiveListener, flask: ThisFlask) {
    const { cancel: cancelStop } = flask.onDiscard(listener.stop);
    const { stop: stopPausing } = flask.onDeactivate(() => listener.pause());
    const { stop: stopResuming } = flask.onReactivate(listener.resume);
@@ -188,3 +179,29 @@ function bindToFlask(listener: ActiveListener, flask: ThisFlask | undefined) {
 // currentFlask
 // until
 // flask
+
+
+function wrapWithContextAndFlask(callback: Callback, config: {
+   afterCall?: () => void,
+   enclosingFlask: Flask | undefined,
+   trace_DEV: string | undefined
+}) {
+   const { afterCall, enclosingFlask, trace_DEV } = config
+   let taskFlask: Flask;
+
+   const context = $_snap_context()
+
+   return (...args: any[]) => {
+      if (taskFlask) taskFlask.discard()
+      taskFlask = enclosingFlask?.spawn() || new Flask()
+      try {
+         asyncContextStack.push(context);
+         if (__DEV__) asyncTraceStack?.push(trace_DEV!)
+         taskFlask.collectTasks(() => callback(...args))
+      }
+      finally {
+         if (afterCall) afterCall()
+         asyncContextStack.pop()
+      }
+   }
+}

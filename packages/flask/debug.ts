@@ -1,7 +1,7 @@
 import { getAppOnlyTrace } from "../lumo/src/watch/debug";
 import { createStack, Stack } from "./context/AsyncContext";
 
-export const asyncTraceStack: Stack<string> | undefined = __DEV__ ? createStack<string>({ name: 'trace' }) : undefined;
+export const asyncTraceStack: Stack<string> | undefined = __DEV__ ? createStack<string>('trace') : undefined;
 
 function getActiveTrace() {
    return asyncTraceStack?.getCurrent()

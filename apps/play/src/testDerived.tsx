@@ -1,5 +1,4 @@
-//@ts-nocheck
-import { If, component, watch, Else, ElseIf } from "@rue/lumo";
+import { If, component, Else, ElseIf } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
 export function TestDerivedConditional() {
@@ -13,18 +12,12 @@ export function TestDerivedConditional() {
 
    })
    const $doubleCount = ion(() => $count() * 2)
-   const $isGreaterThanOne = ion(() => $doubleCount() > 1)
-   watch($isGreaterThanOne, () => {
-      console.log('yes'!)
-   })
 
    const $aActive = ion(true, {
       toggle() {
          $aActive.state = !$aActive.state
       }
    })
-
-
 
    const $bActive = ion(true, {
       toggle() {
