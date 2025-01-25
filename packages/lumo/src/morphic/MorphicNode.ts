@@ -71,7 +71,7 @@ export class MorphicRenderKit {
         //TODO: 
         const nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(this.switchMap[this.activeKey]())), parent, nodePod);
         pushCommons(this.context)
-        this.dynamicNode.mount(function renderMorphicNode() {
+        this.dynamicNode.activate(function renderMorphicNode() {
             mountNodeEntities(nodeEntities, parent, fragment)
         })
         popCommons()
@@ -117,12 +117,9 @@ export class MorphicRenderKit {
         const dynamicNode = this.dynamicNode = this.parentDynamicNode.fork()
         const _this = this
         if (this.preserve && this.renderedKeys?.has(key)) {
-            dynamicNode.remount(function activateMorphicForm() {
-                const nodeEntities = normalizeToArray(unnestComponent(_this.switchMap[key]()))
-                mountConditional(parent, _this.dynamicNodePod, nodeEntities)
-            })
+            dynamicNode.reactivate()
         } else {
-            dynamicNode.mount(function reactivateMorphicForm() {
+            dynamicNode.activate(function reactivateMorphicForm() {
                 const nodeEntities = normalizeToArray(unnestComponent(_this.switchMap[key]()))
                 mountConditional(parent, _this.dynamicNodePod, nodeEntities)
             })

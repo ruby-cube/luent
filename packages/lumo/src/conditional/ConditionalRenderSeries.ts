@@ -32,7 +32,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       swap: SwapType = 'create'
    ) {
       super(statements, makeElseKit);
-      this.parentDynamicNode = getDynamicNode()
+      this.parentDynamicNode = getDynamicNode() //ie: enclosingFlask / outerFlask
       this.activeIndex = this.evaluateConditions()
       if (!this.isDynamic) {
          return;
@@ -83,7 +83,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       if (this.isDynamic && kit.type === 'create') {
          const dynamicNode = kit.dynamicNode = getDynamicNode().fork()
-         dynamicNode.mount(renderConditional)
+         dynamicNode.activate(renderConditional)
       }
       else if (kit.type !== 'show') {
          renderConditional()
@@ -341,18 +341,19 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          hideDOMNodes(pod);
       }
       else if (activationType === 'create') {
-         // remove from 
-         removeDOMNodes(pod)
-         kit.nodePod!.length = 0;
-
          // discard of flask
          const dynamicNode = kit.dynamicNode!
          kit.dynamicNode = undefined;
          dynamicNode.discard()
+
+         // remove from 
+         removeDOMNodes(pod)
+         pod.length = 0;
       }
       else if (activationType === 'mount') {
+         const dynamicNode = kit.dynamicNode
+         dynamicNode?.deactivate()
          removeDOMNodes(pod);
-         // TODO: maybe deactivate dynamic node so that effects won't run?
       }
    }
 
@@ -374,17 +375,14 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       let dynamicNode = kit.dynamicNode
       if (dynamicNode === undefined || dynamicNode === NULLISH_DYNAMIC_NODE) {
          dynamicNode = kit.dynamicNode = this.parentDynamicNode.fork();
-         dynamicNode.mount(function renderConditionalUpdate() {
+         dynamicNode.activate(function renderConditionalUpdate() {
             const nodeEntities = series.render(kit, parent)
             mountConditional(parent, pod, nodeEntities);
          })
       }
       else {
          // reactivate preserved nodes
-         dynamicNode.remount(function updateConditional() {
-            const nodeEntities = series.render(kit, parent);
-            mountConditional(parent, pod, nodeEntities)
-         })
+         dynamicNode.reactivate()
       }
    }
 }
@@ -398,18 +396,22 @@ export function mountConditional(
    fragment?: DocumentFragment
 ) {
    const _fragment = fragment || new DocumentFragment();
-
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
    if (fragment) return; // no need to mount to DOM yet since fragment originates higher up
+   mountDOMNodes(pod, parent, _fragment)
+}
+
+
+export function mountDOMNodes(pod: NodePod, parent: Element, fragment: DocumentFragment) {
    let prevNode = pod.prevNode;
    if (prevNode && prevNode === parent) {
-      parent.append(_fragment) //for teleport
+      parent.append(fragment) //for teleport
    }
    else if (prevNode) {
-      prevNode.after(_fragment)
+      prevNode.after(fragment)
    }
    else {
-      parent.prepend(_fragment)
+      parent.prepend(fragment)
    }
 }
 

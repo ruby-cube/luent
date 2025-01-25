@@ -176,10 +176,7 @@ function bindToFlask(listener: ActiveListener, flask: ThisFlask) {
    }
 }
 
-// currentFlask
-// until
-// flask
-
+// onActivate doesn't make sense for task flasks except as reactivate... $thisTask() instead of flask? $thisNode()
 
 function wrapWithContextAndFlask(callback: Callback, config: {
    afterCall?: () => void,
@@ -198,8 +195,8 @@ function wrapWithContextAndFlask(callback: Callback, config: {
          asyncContextStack.push(context);
          if (__DEV__) asyncTraceStack?.push(trace_DEV!)
          taskFlask.collectTasks(() => callback(...args))
-      }
-      finally {
+   }
+   finally {
          if (afterCall) afterCall()
          asyncContextStack.pop()
       }

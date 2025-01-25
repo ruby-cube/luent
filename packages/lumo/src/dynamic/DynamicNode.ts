@@ -29,15 +29,13 @@ export class DynamicNode extends Flask {
       return new DynamicNode(this)
    }
 
-   mount(render: () => void) {
-      this.collectTasks(render)
-      this.activate()
-   }
+   // mount(render: () => void) {
+   //    this.activate(render)
+   // }
 
-   remount(render: () => void) {
-      render();
-      this.reactivate()
-   }
+   // remount() {
+   //    this.reactivate()
+   // }
 }
 
 

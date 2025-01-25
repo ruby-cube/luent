@@ -12,7 +12,7 @@ import { createCommons } from "../context/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { getTrace } from "../watch/debug";
 import { NodePod } from "../node/NodePod";
-import { mountConditional } from "../conditional/ConditionalRenderSeries";
+import { mountConditional, mountDOMNodes, removeDOMNodes } from "../conditional/ConditionalRenderSeries";
 import { getActiveFlask } from "@rue/flask";
 
 
@@ -174,7 +174,7 @@ export class ListRenderKit {
 
          if (isDynamic) {
             const dynamicNode = getDynamicNode().fork()
-            dynamicNode.mount(function mountDynamicItem() {
+            dynamicNode.activate(function mountDynamicItem() {
                const nodeEntities = listKit.renderItem(item, $index, parent, nodePod)
                mountNodeEntities(nodeEntities, parent, fragment);
             })
@@ -193,9 +193,7 @@ export class ListRenderKit {
          const nodePod = this.dynamicNodePod![index] as NodePod;
          const dynamicNode = dynamicNodeMap.get(nodePod)
          dynamicNode?.discard()
-         nodePod.forEachNode(node =>
-            node.remove()
-         )
+         removeDOMNodes(nodePod)
       }
       //TODO: how do I handle items that have been moved to another port?
    }
@@ -257,7 +255,7 @@ export class ListRenderKit {
             const renderItem = this.renderItem
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
-            dynamicNode.mount(function renderNewListItem() {
+            dynamicNode.activate(function renderNewListItem() {
                const nodeEntities = renderItem(toValue(list)[i], $index, parent, nodePod);
                // mountConditional(parent, nodePod, nodeEntities, fragment)
                mountNodeEntities(nodeEntities, parent, fragment)
@@ -267,7 +265,7 @@ export class ListRenderKit {
          }
          else if (hasMoved(uItem)) {
             // move node to fragment (DOM will auto-remove node from DOM)
-            appendNodes(fragment, nodePod);
+            transferNodes(fragment, nodePod);
          }
       }
       this.indices = newIndices;
@@ -303,10 +301,7 @@ export class ListRenderKit {
 
       // (3) insert nodes into DOM
       for (const [index, fragment] of indicesAndFragments) {
-         const prevNode = (<NodePod>dynamicNodePod[index]).prevNode
-         if (prevNode && prevNode === parent) parent.append(fragment) // for teleport
-         else if (prevNode) prevNode.after(fragment);
-         else parent.prepend(fragment);
+         mountDOMNodes(<NodePod>dynamicNodePod[index], parent, fragment)
       }
 
       this.castUpdated(toFromIndices)
@@ -328,14 +323,14 @@ export class ListRenderKit {
 
 
 
-function appendNodes(fragment: DocumentFragment, nodePod: NodePod) {
+function transferNodes(fragment: DocumentFragment, nodePod: NodePod) {
    for (const nodeOrPod of nodePod) {
       if (nodeOrPod instanceof Node) {
          fragment.appendChild(nodeOrPod)
       }
       else {
          for (const nodePod of nodeOrPod) {
-            appendNodes(fragment, nodePod)
+            transferNodes(fragment, nodePod as NodePod)
          }
       }
    }

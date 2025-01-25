@@ -33,7 +33,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
    const nodePod = new NodePod()
    const remountable = config?.remountable
    const preserve = remountable ? true : false
-   const dynamicNode = new DynamicNode(null, preserve);
+   const dynamicNode = new DynamicNode();
 
    return {
       mount(element: string | HTMLElement | SVGAElement) {
@@ -42,7 +42,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
          appRoot = root!;
 
          // (2) attach developer's root component to root element
-         dynamicNode.mount(function mountRootComponent() {
+         dynamicNode.activate(function mountRootComponent() {
             let output: Component = { renderedTemplate: undefined }
             pushCommons(appContext)
             // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount

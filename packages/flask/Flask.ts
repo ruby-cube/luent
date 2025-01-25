@@ -11,7 +11,7 @@ export function getActiveFlask() {
 }
 
 export type ThisFlask = {
-   [K in keyof Pick<Flask, 'discard'| 'onDiscard' | 'onActivate' | 'onDeactivate' | 'onReactivate'>]: Pick<Flask, 'discard'| 'onDiscard' | 'onActivate' | 'onDeactivate' | 'onReactivate'>[K]
+   [K in keyof Pick<Flask, 'discard' | 'onDiscard' | 'onActivate' | 'onDeactivate' | 'onReactivate'>]: Pick<Flask, 'discard' | 'onDiscard' | 'onActivate' | 'onDeactivate' | 'onReactivate'>[K]
 }
 
 export function $thisFlask(): ThisFlask { //TODO: limit public properties and methods
@@ -84,11 +84,11 @@ export class Flask {
       }
    }
 
-   private _activate?: () => void
+   // private _activate?: () => void
 
-   get activate() {
-      return this._activate || (this._activate = () => this.emit(LifecycleHook.ACTIVATE))
-   }
+   // get activate() {
+   //    return this._activate || (this._activate = () => this.emit(LifecycleHook.ACTIVATE))
+   // }
 
    private _onActivate?: (task: Task, options?: SchedulerOptions) => PendingOp<void>
 
@@ -125,7 +125,7 @@ export class Flask {
    private _reactivate?: () => void
 
    get reactivate() {
-      return this._reactivate || (this._reactivate = () => this.emit(LifecycleHook.REACTIVATE))
+      return this._reactivate || (this._reactivate = () => (this.collectTasks(this.setup, LifecycleHook.REACTIVATE), this.emit(LifecycleHook.REACTIVATE)))
    }
 
    private _onReactivate?: (task: Task, options?: ListenerOptions) => ActiveListener
@@ -134,12 +134,20 @@ export class Flask {
       return this._onReactivate || (this._onReactivate = (task: Task, options?: ListenerOptions) => on(LifecycleHook.REACTIVATE, this, task, options))
    }
 
-   collectTasks<T>(fn: () => T) {
+   setup!: () => any
+
+   activate<T>(setup: () => T) {
+      this.setup = setup
+      this.collectTasks(setup, LifecycleHook.ACTIVATE)
+   }
+
+   collectTasks(fn: () => any, hook: LifecycleHook) {
       try {
          flaskStack.push(this);
          return fn();
       }
       finally {
+         this.emit(hook)
          flaskStack.pop();
       }
    }
@@ -167,7 +175,7 @@ export class Flask {
 function at(hookName: LifecycleHook, flask: Flask, task: Task, options: SchedulerOptions = {}) {
    const tasks = flask.tasks
 
-   return $schedule(task, {...options, flask: null}, { //QUESTION: I don't know if binding to a flask will cause an infinite loop of cleanup or if not binding will cause memory leak
+   return $schedule(task, { ...options, flask: null }, { //QUESTION: I don't know if binding to a flask will cause an infinite loop of cleanup or if not binding will cause memory leak
       enroll(task) {
          tasks.addToSet(task, hookName)
       },
