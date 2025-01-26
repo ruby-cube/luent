@@ -1,7 +1,7 @@
 import { SetMap } from "@rue/utils";
 import { $_snap_context, asyncContextStack, ContextualState } from "./context/AsyncContext";
 import { PendingOp, SchedulerOptions } from "./PendingOp";
-import { ActiveListener, ListenerOptions } from "./ActiveListener";
+import { Listener, ListenerOptions } from "./Listener";
 import { $listen, $schedule } from "./flaskableListeners";
 
 export const [getActiveFlask, setFlask, flaskStack] = ContextualState<Flask>('flask')
@@ -124,7 +124,7 @@ export class Flask {
       return this._deactivate || (this._deactivate = () => this.emit(LifecycleHook.DEACTIVATE))
    }
 
-   private _onDeactivate?: (task: Task, options?: ListenerOptions) => ActiveListener
+   private _onDeactivate?: (task: Task, options?: ListenerOptions) => Listener
 
    get onDeactivate() {
       return this._onDeactivate || (this._onDeactivate = (task: Task, options?: ListenerOptions) => on(LifecycleHook.DEACTIVATE, this, task, options))
@@ -137,7 +137,7 @@ export class Flask {
       return this._reactivate || (this._reactivate = () => this.emit(LifecycleHook.REACTIVATE))
    }
 
-   private _onReactivate?: (task: Task, options?: ListenerOptions) => ActiveListener
+   private _onReactivate?: (task: Task, options?: ListenerOptions) => Listener
 
    get onReactivate() {
       return this._onReactivate || (this._onReactivate = (task: Task, options?: ListenerOptions) => on(LifecycleHook.REACTIVATE, this, task, options))
@@ -147,7 +147,7 @@ export class Flask {
    //    flaskStack.push(this)
    // }
 
-   contain(fn: () => any) {
+   containCall(fn: () => any) {
       try {
          flaskStack.push(this);
          return fn();

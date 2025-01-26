@@ -1,12 +1,12 @@
 import { AnyObject } from "@rue/types";
-import { ActiveListener, EnrollFunction, ListenerOptions, makeActiveListener, RemoveFunction, ScheduleStop } from "./ActiveListener";
+import { Listener, EnrollFunction, ListenerOptions, makeActiveListener, RemoveFunction, ScheduleStop } from "./Listener";
 import { makePendingCancelOp, PendingCancelOp } from "./PendingCancelOp";
 import { makePendingOp, PendingOp, ScheduleCancel, SchedulerOptions } from "./PendingOp";
 import { buildTrace_DEV, asyncTraceStack } from "./debug";
 
 export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O extends AnyObject = {}> = <
    OPT extends ListenerOptions & O,
->(target: T, callback: CB, options?: OPT) => ActiveListener;
+>(target: T, callback: CB, options?: OPT) => Listener;
 
 
 
@@ -44,7 +44,7 @@ export function $listen<
       enroll: E,
       remove: RemoveFunction<E>
    }
-): CB extends CallbackRemover ? PendingCancelOp : ActiveListener {
+): CB extends CallbackRemover ? PendingCancelOp : Listener {
    const { enroll, remove } = config;
 
    if (isRemover(callback)) {
@@ -52,7 +52,7 @@ export function $listen<
          callback,
          enroll,
          remove
-      }) as CB extends CallbackRemover ? PendingCancelOp : ActiveListener
+      }) as CB extends CallbackRemover ? PendingCancelOp : Listener
    }
 
    return makeActiveListener({
@@ -61,7 +61,7 @@ export function $listen<
       remove,
       options,
       trace_DEV: __DEV__ ? buildTrace_DEV() : undefined
-   }) as CB extends CallbackRemover ? PendingCancelOp : ActiveListener
+   }) as CB extends CallbackRemover ? PendingCancelOp : Listener
 }
 
 

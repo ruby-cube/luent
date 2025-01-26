@@ -2,7 +2,7 @@ import { DOMNode, Slot } from "../component/InternalComponent";
 import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon, watch } from "@rue/quarky";
 import { isFunction, isObject, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
-import { $listen, ActiveListener, ListenerOptions, PendingOp } from "@rue/flask";
+import { $listen, Listener, ListenerOptions, PendingOp } from "@rue/flask";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";

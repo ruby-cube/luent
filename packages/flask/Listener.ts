@@ -5,10 +5,9 @@ import { mapHandlers } from "./handlerMap";
 import { AbortSignal, RegisterAbortSignal } from "./AbortSignal";
 import { $_snap_context, callWithContext } from "./context/AsyncContext";
 import { Flask, getActiveFlask, setFlask, ThisFlask } from "./Flask";
-import { listen } from "@rue/lumo";
 import { setTrace } from "./debug";
 
-export type ActiveListener = {
+export type Listener = {
    stop(): boolean;
    pause(): boolean;
    resume(): boolean;
@@ -49,7 +48,7 @@ type ActiveListenerConfig<E extends EnrollFunction = EnrollFunction> = {
 
 export function makeActiveListener<E extends (wrappedCB: Callback) => void | Callback>(
    config: ActiveListenerConfig<E>
-): ActiveListener {
+): Listener {
    const { enroll, remove, callback, options, trace_DEV } = config;
    if (!callback) {
       if (__DEV__) console.warn("No callback was passed into makeActiveListener")
@@ -138,11 +137,11 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 
    returnVal = enroll(_callback);
 
-   return activeListener as ActiveListener;
+   return activeListener as Listener;
 }
 
 
-function bindToFlask(listener: ActiveListener, flask: Flask) {
+function bindToFlask(listener: Listener, flask: Flask) {
    const { cancel: cancelStop } = flask.onDiscard(listener.stop);
    const { stop: stopPausing } = flask.onDeactivate(listener.pause); 
    const { stop: stopResuming } = flask.onReactivate(listener.resume);

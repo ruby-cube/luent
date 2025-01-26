@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { asWatchSubject, WatchSubject } from "./WatchSubject";
-import { $listen, ActiveListener, getActiveFlask, ListenerOptions } from "@rue/flask";
+import { $listen, Listener, getActiveFlask, ListenerOptions } from "@rue/flask";
 import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
@@ -178,9 +178,9 @@ function InertWatcher() {
       resume: noOp,
    }
 }
-// export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? OnChangeHandler<R> : never, options?: WatchOptions): ActiveListener
-// export function watch<T extends IonizedModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): ActiveListener
-export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: WatchOptions): ActiveListener {
+// export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? OnChangeHandler<R> : never, options?: WatchOptions): Listener
+// export function watch<T extends IonizedModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): Listener
+export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: WatchOptions): Listener {
    const isMultiSubject = isMultiWatchSubject(subject);
    if (!isMultiSubject && !(subject instanceof Function) && !isReactive(subject)) {
       return InertWatcher()

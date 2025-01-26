@@ -1,5 +1,5 @@
 import { useIncrementalID } from "@rue/utils";
-import { ActiveListener } from "./ActiveListener";
+import { Listener } from "./Listener";
 import { PendingOp } from "./PendingOp";
 import { Flask } from "./Flask";
 
@@ -7,11 +7,11 @@ export let shouldWarnNoCleanup = false;
 
 const listenersWithNoCleanup = new Set();
 
-export function markNoCleanup(listener: ActiveListener | PendingOp) {
+export function markNoCleanup(listener: Listener | PendingOp) {
     listenersWithNoCleanup.add(listener);
 }
 
-export function unmarkNoCleanup(listener: ActiveListener | PendingOp) {
+export function unmarkNoCleanup(listener: Listener | PendingOp) {
     listenersWithNoCleanup.delete(listener)
 }
 
@@ -32,7 +32,7 @@ export function configureFlask(config: {
 
 export const genIncrementalId = __DEV__ ? useIncrementalID() : undefined;
 
-export const setUpCleanupWarning = __DEV__ ? (listener: ActiveListener | PendingOp, cleanupFn: Function | null | undefined, flask: Flask | undefined) => {
+export const setUpCleanupWarning = __DEV__ ? (listener: Listener | PendingOp, cleanupFn: Function | null | undefined, flask: Flask | undefined) => {
     if (shouldWarnNoCleanup) {
         if (!flask && !cleanupFn) {
             const listenerID = genIncrementalId!();

@@ -41,7 +41,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
          appRoot = root!;
 
          // (2) attach developer's root component to root element
-         flask.contain(function mountRootComponent() {
+         flask.containCall(function mountRootComponent() {
             let output: Component = { renderedTemplate: undefined }
             pushCommons(appContext)
             // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount

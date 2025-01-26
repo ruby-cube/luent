@@ -265,7 +265,7 @@ listener                           options
 
 There are two main types of flasked listeners: one-time listeners and sustained listeners. As their names suggest, one-time listeners will listen at most once (i.e. the handler can run at most one time) and the sustained listeners will continue to listen so long as the listener remains active (i.e. the handler will run every time the event or hook is emitted).
 
-**Sustained listeners** return an `ActiveListener` object. This object has a single `stop` method, which can be called to stop the listener.
+**Sustained listeners** return an `Listener` object. This object has a single `stop` method, which can be called to stop the listener.
 
 ```tsx
 const mouseMoveListener =
@@ -299,7 +299,7 @@ const result = await pendingOp;
 
 ### Listener Morphing
 
-If created as a morphable listener, a one-time listener can be turned into a sustained listener and vice-versa via the options parameter. The listener’s type definition will indicate whether it returns a `PendingOp` (as a one-time listener) or an `ActiveListener` (as a sustained listener). Besides listener morphing, the options parameter can be useful for marking listeners as one-time or sustained explicitly in the code, if so desired.
+If created as a morphable listener, a one-time listener can be turned into a sustained listener and vice-versa via the options parameter. The listener’s type definition will indicate whether it returns a `PendingOp` (as a one-time listener) or an `Listener` (as a sustained listener). Besides listener morphing, the options parameter can be useful for marking listeners as one-time or sustained explicitly in the code, if so desired.
 
 ```tsx
 onPopulated(() => {   // sustained listener
@@ -963,7 +963,7 @@ Sets up a listener. Depending on options and config, this could behave as a one-
 ```ts
 const activeListener = $listen(handler, options, config)
         |                        |         |        |
- PendingOp | ActiveListener   Handler      |   ListenerConfig
+ PendingOp | Listener   Handler      |   ListenerConfig
                                      ListenerOptions
 ```
 
@@ -1022,7 +1022,7 @@ Sets up a sustained listener.
 ```ts
 const activeListener = $subscribe(handler, options, config)
            |                        |         |        |
-        ActiveListener            Handler     |   SubscribeConfig
+        Listener            Handler     |   SubscribeConfig
                                        ListenerOptions
 ```
 
@@ -1033,7 +1033,7 @@ type SubscribeConfig = {
     remove: (handlerOrReturnVal) => void, 
 }
 
-type ActiveListener = { stop: () => void };
+type Listener = { stop: () => void };
 
 type ListenerOptions = {
     until?: ScheduleStop;

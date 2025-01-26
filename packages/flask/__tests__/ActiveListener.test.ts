@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach, it } from "vitest";
-import { makeActiveListener } from "../ActiveListener";
+import { makeActiveListener } from "../Listener";
 import { onFlaskDiscard, getActiveFlask, EffectFlask } from "../EffectFlask";
 
 vi.mock('../EffectFlask', () => ({
@@ -8,7 +8,7 @@ vi.mock('../EffectFlask', () => ({
     getActiveFlask: vi.fn()
 }));
 
-describe("ActiveListener", () => {
+describe("Listener", () => {
     let enroll: ReturnType<typeof vi.fn>;
     let remove: ReturnType<typeof vi.fn>;
     let callback: ReturnType<typeof vi.fn>;
@@ -33,7 +33,7 @@ describe("ActiveListener", () => {
     });
 
 
-    it('should enroll the callback and return an ActiveListener', () => {
+    it('should enroll the callback and return an Listener', () => {
         const listener = makeActiveListener(config);
 
         expect(enroll).toHaveBeenCalledOnce();

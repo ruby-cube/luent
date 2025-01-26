@@ -1,4 +1,4 @@
-import { $listen, ActiveListener, CallbackRemover, defineCustomCleanupScheduler, LIFETIME, ListenerOptions, PendingCancelOp, ScheduleStop } from '@rue/flask';
+import { $listen, Listener, CallbackRemover, defineCustomCleanupScheduler, LIFETIME, ListenerOptions, PendingCancelOp, ScheduleStop } from '@rue/flask';
 import { isIon, Ref } from '@rue/quarky';
 import { NodeRef } from '../node/NodeRef';
 
@@ -26,7 +26,7 @@ export function listen<
     event: EventName<T>,
     handler: CB & EventHandler<T, EventName<T>>,
     options?: EventListenerOptions
-): CB extends CallbackRemover ? PendingCancelOp : ActiveListener {
+): CB extends CallbackRemover ? PendingCancelOp : Listener {
 
     return $listen(handler, <ListenerOptions>options || {}, {
         enroll(cb) {
