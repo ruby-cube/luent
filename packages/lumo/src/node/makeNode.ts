@@ -6,7 +6,7 @@ import { NodeReferent, NodeRef, NodesRef } from "./NodeRef";
 import { getActiveFlask, onFlaskDiscard } from "@rue/flask";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
-import { createCommons } from "../context/Commons";
+import { createCommons } from "../commons/Commons";
 import { AnyObject, Booleanny } from "@rue/types";
 import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
@@ -19,7 +19,7 @@ import { MaybeIon } from "../InputTypes";
 import { isFunction } from "@rue/utils";
 import { isNamedDerivation } from "../component/fromTag";
 import { InnerHTMLKit } from "./mountInnerHTML";
-import { getCommons, popCommons, pushCommons } from "../context/context-stack";
+import { getCommons, popCommons, pushCommons } from "../commons/commons-stack";
 
 // export function Fragment() {
 //    // for jsx-runtime

@@ -1,9 +1,10 @@
-// const nodeStack = createStack({
+// const nodeStack = ContextualState({
 //    name: 'dynamic node',
 //    parentKey: 'parent'
 
-import { context } from "../../lumo/src/context/Commons";
-import { asyncTrace } from "../debug";
+import { context } from "../../lumo/src/commons/Commons";
+import { asyncTrace_DEV } from "../debug";
+import { Callback } from "../flaskableListeners";
 
 // })
 type ActiveNodes = Map<string | symbol, any>
@@ -42,10 +43,14 @@ export const asyncContextStack = new AsyncContextStack()
 export type Stack<T = any> = {
    pop(): void;
    push(node: T): void;
-   getCurrent(): T | undefined;
+   // getCurrent(): T | undefined;
 }
 
-export function createStack<T>(name: string): Stack<T> {
+type GetContextualState<T> = () => T | undefined
+type SetContextualState<T> = (state: T) => void
+
+
+export function ContextualState<T>(name: string): [GetContextualState<T>, SetContextualState<T>, Stack<T>] {
    // const { name, getParent } = config;
    // if (getParent) {
    //    let prevNode: T | undefined;
@@ -77,13 +82,15 @@ export function createStack<T>(name: string): Stack<T> {
    // }
 
    const _stack: T[] = [];
+
+   function push(node: T) {
+      _stack.push(node)
+      if (_stack.length) {
+         asyncContextStack.activeNodes.set(name, node)
+      }
+   }
    const stack = {
-      push(node: T) {
-         _stack.push(node)
-         if (_stack.length) {
-            asyncContextStack.activeNodes.set(name, node)
-         }
-      },
+      push,
       pop() {
          _stack.pop();
          if (_stack.length)
@@ -91,13 +98,17 @@ export function createStack<T>(name: string): Stack<T> {
          else
             asyncContextStack.activeNodes.delete(name)
 
-      },
-      getCurrent() {
-         return _stack.at(-1)
       }
    }
+
    asyncContextStack.stacks.set(name, stack)
-   return stack;
+   return [
+      function getCurrentState() {
+         return _stack.at(-1)
+      },
+      push,
+      stack
+   ];
 }
 
 
@@ -111,6 +122,45 @@ export function $_run_with_(context: ActiveNodes, fn: Function) {
       asyncContextStack.push(context);
       return fn()
    } finally {
+      asyncContextStack.pop()
+   }
+}
+
+
+export function wrapWithContext(callback: Callback, config: {
+   beforeCall?: () => void,
+   afterCall?: () => void,
+}) {
+   const { afterCall, beforeCall } = config
+   const context = $_snap_context()
+
+   return (...args: any[]) => {
+      try {
+         asyncContextStack.push(context);
+         if (beforeCall) beforeCall()
+         callback(...args)
+      }
+      finally {
+         if (afterCall) afterCall()
+         asyncContextStack.pop()
+      }
+   }
+}
+
+export function callWithContext(config: {
+   callback: () => any,
+   context?: Map<any, any>,
+   beforeCall?: () => void,
+   afterCall?: () => void,
+}) {
+   const { afterCall, beforeCall, callback, context } = config
+   try {
+      if (context) asyncContextStack.push(context);
+      if (beforeCall) beforeCall()
+      return callback()
+   }
+   finally {
+      if (afterCall) afterCall()
       asyncContextStack.pop()
    }
 }

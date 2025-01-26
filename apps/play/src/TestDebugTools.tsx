@@ -1,7 +1,7 @@
 import { component, listen} from "@rue/lumo";
 import { ion, ionize, watch } from "@rue/quarky";
 import { $thisEffect } from "../../../packages/quarky/src/effects/ThisEffect";
-import { asyncTrace } from "../../../packages/flask/debug";
+import { asyncTrace_DEV } from "../../../packages/flask/debug";
 import {  $_run_with_, $_snap_context } from "../../../packages/flask/context/AsyncContext";
 import { getActiveFlask } from "@rue/flask";
 
@@ -75,7 +75,7 @@ export function TestDebugApp() {
 
 
    function doSomething() {
-      asyncTrace()
+      asyncTrace_DEV()
       // task.run()
       // console.trace()
       // console.log(getTrace())

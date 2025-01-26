@@ -2,11 +2,11 @@ import { Callback, CallbackRemover, useCleanupScheduler } from "./flaskableListe
 import { PendingCancelOp } from "./PendingCancelOp";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { mapHandlers } from "./handlerMap";
-import { isAbortSignal, AbortSignal, RegisterAbortSignal } from "./AbortSignal";
-import { asyncTraceStack } from "./debug";
-import { $_snap_context, $_wrap_with_, asyncContextStack } from "./context/AsyncContext";
-import { Flask, getActiveFlask, ThisFlask } from "./Flask";
+import { AbortSignal, RegisterAbortSignal } from "./AbortSignal";
+import { $_snap_context, callWithContext } from "./context/AsyncContext";
+import { Flask, getActiveFlask, setFlask, ThisFlask } from "./Flask";
 import { listen } from "@rue/lumo";
+import { setTrace } from "./debug";
 
 export type ActiveListener = {
    stop(): boolean;
@@ -21,7 +21,7 @@ export const LIFETIME = null;
 export type ListenerOptions = {
    once?: boolean;
    until?: ScheduleStop | AbortSignal | any[]
-   flask?: ThisFlask | null //| 'outlive';
+   flask?: ThisFlask | Flask | null //| 'outlive';
    __devName?: string;
 }
 
@@ -63,7 +63,11 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
       };
    }
    const once = options?.once;
-   const flask = options?.flask;
+   const _flask = options?.flask;
+   const flask = _flask instanceof ThisFlask ?
+      //@ts-expect-error: flask is private
+      _flask.flask
+      : _flask;
 
    let returnVal: any;
    let cancelPendingStop: (() => void) | undefined
@@ -80,39 +84,13 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
       }
    }
 
-   const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask()) as Flask | undefined
+   const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask())
 
-   const _callback = wrapWithContextAndFlask(callback, {
+   const _callback = wrapWithFlask(callback, {
       afterCall: once ? _remove : undefined,
       enclosingFlask,
       trace_DEV
    })
-
-   // once ? (...args: any[]) => {
-   //    if (taskFlask) taskFlask.discard()
-   //    taskFlask = enclosingFlask?.spawn() || new Flask()
-   //    try {
-   //       asyncContextStack.push(context);
-   //       if (__DEV__) asyncTraceStack?.push(trace_DEV!)
-   //       taskFlask.collectTasks(() => callback(...args))
-   //    }
-   //    finally {
-   //       _remove()
-   //       asyncContextStack.pop()
-   //    }
-   // } :
-   //    (...args: any[]) => {
-   //       if (taskFlask) taskFlask.discard()
-   //       taskFlask = enclosingFlask?.spawn() || new Flask()
-   //       try {
-   //          asyncContextStack.push(context);
-   //          if (__DEV__) asyncTraceStack?.push(trace_DEV!)
-   //          taskFlask.collectTasks(() => callback(...args))
-   //       }
-   //       finally {
-   //          asyncContextStack.pop()
-   //       }
-   //    }
 
    mapHandlers(_callback, callback);
 
@@ -136,7 +114,7 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
       paused = true;
       return true;
    }
-   pause.isRemover = true as const;
+   // pause.isRemover = true as const;
    pause.__devName = options?.__devName;
 
    let until = options?.until as ScheduleStop | RegisterAbortSignal | null | undefined | any[]
@@ -164,9 +142,9 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 }
 
 
-function bindToFlask(listener: ActiveListener, flask: ThisFlask) {
+function bindToFlask(listener: ActiveListener, flask: Flask) {
    const { cancel: cancelStop } = flask.onDiscard(listener.stop);
-   const { stop: stopPausing } = flask.onDeactivate(() => listener.pause());
+   const { stop: stopPausing } = flask.onDeactivate(listener.pause); 
    const { stop: stopResuming } = flask.onReactivate(listener.resume);
 
    return function unbind() {
@@ -176,29 +154,46 @@ function bindToFlask(listener: ActiveListener, flask: ThisFlask) {
    }
 }
 
-// onActivate doesn't make sense for task flasks except as reactivate... $thisTask() instead of flask? $thisNode()
+// // onActivate doesn't make sense for task flasks except as reactivate... $thisTask() instead of flask? $thisNode()
 
-function wrapWithContextAndFlask(callback: Callback, config: {
+// function wrapWithFlask(callback: Callback, config: {
+//    afterCall?: () => void,
+//    enclosingFlask: Flask | undefined,
+//    trace_DEV: string | undefined
+// }) {
+//    const { afterCall, enclosingFlask } = config
+//    let taskFlask: Flask;
+//    const context = $_snap_context()
+//    return (...args: any[]) => {
+//       if (taskFlask) taskFlask.discard()
+//       taskFlask = enclosingFlask?.spawn() || new Flask()
+//       taskFlask.activate(() => callback(...args)) //TODO: pass in dev trace
+//       if (afterCall) afterCall()
+//    }
+// }
+
+
+function wrapWithFlask(callback: Callback, config: {
    afterCall?: () => void,
-   enclosingFlask: Flask | undefined,
-   trace_DEV: string | undefined
+   enclosingFlask?: Flask,
+   trace_DEV?: string
 }) {
    const { afterCall, enclosingFlask, trace_DEV } = config
-   let taskFlask: Flask;
-
    const context = $_snap_context()
-
+   let taskFlask: Flask;
    return (...args: any[]) => {
       if (taskFlask) taskFlask.discard()
-      taskFlask = enclosingFlask?.spawn() || new Flask()
-      try {
-         asyncContextStack.push(context);
-         if (__DEV__) asyncTraceStack?.push(trace_DEV!)
-         taskFlask.collectTasks(() => callback(...args))
-   }
-   finally {
-         if (afterCall) afterCall()
-         asyncContextStack.pop()
-      }
+      taskFlask = enclosingFlask?.spawn() || new Flask() //QUESTION: Do we want callback to be called again on reactivate?? you should only call if dirty right?
+      return callWithContext({
+         context,
+         beforeCall() {
+            setFlask(taskFlask)
+            if (__DEV__) setTrace!(trace_DEV!)
+         },
+         callback: () => callback(...args),
+         afterCall
+      })
    }
 }
+
+

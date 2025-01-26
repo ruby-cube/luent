@@ -1,16 +1,16 @@
 import { AnyObject } from "@rue/types";
 import { component, InternalComponent, Slot } from "../component/InternalComponent";
-import { getActiveCommons, popCommons, pushCommons } from "./context-stack";
-import { AppContext, _ContextInputType } from "./provide";
+import { getClosestCommons, popCommons, pushCommons } from "./commons-stack";
+import { AppCommons, _ContextInputType } from "./provide";
 import { ComponentConfig, NodeEntity } from "../node/makeNode";
 import { ContextKeyMap } from "@rue/lumo";
-import { asyncTrace } from "../../../flask/debug";
+import { asyncTrace_DEV } from "../../../flask/debug";
 
-export interface NodeContext {
+export interface NodeCommons {
     entries: AnyObject;
-    parent: NodeContext | AppContext,
-    app: AppContext,
-    global?: AppContext,
+    parent: NodeCommons | AppCommons,
+    app: AppCommons,
+    global?: AppCommons,
 }
 
 export type ContextEntries<T> = {
@@ -29,13 +29,13 @@ export function Context<T extends ContextEntries<T>>(input: {
 }) {
     const { Slot } = input
 
-    const parentContext = getActiveCommons()
+    const parentContext = getClosestCommons()
     if (!parentContext) {
-       asyncTrace()
+       asyncTrace_DEV()
       throw new Error(`no context found :( This should never happen`)
     }
 
-    const context: NodeContext = {
+    const context: NodeCommons = {
         entries: input.provide,
         parent: parentContext,
         app: parentContext?.app,

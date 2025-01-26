@@ -6,7 +6,7 @@ import { makeComponent } from '../../component/makeComponent';
 import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
 import { createCommons } from '../Commons';
-import { defineContextProp } from '../ContextKey';
+import { defineContextProp } from '../CommonsKey';
 import { Ion, Ionized, MaybeIon, v } from '../../InputTypes';
 import { ion, ionize, isIon, isIonizedModel } from '@rue/quarky';
 

@@ -1,5 +1,5 @@
 import { RegisterAbortSignal } from "./AbortSignal";
-import { getActiveFlask, onFlaskDiscard, ThisFlask } from "./Flask";
+import { Flask, getActiveFlask, ThisFlask } from "./Flask";
 import { CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
 import { mapHandlers } from "./handlerMap";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
@@ -16,7 +16,7 @@ export type PendingOp<T = unknown> = Promise<T> & {
 
 export type SchedulerOptions = {
    cancel?: ScheduleCancel | AbortSignal,
-   flask?: ThisFlask | null //| 'outlive',
+   flask?: ThisFlask | Flask | null //| 'outlive',
 }
 
 export type ScheduleCancel = (cancel: CallbackRemover) => PendingCancelOp;

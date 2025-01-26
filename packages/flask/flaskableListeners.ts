@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { ActiveListener, EnrollFunction, ListenerOptions, makeActiveListener, RemoveFunction, ScheduleStop } from "./ActiveListener";
 import { makePendingCancelOp, PendingCancelOp } from "./PendingCancelOp";
 import { makePendingOp, PendingOp, ScheduleCancel, SchedulerOptions } from "./PendingOp";
-import { buildTrace, asyncTraceStack } from "./debug";
+import { buildTrace_DEV, asyncTraceStack } from "./debug";
 
 export type SustainedTargetedListener<T = any, CB extends Callback = Callback, O extends AnyObject = {}> = <
    OPT extends ListenerOptions & O,
@@ -60,7 +60,7 @@ export function $listen<
       enroll,
       remove,
       options,
-      trace_DEV: __DEV__ ? buildTrace() : undefined
+      trace_DEV: __DEV__ ? buildTrace_DEV() : undefined
    }) as CB extends CallbackRemover ? PendingCancelOp : ActiveListener
 }
 

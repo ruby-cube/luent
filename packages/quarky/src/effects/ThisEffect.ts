@@ -22,7 +22,7 @@ export class ThisEffect {
    private _onCleanup?: (cleanUp: () => void) => PendingCancelOp
 
    [INTERNAL]?: {
-      asyncTrace: string
+      asyncTrace_DEV: string
    }
 }
 

@@ -3,9 +3,9 @@ import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { ReactiveGet } from "../../../quarky/src";
-import { Context, getCommons, getActiveCommons, popCommons, pushCommons } from "../context/context-stack";
+import { Commons, getCommons } from "../commons/commons-stack";
 // import { getPhasicNode } from "../transition/PhasicNode";
-import { createCommons } from "../context/Commons";
+import { createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
@@ -35,13 +35,13 @@ export function If($condition: Booleanny | ((_?: any) => Booleanny), renderCondi
 export function If($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderFunction | NodeEntity): ConditionalRenderKit
 export function If($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalRenderKit {
    const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional)
-   const activationType = renderConditional ? typeOrRenderConditional as ActivationType : undefined 
+   const activationType = renderConditional ? typeOrRenderConditional as ActivationType : undefined
 
    resetCurrentNodePodIndex()
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
       'if',
-      wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getCommons()),
+      wrapWithCommons(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getCommons()),
       activationType,
       transitionNodes,
       { $condition }
@@ -58,7 +58,7 @@ export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), typeOrR
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
       'elseIf',
-      wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getCommons()),
+      wrapWithCommons(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getCommons()),
       activationType,
       transitionNodes,
       { $condition }
@@ -75,7 +75,7 @@ export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | Acti
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
       'else',
-      wrapWithContext(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getCommons()),
+      wrapWithCommons(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getCommons()),
       activationType,
       transitionNodes,
    )
@@ -83,22 +83,19 @@ export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | Acti
 
 
 //TODO: wrap with asyncContext instead of pushing commons?
-function wrapWithContext(renderConditional: RenderFunction, context: AnyObject, outerContext: Context) {
+function wrapWithCommons(renderConditional: RenderFunction, provide: AnyObject, outerCommons: Commons) {
    return (parent: Element, nodePod: NodePod) => {
-      // const isInitialLoad = getActiveCommons() === outerContext
-      try {
-         // if (!isInitialLoad) 
-            pushCommons(outerContext)
-         const nodeEntities = setUpNodeEntities(normalizeToArray(
+      // try {
+      //    pushCommons(outerCommons)
+         const nodeEntities = setUpNodeEntities(normalizeToArray(  
             createCommons(renderConditional, {
-               provide: context
+               provide
             })), parent, nodePod)
          return nodeEntities;
-      }
-      finally {
-         // if (!isInitialLoad) 
-            popCommons()
-      }
+      // }
+      // finally {
+      //    popCommons()
+      // }
    }
 }
 

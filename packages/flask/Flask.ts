@@ -1,62 +1,72 @@
 import { SetMap } from "@rue/utils";
-import { createStack } from "./context/AsyncContext";
+import { $_snap_context, asyncContextStack, ContextualState } from "./context/AsyncContext";
 import { PendingOp, SchedulerOptions } from "./PendingOp";
 import { ActiveListener, ListenerOptions } from "./ActiveListener";
 import { $listen, $schedule } from "./flaskableListeners";
 
-const flaskStack = createStack<Flask>('flask')
+export const [getActiveFlask, setFlask, flaskStack] = ContextualState<Flask>('flask')
 
-export function getActiveFlask() {
-   return flaskStack.getCurrent()
-}
 
-export type ThisFlask = {
-   [K in keyof Pick<Flask, 'discard' | 'onDiscard' | 'onActivate' | 'onDeactivate' | 'onReactivate'>]: Pick<Flask, 'discard' | 'onDiscard' | 'onActivate' | 'onDeactivate' | 'onReactivate'>[K]
-}
+
+// export function pushFlask(flask: Flask) {
+//    flaskStack.push(flask)
+// }
+
+// export function popFlask() {
+//    flaskStack.pop()
+// }
 
 export function $thisFlask(): ThisFlask { //TODO: limit public properties and methods
    const flask = getActiveFlask()
-   if (!flask) throw new Error('no flask')
-   return flask;
+   if (!flask) throw new Error('No flask found. Must call within the scope of a flask')
+   return flask.thisFlask || new ThisFlask(flask);
 }
-
-export function onFlaskDiscard(task: Task) {
-   const flask = getActiveFlask();
-   if (!flask) return;
-   return flask.onDiscard(task);
-}
-
 
 type Task = () => void
 
 export enum LifecycleHook {
-   ACTIVATE = 'a',
-   REACTIVATE = 'r',
+   // ACTIVATE = 'a',
    DEACTIVATE = 'bda',
+   REACTIVATE = 'r',
    DISCARD = 'bd',
 }
 
-// export function makeDynamicNode() {
-//    const parent = getActiveDynamicNode();
-//    const dynamicNode = new DynamicNode(parent);
-//    if (parent instanceof DynamicNode) {
-//        parent.onReactivate(() => { dynamicNode.emit(LifecycleHook.ON_REACTIVATE) }, { //FIX: This makes on activated run twice when it is first activated (see if this has been fixed)
-//            until: dynamicNode.onDestroy,
-//        })
-//        parent.onDeactivate(() => { dynamicNode.emit(LifecycleHook.ON_DEACTIVATE) }, {
-//            until: dynamicNode.onDestroy,
-//        })
-//        parent.onDestroy(() => { dynamicNode.destroy() }, {
-//            cancel: dynamicNode.onDestroy,
-//            __devName: 'makeDynamicNode, onDestroy'
-//        })
-//    }
-//    return dynamicNode;
-// }
+export class ThisFlask {
+   constructor(
+      private flask: Flask
+   ) {
+      flask.thisFlask = this;
+   }
+
+   get discard() {
+      return this.flask.discard
+   }
+
+   get onDiscard() {
+      return this.flask.onDiscard
+   }
+
+   // get onDeactivate() {
+   //    return this.flask.onDeactivate
+   // }
+
+   // get onReactivate() {
+   //    return this.flask.onReactivate
+   // }
+}
 
 
 export class Flask {
-   constructor(public outer?: Flask) {
+   thisFlask?: ThisFlask
+   outer?: Flask
+   type?: string
+
+   constructor(config: {
+      outer?: Flask,
+      type?: string
+   } = {}) {
+      const { outer, type } = config
+      this.type = type;
       if (outer) {
          outer.onReactivate(this.reactivate, {
             until: this.onDiscard,
@@ -70,8 +80,8 @@ export class Flask {
       }
    }
 
-   spawn() {
-      return new Flask(this);
+   spawn(type?: string) {
+      return new Flask({ outer: this, type });
    }
 
    tasks: SetMap<LifecycleHook, Task> = new SetMap();
@@ -90,12 +100,11 @@ export class Flask {
    //    return this._activate || (this._activate = () => this.emit(LifecycleHook.ACTIVATE))
    // }
 
-   private _onActivate?: (task: Task, options?: SchedulerOptions) => PendingOp<void>
+   // private _onActivate?: (task: Task, options?: SchedulerOptions) => PendingOp<void>
 
-   get onActivate() {
-      return this._onActivate || (this._onActivate = (task: Task, options?: SchedulerOptions) => at(LifecycleHook.ACTIVATE, this, task, options))
-   }
-   //TODO: include option that uses onActivate as onReactivate as well {onReactivate: true}
+   // get onActivate() {
+   //    return this._onActivate || (this._onActivate = (task: Task, options?: SchedulerOptions) => at(LifecycleHook.ACTIVATE, this, task, options))
+   // }
 
    private _discard?: () => void
 
@@ -125,7 +134,7 @@ export class Flask {
    private _reactivate?: () => void
 
    get reactivate() {
-      return this._reactivate || (this._reactivate = () => (this.collectTasks(this.setup, LifecycleHook.REACTIVATE), this.emit(LifecycleHook.REACTIVATE)))
+      return this._reactivate || (this._reactivate = () => this.emit(LifecycleHook.REACTIVATE))
    }
 
    private _onReactivate?: (task: Task, options?: ListenerOptions) => ActiveListener
@@ -134,40 +143,23 @@ export class Flask {
       return this._onReactivate || (this._onReactivate = (task: Task, options?: ListenerOptions) => on(LifecycleHook.REACTIVATE, this, task, options))
    }
 
-   setup!: () => any
+   // open() {
+   //    flaskStack.push(this)
+   // }
 
-   activate<T>(setup: () => T) {
-      this.setup = setup
-      this.collectTasks(setup, LifecycleHook.ACTIVATE)
-   }
-
-   collectTasks(fn: () => any, hook: LifecycleHook) {
+   contain(fn: () => any) {
       try {
          flaskStack.push(this);
          return fn();
       }
       finally {
-         this.emit(hook)
-         flaskStack.pop();
+         flaskStack.pop()
       }
    }
 }
 
 
-// export function collectEffects<T>(run: (flask: Flask, outerFlask: Flask | null) => T) {
-//    try {
-//       const flask = new Flask();
-//       pushFlask(flask);
-//       return run(flask, flask.outer || null);
-//    }
-//    catch {
-//       popFlask();
-//    }
-// }
 
-
-//@ts-ignore
-//const newFlask = flask.fork()
 
 
 

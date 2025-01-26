@@ -1,13 +1,13 @@
 import { Component, ComponentSetup, DOMNode, InternalComponent } from "./component/InternalComponent";
-import { DynamicNode } from "./dynamic/DynamicNode";
 import { AnyObject } from "@rue/types";
 import { setComponentAttributes } from "./component/makeComponent";
-import { AppContext, createAppContext } from "./context/provide";
-import { getCommons, popCommons, pushCommons } from "./context/context-stack";
-import { ContextEntries } from "./context/Commons";
-import { _dog_ } from "./context/x_context-keys";
+import { AppCommons, createAppContext } from "./commons/provide";
+import { getCommons, popCommons, pushCommons } from "./commons/commons-stack";
+import { ContextEntries } from "./commons/Commons";
+import { _dog_ } from "./commons/x_context-keys";
 import { NodePod } from "./node/NodePod";
 import { removeDOMNodes } from "./conditional/ConditionalRenderSeries";
+import { Flask } from "@rue/flask";
 
 let appRoot: Element;
 
@@ -26,14 +26,13 @@ export function getAppRoot() {
 // }
 
 
-export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App: ComponentSetup<T>, config?: { with?: E, remountable?: boolean, globalContext?: AppContext, setup?: T }) {
+export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App: ComponentSetup<T>, config?: { with?: E, remountable?: boolean, globalContext?: AppCommons, setup?: T }) {
 
    // (1) instantiate developer's root component
    const appContext = createAppContext(config?.with, config?.globalContext)
    const nodePod = new NodePod()
    const remountable = config?.remountable
-   const preserve = remountable ? true : false
-   const dynamicNode = new DynamicNode();
+   const flask = new Flask({ type: 'view' });
 
    return {
       mount(element: string | HTMLElement | SVGAElement) {
@@ -42,7 +41,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
          appRoot = root!;
 
          // (2) attach developer's root component to root element
-         dynamicNode.activate(function mountRootComponent() {
+         flask.contain(function mountRootComponent() {
             let output: Component = { renderedTemplate: undefined }
             pushCommons(appContext)
             // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
@@ -77,7 +76,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
 
       discard() {
          this.unmount()
-         dynamicNode.discard()
+         flask.discard()
       }
    }
 }

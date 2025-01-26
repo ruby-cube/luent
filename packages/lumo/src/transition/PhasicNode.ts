@@ -1,13 +1,13 @@
-import { createCommons } from "../context/Commons";
-import { defineContextProp } from "../context/ContextKey";
+import { createCommons } from "../commons/Commons";
+import { defineContextProp } from "../commons/CommonsKey";
 import { makeElement } from "../element/makeElement";
 import { NodeEntity } from "../node/makeNode";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
-import { fromCommons } from "../context/provide";
+import { fromCommons } from "../commons/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
-import type { Context as ContextType } from "../context/context-stack";
+import type { Context as ContextType } from "../commons/commons-stack";
 import { v } from "../InputTypes";
 import { Ion } from "@rue/quarky";
 import { component, Slot } from "../component/InternalComponent";

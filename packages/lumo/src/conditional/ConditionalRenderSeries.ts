@@ -1,4 +1,4 @@
-import { DynamicNode, getDynamicNode, NULLISH_DYNAMIC_NODE } from "../dynamic/DynamicNode";
+import { getViewFlask } from "../flask/ViewFlask";
 import { NodeEntity, SwapType } from "../node/makeNode";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
@@ -9,6 +9,9 @@ import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { NodeKit } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
+import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
+import { buildTrace_DEV, setTrace } from "../../../flask/debug";
+import { Flask, setFlask } from "@rue/flask";
 
 //TODO: rename 'phasic node' to 'transition node'
 //TODO: rename transitionNodes to 'transitNodes'
@@ -25,6 +28,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
    /* We render all show statements eagerly to prevent buggy rendering */
    showKits: ConditionalRenderKit[] | undefined
+   context: Map<string | symbol, any>;
+   trace_DEV?: string
 
    constructor(
       statements: ConditionalRenderKit[],
@@ -32,7 +37,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       swap: SwapType = 'create'
    ) {
       super(statements, makeElseKit);
-      this.parentDynamicNode = getDynamicNode() //ie: enclosingFlask / outerFlask
+      this.context = $_snap_context()
+      this.trace_DEV = __DEV__ ? buildTrace_DEV() : undefined
+      this.outerFlask = getViewFlask() //ie: enclosingFlask
       this.activeIndex = this.evaluateConditions()
       if (!this.isDynamic) {
          return;
@@ -81,31 +88,29 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const kit = this.statements[activeIndex]
       kit.nodePod!.activate()
 
-      if (this.isDynamic && kit.type === 'create') {
-         const dynamicNode = kit.dynamicNode = getDynamicNode().fork()
-         dynamicNode.activate(renderConditional)
+      if (kit.type !== 'show' && !this.isDynamic) {
+         this.render(kit, parent, fragment) //TODO: render function is not wrapped in context because dynamicNode does it... why doesn't 'mount' get a dynamic node???
       }
-      else if (kit.type !== 'show') {
-         renderConditional()
+      else {
+         const flask = kit.flask = this.outerFlask.spawn('view')
+         this.render(kit, parent, fragment, flask)
       }
 
       const showKits = this.showKits
       if (showKits)
          for (const showKit of showKits) {
             const pod = showKit.nodePod!
-            const nodeEntities = series.render(showKit, parent)
-            mountConditional(parent, pod, nodeEntities, fragment);
+
+            this.render(showKit, parent, fragment)
+
             pod.activate()
             if (showKit !== kit) hideDOMNodes(pod)
          }
-
-      function renderConditional() {
-         const nodeEntities = series.render(kit, parent)
-         mountConditional(parent, kit.nodePod!, nodeEntities, fragment);
-      }
    }
 
-   parentDynamicNode: DynamicNode
+
+
+   outerFlask: Flask
 
    setUp(
       parent: Element,
@@ -315,7 +320,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       //     const activeIndex = series.evaluateConditions();
 
       //     // (3)
-      //     pushDynamicNode(parentDynamicNode!)
+      //     pushDynamicNode(outerFlask!)
       //     series.activateConditional(activeIndex, parent)
       //     popDynamicNode()
 
@@ -327,8 +332,18 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       return this;
    }
 
-   private render(kit: ConditionalRenderKit, parent: Element) {
-      return kit.renderConditional(parent, kit.nodePod || (console.log('no kit pod :('), this.nodePod))
+   private render(kit: ConditionalRenderKit, parent: Element, fragment?: DocumentFragment, flask?: Flask) {
+      callWithContext({
+         context: this.context,
+         beforeCall: () => {
+            if (flask) setFlask(flask)
+            if (__DEV__) setTrace!(this.trace_DEV!)
+         },
+         callback: () => {
+            const nodeEntities = kit.renderConditional(parent, kit.nodePod || (console.warn('DEV RESEARCH: no kit pod :('), this.nodePod))
+            mountConditional(parent, kit.nodePod!, nodeEntities, fragment);
+         },
+      })
    }
 
    private deactivateConditional(index: number) {
@@ -342,17 +357,17 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       }
       else if (activationType === 'create') {
          // discard of flask
-         const dynamicNode = kit.dynamicNode!
-         kit.dynamicNode = undefined;
-         dynamicNode.discard()
+         const flask = kit.flask!
+         kit.flask = undefined;
+         flask.discard()
 
          // remove from 
          removeDOMNodes(pod)
          pod.length = 0;
       }
       else if (activationType === 'mount') {
-         const dynamicNode = kit.dynamicNode
-         dynamicNode?.deactivate()
+         const flask = kit.flask
+         flask?.deactivate()
          removeDOMNodes(pod);
       }
    }
@@ -370,20 +385,10 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          return;
       }
       pod.activate()
-      const series = this;
 
-      let dynamicNode = kit.dynamicNode
-      if (dynamicNode === undefined || dynamicNode === NULLISH_DYNAMIC_NODE) {
-         dynamicNode = kit.dynamicNode = this.parentDynamicNode.fork();
-         dynamicNode.activate(function renderConditionalUpdate() {
-            const nodeEntities = series.render(kit, parent)
-            mountConditional(parent, pod, nodeEntities);
-         })
-      }
-      else {
-         // reactivate preserved nodes
-         dynamicNode.reactivate()
-      }
+      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn('view'))
+      this.render(kit, parent, undefined, flask)
+      if (activationType === 'mount') flask.reactivate() // reactivate preserved watchers etc.
    }
 }
 

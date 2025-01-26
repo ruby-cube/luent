@@ -1,12 +1,12 @@
-import { createStack } from "../../../flask/context/AsyncContext";
-import { NodeContext } from "./Commons";
-import { AppContext } from "./provide";
+import { ContextualState } from "../../../flask/context/AsyncContext";
+import { NodeCommons } from "./Commons";
+import { AppCommons } from "./provide";
 
-export type Context = NodeContext | AppContext
+export type Commons = NodeCommons | AppCommons
 
 // manage commons stack
-// let currentContext: Context | undefined;
-// let previousContext: Context | undefined;
+// let currentContext: Commons | undefined;
+// let previousContext: Commons | undefined;
 
 // export function getCurrentContext() {
 //    return currentContext;
@@ -17,7 +17,7 @@ export type Context = NodeContext | AppContext
 // must be wrapped with its commons with push and pop for when they run asynchronously
 // However, it must NOT push and pop commons for its initial render.
 
-export function pushCommons(commons: Context | undefined) {
+export function pushCommons(commons: Commons | undefined) {
    if (!commons) throw new Error(`Provider is undefined`)
    // previousContext = currentContext;
    // currentContext = commons;
@@ -31,16 +31,14 @@ export function popCommons() {
 }
 
 export function getCommons() {
-   const commons = getActiveCommons()
+   const commons = getClosestCommons()
    if (!commons) throw new Error('No commons found')
    return commons;
 }
 
-const commonsStack = createStack<Context>('commons')
+export const [getClosestCommons, setCommons, commonsStack] = ContextualState<Commons>('commons')
 
-export function getActiveCommons() {
-   return commonsStack.getCurrent();
-}
+
 
 
 

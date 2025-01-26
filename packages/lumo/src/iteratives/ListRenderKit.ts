@@ -1,19 +1,21 @@
-import { isIon, isIonizedModel, ion, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, watch, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon, toValue, getWithoutTracking } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, watch, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon, toValue, getWithoutTracking, Ion } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
 import { mountNodeEntities } from "../node/mountNodeEntity";
-import { DynamicNode, getDynamicNode } from "../dynamic/DynamicNode";
+import { getViewFlask } from "../flask/ViewFlask";
 import { diff, InsertAndMoveKit } from "./diff";
-import { Context, getActiveCommons, getCommons, popCommons, pushCommons } from "../context/context-stack";
+import { Commons } from "../commons/commons-stack";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
-import { createCommons } from "../context/Commons";
+import { createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { getTrace } from "../watch/debug";
 import { NodePod } from "../node/NodePod";
 import { mountConditional, mountDOMNodes, removeDOMNodes } from "../conditional/ConditionalRenderSeries";
-import { getActiveFlask } from "@rue/flask";
+import { Flask, getActiveFlask, setFlask } from "@rue/flask";
+import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
+import { buildTrace_DEV, setTrace } from "../../../flask/debug";
 
 
 type Index = number
@@ -21,7 +23,7 @@ type Count = number
 
 type DynamicList<T = any> = Collection<T> | ReactiveGet<Collection<T>>
 
-const dynamicNodeMap: WeakMap<NodePod, DynamicNode> = new WeakMap()
+const flaskMap: WeakMap<NodePod, Flask> = new WeakMap()
 
 // let currentItem: any;
 let $currentIndex: AtomicIon<number> | undefined;
@@ -35,44 +37,50 @@ export function setCurrentIndex($index: AtomicIon<number> | undefined) {
    $currentIndex = $index;
 }
 
-function wrapWithContext(renderItem: RenderItem<any[]>, list: ListRenderKit) {
-   return (item: any, $index: AtomicIon<number>, parent: Element, nodePod: NodePod) => {
-      const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
-      list.transitions.set($index, transitionNodes)
-      // const isInitialLoad = list.context === getActiveCommons()
-      try {
-         // if (!isInitialLoad) {
-            pushList(list) //QUESTION: dunno if pushList needs to be in this conditional block
-            pushCommons(list.context)
-         // }
-         const nodeEntities = setUpNodeEntities(normalizeToArray(
-            createCommons(() => renderItem(item, $index), {
-               provide: { [REGISTER_TRANSITION_NODE]: registerTransitionNode }
-            })
-         ), parent, nodePod)
-         return nodeEntities;
-      }
-      finally {
-         // if (!isInitialLoad) {
-            popCommons()
-            popList()
-         // }
-      }
+function callWithCommons(renderItem: RenderItem<any[]>, list: ListRenderKit, item: any, $index: Ion<number>, parent: Element, nodePod: NodePod) {
+   const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() // QUESTION: Should this be outside of the render function??
+   list.transitions.set($index, transitionNodes)
+   try {
+      pushList(list)
+      const nodeEntities = setUpNodeEntities(normalizeToArray(
+         createCommons(() => renderItem(item, $index), {
+            provide: { [REGISTER_TRANSITION_NODE]: registerTransitionNode }
+         })
+      ), parent, nodePod)
+      return nodeEntities;
+   }
+   finally {
+      popList()
    }
 }
 
 export class ListRenderKit {
-   renderItem: (item: any, $index: AtomicIon<number>, parent: Element, nodePod: NodePod) => NodeKit[]
-   trace: unknown;
+   renderItem: (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => void
+   trace_DEV?: string;
 
    constructor(
       renderItem: RenderItem<any[]>, //QUESTION: Does this need the context object?
       public data: ListData,
       public getUID: ((item: unknown) => unknown) | undefined,
-      public context: Context
+      public commons: Commons
    ) {
-      this.renderItem = wrapWithContext(renderItem, this);
-      this.trace = getTrace()
+      const context = $_snap_context()
+      this.renderItem = (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => {
+         callWithContext({
+            context,
+            beforeCall: () => {
+               if (flask) setFlask(flask)
+               if (__DEV__) setTrace!(this.trace_DEV!)
+            },
+            callback: () => {
+               const nodeEntities = callWithCommons(renderItem, this, item, $index, parent, nodePod)
+               mountNodeEntities(nodeEntities, parent, fragment);
+            },
+         })
+      }
+
+      if (__DEV__) this.trace_DEV = buildTrace_DEV()
+      this.outerFlask = getViewFlask()
    }
 
    beforeUpdateTasks: Set<Function> = new Set()
@@ -101,7 +109,7 @@ export class ListRenderKit {
       return this._transitions = new Map();
    }
 
-   parentDynamicNode!: DynamicNode
+   outerFlask!: Flask
 
    setUp(
       parent: Element,
@@ -122,13 +130,12 @@ export class ListRenderKit {
       if (isDynamic) {
          // set up watcher for updates
          // const renderCycle = getCurrentRenderCycle();
-         const parentDynamicNode = this.parentDynamicNode = getDynamicNode()
          const _data = isIon(data) ? getWithoutTracking(data) : data // unwrap potentially nested ionized model
          const rawData = isIonizedModel(_data) ? toRaw(_data) as Collection<any> : undefined
          let clone = isIonizedModel(_data) ? shallowClone(rawData!) : undefined //TODO: need to handle cases when ionizedModel is nested in ion
          //TODO: figure out typing for Set, Map, Object vs Array
 
-         watch(data as any/* FIX: type error*/, ({newState, oldState}) => { // typecast as one of the options so that typescript won't complain
+         watch(data as any/* FIX: type error*/, ({ newState, oldState }) => { // typecast as one of the options so that typescript won't complain
             const _oldValue = clone || oldState;
             if (isIonizedModel(_data)) clone = shallowClone(rawData!) as any[]
             const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || newState, _oldValue, getUID)
@@ -139,10 +146,10 @@ export class ListRenderKit {
             this.castBeforeUpdate();
             this.removeItems(indicesToRemove!);
             try {
-               this.insertAndMoveItems(insertAndMoveKit!, parent, parentDynamicNode);
+               this.insertAndMoveItems(insertAndMoveKit!, parent);
             }
             catch (err) {
-               console.error(err, this.trace)
+               console.error(err, this.trace_DEV)
             }
             console.log('updating list', newState.length, _oldValue.length)
          }, { phase: Phase.RENDER })
@@ -173,16 +180,12 @@ export class ListRenderKit {
          const nodePod = isDynamic ? dynamicNodePod.appendNodePod() : this.outerNodePod;
 
          if (isDynamic) {
-            const dynamicNode = getDynamicNode().fork()
-            dynamicNode.activate(function mountDynamicItem() {
-               const nodeEntities = listKit.renderItem(item, $index, parent, nodePod)
-               mountNodeEntities(nodeEntities, parent, fragment);
-            })
-            dynamicNodeMap.set(nodePod, dynamicNode)
+            const flask = this.outerFlask.spawn('view')
+            listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
+            flaskMap.set(nodePod, flask)
          }
          else {
-            const nodeEntities = this.renderItem(item, $index, parent, nodePod)
-            mountNodeEntities(nodeEntities, parent, fragment);
+            listKit.renderItem(item, $index, parent, nodePod, fragment)
          }
       }
    }
@@ -191,8 +194,8 @@ export class ListRenderKit {
       // remove from DOM
       for (const index of indicesToRemove) {
          const nodePod = this.dynamicNodePod![index] as NodePod;
-         const dynamicNode = dynamicNodeMap.get(nodePod)
-         dynamicNode?.discard()
+         const flask = flaskMap.get(nodePod)
+         flask?.discard()
          removeDOMNodes(nodePod)
       }
       //TODO: how do I handle items that have been moved to another port?
@@ -201,29 +204,28 @@ export class ListRenderKit {
    private insertAndMoveItems(
       insertAndMoveKit: InsertAndMoveKit,
       parent: Element,
-      parentDynamicNode: DynamicNode
    ) {
       const { isNewItem, hasMoved, newUArray, oldUArray, isRemoved } = insertAndMoveKit;
       const dynamicNodePod = this.dynamicNodePod!
       if (dynamicNodePod.length !== oldUArray.length)
          throw new Error("dynamicPod and data length are mismatched")
-      
+
       const indicesAndNodePods: [number, NodePod[]][] = []
       const indicesAndFragments: [number, DocumentFragment][] = []
       let fragment = new DocumentFragment();
-      
+
       const newIndices: AtomicIon<number>[] = [];
       const toFromIndices: [number, number][] = []
-      
+
       for (let i = 0; i < newUArray.length; i++) {
          const uItem = newUArray[i];
          const _isNewItem = isNewItem(uItem);
          const itemHasMoved = hasMoved(uItem);
          const oldIndex = oldUArray.indexOf(uItem)
          const nodePod = _isNewItem ? new NodePod()
-         : itemHasMoved ? (dynamicNodePod[oldIndex] as unknown as NodePod) // dynamicNodePod[index]
-         : null;
-         
+            : itemHasMoved ? (dynamicNodePod[oldIndex] as unknown as NodePod) // dynamicNodePod[index]
+               : null;
+
          if (!_isNewItem) {
             // update $index.state
             const $index = this.indices[oldIndex];
@@ -251,17 +253,12 @@ export class ListRenderKit {
             setCurrentIndex($index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
-            const dynamicNode = parentDynamicNode.fork()
-            const renderItem = this.renderItem
+            const flask = this.outerFlask.spawn('view')
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
-            dynamicNode.activate(function renderNewListItem() {
-               const nodeEntities = renderItem(toValue(list)[i], $index, parent, nodePod);
-               // mountConditional(parent, nodePod, nodeEntities, fragment)
-               mountNodeEntities(nodeEntities, parent, fragment)
-            })
+            this.renderItem(toValue(list)[i], $index, parent, nodePod, fragment, flask)
             setCurrentIndex(undefined)
-            dynamicNodeMap.set(nodePod, dynamicNode)
+            flaskMap.set(nodePod, flask)
          }
          else if (hasMoved(uItem)) {
             // move node to fragment (DOM will auto-remove node from DOM)

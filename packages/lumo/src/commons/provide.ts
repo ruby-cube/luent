@@ -1,6 +1,6 @@
-import { Context, getActiveCommons } from "./context-stack";
-import { ContextEntries, NodeContext } from "./Commons";
-import { contextTypeMap, TypeConfig } from "./ContextKey";
+import { Commons, getClosestCommons } from "./commons-stack";
+import { ContextEntries, NodeCommons } from "./Commons";
+import { contextTypeMap, TypeConfig } from "./CommonsKey";
 import { isIon, isIonizedModel, toIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { isNamedDerivation, unnestValue } from "../component/fromTag";
@@ -8,11 +8,11 @@ import { ContextKeyMap } from "@rue/lumo";
 import { isFunction } from "@rue/utils";
 
 
-export interface AppContext {
+export interface AppCommons {
    entries?: Map<symbol | string, any>;
-   parent?: AppContext,
-   app: AppContext,
-   global?: AppContext,
+   parent?: AppCommons,
+   app: AppCommons,
+   global?: AppCommons,
 }
 
 
@@ -26,12 +26,12 @@ export type _ContextInputType<C> =
    : 'invalid typeConfig'
 
 
-export function fromCommons<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
-   let _context = context || getActiveCommons();
+export function fromCommons<K extends string | symbol>(key: K, context?: NodeCommons | AppCommons): ValidatedContextEntry<K> {
+   let _context = context || getClosestCommons();
    if (!_context) throw new Error(``)
 
    // climb context tree
-   let parent: Context | undefined = _context;
+   let parent: Commons | undefined = _context;
    const typeConfig = contextTypeMap.get(key)
    while (parent !== undefined) {
       const entries = parent.entries
@@ -71,12 +71,12 @@ function get(key: string | symbol, entries: Map<any, any> | AnyObject | undefine
 
 
 
-export function createAppContext(entries: AnyObject | undefined, globalContext: AppContext | undefined) {
+export function createAppContext(entries: AnyObject | undefined, globalContext: AppCommons | undefined) {
    const _entries = entries ? toMap(entries) : new Map()
    const appContext = {
       entries: _entries,
       parent: globalContext,
-      app: undefined as unknown as AppContext,
+      app: undefined as unknown as AppCommons,
       global: globalContext,
    }
    appContext.app = appContext
@@ -92,7 +92,7 @@ function toMap(entries: AnyObject) {
 }
 
 export function provideAppwide<K extends string | symbol>(key: K, value: ContextType<K>) {
-   let context = getActiveCommons();
+   let context = getClosestCommons();
    if (!context)
       throw new Error("No context found :(")
    const appEntries = context.app.entries || (context.app.entries = new Map());
@@ -107,8 +107,8 @@ export function provideAppwide<K extends string | symbol>(key: K, value: Context
    return value;
 }
 
-export function fromApp<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
-   let _context = context || getActiveCommons();
+export function fromApp<K extends string | symbol>(key: K, context?: NodeCommons | AppCommons): ValidatedContextEntry<K> {
+   let _context = context || getClosestCommons();
    if (!_context) throw new Error(``)
    const appContext = _context.app;
    if (!appContext) throw new Error("No app context found :( This should never happen")
@@ -124,13 +124,13 @@ export function fromApp<K extends string | symbol>(key: K, context?: NodeContext
 
 export function createGlobalContext<E extends ContextEntries<E>>(entries?: E) {
    const _entries = entries ? toMap(entries) : new Map()
-   const context = { entries: _entries, app: undefined, global: undefined } as unknown as AppContext
+   const context = { entries: _entries, app: undefined, global: undefined } as unknown as AppCommons
    context.global = context;
    return context
 }
 
 export function provideGlobal<K extends string | symbol>(key: K, value: ContextType<K>) {
-   let context = getActiveCommons();
+   let context = getClosestCommons();
    if (!context)
       throw new Error('')
    if (!context.global)
@@ -148,8 +148,8 @@ export function provideGlobal<K extends string | symbol>(key: K, value: ContextT
    return value;
 }
 
-export function fromGlobal<K extends string | symbol>(key: K, context?: NodeContext | AppContext): ValidatedContextEntry<K> {
-   let _context = context || getActiveCommons();
+export function fromGlobal<K extends string | symbol>(key: K, context?: NodeCommons | AppCommons): ValidatedContextEntry<K> {
+   let _context = context || getClosestCommons();
    if (!_context)
       throw new Error('')
    const globalEntries = _context?.global?.entries

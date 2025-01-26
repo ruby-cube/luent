@@ -1,6 +1,6 @@
 import { component, fromTag, v } from "@rue/lumo"
 import { Ion, ion, watch } from "@rue/quarky"
-import { DynamicNode } from "../../../packages/lumo/src/dynamic/DynamicNode";
+import { DynamicNode } from "../../../packages/lumo/src/flask/ViewFlask";
 
 /**
  * [] Should asynchronous functions be bound to their contexts? ... It's a lot of work... leaning towards no..

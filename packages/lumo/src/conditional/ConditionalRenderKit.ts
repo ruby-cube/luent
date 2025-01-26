@@ -3,8 +3,8 @@ import { ConditionalKit } from "./ConditionalKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { TransitionNode } from "../transition/TransitionNode";
 import { NodeKit } from "../node/setUpNodeEntities";
-import { DynamicNode } from "../dynamic/DynamicNode";
 import { NodePod } from "../node/NodePod";
+import { Flask } from "@rue/flask";
 
 export type RenderConditional = (parent: Element, nodePod: NodePod) => NodeKit[]
 
@@ -13,7 +13,7 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
     nodePodIndex?: number
 
     nodePod: NodePod | undefined;
-    dynamicNode: DynamicNode | undefined;
+    flask: Flask | undefined;
 
     constructor(
         statementType: 'if' | 'elseIf' | 'else',
