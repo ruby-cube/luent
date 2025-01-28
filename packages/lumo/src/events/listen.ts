@@ -1,7 +1,7 @@
-import { $listen, Listener, CallbackRemover, defineCustomCleanupScheduler, ListenerOptions, PendingStop, ScheduleStop } from '@rue/flask';
+import { $listen, ResumableListener, CallbackRemover, defineCustomCleanupScheduler, SustainedListenerOptions, ScheduleStop } from '@rue/flask';
 
 
-type EventListenerOptions = Omit<AddEventListenerOptions, "signal"> & Omit<ListenerOptions, 'until'> & CustomCleanupSchedulerListenerOptions
+type EventListenerOptions = Omit<AddEventListenerOptions, "signal"> & Omit<SustainedListenerOptions, 'until'> & CustomCleanupSchedulerListenerOptions
 
 export type CustomCleanupSchedulerListenerOptions = {
     until?: [EventTarget, keyof DocumentEventMap | keyof HTMLElementEventMap | keyof WindowEventMap] | ScheduleStop  | AbortSignal
@@ -26,7 +26,7 @@ export function listen<
     options?: EventListenerOptions
 ){
 
-    return $listen(handler, <ListenerOptions>options || {}, {
+    return $listen(handler, <SustainedListenerOptions>options || {}, {
         enroll(cb) {
             element.addEventListener(event, cb, options)
         },

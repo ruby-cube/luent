@@ -1,4 +1,4 @@
-import { $listen, ListenerOptions } from "@rue/flask";
+import { $listen, SustainedListenerOptions } from "@rue/flask";
 import type { ListRenderKit } from "./ListRenderKit";
 
 const listSetupStack: ListRenderKit[] = [];
@@ -21,7 +21,7 @@ export function isSettingUpList() {
 //     return activeList && activeList.isUpdating;
 // }
 
-export function onListUpdated(task: (toFromIndices: [number, number][]) => void, options?: ListenerOptions) {
+export function onListUpdated(task: (toFromIndices: [number, number][]) => void, options?: SustainedListenerOptions) {
    const list = listSetupStack.at(-1);
    if (!list) throw new Error(`onListUpdated hook must be called during list setup`)
    return $listen(task, options ?? {}, {
@@ -34,7 +34,7 @@ export function onListUpdated(task: (toFromIndices: [number, number][]) => void,
    })
 }
 
-export function onBeforeListUpdate(task: () => void, options?: ListenerOptions) {
+export function onBeforeListUpdate(task: () => void, options?: SustainedListenerOptions) {
    const list = listSetupStack.at(-1);
    if (!list) throw new Error(`onListUpdated hook must be called during list setup`)
    return $listen(task, options ?? {}, {

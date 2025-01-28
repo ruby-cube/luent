@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { asWatchSubject, WatchSubject } from "./WatchSubject";
-import { $listen, Listener, getActiveFlask, ListenerOptions } from "@rue/flask";
+import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { IonicDerivation } from "../derivations/IonicDerivation";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
@@ -31,13 +31,13 @@ export type WatchOptions = {
    stateChange?: boolean;
    // isEqual?: (oldValue?: any, newValue?: any) => boolean;
    // retrack?: boolean;
-} & RenderCycleOptions & ListenerOptions & WatchDebugOptions
+} & RenderCycleOptions & SustainedListenerOptions & WatchDebugOptions
 
 export type EffectOptions = {
    retrack?: true;
    only?: (boolean | AnyObject | AnyIon)[];
    also?: AnyObject[]
-} & RenderCycleOptions & ListenerOptions & WatchDebugOptions
+} & RenderCycleOptions & SustainedListenerOptions & WatchDebugOptions
 
 
 
@@ -178,9 +178,9 @@ function InertWatcher() {
       resume: noOp,
    }
 }
-// export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? OnChangeHandler<R> : never, options?: WatchOptions): Listener
-// export function watch<T extends IonizedModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): Listener
-export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: WatchOptions): Listener {
+// export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? OnChangeHandler<R> : never, options?: WatchOptions): ResumableListener
+// export function watch<T extends IonizedModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): ResumableListener
+export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: WatchOptions): ResumableListener {
    const isMultiSubject = isMultiWatchSubject(subject);
    if (!isMultiSubject && !(subject instanceof Function) && !isReactive(subject)) {
       return InertWatcher()
@@ -385,21 +385,19 @@ function setUpWatcher(
    effect: Effect,
    $activeEffect: Neutron<ThisEffect>,
    phase: Phase,
-   options: ListenerOptions & RenderCycleOptions,
+   options: SustainedListenerOptions & RenderCycleOptions,
    ionicDerivations?: IonicDerivation[]
 ) {
    let wrappedEffect: () => void;
    const forNextCycle = options?.cycle === 'next';
    const { pause, resume, stop } = $listen(effect, options || {}, {
       enroll(_effect) {
-         if (options?.__devName === 'setUpStyles') console.log('ADD: style watcher')
          wrappedEffect = _effect;
          for (const subject of watchSubjects) {
             subject.watch(_effect, phase, forNextCycle)
          }
       },
       remove(_effect) {
-         if (options?.__devName === 'setUpStyles') console.trace('REMOVE: style watcher')
          runCleanups($activeEffect())
          for (const subject of watchSubjects) {
             subject.unwatch(_effect, phase)

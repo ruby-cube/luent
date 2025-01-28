@@ -7,29 +7,29 @@ import { Flask, getActiveFlask, setFlask, ThisFlask } from "./Flask";
 import { setTrace } from "./debug";
 import { noop } from "@rue/utils";
 
-export type Listener = {
+export type ResumableListener = {
    stop(): boolean;
    pause(): boolean;
    resume(): boolean;
 }
 
-export type Pending = {
+export type Listener = {
    stop(): boolean;
 }
 
 
-export type ListenerOptions = {
+export type SustainedListenerOptions = {
    once?: boolean;
    until?: ScheduleStop | AbortSignal | null
-} & AttendantOptions
+} & ListenerOptions
 
-export type ScheduleStop = (stop: CallbackRemover) => Pending;
+export type ScheduleStop = (stop: CallbackRemover) => Listener;
 
 export type SchedulerOptions = {
    cancel?: ScheduleStop | AbortSignal | null,
-} & AttendantOptions
+} & ListenerOptions
 
-type AttendantOptions = {
+export type ListenerOptions = {
    within?: ThisFlask | null //| 'outlive',
    preserve?: true
 }
@@ -47,7 +47,7 @@ type ListenerConfig<E extends EnrollFunction = EnrollFunction> = {
    callback: Callback,
    enroll: E,
    remove: RemoveFunction<E>,
-   options: ListenerOptions | undefined
+   options: SustainedListenerOptions | undefined
    trace_DEV?: string,
 }
 
@@ -60,9 +60,9 @@ export function toListenerOptions(options: SchedulerOptions | undefined) {
    }
 }
 
-export function makeAttendant<E extends (wrappedCB: Callback) => void | Callback>(
+export function makeListener<E extends (wrappedCB: Callback) => void | Callback>(
    config: ListenerConfig<E>
-): Listener {
+): ResumableListener {
    const { enroll, remove, callback, options, trace_DEV } = config;
    if (!callback) {
       if (__DEV__) console.warn("No callback was passed into makeListener")
@@ -153,14 +153,14 @@ export function makeAttendant<E extends (wrappedCB: Callback) => void | Callback
 
    returnVal = enroll(_callback);
 
-   return activeListener as Listener;
+   return activeListener as ResumableListener;
 }
 
 const noopable = {
    stop: noop
 }
 
-function bindListenerToFlask(listener: Listener, flask: Flask, preserve: boolean, until: any | null) {
+function bindListenerToFlask(listener: ResumableListener, flask: Flask, preserve: boolean, until: any | null) {
    const { stop: cancelStop } = until === null ? noopable : flask.onDiscard(listener.stop);
    const { stop: stopPausing } = preserve ? noopable : flask.onUnmount(listener.pause);
    const { stop: stopResuming } = preserve ? noopable : flask.onRemount(listener.resume);

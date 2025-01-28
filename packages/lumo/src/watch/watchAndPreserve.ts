@@ -1,5 +1,5 @@
 import { isIon, watchEffect as _watchIonicEffect, afterRender, ReactiveGet, shallowClone, watch as _watch, WatchOptions, Ionized, OnChangeHandler, Phase, __devCheckIfTracked } from "../../../quarky/src";
-import { Listener, ListenerOptions } from "@rue/flask";
+import { ResumableListener, SustainedListenerOptions } from "@rue/flask";
 import { CustomCleanupSchedulerListenerOptions } from "../events/listen";
 import { DynamicNode, getActiveViewFlask } from "../flask/ViewFlask";
 import { AnyObject } from "@rue/types";
@@ -8,7 +8,7 @@ import { getTrace } from "./debug";
 type WatchForRenderOptions = {
     eager?: true;
     retrack?: boolean;
-} & ListenerOptions
+} & SustainedListenerOptions
 
 
 type LumoWatchOptions = CustomCleanupSchedulerListenerOptions & Omit<WatchOptions, 'until'>
@@ -45,7 +45,7 @@ function _initializeRender(effect: () => void) {
 //     return asPreservedWatcher(_watchIonicEffect(effect), dynamicNode);
 // }
 
-// function asPreservedWatcher({ pause, resume, stop }: Listener, dynamicNode: DynamicNode) {
+// function asPreservedWatcher({ pause, resume, stop }: ResumableListener, dynamicNode: DynamicNode) {
 //     const deactivationHook = dynamicNode.onUnmount(pause)
 //     const activationHook = dynamicNode.onRemount(resume)
 
@@ -64,13 +64,13 @@ function _initializeRender(effect: () => void) {
 
 // type MultiWatchSubjectValues<T> = {[K in keyof T]: T[K] extends (...args: any[])=>infer R ? R : T[K]}
 
-// export function watch<T extends () => any>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): Listener
-// export function watch<T extends Ionized<AnyObject>>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): Listener
-// export function watch<T extends any[]>(target: [...T], effect: OnChangeHandler<T>, options?: LumoWatchOptions): Listener
-// export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): Listener
-// // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): Listener
-// // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): Listener
-// export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): Listener {
+// export function watch<T extends () => any>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ResumableListener
+// export function watch<T extends Ionized<AnyObject>>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ResumableListener
+// export function watch<T extends any[]>(target: [...T], effect: OnChangeHandler<T>, options?: LumoWatchOptions): ResumableListener
+// export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ResumableListener
+// // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ResumableListener
+// // export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ResumableListener
+// export function watch<T>(target: T, effect: OnChangeHandler<T>, options?: LumoWatchOptions): ResumableListener {
 //    // console.log(getTrace()) 
 //    const dynamicNode = getActiveViewFlask() //TODO: dynamic node or flask?
 //     if (!dynamicNode)

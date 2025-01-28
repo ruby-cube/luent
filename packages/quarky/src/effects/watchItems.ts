@@ -1,4 +1,4 @@
-import { Listener } from "@rue/flask";
+import { ResumableListener } from "@rue/flask";
 import { ReactiveGet } from "../derivations/DerivedIon";
 import { ionize, IonizedModel, isIonizedModel, toRaw } from "../ionize/ionize";
 import { OnChangeHandler, watch, WatchOptions } from "./watch";
@@ -6,7 +6,7 @@ import { isIntegerKey } from "../ionize/IonicArray";
 import { AnyObject } from "@rue/types";
 import { shallowClone } from "../ionize/TimeTraveler";
 
-type WatchersMap = Map<AnyObject | ReactiveGet, Listener>
+type WatchersMap = Map<AnyObject | ReactiveGet, ResumableListener>
 
 
 export type KeyPath = PropertyKey[]
@@ -25,12 +25,12 @@ export function watchItems<T extends ReactiveGet>(
     reactiveList: IonizedModel<T[]>,
     effect: T extends () => infer R ? OnChangeHandler<R> : never,
     options?: WatchOptions
-): Listener
+): ResumableListener
 export function watchItems<T extends IonizedModel>(
     reactiveList: IonizedModel<T[]>,
     effect: MutationEffect<T>,
     options?: WatchOptions
-): Listener
+): ResumableListener
 export function watchItems<T extends ReactiveGet | IonizedModel>(
     reactiveList: IonizedModel<T[]>,
     effect: T extends () => infer R ? OnChangeHandler<R> : MutationEffect<T>,
@@ -140,12 +140,12 @@ export function watchCollectionValues<T extends ReactiveGet>(
     reactiveCollection: IonizedModel<Map<any, T>> | IonizedModel<Set<T>>,
     effect: T extends () => infer R ? OnChangeHandler<R> : never,
     options?: WatchOptions
-): Listener
+): ResumableListener
 export function watchCollectionValues<T extends IonizedModel>(
     reactiveCollection: IonizedModel<Map<any, T>> | IonizedModel<Set<T>>,
     effect: MutationEffect<T>,
     options?: WatchOptions
-): Listener
+): ResumableListener
 export function watchCollectionValues<T extends ReactiveGet | IonizedModel>(
     reactiveCollection: IonizedModel<Map<any, T>> | IonizedModel<Set<T>>,
     effect: T extends () => infer R ? OnChangeHandler<R> : MutationEffect<T>,
@@ -209,12 +209,12 @@ export function watchMapKeys<T extends ReactiveGet>(
     reactiveMap: IonizedModel<Map<T, any>>,
     effect: T extends () => infer R ? OnChangeHandler<R> : never,
     options?: WatchOptions
-): Listener
+): ResumableListener
 export function watchMapKeys<T extends IonizedModel>(
     reactiveMap: IonizedModel<Map<T, any>>,
     effect: MutationEffect<T>,
     options?: WatchOptions
-): Listener
+): ResumableListener
 export function watchMapKeys<T extends ReactiveGet | IonizedModel>(
     reactiveMap: IonizedModel<Map<T, any>>,
     effect: T extends () => infer R ? OnChangeHandler<R> : MutationEffect<T>,

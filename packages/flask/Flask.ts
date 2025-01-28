@@ -1,7 +1,6 @@
 import { SetMap } from "@rue/utils";
 import { ContextualState } from "./context/AsyncContext";
-import { PendingOp, SchedulerOptions } from "./PendingOp";
-import { Listener, ListenerOptions } from "./Attendant";
+import { ResumableListener, SustainedListenerOptions } from "./Listener";
 import { $listen, $schedule } from "./flaskableListeners";
 
 export const [getActiveFlask, setFlask, flaskStack] = ContextualState<Flask>('flask')
@@ -131,17 +130,17 @@ export class Flask {
       return on(LifecycleHook.MOUNT, this, task)
    }
 
-   onDiscard!: (task: Task) => Listener
+   onDiscard!: (task: Task) => ResumableListener
 
    discard!: () => void
 
    unmount!: () => void
 
-   onUnmount!: (task: Task, options?: ListenerOptions) => Listener
+   onUnmount!: (task: Task, options?: SustainedListenerOptions) => ResumableListener
 
    remount!: () => void
 
-   onRemount!: (task: Task, options?: ListenerOptions) => Listener
+   onRemount!: (task: Task, options?: SustainedListenerOptions) => ResumableListener
 
    containCall(fn: () => any) {
       try {

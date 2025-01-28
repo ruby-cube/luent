@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach, it } from "vitest";
-import { makeListener } from "../Attendant";
+import { makeListener } from "../Listener";
 import { onFlaskDiscard, getActiveFlask, EffectFlask } from "../EffectFlask";
 
 vi.mock('../EffectFlask', () => ({
@@ -8,7 +8,7 @@ vi.mock('../EffectFlask', () => ({
     getActiveFlask: vi.fn()
 }));
 
-describe("Listener", () => {
+describe("ResumableListener", () => {
     let enroll: ReturnType<typeof vi.fn>;
     let remove: ReturnType<typeof vi.fn>;
     let callback: ReturnType<typeof vi.fn>;
@@ -33,7 +33,7 @@ describe("Listener", () => {
     });
 
 
-    it('should enroll the callback and return an Listener', () => {
+    it('should enroll the callback and return an ResumableListener', () => {
         const listener = makeListener(config);
 
         expect(enroll).toHaveBeenCalledOnce();

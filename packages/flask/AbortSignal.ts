@@ -1,10 +1,10 @@
 import { isFunction } from "@rue/utils";
-import { Listener, Pending } from "./Attendant";
+import { ResumableListener, Listener } from "./Listener";
 
 
 
 export type AbortSignal = () => void
-export type RegisterAbortSignal = (cleanup: () => void) => Pending
+export type RegisterAbortSignal = (cleanup: () => void) => Listener
 
 export function AbortSignal(): () => void {
     let cleanups: Set<() => void> | null = new Set()

@@ -1,4 +1,4 @@
-import { Listener } from "@rue/flask"
+import { ResumableListener } from "@rue/flask"
 import { AnyObject } from "@rue/types"
 import { AnyIon, asMetaIon, AtomicIon, ionize, isAtomicIon, Phase, watch } from "@rue/quarky"
 import { $thisEffect } from "../../../quarky/src/effects/ThisEffect";

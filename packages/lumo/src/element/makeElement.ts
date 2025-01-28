@@ -2,7 +2,7 @@ import { DOMNode, Slot } from "../component/InternalComponent";
 import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon, watch } from "@rue/quarky";
 import { isFunction, isObject, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
-import { $listen, Listener, ListenerOptions, PendingOp } from "@rue/flask";
+import { $listen, ResumableListener, SustainedListenerOptions} from "@rue/flask";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
@@ -152,7 +152,7 @@ function toString(value: any) {
 }
 
 //TODO: figure out how to incorporate options into inline events
-function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, options?: ListenerOptions & AddEventListenerOptions) {
+function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, options?: SustainedListenerOptions & AddEventListenerOptions) {
    for (const key in events) {
       const handlers = normalizeToArray(events[key]);
       for (const handler of handlers) {

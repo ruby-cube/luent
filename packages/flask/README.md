@@ -964,7 +964,7 @@ Sets up a listener. Depending on options and config, this could behave as a one-
 const activeListener = $listen(handler, options, config)
         |                        |         |        |
  PendingOp | Listener   Handler      |   ListenerConfig
-                                     ListenerOptions
+                                     SustainedListenerOptions
 ```
 
 #### Type Definitions
@@ -975,7 +975,7 @@ type ListenerConfig = {
     onceAsDefault?: true | undefined
 }
 
-type ListenerOptions = {
+type SustainedListenerOptions = {
     once?: true;
     sustain?: true;
     cancel?: ScheduleCancel;
@@ -995,7 +995,7 @@ Sets up a one-time listener.
 const pendingOp = $schedule(handler, options, config)
            |                  |         |        |
       PendingOp            Handler      |   SchedulerConfig
-                                  ListenerOptions
+                                  SustainedListenerOptions
 ```
 
 #### Type Definitions
@@ -1007,7 +1007,7 @@ type SchedulerConfig = {
 
 type PendingOp = Promise<ReturnType<Handler>> & { cancel: () => void };
 
-type ListenerOptions = {
+type SustainedListenerOptions = {
     cancel?: ScheduleCancel;
     $lifetime?: true;
     outlive?: true;
@@ -1023,7 +1023,7 @@ Sets up a sustained listener.
 const activeListener = $subscribe(handler, options, config)
            |                        |         |        |
         Listener            Handler     |   SubscribeConfig
-                                       ListenerOptions
+                                       SustainedListenerOptions
 ```
 
 #### Type Definitions
@@ -1035,7 +1035,7 @@ type SubscribeConfig = {
 
 type Listener = { stop: () => void };
 
-type ListenerOptions = {
+type SustainedListenerOptions = {
     until?: ScheduleStop;
     $lifetime?: true;
     $tilStop?: true;
@@ -1087,7 +1087,7 @@ type Watch = typeof watch;
 
 export function onChange<
 CB extends Parameters<Watch>[1], 
-OPT extends ListenerOptions & WatchOptions,
+OPT extends SustainedListenerOptions & WatchOptions,
 >(target: Parameters<Watch>[0], handler: CB, options?: OPT) {
 
     return $listen(handler, options, {
@@ -1106,7 +1106,7 @@ OPT extends ListenerOptions & WatchOptions,
 
 export function beforeRepaint<
 CB extends Callback,
-OPT extends ListenerOptions
+OPT extends SustainedListenerOptions
 >(handler: CB, options?: OPT) {
 
     return $schedule(handler, options, {

@@ -1,6 +1,4 @@
-import { AnyObject } from "@rue/types";
-import { Listener, EnrollFunction, ListenerOptions, RemoveFunction, ScheduleStop, toListenerOptions, SchedulerOptions, makeAttendant } from "./Attendant";
-import { makePendingStop, PendingStop } from "./PendingStop";
+import { ResumableListener, EnrollFunction, SustainedListenerOptions, RemoveFunction, ScheduleStop, toListenerOptions, SchedulerOptions, makeListener, Listener } from "./Listener";
 import { buildTrace_DEV } from "./debug";
 
 export type CallbackRemover = {
@@ -12,7 +10,7 @@ export type Callback = (...arg: any[]) => any;
 export type Callbacks = Set<Callback | CallbackRemover>;
 
 
-let _useCleanupScheduler: undefined | ((...args: any[]) => (cleanup: CallbackRemover) => Listener)
+let _useCleanupScheduler: undefined | ((...args: any[]) => (cleanup: CallbackRemover) => ResumableListener)
 
 export function useCleanupScheduler(...args: any[]) {
    if (_useCleanupScheduler) {
@@ -21,7 +19,7 @@ export function useCleanupScheduler(...args: any[]) {
 }
 
 // allows custom clean up option like { until: [document, 'click'] }
-export function defineCustomCleanupScheduler(scheduler: (...args: any[]) => (cleanup: CallbackRemover) => Listener) {
+export function defineCustomCleanupScheduler(scheduler: (...args: any[]) => (cleanup: CallbackRemover) => ResumableListener) {
    if (__DEV__ && _useCleanupScheduler) console.warn(`overriding custom cleanup scheduler`)
    _useCleanupScheduler = scheduler;
 }
@@ -31,50 +29,31 @@ export function $listen<
    E extends EnrollFunction
 >(
    callback: Callback,
-   options: ListenerOptions,
+   options: SustainedListenerOptions,
    config: {
       enroll: E,
       remove: RemoveFunction<E>
    }
 ) {
    const { enroll, remove } = config;
-   return makeAttendant({
+   return makeListener({
       callback,
       enroll,
       remove,
       options,
       trace_DEV: __DEV__ ? buildTrace_DEV() : undefined
    })
-   // const { enroll, remove } = config;
-
-   // if (isRemover(callback)) {
-   //    return makePendingStop({
-   //       callback,
-   //       enroll,
-   //       remove
-   //    }) as CB extends CallbackRemover ? PendingStop : Listener
-   // }
-
-   // return makeListener({
-   //    callback,
-   //    enroll,
-   //    remove,
-   //    options,
-   //    trace_DEV: __DEV__ ? buildTrace_DEV() : undefined
-   // }) as CB extends CallbackRemover ? PendingStop : Listener
 }
 
-
-// export type ScheduledOp<CB extends Callback> = CB extends { isRemover: true } ? PendingStop : Listener
 
 export function $schedule<
    E extends EnrollFunction
 >(callback: Callback, options: SchedulerOptions | undefined, config: {
    enroll: EnrollFunction,
    remove: RemoveFunction<E>
-}) {
+}): Pending {
    const { enroll, remove } = config;
-   return makeAttendant({
+   return makeListener({
       callback,
       enroll,
       remove,
@@ -83,31 +62,4 @@ export function $schedule<
    })
 }
 
-
-
-// function makeAttendant(
-//    callback: Callback,
-//    options: ListenerOptions,
-//    config: {
-//       enroll: EnrollFunction,
-//       remove: RemoveFunction<any>
-//    }
-// ) {
-//    const { enroll, remove } = config;
-
-//    // if (isRemover(callback)) {
-//    //    return makePendingStop({
-//    //       callback,
-//    //       enroll,
-//    //       remove
-//    //    })
-//    // }
-
-//    return makeListener({
-//       callback,
-//       enroll,
-//       remove,
-//       options,
-//       trace_DEV: __DEV__ ? buildTrace_DEV() : undefined
-//    })
-// }
+type Pending = Listener
