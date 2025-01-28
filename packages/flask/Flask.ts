@@ -1,7 +1,7 @@
 import { SetMap } from "@rue/utils";
 import { ContextualState } from "./context/AsyncContext";
 import { PendingOp, SchedulerOptions } from "./PendingOp";
-import { Listener, ListenerOptions } from "./Listener";
+import { Listener, ListenerOptions } from "./Attendant";
 import { $listen, $schedule } from "./flaskableListeners";
 
 export const [getActiveFlask, setFlask, flaskStack] = ContextualState<Flask>('flask')
@@ -64,15 +64,15 @@ export class Flask {
 
       // Bind to this, to allow easy passing into hooks
       Object.defineProperty(this, 'onUnmount', {
-         value: (task: Task, options?: ListenerOptions) => on(LifecycleHook.UNMOUNT, this, task, options),
+         value: (task: Task) => on(LifecycleHook.UNMOUNT, this, task),
          writable: false
       })
       Object.defineProperty(this, 'onRemount', {
-         value: (task: Task, options?: ListenerOptions) => on(LifecycleHook.REMOUNT, this, task, options),
+         value: (task: Task) => on(LifecycleHook.REMOUNT, this, task),
          writable: false
       })
       Object.defineProperty(this, 'onDiscard', {
-         value: (task: Task, options?: SchedulerOptions) => at(LifecycleHook.DISCARD, this, task, options),
+         value: (task: Task) => on(LifecycleHook.DISCARD, this, task),
          writable: false
       })
       Object.defineProperty(this, 'unmount', {
@@ -84,19 +84,24 @@ export class Flask {
          writable: false
       })
       Object.defineProperty(this, 'discard', {
-         value: () => this.emit(LifecycleHook.DISCARD),
+         value: () => {
+            this.emit(LifecycleHook.DISCARD)
+            this.tasks.delete(LifecycleHook.MOUNT);
+            this.tasks.delete(LifecycleHook.REMOUNT);
+            this.tasks.delete(LifecycleHook.UNMOUNT);
+            this.tasks.delete(LifecycleHook.DISCARD);
+         },
          writable: false
       })
 
       if (outer) {
-         outer.onRemount(this.remount, {
-            until: this.onDiscard,
-         })
-         outer.onUnmount(this.unmount, {
-            until: this.onDiscard,
-         })
-         outer.onDiscard(this.discard, {
-            cancel: this.onDiscard
+         const remountListener = outer.onRemount(this.remount)
+         const unmountListener = outer.onUnmount(this.unmount)
+         const discardListener = outer.onDiscard(this.discard)
+         this.onDiscard(()=>{
+            remountListener.stop()
+            unmountListener.stop()
+            discardListener.stop()
          })
       }
    }
@@ -118,13 +123,15 @@ export class Flask {
    // Because mount doesn't have a reason to be passed into other hooks as a callback, no need to bind to this.
    mount() {
       this.emit(LifecycleHook.MOUNT)
+      this.tasks.delete(LifecycleHook.MOUNT);
    }
 
-   onMount(task: Task, options?: SchedulerOptions) {
-      at(LifecycleHook.MOUNT, this, task, options)
+   onMount(task: Task) {
+      if (!this.tasks.get(LifecycleHook.MOUNT)) return;
+      return on(LifecycleHook.MOUNT, this, task)
    }
 
-   onDiscard!: (task: Task, options?: SchedulerOptions) => PendingOp<void>
+   onDiscard!: (task: Task) => Listener
 
    discard!: () => void
 
@@ -147,28 +154,38 @@ export class Flask {
    }
 }
 
-function at(hookName: LifecycleHook, flask: Flask, task: Task, options: SchedulerOptions = {}) {
-   const tasks = flask.tasks
+// function at(hookName: LifecycleHook, flask: Flask, task: Task) {
+//    const tasks = flask.tasks
 
-   return $schedule(task, { /* until: flask.onDiscard,  */...options, within: null }, {
-      enroll(task) {
-         tasks.addToSet(task, hookName)
-      },
-      remove(task) {
+//    $schedule(task, { /* until: flask.onDiscard,  */...options, within: null }, {
+//       enroll(task) {
+//          tasks.addToSet(task, hookName)
+//       },
+//       remove(task) {
+//          tasks.deleteFromSet(task, hookName)
+//       }
+//    });
+// }
+
+// function on(hookName: LifecycleHook, flask: Flask, task: Task) {
+//    const tasks = flask.tasks
+
+//    $listen(task, { /* until: flask.onDiscard,  */...options, within: null }, {
+//       enroll(task) {
+//          tasks.addToSet(task, hookName)
+//       },
+//       remove(task) {
+//          tasks.deleteFromSet(task, hookName)
+//       }
+//    });
+// }
+
+function on(hookName: LifecycleHook, flask: Flask, task: () => void) {
+   const tasks = flask.tasks
+   tasks.addToSet(task, hookName)
+   return {
+      stop() {
          tasks.deleteFromSet(task, hookName)
       }
-   });
-}
-
-function on(hookName: LifecycleHook, flask: Flask, task: Task, options: ListenerOptions = {}) {
-   const tasks = flask.tasks
-
-   return $listen(task, { /* until: flask.onDiscard,  */...options, within: null }, {
-      enroll(task) {
-         tasks.addToSet(task, hookName)
-      },
-      remove(task) {
-         tasks.deleteFromSet(task, hookName)
-      }
-   });
+   }
 }

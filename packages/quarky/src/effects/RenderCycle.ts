@@ -1,5 +1,5 @@
 import { setImmediate, clearImmediate } from "@rue/thread";
-import { $schedule, LIFETIME, NEVER, ScheduleCancel, SchedulerOptions, unwrap } from "@rue/flask";
+import { $schedule, SchedulerOptions, unwrap } from "@rue/flask";
 import { SetMap } from "@rue/utils";
 import { asMetaIonizedModel, Ionized, IonizedModel } from "../ionize/ionize";
 import { MetaIonizedModel } from "../ionize/MetaIonizedModel";

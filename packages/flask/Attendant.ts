@@ -1,11 +1,11 @@
 import { Callback, CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
-import { PendingCancelOp } from "./PendingCancelOp";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { mapHandlers } from "./handlerMap";
 import { AbortSignal, RegisterAbortSignal } from "./AbortSignal";
 import { $_snap_context, callWithContext } from "./context/AsyncContext";
 import { Flask, getActiveFlask, setFlask, ThisFlask } from "./Flask";
 import { setTrace } from "./debug";
+import { noop } from "@rue/utils";
 
 export type Listener = {
    stop(): boolean;
@@ -13,16 +13,27 @@ export type Listener = {
    resume(): boolean;
 }
 
-export type ScheduleStop = (stop: CallbackRemover) => PendingCancelOp;
+export type Pending = {
+   stop(): boolean;
+}
 
-export const LIFETIME = null;
 
 export type ListenerOptions = {
    once?: boolean;
-   until?: ScheduleStop | AbortSignal | any[]
-   within?: ThisFlask | null //| 'outlive';
-   __devName?: string;
+   until?: ScheduleStop | AbortSignal | null
+} & AttendantOptions
+
+export type ScheduleStop = (stop: CallbackRemover) => Pending;
+
+export type SchedulerOptions = {
+   cancel?: ScheduleStop | AbortSignal | null,
+} & AttendantOptions
+
+type AttendantOptions = {
+   within?: ThisFlask | null //| 'outlive',
+   preserve?: true
 }
+
 
 export type EnrollFunction = (wrappedCB: Callback) => any
 export type RemoveFunction<E extends EnrollFunction> =
@@ -32,7 +43,7 @@ export type RemoveFunction<E extends EnrollFunction> =
    : (forRemoval: R) => void
    : never
 
-type ActiveListenerConfig<E extends EnrollFunction = EnrollFunction> = {
+type ListenerConfig<E extends EnrollFunction = EnrollFunction> = {
    callback: Callback,
    enroll: E,
    remove: RemoveFunction<E>,
@@ -40,14 +51,17 @@ type ActiveListenerConfig<E extends EnrollFunction = EnrollFunction> = {
    trace_DEV?: string,
 }
 
+export function toListenerOptions(options: SchedulerOptions | undefined) {
+   if (!options) return { once: true }
+   return {
+      once: true,
+      until: options.cancel,
+      within: options.within
+   }
+}
 
-
-
-
-
-
-export function makeListener<E extends (wrappedCB: Callback) => void | Callback>(
-   config: ActiveListenerConfig<E>
+export function makeAttendant<E extends (wrappedCB: Callback) => void | Callback>(
+   config: ListenerConfig<E>
 ): Listener {
    const { enroll, remove, callback, options, trace_DEV } = config;
    if (!callback) {
@@ -61,7 +75,8 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
          resume: noOp
       };
    }
-   const once = options?.once;
+   const once = options?.once || isRemover(callback);
+   const preserve = options?.preserve || false;
    const within = options?.within;
    const flask = within instanceof ThisFlask ?
       //@ts-expect-error: flask is private
@@ -104,7 +119,7 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
       return true;
    }
    _remove.isRemover = true as const;
-   _remove.__devName = options?.__devName;
+   // _remove.__devName = options?.__devName;
 
    let paused = false;
    function pause() {
@@ -114,9 +129,10 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
       return true;
    }
    // pause.isRemover = true as const;
-   pause.__devName = options?.__devName;
+   // pause.__devName = options?.__devName;
 
-   let until = options?.until as ScheduleStop | RegisterAbortSignal | null | undefined | any[]
+   let until = options?.until
+   // as ScheduleStop | RegisterAbortSignal | null | undefined | any[]
 
    if (until instanceof Array) {
       until = useCleanupScheduler(...until) // for custom cleanup, like [document, 'mouseup']
@@ -124,27 +140,30 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
 
    if (until) {
       const pendingStop = until(_remove);
-      if (pendingStop) cancelPendingStop = pendingStop.cancel;
+      if (pendingStop) cancelPendingStop = pendingStop.stop;
       if (__DEV__ && !cancelPendingStop)
-         console.warn('`until` function should be a flaskable scheduler that return a PendingCancelOp for cleanup. See @rue/flask')
+         console.warn('`until` function should be a flaskable scheduler that return a Pending object for cleanup. See @rue/flask')
    }
 
    if (enclosingFlask) {
-      unbind = bindToFlask(activeListener, enclosingFlask)
+      unbind = bindListenerToFlask(activeListener, enclosingFlask, preserve, until)
    }
 
-   if (__DEV__ && flask !== null) setUpCleanupWarning!(activeListener, until, enclosingFlask)
+   if (__DEV__ && (flask !== null || until !== null)) setUpCleanupWarning!(activeListener, until, enclosingFlask)
 
    returnVal = enroll(_callback);
 
    return activeListener as Listener;
 }
 
+const noopable = {
+   stop: noop
+}
 
-function bindToFlask(listener: Listener, flask: Flask) {
-   const { cancel: cancelStop } = flask.onDiscard(listener.stop);
-   const { stop: stopPausing } = flask.onUnmount(listener.pause);
-   const { stop: stopResuming } = flask.onRemount(listener.resume);
+function bindListenerToFlask(listener: Listener, flask: Flask, preserve: boolean, until: any | null) {
+   const { stop: cancelStop } = until === null ? noopable : flask.onDiscard(listener.stop);
+   const { stop: stopPausing } = preserve ? noopable : flask.onUnmount(listener.pause);
+   const { stop: stopResuming } = preserve ? noopable : flask.onRemount(listener.resume);
 
    return function unbind() {
       cancelStop()
@@ -153,6 +172,11 @@ function bindToFlask(listener: Listener, flask: Flask) {
    }
 }
 
+
+
+function isRemover(callback: Callback) {
+   return "isRemover" in callback && callback.isRemover;
+}
 // // onMount doesn't make sense for task flasks except as remount... $thisTask() instead of flask? $thisNode()
 
 // function wrapWithFlask(callback: Callback, config: {
@@ -194,6 +218,3 @@ function wrapWithFlask(callback: Callback, config: {
       })
    }
 }
-
-//FIX: a scene may not necessarily want to end when the view is unmounted... how can we give more control with this?
-

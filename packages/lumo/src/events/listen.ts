@@ -1,12 +1,10 @@
-import { $listen, Listener, CallbackRemover, defineCustomCleanupScheduler, LIFETIME, ListenerOptions, PendingCancelOp, ScheduleStop } from '@rue/flask';
-import { isIon, Ref } from '@rue/quarky';
-import { NodeRef } from '../node/NodeRef';
+import { $listen, Listener, CallbackRemover, defineCustomCleanupScheduler, ListenerOptions, PendingStop, ScheduleStop } from '@rue/flask';
 
 
 type EventListenerOptions = Omit<AddEventListenerOptions, "signal"> & Omit<ListenerOptions, 'until'> & CustomCleanupSchedulerListenerOptions
 
 export type CustomCleanupSchedulerListenerOptions = {
-    until?: [EventTarget, keyof DocumentEventMap | keyof HTMLElementEventMap | keyof WindowEventMap] | ScheduleStop | typeof LIFETIME | AbortSignal
+    until?: [EventTarget, keyof DocumentEventMap | keyof HTMLElementEventMap | keyof WindowEventMap] | ScheduleStop  | AbortSignal
 }
 
 type EventName<T> = T extends Document ? keyof DocumentEventMap :
@@ -26,7 +24,7 @@ export function listen<
     event: EventName<T>,
     handler: CB & EventHandler<T, EventName<T>>,
     options?: EventListenerOptions
-): CB extends CallbackRemover ? PendingCancelOp : Listener {
+){
 
     return $listen(handler, <ListenerOptions>options || {}, {
         enroll(cb) {

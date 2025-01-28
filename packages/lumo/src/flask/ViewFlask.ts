@@ -11,6 +11,9 @@ export function getViewFlask(): Flask {
 }
 
 function findViewFlask(flask: Flask | undefined) {
+   //TODO: RESEARCH/EXPERIENCE REQUIRED: 
+   // Questionable whether this should be allowed. Maybe it's better practice to only call $thisView() directly in the view and pass down?
+   // and then we wouldn't need a public .outer property
    do {
       if (flask?.type === 'view') return flask;
       flask = flask?.outer

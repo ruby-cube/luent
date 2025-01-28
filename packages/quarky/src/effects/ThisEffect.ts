@@ -1,4 +1,4 @@
-import { $schedule, PendingCancelOp } from "@rue/flask";
+import { $schedule, PendingStop } from "@rue/flask";
 
 export const INTERNAL = Symbol('internal')
 
@@ -19,7 +19,7 @@ export class ThisEffect {
       })
    }
 
-   private _onCleanup?: (cleanUp: () => void) => PendingCancelOp
+   private _onCleanup?: (cleanUp: () => void) => PendingStop
 
    [INTERNAL]?: {
       asyncTrace_DEV: string

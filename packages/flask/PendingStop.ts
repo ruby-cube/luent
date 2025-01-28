@@ -1,16 +1,16 @@
 
-export type PendingCancelOp = {
+export type PendingStop = {
     cancel: () => void;
 }
 
-export function makePendingCancelOp(config: {
+export function makePendingStop(config: {
     callback: () => void,
     enroll: (cb: () => void) => any,
     remove: (cbOrReturnVal: any) => void
-}): PendingCancelOp {
+}): PendingStop {
     const { callback, enroll, remove } = config
     let returnVal: any;
-    // let pendingFlaskCleanup: PendingCancelOp | undefined;
+    // let pendingFlaskCleanup: PendingStop | undefined;
 
     const _callback = () => {
         callback();

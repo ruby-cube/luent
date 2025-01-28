@@ -1,14 +1,12 @@
 import { RegisterAbortSignal } from "./AbortSignal";
-import { Flask, getActiveFlask, ThisFlask } from "./Flask";
+import { getActiveFlask, ThisFlask } from "./Flask";
 import { CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
 import { mapHandlers } from "./handlerMap";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
-import { PendingCancelOp } from "./PendingCancelOp";
+import { PendingStop } from "./PendingStop";
 
-export type PendingOp<T = unknown> = Promise<T> & {
-   cancel(): void;
-   // pause(): boolean;
-   // resume(): boolean; //TODO: add pause and resume??
+export type PendingOp<T = unknown> = Promise<T> & { // QUESTION: Is there any real reason for schedulers to return promises??
+   stop(): void;
 }
 
 
@@ -19,7 +17,7 @@ export type SchedulerOptions = {
    within?: ThisFlask | null //| 'outlive',
 }
 
-export type ScheduleCancel = (cancel: CallbackRemover) => PendingCancelOp;
+export type ScheduleCancel = (cancel: CallbackRemover) => PendingStop;
 
 
 export class Cancellation {
@@ -48,8 +46,8 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
    let returnVal: any;
    let _resolve: (result?: any) => void;
    let pendingOp: PendingOp<ReturnType<CB>>
-   let pendingCancelOp: PendingCancelOp | null;
-   let pendingFlaskCleanup: PendingCancelOp | undefined;
+   let pendingCancelOp: PendingStop | null;
+   let pendingFlaskCleanup: PendingStop | undefined;
 
    const _callback = oneTimeCallback as CB
    // const _callback = bindFlask(oneTimeCallback, flask === 'outlive' ? null : flask) as CB
@@ -89,7 +87,7 @@ export function makePendingOp<CB extends (...arg: any[]) => any>(config: {
    }) as CallbackRemover;
    cancel.isRemover = true as const; // Serves as a marker to indicate it should run only once if passed into a listener.
 
-   pendingOp.cancel = cancel;
+   pendingOp.stop = cancel;
 
    if (scheduleCancellation) {
       pendingCancelOp = scheduleCancellation ? scheduleCancellation(cancel) : null;

@@ -1,5 +1,5 @@
 import { useIncrementalID } from "@rue/utils";
-import { Listener } from "./Listener";
+import { Listener } from "./Attendant";
 import { PendingOp } from "./PendingOp";
 import { Flask } from "./Flask";
 
