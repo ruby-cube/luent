@@ -46,8 +46,8 @@ function _initializeRender(effect: () => void) {
 // }
 
 // function asPreservedWatcher({ pause, resume, stop }: Listener, dynamicNode: DynamicNode) {
-//     const deactivationHook = dynamicNode.onDeactivate(pause)
-//     const activationHook = dynamicNode.onReactivate(resume)
+//     const deactivationHook = dynamicNode.onUnmount(pause)
+//     const activationHook = dynamicNode.onRemount(resume)
 
 //     return {
 //         stop() {

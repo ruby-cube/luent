@@ -50,8 +50,8 @@ Dynamic node
 - context
 - onCreated
 - onDiscard
-- onReactivate
-- onDeactivate
+- onRemount
+- onUnmount
 
 context.get()
 context.getGlobal()
@@ -72,7 +72,7 @@ watch($list, async () => {
     useDoor()
 })
 
-// what about preserve??, activate and deactivate?
+// what about preserve??, activate and unmount?
 // derived ions
 // cases: 
 // - you want a watcher or listener to outlive its context (not needed if initialized in handler or an effect)

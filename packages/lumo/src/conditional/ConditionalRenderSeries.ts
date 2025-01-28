@@ -210,7 +210,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             }
             catch (err) {
                if (__DEV__) console.error(err)
-               return; // if deactivate fails, we don't activate the new conditional
+               return; // if unmount fails, we don't activate the new conditional
             }
 
             // (3)
@@ -351,7 +351,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const pod = kit.nodePod!
       const activationType = kit.type
       if (activationType === 'show') {
-         console.log('deactivate conditional', index)
+         console.log('unmount conditional', index)
          // preserve dynamic node and node pod
          hideDOMNodes(pod);
       }
@@ -367,7 +367,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       }
       else if (activationType === 'mount') {
          const flask = kit.flask
-         flask?.deactivate()
+         flask?.unmount()
          removeDOMNodes(pod);
       }
    }
@@ -388,7 +388,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn('view'))
       this.render(kit, parent, undefined, flask)
-      if (activationType === 'mount') flask.reactivate() // reactivate preserved watchers etc.
+      if (activationType === 'mount') flask.remount() // remount preserved watchers etc.
    }
 }
 

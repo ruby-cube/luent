@@ -365,7 +365,7 @@ function warnOverlappingStyles(stylesA: string, stylesB: string) {
 
 //     }
 //     else {
-//         onDeactivate(() => {
+//         onUnmount(() => {
 
 //         })
 //     }

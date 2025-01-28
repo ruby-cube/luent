@@ -203,12 +203,12 @@ function ArticleBlock(setup: {
 //         console.log("node ref", button, countDiv)
 //     })
 
-//     // onReactivate(() => {
+//     // onRemount(() => {
 //     //     console.log("activated yo")
 //     // })
 
-//     // onDeactivate(() => {
-//     //     console.log("deactivate")
+//     // onUnmount(() => {
+//     //     console.log("unmount")
 //     // })
 
 //     _this.onDiscard(() => {

@@ -148,7 +148,7 @@ export function makeComponent(
 //     //         onDeactivated(() => {
 //     //             ref.components = null;
 //     //         })
-//     //         onReactivate(() => {
+//     //         onRemount(() => {
 //     //             ref.components = components
 //     //         })
 //     //     }
@@ -161,7 +161,7 @@ export function makeComponent(
 //         onDeactivated(() => {
 //             ref.setValue(null)
 //         })
-//         onReactivate(() => {
+//         onRemount(() => {
 //             ref.setValue(component)
 //         })
 //     }

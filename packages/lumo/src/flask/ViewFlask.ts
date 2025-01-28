@@ -1,4 +1,4 @@
-import { $thisFlask, Flask, getActiveFlask } from "@rue/flask";
+import { Flask, getActiveFlask, ThisFlask } from "@rue/flask";
 
 export function getActiveViewFlask() {
    return findViewFlask(getActiveFlask());
@@ -19,22 +19,12 @@ function findViewFlask(flask: Flask | undefined) {
    throw new Error('no view flask found')
 }
 
-// export class DynamicNode extends Flask {
+export function $thisView() {
+   const flask = getViewFlask();
+   if (!flask) throw new Error('No flask found. Must call within the scope of a flask')
+   return flask.thisFlask || new ThisFlask(flask);
+}
 
-//    constructor(public parent?: DynamicNode
-//    ) {
-//       super(parent)
-//    }
-
-//    fork() {
-//       return new DynamicNode(this)
-//    }
-
-//    //QUESTION: Should dynamic node handle removing domnodes??
-// }
-
-
-// export const NULLISH_DYNAMIC_NODE = new DynamicNode()
 
 
 

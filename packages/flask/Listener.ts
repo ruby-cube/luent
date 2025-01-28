@@ -20,7 +20,7 @@ export const LIFETIME = null;
 export type ListenerOptions = {
    once?: boolean;
    until?: ScheduleStop | AbortSignal | any[]
-   flask?: ThisFlask | Flask | null //| 'outlive';
+   within?: ThisFlask | null //| 'outlive';
    __devName?: string;
 }
 
@@ -46,12 +46,12 @@ type ActiveListenerConfig<E extends EnrollFunction = EnrollFunction> = {
 
 
 
-export function makeActiveListener<E extends (wrappedCB: Callback) => void | Callback>(
+export function makeListener<E extends (wrappedCB: Callback) => void | Callback>(
    config: ActiveListenerConfig<E>
 ): Listener {
    const { enroll, remove, callback, options, trace_DEV } = config;
    if (!callback) {
-      if (__DEV__) console.warn("No callback was passed into makeActiveListener")
+      if (__DEV__) console.warn("No callback was passed into makeListener")
       function noOp() {
          return false;
       }
@@ -62,11 +62,11 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
       };
    }
    const once = options?.once;
-   const _flask = options?.flask;
-   const flask = _flask instanceof ThisFlask ?
+   const within = options?.within;
+   const flask = within instanceof ThisFlask ?
       //@ts-expect-error: flask is private
-      _flask.flask
-      : _flask;
+      within.flask
+      : within;
 
    let returnVal: any;
    let cancelPendingStop: (() => void) | undefined
@@ -143,8 +143,8 @@ export function makeActiveListener<E extends (wrappedCB: Callback) => void | Cal
 
 function bindToFlask(listener: Listener, flask: Flask) {
    const { cancel: cancelStop } = flask.onDiscard(listener.stop);
-   const { stop: stopPausing } = flask.onDeactivate(listener.pause); 
-   const { stop: stopResuming } = flask.onReactivate(listener.resume);
+   const { stop: stopPausing } = flask.onUnmount(listener.pause);
+   const { stop: stopResuming } = flask.onRemount(listener.resume);
 
    return function unbind() {
       cancelStop()
@@ -153,7 +153,7 @@ function bindToFlask(listener: Listener, flask: Flask) {
    }
 }
 
-// // onActivate doesn't make sense for task flasks except as reactivate... $thisTask() instead of flask? $thisNode()
+// // onMount doesn't make sense for task flasks except as remount... $thisTask() instead of flask? $thisNode()
 
 // function wrapWithFlask(callback: Callback, config: {
 //    afterCall?: () => void,
@@ -179,14 +179,14 @@ function wrapWithFlask(callback: Callback, config: {
 }) {
    const { afterCall, enclosingFlask, trace_DEV } = config
    const context = $_snap_context()
-   let taskFlask: Flask;
+   let scene: Flask;
    return (...args: any[]) => {
-      if (taskFlask) taskFlask.discard()
-      taskFlask = enclosingFlask?.spawn() || new Flask() //QUESTION: Do we want callback to be called again on reactivate?? you should only call if dirty right?
+      if (scene) scene.discard()
+      scene = enclosingFlask?.spawn('scene') || new Flask({ type: 'scene' }) //QUESTION: Do we want callback to be called again on remount?? you should only call if dirty right?
       return callWithContext({
          context,
          beforeCall() {
-            setFlask(taskFlask)
+            setFlask(scene)
             if (__DEV__) setTrace!(trace_DEV!)
          },
          callback: () => callback(...args),
@@ -195,4 +195,5 @@ function wrapWithFlask(callback: Callback, config: {
    }
 }
 
+//FIX: a scene may not necessarily want to end when the view is unmounted... how can we give more control with this?
 

@@ -71,7 +71,7 @@ export class MorphicRenderKit {
       //TODO: 
       const nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(this.switchMap[this.activeKey]())), parent, nodePod);
       pushCommons(this.context)
-      this.flask.contain(function renderMorphicNode() {
+      this.flask.containCall(function renderMorphicNode() {
          mountNodeEntities(nodeEntities, parent, fragment)
       })
       popCommons()
@@ -117,9 +117,9 @@ export class MorphicRenderKit {
       const flask = this.flask = this.outerFlask.spawn('view')
       const _this = this
       if (this.preserve && this.renderedKeys?.has(key)) {
-         flask.reactivate() //FIX:
+         flask.remount() //FIX:
       } else {
-         flask.contain(function reactivateMorphicForm() {
+         flask.containCall(function reactivateMorphicForm() {
             const nodeEntities = normalizeToArray(unnestComponent(_this.switchMap[key]()))
             mountConditional(parent, _this.dynamicNodePod, nodeEntities)
          })

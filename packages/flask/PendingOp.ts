@@ -16,7 +16,7 @@ export type PendingOp<T = unknown> = Promise<T> & {
 
 export type SchedulerOptions = {
    cancel?: ScheduleCancel | AbortSignal,
-   flask?: ThisFlask | Flask | null //| 'outlive',
+   within?: ThisFlask | null //| 'outlive',
 }
 
 export type ScheduleCancel = (cancel: CallbackRemover) => PendingCancelOp;

@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach, it } from "vitest";
-import { makeActiveListener } from "../Listener";
+import { makeListener } from "../Listener";
 import { onFlaskDiscard, getActiveFlask, EffectFlask } from "../EffectFlask";
 
 vi.mock('../EffectFlask', () => ({
@@ -34,7 +34,7 @@ describe("Listener", () => {
 
 
     it('should enroll the callback and return an Listener', () => {
-        const listener = makeActiveListener(config);
+        const listener = makeListener(config);
 
         expect(enroll).toHaveBeenCalledOnce();
         expect(enroll).toHaveBeenCalledWith(expect.any(Function));
@@ -43,7 +43,7 @@ describe("Listener", () => {
 
 
     it('should call the remove function when stop is called', () => {
-        const listener = makeActiveListener(config);
+        const listener = makeListener(config);
 
         listener.stop();
 
@@ -53,7 +53,7 @@ describe("Listener", () => {
 
 
     it('should call the callback when the wrapped callback is invoked', () => {
-        makeActiveListener(config);
+        makeListener(config);
         const wrappedCallback = enroll.mock.calls[0][0];
 
         wrappedCallback();
@@ -64,7 +64,7 @@ describe("Listener", () => {
 
     it('should remove the listener after callback if `once` is set to true', () => {
         config.options.once = true;
-        makeActiveListener(config);
+        makeListener(config);
         const wrappedCallback = enroll.mock.calls[0][0];
 
         wrappedCallback();
@@ -75,7 +75,7 @@ describe("Listener", () => {
 
     it('should call `until` function with `stop` function if `until` is provided', () => {
         config.options.until = until;
-        const listener = makeActiveListener(config);
+        const listener = makeListener(config);
 
         expect(until).toHaveBeenCalledWith(listener.stop);
     });
@@ -86,7 +86,7 @@ describe("Listener", () => {
         until.mockReturnValue({ cancel: cancelMock });
         config.options.until = until;
 
-        const listener = makeActiveListener(config);
+        const listener = makeListener(config);
         listener.stop();
 
         expect(cancelMock).toHaveBeenCalled();
@@ -96,7 +96,7 @@ describe("Listener", () => {
    //      const flask = { onDiscard: vi.fn() };
    //      config.options.flask = flask;
 
-   //      makeActiveListener(config);
+   //      makeListener(config);
 
    //      expect(onFlaskDiscard).not.toHaveBeenCalled();
 
@@ -107,7 +107,7 @@ describe("Listener", () => {
     it('should call onFlaskDiscard', () => {
         config.options = {}
 
-        makeActiveListener(config);
+        makeListener(config);
 
         expect(onFlaskDiscard).toHaveBeenCalledOnce();
         expect(onFlaskDiscard).toHaveBeenCalledWith(expect.any(Function));
@@ -116,7 +116,7 @@ describe("Listener", () => {
    //  it('should not call onFlaskDiscard if flask === "outlive"', () => {
    //      config.options.flask = 'outlive';
 
-   //      makeActiveListener(config);
+   //      makeListener(config);
 
    //      expect(onFlaskDiscard).not.toHaveBeenCalled();
 
@@ -126,14 +126,14 @@ describe("Listener", () => {
     it('should handle missing options object gracefully', () => {
         config.options = undefined;
 
-        expect(() => makeActiveListener(config)).not.toThrow();
-        const listener = makeActiveListener(config);
+        expect(() => makeListener(config)).not.toThrow();
+        const listener = makeListener(config);
         expect(listener).toHaveProperty('stop');
     });
 
 
     it('should handle multiple calls to stop gracefully', () => {
-        const listener = makeActiveListener(config);
+        const listener = makeListener(config);
 
         listener.stop();
         listener.stop();
@@ -146,7 +146,7 @@ describe("Listener", () => {
         until.mockReturnValue(null);
         config.options.until = until;
 
-        const listener = makeActiveListener(config);
+        const listener = makeListener(config);
 
         expect(() => listener.stop()).not.toThrow();
         expect(remove).toHaveBeenCalled();
@@ -157,7 +157,7 @@ describe("Listener", () => {
         const error = new Error('Remove error');
         remove.mockImplementation(() => { throw error; });
 
-        const listener = makeActiveListener(config);
+        const listener = makeListener(config);
 
         expect(() => listener.stop()).toThrow(error);
     });
@@ -168,7 +168,7 @@ describe("Listener", () => {
         callback.mockImplementation(() => { throw error; });
         config.options.once = true;
 
-        const listener = makeActiveListener(config);
+        const listener = makeListener(config);
         const wrappedCallback = enroll.mock.calls[0][0];
 
         expect(() => wrappedCallback()).toThrow(error);
@@ -179,6 +179,6 @@ describe("Listener", () => {
     it('should handle missing callback gracefully', () => {
         config.callback = undefined;
 
-        expect(() => makeActiveListener(config)).not.toThrow();
+        expect(() => makeListener(config)).not.toThrow();
     });
 })
