@@ -129,19 +129,19 @@ export function makeNode(
 
    switch (nodeType) {
       case '$--commons':
-         if (!Slot) throw new Error(`Extraneous <Context>`)
+         if (!Slot) throw new Error(`Extraneous <$--commons>`)
          return createCommons(Slot, <ComponentConfig>config)
 
       case '$--try':
-         if (!Slot) throw new Error(`Extraneous <Context>`)
+         if (!Slot) throw new Error(`Extraneous <$--commons>`)
          return createTryNode(Slot, <TryNodeInput>config)
 
       case '$--suspense':
-         if (!Slot) throw new Error(`Extraneous <Context>`)
+         if (!Slot) throw new Error(`Extraneous <$--commons>`)
          return createSuspenseNode(Slot, <SuspenseNodeInput>config)
 
       case '$--portal':
-         if (!Slot) throw new Error(`Extraneous <Context>`)
+         if (!Slot) throw new Error(`Extraneous <$--commons>`)
          return createPortalNode(Slot, <PortalNodeInput>config)
 
       case 'vvv:show':

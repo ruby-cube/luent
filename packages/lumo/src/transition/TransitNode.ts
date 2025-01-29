@@ -3,7 +3,7 @@ import { v } from "../InputTypes";
 import { NodeRef } from "../node/NodeRef";
 import { NodeEntity } from "../node/makeNode";
 import { makeElement } from "../element/makeElement";
-import { defineContextProp } from "../commons/CommonsKey";
+import { defineCommonsEntry } from "../commons/CommonsKey";
 import { fromCommons } from "../commons/provide";
 import { Ion } from "@rue/quarky";
 import { component } from "../component/InternalComponent";
@@ -54,10 +54,10 @@ export function renderTransitNode(
 
 const REGISTER_TRANSITION_NODE = Symbol('registerTransitionNode')
 
-const pushTransitionNode = defineContextProp(REGISTER_TRANSITION_NODE, v<(transitionNode: TransitionNode) => void>)
+const pushTransitionNode = defineCommonsEntry(REGISTER_TRANSITION_NODE, v<(transitionNode: TransitionNode) => void>)
 
 declare module '@rue/lumo' {
-    interface ContextKeyMap {
+    interface CommonsKeyMap {
         [REGISTER_TRANSITION_NODE]: typeof pushTransitionNode
     }
 }

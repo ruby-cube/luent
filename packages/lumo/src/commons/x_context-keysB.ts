@@ -1,12 +1,12 @@
 import { v } from "../InputTypes"
-import { defineContextProp } from "./CommonsKey"
+import { defineCommonsEntry } from "./CommonsKey"
 
 export const _cat_ = Symbol('cat')
 
-const catType = defineContextProp(_cat_, v<number>)
+const catType = defineCommonsEntry(_cat_, v<number>)
 
 declare module '@rue/lumo' {
-    interface ContextKeyMap {
+    interface CommonsKeyMap {
         [_cat_]: typeof catType
     }
 }

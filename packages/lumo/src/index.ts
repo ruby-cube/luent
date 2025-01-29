@@ -25,17 +25,17 @@ export * from './transition/TransitionNode' //TODO: Limit to public API
 
 
 /**
- *  App developers can extend ContextKeyMap interface like so:
+ *  App developers can extend CommonsKeyMap interface like so:
  *  
  *  export const Frog = Symbol('frog')
  * 
- *  const frogType = defineContextProp(FROG, v<string>)
+ *  const frogType = defineCommonsEntry(FROG, v<string>)
  *  
  *  declare module '@rue/lumo' {
- *     interface ContextKeyMap {
+ *     interface CommonsKeyMap {
  *        [_dog_]: typeof frogType
  *     }
  *  }
  * 
  */
-export interface ContextKeyMap { }
+export interface CommonsKeyMap { }

@@ -32,7 +32,7 @@ import { TestApp } from './TestApp';
 // import { NestedPend } from './NestedPend';
 
 
-// const rootContext = createGlobalContext()
+// const rootContext = createGlobalCommons()
 
 const app = createApp(TestApp)
 

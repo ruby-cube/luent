@@ -75,7 +75,8 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
          resume: noOp
       };
    }
-   const once = options?.once || isRemover(callback);
+   const callbackIsRemover = isRemover(callback);
+   const once = options?.once || callbackIsRemover;
    const preserve = options?.preserve || false;
    const within = options?.within;
    const flask = within instanceof ThisFlask ?
@@ -100,7 +101,7 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
 
    const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask())
 
-   const _callback = wrapWithFlask(callback, {
+   const _callback = callbackIsRemover ? callback : wrapWithFlask(callback, {
       afterCall: once ? _remove : undefined,
       enclosingFlask,
       trace_DEV

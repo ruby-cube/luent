@@ -8,7 +8,7 @@ import * as CSS from "csstype";
 // import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
 import { NodeRef } from "../../src/node/NodeRef";
-import { COMPONENT_ATTRIBUTES, ContextKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/lumo";
+import { COMPONENT_ATTRIBUTES, CommonsKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/lumo";
 import { AnyObject, Booleanny } from "@rue/types";
 import { PortalNodeInput } from "../../src/boundaries/Portal";
 import { MaybeIon } from "@rue/quarky";
@@ -2560,12 +2560,12 @@ declare global {
 
 
 
-      // type ContextEntries<T> = {
-      //     [K in keyof T]: K extends keyof ContextKeyMap ? _ContextInputType<ContextKeyMap[K]> : any;
+      // type CommonsEntries<T> = {
+      //     [K in keyof T]: K extends keyof CommonsKeyMap ? _ContextInputType<CommonsKeyMap[K]> : any;
       // }
 
       // type ContextNodeInput<T> = {
-      //     with: T & ContextEntries<T>,
+      //     with: T & CommonsEntries<T>,
       //     Slot: (() => NodeEntity) | NodeEntity
       // }
 

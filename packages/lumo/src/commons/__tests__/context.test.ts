@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { fromApp, fromCommons, createGlobalContext, fromGlobal } from '../provide';
+import { fromApp, fromCommons, createGlobalCommons, fromGlobal } from '../provide';
 import { component } from '../../component/InternalComponent';
 import { createApp } from '../../createApp';
 import { makeComponent } from '../../component/makeComponent';
 import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
 import { createCommons } from '../Commons';
-import { defineContextProp } from '../CommonsKey';
+import { defineCommonsEntry } from '../CommonsKey';
 import { Ion, Ionized, MaybeIon, v } from '../../InputTypes';
 import { ion, ionize, isIon, isIonizedModel } from '@rue/quarky';
 
@@ -132,10 +132,10 @@ describe('Integration tests the Context API', () => {
         })
     });
 
-    describe('createGlobalContext()', () => {
+    describe('createGlobalCommons()', () => {
         it('should create a trans-app context accessible across the application', () => {
             const value = 'sir robin'
-            const globalContext = createGlobalContext({ [_frog_]: value });
+            const globalCommons = createGlobalCommons({ [_frog_]: value });
 
             let frog;
             let frogB;
@@ -148,11 +148,11 @@ describe('Integration tests the Context API', () => {
                     makeElement('div', () => ['hi'], {}, undefined)
                 )
             }
-            const app = createApp(App, { globalContext });
+            const app = createApp(App, { globalCommons });
 
             app.mount(<HTMLElement>document.createElement('div'))
 
-            expect(globalContext).toBeDefined();
+            expect(globalCommons).toBeDefined();
             expect(frog).toBe(value)
             expect(frogB).toBe(value)
             expect(() => fromGlobal(_frog_)).toThrow()
@@ -160,24 +160,24 @@ describe('Integration tests the Context API', () => {
         });
 
         it('should create a trans-app context accessible across the application', () => {
-            const globalContext = createGlobalContext();
-            expect(globalContext).toBeDefined();
+            const globalCommons = createGlobalCommons();
+            expect(globalCommons).toBeDefined();
         });
     });
 
     // describe('provideGlobal() and global()', () => {
     //     it('should provide a global value accessible from anywhere in the application', () => {
-    //         const globalContext = createGlobalContext();
-    //         provideGlobal(globalContext, 'globalConfig', { theme: 'dark' });
-    //         const config = global(globalContext, 'globalConfig');
+    //         const globalCommons = createGlobalCommons();
+    //         provideGlobal(globalCommons, 'globalConfig', { theme: 'dark' });
+    //         const config = global(globalCommons, 'globalConfig');
     //         expect(config).toEqual({ theme: 'dark' });
     //     });
 
     //     it('should override global values if provided again', () => {
-    //         const globalContext = createGlobalContext();
-    //         provideGlobal(globalContext, 'globalConfig', { theme: 'dark' });
-    //         provideGlobal(globalContext, 'globalConfig', { theme: 'light' });
-    //         const config = global(globalContext, 'globalConfig');
+    //         const globalCommons = createGlobalCommons();
+    //         provideGlobal(globalCommons, 'globalConfig', { theme: 'dark' });
+    //         provideGlobal(globalCommons, 'globalConfig', { theme: 'light' });
+    //         const config = global(globalCommons, 'globalConfig');
     //         expect(config).toEqual({ theme: 'light' });
     //     });
     // });
@@ -334,8 +334,8 @@ describe('Integration tests the Context API', () => {
                 )
             }
 
-            const globalContext = createGlobalContext({ [GLOBAL_FROG]: globalValue })
-            const app = createApp(App, { with: { [APP_FROG]: appValue }, globalContext });
+            const globalCommons = createGlobalCommons({ [GLOBAL_FROG]: globalValue })
+            const app = createApp(App, { with: { [APP_FROG]: appValue }, globalCommons });
 
             app.mount(<HTMLElement>document.createElement('div'))
 
@@ -353,16 +353,16 @@ describe('Integration tests the Context API', () => {
     // it should validate Ionized
 
 
-    describe('defineContextProp and validation', () => {
+    describe('defineCommonsEntry and validation', () => {
         it('should throw an error if required context prop is not provided', () => {
 
             const value = 0
             const _frog_ = 'frog'
-            defineContextProp(_frog_, v)
+            defineCommonsEntry(_frog_, v)
             let frog;
 
             const KERMIT = 'kermit'
-            defineContextProp(KERMIT, v)
+            defineCommonsEntry(KERMIT, v)
 
             function App() {
                 return component(
@@ -401,7 +401,7 @@ describe('Integration tests the Context API', () => {
         it('should allow optional props to be undefined', () => {
 
             const _frog_ = 'frog'
-            defineContextProp(_frog_, v('?'))
+            defineCommonsEntry(_frog_, v('?'))
             let frog = 'hi'
 
             function App() {
@@ -430,7 +430,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const defaultValue = 'kermit'
-            defineContextProp(_frog_, v('?')(() => defaultValue))
+            defineCommonsEntry(_frog_, v('?')(() => defaultValue))
             let frog = 'hi'
 
             function App() {
@@ -458,7 +458,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            defineContextProp(_frog_, MaybeIon)
+            defineCommonsEntry(_frog_, MaybeIon)
             let frog = 'hi'
 
             function App() {
@@ -489,7 +489,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            defineContextProp(_frog_, Ion)
+            defineCommonsEntry(_frog_, Ion)
             let frog = 'hi'
 
             function App() {
@@ -529,7 +529,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            defineContextProp(_frog_, Ionized)
+            defineCommonsEntry(_frog_, Ionized)
             let frog = 'hi'
 
             function App() {
@@ -569,7 +569,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            defineContextProp(_frog_, Ion)
+            defineCommonsEntry(_frog_, Ion)
             let frog = 'hi'
 
             function App() {
@@ -600,7 +600,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = { name: 'kermit' }
-            defineContextProp(_frog_, Ionized)
+            defineCommonsEntry(_frog_, Ionized)
             let frog = 'hi'
 
             function App() {
@@ -630,7 +630,7 @@ describe('Integration tests the Context API', () => {
         it('should allow MaybeIon to be undefined if optional', () => {
 
             const _frog_ = 'frog'
-            defineContextProp(_frog_, MaybeIon('?'))
+            defineCommonsEntry(_frog_, MaybeIon('?'))
             let frog = 'hi'
 
             function App() {
@@ -659,7 +659,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const defaultValue = 'kermit'
-            defineContextProp(_frog_, MaybeIon('?')(() => defaultValue))
+            defineCommonsEntry(_frog_, MaybeIon('?')(() => defaultValue))
             let frog = 'hi'
 
             function App() {

@@ -1,9 +1,9 @@
 import { Component, ComponentSetup, DOMNode, InternalComponent } from "./component/InternalComponent";
 import { AnyObject } from "@rue/types";
 import { setComponentAttributes } from "./component/makeComponent";
-import { AppCommons, createAppContext } from "./commons/provide";
+import { AppCommons, createAppCommons } from "./commons/provide";
 import { getCommons, popCommons, pushCommons } from "./commons/commons-stack";
-import { ContextEntries } from "./commons/Commons";
+import { CommonsEntries } from "./commons/Commons";
 import { _dog_ } from "./commons/x_context-keys";
 import { NodePod } from "./node/NodePod";
 import { removeDOMNodes } from "./conditional/ConditionalRenderSeries";
@@ -26,10 +26,10 @@ export function getAppRoot() {
 // }
 
 
-export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App: ComponentSetup<T>, config?: { with?: E, remountable?: boolean, globalContext?: AppCommons, setup?: T }) {
+export function createApp<T extends AnyObject, E extends CommonsEntries<E>>(App: ComponentSetup<T>, config?: { provide?: E, remountable?: boolean, globalCommons?: AppCommons, setup?: T }) {
 
    // (1) instantiate developer's root component
-   const appContext = createAppContext(config?.with, config?.globalContext)
+   const appCommons = createAppCommons(config?.provide, config?.globalCommons)
    const nodePod = new NodePod()
    const remountable = config?.remountable
    const flask = new Flask({ type: 'view' });
@@ -43,7 +43,7 @@ export function createApp<T extends AnyObject, E extends ContextEntries<E>>(App:
          // (2) attach developer's root component to root element
          flask.containCall(function mountRootComponent() {
             let output: Component = { renderedTemplate: undefined }
-            pushCommons(appContext)
+            pushCommons(appCommons)
             // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
             setComponentAttributes(config?.setup || {})
             try {

@@ -1,10 +1,10 @@
 import { Commons, getClosestCommons } from "./commons-stack";
-import { ContextEntries, NodeCommons } from "./Commons";
-import { contextTypeMap, TypeConfig } from "./CommonsKey";
+import { CommonsEntries, NodeCommons } from "./Commons";
+import { commonsTypeMap, TypeConfig } from "./CommonsKey";
 import { isIon, isIonizedModel, toIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { isNamedDerivation, unnestValue } from "../component/fromTag";
-import { ContextKeyMap } from "@rue/lumo";
+import { CommonsKeyMap } from "@rue/lumo";
 import { isFunction } from "@rue/utils";
 
 
@@ -16,7 +16,7 @@ export interface AppCommons {
 }
 
 
-type ContextType<K> = K extends keyof ContextKeyMap ? _ContextInputType<ContextKeyMap[K]> : any;
+type ContextType<K> = K extends keyof CommonsKeyMap ? _ContextInputType<CommonsKeyMap[K]> : any;
 
 export type _ContextInputType<C> =
    C extends { name: '$IonOrIon' | '$IonizedOrIonized' | '$Ionized' | '$Ion' | '$Ref'; required: true } & ((arg: any) => { $inputType: infer I }) ? I
@@ -26,13 +26,13 @@ export type _ContextInputType<C> =
    : 'invalid typeConfig'
 
 
-export function fromCommons<K extends string | symbol>(key: K, context?: NodeCommons | AppCommons): ValidatedContextEntry<K> {
-   let _context = context || getClosestCommons();
+export function fromCommons<K extends string | symbol>(key: K, commons?: NodeCommons | AppCommons): ValidatedContextEntry<K> {
+   let _context = commons || getClosestCommons();
    if (!_context) throw new Error(``)
 
-   // climb context tree
+   // climb commons tree
    let parent: Commons | undefined = _context;
-   const typeConfig = contextTypeMap.get(key)
+   const typeConfig = commonsTypeMap.get(key)
    while (parent !== undefined) {
       const entries = parent.entries
       if (has(key, entries)) {
@@ -71,16 +71,16 @@ function get(key: string | symbol, entries: Map<any, any> | AnyObject | undefine
 
 
 
-export function createAppContext(entries: AnyObject | undefined, globalContext: AppCommons | undefined) {
+export function createAppCommons(entries: AnyObject | undefined, globalCommons: AppCommons | undefined) {
    const _entries = entries ? toMap(entries) : new Map()
-   const appContext = {
+   const appCommons = {
       entries: _entries,
-      parent: globalContext,
+      parent: globalCommons,
       app: undefined as unknown as AppCommons,
-      global: globalContext,
+      global: globalCommons,
    }
-   appContext.app = appContext
-   return appContext;
+   appCommons.app = appCommons
+   return appCommons;
 }
 
 function toMap(entries: AnyObject) {
@@ -92,10 +92,10 @@ function toMap(entries: AnyObject) {
 }
 
 export function provideAppwide<K extends string | symbol>(key: K, value: ContextType<K>) {
-   let context = getClosestCommons();
-   if (!context)
-      throw new Error("No context found :(")
-   const appEntries = context.app.entries || (context.app.entries = new Map());
+   let commons = getClosestCommons();
+   if (!commons)
+      throw new Error("No commons found :(")
+   const appEntries = commons.app.entries || (commons.app.entries = new Map());
    if (appEntries.has(key)) {
       if (__DEV__) {
          console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
@@ -107,13 +107,13 @@ export function provideAppwide<K extends string | symbol>(key: K, value: Context
    return value;
 }
 
-export function fromApp<K extends string | symbol>(key: K, context?: NodeCommons | AppCommons): ValidatedContextEntry<K> {
-   let _context = context || getClosestCommons();
+export function fromApp<K extends string | symbol>(key: K, commons?: NodeCommons | AppCommons): ValidatedContextEntry<K> {
+   let _context = commons || getClosestCommons();
    if (!_context) throw new Error(``)
-   const appContext = _context.app;
-   if (!appContext) throw new Error("No app context found :( This should never happen")
-   const typeConfig = contextTypeMap.get(key)
-   const value = appContext.entries?.get(key)
+   const appCommons = _context.app;
+   if (!appCommons) throw new Error("No app commons found :( This should never happen")
+   const typeConfig = commonsTypeMap.get(key)
+   const value = appCommons.entries?.get(key)
    if (value === undefined) return fromGlobal(key);
    if (!typeConfig) return value;
    return validateContextEntry(key, value, typeConfig)
@@ -122,21 +122,21 @@ export function fromApp<K extends string | symbol>(key: K, context?: NodeCommons
 
 
 
-export function createGlobalContext<E extends ContextEntries<E>>(entries?: E) {
+export function createGlobalCommons<E extends CommonsEntries<E>>(entries?: E) {
    const _entries = entries ? toMap(entries) : new Map()
-   const context = { entries: _entries, app: undefined, global: undefined } as unknown as AppCommons
-   context.global = context;
-   return context
+   const commons = { entries: _entries, app: undefined, global: undefined } as unknown as AppCommons
+   commons.global = commons;
+   return commons
 }
 
 export function provideGlobal<K extends string | symbol>(key: K, value: ContextType<K>) {
-   let context = getClosestCommons();
-   if (!context)
+   let commons = getClosestCommons();
+   if (!commons)
       throw new Error('')
-   if (!context.global)
-      throw new Error('No global context found. Call createGlobalContext() and pass into createApp() via config')
+   if (!commons.global)
+      throw new Error('No global commons found. Call createGlobalCommons() and pass into createApp() via config')
 
-   const globalEntries = context.global.entries!
+   const globalEntries = commons.global.entries!
    if (globalEntries.has(key)) {
       if (__DEV__) {
          console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
@@ -148,12 +148,12 @@ export function provideGlobal<K extends string | symbol>(key: K, value: ContextT
    return value;
 }
 
-export function fromGlobal<K extends string | symbol>(key: K, context?: NodeCommons | AppCommons): ValidatedContextEntry<K> {
-   let _context = context || getClosestCommons();
+export function fromGlobal<K extends string | symbol>(key: K, commons?: NodeCommons | AppCommons): ValidatedContextEntry<K> {
+   let _context = commons || getClosestCommons();
    if (!_context)
       throw new Error('')
    const globalEntries = _context?.global?.entries
-   const typeConfig = contextTypeMap.get(key)
+   const typeConfig = commonsTypeMap.get(key)
    const value = globalEntries?.get(key)
    if (!typeConfig) return value;
    return validateContextEntry(key, value, typeConfig)
@@ -163,7 +163,7 @@ export function fromGlobal<K extends string | symbol>(key: K, context?: NodeComm
 
 
 
-type ValidatedContextEntry<K> = K extends keyof ContextKeyMap ? _ValidatedContextEntry<ContextKeyMap[K]> : any;
+type ValidatedContextEntry<K> = K extends keyof CommonsKeyMap ? _ValidatedContextEntry<CommonsKeyMap[K]> : any;
 
 
 type _ValidatedContextEntry<C> =
@@ -173,7 +173,7 @@ type _ValidatedContextEntry<C> =
 
 function validateContextEntry(key: string | symbol, value: any, typeConfig: TypeConfig) {
    // const assertions = typeConfig;
-   // if (assertions) { //TODO: add assertion parameter to defineContextProp or provide a registerAssertions function
+   // if (assertions) { //TODO: add assertion parameter to defineCommonsEntry or provide a registerAssertions function
    //     const _assertions = assertions instanceof Array ? assertions : [assertions]
    //     for (const assert of _assertions) {
    //         assert(isIon(value) ? value() : value);
@@ -183,7 +183,7 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
       value = (<Function><unknown>typeConfig.default)()
    }
    else if (!typeConfig.optional && value === undefined) {
-      throw new Error(`Required context entry for ${String(key)} is undefined or not found.`)
+      throw new Error(`Required commons entry for ${String(key)} is undefined or not found.`)
    }
 
    //TODO: extract to shared function with prep() to reuse logic?
@@ -194,7 +194,7 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
 
       case '_Ion':
          if (!isIon(value)) {
-            throw new Error(`[INVALID INPUT] Value of context entry, '${String(key)}', must be an ion`)
+            throw new Error(`[INVALID INPUT] Value of commons entry, '${String(key)}', must be an ion`)
          }
          return value; //TODO: make Ion read-only, rein $Ion
 
@@ -203,7 +203,7 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
 
       case '_Ionized':
          if (!isIonizedModel(value)) {
-            throw new Error(`[INVALID INPUT] Value of context entry, '${String(key)}', must be an ionized`)
+            throw new Error(`[INVALID INPUT] Value of commons entry, '${String(key)}', must be an ionized`)
          }
          return unnestValue(value); //TODO: readonly, rein
 

@@ -1,15 +1,15 @@
 import { fromApp } from "./provide";
 
-export const contextTypeMap: Map<symbol | `${string}`, TypeConfig> = new Map();
+export const commonsTypeMap: Map<symbol | `${string}`, TypeConfig> = new Map();
 
-export function defineContextProp<D extends TypeConfig, S extends symbol | `${string}`>(symbolKey: S, typeDef: D) {
+export function defineCommonsEntry<D extends TypeConfig, S extends symbol | `${string}`>(symbolKey: S, typeDef: D) {
     const typeConfig = {
         key: symbolKey,
         name: typeDef.name,
         optional: typeDef.optional,
         default: typeDef.default
     } as { key: S } & D
-    contextTypeMap.set(symbolKey, typeConfig)
+    commonsTypeMap.set(symbolKey, typeConfig)
     return typeConfig
 }
 

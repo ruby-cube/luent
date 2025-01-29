@@ -1,5 +1,5 @@
 import { createCommons } from "../commons/Commons";
-import { defineContextProp } from "../commons/CommonsKey";
+import { defineCommonsEntry } from "../commons/CommonsKey";
 import { makeElement } from "../element/makeElement";
 import { NodeEntity } from "../node/makeNode";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
@@ -7,7 +7,7 @@ import { fromCommons } from "../commons/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
-import type { Context as ContextType } from "../commons/commons-stack";
+import type { Commons as CommonsType } from "../commons/commons-stack";
 import { v } from "../InputTypes";
 import { Ion } from "@rue/quarky";
 import { component, Slot } from "../component/InternalComponent";
@@ -20,10 +20,10 @@ export type TransitionConfig = TransitionFunction | AnimationFunction | Transiti
 
 export const GET_PHASIC_NODE = Symbol('usePhaseChange')
 
-const getPhasicNodeDef = defineContextProp(GET_PHASIC_NODE, v<() => TransitionNode>('?'))
+const getPhasicNodeDef = defineCommonsEntry(GET_PHASIC_NODE, v<() => TransitionNode>('?'))
 
 declare module '@rue/lumo' {
-    interface ContextKeyMap {
+    interface CommonsKeyMap {
         [GET_PHASIC_NODE]: typeof getPhasicNodeDef
     }
 }
@@ -83,8 +83,8 @@ function createPhasicNode(
     ), { provide: { [GET_PHASIC_NODE]: _getPhasicNode } })
 }
 
-export function getPhasicNode(context?: ContextType) {
-    const phasicNode = fromCommons(GET_PHASIC_NODE, context)?.()
+export function getPhasicNode(commons?: CommonsType) {
+    const phasicNode = fromCommons(GET_PHASIC_NODE, commons)?.()
     return phasicNode
 }
 

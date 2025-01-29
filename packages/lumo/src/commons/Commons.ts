@@ -3,7 +3,7 @@ import { component, InternalComponent, Slot } from "../component/InternalCompone
 import { getClosestCommons, popCommons, pushCommons } from "./commons-stack";
 import { AppCommons, _ContextInputType } from "./provide";
 import { ComponentConfig, NodeEntity } from "../node/makeNode";
-import { ContextKeyMap } from "@rue/lumo";
+import { CommonsKeyMap } from "@rue/lumo";
 import { asyncTrace_DEV } from "../../../flask/debug";
 
 export interface NodeCommons {
@@ -13,35 +13,31 @@ export interface NodeCommons {
     global?: AppCommons,
 }
 
-export type ContextEntries<T> = {
-    [K in keyof T]: K extends keyof ContextKeyMap ? _ContextInputType<ContextKeyMap[K]> : any;
+export type CommonsEntries<T> = {
+    [K in keyof T]: K extends keyof CommonsKeyMap ? _ContextInputType<CommonsKeyMap[K]> : any;
 }
 
 //API
-export const context = {
-    node: Context
-}
 
-
-export function Context<T extends ContextEntries<T>>(input: {
+export function Commons<T extends CommonsEntries<T>>(input: {
     provide: T,
     Slot: ()=>NodeEntity
 }) {
     const { Slot } = input
 
-    const parentContext = getClosestCommons()
-    if (!parentContext) {
+    const parentCommons = getClosestCommons()
+    if (!parentCommons) {
        asyncTrace_DEV()
-      throw new Error(`no context found :( This should never happen`)
+      throw new Error(`no commons found :( This should never happen`)
     }
 
-    const context: NodeCommons = {
+    const commons: NodeCommons = {
         entries: input.provide,
-        parent: parentContext,
-        app: parentContext?.app,
-        global: parentContext?.global
+        parent: parentCommons,
+        app: parentCommons?.app,
+        global: parentCommons?.global
     }
-    pushCommons(context)
+    pushCommons(commons)
     const nodeEntities = Slot()
     popCommons()
     return component(nodeEntities)
@@ -51,7 +47,7 @@ export function createCommons(
     Slot: () => NodeEntity,
     config: ComponentConfig,
 ): InternalComponent {
-   const output = Context({ Slot, provide: config.provide })
+   const output = Commons({ Slot, provide: config.provide })
    return new InternalComponent(output, undefined, undefined);
 }
 

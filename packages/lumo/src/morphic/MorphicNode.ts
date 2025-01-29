@@ -45,7 +45,7 @@ export class MorphicRenderKit {
       public switchMap: { [key: string]: RenderFunction },
       public activeKey: string,
       public preserve: boolean,
-      public context: NodeCommons | AppCommons,
+      public commons: NodeCommons | AppCommons,
       public outerFlask: Flask
    ) {
       if (preserve) {
@@ -70,7 +70,7 @@ export class MorphicRenderKit {
       const nodePod = this.dynamicNodePod[0]
       //TODO: 
       const nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(this.switchMap[this.activeKey]())), parent, nodePod);
-      pushCommons(this.context)
+      pushCommons(this.commons)
       this.flask.containCall(function renderMorphicNode() {
          mountNodeEntities(nodeEntities, parent, fragment)
       })
@@ -93,7 +93,7 @@ export class MorphicRenderKit {
          this.deactivateForm()
 
          // render new form
-         pushCommons(this.context)
+         pushCommons(this.commons)
          this.activateForm(key, parent, _nodePod)
          popCommons()
 
