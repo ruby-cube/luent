@@ -1,6 +1,7 @@
 import { component, If, Else, fade, ElseIf, slide, fromTag, v, target, prep, Ion } from "@rue/lumo";
-import { ion, ionize } from "@rue/quarky";
+import { ion, ionize, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
+import { asyncTrace_DEV } from "../../../packages/flask/debug";
 
 
 export function MountIf() {
@@ -51,15 +52,19 @@ export function MountIf() {
             $color.state = 'lim'
       }
    })
+
+   watch($color, ()=>{
+      asyncTrace_DEV()
+   })
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
    return component(
       <>
          {/* <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: 'lime' }}>shout</button> */}
          <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: ($color()) + 'e' }}>shout</button>
-         <h1>Hello {$=todos[0].name}</h1>
+         <h1>Hello {$ = todos[0].name}</h1>
          <div>hi</div>
          <$--transition>
-            {If($active,
+            {If($active, (asyncTrace_DEV(),
                <>
                   oh
                   <$--transit with={slide({ x: -100, duration: 2200 })}>
@@ -72,7 +77,7 @@ export function MountIf() {
                      <p>ready</p>
                   )}
                </>
-            )}
+            ))}
             {ElseIf($ready,
                <>
                   low

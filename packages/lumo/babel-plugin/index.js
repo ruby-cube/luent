@@ -207,11 +207,11 @@ function transformTemplateArgToRenderFunction(args) {
    const lastIndex = args.length - 1;
    const templateArg = args[lastIndex]
    // console.log('transforming template arg', templateArg)
-   if (t.isCallExpression(templateArg) && isTemplateFunction(templateArg.callee.name)) {
-      //TODO: what if fragment is transformed to ArrayExpression before this transformation?
-      args[lastIndex] = toRenderFunction(templateArg)
-   }
-   else if (templateArg && isJSXRoot(templateArg)) {
+   if (
+      t.isCallExpression(templateArg) && isTemplateFunction(templateArg.callee.name)
+      ||templateArg && isJSXRoot(templateArg)
+      || t.isSequenceExpression(templateArg)
+   ) {
       args[lastIndex] = toRenderFunction(templateArg)
    }
 }
@@ -339,13 +339,18 @@ function isTargetCall(node) {
 function toRenderFunction(node) {
    return t.arrowFunctionExpression(
       [], // No parameters
-      t.isSequenceExpression(node) ? node : normalizeToArrayExpression(node) //TODO: normalizeToArrayExpression for last argument in sequence expression
+      normalizeToArrayExpression(node)
    )
 }
+
 
 function normalizeToArrayExpression(node) {
    if (t.isArrayExpression(node)) return node;
    if (isJSXFragment(node)) return node;
+   if (t.isSequenceExpression(node)){
+      console.log('sequence expression!!')
+      return normalizeToArrayExpression(node.expressions.at(-1))
+   }
    const arrayExpression = t.arrayExpression([node])
    arrayExpression.visited = true;
    return arrayExpression

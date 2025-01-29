@@ -121,7 +121,7 @@ function logTrackedOpTrace(atom: TrackedOp) {
 
 const libraryPaths = ['/packages/'] //TODO: make this configurable
 
-export function getAppOnlyTrace() {
+export function getPublicTrace() {
    const rawTrace = getTrace() as string;
    const traceLines = rawTrace.split('\n');
    traceLines.shift()
@@ -132,4 +132,10 @@ export function getAppOnlyTrace() {
    if (appLines.length)
       return appLines.reduce((prev, line) => prev + '\n' + line).trim()
    return undefined
+}
+
+export function getInternalTrace(cutoff: string){
+   const rawTrace = getTrace() as string;
+   const rawTraceTail = rawTrace.split(cutoff).at(-1)!
+   return rawTraceTail.slice(rawTraceTail.indexOf('at ')).trim()
 }
