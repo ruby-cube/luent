@@ -181,7 +181,7 @@ export const MaybeIon = ((optional: '?' | '??') => {
       optional
    }
 }) as {
-   <T, M extends AnyObject = {}>(optional?: '?'): {
+   <T, M extends AnyObject = {}>(optional?: '?' | '??'): {
       name: 'MaybeIon',
       validatedType: Ion<T, M>;
       inputType: Ion<T, M> | T;

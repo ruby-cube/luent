@@ -1,5 +1,5 @@
 import { AnyObject, UnionToIntersection } from "@rue/types";
-import { isIon, isIonizedModel, isReined, readonly } from "@rue/quarky";
+import { AnyIon, Ion, isIon, isIonizedModel, isReined, readonly } from "@rue/quarky";
 import { toIon, toValue } from "../../../quarky/src/ion/toIons";
 import { getComponentAttributes } from "./makeComponent";
 import { isFunction, isObject } from "@rue/utils";
@@ -24,22 +24,24 @@ export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
  */
 
 type ComponentValidatedInput<C> = {
-   [K in keyof C as C[K] extends { required: true } | { default: true } ? K extends `on:${string}` ? never : K extends `nu:${infer S}` | `nu?:${infer S}` | `m:${infer S}` ? S
-   : K : never/* exclude optionals */]:
+   [K in keyof C as
+   K extends `on:${string}` ? never
+   : K extends `nu:${infer S}` | `nu?:${infer S}` | `m:${infer S}` ? S
+   : C[K] extends { name: 'MaybeIon' } ? never : K]:
 
-   C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? K extends `nu:${string}` ? I : K extends `nu?:${string}` ? I | DeepReadonly<I> : DeepReadonly<I>
+   C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ?
+   K extends `nu:${string}` ? MaybeOptional<I, C[K]>
+   : K extends `nu?:${string}` ? MaybeOptional<DeepReadonly<I>, C[K]>
+   : MaybeOptional<DeepReadonly<I>, C[K]>
    : 'invalid typeConfig'
-} & WithOptionals<C> & WithEmit<C>
+} & WithEmit<C> & WithIons<C>
 
-type WithOptionals<C> = {
-   [K in keyof C as C[K] extends { optional: '?' } ? K extends `on:${string}` ? never
-   : K : never/* exclude required */]?:
+type MaybeOptional<V, C> = C extends {optional: '?'} ? V | undefined : V;
 
-   C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? DeepReadonly<I>
-   : 'invalid typeConfig'
-}
 
-type WithEmit<C> = C extends { [key: `on:${string}`]: any } ? { emit: <K extends EventNames<C>>(eventName: K, event: EventObj<C, `on:${K}`>) => void } : {}
+type WithEmit<C> = C extends { [key: `on:${string}`]: any } ? { 
+   emit: <K extends EventNames<C>>(eventName: K, event: EventObj<C, `on:${K}`>) => void 
+} : {}
 
 type EventObj<C extends AnyObject, K extends string> = C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? Parameters<I extends (...args: any) => any ? I : never>[0]
    : 'invalid typeConfig'
@@ -48,6 +50,12 @@ type EventNames<C> = keyof _EventsOnly<C>
 type _EventsOnly<C> = { [K in keyof C as K extends `on:${infer S}` ? S : never]: C[K] }
 
 
+type WithIons<C> = {
+   [K in keyof C as C[K] extends { name: 'MaybeIon' } ? K extends string ? `$${K}` : K : never]:
+
+   C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? MaybeOptional<I, C[K]>
+   : 'invalid typeConfig'
+}
 
 
 const exampleConfig = {

@@ -19,7 +19,7 @@ import { TestDebugApp } from './TestDebugTools';
 import { Transformers } from './jsx-$transform';
 import { TestCommons } from './TestCommons';
 import { TestApp } from './TestApp';
-import { MarkdownApp } from './demos/markdown-app';
+import { MarkdownApp } from './demos/markdown-app/markdown-app';
 // import { PlainList } from './TestList';
 // import { HelloWorld } from './HelloWorld';
 // import { Check } from './childrenTest';

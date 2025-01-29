@@ -1,15 +1,22 @@
 import { marked } from 'marked'
+//@ts-expect-error
 import { debounce } from 'lodash-es'
 import { ion } from '@rue/quarky'
-import { component } from '@rue/lumo'
+import { component, fromTag, Ion, v } from '@rue/lumo'
 
 
-export function MarkdownApp() {
+export function MarkdownApp(
+   input = fromTag({
+      markdown: Ion<string>('??')('#Hello World')
+   })
+) {
+
+   const { $markdown } = input
 
    const $input = ion('# Hello World')
    const $output = ion(() => marked($input()))
 
-   const update = debounce(e => {
+   const update = debounce((e: any) => {
       $input.state = e.target.value
    }, 100)
 
@@ -20,7 +27,7 @@ export function MarkdownApp() {
             <div class='output'>{$output}</div>
             <div class='output'>{{ innerHTML: $output }}</div>
          </div>
-         <$--link href='/src/demos/markdown-app.css' rel='stylesheet' />
+         <$--link href='/src/demos/markdown-app/markdown-app.css' rel='stylesheet' />
       </>
    )
 }

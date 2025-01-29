@@ -18,3 +18,8 @@ function Tabs() {
 function MainView(){
    
 }
+
+const data = [
+
+]
+
