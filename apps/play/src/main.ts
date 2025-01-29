@@ -42,9 +42,6 @@ if (__DEV__) configureFlask({
 
 app.mount('#app')
 
-
-
-
 // function doSomething() {
 //     const dynamicNode = makeDynamicNode(false)
 //     const unrelated = true;

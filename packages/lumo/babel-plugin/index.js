@@ -357,7 +357,8 @@ function isDerivation(path) {
       return false;
    if (t.isArrowFunctionExpression(node)
       || t.isFunctionExpression(node)
-      || t.isLiteral(node)
+      || t.isObjectExpression(node)
+      || t.isArrayExpression(node)
       || t.isIdentifier(node)
       || t.isCallExpression(node) && isTemplateFunction(node.callee.name)) {
       return false;
@@ -384,7 +385,11 @@ function hasIonicCallExpression(path) {
 }
 
 function isIonicCallExpression(node) {
-   return t.isCallExpression(node) && /^\$[a-z]/.test(node.callee.name) && node.arguments.length === 0
+   return t.isCallExpression(node) && /^\$[a-z]/.test(node.callee.name) && node.arguments.length === 0 && !isParenthesized(node)
+}
+
+function isParenthesized(node){
+return 'extra' in node && node.extra.parenthesized === true;
 }
 
 function hasNonIonMemberExpression(path) {
