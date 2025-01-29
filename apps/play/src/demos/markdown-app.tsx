@@ -14,10 +14,13 @@ export function MarkdownApp() {
    }, 100)
 
    return component(
-      <div class='editor'>
-         <textarea class='input' on:input={update}>{$input}</textarea>
-         <div class='output'>{$output}</div>
-         <div class='output'>{{ innerHTML: $output }}</div>
-      </div>
+      <>
+         <div class='editor'>
+            <textarea class='input' on:input={update}>{$input}</textarea>
+            <div class='output'>{$output}</div>
+            <div class='output'>{{ innerHTML: $output }}</div>
+         </div>
+         <$--link href='/src/demos/markdown-app.css' rel='stylesheet' />
+      </>
    )
 }

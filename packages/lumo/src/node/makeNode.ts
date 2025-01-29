@@ -69,7 +69,7 @@ export type EventsConfig = {
 
 type Falsey = undefined | null | false
 export type StyleInput = MaybeIon<string | Falsey> | MaybeIon<{ [key: string]: MaybeIon<string | number | Falsey> }>
-export type ClassInput = MaybeIon<string | Falsey> | MaybeIon<{[key: string]: MaybeIon<Booleanny>}>
+export type ClassInput = MaybeIon<string | Falsey> | MaybeIon<{ [key: string]: MaybeIon<Booleanny> }>
 
 
 export type ElementConfig<K extends HTMLTag = HTMLTag> = {
@@ -122,7 +122,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 // }
 
 export function makeNode(
-   nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--commons' | 'vvv:mount' | 'vvv:create' | 'vvv:show' | '$--try' | '$--suspense' | '$--portal',
+   nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--commons' | 'vvv:mount' | 'vvv:create' | 'vvv:show' | '$--try' | '$--suspense' | '$--portal' | '$--link',
    Slot: undefined | (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent | SwapConfig | JSX.Element | undefined {
@@ -133,16 +133,21 @@ export function makeNode(
          return createCommons(Slot, <ComponentConfig>config)
 
       case '$--try':
-         if (!Slot) throw new Error(`Extraneous <$--commons>`)
+         if (!Slot) throw new Error(`Extraneous <$--try>`)
          return createTryNode(Slot, <TryNodeInput>config)
 
       case '$--suspense':
-         if (!Slot) throw new Error(`Extraneous <$--commons>`)
+         if (!Slot) throw new Error(`Extraneous <$--suspense>`)
          return createSuspenseNode(Slot, <SuspenseNodeInput>config)
 
       case '$--portal':
-         if (!Slot) throw new Error(`Extraneous <$--commons>`)
+         if (!Slot) throw new Error(`Extraneous <$--portal>`)
          return createPortalNode(Slot, <PortalNodeInput>config)
+
+      case '$--link':
+         return createPortalNode(() =>
+            makeElement('link', undefined, <ElementConfig>config, undefined)
+            , { to: 'head' })
 
       case 'vvv:show':
          return new SwapConfig('show')

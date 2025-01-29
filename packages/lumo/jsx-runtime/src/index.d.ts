@@ -2575,6 +2575,7 @@ declare global {
          'vvv:create': {};
          'i--i': {};
          '$--portal': PortalNodeInput & { Slot: Lumo.Slot }
+         '$--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
          '$--commons': ContextNodeInput & { Slot: Lumo.Slot };
          '$--suspense': SuspenseNodeInput & { Slot: Lumo.Slot };
          '$--try': TryNodeInput & { Slot: Lumo.Slot };

@@ -54,7 +54,7 @@ export function component<T extends AnyObject | undefined = AnyObject | undefine
 }
 
 export class InternalComponent {
-   nodeEntities: NodeEntity[] | null = null; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
+   nodeEntities: NodeEntity[] | undefined = undefined; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
    exposed: AnyObject | undefined;
    nodeKits?: NodeKit[]
 

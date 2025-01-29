@@ -348,7 +348,6 @@ function normalizeToArrayExpression(node) {
    if (t.isArrayExpression(node)) return node;
    if (isJSXFragment(node)) return node;
    if (t.isSequenceExpression(node)){
-      console.log('sequence expression!!')
       return normalizeToArrayExpression(node.expressions.at(-1))
    }
    const arrayExpression = t.arrayExpression([node])
