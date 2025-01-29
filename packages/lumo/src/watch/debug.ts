@@ -1,12 +1,7 @@
-import { ResumableListener } from "@rue/flask"
-import { AnyObject } from "@rue/types"
 import { AnyIon, asMetaIon, AtomicIon, ionize, isAtomicIon, Phase, watch } from "@rue/quarky"
-import { $thisEffect } from "../../../quarky/src/effects/ThisEffect";
 import { isTrackedOp, TrackedOp } from "../../../quarky/src/ionize/TrackedOp";
 import { isPropIon, PropIon } from "../../../quarky/src/ionize/PropIon";
 import { META } from "../../../quarky/src/ReactiveEntity";
-import { trace } from "console";
-import { asyncTraceStack } from "../../../flask/debug";
 
 export function getTrace() {
    Error.stackTraceLimit = Infinity;

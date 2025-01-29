@@ -14,8 +14,6 @@ import { AnyIon, isIon } from "../ion/Ion";
 import { asMetaIon, isAtomicIon, AtomicIon } from "../ion/AtomicIon";
 import { asIonicAtom } from "../derivations/IonicAtom";
 import { isPropIon, PropIon } from "../ionize/PropIon";
-import { popEffect, pushEffect, runCleanups, ThisEffect } from "./ThisEffect";
-import { neutron, Neutron } from "../ion/Neutron";
 import { toValue } from "../ion/toIons";
 import { StateChangeEvent } from "./StateChangeEvent";
 
@@ -213,7 +211,6 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
       watch(oldValue, effect, options)
    }
 
-   const $activeEffect = neutron() as Neutron<ThisEffect>
 
    function changeHandler() {
       const newValue = isMultiSubject ? getValues(subjects) : toValue(subject0) // This is when retracking happens
@@ -224,18 +221,15 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
       )
          return;
       eager = false;
-      runCleanups($activeEffect())
-      const _effect = new ThisEffect();
-      $activeEffect.state = _effect
 
       let prevSubject = currentWatchSubject;
       try {
          currentWatchSubject = subjects // prevents infinite loops for synchronous effects //TODO: do we need this in watchModel and initialize effect?
-         pushEffect(_effect)
+         // pushEffect(_effect)
          effect(new StateChangeEvent(subject, newValue, oldValue, getMutations(subjects)))
       }
       finally {
-         popEffect()
+         // popEffect()
          currentWatchSubject = prevSubject;
          oldValue = newValue;
       }
@@ -248,7 +242,6 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
    return setUpWatcher(
       watchSubjects,
       changeHandler,
-      $activeEffect,
       phase,
       options || {},
       ionicDerivations
@@ -356,12 +349,8 @@ function scheduleEffectEagerly(effect: Effect, phase: Phase) {
 export function watchEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
    const phase = options?.phase || Phase.BEFORE_RENDER;
    const retrack = options?.retrack || false;
-   // const selectiveSubjects = options?.only;
-   // const selector = selectiveSubjects?.[0] === true ? true : false;
-   // const additionalSubjects = normalizeWatchSubjects(options?.also || selector ? <any[]>selectiveSubjects!.slice(1) : selectiveSubjects);
-   // const additionalWatchSubjects = additionalSubjects ? asWatchSubjects(additionalSubjects) : [];
-   const $activeEffect = neutron() as Neutron<ThisEffect>
-   const reactiveEffect = createIonicEffect(effect, $activeEffect, retrack)
+
+   const reactiveEffect = createIonicEffect(effect, retrack)
    const watchSubject = asWatchSubject(reactiveEffect);
 
    // if (__DEV__ && selectiveSubjects && options?.also)
@@ -372,7 +361,7 @@ export function watchEffect(effect: () => void, options?: EffectOptions) { //NOT
    return setUpWatcher(
       [watchSubject],
       reactiveEffect,
-      $activeEffect,
+      // $activeEffect,
       phase,
       options || {},
       [reactiveEffect[META]]
@@ -383,7 +372,6 @@ export function watchEffect(effect: () => void, options?: EffectOptions) { //NOT
 function setUpWatcher(
    watchSubjects: WatchSubject[],
    effect: Effect,
-   $activeEffect: Neutron<ThisEffect>,
    phase: Phase,
    options: SustainedListenerOptions & RenderCycleOptions,
    ionicDerivations?: IonicDerivation[]
@@ -398,7 +386,7 @@ function setUpWatcher(
          }
       },
       remove(_effect) {
-         runCleanups($activeEffect())
+         // runCleanups($activeEffect())
          for (const subject of watchSubjects) {
             subject.unwatch(_effect, phase)
          }

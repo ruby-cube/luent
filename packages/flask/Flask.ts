@@ -1,7 +1,6 @@
 import { SetMap } from "@rue/utils";
 import { ContextualState } from "./context/AsyncContext";
 import { ResumableListener, SustainedListenerOptions } from "./Listener";
-import { $listen, $schedule } from "./flaskableListeners";
 
 export const [getActiveFlask, setFlask, flaskStack] = ContextualState<Flask>('flask')
 

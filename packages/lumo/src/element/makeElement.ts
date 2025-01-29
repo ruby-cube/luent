@@ -2,7 +2,7 @@ import { DOMNode, Slot } from "../component/InternalComponent";
 import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon, watch } from "@rue/quarky";
 import { isFunction, isObject, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
-import { $listen, ResumableListener, SustainedListenerOptions} from "@rue/flask";
+import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
@@ -11,7 +11,6 @@ import { isHTMLEvent } from "../html/attributes";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
 import { initializeListRef, initializeRef, isNodeRef, NodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
-import { $thisEffect, ThisEffect } from "../../../quarky/src/effects/ThisEffect";
 import { NodePod } from "../node/NodePod";
 import { _dog_ } from "../commons/x_context-keys";
 import { MaybeIon } from "../InputTypes";
@@ -153,10 +152,12 @@ function toString(value: any) {
 
 //TODO: figure out how to incorporate options into inline events
 function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, options?: SustainedListenerOptions & AddEventListenerOptions) {
+
    for (const key in events) {
       const handlers = normalizeToArray(events[key]);
       for (const handler of handlers) {
-         $listen(handler, options || {}, {
+         $listen(handler, options ? (options.preserve = true, options) : { preserve: true }, {
+            // preserve since there is no need to pause listener when it is unmounted--it will never be triggered
             enroll: (cb) => {
                node.addEventListener(key, cb, options);
             },
@@ -183,7 +184,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
       if (isIon(entry)) {
          watch(entry, ({ newState, oldState }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             if (oldState) removePreviousClasses(oldState, classList)
-            if (newState) addClasses(newState, classList, $thisEffect())
+            if (newState) addClasses(newState, classList)
          }, { eager: true, phase: Phase.RENDER })
       }
       else if (entry) {
@@ -214,12 +215,12 @@ function removePreviousClasses(prevValue: string | AnyObject, classList: DOMToke
 }
 
 
-function addClasses(value: string | AnyObject, classList: DOMTokenList, outerEffect?: ThisEffect) {
+function addClasses(value: string | AnyObject, classList: DOMTokenList) {
    if (isString(value)) {
       setUpClassesFromString(value, classList)
    }
    else if (isObject(value)) {
-      setUpClassesFromObject(value, classList, outerEffect)
+      setUpClassesFromObject(value, classList)
    }
    else {
       if (__DEV__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
@@ -227,17 +228,16 @@ function addClasses(value: string | AnyObject, classList: DOMTokenList, outerEff
 }
 
 
-function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList, outerEffect: ThisEffect | undefined) {
+function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList) {
    for (const key in entry) {
       const value = entry[key]
       if (value && isIon(value)) {
-         watch(value, ({newState, oldState}) => {
+         watch(value, ({ newState, oldState }) => {
             if (oldState) classList.remove(key)
             if (newState) classList.add(key)
          }, {
             eager: true,
             phase: Phase.RENDER,
-            // until: outerEffect?.onCleanup
          })
       }
       else if (value) {
@@ -272,9 +272,9 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {
       if (isIon(entry)) {
-         watch(entry, ({newState}/* value: string | AnyObject | Falsey */) => {
-            setUpStyleEntry(style, newState, $thisEffect());
-         }, { eager: true, phase: Phase.RENDER})
+         watch(entry, ({ newState }/* value: string | AnyObject | Falsey */) => {
+            setUpStyleEntry(style, newState);
+         }, { eager: true, phase: Phase.RENDER })
       }
       else {
          setUpStyleEntry(style, entry)
@@ -282,18 +282,17 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    }
 }
 
-function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey, outerEffect?: ThisEffect) {
+function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey) {
    if (entry instanceof Object) {
       for (const key in entry) {
          const value = entry[key];
          if (isIon(value)) {
-            watch(value, ({newState}/* value: string | number | Falsey */) => {
+            watch(value, ({ newState }/* value: string | number | Falsey */) => {
                assignStyleProperty(style, toStylePropertyName(key), newState)
             }, {
                eager: true,
                phase: Phase.RENDER,
                // __devName: 'setUpStyles', 
-               // until: outerEffect?.onCleanup
             })
          }
          else {
