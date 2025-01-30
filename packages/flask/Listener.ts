@@ -43,8 +43,8 @@ export type RemoveFunction<E extends EnrollFunction> =
    : (forRemoval: R) => void
    : never
 
-export type CleanupPause = () => void
-export type Pause = () => CleanupPause
+export type PauseCleanup = () => void
+export type Pause = () => PauseCleanup | void
 
 type ListenerConfig<E extends EnrollFunction = EnrollFunction> = {
    callback: Callback,
@@ -94,7 +94,7 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
    let unbind: (() => void) | undefined
 
    const activeListener = {
-      stop: _remove,
+      stop,
       pause: _pause,
       resume() {
          console.log('resuming')
@@ -109,7 +109,7 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
    const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask())
 
    const _callback = callbackIsRemover ? callback : wrapWithFlask(callback, {
-      afterCall: once ? _remove : undefined,
+      afterCall: once ? stop : undefined,
       enclosingFlask,
       trace_DEV
    })
@@ -117,7 +117,7 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
    mapHandlers(_callback, callback);
 
    let stopped = false;
-   function _remove() {
+   function stop() {
       if (stopped) return false;
       stopped = true;
       remove(returnVal ?? _callback);
@@ -127,11 +127,11 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
       if (pauseCleanup) pauseCleanup()
       return true;
    }
-   _remove.isRemover = true as const;
+   stop.isRemover = true as const;
    // _remove.__devName = options?.__devName;
 
 
-   let pauseCleanup: () => void;
+   let pauseCleanup: PauseCleanup | void;
    let paused = false;
    function _pause() {
       console.log('pausing')
@@ -152,7 +152,7 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
    }
 
    if (until) {
-      const pendingStop = until(_remove);
+      const pendingStop = until(stop);
       if (pendingStop) cancelPendingStop = pendingStop.stop;
       if (__DEV__ && !cancelPendingStop)
          console.warn('`until` function should be a flaskable scheduler that return a Pending object for cleanup. See @rue/flask')
