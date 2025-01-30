@@ -1,5 +1,5 @@
 import { ComponentSetup, HTMLTag, makeNode, normalizeToRenderFunction, Slot } from "@rue/lumo";
-import { Ion, isIon } from "@rue/quarky";
+import { AnyObject } from "@rue/types";
 import { isFunction, isObjectLiteral, normalizeToArray } from "@rue/utils";
 
 // without custom jsx compiler
@@ -30,13 +30,10 @@ export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Slot
    );
 }
 
-function processSlot(Slot: Slot | { z: Ion } | { [key: string]: Slot } | undefined) {
+function processSlot(Slot: Slot | { nu: AnyObject } | { [key: string]: Slot } | undefined) {
    if (Slot === undefined) return undefined;
    if (isObjectLiteral(Slot)) {
-      if ('z' in Slot && isIon(Slot.z)) {
-         return Slot.z();
-      }
-      // named slots
+      // named slots, innerHTML kit, or two-way binding
       return Slot;
    }
    return normalizeToRenderFunction(<Slot>Slot)

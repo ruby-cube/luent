@@ -3,11 +3,11 @@ import { MarkdownApp } from "./markdown-app";
 import { AtomicIon, ion, ionize } from "@rue/quarky";
 
 export function TabApp() {
-   // const data = ionize(
-   //    [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
-   // )
+   const data = ionize(
+      [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
+   )
 
-   const data = ionize({ id: 0, markdown: '# Sunny Day' })
+   // const data = ionize({ id: 0, markdown: '# Sunny Day' })
    const $active = ion(true, {
       toggle() {
          $active.state = !$active()
@@ -25,7 +25,7 @@ export function TabApp() {
          <button on:click={$open.toggle}>open</button>
          <button on:click={$active.toggle}>toggle</button>
          {/* {For(data, item => item.id, (item) => (
-            <MarkdownApp nu:markdown={item.$markdown}></MarkdownApp>
+            <MarkdownApp nu:markdown={ions(item).$markdown}></MarkdownApp>
          ))} */}
          {
          If($open, 'create', 

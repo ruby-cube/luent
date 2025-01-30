@@ -12,7 +12,7 @@ const attendant = asyncTask(e => {
 //--------------------------------
 
 asyncTask({
-   onMount: () =>
+   onMounted: () =>
       setTimeout(() => {
          console.log('time up!')
       }, 100),
@@ -22,7 +22,7 @@ asyncTask({
 })
 
 asyncTask({
-   onMount: () =>
+   onMounted: () =>
       setTimeout(() => {
          console.log('time up!')
       }, 100),
@@ -34,13 +34,13 @@ asyncTask({
 
 //--------------------------------
 
-const $timeoutA = onMount(() =>
+const $timeoutA = onMounted(() =>
    setTimeout(() => {
       console.log('time up!')
    }, 100)
 )
 
-const $timeoutB = onMount(() =>
+const $timeoutB = onMounted(() =>
    setTimeout(() => {
       console.log('time up!')
    }, 100)
@@ -53,13 +53,13 @@ onUnmount(() => {
 
 //--------------------------------
 
-const $timeoutA = onMount(intial => initial &&
+const $timeoutA = onMounted(intial => initial &&
    setTimeout(() => {
       console.log('time up!')
    }, 100)
 )
 
-const $timeoutB = onMount(() =>
+const $timeoutB = onMounted(() =>
    setTimeout(() => {
       console.log('time up!')
    }, 100)
@@ -73,7 +73,7 @@ onUnmount(final => {
 
 //--------------------------------
 
-onMount(() => {
+onMounted(() => {
    const timeoutA = setTimeout(() => {
       console.log('time up!')
    }, 100)
@@ -90,7 +90,7 @@ onMount(() => {
 
 
 listen(activateBtn, 'click', () => {
-   const $chat = onMount(() =>  // will always be a remount for things you want to toggle on and off based on whether somethings visible
+   const $chat = onMounted(() =>  // will always be a remount for things you want to toggle on and off based on whether somethings visible
       startChat()
    )
 
@@ -110,7 +110,7 @@ listen(activateBtn, 'click', () => {
 
 //--------------------------------
 
-const $timeouts = onMount(() => ({
+const $timeouts = onMounted(() => ({
    timeoutA: setTimeout(() => {
       console.log('time up!')
    }, 100),
@@ -133,7 +133,7 @@ onUnmount(() => {
 let timeoutA: string;
 let timeoutB: string;
 
-onMount(() => {
+onMounted(() => {
    timeoutA = setTimeout(() => {
       console.log('time up!')
    }, 100),

@@ -76,7 +76,7 @@ export function createApp<T extends AnyObject, E extends CommonsEntries<E>>(App:
 
       discard() {
          this.unmount()
-         flask.discard()
+         flask.emitDiscard()
       }
    }
 }

@@ -45,12 +45,12 @@ function mountNodeEntity(
         || nodeEntity instanceof ListRenderKit
         || nodeEntity instanceof ConditionalRenderSeries
     ) { //TODO: make a shared prototype
-       
         nodeEntity.mount(parent,fragment)
     }
     else if (isInnerHTMLKit(nodeEntity)){
       mountInnerHTML(nodeEntity, parent)
     }
+    
     // else if (nodeEntity instanceof ListRenderKit) { // may or may not be dynamic, depending on data
     //     nodeEntity.mount(parent, nodePod, fragment);
     // }

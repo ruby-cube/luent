@@ -213,7 +213,6 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
 
 
    function changeHandler() {
-      console.log('changign', subject)
       const newValue = isMultiSubject ? getValues(subjects) : toValue(subject0) // This is when retracking happens
 
       if (watchStateChange && (!eager && (isMultiSubject && noChanges(subjects, newValue, oldValue)

@@ -156,7 +156,7 @@ function useTable() {
 
         onExited(() => {
             // do work
-            flask.discard();
+            flask.emitDiscard();
         });
         
         return { /* ... */ };
@@ -182,7 +182,7 @@ function useTable() {
 
         onExited(() => {
             // do work
-            flask.discard();
+            flask.emitDiscard();
         });
 
         outerFlask.onDisposed(() => {
@@ -511,7 +511,7 @@ function useTable() {
 
         onExited(() => {
             // do work
-            flask.discard();
+            flask.emitDiscard();
         });
 
         outerFlask.onDisposed(() => {
@@ -547,7 +547,7 @@ const useTable = enflask((flask) => {
 
     onExited(() => {
         // do work
-        flask.discard();
+        flask.emitDiscard();
     });
 
     return { /* ... */ };
@@ -593,7 +593,7 @@ function useTable() {
 
         onExited(() => {
             // do work
-            flask.discard();
+            flask.emitDiscard();
         });
 
         const data = await fetchData(/* ... */);
@@ -619,7 +619,7 @@ function useTable() {
 
         onExited(() => {
             // do work
-            flask.discard();
+            flask.emitDiscard();
         });
 
         const [data, error] = await flask.after(
@@ -870,7 +870,7 @@ function useTable() {
 
         onExited(() => {
             // do work
-            flask.discard();
+            flask.emitDiscard();
         });
 
         outerFlask.onDisposed(() => {
@@ -934,7 +934,7 @@ const useTable = enflask((flask) => {
 
     onExited(() => {
         // do work
-        flask.discard();
+        flask.emitDiscard();
     });
 
     return { /* ... */ };

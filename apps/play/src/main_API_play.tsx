@@ -50,7 +50,7 @@ Dynamic node
 - context
 - onCreated
 - onDiscard
-- onRemount
+- onRemounted
 - onUnmount
 
 context.get()
@@ -110,7 +110,7 @@ function useMouse(flask) {
 
     return {
         discard() {
-            flask.discard()
+            flask.emitDiscard()
         }
     }
 }

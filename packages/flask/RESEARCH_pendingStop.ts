@@ -22,7 +22,7 @@ listen(document, 'click', watcher.stop, { once: true, preserve: true })
 
 watch($count, () => {
 
-}) // internally flask.onUnmount(), flask.onDiscard(), flask.onMount()
+}) // internally flask.onUnmount(), flask.onDiscard(), flask.onMounted()
 
 
 // CONCLUSION: 
@@ -35,7 +35,7 @@ watch($count, () => {
 
 
 // RESEARCH QUESTION 2: 
-// Should flask.onUnmount(), flask.onDiscard(), flask.onMount(), be normal listeners 
+// Should flask.onUnmount(), flask.onDiscard(), flask.onMounted(), be normal listeners 
 // ie 
 // - bound to encompassing flask
 // - pause and resume with flask

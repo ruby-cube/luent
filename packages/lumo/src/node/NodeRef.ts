@@ -31,8 +31,12 @@ export type NodesRef<T extends RefSource = RefSource> = (() => NodeReferent<T>[]
       [INTERNAL]: MetaNodesRef;
    }
 
-   export function isNodeRef(value: any){
+   export function isAnyNodeRef(value: any): value is NodeRef | NodesRef{
       return value instanceof Object && INTERNAL in value
+   }
+
+   export function isNodesRef(value: any): value is NodesRef{
+      return value instanceof Object && INTERNAL in value && value[INTERNAL] instanceof MetaNodesRef
    }
 
 

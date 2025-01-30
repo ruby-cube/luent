@@ -36,14 +36,14 @@ export class ThisFlask {
       flask.thisFlask = this;
    }
 
-   onMount(cb: (initial: boolean) => void) {
-      this.flask.onMount(() => cb(true))
-      this.flask.onRemount(() => cb(false))
+   onMounted(task: (initial: boolean) => void) {
+      this.flask.onMounted(() => task(true))
+      this.flask.onRemounted(() => task(false))
    }
 
-   onUnmount(cb: (final: boolean) => void) {
-      this.flask.onUnmount(() => cb(false))
-      this.flask.onDiscard(() => cb(true))
+   onUnmount(task: (final: boolean) => void) {
+      this.flask.onUnmount(() => task(false))
+      this.flask.onDiscard(() => task(true))
    }
 }
 
@@ -65,7 +65,7 @@ export class Flask {
          value: (task: Task) => on(LifecycleHook.UNMOUNT, this, task),
          writable: false
       })
-      Object.defineProperty(this, 'onRemount', {
+      Object.defineProperty(this, 'onRemounted', {
          value: (task: Task) => on(LifecycleHook.REMOUNT, this, task),
          writable: false
       })
@@ -73,15 +73,15 @@ export class Flask {
          value: (task: Task) => on(LifecycleHook.DISCARD, this, task),
          writable: false
       })
-      Object.defineProperty(this, 'unmount', {
+      Object.defineProperty(this, 'emitUnmount', {
          value: () => this.emit(LifecycleHook.UNMOUNT),
          writable: false
       })
-      Object.defineProperty(this, 'remount', {
+      Object.defineProperty(this, 'emitRemounted', {
          value: () => this.emit(LifecycleHook.REMOUNT),
          writable: false
       })
-      Object.defineProperty(this, 'discard', {
+      Object.defineProperty(this, 'emitDiscard', {
          value: () => {
             this.emit(LifecycleHook.DISCARD)
             this.tasks.delete(LifecycleHook.MOUNT);
@@ -93,9 +93,9 @@ export class Flask {
       })
 
       if (outer) {
-         const remountListener = outer.onRemount(this.remount)
-         const unmountListener = outer.onUnmount(this.unmount)
-         const discardListener = outer.onDiscard(this.discard)
+         const remountListener = outer.onRemounted(this.emitRemounted)
+         const unmountListener = outer.onUnmount(this.emitUnmount)
+         const discardListener = outer.onDiscard(this.emitDiscard)
          this.onDiscard(()=>{
             remountListener.stop()
             unmountListener.stop()
@@ -119,27 +119,28 @@ export class Flask {
    }
 
    // Because mount doesn't have a reason to be passed into other hooks as a callback, no need to bind to this.
-   mount() {
+   emitMounted() {
+      if (!this.tasks.get(LifecycleHook.MOUNT)) return;
+      console.log('mount flask', this.tasks.get(LifecycleHook.MOUNT))
       this.emit(LifecycleHook.MOUNT)
       this.tasks.delete(LifecycleHook.MOUNT);
    }
 
-   onMount(task: Task) {
-      if (!this.tasks.get(LifecycleHook.MOUNT)) return;
+   onMounted(task: Task) {
       return on(LifecycleHook.MOUNT, this, task)
    }
 
    onDiscard!: (task: Task) => ResumableListener
 
-   discard!: () => void
+   emitDiscard!: () => void
 
-   unmount!: () => void
+   emitUnmount!: () => void
 
    onUnmount!: (task: Task, options?: SustainedListenerOptions) => ResumableListener
 
-   remount!: () => void
+   emitRemounted!: () => void
 
-   onRemount!: (task: Task, options?: SustainedListenerOptions) => ResumableListener
+   onRemounted!: (task: Task, options?: SustainedListenerOptions) => ResumableListener
 
    containCall(fn: () => any) {
       try {

@@ -19,6 +19,7 @@ import { isFunction } from "@rue/utils";
 import { isNamedDerivation } from "../component/fromTag";
 import { InnerHTMLKit } from "./mountInnerHTML";
 import { getCommons, popCommons, pushCommons } from "../commons/commons-stack";
+import { MutableKit } from "./setUpNodeEntities";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -45,6 +46,7 @@ export type NodeEntity =
    | ConditionalRenderKit
    | ConditionalRenderSeries
    | InnerHTMLKit
+   // | MutableKit
 
 
 

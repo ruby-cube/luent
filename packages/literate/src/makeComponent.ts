@@ -90,7 +90,7 @@ function initializeComponent(
     }
 
     // const flask = component.flask!;
-    // flask.outer?.onDiscard(flask.discard) // no outer flask means it's the root component
+    // flask.outer?.onDiscard(flask.emitDiscard) // no outer flask means it's the root component
 }
 
 function validateOutput(output: any) {

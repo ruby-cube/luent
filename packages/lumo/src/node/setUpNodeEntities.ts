@@ -11,12 +11,16 @@ import { setUpTextNode } from "./mountTextNode";
 import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./mountInnerHTML";
 import { getClosestCommons } from "../commons/commons-stack";
 import { NodePod } from "./NodePod";
+import { AnyObject } from "@rue/types";
 
 // [ ] validate and apply swap tag
 // [ ] validate and compose conditional series
 // [V] spread arrays and nested array
 
-export type NodeKit = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderSeries | MorphicRenderKit | InnerHTMLKit
+export type NodeKit = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderSeries | MorphicRenderKit | InnerHTMLKit 
+// | MutableKit
+
+export type MutableKit = { nu: AnyObject }
 
 type HTMLString = string;
 

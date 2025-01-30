@@ -42,7 +42,6 @@ export class IonicDerivation<T = any> implements ReactiveEntity {
    atoms?: Set<IonicAtom>
 
    trackAtoms(ionicDerivation: (() => any) | Ionized<AnyObject>) {
-      console.log('tracking atoms')
       const tracker = new DependencyTracker();
       let value;
       let deps: Set<IonicAtom>;
@@ -73,7 +72,6 @@ export class IonicDerivation<T = any> implements ReactiveEntity {
    }
 
    untrackAtoms() {
-      console.log('untracking atoms')
       const atoms = this.atoms;
       if (!atoms) return;
       for (const atom of atoms) {

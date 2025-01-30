@@ -33,9 +33,13 @@ export function registerIonizedModel(ionicModel: IonizedModel, target: AnyObject
    ionizedModels.set(target, ionicModel)
 }
 
-export function isIonizedModel(value: any): value is AnyObject {
+export function isIonizedModel(value: any): value is Ionized<AnyObject> {
    if (!isObject(value)) return false;
-   return Boolean(value[META]?.type === IONIZED_MODEL);
+   return Boolean(
+      //@ts-expect-error
+      value[META]
+         ?.type === IONIZED_MODEL
+   );
 }
 
 type AbsorbedIon<T> = {
@@ -45,6 +49,7 @@ type AbsorbedIon<T> = {
 
 
 
+export type Ionized<T extends AnyObject, M extends {} = {}> = T & { [META]: MetaIonizedModel }
 // export type Ionized<T extends AnyObject, M extends {} = {}> = {
 //    [K in keyof T as (K extends '~$methods' ? never : K extends keyof M ? M[K] extends boolean ? K : K extends string ? `_${K}` : K : K)]:
 //    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? T[K] : V :

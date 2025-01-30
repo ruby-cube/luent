@@ -12,7 +12,7 @@ export function $thisScene() {
 
 class ThisScene extends ThisFlask {
    end() {
-      this.flask.discard()
+      this.flask.emitDiscard()
    }
 }
 

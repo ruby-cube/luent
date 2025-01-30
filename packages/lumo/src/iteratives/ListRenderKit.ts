@@ -182,7 +182,7 @@ export class ListRenderKit {
          if (isDynamic) {
             const flask = this.outerFlask.spawn('view')
             listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
-            flask.mount()
+            flask.emitMounted()
             flaskMap.set(nodePod, flask)
          }
          else {
@@ -196,7 +196,7 @@ export class ListRenderKit {
       for (const index of indicesToRemove) {
          const nodePod = this.dynamicNodePod![index] as NodePod;
          const flask = flaskMap.get(nodePod)
-         flask?.discard()
+         flask?.emitDiscard()
          removeDOMNodes(nodePod)
       }
       //TODO: how do I handle items that have been moved to another port?
@@ -258,7 +258,7 @@ export class ListRenderKit {
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             this.renderItem(toValue(list)[i], $index, parent, nodePod, fragment, flask)
-            flask.mount()
+            flask.emitMounted()
             setCurrentIndex(undefined)
             flaskMap.set(nodePod, flask)
          }

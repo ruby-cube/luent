@@ -216,7 +216,6 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
          //    }
          // }
          if (typeConfig) {
-            console.log('typeConfig', typeConfig, key)
             const config = typeConfig[key];
             if (config === undefined) continue;
             if ('optional' in config && value === undefined && 'default' in config && isFunction(config.default)) {

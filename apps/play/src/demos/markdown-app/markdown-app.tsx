@@ -2,8 +2,7 @@ import { marked } from 'marked'
 //@ts-expect-error
 import { debounce } from 'lodash-es'
 import { ion, ionize, watch } from '@rue/quarky'
-import { component, fromTag, Ion, NodeRef, v } from '@rue/lumo'
-import { $thisView } from '../../../../../packages/lumo/src/flask/ViewFlask'
+import { component, fromTag, Ion, NodeRef, onMounted, onUnmount } from '@rue/lumo'
 
 
 export function MarkdownApp(
@@ -14,13 +13,13 @@ export function MarkdownApp(
 
    const { $markdown } = input
 
-   const $output = ion(() => (console.log('getting output'), marked($markdown())))
+   const $output = ion(() => (marked($markdown())))
 
 
-   const update = debounce((e: any) => {
-      //@ts-expect-error
-      $markdown.state = e.target.value
-   }, 100)
+   // const update = (e: any) => {
+   //    //@ts-expect-error
+   //    $markdown.state = e.target.value
+   // }
 
    const $textArea = NodeRef('textarea')
 
@@ -29,7 +28,7 @@ export function MarkdownApp(
       selectionEnd: undefined as undefined | number,
    })
 
-   $thisView().onUnmount(final => {
+   onUnmount(final => {
       if (final) return;
       const textArea = $textArea()!
       const isActive = document.activeElement !== textArea
@@ -37,9 +36,10 @@ export function MarkdownApp(
       caretRange.selectionEnd = isActive ? textArea.selectionEnd : undefined
    })
 
-   $thisView().onMount(initial => {
-      if (initial) return;
+   onMounted(initial => {
       const textArea = $textArea()!
+      console.log('textArea', textArea)
+      if (initial) return;
       const { selectionEnd, selectionStart } = caretRange
       if (selectionStart === undefined) return;
       textArea.focus();
@@ -49,12 +49,11 @@ export function MarkdownApp(
 
    const $count = ion(0, {
       increment() {
-         console.log('incrementing')
          $count.state++
       }
    })
 
-   const $doubleCount = ion(()=>$count()*2)
+   const $doubleCount = ion(() => $count() * 2)
 
    // watch($count, e => {
    //    console.log(e.newState)
@@ -70,27 +69,16 @@ export function MarkdownApp(
    // Pausing and resuming is only helpful if state is shared across views
    // and state can be mutated outside of the hidden view
 
-   function setCaret() {
-      const textArea = $textArea()!
-      textArea.focus()
-      textArea.selectionStart = 3;
-      textArea.selectionEnd = 3;
-   }
 
-   function getCaret() {
-      const textArea = $textArea()!
-      console.log(textArea.selectionStart, textArea.selectionEnd)
-   }
+
 
    return component(
       <>
          <div>local state: {$count}</div>
          <div>local state: {$doubleCount}</div>
          <button on:click={$count.increment}>increment</button>
-         {/* <button on:click={setCaret}>caret</button> */}
-         {/* <button on:click={getCaret}>get caret</button> */}
          <div class='editor'>
-            <textarea class='input' on:input={update} ref={$textArea}>{$markdown}</textarea>
+            <textarea class='input' ref={$textArea}>{{ nu: $markdown }}</textarea>
             {/* <div class='output'>{$output}</div> */}
             <div class='output'>{{ innerHTML: $output }}</div>
             {/* <textarea>{$markdown}</textarea> */}

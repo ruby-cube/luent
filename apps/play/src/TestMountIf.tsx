@@ -208,7 +208,7 @@ function ArticleBlock(setup: {
 //         console.log("node ref", button, countDiv)
 //     })
 
-//     // onRemount(() => {
+//     // onRemounted(() => {
 //     //     console.log("activated yo")
 //     // })
 

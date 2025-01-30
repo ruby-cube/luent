@@ -1,6 +1,6 @@
 import { DOMNode, Slot } from "../component/InternalComponent";
-import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon, watch } from "@rue/quarky";
-import { isFunction, isObject, isString, noop, normalizeToArray } from "@rue/utils";
+import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon, watch, MaybeIon, isDerivedIon, WritableDerivedIon } from "@rue/quarky";
+import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
 import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask";
 import { mountNodeEntities } from "../node/mountNodeEntity";
@@ -8,12 +8,11 @@ import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "../html/attributes";
-import { setUpNodeEntities } from "../node/setUpNodeEntities";
-import { initializeListRef, initializeRef, isNodeRef, NodesRef } from "../node/NodeRef";
+import { MutableKit, setUpNodeEntities } from "../node/setUpNodeEntities";
+import { initializeListRef, initializeRef, isAnyNodeRef, NodesRef, isNodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
 import { NodePod } from "../node/NodePod";
 import { _dog_ } from "../commons/x_context-keys";
-import { MaybeIon } from "../InputTypes";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -36,12 +35,13 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
    const { attributes, events } = analyzeAttributes(other)
 
+
    const domNode = isHydrating() ? getElement() : document.createElement(tagName);
 
    if (ref) {
-      if (!isNodeRef(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef as ref")
-      if ($index) {
-         initializeListRef(<NodesRef>ref, domNode, $index)
+      if (!isAnyNodeRef(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef as ref")
+      if (isNodesRef(ref)) {
+         initializeListRef(<NodesRef>ref, domNode, $index!)
       }
       else {
          initializeRef(ref, domNode)
@@ -51,6 +51,8 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
    if (classes) setUpClasses(domNode, normalizeToArray(classes))
    if (styles) setUpStyles(domNode, normalizeToArray(styles))
    setUpEvents(domNode, events);
+
+   const _Slot = bindView(domNode, Slot, attributes)
    setUpAttributes(domNode, attributes);
    //  if (dynamicAttributes)
    //      setUpDynamicAttributes(
@@ -59,8 +61,8 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
    //          dynamicAttributes
    //      );
 
-   if (Slot) {
-      const rawOutput = normalizeToArray(isFunction(Slot) ? Slot() : Slot)
+   if (_Slot) {
+      const rawOutput = normalizeToArray(isFunction(_Slot) ? _Slot() : _Slot)
       const nodePod = new NodePod();
       const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodePod)
       mountNodeEntities(nodeEntities, domNode)
@@ -107,11 +109,8 @@ function analyzeAttributes(entries: AnyObject) {
       else if (isHTMLEvent(key)) {
          events[key.slice(3)] = entries[key];
       }
-      // else if (isHTMLAttribute(key, tag)) {
-      // }
       else {
          attributes[key] = entries[key];
-         // jsxProps[key] = jsxEntries[key];
       }
    }
    return {
@@ -121,17 +120,102 @@ function analyzeAttributes(entries: AnyObject) {
    }
 }
 
+function bindView(element: Element, Slot: Slot | undefined, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+   console.log('binding view', element.tagName)
+   switch (element.tagName) {
+      case 'INPUT':
+         bindInput(<HTMLInputElement>element, attributes)
+         return Slot;
+
+      case 'TEXTAREA':
+         return bindTextarea(<HTMLTextAreaElement>element, Slot);
+
+      default:
+         return Slot;
+   }
+}
+
+function bindInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+   if (!('nu:value' in attributes))
+      return;
+   const ion = attributes['nu:value'];
+   delete attributes['nu:value'];
+   attributes.value = ion;
+   if (!isIon(ion) || !('state' in ion)) {
+      if (__DEV__) console.warn('nu:value must receive a mutable ion for two-way binding to work')
+   }
+   else {
+      setUpInputListener(element, ion)
+   }
+}
+
+function bindTextarea(element: Element, Slot: Slot | undefined) {
+   console.log('bindTextArea', Slot)
+   if (!Slot || !isFunction(Slot)) return;
+   const nodeEntities = Slot();
+   const kit = nodeEntities instanceof Array ? nodeEntities[0] : nodeEntities;
+   if (!isObjectLiteral(kit) && !('nu' in kit))return;
+   const ion = kit.nu;
+   console.log('nu ion', ion)
+   if (!isIon(ion) || !('state' in ion)) {
+      if (__DEV__) console.warn('nu:value must receive a mutable ion for two-way binding to work')
+   }
+   else {
+      setUpInputListener(element, ion)
+   }
+   return ion;
+}
+
+function setUpInputListener(element: Element, ion: { state: any } | { set: (value: any) => any }) {
+   element.addEventListener('input', e => {
+      if (isDerivedIon(ion) && 'set' in ion) {
+         ion.set(
+            //@ts-expect-error
+            e.target.value
+         )
+      }
+      else if ('state' in ion) {
+         ion.state =
+            //@ts-expect-error
+            e.target.value;
+      }
+      else {
+         throw new Error('invalid two-way binding')
+      }
+   })
+}
+
+// type ViewBindingKit = {
+//    ion: { state: any } | { set: (value: any) => any };
+//    isSameAsView: (value: any) => boolean;
+// }
+
+// function isViewBindingKit(value: any): value is ViewBindingKit {
+//    return 'fromInput' in value;
+// }
+
 function setUpAttributes(node: Element, attributes: { [key: string]: any | DerivedIon<any> }) {
    for (const key in attributes) {
+      const _key = key.startsWith('nu:') ? key.slice(3) : key;
+      if (__DEV__ && key.startsWith('nu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
+      // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'nu:' keys are invalid
       const value = attributes[key]
-      //TODO: only attributes that affect layout should be scheduled for render
+      //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {
          watch(value, ({ newState }) => {
-            setAttribute(node, key, newState)
+            setAttribute(node, _key, newState)
          }, { eager: true, phase: Phase.RENDER })
       }
+      // else if (isViewBindingKit(value)) {
+      //    watch(value.ion, ({ newState }) => {
+      //       if (value.isSameAsView(newState)) {
+      //          return;
+      //       }
+      //       setAttribute(node, _key, newState)
+      //    }, { eager: true, phase: Phase.RENDER })
+      // }
       else if (!isHydrating()) {
-         node.setAttribute(key, toString(value))
+         node.setAttribute(_key, toString(value))
       }
    }
 }

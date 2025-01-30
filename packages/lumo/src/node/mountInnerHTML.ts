@@ -22,7 +22,7 @@ export function mountInnerHTML(kit: InnerHTMLKit, parent: Element) {
 function keepInnerHTMLUpdated(htmlString: ReactiveGet<any>, parentNode: Element) {
    watch(htmlString, ({ newState }) => {
       parentNode.innerHTML = toString(newState);
-   }, { phase: Phase.RENDER, __devName: keepInnerHTMLUpdated.name });
+   }, { phase: Phase.RENDER });
 }
 
 

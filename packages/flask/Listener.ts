@@ -97,7 +97,6 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
       stop,
       pause: _pause,
       resume() {
-         console.log('resuming')
          if (stopped || !paused) return false;
          paused = false;
          returnVal = enroll(_callback);
@@ -176,7 +175,7 @@ const noopable = {
 function bindListenerToFlask(listener: ResumableListener, flask: Flask, preserve: boolean, until: any | null) {
    const { stop: cancelStop } = until === null ? noopable : flask.onDiscard(listener.stop);
    const { stop: stopPausing } = preserve ? noopable : flask.onUnmount(listener.pause);
-   const { stop: stopResuming } = preserve ? noopable : flask.onRemount(listener.resume);
+   const { stop: stopResuming } = preserve ? noopable : flask.onRemounted(listener.resume);
 
    return function unbind() {
       cancelStop()
@@ -190,7 +189,7 @@ function bindListenerToFlask(listener: ResumableListener, flask: Flask, preserve
 function isRemover(callback: Callback) {
    return "isRemover" in callback && callback.isRemover;
 }
-// // onMount doesn't make sense for task flasks except as remount... $thisTask() instead of flask? $thisNode()
+// // onMounted doesn't make sense for task flasks except as remount... $thisTask() instead of flask? $thisNode()
 
 // function wrapWithFlask(callback: Callback, config: {
 //    afterCall?: () => void,
@@ -218,7 +217,7 @@ function wrapWithFlask(callback: Callback, config: {
    const context = $_snap_context()
    let scene: Flask;
    return (...args: any[]) => {
-      if (scene) scene.discard()
+      if (scene) scene.emitDiscard()
       scene = enclosingFlask?.spawn('scene') || new Flask({ type: 'scene' }) //QUESTION: Do we want callback to be called again on remount?? you should only call if dirty right?
       return callWithContext({
          context,
