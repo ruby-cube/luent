@@ -1,4 +1,4 @@
-import { ResumableListener, EnrollFunction, SustainedListenerOptions, RemoveFunction, ScheduleStop, toListenerOptions, SchedulerOptions, makeListener, Listener } from "./Listener";
+import { ResumableListener, EnrollFunction, SustainedListenerOptions, RemoveFunction, ScheduleStop, toListenerOptions, SchedulerOptions, makeListener, Listener, Pause } from "./Listener";
 import { buildTrace_DEV } from "./debug";
 
 export type CallbackRemover = {
@@ -25,6 +25,7 @@ export function defineCustomCleanupScheduler(scheduler: (...args: any[]) => (cle
 }
 
 
+
 export function $listen<
    E extends EnrollFunction
 >(
@@ -32,14 +33,18 @@ export function $listen<
    options: SustainedListenerOptions,
    config: {
       enroll: E,
-      remove: RemoveFunction<E>
+      remove: RemoveFunction<E>,
+      pause?: Pause,
+      resume?: Function,
    }
 ) {
-   const { enroll, remove } = config;
+   const { enroll, remove, pause, resume } = config;
    return makeListener({
       callback,
       enroll,
       remove,
+      pause,
+      resume,
       options,
       trace_DEV: __DEV__ ? buildTrace_DEV() : undefined
    })
@@ -50,13 +55,17 @@ export function $schedule<
    E extends EnrollFunction
 >(callback: Callback, options: SchedulerOptions | undefined, config: {
    enroll: EnrollFunction,
-   remove: RemoveFunction<E>
+   remove: RemoveFunction<E>,
+   pause?: Pause,
+   resume?: Function,
 }): Pending {
-   const { enroll, remove } = config;
+   const { enroll, remove, pause, resume } = config;
    return makeListener({
       callback,
       enroll,
       remove,
+      pause,
+      resume,
       options: toListenerOptions(options),
       trace_DEV: __DEV__ ? buildTrace_DEV() : undefined
    })

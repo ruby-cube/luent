@@ -24,13 +24,15 @@ export function trigger(target: AtomicIon | PropIon, newValue?: any, oldValue?: 
     // }
 
     if (isWatched(target)) {
-        asWatchSubject(target).triggerEffects()
-    }
+       asWatchSubject(target).triggerEffects()
+      }
+      
     triggerIonicAtom(target, newValue, oldValue)
 }
 
 export function triggerIonicAtom(target: ReactivePrimitive, newValue?: any, oldValue?: any) {
-    if (isIonicAtom(target)) {
+   if (isIonicAtom(target)) {
+      
         asIonicAtom(target).triggerDerivations(newValue, oldValue)
     }
 }

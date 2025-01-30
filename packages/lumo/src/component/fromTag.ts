@@ -3,7 +3,7 @@ import { AnyIon, Ion, isIon, isIonizedModel, isReined, readonly } from "@rue/qua
 import { toIon, toValue } from "../../../quarky/src/ion/toIons";
 import { getComponentAttributes } from "./makeComponent";
 import { isFunction, isObject } from "@rue/utils";
-import { DeepReadonly, v } from "../InputTypes";
+import { DeepReadonly, v, Readonly, MaybeIon } from "../InputTypes";
 
 //TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
 
@@ -26,21 +26,24 @@ export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
 type ComponentValidatedInput<C> = {
    [K in keyof C as
    K extends `on:${string}` ? never
-   : K extends `nu:${infer S}` | `nu?:${infer S}` | `m:${infer S}` ? S
+   : K extends `nu:${string}` | `nu?:${string}` ? never
+   : K extends `m:${infer S}` ? S
    : C[K] extends { name: 'MaybeIon' } ? never : K]:
 
    C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ?
-   K extends `nu:${string}` ? MaybeOptional<I, C[K]>
-   : K extends `nu?:${string}` ? MaybeOptional<DeepReadonly<I>, C[K]>
-   : MaybeOptional<DeepReadonly<I>, C[K]>
+   // K extends `nu:${string}` ? MaybeOptional<I, C[K]>
+   // : K extends `nu?:${string}` ? MaybeOptional<DeepReadonly<I> | I, C[K]>
+   // : 
+   MaybeOptional<DeepReadonly<I>, C[K]>
    : 'invalid typeConfig'
-} & WithEmit<C> & WithIons<C>
+} & (HasEvent<C> extends true ? WithEmit<C> : {}) & WithIons<C> & WithMutable<C>
 
-type MaybeOptional<V, C> = C extends {optional: '?'} ? V | undefined : V;
+type MaybeOptional<V, C> = C extends { optional: '?' } ? V | undefined : V;
 
+type HasEvent<C> = keyof C extends never ? false : keyof C extends `on:${string}` ? true : false;
 
-type WithEmit<C> = C extends { [key: `on:${string}`]: any } ? { 
-   emit: <K extends EventNames<C>>(eventName: K, event: EventObj<C, `on:${K}`>) => void 
+type WithEmit<C> = C extends AnyObject ? {
+   emit: <K extends EventNames<C>>(eventName: K, event: EventObj<C, `on:${K}`>) => void
 } : {}
 
 type EventObj<C extends AnyObject, K extends string> = C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? Parameters<I extends (...args: any) => any ? I : never>[0]
@@ -56,6 +59,30 @@ type WithIons<C> = {
    C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? MaybeOptional<I, C[K]>
    : 'invalid typeConfig'
 }
+
+type WithMutable<C> = {
+   [K in keyof C as K extends `nu:${infer N}` | `nu?:${infer N}` ? MaybeIonKey<N, C[K]> : never]:
+   C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ?
+   K extends `nu:${string}` ? MaybeOptional<I, C[K]>
+   : K extends `nu?:${string}` ? MaybeOptional<DeepReadonly<I> | I, C[K]>
+   : never : never
+}
+
+type MaybeIonKey<K, Config> = Config extends { name: 'MaybeIon' } ? K extends string ? `$${K}` : K : K;
+
+type MaybeMutableIon<I, Config> =
+   Config extends { name: 'MaybeIon' } ?
+   I : I
+
+
+
+
+
+function isMutable<T extends DeepReadonly<AnyObject> | AnyObject>(value: T): value is Exclude<T, Readonly<any>> {
+   return true;
+}
+
+
 
 
 const exampleConfig = {
@@ -106,6 +133,7 @@ tryIt({ frog: f, dove: d })
 
 //@ts-expect-error
 tryIt({ dove: d, well: w })
+
 
 /**
  * Component Tag Attributes

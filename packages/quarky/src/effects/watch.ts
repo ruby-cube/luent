@@ -49,10 +49,10 @@ export type MutationRecord = {
 
 
 // export type MutationEffect<T extends IonizedModel = IonizedModel> = (newValue: T, mutations: MutationRecord[]) => void
-export type OnChangeHandler<T = any> =  (event: StateChangeEvent<T>) => void
-   // :  (newValue: 'frog', oldValue: 'frog') => void
-   // (newValue: { [K in keyof T]: T[K] extends () => infer R ? R : T[K] }, oldValue: { [K in keyof T]: T[K] extends () => infer R ? R : T[K] }) => void
-   // : (newValue: T, oldValue: T) => void
+export type OnChangeHandler<T = any> = (event: StateChangeEvent<T>) => void
+// :  (newValue: 'frog', oldValue: 'frog') => void
+// (newValue: { [K in keyof T]: T[K] extends () => infer R ? R : T[K] }, oldValue: { [K in keyof T]: T[K] extends () => infer R ? R : T[K] }) => void
+// : (newValue: T, oldValue: T) => void
 
 export type ReactiveEffect = {
    (): void;
@@ -213,6 +213,7 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
 
 
    function changeHandler() {
+      console.log('changign', subject)
       const newValue = isMultiSubject ? getValues(subjects) : toValue(subject0) // This is when retracking happens
 
       if (watchStateChange && (!eager && (isMultiSubject && noChanges(subjects, newValue, oldValue)
@@ -378,7 +379,11 @@ function setUpWatcher(
 ) {
    let wrappedEffect: () => void;
    const forNextCycle = options?.cycle === 'next';
-   const { pause, resume, stop } = $listen(effect, options || {}, {
+   let dirty = false;
+   function markDirty() {
+      dirty = true;
+   }
+   return $listen(effect, options || {}, {
       enroll(_effect) {
          wrappedEffect = _effect;
          for (const subject of watchSubjects) {
@@ -386,7 +391,6 @@ function setUpWatcher(
          }
       },
       remove(_effect) {
-         // runCleanups($activeEffect())
          for (const subject of watchSubjects) {
             subject.unwatch(_effect, phase)
          }
@@ -395,31 +399,52 @@ function setUpWatcher(
                derivation.untrackAtoms()
             }
          }
-      }
-   });
-
-   let dirty = false;
-
-   return {
-      stop,
+      },
       pause() {
-         const success = pause()
-         if (!success) return false;
          for (const subject of watchSubjects) {
             subject.watch(markDirty, phase)
          }
-         function markDirty() {
-            dirty = true;
+         return () => {
+            for (const subject of watchSubjects) {
+               subject.unwatch(markDirty, phase)
+            }
          }
-         return true;
       },
       resume() {
-         const success = resume()
-         if (!success) return false;
-         if (dirty) wrappedEffect()
-         dirty = false;
-         return true;
+         for (const subject of watchSubjects) {
+            subject.unwatch(markDirty, phase)
+         }
+         if (dirty) {
+            wrappedEffect()
+            dirty = false;
+         }
       }
-   }
+   });
+
+
+
+   // return {
+   //    stop,
+   //    pause() {
+   //       console.log('pause watcher')
+   //       const success = pause()
+   //       if (!success) return false;
+   //       for (const subject of watchSubjects) {
+   //          subject.watch(markDirty, phase)
+   //       }
+   //       function markDirty() {
+   //          dirty = true;
+   //       }
+   //       return true;
+   //    },
+   //    resume() {
+   //       console.log('resume watcher')
+   //       const success = resume()
+   //       if (!success) return false;
+   //       if (dirty) wrappedEffect()
+   //       dirty = false;
+   //       return true;
+   //    }
+   // }
 }
 

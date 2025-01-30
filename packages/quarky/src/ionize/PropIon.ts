@@ -158,15 +158,14 @@ export function getPropIon(
 }
 
 function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel: T, key: K, methods?: M & { [key: string]: PropertyKey | true }): PropIon<T[K], M> {
-    const rawTarget = toRaw(ionicModel)
-
+    const rawTarget = toRaw(ionicModel) as T
 
     function $propIon() {
         reregisterIfNeeded()
         const tracker = getActiveTracker()
         if (tracker)
-            return toRaw(ionicModel)[key]
-        return ionicModel[key];
+         return ionicModel[key];
+        return rawTarget[key]
     }
 
     const proto = {
@@ -176,6 +175,12 @@ function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel:
         //     if (__DEV__) __devCheckIfTracked()
         //     return setValue(ionicModel, key, newValue, ionicModel[key])
         // }
+        get state() {
+         return rawTarget[key]
+      },
+      set state(value: T[K]) {
+         ionicModel[key] = value;
+      },
     } as AnyObject
 
 

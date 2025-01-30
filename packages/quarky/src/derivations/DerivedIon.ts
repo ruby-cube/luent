@@ -81,8 +81,6 @@ export function createDerivedIon<T extends any>(
       return pureGetter as DerivedNeutron;
    }
 
-   let initialized = false;
-
    function $derivedIon() {
       // const tracker = getActiveTracker()
       // if (tracker) {
@@ -98,14 +96,15 @@ export function createDerivedIon<T extends any>(
       // }
 
       // if (!initialized || derived.dirty && retrack) {
+         const initialized = !!derived.atoms;
          const value = !initialized ? derived.trackAtoms(pureGetter)
             : (derived.dirty && retrack) ? derived.trackAtoms(() => pureGetter(derived.value))
                : derived.dirty ? pureGetter(derived.value) : derived.value;
-         derived.forwardAtoms(derived.atoms)
+
+         derived.forwardAtoms(derived.atoms!)
          if (!initialized || derived.dirty)
             derived.updateValue(value)
          if (!retrack) derived.undirty()
-         initialized = true;
          return value;
       // }
 

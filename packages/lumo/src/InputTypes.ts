@@ -82,7 +82,6 @@ type PropertyValuesOf<T> = T[keyof T];
 // const el = array.splice(0, 1)
 
 
-export type MaybeIon<T> = (($?: any) => T) | T
 
 export const v = ((optional?: '?' | '??') => {
    if (optional === '??')
@@ -366,7 +365,7 @@ const _PURE_ = Symbol('pure function marker')
 export type DeepReadonly<T> = T extends Function ? T : T extends (infer E)[] ? readonly DeepReadonly<E>[] : T extends Object ? Readonly<T> : T;
 
 
-type Readonly<T> = {
+export type Readonly<T> = {
    readonly [K in keyof T
    as T[K] extends { [_PURE_]: true } ? K
    : T extends { '~pure'?: infer P } ? K extends P ? T[K] extends (...args: any[]) => any ? ReturnType<T[K]> extends void ? never : K : K : T[K] extends Function ? never : K

@@ -49,7 +49,8 @@ export function createAtomicIon<
          return metaIon.value //TODO: not sure if this should allow tracking or not by calling $ion()
       },
       set state(value: T) {
-         setIonValue(value)
+         setValue(metaIon, value, metaIon.value);
+         // setIonValue(value)
       },
 
    } as AnyObject
@@ -58,9 +59,9 @@ export function createAtomicIon<
       attachIonMethods(proto, methods)
    }
 
-   function setIonValue(newValue: any) {
-      return setValue(metaIon, newValue, metaIon.value);
-   }
+   // function setIonValue(newValue: any) {
+   //    return setValue(metaIon, newValue, metaIon.value);
+   // }
 
    function $ion() {
       if (inert) return metaIon.value;
@@ -94,6 +95,7 @@ function setValue(metaIon: MetaIon, newValue: unknown, oldValue: unknown) {
       trigger(metaIon.o, newValue, oldValue) // for onTriggered
       return oldValue;
    }
+   
    const $ion = metaIon.o;
    const _newValue = shouldIonize(newValue, metaIon) ? ionize(newValue) : newValue
    // toIonicModelIfMust(newValue, metaIon)

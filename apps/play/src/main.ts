@@ -20,6 +20,7 @@ import { Transformers } from './jsx-$transform';
 import { TestCommons } from './TestCommons';
 import { TestApp } from './TestApp';
 import { MarkdownApp } from './demos/markdown-app/markdown-app';
+import { TabApp } from './demos/markdown-app/TestTabs';
 // import { PlainList } from './TestList';
 // import { HelloWorld } from './HelloWorld';
 // import { Check } from './childrenTest';
@@ -35,7 +36,7 @@ import { MarkdownApp } from './demos/markdown-app/markdown-app';
 
 // const rootContext = createGlobalCommons()
 
-const app = createApp(MarkdownApp)
+const app = createApp(TabApp)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

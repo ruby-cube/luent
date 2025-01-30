@@ -43,10 +43,15 @@ export type RemoveFunction<E extends EnrollFunction> =
    : (forRemoval: R) => void
    : never
 
+export type CleanupPause = () => void
+export type Pause = () => CleanupPause
+
 type ListenerConfig<E extends EnrollFunction = EnrollFunction> = {
    callback: Callback,
    enroll: E,
    remove: RemoveFunction<E>,
+   pause?: Pause,
+   resume?: Function,
    options: SustainedListenerOptions | undefined
    trace_DEV?: string,
 }
@@ -63,7 +68,7 @@ export function toListenerOptions(options: SchedulerOptions | undefined) {
 export function makeListener<E extends (wrappedCB: Callback) => void | Callback>(
    config: ListenerConfig<E>
 ): ResumableListener {
-   const { enroll, remove, callback, options, trace_DEV } = config;
+   const { enroll, remove, callback, pause, resume, options, trace_DEV } = config;
    if (!callback) {
       if (__DEV__) console.warn("No callback was passed into makeListener")
       function noOp() {
@@ -90,11 +95,13 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
 
    const activeListener = {
       stop: _remove,
-      pause,
+      pause: _pause,
       resume() {
+         console.log('resuming')
          if (stopped || !paused) return false;
          paused = false;
          returnVal = enroll(_callback);
+         if (resume) resume();
          return true;
       }
    }
@@ -117,15 +124,20 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
       if (__DEV__) unmarkNoCleanup(activeListener);
       if (cancelPendingStop) cancelPendingStop();
       if (unbind) unbind();
+      if (pauseCleanup) pauseCleanup()
       return true;
    }
    _remove.isRemover = true as const;
    // _remove.__devName = options?.__devName;
 
+
+   let pauseCleanup: () => void;
    let paused = false;
-   function pause() {
+   function _pause() {
+      console.log('pausing')
       if (stopped || paused) return false;
       remove(returnVal ?? _callback);
+      if (pause) pauseCleanup = pause();
       paused = true;
       return true;
    }
