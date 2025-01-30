@@ -94,6 +94,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       else {
          const flask = kit.flask = this.outerFlask.spawn('view')
          this.render(kit, parent, fragment, flask)
+         flask.mount() // emits mount hook
       }
 
       const showKits = this.showKits
@@ -377,6 +378,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    ) {
       const kit = this.statements[activeIndex]
       const activationType = kit.type
+      const isInitialMount = !kit.nodePod
       const pod = kit.nodePod || (kit.nodePod = this.nodePod.appendNodePod())
 
       if (activationType === 'show') { //NOTE: 'show' statements are not dynamic nodes because they are not removed from the DOM and setup is not rerun
@@ -387,7 +389,10 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn('view'))
       this.render(kit, parent, undefined, flask)
-      if (activationType === 'mount') flask.remount() // remount preserved watchers etc.
+      if (activationType === 'create' || isInitialMount)
+         flask.mount()
+      else
+         flask.remount() // remount preserved watchers etc.
    }
 }
 

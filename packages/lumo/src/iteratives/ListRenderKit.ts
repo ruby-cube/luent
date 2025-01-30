@@ -182,6 +182,7 @@ export class ListRenderKit {
          if (isDynamic) {
             const flask = this.outerFlask.spawn('view')
             listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
+            flask.mount()
             flaskMap.set(nodePod, flask)
          }
          else {
@@ -257,6 +258,7 @@ export class ListRenderKit {
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             this.renderItem(toValue(list)[i], $index, parent, nodePod, fragment, flask)
+            flask.mount()
             setCurrentIndex(undefined)
             flaskMap.set(nodePod, flask)
          }
