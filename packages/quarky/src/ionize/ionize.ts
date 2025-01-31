@@ -8,7 +8,6 @@ import { inert, Inert, isInert } from "./inert";
 import { AnyIon, Ion, ion, isIon } from "../ion/Ion";
 import { AtomicIon, MetaIon } from "../ion/AtomicIon";
 import { createIonizedModel, getStructureConfigs } from "./IonizedModel";
-import { PropIon } from "./PropIon";
 import { getTrace } from "../../../lumo/src/watch/debug";
 
 
@@ -180,23 +179,14 @@ export function toRaw<T>(target: T): AsRaw<T> {
 }
 
 
-// export function toRawIfNeeded(
-//     newValue: any,
-//     key?: ProxyTargetKey
-// ) {
-//     if (isIonizedModel(newValue)) return toRaw(newValue);
-//     return newValue;
-// }
+export function o$<T>(model: T): AsIons<T> {
+   return model as AsIons<T>
+}
 
-
-// export function createIonicModel( //TODO: combine with createIonizedModel
-//    target: object,
-//    methods: { 'all methods'?: true } | undefined | 'all methods',
-// ): object {
-//    const _methods = methods === 'all methods' ? undefined : methods;
-//    const exposeAllMethods = methods === 'all methods' ? true : methods?.['all methods']
-//    return createIonizedModel(getStructureConfigs(target), target, _methods, exposeAllMethods || false)
-// }
+type AsIons<T> = {
+   //TODO: don't turn methods into ions
+   [K in keyof T as K extends string ? `$${K}` : K]: AtomicIon<T[K]>
+}
 
 
 

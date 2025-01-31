@@ -1,5 +1,5 @@
 import { createCommons } from "../commons/Commons";
-import { defineCommonsEntry } from "../commons/CommonsKey";
+import { CommonsKey } from "../commons/CommonsKey";
 import { makeElement } from "../element/makeElement";
 import { NodeEntity } from "../node/makeNode";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
@@ -20,7 +20,7 @@ export type TransitionConfig = TransitionFunction | AnimationFunction | Transiti
 
 export const GET_PHASIC_NODE = Symbol('usePhaseChange')
 
-const getPhasicNodeDef = defineCommonsEntry(GET_PHASIC_NODE, v<() => TransitionNode>('?'))
+const getPhasicNodeDef = CommonsKey(GET_PHASIC_NODE, v<() => TransitionNode>('?'))
 
 declare module '@rue/lumo' {
     interface CommonsKeyMap {

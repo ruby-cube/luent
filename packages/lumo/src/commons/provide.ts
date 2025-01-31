@@ -26,7 +26,7 @@ export type _ContextInputType<C> =
    : 'invalid typeConfig'
 
 
-export function fromCommons<K extends string | symbol>(key: K, commons?: NodeCommons | AppCommons): ValidatedContextEntry<K> {
+export function fromCommons<K>(key: K, commons?: NodeCommons | AppCommons): _ValidatedContextEntry<K> {
    let _context = commons || getClosestCommons();
    if (!_context) throw new Error(``)
 
@@ -173,7 +173,7 @@ type _ValidatedContextEntry<C> =
 
 function validateContextEntry(key: string | symbol, value: any, typeConfig: TypeConfig) {
    // const assertions = typeConfig;
-   // if (assertions) { //TODO: add assertion parameter to defineCommonsEntry or provide a registerAssertions function
+   // if (assertions) { //TODO: add assertion parameter to CommonsKey or provide a registerAssertions function
    //     const _assertions = assertions instanceof Array ? assertions : [assertions]
    //     for (const assert of _assertions) {
    //         assert(isIon(value) ? value() : value);

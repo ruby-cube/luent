@@ -103,10 +103,10 @@ export const v = ((optional?: '?' | '??') => {
       inputType: T;
       optional: '?';
       default: undefined
-   } & ((defaultValue: T) => {
+   } & (<D>(defaultValue: D) => {
       name: 'v',
-      validatedType: T;
-      inputType: T;
+      validatedType: D;
+      inputType: D;
       optional: 'withDefault';
       default: true;
    }),
@@ -136,10 +136,10 @@ export const z = ((optional?: '?' | '??') => {
       inputType: T;
       optional: '?';
       default: undefined
-   } & ((defaultValue: T) => {
+   } & (<D>(defaultValue: D) => {
       name: 'z',
-      validatedType: T;
-      inputType: T;
+      validatedType: D;
+      inputType: D;
       optional: 'withDefault';
       default: true;
    }),
@@ -186,10 +186,10 @@ export const MaybeIon = ((optional: '?' | '??') => {
       inputType: Ion<T, M> | T;
       optional: '?';
       default: undefined
-   } & ((defaultValue: T) => {
+   } & (<D extends Ion>(defaultValue: D) => {
       name: 'MaybeIon',
-      validatedType: Ion<T, M>;
-      inputType: Ion<T, M> | T;
+      validatedType: D extends Ion<infer S, infer F> ? Ion<S, F> : D;
+      inputType: D extends Ion<infer S, infer F> ? Ion<S, F> : D | T;
       optional: 'withDefault';
       default: true;
    }),
@@ -299,10 +299,10 @@ export const MaybeIonized = ((optional?: '?' | '??') => {
       inputType: T;
       optional: '?';
       default: undefined
-   } & ((defaultValue: T) => {
+   } & (<D>(defaultValue: D) => {
       name: 'MaybeIonized',
-      validatedType: T;
-      inputType: T;
+      validatedType: D;
+      inputType: D;
       optional: 'withDefault';
       default: true;
    }),

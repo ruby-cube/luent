@@ -2,16 +2,32 @@ import { fromApp } from "./provide";
 
 export const commonsTypeMap: Map<symbol | `${string}`, TypeConfig> = new Map();
 
-export function defineCommonsEntry<D extends TypeConfig, S extends symbol | `${string}`>(symbolKey: S, typeDef: D) {
-    const typeConfig = {
-        key: symbolKey,
-        name: typeDef.name,
-        optional: typeDef.optional,
-        default: typeDef.default
-    } as { key: S } & D
-    commonsTypeMap.set(symbolKey, typeConfig)
-    return typeConfig
+// export function CommonsKey<D extends TypeConfig, S extends symbol | `${string}`>(symbolKey: S, typeDef: D) {
+   
+//     const typeConfig = {
+//         key: symbolKey,
+//         name: typeDef.name,
+//         optional: typeDef.optional,
+//         default: typeDef.default
+//     } as { key: S } & D
+//     commonsTypeMap.set(symbolKey, typeConfig)
+//     return typeConfig
+// }
+
+export function CommonsKey<D extends TypeConfig>(typeDef: D){
+   const symbolKey = Symbol('commons key');
+//    const typeConfig = {
+//       // key: symbolKey,
+//       name: typeDef.name,
+//       optional: typeDef.optional,
+//       default: typeDef.default
+//   } 
+//   as { key: S } & D
+  commonsTypeMap.set(symbolKey, typeDef)
+  return symbolKey as typeof symbolKey & D
 }
+
+
 
 
 export type TypeConfig = {

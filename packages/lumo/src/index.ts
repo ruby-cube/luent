@@ -30,7 +30,7 @@ export * from './flask/ViewFlask' //TODO: Limit to public API
  *  
  *  export const Frog = Symbol('frog')
  * 
- *  const frogType = defineCommonsEntry(FROG, v<string>)
+ *  const frogType = CommonsKey(FROG, v<string>)
  *  
  *  declare module '@rue/lumo' {
  *     interface CommonsKeyMap {

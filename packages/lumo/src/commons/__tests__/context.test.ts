@@ -6,7 +6,7 @@ import { makeComponent } from '../../component/makeComponent';
 import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
 import { createCommons } from '../Commons';
-import { defineCommonsEntry } from '../CommonsKey';
+import { CommonsKey } from '../CommonsKey';
 import { Ion, Ionized, MaybeIon, v } from '../../InputTypes';
 import { ion, ionize, isIon, isIonizedModel } from '@rue/quarky';
 
@@ -353,16 +353,16 @@ describe('Integration tests the Context API', () => {
     // it should validate Ionized
 
 
-    describe('defineCommonsEntry and validation', () => {
+    describe('CommonsKey and validation', () => {
         it('should throw an error if required context prop is not provided', () => {
 
             const value = 0
             const _frog_ = 'frog'
-            defineCommonsEntry(_frog_, v)
+            CommonsKey(_frog_, v)
             let frog;
 
             const KERMIT = 'kermit'
-            defineCommonsEntry(KERMIT, v)
+            CommonsKey(KERMIT, v)
 
             function App() {
                 return component(
@@ -401,7 +401,7 @@ describe('Integration tests the Context API', () => {
         it('should allow optional props to be undefined', () => {
 
             const _frog_ = 'frog'
-            defineCommonsEntry(_frog_, v('?'))
+            CommonsKey(_frog_, v('?'))
             let frog = 'hi'
 
             function App() {
@@ -430,7 +430,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const defaultValue = 'kermit'
-            defineCommonsEntry(_frog_, v('?')(() => defaultValue))
+            CommonsKey(_frog_, v('?')(() => defaultValue))
             let frog = 'hi'
 
             function App() {
@@ -458,7 +458,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            defineCommonsEntry(_frog_, MaybeIon)
+            CommonsKey(_frog_, MaybeIon)
             let frog = 'hi'
 
             function App() {
@@ -489,7 +489,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            defineCommonsEntry(_frog_, Ion)
+            CommonsKey(_frog_, Ion)
             let frog = 'hi'
 
             function App() {
@@ -529,7 +529,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            defineCommonsEntry(_frog_, Ionized)
+            CommonsKey(_frog_, Ionized)
             let frog = 'hi'
 
             function App() {
@@ -569,7 +569,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = 'kermit'
-            defineCommonsEntry(_frog_, Ion)
+            CommonsKey(_frog_, Ion)
             let frog = 'hi'
 
             function App() {
@@ -600,7 +600,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const value = { name: 'kermit' }
-            defineCommonsEntry(_frog_, Ionized)
+            CommonsKey(_frog_, Ionized)
             let frog = 'hi'
 
             function App() {
@@ -630,7 +630,7 @@ describe('Integration tests the Context API', () => {
         it('should allow MaybeIon to be undefined if optional', () => {
 
             const _frog_ = 'frog'
-            defineCommonsEntry(_frog_, MaybeIon('?'))
+            CommonsKey(_frog_, MaybeIon('?'))
             let frog = 'hi'
 
             function App() {
@@ -659,7 +659,7 @@ describe('Integration tests the Context API', () => {
 
             const _frog_ = 'frog'
             const defaultValue = 'kermit'
-            defineCommonsEntry(_frog_, MaybeIon('?')(() => defaultValue))
+            CommonsKey(_frog_, MaybeIon('?')(() => defaultValue))
             let frog = 'hi'
 
             function App() {
