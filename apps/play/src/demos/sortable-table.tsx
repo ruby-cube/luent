@@ -16,7 +16,7 @@ function SortableTableApp() {
    return component(
       <>
          <form id="search">
-            Search <input name="query" nu:value={searchQuery} />
+            Search <input name="query" mu:value={searchQuery} />
          </form>
          <SortableTable
             data={gridData}

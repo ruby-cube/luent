@@ -24,13 +24,14 @@ export function TabApp() {
          <button on:click={$open.toggle}>open</button>
          <button on:click={$active.toggle}>toggle</button>
          {/* {For(data, item => item.id, (item) => (
-            <MarkdownApp nu:markdown={ions(item).$markdown}></MarkdownApp>
+            <MarkdownApp mu:markdown={ions(item).$markdown}></MarkdownApp>
          ))} */}
          {
             If($open, 'create',
                If($active, 'mount',
-                  <MarkdownApp nu:markdown={$markdown}></MarkdownApp>
-                  // <MarkdownApp nu:markdown={ions(data).$markdown}></MarkdownApp>
+                  // <MarkdownApp></MarkdownApp>
+                  <MarkdownApp mu:markdown={$markdown}></MarkdownApp>
+                  // <MarkdownApp mu:markdown={ions(data).$markdown}></MarkdownApp>
                )
             )
          }
@@ -75,90 +76,55 @@ class File {
 // function toFiles(data: FileData[]) {
 //    return data.map(file => new File(file.id, file.markdown))
 // }
+
 //TODO: What's the best way to sync with your database?
 
-function fromDB(MARKDOWN_FILES) {
-   return [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
-}
 
-function LoadingApp() {
-   const $data = dispatch({ get: MARKDOWN_FILES }) // how to deal with latency?
+function LoadingApp() { //Stand in until I fix createApp
+   const data = [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
+
+   const files = asFiles(data)
 
    return component(
-      <>
-         {Await($data,
-            <App data={$data}></App>
-         )}
-         {Meanwhile(
-            <>
-               <Sidebar></Sidebar>
-               <main></main>
-            </>
-         )}
-         {Catch(error =>
-            <div>oh no</div>
-         )}
-      </>
+      <App files={files}></App>
    )
 }
 
-function Album() {
-   const $album = resolveSuspense(fromCloud(ALBUM)) 
-   const $albumB = resolveSuspense(fromCloud(ALBUMB)) // will resolve in parallel
-   const $albumDescription = resolveSuspense(fromCloud(ALBUM, )) //TODO: how to resolve in sequence (dependent fetches)
-
-
-   return component((album = $album()) =>
-      <div>{album.$title}</div>
-   )
+function asFiles(data: FileData){
+   return ionize(data.map(file => new File(file.id, file.markdown)), {
+      remove(index: number) {
+         files.splice(index, 1);
+      },
+      add(file: File, index) {
+         files.splice(index, 0, file)
+      }
+   }) // Assumes no realtime updates from db. For realtime updates, use derived ion
 }
-
-
-
-const MARKDOWN_FILES = defineDBSync(() => {
-   const $data = dispatch({ get: '...' }, [])
-
-   const $files = ion(() => ionize($data().map(file => new File(file.id, file.markdown)),
-      {
-         remove(index: number) {
-            files.splice(index, 1);
-         },
-         add(file: File, index) {
-            files.splice(index, 0, file)
-         }
-      }))
-
-   watch($files, ({ mutations }) => {
-      dispatch({ post: '...', })
-      //TODO: how to rollback with failed action(s)
-   })
-
-   return $files;
-})
-
 
 
 function App(input = fromTag({
-   // data: v<FileData[]>
+   files: Ionized<File[] & {
+      remove(index: number): void;
+      add(file: File, index: any): void;
+   }>
 })) {
-   const $files = fromCloud(MARKDOWN_FILES, [])
 
    const $openedFiles = ion(() => $files().filter((file) => file.opened))
 
    const MainView = Polymorph({
-      default:
-         <Home></Home>
+      home: <Home></Home>
       ,
       file: [(o: File) => o.id, file =>
-         <MarkdownApp nu:markdown={o$(file).$markdown}></MarkdownApp>
-      ]
+         <MarkdownApp mu:markdown={o$(file).$markdown}></MarkdownApp>
+      ],
+      default: 'home' // key | render function | undefined (default)
    })
 
    // MainView.mount('home')
    // MainView.mount('file', file)
    // MainView.unmount(); // will mount default if provided
-   // MainView.discardAll().mount('home');
-   // MainView.discard('file', file).mount('home')
+   // MainView.discardAll()
+   // MainView.discard('file', file)
 
    function openFile(file: File) {
       file.open()
@@ -167,8 +133,9 @@ function App(input = fromTag({
 
    function closeFile(file: File) {
       file.close()
-      MainView.discard('file', file)
-      fallbackFocus()
+      MainView.discard('file', file, {
+         fallback: fallbackFocus()
+      })
    }
 
    function fallbackFocus() {
@@ -176,8 +143,6 @@ function App(input = fromTag({
       if (prevFile && prevFile.opened) {
          focusFile(prevFile)
       }
-      else
-         MainView.mount('default')
    }
 
    function focusFile(file: File) {
@@ -198,31 +163,18 @@ function App(input = fromTag({
 
    return component(
       <>
-         {Await($files, (files) =>
-            <>
-               <Sidebar files={files} provide={[
-                  m(OPENFILE, index => openFile(files[index])),
-                  m(ADDFILE, addFile),
-                  m(DELETEFILE, deleteFile)
-               ]}></Sidebar>
-               <main>
-                  <Tabs files={$openedFiles} provide={[
-                     m(CLOSEFILE, index => closeFile($openedFiles()[index])),
-                     m(FOCUSFILE, index => focusFile($openedFiles()[index]))
-                  ]} />
-                  <MainView as={existingFile ? ['file', file] : 'home'}></MainView>
-               </main>
-            </>
-         )}
-         {Meanwhile(
-            <>
-               <Sidebar></Sidebar>
-               <main></main>
-            </>
-         )}
-         {Catch(error =>
-            <div>oh no</div>
-         )}
+         <Sidebar files={files} provide={[
+            m(OPENFILE, index => openFile(files[index])),
+            m(ADDFILE, addFile),
+            m(DELETEFILE, deleteFile)
+         ]}></Sidebar>
+         <main>
+            <Tabs files={$openedFiles} provide={[
+               m(CLOSEFILE, index => closeFile($openedFiles()[index])),
+               m(FOCUSFILE, index => focusFile($openedFiles()[index]))
+            ]} />
+            <MainView as={existingFile ? ['file', file] : 'home'}></MainView>
+         </main>
       </>
    )
 }

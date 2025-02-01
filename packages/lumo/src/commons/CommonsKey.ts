@@ -27,6 +27,10 @@ export function CommonsKey<D extends TypeConfig>(typeDef: D){
   return symbolKey as typeof symbolKey & D
 }
 
+export function m<T extends symbol | string | TypeConfig>(key: T, value: any ){
+
+}
+
 
 
 

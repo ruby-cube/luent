@@ -136,13 +136,13 @@ function bindView(element: Element, Slot: Slot | undefined, attributes: { [key: 
 }
 
 function bindInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
-   if (!('nu:value' in attributes))
+   if (!('mu:value' in attributes))
       return;
-   const ion = attributes['nu:value'];
-   delete attributes['nu:value'];
+   const ion = attributes['mu:value'];
+   delete attributes['mu:value'];
    attributes.value = ion;
    if (!isIon(ion) || !('state' in ion)) {
-      if (__DEV__) console.warn('nu:value must receive a mutable ion for two-way binding to work')
+      if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
    }
    else {
       setUpInputListener(element, ion)
@@ -154,11 +154,10 @@ function bindTextarea(element: Element, Slot: Slot | undefined) {
    if (!Slot || !isFunction(Slot)) return;
    const nodeEntities = Slot();
    const kit = nodeEntities instanceof Array ? nodeEntities[0] : nodeEntities;
-   if (!isObjectLiteral(kit) && !('nu' in kit))return;
-   const ion = kit.nu;
-   console.log('nu ion', ion)
+   if (!isObjectLiteral(kit) && !('mu' in kit))return;
+   const ion = kit.mu;
    if (!isIon(ion) || !('state' in ion)) {
-      if (__DEV__) console.warn('nu:value must receive a mutable ion for two-way binding to work')
+      if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
    }
    else {
       setUpInputListener(element, ion)
@@ -196,9 +195,9 @@ function setUpInputListener(element: Element, ion: { state: any } | { set: (valu
 
 function setUpAttributes(node: Element, attributes: { [key: string]: any | DerivedIon<any> }) {
    for (const key in attributes) {
-      const _key = key.startsWith('nu:') ? key.slice(3) : key;
-      if (__DEV__ && key.startsWith('nu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
-      // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'nu:' keys are invalid
+      const _key = key.startsWith('mu:') ? key.slice(3) : key;
+      if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
+      // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid
       const value = attributes[key]
       //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {

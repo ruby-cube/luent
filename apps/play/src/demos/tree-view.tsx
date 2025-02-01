@@ -35,7 +35,7 @@ export function TreeApp() {
       TreeItem = TreeItemView
    ) =>
       <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
-         <TreeItem nu:item={treeItem}></TreeItem>
+         <TreeItem mu:item={treeItem}></TreeItem>
       </ul>
    )
 }
@@ -130,7 +130,7 @@ function createTreeItem(data: ItemData): TreeItem {
 const textarea = document.createElement('textarea')
 
 function TreeItemView(input = fromTag({
-   'nu:item': Ionized<TreeItem>,
+   'mu:item': Ionized<TreeItem>,
    // list: v<string[]>,
    // 'on:click': v<(e: { pen: string }) => void>('?')
 })) {
@@ -177,7 +177,7 @@ function TreeItemView(input = fromTag({
          {If($isFolder, 'create', If($isOpen, 'mount',
             <ul>
                {For(item.children!, m => m, item => (
-                  <TreeItem nu:item={item}></TreeItem>
+                  <TreeItem mu:item={item}></TreeItem>
                ))}
                <li class='add' on:click={e => item.addChild()}>+</li>
             </ul>

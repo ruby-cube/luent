@@ -7,7 +7,7 @@ import { component, fromTag, Ion, NodeRef, onMounted, onUnmount } from '@rue/lum
 
 export function MarkdownApp(
    input = fromTag({
-      'nu:markdown': Ion<string>('??')('#Hello World')
+      'mu:markdown': Ion<string>('??')(()=>'#Hello World')
    })
 ) {
 
@@ -78,7 +78,7 @@ export function MarkdownApp(
          <div>local state: {$doubleCount}</div>
          <button on:click={$count.increment}>increment</button>
          <div class='editor'>
-            <textarea class='input' ref={$textArea}>{{ nu: $markdown }}</textarea>
+            <textarea class='input' ref={$textArea}>{{ mu: $markdown }}</textarea>
             {/* <div class='output'>{$output}</div> */}
             <div class='output'>{{ innerHTML: $output }}</div>
             {/* <textarea>{$markdown}</textarea> */}

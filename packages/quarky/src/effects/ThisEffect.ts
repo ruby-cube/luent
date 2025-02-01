@@ -22,7 +22,7 @@ export class ThisEffect {
    private _onCleanup?: (cleanUp: () => void) => Listener
 
    [INTERNAL]?: {
-      asyncTrace_DEV: string
+      __DEV__asyncTrace: string
    }
 }
 

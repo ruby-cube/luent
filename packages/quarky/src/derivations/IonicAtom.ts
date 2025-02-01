@@ -33,9 +33,7 @@ export class IonicAtom {
     }
 
     triggerDerivations(newValue: any, oldValue: any) {
-      console.log('set ion value', newValue, oldValue)
         for (const derivation of this.derivations) {
-         console.log('derivation', derivation)
             if (isIonizedModel(derivation.o)) {
                 const reactive = derivation.o
                 const atom = this.primitive;

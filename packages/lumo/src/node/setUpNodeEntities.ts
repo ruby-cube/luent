@@ -20,7 +20,7 @@ import { AnyObject } from "@rue/types";
 export type NodeKit = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderSeries | MorphicRenderKit | InnerHTMLKit 
 // | MutableKit
 
-export type MutableKit = { nu: AnyObject }
+export type MutableKit = { mu: AnyObject }
 
 type HTMLString = string;
 

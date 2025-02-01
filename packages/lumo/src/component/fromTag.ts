@@ -26,13 +26,13 @@ export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
 type ComponentValidatedInput<C> = {
    [K in keyof C as
    K extends `on:${string}` ? never
-   : K extends `nu:${string}` | `nu?:${string}` ? never
+   : K extends `mu:${string}` | `mu?:${string}` ? never
    : K extends `m:${infer S}` ? S
    : C[K] extends { name: 'MaybeIon' } ? never : K]:
 
    C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ?
-   // K extends `nu:${string}` ? MaybeOptional<I, C[K]>
-   // : K extends `nu?:${string}` ? MaybeOptional<DeepReadonly<I> | I, C[K]>
+   // K extends `mu:${string}` ? MaybeOptional<I, C[K]>
+   // : K extends `mu?:${string}` ? MaybeOptional<DeepReadonly<I> | I, C[K]>
    // : 
    MaybeOptional<DeepReadonly<I>, C[K]>
    : 'invalid typeConfig'
@@ -61,10 +61,10 @@ type WithIons<C> = {
 }
 
 type WithMutable<C> = {
-   [K in keyof C as K extends `nu:${infer N}` | `nu?:${infer N}` ? MaybeIonKey<N, C[K]> : never]:
+   [K in keyof C as K extends `mu:${infer N}` | `mu?:${infer N}` ? MaybeIonKey<N, C[K]> : never]:
    C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ?
-   K extends `nu:${string}` ? MaybeOptional<I, C[K]>
-   : K extends `nu?:${string}` ? MaybeOptional<DeepReadonly<I> | I, C[K]>
+   K extends `mu:${string}` ? MaybeOptional<I, C[K]>
+   : K extends `mu?:${string}` ? MaybeOptional<DeepReadonly<I> | I, C[K]>
    : never : never
 }
 
@@ -87,8 +87,8 @@ function isMutable<T extends DeepReadonly<AnyObject> | AnyObject>(value: T): val
 
 const exampleConfig = {
    dove: v<Dove>,
-   'nu?:frog': v<Frog>,
-   'nu?:well': v<Well>
+   'mu?:frog': v<Frog>,
+   'mu?:well': v<Well>
 }
 
 type Frog = { name: string }
@@ -96,13 +96,13 @@ type Well = { depth: number }
 type Dove = { distance: number }
 
 type ExampleRequired = {
-   'nu:frog': Frog
+   'mu:frog': Frog
 } | {
    frog: Frog
 }
 
 type ExampleOptional = {
-   'nu:frog'?: Frog
+   'mu:frog'?: Frog
 } | {
    frog?: Frog
 }
@@ -117,16 +117,16 @@ const f = null as unknown as Frog
 const w = null as unknown as Well
 const d = null as unknown as Dove
 
-tryIt({ "nu:frog": f, dove: d, "nu:well": w })
-tryIt({ frog: f, dove: d, "nu:well": w })
-tryIt({ "nu:frog": f, dove: d, well: w })
+tryIt({ "mu:frog": f, dove: d, "mu:well": w })
+tryIt({ frog: f, dove: d, "mu:well": w })
+tryIt({ "mu:frog": f, dove: d, well: w })
 tryIt({ frog: f, dove: d, well: w })
 
 //@ts-expect-error
-tryIt({ "nu:frog": f, dove: d })
+tryIt({ "mu:frog": f, dove: d })
 
 //@ts-expect-error
-tryIt({ dove: d, "nu:well": w })
+tryIt({ dove: d, "mu:well": w })
 
 //@ts-expect-error
 tryIt({ frog: f, dove: d })
@@ -140,14 +140,14 @@ tryIt({ dove: d, well: w })
  */
 
 type ComponentAttributes<C> = {
-   [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `nu?:${string}` ? never : K : never]:
+   [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `mu?:${string}` ? never : K : never]:
    C[K] extends ((arg: any) => { inputType: infer I }) ? I : 'invalid typeConfig'
 } & {
-   [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `nu?:${string}` ? never : K : never]?:
+   [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `mu?:${string}` ? never : K : never]?:
    C[K] extends { inputType: infer I } ? I : 'invalid typeConfig'
 } & (WithMaybeMutables<C> extends never ? {} : WithMaybeMutables<C>)
 // & {
-//    [K in keyof C as K extends `nu?:${infer S}` ? `nu:${K}` : never]:
+//    [K in keyof C as K extends `mu?:${infer S}` ? `mu:${K}` : never]:
 //    C[K] extends (arg: any) => { $inputType: infer I } ? I : 'invalid typeConfig'
 // } & {
 //    [K in keyof C as C[K] extends { name: '$Ionized' | '$Ion'; optional: '?' | 'withDefault' } ? K extends string ? `$${K}` : never : never]?:
@@ -167,13 +167,13 @@ type TupleToUnion<T extends any[]> = T[number];
 
 
 type RequiredMaybeMutables<C> = {
-   [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `nu?:${infer S}` ? S : never : never]:
-   C[K] extends ((arg: any) => { inputType: infer I }) ? K extends `nu?:${infer S}` ? [{ [K in `nu:${S}`]: I }, { [K in S]: I }] : never : 'invalid typeConfig'
+   [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `mu?:${infer S}` ? S : never : never]:
+   C[K] extends ((arg: any) => { inputType: infer I }) ? K extends `mu?:${infer S}` ? [{ [K in `mu:${S}`]: I }, { [K in S]: I }] : never : 'invalid typeConfig'
 }
 
 type OptionalMaybeMutables<C> = {
-   [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `nu?:${infer S}` ? S : never : never]:
-   C[K] extends { inputType: infer I } ? K extends `nu?:${infer S}` ? [{ [K in `nu:${S}`]?: I }, { [K in S]?: I }] : never : 'invalid typeConfig'
+   [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `mu?:${infer S}` ? S : never : never]:
+   C[K] extends { inputType: infer I } ? K extends `mu?:${infer S}` ? [{ [K in `mu:${S}`]?: I }, { [K in S]?: I }] : never : 'invalid typeConfig'
 }
 
 
@@ -206,6 +206,7 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
    if (typeConfig) {
       const validatedAttributes = {} as AnyObject;
 
+      //TODO: I need to check typeConfig for default values
       for (const key in attributes) {
          let value = (<AnyObject>attributes)[key]
          // if (assertions && assertions[key]) {
@@ -227,7 +228,7 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
 
             switch (config.name) {
                case 'v':
-                  const vKey = key.startsWith('nu:') || key.startsWith('on:') ? key.slice(3) : key;
+                  const vKey = key.startsWith('mu:') || key.startsWith('on:') ? key.slice(3) : key;
                   if (key.startsWith('on:')) {
                      if (!isFunction(value) || isIon(value)) throw new Error('event handler must be a function')
                      const handlers = eventHandlers || (validatedAttributes.emit = (event: string) => { eventHandlers![event]() }, eventHandlers = {})
@@ -238,7 +239,7 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                   break;
 
                case 'MaybeIon':
-                  const ionKey = key.startsWith('nu:') ? key.slice(3) : key;
+                  const ionKey = key.startsWith('mu:') ? key.slice(3) : key;
                   // if (!isIon(value)) {
                   //    throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ion`)
                   // }
@@ -252,7 +253,7 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                //    break;
 
                case 'MaybeIonized':
-                  const modelKey = key.startsWith('nu:') ? key.slice(3) : key;
+                  const modelKey = key.startsWith('mu:') ? key.slice(3) : key;
                   // const model = unnestValue(value)
                   // if (!isIonizedModel(model)) {
                   //    throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ionized`)

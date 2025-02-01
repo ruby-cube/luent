@@ -30,7 +30,7 @@ export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Slot
    );
 }
 
-function processSlot(Slot: Slot | { nu: AnyObject } | { [key: string]: Slot } | undefined) {
+function processSlot(Slot: Slot | { mu: AnyObject } | { [key: string]: Slot } | undefined) {
    if (Slot === undefined) return undefined;
    if (isObjectLiteral(Slot)) {
       // named slots, innerHTML kit, or two-way binding

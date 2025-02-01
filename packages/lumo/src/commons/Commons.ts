@@ -4,7 +4,7 @@ import { getClosestCommons, popCommons, pushCommons } from "./commons-stack";
 import { AppCommons, _ContextInputType } from "./provide";
 import { ComponentConfig, NodeEntity } from "../node/makeNode";
 import { CommonsKeyMap } from "@rue/lumo";
-import { asyncTrace_DEV } from "../../../flask/debug";
+import { __DEV__asyncTrace } from "../../../flask/debug";
 
 export interface NodeCommons {
     entries: AnyObject;
@@ -27,7 +27,7 @@ export function Commons<T extends CommonsEntries<T>>(input: {
 
     const parentCommons = getClosestCommons()
     if (!parentCommons) {
-       asyncTrace_DEV()
+       __DEV__asyncTrace()
       throw new Error(`no commons found :( This should never happen`)
     }
 

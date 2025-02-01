@@ -17,7 +17,7 @@ export function buildTrace_DEV() {
    return (trace ? trace + '\n' : '') + (currentTrace ? '    at ... async ' + currentTrace?.slice(3) : '')
 }
 
-export function asyncTrace_DEV() {
-   const trace = __INTERNAL_TRACE__ ? getInternalTrace(asyncTrace_DEV.name) : getPublicTrace()
+export function __DEV__asyncTrace() {
+   const trace = __INTERNAL_TRACE__ ? getInternalTrace(__DEV__asyncTrace.name) : getPublicTrace()
    console.log('NonError Async Trace\n    ' + (trace ? trace + '\n    ' : '') + 'at ... async ' + getCurrentTrace?.()?.slice(3).trimEnd())
 }
