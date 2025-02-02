@@ -2,7 +2,7 @@ import { marked } from 'marked'
 //@ts-expect-error
 import { debounce } from 'lodash-es'
 import { ion, ionize, watch } from '@rue/quarky'
-import { component, fromTag, Ion, NodeRef, onMounted, onUnmount } from '@rue/lumo'
+import { component, fromTag, Ion, NodeRef, onMount, onUnmount } from '@rue/lumo'
 
 
 export function MarkdownApp(
@@ -28,18 +28,15 @@ export function MarkdownApp(
       selectionEnd: undefined as undefined | number,
    })
 
-   onUnmount(final => {
-      if (final) return;
+   onDemount(() => {
       const textArea = $textArea()!
       const isActive = document.activeElement !== textArea
       caretRange.selectionStart = isActive ? textArea.selectionStart : undefined
       caretRange.selectionEnd = isActive ? textArea.selectionEnd : undefined
    })
 
-   onMounted(initial => {
+   onRemount(() => {
       const textArea = $textArea()!
-      console.log('textArea', textArea)
-      if (initial) return;
       const { selectionEnd, selectionStart } = caretRange
       if (selectionStart === undefined) return;
       textArea.focus();

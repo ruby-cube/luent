@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { If, expose, NodeEntity, onMounted, RenderFunction } from "@rue/lumo"
+import { If, expose, NodeEntity, onMount, RenderFunction } from "@rue/lumo"
 import { $, watch } from "../../../packages/quarky/src"
 import { ion } from "@rue/quarky/ion";
 

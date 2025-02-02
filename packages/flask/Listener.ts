@@ -4,7 +4,7 @@ import { mapHandlers } from "./handlerMap";
 import { AbortSignal, RegisterAbortSignal } from "./AbortSignal";
 import { $_snap_context, callWithContext } from "./context/AsyncContext";
 import { Flask, getActiveFlask, setFlask, ThisFlask } from "./Flask";
-import { setTrace } from "./debug";
+import { setAsyncPath } from "./debug";
 import { noop } from "@rue/utils";
 
 export type ResumableListener = {
@@ -53,7 +53,7 @@ type ListenerConfig<E extends EnrollFunction = EnrollFunction> = {
    pause?: Pause,
    resume?: Function,
    options: SustainedListenerOptions | undefined
-   trace_DEV?: string,
+   __DEV__asyncPath?: string,
 }
 
 export function toListenerOptions(options: SchedulerOptions | undefined) {
@@ -68,7 +68,7 @@ export function toListenerOptions(options: SchedulerOptions | undefined) {
 export function makeListener<E extends (wrappedCB: Callback) => void | Callback>(
    config: ListenerConfig<E>
 ): ResumableListener {
-   const { enroll, remove, callback, pause, resume, options, trace_DEV } = config;
+   const { enroll, remove, callback, pause, resume, options, __DEV__asyncPath } = config;
    if (!callback) {
       if (__DEV__) console.warn("No callback was passed into makeListener")
       function noOp() {
@@ -110,7 +110,7 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
    const _callback = callbackIsRemover ? callback : wrapWithFlask(callback, {
       afterCall: once ? stop : undefined,
       enclosingFlask,
-      trace_DEV
+      __DEV__asyncPath
    })
 
    mapHandlers(_callback, callback);
@@ -175,7 +175,7 @@ const noopable = {
 function bindListenerToFlask(listener: ResumableListener, flask: Flask, preserve: boolean, until: any | null) {
    const { stop: cancelStop } = until === null ? noopable : flask.onDiscard(listener.stop);
    const { stop: stopPausing } = preserve ? noopable : flask.onUnmount(listener.pause);
-   const { stop: stopResuming } = preserve ? noopable : flask.onRemounted(listener.resume);
+   const { stop: stopResuming } = preserve ? noopable : flask.onRemount(listener.resume);
 
    return function unbind() {
       cancelStop()
@@ -189,12 +189,12 @@ function bindListenerToFlask(listener: ResumableListener, flask: Flask, preserve
 function isRemover(callback: Callback) {
    return "isRemover" in callback && callback.isRemover;
 }
-// // onMounted doesn't make sense for task flasks except as remount... $thisTask() instead of flask? $thisNode()
+// // onMount doesn't make sense for task flasks except as remount... $thisTask() instead of flask? $thisNode()
 
 // function wrapWithFlask(callback: Callback, config: {
 //    afterCall?: () => void,
 //    enclosingFlask: Flask | undefined,
-//    trace_DEV: string | undefined
+//    __DEV__asyncPath: string | undefined
 // }) {
 //    const { afterCall, enclosingFlask } = config
 //    let taskFlask: Flask;
@@ -211,9 +211,9 @@ function isRemover(callback: Callback) {
 function wrapWithFlask(callback: Callback, config: {
    afterCall?: () => void,
    enclosingFlask?: Flask,
-   trace_DEV?: string
+   __DEV__asyncPath?: string
 }) {
-   const { afterCall, enclosingFlask, trace_DEV } = config
+   const { afterCall, enclosingFlask, __DEV__asyncPath } = config
    const context = $_snap_context()
    let scene: Flask;
    return (...args: any[]) => {
@@ -223,7 +223,7 @@ function wrapWithFlask(callback: Callback, config: {
          context,
          beforeCall() {
             setFlask(scene)
-            if (__DEV__) setTrace!(trace_DEV!)
+            if (__DEV__) setAsyncPath!(__DEV__asyncPath!)
          },
          callback: () => callback(...args),
          afterCall

@@ -1,7 +1,6 @@
 import { component, If, Else, fade, ElseIf, slide, fromTag, v, target, prep, Ion } from "@rue/lumo";
-import { ion, ionize, watch } from "@rue/quarky";
+import { __DEV__debug, ion, ionize, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
-import { __DEV__asyncTrace } from "../../../packages/flask/debug";
 
 
 export function MountIf() {
@@ -54,7 +53,7 @@ export function MountIf() {
    })
 
    watch($color, ()=>{
-      __DEV__asyncTrace()
+      __DEV__debug.traceAsyncPath()
    })
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
    return component(
@@ -64,7 +63,7 @@ export function MountIf() {
          <h1>Hello {$ = todos[0].name}</h1>
          <div>hi</div>
          <$--transition>
-            {If($active, (__DEV__asyncTrace(),
+            {If($active, (__DEV__debug.traceAsyncPath(),
                <>
                   oh
                   <$--transit with={slide({ x: -100, duration: 2200 })}>
@@ -208,7 +207,7 @@ function ArticleBlock(setup: {
 //         console.log("node ref", button, countDiv)
 //     })
 
-//     // onRemounted(() => {
+//     // onRemount(() => {
 //     //     console.log("activated yo")
 //     // })
 

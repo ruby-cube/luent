@@ -1,4 +1,4 @@
-import { ifCase, For, setUpNode, setUpNodesIn, onRemounted, beforeMount, beforeUnmount, onDeactivated, onMounted, onUnmounted, onUpdated } from "../../../packages/lumo/src";
+import { ifCase, For, setUpNode, setUpNodesIn, onRemount, beforeMount, beforeUnmount, onDeactivated, onMount, onUnmounted, onUpdated } from "../../../packages/lumo/src";
 import { useReactivity, ion, watch, ReactiveGet } from "../../../packages/quarky/src";
 
 const { $, mu, ionize, set } = useReactivity()
@@ -186,7 +186,7 @@ function List() {
     //     console.log("deactivated")
     // })
 
-    // onRemounted(() => {
+    // onRemount(() => {
     //     console.log("activated")
     // })
 
@@ -202,7 +202,7 @@ function List() {
     //     console.log("before mount")
     // })
 
-    // onMounted(() => {
+    // onMount(() => {
     //     console.log("Mounted")
     // })
 
@@ -249,7 +249,7 @@ function List() {
     //     console.log(console.log)
     // })
 
-    // onMounted(()=>{
+    // onMount(()=>{
     //     console.log(oItems.value)
     // })
 

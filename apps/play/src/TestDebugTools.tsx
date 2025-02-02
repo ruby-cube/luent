@@ -1,12 +1,16 @@
-import { component, listen} from "@rue/lumo";
-import { ion, ionize, watch } from "@rue/quarky";
-import { __DEV__asyncTrace } from "../../../packages/flask/debug";
-import {  $_run_with_, $_snap_context } from "../../../packages/flask/context/AsyncContext";
+//@ts-nocheck
+import { component, listen } from "@rue/lumo";
+import { __DEV__debug, ion, ionize, watch } from "@rue/quarky";
+import { $_run_with_, $_snap_context } from "../../../packages/flask/context/AsyncContext";
 import { getActiveFlask } from "@rue/flask";
 
 
 
-export function TestDebugApp() {
+export function TestDebugApp(input = fromTag()) {
+
+   //NOTE: traceable is meant to enable you to trace functions and methods defined externally
+   const doSomething = traceable('doSomething', input.doSomething)
+
    const $count = ion(0, {
       increment() {
          $count.state++
@@ -16,6 +20,10 @@ export function TestDebugApp() {
       }
    })
 
+   $count.__DEV__label('$count')
+   __DEV__debug.traceTriggers($count)
+   __DEV__debug.traceCalls($count, 'decrement')
+
    const frog = ionize({
       name: { royalName: 'sir robin' },
       changeName() {
@@ -23,15 +31,11 @@ export function TestDebugApp() {
       }
    })
 
-   const name = frog.name
-
-
-   // if (__DEV__)
-   // traceTriggers(frog)
-
    function setSame() {
       $count.state = $count.state;
    }
+
+   __DEV__debug.traceCalls(setSame)
 
    function refreshCounter() {
       console.log('log stuff')
@@ -74,7 +78,7 @@ export function TestDebugApp() {
 
 
    function doSomething() {
-      __DEV__asyncTrace()
+      __DEV__debug.traceAsyncPath()
       // task.run()
       // console.trace()
       // console.log(getTrace())
@@ -88,11 +92,15 @@ export function TestDebugApp() {
       })
    }
 
+   function incrementCount() {
+      $count.increment()
+   }
+
 
    return component(
       <>
          <div>{$count}</div>
-         <button on:click={e => $count.increment()}>increment</button>
+         <button on:click={e => incrementCount()}>increment</button>
          <button on:click={e => $count.decrement()}>decrement</button>
          <button on:click={refreshCounter}>set same</button>
       </>

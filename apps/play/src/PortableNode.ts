@@ -65,7 +65,7 @@ const renderPortableItemMap: Map<UID, () => any> = new Map()
 
 // onDiscard()
 
-// onMounted()
+// onMount()
 
 // beforeUnmount()
 

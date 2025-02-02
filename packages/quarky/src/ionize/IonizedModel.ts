@@ -13,6 +13,7 @@ import { AnyIon, isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PropIon";
 import { rein } from "../rein";
 import { READONLY } from "../ion/ReinedIon";
+import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug";
 
 
 
@@ -195,8 +196,8 @@ export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonicMo
    return false;
 }
 
-function extendTarget(target: AnyObject, methods: AnyObject){
-   const proto = {...methods}
+function extendTarget(target: AnyObject, methods: AnyObject) {
+   const proto = { ...methods }
    Object.setPrototypeOf(proto, Object.getPrototypeOf(target))
    Object.setPrototypeOf(target, proto)
    return target
@@ -220,7 +221,7 @@ export function createIonizedModel(
       },
       get(target, key, receiver) {
          if (__DEV__) emitSignal()
-            if (key === META) return metaIonicModel
+         if (key === META) return metaIonicModel
          if (isNonTrackable(key, structureConfigs)) {
             const value = Reflect.get(target, key, receiver); //_target
             if (value instanceof Function) {
@@ -229,17 +230,17 @@ export function createIonizedModel(
             }
             return value;
          }
-         
+
          const isIonAccessKey = typeof key === 'string' && key[0] === '$'
          //NOTE: Temporarily hidden rein because of issues
          // const reinedMeta = getReinedMeta(target, ionicModel, receiver)
          // if (reinedMeta && !reinedMeta.isExposedKey(isIonAccessKey ? key.slice(1) : key)) {
-            //    if (__DEV__) console.warn(`Property is restricted. Cannot access '${key.toString()}'`)
-            //    return undefined;
-            // }
-            const reinedMeta = { isExposedKey: () => true } //NOTE: TEMPORARY
-            
-            if (methods && key in methods && key !== 'has') {
+         //    if (__DEV__) console.warn(`Property is restricted. Cannot access '${key.toString()}'`)
+         //    return undefined;
+         // }
+         const reinedMeta = { isExposedKey: () => true } //NOTE: TEMPORARY
+
+         if (methods && key in methods && key !== 'has') {
             const method = methods[key]
             if (isMethod(method)) {
                return accessMethod(
@@ -409,7 +410,10 @@ function getBoundMethod(
    let boundMethod = boundMethodMap.get(key)
    if (boundMethod) return boundMethod;
    if (method) {
-      boundMethod = method.bind(proxy);
+      boundMethod =
+         __DEV__ ?
+            traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
+            : method.bind(proxy);
       boundMethodMap.set(key, boundMethod!)
       return boundMethod;
    }
@@ -433,7 +437,8 @@ function getNativeMethod(
       if (mutatingOps && key in mutatingOps) {
          const createOp = mutatingOps[key].createOp
          const getPreopData = mutatingOps[key].preop
-         const op = createOp(target, ionicModel, meta, getPreopData)
+         const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionicModel, key, createOp(target, ionicModel, meta, getPreopData))
+            : createOp(target, ionicModel, meta, getPreopData)
          boundMethodMap.set(_key, op)
          return op;
       }
@@ -478,6 +483,9 @@ export function reactiveSetter(
    if (isIon(oldValue) && !isIon(newValue)) {
       return setAbsorbedIon(oldValue, newValue, ionicModel, key, oldValue(), structureConfigs)
    }
+
+   __DEV__traceMethodCall('IonizedModel', ionicModel, key)
+
    if (oldValue === newValue
       || isNonTrackable(key, structureConfigs)
       || !isWritable(target, key)) {

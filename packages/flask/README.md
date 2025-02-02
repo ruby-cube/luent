@@ -79,7 +79,7 @@ const pendingTask = queueTask(() => {
 		// do work...
 });
 
-onMounted(() => {
+onMount(() => {
     if (isFull()) {
         pendingTask.cancel();
     }

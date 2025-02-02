@@ -46,8 +46,8 @@ type FileData = {
 }
 
 class File {
-   opened: boolean = false
-   active: boolean = false
+   // opened: boolean = false
+   // active: boolean = false
 
    constructor(
       public id: number = genId(),
@@ -62,54 +62,168 @@ class File {
       return secondLineOf(this.markdown)
    }
 
-   close() {
-      this.active = false;
-      this.opened = false;
-   }
+   // close() {
+   //    this.active = false;
+   //    this.opened = false;
+   // }
 
-   open() {
-      this.active = true;
-      this.opened = true;
-   }
+   // open() {
+   //    this.active = true;
+   //    this.opened = true;
+   // }
 }
 
-// function toFiles(data: FileData[]) {
-//    return data.map(file => new File(file.id, file.markdown))
-// }
+function asFiles(data: FileData[]) {
+   return data.map(file => new File(file.id, file.markdown))
+}
 
 //TODO: What's the best way to sync with your database?
 
 
-function LoadingApp() { //Stand in until I fix createApp
-   const data = [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
+// A resource is where you transform the raw data into a rich domain model and set up syncing to the db
 
-   const files = asFiles(data)
+// const FILES = defineResource(async ({userId: number}) => {
+//    const data = await dispatch({ get: DB_FILES })
+//    // [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
+
+//    //TODO: how do you set up realtime updates from database and locally from another tab
+
+//    const files = ionize(asFiles(data), {
+//       add(file: File) {
+//          files.push(file)
+//          files.sortAlphabetically()
+//       },
+//       delete(index: number) {
+//          files.splice(index, 1)
+//       },
+//       sortAlphabetically() {
+//          //TODO:
+//       }
+//    })
+
+//    watch(files, ({ collectionChanges }) => {
+//       // TODO: update database
+//    })
+
+//    return files;
+// })
+const data = [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
+
+function LoadingApp() { //Stand in until I fix createApp
+
+   // const files = fromResources(FILES, { $userId })
+
+
+   const files = ionize(asFiles(data), {
+      add(file: File) {
+         files.push(file)
+         files.sortAlphabetically()
+      },
+      delete(index: number) {
+         files.splice(index, 1)
+      },
+      sortAlphabetically() {
+         //TODO:
+      }
+   })
+
 
    return component(
+      // Await
       <App files={files}></App>
    )
 }
 
-function asFiles(data: FileData){
-   return ionize(data.map(file => new File(file.id, file.markdown)), {
-      remove(index: number) {
-         files.splice(index, 1);
-      },
-      add(file: File, index) {
-         files.splice(index, 0, file)
-      }
-   }) // Assumes no realtime updates from db. For realtime updates, use derived ion
-}
+// type Files = ReturnType<typeof asIonizedFiles>
+
+// function asIonizedFiles(data: FileData[]){
+
+//    return ionize(data.map(file => new File(file.id, file.markdown)), {
+
+//       remove(index: number) {
+//          files.splice(index, 1);
+//       },
+
+//       add(file: File, index) {
+//          files.splice(index, 0, file)
+//       }
+//    }) // Assumes no realtime updates from db. For realtime updates, use derived ion
+// }
+
+// class Files extends Array<File> {
+
+//    constructor(data: FileData[]){
+//       super(...data.map(file=>new File(file.id, file.markdown)))
+//    }
+
+//    remove(index: number) {
+//       files.splice(index, 1);
+//    }
+
+//    add(file: File, index) {
+//       files.splice(index, 0, file)
+//    }
+// }
 
 
 function App(input = fromTag({
-   files: Ionized<File[] & {
-      remove(index: number): void;
-      add(file: File, index: any): void;
-   }>
+   files: Ionized<File[]>
 })) {
 
-   const $openedFiles = ion(() => $files().filter((file) => file.opened))
+   const { files } = input;
+
+   function addNewFile() {
+      const file = files.add(new File())
+      openFile_makeActive(file)
+   }
+
+   function deleteFile(index: number) {
+      const file = files[index]
+      if (isOpen(file)) closeFile(file)
+      files.delete(index)
+   }
+
+   const openedFiles = ionize([] as File[], {
+      delete(index: number) {
+         if (index < 0 || index >= openedFiles.length) return false;
+         openedFiles.splice(index, 1);
+         return true;
+      },
+      insert(file: File, index) {
+         openedFiles.splice(index, 0, file)
+      }
+   })
+
+   function openFile_makeActive(file: File) {
+      const index = $activeFile() ? openedFiles.indexOf($activeFile()) : 0
+      openedFiles.insert(file, index)
+      $activeFile.as(file)
+   }
+
+   function isOpen(file: File) {
+      return openedFiles.indexOf(file) !== -1
+   }
+
+   function closeOpenedFile(index: number) {
+      openedFiles.delete(index)
+      if ($activeFile() === file) {
+         $activeFile.as(prevActiveFile)
+      }
+   }
+
+   function focusOpenedFile(index: number) {
+      $activeFile.as($openedFiles()[index])
+   }
+
+
+   let prevActiveFile: File | undefined;
+
+   const $activeFile = ion(undefined as File | undefined, {
+      as(file: File) {
+         prevActiveFile = $activeFile.state;
+         $activeFile = file;
+      }
+   })
 
    const MainView = Polymorph({
       home: <Home></Home>
@@ -120,46 +234,27 @@ function App(input = fromTag({
       default: 'home' // key | render function | undefined (default)
    })
 
+   watch($activeFile, ({ newState: file }) => {
+      if (!isOpen(prevActiveFile))
+         MainView.discard('file', prevActiveFile.id)
+      if (file) MainView.mount('file', file.id)
+      else MainView.mount('home')
+
+   })
+
+   watch(openedFiles, ({ collectionChange }) => {
+      const { removedItems, newItems, movedItems } = collectionChange //TODO: implement with getters for lazy computation
+      if (removedItems)
+         for (const file of removedItems) {
+            MainView.discard('file', file.id)
+         }
+   })
+
    // MainView.mount('home')
    // MainView.mount('file', file)
    // MainView.unmount(); // will mount default if provided
    // MainView.discardAll()
    // MainView.discard('file', file)
-
-   function openFile(file: File) {
-      file.open()
-      MainView.mount('file', file)
-   }
-
-   function closeFile(file: File) {
-      file.close()
-      MainView.discard('file', file, {
-         fallback: fallbackFocus()
-      })
-   }
-
-   function fallbackFocus() {
-      const prevFile = $prevActiveFile()
-      if (prevFile && prevFile.opened) {
-         focusFile(prevFile)
-      }
-   }
-
-   function focusFile(file: File) {
-      file.active = true;
-      MainView.mount('file', file)
-   }
-
-   function addFile(index: number) {
-      const file = files.add(new File(), index)
-      openFile(file)
-   }
-
-   function deleteFile(index: number) {
-      const file = files[index];
-      closeFile(file)
-      files.remove(index)
-   }
 
    return component(
       <>
@@ -170,8 +265,8 @@ function App(input = fromTag({
          ]}></Sidebar>
          <main>
             <Tabs files={$openedFiles} provide={[
-               m(CLOSEFILE, index => closeFile($openedFiles()[index])),
-               m(FOCUSFILE, index => focusFile($openedFiles()[index]))
+               m(CLOSEFILE, closeOpenedFile),
+               m(FOCUSFILE, focusOpenedFile)
             ]} />
             <MainView as={existingFile ? ['file', file] : 'home'}></MainView>
          </main>
@@ -227,7 +322,7 @@ function Tab(input = fromTag({
    const { file, closeFile, focusFile, $index, inherited } = input
 
    return component(
-      <div style={[{ backgroundColor: $ = file.active ? 'red' : 'gray' }, inherited.style]}
+      <div style={[{ backgroundColor: $=file.active ? 'red' : 'gray' }, inherited.style]}
          on:click={e => focusFile($index())}
       >
          {o$(file).$title}

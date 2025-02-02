@@ -117,7 +117,7 @@ export class MorphicRenderKit {
       const flask = this.flask = this.outerFlask.spawn('view')
       const _this = this
       if (this.preserve && this.renderedKeys?.has(key)) {
-         flask.emitRemounted() //FIX:
+         flask.emitRemount() //FIX:
       } else {
          flask.containCall(function reactivateMorphicForm() {
             const nodeEntities = normalizeToArray(unnestComponent(_this.switchMap[key]()))

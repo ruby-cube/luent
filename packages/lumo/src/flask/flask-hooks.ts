@@ -1,9 +1,9 @@
 import { $thisFlask } from "@rue/flask";
 
-export function onMounted(task: (initial: boolean) => void) {
+export function onMount(task: (initial: boolean) => void) {
    const flask = $thisFlask()
    if (!flask) throw new Error('no flask :(')
-   flask.onMounted(task);
+   flask.onMount(task);
 }
 
 export function onUnmount(task: (final: boolean) => void) {

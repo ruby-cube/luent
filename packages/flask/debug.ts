@@ -1,23 +1,56 @@
-import { getInternalTrace, getPublicTrace, getTrace } from "../lumo/src/watch/debug";
+import { AnyObject } from "@rue/types";
 import { ContextualState } from "./context/AsyncContext";
 
-export const [getCurrentTrace, setTrace] = __DEV__ ? ContextualState<string>('trace') : [];
-
-// function getActiveTrace() {
-//    return asyncTraceStack?.[0]()
-// }
-
-// function 
+export const [getAsyncPath, setAsyncPath] = __DEV__ ? ContextualState<string>('trace') : [];
 
 const __INTERNAL_TRACE__ = false;
 
-export function buildTrace_DEV() {
-   const currentTrace = getCurrentTrace?.()
-   const trace = __INTERNAL_TRACE__ ? getInternalTrace(buildTrace_DEV.name) : getPublicTrace()
-   return (trace ? trace + '\n' : '') + (currentTrace ? '    at ... async ' + currentTrace?.slice(3) : '')
+export function __DEV__getTrace() {
+   return __INTERNAL_TRACE__ ? getInternalTrace(__DEV__getTrace.name) : getPublicTrace()
 }
 
-export function __DEV__asyncTrace() {
-   const trace = __INTERNAL_TRACE__ ? getInternalTrace(__DEV__asyncTrace.name) : getPublicTrace()
-   console.log('NonError Async Trace\n    ' + (trace ? trace + '\n    ' : '') + 'at ... async ' + getCurrentTrace?.()?.slice(3).trimEnd())
+export function __DEV__buildAsyncPath() {
+   const currentTrace = getAsyncPath?.()
+   const trace = __DEV__getTrace()
+   return (trace ? trace + '\n' : '') + (currentTrace ? '    at async ' + currentTrace?.slice(3) : '')
+}
+
+export function traceAsyncPath(...labels: string[]) {
+   const trace = __DEV__getTrace()
+   for (const label of labels) {
+      console.log(`# ${label}`)
+   }
+   console.log(`NonError Async Trace:\n    ` + (trace ? trace + '\n    ' : '') + 'at async ' + getAsyncPath?.()?.slice(3).trimEnd())
+}
+// TODO: add async context to await, promises, and any other registered functions via compiler
+
+export function getTrace() {
+   Error.stackTraceLimit = Infinity;
+   try {
+      throw new Error('Trace')
+   }
+   catch (err) {
+      return err instanceof Error ? err.stack ?? err : err
+   }
+}
+
+const libraryPaths = ['/packages/'] //TODO: make this configurable
+
+export function getPublicTrace() {
+   const rawTrace = getTrace() as string;
+   const traceLines = rawTrace.split('\n');
+   traceLines.shift()
+   let appLines = traceLines;
+   for (const path of libraryPaths) {
+      appLines = appLines.filter((line) => !line.includes(path))
+   }
+   if (appLines.length)
+      return appLines.reduce((prev, line) => prev + '\n' + line).trim()
+   return undefined
+}
+
+export function getInternalTrace(cutoff: string){
+   const rawTrace = getTrace() as string;
+   const rawTraceTail = rawTrace.split(cutoff).at(-1)!
+   return rawTraceTail.slice(rawTraceTail.indexOf('at ')).trim()
 }

@@ -10,7 +10,7 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { NodeKit } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
 import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
-import { buildTrace_DEV, setTrace } from "../../../flask/debug";
+import { __DEV__buildAsyncPath, setAsyncPath } from "../../../flask/debug";
 import { Flask, setFlask } from "@rue/flask";
 
 //TODO: rename 'phasic node' to 'transition node'
@@ -29,7 +29,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    /* We render all show statements eagerly to prevent buggy rendering */
    showKits: ConditionalRenderKit[] | undefined
    context: Map<string | symbol, any>;
-   trace_DEV?: string
+   __DEV__asyncPath?: string
 
    constructor(
       statements: ConditionalRenderKit[],
@@ -38,7 +38,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    ) {
       super(statements, makeElseKit);
       this.context = $_snap_context()
-      this.trace_DEV = __DEV__ ? buildTrace_DEV() : undefined
+      this.__DEV__asyncPath = __DEV__ ? __DEV__buildAsyncPath() : undefined
       this.outerFlask = getViewFlask() //ie: enclosingFlask
       this.activeIndex = this.evaluateConditions()
       if (!this.isDynamic) {
@@ -94,7 +94,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       else {
          const flask = kit.flask = this.outerFlask.spawn('view')
          this.render(kit, parent, fragment, flask)
-         flask.emitMounted() // emits mount hook
+         flask.emitInitialMount() // emits mount hook
       }
 
       const showKits = this.showKits
@@ -337,7 +337,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          context: this.context,
          beforeCall: () => {
             if (flask) setFlask(flask)
-            if (__DEV__) setTrace!(this.trace_DEV!)
+            if (__DEV__) setAsyncPath!(this.__DEV__asyncPath!)
          },
          callback: () => {
             const nodeEntities = kit.renderConditional(parent, kit.nodePod || (console.warn('DEV RESEARCH: no kit pod :('), this.nodePod))
@@ -366,7 +366,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       }
       else if (activationType === 'mount') {
          const flask = kit.flask
-         flask?.emitUnmount()
+         flask?.emitDemount()
          removeDOMNodes(pod);
       }
    }
@@ -389,9 +389,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn('view'))
       this.render(kit, parent, undefined, flask)
       if (activationType === 'create' || isInitialMount)
-         flask.emitMounted()
+         flask.emitInitialMount()
       else
-         flask.emitRemounted() // remount preserved watchers etc.
+         flask.emitRemount() // remount preserved watchers etc.
    }
 }
 

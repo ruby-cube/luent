@@ -1,4 +1,4 @@
-import { __devCheckIfTracked, __devCheckIfNotTracked, AtomicIon, Ion } from "../../../quarky/src";
+import { __devCheckIfTracked, __devCheckIfNotTracked, AtomicIon, Ion, isNamedDerivation } from "../../../quarky/src";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { InferSlot, makeComponent } from "../component/makeComponent";
@@ -16,7 +16,6 @@ import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
 import { META } from "../../../quarky/src/ReactiveEntity";
 import { MaybeIon } from "../InputTypes";
 import { isFunction } from "@rue/utils";
-import { isNamedDerivation } from "../component/fromTag";
 import { InnerHTMLKit } from "./mountInnerHTML";
 import { getCommons, popCommons, pushCommons } from "../commons/commons-stack";
 import { MutableKit } from "./setUpNodeEntities";

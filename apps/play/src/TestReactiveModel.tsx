@@ -155,7 +155,7 @@ export function List(
 
 
       //     <button
-      //         on:click={[increment, { until: onMounted }]}
+      //         on:click={[increment, { until: onMount }]}
       //     >
       //         clear
       //     </button>

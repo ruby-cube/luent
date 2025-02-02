@@ -4,9 +4,10 @@ import { META } from "../ReactiveEntity";
 import { __devCheckIfTracked, getActiveTracker } from "./DependencyTracker";
 import { AnyObject } from "@rue/types";
 import { ProtectedIon } from "../ion/ReinedIon";
-import { AnyIon, IonMethods, isIon } from "../ion/Ion";
+import { AnyIon, Ion, IonMethods, isIon } from "../ion/Ion";
 import { DerivedNeutron } from "../ion/Neutron";
 import { getActiveFlask } from "@rue/flask";
+import { Traceable } from "../debug";
 
 // The $ function has various purposes
 // - it marks a function as a reactive getter so that it can be distinguished from normal functions
@@ -40,6 +41,7 @@ export class MetaDerivedIon extends IonicDerivation {
    override type = DERIVED_ION
    asDefaultReined?: ProtectedIon
    asReadonly?: ProtectedIon
+   __DEV__asTraceable?: Traceable;
 
    constructor(
       override readonly o: DerivedIon,
@@ -48,6 +50,7 @@ export class MetaDerivedIon extends IonicDerivation {
       public inert: boolean = false
    ) {
       super(o, DERIVED_ION, retrack);
+      if (__DEV__) this.__DEV__asTraceable = new Traceable()
    }
 
    value: any;
@@ -96,16 +99,16 @@ export function createDerivedIon<T extends any>(
       // }
 
       // if (!initialized || derived.dirty && retrack) {
-         const initialized = !!derived.atoms;
-         const value = !initialized ? derived.trackAtoms(pureGetter)
-            : (derived.dirty && retrack) ? derived.trackAtoms(() => pureGetter(derived.value))
-               : derived.dirty ? pureGetter(derived.value) : derived.value;
+      const initialized = !!derived.atoms;
+      const value = !initialized ? derived.trackAtoms(pureGetter)
+         : (derived.dirty && retrack) ? derived.trackAtoms(() => pureGetter(derived.value))
+            : derived.dirty ? pureGetter(derived.value) : derived.value;
 
-         derived.forwardAtoms(derived.atoms!)
-         if (!initialized || derived.dirty)
-            derived.updateValue(value)
-         if (!retrack) derived.undirty()
-         return value;
+      derived.forwardAtoms(derived.atoms!)
+      if (!initialized || derived.dirty)
+         derived.updateValue(value)
+      if (!retrack) derived.undirty()
+      return value;
       // }
 
       // if (derived.dirty) {
@@ -128,7 +131,7 @@ export function createDerivedIon<T extends any>(
    } as AnyObject
 
    if (methods) {
-      attachIonMethods(proto, methods)
+      attachIonMethods('MemoizedDerivationIon', $derivedIon as Ion, proto, methods)
    }
 
    Object.setPrototypeOf($derivedIon, proto)
@@ -162,3 +165,6 @@ export type ReactiveDerivedIon<T, M> = M extends { [key: string]: (...args: any[
 //     return createDerivedIon(derivation) as ReactiveDerivedIon<T, M>
 // }
 
+export function isNamedDerivation(value: any) {
+   return value instanceof Function && isIon(value)
+}

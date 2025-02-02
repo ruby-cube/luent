@@ -3,7 +3,7 @@ import { CommonsEntries, NodeCommons } from "./Commons";
 import { commonsTypeMap, TypeConfig } from "./CommonsKey";
 import { isIon, isIonizedModel, toIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
-import { isNamedDerivation, unnestValue } from "../component/fromTag";
+import { unnestValue } from "../component/fromTag";
 import { CommonsKeyMap } from "@rue/lumo";
 import { isFunction } from "@rue/utils";
 

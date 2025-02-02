@@ -8,7 +8,7 @@ import { inert, Inert, isInert } from "./inert";
 import { AnyIon, Ion, ion, isIon } from "../ion/Ion";
 import { AtomicIon, MetaIon } from "../ion/AtomicIon";
 import { createIonizedModel, getStructureConfigs } from "./IonizedModel";
-import { getTrace } from "../../../lumo/src/watch/debug";
+import { getPublicTrace, getTrace } from "../../../flask/debug";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -104,7 +104,7 @@ type IonizedGetter<T, K extends keyof T> =
 
 //API
 export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: string]: (...args: any[]) => any }): M extends AnyObject ? T & M : T {
-   const trace = __DEV__ ? traceIonized() : undefined
+   const trace = __DEV__ ? getPublicTrace() : undefined
    if (isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
@@ -117,32 +117,32 @@ export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: 
    return createIonizedModel(rawTarget, methods, trace) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
 }
 
-function traceIonized() { //TODO: what about objects that are ionized by ionsOf()?
-   return extractTrace(getTrace() as string)
-}
+// function traceIonized() { //TODO: what about objects that are ionized by ionsOf()?
+//    return extractTrace(getPublicTrace() 
+// }
 
-function extractTrace(rawTrace: string) {
-   const rawTraceTail = rawTrace.split('at ionize').at(-1)!
-   const trimmedTraceTail = trimHead(rawTraceTail)
-   if (trimmedTraceTail.includes('at maybeIonize'))
-      return extractIonizedPropertyTrace(trimmedTraceTail)
-   return trimTail(trimmedTraceTail)
-}
+// function extractTrace(rawTrace: string) {
+//    const rawTraceTail = rawTrace.split('at ionize').at(-1)!
+//    const trimmedTraceTail = trimHead(rawTraceTail)
+//    if (trimmedTraceTail.includes('at maybeIonize'))
+//       return extractIonizedPropertyTrace(trimmedTraceTail)
+//    return trimTail(trimmedTraceTail)
+// }
 
-function extractIonizedPropertyTrace(rawTrace: string) {
-   const cutoff = rawTrace.includes('at Proxy.at') ? 'at Proxy.at'
-      : rawTrace.includes('at Proxy.') ? 'at Proxy.' : 'at Object.get'
-   const rawTraceTail = rawTrace.split(cutoff).at(-1)!
-   return trimTail(trimHead(rawTraceTail))
-}
+// function extractIonizedPropertyTrace(rawTrace: string) {
+//    const cutoff = rawTrace.includes('at Proxy.at') ? 'at Proxy.at'
+//       : rawTrace.includes('at Proxy.') ? 'at Proxy.' : 'at Object.get'
+//    const rawTraceTail = rawTrace.split(cutoff).at(-1)!
+//    return trimTail(trimHead(rawTraceTail))
+// }
 
-function trimHead(rawTrace: string) {
-   return rawTrace.slice(rawTrace.indexOf('at'))
-}
+// function trimHead(rawTrace: string) {
+//    return rawTrace.slice(rawTrace.indexOf('at'))
+// }
 
-function trimTail(rawTrace: string) {
-   return 'at' + rawTrace.split('at')[1].trimEnd()
-}
+// function trimTail(rawTrace: string) {
+//    return 'at' + rawTrace.split('at')[1].trimEnd()
+// }
 
 // export function ionizeWithMarks<
 //    T extends AnyObject,

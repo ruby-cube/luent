@@ -4,6 +4,8 @@ import type { TrackedOp } from "./TrackedOp"
 import type { ReactiveEntity } from "../ReactiveEntity"
 import { PropIon } from "./PropIon"
 import { IonicDerivation } from "../derivations/IonicDerivation"
+import { __DEV__getTrace } from "../../../flask/debug"
+import { Traceable } from "../debug"
 
 
 
@@ -21,6 +23,7 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
 
    asDefaultReined?: Ionized<T>
    asReadonly?: Ionized<T>
+   __DEV__asTraceable?: Traceable
 
    initIonicModel(ionicModel: Ionized<T>) {
       if (this.ionicModel) return;
@@ -39,6 +42,7 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
       // public reactive: T
       // public traps?: ReactiveTraps<T>
    ) {
+      if (__DEV__) this.__DEV__asTraceable = new Traceable()
    }
 
    private appendedProperties: Set<PropertyKey> = new Set()
@@ -163,6 +167,11 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
       if (!this.observedEntryKeys) return;
       this.observedEntryKeys.delete(entryKey)
    }
+
+   // __DEV__traceTriggers?: Set<PropertyKey> = __DEV__ ? new Set() : undefined
+   // __DEV__origin?: string
+   // __DEV__labels?: Set<string>
+
 }
 
 

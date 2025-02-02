@@ -1,17 +1,19 @@
-import { emitSignal } from "../debug";
+import { __DEV__traceMethodCall, emitSignal } from "../debug";
 import { isIonizedModel, ionize } from "../ionize/ionize";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { trigger } from "../trigger";
 import { META, ReactiveEntity } from "../ReactiveEntity";
 import { AnyObject } from "@rue/types";
-import { IonMethods, isIon } from "./Ion";
+import { AnyIon, Ion, IonMethods, isIon } from "./Ion";
 import { ProtectedIon } from "./ReinedIon";
+import { __DEV__getTrace,  } from "../../../flask/debug";
+import {  __DEV__trace, Traceable, traceableMethodWrap } from "../debug";
 
 export type AtomicIon<T = any, M extends AnyObject = {}> = (() => T)
    & {
       [META]: MetaIon<T>;
       state: T;
-   } & { [K in keyof M]: M[K] } 
+   } & { [K in keyof M]: M[K] }
 
 
 export const ION = Symbol('atomicIon');
@@ -22,6 +24,7 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
 
    asDefaultReined?: ProtectedIon
    asReadonly?: ProtectedIon
+   __DEV__asTraceable?: Traceable;
 
    constructor(
       readonly o: AtomicIon<T>,
@@ -29,7 +32,10 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
       readonly hasIonicValue: boolean = false,
       public hasMethods: boolean = false,
       public inert = false
-   ) { }
+   ) {
+      if (__DEV__) this.__DEV__asTraceable = new Traceable()
+   }
+
 }
 
 
@@ -50,13 +56,12 @@ export function createAtomicIon<
       },
       set state(value: T) {
          setValue(metaIon, value, metaIon.value);
-         // setIonValue(value)
+         __DEV__traceMethodCall('AtomicIon', $ion, 'state')
       },
-
    } as AnyObject
 
    if (methods) {
-      attachIonMethods(proto, methods)
+      attachIonMethods('AtomicIon', $ion as Ion, proto, methods)
    }
 
    // function setIonValue(newValue: any) {
@@ -78,12 +83,14 @@ export function createAtomicIon<
    return $ion as AtomicIon<T, M>
 }
 
-export function attachIonMethods(proto: AnyObject, methods: AnyObject) {
+export function attachIonMethods(type: string, ion: Ion, proto: AnyObject, methods: AnyObject) {
    for (const key in methods) {
-      proto[key] = methods[key]
+      proto[key] = __DEV__ ? traceableMethodWrap(type, ion, key, methods[key]) : methods[key]
    }
    return proto;
 }
+
+
 
 // ORDER:
 // - set value
@@ -95,7 +102,7 @@ function setValue(metaIon: MetaIon, newValue: unknown, oldValue: unknown) {
       trigger(metaIon.o, newValue, oldValue) // for onTriggered
       return oldValue;
    }
-   
+
    const $ion = metaIon.o;
    const _newValue = shouldIonize(newValue, metaIon) ? ionize(newValue) : newValue
    // toIonicModelIfMust(newValue, metaIon)

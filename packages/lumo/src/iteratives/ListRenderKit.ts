@@ -10,12 +10,11 @@ import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
 import { createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
-import { getTrace } from "../watch/debug";
 import { NodePod } from "../node/NodePod";
 import { mountConditional, mountDOMNodes, removeDOMNodes } from "../conditional/ConditionalRenderSeries";
 import { Flask, getActiveFlask, setFlask } from "@rue/flask";
 import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
-import { buildTrace_DEV, setTrace } from "../../../flask/debug";
+import { __DEV__buildAsyncPath, setAsyncPath } from "../../../flask/debug";
 
 
 type Index = number
@@ -56,7 +55,7 @@ function callWithCommons(renderItem: RenderItem<any[]>, list: ListRenderKit, ite
 
 export class ListRenderKit {
    renderItem: (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => void
-   trace_DEV?: string;
+   __DEV__asyncPath?: string;
 
    constructor(
       renderItem: RenderItem<any[]>, //QUESTION: Does this need the context object?
@@ -70,7 +69,7 @@ export class ListRenderKit {
             context,
             beforeCall: () => {
                if (flask) setFlask(flask)
-               if (__DEV__) setTrace!(this.trace_DEV!)
+               if (__DEV__) setAsyncPath!(this.__DEV__asyncPath!)
             },
             callback: () => {
                const nodeEntities = callWithCommons(renderItem, this, item, $index, parent, nodePod)
@@ -79,7 +78,7 @@ export class ListRenderKit {
          })
       }
 
-      if (__DEV__) this.trace_DEV = buildTrace_DEV()
+      if (__DEV__) this.__DEV__asyncPath = __DEV__buildAsyncPath()
       this.outerFlask = getViewFlask()
    }
 
@@ -149,7 +148,7 @@ export class ListRenderKit {
                this.insertAndMoveItems(insertAndMoveKit!, parent);
             }
             catch (err) {
-               console.error(err, this.trace_DEV)
+               console.error(err, this.__DEV__asyncPath)
             }
             console.log('updating list', newState.length, _oldValue.length)
          }, { phase: Phase.RENDER })
@@ -182,7 +181,7 @@ export class ListRenderKit {
          if (isDynamic) {
             const flask = this.outerFlask.spawn('view')
             listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
-            flask.emitMounted()
+            flask.emitInitialMount()
             flaskMap.set(nodePod, flask)
          }
          else {
@@ -258,7 +257,7 @@ export class ListRenderKit {
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             this.renderItem(toValue(list)[i], $index, parent, nodePod, fragment, flask)
-            flask.emitMounted()
+            flask.emitInitialMount()
             setCurrentIndex(undefined)
             flaskMap.set(nodePod, flask)
          }

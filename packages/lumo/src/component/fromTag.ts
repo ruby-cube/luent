@@ -185,9 +185,7 @@ export function fromTag<C>(typeConfig?: C & { [key: string]: { validatedType: an
    return prep(attributes, typeConfig) as C extends {} ? ComponentValidatedInput<C> & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject
 }
 
-export function isNamedDerivation(value: any) {
-   return value instanceof Function && isIon(value)
-}
+
 
 // assertions?: { [K in keyof C]?: ((value: any) => void) | ((value: any) => void)[] }
 

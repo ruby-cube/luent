@@ -1,5 +1,5 @@
 import { ResumableListener, EnrollFunction, SustainedListenerOptions, RemoveFunction, ScheduleStop, toListenerOptions, SchedulerOptions, makeListener, Listener, Pause } from "./Listener";
-import { buildTrace_DEV } from "./debug";
+import { __DEV__buildAsyncPath } from "./debug";
 
 export type CallbackRemover = {
    (): void;
@@ -46,7 +46,7 @@ export function $listen<
       pause,
       resume,
       options,
-      trace_DEV: __DEV__ ? buildTrace_DEV() : undefined
+      __DEV__asyncPath: __DEV__buildAsyncPath()
    })
 }
 
@@ -67,7 +67,7 @@ export function $schedule<
       pause,
       resume,
       options: toListenerOptions(options),
-      trace_DEV: __DEV__ ? buildTrace_DEV() : undefined
+      __DEV__asyncPath: __DEV__ ? __DEV__buildAsyncPath() : undefined
    })
 }
 
