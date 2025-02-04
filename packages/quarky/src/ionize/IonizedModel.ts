@@ -196,10 +196,12 @@ export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonicMo
    return false;
 }
 
-function extendTarget(target: AnyObject, methods: AnyObject) {
-   const proto = { ...methods }
-   Object.setPrototypeOf(proto, Object.getPrototypeOf(target))
-   Object.setPrototypeOf(target, proto)
+//TODO: use compiler to extend instead of setPrototype of, which is bad for performance
+function extendTarget(target: AnyObject, proto: AnyObject) {
+   const _proto = Object.create(null)
+   Object.setPrototypeOf(_proto, Object.getPrototypeOf(target))
+   Object.setPrototypeOf(target, _proto)
+   Object.assign(_proto, proto)
    return target
 }
 
@@ -209,10 +211,28 @@ export function createIonizedModel(
    devTrace: string | undefined
 ) {
 
-
    const target = methods ? extendTarget(_target, methods) : _target; //NOTE: If methods and target has overlapping methods, it will overwrite the original target's method
    const structureConfigs = getStructureConfigs(target);
    const metaIonicModel = new MetaIonizedModel(target, devTrace)
+
+   let __DEV__labelName: string | undefined;
+
+   function __DEV__label(label: string) {
+      __DEV__labelName = label;
+   }
+
+   const proxySwitchMap = new Map([
+      [META as any, () =>
+         metaIonicModel as any
+      ],
+      ['__DEV__labelName', () =>
+         __DEV__labelName
+      ],
+      ['__DEV__label', () =>
+         __DEV__label
+      ],
+   ])
+
    const ionicModel = new Proxy(target, {
       has(target, key) {
          if (key === META)
@@ -221,7 +241,8 @@ export function createIonizedModel(
       },
       get(target, key, receiver) {
          if (__DEV__) emitSignal()
-         if (key === META) return metaIonicModel
+         const getValue = proxySwitchMap.get(key)
+         if (getValue) return getValue();
          if (isNonTrackable(key, structureConfigs)) {
             const value = Reflect.get(target, key, receiver); //_target
             if (value instanceof Function) {

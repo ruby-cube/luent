@@ -1,15 +1,15 @@
 //@ts-nocheck
 import { component, listen } from "@rue/lumo";
-import { __DEV__debug, ion, ionize, watch } from "@rue/quarky";
+import { traceable, __DEV__debug, ion, ionize, watch } from "@rue/quarky";
 import { $_run_with_, $_snap_context } from "../../../packages/flask/context/AsyncContext";
 import { getActiveFlask } from "@rue/flask";
 
 
 
-export function TestDebugApp(input = fromTag()) {
+export function TestDebugApp() {
 
    //NOTE: traceable is meant to enable you to trace functions and methods defined externally
-   const doSomething = traceable('doSomething', input.doSomething)
+   // const doSomething = traceable('doSomething', input.doSomething)
 
    const $count = ion(0, {
       increment() {
@@ -23,6 +23,7 @@ export function TestDebugApp(input = fromTag()) {
    $count.__DEV__label('$count')
    __DEV__debug.traceTriggers($count)
    __DEV__debug.traceCalls($count, 'decrement')
+   __DEV__debug.traceAsyncPath($count)
 
    const frog = ionize({
       name: { royalName: 'sir robin' },
@@ -35,7 +36,7 @@ export function TestDebugApp(input = fromTag()) {
       $count.state = $count.state;
    }
 
-   __DEV__debug.traceCalls(setSame)
+   // __DEV__debug.traceCalls(setSame)
 
    function refreshCounter() {
       console.log('log stuff')

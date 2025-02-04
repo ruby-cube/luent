@@ -15,11 +15,9 @@ export function __DEV__buildAsyncPath() {
    return (trace ? trace + '\n' : '') + (currentTrace ? '    at async ' + currentTrace?.slice(3) : '')
 }
 
-export function traceAsyncPath(...labels: string[]) {
+export function traceAsyncPath(label: string) {
    const trace = __DEV__getTrace()
-   for (const label of labels) {
       console.log(`# ${label}`)
-   }
    console.log(`NonError Async Trace:\n    ` + (trace ? trace + '\n    ' : '') + 'at async ' + getAsyncPath?.()?.slice(3).trimEnd())
 }
 // TODO: add async context to await, promises, and any other registered functions via compiler

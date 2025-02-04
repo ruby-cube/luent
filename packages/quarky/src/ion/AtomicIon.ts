@@ -1,4 +1,4 @@
-import { __DEV__traceMethodCall, emitSignal } from "../debug";
+import { __DEV__label, __DEV__traceMethodCall, emitSignal } from "../debug";
 import { isIonizedModel, ionize } from "../ionize/ionize";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { trigger } from "../trigger";
@@ -6,8 +6,8 @@ import { META, ReactiveEntity } from "../ReactiveEntity";
 import { AnyObject } from "@rue/types";
 import { AnyIon, Ion, IonMethods, isIon } from "./Ion";
 import { ProtectedIon } from "./ReinedIon";
-import { __DEV__getTrace,  } from "../../../flask/debug";
-import {  __DEV__trace, Traceable, traceableMethodWrap } from "../debug";
+import { __DEV__getTrace, } from "../../../flask/debug";
+import { __DEV__trace, Traceable, traceableMethodWrap } from "../debug";
 
 export type AtomicIon<T = any, M extends AnyObject = {}> = (() => T)
    & {
@@ -51,6 +51,8 @@ export function createAtomicIon<
 
    const proto = {
       [META]: metaIon,
+      __DEV__labelName: undefined,
+      __DEV__label: __DEV__label,
       get state() {
          return metaIon.value //TODO: not sure if this should allow tracking or not by calling $ion()
       },

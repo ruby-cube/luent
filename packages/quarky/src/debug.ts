@@ -30,38 +30,32 @@ export function emitSignal() {
 //+++++++
 
 
-export function __DEV__trace(type: string, labels: Set<string>, origin: string, key?: PropertyKey) {
+export function __DEV__trace(type: string, label: string, origin: string, key?: PropertyKey) {
    const trace = __DEV__getTrace()
 
    console.log('')
-   for (const label of labels) {
-      console.log(`# ${label}`)
-   }
+   console.log(`# ${label}`)
    console.log(`NonError Origin: ${type}\n    ` + (origin ? origin : ''))
-   console.log(`NonError Call Trace: ${key ? type + '.'+String(key) : ''}\n    ` + (trace ? trace : ''))
+   console.log(`NonError Call Trace: ${key ? type + '.' + String(key) : ''}\n    ` + (trace ? trace : ''))
    console.log('')
 }
 
 // type Traceable = AnyObject | Ion;
 
 export const __DEV__debug = {
-   labelTraces,
-
    // traceTrackers,
    traceTriggers,
    traceCalls,
    // traceAsyncPaths,
 
    // logAtoms,
-   traceable,
+   // traceable,
 
    traceAsyncPath,
    // traceTrigger // TODO: This should be on effect  effect.__DEV__traceTrigger()
 }
 
-function labelTraces(subject: { [META]: AnyObject }, label: string) {
-   asTraceable(subject).__DEV__labels.add(label);
-}
+
 
 function asTraceable(subject: AnyObject): Traceable {
    const traceable = subject[META].__DEV__asTraceable
@@ -71,12 +65,12 @@ function asTraceable(subject: AnyObject): Traceable {
 
 export function __DEV__traceMethodCall(type: string, subject: AnyObject, key: PropertyKey) {
    const traceable = asTraceable(subject);
-   if (traceable.__DEV__traceTriggers.has(key)) __DEV__trace(type, traceable.__DEV__labels, traceable.__DEV__origin!, key)
+   if (traceable.__DEV__traceTriggers.has(key)) __DEV__trace(type, subject.__DEV__labelName, traceable.__DEV__origin!, key)
 }
 
-function __DEV__traceFunctionCall(subject: Function) {
+function __DEV__traceFunctionCall(subject: Function & Labellable) {
    const traceable = asTraceable(subject);
-   __DEV__trace('Function', traceable.__DEV__labels, traceable.__DEV__origin!)
+   __DEV__trace('Function', subject.__DEV__labelName, traceable.__DEV__origin!)
 }
 
 export function traceableMethodWrap(type: string, subject: AnyObject, key: PropertyKey, fn: Function) {
@@ -104,7 +98,7 @@ export class Traceable {
 
    constructor() {
       this.__DEV__origin = getOriginTrace()
-      this.__DEV__labels = new Set()
+      // this.__DEV__labels = new Set()
    }
 
    __DEV__traceTriggers: Set<PropertyKey> = new Set()
@@ -112,7 +106,7 @@ export class Traceable {
    __DEV__traceTrackers: Set<PropertyKey> = new Set()
 
    __DEV__origin?: string
-   __DEV__labels: Set<string>
+   // __DEV__labels: Set<string>
 }
 
 
@@ -177,7 +171,7 @@ function traceMemberTriggers(subject: AnyObject, key: PropertyKey) {
 
 
 
-function traceable<T>(subject: T) :T {
+export function traceable<T>(subject: T): T & Labellable {
    if (isTraceable(subject)) return subject;
    if (isFunction(subject)) {
       return createTraceableFunction(subject)
@@ -187,15 +181,34 @@ function traceable<T>(subject: T) :T {
    throw new Error('INVALID INPUT. Only objects or functions can be made traceable')
 }
 
-function createTraceableObject(subject: Object) {
+function createTraceableObject(target: Object) {
    const meta = {
       __DEV__asTraceable: new Traceable()
    }
    const wrappedMethods: AnyObject = {}
 
-   const proxy = new Proxy(subject, {
+   let __DEV__labelName: string | undefined;
+
+   function __DEV__label(label: string) {
+      __DEV__labelName = label;
+   }
+
+   const proxySwitchMap = new Map([
+      [META as any, () =>
+         meta as any
+      ],
+      ['__DEV__labelName', () =>
+         __DEV__labelName
+      ],
+      ['__DEV__label', () =>
+         __DEV__label
+      ],
+   ])
+
+   const proxy = new Proxy(target, {
       get(target, key, receiver) {
-         if (key === META) return meta;
+         const getValue = proxySwitchMap.get(key)
+         if (getValue) return getValue();
          const value = Reflect.get(target, key, receiver)
          if (isFunction(value) && !isIon(value)) {
             return wrappedMethods[key] ?? (wrappedMethods[key] = traceableMethodWrap('IonizedModel', proxy, key, value))
@@ -212,20 +225,35 @@ function createTraceableObject(subject: Object) {
 const __DEV__traceFunctions = new Set()
 const __DEV__traceAsyncPathsFunctions = new Set()
 
-function createTraceableFunction(fn: Function) {
+function createTraceableFunction(fn: Function & Labellable) {
    const traceable = new Traceable()
    function traceableFn(...args: any[]) {
       if (__DEV__traceFunctions.has(traceableFn))
-         __DEV__trace('TraceableFunction', traceable.__DEV__labels, traceable.__DEV__origin!)
+         __DEV__trace('TraceableFunction', fn.__DEV__labelName, traceable.__DEV__origin!)
       if (__DEV__traceAsyncPathsFunctions.has(traceableFn))
-         traceAsyncPath(...traceable.__DEV__labels)
+         traceAsyncPath(fn.__DEV__labelName)
       return fn(...args)
    }
    //@ts-expect-error
    traceableFn[META] = {
       __DEV__asTraceable: traceable
    }
+   traceableFn.__DEV__label = __DEV__label
    return traceableFn;
+}
+
+// extended property and methods
+// wrapped methods (from target)
+// target properties (...and methods)
+
+
+export interface Labellable {
+   __DEV__labelName: string
+   __DEV__label: (label: string) => void
+}
+
+export function __DEV__label(this: Labellable, label: string) {
+   this.__DEV__labelName = label;
 }
 
 
