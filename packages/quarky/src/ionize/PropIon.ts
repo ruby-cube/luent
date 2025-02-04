@@ -164,7 +164,7 @@ function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel:
       reregisterIfNeeded()
       const tracker = getActiveTracker()
       if (tracker)
-         return ionicModel[key];
+         return ionicModel[key]; //FIX: the key for ionic model may be different than for rawTarget because of the $ normalization
       return rawTarget[key]
    }
 

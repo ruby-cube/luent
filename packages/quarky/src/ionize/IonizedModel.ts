@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { asMetaIonizedModel, ionize, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
+import { asMetaIonizedModel, ionize, Ionized, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
 import { emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
@@ -127,13 +127,13 @@ type CustomIonicModelConfig = {
    // getStructureKeys: (model: AnyObject) => any[]
 }
 
-type BeforeSetCallback = (ionicModel: IonizedModel, meta: MetaIonizedModel, key: PropertyKey, oldValue: any) => void
-type AfterSetCallback = (ionicModel: IonizedModel, meta: MetaIonizedModel, key: PropertyKey, newValue: any, oldValue: any) => void
+type BeforeSetCallback = (ionizedModel: IonizedModel, meta: MetaIonizedModel, key: PropertyKey, oldValue: any) => void
+type AfterSetCallback = (ionizedModel: IonizedModel, meta: MetaIonizedModel, key: PropertyKey, newValue: any, oldValue: any) => void
 
-type CreateTrackableOp = (target: AnyObject, ionicModel: IonizedModel<AnyObject>) => (...args: any[]) => any
+type CreateTrackableOp = (target: AnyObject, ionizedModel: IonizedModel<AnyObject>) => (...args: any[]) => any
 
 type MutatingOpConfig = {
-   createOp: (target: AnyObject, ionicModel: IonizedModel<AnyObject>, meta: any, getPreopData: GetPreopData | undefined) => (...args: any[]) => any
+   createOp: (target: AnyObject, ionizedModel: IonizedModel<AnyObject>, meta: any, getPreopData: GetPreopData | undefined) => (...args: any[]) => any
    preop?: GetPreopData
    revert?: Revert
 }
@@ -173,11 +173,11 @@ function isCustomIonicStructure(value: any) {
 //     return config.mutatingOps
 // }
 
-function emitAfterSet(structureConfigs: CustomIonicModelConfig[], ionicModel: IonizedModel, meta: MetaIonizedModel, key: PropertyKey, newValue: any, oldValue: any) {
+function emitAfterSet(structureConfigs: CustomIonicModelConfig[], ionizedModel: IonizedModel, meta: MetaIonizedModel, key: PropertyKey, newValue: any, oldValue: any) {
    if (structureConfigs[0].structure === Object) return;
    for (const config of structureConfigs) {
       const afterSet = config.afterSet
-      if (afterSet) afterSet(ionicModel, meta, key, newValue, oldValue)
+      if (afterSet) afterSet(ionizedModel, meta, key, newValue, oldValue)
    }
 }
 
@@ -198,12 +198,11 @@ export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonicMo
 
 
 export function createIonizedModel(
-   _target: object,
+   target: object,
    methods: AnyObject | undefined,
    devTrace: string | undefined
 ) {
 
-   const target = methods ? extendTarget(_target, methods) : _target; //NOTE: If methods and target has overlapping methods, it will overwrite the original target's method
    const structureConfigs = getStructureConfigs(target);
    const metaIonicModel = new MetaIonizedModel(target, devTrace)
 
@@ -213,7 +212,7 @@ export function createIonizedModel(
       __DEV__labelName = label;
    }
 
-   const proxySwitchMap = new Map([
+   const switchMap = new Map([
       [META as any, () =>
          metaIonicModel as any
       ],
@@ -225,127 +224,33 @@ export function createIonizedModel(
       ],
    ])
 
-   const ionicModel = new Proxy(target, {
+   const ionizedModel = new Proxy(target, {
       has(target, key) {
-         if (key === META)
+         const getValue = switchMap.get(key)
+         if (getValue)
             return true;
          return key in target || !!methods && key in methods
       },
       get(target, key, receiver) {
+         if (__DEV__ && ionizedModel !== receiver) console.warn('An ionized model cannot serve as a prototype')
          if (__DEV__) emitSignal()
-         const getValue = proxySwitchMap.get(key)
+         const getValue = switchMap.get(key)
          if (getValue) return getValue();
-         if (isNonTrackable(key, structureConfigs)) {
-            const value = Reflect.get(target, key, receiver); //_target
-            if (value instanceof Function) {
-               return (...args: any[]) =>
-                  value.call(target/* _target */, ...args) //TODO: Simplify... a bound method needs to be created and stored
-            }
-            return value;
-         }
-
-         const isIonAccessKey = typeof key === 'string' && key[0] === '$'
-         //NOTE: Temporarily hidden rein because of issues
-         // const reinedMeta = getReinedMeta(target, ionicModel, receiver)
-         // if (reinedMeta && !reinedMeta.isExposedKey(isIonAccessKey ? key.slice(1) : key)) {
-         //    if (__DEV__) console.warn(`Property is restricted. Cannot access '${key.toString()}'`)
-         //    return undefined;
-         // }
-         const reinedMeta = { isExposedKey: () => true } //NOTE: TEMPORARY
-
-         if (methods && key in methods) {
-            const method = methods[key]
-            if (isMethod(method)) {
-               return accessMethod(
-                  target,
-                  ionicModel,
-                  receiver,
-                  key,
-                  boundMethodMap,
-                  method
-               )
-            }
-         }
-         const _key = typeof key === 'string' && key.startsWith('_') ? key.slice(1) : key;
-         if (isNativeMethod(_key, structureConfigs)) {
-            // console.log('isNativeMethod', _key)
-            // if (reinedMeta) {
-            //    if (reinedMeta.isExposedKey(_key)) {
-            //       return getNativeMethod(
-            //          _key,
-            //          structureConfigs,
-            //          _target,
-            //          ionicModel,
-            //          metaIonicModel,
-            //          boundMethodMap,
-            //       )
-            //    }
-            //    return undefined;
-            // }
-            // else {
-            return getNativeMethod(
-               _key,
-               structureConfigs,
-               _target, //_target?
-               ionicModel,
-               metaIonicModel,
-               boundMethodMap,
-            )
-            // }
-         }
-         let value;
-         try { //TODO: decide whether to use Reflect.get or target[key], or when to use which
-            // console.warn('Reflect.get failed with error, switched to target[key]:', err)
-            value = target[key]
-         }
-         catch (err) {
-            console.warn('target[key] failed with error, switched to Reflect.get:', err)
-            value = Reflect.get(target, key, receiver) // TODO: deep readonly and reined
-            /* 
-            https://stackoverflow.com/questions/37199019/method-set-prototype-add-called-on-incompatible-receiver-undefined
-            set.size causes incompatible reciever error. It may be because its a getter that uses 'this'
-            */
-         }
-
-         if (isIonAccessKey) {
-            if (isIon(value))
-               return maybeReined(value, reinedMeta); // { $count: $count } get ion case
-            const _key = key.slice(1);
-            if (value === undefined) {
-               const _value = Reflect.get(target, _key, receiver);
-               if (isIon(_value))
-                  return maybeReined(_value, reinedMeta);  // { count: $count } get ion case
-            }
-            return maybeReined(asPropIon(ionicModel, _key), reinedMeta) // { count: 0}  and { $count: 0 } get ion case
-         }
-
-         if (isIon(value)) {
-            return maybeReined(maybeIonize(value(), target, ionicModel, receiver), reinedMeta); // { count: $count } get value case
-         }
-
-         if (isMethod(value))
-            return accessMethod(
-               target,
-               ionicModel,
-               receiver,
-               typeof _key === 'string' ? '_' + _key : key,
-               boundMethodMap,
-               value
-            )
-         const _value = maybeReined(maybeIonize(value, target, ionicModel, receiver), reinedMeta)
-         const tracker = getActiveTracker()
-         if (!tracker || Reflect.getOwnPropertyDescriptor(target, key)?.writable === false)
-            return _value;
-         tracker.track(asTrackedProp(ionicModel, key))
-         return _value;
+         return initialAccess(
+            target,
+            methods,
+            ionizedModel,
+            metaIonicModel,
+            structureConfigs,
+            key,
+            receiver,
+            switchMap
+         )
       },
       set(target, key, value, receiver) {
-         if (isRestricted(target, ionicModel, receiver)) {
-            return false;
-         }
          return reactiveSetter(
             structureConfigs,
-            ionicModel,
+            ionizedModel,
             metaIonicModel,
             target,
             key,
@@ -353,25 +258,152 @@ export function createIonizedModel(
             receiver
          )
       }
-   }) as IonizedModel
+   }) as Ionized<AnyObject>
 
-   const boundMethodMap = new Map()
-
-   metaIonicModel.initIonicModel(ionicModel)
-   registerIonizedModel(ionicModel, target)
-   return ionicModel
+   metaIonicModel.initIonicModel(ionizedModel)
+   if (!methods) registerIonizedModel(ionizedModel, target)
+   return ionizedModel
 }
 
-function maybeIonize(value: any, target: AnyObject, proxy: AnyObject, receiver: AnyObject) {
+type ProxySwitchMap = Map<string | symbol, () => any>
+
+
+function initialAccess(
+   target: AnyObject,
+   methods: AnyObject | undefined,
+   ionizedModel: IonizedModel,
+   metaIonicModel: MetaIonizedModel,
+   structureConfigs: CustomIonicModelConfig[],
+   key: string | symbol,
+   receiver: AnyObject,
+   switchMap: ProxySwitchMap
+) {
+   if (methods && key in methods) {
+      return bindMethod(methods[key], key, ionizedModel, switchMap)
+   }
+
+   const isIonAccessKey = typeof key === 'string' && key[0] === '$'
+   const _key = methods ? getTargetKey(methods, key) : key;
+   const value = getTargetPropertyValue(target, _key, receiver)
+   if (isMethod(value)) {
+      if (isNativeMethod(_key, structureConfigs)) {
+         return getNativeMethod(
+            _key,
+            key,
+            structureConfigs,
+            target,
+            ionizedModel,
+            metaIonicModel,
+            switchMap
+         )
+      }
+      return bindMethod(value, key, ionizedModel, switchMap)
+   }
+
+   if (isNonTrackable(key, structureConfigs)) { //QUESTION: is this worth it? //TODO: include non-writable properties
+      return initialNonTrackablePropertyAccess(target, key, value, switchMap);
+   }
+
+   if (isIonAccessKey) {
+      return initialIonAccess(ionizedModel, target, key, value, switchMap);
+   }
+
+   if (isIon(value)) {
+      return initialAbsorbedIonStateAccess(key, value, switchMap)
+   }
+
+   return initialTrackableStateAccess(ionizedModel, target, key, value, switchMap)
+}
+
+
+function bindMethod(method: Function, key: string | symbol, proxy: AnyObject, switchMap: ProxySwitchMap) {
+   if (!isMethod(method)) throw new Error('Invalid method')
+   const boundMethod =
+      __DEV__ ?
+         traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
+         : method.bind(proxy);
+   switchMap.set(key, () => boundMethod)
+   return boundMethod;
+}
+
+function initialNonTrackablePropertyAccess(
+   target: AnyObject,
+   key: string | symbol,
+   value: any,
+   switchMap: ProxySwitchMap
+) {
+   switchMap.set(key, () => target[key])
+   return value;
+}
+
+function initialIonAccess(proxy: AnyObject, target: AnyObject, key: string, value: any, switchMap: ProxySwitchMap) {
+   if (isIon(value)) {
+      // Absorbed Ion
+      switchMap.set(key, () => target[key])
+      return value; // { $count: $count } get ion case
+   }
+   const _key = key.slice(1);
+   if (value === undefined) {
+      const _value = target[_key]
+      if (isIon(_value)) {
+         // Absorbed Ion
+         switchMap.set(key, () => target[_key])
+         return _value;  // { count: $count } get ion case
+      }
+      // Prop Ion
+      const propIon = asPropIon(proxy, _key)  // { count: 0}  get ion case
+      switchMap.set(key, () => propIon)
+      return propIon;
+   }
+   // Prop Ion
+   const propIon = asPropIon(proxy, key, _key) //FIX:  
+   switchMap.set(key, () => propIon)
+   return propIon // { $count: 0 } get ion case
+}
+
+function initialAbsorbedIonStateAccess(key: string | symbol, value: any, switchMap: ProxySwitchMap) {
+   switchMap.set(key, () => maybeIonize(value()))
+   return maybeIonize(value()); // { count: $count } get value case
+}
+
+function getTargetKey(methods: AnyObject, key: string | symbol) {
+   const keyWithoutUnderscorePrefix = typeof key === 'string' && key.startsWith('_') ? key.slice(1) : key;
+   if (keyWithoutUnderscorePrefix in methods) return keyWithoutUnderscorePrefix;
+   return key;
+}
+
+function getTargetPropertyValue(target: AnyObject, key: string | symbol, receiver: AnyObject) {
+   try {
+      //TODO: decide whether to use Reflect.get or target[key], or when to use which
+      // console.warn('Reflect.get failed with error, switched to target[key]:', err)
+      return target[key]
+   }
+   catch (err) {
+      console.warn('target[key] failed with error, switched to Reflect.get:', err)
+      return Reflect.get(target, key, receiver) // TODO: deep readonly and reined
+      /* 
+      https://stackoverflow.com/questions/37199019/method-set-prototype-add-called-on-incompatible-receiver-undefined
+      set.size causes incompatible reciever error. It may be because its a getter that uses 'this'
+      */
+   }
+}
+
+function initialTrackableStateAccess(ionizedModel: AnyObject, target: AnyObject, key: string | symbol, value: any, switchMap: ProxySwitchMap) {
+   function getState(value: any) {
+      const _value = maybeIonize(value)
+      const tracker = getActiveTracker()
+      if (!tracker)
+         return _value;
+      tracker.track(asTrackedProp(ionizedModel, key))
+      return _value;
+   }
+   switchMap.set(key, () => getState(target[key]))
+   return getState(value)
+}
+
+function maybeIonize(value: any) {
    if (!(value instanceof Object))
       return value;
-   if (isReadonlyProxy(target, proxy, receiver)) {
-      return rein(ionize(value), READONLY)
-   }
-   const reinedMeta = getReinedMeta(target, proxy, receiver)
-   if (reinedMeta) {
-      return rein(ionize(value))
-   }
    return ionize(value)
 }
 
@@ -434,32 +466,29 @@ function getBoundMethod(
 }
 
 function getNativeMethod(
-   key: string | symbol,
+   nativeKey: string | symbol,
+   publicKey: string | symbol,
    structureConfigs: CustomIonicModelConfig[],
    target: AnyObject,
-   ionicModel: IonizedModel,
+   ionizedModel: IonizedModel,
    meta: MetaIonizedModel,
-   boundMethodMap: Map<PropertyKey, Function>,
+   switchMap: ProxySwitchMap,
 ) {
-   const _key = typeof key === 'string' ? '_' + key : key
-   let boundMethod = boundMethodMap.get(_key)
-   if (boundMethod) return boundMethod;
-
    for (const config of structureConfigs) {
       const mutatingOps = config.mutatingOps
-      if (mutatingOps && key in mutatingOps) {
-         const createOp = mutatingOps[key].createOp
-         const getPreopData = mutatingOps[key].preop
-         const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionicModel, key, createOp(target, ionicModel, meta, getPreopData))
-            : createOp(target, ionicModel, meta, getPreopData)
-         boundMethodMap.set(_key, op)
+      if (mutatingOps && nativeKey in mutatingOps) {
+         const createOp = mutatingOps[nativeKey].createOp
+         const getPreopData = mutatingOps[nativeKey].preop
+         const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, meta, getPreopData))
+            : createOp(target, ionizedModel, meta, getPreopData)
+            switchMap.set(publicKey, op)
          return op;
       }
       const trackableOps = config.trackableOps
-      if (trackableOps && key in trackableOps) {
-         const createOp = trackableOps[key]
-         const op = createOp(target, ionicModel)
-         boundMethodMap.set(_key, op)
+      if (trackableOps && nativeKey in trackableOps) {
+         const createOp = trackableOps[nativeKey]
+         const op = createOp(target, ionizedModel)
+         switchMap.set(publicKey, op)
          return op;
       }
    }
@@ -479,14 +508,14 @@ function maybeReined(
 
 export function reactiveSetter(
    structureConfigs: CustomIonicModelConfig[], // and Tuple
-   ionicModel: IonizedModel,
+   ionizedModel: IonizedModel,
    metaIonicModel: MetaIonizedModel,
    target: AnyObject,
    key: string | symbol,
    newValue: any,
    receiver: AnyObject
 ) {
-   if (isRestricted(target, ionicModel, receiver)) {
+   if (isRestricted(target, ionizedModel, receiver)) {
       if (__DEV__) console.warn('Set operation failed. Property is readonly')
       return false;
    }
@@ -494,15 +523,15 @@ export function reactiveSetter(
 
    const oldValue = Reflect.get(target, key, receiver);
    if (isIon(oldValue) && !isIon(newValue)) {
-      return setAbsorbedIon(oldValue, newValue, ionicModel, key, oldValue(), structureConfigs)
+      return setAbsorbedIon(oldValue, newValue, ionizedModel, key, oldValue(), structureConfigs)
    }
 
-   __DEV__traceMethodCall('IonizedModel', ionicModel, key)
+   __DEV__traceMethodCall('IonizedModel', ionizedModel, key)
 
    if (oldValue === newValue
       || isNonTrackable(key, structureConfigs)
       || !isWritable(target, key)) {
-      const prop = getObservedProp(ionicModel, key)
+      const prop = getObservedProp(ionizedModel, key)
       if (prop) trigger(prop, newValue, oldValue)
       target[key] = newValue
       return true;
@@ -515,15 +544,15 @@ export function reactiveSetter(
 
    storeSnapshot(metaIonicModel)
 
-   const prop = getObservedProp(ionicModel, key);
+   const prop = getObservedProp(ionizedModel, key);
    if (prop) {
       trigger(prop, _newValue, _oldValue)
    }
 
-   emitAfterSet(structureConfigs, ionicModel, metaIonicModel, key, _newValue, _oldValue)
+   emitAfterSet(structureConfigs, ionizedModel, metaIonicModel, key, _newValue, _oldValue)
 
    triggerIonicModel(
-      ionicModel,
+      ionizedModel,
       '[[set]]',
       [key, _newValue],
       _newValue,
@@ -535,7 +564,7 @@ export function reactiveSetter(
 
 
 
-export function setAbsorbedIon(ion: AnyIon, value: any, ionicModel: IonizedModel, key: PropertyKey, oldValue: any, structureConfigs: CustomIonicModelConfig[]) {
+export function setAbsorbedIon(ion: AnyIon, value: any, ionizedModel: IonizedModel, key: PropertyKey, oldValue: any, structureConfigs: CustomIonicModelConfig[]) {
    if ('state' in ion) {
       try {
          ion.state = value;
@@ -545,15 +574,15 @@ export function setAbsorbedIon(ion: AnyIon, value: any, ionicModel: IonizedModel
          return false;
       }
 
-      const prop = getObservedProp(ionicModel, key);
+      const prop = getObservedProp(ionizedModel, key);
       if (prop) {
          trigger(prop, value, oldValue)
       }
 
-      emitAfterSet(structureConfigs, ionicModel, asMetaIonizedModel(ionicModel), key, value, oldValue)
+      emitAfterSet(structureConfigs, ionizedModel, asMetaIonizedModel(ionizedModel), key, value, oldValue)
 
       triggerIonicModel(
-         ionicModel,
+         ionizedModel,
          '[[set]]',
          [key, value],
          value,

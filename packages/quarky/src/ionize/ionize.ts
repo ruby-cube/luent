@@ -112,8 +112,8 @@ export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: 
    //TODO: What about a readonly object that is not an ionic model?
    if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
    const rawTarget = toRaw(target)
-   const existingIonicModel = ionizedModels.get(rawTarget)
-   if (existingIonicModel && !methods) return existingIonicModel as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
+   const existingIonicModel = !methods ? ionizedModels.get(rawTarget) : undefined;
+   if (existingIonicModel) return existingIonicModel as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
    return createIonizedModel(rawTarget, methods, trace) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
 }
 
