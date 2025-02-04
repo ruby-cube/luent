@@ -98,8 +98,8 @@ export function List(
 
    // toRaw(selected).add({id: '', content: ''})
 
-   // const vals = selected.values()
-   Array.from(selected)
+   const vals = selected.values()
+   Array.from(toRaw(selected))
 
    function moveSelectedItems(index: number) {
       moveUniqueItems(selected, list, index)

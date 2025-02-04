@@ -141,7 +141,6 @@ type MutatingOpConfig = {
 export type GetPreopData = (target: AnyObject, args?: any[]) => any;
 type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
 
-const something: Map<any, { dog?: number }> = new Map([[Object, { dog: 9 }]])
 
 
 const ionicStructureMap = new Map([[
@@ -243,11 +242,11 @@ export function createIonizedModel(
             metaIonicModel,
             structureConfigs,
             key,
-            receiver,
             switchMap
          )
       },
       set(target, key, value, receiver) {
+         if (key === 'has') console.warn(key, value)
          return reactiveSetter(
             structureConfigs,
             ionizedModel,
@@ -275,28 +274,27 @@ function initialAccess(
    metaIonicModel: MetaIonizedModel,
    structureConfigs: CustomIonicModelConfig[],
    key: string | symbol,
-   receiver: AnyObject,
    switchMap: ProxySwitchMap
 ) {
+   if (key === 'has') console.log('has is here')
    if (methods && key in methods) {
       return bindMethod(methods[key], key, ionizedModel, switchMap)
    }
-
-   const isIonAccessKey = typeof key === 'string' && key[0] === '$'
    const _key = methods ? getTargetKey(methods, key) : key;
-   const value = getTargetPropertyValue(target, _key, receiver)
+   if (isNativeMethod(_key, structureConfigs)) { //NOTE: this block must be above target[_key] for Array.from(set) to work
+      return getNativeMethod(
+         _key,
+         key,
+         structureConfigs,
+         target,
+         ionizedModel,
+         metaIonicModel,
+         switchMap
+      )
+   }
+   const isIonAccessKey = typeof key === 'string' && key[0] === '$' //TODO: need to use regex
+   const value = target[_key]
    if (isMethod(value)) {
-      if (isNativeMethod(_key, structureConfigs)) {
-         return getNativeMethod(
-            _key,
-            key,
-            structureConfigs,
-            target,
-            ionizedModel,
-            metaIonicModel,
-            switchMap
-         )
-      }
       return bindMethod(value, key, ionizedModel, switchMap)
    }
 
@@ -480,14 +478,14 @@ function getNativeMethod(
          const getPreopData = mutatingOps[nativeKey].preop
          const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, meta, getPreopData))
             : createOp(target, ionizedModel, meta, getPreopData)
-         switchMap.set(publicKey, op)
+         switchMap.set(publicKey, ()=>op)
          return op;
       }
       const trackableOps = config.trackableOps
       if (trackableOps && nativeKey in trackableOps) {
          const createOp = trackableOps[nativeKey]
          const op = createOp(target, ionizedModel)
-         switchMap.set(publicKey, op)
+         switchMap.set(publicKey, ()=>op)
          return op;
       }
    }

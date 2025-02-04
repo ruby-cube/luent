@@ -36,7 +36,7 @@ import { TabApp } from './demos/markdown-app/TestTabs';
 
 // const rootContext = createGlobalCommons()
 
-const app = createApp(TestDebugApp)
+const app = createApp(TestApp)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true
