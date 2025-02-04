@@ -14,21 +14,21 @@ import { readonly } from "../readonly";
 
 
 export function isPropIon(value: any): value is PropIon {
-    return value?.[META] instanceof MetaPropIon;
+   return value?.[META] instanceof MetaPropIon;
 }
 
 export type PropIon<T = any, M = undefined> = M extends undefined ? {
-    (): T
-    // set: (newValue: T) => T
-    [META]: MetaPropIon
+   (): T
+   // set: (newValue: T) => T
+   [META]: MetaPropIon
 } : M & {
-    (): T
-    // set: (newValue: T) => T
-    [META]: MetaPropIon
+   (): T
+   // set: (newValue: T) => T
+   [META]: MetaPropIon
 }
 
 type TransferredMethods<T, M> = {
-    [K in keyof M]: M[K] extends true ? T[K extends keyof T ? K : never] : T[M[K] extends keyof T ? M[K] : never]
+   [K in keyof M]: M[K] extends true ? T[K extends keyof T ? K : never] : T[M[K] extends keyof T ? M[K] : never]
 }
 
 // export type ReadonlyPropIon<T = any, M = undefined> = M extends undefined ? {
@@ -40,8 +40,8 @@ type TransferredMethods<T, M> = {
 // }
 
 export type PropIonCapsule<T = any, M extends AnyObject = AnyObject> = {
-    (): T
-    [META]: MetaPropIon
+   (): T
+   [META]: MetaPropIon
 } & M
 
 
@@ -50,199 +50,187 @@ export type PropIonCapsule<T = any, M extends AnyObject = AnyObject> = {
 const entryKeyValidators: ((model: AnyObject, key: PropertyKey) => boolean)[] = [];
 
 export function registerEntryKeyValidator(isEntryKey: (model: AnyObject, key: PropertyKey) => boolean) {
-    entryKeyValidators.push(isEntryKey);
+   entryKeyValidators.push(isEntryKey);
 }
 
 
 function isEntryKey(rawModel: AnyObject, key: PropertyKey) {
-    for (const validator of entryKeyValidators) {
-        const is = validator(rawModel, key)
-        if (is) return true;
-    }
-    return false;
+   for (const validator of entryKeyValidators) {
+      const is = validator(rawModel, key)
+      if (is) return true;
+   }
+   return false;
 }
 
 class MetaPropIon {
 
-    asReadonly?: PropIon
-    // asObservedProp!: ObservedProp
+   asReadonly?: PropIon
+   // asObservedProp!: ObservedProp
 
-    //to fulfill MetaWritableIon interface
-    asDefaultReined = undefined
-    hasMethods = false;
-    isEntryKey = false;
+   //to fulfill MetaWritableIon interface
+   asDefaultReined = undefined
+   hasMethods = false;
+   isEntryKey = false;
 
-    constructor(
-        public o: PropIon,
-        public model: IonizedModel,
-        public key: PropertyKey,
-        public inert: boolean = false
-    ) {
-        asMetaIonizedModel(model).registerPropIon(key, o)
-        this.isEntryKey = isEntryKey(toRaw(model), key)
-    }
+   constructor(
+      public o: PropIon,
+      public model: IonizedModel,
+      public key: PropertyKey,
+      public inert: boolean = false
+   ) {
+      asMetaIonizedModel(model).registerPropIon(key, o)
+      this.isEntryKey = isEntryKey(toRaw(model), key)
+   }
 
-    asWatchSubject?: WatchSubject
-    asAtom?: IonicAtom
-    private isIndex: boolean = false
+   asWatchSubject?: WatchSubject
+   asAtom?: IonicAtom
+   private isIndex: boolean = false
 
-    watch() {
-        if (this.asWatchSubject) return;
-        const metaModel = asMetaIonizedModel(this.model)
-        if (this.isEntryKey)
-            metaModel.addObservedEntryKey(this.key);
+   watch() {
+      if (this.asWatchSubject) return;
+      const metaModel = asMetaIonizedModel(this.model)
+      if (this.isEntryKey)
+         metaModel.addObservedEntryKey(this.key);
 
-        const watchSubject = this.asWatchSubject = asWatchSubject(this.o)
+      const watchSubject = this.asWatchSubject = asWatchSubject(this.o)
 
-        watchSubject.onUnwatched(() => {
-            if (watchSubject.watchCount === 0 && this.asAtom?.derivations.size === 0) {
-                this.discard()
-            }
-        })
-    }
+      watchSubject.onUnwatched(() => {
+         if (watchSubject.watchCount === 0 && this.asAtom?.derivations.size === 0) {
+            this.discard()
+         }
+      })
+   }
 
-    track() {
-        if (this.asAtom) return;
+   track() {
+      if (this.asAtom) return;
 
-        const atom = this.asAtom = asIonicAtom(this.o)
+      const atom = this.asAtom = asIonicAtom(this.o)
 
-        if (this.isEntryKey)
-            asMetaIonizedModel(this.model).addObservedEntryKey(this.key)
+      if (this.isEntryKey)
+         asMetaIonizedModel(this.model).addObservedEntryKey(this.key)
 
-        atom.onUntracked(() => {
-            if (this.asWatchSubject?.watchCount === 0 && atom.derivations.size === 0) {
-                this.discard()
-            }
-        })
-    }
+      atom.onUntracked(() => {
+         if (this.asWatchSubject?.watchCount === 0 && atom.derivations.size === 0) {
+            this.discard()
+         }
+      })
+   }
 
-    discard() {
-        const metaModel = asMetaIonizedModel(this.model)
-        const key = this.key
-        if (this.isEntryKey) metaModel.deleteObservedEntryKey(key)
-        metaModel.unregisterPropIon(key)
-    }
+   discard() {
+      const metaModel = asMetaIonizedModel(this.model)
+      const key = this.key
+      if (this.isEntryKey) metaModel.deleteObservedEntryKey(key)
+      metaModel.unregisterPropIon(key)
+   }
 }
 
 type AsPropIon<T extends AnyObject, K extends keyof T, M> = PropIon<T[K], M extends AnyObject ? { [K in keyof TransferredMethods<T, M>]: TransferredMethods<T, M>[K] } : undefined>
 
 export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, key: K, methods?: M & { [key: string]: keyof T | true }): AsPropIon<T, K, M> {
-    const ionicModel = isIonizedModel(model) ? model : ionize(model) //TODO: is there a more performant solution than ionizing non-reactive models? like mapping model to prop ions?
-    const rawTarget = toRaw(ionicModel)
-    const value = rawTarget[key];
+   const ionicModel = isIonizedModel(model) ? model : ionize(model) //TODO: is there a more performant solution than ionizing non-reactive models? like mapping model to prop ions?
+   const rawTarget = toRaw(ionicModel)
+   const value = rawTarget[key];
 
-    // return absorbed ion
-    if (isIon(value)) {
-        if (methods && __DEV__) console.warn(`absorbed ions cannot have additional methods assigned to them`)
-        if (isReinedIonizedModel(ionicModel))
-            return reinIon(value, []);
-        return value;
-    }
+   // return absorbed ion
+   if (isIon(value)) {
+      if (methods && __DEV__) console.warn(`absorbed ions cannot have additional methods assigned to them`)
+      if (isReinedIonizedModel(ionicModel))
+         return reinIon(value, []);
+      return value;
+   }
 
-    // return existing propIon
-    const propIon = getPropIon(ionicModel, key) //TODO: need a map for readonly prop ions too...
-    if (propIon && !methods) {
-        if (isReinedIonizedModel(ionicModel)) {
-            readonly(propIon)
-        }
-        return propIon as AsPropIon<T, K, M>
-    }
-    return createPropIon(ionicModel, key, methods) as AsPropIon<T, K, M>
+   // return existing propIon
+   const propIon = getPropIon(ionicModel, key) //TODO: need a map for readonly prop ions too...
+   if (propIon && !methods) {
+      if (isReinedIonizedModel(ionicModel)) {
+         readonly(propIon)
+      }
+      return propIon as AsPropIon<T, K, M>
+   }
+   return createPropIon(ionicModel, key, methods) as AsPropIon<T, K, M>
 }
 
 export function getPropIon(
-    ionicModel: IonizedModel,
-    key: PropertyKey
+   ionicModel: IonizedModel,
+   key: PropertyKey
 ) {
-    return asMetaIonizedModel(ionicModel).getPropIon(key)
+   return asMetaIonizedModel(ionicModel).getPropIon(key)
 }
 
 function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel: T, key: K, methods?: M & { [key: string]: PropertyKey | true }): PropIon<T[K], M> {
-    const rawTarget = toRaw(ionicModel) as T
+   const rawTarget = toRaw(ionicModel) as T
 
-    function $propIon() {
-        reregisterIfNeeded()
-        const tracker = getActiveTracker()
-        if (tracker)
+   function $propIon() {
+      reregisterIfNeeded()
+      const tracker = getActiveTracker()
+      if (tracker)
          return ionicModel[key];
-        return rawTarget[key]
-    }
+      return rawTarget[key]
+   }
 
-    const proto = {
-        [META]: new MetaPropIon(<PropIon>$propIon, ionicModel, key),
-        // set: (newValue: T[K]) => {
-        //     reregisterIfNeeded()
-        //     if (__DEV__) __devCheckIfTracked()
-        //     return setValue(ionicModel, key, newValue, ionicModel[key])
-        // }
-        get state() {
+   $propIon[META] = new MetaPropIon(<PropIon>$propIon, ionicModel, key)
+
+   Object.defineProperty($propIon, 'state', {
+      get() {
          return rawTarget[key]
       },
-      set state(value: T[K]) {
+      set(value: T[K]) {
          ionicModel[key] = value;
-      },
-    } as AnyObject
+      }
+   })
 
 
-    if (methods) {
-        for (const key in methods) {
-            // if (key === 'as') {
-            //     if (__DEV__) console.warn(`'as' is reserved for the native set method for ions. Choose different method name`)
-            //     continue;
-            // }
+   if (methods) {
+      for (const key in methods) {
+         const methodKey = methods[key] === true ? key : methods[key]
+         //@ts-expect-error
+         $propIon[key]
+            = ionicModel[methodKey] //TODO: 
+         // .bind(proto) // This makes set function available to `this` even after protected //QUESTION: is this necessary if dev does not use this??
+      }
+   }
 
-            const methodKey = methods[key] === true ? key : methods[key]
-            proto[key] = ionicModel[methodKey] //TODO: 
-            // .bind(proto) // This makes set function available to `this` even after protected //QUESTION: is this necessary if dev does not use this??
-        }
-    }
+   function reregisterIfNeeded() {
+      const metaIonicModel = asMetaIonizedModel(ionicModel);
+      if (!metaIonicModel.getPropIon(key)) {
+         if (__DEV__) console.warn(`[CASE RESEARCH] I'm curious how often and in what cases this happens: $propIon for ${key.toString()} in${JSON.stringify(rawTarget)} is no longer observed, but there's still an active reference to it`)
+         metaIonicModel.registerPropIon(key, $propIon as PropIon) // This means $propIon is not being watched and is not an atom anywhere, but it's still being used
+      }
+   }
 
-    Object.setPrototypeOf($propIon, proto)
-
-    // $propIon[META] = new MetaPropIon(<PropIon>$propIon, ionicModel, key)
-    // $propIon.set = 
-
-    function reregisterIfNeeded() {
-        const metaIonicModel = asMetaIonizedModel(ionicModel);
-        if (!metaIonicModel.getPropIon(key)) {
-            if (__DEV__) console.warn(`[CASE RESEARCH] I'm curious how often and in what cases this happens: $propIon for ${key.toString()} in${JSON.stringify(rawTarget)} is no longer observed, but there's still an active reference to it`)
-            metaIonicModel.registerPropIon(key, $propIon as PropIon) // This means $propIon is not being watched and is not an atom anywhere, but it's still being used
-        }
-    }
-
-    return $propIon as PropIon<T[K], M>
-    // return isReinedIonizedModel(ionicModel) ? reinIon($propIon as PropIon, READONLY) : $propIon //FIX: isn't it already protected?
+   return $propIon as PropIon<T[K], M>
+   // return isReinedIonizedModel(ionicModel) ? reinIon($propIon as PropIon, READONLY) : $propIon //FIX: isn't it already protected?
 }
 
 export function asTrackedProp(
-    ionicModel: IonizedModel,
-    key: PropertyKey
+   ionicModel: IonizedModel,
+   key: PropertyKey
 ) {
-    const prop = getPropIon(ionicModel, key) ?? createPropIon(ionicModel, key)
-    const meta = asMetaIon(prop)
-    meta.track()
-    return prop;
+   const prop = getPropIon(ionicModel, key) ?? createPropIon(ionicModel, key)
+   const meta = asMetaIon(prop)
+   meta.track()
+   return prop;
 }
 
 export function asWatchedProp(
-    ionicModel: IonizedModel,
-    key: PropertyKey
+   ionicModel: IonizedModel,
+   key: PropertyKey
 ) {
-    const prop = getPropIon(ionicModel, key) ?? createPropIon(ionicModel, key)
-    const meta = asMetaIon(prop)
-    meta.watch()
-    return prop;
+   const prop = getPropIon(ionicModel, key) ?? createPropIon(ionicModel, key)
+   const meta = asMetaIon(prop)
+   meta.watch()
+   return prop;
 }
 
 export function getObservedProp( // observed means watched and/or tracked
-    ionicModel: IonizedModel,
-    key: PropertyKey
+   ionicModel: IonizedModel,
+   key: PropertyKey
 ) {
-    const prop = getPropIon(ionicModel, key);
-    if (!prop) return undefined;
-    const meta = asMetaIon(prop);
-    if (meta.asWatchSubject || meta.asAtom) return prop;
-    return undefined;
+   const prop = getPropIon(ionicModel, key);
+   if (!prop) return undefined;
+   const meta = asMetaIon(prop);
+   if (meta.asWatchSubject || meta.asAtom) return prop;
+   return undefined;
 }
 
 
@@ -277,9 +265,9 @@ export function getObservedProp( // observed means watched and/or tracked
 
 
 function setValue<T>(reactive: IonizedModel, key: PropertyKey, newValue: T, oldValue: T) {
-    if (oldValue === newValue) return oldValue;
-    reactive[key] = newValue;
-    return newValue;
+   if (oldValue === newValue) return oldValue;
+   reactive[key] = newValue;
+   return newValue;
 }
 
 
@@ -296,46 +284,46 @@ const PROP_ION_CAPSULE = Symbol('propIonWithMethods')
  * ```
 */
 function PropIon<T extends IonizedModel, K extends keyof T>(ionicModel: T, key: K, methods: {
-    [key: string]: (...args: any[]) => any
+   [key: string]: (...args: any[]) => any
 }) {
-    const coreIon = asPropIon(ionicModel, key)
-    function $propIonCapsule() {
-        return coreIon()
-    }
+   const coreIon = asPropIon(ionicModel, key)
+   function $propIonCapsule() {
+      return coreIon()
+   }
 
-    $propIonCapsule[META] = coreIon[META]
-    $propIonCapsule[PROP_ION_CAPSULE] = true
-    Object.setPrototypeOf($propIonCapsule, methods)
+   $propIonCapsule[META] = coreIon[META]
+   $propIonCapsule[PROP_ION_CAPSULE] = true
+   Object.setPrototypeOf($propIonCapsule, methods) //FIX: remove setPrototypeOf
 
-    return $propIonCapsule;
+   return $propIonCapsule;
 }
 
 export function protectPropIonCapsule($ion: PropIon, methodKeys?: { [key: string]: true } | typeof READONLY) {
-    if (methodKeys === READONLY) {
-        const coreIon = $ion[META].o
-        return rein(coreIon, READONLY)
-    }
-    if (methodKeys) {
-        return createCustomProtectedPropIonCapsule($ion, methodKeys)
-    }
-    return $ion; // since prop ion capsule are inherently protected, return original
+   if (methodKeys === READONLY) {
+      const coreIon = $ion[META].o
+      return rein(coreIon, READONLY)
+   }
+   if (methodKeys) {
+      return createCustomProtectedPropIonCapsule($ion, methodKeys)
+   }
+   return $ion; // since prop ion capsule are inherently protected, return original
 }
 
 function createCustomProtectedPropIonCapsule($ion: PropIon, methodKeys: { [key: string]: true }) {
-    const coreIon = $ion[META].o
-    const methods = Object.getPrototypeOf($ion)
-    function $customProtected() {
-        return coreIon();
-    }
-    $customProtected[META] = coreIon[META]
-    $customProtected[PROP_ION_CAPSULE] = true
-    for (const key in methods) {
-        if (!(key in methodKeys)) {
-            (<AnyObject>$customProtected)[key] = protectedMethod
-        }
-    }
-    Object.setPrototypeOf($customProtected, methods)
-    return $customProtected
+   const coreIon = $ion[META].o
+   const methods = Object.getPrototypeOf($ion) //FIX: 
+   function $customProtected() {
+      return coreIon();
+   }
+   $customProtected[META] = coreIon[META]
+   $customProtected[PROP_ION_CAPSULE] = true
+   for (const key in methods) {
+      if (!(key in methodKeys)) {
+         (<AnyObject>$customProtected)[key] = protectedMethod
+      }
+   }
+   Object.setPrototypeOf($customProtected, methods) //FIX: remove setPrototype
+   return $customProtected
 }
 
 

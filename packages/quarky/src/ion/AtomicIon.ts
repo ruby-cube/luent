@@ -1,4 +1,4 @@
-import { __DEV__label, __DEV__traceMethodCall, emitSignal } from "../debug";
+import { __DEV__label, __DEV__traceMethodCall, emitSignal, Labellable } from "../debug";
 import { isIonizedModel, ionize } from "../ionize/ionize";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { trigger } from "../trigger";
@@ -13,7 +13,7 @@ export type AtomicIon<T = any, M extends AnyObject = {}> = (() => T)
    & {
       [META]: MetaIon<T>;
       state: T;
-   } & { [K in keyof M]: M[K] }
+   } & { [K in keyof M]: M[K] } & Labellable
 
 
 export const ION = Symbol('atomicIon');
@@ -49,27 +49,6 @@ export function createAtomicIon<
 ) {
    const metaIon = new MetaIon(<AtomicIon>$ion, value, isIonizedModel(value), !!methods, !!inert)
 
-   const proto = {
-      [META]: metaIon,
-      __DEV__labelName: undefined,
-      __DEV__label: __DEV__label,
-      get state() {
-         return metaIon.value //TODO: not sure if this should allow tracking or not by calling $ion()
-      },
-      set state(value: T) {
-         setValue(metaIon, value, metaIon.value);
-         __DEV__traceMethodCall('AtomicIon', $ion, 'state')
-      },
-   } as AnyObject
-
-   if (methods) {
-      attachIonMethods('AtomicIon', $ion as Ion, proto, methods)
-   }
-
-   // function setIonValue(newValue: any) {
-   //    return setValue(metaIon, newValue, metaIon.value);
-   // }
-
    function $ion() {
       if (inert) return metaIon.value;
       if (__DEV__) emitSignal();
@@ -80,16 +59,34 @@ export function createAtomicIon<
       return metaIon.value as T;
    }
 
-   Object.setPrototypeOf($ion, proto)
+   $ion[META] = metaIon
+   $ion.__DEV__labelName = undefined
+   $ion.__DEV__label = __DEV__label
 
-   return $ion as AtomicIon<T, M>
+   Object.defineProperty($ion, 'state', {
+      get() {
+         return metaIon.value //TODO: not sure if this should allow tracking or not by calling $ion()
+      },
+      set(value: T) {
+         setValue(metaIon, value, metaIon.value);
+         __DEV__traceMethodCall('AtomicIon', $ion, 'state')
+      }
+   })
+
+   if (methods) {
+      attachIonMethods('AtomicIon', $ion as Ion, methods)
+   }
+
+   return $ion
 }
 
-export function attachIonMethods(type: string, ion: Ion, proto: AnyObject, methods: AnyObject) {
+export function attachIonMethods(type: string, ion: Ion, methods: AnyObject) {
    for (const key in methods) {
-      proto[key] = __DEV__ ? traceableMethodWrap(type, ion, key, methods[key]) : methods[key]
+      //@ts-expect-error
+      ion[key]
+         = __DEV__ ? traceableMethodWrap(type, ion, key, methods[key]) : methods[key]
    }
-   return proto;
+   return ion;
 }
 
 

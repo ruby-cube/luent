@@ -248,7 +248,7 @@ function createTraceableFunction(fn: Function & Labellable) {
 
 
 export interface Labellable {
-   __DEV__labelName: string
+   __DEV__labelName?: string
    __DEV__label: (label: string) => void
 }
 

@@ -1,5 +1,6 @@
 import { $schedule, Callback } from "./flaskableListeners";
 
+
 export function flaskablePromise<T>(promise: Promise<T>): Promise<T> {
     const flaskable = {
         then<TResult1 = T>(
@@ -21,9 +22,11 @@ export function flaskablePromise<T>(promise: Promise<T>): Promise<T> {
         }
     } as Promise<T>
 
-    Object.setPrototypeOf(flaskable, promise);
+    Object.setPrototypeOf(flaskable, promise); //TODO: get rid of setPrototypeOf
     return flaskable;
 }
+
+
 
 export class FlaskablePromise<T> extends Promise<T> {
     

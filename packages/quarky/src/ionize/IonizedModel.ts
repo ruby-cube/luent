@@ -196,14 +196,6 @@ export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonicMo
    return false;
 }
 
-//TODO: use compiler to extend instead of setPrototype of, which is bad for performance
-function extendTarget(target: AnyObject, proto: AnyObject) {
-   const _proto = Object.create(null)
-   Object.setPrototypeOf(_proto, Object.getPrototypeOf(target))
-   Object.setPrototypeOf(target, _proto)
-   Object.assign(_proto, proto)
-   return target
-}
 
 export function createIonizedModel(
    _target: object,
@@ -261,7 +253,7 @@ export function createIonizedModel(
          // }
          const reinedMeta = { isExposedKey: () => true } //NOTE: TEMPORARY
 
-         if (methods && key in methods && key !== 'has') {
+         if (methods && key in methods) {
             const method = methods[key]
             if (isMethod(method)) {
                return accessMethod(

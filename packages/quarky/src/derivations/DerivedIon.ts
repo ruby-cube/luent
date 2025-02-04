@@ -70,17 +70,17 @@ export function createDerivedIon<T extends any>(
    const derived = new MetaDerivedIon(<DerivedIon>$derivedIon, retrack, !!methods, inert);
 
    if (inert) {
-      const proto = {
-         [META]: derived
-      } as AnyObject
+      //@ts-expect-error
+      pureGetter[META]
+         = derived
 
       if (methods) {
          for (const key in methods) {
-            proto[key] = methods[key].bind(proto)
+            //@ts-expect-error
+            pureGetter[key]
+               = methods[key].bind(pureGetter)
          }
       }
-      Object.setPrototypeOf(pureGetter, proto)
-
       return pureGetter as DerivedNeutron;
    }
 
@@ -123,18 +123,15 @@ export function createDerivedIon<T extends any>(
       // return derived.value; // memoized value
    }
 
-   const proto = {
-      [META]: derived,
-      untrack() {
-         derived.untrackAtoms()
-      }
-   } as AnyObject
-
-   if (methods) {
-      attachIonMethods('MemoizedDerivationIon', $derivedIon as Ion, proto, methods)
+   $derivedIon[META] = derived
+   $derivedIon.untrack =   function untrack() {
+      derived.untrackAtoms()
    }
 
-   Object.setPrototypeOf($derivedIon, proto)
+   if (methods) {
+      attachIonMethods('MemoizedDerivationIon', $derivedIon as Ion, methods)
+   }
+
    const flask = getActiveFlask()
    if (flask) {
       flask.onDiscard(() => { //TODO: what about if a derived ion is created outside of a flask?? or if you want to bind the derived ion to an outer flask?

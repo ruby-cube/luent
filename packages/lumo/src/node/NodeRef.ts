@@ -86,15 +86,10 @@ export function createNodeRef(
 ) {
    const metaRef = new MetaNodeRef(<NodeRef>$ref, value)
 
-   const proto = {
-      [INTERNAL]: metaRef,
-   }
-
    function $ref() {
       return metaRef.value;
    }
-
-   Object.setPrototypeOf($ref, proto)
+   $ref[INTERNAL] = metaRef
 
    return $ref
 }
