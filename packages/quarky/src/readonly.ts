@@ -2,7 +2,6 @@ import { AnyObject } from "@rue/types";
 import { asReadonlyIon, isWritableIon } from "./ion/ReinedIon";
 import { isIonizedModel } from "./ionize/ionize";
 import { asReadonlyIonizedModel, isReadonlyIonizedModel } from "./ionize/ReadonlyIonizedModel";
-import { isReinedObject, REINED_TARGET } from "./rein";
 
 export function readonly<T>(entity: T) {
    //NOTE: temporarily disabiling readonly

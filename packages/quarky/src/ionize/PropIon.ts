@@ -1,15 +1,11 @@
-import { AnyObject, ReadonlyKeys } from "@rue/types";
+import { AnyObject } from "@rue/types";
 import { asMetaIonizedModel, isIonizedModel, ionize, IonizedModel, toRaw } from "./ionize";
 import { META } from "../ReactiveEntity";
 import { isIon } from "../ion/Ion";
-import { protectedMethod, reinIon, READONLY } from "../ion/ReinedIon";
-import { isReinedIonizedModel, isRestricted } from "./ReinedIonizedModel";
-import { rein } from "../rein";
 import { __devCheckIfTracked, getActiveTracker } from "../derivations/DependencyTracker";
 import { asWatchSubject, WatchSubject } from "../effects/WatchSubject";
 import { asIonicAtom, IonicAtom } from "../derivations/IonicAtom";
 import { asMetaIon } from "../ion/AtomicIon";
-import { readonly } from "../readonly";
 
 
 
