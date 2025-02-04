@@ -3,6 +3,7 @@ import { List } from "./TestReactiveModel";
 import { MountIf } from "./TestMountIf";
 import { TestDerivedConditional } from "./testDerived";
 import { TestDerived } from "./testDerivedIon";
+import { TestPropIons } from "./TestPropIons";
 
 export function TestApp(){
    return component(
@@ -20,6 +21,10 @@ export function TestApp(){
       <h2>List Rendering</h2>
       <hr />
       <List></List>
+      <hr />
+      <h2>Prop Ions</h2>
+      <hr />
+      <TestPropIons></TestPropIons>
       </>
    )
 }

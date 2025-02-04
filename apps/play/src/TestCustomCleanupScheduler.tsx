@@ -286,7 +286,7 @@ export function TestCleanupScheduler({
    })
 
    //@ts-expect-error
-   const $frogName = asPropIon($frog, 'name', {
+   const $frogName = ion(()=>$frog.name, {
       $$set: $frog.setName
    })
 

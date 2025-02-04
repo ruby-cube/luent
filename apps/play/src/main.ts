@@ -21,6 +21,7 @@ import { TestCommons } from './TestCommons';
 import { TestApp } from './TestApp';
 import { MarkdownApp } from './demos/markdown-app/markdown-app';
 import { TabApp } from './demos/markdown-app/TestTabs';
+import { TestPropIons } from './TestPropIons';
 // import { PlainList } from './TestList';
 // import { HelloWorld } from './HelloWorld';
 // import { Check } from './childrenTest';
@@ -36,7 +37,7 @@ import { TabApp } from './demos/markdown-app/TestTabs';
 
 // const rootContext = createGlobalCommons()
 
-const app = createApp(TestApp)
+const app = createApp(TestPropIons)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true
