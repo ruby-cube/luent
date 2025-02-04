@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { asMetaIonizedModel, ionize, Ionized, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
-import { emitSignal } from "../debug";
+import { asTraceable, emitSignal } from "../debug";
 import { getActiveTracker } from "../derivations/DependencyTracker";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { IonizedModel, storeSnapshot } from "./ionize";
@@ -355,10 +355,9 @@ function initialIonAccess(proxy: AnyObject, target: AnyObject, key: string, valu
       switchMap.set(key, () => propIon)
       return propIon;
    }
-   // Prop Ion
-   const propIon = asPropIon(proxy, key, _key) //FIX:  
-   switchMap.set(key, () => propIon)
-   return propIon // { $count: 0 } get ion case
+   // Invalid property { $count: 0 } 
+   initialTrackableStateAccess(proxy, target, key, value, switchMap)
+   if (__DEV__) console.warn('Invalid Property Key initialization: Property keys prefixed with a single dollar sign ($) are reserved for ions.\n' + asTraceable(proxy).__DEV__origin)
 }
 
 function initialAbsorbedIonStateAccess(key: string | symbol, value: any, switchMap: ProxySwitchMap) {
@@ -481,7 +480,7 @@ function getNativeMethod(
          const getPreopData = mutatingOps[nativeKey].preop
          const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, meta, getPreopData))
             : createOp(target, ionizedModel, meta, getPreopData)
-            switchMap.set(publicKey, op)
+         switchMap.set(publicKey, op)
          return op;
       }
       const trackableOps = config.trackableOps
@@ -495,14 +494,7 @@ function getNativeMethod(
 }
 
 
-function maybeReined(
-   value: any,
-   reinedMeta: {
-      isExposedKey: (key: PropertyKey) => boolean;
-   } | undefined
-) {
-   return reinedMeta && value instanceof Object ? rein(value) : value
-}
+
 
 
 

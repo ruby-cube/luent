@@ -57,7 +57,7 @@ export const __DEV__debug = {
 
 
 
-function asTraceable(subject: AnyObject): Traceable {
+export function asTraceable(subject: AnyObject): Traceable {
    const traceable = subject[META].__DEV__asTraceable
    if (!traceable) throw new Error('Subject is not traceable')
    return traceable;

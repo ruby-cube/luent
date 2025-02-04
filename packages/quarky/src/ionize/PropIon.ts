@@ -78,7 +78,7 @@ class MetaPropIon {
       public key: PropertyKey,
       public inert: boolean = false
    ) {
-      asMetaIonizedModel(model).registerPropIon(key, o)
+      // asMetaIonizedModel(model).registerPropIon(key, o)
       this.isEntryKey = isEntryKey(toRaw(model), key)
    }
 
@@ -126,7 +126,14 @@ class MetaPropIon {
 
 type AsPropIon<T extends AnyObject, K extends keyof T, M> = PropIon<T[K], M extends AnyObject ? { [K in keyof TransferredMethods<T, M>]: TransferredMethods<T, M>[K] } : undefined>
 
-export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, key: K, methods?: M & { [key: string]: keyof T | true }): AsPropIon<T, K, M> {
+// writable .state  --depending on if frog is readonly or mutable (or reined ?)
+// methods 
+
+export function asPropIon<T extends AnyObject, K extends keyof T, M>(
+   model: T,
+   key: K,
+   methods?: M & { [key: string]: keyof T | true }
+): AsPropIon<T, K, M> {
    const ionicModel = isIonizedModel(model) ? model : ionize(model) //TODO: is there a more performant solution than ionizing non-reactive models? like mapping model to prop ions?
    const rawTarget = toRaw(ionicModel)
    const value = rawTarget[key];
@@ -134,17 +141,17 @@ export function asPropIon<T extends AnyObject, K extends keyof T, M>(model: T, k
    // return absorbed ion
    if (isIon(value)) {
       if (methods && __DEV__) console.warn(`absorbed ions cannot have additional methods assigned to them`)
-      if (isReinedIonizedModel(ionicModel))
-         return reinIon(value, []);
+      // if (isReinedIonizedModel(ionicModel))
+      //    return reinIon(value, []);
       return value;
    }
 
    // return existing propIon
-   const propIon = getPropIon(ionicModel, key) //TODO: need a map for readonly prop ions too...
-   if (propIon && !methods) {
-      if (isReinedIonizedModel(ionicModel)) {
-         readonly(propIon)
-      }
+   const propIon = methods ? undefined : getPropIon(ionicModel, key) //TODO: need a map for readonly prop ions too...
+   if (propIon) {
+      // if (isReinedIonizedModel(ionicModel)) {
+      //    readonly(propIon)
+      // }
       return propIon as AsPropIon<T, K, M>
    }
    return createPropIon(ionicModel, key, methods) as AsPropIon<T, K, M>
@@ -157,11 +164,11 @@ export function getPropIon(
    return asMetaIonizedModel(ionicModel).getPropIon(key)
 }
 
-function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel: T, key: K, methods?: M & { [key: string]: PropertyKey | true }): PropIon<T[K], M> {
-   const rawTarget = toRaw(ionicModel) as T
+function createPropIon(ionicModel: AnyObject, key: PropertyKey, methods?: { [key: string]: PropertyKey | true }): PropIon {
+   const rawTarget = toRaw(ionicModel)
 
    function $propIon() {
-      reregisterIfNeeded()
+      if (!methods) reregisterIfNeeded($propIon, ionicModel, key)
       const tracker = getActiveTracker()
       if (tracker)
          return ionicModel[key]; //FIX: the key for ionic model may be different than for rawTarget because of the $ normalization
@@ -170,15 +177,15 @@ function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel:
 
    $propIon[META] = new MetaPropIon(<PropIon>$propIon, ionicModel, key)
 
+   //TODO: only include state if ionicModel is not readonly
    Object.defineProperty($propIon, 'state', {
       get() {
          return rawTarget[key]
       },
-      set(value: T[K]) {
+      set(value: unknown) {
          ionicModel[key] = value;
       }
    })
-
 
    if (methods) {
       for (const key in methods) {
@@ -189,17 +196,20 @@ function createPropIon<T extends IonizedModel, K extends keyof T, M>(ionicModel:
          // .bind(proto) // This makes set function available to `this` even after protected //QUESTION: is this necessary if dev does not use this??
       }
    }
-
-   function reregisterIfNeeded() {
-      const metaIonicModel = asMetaIonizedModel(ionicModel);
-      if (!metaIonicModel.getPropIon(key)) {
-         if (__DEV__) console.warn(`[CASE RESEARCH] I'm curious how often and in what cases this happens: $propIon for ${key.toString()} in${JSON.stringify(rawTarget)} is no longer observed, but there's still an active reference to it`)
-         metaIonicModel.registerPropIon(key, $propIon as PropIon) // This means $propIon is not being watched and is not an atom anywhere, but it's still being used
-      }
+   else {
+      asMetaIonizedModel(ionicModel).registerPropIon(key, $propIon as PropIon)
    }
 
-   return $propIon as PropIon<T[K], M>
+   return $propIon as PropIon
    // return isReinedIonizedModel(ionicModel) ? reinIon($propIon as PropIon, READONLY) : $propIon //FIX: isn't it already protected?
+}
+
+function reregisterIfNeeded($propIon: PropIon, ionicModel: AnyObject, rawKey: PropertyKey) {
+   const metaIonicModel = asMetaIonizedModel(ionicModel);
+   if (!metaIonicModel.getPropIon(rawKey)) {
+      if (__DEV__) console.warn(`[CASE RESEARCH] I'm curious how often and in what cases this happens: $propIon for ${key.toString()} in${JSON.stringify(rawTarget)} is no longer observed, but there's still an active reference to it`)
+      metaIonicModel.registerPropIon(rawKey, $propIon as PropIon) // This means $propIon is not being watched and is not an atom anywhere, but it's still being used
+   }
 }
 
 export function asTrackedProp(
