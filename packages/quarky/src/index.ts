@@ -16,7 +16,7 @@ export * from "./effects/RenderCycle" //TODO: limit exports to public api
 export * from "./ionize/TimeTraveler" //TODO: limit exports to public api
 export * from "./ionize/ionize" //TODO: limit exports to public api
 export * from "./effects/areEqual" //TODO: limit exports to public api
-export * from "./readonly" //TODO: limit exports to public api
+export * from "./NonlocalReadonly" //TODO: limit exports to public api
 
 installIonicArray()
 installIonicSet()

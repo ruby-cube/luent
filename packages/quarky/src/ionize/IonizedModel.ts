@@ -6,13 +6,10 @@ import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { IonizedModel, storeSnapshot } from "./ionize";
 import { trigger, triggerIonicAtom, triggerIonicModel } from "../trigger";
 import { MetaIonizedModel } from "./MetaIonizedModel";
-import { noop } from "@rue/utils";
-import { getReinedMeta, isRestricted, isReadonlyProxy, REINED_META } from "./ReinedIonizedModel";
+import { isFunction, noop } from "@rue/utils";
 import { META } from "../ReactiveEntity";
 import { AnyIon, isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PropIon";
-import { rein } from "../rein";
-import { READONLY } from "../ion/ReinedIon";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug";
 
 
@@ -116,7 +113,7 @@ function getStructureConfig(target: AnyObject, configs: any[]) {
    return getStructureConfig(proto, configs)
 }
 
-type CustomIonicModelConfig = {
+export type CustomIonicModelConfig = {
    structure?: any;
    nontrackableKeys?: { [key: PropertyKey]: boolean };
    trackableOps?: { [key: PropertyKey]: CreateTrackableOp }
@@ -199,29 +196,11 @@ export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonicMo
 export function createIonizedModel(
    target: object,
    methods: AnyObject | undefined,
-   devTrace: string | undefined
 ) {
 
    const structureConfigs = getStructureConfigs(target);
-   const metaIonicModel = new MetaIonizedModel(target, devTrace)
-
-   let __DEV__labelName: string | undefined;
-
-   function __DEV__label(label: string) {
-      __DEV__labelName = label;
-   }
-
-   const switchMap = new Map([
-      [META as any, () =>
-         metaIonicModel as any
-      ],
-      ['__DEV__labelName', () =>
-         __DEV__labelName
-      ],
-      ['__DEV__label', () =>
-         __DEV__label
-      ],
-   ])
+   const metaIonicModel = new MetaIonizedModel(target, methods, structureConfigs)
+   const switchMap = createProxySwitchMap(metaIonicModel)
 
    const ionizedModel = new Proxy(target, {
       has(target, key) {
@@ -231,8 +210,7 @@ export function createIonizedModel(
          return key in target || !!methods && key in methods
       },
       get(target, key, receiver) {
-         if (__DEV__ && ionizedModel !== receiver) console.warn('An ionized model cannot serve as a prototype')
-         if (__DEV__) emitSignal()
+         __DEV__proxyGetterAssertions(ionizedModel, receiver)
          const getValue = switchMap.get(key)
          if (getValue) return getValue();
          return initialAccess(
@@ -264,7 +242,7 @@ export function createIonizedModel(
    return ionizedModel
 }
 
-type ProxySwitchMap = Map<string | symbol, () => any>
+export type ProxySwitchMap = Map<string | symbol, () => any>
 
 
 function initialAccess(
@@ -276,27 +254,45 @@ function initialAccess(
    key: string | symbol,
    switchMap: ProxySwitchMap
 ) {
-   if (key === 'has') console.log('has is here')
    if (methods && key in methods) {
       return bindMethod(methods[key], key, ionizedModel, switchMap)
    }
    const _key = methods ? getTargetKey(methods, key) : key;
-   if (isNativeMethod(_key, structureConfigs)) { //NOTE: this block must be above target[_key] for Array.from(set) to work
-      return getNativeMethod(
+   const nativeMethodConfig = getNativeMethodConfig(_key, structureConfigs)
+   if (nativeMethodConfig) { //NOTE: this block must be above target[_key] for Array.from(set) to work
+      return bindNativeMethod(
+         nativeMethodConfig,
          _key,
          key,
-         structureConfigs,
          target,
          ionizedModel,
          metaIonicModel,
          switchMap
       )
    }
-   const isIonAccessKey = typeof key === 'string' && key[0] === '$' //TODO: need to use regex
    const value = target[_key]
    if (isMethod(value)) {
       return bindMethod(value, key, ionizedModel, switchMap)
    }
+   return initialPropertyAccess(
+      target,
+      ionizedModel,
+      structureConfigs,
+      key,
+      value,
+      switchMap
+   )
+}
+
+export function initialPropertyAccess(
+   target: AnyObject,
+   ionizedModel: IonizedModel,
+   structureConfigs: CustomIonicModelConfig[],
+   key: string | symbol,
+   value: any,
+   switchMap: ProxySwitchMap
+) {
+   const isIonAccessKey = typeof key === 'string' && key[0] === '$' //TODO: need to use regex
 
    if (isNonTrackable(key, structureConfigs)) { //QUESTION: is this worth it? //TODO: include non-writable properties
       return initialNonTrackablePropertyAccess(target, key, value, switchMap);
@@ -312,6 +308,7 @@ function initialAccess(
 
    return initialTrackableStateAccess(ionizedModel, target, key, value, switchMap)
 }
+
 
 
 function bindMethod(method: Function, key: string | symbol, proxy: AnyObject, switchMap: ProxySwitchMap) {
@@ -363,7 +360,7 @@ function initialAbsorbedIonStateAccess(key: string | symbol, value: any, switchM
    return maybeIonize(value()); // { count: $count } get value case
 }
 
-function getTargetKey(methods: AnyObject, key: string | symbol) {
+export function getTargetKey(methods: AnyObject, key: string | symbol) {
    const keyWithoutUnderscorePrefix = typeof key === 'string' && key.startsWith('_') ? key.slice(1) : key;
    if (keyWithoutUnderscorePrefix in methods) return keyWithoutUnderscorePrefix;
    return key;
@@ -385,7 +382,13 @@ function getTargetPropertyValue(target: AnyObject, key: string | symbol, receive
    }
 }
 
-function initialTrackableStateAccess(ionizedModel: AnyObject, target: AnyObject, key: string | symbol, value: any, switchMap: ProxySwitchMap) {
+function initialTrackableStateAccess(
+   ionizedModel: AnyObject, 
+   target: AnyObject, 
+   key: string | symbol, 
+   value: any, 
+   switchMap: ProxySwitchMap
+) {
    function getState(value: any) {
       const _value = maybeIonize(value)
       const tracker = getActiveTracker()
@@ -404,17 +407,7 @@ function maybeIonize(value: any) {
    return ionize(value)
 }
 
-function isNativeMethod(key: PropertyKey, structureConfigs: CustomIonicModelConfig[]) {
-   for (const structure of structureConfigs) {
-      const mutatingOps = structure.mutatingOps
-      if (mutatingOps && key in mutatingOps)
-         return true;
-      const trackableOps = structure.trackableOps
-      if (trackableOps && key in trackableOps)
-         return true;
-   }
-   return false;
-}
+
 
 export function isMethod(value: any): value is Function {
    return value instanceof Function && !isIon(value)
@@ -430,11 +423,6 @@ export function accessMethod(
    boundMethodMap: Map<PropertyKey, Function>,
    method?: Function
 ) {
-   if (isReadonlyProxy(target, proxy, receiver)) {
-      if (__DEV__) console.warn('Object is readonly. Cannot access methods')
-      return undefined;
-   }
-
    return getBoundMethod(
       proxy,
       key,
@@ -462,38 +450,86 @@ function getBoundMethod(
    throw new Error('No method provided')
 }
 
-function getNativeMethod(
+export function isNativeMethod(key: PropertyKey, structureConfigs: CustomIonicModelConfig[]) {
+   for (const structure of structureConfigs) {
+      const mutatingOps = structure.mutatingOps
+      if (mutatingOps && key in mutatingOps)
+         return true;
+      const trackableOps = structure.trackableOps
+      if (trackableOps && key in trackableOps)
+         return true;
+   }
+   return false;
+}
+
+export function getNativeMethodConfig(
+   nativeKey: string | symbol,
+   structureConfigs: CustomIonicModelConfig[],
+) {
+   for (const config of structureConfigs) {
+      const mutatingOps = config.mutatingOps
+      if (mutatingOps && nativeKey in mutatingOps) {
+         return mutatingOps[nativeKey]
+      }
+      const trackableOps = config.trackableOps
+      if (trackableOps && nativeKey in trackableOps) {
+         return trackableOps[nativeKey]
+      }
+   }
+   return undefined;
+}
+
+function bindNativeMethod(
+   config: Function | AnyObject,
    nativeKey: string | symbol,
    publicKey: string | symbol,
-   structureConfigs: CustomIonicModelConfig[],
    target: AnyObject,
    ionizedModel: IonizedModel,
    meta: MetaIonizedModel,
    switchMap: ProxySwitchMap,
 ) {
-   for (const config of structureConfigs) {
-      const mutatingOps = config.mutatingOps
-      if (mutatingOps && nativeKey in mutatingOps) {
-         const createOp = mutatingOps[nativeKey].createOp
-         const getPreopData = mutatingOps[nativeKey].preop
-         const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, meta, getPreopData))
-            : createOp(target, ionizedModel, meta, getPreopData)
-         switchMap.set(publicKey, ()=>op)
-         return op;
-      }
-      const trackableOps = config.trackableOps
-      if (trackableOps && nativeKey in trackableOps) {
-         const createOp = trackableOps[nativeKey]
-         const op = createOp(target, ionizedModel)
-         switchMap.set(publicKey, ()=>op)
-         return op;
-      }
+   if (isFunction(config)) {
+      const op = config(target, ionizedModel)
+      switchMap.set(publicKey, () => op)
+      return op;
+   }
+   else {
+      const createOp = config[nativeKey].createOp
+      const getPreopData = config[nativeKey].preop
+      const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, meta, getPreopData))
+         : createOp(target, ionizedModel, meta, getPreopData)
+      switchMap.set(publicKey, () => op)
+      return op;
    }
 }
 
 
 
+export function createProxySwitchMap(meta: AnyObject) {
+   let __DEV__labelName: string | undefined;
 
+   function __DEV__label(label: string) {
+      __DEV__labelName = label;
+   }
+
+   return new Map([
+      [META as any, () =>
+         meta as any
+      ],
+      ['__DEV__labelName', () =>
+         __DEV__labelName
+      ],
+      ['__DEV__label', () =>
+         __DEV__label
+      ],
+   ])
+}
+
+export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObject) {
+   if (proxy !== receiver)
+      throw new Error('An ionized model cannot serve as a prototype')
+   emitSignal()
+}
 
 
 export function reactiveSetter(
@@ -505,10 +541,6 @@ export function reactiveSetter(
    newValue: any,
    receiver: AnyObject
 ) {
-   if (isRestricted(target, ionizedModel, receiver)) {
-      if (__DEV__) console.warn('Set operation failed. Property is readonly')
-      return false;
-   }
    if (metaIonicModel.isNewProperty(key)) metaIonicModel.registerNewProperty(key)
 
    const oldValue = Reflect.get(target, key, receiver);

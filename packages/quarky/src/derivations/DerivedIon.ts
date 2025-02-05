@@ -39,7 +39,7 @@ export function isDerivedIon(maybeDerivedIon: any): maybeDerivedIon is DerivedIo
 export class MetaDerivedIon extends IonicDerivation {
 
    override type = DERIVED_ION
-   asDefaultReined?: ProtectedIon
+   asReined?: ProtectedIon
    asReadonly?: ProtectedIon
    __DEV__asTraceable?: Traceable;
 

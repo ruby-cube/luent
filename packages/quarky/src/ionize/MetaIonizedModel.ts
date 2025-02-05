@@ -4,8 +4,9 @@ import type { TrackedOp } from "./TrackedOp"
 import type { ReactiveEntity } from "../ReactiveEntity"
 import { PropIon } from "./PropIon"
 import { IonicDerivation } from "../derivations/IonicDerivation"
-import { __DEV__getTrace } from "../../../flask/debug"
+import { __DEV__getTrace, getPublicTrace } from "../../../flask/debug"
 import { Traceable } from "../debug"
+import { CustomIonicModelConfig } from "./IonizedModel"
 
 
 
@@ -21,7 +22,7 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
    // shallowReactive?: IonizedModel<T>
    readonly type = IONIZED_MODEL
 
-   asDefaultReined?: Ionized<T>
+   asReined?: Ionized<T>
    asReadonly?: Ionized<T>
    __DEV__asTraceable?: Traceable
 
@@ -37,8 +38,8 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
 
    constructor(
       public rawTarget: T,
-      public devTrace: string | undefined
-      //   public exposedMethods: AnyObject | undefined
+      public methods: AnyObject | undefined,
+      public structureConfigs: CustomIonicModelConfig[]
       // public reactive: T
       // public traps?: ReactiveTraps<T>
    ) {
@@ -197,3 +198,4 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
 // export function isCollection(target: unknown): target is Collection {
 //     return target instanceof Array || target instanceof Set || target instanceof Map
 // }
+

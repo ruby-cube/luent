@@ -22,7 +22,7 @@ export class MetaIon<T = unknown> implements ReactiveEntity {
 
    type = ION
 
-   asDefaultReined?: ProtectedIon
+   asReined?: ProtectedIon
    asReadonly?: ProtectedIon
    __DEV__asTraceable?: Traceable;
 

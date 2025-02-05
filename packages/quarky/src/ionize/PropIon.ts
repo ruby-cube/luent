@@ -64,7 +64,7 @@ class MetaPropIon {
    // asObservedProp!: ObservedProp
 
    //to fulfill MetaWritableIon interface
-   asDefaultReined = undefined
+   asReined = undefined
    hasMethods = false;
    isEntryKey = false;
 

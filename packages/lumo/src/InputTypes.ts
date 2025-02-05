@@ -349,13 +349,13 @@ export { MaybeIonized as Ionized }
 
 
 
-export function pure<F extends (...args: any[]) => any>(fn: F): ReturnType<F> extends void ? F : Pure<F> {
-   return fn as ReturnType<F> extends void ? F : Pure<F>
-}
+// export function pure<F extends (...args: any[]) => any>(fn: F): ReturnType<F> extends void ? F : Pure<F> {
+//    return fn as ReturnType<F> extends void ? F : Pure<F>
+// }
 
-export type Pure<Fn extends Function> = Fn & { [_PURE_]: true }
+// export type Pure<Fn extends Function> = Fn & { [_PURE_]: true }
 
-const _PURE_ = Symbol('pure function marker')
+// const _PURE_ = Symbol('pure function marker')
 
 
 /**
@@ -367,16 +367,9 @@ export type DeepReadonly<T> = T extends Function ? T : T extends (infer E)[] ? r
 
 export type Readonly<T> = {
    readonly [K in keyof T
-   as T[K] extends { [_PURE_]: true } ? K
-   : T extends { '~pure'?: infer P } ? K extends P ? T[K] extends (...args: any[]) => any ? ReturnType<T[K]> extends void ? never : K : K : T[K] extends Function ? never : K
-   : T[K] extends Function ? never : K]: DeepReadonly<T[K]>
+   as T[K] extends Function ? never : K]: DeepReadonly<T[K]>
 }
 
-export type NonVoidMethods<T, K extends keyof Partial<NonVoidMethodsOnly<T>>> = K
-
-type NonVoidMethodsOnly<T> = {
-   [K in keyof T as T[K] extends (...args: any[]) => any ? ReturnType<T[K]> extends void ? never : K : never]: T[K]
-}
 
 //TODO: exclude mutating methods, but type getter methods such that they return readonly
 interface ReadonlyCollections<T> {
@@ -400,32 +393,7 @@ type AsReadonly<T> = {
 }
 
 
-class Dog {
-   food!: {
-      kibble: true
-   }
 
-   constructor() {
-
-   }
-
-   getFood() {
-      return this.food
-   }
-}
-
-interface Dog {
-   '~pure'?: NonVoidMethods<Dog, 'getFood'>;
-   '~getters'?: {
-      getFood(): Readonly<Dog['food']>
-   }
-}
-
-
-function hey(dog: Readonly<Dog>) {
-   const foodB = dog.food
-   const food = dog.getFood()
-}
 
 // type TypedReturn<T, K extends keyof T> = T[K] extends (...args: infer P) => infer R ? (this: Readonly<T>, ...args: P) => ReturnType<Readonly<T>[K]> : never
 

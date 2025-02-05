@@ -104,7 +104,6 @@ type IonizedGetter<T, K extends keyof T> =
 
 //API
 export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: string]: (...args: any[]) => any }): M extends AnyObject ? T & M : T {
-   const trace = __DEV__ ? getPublicTrace() : undefined
    if (isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
@@ -114,7 +113,7 @@ export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: 
    const rawTarget = toRaw(target)
    const existingIonicModel = !methods ? ionizedModels.get(rawTarget) : undefined;
    if (existingIonicModel) return existingIonicModel as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
-   return createIonizedModel(rawTarget, methods, trace) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
+   return createIonizedModel(rawTarget, methods) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
 }
 
 // function traceIonized() { //TODO: what about objects that are ionized by ionsOf()?

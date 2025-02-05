@@ -2,7 +2,6 @@ import { AnyObject } from "@rue/types";
 import { createDerivedIon, createWritableDerivedIon, DerivedIon, isDerivedIon, ReactiveDerivedIon, WritableDerivedIon } from "../derivations/DerivedIon";
 import { asPropIon, isPropIon, PropIon } from "../ionize/PropIon";
 import { AtomicIon, createAtomicIon, isAtomicIon } from "./AtomicIon";
-import { ProtectedIon } from "./ReinedIon";
 import { META } from "../ReactiveEntity";
 import { isFunction } from "@rue/utils";
 
