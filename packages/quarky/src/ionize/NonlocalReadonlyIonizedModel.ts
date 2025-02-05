@@ -26,9 +26,8 @@ export function createNonlocalReadonlyIonizedModel(originalIonizedModel: Ionized
       },
       get(target, key, receiver) {
          __DEV__proxyGetterAssertions(readonlyModel, receiver)
-
          const getValue = switchMap.get(key)
-         if (getValue) return asNonlocalReadonly(getValue());
+         if (getValue) return getValue();
          return initialAccess(
             target,
             methods,
@@ -69,14 +68,15 @@ function initialAccess(
    if (isMethod(value)) {
       return restrictAccess(key, switchMap)
    }
-   return asNonlocalReadonly(initialPropertyAccess(
+   return initialPropertyAccess( //TODO: figure out a better way to implement deep readonly
       target,
       ionizedModel,
       structureConfigs,
       key,
       value,
-      switchMap
-   ))
+      switchMap,
+      value => asNonlocalReadonly(value)
+   )
 }
 
 

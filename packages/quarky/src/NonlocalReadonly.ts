@@ -3,7 +3,7 @@ import { createNonlocalReadonlyIonizedModel } from "./ionize/NonlocalReadonlyIon
 import { isIonizedModel } from "./ionize/ionize";
 import { createReadonlyIon, isWritableIon } from "./ion/ReadonlyIon";
 import { __DEV__proxyGetterAssertions, createProxySwitchMap, isMethod, ProxySwitchMap } from "./ionize/IonizedModel";
-import { isObject } from "@rue/utils";
+import { isFunction, isObject } from "@rue/utils";
 import { META } from "./ReactiveEntity";
 import { Traceable } from "./debug";
 
@@ -20,22 +20,20 @@ export function asNonlocalReadonly(value: any) {
    if (isIonizedModel(value)) {
       return createNonlocalReadonlyIonizedModel(value)
    }
-   if (isObject(value)) {
+   if (!isFunction(value) && value instanceof Object) {
       return createReadonlyObject(value)
    }
    return value;
 }
 
 //TODO: Should we have readonly functions that return deep readonly? Or leave it up to dev to call asNonlocalReadonly?
-export function returnsReadonly(){
+export function returnsReadonly() {
 
 }
 
 export function isReadonly(value: any) {
-   if (!isObject(value)) return false;
-   const meta =
-      //@ts-expect-error
-      value[META]
+   if (!(value instanceof Object)) return false;
+   const meta = value[META] || readonlyMetaMap.get(value)
    if (meta && meta.asReadonly === value) return true;
    return false;
 }
@@ -64,7 +62,7 @@ export function createReadonlyObject(obj: AnyObject) { //TODO: what about Arrays
          )
       },
       set() {
-        if (__DEV__) console.error('Set operation failed. Object is readonly.')
+         if (__DEV__) console.error('Set operation failed. Object is readonly.')
          return false;
       }
    })
@@ -102,7 +100,7 @@ function initialAccess(
       target,
       key,
       value,
-      switchMap
+      switchMap,
    )
 }
 

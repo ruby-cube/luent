@@ -1,4 +1,4 @@
-import { asNonlocalReadonly, ion, ionize } from "@rue/quarky";
+import { asNonlocalReadonly, ion, ionize, isReadonly } from "@rue/quarky";
 
 // IONIZED OBJECT LITERAL
 console.log('')
@@ -32,6 +32,7 @@ catch (err) {
 const roFrogA = asNonlocalReadonly(frog)
 const roFrogB = asNonlocalReadonly(frog)
 console.log(roFrogA === roFrogB)
+console.log(isReadonly(roFrogA))
 
 
 // IONIZED CLASS with extra methods
@@ -45,6 +46,8 @@ class FrogPrince {
    ) {
 
    }
+
+   qualities: string[] = []
 
    setName(name: string) {
       this.name = name
@@ -151,5 +154,19 @@ const roKermieB = asNonlocalReadonly(kermie)
 const roKermieC = asNonlocalReadonly(roKermieA)
 console.log(roKermieA === roKermieB)
 console.log(roKermieC === roKermieB)
+console.log(isReadonly(roKermieB))
 
 // DEEP READONLY
+console.log('')
+console.log('# plain object deep readonly')
+const frogPrince2 = new FrogPrince('sir robin')
+const roFrogPrince = asNonlocalReadonly(frogPrince2)
+console.log(isReadonly(roFrogPrince.qualities))
+console.log(!isReadonly(frogPrince2.qualities))
+
+console.log('')
+console.log('# ionized object deep readonly')
+const frogPrince3 = ionize(new FrogPrince('sir robin'))
+const roFrogPrince3 = asNonlocalReadonly(frogPrince3)
+console.log(isReadonly(roFrogPrince3.qualities))
+console.log(!isReadonly(frogPrince3.qualities))

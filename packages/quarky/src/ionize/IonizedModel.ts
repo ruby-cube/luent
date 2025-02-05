@@ -290,23 +290,24 @@ export function initialPropertyAccess(
    structureConfigs: CustomIonicModelConfig[],
    key: string | symbol,
    value: any,
-   switchMap: ProxySwitchMap
+   switchMap: ProxySwitchMap,
+   transformValue: (value: any) => any = (value: any) => value
 ) {
    const isIonAccessKey = typeof key === 'string' && key[0] === '$' //TODO: need to use regex
 
    if (isNonTrackable(key, structureConfigs)) { //QUESTION: is this worth it? //TODO: include non-writable properties
-      return initialNonTrackablePropertyAccess(target, key, value, switchMap);
+      return initialNonTrackablePropertyAccess(target, key, value, switchMap, transformValue);
    }
 
    if (isIonAccessKey) {
-      return initialIonAccess(ionizedModel, target, key, value, switchMap);
+      return initialIonAccess(ionizedModel, target, key, value, switchMap, transformValue);
    }
 
    if (isIon(value)) {
-      return initialAbsorbedIonStateAccess(key, value, switchMap)
+      return initialAbsorbedIonStateAccess(key, value, switchMap, transformValue)
    }
 
-   return initialTrackableStateAccess(ionizedModel, target, key, value, switchMap)
+   return initialTrackableStateAccess(ionizedModel, target, key, value, switchMap, transformValue)
 }
 
 
@@ -325,39 +326,47 @@ function initialNonTrackablePropertyAccess(
    target: AnyObject,
    key: string | symbol,
    value: any,
-   switchMap: ProxySwitchMap
+   switchMap: ProxySwitchMap,
+   transformValue: Function
 ) {
-   switchMap.set(key, () => target[key])
-   return value;
+   switchMap.set(key, () => transformValue(target[key]))
+   return transformValue(value);
 }
 
-function initialIonAccess(proxy: AnyObject, target: AnyObject, key: string, value: any, switchMap: ProxySwitchMap) {
+function initialIonAccess(
+   proxy: AnyObject,
+   target: AnyObject,
+   key: string,
+   value: any,
+   switchMap: ProxySwitchMap,
+   transformValue: Function
+) {
    if (isIon(value)) {
       // Absorbed Ion
-      switchMap.set(key, () => target[key])
-      return value; // { $count: $count } get ion case
+      switchMap.set(key, () => transformValue(target[key]))
+      return transformValue(value); // { $count: $count } get ion case
    }
    const _key = key.slice(1);
    if (value === undefined) {
       const _value = target[_key]
       if (isIon(_value)) {
          // Absorbed Ion
-         switchMap.set(key, () => target[_key])
-         return _value;  // { count: $count } get ion case
+         switchMap.set(key, () => transformValue(target[_key]))
+         return transformValue(_value);  // { count: $count } get ion case
       }
       // Prop Ion
       const propIon = asPropIon(proxy, _key)  // { count: 0}  get ion case
-      switchMap.set(key, () => propIon)
-      return propIon;
+      switchMap.set(key, () => transformValue(propIon))
+      return transformValue(propIon);
    }
    // Invalid property { $count: 0 } 
-   initialTrackableStateAccess(proxy, target, key, value, switchMap)
+   initialTrackableStateAccess(proxy, target, key, value, switchMap, transformValue)
    if (__DEV__) console.warn('Invalid Property Key initialization: Property keys prefixed with a single dollar sign ($) are reserved for ions.\n' + asTraceable(proxy).__DEV__origin)
 }
 
-function initialAbsorbedIonStateAccess(key: string | symbol, value: any, switchMap: ProxySwitchMap) {
-   switchMap.set(key, () => maybeIonize(value()))
-   return maybeIonize(value()); // { count: $count } get value case
+function initialAbsorbedIonStateAccess(key: string | symbol, value: any, switchMap: ProxySwitchMap, transformValue: Function) {
+   switchMap.set(key, () => transformValue(maybeIonize(value())))
+   return transformValue(maybeIonize(value())); // { count: $count } get value case
 }
 
 export function getTargetKey(methods: AnyObject, key: string | symbol) {
@@ -383,19 +392,18 @@ function getTargetPropertyValue(target: AnyObject, key: string | symbol, receive
 }
 
 function initialTrackableStateAccess(
-   ionizedModel: AnyObject, 
-   target: AnyObject, 
-   key: string | symbol, 
-   value: any, 
-   switchMap: ProxySwitchMap
+   ionizedModel: AnyObject,
+   target: AnyObject,
+   key: string | symbol,
+   value: any,
+   switchMap: ProxySwitchMap,
+   transformValue: Function
 ) {
    function getState(value: any) {
       const _value = maybeIonize(value)
       const tracker = getActiveTracker()
-      if (!tracker)
-         return _value;
-      tracker.track(asTrackedProp(ionizedModel, key))
-      return _value;
+      if (tracker) tracker.track(asTrackedProp(ionizedModel, key))
+      return transformValue(_value);
    }
    switchMap.set(key, () => getState(target[key]))
    return getState(value)
