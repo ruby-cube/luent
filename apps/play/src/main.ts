@@ -37,13 +37,17 @@ import { TestPropIons } from './TestPropIons';
 
 // const rootContext = createGlobalCommons()
 
-const app = createApp(TestPropIons)
+import { frog } from './TestReadonly';
 
-if (__DEV__) configureFlask({
-    warnNoCleanup: true
-})
+frog;
 
-app.mount('#app')
+// const app = createApp(TestPropIons)
+
+// if (__DEV__) configureFlask({
+//     warnNoCleanup: true
+// })
+
+// app.mount('#app')
 
 // function doSomething() {
 //     const dynamicNode = makeDynamicNode(false)

@@ -39,7 +39,8 @@ export function createNonlocalReadonlyIonizedModel(originalIonizedModel: Ionized
          )
       },
       set() {
-         throw new Error('This is a read only object')
+         if (__DEV__) console.error('Set operation failed. Object is readonly.')
+         return false;
       }
    }) as Ionized<AnyObject>
 

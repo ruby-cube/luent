@@ -8,9 +8,9 @@ import { META } from "./ReactiveEntity";
 import { Traceable } from "./debug";
 
 export function asNonlocalReadonly(value: any) {
-   if (!isObject(value)) return value;
-   if (META in value) {
-      const meta = value[META] as { asReadonly?: AnyObject }
+   if (!(value instanceof Object)) return value;
+   if (META in value || readonlyMetaMap.has(value)) {
+      const meta = value[META] ?? readonlyMetaMap.get(value) as { asReadonly?: AnyObject }
       const readonly = meta.asReadonly
       if (readonly) return readonly;
    }
@@ -23,8 +23,12 @@ export function asNonlocalReadonly(value: any) {
    if (isObject(value)) {
       return createReadonlyObject(value)
    }
-   //QUESTION: Should we have readonly functions that return deep readonly?
    return value;
+}
+
+//TODO: Should we have readonly functions that return deep readonly? Or leave it up to dev to call asNonlocalReadonly?
+export function returnsReadonly(){
+
 }
 
 export function isReadonly(value: any) {
@@ -36,11 +40,18 @@ export function isReadonly(value: any) {
    return false;
 }
 
+const readonlyMetaMap = new Map()
 
 export function createReadonlyObject(obj: AnyObject) { //TODO: what about Arrays, Maps, and Sets for deep readonly
-   const meta = new MetaReadonlyObject(obj)
+   const meta = readonlyMetaMap.get(obj) ?? new MetaReadonlyObject(obj)
    const switchMap = createProxySwitchMap(meta)
    const proxy = new Proxy(obj, {
+      has(target, key) { //TODO: should methods not be in readonly object?
+         const getValue = switchMap.get(key)
+         if (getValue)
+            return true;
+         return key in target
+      },
       get(target, key, receiver) {
          __DEV__proxyGetterAssertions(proxy, receiver)
          const getValue = switchMap.get(key)
@@ -53,10 +64,13 @@ export function createReadonlyObject(obj: AnyObject) { //TODO: what about Arrays
          )
       },
       set() {
-         console.warn('Set operation failed. Object is readonly.')
+        if (__DEV__) console.error('Set operation failed. Object is readonly.')
          return false;
       }
    })
+   readonlyMetaMap.set(obj, meta)
+   meta.asReadonly = proxy;
+   return proxy;
 }
 
 class MetaReadonlyObject {
@@ -106,13 +120,12 @@ export function isLocalKey(key: string | symbol) {
    return (typeof key === 'string' && /^_[a-zA-Z]/.test(key))
 }
 
-
 export function restrictAccess(key: string | symbol, switchMap: ProxySwitchMap) {
    switchMap.set(key, getRestrictedProperty)
    return getRestrictedProperty()
 }
 function getRestrictedProperty() {
-   if (__DEV__) throw new Error('Object is read-only and non-local. Cannot access methods or local properties')
+   if (__DEV__) console.error('Object is read-only and non-local. Cannot access methods or local properties')
    return undefined;
 }
 
