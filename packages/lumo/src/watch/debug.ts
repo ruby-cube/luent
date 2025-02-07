@@ -1,7 +1,8 @@
-import { AnyIon, asMetaIon, AtomicIon, ionize, isAtomicIon, Phase, watch } from "@rue/quarky"
-import { isTrackedOp, TrackedOp } from "../../../quarky/src/ionize/TrackedOp";
-import { isPropIon, PropIon } from "../../../quarky/src/ionize/PropIon";
-import { META } from "../../../quarky/src/ReactiveEntity";
+import { AtomicIon, ionize, isAtomicIon, Phase, watch } from "@rue/quarky"
+import { isTrackedOp, TrackedOp } from "../../../quarky/src/ionized/TrackedOp";
+import { isPropIon, PropIon } from "../../../quarky/src/ionized/PrimaryPion";
+import { quarksOf, isQuarky } from "../../../quarky/src/QuarkyEntity";
+import { getTrace } from "../../../flask/debug";
 
 
 
@@ -43,8 +44,8 @@ export function traceTriggers<T>(subject: T) {
       const traceableAtom = asTraceable(atom)
       traceableAtom.__addTrigger({
          trace: traceTrigger(),
-         newState: META in atom ? atom[META].state : atom.state, //TODO:
-         oldState: META in atom ? atom[META].prevState : atom.prevState //TODO:
+         newState: isQuarky(atom) ? quarksOf(atom).state : atom.state, //TODO:
+         oldState: isQuarky(atom) ? quarksOf(atom).prevState : atom.prevState //TODO:
       })
       __logTriggeredAtom(atom)
    }, {
@@ -72,6 +73,7 @@ function __logTriggeredAtom(atom: Atom) {
    triggeredAtoms.add(atom)
    watch(triggeredAtoms, () => {
       for (const atom of triggeredAtoms) {
+         //FIX: atom.__DEV__logTrace
          if (isAtomicIon(atom)) logAtomicIonTrace(atom)
          else if (isPropIon(atom)) logPropTrace(atom);
          else if (isTrackedOp(atom)) logTrackedOpTrace(atom)
@@ -90,15 +92,15 @@ function __logTriggeredAtom(atom: Atom) {
 }
 
 function logAtomicIonTrace(atom: AtomicIon) {
-   const originTrace = asMetaIon(atom).__DEV__origin
+   const originTrace = quarksOf(atom).__DEV__origin
    console.log('\n[TRIGGER TRACE] for ion')
    console.log('NonError ion origin trace\n    ' + originTrace)
 }
 
 function logPropTrace(atom: PropIon) {
-   const meta = asMetaIon(atom)
-   const originTrace = meta.__DEV__origin //TODO: add property
-   console.log(`\n[TRIGGER TRACE] for ionic property "${String(meta.key)}"`)
+   const quarks = quarksOf(atom)
+   const originTrace = quarks.__DEV__origin //TODO: add property
+   console.log(`\n[TRIGGER TRACE] for ionic property "${String(quarks.key)}"`)
    console.log('NonError origin trace\n    ' + originTrace)
 }
 

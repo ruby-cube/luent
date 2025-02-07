@@ -1,7 +1,7 @@
 import { Commons, getClosestCommons } from "./commons-stack";
 import { CommonsEntries, NodeCommons } from "./Commons";
 import { commonsTypeMap, TypeConfig } from "./CommonsKey";
-import { isIon, isIonizedModel, toIon } from "@rue/quarky";
+import { isMuon, isIonizedModel, toIon } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { unnestValue } from "../component/fromTag";
 import { CommonsKeyMap } from "@rue/lumo";
@@ -176,7 +176,7 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
    // if (assertions) { //TODO: add assertion parameter to CommonsKey or provide a registerAssertions function
    //     const _assertions = assertions instanceof Array ? assertions : [assertions]
    //     for (const assert of _assertions) {
-   //         assert(isIon(value) ? value() : value);
+   //         assert(isMuon(value) ? value() : value);
    //     }
    // }
    if (typeConfig.optional === 'withDefault' && value === undefined && isFunction(typeConfig.default as any)) {
@@ -193,7 +193,7 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
          return unnestValue(value)
 
       case '_Ion':
-         if (!isIon(value)) {
+         if (!isMuon(value)) {
             throw new Error(`[INVALID INPUT] Value of commons entry, '${String(key)}', must be an ion`)
          }
          return value; //TODO: make Ion read-only

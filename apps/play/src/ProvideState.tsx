@@ -1,6 +1,6 @@
 import { component, fromCommons, fromTag, prep, TypedKey, v } from "@rue/lumo"
 import { DerivedIon, ion, ionize } from "@rue/quarky";
-import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
+import { asPropIon } from "../../../packages/quarky/src/ionized/PrimaryPion";
 
 const COUNTER = Symbol("Counter") as TypedKey<Counter>
 const DOUBLE_COUNT = Symbol("DerivedIon<number>") as TypedKey<DerivedIon<number>>

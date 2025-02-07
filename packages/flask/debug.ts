@@ -15,9 +15,9 @@ export function __DEV__buildAsyncPath() {
    return (trace ? trace + '\n' : '') + (currentTrace ? '    at async ' + currentTrace?.slice(3) : '')
 }
 
-export function traceAsyncPath(label: string) {
+export function traceAsyncPath(label: string = 'unlabeled') {
    const trace = __DEV__getTrace()
-      console.log(`# ${label}`)
+   console.log(`# ${label}`)
    console.log(`NonError Async Trace:\n    ` + (trace ? trace + '\n    ' : '') + 'at async ' + getAsyncPath?.()?.slice(3).trimEnd())
 }
 // TODO: add async context to await, promises, and any other registered functions via compiler
@@ -47,7 +47,7 @@ export function getPublicTrace() {
    return undefined
 }
 
-export function getInternalTrace(cutoff: string){
+export function getInternalTrace(cutoff: string) {
    const rawTrace = getTrace() as string;
    const rawTraceTail = rawTrace.split(cutoff).at(-1)!
    return rawTraceTail.slice(rawTraceTail.indexOf('at ')).trim()

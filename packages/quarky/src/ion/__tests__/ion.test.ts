@@ -1,8 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ion } from '../Ion';
-import { MetaIon } from '../AtomicIon';
-import { createDerivedIon, DERIVED_ION } from '../../derivations/DerivedIon';
-import { META } from '../../ReactiveEntity';
+import { MetaIon } from '../PrimaryIon';
+import { createDerivedIon, DERIVED_ION } from '../../ionic/DerivationIon';
 import exp from 'constants';
 
 describe('ion function', () => {
@@ -11,7 +10,7 @@ describe('ion function', () => {
         expect(typeof atomicIon).toBe('function');
         expect(isFunction(atomicIon)).toBe(false)
         expect(atomicIon()).toBe(10);
-        expect(atomicIon[META]).toBeInstanceOf(MetaIon);
+        expect(atomicIon[QUARKS]).toBeInstanceOf(MetaIon);
     });
 
     it('should invoke setValue when `value` is set', () => {
@@ -31,7 +30,7 @@ describe('ion function', () => {
 
         $count.double()
         expect($count()).toBe(10);
-        expect($count[META]).toBeInstanceOf(MetaIon);
+        expect($count[QUARKS]).toBeInstanceOf(MetaIon);
     });
 
     it('should throw an error if .value is read', () => {
@@ -42,7 +41,7 @@ describe('ion function', () => {
         });
 
         expect(()=>$count.state).toThrowError();
-        expect($count[META]).toBeInstanceOf(MetaIon);
+        expect($count[QUARKS]).toBeInstanceOf(MetaIon);
     });
  
 
@@ -76,7 +75,7 @@ describe('ion function', () => {
         expect($doubleCount()).toBe(2);
         $count.state = 4
         expect($doubleCount()).toBe(8);
-        expect($doubleCount[META].type).toBe(DERIVED_ION);
+        expect($doubleCount[QUARKS].type).toBe(DERIVED_ION);
       });
 
       it('should create a derived ion that tracks dependencies correctly', () => {

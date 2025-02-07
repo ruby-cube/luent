@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types"
-import { Inert, inert, markInertProps } from "../../../packages/quarky/src/ionize/inert"
+import { Inert, inert, markInertProps } from "../../../packages/quarky/src/ionized/inert"
 import { ionize } from "@rue/quarky"
 
 class _ThirdPartyCat {

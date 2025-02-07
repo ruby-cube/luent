@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { ionize } from '../../ionize/ionize';
-import { asNonlocalReadonly, isReadonly } from '../../NonlocalReadonly';
+import { ionize } from '../../ionized/ionize';
+import { asNonlocalReadonly, isReadonly } from '../../nonlocal/NonlocalReadonly';
 import { ion } from '../Ion';
 
 describe('ionized object', () => {

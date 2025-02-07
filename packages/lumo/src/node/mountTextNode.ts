@@ -1,4 +1,4 @@
-import { isIon, ReactiveGet, Phase, tracked, __devCheckIfTracked, watch } from "@rue/quarky";
+import { isMuon, ReactiveGet, Phase, tracked, __devCheckIfTracked, watch } from "@rue/quarky";
 import { NodePod } from "./NodePod";
 
 
@@ -8,7 +8,7 @@ export function setUpTextNode(text: ReactiveGet | any, nodePod: NodePod) {
 
     nodePod.push(textNode)
 
-    if (isIon(text)) {
+    if (isMuon(text)) {
         keepTextNodeUpdated(text, textNode)
     }
     return textNode;
@@ -28,7 +28,7 @@ function keepTextNodeUpdated(text: ReactiveGet<any>, textNode: CharacterData) {
 
 function createTextNode(value: ReactiveGet | any) {
     if (__DEV__) __devCheckIfTracked()
-    const _value = isIon(value) ? value() : value;
+    const _value = isMuon(value) ? value() : value;
     const text = toString(_value)
     const textNode = document.createTextNode(text);
     return textNode;

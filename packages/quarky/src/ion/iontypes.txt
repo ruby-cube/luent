@@ -1,0 +1,157 @@
+*  First Goal: Create a conceptual model of reactivity and reactivity API that feels intuitive and easy to use
+*  Second Goal: Optimize performance
+
+
+       observable state
+
+observable            observable
+state                 state
+getter                setter
+(ion)
+
+trackable          state change
+state             signal/emitter 
+signal          (trigger effects)
+
+
+observed - general term for having subscribers to state change, either via tracking or watching
+tracked - to be a part of an ionic compound (memoized derivation or ionic effect)
+watched - to have an effect if state changes
+
+const tracker = activateIonicEffect(() => {
+
+})
+
+tracker.stop()
+
+------
+
+x reacts to state changes
+reactive effects - update view, fetch data
+reactive system - reactive view, reactive controller
+
+memoized derivations are not reactive,
+they are lazy
+"lazily reactive" auto-updating models
+
+derivations
+
+-------
+
+state
+accessor
+mutator
+
+
+      plain state
+
+plain             plain
+state getter      state setter
+(neutron)
+
+let _count = 0;
+
+function getCount(){
+   return _count;
+}
+
+function setCount(count){
+   _count = count;
+}
+
+----
+Observable Compounds
+(made up of observable atoms, either through tracking or through containing them as properties)
+
+IONIC COMPOUND
+observable compound 
+observable via atom tracking
+up-to-date via computational calls
+- ionic derivations produce derived state
+
+
+IONIC COMPOUND, TRACKING SCOPES (memoized ionic derivations have an inherent tracker, ionic effects need a watcher to be tracked)
+observable and reactive compounds
+observable via atom tracking
+reactive via atom subscription
+- memoized ionic derivations produce derived state
+- ionic reactive effects
+
+IONIZED COMPOUND
+observable and reactive compound
+observable via registration as watched model
+reactive via ownership of observable prop ions and trackable ops
+- ionized models
+
+----
+
+STATE MANAGEMENT
+capsules (bundling methods with state)
+
+readonly
+reined
+
+---
+
+QUESTIONS:
+[ ] Should pure functions with $[state] names be called ions or accessors? They are used for both observable and unobservable state
+
+muon     accessor with special $[state] format, that may or may not capsular (have methods), be observable (track and trigger), or writable {state: any}
+ion      observable muon
+neutron  non-observable muon
+
+
+Types: 
+- public interfaces (for both app development and for debugging)
+- internal interfaces (usually for typescript purposes)
+
+----
+
+Reactivity
+- reactive vs inert
+
+State Composition (whether reactive or inert)
+- atomic state vs derived state
+
+Reactive Composition 
+- atomic ion vs ionic/ionized compound
+
+Mutability (whether reactive or inert)
+- writable vs readonly
+
+Encapsulation (whether reactive or inert)
+- methods vs no methods
+
+----
+
+Reactive Derived State
+- memoized derivation ion vs plain derivation ion
+
+Reactive Ionized Compound
+- absorbed muon (can be ion or neutron) vs prop ion
+
+Muons
+- managed muon vs plain function muon
+
+
+---
+
+assumed reactivity
+
+
+'derived ionized compounds'
+
+const frogPrince = ionize({
+   ...o$(frog), // this will spread both ions and properties... but we only want ions
+   ...o$(prince)
+})
+
+
+//
+isMuon: typeof x === 'function' && x.length === 0 && 
+
+
+type Muon = NonVoidFunction 
+
+
+

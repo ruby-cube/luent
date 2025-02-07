@@ -89,7 +89,6 @@ export function initializeComponentRef(
    publicComponent: PublicComponent,
    $index: AtomicIon<number> | undefined,
 ) {
-   if (!isAtomicIon(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef ion as ref")
    if ($index) {
       initializeListRef(<NodesRef>ref, publicComponent, $index)
    }

@@ -1,9 +1,9 @@
 //@ts-nocheck
 import { TypedKey } from "@rue/lumo";
-import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
-import { ObservedProp } from "../ionize/ObservedProp";
-import { Phase, RenderCycle, useRenderCycle } from "../effects/RenderCycle";
-import { PropIon } from "../ionize/PropIon";
+import { AtomicIon, isAtomicIon } from "../ion/PrimaryIon";
+import { ObservedProp } from "../ionized/ObservedProp";
+import { Phase, RenderCycle, useRenderCycle } from "../watch/RenderCycle";
+import { PropIon } from "../ionized/PrimaryPion";
 
 
 //TODO: 

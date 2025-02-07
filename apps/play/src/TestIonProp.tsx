@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo";
-import { asPropIon } from "../../../packages/quarky/src/ionize/PropIon";
+import { asPropIon } from "../../../packages/quarky/src/ionized/PrimaryPion";
 import { ion, ionize, watch } from "@rue/quarky";
 
 

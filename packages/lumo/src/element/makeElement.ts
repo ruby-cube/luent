@@ -1,5 +1,5 @@
 import { DOMNode, Slot } from "../component/InternalComponent";
-import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon, watch, MaybeIon, isDerivedIon, WritableDerivedIon } from "@rue/quarky";
+import { DerivedIon, ReactiveGet, isMuon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon, watch, MaybeIon, isDerivedIon, WritableDerivedIon } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
 import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask";
@@ -141,7 +141,7 @@ function bindInput(element: HTMLInputElement, attributes: { [key: string]: Mutab
    const ion = attributes['mu:value'];
    delete attributes['mu:value'];
    attributes.value = ion;
-   if (!isIon(ion) || !('state' in ion)) {
+   if (!isMuon(ion) || !('state' in ion)) {
       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
    }
    else {
@@ -156,7 +156,7 @@ function bindTextarea(element: Element, Slot: Slot | undefined) {
    const kit = nodeEntities instanceof Array ? nodeEntities[0] : nodeEntities;
    if (!isObjectLiteral(kit) && !('mu' in kit))return;
    const ion = kit.mu;
-   if (!isIon(ion) || !('state' in ion)) {
+   if (!isMuon(ion) || !('state' in ion)) {
       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
    }
    else {
@@ -200,7 +200,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: any | Deriv
       // valid two-way binding should have already been removed with by bindViewInput, so any remaining 'mu:' keys are invalid
       const value = attributes[key]
       //TODO: only attributes that affect layout should be scheduled for render phase
-      if (isIon(value)) {
+      if (isMuon(value)) {
          watch(value, ({ newState }) => {
             setAttribute(node, _key, newState)
          }, { eager: true, phase: Phase.RENDER })
@@ -264,7 +264,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
    const classList = node.classList
 
    for (const entry of classes) {
-      if (isIon(entry)) {
+      if (isMuon(entry)) {
          watch(entry, ({ newState, oldState }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             if (oldState) removePreviousClasses(oldState, classList)
             if (newState) addClasses(newState, classList)
@@ -314,7 +314,7 @@ function addClasses(value: string | AnyObject, classList: DOMTokenList) {
 function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList) {
    for (const key in entry) {
       const value = entry[key]
-      if (value && isIon(value)) {
+      if (value && isMuon(value)) {
          watch(value, ({ newState, oldState }) => {
             if (oldState) classList.remove(key)
             if (newState) classList.add(key)
@@ -354,7 +354,7 @@ function setUpClassesFromString(classString: string, classList: DOMTokenList) {
 function setUpStyles(node: Element, styles: StyleInput[]) {
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {
-      if (isIon(entry)) {
+      if (isMuon(entry)) {
          watch(entry, ({ newState }/* value: string | AnyObject | Falsey */) => {
             setUpStyleEntry(style, newState);
          }, { eager: true, phase: Phase.RENDER })
@@ -369,7 +369,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
    if (entry instanceof Object) {
       for (const key in entry) {
          const value = entry[key];
-         if (isIon(value)) {
+         if (isMuon(value)) {
             watch(value, ({ newState }/* value: string | number | Falsey */) => {
                assignStyleProperty(style, toStylePropertyName(key), newState)
             }, {

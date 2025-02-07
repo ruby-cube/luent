@@ -1,4 +1,4 @@
-import { isIon, isIonizedModel, ion, toRaw, shallowClone, ReactiveGet, isAtomicIon, asMetaIon, watch, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon, toValue, getWithoutTracking, Ion } from "@rue/quarky";
+import { isMuon, isIonizedModel, ion, toRaw, shallowClone, ReactiveGet,  watch, Phase, DerivedIon, __devCheckIfTracked, ionize, AtomicIon, toValue, untrackedCall, Ion } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
@@ -119,8 +119,8 @@ export class ListRenderKit {
       if (__DEV__) __devCheckIfTracked()
 
 
-      const _isIonicModel = isIonizedModel(data)
-      const isDynamic = this.isDynamic = _isIonicModel || isIon(data);
+      const _isIonizedModel = isIonizedModel(data)
+      const isDynamic = this.isDynamic = _isIonizedModel || isMuon(data);
       this.outerNodePod = outerNodePod;
       const dynamicNodePod = this.dynamicNodePod = isDynamic ? outerNodePod.appendNodePod() : undefined;
 
@@ -129,7 +129,7 @@ export class ListRenderKit {
       if (isDynamic) {
          // set up watcher for updates
          // const renderCycle = getCurrentRenderCycle();
-         const _data = isIon(data) ? getWithoutTracking(data) : data // unwrap potentially nested ionized model
+         const _data = isMuon(data) ? untrackedCall(data) : data // unwrap potentially nested ionized model
          const rawData = isIonizedModel(_data) ? toRaw(_data) as Collection<any> : undefined
          let clone = isIonizedModel(_data) ? shallowClone(rawData!) : undefined //TODO: need to handle cases when ionizedModel is nested in ion
          //TODO: figure out typing for Set, Map, Object vs Array
@@ -255,7 +255,7 @@ export class ListRenderKit {
             // create and collect consecutive new items onto the same fragment
             const flask = this.outerFlask.spawn('view')
             const list = this.data;
-            // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).hasIonicValue) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
+            // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).stateIsIonized) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             this.renderItem(toValue(list)[i], $index, parent, nodePod, fragment, flask)
             flask.emitInitialMount()
             setCurrentIndex(undefined)

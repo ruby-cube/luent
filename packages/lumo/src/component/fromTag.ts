@@ -1,5 +1,5 @@
 import { AnyObject, UnionToIntersection } from "@rue/types";
-import { AnyIon, Ion, isIon, isIonizedModel, isReined, readonly } from "@rue/quarky";
+import { AnyIon, Ion, isMuon, isIonizedModel, isReined, readonly } from "@rue/quarky";
 import { toIon, toValue } from "../../../quarky/src/ion/toIons";
 import { getComponentAttributes } from "./makeComponent";
 import { isFunction, isObject } from "@rue/utils";
@@ -190,7 +190,7 @@ export function fromTag<C>(typeConfig?: C & { [key: string]: { validatedType: an
 // assertions?: { [K in keyof C]?: ((value: any) => void) | ((value: any) => void)[] }
 
 export function unnestValue(value: any) {
-   if (isIon(value)) {
+   if (isMuon(value)) {
       if (__DEV__) console.warn('RESEARCH: Had to unnest value from ion... you may be writing inefficient code')
       return unnestValue(value());
    }
@@ -211,7 +211,7 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
          //    const validation = assertions[key]
          //    const _assertions = validation instanceof Array ? validation : [validation]
          //    for (const assert of _assertions) {
-         //       assert(isIon(value) ? value() : value);
+         //       assert(isMuon(value) ? value() : value);
          //    }
          // }
          if (typeConfig) {
@@ -228,7 +228,7 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                case 'v':
                   const vKey = key.startsWith('mu:') || key.startsWith('on:') ? key.slice(3) : key;
                   if (key.startsWith('on:')) {
-                     if (!isFunction(value) || isIon(value)) throw new Error('event handler must be a function')
+                     if (!isFunction(value) || isMuon(value)) throw new Error('event handler must be a function')
                      const handlers = eventHandlers || (validatedAttributes.emit = (event: string) => { eventHandlers![event]() }, eventHandlers = {})
                      handlers['emit' + vKey] = value;
                   }
@@ -238,7 +238,7 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
 
                case 'MaybeIon':
                   const ionKey = key.startsWith('mu:') ? key.slice(3) : key;
-                  // if (!isIon(value)) {
+                  // if (!isMuon(value)) {
                   //    throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ion`)
                   // }
                   // validatedAttributes['$' + key] = value;
@@ -247,7 +247,7 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                   break;
 
                // case 'MaybeIon':
-               //    // validatedAttributes['$' + key] = isNamedDerivation(value) ? value : isIon(value) ? isReined(value) ? value : readonly(value) : readonly(toIon(value))
+               //    // validatedAttributes['$' + key] = isNamedDerivation(value) ? value : isMuon(value) ? isReined(value) ? value : readonly(value) : readonly(toIon(value))
                //    break;
 
                case 'MaybeIonized':

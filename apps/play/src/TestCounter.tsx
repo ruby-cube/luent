@@ -7,7 +7,7 @@
 // - derived signal with memo
 
 import { component } from "@rue/lumo"
-import { ionize, ion, isIon } from "../../../packages/quarky/src"
+import { ionize, ion, isMuon } from "../../../packages/quarky/src"
 
 // export function TestCounter() {
 //    const $count = ion(0, {

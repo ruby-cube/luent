@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { Component, Else, ElseIf, expose, For, fromTag, If, Ion, prep, provideAppwide, v, watch } from "@rue/lumo";
 import { ion, ionize, Ionized, ionizeWithMarks } from "@rue/quarky";
-import { Inert, inert } from "../../../packages/quarky/src/ionize/inert";
+import { Inert, inert } from "../../../packages/quarky/src/ionized/inert";
 import { Well, Wellerman } from "./Well";
 
 function Swap() {

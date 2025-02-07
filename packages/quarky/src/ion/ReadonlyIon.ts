@@ -1,28 +1,28 @@
-import { getWithoutTracking } from "../derivations/DependencyTracker";
-import { asNonlocalReadonly } from "../NonlocalReadonly";
-import { META } from "../ReactiveEntity";
-import { Ion, isIon } from "./Ion";
+import { untrackedCall } from "../ionic/x_DependencyTracker";
+import { asNonlocalReadonly } from "../nonlocal/NonlocalReadonly";
+import { quarksOf, QUARKS } from "../QuarkyEntity";
+import { Ion, isMuon } from "./Ion";
 
 type WritableIon = Ion & { state: any }
 
 export function createReadonlyIon(ion: WritableIon) {
-   const meta = ion[META]
+   const quarks = quarksOf(ion)
    function $readonlyIon() {
       return asNonlocalReadonly(ion())
    }
-   $readonlyIon[META] = meta;
+   $readonlyIon[QUARKS] = quarks;
    Object.defineProperty($readonlyIon, 'state', {
       get(){
-         return getWithoutTracking(ion)
+         return untrackedCall(ion)
       },
       set() {
          if (__DEV__) console.error('Set operation failed. Ion is readonly.')
             return false;
       }
    })
-   return meta.asReadonly = $readonlyIon
+   return quarks.asReadonly = $readonlyIon
 }
 
 export function isWritableIon(value: any): value is WritableIon {
-   return isIon(value) && 'state' in value;
+   return isMuon(value) && 'state' in value;
 }

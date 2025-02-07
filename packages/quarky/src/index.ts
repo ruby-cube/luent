@@ -1,22 +1,22 @@
-import { installIonicArray } from "./ionize/IonicArray"
-import { installIonicMap } from "./ionize/IonicMap"
-import { installIonicSet } from "./ionize/IonicSet"
+import { installIonicArray } from "./ionized/IonizedArray"
+import { installIonicMap } from "./ionized/IonizedMap"
+import { installIonicSet } from "./ionized/IonizedSet"
 
-export * from "./derivations/DerivedIon" //TODO: limit exports to public api
-export * from "./debug" //TODO: limit exports to public api
-export * from "./ionize/ionize" //TODO: limit exports to public api
-export * from "./ion/AtomicIon" //TODO: limit exports to public api
+export * from "./ionic/DerivationIon" //TODO: limit exports to public api
+export * from "./debug/debug" //TODO: limit exports to public api
+export * from "./ionized/ionize" //TODO: limit exports to public api
+export * from "./ion/PrimaryIon" //TODO: limit exports to public api
 export * from "./ion/Ion" //TODO: limit exports to public api
 export * from "./ion/toIons" //TODO: limit exports to public api
 export * from "./ion/Neutron" //TODO: limit exports to public api
-export * from "./derivations/DependencyTracker" //TODO: limit exports to public api
-export * from "./effects/watch" //TODO: limit exports to public api
-export * from "./effects/debug" //TODO: limit exports to public api
-export * from "./effects/RenderCycle" //TODO: limit exports to public api
-export * from "./ionize/TimeTraveler" //TODO: limit exports to public api
-export * from "./ionize/ionize" //TODO: limit exports to public api
-export * from "./effects/areEqual" //TODO: limit exports to public api
-export * from "./NonlocalReadonly" //TODO: limit exports to public api
+export * from "./ionic/x_DependencyTracker" //TODO: limit exports to public api
+export * from "./watch/watch" //TODO: limit exports to public api
+export * from "./watch/debug" //TODO: limit exports to public api
+export * from "./watch/RenderCycle" //TODO: limit exports to public api
+export * from "./ionized/TimeTraveler" //TODO: limit exports to public api
+export * from "./ionized/ionize" //TODO: limit exports to public api
+export * from "./watch/areEqual" //TODO: limit exports to public api
+export * from "./nonlocal/NonlocalReadonly" //TODO: limit exports to public api
 
 installIonicArray()
 installIonicSet()
