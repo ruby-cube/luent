@@ -3,7 +3,7 @@
 
 
 import { AnyObject } from "@rue/types";
-import { asIonicAtom } from "../ionic/IonicAtom";
+import { asAtom } from "../ionic/IonicAtom";
 import { MetaIonizedModel } from "./MetaIonizedModel";
 import { Ionized, IonizedModel } from "./ionize";
 import { quarksOf } from "../QuarkyEntity";
@@ -11,7 +11,7 @@ import { quarksOf } from "../QuarkyEntity";
 
 
 
-export class TrackedOp {
+export class TrackedOp { //QUESTION: should this be tracked op or trackable op??  because becoming an ionic atom is the "tracked" part
 
     constructor(
         public metaIonizedModel: MetaIonizedModel,

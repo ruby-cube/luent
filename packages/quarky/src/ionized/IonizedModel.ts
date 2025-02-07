@@ -1,7 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { ionize, Ionized, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
-import { getActiveTracker } from "../ionic/x_DependencyTracker";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { IonizedModel, storeSnapshot } from "./ionize";
 import { trigger, triggerIonicAtom, triggerIonizedModel } from "../reactivity/x_trigger";
@@ -11,6 +10,7 @@ import { AnyIon, isMuon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PrimaryPion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
 import { QUARKS, quarksOf } from "../QuarkyEntity";
+import { getActiveTracker } from "../ionic/IonicCompound";
 
 
 

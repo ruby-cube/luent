@@ -1,12 +1,12 @@
 import { isFunction, isObject } from "@rue/utils";
-import { __devCheckIfTracked, untrackedCall } from "../ionic/x_DependencyTracker";
 import { isMuon } from "../ion/Ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
 import { AtomicIon, isAtomicIon } from "../ion/PrimaryIon";
-import { isDerivedIon, isDerivationFunction } from "../ionic/DerivationIon";
+import { isDerivedIon, isDerivationFunction } from "../ionic/DerivationCapsule";
 import { quarksOf, hasQuarks, QUARKS, QuarkyEntity } from "../QuarkyEntity";
 import { __DEV__label } from "./DEVLabellable";
+import { untrackedCall } from "../ionic/IonicCompound";
 
 
 let _isSignal = false;

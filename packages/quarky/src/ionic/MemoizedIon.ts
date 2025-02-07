@@ -1,5 +1,4 @@
-import { IonicCompound, MaybeIonicCompound } from "./IonicCompound";
-import { __devCheckIfTracked } from "./x_DependencyTracker";
+import { getActiveTracker, IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { getActiveFlask } from "@rue/flask";
 import { quarksOf, QUARKS, Quarks, hasQuarks } from "../QuarkyEntity";
@@ -7,6 +6,7 @@ import { __DEV__initTraceability, attachCapsuleMethods, Capsule, CapsuleQuarks }
 import { Muon } from "../reactivity/reactivity-system";
 import { MaybeIonicAtom } from "./IonicAtom";
 import { __DEV__label } from "../debug/DEVLabellable";
+import { emitSignal } from "../debug/debug";
 
 /**
 * Managed Derivation Ion
@@ -62,6 +62,9 @@ export function createMemoizedIon(
    retrack: boolean = true
 ) {
    const $memoizedIon = () => {
+      if (__DEV__) emitSignal();
+      getActiveTracker()?.track(ion)
+
       const compound = ion.asIonicCompound!;
       const initialized = !!compound.atoms;
       const value = !initialized ? compound.trackAtoms(derivation)

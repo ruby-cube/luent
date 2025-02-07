@@ -12,7 +12,7 @@ export interface MaybeIonicAtom {
  */
 export class IonicAtom {
    constructor(
-      public atom: MaybeIonicAtom
+      public maybeAtom: MaybeIonicAtom
    ) {
    }
 
@@ -24,7 +24,7 @@ export class IonicAtom {
 
    removeCompound(compound: IonicCompound) {
       this.compounds.delete(compound);
-      this.cleanUp?.(this.atom)
+      this.cleanUp?.(this.maybeAtom)
    }
 
    react() {
@@ -38,9 +38,9 @@ export class IonicAtom {
    //    for (const derivation of this.derivations) {
    //       if (isIonizedModel(derivation.o)) { //TODO: move to IonizedCompound?
    //          const reactive = derivation.o
-   //          const atom = this.quarks;
+   //          const maybeAtom = this.quarks;
    //          useRenderCycle().recordOp(reactive, {
-   //             target: atom,
+   //             target: maybeAtom,
    //             op: 'set',
    //             args: [newValue],
    //             output: newValue,
@@ -50,10 +50,13 @@ export class IonicAtom {
    //       derivation.trigger();
    //    }
    // }
+   discard(){
+      this.maybeAtom.asIonicAtom = undefined; //TODO: when should this be called such that we don't cause thrashing of discarding and creating an IonicAtom more than needed?
+   }
 
-   cleanUp?: (atom: MaybeIonicAtom) => void
+   cleanUp?: (maybeAtom: MaybeIonicAtom) => void
 
-   onUntracked(cleanUp: (atom: MaybeIonicAtom) => void) {
+   onUntracked(cleanUp: (maybeAtom: MaybeIonicAtom) => void) {
       if (__DEV__ && this.cleanUp) {
          console.error('Overriding existing cleanup function. This means we need an array for onUntracked tasks')
       }
@@ -62,8 +65,8 @@ export class IonicAtom {
 }
 
 //TODO: need to initialize memoized derivations and maybe ionized models as ionic atoms
-export function asAtom(entity: MaybeIonicAtom) {
-   return entity.asIonicAtom ?? (entity.asIonicAtom = new IonicAtom(entity))
+export function asAtom(maybeAtom: MaybeIonicAtom) {
+   return maybeAtom.asIonicAtom ?? (maybeAtom.asIonicAtom = new IonicAtom(maybeAtom))
 
 }
 

@@ -1,18 +1,16 @@
 import { SetMap } from "@rue/utils";
 import { Task, onRenderCycleComplete, Phase, useRenderCycle } from "./RenderCycle";
-// import { runEffect } from "./watch";
-import { getDependencyTracker } from "../ionic/x_DependencyTracker";
 
 
 export type Watchable = {
-   asWatchSubject?: WatchSubject
+   asWatched?: Watched
 }
 
-const watchSubjectMap: WeakMap<Watchable, WatchSubject> = new WeakMap()
+export class Watched<T extends Watchable = Watchable> {
 
-export class WatchSubject<T extends Watchable = Watchable> {
-
-   constructor(public target: T) {
+   constructor(
+      public watchable: T
+   ) {
       this.effects = new SetMap()
    }
 
@@ -50,9 +48,6 @@ export class WatchSubject<T extends Watchable = Watchable> {
    }
 
    watch(effect: Task, phase: Phase, forNextCycle?: boolean) {
-      if (this.watchCount === 0) {
-         watchSubjectMap.set(this.target, this)
-      }
       if (forNextCycle) {
          this.queueForNextCycle(effect, phase)
       }
@@ -66,13 +61,23 @@ export class WatchSubject<T extends Watchable = Watchable> {
       this.removeEffect(effect, phase)
       this.watchCount--
       if (this.watchCount === 0) {
-         watchSubjectMap.delete(this.target)
+         this.discard() //TODO: when should this be called such that we don't cause thrashing of discarding and creating an Watched more than needed? At the end of a cycle?
       }
 
       this.emitUnwatched()
    }
 
-   triggerEffects() {
+   discard(){
+      this.watchable.asWatched = undefined;
+      //QUESTION: Do I need to release watchable too? this.watchable = undefined?
+   }
+
+   prevCycle?: any //TODO: ScheduleCycle
+
+   triggerEffects() { // the surrounding effect when original trigger happened
+      // const currentCycle = $currentCycle(); 
+      // if (this.prevCycle === currentCycle) return; // prevents repeats
+      // this.prevCycle = currentCycle
       for (const [phase, effects] of this.effects) {
          if (phase === Phase.SYNC) {
             this.runSyncEffects(effects);
@@ -84,18 +89,18 @@ export class WatchSubject<T extends Watchable = Watchable> {
    }
 
    private runSyncEffects(effects: Set<Task>) {
-      const tracker = getDependencyTracker();
-      tracker?.stop(); // in case reactive refs are triggered during a reactiveEffect
+      // const tracker = getDependencyTracker();
+      // tracker?.stop(); // in case reactive refs are triggered during a reactiveEffect
       for (const effect of effects) {
          // runEffect(effect)
          effect()
       }
-      tracker?.restore();
+      // tracker?.restore();
    }
 
    private scheduleEffects(effects: Set<Task>, phase: Exclude<Phase, Phase.SYNC>) {
       const renderCycle = useRenderCycle()
-      for (const effect of effects) {
+      for (const effect of effects) { //TODO: Can we skip this loop and just pass the whole set to the task runner?
          renderCycle.scheduleTask(effect, phase)
       }
    }
@@ -115,17 +120,6 @@ export class WatchSubject<T extends Watchable = Watchable> {
 }
 
 
-
-
-export function isWatched(target: Watchable | null | undefined) {
-   if (!target) return false;
-   return Boolean(watchSubjectMap.get(target));
-}
-
-export function asWatchSubject(target: Watchable): WatchSubject {
-   let watchSubject = watchSubjectMap.get(target)
-   if (!watchSubject) {
-      watchSubject = new WatchSubject(target)
-   }
-   return watchSubject;
+export function asWatched(watchable: Watchable): Watched {
+   return watchable.asWatched ?? (watchable.asWatched = new Watched(watchable))
 }

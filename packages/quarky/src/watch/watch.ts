@@ -1,22 +1,21 @@
 import { AnyObject } from "@rue/types";
-import { asWatchSubject, WatchSubject } from "./WatchSubject";
+import { asWatched, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { IonicCompound } from "../ionic/IonicCompound";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
-import { ReactiveGet, DerivedIon, isDerivedIon, createDerivationIon } from "../ionic/DerivationIon";
+import {DerivedIon, isDerivedIon, createDerivationIon } from "../ionic/DerivationCapsule";
 import { isIonizedModel, toRaw, } from "../ionized/ionize";
 import { areEqual } from "./areEqual";
-import { createIonicEffect, IonicEffect } from "../ionic/IonicEffect";
-import { isReactive } from "../reactivity/ReactiveEntity";
-import { __devCheckIfTracked } from "../ionic/x_DependencyTracker";
-import { AnyIon, isMuon } from "../ion/Ion";
+import { createIonicEffect } from "../ionic/IonicEffect";
+import { AnyIon } from "../ion/Ion";
 import { AtomicIon } from "../ion/PrimaryIon";
-import { asIonicAtom } from "../ionic/IonicAtom";
+import { asAtom } from "../ionic/IonicAtom";
 import { isPropIon, PropIon } from "../ionized/PrimaryPion";
 import { toValue } from "../ion/toIons";
 import { StateChangeEvent } from "./StateChangeEvent";
-import { quarksOf, QUARKS, QuarkyEntity } from "../QuarkyEntity";
+import { quarksOf } from "../QuarkyEntity";
+import { isMuon } from "../muon/Muon";
 
 
 type RenderCycleOptions = {
@@ -124,9 +123,9 @@ function normalizeWatchSubject(subject: AnyIon | AnyObject) {
 }
 
 function asWatchSubjects(subjects: (AnyIon | AnyObject)[]) {
-   const watchSubjects: WatchSubject[] = []
+   const watchSubjects: Watched[] = []
    for (const subject of subjects) {
-      watchSubjects.push(asWatchSubject(subject))
+      watchSubjects.push(asWatched(subject))
    }
    return watchSubjects
 }
@@ -176,6 +175,9 @@ function InertWatcher() {
       resume: noOp,
    }
 }
+
+let currentEffect: Function | undefined;
+
 // export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? OnChangeHandler<R> : never, options?: WatchOptions): ResumableListener
 // export function watch<T extends IonizedModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): ResumableListener
 export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: WatchOptions): ResumableListener {
@@ -211,11 +213,19 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
       watch(oldValue, effect, options)
    }
 
-   const watchEffect = createWatchEffect()
-
+   let prevCycle: any;
    function changeHandler() {
-      if (currentEffect && currentEffect === watchEffect) return; // prevent infinite loops for synchronous effects
-      pushEffect(watchEffect)
+      const currentCycle = $currentCycle()
+      if (currentCycle === prevCycle) {
+         if (triggeredByItself()) // how do we know?
+            return; // prevent infinite loops for "synchronous" effects, assumes effects are never nested
+         else {
+            rescheduleForNextCycle()
+            return;
+         }
+      }
+      prevCycle = currentCycle;
+
       const newValue = isMultiSubject ? getValues(subjects) : toValue(subject0) // This is when retracking happens
 
       if (watchStateChange && (!eager && (isMultiSubject && noChanges(subjects, newValue, oldValue)
@@ -225,15 +235,11 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
          return;
       eager = false;
 
-      let prevSubject = currentWatchSubject;
       try {
-         currentWatchSubject = subjects // prevents infinite loops for synchronous effects //TODO: do we need this in watchModel and initialize effect?
-         // pushEffect(_effect)
          effect(new StateChangeEvent(subject, newValue, oldValue, getMutations(subjects)))
       }
       finally {
-         popEffect()
-         currentWatchSubject = prevSubject;
+         currentEffect = undefined;
          oldValue = newValue;
       }
    }
@@ -300,7 +306,7 @@ function getMutations(subjects: (AnyIon | AnyObject)[]) {
 //     const phase = options?.phase || Phase.BEFORE_RENDER
 //     // const deep = options?.deep
 
-//     const watchSubject = asWatchSubject(subject);
+//     const watchSubject = asWatched(subject);
 
 //     quarksOf(subject).trackAbsorbedIons()
 
@@ -354,7 +360,7 @@ export function watchEffect(effect: () => void, options?: EffectOptions) { //NOT
    const retrack = options?.retrack || false;
 
    const reactiveEffect = createIonicEffect(effect, retrack)
-   const watchSubject = asWatchSubject(reactiveEffect);
+   const watchSubject = asWatched(reactiveEffect);
 
    // if (__DEV__ && selectiveSubjects && options?.also)
    // throw Error(`INVALID OPTIONS: Cannot configure watchEffect with both 'only' and 'also' options.`)
@@ -373,7 +379,7 @@ export function watchEffect(effect: () => void, options?: EffectOptions) { //NOT
 
 
 function setUpWatcher(
-   watchSubjects: WatchSubject[],
+   watchSubjects: Watched[],
    effect: Effect,
    phase: Phase,
    options: SustainedListenerOptions & RenderCycleOptions,

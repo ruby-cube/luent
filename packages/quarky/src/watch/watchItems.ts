@@ -1,5 +1,5 @@
 import { ResumableListener } from "@rue/flask";
-import { ReactiveGet } from "../ionic/DerivationIon";
+import { ReactiveGet } from "../ionic/DerivationCapsule";
 import { ionize, IonizedModel, isIonizedModel, toRaw } from "../ionized/ionize";
 import { OnChangeHandler, watch, WatchOptions } from "./watch";
 import { isIntegerKey } from "../ionized/IonizedArray";

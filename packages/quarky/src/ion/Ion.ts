@@ -1,9 +1,10 @@
 import { AnyObject } from "@rue/types";
-import { createDerivationIon, createWritableDerivedIon, DerivedIon, isDerivedIon, ReactiveDerivedIon, WritableDerivedIon } from "../ionic/DerivationIon";
+import { createDerivationIon, createWritableDerivedIon, ReactiveDerivedIon, WritableDerivedIon } from "../ionic/DerivationCapsule";
 import { asPropIon, isPropIon, PropIon } from "../ionized/PrimaryPion";
 import { AtomicIon, createPrimaryIon, isAtomicIon } from "./PrimaryIon";
 import { isFunction } from "@rue/utils";
 import { QUARKS } from "../QuarkyEntity";
+import { isMuon } from "../muon/Muon";
 
 export type MaybeIon<T> = Ion<T> | T;
 

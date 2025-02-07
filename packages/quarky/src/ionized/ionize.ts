@@ -217,7 +217,7 @@ type AsIons<T> = {
 //     }
 //     // clean up
 //     const prop = asObservedProp(reactive, key)
-//     const watchSubject = asWatchSubject(prop)
+//     const watchSubject = asWatched(prop)
 //     watchSubject.onUnwatched(() => {
 //         unobserve(prop, isIndex ? () => {
 //             (<MetaIonicCollection>metaIonizedModel).deleteObservedEntryKey(key)
@@ -228,7 +228,7 @@ type AsIons<T> = {
 
 
 // function unobserve(prop: ObservedProp) {
-//     const watchSubject = asWatchSubject(prop)
+//     const watchSubject = asWatched(prop)
 //     const atom = asAtom(prop)
 //     if (watchSubject.watchCount === 0 && atom.derivations.size === 0) {
 //         prop.discard()

@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { createDerivationIon, createWritableDerivedIon, DerivedIon, DerivedIonQuarks, WritableDerivedIon } from "../ionic/DerivationIon";
+import { createDerivationIon, createWritableDerivedIon, DerivedIon, DerivedIonQuarks, WritableDerivedIon } from "../ionic/DerivationCapsule";
 import { AnyIon, isMuon } from "./Ion";
 import { createPrimaryIon, AtomicIon, } from "./PrimaryIon";
 import { isFunction } from "@rue/utils";
@@ -63,7 +63,7 @@ export function createPrimaryNeutron(
       entity: $ion,
       type: PRIMARY_ION,
       asIonicAtom: undefined,
-      asWatchSubject: undefined
+      asWatched: undefined
    }
    __DEV__initTraceability(ion)
 

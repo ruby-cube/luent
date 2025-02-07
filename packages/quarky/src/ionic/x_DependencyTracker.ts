@@ -91,9 +91,3 @@ export function untrackedCall(reactiveRef: (() => any) | TrackedOp) {
 
 
 
-export function __devCheckIfTracked() {
-    if (isTrackedContext()) console.warn(`RESEARCH: This is currently a tracked context. May need to use untrackedCall`)
-}
-export function __devCheckIfNotTracked() {
-    if (!isTrackedContext()) console.warn(`RESEARCH: This is currently not a tracked context. untrackedCall may be extraneous`)
-}

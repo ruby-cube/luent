@@ -1,6 +1,6 @@
 import { asIonicAtom, isIonicAtom, ReactivePrimitive } from "../ionic/IonicAtom";
 import { AtomicIon } from "../ion/PrimaryIon";
-import { asWatchSubject, isWatched } from "../watch/WatchSubject";
+import { asWatched, isWatched } from "../watch/Watched";
 import { getCurrentRenderCycle, useRenderCycle } from "../watch/RenderCycle";
 import { untrackedCall } from "../ionic/x_DependencyTracker";
 import { isIonicEffectAtom } from "../ionic/IonicEffect";
@@ -18,7 +18,7 @@ export function trigger(target: AtomicIon | PropIon, newValue?: any, oldValue?: 
         return;
 
     if (isWatched(target)) {
-       asWatchSubject(target).triggerEffects()
+       asWatched(target).triggerEffects()
       }
       
     triggerIonicAtom(target, newValue, oldValue)
@@ -32,7 +32,7 @@ export function triggerIonicAtom(target: ReactivePrimitive, newValue?: any, oldV
 }
 
 // export function triggerIonizedModel(reactive: IonizedModel) {
-//     asWatchSubject(reactive).triggerEffects()
+//     asWatched(reactive).triggerEffects()
 // }
 
 
@@ -45,7 +45,7 @@ export function triggerIonizedModel(
 ) {
     if (isWatched(model)) {
 
-        asWatchSubject(model).triggerEffects()
+        asWatched(model).triggerEffects()
 
         useRenderCycle().recordOp(model, {
             target: model,

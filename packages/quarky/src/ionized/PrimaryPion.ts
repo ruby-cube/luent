@@ -1,10 +1,10 @@
 import { AnyObject } from "@rue/types";
 import {  isIonizedModel, ionize, IonizedModel, toRaw } from "./ionize";
-import { isMuon } from "../ion/Ion";
-import { __devCheckIfTracked, getActiveTracker } from "../ionic/x_DependencyTracker";
-import { asWatchSubject, WatchSubject } from "../watch/WatchSubject";
-import { asIonicAtom, IonicAtom } from "../ionic/IonicAtom";
+import { asWatched, Watched } from "../watch/Watched";
+import { asAtom, IonicAtom } from "../ionic/IonicAtom";
 import { quarksOf, QUARKS } from "../QuarkyEntity";
+import { isMuon } from "../muon/Muon";
+import { getActiveTracker } from "../ionic/IonicCompound";
 
 
 //TODO: Whether a Pion is Writable or not depends of if the property is writable
@@ -78,17 +78,17 @@ class MetaPropIon {
       this.isEntryKey = isEntryKey(toRaw(model), key)
    }
 
-   asWatchSubject?: WatchSubject
+   asWatched?: Watched
    asAtom?: IonicAtom
    private isIndex: boolean = false
 
    watch() {
-      if (this.asWatchSubject) return;
+      if (this.asWatched) return;
       const metaModel = quarksOf(this.model)
       if (this.isEntryKey)
          metaModel.addObservedEntryKey(this.key);
 
-      const watchSubject = this.asWatchSubject = asWatchSubject(this.o)
+      const watchSubject = this.asWatched = asWatched(this.o)
 
       watchSubject.onUnwatched(() => {
          if (watchSubject.watchCount === 0 && this.asAtom?.derivations.size === 0) {
@@ -106,7 +106,7 @@ class MetaPropIon {
          quarksOf(this.model).addObservedEntryKey(this.key)
 
       atom.onUntracked(() => {
-         if (this.asWatchSubject?.watchCount === 0 && atom.derivations.size === 0) {
+         if (this.asWatched?.watchCount === 0 && atom.derivations.size === 0) {
             this.discard()
          }
       })
@@ -217,7 +217,7 @@ export function getObservedProp( // observed means watched and/or tracked
    const prop = getPropIon(ionicModel, key);
    if (!prop) return undefined;
    const meta = quarksOf(prop);
-   if (meta.asWatchSubject || meta.asAtom) return prop;
+   if (meta.asWatched || meta.asAtom) return prop;
    return undefined;
 }
 

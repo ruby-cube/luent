@@ -30,10 +30,7 @@ export type PrimaryIon = {
 
 function getReactiveState(ion: PrimaryIon) {
    if (__DEV__) emitSignal();
-   const tracker = getActiveTracker()
-   if (!tracker)
-      return ion.state
-   tracker.track(ion)
+   getActiveTracker()?.track(ion)
    return ion.state;
 }
 
@@ -48,7 +45,7 @@ function setReactiveState(ion: PrimaryIon, oldState: unknown, newState: unknown)
    const state = shouldIonize(newState, ion.stateIsIonized) ? ionize(newState) : newState
    ion.state = state; // must set state before triggering effects and derivations
    ion.asIonicAtom?.react()
-   ion.asWatchSubject?.triggerEffects()
+   ion.asWatched?.triggerEffects()
    return state;
 }
 
@@ -63,18 +60,16 @@ export function createPrimaryIon(
 ) {
    const $ion = (() => getReactiveState(ion)) as $PrimaryIon
 
-   let stateIsIonized = isIonizedModel(state)
-
    const ion: PrimaryIon = {
       state,
       stateIsIonized: isIonizedModel(state),
       entity: $ion,
       type: PRIMARY_ION,
       asIonicAtom: undefined,
-      asWatchSubject: undefined,
-      __DEV__asTraceable: undefined,
+      asWatched: undefined,
       asReadonly: undefined,
       asReined: undefined,
+      __DEV__asTraceable: undefined,
    }
    __DEV__initTraceability(ion)
 

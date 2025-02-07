@@ -1,7 +1,8 @@
-import { untrackedCall } from "../ionic/x_DependencyTracker";
+import { untrackedCall } from "../ionic/IonicCompound";
+import { isMuon } from "../muon/Muon";
 import { asNonlocalReadonly } from "../nonlocal/NonlocalReadonly";
 import { quarksOf, QUARKS } from "../QuarkyEntity";
-import { Ion, isMuon } from "./Ion";
+import { Ion } from "./Ion";
 
 type WritableIon = Ion & { state: any }
 
