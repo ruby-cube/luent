@@ -6,7 +6,7 @@ type QuarkyEntity<T = Quarks> = {
 
 export const QUARKS = Symbol('quarks')
 
-export function isQuarky(value: any): value is QuarkyEntity {
+export function hasQuarks(value: any): value is QuarkyEntity {
    return QUARKS in value;
 }
 

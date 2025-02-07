@@ -1,74 +1,31 @@
-import { AtomicIon } from "../ion/PrimaryIon";
-import { PropIon } from "../ionized/PrimaryPion";
-import { QUARKS, QuarkyEntity } from "../QuarkyEntity";
-import { asIonicAtom } from "./IonicAtom";
-import { IonicCompound } from "./IonicCompound";
+import { Watchable, WatchSubject } from "../watch/WatchSubject";
+import { IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 
-// Used to create reactive effect and reactive getters
+type IonicEffect = MaybeIonicCompound<EffectCompound>
 
-export type IonicEffect = {
-    (...args: any[]): any;
-    initialize: () => IonicEffect;
-} & QuarkyEntity<IonicCompound>
+export class EffectCompound extends IonicCompound<IonicEffect> implements Watchable {
+   asWatchSubject: WatchSubject = new WatchSubject(this)
 
-function trackIonicEffect(derivation: IonicCompound, fn: () => any) {
-    const value = derivation.trackAtoms(() => runIonicEffect(fn, derivation));
-    // derivation.forwardAtoms(derivation.atoms)
-    return value;
+   override trigger(): void {
+      this.dirty = true;
+      this.asWatchSubject.triggerEffects()
+   }
 }
 
-const IONIC_EFFECT = Symbol('ionicEffect')
+export function createIonicEffect(task: () => any, retrack: boolean = true) {
+   const compound: EffectCompound = new EffectCompound(effect)
+   
+   let initialized = false;
+   function effect() {
+      if (!initialized || retrack && compound.dirty) {
+         compound.trackAtoms(task)
+         compound.dirty = false;
+      }
+      else {
+         task()
+      }
+   }
+   effect.asIonicCompound = compound;
 
-// prevent infinite loop if ionic effect sets ion or ionic property synchronously
-let currentMetaIonicEffect: IonicCompound | undefined
-
-export function isIonicEffectAtom(atom: AtomicIon | PropIon) {
-    if (!currentMetaIonicEffect) return false;
-    return currentMetaIonicEffect.atoms.has(asAtom(atom));
-}
-
-function runIonicEffect(effect: () => void, meta: IonicCompound) {
-    let prevMeta = currentMetaIonicEffect
-    try {
-        currentMetaIonicEffect = meta
-        effect()
-    }
-    finally{
-        currentMetaIonicEffect = prevMeta;
-    }
-}
-
-export function createIonicEffect(fn: () => any, retrack: boolean) {
-    if (retrack) {
-        const derivation = new IonicCompound(ionicEffect, IONIC_EFFECT)
-
-        function ionicEffect() {
-            if (derivation.dirty) {
-                trackIonicEffect(derivation, fn)
-                derivation.undirty()
-            }
-            else {
-                runIonicEffect(fn, derivation)
-            }
-        }
-        ionicEffect[QUARKS] = derivation
-        ionicEffect.initialize = () => {
-            trackIonicEffect(derivation, fn);
-            return ionicEffect;
-        }
-
-        return ionicEffect as IonicEffect
-    }
-    else {
-        const derivation = new IonicCompound(ionicEffect, IONIC_EFFECT)
-        function ionicEffect() {
-            runIonicEffect(fn, derivation)
-        }
-        ionicEffect.initialize = () => {
-            trackIonicEffect(derivation, fn);
-            return ionicEffect;
-        }
-        ionicEffect[QUARKS] = derivation
-        return ionicEffect as IonicEffect;
-    }
+   return effect
 }

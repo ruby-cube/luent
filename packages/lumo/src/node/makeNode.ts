@@ -1,4 +1,4 @@
-import { __devCheckIfTracked, __devCheckIfNotTracked, AtomicIon, Ion, isNamedDerivation } from "../../../quarky/src";
+import { __devCheckIfTracked, __devCheckIfNotTracked, Ion } from "../../../quarky/src";
 import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { InferSlot, makeComponent } from "../component/makeComponent";
@@ -14,6 +14,7 @@ import { createTryNode, TryNodeInput } from "../boundaries/Try";
 import { createSuspenseNode, SuspenseNodeInput } from "../boundaries/Suspense";
 import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./mountInnerHTML";
+import { isDerivationFunction } from "../../../quarky/src/muon/Muon";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -97,7 +98,7 @@ export class SwapConfig {
 
 // TODO: how to distinguish render function from derived getter 
 export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity) | NodeEntity) {
-   if (slot instanceof Function && !isNamedDerivation(slot)) { // distinguishes derivation functions from render functions
+   if (slot instanceof Function && !isDerivationFunction(slot)) { // distinguishes derivation functions from render functions
       return slot as (...args: any[]) => NodeEntity;
    }
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')

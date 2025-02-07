@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { createDerivedIon, createWritableDerivedIon, DerivedIon, isDerivedIon, ReactiveDerivedIon, WritableDerivedIon } from "../ionic/DerivationIon";
+import { createDerivationIon, createWritableDerivedIon, DerivedIon, isDerivedIon, ReactiveDerivedIon, WritableDerivedIon } from "../ionic/DerivationIon";
 import { asPropIon, isPropIon, PropIon } from "../ionized/PrimaryPion";
 import { AtomicIon, createPrimaryIon, isAtomicIon } from "./PrimaryIon";
 import { isFunction } from "@rue/utils";
@@ -37,7 +37,7 @@ export function ion<T, M>(value?: T, methods?: M & IonMethods): T extends AnyIon
             <(prev?: any) => unknown>value,
             methods
          ) as T extends AnyIon ? T : T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-      return createDerivedIon(<(prev?: any) => unknown>value) as T extends AnyIon ? T : T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
+      return createDerivationIon(<(prev?: any) => unknown>value) as T extends AnyIon ? T : T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
    }
    return createPrimaryIon(value, methods) as T extends AnyIon ? T : T extends (args?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
 }

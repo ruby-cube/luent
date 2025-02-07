@@ -247,7 +247,7 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                   break;
 
                // case 'MaybeIon':
-               //    // validatedAttributes['$' + key] = isNamedDerivation(value) ? value : isMuon(value) ? isReined(value) ? value : readonly(value) : readonly(toIon(value))
+               //    // validatedAttributes['$' + key] = isDerivationFunction(value) ? value : isMuon(value) ? isReined(value) ? value : readonly(value) : readonly(toIon(value))
                //    break;
 
                case 'MaybeIonized':

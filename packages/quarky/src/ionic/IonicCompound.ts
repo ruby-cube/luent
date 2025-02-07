@@ -35,18 +35,19 @@ export function untrackedCall(fn: Function) {
 /**
  * for memoized derivations and ionic effects
  */
-export interface MaybeIonicCompound {
-   asIonicCompound?: IonicCompound
+export interface MaybeIonicCompound<T extends IonicCompound = IonicCompound> {
+   asIonicCompound?: T
 }
 
 
 
-export class IonicCompound<T extends MaybeIonicCompound = MaybeIonicCompound> implements Compound {
+export class IonicCompound<T extends MaybeIonicCompound = { asIonicCompound?: IonicCompound }> implements Compound {
 
    constructor(
       readonly compound: T,
    ) {
    }
+   dirty: boolean = false;
 
    atoms: Set<IonicAtom> = new Set()
 

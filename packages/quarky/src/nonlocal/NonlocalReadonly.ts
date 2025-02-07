@@ -5,11 +5,11 @@ import { createReadonlyIon, isWritableIon } from "../ion/ReadonlyIon";
 import { __DEV__proxyGetterAssertions, createProxySwitchMap, isMethod, ProxySwitchMap } from "../ionized/IonizedModel";
 import { isFunction, isObject } from "@rue/utils";
 import { Traceable } from "../debug/debug";
-import { quarksOf, isQuarky } from "../QuarkyEntity";
+import { quarksOf, hasQuarks } from "../QuarkyEntity";
 
 export function asNonlocalReadonly(value: any) {
    if (!(value instanceof Object)) return value;
-   if (isQuarky(value) || readonlyQuarksMap.has(value)) {
+   if (hasQuarks(value) || readonlyQuarksMap.has(value)) {
       const meta = quarksOf(value) ?? readonlyQuarksMap.get(value) as { asReadonly?: AnyObject }
       const readonly = meta.asReadonly
       if (readonly) return readonly;

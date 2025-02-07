@@ -4,7 +4,7 @@ import { AnyObject } from "@rue/types";
 import { AnyIon, Ion, IonMethods } from "../ion/Ion";
 import { DerivedNeutron } from "../ion/Neutron";
 import { getActiveFlask } from "@rue/flask";
-import { quarksOf, QUARKS, Quarks, isQuarky } from "../QuarkyEntity";
+import { quarksOf, QUARKS, Quarks, hasQuarks } from "../QuarkyEntity";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule, CapsuleQuarks } from "../capsule/Capsule";
 import { Muon } from "../reactivity/reactivity-system";
 import { MaybeIonicAtom } from "./IonicAtom";
@@ -36,7 +36,7 @@ export type MemoizedIon = {
 export const MEMOIZED_ION = Symbol('Memoized Ion')
 
 export function isMemoizedIon(value: unknown): value is $MemoizedIon {
-   return isQuarky(value) && quarksOf(value).type === MEMOIZED_ION
+   return hasQuarks(value) && quarksOf(value).type === MEMOIZED_ION
 }
 
 
@@ -57,48 +57,35 @@ export class MemoizedCompound<T extends MemoizedIon = MemoizedIon> extends Ionic
 }
 
 
-export function createDerivedIon<T extends any>(
-   pureGetter: (previousValue?: T) => T,
+export function createDerivationIon(
+   derivation: (previousValue?: unknown) => unknown,
    methods?: AnyObject,
-   retrack: boolean = true,
-   memoize: boolean = false // change to memoize
-): DerivedIon<T> | DerivedNeutron<T> {
+   memoize: boolean = true, // change to memoize
+   retrack: boolean = true
+) {
    const derived = new DerivedIonQuarks(<DerivedIon>$derivedIon);
 
    if (!memoize) {
       //@ts-expect-error
-      pureGetter[QUARKS]
+      derivation[QUARKS]
          = derived
 
       if (methods) {
          for (const key in methods) {
             //@ts-expect-error
-            pureGetter[key]
-               = methods[key].bind(pureGetter)
+            derivation[key]
+               = methods[key].bind(derivation)
          }
       }
-      return pureGetter as DerivedNeutron;
+      return derivation as DerivedNeutron;
    }
 
    function $derivedIon() {
-      // const tracker = getActiveTracker()
-      // if (tracker) {
-      //    if (derived.dirty) {
-      //       const newValue = pureGetter(derived.value);
-      //       derived.forwardAtoms(derived.atoms) //NOTE: Added this mindlessly trying to get nested derivations to work
-      //       derived.updateValue(newValue);
-      //       if (!retrack) derived.undirty()
-      //       return newValue;
-      //    }
-      //    derived.forwardAtoms(derived.atoms) //NOTE: Added this mindlessly trying to get nested derivations to work
-      //    return derived.value;
-      // }
-
-      // if (!initialized || derived.dirty && retrack) {
+ 
       const initialized = !!derived.atoms;
-      const value = !initialized ? derived.trackAtoms(pureGetter)
-         : (derived.dirty && retrack) ? derived.trackAtoms(() => pureGetter(derived.value))
-            : derived.dirty ? pureGetter(derived.value) : derived.value;
+      const value = !initialized ? derived.trackAtoms(derivation)
+         : (derived.dirty && retrack) ? derived.trackAtoms(() => derivation(derived.value))
+            : derived.dirty ? derivation(derived.value) : derived.value;
 
       derived.forwardAtoms(derived.atoms!)
       if (!initialized || derived.dirty)
@@ -108,7 +95,7 @@ export function createDerivedIon<T extends any>(
       // }
 
       // if (derived.dirty) {
-      //    const newValue = pureGetter(derived.value);
+      //    const newValue = derivation(derived.value);
       //    derived.forwardAtoms(derived.atoms)
       //    derived.updateValue(newValue)
       //    derived.undirty()
@@ -145,8 +132,8 @@ export type WritableDerivedIon<T = any, M extends AnyObject = {}> = {
    untrack: () => void;
 } & M & QuarkyEntity<DerivedIonQuarks>
 
-export function createWritableDerivedIon<T, M>(pureGetter: () => T, methods: M & IonMethods, inert: boolean = false) {
-   const writable = createDerivedIon(pureGetter, methods, inert);
+export function createWritableDerivedIon<T, M>(derivation: () => T, methods: M & IonMethods, inert: boolean = false) {
+   const writable = createDerivationIon(derivation, methods, inert);
    return writable;
 }
 
@@ -156,9 +143,5 @@ export type ReactiveDerivedIon<T, M> = M extends { [key: string]: (...args: any[
 // export function DerivedIon<T, M>(derivation: () => T, methods?: M & { [key: string]: (...args: any[]) => any }): ReactiveDerivedIon<T, M> {
 //     if (isMuon(derivation)) throw new Error('INVALID INPUT: Ions cannot be made into ions')
 //     if (methods) return createWritableDerivedIon(derivation, methods) as ReactiveDerivedIon<T, M>
-//     return createDerivedIon(derivation) as ReactiveDerivedIon<T, M>
+//     return createDerivationIon(derivation) as ReactiveDerivedIon<T, M>
 // }
-
-export function isNamedDerivation(value: any) {
-   return value instanceof Function && isMuon(value)
-}

@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { createDerivedIon, createWritableDerivedIon, DerivedIon, DerivedIonQuarks, WritableDerivedIon } from "../ionic/DerivationIon";
+import { createDerivationIon, createWritableDerivedIon, DerivedIon, DerivedIonQuarks, WritableDerivedIon } from "../ionic/DerivationIon";
 import { AnyIon, isMuon } from "./Ion";
 import { createPrimaryIon, AtomicIon, } from "./PrimaryIon";
 import { isFunction } from "@rue/utils";
@@ -20,7 +20,7 @@ export function neutron<T, M>(value?: T, methods?: M & { [key: string]: (...args
    }
    if (isFunction(value)) {
       if (methods) return createWritableDerivedIon(<() => unknown>value, methods, INERT) as T extends AnyIon ? T : T extends () => unknown ? _DerivedNeutron<T, M> : _Neutron<T, M>
-      return createDerivedIon(<() => unknown>value, undefined, INERT) as T extends AnyIon ? T : T extends () => unknown ? _DerivedNeutron<T, M> : _Neutron<T, M>
+      return createDerivationIon(<() => unknown>value, undefined, INERT) as T extends AnyIon ? T : T extends () => unknown ? _DerivedNeutron<T, M> : _Neutron<T, M>
    }
    return createPrimaryIon(value, methods, INERT) as T extends AnyIon ? T : T extends () => unknown ? _DerivedNeutron<T, M> : _Neutron<T, M>
 }
@@ -40,47 +40,54 @@ type _DerivedNeutron<T, M> = M extends { [key: string]: (...args: any[]) => any 
 // export function DerivedNeutron<T, M, D>(derivation: D & (() => T), methods?: M & { [key: string]: (...args: any[]) => any }): D extends AnyIon ? D : _DerivedNeutron<T, M> {
 //     if (isMuon(derivation)) return derivation as D extends AnyIon ? D : _DerivedNeutron<T, M>; //TODO: Error message?
 //     if (methods) return createWritableDerivedIon(derivation, methods, INERT) as D extends AnyIon ? D : _DerivedNeutron<T, M>
-//     return createDerivedIon(derivation, undefined, INERT) as D extends AnyIon ? D : _DerivedNeutron<T, M>
+//     return createDerivationIon(derivation, undefined, INERT) as D extends AnyIon ? D : _DerivedNeutron<T, M>
 // }
 
-export class NeutronQuarks<T = unknown> {
+ //TODO: I don't know how I should handle read-only, and traceability for neutrons. Should they have quarks?
 
-   asReined?: ProtectedIon
-   asReadonly?: ProtectedIon
-   __DEV__asTraceable?: Traceable;
+/** INTERNAL */
+export function createPrimaryNeutron(
+   state: any,
+   methods?: object,
+   inert: boolean = false
+) {
+   const $ion = (inert ? () => state
+      : () => getReactiveState(ion)) as $PrimaryIon
 
-   constructor(
-      readonly o: AtomicIon<T>,
-      public state: T,
-      readonly stateIsIonized: boolean = false, //Is this important for neutron?
-   ) {
-      if (__DEV__) this.__DEV__asTraceable = new Traceable()
+
+   let stateIsIonized = isIonizedModel(state)
+
+   const ion: PrimaryIon = {
+      state,
+      stateIsIonized,
+      entity: $ion,
+      type: PRIMARY_ION,
+      asIonicAtom: undefined,
+      asWatchSubject: undefined
    }
-}
+   __DEV__initTraceability(ion)
 
-export function createNeutron(value: any, methods?: AnyObject) {
-   const metaIon = new AtomicIonQuarks(<AtomicIon>$ion, value, isIonizedModel(value))
-
-   function $ion() {
-      return metaIon.state;
-   }
-
-   $ion[QUARKS] = metaIon
+   $ion[QUARKS] = ion
    $ion.__DEV__labelName = undefined
    $ion.__DEV__label = __DEV__label
 
+   const capsuleName = 'PrimaryIon'
+
    Object.defineProperty($ion, 'state', {
       get() {
-         return metaIon.value //TODO: not sure if this should allow tracking or not by calling $ion()
+         return ion.state;
       },
-      set(value: T) {
-         setValue(metaIon, value, metaIon.value);
-         __DEV__traceMethodCall('AtomicIon', $ion, 'state')
+      set: inert ? value => {
+         __DEV__traceMethodCall(capsuleName, $ion, 'state')
+         return state = shouldIonize(value, stateIsIonized) ? ionize(value) : value
+      } : value => {
+         __DEV__traceMethodCall(capsuleName, $ion, 'state')
+         return setReactiveState(ion, ion.state, value);
       }
    })
 
    if (methods) {
-      attachCapsuleMethods('AtomicIon', $ion as Ion, methods)
+      attachCapsuleMethods(capsuleName, $ion, methods)
    }
 
    return $ion

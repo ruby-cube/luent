@@ -4,7 +4,9 @@ import { Task, onRenderCycleComplete, Phase, useRenderCycle } from "./RenderCycl
 import { getDependencyTracker } from "../ionic/x_DependencyTracker";
 
 
-type Watchable = any
+export type Watchable = {
+   asWatchSubject?: WatchSubject
+}
 
 const watchSubjectMap: WeakMap<Watchable, WatchSubject> = new WeakMap()
 

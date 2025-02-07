@@ -48,7 +48,6 @@ function triggerEffects(subject: WatchSubject) {
 
 interface WatchEffect {
    next: WatchEffect
-   triggers: Set<AtomicMuon>
 }
 
 
@@ -68,9 +67,9 @@ export type WritableMuon<T extends NonVoid = NonVoid, M extends Methods = {}> = 
 } & M
 
 /* API */
-export type MemoizedDerivation<T extends NonVoid = NonVoid, M extends Methods = {}> = Muon<T> & {
-   untrack: () => void //TODO: rename to something else or eliminate
-} & M
+// export type MemoizedDerivation<T extends NonVoid = NonVoid, M extends Methods = {}> = Muon<T> & {
+//    untrack: () => void //TODO: rename to something else or eliminate
+// } & M
 
 
 
@@ -88,15 +87,6 @@ type IonicEffect = () => void/* TODO: */ & QuarkyEntity<IonicEffectQuarks>
 
 type IonizedModel = QuarkyEntity<IonizedModelQuarks>
 
-
-
-
-export type MemoizedMuon = { dirty: boolean } & IonicAtom & IonicCompound //QUESTION: dunno if there should be Quarks<>
-
-function triggerDerivation(this: MemoizedMuon, oldState: unknown, newState: unknown) {
-   this.dirty = true;
-   this.react(oldState, newState)
-}
 
 type IonicWatchEffect = IonicCompound & WatchEffect
 

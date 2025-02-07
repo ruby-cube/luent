@@ -3,7 +3,7 @@ import { isIonizedModel, ionize } from "../ionized/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
-import { isQuarky, Quarks, QUARKS, quarksOf } from "../QuarkyEntity";
+import { hasQuarks, Quarks, QUARKS, quarksOf } from "../QuarkyEntity";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { WritableMuon } from "../reactivity/reactivity-system";
 import { __DEV__initTraceability, attachCapsuleMethods, CapsuleQuarks, Capsule } from "../capsule/Capsule";
@@ -59,22 +59,22 @@ function shouldIonize(newValue: unknown, stateIsIonized: boolean): newValue is A
 /** INTERNAL */
 export function createPrimaryIon(
    state: any,
-   methods?: object,
-   inert: boolean = false
+   methods?: object
 ) {
-   const $ion = (inert ? () => state
-      : () => getReactiveState(ion)) as $PrimaryIon
-
+   const $ion = (() => getReactiveState(ion)) as $PrimaryIon
 
    let stateIsIonized = isIonizedModel(state)
 
    const ion: PrimaryIon = {
       state,
-      stateIsIonized,
+      stateIsIonized: isIonizedModel(state),
       entity: $ion,
       type: PRIMARY_ION,
       asIonicAtom: undefined,
-      asWatchSubject: undefined
+      asWatchSubject: undefined,
+      __DEV__asTraceable: undefined,
+      asReadonly: undefined,
+      asReined: undefined,
    }
    __DEV__initTraceability(ion)
 
@@ -88,10 +88,7 @@ export function createPrimaryIon(
       get() {
          return ion.state;
       },
-      set: inert ? value => {
-         __DEV__traceMethodCall(capsuleName, $ion, 'state')
-         return state = shouldIonize(value, stateIsIonized) ? ionize(value) : value
-      } : value => {
+      set:  value => {
          __DEV__traceMethodCall(capsuleName, $ion, 'state')
          return setReactiveState(ion, ion.state, value);
       }
@@ -110,5 +107,5 @@ const PRIMARY_ION = Symbol('atomic ion')
  * INTERNAL
  */
 export function isAtomicIon(value: unknown): value is $PrimaryIon {
-   return isQuarky(value) && quarksOf(value).type === PRIMARY_ION
+   return hasQuarks(value) && quarksOf(value).type === PRIMARY_ION
 }

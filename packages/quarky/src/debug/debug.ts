@@ -4,8 +4,8 @@ import { isMuon } from "../ion/Ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
 import { AtomicIon, isAtomicIon } from "../ion/PrimaryIon";
-import { isDerivedIon, isNamedDerivation } from "../ionic/DerivationIon";
-import { quarksOf, isQuarky, QUARKS, QuarkyEntity } from "../QuarkyEntity";
+import { isDerivedIon, isDerivationFunction } from "../ionic/DerivationIon";
+import { quarksOf, hasQuarks, QUARKS, QuarkyEntity } from "../QuarkyEntity";
 import { __DEV__label } from "./DEVLabellable";
 
 
@@ -129,7 +129,7 @@ function traceTriggers(subject: AnyObject, key?: PropertyKey) {
       traceMemberTriggers(subject, key)
    }
    else if (isAtomicIon(subject)) traceIonTriggers(subject)
-   else if (isNamedDerivation(subject) || isDerivedIon(subject)) traceDerivationTriggers(subject)
+   else if (isDerivationFunction(subject) || isDerivedIon(subject)) traceDerivationTriggers(subject)
    else throw new Error('invalid subject. To trace a function call use traceCall()')
 }
 
@@ -167,7 +167,7 @@ type TraceableQuarks = {
 }
 
 function isTraceable(subject: AnyObject): subject is TraceableSubject {
-   return isNamedDerivation(subject) || isQuarky(subject);
+   return isDerivationFunction(subject) || hasQuarks(subject);
 }
 
 function traceMemberTriggers(subject: TraceableSubject, key: PropertyKey) {

@@ -4,7 +4,7 @@ import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } 
 import { IonicCompound } from "../ionic/IonicCompound";
 import { getCurrentRenderCycle, Phase, useRenderCycle } from "./RenderCycle";
 import { WatchDebugOptions } from "./debug";
-import { ReactiveGet, DerivedIon, isDerivedIon, createDerivedIon } from "../ionic/DerivationIon";
+import { ReactiveGet, DerivedIon, isDerivedIon, createDerivationIon } from "../ionic/DerivationIon";
 import { isIonizedModel, toRaw, } from "../ionized/ionize";
 import { areEqual } from "./areEqual";
 import { createIonicEffect, IonicEffect } from "../ionic/IonicEffect";
@@ -111,7 +111,7 @@ function normalizeWatchSubjects(subjects: ((AnyIon | AnyObject)[]) | undefined) 
 
 function normalizeWatchSubject(subject: AnyIon | AnyObject) {
    if (subject instanceof Function)
-      return createDerivedIon(subject)
+      return createDerivationIon(subject)
    if (isPropIon(subject)) {
       quarksOf(subject).watch()
       return subject;

@@ -1,7 +1,7 @@
 import { AtomicIon, ionize, isAtomicIon, Phase, watch } from "@rue/quarky"
 import { isTrackedOp, TrackedOp } from "../../../quarky/src/ionized/TrackedOp";
 import { isPropIon, PropIon } from "../../../quarky/src/ionized/PrimaryPion";
-import { quarksOf, isQuarky } from "../../../quarky/src/QuarkyEntity";
+import { quarksOf, hasQuarks } from "../../../quarky/src/QuarkyEntity";
 import { getTrace } from "../../../flask/debug";
 
 
@@ -44,8 +44,8 @@ export function traceTriggers<T>(subject: T) {
       const traceableAtom = asTraceable(atom)
       traceableAtom.__addTrigger({
          trace: traceTrigger(),
-         newState: isQuarky(atom) ? quarksOf(atom).state : atom.state, //TODO:
-         oldState: isQuarky(atom) ? quarksOf(atom).prevState : atom.prevState //TODO:
+         newState: hasQuarks(atom) ? quarksOf(atom).state : atom.state, //TODO:
+         oldState: hasQuarks(atom) ? quarksOf(atom).prevState : atom.prevState //TODO:
       })
       __logTriggeredAtom(atom)
    }, {

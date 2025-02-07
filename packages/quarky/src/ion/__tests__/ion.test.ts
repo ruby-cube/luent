@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ion } from '../Ion';
 import { MetaIon } from '../PrimaryIon';
-import { createDerivedIon, DERIVED_ION } from '../../ionic/DerivationIon';
+import { createDerivationIon, DERIVED_ION } from '../../ionic/DerivationIon';
 import exp from 'constants';
 
 describe('ion function', () => {
@@ -101,7 +101,7 @@ describe('ion function', () => {
 
     //   it('should not track dependencies if inert flag is true', () => {
     //     const depIon = ion(1);
-    //     const inertDerivedIon = createDerivedIon(() => depIon() * 2, {}, true);
+    //     const inertDerivedIon = createDerivationIon(() => depIon() * 2, {}, true);
     //     depIon.as(3);  // update dependency
 
     //     expect(inertDerivedIon()).toBe(2);  // unchanged due to inert flag
