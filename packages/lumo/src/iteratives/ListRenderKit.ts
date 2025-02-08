@@ -1,4 +1,4 @@
-import { isIon, isIonizedModel, ion, toRaw, shallowClone,  watch, Phase, __devCheckIfTracked, ionize, PrimaryIon, toValue, untrackedCall, Ion } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone,  watch, Phase, __devCheckIfTracked, ionize, AtomicIon, toValue, untrackedCall, Ion } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
@@ -179,7 +179,7 @@ export class ListRenderKit {
          const nodePod = isDynamic ? dynamicNodePod.appendNodePod() : this.outerNodePod;
 
          if (isDynamic) {
-            const flask = this.outerFlask.spawn('view')
+            const flask = this.outerFlask.spawn({type: 'view', creationScope: true})
             listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
             flask.emitInitialMount()
             flaskMap.set(nodePod, flask)
@@ -253,7 +253,7 @@ export class ListRenderKit {
             setCurrentIndex($index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
-            const flask = this.outerFlask.spawn('view')
+            const flask = this.outerFlask.spawn({type:'view', creationScope: true})
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).stateIsIonized) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             this.renderItem(toValue(list)[i], $index, parent, nodePod, fragment, flask)

@@ -28,7 +28,7 @@ import { TestPropIons } from './TestPropIons';
 // import { TestDerived } from './testDerivedIon';
 // import { OverrideMethods } from './TestOverrideMethods';
 // import { queueTask } from '@rue/thread';
-// import { RenderCycle } from '@rue/quarky';
+// import { TaskCycle } from '@rue/quarky';
 // import { MainSite } from './AwaitTest';
 // import { ConditionalFlaskTest } from './ConditionalFlaskTest';
 // import { Root } from './TreeTest';

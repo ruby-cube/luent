@@ -1,13 +1,12 @@
 import { IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
-import { AnyIon, Ion, IonMethods } from "../ion/Ion";
-import { DerivedNeutron } from "../ion/Neutron";
-import { getActiveFlask } from "@rue/flask";
 import { quarksOf, QUARKS, Quarks, hasQuarks } from "../Quarks";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule, CapsuleQuarks } from "../capsule/Capsule";
 import { Muon } from "../reactivity/reactivity-system";
 import { MaybeIonicAtom } from "./IonicAtom";
 import { __DEV__label } from "../debug/DEVLabellable";
+import { isIon } from "../ion/Ion";
+
 
 /**
 * Managed Derivation Ion
@@ -17,6 +16,7 @@ import { __DEV__label } from "../debug/DEVLabellable";
 * - encapsulates with methods
 * ---- manage dev traces through quarky capsule **
 **/
+
 
 // /** INTERNAL */
 export type $DerivationCapsule = Muon & Capsule & { //NOTE: For DEV only so that you don't have to go out of your way to make a derivation ion traceable

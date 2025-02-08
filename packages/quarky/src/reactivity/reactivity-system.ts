@@ -54,30 +54,12 @@ interface WatchEffect {
 
 
 
-//QUESTION: Should I call these Ions or Muons?
 
-/* API */
-export type Muon<T extends NonVoid = NonVoid, M extends Methods = {}> = (() => T) & M
 
-type Methods = { [key: PropertyKey]: (...args: any) => any }
-
-/* API */  // basically writable atomic ions, neutrons, and pions
-export type WritableMuon<T extends NonVoid = NonVoid, M extends Methods = {}> = Muon<T> & {
-   state: T
-} & M
-
-/* API */
-// export type MemoizedDerivation<T extends NonVoid = NonVoid, M extends Methods = {}> = Muon<T> & {
-//    untrack: () => void //TODO: rename to something else or eliminate
-// } & M
 
 
 
 /* INTERNAL */
-
-type NonVoid = string | number | object | undefined | boolean | bigint | symbol | null
-
-
 
 type AtomicPion = WritableMuon & QuarkyEntity<AtomicPionQuarks> // If a property is non-writable, simply return a derivation function
 

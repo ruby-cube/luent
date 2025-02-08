@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import {  isIonizedModel, ionize, IonizedModel, toRaw } from "./ionize";
 import { asWatched, Watched } from "../watch/Watched";
 import { asAtom, IonicAtom } from "../ionic/IonicAtom";
-import { quarksOf, QUARKS } from "../Quarks";
+import { quarksOf, QUARKS, Quarks } from "../Quarks";
 import { isIon } from "../muon/Muon";
 import { getActiveTracker } from "../ionic/IonicCompound";
 
@@ -59,8 +59,8 @@ function isEntryKey(rawModel: AnyObject, key: PropertyKey) {
    return false;
 }
 
-class MetaPropIon {
-
+class MetaPropIon implements Quarks{
+ 
    asReadonly?: PropIon
    // asObservedProp!: ObservedProp
 
@@ -77,6 +77,8 @@ class MetaPropIon {
       quarksOf(model).registerPropIon(key, o)
       this.isEntryKey = isEntryKey(toRaw(model), key)
    }
+   entity: object;
+   type: string | symbol;
 
    asWatched?: Watched
    asAtom?: IonicAtom

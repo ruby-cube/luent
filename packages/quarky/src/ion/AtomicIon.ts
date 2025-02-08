@@ -5,46 +5,45 @@ import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
 import { hasQuarks, Quarks, QUARKS, quarksOf } from "../Quarks";
 import { __DEV__label } from "../debug/DEVLabellable";
-import { WritableMuon } from "../reactivity/reactivity-system";
 import { __DEV__initTraceability, attachCapsuleMethods, CapsuleQuarks, Capsule } from "../capsule/Capsule";
 import { getActiveTracker } from "../ionic/IonicCompound";
-import { PrimaryMuon } from "../muon/PrimaryMuon";
+import { Atomic, WritableIon } from "./Ion";
 
 /** INTERNAL */
-export type $PrimaryIon = WritableMuon & Capsule & {
-   [QUARKS]: PrimaryIon
+export type $AtomicIon = WritableIon & Capsule & {
+   [QUARKS]: AtomicIon
 }
 
 /** 
  * INTERNAL 
  * For reactive ions only.
  * */
-export type PrimaryIon = {
+export type AtomicIon = {
    state: any,
    stateIsIonized: boolean,
 }
-   & Quarks<$PrimaryIon>
-   & PrimaryMuon
+   & Quarks<$AtomicIon>
+   & Atomic
    & CapsuleQuarks
 
 
-function getReactiveState(ion: PrimaryIon) {
+function getReactiveState(ion: AtomicIon) {
    if (__DEV__) emitSignal();
    getActiveTracker()?.track(ion)
    return ion.state;
 }
 
 
-function setReactiveState(ion: PrimaryIon, oldState: unknown, newState: unknown) {
+function setReactiveState(ion: AtomicIon, oldState: unknown, newState: unknown) {
    if (oldState === newState) {
       //TODO: I dunno how to implement this yet. For dev traces
-      // if (__DEV__) ion.asIonicAtom?.react() ?? (ion.asIonicAtom = asAtom(ion), ion.asIonicAtom.react())
+      // if (__DEV__) ion.asAtom?.react() ?? (ion.asAtom = asAtom(ion), ion.asAtom.react())
       return oldState;
    }
 
    const state = shouldIonize(newState, ion.stateIsIonized) ? ionize(newState) : newState
    ion.state = state; // must set state before triggering effects and derivations
-   ion.asIonicAtom?.react()
+   ion.asAtom?.react()
    ion.asWatched?.triggerEffects()
    return state;
 }
@@ -58,14 +57,14 @@ export function createPrimaryIon(
    state: any,
    methods?: object
 ) {
-   const $ion = (() => getReactiveState(ion)) as $PrimaryIon
+   const $ion = (() => getReactiveState(ion)) as $AtomicIon
 
-   const ion: PrimaryIon = {
+   const ion: AtomicIon = {
       state,
       stateIsIonized: isIonizedModel(state),
       entity: $ion,
       type: PRIMARY_ION,
-      asIonicAtom: undefined,
+      asAtom: undefined,
       asWatched: undefined,
       asReadonly: undefined,
       asReined: undefined,
@@ -77,7 +76,7 @@ export function createPrimaryIon(
    $ion.__DEV__labelName = undefined
    $ion.__DEV__label = __DEV__label
 
-   const capsuleName = 'PrimaryIon'
+   const capsuleName = 'AtomicIon'
 
    Object.defineProperty($ion, 'state', {
       get() {
@@ -101,6 +100,6 @@ const PRIMARY_ION = Symbol('atomic ion')
 /**
  * INTERNAL
  */
-export function isAtomicIon(value: unknown): value is $PrimaryIon {
+export function isAtomicIon(value: unknown): value is $AtomicIon {
    return hasQuarks(value) && quarksOf(value).type === PRIMARY_ION
 }

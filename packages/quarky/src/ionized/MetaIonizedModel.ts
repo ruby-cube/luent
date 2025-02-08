@@ -66,6 +66,7 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
    }
 
    private asDerivation?: IonicCompound
+   
    trackAbsorbedIons() {
       if (this.asDerivation && this.hasNewAbsorbedIons === false) return;
       const derivation = this.asDerivation || (this.asDerivation = new IonicCompound(this.ionicModel, IONIZED_MODEL, false))

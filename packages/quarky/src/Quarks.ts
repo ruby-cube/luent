@@ -10,7 +10,7 @@ export function hasQuarks(value: any): value is QuarkyEntity {
    return QUARKS in value;
 }
 
-export function quarksOf<T extends QuarkyEntity>(obj: T) {
+export function quarksOf<T extends QuarkyEntity>(obj: T): T[typeof QUARKS] {
    return obj[QUARKS];
 }
 

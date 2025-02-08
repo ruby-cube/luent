@@ -1,11 +1,12 @@
+//@ts-nocheck
 import { AnyObject } from "@rue/types";
 import { isObject } from "@rue/utils";
 import { timeTraveler } from "./TimeTraveler";
-import { useRenderCycle } from "../watch/RenderCycle";
+import { useRenderCycle } from "../watch/TaskCycle";
 import { MetaIonizedModel, IONIZED_MODEL } from "./MetaIonizedModel";
 import { inert, Inert, isInert } from "./inert";
 import { AnyIon, Ion, ion, isIon } from "../ion/Ion";
-import { AtomicIon, AtomicIonQuarks } from "../ion/PrimaryIon";
+import { AtomicIon, AtomicIonQuarks } from "../ion/AtomicIon";
 import { createIonizedModel, getStructureConfigs } from "./IonizedModel";
 import { getPublicTrace, getTrace } from "../../../flask/debug";
 import { QUARKS } from "../Quarks";
@@ -189,7 +190,13 @@ type AsIons<T> = {
 
 
 
-
+const frog = ionize({
+   a: 2,
+   b: 4,
+   get somethingComplex() {
+      return this.a + this.b
+   }
+})
 
 
 

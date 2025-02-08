@@ -388,6 +388,7 @@ function hasIonicCallExpression(path) {
    return found;
 }
 
+
 function isIonicCallExpression(node) {
    return t.isCallExpression(node) && /^\$[a-z]/.test(node.callee.name) && node.arguments.length === 0 && !isParenthesized(node)
 }

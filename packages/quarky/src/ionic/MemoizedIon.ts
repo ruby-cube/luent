@@ -1,12 +1,15 @@
 import { getActiveTracker, IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
-import { getActiveFlask } from "@rue/flask";
+import { Flask, getActiveFlask } from "@rue/flask";
 import { quarksOf, QUARKS, Quarks, hasQuarks } from "../Quarks";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule, CapsuleQuarks } from "../capsule/Capsule";
 import { Muon } from "../reactivity/reactivity-system";
 import { MaybeIonicAtom } from "./IonicAtom";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { emitSignal } from "../debug/debug";
+import { Watchable } from "../watch/Watched";
+import { isIonizedModel } from "../ionized/ionize";
+import { Ion } from "../ion/Ion";
 
 /**
 * Managed Derivation Ion
@@ -18,7 +21,7 @@ import { emitSignal } from "../debug/debug";
 **/
 
 // /** INTERNAL */
-export type $MemoizedIon = Muon & Capsule & {
+export type $MemoizedIon = Ion & Capsule & {
    [QUARKS]: MemoizedIon
 }
 
@@ -27,6 +30,7 @@ export type $MemoizedIon = Muon & Capsule & {
  * */
 export type MemoizedIon =
    Quarks<$MemoizedIon>
+   & Watchable
    & CapsuleQuarks
    & MaybeIonicAtom
    & MaybeIonicCompound<MemoizedCompound>
@@ -51,24 +55,32 @@ export class MemoizedCompound extends IonicCompound<MemoizedIon> {
 
    override trigger(): void {
       this.dirty = true;
-      this.ion.asIonicAtom?.react()
+      this.ion.asAtom?.react()
+      this.ion.asWatched?.triggerEffects()
    }
 }
-
 
 export function createMemoizedIon(
    derivation: (previousValue?: unknown) => unknown,
    methods?: AnyObject,
    retrack: boolean = true
 ) {
+   const creationFlask = getActiveFlask()
+
    const $memoizedIon = () => {
       if (__DEV__) emitSignal();
       getActiveTracker()?.track(ion)
 
-      const compound = ion.asIonicCompound!;
       const initialized = !!compound.atoms;
-      const value = !initialized ? compound.trackAtoms(derivation)
-         : (retrack && compound.dirty) ? compound.trackAtoms(() => derivation(compound.state))
+      if (!initialized) {
+         const flask = getActiveFlask()
+         assertValidInitialization(flask, creationFlask) // prevents memory leaks caused by usng memoized ion outside of its creation scope
+         flask?.onDiscard(() => {
+            compound.untrackAtoms()
+         })
+      }
+      const value = !initialized ? compound.trackedCall(derivation)
+         : (retrack && compound.dirty) ? compound.trackedCall(() => derivation(compound.state))
             : compound.dirty ? derivation(compound.state)
                : compound.state;
 
@@ -81,14 +93,15 @@ export function createMemoizedIon(
    const ion: MemoizedIon = {
       entity: $memoizedIon,
       type: MEMOIZED_ION,
-      asIonicAtom: undefined,
-      asIonicCompound: undefined,
+      asAtom: undefined,
+      asCompound: undefined,
       __DEV__asTraceable: undefined,
       asReadonly: undefined,
       asReined: undefined,
+      asWatched: undefined
    }
 
-   const compound = ion.asIonicCompound = new MemoizedCompound(ion)
+   const compound = ion.asCompound = new MemoizedCompound(ion)
 
    $memoizedIon[QUARKS] = ion
    $memoizedIon.__DEV__labelName = undefined
@@ -100,14 +113,31 @@ export function createMemoizedIon(
       attachCapsuleMethods('MemoizedDerivationIon', $memoizedIon, methods)
    }
 
-   const flask = getActiveFlask()
-   if (flask) {
-      flask.onDiscard(() => {
-         compound.untrackAtoms()
-      })
-   }
-
    return $memoizedIon;
 }
 
+/* Not sure if this is correct. 
+Memory leaks occur when an object is referenced outside of its creation scope in a way that does not reassign it with the new version of the object, ie collecting it in an array, map, or set.
+*/
+function assertValidInitialization(initializationFlask: Flask | undefined, creationFlask: Flask | undefined) {
+   if (!creationFlask) return;
+   if (!initializationFlask) {
+      if (creationFlask.creationScopeID === "0") // both are in global creation scope
+         return;
+      throw new Error("Memory leak alert. A memoized ion cannot be called outside its creation scope.")
+   }
+   if (initializationFlask.creationScopeID === creationFlask.creationScopeID) return;
+   if (!flaskAContainsFlaskB(creationFlask, initializationFlask))
+      throw new Error("Memory leak alert. A memoized ion cannot be called outside its creation scope.")
+}
 
+function flaskAContainsFlaskB(flaskA: Flask, flaskB: Flask) {
+   let outer = flaskB.outer
+   do {
+      if (outer === flaskA)
+         return true;
+      outer = outer?.outer;
+   }
+   while (outer)
+   return false;
+}

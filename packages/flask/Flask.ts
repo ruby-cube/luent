@@ -1,4 +1,4 @@
-import { SetMap } from "@rue/utils";
+import { SetMap, UIDGenerator } from "@rue/utils";
 import { ContextualState } from "./context/AsyncContext";
 import { ResumableListener, SustainedListenerOptions } from "./Listener";
 
@@ -68,18 +68,22 @@ export class ThisFlask {
    }
 }
 
+const genUID = UIDGenerator(11)
 
 export class Flask {
    thisFlask?: ThisFlask
    outer?: Flask
    type?: string
+   creationScopeID: string
 
    constructor(config: {
       outer?: Flask,
       type?: string
+      creationScope?: boolean
    } = {}) {
-      const { outer, type } = config
+      const { outer, type, creationScope } = config
       this.type = type;
+      this.creationScopeID = creationScope ? genUID() : outer?.creationScopeID ?? "0"
 
       // Bind to this, to allow easy passing into hooks
       Object.defineProperty(this, 'onDemount', {
@@ -125,8 +129,8 @@ export class Flask {
       }
    }
 
-   spawn(type?: string) {
-      return new Flask({ outer: this, type });
+   spawn(config: {type?: string, creationScope?: boolean}) {
+      return new Flask({ outer: this, type: config.type, creationScope: config.creationScope });
    }
 
    tasks: SetMap<LifecycleHook, Task> = new SetMap();

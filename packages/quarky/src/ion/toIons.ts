@@ -1,5 +1,5 @@
 import { AnyIon, Ion, isIon} from "./Ion";
-import { AtomicIon } from "./PrimaryIon";
+import { AtomicIon } from "./AtomicIon";
 import { neutron } from "./Neutron";
 import { isFunction } from "@rue/utils";
 

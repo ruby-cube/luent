@@ -1,6 +1,6 @@
 import { MutationRecord } from "./watch"
 
-export class StateChangeEvent<S> {
+export class ChangeEvent<S> {
    trace?: string;
    constructor(
       public subject: S,

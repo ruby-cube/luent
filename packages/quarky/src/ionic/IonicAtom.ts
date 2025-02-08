@@ -4,7 +4,7 @@ export const CLEAN_UP = 'x__cleanUp'
 
 
 export interface MaybeIonicAtom {
-   asIonicAtom?: IonicAtom
+   asAtom?: IonicAtom
 }
 
 /**
@@ -51,7 +51,7 @@ export class IonicAtom {
    //    }
    // }
    discard(){
-      this.maybeAtom.asIonicAtom = undefined; //TODO: when should this be called such that we don't cause thrashing of discarding and creating an IonicAtom more than needed?
+      this.maybeAtom.asAtom = undefined; //TODO: when should this be called such that we don't cause thrashing of discarding and creating an IonicAtom more than needed?
    }
 
    cleanUp?: (maybeAtom: MaybeIonicAtom) => void
@@ -66,7 +66,7 @@ export class IonicAtom {
 
 //TODO: need to initialize memoized derivations and maybe ionized models as ionic atoms
 export function asAtom(maybeAtom: MaybeIonicAtom) {
-   return maybeAtom.asIonicAtom ?? (maybeAtom.asIonicAtom = new IonicAtom(maybeAtom))
+   return maybeAtom.asAtom ?? (maybeAtom.asAtom = new IonicAtom(maybeAtom))
 
 }
 

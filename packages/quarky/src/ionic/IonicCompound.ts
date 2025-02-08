@@ -1,8 +1,11 @@
+import { AnyObject } from "@rue/types";
 import { IonicAtom, MaybeIonicAtom, asAtom } from "./IonicAtom";
+import { toRaw } from "../ionized/ionize";
+import { isIon } from "../ion/Ion";
 
-const trackerStack: IonicCompound[] = []
+const trackerStack: (IonicCompound | null)[] = []
 
-function pushTracker(tracker: IonicCompound) {
+function pushTracker(tracker: IonicCompound | null) {
    trackerStack.push(tracker)
 }
 
@@ -21,6 +24,12 @@ export function isTrackedContext() {
    return Boolean(getActiveTracker())
 }
 
+/**
+ * Pauses tracking for all of a function's call, even if there are nested memoized ion trackers in the call.
+ * Contrasts with detachedCall, which still allows nested trackers to track.
+ * @param fn 
+ * @returns 
+ */
 export function untrackedCall(fn: Function) {
    pauseTracking = true;
    try {
@@ -31,17 +40,30 @@ export function untrackedCall(fn: Function) {
    }
 }
 
-
 /**
- * for memoized derivations and ionic effects
+ * For memoized ions, which are both atom and compound to be called within watch and not be tracked by the outer tracking context.
+ * @param fn 
+ * @returns 
  */
-export interface MaybeIonicCompound<T extends IonicCompound = IonicCompound> {
-   asIonicCompound?: T
+export function detachedCall(fn: Function) {
+   pushTracker(null)
+   try {
+      return fn();
+   }
+   finally {
+      popTracker()
+   }
 }
 
 
+/**
+ * for memoized derivations and ionic effects and ionized models
+ */
+export interface MaybeIonicCompound<T extends IonicCompound = IonicCompound> {
+   asCompound?: T
+}
 
-export class IonicCompound<T extends MaybeIonicCompound = { asIonicCompound?: IonicCompound }> implements Compound {
+export class IonicCompound<T extends MaybeIonicCompound = { asCompound?: IonicCompound }> {
 
    constructor(
       readonly compound: T,
@@ -49,50 +71,56 @@ export class IonicCompound<T extends MaybeIonicCompound = { asIonicCompound?: Io
    }
    dirty: boolean = false;
 
-   atoms: Set<IonicAtom> = new Set()
+   atoms: IonicAtom[] = []
+
+   track(entity: MaybeIonicAtom) {
+      const atom = asAtom(entity)
+      if (atom.compounds.has(this)) return;
+      this.atoms.push(atom)
+      return atom;
+   }
 
    trigger(): void {
       if (__DEV__) console.warn('Not implemented')
    }
 
-   trackAtoms(fn: () => any) {
+   trackedCall(fn: () => any) {
       pushTracker(this);
       try {
          return fn();
       }
       finally {
          popTracker();
-         if (__DEV__ && this.atoms.size === 0) {
+         if (__DEV__ && this.atoms.length === 0) {
             throw new Error('Watch target or derived AtomicIon has no dependencies (and therefore no reactivity', { cause: 'no dependencies' })
          }
       }
    }
 
    untrackAtoms() {
-      const atoms = this.atoms;
-      if (!atoms) return;
-      for (const atom of atoms) {
+      this.atoms?.forEach(atom => {
          atom.removeCompound(this)
-      }
-      this.atoms.clear()
+      })
+      this.atoms = []
    }
 
-   track = track
+   collectAbsorbedIons(ionicModel: AnyObject) {
+      const target = toRaw(ionicModel);
+      for (const key in target) {
+         const value = target[key]
+         if (isIon(value)) {
+            this.track(<MaybeIonicAtom>value)
+         }
+      }
+   }
 }
 
+// export interface Compound {
+//    atoms: Set<IonicAtom>
+//    track(entity: MaybeIonicAtom): IonicAtom
+//    trigger(): void
+// }
 
-
-export interface Compound {
-   atoms: Set<IonicAtom>
-   track(entity: MaybeIonicAtom): IonicAtom
-   trigger(): void
-}
-
-export function track(this: Compound, entity: MaybeIonicAtom) {
-   const atom = asAtom(entity)
-   this.atoms.add(atom)
-   return atom;
-}
 
 
 export function __devCheckIfTracked() {

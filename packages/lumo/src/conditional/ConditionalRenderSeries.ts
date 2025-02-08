@@ -92,7 +92,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          this.render(kit, parent, fragment) //TODO: render function is not wrapped in context because dynamicNode does it... why doesn't 'mount' get a dynamic node???
       }
       else {
-         const flask = kit.flask = this.outerFlask.spawn('view')
+         const flask = kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === 'create' })
          this.render(kit, parent, fragment, flask)
          flask.emitInitialMount() // emits mount hook
       }
@@ -386,7 +386,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       }
       pod.activate()
 
-      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn('view'))
+      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({type:'view', creationScope: kit.type === "create"}))
       this.render(kit, parent, undefined, flask)
       if (activationType === 'create' || isInitialMount)
          flask.emitInitialMount()

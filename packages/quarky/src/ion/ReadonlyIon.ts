@@ -1,26 +1,20 @@
-import { untrackedCall } from "../ionic/IonicCompound";
-import { isIon } from "../muon/Muon";
+import { Capsule, CapsuleQuarks } from "../capsule/Capsule";
 import { asNonlocalReadonly } from "../nonlocal/NonlocalReadonly";
-import { quarksOf, QUARKS } from "../Quarks";
-import { Ion } from "./Ion";
+import { quarksOf, QUARKS, Quarks } from "../Quarks";
+import { isIon, NonVoid, WritableIon } from "./Ion";
 
-type WritableIon = Ion & { state: any }
+type $WritableIon = (() => NonVoid) & {
+   state: NonVoid;
+} & {
+   [QUARKS]: CapsuleQuarks & Quarks;
+}
 
-export function createReadonlyIon(ion: WritableIon) {
-   const quarks = quarksOf(ion)
+export function createReadonlyIon($ion: $WritableIon) {
+   const quarks = quarksOf($ion)
    function $readonlyIon() {
-      return asNonlocalReadonly(ion())
+      return asNonlocalReadonly($ion())
    }
    $readonlyIon[QUARKS] = quarks;
-   Object.defineProperty($readonlyIon, 'state', {
-      get(){
-         return untrackedCall(ion)
-      },
-      set() {
-         if (__DEV__) console.error('Set operation failed. Ion is readonly.')
-            return false;
-      }
-   })
    return quarks.asReadonly = $readonlyIon
 }
 

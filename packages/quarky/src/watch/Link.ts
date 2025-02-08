@@ -17,14 +17,14 @@ class ExclusivePod {
       if (tail) tail.next = link
       this.tail = link
 
-      link.transfer(this, tail)
+      link.pass(this, tail)
       return link;
    }
 
    delete(link: ExclusiveLink) {
       if (!this.has(link)) return false;
       this.unlink(link)
-      link.transfer()
+      link.pass()
       return true;
    }
 
@@ -102,7 +102,12 @@ class ExclusiveLink {
 
    }
 
-   transfer(pod?: ExclusivePod, prev?: ExclusiveLink) {
+   /**
+    * Reassigns a link's pod and prev properties.
+    * @param pod ExclusivePod | undefined
+    * @param prev ExclusiveLink | undefined
+    */
+   pass(pod?: ExclusivePod, prev?: ExclusiveLink) {
       this.prev = prev
       this.pod = pod
    }

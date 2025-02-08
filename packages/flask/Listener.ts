@@ -218,7 +218,7 @@ function wrapWithFlask(callback: Callback, config: {
    let scene: Flask;
    return (...args: any[]) => {
       if (scene) scene.emitDiscard()
-      scene = enclosingFlask?.spawn('scene') || new Flask({ type: 'scene' }) //QUESTION: Do we want callback to be called again on remount?? you should only call if dirty right?
+      scene = enclosingFlask?.spawn({type:'scene', creationScope: true}) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if dirty right?
       return callWithContext({
          context,
          beforeCall() {

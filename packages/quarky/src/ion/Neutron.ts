@@ -1,10 +1,7 @@
 import { AnyObject } from "@rue/types";
-import { createDerivationIon, createWritableDerivedIon, DerivedIon, DerivedIonQuarks, WritableDerivedIon } from "../ionic/DerivationCapsule";
-import { AnyIon, isIon } from "./Ion";
-import { createPrimaryIon, AtomicIon, } from "./PrimaryIon";
+import { createPrimaryIon, AtomicIon, } from "./AtomicIon";
 import { isFunction } from "@rue/utils";
 import { QUARKS } from "../Quarks";
-import { Traceable } from "../debug/debug";
 
 const INERT = true;
 
@@ -52,17 +49,17 @@ export function createPrimaryNeutron(
    inert: boolean = false
 ) {
    const $ion = (inert ? () => state
-      : () => getReactiveState(ion)) as $PrimaryIon
+      : () => getReactiveState(ion)) as $AtomicIon
 
 
    let stateIsIonized = isIonizedModel(state)
 
-   const ion: PrimaryIon = {
+   const ion: AtomicIon = {
       state,
       stateIsIonized,
       entity: $ion,
       type: PRIMARY_ION,
-      asIonicAtom: undefined,
+      asAtom: undefined,
       asWatched: undefined
    }
    __DEV__initTraceability(ion)
@@ -71,7 +68,7 @@ export function createPrimaryNeutron(
    $ion.__DEV__labelName = undefined
    $ion.__DEV__label = __DEV__label
 
-   const capsuleName = 'PrimaryIon'
+   const capsuleName = 'AtomicIon'
 
    Object.defineProperty($ion, 'state', {
       get() {

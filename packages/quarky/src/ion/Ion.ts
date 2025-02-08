@@ -1,43 +1,54 @@
-//@ts-nocheck
-
-import { AnyObject } from "@rue/types";
-import { asPropIon, isPropIon, PropIon } from "../ionized/PrimaryPion";
-import { AtomicIon, createPrimaryIon, isAtomicIon } from "./PrimaryIon";
+import { MaybeIonicAtom } from "../ionic/IonicAtom";
+import { asPropIon } from "../ionized/PrimaryPion";
+import { Watchable } from "../watch/Watched";
+import { createPrimaryIon } from "./AtomicIon";
 import { isFunction } from "@rue/utils";
-import { QUARKS } from "../Quarks";
-import { isIon } from "../muon/Muon";
-import { isMemoizedIon } from "../ionic/MemoizedIon";
 
-export type MaybeIon<T> = Ion<T> | T;
+/* API */
+export type Ion<T extends NonVoid = NonVoid, M extends Methods = {}> = (() => T) & M
 
-export type AnyIon<T = any> = () => T
-// DerivedIon<T> | AtomicIon<T> | ProtectedIon<T> | WritableDerivedIon<T> | PropIon<T>
+type Methods = { [key: PropertyKey]: (...args: any) => any }
 
-isIon // any sort of ion
-isAtomicIon // reactive
-isInertIon // inert
-isDerivationIon // derivation ion (any sort of derivation)
-isMemoizedIon // memoized derivation
-isPropIon
-isAbsorbedIon
-isIonizedModel
-isReactive
+/* API */  // basically writable atomic ions, neutrons, and pions
+export type WritableIon<T extends NonVoid = NonVoid, M extends Methods = {}> = Ion<T> & {
+   state: T
+} & M
+
+export type NonVoid = string | number | object | undefined | boolean | bigint | symbol | null
+
+/* API */
+export type MemoizedIon<T extends NonVoid = NonVoid, M extends Methods = {}> = Ion<T> & {
+   releaseAtoms: () => void //TODO: rename to something else or eliminate
+} & M
+
+export function isIon(value: unknown): value is Ion {
+   return isFunction(value) && /^\$[a-z]/.test(value.name) && value.length === 0
+}
+
+// isIon // any sort of ion
+// isAtomic // primary
+// isNeutron // known inert
+// isMemoized // memoized derivation
+// isWritable
+// isCapsule
+// isPropIon
+// isAbsorbedIon
+// isIonized
+// isReactive
+// isReadonly
+// isReined
 
 
-const $doubleCount = ion.memo(() => {
+export type Atomic = MaybeIonicAtom & Watchable
 
-})
 
-const $count = ion.inert(0)
+// const $doubleCount = ion.memo(() => {
 
-export type Ion<T = any, M extends AnyObject = {}> = (() => T)
-   & {
-      [QUARKS]: any
-   } & M
+// })
 
-type ReactiveIon<T, M> = M extends AnyObject ? AtomicIon<T, M> : AtomicIon<T>
+// const $count = ion.inert(0)
 
-export type IonMethods = { [key: PropertyKey]: (...args: any[]) => any }
+
 
 // API
 export function ion<T, M>(value?: T & (() => any), methods?: M & IonMethods): T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>

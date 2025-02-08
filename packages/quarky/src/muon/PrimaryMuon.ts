@@ -1,7 +1,7 @@
 import { MaybeIonicAtom } from "../ionic/IonicAtom";
 import { Watchable } from "../watch/Watched";
 
-export type PrimaryMuon = MaybeIonicAtom & Watchable
+
 
 
 
