@@ -206,7 +206,7 @@ export function installIonicMap() {
 //             }
 //             if (isNonTrackable(key, Map))
 //                 return value;
-//             if (isMuon(value)) return value();
+//             if (isIon(value)) return value();
 
 //             if (isFunction(value))
 //                 return accessMethod(

@@ -1,7 +1,7 @@
 import { untrackedCall } from "../ionic/IonicCompound";
-import { isMuon } from "../muon/Muon";
+import { isIon } from "../muon/Muon";
 import { asNonlocalReadonly } from "../nonlocal/NonlocalReadonly";
-import { quarksOf, QUARKS } from "../QuarkyEntity";
+import { quarksOf, QUARKS } from "../Quarks";
 import { Ion } from "./Ion";
 
 type WritableIon = Ion & { state: any }
@@ -25,5 +25,5 @@ export function createReadonlyIon(ion: WritableIon) {
 }
 
 export function isWritableIon(value: any): value is WritableIon {
-   return isMuon(value) && 'state' in value;
+   return isIon(value) && 'state' in value;
 }

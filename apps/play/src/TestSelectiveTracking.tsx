@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo";
-import { DerivedIon, ion, ionize, isMuon, watch, watchEffect } from "@rue/quarky";
+import { DerivedIon, ion, ionize, isIon, watch, watchEffect } from "@rue/quarky";
 import { asPropIon } from "../../../packages/quarky/src/ionized/PrimaryPion";
 
 export function TestSelectiveTracking() {

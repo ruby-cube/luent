@@ -1,4 +1,4 @@
-import { AnyIon, Ion, isMuon} from "./Ion";
+import { AnyIon, Ion, isIon} from "./Ion";
 import { AtomicIon } from "./PrimaryIon";
 import { neutron } from "./Neutron";
 import { isFunction } from "@rue/utils";
@@ -36,7 +36,7 @@ import { isFunction } from "@rue/utils";
 // }
 
 export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
-    return isMuon(value) ? value : neutron(value) as T extends Ion ? T : Ion<T>
+    return isIon(value) ? value : neutron(value) as T extends Ion ? T : Ion<T>
 }
 
 

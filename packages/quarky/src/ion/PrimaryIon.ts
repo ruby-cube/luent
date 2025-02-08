@@ -3,7 +3,7 @@ import { isIonizedModel, ionize } from "../ionized/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
-import { hasQuarks, Quarks, QUARKS, quarksOf } from "../QuarkyEntity";
+import { hasQuarks, Quarks, QUARKS, quarksOf } from "../Quarks";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { WritableMuon } from "../reactivity/reactivity-system";
 import { __DEV__initTraceability, attachCapsuleMethods, CapsuleQuarks, Capsule } from "../capsule/Capsule";

@@ -230,7 +230,7 @@ export function installIonicSet() {
 //             if (isNonTrackable(key, Set))
 //                 return value;
 
-//             if (isMuon(value))
+//             if (isIon(value))
 //                 return value();
 
 //             if (isFunction(value)) {

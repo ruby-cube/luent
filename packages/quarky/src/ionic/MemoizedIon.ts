@@ -1,7 +1,7 @@
 import { getActiveTracker, IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { getActiveFlask } from "@rue/flask";
-import { quarksOf, QUARKS, Quarks, hasQuarks } from "../QuarkyEntity";
+import { quarksOf, QUARKS, Quarks, hasQuarks } from "../Quarks";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule, CapsuleQuarks } from "../capsule/Capsule";
 import { Muon } from "../reactivity/reactivity-system";
 import { MaybeIonicAtom } from "./IonicAtom";

@@ -1,4 +1,4 @@
-import { isMuon } from "../ion/Ion";
+import { isIon } from "../ion/Ion";
 import { isTrackedOp, TrackedOp } from "../ionized/TrackedOp";
 import { IonicAtom } from "./IonicAtom";
 
@@ -81,7 +81,7 @@ export function untrackedCall(reactiveRef: (() => any) | TrackedOp) {
     const tracker = getDependencyTracker();
     tracker?.stop();
     let value;
-    if (isMuon(reactiveRef))
+    if (isIon(reactiveRef))
         value = reactiveRef();
     else if (isTrackedOp(reactiveRef))
         value = reactiveRef.getOutput()

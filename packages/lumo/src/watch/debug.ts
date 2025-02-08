@@ -1,7 +1,7 @@
 import { AtomicIon, ionize, isAtomicIon, Phase, watch } from "@rue/quarky"
 import { isTrackedOp, TrackedOp } from "../../../quarky/src/ionized/TrackedOp";
 import { isPropIon, PropIon } from "../../../quarky/src/ionized/PrimaryPion";
-import { quarksOf, hasQuarks } from "../../../quarky/src/QuarkyEntity";
+import { quarksOf, hasQuarks } from "../../../quarky/src/Quarks";
 import { getTrace } from "../../../flask/debug";
 
 

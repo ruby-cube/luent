@@ -1,19 +1,34 @@
+//@ts-nocheck
+
 import { AnyObject } from "@rue/types";
-import { createDerivationIon, createWritableDerivedIon, ReactiveDerivedIon, WritableDerivedIon } from "../ionic/DerivationCapsule";
 import { asPropIon, isPropIon, PropIon } from "../ionized/PrimaryPion";
 import { AtomicIon, createPrimaryIon, isAtomicIon } from "./PrimaryIon";
 import { isFunction } from "@rue/utils";
-import { QUARKS } from "../QuarkyEntity";
-import { isMuon } from "../muon/Muon";
+import { QUARKS } from "../Quarks";
+import { isIon } from "../muon/Muon";
+import { isMemoizedIon } from "../ionic/MemoizedIon";
 
 export type MaybeIon<T> = Ion<T> | T;
 
-export type AnyIon<T = any> = ()=>T
+export type AnyIon<T = any> = () => T
 // DerivedIon<T> | AtomicIon<T> | ProtectedIon<T> | WritableDerivedIon<T> | PropIon<T>
 
+isIon // any sort of ion
+isAtomicIon // reactive
+isInertIon // inert
+isDerivationIon // derivation ion (any sort of derivation)
+isMemoizedIon // memoized derivation
+isPropIon
+isAbsorbedIon
+isIonizedModel
+isReactive
 
 
+const $doubleCount = ion.memo(() => {
 
+})
+
+const $count = ion.inert(0)
 
 export type Ion<T = any, M extends AnyObject = {}> = (() => T)
    & {
@@ -28,7 +43,7 @@ export type IonMethods = { [key: PropertyKey]: (...args: any[]) => any }
 export function ion<T, M>(value?: T & (() => any), methods?: M & IonMethods): T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
 export function ion<T, M>(value?: T, methods?: M & IonMethods): ReactiveIon<T, M>
 export function ion<T, M>(value?: T, methods?: M & IonMethods): T extends AnyIon ? T : T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M> {
-   if (isMuon(value)) {
+   if (isIon(value)) {
       if (__DEV__ && methods) console.warn(`Cannot make an existing ion into an ion. Methods will not be attached`)
       return value as T extends AnyIon ? T : T extends (args?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
    }

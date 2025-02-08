@@ -511,7 +511,7 @@ export function installIonicArray() {
 //         return value;
 //     }
 //     if (isNonTrackable(key, [Array])) return value;
-//     if (isMuon(value) && !isIntegerKey(key)) return value();
+//     if (isIon(value) && !isIntegerKey(key)) return value();
 //     if (isMutatingArrayMethod(key)) {
 //         if (isReadonlyProxy(target, ionicModel, receiver)) {
 //             if (__DEV__) console.warn('Object is readonly. Cannot access methods')
@@ -605,7 +605,7 @@ export function installIonicArray() {
 //     }
 
 //     const oldValue = Reflect.get(target, key, receiver);
-//     if (isMuon(oldValue) && !isIntegerKey(key)) //TODO: replaceAbsorbedIon. //QUESTION: Should Indices absorb ions? Vue doesn't
+//     if (isIon(oldValue) && !isIntegerKey(key)) //TODO: replaceAbsorbedIon. //QUESTION: Should Indices absorb ions? Vue doesn't
 //         return setAbsorbedIon(oldValue, _newValue)
 //     if (oldValue === _newValue
 //         || isNonTrackable(key, [Array])

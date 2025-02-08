@@ -4,11 +4,11 @@ import { timeTraveler } from "./TimeTraveler";
 import { useRenderCycle } from "../watch/RenderCycle";
 import { MetaIonizedModel, IONIZED_MODEL } from "./MetaIonizedModel";
 import { inert, Inert, isInert } from "./inert";
-import { AnyIon, Ion, ion, isMuon } from "../ion/Ion";
+import { AnyIon, Ion, ion, isIon } from "../ion/Ion";
 import { AtomicIon, AtomicIonQuarks } from "../ion/PrimaryIon";
 import { createIonizedModel, getStructureConfigs } from "./IonizedModel";
 import { getPublicTrace, getTrace } from "../../../flask/debug";
-import { QUARKS } from "../QuarkyEntity";
+import { QUARKS } from "../Quarks";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -104,7 +104,7 @@ type IonizedGetter<T, K extends keyof T> =
 
 //API
 export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: string]: (...args: any[]) => any }): M extends AnyObject ? T & M : T {
-   if (isMuon(target) || isInert(target)) {
+   if (isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
    }

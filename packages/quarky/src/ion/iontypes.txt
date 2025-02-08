@@ -148,7 +148,7 @@ const frogPrince = ionize({
 
 
 //
-isMuon: typeof x === 'function' && x.length === 0 && 
+isIon: typeof x === 'function' && x.length === 0 && 
 
 
 type Muon = NonVoidFunction 

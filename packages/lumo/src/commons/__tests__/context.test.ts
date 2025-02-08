@@ -8,7 +8,7 @@ import { JSDOM } from 'jsdom'
 import { createCommons } from '../Commons';
 import { CommonsKey } from '../CommonsKey';
 import { Ion, Ionized, MaybeIon, v } from '../../InputTypes';
-import { ion, ionize, isMuon, isIonizedModel } from '@rue/quarky';
+import { ion, ionize, isIon, isIonizedModel } from '@rue/quarky';
 
 
 // Common setup to reset the environment before each test
@@ -481,7 +481,7 @@ describe('Integration tests the Context API', () => {
 
             app.mount(<HTMLElement>document.createElement('div'))
 
-            expect(isMuon(frog)).toBe(true)
+            expect(isIon(frog)).toBe(true)
             expect((<Function><unknown>frog)()).toBe(value)
         });
 
@@ -592,7 +592,7 @@ describe('Integration tests the Context API', () => {
 
             app.mount(<HTMLElement>document.createElement('div'))
 
-            expect(isMuon(frog)).toBe(true)
+            expect(isIon(frog)).toBe(true)
         });
 
 
@@ -680,7 +680,7 @@ describe('Integration tests the Context API', () => {
 
             app.mount(<HTMLElement>document.createElement('div'))
 
-            expect(isMuon(frog)).toBe(true)
+            expect(isIon(frog)).toBe(true)
             expect((<Function><unknown>frog)()).toBe(defaultValue)
 
         });

@@ -19,7 +19,7 @@
 */
 
 import { IonicAtom, MaybeIonicAtom } from "../ionic/IonicAtom"
-import { Quarks, QuarkyEntity } from "../QuarkyEntity"
+import { Quarks, QuarkyEntity } from "../Quarks"
 
 //ABSTRACT
 

@@ -6,10 +6,10 @@ import { IonizedModel, storeSnapshot } from "./ionize";
 import { trigger, triggerIonicAtom, triggerIonizedModel } from "../reactivity/x_trigger";
 import { MetaIonizedModel } from "./MetaIonizedModel";
 import { isFunction, noop } from "@rue/utils";
-import { AnyIon, isMuon } from "../ion/Ion";
+import { AnyIon, isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PrimaryPion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
-import { QUARKS, quarksOf } from "../QuarkyEntity";
+import { QUARKS, quarksOf } from "../Quarks";
 import { getActiveTracker } from "../ionic/IonicCompound";
 
 
@@ -303,7 +303,7 @@ export function initialPropertyAccess(
       return initialIonAccess(ionizedModel, target, key, value, switchMap, transformValue);
    }
 
-   if (isMuon(value)) {
+   if (isIon(value)) {
       return initialAbsorbedIonStateAccess(key, value, switchMap, transformValue)
    }
 
@@ -341,7 +341,7 @@ function initialIonAccess(
    switchMap: ProxySwitchMap,
    transformValue: Function
 ) {
-   if (isMuon(value)) {
+   if (isIon(value)) {
       // Absorbed Ion
       switchMap.set(key, () => transformValue(target[key]))
       return transformValue(value); // { $count: $count } get ion case
@@ -349,7 +349,7 @@ function initialIonAccess(
    const _key = key.slice(1);
    if (value === undefined) {
       const _value = target[_key]
-      if (isMuon(_value)) {
+      if (isIon(_value)) {
          // Absorbed Ion
          switchMap.set(key, () => transformValue(target[_key]))
          return transformValue(_value);  // { count: $count } get ion case
@@ -418,7 +418,7 @@ function maybeIonize(value: any) {
 
 
 export function isMethod(value: any): value is Function {
-   return value instanceof Function && !isMuon(value)
+   return value instanceof Function && !isIon(value)
 }
 
 
@@ -552,7 +552,7 @@ export function reactiveSetter(
    if (metaIonizedModel.isNewProperty(key)) metaIonizedModel.registerNewProperty(key)
 
    const oldValue = Reflect.get(target, key, receiver);
-   if (isMuon(oldValue) && !isMuon(newValue)) {
+   if (isIon(oldValue) && !isIon(newValue)) {
       return setAbsorbedIon(oldValue, newValue, ionizedModel, key, oldValue(), structureConfigs)
    }
 
@@ -567,10 +567,10 @@ export function reactiveSetter(
       return true;
    }
 
-   const _newValue = toRaw(isMuon(newValue) ? newValue() : newValue)
-   const _oldValue = isMuon(oldValue) ? oldValue() : oldValue
+   const _newValue = toRaw(isIon(newValue) ? newValue() : newValue)
+   const _oldValue = isIon(oldValue) ? oldValue() : oldValue
 
-   target[key] = isMuon(newValue) ? newValue : _newValue
+   target[key] = isIon(newValue) ? newValue : _newValue
 
    storeSnapshot(metaIonizedModel)
 

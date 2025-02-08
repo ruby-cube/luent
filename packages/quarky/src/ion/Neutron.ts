@@ -1,9 +1,9 @@
 import { AnyObject } from "@rue/types";
 import { createDerivationIon, createWritableDerivedIon, DerivedIon, DerivedIonQuarks, WritableDerivedIon } from "../ionic/DerivationCapsule";
-import { AnyIon, isMuon } from "./Ion";
+import { AnyIon, isIon } from "./Ion";
 import { createPrimaryIon, AtomicIon, } from "./PrimaryIon";
 import { isFunction } from "@rue/utils";
-import { QUARKS } from "../QuarkyEntity";
+import { QUARKS } from "../Quarks";
 import { Traceable } from "../debug/debug";
 
 const INERT = true;
@@ -14,7 +14,7 @@ export type Neutron<T, M = undefined> = M extends { [key: string]: (...args: any
 export function neutron<T, M>(value?: T & (() => unknown), methods?: M & { [key: string]: (...args: any[]) => any }): T extends AnyIon ? T : _DerivedNeutron<T, M>
 export function neutron<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends AnyIon ? T : _Neutron<T, M>
 export function neutron<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends AnyIon ? T : T extends () => unknown ? _DerivedNeutron<T, M> : _Neutron<T, M> {
-   if (isMuon(value)) {
+   if (isIon(value)) {
       if (__DEV__ && methods) console.warn(`Cannot make a ref from existing ion. Methods will not be attached`)
       return value as T extends AnyIon ? T : T extends () => unknown ? _DerivedNeutron<T, M> : _Neutron<T, M>
    }
@@ -38,7 +38,7 @@ export type DerivedNeutron<T = any> = {
 type _DerivedNeutron<T, M> = M extends { [key: string]: (...args: any[]) => any } ? WritableDerivedIon<T, M> : DerivedIon<T>
 
 // export function DerivedNeutron<T, M, D>(derivation: D & (() => T), methods?: M & { [key: string]: (...args: any[]) => any }): D extends AnyIon ? D : _DerivedNeutron<T, M> {
-//     if (isMuon(derivation)) return derivation as D extends AnyIon ? D : _DerivedNeutron<T, M>; //TODO: Error message?
+//     if (isIon(derivation)) return derivation as D extends AnyIon ? D : _DerivedNeutron<T, M>; //TODO: Error message?
 //     if (methods) return createWritableDerivedIon(derivation, methods, INERT) as D extends AnyIon ? D : _DerivedNeutron<T, M>
 //     return createDerivationIon(derivation, undefined, INERT) as D extends AnyIon ? D : _DerivedNeutron<T, M>
 // }

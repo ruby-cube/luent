@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types";
 import { AnyIon, Ion, IonMethods } from "../ion/Ion";
 import { DerivedNeutron } from "../ion/Neutron";
 import { getActiveFlask } from "@rue/flask";
-import { quarksOf, QUARKS, Quarks, hasQuarks } from "../QuarkyEntity";
+import { quarksOf, QUARKS, Quarks, hasQuarks } from "../Quarks";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule, CapsuleQuarks } from "../capsule/Capsule";
 import { Muon } from "../reactivity/reactivity-system";
 import { MaybeIonicAtom } from "./IonicAtom";

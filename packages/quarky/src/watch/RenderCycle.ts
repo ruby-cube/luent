@@ -5,7 +5,7 @@ import { Ionized, IonizedModel } from "../ionized/ionize";
 import { MetaIonizedModel } from "../ionized/MetaIonizedModel";
 import { MutationRecord } from "./watch";
 import { AnyObject } from "@rue/types";
-import { quarksOf } from "../QuarkyEntity";
+import { quarksOf } from "../Quarks";
 
 export type Watchable = any
 // AtomicIon | DerivedIon | IonicEffect  | IonizedModel | ObservedProp

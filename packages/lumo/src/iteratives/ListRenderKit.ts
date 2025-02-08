@@ -1,4 +1,4 @@
-import { isMuon, isIonizedModel, ion, toRaw, shallowClone,  watch, Phase, __devCheckIfTracked, ionize, PrimaryIon, toValue, untrackedCall, Ion } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone,  watch, Phase, __devCheckIfTracked, ionize, PrimaryIon, toValue, untrackedCall, Ion } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
@@ -120,7 +120,7 @@ export class ListRenderKit {
 
 
       const _isIonizedModel = isIonizedModel(data)
-      const isDynamic = this.isDynamic = _isIonizedModel || isMuon(data);
+      const isDynamic = this.isDynamic = _isIonizedModel || isIon(data);
       this.outerNodePod = outerNodePod;
       const dynamicNodePod = this.dynamicNodePod = isDynamic ? outerNodePod.appendNodePod() : undefined;
 
@@ -129,7 +129,7 @@ export class ListRenderKit {
       if (isDynamic) {
          // set up watcher for updates
          // const renderCycle = getCurrentRenderCycle();
-         const _data = isMuon(data) ? untrackedCall(data) : data // unwrap potentially nested ionized model
+         const _data = isIon(data) ? untrackedCall(data) : data // unwrap potentially nested ionized model
          const rawData = isIonizedModel(_data) ? toRaw(_data) as Collection<any> : undefined
          let clone = isIonizedModel(_data) ? shallowClone(rawData!) : undefined //TODO: need to handle cases when ionizedModel is nested in ion
          //TODO: figure out typing for Set, Map, Object vs Array

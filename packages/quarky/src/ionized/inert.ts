@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel } from "./ionize";
 import { isFunction } from "@rue/utils";
-import { isMuon } from "../muon/Muon";
+import { isIon } from "../muon/Muon";
 
 const inertObjects: WeakSet<AnyObject> = new WeakSet()
 
@@ -11,7 +11,7 @@ const INERT = Symbol('inert');
 
 export function inert<T extends AnyObject>(obj: T): T & Inert {
    if (!(obj instanceof Object)) throw new Error("Only objects can be marked as inert")
-   if (isMuon(obj) || isIonizedModel(obj)) throw new Error('cannot mark an ion or ionized model as inert')
+   if (isIon(obj) || isIonizedModel(obj)) throw new Error('cannot mark an ion or ionized model as inert')
    if (isFunction(obj)) throw new Error(`Functions are inert by default`)
    inertObjects.add(obj)
    return obj as T & Inert

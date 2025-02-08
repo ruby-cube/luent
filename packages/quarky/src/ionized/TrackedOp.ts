@@ -6,7 +6,7 @@ import { AnyObject } from "@rue/types";
 import { asAtom } from "../ionic/IonicAtom";
 import { MetaIonizedModel } from "./MetaIonizedModel";
 import { Ionized, IonizedModel } from "./ionize";
-import { quarksOf } from "../QuarkyEntity";
+import { quarksOf } from "../Quarks";
 
 
 

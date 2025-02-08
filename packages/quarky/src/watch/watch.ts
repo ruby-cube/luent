@@ -14,8 +14,8 @@ import { asAtom } from "../ionic/IonicAtom";
 import { isPropIon, PropIon } from "../ionized/PrimaryPion";
 import { toValue } from "../ion/toIons";
 import { StateChangeEvent } from "./StateChangeEvent";
-import { quarksOf } from "../QuarkyEntity";
-import { isMuon } from "../muon/Muon";
+import { quarksOf } from "../Quarks";
+import { isIon } from "../muon/Muon";
 
 
 type RenderCycleOptions = {
@@ -155,7 +155,7 @@ function getIonicDerivations(inputSubjects: (AnyIon | AnyObject)[], subjects: (A
 
 
 function isMultiWatchSubject(subject: AnyObject | AnyIon | (AnyIon | AnyObject)[]): subject is (AnyIon | AnyObject)[] {
-   if (isMuon(subject)) return false;
+   if (isIon(subject)) return false;
    if (!isIonizedModel(subject) && subject instanceof Array) {
       for (const item of subject) {
          if (isReactive(item)) return true;
@@ -229,7 +229,7 @@ export function watch<T>(subject: T, effect: OnChangeHandler<T>, options?: Watch
       const newValue = isMultiSubject ? getValues(subjects) : toValue(subject0) // This is when retracking happens
 
       if (watchStateChange && (!eager && (isMultiSubject && noChanges(subjects, newValue, oldValue)
-         || isMuon(subject0) && noChange(newValue, oldValue)
+         || isIon(subject0) && noChange(newValue, oldValue)
          || isIonizedModel(subject) && noMutations(subject)))
       )
          return;
@@ -265,7 +265,7 @@ function noChange(newValue: any, oldValue: any) {
 
 function noChanges(subjects: any[], newValues: any[], oldValues: any[]) {
    for (let i = 0; i < subjects.length; i++) {
-      if (isMuon(subjects[i])) {
+      if (isIon(subjects[i])) {
          if (!noChange(newValues[i], newValues[i])) {
             return false;
          }

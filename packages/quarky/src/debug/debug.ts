@@ -1,10 +1,10 @@
 import { isFunction, isObject } from "@rue/utils";
-import { isMuon } from "../ion/Ion";
+import { isIon } from "../ion/Ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
 import { AtomicIon, isAtomicIon } from "../ion/PrimaryIon";
 import { isDerivedIon, isDerivationFunction } from "../ionic/DerivationCapsule";
-import { quarksOf, hasQuarks, QUARKS, QuarkyEntity } from "../QuarkyEntity";
+import { quarksOf, hasQuarks, QUARKS, QuarkyEntity } from "../Quarks";
 import { __DEV__label } from "./DEVLabellable";
 import { untrackedCall } from "../ionic/IonicCompound";
 
@@ -13,7 +13,7 @@ let _isSignal = false;
 
 function isReactive<T>(maybeHasSignal: T): maybeHasSignal is T & Function {
    if (!(isFunction(maybeHasSignal))) return false;
-   console.warn('Using `isReactive` on a function with unknown side effects can cause bugs. To avoid unknown side-effects, never use isReactive() in production. Instead use `isMuon` to check for reactivity and pass any impromptu getters into the $ function. `isReactive` is only to check if you have a wrapped signal')
+   console.warn('Using `isReactive` on a function with unknown side effects can cause bugs. To avoid unknown side-effects, never use isReactive() in production. Instead use `isIon` to check for reactivity and pass any impromptu getters into the $ function. `isReactive` is only to check if you have a wrapped signal')
    _isSignal = false;
    try{
       untrackedCall(maybeHasSignal) //TODO: what if function has async code?
@@ -124,7 +124,7 @@ function traceTriggers(subject: AnyObject, key?: PropertyKey) {
    }
    if (key) {
       const value = subject[key];
-      if (isFunction(value) && !isMuon(value))
+      if (isFunction(value) && !isIon(value))
          throw new Error('invalid subject. To trace a function call use traceCall()')
       traceMemberTriggers(subject, key)
    }
@@ -151,7 +151,7 @@ function traceCalls(subject: AnyObject, key?: PropertyKey) {
 }
 
 function isTrueFunction(value: any): value is Function {
-   return isFunction(value) && !isMuon(value)
+   return isFunction(value) && !isIon(value)
 }
 
 function traceIonTriggers(subject: AtomicIon) {
@@ -217,7 +217,7 @@ function createTraceableObject(target: Object) {
          const getValue = proxySwitchMap.get(key)
          if (getValue) return getValue();
          const value = Reflect.get(target, key, receiver)
-         if (isFunction(value) && !isMuon(value)) {
+         if (isFunction(value) && !isIon(value)) {
             return wrappedMethods[key] ?? (wrappedMethods[key] = traceableMethodWrap('IonizedModel', proxy, key, value))
          }
       },

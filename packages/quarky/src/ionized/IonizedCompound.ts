@@ -4,7 +4,7 @@ function collectAbsorbedIons(ionicModel: Ionized<AnyObject>, tracker: AsIonicCom
    const target = toRaw(ionicModel);
    for (const key in target) {
       const value = target[key]
-      if (isMuon(value)) {
+      if (isIon(value)) {
          tracker.track(value)
       }
    }

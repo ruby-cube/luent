@@ -2,8 +2,8 @@ import { AnyObject } from "@rue/types";
 import {  isIonizedModel, ionize, IonizedModel, toRaw } from "./ionize";
 import { asWatched, Watched } from "../watch/Watched";
 import { asAtom, IonicAtom } from "../ionic/IonicAtom";
-import { quarksOf, QUARKS } from "../QuarkyEntity";
-import { isMuon } from "../muon/Muon";
+import { quarksOf, QUARKS } from "../Quarks";
+import { isIon } from "../muon/Muon";
 import { getActiveTracker } from "../ionic/IonicCompound";
 
 
@@ -132,7 +132,7 @@ export function asPropIon<T extends AnyObject, K extends keyof T, M>(
    const rawTarget = toRaw(ionicModel)
    const value = rawTarget[key];
 
-   if (isMuon(value)) {
+   if (isIon(value)) {
       // absorbed ion
       return value;
    }
