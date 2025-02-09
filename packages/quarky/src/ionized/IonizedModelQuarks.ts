@@ -1,13 +1,17 @@
 import type { AnyObject } from "@rue/types"
 import type { Ionized, IonizedModel } from "./ionize"
 import type { TrackedOp } from "./TrackedOp"
-import type { ReactiveEntity } from "../reactivity/ReactiveEntity"
 import { PropIon } from "./PrimaryPion"
 import { IonicCompound } from "../ionic/IonicCompound"
-import { __DEV__getTrace, getPublicTrace } from "../../../flask/debug"
+import { __DEV__getTrace } from "../../../flask/debug"
 import { Traceable } from "../debug/debug"
 import { CustomIonizedModelConfig } from "./IonizedModel"
-import { quarksOf } from "../Quarks"
+import { Quarks } from "../Quarks"
+import { Watchable, Watched } from "../watch/Watched"
+import { CapsuleQuarks } from "../capsule/Capsule"
+import { MaybeParticle, Particle } from "../Compound/Particle"
+import { MaybeCompound } from "../Compound/Compound"
+import { IonizedCompound } from "./IonizedCompound"
 
 
 
@@ -18,8 +22,16 @@ type EntryKey = any
 
 export const IONIZED_MODEL = Symbol('ionicModel')
 
-export class MetaIonizedModel<T extends AnyObject = AnyObject> implements ReactiveEntity {
-   ionicModel?: Ionized<T>
+// type IonizedModelQuarks = Quarks<IonizedModel>
+// & Watchable
+// & CapsuleQuarks
+// & MaybeParticle
+// & MaybeCompound<IonizedCompound>
+
+export class IonizedModelQuarks<T extends AnyObject = AnyObject>
+   implements Quarks<IonizedModel>, Watchable, CapsuleQuarks, MaybeParticle, MaybeCompound<IonizedCompound> {
+   entity!: IonizedModel
+   ionicModel?: Ionized<T> //TODO: rename as entity
    // shallowReactive?: IonizedModel<T>
    readonly type = IONIZED_MODEL
 
@@ -46,6 +58,9 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
    ) {
       if (__DEV__) this.__DEV__asTraceable = new Traceable()
    }
+   asCompound?: IonizedCompound | undefined
+   asParticle?: Particle | undefined
+   asWatched?: Watched<Watchable> | undefined
 
    private appendedProperties: Set<PropertyKey> = new Set()
 

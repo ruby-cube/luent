@@ -4,7 +4,7 @@ import { asTraceable, emitSignal } from "../debug/debug";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { storeSnapshot } from "./ionize";
 import { trigger, } from "../reactivity/x_trigger";
-import { MetaIonizedModel } from "./MetaIonizedModel";
+import { MetaIonizedModel } from "./IonizedModelQuarks";
 import { isFunction, noop } from "@rue/utils";
 import { AnyIon, isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PrimaryPion";
@@ -603,15 +603,7 @@ export type IonizedModel = {
    [QUARKS]: IonizedModelQuarks
 }
 
-/** 
- * INTERNAL 
- * */
-export type IonizedModelQuarks =
-   Quarks<IonizedModel>
-   & Watchable
-   & CapsuleQuarks
-   & MaybeParticle
-   & MaybeCompound<IonizedCompound>
+
 
 /**
  * When a pion is the original source of an effect chain, we use triggerIonizedModel
@@ -631,7 +623,7 @@ function triggerIonizedModel(
    const quarks = quarksOf(model)
    quarks.asParticle?.react()
    quarks.asWatched?.triggerEffects()
-   if (quarks.asWatched){
+   if (quarks.asWatched || quarks.asParticle) {
       quarks.recordOp({
          op,
          args,

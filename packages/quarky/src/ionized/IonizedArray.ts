@@ -5,7 +5,7 @@ import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, Ionized, ionize, } 
 import { getTrackedOp } from "./TrackedOp";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getObservedProp } from "./PrimaryPion";
-import { MetaIonizedModel } from "./MetaIonizedModel";
+import { MetaIonizedModel } from "./IonizedModelQuarks";
 import { nontrackableIterableKeys } from "./IonizedSet";
 
 type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;

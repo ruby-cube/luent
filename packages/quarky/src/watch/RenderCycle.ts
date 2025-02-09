@@ -2,7 +2,7 @@ import { setImmediate, clearImmediate } from "@rue/thread";
 import { $schedule, SchedulerOptions, unwrap } from "@rue/flask";
 import { SetMap } from "@rue/utils";
 import { Ionized } from "../ionized/ionize";
-import { MetaIonizedModel } from "../ionized/MetaIonizedModel";
+import { MetaIonizedModel } from "../ionized/IonizedModelQuarks";
 import { MutationRecord } from "./watch";
 import { AnyObject } from "@rue/types";
 import { quarksOf } from "../Quarks";

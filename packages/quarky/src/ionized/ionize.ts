@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types";
 import { isObject } from "@rue/utils";
 import { timeTraveler } from "./TimeTraveler";
 import { useEffectCycle } from "../watch/TaskCycle";
-import { MetaIonizedModel, IONIZED_MODEL } from "./MetaIonizedModel";
+import { MetaIonizedModel, IONIZED_MODEL } from "./IonizedModelQuarks";
 import { inert, Inert, isInert } from "./inert";
 import { AnyIon, Ion, ion, isIon } from "../ion/Ion";
 import { AtomicIon, AtomicIonQuarks } from "../ion/AtomicIon";

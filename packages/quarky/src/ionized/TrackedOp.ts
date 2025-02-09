@@ -4,7 +4,7 @@
 
 import { AnyObject } from "@rue/types";
 import { asParticle } from "../Compound/Particle";
-import { MetaIonizedModel } from "./MetaIonizedModel";
+import { MetaIonizedModel } from "./IonizedModelQuarks";
 import { Ionized, IonizedModel } from "./ionize";
 import { quarksOf } from "../Quarks";
 

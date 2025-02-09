@@ -3,7 +3,7 @@ import { trigger, triggerIonicAtom, triggerIonizedModel } from "../reactivity/x_
 import { IonizedModel, storeSnapshot, toRaw } from "./ionize";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getTrackedOp } from "./TrackedOp";
-import { MetaIonizedModel } from "./MetaIonizedModel";
+import { MetaIonizedModel } from "./IonizedModelQuarks";
 import { getObservedProp } from "./PrimaryPion";
 
 // declare global {

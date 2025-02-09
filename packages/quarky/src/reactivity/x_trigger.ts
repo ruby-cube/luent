@@ -2,11 +2,11 @@ import { asParticle, isIonicAtom, ReactivePrimitive } from "../Compound/Particle
 import { AtomicIon } from "../ion/AtomicIon";
 import { asWatched, isWatched } from "../watch/Watched";
 import { getCurrentRenderCycle, useEffectCycle } from "../watch/TaskCycle";
-import { untrackedCall } from "../ionic/x_DependencyTracker";
 import { isIonicEffectAtom } from "../ionic/IonicEffect";
 import { isCurrentWatchSubject } from "../watch/watch";
 import { PropIon } from "../ionized/PrimaryPion";
 import { AnyObject } from "@rue/types";
+import { untrackedCall } from "../ionic/IonicCompound";
 
 
 export function trigger(target: AtomicIon | PropIon, newValue?: any, oldValue?: any) {
