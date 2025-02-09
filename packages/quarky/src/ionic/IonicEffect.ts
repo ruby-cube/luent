@@ -1,29 +1,14 @@
-import { QUARKS } from "../Quarks";
+import { MaybeCompound } from "../compound/Compound";
 import { Watched } from "../watch/Watched";
-import { IonicCompound, MaybeIonicCompound } from "./IonicCompound";
+import { IonicCompound } from "./IonicCompound";
 
-type IonicEffect = MaybeIonicCompound<TerminalCompound> & { asWatched: Watched }
-
-/**
- * A terminal compound is the "end" of a reactive chain, i.e. the compound is not the atom of a larger compound.
- */
-export class TerminalCompound extends IonicCompound<IonicEffect> {
-
-   constructor(
-      compound: IonicEffect
-   ) {
-      super(compound)
-   }
-   override trigger(): void {
-      this.dirty = true;
-      this.compound.asWatched!.triggerEffects()
-   }
-}
+type IonicEffect = MaybeCompound<IonicCompound> & { asWatched: Watched }
 
 let currentEffect: Function | undefined
 
 export function createIonicEffect(task: () => any, retrack: boolean = true) {
-   const compound: TerminalCompound = new TerminalCompound(effect)
+   const compound: IonicCompound<IonicEffect> = new IonicCompound(effect)
+   compound.trigger = trigger
 
    let initialized = false;
    // let prevCycle: any;
@@ -51,4 +36,8 @@ export function createIonicEffect(task: () => any, retrack: boolean = true) {
    return effect
 }
 
+function trigger(this: IonicCompound<IonicEffect>): void {
+   this.dirty = true;
+   this.compound.asWatched!.triggerEffects()
+}
 

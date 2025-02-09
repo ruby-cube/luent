@@ -8,7 +8,7 @@ import { ionize, IonizedModel, isIonizedModel, toRaw, } from "../ionized/ionize"
 import { areEqual } from "./areEqual";
 import { createIonicEffect, TerminalCompound } from "../ionic/IonicEffect";
 import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
-import { asAtom } from "../ionic/IonicAtom";
+import { asAtom } from "../compound/Atom";
 import { isPropIon, PropIon } from "../ionized/PrimaryPion";
 import { toValue } from "../ion/toIons";
 import { ChangeEvent } from "./ChangeEvent";

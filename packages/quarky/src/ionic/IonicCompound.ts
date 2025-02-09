@@ -1,11 +1,9 @@
-import { AnyObject } from "@rue/types";
-import { IonicAtom, MaybeIonicAtom, asAtom } from "./IonicAtom";
-import { toRaw } from "../ionized/ionize";
-import { isIon } from "../ion/Ion";
+import { IonicAtom, MaybeIonicAtom, asAtom } from "../compound/Atom";
+import { Compound, MaybeCompound, track, untrackAtoms } from "../compound/Compound";
 
-const trackerStack: (IonicCompound | null)[] = []
+const trackerStack: (Compound | null)[] = []
 
-function pushTracker(tracker: IonicCompound | null) {
+function pushTracker(tracker: Compound | null) {
    trackerStack.push(tracker)
 }
 
@@ -56,33 +54,25 @@ export function detachedCall(fn: Function) {
 }
 
 
-/**
- * for memoized derivations and ionic effects and ionized models
- */
-export interface MaybeIonicCompound<T extends IonicCompound = IonicCompound> {
-   asCompound?: T
-}
 
-export class IonicCompound<T extends MaybeIonicCompound = { asCompound?: IonicCompound }> {
+
+
+export class IonicCompound<T extends MaybeCompound = { asCompound?: IonicCompound }> implements Compound {
 
    constructor(
       readonly compound: T,
    ) {
    }
+
+   state?: unknown
+
    dirty: boolean = false;
 
    atoms: IonicAtom[] = []
 
-   track(entity: MaybeIonicAtom) {
-      const atom = asAtom(entity)
-      if (atom.compounds.has(this)) return;
-      this.atoms.push(atom)
-      return atom;
-   }
+   track = track
 
-   trigger(): void {
-      if (__DEV__) console.warn('Not implemented')
-   }
+   trigger!: () => void
 
    trackedCall(fn: () => any) {
       pushTracker(this);
@@ -97,31 +87,8 @@ export class IonicCompound<T extends MaybeIonicCompound = { asCompound?: IonicCo
       }
    }
 
-   untrackAtoms() {
-      this.atoms?.forEach(atom => {
-         atom.removeCompound(this)
-      })
-      this.atoms = []
-   }
-
-   collectAbsorbedIons(ionicModel: AnyObject) {
-      const target = toRaw(ionicModel);
-      for (const key in target) {
-         const value = target[key]
-         if (isIon(value)) {
-            this.track(<MaybeIonicAtom>value)
-         }
-      }
-   }
+   untrackAtoms = untrackAtoms
 }
-
-// export interface Compound {
-//    atoms: Set<IonicAtom>
-//    track(entity: MaybeIonicAtom): IonicAtom
-//    trigger(): void
-// }
-
-
 
 export function __devCheckIfTracked() {
    if (isTrackedContext()) console.warn(`RESEARCH: This is currently a tracked context. May need to use untrackedCall`)

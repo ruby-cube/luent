@@ -18,7 +18,7 @@
 - WatchEffects (linkable)
 */
 
-import { IonicAtom, MaybeIonicAtom } from "../ionic/IonicAtom"
+import { IonicAtom, MaybeIonicAtom } from "../compound/Atom"
 import { Quarks, QuarkyEntity } from "../Quarks"
 
 //ABSTRACT

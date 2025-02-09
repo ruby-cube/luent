@@ -1,4 +1,4 @@
-import { asAtom, isIonicAtom, ReactivePrimitive } from "../ionic/IonicAtom";
+import { asAtom, isIonicAtom, ReactivePrimitive } from "../compound/Atom";
 import { AtomicIon } from "../ion/AtomicIon";
 import { asWatched, isWatched } from "../watch/Watched";
 import { getCurrentRenderCycle, useRenderCycle } from "../watch/TaskCycle";

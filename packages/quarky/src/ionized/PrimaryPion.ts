@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import {  isIonizedModel, ionize, IonizedModel, toRaw } from "./ionize";
 import { asWatched, Watched } from "../watch/Watched";
-import { asAtom, IonicAtom } from "../ionic/IonicAtom";
+import { asAtom, IonicAtom } from "../compound/Atom";
 import { quarksOf, QUARKS, Quarks } from "../Quarks";
 import { isIon } from "../muon/Muon";
 import { getActiveTracker } from "../ionic/IonicCompound";

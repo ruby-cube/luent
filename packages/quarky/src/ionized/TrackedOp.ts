@@ -3,7 +3,7 @@
 
 
 import { AnyObject } from "@rue/types";
-import { asAtom } from "../ionic/IonicAtom";
+import { asAtom } from "../compound/Atom";
 import { MetaIonizedModel } from "./MetaIonizedModel";
 import { Ionized, IonizedModel } from "./ionize";
 import { quarksOf } from "../Quarks";

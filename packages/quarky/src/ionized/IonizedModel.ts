@@ -604,10 +604,10 @@ export function setAbsorbedIon(ion: AnyIon, value: any, ionizedModel: IonizedMod
          return false;
       }
 
-      const prop = getObservedProp(ionizedModel, key);
-      if (prop) {
-         trigger(prop, value, oldValue)
-      }
+      // const prop = getObservedProp(ionizedModel, key); //TODO: I don't think this is needed
+      // if (prop) {
+      //    trigger(prop, value, oldValue)
+      // }
 
       emitAfterSet(structureConfigs, ionizedModel, quarksOf(ionizedModel), key, value, oldValue)
 

@@ -1,15 +1,14 @@
-import { getActiveTracker, IonicCompound, MaybeIonicCompound } from "./IonicCompound";
+import { getActiveTracker, IonicCompound } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
 import { quarksOf, QUARKS, Quarks, hasQuarks } from "../Quarks";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule, CapsuleQuarks } from "../capsule/Capsule";
-import { Muon } from "../reactivity/reactivity-system";
-import { MaybeIonicAtom } from "./IonicAtom";
+import { MaybeIonicAtom } from "../compound/Atom";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { emitSignal } from "../debug/debug";
 import { Watchable } from "../watch/Watched";
-import { isIonizedModel } from "../ionized/ionize";
 import { Ion } from "../ion/Ion";
+import { MaybeCompound } from "../compound/Compound";
 
 /**
 * Managed Derivation Ion
@@ -24,6 +23,7 @@ import { Ion } from "../ion/Ion";
 export type $MemoizedIon = Ion & Capsule & {
    [QUARKS]: MemoizedIon
 }
+type MemoizedCompound = IonicCompound<MemoizedIon> & {state: unknown}
 
 /** 
  * INTERNAL 
@@ -33,31 +33,12 @@ export type MemoizedIon =
    & Watchable
    & CapsuleQuarks
    & MaybeIonicAtom
-   & MaybeIonicCompound<MemoizedCompound>
+   & MaybeCompound<MemoizedCompound>
 
 export const MEMOIZED_ION = Symbol('Memoized Ion')
 
 export function isMemoizedIon(value: unknown): value is $MemoizedIon {
    return hasQuarks(value) && quarksOf(value).type === MEMOIZED_ION
-}
-
-
-
-export class MemoizedCompound extends IonicCompound<MemoizedIon> {
-
-   constructor(
-      readonly ion: MemoizedIon
-   ) {
-      super(ion);
-   }
-
-   state: unknown;
-
-   override trigger(): void {
-      this.dirty = true;
-      this.ion.asAtom?.react()
-      this.ion.asWatched?.triggerEffects()
-   }
 }
 
 export function createMemoizedIon(
@@ -101,7 +82,8 @@ export function createMemoizedIon(
       asWatched: undefined
    }
 
-   const compound = ion.asCompound = new MemoizedCompound(ion)
+   const compound = ion.asCompound = new IonicCompound(ion) as MemoizedCompound
+   compound.trigger = trigger
 
    $memoizedIon[QUARKS] = ion
    $memoizedIon.__DEV__labelName = undefined
@@ -114,6 +96,12 @@ export function createMemoizedIon(
    }
 
    return $memoizedIon;
+}
+
+function trigger(this: IonicCompound<MemoizedIon>): void {
+   this.dirty = true;
+   this.compound.asAtom?.react()
+   this.compound.asWatched?.triggerEffects()
 }
 
 /* Not sure if this is correct. 

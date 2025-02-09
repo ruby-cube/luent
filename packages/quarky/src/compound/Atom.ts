@@ -1,4 +1,4 @@
-import { IonicCompound } from "./IonicCompound";
+import { Compound } from "../ionic/IonicCompound";
 
 export const CLEAN_UP = 'x__cleanUp'
 
@@ -16,13 +16,13 @@ export class IonicAtom {
    ) {
    }
 
-   compounds: Set<IonicCompound> = new Set()
+   compounds: Set<Compound> = new Set()
 
-   addCompound(compound: IonicCompound) {
+   addCompound(compound: Compound) {
       this.compounds.add(compound)
    }
 
-   removeCompound(compound: IonicCompound) {
+   removeCompound(compound: Compound) {
       this.compounds.delete(compound);
       this.cleanUp?.(this.maybeAtom)
    }

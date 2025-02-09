@@ -1,8 +1,11 @@
 import { QUARKS, Quarks } from "../Quarks";
 import { Watchable } from "../watch/Watched";
 import { CapsuleQuarks } from "../capsule/Capsule";
-import { MaybeIonicAtom } from "../ionic/IonicAtom";
+import { MaybeIonicAtom } from "../compound/Atom";
 import { IonicCompound, MaybeIonicCompound } from "../ionic/IonicCompound";
+import { AnyObject } from "@rue/types";
+import { toRaw } from "./ionize";
+import { isIon } from "../ion/Ion";
 
 //TODO: 
 
@@ -40,5 +43,15 @@ export class IonizedCompound extends IonicCompound<IonizedModelQuarks> {
    override trigger(): void {
       this.quarks.asAtom?.react()
       this.quarks.asWatched?.triggerEffects()
+   }
+
+   collectAbsorbedIons(ionicModel: AnyObject) {
+      const target = toRaw(ionicModel);
+      for (const key in target) {
+         const value = target[key]
+         if (isIon(value)) {
+            this.track(<MaybeIonicAtom>value)
+         }
+      }
    }
 }
