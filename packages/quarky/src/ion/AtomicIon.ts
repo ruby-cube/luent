@@ -8,6 +8,7 @@ import { __DEV__label } from "../debug/DEVLabellable";
 import { __DEV__initTraceability, attachCapsuleMethods, CapsuleQuarks, Capsule } from "../capsule/Capsule";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Atomic, WritableIon } from "./Ion";
+import { Mutation } from "../watch/watch";
 
 /** INTERNAL */
 export type $AtomicIon = WritableIon & Capsule & {
@@ -37,14 +38,24 @@ function getReactiveState(ion: AtomicIon) {
 function setReactiveState(ion: AtomicIon, oldState: unknown, newState: unknown) {
    if (oldState === newState) {
       //TODO: I dunno how to implement this yet. For dev traces
-      // if (__DEV__) ion.asParticle?.react() ?? (ion.asParticle = asParticle(ion), ion.asParticle.react())
+      // if (__DEV__) ion.asParticle?.triggerCompounds() ?? (ion.asParticle = asParticle(ion), ion.asParticle.triggerCompounds())
       return oldState;
    }
 
    const state = shouldIonize(newState, ion.stateIsIonized) ? ionize(newState) : newState
    ion.state = state; // must set state before triggering effects and derivations
-   ion.asParticle?.react()
-   ion.asWatched?.triggerEffects()
+   const { asParticle, asWatched } = ion
+   if (asParticle || asWatched) {
+      const mutation = new Mutation(
+         ion,
+         '[[set]]',
+         ['state', newState],
+         newState,
+         oldState
+      )
+      asParticle?.triggerCompounds(mutation)
+      asWatched?.triggerEffects(mutation)
+   }
    return state;
 }
 
@@ -82,7 +93,7 @@ export function createPrimaryIon(
       get() {
          return ion.state;
       },
-      set:  value => {
+      set: value => {
          __DEV__traceMethodCall(capsuleName, $ion, 'state')
          return setReactiveState(ion, ion.state, value);
       }

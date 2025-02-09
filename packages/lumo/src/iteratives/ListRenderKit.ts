@@ -128,7 +128,7 @@ export class ListRenderKit {
 
       if (isDynamic) {
          // set up watcher for updates
-         // const renderCycle = getCurrentRenderCycle();
+         // const effectCycle = getCurrentEffectCylce();
          const _data = isIon(data) ? untrackedCall(data) : data // unwrap potentially nested ionized model
          const rawData = isIonizedModel(_data) ? toRaw(_data) as Collection<any> : undefined
          let clone = isIonizedModel(_data) ? shallowClone(rawData!) : undefined //TODO: need to handle cases when ionizedModel is nested in ion

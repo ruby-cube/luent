@@ -4,19 +4,20 @@ import { asTraceable, emitSignal } from "../debug/debug";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { storeSnapshot } from "./ionize";
 import { trigger, } from "../reactivity/x_trigger";
-import { MetaIonizedModel } from "./IonizedModelQuarks";
+import { IonizedModelQuarks, MetaIonizedModel } from "./IonizedModelQuarks";
 import { isFunction, noop } from "@rue/utils";
 import { AnyIon, isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PrimaryPion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
 import { Quarks, QUARKS, quarksOf } from "../Quarks";
 import { getActiveTracker } from "../ionic/IonicCompound";
-import { useEffectCycle } from "../watch/RenderCycle";
+import { useEffectCycle } from "../watch/EffectCycle";
 import { Watchable } from "../watch/Watched";
 import { CapsuleQuarks } from "../capsule/Capsule";
 import { MaybeParticle } from "../Compound/Particle";
 import { MaybeCompound } from "../Compound/Compound";
 import { IonizedCompound } from "./IonizedCompound";
+import { Mutation } from "../watch/watch";
 
 
 
@@ -620,16 +621,17 @@ function triggerIonizedModel(
    output: any,
    preopData?: any
 ) {
-   const quarks = quarksOf(model)
-   quarks.asParticle?.react()
-   quarks.asWatched?.triggerEffects()
-   if (quarks.asWatched || quarks.asParticle) {
-      quarks.recordOp({
+   const { asParticle, asWatched } = quarksOf(model)
+   if (asParticle || asWatched) {
+      const mutation = new Mutation(//TODO: clear ops after cycle is done
+         model,
          op,
          args,
          output,
          preopData
-      })
+      )
+      asParticle?.triggerCompounds(mutation)
+      asWatched?.triggerEffects(mutation)
    }
 }
 

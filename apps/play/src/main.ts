@@ -28,7 +28,7 @@ import { TestPropIons } from './TestPropIons';
 // import { TestDerived } from './testDerivedIon';
 // import { OverrideMethods } from './TestOverrideMethods';
 // import { queueTask } from '@rue/thread';
-// import { TaskCycle } from '@rue/quarky';
+// import { EffectCycle } from '@rue/quarky';
 // import { MainSite } from './AwaitTest';
 // import { ConditionalFlaskTest } from './ConditionalFlaskTest';
 // import { Root } from './TreeTest';
@@ -92,7 +92,7 @@ let end = false;
 
 
 
-let renderCycle;
+let effectCycle;
 
 // function clickOuterDivA() {
 //     console.log("CLICK outer A")
@@ -160,9 +160,9 @@ let renderCycle;
 // }
 
 // function que(msg: string) {
-//     if (!renderCycle) {
+//     if (!effectCycle) {
 //         queueTask(() => {
-//             renderCycle = null
+//             effectCycle = null
 //             console.log(msg, "TASK PRE")
 //            requestAnimationFrame(() => {
 //                 console.log(msg, "RENDER")
@@ -172,7 +172,7 @@ let renderCycle;
 //                 })
 //             })
 //         })
-//         renderCycle = true;
+//         effectCycle = true;
 //     }
 // }
 

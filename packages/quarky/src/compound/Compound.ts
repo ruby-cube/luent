@@ -1,5 +1,6 @@
 import { asParticle, Particle, MaybeParticle } from "./Particle"
 import { Watchable } from "../watch/Watched"
+import { Mutation } from "../watch/watch"
 
 export type MaybeCompound<T extends Compound = Compound> = {
    asCompound?: T
@@ -9,7 +10,7 @@ export interface Compound {
    quarks: Watchable
    particles: Particle[]
    track(entity: MaybeParticle): Particle
-   trigger(): void
+   trigger(mutation: Mutation): void
    untrackParticles(): void
 }
 
@@ -27,6 +28,6 @@ export interface Compound {
       this.particles = []
    }
 
-   export function triggerEffects(compound: Compound) {
-      compound.quarks.asWatched?.triggerEffects()
+   export function triggerEffects(compound: Compound, mutation: Mutation) {
+      compound.quarks.asWatched?.triggerEffects(mutation)
    }

@@ -6,7 +6,9 @@ import { AnyObject } from "@rue/types";
 import { toRaw } from "./ionize";
 import { isIon } from "../ion/Ion";
 import { Compound, track, untrackParticles, MaybeCompound, triggerEffects } from "../Compound/Compound";
-import { useEffectCycle } from "../watch/RenderCycle";
+import { useEffectCycle } from "../watch/EffectCycle";
+import { Mutation } from "../watch/watch";
+import { IonizedModelQuarks } from "./IonizedModelQuarks";
 
 //TODO: 
 
@@ -46,13 +48,13 @@ export class IonizedCompound implements Compound {
 
    track = track
 
-   trigger(): void {
-      this.quarks.asParticle?.react()
-      triggerEffects(this)
+   trigger(mutation: Mutation): void {
+      this.quarks.asParticle?.triggerCompounds(mutation)
+      triggerEffects(this, mutation)
    }
 
    collectAbsorbedIons(ionicModel: AnyObject) {
-      const target = toRaw(ionicModel);
+      const target = toRaw(ionicModel) as AnyObject;
       for (const key in target) {
          const value = target[key]
          if (isIon(value)) {

@@ -1,11 +1,6 @@
 import { setImmediate, clearImmediate } from "@rue/thread";
 import { $schedule, SchedulerOptions, unwrap } from "@rue/flask";
 import { SetMap } from "@rue/utils";
-import { Ionized } from "../ionized/ionize";
-import { MetaIonizedModel } from "../ionized/IonizedModelQuarks";
-import { MutationRecord } from "./watch";
-import { AnyObject } from "@rue/types";
-import { quarksOf } from "../Quarks";
 
 // returns a enum for the phases
 // export const {
@@ -40,32 +35,32 @@ export const AFTER_RENDER = Phase.AFTER_RENDER
 
 // const COMPLETE: 4 = Phase.AFTER_RENDER + 1 as 4
 
-let renderCycleCount = -1;
+let cycleCount = -1;
 
-let currentRenderCycle: TaskCycle | undefined;
-// let flushingRenderCycle: TaskCycle | undefined;
+let currentCycle: EffectCycle | undefined;
+// let flushingRenderCycle: EffectCycle | undefined;
 
-// function startFlushPhase(phase: Phase, renderCycle: TaskCycle) {
-//     renderCycle.setPhase(phase);
-//     // flushingRenderCycle = renderCycle
+// function startFlushPhase(phase: Phase, effectCycle: EffectCycle) {
+//     effectCycle.setPhase(phase);
+//     // flushingRenderCycle = effectCycle
 // }
 
-// function endFlushPhase(renderCycle: TaskCycle) {
-//     renderCycle.endPhase()
+// function endFlushPhase(effectCycle: EffectCycle) {
+//     effectCycle.endPhase()
 //     // flushingRenderCycle = undefined
 // }
 
-export function getCurrentRenderCycle() {
-   return currentRenderCycle;
+export function getCurrentEffectCylce() {
+   return currentCycle;
 }
 
 export function useEffectCycle() {
-   let renderCycle = currentRenderCycle
-   if (!renderCycle) {
-      renderCycle = new TaskCycle();
+   let effectCycle = currentCycle
+   if (!effectCycle) {
+      effectCycle = new EffectCycle();
 
    }
-   return renderCycle;
+   return effectCycle;
 }
 
 // export function getFlushingRenderCycle() {
@@ -74,17 +69,17 @@ export function useEffectCycle() {
 
 
 
-function startCollectingEffects(renderCycle: TaskCycle) {
-   if (currentRenderCycle)
+function startCollectingEffects(effectCycle: EffectCycle) {
+   if (currentCycle)
       throw new Error("Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
-   return currentRenderCycle = renderCycle;
+   return currentCycle = effectCycle;
 }
 
 function endCollectingEffects() {
-   currentRenderCycle = undefined;
+   currentCycle = undefined;
 }
 
-export class TaskCycle {
+export class EffectCycle {
 
    completedPhase: Phase | 0 = 0
    setCompletedPhase(phase: Phase) {
@@ -97,7 +92,7 @@ export class TaskCycle {
    }
 
    constructor() {
-      renderCycleCount++;
+      cycleCount++;
       startCollectingEffects(this)
       queueTask(() => { //QUESTION: Should I wrap in a flask??
          beforeRepaint(() => {
@@ -121,7 +116,7 @@ export class TaskCycle {
    }
 
    get count() {
-      return renderCycleCount;
+      return cycleCount;
    }
 
 
@@ -179,7 +174,7 @@ export class TaskCycle {
 
 
    // runTasks(hookName: Hooks) {
-   //     const tasks = currentRenderCycle?.tasks;
+   //     const tasks = currentCycle?.tasks;
    //     if (!tasks) return;
    //     const _tasks = tasks[hookName]
    //     for (const task of _tasks) {
@@ -209,26 +204,26 @@ export class TaskCycle {
 // const updateCompletedTasks: (() => void)[] = [];
 
 
-function createRenderCycleHook(phase: Phase) {
+function createCycleHook(phase: Phase) {
    return (task: () => void, options?: SchedulerOptions) => {
       const _options = options || { cancel: null }
       _options.cancel = null
-      const renderCycle = useEffectCycle()
+      const effectCycle = useEffectCycle()
       return $schedule(task, _options, {
          enroll(task) {
-            renderCycle.tasks.addToSet(task, phase)
+            effectCycle.tasks.addToSet(task, phase)
          },
          remove(task) {
-            renderCycle.tasks.deleteFromSet(task, phase)
+            effectCycle.tasks.deleteFromSet(task, phase)
          }
       })
    }
 }
 
-export const beforeRender = createRenderCycleHook(Phase.BEFORE_RENDER)
-export const onRender = createRenderCycleHook(Phase.RENDER)
-export const afterRender = createRenderCycleHook(Phase.AFTER_RENDER)
-export const onRenderCycleComplete = createRenderCycleHook(Phase.CYCLE_COMPLETE)
+export const beforeRender = createCycleHook(Phase.BEFORE_RENDER)
+export const onRender = createCycleHook(Phase.RENDER)
+export const afterRender = createCycleHook(Phase.AFTER_RENDER)
+export const onEffectCycleComplete = createCycleHook(Phase.CYCLE_COMPLETE)
 
 
 // export function onPhaseCompleted(phase: Phase, handler: () => void) {
@@ -239,7 +234,7 @@ export const onRenderCycleComplete = createRenderCycleHook(Phase.CYCLE_COMPLETE)
 //         afterRender(handler)
 //     }
 //     else if (phase === Phase.AFTER_RENDER) {
-//         onRenderCycleComplete(handler)
+//         onEffectCycleComplete(handler)
 
 //     }
 //     else if (phase === Phase.SYNC) {
@@ -249,10 +244,10 @@ export const onRenderCycleComplete = createRenderCycleHook(Phase.CYCLE_COMPLETE)
 
 
 // export function runPrerenderEffectsAndTasks() {
-//     const renderCycle = getCurrentRenderCycle()
-//     if (renderCycle) {
-//         renderCycle.runTasks(Phase.BEFORE_RENDER);
-//         renderCycle.runTasks(Hooks.AFTER_PRERENDER_PHASE)
+//     const effectCycle = getCurrentEffectCylce()
+//     if (effectCycle) {
+//         effectCycle.runTasks(Phase.BEFORE_RENDER);
+//         effectCycle.runTasks(Hooks.AFTER_PRERENDER_PHASE)
 //     }
 // }
 

@@ -9,6 +9,7 @@ import { emitSignal } from "../debug/debug";
 import { Watchable } from "../watch/Watched";
 import { Ion } from "../ion/Ion";
 import { MaybeCompound, triggerEffects } from "../Compound/Compound";
+import { Mutation } from "../watch/watch";
 
 /**
 * Managed Derivation Ion
@@ -98,10 +99,10 @@ export function createMemoizedIon(
    return $memoizedIon;
 }
 
-function trigger(this: IonicCompound<MemoizedIon>): void {
+function trigger(this: IonicCompound<MemoizedIon>, mutation: Mutation): void {
    this.dirty = true;
-   this.quarks.asParticle?.react()
-   triggerEffects(this)
+   this.quarks.asParticle?.triggerCompounds(mutation)
+   triggerEffects(this, mutation)
 }
 
 /* Not sure if this is correct. 

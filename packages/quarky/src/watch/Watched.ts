@@ -1,5 +1,6 @@
 import { SetMap } from "@rue/utils";
-import { Task, onRenderCycleComplete, Phase, useEffectCycle } from "./TaskCycle";
+import { Task, onEffectCycleComplete, Phase, useEffectCycle } from "./EffectCycle";
+import { Mutation } from "./watch";
 
 
 export type Watchable = {
@@ -9,7 +10,7 @@ export type Watchable = {
 export class Watched<T extends Watchable = Watchable> {
 
    constructor(
-      public watchable: T
+      public quarks: T
    ) {
       this.effects = new SetMap()
    }
@@ -30,7 +31,7 @@ export class Watched<T extends Watchable = Watchable> {
       const mustSetUpQueueTransfer = toBeQueued.size > 0;
 
       if (mustSetUpQueueTransfer) {
-         onRenderCycleComplete(() => {
+         onEffectCycleComplete(() => {
             for (const effect of toBeQueued!) {
                this.effects.addToSet(effect, phase)
             }
@@ -68,13 +69,13 @@ export class Watched<T extends Watchable = Watchable> {
    }
 
    discard(){
-      this.watchable.asWatched = undefined;
+      this.quarks.asWatched = undefined;
       //QUESTION: Do I need to release watchable too? this.watchable = undefined?
    }
 
    prevCycle?: any //TODO: ScheduleCycle
 
-   triggerEffects() { // the surrounding effect when original trigger happened
+   triggerEffects(mutation: Mutation) { // the surrounding effect when original trigger happened
       // const currentCycle = $currentCycle(); 
       // if (this.prevCycle === currentCycle) return; // prevents repeats
       // this.prevCycle = currentCycle
@@ -86,7 +87,11 @@ export class Watched<T extends Watchable = Watchable> {
             this.scheduleEffects(effects, phase)
          }
       }
+
+      this.mutations.push(mutation);
    }
+
+   mutations: Mutation[] = []
 
    private runSyncEffects(effects: Set<Task>) {
       // const tracker = getDependencyTracker();
@@ -99,9 +104,9 @@ export class Watched<T extends Watchable = Watchable> {
    }
 
    private scheduleEffects(effects: Set<Task>, phase: Exclude<Phase, Phase.SYNC>) {
-      const renderCycle = useEffectCycle()
+      const effectCycle = useEffectCycle()
       for (const effect of effects) { //TODO: Can we skip this loop and just pass the whole set to the task runner?
-         renderCycle.scheduleTask(effect, phase)
+         effectCycle.scheduleTask(effect, phase)
       }
    }
 
@@ -120,6 +125,6 @@ export class Watched<T extends Watchable = Watchable> {
 }
 
 
-export function asWatched(watchable: Watchable): Watched {
-   return watchable.asWatched ?? (watchable.asWatched = new Watched(watchable))
+export function asWatched(quarks: Watchable): Watched {
+   return quarks.asWatched ?? (quarks.asWatched = new Watched(quarks))
 }

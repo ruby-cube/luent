@@ -190,9 +190,9 @@ export class IonizedModelQuarks<T extends AnyObject = AnyObject>
    // __DEV__origin?: string
    // __DEV__labels?: Set<string>
 
-   ops?: MutationRecord[]
+   ops?: Mutation[]
 
-   recordOp(op: MutationRecord) {
+   recordOp(op: Mutation) {
       const ops = this.ops ?? (this.ops = [])
       ops.push(op)
    }

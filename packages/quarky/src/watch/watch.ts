@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { asWatched, Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, MaybeIonicCompound } from "../ionic/IonicCompound";
-import { getCurrentRenderCycle, Phase, useEffectCycle } from "./TaskCycle";
+import { getCurrentEffectCylce, Phase, useEffectCycle } from "./EffectCycle";
 import { WatchDebugOptions } from "./debug";
 import { ionize, IonizedModel, isIonizedModel, toRaw, } from "../ionized/ionize";
 import { areEqual } from "./areEqual";
@@ -12,7 +12,7 @@ import { asParticle } from "../Compound/Particle";
 import { isPropIon, PropIon } from "../ionized/PrimaryPion";
 import { toValue } from "../ion/toIons";
 import { ChangeEvent } from "./ChangeEvent";
-import { QUARKS, quarksOf } from "../Quarks";
+import { Quarks, QUARKS, quarksOf } from "../Quarks";
 import { Ion, isIon } from "../ion/Ion";
 import { isMemoizedIon } from "../ionic/MemoizedIon";
 import { untrackedCall } from "../ionic/x_DependencyTracker";
@@ -20,7 +20,7 @@ import { createWatchedDerivation } from "./WatchedDerivation";
 import { isFunction, noop } from "@rue/utils";
 
 
-type RenderCycleOptions = {
+type EffectCycleOptions = {
    phase?: Phase;
    cycle?: 'current' | 'next'
 }
@@ -31,22 +31,23 @@ export type WatchOptions = {
    stateChange?: boolean;
    // isEqual?: (oldValue?: any, newValue?: any) => boolean;
    // retrack?: boolean;
-} & RenderCycleOptions & SustainedListenerOptions & WatchDebugOptions
+} & EffectCycleOptions & SustainedListenerOptions & WatchDebugOptions
 
 export type EffectOptions = {
    retrack?: true;
    // only?: (boolean | AnyObject | Ion)[];
    // also?: AnyObject[]
-} & RenderCycleOptions & SustainedListenerOptions & WatchDebugOptions
+} & EffectCycleOptions & SustainedListenerOptions & WatchDebugOptions
 
+export class Mutation {
 
-
-export type MutationRecord = {
-   target: AnyObject | AtomicIon | PropIon,
-   op: string,
-   args: any[],
-   output: any,
-   preopData?: any
+   constructor(
+      public target: AnyObject | AtomicIon, //QUESTION: make sure these are readonly? Do I want these exposed to app devs? or just for internal use?
+      public op: '[[set]]' | string,
+      public args: [PropertyKey, unknown] | unknown[],
+      public output?: unknown,
+      public preopData?: unknown // old state for [[set]] ops
+   ){}
 }
 
 
@@ -346,7 +347,7 @@ function getMutations(subjects: (AnyIon | AnyObject)[]) {
    //FIX: Temporary
    return []
    for (const subject of subjects) {
-      const mutations = getCurrentRenderCycle()?.getOps(subject)
+      const mutations = getCurrentEffectCylce()?.getOps(subject)
       if (!mutations) throw new Error("No mutations :(")
       return mutations //FIX: temporary
    }
@@ -370,7 +371,7 @@ function getMutations(subjects: (AnyIon | AnyObject)[]) {
 //     const $activeEffect = ref(undefined) as AtomicIon<ThisEffect | undefined>
 
 //     function mutationEffect() {
-//         const mutations = getCurrentRenderCycle()?.getOps(subject)
+//         const mutations = getCurrentEffectCylce()?.getOps(subject)
 //         if (!mutations) throw new Error("No mutations :(")
 
 //         try {
@@ -434,7 +435,7 @@ function setUpWatcher(
    subject: Watched,
    effect: Effect,
    phase: Phase,
-   options: SustainedListenerOptions & RenderCycleOptions,
+   options: SustainedListenerOptions & EffectCycleOptions,
    compound?: IonicCompound //
 ) {
    let wrappedEffect: () => void;

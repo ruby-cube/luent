@@ -1,6 +1,7 @@
 import { Particle, MaybeParticle, asParticle } from "../Compound/Particle";
 import { Compound, MaybeCompound,  track, untrackParticles } from "../Compound/Compound";
 import { Watchable } from "../watch/Watched";
+import { Mutation } from "../watch/watch";
 
 const trackerStack: (Compound | null)[] = []
 
@@ -73,7 +74,7 @@ export class IonicCompound<T extends MaybeCompound = { asCompound?: IonicCompoun
 
    track = track
 
-   trigger!: () => void
+   trigger!: (mutation: Mutation) => void
 
    trackedCall(fn: () => any) {
       pushTracker(this);

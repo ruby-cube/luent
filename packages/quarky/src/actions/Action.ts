@@ -1,128 +1,136 @@
-//@ts-nocheck
-import { TypedKey } from "@rue/lumo";
-import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
-import { ObservedProp } from "../ionized/ObservedProp";
-import { Phase, TaskCycle, useEffectCycle } from "../watch/TaskCycle";
-import { PropIon } from "../ionized/PrimaryPion";
+import { AnyObject } from "@rue/types";
+import { hasQuarks, Quarks, QUARKS, quarksOf } from "../Quarks";
+import { Mutation } from "../watch/watch";
+
+// Example:
+//
+// const INSERT_TEXT = defineAction({
+//    do(action) {
+//       return (document, word, index) => {
+//          action.snapshot(document, DEEP);
+//          return document.insertText(word, index)
+//       }
+//    },
+//    catch(err, action) {
+//       action.rollback()
+//    }
+// })
+// 
+// __DEV__label(INSERT_TEXT, 'insert text') //TODO:
+//
+// const output = doAction(INSERT_TEXT, [document, word, index])
 
 
-//TODO: 
-// - action nesting
-// - state rollback
-// - history/state record
+// Example of selective deep snapshotting:
+//
+// action.snapshot(document, { // can snapshot derivations as well!
+//    lines: true, // shallow snapshot
+//    panels: DEEP // deep snapshot
+// })
 
-class ActionRecord {
-    success: boolean = true
+export const DEEP = true;
 
-    constructor() {
+type Task = () => void;
 
-    }
+class Action {
 
-    nestedActions?: ActionRecord[]
+   mutations: Mutation[] = []
 
-    tracked: Set<AtomicIon | PropIon> = new Set()
-
-    trackChange(reactivePrimitive: AtomicIon | PropIon) {
-        if (this.tracked.has(reactivePrimitive)) return;
-        this.tracked.add(reactivePrimitive);
-        watch(subject, ({newState, oldState}) => {
-            if (!action.success) {
-                subject.value = oldState
+   snapshot(target: AnyObject, deep: boolean) {
+      if (!hasQuarks(target)) return false; //TODO: or, if it is a plain object, we can do the clone method instead of mutations. What about derivations from neutrons?
+      if (deep) {
+         //TODO: What about arrays, or arrays with properties on them, or tuples?
+         for (const key in target) {
+            const value = (<AnyObject>target)[key]
+            if (hasQuarks(value)) {
+               this.snapshot(value, true)
             }
-        })
-    }
-    //TODO: trackMutation, recordChange? recordMutation? for history
+         }
+      }
+      else {
+         storeMutations(this, <{ [QUARKS]: StatefulQuarks }>target)
+      }
+      return true;
+   }
 
-    trackMutation(){
+   rollback() {
+      const mutations = this.mutations
+      for (const mutation of mutations) {
+         mutation.undo()
+      }
+   }
 
-    }
+   tasks: Task[] | undefined = []
+
+   onCompleted(task: Task) {
+      this.tasks!.push(task)
+   }
+
+   emitCompleted() {
+      const tasks = this.tasks!;
+      for (const task of tasks) {
+         task()
+      }
+      this.tasks = undefined; //releases reference to quarks
+   }
 }
 
+export type StatefulQuarks = {
+   recordOp: undefined | ((mutation: Mutation) => void);
+} & Quarks
 
-type Action = (...args: unknown[]) => unknown
-
-const actionMap: Map<string | TypedKey<Action>, Action> = new Map()
-
-/**
- * Limitation: Actions must be synchronous. Perform any asynchronous calls before action is performed and perform action after asynchronous tasks are completed 
-*/
-function registerAction(actionKey: string | TypedKey<Action>, actionFn: Action) {
-    actionMap.set(actionKey, actionFn)
+function storeMutations(action: Action, target: { [QUARKS]: StatefulQuarks }) {
+   const quarks = quarksOf(target)
+   quarks.recordOp = (mutation: Mutation) => {
+      const mutations = action.mutations;
+      if (mutations.at(-1) === mutation) return; // prevents the same mutation from being recorded multiple times
+      action.mutations.push(mutation)
+   };
+   action.onCompleted(() => {
+      quarks.recordOp = undefined;
+   })
 }
 
-function getAction(actionKey: string | TypedKey<(...args: unknown[]) => unknown>) {
-    const action = actionMap.get(actionKey)
-    if (!action) throw new Error(`Action not found. ${String(actionKey)} must be registered as an action`)
-    return action
+type Name = symbol
+
+type ActionDefinition = {
+   do(action: Action): (...args: any[]) => any
+   catch(error: unknown, action: Action): any
 }
 
+const actionMap: Map<Name, ActionDefinition> = new Map()
 
-// Action stack
-let currentAction: undefined | ActionRecord
-let prevAction: undefined | ActionRecord
-
-function getCurrentAction() {
-    return currentAction;
+export function defineAction(action: ActionDefinition) { //TODO: generics
+   const name = Symbol()
+   actionMap.set(name, action)
+   return name;
 }
 
-function pushAction(action: ActionRecord) {
-    prevAction = currentAction;
-    currentAction = action
+export function doAction<T>(name: Name, args: any[]) { //TODO: Generics
+   const action = actionMap.get(name);
+   if (!action) throw new Error(`No action `)
+   const thisAction = new Action()
+   try {
+      const output = action.do(thisAction)(...args)
+      if (output instanceof Promise) {
+         const awaitPromise = async () => {
+            try {
+               return await output;
+            }
+            catch (err) {
+               return action.catch(err, thisAction)
+            }
+         }
+         return awaitPromise()
+      }
+      else {
+         return output;
+      }
+   }
+   catch (err) {
+      return action.catch(err, thisAction)
+   }
+   finally {
+      thisAction.emitCompleted()
+   }
 }
-
-function popAction() {
-    currentAction = prevAction;
-    prevAction = undefined;
-}
-
-/**
- * Limitation: 
- * - Actions must be synchronous. Perform any asynchronous calls before action is performed and perform action after asynchronous tasks are completed 
- * - Actions must be performed BEFORE the render phase of a render cycle.
-*/
-function doAction(actionKey: string | TypedKey<(...args: unknown[]) => unknown>, args: unknown[], propagatesError: boolean = true) {
-    const renderCycle = useEffectCycle()
-    if (renderCycle.phase > Phase.BEFORE_RENDER) throw new Error('doAction can only be called before render. Make sure doAction call is not nested in a watcher effect that is scheduled for the render or post-render phase')
-    const action = new ActionRecord(actionKey, args)
-    try {
-        pushAction(action)
-        emitBeforeAction(actionKey, action)
-        const output = getAction(actionKey)(...args)
-        emitAfterAction(actionKey, action)
-        return [output, null]
-    }
-    catch (err) {
-        if (propagatesError) {
-            if (typeof err === 'string')
-                throw new Error(err)
-            else throw new Error(err.message)
-        }
-        return [null, err]
-    }
-    finally {
-        popAction()
-    }
-}
-
-
-function trackAction(reactivePrimitive: AtomicIon | PropIon) {
-    const action = getCurrentAction();
-    if (!action) return;
-    action.trackChange(reactivePrimitive)
-}
-
-
-/* 
-EXAMPLE:
-
-const [output, err] =
-    doAction(INSERT_TEXT, [word, index])
-
-if (err) {
-    displayErrorMessage(err)
-}
-else {
-    storeResult(output)
-} 
-*/
-

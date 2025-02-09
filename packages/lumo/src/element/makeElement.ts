@@ -1,5 +1,5 @@
 import { DOMNode, Slot } from "../component/InternalComponent";
-import { DerivedIon, ReactiveGet, isIon, getCurrentRenderCycle, Phase, isAtomicIon, AtomicIon, watch, MaybeIon, isDerivedIon, WritableDerivedIon } from "@rue/quarky";
+import { DerivedIon, ReactiveGet, isIon, getCurrentEffectCylce, Phase, isAtomicIon, AtomicIon, watch, MaybeIon, isDerivedIon, WritableDerivedIon } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
 import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask";

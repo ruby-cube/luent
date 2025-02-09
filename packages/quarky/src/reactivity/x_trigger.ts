@@ -1,7 +1,7 @@
 import { asParticle, isIonicAtom, ReactivePrimitive } from "../Compound/Particle";
 import { AtomicIon } from "../ion/AtomicIon";
 import { asWatched, isWatched } from "../watch/Watched";
-import { getCurrentRenderCycle, useEffectCycle } from "../watch/TaskCycle";
+import { getCurrentEffectCylce, useEffectCycle } from "../watch/EffectCycle";
 import { isIonicEffectAtom } from "../ionic/IonicEffect";
 import { isCurrentWatchSubject } from "../watch/watch";
 import { PropIon } from "../ionized/PrimaryPion";
@@ -10,8 +10,8 @@ import { untrackedCall } from "../ionic/IonicCompound";
 
 
 export function trigger(target: AtomicIon | PropIon, newValue?: any, oldValue?: any) {
-    if (__DEV__ && getCurrentRenderCycle() && getCurrentRenderCycle()!.phase > 1)
-        console.warn(`CASE RESEARCH: Reactive entity triggered during phase ${getCurrentRenderCycle()!.phase}:`, target, untrackedCall(target))
+    if (__DEV__ && getCurrentEffectCylce() && getCurrentEffectCylce()!.phase > 1)
+        console.warn(`CASE RESEARCH: Reactive entity triggered during phase ${getCurrentEffectCylce()!.phase}:`, target, untrackedCall(target))
 
     // prevent infinite loops for synchronous effects
     if (isIonicEffectAtom(target) || isCurrentWatchSubject(target))

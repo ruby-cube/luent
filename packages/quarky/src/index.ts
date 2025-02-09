@@ -11,7 +11,7 @@ export * from "./ion/toIons" //TODO: limit exports to public api
 export * from "./ion/Neutron" //TODO: limit exports to public api
 export * from "./watch/watch" //TODO: limit exports to public api
 export * from "./watch/debug" //TODO: limit exports to public api
-export * from "./watch/TaskCycle" //TODO: limit exports to public api
+export * from "./watch/EffectCycle" //TODO: limit exports to public api
 export * from "./ionized/TimeTraveler" //TODO: limit exports to public api
 export * from "./ionized/ionize" //TODO: limit exports to public api
 export * from "./watch/areEqual" //TODO: limit exports to public api

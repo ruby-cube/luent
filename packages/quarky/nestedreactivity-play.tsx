@@ -1,7 +1,7 @@
 //@ts-nocheck
 
 import ""
-import { watchEffect, ionize, onRenderCycleComplete, afterRender } from "./src"
+import { watchEffect, ionize, onEffectCycleComplete, afterRender } from "./src"
 
 const $frog = ionize({
     name: "sir robin",
@@ -97,7 +97,7 @@ function ListBlock(attributes: {
 
     })
 
-    onRenderCycleComplete(() => {
+    onEffectCycleComplete(() => {
 
     })
 

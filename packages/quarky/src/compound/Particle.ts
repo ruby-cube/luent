@@ -1,5 +1,6 @@
 import { IterableSet } from "@rue/utils";
 import { Compound } from "./Compound";
+import { Mutation } from "../watch/watch";
 
 export const CLEAN_UP = 'x__cleanUp'
 
@@ -28,10 +29,10 @@ export class Particle {
       this.cleanUp?.(this.quarks)
    }
 
-   react() {
+   triggerCompounds(mutation: Mutation) {
       const compounds = this.compounds;
       for (const compound of compounds){
-         compound.trigger()
+         compound.trigger(mutation)
       }
    }
 
