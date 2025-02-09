@@ -146,7 +146,6 @@ export type GetPreopData = (target: AnyObject, args?: any[]) => any;
 type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
 
 
-
 const ionicStructureMap = new Map([[
    Object, {
       nontrackableKeys: {
@@ -631,7 +630,7 @@ function triggerIonizedModel(
          preopData
       )
       asParticle?.triggerCompounds(mutation)
-      asWatched?.triggerEffects(mutation)
+      asWatched?.triggerEffects()
    }
 }
 

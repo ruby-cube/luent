@@ -2,31 +2,37 @@ import { AnyObject } from "@rue/types";
 import { hasQuarks, Quarks, QUARKS, quarksOf } from "../Quarks";
 import { Mutation } from "../watch/watch";
 
-// Example:
-//
-// const INSERT_TEXT = defineAction({
-//    do(action) {
-//       return (document, word, index) => {
-//          action.snapshot(document, DEEP);
-//          return document.insertText(word, index)
-//       }
-//    },
-//    catch(err, action) {
-//       action.rollback()
-//    }
-// })
-// 
-// __DEV__label(INSERT_TEXT, 'insert text') //TODO:
-//
-// const output = doAction(INSERT_TEXT, [document, word, index])
+/**  
+* Example:
+*
+* const INSERT_TEXT = defineAction({
+*    do(action) {
+*       return (document, word, index) => {
+*          action.snapshot(document, DEEP);
+*          return document.insertText(word, index)
+*       }
+*    },
+*    catch(err, action) {
+*       action.rollback()
+*    }
+* })
+* 
+* __DEV__label(INSERT_TEXT, 'insert text') //TODO:
+*
+* const output = doAction(INSERT_TEXT, [document, word, index]) 
+* 
+**/
 
+/**
+* Example of selective deep snapshotting:
+*
+* action.snapshot(document, { // can snapshot derivations as well!
+*    lines: true, // shallow snapshot
+*    panels: DEEP // deep snapshot
+* })
+* 
+**/
 
-// Example of selective deep snapshotting:
-//
-// action.snapshot(document, { // can snapshot derivations as well!
-//    lines: true, // shallow snapshot
-//    panels: DEEP // deep snapshot
-// })
 
 export const DEEP = true;
 

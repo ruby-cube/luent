@@ -49,8 +49,9 @@ export class IonizedCompound implements Compound {
    track = track
 
    trigger(mutation: Mutation): void {
+      this.quarks.recordOp?.(mutation)
       this.quarks.asParticle?.triggerCompounds(mutation)
-      triggerEffects(this, mutation)
+      triggerEffects(this)
    }
 
    collectAbsorbedIons(ionicModel: AnyObject) {

@@ -28,6 +28,6 @@ export interface Compound {
       this.particles = []
    }
 
-   export function triggerEffects(compound: Compound, mutation: Mutation) {
-      compound.quarks.asWatched?.triggerEffects(mutation)
+   export function triggerEffects(compound: Compound) {
+      compound.quarks.asWatched?.triggerEffects()
    }

@@ -75,7 +75,7 @@ export class Watched<T extends Watchable = Watchable> {
 
    prevCycle?: any //TODO: ScheduleCycle
 
-   triggerEffects(mutation: Mutation) { // the surrounding effect when original trigger happened
+   triggerEffects() { // the surrounding effect when original trigger happened
       // const currentCycle = $currentCycle(); 
       // if (this.prevCycle === currentCycle) return; // prevents repeats
       // this.prevCycle = currentCycle
@@ -87,11 +87,8 @@ export class Watched<T extends Watchable = Watchable> {
             this.scheduleEffects(effects, phase)
          }
       }
-
-      this.mutations.push(mutation);
    }
 
-   mutations: Mutation[] = []
 
    private runSyncEffects(effects: Set<Task>) {
       // const tracker = getDependencyTracker();

@@ -59,7 +59,7 @@ export function detachedCall(fn: Function) {
 
 
 
-export class IonicCompound<T extends MaybeCompound = { asCompound?: IonicCompound } & Watchable> implements Compound {
+export class IonicCompound<T extends MaybeCompound = { asCompound?: IonicCompound } & Watchable > implements Compound {
 
    constructor(
       readonly quarks: T,

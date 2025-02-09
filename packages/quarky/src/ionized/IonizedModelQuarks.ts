@@ -12,6 +12,7 @@ import { CapsuleQuarks } from "../capsule/Capsule"
 import { MaybeParticle, Particle } from "../Compound/Particle"
 import { MaybeCompound } from "../Compound/Compound"
 import { IonizedCompound } from "./IonizedCompound"
+import { Mutation } from "../watch/watch"
 
 
 
@@ -58,6 +59,7 @@ export class IonizedModelQuarks<T extends AnyObject = AnyObject>
    ) {
       if (__DEV__) this.__DEV__asTraceable = new Traceable()
    }
+   recordOp: ((mutation: Mutation) => void) | undefined
    asCompound?: IonizedCompound | undefined
    asParticle?: Particle | undefined
    asWatched?: Watched<Watchable> | undefined
@@ -190,11 +192,24 @@ export class IonizedModelQuarks<T extends AnyObject = AnyObject>
    // __DEV__origin?: string
    // __DEV__labels?: Set<string>
 
-   ops?: Mutation[]
+   reversionOps: Map<string, (mutation: Mutation) => true> = new Map()
 
-   recordOp(op: Mutation) {
-      const ops = this.ops ?? (this.ops = [])
-      ops.push(op)
+   revertOp(mutation: Mutation) {
+      const op = mutation.op
+      this.reversionOps.get(op)?.(mutation) || (this.reversionOps.set(op, (mutation: Mutation) => {
+         const initialized = true;
+         const configs = this.structureConfigs;
+         for (const config of configs) {
+            const mutatingOps = config.mutatingOps
+            if (mutatingOps && op in mutatingOps) {
+               const mutatingOp = mutatingOps[op]
+               if (!mutatingOp) continue;
+               mutatingOp.revert?.(mutation.target, mutation)
+               return initialized;
+            }
+         }
+         return initialized;
+      }))
    }
 }
 

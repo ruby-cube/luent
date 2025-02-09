@@ -9,6 +9,8 @@ import { __DEV__initTraceability, attachCapsuleMethods, CapsuleQuarks, Capsule }
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Atomic, WritableIon } from "./Ion";
 import { Mutation } from "../watch/watch";
+import { StatefulQuarks } from "../actions/Action";
+import { asParticle } from "../Compound/Particle";
 
 /** INTERNAL */
 export type $AtomicIon = WritableIon & Capsule & {
@@ -28,6 +30,7 @@ export type AtomicIon = {
    & CapsuleQuarks
 
 
+
 function getReactiveState(ion: AtomicIon) {
    if (__DEV__) emitSignal();
    getActiveTracker()?.track(ion)
@@ -44,18 +47,17 @@ function setReactiveState(ion: AtomicIon, oldState: unknown, newState: unknown) 
 
    const state = shouldIonize(newState, ion.stateIsIonized) ? ionize(newState) : newState
    ion.state = state; // must set state before triggering effects and derivations
-   const { asParticle, asWatched } = ion
-   if (asParticle || asWatched) {
-      const mutation = new Mutation(
-         ion,
-         '[[set]]',
-         ['state', newState],
-         newState,
-         oldState
-      )
-      asParticle?.triggerCompounds(mutation)
-      asWatched?.triggerEffects(mutation)
-   }
+   const { recordOp, asParticle, asWatched } = ion
+   const mutation = recordOp || asParticle ? new Mutation(
+      ion,
+      '[[set]]',
+      ['state', newState],
+      newState,
+      oldState
+   ) : undefined
+   recordOp?.(mutation!)
+   asParticle?.triggerCompounds(mutation!)
+   asWatched?.triggerEffects()
    return state;
 }
 

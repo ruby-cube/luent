@@ -39,15 +39,42 @@ export type EffectOptions = {
    // also?: AnyObject[]
 } & EffectCycleOptions & SustainedListenerOptions & WatchDebugOptions
 
+function undoSetOp(mutation: Mutation) {
+   const target = mutation.target as AnyObject;
+   const [key] = mutation.args as [PropertyKey]
+   const oldValue = mutation.preopData
+   target[key] = oldValue;
+}
+
+function undoOp(mutation: Mutation) {
+   quarksOf(mutation.target).revertOp(mutation)
+}
+
+
+
 export class Mutation {
 
    constructor(
       public target: AnyObject | AtomicIon, //QUESTION: make sure these are readonly? Do I want these exposed to app devs? or just for internal use?
       public op: '[[set]]' | string,
       public args: [PropertyKey, unknown] | unknown[],
-      public output?: unknown,
-      public preopData?: unknown // old state for [[set]] ops
-   ){}
+      public output: unknown,
+      public preopData: unknown // old state for [[set]] ops
+   ) { }
+
+   undo() {
+      if (this.op === '[[set]]') {
+         const target = this.target as AnyObject;
+         const [key] = this.args as [PropertyKey]
+         const oldValue = this.preopData
+         target[key] = oldValue;
+      } else if (isIonizedModel(this.target)) {
+         quarksOf(this.target).revertOp(this)
+      }
+      else {
+         if (__DEV__) console.warn('invalid mutation target')
+      }
+   }
 }
 
 

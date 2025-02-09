@@ -101,8 +101,9 @@ export function createMemoizedIon(
 
 function trigger(this: IonicCompound<MemoizedIon>, mutation: Mutation): void {
    this.dirty = true;
+   this.quarks.recordOp?.(mutation)
    this.quarks.asParticle?.triggerCompounds(mutation)
-   triggerEffects(this, mutation)
+   triggerEffects(this)
 }
 
 /* Not sure if this is correct. 
