@@ -1,25 +1,32 @@
-import { asAtom, IonicAtom, MaybeIonicAtom } from "./Atom"
+import { asParticle, Particle, MaybeParticle } from "./Particle"
+import { Watchable } from "../watch/Watched"
 
-export interface MaybeCompound<T extends Compound = Compound> {
+export type MaybeCompound<T extends Compound = Compound> = {
    asCompound?: T
-}
+} & Watchable
 
 export interface Compound {
-   atoms: IonicAtom[]
-   track(entity: MaybeIonicAtom): IonicAtom
+   quarks: Watchable
+   particles: Particle[]
+   track(entity: MaybeParticle): Particle
    trigger(): void
+   untrackParticles(): void
 }
 
-export function track(this: Compound, entity: MaybeIonicAtom) {
-   const atom = asAtom(entity)
-   if (atom.compounds.has(this)) return atom;
-   this.atoms.push(atom)
-   return atom;
-}
+   export function track(this: Compound, entity: MaybeParticle) {
+      const particle = asParticle(entity)
+      if (particle.compounds.has(this)) return particle;
+      this.particles.push(particle)
+      return particle;
+   }
 
-export function untrackAtoms(this: Compound) {
-   this.atoms?.forEach(atom => {
-      atom.removeCompound(this)
-   })
-   this.atoms = []
-}
+   export function untrackParticles(this: Compound) {
+      this.particles?.forEach(particle => {
+         particle.removeCompound(this)
+      })
+      this.particles = []
+   }
+
+   export function triggerEffects(compound: Compound) {
+      compound.quarks.asWatched?.triggerEffects()
+   }

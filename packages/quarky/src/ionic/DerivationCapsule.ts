@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types";
 import { quarksOf, QUARKS, Quarks, hasQuarks } from "../Quarks";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule, CapsuleQuarks } from "../capsule/Capsule";
 import { Muon } from "../reactivity/reactivity-system";
-import { MaybeIonicAtom } from "../compound/Atom";
+import { MaybeParticle } from "../Compound/Particle";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { isIon } from "../ion/Ion";
 
@@ -30,7 +30,7 @@ export type __DEV__DerivationCapsule = {
 }
    & Quarks<$DerivationCapsule>
    & CapsuleQuarks
-   & MaybeIonicAtom
+   & MaybeParticle
    & MaybeIonicCompound
 
 export const DERIVATION_CAPSULE = Symbol('DEV Derivation Capsule')

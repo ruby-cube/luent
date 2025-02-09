@@ -7,6 +7,7 @@ import { IonicCompound } from "../ionic/IonicCompound"
 import { __DEV__getTrace, getPublicTrace } from "../../../flask/debug"
 import { Traceable } from "../debug/debug"
 import { CustomIonizedModelConfig } from "./IonizedModel"
+import { quarksOf } from "../Quarks"
 
 
 
@@ -66,7 +67,7 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
    }
 
    private asDerivation?: IonicCompound
-   
+
    trackAbsorbedIons() {
       if (this.asDerivation && this.hasNewAbsorbedIons === false) return;
       const derivation = this.asDerivation || (this.asDerivation = new IonicCompound(this.ionicModel, IONIZED_MODEL, false))
@@ -174,6 +175,12 @@ export class MetaIonizedModel<T extends AnyObject = AnyObject> implements Reacti
    // __DEV__origin?: string
    // __DEV__labels?: Set<string>
 
+   ops?: MutationRecord[]
+
+   recordOp(op: MutationRecord) {
+      const ops = this.ops ?? (this.ops = [])
+      ops.push(op)
+   }
 }
 
 

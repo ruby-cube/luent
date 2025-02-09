@@ -37,13 +37,13 @@ function getReactiveState(ion: AtomicIon) {
 function setReactiveState(ion: AtomicIon, oldState: unknown, newState: unknown) {
    if (oldState === newState) {
       //TODO: I dunno how to implement this yet. For dev traces
-      // if (__DEV__) ion.asAtom?.react() ?? (ion.asAtom = asAtom(ion), ion.asAtom.react())
+      // if (__DEV__) ion.asParticle?.react() ?? (ion.asParticle = asParticle(ion), ion.asParticle.react())
       return oldState;
    }
 
    const state = shouldIonize(newState, ion.stateIsIonized) ? ionize(newState) : newState
    ion.state = state; // must set state before triggering effects and derivations
-   ion.asAtom?.react()
+   ion.asParticle?.react()
    ion.asWatched?.triggerEffects()
    return state;
 }
@@ -64,7 +64,7 @@ export function createPrimaryIon(
       stateIsIonized: isIonizedModel(state),
       entity: $ion,
       type: PRIMARY_ION,
-      asAtom: undefined,
+      asParticle: undefined,
       asWatched: undefined,
       asReadonly: undefined,
       asReined: undefined,

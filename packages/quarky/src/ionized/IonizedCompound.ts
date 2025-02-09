@@ -1,28 +1,16 @@
 import { QUARKS, Quarks } from "../Quarks";
 import { Watchable } from "../watch/Watched";
 import { CapsuleQuarks } from "../capsule/Capsule";
-import { MaybeIonicAtom } from "../compound/Atom";
-import { IonicCompound, MaybeIonicCompound } from "../ionic/IonicCompound";
+import { MaybeParticle, Particle } from "../Compound/Particle";
 import { AnyObject } from "@rue/types";
 import { toRaw } from "./ionize";
 import { isIon } from "../ion/Ion";
+import { Compound, track, untrackParticles, MaybeCompound, triggerEffects } from "../Compound/Compound";
+import { useEffectCycle } from "../watch/RenderCycle";
 
 //TODO: 
 
-// // /** INTERNAL */
-export type IonizedModel = {
-   [QUARKS]: IonizedModelQuarks
-}
 
-/** 
- * INTERNAL 
- * */
-export type IonizedModelQuarks =
-   Quarks<IonizedModel>
-   & Watchable
-   & CapsuleQuarks
-   & MaybeIonicAtom
-   & MaybeIonicCompound<IonizedCompound>
 
 // export const MEMOIZED_ION = Symbol('Memoized Ion')
 
@@ -30,19 +18,37 @@ export type IonizedModelQuarks =
 //    return hasQuarks(value) && quarksOf(value).type === MEMOIZED_ION
 // }
 
+// triggerDerivations(newValue: any, oldValue: any) {
+//    for (const derivation of this.derivations) {
+//       if (isIonizedModel(derivation.o)) { //TODO: move to IonizedCompound?
+//          const reactive = derivation.o
+//          const quarks = this.quarks;
+//          useEffectCycle().recordOp(reactive, {
+//             target: quarks,
+//             op: 'set',
+//             args: [newValue],
+//             output: newValue,
+//             preopData: oldValue
+//          })
+//       }
+//       derivation.trigger();
+//    }
+// }
 
 
-export class IonizedCompound extends IonicCompound<IonizedModelQuarks> {
+export class IonizedCompound implements Compound {
 
    constructor(
       readonly quarks: IonizedModelQuarks
    ) {
-      super(quarks);
    }
+   particles: Particle[] = []
 
-   override trigger(): void {
-      this.quarks.asAtom?.react()
-      this.quarks.asWatched?.triggerEffects()
+   track = track
+
+   trigger(): void {
+      this.quarks.asParticle?.react()
+      triggerEffects(this)
    }
 
    collectAbsorbedIons(ionicModel: AnyObject) {
@@ -50,8 +56,9 @@ export class IonizedCompound extends IonicCompound<IonizedModelQuarks> {
       for (const key in target) {
          const value = target[key]
          if (isIon(value)) {
-            this.track(<MaybeIonicAtom>value)
+            this.track(<MaybeParticle>value)
          }
       }
    }
+   untrackParticles = untrackParticles
 }

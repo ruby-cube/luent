@@ -2,15 +2,21 @@ import { AnyObject } from "@rue/types";
 import { ionize, Ionized, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
-import { IonizedModel, storeSnapshot } from "./ionize";
-import { trigger, triggerIonicAtom, triggerIonizedModel } from "../reactivity/x_trigger";
+import { storeSnapshot } from "./ionize";
+import { trigger, } from "../reactivity/x_trigger";
 import { MetaIonizedModel } from "./MetaIonizedModel";
 import { isFunction, noop } from "@rue/utils";
 import { AnyIon, isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PrimaryPion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
-import { QUARKS, quarksOf } from "../Quarks";
+import { Quarks, QUARKS, quarksOf } from "../Quarks";
 import { getActiveTracker } from "../ionic/IonicCompound";
+import { useEffectCycle } from "../watch/RenderCycle";
+import { Watchable } from "../watch/Watched";
+import { CapsuleQuarks } from "../capsule/Capsule";
+import { MaybeParticle } from "../Compound/Particle";
+import { MaybeCompound } from "../Compound/Compound";
+import { IonizedCompound } from "./IonizedCompound";
 
 
 
@@ -592,7 +598,48 @@ export function reactiveSetter(
    return true;
 }
 
+// // /** INTERNAL */
+export type IonizedModel = {
+   [QUARKS]: IonizedModelQuarks
+}
 
+/** 
+ * INTERNAL 
+ * */
+export type IonizedModelQuarks =
+   Quarks<IonizedModel>
+   & Watchable
+   & CapsuleQuarks
+   & MaybeParticle
+   & MaybeCompound<IonizedCompound>
+
+/**
+ * When a pion is the original source of an effect chain, we use triggerIonizedModel
+ * @param quarks 
+ * @param op 
+ * @param args 
+ * @param output 
+ * @param preopData 
+ */
+function triggerIonizedModel(
+   model: IonizedModel,
+   op: string,
+   args: any[],
+   output: any,
+   preopData?: any
+) {
+   const quarks = quarksOf(model)
+   quarks.asParticle?.react()
+   quarks.asWatched?.triggerEffects()
+   if (quarks.asWatched){
+      quarks.recordOp({
+         op,
+         args,
+         output,
+         preopData
+      })
+   }
+}
 
 export function setAbsorbedIon(ion: AnyIon, value: any, ionizedModel: IonizedModel, key: PropertyKey, oldValue: any, structureConfigs: CustomIonizedModelConfig[]) {
    if ('state' in ion) {

@@ -61,7 +61,7 @@ function setCount(count){
 
 ----
 Observable Compounds
-(made up of observable atoms, either through tracking or through containing them as properties)
+(made up of observable particles, either through tracking or through containing them as properties)
 
 IONIC COMPOUND
 observable compound 

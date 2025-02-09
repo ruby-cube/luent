@@ -18,7 +18,7 @@
 - WatchEffects (linkable)
 */
 
-import { IonicAtom, MaybeIonicAtom } from "../compound/Atom"
+import { Particle, MaybeParticle } from "../Compound/Particle"
 import { Quarks, QuarkyEntity } from "../Quarks"
 
 //ABSTRACT
@@ -28,7 +28,7 @@ import { Quarks, QuarkyEntity } from "../Quarks"
 
 
 interface Link {
-   atom: IonicAtom,
+   atom: Particle,
    compound: IonicCompound,
    nextParticle: Link | undefined,
    nextCompound: Link | undefined
@@ -80,30 +80,11 @@ function triggerIonicEffect(this: IonicWatchEffect) {
 
 type IonizedModelQuarks = IonicCompound & Quarks<IonizedModel>
 
-export function triggerIonizedModel(
-   this: IonizedModelQuarks,
-   op: string,
-   args: any[],
-   output: any,
-   preopData?: any
-) {
-   if (this.effects) {
-      triggerEffects.call(this)
-
-      useRenderCycle().recordOp(this.entity, {
-         target: this.entity,
-         op,
-         args,
-         output,
-         preopData
-      })
-   }
-}
 
 
 
-class TrackedOp implements IonicAtom {
-   react: (this: IonicAtom, oldState: unknown, newState: unknown) => void
+class TrackedOp implements Particle {
+   react: (this: Particle, oldState: unknown, newState: unknown) => void
    effects?: Set<WatchEffect> | undefined
    effectsHead?: WatchEffect | undefined
    effectsTail?: WatchEffect | undefined
@@ -116,10 +97,10 @@ class TrackedOp implements IonicAtom {
 } // 'trackable get ops'
 
 
-class MemoizedIonQuarks implements IonicCompound, IonicAtom, Watched, Quarks<MemoizedIon> {
-   react: (this: IonicAtom, oldState: unknown, newState: unknown) => void
+class MemoizedIonQuarks implements IonicCompound, Particle, Watched, Quarks<MemoizedIon> {
+   react: (this: Particle, oldState: unknown, newState: unknown) => void
    type: string | symbol
-   atoms: Set<IonicAtom>
+   particles: Set<Particle>
    particlesHead: Link | undefined
    particlesTail: Link | undefined
    dirty: boolean
@@ -141,7 +122,7 @@ class MemoizedIonQuarks implements IonicCompound, IonicAtom, Watched, Quarks<Mem
 class IonicEffectQuarks implements IonicCompound, Watched, Quarks<IonicEffect> {
    trigger: (this: IonicCompound, oldState: unknown, newState: unknown) => void
    type: string | symbol
-   atoms: Set<IonicAtom>
+   particles: Set<Particle>
    particlesHead: Link | undefined
    particlesTail: Link | undefined
    dirty: boolean

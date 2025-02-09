@@ -1,4 +1,4 @@
-import { MaybeCompound } from "../compound/Compound";
+import { MaybeCompound, triggerEffects } from "../Compound/Compound";
 import { Watched } from "../watch/Watched";
 import { IonicCompound } from "./IonicCompound";
 
@@ -38,6 +38,6 @@ export function createIonicEffect(task: () => any, retrack: boolean = true) {
 
 function trigger(this: IonicCompound<IonicEffect>): void {
    this.dirty = true;
-   this.compound.asWatched!.triggerEffects()
+   triggerEffects(this)
 }
 

@@ -1,5 +1,6 @@
-import { IonicAtom, MaybeIonicAtom, asAtom } from "../compound/Atom";
-import { Compound, MaybeCompound, track, untrackAtoms } from "../compound/Compound";
+import { Particle, MaybeParticle, asParticle } from "../Compound/Particle";
+import { Compound, MaybeCompound,  track, untrackParticles } from "../Compound/Compound";
+import { Watchable } from "../watch/Watched";
 
 const trackerStack: (Compound | null)[] = []
 
@@ -57,10 +58,10 @@ export function detachedCall(fn: Function) {
 
 
 
-export class IonicCompound<T extends MaybeCompound = { asCompound?: IonicCompound }> implements Compound {
+export class IonicCompound<T extends MaybeCompound = { asCompound?: IonicCompound } & Watchable> implements Compound {
 
    constructor(
-      readonly compound: T,
+      readonly quarks: T,
    ) {
    }
 
@@ -68,7 +69,7 @@ export class IonicCompound<T extends MaybeCompound = { asCompound?: IonicCompoun
 
    dirty: boolean = false;
 
-   atoms: IonicAtom[] = []
+   particles: Particle[] = []
 
    track = track
 
@@ -81,13 +82,13 @@ export class IonicCompound<T extends MaybeCompound = { asCompound?: IonicCompoun
       }
       finally {
          popTracker();
-         if (__DEV__ && this.atoms.length === 0) {
+         if (__DEV__ && this.particles.length === 0) {
             throw new Error('Watch target or derived AtomicIon has no dependencies (and therefore no reactivity', { cause: 'no dependencies' })
          }
       }
    }
 
-   untrackAtoms = untrackAtoms
+   untrackParticles = untrackParticles
 }
 
 export function __devCheckIfTracked() {

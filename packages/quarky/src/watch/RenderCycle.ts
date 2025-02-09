@@ -59,7 +59,7 @@ export function getCurrentRenderCycle() {
    return currentRenderCycle;
 }
 
-export function useRenderCycle() {
+export function useEffectCycle() {
    let renderCycle = currentRenderCycle
    if (!renderCycle) {
       renderCycle = new TaskCycle();
@@ -124,23 +124,6 @@ export class TaskCycle {
       return renderCycleCount;
    }
 
-   opsMap: WeakMap<MetaIonizedModel, MutationRecord[]> = new WeakMap();
-
-   recordOp(target: Ionized<AnyObject>, op: MutationRecord) {
-      const meta = quarksOf(target)
-      let existingOps = this.opsMap.get(meta);
-      if (existingOps) {
-         existingOps.push(op)
-      }
-      else {
-         this.opsMap.set(meta, [op]);
-      }
-   }
-
-   getOps(target: Ionized<AnyObject>) {
-      const quarks = quarksOf(target)
-      return this.opsMap.get(quarks)
-   }
 
 
    // TASKS:
@@ -230,7 +213,7 @@ function createRenderCycleHook(phase: Phase) {
    return (task: () => void, options?: SchedulerOptions) => {
       const _options = options || { cancel: null }
       _options.cancel = null
-      const renderCycle = useRenderCycle()
+      const renderCycle = useEffectCycle()
       return $schedule(task, _options, {
          enroll(task) {
             renderCycle.tasks.addToSet(task, phase)

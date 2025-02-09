@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { isIonicAtom } from "../compound/Atom";
+import { isIonicAtom } from "../Compound/Particle";
 import { trigger, triggerIonicAtom, triggerIonizedModel } from "../reactivity/x_trigger";
 import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
 import { getTrackedOp } from "./TrackedOp";

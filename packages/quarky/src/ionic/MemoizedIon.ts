@@ -3,12 +3,12 @@ import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
 import { quarksOf, QUARKS, Quarks, hasQuarks } from "../Quarks";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule, CapsuleQuarks } from "../capsule/Capsule";
-import { MaybeIonicAtom } from "../compound/Atom";
+import { MaybeParticle } from "../Compound/Particle";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { emitSignal } from "../debug/debug";
 import { Watchable } from "../watch/Watched";
 import { Ion } from "../ion/Ion";
-import { MaybeCompound } from "../compound/Compound";
+import { MaybeCompound, triggerEffects } from "../Compound/Compound";
 
 /**
 * Managed Derivation Ion
@@ -32,7 +32,7 @@ export type MemoizedIon =
    Quarks<$MemoizedIon>
    & Watchable
    & CapsuleQuarks
-   & MaybeIonicAtom
+   & MaybeParticle
    & MaybeCompound<MemoizedCompound>
 
 export const MEMOIZED_ION = Symbol('Memoized Ion')
@@ -52,12 +52,12 @@ export function createMemoizedIon(
       if (__DEV__) emitSignal();
       getActiveTracker()?.track(ion)
 
-      const initialized = !!compound.atoms;
+      const initialized = !!compound.particles;
       if (!initialized) {
          const flask = getActiveFlask()
          assertValidInitialization(flask, creationFlask) // prevents memory leaks caused by usng memoized ion outside of its creation scope
          flask?.onDiscard(() => {
-            compound.untrackAtoms()
+            compound.untrackParticles()
          })
       }
       const value = !initialized ? compound.trackedCall(derivation)
@@ -74,7 +74,7 @@ export function createMemoizedIon(
    const ion: MemoizedIon = {
       entity: $memoizedIon,
       type: MEMOIZED_ION,
-      asAtom: undefined,
+      asParticle: undefined,
       asCompound: undefined,
       __DEV__asTraceable: undefined,
       asReadonly: undefined,
@@ -100,8 +100,8 @@ export function createMemoizedIon(
 
 function trigger(this: IonicCompound<MemoizedIon>): void {
    this.dirty = true;
-   this.compound.asAtom?.react()
-   this.compound.asWatched?.triggerEffects()
+   this.quarks.asParticle?.react()
+   triggerEffects(this)
 }
 
 /* Not sure if this is correct. 

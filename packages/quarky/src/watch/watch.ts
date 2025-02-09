@@ -2,13 +2,13 @@ import { AnyObject } from "@rue/types";
 import { asWatched, Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, MaybeIonicCompound } from "../ionic/IonicCompound";
-import { getCurrentRenderCycle, Phase, useRenderCycle } from "./TaskCycle";
+import { getCurrentRenderCycle, Phase, useEffectCycle } from "./TaskCycle";
 import { WatchDebugOptions } from "./debug";
 import { ionize, IonizedModel, isIonizedModel, toRaw, } from "../ionized/ionize";
 import { areEqual } from "./areEqual";
 import { createIonicEffect, TerminalCompound } from "../ionic/IonicEffect";
 import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
-import { asAtom } from "../compound/Atom";
+import { asParticle } from "../Compound/Particle";
 import { isPropIon, PropIon } from "../ionized/PrimaryPion";
 import { toValue } from "../ion/toIons";
 import { ChangeEvent } from "./ChangeEvent";
@@ -77,7 +77,7 @@ export function isCurrentWatchSubject(atom: AtomicIon | PropIon) {
    if (!currentWatchSubject) return false;
    if (currentWatchSubject === atom) return true;
    if (isDerivedIon(currentWatchSubject)) {
-      return quarksOf(currentWatchSubject).atoms.has(asAtom(atom))
+      return quarksOf(currentWatchSubject).particles.has(asParticle(atom))
    }
    if (isIonizedModel(currentWatchSubject)) {
       if (isPropIon(atom)) {
@@ -261,7 +261,7 @@ export function watch<T extends any[]>(...args: [...T, ChangeHandler<T>] | [...T
    try {
       oldValue = getValue(_subject);
       // isMultiSubject ? getValues(subjects) : toValue(subject0)  // if atomic ion, need untrackedCall()
-      // This is when memoized is initialized if not already //QUESTION: How to I prevent memo from being tracked as an atom while also letting it track its atoms
+      // This is when memoized is initialized if not already //QUESTION: How to I prevent memo from being tracked as an atom while also letting it track its particles
    }
    catch (err) {
       if (err instanceof Object && 'cause' in err && err.cause === 'no dependencies') {
@@ -408,7 +408,7 @@ function scheduleEffectEagerly(effect: Effect, phase: Phase) {
       // runEffect(effect)
       effect()
    }
-   else useRenderCycle().scheduleTask(effect, phase)
+   else useEffectCycle().scheduleTask(effect, phase)
 }
 
 
@@ -451,7 +451,7 @@ function setUpWatcher(
       remove(_effect) {
          subject.unwatch(_effect, phase)
          if (compound)
-            compound.untrackAtoms()
+            compound.untrackParticles()
       },
       pause() {
          subject.watch(markDirty, phase)

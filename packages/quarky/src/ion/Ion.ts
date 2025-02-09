@@ -1,4 +1,4 @@
-import { MaybeIonicAtom } from "../compound/Atom";
+import { MaybeParticle } from "../Compound/Particle";
 import { asPropIon } from "../ionized/PrimaryPion";
 import { Watchable } from "../watch/Watched";
 import { createPrimaryIon } from "./AtomicIon";
@@ -39,7 +39,7 @@ export function isIon(value: unknown): value is Ion {
 // isReined
 
 
-export type Atomic = MaybeIonicAtom & Watchable
+export type Atomic = MaybeParticle & Watchable
 
 
 // const $doubleCount = ion.memo(() => {

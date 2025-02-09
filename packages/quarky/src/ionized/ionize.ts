@@ -2,7 +2,7 @@
 import { AnyObject } from "@rue/types";
 import { isObject } from "@rue/utils";
 import { timeTraveler } from "./TimeTraveler";
-import { useRenderCycle } from "../watch/TaskCycle";
+import { useEffectCycle } from "../watch/TaskCycle";
 import { MetaIonizedModel, IONIZED_MODEL } from "./MetaIonizedModel";
 import { inert, Inert, isInert } from "./inert";
 import { AnyIon, Ion, ion, isIon } from "../ion/Ion";
@@ -162,12 +162,9 @@ export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: 
 // type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | typeof inert }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends typeof inert ? T[K] & Inert : T[K] } //TODO: Mark public
 
 export function storeSnapshot(metaIonizedModel: MetaIonizedModel, clone?: AnyObject) {
-   timeTraveler.takeSnapshot(toRaw(metaIonizedModel), useRenderCycle().count, clone)
+   timeTraveler.takeSnapshot(toRaw(metaIonizedModel), useEffectCycle().count, clone)
 }
 
-// export function recordOp(reactive: IonizedModel, op: MutationRecord) {
-//     useRenderCycle().recordOp(reactive, op)
-// }
 
 
 type AsRaw<T> = T extends MetaIonizedModel<infer R> ? R : T extends IonizedModel<infer R> ? R : T
@@ -236,7 +233,7 @@ const frog = ionize({
 
 // function unobserve(prop: ObservedProp) {
 //     const watchSubject = asWatched(prop)
-//     const atom = asAtom(prop)
+//     const atom = asParticle(prop)
 //     if (watchSubject.watchCount === 0 && atom.derivations.size === 0) {
 //         prop.discard()
 //     }
@@ -252,49 +249,6 @@ const frog = ionize({
 
 
 
-
-
-// export function triggerIonizedModelWithSetOp(
-//     reactive: IonizedModel,
-//     key: string | symbol,
-//     newValue: any,
-//     oldValue: any,
-// ) {
-//     if (isWatched(reactive)) {
-//         useRenderCycle().recordOp(reactive, {
-//             target: reactive,
-//             op: {
-//                 type: '[[set]]',
-//                 key,
-//                 newValue: newValue,
-//                 oldValue
-//             }
-//         })
-
-//         triggerIonizedModel(reactive)
-//     }
-
-//     // if (isNestedWatched(reactive)) {
-//     //     const [rootWatchedModel, keyPath] = getRootWatchedModelAndKeyPath(reactive)
-//     //     recordOp(rootWatchedModel, {
-//     //         target: reactive,
-//     //         targetPath: keyPath,
-//     //         root: rootWatchedModel,
-//     //         op: {
-//     //             type: '[[set]]',
-//     //             key,
-//     //             newValue: newValue,
-//     //             oldValue
-//     //         }
-//     //     })
-
-//     //     triggerIonizedModel(rootWatchedModel)
-//     // }
-// }
-
-// export function quarksOf<T extends AnyObject>(reactive: Ionized<T>): MetaIonizedModel<T> {
-//    return reactive[QUARKS] as MetaIonizedModel<T>;
-// }
 
 
 // export type ReactiveTraps<T extends Ionizable = Ionizable> = ProxyHandler<T>

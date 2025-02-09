@@ -1,4 +1,4 @@
-import { MaybeCompound } from "../compound/Compound";
+import { MaybeCompound } from "../Compound/Compound";
 import { Watched } from "../watch/Watched";
 import { IonicCompound } from "./IonicCompound";
 

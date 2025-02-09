@@ -55,7 +55,7 @@ function $ion() {
    const initializationFlask = getActiveFlask()
    assertValidInitialization(initializationFlask, creationFlask)
    initializationFlask.onDiscard(() => {
-      compound.untrackAtoms()
+      compound.untrackParticles()
    })
 }
 

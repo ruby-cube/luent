@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import {  isIonizedModel, ionize, IonizedModel, toRaw } from "./ionize";
 import { asWatched, Watched } from "../watch/Watched";
-import { asAtom, IonicAtom } from "../compound/Atom";
+import { asParticle, Particle } from "../Compound/Particle";
 import { quarksOf, QUARKS, Quarks } from "../Quarks";
 import { isIon } from "../muon/Muon";
 import { getActiveTracker } from "../ionic/IonicCompound";
@@ -81,7 +81,7 @@ class MetaPropIon implements Quarks{
    type: string | symbol;
 
    asWatched?: Watched
-   asAtom?: IonicAtom
+   asParticle?: Particle
    private isIndex: boolean = false
 
    watch() {
@@ -93,16 +93,16 @@ class MetaPropIon implements Quarks{
       const watchSubject = this.asWatched = asWatched(this.o)
 
       watchSubject.onUnwatched(() => {
-         if (watchSubject.watchCount === 0 && this.asAtom?.derivations.size === 0) {
+         if (watchSubject.watchCount === 0 && this.asParticle?.derivations.size === 0) {
             this.discard()
          }
       })
    }
 
    track() {
-      if (this.asAtom) return;
+      if (this.asParticle) return;
 
-      const atom = this.asAtom = asAtom(this.o)
+      const atom = this.asParticle = asParticle(this.o)
 
       if (this.isEntryKey)
          quarksOf(this.model).addObservedEntryKey(this.key)
@@ -219,7 +219,7 @@ export function getObservedProp( // observed means watched and/or tracked
    const prop = getPropIon(ionicModel, key);
    if (!prop) return undefined;
    const meta = quarksOf(prop);
-   if (meta.asWatched || meta.asAtom) return prop;
+   if (meta.asWatched || meta.asParticle) return prop;
    return undefined;
 }
 

@@ -1,7 +1,7 @@
-import { asAtom, isIonicAtom, ReactivePrimitive } from "../compound/Atom";
+import { asParticle, isIonicAtom, ReactivePrimitive } from "../Compound/Particle";
 import { AtomicIon } from "../ion/AtomicIon";
 import { asWatched, isWatched } from "../watch/Watched";
-import { getCurrentRenderCycle, useRenderCycle } from "../watch/TaskCycle";
+import { getCurrentRenderCycle, useEffectCycle } from "../watch/TaskCycle";
 import { untrackedCall } from "../ionic/x_DependencyTracker";
 import { isIonicEffectAtom } from "../ionic/IonicEffect";
 import { isCurrentWatchSubject } from "../watch/watch";
@@ -27,7 +27,7 @@ export function trigger(target: AtomicIon | PropIon, newValue?: any, oldValue?: 
 export function triggerIonicAtom(target: ReactivePrimitive, newValue?: any, oldValue?: any) {
    if (isIonicAtom(target)) {
       
-        asAtom(target).triggerDerivations(newValue, oldValue)
+        asParticle(target).triggerDerivations(newValue, oldValue)
     }
 }
 
@@ -47,7 +47,7 @@ export function triggerIonizedModel(
 
         asWatched(model).triggerEffects()
 
-        useRenderCycle().recordOp(model, {
+        useEffectCycle().recordOp(model, {
             target: model,
             op,
             args,

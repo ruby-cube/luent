@@ -59,7 +59,7 @@ export function createPrimaryNeutron(
       stateIsIonized,
       entity: $ion,
       type: PRIMARY_ION,
-      asAtom: undefined,
+      asParticle: undefined,
       asWatched: undefined
    }
    __DEV__initTraceability(ion)

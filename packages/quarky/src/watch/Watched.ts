@@ -1,5 +1,5 @@
 import { SetMap } from "@rue/utils";
-import { Task, onRenderCycleComplete, Phase, useRenderCycle } from "./TaskCycle";
+import { Task, onRenderCycleComplete, Phase, useEffectCycle } from "./TaskCycle";
 
 
 export type Watchable = {
@@ -99,7 +99,7 @@ export class Watched<T extends Watchable = Watchable> {
    }
 
    private scheduleEffects(effects: Set<Task>, phase: Exclude<Phase, Phase.SYNC>) {
-      const renderCycle = useRenderCycle()
+      const renderCycle = useEffectCycle()
       for (const effect of effects) { //TODO: Can we skip this loop and just pass the whole set to the task runner?
          renderCycle.scheduleTask(effect, phase)
       }

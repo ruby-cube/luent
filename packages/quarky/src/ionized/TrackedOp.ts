@@ -3,7 +3,7 @@
 
 
 import { AnyObject } from "@rue/types";
-import { asAtom } from "../compound/Atom";
+import { asParticle } from "../Compound/Particle";
 import { MetaIonizedModel } from "./MetaIonizedModel";
 import { Ionized, IonizedModel } from "./ionize";
 import { quarksOf } from "../Quarks";
@@ -62,7 +62,7 @@ function createTrackedOp(
     const metaIonizedModel = quarksOf(model);
     const trackedOp = new TrackedOp(metaIonizedModel, op, key)
     metaIonizedModel.addObservedEntryKey(key)
-    const atom = asAtom(trackedOp);
+    const atom = asParticle(trackedOp);
     atom.onUntracked(() => {
         if (atom.derivations.size === 0) {
             metaIonizedModel.deleteObservedEntryKey(key)

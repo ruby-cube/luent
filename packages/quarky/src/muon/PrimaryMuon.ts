@@ -1,4 +1,4 @@
-import { MaybeIonicAtom } from "../compound/Atom";
+import { MaybeParticle } from "../Compound/Particle";
 import { Watchable } from "../watch/Watched";
 
 

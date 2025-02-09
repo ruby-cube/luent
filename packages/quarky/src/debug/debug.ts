@@ -272,8 +272,8 @@ function createTraceableFunction(fn: Function & TraceableSubject) {
 // __DEV__debug.traceTrackers($count)
 
 // // Derivations
-// __DEV__debug.traceTriggers($doubleCount) // logs when any of its atoms are triggered
-// __DEV__debug.traceTrackers($count) // logs atoms
+// __DEV__debug.traceTriggers($doubleCount) // logs when any of its particles are triggered
+// __DEV__debug.traceTrackers($count) // logs particles
 
 
 
