@@ -4,21 +4,25 @@ import { IonicCompound } from "./IonicCompound";
 
 type IonicEffect = MaybeCompound<IonicCompound> & { asWatched: Watched }
 
-let currentEffect: Function | undefined
+// let currentEffect: Function | undefined
 
 export function createIonicEffect(task: () => any, retrack: boolean = true) {
    const compound: IonicCompound<IonicEffect> = new IonicCompound(effect)
    compound.trigger = trigger
 
-   let initialized = false;
-   // let prevCycle: any;
+   let fn = initialize;
+
    function effect() {
-      // const currentCycle = $currentCycle()
-      // if (prevCycle === currentEffect) {
-      //    return; // prevent infinite loop for synchronous effects
-      // }
-      // prevCycle = currentCycle;
-      if (!initialized || retrack && compound.dirty) {
+      return fn()
+   }
+
+   function initialize() {
+      fn = runEffect
+      compound.trackedCall(task)
+   }
+
+   function runEffect() {
+      if (retrack && compound.dirty) {
          try {
             compound.trackedCall(task)
          }
@@ -30,6 +34,7 @@ export function createIonicEffect(task: () => any, retrack: boolean = true) {
          task()
       }
    }
+
    effect.asCompound = compound;
    effect.asWatched = new Watched(effect as IonicEffect)
 
