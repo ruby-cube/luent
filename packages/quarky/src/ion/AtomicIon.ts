@@ -9,6 +9,7 @@ import { __DEV__initTraceability, attachCapsuleMethods, MutableCapsule } from ".
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Atomic, WritableIon } from "./Ion";
 import { Mutation } from "../actions/Mutable";
+import { unwatch, watch, Watched } from "../watch/Watched";
 
 /** INTERNAL */
 export type $AtomicIonState = WritableIon & MutableCapsule & {
@@ -76,6 +77,18 @@ export function createPrimaryIon(
       asReined: undefined,
       recordOp: undefined,
       __DEV__asTraceable: new Traceable(),
+
+      watch() {
+         return watch(this, () => {
+            return this.asWatched = new Watched(this)
+         })
+      },
+
+      unwatch() {
+         unwatch(ion.asWatched!, () => {
+            ion.asWatched = undefined
+         })
+      }
    }
 
    $state[QUARKS] = ion

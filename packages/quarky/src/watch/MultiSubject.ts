@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { IonicCompound } from "../ionic/IonicCompound";
+import { IonicCompound, MaybeIonicCompound } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { Watched } from "./Watched";
 import { Ion } from "../ion/Ion";
@@ -9,9 +9,15 @@ import { isIonizedModel } from "../ionized/ionize";
 import { isGetter } from "./watch";
 
 export function createMultiSubject(subjects: unknown[] & AnyObject) {
-   const quarks = {
-      asCompound: undefined as unknown as IonicCompound,
-      asWatched: undefined as unknown as Watched
+   const quarks: MaybeIonicCompound = {
+      asCompound: undefined,
+      asWatched: undefined,
+      watch(){
+         return this.asWatched!
+      },
+      unwatch(){
+         quarks.asWatched = undefined;
+      }
    }
    const compound: IonicCompound = new IonicCompound(quarks)
    quarks.asCompound = compound;

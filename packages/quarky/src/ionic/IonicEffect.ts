@@ -1,8 +1,10 @@
-import { MaybeCompound, triggerEffects } from "../Compound/Compound";
+import { noop } from "@rue/utils";
+import { triggerEffects } from "../Compound/Compound";
 import { Watched } from "../watch/Watched";
-import { IonicCompound } from "./IonicCompound";
+import { IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 
-type IonicEffect = MaybeCompound<IonicCompound> & { asWatched: Watched }
+type IonicEffect = MaybeIonicCompound
+// & { asWatched?: Watched }
 
 
 export function createIonicEffect(task: () => any, retrack: boolean = true) {
@@ -36,6 +38,8 @@ export function createIonicEffect(task: () => any, retrack: boolean = true) {
 
    effect.asCompound = compound;
    effect.asWatched = new Watched(effect as IonicEffect)
+   effect.watch = noop as () => Watched;
+   effect.unwatch = noop;
 
    return effect
 }

@@ -8,7 +8,7 @@ import { isFunction, noop } from "@rue/utils";
 import { Ion, isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./Pion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
-import { Quarks, QUARKS, quarksOf } from "../Quarks";
+import { QUARKS, quarksOf } from "../Quarks";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
 import { Mutation } from "../actions/Mutable";

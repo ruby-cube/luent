@@ -3,7 +3,7 @@ import { PropIon } from "./Pion"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { Traceable } from "../debug/debug"
 import { CustomIonizedModelConfig, IonizedModel } from "./IonizedModel"
-import { Watchable, Watched } from "../watch/Watched"
+import { unwatch, watch, Watchable, Watched } from "../watch/Watched"
 import { MaybeParticle, Particle } from "../Compound/Particle"
 import { MaybeCompound } from "../Compound/Compound"
 import { IonizedCompound } from "./IonizedCompound"
@@ -39,6 +39,7 @@ export class IonizedModelQuarks
    asReadonly?: object
    __DEV__asTraceable = new Traceable()
 
+
    initIonizedModel(ionicModel: IonizedModel) {
       if (this.ionicModel) return;
       this.ionicModel = ionicModel;
@@ -57,11 +58,24 @@ export class IonizedModelQuarks
       // public traps?: ReactiveTraps<T>
    ) {
       if (__DEV__) this.__DEV__asTraceable = new Traceable()
+      this.unwatch = () => {
+         unwatch(this.asWatched!, () => {
+            this.asWatched = undefined
+         })
+      }
    }
    recordOp: ((mutation: Mutation) => void) | undefined
-   asCompound?: IonizedCompound | undefined
+   asCompound?: IonizedCompound
    asParticle?: Particle | undefined
    asWatched?: Watched<Watchable> | undefined
+   
+   watch() {
+      return watch(this, () => {
+         return this.asWatched = new Watched(this)
+      })
+   }
+   unwatch: () => void
+
 
    private appendedProperties: Set<PropertyKey> = new Set()
 
@@ -82,11 +96,11 @@ export class IonizedModelQuarks
       this.hasNewAbsorbedIons = false;
    }
 
-   private asDerivation?: IonizedCompound
+   // private asCompound?: IonizedCompound
 
    trackAbsorbedIons() {
-      if (this.asDerivation && this.hasNewAbsorbedIons === false) return;
-      const derivation = this.asDerivation || (this.asDerivation = new IonizedCompound(this))
+      if (this.asCompound && this.hasNewAbsorbedIons === false) return;
+      const derivation = this.asCompound || (this.asCompound = new IonizedCompound(this))
       derivation.collectAbsorbedIons(this.ionicModel!)
       this.undirty()
    }

@@ -4,9 +4,31 @@ import { Task, onEffectCycleComplete, Phase, useEffectCycle } from "./EffectCycl
 
 export type Watchable = {
    asWatched?: Watched
+   watch: () => Watched
+   unwatch: () => void
 }
 
+export function watch(quarks: Watchable, initialize: () => Watched) {
+   if (!quarks.asWatched) {
+      const watched = initialize()
+      watched.watchCount++;
+      return watched
+   }
+   quarks.asWatched!.watchCount++;
+   return quarks.asWatched!
+}
+
+export function unwatch(watched: Watched, cleanup: () => void) {
+   watched.watchCount--
+   if (watched.watchCount === 0) {
+      cleanup()
+      //TODO: when should this be called such that we don't cause thrashing of discarding and creating an Watched more than needed? At the end of a cycle?
+   }
+}
+
+
 export class Watched<T extends Watchable = Watchable> {
+   watchCount: number = 0
 
    constructor(
       public quarks: T
@@ -14,7 +36,7 @@ export class Watched<T extends Watchable = Watchable> {
       this.effects = new SetMap()
    }
 
-   watchCount = 0
+   // watchCount = 0
    private nextCycleEffects: SetMap<Phase, Task> | undefined;
    private effects: SetMap<Phase, Task>;
 
@@ -54,23 +76,17 @@ export class Watched<T extends Watchable = Watchable> {
       else {
          this.queueEffect(effect, phase)
       }
-      this.watchCount++;
    }
 
    unwatch(effect: Task, phase: Phase) {
       this.removeEffect(effect, phase)
-      this.watchCount--
-      if (this.watchCount === 0) {
-         this.discard() //TODO: when should this be called such that we don't cause thrashing of discarding and creating an Watched more than needed? At the end of a cycle?
-      }
-
       this.emitUnwatched()
    }
 
-   discard(){
-      this.quarks.asWatched = undefined;
-      //QUESTION: Do I need to release watchable too? this.watchable = undefined?
-   }
+   // discard(){
+   //    this.quarks.asWatched = undefined;
+   //    //QUESTION: Do I need to release watchable too? this.watchable = undefined?
+   // }
 
    prevCycle?: any //TODO: ScheduleCycle
 
@@ -106,21 +122,20 @@ export class Watched<T extends Watchable = Watchable> {
       }
    }
 
-   private cleanUp?: () => void
+   private cleanups: (() => void)[] = [] //TODO: make into array
 
    onUnwatched(cleanUp: () => void) {
-      if (__DEV__ && this.cleanUp) {
-         console.error('Overriding existing cleanup function. This means we need an array for onUnwatched tasks')
-      }
-      this.cleanUp = cleanUp;
+      this.cleanups.push(cleanUp)
    }
 
    private emitUnwatched() {
-      this.cleanUp?.()
+      for (const cleanUp of this.cleanups) {
+         cleanUp()
+      }
    }
 }
 
 
-export function asWatched(quarks: Watchable): Watched {
-   return quarks.asWatched ?? (quarks.asWatched = new Watched(quarks))
-}
+// export function asWatched(quarks: Watchable): Watched {
+//    return quarks.asWatched ?? (quarks.asWatched = new Watched(quarks))
+// }

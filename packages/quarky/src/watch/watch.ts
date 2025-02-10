@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { asWatched, Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
-import { detachedCall, IonicCompound, untrackedCall } from "../ionic/IonicCompound";
+import { detachedCall, IonicCompound, MaybeIonicCompound, untrackedCall } from "../ionic/IonicCompound";
 import { getCurrentEffectCylce, Phase, useEffectCycle } from "./EffectCycle";
 import { WatchDebugOptions } from "./debug";
 import { isIonizedModel, toRaw, } from "../ionized/ionize";
@@ -10,10 +10,11 @@ import { createIonicEffect } from "../ionic/IonicEffect";
 import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
 import { asParticle } from "../Compound/Particle";
 import { isPropIon, PropIon } from "../ionized/Pion";
-import { QUARKS, quarksOf } from "../Quarks";
-import { isIon, toValue } from "../ion/Ion";
-import { isMemoizedIon } from "../ionic/DerivationIon";
-import { createWatchedDerivation } from "./WatchedDerivation";
+import { hasQuarks, QUARKS, quarksOf } from "../Quarks";
+import { Ion, isIon, toValue } from "../ion/Ion";
+import { createWatchedDerivation } from "../ionic/WatchedDerivation";
+import { createMultiSubject } from "./MultiSubject";
+import { isManagedDerivation } from "../ionic/DerivationIon";
 
 export class ChangeEvent<S> {
    trace?: string;
@@ -21,7 +22,6 @@ export class ChangeEvent<S> {
       public subject: S,
       public newState?: S extends () => infer T ? T : S,
       public oldState?: S extends () => infer T ? T : S,
-      public mutations?: Mutation[]
    ) { }
 }
 
@@ -148,17 +148,24 @@ let currentEffect: Function | undefined;
 
 
 function getValue(subject: unknown) {
-   if (isMemoizedIon(subject))
+   if (isManagedDerivation(subject))
       detachedCall(subject)
-   else if (isDerivation(subject))
+   else if (isWatchedDerivation(subject)) {
       subject() // allows initial tracking
-   else if (isIon) {
+   }
+   else if (isIon(subject)) {
       untrackedCall(subject)
    }
-   else
+   else {
       subject
+   }
 }
 
+function noReactivity(subject: AnyObject) {
+   return subject.asCompound && subject.asCompound.particles.length === 0;
+}
+
+type WatchSubjects = (AnyObject | Ion)[]
 
 //NOTE: I have decided watch should NOT handle ions that return ionized models together. Dev should handle them with separate watchers
 // However, For($list) will handle this for the devs
@@ -166,78 +173,50 @@ function getValue(subject: unknown) {
 // export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? ChangeHandler<R> : never, options?: WatchOptions): ResumableListener
 // export function watch<T extends IonizedModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): ResumableListener
 // export function watch<T>(subject: T, effect: ChangeHandler<T>, options?: WatchOptions): ResumableListener {
-export function watch<T extends any[]>(...args: [...T, ChangeHandler<T>] | [...T, ChangeHandler<T>, WatchOptions]): ResumableListener {
+export function watch<T extends WatchSubjects>(...args: [...T, ChangeHandler<T>] | [...T, ChangeHandler<T>, WatchOptions]): ResumableListener {
    const lastArg = args.pop()
    const noOptions = lastArg instanceof Function
    const effect = lastArg instanceof Function ? lastArg : args.pop()
-   const options = noOptions ? {} : lastArg;
-   if (!(effect instanceof Function)) throw new Error("Invalid input. Effect function must be last or second to last argument.")
+   const options = noOptions ? {} : lastArg as WatchOptions
+   if (!effect || !(effect instanceof Function))
+      throw new Error("Invalid input. Effect function must be last or second to last argument.")
    if (args.length === 0) throw new Error("Invalid input. No watch subjects")
    const isMultiSubject = args.length > 1;
-   const subject = isMultiSubject ? args : args[0]
+   const _subject = isMultiSubject ? args : args[0]
 
-   if (isNeutron(subject)) {
+   const subject = isMultiSubject ? createMultiSubject(<WatchSubjects>_subject)
+      : hasQuarks(_subject) ? _subject
+         : _subject instanceof Function ? createWatchedDerivation(<() => unknown>_subject)
+            : _subject as AnyObject //non-ionized object
+
+   if (!hasQuarks(subject) || (<{ inert: boolean }>quarksOf(subject)).inert)
       return InertWatcher()
-   }
-   if (isIonizedModel(subject)) {
-      return watchModel(subject, effect, options)
-   }
-   if (isMultiSubject) {
-      return watchMulti(subject, effect, options)
-   }
-   if (isMemoized(subject)) {
-      return watchMemoized(subject, effect, options)
-   }
-   if (isAtomic(subject)) {
 
-   }
+   const quarks = quarksOf(subject) as Watchable & MaybeIonicCompound
+   const watchSubject = quarks.watch()
+   watchSubject.onUnwatched(quarks.unwatch)
 
    let eager: boolean | undefined = options?.eager
    const watchStateChange = options?.stateChange === false ? false : true;
    const phase = options?.phase ?? Phase.BEFORE_RENDER
 
-   const _subject = normalizeSubject(subject)
-   const watched = asWatched(quarksOf(_subject))
-   // const _watchSubject = isMultiSubject ? watchSubjects : watchSubjects[0];
-   // const ionicDerivations = isMultiSubject ? getIonicDerivations(subject, subjects) : subject instanceof Function ? [quarksOf(subject0) as IonicCompound] : undefined
+   let oldValue = getValue(subject); // this is where initial tracking happens if derivation not already initialized 
 
-   let oldValue: T;
-   try {
-      oldValue = getValue(_subject);
-      // isMultiSubject ? getValues(subjects) : toValue(subject0)  // if atomic ion, need untrackedCall()
-      // This is when memoized is initialized if not already //QUESTION: How to I prevent memo from being tracked as an atom while also letting it track its particles
-   }
-   catch (err) {
-      if (err instanceof Object && 'cause' in err && err.cause === 'no dependencies') {
-         if (__DEV__) console.warn('inert watcher', effect)
-         return InertWatcher()
-      }
-   }
+   if (noReactivity(subject)) return InertWatcher()
 
-   let prevCycle: any;
    function changeHandler() {
-      const currentCycle = $currentCycle()
-      if (currentCycle === prevCycle) {
-         if (triggeredByItself()) // how do we know?
-            return; // prevent infinite loops for "synchronous" effects, assumes effects are never nested
-         else {
-            rescheduleForNextCycle()
-            return;
-         }
-      }
-      prevCycle = currentCycle;
 
-      const newValue = isMultiSubject ? getValues(subjects) : toValue(subject0) // This is when retracking happens
+      const newValue = getValue(subject)
 
       if (watchStateChange && (!eager && (isMultiSubject && noChanges(subjects, newValue, oldValue)
          || isIon(subject0) && noChange(newValue, oldValue)
-         || isIonizedModel(subject) && noMutations(subject)))
+         || isIonizedModel(subject) && noMutations(subject))) //TODO: simplify this monsterous condition
       )
          return;
       eager = false;
 
       try {
-         effect(new ChangeEvent(subject, newValue, oldValue, getMutations(subjects)))
+         (<ChangeHandler>effect)(new ChangeEvent(subject, newValue, oldValue))
       }
       finally {
          currentEffect = undefined;
@@ -249,12 +228,12 @@ export function watch<T extends any[]>(...args: [...T, ChangeHandler<T>] | [...T
       scheduleEffectEagerly(changeHandler, phase)
    }
 
-   return setUpWatcher(
-      watched,
+   return setUpWatcher( //TODO: need to pass watchable subject to unwatch
+      watchSubject,
       changeHandler,
       phase,
       options || {},
-      quarksOf(_subject).asCompound
+      quarks.asCompound
    )
 }
 

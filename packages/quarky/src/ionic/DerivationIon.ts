@@ -1,4 +1,4 @@
-import { getActiveTracker, IonicCompound } from "./IonicCompound";
+import { getActiveTracker, IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
 import { quarksOf, QUARKS, hasQuarks, EntityQuarks, QuarksOf } from "../Quarks";
@@ -6,7 +6,7 @@ import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsu
 import { MaybeParticle } from "../Compound/Particle";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { emitSignal, Traceable } from "../debug/debug";
-import { Watchable } from "../watch/Watched";
+import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
 import { Ion } from "../ion/Ion";
 import { MaybeCompound, triggerEffects } from "../Compound/Compound";
 import { Mutation } from "../actions/Mutable";
@@ -23,12 +23,13 @@ import { Mutation } from "../actions/Mutable";
 // /** INTERNAL */
 export type $DerivedState = Ion & Capsule & {
    [QUARKS]: {
+      inert: boolean
       state: unknown
    }
    & EntityQuarks<$DerivedState>
    & Watchable
    & MaybeParticle
-   & MaybeCompound<IonicCompound>
+   & MaybeIonicCompound
 }
 
 /** 
@@ -58,6 +59,7 @@ export function createMaybeMemoizedIon(
       const value = compound.trackedCall(derivation)
       if (compound.particles.length === 0) {
          fn = getState
+         ion.inert = true;
          // no reactivity, no memoization
          compound = undefined;
          return value;
@@ -67,7 +69,7 @@ export function createMaybeMemoizedIon(
          getActiveTracker()?.track(ion)
          fn = getMemoizedState
          ion.state = value;
-         ion.asCompound = compound 
+         ion.asCompound = compound
          compound.trigger = trigger
          const flask = getActiveFlask()
          assertValidInitialization(flask, creationFlask) // prevents memory leaks caused by usng memoized ion outside of its creation scope
@@ -98,6 +100,7 @@ export function createMaybeMemoizedIon(
    }
 
    const ion: ManagedDerivation = {
+      inert: false,
       state: undefined,
       entity: $derived,
       type: DERIVATION_ION,
@@ -105,6 +108,17 @@ export function createMaybeMemoizedIon(
       asCompound: undefined,
       asWatched: undefined,
       __DEV__asTraceable: new Traceable(),
+      watch() {
+         return watch(this, () => {
+            return this.asWatched = new Watched(this)
+         })
+      },
+
+      unwatch() {
+         unwatch(ion.asWatched!, () => {
+            ion.asWatched = undefined
+         })
+      }
    }
 
    $derived[QUARKS] = ion

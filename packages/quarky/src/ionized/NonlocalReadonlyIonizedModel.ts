@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { Ionized, IonizedModel } from "./ionize";
 import { __DEV__proxyGetterAssertions, createProxySwitchMap, CustomIonizedModelConfig, getNativeMethodConfig, getTargetKey, initialPropertyAccess, isMethod, isNativeMethod, ProxySwitchMap } from "./IonizedModel";
-import { asNonlocalReadonly, isLocalKey, restrictAccess } from "../nonlocal/NonlocalReadonly";
+import { asNonlocalReadonly, isLocalKey, restrictAccess } from "../capsule/NonlocalReadonly";
 import { quarksOf } from "../Quarks";
 
 
