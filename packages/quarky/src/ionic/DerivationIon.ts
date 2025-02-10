@@ -1,15 +1,15 @@
 import { getActiveTracker, IonicCompound } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
-import { quarksOf, QUARKS, Quarks, hasQuarks } from "../Quarks";
-import { __DEV__initTraceability, attachCapsuleMethods, Capsule, CapsuleQuarks } from "../capsule/Capsule";
+import { quarksOf, QUARKS, hasQuarks, EntityQuarks, QuarksOf } from "../Quarks";
+import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { MaybeParticle } from "../Compound/Particle";
 import { __DEV__label } from "../debug/DEVLabellable";
-import { emitSignal } from "../debug/debug";
+import { emitSignal, Traceable } from "../debug/debug";
 import { Watchable } from "../watch/Watched";
 import { Ion } from "../ion/Ion";
 import { MaybeCompound, triggerEffects } from "../Compound/Compound";
-import { Mutation } from "../watch/watch";
+import { Mutation } from "../actions/Mutable";
 
 /**
 * Managed Derivation Ion
@@ -21,32 +21,25 @@ import { Mutation } from "../watch/watch";
 **/
 
 // /** INTERNAL */
-export type $MemoizedIon = Ion & Capsule & {
-   [QUARKS]: MemoizedDerivation
+export type $DerivedState = Ion & Capsule & {
+   [QUARKS]: {
+      state: unknown
+   }
+   & EntityQuarks<$DerivedState>
+   & Watchable
+   & MaybeParticle
+   & MaybeCompound<IonicCompound>
 }
-type MemoizedCompound = IonicCompound<MemoizedDerivation>
 
 /** 
  * INTERNAL 
  * */
-export type MemoizedDerivation = { 
-   state: unknown
-   entity: $MemoizedIon 
-} &
-   Quarks
-   & Watchable
-   & CapsuleQuarks
-   & MaybeParticle
-   & MaybeCompound<MemoizedCompound>
+export type ManagedDerivation = QuarksOf<$DerivedState>
 
+export const DERIVATION_ION = Symbol('Derivation Ion')
 
-
-export const MAYBE_MEMOIZED = Symbol('Maybe Memoized Ion')
-export const MEMOIZED_ION = Symbol('Memoized Ion')
-export const DERIVATION = Symbol('Derivation')
-
-export function isMemoizedIon(value: unknown): value is $MemoizedIon {
-   return hasQuarks(value) && quarksOf(value).type === MEMOIZED_ION
+export function isManagedDerivation(value: unknown): value is $DerivedState {
+   return hasQuarks(value) && quarksOf(<$DerivedState>value).type === DERIVATION_ION
 }
 
 export function createMaybeMemoizedIon(
@@ -58,25 +51,23 @@ export function createMaybeMemoizedIon(
 
    let compound: IonicCompound | undefined
    let fn = initialize
-   const $maybeMemoized = () => fn()
+   const $derived = () => fn()
 
    function initialize() {
       compound = new IonicCompound(ion)
       const value = compound.trackedCall(derivation)
       if (compound.particles.length === 0) {
-         ion.type = DERIVATION;
          fn = getState
          // no reactivity, no memoization
          compound = undefined;
          return value;
       }
       else {
-         ion.type = MEMOIZED_ION;
          if (__DEV__) emitSignal();
          getActiveTracker()?.track(ion)
          fn = getMemoizedState
          ion.state = value;
-         ion.asCompound = compound as MemoizedCompound
+         ion.asCompound = compound 
          compound.trigger = trigger
          const flask = getActiveFlask()
          assertValidInitialization(flask, creationFlask) // prevents memory leaks caused by usng memoized ion outside of its creation scope
@@ -106,38 +97,33 @@ export function createMaybeMemoizedIon(
       return ion.state = derivation(ion.state)
    }
 
-   const ion: MemoizedDerivation = {
+   const ion: ManagedDerivation = {
       state: undefined,
-      entity: $maybeMemoized,
-      type: MAYBE_MEMOIZED,
+      entity: $derived,
+      type: DERIVATION_ION,
       asParticle: undefined,
       asCompound: undefined,
-      __DEV__asTraceable: undefined,
-      asReadonly: undefined,
-      asReined: undefined,
       asWatched: undefined,
-      recordOp: undefined
+      __DEV__asTraceable: new Traceable(),
    }
 
-   $maybeMemoized[QUARKS] = ion
-   $maybeMemoized.__DEV__labelName = undefined
-   $maybeMemoized.__DEV__label = __DEV__label
+   $derived[QUARKS] = ion
+   $derived.__DEV__labelName = undefined
+   $derived.__DEV__label = __DEV__label
 
-   __DEV__initTraceability(ion)
 
    if (methods) {
-      attachCapsuleMethods('MemoizedDerivationIon', $maybeMemoized, methods)
+      attachCapsuleMethods('MemoizedDerivationIon', $derived, methods)
    }
 
-   return $maybeMemoized;
+   return $derived;
 }
 
 
 
 
-function trigger(this: IonicCompound<MemoizedDerivation>, mutation: Mutation): void {
+function trigger(this: IonicCompound<ManagedDerivation>, mutation: Mutation): void {
    this.dirty = true;
-   this.quarks.recordOp?.(mutation)
    this.quarks.asParticle?.triggerCompounds(mutation)
    triggerEffects(this)
 }

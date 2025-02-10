@@ -1,6 +1,5 @@
 import { SetMap } from "@rue/utils";
 import { Task, onEffectCycleComplete, Phase, useEffectCycle } from "./EffectCycle";
-import { Mutation } from "./watch";
 
 
 export type Watchable = {

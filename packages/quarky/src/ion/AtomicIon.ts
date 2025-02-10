@@ -1,32 +1,28 @@
-import { __DEV__traceMethodCall, emitSignal } from "../debug/debug";
+import { __DEV__traceMethodCall, emitSignal, Traceable, TraceableSubject } from "../debug/debug";
 import { isIonizedModel, ionize } from "../ionized/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
-import { hasQuarks, QUARKS, quarksOf } from "../Quarks";
+import { EntityQuarks, hasQuarks, QUARKS, QuarksOf, quarksOf } from "../Quarks";
 import { __DEV__label } from "../debug/DEVLabellable";
-import { __DEV__initTraceability, attachCapsuleMethods, CapsuleQuarks, Capsule } from "../capsule/Capsule";
+import { __DEV__initTraceability, attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Atomic, WritableIon } from "./Ion";
-import { Mutation } from "../watch/watch";
+import { Mutation } from "../actions/Mutable";
 
 /** INTERNAL */
-export type $AtomicIon = WritableIon & Capsule & {
-   [QUARKS]: AtomicIon
+export type $AtomicIonState = WritableIon & MutableCapsule & {
+   [QUARKS]: {
+      state: any,
+      stateIsIonized: boolean,
+   } & Atomic & EntityQuarks<$AtomicIonState>
 }
 
 /** 
  * INTERNAL 
  * For reactive ions only.
  * */
-export type AtomicIon = {
-   state: any,
-   stateIsIonized: boolean,
-}
-   & Atomic
-   & CapsuleQuarks
-
-
+export type AtomicIon = QuarksOf<$AtomicIonState>
 
 function getReactiveState(ion: AtomicIon) {
    if (__DEV__) emitSignal();
@@ -67,42 +63,42 @@ export function createPrimaryIon(
    state: any,
    methods?: object
 ) {
-   const $ion = (() => getReactiveState(ion)) as $AtomicIon
+   const $state = (() => getReactiveState(ion)) as $AtomicIonState
 
    const ion: AtomicIon = {
       state,
       stateIsIonized: isIonizedModel(state),
-      entity: $ion,
+      entity: $state,
       type: PRIMARY_ION,
       asParticle: undefined,
       asWatched: undefined,
       asReadonly: undefined,
       asReined: undefined,
-      __DEV__asTraceable: undefined,
+      recordOp: undefined,
+      __DEV__asTraceable: new Traceable(),
    }
-   __DEV__initTraceability(ion)
 
-   $ion[QUARKS] = ion
-   $ion.__DEV__labelName = undefined
-   $ion.__DEV__label = __DEV__label
+   $state[QUARKS] = ion
+   $state.__DEV__labelName = undefined as string | undefined
+   $state.__DEV__label = __DEV__label
 
    const capsuleName = 'AtomicIon'
 
-   Object.defineProperty($ion, 'state', {
+   Object.defineProperty($state, 'state', {
       get() {
          return ion.state;
       },
       set: value => {
-         __DEV__traceMethodCall(capsuleName, $ion, 'state')
+         __DEV__traceMethodCall(capsuleName, $state, 'state')
          return setReactiveState(ion, ion.state, value);
       }
    })
 
    if (methods) {
-      attachCapsuleMethods(capsuleName, $ion, methods)
+      attachCapsuleMethods(capsuleName, $state, methods)
    }
 
-   return $ion
+   return $state
 }
 
 const PRIMARY_ION = Symbol('atomic ion')
@@ -110,6 +106,6 @@ const PRIMARY_ION = Symbol('atomic ion')
 /**
  * INTERNAL
  */
-export function isAtomicIon(value: unknown): value is $AtomicIon {
-   return hasQuarks(value) && quarksOf(value).type === PRIMARY_ION
+export function isAtomicIon(value: unknown): value is $AtomicIonState {
+   return hasQuarks(value) && quarksOf(<$AtomicIonState>value).type === PRIMARY_ION
 }

@@ -3,7 +3,6 @@ import { IonicCompound } from "../ionic/IonicCompound";
 import { QUARKS } from "../Quarks";
 import { Watched } from "./Watched";
 
-type WatchedEntity = MaybeCompound<IonicCompound> & { asWatched: Watched }
 
 export function createWatchedDerivation(derivation: () => any) {
    const quarks = {
@@ -12,22 +11,19 @@ export function createWatchedDerivation(derivation: () => any) {
    }
    const compound: IonicCompound = new IonicCompound(quarks)
    compound.trigger = () => triggerEffects(compound)
+   
    quarks.asCompound = compound;
    quarks.asWatched = new Watched(quarks)
 
    let fn = initialize;
-   function $derivation() {
+   function $watchedDerivedState() {
       return fn()
    }
-   $derivation[QUARKS] = quarks
+   $watchedDerivedState[QUARKS] = quarks
 
    function initialize() {
       fn = derivation
       return compound.trackedCall(derivation)
    }
-   return $derivation;
-}
-
-function trigger(this: Compound) {
-
+   return $watchedDerivedState;
 }

@@ -10,11 +10,10 @@ import { createIonicEffect } from "../ionic/IonicEffect";
 import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
 import { asParticle } from "../Compound/Particle";
 import { isPropIon, PropIon } from "../ionized/Pion";
-import { Quarks, QUARKS, quarksOf } from "../Quarks";
-import { Ion, isIon, toValue } from "../ion/Ion";
-import { isMemoizedIon } from "../ionic/MaybeMemoized";
+import { QUARKS, quarksOf } from "../Quarks";
+import { isIon, toValue } from "../ion/Ion";
+import { isMemoizedIon } from "../ionic/DerivationIon";
 import { createWatchedDerivation } from "./WatchedDerivation";
-import { isFunction, noop } from "@rue/utils";
 
 export class ChangeEvent<S> {
    trace?: string;
@@ -47,30 +46,6 @@ export type EffectOptions = {
 
 
 
-export class Mutation {
-
-   constructor(
-      public target: AnyObject | AtomicIon, //QUESTION: make sure these are readonly? Do I want these exposed to app devs? or just for internal use?
-      public op: '[[set]]' | string,
-      public args: [PropertyKey, unknown] | unknown[],
-      public output: unknown,
-      public preopData: unknown // old state for [[set]] ops
-   ) { }
-
-   undo() {
-      if (this.op === '[[set]]') {
-         const target = this.target as AnyObject;
-         const [key] = this.args as [PropertyKey]
-         const oldValue = this.preopData
-         target[key] = oldValue;
-      } else if (isIonizedModel(this.target)) {
-         quarksOf(this.target).revertOp(this)
-      }
-      else {
-         if (__DEV__) console.warn('invalid mutation target')
-      }
-   }
-}
 
 
 export type ChangeHandler<T = any> = (event: ChangeEvent<T>) => void

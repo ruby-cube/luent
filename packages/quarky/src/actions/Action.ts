@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
-import { hasQuarks, QUARKS, quarksOf } from "../Quarks";
-import { Mutation } from "../watch/watch";
+import { hasQuarks, quarksOf } from "../Quarks";
+import { Mutable, Mutation, MutableEntity } from "./Mutable";
 
 // Actions may span mulitple effect cycles
 
@@ -56,7 +56,7 @@ class Action {
          }
       }
       else {
-         storeMutations(this, <{ [QUARKS]: StatefulQuarks }>target)
+         storeMutations(this, <MutableEntity>target)
       }
       return true;
    }
@@ -83,11 +83,9 @@ class Action {
    }
 }
 
-export type StatefulQuarks = {
-   recordOp: undefined | ((mutation: Mutation) => void);
-}
 
-function storeMutations(action: Action, target: { [QUARKS]: StatefulQuarks }) {
+
+function storeMutations(action: Action, target: MutableEntity) {
    const quarks = quarksOf(target)
    quarks.recordOp = (mutation: Mutation) => {
       const mutations = action.mutations;

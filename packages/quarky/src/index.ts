@@ -6,7 +6,6 @@ export * from "./debug/debug" //TODO: limit exports to public api
 export * from "./ionized/ionize" //TODO: limit exports to public api
 export * from "./ion/AtomicIon" //TODO: limit exports to public api
 export * from "./ion/Ion" //TODO: limit exports to public api
-export * from "./ion/toIons" //TODO: limit exports to public api
 export * from "./ion/Neutron" //TODO: limit exports to public api
 export * from "./watch/watch" //TODO: limit exports to public api
 export * from "./watch/debug" //TODO: limit exports to public api
@@ -17,8 +16,8 @@ export * from "./watch/areEqual" //TODO: limit exports to public api
 export * from "./nonlocal/NonlocalReadonly" //TODO: limit exports to public api
 export * from "./ionic/IonicCompound" //TODO: limit exports to public api
 export * from "./Compound/Particle" //TODO: limit exports to public api
-export * from "./ionic/MaybeMemoized" //TODO: limit exports to public api
-export * from "./ionic/DerivationCapsule" //TODO: limit exports to public api
+export * from "./ionic/DerivationIon" //TODO: limit exports to public api
+export * from "./ionic/GetterIon" //TODO: limit exports to public api
 
 installIonicArray()
 installIonicSet()

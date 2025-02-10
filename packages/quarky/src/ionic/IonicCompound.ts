@@ -1,7 +1,7 @@
 import { Particle } from "../Compound/Particle";
 import { Compound, MaybeCompound, track, untrackParticles } from "../Compound/Compound";
 import { Watchable } from "../watch/Watched";
-import { Mutation } from "../watch/watch";
+import { Mutation } from "../actions/Mutable";
 
 const trackerStack: (Compound | null)[] = []
 
@@ -54,10 +54,6 @@ export function detachedCall(fn: Function) {
       popTracker()
    }
 }
-
-
-
-
 
 export class IonicCompound<T extends MaybeCompound = { asCompound?: IonicCompound } & Watchable> implements Compound {
 

@@ -60,7 +60,7 @@ export const __DEV__debug = {
    // traceTrigger // TODO: This should be on effect  effect.__DEV__traceTrigger()
 }
 
-type TraceableSubject = { [QUARKS]: TraceableQuarks, __DEV__labelName: string }
+export type TraceableSubject = { [QUARKS]: TraceableQuarks, __DEV__labelName?: string }
 
 // export type TraceableQuarks = { __DEV__asTraceable?: Traceable; }
 

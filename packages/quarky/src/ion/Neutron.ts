@@ -49,7 +49,7 @@ export function createPrimaryNeutron(
    inert: boolean = false
 ) {
    const $ion = (inert ? () => state
-      : () => getReactiveState(ion)) as $AtomicIon
+      : () => getReactiveState(ion)) as $AtomicIonState
 
 
    let stateIsIonized = isIonizedModel(state)

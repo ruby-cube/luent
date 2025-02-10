@@ -4,7 +4,6 @@ import { IonicCompound } from "./IonicCompound";
 
 type IonicEffect = MaybeCompound<IonicCompound> & { asWatched: Watched }
 
-// let currentEffect: Function | undefined
 
 export function createIonicEffect(task: () => any, retrack: boolean = true) {
    const compound: IonicCompound<IonicEffect> = new IonicCompound(effect)

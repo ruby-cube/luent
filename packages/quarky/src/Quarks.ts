@@ -1,3 +1,4 @@
+
 export const QUARKS = Symbol('quarks')
 
 export function hasQuarks(value: unknown): value is { [QUARKS]: Quarks } {
@@ -9,6 +10,12 @@ export function quarksOf<T extends { [QUARKS]: Quarks }>(obj: T): T[typeof QUARK
 }
 
 
-export type Quarks = {
-   type: string | symbol
+export type Quarks = object
+
+export type QuarksOf<T extends { [QUARKS]: Quarks }> = T extends { [QUARKS]: infer Q } ? Q : never
+
+
+export type EntityQuarks<T> = {
+   type: string | symbol,
+   entity: T,
 }

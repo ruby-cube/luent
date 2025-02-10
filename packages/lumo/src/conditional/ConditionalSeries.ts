@@ -1,5 +1,5 @@
 import { __devCheckIfTracked } from "@rue/quarky";
-import { Muon } from "../../../quarky/src/reactivity/reactivity-system";
+import { Muon } from "../../../quarky/src/notes-reactivity-system";
 import { ConditionalKit } from "./ConditionalKit";
 import { Booleanny } from "@rue/types";
 
