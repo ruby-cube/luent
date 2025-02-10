@@ -10,13 +10,13 @@ export type WatchDebugOptions = {
     onTrigger?: OnTrigger;
 }
 
-type OnTrack = (target?: AtomicIon | PropIon | Ionized<AnyObject>) => void
+type OnTrack = (target?: AtomicIon | PropIon | IonizedModel) => void
 type OnTrigger = () => void
 
-const onTrackMap: Map<AtomicIon | PropIon | Ionized<AnyObject>, OnTrack> = new Map();
-const onTriggerMap: Map<AtomicIon | PropIon | Ionized<AnyObject>, OnTrigger> = new Map();
+const onTrackMap: Map<AtomicIon | PropIon | IonizedModel, OnTrack> = new Map();
+const onTriggerMap: Map<AtomicIon | PropIon | IonizedModel, OnTrigger> = new Map();
 
-export function registerDebuggers(targets: (AtomicIon | PropIon)[] | Ionized<AnyObject>, options: WatchDebugOptions | undefined){
+export function registerDebuggers(targets: (AtomicIon | PropIon)[] | IonizedModel, options: WatchDebugOptions | undefined){
     const {onTrack, onTrigger} = options ?? {}
     const _targets = isIonizedModel(targets) ? [targets] : targets
     if (onTrack){
@@ -31,17 +31,17 @@ export function registerDebuggers(targets: (AtomicIon | PropIon)[] | Ionized<Any
     }
 }
 
-export function runTrackDebugger(target: AtomicIon | PropIon | Ionized<AnyObject>){
+export function runTrackDebugger(target: AtomicIon | PropIon | IonizedModel){
     const onTrack = onTrackMap.get(target);
     if (onTrack) onTrack();
 }
 
-export function runTriggerDebugger(target: AtomicIon | PropIon | Ionized<AnyObject>){
+export function runTriggerDebugger(target: AtomicIon | PropIon | IonizedModel){
     const onTrigger = onTriggerMap.get(target);
     if (onTrigger) onTrigger();
 }
 
-export function collectReactiveProps(target: Ionized<AnyObject>, deps?: PropIon[]) {
+export function collectReactiveProps(target: IonizedModel, deps?: PropIon[]) {
     if (!isIonizedModel(target)) return [];
     const _deps = deps || [];
     // for (const key in target) {

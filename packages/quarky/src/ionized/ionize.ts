@@ -3,7 +3,7 @@ import { AnyObject } from "@rue/types";
 import { isObject } from "@rue/utils";
 import { timeTraveler } from "./TimeTraveler";
 import { useEffectCycle } from "../watch/EffectCycle";
-import { MetaIonizedModel, IONIZED_MODEL } from "./IonizedModelQuarks";
+import { IonizedModelQuarks, IONIZED_MODEL } from "./IonizedModelQuarks";
 import { inert, Inert, isInert } from "./inert";
 import { AnyIon, Ion, ion, isIon } from "../ion/Ion";
 import { AtomicIon, AtomicIonQuarks } from "../ion/AtomicIon";
@@ -33,7 +33,7 @@ export function registerIonizedModel(ionicModel: IonizedModel, target: AnyObject
    ionizedModels.set(target, ionicModel)
 }
 
-export function isIonizedModel(value: any): value is Ionized<AnyObject> {
+export function isIonizedModel(value: any): value is IonizedModel {
    if (!isObject(value)) return false;
    return Boolean(
       //@ts-expect-error
@@ -49,7 +49,7 @@ type AbsorbedIon<T> = {
 
 
 
-export type Ionized<T extends AnyObject, M extends {} = {}> = T & { [QUARKS]: MetaIonizedModel }
+export type Ionized<T extends AnyObject, M extends {} = {}> = T & { [QUARKS]: IonizedModelQuarks }
 // export type Ionized<T extends AnyObject, M extends {} = {}> = {
 //    [K in keyof T as (K extends '~$methods' ? never : K extends keyof M ? M[K] extends boolean ? K : K extends string ? `_${K}` : K : K)]:
 //    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? T[K] : V :
@@ -58,7 +58,7 @@ export type Ionized<T extends AnyObject, M extends {} = {}> = T & { [QUARKS]: Me
 //    : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
 //    : T[K] extends { [key: PropertyKey]: any } | undefined ? Ionized<Exclude<T[K], undefined>> | undefined
 //    : T[K]
-// } & InvertIons<T, OmitTrue<M>> & OmitTrue<M> & { [QUARKS]: MetaIonizedModel }
+// } & InvertIons<T, OmitTrue<M>> & OmitTrue<M> & { [QUARKS]: IonizedModelQuarks }
 
 type OmitTrue<M extends {}> = { [K in keyof M as M[K] extends true ? never : K]: Exclude<M[K], true> }
 
@@ -161,16 +161,16 @@ export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: 
 
 // type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | typeof inert }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends typeof inert ? T[K] & Inert : T[K] } //TODO: Mark public
 
-export function storeSnapshot(metaIonizedModel: MetaIonizedModel, clone?: AnyObject) {
-   timeTraveler.takeSnapshot(toRaw(metaIonizedModel), useEffectCycle().count, clone)
+export function storeSnapshot(modelQuarks: IonizedModelQuarks, clone?: AnyObject) {
+   timeTraveler.takeSnapshot(toRaw(modelQuarks), useEffectCycle().count, clone)
 }
 
 
 
-type AsRaw<T> = T extends MetaIonizedModel<infer R> ? R : T extends IonizedModel<infer R> ? R : T
+type AsRaw<T> = T extends IonizedModelQuarks<infer R> ? R : T extends IonizedModel<infer R> ? R : T
 
 export function toRaw<T>(target: T): AsRaw<T> {
-   if (target instanceof MetaIonizedModel) return target.rawTarget;
+   if (target instanceof IonizedModelQuarks) return target.rawTarget;
    if (isIonizedModel(target)) return quarksOf(target).rawTarget as AsRaw<T>;
    return target as AsRaw<T>; // already raw target
 }
@@ -214,17 +214,17 @@ const frog = ionize({
 
 
 // export function toWatchedProp(reactive: IonizedModel, key: PropertyKey) {
-//     const metaIonizedModel = reactive[QUARKS]
-//     const isIndex = toRaw(metaIonizedModel) instanceof Array && isIntegerKey(key)
+//     const modelQuarks = reactive[QUARKS]
+//     const isIndex = toRaw(modelQuarks) instanceof Array && isIntegerKey(key)
 //     if (isIndex) {
-//         (<MetaIonicCollection>metaIonizedModel).addObservedEntryKey(key)
+//         (<MetaIonicCollection>modelQuarks).addObservedEntryKey(key)
 //     }
 //     // clean up
 //     const prop = asObservedProp(reactive, key)
 //     const watchSubject = asWatched(prop)
 //     watchSubject.onUnwatched(() => {
 //         unobserve(prop, isIndex ? () => {
-//             (<MetaIonicCollection>metaIonizedModel).deleteObservedEntryKey(key)
+//             (<MetaIonicCollection>modelQuarks).deleteObservedEntryKey(key)
 //         } : undefined)
 //     })
 //     return prop;

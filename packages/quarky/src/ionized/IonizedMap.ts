@@ -161,11 +161,11 @@ export function installIonicMap() {
 //     target: Map<any, any>,
 //     methods: AnyObject | undefined
 // ) {
-//     const metaIonizedModel = new MetaIonicCollection(target, methods)
+//     const modelQuarks = new MetaIonicCollection(target, methods)
 //     const ionicModel = new Proxy(target, {
 //         get(target, key, receiver) {
 //             if (__DEV__) emitSignal()
-//             if (key === QUARKS) return metaIonizedModel
+//             if (key === QUARKS) return modelQuarks
 //             const reinedMeta = getReinedMeta(target, ionicModel, receiver)
 //             if (reinedMeta) {
 //                 const keys = reinedMeta.propertyKeys
@@ -228,7 +228,7 @@ export function installIonicMap() {
 //             return reactiveSetter(
 //                 Map,
 //                 ionicModel,
-//                 metaIonizedModel,
+//                 modelQuarks,
 //                 target,
 //                 key,
 //                 value,
@@ -254,12 +254,12 @@ export function installIonicMap() {
 //         )],
 //         ['clear', useClearOp(
 //             ionicModel,
-//             metaIonizedModel,
+//             modelQuarks,
 //             target
 //         )],
 //         ['delete', useDeleteOp(
 //             ionicModel,
-//             metaIonizedModel,
+//             modelQuarks,
 //             target
 //         )]
 //     ])
@@ -274,9 +274,9 @@ export function installIonicMap() {
 
 //         if (oldValue === _newValue) return;
 
-//         storeSnapshot(metaIonizedModel)
+//         storeSnapshot(modelQuarks)
 
-//         const ionicModel = metaIonizedModel.ionicModel!
+//         const ionicModel = modelQuarks.ionicModel!
 //         if (oldSize !== newSize) {
 //             const sizeProp = getObservedProp(ionicModel, 'size')
 //             if (sizeProp)
@@ -298,7 +298,7 @@ export function installIonicMap() {
 //         return output;
 //     }
 
-//     metaIonizedModel.initIonizedModel(ionicModel)
+//     modelQuarks.initIonizedModel(ionicModel)
 //     registerIonizedModel(ionicModel, target)
 //     return ionicModel
 // }

@@ -39,7 +39,7 @@ export function areShallowEqualArrays(arrayA: any[], arrayB: any[]) {
 }
 
 
-function reactivePropsAreEqual(reactiveA: Ionized<AnyObject>, reactiveB: Ionized<AnyObject>) {
+function reactivePropsAreEqual(reactiveA: IonizedModel, reactiveB: IonizedModel) {
     if (!isIonicObject(reactiveA) || !isIonicObject(reactiveB)) throw new Error("Invalid input type");
     const rawA = toRaw(reactiveA)
     const rawB = toRaw(reactiveB)

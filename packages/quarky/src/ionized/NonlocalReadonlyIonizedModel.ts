@@ -40,7 +40,7 @@ export function createNonlocalReadonlyIonizedModel(originalIonizedModel: Ionized
          if (__DEV__) console.error('Set operation failed. Object is readonly.')
          return false;
       }
-   }) as Ionized<AnyObject>
+   }) as IonizedModel
 
    quarks.asReadonly = readonlyModel
    return readonlyModel

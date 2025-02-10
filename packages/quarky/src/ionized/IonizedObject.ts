@@ -18,11 +18,11 @@ export function isIonicObject(value: any): value is IonizedModel {
 //     methods: AnyObject | undefined
 // ) {
 //     const boundMethodMap: Map<string | symbol, Function> = new Map()
-//     const metaIonizedModel = new MetaIonizedModel(target, methods)
+//     const modelQuarks = new IonizedModelQuarks(target, methods)
 //     const ionicModel = new Proxy(target, {
 //         get(target, key, receiver) {
 //             if (__DEV__) emitSignal();
-//             if (key === QUARKS) return metaIonizedModel;
+//             if (key === QUARKS) return modelQuarks;
 //             const reinedMeta = getReinedMeta(target, ionicModel, receiver)
 //             if (reinedMeta) {
 //                 const keys = reinedMeta.propertyKeys
@@ -68,16 +68,16 @@ export function isIonicObject(value: any): value is IonizedModel {
 //             return reactiveSetter(
 //                 [Object],
 //                 ionicModel,
-//                 metaIonizedModel!,
+//                 modelQuarks!,
 //                 target,
 //                 key,
 //                 value,
 //                 receiver
 //             )
 //         }
-//     }) as IonizedModel<AnyObject>
+//     }) as IonizedModel
 
-//     metaIonizedModel.initIonizedModel(ionicModel)
+//     modelQuarks.initIonizedModel(ionicModel)
 //     registerIonizedModel(ionicModel, target)
 //     return ionicModel
 // }

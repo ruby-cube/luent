@@ -1,17 +1,15 @@
 import type { AnyObject } from "@rue/types"
-import type { Ionized } from "./ionize"
-import { registerTrackedOp, type TrackedOp } from "./TrackedOp"
 import { PropIon } from "./Pion"
-import { IonicCompound } from "../ionic/IonicCompound"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { Traceable } from "../debug/debug"
 import { CustomIonizedModelConfig, IonizedModel } from "./IonizedModel"
 import { Watchable, Watched } from "../watch/Watched"
-import { CapsuleQuarks } from "../capsule/Capsule"
 import { MaybeParticle, Particle } from "../Compound/Particle"
 import { MaybeCompound } from "../Compound/Compound"
 import { IonizedCompound } from "./IonizedCompound"
-import { Mutation } from "../watch/watch"
+import { QuarksOf } from "../Quarks"
+import { Capsule } from "../capsule/Capsule"
+import { Mutation } from "../actions/Mutable"
 
 
 
@@ -31,7 +29,7 @@ export const IONIZED_MODEL = Symbol('ionicModel')
 // & MaybeCompound<IonizedCompound>
 
 export class IonizedModelQuarks
-   implements Watchable, CapsuleQuarks, MaybeParticle, MaybeCompound<IonizedCompound> {
+   implements Watchable, QuarksOf<Capsule>, MaybeParticle, MaybeCompound<IonizedCompound> {
    // entity!: IonizedModel
    ionicModel?: IonizedModel //TODO: rename as entity
    // shallowReactive?: IonizedModel<T>
@@ -39,7 +37,7 @@ export class IonizedModelQuarks
 
    asReined?: object
    asReadonly?: object
-   __DEV__asTraceable?: Traceable
+   __DEV__asTraceable = new Traceable()
 
    initIonizedModel(ionicModel: IonizedModel) {
       if (this.ionicModel) return;
@@ -196,7 +194,7 @@ export class IonizedModelQuarks
 
 // export type Collection<K = any, V = any> = Set<K> | Array<K> | Map<K, V>
 
-// export class MetaIonicCollection<T extends Collection = Collection> extends MetaIonizedModel<T> {
+// export class MetaIonicCollection<T extends Collection = Collection> extends IonizedModelQuarks<T> {
 //     constructor(rawTarget: T, methods: AnyObject = {}) {
 //         super(rawTarget, methods)
 //     }

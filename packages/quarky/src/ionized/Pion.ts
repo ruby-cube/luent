@@ -187,10 +187,10 @@ function createPropIon(ionicModel: AnyObject, key: PropertyKey): PropIon {
 }
 
 function reregisterIfNeeded($propIon: PropIon, ionicModel: AnyObject, rawKey: PropertyKey) {
-   const metaIonizedModel = quarksOf(ionicModel);
-   if (!metaIonizedModel.getPropIon(rawKey)) {
+   const modelQuarks = quarksOf(ionicModel);
+   if (!modelQuarks.getPropIon(rawKey)) {
       if (__DEV__) console.warn(`[CASE RESEARCH] I'm curious how often and in what cases this happens: $propIon for ${key.toString()} in${JSON.stringify(rawTarget)} is no longer observed, but there's still an active reference to it`)
-      metaIonizedModel.registerPropIon(rawKey, $propIon as PropIon) // This means $propIon is not being watched and is not an particle anywhere, but it's still being used
+      modelQuarks.registerPropIon(rawKey, $propIon as PropIon) // This means $propIon is not being watched and is not an particle anywhere, but it's still being used
    }
 }
 

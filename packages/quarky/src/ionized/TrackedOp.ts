@@ -47,7 +47,7 @@ export class TrackedOp implements Quarks, MaybeParticle { //QUESTION: should thi
 // }
 
 export function asTrackedOp(
-   model: Ionized<AnyObject>,
+   model: IonizedModel,
    op: string,
    key: any
 ): TrackedOp {

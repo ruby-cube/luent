@@ -3,7 +3,7 @@ import { trigger, triggerIonicAtom, triggerIonizedModel } from "../reactivity/x_
 import { IonizedModel, storeSnapshot, toRaw } from "./ionize";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getTrackedOp } from "./TrackedOp";
-import { MetaIonizedModel } from "./IonizedModelQuarks";
+import { IonizedModelQuarks } from "./IonizedModelQuarks";
 import { getObservedProp } from "./Pion";
 
 // declare global {
@@ -180,12 +180,12 @@ export function installIonicSet() {
 //     target: Set<any>,
 //     methods: AnyObject | undefined
 // ) {
-//     const metaIonizedModel = new MetaIonicCollection(target, methods)
+//     const modelQuarks = new MetaIonicCollection(target, methods)
 
 //     const ionicModel = new Proxy(target, {
 //         get(target, key, receiver) {
 //             if (__DEV__) emitSignal()
-//             if (key === QUARKS) return metaIonizedModel
+//             if (key === QUARKS) return modelQuarks
 //             const reinedMeta = getReinedMeta(target, ionicModel, receiver)
 //             if (reinedMeta) {
 //                 const keys = reinedMeta.propertyKeys
@@ -254,7 +254,7 @@ export function installIonicSet() {
 //             return reactiveSetter(
 //                 Set,
 //                 ionicModel,
-//                 metaIonizedModel,
+//                 modelQuarks,
 //                 target,
 //                 key,
 //                 value,
@@ -273,12 +273,12 @@ export function installIonicSet() {
 //     ['add', addOp],
 //     ['clear', useClearOp(
 //         ionicModel,
-//         metaIonizedModel,
+//         modelQuarks,
 //         target
 //     )],
 //     ['delete', useDeleteOp(
 //         ionicModel,
-//         metaIonizedModel,
+//         modelQuarks,
 //         target
 //     )]
 // ])
@@ -292,7 +292,7 @@ export function installIonicSet() {
 
 
 //         if (oldSize === newSize) return;
-//         storeSnapshot(metaIonizedModel)
+//         storeSnapshot(modelQuarks)
 
 //         const sizeProp = getObservedProp(ionicModel, 'size')
 //         if (sizeProp)
@@ -312,7 +312,7 @@ export function installIonicSet() {
 //         return output;
 //     }
 
-//     metaIonizedModel.initIonizedModel(ionicModel)
+//     modelQuarks.initIonizedModel(ionicModel)
 //     registerIonizedModel(ionicModel, target)
 //     return ionicModel
 // }
@@ -322,7 +322,7 @@ export function installIonicSet() {
 
 export function useDeleteOp(
    ionicModel: IonizedModel,
-   metaIonizedModel: MetaIonizedModel,
+   modelQuarks: IonizedModelQuarks,
    target: AnyObject,
    getPreopData: GetPreopData
 ) {
@@ -334,7 +334,7 @@ export function useDeleteOp(
       const newSize = target.size
       if (oldSize === newSize) return;
 
-      storeSnapshot(metaIonizedModel)
+      storeSnapshot(modelQuarks)
 
       const sizeProp = getObservedProp(ionicModel, 'size')
       if (sizeProp)
@@ -364,7 +364,7 @@ export function useDeleteOp(
 
 export function useClearOp(
    ionicModel: IonizedModel,
-   metaIonizedModel: MetaIonizedModel,
+   modelQuarks: IonizedModelQuarks,
    target: AnyObject,
    getPreopData: GetPreopData
 ) {
@@ -376,9 +376,9 @@ export function useClearOp(
 
       if (oldSize === newSize) return;
 
-      storeSnapshot(metaIonizedModel)
+      storeSnapshot(modelQuarks)
 
-      const trackedEntries = metaIonizedModel.observedEntryKeys
+      const trackedEntries = modelQuarks.observedEntryKeys
       if (trackedEntries) {
          for (const entryKey of trackedEntries) {
             const hasOp = getTrackedOp(ionicModel.has, entryKey)
