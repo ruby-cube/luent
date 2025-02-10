@@ -6,6 +6,7 @@ import { __DEV__label } from "../debug/DEVLabellable";
 import { Ion, isIon } from "../ion/Ion";
 import { MaybeCompound } from "../Compound/Compound";
 
+// USE CASE: Mainly for pions that need methods
 
 /**
 * Managed Derivation Ion
@@ -39,12 +40,13 @@ export function isDerivationCapsule(value: unknown): value is $DerivationCapsule
 }
 
 export function createDerivationCapsule(
-   derivation: (previousValue?: unknown) => unknown,
+   derivation: (prevState?: unknown) => unknown,
    methods: AnyObject,
 ) {
    const capsule = {}
+   let previousState: unknown;
    function $capsuleIon() {
-      return derivation()
+      return previousState = derivation(previousState)
    }
 
    $capsuleIon[QUARKS] = capsule

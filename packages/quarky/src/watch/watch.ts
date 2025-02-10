@@ -14,7 +14,7 @@ import { toValue } from "../ion/toIons";
 import { ChangeEvent } from "./ChangeEvent";
 import { Quarks, QUARKS, quarksOf } from "../Quarks";
 import { Ion, isIon } from "../ion/Ion";
-import { isMemoizedIon } from "../ionic/MemoizedIon";
+import { isMemoizedIon } from "../ionic/MaybeMemoized";
 import { untrackedCall } from "../ionic/x_DependencyTracker";
 import { createWatchedDerivation } from "./WatchedDerivation";
 import { isFunction, noop } from "@rue/utils";
@@ -38,17 +38,6 @@ export type EffectOptions = {
    // only?: (boolean | AnyObject | Ion)[];
    // also?: AnyObject[]
 } & EffectCycleOptions & SustainedListenerOptions & WatchDebugOptions
-
-function undoSetOp(mutation: Mutation) {
-   const target = mutation.target as AnyObject;
-   const [key] = mutation.args as [PropertyKey]
-   const oldValue = mutation.preopData
-   target[key] = oldValue;
-}
-
-function undoOp(mutation: Mutation) {
-   quarksOf(mutation.target).revertOp(mutation)
-}
 
 
 

@@ -1,9 +1,10 @@
 import { AnyObject } from "@rue/types";
-import {  isIonizedModel, ionize, IonizedModel, toRaw } from "./ionize";
+import {  isIonizedModel, ionize, toRaw } from "./ionize";
 import { asWatched, Watched } from "../watch/Watched";
 import { asParticle, Particle } from "../Compound/Particle";
 import { quarksOf, QUARKS, Quarks } from "../Quarks";
 import { getActiveTracker } from "../ionic/IonicCompound";
+import { IonizedModel } from "./IonizedModel";
 
 
 //TODO: Whether a Pion is Writable or not depends of if the property is writable
@@ -94,7 +95,7 @@ class PionQuarks implements Quarks{
       const watchSubject = this.asWatched = asWatched(this.o)
 
       watchSubject.onUnwatched(() => {
-         if (watchSubject.watchCount === 0 && this.asParticle?.derivations.size === 0) {
+         if (watchSubject.watchCount === 0 && this.asParticle?.compounds.size === 0) {
             this.discard()
          }
       })
@@ -109,7 +110,7 @@ class PionQuarks implements Quarks{
          quarksOf(this.model).addObservedEntryKey(this.key)
 
       atom.onUntracked(() => {
-         if (this.asWatched?.watchCount === 0 && atom.derivations.size === 0) {
+         if (this.asWatched?.watchCount === 0 && atom.compounds.size === 0) {
             this.discard()
          }
       })

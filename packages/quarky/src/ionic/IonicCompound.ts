@@ -1,5 +1,5 @@
 import { Particle, MaybeParticle, asParticle } from "../Compound/Particle";
-import { Compound, MaybeCompound,  track, untrackParticles } from "../Compound/Compound";
+import { Compound, MaybeCompound, track, untrackParticles } from "../Compound/Compound";
 import { Watchable } from "../watch/Watched";
 import { Mutation } from "../watch/watch";
 
@@ -59,7 +59,7 @@ export function detachedCall(fn: Function) {
 
 
 
-export class IonicCompound<T extends MaybeCompound = { asCompound?: IonicCompound } & Watchable > implements Compound {
+export class IonicCompound<T extends MaybeCompound = { asCompound?: IonicCompound } & Watchable> implements Compound {
 
    constructor(
       readonly quarks: T,
@@ -84,7 +84,7 @@ export class IonicCompound<T extends MaybeCompound = { asCompound?: IonicCompoun
       finally {
          popTracker();
          if (__DEV__ && this.particles.length === 0) {
-            throw new Error('Watch target or derived AtomicIon has no dependencies (and therefore no reactivity', { cause: 'no dependencies' })
+            console.warn('Watch target or derived AtomicIon has no dependencies (and therefore no reactivity')
          }
       }
    }

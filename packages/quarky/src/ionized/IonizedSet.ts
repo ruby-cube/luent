@@ -113,7 +113,7 @@ export function installIonicSet() {
                   if (sizeProp)
                      trigger(sizeProp, newSize, oldSize);
 
-                  const hasOp = getTrackedOp(ionicModel, 'has', _newValue)
+                  const hasOp = getTrackedOp(ionicModel.has, _newValue)
                   if (hasOp) triggerIonicAtom(hasOp);
 
                   triggerIonizedModel(
@@ -340,11 +340,11 @@ export function useDeleteOp(
       if (sizeProp)
          trigger(sizeProp, newSize, oldSize);
 
-      const hasOp = getTrackedOp(ionicModel, 'has', key)
+      const hasOp = getTrackedOp(ionicModel.has, key)
       if (hasOp) triggerIonicAtom(hasOp);
 
       if (target instanceof Map) {
-         const getOp = getTrackedOp(ionicModel, 'get', key)
+         const getOp = getTrackedOp(ionicModel.get, key)
          if (getOp) triggerIonicAtom(getOp);
       }
 
@@ -381,11 +381,11 @@ export function useClearOp(
       const trackedEntries = metaIonizedModel.observedEntryKeys
       if (trackedEntries) {
          for (const entryKey of trackedEntries) {
-            const hasOp = getTrackedOp(ionicModel, 'has', entryKey)
+            const hasOp = getTrackedOp(ionicModel.has, entryKey)
             if (hasOp) triggerIonicAtom(hasOp);
 
             if (target instanceof Map) {
-               const getOp = getTrackedOp(ionicModel, 'get', entryKey)
+               const getOp = getTrackedOp(ionicModel.get, entryKey)
                if (getOp) triggerIonicAtom(getOp);
             }
          }

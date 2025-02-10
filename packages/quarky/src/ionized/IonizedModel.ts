@@ -1,10 +1,10 @@
 import { AnyObject } from "@rue/types";
 import { ionize, Ionized, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
-import { asTrackedOp, getTrackedOp } from "./TrackedOp";
+import { asTrackedOp, getTrackedOp, TRACKED } from "./TrackedOp";
 import { storeSnapshot } from "./ionize";
 import { trigger, } from "../reactivity/x_trigger";
-import { IonizedModelQuarks, TRACKED } from "./IonizedModelQuarks";
+import { IonizedModelQuarks } from "./IonizedModelQuarks";
 import { isFunction, noop } from "@rue/utils";
 import { isIon } from "../ion/Ion";
 import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./Pion";

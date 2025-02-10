@@ -234,7 +234,7 @@ const frog = ionize({
 // function unobserve(prop: ObservedProp) {
 //     const watchSubject = asWatched(prop)
 //     const atom = asParticle(prop)
-//     if (watchSubject.watchCount === 0 && atom.derivations.size === 0) {
+//     if (watchSubject.watchCount === 0 && atom.compounds.size === 0) {
 //         prop.discard()
 //     }
 // }

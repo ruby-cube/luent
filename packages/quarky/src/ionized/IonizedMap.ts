@@ -88,10 +88,10 @@ export function installIonicMap() {
                         trigger(sizeProp, newSize, oldSize);
                   }
 
-                  const hasOp = getTrackedOp(ionicModel, 'has', key)
+                  const hasOp = getTrackedOp(ionicModel.has, key)
                   if (hasOp) triggerIonicAtom(hasOp);
 
-                  const getOp = getTrackedOp(ionicModel, 'get', key)
+                  const getOp = getTrackedOp(ionicModel.get, key)
                   if (getOp) triggerIonicAtom(getOp);
 
                   triggerIonizedModel(

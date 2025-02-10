@@ -24,12 +24,15 @@ import { Mutation } from "../watch/watch";
 export type $MemoizedIon = Ion & Capsule & {
    [QUARKS]: MemoizedDerivation
 }
-type MemoizedCompound = IonicCompound<MemoizedDerivation> & {state: unknown}
+type MemoizedCompound = IonicCompound<MemoizedDerivation>
 
 /** 
  * INTERNAL 
  * */
-export type MemoizedDerivation =
+export type MemoizedDerivation = { 
+   state: unknown
+   entity: $MemoizedIon 
+} &
    Quarks
    & Watchable
    & CapsuleQuarks
@@ -38,68 +41,99 @@ export type MemoizedDerivation =
 
 
 
+export const MAYBE_MEMOIZED = Symbol('Maybe Memoized Ion')
 export const MEMOIZED_ION = Symbol('Memoized Ion')
+export const DERIVATION = Symbol('Derivation')
 
 export function isMemoizedIon(value: unknown): value is $MemoizedIon {
    return hasQuarks(value) && quarksOf(value).type === MEMOIZED_ION
 }
 
-export function createMemoizedIon(
+export function createMaybeMemoizedIon(
    derivation: (previousValue?: unknown) => unknown,
    methods?: AnyObject,
    retrack: boolean = true
 ) {
    const creationFlask = getActiveFlask()
 
-   const $memoizedIon = () => {
-      if (__DEV__) emitSignal();
-      getActiveTracker()?.track(ion)
+   let compound: IonicCompound | undefined
+   let fn = initialize
+   const $maybeMemoized = () => fn()
 
-      const initialized = !!compound.particles;
-      if (!initialized) {
+   function initialize() {
+      compound = new IonicCompound(ion)
+      const value = compound.trackedCall(derivation)
+      if (compound.particles.length === 0) {
+         ion.type = DERIVATION;
+         fn = getState
+         // no reactivity, no memoization
+         compound = undefined;
+         return value;
+      }
+      else {
+         ion.type = MEMOIZED_ION;
+         if (__DEV__) emitSignal();
+         getActiveTracker()?.track(ion)
+         fn = getMemoizedState
+         ion.state = value;
+         ion.asCompound = compound as MemoizedCompound
+         compound.trigger = trigger
          const flask = getActiveFlask()
          assertValidInitialization(flask, creationFlask) // prevents memory leaks caused by usng memoized ion outside of its creation scope
          flask?.onDiscard(() => {
-            compound.untrackParticles()
+            compound!.untrackParticles()
          })
+         return value;
       }
-      const value = !initialized ? compound.trackedCall(derivation)
-         : (retrack && compound.dirty) ? compound.trackedCall(() => derivation(compound.state))
-            : compound.dirty ? derivation(compound.state)
-               : compound.state;
+   }
 
-      if (!initialized || compound.dirty)
-         compound.state = value;
-      compound.dirty = false;
+   function getMemoizedState() {
+      getActiveTracker()?.track(ion)
+      const compound = ion.asCompound!
+      const value =
+         (retrack && compound.dirty) ? compound.trackedCall(() => derivation(ion.state))
+            : compound.dirty ? derivation(ion.state)
+               : ion.state;
+
+      if (compound.dirty) {
+         ion.state = value;
+         compound.dirty = false;
+      }
       return value;
    }
 
+   function getState() {
+      return ion.state = derivation(ion.state)
+   }
+
    const ion: MemoizedDerivation = {
-      entity: $memoizedIon,
-      type: MEMOIZED_ION,
+      state: undefined,
+      entity: $maybeMemoized,
+      type: MAYBE_MEMOIZED,
       asParticle: undefined,
       asCompound: undefined,
       __DEV__asTraceable: undefined,
       asReadonly: undefined,
       asReined: undefined,
-      asWatched: undefined
+      asWatched: undefined,
+      recordOp: undefined
    }
 
-   const compound = ion.asCompound = new IonicCompound(ion) as MemoizedCompound
-   compound.trigger = trigger
-
-   $memoizedIon[QUARKS] = ion
-   $memoizedIon.__DEV__labelName = undefined
-   $memoizedIon.__DEV__label = __DEV__label
+   $maybeMemoized[QUARKS] = ion
+   $maybeMemoized.__DEV__labelName = undefined
+   $maybeMemoized.__DEV__label = __DEV__label
 
    __DEV__initTraceability(ion)
 
    if (methods) {
-      attachCapsuleMethods('MemoizedDerivationIon', $memoizedIon, methods)
+      attachCapsuleMethods('MemoizedDerivationIon', $maybeMemoized, methods)
    }
 
-   return $memoizedIon;
+   return $maybeMemoized;
 }
+
+
+
 
 function trigger(this: IonicCompound<MemoizedDerivation>, mutation: Mutation): void {
    this.dirty = true;

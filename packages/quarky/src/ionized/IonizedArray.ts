@@ -4,6 +4,7 @@ import { getTrackedOp } from "./TrackedOp";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getObservedProp } from "./Pion";
 import { nontrackableIterableKeys } from "./IonizedSet";
+import { Mutation } from "../watch/watch";
 
 type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 
@@ -67,7 +68,7 @@ type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 //    }
 // }
 
-const dogs = ionize([{name: 'lo'}])
+const dogs = ionize([{ name: 'lo' }])
 
 const jim = dogs.at(0)
 
@@ -220,10 +221,9 @@ export function installIonicArray() {
       },
 
       afterSet(ionicModel, meta, key, newValue, oldValue) {
-         const op = isIntegerKey(key) ? getTrackedOp(ionicModel, 'at', key) : null
-         if (op) {
-            triggerIonicAtom(op)
-         }
+         const mutation = new Mutation(ionicModel, '[[set]]', [key, newValue], newValue, oldValue)
+         const op = isIntegerKey(key) ? getTrackedOp(ionicModel.at, key) : null
+         op?.asParticle.triggerCompounds(mutation)
 
          const observedIndices = meta.observedEntryKeys
          if (observedIndices && key === 'length') {
@@ -235,13 +235,10 @@ export function installIonicArray() {
                const index = parseInt(indexKey)
                if (index > newValue || index > oldValue) {
                   const prop = getObservedProp(ionicModel, indexKey)
-                  if (prop) {
-                     trigger(prop, newValue, oldValue)
-                  }
-                  const op = getTrackedOp(ionicModel, 'at', index)
-                  if (op) {
-                     op.asParticle.trigger(mutation)
-                  }
+                  prop?.asParticle?.triggerCompounds(mutation)
+                  prop?.asWatched?.triggerEffects()
+                  const op = getTrackedOp(ionicModel.at, index)
+                  op?.asParticle.triggerCompounds(mutation)
                }
             }
          }
@@ -305,7 +302,7 @@ export function installIonicArray() {
          if (key === 'pop') {
             const prop = getObservedProp(ionicModel, (oldLength - 1).toString())
             if (prop) trigger(prop);
-            const op = getTrackedOp(ionicModel, 'at', - 1)
+            const op = getTrackedOp(ionicModel.at, - 1)
             if (op) triggerIonicAtom(op);
          }
 
@@ -322,7 +319,7 @@ export function installIonicArray() {
                   if (prop) {
                      trigger(prop)
                   }
-                  const op = getTrackedOp(ionicModel, 'at', index)
+                  const op = getTrackedOp(ionicModel.at, index)
                   if (op) {
                      if (isIonicAtom(op)) {
                         triggerIonicAtom(op)
@@ -591,7 +588,7 @@ export function installIonicArray() {
 //     if (metaIonizedModel.isNewProperty(key)) metaIonizedModel.registerNewProperty(key)
 
 //     const _newValue = toRaw(newValue)
-//     const op = target instanceof Array && isIntegerKey(key) ? getTrackedOp(ionicModel, 'at', key) : null;
+//     const op = target instanceof Array && isIntegerKey(key) ? getTrackedOp(ionicModel.at, key) : null;
 //     const prop = getObservedProp(ionicModel, key);
 //     if (!prop && !op) {
 //         // Reflect.set(target, key, newValue, receiver);
@@ -637,7 +634,7 @@ export function installIonicArray() {
 //                 if (prop) {
 //                     trigger(prop, _newValue, oldValue)
 //                 }
-//                 const op = getTrackedOp(ionicModel, 'at', index)
+//                 const op = getTrackedOp(ionicModel.at, index)
 //                 if (op) {
 //                     if (isIonicAtom(op)) {
 //                         triggerIonicAtom(op)
