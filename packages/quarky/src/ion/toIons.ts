@@ -35,14 +35,7 @@ import { isFunction } from "@rue/utils";
 //     return output;
 // }
 
-export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
-    return isIon(value) ? value : neutron(value) as T extends Ion ? T : Ion<T>
-}
 
-
-export function toValue(maybeFn: any){
-   return isFunction(maybeFn)? maybeFn(): maybeFn;
-}
 
 
 // function MovableBox(setup: {

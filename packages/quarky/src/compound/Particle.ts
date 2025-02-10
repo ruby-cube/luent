@@ -20,11 +20,11 @@ export class Particle {
 
    compounds: IterableSet<Compound> = new IterableSet()
 
-   addCompound(compound: Compound) {
+   associate(compound: Compound) {
       this.compounds.add(compound)
    }
 
-   removeCompound(compound: Compound) {
+   dissociate(compound: Compound) {
       this.compounds.delete(compound);
       this.cleanUp?.(this.quarks)
    }
@@ -43,7 +43,7 @@ export class Particle {
 
    cleanUp?: (quarks: MaybeParticle) => void
 
-   onUntracked(cleanUp: (quarks: MaybeParticle) => void) {
+   onDissociated(cleanUp: (quarks: MaybeParticle) => void) {
       if (__DEV__ && this.cleanUp) {
          console.error('Overriding existing cleanup function. This means we need an array for onUntracked tasks')
       }

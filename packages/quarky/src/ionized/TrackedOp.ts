@@ -23,7 +23,7 @@ export class TrackedOp implements Quarks, MaybeParticle { //QUESTION: should thi
       const modelQuarks = quarksOf(model);
       modelQuarks.addObservedEntryKey(entryKey)
       const particle = this.asParticle = asParticle(this);
-      particle.onUntracked(() => {
+      particle.onDissociated(() => {
          if (particle.compounds.size === 0) {
             modelQuarks.deleteObservedEntryKey(entryKey)
             this.discard()

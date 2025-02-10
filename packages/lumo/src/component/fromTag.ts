@@ -1,6 +1,5 @@
 import { AnyObject, UnionToIntersection } from "@rue/types";
-import { AnyIon, Ion, isIon, isIonizedModel, isReined, readonly } from "@rue/quarky";
-import { toIon, toValue } from "../../../quarky/src/ion/toIons";
+import { isIon, toIon, } from "@rue/quarky";
 import { getComponentAttributes } from "./makeComponent";
 import { isFunction, isObject } from "@rue/utils";
 import { DeepReadonly, v, Readonly, MaybeIon } from "../InputTypes";

@@ -25,6 +25,15 @@ export function isIon(value: unknown): value is Ion {
    return isFunction(value) && /^\$[a-z]/.test(value.name) && value.length === 0
 }
 
+export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
+   return isIon(value) ? value : neutron(value) as T extends Ion ? T : Ion<T>
+}
+
+
+export function toValue(maybeFn: any){
+  return isFunction(maybeFn)? maybeFn(): maybeFn;
+}
+
 // isIon // any sort of ion
 // isAtomic // primary
 // isNeutron // known inert

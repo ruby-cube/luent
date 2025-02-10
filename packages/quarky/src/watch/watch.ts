@@ -1,24 +1,30 @@
 import { AnyObject } from "@rue/types";
 import { asWatched, Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
-import { detachedCall, IonicCompound, MaybeIonicCompound } from "../ionic/IonicCompound";
+import { detachedCall, IonicCompound, untrackedCall } from "../ionic/IonicCompound";
 import { getCurrentEffectCylce, Phase, useEffectCycle } from "./EffectCycle";
 import { WatchDebugOptions } from "./debug";
-import { ionize, IonizedModel, isIonizedModel, toRaw, } from "../ionized/ionize";
+import { isIonizedModel, toRaw, } from "../ionized/ionize";
 import { areEqual } from "./areEqual";
-import { createIonicEffect, TerminalCompound } from "../ionic/IonicEffect";
+import { createIonicEffect } from "../ionic/IonicEffect";
 import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
 import { asParticle } from "../Compound/Particle";
 import { isPropIon, PropIon } from "../ionized/Pion";
-import { toValue } from "../ion/toIons";
-import { ChangeEvent } from "./ChangeEvent";
 import { Quarks, QUARKS, quarksOf } from "../Quarks";
-import { Ion, isIon } from "../ion/Ion";
+import { Ion, isIon, toValue } from "../ion/Ion";
 import { isMemoizedIon } from "../ionic/MaybeMemoized";
-import { untrackedCall } from "../ionic/x_DependencyTracker";
 import { createWatchedDerivation } from "./WatchedDerivation";
 import { isFunction, noop } from "@rue/utils";
 
+export class ChangeEvent<S> {
+   trace?: string;
+   constructor(
+      public subject: S,
+      public newState?: S extends () => infer T ? T : S,
+      public oldState?: S extends () => infer T ? T : S,
+      public mutations?: Mutation[]
+   ) { }
+}
 
 type EffectCycleOptions = {
    phase?: Phase;
@@ -147,64 +153,10 @@ function normalizeSubject(subject: unknown): { [QUARKS]: Watchable } {
    throw new Error("invalid input")
 }
 
-function isGetter(value: unknown): value is () => any {
+export function isGetter(value: unknown): value is () => any {
    return value instanceof Function && value.length === 0;
 }
 
-function createMultiSubject(subjects: unknown[] & AnyObject) {
-   const quarks = {
-      asCompound: undefined as unknown as TerminalCompound,
-      asWatched: undefined as unknown as Watched
-   }
-   const compound: TerminalCompound = new TerminalCompound(quarks)
-   quarks.asCompound = compound;
-   quarks.asWatched = new Watched(quarks)
-
-   let fn = initialize
-   let getterFn = (subject: Ion) => compound.trackedCall(subject)
-   let absorbedFn = (subject: IonizedModel) => {
-      compound.track(subject)
-      maybeInitializeIonizedCompound(subject)
-   }
-   function $subjects() {
-      return fn()
-   }
-   $subjects[QUARKS] = quarks
-
-   function initialize() {
-      try {
-         return getValues()
-      }
-      finally {
-         getterFn = (subject: Ion) => subject()
-         absorbedFn = noop
-         fn = getValues;
-      }
-   }
-
-   function getValues() {
-      const values: unknown[] = []
-      for (const subject of subjects) {
-         if (isGetter(subject)) {
-            values.push(getterFn(subject))
-         }
-         if (isIonizedModel(subject)) {
-            absorbedFn(subject)
-            values.push(subject)
-         }
-      }
-   }
-
-   return $subjects;
-}
-
-function maybeInitializeIonizedCompound(subject: AnyObject) {
-   const quarks = quarksOf(subject)
-   if (!quarks.asCompound) {
-      const ionizedCompound = asIonizedCompound(quarksOf(subject))
-      ionizedCompound.collectAbsorbedIons(subject) //TODO: but only if not initialized already...
-   }
-}
 
 function InertWatcher() {
    function noOp() {

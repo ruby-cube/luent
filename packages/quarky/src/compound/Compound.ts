@@ -18,12 +18,13 @@ export interface Compound {
       const particle = asParticle(entity)
       if (particle.compounds.has(this)) return particle;
       this.particles.push(particle)
+      particle.associate(this)
       return particle;
    }
 
    export function untrackParticles(this: Compound) {
       this.particles?.forEach(particle => {
-         particle.removeCompound(this)
+         particle.dissociate(this)
       })
       this.particles = []
    }

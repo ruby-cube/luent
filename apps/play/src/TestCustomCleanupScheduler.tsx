@@ -3,7 +3,6 @@ import { component, NodeRef } from "@rue/lumo"
 import { AnyIon, DerivedIon, AtomicIon, ion, ionize, watchEffect, watch} from "@rue/quarky"
 import { asPropIon } from "../../../packages/quarky/src/ionized/Pion"
 import { or, $setup, is, isDefined, isAny, not } from "../../../packages/lumo/src/component/X_$setup"
-import { toIon } from "../../../packages/quarky/src/ion/toIons"
 import { AnyObject } from "@rue/types"
 import { toIonicProps } from "../../../packages/lumo/src/component/X_normalizeProps"
 

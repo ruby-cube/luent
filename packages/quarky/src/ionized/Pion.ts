@@ -104,13 +104,13 @@ class PionQuarks implements Quarks{
    track() {
       if (this.asParticle) return;
 
-      const atom = this.asParticle = asParticle(this.o)
+      const particle = this.asParticle = asParticle(this.o)
 
       if (this.isEntryKey)
          quarksOf(this.model).addObservedEntryKey(this.key)
 
-      atom.onUntracked(() => {
-         if (this.asWatched?.watchCount === 0 && atom.compounds.size === 0) {
+      particle.onDissociated(() => {
+         if (this.asWatched?.watchCount === 0 && particle.compounds.size === 0) {
             this.discard()
          }
       })
@@ -190,7 +190,7 @@ function reregisterIfNeeded($propIon: PropIon, ionicModel: AnyObject, rawKey: Pr
    const metaIonizedModel = quarksOf(ionicModel);
    if (!metaIonizedModel.getPropIon(rawKey)) {
       if (__DEV__) console.warn(`[CASE RESEARCH] I'm curious how often and in what cases this happens: $propIon for ${key.toString()} in${JSON.stringify(rawTarget)} is no longer observed, but there's still an active reference to it`)
-      metaIonizedModel.registerPropIon(rawKey, $propIon as PropIon) // This means $propIon is not being watched and is not an atom anywhere, but it's still being used
+      metaIonizedModel.registerPropIon(rawKey, $propIon as PropIon) // This means $propIon is not being watched and is not an particle anywhere, but it's still being used
    }
 }
 

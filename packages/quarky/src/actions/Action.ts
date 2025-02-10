@@ -2,6 +2,8 @@ import { AnyObject } from "@rue/types";
 import { hasQuarks, QUARKS, quarksOf } from "../Quarks";
 import { Mutation } from "../watch/watch";
 
+// Actions may span mulitple effect cycles
+
 /**  
 * Example:
 *
