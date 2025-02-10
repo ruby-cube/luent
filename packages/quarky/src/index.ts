@@ -16,7 +16,6 @@ export * from "./ionized/TimeTraveler" //TODO: limit exports to public api
 export * from "./ionized/ionize" //TODO: limit exports to public api
 export * from "./watch/areEqual" //TODO: limit exports to public api
 export * from "./nonlocal/NonlocalReadonly" //TODO: limit exports to public api
-export * from "./muon/Muon" //TODO: limit exports to public api
 export * from "./ionic/IonicCompound" //TODO: limit exports to public api
 export * from "./Compound/Particle" //TODO: limit exports to public api
 export * from "./ionic/MemoizedIon" //TODO: limit exports to public api

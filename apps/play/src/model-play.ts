@@ -3,7 +3,7 @@
 
 import { ion, ionize } from "@rue/quarky"
 import { inert } from "../../../packages/quarky/src/ionized/inert"
-import { asPropIon } from "../../../packages/quarky/src/ionized/PrimaryPion"
+import { asPropIon } from "../../../packages/quarky/src/ionized/Pion"
 
 
 // state kit (to be destructured):      const { $list } = ListKit(listData)

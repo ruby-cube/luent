@@ -4,7 +4,7 @@ import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/
 import { AnyObject } from "@rue/types";
 import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
 import { isDerivedIon, isDerivationFunction } from "../ionic/DerivationCapsule";
-import { quarksOf, hasQuarks, QUARKS, QuarkyEntity } from "../Quarks";
+import { quarksOf, hasQuarks, QUARKS, Quarks } from "../Quarks";
 import { __DEV__label } from "./DEVLabellable";
 import { untrackedCall } from "../ionic/IonicCompound";
 
@@ -15,10 +15,10 @@ function isReactive<T>(maybeHasSignal: T): maybeHasSignal is T & Function {
    if (!(isFunction(maybeHasSignal))) return false;
    console.warn('Using `isReactive` on a function with unknown side effects can cause bugs. To avoid unknown side-effects, never use isReactive() in production. Instead use `isIon` to check for reactivity and pass any impromptu getters into the $ function. `isReactive` is only to check if you have a wrapped signal')
    _isSignal = false;
-   try{
+   try {
       untrackedCall(maybeHasSignal) //TODO: what if function has async code?
    }
-   finally{
+   finally {
       if (_isSignal) {
          _isSignal = false;
          return true;
@@ -61,7 +61,9 @@ export const __DEV__debug = {
    // traceTrigger // TODO: This should be on effect  effect.__DEV__traceTrigger()
 }
 
-type TraceableSubject = QuarkyEntity
+type TraceableSubject = { [QUARKS]: TraceableQuarks, __DEV__labelName: string }
+
+// export type TraceableQuarks = { __DEV__asTraceable?: Traceable; }
 
 
 export function asTraceable(subject: TraceableSubject): Traceable {
@@ -164,7 +166,7 @@ function traceDerivationTriggers(subject: () => any) {
 
 type TraceableQuarks = {
    __DEV__asTraceable: Traceable
-}
+} & Quarks
 
 function isTraceable(subject: AnyObject): subject is TraceableSubject {
    return isDerivationFunction(subject) || hasQuarks(subject);

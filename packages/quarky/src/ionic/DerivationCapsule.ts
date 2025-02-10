@@ -1,11 +1,10 @@
-import { IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
-import { quarksOf, QUARKS, Quarks, hasQuarks } from "../Quarks";
+import { quarksOf, QUARKS, hasQuarks } from "../Quarks";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule, CapsuleQuarks } from "../capsule/Capsule";
-import { Muon } from "../reactivity/reactivity-system";
 import { MaybeParticle } from "../Compound/Particle";
 import { __DEV__label } from "../debug/DEVLabellable";
-import { isIon } from "../ion/Ion";
+import { Ion, isIon } from "../ion/Ion";
+import { MaybeCompound } from "../Compound/Compound";
 
 
 /**
@@ -19,7 +18,7 @@ import { isIon } from "../ion/Ion";
 
 
 // /** INTERNAL */
-export type $DerivationCapsule = Muon & Capsule & { //NOTE: For DEV only so that you don't have to go out of your way to make a derivation ion traceable
+export type $DerivationCapsule = Ion & Capsule & { //NOTE: For DEV only so that you don't have to go out of your way to make a derivation ion traceable
    [QUARKS]: __DEV__DerivationCapsule
 }
 
@@ -27,11 +26,11 @@ export type $DerivationCapsule = Muon & Capsule & { //NOTE: For DEV only so that
  * INTERNAL 
  * */
 export type __DEV__DerivationCapsule = {
+   type: typeof DERIVATION_CAPSULE
 }
-   & Quarks<$DerivationCapsule>
    & CapsuleQuarks
    & MaybeParticle
-   & MaybeIonicCompound
+   & MaybeCompound
 
 export const DERIVATION_CAPSULE = Symbol('DEV Derivation Capsule')
 

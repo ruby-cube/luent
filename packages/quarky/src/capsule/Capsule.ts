@@ -2,6 +2,7 @@ import { AnyObject } from "@rue/types";
 import { Traceable, traceableMethodWrap } from "../debug/debug";
 import { DEVLabellable } from "../debug/DEVLabellable";
 import { StatefulQuarks } from "../actions/Action";
+import { Quarks } from "../Quarks";
 
 
 export type Capsule = DEVLabellable
@@ -10,7 +11,7 @@ export type CapsuleQuarks = {
    asReined?: object
    asReadonly?: object
    __DEV__asTraceable?: Traceable;
-} & StatefulQuarks
+} & StatefulQuarks & Quarks
 
 export function __DEV__initTraceability(capsule: CapsuleQuarks) {
    capsule.__DEV__asTraceable = new Traceable()

@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { hasQuarks, Quarks, QUARKS, quarksOf } from "../Quarks";
+import { hasQuarks, QUARKS, quarksOf } from "../Quarks";
 import { Mutation } from "../watch/watch";
 
 /**  
@@ -83,7 +83,7 @@ class Action {
 
 export type StatefulQuarks = {
    recordOp: undefined | ((mutation: Mutation) => void);
-} & Quarks
+}
 
 function storeMutations(action: Action, target: { [QUARKS]: StatefulQuarks }) {
    const quarks = quarksOf(target)

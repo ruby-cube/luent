@@ -4,10 +4,10 @@ import { asTraceable, emitSignal } from "../debug/debug";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
 import { storeSnapshot } from "./ionize";
 import { trigger, } from "../reactivity/x_trigger";
-import { IonizedModelQuarks, MetaIonizedModel } from "./IonizedModelQuarks";
+import { IonizedModelQuarks, TRACKED } from "./IonizedModelQuarks";
 import { isFunction, noop } from "@rue/utils";
-import { AnyIon, isIon } from "../ion/Ion";
-import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./PrimaryPion";
+import { isIon } from "../ion/Ion";
+import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./Pion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
 import { Quarks, QUARKS, quarksOf } from "../Quarks";
 import { getActiveTracker } from "../ionic/IonicCompound";
@@ -19,7 +19,10 @@ import { MaybeCompound } from "../Compound/Compound";
 import { IonizedCompound } from "./IonizedCompound";
 import { Mutation } from "../watch/watch";
 
-
+// // /** INTERNAL */
+export type IonizedModel = {
+   [QUARKS]: IonizedModelQuarks
+} & AnyObject
 
 
 export const UNDEFINED_OP: Function = noop
@@ -31,7 +34,7 @@ export function useTrackableGetOp(
    op: string,
    fn: (key: any) => any,
 ) {
-   return function trackableGetOp(arg: any) {
+   const trackableOp = function trackableGetOp(arg: any) {
       if (__DEV__) emitSignal();
       const tracker = getActiveTracker()
       const _arg = toRaw(arg)
@@ -41,6 +44,8 @@ export function useTrackableGetOp(
       tracker.track(asTrackedOp(reactive, op, _arg))
       return fn.call(target, _arg)
    }
+   trackableOp[TRACKED] = undefined;
+   return trackableOp
 }
 
 
@@ -255,7 +260,7 @@ function initialAccess(
    target: AnyObject,
    methods: AnyObject | undefined,
    ionizedModel: IonizedModel,
-   metaIonizedModel: MetaIonizedModel,
+   quarks: IonizedModelQuarks,
    structureConfigs: CustomIonizedModelConfig[],
    key: string | symbol,
    switchMap: ProxySwitchMap
@@ -272,7 +277,7 @@ function initialAccess(
          key,
          target,
          ionizedModel,
-         metaIonizedModel,
+         quarks,
          switchMap
       )
    }
@@ -499,10 +504,10 @@ function bindNativeMethod(
    publicKey: string | symbol,
    target: AnyObject,
    ionizedModel: IonizedModel,
-   meta: MetaIonizedModel,
+   quarks: IonizedModelQuarks,
    switchMap: ProxySwitchMap,
 ) {
-   if (isFunction(config)) {
+   if (isFunction(config)) { // trackable ops
       const op = config(target, ionizedModel)
       switchMap.set(publicKey, () => op)
       return op;
@@ -510,8 +515,8 @@ function bindNativeMethod(
    else {
       const createOp = config[nativeKey].createOp
       const getPreopData = config[nativeKey].preop
-      const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, meta, getPreopData))
-         : createOp(target, ionizedModel, meta, getPreopData)
+      const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, quarks, getPreopData))
+         : createOp(target, ionizedModel, quarks, getPreopData)
       switchMap.set(publicKey, () => op)
       return op;
    }
@@ -598,10 +603,7 @@ export function reactiveSetter(
    return true;
 }
 
-// // /** INTERNAL */
-export type IonizedModel = {
-   [QUARKS]: IonizedModelQuarks
-}
+
 
 
 

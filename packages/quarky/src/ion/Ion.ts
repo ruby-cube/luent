@@ -1,5 +1,5 @@
 import { MaybeParticle } from "../Compound/Particle";
-import { asPropIon } from "../ionized/PrimaryPion";
+import { asPropIon } from "../ionized/Pion";
 import { Watchable } from "../watch/Watched";
 import { createPrimaryIon } from "./AtomicIon";
 import { isFunction } from "@rue/utils";

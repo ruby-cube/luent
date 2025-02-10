@@ -3,7 +3,6 @@ import {  isIonizedModel, ionize, IonizedModel, toRaw } from "./ionize";
 import { asWatched, Watched } from "../watch/Watched";
 import { asParticle, Particle } from "../Compound/Particle";
 import { quarksOf, QUARKS, Quarks } from "../Quarks";
-import { isIon } from "../muon/Muon";
 import { getActiveTracker } from "../ionic/IonicCompound";
 
 
@@ -11,17 +10,17 @@ import { getActiveTracker } from "../ionic/IonicCompound";
 // If a property is non-writable, simply return a derivation function instead of a proper pion
 
 export function isPropIon(value: any): value is PropIon {
-   return quarksOf(value) instanceof MetaPropIon;
+   return quarksOf(value) instanceof PionQuarks;
 }
 
 export type PropIon<T = any, M = undefined> = M extends undefined ? {
    (): T
    // set: (newValue: T) => T
-   [QUARKS]: MetaPropIon
+   [QUARKS]: PionQuarks
 } : M & {
    (): T
    // set: (newValue: T) => T
-   [QUARKS]: MetaPropIon
+   [QUARKS]: PionQuarks
 }
 
 type TransferredMethods<T, M> = {
@@ -30,15 +29,15 @@ type TransferredMethods<T, M> = {
 
 // export type ReadonlyPropIon<T = any, M = undefined> = M extends undefined ? {
 //     (selected?: true): T
-//     [QUARKS]: MetaPropIon
+//     [QUARKS]: PionQuarks
 // } : M & {
 //     (selected?: true): T
-//     [QUARKS]: MetaPropIon
+//     [QUARKS]: PionQuarks
 // }
 
 export type PropIonCapsule<T = any, M extends AnyObject = AnyObject> = {
    (): T
-   [QUARKS]: MetaPropIon
+   [QUARKS]: PionQuarks
 } & M
 
 
@@ -59,7 +58,9 @@ function isEntryKey(rawModel: AnyObject, key: PropertyKey) {
    return false;
 }
 
-class MetaPropIon implements Quarks{
+const ATOMIC_PION = Symbol('pion')
+
+class PionQuarks implements Quarks{
  
    asReadonly?: PropIon
    // asObservedProp!: ObservedProp
@@ -78,7 +79,7 @@ class MetaPropIon implements Quarks{
       this.isEntryKey = isEntryKey(toRaw(model), key)
    }
    entity: object;
-   type: string | symbol;
+   type: string | symbol = ATOMIC_PION
 
    asWatched?: Watched
    asParticle?: Particle
@@ -168,7 +169,7 @@ function createPropIon(ionicModel: AnyObject, key: PropertyKey): PropIon {
       return rawTarget[key]
    }
 
-   $propIon[QUARKS] = new MetaPropIon(<PropIon>$propIon, ionicModel, key)
+   $propIon[QUARKS] = new PionQuarks(<PropIon>$propIon, ionicModel, key)
 
    //TODO: only include state if ionicModel is not readonly
    Object.defineProperty($propIon, 'state', {

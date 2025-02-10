@@ -1,9 +1,8 @@
 import { AnyObject } from "@rue/types";
-import { isIonicAtom } from "../Compound/Particle";
 import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
 import { getTrackedOp } from "./TrackedOp";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
-import { getObservedProp } from "./PrimaryPion";
+import { getObservedProp } from "./Pion";
 import { nontrackableIterableKeys } from "./IonizedSet";
 
 type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
@@ -241,9 +240,7 @@ export function installIonicArray() {
                   }
                   const op = getTrackedOp(ionicModel, 'at', index)
                   if (op) {
-                     if (isIonicAtom(op)) {
-                        triggerIonicAtom(op)
-                     }
+                     op.asParticle.trigger(mutation)
                   }
                }
             }

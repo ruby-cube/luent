@@ -1,12 +1,12 @@
-import { Capsule, CapsuleQuarks } from "../capsule/Capsule";
+import {  CapsuleQuarks } from "../capsule/Capsule";
 import { asNonlocalReadonly } from "../nonlocal/NonlocalReadonly";
-import { quarksOf, QUARKS, Quarks } from "../Quarks";
+import { quarksOf, QUARKS } from "../Quarks";
 import { isIon, NonVoid, WritableIon } from "./Ion";
 
 type $WritableIon = (() => NonVoid) & {
    state: NonVoid;
 } & {
-   [QUARKS]: CapsuleQuarks & Quarks;
+   [QUARKS]: CapsuleQuarks;
 }
 
 export function createReadonlyIon($ion: $WritableIon) {

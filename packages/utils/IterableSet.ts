@@ -6,6 +6,10 @@ export class IterableSet<T> {
       this.has = this.indexMap.has.bind(this.indexMap)
    }
 
+   get size(){
+      return this.indexMap.size
+   }
+
    add(value: T) {
       if (this.indexMap.has(value)) return this; // Avoid duplicates
       this.indexMap.set(value, this.arr.length);

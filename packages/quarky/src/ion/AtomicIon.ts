@@ -3,14 +3,12 @@ import { isIonizedModel, ionize } from "../ionized/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
-import { hasQuarks, Quarks, QUARKS, quarksOf } from "../Quarks";
+import { hasQuarks, QUARKS, quarksOf } from "../Quarks";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { __DEV__initTraceability, attachCapsuleMethods, CapsuleQuarks, Capsule } from "../capsule/Capsule";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Atomic, WritableIon } from "./Ion";
 import { Mutation } from "../watch/watch";
-import { StatefulQuarks } from "../actions/Action";
-import { asParticle } from "../Compound/Particle";
 
 /** INTERNAL */
 export type $AtomicIon = WritableIon & Capsule & {
@@ -25,7 +23,6 @@ export type AtomicIon = {
    state: any,
    stateIsIonized: boolean,
 }
-   & Quarks<$AtomicIon>
    & Atomic
    & CapsuleQuarks
 

@@ -4,7 +4,7 @@ import { IonizedModel, storeSnapshot, toRaw } from "./ionize";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getTrackedOp } from "./TrackedOp";
 import { MetaIonizedModel } from "./IonizedModelQuarks";
-import { getObservedProp } from "./PrimaryPion";
+import { getObservedProp } from "./Pion";
 
 // declare global {
 //    interface Set<T> {

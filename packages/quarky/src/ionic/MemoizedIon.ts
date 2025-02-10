@@ -22,19 +22,21 @@ import { Mutation } from "../watch/watch";
 
 // /** INTERNAL */
 export type $MemoizedIon = Ion & Capsule & {
-   [QUARKS]: MemoizedIon
+   [QUARKS]: MemoizedDerivation
 }
-type MemoizedCompound = IonicCompound<MemoizedIon> & {state: unknown}
+type MemoizedCompound = IonicCompound<MemoizedDerivation> & {state: unknown}
 
 /** 
  * INTERNAL 
  * */
-export type MemoizedIon =
-   Quarks<$MemoizedIon>
+export type MemoizedDerivation =
+   Quarks
    & Watchable
    & CapsuleQuarks
    & MaybeParticle
    & MaybeCompound<MemoizedCompound>
+
+
 
 export const MEMOIZED_ION = Symbol('Memoized Ion')
 
@@ -72,7 +74,7 @@ export function createMemoizedIon(
       return value;
    }
 
-   const ion: MemoizedIon = {
+   const ion: MemoizedDerivation = {
       entity: $memoizedIon,
       type: MEMOIZED_ION,
       asParticle: undefined,
@@ -99,7 +101,7 @@ export function createMemoizedIon(
    return $memoizedIon;
 }
 
-function trigger(this: IonicCompound<MemoizedIon>, mutation: Mutation): void {
+function trigger(this: IonicCompound<MemoizedDerivation>, mutation: Mutation): void {
    this.dirty = true;
    this.quarks.recordOp?.(mutation)
    this.quarks.asParticle?.triggerCompounds(mutation)

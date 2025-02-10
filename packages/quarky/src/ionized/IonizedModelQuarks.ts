@@ -1,12 +1,11 @@
 import type { AnyObject } from "@rue/types"
-import type { Ionized, IonizedModel } from "./ionize"
-import type { TrackedOp } from "./TrackedOp"
-import { PropIon } from "./PrimaryPion"
+import type { Ionized } from "./ionize"
+import { registerTrackedOp, type TrackedOp } from "./TrackedOp"
+import { PropIon } from "./Pion"
 import { IonicCompound } from "../ionic/IonicCompound"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { Traceable } from "../debug/debug"
-import { CustomIonizedModelConfig } from "./IonizedModel"
-import { Quarks } from "../Quarks"
+import { CustomIonizedModelConfig, IonizedModel } from "./IonizedModel"
 import { Watchable, Watched } from "../watch/Watched"
 import { CapsuleQuarks } from "../capsule/Capsule"
 import { MaybeParticle, Particle } from "../Compound/Particle"
@@ -17,11 +16,13 @@ import { Mutation } from "../watch/watch"
 
 
 
-type OpMap = Map<EntryKey, TrackedOp>
-type OpName = string
-type EntryKey = any
+// type OpMap = Map<EntryKey, TrackedOp>
+// type OpName = string
+// type EntryKey = any
 
 export const IONIZED_MODEL = Symbol('ionicModel')
+
+
 
 // type IonizedModelQuarks = Quarks<IonizedModel>
 // & Watchable
@@ -29,20 +30,20 @@ export const IONIZED_MODEL = Symbol('ionicModel')
 // & MaybeParticle
 // & MaybeCompound<IonizedCompound>
 
-export class IonizedModelQuarks<T extends AnyObject = AnyObject>
-   implements Quarks<IonizedModel>, Watchable, CapsuleQuarks, MaybeParticle, MaybeCompound<IonizedCompound> {
-   entity!: IonizedModel
-   ionicModel?: Ionized<T> //TODO: rename as entity
+export class IonizedModelQuarks
+   implements Watchable, CapsuleQuarks, MaybeParticle, MaybeCompound<IonizedCompound> {
+   // entity!: IonizedModel
+   ionicModel?: IonizedModel //TODO: rename as entity
    // shallowReactive?: IonizedModel<T>
    readonly type = IONIZED_MODEL
 
-   asReined?: Ionized<T>
-   asReadonly?: Ionized<T>
+   asReined?: object
+   asReadonly?: object
    __DEV__asTraceable?: Traceable
 
-   initIonizedModel(ionicModel: Ionized<T>) {
+   initIonizedModel(ionicModel: IonizedModel) {
       if (this.ionicModel) return;
-      this.ionicModel = ionicModel as Ionized<T>;
+      this.ionicModel = ionicModel;
    }
 
    // initShallowReactive(ionicModel: IonizedModel) {
@@ -51,7 +52,7 @@ export class IonizedModelQuarks<T extends AnyObject = AnyObject>
    // }
 
    constructor(
-      public rawTarget: T,
+      public rawTarget: AnyObject,
       public methods: AnyObject | undefined,
       public structureConfigs: CustomIonizedModelConfig[]
       // public reactive: T
@@ -83,12 +84,12 @@ export class IonizedModelQuarks<T extends AnyObject = AnyObject>
       this.hasNewAbsorbedIons = false;
    }
 
-   private asDerivation?: IonicCompound
+   private asDerivation?: IonizedCompound
 
    trackAbsorbedIons() {
       if (this.asDerivation && this.hasNewAbsorbedIons === false) return;
-      const derivation = this.asDerivation || (this.asDerivation = new IonicCompound(this.ionicModel, IONIZED_MODEL, false))
-      derivation.trackAtoms(this.ionicModel!)
+      const derivation = this.asDerivation || (this.asDerivation = new IonizedCompound(this))
+      derivation.collectAbsorbedIons(this.ionicModel!)
       this.undirty()
    }
 
@@ -129,50 +130,28 @@ export class IonizedModelQuarks<T extends AnyObject = AnyObject>
    }
 
 
-   // multiPropIons?: Map<string, DerivedIon>
+   // trackedOps?: Map<OpName, OpMap>
 
-   // registerMultiPropIon(key: string, ion: DerivedIon) {
-   //     if (!this.multiPropIons) this.multiPropIons = new Map()
-   //     this.multiPropIons.set(key, ion)
+   // registerTrackedOp(op: OpName, entryKey: EntryKey, trackedOp: TrackedOp) {
+   //    if (!this.trackedOps) this.trackedOps = new Map()
+   //    let opMap = this.trackedOps.get(op);
+   //    if (!opMap) {
+   //       opMap = new Map();
+   //       this.trackedOps.set(op, opMap)
+   //    }
+   //    opMap.set(entryKey, trackedOp)
    // }
 
-   // unregisterMultiPropIon(key: string) { //QUESTION: When to unregister?
-   //     if (!this.multiPropIons) return;
-   //     this.multiPropIons.delete(key)
+   // unregisterTrackedOp(op: OpName, entryKey: EntryKey) {
+   //    if (!this.trackedOps) return;
+   //    const opMap = this.trackedOps.get(op)
+   //    opMap?.delete(entryKey)
+   //    if (opMap?.size === 0) {
+   //       this.trackedOps.delete(op)
+   //    }
    // }
 
-   // getMultiPropIon(key: string) {
-   //     if (!this.multiPropIons) return;
-   //     return this.multiPropIons.get(key)
-   // }
 
-
-
-   trackedOps?: Map<OpName, OpMap>
-
-   registerTrackedOp(op: OpName, entryKey: EntryKey, trackedOp: TrackedOp) {
-      if (!this.trackedOps) this.trackedOps = new Map()
-      let opMap = this.trackedOps.get(op);
-      if (!opMap) {
-         opMap = new Map();
-         this.trackedOps.set(op, opMap)
-      }
-      opMap.set(entryKey, trackedOp)
-   }
-
-   unregisterTrackedOp(op: OpName, entryKey: EntryKey) {
-      if (!this.trackedOps) return;
-      const opMap = this.trackedOps.get(op)
-      opMap?.delete(entryKey)
-      if (opMap?.size === 0) {
-         this.trackedOps.delete(op)
-      }
-   }
-
-   getTrackedOp(op: OpName, entryKey: EntryKey) {
-      if (!this.trackedOps) return;
-      return this.trackedOps.get(op)?.get(entryKey)
-   }
 
 
    // allows collections to efficiently trigger observed props/ops when a sweeping mutation like clear() or .length = 0 occurs

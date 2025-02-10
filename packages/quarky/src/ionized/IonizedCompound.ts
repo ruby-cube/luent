@@ -1,12 +1,8 @@
-import { QUARKS, Quarks } from "../Quarks";
-import { Watchable } from "../watch/Watched";
-import { CapsuleQuarks } from "../capsule/Capsule";
 import { MaybeParticle, Particle } from "../Compound/Particle";
 import { AnyObject } from "@rue/types";
 import { toRaw } from "./ionize";
 import { isIon } from "../ion/Ion";
 import { Compound, track, untrackParticles, MaybeCompound, triggerEffects } from "../Compound/Compound";
-import { useEffectCycle } from "../watch/EffectCycle";
 import { Mutation } from "../watch/watch";
 import { IonizedModelQuarks } from "./IonizedModelQuarks";
 

@@ -31,41 +31,39 @@ export type NodesRef<T extends RefSource = RefSource> = (() => NodeReferent<T>[]
       [INTERNAL]: MetaNodesRef;
    }
 
-   export function isAnyNodeRef(value: any): value is NodeRef | NodesRef{
-      return value instanceof Object && INTERNAL in value
-   }
+export function isAnyNodeRef(value: any): value is NodeRef | NodesRef {
+   return value instanceof Object && INTERNAL in value
+}
 
-   export function isNodesRef(value: any): value is NodesRef{
-      return value instanceof Object && INTERNAL in value && value[INTERNAL] instanceof MetaNodesRef
-   }
+export function isNodesRef(value: any): value is NodesRef {
+   return value instanceof Object && INTERNAL in value && value[INTERNAL] instanceof MetaNodesRef
+}
 
-
-export function NodeRef<
+function ref<
    T extends RefSource
    = RefSource
->(source: T) {
-   return createNodeRef(undefined) as NodeRef<T>;
-}
+>(source: T, array?: NodeReferent<T>[]) {
+   const $ref = createNodeRef(array)
+   if (array) {
+      const _ref = $ref[INTERNAL] as MetaNodesRef
 
-export function NodesRef<T extends RefSource = RefSource>(source: T): NodesRef<T> {
-   let $nodes = createNodeRef([]) as NodesRef<T>
-   const _ref = $nodes[INTERNAL]
-
-   getActiveFlask()?.onDiscard(() => {
-      _ref.setValue([]); // clear nodes
-   })
-
-   if (isSettingUpList()) {
-      onBeforeListUpdate(() => {
-         _ref.prepUpdate();
+      getActiveFlask()?.onDiscard(() => {
+         _ref.setValue([]); // clear nodes
       })
-
-      onListUpdated((toFromIndices) => {
-         _ref.update(toFromIndices)
-      })
+   
+      if (isSettingUpList()) {
+         onBeforeListUpdate(() => {
+            _ref.prepUpdate();
+         })
+   
+         onListUpdated((toFromIndices) => {
+            _ref.update(toFromIndices)
+         })
+      }
    }
-   return $nodes
+   return $ref;
 }
+
 
 
 

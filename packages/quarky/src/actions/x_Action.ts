@@ -3,7 +3,7 @@ import { TypedKey } from "@rue/lumo";
 import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
 import { ObservedProp } from "../ionized/ObservedProp";
 import { Phase, EffectCycle, useEffectCycle } from "../watch/EffectCycle";
-import { PropIon } from "../ionized/PrimaryPion";
+import { PropIon } from "../ionized/Pion";
 
 
 //TODO: 

@@ -19,7 +19,7 @@ import { QUARKS } from "../Quarks";
 
 //TODO: figure out the simplest way developers can add types to custom data strucures
 
-export type IonizedModel<T extends AnyObject = AnyObject> = T //TODO: add ion properties $
+// export type IonizedModel<T extends AnyObject = AnyObject> = T //TODO: add ion properties $
 // export type MaybeIonized<T> = T extends AnyObject ? <T> : T;
 
 export type Readonly<T extends AnyObject = AnyObject> = {

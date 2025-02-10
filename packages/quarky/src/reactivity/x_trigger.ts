@@ -4,7 +4,7 @@ import { asWatched, isWatched } from "../watch/Watched";
 import { getCurrentEffectCylce, useEffectCycle } from "../watch/EffectCycle";
 import { isIonicEffectAtom } from "../ionic/IonicEffect";
 import { isCurrentWatchSubject } from "../watch/watch";
-import { PropIon } from "../ionized/PrimaryPion";
+import { PropIon } from "../ionized/Pion";
 import { AnyObject } from "@rue/types";
 import { untrackedCall } from "../ionic/IonicCompound";
 

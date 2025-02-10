@@ -90,11 +90,19 @@ export function initializeComponentRef(
    $index: AtomicIon<number> | undefined,
 ) {
    if ($index) {
-      initializeListRef(<NodesRef>ref, publicComponent, $index)
+      initializeListRef(<NodesRef>ref, __DEV__leakProof(publicComponent), $index)
    }
    else {
-      initializeRef(ref, publicComponent)
+      initializeRef(ref, __DEV__leakProof(publicComponent))
    }
+}
+
+function __DEV__leakProof(exposed: AnyObject) {
+   //TODO: make sure everything has creationScopeID
+}
+
+function __DEV__assertInCreationScope(object: AnyObject) {
+   //TODO: assert that object is within its creation scope
 }
 
 export function unnestComponent(nodeEntities: NodeEntity) {

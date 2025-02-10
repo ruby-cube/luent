@@ -9,7 +9,7 @@ import { areEqual } from "./areEqual";
 import { createIonicEffect, TerminalCompound } from "../ionic/IonicEffect";
 import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
 import { asParticle } from "../Compound/Particle";
-import { isPropIon, PropIon } from "../ionized/PrimaryPion";
+import { isPropIon, PropIon } from "../ionized/Pion";
 import { toValue } from "../ion/toIons";
 import { ChangeEvent } from "./ChangeEvent";
 import { Quarks, QUARKS, quarksOf } from "../Quarks";
