@@ -64,7 +64,7 @@ export class IonicCompound<T extends MaybeIonicCompound = { asCompound?: IonicCo
    ) {
    }
 
-   dirty: boolean = false;
+   // dirty: boolean = false;
 
    particles: Particle[] = []
 

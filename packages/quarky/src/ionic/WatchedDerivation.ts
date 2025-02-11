@@ -4,7 +4,7 @@ import { QUARKS } from "../Quarks";
 import { Watched } from "../watch/Watched";
 
 
-export function createWatchedDerivation(derivation: () => any) {
+export function createWatchedDerivation(derivation: () => any, retrack: boolean) {
    const quarks: MaybeIonicCompound = {
       asCompound: undefined,
       asWatched: undefined,
@@ -21,7 +21,7 @@ export function createWatchedDerivation(derivation: () => any) {
    quarks.asCompound = compound;
    quarks.asWatched = new Watched(quarks)
 
-   let fn = initialize;
+   let fn = retrack ? retrackedCall : initialize;
    function $watchedDerivedState() {
       return fn()
    }
@@ -29,6 +29,10 @@ export function createWatchedDerivation(derivation: () => any) {
 
    function initialize() {
       fn = derivation
+      return compound.trackedCall(derivation)
+   }
+
+   function retrackedCall(){
       return compound.trackedCall(derivation)
    }
    return $watchedDerivedState;

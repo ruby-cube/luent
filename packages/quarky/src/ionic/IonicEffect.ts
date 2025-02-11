@@ -24,14 +24,9 @@ export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
    }
 
    function runEffect() {
-      if (retrack && compound.dirty) {
-         try {
+      if (retrack) {
             compound.trackedCall(task)
-         }
-         finally {
-            compound.dirty = false;
-         }
-      }
+     }
       else {
          task()
       }
@@ -46,7 +41,6 @@ export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
 }
 
 function trigger(this: IonicCompound<IonicEffect>): void {
-   this.dirty = true;
    triggerEffects(this)
 }
 

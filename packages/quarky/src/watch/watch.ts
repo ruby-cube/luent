@@ -136,10 +136,12 @@ export function watch<
    const isMultiSubject = args.length > 1;
    const _subject = isMultiSubject ? args : args[0]
 
+   const retrack = !!(options?.retrack)
+
    const subject = isMultiSubject ? createMultiSubject(<WatchSubjects>_subject)
       : isGetterIon(_subject) ? asCoreIon(_subject)
          : hasQuarks(_subject) ? _subject
-            : _subject instanceof Function ? createWatchedDerivation(<() => unknown>_subject)
+            : _subject instanceof Function ? createWatchedDerivation(<() => unknown>_subject, retrack)
                : _subject as AnyObject //non-ionized object
 
    if (!hasQuarks(subject) || (<{ inert: boolean }>quarksOf(subject)).inert)

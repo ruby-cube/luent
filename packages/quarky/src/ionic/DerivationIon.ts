@@ -25,6 +25,7 @@ export type $DerivedState = Ion & Capsule & {
    [QUARKS]: {
       inert: boolean
       state: unknown
+      dirty:boolean
    }
    & EntityQuarks<$DerivedState>
    & Watchable
@@ -84,13 +85,13 @@ export function createMaybeMemoizedIon(
       getActiveTracker()?.track(ion)
       const compound = ion.asCompound!
       const value =
-         (retrack && compound.dirty) ? compound.trackedCall(() => derivation(ion.state))
-            : compound.dirty ? derivation(ion.state)
+         (retrack && ion.dirty) ? compound.trackedCall(() => derivation(ion.state))
+            : ion.dirty ? derivation(ion.state)
                : ion.state;
 
-      if (compound.dirty) {
+      if (ion.dirty) {
          ion.state = value;
-         compound.dirty = false;
+         ion.dirty = false;
       }
       return value;
    }
@@ -101,6 +102,7 @@ export function createMaybeMemoizedIon(
 
    const ion: ManagedDerivation = {
       inert: false,
+      dirty: false,
       state: undefined,
       entity: $derived,
       type: DERIVATION_ION,
@@ -137,7 +139,7 @@ export function createMaybeMemoizedIon(
 
 
 function trigger(this: IonicCompound<ManagedDerivation>, mutation: Mutation): void {
-   this.dirty = true;
+   this.quarks.dirty = true;
    this.quarks.asParticle?.triggerCompounds(mutation)
    triggerEffects(this)
 }
