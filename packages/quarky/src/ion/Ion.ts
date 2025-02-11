@@ -1,5 +1,5 @@
 import { MaybeParticle } from "../Compound/Particle";
-import { asPropIon } from "../ionized/Pion";
+import { asPropIon } from "../ionized/AtomicPion";
 import { Watchable } from "../watch/Watched";
 import { createPrimaryIon } from "./AtomicIon";
 import { isFunction } from "@rue/utils";
@@ -40,7 +40,7 @@ export function toValue(maybeFn: any){
 // isMemoized // memoized derivation
 // isWritable
 // isCapsule
-// isPropIon
+// isAtomicPion
 // isAbsorbedIon
 // isIonized
 // isReactive

@@ -40,7 +40,7 @@ import { noop } from "@rue/utils";
 
 // /** INTERNAL */
 export type $GetterIonState = Ion & Capsule & {
-   [QUARKS]: EntityQuarks<$GetterIonState> & { inert: boolean, coreIon: undefined | Ion }
+   [QUARKS]: EntityQuarks<$GetterIonState> & { type: symbol, inert: boolean, coreIon: undefined | Ion }
 }
 
 /** 

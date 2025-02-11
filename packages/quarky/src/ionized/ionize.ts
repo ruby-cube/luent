@@ -2,13 +2,13 @@ import { AnyObject } from "@rue/types";
 import { isObject } from "@rue/utils";
 import { timeTraveler } from "./TimeTraveler";
 import { useEffectCycle } from "../watch/EffectCycle";
-import { IonizedModelQuarks, IONIZED_MODEL } from "./IonizedModelQuarks";
+import { IonizedModelQuarks } from "./IonizedModelQuarks";
 import { inert, Inert, isInert } from "./inert";
 import { Ion, ion, isIon } from "../ion/Ion";
 import { AtomicIon } from "../ion/AtomicIon";
 import { createIonizedModel, getStructureConfigs, IonizedModel } from "./IonizedModel";
 import { getPublicTrace, getTrace } from "../../../flask/debug";
-import { QUARKS } from "../Quarks";
+import { hasQuarks, QUARKS, quarksOf } from "../Quarks";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -34,11 +34,7 @@ export function registerIonizedModel(ionicModel: IonizedModel, target: AnyObject
 
 export function isIonizedModel(value: any): value is IonizedModel {
    if (!isObject(value)) return false;
-   return Boolean(
-      //@ts-expect-error
-      value[QUARKS]
-         ?.type === IONIZED_MODEL
-   );
+   return hasQuarks(value) && quarksOf(value) instanceof IonizedModelQuarks;
 }
 
 type AbsorbedIon<T> = {

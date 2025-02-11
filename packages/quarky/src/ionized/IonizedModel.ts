@@ -1,12 +1,12 @@
 import { AnyObject } from "@rue/types";
 import { ionize, Ionized, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
-import { asTrackedOp, getTrackedOp, TRACKED } from "./TrackedOp";
+import { asTrackedOp, TRACKED } from "./TrackedOp";
 import { storeSnapshot } from "./ionize";
 import { IonizedModelQuarks } from "./IonizedModelQuarks";
 import { isFunction, noop } from "@rue/utils";
 import { Ion, isIon } from "../ion/Ion";
-import { asPropIon, asTrackedProp, getObservedProp, registerEntryKeyValidator } from "./Pion";
+import { asPionQuarks, asPropIon } from "./AtomicPion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
 import { QUARKS, quarksOf } from "../Quarks";
 import { getActiveTracker } from "../ionic/IonicCompound";
@@ -16,8 +16,13 @@ import { Mutation } from "../actions/Mutable";
 // // /** INTERNAL */
 export type IonizedModel = {
    [QUARKS]: IonizedModelQuarks
-} & Capsule
+} & Capsule & AnyObject
 
+// for inert properties use absorbed neutrons
+// const frog = ionized({
+//    name: neutron('kermit'),
+//    age: 0
+// })
 
 export const UNDEFINED_OP: Function = noop
 
@@ -405,7 +410,7 @@ function initialTrackableStateAccess(
    function getState(value: any) {
       const _value = maybeIonize(value)
       const tracker = getActiveTracker()
-      if (tracker) tracker.track(asTrackedProp(ionizedModel, key)) //TODO: Tracking properties that are derivations (just a getter, no setter) or non-writable is superfluous
+      if (tracker) tracker.track(asPionQuarks(ionizedModel, key)) //TODO: Tracking properties that are derivations (just a getter, no setter) or non-writable is superfluous
       return transformValue(_value);
    }
    switchMap.set(key, () => getState(target[key]))

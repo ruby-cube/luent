@@ -14,6 +14,7 @@ import { unwatch, watch, Watched } from "../watch/Watched";
 /** INTERNAL */
 export type $AtomicIonState = WritableIon & MutableCapsule & {
    [QUARKS]: {
+      type: symbol;
       state: any,
       stateIsIonized: boolean,
    } & Atomic & EntityQuarks<$AtomicIonState>

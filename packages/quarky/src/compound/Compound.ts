@@ -14,21 +14,21 @@ export interface Compound {
    untrackParticles(): void
 }
 
-   export function track(this: Compound, entity: MaybeParticle) {
-      const particle = asParticle(entity)
-      if (particle.compounds.has(this)) return particle;
-      this.particles.push(particle)
-      particle.associate(this)
-      return particle;
-   }
+export function track(this: Compound, entity: MaybeParticle) {
+   const particle = asParticle(entity)
+   if (particle.compounds.has(this)) return particle;
+   this.particles.push(particle)
+   particle.associate(this)
+   return particle;
+}
 
-   export function untrackParticles(this: Compound) {
-      this.particles?.forEach(particle => {
-         particle.dissociate(this)
-      })
-      this.particles = []
-   }
+export function untrackParticles(this: Compound) {
+   this.particles?.forEach(particle => {
+      particle.dissociate(this)
+   })
+   this.particles = []
+}
 
-   export function triggerEffects(compound: Compound) {
-      compound.quarks.asWatched?.triggerEffects()
-   }
+export function triggerEffects(compound: Compound) {
+   compound.quarks.asWatched?.triggerEffects()
+}

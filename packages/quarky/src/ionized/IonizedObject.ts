@@ -61,7 +61,7 @@ export function isIonicObject(value: any): value is IonizedModel {
 //                 // if (isIon(value)) return value();
 //                 return _value;
 //             }
-//             tracker.track(asTrackedProp(ionicModel, key));
+//             tracker.track(asPionQuarks(ionicModel, key));
 //             return _value;
 //         },
 //         set(target, key, value, receiver) {

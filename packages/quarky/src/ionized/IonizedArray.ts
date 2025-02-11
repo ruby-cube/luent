@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
 import { getTrackedOp } from "./TrackedOp";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
-import { getObservedProp } from "./Pion";
+import { getObservedProp } from "./AtomicPion";
 import { nontrackableIterableKeys } from "./IonizedSet";
 import { Mutation } from "../watch/watch";
 
@@ -539,7 +539,7 @@ export function installIonicArray() {
 //     const tracker = getActiveTracker()
 //     if (!tracker) return _value;
 
-//     tracker.track(asTrackedProp(ionicModel, key))
+//     tracker.track(asPionQuarks(ionicModel, key))
 //     return _value;
 // }
 

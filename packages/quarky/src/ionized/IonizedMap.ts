@@ -2,7 +2,7 @@ import { trigger, triggerIonicAtom, triggerIonizedModel } from "../reactivity/x_
 import { IonizedModel, storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
 import { nontrackableIterableKeys, useClearOp, useDeleteOp } from "./IonizedSet";
 import { asTrackedOp, getTrackedOp } from "./TrackedOp";
-import { asTrackedProp, getObservedProp } from "./Pion";
+import { asTrackedProp, getObservedProp } from "./AtomicPion";
 import { defineIonizedStructure, useTrackableGetOp } from "./IonizedModel";
 import { AnyObject } from "@rue/types";
 
@@ -221,7 +221,7 @@ export function installIonicMap() {
 //             const tracker = getActiveTracker()
 //             if (!tracker)
 //                 return _value;
-//             tracker.track(asTrackedProp(ionicModel, key))
+//             tracker.track(asPionQuarks(ionicModel, key))
 //             return _value;
 //         },
 //         set(target, key, value, receiver) {

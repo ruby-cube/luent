@@ -4,7 +4,7 @@ import { IonizedModel, storeSnapshot, toRaw } from "./ionize";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getTrackedOp } from "./TrackedOp";
 import { IonizedModelQuarks } from "./IonizedModelQuarks";
-import { getObservedProp } from "./Pion";
+import { getObservedProp } from "./AtomicPion";
 
 // declare global {
 //    interface Set<T> {
@@ -247,7 +247,7 @@ export function installIonicSet() {
 //             const tracker = getActiveTracker()
 //             if (!tracker)
 //                 return _value;
-//             tracker.track(asTrackedProp(ionicModel, key))
+//             tracker.track(asPionQuarks(ionicModel, key))
 //             return _value;
 //         },
 //         set(target, key, value, receiver) {

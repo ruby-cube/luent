@@ -23,6 +23,7 @@ import { Mutation } from "../actions/Mutable";
 // /** INTERNAL */
 export type $DerivedState = Ion & Capsule & {
    [QUARKS]: {
+      type: symbol
       inert: boolean
       state: unknown
       dirty:boolean

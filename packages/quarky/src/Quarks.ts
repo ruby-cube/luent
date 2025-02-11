@@ -19,6 +19,6 @@ export type QuarksOf<T extends { [QUARKS]: Quarks }> = T extends { [QUARKS]: inf
 
 
 export type EntityQuarks<T> = {
-   type: string | symbol,
+   // type: string | symbol,
    entity: T,
 }

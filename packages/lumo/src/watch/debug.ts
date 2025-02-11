@@ -1,6 +1,6 @@
 import { AtomicIon, ionize, isAtomicIon, Phase, watch } from "@rue/quarky"
 import { isTrackedOp, TrackedOp } from "../../../quarky/src/ionized/TrackedOp";
-import { isPropIon, PropIon } from "../../../quarky/src/ionized/Pion";
+import { isAtomicPion, PropIon } from "../../../quarky/src/ionized/AtomicPion";
 import { quarksOf, hasQuarks } from "../../../quarky/src/Quarks";
 import { getTrace } from "../../../flask/debug";
 
@@ -75,7 +75,7 @@ function __logTriggeredAtom(atom: Atom) {
       for (const atom of triggeredAtoms) {
          //FIX: atom.__DEV__logTrace
          if (isAtomicIon(atom)) logAtomicIonTrace(atom)
-         else if (isPropIon(atom)) logPropTrace(atom);
+         else if (isAtomicPion(atom)) logPropTrace(atom);
          else if (isTrackedOp(atom)) logTrackedOpTrace(atom)
          else throw new Error('Invalid atom')
 

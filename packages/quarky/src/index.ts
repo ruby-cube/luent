@@ -13,11 +13,11 @@ export * from "./watch/EffectCycle" //TODO: limit exports to public api
 export * from "./ionized/TimeTraveler" //TODO: limit exports to public api
 export * from "./ionized/ionize" //TODO: limit exports to public api
 export * from "./watch/areEqual" //TODO: limit exports to public api
-export * from "./capsule/NonlocalReadonly" //TODO: limit exports to public api
+export * from "./capsule/Readonly" //TODO: limit exports to public api
 export * from "./ionic/IonicCompound" //TODO: limit exports to public api
 export * from "./Compound/Particle" //TODO: limit exports to public api
 export * from "./ionic/DerivationIon" //TODO: limit exports to public api
-export * from "./ionized/GetterIon" //TODO: limit exports to public api
+export * from "./ionized/GetterPion" //TODO: limit exports to public api
 
 installIonicArray()
 installIonicSet()
