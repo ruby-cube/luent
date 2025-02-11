@@ -3,7 +3,7 @@ import { isIonizedModel, ionize } from "../ionized/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
-import { EntityQuarks, hasQuarks, QUARKS, QuarksOf, quarksOf } from "../Quarks";
+import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { __DEV__initTraceability, attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
 import { getActiveTracker } from "../ionic/IonicCompound";
@@ -13,18 +13,18 @@ import { unwatch, watch, Watched } from "../watch/Watched";
 
 /** INTERNAL */
 export type $AtomicIonState = WritableIon & MutableCapsule & {
-   [QUARKS]: {
+   [QUARK]: {
       type: symbol;
       state: any,
       stateIsIonized: boolean,
-   } & Atomic & EntityQuarks<$AtomicIonState>
+   } & Atomic & EntityQuark<$AtomicIonState>
 }
 
 /** 
  * INTERNAL 
  * For reactive ions only.
  * */
-export type AtomicIon = QuarksOf<$AtomicIonState>
+export type AtomicIon = QuarkOf<$AtomicIonState>
 
 function getReactiveState(ion: AtomicIon) {
    if (__DEV__) emitSignal();
@@ -83,7 +83,7 @@ export function createPrimaryIon(
       unwatch: () => unwatch.call(ion)
    }
 
-   $state[QUARKS] = ion
+   $state[QUARK] = ion
    $state.__DEV__labelName = undefined as string | undefined
    $state.__DEV__label = __DEV__label
 
@@ -112,5 +112,5 @@ const PRIMARY_ION = Symbol('atomic ion')
  * INTERNAL
  */
 export function isAtomicIon(value: unknown): value is $AtomicIonState {
-   return hasQuarks(value) && quarksOf(<$AtomicIonState>value).type === PRIMARY_ION
+   return hasQuark(value) && quarkOf(<$AtomicIonState>value).type === PRIMARY_ION
 }

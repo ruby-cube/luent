@@ -2,14 +2,14 @@ import { AnyObject } from "@rue/types";
 import { isIonizedModel, ionize, toRaw } from "./ionize";
 import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
 import { asParticle, Particle } from "../Compound/Particle";
-import { quarksOf, QUARKS, Quarks, EntityQuarks, QuarksOf } from "../Quarks";
+import { quarkOf, QUARK, Quark, EntityQuark, QuarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { IonizedModel } from "./IonizedModel";
 import { Atomic, Ion, isIon, WritableIon } from "../ion/Ion";
 import { MutableCapsule } from "../capsule/Capsule";
 import { Mutation } from "../actions/Mutable";
 import { __DEV__traceMethodCall, Traceable } from "../debug/debug";
-import { IonizedModelQuarks, PionQuarks } from "./IonizedModelQuarks";
+import { IonizedModelQuark, PionQuark } from "./IonizedModelQuark";
 
 // writable vs non-writable 
 // inert vs reactive
@@ -32,24 +32,24 @@ Derivation vs direct value
  * @returns 
  */
 export function isAtomicPion(value: any): value is AtomicPion {
-   return quarksOf(value) instanceof AtomicPionQuarks;
+   return quarkOf(value) instanceof AtomicPionQuark;
 }
 
 /** INTERNAL */
 export type $AtomicPionState = WritableIon & MutableCapsule & {
-   [QUARKS]: Atomic & PionQuarks<$AtomicPionState>
+   [QUARK]: Atomic & PionQuark<$AtomicPionState>
 }
 
 /** 
  * INTERNAL 
  * - For reactive ions only. 
- * - Unlike other quarks of entities that can only exist if the entity exists,
- * pion quarks can exist before the ion is created. 
+ * - Unlike other quark of entities that can only exist if the entity exists,
+ * pion quark can exist before the ion is created. 
  * */
-export type AtomicPion = QuarksOf<$AtomicPionState>
+export type AtomicPion = QuarkOf<$AtomicPionState>
 
 
-class AtomicPionQuarks implements AtomicPion {
+class AtomicPionQuark implements AtomicPion {
 
    asReadonly?: Ion
    asReined?: Ion
@@ -109,7 +109,7 @@ export function asPropIon(
 
 
 
-function createAtomicPion(model: IonizedModel, key: PropertyKey, pionQuarks?: AtomicPionQuarks): $AtomicPionState {
+function createAtomicPion(model: IonizedModel, key: PropertyKey, pionQuark?: AtomicPionQuark): $AtomicPionState {
    const rawTarget = toRaw(model)
 
    function $propIon() {
@@ -119,7 +119,7 @@ function createAtomicPion(model: IonizedModel, key: PropertyKey, pionQuarks?: At
       return rawTarget[key]
    }
 
-   $propIon[QUARKS] = pionQuarks ?? asPionQuarks(model, key)
+   $propIon[QUARK] = pionQuark ?? asPionQuark(model, key)
 
    Object.defineProperty($propIon, 'state', {
       get() {
@@ -133,21 +133,21 @@ function createAtomicPion(model: IonizedModel, key: PropertyKey, pionQuarks?: At
    return $propIon as $AtomicPionState
 }
 
-export function asPionQuarks(
+export function asPionQuark(
    model: IonizedModel,
    key: PropertyKey,
 ) {
-   const quarks = quarksOf(model)
-   return quarks.pions.get(key) ?? createPionQuarks(model, key)
+   const quark = quarkOf(model)
+   return quark.pions.get(key) ?? createPionQuark(model, key)
 }
 
-function createPionQuarks(model: IonizedModel, key: PropertyKey){
-   const quarks = quarksOf(model)
-   const pion = isGetterProperty(quarks, key) ? new DerivationPionQuarks() : new AtomicPionQuarks(model, key)
-   quarks.pions.set(key, pion)
+function createPionQuark(model: IonizedModel, key: PropertyKey){
+   const quark = quarkOf(model)
+   const pion = isGetterProperty(quark, key) ? new DerivationPionQuark() : new AtomicPionQuark(model, key)
+   quark.pions.set(key, pion)
    return pion
 }
 
-function isGetterProperty(modelQuarks: IonizedModelQuarks, key: PropertyKey){
+function isGetterProperty(modelQuark: IonizedModelQuark, key: PropertyKey){
    return true; //TODO:
 }

@@ -3,19 +3,19 @@ import { ionize, Ionized, isIonizedModel, registerIonizedModel, toRaw } from "./
 import { asTraceable, emitSignal } from "../debug/debug";
 import { asTrackedOp, TRACKED } from "./TrackedOp";
 import { storeSnapshot } from "./ionize";
-import { IonizedModelQuarks } from "./IonizedModelQuarks";
+import { IonizedModelQuark } from "./IonizedModelQuark";
 import { isFunction, noop } from "@rue/utils";
 import { Ion, isIon } from "../ion/Ion";
-import { asPionQuarks, asPropIon } from "./AtomicPion";
+import { asPionQuark, asPropIon } from "./AtomicPion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
-import { QUARKS, quarksOf } from "../Quarks";
+import { QUARK, quarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
 import { Mutation } from "../actions/Mutable";
 
 // // /** INTERNAL */
 export type IonizedModel = {
-   [QUARKS]: IonizedModelQuarks
+   [QUARK]: IonizedModelQuark
 } & Capsule & AnyObject
 
 // for inert properties use absorbed neutrons
@@ -135,8 +135,8 @@ export type CustomIonizedModelConfig = {
    // getStructureKeys: (model: AnyObject) => any[]
 }
 
-type BeforeSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuarks, key: PropertyKey, oldValue: any) => void
-type AfterSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuarks, key: PropertyKey, newValue: any, oldValue: any) => void
+type BeforeSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, oldValue: any) => void
+type AfterSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, newValue: any, oldValue: any) => void
 
 type CreateTrackableOp = (target: AnyObject, ionizedModel: IonizedModel) => (...args: any[]) => any
 
@@ -179,7 +179,7 @@ function isCustomIonicStructure(value: any) {
 //     return config.mutatingOps
 // }
 
-function emitAfterSet(structureConfigs: CustomIonizedModelConfig[], ionizedModel: IonizedModel, meta: IonizedModelQuarks, key: PropertyKey, newValue: any, oldValue: any) {
+function emitAfterSet(structureConfigs: CustomIonizedModelConfig[], ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, newValue: any, oldValue: any) {
    if (structureConfigs[0].structure === Object) return;
    for (const config of structureConfigs) {
       const afterSet = config.afterSet
@@ -222,7 +222,7 @@ export function createIonizedModel(
             target,
             methods,
             ionizedModel,
-            modelQuarks,
+            modelQuark,
             structureConfigs,
             key,
             switchMap
@@ -233,7 +233,7 @@ export function createIonizedModel(
          return reactiveSetter(
             structureConfigs,
             ionizedModel,
-            modelQuarks,
+            modelQuark,
             target,
             key,
             value,
@@ -243,8 +243,8 @@ export function createIonizedModel(
    }) as IonizedModel
 
    const structureConfigs = getStructureConfigs(target);
-   const modelQuarks = new IonizedModelQuarks(ionizedModel, target, methods, structureConfigs)
-   const switchMap = createProxySwitchMap(modelQuarks)
+   const modelQuark = new IonizedModelQuark(ionizedModel, target, methods, structureConfigs)
+   const switchMap = createProxySwitchMap(modelQuark)
 
    if (!methods) registerIonizedModel(ionizedModel, target)
    return ionizedModel
@@ -257,7 +257,7 @@ function initialAccess(
    target: AnyObject,
    methods: AnyObject | undefined,
    ionizedModel: IonizedModel,
-   quarks: IonizedModelQuarks,
+   quark: IonizedModelQuark,
    structureConfigs: CustomIonizedModelConfig[],
    key: string | symbol,
    switchMap: ProxySwitchMap
@@ -274,7 +274,7 @@ function initialAccess(
          key,
          target,
          ionizedModel,
-         quarks,
+         quark,
          switchMap
       )
    }
@@ -410,7 +410,7 @@ function initialTrackableStateAccess(
    function getState(value: any) {
       const _value = maybeIonize(value)
       const tracker = getActiveTracker()
-      if (tracker) tracker.track(asPionQuarks(ionizedModel, key)) //TODO: Tracking properties that are derivations (just a getter, no setter) or non-writable is superfluous
+      if (tracker) tracker.track(asPionQuark(ionizedModel, key)) //TODO: Tracking properties that are derivations (just a getter, no setter) or non-writable is superfluous
       return transformValue(_value);
    }
    switchMap.set(key, () => getState(target[key]))
@@ -501,7 +501,7 @@ function bindNativeMethod(
    publicKey: string | symbol,
    target: AnyObject,
    ionizedModel: IonizedModel,
-   quarks: IonizedModelQuarks,
+   quark: IonizedModelQuark,
    switchMap: ProxySwitchMap,
 ) {
    if (isFunction(config)) { // trackable ops
@@ -512,8 +512,8 @@ function bindNativeMethod(
    else {
       const createOp = config[nativeKey].createOp
       const getPreopData = config[nativeKey].preop
-      const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, quarks, getPreopData))
-         : createOp(target, ionizedModel, quarks, getPreopData)
+      const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, quark, getPreopData))
+         : createOp(target, ionizedModel, quark, getPreopData)
       switchMap.set(publicKey, () => op)
       return op;
    }
@@ -529,7 +529,7 @@ export function createProxySwitchMap(meta: AnyObject) {
    }
 
    return new Map([
-      [QUARKS as any, () =>
+      [QUARK as any, () =>
          meta as any
       ],
       ['__DEV__labelName', () =>
@@ -551,13 +551,13 @@ export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObje
 export function reactiveSetter(
    structureConfigs: CustomIonizedModelConfig[], // and Tuple
    ionizedModel: IonizedModel,
-   modelQuarks: IonizedModelQuarks,
+   modelQuark: IonizedModelQuark,
    target: AnyObject,
    key: string | symbol,
    newValue: any,
    receiver: AnyObject
 ) {
-   if (modelQuarks.isNewProperty(key)) modelQuarks.registerNewProperty(key)
+   if (modelQuark.isNewProperty(key)) modelQuark.registerNewProperty(key)
 
    const oldValue = Reflect.get(target, key, receiver);
    if (isIon(oldValue) && !isIon(newValue)) {
@@ -580,14 +580,14 @@ export function reactiveSetter(
 
    target[key] = isIon(newValue) ? newValue : _newValue
 
-   storeSnapshot(modelQuarks)
+   storeSnapshot(modelQuark)
 
    const prop = getObservedProp(ionizedModel, key);
    if (prop) {
       trigger(prop, _newValue, _oldValue)
    }
 
-   emitAfterSet(structureConfigs, ionizedModel, modelQuarks, key, _newValue, _oldValue)
+   emitAfterSet(structureConfigs, ionizedModel, modelQuark, key, _newValue, _oldValue)
 
    triggerIonizedModel(
       ionizedModel,
@@ -606,7 +606,7 @@ export function reactiveSetter(
 
 /**
  * When a pion is the original source of an effect chain, we use triggerIonizedModel
- * @param quarks 
+ * @param quark 
  * @param op 
  * @param args 
  * @param output 
@@ -619,7 +619,7 @@ function triggerIonizedModel(
    output: any,
    preopData?: any
 ) {
-   const { asParticle, asWatched } = quarksOf(model)
+   const { asParticle, asWatched } = quarkOf(model)
    if (asParticle || asWatched) {
       const mutation = new Mutation(//TODO: clear ops after cycle is done
          model,
@@ -648,7 +648,7 @@ export function setAbsorbedIon(ion: Ion, value: any, ionizedModel: IonizedModel,
       //    trigger(prop, value, oldValue)
       // }
 
-      emitAfterSet(structureConfigs, ionizedModel, quarksOf(ionizedModel), key, value, oldValue)
+      emitAfterSet(structureConfigs, ionizedModel, quarkOf(ionizedModel), key, value, oldValue)
 
       triggerIonizedModel(
          ionizedModel,

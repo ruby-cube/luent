@@ -4,7 +4,7 @@ import { toRaw } from "./ionize";
 import { isIon } from "../ion/Ion";
 import { Compound, track, untrackParticles, MaybeCompound, triggerEffects } from "../Compound/Compound";
 import { Mutation } from "../watch/watch";
-import { IonizedModelQuarks } from "./IonizedModelQuarks";
+import { IonizedModelQuark } from "./IonizedModelQuark";
 
 //TODO: 
 
@@ -13,16 +13,16 @@ import { IonizedModelQuarks } from "./IonizedModelQuarks";
 // export const MEMOIZED_ION = Symbol('Memoized Ion')
 
 // export function isMemoizedIon(value: unknown): value is $MemoizedIon {
-//    return hasQuarks(value) && quarksOf(value).type === MEMOIZED_ION
+//    return hasQuark(value) && quarkOf(value).type === MEMOIZED_ION
 // }
 
 // triggerDerivations(newValue: any, oldValue: any) {
 //    for (const derivation of this.derivations) {
 //       if (isIonizedModel(derivation.o)) { //TODO: move to IonizedCompound?
 //          const reactive = derivation.o
-//          const quarks = this.quarks;
+//          const quark = this.quark;
 //          useEffectCycle().recordOp(reactive, {
-//             target: quarks,
+//             target: quark,
 //             op: 'set',
 //             args: [newValue],
 //             output: newValue,
@@ -37,7 +37,7 @@ import { IonizedModelQuarks } from "./IonizedModelQuarks";
 export class IonizedCompound implements Compound {
 
    constructor(
-      readonly quarks: IonizedModelQuarks
+      readonly quark: IonizedModelQuark
    ) {
    }
    particles: Particle[] = []
@@ -45,8 +45,8 @@ export class IonizedCompound implements Compound {
    track = track
 
    trigger(mutation: Mutation): void {
-      this.quarks.recordOp?.(mutation)
-      this.quarks.asParticle?.triggerCompounds(mutation)
+      this.quark.recordOp?.(mutation)
+      this.quark.asParticle?.triggerCompounds(mutation)
       triggerEffects(this)
    }
 

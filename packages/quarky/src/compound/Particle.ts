@@ -1,13 +1,13 @@
 import { IterableSet } from "@rue/utils";
 import { Compound } from "./Compound";
 import { Mutation } from "../actions/Mutable";
-import { EntityQuarks } from "../Quarks";
+import { EntityQuark } from "../Quark";
 import { AnyObject } from "@rue/types";
 
 export const CLEAN_UP = 'x__cleanUp'
 
 
-export interface MaybeParticle extends EntityQuarks<AnyObject>{
+export interface MaybeParticle extends EntityQuark<AnyObject>{
    asParticle?: Particle
 }
 
@@ -16,7 +16,7 @@ export interface MaybeParticle extends EntityQuarks<AnyObject>{
  */
 export class Particle {
    constructor(
-      public quarks: MaybeParticle
+      public quark: MaybeParticle
    ) {
    }
 
@@ -28,7 +28,7 @@ export class Particle {
 
    dissociate(compound: Compound) {
       this.compounds.delete(compound);
-      this.cleanUp?.(this.quarks)
+      this.cleanUp?.(this.quark)
    }
 
    triggerCompounds(mutation: Mutation) {
@@ -39,13 +39,13 @@ export class Particle {
    }
 
    discard(){
-      this.quarks.asParticle = undefined; 
+      this.quark.asParticle = undefined; 
       //TODO: when should this be called such that we don't cause thrashing of discarding and creating an Particle more than needed?
    }
 
-   cleanUp?: (quarks: MaybeParticle) => void
+   cleanUp?: (quark: MaybeParticle) => void
 
-   onDissociated(cleanUp: (quarks: MaybeParticle) => void) {
+   onDissociated(cleanUp: (quark: MaybeParticle) => void) {
       if (__DEV__ && this.cleanUp) {
          console.error('Overriding existing cleanup function. This means we need an array for onUntracked tasks')
       }
@@ -54,8 +54,8 @@ export class Particle {
 }
 
 //TODO: need to initialize memoized derivations and maybe ionized models as ionic particles
-export function asParticle(quarks: MaybeParticle) {
-   return quarks.asParticle ?? (quarks.asParticle = new Particle(quarks))
+export function asParticle(quark: MaybeParticle) {
+   return quark.asParticle ?? (quark.asParticle = new Particle(quark))
 }
 
 

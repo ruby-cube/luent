@@ -1,7 +1,7 @@
 import { getActiveTracker, IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
-import { quarksOf, QUARKS, hasQuarks, EntityQuarks, QuarksOf } from "../Quarks";
+import { quarkOf, QUARK, hasQuark, EntityQuark, QuarkOf } from "../Quark";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { MaybeParticle } from "../Compound/Particle";
 import { __DEV__label } from "../debug/DEVLabellable";
@@ -22,13 +22,13 @@ import { Mutation } from "../actions/Mutable";
 
 // /** INTERNAL */
 export type $DerivedState = Ion & Capsule & {
-   [QUARKS]: {
+   [QUARK]: {
       type: symbol
       inert: boolean
       state: unknown
       dirty:boolean
    }
-   & EntityQuarks<$DerivedState>
+   & EntityQuark<$DerivedState>
    & Watchable
    & MaybeParticle
    & MaybeIonicCompound
@@ -37,12 +37,12 @@ export type $DerivedState = Ion & Capsule & {
 /** 
  * INTERNAL 
  * */
-export type ManagedDerivation = QuarksOf<$DerivedState>
+export type ManagedDerivation = QuarkOf<$DerivedState>
 
 export const DERIVATION_ION = Symbol('Derivation Ion')
 
 export function isManagedDerivation(value: unknown): value is $DerivedState {
-   return hasQuarks(value) && quarksOf(<$DerivedState>value).type === DERIVATION_ION
+   return hasQuark(value) && quarkOf(<$DerivedState>value).type === DERIVATION_ION
 }
 
 export function createMaybeMemoizedIon(
@@ -115,7 +115,7 @@ export function createMaybeMemoizedIon(
       unwatch: () => unwatch.call(ion)
    }
 
-   $derived[QUARKS] = ion
+   $derived[QUARK] = ion
    $derived.__DEV__labelName = undefined
    $derived.__DEV__label = __DEV__label
 
@@ -131,8 +131,8 @@ export function createMaybeMemoizedIon(
 
 
 function trigger(this: IonicCompound<ManagedDerivation>, mutation: Mutation): void {
-   this.quarks.dirty = true;
-   this.quarks.asParticle?.triggerCompounds(mutation)
+   this.quark.dirty = true;
+   this.quark.asParticle?.triggerCompounds(mutation)
    triggerEffects(this)
 }
 

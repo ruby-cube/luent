@@ -2,13 +2,13 @@ import { AnyObject } from "@rue/types";
 import { isObject } from "@rue/utils";
 import { timeTraveler } from "./TimeTraveler";
 import { useEffectCycle } from "../watch/EffectCycle";
-import { IonizedModelQuarks } from "./IonizedModelQuarks";
+import { IonizedModelQuark } from "./IonizedModelQuark";
 import { inert, Inert, isInert } from "./inert";
 import { Ion, ion, isIon } from "../ion/Ion";
 import { AtomicIon } from "../ion/AtomicIon";
 import { createIonizedModel, getStructureConfigs, IonizedModel } from "./IonizedModel";
 import { getPublicTrace, getTrace } from "../../../flask/debug";
-import { hasQuarks, QUARKS, quarksOf } from "../Quarks";
+import { hasQuark, QUARK, quarkOf } from "../Quark";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -34,39 +34,39 @@ export function registerIonizedModel(ionicModel: IonizedModel, target: AnyObject
 
 export function isIonizedModel(value: any): value is IonizedModel {
    if (!isObject(value)) return false;
-   return hasQuarks(value) && quarksOf(value) instanceof IonizedModelQuarks;
+   return hasQuark(value) && quarkOf(value) instanceof IonizedModelQuark;
 }
 
 type AbsorbedIon<T> = {
    (...args: any[]): T;
-   [QUARKS]: any;
+   [QUARK]: any;
 }
 
 
 
-export type Ionized<T extends AnyObject, M extends {} = {}> = T & { [QUARKS]: IonizedModelQuarks }
+export type Ionized<T extends AnyObject, M extends {} = {}> = T & { [QUARK]: IonizedModelQuark }
 // export type Ionized<T extends AnyObject, M extends {} = {}> = {
 //    [K in keyof T as (K extends '~$methods' ? never : K extends keyof M ? M[K] extends boolean ? K : K extends string ? `_${K}` : K : K)]:
 //    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? T[K] : V :
-//    T[K] extends { [QUARKS]: any } | Inert ? T[K]
+//    T[K] extends { [QUARK]: any } | Inert ? T[K]
 //    : T[K] extends (...args: any[]) => any ? IonizedGetter<T, K>
 //    : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
 //    : T[K] extends { [key: PropertyKey]: any } | undefined ? Ionized<Exclude<T[K], undefined>> | undefined
 //    : T[K]
-// } & InvertIons<T, OmitTrue<M>> & OmitTrue<M> & { [QUARKS]: IonizedModelQuarks }
+// } & InvertIons<T, OmitTrue<M>> & OmitTrue<M> & { [QUARK]: IonizedModelQuark }
 
 type OmitTrue<M extends {}> = { [K in keyof M as M[K] extends true ? never : K]: Exclude<M[K], true> }
 
 type ReadonlyIon<T> = {
    (): T
-   [QUARKS]: AtomicIon;
+   [QUARK]: AtomicIon;
 }
 
 type InvertIons<T extends AnyObject, M = {}> = {
    [K in keyof T as (K extends '~$methods' ? never : K extends keyof M ? never : T[K] extends AbsorbedIon<any> ? K extends `$${infer S}` ? S : K extends string ? `$${K}` : never : T[K] extends (...args: any[]) => any ? never : K extends `$${string}` ? never : K extends string ? `$${K}` : never)]:
    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? V : T[K]
    : ReadonlyIon<
-      T[K] extends { [QUARKS]: any } | ((...args: any[]) => any) | Inert ? T[K]
+      T[K] extends { [QUARK]: any } | ((...args: any[]) => any) | Inert ? T[K]
       : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
       : T[K] extends { [key: PropertyKey]: any } | undefined ? Ionized<Exclude<T[K], undefined>> | undefined
       : T[K]
@@ -156,17 +156,17 @@ export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: 
 
 // type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | typeof inert }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends typeof inert ? T[K] & Inert : T[K] } //TODO: Mark public
 
-export function storeSnapshot(modelQuarks: IonizedModelQuarks, clone?: AnyObject) {
-   timeTraveler.takeSnapshot(toRaw(modelQuarks), useEffectCycle().count, clone)
+export function storeSnapshot(modelQuark: IonizedModelQuark, clone?: AnyObject) {
+   timeTraveler.takeSnapshot(toRaw(modelQuark), useEffectCycle().count, clone)
 }
 
 
 
-type AsRaw<T> = T extends IonizedModelQuarks<infer R> ? R : T extends IonizedModel<infer R> ? R : T
+type AsRaw<T> = T extends IonizedModelQuark<infer R> ? R : T extends IonizedModel<infer R> ? R : T
 
 export function toRaw<T>(target: T): AsRaw<T> {
-   if (target instanceof IonizedModelQuarks) return target.rawTarget;
-   if (isIonizedModel(target)) return quarksOf(target).rawTarget as AsRaw<T>;
+   if (target instanceof IonizedModelQuark) return target.rawTarget;
+   if (isIonizedModel(target)) return quarkOf(target).rawTarget as AsRaw<T>;
    return target as AsRaw<T>; // already raw target
 }
 
@@ -209,17 +209,17 @@ const frog = ionize({
 
 
 // export function toWatchedProp(reactive: IonizedModel, key: PropertyKey) {
-//     const modelQuarks = reactive[QUARKS]
-//     const isIndex = toRaw(modelQuarks) instanceof Array && isIntegerKey(key)
+//     const modelQuark = reactive[QUARK]
+//     const isIndex = toRaw(modelQuark) instanceof Array && isIntegerKey(key)
 //     if (isIndex) {
-//         (<MetaIonicCollection>modelQuarks).addObservedEntryKey(key)
+//         (<MetaIonicCollection>modelQuark).addObservedEntryKey(key)
 //     }
 //     // clean up
 //     const prop = asObservedProp(reactive, key)
 //     const watchSubject = asWatched(prop)
 //     watchSubject.onUnwatched(() => {
 //         unobserve(prop, isIndex ? () => {
-//             (<MetaIonicCollection>modelQuarks).deleteObservedEntryKey(key)
+//             (<MetaIonicCollection>modelQuark).deleteObservedEntryKey(key)
 //         } : undefined)
 //     })
 //     return prop;

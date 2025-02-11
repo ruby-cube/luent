@@ -60,7 +60,7 @@ export type MaybeIonicCompound = MaybeCompound<IonicCompound>
 export class IonicCompound<T extends MaybeIonicCompound = { asCompound?: IonicCompound } & Watchable> implements Compound {
 
    constructor(
-      readonly quarks: T,
+      readonly quark: T,
    ) {
    }
 

@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { Ionized, IonizedModel } from "./ionize";
 import { __DEV__proxyGetterAssertions, createProxySwitchMap, CustomIonizedModelConfig, getNativeMethodConfig, getTargetKey, initialPropertyAccess, isMethod, isNativeMethod, ProxySwitchMap } from "./IonizedModel";
 import { asNonlocalReadonly, isLocalKey, restrictAccess } from "../capsule/Readonly";
-import { quarksOf } from "../Quarks";
+import { quarkOf } from "../Quark";
 
 
 
@@ -11,10 +11,10 @@ import { quarksOf } from "../Quarks";
 
 
 export function createNonlocalReadonlyIonizedModel(originalIonizedModel: IonizedModel) {
-   const quarks = quarksOf(<Ionized<Object>>originalIonizedModel)
-   const { rawTarget, methods, structureConfigs } = quarks
+   const quark = quarkOf(<Ionized<Object>>originalIonizedModel)
+   const { rawTarget, methods, structureConfigs } = quark
 
-   const switchMap = createProxySwitchMap(quarks)
+   const switchMap = createProxySwitchMap(quark)
 
    const readonlyModel = new Proxy(rawTarget, {
       has(target, key) { //TODO: should methods not be in readonly object?
@@ -42,7 +42,7 @@ export function createNonlocalReadonlyIonizedModel(originalIonizedModel: Ionized
       }
    }) as IonizedModel
 
-   quarks.asReadonly = readonlyModel
+   quark.asReadonly = readonlyModel
    return readonlyModel
 }
 

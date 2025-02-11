@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { quarksOf, QUARKS, hasQuarks, QuarksOf, EntityQuarks } from "../Quarks";
+import { quarkOf, QUARK, hasQuark, QuarkOf, EntityQuark } from "../Quark";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { Ion, NonVoid } from "../ion/Ion";
@@ -40,23 +40,23 @@ import { noop } from "@rue/utils";
 
 // /** INTERNAL */
 export type $GetterIonState = Ion & Capsule & {
-   [QUARKS]: EntityQuarks<$GetterIonState> & { type: symbol, inert: boolean, coreIon: undefined | Ion }
+   [QUARK]: EntityQuark<$GetterIonState> & { type: symbol, inert: boolean, coreIon: undefined | Ion }
 }
 
 /** 
  * INTERNAL 
  * */
-export type GetterIon = QuarksOf<$GetterIonState>
+export type GetterIon = QuarkOf<$GetterIonState>
 
 
 export const GETTER_ION = Symbol('GetterIon')
 
 export function isGetterIon(value: unknown): value is $GetterIonState {
-   return hasQuarks(value) && quarksOf(<$GetterIonState>value).type === GETTER_ION
+   return hasQuark(value) && quarkOf(<$GetterIonState>value).type === GETTER_ION
 }
 
 export function asCoreIon($state: $GetterIonState){
-   return quarksOf($state).coreIon;
+   return quarkOf($state).coreIon;
 }
 
 export function createGetterIon(
@@ -85,14 +85,14 @@ export function createGetterIon(
       capsule.inert = true;
    }
    else {
-      capsule.coreIon = particles[0].quarks.entity as Ion //QUESTION: Do we get a pion or a trackedProp??
+      capsule.coreIon = particles[0].quark.entity as Ion //QUESTION: Do we get a pion or a trackedProp??
    }
 
    function $capsuleIon() { // wrap so that name starts with $
       return derivation()
    }
 
-   $capsuleIon[QUARKS] = capsule
+   $capsuleIon[QUARK] = capsule
    $capsuleIon.__DEV__labelName = undefined
    $capsuleIon.__DEV__label = __DEV__label
 

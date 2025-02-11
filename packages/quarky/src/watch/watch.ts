@@ -4,7 +4,7 @@ import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } 
 import { detachedCall, IonicCompound, MaybeIonicCompound, untrackedCall } from "../ionic/IonicCompound";
 import { Phase, useEffectCycle } from "./EffectCycle";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
-import { hasQuarks, QUARKS, quarksOf } from "../Quarks";
+import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { Ion, isIon } from "../ion/Ion";
 import { createWatchedDerivation } from "../ionic/WatchedDerivation";
 import { createMultiSubject } from "./MultiSubject";
@@ -49,7 +49,7 @@ type SubjectValue<T> = T extends () => infer R ? R : T
 // Possible subjects
 // ---
 // plain function (potentially inert)
-// ion (potentially inert/neutron) (should have a watch fn on quarks)
+// ion (potentially inert/neutron) (should have a watch fn on quark)
 // memoized ion
 // 
 // ionized model possibly with absorbed ions
@@ -140,16 +140,16 @@ export function watch<
 
    const subject = isMultiSubject ? createMultiSubject(<WatchSubjects>_subject)
       : isGetterIon(_subject) ? asCoreIon(_subject)
-         : hasQuarks(_subject) ? _subject
+         : hasQuark(_subject) ? _subject
             : _subject instanceof Function ? createWatchedDerivation(<() => unknown>_subject, retrack)
                : _subject as AnyObject //non-ionized object
 
-   if (!hasQuarks(subject) || (<{ inert: boolean }>quarksOf(subject)).inert)
+   if (!hasQuark(subject) || (<{ inert: boolean }>quarkOf(subject)).inert)
       return InertWatcher()
 
-   const quarks = quarksOf(subject) as Watchable & MaybeIonicCompound
-   const watchSubject = quarks.watch()
-   watchSubject.onUnwatched(quarks.unwatch)
+   const quark = quarkOf(subject) as Watchable & MaybeIonicCompound
+   const watchSubject = quark.watch()
+   watchSubject.onUnwatched(quark.unwatch)
 
    let eager: boolean | undefined = options?.eager
    const isEqual = options?.isEqual ?? isStrictlyEqual
@@ -184,7 +184,7 @@ export function watch<
       wrappedEffect,
       phase,
       options || {},
-      quarks.asCompound
+      quark.asCompound
    )
 }
 

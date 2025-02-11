@@ -14,7 +14,7 @@ function isEntryKey(rawModel: AnyObject, key: PropertyKey) {
    return false;
 }
 
-class PionQuarks implements AtomicPion {
+class PionQuark implements AtomicPion {
 
    asReadonly?: PropIon
    // asObservedProp!: ObservedProp
@@ -28,7 +28,7 @@ class PionQuarks implements AtomicPion {
       public key: PropertyKey,
       public inert: boolean = false
    ) {
-      quarksOf(model).registerPion(key, this)
+      quarkOf(model).registerPion(key, this)
       this.isEntryKey = isEntryKey(toRaw(model), key)
    }
    private _entity: undefined | $AtomicPionState
@@ -43,9 +43,9 @@ class PionQuarks implements AtomicPion {
 
    watch() {
       if (this.asWatched) return;
-      const quarks = quarksOf(this.model)
+      const quark = quarkOf(this.model)
       if (this.isEntryKey)
-         quarks.addObservedEntryKey(this.key);
+         quark.addObservedEntryKey(this.key);
 
       const watchSubject = this.asWatched = asWatched(this.o)
 
@@ -64,7 +64,7 @@ class PionQuarks implements AtomicPion {
       const particle = this.asParticle = asParticle(this.o)
 
       if (this.isEntryKey)
-         quarksOf(this.model).addObservedEntryKey(this.key)
+         quarkOf(this.model).addObservedEntryKey(this.key)
 
       particle.onDissociated(() => {
          if (this.asWatched?.watchCount === 0 && particle.compounds.size === 0) {
@@ -74,7 +74,7 @@ class PionQuarks implements AtomicPion {
    }
 
    discard() {
-      const metaModel = quarksOf(this.model)
+      const metaModel = quarkOf(this.model)
       const key = this.key
       if (this.isEntryKey) metaModel.deleteObservedEntryKey(key)
       metaModel.unregisterPropIon(key)

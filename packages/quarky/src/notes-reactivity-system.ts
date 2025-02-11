@@ -62,7 +62,7 @@
 * */
 
 import { Particle, MaybeParticle } from "./Compound/Particle"
-import { Quarks, QuarkyEntity } from "./Quarks"
+import { Quark, QuarkyEntity } from "./Quark"
 
 //ABSTRACT
 
@@ -104,13 +104,13 @@ interface WatchEffect {
 
 /* INTERNAL */
 
-type AtomicPion = WritableMuon & QuarkyEntity<AtomicPionQuarks> // If a property is non-writable, simply return a derivation function
+type AtomicPion = WritableMuon & QuarkyEntity<AtomicPionQuark> // If a property is non-writable, simply return a derivation function
 
-type MemoizedIon = MemoizedDerivation & QuarkyEntity<MemoizedIonQuarks>
+type MemoizedIon = MemoizedDerivation & QuarkyEntity<MemoizedIonQuark>
 
-type IonicEffect = () => void/* TODO: */ & QuarkyEntity<IonicEffectQuarks>
+type IonicEffect = () => void/* TODO: */ & QuarkyEntity<IonicEffectQuark>
 
-type IonizedModel = QuarkyEntity<IonizedModelQuarks>
+type IonizedModel = QuarkyEntity<IonizedModelQuark>
 
 
 type IonicWatchEffect = IonicCompound & WatchEffect
@@ -121,7 +121,7 @@ function triggerIonicEffect(this: IonicWatchEffect) {
 
 
 
-type IonizedModelQuarks = IonicCompound & Quarks<IonizedModel>
+type IonizedModelQuark = IonicCompound & Quark<IonizedModel>
 
 
 
@@ -140,7 +140,7 @@ class TrackedOp implements Particle {
 } // 'trackable get ops'
 
 
-class MemoizedIonQuarks implements IonicCompound, Particle, Watched, Quarks<MemoizedIon> {
+class MemoizedIonQuark implements IonicCompound, Particle, Watched, Quark<MemoizedIon> {
    react: (this: Particle, oldState: unknown, newState: unknown) => void
    type: string | symbol
    particles: Set<Particle>
@@ -162,7 +162,7 @@ class MemoizedIonQuarks implements IonicCompound, Particle, Watched, Quarks<Memo
    }
 }
 
-class IonicEffectQuarks implements IonicCompound, Watched, Quarks<IonicEffect> {
+class IonicEffectQuark implements IonicCompound, Watched, Quark<IonicEffect> {
    trigger: (this: IonicCompound, oldState: unknown, newState: unknown) => void
    type: string | symbol
    particles: Set<Particle>

@@ -4,30 +4,30 @@ import { IonizedModel } from "../ionized/IonizedModel";
 import { unwatch, watch, Watched } from "./Watched";
 import { Ion } from "../ion/Ion";
 import { noop } from "@rue/utils";
-import { QUARKS, quarksOf } from "../Quarks";
+import { QUARK, quarkOf } from "../Quark";
 import { isIonizedModel } from "../ionized/ionize";
 
 export function createMultiSubject(subjects: unknown[] & AnyObject) {
-   const quarks: MaybeIonicCompound = {
+   const quark: MaybeIonicCompound = {
       asCompound: undefined,
       asWatched: undefined,
       watch,
-      unwatch: () => unwatch.call(quarks)
+      unwatch: () => unwatch.call(quark)
    }
-   const compound: IonicCompound = new IonicCompound(quarks)
-   quarks.asCompound = compound;
-   quarks.asWatched = new Watched(quarks)
+   const compound: IonicCompound = new IonicCompound(quark)
+   quark.asCompound = compound;
+   quark.asWatched = new Watched(quark)
 
    let fn = initialize
    let getterFn = (subject: Ion) => compound.trackedCall(subject)
    let absorbedFn = (subject: IonizedModel) => {
-      compound.track(quarksOf(subject))
+      compound.track(quarkOf(subject))
       maybeInitializeIonizedCompound(subject)
    }
    function $subjects() {
       return fn()
    }
-   $subjects[QUARKS] = quarks
+   $subjects[QUARK] = quark
 
    function initialize() {
       try {
@@ -64,9 +64,9 @@ function isGetter(value: unknown): value is () => any {
 }
 
 function maybeInitializeIonizedCompound(subject: AnyObject) {
-   const quarks = quarksOf(subject)
-   if (!quarks.asCompound) {
-      const ionizedCompound = asIonizedCompound(quarksOf(subject))
+   const quark = quarkOf(subject)
+   if (!quark.asCompound) {
+      const ionizedCompound = asIonizedCompound(quarkOf(subject))
       ionizedCompound.collectAbsorbedIons(subject) //TODO: but only if not initialized already...
    }
 }

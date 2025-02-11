@@ -255,7 +255,7 @@ export function installIonicArray() {
       opName: string,
       deionizeArgs?: (args: any[]) => any[]
    ) {
-      return function createOp(target: AnyObject, ionicModel: IonizedModel, meta: IonizedModelQuarks<any[]>, getPreopData: GetPreopData | undefined) {
+      return function createOp(target: AnyObject, ionicModel: IonizedModel, meta: IonizedModelQuark<any[]>, getPreopData: GetPreopData | undefined) {
          const fn = target[opName]
          return useMutatingArrayOp(
             <IonizedModel<any[]>>ionicModel,
@@ -278,7 +278,7 @@ export function installIonicArray() {
 
    function useMutatingArrayOp(
       ionicModel: IonizedModel<any[]>,
-      modelQuarks: IonizedModelQuarks<any[]>,
+      modelQuark: IonizedModelQuark<any[]>,
       target: any[],
       key: string,
       fn: Function,
@@ -292,7 +292,7 @@ export function installIonicArray() {
          const output = fn.apply(ionicModel, _args); // perform mutation
          const newLength = target.length;
          if (key in lengthMutatingOps && oldLength === newLength) return output;
-         storeSnapshot(modelQuarks)
+         storeSnapshot(modelQuark)
 
          const lengthProp = getObservedProp(ionicModel, 'length')
          if (lengthProp) {
@@ -306,7 +306,7 @@ export function installIonicArray() {
             if (op) triggerIonicAtom(op);
          }
 
-         const observedIndices = modelQuarks.observedEntryKeys
+         const observedIndices = modelQuark.observedEntryKeys
          if (observedIndices && oldLength < newLength) {
             for (const indexKey of observedIndices) {
                if (typeof indexKey !== 'string') {
@@ -373,19 +373,19 @@ export function installIonicArray() {
 //     methods: AnyObject | undefined
 // ) {
 //     const boundMethodMap: Map<string | symbol, Function> = new Map()
-//     const modelQuarks = new MetaIonicCollection(target, methods)
+//     const modelQuark = new MetaIonicCollection(target, methods)
 //     const ionicModel = new Proxy(target, {
 //         get(target, key, receiver) {
 //             return reactiveArrayGetter(
 //                 ionicModel,
 //                 methods,
-//                 modelQuarks,
+//                 modelQuark,
 //                 function handleMutatingMethod(key: string, fn) {
 //                     return (...args: any[]) => {
 //                         return useMutatingArrayOp(
 //                             args,
 //                             ionicModel,
-//                             modelQuarks,
+//                             modelQuark,
 //                             target,
 //                             key,
 //                             fn
@@ -401,7 +401,7 @@ export function installIonicArray() {
 //         set(target, key, value, receiver) {
 //             return reactiveArraySetter(
 //                 ionicModel,
-//                 modelQuarks,
+//                 modelQuark,
 //                 target,
 //                 key,
 //                 value,
@@ -409,7 +409,7 @@ export function installIonicArray() {
 //             )
 //         }
 //     }) as IonizedModel<any[]>
-//     modelQuarks.initIonizedModel(ionicModel)
+//     modelQuark.initIonizedModel(ionicModel)
 //     registerIonizedModel(ionicModel, target)
 //     return ionicModel
 // }
@@ -421,13 +421,13 @@ export function installIonicArray() {
 // ) {
 
 //     const boundMethodMap: Map<string | symbol, Function> = new Map()
-//     const modelQuarks = new MetaIonicCollection(target, methods)
+//     const modelQuark = new MetaIonicCollection(target, methods)
 //     const ionicModel = new Proxy(target, {
 //         get(target, key, receiver) {
 //             return reactiveArrayGetter(
 //                 ionicModel,
 //                 methods,
-//                 modelQuarks,
+//                 modelQuark,
 //                 function handleMutatingMethod() {
 //                     throw new Error("Tuples can only be mutated by index")
 //                 },
@@ -440,7 +440,7 @@ export function installIonicArray() {
 //         set(target, key, value, receiver) {
 //             return reactiveArraySetter(
 //                 ionicModel,
-//                 modelQuarks,
+//                 modelQuark,
 //                 target,
 //                 key,
 //                 value,
@@ -448,7 +448,7 @@ export function installIonicArray() {
 //             )
 //         }
 //     }) as IonizedModel<any[]>
-//     modelQuarks.initIonizedModel(ionicModel)
+//     modelQuark.initIonizedModel(ionicModel)
 //     registerIonizedModel(ionicModel, target)
 //     return ionicModel
 // }
@@ -470,7 +470,7 @@ export function installIonicArray() {
 // function reactiveArrayGetter(
 //     ionicModel: IonizedModel<Collection>,
 //     methods: AnyObject | undefined,
-//     modelQuarks: MetaIonicCollection,
+//     modelQuark: MetaIonicCollection,
 //     handleMutatingMethod: (key: string, fn: Function) => (...args: any[]) => any,
 //     target: any[],
 //     key: string | symbol,
@@ -478,7 +478,7 @@ export function installIonicArray() {
 //     boundMethodMap: Map<string | symbol, Function>
 // ) {
 //     if (__DEV__) emitSignal();
-//     if (key === QUARKS) return modelQuarks;
+//     if (key === QUARK) return modelQuark;
 //     const reinedMeta = getReinedMeta(target, ionicModel, receiver)
 //     if (reinedMeta) {
 //         const keys = reinedMeta.propertyKeys
@@ -539,7 +539,7 @@ export function installIonicArray() {
 //     const tracker = getActiveTracker()
 //     if (!tracker) return _value;
 
-//     tracker.track(asPionQuarks(ionicModel, key))
+//     tracker.track(asPionQuark(ionicModel, key))
 //     return _value;
 // }
 
@@ -575,7 +575,7 @@ export function installIonicArray() {
 
 // function reactiveArraySetter(
 //     ionicModel: IonizedModel,
-//     modelQuarks: IonizedModelQuarks,
+//     modelQuark: IonizedModelQuark,
 //     target: AnyObject,
 //     key: string | symbol,
 //     newValue: any,
@@ -585,7 +585,7 @@ export function installIonicArray() {
 //         if (__DEV__) console.warn('Set operation failed. Property is readonly')
 //         return false;
 //     }
-//     if (modelQuarks.isNewProperty(key)) modelQuarks.registerNewProperty(key)
+//     if (modelQuark.isNewProperty(key)) modelQuark.registerNewProperty(key)
 
 //     const _newValue = toRaw(newValue)
 //     const op = target instanceof Array && isIntegerKey(key) ? getTrackedOp(ionicModel.at, key) : null;
@@ -611,7 +611,7 @@ export function installIonicArray() {
 //     // Reflect.set(target, key, _newValue, receiver);
 //     target[key] = _newValue // cannot use Reflect.set because it does not set the property synchronously
 
-//     storeSnapshot(modelQuarks)
+//     storeSnapshot(modelQuark)
 
 //     if (prop) {
 //         trigger(prop, _newValue, oldValue)
@@ -621,7 +621,7 @@ export function installIonicArray() {
 //         triggerIonicAtom(op)
 //     }
 
-//     const trackedIndices = modelQuarks.observedEntryKeys
+//     const trackedIndices = modelQuark.observedEntryKeys
 //     if (trackedIndices && key === 'length') {
 //         for (const indexKey of trackedIndices) {
 //             if (typeof indexKey !== 'string') {

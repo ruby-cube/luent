@@ -1,23 +1,23 @@
 import { AnyObject } from "@rue/types";
 import { Traceable, traceableMethodWrap, TraceableSubject } from "../debug/debug";
 import { DEVLabellable } from "../debug/DEVLabellable";
-import { QUARKS, Quarks, QuarksOf } from "../Quarks";
+import { QUARK, Quark, QuarkOf } from "../Quark";
 import { Mutable } from "../actions/Mutable";
 
 
 export type Capsule = DEVLabellable & TraceableSubject & {
-   [QUARKS]: Quarks
+   [QUARK]: Quark
 }
 
 export type MutableCapsule = Capsule & {
-   [QUARKS]: {
+   [QUARK]: {
       asReined?: object
       asReadonly?: object
    } & Mutable
 }
 
 
-export function __DEV__initTraceability(capsule: QuarksOf<Capsule>) {
+export function __DEV__initTraceability(capsule: QuarkOf<Capsule>) {
    capsule.__DEV__asTraceable = new Traceable()
 }
 

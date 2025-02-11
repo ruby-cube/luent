@@ -1,6 +1,6 @@
 import { triggerEffects } from "../Compound/Compound";
 import { IonicCompound, MaybeIonicCompound } from "./IonicCompound";
-import { QUARKS } from "../Quarks";
+import { QUARK } from "../Quark";
 import { unwatch, watch, Watched } from "../watch/Watched";
 
 /**
@@ -9,23 +9,23 @@ import { unwatch, watch, Watched } from "../watch/Watched";
  */
 
 export function createWatchedDerivation(derivation: () => any, retrack: boolean) {
-   const quarks: MaybeIonicCompound = {
+   const quark: MaybeIonicCompound = {
       asCompound: undefined,
       asWatched: undefined,
       watch,
-      unwatch: () => unwatch.call(quarks)
+      unwatch: () => unwatch.call(quark)
    }
-   const compound: IonicCompound = new IonicCompound(quarks)
+   const compound: IonicCompound = new IonicCompound(quark)
    compound.trigger = () => triggerEffects(compound)
 
-   quarks.asCompound = compound;
-   quarks.asWatched = new Watched(quarks)
+   quark.asCompound = compound;
+   quark.asWatched = new Watched(quark)
 
    let fn = retrack ? retrackedCall : initialize;
    function $watchedDerivedState() {
       return fn()
    }
-   $watchedDerivedState[QUARKS] = quarks
+   $watchedDerivedState[QUARK] = quark
 
    function initialize() {
       fn = derivation

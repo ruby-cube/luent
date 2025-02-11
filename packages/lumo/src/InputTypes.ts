@@ -256,7 +256,7 @@ type Ion<T = any, M extends AnyObject = {}> = (() => T) & M
 
 // export type Ionized<T extends AnyObject, M = {}> = {
 //    [K in keyof T]: T[K] extends AtomicIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
-// } & M & { [QUARKS]: IonizedModelQuarks }
+// } & M & { [QUARK]: IonizedModelQuark }
 
 // const _Ionized = ((optional: '?') => {
 //    return {

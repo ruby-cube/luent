@@ -1,7 +1,7 @@
 import { AtomicIon, ionize, isAtomicIon, Phase, watch } from "@rue/quarky"
 import { isTrackedOp, TrackedOp } from "../../../quarky/src/ionized/TrackedOp";
 import { isAtomicPion, PropIon } from "../../../quarky/src/ionized/AtomicPion";
-import { quarksOf, hasQuarks } from "../../../quarky/src/Quarks";
+import { quarkOf, hasQuark } from "../../../quarky/src/Quark";
 import { getTrace } from "../../../flask/debug";
 
 
@@ -44,8 +44,8 @@ export function traceTriggers<T>(subject: T) {
       const traceableAtom = asTraceable(atom)
       traceableAtom.__addTrigger({
          trace: traceTrigger(),
-         newState: hasQuarks(atom) ? quarksOf(atom).state : atom.state, //TODO:
-         oldState: hasQuarks(atom) ? quarksOf(atom).prevState : atom.prevState //TODO:
+         newState: hasQuark(atom) ? quarkOf(atom).state : atom.state, //TODO:
+         oldState: hasQuark(atom) ? quarkOf(atom).prevState : atom.prevState //TODO:
       })
       __logTriggeredAtom(atom)
    }, {
@@ -92,15 +92,15 @@ function __logTriggeredAtom(atom: Atom) {
 }
 
 function logAtomicIonTrace(atom: AtomicIon) {
-   const originTrace = quarksOf(atom).__DEV__origin
+   const originTrace = quarkOf(atom).__DEV__origin
    console.log('\n[TRIGGER TRACE] for ion')
    console.log('NonError ion origin trace\n    ' + originTrace)
 }
 
 function logPropTrace(atom: PropIon) {
-   const quarks = quarksOf(atom)
-   const originTrace = quarks.__DEV__origin //TODO: add property
-   console.log(`\n[TRIGGER TRACE] for ionic property "${String(quarks.key)}"`)
+   const quark = quarkOf(atom)
+   const originTrace = quark.__DEV__origin //TODO: add property
+   console.log(`\n[TRIGGER TRACE] for ionic property "${String(quark.key)}"`)
    console.log('NonError origin trace\n    ' + originTrace)
 }
 

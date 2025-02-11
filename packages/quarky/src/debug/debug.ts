@@ -3,7 +3,7 @@ import { isIon } from "../ion/Ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
 import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
-import { quarksOf, hasQuarks, QUARKS, Quarks } from "../Quarks";
+import { quarkOf, hasQuark, QUARK, Quark } from "../Quark";
 import { __DEV__label } from "./DEVLabellable";
 import { untrackedCall } from "../ionic/IonicCompound";
 
@@ -60,13 +60,13 @@ export const __DEV__debug = {
    // traceTrigger // TODO: This should be on effect  effect.__DEV__traceTrigger()
 }
 
-export type TraceableSubject = { [QUARKS]: TraceableQuarks, __DEV__labelName?: string }
+export type TraceableSubject = { [QUARK]: TraceableQuark, __DEV__labelName?: string }
 
-// export type TraceableQuarks = { __DEV__asTraceable?: Traceable; }
+// export type TraceableQuark = { __DEV__asTraceable?: Traceable; }
 
 
 export function asTraceable(subject: TraceableSubject): Traceable {
-   const traceable = quarksOf(subject).__DEV__asTraceable
+   const traceable = quarkOf(subject).__DEV__asTraceable
    if (!traceable) throw new Error('Subject is not traceable')
    return traceable;
 }
@@ -163,12 +163,12 @@ function traceDerivationTriggers(subject: () => any) {
    //TODO: see watch/debug.ts
 }
 
-type TraceableQuarks = {
+type TraceableQuark = {
    __DEV__asTraceable: Traceable
-} & Quarks
+} & Quark
 
 function isTraceable(subject: AnyObject): subject is TraceableSubject {
-   return isDerivationFunction(subject) || hasQuarks(subject);
+   return isDerivationFunction(subject) || hasQuark(subject);
 }
 
 function traceMemberTriggers(subject: TraceableSubject, key: PropertyKey) {
@@ -202,7 +202,7 @@ function createTraceableObject(target: Object) {
    }
 
    const proxySwitchMap = new Map([
-      [QUARKS as any, () =>
+      [QUARK as any, () =>
          meta as any
       ],
       ['__DEV__labelName', () =>
@@ -243,7 +243,7 @@ function createTraceableFunction(fn: Function & TraceableSubject) {
       return fn(...args)
    }
    //@ts-expect-error
-   traceableFn[QUARKS] = {
+   traceableFn[QUARK] = {
       __DEV__asTraceable: traceable
    }
    traceableFn.__DEV__label = __DEV__label

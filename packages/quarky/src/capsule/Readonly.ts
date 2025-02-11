@@ -5,12 +5,12 @@ import { createReadonlyIon, isWritableIon } from "../ion/ReadonlyIon";
 import { __DEV__proxyGetterAssertions, createProxySwitchMap, isMethod, ProxySwitchMap } from "../ionized/IonizedModel";
 import { isFunction, isObject } from "@rue/utils";
 import { Traceable } from "../debug/debug";
-import { quarksOf, hasQuarks } from "../Quarks";
+import { quarkOf, hasQuark } from "../Quark";
 
 export function asNonlocalReadonly(value: any) {
    if (!(value instanceof Object)) return value;
-   if (hasQuarks(value) || readonlyQuarksMap.has(value)) {
-      const meta = quarksOf(value) ?? readonlyQuarksMap.get(value) as { asReadonly?: AnyObject }
+   if (hasQuark(value) || readonlyQuarkMap.has(value)) {
+      const meta = quarkOf(value) ?? readonlyQuarkMap.get(value) as { asReadonly?: AnyObject }
       const readonly = meta.asReadonly
       if (readonly) return readonly;
    }
@@ -33,15 +33,15 @@ export function returnsReadonly() {
 
 export function isReadonly(value: any) {
    if (!(value instanceof Object)) return false;
-   const quarks = quarksOf(value) || readonlyQuarksMap.get(value)
-   if (quarks && quarks.asReadonly === value) return true;
+   const quark = quarkOf(value) || readonlyQuarkMap.get(value)
+   if (quark && quark.asReadonly === value) return true;
    return false;
 }
 
-const readonlyQuarksMap = new Map()
+const readonlyQuarkMap = new Map()
 
 export function createReadonlyObject(obj: AnyObject) { //TODO: what about Arrays, Maps, and Sets for deep readonly
-   const meta = readonlyQuarksMap.get(obj) ?? new MetaReadonlyObject(obj)
+   const meta = readonlyQuarkMap.get(obj) ?? new MetaReadonlyObject(obj)
    const switchMap = createProxySwitchMap(meta)
    const proxy = new Proxy(obj, {
       has(target, key) { //TODO: should methods not be in readonly object?
@@ -66,7 +66,7 @@ export function createReadonlyObject(obj: AnyObject) { //TODO: what about Arrays
          return false;
       }
    })
-   readonlyQuarksMap.set(obj, meta)
+   readonlyQuarkMap.set(obj, meta)
    meta.asReadonly = proxy;
    return proxy;
 }

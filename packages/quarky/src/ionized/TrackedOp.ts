@@ -5,10 +5,10 @@
 import { AnyObject } from "@rue/types";
 import { asParticle, MaybeParticle, Particle } from "../Compound/Particle";
 import { Ionized } from "./ionize";
-import { Quarks, quarksOf } from "../Quarks";
+import { Quark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
 
-export class TrackedOp implements Quarks, MaybeParticle { //QUESTION: should this be tracked op or trackable op??  because becoming an ionic particle is the "tracked" part
+export class TrackedOp implements Quark, MaybeParticle { //QUESTION: should this be tracked op or trackable op??  because becoming an ionic particle is the "tracked" part
    type: string | symbol = 'tracked op'
    asParticle!: Particle
    trackableOp: Function & TrackableOp;
@@ -20,12 +20,12 @@ export class TrackedOp implements Quarks, MaybeParticle { //QUESTION: should thi
    ) {
       const trackableOp = this.trackableOp = model[op]
       registerTrackedOp(trackableOp, entryKey, this)
-      const modelQuarks = quarksOf(model);
-      modelQuarks.addObservedEntryKey(entryKey)
+      const modelQuark = quarkOf(model);
+      modelQuark.addObservedEntryKey(entryKey)
       const particle = this.asParticle = asParticle(this);
       particle.onDissociated(() => {
          if (particle.compounds.size === 0) {
-            modelQuarks.deleteObservedEntryKey(entryKey)
+            modelQuark.deleteObservedEntryKey(entryKey)
             this.discard()
          }
       })
@@ -36,7 +36,7 @@ export class TrackedOp implements Quarks, MaybeParticle { //QUESTION: should thi
    }
 
    // getOutput() {
-   //    return this.modelQuarks.rawTarget[this.op](this.entryKey)
+   //    return this.modelQuark.rawTarget[this.op](this.entryKey)
    // }
 }
 
@@ -61,7 +61,7 @@ export function asTrackedOp(
 //    op: string,
 //    key: any
 // ) {
-//    return quarksOf(model).getTrackedOp(op, key)
+//    return quarkOf(model).getTrackedOp(op, key)
 // }
 
 

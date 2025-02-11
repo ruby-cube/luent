@@ -19,7 +19,7 @@ export function unwatch(this: Watchable) {
 export class Watched<T extends Watchable = Watchable> {
 
    constructor(
-      public quarks: T
+      public quark: T
    ) {
       this.effects = new SetMap()
    }
@@ -77,7 +77,7 @@ export class Watched<T extends Watchable = Watchable> {
    }
 
    // discard(){
-   //    this.quarks.asWatched = undefined;
+   //    this.quark.asWatched = undefined;
    //    //QUESTION: Do I need to release watchable too? this.watchable = undefined?
    // }
 
@@ -128,6 +128,6 @@ export class Watched<T extends Watchable = Watchable> {
 }
 
 
-// export function asWatched(quarks: Watchable): Watched {
-//    return quarks.asWatched ?? (quarks.asWatched = new Watched(quarks))
+// export function asWatched(quark: Watchable): Watched {
+//    return quark.asWatched ?? (quark.asWatched = new Watched(quark))
 // }

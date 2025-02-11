@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { createPrimaryIon, AtomicIon, } from "./AtomicIon";
 import { isFunction } from "@rue/utils";
-import { QUARKS } from "../Quarks";
+import { QUARK } from "../Quark";
 
 const INERT = true;
 
@@ -24,12 +24,12 @@ export function neutron<T, M>(value?: T, methods?: M & { [key: string]: (...args
 
 export type WritableDerivedNeutron<T = any, M extends AnyObject = {}> = {
    (): T
-   [QUARKS]: DerivedIonQuarks;
+   [QUARK]: DerivedIonQuark;
 } & M
 
 export type DerivedNeutron<T = any> = {
    (): T
-   [QUARKS]: DerivedIonQuarks;
+   [QUARK]: DerivedIonQuark;
 }
 
 type _DerivedNeutron<T, M> = M extends { [key: string]: (...args: any[]) => any } ? WritableDerivedIon<T, M> : DerivedIon<T>
@@ -40,7 +40,7 @@ type _DerivedNeutron<T, M> = M extends { [key: string]: (...args: any[]) => any 
 //     return createDerivationIon(derivation, undefined, INERT) as D extends AnyIon ? D : _DerivedNeutron<T, M>
 // }
 
- //TODO: I don't know how I should handle read-only, and traceability for neutrons. Should they have quarks?
+ //TODO: I don't know how I should handle read-only, and traceability for neutrons. Should they have quark?
 
 /** INTERNAL */
 export function createPrimaryNeutron(
@@ -64,7 +64,7 @@ export function createPrimaryNeutron(
    }
    __DEV__initTraceability(ion)
 
-   $ion[QUARKS] = ion
+   $ion[QUARK] = ion
    $ion.__DEV__labelName = undefined
    $ion.__DEV__label = __DEV__label
 

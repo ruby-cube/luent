@@ -161,11 +161,11 @@ export function installIonicMap() {
 //     target: Map<any, any>,
 //     methods: AnyObject | undefined
 // ) {
-//     const modelQuarks = new MetaIonicCollection(target, methods)
+//     const modelQuark = new MetaIonicCollection(target, methods)
 //     const ionicModel = new Proxy(target, {
 //         get(target, key, receiver) {
 //             if (__DEV__) emitSignal()
-//             if (key === QUARKS) return modelQuarks
+//             if (key === QUARK) return modelQuark
 //             const reinedMeta = getReinedMeta(target, ionicModel, receiver)
 //             if (reinedMeta) {
 //                 const keys = reinedMeta.propertyKeys
@@ -221,14 +221,14 @@ export function installIonicMap() {
 //             const tracker = getActiveTracker()
 //             if (!tracker)
 //                 return _value;
-//             tracker.track(asPionQuarks(ionicModel, key))
+//             tracker.track(asPionQuark(ionicModel, key))
 //             return _value;
 //         },
 //         set(target, key, value, receiver) {
 //             return reactiveSetter(
 //                 Map,
 //                 ionicModel,
-//                 modelQuarks,
+//                 modelQuark,
 //                 target,
 //                 key,
 //                 value,
@@ -254,12 +254,12 @@ export function installIonicMap() {
 //         )],
 //         ['clear', useClearOp(
 //             ionicModel,
-//             modelQuarks,
+//             modelQuark,
 //             target
 //         )],
 //         ['delete', useDeleteOp(
 //             ionicModel,
-//             modelQuarks,
+//             modelQuark,
 //             target
 //         )]
 //     ])
@@ -274,9 +274,9 @@ export function installIonicMap() {
 
 //         if (oldValue === _newValue) return;
 
-//         storeSnapshot(modelQuarks)
+//         storeSnapshot(modelQuark)
 
-//         const ionicModel = modelQuarks.ionicModel!
+//         const ionicModel = modelQuark.ionicModel!
 //         if (oldSize !== newSize) {
 //             const sizeProp = getObservedProp(ionicModel, 'size')
 //             if (sizeProp)
@@ -298,7 +298,7 @@ export function installIonicMap() {
 //         return output;
 //     }
 
-//     modelQuarks.initIonizedModel(ionicModel)
+//     modelQuark.initIonizedModel(ionicModel)
 //     registerIonizedModel(ionicModel, target)
 //     return ionicModel
 // }

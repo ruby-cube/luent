@@ -6,7 +6,7 @@ import { unwatch, watch, Watchable, Watched } from "../watch/Watched"
 import { MaybeParticle, Particle } from "../Compound/Particle"
 import { MaybeCompound } from "../Compound/Compound"
 import { IonizedCompound } from "./IonizedCompound"
-import { EntityQuarks, QuarksOf } from "../Quarks"
+import { EntityQuark, QuarkOf } from "../Quark"
 import { Capsule } from "../capsule/Capsule"
 import { Mutation } from "../actions/Mutable"
 
@@ -18,16 +18,16 @@ import { Mutation } from "../actions/Mutable"
 // type EntryKey = any
 
 
-export type PionQuarks<T> = EntityQuarks<T>
+export type PionQuark<T> = EntityQuark<T>
 
-// type IonizedModelQuarks = Quarks<IonizedModel>
+// type IonizedModelQuark = Quark<IonizedModel>
 // & Watchable
-// & CapsuleQuarks
+// & CapsuleQuark
 // & MaybeParticle
 // & MaybeCompound<IonizedCompound>
 
-export class IonizedModelQuarks
-   implements Watchable, QuarksOf<Capsule>, MaybeParticle, MaybeCompound<IonizedCompound> {
+export class IonizedModelQuark
+   implements Watchable, QuarkOf<Capsule>, MaybeParticle, MaybeCompound<IonizedCompound> {
 
    asReined?: object
    asReadonly?: object
@@ -78,9 +78,9 @@ export class IonizedModelQuarks
       this.undirty()
    }
 
-   pions: Map<PropertyKey, PionQuarks> = new Map()
+   pions: Map<PropertyKey, PionQuark> = new Map()
 
-   registerPion(key: PropertyKey, pion: PionQuarks) {
+   registerPion(key: PropertyKey, pion: PionQuark) {
       this.pions.set(key, pion)
    }
 
@@ -126,7 +126,7 @@ export class IonizedModelQuarks
 
 // export type Collection<K = any, V = any> = Set<K> | Array<K> | Map<K, V>
 
-// export class MetaIonicCollection<T extends Collection = Collection> extends IonizedModelQuarks<T> {
+// export class MetaIonicCollection<T extends Collection = Collection> extends IonizedModelQuark<T> {
 //     constructor(rawTarget: T, methods: AnyObject = {}) {
 //         super(rawTarget, methods)
 //     }

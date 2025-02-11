@@ -1,15 +1,15 @@
 import { AnyObject } from "@rue/types";
 import { AtomicIon } from "../ion/AtomicIon";
 import { isIonizedModel } from "../ionized/ionize";
-import { QUARKS, QuarksOf, quarksOf } from "../Quarks";
+import { QUARK, QuarkOf, quarkOf } from "../Quark";
 
 export type MutableEntity = {
-   [QUARKS]: {
+   [QUARK]: {
       recordOp: undefined | ((mutation: Mutation) => void);
    }
 }
 
-export type Mutable = QuarksOf<MutableEntity>
+export type Mutable = QuarkOf<MutableEntity>
 
 
 export class Mutation {
@@ -29,7 +29,7 @@ export class Mutation {
          const oldValue = this.preopData
          target[key] = oldValue;
       } else if (isIonizedModel(this.target)) {
-         quarksOf(this.target).revertOp(this)
+         quarkOf(this.target).revertOp(this)
       }
       else {
          if (__DEV__) console.warn('invalid mutation target')

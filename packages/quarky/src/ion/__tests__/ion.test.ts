@@ -10,7 +10,7 @@ describe('ion function', () => {
         expect(typeof atomicIon).toBe('function');
         expect(isFunction(atomicIon)).toBe(false)
         expect(atomicIon()).toBe(10);
-        expect(atomicIon[QUARKS]).toBeInstanceOf(MetaIon);
+        expect(atomicIon[QUARK]).toBeInstanceOf(MetaIon);
     });
 
     it('should invoke setValue when `value` is set', () => {
@@ -30,7 +30,7 @@ describe('ion function', () => {
 
         $count.double()
         expect($count()).toBe(10);
-        expect($count[QUARKS]).toBeInstanceOf(MetaIon);
+        expect($count[QUARK]).toBeInstanceOf(MetaIon);
     });
 
     it('should throw an error if .value is read', () => {
@@ -41,7 +41,7 @@ describe('ion function', () => {
         });
 
         expect(()=>$count.state).toThrowError();
-        expect($count[QUARKS]).toBeInstanceOf(MetaIon);
+        expect($count[QUARK]).toBeInstanceOf(MetaIon);
     });
  
 
@@ -75,7 +75,7 @@ describe('ion function', () => {
         expect($doubleCount()).toBe(2);
         $count.state = 4
         expect($doubleCount()).toBe(8);
-        expect($doubleCount[QUARKS].type).toBe(DERIVED_ION);
+        expect($doubleCount[QUARK].type).toBe(DERIVED_ION);
       });
 
       it('should create a derived ion that tracks dependencies correctly', () => {
