@@ -1,19 +1,19 @@
 import { triggerEffects } from "../Compound/Compound";
 import { IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 import { QUARKS } from "../Quarks";
-import { Watched } from "../watch/Watched";
+import { unwatch, watch, Watched } from "../watch/Watched";
 
+/**
+ * NOTES: 
+ * - Watched derivations don't need a dirty state because if they are called, it means they're dirty
+ */
 
 export function createWatchedDerivation(derivation: () => any, retrack: boolean) {
    const quarks: MaybeIonicCompound = {
       asCompound: undefined,
       asWatched: undefined,
-      watch() {
-         return this.asWatched!;
-      },
-      unwatch() {
-         quarks.asWatched = undefined;
-      }
+      watch,
+      unwatch: () => unwatch.call(quarks)
    }
    const compound: IonicCompound = new IonicCompound(quarks)
    compound.trigger = () => triggerEffects(compound)
@@ -32,7 +32,7 @@ export function createWatchedDerivation(derivation: () => any, retrack: boolean)
       return compound.trackedCall(derivation)
    }
 
-   function retrackedCall(){
+   function retrackedCall() {
       return compound.trackedCall(derivation)
    }
    return $watchedDerivedState;

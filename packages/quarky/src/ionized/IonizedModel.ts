@@ -202,11 +202,6 @@ export function createIonizedModel(
    target: object,
    methods: AnyObject | undefined,
 ) {
-
-   const structureConfigs = getStructureConfigs(target);
-   const modelQuarks = new IonizedModelQuarks(target, methods, structureConfigs)
-   const switchMap = createProxySwitchMap(modelQuarks)
-
    const ionizedModel = new Proxy(target, {
       has(target, key) {
          const getValue = switchMap.get(key)
@@ -242,7 +237,10 @@ export function createIonizedModel(
       }
    }) as IonizedModel
 
-   modelQuarks.initIonizedModel(ionizedModel)
+   const structureConfigs = getStructureConfigs(target);
+   const modelQuarks = new IonizedModelQuarks(ionizedModel, target, methods, structureConfigs)
+   const switchMap = createProxySwitchMap(modelQuarks)
+
    if (!methods) registerIonizedModel(ionizedModel, target)
    return ionizedModel
 }

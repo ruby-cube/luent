@@ -3,8 +3,12 @@ import { triggerEffects } from "../Compound/Compound";
 import { Watched } from "../watch/Watched";
 import { IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 
+/**
+ * NOTES: 
+ * - Ionic effects don't need a dirty state because if they are called, it means they're dirty
+ */
+
 type IonicEffect = MaybeIonicCompound
-// & { asWatched?: Watched }
 
 export type IonicTask<S = unknown> = (prevState?: S) => S
 
@@ -25,8 +29,8 @@ export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
 
    function runEffect() {
       if (retrack) {
-            compound.trackedCall(task)
-     }
+         compound.trackedCall(task)
+      }
       else {
          task()
       }

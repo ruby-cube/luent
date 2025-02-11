@@ -30,27 +30,15 @@ export const IONIZED_MODEL = Symbol('ionicModel')
 
 export class IonizedModelQuarks
    implements Watchable, QuarksOf<Capsule>, MaybeParticle, MaybeCompound<IonizedCompound> {
-   // entity!: IonizedModel
-   ionicModel?: IonizedModel //TODO: rename as entity
-   // shallowReactive?: IonizedModel<T>
-   readonly type = IONIZED_MODEL
 
-   asReined?: object
-   asReadonly?: object
-   __DEV__asTraceable = new Traceable()
-
-
-   initIonizedModel(ionicModel: IonizedModel) {
-      if (this.ionicModel) return;
-      this.ionicModel = ionicModel;
-   }
-
-   // initShallowReactive(ionicModel: IonizedModel) {
-   //     if (this.deepReactive) return;
-   //     this.deepReactive = ionicModel as IonizedModel<T>;
-   // }
-
-   constructor(
+      readonly type = IONIZED_MODEL
+      
+      asReined?: object
+      asReadonly?: object
+      __DEV__asTraceable = new Traceable()
+      
+      constructor(
+      public entity: IonizedModel,
       public rawTarget: AnyObject,
       public methods: AnyObject | undefined,
       public structureConfigs: CustomIonizedModelConfig[]
@@ -58,22 +46,16 @@ export class IonizedModelQuarks
       // public traps?: ReactiveTraps<T>
    ) {
       if (__DEV__) this.__DEV__asTraceable = new Traceable()
-      this.unwatch = () => {
-         unwatch(this.asWatched!, () => {
-            this.asWatched = undefined
-         })
-      }
+      this.watch = watch
+      this.unwatch = () => unwatch.call(this)
    }
+
    recordOp: ((mutation: Mutation) => void) | undefined
    asCompound?: IonizedCompound
    asParticle?: Particle | undefined
    asWatched?: Watched<Watchable> | undefined
-   
-   watch() {
-      return watch(this, () => {
-         return this.asWatched = new Watched(this)
-      })
-   }
+
+   watch: (this: Watchable) => Watched<Watchable>
    unwatch: () => void
 
 
@@ -101,7 +83,7 @@ export class IonizedModelQuarks
    trackAbsorbedIons() {
       if (this.asCompound && this.hasNewAbsorbedIons === false) return;
       const derivation = this.asCompound || (this.asCompound = new IonizedCompound(this))
-      derivation.collectAbsorbedIons(this.ionicModel!)
+      derivation.collectAbsorbedIons(this.entity!)
       this.undirty()
    }
 

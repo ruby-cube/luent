@@ -8,27 +8,15 @@ export type Watchable = {
    unwatch: () => void
 }
 
-export function watch(quarks: Watchable, initialize: () => Watched) {
-   if (!quarks.asWatched) {
-      const watched = initialize()
-      watched.watchCount++;
-      return watched
-   }
-   quarks.asWatched!.watchCount++;
-   return quarks.asWatched!
+export function watch(this: Watchable) {
+   return this.asWatched ?? (this.asWatched = new Watched(this))
 }
 
-export function unwatch(watched: Watched, cleanup: () => void) {
-   watched.watchCount--
-   if (watched.watchCount === 0) {
-      cleanup()
-      //TODO: when should this be called such that we don't cause thrashing of discarding and creating an Watched more than needed? At the end of a cycle?
-   }
+export function unwatch(this: Watchable) {
+   this.asWatched = undefined
 }
-
 
 export class Watched<T extends Watchable = Watchable> {
-   watchCount: number = 0
 
    constructor(
       public quarks: T
@@ -69,6 +57,8 @@ export class Watched<T extends Watchable = Watchable> {
       this.effects.deleteFromSet(effect, phase)
    }
 
+   watchCount: number = 0
+
    watch(effect: Task, phase: Phase, forNextCycle?: boolean) {
       if (forNextCycle) {
          this.queueForNextCycle(effect, phase)
@@ -76,11 +66,14 @@ export class Watched<T extends Watchable = Watchable> {
       else {
          this.queueEffect(effect, phase)
       }
+      this.watchCount++
    }
 
    unwatch(effect: Task, phase: Phase) {
       this.removeEffect(effect, phase)
-      this.emitUnwatched()
+      if (this.watchCount === 0) {
+         this.emitDiscard()
+      }
    }
 
    // discard(){
@@ -104,7 +97,6 @@ export class Watched<T extends Watchable = Watchable> {
       }
    }
 
-
    private runSyncEffects(effects: Set<Task>) {
       // const tracker = getDependencyTracker();
       // tracker?.stop(); // in case reactive refs are triggered during a reactiveEffect
@@ -124,11 +116,11 @@ export class Watched<T extends Watchable = Watchable> {
 
    private cleanups: (() => void)[] = [] //TODO: make into array
 
-   onUnwatched(cleanUp: () => void) {
+   onDiscard(cleanUp: () => void) {
       this.cleanups.push(cleanUp)
    }
 
-   private emitUnwatched() {
+   private emitDiscard() {
       for (const cleanUp of this.cleanups) {
          cleanUp()
       }
