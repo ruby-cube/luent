@@ -10,6 +10,7 @@ import { createWatchedDerivation } from "../ionic/WatchedDerivation";
 import { createMultiSubject } from "./MultiSubject";
 import { isManagedDerivation } from "../ionic/DerivationIon";
 import { isObjectLiteral } from "@rue/utils";
+import { asCoreIon, isGetterIon } from "../ionized/GetterIon";
 
 // export class ChangeEvent<S> {
 //    trace?: string;
@@ -27,7 +28,7 @@ export type EffectOptions = {
    eager?: true;
    isEqual?: (prevState?: any, newState?: any) => boolean;
    retrack?: true;
-} & SustainedListenerOptions 
+} & SustainedListenerOptions
 // & WatchDebugOptions
 
 export type Effect<T = unknown> = (prevState: SubjectValues<T>) => void;
@@ -43,25 +44,6 @@ type MultiSubjectValues<T> =
    : T
 
 type SubjectValue<T> = T extends () => infer R ? R : T
-
-// type Effect = () => void
-
-
-
-
-// manages nested watch calls to prevent infinite loops
-// let isRunningEffect = false;
-
-// export function runEffect(effect: Effect) {
-//     isRunningEffect = true;
-//     effect()
-//     isRunningEffect = false;
-// }
-
-// function shouldScheduleForNextCycle() {
-//     return isRunningEffect;
-// }
-
 
 
 // Possible subjects
@@ -93,12 +75,13 @@ function InertWatcher() {
 
 function getValue(subject: unknown) {
    if (isManagedDerivation(subject))
-      detachedCall(subject)
-   else if (isWatchedDerivation(subject)) {
-      subject() // allows initial tracking
+      return detachedCall(subject)
+   if (isWatchedDerivation(subject) || isGetterIon(subject)) {
+      const compound = new IonicCompound()
+      return trackedCall(subject)
    }
-   else if (isIon(subject)) {
-      untrackedCall(subject)
+   if (isIon(subject)) {
+      untrackedCall(subject) // why untracked? we don't want 
    }
    else {
       subject
@@ -142,7 +125,7 @@ export function watch<
    if (args[0] instanceof Function && (args.length === 1 || args.length === 2 && isObjectLiteral(args[1]))) {
       return initIonicEffect(<IonicTask>args[0])
    }
-   //TODO: retrack WatchedDerivations and GetterIons when necessary
+   //TODO: retrack WatchedDerivations when necessary
    const lastArg = args.pop()
    const noOptions = lastArg instanceof Function
    const effect = lastArg instanceof Function ? lastArg : args.pop()
@@ -153,11 +136,11 @@ export function watch<
    const isMultiSubject = args.length > 1;
    const _subject = isMultiSubject ? args : args[0]
 
-
    const subject = isMultiSubject ? createMultiSubject(<WatchSubjects>_subject)
-      : hasQuarks(_subject) ? _subject
-         : _subject instanceof Function ? createWatchedDerivation(<() => unknown>_subject)
-            : _subject as AnyObject //non-ionized object
+      : isGetterIon(_subject) ? asCoreIon(_subject)
+         : hasQuarks(_subject) ? _subject
+            : _subject instanceof Function ? createWatchedDerivation(<() => unknown>_subject)
+               : _subject as AnyObject //non-ionized object
 
    if (!hasQuarks(subject) || (<{ inert: boolean }>quarksOf(subject)).inert)
       return InertWatcher()

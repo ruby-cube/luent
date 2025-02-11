@@ -1,11 +1,13 @@
 import { IterableSet } from "@rue/utils";
 import { Compound } from "./Compound";
-import { Mutation } from "../watch/watch";
+import { Mutation } from "../actions/Mutable";
+import { EntityQuarks } from "../Quarks";
+import { AnyObject } from "@rue/types";
 
 export const CLEAN_UP = 'x__cleanUp'
 
 
-export interface MaybeParticle {
+export interface MaybeParticle extends EntityQuarks<AnyObject>{
    asParticle?: Particle
 }
 

@@ -1,6 +1,6 @@
 import { asParticle, Particle, MaybeParticle } from "./Particle"
 import { Watchable } from "../watch/Watched"
-import { Mutation } from "../watch/watch"
+import { Mutation } from "../actions/Mutable"
 
 export type MaybeCompound<T extends Compound = Compound> = {
    asCompound?: T

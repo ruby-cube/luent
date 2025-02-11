@@ -1,7 +1,7 @@
 import { triggerEffects } from "../Compound/Compound";
 import { IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 import { QUARKS } from "../Quarks";
-import { Watchable, Watched } from "../watch/Watched";
+import { Watched } from "../watch/Watched";
 
 
 export function createWatchedDerivation(derivation: () => any) {
