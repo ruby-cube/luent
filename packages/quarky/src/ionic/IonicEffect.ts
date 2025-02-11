@@ -6,8 +6,9 @@ import { IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 type IonicEffect = MaybeIonicCompound
 // & { asWatched?: Watched }
 
+export type IonicTask<S = unknown> = (prevState?: S) => S
 
-export function createIonicEffect(task: () => any, retrack: boolean = true) {
+export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
    const compound: IonicCompound<IonicEffect> = new IonicCompound(effect)
    compound.trigger = trigger
 

@@ -6,7 +6,6 @@ import { Ion } from "../ion/Ion";
 import { noop } from "@rue/utils";
 import { QUARKS, quarksOf } from "../Quarks";
 import { isIonizedModel } from "../ionized/ionize";
-import { isGetter } from "./watch";
 
 export function createMultiSubject(subjects: unknown[] & AnyObject) {
    const quarks: MaybeIonicCompound = {
@@ -48,17 +47,24 @@ export function createMultiSubject(subjects: unknown[] & AnyObject) {
    function getValues() {
       const values: unknown[] = []
       for (const subject of subjects) {
-         if (isGetter(subject)) {
-            values.push(getterFn(subject))
-         }
          if (isIonizedModel(subject)) {
             absorbedFn(subject)
             values.push(subject)
+         }
+         else if (isGetter(subject)) {
+            values.push(getterFn(subject))
+         }
+         else {
+            if (__DEV__) throw new Error('Invalid watch subject')
          }
       }
    }
 
    return $subjects;
+}
+
+function isGetter(value: unknown): value is () => any {
+   return value instanceof Function && value.length === 0;
 }
 
 function maybeInitializeIonizedCompound(subject: AnyObject) {

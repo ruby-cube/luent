@@ -1,29 +1,24 @@
 import { AnyObject } from "@rue/types";
-import { asWatched, Watchable, Watched } from "./Watched";
+import { Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, MaybeIonicCompound, untrackedCall } from "../ionic/IonicCompound";
-import { getCurrentEffectCylce, Phase, useEffectCycle } from "./EffectCycle";
+import { Phase, useEffectCycle } from "./EffectCycle";
 import { WatchDebugOptions } from "./debug";
-import { isIonizedModel, toRaw, } from "../ionized/ionize";
-import { areEqual } from "./areEqual";
-import { createIonicEffect } from "../ionic/IonicEffect";
-import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
-import { asParticle } from "../Compound/Particle";
-import { isPropIon, PropIon } from "../ionized/Pion";
+import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { hasQuarks, QUARKS, quarksOf } from "../Quarks";
 import { Ion, isIon, toValue } from "../ion/Ion";
 import { createWatchedDerivation } from "../ionic/WatchedDerivation";
 import { createMultiSubject } from "./MultiSubject";
 import { isManagedDerivation } from "../ionic/DerivationIon";
 
-export class ChangeEvent<S> {
-   trace?: string;
-   constructor(
-      public subject: S,
-      public newState?: S extends () => infer T ? T : S,
-      public oldState?: S extends () => infer T ? T : S,
-   ) { }
-}
+// export class ChangeEvent<S> {
+//    trace?: string;
+//    constructor(
+//       public subject: S,
+//       public newState?: S extends () => infer T ? T : S,
+//       public oldState?: S extends () => infer T ? T : S,
+//    ) { }
+// }
 
 type EffectCycleOptions = {
    phase?: Phase;
@@ -31,26 +26,26 @@ type EffectCycleOptions = {
 }
 
 export type WatchOptions = {
-   // deep?: boolean;
    eager?: true;
-   stateChange?: boolean;
-   // isEqual?: (oldValue?: any, newValue?: any) => boolean;
-   // retrack?: boolean;
-} & EffectCycleOptions & SustainedListenerOptions & WatchDebugOptions
-
-export type EffectOptions = {
+   isEqual?: (prevState?: any, newState?: any) => boolean;
    retrack?: true;
-   // only?: (boolean | AnyObject | Ion)[];
-   // also?: AnyObject[]
 } & EffectCycleOptions & SustainedListenerOptions & WatchDebugOptions
 
+export type Effect<T> = (prevState: SubjectValues<T>) => void;
 
+type SubjectValues<T> = T extends [() => infer R] ? R : T extends [infer O] ? O : MultiSubjectValues<T>;
 
+type MultiSubjectValues<T> =
+   T extends [infer A, infer B] ? [SubjectValue<A>, SubjectValue<B>]
+   : T extends [infer A, infer B, infer C] ? [SubjectValue<A>, SubjectValue<B>, SubjectValue<C>]
+   : T extends [infer A, infer B, infer C, infer D] ? [SubjectValue<A>, SubjectValue<B>, SubjectValue<C>, SubjectValues<D>]
+   : T extends [infer A, infer B, infer C, infer D, infer E] ? [SubjectValue<A>, SubjectValue<B>, SubjectValue<C>, SubjectValue<D>, SubjectValue<E>]
+   : T extends [infer A, infer B, infer C, infer D, infer E, infer F] ? [SubjectValue<A>, SubjectValue<B>, SubjectValue<C>, SubjectValue<D>, SubjectValue<E>, SubjectValue<F>]
+   : T
 
+type SubjectValue<T> = T extends () => infer R ? R : T
 
-export type ChangeHandler<T = any> = (event: ChangeEvent<T>) => void
-
-type Effect = () => void
+// type Effect = () => void
 
 
 
@@ -69,22 +64,6 @@ type Effect = () => void
 // }
 
 
-let currentWatchSubject: DerivedIon | AtomicIon | AnyObject | undefined // prevents infinite loops for synchronous effects that set ions
-
-export function isCurrentWatchSubject(atom: AtomicIon | PropIon) {
-   if (!currentWatchSubject) return false;
-   if (currentWatchSubject === atom) return true;
-   if (isDerivedIon(currentWatchSubject)) {
-      return quarksOf(currentWatchSubject).particles.has(asParticle(atom))
-   }
-   if (isIonizedModel(currentWatchSubject)) {
-      if (isPropIon(atom)) {
-         return quarksOf(atom).model === currentWatchSubject;
-      }
-      //TODO: what about absorbed ions?
-   }
-
-}
 
 // Possible subjects
 // ---
@@ -98,39 +77,8 @@ export function isCurrentWatchSubject(atom: AtomicIon | PropIon) {
 // --
 // ionized collection
 
-/**
- * Create compounds if needed
- * @param subject 
- * @returns 
- */
-function normalizeSubject(subject: unknown): { [QUARKS]: Watchable } {
-   if (isAtomicIon(subject)) {
-      return subject;
-   }
-   if (isMemoizedIon(subject)) {
-      return subject;
-   }
-   if (isPropIon(subject)) {
-      quarksOf(subject).watch()
-      return subject;
-   }
-   if (isMultiSubject) {
-      return createMultiSubject(subject)
-   }
-   if (isGetter(subject)) {
-      return createWatchedDerivation(subject)
-   }
-   if (isIonizedModel(subject)) {
-      const compound = asIonizedCompound(quarksOf(subject)) //
-      compound.trackAbsorbedIons()
-      return subject;
-   }
-   throw new Error("invalid input")
-}
 
-export function isGetter(value: unknown): value is () => any {
-   return value instanceof Function && value.length === 0;
-}
+
 
 
 function InertWatcher() {
@@ -143,9 +91,6 @@ function InertWatcher() {
       resume: noOp,
    }
 }
-
-let currentEffect: Function | undefined;
-
 
 function getValue(subject: unknown) {
    if (isManagedDerivation(subject))
@@ -165,15 +110,43 @@ function noReactivity(subject: AnyObject) {
    return subject.asCompound && subject.asCompound.particles.length === 0;
 }
 
-type WatchSubjects = (AnyObject | Ion)[]
+type WatchSubjects = (Object | Ion)[]
 
 //NOTE: I have decided watch should NOT handle ions that return ionized models together. Dev should handle them with separate watchers
 // However, For($list) will handle this for the devs
-
-// export function watch<T extends AnyIon | ReactiveGet>(subject: T, effect: T extends () => infer R ? ChangeHandler<R> : never, options?: WatchOptions): ResumableListener
-// export function watch<T extends IonizedModel>(subject: T, effect: MutationEffect<T>, options?: WatchOptions): ResumableListener
-// export function watch<T>(subject: T, effect: ChangeHandler<T>, options?: WatchOptions): ResumableListener {
-export function watch<T extends WatchSubjects>(...args: [...T, ChangeHandler<T>] | [...T, ChangeHandler<T>, WatchOptions]): ResumableListener {
+export function watch<
+   T extends WatchSubjects,
+   P
+>(effect: IonicTask<P>): ResumableListener
+export function watch<
+   T extends WatchSubjects,
+   P
+>(effect: IonicTask<P>, options: WatchOptions): ResumableListener
+export function watch<
+T extends WatchSubjects,
+P
+>(subject: T, effect: Effect<T>): ResumableListener
+export function watch<
+   T extends WatchSubjects,
+   P
+>(subject: T, effect: Effect<T>, options: WatchOptions): ResumableListener
+export function watch<
+   T extends WatchSubjects,
+   P
+>(...args: [...T, Effect<T>] | [...T, Effect<T>, WatchOptions]): ResumableListener
+export function watch<
+   T extends WatchSubjects,
+   P
+>(...args: [...T, Effect<T>, WatchOptions]): ResumableListener
+export function watch<
+   T extends WatchSubjects,
+   P
+>(...args: [IonicTask<P>] | [IonicTask<P>, WatchOptions] | [...T, Effect<T>] | [...T, Effect<T>, WatchOptions]): ResumableListener {
+   if (args.length === 1 && args[0] instanceof Function) {
+      return initIonicEffect(args[0])
+   }
+   //TODO: include IonicEffect
+   //TODO: retrack WatchedDerivations and GetterIons when necessary
    const lastArg = args.pop()
    const noOptions = lastArg instanceof Function
    const effect = lastArg instanceof Function ? lastArg : args.pop()
@@ -183,6 +156,7 @@ export function watch<T extends WatchSubjects>(...args: [...T, ChangeHandler<T>]
    if (args.length === 0) throw new Error("Invalid input. No watch subjects")
    const isMultiSubject = args.length > 1;
    const _subject = isMultiSubject ? args : args[0]
+
 
    const subject = isMultiSubject ? createMultiSubject(<WatchSubjects>_subject)
       : hasQuarks(_subject) ? _subject
@@ -197,145 +171,57 @@ export function watch<T extends WatchSubjects>(...args: [...T, ChangeHandler<T>]
    watchSubject.onUnwatched(quarks.unwatch)
 
    let eager: boolean | undefined = options?.eager
-   const watchStateChange = options?.stateChange === false ? false : true;
+   const isEqual = options?.isEqual ?? isStrictlyEqual
    const phase = options?.phase ?? Phase.BEFORE_RENDER
 
-   let oldValue = getValue(subject); // this is where initial tracking happens if derivation not already initialized 
+   let prevState = getValue(subject); // this is where initial tracking happens if derivation not already initialized 
 
    if (noReactivity(subject)) return InertWatcher()
 
-   function changeHandler() {
+   function wrappedEffect() {
+      const newState = getValue(subject)
 
-      const newValue = getValue(subject)
-
-      if (watchStateChange && (!eager && (isMultiSubject && noChanges(subjects, newValue, oldValue)
-         || isIon(subject0) && noChange(newValue, oldValue)
-         || isIonizedModel(subject) && noMutations(subject))) //TODO: simplify this monsterous condition
-      )
+      if (isEqual(prevState, newState))
          return;
+
       eager = false;
 
       try {
-         (<ChangeHandler>effect)(new ChangeEvent(subject, newValue, oldValue))
+         (<Effect>effect)(prevState)
       }
       finally {
-         currentEffect = undefined;
-         oldValue = newValue;
+         prevState = newState;
       }
    }
 
    if (eager) {
-      scheduleEffectEagerly(changeHandler, phase)
+      scheduleEffectEagerly(wrappedEffect, phase)
    }
 
    return setUpWatcher( //TODO: need to pass watchable subject to unwatch
       watchSubject,
-      changeHandler,
+      wrappedEffect,
       phase,
       options || {},
       quarks.asCompound
    )
 }
 
-
-
-function noChange(newValue: any, oldValue: any) {
-   return areEqual(toRaw(newValue), toRaw(oldValue))
+function isStrictlyEqual(oldState: unknown, newState: unknown) {
+   return newState === oldState
 }
 
-function noChanges(subjects: any[], newValues: any[], oldValues: any[]) {
-   for (let i = 0; i < subjects.length; i++) {
-      if (isIon(subjects[i])) {
-         if (!noChange(newValues[i], newValues[i])) {
-            return false;
-         }
-      }
-      else if (isIonizedModel(subjects[i])) {
-         if (!noMutations(subjects[i])) {
-            return false;
-         }
-      }
-   }
-   return true;
-}
+type WrappedEffect = () => void
 
-function noMutations(model: AnyObject) {
-   //TODO: 
-   return false;
-}
-
-//TODO: Figure out what is the best format to use. Should mutations be in order of mutation? or organized by mutation target?
-function getMutations(subjects: (AnyIon | AnyObject)[]) {
-   //FIX: Temporary
-   return []
-   for (const subject of subjects) {
-      const mutations = getCurrentEffectCylce()?.getOps(subject)
-      if (!mutations) throw new Error("No mutations :(")
-      return mutations //FIX: temporary
-   }
-   return []
-}
-
-
-// function watchReactiveModel<T extends IonizedModel>(subject: T, effect: MutationEffect<T>, options: WatchOptions) {
-//     if (!isIonizedModel(subject)) {
-//         console.warn(`Watching non-reactive object. Is this intentional?`)
-//         return { stop: noop };
-//     }
-//     const eager = options?.eager
-//     const phase = options?.phase || Phase.BEFORE_RENDER
-//     // const deep = options?.deep
-
-//     const watchSubject = asWatched(subject);
-
-//     quarksOf(subject).trackAbsorbedIons()
-
-//     const $activeEffect = ref(undefined) as AtomicIon<ThisEffect | undefined>
-
-//     function mutationEffect() {
-//         const mutations = getCurrentEffectCylce()?.getOps(subject)
-//         if (!mutations) throw new Error("No mutations :(")
-
-//         try {
-//             runCleanups($activeEffect())
-//             const _effect = new ThisEffect(watchSubject);
-//             $activeEffect.set(_effect)
-//             pushEffect(_effect)
-//             effect(subject, mutations)
-//         }
-//         finally {
-//             popEffect()
-//         }
-//     }
-
-//     if (eager) {
-//         scheduleEffectEagerly(mutationEffect, phase)
-//     }
-
-//     const forNextCycle = options?.cycle === 'next';
-
-//     return $listen(mutationEffect, options || {}, {
-//         enroll(_effect) {
-//             watchSubject.watch(_effect, phase, forNextCycle)
-//         },
-//         remove(_effect) {
-//             watchSubject.unwatch(_effect, phase)
-//             // if (nestedWatcher) nestedWatcher.unwatch()
-//         }
-//     });
-// }
-
-
-function scheduleEffectEagerly(effect: Effect, phase: Phase) {
+function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: Phase) {
    if (phase === Phase.SYNC) {
-      // runEffect(effect)
       effect()
    }
    else useEffectCycle().scheduleTask(effect, phase)
 }
 
 
-export function initIonicEffect(effect: () => void, options?: EffectOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
+export function initIonicEffect(effect: IonicTask, options?: WatchOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
    const phase = options?.phase || Phase.BEFORE_RENDER;
    const retrack = options?.retrack || false;
 
@@ -392,3 +278,24 @@ function setUpWatcher(
    });
 }
 
+
+
+watch(() => {
+
+}, { cycle: "current" })
+
+watch((prevState?: number) => {
+   return 9
+}, { eager: true })
+
+watch(() => 3, prev => {
+   console.log(prev, "llfll;klsflff")
+})
+
+watch(() => 3, () => 'hi', {frog: 'sir'}, prev => {
+   console.log(prev, "llfllff")
+})
+
+watch({ dog: 9 }, (prev) => {
+   console.log('dookkr', prev)
+})
