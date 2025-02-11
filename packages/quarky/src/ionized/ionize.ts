@@ -1,13 +1,12 @@
-//@ts-nocheck
 import { AnyObject } from "@rue/types";
 import { isObject } from "@rue/utils";
 import { timeTraveler } from "./TimeTraveler";
 import { useEffectCycle } from "../watch/EffectCycle";
 import { IonizedModelQuarks, IONIZED_MODEL } from "./IonizedModelQuarks";
 import { inert, Inert, isInert } from "./inert";
-import { AnyIon, Ion, ion, isIon } from "../ion/Ion";
-import { AtomicIon, AtomicIonQuarks } from "../ion/AtomicIon";
-import { createIonizedModel, getStructureConfigs } from "./IonizedModel";
+import { Ion, ion, isIon } from "../ion/Ion";
+import { AtomicIon } from "../ion/AtomicIon";
+import { createIonizedModel, getStructureConfigs, IonizedModel } from "./IonizedModel";
 import { getPublicTrace, getTrace } from "../../../flask/debug";
 import { QUARKS } from "../Quarks";
 
@@ -64,7 +63,7 @@ type OmitTrue<M extends {}> = { [K in keyof M as M[K] extends true ? never : K]:
 
 type ReadonlyIon<T> = {
    (): T
-   [QUARKS]: AtomicIonQuarks;
+   [QUARKS]: AtomicIon;
 }
 
 type InvertIons<T extends AnyObject, M = {}> = {

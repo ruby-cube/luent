@@ -3,13 +3,13 @@ import { Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, MaybeIonicCompound, untrackedCall } from "../ionic/IonicCompound";
 import { Phase, useEffectCycle } from "./EffectCycle";
-import { WatchDebugOptions } from "./debug";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { hasQuarks, QUARKS, quarksOf } from "../Quarks";
-import { Ion, isIon, toValue } from "../ion/Ion";
+import { Ion, isIon } from "../ion/Ion";
 import { createWatchedDerivation } from "../ionic/WatchedDerivation";
 import { createMultiSubject } from "./MultiSubject";
 import { isManagedDerivation } from "../ionic/DerivationIon";
+import { isObjectLiteral } from "@rue/utils";
 
 // export class ChangeEvent<S> {
 //    trace?: string;
@@ -20,18 +20,17 @@ import { isManagedDerivation } from "../ionic/DerivationIon";
 //    ) { }
 // }
 
-type EffectCycleOptions = {
+
+export type EffectOptions = {
    phase?: Phase;
    cycle?: 'current' | 'next'
-}
-
-export type WatchOptions = {
    eager?: true;
    isEqual?: (prevState?: any, newState?: any) => boolean;
    retrack?: true;
-} & EffectCycleOptions & SustainedListenerOptions & WatchDebugOptions
+} & SustainedListenerOptions 
+// & WatchDebugOptions
 
-export type Effect<T> = (prevState: SubjectValues<T>) => void;
+export type Effect<T = unknown> = (prevState: SubjectValues<T>) => void;
 
 type SubjectValues<T> = T extends [() => infer R] ? R : T extends [infer O] ? O : MultiSubjectValues<T>;
 
@@ -112,8 +111,6 @@ function noReactivity(subject: AnyObject) {
 
 type WatchSubjects = (Object | Ion)[]
 
-//NOTE: I have decided watch should NOT handle ions that return ionized models together. Dev should handle them with separate watchers
-// However, For($list) will handle this for the devs
 export function watch<
    T extends WatchSubjects,
    P
@@ -121,36 +118,35 @@ export function watch<
 export function watch<
    T extends WatchSubjects,
    P
->(effect: IonicTask<P>, options: WatchOptions): ResumableListener
+>(effect: IonicTask<P>, options: EffectOptions): ResumableListener
 export function watch<
-T extends WatchSubjects,
-P
+   T extends WatchSubjects,
+   P
 >(subject: T, effect: Effect<T>): ResumableListener
 export function watch<
    T extends WatchSubjects,
    P
->(subject: T, effect: Effect<T>, options: WatchOptions): ResumableListener
+>(subject: T, effect: Effect<T>, options: EffectOptions): ResumableListener
 export function watch<
    T extends WatchSubjects,
    P
->(...args: [...T, Effect<T>] | [...T, Effect<T>, WatchOptions]): ResumableListener
+>(...args: [...T, Effect<T>] | [...T, Effect<T>, EffectOptions]): ResumableListener
 export function watch<
    T extends WatchSubjects,
    P
->(...args: [...T, Effect<T>, WatchOptions]): ResumableListener
+>(...args: [...T, Effect<T>, EffectOptions]): ResumableListener
 export function watch<
    T extends WatchSubjects,
    P
->(...args: [IonicTask<P>] | [IonicTask<P>, WatchOptions] | [...T, Effect<T>] | [...T, Effect<T>, WatchOptions]): ResumableListener {
-   if (args.length === 1 && args[0] instanceof Function) {
-      return initIonicEffect(args[0])
+>(...args: [IonicTask<P>] | [IonicTask<P>, EffectOptions] | [...T, Effect<T>] | [...T, Effect<T>, EffectOptions]): ResumableListener {
+   if (args[0] instanceof Function && (args.length === 1 || args.length === 2 && isObjectLiteral(args[1]))) {
+      return initIonicEffect(<IonicTask>args[0])
    }
-   //TODO: include IonicEffect
    //TODO: retrack WatchedDerivations and GetterIons when necessary
    const lastArg = args.pop()
    const noOptions = lastArg instanceof Function
    const effect = lastArg instanceof Function ? lastArg : args.pop()
-   const options = noOptions ? {} : lastArg as WatchOptions
+   const options = noOptions ? {} : lastArg as EffectOptions
    if (!effect || !(effect instanceof Function))
       throw new Error("Invalid input. Effect function must be last or second to last argument.")
    if (args.length === 0) throw new Error("Invalid input. No watch subjects")
@@ -198,7 +194,7 @@ export function watch<
       scheduleEffectEagerly(wrappedEffect, phase)
    }
 
-   return setUpWatcher( //TODO: need to pass watchable subject to unwatch
+   return setUpWatcher(
       watchSubject,
       wrappedEffect,
       phase,
@@ -221,7 +217,7 @@ function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: Phase) {
 }
 
 
-export function initIonicEffect(effect: IonicTask, options?: WatchOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
+export function initIonicEffect(effect: IonicTask, options?: EffectOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
    const phase = options?.phase || Phase.BEFORE_RENDER;
    const retrack = options?.retrack || false;
 
@@ -241,9 +237,9 @@ export function initIonicEffect(effect: IonicTask, options?: WatchOptions) { //N
 
 function setUpWatcher(
    subject: Watched,
-   effect: Effect,
+   effect: WrappedEffect,
    phase: Phase,
-   options: SustainedListenerOptions & EffectCycleOptions,
+   options: EffectOptions,
    compound?: IonicCompound //
 ) {
    let wrappedEffect: () => void;
@@ -280,22 +276,22 @@ function setUpWatcher(
 
 
 
-watch(() => {
+// watch(() => {
 
-}, { cycle: "current" })
+// }, { cycle: "current" })
 
-watch((prevState?: number) => {
-   return 9
-}, { eager: true })
+// watch((prevState?: number) => {
+//    return 9
+// }, { eager: true })
 
-watch(() => 3, prev => {
-   console.log(prev, "llfll;klsflff")
-})
+// watch(() => 3, prev => {
+//    console.log(prev, "llfll;klsflff")
+// })
 
-watch(() => 3, () => 'hi', {frog: 'sir'}, prev => {
-   console.log(prev, "llfllff")
-})
+// watch(() => 3, () => 'hi', {frog: 'sir'}, prev => {
+//    console.log(prev, "llfllff")
+// })
 
-watch({ dog: 9 }, (prev) => {
-   console.log('dookkr', prev)
-})
+// watch({ dog: 9 }, (prev) => {
+//    console.log('dookkr', prev)
+// })
