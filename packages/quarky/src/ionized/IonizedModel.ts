@@ -562,35 +562,28 @@ export function reactiveSetter(
    }
 
    const oldState = target[key];
+   
    if (isIon(oldState)) {
-      return setAbsorbedIonState(model, key, oldState, value)
+      return setAbsorbedIonState(model, key, oldState, value) // we let absorbed ion to decide whether to ionize value or not
    }
 
    __DEV__traceMethodCall('IonizedModel', model, key)
-
+   
    if (!isWritable(target, key)) {
       if (__DEV__) console.warn(`${String(key)} is not writable.`)
-      return false;
+         return false;
    }
 
    const newState = maybeIonize(value)
+
    if (oldState === newState) {
       // if (__DEV__) getObservedPion(ionizedModel, key)?.trigger(newValue, oldValue) //TODO: what about auto-ionizing new value?
       return true;
    }
 
-   // const _newValue = toRaw(isIon(newValue) ? newValue() : newValue)
-   // const _oldValue = isIon(oldState) ? oldState() : oldValue
-
    target[key] = newState
 
    storeSnapshot(quark)
-
-   //TODO: 
-   // auto-ionize
-   // setting absorbed ion value
-   // setting absorbed ion
-   // setting get() property or non-writable property
 
    const pion = getObservedPion(model, key);
    if (pion && pion instanceof AtomicPionQuark) setAtomicState(target, key, pion, oldState, newState)

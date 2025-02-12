@@ -42,7 +42,10 @@ export class IonizedModelQuark
       public structureConfigs: CustomIonizedModelConfig[]
    ) {
       if (__DEV__) this.__DEV__asTraceable = new Traceable()
-      this.watch = watch
+      this.watch = () => {
+         this.trackAbsorbedIons()
+         return watch.call(this)
+      }
       this.unwatch = () => unwatch.call(this)
    }
 
@@ -62,24 +65,24 @@ export class IonizedModelQuark
 
    registerNewProperty(key: PropertyKey) {
       this.appendedProperties.add(key)
-      this.markDirty()
+      // this.markDirty()
    }
 
-   private hasNewAbsorbedIons: boolean = true;
-   private markDirty() {
-      this.hasNewAbsorbedIons = true
-   }
-   private undirty() {
-      this.hasNewAbsorbedIons = false;
-   }
+   // private hasNewAbsorbedIons: boolean = true;
+   // private markDirty() {
+   //    this.hasNewAbsorbedIons = true
+   // }
+   // private undirty() {
+   //    this.hasNewAbsorbedIons = false;
+   // }
 
    // absorbedIons?: IterableSet<MaybeParticle> 
 
    trackAbsorbedIons() {
-      if (this.asCompound && this.hasNewAbsorbedIons === false) return;
+      if (this.asCompound) return;
       const derivation = this.asCompound || (this.asCompound = new IonizedCompound(this))
       derivation.collectAbsorbedIons(this.entity!)
-      this.undirty()
+      // this.undirty()
    }
 
    pions: Map<PropertyKey, PionQuark> = new Map()

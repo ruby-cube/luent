@@ -44,7 +44,7 @@ export class IonizedCompound implements Compound {
       readonly quark: IonizedModelQuark
    ) {
    }
-   
+
    particles: Particle[] = []
 
    track = track
@@ -56,21 +56,20 @@ export class IonizedCompound implements Compound {
    }
 
    collectAbsorbedIons(model: IonizedModel) {
-      const quark = quarkOf(model)
-      let absorbedIons = quark.absorbedIons
-      if (absorbedIons) {
-         for (const ion of absorbedIons) {
-            this.track(ion)
-         }
-      }
-      absorbedIons = quark.absorbedIons = new IterableSet()
+      // const quark = quarkOf(model)
+      // let absorbedIons = quark.absorbedIons
+      // if (absorbedIons) {
+      //    for (const ion of absorbedIons) {
+      //       this.track(ion)
+      //    }
+      // }
+      // absorbedIons = quark.absorbedIons = new IterableSet()
       const target = toRaw(model) as AnyObject;
       for (const key in target) { //TODO: can we make this more efficient than looping though all object keys?
          const value = target[key]
          if (isIon(value)) {
             if (hasQuark(value)) {
                const ion = quarkOf(value) as MaybeParticle
-               absorbedIons.add(ion)
                this.track(ion)
             }
             else {
