@@ -9,6 +9,8 @@ import { IonizedCompound } from "./IonizedCompound"
 import { EntityQuark, QuarkOf } from "../Quark"
 import { Capsule } from "../capsule/Capsule"
 import { Mutation } from "../actions/Mutable"
+import { $AtomicPionState } from "../ion/AtomicPion"
+import { Ion } from "../ion/Ion"
 
 
 
@@ -18,7 +20,7 @@ import { Mutation } from "../actions/Mutable"
 // type EntryKey = any
 
 
-export type PionQuark<T> = EntityQuark<T>
+export type PionQuark<T = Ion> = EntityQuark<T> & Watchable & MaybeParticle
 
 // type IonizedModelQuark = Quark<IonizedModel>
 // & Watchable

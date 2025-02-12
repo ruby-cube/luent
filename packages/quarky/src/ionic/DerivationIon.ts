@@ -1,7 +1,7 @@
 import { getActiveTracker, IonicCompound, MaybeIonicCompound } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
-import { quarkOf, QUARK, hasQuark, EntityQuark, QuarkOf } from "../Quark";
+import { quarkOf, QUARK, hasQuark, EntityQuark, QuarkOf, Quark } from "../Quark";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { MaybeParticle } from "../Compound/Particle";
 import { __DEV__label } from "../debug/DEVLabellable";
@@ -48,7 +48,8 @@ export function isManagedDerivation(value: unknown): value is $DerivedState {
 export function createMaybeMemoizedIon(
    derivation: (previousValue?: unknown) => unknown,
    methods?: AnyObject,
-   retrack: boolean = true
+   retrack: boolean = true,
+   quark?: ManagedDerivation,
 ) {
    const creationFlask = getActiveFlask()
 
@@ -101,7 +102,7 @@ export function createMaybeMemoizedIon(
       return ion.state = derivation(ion.state)
    }
 
-   const ion: ManagedDerivation = {
+   const ion: ManagedDerivation = quark ?? {
       inert: false,
       dirty: false,
       state: undefined,

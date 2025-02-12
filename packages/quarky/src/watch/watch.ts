@@ -10,7 +10,7 @@ import { createWatchedDerivation } from "../ionic/WatchedDerivation";
 import { createMultiSubject } from "./MultiSubject";
 import { isManagedDerivation } from "../ionic/DerivationIon";
 import { isObjectLiteral } from "@rue/utils";
-import { asCoreIon, isGetterIon } from "../ionized/GetterPion";
+import { asCoreIon, isGetterIon } from "../ionic/GetterPion";
 
 // export class ChangeEvent<S> {
 //    trace?: string;

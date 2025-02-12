@@ -1,12 +1,12 @@
 import { AnyObject } from "@rue/types";
 import { ionize, Ionized, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
-import { asTrackedOp, TRACKED } from "./TrackedOp";
+import { asTrackedOp, TRACKED } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { isFunction, noop } from "@rue/utils";
 import { Ion, isIon } from "../ion/Ion";
-import { asPionQuark, asPropIon } from "./AtomicPion";
+import { asPionQuark, asPion } from "../ion/AtomicPion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
 import { QUARK, quarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
@@ -363,7 +363,7 @@ function initialIonAccess(
          return transformValue(_value);  // { count: $count } get ion case
       }
       // Prop Ion
-      const propIon = asPropIon(proxy, _key)  // { count: 0}  get ion case
+      const propIon = asPion(proxy, _key)  // { count: 0}  get ion case
       switchMap.set(key, () => transformValue(propIon))
       return transformValue(propIon);
    }

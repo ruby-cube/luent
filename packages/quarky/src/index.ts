@@ -17,7 +17,7 @@ export * from "./capsule/Readonly" //TODO: limit exports to public api
 export * from "./ionic/IonicCompound" //TODO: limit exports to public api
 export * from "./Compound/Particle" //TODO: limit exports to public api
 export * from "./ionic/DerivationIon" //TODO: limit exports to public api
-export * from "./ionized/GetterPion" //TODO: limit exports to public api
+export * from "./ionic/GetterPion" //TODO: limit exports to public api
 
 installIonicArray()
 installIonicSet()

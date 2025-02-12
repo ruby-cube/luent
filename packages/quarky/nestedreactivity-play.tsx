@@ -30,7 +30,7 @@ const counter = ionize({
 
 
 
-const $frogName = asPropIon($frog, 'name')
+const $frogName = asPion($frog, 'name')
 
 watch(PropsIon($frog, ['name', 'store']))
 
@@ -138,7 +138,7 @@ function ListBlock(attributes: {
 
     const $frog = IonizedModel(new Frog())
 
-    const $name = asPropIon(frog$, 'name') //$GetProp<string>
+    const $name = asPion(frog$, 'name') //$GetProp<string>
 
     const $div = NodeRef('div')
 
@@ -189,7 +189,7 @@ function ListBlock(attributes: {
 
     const $frog = ionize(new Frog())
 
-    const $name = asPropIon(frog$, 'name') //$GetProp<string>
+    const $name = asPion(frog$, 'name') //$GetProp<string>
 
     const $div = NodeRef('div')
 

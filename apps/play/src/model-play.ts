@@ -3,7 +3,7 @@
 
 import { ion, ionize } from "@rue/quarky"
 import { inert } from "../../../packages/quarky/src/ionized/inert"
-import { asPropIon } from "../../../packages/quarky/src/ionized/AtomicPion"
+import { asPion } from "../../../packages/quarky/src/ion/AtomicPion"
 
 
 // state kit (to be destructured):      const { $list } = ListKit(listData)
@@ -33,7 +33,7 @@ const $frogWithDerived = ionize({
 })
 
 const $frogWithPropIon = ionize({
-    name: asPropIon($asFroggy, 'name')
+    name: asPion($asFroggy, 'name')
 })
 
 

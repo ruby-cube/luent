@@ -2,11 +2,10 @@
 
 
 
-import { AnyObject } from "@rue/types";
 import { asParticle, MaybeParticle, Particle } from "../Compound/Particle";
-import { Ionized } from "./ionize";
 import { Quark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
+import { noop } from "@rue/utils";
 
 export class TrackedOp implements Quark, MaybeParticle { //QUESTION: should this be tracked op or trackable op??  because becoming an ionic particle is the "tracked" part
    type: string | symbol = 'tracked op'
@@ -30,6 +29,7 @@ export class TrackedOp implements Quark, MaybeParticle { //QUESTION: should this
          }
       })
    }
+   entity=noop;
 
    discard() {
       unregisterTrackedOp(this.trackableOp, this.entryKey)

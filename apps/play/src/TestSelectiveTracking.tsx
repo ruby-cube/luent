@@ -1,6 +1,6 @@
 import { component } from "@rue/lumo";
 import { DerivedIon, ion, ionize, isIon, watch, watchEffect } from "@rue/quarky";
-import { asPropIon } from "../../../packages/quarky/src/ionized/AtomicPion";
+import { asPion } from "../../../packages/quarky/src/ion/AtomicPion";
 
 export function TestSelectiveTracking() {
 
@@ -56,7 +56,7 @@ export function TestSelectiveTracking() {
         // console.log($frog.name)
     }
 
-    const $frogName = asPropIon($frog, 'name')
+    const $frogName = asPion($frog, 'name')
 
     watch($frogName, (name) => {
         console.log('frog name changed', name)

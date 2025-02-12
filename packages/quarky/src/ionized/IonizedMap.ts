@@ -1,8 +1,8 @@
 import { trigger, triggerIonicAtom, triggerIonizedModel } from "../reactivity/x_trigger";
 import { IonizedModel, storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
 import { nontrackableIterableKeys, useClearOp, useDeleteOp } from "./IonizedSet";
-import { asTrackedOp, getTrackedOp } from "./TrackedOp";
-import { asTrackedProp, getObservedProp } from "./AtomicPion";
+import { asTrackedOp, getTrackedOp } from "./AtomicOp";
+import { asTrackedProp, getObservedProp } from "../ion/AtomicPion";
 import { defineIonizedStructure, useTrackableGetOp } from "./IonizedModel";
 import { AnyObject } from "@rue/types";
 

@@ -1,5 +1,4 @@
 import { MaybeParticle } from "../Compound/Particle";
-import { asPropIon } from "../ionized/AtomicPion";
 import { Watchable } from "../watch/Watched";
 import { createPrimaryIon } from "./AtomicIon";
 import { isFunction } from "@rue/utils";
@@ -78,4 +77,3 @@ export function ion<T, M>(value?: T, methods?: M & IonMethods): T extends AnyIon
    return createPrimaryIon(value, methods) as T extends AnyIon ? T : T extends (args?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
 }
 
-ion.of = asPropIon

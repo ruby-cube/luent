@@ -1,6 +1,6 @@
 import { component, fromCommons, fromTag, prep, TypedKey, v } from "@rue/lumo"
 import { DerivedIon, ion, ionize } from "@rue/quarky";
-import { asPropIon } from "../../../packages/quarky/src/ionized/AtomicPion";
+import { asPion } from "../../../packages/quarky/src/ion/AtomicPion";
 
 const COUNTER = Symbol("Counter") as TypedKey<Counter>
 const DOUBLE_COUNT = Symbol("DerivedIon<number>") as TypedKey<DerivedIon<number>>
@@ -157,8 +157,8 @@ function GrandChildBlock() {
    const counter = fromCommons(COUNTER)
    const $doubleCount = fromCommons(DOUBLE_COUNT)
    const name = fromCommons(NAME)
-   const $name = asPropIon(name, '$')
-   const $count = asPropIon(counter.$, 'count')
+   const $name = asPion(name, '$')
+   const $count = asPion(counter.$, 'count')
 
 
 

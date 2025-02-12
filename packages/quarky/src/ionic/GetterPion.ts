@@ -4,7 +4,7 @@ import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsu
 import { __DEV__label } from "../debug/DEVLabellable";
 import { Ion, NonVoid } from "../ion/Ion";
 import { Traceable } from "../debug/debug";
-import { IonicCompound } from "../ionic/IonicCompound";
+import { IonicCompound } from "./IonicCompound";
 import { Watched } from "../watch/Watched";
 import { noop } from "@rue/utils";
 
@@ -65,7 +65,7 @@ export function createGetterIon(
 ) {
    let compound: IonicCompound | undefined = new IonicCompound({ watch: noop as () => Watched, unwatch: noop })
    compound.trackedCall(derivation)
-   const particles = compound.particles;
+   const particles = compound.particles
    compound = undefined;
 
    if (particles.length > 1) {
@@ -85,7 +85,7 @@ export function createGetterIon(
       capsule.inert = true;
    }
    else {
-      capsule.coreIon = particles[0].quark.entity as Ion //QUESTION: Do we get a pion or a trackedProp??
+      capsule.coreIon = particles[0].quark.entity as Ion
    }
 
    function $capsuleIon() { // wrap so that name starts with $

@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo";
-import { asPropIon } from "../../../packages/quarky/src/ionized/AtomicPion";
+import { asPion } from "../../../packages/quarky/src/ion/AtomicPion";
 import { ion, ionize, watch } from "@rue/quarky";
 
 
@@ -20,7 +20,7 @@ export function TestIonProp() {
 
 
 
-    const $bigBirdSleep = asPropIon($bigBird, 'sleep')
+    const $bigBirdSleep = asPion($bigBird, 'sleep')
     console.log($bigBirdSleep)
 
     const $doubleCount = ion(

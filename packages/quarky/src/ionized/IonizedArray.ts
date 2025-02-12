@@ -1,8 +1,8 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
-import { getTrackedOp } from "./TrackedOp";
+import { getTrackedOp } from "./AtomicOp";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
-import { getObservedProp } from "./AtomicPion";
+import { getObservedProp } from "../ion/AtomicPion";
 import { nontrackableIterableKeys } from "./IonizedSet";
 import { Mutation } from "../watch/watch";
 
