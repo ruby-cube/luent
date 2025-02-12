@@ -1,8 +1,8 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
-import { getTrackedOp } from "./AtomicOp";
+import { getAtomicOp } from "./AtomicOp";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
-import { getObservedProp } from "../ion/AtomicPion";
+import { getObservedPion } from "../ion/AtomicPion";
 import { nontrackableIterableKeys } from "./IonizedSet";
 import { Mutation } from "../watch/watch";
 
@@ -222,7 +222,7 @@ export function installIonicArray() {
 
       afterSet(ionicModel, meta, key, newValue, oldValue) {
          const mutation = new Mutation(ionicModel, '[[set]]', [key, newValue], newValue, oldValue)
-         const op = isIntegerKey(key) ? getTrackedOp(ionicModel.at, key) : null
+         const op = isIntegerKey(key) ? getAtomicOp(ionicModel.at, key) : null
          op?.asParticle.triggerCompounds(mutation)
 
          const observedIndices = meta.observedEntryKeys
@@ -234,10 +234,10 @@ export function installIonicArray() {
                }
                const index = parseInt(indexKey)
                if (index > newValue || index > oldValue) {
-                  const prop = getObservedProp(ionicModel, indexKey)
+                  const prop = getObservedPion(ionicModel, indexKey)
                   prop?.asParticle?.triggerCompounds(mutation)
                   prop?.asWatched?.triggerEffects()
-                  const op = getTrackedOp(ionicModel.at, index)
+                  const op = getAtomicOp(ionicModel.at, index)
                   op?.asParticle.triggerCompounds(mutation)
                }
             }
@@ -294,15 +294,15 @@ export function installIonicArray() {
          if (key in lengthMutatingOps && oldLength === newLength) return output;
          storeSnapshot(modelQuark)
 
-         const lengthProp = getObservedProp(ionicModel, 'length')
+         const lengthProp = getObservedPion(ionicModel, 'length')
          if (lengthProp) {
             trigger(lengthProp, newLength, oldLength); // trigger for length change
          }
 
          if (key === 'pop') {
-            const prop = getObservedProp(ionicModel, (oldLength - 1).toString())
+            const prop = getObservedPion(ionicModel, (oldLength - 1).toString())
             if (prop) trigger(prop);
-            const op = getTrackedOp(ionicModel.at, - 1)
+            const op = getAtomicOp(ionicModel.at, - 1)
             if (op) triggerIonicAtom(op);
          }
 
@@ -315,11 +315,11 @@ export function installIonicArray() {
                }
                const index = parseInt(indexKey)
                if (index >= newLength) {
-                  const prop = getObservedProp(ionicModel, indexKey)
+                  const prop = getObservedPion(ionicModel, indexKey)
                   if (prop) {
                      trigger(prop)
                   }
-                  const op = getTrackedOp(ionicModel.at, index)
+                  const op = getAtomicOp(ionicModel.at, index)
                   if (op) {
                      if (isIonicAtom(op)) {
                         triggerIonicAtom(op)
@@ -588,8 +588,8 @@ export function installIonicArray() {
 //     if (modelQuark.isNewProperty(key)) modelQuark.registerNewProperty(key)
 
 //     const _newValue = toRaw(newValue)
-//     const op = target instanceof Array && isIntegerKey(key) ? getTrackedOp(ionicModel.at, key) : null;
-//     const prop = getObservedProp(ionicModel, key);
+//     const op = target instanceof Array && isIntegerKey(key) ? getAtomicOp(ionicModel.at, key) : null;
+//     const prop = getObservedPion(ionicModel, key);
 //     if (!prop && !op) {
 //         // Reflect.set(target, key, newValue, receiver);
 //         target[key] = _newValue
@@ -630,11 +630,11 @@ export function installIonicArray() {
 //             }
 //             const index = parseInt(indexKey)
 //             if (index > _newValue || index > oldValue) {
-//                 const prop = getObservedProp(ionicModel, indexKey)
+//                 const prop = getObservedPion(ionicModel, indexKey)
 //                 if (prop) {
 //                     trigger(prop, _newValue, oldValue)
 //                 }
-//                 const op = getTrackedOp(ionicModel.at, index)
+//                 const op = getAtomicOp(ionicModel.at, index)
 //                 if (op) {
 //                     if (isIonicAtom(op)) {
 //                         triggerIonicAtom(op)

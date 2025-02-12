@@ -126,7 +126,7 @@ type IonizedModelQuark = IonicCompound & Quark<IonizedModel>
 
 
 
-class TrackedOp implements Particle {
+class AtomicOp implements Particle {
    react: (this: Particle, oldState: unknown, newState: unknown) => void
    effects?: Set<WatchEffect> | undefined
    effectsHead?: WatchEffect | undefined

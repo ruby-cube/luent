@@ -1,17 +1,17 @@
 import { AnyObject } from "@rue/types";
 import { ionize, Ionized, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
-import { asTrackedOp, TRACKED } from "./AtomicOp";
+import { asAtomicOp, TRACKED } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { isFunction, noop } from "@rue/utils";
 import { Ion, isIon } from "../ion/Ion";
-import { asPionQuark, asPion } from "../ion/AtomicPion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
 import { QUARK, quarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
 import { Mutation } from "../actions/Mutable";
+import { asPion, asPionQuark, getObservedPion } from "./Pion";
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -40,7 +40,7 @@ export function useTrackableGetOp(
       // const value = Reflect.apply(fn, target, _arg)
       if (!tracker)
          return fn.call(target, _arg)
-      tracker.track(asTrackedOp(reactive, op, _arg))
+      tracker.track(asAtomicOp(reactive, op, _arg))
       return fn.call(target, _arg)
    }
    trackableOp[TRACKED] = undefined;
@@ -96,10 +96,10 @@ export function defineIonizedStructure(structureKey: any, config: CustomIonizedM
       return;
    }
    config.structure = structureKey;
-   const { isEntryKey } = config
-   if (isEntryKey) {
-      registerEntryKeyValidator(isEntryKey)
-   }
+   // const { isEntryKey } = config
+   // if (isEntryKey) {
+   //    registerEntryKeyValidator(isEntryKey)
+   // }
 
    ionicStructureMap.set(structureKey, config)
 }
@@ -569,8 +569,7 @@ export function reactiveSetter(
    if (oldValue === newValue
       || isNonTrackable(key, structureConfigs)
       || !isWritable(target, key)) {
-      const prop = getObservedProp(ionizedModel, key)
-      if (prop) trigger(prop, newValue, oldValue)
+      getObservedPion(ionizedModel, key)?.trigger(newValue, oldValue)
       target[key] = newValue
       return true;
    }
@@ -582,7 +581,7 @@ export function reactiveSetter(
 
    storeSnapshot(modelQuark)
 
-   const prop = getObservedProp(ionizedModel, key);
+   const prop = getObservedPion(ionizedModel, key);
    if (prop) {
       trigger(prop, _newValue, _oldValue)
    }
@@ -643,7 +642,7 @@ export function setAbsorbedIon(ion: Ion, value: any, ionizedModel: IonizedModel,
          return false;
       }
 
-      // const prop = getObservedProp(ionizedModel, key); //TODO: I don't think this is needed
+      // const prop = getObservedPion(ionizedModel, key); //TODO: I don't think this is needed
       // if (prop) {
       //    trigger(prop, value, oldValue)
       // }

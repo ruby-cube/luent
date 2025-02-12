@@ -7,8 +7,8 @@ import { Quark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
 import { noop } from "@rue/utils";
 
-export class TrackedOp implements Quark, MaybeParticle { //QUESTION: should this be tracked op or trackable op??  because becoming an ionic particle is the "tracked" part
-   type: string | symbol = 'tracked op'
+export class AtomicOp implements Quark, MaybeParticle {
+   type: string | symbol = 'atomic op'
    asParticle!: Particle
    trackableOp: Function & TrackableOp;
 
@@ -18,13 +18,13 @@ export class TrackedOp implements Quark, MaybeParticle { //QUESTION: should this
       public entryKey: any,
    ) {
       const trackableOp = this.trackableOp = model[op]
-      registerTrackedOp(trackableOp, entryKey, this)
-      const modelQuark = quarkOf(model);
-      modelQuark.addObservedEntryKey(entryKey)
+      registerAtomicOp(trackableOp, entryKey, this)
+      // const modelQuark = quarkOf(model);
+      // modelQuark.addObservedEntryKey(entryKey)
       const particle = this.asParticle = asParticle(this);
       particle.onDissociated(() => {
          if (particle.compounds.size === 0) {
-            modelQuark.deleteObservedEntryKey(entryKey)
+            // modelQuark.deleteObservedEntryKey(entryKey)
             this.discard()
          }
       })
@@ -32,7 +32,7 @@ export class TrackedOp implements Quark, MaybeParticle { //QUESTION: should this
    entity=noop;
 
    discard() {
-      unregisterTrackedOp(this.trackableOp, this.entryKey)
+      unregisterAtomicOp(this.trackableOp, this.entryKey)
    }
 
    // getOutput() {
@@ -41,43 +41,34 @@ export class TrackedOp implements Quark, MaybeParticle { //QUESTION: should this
 }
 
 
-// export function isTrackedOp(value: any): value is TrackedOp {
+// export function isTrackedOp(value: any): value is AtomicOp {
 //    if (!(value instanceof Object)) return false;
-//    return value instanceof TrackedOp;
+//    return value instanceof AtomicOp;
 // }
 
-export function asTrackedOp(
+export function asAtomicOp(
    model: IonizedModel,
    op: string,
    key: any
-): TrackedOp {
-   const trackedOp = getTrackedOp(model[op], key)
-   if (trackedOp) return trackedOp;
-   return new TrackedOp(model, op, key)
+): AtomicOp {
+   const atomicOp = getAtomicOp(model[op], key)
+   if (atomicOp) return atomicOp;
+   return new AtomicOp(model, op, key)
 }
 
-// export function getTrackedOp(
-//    model: IonizedModel,
-//    op: string,
-//    key: any
-// ) {
-//    return quarkOf(model).getTrackedOp(op, key)
-// }
-
-
-type TrackableOp = { [TRACKED]?: Map<EntryKey, TrackedOp> | undefined }
+type TrackableOp = { [TRACKED]?: Map<EntryKey, AtomicOp> | undefined }
 type EntryKey = any
-export const TRACKED = Symbol('tracked ops')
+export const TRACKED = Symbol('tracked atomic ops')
 
-export function registerTrackedOp(
+export function registerAtomicOp(
    op: Function & TrackableOp,
    entryKey: EntryKey,
-   trackedOp: TrackedOp
+   atomicOp: AtomicOp
 ) {
-   op[TRACKED]?.set(entryKey, trackedOp) ?? (op[TRACKED] = new Map([[entryKey, trackedOp]]))
+   op[TRACKED]?.set(entryKey, atomicOp) ?? (op[TRACKED] = new Map([[entryKey, atomicOp]]))
 }
 
-export function unregisterTrackedOp(
+export function unregisterAtomicOp(
    op: Function & TrackableOp,
    entryKey: EntryKey
 ) {
@@ -85,7 +76,7 @@ export function unregisterTrackedOp(
    trackedOps?.delete(entryKey)
 }
 
-export function getTrackedOp(
+export function getAtomicOp(
    op: Function & TrackableOp,
    entryKey: EntryKey
 ) {

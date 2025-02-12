@@ -66,7 +66,7 @@ export class DerivationPionQuark implements QuarkOf<$DerivedPionState> {
 }
 
 export function createDerivationPion(model: IonizedModel, key: PropertyKey, pionQuark?: DerivationPionQuark): $DerivedPionState {
-   const quark = pionQuark ?? asPionQuark(model, key)
-   return createMaybeMemoizedIon(quark.derivation, undefined, undefined, pionQuark ?? asPionQuark(model, key))
+   const quark = pionQuark ?? asPionQuark(model, key) as DerivationPionQuark
+   return createMaybeMemoizedIon(quark.derivation, undefined, undefined, quark)
 }
 

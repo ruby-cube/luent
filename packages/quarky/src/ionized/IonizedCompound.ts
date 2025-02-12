@@ -3,8 +3,12 @@ import { AnyObject } from "@rue/types";
 import { toRaw } from "./ionize";
 import { isIon } from "../ion/Ion";
 import { Compound, track, untrackParticles, MaybeCompound, triggerEffects } from "../Compound/Compound";
-import { Mutation } from "../watch/watch";
 import { IonizedModelQuark } from "./IonizedModelQuark";
+import { Mutation } from "../actions/Mutable";
+import { hasQuark, quarkOf } from "../Quark";
+import { IonizedModel } from "./IonizedModel";
+import { IterableSet } from "@rue/utils";
+import { DerivationPionQuark } from "../ionic/DerivationPion";
 
 //TODO: 
 
@@ -35,11 +39,12 @@ import { IonizedModelQuark } from "./IonizedModelQuark";
 
 
 export class IonizedCompound implements Compound {
-
+   
    constructor(
       readonly quark: IonizedModelQuark
    ) {
    }
+   
    particles: Particle[] = []
 
    track = track
@@ -50,14 +55,32 @@ export class IonizedCompound implements Compound {
       triggerEffects(this)
    }
 
-   collectAbsorbedIons(ionicModel: AnyObject) {
-      const target = toRaw(ionicModel) as AnyObject;
-      for (const key in target) {
+   collectAbsorbedIons(model: IonizedModel) {
+      const quark = quarkOf(model)
+      let absorbedIons = quark.absorbedIons
+      if (absorbedIons) {
+         for (const ion of absorbedIons) {
+            this.track(ion)
+         }
+      }
+      absorbedIons = quark.absorbedIons = new IterableSet()
+      const target = toRaw(model) as AnyObject;
+      for (const key in target) { //TODO: can we make this more efficient than looping though all object keys?
          const value = target[key]
          if (isIon(value)) {
-            this.track(<MaybeParticle>value)
+            if (hasQuark(value)) {
+               const ion = quarkOf(value) as MaybeParticle
+               absorbedIons.add(ion)
+               this.track(ion)
+            }
+            else {
+               // derivation function (no quarks)
+               const ion = new DerivationPionQuark(model, key, value) // create an unregistered DerivationPionQuark //QUESTION: not entirely sure this is the right thing to do
+               this.track(ion)
+            }
          }
       }
    }
+
    untrackParticles = untrackParticles
 }

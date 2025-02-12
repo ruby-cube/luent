@@ -1,8 +1,8 @@
 import { trigger, triggerIonicAtom, triggerIonizedModel } from "../reactivity/x_trigger";
 import { IonizedModel, storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
 import { nontrackableIterableKeys, useClearOp, useDeleteOp } from "./IonizedSet";
-import { asTrackedOp, getTrackedOp } from "./AtomicOp";
-import { asTrackedProp, getObservedProp } from "../ion/AtomicPion";
+import { asAtomicOp, getAtomicOp } from "./AtomicOp";
+import { asTrackedProp, getObservedPion } from "../ion/AtomicPion";
 import { defineIonizedStructure, useTrackableGetOp } from "./IonizedModel";
 import { AnyObject } from "@rue/types";
 
@@ -83,15 +83,15 @@ export function installIonicMap() {
                   storeSnapshot(meta)
 
                   if (oldSize !== newSize) {
-                     const sizeProp = getObservedProp(ionicModel, 'size')
+                     const sizeProp = getObservedPion(ionicModel, 'size')
                      if (sizeProp)
                         trigger(sizeProp, newSize, oldSize);
                   }
 
-                  const hasOp = getTrackedOp(ionicModel.has, key)
+                  const hasOp = getAtomicOp(ionicModel.has, key)
                   if (hasOp) triggerIonicAtom(hasOp);
 
-                  const getOp = getTrackedOp(ionicModel.get, key)
+                  const getOp = getAtomicOp(ionicModel.get, key)
                   if (getOp) triggerIonicAtom(getOp);
 
                   triggerIonizedModel(
@@ -278,14 +278,14 @@ export function installIonicMap() {
 
 //         const ionicModel = modelQuark.ionicModel!
 //         if (oldSize !== newSize) {
-//             const sizeProp = getObservedProp(ionicModel, 'size')
+//             const sizeProp = getObservedPion(ionicModel, 'size')
 //             if (sizeProp)
 //                 trigger(sizeProp, newSize, oldSize);
 //         }
 
-//         const hasOp = getTrackedOp(ionicModel, 'has', key)
+//         const hasOp = getAtomicOp(ionicModel, 'has', key)
 //         if (hasOp) triggerIonicAtom(hasOp);
-//         const getOp = getTrackedOp(ionicModel, 'get', key)
+//         const getOp = getAtomicOp(ionicModel, 'get', key)
 //         if (getOp) triggerIonicAtom(getOp);
 
 //         triggerIonizedModelWithMutation(

@@ -6,21 +6,21 @@ import { unwatch, watch, Watchable, Watched } from "../watch/Watched"
 import { MaybeParticle, Particle } from "../Compound/Particle"
 import { MaybeCompound } from "../Compound/Compound"
 import { IonizedCompound } from "./IonizedCompound"
-import { EntityQuark, QuarkOf } from "../Quark"
+import { EntityQuark, Quark, QuarkOf } from "../Quark"
 import { Capsule } from "../capsule/Capsule"
 import { Mutation } from "../actions/Mutable"
-import { $AtomicPionState } from "../ion/AtomicPion"
-import { Ion } from "../ion/Ion"
+import { PionQuark } from "./Pion"
+import { IterableSet } from "@rue/utils"
 
 
 
 
-// type OpMap = Map<EntryKey, TrackedOp>
+// type OpMap = Map<EntryKey, AtomicOp>
 // type OpName = string
 // type EntryKey = any
 
 
-export type PionQuark<T = Ion> = EntityQuark<T> & Watchable & MaybeParticle
+
 
 // type IonizedModelQuark = Quark<IonizedModel>
 // & Watchable
@@ -73,6 +73,8 @@ export class IonizedModelQuark
       this.hasNewAbsorbedIons = false;
    }
 
+   absorbedIons?: IterableSet<MaybeParticle> 
+
    trackAbsorbedIons() {
       if (this.asCompound && this.hasNewAbsorbedIons === false) return;
       const derivation = this.asCompound || (this.asCompound = new IonizedCompound(this))
@@ -86,18 +88,24 @@ export class IonizedModelQuark
       this.pions.set(key, pion)
    }
 
+   // unregisterPion(key: PropertyKey){
+   //    this.pions.delete(key)
+   // }
+
+   //TODO: Do I really need observed entry keys??  Do I need to unregister pion?
+
    // allows collections to efficiently trigger observed props/ops when a sweeping mutation like clear() or .length = 0 occurs
-   observedEntryKeys?: Set<PropertyKey>
+   // observedEntryKeys?: Set<PropertyKey>
 
-   addObservedEntryKey(entryKey: any) {
-      if (!this.observedEntryKeys) this.observedEntryKeys = new Set()
-      this.observedEntryKeys.add(entryKey)
-   }
+   // addObservedEntryKey(entryKey: any) {
+   //    if (!this.observedEntryKeys) this.observedEntryKeys = new Set()
+   //    this.observedEntryKeys.add(entryKey)
+   // }
 
-   deleteObservedEntryKey(entryKey: any) {
-      if (!this.observedEntryKeys) return;
-      this.observedEntryKeys.delete(entryKey)
-   }
+   // deleteObservedEntryKey(entryKey: any) {
+   //    if (!this.observedEntryKeys) return;
+   //    this.observedEntryKeys.delete(entryKey)
+   // }
 
    // __DEV__traceTriggers?: Set<PropertyKey> = __DEV__ ? new Set() : undefined
    // __DEV__origin?: string

@@ -2,9 +2,9 @@ import { AnyObject } from "@rue/types";
 import { trigger, triggerIonicAtom, triggerIonizedModel } from "../reactivity/x_trigger";
 import { IonizedModel, storeSnapshot, toRaw } from "./ionize";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
-import { getTrackedOp } from "./AtomicOp";
+import { getAtomicOp } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
-import { getObservedProp } from "../ion/AtomicPion";
+import { getObservedPion } from "../ion/AtomicPion";
 
 // declare global {
 //    interface Set<T> {
@@ -109,11 +109,11 @@ export function installIonicSet() {
                   if (oldSize === newSize) return;
                   storeSnapshot(meta)
 
-                  const sizeProp = getObservedProp(ionicModel, 'size')
+                  const sizeProp = getObservedPion(ionicModel, 'size')
                   if (sizeProp)
                      trigger(sizeProp, newSize, oldSize);
 
-                  const hasOp = getTrackedOp(ionicModel.has, _newValue)
+                  const hasOp = getAtomicOp(ionicModel.has, _newValue)
                   if (hasOp) triggerIonicAtom(hasOp);
 
                   triggerIonizedModel(
@@ -294,11 +294,11 @@ export function installIonicSet() {
 //         if (oldSize === newSize) return;
 //         storeSnapshot(modelQuark)
 
-//         const sizeProp = getObservedProp(ionicModel, 'size')
+//         const sizeProp = getObservedPion(ionicModel, 'size')
 //         if (sizeProp)
 //             trigger(sizeProp, newSize, oldSize);
 
-//         const hasOp = getTrackedOp(ionicModel, 'has', _newValue)
+//         const hasOp = getAtomicOp(ionicModel, 'has', _newValue)
 //         if (hasOp) triggerIonicAtom(hasOp);
 
 //         triggerIonizedModel(
@@ -336,15 +336,15 @@ export function useDeleteOp(
 
       storeSnapshot(modelQuark)
 
-      const sizeProp = getObservedProp(ionicModel, 'size')
+      const sizeProp = getObservedPion(ionicModel, 'size')
       if (sizeProp)
          trigger(sizeProp, newSize, oldSize);
 
-      const hasOp = getTrackedOp(ionicModel.has, key)
+      const hasOp = getAtomicOp(ionicModel.has, key)
       if (hasOp) triggerIonicAtom(hasOp);
 
       if (target instanceof Map) {
-         const getOp = getTrackedOp(ionicModel.get, key)
+         const getOp = getAtomicOp(ionicModel.get, key)
          if (getOp) triggerIonicAtom(getOp);
       }
 
@@ -381,17 +381,17 @@ export function useClearOp(
       const trackedEntries = modelQuark.observedEntryKeys
       if (trackedEntries) {
          for (const entryKey of trackedEntries) {
-            const hasOp = getTrackedOp(ionicModel.has, entryKey)
+            const hasOp = getAtomicOp(ionicModel.has, entryKey)
             if (hasOp) triggerIonicAtom(hasOp);
 
             if (target instanceof Map) {
-               const getOp = getTrackedOp(ionicModel.get, entryKey)
+               const getOp = getAtomicOp(ionicModel.get, entryKey)
                if (getOp) triggerIonicAtom(getOp);
             }
          }
       }
 
-      const sizeProp = getObservedProp(ionicModel, 'size')
+      const sizeProp = getObservedPion(ionicModel, 'size')
       if (sizeProp)
          trigger(sizeProp, newSize, oldSize);
 

@@ -1,5 +1,5 @@
 import { AtomicIon, ionize, isAtomicIon, Phase, watch } from "@rue/quarky"
-import { isTrackedOp, TrackedOp } from "../../../quarky/src/ionized/AtomicOp";
+import { isTrackedOp, AtomicOp } from "../../../quarky/src/ionized/AtomicOp";
 import { isAtomicPionQuark } from "../../../quarky/src/ion/AtomicPion";
 import { quarkOf, hasQuark } from "../../../quarky/src/Quark";
 import { getTrace } from "../../../flask/debug";
@@ -13,7 +13,7 @@ import { getTrace } from "../../../flask/debug";
 type MultiWatchSubjectValues<T> = { [K in keyof T]: T[K] extends (...args: any[]) => infer R ? R : T[K] }
 
 
-type Atom = (AtomicIon | TrackedOp | PropIon) & { asTraceableAtom?: TraceableAtom }
+type Atom = (AtomicIon | AtomicOp | PropIon) & { asTraceableAtom?: TraceableAtom }
 
 class TraceableAtom {
    triggers: undefined | TriggerEvent[]
@@ -104,7 +104,7 @@ function logPropTrace(atom: PropIon) {
    console.log('NonError origin trace\n    ' + originTrace)
 }
 
-function logTrackedOpTrace(atom: TrackedOp) {
+function logTrackedOpTrace(atom: AtomicOp) {
    const originTrace = atom.__DEV__origin //TODO: add property
    console.log(`\n[TRIGGER TRACE] for ionic op "${String(atom.op)}"`) //QUESTION: should i provide entryKey?
    console.log('NonError origin trace\n    ' + originTrace)

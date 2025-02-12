@@ -9,8 +9,7 @@ import { Atomic, Ion, isIon, WritableIon } from "./Ion";
 import { MutableCapsule } from "../capsule/Capsule";
 import { Mutation } from "../actions/Mutable";
 import { __DEV__traceMethodCall, Traceable } from "../debug/debug";
-import { IonizedModelQuark, PionQuark } from "../ionized/IonizedModelQuark";
-import { asPionQuark } from "../ionized/Pion";
+import { asPionQuark, PionQuark } from "../ionized/Pion";
 
 // writable vs non-writable 
 // inert vs reactive
@@ -64,14 +63,6 @@ export class AtomicPionQuark implements AtomicPion {
    __DEV__asTraceable: Traceable = new Traceable()
    recordOp: ((mutation: Mutation) => void) | undefined;
 
-   constructor(
-      public model: IonizedModel,
-      public key: PropertyKey,
-   ) {
-      this.watch = watch;
-      this.unwatch = () => unwatch.call(this)
-   }
-
    private _entity: undefined | $AtomicPionState
 
    get entity() {
@@ -81,11 +72,15 @@ export class AtomicPionQuark implements AtomicPion {
    set entity(pion: $AtomicPionState) {
       this._entity = pion;
    }
+
+   constructor(
+      public model: IonizedModel,
+      public key: PropertyKey,
+   ) {
+      this.watch = watch;
+      this.unwatch = () => unwatch.call(this)
+   }
 }
-
-
-
-
 
 
 export function createAtomicPion(model: IonizedModel, key: PropertyKey, pionQuark?: AtomicPionQuark): $AtomicPionState {
