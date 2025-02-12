@@ -73,7 +73,7 @@ export class IonizedModelQuark
       this.hasNewAbsorbedIons = false;
    }
 
-   absorbedIons?: IterableSet<MaybeParticle> 
+   // absorbedIons?: IterableSet<MaybeParticle> 
 
    trackAbsorbedIons() {
       if (this.asCompound && this.hasNewAbsorbedIons === false) return;

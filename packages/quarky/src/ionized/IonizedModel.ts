@@ -12,6 +12,8 @@ import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
 import { Mutation } from "../actions/Mutable";
 import { asPion, asPionQuark, getObservedPion } from "./Pion";
+import { setAtomicState } from "../ion/Atomic";
+import { AtomicPionQuark } from "../ion/AtomicPion";
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -179,11 +181,13 @@ function isCustomIonicStructure(value: any) {
 //     return config.mutatingOps
 // }
 
-function emitAfterSet(structureConfigs: CustomIonizedModelConfig[], ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, newValue: any, oldValue: any) {
-   if (structureConfigs[0].structure === Object) return;
-   for (const config of structureConfigs) {
+function emitAfterSet(model: IonizedModel, key: PropertyKey, newValue: any, oldValue: any) {
+   const quark = quarkOf(model)
+   const configs = quark.structureConfigs;
+   if (configs[0].structure === Object) return;
+   for (const config of configs) {
       const afterSet = config.afterSet
-      if (afterSet) afterSet(ionizedModel, meta, key, newValue, oldValue)
+      if (afterSet) afterSet(model, quark, key, newValue, oldValue)
    }
 }
 
@@ -228,16 +232,12 @@ export function createIonizedModel(
             switchMap
          )
       },
-      set(target, key, value, receiver) {
-         if (key === 'has') console.warn(key, value)
+      set(target, key, value) {
          return reactiveSetter(
-            structureConfigs,
             ionizedModel,
-            modelQuark,
             target,
             key,
-            value,
-            receiver
+            value
          )
       }
    }) as IonizedModel
@@ -549,51 +549,60 @@ export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObje
 
 
 export function reactiveSetter(
-   structureConfigs: CustomIonizedModelConfig[], // and Tuple
-   ionizedModel: IonizedModel,
-   modelQuark: IonizedModelQuark,
+   model: IonizedModel,
    target: AnyObject,
    key: string | symbol,
-   newValue: any,
-   receiver: AnyObject
+   value: unknown,
 ) {
-   if (modelQuark.isNewProperty(key)) modelQuark.registerNewProperty(key)
-
-   const oldValue = Reflect.get(target, key, receiver);
-   if (isIon(oldValue) && !isIon(newValue)) {
-      return setAbsorbedIon(oldValue, newValue, ionizedModel, key, oldValue(), structureConfigs)
-   }
-
-   __DEV__traceMethodCall('IonizedModel', ionizedModel, key)
-
-   if (oldValue === newValue
-      || isNonTrackable(key, structureConfigs)
-      || !isWritable(target, key)) {
-      getObservedPion(ionizedModel, key)?.trigger(newValue, oldValue)
-      target[key] = newValue
+   const quark = quarkOf(model)
+   if (quark.isNewProperty(key)) {
+      quark.registerNewProperty(key)
+      // TODO:
       return true;
    }
 
-   const _newValue = toRaw(isIon(newValue) ? newValue() : newValue)
-   const _oldValue = isIon(oldValue) ? oldValue() : oldValue
-
-   target[key] = isIon(newValue) ? newValue : _newValue
-
-   storeSnapshot(modelQuark)
-
-   const prop = getObservedPion(ionizedModel, key);
-   if (prop) {
-      trigger(prop, _newValue, _oldValue)
+   const oldState = target[key];
+   if (isIon(oldState)) {
+      return setAbsorbedIonState(model, key, oldState, value)
    }
 
-   emitAfterSet(structureConfigs, ionizedModel, modelQuark, key, _newValue, _oldValue)
+   __DEV__traceMethodCall('IonizedModel', model, key)
+
+   if (!isWritable(target, key)) {
+      if (__DEV__) console.warn(`${String(key)} is not writable.`)
+      return false;
+   }
+
+   const newState = maybeIonize(value)
+   if (oldState === newState) {
+      // if (__DEV__) getObservedPion(ionizedModel, key)?.trigger(newValue, oldValue) //TODO: what about auto-ionizing new value?
+      return true;
+   }
+
+   // const _newValue = toRaw(isIon(newValue) ? newValue() : newValue)
+   // const _oldValue = isIon(oldState) ? oldState() : oldValue
+
+   target[key] = newState
+
+   storeSnapshot(quark)
+
+   //TODO: 
+   // auto-ionize
+   // setting absorbed ion value
+   // setting absorbed ion
+   // setting get() property or non-writable property
+
+   const pion = getObservedPion(model, key);
+   if (pion && pion instanceof AtomicPionQuark) setAtomicState(target, key, pion, oldState, newState)
+
+   emitAfterSet(model, key, newState, oldState) // for array.length === 0 and array.at(-1)
 
    triggerIonizedModel(
-      ionizedModel,
+      model,
       '[[set]]',
-      [key, _newValue],
-      _newValue,
-      _oldValue,
+      [key, newState],
+      newState,
+      oldState,
    )
 
    return true;
@@ -632,7 +641,8 @@ function triggerIonizedModel(
    }
 }
 
-export function setAbsorbedIon(ion: Ion, value: any, ionizedModel: IonizedModel, key: PropertyKey, oldValue: any, structureConfigs: CustomIonizedModelConfig[]) {
+export function setAbsorbedIonState(model: IonizedModel, key: PropertyKey, ion: Ion, value: unknown) {
+   const oldState = ion()
    if ('state' in ion) {
       try {
          ion.state = value;
@@ -641,20 +651,16 @@ export function setAbsorbedIon(ion: Ion, value: any, ionizedModel: IonizedModel,
          if (__DEV__) throw new Error("Absorbed AtomicIon is read only") //TODO: since readonly is only being enforced at the typescript level, make sure typescript prevents mutation of readonly absorbed ions
          return false;
       }
+      const newState = ion.state // get the state that has been maybeIonized
 
-      // const prop = getObservedPion(ionizedModel, key); //TODO: I don't think this is needed
-      // if (prop) {
-      //    trigger(prop, value, oldValue)
-      // }
-
-      emitAfterSet(structureConfigs, ionizedModel, quarkOf(ionizedModel), key, value, oldValue)
+      emitAfterSet(model, key, newState, oldState)
 
       triggerIonizedModel(
-         ionizedModel,
+         model,
          '[[set]]',
-         [key, value],
-         value,
-         oldValue,
+         [key, newState],
+         newState,
+         oldState,
       )
       return true;
    }

@@ -1,3 +1,4 @@
+import { Mutable } from "../actions/Mutable";
 import { MaybeParticle } from "../Compound/Particle";
 import { Watchable } from "../watch/Watched";
 import { createPrimaryIon } from "./AtomicIon";
@@ -47,7 +48,7 @@ export function toValue(maybeFn: any){
 // isReined
 
 
-export type Atomic = MaybeParticle & Watchable
+
 
 
 // const $doubleCount = ion.memo(() => {

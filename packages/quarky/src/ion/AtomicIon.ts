@@ -7,9 +7,11 @@ import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { __DEV__initTraceability, attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
 import { getActiveTracker } from "../ionic/IonicCompound";
-import { Atomic, WritableIon } from "./Ion";
-import { Mutation } from "../actions/Mutable";
+import { WritableIon } from "./Ion";
+import { Mutable, Mutation } from "../actions/Mutable";
 import { unwatch, watch, Watched } from "../watch/Watched";
+import { MaybeParticle } from "../Compound/Particle";
+import { Atomic, getAtomicState, setAtomicState } from "./Atomic";
 
 /** INTERNAL */
 export type $AtomicIonState = WritableIon & MutableCapsule & {
@@ -26,36 +28,6 @@ export type $AtomicIonState = WritableIon & MutableCapsule & {
  * */
 export type AtomicIon = QuarkOf<$AtomicIonState>
 
-function getReactiveState(ion: AtomicIon) {
-   if (__DEV__) emitSignal();
-   getActiveTracker()?.track(ion)
-   return ion.state;
-}
-
-
-function setReactiveState(ion: AtomicIon, oldState: unknown, newState: unknown) {
-   if (oldState === newState) {
-      //TODO: I dunno how to implement this yet. For dev traces
-      // if (__DEV__) ion.asParticle?.triggerCompounds() ?? (ion.asParticle = asParticle(ion), ion.asParticle.triggerCompounds())
-      return oldState;
-   }
-
-   const state = shouldIonize(newState, ion.stateIsIonized) ? ionize(newState) : newState
-   ion.state = state; // must set state before triggering effects and derivations
-   const { recordOp, asParticle, asWatched } = ion
-   const mutation = recordOp || asParticle ? new Mutation(
-      ion,
-      '[[set]]',
-      ['state', newState],
-      newState,
-      oldState
-   ) : undefined
-   recordOp?.(mutation!)
-   asParticle?.triggerCompounds(mutation!)
-   asWatched?.triggerEffects()
-   return state;
-}
-
 function shouldIonize(newValue: unknown, stateIsIonized: boolean): newValue is AnyObject {
    return newValue instanceof Object && stateIsIonized;
 }
@@ -65,7 +37,7 @@ export function createPrimaryIon(
    state: any,
    methods?: object
 ) {
-   const $state = (() => getReactiveState(ion)) as $AtomicIonState
+   const $state = (() => getAtomicState(ion, 'state', ion)) as $AtomicIonState
 
    const ion: AtomicIon = {
       state,
@@ -95,7 +67,14 @@ export function createPrimaryIon(
       },
       set: value => {
          __DEV__traceMethodCall(capsuleName, $state, 'state')
-         return setReactiveState(ion, ion.state, value);
+         const oldState = ion.state;
+         if (value === oldState) {
+            //TODO: I dunno how to implement this yet. For dev traces
+            // if (__DEV__) ion.asParticle?.triggerCompounds() ?? (ion.asParticle = asParticle(ion), ion.asParticle.triggerCompounds())
+            return value;
+         }
+         const state = shouldIonize(value, ion.stateIsIonized) ? ionize(value) : value
+         return setAtomicState(ion, 'state', ion, ion.state, state);
       }
    })
 

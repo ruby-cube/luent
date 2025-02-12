@@ -7,7 +7,7 @@ import { $DerivedPionState, createDerivationPion, DerivationPionQuark } from "..
 import { MaybeParticle } from "../Compound/Particle"
 import { Watchable } from "../watch/Watched"
 
-export type PionQuark<T = $AtomicPionState | $DerivedPionState> = EntityQuark<T> & Watchable & MaybeParticle & { trigger: (oldValue: unknown, newValue: unknown) => void }
+export type PionQuark<T = $AtomicPionState | $DerivedPionState> = EntityQuark<T> & Watchable & MaybeParticle
 
 export function asPionQuark(
    model: IonizedModel,

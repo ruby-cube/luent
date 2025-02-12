@@ -5,11 +5,12 @@ import { asParticle, Particle } from "../Compound/Particle";
 import { quarkOf, QUARK, Quark, EntityQuark, QuarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
-import { Atomic, Ion, isIon, WritableIon } from "./Ion";
+import { Ion, isIon, WritableIon } from "./Ion";
 import { MutableCapsule } from "../capsule/Capsule";
 import { Mutation } from "../actions/Mutable";
 import { __DEV__traceMethodCall, Traceable } from "../debug/debug";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
+import { Atomic } from "./Atomic";
 
 // writable vs non-writable 
 // inert vs reactive
@@ -37,7 +38,7 @@ export function isAtomicPionQuark(value: any): value is AtomicPionQuark {
 
 /** INTERNAL */
 export type $AtomicPionState = WritableIon & MutableCapsule & {
-   [QUARK]: PionQuark<$AtomicPionState>
+   [QUARK]: PionQuark<$AtomicPionState> & Atomic
 }
 
 /** 
