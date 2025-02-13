@@ -10,7 +10,7 @@ import { getActiveTracker } from "../ionic/IonicCompound";
 import { WritableIon } from "./Ion";
 import { Mutable, Mutation } from "../actions/Mutable";
 import { unwatch, watch, Watched } from "../watch/Watched";
-import { MaybeParticle } from "../Compound/Particle";
+import { ParticleMorph } from "../Compound/Particle";
 import { Atomic, getAtomicState, setAtomicState } from "./Atomic";
 
 /** INTERNAL */

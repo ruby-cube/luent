@@ -1,4 +1,4 @@
-import { asParticle, Particle, MaybeParticle } from "./Particle"
+import { asParticle, Particle, ParticleMorph } from "./Particle"
 import { Watchable } from "../watch/Watched"
 import { Mutation } from "../actions/Mutable"
 
@@ -9,12 +9,12 @@ export type MaybeCompound<T extends Compound = Compound> = {
 export interface Compound {
    quark: Watchable
    particles: Particle[]
-   track(entity: MaybeParticle): Particle
+   track(entity: ParticleMorph): Particle
    trigger(mutation: Mutation): void
    untrackParticles(): void
 }
 
-export function track(this: Compound, entity: MaybeParticle) {
+export function track(this: Compound, entity: ParticleMorph) {
    const particle = asParticle(entity)
    if (particle.compounds.has(this)) return particle;
    this.particles.push(particle)

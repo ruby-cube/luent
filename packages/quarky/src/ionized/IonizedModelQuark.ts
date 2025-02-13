@@ -3,7 +3,7 @@ import { __DEV__getTrace } from "../../../flask/debug"
 import { Traceable } from "../debug/debug"
 import { CustomIonizedModelConfig, IonizedModel } from "./IonizedModel"
 import { unwatch, watch, Watchable, Watched } from "../watch/Watched"
-import { MaybeParticle, Particle } from "../Compound/Particle"
+import { ParticleMorph, Particle } from "../Compound/Particle"
 import { MaybeCompound } from "../Compound/Compound"
 import { IonizedCompound } from "./IonizedCompound"
 import { EntityQuark, Quark, QuarkOf } from "../Quark"
@@ -25,11 +25,11 @@ import { IterableSet } from "@rue/utils"
 // type IonizedModelQuark = Quark<IonizedModel>
 // & Watchable
 // & CapsuleQuark
-// & MaybeParticle
+// & ParticleMorph
 // & MaybeCompound<IonizedCompound>
 
 export class IonizedModelQuark
-   implements Watchable, QuarkOf<Capsule>, MaybeParticle, MaybeCompound<IonizedCompound> {
+   implements Watchable, QuarkOf<Capsule>, ParticleMorph, MaybeCompound<IonizedCompound> {
 
    asReined?: object
    asReadonly?: object
@@ -76,7 +76,7 @@ export class IonizedModelQuark
    //    this.hasNewAbsorbedIons = false;
    // }
 
-   // absorbedIons?: IterableSet<MaybeParticle> 
+   // absorbedIons?: IterableSet<ParticleMorph> 
 
    trackAbsorbedIons() {
       if (this.asCompound) return;

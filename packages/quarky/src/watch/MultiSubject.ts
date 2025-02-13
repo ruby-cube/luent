@@ -1,17 +1,27 @@
 import { AnyObject } from "@rue/types";
-import { IonicCompound, MaybeIonicCompound } from "../ionic/IonicCompound";
+import { IonicCompound, IonicCompoundMorph } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { unwatch, watch, Watched } from "./Watched";
-import { Ion } from "../ion/Ion";
+import { Ion, isIon } from "../ion/Ion";
 import { noop } from "@rue/utils";
-import { QUARK, quarkOf } from "../Quark";
+import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { isIonizedModel } from "../ionized/ionize";
-import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
-import { isManagedDerivation, ManagedDerivation } from "../ionic/DerivationIon";
-import { MaybeParticle } from "../Compound/Particle";
+import { ParticleMorph } from "../Compound/Particle";
+import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
 
-export function createMultiSubject(subjects: unknown[] & AnyObject) {
-   const quark: MaybeIonicCompound = {
+const MULTISUBJECT_ION = 'MultisubjectIon'
+
+export function isMultisubjectIon(value: unknown): value is () => unknown[] & { [QUARK]: IonicCompoundMorph } {
+   return hasQuark(value) && (<MultisubjectIon>quarkOf(value)).type === MULTISUBJECT_ION
+}
+
+type MultisubjectIon = {
+   type: string
+} & IonicCompoundMorph
+
+export function createMultisubjectIon(subjects: unknown[] & AnyObject) {
+   const quark: MultisubjectIon = {
+      type: MULTISUBJECT_ION,
       asCompound: undefined,
       asWatched: undefined,
       watch,
@@ -22,7 +32,7 @@ export function createMultiSubject(subjects: unknown[] & AnyObject) {
    quark.asWatched = new Watched(quark)
 
    let fn = initialize
-   let getterFn = (subject: Ion & (AtomicIon | ManagedDerivation)) => { //TODO: what about pions?
+   let getterFn = (subject: Ion & { [QUARK]: ParticleMorph }) => {
       compound.track(quarkOf(subject))
       return subject()
    }
@@ -55,8 +65,12 @@ export function createMultiSubject(subjects: unknown[] & AnyObject) {
             absorbedFn(subject)
             values.push(subject)
          }
-         else if (isAtomicIon(subject) || isManagedDerivation(subject) && !quarkOf(subject).inert) {
-            values.push(getterFn(subject))
+         else if (isIon(subject)) {
+            if (isMarkedInert(subject))
+               values.push(subject())
+            else if (isParticleMorphic(subject)) {
+               values.push(getterFn(isPionCapsule(subject) ? asCoreIon(subject)! : subject))
+            }
          }
          else if (isGetter(subject)) {
             values.push(trackedCall(subject))
@@ -74,3 +88,13 @@ function isGetter(value: unknown): value is () => any {
    return value instanceof Function && value.length === 0;
 }
 
+
+function isMarkedInert(value: unknown): value is { [QUARK]: { inert: true } } {
+   if (!hasQuark(value)) return false;
+   const quark = quarkOf(value);
+   return 'inert' in quark && Boolean(quark.inert)
+}
+
+function isParticleMorphic(value: unknown): value is { [QUARK]: ParticleMorph } {
+   return hasQuark(value)
+}

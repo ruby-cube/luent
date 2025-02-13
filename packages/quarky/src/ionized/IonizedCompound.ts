@@ -1,4 +1,4 @@
-import { MaybeParticle, Particle } from "../Compound/Particle";
+import { ParticleMorph, Particle } from "../Compound/Particle";
 import { AnyObject } from "@rue/types";
 import { toRaw } from "./ionize";
 import { isIon } from "../ion/Ion";
@@ -69,7 +69,7 @@ export class IonizedCompound implements Compound {
          const value = target[key]
          if (isIon(value)) {
             if (hasQuark(value)) {
-               const ion = quarkOf(value) as MaybeParticle
+               const ion = quarkOf(value) as ParticleMorph
                this.track(ion)
             }
             else {

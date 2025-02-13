@@ -47,10 +47,7 @@ export type $AtomicPionState = WritableIon & MutableCapsule & {
  * - Unlike other quark of entities that can only exist if the entity exists,
  * pion quark can exist before the ion is created. 
  * */
-export type AtomicPion = QuarkOf<$AtomicPionState>
-
-
-export class AtomicPionQuark implements AtomicPion {
+export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
 
    asReadonly?: Ion
    asReined?: Ion

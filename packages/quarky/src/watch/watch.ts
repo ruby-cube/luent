@@ -1,16 +1,16 @@
 import { AnyObject } from "@rue/types";
 import { Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
-import { detachedCall, IonicCompound, MaybeIonicCompound, untrackedCall } from "../ionic/IonicCompound";
+import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "../ionic/IonicCompound";
 import { Phase, useEffectCycle } from "./EffectCycle";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { Ion, isIon } from "../ion/Ion";
-import { createWatchedDerivation } from "../ionic/WatchedDerivation";
-import { createMultiSubject } from "./MultiSubject";
+import { createWatchedDerivation, isWatchedDerivation } from "../ionic/WatchedDerivation";
+import { createMultisubjectIon, isMultisubjectIon } from "./MultiSubject";
 import { isManagedDerivation } from "../ionic/DerivationIon";
 import { isObjectLiteral } from "@rue/utils";
-import { asCoreIon, isGetterIon } from "../ionic/GetterPion";
+import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
 
 // export class ChangeEvent<S> {
 //    trace?: string;
@@ -74,18 +74,21 @@ function InertWatcher() {
 }
 
 function getValue(subject: unknown) {
-   if (isManagedDerivation(subject))
-      return detachedCall(subject)
-   if (isWatchedDerivation(subject) || isGetterIon(subject)) {
-      const compound = new IonicCompound()
-      return trackedCall(subject)
-   }
+
    if (isIon(subject)) {
-      untrackedCall(subject) // why untracked? we don't want 
+      return getIonValue(subject)
    }
-   else {
-      subject
+   return subject
+}
+
+function getIonValue(subject: Ion) {
+   if (isManagedDerivation(subject)) // memoized
+      return detachedCall(subject) // allows internal tracking, disables being tracked
+   if (isMultisubjectIon(subject) || isWatchedDerivation(subject)) {
+      return subject() // allow internal tracking, no need to detach because multisubject and watch derivations cannot be particles
    }
+   // atomic ion/pion
+   return untrackedCall(subject) // disables being tracked
 }
 
 function noReactivity(subject: AnyObject) {
@@ -125,7 +128,6 @@ export function watch<
    if (args[0] instanceof Function && (args.length === 1 || args.length === 2 && isObjectLiteral(args[1]))) {
       return initIonicEffect(<IonicTask>args[0])
    }
-   //TODO: retrack WatchedDerivations when necessary
    const lastArg = args.pop()
    const noOptions = lastArg instanceof Function
    const effect = lastArg instanceof Function ? lastArg : args.pop()
@@ -138,8 +140,8 @@ export function watch<
 
    const retrack = !!(options?.retrack)
 
-   const subject = isMultiSubject ? createMultiSubject(<WatchSubjects>_subject)
-      : isGetterIon(_subject) ? asCoreIon(_subject)
+   const subject = isMultiSubject ? createMultisubjectIon(<WatchSubjects>_subject)
+      : isPionCapsule(_subject) ? asCoreIon(_subject)
          : hasQuark(_subject) ? _subject
             : _subject instanceof Function ? createWatchedDerivation(<() => unknown>_subject, retrack)
                : _subject as AnyObject //non-ionized object
@@ -147,9 +149,9 @@ export function watch<
    if (!hasQuark(subject) || (<{ inert: boolean }>quarkOf(subject)).inert)
       return InertWatcher()
 
-   const quark = quarkOf(subject) as Watchable & MaybeIonicCompound
+   const quark = quarkOf(subject) as Watchable & IonicCompoundMorph
    const watchSubject = quark.watch()
-   watchSubject.onUnwatched(quark.unwatch)
+   watchSubject.onDiscard(quark.unwatch)
 
    let eager: boolean | undefined = options?.eager
    const isEqual = options?.isEqual ?? isStrictlyEqual
@@ -202,7 +204,7 @@ function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: Phase) {
 }
 
 
-export function initIonicEffect(effect: IonicTask, options?: EffectOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
+function initIonicEffect(effect: IonicTask, options?: EffectOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
    const phase = options?.phase || Phase.BEFORE_RENDER;
    const retrack = options?.retrack || false;
 

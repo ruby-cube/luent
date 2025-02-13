@@ -55,9 +55,9 @@ export function detachedCall(fn: Function) {
    }
 }
 
-export type MaybeIonicCompound = MaybeCompound<IonicCompound>
+export type IonicCompoundMorph = MaybeCompound<IonicCompound>
 
-export class IonicCompound<T extends MaybeIonicCompound = { asCompound?: IonicCompound } & Watchable> implements Compound {
+export class IonicCompound<T extends IonicCompoundMorph = { asCompound?: IonicCompound } & Watchable> implements Compound {
 
    constructor(
       readonly quark: T,

@@ -1,14 +1,14 @@
 import { noop } from "@rue/utils";
 import { triggerEffects } from "../Compound/Compound";
 import { Watched } from "../watch/Watched";
-import { IonicCompound, MaybeIonicCompound } from "./IonicCompound";
+import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 
 /**
  * NOTES: 
  * - Ionic effects don't need a dirty state because if they are called, it means they're dirty
  */
 
-type IonicEffect = MaybeIonicCompound
+type IonicEffect = IonicCompoundMorph
 
 export type IonicTask<S = unknown> = (prevState?: S) => S
 

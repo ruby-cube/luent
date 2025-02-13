@@ -61,7 +61,7 @@
 * 
 * */
 
-import { Particle, MaybeParticle } from "./Compound/Particle"
+import { Particle, ParticleMorph } from "./Compound/Particle"
 import { Quark, QuarkyEntity } from "./Quark"
 
 //ABSTRACT

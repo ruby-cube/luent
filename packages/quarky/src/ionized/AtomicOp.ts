@@ -2,12 +2,12 @@
 
 
 
-import { asParticle, MaybeParticle, Particle } from "../Compound/Particle";
+import { asParticle, ParticleMorph, Particle } from "../Compound/Particle";
 import { Quark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
 import { noop } from "@rue/utils";
 
-export class AtomicOp implements Quark, MaybeParticle {
+export class AtomicOp implements Quark, ParticleMorph {
    type: string | symbol = 'atomic op'
    asParticle!: Particle
    trackableOp: Function & TrackableOp;

@@ -1,13 +1,14 @@
 import { AnyObject } from "@rue/types";
 import { Mutable, Mutation } from "../actions/Mutable";
-import { MaybeParticle } from "../Compound/Particle";
+import { ParticleMorph } from "../Compound/Particle";
 import { Watchable } from "../watch/Watched";
 import { emitSignal } from "../debug/debug";
 import { getActiveTracker } from "../ionic/IonicCompound";
 
-export type Atomic = MaybeParticle & Watchable & Mutable
+export type Atomic = ParticleMorph & Watchable & Mutable
 
-export function getAtomicState(target: AnyObject, key: PropertyKey, particle: MaybeParticle) {
+
+export function getAtomicState(target: AnyObject, key: PropertyKey, particle: ParticleMorph) {
    if (__DEV__) emitSignal();
    getActiveTracker()?.track(particle)
    return target[key];

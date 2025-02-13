@@ -1,9 +1,9 @@
-import { getActiveTracker, IonicCompound, MaybeIonicCompound } from "./IonicCompound";
+import { getActiveTracker, IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
 import { quarkOf, QUARK, hasQuark, EntityQuark, QuarkOf, Quark } from "../Quark";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsule/Capsule";
-import { MaybeParticle } from "../Compound/Particle";
+import { ParticleMorph } from "../Compound/Particle";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { emitSignal, Traceable } from "../debug/debug";
 import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
@@ -30,8 +30,8 @@ export type $DerivedState = Ion & Capsule & {
    }
    & EntityQuark<$DerivedState>
    & Watchable
-   & MaybeParticle
-   & MaybeIonicCompound
+   & ParticleMorph
+   & IonicCompoundMorph
 }
 
 /** 

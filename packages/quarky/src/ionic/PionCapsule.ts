@@ -7,6 +7,7 @@ import { Traceable } from "../debug/debug";
 import { IonicCompound } from "./IonicCompound";
 import { Watched } from "../watch/Watched";
 import { noop } from "@rue/utils";
+import { $AtomicPionState } from "../ion/AtomicPion";
 
 // USE CASE: 
 // For pions that need methods
@@ -40,7 +41,7 @@ import { noop } from "@rue/utils";
 
 // /** INTERNAL */
 export type $GetterIonState = Ion & Capsule & {
-   [QUARK]: EntityQuark<$GetterIonState> & { type: symbol, inert: boolean, coreIon: undefined | Ion }
+   [QUARK]: EntityQuark<$GetterIonState> & { type: symbol, inert: boolean, coreIon: undefined | $AtomicPionState }
 }
 
 /** 
@@ -51,7 +52,7 @@ export type GetterIon = QuarkOf<$GetterIonState>
 
 export const GETTER_ION = Symbol('GetterIon')
 
-export function isGetterIon(value: unknown): value is $GetterIonState {
+export function isPionCapsule(value: unknown): value is $GetterIonState {
    return hasQuark(value) && quarkOf(<$GetterIonState>value).type === GETTER_ION
 }
 
@@ -59,9 +60,9 @@ export function asCoreIon($state: $GetterIonState){
    return quarkOf($state).coreIon;
 }
 
-export function createGetterIon(
+export function createPionCapsule(
    derivation: () => NonVoid,
-   methods?: AnyObject,
+   methods: AnyObject,
 ) {
    let compound: IonicCompound | undefined = new IonicCompound({ watch: noop as () => Watched, unwatch: noop })
    compound.trackedCall(derivation)
@@ -85,7 +86,7 @@ export function createGetterIon(
       capsule.inert = true;
    }
    else {
-      capsule.coreIon = particles[0].quark.entity as Ion
+      capsule.coreIon = particles[0].quark.entity as $AtomicPionState
    }
 
    function $capsuleIon() { // wrap so that name starts with $
@@ -96,7 +97,7 @@ export function createGetterIon(
    $capsuleIon.__DEV__labelName = undefined
    $capsuleIon.__DEV__label = __DEV__label
 
-   if (methods) attachCapsuleMethods('GetterIon', $capsuleIon, methods)
+   attachCapsuleMethods('GetterIon', $capsuleIon, methods)
 
    return $capsuleIon;
 }

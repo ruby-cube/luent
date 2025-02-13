@@ -1,5 +1,5 @@
 import { Mutable } from "../actions/Mutable";
-import { MaybeParticle } from "../Compound/Particle";
+import { ParticleMorph } from "../Compound/Particle";
 import { Watchable } from "../watch/Watched";
 import { createPrimaryIon } from "./AtomicIon";
 import { isFunction } from "@rue/utils";
