@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "../ionic/IonicCompound";
-import { Phase, useEffectCycle } from "./EffectCycle";
+import { Phase, $effectCycle } from "./EffectCycle";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { Ion, isIon } from "../ion/Ion";
@@ -207,7 +207,7 @@ function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: Phase) {
       effect()
    }
    else {
-      useEffectCycle().scheduleEffect(new EffectLink(effect), phase)
+      $effectCycle().scheduleEffect(new EffectLink(effect), phase)
    }
 }
 

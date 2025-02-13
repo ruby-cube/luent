@@ -1,4 +1,4 @@
-import { Task, onEffectCycleComplete, Phase, useEffectCycle } from "./EffectCycle";
+import { Task, onEffectCycleComplete, Phase, $effectCycle } from "./EffectCycle";
 import { EffectLink, EffectVine } from "./EffectLink";
 import { effectStack } from "./EffectStack";
 import { PhaseMap } from "./PhaseMap";
@@ -103,7 +103,7 @@ export class Watched<T extends Watchable = Watchable> {
    }
 
    private scheduleEffects(effects: EffectVine, phase: Exclude<Phase, Phase.SYNC>) {
-      const effectCycle = useEffectCycle()
+      const effectCycle = $effectCycle()
       for (const effect of effects) { //TODO: Can we skip this loop and just pass the whole set to the task runner?
          effectCycle.scheduleEffect(effect, phase)
       }

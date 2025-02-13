@@ -2,7 +2,7 @@
 import { TypedKey } from "@rue/lumo";
 import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
 import { ObservedProp } from "../ionized/ObservedProp";
-import { Phase, EffectCycle, useEffectCycle } from "../watch/EffectCycle";
+import { Phase, EffectCycle, $effectCycle } from "../watch/EffectCycle";
 import { PropIon } from "../ion/AtomicPion";
 
 
@@ -81,7 +81,7 @@ function popAction() {
  * - Actions must be performed BEFORE the render phase of a render cycle.
 */
 function doAction(actionKey: string | TypedKey<(...args: unknown[]) => unknown>, args: unknown[], propagatesError: boolean = true) {
-    const effectCycle = useEffectCycle()
+    const effectCycle = $effectCycle()
     if (effectCycle.phase > Phase.BEFORE_RENDER) throw new Error('doAction can only be called before render. Make sure doAction call is not nested in a watcher effect that is scheduled for the render or post-render phase')
     const action = new ActionRecord(actionKey, args)
     try {

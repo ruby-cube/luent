@@ -2,7 +2,7 @@ import { setImmediate } from "@rue/thread";
 import { $schedule, Listener, SchedulerOptions, unwrap } from "@rue/flask";
 import { PhaseMap } from "./PhaseMap";
 import { EffectLink } from "./EffectLink";
-import { pipe } from "@rue/utils";
+import { noop, pipe } from "@rue/utils";
 
 // returns a enum for the phases
 //
@@ -18,15 +18,14 @@ import { pipe } from "@rue/utils";
 
 type EffectCycleHook = (effect: () => void, options?: SchedulerOptions) => Listener //Should this be void?
 
-export let onEndEffectCycle: EffectCycleHook
+export let onEffectCycleComplete: EffectCycleHook
 
 export function setUpEffectCycle(phases: [CyclePhase, ...CyclePhase[]]) {
    pipe(
-      () => phases.at(-1)!.scheduleNextPhase = scheduleFinalPhase,
-      () => phases.push(definePhase('END_EFFECT_CYCLE')),
-      () => onEndEffectCycle = createEffectCycleHook(phases.at(-1)!.phase)
+      () => cyclePhases.at(-1)!.scheduleNextPhase = scheduleFinalPhase,
+      () => definePhase('END_EFFECT_CYCLE'),
+      () => onEffectCycleComplete = createEffectCycleHook(phaseNums.at(-1)!)
    )
-   cyclePhases = phases;
    return phaseNums;
 }
 
@@ -40,22 +39,20 @@ type CyclePhase = {
    next: CyclePhase | undefined
 }
 
-let phaseCount = 0;
-let cyclePhases: CyclePhase[];
-const phaseNums: number[] = []
+const phaseNums: number[] = [0] // 0 represents the initial task phase
+let cyclePhases: CyclePhase[] = [{ name: 'INITIAL_TASK', phase: 0, schedule: noop, scheduleNextPhase: noop, next: undefined }]
 
 export function definePhase(phaseName: string, scheduler?: Function): CyclePhase {
-   let phase = 0;
-   phaseNums.push(phase = phaseCount++)
-
+   const prevPhase = cyclePhases.at(-1)
    const cyclePhase = {
       name: phaseName,
-      phase,
+      phase: phaseNums.length,
       schedule: scheduler ?? setImmediate,
       scheduleNextPhase: schedulePhase,
       next: undefined
    }
-   const prevPhase = cyclePhases.at(-1)
+   cyclePhases.push(cyclePhase)
+   phaseNums.push(phaseNums.length)
    if (prevPhase) prevPhase.next = cyclePhase;
    return cyclePhase
 }
@@ -66,11 +63,7 @@ let cycleCount = -1;
 let currentCycle: EffectCycle | undefined;
 let nextCycle: EffectCycle | undefined;
 
-export function getCurrentEffectCylce() {
-   return currentCycle;
-}
-
-export function useEffectCycle() {
+export function $effectCycle() {
    let effectCycle = currentCycle
    if (!effectCycle) {
       effectCycle = new EffectCycle().initiate();
@@ -82,11 +75,12 @@ function beginCycle(effectCycle: EffectCycle) {
    if (currentCycle)
       throw new Error("Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
    currentCycle = effectCycle;
-   schedulePhase(effectCycle, cyclePhases[0])
+   schedulePhase(effectCycle, cyclePhases[1])
 }
 
 function closeCycle() {
    currentCycle = nextCycle;
+   if (currentCycle) currentCycle.initiate()
 }
 
 function schedulePhase(cycle: EffectCycle, { schedule, scheduleNextPhase, phase, next }: CyclePhase) {
@@ -112,8 +106,8 @@ function scheduleFinalPhase(cycle: EffectCycle, { schedule, phase, next }: Cycle
 export class EffectCycle {
 
    currentPhase: number = 0
-   
-   initiate(){
+
+   initiate() {
       cycleCount++;
       beginCycle(this)
       return this;
@@ -128,8 +122,8 @@ export class EffectCycle {
    scheduleEffect(effect: EffectLink, phase: number) {
       if (phase < this.currentPhase) {
          if (__DEV__) console.warn(`CASE RESEARCH: Effect was triggered after phase ${phase} of this cycle. Will schedule for next cycle.`)
-            nextCycle = nextCycle ?? new EffectCycle()
-            nextCycle.scheduleEffect(effect, phase)
+         nextCycle = nextCycle ?? new EffectCycle()
+         nextCycle.scheduleEffect(effect, phase)
          return;
       }
 
@@ -169,7 +163,7 @@ export function createEffectCycleHook(phase: number) {
    return (effect: () => void, options?: SchedulerOptions) => {
       const _options = options || { cancel: null }
       _options.cancel = null
-      const effectCycle = useEffectCycle()
+      const effectCycle = $effectCycle()
       let effectLink: EffectLink
       return $schedule(effect, _options, {
          enroll(effect) {

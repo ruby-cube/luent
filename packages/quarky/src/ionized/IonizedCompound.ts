@@ -25,7 +25,7 @@ import { DerivationPionQuark } from "../ionic/DerivationPion";
 //       if (isIonizedModel(derivation.o)) { //TODO: move to IonizedCompound?
 //          const reactive = derivation.o
 //          const quark = this.quark;
-//          useEffectCycle().recordOp(reactive, {
+//          $effectCycle().recordOp(reactive, {
 //             target: quark,
 //             op: 'set',
 //             args: [newValue],
