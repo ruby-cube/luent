@@ -7,7 +7,6 @@ import { inert, Inert, isInert } from "./inert";
 import { Ion, ion, isIon } from "../ion/Ion";
 import { AtomicIon } from "../ion/AtomicIon";
 import { createIonizedModel, getStructureConfigs, IonizedModel } from "./IonizedModel";
-import { getPublicTrace, getTrace } from "../../../flask/debug";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 
 

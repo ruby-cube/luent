@@ -44,7 +44,7 @@ type GetContextualState<T> = () => T | undefined
 type SetContextualState<T> = (state: T) => void
 
 
-export function ContextualState<T>(name: string): [GetContextualState<T>, SetContextualState<T>, Stack<T>] {
+export function AsyncState<T>(name: string): [GetContextualState<T>, SetContextualState<T>, Stack<T>] {
    // const { name, getParent } = config;
    // if (getParent) {
    //    let prevNode: T | undefined;

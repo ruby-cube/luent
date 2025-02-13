@@ -1,5 +1,6 @@
 import { SetMap } from "@rue/utils";
 import { Task, onEffectCycleComplete, Phase, useEffectCycle } from "./EffectCycle";
+import { effectStack } from "./EffectStack";
 
 
 export type Watchable = {
@@ -101,8 +102,14 @@ export class Watched<T extends Watchable = Watchable> {
       // const tracker = getDependencyTracker();
       // tracker?.stop(); // in case reactive refs are triggered during a reactiveEffect
       for (const effect of effects) {
-         // runEffect(effect)
-         effect()
+         if (effectStack.has(effect)) continue;
+         effectStack.push(effect)
+         try {
+            effect()
+         }
+         finally {
+            effectStack.pop()
+         }
       }
       // tracker?.restore();
    }

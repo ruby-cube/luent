@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { createPrimaryIon, AtomicIon, } from "./AtomicIon";
 import { isFunction } from "@rue/utils";
-import { QUARK } from "../Quark";
+import { hasQuark, QUARK, quarkOf } from "../Quark";
 
 const INERT = true;
 
@@ -88,4 +88,9 @@ export function createPrimaryNeutron(
    }
 
    return $ion
+}
+
+
+export function isNeutron(value: unknown): value is { [QUARK]: { inert: true } } {
+   return hasQuark(value) && (<{ inert: true }>quarkOf(value)).inert === true;
 }

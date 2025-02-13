@@ -11,6 +11,9 @@ export interface ParticleMorph extends EntityQuark<AnyObject> {
    asParticle?: Particle
 }
 
+export function isParticleMorphic(value: unknown): value is { [QUARK]: ParticleMorph } {
+   return hasQuark(value) && 'asParticle' in quarkOf(value)
+}
 
 /**
  * - Atomic Ions, Atomic Pions, Tracked Ops, Memoized Derivations, maybe Ionized Model

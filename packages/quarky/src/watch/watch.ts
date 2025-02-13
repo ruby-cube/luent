@@ -9,7 +9,7 @@ import { Ion, isIon } from "../ion/Ion";
 import { createWatchedDerivation, isWatchedDerivation } from "../ionic/WatchedDerivation";
 import { createMultisubjectIon, isMultisubjectIon } from "./MultiSubject";
 import { isManagedDerivation } from "../ionic/DerivationIon";
-import { isObjectLiteral } from "@rue/utils";
+import { isObject, isObjectLiteral } from "@rue/utils";
 import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
 
 // export class ChangeEvent<S> {
@@ -143,8 +143,9 @@ export function watch<
    const subject = isMultiSubject ? createMultisubjectIon(<WatchSubjects>_subject)
       : isPionCapsule(_subject) ? asCoreIon(_subject)
          : hasQuark(_subject) ? _subject
-            : _subject instanceof Function ? createWatchedDerivation(<() => unknown>_subject, retrack)
-               : _subject as AnyObject //non-ionized object
+            : isGetter(_subject) ? createWatchedDerivation(<() => unknown>_subject, retrack)
+               : isObject(_subject) ? _subject as AnyObject //non-ionized object
+                  : null
 
    if (!hasQuark(subject) || (<{ inert: boolean }>quarkOf(subject)).inert)
       return InertWatcher()
@@ -188,6 +189,10 @@ export function watch<
       options || {},
       quark.asCompound
    )
+}
+
+export function isGetter(value: unknown): value is () => any {
+   return value instanceof Function && value.length === 0;
 }
 
 function isStrictlyEqual(oldState: unknown, newState: unknown) {

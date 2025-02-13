@@ -6,8 +6,10 @@ import { Ion, isIon } from "../ion/Ion";
 import { noop } from "@rue/utils";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { isIonizedModel } from "../ionized/ionize";
-import { ParticleMorph } from "../Compound/Particle";
+import { isParticleMorphic, ParticleMorph } from "../Compound/Particle";
 import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
+import { isNeutron } from "../ion/Neutron";
+import { isGetter } from "./watch";
 
 const MULTISUBJECT_ION = 'MultisubjectIon'
 
@@ -66,7 +68,7 @@ export function createMultisubjectIon(subjects: unknown[] & AnyObject) {
             values.push(subject)
          }
          else if (isIon(subject)) {
-            if (isMarkedInert(subject))
+            if (isNeutron(subject))
                values.push(subject())
             else if (isParticleMorphic(subject)) {
                values.push(getterFn(isPionCapsule(subject) ? asCoreIon(subject)! : subject))
@@ -84,15 +86,8 @@ export function createMultisubjectIon(subjects: unknown[] & AnyObject) {
    return $subjects;
 }
 
-function isGetter(value: unknown): value is () => any {
-   return value instanceof Function && value.length === 0;
-}
 
 
-function isMarkedInert(value: unknown): value is { [QUARK]: { inert: true } } {
-   return hasQuark(value) && (<{ inert: true }>quarkOf(value)).inert === true;
-}
 
-function isParticleMorphic(value: unknown): value is { [QUARK]: ParticleMorph } {
-   return hasQuark(value) && 'asParticle' in quarkOf(value)
-}
+
+

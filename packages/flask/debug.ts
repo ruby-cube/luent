@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
-import { ContextualState } from "./context/AsyncContext";
+import { AsyncState } from "./context/AsyncContext";
 
-export const [getAsyncPath, setAsyncPath] = __DEV__ ? ContextualState<string>('trace') : [];
+export const [getAsyncPath, setAsyncPath] = __DEV__ ? AsyncState<string>('trace') : [];
 
 const __INTERNAL_TRACE__ = false;
 

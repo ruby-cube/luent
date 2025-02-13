@@ -91,7 +91,7 @@ class ExclusivePod {
    }
 }
 
-class ExclusiveLink {
+export class ExclusiveLink {
    pod: ExclusivePod | undefined // can only belong to on pod at a time
    next: ExclusiveLink | undefined
    prev: ExclusiveLink | undefined

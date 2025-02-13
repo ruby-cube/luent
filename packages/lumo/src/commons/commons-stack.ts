@@ -1,4 +1,4 @@
-import { ContextualState } from "../../../flask/context/AsyncContext";
+import { AsyncState } from "../../../flask/context/AsyncContext";
 import { NodeCommons } from "./Commons";
 import { AppCommons } from "./provide";
 
@@ -36,7 +36,7 @@ export function getCommons() {
    return commons;
 }
 
-export const [getClosestCommons, setCommons, commonsStack] = ContextualState<Commons>('commons')
+export const [getClosestCommons, setCommons, commonsStack] = AsyncState<Commons>('commons')
 
 
 

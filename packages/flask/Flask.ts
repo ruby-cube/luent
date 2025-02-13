@@ -1,8 +1,8 @@
 import { SetMap, UIDGenerator } from "@rue/utils";
-import { ContextualState } from "./context/AsyncContext";
+import { AsyncState } from "./context/AsyncContext";
 import { ResumableListener, SustainedListenerOptions } from "./Listener";
 
-export const [getActiveFlask, setFlask, flaskStack] = ContextualState<Flask>('flask')
+export const [getActiveFlask, setFlask, flaskStack] = AsyncState<Flask>('flask')
 
 
 
