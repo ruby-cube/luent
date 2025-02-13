@@ -8,7 +8,7 @@ import { __DEV__label } from "../debug/DEVLabellable";
 import { emitSignal, Traceable } from "../debug/debug";
 import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
 import { Ion } from "../ion/Ion";
-import { MaybeCompound, triggerEffects } from "../Compound/Compound";
+import { CompoundMorph, triggerEffects } from "../Compound/Compound";
 import { Mutation } from "../actions/Mutable";
 
 /**

@@ -2,7 +2,7 @@ import { asParticle, Particle, ParticleMorph } from "./Particle"
 import { Watchable } from "../watch/Watched"
 import { Mutation } from "../actions/Mutable"
 
-export type MaybeCompound<T extends Compound = Compound> = {
+export type CompoundMorph<T extends Compound = Compound> = {
    asCompound?: T
 } & Watchable
 

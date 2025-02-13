@@ -4,7 +4,7 @@ import { Traceable } from "../debug/debug"
 import { CustomIonizedModelConfig, IonizedModel } from "./IonizedModel"
 import { unwatch, watch, Watchable, Watched } from "../watch/Watched"
 import { ParticleMorph, Particle } from "../Compound/Particle"
-import { MaybeCompound } from "../Compound/Compound"
+import { CompoundMorph } from "../Compound/Compound"
 import { IonizedCompound } from "./IonizedCompound"
 import { EntityQuark, Quark, QuarkOf } from "../Quark"
 import { Capsule } from "../capsule/Capsule"
@@ -26,10 +26,10 @@ import { IterableSet } from "@rue/utils"
 // & Watchable
 // & CapsuleQuark
 // & ParticleMorph
-// & MaybeCompound<IonizedCompound>
+// & CompoundMorph<IonizedCompound>
 
 export class IonizedModelQuark
-   implements Watchable, QuarkOf<Capsule>, ParticleMorph, MaybeCompound<IonizedCompound> {
+   implements Watchable, QuarkOf<Capsule>, ParticleMorph, CompoundMorph<IonizedCompound> {
 
    asReined?: object
    asReadonly?: object

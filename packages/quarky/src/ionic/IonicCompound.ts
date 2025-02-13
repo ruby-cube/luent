@@ -1,5 +1,5 @@
 import { Particle } from "../Compound/Particle";
-import { Compound, MaybeCompound, track, untrackParticles } from "../Compound/Compound";
+import { Compound, CompoundMorph, track, untrackParticles } from "../Compound/Compound";
 import { Watchable } from "../watch/Watched";
 import { Mutation } from "../actions/Mutable";
 
@@ -55,7 +55,7 @@ export function detachedCall(fn: Function) {
    }
 }
 
-export type IonicCompoundMorph = MaybeCompound<IonicCompound>
+export type IonicCompoundMorph = CompoundMorph<IonicCompound>
 
 export class IonicCompound<T extends IonicCompoundMorph = { asCompound?: IonicCompound } & Watchable> implements Compound {
 

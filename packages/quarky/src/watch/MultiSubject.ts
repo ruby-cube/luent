@@ -90,11 +90,9 @@ function isGetter(value: unknown): value is () => any {
 
 
 function isMarkedInert(value: unknown): value is { [QUARK]: { inert: true } } {
-   if (!hasQuark(value)) return false;
-   const quark = quarkOf(value);
-   return 'inert' in quark && Boolean(quark.inert)
+   return hasQuark(value) && (<{ inert: true }>quarkOf(value)).inert === true;
 }
 
 function isParticleMorphic(value: unknown): value is { [QUARK]: ParticleMorph } {
-   return hasQuark(value)
+   return hasQuark(value) && 'asParticle' in quarkOf(value)
 }
