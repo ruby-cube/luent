@@ -1,6 +1,8 @@
 import { setImmediate, clearImmediate } from "@rue/thread";
 import { $schedule, SchedulerOptions, unwrap } from "@rue/flask";
 import { SetMap } from "@rue/utils";
+import { PhaseMap } from "./PhaseMap";
+import { EffectLink } from "./EffectLink";
 
 // returns a enum for the phases
 // export const {
@@ -98,19 +100,19 @@ export class EffectCycle {
          beforeRepaint(() => {
             queueTask(() => { // queue this BEFORE running render so that it will run as soon after render as possible
                this.setPhase(Phase.AFTER_RENDER)
-               this.runTasks(Phase.AFTER_RENDER);
+               this.runEffects(Phase.AFTER_RENDER);
                this.setCompletedPhase(Phase.AFTER_RENDER)
 
-               this.runTasks(Phase.CYCLE_COMPLETE)
+               this.runEffects(Phase.CYCLE_COMPLETE)
                this.setCompletedPhase(Phase.CYCLE_COMPLETE)
                endCollectingEffects(); // Any set ops after this point will be scheduled for the NEXT render cycle
             })
             this.setPhase(Phase.RENDER)
-            this.runTasks(Phase.RENDER);
+            this.runEffects(Phase.RENDER);
             this.setCompletedPhase(Phase.RENDER)
          })
          this.setPhase(Phase.BEFORE_RENDER)
-         this.runTasks(Phase.BEFORE_RENDER);
+         this.runEffects(Phase.BEFORE_RENDER);
          this.setCompletedPhase(Phase.BEFORE_RENDER)
       })
    }
@@ -122,10 +124,10 @@ export class EffectCycle {
 
 
    // TASKS:
+   effects: PhaseMap = new PhaseMap();
+   // effects: SetMap<Phase, Task> = new SetMap();
 
-   tasks: SetMap<Phase, Task> = new SetMap();
-
-   scheduleTask(task: Task, phase: Exclude<Phase, Phase.SYNC>) {
+   scheduleEffect(effect: EffectLink, phase: Exclude<Phase, Phase.SYNC>) {
       if (phase <= this.completedPhase) {
          if (__DEV__) console.warn(`CASE RESEARCH: Effect was triggered after render cycle phase ${phase}. Task will not run. Potentially implement a way to schedule for next cycle instead if needed?`)
          return;
@@ -134,35 +136,27 @@ export class EffectCycle {
       //     this.reactiveEffects.addToSet(effect, phase)
       // }
       // else {
-      this.tasks.addToSet(task, phase)
+      this.effects.addToSet(effect, phase)
       // }
       return {
          cancel: () => {
-            this.tasks.deleteFromSet(task, phase)
+            this.effects.deleteFromSet(effect, phase)
          }
       }
    }
 
-   runTasks(phase: Phase) {
-      const tasks = this.tasks.get(phase);
-      if (tasks) {
-         for (const task of tasks) {
-            // runEffect(effect)
-            task()
+   private runEffects(phase: Phase) {
+      const effects = this.effects.get(phase);
+      if (effects) {
+         for (const effect of effects) {
+            effect.task()
          }
       }
-      // const reactiveEffects = this.reactiveEffects.get(phase)
-      // if (reactiveEffects) {
-      //     for (const effect of reactiveEffects) {
-      //         // runEffect(effect);
-      //         effect()
-      //     }
-      // }
    }
 
    // TASKS
 
-   // tasks: {
+   // effects: {
    //     [Hooks.BEFORE_RENDER]: Set<Function>,
    //     [Hooks.ON_RENDERED]: Set<Function>,
    //     [Hooks.ON_RENDER_CYCLE_COMPLETE]: Set<Function>,
@@ -173,12 +167,12 @@ export class EffectCycle {
    //     }
 
 
-   // runTasks(hookName: Hooks) {
-   //     const tasks = currentCycle?.tasks;
-   //     if (!tasks) return;
-   //     const _tasks = tasks[hookName]
-   //     for (const task of _tasks) {
-   //         task();
+   // runEffects(hookName: Hooks) {
+   //     const effects = currentCycle?.effects;
+   //     if (!effects) return;
+   //     const _tasks = effects[hookName]
+   //     for (const effect of _tasks) {
+   //         effect();
    //     }
    // }
 }
@@ -205,16 +199,18 @@ export class EffectCycle {
 
 
 function createCycleHook(phase: Phase) {
-   return (task: () => void, options?: SchedulerOptions) => {
+   return (effect: () => void, options?: SchedulerOptions) => {
       const _options = options || { cancel: null }
       _options.cancel = null
       const effectCycle = useEffectCycle()
-      return $schedule(task, _options, {
-         enroll(task) {
-            effectCycle.tasks.addToSet(task, phase)
+      let effectLink: EffectLink
+      return $schedule(effect, _options, {
+         enroll(effect) {
+            effectLink = new EffectLink(effect)
+            effectCycle.effects.addToSet(effectLink, phase)
          },
-         remove(task) {
-            effectCycle.tasks.deleteFromSet(task, phase)
+         remove() {
+            effectCycle.effects.deleteFromSet(effectLink, phase)
          }
       })
    }
@@ -246,8 +242,8 @@ export const onEffectCycleComplete = createCycleHook(Phase.CYCLE_COMPLETE)
 // export function runPrerenderEffectsAndTasks() {
 //     const effectCycle = getCurrentEffectCylce()
 //     if (effectCycle) {
-//         effectCycle.runTasks(Phase.BEFORE_RENDER);
-//         effectCycle.runTasks(Hooks.AFTER_PRERENDER_PHASE)
+//         effectCycle.runEffects(Phase.BEFORE_RENDER);
+//         effectCycle.runEffects(Hooks.AFTER_PRERENDER_PHASE)
 //     }
 // }
 

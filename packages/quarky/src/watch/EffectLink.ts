@@ -1,14 +1,21 @@
-class ExclusivePod {
-   private head: ExclusiveLink | undefined
-   private tail: ExclusiveLink | undefined
+import { Watched } from "./Watched";
 
-   add(link: ExclusiveLink) {
-      const pod = link.pod;
-      if (pod === this) return;
+export class EffectVine {
+   private head: EffectLink | undefined
+   private tail: EffectLink | undefined
 
-      pod?.unlink(link)
+   private _size: number = 0;
+   get size() {
+      return this._size;
+   }
 
-      // link pod
+   add(link: EffectLink) {
+      const vine = link.vine;
+      if (vine === this) return;
+
+      vine?.unlink(link)
+
+      // link vine
       if (!this.head) {
          this.head = link
       }
@@ -18,18 +25,22 @@ class ExclusivePod {
       this.tail = link
 
       link.pass(this, tail)
+
+      this._size++;
       return link;
    }
 
-   delete(link: ExclusiveLink) {
-      if (!this.has(link)) return false;
+   delete(link: EffectLink) {
+      if (!this.has(link))
+         return false;
       this.unlink(link)
       link.pass()
+      this._size--;
       return true;
    }
 
-   private unlink(link: ExclusiveLink) {
-      // unlink from pod
+   private unlink(link: EffectLink) {
+      // unlink from vine
       const prevLink = link.prev;
       const nextLink = link.next;
 
@@ -50,19 +61,20 @@ class ExclusivePod {
       link.next = undefined;
    }
 
-   has(link: ExclusiveLink) {
-      return link.pod === this;
+   has(link: EffectLink) {
+      return link.vine === this;
    }
 
-   absorb(pod: ExclusivePod) {
-      const head = pod.head;
-      const tail = pod.tail;
+   absorb(vine: EffectVine) {
+      const head = vine.head;
+      const tail = vine.tail;
       if (!tail) return;
-      pod.head = undefined
-      pod.tail = undefined
-      pod.forEach(link => {
-         link.pod = this
-      })
+      vine.head = undefined
+      vine.tail = undefined
+
+      for (const link of vine) {
+         link.vine = this
+      }
       const thisTail = this.tail;
       if (!thisTail) {
          this.head = head;
@@ -72,43 +84,53 @@ class ExclusivePod {
          thisTail.next = head;
          head!.prev = thisTail;
       }
+      this._size += vine._size;
    }
 
    clear() {
       this.head = undefined;
       this.tail = undefined;
-      this.forEach(link => {
-         link.pod = undefined
-      })
+      for (const link of this) {
+         link.vine = undefined
+      }
+      this._size = 0
    }
 
-   forEach(task: (link: ExclusiveLink) => void) {
+   *[Symbol.iterator](): Iterator<EffectLink> {
       let current = this.head;
       while (current) {
-         task(current)
+         yield current;
          current = current.next
       }
    }
+
 }
 
-export class ExclusiveLink {
-   pod: ExclusivePod | undefined // can only belong to on pod at a time
-   next: ExclusiveLink | undefined
-   prev: ExclusiveLink | undefined
+
+// interface EffectLink<T> {
+//    vine: EffectVine | undefined // can only belong to on vine at a time
+//    next: T | undefined
+//    prev: T | undefined
+//    pass(vine?: EffectVine, prev?: T): void
+// }
+
+export class EffectLink {
+   vine: EffectVine | undefined // can only belong to on vine at a time
+   next: EffectLink | undefined
+   prev: EffectLink | undefined
 
    constructor(
-      public value: any
-   ) {
-
-   }
+      public task: () => void,
+      public watched?: Watched
+   ) { }
 
    /**
-    * Reassigns a link's pod and prev properties.
-    * @param pod ExclusivePod | undefined
-    * @param prev ExclusiveLink | undefined
+    * Reassigns a link's vine and prev properties.
+    * @param vine EffectVine | undefined
+    * @param prev EffectLink | undefined
     */
-   pass(pod?: ExclusivePod, prev?: ExclusiveLink) {
+   pass(vine?: EffectVine, prev?: EffectLink) {
       this.prev = prev
-      this.pod = pod
+      this.vine = vine
    }
 }

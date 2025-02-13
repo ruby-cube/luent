@@ -1,14 +1,14 @@
 import { AsyncState } from "@rue/flask";
-import { ExclusiveLink } from "./EffectLink";
+import { EffectLink } from "./EffectLink";
 
-export const [getEffect, setEffect, _effectStack] = AsyncState<ExclusiveLink>('current effect');
+export const [getEffect, setEffect, _effectStack] = AsyncState<EffectLink>('current effect');
 const activeEffects = new Set()
 
 export const effectStack = {
-   has(effect: ExclusiveLink) {
+   has(effect: EffectLink) {
       return activeEffects.has(effect)
    },
-   push(effect: ExclusiveLink) {
+   push(effect: EffectLink) {
       activeEffects.add(effect)
       _effectStack.push(effect)
    },

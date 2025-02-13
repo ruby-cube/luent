@@ -11,6 +11,7 @@ import { createMultisubjectIon, isMultisubjectIon } from "./MultiSubject";
 import { isManagedDerivation } from "../ionic/DerivationIon";
 import { isObject, isObjectLiteral } from "@rue/utils";
 import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
+import { EffectLink } from "./EffectLink";
 
 // export class ChangeEvent<S> {
 //    trace?: string;
@@ -205,7 +206,9 @@ function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: Phase) {
    if (phase === Phase.SYNC) {
       effect()
    }
-   else useEffectCycle().scheduleTask(effect, phase)
+   else {
+      useEffectCycle().scheduleEffect(new EffectLink(effect), phase)
+   }
 }
 
 
@@ -214,6 +217,7 @@ function initIonicEffect(effect: IonicTask, options?: EffectOptions) { //NOTE: a
    const retrack = options?.retrack || false;
 
    const wrappedEffect = createIonicEffect(effect, retrack)
+
 
    scheduleEffectEagerly(wrappedEffect, phase);
 
@@ -236,15 +240,18 @@ function setUpWatcher(
 ) {
    const forNextCycle = options?.cycle === 'next';
    let dirty = false;
-   function markDirty() {
-      dirty = true;
-   }
+   const markDirty = new EffectLink(() => {
+      dirty = true
+   }, subject)
+   let effectLink: EffectLink;
+
    return $listen(effect, options || {}, {
-      enroll(_effect) {
-         subject.watch(_effect, phase, forNextCycle)
+      enroll(task) {
+         effectLink = new EffectLink(task, subject)
+         subject.watch(effectLink, phase, forNextCycle)
       },
-      remove(_effect) {
-         subject.unwatch(_effect, phase)
+      remove() {
+         subject.unwatch(effectLink, phase)
          if (compound)
             compound.untrackParticles()
       },
@@ -254,10 +261,10 @@ function setUpWatcher(
             subject.unwatch(markDirty, phase)
          }
       },
-      resume(_effect) {
+      resume(task) {
          subject.unwatch(markDirty, phase)
          if (dirty) {
-            _effect()
+            task()
             dirty = false;
          }
       }

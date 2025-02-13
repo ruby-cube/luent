@@ -1,6 +1,7 @@
-import { SetMap } from "@rue/utils";
 import { Task, onEffectCycleComplete, Phase, useEffectCycle } from "./EffectCycle";
+import { EffectLink, EffectVine } from "./EffectLink";
 import { effectStack } from "./EffectStack";
+import { PhaseMap } from "./PhaseMap";
 
 
 export type Watchable = {
@@ -22,18 +23,17 @@ export class Watched<T extends Watchable = Watchable> {
    constructor(
       public quark: T
    ) {
-      this.effects = new SetMap()
+      this.effects = new PhaseMap()
    }
 
-   // watchCount = 0
-   private nextCycleEffects: SetMap<Phase, Task> | undefined;
-   private effects: SetMap<Phase, Task>;
+   private nextCycleEffects: PhaseMap | undefined;
+   private effects: PhaseMap;
 
    private initializeNextCycleEffects() {
-      this.nextCycleEffects = new SetMap()
+      this.nextCycleEffects = new PhaseMap()
    }
 
-   private queueForNextCycle(effect: Task, phase: Phase) {
+   private queueForNextCycle(effect: EffectLink, phase: Phase) {
       if (!this.nextCycleEffects) this.initializeNextCycleEffects()
       this.nextCycleEffects!.addToSet(effect, phase)
       const toBeQueued = this.nextCycleEffects?.get(phase);
@@ -50,17 +50,18 @@ export class Watched<T extends Watchable = Watchable> {
       }
    }
 
-   private queueEffect(effect: Task, phase: Phase) {
+   private queueEffect(effect: EffectLink, phase: Phase) {
       this.effects.addToSet(effect, phase)
    }
 
-   private removeEffect(effect: Task, phase: Phase) {
+   private removeEffect(effect: EffectLink, phase: Phase) {
       this.effects.deleteFromSet(effect, phase)
    }
 
+
    watchCount: number = 0
 
-   watch(effect: Task, phase: Phase, forNextCycle?: boolean) {
+   watch(effect: EffectLink, phase: Phase, forNextCycle?: boolean) {
       if (forNextCycle) {
          this.queueForNextCycle(effect, phase)
       }
@@ -70,24 +71,14 @@ export class Watched<T extends Watchable = Watchable> {
       this.watchCount++
    }
 
-   unwatch(effect: Task, phase: Phase) {
+   unwatch(effect: EffectLink, phase: Phase) {
       this.removeEffect(effect, phase)
       if (this.watchCount === 0) {
          this.emitDiscard()
       }
    }
 
-   // discard(){
-   //    this.quark.asWatched = undefined;
-   //    //QUESTION: Do I need to release watchable too? this.watchable = undefined?
-   // }
-
-   prevCycle?: any //TODO: ScheduleCycle
-
    triggerEffects() { // the surrounding effect when original trigger happened
-      // const currentCycle = $currentCycle(); 
-      // if (this.prevCycle === currentCycle) return; // prevents repeats
-      // this.prevCycle = currentCycle
       for (const [phase, effects] of this.effects) {
          if (phase === Phase.SYNC) {
             this.runSyncEffects(effects);
@@ -98,26 +89,23 @@ export class Watched<T extends Watchable = Watchable> {
       }
    }
 
-   private runSyncEffects(effects: Set<Task>) {
-      // const tracker = getDependencyTracker();
-      // tracker?.stop(); // in case reactive refs are triggered during a reactiveEffect
+   private runSyncEffects(effects: EffectVine) {
       for (const effect of effects) {
          if (effectStack.has(effect)) continue;
          effectStack.push(effect)
          try {
-            effect()
+            effect.task()
          }
          finally {
             effectStack.pop()
          }
       }
-      // tracker?.restore();
    }
 
-   private scheduleEffects(effects: Set<Task>, phase: Exclude<Phase, Phase.SYNC>) {
+   private scheduleEffects(effects: EffectVine, phase: Exclude<Phase, Phase.SYNC>) {
       const effectCycle = useEffectCycle()
       for (const effect of effects) { //TODO: Can we skip this loop and just pass the whole set to the task runner?
-         effectCycle.scheduleTask(effect, phase)
+         effectCycle.scheduleEffect(effect, phase)
       }
    }
 
@@ -132,6 +120,11 @@ export class Watched<T extends Watchable = Watchable> {
          cleanUp()
       }
    }
+
+   // discard(){
+   //    this.quark.asWatched = undefined;
+   //    //QUESTION: Do I need to release watchable too? this.watchable = undefined?
+   // }
 }
 
 
