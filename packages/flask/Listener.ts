@@ -51,7 +51,7 @@ type ListenerConfig<E extends EnrollFunction = EnrollFunction> = {
    enroll: E,
    remove: RemoveFunction<E>,
    pause?: Pause,
-   resume?: Function,
+   resume?: EnrollFunction,
    options: SustainedListenerOptions | undefined
    __DEV__asyncPath?: string,
 }
@@ -100,7 +100,7 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
          if (stopped || !paused) return false;
          paused = false;
          returnVal = enroll(_callback);
-         if (resume) resume();
+         if (resume) resume(_callback);
          return true;
       }
    }
@@ -140,8 +140,6 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
       paused = true;
       return true;
    }
-   // pause.isRemover = true as const;
-   // pause.__devName = options?.__devName;
 
    let until = options?.until
    // as ScheduleStop | RegisterAbortSignal | null | undefined | any[]

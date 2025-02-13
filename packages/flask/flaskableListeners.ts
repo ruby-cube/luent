@@ -35,7 +35,7 @@ export function $listen<
       enroll: E,
       remove: RemoveFunction<E>,
       pause?: Pause,
-      resume?: Function,
+      resume?: EnrollFunction,
    }
 ) {
    const { enroll, remove, pause, resume } = config;
@@ -57,7 +57,7 @@ export function $schedule<
    enroll: EnrollFunction,
    remove: RemoveFunction<E>,
    pause?: Pause,
-   resume?: Function,
+   resume?: EnrollFunction,
 }): Pending {
    const { enroll, remove, pause, resume } = config;
    return makeListener({

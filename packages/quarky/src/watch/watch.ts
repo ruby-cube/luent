@@ -229,7 +229,6 @@ function setUpWatcher(
    options: EffectOptions,
    compound?: IonicCompound //
 ) {
-   let wrappedEffect: () => void;
    const forNextCycle = options?.cycle === 'next';
    let dirty = false;
    function markDirty() {
@@ -237,7 +236,6 @@ function setUpWatcher(
    }
    return $listen(effect, options || {}, {
       enroll(_effect) {
-         wrappedEffect = _effect;
          subject.watch(_effect, phase, forNextCycle)
       },
       remove(_effect) {
@@ -251,10 +249,10 @@ function setUpWatcher(
             subject.unwatch(markDirty, phase)
          }
       },
-      resume() {
+      resume(_effect) {
          subject.unwatch(markDirty, phase)
          if (dirty) {
-            wrappedEffect()
+            _effect()
             dirty = false;
          }
       }
