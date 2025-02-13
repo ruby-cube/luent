@@ -1,4 +1,4 @@
-import { __DEV__traceMethodCall, emitSignal, Traceable, TraceableSubject } from "../debug/debug";
+import { __DEV__traceMethodCall, Traceable } from "../debug/debug";
 import { isIonizedModel, ionize } from "../ionized/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
@@ -6,15 +6,12 @@ import { __DEV__trace } from "../debug/debug";
 import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { __DEV__initTraceability, attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
-import { getActiveTracker } from "../ionic/IonicCompound";
-import { WritableIon } from "./Ion";
-import { Mutable, Mutation } from "../actions/Mutable";
+import { AtomicIon } from "./Ion";
 import { unwatch, watch, Watched } from "../watch/Watched";
-import { ParticleMorph } from "../Compound/Particle";
 import { Atomic, getAtomicState, setAtomicState } from "./Atomic";
 
 /** INTERNAL */
-export type $AtomicIonState = WritableIon & MutableCapsule & {
+export type $AtomicIonState = AtomicIon & MutableCapsule & {
    [QUARK]: {
       type: symbol;
       state: any,
@@ -26,7 +23,7 @@ export type $AtomicIonState = WritableIon & MutableCapsule & {
  * INTERNAL 
  * For reactive ions only.
  * */
-export type AtomicIon = QuarkOf<$AtomicIonState>
+export type AtomicIonQuark = QuarkOf<$AtomicIonState>
 
 function shouldIonize(newValue: unknown, stateIsIonized: boolean): newValue is AnyObject {
    return newValue instanceof Object && stateIsIonized;
@@ -39,7 +36,7 @@ export function createPrimaryIon(
 ) {
    const $state = (() => getAtomicState(ion, 'state', ion)) as $AtomicIonState
 
-   const ion: AtomicIon = {
+   const ion: AtomicIonQuark = {
       state,
       stateIsIonized: isIonizedModel(state),
       entity: $state,

@@ -10,16 +10,13 @@ export type Ion<T extends NonVoid = NonVoid, M extends Methods = {}> = (() => T)
 type Methods = { [key: PropertyKey]: (...args: any) => any }
 
 /* API */  // basically writable atomic ions, neutrons, and pions
-export type WritableIon<T extends NonVoid = NonVoid, M extends Methods = {}> = Ion<T> & {
+export type AtomicIon<T extends NonVoid = NonVoid, M extends Methods = {}> = Ion<T> & {
    state: T
 } & M
 
 export type NonVoid = string | number | object | undefined | boolean | bigint | symbol | null
 
-/* API */
-export type MemoizedIon<T extends NonVoid = NonVoid, M extends Methods = {}> = Ion<T> & {
-   releaseAtoms: () => void //TODO: rename to something else or eliminate
-} & M
+
 
 export function isIon(value: unknown): value is Ion {
    return isFunction(value) && /^\$[a-z]/.test(value.name) && value.length === 0

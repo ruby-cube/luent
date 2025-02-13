@@ -211,8 +211,16 @@ function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: Phase) {
    }
 }
 
-
-function initIonicEffect(effect: IonicTask, options?: EffectOptions) { //NOTE: an effect is essentially a derived ion and effect combined into one function
+/**
+ * Initializes ionic effect by running the effect and then watching its dependencies, re-running the effect 
+ * when any of its dependencies change in state.
+ * 
+ * An ionic effect is essentially a watch subject and effect combined into one function.
+ * As a watch subject, it can return state. As an effect it receives the previous state.
+ * This is useful if state needs to be shared between effect runs.
+ * In most cases, an ionic effect will be a simple void function that performs side effects.
+ */
+function initIonicEffect(effect: IonicTask, options?: EffectOptions) {
    const phase = options?.phase || Phase.BEFORE_RENDER;
    const retrack = options?.retrack || false;
 
