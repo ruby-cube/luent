@@ -43,9 +43,9 @@ export function ion<
    return createAtomicIon(initialState, methods) as unknown as IonReturn<T, M>
 }
 
-ion.ionize = function ionize<T extends object, M>(initialState: T, methods?: M & Methods): M extends Methods ? AtomicIon<T, M> : AtomicIon<T> {
-   return createAtomicIon(ionize(initialState), methods, true) as unknown as M extends Methods ? AtomicIon<T, M> : AtomicIon<T>
-}
+// ion.ionize = function _ionize<T extends object, M>(initialState: T, methods?: M & Methods): M extends Methods ? AtomicIon<T, M> : AtomicIon<T> {
+//    return createAtomicIon(ionize(initialState), methods, true) as unknown as M extends Methods ? AtomicIon<T, M> : AtomicIon<T>
+// }
 
 // isIon // any sort of ion
 // isAtomic // primary

@@ -5,9 +5,9 @@ import { $effectCycle } from "../watch/EffectCycle";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { inert, Inert, isInert } from "./inert";
 import { Ion, ion, isIon } from "../ion/ion";
-import { AtomicIon } from "../ion/AtomicIon";
 import { createIonizedModel, getStructureConfigs, IonizedModel } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
+import { AtomicIonQuark } from "../ion/AtomicIon";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -16,13 +16,6 @@ import { hasQuark, QUARK, quarkOf } from "../Quark";
 // - class instances whose DIRECT prototype has been registered as ionizable
 
 //TODO: figure out the simplest way developers can add types to custom data strucures
-
-// export type IonizedModel<T extends AnyObject = AnyObject> = T //TODO: add ion properties $
-// export type MaybeIonized<T> = T extends AnyObject ? <T> : T;
-
-export type Readonly<T extends AnyObject = AnyObject> = {
-   readonly [K in keyof T]: T[K]
-}
 
 
 const ionizedModels: WeakMap<AnyObject, IonizedModel> = new WeakMap()
@@ -36,12 +29,16 @@ export function isIonizedModel(value: any): value is IonizedModel {
    return hasQuark(value) && quarkOf(value) instanceof IonizedModelQuark;
 }
 
+
+
 type AbsorbedIon<T> = {
    (...args: any[]): T;
    [QUARK]: any;
 }
 
-
+export type Readonly<T extends AnyObject = AnyObject> = {
+   readonly [K in keyof T]: T[K]
+}
 
 export type Ionized<T extends AnyObject, M extends {} = {}> = T & { [QUARK]: IonizedModelQuark }
 // export type Ionized<T extends AnyObject, M extends {} = {}> = {
@@ -58,7 +55,7 @@ type OmitTrue<M extends {}> = { [K in keyof M as M[K] extends true ? never : K]:
 
 type ReadonlyIon<T> = {
    (): T
-   [QUARK]: AtomicIon;
+   // [QUARK]: AtomicIonQuark;
 }
 
 type InvertIons<T extends AnyObject, M = {}> = {
@@ -181,13 +178,13 @@ type AsIons<T> = {
 
 
 
-const frog = ionize({
-   a: 2,
-   b: 4,
-   get somethingComplex() {
-      return this.a + this.b
-   }
-})
+// const frog = ionize({
+//    a: 2,
+//    b: 4,
+//    get somethingComplex() {
+//       return this.a + this.b
+//    }
+// })
 
 
 

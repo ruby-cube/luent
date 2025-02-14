@@ -2,7 +2,6 @@ import { NodeEntity } from "../node/makeNode";
 import { renderPhasicNode, TransitionConfig } from "./PhasicNode";
 import { createTransitionStyleSheet, getTransitionStylesheet, TransitionClasses, TransitionFunction, TransitionKit } from "./defineTransition";
 import { AnimationClass, AnimationFunction, AnimationKit } from "./defineAnimation";
-import { NodeRef } from "../node/NodeRef";
 import { renderTransitNode } from "./TransitNode";
 import { AnyObject } from "@rue/types";
 import { Ion } from "@rue/quarky";

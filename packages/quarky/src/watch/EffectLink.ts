@@ -66,15 +66,10 @@ export class EffectVine {
    }
 
    absorb(vine: EffectVine) {
+      // NOTE: absorption doesn't reassign a link's vine, so it still is connected to the original vine...
       const head = vine.head;
       const tail = vine.tail;
       if (!tail) return;
-      vine.head = undefined
-      vine.tail = undefined
-
-      for (const link of vine) {
-         link.vine = this
-      }
       const thisTail = this.tail;
       if (!thisTail) {
          this.head = head;
@@ -85,6 +80,7 @@ export class EffectVine {
          head!.prev = thisTail;
       }
       this._size += vine._size;
+      vine.clear()
    }
 
    clear() {

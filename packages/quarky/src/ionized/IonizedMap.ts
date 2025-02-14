@@ -1,10 +1,9 @@
-import { trigger, triggerIonicAtom, triggerIonizedModel } from "../reactivity/x_trigger";
-import { IonizedModel, storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
+import {  storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
 import { nontrackableIterableKeys, useClearOp, useDeleteOp } from "./IonizedSet";
 import { asAtomicOp, getAtomicOp } from "./AtomicOp";
-import { asTrackedProp, getObservedPion } from "../ion/AtomicPion";
 import { defineIonizedStructure, useTrackableGetOp } from "./IonizedModel";
 import { AnyObject } from "@rue/types";
+import { getObservedPion } from "./Pion";
 
 // declare global {
 //    interface Map<K, V> {

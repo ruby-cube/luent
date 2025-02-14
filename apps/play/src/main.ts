@@ -2,26 +2,26 @@
 // // console.log(jsx)
 // // import { App } from './App';
 import './style.css'
-import './demos/tree-view.css'
-import {TreeApp} from './demos/tree-view'
+// import './demos/tree-view.css'
+// import {TreeApp} from './demos/tree-view'
 // import { TestCounter } from './TestCounter';
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
-import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
+// import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { component, createApp } from '@rue/lumo';
-import { MountIf } from './TestMountIf';
-import { List } from './TestReactiveModel';
-import { TestCounterModel } from './TestCounter';
-import { TestDerived } from './testDerivedIon';
-import { TestDerivedConditional } from './testDerived';
-import { TestDebugApp } from './TestDebugTools';
-import { Transformers } from './jsx-$transform';
-import { TestCommons } from './TestCommons';
-import { TestApp } from './TestApp';
-import { MarkdownApp } from './demos/markdown-app/markdown-app';
-import { TabApp } from './demos/markdown-app/TestTabs';
-import { TestPropIons } from './TestPropIons';
+import { TestCounter } from './TestCounter';
+// import { MountIf } from './TestMountIf';
+// import { List } from './TestReactiveModel';
+// import { TestDerived } from './testDerivedIon';
+// import { TestDerivedConditional } from './testDerived';
+// import { TestDebugApp } from './TestDebugTools';
+// import { Transformers } from './jsx-$transform';
+// import { TestCommons } from './TestCommons';
+// import { TestApp } from './TestApp';
+// import { MarkdownApp } from './demos/markdown-app/markdown-app';
+// import { TabApp } from './demos/markdown-app/TestTabs';
+// import { TestPropIons } from './TestPropIons';
 // import { PlainList } from './TestList';
 // import { HelloWorld } from './HelloWorld';
 // import { Check } from './childrenTest';
@@ -37,17 +37,17 @@ import { TestPropIons } from './TestPropIons';
 
 // const rootContext = createGlobalCommons()
 
-import { frog } from './TestReadonly';
+// import { frog } from './TestReadonly';
 
-frog;
+// frog;
 
-// const app = createApp(TestPropIons)
+const app = createApp(TestCounter)
 
 // if (__DEV__) configureFlask({
 //     warnNoCleanup: true
 // })
 
-// app.mount('#app')
+app.mount('#app')
 
 // function doSomething() {
 //     const dynamicNode = makeDynamicNode(false)

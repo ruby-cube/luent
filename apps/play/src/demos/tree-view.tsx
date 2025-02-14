@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, fromTag, Ionized, If, Else, For, watch, v, Nonlocal, _Nonlocal, pure, Pure } from "@rue/lumo";
-import { ion, ionize, Phase, toRaw } from "@rue/quarky";
+import { ion, ionize, toRaw } from "@rue/quarky";
 
 
 

@@ -1,4 +1,4 @@
-import { isIon, isIonizedModel, ion, toRaw, shallowClone,  watch, Phase, __devCheckIfTracked, ionize, AtomicIon, toValue, untrackedCall, Ion } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone,  watch,  __devCheckIfTracked, ionize, AtomicIon, toValue, untrackedCall, Ion } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
@@ -15,6 +15,7 @@ import { mountConditional, mountDOMNodes, removeDOMNodes } from "../conditional/
 import { Flask, getActiveFlask, setFlask } from "@rue/flask";
 import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, setAsyncPath } from "../../../flask/debug";
+import { RENDER } from "../render/render-cycle";
 
 
 type Index = number
@@ -151,7 +152,7 @@ export class ListRenderKit {
                console.error(err, this.__DEV__asyncPath)
             }
             console.log('updating list', newState.length, _oldValue.length)
-         }, { phase: Phase.RENDER })
+         }, { phase: RENDER })
       }
       // currentItem = undefined;
       $currentIndex = undefined;

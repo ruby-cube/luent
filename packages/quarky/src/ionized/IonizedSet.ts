@@ -1,10 +1,9 @@
 import { AnyObject } from "@rue/types";
-import { trigger, triggerIonicAtom, triggerIonizedModel } from "../reactivity/x_trigger";
-import { IonizedModel, storeSnapshot, toRaw } from "./ionize";
+import {storeSnapshot, toRaw } from "./ionize";
 import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
 import { getAtomicOp } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
-import { getObservedPion } from "../ion/AtomicPion";
+import { getObservedPion } from "./Pion";
 
 // declare global {
 //    interface Set<T> {

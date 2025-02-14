@@ -1,8 +1,9 @@
-import { AtomicIon, ionize, isAtomicIon, Phase, watch } from "@rue/quarky"
-import { isTrackedOp, AtomicOp } from "../../../quarky/src/ionized/AtomicOp";
+import { AtomicIon, ionize, isAtomicIon, SYNC, watch } from "@rue/quarky"
+import { AtomicOp } from "../../../quarky/src/ionized/AtomicOp";
 import { isAtomicPionQuark } from "../../../quarky/src/ion/AtomicPion";
 import { quarkOf, hasQuark } from "../../../quarky/src/Quark";
 import { getTrace } from "../../../flask/debug";
+import { RENDER_CYCLE_COMPLETE } from "./render-cycle";
 
 
 
@@ -49,7 +50,7 @@ export function traceTriggers<T>(subject: T) {
       })
       __logTriggeredAtom(atom)
    }, {
-      phase: Phase.SYNC,
+      phase: SYNC,
       stateChange: false
    })
 }
@@ -87,7 +88,7 @@ function __logTriggeredAtom(atom: Atom) {
       }
 
    }, {
-      phase: Phase.CYCLE_COMPLETE
+      phase: RENDER_CYCLE_COMPLETE
    })
 }
 

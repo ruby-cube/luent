@@ -1,10 +1,11 @@
 import { AnyObject } from "@rue/types";
-import { isIonizedModel, IonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
+import { isIonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
 import { getAtomicOp } from "./AtomicOp";
-import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
-import { getObservedPion } from "../ion/AtomicPion";
+import { defineIonizedStructure, GetPreopData, IonizedModel, useTrackableGetOp } from "./IonizedModel";
 import { nontrackableIterableKeys } from "./IonizedSet";
-import { Mutation } from "../watch/watch";
+import { getObservedPion } from "./Pion";
+import { Mutation } from "../actions/Mutable";
+import { IonizedModelQuark } from "./IonizedModelQuark";
 
 type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 

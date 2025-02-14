@@ -5,7 +5,8 @@ export const [
    SYNC,
    BEFORE_RENDER,
    RENDER,
-   AFTER_RENDER
+   AFTER_RENDER,
+   RENDER_CYCLE_COMPLETE
 ] = setUpEffectCycle([ //(default to queueTask for all phases)
    definePhase('BEFORE_RENDER', queueTask),
    definePhase('RENDER', requestAnimationFrame),

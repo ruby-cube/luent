@@ -1,5 +1,5 @@
 import { DOMNode, Slot } from "../component/InternalComponent";
-import { DerivedIon, ReactiveGet, isIon, getCurrentEffectCylce, Phase, isAtomicIon, AtomicIon, watch, MaybeIon, isDerivedIon, WritableDerivedIon } from "@rue/quarky";
+import {isIon, AtomicIon, watch } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
 import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask";
@@ -13,6 +13,7 @@ import { initializeListRef, initializeRef, isAnyNodeRef, NodesRef, isNodesRef } 
 import { camelToKebabCase } from "@rue/utils";
 import { NodePod } from "../node/NodePod";
 import { _dog_ } from "../commons/x_context-keys";
+import { RENDER } from "../render/render-cycle";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -203,7 +204,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: any | Deriv
       if (isIon(value)) {
          watch(value, ({ newState }) => {
             setAttribute(node, _key, newState)
-         }, { eager: true, phase: Phase.RENDER })
+         }, { eager: true, phase: RENDER })
       }
       // else if (isViewBindingKit(value)) {
       //    watch(value.ion, ({ newState }) => {
@@ -268,7 +269,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
          watch(entry, ({ newState, oldState }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             if (oldState) removePreviousClasses(oldState, classList)
             if (newState) addClasses(newState, classList)
-         }, { eager: true, phase: Phase.RENDER })
+         }, { eager: true, phase: RENDER })
       }
       else if (entry) {
          addClasses(entry, classList)
@@ -320,7 +321,7 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
             if (newState) classList.add(key)
          }, {
             eager: true,
-            phase: Phase.RENDER,
+            phase: RENDER,
          })
       }
       else if (value) {
@@ -355,9 +356,9 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {
       if (isIon(entry)) {
-         watch(entry, ({ newState }/* value: string | AnyObject | Falsey */) => {
-            setUpStyleEntry(style, newState);
-         }, { eager: true, phase: Phase.RENDER })
+         watch(entry, (/* value: string | AnyObject | Falsey */) => {
+            setUpStyleEntry(style, entry());
+         }, { eager: true, phase: RENDER })
       }
       else {
          setUpStyleEntry(style, entry)
@@ -374,7 +375,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
                assignStyleProperty(style, toStylePropertyName(key), newState)
             }, {
                eager: true,
-               phase: Phase.RENDER,
+               phase: RENDER,
                // __devName: 'setUpStyles', 
             })
          }

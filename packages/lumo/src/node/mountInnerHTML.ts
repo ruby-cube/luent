@@ -1,4 +1,4 @@
-import { isIon, ReactiveGet, Phase, __devCheckIfTracked, MaybeIon, watch } from "@rue/quarky";
+import { isIon, __devCheckIfTracked, watch } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
 import { NodeEntity } from "./makeNode";
 
@@ -22,7 +22,7 @@ export function mountInnerHTML(kit: InnerHTMLKit, parent: Element) {
 function keepInnerHTMLUpdated(htmlString: ReactiveGet<any>, parentNode: Element) {
    watch(htmlString, ({ newState }) => {
       parentNode.innerHTML = toString(newState);
-   }, { phase: Phase.RENDER });
+   }, { phase: RENDER });
 }
 
 

@@ -1,3 +1,4 @@
+import { RENDER } from "../../../packages/lumo/src/render/render-cycle";
 import { ion } from "../../../packages/quarky/src"
 import { NodeRef } from "@rue/lumo";
 
@@ -111,5 +112,5 @@ function setUpMorphling(morphlingKit: MorphlingKit) {
     const $render = morphlingKit.$render
     watch($render, (render) => {
         const output = render()
-    }, { phase: Phase.RENDER })
+    }, { phase: RENDER })
 }

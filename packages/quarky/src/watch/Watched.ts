@@ -39,7 +39,7 @@ export class Watched<T extends Watchable = Watchable> {
       const nextCycleEffects = this.nextCycleEffects ?? (this.nextCycleEffects = new PhaseMap())
       let toBeQueued = nextCycleEffects.get(phase);
       nextCycleEffects.addToVine(effect, phase)
-      if (!toBeQueued){
+      if (!toBeQueued) {
          toBeQueued = nextCycleEffects.get(phase)
          onEffectCycleComplete(() => {
             this.effects.absorb(toBeQueued!, phase)
@@ -78,13 +78,14 @@ export class Watched<T extends Watchable = Watchable> {
       }
    }
 
-   private scheduleReabsorption(phase: number){
+   private scheduleReabsorption(phase: number) {
       const completed = this.completedEffects.get(phase);
       if (completed || completed === null) return;
       this.completedEffects.set(phase, null);
       onEffectCycleComplete(() => {
          const completed = this.completedEffects.get(phase)
          if (completed) this.effects.absorb(completed, phase)
+         this.completedEffects.delete(phase)
       })
    }
 

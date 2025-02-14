@@ -24,11 +24,13 @@ type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listene
 export let onEffectCycleComplete: EffectCycleHook
 
 export function setUpEffectCycle(phases: [CyclePhase, ...CyclePhase[]]) {
+   console.log(cyclePhases)
    pipe(
-      () => cyclePhases.at(-1)!.scheduleNextPhase = scheduleFinalPhase,
+      () => cyclePhases.at(-2)!.scheduleNextPhase = scheduleFinalPhase,
       () => definePhase('END_EFFECT_CYCLE'),
       () => onEffectCycleComplete = createEffectCycleHook(phaseNums.at(-1)!)
    )
+   console.log(cyclePhases)
    return phaseNums;
 }
 
@@ -129,8 +131,7 @@ export class EffectCycle {
          nextCycle.scheduleEffects(effects, phase)
          return;
       }
-      const phaseEffects = this.effects.get(phase)
-      phaseEffects?.absorb(effects)
+      this.effects.absorb(effects, phase)
    }
 
    scheduleEffect(effect: EffectLink, phase: number) {
@@ -148,7 +149,7 @@ export class EffectCycle {
       if (effects) {
          for (const effect of effects) {
             effect.task()
-            if (effect.vine !== effects) continue; // effect has already been removed
+            if (!effect.vine) continue; // effect has already been removed during the effect via 'once' or 'scheduler'
             const subject = effect.watchSubject;
             if (!subject) continue;
             subject.completedEffects.addToVine(effect, phase)

@@ -4,7 +4,7 @@ import { mountNodeEntities } from "../node/mountNodeEntity";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { ConditionalSeries } from "./ConditionalSeries";
 import { hideDOMNodes, showDOMNodes } from "./toggledisplay";
-import { areShallowEqualArrays, Phase, watch } from "../../../quarky/src";
+import { areShallowEqualArrays, watch } from "../../../quarky/src";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { NodeKit } from "../node/setUpNodeEntities";
@@ -12,6 +12,7 @@ import { NodePod } from "../node/NodePod";
 import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, setAsyncPath } from "../../../flask/debug";
 import { Flask, setFlask } from "@rue/flask";
+import { RENDER } from "../render/render-cycle";
 
 //TODO: rename 'phasic node' to 'transition node'
 //TODO: rename transitionNodes to 'transitNodes'
@@ -305,7 +306,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          }
       }, {
          // retrack: true,
-         phase: Phase.RENDER,
+         phase: RENDER,
       })
 
       // // set up watcher for updates
