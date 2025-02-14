@@ -1,7 +1,7 @@
 import {  CapsuleQuark } from "../capsule/Capsule";
 import { asNonlocalReadonly } from "../capsule/Readonly";
 import { quarkOf, QUARK } from "../Quark";
-import { isIon, NonVoid, WritableIon } from "./Ion";
+import { isIon, NonVoid, WritableIon } from "./ion";
 
 type $WritableIon = (() => NonVoid) & {
    state: NonVoid;

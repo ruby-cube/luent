@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { ion } from '../Ion';
+import { ion } from '../ion';
 import { MetaIon } from '../AtomicIon';
 import { createDerivationIon, DERIVED_ION } from '../../ionic/PionCapsule';
 import exp from 'constants';

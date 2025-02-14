@@ -5,7 +5,7 @@ import { asParticle, Particle } from "../Compound/Particle";
 import { quarkOf, QUARK, Quark, EntityQuark, QuarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
-import { Ion, isIon, AtomicIon } from "./Ion";
+import { Ion, isIon, AtomicIon } from "./ion";
 import { MutableCapsule } from "../capsule/Capsule";
 import { Mutation } from "../actions/Mutable";
 import { __DEV__traceMethodCall, Traceable } from "../debug/debug";

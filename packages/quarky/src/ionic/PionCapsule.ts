@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { quarkOf, QUARK, hasQuark, QuarkOf, EntityQuark } from "../Quark";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { __DEV__label } from "../debug/DEVLabellable";
-import { Ion, NonVoid } from "../ion/Ion";
+import { Ion, NonVoid } from "../ion/ion";
 import { Traceable } from "../debug/debug";
 import { IonicCompound } from "./IonicCompound";
 import { Watched } from "../watch/Watched";

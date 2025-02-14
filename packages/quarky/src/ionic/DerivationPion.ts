@@ -1,7 +1,7 @@
 import { Capsule } from "../capsule/Capsule";
 import { Particle } from "../Compound/Particle";
 import { Traceable } from "../debug/debug";
-import { Ion, NonVoid } from "../ion/Ion";
+import { Ion, NonVoid } from "../ion/ion";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
 import { QUARK, QuarkOf, quarkOf } from "../Quark";
@@ -33,7 +33,7 @@ export type $DerivedPionState = Ion & Capsule & {
 export class DerivationPionQuark implements QuarkOf<$DerivedPionState> {
    type = DERIVATION_ION
    inert: boolean = false
-   state: unknown;
+   state: NonVoid;
    dirty: boolean = false
 
    asParticle?: Particle

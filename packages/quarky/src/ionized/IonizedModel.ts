@@ -5,7 +5,7 @@ import { asAtomicOp, TRACKED } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { isFunction, noop } from "@rue/utils";
-import { Ion, isIon } from "../ion/Ion";
+import { Ion, isIon } from "../ion/ion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
 import { QUARK, quarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";

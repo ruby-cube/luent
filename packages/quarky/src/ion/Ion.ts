@@ -1,18 +1,15 @@
-import { Mutable } from "../actions/Mutable";
-import { ParticleMorph } from "../Compound/Particle";
-import { Watchable } from "../watch/Watched";
-import { createPrimaryIon } from "./AtomicIon";
 import { isFunction } from "@rue/utils";
+import { neutron } from "./Neutron";
+import { createMaybeMemoizedIon } from "../ionic/DerivationIon";
+import { createAtomicIon } from "./AtomicIon";
 
 /* API */
-export type Ion<T extends NonVoid = NonVoid, M extends Methods = {}> = (() => T) & M
+export type Ion<T extends NonVoid = NonVoid, M = {}> = (() => T) & M
 
 type Methods = { [key: PropertyKey]: (...args: any) => any }
 
-/* API */  // basically writable atomic ions, neutrons, and pions
-export type AtomicIon<T extends NonVoid = NonVoid, M extends Methods = {}> = Ion<T> & {
-   state: T
-} & M
+/* API */  // atomic ions, neutrons, and pions
+export type AtomicIon<T extends NonVoid = NonVoid, M = { state: T }> = (() => T) & M & { state: T }
 
 export type NonVoid = string | number | object | undefined | boolean | bigint | symbol | null
 
@@ -22,13 +19,29 @@ export function isIon(value: unknown): value is Ion {
    return isFunction(value) && /^\$[a-z]/.test(value.name) && value.length === 0
 }
 
-export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
-   return isIon(value) ? value : neutron(value) as T extends Ion ? T : Ion<T>
+export function toIon<T extends NonVoid | Ion>(value: T): T extends Ion ? T : Ion<T> {
+   return (isIon(value) ? value : neutron(value)) as T extends Ion ? T : Ion<T>
 }
 
+export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
+   return isFunction(maybeFn) ? maybeFn() : maybeFn;
+}
 
-export function toValue(maybeFn: any){
-  return isFunction(maybeFn)? maybeFn(): maybeFn;
+type Derivation<R extends NonVoid = NonVoid> = (prevValue?: R) => R
+type IonReturn<T extends NonVoid, M> = T extends Derivation<infer R> ? Ion<Broad<R>, M> : M extends Methods ? AtomicIon<Broad<T>, M> : AtomicIon<Broad<T>>
+
+type Broad<T> = T extends boolean ? boolean : T extends string ? string : T extends number ? number : T;
+
+export function ion<
+   T extends NonVoid,
+   M
+>(value: T, methods?: M & Methods): T extends Derivation<infer R> ? Ion<Broad<R>, M> : M extends Methods ? AtomicIon<Broad<T>, M> : AtomicIon<Broad<T>>
+{
+   if (isIon(value)) return value as unknown as IonReturn<T, M>
+   if (isFunction(value)) {
+      return createMaybeMemoizedIon(<Derivation>value, methods, true) as unknown as IonReturn<T, M>
+   }
+   return createAtomicIon(value, methods) as unknown as IonReturn<T, M>
 }
 
 // isIon // any sort of ion
@@ -45,33 +58,28 @@ export function toValue(maybeFn: any){
 // isReined
 
 
+// const $count = ion(0)
 
+// const $doublecount = ion(() => $count() * 2)
 
+// const $countB = ion((prev?: number) => (prev ?? 0) + 2, {
+//    toggler() {
 
-// const $doubleCount = ion.memo(() => {
-
+//    }
 // })
 
-// const $count = ion.inert(0)
+// const $active = ion('frog', {
+//    toggle() {
 
+//    }
+// })
 
+// const $actived = ion(false)
 
-// API
-export function ion<T, M>(value?: T & (() => any), methods?: M & IonMethods): T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-export function ion<T, M>(value?: T, methods?: M & IonMethods): ReactiveIon<T, M>
-export function ion<T, M>(value?: T, methods?: M & IonMethods): T extends AnyIon ? T : T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M> {
-   if (isIon(value)) {
-      if (__DEV__ && methods) console.warn(`Cannot make an existing ion into an ion. Methods will not be attached`)
-      return value as T extends AnyIon ? T : T extends (args?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-   }
-   if (isFunction(value)) {
-      if (methods)
-         return createWritableDerivedIon(
-            <(prev?: any) => unknown>value,
-            methods
-         ) as T extends AnyIon ? T : T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-      return createDerivationIon(<(prev?: any) => unknown>value) as T extends AnyIon ? T : T extends (arg?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-   }
-   return createPrimaryIon(value, methods) as T extends AnyIon ? T : T extends (args?: any) => infer R ? ReactiveDerivedIon<R, M> : ReactiveIon<T, M>
-}
+// $actived.state = true
 
+// function som<T>(value: T): T {
+//    return null as T;
+// }
+
+// som(true)

@@ -1,4 +1,4 @@
-import { Ion } from "../ion/Ion"
+import { Ion } from "../ion/ion"
 import { EntityQuark, quarkOf } from "../Quark"
 import { $AtomicPionState, AtomicPionQuark, createAtomicPion } from "../ion/AtomicPion"
 import { IonizedModel } from "./IonizedModel"

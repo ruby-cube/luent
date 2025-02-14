@@ -1,5 +1,5 @@
 import { isFunction, isObject } from "@rue/utils";
-import { isIon } from "../ion/Ion";
+import { isIon } from "../ion/ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
 import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";

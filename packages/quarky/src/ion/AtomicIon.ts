@@ -6,7 +6,7 @@ import { __DEV__trace } from "../debug/debug";
 import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { __DEV__initTraceability, attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
-import { AtomicIon } from "./Ion";
+import { AtomicIon } from "./ion";
 import { unwatch, watch, Watched } from "../watch/Watched";
 import { Atomic, getAtomicState, setAtomicState } from "./Atomic";
 
@@ -30,7 +30,7 @@ function shouldIonize(newValue: unknown, stateIsIonized: boolean): newValue is A
 }
 
 /** INTERNAL */
-export function createPrimaryIon(
+export function createAtomicIon(
    state: any,
    methods?: object
 ) {

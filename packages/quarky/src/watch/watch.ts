@@ -5,7 +5,7 @@ import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "
 import { $effectCycle, PHASE_ONE, SYNC } from "./EffectCycle";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
-import { Ion, isIon } from "../ion/Ion";
+import { Ion, isIon } from "../ion/ion";
 import { createWatchedDerivation, isWatchedDerivation } from "../ionic/WatchedDerivation";
 import { createMultisubjectIon, isMultisubjectIon } from "./MultiSubject";
 import { isManagedDerivation } from "../ionic/DerivationIon";

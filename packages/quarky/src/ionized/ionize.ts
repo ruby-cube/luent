@@ -4,7 +4,7 @@ import { timeTraveler } from "./TimeTraveler";
 import { $effectCycle } from "../watch/EffectCycle";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { inert, Inert, isInert } from "./inert";
-import { Ion, ion, isIon } from "../ion/Ion";
+import { Ion, ion, isIon } from "../ion/ion";
 import { AtomicIon } from "../ion/AtomicIon";
 import { createIonizedModel, getStructureConfigs, IonizedModel } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";

@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { Ion } from "./ion/Ion";
+import { Ion } from "./ion/ion";
 
 export const QUARK = Symbol('quark')
 

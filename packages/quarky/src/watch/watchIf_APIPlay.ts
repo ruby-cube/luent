@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { Booleanny } from "@rue/types"
-import { AnyIon } from "../ion/Ion"
+import { AnyIon } from "../ion/ion"
 import { watch } from "./watch"
 
 
