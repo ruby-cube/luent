@@ -25,20 +25,21 @@ export type $AtomicIonState = AtomicIon & MutableCapsule & {
  * */
 export type AtomicIonQuark = QuarkOf<$AtomicIonState>
 
-function shouldIonize(newValue: unknown, stateIsIonized: boolean): newValue is AnyObject {
+export function shouldIonize(newValue: unknown, stateIsIonized: boolean): newValue is AnyObject {
    return newValue instanceof Object && stateIsIonized;
 }
 
 /** INTERNAL */
 export function createAtomicIon(
    state: any,
-   methods?: object
+   methods?: object,
+   stateIsIonized: boolean = false
 ) {
    const $state = (() => getAtomicState(ion, 'state', ion)) as $AtomicIonState
 
    const ion: AtomicIonQuark = {
       state,
-      stateIsIonized: isIonizedModel(state),
+      stateIsIonized: stateIsIonized ?? isIonizedModel(state),
       entity: $state,
       type: PRIMARY_ION,
       asParticle: undefined,

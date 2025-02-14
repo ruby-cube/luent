@@ -1,66 +1,51 @@
-import { AnyObject } from "@rue/types";
-import { createPrimaryIon, AtomicIon, } from "./AtomicIon";
 import { isFunction } from "@rue/utils";
-import { hasQuark, QUARK, quarkOf } from "../Quark";
+import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
+import { shouldIonize } from "./AtomicIon";
+import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsule/Capsule";
+import { __DEV__traceMethodCall, Traceable } from "../debug/debug";
+import { ionize } from "../ionized/ionize";
+import { __DEV__label } from "../debug/DEVLabellable";
+import { AtomicIon, Methods, NonVoid } from "./ion";
 
-const INERT = true;
 
-type _Neutron<T, M> = M extends { [key: string]: (...args: any[]) => any } ? AtomicIon<T, M> : AtomicIon<T>
-export type Neutron<T, M = undefined> = M extends { [key: string]: (...args: any[]) => any } ? AtomicIon<T, M> : AtomicIon<T>
-
-export function neutron<T, M>(value?: T & (() => unknown), methods?: M & { [key: string]: (...args: any[]) => any }): T extends AnyIon ? T : _DerivedNeutron<T, M>
-export function neutron<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends AnyIon ? T : _Neutron<T, M>
-export function neutron<T, M>(value?: T, methods?: M & { [key: string]: (...args: any[]) => any }): T extends AnyIon ? T : T extends () => unknown ? _DerivedNeutron<T, M> : _Neutron<T, M> {
-   if (isIon(value)) {
-      if (__DEV__ && methods) console.warn(`Cannot make a ref from existing ion. Methods will not be attached`)
-      return value as T extends AnyIon ? T : T extends () => unknown ? _DerivedNeutron<T, M> : _Neutron<T, M>
-   }
-   if (isFunction(value)) {
-      if (methods) return createWritableDerivedIon(<() => unknown>value, methods, INERT) as T extends AnyIon ? T : T extends () => unknown ? _DerivedNeutron<T, M> : _Neutron<T, M>
-      return createDerivationIon(<() => unknown>value, undefined, INERT) as T extends AnyIon ? T : T extends () => unknown ? _DerivedNeutron<T, M> : _Neutron<T, M>
-   }
-   return createPrimaryIon(value, methods, INERT) as T extends AnyIon ? T : T extends () => unknown ? _DerivedNeutron<T, M> : _Neutron<T, M>
+export function neutron<T extends NonVoid, M>(initialState: T, methods?: M & Methods): M extends Methods ? AtomicIon<T, M> : AtomicIon<T> {
+   return createAtomicNeutron(initialState, methods, false) as unknown as M extends Methods ? AtomicIon<T, M> : AtomicIon<T>
 }
 
-export type WritableDerivedNeutron<T = any, M extends AnyObject = {}> = {
-   (): T
-   [QUARK]: DerivedIonQuark;
-} & M
 
-export type DerivedNeutron<T = any> = {
-   (): T
-   [QUARK]: DerivedIonQuark;
+//TODO: I don't know how I should handle read-only, and traceability for neutrons.
+/** INTERNAL */
+export type $NeutronState = AtomicIon & Capsule & {
+   [QUARK]: {
+      type: symbol;
+      inert: true;
+      state: any,
+      stateIsIonized: boolean,
+   } & EntityQuark<$NeutronState>
 }
 
-type _DerivedNeutron<T, M> = M extends { [key: string]: (...args: any[]) => any } ? WritableDerivedIon<T, M> : DerivedIon<T>
-
-// export function DerivedNeutron<T, M, D>(derivation: D & (() => T), methods?: M & { [key: string]: (...args: any[]) => any }): D extends AnyIon ? D : _DerivedNeutron<T, M> {
-//     if (isIon(derivation)) return derivation as D extends AnyIon ? D : _DerivedNeutron<T, M>; //TODO: Error message?
-//     if (methods) return createWritableDerivedIon(derivation, methods, INERT) as D extends AnyIon ? D : _DerivedNeutron<T, M>
-//     return createDerivationIon(derivation, undefined, INERT) as D extends AnyIon ? D : _DerivedNeutron<T, M>
-// }
-
- //TODO: I don't know how I should handle read-only, and traceability for neutrons. Should they have quark?
+/** 
+ * INTERNAL 
+ * For reactive ions only.
+ * */
+export type NeutronQuark = QuarkOf<$NeutronState>
+const INERT_ION = Symbol('atomic neutron')
 
 /** INTERNAL */
-export function createPrimaryNeutron(
+export function createAtomicNeutron(
    state: any,
    methods?: object,
-   inert: boolean = false
+   stateIsIonized: boolean = false
 ) {
-   const $ion = (inert ? () => state
-      : () => getReactiveState(ion)) as $AtomicIonState
+   const $ion = (() => ion.state) as $NeutronState
 
-
-   let stateIsIonized = isIonizedModel(state)
-
-   const ion: AtomicIon = {
+   const ion: NeutronQuark = {
       state,
       stateIsIonized,
+      inert: true,
       entity: $ion,
-      type: PRIMARY_ION,
-      asParticle: undefined,
-      asWatched: undefined
+      type: INERT_ION,
+      __DEV__asTraceable: new Traceable()
    }
    __DEV__initTraceability(ion)
 
@@ -68,18 +53,15 @@ export function createPrimaryNeutron(
    $ion.__DEV__labelName = undefined
    $ion.__DEV__label = __DEV__label
 
-   const capsuleName = 'AtomicIon'
+   const capsuleName = 'Neutron'
 
    Object.defineProperty($ion, 'state', {
       get() {
          return ion.state;
       },
-      set: inert ? value => {
+      set: value => {
          __DEV__traceMethodCall(capsuleName, $ion, 'state')
          return state = shouldIonize(value, stateIsIonized) ? ionize(value) : value
-      } : value => {
-         __DEV__traceMethodCall(capsuleName, $ion, 'state')
-         return setReactiveState(ion, ion.state, value);
       }
    })
 
@@ -91,6 +73,6 @@ export function createPrimaryNeutron(
 }
 
 
-export function isNeutron(value: unknown): value is { [QUARK]: { inert: true } } {
+export function isInertIon(value: unknown): value is { [QUARK]: { inert: true } } {
    return hasQuark(value) && (<{ inert: true }>quarkOf(value)).inert === true;
 }

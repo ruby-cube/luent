@@ -8,7 +8,7 @@ import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { isIonizedModel } from "../ionized/ionize";
 import { isParticleMorphic, ParticleMorph } from "../Compound/Particle";
 import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
-import { isNeutron } from "../ion/Neutron";
+import { isInertIon } from "../ion/Neutron";
 import { isGetter } from "./watch";
 
 const MULTISUBJECT_ION = 'MultisubjectIon'
@@ -68,7 +68,7 @@ export function createMultisubjectIon(subjects: unknown[] & AnyObject) {
             values.push(subject)
          }
          else if (isIon(subject)) {
-            if (isNeutron(subject))
+            if (isInertIon(subject))
                values.push(subject())
             else if (isParticleMorphic(subject)) {
                values.push(getterFn(isPionCapsule(subject) ? asCoreIon(subject)! : subject))

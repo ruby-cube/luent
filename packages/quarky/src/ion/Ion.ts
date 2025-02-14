@@ -6,7 +6,7 @@ import { createAtomicIon } from "./AtomicIon";
 /* API */
 export type Ion<T extends NonVoid = NonVoid, M = {}> = (() => T) & M
 
-type Methods = { [key: PropertyKey]: (...args: any) => any }
+export type Methods = { [key: PropertyKey]: (...args: any) => any }
 
 /* API */  // atomic ions, neutrons, and pions
 export type AtomicIon<T extends NonVoid = NonVoid, M = { state: T }> = (() => T) & M & { state: T }
@@ -35,18 +35,21 @@ type Broad<T> = T extends boolean ? boolean : T extends string ? string : T exte
 export function ion<
    T extends NonVoid,
    M
->(value: T, methods?: M & Methods): T extends Derivation<infer R> ? Ion<Broad<R>, M> : M extends Methods ? AtomicIon<Broad<T>, M> : AtomicIon<Broad<T>>
-{
-   if (isIon(value)) return value as unknown as IonReturn<T, M>
-   if (isFunction(value)) {
-      return createMaybeMemoizedIon(<Derivation>value, methods, true) as unknown as IonReturn<T, M>
+>(initialState: T, methods?: M & Methods): T extends Derivation<infer R> ? Ion<Broad<R>, M> : M extends Methods ? AtomicIon<Broad<T>, M> : AtomicIon<Broad<T>> {
+   if (isIon(initialState)) return initialState as unknown as IonReturn<T, M>
+   if (isFunction(initialState)) {
+      return createMaybeMemoizedIon(<Derivation>initialState, methods, true) as unknown as IonReturn<T, M>
    }
-   return createAtomicIon(value, methods) as unknown as IonReturn<T, M>
+   return createAtomicIon(initialState, methods) as unknown as IonReturn<T, M>
+}
+
+ion.ionize = function ionize<T extends object, M>(initialState: T, methods?: M & Methods): M extends Methods ? AtomicIon<T, M> : AtomicIon<T> {
+   return createAtomicIon(ionize(initialState), methods, true) as unknown as M extends Methods ? AtomicIon<T, M> : AtomicIon<T>
 }
 
 // isIon // any sort of ion
 // isAtomic // primary
-// isNeutron // known inert
+// isInertIon // known inert
 // isMemoized // memoized derivation
 // isWritable
 // isCapsule
