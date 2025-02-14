@@ -1,15 +1,14 @@
-import { Watched } from "./Watched";
 
-export class EffectVine {
-   private head: EffectLink | undefined
-   private tail: EffectLink | undefined
+export class ExclusiveVine {
+   private head: ExclusiveLink | undefined
+   private tail: ExclusiveLink | undefined
 
    private _size: number = 0;
    get size() {
       return this._size;
    }
 
-   add(link: EffectLink) {
+   add(link: ExclusiveLink) {
       const vine = link.vine;
       if (vine === this) return;
 
@@ -30,7 +29,7 @@ export class EffectVine {
       return link;
    }
 
-   delete(link: EffectLink) {
+   delete(link: ExclusiveLink) {
       if (!this.has(link))
          return false;
       this.unlink(link)
@@ -39,7 +38,7 @@ export class EffectVine {
       return true;
    }
 
-   private unlink(link: EffectLink) {
+   private unlink(link: ExclusiveLink) {
       // unlink from vine
       const prevLink = link.prev;
       const nextLink = link.next;
@@ -61,11 +60,11 @@ export class EffectVine {
       link.next = undefined;
    }
 
-   has(link: EffectLink) {
+   has(link: ExclusiveLink) {
       return link.vine === this;
    }
 
-   absorb(vine: EffectVine) {
+   absorb(vine: ExclusiveVine) {
       const head = vine.head;
       const tail = vine.tail;
       if (!tail) return;
@@ -96,41 +95,40 @@ export class EffectVine {
       this._size = 0
    }
 
-   *[Symbol.iterator](): Iterator<EffectLink> {
+   *[Symbol.iterator](): Iterator<ExclusiveLink> {
       let current = this.head;
       while (current) {
-         const next = current.next;
          yield current;
-         current = current.vine === this ? current.next : next /* in case link has been removed */;
+         current = current.next
       }
    }
 
 }
 
 
+// interface ExclusiveLink<T> {
+//    vine: ExclusiveVine | undefined // can only belong to on vine at a time
+//    next: T | undefined
+//    prev: T | undefined
+//    pass(vine?: ExclusiveVine, prev?: T): void
+// }
 
-
-export class EffectLink {
-   vine: EffectVine | undefined // can only belong to on vine at a time
-   next: EffectLink | undefined
-   prev: EffectLink | undefined
+export class ExclusiveLink {
+   vine: ExclusiveVine | undefined // can only belong to on vine at a time
+   next: ExclusiveLink | undefined
+   prev: ExclusiveLink | undefined
 
    constructor(
-      public task: () => void,
-      public watchSubject?: Watched
+      public value: unknown,
    ) { }
 
    /**
     * Reassigns a link's vine and prev properties.
-    * @param vine EffectVine | undefined
-    * @param prev EffectLink | undefined
+    * @param vine ExclusiveVine | undefined
+    * @param prev ExclusiveLink | undefined
     */
-   pass(vine?: EffectVine, prev?: EffectLink) {
+   pass(vine?: ExclusiveVine, prev?: ExclusiveLink) {
       this.prev = prev
       this.vine = vine
-   }
-
-   remove() {
-      this.vine?.delete(this)
    }
 }

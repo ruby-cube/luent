@@ -2,7 +2,7 @@ import { EffectVine, EffectLink } from "./EffectLink";
 
 
 
-export class PhaseMap extends Map<number, EffectVine> {
+export class PhaseMap extends Map<number, EffectVine | null> {
    constructor() {
       super();
    }
@@ -13,14 +13,19 @@ export class PhaseMap extends Map<number, EffectVine> {
       return vine
    }
 
-   addToSet(value: EffectLink, phase: number) {
+   addToVine(value: EffectLink, phase: number) {
       let vine = this.get(phase)
       if (!vine) vine = this.initializeVine(phase);
       vine.add(value);
    }
 
-   deleteFromSet(value: EffectLink, phase: number) {
+   deleteFromVine(value: EffectLink, phase: number) {
       let vine = this.get(phase)
       vine?.delete(value);
+   }
+
+   absorb(vine: EffectVine, phase: number){
+      const effects = this.get(phase) ?? this.initializeVine(phase);
+      effects.absorb(vine)
    }
 }

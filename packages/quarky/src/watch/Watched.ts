@@ -1,4 +1,4 @@
-import { Task, onEffectCycleComplete, Phase, $effectCycle } from "./EffectCycle";
+import { onEffectCycleComplete, $effectCycle } from "./EffectCycle";
 import { EffectLink, EffectVine } from "./EffectLink";
 import { effectStack } from "./EffectStack";
 import { PhaseMap } from "./PhaseMap";
@@ -23,56 +23,44 @@ export class Watched<T extends Watchable = Watchable> {
    constructor(
       public quark: T
    ) {
-      this.effects = new PhaseMap()
    }
 
+   private effects: PhaseMap = new PhaseMap()
    private nextCycleEffects: PhaseMap | undefined;
-   private effects: PhaseMap;
 
-   private initializeNextCycleEffects() {
-      this.nextCycleEffects = new PhaseMap()
+   private _completedEffects: PhaseMap | undefined;
+
+   get completedEffects() {
+      return this._completedEffects || (this._completedEffects = new PhaseMap())
    }
 
-   private queueForNextCycle(effect: EffectLink, phase: Phase) {
-      if (!this.nextCycleEffects) this.initializeNextCycleEffects()
-      this.nextCycleEffects!.addToSet(effect, phase)
-      const toBeQueued = this.nextCycleEffects?.get(phase);
-      if (!toBeQueued) return;
-      const mustSetUpQueueTransfer = toBeQueued.size > 0;
 
-      if (mustSetUpQueueTransfer) {
+   private queueForNextCycle(effect: EffectLink, phase: number) {
+      const nextCycleEffects = this.nextCycleEffects ?? (this.nextCycleEffects = new PhaseMap())
+      let toBeQueued = nextCycleEffects.get(phase);
+      nextCycleEffects.addToVine(effect, phase)
+      if (!toBeQueued){
+         toBeQueued = nextCycleEffects.get(phase)
          onEffectCycleComplete(() => {
-            for (const effect of toBeQueued!) {
-               this.effects.addToSet(effect, phase)
-            }
-            toBeQueued.clear()
+            this.effects.absorb(toBeQueued!, phase)
          })
       }
    }
 
-   private queueEffect(effect: EffectLink, phase: Phase) {
-      this.effects.addToSet(effect, phase)
-   }
-
-   private removeEffect(effect: EffectLink, phase: Phase) {
-      this.effects.deleteFromSet(effect, phase)
-   }
-
-
    watchCount: number = 0
 
-   watch(effect: EffectLink, phase: Phase, forNextCycle?: boolean) {
+   watch(effect: EffectLink, phase: number, forNextCycle?: boolean) {
       if (forNextCycle) {
          this.queueForNextCycle(effect, phase)
       }
       else {
-         this.queueEffect(effect, phase)
+         this.effects.addToVine(effect, phase)
       }
       this.watchCount++
    }
 
-   unwatch(effect: EffectLink, phase: Phase) {
-      this.removeEffect(effect, phase)
+   unwatch(effect: EffectLink, phase: number) {
+      effect.remove()
       if (this.watchCount === 0) {
          this.emitDiscard()
       }
@@ -80,18 +68,29 @@ export class Watched<T extends Watchable = Watchable> {
 
    triggerEffects() { // the surrounding effect when original trigger happened
       for (const [phase, effects] of this.effects) {
-         if (phase === Phase.SYNC) {
-            this.runSyncEffects(effects);
+         if (phase === 0) {
+            this.runSyncEffects(effects!);
          }
          else {
-            this.scheduleEffects(effects, phase)
+            $effectCycle().scheduleEffects(effects!, phase)
+            this.scheduleReabsorption(phase)
          }
       }
    }
 
+   private scheduleReabsorption(phase: number){
+      const completed = this.completedEffects.get(phase);
+      if (completed || completed === null) return;
+      this.completedEffects.set(phase, null);
+      onEffectCycleComplete(() => {
+         const completed = this.completedEffects.get(phase)
+         if (completed) this.effects.absorb(completed, phase)
+      })
+   }
+
    private runSyncEffects(effects: EffectVine) {
       for (const effect of effects) {
-         if (effectStack.has(effect)) continue;
+         if (effectStack.has(effect)) continue; // prevents infinite loops
          effectStack.push(effect)
          try {
             effect.task()
@@ -99,13 +98,6 @@ export class Watched<T extends Watchable = Watchable> {
          finally {
             effectStack.pop()
          }
-      }
-   }
-
-   private scheduleEffects(effects: EffectVine, phase: Exclude<Phase, Phase.SYNC>) {
-      const effectCycle = $effectCycle()
-      for (const effect of effects) { //TODO: Can we skip this loop and just pass the whole set to the task runner?
-         effectCycle.scheduleEffect(effect, phase)
       }
    }
 
@@ -126,8 +118,3 @@ export class Watched<T extends Watchable = Watchable> {
    //    //QUESTION: Do I need to release watchable too? this.watchable = undefined?
    // }
 }
-
-
-// export function asWatched(quark: Watchable): Watched {
-//    return quark.asWatched ?? (quark.asWatched = new Watched(quark))
-// }

@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "../ionic/IonicCompound";
-import { Phase, $effectCycle } from "./EffectCycle";
+import { $effectCycle, PHASE_ONE, SYNC } from "./EffectCycle";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { Ion, isIon } from "../ion/Ion";
@@ -24,7 +24,7 @@ import { EffectLink } from "./EffectLink";
 
 
 export type EffectOptions = {
-   phase?: Phase;
+   phase?: number;
    cycle?: 'current' | 'next'
    eager?: true;
    isEqual?: (prevState?: any, newState?: any) => boolean;
@@ -157,7 +157,7 @@ export function watch<
 
    let eager: boolean | undefined = options?.eager
    const isEqual = options?.isEqual ?? isStrictlyEqual
-   const phase = options?.phase ?? Phase.BEFORE_RENDER
+   const phase = options?.phase ?? PHASE_ONE;
 
    let prevState = getValue(subject); // this is where initial tracking happens if derivation not already initialized 
 
@@ -202,8 +202,8 @@ function isStrictlyEqual(oldState: unknown, newState: unknown) {
 
 type WrappedEffect = () => void
 
-function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: Phase) {
-   if (phase === Phase.SYNC) {
+function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: number) {
+   if (phase === SYNC) {
       effect()
    }
    else {
@@ -221,7 +221,7 @@ function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: Phase) {
  * In most cases, an ionic effect will be a simple void function that performs side effects.
  */
 function initIonicEffect(effect: IonicTask, options?: EffectOptions) {
-   const phase = options?.phase || Phase.BEFORE_RENDER;
+   const phase = options?.phase || PHASE_ONE;
    const retrack = options?.retrack || false;
 
    const wrappedEffect = createIonicEffect(effect, retrack)
@@ -242,7 +242,7 @@ function initIonicEffect(effect: IonicTask, options?: EffectOptions) {
 function setUpWatcher(
    subject: Watched,
    effect: WrappedEffect,
-   phase: Phase,
+   phase: number,
    options: EffectOptions,
    compound?: IonicCompound //
 ) {
