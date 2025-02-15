@@ -6,7 +6,7 @@ import { Ion, isIon } from "../ion/ion";
 import { noop } from "@rue/utils";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { isIonizedModel } from "../ionized/ionize";
-import { isParticleMorphic, ParticleMorph } from "../Compound/Particle";
+import { isParticleMorphic, ParticleMorph } from "../compound/Particle";
 import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
 import { isInertIon } from "../ion/Neutron";
 import { isGetter } from "./watch";

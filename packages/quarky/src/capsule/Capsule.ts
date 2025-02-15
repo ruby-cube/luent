@@ -2,7 +2,6 @@ import { AnyObject } from "@rue/types";
 import { Traceable, traceableMethodWrap, TraceableSubject } from "../debug/debug";
 import { DEVLabellable } from "../debug/DEVLabellable";
 import { QUARK, Quark, QuarkOf } from "../Quark";
-import { Mutable } from "../actions/Mutable";
 
 
 export type Capsule = DEVLabellable & TraceableSubject & {
@@ -13,7 +12,7 @@ export type MutableCapsule = Capsule & {
    [QUARK]: {
       asReined?: object
       asReadonly?: object
-   } & Mutable
+   }
 }
 
 

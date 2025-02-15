@@ -1,6 +1,6 @@
 import { IterableSet } from "@rue/utils";
 import { Compound } from "./Compound";
-import { Mutation } from "../actions/Mutable";
+import { Mutation } from "../mutation/Mutable";
 import { EntityQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { AnyObject } from "@rue/types";
 
@@ -35,10 +35,10 @@ export class Particle {
       this.cleanUp?.(this.quark)
    }
 
-   triggerCompounds(mutation: Mutation) {
+   triggerCompounds() {
       const compounds = this.compounds;
       for (const compound of compounds) {
-         compound.trigger(mutation)
+         compound.trigger()
       }
    }
 

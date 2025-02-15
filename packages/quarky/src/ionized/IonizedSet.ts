@@ -4,7 +4,7 @@ import { defineIonizedStructure, GetPreopData, IonizedModel, triggerIonizedModel
 import { getAtomicOp, triggerOp } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { getObservedPion, triggerPion } from "./Pion";
-import { Mutation } from "../actions/Mutable";
+import { Mutation } from "../mutation/Mutable";
 import { quarkOf } from "../Quark";
 
 // declare global {
@@ -347,16 +347,15 @@ export function useDeleteOp(
 
       modelQuark.recordOp?.(mutation)
 
-      triggerPion(getObservedPion(ionicModel, 'size'), mutation)
-      triggerOp(getAtomicOp(ionicModel.has, key), mutation)
+      triggerPion(getObservedPion(ionicModel, 'size'))
+      triggerOp(getAtomicOp(ionicModel.has, key))
 
       if (target instanceof Map) {
-         triggerOp(getAtomicOp(ionicModel.get, key), mutation)
+         triggerOp(getAtomicOp(ionicModel.get, key))
       }
 
       triggerIonizedModel(
-         ionicModel,
-         mutation
+         ionicModel
       )
 
       return output;

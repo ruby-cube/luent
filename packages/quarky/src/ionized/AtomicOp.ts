@@ -2,8 +2,8 @@
 
 
 
-import { Mutation } from "../actions/Mutable";
-import { asParticle, ParticleMorph, Particle } from "../Compound/Particle";
+import { Mutation } from "../mutation/Mutable";
+import { asParticle, ParticleMorph, Particle } from "../compound/Particle";
 import { Quark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
 import { noop } from "@rue/utils";
@@ -84,6 +84,6 @@ export function getAtomicOp(
    return op[TRACKED]?.get(entryKey)
 }
 
-export function triggerOp(quark: AtomicOp | undefined, mutation: Mutation) {
-   quark?.asParticle?.triggerCompounds(mutation)
+export function triggerOp(quark: AtomicOp | undefined) {
+   quark?.asParticle?.triggerCompounds()
 }

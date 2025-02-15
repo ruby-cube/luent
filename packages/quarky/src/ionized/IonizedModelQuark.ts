@@ -3,12 +3,12 @@ import { __DEV__getTrace } from "../../../flask/debug"
 import { Traceable } from "../debug/debug"
 import { CustomIonizedModelConfig, IonizedModel } from "./IonizedModel"
 import { unwatch, watch, Watchable, Watched } from "../watch/Watched"
-import { ParticleMorph, Particle } from "../Compound/Particle"
-import { CompoundMorph } from "../Compound/Compound"
+import { ParticleMorph, Particle } from "../compound/Particle"
+import { CompoundMorph } from "../compound/Compound"
 import { IonizedCompound } from "./IonizedCompound"
 import { EntityQuark, Quark, QuarkOf } from "../Quark"
 import { Capsule } from "../capsule/Capsule"
-import { Mutation } from "../actions/Mutable"
+import { Mutable, Mutation } from "../mutation/Mutable"
 import { PionQuark } from "./Pion"
 import { IterableSet } from "@rue/utils"
 
@@ -28,8 +28,7 @@ import { IterableSet } from "@rue/utils"
 // & ParticleMorph
 // & CompoundMorph<IonizedCompound>
 
-export class IonizedModelQuark
-   implements Watchable, QuarkOf<Capsule>, ParticleMorph, CompoundMorph<IonizedCompound> {
+export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
    asReined?: object
    asReadonly?: object
@@ -48,9 +47,8 @@ export class IonizedModelQuark
       }
       this.unwatch = () => unwatch.call(this)
    }
+   asMutable: Mutable = new Mutable()
 
-   recordOp: ((mutation: Mutation) => void) | undefined
-   mutation: undefined
    asCompound?: IonizedCompound
    asParticle?: Particle | undefined
    asWatched?: Watched<Watchable> | undefined

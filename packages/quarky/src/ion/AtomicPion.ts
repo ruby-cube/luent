@@ -1,13 +1,13 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, ionize, toRaw } from "../ionized/ionize";
 import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
-import { asParticle, Particle } from "../Compound/Particle";
+import { asParticle, Particle } from "../compound/Particle";
 import { quarkOf, QUARK, Quark, EntityQuark, QuarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { Ion, isIon, AtomicIon } from "./ion";
 import { MutableCapsule } from "../capsule/Capsule";
-import { Mutation } from "../actions/Mutable";
+import { Mutation } from "../mutation/Mutable";
 import { __DEV__traceMethodCall, Traceable } from "../debug/debug";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
 import { Atomic } from "./Atomic";
@@ -61,8 +61,6 @@ export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
    unwatch: () => void;
 
    __DEV__asTraceable: Traceable = new Traceable()
-   recordOp: ((mutation: Mutation) => void) | undefined;
-   mutation: undefined
 
    private _entity: undefined | $AtomicPionState
 

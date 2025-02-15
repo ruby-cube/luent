@@ -1,5 +1,5 @@
 import { Capsule } from "../capsule/Capsule";
-import { Particle } from "../Compound/Particle";
+import { Particle } from "../compound/Particle";
 import { Traceable } from "../debug/debug";
 import { Ion, NonVoid } from "../ion/ion";
 import { IonizedModel } from "../ionized/IonizedModel";

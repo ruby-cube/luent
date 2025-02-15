@@ -10,16 +10,19 @@ import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../de
 import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
-import { Mutable, MutableEntity, Mutation } from "../actions/Mutable";
+import { Mutable, MutableEntity, Mutation } from "../mutation/Mutable";
 import { asPion, asPionQuark, getObservedPion } from "./Pion";
 import { Atomic, trigger } from "../ion/Atomic";
 import { AtomicPionQuark } from "../ion/AtomicPion";
-import { ParticleMorph } from "../Compound/Particle";
+import { ParticleMorph } from "../compound/Particle";
+import { CompoundMorph } from "../compound/Compound";
+import { Watchable } from "../watch/Watched";
+import { IonizedCompound } from "./IonizedCompound";
 
 // // /** INTERNAL */
 export type IonizedModel = {
-   [QUARK]: IonizedModelQuark
-} & Capsule & AnyObject
+   [QUARK]: Watchable & ParticleMorph & CompoundMorph<IonizedCompound> & IonizedModelQuark
+} & Capsule & MutableEntity  & AnyObject
 
 // for inert properties use absorbed neutrons
 // const frog = ionized({
@@ -139,7 +142,7 @@ export type CustomIonizedModelConfig = {
 }
 
 type BeforeSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, oldValue: any) => void
-type AfterSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, newValue: any, oldValue: any, mutation: Mutation) => void
+type AfterSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, newValue: any, oldValue: any) => void
 
 type CreateTrackableOp = (target: AnyObject, ionizedModel: IonizedModel) => (...args: any[]) => any
 
@@ -182,13 +185,13 @@ function isCustomIonicStructure(value: any) {
 //     return config.mutatingOps
 // }
 
-function emitAfterSet(model: IonizedModel, key: PropertyKey, newValue: any, oldValue: any, mutation: Mutation) {
+function emitAfterSet(model: IonizedModel, key: PropertyKey, newValue: any, oldValue: any) {
    const quark = quarkOf(model)
    const configs = quark.structureConfigs;
    if (configs[0].structure === Object) return;
    for (const config of configs) {
       const afterSet = config.afterSet
-      if (afterSet) afterSet(model, quark, key, newValue, oldValue, mutation)
+      if (afterSet) afterSet(model, quark, key, newValue, oldValue)
    }
 }
 
@@ -596,13 +599,12 @@ export function reactiveSetter(
       oldState,
    )
 
-   if (pion && pion instanceof AtomicPionQuark) trigger(pion, mutation)
+   if (pion && pion instanceof AtomicPionQuark) trigger(pion)
 
-   emitAfterSet(model, key, newState, oldState, mutation) // for array.length === 0 and array.at(-1)
+   emitAfterSet(model, key, newState, oldState) // for array.length === 0 and array.at(-1)
 
    triggerIonizedModel(
-      model,
-      mutation
+      model
    )
 
    return true;
@@ -610,11 +612,10 @@ export function reactiveSetter(
 
 
 export function triggerIonizedModel(
-   model: IonizedModel,
-   mutation: Mutation
+   model: IonizedModel
 ) {
    const { asParticle, asWatched } = quarkOf(model);
-   asParticle?.triggerCompounds(mutation)
+   asParticle?.triggerCompounds()
    asWatched?.triggerEffects()
 }
 
@@ -637,13 +638,10 @@ export function setAbsorbedIonState(model: IonizedModel, key: PropertyKey, ion: 
       }
       const newState = ion.state // get the state that has been maybeIonized
 
-      const mutation = getMutation(<MutableEntity>ion)!
-
-      emitAfterSet(model, key, newState, oldState, mutation)
+      emitAfterSet(model, key, newState, oldState)
 
       triggerIonizedModel(
          model,
-         mutation
       )
       return true;
    }
@@ -651,10 +649,10 @@ export function setAbsorbedIonState(model: IonizedModel, key: PropertyKey, ion: 
    return false;
 }
 
-function getMutation(ion: HasQuark<Mutable>) {
-   const quark = quarkOf(ion)
-   return quark.mutation;
-}
+// function getMutation(ion: HasQuark<Mutable>) {
+//    const quark = quarkOf(ion)
+//    return quark.mutation;
+// }
 
 
 function isWritable(target: Object, key: PropertyKey) {

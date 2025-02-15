@@ -1,7 +1,7 @@
-import { Particle } from "../Compound/Particle";
-import { Compound, CompoundMorph, track, untrackParticles } from "../Compound/Compound";
+import { Particle } from "../compound/Particle";
+import { Compound, CompoundMorph, track, untrackParticles } from "../compound/Compound";
 import { Watchable } from "../watch/Watched";
-import { Mutation } from "../actions/Mutable";
+import { Mutation } from "../mutation/Mutable";
 
 const trackerStack: (Compound | null)[] = []
 
@@ -70,7 +70,7 @@ export class IonicCompound<T extends IonicCompoundMorph = { asCompound?: IonicCo
 
    track = track
 
-   trigger!: (mutation: Mutation) => void
+   trigger!: () => void
 
    trackedCall(fn: () => any) {
       this.untrackParticles()

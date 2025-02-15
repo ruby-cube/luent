@@ -1,4 +1,4 @@
-import { triggerEffects } from "../Compound/Compound";
+import { triggerEffects } from "../compound/Compound";
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { unwatch, watch, Watched } from "../watch/Watched";

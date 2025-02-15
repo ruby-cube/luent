@@ -1,12 +1,14 @@
 import { isFunction } from "@rue/utils";
-import { ResumableListener, Listener } from "./Listener";
+import { Listener } from "./Listener";
 
 
+type Task = ()=>void
 
-export type AbortSignal = () => void
-export type RegisterAbortSignal = (cleanup: () => void) => Listener
+export type AbortSignal = (() => void) | OnAbort
 
-export function AbortSignal(): () => void {
+export type OnAbort = (task: Task) => Listener
+
+export function AbortSignal() {
     let cleanups: Set<() => void> | null = new Set()
 
     return function abort(cleanup?: any) {

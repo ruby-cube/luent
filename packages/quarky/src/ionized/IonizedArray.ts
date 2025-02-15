@@ -4,7 +4,7 @@ import { AtomicOp, getAtomicOp, triggerOp } from "./AtomicOp";
 import { defineIonizedStructure, GetPreopData, IonizedModel, useTrackableGetOp } from "./IonizedModel";
 import { nontrackableIterableKeys } from "./IonizedSet";
 import { getObservedPion, PionQuark, triggerPion } from "./Pion";
-import { Mutation } from "../actions/Mutable";
+import { Mutation } from "../mutation/Mutable";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 
 type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;

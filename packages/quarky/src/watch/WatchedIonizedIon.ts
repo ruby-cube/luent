@@ -1,4 +1,4 @@
-import { triggerEffects } from "../Compound/Compound";
+import { triggerEffects } from "../compound/Compound";
 import { $AtomicIonState } from "../ion/AtomicIon";
 import { $AtomicPionState } from "../ion/AtomicPion";
 import { IonicCompound, IonicCompoundMorph } from "../ionic/IonicCompound";

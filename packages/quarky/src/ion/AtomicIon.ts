@@ -1,5 +1,5 @@
 import { __DEV__traceMethodCall, Traceable } from "../debug/debug";
-import { isIonizedModel, ionize } from "../ionized/ionize";
+import { ionize } from "../ionized/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
@@ -7,9 +7,9 @@ import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { __DEV__initTraceability, attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
 import { AtomicIon } from "./ion";
-import { unwatch, watch, Watched } from "../watch/Watched";
+import { unwatch, watch } from "../watch/Watched";
 import { Atomic, getAtomicState, trigger } from "./Atomic";
-import { Mutation } from "../actions/Mutable";
+import { Mutable, MutableEntity, Mutation } from "../mutation/Mutable";
 
 /** INTERNAL */
 export type $AtomicIonState = AtomicIon & MutableCapsule & {
@@ -18,7 +18,7 @@ export type $AtomicIonState = AtomicIon & MutableCapsule & {
       state: any,
       ionized: boolean,
    } & Atomic & EntityQuark<$AtomicIonState>
-}
+} & MutableEntity
 
 /** 
  * INTERNAL 
@@ -43,12 +43,11 @@ export function createAtomicIon(
       ionized,
       entity: $state,
       type: ATOMIC_ION,
+      asMutable: new Mutable(),
       asParticle: undefined,
       asWatched: undefined,
       asReadonly: undefined,
       asReined: undefined,
-      recordOp: undefined,
-      mutation: undefined,
       __DEV__asTraceable: new Traceable(),
 
       watch,
@@ -82,9 +81,8 @@ export function createAtomicIon(
             state,
             oldState
          )
-         ion.mutation = mutation; //TODO: how do I set to undefined after everything is done?
-         
-         trigger(ion, mutation)
+
+         trigger(ion)
          return state;
       }
    })

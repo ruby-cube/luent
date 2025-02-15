@@ -3,13 +3,13 @@ import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
 import { quarkOf, QUARK, hasQuark, EntityQuark, QuarkOf, Quark } from "../Quark";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsule/Capsule";
-import { ParticleMorph } from "../Compound/Particle";
+import { ParticleMorph } from "../compound/Particle";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { emitSignal, Traceable } from "../debug/debug";
 import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
 import { Ion, NonVoid } from "../ion/ion";
-import { CompoundMorph, triggerEffects } from "../Compound/Compound";
-import { Mutation } from "../actions/Mutable";
+import { CompoundMorph, triggerEffects } from "../compound/Compound";
+import { Mutation } from "../mutation/Mutable";
 
 /**
 * Managed Derivation Ion

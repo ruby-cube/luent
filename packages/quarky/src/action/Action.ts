@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { hasQuark, quarkOf } from "../Quark";
-import { Mutable, Mutation, MutableEntity } from "./Mutable";
+import { Mutable, Mutation, MutableEntity } from "../mutation/Mutable";
 
 // Actions may span mulitple effect cycles
 
@@ -47,6 +47,7 @@ class Action {
    snapshot(target: AnyObject, deep: boolean) {
       if (!hasQuark(target)) return false; //TODO: or, if it is a plain object, we can do the clone method instead of mutations. What about derivations from neutrons?
       if (deep) {
+         storeMutations(this, <MutableEntity>target)
          //TODO: What about arrays, or arrays with properties on them, or tuples?
          for (const key in target) {
             const value = (<AnyObject>target)[key]
@@ -90,7 +91,7 @@ function storeMutations(action: Action, target: MutableEntity) {
    quark.recordOp = (mutation: Mutation) => {
       const mutations = action.mutations;
       if (mutations.at(-1) === mutation) return; // prevents the same mutation from being recorded multiple times
-      action.mutations.push(mutation)
+      mutations.push(mutation)
    };
    action.onCompleted(() => {
       quark.recordOp = undefined;

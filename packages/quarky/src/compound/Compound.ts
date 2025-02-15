@@ -1,6 +1,6 @@
 import { asParticle, Particle, ParticleMorph } from "./Particle"
 import { Watchable } from "../watch/Watched"
-import { Mutation } from "../actions/Mutable"
+import { Mutation } from "../mutation/Mutable"
 
 
 /**
@@ -18,7 +18,7 @@ export interface Compound {
    quark: Watchable
    particles: Particle[]
    track(entity: ParticleMorph): Particle
-   trigger(mutation: Mutation): void
+   trigger(): void
    untrackParticles(): void
 }
 

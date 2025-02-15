@@ -1,10 +1,10 @@
-import { ParticleMorph, Particle } from "../Compound/Particle";
+import { ParticleMorph, Particle } from "../compound/Particle";
 import { AnyObject } from "@rue/types";
 import { toRaw } from "./ionize";
 import { isIon } from "../ion/ion";
-import { Compound, track, untrackParticles, CompoundMorph, triggerEffects } from "../Compound/Compound";
+import { Compound, track, untrackParticles, CompoundMorph, triggerEffects } from "../compound/Compound";
 import { IonizedModelQuark } from "./IonizedModelQuark";
-import { Mutation } from "../actions/Mutable";
+import { Mutation } from "../mutation/Mutable";
 import { hasQuark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
 import { IterableSet } from "@rue/utils";
@@ -49,9 +49,8 @@ export class IonizedCompound implements Compound {
 
    track = track
 
-   trigger(mutation: Mutation): void {
-      this.quark.recordOp?.(mutation)
-      this.quark.asParticle?.triggerCompounds(mutation)
+   trigger(): void {
+      this.quark.asParticle?.triggerCompounds()
       triggerEffects(this)
    }
 
