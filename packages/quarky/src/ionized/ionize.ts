@@ -99,7 +99,7 @@ const SHOULD_IONIZE = Symbol('should ionize')
 //API
 export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: string]: (...args: any[]) => any }): M extends AnyObject ? T & M : T {
    if (!isObject(target))
-      return { [SHOULD_IONIZE]: target }
+      return { [SHOULD_IONIZE]: target };
    if (isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;

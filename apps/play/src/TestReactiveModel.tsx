@@ -1,6 +1,6 @@
 import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { ion, __addDevName, DerivedIon, ionize, toRaw, watch } from "@rue/quarky";
+import { ion, __addDevName, ionize, toRaw, watch } from "@rue/quarky";
 
 
 const randomColor = useRandomColorGenerator()

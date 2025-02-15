@@ -372,6 +372,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          const value = entry[key];
          if (isIon(value)) {
             watch(value, ({ state }/* value: string | number | Falsey */) => {
+               console.log("!!!! Style", entry, state)
                assignStyleProperty(style, toStylePropertyName(key), state)
             }, {
                eager: true,

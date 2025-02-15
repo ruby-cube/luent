@@ -19,7 +19,7 @@ const $count = ion(0)
  * Should prefer dervations over this method, 
  * but let's say we want to "auto correct" changes to a message.
  */
-watch($message, ({ newState: msg }) => {
+watch($message, ({ state: msg }) => {
    if (msg.endsWith("!")) {
       $message.state = msg.slice(-1) // we do not expect this to cause effect to rerun. 
       $count.state++ // we expect this to cause effects elsewhere to run. But what if the effects have already run? 
@@ -54,7 +54,7 @@ This way effects will be run more efficiently instead of having to run the same 
 
 const $active = ion(false)
 
-watch($message, ({ newState: msg }) => {
+watch($message, ({ state: msg }) => {
    watch($active, () => {
       if (msg.endsWith("!")) {
          $message.state = msg.slice(-1) // This should cause an animation, like nesting request animation frame

@@ -21,7 +21,7 @@ export class ChangeEvent<S = unknown> {
    // trace?: string;
    constructor(
       public prevState: S,
-      public state: S ,
+      public state: S,
    ) { }
 }
 
@@ -166,7 +166,7 @@ export function watch<
    watchSubject.onDiscard(quark.unwatch)
 
    let eager: boolean | undefined = options?.eager
-   const isEqual = options?.isEqual ?? isStrictlyEqual
+   const isEqual = options?.isEqual ?? isIonizedModel(prevState) ? () => false : isStrictlyEqual
    const phase = options?.phase ?? PHASE_ONE;
 
 

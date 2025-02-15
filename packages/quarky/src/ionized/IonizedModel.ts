@@ -513,8 +513,8 @@ function bindNativeMethod(
       return op;
    }
    else {
-      const createOp = config[nativeKey].createOp
-      const getPreopData = config[nativeKey].preop
+      const createOp = config.createOp
+      const getPreopData = config.preop
       const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, quark, getPreopData))
          : createOp(target, ionizedModel, quark, getPreopData)
       switchMap.set(publicKey, () => op)

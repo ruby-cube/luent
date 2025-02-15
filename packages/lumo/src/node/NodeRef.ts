@@ -39,7 +39,7 @@ export function isNodesRef(value: any): value is NodesRef {
    return value instanceof Object && INTERNAL in value && value[INTERNAL] instanceof MetaNodesRef
 }
 
-function ref<
+export function ref<
    T extends RefSource
    = RefSource
 >(source: T, array?: NodeReferent<T>[]) {

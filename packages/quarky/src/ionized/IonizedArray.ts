@@ -311,6 +311,7 @@ export function installIonicArray() {
 
          getAtomicPion(model, 'length')?.trigger()
 
+         //FIX: These need to be different depending on the op
          triggerObservedIndices(model, modelQuark.pions, prevLength, newLength)
 
          return output;

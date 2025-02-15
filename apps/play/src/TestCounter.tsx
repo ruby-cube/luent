@@ -7,7 +7,7 @@
 // - derived signal with memo
 
 import { component } from "@rue/lumo"
-import { ion, SYNC, watch } from "@rue/quarky"
+import { ion, ionize, o$, SYNC, watch } from "@rue/quarky"
 
 export function TestCounter() {
    const $count = ion(0, {
@@ -36,24 +36,28 @@ export function TestCounter() {
 }
 
 
-// export function TestCounterModel() {
+export function TestCounterModel() {
 
-//    const counter = ionize({
-//       count: 0
-//    }, {
-//       increment(){
-//          counter.count++
-//       },
-//       decrement(){
-//          counter.count--
-//       }
-//    })
+   const counter = ionize({
+      count: 0
+   }, {
+      increment(){
+         counter.count++
+      },
+      decrement(){
+         counter.count--
+      }
+   })
 
-//    return component(
-//       <>
-//          <div>{counter.$count}</div>
-//          <button on:click={counter.increment}>increment</button>
-//          <button on:click={counter.decrement}>decrement</button>
-//       </>
-//    )
-// }
+   watch(counter, (state)=>{
+      console.log('changed', state)
+   })
+
+   return component(
+      <>
+         <div>{o$(counter).$count}</div>
+         <button on:click={counter.increment}>increment</button>
+         <button on:click={counter.decrement}>decrement</button>
+      </>
+   )
+}

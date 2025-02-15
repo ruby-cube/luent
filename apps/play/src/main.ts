@@ -10,7 +10,8 @@ import './style.css'
 // import { TestConditional } from './TestConditional';
 // import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { component, createApp } from '@rue/lumo';
-import { TestCounter } from './TestCounter';
+import { TestCounter, TestCounterModel } from './TestCounter';
+import { TestApp } from './TestApp';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -41,7 +42,7 @@ import { TestCounter } from './TestCounter';
 
 // frog;
 
-const app = createApp(TestCounter)
+const app = createApp(TestApp)
 
 // if (__DEV__) configureFlask({
 //     warnNoCleanup: true
