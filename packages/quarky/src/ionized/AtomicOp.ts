@@ -88,3 +88,9 @@ export function getAtomicOp(
    return op[TRACKED]?.get(entryKey)
 }
 
+export function getAtomicOps(
+   op: Function & TrackableOp
+){
+   return op[TRACKED]
+}
+

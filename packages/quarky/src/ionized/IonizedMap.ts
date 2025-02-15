@@ -1,6 +1,6 @@
 import { storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
 import { nontrackableIterableKeys, useClearOp, useDeleteOp } from "./IonizedSet";
-import { getAtomicOp } from "./AtomicOp";
+import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { defineIonizedStructure, useTrackableGetOp } from "./IonizedModel";
 import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../mutation/Mutable";
@@ -106,13 +106,23 @@ export function installIonicMap() {
          },
          clear: {
             createOp(target, ionizedModel, quark, getPreopData) {
-
-               return useClearOp(
+               const clearOp = useClearOp(
                   ionizedModel,
                   quark,
                   target,
                   getPreopData!
                )
+
+               return () => {
+                  const output = clearOp()
+                  const getOps = getAtomicOps(ionizedModel.get)
+                  if (getOps) {
+                     for (const [_, atomicOp] of getOps) {
+                        atomicOp.trigger()
+                     }
+                  }
+                  return output;
+               }
             },
 
             preop(target) {

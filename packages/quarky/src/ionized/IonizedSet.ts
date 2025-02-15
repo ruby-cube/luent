@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { storeSnapshot, toRaw } from "./ionize";
 import { defineIonizedStructure, GetPreopData, IonizedModel, useTrackableGetOp } from "./IonizedModel";
-import { getAtomicOp } from "./AtomicOp";
+import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../mutation/Mutable";
@@ -170,7 +170,6 @@ export function installIonicSet() {
                ionizedModel.add(preopData)
             }
          },
-
       }
    })
 }
@@ -381,14 +380,10 @@ export function useClearOp(
 
       modelQuark.trigger()
 
-      const trackedEntries = modelQuark.observedEntryKeys
-      if (trackedEntries) {
-         for (const entryKey of trackedEntries) {
-            getAtomicOp(ionizedModel.has, entryKey)?.trigger()
-
-            if (target instanceof Map) {
-               getAtomicOp(ionizedModel.get, entryKey)?.trigger()
-            }
+      const hasOps = getAtomicOps(ionizedModel.has)
+      if (hasOps) {
+         for (const [_, atomicOp] of hasOps) {
+            atomicOp.trigger()
          }
       }
 
