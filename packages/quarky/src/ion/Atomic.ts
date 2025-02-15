@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
-import { Mutable, Mutation } from "../actions/Mutable";
-import { ParticleMorph } from "../Compound/Particle";
+import { Mutable, MutableEntity, Mutation } from "../actions/Mutable";
+import { Particle, ParticleMorph } from "../Compound/Particle";
 import { Watchable } from "../watch/Watched";
 import { emitSignal } from "../debug/debug";
 import { getActiveTracker } from "../ionic/IonicCompound";
@@ -15,18 +15,39 @@ export function getAtomicState(target: AnyObject, key: PropertyKey, particle: Pa
 }
 
 
-export function setAtomicState(target: AnyObject, key: PropertyKey, quark: Atomic, oldState: unknown, newState: unknown) {
-   target[key] = newState; // must set state before triggering effects and derivations
-   const { recordOp, asParticle, asWatched } = quark
-   const mutation = recordOp || asParticle ? new Mutation(
-      target,
-      '[[set]]',
-      [key, newState],
-      newState,
-      oldState
-   ) : undefined
-   recordOp?.(mutation!)
-   asParticle?.triggerCompounds(mutation!)
-   asWatched?.triggerEffects()
-   return newState;
+// export function setAtomicState(
+//    mutable: MutableEntity,
+//    rawTarget: AnyObject, //FIX: This needs to be the raw target,
+//    key: PropertyKey,
+//    oldState: unknown,
+//    newState: unknown,
+//    quark: Atomic | undefined,
+// ) {
+//    rawTarget[key] = newState; // must set state before triggering effects and derivations
+//    const mutation = new Mutation(
+//       mutable, //FIX: this needs to be the ionized model and $state
+//       '[[set]]',
+//       [key, newState],
+//       newState,
+//       oldState
+//    )
+//    trigger(quark, mutation)
+//    return mutation
+// }
+
+
+/**
+ * @param quark 
+ * @param op 
+ * @param args 
+ * @param output 
+ * @param preopData 
+ */
+export function trigger(
+   quark: Atomic,
+   mutation: Mutation
+) {
+   quark.recordOp?.(mutation)
+   quark.asParticle?.triggerCompounds(mutation!)
+   quark.asWatched?.triggerEffects()
 }

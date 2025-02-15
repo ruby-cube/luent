@@ -1,9 +1,11 @@
 import { AnyObject } from "@rue/types";
 import {storeSnapshot, toRaw } from "./ionize";
-import { defineIonizedStructure, GetPreopData, useTrackableGetOp } from "./IonizedModel";
-import { getAtomicOp } from "./AtomicOp";
+import { defineIonizedStructure, GetPreopData, IonizedModel, triggerIonizedModel, useTrackableGetOp } from "./IonizedModel";
+import { getAtomicOp, triggerOp } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
-import { getObservedPion } from "./Pion";
+import { getObservedPion, triggerPion } from "./Pion";
+import { Mutation } from "../actions/Mutable";
+import { quarkOf } from "../Quark";
 
 // declare global {
 //    interface Set<T> {
@@ -335,24 +337,26 @@ export function useDeleteOp(
 
       storeSnapshot(modelQuark)
 
-      const sizeProp = getObservedPion(ionicModel, 'size')
-      if (sizeProp)
-         trigger(sizeProp, newSize, oldSize);
-
-      const hasOp = getAtomicOp(ionicModel.has, key)
-      if (hasOp) triggerIonicAtom(hasOp);
-
-      if (target instanceof Map) {
-         const getOp = getAtomicOp(ionicModel.get, key)
-         if (getOp) triggerIonicAtom(getOp);
-      }
-
-      triggerIonizedModel(
+      const mutation = new Mutation(
          ionicModel,
          'delete',
          [key],
          output,
          preopData
+      )
+
+      modelQuark.recordOp?.(mutation)
+
+      triggerPion(getObservedPion(ionicModel, 'size'), mutation)
+      triggerOp(getAtomicOp(ionicModel.has, key), mutation)
+
+      if (target instanceof Map) {
+         triggerOp(getAtomicOp(ionicModel.get, key), mutation)
+      }
+
+      triggerIonizedModel(
+         ionicModel,
+         mutation
       )
 
       return output;

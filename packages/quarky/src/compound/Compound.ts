@@ -2,10 +2,18 @@ import { asParticle, Particle, ParticleMorph } from "./Particle"
 import { Watchable } from "../watch/Watched"
 import { Mutation } from "../actions/Mutable"
 
+
+/**
+ * INTERNAL
+ */
 export type CompoundMorph<T extends Compound = Compound> = {
    asCompound?: T
 } & Watchable
 
+
+/**
+ * INTERNAL
+ */
 export interface Compound {
    quark: Watchable
    particles: Particle[]
@@ -14,6 +22,13 @@ export interface Compound {
    untrackParticles(): void
 }
 
+
+/**
+ * INTERNAL METHOD
+ * @param this 
+ * @param entity 
+ * @returns 
+ */
 export function track(this: Compound, entity: ParticleMorph) {
    const particle = asParticle(entity)
    if (particle.compounds.has(this)) return particle;
@@ -22,6 +37,11 @@ export function track(this: Compound, entity: ParticleMorph) {
    return particle;
 }
 
+
+/**
+ * INTERNAL METHOD
+ * @param this 
+ */
 export function untrackParticles(this: Compound) {
    this.particles?.forEach(particle => {
       particle.dissociate(this)
@@ -29,6 +49,12 @@ export function untrackParticles(this: Compound) {
    this.particles = []
 }
 
+
+/**
+ * INTERNAL PROCEDURE
+ * 
+ * @param compound 
+ */
 export function triggerEffects(compound: Compound) {
    compound.quark.asWatched?.triggerEffects()
 }

@@ -20,8 +20,7 @@ export function TestCounter() {
    })
    const $doubleCount = ion(() => $count() * 2)
 
-   watch($count, (prevState) => {
-      console.log(prevState, $count())
+   watch($count, () => {
       $count.increment()
    }, {phase: SYNC})
 

@@ -1,9 +1,9 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
-import { getAtomicOp } from "./AtomicOp";
+import { AtomicOp, getAtomicOp, triggerOp } from "./AtomicOp";
 import { defineIonizedStructure, GetPreopData, IonizedModel, useTrackableGetOp } from "./IonizedModel";
 import { nontrackableIterableKeys } from "./IonizedSet";
-import { getObservedPion } from "./Pion";
+import { getObservedPion, PionQuark, triggerPion } from "./Pion";
 import { Mutation } from "../actions/Mutable";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 
@@ -221,10 +221,8 @@ export function installIonicArray() {
          },
       },
 
-      afterSet(ionicModel, meta, key, newValue, oldValue) {
-         const mutation = new Mutation(ionicModel, '[[set]]', [key, newValue], newValue, oldValue)
-         const op = isIntegerKey(key) ? getAtomicOp(ionicModel.at, key) : null
-         op?.asParticle.triggerCompounds(mutation)
+      afterSet(ionicModel, meta, key, newValue, oldValue, mutation) {
+         if (isIntegerKey(key)) triggerOp(getAtomicOp(ionicModel.at, key), mutation)
 
          const observedIndices = meta.observedEntryKeys
          if (observedIndices && key === 'length') {
@@ -235,11 +233,9 @@ export function installIonicArray() {
                }
                const index = parseInt(indexKey)
                if (index > newValue || index > oldValue) {
-                  const prop = getObservedPion(ionicModel, indexKey)
-                  prop?.asParticle?.triggerCompounds(mutation)
-                  prop?.asWatched?.triggerEffects()
-                  const op = getAtomicOp(ionicModel.at, index)
-                  op?.asParticle.triggerCompounds(mutation)
+                  if (key !== indexKey)
+                     triggerPion(getObservedPion(ionicModel, indexKey), mutation)
+                  triggerOp(getAtomicOp(ionicModel.at, index), mutation)
                }
             }
          }

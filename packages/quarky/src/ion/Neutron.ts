@@ -1,4 +1,3 @@
-import { isFunction } from "@rue/utils";
 import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { shouldIonize } from "./AtomicIon";
 import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsule/Capsule";
@@ -20,7 +19,7 @@ export type $NeutronState = AtomicIon & Capsule & {
       type: symbol;
       inert: true;
       state: any,
-      stateIsIonized: boolean,
+      ionized: boolean, //TODO: remove? an ionized neutron is useless because the watcher will never be triggered... to work, you need to make the neutron reactive.
    } & EntityQuark<$NeutronState>
 }
 
@@ -35,13 +34,13 @@ const INERT_ION = Symbol('atomic neutron')
 export function createAtomicNeutron(
    state: any,
    methods?: object,
-   stateIsIonized: boolean = false
+   ionized: boolean = false
 ) {
    const $ion = (() => ion.state) as $NeutronState
 
    const ion: NeutronQuark = {
       state,
-      stateIsIonized,
+      ionized,
       inert: true,
       entity: $ion,
       type: INERT_ION,
@@ -61,7 +60,7 @@ export function createAtomicNeutron(
       },
       set: value => {
          __DEV__traceMethodCall(capsuleName, $ion, 'state')
-         return state = shouldIonize(value, stateIsIonized) ? ionize(value) : value
+         return state = shouldIonize(value, ionized) ? ionize(value) : value
       }
    })
 

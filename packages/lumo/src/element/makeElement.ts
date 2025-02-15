@@ -202,8 +202,8 @@ function setUpAttributes(node: Element, attributes: { [key: string]: any | Deriv
       const value = attributes[key]
       //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {
-         watch(value, ({ newState }) => {
-            setAttribute(node, _key, newState)
+         watch(value, ({ state }) => {
+            setAttribute(node, _key, state)
          }, { eager: true, phase: RENDER })
       }
       // else if (isViewBindingKit(value)) {
@@ -266,9 +266,9 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
 
    for (const entry of classes) {
       if (isIon(entry)) {
-         watch(entry, ({ newState, oldState }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
-            if (oldState) removePreviousClasses(oldState, classList)
-            if (newState) addClasses(newState, classList)
+         watch(entry, ({ state, prevState }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
+            if (prevState) removePreviousClasses(prevState, classList)
+            if (state) addClasses(state, classList)
          }, { eager: true, phase: RENDER })
       }
       else if (entry) {
@@ -316,9 +316,9 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
    for (const key in entry) {
       const value = entry[key]
       if (value && isIon(value)) {
-         watch(value, ({ newState, oldState }) => {
-            if (oldState) classList.remove(key)
-            if (newState) classList.add(key)
+         watch(value, ({ state, prevState }) => {
+            if (prevState) classList.remove(key)
+            if (state) classList.add(key)
          }, {
             eager: true,
             phase: RENDER,
@@ -356,8 +356,8 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {
       if (isIon(entry)) {
-         watch(entry, (/* value: string | AnyObject | Falsey */) => {
-            setUpStyleEntry(style, entry());
+         watch(entry, ({state}/* value: string | AnyObject | Falsey */) => {
+            setUpStyleEntry(style, state);
          }, { eager: true, phase: RENDER })
       }
       else {
@@ -371,8 +371,8 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
       for (const key in entry) {
          const value = entry[key];
          if (isIon(value)) {
-            watch(value, ({ newState }/* value: string | number | Falsey */) => {
-               assignStyleProperty(style, toStylePropertyName(key), newState)
+            watch(value, ({ state }/* value: string | number | Falsey */) => {
+               assignStyleProperty(style, toStylePropertyName(key), state)
             }, {
                eager: true,
                phase: RENDER,

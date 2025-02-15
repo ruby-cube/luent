@@ -50,6 +50,7 @@ export class IonizedModelQuark
    }
 
    recordOp: ((mutation: Mutation) => void) | undefined
+   mutation: undefined
    asCompound?: IonizedCompound
    asParticle?: Particle | undefined
    asWatched?: Watched<Watchable> | undefined

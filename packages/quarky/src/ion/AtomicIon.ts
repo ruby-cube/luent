@@ -8,14 +8,15 @@ import { __DEV__label } from "../debug/DEVLabellable";
 import { __DEV__initTraceability, attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
 import { AtomicIon } from "./ion";
 import { unwatch, watch, Watched } from "../watch/Watched";
-import { Atomic, getAtomicState, setAtomicState } from "./Atomic";
+import { Atomic, getAtomicState, trigger } from "./Atomic";
+import { Mutation } from "../actions/Mutable";
 
 /** INTERNAL */
 export type $AtomicIonState = AtomicIon & MutableCapsule & {
    [QUARK]: {
       type: symbol;
       state: any,
-      stateIsIonized: boolean,
+      ionized: boolean,
    } & Atomic & EntityQuark<$AtomicIonState>
 }
 
@@ -25,28 +26,29 @@ export type $AtomicIonState = AtomicIon & MutableCapsule & {
  * */
 export type AtomicIonQuark = QuarkOf<$AtomicIonState>
 
-export function shouldIonize(newValue: unknown, stateIsIonized: boolean): newValue is AnyObject {
-   return newValue instanceof Object && stateIsIonized;
+export function shouldIonize(newValue: unknown, ionized: boolean): newValue is AnyObject {
+   return newValue instanceof Object && ionized;
 }
 
 /** INTERNAL */
 export function createAtomicIon(
    state: any,
    methods?: object,
-   stateIsIonized: boolean = false
+   ionized: boolean = false
 ) {
    const $state = (() => getAtomicState(ion, 'state', ion)) as $AtomicIonState
 
    const ion: AtomicIonQuark = {
       state,
-      stateIsIonized: stateIsIonized ?? isIonizedModel(state),
+      ionized,
       entity: $state,
-      type: PRIMARY_ION,
+      type: ATOMIC_ION,
       asParticle: undefined,
       asWatched: undefined,
       asReadonly: undefined,
       asReined: undefined,
       recordOp: undefined,
+      mutation: undefined,
       __DEV__asTraceable: new Traceable(),
 
       watch,
@@ -71,8 +73,19 @@ export function createAtomicIon(
             // if (__DEV__) ion.asParticle?.triggerCompounds() ?? (ion.asParticle = asParticle(ion), ion.asParticle.triggerCompounds())
             return value;
          }
-         const state = shouldIonize(value, ion.stateIsIonized) ? ionize(value) : value
-         return setAtomicState(ion, 'state', ion, ion.state, state);
+         const state = shouldIonize(value, ion.ionized) ? ionize(value) : value
+         ion.state = state;
+         const mutation = new Mutation(
+            $state,
+            '[[set]]',
+            ['state', state],
+            state,
+            oldState
+         )
+         ion.mutation = mutation; //TODO: how do I set to undefined after everything is done?
+         
+         trigger(ion, mutation)
+         return state;
       }
    })
 
@@ -83,11 +96,15 @@ export function createAtomicIon(
    return $state
 }
 
-const PRIMARY_ION = Symbol('atomic ion')
+const ATOMIC_ION = Symbol('atomic ion')
 
 /**
  * INTERNAL
  */
 export function isAtomicIon(value: unknown): value is $AtomicIonState {
-   return hasQuark(value) && quarkOf(<$AtomicIonState>value).type === PRIMARY_ION
+   return hasQuark(value) && quarkOf(<$AtomicIonState>value).type === ATOMIC_ION
+}
+
+export function isAtomicIonQuark(value: unknown): value is AtomicIonQuark {
+   return value instanceof Object && 'type' in value && value.type === ATOMIC_ION
 }

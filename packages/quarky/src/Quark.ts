@@ -22,3 +22,5 @@ export type EntityQuark<T> = {
    // type: string | symbol,
    entity: T,
 }
+
+export type HasQuark<T = Quark> = {[QUARK]:T}

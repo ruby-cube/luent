@@ -2,6 +2,7 @@ import { noop } from "@rue/utils";
 import { triggerEffects } from "../Compound/Compound";
 import { Watched } from "../watch/Watched";
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
+import { ChangeEvent } from "../watch/watch";
 
 /**
  * NOTES: 
@@ -10,7 +11,7 @@ import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 
 type IonicEffect = IonicCompoundMorph
 
-export type IonicTask<S = unknown> = (prevState?: S) => S
+export type IonicTask<S = unknown> = (event: ChangeEvent<S>) => S
 
 export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
    const compound: IonicCompound<IonicEffect> = new IonicCompound(effect)
@@ -18,21 +19,23 @@ export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
 
    let fn = initialize;
 
+   let state: unknown;
    function effect() {
-      return fn()
+      state = fn(new ChangeEvent(state, state))
+      return state;
    }
 
-   function initialize() {
+   function initialize(event: ChangeEvent) {
       fn = runEffect
-      compound.trackedCall(task)
+      return compound.trackedCall(()=>task(event))
    }
 
-   function runEffect() {
+   function runEffect(event: ChangeEvent) {
       if (retrack) {
-         compound.trackedCall(task)
+         return compound.trackedCall(()=>task(event))
       }
       else {
-         task()
+         return task(event)
       }
    }
 

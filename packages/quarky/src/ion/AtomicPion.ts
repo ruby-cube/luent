@@ -52,6 +52,8 @@ export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
    asReadonly?: Ion
    asReined?: Ion
 
+   ionized: boolean = false;
+
    asWatched?: Watched
    asParticle?: Particle
 
@@ -60,6 +62,7 @@ export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
 
    __DEV__asTraceable: Traceable = new Traceable()
    recordOp: ((mutation: Mutation) => void) | undefined;
+   mutation: undefined
 
    private _entity: undefined | $AtomicPionState
 

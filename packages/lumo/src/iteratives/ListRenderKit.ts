@@ -135,13 +135,13 @@ export class ListRenderKit {
          let clone = isIonizedModel(_data) ? shallowClone(rawData!) : undefined //TODO: need to handle cases when ionizedModel is nested in ion
          //TODO: figure out typing for Set, Map, Object vs Array
 
-         watch(data as any/* FIX: type error*/, ({ newState, oldState }) => { // typecast as one of the options so that typescript won't complain
-            const _oldValue = clone || oldState;
+         watch(data as any/* FIX: type error*/, ({ state, prevState }) => { // typecast as one of the options so that typescript won't complain
+            const _oldValue = clone || prevState;
             if (isIonizedModel(_data)) clone = shallowClone(rawData!) as any[]
-            const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || newState, _oldValue, getUID)
+            const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || state, _oldValue, getUID)
             if (noChange) return;
             if (dynamicNodePod!.length !== _oldValue.length)
-               throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${oldState.length} are mismatched. This should never happen.`)
+               throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${prevState.length} are mismatched. This should never happen.`)
 
             this.castBeforeUpdate();
             this.removeItems(indicesToRemove!);
@@ -151,7 +151,7 @@ export class ListRenderKit {
             catch (err) {
                console.error(err, this.__DEV__asyncPath)
             }
-            console.log('updating list', newState.length, _oldValue.length)
+            console.log('updating list', state.length, _oldValue.length)
          }, { phase: RENDER })
       }
       // currentItem = undefined;

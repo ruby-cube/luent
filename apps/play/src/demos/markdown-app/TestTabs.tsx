@@ -234,7 +234,7 @@ function App(input = fromTag({
       default: 'home' // key | render function | undefined (default)
    })
 
-   watch($activeFile, ({ newState: file }) => {
+   watch($activeFile, ({ state: file }) => {
       if (!isOpen(prevActiveFile))
          MainView.discard('file', prevActiveFile.id)
       if (file) MainView.mount('file', file.id)

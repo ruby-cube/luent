@@ -7,13 +7,14 @@ import { IonizedModelQuark } from "./IonizedModelQuark";
 import { isFunction, noop } from "@rue/utils";
 import { Ion, isIon } from "../ion/ion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
-import { QUARK, quarkOf } from "../Quark";
+import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
-import { Mutation } from "../actions/Mutable";
+import { Mutable, MutableEntity, Mutation } from "../actions/Mutable";
 import { asPion, asPionQuark, getObservedPion } from "./Pion";
-import { setAtomicState } from "../ion/Atomic";
+import { Atomic, trigger } from "../ion/Atomic";
 import { AtomicPionQuark } from "../ion/AtomicPion";
+import { ParticleMorph } from "../Compound/Particle";
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -138,7 +139,7 @@ export type CustomIonizedModelConfig = {
 }
 
 type BeforeSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, oldValue: any) => void
-type AfterSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, newValue: any, oldValue: any) => void
+type AfterSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, newValue: any, oldValue: any, mutation: Mutation) => void
 
 type CreateTrackableOp = (target: AnyObject, ionizedModel: IonizedModel) => (...args: any[]) => any
 
@@ -181,13 +182,13 @@ function isCustomIonicStructure(value: any) {
 //     return config.mutatingOps
 // }
 
-function emitAfterSet(model: IonizedModel, key: PropertyKey, newValue: any, oldValue: any) {
+function emitAfterSet(model: IonizedModel, key: PropertyKey, newValue: any, oldValue: any, mutation: Mutation) {
    const quark = quarkOf(model)
    const configs = quark.structureConfigs;
    if (configs[0].structure === Object) return;
    for (const config of configs) {
       const afterSet = config.afterSet
-      if (afterSet) afterSet(model, quark, key, newValue, oldValue)
+      if (afterSet) afterSet(model, quark, key, newValue, oldValue, mutation)
    }
 }
 
@@ -562,16 +563,16 @@ export function reactiveSetter(
    }
 
    const oldState = target[key];
-   
+
    if (isIon(oldState)) {
       return setAbsorbedIonState(model, key, oldState, value) // we let absorbed ion to decide whether to ionize value or not
    }
 
    __DEV__traceMethodCall('IonizedModel', model, key)
-   
+
    if (!isWritable(target, key)) {
       if (__DEV__) console.warn(`${String(key)} is not writable.`)
-         return false;
+      return false;
    }
 
    const newState = maybeIonize(value)
@@ -581,16 +582,13 @@ export function reactiveSetter(
       return true;
    }
 
-   target[key] = newState
-
    storeSnapshot(quark)
 
+   target[key] = newState
+
    const pion = getObservedPion(model, key);
-   if (pion && pion instanceof AtomicPionQuark) setAtomicState(target, key, pion, oldState, newState)
 
-   emitAfterSet(model, key, newState, oldState) // for array.length === 0 and array.at(-1)
-
-   triggerIonizedModel(
+   const mutation = new Mutation(
       model,
       '[[set]]',
       [key, newState],
@@ -598,45 +596,38 @@ export function reactiveSetter(
       oldState,
    )
 
+   if (pion && pion instanceof AtomicPionQuark) trigger(pion, mutation)
+
+   emitAfterSet(model, key, newState, oldState, mutation) // for array.length === 0 and array.at(-1)
+
+   triggerIonizedModel(
+      model,
+      mutation
+   )
+
    return true;
 }
 
 
-
-
-
-/**
- * When a pion is the original source of an effect chain, we use triggerIonizedModel
- * @param quark 
- * @param op 
- * @param args 
- * @param output 
- * @param preopData 
- */
-function triggerIonizedModel(
+export function triggerIonizedModel(
    model: IonizedModel,
-   op: string,
-   args: any[],
-   output: any,
-   preopData?: any
+   mutation: Mutation
 ) {
-   const { asParticle, asWatched } = quarkOf(model)
-   if (asParticle || asWatched) {
-      const mutation = new Mutation(//TODO: clear ops after cycle is done
-         model,
-         op,
-         args,
-         output,
-         preopData
-      )
-      asParticle?.triggerCompounds(mutation)
-      asWatched?.triggerEffects()
-   }
+   const { asParticle, asWatched } = quarkOf(model);
+   asParticle?.triggerCompounds(mutation)
+   asWatched?.triggerEffects()
 }
+
+
+
+
+
+
+
 
 export function setAbsorbedIonState(model: IonizedModel, key: PropertyKey, ion: Ion, value: unknown) {
    const oldState = ion()
-   if ('state' in ion) {
+   if (hasQuark(ion) && 'state' in ion) {
       try {
          ion.state = value;
       }
@@ -646,19 +637,23 @@ export function setAbsorbedIonState(model: IonizedModel, key: PropertyKey, ion: 
       }
       const newState = ion.state // get the state that has been maybeIonized
 
-      emitAfterSet(model, key, newState, oldState)
+      const mutation = getMutation(<MutableEntity>ion)!
+
+      emitAfterSet(model, key, newState, oldState, mutation)
 
       triggerIonizedModel(
          model,
-         '[[set]]',
-         [key, newState],
-         newState,
-         oldState,
+         mutation
       )
       return true;
    }
    if (__DEV__) throw new Error("Absorbed AtomicIon is read only")
    return false;
+}
+
+function getMutation(ion: HasQuark<Mutable>) {
+   const quark = quarkOf(ion)
+   return quark.mutation;
 }
 
 

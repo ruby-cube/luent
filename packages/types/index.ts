@@ -2,12 +2,16 @@
 export type AnyObject = { [key: string | symbol]: any }
 
 export type Identity<T> = { // Flattens intersection
-  [P in keyof T]: T[P]
+   [P in keyof T]: T[P]
 };
 
 export type Consolidate<T> = { // Flattens intersection and removes index signatures
-  [P in keyof T as string extends P ? never : number extends P ? never : P]: T[P]
+   [P in keyof T as string extends P ? never : number extends P ? never : P]: T[P]
 };
+
+export type Glass<T> = {
+   [K in keyof T]: T[K]
+} & {}
 
 // make Readonly type writeable
 export type Writable<T extends Readonly<{}>> = { -readonly [P in keyof T]: T[P] };
@@ -15,10 +19,10 @@ export type Writable<T extends Readonly<{}>> = { -readonly [P in keyof T]: T[P] 
 // export type RemoveKeys<T, K extends string | number | symbol> = Omit<Consolidate<T>, K>
 
 
-export type Clean<T, K extends string | number | symbol> = Omit<Consolidate<T>, K>;
+// export type Clean<T, K extends string | number | symbol> = Omit<Consolidate<T>, K>;
 
 export type UnionToIntersection<U> =
-  (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
+   (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
 
 export type TypeCheck<T extends X, X> = T;
 
@@ -30,24 +34,24 @@ export type Public<T> = Omit<T, PrivateKeys<keyof T>>
 export type FunctionType<F extends (...args: any) => any> = (...args: Parameters<F>) => ReturnType<F>
 
 export type OptionalKeys<T> = {
-  [K in keyof T]-?: {} extends Pick<T, K> ? K : never
+   [K in keyof T]-?: {} extends Pick<T, K> ? K : never
 }[keyof T];
 
 export type RequiredKeys<T> = {
-  [K in keyof T]-?: {} extends Pick<T, K> ? never : K
+   [K in keyof T]-?: {} extends Pick<T, K> ? never : K
 }[keyof T];
 
 export type IfEquals<X, Y, A = X, B = never> =
-    (<T>() => T extends X ? 1 : 2) extends
-    (<T>() => T extends Y ? 1 : 2) ? A : B;
+   (<T>() => T extends X ? 1 : 2) extends
+   (<T>() => T extends Y ? 1 : 2) ? A : B;
 
 export type ReadonlyKeys<T> = {
-    [P in keyof T]-?:
-    IfEquals<
-        { [Q in P]: T[P] },
-        { readonly [Q in P]: T[P] },
-        P
-    >
+   [P in keyof T]-?:
+   IfEquals<
+      { [Q in P]: T[P] },
+      { readonly [Q in P]: T[P] },
+      P
+   >
 }[keyof T];
 
 // export type VPropsType<T> = Readonly<
@@ -61,20 +65,20 @@ export type ReadonlyKeys<T> = {
 // >
 
 export type ReKey<T, R> = {
-  [K in keyof T as K extends keyof R
-  ? R[K] extends string
-  ? R[K]
-  : never
-  : K]: K extends keyof T ? T[K] : never;
+   [K in keyof T as K extends keyof R
+   ? R[K] extends string
+   ? R[K]
+   : never
+   : K]: K extends keyof T ? T[K] : never;
 };
 
 export type UnNested<T> = UnionToIntersection<T[keyof T]>;
 
 // creates intersection of an object types values, assuming values are also object types
 export type ValueIntersection<T extends Object> = {
-  [K in keyof T]: (x: T[K]) => void
+   [K in keyof T]: (x: T[K]) => void
 }[keyof T] extends
-  (x: infer I) => void ? I : never;
+   (x: infer I) => void ? I : never;
 
 
 export type ArrayToUnion<A extends any[]> = A[number];
@@ -87,12 +91,12 @@ export type Mutable<T> = T & { [Key in keyof T]: T[Key] };
 export type Cast = unknown; // force type casting
 
 export type Class = {
-  prototype: Object;
-  new(...args: any[]): Object;
+   prototype: Object;
+   new(...args: any[]): Object;
 };
 
 export type ArrayItem<A extends unknown[]> =
-  A extends (infer I)[] ? I : never;
+   A extends (infer I)[] ? I : never;
 
 
 

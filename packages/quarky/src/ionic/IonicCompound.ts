@@ -73,6 +73,7 @@ export class IonicCompound<T extends IonicCompoundMorph = { asCompound?: IonicCo
    trigger!: (mutation: Mutation) => void
 
    trackedCall(fn: () => any) {
+      this.untrackParticles()
       pushTracker(this);
       try {
          return fn();

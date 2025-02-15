@@ -1,10 +1,10 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject, Glass } from "@rue/types";
 import { Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "../ionic/IonicCompound";
 import { $effectCycle, PHASE_ONE, SYNC } from "./EffectCycle";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
-import { hasQuark, QUARK, quarkOf } from "../Quark";
+import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { Ion, isIon } from "../ion/ion";
 import { createWatchedDerivation, isWatchedDerivation } from "../ionic/WatchedDerivation";
 import { createMultisubjectIon, isMultisubjectIon } from "./MultiSubject";
@@ -12,15 +12,18 @@ import { isManagedDerivation } from "../ionic/DerivationIon";
 import { isObject, isObjectLiteral } from "@rue/utils";
 import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
 import { EffectLink } from "./EffectLink";
+import { isIonizedModel } from "../ionized/ionize";
+import { $AtomicIonState, isAtomicIon, isAtomicIonQuark } from "../ion/AtomicIon";
+import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
+import { createWatchedIonizedIon } from "./WatchedIonizedIon";
 
-// export class ChangeEvent<S> {
-//    trace?: string;
-//    constructor(
-//       public subject: S,
-//       public newState?: S extends () => infer T ? T : S,
-//       public oldState?: S extends () => infer T ? T : S,
-//    ) { }
-// }
+export class ChangeEvent<S = unknown> {
+   // trace?: string;
+   constructor(
+      public prevState: S,
+      public state: S ,
+   ) { }
+}
 
 
 export type EffectOptions = {
@@ -29,10 +32,10 @@ export type EffectOptions = {
    eager?: true;
    isEqual?: (prevState?: any, newState?: any) => boolean;
    retrack?: true;
-} & SustainedListenerOptions
+} & Glass<SustainedListenerOptions>
 // & WatchDebugOptions
 
-export type Effect<T = unknown> = (prevState: SubjectValues<T>) => void;
+export type Effect<T = unknown> = (event: ChangeEvent<SubjectValues<T>>) => void;
 
 type SubjectValues<T> = T extends [() => infer R] ? R : T extends [infer O] ? O : MultiSubjectValues<T>;
 
@@ -93,6 +96,7 @@ function getIonValue(subject: Ion) {
 }
 
 function noReactivity(subject: AnyObject) {
+   if (quarkOf(<HasQuark<{ inert: boolean }>>subject).inert) return true;
    return subject.asCompound && subject.asCompound.particles.length === 0;
 }
 
@@ -141,17 +145,23 @@ export function watch<
 
    const retrack = !!(options?.retrack)
 
-   const subject = isMultiSubject ? createMultisubjectIon(<WatchSubjects>_subject)
-      : isPionCapsule(_subject) ? asCoreIon(_subject)
-         : hasQuark(_subject) ? _subject
-            : isGetter(_subject) ? createWatchedDerivation(<() => unknown>_subject, retrack)
-               : isObject(_subject) ? _subject as AnyObject //non-ionized object
-                  : null
+   let subject = normalizeSubject(_subject, isMultiSubject, retrack)
 
-   if (!hasQuark(subject) || (<{ inert: boolean }>quarkOf(subject)).inert)
+   if (!hasQuark(subject)) // plain object
       return InertWatcher()
 
-   const quark = quarkOf(subject) as Watchable & IonicCompoundMorph
+   let prevState = getValue(subject); // this is where initial reactivity tracking happens (if derivation not already initialized) 
+
+   if (noReactivity(subject)) {
+      if (isIonizedModel(prevState)) {
+         subject = prevState; // watch ionized model
+      }
+      else {
+         return InertWatcher()
+      }
+   }
+
+   const quark = quarkOf(<HasQuark>subject) as Watchable & IonicCompoundMorph
    const watchSubject = quark.watch()
    watchSubject.onDiscard(quark.unwatch)
 
@@ -159,9 +169,7 @@ export function watch<
    const isEqual = options?.isEqual ?? isStrictlyEqual
    const phase = options?.phase ?? PHASE_ONE;
 
-   let prevState = getValue(subject); // this is where initial tracking happens if derivation not already initialized 
 
-   if (noReactivity(subject)) return InertWatcher()
 
    function wrappedEffect() {
       const newState = getValue(subject)
@@ -172,7 +180,7 @@ export function watch<
       eager = false;
 
       try {
-         (<Effect>effect)(prevState)
+         (<Effect>effect)(new ChangeEvent(prevState, newState))
       }
       finally {
          prevState = newState;
@@ -191,6 +199,25 @@ export function watch<
       quark.asCompound
    )
 }
+
+function normalizeSubject(_subject: unknown, isMultiSubject: boolean, retrack: boolean) {
+   return isMultiSubject ? createMultisubjectIon(<WatchSubjects>_subject)
+      : isIonizedIon(_subject) ? createWatchedIonizedIon(_subject)
+         : isPionCapsule(_subject) ? asCoreIon(_subject)
+            : hasQuark(_subject) ? _subject
+               : isGetter(_subject) ? createWatchedDerivation(<() => unknown>_subject, retrack)
+                  : isObject(_subject) ? _subject as AnyObject //non-ionized object
+                     : null
+}
+
+
+
+function isIonizedIon(subject: unknown): subject is $AtomicIonState | $AtomicPionState {
+   if (!hasQuark(subject)) return false;
+   const quark = quarkOf(subject)
+   return (isAtomicIonQuark(quark) || isAtomicPionQuark(quark)) && quark.ionized;
+}
+
 
 export function isGetter(value: unknown): value is () => any {
    return value instanceof Function && value.length === 0;
@@ -225,7 +252,6 @@ function initIonicEffect(effect: IonicTask, options?: EffectOptions) {
    const retrack = options?.retrack || false;
 
    const wrappedEffect = createIonicEffect(effect, retrack)
-
 
    scheduleEffectEagerly(wrappedEffect, phase);
 
@@ -285,18 +311,19 @@ function setUpWatcher(
 
 // }, { cycle: "current" })
 
-// watch((prevState?: number) => {
+// watch((event: ChangeEvent<number>) => {
+//    event.prevState
 //    return 9
 // }, { eager: true })
 
-// watch(() => 3, prev => {
-//    console.log(prev, "llfll;klsflff")
+// watch(() => 3, e => {
+//    console.log(e.prevState, "llfll;klsflff")
 // })
 
-// watch(() => 3, () => 'hi', {frog: 'sir'}, prev => {
-//    console.log(prev, "llfllff")
+// watch(() => 3, () => 'hi', {frog: 'sir'}, e => {
+//    console.log(e.state, "llfllff")
 // })
 
-// watch({ dog: 9 }, (prev) => {
-//    console.log('dookkr', prev)
+// watch({ dog: 9 }, (e) => {
+//    console.log('dookkr', e.prevState)
 // })
