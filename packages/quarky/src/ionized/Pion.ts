@@ -5,7 +5,7 @@ import { IonizedModel } from "./IonizedModel"
 import { IonizedModelQuark } from "./IonizedModelQuark"
 import { $DerivedPionState, createDerivationPion, DerivationPionQuark } from "../ionic/DerivationPion"
 import { ParticleMorph } from "../compound/Particle"
-import { Watchable } from "../watch/Watched"
+import { Watchable } from "../reactivity/Watched"
 
 export type PionQuark<T = $AtomicPionState | $DerivedPionState> = EntityQuark<T> & Watchable & ParticleMorph
 
@@ -49,17 +49,25 @@ function createPion(model: IonizedModel, key: PropertyKey, pionQuark: PionQuark)
    return derivation ? createDerivationPion(model, key, <DerivationPionQuark>pionQuark) : createAtomicPion(model, key, <AtomicPionQuark>pionQuark)
 }
 
-/**
- * Observed means tracked and/or watched
- * @param model 
- * @param key 
- */
-export function getObservedPion(
+// /**
+//  * Observed means tracked and/or watched
+//  * @param model 
+//  * @param key 
+//  */
+// export function getObservedPion(
+//    model: IonizedModel,
+//    key: PropertyKey,
+// ) {
+//    const pion = quarkOf(model).pions.get(key)
+//    return pion && (pion.asWatched || pion.asParticle) ? pion : undefined
+// }
+
+export function getAtomicPion(
    model: IonizedModel,
    key: PropertyKey,
-) {
+){
    const pion = quarkOf(model).pions.get(key)
-   return pion && (pion.asWatched || pion.asParticle) ? pion : undefined
+   return pion && pion instanceof AtomicPionQuark ? pion : undefined
 }
 
 export function triggerPion(quark: PionQuark | undefined) {

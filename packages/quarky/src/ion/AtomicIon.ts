@@ -7,9 +7,10 @@ import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { __DEV__initTraceability, attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
 import { AtomicIon } from "./ion";
-import { unwatch, watch } from "../watch/Watched";
-import { Atomic, getAtomicState, trigger } from "./Atomic";
-import { Mutable, MutableEntity, Mutation } from "../mutation/Mutable";
+import { unwatch, watch } from "../reactivity/Watched";
+import { Atomic, getAtomicState } from "./Atomic";
+import { Mutable, MutableEntity, Mutation, recordMutation } from "../mutation/Mutable";
+import { trigger } from "../reactivity/trigger";
 
 /** INTERNAL */
 export type $AtomicIonState = AtomicIon & MutableCapsule & {
@@ -17,6 +18,7 @@ export type $AtomicIonState = AtomicIon & MutableCapsule & {
       type: symbol;
       state: any,
       ionized: boolean,
+      trigger(): void
    } & Atomic & EntityQuark<$AtomicIonState>
 } & MutableEntity
 
@@ -49,7 +51,7 @@ export function createAtomicIon(
       asReadonly: undefined,
       asReined: undefined,
       __DEV__asTraceable: new Traceable(),
-
+      trigger,
       watch,
       unwatch: () => unwatch.call(ion)
    }
@@ -74,15 +76,14 @@ export function createAtomicIon(
          }
          const state = shouldIonize(value, ion.ionized) ? ionize(value) : value
          ion.state = state;
-         const mutation = new Mutation(
+         recordMutation(ion, new Mutation(
             $state,
             '[[set]]',
             ['state', state],
             state,
             oldState
-         )
-
-         trigger(ion)
+         ))
+         ion.trigger()
          return state;
       }
    })

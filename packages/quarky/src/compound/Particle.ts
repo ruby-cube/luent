@@ -1,6 +1,5 @@
 import { IterableSet } from "@rue/utils";
 import { Compound } from "./Compound";
-import { Mutation } from "../mutation/Mutable";
 import { EntityQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { AnyObject } from "@rue/types";
 
@@ -9,6 +8,10 @@ export const CLEAN_UP = 'x__cleanUp'
 
 export interface ParticleMorph extends EntityQuark<AnyObject> {
    asParticle?: Particle
+}
+
+export function triggerCompounds(quark: ParticleMorph | undefined){
+      quark?.asParticle?.triggerCompounds()
 }
 
 export function isParticleMorphic(value: unknown): value is { [QUARK]: ParticleMorph } {

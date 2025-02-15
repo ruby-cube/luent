@@ -39,6 +39,10 @@ export class AtomicOp implements Quark, ParticleMorph {
    // getOutput() {
    //    return this.modelQuark.rawTarget[this.op](this.entryKey)
    // }
+
+   trigger(){
+      this.asParticle.triggerCompounds()
+   }
 }
 
 
@@ -84,6 +88,3 @@ export function getAtomicOp(
    return op[TRACKED]?.get(entryKey)
 }
 
-export function triggerOp(quark: AtomicOp | undefined) {
-   quark?.asParticle?.triggerCompounds()
-}

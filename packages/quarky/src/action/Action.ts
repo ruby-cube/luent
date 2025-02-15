@@ -1,8 +1,13 @@
 import { AnyObject } from "@rue/types";
 import { hasQuark, quarkOf } from "../Quark";
-import { Mutable, Mutation, MutableEntity } from "../mutation/Mutable";
+import { Mutable, Mutation, MutableEntity, asMutable } from "../mutation/Mutable";
 
 // Actions may span mulitple effect cycles
+
+//TODO: figure out how to distinguish between state that should rollback vs state that shouldn't
+// - is this something defined when an atomic ion or ionized model is created?
+// - OR is this something defined when creating an action?
+// - OR is this defined DURING mutation?
 
 /**  
 * Example:
@@ -10,7 +15,7 @@ import { Mutable, Mutation, MutableEntity } from "../mutation/Mutable";
 * const INSERT_TEXT = defineAction({
 *    do(action) {
 *       return (document, word, index) => {
-*          action.snapshot(document, DEEP);
+*          action.snapshot(document, DEEP); 
 *          return document.insertText(word, index)
 *       }
 *    },
@@ -87,16 +92,14 @@ class Action {
 
 
 function storeMutations(action: Action, target: MutableEntity) {
-   const quark = quarkOf(target)
-   quark.recordOp = (mutation: Mutation) => {
+   asMutable(target).onMutated((mutation: Mutation) => {
       const mutations = action.mutations;
       if (mutations.at(-1) === mutation) return; // prevents the same mutation from being recorded multiple times
       mutations.push(mutation)
-   };
-   action.onCompleted(() => {
-      quark.recordOp = undefined;
-   })
+   }, { until: action.onCompleted });
 }
+
+
 
 type Name = symbol
 

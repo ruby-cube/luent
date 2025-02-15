@@ -1,9 +1,9 @@
-import {  storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
+import { storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
 import { nontrackableIterableKeys, useClearOp, useDeleteOp } from "./IonizedSet";
-import { asAtomicOp, getAtomicOp } from "./AtomicOp";
+import { getAtomicOp } from "./AtomicOp";
 import { defineIonizedStructure, useTrackableGetOp } from "./IonizedModel";
-import { AnyObject } from "@rue/types";
-import { getObservedPion } from "./Pion";
+import { getAtomicPion } from "./Pion";
+import { Mutation, recordMutation } from "../mutation/Mutable";
 
 // declare global {
 //    interface Map<K, V> {
@@ -49,17 +49,17 @@ export function installIonicMap() {
    defineIonizedStructure(Map, {
       nontrackableKeys: nontrackableIterableKeys,
       trackableOps: {
-         has(target, ionicModel) {
+         has(target, ionizedModel) {
             return useTrackableGetOp(
-               ionicModel,
+               ionizedModel,
                target,
                'has',
                target.has
             )
          },
-         get(target, ionicModel) {
+         get(target, ionizedModel) {
             return useTrackableGetOp(
-               ionicModel,
+               ionizedModel,
                target,
                'get',
                target.get
@@ -68,7 +68,7 @@ export function installIonicMap() {
       },
       mutatingOps: {
          set: {
-            createOp(target, ionicModel, meta) {
+            createOp(target, model, quark) {
 
                return function set(key: any, newValue: any) { //QUESTION: do we need to toRaw the key?
                   const oldSize = target.size
@@ -79,27 +79,22 @@ export function installIonicMap() {
 
                   if (oldValue === _newValue) return;
 
-                  storeSnapshot(meta)
+                  storeSnapshot(quark)
 
-                  if (oldSize !== newSize) {
-                     const sizeProp = getObservedPion(ionicModel, 'size')
-                     if (sizeProp)
-                        trigger(sizeProp, newSize, oldSize);
-                  }
-
-                  const hasOp = getAtomicOp(ionicModel.has, key)
-                  if (hasOp) triggerIonicAtom(hasOp);
-
-                  const getOp = getAtomicOp(ionicModel.get, key)
-                  if (getOp) triggerIonicAtom(getOp);
-
-                  triggerIonizedModel(
-                     ionicModel,
+                  recordMutation(quark, new Mutation(
+                     model,
                      'set',
                      [key, _newValue],
                      output,
                      oldValue
-                  )
+                  ))
+
+                  if (oldSize !== newSize) {
+                     getAtomicPion(model, 'size')?.trigger()
+                  }
+
+                  getAtomicOp(model.has, key)?.trigger()
+                  getAtomicOp(model.get, key)?.trigger()
 
                   return output;
                }
@@ -110,35 +105,40 @@ export function installIonicMap() {
             }
          },
          clear: {
-            createOp(target, ionicModel, meta, getPreopData) {
+            createOp(target, ionizedModel, quark, getPreopData) {
 
                return useClearOp(
-                  ionicModel,
-                  meta,
+                  ionizedModel,
+                  quark,
                   target,
                   getPreopData!
                )
             },
 
-            preop(model) {
-               return Array.from(<Map<any, any>>model)
+            preop(target) {
+               return Array.from(<Map<any, any>>target)
             },
 
-            revert(ionicModel, { preopData }) {
+            revert(ionizedModel, { preopData }) {
                for (const [key, value] of preopData) {
-                  ionicModel.set(key, value) //QUESTION: not sure if this should be the raw target or the ionic model
+                  ionizedModel.set(key, value) //QUESTION: not sure if this should be the raw target or the ionic model
                }
             }
          },
          delete: {
-            createOp(target, ionicModel, meta, getPreopData) {
-
-               return useDeleteOp(
-                  ionicModel,
-                  meta,
+            createOp(target, ionizedModel, quark, getPreopData) {
+               const deleteOp = useDeleteOp(
+                  ionizedModel,
+                  quark,
                   target,
                   getPreopData!
                )
+
+               return (key: unknown) => {
+                  const output = deleteOp(key)
+                  getAtomicOp(ionizedModel.get, key)?.trigger()
+                  return output;
+               }
             },
 
             preop(model, args) {
@@ -147,8 +147,8 @@ export function installIonicMap() {
                return { key, value }
             },
 
-            revert(ionicModel, { preopData }) {
-               ionicModel.set(preopData.key, preopData.value)
+            revert(ionizedModel, { preopData }) {
+               ionizedModel.set(preopData.key, preopData.value)
             }
          },
 
@@ -161,11 +161,11 @@ export function installIonicMap() {
 //     methods: AnyObject | undefined
 // ) {
 //     const modelQuark = new MetaIonicCollection(target, methods)
-//     const ionicModel = new Proxy(target, {
+//     const ionizedModel = new Proxy(target, {
 //         get(target, key, receiver) {
 //             if (__DEV__) emitSignal()
 //             if (key === QUARK) return modelQuark
-//             const reinedMeta = getReinedMeta(target, ionicModel, receiver)
+//             const reinedMeta = getReinedMeta(target, ionizedModel, receiver)
 //             if (reinedMeta) {
 //                 const keys = reinedMeta.propertyKeys
 //                 if (keys && !(key in keys)) {
@@ -176,7 +176,7 @@ export function installIonicMap() {
 //             if (methods && key in methods) {
 //                 return accessMethod(
 //                     target,
-//                     ionicModel,
+//                     ionizedModel,
 //                     receiver,
 //                     key,
 //                     boundMethodMap,
@@ -189,7 +189,7 @@ export function installIonicMap() {
 //                     if (keys && key in keys) {
 //                         return accessMethod(
 //                             target,
-//                             ionicModel,
+//                             ionizedModel,
 //                             receiver,
 //                             key,
 //                             boundMethodMap
@@ -210,23 +210,23 @@ export function installIonicMap() {
 //             if (isFunction(value))
 //                 return accessMethod(
 //                     target,
-//                     ionicModel,
+//                     ionizedModel,
 //                     receiver,
 //                     key,
 //                     boundMethodMap,
 //                     value
 //                 )
-//             const _value = maybeIonize(value, target, ionicModel, receiver)
+//             const _value = maybeIonize(value, target, ionizedModel, receiver)
 //             const tracker = getActiveTracker()
 //             if (!tracker)
 //                 return _value;
-//             tracker.track(asPionQuark(ionicModel, key))
+//             tracker.track(asPionQuark(ionizedModel, key))
 //             return _value;
 //         },
 //         set(target, key, value, receiver) {
 //             return reactiveSetter(
 //                 Map,
-//                 ionicModel,
+//                 ionizedModel,
 //                 modelQuark,
 //                 target,
 //                 key,
@@ -240,24 +240,24 @@ export function installIonicMap() {
 //     const boundMethodMap: Map<string | symbol, (...arg: any[]) => any> = new Map([
 //         ['set', setOp],
 //         ['has', useTrackableGetOp(
-//             ionicModel,
+//             ionizedModel,
 //             target,
 //             'has',
 //             target.has
 //         )],
 //         ['get', useTrackableGetOp(
-//             ionicModel,
+//             ionizedModel,
 //             target,
 //             'get',
 //             target.get
 //         )],
 //         ['clear', useClearOp(
-//             ionicModel,
+//             ionizedModel,
 //             modelQuark,
 //             target
 //         )],
 //         ['delete', useDeleteOp(
-//             ionicModel,
+//             ionizedModel,
 //             modelQuark,
 //             target
 //         )]
@@ -275,20 +275,20 @@ export function installIonicMap() {
 
 //         storeSnapshot(modelQuark)
 
-//         const ionicModel = modelQuark.ionicModel!
+//         const ionizedModel = modelQuark.ionizedModel!
 //         if (oldSize !== newSize) {
-//             const sizeProp = getObservedPion(ionicModel, 'size')
+//             const sizeProp = getObservedPion(ionizedModel, 'size')
 //             if (sizeProp)
 //                 trigger(sizeProp, newSize, oldSize);
 //         }
 
-//         const hasOp = getAtomicOp(ionicModel, 'has', key)
+//         const hasOp = getAtomicOp(ionizedModel, 'has', key)
 //         if (hasOp) triggerIonicAtom(hasOp);
-//         const getOp = getAtomicOp(ionicModel, 'get', key)
+//         const getOp = getAtomicOp(ionizedModel, 'get', key)
 //         if (getOp) triggerIonicAtom(getOp);
 
 //         triggerIonizedModelWithMutation(
-//             ionicModel,
+//             ionizedModel,
 //             'set',
 //             [key, _newValue],
 //             output
@@ -297,9 +297,9 @@ export function installIonicMap() {
 //         return output;
 //     }
 
-//     modelQuark.initIonizedModel(ionicModel)
-//     registerIonizedModel(ionicModel, target)
-//     return ionicModel
+//     modelQuark.initIonizedModel(ionizedModel)
+//     registerIonizedModel(ionizedModel, target)
+//     return ionizedModel
 // }
 
 

@@ -5,7 +5,7 @@ import { __DEV__label } from "../debug/DEVLabellable";
 import { Ion, NonVoid } from "../ion/ion";
 import { Traceable } from "../debug/debug";
 import { IonicCompound } from "./IonicCompound";
-import { Watched } from "../watch/Watched";
+import { Watched } from "../reactivity/Watched";
 import { noop } from "@rue/utils";
 import { $AtomicPionState } from "../ion/AtomicPion";
 

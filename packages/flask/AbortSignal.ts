@@ -16,11 +16,12 @@ export function AbortSignal() {
             cleanups.add(cleanup)
             return {
                 stop() {
-                    if (!cleanups) return;
+                    if (!cleanups) return false;
                     cleanups.delete(cleanup)
                     if (cleanups.size === 0) {
                         cleanups = null;
                     }
+                    return true;
                 }
             }
         }

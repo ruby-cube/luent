@@ -1,23 +1,23 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel } from "../ionized/ionize";
 import { QUARK, quarkOf } from "../Quark";
-import { AbortSignal } from "../../../flask/AbortSignal";
+import { AbortSignal, OnAbort } from "../../../flask/AbortSignal";
 import { IterableSet } from "@rue/utils";
 
 export type MutableEntity = {
    [QUARK]: MutableMorph
 }
 
-type MutableMorph = {
+export type MutableMorph = {
    asMutable: Mutable
 }
 
-type MutationTask = (mutation: Mutation) => void
+export type MutationTask = (mutation: Mutation) => void
 
 export class Mutable {
    mutationTasks: IterableSet<MutationTask> = new IterableSet()
 
-   onMutated(task: MutationTask, options: { until: AbortSignal }) {
+   onMutated(task: MutationTask, options: { until: OnAbort | ((task: () => void) => void) }) {
       this.mutationTasks.add(task)
       const onAbort = options.until
       onAbort(() => {
@@ -42,7 +42,7 @@ export class Mutation {
       public op: '[[set]]' | string,
       public args: [PropertyKey, unknown] | unknown[],
       public output: unknown,
-      public preopData: unknown // old state for [[set]] ops
+      public preopData: undefined| unknown // old state for [[set]] ops
    ) { }
 
    undo() {
@@ -96,3 +96,10 @@ export function recordMutations(quark: Mutable) {
 }
 
 
+export function asMutable(entity: MutableEntity){
+   return quarkOf(entity).asMutable;
+}
+
+export function recordMutation(quark: MutableMorph, mutation: Mutation){
+   quark.asMutable.emitMutation(mutation)
+}

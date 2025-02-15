@@ -2,15 +2,13 @@ import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { Traceable } from "../debug/debug"
 import { CustomIonizedModelConfig, IonizedModel } from "./IonizedModel"
-import { unwatch, watch, Watchable, Watched } from "../watch/Watched"
+import { unwatch, watch, Watchable, Watched } from "../reactivity/Watched"
 import { ParticleMorph, Particle } from "../compound/Particle"
-import { CompoundMorph } from "../compound/Compound"
 import { IonizedCompound } from "./IonizedCompound"
 import { EntityQuark, Quark, QuarkOf } from "../Quark"
-import { Capsule } from "../capsule/Capsule"
 import { Mutable, Mutation } from "../mutation/Mutable"
 import { PionQuark } from "./Pion"
-import { IterableSet } from "@rue/utils"
+import { trigger } from "../reactivity/trigger"
 
 
 
@@ -83,6 +81,8 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
       derivation.collectAbsorbedIons(this.entity!)
       // this.undirty()
    }
+
+   trigger = trigger
 
    pions: Map<PropertyKey, PionQuark> = new Map()
 

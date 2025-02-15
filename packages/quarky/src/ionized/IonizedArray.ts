@@ -1,13 +1,13 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
-import { AtomicOp, getAtomicOp, triggerOp } from "./AtomicOp";
+import { AtomicOp, getAtomicOp } from "./AtomicOp";
 import { defineIonizedStructure, GetPreopData, IonizedModel, useTrackableGetOp } from "./IonizedModel";
 import { nontrackableIterableKeys } from "./IonizedSet";
-import { getObservedPion, PionQuark, triggerPion } from "./Pion";
-import { Mutation } from "../mutation/Mutable";
+import { getAtomicPion, PionQuark, triggerPion } from "./Pion";
+import { Mutation, recordMutation } from "../mutation/Mutable";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 
-type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
+// type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 
 // declare global {
 //    interface Array<T> {
@@ -69,9 +69,9 @@ type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 //    }
 // }
 
-const dogs = ionize([{ name: 'lo' }])
+// const dogs = ionize([{ name: 'lo' }])
 
-const jim = dogs.at(0)
+// const jim = dogs.at(0)
 
 const trackableArrayOps = {
 
@@ -137,9 +137,9 @@ export function installIonicArray() {
       nontrackableKeys: nontrackableIterableKeys,
 
       trackableOps: {
-         at(target, ionicModel) {
+         at(target, ionizedModel) {
             return useTrackableGetOp(
-               ionicModel,
+               ionizedModel,
                target,
                'at',
                target.at
@@ -160,7 +160,7 @@ export function installIonicArray() {
          },
 
          pop: {
-            createOp: useMutatingArrayOpFactory('pop'),
+            createOp: createPopMethod,
             revert(model, { output }) {
                model.push(output)
             }
@@ -221,42 +221,48 @@ export function installIonicArray() {
          },
       },
 
-      afterSet(ionicModel, meta, key, newValue, oldValue, mutation) {
-         if (isIntegerKey(key)) triggerOp(getAtomicOp(ionicModel.at, key), mutation)
+      afterSet(ionizedModel, quark, key, newValue, oldValue) {
+         if (isIntegerKey(key)) {
+            getAtomicOp(ionizedModel.at, key)?.trigger()
+            return;
+         }
 
-         const observedIndices = meta.observedEntryKeys
-         if (observedIndices && key === 'length') {
-            for (const indexKey of observedIndices) {
-               if (typeof indexKey !== 'string') {
-                  console.warn(`index key is not string. May need to refactor code`)
-                  continue;
-               }
-               const index = parseInt(indexKey)
-               if (index > newValue || index > oldValue) {
-                  if (key !== indexKey)
-                     triggerPion(getObservedPion(ionicModel, indexKey), mutation)
-                  triggerOp(getAtomicOp(ionicModel.at, index), mutation)
-               }
+         if (key !== 'length') {
+            return;
+         }
+
+         const pions = quark.pions
+         if (!pions) {
+            return;
+         }
+
+         for (const [indexKey] of pions) {
+            if (!isIntegerKey(indexKey)) continue;
+            const index = parseInt(<string>indexKey)
+            if (index >= newValue) {
+               getAtomicPion(ionizedModel, indexKey)?.trigger()
+               getAtomicOp(ionizedModel.at, index)?.trigger()
+            }
+            if (index > oldValue) {
+               getAtomicOp(ionizedModel.at, index)?.trigger()
             }
          }
-      },
+      }
 
-      isEntryKey(model, key) {
-         return !!(model instanceof Array && isIntegerKey(key))
-      },
+      // isEntryKey(model, key) {
+      //    return !!(model instanceof Array && isIntegerKey(key))
+      // },
    })
-
-
 
    function useMutatingArrayOpFactory(
       opName: string,
       deionizeArgs?: (args: any[]) => any[]
    ) {
-      return function createOp(target: AnyObject, ionicModel: IonizedModel, meta: IonizedModelQuark<any[]>, getPreopData: GetPreopData | undefined) {
+      return function createOp(target: AnyObject, ionizedModel: IonizedModel, quark: IonizedModelQuark, getPreopData: GetPreopData | undefined) {
          const fn = target[opName]
          return useMutatingArrayOp(
-            <IonizedModel<any[]>>ionicModel,
-            meta,
+            ionizedModel,
+            quark,
             <any[]>target,
             opName,
             fn,
@@ -274,8 +280,8 @@ export function installIonicArray() {
    }
 
    function useMutatingArrayOp(
-      ionicModel: IonizedModel<any[]>,
-      modelQuark: IonizedModelQuark<any[]>,
+      model: IonizedModel,
+      modelQuark: IonizedModelQuark,
       target: any[],
       key: string,
       fn: Function,
@@ -285,55 +291,62 @@ export function installIonicArray() {
       return (...args: any[]) => {
          const preopData = getPreopData ? getPreopData(target, args) : undefined
          const _args = deionizeArgs ? deionizeArgs(args) : args
-         const oldLength = target.length;
-         const output = fn.apply(ionicModel, _args); // perform mutation
+         const prevLength = target.length;
+         const output = fn.apply(model, _args); // perform mutation
          const newLength = target.length;
-         if (key in lengthMutatingOps && oldLength === newLength) return output;
+
+         if (key in lengthMutatingOps && prevLength === newLength) return output;
+
          storeSnapshot(modelQuark)
 
-         const lengthProp = getObservedPion(ionicModel, 'length')
-         if (lengthProp) {
-            trigger(lengthProp, newLength, oldLength); // trigger for length change
-         }
-
-         if (key === 'pop') {
-            const prop = getObservedPion(ionicModel, (oldLength - 1).toString())
-            if (prop) trigger(prop);
-            const op = getAtomicOp(ionicModel.at, - 1)
-            if (op) triggerIonicAtom(op);
-         }
-
-         const observedIndices = modelQuark.observedEntryKeys
-         if (observedIndices && oldLength < newLength) {
-            for (const indexKey of observedIndices) {
-               if (typeof indexKey !== 'string') {
-                  console.warn(`index key is not string. May need to refactor code`)
-                  continue;
-               }
-               const index = parseInt(indexKey)
-               if (index >= newLength) {
-                  const prop = getObservedPion(ionicModel, indexKey)
-                  if (prop) {
-                     trigger(prop)
-                  }
-                  const op = getAtomicOp(ionicModel.at, index)
-                  if (op) {
-                     if (isIonicAtom(op)) {
-                        triggerIonicAtom(op)
-                     }
-                  }
-               }
-            }
-         }
-
-         triggerIonizedModel(
-            ionicModel,
+         recordMutation(modelQuark, new Mutation(
+            model,
             key,
             _args,
             output,
             preopData
-         )
+         ))
 
+         modelQuark.trigger()
+
+         getAtomicPion(model, 'length')?.trigger()
+
+         triggerObservedIndices(model, modelQuark.pions, prevLength, newLength)
+
+         return output;
+      }
+   }
+
+   //TODO: these need to be specialized to the different methods...
+   function triggerObservedIndices(model: IonizedModel, pions: IonizedModelQuark['pions'], prevLength: number, newLength: number) {
+      if (pions && prevLength < newLength) {
+         for (const [indexKey] of pions) {
+            if (!isIntegerKey(indexKey)) continue;
+            const index = parseInt(<string>indexKey)
+            if (index >= newLength) {
+               getAtomicPion(model, indexKey)?.trigger()
+               getAtomicOp(model.at, index)?.trigger()
+            }
+         }
+      }
+   }
+
+   function createPopMethod(target: AnyObject, ionizedModel: IonizedModel, quark: IonizedModelQuark, getPreopData: GetPreopData | undefined) {
+      const performOp = useMutatingArrayOp(
+         ionizedModel,
+         quark,
+         <any[]>target,
+         'pop',
+         target.pop,
+         getPreopData,
+         deionizeArgs
+      )
+
+      return () => {
+         const prevLength = target.length;
+         const output = performOp()
+         getAtomicPion(ionizedModel, (prevLength - 1).toString())?.trigger()
+         getAtomicOp(ionizedModel.at, - 1)?.trigger()
          return output;
       }
    }
@@ -347,6 +360,7 @@ export function installIonicArray() {
 
    function fillOrCopyWithinRevert(model: AnyObject, data: { preopData: any[], args: any[] }) {
       const { preopData: slice, args } = data
+
       let index = args![1] ?? 0;
       for (let i = 0; i < slice.length; i++) {
          model[index] = slice[i];
@@ -361,296 +375,8 @@ export function installIonicArray() {
       }
       return _args;
    }
-
-
 }
 
-// export function createIonicArray(
-//     target: any[],
-//     methods: AnyObject | undefined
-// ) {
-//     const boundMethodMap: Map<string | symbol, Function> = new Map()
-//     const modelQuark = new MetaIonicCollection(target, methods)
-//     const ionicModel = new Proxy(target, {
-//         get(target, key, receiver) {
-//             return reactiveArrayGetter(
-//                 ionicModel,
-//                 methods,
-//                 modelQuark,
-//                 function handleMutatingMethod(key: string, fn) {
-//                     return (...args: any[]) => {
-//                         return useMutatingArrayOp(
-//                             args,
-//                             ionicModel,
-//                             modelQuark,
-//                             target,
-//                             key,
-//                             fn
-//                         )
-//                     }
-//                 },
-//                 <any[]>target,
-//                 key,
-//                 receiver,
-//                 boundMethodMap
-//             )
-//         },
-//         set(target, key, value, receiver) {
-//             return reactiveArraySetter(
-//                 ionicModel,
-//                 modelQuark,
-//                 target,
-//                 key,
-//                 value,
-//                 receiver
-//             )
-//         }
-//     }) as IonizedModel<any[]>
-//     modelQuark.initIonizedModel(ionicModel)
-//     registerIonizedModel(ionicModel, target)
-//     return ionicModel
-// }
-
-
-// export function createIonicTuple<T extends any[]>(
-//     target: T,
-//     methods: AnyObject | undefined
-// ) {
-
-//     const boundMethodMap: Map<string | symbol, Function> = new Map()
-//     const modelQuark = new MetaIonicCollection(target, methods)
-//     const ionicModel = new Proxy(target, {
-//         get(target, key, receiver) {
-//             return reactiveArrayGetter(
-//                 ionicModel,
-//                 methods,
-//                 modelQuark,
-//                 function handleMutatingMethod() {
-//                     throw new Error("Tuples can only be mutated by index")
-//                 },
-//                 <any[]>target,
-//                 key,
-//                 receiver,
-//                 boundMethodMap
-//             )
-//         },
-//         set(target, key, value, receiver) {
-//             return reactiveArraySetter(
-//                 ionicModel,
-//                 modelQuark,
-//                 target,
-//                 key,
-//                 value,
-//                 receiver
-//             )
-//         }
-//     }) as IonizedModel<any[]>
-//     modelQuark.initIonizedModel(ionicModel)
-//     registerIonizedModel(ionicModel, target)
-//     return ionicModel
-// }
-
-// export function createReactiveArrayItems(
-//     target: any[],
-// ) {
-//     for (let i = 0; i < target.length; i++) {
-//         const item = target[i]
-//         if (isIonizedModel(item)) continue;
-//         if (!(item instanceof Object)) continue;
-//         const item$ = createIonizedModel(item, DEEP)
-//         if (item$ === null) continue;
-//         target[i] = item$;
-//     }
-// }
-
-
-// function reactiveArrayGetter(
-//     ionicModel: IonizedModel<Collection>,
-//     methods: AnyObject | undefined,
-//     modelQuark: MetaIonicCollection,
-//     handleMutatingMethod: (key: string, fn: Function) => (...args: any[]) => any,
-//     target: any[],
-//     key: string | symbol,
-//     receiver: AnyObject,
-//     boundMethodMap: Map<string | symbol, Function>
-// ) {
-//     if (__DEV__) emitSignal();
-//     if (key === QUARK) return modelQuark;
-//     const reinedMeta = getReinedMeta(target, ionicModel, receiver)
-//     if (reinedMeta) {
-//         const keys = reinedMeta.propertyKeys
-//         if (keys && !(key in keys)) {
-//             if (__DEV__) console.warn(`Object is protected. Cannot access '${key.toString()}'`)
-//             return undefined;
-//         }
-//     }
-//     if (methods && key in methods) {
-//         return accessMethod(
-//             target,
-//             ionicModel,
-//             receiver,
-//             key,
-//             boundMethodMap,
-//             methods[key]
-//         )
-//     }
-//     // if (key === '_$' && deep) return asShallowReactive(target);
-//     const value = Reflect.get(target, key, receiver);
-//     if (typeof key === 'symbol' && key.description === 'Symbol.iterator') {
-//         return value;
-//     }
-//     if (isNonTrackable(key, [Array])) return value;
-//     if (isIon(value) && !isIntegerKey(key)) return value();
-//     if (isMutatingArrayMethod(key)) {
-//         if (isReadonlyProxy(target, ionicModel, receiver)) {
-//             if (__DEV__) console.warn('Object is readonly. Cannot access methods')
-//             return undefined;
-//         }
-//         if (reinedMeta) {
-//             const keys = reinedMeta.propertyKeys
-//             if (keys && key in keys) {
-//                 return handleMutatingMethod(<string>key, value);
-//             }
-//             return undefined;
-//         }
-//         return handleMutatingMethod(<string>key, value);
-//     }
-//     if (isFunction(value))
-//         return accessMethod(
-//             target,
-//             ionicModel,
-//             receiver,
-//             key,
-//             boundMethodMap,
-//             value
-//         )
-//     if (key === 'at') {
-//         return useTrackableGetOp(
-//             ionicModel,
-//             target,
-//             key,
-//             value
-//         )
-//     }
-//     const _value = maybeIonize(value, target, ionicModel, receiver)
-//     const tracker = getActiveTracker()
-//     if (!tracker) return _value;
-
-//     tracker.track(asPionQuark(ionicModel, key))
-//     return _value;
-// }
-
-
-// function deionizeArgs(args: any[]) { // This is a generic deionize args function that will only deionize two layers down
-//     const _args: any[] = []
-//     for (const arg of args) {
-//         if (isIonizedModel(arg)) _args.push(toRaw(arg));
-//         else if (arg instanceof Object) {
-//             _args.push(deionizeProps(arg))
-//         }
-//         else {
-//             _args.push(arg)
-//         }
-//     }
-// }
-
-// function deionizeProps(object: AnyObject) {
-//     if (isCollection(object)){
-//         return deionizeItems(object)
-//     }
-//     const _object: AnyObject = {}
-//     for (const key in object) {
-//         _object[key] = toRaw(object[key])
-//     }
-//     return _object;
-// }
-
-// function deionizeItems(collection: any[] | Map<any, any> | Set<any>) {
-
-// }
-
-
-// function reactiveArraySetter(
-//     ionicModel: IonizedModel,
-//     modelQuark: IonizedModelQuark,
-//     target: AnyObject,
-//     key: string | symbol,
-//     newValue: any,
-//     receiver: AnyObject
-// ) {
-//     if (isRestricted(target, ionicModel, receiver)) {
-//         if (__DEV__) console.warn('Set operation failed. Property is readonly')
-//         return false;
-//     }
-//     if (modelQuark.isNewProperty(key)) modelQuark.registerNewProperty(key)
-
-//     const _newValue = toRaw(newValue)
-//     const op = target instanceof Array && isIntegerKey(key) ? getAtomicOp(ionicModel.at, key) : null;
-//     const prop = getObservedPion(ionicModel, key);
-//     if (!prop && !op) {
-//         // Reflect.set(target, key, newValue, receiver);
-//         target[key] = _newValue
-//         return true;
-//     }
-
-//     const oldValue = Reflect.get(target, key, receiver);
-//     if (isIon(oldValue) && !isIntegerKey(key)) //TODO: replaceAbsorbedIon. //QUESTION: Should Indices absorb ions? Vue doesn't
-//         return setAbsorbedIon(oldValue, _newValue)
-//     if (oldValue === _newValue
-//         || isNonTrackable(key, [Array])
-//         || !isWritable(target, key)) {
-//         // Reflect.set(target, key, newValue, receiver);
-//         target[key] = _newValue
-//         return true;
-//     }
-
-
-//     // Reflect.set(target, key, _newValue, receiver);
-//     target[key] = _newValue // cannot use Reflect.set because it does not set the property synchronously
-
-//     storeSnapshot(modelQuark)
-
-//     if (prop) {
-//         trigger(prop, _newValue, oldValue)
-//     }
-
-//     if (op) {
-//         triggerIonicAtom(op)
-//     }
-
-//     const trackedIndices = modelQuark.observedEntryKeys
-//     if (trackedIndices && key === 'length') {
-//         for (const indexKey of trackedIndices) {
-//             if (typeof indexKey !== 'string') {
-//                 console.warn(`index key is not string. May need to refactor code`)
-//                 continue;
-//             }
-//             const index = parseInt(indexKey)
-//             if (index > _newValue || index > oldValue) {
-//                 const prop = getObservedPion(ionicModel, indexKey)
-//                 if (prop) {
-//                     trigger(prop, _newValue, oldValue)
-//                 }
-//                 const op = getAtomicOp(ionicModel.at, index)
-//                 if (op) {
-//                     if (isIonicAtom(op)) {
-//                         triggerIonicAtom(op)
-//                     }
-//                 }
-//             }
-//         }
-//     }
-
-//     triggerIonizedModel(
-//         ionicModel,
-//         with_op = '[[set]]',
-//         with_args = [key, _newValue],
-//         with_output = _newValue,
-//         with_preopData = oldValue,
-//     )
-
-//     return true;
-// }
 
 
 
@@ -661,7 +387,7 @@ export function isIntegerKey(key: unknown) {
 }
 
 
-export function isIonicArray(target: any): target is IonizedModel<any[]> {
+export function isIonizedArray(target: any): target is IonizedModel {
    if (!isIonizedModel(target)) return false;
    if (toRaw(target) instanceof Array) return true;
    return false;

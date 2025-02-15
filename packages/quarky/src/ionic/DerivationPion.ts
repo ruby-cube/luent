@@ -5,7 +5,7 @@ import { Ion, NonVoid } from "../ion/ion";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
 import { QUARK, QuarkOf, quarkOf } from "../Quark";
-import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
+import { unwatch, watch, Watchable, Watched } from "../reactivity/Watched";
 import { createMaybeMemoizedIon, DERIVATION_ION, ManagedDerivation } from "./DerivationIon";
 import { IonicCompound } from "./IonicCompound";
 

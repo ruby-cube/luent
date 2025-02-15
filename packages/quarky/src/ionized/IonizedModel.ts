@@ -10,13 +10,12 @@ import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../de
 import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
-import { Mutable, MutableEntity, Mutation } from "../mutation/Mutable";
-import { asPion, asPionQuark, getObservedPion } from "./Pion";
-import { Atomic, trigger } from "../ion/Atomic";
+import { Mutable, MutableEntity, MutableMorph, Mutation, recordMutation } from "../mutation/Mutable";
+import { asPion, asPionQuark, getAtomicPion } from "./Pion";
 import { AtomicPionQuark } from "../ion/AtomicPion";
 import { ParticleMorph } from "../compound/Particle";
 import { CompoundMorph } from "../compound/Compound";
-import { Watchable } from "../watch/Watched";
+import { Watchable } from "../reactivity/Watched";
 import { IonizedCompound } from "./IonizedCompound";
 
 // // /** INTERNAL */
@@ -584,40 +583,43 @@ export function reactiveSetter(
       // if (__DEV__) getObservedPion(ionizedModel, key)?.trigger(newValue, oldValue) //TODO: what about auto-ionizing new value?
       return true;
    }
+   
+   target[key] = newState
 
    storeSnapshot(quark)
 
-   target[key] = newState
+   emitAfterSet(model, key, newState, oldState) // for array.length === 0 and array.at(-1)
 
-   const pion = getObservedPion(model, key);
-
-   const mutation = new Mutation(
+   recordMutation(quark, new Mutation(
       model,
       '[[set]]',
       [key, newState],
       newState,
       oldState,
-   )
+   ))
 
-   if (pion && pion instanceof AtomicPionQuark) trigger(pion)
-
-   emitAfterSet(model, key, newState, oldState) // for array.length === 0 and array.at(-1)
-
-   triggerIonizedModel(
-      model
-   )
+   quark.trigger()
+   getAtomicPion(model, key)?.trigger()
 
    return true;
 }
 
+// PARTICLE
+// tracked op
 
-export function triggerIonizedModel(
-   model: IonizedModel
-) {
-   const { asParticle, asWatched } = quarkOf(model);
-   asParticle?.triggerCompounds()
-   asWatched?.triggerEffects()
-}
+// WATCHABLE & PARTICLE
+// atomic ion
+// atomic pion
+// model
+
+
+// export function triggerIonizedModel(
+//    model: IonizedModel
+// ) {
+//    const { asParticle, asWatched } = quarkOf(model);
+//    asParticle?.triggerCompounds()
+//    asWatched?.triggerEffects()
+// }
 
 
 
@@ -640,9 +642,8 @@ export function setAbsorbedIonState(model: IonizedModel, key: PropertyKey, ion: 
 
       emitAfterSet(model, key, newState, oldState)
 
-      triggerIonizedModel(
-         model,
-      )
+      quarkOf(model).trigger()
+
       return true;
    }
    if (__DEV__) throw new Error("Absorbed AtomicIon is read only")

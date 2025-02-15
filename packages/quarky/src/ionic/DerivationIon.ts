@@ -6,7 +6,7 @@ import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsu
 import { ParticleMorph } from "../compound/Particle";
 import { __DEV__label } from "../debug/DEVLabellable";
 import { emitSignal, Traceable } from "../debug/debug";
-import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
+import { unwatch, watch, Watchable, Watched } from "../reactivity/Watched";
 import { Ion, NonVoid } from "../ion/ion";
 import { CompoundMorph, triggerEffects } from "../compound/Compound";
 import { Mutation } from "../mutation/Mutable";
@@ -131,9 +131,9 @@ export function createMaybeMemoizedIon(
 
 
 
-function trigger(this: IonicCompound<ManagedDerivation>, mutation: Mutation): void {
+function trigger(this: IonicCompound<ManagedDerivation>): void {
    this.quark.dirty = true;
-   this.quark.asParticle?.triggerCompounds(mutation)
+   this.quark.asParticle?.triggerCompounds()
    triggerEffects(this)
 }
 

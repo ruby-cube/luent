@@ -1,6 +1,6 @@
 import { Particle } from "../compound/Particle";
 import { Compound, CompoundMorph, track, untrackParticles } from "../compound/Compound";
-import { Watchable } from "../watch/Watched";
+import { Watchable } from "../reactivity/Watched";
 import { Mutation } from "../mutation/Mutable";
 
 const trackerStack: (Compound | null)[] = []

@@ -1,10 +1,10 @@
 import { AnyObject } from "@rue/types";
-import {storeSnapshot, toRaw } from "./ionize";
-import { defineIonizedStructure, GetPreopData, IonizedModel, triggerIonizedModel, useTrackableGetOp } from "./IonizedModel";
-import { getAtomicOp, triggerOp } from "./AtomicOp";
+import { storeSnapshot, toRaw } from "./ionize";
+import { defineIonizedStructure, GetPreopData, IonizedModel, useTrackableGetOp } from "./IonizedModel";
+import { getAtomicOp } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
-import { getObservedPion, triggerPion } from "./Pion";
-import { Mutation } from "../mutation/Mutable";
+import { getAtomicPion } from "./Pion";
+import { Mutation, recordMutation } from "../mutation/Mutable";
 import { quarkOf } from "../Quark";
 
 // declare global {
@@ -71,25 +71,25 @@ export function installIonicSet() {
    defineIonizedStructure(Set, {
       nontrackableKeys: nontrackableIterableKeys, //FIX: I don't think this is correct
       trackableOps: {
-         has(target, ionicModel) {
+         has(target, ionizedModel) {
             return useTrackableGetOp(
-               ionicModel,
+               ionizedModel,
                target,
                'has',
                target.has
             )
          },
-         values(target, ionicModel){
+         values(target, ionizedModel) {
             return useTrackableGetOp(
-               ionicModel,
+               ionizedModel,
                target,
                'values',
                target.values
             )
          },
-         entries(target, ionicModel){
+         entries(target, ionizedModel) {
             return useTrackableGetOp(
-               ionicModel,
+               ionizedModel,
                target,
                'entries',
                target.entries
@@ -98,31 +98,30 @@ export function installIonicSet() {
       },
       mutatingOps: {
          add: {
-            createOp(target, ionicModel, meta) {
-
+            createOp(target, ionizedModel, quark) {
                return function add(newValue: any) {
                   const oldSize = target.size
                   const _newValue = toRaw(newValue)
                   const output = target.add(_newValue); //perform op
                   const newSize = target.size
 
-
                   if (oldSize === newSize) return;
-                  storeSnapshot(meta)
 
-                  const sizeProp = getObservedPion(ionicModel, 'size')
-                  if (sizeProp)
-                     trigger(sizeProp, newSize, oldSize);
+                  storeSnapshot(quark)
 
-                  const hasOp = getAtomicOp(ionicModel.has, _newValue)
-                  if (hasOp) triggerIonicAtom(hasOp);
-
-                  triggerIonizedModel(
-                     ionicModel,
+                  recordMutation(quark, new Mutation(
+                     ionizedModel,
                      'add',
                      [_newValue],
-                     output
-                  )
+                     output,
+                     undefined
+                  ))
+
+                  quark.trigger()
+
+                  getAtomicPion(ionizedModel, 'size')?.trigger()
+
+                  getAtomicOp(ionizedModel.has, _newValue)?.trigger()
 
                   return output;
                }
@@ -133,10 +132,10 @@ export function installIonicSet() {
             }
          },
          clear: {
-            createOp(target, ionicModel, meta, getPreopData) {
+            createOp(target, ionizedModel, quark, getPreopData) {
                return useClearOp(
-                  ionicModel,
-                  meta,
+                  ionizedModel,
+                  quark,
                   target,
                   getPreopData!
                )
@@ -146,18 +145,18 @@ export function installIonicSet() {
                return Array.from(<Set<any>>toRaw(model))
             },
 
-            revert(ionicModel, { preopData }) {
+            revert(ionizedModel, { preopData }) {
                for (const value of preopData) {
-                  ionicModel.add(value) //QUESTION: not sure if this should be the raw target or the ionic model
+                  ionizedModel.add(value) //QUESTION: not sure if this should be the raw target or the ionic model
                }
             }
          },
          delete: {
-            createOp(target, ionicModel, meta, getPreopData) {
+            createOp(target, ionizedModel, quark, getPreopData) {
 
                return useDeleteOp(
-                  ionicModel,
-                  meta,
+                  ionizedModel,
+                  quark,
                   target,
                   getPreopData!
                )
@@ -167,8 +166,8 @@ export function installIonicSet() {
                return target[args![0]]
             },
 
-            revert(ionicModel, { preopData }) {
-               ionicModel.add(preopData)
+            revert(ionizedModel, { preopData }) {
+               ionizedModel.add(preopData)
             }
          },
 
@@ -183,11 +182,11 @@ export function installIonicSet() {
 // ) {
 //     const modelQuark = new MetaIonicCollection(target, methods)
 
-//     const ionicModel = new Proxy(target, {
+//     const ionizedModel = new Proxy(target, {
 //         get(target, key, receiver) {
 //             if (__DEV__) emitSignal()
 //             if (key === QUARK) return modelQuark
-//             const reinedMeta = getReinedMeta(target, ionicModel, receiver)
+//             const reinedMeta = getReinedMeta(target, ionizedModel, receiver)
 //             if (reinedMeta) {
 //                 const keys = reinedMeta.propertyKeys
 //                 if (keys && !(key in keys)) {
@@ -198,7 +197,7 @@ export function installIonicSet() {
 //             if (methods && key in methods) {
 //                 return accessMethod(
 //                     target,
-//                     ionicModel,
+//                     ionizedModel,
 //                     receiver,
 //                     key,
 //                     boundMethodMap,
@@ -212,7 +211,7 @@ export function installIonicSet() {
 //                     if (keys && key in keys) {
 //                         return accessMethod(
 //                             target,
-//                             ionicModel,
+//                             ionizedModel,
 //                             receiver,
 //                             key,
 //                             boundMethodMap
@@ -237,24 +236,24 @@ export function installIonicSet() {
 //             if (isFunction(value)) {
 //                 return accessMethod(
 //                     target,
-//                     ionicModel,
+//                     ionizedModel,
 //                     receiver,
 //                     key,
 //                     boundMethodMap,
 //                     value
 //                 )
 //             }
-//             const _value = maybeIonize(value, target, ionicModel, receiver)
+//             const _value = maybeIonize(value, target, ionizedModel, receiver)
 //             const tracker = getActiveTracker()
 //             if (!tracker)
 //                 return _value;
-//             tracker.track(asPionQuark(ionicModel, key))
+//             tracker.track(asPionQuark(ionizedModel, key))
 //             return _value;
 //         },
 //         set(target, key, value, receiver) {
 //             return reactiveSetter(
 //                 Set,
-//                 ionicModel,
+//                 ionizedModel,
 //                 modelQuark,
 //                 target,
 //                 key,
@@ -266,19 +265,19 @@ export function installIonicSet() {
 
 // const boundMethodMap: Map<string | symbol, Function> = new Map([
 //     ['has', useTrackableGetOp(
-//         ionicModel,
+//         ionizedModel,
 //         target,
 //         'has',
 //         target.has
 //     )],
 //     ['add', addOp],
 //     ['clear', useClearOp(
-//         ionicModel,
+//         ionizedModel,
 //         modelQuark,
 //         target
 //     )],
 //     ['delete', useDeleteOp(
-//         ionicModel,
+//         ionizedModel,
 //         modelQuark,
 //         target
 //     )]
@@ -295,15 +294,15 @@ export function installIonicSet() {
 //         if (oldSize === newSize) return;
 //         storeSnapshot(modelQuark)
 
-//         const sizeProp = getObservedPion(ionicModel, 'size')
+//         const sizeProp = getObservedPion(ionizedModel, 'size')
 //         if (sizeProp)
 //             trigger(sizeProp, newSize, oldSize);
 
-//         const hasOp = getAtomicOp(ionicModel, 'has', _newValue)
+//         const hasOp = getAtomicOp(ionizedModel, 'has', _newValue)
 //         if (hasOp) triggerIonicAtom(hasOp);
 
 //         triggerIonizedModel(
-//             ionicModel,
+//             ionizedModel,
 //             'add',
 //             [_newValue],
 //             output,
@@ -313,16 +312,16 @@ export function installIonicSet() {
 //         return output;
 //     }
 
-//     modelQuark.initIonizedModel(ionicModel)
-//     registerIonizedModel(ionicModel, target)
-//     return ionicModel
+//     modelQuark.initIonizedModel(ionizedModel)
+//     registerIonizedModel(ionizedModel, target)
+//     return ionizedModel
 // }
 
 
 
 
 export function useDeleteOp(
-   ionicModel: IonizedModel,
+   ionizedModel: IonizedModel,
    modelQuark: IonizedModelQuark,
    target: AnyObject,
    getPreopData: GetPreopData
@@ -337,26 +336,18 @@ export function useDeleteOp(
 
       storeSnapshot(modelQuark)
 
-      const mutation = new Mutation(
-         ionicModel,
+      recordMutation(modelQuark, new Mutation(
+         ionizedModel,
          'delete',
          [key],
          output,
          preopData
-      )
+      ))
 
-      modelQuark.recordOp?.(mutation)
+      modelQuark.trigger()
 
-      triggerPion(getObservedPion(ionicModel, 'size'))
-      triggerOp(getAtomicOp(ionicModel.has, key))
-
-      if (target instanceof Map) {
-         triggerOp(getAtomicOp(ionicModel.get, key))
-      }
-
-      triggerIonizedModel(
-         ionicModel
-      )
+      getAtomicPion(ionizedModel, 'size')?.trigger()
+      getAtomicOp(ionizedModel.has, key)?.trigger()
 
       return output;
    }
@@ -365,7 +356,7 @@ export function useDeleteOp(
 
 
 export function useClearOp(
-   ionicModel: IonizedModel,
+   ionizedModel: IonizedModel,
    modelQuark: IonizedModelQuark,
    target: AnyObject,
    getPreopData: GetPreopData
@@ -380,31 +371,30 @@ export function useClearOp(
 
       storeSnapshot(modelQuark)
 
-      const trackedEntries = modelQuark.observedEntryKeys
-      if (trackedEntries) {
-         for (const entryKey of trackedEntries) {
-            const hasOp = getAtomicOp(ionicModel.has, entryKey)
-            if (hasOp) triggerIonicAtom(hasOp);
-
-            if (target instanceof Map) {
-               const getOp = getAtomicOp(ionicModel.get, entryKey)
-               if (getOp) triggerIonicAtom(getOp);
-            }
-         }
-      }
-
-      const sizeProp = getObservedPion(ionicModel, 'size')
-      if (sizeProp)
-         trigger(sizeProp, newSize, oldSize);
-
-
-      triggerIonizedModel(
-         ionicModel,
+      recordMutation(modelQuark, new Mutation(
+         ionizedModel,
          'clear',
          [],
          output,
          preopData
-      )
+      ))
+
+      modelQuark.trigger()
+
+      const trackedEntries = modelQuark.observedEntryKeys
+      if (trackedEntries) {
+         for (const entryKey of trackedEntries) {
+            getAtomicOp(ionizedModel.has, entryKey)?.trigger()
+
+            if (target instanceof Map) {
+               getAtomicOp(ionizedModel.get, entryKey)?.trigger()
+            }
+         }
+      }
+
+      getAtomicPion(ionizedModel, 'size')?.trigger()
+
+
 
       return output;
    }

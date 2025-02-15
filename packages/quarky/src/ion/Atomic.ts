@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { Particle, ParticleMorph } from "../compound/Particle";
-import { Watchable } from "../watch/Watched";
+import { Watchable } from "../reactivity/Watched";
 import { emitSignal } from "../debug/debug";
 import { getActiveTracker } from "../ionic/IonicCompound";
 
@@ -35,16 +35,4 @@ export function getAtomicState(target: AnyObject, key: PropertyKey, particle: Pa
 // }
 
 
-/**
- * @param quark 
- * @param op 
- * @param args 
- * @param output 
- * @param preopData 
- */
-export function trigger( //TODO: figure out which abstraction this belongs to ...  atomic ions, atomic pions, memoized derivations, but not terminal compound
-   quark: Atomic,
-) {
-   quark.asParticle?.triggerCompounds()
-   quark.asWatched?.triggerEffects()
-}
+
