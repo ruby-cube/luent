@@ -259,6 +259,7 @@ export function installIonicArray() {
       deionizeArgs?: (args: any[]) => any[]
    ) {
       return function createOp(target: AnyObject, ionizedModel: IonizedModel, quark: IonizedModelQuark, getPreopData: GetPreopData | undefined) {
+         console.log(opName, target[0], target[1], target[2])
          const fn = target[opName]
          return useMutatingArrayOp(
             ionizedModel,
@@ -292,7 +293,7 @@ export function installIonicArray() {
          const preopData = getPreopData ? getPreopData(target, args) : undefined
          const _args = deionizeArgs ? deionizeArgs(args) : args
          const prevLength = target.length;
-         const output = fn.apply(model, _args); // perform mutation
+         const output = fn.apply(target, _args); // perform mutation
          const newLength = target.length;
 
          if (key in lengthMutatingOps && prevLength === newLength) return output;

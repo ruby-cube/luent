@@ -67,6 +67,7 @@ export function createAtomicIon(
          return ion.state;
       },
       set: value => {
+
          __DEV__traceMethodCall(capsuleName, $state, 'state')
          const oldState = ion.state;
          if (value === oldState) {
@@ -76,6 +77,7 @@ export function createAtomicIon(
          }
          const state = shouldIonize(value, ion.ionized) ? ionize(value) : value
          ion.state = state;
+        
          recordMutation(ion, new Mutation(
             $state,
             '[[set]]',
@@ -84,6 +86,7 @@ export function createAtomicIon(
             oldState
          ))
          ion.trigger()
+
          return state;
       }
    })

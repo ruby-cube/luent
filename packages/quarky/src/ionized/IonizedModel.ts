@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { ionize, Ionized, isIonizedModel, registerIonizedModel, toRaw } from "./ionize";
+import { ionize,  registerIonizedModel, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
 import { asAtomicOp, TRACKED } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
@@ -12,7 +12,6 @@ import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
 import { Mutable, MutableEntity, MutableMorph, Mutation, recordMutation } from "../mutation/Mutable";
 import { asPion, asPionQuark, getAtomicPion } from "./Pion";
-import { AtomicPionQuark } from "../ion/AtomicPion";
 import { ParticleMorph } from "../compound/Particle";
 import { CompoundMorph } from "../compound/Compound";
 import { Watchable } from "../reactivity/Watched";

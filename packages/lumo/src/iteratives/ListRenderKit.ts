@@ -131,7 +131,7 @@ export class ListRenderKit {
          // set up watcher for updates
          // const effectCycle = getCurrentEffectCylce();
          const _data = isIon(data) ? untrackedCall(data) : data // unwrap potentially nested ionized model
-         const rawData = isIonizedModel(_data) ? toRaw(_data) as Collection<any> : undefined
+         const rawData = isIonizedModel(_data) ? (console.log('USING RAW'), toRaw(_data)) as Collection<any> : undefined
          let clone = isIonizedModel(_data) ? shallowClone(rawData!) : undefined //TODO: need to handle cases when ionizedModel is nested in ion
          //TODO: figure out typing for Set, Map, Object vs Array
 
@@ -230,6 +230,7 @@ export class ListRenderKit {
          if (!_isNewItem) {
             // update $index.state
             const $index = this.indices[oldIndex];
+            console.log('update index', $index(), i)
             newIndices.push($index);
             $index.state = i
 

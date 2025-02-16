@@ -173,7 +173,7 @@ export function watch<
 
    function wrappedEffect() {
       const newState = getValue(subject)
-
+      if (typeof newState === 'number')console.log('index? in wrappedEFfect', newState)
       if (!eager && isEqual(prevState, newState))
          return;
 

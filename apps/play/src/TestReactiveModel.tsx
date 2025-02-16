@@ -72,6 +72,9 @@ export function List(
       }
    })
 
+   console.log('list', list)
+   console.log('raw list', toRaw(list))
+
 
    const mySet = new Set()
    const selected = ionize(mySet, {
@@ -117,7 +120,7 @@ export function List(
             insert!
          </div>
 
-         {For(list, item => item.id, (item, $index) => (
+         {For(list, item => item.id, (item, $index) => (console.log('rendering', item.content, $index()),
             <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
                // <div
                style={{

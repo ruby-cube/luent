@@ -1,8 +1,15 @@
+import { $effectCycle } from "./EffectCycle";
 import { Watched } from "./Watched";
 
 export class EffectVine {
    private head: EffectLink | undefined
    private tail: EffectLink | undefined
+
+   constructor(
+      public __DEV__name: string
+   ) {
+
+   }
 
    private _size: number = 0;
    get size() {
@@ -12,7 +19,6 @@ export class EffectVine {
    add(link: EffectLink) {
       const vine = link.vine;
       if (vine === this) return;
-
       vine?.unlink(link)
 
       // link vine
@@ -33,6 +39,7 @@ export class EffectVine {
    delete(link: EffectLink) {
       if (!this.has(link))
          return false;
+
       this.unlink(link)
       link.pass()
       this._size--;
@@ -40,6 +47,8 @@ export class EffectVine {
    }
 
    private unlink(link: EffectLink) {
+      this.storeNext(link)
+
       // unlink from vine
       const prevLink = link.prev;
       const nextLink = link.next;
@@ -66,7 +75,6 @@ export class EffectVine {
    }
 
    absorb(vine: EffectVine) {
-      // NOTE: absorption doesn't reassign a link's vine, so it still is connected to the original vine...
       const head = vine.head;
       const tail = vine.tail;
       if (!tail) return;
@@ -80,25 +88,43 @@ export class EffectVine {
          head!.prev = thisTail;
       }
       this._size += vine._size;
-      vine.clear()
+      vine.pour(this)
    }
 
-   clear() {
+   pour(destination?: EffectVine) {
+      if (this.tail) this.storeNext(this.tail)
+      for (const link of this) {
+         link.vine = destination
+      }
       this.head = undefined;
       this.tail = undefined;
-      for (const link of this) {
-         link.vine = undefined
-      }
       this._size = 0
    }
 
-   *[Symbol.iterator](): Iterator<EffectLink> {
-      let current = this.head;
-      while (current) {
-         const next = current.next;
-         yield current;
-         current = current.vine === this ? current.next : next /* in case link has been removed */;
+   clear() {
+      this.pour()
+   }
+
+   private current?: EffectLink | undefined
+   private next?: EffectLink | undefined
+
+   private storeNext(removal: EffectLink) {
+      if (removal !== this.current) {
+         return;
       }
+      this.next = removal.next;
+   }
+
+   *[Symbol.iterator](): Iterator<EffectLink> {
+      let current = this.current = this.head;
+      while (current) {
+         const next = current.next; // works if not last item
+         yield current;
+         current = this.current = next ?? this.next /* accesses the new 'next' of a removed effect */
+         this.next = undefined;
+      }
+      this.current = undefined;
+      this.next = undefined;
    }
 
 }

@@ -122,7 +122,7 @@ export class EffectCycle {
       return cycleCount;
    }
 
-   effects: PhaseMap = new PhaseMap();
+   effects: PhaseMap = new PhaseMap('effect cycle');
 
    scheduleEffects(effects: EffectVine, phase: number) {
       if (phase < this.currentPhase) {
@@ -132,6 +132,7 @@ export class EffectCycle {
          return;
       }
       this.effects.absorb(effects, phase)
+      console.log('scheduled effects', phase, this.effects)
    }
 
    scheduleEffect(effect: EffectLink, phase: number) {
@@ -147,6 +148,7 @@ export class EffectCycle {
    private runEffects(phase: number) {
       const effects = this.effects.get(phase);
       if (effects) {
+         console.log('RUN EFFECTS', phase)
          for (const effect of effects) {
             effect.task()
             if (!effect.vine) continue; // effect has already been removed during the effect via 'once' or 'scheduler'
@@ -154,6 +156,7 @@ export class EffectCycle {
             if (!subject) continue;
             subject.completedEffects.addToVine(effect, phase)
          }
+         console.log('END', phase)
       }
    }
 

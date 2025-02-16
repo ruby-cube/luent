@@ -122,7 +122,6 @@ function analyzeAttributes(entries: AnyObject) {
 }
 
 function bindView(element: Element, Slot: Slot | undefined, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
-   console.log('binding view', element.tagName)
    switch (element.tagName) {
       case 'INPUT':
          bindInput(<HTMLInputElement>element, attributes)
@@ -371,9 +370,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
       for (const key in entry) {
          const value = entry[key];
          if (isIon(value)) {
-            console.log("!!!! Style", value)
             watch(value, ({ state }/* value: string | number | Falsey */) => {
-               console.log("!!!! Style", value, entry, state)
                assignStyleProperty(style, toStylePropertyName(key), state)
             }, {
                eager: true,

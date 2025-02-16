@@ -21,9 +21,24 @@ export function TestCounter() {
    })
    const $doubleCount = ion(() => $count() * 2)
 
+   const $index = ion(0, {
+      increment() {
+         $index.state++
+      },
+      decrement() {
+         $index.state--
+      }
+   })
+
+   watch($index, ()=>{
+      console.log('running index effect')
+   }, {phase: RENDER})
+
    watch($count, () => {
-      $count.increment()
-   }, { phase: SYNC })
+      console.log('running $count effect')
+      // $count.increment()
+      $index.increment()
+   }, { phase: RENDER })
 
    return component(
       <>

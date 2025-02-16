@@ -10,6 +10,7 @@ export function setUpTextNode(text: Ion | any, nodePod: NodePod) {
     nodePod.push(textNode)
 
     if (isIon(text)) {
+
         keepTextNodeUpdated(text, textNode)
     }
     return textNode;
@@ -21,8 +22,9 @@ export function mountTextNode(textNode: CharacterData, parent: Element, fragment
 }
 
 function keepTextNodeUpdated(text: Ion, textNode: CharacterData) {
-   watch(text, () => {
-      textNode.data = toString(text());
+   watch(text, ({state}) => {
+      // if (typeof state === 'number')console.log('index?', text)
+      textNode.data = toString(state);
    }, { phase: RENDER, __devName: keepTextNodeUpdated.name });
 }
 

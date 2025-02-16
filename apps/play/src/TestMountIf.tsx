@@ -52,9 +52,9 @@ export function MountIf() {
       }
    })
 
-   watch($color, ()=>{
-      __DEV__debug.traceAsyncPath()
-   })
+   // watch($color, ()=>{
+   //    __DEV__debug.traceAsyncPath()
+   // })
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
    return component(
       <>

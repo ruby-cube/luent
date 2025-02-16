@@ -3,12 +3,14 @@ import { EffectVine, EffectLink } from "./EffectLink";
 
 
 export class PhaseMap extends Map<number, EffectVine | null> {
-   constructor() {
+   constructor(
+      public __DEV__name: string
+   ) {
       super();
    }
 
    private initializeVine(phase: number) {
-      const vine: EffectVine = new EffectVine()
+      const vine: EffectVine = new EffectVine(this.__DEV__name)
       this.set(phase, vine);
       return vine
    }

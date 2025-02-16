@@ -1,3 +1,4 @@
+import { RENDER } from "../../../lumo/src/render/render-cycle";
 import { onEffectCycleComplete, $effectCycle } from "./EffectCycle";
 import { EffectLink, EffectVine } from "./EffectLink";
 import { effectStack } from "./EffectStack";
@@ -25,18 +26,18 @@ export class Watched<T extends Watchable = Watchable> {
    ) {
    }
 
-   private effects: PhaseMap = new PhaseMap()
+   private effects: PhaseMap = new PhaseMap('effects')
    private nextCycleEffects: PhaseMap | undefined;
 
    private _completedEffects: PhaseMap | undefined;
 
    get completedEffects() {
-      return this._completedEffects || (this._completedEffects = new PhaseMap())
+      return this._completedEffects || (this._completedEffects = new PhaseMap('completed effects'))
    }
 
 
    private queueForNextCycle(effect: EffectLink, phase: number) {
-      const nextCycleEffects = this.nextCycleEffects ?? (this.nextCycleEffects = new PhaseMap())
+      const nextCycleEffects = this.nextCycleEffects ?? (this.nextCycleEffects = new PhaseMap('next cycle effects'))
       let toBeQueued = nextCycleEffects.get(phase);
       nextCycleEffects.addToVine(effect, phase)
       if (!toBeQueued) {
@@ -72,6 +73,7 @@ export class Watched<T extends Watchable = Watchable> {
             this.runSyncEffects(effects!);
          }
          else {
+            if (typeof this.quark.state === 'number') console.log('index???', this.quark.state, phase === RENDER, $effectCycle().currentPhase)
             $effectCycle().scheduleEffects(effects!, phase)
             this.scheduleReabsorption(phase)
          }
