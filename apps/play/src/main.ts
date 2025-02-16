@@ -12,6 +12,7 @@ import './style.css'
 import { component, createApp } from '@rue/lumo';
 import { TestCounter, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
+import { MountIf } from './TestMountIf';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -42,7 +43,7 @@ import { TestApp } from './TestApp';
 
 // frog;
 
-const app = createApp(TestApp)
+const app = createApp(MountIf)
 
 // if (__DEV__) configureFlask({
 //     warnNoCleanup: true

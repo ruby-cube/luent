@@ -174,7 +174,7 @@ export function watch<
    function wrappedEffect() {
       const newState = getValue(subject)
 
-      if (isEqual(prevState, newState))
+      if (!eager && isEqual(prevState, newState))
          return;
 
       eager = false;

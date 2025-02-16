@@ -8,6 +8,7 @@
 
 import { component } from "@rue/lumo"
 import { ion, ionize, o$, SYNC, watch } from "@rue/quarky"
+import { RENDER } from "../../../packages/lumo/src/render/render-cycle"
 
 export function TestCounter() {
    const $count = ion(0, {
@@ -22,7 +23,7 @@ export function TestCounter() {
 
    watch($count, () => {
       $count.increment()
-   }, {phase: SYNC})
+   }, { phase: SYNC })
 
    return component(
       <>
@@ -41,17 +42,17 @@ export function TestCounterModel() {
    const counter = ionize({
       count: 0
    }, {
-      increment(){
+      increment() {
          counter.count++
       },
-      decrement(){
+      decrement() {
          counter.count--
       }
    })
 
-   watch(counter, (state)=>{
+   watch(counter, ({ state }) => {
       console.log('changed', state)
-   })
+   }, { eager: true, phase: RENDER })
 
    return component(
       <>

@@ -657,7 +657,8 @@ export function setAbsorbedIonState(model: IonizedModel, key: PropertyKey, ion: 
 
 
 function isWritable(target: Object, key: PropertyKey) {
-   const descriptor = Reflect.getOwnPropertyDescriptor(target, key);
-   if (descriptor?.writable === true) return true;
+   const descriptor = Object.getOwnPropertyDescriptor(target, key);
+   if (!descriptor) return true;
+   if (descriptor.writable === true) return true;
    return false;
 }
