@@ -3,7 +3,7 @@ import { nontrackableIterableKeys, useClearOp, useDeleteOp } from "./IonizedSet"
 import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { defineIonizedStructure, useTrackableGetOp } from "./IonizedModel";
 import { getAtomicPion } from "./Pion";
-import { Mutation, recordMutation } from "../mutation/Mutable";
+import { Mutation, recordMutation } from "../Mutable";
 
 // declare global {
 //    interface Map<K, V> {

@@ -1,6 +1,6 @@
 import { asParticle, Particle, ParticleMorph } from "./Particle"
 import { Watchable } from "../reactivity/Watched"
-import { Mutation } from "../mutation/Mutable"
+import { Mutation } from "../Mutable"
 
 
 /**

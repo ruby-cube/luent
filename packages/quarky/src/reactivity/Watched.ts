@@ -73,7 +73,6 @@ export class Watched<T extends Watchable = Watchable> {
             this.runSyncEffects(effects!);
          }
          else {
-            if (typeof this.quark.state === 'number') console.log('index???', this.quark.state, phase === RENDER, $effectCycle().currentPhase)
             $effectCycle().scheduleEffects(effects!, phase)
             this.scheduleReabsorption(phase)
          }

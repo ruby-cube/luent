@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
-import { isIonizedModel } from "../ionized/ionize";
-import { QUARK, quarkOf } from "../Quark";
-import { AbortSignal, OnAbort } from "../../../flask/AbortSignal";
+import { isIonizedModel } from "./ionized/ionize";
+import { QUARK, quarkOf } from "./Quark";
+import { AbortSignal, OnAbort } from "../../flask/AbortSignal";
 import { IterableSet } from "@rue/utils";
 
 export type MutableEntity = {
@@ -77,8 +77,8 @@ class MutationRecording {
 // let recording = recordMutations(target)
 
 // watch(target, ({ state, prevState }) => {
-//    this.applyMutations(recording.mutations)
 //    recording.stop()
+//    this.applyMutations(recording.mutations)
 
 //    recording = recordMutations(target)
 // })

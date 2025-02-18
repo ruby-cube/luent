@@ -1,4 +1,4 @@
-import { __DEV__traceMethodCall, Traceable } from "../debug/debug";
+import { __DEV__traceMethodCall, emitSignal, Traceable } from "../debug/debug";
 import { ionize } from "../ionized/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
@@ -8,9 +8,10 @@ import { __DEV__label } from "../debug/DEVLabellable";
 import { __DEV__initTraceability, attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
 import { AtomicIon } from "./ion";
 import { unwatch, watch } from "../reactivity/Watched";
-import { Atomic, getAtomicState } from "./Atomic";
-import { Mutable, MutableEntity, Mutation, recordMutation } from "../mutation/Mutable";
+import { Atomic } from "./Atomic";
+import { Mutable, MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { trigger } from "../reactivity/trigger";
+import { getActiveTracker } from "../ionic/IonicCompound";
 
 /** INTERNAL */
 export type $AtomicIonState = AtomicIon & MutableCapsule & {
@@ -38,7 +39,11 @@ export function createAtomicIon(
    methods?: object,
    ionized: boolean = false
 ) {
-   const $state = (() => getAtomicState(ion, 'state', ion)) as $AtomicIonState
+   const $state = (() => {
+      if (__DEV__) emitSignal();
+      getActiveTracker()?.track(ion)
+      return ion.state;
+   }) as $AtomicIonState
 
    const ion: AtomicIonQuark = {
       state,
@@ -77,7 +82,7 @@ export function createAtomicIon(
          }
          const state = shouldIonize(value, ion.ionized) ? ionize(value) : value
          ion.state = state;
-        
+
          recordMutation(ion, new Mutation(
             $state,
             '[[set]]',

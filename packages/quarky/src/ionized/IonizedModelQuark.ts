@@ -6,7 +6,7 @@ import { unwatch, watch, Watchable, Watched } from "../reactivity/Watched"
 import { ParticleMorph, Particle } from "../compound/Particle"
 import { IonizedCompound } from "./IonizedCompound"
 import { EntityQuark, Quark, QuarkOf } from "../Quark"
-import { Mutable, Mutation } from "../mutation/Mutable"
+import { Mutable, Mutation } from "../Mutable"
 import { PionQuark } from "./Pion"
 import { trigger } from "../reactivity/trigger"
 

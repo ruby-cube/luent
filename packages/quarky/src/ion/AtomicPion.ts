@@ -7,7 +7,7 @@ import { getActiveTracker } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { Ion, isIon, AtomicIon } from "./ion";
 import { MutableCapsule } from "../capsule/Capsule";
-import { Mutation } from "../mutation/Mutable";
+import { Mutation } from "../Mutable";
 import { __DEV__traceMethodCall, Traceable } from "../debug/debug";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
 import { Atomic } from "./Atomic";
@@ -88,16 +88,16 @@ export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
 export function createAtomicPion(model: IonizedModel, key: PropertyKey, pionQuark?: AtomicPionQuark): $AtomicPionState {
    const rawTarget = toRaw(model)
 
-   function $propIon() {
+   function $atomicPionState() {
       const tracker = getActiveTracker()
       if (tracker)
          return model[key];
       return rawTarget[key]
    }
 
-   $propIon[QUARK] = pionQuark ?? asPionQuark(model, key)
+   $atomicPionState[QUARK] = pionQuark ?? asPionQuark(model, key)
 
-   Object.defineProperty($propIon, 'state', {
+   Object.defineProperty($atomicPionState, 'state', {
       get() {
          return rawTarget[key]
       },
@@ -106,6 +106,6 @@ export function createAtomicPion(model: IonizedModel, key: PropertyKey, pionQuar
       }
    })
 
-   return $propIon as $AtomicPionState
+   return $atomicPionState as $AtomicPionState
 }
 

@@ -61,8 +61,8 @@
 * 
 * */
 
-import { Particle, ParticleMorph } from "./compound/Particle"
-import { Quark, QuarkyEntity } from "./Quark"
+import { Particle, ParticleMorph } from "../compound/Particle"
+import { Quark, QuarkyEntity } from "../Quark"
 
 //ABSTRACT
 

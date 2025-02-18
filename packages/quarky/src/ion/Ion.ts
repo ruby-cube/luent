@@ -2,17 +2,18 @@ import { isFunction } from "@rue/utils";
 import { neutron } from "./Neutron";
 import { createMaybeMemoizedIon } from "../ionic/DerivationIon";
 import { createAtomicIon } from "./AtomicIon";
+import { ionize } from "../ionized/ionize";
+import { maybeIonize } from "../ionized/IonizedModel";
 
 /* API */
 export type Ion<T extends NonVoid = NonVoid, M = {}> = (() => T) & M
-
-export type Methods = { [key: PropertyKey]: (...args: any) => any }
 
 /* API */  // atomic ions, neutrons, and pions
 export type AtomicIon<T extends NonVoid = NonVoid, M = { state: T }> = (() => T) & M & { state: T }
 
 export type NonVoid = string | number | object | undefined | boolean | bigint | symbol | null
 
+export type Methods = { [key: PropertyKey]: (...args: any) => any }
 
 
 export function isIon(value: unknown): value is Ion {
@@ -43,9 +44,9 @@ export function ion<
    return createAtomicIon(initialState, methods) as unknown as IonReturn<T, M>
 }
 
-// ion.ionize = function _ionize<T extends object, M>(initialState: T, methods?: M & Methods): M extends Methods ? AtomicIon<T, M> : AtomicIon<T> {
-//    return createAtomicIon(ionize(initialState), methods, true) as unknown as M extends Methods ? AtomicIon<T, M> : AtomicIon<T>
-// }
+ion.ionize = function createIonizedIon<T extends object, M>(initialState: T, methods?: M & Methods): M extends Methods ? AtomicIon<T, M> : AtomicIon<T> {
+   return createAtomicIon(maybeIonize(initialState), methods, true) as unknown as M extends Methods ? AtomicIon<T, M> : AtomicIon<T>
+}
 
 // isIon // any sort of ion
 // isAtomic // primary

@@ -4,10 +4,8 @@ import { toRaw } from "./ionize";
 import { isIon } from "../ion/ion";
 import { Compound, track, untrackParticles, CompoundMorph, triggerEffects } from "../compound/Compound";
 import { IonizedModelQuark } from "./IonizedModelQuark";
-import { Mutation } from "../mutation/Mutable";
 import { hasQuark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
-import { IterableSet } from "@rue/utils";
 import { DerivationPionQuark } from "../ionic/DerivationPion";
 
 //TODO: 
@@ -55,16 +53,8 @@ export class IonizedCompound implements Compound {
    }
 
    collectAbsorbedIons(model: IonizedModel) {
-      // const quark = quarkOf(model)
-      // let absorbedIons = quark.absorbedIons
-      // if (absorbedIons) {
-      //    for (const ion of absorbedIons) {
-      //       this.track(ion)
-      //    }
-      // }
-      // absorbedIons = quark.absorbedIons = new IterableSet()
       const target = toRaw(model) as AnyObject;
-      for (const key in target) { //TODO: can we make this more efficient than looping though all object keys?
+      for (const key in target) { 
          const value = target[key]
          if (isIon(value)) {
             if (hasQuark(value)) {

@@ -10,7 +10,7 @@ import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../de
 import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
-import { Mutable, MutableEntity, MutableMorph, Mutation, recordMutation } from "../mutation/Mutable";
+import { Mutable, MutableEntity, MutableMorph, Mutation, recordMutation } from "../Mutable";
 import { asPion, asPionQuark, getAtomicPion } from "./Pion";
 import { ParticleMorph } from "../compound/Particle";
 import { CompoundMorph } from "../compound/Compound";
@@ -419,7 +419,7 @@ function initialTrackableStateAccess(
    return getState(value)
 }
 
-function maybeIonize(value: any) {
+export function maybeIonize(value: any) {
    if (!(value instanceof Object))
       return value;
    return ionize(value)

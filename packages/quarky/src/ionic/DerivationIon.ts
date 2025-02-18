@@ -9,7 +9,7 @@ import { emitSignal, Traceable } from "../debug/debug";
 import { unwatch, watch, Watchable, Watched } from "../reactivity/Watched";
 import { Ion, NonVoid } from "../ion/ion";
 import { CompoundMorph, triggerEffects } from "../compound/Compound";
-import { Mutation } from "../mutation/Mutable";
+import { Mutation } from "../Mutable";
 
 /**
 * Managed Derivation Ion

@@ -4,7 +4,7 @@ import { defineIonizedStructure, GetPreopData, IonizedModel, useTrackableGetOp }
 import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { getAtomicPion } from "./Pion";
-import { Mutation, recordMutation } from "../mutation/Mutable";
+import { Mutation, recordMutation } from "../Mutable";
 import { quarkOf } from "../Quark";
 
 // declare global {

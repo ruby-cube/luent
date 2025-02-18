@@ -1,6 +1,3 @@
-import { AnyObject } from "@rue/types";
-import { Ion } from "./ion/ion";
-
 export const QUARK = Symbol('quark')
 
 export function hasQuark(value: unknown): value is { [QUARK]: Quark } {

@@ -1,8 +1,3 @@
-
-
-
-
-import { Mutation } from "../mutation/Mutable";
 import { asParticle, ParticleMorph, Particle } from "../compound/Particle";
 import { Quark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
@@ -30,7 +25,7 @@ export class AtomicOp implements Quark, ParticleMorph {
          }
       })
    }
-   entity=noop;
+   entity = noop;
 
    discard() {
       unregisterAtomicOp(this.trackableOp, this.entryKey)
@@ -40,7 +35,7 @@ export class AtomicOp implements Quark, ParticleMorph {
    //    return this.modelQuark.rawTarget[this.op](this.entryKey)
    // }
 
-   trigger(){
+   trigger() {
       this.asParticle.triggerCompounds()
    }
 }
@@ -90,7 +85,7 @@ export function getAtomicOp(
 
 export function getAtomicOps(
    op: Function & TrackableOp
-){
+) {
    return op[TRACKED]
 }
 

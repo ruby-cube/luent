@@ -30,7 +30,6 @@ export function setUpEffectCycle(phases: [CyclePhase, ...CyclePhase[]]) {
       () => definePhase('END_EFFECT_CYCLE'),
       () => onEffectCycleComplete = createEffectCycleHook(phaseNums.at(-1)!)
    )
-   console.log(cyclePhases)
    return phaseNums;
 }
 

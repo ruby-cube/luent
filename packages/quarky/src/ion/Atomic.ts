@@ -7,11 +7,11 @@ import { getActiveTracker } from "../ionic/IonicCompound";
 export type Atomic = ParticleMorph & Watchable
 
 
-export function getAtomicState(target: AnyObject, key: PropertyKey, particle: ParticleMorph) {
-   if (__DEV__) emitSignal();
-   getActiveTracker()?.track(particle)
-   return target[key];
-}
+// export function getAtomicState(target: AnyObject, key: PropertyKey, particle: ParticleMorph) {
+//    if (__DEV__) emitSignal();
+//    getActiveTracker()?.track(particle)
+//    return target[key];
+// }
 
 
 // export function setAtomicState(

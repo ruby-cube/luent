@@ -1,7 +1,7 @@
 import { Particle } from "../compound/Particle";
 import { Compound, CompoundMorph, track, untrackParticles } from "../compound/Compound";
 import { Watchable } from "../reactivity/Watched";
-import { Mutation } from "../mutation/Mutable";
+import { Mutation } from "../Mutable";
 
 const trackerStack: (Compound | null)[] = []
 
@@ -41,7 +41,7 @@ export function untrackedCall(fn: Function) {
 }
 
 /**
- * For memoized ions, which are both atom and compound to be called within watch and not be tracked by the outer tracking context.
+ * For memoized ions, which are both particles and compounds to be called within watch and not be tracked by the outer tracking context.
  * @param fn 
  * @returns 
  */
