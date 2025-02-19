@@ -32,6 +32,7 @@ type EndPhase = number;
 
 //TODO: configure default phase for watch
 export function useReactivity(phases?: [CyclePhase, ...CyclePhase[]]): [SyncPhase, ...Phases, EndPhase] {
+   console.log('configuring reactivity')
    const completionPhase = definePhase('END_EFFECT_CYCLE')
    if (phases) {
       const phaseNums = [0]
@@ -43,7 +44,7 @@ export function useReactivity(phases?: [CyclePhase, ...CyclePhase[]]): [SyncPhas
          phaseNums.push(phaseNum)
       }
       if (phases.length === 1) schedulePhaseOne = scheduleFinalPhase
-      else cyclePhases.at(-1)!.scheduleNextPhase = scheduleFinalPhase
+      else cyclePhases.at(-2)!.scheduleNextPhase = scheduleFinalPhase
 
       const endPhase = cyclePhases.length;
       cyclePhases.at(-1)!.next = completionPhase
@@ -127,7 +128,8 @@ function schedulePhase(cycle: EffectCycle, { schedule, scheduleNextPhase, phase,
    })
 }
 
-function scheduleFinalPhase(cycle: EffectCycle, { schedule, phase, next }: CyclePhase) {
+function scheduleFinalPhase(cycle: EffectCycle, { name, schedule, phase, next }: CyclePhase) {
+   console.log('schedule final phase', name)
    schedule(() => {
       // scheduleNextPhase
       cycle.runEffects(phase)

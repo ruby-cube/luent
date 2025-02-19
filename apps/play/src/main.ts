@@ -8,7 +8,7 @@ import './style.css'
 // import { TestBox } from './TestBox';
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
-// import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
+import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { component, createApp } from '@rue/lumo';
 import { TestCounter, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
@@ -38,41 +38,41 @@ import { definePhase, ion, queueTask, useReactivity, watch } from '@rue/quarky';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
-export const [
-   SYNC,
-   BATCHED
-] = useReactivity()
+// export const [
+//    SYNC,
+//    BATCHED
+// ] = useReactivity()
 
 
 
-const $count = ion(0, {
-   increment() {
-      $count.state++
-   },
-   decrement() {
-      $count.state--
-   }
-})
+// const $count = ion(0, {
+//    increment() {
+//       $count.state++
+//    },
+//    decrement() {
+//       $count.state--
+//    }
+// })
 
-const $doubleCount = ion(() => $count() * 2)
+// const $doubleCount = ion(() => $count() * 2)
 
-watch(() => {
-   console.trace()
-   console.log('+++++++++++++++++')
-   console.log('double count is now', $doubleCount())
-   console.log('count is', $count())
-   console.log('+++++++++++++++++')
-}, { phase: SYNC })
+// watch(() => {
+//    console.trace()
+//    console.log('+++++++++++++++++')
+//    console.log('double count is now', $doubleCount())
+//    console.log('count is', $count())
+//    console.log('+++++++++++++++++')
+// }, { phase: SYNC })
 
-function doStuff() {
-   $count.increment()
-   $count.decrement()
-   // $count.increment()
-}
+// function doStuff() {
+//    $count.increment()
+//    $count.decrement()
+//    // $count.increment()
+// }
 
-window.$count = $count
-window.$doubleCount = $doubleCount
-window.doStuff = doStuff
+// window.$count = $count
+// window.$doubleCount = $doubleCount
+// window.doStuff = doStuff
 
 
 // const rootContext = createGlobalCommons()
@@ -81,13 +81,13 @@ window.doStuff = doStuff
 
 // frog;
 
-// const app = createApp(TestApp)
+const app = createApp(TestApp)
 
-// if (__DEV__) configureFlask({
-//     warnNoCleanup: true
-// })
+if (__DEV__) configureFlask({
+    warnNoCleanup: true
+})
 
-// app.mount('#app')
+app.mount('#app')
 
 // function doSomething() {
 //     const dynamicNode = makeDynamicNode(false)
