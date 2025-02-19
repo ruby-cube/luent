@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { ionize,  registerIonizedModel, toRaw } from "./ionize";
+import { ionize, registerIonizedModel, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
 import { asAtomicOp, TRACKED } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
@@ -14,13 +14,14 @@ import { Mutable, MutableEntity, MutableMorph, Mutation, recordMutation } from "
 import { asPion, asPionQuark, getAtomicPion } from "./Pion";
 import { ParticleMorph } from "../compound/Particle";
 import { CompoundMorph } from "../compound/Compound";
-import { Watchable } from "../reactivity/Watched";
+import { Watchable } from "../watch/Watched";
 import { IonizedCompound } from "./IonizedCompound";
+import { $syncEffects } from "../effect-cycle/SyncEffects";
 
 // // /** INTERNAL */
 export type IonizedModel = {
    [QUARK]: Watchable & ParticleMorph & CompoundMorph<IonizedCompound> & IonizedModelQuark
-} & Capsule & MutableEntity  & AnyObject
+} & Capsule & MutableEntity & AnyObject
 
 // for inert properties use absorbed neutrons
 // const frog = ionized({
@@ -371,7 +372,7 @@ function initialIonAccess(
    }
    // Invalid property { $count: 0 } 
    initialTrackableStateAccess(proxy, target, key, value, switchMap, transformValue)
-   if (__DEV__) console.warn('Invalid Property Key initialization: Property keys prefixed with a single dollar sign ($) are reserved for ions.\n' + asTraceable(proxy).__DEV__origin)
+   if (__DEV__) console.warn('Invalid Property Key initialization: Property keys prefixed with a single dollar sign ($) are reserved for ions.\n' + asTraceable(proxy).origin)
 }
 
 function initialAbsorbedIonStateAccess(key: string | symbol, value: any, switchMap: ProxySwitchMap, transformValue: Function) {
@@ -524,18 +525,18 @@ function bindNativeMethod(
 
 
 export function createProxySwitchMap(meta: AnyObject) {
-   let __DEV__labelName: string | undefined;
+   let labelName: string | undefined;
 
    function __DEV__label(label: string) {
-      __DEV__labelName = label;
+      labelName = label;
    }
 
    return new Map([
       [QUARK as any, () =>
          meta as any
       ],
-      ['__DEV__labelName', () =>
-         __DEV__labelName
+      ['labelName', () =>
+         labelName
       ],
       ['__DEV__label', () =>
          __DEV__label
@@ -582,7 +583,7 @@ export function reactiveSetter(
       // if (__DEV__) getObservedPion(ionizedModel, key)?.trigger(newValue, oldValue) //TODO: what about auto-ionizing new value?
       return true;
    }
-   
+
    target[key] = newState
 
    storeSnapshot(quark)
@@ -599,6 +600,8 @@ export function reactiveSetter(
 
    quark.trigger()
    getAtomicPion(model, key)?.trigger()
+
+   $syncEffects().run()
 
    return true;
 }

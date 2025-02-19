@@ -5,7 +5,7 @@ import { Ion, NonVoid } from "../ion/ion";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
 import { QUARK, QuarkOf, quarkOf } from "../Quark";
-import { unwatch, watch, Watchable, Watched } from "../reactivity/Watched";
+import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
 import { createMaybeMemoizedIon, DERIVATION_ION, ManagedDerivation } from "./DerivationIon";
 import { IonicCompound } from "./IonicCompound";
 
@@ -43,7 +43,7 @@ export class DerivationPionQuark implements QuarkOf<$DerivedPionState> {
    watch: () => Watched<Watchable>;
    unwatch: () => void;
 
-   __DEV__asTraceable: Traceable = new Traceable()
+   asTraceable: Traceable = new Traceable()
 
    constructor(
       public model: IonizedModel,

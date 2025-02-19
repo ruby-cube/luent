@@ -1,5 +1,5 @@
 import { component, If, Else, fade, ElseIf, slide, fromTag, v, target, prep, Ion } from "@rue/lumo";
-import { __DEV__debug, ion, ionize, watch } from "@rue/quarky";
+import { debug, ion, ionize, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
 
@@ -53,7 +53,7 @@ export function MountIf() {
    })
 
    // watch($color, ()=>{
-   //    __DEV__debug.traceAsyncPath()
+   //    debug.traceAsyncPath()
    // })
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
    return component(
@@ -63,7 +63,7 @@ export function MountIf() {
          <h1>Hello {$=todos[0].name}</h1>
          <div>hi</div>
          <$--transition>
-            {If($active, (__DEV__debug.traceAsyncPath(),
+            {If($active, (debug.traceAsyncPath(),
                <>
                   oh
                   <$--transit with={slide({ x: -100, duration: 2200 })}>

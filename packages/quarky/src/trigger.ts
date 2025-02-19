@@ -1,5 +1,5 @@
-import { ParticleMorph } from "../compound/Particle";
-import { Watchable } from "./Watched";
+import { ParticleMorph } from "./compound/Particle";
+import { Watchable } from "./watch/Watched";
 
 /**
  * @param quark 

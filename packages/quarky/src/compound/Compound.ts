@@ -1,6 +1,6 @@
 import { asParticle, Particle, ParticleMorph } from "./Particle"
-import { Watchable } from "../reactivity/Watched"
-import { Mutation } from "../Mutable"
+import { Watchable } from "../watch/Watched"
+import { isObject } from "@rue/utils"
 
 
 /**
@@ -22,6 +22,9 @@ export interface Compound {
    untrackParticles(): void
 }
 
+export function isCompound(value: unknown): value is Compound{
+   return isObject(value) && 'particles' in value;
+}
 
 /**
  * INTERNAL METHOD

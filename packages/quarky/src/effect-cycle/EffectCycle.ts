@@ -10,7 +10,7 @@ import { noop, pipe } from "@rue/utils";
 //    BEFORE_RENDER,
 //    RENDER,
 //    AFTER_RENDER,
-// ] = configureEffectCycle([ //(default to queueTask for all phases)
+// ] = useReactivity([ //(default to queueTask for all phases)
 //    definePhase('BEFORE_RENDER', queueTask),
 //    definePhase('RENDER', beforeRepaint),
 //    definePhase('AFTER_RENDER', queueTask)
@@ -22,17 +22,50 @@ export const PHASE_ONE = 1;
 type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
 
 export let onEffectCycleComplete: EffectCycleHook
+let schedulePhaseOne = schedulePhase
+const initialTaskPhase = { name: 'INITIAL_TASK', phase: SYNC, schedule: noop, scheduleNextPhase: noop, next: undefined }
+const cyclePhases: CyclePhase[] = [initialTaskPhase]
 
-export function setUpEffectCycle(phases: [CyclePhase, ...CyclePhase[]]) {
-   console.log(cyclePhases)
-   pipe(
-      () => cyclePhases.at(-2)!.scheduleNextPhase = scheduleFinalPhase,
-      () => definePhase('END_EFFECT_CYCLE'),
-      () => onEffectCycleComplete = createEffectCycleHook(phaseNums.at(-1)!)
-   )
-   return phaseNums;
+type SyncPhase = 0;
+type Phases = number[];
+type EndPhase = number;
+
+//TODO: configure default phase for watch
+export function useReactivity(phases?: [CyclePhase, ...CyclePhase[]]): [SyncPhase, ...Phases, EndPhase] {
+   const completionPhase = definePhase('END_EFFECT_CYCLE')
+   if (phases) {
+      const phaseNums = [0]
+      for (let i = 0; i < phases.length; i++) {
+         const phase = phases[i]
+         const phaseNum = phase.phase = i + 1;
+         phase.next = phases[i + 1]
+         cyclePhases.push(phase)
+         phaseNums.push(phaseNum)
+      }
+      if (phases.length === 1) schedulePhaseOne = scheduleFinalPhase
+      else cyclePhases.at(-1)!.scheduleNextPhase = scheduleFinalPhase
+
+      const endPhase = cyclePhases.length;
+      cyclePhases.at(-1)!.next = completionPhase
+      completionPhase.phase = endPhase
+      cyclePhases.push(completionPhase)
+      phaseNums.push(endPhase)
+      onEffectCycleComplete = createEffectCycleHook(endPhase)
+      console.log(cyclePhases)
+      return phaseNums as [SyncPhase, ...Phases, EndPhase];
+   }
+   cyclePhases.push({
+      name: 'BATCHED_EFFECTS',
+      phase: PHASE_ONE,
+      schedule: setImmediate,
+      scheduleNextPhase: noop,
+      next: completionPhase
+   })
+   cyclePhases.push(completionPhase)
+   schedulePhaseOne = scheduleFinalPhase
+   onEffectCycleComplete = createEffectCycleHook(2)
+   return [0, 1, 2]
 }
-
 
 
 type CyclePhase = {
@@ -43,22 +76,22 @@ type CyclePhase = {
    next: CyclePhase | undefined
 }
 
-const phaseNums: number[] = [SYNC] // 0 represents the initial task phase
-let cyclePhases: CyclePhase[] = [{ name: 'INITIAL_TASK', phase: SYNC, schedule: noop, scheduleNextPhase: noop, next: undefined }]
+//TODO: how to only have one phase
+
+// const defaultPhaseNums = [SYNC, PHASE_ONE]
+// const defaultCyclePhases = [initialTaskPhase, ]
+
+
+
 
 export function definePhase(phaseName: string, scheduler?: Function): CyclePhase {
-   const prevPhase = cyclePhases.at(-1)
-   const cyclePhase = {
+   return {
       name: phaseName,
-      phase: phaseNums.length,
+      phase: 2,
       schedule: scheduler ?? setImmediate,
       scheduleNextPhase: schedulePhase,
       next: undefined
    }
-   cyclePhases.push(cyclePhase)
-   phaseNums.push(phaseNums.length)
-   if (prevPhase) prevPhase.next = cyclePhase;
-   return cyclePhase
 }
 
 
@@ -79,7 +112,7 @@ function beginCycle(effectCycle: EffectCycle) {
    if (currentCycle)
       throw new Error("Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
    currentCycle = effectCycle;
-   schedulePhase(effectCycle, cyclePhases[PHASE_ONE])
+   schedulePhaseOne(effectCycle, cyclePhases[PHASE_ONE])
 }
 
 function closeCycle() {
@@ -90,14 +123,16 @@ function closeCycle() {
 function schedulePhase(cycle: EffectCycle, { schedule, scheduleNextPhase, phase, next }: CyclePhase) {
    schedule(() => {
       scheduleNextPhase(cycle, next) // schedule next phase BEFORE running phase so that next phase effects will run before effects scheduled DURING phase
-      cycle.runPhase(phase)
+      cycle.runEffects(phase)
    })
 }
 
 function scheduleFinalPhase(cycle: EffectCycle, { schedule, phase, next }: CyclePhase) {
    schedule(() => {
-      cycle.runPhase(phase)
-      cycle.runPhase(next!.phase)
+      // scheduleNextPhase
+      cycle.runEffects(phase)
+      // end cycle
+      cycle.runEffects(next!.phase)
       closeCycle(); // Any set ops after this point will be scheduled for the NEXT render cycle
    })
 }
@@ -144,24 +179,18 @@ export class EffectCycle {
       this.effects.addToVine(effect, phase)
    }
 
-   private runEffects(phase: number) {
+   runEffects(phase: number) {
+      this.currentPhase = phase;
       const effects = this.effects.get(phase);
       if (effects) {
          console.log('RUN EFFECTS', phase)
          for (const effect of effects) {
             effect.task()
             if (!effect.vine) continue; // effect has already been removed during the effect via 'once' or 'scheduler'
-            const subject = effect.watchSubject;
-            if (!subject) continue;
-            subject.completedEffects.addToVine(effect, phase)
+            effect.watchSubject?.completedEffects.addToVine(effect, phase)
          }
          console.log('END', phase)
       }
-   }
-
-   runPhase(phase: number) {
-      this.currentPhase = phase;
-      this.runEffects(phase);
    }
 }
 

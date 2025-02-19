@@ -6,6 +6,7 @@ import { IonizedModelQuark } from "./IonizedModelQuark";
 import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { quarkOf } from "../Quark";
+import { $syncEffects } from "../effect-cycle/SyncEffects";
 
 // declare global {
 //    interface Set<T> {
@@ -122,6 +123,9 @@ export function installIonicSet() {
                   getAtomicPion(ionizedModel, 'size')?.trigger()
 
                   getAtomicOp(ionizedModel.has, _newValue)?.trigger()
+
+                     
+                           $syncEffects().run()
 
                   return output;
                }
@@ -348,6 +352,9 @@ export function useDeleteOp(
       getAtomicPion(ionizedModel, 'size')?.trigger()
       getAtomicOp(ionizedModel.has, key)?.trigger()
 
+         
+      $syncEffects().run()
+
       return output;
    }
 }
@@ -389,7 +396,7 @@ export function useClearOp(
 
       getAtomicPion(ionizedModel, 'size')?.trigger()
 
-
+      $syncEffects().run()
 
       return output;
    }

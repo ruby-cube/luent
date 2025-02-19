@@ -93,20 +93,20 @@ function __logTriggeredAtom(atom: Atom) {
 }
 
 function logAtomicIonTrace(atom: AtomicIon) {
-   const originTrace = quarkOf(atom).__DEV__origin
+   const originTrace = quarkOf(atom).origin
    console.log('\n[TRIGGER TRACE] for ion')
    console.log('NonError ion origin trace\n    ' + originTrace)
 }
 
 function logPropTrace(atom: PropIon) {
    const quark = quarkOf(atom)
-   const originTrace = quark.__DEV__origin //TODO: add property
+   const originTrace = quark.origin //TODO: add property
    console.log(`\n[TRIGGER TRACE] for ionic property "${String(quark.key)}"`)
    console.log('NonError origin trace\n    ' + originTrace)
 }
 
 function logTrackedOpTrace(atom: AtomicOp) {
-   const originTrace = atom.__DEV__origin //TODO: add property
+   const originTrace = atom.origin //TODO: add property
    console.log(`\n[TRIGGER TRACE] for ionic op "${String(atom.op)}"`) //QUESTION: should i provide entryKey?
    console.log('NonError origin trace\n    ' + originTrace)
 }

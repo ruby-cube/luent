@@ -1,17 +1,17 @@
-import { __DEV__traceMethodCall, emitSignal, Traceable } from "../debug/debug";
+import { __DEV__label, __DEV__traceMethodCall, emitSignal, Traceable } from "../debug/debug";
 import { ionize } from "../ionized/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
 import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
-import { __DEV__label } from "../debug/DEVLabellable";
-import { __DEV__initTraceability, attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
+import { attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
 import { AtomicIon } from "./ion";
-import { unwatch, watch } from "../reactivity/Watched";
-import { Atomic } from "./Atomic";
+import { unwatch, watch, Watchable } from "../watch/Watched";
 import { Mutable, MutableEntity, Mutation, recordMutation } from "../Mutable";
-import { trigger } from "../reactivity/trigger";
+import { trigger } from "../trigger";
 import { getActiveTracker } from "../ionic/IonicCompound";
+import { ParticleMorph } from "../compound/Particle";
+import { $syncEffects } from "../effect-cycle/SyncEffects";
 
 /** INTERNAL */
 export type $AtomicIonState = AtomicIon & MutableCapsule & {
@@ -20,7 +20,7 @@ export type $AtomicIonState = AtomicIon & MutableCapsule & {
       state: any,
       ionized: boolean,
       trigger(): void
-   } & Atomic & EntityQuark<$AtomicIonState>
+   } & EntityQuark<$AtomicIonState> & ParticleMorph & Watchable
 } & MutableEntity
 
 /** 
@@ -55,14 +55,14 @@ export function createAtomicIon(
       asWatched: undefined,
       asReadonly: undefined,
       asReined: undefined,
-      __DEV__asTraceable: new Traceable(),
+      asTraceable: new Traceable(),
       trigger,
       watch,
       unwatch: () => unwatch.call(ion)
    }
 
    $state[QUARK] = ion
-   $state.__DEV__labelName = undefined as string | undefined
+   $state.labelName = undefined as string | undefined
    $state.__DEV__label = __DEV__label
 
    const capsuleName = 'AtomicIon'
@@ -90,7 +90,10 @@ export function createAtomicIon(
             state,
             oldState
          ))
+
          ion.trigger()
+         
+         $syncEffects().run()
 
          return state;
       }

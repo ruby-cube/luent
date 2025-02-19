@@ -6,6 +6,7 @@ import { nontrackableIterableKeys } from "./IonizedSet";
 import { getAtomicPion, PionQuark, triggerPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { IonizedModelQuark } from "./IonizedModelQuark";
+import { $syncEffects } from "../effect-cycle/SyncEffects";
 
 // type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 
@@ -314,6 +315,8 @@ export function installIonicArray() {
 
          //FIX: These need to be different depending on the op
          triggerObservedIndices(model, modelQuark.pions, prevLength, newLength)
+
+         $syncEffects().run()
 
          return output;
       }

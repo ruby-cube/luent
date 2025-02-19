@@ -1,11 +1,10 @@
 import { AnyObject } from "@rue/types";
 import { quarkOf, QUARK, hasQuark, QuarkOf, EntityQuark } from "../Quark";
-import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsule/Capsule";
-import { __DEV__label } from "../debug/DEVLabellable";
+import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { Ion, NonVoid } from "../ion/ion";
-import { Traceable } from "../debug/debug";
+import { __DEV__label, Traceable } from "../debug/debug";
 import { IonicCompound } from "./IonicCompound";
-import { Watched } from "../reactivity/Watched";
+import { Watched } from "../watch/Watched";
 import { noop } from "@rue/utils";
 import { $AtomicPionState } from "../ion/AtomicPion";
 
@@ -79,7 +78,7 @@ export function createPionCapsule(
       entity: $capsuleIon,
       coreIon: undefined,  // this is what needs to be returned as the watched ion, either a pion or an ion
       type: GETTER_ION,
-      __DEV__asTraceable: new Traceable(),
+      asTraceable: new Traceable(),
    }
 
    if (particles.length === 0) {
@@ -94,7 +93,7 @@ export function createPionCapsule(
    }
 
    $capsuleIon[QUARK] = capsule
-   $capsuleIon.__DEV__labelName = undefined
+   $capsuleIon.labelName = undefined
    $capsuleIon.__DEV__label = __DEV__label
 
    attachCapsuleMethods('GetterIon', $capsuleIon, methods)

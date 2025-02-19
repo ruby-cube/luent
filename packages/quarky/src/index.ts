@@ -7,12 +7,12 @@ export * from "./ionized/ionize" //TODO: limit exports to public api
 export * from "./ion/AtomicIon" //TODO: limit exports to public api
 export * from "./ion/ion" //TODO: limit exports to public api
 export * from "./ion/Neutron" //TODO: limit exports to public api
-export * from "./reactivity/watch" //TODO: limit exports to public api
-export * from "./reactivity/debug" //TODO: limit exports to public api
-export * from "./reactivity/EffectCycle" //TODO: limit exports to public api
+export * from "./watch/watch" //TODO: limit exports to public api
+export * from "./__notes__/x_watch-debug" //TODO: limit exports to public api
+export * from "./effect-cycle/EffectCycle" //TODO: limit exports to public api
 export * from "./ionized/TimeTraveler" //TODO: limit exports to public api
 export * from "./ionized/ionize" //TODO: limit exports to public api
-export * from "./reactivity/areEqual" //TODO: limit exports to public api
+export * from "./__notes__/areEqual" //TODO: limit exports to public api
 export * from "./capsule/Readonly" //TODO: limit exports to public api
 export * from "./ionic/IonicCompound" //TODO: limit exports to public api
 export * from "./compound/Particle" //TODO: limit exports to public api

@@ -5,7 +5,7 @@ import { IonizedModel } from "./IonizedModel"
 import { IonizedModelQuark } from "./IonizedModelQuark"
 import { $DerivedPionState, createDerivationPion, DerivationPionQuark } from "../ionic/DerivationPion"
 import { ParticleMorph } from "../compound/Particle"
-import { Watchable } from "../reactivity/Watched"
+import { Watchable } from "../watch/Watched"
 
 export type PionQuark<T = $AtomicPionState | $DerivedPionState> = EntityQuark<T> & Watchable & ParticleMorph
 

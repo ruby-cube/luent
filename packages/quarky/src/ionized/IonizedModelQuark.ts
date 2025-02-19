@@ -2,13 +2,13 @@ import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { Traceable } from "../debug/debug"
 import { CustomIonizedModelConfig, IonizedModel } from "./IonizedModel"
-import { unwatch, watch, Watchable, Watched } from "../reactivity/Watched"
+import { unwatch, watch, Watchable, Watched } from "../watch/Watched"
 import { ParticleMorph, Particle } from "../compound/Particle"
 import { IonizedCompound } from "./IonizedCompound"
 import { EntityQuark, Quark, QuarkOf } from "../Quark"
 import { Mutable, Mutation } from "../Mutable"
 import { PionQuark } from "./Pion"
-import { trigger } from "../reactivity/trigger"
+import { trigger } from "../trigger"
 
 
 
@@ -30,7 +30,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
    asReined?: object
    asReadonly?: object
-   __DEV__asTraceable = new Traceable()
+   asTraceable = new Traceable()
 
    constructor(
       public entity: IonizedModel,
@@ -38,7 +38,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
       public methods: AnyObject | undefined,
       public structureConfigs: CustomIonizedModelConfig[]
    ) {
-      if (__DEV__) this.__DEV__asTraceable = new Traceable()
+      if (__DEV__) this.asTraceable = new Traceable()
       this.watch = () => {
          this.trackAbsorbedIons()
          return watch.call(this)
@@ -109,8 +109,8 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
    //    this.observedEntryKeys.delete(entryKey)
    // }
 
-   // __DEV__traceTriggers?: Set<PropertyKey> = __DEV__ ? new Set() : undefined
-   // __DEV__origin?: string
+   // traceTriggers?: Set<PropertyKey> = __DEV__ ? new Set() : undefined
+   // origin?: string
    // __DEV__labels?: Set<string>
 
    reversionOps: Map<string, (mutation: Mutation) => true> = new Map()

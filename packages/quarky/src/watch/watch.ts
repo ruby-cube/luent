@@ -2,7 +2,7 @@ import { AnyObject, Glass } from "@rue/types";
 import { Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "../ionic/IonicCompound";
-import { $effectCycle, PHASE_ONE, SYNC } from "./EffectCycle";
+import { $effectCycle, PHASE_ONE, SYNC } from "../effect-cycle/EffectCycle";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { Ion, isIon } from "../ion/ion";
@@ -11,11 +11,12 @@ import { createMultisubjectIon, isMultisubjectIon } from "./MultiSubject";
 import { isManagedDerivation } from "../ionic/DerivationIon";
 import { isObject, isObjectLiteral } from "@rue/utils";
 import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
-import { EffectLink } from "./EffectLink";
+import { EffectLink } from "../effect-cycle/EffectLink";
 import { isIonizedModel } from "../ionized/ionize";
 import { $AtomicIonState, isAtomicIon, isAtomicIonQuark } from "../ion/AtomicIon";
 import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
-import { createWatchedIonizedIon } from "./WatchedIonizedIon";
+import { createWatchedIonizedIon } from "./IonizedIon";
+import { debug } from "../debug/debug";
 
 export class ChangeEvent<S = unknown> {
    // trace?: string;
@@ -25,15 +26,27 @@ export class ChangeEvent<S = unknown> {
    ) { }
 }
 
-
+/**
+ * Default values:
+ * 
+ * phase: 1
+ * eager: false
+ * retrack: true
+ * cycle: 'current'
+ * hasChanged: a !== b
+ */
 export type EffectOptions = {
    phase?: number;
    cycle?: 'current' | 'next'
-   eager?: true;
-   isEqual?: (prevState?: any, newState?: any) => boolean;
-   retrack?: true;
-} & Glass<SustainedListenerOptions>
-// & WatchDebugOptions
+   eager?: boolean;
+   retrack?: boolean;
+   hasChanged?: (prevState?: any, newState?: any) => boolean;
+} & Glass<SustainedListenerOptions & WatchDebugOptions>
+
+type WatchDebugOptions = {
+   logAtoms?: boolean,
+   traceTriggers?: boolean
+}
 
 export type Effect<T = unknown> = (event: ChangeEvent<SubjectValues<T>>) => void;
 
@@ -131,7 +144,7 @@ export function watch<
    P
 >(...args: [IonicTask<P>] | [IonicTask<P>, EffectOptions] | [...T, Effect<T>] | [...T, Effect<T>, EffectOptions]): ResumableListener {
    if (args[0] instanceof Function && (args.length === 1 || args.length === 2 && isObjectLiteral(args[1]))) {
-      return initIonicEffect(<IonicTask>args[0])
+      return initIonicEffect(<IonicTask>args[0], <EffectOptions>args[1])
    }
    const lastArg = args.pop()
    const noOptions = lastArg instanceof Function
@@ -146,6 +159,10 @@ export function watch<
    const retrack = !!(options?.retrack)
 
    let subject = normalizeSubject(_subject, isMultiSubject, retrack)
+
+   if (options?.traceTriggers){
+      //TODO:
+   }
 
    if (!hasQuark(subject)) // plain object
       return InertWatcher()
@@ -166,7 +183,7 @@ export function watch<
    watchSubject.onDiscard(quark.unwatch)
 
    let eager: boolean | undefined = options?.eager
-   const isEqual = options?.isEqual ?? isIonizedModel(prevState) ? () => false : isStrictlyEqual
+   const hasChanged = options?.hasChanged ?? isIonizedModel(prevState) ? () => true : notStrictlyEqual
    const phase = options?.phase ?? PHASE_ONE;
 
 
@@ -174,7 +191,7 @@ export function watch<
    function wrappedEffect() {
       const newState = getValue(subject)
       if (typeof newState === 'number')console.log('index? in wrappedEFfect', newState)
-      if (!eager && isEqual(prevState, newState))
+      if (!eager && !hasChanged(prevState, newState))
          return;
 
       eager = false;
@@ -223,8 +240,8 @@ export function isGetter(value: unknown): value is () => any {
    return value instanceof Function && value.length === 0;
 }
 
-function isStrictlyEqual(oldState: unknown, newState: unknown) {
-   return newState === oldState
+function notStrictlyEqual(oldState: unknown, newState: unknown) {
+   return newState !== oldState
 }
 
 type WrappedEffect = () => void
@@ -248,8 +265,8 @@ function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: number) {
  * In most cases, an ionic effect will be a simple void function that performs side effects.
  */
 function initIonicEffect(effect: IonicTask, options?: EffectOptions) {
-   const phase = options?.phase || PHASE_ONE;
-   const retrack = options?.retrack || false;
+   const phase = options?.phase ?? PHASE_ONE;
+   const retrack = options?.retrack ?? false;
 
    const wrappedEffect = createIonicEffect(effect, retrack)
 

@@ -1,4 +1,4 @@
-import { createEffectCycleHook, definePhase, onEffectCycleComplete, queueTask, setUpEffectCycle } from "@rue/quarky"
+import { createEffectCycleHook, definePhase, onEffectCycleComplete, queueTask, useReactivity } from "@rue/quarky"
 
 
 export const [
@@ -7,7 +7,7 @@ export const [
    RENDER,
    AFTER_RENDER,
    RENDER_CYCLE_COMPLETE
-] = setUpEffectCycle([ //(default to queueTask for all phases)
+] = useReactivity([ //(default to queueTask for all phases)
    definePhase('BEFORE_RENDER', queueTask),
    definePhase('RENDER', requestAnimationFrame),
    definePhase('AFTER_RENDER', queueTask)

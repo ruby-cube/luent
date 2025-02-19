@@ -14,6 +14,7 @@ import { TestCounter, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
 import { List } from './TestReactiveModel';
+import { definePhase, ion, queueTask, useReactivity, watch } from '@rue/quarky';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -37,6 +38,42 @@ import { List } from './TestReactiveModel';
 // import { Root } from './TreeTest';
 // import { NestedPend } from './NestedPend';
 
+export const [
+   SYNC,
+   BATCHED
+] = useReactivity()
+
+
+
+const $count = ion(0, {
+   increment() {
+      $count.state++
+   },
+   decrement() {
+      $count.state--
+   }
+})
+
+const $doubleCount = ion(() => $count() * 2)
+
+watch(() => {
+   console.trace()
+   console.log('+++++++++++++++++')
+   console.log('double count is now', $doubleCount())
+   console.log('count is', $count())
+   console.log('+++++++++++++++++')
+}, { phase: SYNC })
+
+function doStuff() {
+   $count.increment()
+   $count.decrement()
+   // $count.increment()
+}
+
+window.$count = $count
+window.$doubleCount = $doubleCount
+window.doStuff = doStuff
+
 
 // const rootContext = createGlobalCommons()
 
@@ -44,13 +81,13 @@ import { List } from './TestReactiveModel';
 
 // frog;
 
-const app = createApp(List)
+// const app = createApp(TestApp)
 
 // if (__DEV__) configureFlask({
 //     warnNoCleanup: true
 // })
 
-app.mount('#app')
+// app.mount('#app')
 
 // function doSomething() {
 //     const dynamicNode = makeDynamicNode(false)

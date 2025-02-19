@@ -2,11 +2,10 @@ import { getActiveTracker, IonicCompound, IonicCompoundMorph } from "./IonicComp
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
 import { quarkOf, QUARK, hasQuark, EntityQuark, QuarkOf, Quark } from "../Quark";
-import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsule/Capsule";
+import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { ParticleMorph } from "../compound/Particle";
-import { __DEV__label } from "../debug/DEVLabellable";
-import { emitSignal, Traceable } from "../debug/debug";
-import { unwatch, watch, Watchable, Watched } from "../reactivity/Watched";
+import { __DEV__label, emitSignal, Traceable } from "../debug/debug";
+import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
 import { Ion, NonVoid } from "../ion/ion";
 import { CompoundMorph, triggerEffects } from "../compound/Compound";
 import { Mutation } from "../Mutable";
@@ -111,13 +110,13 @@ export function createMaybeMemoizedIon(
       asParticle: undefined,
       asCompound: undefined,
       asWatched: undefined,
-      __DEV__asTraceable: new Traceable(),
+      asTraceable: new Traceable(),
       watch,
       unwatch: () => unwatch.call(ion)
    }
 
    $derived[QUARK] = ion
-   $derived.__DEV__labelName = undefined
+   $derived.labelName = undefined
    $derived.__DEV__label = __DEV__label
 
 

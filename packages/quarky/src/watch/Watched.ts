@@ -1,8 +1,7 @@
-import { RENDER } from "../../../lumo/src/render/render-cycle";
-import { onEffectCycleComplete, $effectCycle } from "./EffectCycle";
-import { EffectLink, EffectVine } from "./EffectLink";
-import { effectStack } from "./EffectStack";
-import { PhaseMap } from "./PhaseMap";
+import { onEffectCycleComplete, $effectCycle } from "../effect-cycle/EffectCycle";
+import { EffectLink, EffectVine } from "../effect-cycle/EffectLink";
+import { PhaseMap } from "../effect-cycle/PhaseMap";
+import { $syncEffects } from "../effect-cycle/SyncEffects";
 
 
 export type Watchable = {
@@ -26,7 +25,7 @@ export class Watched<T extends Watchable = Watchable> {
    ) {
    }
 
-   private effects: PhaseMap = new PhaseMap('effects')
+   effects: PhaseMap = new PhaseMap('effects')
    private nextCycleEffects: PhaseMap | undefined;
 
    private _completedEffects: PhaseMap | undefined;
@@ -70,7 +69,7 @@ export class Watched<T extends Watchable = Watchable> {
    triggerEffects() { // the surrounding effect when original trigger happened
       for (const [phase, effects] of this.effects) {
          if (phase === 0) {
-            this.runSyncEffects(effects!);
+            this.scheduleSyncEffects(effects!);
          }
          else {
             $effectCycle().scheduleEffects(effects!, phase)
@@ -90,17 +89,8 @@ export class Watched<T extends Watchable = Watchable> {
       })
    }
 
-   private runSyncEffects(effects: EffectVine) {
-      for (const effect of effects) {
-         if (effectStack.has(effect)) continue; // prevents infinite loops
-         effectStack.push(effect)
-         try {
-            effect.task()
-         }
-         finally {
-            effectStack.pop()
-         }
-      }
+   private scheduleSyncEffects(effects: EffectVine) {
+      $syncEffects().absorb(effects)
    }
 
    private cleanups: (() => void)[] = [] //TODO: make into array

@@ -20,6 +20,7 @@ export function isIon(value: unknown): value is Ion {
    return isFunction(value) && /^\$[a-z]/.test(value.name) && value.length === 0
 }
 
+
 export function toIon<T extends NonVoid | Ion>(value: T): T extends Ion ? T : Ion<T> {
    return (isIon(value) ? value : neutron(value)) as T extends Ion ? T : Ion<T>
 }
@@ -31,8 +32,18 @@ export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
 type Derivation<R extends NonVoid = NonVoid> = (prevValue?: R) => R
 type IonReturn<T extends NonVoid, M> = T extends Derivation<infer R> ? Ion<Broad<R>, M> : M extends Methods ? AtomicIon<Broad<T>, M> : AtomicIon<Broad<T>>
 
+/**
+ * Because inferring the return of a derivation causes type-narrowing of the intitial state, we need to broaden the type back again.
+ */
 type Broad<T> = T extends boolean ? boolean : T extends string ? string : T extends number ? number : T;
 
+
+/**
+ * API
+ * @param initialState 
+ * @param methods 
+ * @returns 
+ */
 export function ion<
    T extends NonVoid,
    M

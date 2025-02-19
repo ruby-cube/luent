@@ -1,6 +1,6 @@
 import { ResumableListener } from "@rue/flask";
 import { ionize, IonizedModel, isIonizedModel, toRaw } from "../ionized/ionize";
-import { OnChangeHandler, watch, WatchOptions } from "./watch";
+import { OnChangeHandler, watch, WatchOptions } from "../watch/watch";
 import { isIntegerKey } from "../ionized/IonizedArray";
 import { AnyObject } from "@rue/types";
 import { shallowClone } from "../ionized/TimeTraveler";

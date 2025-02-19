@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isObject } from "@rue/utils";
 import { timeTraveler } from "./TimeTraveler";
-import { $effectCycle } from "../reactivity/EffectCycle";
+import { $effectCycle } from "../effect-cycle/EffectCycle";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { inert, Inert, isInert } from "./inert";
 import { Ion, ion, isIon } from "../ion/ion";

@@ -1,9 +1,8 @@
 import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { shouldIonize } from "./AtomicIon";
-import { __DEV__initTraceability, attachCapsuleMethods, Capsule } from "../capsule/Capsule";
-import { __DEV__traceMethodCall, Traceable } from "../debug/debug";
+import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
+import { __DEV__label, __DEV__traceMethodCall, Traceable } from "../debug/debug";
 import { ionize } from "../ionized/ionize";
-import { __DEV__label } from "../debug/DEVLabellable";
 import { AtomicIon, Methods, NonVoid } from "./ion";
 
 
@@ -14,20 +13,21 @@ export function neutron<T extends NonVoid, M>(initialState: T, methods?: M & Met
 
 //TODO: I don't know how I should handle read-only, and traceability for neutrons.
 /** INTERNAL */
-export type $NeutronState = AtomicIon & Capsule & {
+export type $AtomicNeutronState = AtomicIon & Capsule & {
    [QUARK]: {
       type: symbol;
       inert: true;
       state: any,
       ionized: boolean, //TODO: remove? an ionized neutron is useless because the watcher will never be triggered... to work, you need to make the neutron reactive.
-   } & EntityQuark<$NeutronState>
+   } & EntityQuark<$AtomicNeutronState>
 }
 
 /** 
  * INTERNAL 
  * For reactive ions only.
  * */
-export type NeutronQuark = QuarkOf<$NeutronState>
+export type NeutronQuark = QuarkOf<$AtomicNeutronState>
+
 const INERT_ION = Symbol('atomic neutron')
 
 /** INTERNAL */
@@ -36,7 +36,7 @@ export function createAtomicNeutron(
    methods?: object,
    ionized: boolean = false
 ) {
-   const $ion = (() => ion.state) as $NeutronState
+   const $ion = (() => ion.state) as $AtomicNeutronState
 
    const ion: NeutronQuark = {
       state,
@@ -44,12 +44,11 @@ export function createAtomicNeutron(
       inert: true,
       entity: $ion,
       type: INERT_ION,
-      __DEV__asTraceable: new Traceable()
+      asTraceable: new Traceable()
    }
-   __DEV__initTraceability(ion)
 
    $ion[QUARK] = ion
-   $ion.__DEV__labelName = undefined
+   $ion.labelName = undefined
    $ion.__DEV__label = __DEV__label
 
    const capsuleName = 'Neutron'

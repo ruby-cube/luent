@@ -1,4 +1,5 @@
 import { asParticle, ParticleMorph, Particle } from "../compound/Particle";
+import { Traceable } from "../debug/debug";
 import { Quark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
 import { noop } from "@rue/utils";
@@ -7,6 +8,7 @@ export class AtomicOp implements Quark, ParticleMorph {
    type: string | symbol = 'atomic op'
    asParticle!: Particle
    trackableOp: Function & TrackableOp;
+   asTraceable: Traceable;
 
    constructor(
       public model: IonizedModel,
@@ -24,6 +26,8 @@ export class AtomicOp implements Quark, ParticleMorph {
             this.discard()
          }
       })
+      
+      this.asTraceable = quarkOf(this.model).asTraceable
    }
    entity = noop;
 

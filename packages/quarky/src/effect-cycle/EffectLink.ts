@@ -1,5 +1,4 @@
-import { $effectCycle } from "./EffectCycle";
-import { Watched } from "./Watched";
+import { Watched } from "../watch/Watched";
 
 export class EffectVine {
    private head: EffectLink | undefined
@@ -42,7 +41,6 @@ export class EffectVine {
 
       this.unlink(link)
       link.pass()
-      this._size--;
       return true;
    }
 
@@ -68,6 +66,7 @@ export class EffectVine {
       }
 
       link.next = undefined;
+      this._size--;
    }
 
    has(link: EffectLink) {
@@ -155,4 +154,5 @@ export class EffectLink {
    remove() {
       this.vine?.delete(this)
    }
+
 }

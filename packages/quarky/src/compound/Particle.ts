@@ -2,13 +2,14 @@ import { IterableSet } from "@rue/utils";
 import { Compound } from "./Compound";
 import { EntityQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { AnyObject } from "@rue/types";
+import { TraceableQuark } from "../debug/debug";
 
 export const CLEAN_UP = 'x__cleanUp'
 
 
-export interface ParticleMorph extends EntityQuark<AnyObject> {
+export type ParticleMorph = EntityQuark<AnyObject> & {
    asParticle?: Particle
-}
+} & TraceableQuark
 
 export function triggerCompounds(quark: ParticleMorph | undefined){
       quark?.asParticle?.triggerCompounds()

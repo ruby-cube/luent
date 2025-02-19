@@ -1,4 +1,3 @@
-import { AnyObject } from "@rue/types";
 import { AsyncState } from "./context/AsyncContext";
 
 export const [getAsyncPath, setAsyncPath] = __DEV__ ? AsyncState<string>('trace') : [];

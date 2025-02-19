@@ -1,20 +1,8 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, Ionized } from "../ionized/ionize";
-import { AtomicIon } from "../ion/AtomicIon";
-import { PropIon } from "../ion/AtomicPion";
 
-//TODO: onTrigger works as desired. onTrack needs to be rethunk.
 
-export type WatchDebugOptions = {
-    onTrack?: OnTrack;
-    onTrigger?: OnTrigger;
-}
 
-type OnTrack = (target?: AtomicIon | PropIon | IonizedModel) => void
-type OnTrigger = () => void
-
-const onTrackMap: Map<AtomicIon | PropIon | IonizedModel, OnTrack> = new Map();
-const onTriggerMap: Map<AtomicIon | PropIon | IonizedModel, OnTrigger> = new Map();
 
 export function registerDebuggers(targets: (AtomicIon | PropIon)[] | IonizedModel, options: WatchDebugOptions | undefined){
     const {onTrack, onTrigger} = options ?? {}
