@@ -18,6 +18,11 @@ import { noop, pipe } from "@rue/utils";
 
 export const SYNC = 0; // 0 represents both sync and initial task phase
 export const PHASE_ONE = 1;
+export let DEFAULT_PHASE = PHASE_ONE;
+
+export function setDefaultPhase(phase: number){
+   DEFAULT_PHASE = phase;
+}
 
 type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
 
@@ -30,7 +35,6 @@ type SyncPhase = 0;
 type Phases = number[];
 type EndPhase = number;
 
-//TODO: configure default phase for watch
 export function useReactivity(phases?: [CyclePhase, ...CyclePhase[]]): [SyncPhase, ...Phases, EndPhase] {
    console.log('configuring reactivity')
    const completionPhase = definePhase('END_EFFECT_CYCLE')
@@ -149,6 +153,7 @@ export class EffectCycle {
    currentPhase: number = SYNC
 
    initiate() {
+      console.trace('initiating effect cycle')
       cycleCount++;
       beginCycle(this)
       return this;
@@ -209,6 +214,7 @@ export function createEffectCycleHook(phase: number) { //TODO: what happens if p
       const _options = options || { cancel: null }
       _options.cancel = null
       const effectCycle = $effectCycle()
+      console.log('createhook', effectCycle)
       return $schedule(task, _options, {
          enroll(task) {
             const effectLink = new EffectLink(task)

@@ -1,5 +1,5 @@
 import { DOMNode, Slot } from "../component/InternalComponent";
-import {isIon, AtomicIon, watch } from "@rue/quarky";
+import { isIon, AtomicIon, watch, isManagedDerivation } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
 import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask";
@@ -135,7 +135,21 @@ function bindView(element: Element, Slot: Slot | undefined, attributes: { [key: 
    }
 }
 
-function bindInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+   if (!('mu:checked' in attributes))
+      return;
+   const ion = attributes['mu:checked'];
+   const radioValue = attributes.value;
+   delete attributes['mu:checked'];
+   attributes.checked = function $drv() { return ion() === radioValue };
+   if (!isIon(ion) || !('state' in ion)) {
+      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
+   }
+   else {
+      setUpInputListener(element, ion)
+   }
+}
+function bindTextInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
    if (!('mu:value' in attributes))
       return;
    const ion = attributes['mu:value'];
@@ -149,12 +163,24 @@ function bindInput(element: HTMLInputElement, attributes: { [key: string]: Mutab
    }
 }
 
+function bindInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+   switch (attributes.type) {
+      case 'radio':
+         bindRadioInput(element, attributes)
+         break;
+
+      default:
+         bindTextInput(element, attributes)
+         break;
+   }
+}
+
 function bindTextarea(element: Element, Slot: Slot | undefined) {
    console.log('bindTextArea', Slot)
    if (!Slot || !isFunction(Slot)) return;
    const nodeEntities = Slot();
    const kit = nodeEntities instanceof Array ? nodeEntities[0] : nodeEntities;
-   if (!isObjectLiteral(kit) && !('mu' in kit))return;
+   if (!isObjectLiteral(kit) && !('mu' in kit)) return;
    const ion = kit.mu;
    if (!isIon(ion) || !('state' in ion)) {
       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
@@ -167,7 +193,7 @@ function bindTextarea(element: Element, Slot: Slot | undefined) {
 
 function setUpInputListener(element: Element, ion: { state: any } | { set: (value: any) => any }) {
    element.addEventListener('input', e => {
-      if (isDerivedIon(ion) && 'set' in ion) {
+      if (isManagedDerivation(ion) && 'set' in ion) {
          ion.set(
             //@ts-expect-error
             e.target.value
@@ -355,7 +381,7 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {
       if (isIon(entry)) {
-         watch(entry, ({state}/* value: string | AnyObject | Falsey */) => {
+         watch(entry, ({ state }/* value: string | AnyObject | Falsey */) => {
             setUpStyleEntry(style, state);
          }, { eager: true, phase: RENDER })
       }

@@ -2,7 +2,7 @@ import { marked } from 'marked'
 //@ts-expect-error
 import { debounce } from 'lodash-es'
 import { ion, ionize, watch } from '@rue/quarky'
-import { component, fromTag, Ion, NodeRef, onMount, onUnmount } from '@rue/lumo'
+import { component, fromTag, Ion, NodeRef, onDemount, onMount, onRemount, onUnmount, ref } from '@rue/lumo'
 
 
 export function MarkdownApp(
@@ -21,7 +21,7 @@ export function MarkdownApp(
    //    $markdown.state = e.target.value
    // }
 
-   const $textArea = NodeRef('textarea')
+   const $textArea = ref('textarea')
 
    const caretRange = ionize({
       selectionStart: undefined as undefined | number,

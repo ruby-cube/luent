@@ -42,7 +42,7 @@ export function createWatchedDerivation(derivation: () => any, retrack: boolean)
    }
 
    function retrackedCall() {
-      return compound.trackedCall(derivation)
+      return compound.retrackedCall(derivation)
    }
    return $watchedDerivedState;
 }

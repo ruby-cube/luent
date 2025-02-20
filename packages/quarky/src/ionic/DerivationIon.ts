@@ -86,7 +86,7 @@ export function createMaybeMemoizedIon(
       getActiveTracker()?.track(ion)
       const compound = ion.asCompound!
       const value =
-         (retrack && ion.dirty) ? compound.trackedCall(() => derivation(ion.state))
+         (retrack && ion.dirty) ? compound.retrackedCall(() => derivation(ion.state))
             : ion.dirty ? derivation(ion.state)
                : ion.state;
 

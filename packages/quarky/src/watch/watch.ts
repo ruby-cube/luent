@@ -2,7 +2,7 @@ import { AnyObject, Glass } from "@rue/types";
 import { Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "../ionic/IonicCompound";
-import { $effectCycle, PHASE_ONE, SYNC } from "../effect-cycle/EffectCycle";
+import { $effectCycle, DEFAULT_PHASE, SYNC } from "../effect-cycle/EffectCycle";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { Ion, isIon } from "../ion/ion";
@@ -16,7 +16,6 @@ import { isIonizedModel } from "../ionized/ionize";
 import { $AtomicIonState, isAtomicIon, isAtomicIonQuark } from "../ion/AtomicIon";
 import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
 import { createWatchedIonizedIon } from "./IonizedIon";
-import { debug } from "../debug/debug";
 
 export class ChangeEvent<S = unknown> {
    // trace?: string;
@@ -43,7 +42,7 @@ export type EffectOptions = {
    hasChanged?: (prevState?: any, newState?: any) => boolean;
 } & Glass<SustainedListenerOptions & WatchDebugOptions>
 
-type WatchDebugOptions = {
+export type WatchDebugOptions = {
    logAtoms?: boolean,
    traceTriggers?: boolean
 }
@@ -184,7 +183,7 @@ export function watch<
 
    let eager: boolean | undefined = options?.eager
    const hasChanged = options?.hasChanged ?? isIonizedModel(prevState) ? () => true : notStrictlyEqual
-   const phase = options?.phase ?? PHASE_ONE;
+   const phase = options?.phase ?? DEFAULT_PHASE;
 
 
 
@@ -246,7 +245,7 @@ function notStrictlyEqual(oldState: unknown, newState: unknown) {
 
 type WrappedEffect = () => void
 
-function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: number) {
+export function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: number) {
    if (phase === SYNC) {
       effect()
    }
@@ -265,7 +264,7 @@ function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: number) {
  * In most cases, an ionic effect will be a simple void function that performs side effects.
  */
 function initIonicEffect(effect: IonicTask, options?: EffectOptions) {
-   const phase = options?.phase ?? PHASE_ONE;
+   const phase = options?.phase ?? DEFAULT_PHASE;
    const retrack = options?.retrack ?? false;
 
    const wrappedEffect = createIonicEffect(effect, retrack)
@@ -282,7 +281,7 @@ function initIonicEffect(effect: IonicTask, options?: EffectOptions) {
 }
 
 
-function setUpWatcher(
+export function setUpWatcher(
    subject: Watched,
    effect: WrappedEffect,
    phase: number,

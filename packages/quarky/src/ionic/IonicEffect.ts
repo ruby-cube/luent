@@ -32,7 +32,7 @@ export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
 
    function runEffect(event: ChangeEvent) {
       if (retrack) {
-         return compound.trackedCall(()=>task(event))
+         return compound.retrackedCall(()=>task(event))
       }
       else {
          return task(event)

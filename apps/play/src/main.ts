@@ -15,6 +15,8 @@ import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
 import { List } from './TestReactiveModel';
 import { definePhase, ion, queueTask, useReactivity, watch } from '@rue/quarky';
+import { MarkdownApp } from './demos/markdown-app/markdown-app';
+import { View } from './demos/vue-data-fetching';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -81,7 +83,7 @@ import { definePhase, ion, queueTask, useReactivity, watch } from '@rue/quarky';
 
 // frog;
 
-const app = createApp(TestApp)
+const app = createApp(View)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

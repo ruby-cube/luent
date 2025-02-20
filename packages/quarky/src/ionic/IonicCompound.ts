@@ -73,7 +73,7 @@ export class IonicCompound<T extends IonicCompoundMorph = { asCompound?: IonicCo
    trigger!: () => void
 
    trackedCall(fn: () => any) {
-      this.untrackParticles()
+      // this.untrackParticles()
       pushTracker(this);
       try {
          return fn();
@@ -84,6 +84,11 @@ export class IonicCompound<T extends IonicCompoundMorph = { asCompound?: IonicCo
             console.warn('Watch target or derived AtomicIon has no dependencies (and therefore no reactivity')
          }
       }
+   }
+
+   retrackedCall(fn: ()=>any){
+      this.untrackParticles()
+      return this.trackedCall(fn)
    }
 
    untrackParticles = untrackParticles

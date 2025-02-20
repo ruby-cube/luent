@@ -1723,7 +1723,7 @@ declare namespace React {
 
    interface LabelHTMLAttributes<T> extends HTMLAttributes<T> {
       form?: string | undefined;
-      htmlFor?: string | undefined;
+      for?: string | undefined;
    }
 
    interface LiHTMLAttributes<T> extends HTMLAttributes<T> {

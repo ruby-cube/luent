@@ -39,10 +39,12 @@ export function isNodesRef(value: any): value is NodesRef {
    return value instanceof Object && INTERNAL in value && value[INTERNAL] instanceof MetaNodesRef
 }
 
+type RefReturn<T extends RefSource, A> = A extends NodeReferent[] ? NodesRef<T> : NodeRef<T>
+
 export function ref<
-   T extends RefSource
-   = RefSource
->(source: T, array?: NodeReferent<T>[]) {
+T extends RefSource,
+A,
+>(source: T, array?: A): RefReturn<T, A>{
    const $ref = createNodeRef(array)
    if (array) {
       const _ref = $ref[INTERNAL] as MetaNodesRef
@@ -50,18 +52,18 @@ export function ref<
       getActiveFlask()?.onDiscard(() => {
          _ref.setValue([]); // clear nodes
       })
-   
+
       if (isSettingUpList()) {
          onBeforeListUpdate(() => {
             _ref.prepUpdate();
          })
-   
+
          onListUpdated((toFromIndices) => {
             _ref.update(toFromIndices)
          })
       }
    }
-   return $ref;
+   return $ref as RefReturn<T, A>
 }
 
 
