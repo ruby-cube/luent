@@ -216,11 +216,11 @@ export function watch<
       wrappedEffect,
       phase,
       options || {},
-      quark.asCompound
+      !hasQuark(_subject) ? quark.asCompound : undefined // only pass terminal compounds
    )
 }
 
-export function getPhase(options: undefined | EffectOptions){
+export function getPhase(options: undefined | EffectOptions) {
    return options?.phase ?? (options?.sync ? SYNC : $effectCycle().currentPhase || DEFAULT_PHASE)
 }
 

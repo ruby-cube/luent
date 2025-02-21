@@ -46,6 +46,7 @@ export function track(this: Compound, entity: ParticleMorph) {
  * @param this 
  */
 export function untrackParticles(this: Compound) {
+   console.log('untracking particles', this)
    this.particles?.forEach(particle => {
       particle.dissociate(this)
    })

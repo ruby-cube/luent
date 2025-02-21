@@ -1,4 +1,4 @@
-import { isIon, isIonizedModel, ion, toRaw, shallowClone,  watch,  __devCheckIfTracked, ionize, AtomicIon, toValue, untrackedCall, Ion } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __devCheckIfTracked, ionize, AtomicIon, toValue, untrackedCall, Ion } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
@@ -180,7 +180,7 @@ export class ListRenderKit {
          const nodePod = isDynamic ? dynamicNodePod.appendNodePod() : this.outerNodePod;
 
          if (isDynamic) {
-            const flask = this.outerFlask.spawn({type: 'view', creationScope: true})
+            const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
             listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
             flask.emitInitialMount()
             flaskMap.set(nodePod, flask)
@@ -210,7 +210,7 @@ export class ListRenderKit {
       const dynamicNodePod = this.dynamicNodePod!
       if (dynamicNodePod.length !== oldUArray.length)
          throw new Error("dynamicPod and data length are mismatched")
-
+     
       const indicesAndNodePods: [number, NodePod[]][] = []
       const indicesAndFragments: [number, DocumentFragment][] = []
       let fragment = new DocumentFragment();
@@ -223,6 +223,7 @@ export class ListRenderKit {
          const _isNewItem = isNewItem(uItem);
          const itemHasMoved = hasMoved(uItem);
          const oldIndex = oldUArray.indexOf(uItem)
+         console.log('item has moved', oldIndex, i,  itemHasMoved)
          const nodePod = _isNewItem ? new NodePod()
             : itemHasMoved ? (dynamicNodePod[oldIndex] as unknown as NodePod) // dynamicNodePod[index]
                : null;
@@ -239,6 +240,7 @@ export class ListRenderKit {
          };
 
          if (!nodePod) continue;
+  
          const prevEntry = indicesAndNodePods.at(-1);
          if (prevEntry && prevEntry[0] + 1 === i) {
             prevEntry[1].push(nodePod); // include nodePod for re/insertion
@@ -255,7 +257,7 @@ export class ListRenderKit {
             setCurrentIndex($index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
-            const flask = this.outerFlask.spawn({type:'view', creationScope: true})
+            const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
             const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).stateIsIonized) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
             this.renderItem(toValue(list)[i], $index, parent, nodePod, fragment, flask)

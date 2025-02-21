@@ -18,6 +18,8 @@ import { definePhase, ion, queueTask, useReactivity, watch } from '@rue/quarky';
 import { MarkdownApp } from './demos/markdown-app/markdown-app';
 import { View } from './demos/vue-data-fetching';
 import { TabApp } from './demos/markdown-app/TestTabs';
+import { TreeApp } from './demos/tree-view';
+import { SortableTableApp } from './demos/sortable-table';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -84,7 +86,7 @@ import { TabApp } from './demos/markdown-app/TestTabs';
 
 // frog;
 
-const app = createApp(TabApp)
+const app = createApp(SortableTableApp)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true
