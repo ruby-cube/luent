@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { DEVLabellable, Traceable, traceableMethodWrap, TraceableSubject } from "../debug/debug";
+import { DEVLabellable, traceableMethodWrap, TraceableSubject } from "../debug/debug";
 import { QUARK, Quark, QuarkOf } from "../Quark";
 
 

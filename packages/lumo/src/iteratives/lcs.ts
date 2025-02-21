@@ -1,9 +1,11 @@
-var indexMap = function(list) {
-    var map = {}
-    list.forEach(function(each, i) {
-      map[each] = map[each] || []
-      map[each].push(i)
-    })
+var indexMap = function(list: any[]) {
+    var map: Map<any, number[]> = new Map()
+    for (let i =0; i<list.length; i++){
+      const item = list[i]
+       map.set(item, map.get(item) || [])
+       map.get(item)!.push(i)
+
+    }
     return map
   }
   
@@ -14,7 +16,7 @@ var indexMap = function(list) {
     seq2.forEach(function(eachAfter, indexAfter) {
       var overlapLength
       var overlap: any[] = []
-      var indexesBefore = indexMapBefore[eachAfter] || []
+      var indexesBefore = indexMapBefore.get(eachAfter) || []
       indexesBefore.forEach(function(indexBefore) {
         overlapLength = ((indexBefore && previousOverlap[indexBefore-1]) || 0) + 1;
         if (overlapLength > result.length) {
@@ -29,67 +31,6 @@ var indexMap = function(list) {
     return getSubsequence(seq1, result.startString1, result.length)
   }
 
-// export function longestCommonSubsequence(newSequence: string | any[], oldSequence: string | any[]) { //FIX: this function is broken
-//     let lcsLength = 0;
-//     let lcsStartIndices = [0, 0];
-//     // const [newSequence, oldSequence] = newSequence.length > oldSequence.length ? [newSequence, oldSequence] : [oldSequence, newSequence];
-
-//     let prevSeqLength = 1;
-
-//     let i = 0;
-//     while (i < newSequence.length) {
-//         const itemA = newSequence[i];
-//         let j = 0;
-//         while (j < oldSequence.length) {
-//             const itemB = oldSequence[j];
-//             if (itemA === itemB) {
-//                 const longestPossibleLength = Math.min(oldSequence.length - j, newSequence.length - i);
-//                 if (longestPossibleLength <= lcsLength) {
-//                     j++;
-//                     continue;
-//                 }
-
-//                 let seqLength = 0;
-
-//                 while (seqLength < longestPossibleLength) {
-//                     const itemA = newSequence[i + seqLength];
-//                     const itemB = oldSequence[j + seqLength];
-
-//                     if (itemA == null || itemB == null || itemA !== itemB) {
-//                         if (seqLength > lcsLength) {
-//                             lcsLength = seqLength;
-//                             lcsStartIndices = [i, j];
-//                         }
-//                         prevSeqLength = seqLength;
-//                         break;
-//                     };
-//                     seqLength += 1;
-//                 }
-
-//             }
-//             j++;
-//         }
-//         i += prevSeqLength;
-//         prevSeqLength = 1;
-//     }
-
-
-//     const result = {
-//         newSequence,
-//         oldSequence,
-//         length: lcsLength,
-//         seq: getSubsequence(newSequence, lcsStartIndices[0], lcsLength),
-//         lcsStartIndices
-//     };
-//     console.log(result)
-//     return {
-//         newSequence,
-//         oldSequence,
-//         length: lcsLength,
-//         seq: getSubsequence(newSequence, lcsStartIndices[0], lcsLength),
-//         lcsStartIndices
-//     };
-// };
 
 //  a b c d e f g
 //  ^

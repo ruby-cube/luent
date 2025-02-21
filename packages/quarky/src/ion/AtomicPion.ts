@@ -6,9 +6,10 @@ import { getActiveTracker } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { Ion, isIon, AtomicIon } from "./ion";
 import { MutableCapsule } from "../capsule/Capsule";
-import { __DEV__traceMethodCall, Traceable } from "../debug/debug";
+import { __DEV__traceMethodCall } from "../debug/debug";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
 import { trigger } from "../trigger";
+import { Traceable } from "../debug/Traceable";
 
 // writable vs non-writable 
 // inert vs reactive

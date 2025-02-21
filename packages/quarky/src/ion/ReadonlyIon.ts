@@ -1,10 +1,10 @@
 import { Capsule, MutableCapsule } from "../capsule/Capsule";
 import { asNonlocalReadonly } from "../capsule/Readonly";
 import { quarkOf, QUARK } from "../Quark";
-import { AtomicIon, isIon, NonVoid } from "./ion";
+import { AtomicIon, isIon } from "./ion";
 
-type $WritableIon = (() => NonVoid) & {
-   state: NonVoid;
+type $WritableIon = (() => unknown) & {
+   state: unknown;
 } & MutableCapsule
 
 export function createReadonlyIon($ion: $WritableIon) {

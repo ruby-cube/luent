@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import './style.css'
+// import './style.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
 // import { TestCounter } from './TestCounter';
@@ -20,6 +20,7 @@ import { View } from './demos/vue-data-fetching';
 import { TabApp } from './demos/markdown-app/TestTabs';
 import { TreeApp } from './demos/tree-view';
 import { SortableTableApp } from './demos/sortable-table';
+import { TodoMVC } from './demos/todo-mvc';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -86,7 +87,7 @@ import { SortableTableApp } from './demos/sortable-table';
 
 // frog;
 
-const app = createApp(SortableTableApp)
+const app = createApp(TodoMVC)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

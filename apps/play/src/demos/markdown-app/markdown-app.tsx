@@ -51,6 +51,8 @@ export function MarkdownApp(
       }
    })
 
+
+
    const $doubleCount = ion(() => $count() * 2)
 
    // watch($count, e => {

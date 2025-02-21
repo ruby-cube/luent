@@ -1,7 +1,7 @@
 import { Capsule } from "../capsule/Capsule";
 import { Particle } from "../compound/Particle";
-import { Traceable } from "../debug/debug";
-import { Ion, NonVoid } from "../ion/ion";
+import { Traceable } from "../debug/Traceable";
+import { Ion } from "../ion/ion";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
 import { QUARK, QuarkOf, quarkOf } from "../Quark";
@@ -33,7 +33,7 @@ export type $DerivedPionState = Ion & Capsule & {
 export class DerivationPionQuark implements QuarkOf<$DerivedPionState> {
    type = DERIVATION_ION
    inert: boolean = false
-   state: NonVoid;
+   state: unknown;
    dirty: boolean = false
 
    asParticle?: Particle
@@ -48,7 +48,7 @@ export class DerivationPionQuark implements QuarkOf<$DerivedPionState> {
    constructor(
       public model: IonizedModel,
       public key: PropertyKey,
-      public derivation: () => NonVoid,
+      public derivation: () => unknown,
    ) {
       this.watch = watch;
       this.unwatch = () => unwatch.call(this)

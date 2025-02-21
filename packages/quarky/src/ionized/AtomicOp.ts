@@ -1,5 +1,5 @@
 import { asParticle, ParticleMorph, Particle } from "../compound/Particle";
-import { Traceable } from "../debug/debug";
+import { Traceable } from "../debug/Traceable";
 import { Quark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
 import { noop } from "@rue/utils";

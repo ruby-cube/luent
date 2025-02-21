@@ -4,11 +4,14 @@ import { Flask, getActiveFlask } from "@rue/flask";
 import { quarkOf, QUARK, hasQuark, EntityQuark, QuarkOf, Quark } from "../Quark";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { ParticleMorph } from "../compound/Particle";
-import { __DEV__label, emitSignal, Traceable } from "../debug/debug";
+import { __DEV__label, emitSignal } from "../debug/debug";
 import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
-import { Ion, NonVoid } from "../ion/ion";
+import { Ion } from "../ion/ion";
 import { CompoundMorph, triggerEffects } from "../compound/Compound";
 import { Mutation } from "../Mutable";
+import { Traceable } from "../debug/Traceable";
+
+
 
 /**
 * Managed Derivation Ion
@@ -24,7 +27,7 @@ export type $DerivedState = Ion & Capsule & {
    [QUARK]: {
       type: symbol
       inert: boolean
-      state: NonVoid
+      state: unknown
       dirty:boolean
    }
    & EntityQuark<$DerivedState>
@@ -45,7 +48,7 @@ export function isManagedDerivation(value: unknown): value is $DerivedState {
 }
 
 export function createMaybeMemoizedIon(
-   derivation: (previousValue?: NonVoid) => NonVoid,
+   derivation: (previousValue?: unknown) => unknown,
    methods?: AnyObject,
    retrack: boolean = true,
    quark?: ManagedDerivation,

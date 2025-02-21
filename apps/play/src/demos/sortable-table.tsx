@@ -69,6 +69,8 @@ function SortableTable(input = fromTag({
       return data
    })
 
+   // window.$filteredData = $filteredData;
+
 
 
    function sortBy(key: string) {
@@ -104,7 +106,7 @@ function SortableTable(input = fromTag({
                   </tr>
                </thead>
                <tbody>
-                  {For($filteredData, entry => (console.log('rerendering data'),
+                  {For($filteredData, entry => (
                      <tr>
                         {For(columns, key => (
                            <td>{entry[key]}</td>

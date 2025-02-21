@@ -1,6 +1,5 @@
 import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
-import { Traceable } from "../debug/debug"
 import { CustomIonizedModelConfig, IonizedModel } from "./IonizedModel"
 import { unwatch, watch, Watchable, Watched } from "../watch/Watched"
 import { ParticleMorph, Particle } from "../compound/Particle"
@@ -9,6 +8,7 @@ import { EntityQuark, Quark, QuarkOf } from "../Quark"
 import { Mutable, Mutation } from "../Mutable"
 import { PionQuark } from "./Pion"
 import { trigger } from "../trigger"
+import { Traceable } from "../debug/Traceable"
 
 
 
@@ -30,7 +30,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
    asReined?: object
    asReadonly?: object
-   asTraceable = new Traceable()
+   asTraceable: Traceable
 
    constructor(
       public entity: IonizedModel,
@@ -38,7 +38,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
       public methods: AnyObject | undefined,
       public structureConfigs: CustomIonizedModelConfig[]
    ) {
-      if (__DEV__) this.asTraceable = new Traceable()
+      this.asTraceable = new Traceable()
       this.watch = () => {
          this.trackAbsorbedIons()
          return watch.call(this)

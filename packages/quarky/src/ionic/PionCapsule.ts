@@ -1,12 +1,13 @@
 import { AnyObject } from "@rue/types";
 import { quarkOf, QUARK, hasQuark, QuarkOf, EntityQuark } from "../Quark";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
-import { Ion, NonVoid } from "../ion/ion";
-import { __DEV__label, Traceable } from "../debug/debug";
+import { Ion } from "../ion/ion";
+import { __DEV__label } from "../debug/debug";
 import { IonicCompound } from "./IonicCompound";
 import { Watched } from "../watch/Watched";
 import { noop } from "@rue/utils";
 import { $AtomicPionState } from "../ion/AtomicPion";
+import { Traceable } from "../debug/Traceable";
 
 // USE CASE: 
 // For pions that need methods
@@ -60,7 +61,7 @@ export function asCoreIon($state: $GetterIonState){
 }
 
 export function createPionCapsule(
-   derivation: () => NonVoid,
+   derivation: () => unknown,
    methods: AnyObject,
 ) {
    let compound: IonicCompound | undefined = new IonicCompound({ watch: noop as () => Watched, unwatch: noop })

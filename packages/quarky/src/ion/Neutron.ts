@@ -1,12 +1,13 @@
 import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { shouldIonize } from "./AtomicIon";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
-import { __DEV__label, __DEV__traceMethodCall, Traceable } from "../debug/debug";
+import { __DEV__label, __DEV__traceMethodCall } from "../debug/debug";
 import { ionize } from "../ionized/ionize";
-import { AtomicIon, Methods, NonVoid } from "./ion";
+import { AtomicIon, Methods } from "./ion";
+import { Traceable } from "../debug/Traceable";
 
 
-export function neutron<T extends NonVoid, M>(initialState: T, methods?: M & Methods): M extends Methods ? AtomicIon<T, M> : AtomicIon<T> {
+export function neutron<T, M>(initialState: T, methods?: M & Methods): M extends Methods ? AtomicIon<T, M> : AtomicIon<T> {
    return createAtomicNeutron(initialState, methods, false) as unknown as M extends Methods ? AtomicIon<T, M> : AtomicIon<T>
 }
 

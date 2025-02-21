@@ -88,7 +88,7 @@ class UniqueArray extends Array {
 
 function makeItemsUnique(arr1: any[], arr2: any[], getUID: ((item: unknown) => unknown) | undefined): [any[], any[]] {
    if (getUID) return [toIdArray(arr1, getUID), toIdArray(arr2, getUID)]
-
+   if (arr1[0] instanceof Object || arr2[0] instanceof Object) return [arr1, arr2]
    const uniqueArr1 = [];
    const uniqueArr2 = [];
    const itemMap: Map<any, any> = new Map();
@@ -100,7 +100,7 @@ function makeItemsUnique(arr1: any[], arr2: any[], getUID: ((item: unknown) => u
       const item = arr1[i];
       if (arr1Set.has(item)) {
          // make item unique
-         const uItem = [item]
+         const uItem = { value: item }
 
          // store for arr2 compariston
          let uItems = uMap.get(item)
@@ -141,7 +141,7 @@ function makeItemsUnique(arr1: any[], arr2: any[], getUID: ((item: unknown) => u
          }
       }
       else if (arr2Set.has(item)) {
-         const uItem = [item] // make item unique
+         const uItem = { value: item } // make item unique
          uniqueArr2.push(uItem);
          // map for retrieval
          itemMap.set(uItem, item)

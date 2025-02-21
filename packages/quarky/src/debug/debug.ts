@@ -1,14 +1,15 @@
 import { isFunction, isObject } from "@rue/utils";
+import { isAtomicIon } from "../ion/AtomicIon";
 import { AtomicIon, isIon } from "../ion/ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
-import { isAtomicIon } from "../ion/AtomicIon";
 import { quarkOf, hasQuark, QUARK, Quark } from "../Quark";
 import { untrackedCall } from "../ionic/IonicCompound";
 import { Compound, CompoundMorph, isCompound } from "../compound/Compound";
 import { isIonizedModel } from "../ionized/ionize";
 import { Particle } from "../compound/Particle";
 import { IonizedModel } from "../ionized/IonizedModel";
+import { Traceable } from "./Traceable";
 
 export interface DEVLabellable {
    labelName?: string
@@ -143,28 +144,9 @@ export function traceableFunctionWrap(fn: TraceableSubject & Function) {
    }
 }
 
-function getOriginTrace() {
-   const trace = getPublicTrace()
-   if (!trace) return '';
-   return 'at ' + trace?.split('at')[1].trim()
-   // console.log(trace)
-   // return trace
-}
 
-export class Traceable {
 
-   constructor() {
-      this.origin = getOriginTrace()
-      // this.__DEV__labels = new Set()
-   }
 
-   traceTriggers: Set<PropertyKey> = new Set()
-   __DEV__traceAsyncPath: Set<PropertyKey> = new Set()
-   __DEV__traceTrackers: Set<PropertyKey> = new Set()
-
-   origin?: string
-   // __DEV__labels: Set<string>
-}
 
 
 function traceTriggers(subject: AnyObject, key?: PropertyKey) {

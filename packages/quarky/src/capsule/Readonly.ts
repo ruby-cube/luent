@@ -4,8 +4,8 @@ import { isIonizedModel } from "../ionized/ionize";
 import { createReadonlyIon, isWritableIon } from "../ion/ReadonlyIon";
 import { __DEV__proxyGetterAssertions, createProxySwitchMap, isMethod, ProxySwitchMap } from "../ionized/IonizedModel";
 import { isFunction, isObject } from "@rue/utils";
-import { Traceable } from "../debug/debug";
 import { quarkOf, hasQuark } from "../Quark";
+import { Traceable } from "../debug/Traceable";
 
 export function asNonlocalReadonly(value: any) {
    if (!(value instanceof Object)) return value;

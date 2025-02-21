@@ -5,12 +5,15 @@ import { createAtomicIon } from "./AtomicIon";
 import { maybeIonize } from "../ionized/IonizedModel";
 
 /* API */
-export type Ion<T extends NonVoid = NonVoid, M = {}> = (() => T) & M
+export type Ion<T = unknown, M = {}> = (() => T) & M
 
 /* API */  // atomic ions, neutrons, and pions
-export type AtomicIon<T extends NonVoid = NonVoid, M = { state: T }> = (() => T) & M & { state: T }
+export type AtomicIon<T = unknown, M = { state: T }> = (() => T) & M & { state: T }
 
-export type NonVoid = string | number | object | undefined | boolean | bigint | symbol | null
+// NOTE: deprecating NonVoid because extending generic as NonVoid causes type-narrowing
+// export type NonVoid = string | number | object | undefined | boolean | bigint | symbol | null
+
+type Derivation<R = unknown> = (prevValue?: R) => R
 
 export type Methods = { [key: PropertyKey]: (...args: any) => any }
 
@@ -20,7 +23,7 @@ export function isIon(value: unknown): value is Ion {
 }
 
 
-export function toIon<T extends NonVoid | Ion>(value: T): T extends Ion ? T : Ion<T> {
+export function toIon<T>(value: T): T extends Ion ? T : Ion<T> {
    return (isIon(value) ? value : neutron(value)) as T extends Ion ? T : Ion<T>
 }
 
@@ -28,14 +31,10 @@ export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
    return isFunction(maybeFn) ? maybeFn() : maybeFn;
 }
 
-type Derivation<R extends NonVoid = NonVoid> = (prevValue?: R) => R
-type IonReturn<T extends NonVoid, M> = T extends Derivation<infer R> ? Ion<Broad<R>, M> : M extends Methods ? AtomicIon<Broad<T>, M> : AtomicIon<Broad<T>>
 
-/**
- * Because inferring the return of a derivation causes type-narrowing of the intitial state, we need to broaden the type back again.
- */
-type Broad<T> = T extends boolean ? boolean : T extends string ? string : T extends number ? number : T;
-
+type AsIon<T, M> = [T] extends [AtomicIon]? T  // [T] extends [AtomicIon] to prevent type-narrowing
+: [T] extends [Derivation<infer R>] ? M extends Methods ? Ion<R, M> : Ion<R>
+: M extends Methods ? AtomicIon<T, M & { state: T }> : AtomicIon<T>
 
 /**
  * API
@@ -44,19 +43,20 @@ type Broad<T> = T extends boolean ? boolean : T extends string ? string : T exte
  * @returns 
  */
 export function ion<
-   T extends NonVoid,
+   T,
    M
->(initialState: T, methods?: M & Methods): T extends Derivation<infer R> ? Ion<Broad<R>, M> : M extends Methods ? AtomicIon<Broad<T>, M> : AtomicIon<Broad<T>> {
-   if (isIon(initialState)) return initialState as unknown as IonReturn<T, M>
+>(initialState: T, methods?: M & Methods): AsIon<T, M> {
+   if (isIon(initialState)) return initialState as unknown as AsIon<T, M>
    if (isFunction(initialState)) {
-      return createMaybeMemoizedIon(<Derivation>initialState, methods, true) as unknown as IonReturn<T, M>
+      return createMaybeMemoizedIon(<Derivation>initialState, methods, true) as unknown as AsIon<T, M>
    }
-   return createAtomicIon(initialState, methods) as unknown as IonReturn<T, M>
+   return createAtomicIon(initialState, methods) as unknown as AsIon<T, M>
 }
 
 ion.ionize = function createIonizedIon<T extends object, M>(initialState: T, methods?: M & Methods): M extends Methods ? AtomicIon<T, M> : AtomicIon<T> {
    return createAtomicIon(maybeIonize(initialState), methods, true) as unknown as M extends Methods ? AtomicIon<T, M> : AtomicIon<T>
 }
+
 
 // isIon // any sort of ion
 // isAtomic // primary
@@ -72,28 +72,28 @@ ion.ionize = function createIonizedIon<T extends object, M>(initialState: T, met
 // isReined
 
 
-// const $count = ion(0)
+const $count = ion(0)
 
-// const $doublecount = ion(() => $count() * 2)
+const $doublecount = ion(() => {if (isIon($count)) return $count() * 2}, {
+   doSomething(){}
+})
 
-// const $countB = ion((prev?: number) => (prev ?? 0) + 2, {
-//    toggler() {
+const $countB = ion((prev?: number) => (prev ?? 0) + 2)
 
-//    }
-// })
+const $active = ion('frog', {
+   toggle() {
 
-// const $active = ion('frog', {
-//    toggle() {
+   }
+})
 
-//    }
-// })
+const $actived = ion(false, {
+   toggler() { }
+})
 
-// const $actived = ion(false)
+$actived.state = true
 
-// $actived.state = true
+function som<T>(value: T): T {
+   return null as T;
+}
 
-// function som<T>(value: T): T {
-//    return null as T;
-// }
-
-// som(true)
+som(true)

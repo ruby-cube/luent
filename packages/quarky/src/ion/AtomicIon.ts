@@ -1,4 +1,4 @@
-import { __DEV__label, __DEV__traceMethodCall, emitSignal, Traceable } from "../debug/debug";
+import { __DEV__label, __DEV__traceMethodCall, emitSignal } from "../debug/debug";
 import { ionize } from "../ionized/ionize";
 import { AnyObject } from "@rue/types";
 import { __DEV__getTrace, } from "../../../flask/debug";
@@ -12,6 +12,7 @@ import { trigger } from "../trigger";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { ParticleMorph } from "../compound/Particle";
 import { $syncEffects } from "../effect-cycle/SyncEffects";
+import { Traceable } from "../debug/Traceable";
 
 /** INTERNAL */
 export type $AtomicIonState = AtomicIon & MutableCapsule & {
