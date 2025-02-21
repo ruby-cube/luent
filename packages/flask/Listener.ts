@@ -1,7 +1,7 @@
 import { Callback, CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { mapHandlers } from "./handlerMap";
-import { AbortSignal, RegisterAbortSignal } from "./AbortSignal";
+import { AbortSignal } from "./AbortSignal";
 import { $_snap_context, callWithContext } from "./context/AsyncContext";
 import { Flask, getActiveFlask, setFlask, ThisFlask } from "./Flask";
 import { setAsyncPath } from "./debug";
@@ -44,7 +44,7 @@ export type RemoveFunction<E extends EnrollFunction> =
    : never
 
 export type PauseCleanup = () => void
-export type Pause = () => PauseCleanup | void
+export type Pause = (arg: any) => PauseCleanup | void
 
 type ListenerConfig<E extends EnrollFunction = EnrollFunction> = {
    callback: Callback,
@@ -99,8 +99,8 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
       resume() {
          if (stopped || !paused) return false;
          paused = false;
-         returnVal = enroll(_callback);
-         if (resume) resume(_callback);
+         // returnVal = enroll(_callback);
+         if (resume) returnVal = resume(_callback);
          return true;
       }
    }
@@ -135,8 +135,8 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
    function _pause() {
       console.log('pausing')
       if (stopped || paused) return false;
-      remove(returnVal ?? _callback);
-      if (pause) pauseCleanup = pause();
+      // remove(returnVal ?? _callback);
+      if (pause) pauseCleanup = pause(returnVal ?? _callback);
       paused = true;
       return true;
    }
@@ -216,7 +216,7 @@ function wrapWithFlask(callback: Callback, config: {
    let scene: Flask;
    return (...args: any[]) => {
       if (scene) scene.emitDiscard()
-      scene = enclosingFlask?.spawn({type:'scene', creationScope: true}) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if dirty right?
+      scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if dirty right?
       return callWithContext({
          context,
          beforeCall() {

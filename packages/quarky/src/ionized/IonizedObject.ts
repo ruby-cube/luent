@@ -1,6 +1,6 @@
 import { isFunction } from "@rue/utils";
-import { isIonizedModel, IonizedModel, toRaw, ionize, registerIonizedModel } from "./ionize";
-import { defineIonizedStructure } from "./IonizedModel";
+import { isIonizedModel, toRaw, ionize, registerIonizedModel } from "./ionize";
+import { defineIonizedStructure, IonizedModel } from "./IonizedModel";
 
 // export const runningIonicObject = true;
 

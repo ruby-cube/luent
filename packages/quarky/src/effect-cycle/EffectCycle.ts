@@ -20,7 +20,7 @@ export const SYNC = 0; // 0 represents both sync and initial task phase
 export const PHASE_ONE = 1;
 export let DEFAULT_PHASE = PHASE_ONE;
 
-export function setDefaultPhase(phase: number){
+export function setDefaultPhase(phase: number) {
    DEFAULT_PHASE = phase;
 }
 
@@ -81,13 +81,6 @@ type CyclePhase = {
    next: CyclePhase | undefined
 }
 
-//TODO: how to only have one phase
-
-// const defaultPhaseNums = [SYNC, PHASE_ONE]
-// const defaultCyclePhases = [initialTaskPhase, ]
-
-
-
 
 export function definePhase(phaseName: string, scheduler?: Function): CyclePhase {
    return {
@@ -138,8 +131,10 @@ function scheduleFinalPhase(cycle: EffectCycle, { name, schedule, phase, next }:
       // scheduleNextPhase
       cycle.runEffects(phase)
       // end cycle
-      cycle.runEffects(next!.phase)
-      closeCycle(); // Any set ops after this point will be scheduled for the NEXT render cycle
+      queueMicrotask(() => {
+         cycle.runEffects(next!.phase)
+         closeCycle();
+      }) // Any set ops after this point will be scheduled for the NEXT render cycle
    })
 }
 
@@ -153,7 +148,6 @@ export class EffectCycle {
    currentPhase: number = SYNC
 
    initiate() {
-      console.trace('initiating effect cycle')
       cycleCount++;
       beginCycle(this)
       return this;

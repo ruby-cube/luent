@@ -93,7 +93,7 @@ export class Watched<T extends Watchable = Watchable> {
       $syncEffects().absorb(effects)
    }
 
-   private cleanups: (() => void)[] = [] //TODO: make into array
+   private cleanups: (() => void)[] = []
 
    onDiscard(cleanUp: () => void) {
       this.cleanups.push(cleanUp)
@@ -104,9 +104,4 @@ export class Watched<T extends Watchable = Watchable> {
          cleanUp()
       }
    }
-
-   // discard(){
-   //    this.quark.asWatched = undefined;
-   //    //QUESTION: Do I need to release watchable too? this.watchable = undefined?
-   // }
 }

@@ -21,8 +21,8 @@ export function TabApp() {
 
    return component(
       <>
-         <button on:click={$open.toggle}>open</button>
-         <button on:click={$active.toggle}>toggle</button>
+         <button on:click={$open.toggle}>open/close</button>
+         <button on:click={$active.toggle}>show/hide</button>
          {/* {For(data, item => item.id, (item) => (
             <MarkdownApp mu:markdown={ions(item).$markdown}></MarkdownApp>
          ))} */}

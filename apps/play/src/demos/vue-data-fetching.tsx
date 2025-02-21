@@ -1,6 +1,6 @@
-import { component, For, If } from "@rue/lumo"
+import { component, Else, For, If, ref } from "@rue/lumo"
 import { ion, ionicTask } from "@rue/quarky"
-import { onPostlude, postludePhase } from "../../../../packages/lumo/src/render/render-cycle"
+import { onPostlude, postlude_phase, render_phase } from "../../../../packages/lumo/src/render/render-cycle"
 
 type Commit = {
    commit: {
@@ -27,14 +27,39 @@ export function View() {
    const $currentBranch = ion(branches[0])
    const $commits = ion([] as Commit[])
 
-   ionicTask(w => {
-      onPostlude(async () => {
-         // this effect will run immediately and then
-         // re-run whenever currentBranch.value changes
-         const response = await fetch(`${API_URL}${w($currentBranch)}`)
-         $commits.state = await response.json()
-      })
+
+   ionicTask(async (w, initial) => {
+      if (!initial) $commits.state = []
+      const response = await fetch(`${API_URL}${w($currentBranch)}`)
+      $commits.state = await response.json()
    })
+
+   ionicTask(async w => {
+      await postlude_phase()
+      console.log('postlude logging', w($currentBranch))
+   })
+
+
+   // @click: e => $currentBranch.state = branch <--- begins render cycle
+   // ..prelude: fetch new commits; set $commits.state = []
+   // ..render: update $currentBranch text, radio buttons; clear $commits
+   // ..postlude: --
+   // ----
+   // @fetch-response: convert response to json
+   // @json-response: set $commits <-- begins render cycle
+   // ..prelude: --
+   // ..render: render $commits
+   // ..postlude: --
+
+   // If the network is fast enough, this could happen in one render cycle:
+   //
+   // @click: e => $currentBranch.state = branch <--- begins render cycle
+   // ..prelude: fetch new commits
+   // @fetch-response: convert response to json
+   // @json-response: set $commits <-- begins render cycle
+   // ..render: update $currentBranch text, radio buttons; render $commits
+   // ..postlude: --
+
 
    function truncate(v: string) {
       const newline = v.indexOf('\n')
@@ -46,19 +71,22 @@ export function View() {
    }
 
    return component(
-      <>
+      <div style='width: 500px'>
          <h1>Latest Vue Core Commits</h1>
+
          {For(branches, branch => (
             <>
-               <input type="radio" name="branch" id={branch}
+               <input type="radio" name="branch"
+                  id={branch}
                   value={branch}
                   mu:checked={$currentBranch}
-                  // on:input={e => $currentBranch.state = branch}
                />
                <label for={branch}>{branch}</label>
             </>
          ))}
+
          <p>vuejs/core@{$currentBranch}</p>
+
          {If($commits().length > 0,
             <ul>
                {For($commits, m => m.sha, ({ html_url, sha, author, commit }) => (
@@ -72,7 +100,7 @@ export function View() {
                ))}
             </ul >
          )}
-      </>
+      </div>
    )
 }
 

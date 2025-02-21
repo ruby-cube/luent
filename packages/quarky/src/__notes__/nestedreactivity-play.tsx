@@ -1,7 +1,7 @@
 //@ts-nocheck
 
 import ""
-import { watchEffect, ionize, onEffectCycleComplete, afterRender } from "./src"
+import { watchEffect, ionize, onEffectCycleComplete, afterRender } from ".."
 
 const $frog = ionize({
     name: "sir robin",

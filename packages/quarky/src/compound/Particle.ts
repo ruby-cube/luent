@@ -61,7 +61,6 @@ export class Particle {
    }
 }
 
-//TODO: need to initialize memoized derivations and maybe ionized models as ionic particles
 export function asParticle(quark: ParticleMorph) {
    return quark.asParticle ?? (quark.asParticle = new Particle(quark))
 }

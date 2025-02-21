@@ -1,6 +1,5 @@
-//@ts-nocheck
-import { $_run_with_, SchedulerOptions } from "@rue/flask"
-import { $effectCycle, createEffectCycleHook, definePhase, onEffectCycleComplete, PHASE_ONE, queueTask, setDefaultPhase, useReactivity, watch } from "@rue/quarky"
+import { $_run_with_, Listener, ResumableListener, SchedulerOptions } from "@rue/flask"
+import { $effectCycle, createEffectCycleHook, definePhase, onEffectCycleComplete, PHASE_ONE, queueTask, setDefaultPhase, useReactivity, watch as _watch, WatchSubjects, Effect } from "@rue/quarky"
 
 
 export const [
@@ -10,7 +9,7 @@ export const [
    POSTLUDE,
    COMPLETION
 ] = useReactivity([ //(default to queueTask for all phases)
-   definePhase('PRELUDE', queueTask),
+   definePhase('PRELUDE', (runPhase: VoidFunction) => queueMicrotask(() => queueMicrotask(runPhase))), // allows devs room to use queueMicrotask 
    definePhase('RENDER', requestAnimationFrame),
    definePhase('POSTLUDE', queueTask)
 ])
@@ -26,10 +25,10 @@ export const onCompletion = onEffectCycleComplete
 // watch($active, () => {
 //    const { width } = measureWidth()
 
-//    await renderPhase()
+//    await render_phase()
 //    column.width = width;
 
-//    await postludePhase()
+//    await postlude_phase()
 //    updateDatabase()
 
 // })
@@ -71,17 +70,17 @@ export const onCompletion = onEffectCycleComplete
 
 //    const { width } = measureWidth()
 
-//    await renderPhase()
+//    await render_phase()
 //    column.width = width;
 
 //    if (!something) return;
 
-//    await postludePhase()
+//    await postlude_phase()
 //    updateDatabase()
 // })
 
 // watch($active, async () => {
-//    await postludePhase()
+//    await postlude_phase()
 //    doSomething()
 // })
 
@@ -91,7 +90,7 @@ export const onCompletion = onEffectCycleComplete
 //    const { width } = measureWidth()
 
 //    watch($count, async () => {
-//       await postludePhase({ cancel: onAbort })
+//       await postlude_phase({ cancel: onAbort })
 //       column.width = width;
 //    })
 // }) //TODO: { sync: true } with batched as default, no phases. Phases will be the responsibility of the ui framework
@@ -109,29 +108,36 @@ export const onCompletion = onEffectCycleComplete
 
 
 type Task = () => void
-
-let _renderPhase: Promise | undefined;
-
-let _postludePhase: Promise | undefined;
-
-export function renderPhase() {
-   if (!_renderPhase) {
-      onCompletion(() => {
-         _renderPhase = undefined
-      })
-   }
-   return _renderPhase ?? (_renderPhase = new Promise(onRender))
+type RenderCyclePhases = {
+   prelude: Promise<void> | undefined;
+   render: Promise<void> | undefined;
+   postlude: Promise<void> | undefined;
 }
 
-export function postludePhase() {
-   console.log('postludePhase')
-   if (!_postludePhase) {
-      onCompletion(() => {
-         _postludePhase = undefined
-      })
-   }
-   return _postludePhase ?? (_postludePhase = new Promise((resolve)=>onPostlude(()=>(console.log('resolving'), resolve()))))
+const renderCyclePhases: RenderCyclePhases = {
+   prelude: undefined,
+   render: undefined,
+   postlude: undefined,
 }
+
+function createRenderCyclePhase(
+   phases: RenderCyclePhases,
+   phase: keyof RenderCyclePhases,
+   hook: (resolve: (...args: any[]) => any) => any
+) {
+   return function cyclePhase() {
+      if (!phases[phase]) {
+         onCompletion(() => {
+            phases[phase] = undefined
+         })
+      }
+      return phases[phase] ?? (phases[phase] = new Promise(hook))
+   }
+}
+
+export const prelude_phase = createRenderCyclePhase(renderCyclePhases, 'prelude', onPrelude)
+export const render_phase = createRenderCyclePhase(renderCyclePhases, 'render', onRender)
+export const postlude_phase = createRenderCyclePhase(renderCyclePhases, 'postlude', onPostlude)
 
 
 
@@ -140,16 +146,39 @@ export function postludePhase() {
 // onPrelude
 // onRender
 // onPostlude
+export function watch<
+   T extends WatchSubjects,
+   P
+>(subject: T, effect: Effect<T>): ResumableListener
+export function watch<
+   T extends WatchSubjects,
+   P
+>(subject: T, effect: Effect<T>, options: EffectOptions): ResumableListener
+export function watch<
+   T extends WatchSubjects,
+   P
+>(...args: [...T, Effect<T>] | [...T, Effect<T>, EffectOptions]): ResumableListener
+export function watch<
+   T extends WatchSubjects,
+   P
+>(...args: [...T, Effect<T>, EffectOptions]): ResumableListener
+export function watch<
+   T extends WatchSubjects,
+   P
+>(...args:
+   // [IonicTask<P>] | [IonicTask<P>, EffectOptions] |
+   [...T, Effect<T>] | [...T, Effect<T>, EffectOptions]): ResumableListener {
+   // function watch(options?: { sync?: boolean }) {
+   options.phase = options?.sync ? SYNC : $effectCycle().currentPhase || PHASE_ONE
 
-// function watch(options?: { sync?: boolean }) {
-//    options.phase = options?.sync ? SYNC : $effectCycle().currentPhase || PHASE_ONE
-// }
+   return _watch(...args)
+}
 
 // const $todoID = ion('kldk')
 // const $data = ion()
 
 // ionicTask(async w => {
-//    await postludePhase()
+//    await postlude_phase()
 
 //    if (w($active)) {
 

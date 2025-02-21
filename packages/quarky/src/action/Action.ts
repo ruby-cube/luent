@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { hasQuark, quarkOf } from "../Quark";
-import { Mutable, Mutation, MutableEntity, asMutable } from "../Mutable";
+import { Mutable, Mutation, MutableEntity, asMutable, isMutableEntity } from "../Mutable";
 
 // Actions may span mulitple effect cycles
 

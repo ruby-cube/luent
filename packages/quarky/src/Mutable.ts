@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel } from "./ionized/ionize";
-import { QUARK, quarkOf } from "./Quark";
+import { hasQuark, QUARK, quarkOf } from "./Quark";
 import { AbortSignal, OnAbort } from "../../flask/AbortSignal";
 import { IterableSet } from "@rue/utils";
 
@@ -10,6 +10,10 @@ export type MutableEntity = {
 
 export type MutableMorph = {
    asMutable: Mutable
+}
+
+export function isMutableEntity(value: unknown): value is MutableEntity{
+   return hasQuark(value) && 'asMutable' in quarkOf(value)
 }
 
 export type MutationTask = (mutation: Mutation) => void

@@ -2,7 +2,6 @@ import { isFunction } from "@rue/utils";
 import { neutron } from "./Neutron";
 import { createMaybeMemoizedIon } from "../ionic/DerivationIon";
 import { createAtomicIon } from "./AtomicIon";
-import { ionize } from "../ionized/ionize";
 import { maybeIonize } from "../ionized/IonizedModel";
 
 /* API */

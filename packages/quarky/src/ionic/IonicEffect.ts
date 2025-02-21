@@ -7,6 +7,7 @@ import { ChangeEvent } from "../watch/watch";
 /**
  * NOTES: 
  * - Ionic effects don't need a dirty state because if they are called, it means they're dirty
+ * - TODO: DEPRECATE once ionicTask is stable
  */
 
 type IonicEffect = IonicCompoundMorph

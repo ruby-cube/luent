@@ -7,6 +7,7 @@
 import * as CSS from "csstype";
 // import * as PropTypes from "prop-types";
 import * as Lumo from "@rue/lumo";
+import * as Quarky from "@rue/quarky";
 import { NodeRef } from "../../src/node/NodeRef";
 import { COMPONENT_ATTRIBUTES, CommonsKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/lumo";
 import { AnyObject, Booleanny } from "@rue/types";
@@ -1709,7 +1710,8 @@ declare namespace React {
       value?: string | readonly string[] | number | undefined;
       width?: number | string | undefined;
 
-      onChange?: ChangeEventHandler<T> | undefined;
+      'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, {set: (value: string)=>unknown}>
+      'mu:checked'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, {set: (value: string)=>unknown}>
    }
 
    interface KeygenHTMLAttributes<T> extends HTMLAttributes<T> {

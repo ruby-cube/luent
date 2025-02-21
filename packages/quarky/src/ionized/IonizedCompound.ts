@@ -8,34 +8,6 @@ import { hasQuark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
 import { DerivationPionQuark } from "../ionic/DerivationPion";
 
-//TODO: 
-
-
-
-// export const MEMOIZED_ION = Symbol('Memoized Ion')
-
-// export function isMemoizedIon(value: unknown): value is $MemoizedIon {
-//    return hasQuark(value) && quarkOf(value).type === MEMOIZED_ION
-// }
-
-// triggerDerivations(newValue: any, oldValue: any) {
-//    for (const derivation of this.derivations) {
-//       if (isIonizedModel(derivation.o)) { //TODO: move to IonizedCompound?
-//          const reactive = derivation.o
-//          const quark = this.quark;
-//          $effectCycle().recordOp(reactive, {
-//             target: quark,
-//             op: 'set',
-//             args: [newValue],
-//             output: newValue,
-//             preopData: oldValue
-//          })
-//       }
-//       derivation.trigger();
-//    }
-// }
-
-
 export class IonizedCompound implements Compound {
    
    constructor(
@@ -63,7 +35,8 @@ export class IonizedCompound implements Compound {
             }
             else {
                // derivation function (no quarks)
-               const ion = new DerivationPionQuark(model, key, value) // create an unregistered DerivationPionQuark //QUESTION: not entirely sure this is the right thing to do
+               const ion = new DerivationPionQuark(model, key, value) 
+               // create an unregistered DerivationPionQuark //QUESTION: not entirely sure this is the right thing to do
                this.track(ion)
             }
          }

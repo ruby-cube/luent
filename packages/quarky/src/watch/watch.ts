@@ -2,7 +2,7 @@ import { AnyObject, Glass } from "@rue/types";
 import { Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "../ionic/IonicCompound";
-import { $effectCycle, DEFAULT_PHASE, SYNC } from "../effect-cycle/EffectCycle";
+import { $effectCycle, DEFAULT_PHASE, PHASE_ONE, SYNC } from "../effect-cycle/EffectCycle";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { Ion, isIon } from "../ion/ion";
@@ -36,6 +36,7 @@ export class ChangeEvent<S = unknown> {
  */
 export type EffectOptions = {
    phase?: number;
+   sync?: boolean;
    cycle?: 'current' | 'next'
    eager?: boolean;
    retrack?: boolean;
@@ -112,16 +113,16 @@ function noReactivity(subject: AnyObject) {
    return subject.asCompound && subject.asCompound.particles.length === 0;
 }
 
-type WatchSubjects = (Object | Ion)[]
+export type WatchSubjects = (Object | Ion)[]
 
-export function watch<
-   T extends WatchSubjects,
-   P
->(effect: IonicTask<P>): ResumableListener
-export function watch<
-   T extends WatchSubjects,
-   P
->(effect: IonicTask<P>, options: EffectOptions): ResumableListener
+// export function watch<
+//    T extends WatchSubjects,
+//    P
+// >(effect: IonicTask<P>): ResumableListener
+// export function watch<
+//    T extends WatchSubjects,
+//    P
+// >(effect: IonicTask<P>, options: EffectOptions): ResumableListener
 export function watch<
    T extends WatchSubjects,
    P
@@ -141,14 +142,18 @@ export function watch<
 export function watch<
    T extends WatchSubjects,
    P
->(...args: [IonicTask<P>] | [IonicTask<P>, EffectOptions] | [...T, Effect<T>] | [...T, Effect<T>, EffectOptions]): ResumableListener {
-   if (args[0] instanceof Function && (args.length === 1 || args.length === 2 && isObjectLiteral(args[1]))) {
-      return initIonicEffect(<IonicTask>args[0], <EffectOptions>args[1])
-   }
+>(...args:
+   // [IonicTask<P>] | [IonicTask<P>, EffectOptions] |
+   [...T, Effect<T>] | [...T, Effect<T>, EffectOptions]): ResumableListener {
+   // if (args[0] instanceof Function && (args.length === 1 || args.length === 2 && isObjectLiteral(args[1]))) {
+   //    return initIonicEffect(<IonicTask>args[0], <EffectOptions>args[1])
+   // }
    const lastArg = args.pop()
    const noOptions = lastArg instanceof Function
    const effect = lastArg instanceof Function ? lastArg : args.pop()
    const options = noOptions ? {} : lastArg as EffectOptions
+   const _options = (options ?? {}) as EffectOptions
+   const phase = _options.phase = getPhase(options)
    if (!effect || !(effect instanceof Function))
       throw new Error("Invalid input. Effect function must be last or second to last argument.")
    if (args.length === 0) throw new Error("Invalid input. No watch subjects")
@@ -159,7 +164,7 @@ export function watch<
 
    let subject = normalizeSubject(_subject, isMultiSubject, retrack)
 
-   if (options?.traceTriggers){
+   if (options?.traceTriggers) {
       //TODO:
    }
 
@@ -183,13 +188,12 @@ export function watch<
 
    let eager: boolean | undefined = options?.eager
    const hasChanged = options?.hasChanged ?? isIonizedModel(prevState) ? () => true : notStrictlyEqual
-   const phase = options?.phase ?? DEFAULT_PHASE;
 
 
 
    function wrappedEffect() {
       const newState = getValue(subject)
-      if (typeof newState === 'number')console.log('index? in wrappedEFfect', newState)
+      if (typeof newState === 'number') console.log('index? in wrappedEFfect', newState)
       if (!eager && !hasChanged(prevState, newState))
          return;
 
@@ -214,6 +218,10 @@ export function watch<
       options || {},
       quark.asCompound
    )
+}
+
+export function getPhase(options: undefined | EffectOptions){
+   return options?.phase ?? (options?.sync ? SYNC : $effectCycle().currentPhase || DEFAULT_PHASE)
 }
 
 function normalizeSubject(_subject: unknown, isMultiSubject: boolean, retrack: boolean) {
@@ -306,6 +314,7 @@ export function setUpWatcher(
             compound.untrackParticles()
       },
       pause() {
+         subject.unwatch(effectLink, phase)
          subject.watch(markDirty, phase)
          return () => {
             subject.unwatch(markDirty, phase)
@@ -313,6 +322,7 @@ export function setUpWatcher(
       },
       resume(task) {
          subject.unwatch(markDirty, phase)
+         subject.watch(effectLink, phase, forNextCycle)
          if (dirty) {
             task()
             dirty = false;

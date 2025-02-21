@@ -76,6 +76,7 @@ export function createMaybeMemoizedIon(
          const flask = getActiveFlask()
          assertValidInitialization(flask, creationFlask) // prevents memory leaks caused by usng memoized ion outside of its creation scope
          flask?.onDiscard(() => {
+            console.log('discarding memoized ion particles')
             compound!.untrackParticles()
          })
          return value;

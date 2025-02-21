@@ -5,7 +5,6 @@ import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
-import { quarkOf } from "../Quark";
 import { $syncEffects } from "../effect-cycle/SyncEffects";
 
 // declare global {
