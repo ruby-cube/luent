@@ -99,13 +99,13 @@ function getValue(subject: unknown) {
 }
 
 function getIonValue(subject: Ion) {
-   if (isManagedDerivation(subject)) // memoized
-      return detachedCall(subject) // allows internal tracking, disables being tracked
    if (isMultisubjectIon(subject) || isWatchedDerivation(subject)) {
       return subject() // allow internal tracking, no need to detach because multisubject and watch derivations cannot be particles
    }
+   // if (isManagedDerivation(subject)) // memoized
    // atomic ion/pion
-   return untrackedCall(subject) // disables being tracked
+      return detachedCall(subject) // allows internal tracking, disables being tracked
+   // return untrackedCall(subject) // disables being tracked
 }
 
 function noReactivity(subject: AnyObject) {
@@ -174,12 +174,12 @@ export function watch<
    let prevState = getValue(subject); // this is where initial reactivity tracking happens (if derivation not already initialized) 
 
    if (noReactivity(subject)) {
-      if (isIonizedModel(prevState)) {
-         subject = prevState; // watch ionized model
-      }
-      else {
+      // if (isIonizedModel(prevState)) {
+      //    subject = prevState; // watch ionized model
+      // }
+      // else {
          return InertWatcher()
-      }
+      // }
    }
 
    const quark = quarkOf(<HasQuark>subject) as Watchable & IonicCompoundMorph
@@ -187,13 +187,10 @@ export function watch<
    watchSubject.onDiscard(quark.unwatch)
 
    let eager: boolean | undefined = options?.eager
-   const hasChanged = options?.hasChanged ?? isIonizedModel(prevState) ? () => true : notStrictlyEqual
-
-
+   let hasChanged = getHasChangedFn(options, prevState)
 
    function wrappedEffect() {
       const newState = getValue(subject)
-      if (typeof newState === 'number') console.log('index? in wrappedEFfect', newState)
       if (!eager && !hasChanged(prevState, newState))
          return;
 
@@ -204,6 +201,7 @@ export function watch<
       }
       finally {
          prevState = newState;
+         hasChanged = getHasChangedFn(options, prevState) //accounts for ions whose value may change from ionized to not ionized
       }
    }
 
@@ -218,6 +216,14 @@ export function watch<
       options || {},
       !hasQuark(_subject) ? quark.asCompound : undefined // only pass terminal compounds
    )
+}
+
+function getHasChangedFn(options: EffectOptions | undefined, state: unknown){
+   return options?.hasChanged ?? isIonizedModel(state) ? always : notStrictlyEqual
+}
+
+function always(){
+   return true;
 }
 
 export function getPhase(options: undefined | EffectOptions) {
@@ -236,7 +242,7 @@ function normalizeSubject(_subject: unknown, isMultiSubject: boolean, retrack: b
 
 
 
-function isIonizedIon(subject: unknown): subject is $AtomicIonState | $AtomicPionState {
+export function isIonizedIon(subject: unknown): subject is $AtomicIonState | $AtomicPionState {
    if (!hasQuark(subject)) return false;
    const quark = quarkOf(subject)
    return (isAtomicIonQuark(quark) || isAtomicPionQuark(quark)) && quark.ionized;

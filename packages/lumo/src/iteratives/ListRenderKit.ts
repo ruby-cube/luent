@@ -1,4 +1,4 @@
-import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __devCheckIfTracked, ionize, AtomicIon, toValue, untrackedCall, Ion } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __devCheckIfTracked, ionize, AtomicIon, toValue, untrackedCall, Ion, detachedCall } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
@@ -16,6 +16,7 @@ import { Flask, getActiveFlask, setFlask } from "@rue/flask";
 import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, setAsyncPath } from "../../../flask/debug";
 import { RENDER } from "../render/render-cycle";
+import { recordMutations } from "../../../quarky/src/Mutable";
 
 
 type Index = number
@@ -130,19 +131,33 @@ export class ListRenderKit {
       if (isDynamic) {
          // set up watcher for updates
          // const effectCycle = getCurrentEffectCylce();
-         const _data = isIon(data) ? untrackedCall(data) : data // unwrap potentially nested ionized model
-         const rawData = isIonizedModel(_data) ? (console.log('USING RAW'), toRaw(_data)) as Collection<any> : undefined
-         let clone = isIonizedModel(_data) ? shallowClone(rawData!) : undefined //TODO: need to handle cases when ionizedModel is nested in ion
+         const _data = isIon(data) ? detachedCall(data) : data // unwrap potentially nested ionized model
+         let clone = isIonizedModel(_data) ? shallowClone(toRaw(_data)) : undefined //TODO: need to handle cases when ionizedModel is nested in ion
          //TODO: figure out typing for Set, Map, Object vs Array
+         let recording = isIonizedModel(_data) ? recordMutations(_data) : undefined
 
-         watch(data as any/* FIX: type error*/, ({ state, prevState }) => { // typecast as one of the options so that typescript won't complain
-            const _oldValue = clone || prevState;
-            if (isIonizedModel(_data)) clone = shallowClone(rawData!) as any[]
-            const { indicesToRemove, insertAndMoveKit, noChange } = diff(rawData || state, _oldValue, getUID)
-            if (noChange) return;
-            if (dynamicNodePod!.length !== _oldValue.length)
+
+
+         watch(data, ({ state, prevState }) => { // typecast as one of the options so that typescript won't complain
+            // if (recording && state === prevState){
+            //    recording.stop()
+            //    console.log('updating list via MUTATIONS')
+            //    //TODO: this.applyMutations(recording.mutations)
+            //    recording = recordMutations(_data)
+            //    return;
+            // }
+            const _prevState = clone || toRaw(prevState)
+            const _state = toRaw(state)
+            clone = isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
+            const { indicesToRemove, insertAndMoveKit, noChange } = diff(_state, _prevState, getUID)
+            if (noChange) {
+               console.log('no change!!')
+               return;
+            }
+            if (dynamicNodePod!.length !== _prevState.length)
                throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${prevState.length} are mismatched. This should never happen.`)
 
+            console.log('changed, lets go!!!')
             this.castBeforeUpdate();
             this.removeItems(indicesToRemove!);
             try {
@@ -151,7 +166,7 @@ export class ListRenderKit {
             catch (err) {
                console.error(err, this.__DEV__asyncPath)
             }
-            console.log('updating list', state.length, _oldValue.length)
+            // console.log('updating list', state.length, _oldValue.length)
          }, { phase: RENDER })
       }
       // currentItem = undefined;
@@ -210,7 +225,7 @@ export class ListRenderKit {
       const dynamicNodePod = this.dynamicNodePod!
       if (dynamicNodePod.length !== oldUArray.length)
          throw new Error("dynamicPod and data length are mismatched")
-     
+
       const indicesAndNodePods: [number, NodePod[]][] = []
       const indicesAndFragments: [number, DocumentFragment][] = []
       let fragment = new DocumentFragment();
@@ -223,7 +238,7 @@ export class ListRenderKit {
          const _isNewItem = isNewItem(uItem);
          const itemHasMoved = hasMoved(uItem);
          const oldIndex = oldUArray.indexOf(uItem)
-         console.log('item has moved', oldIndex, i,  itemHasMoved)
+         console.log('item has moved', oldIndex, i, itemHasMoved)
          const nodePod = _isNewItem ? new NodePod()
             : itemHasMoved ? (dynamicNodePod[oldIndex] as unknown as NodePod) // dynamicNodePod[index]
                : null;
@@ -240,7 +255,7 @@ export class ListRenderKit {
          };
 
          if (!nodePod) continue;
-  
+
          const prevEntry = indicesAndNodePods.at(-1);
          if (prevEntry && prevEntry[0] + 1 === i) {
             prevEntry[1].push(nodePod); // include nodePod for re/insertion

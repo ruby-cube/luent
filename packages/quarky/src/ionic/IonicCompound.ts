@@ -1,6 +1,8 @@
 import { Particle } from "../compound/Particle";
 import { Compound, CompoundMorph, track, untrackParticles } from "../compound/Compound";
 import { Watchable } from "../watch/Watched";
+import { isIonizedModel } from "../ionized/ionize";
+import { quarkOf } from "../Quark";
 
 const trackerStack: (Compound | null)[] = []
 
@@ -75,17 +77,19 @@ export class IonicCompound<T extends IonicCompoundMorph = { asCompound?: IonicCo
       // this.untrackParticles()
       pushTracker(this);
       try {
-         return fn();
+         const value = fn();
+         if (isIonizedModel(value)) this.track(quarkOf(value))
+         return value;
       }
       finally {
          popTracker();
          if (__DEV__ && this.particles.length === 0) {
-            console.warn('Watch target or derived AtomicIon has no dependencies (and therefore no reactivity')
+            console.warn(`Watch target or derived AtomicIon has no dependencies (and therefore no reactivity)`, this)
          }
       }
    }
 
-   retrackedCall(fn: ()=>any){
+   retrackedCall(fn: () => any) {
       this.untrackParticles()
       return this.trackedCall(fn)
    }

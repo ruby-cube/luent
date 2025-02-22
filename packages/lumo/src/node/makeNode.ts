@@ -14,6 +14,7 @@ import { createTryNode, TryNodeInput } from "../boundaries/Try";
 import { createSuspenseNode, SuspenseNodeInput } from "../boundaries/Suspense";
 import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./mountInnerHTML";
+import { MaybeIon } from "../InputTypes";
 
 // export function Fragment() {
 //    // for jsx-runtime

@@ -87,10 +87,11 @@ class MutationRecording {
 //    recording = recordMutations(target)
 // })
 
-export function recordMutations(quark: Mutable) {
+export function recordMutations(entity: MutableEntity) {
+   const mutable = asMutable(entity)
    const recording = new MutationRecording()
 
-   quark.onMutated((mutation: Mutation) => {
+   mutable.onMutated((mutation: Mutation) => {
       const mutations = recording.mutations;
       if (mutations.at(-1) === mutation) return; // prevents the same mutation from being recorded multiple times
       mutations.push(mutation)

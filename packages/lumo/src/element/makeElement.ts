@@ -13,6 +13,7 @@ import { initializeListRef, initializeRef, isAnyNodeRef, NodesRef, isNodesRef } 
 import { camelToKebabCase } from "@rue/utils";
 import { NodePod } from "../node/NodePod";
 import { RENDER } from "../render/render-cycle";
+import { MaybeIon } from "../InputTypes";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -134,6 +135,19 @@ function bindView(element: Element, Slot: Slot | undefined, attributes: { [key: 
    }
 }
 
+function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+   if (!('mu:checked' in attributes))
+      return;
+   const ion = attributes['mu:checked'];
+   delete attributes['mu:checked'];
+   attributes.checked = ion;
+   if (!isIon(ion) || !('state' in ion)) {
+      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
+   }
+   else {
+      setUpInputListener(element, ion, 'checked')
+   }
+}
 function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
    if (!('mu:checked' in attributes))
       return;
@@ -168,6 +182,10 @@ function bindInput(element: HTMLInputElement, attributes: { [key: string]: Mutab
          bindRadioInput(element, attributes)
          break;
 
+      case 'checkbox':
+         bindCheckboxInput(element, attributes)
+         break;
+
       default:
          bindTextInput(element, attributes)
          break;
@@ -190,18 +208,37 @@ function bindTextarea(element: Element, Slot: Slot | undefined) {
    return ion;
 }
 
-function setUpInputListener(element: Element, ion: { state: any } | { set: (value: any) => any }) {
+function setUpCheckboxInputListener(element: Element, ion: { state: any } | { set: (value: any) => any }) {
    element.addEventListener('input', e => {
       if (isManagedDerivation(ion) && 'set' in ion) {
          ion.set(
             //@ts-expect-error
-            e.target.value
+            e.target.checked
          )
       }
       else if ('state' in ion) {
          ion.state =
             //@ts-expect-error
-            e.target.value;
+            e.target.checked;
+      }
+      else {
+         throw new Error('invalid two-way binding')
+      }
+   })
+}
+
+function setUpInputListener(element: Element, ion: { state: any } | { set: (value: any) => any }, key: string = 'value') {
+   element.addEventListener('input', e => {
+      if (isManagedDerivation(ion) && 'set' in ion) {
+         ion.set(
+            //@ts-expect-error
+            e.target[key]
+         )
+      }
+      else if ('state' in ion) {
+         ion.state =
+            //@ts-expect-error
+            e.target[key];
       }
       else {
          throw new Error('invalid two-way binding')
@@ -244,13 +281,17 @@ function setUpAttributes(node: Element, attributes: { [key: string]: any | Deriv
    }
 }
 
-function setAttribute(node: Element, key: string, value: any) {
+function setAttribute(node: Element & AnyObject, key: string, value: any) {
+   console.log('key', key, value)
    //TODO: what if attribute can take a falsey value like 0 or false?
    if (value) {
-      node.setAttribute(key, toString(value))
+      // node.setAttribute(key, toString(value)) //NOTE: Programmatic checking and unchecking of check boxes breaks using setAttribute and removeAttribute
+      node[key] = value;
    }
    else {
-      node.removeAttribute(key);
+      console.log('removing', key, node)
+      node[key] = value;
+      // node.removeAttribute(key);
    }
 }
 
@@ -323,8 +364,11 @@ function removePreviousClasses(prevValue: string | AnyObject, classList: DOMToke
 }
 
 
-function addClasses(value: string | AnyObject, classList: DOMTokenList) {
-   if (isString(value)) {
+function addClasses(value: string | Falsey | { [key: string]: Booleanny }, classList: DOMTokenList) {
+   if (!value) {
+      return;
+   }
+   else if (isString(value)) {
       setUpClassesFromString(value, classList)
    }
    else if (isObject(value)) {
@@ -341,8 +385,9 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
       const value = entry[key]
       if (value && isIon(value)) {
          watch(value, ({ state, prevState }) => {
-            if (prevState) classList.remove(key)
+            console.log('class changed', value, state, prevState)
             if (state) classList.add(key)
+            else if (prevState) classList.remove(key)
          }, {
             eager: true,
             phase: RENDER,

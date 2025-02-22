@@ -1,7 +1,7 @@
 import { storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
-import { nontrackableIterableKeys, useClearOp, useDeleteOp } from "./IonizedSet";
+import { useClearOp, useDeleteOp } from "./IonizedSet";
 import { getAtomicOp, getAtomicOps } from "./AtomicOp";
-import { defineIonizedStructure, useTrackableGetOp } from "./IonizedModel";
+import { defineIonizedStructure, TRACK_ENTRY, TRACK_MODEL, useTrackableGetOp } from "./IonizedModel";
 import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { $syncEffects } from "../effect-cycle/SyncEffects";
@@ -48,24 +48,14 @@ const trackableMapGetOps = {
 
 export function installIonicMap() {
    defineIonizedStructure(Map, {
-      nontrackableKeys: nontrackableIterableKeys,
       trackableOps: {
-         has(target, ionizedModel) {
-            return useTrackableGetOp(
-               ionizedModel,
-               target,
-               'has',
-               target.has
-            )
-         },
-         get(target, ionizedModel) {
-            return useTrackableGetOp(
-               ionizedModel,
-               target,
-               'get',
-               target.get
-            )
-         }
+         has: TRACK_ENTRY,
+         get: TRACK_ENTRY,
+         [Symbol.iterator]: TRACK_MODEL,
+         forEach: TRACK_MODEL,
+         keys: TRACK_MODEL,
+         values: TRACK_MODEL,
+         entries: TRACK_MODEL,
       },
       mutatingOps: {
          set: {

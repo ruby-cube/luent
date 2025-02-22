@@ -12,7 +12,7 @@ export class AtomicOp implements Quark, ParticleMorph {
 
    constructor(
       public model: IonizedModel,
-      public op: string,
+      public op: PropertyKey,
       public entryKey: any,
    ) {
       const trackableOp = this.trackableOp = model[op]
@@ -52,7 +52,7 @@ export class AtomicOp implements Quark, ParticleMorph {
 
 export function asAtomicOp(
    model: IonizedModel,
-   op: string,
+   op: PropertyKey,
    key: any
 ): AtomicOp {
    const atomicOp = getAtomicOp(model[op], key)

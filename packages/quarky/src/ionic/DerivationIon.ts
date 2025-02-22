@@ -10,6 +10,7 @@ import { Ion } from "../ion/ion";
 import { CompoundMorph, triggerEffects } from "../compound/Compound";
 import { Mutation } from "../Mutable";
 import { Traceable } from "../debug/Traceable";
+import { isIonizedModel } from "../ionized/ionize";
 
 
 
@@ -28,7 +29,7 @@ export type $DerivedState = Ion & Capsule & {
       type: symbol
       inert: boolean
       state: unknown
-      dirty:boolean
+      dirty: boolean
    }
    & EntityQuark<$DerivedState>
    & Watchable
@@ -62,6 +63,7 @@ export function createMaybeMemoizedIon(
    function initialize() {
       compound = new IonicCompound(ion)
       const value = compound.trackedCall(derivation)
+      // if (isIonizedModel(value)) compound.track(quarkOf(value))
       if (compound.particles.length === 0) {
          fn = getState
          ion.inert = true;
@@ -93,6 +95,8 @@ export function createMaybeMemoizedIon(
          (retrack && ion.dirty) ? compound.retrackedCall(() => derivation(ion.state))
             : ion.dirty ? derivation(ion.state)
                : ion.state;
+
+      // if (retrack && ion.dirty && isIonizedModel(value)) compound.track(quarkOf(value))
 
       if (ion.dirty) {
          ion.state = value;

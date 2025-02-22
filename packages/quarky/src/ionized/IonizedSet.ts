@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { storeSnapshot, toRaw } from "./ionize";
-import { defineIonizedStructure, GetPreopData, IonizedModel, useTrackableGetOp } from "./IonizedModel";
+import { defineIonizedStructure, GetPreopData, IonizedModel, TRACK_ENTRY, TRACK_MODEL, useTrackableGetOp } from "./IonizedModel";
 import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { getAtomicPion } from "./Pion";
@@ -39,10 +39,7 @@ export const trackableIterableOps = {
    'Symbol.iterator': true
 }
 
-export const nontrackableIterableKeys = {
-   forEach: true,
-   'Symbol.iterator': true
-}
+
 
 
 const trackableSetOps = {
@@ -69,32 +66,21 @@ const trackableSetOps = {
 
 export function installIonicSet() {
    defineIonizedStructure(Set, {
-      nontrackableKeys: nontrackableIterableKeys, //FIX: I don't think this is correct
       trackableOps: {
-         has(target, ionizedModel) {
-            return useTrackableGetOp(
-               ionizedModel,
-               target,
-               'has',
-               target.has
-            )
-         },
-         values(target, ionizedModel) {
-            return useTrackableGetOp(
-               ionizedModel,
-               target,
-               'values',
-               target.values
-            )
-         },
-         entries(target, ionizedModel) {
-            return useTrackableGetOp(
-               ionizedModel,
-               target,
-               'entries',
-               target.entries
-            )
-         }
+         has: TRACK_ENTRY,
+         [Symbol.iterator]: TRACK_MODEL,
+         forEach: TRACK_MODEL,
+         keys: TRACK_MODEL,
+         values: TRACK_MODEL,
+         entries: TRACK_MODEL,
+         difference: TRACK_MODEL, // newSet = difference(otherSet) 
+         union: TRACK_MODEL,
+         intersection: TRACK_MODEL,
+         symmetricDifference: TRACK_MODEL,
+      
+         isSubsetOf: TRACK_MODEL, // boolean = isSubsetOf(otherSet)
+         isSupersetOf: TRACK_MODEL, // boolean = isSupersetOf(otherSet)
+         isDisjointFrom: TRACK_MODEL, // boolean = isDisjointFrom(otherSet)
       },
       mutatingOps: {
          add: {
@@ -123,8 +109,8 @@ export function installIonicSet() {
 
                   getAtomicOp(ionizedModel.has, _newValue)?.trigger()
 
-                     
-                           $syncEffects().run()
+
+                  $syncEffects().run()
 
                   return output;
                }
@@ -351,7 +337,7 @@ export function useDeleteOp(
       getAtomicPion(ionizedModel, 'size')?.trigger()
       getAtomicOp(ionizedModel.has, key)?.trigger()
 
-         
+
       $syncEffects().run()
 
       return output;

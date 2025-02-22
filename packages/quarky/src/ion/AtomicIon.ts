@@ -13,6 +13,7 @@ import { getActiveTracker } from "../ionic/IonicCompound";
 import { ParticleMorph } from "../compound/Particle";
 import { $syncEffects } from "../effect-cycle/SyncEffects";
 import { Traceable } from "../debug/Traceable";
+import { isObject } from "@rue/utils";
 
 /** INTERNAL */
 export type $AtomicIonState = AtomicIon & MutableCapsule & {
@@ -31,7 +32,7 @@ export type $AtomicIonState = AtomicIon & MutableCapsule & {
 export type AtomicIonQuark = QuarkOf<$AtomicIonState>
 
 export function shouldIonize(newValue: unknown, ionized: boolean): newValue is AnyObject {
-   return newValue instanceof Object && ionized;
+   return isObject(newValue) && ionized;
 }
 
 /** INTERNAL */

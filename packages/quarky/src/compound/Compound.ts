@@ -33,6 +33,7 @@ export function isCompound(value: unknown): value is Compound{
  * @returns 
  */
 export function track(this: Compound, entity: ParticleMorph) {
+   console.log('tracked particle', entity)
    const particle = asParticle(entity)
    if (particle.compounds.has(this)) return particle;
    this.particles.push(particle)
@@ -46,7 +47,7 @@ export function track(this: Compound, entity: ParticleMorph) {
  * @param this 
  */
 export function untrackParticles(this: Compound) {
-   console.log('untracking particles', this)
+   console.trace('untracking particles', this)
    this.particles?.forEach(particle => {
       particle.dissociate(this)
    })

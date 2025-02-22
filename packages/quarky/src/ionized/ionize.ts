@@ -253,34 +253,34 @@ type AsIons<T> = {
 //     existingTraps?: ReactiveTraps,
 // ) {
 //     return {
-//         get,
-//         set,
-//         // getPrototypeOf: existingTraps ? existingTraps.getPrototypeOf : () => {
-//         //     return Reflect.getPrototypeOf(target)
-//         // },
-//         // has: existingTraps ? existingTraps.has : (_: unknown, key: PropertyKey) => {
-//         //     return Reflect.has(target, key)
-//         // },
-//         // deleteProperty: existingTraps ? existingTraps.deleteProperty : (_: unknown, key: any) => {
-//         //     return Reflect.deleteProperty(target, key)
-//         // },
-//         // ownKeys: existingTraps ? existingTraps.ownKeys : () => {
-//         //     return Reflect.ownKeys(target)
-//         // },
-//         // setPrototypeOf: existingTraps ? existingTraps.setPrototypeOf : (_: unknown, proto: ReactiveModelContainer | null) => {
-//         //     return Reflect.setPrototypeOf(target, proto)
-//         // },
-//         // isExtensible: existingTraps ? existingTraps.isExtensible : () => {
-//         //     return Reflect.isExtensible(target)
-//         // },
-//         // preventExtensions: existingTraps ? existingTraps.preventExtensions : () => {
-//         //     return Reflect.preventExtensions(target)
-//         // },
-//         // getOwnPropertyDescriptor: existingTraps ? existingTraps.getOwnPropertyDescriptor : (_: unknown, key: PropertyKey) => {
-//         //     return Reflect.getOwnPropertyDescriptor(target, key)
-//         // },
-//         // defineProperty: existingTraps ? existingTraps.defineProperty : (_: unknown, key: PropertyKey, attributes: PropertyDescriptor & ThisType<any>) => {
-//         //     return Reflect.defineProperty(target, key, attributes)
-//         // }
+      //   get,
+      //   set,
+      //   getPrototypeOf: existingTraps ? existingTraps.getPrototypeOf : () => {
+      //       return Reflect.getPrototypeOf(target)
+      //   },
+      //   has: existingTraps ? existingTraps.has : (_: unknown, key: PropertyKey) => {
+      //       return Reflect.has(target, key)
+      //   },
+      //   deleteProperty: existingTraps ? existingTraps.deleteProperty : (_: unknown, key: any) => {
+      //       return Reflect.deleteProperty(target, key)
+      //   },
+      //   ownKeys: existingTraps ? existingTraps.ownKeys : () => {
+      //       return Reflect.ownKeys(target)
+      //   },
+      //   setPrototypeOf: existingTraps ? existingTraps.setPrototypeOf : (_: unknown, proto: ReactiveModelContainer | null) => {
+      //       return Reflect.setPrototypeOf(target, proto)
+      //   },
+      //   isExtensible: existingTraps ? existingTraps.isExtensible : () => {
+      //       return Reflect.isExtensible(target)
+      //   },
+      //   preventExtensions: existingTraps ? existingTraps.preventExtensions : () => {
+      //       return Reflect.preventExtensions(target)
+      //   },
+      //   getOwnPropertyDescriptor: existingTraps ? existingTraps.getOwnPropertyDescriptor : (_: unknown, key: PropertyKey) => {
+      //       return Reflect.getOwnPropertyDescriptor(target, key)
+      //   },
+      //   defineProperty: existingTraps ? existingTraps.defineProperty : (_: unknown, key: PropertyKey, attributes: PropertyDescriptor & ThisType<any>) => {
+      //       return Reflect.defineProperty(target, key, attributes)
+      //   }
 //     }
 // }

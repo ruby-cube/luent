@@ -1,8 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
 import { AtomicOp, getAtomicOp } from "./AtomicOp";
-import { defineIonizedStructure, GetPreopData, IonizedModel, useTrackableGetOp } from "./IonizedModel";
-import { nontrackableIterableKeys } from "./IonizedSet";
+import { defineIonizedStructure, GetPreopData, IonizedModel, TRACK_ENTRY, TRACK_MODEL, useTrackableGetOp, useTrackableOp } from "./IonizedModel";
 import { getAtomicPion, PionQuark, triggerPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { IonizedModelQuark } from "./IonizedModelQuark";
@@ -74,7 +73,53 @@ import { $syncEffects } from "../effect-cycle/SyncEffects";
 
 // const jim = dogs.at(0)
 
+const arr = [1, 2, 3, 4]
+const proxy = new Proxy(arr, {
+   has(target, key) {
+      //TODO: track
+      console.log('has', key)
+      return Reflect.has(target, key)
+   },
+   deleteProperty(target, key) {
+      //TODO: trigger
+      console.log('deleteProperty', key)
+      return Reflect.deleteProperty(target, key)
+   },
+   ownKeys(target) {
+      //TODO: track
+      console.log('ownKeys', target)
+      return Reflect.ownKeys(target)
+   },
+   setPrototypeOf(target, proto) {
+      //TODO: disallow
+      console.log('setPrototypeOf', proto)
+      return Reflect.setPrototypeOf(target, proto)
+   },
+   isExtensible(target) {
+      //TODO: track
+      console.log('isExtensible')
+      return Reflect.isExtensible(target)
+   },
+   preventExtensions(target) {
+      //TODO: trigger
+      console.log('preventExtensions')
+      return Reflect.preventExtensions(target)
+   },
+   getOwnPropertyDescriptor(target, key) {
+      //TODO: track
+      console.log('getOwnPropertyDescriptor', key)
+      return Reflect.getOwnPropertyDescriptor(target, key)
+   },
+   defineProperty(target, key, attributes) {
+      //TODO: trigger
+      console.log('defineProperty', key, attributes)
+      return Reflect.defineProperty(target, key, attributes)
+   }
+})
+
+
 const trackableArrayOps = {
+   [Symbol.iterator]: true,
 
    // whole array, triggered by any change to array
 
@@ -90,6 +135,27 @@ const trackableArrayOps = {
    toLocaleString: true, // string = toLocaleString() 
    toString: true, // string = toString()
 
+   filter: true, // newArray = filter(callbackFn, thisArg?)
+   keys: true,  // newIterable = keys()
+   entries: true, // newEntriesIterator = entries()
+   values: true, // newIterable = values()
+   forEach: true,
+
+   concat: true, // newArray = concat(arrayB, arrayC, ...)
+   with: true, // newArray = arrayInstance.with(index, value)
+
+   find: true, // item = find(callbackFn, thisArg?)
+   findLast: true, // item = findLast(callbackFn, thisArg?)
+
+   findIndex: true, // index = findIndex(callbackFn, thisArg?)
+   findLastIndex: true, // index = findLastIndex(callbackFn, thisArg?)
+
+   every: true, // boolean = every(callbackFn, thisArg?)
+   some: true, // boolean = some(callbackFn, thisArg?)
+
+   // depends on index
+   slice: true, // newArray = slice(start?, end?)
+   toSpliced: true, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
 
    // check if result changed
    lastIndexOf: true, // index = lastIndexOf(item, fromIndex)
@@ -97,18 +163,6 @@ const trackableArrayOps = {
    includes: true, // boolean = includes(item, fromIndex?)
 
    // args
-   find: true, // item = find(callbackFn, thisArg?)
-   findLast: true, // item = findLast(callbackFn, thisArg?)
-
-   findIndex: true, // index = findIndex(callbackFn, thisArg?)
-   findLastIndex: true, // index = findLastIndex(callbackFn, thisArg?)
-
-   filter: true, // newArray = filter(callbackFn, thisArg?)
-
-   every: true, // boolean = every(callbackFn, thisArg?)
-   some: true, // boolean = some(callbackFn, thisArg?)
-
-
    // copyWithin: true,
    // fill: true,
    // pop: true,
@@ -118,35 +172,64 @@ const trackableArrayOps = {
    // reverse: true,
    // sort: true,
    // splice: true,
-
-   // keys: true,  // newIterable = keys()
-   // entries: true, // newEntriesIterator = entries()
-   // values: true, // newIterable = values()
-   // forEach: true,
-
-
-   slice: true, // newArray = slice(start?, end?)
-
-   concat: true, // newArray = concat(arrayB, arrayC, ...)
-   toSpliced: true, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
-
-   with: true, // newArray = arrayInstance.with(index, value)
 }
 
 export function installIonicArray() {
    defineIonizedStructure(Array, {
-      nontrackableKeys: nontrackableIterableKeys,
+      // trackableGetOps: {
+      //    at(target, ionizedModel) {
+      //       return useTrackableGetOp(
+      //          ionizedModel,
+      //          target,
+      //          'at',
+      //          target.at
+      //       )
+      //    }
+      //    //TODO: Trackable ops (as oppsed to get ops)?? not sure if necessary yet
+      // },
 
       trackableOps: {
-         at(target, ionizedModel) {
-            return useTrackableGetOp(
-               ionizedModel,
-               target,
-               'at',
-               target.at
-            )
-         }
-         //TODO: Trackable ops (as oppsed to get ops)?? not sure if necessary yet
+         at: TRACK_ENTRY,
+
+         [Symbol.iterator]: TRACK_MODEL,
+         toReversed: TRACK_MODEL, // newArray = toReversed()
+         flat: TRACK_MODEL, // newArray = flat(depth?)
+         toSorted: TRACK_MODEL, // newArray = toSorted(compareFn?)
+         flatMap: TRACK_MODEL, // newArray = flatMap(callbackFn, thisArg?)
+         map: TRACK_MODEL, // newArray = map(callbackFn, thisArg?)
+         reduce: TRACK_MODEL, // result = reduce(callbackFn, initialValue?)
+         reduceRight: TRACK_MODEL, // result = reduceRight(callbackFn, initialValue?)
+
+         join: TRACK_MODEL, // string = join(separator?)
+         toLocaleString: TRACK_MODEL, // string = toLocaleString() 
+         toString: TRACK_MODEL, // string = toString()
+
+         filter: TRACK_MODEL, // newArray = filter(callbackFn, thisArg?)
+         keys: TRACK_MODEL,  // newIterable = keys()
+         entries: TRACK_MODEL, // newEntriesIterator = entries()
+         values: TRACK_MODEL, // newIterable = values()
+         forEach: TRACK_MODEL,
+
+         concat: TRACK_MODEL, // newArray = concat(arrayB, arrayC, ...)
+         with: TRACK_MODEL, // newArray = arrayInstance.with(index, value)
+
+         find: TRACK_MODEL, // item = find(callbackFn, thisArg?)
+         findLast: TRACK_MODEL, // item = findLast(callbackFn, thisArg?)
+
+         findIndex: TRACK_MODEL, // index = findIndex(callbackFn, thisArg?)
+         findLastIndex: TRACK_MODEL, // index = findLastIndex(callbackFn, thisArg?)
+
+         every: TRACK_MODEL, // boolean = every(callbackFn, thisArg?)
+         some: TRACK_MODEL, // boolean = some(callbackFn, thisArg?)
+
+         // depends on index //TODO: 
+         slice: TRACK_MODEL, // newArray = slice(start?, end?)
+         toSpliced: TRACK_MODEL, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
+
+         // check if result changed //TODO:
+         lastIndexOf: TRACK_MODEL, // index = lastIndexOf(item, fromIndex)
+         indexOf: TRACK_MODEL, // index = indexOf(item, fromIndex)
+         includes: TRACK_MODEL, // boolean = includes(item, fromIndex?)
       },
 
       mutatingOps: {

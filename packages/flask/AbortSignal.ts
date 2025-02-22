@@ -6,7 +6,7 @@ type Task = ()=>void
 
 export type AbortSignal = (() => void) | OnAbort
 
-export type OnAbort = (task: Task) => Listener
+export type OnAbort = (task?: Task) => Listener
 
 export function AbortSignal() {
     let cleanups: Set<() => void> | null = new Set()

@@ -4,6 +4,8 @@
 
 import { AnyObject } from "@rue/types";
 
+export type MaybeIon<T> = T | Ion<T>
+
 // export type _Nonlocal<T> = T extends object
 //   ? T extends Function
 //     ? T
