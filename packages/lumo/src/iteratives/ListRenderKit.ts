@@ -17,6 +17,7 @@ import { $_snap_context, callWithContext } from "../../../flask/context/AsyncCon
 import { __DEV__buildAsyncPath, setAsyncPath } from "../../../flask/debug";
 import { RENDER } from "../render/render-cycle";
 import { recordMutations } from "../../../quarky/src/Mutable";
+import { AnyObject } from "@rue/types";
 
 
 type Index = number
@@ -132,13 +133,23 @@ export class ListRenderKit {
          // set up watcher for updates
          // const effectCycle = getCurrentEffectCylce();
          const _data = isIon(data) ? detachedCall(data) : data // unwrap potentially nested ionized model
-         let clone = isIonizedModel(_data) ? shallowClone(toRaw(_data)) : undefined //TODO: need to handle cases when ionizedModel is nested in ion
+         let clone = createClone(data, _data)
+         // let clone = isIon(data) && isIonizedModel(_data) ? shallowClone(toRaw(_data)) : undefined
          //TODO: figure out typing for Set, Map, Object vs Array
          let recording = isIonizedModel(_data) ? recordMutations(_data) : undefined
 
 
+         function createClone(subject: AnyObject, state: AnyObject){
+            return isIonizedModel(state) ? shallowClone(toRaw(state)) : undefined
+            // return isIon(subject) && isIonizedModel(state) ? shallowClone(toRaw(state)) : undefined
+         }
+
+         function hasChanged(oldState: AnyObject, state: AnyObject){
+
+         }
 
          watch(data, ({ state, prevState }) => { // typecast as one of the options so that typescript won't complain
+            console.log("@% watch ListRenderKit effect for", data.labelName)
             // if (recording && state === prevState){
             //    recording.stop()
             //    console.log('updating list via MUTATIONS')
@@ -146,18 +157,20 @@ export class ListRenderKit {
             //    recording = recordMutations(_data)
             //    return;
             // }
-            const _prevState = clone || toRaw(prevState)
-            const _state = toRaw(state)
-            clone = isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
-            const { indicesToRemove, insertAndMoveKit, noChange } = diff(_state, _prevState, getUID)
-            if (noChange) {
-               console.log('no change!!')
+            const _prevState = clone ?? toRaw(prevState)
+            clone = createClone(data, state)
+            // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
+            const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(state), _prevState, getUID)
+            if (noChange) { //TODO: should we use hasChanged function in watch options instead?
+               console.log('@% no list change!!')
                return;
             }
             if (dynamicNodePod!.length !== _prevState.length)
                throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${prevState.length} are mismatched. This should never happen.`)
 
-            console.log('changed, lets go!!!')
+            console.log('@% list changed, lets go!!!', _prevState, toRaw(state))
+            console.log('@% - prev state', _prevState)
+            console.log('@% - state', toRaw(state))
             this.castBeforeUpdate();
             this.removeItems(indicesToRemove!);
             try {

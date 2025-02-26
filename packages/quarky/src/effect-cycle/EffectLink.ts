@@ -20,6 +20,8 @@ export class EffectVine {
       if (vine === this) return;
       vine?.unlink(link)
 
+      this.appendNextIfIterating(link)
+
       // link vine
       if (!this.head) {
          this.head = link
@@ -32,7 +34,12 @@ export class EffectVine {
       link.pass(this, tail)
 
       this._size++;
+
       return link;
+   }
+
+   private appendNextIfIterating(link: EffectLink | undefined){
+      if (this.current && this.current === this.tail) this.next = link
    }
 
    delete(link: EffectLink) {
@@ -45,7 +52,7 @@ export class EffectVine {
    }
 
    private unlink(link: EffectLink) {
-      this.storeNext(link)
+      this.storeNext(link, link)
 
       // unlink from vine
       const prevLink = link.prev;
@@ -64,7 +71,8 @@ export class EffectVine {
       if (nextLink) {
          nextLink.prev = prevLink;
       }
-
+//@ts-expect-error
+      console.trace("@% unlink()", link.watchSubject?.quark?.entity?.labelName ?? link.watchSubject ?? link.task.__DEV__cb)
       link.next = undefined;
       this._size--;
    }
@@ -77,6 +85,9 @@ export class EffectVine {
       const head = vine.head;
       const tail = vine.tail;
       if (!tail) return;
+
+      this.appendNextIfIterating(head)
+
       const thisTail = this.tail;
       if (!thisTail) {
          this.head = head;
@@ -90,8 +101,8 @@ export class EffectVine {
       vine.pour(this)
    }
 
-   pour(destination?: EffectVine) {
-      if (this.tail) this.storeNext(this.tail)
+   private pour(destination?: EffectVine) {
+      if (this.tail) this.storeNext(this.head!, this.tail)
       for (const link of this) {
          link.vine = destination
       }
@@ -107,26 +118,27 @@ export class EffectVine {
    private current?: EffectLink | undefined
    private next?: EffectLink | undefined
 
-   private storeNext(removal: EffectLink) {
-      if (removal !== this.current) {
+   private storeNext(removalHead: EffectLink, removalTail: EffectLink) {
+      if (removalHead !== this.current 
+         && removalHead !== this.next
+      ) {
          return;
       }
-      this.next = removal.next;
+      this.next = removalTail.next;
    }
 
    *[Symbol.iterator](): Iterator<EffectLink> {
       let current = this.current = this.head;
       while (current) {
-         const next = current.next; // works if not last item
+         this.next = current.next;
          yield current;
-         current = this.current = next ?? this.next /* accesses the new 'next' of a removed effect */
-         this.next = undefined;
+         current = this.current = this.next
       }
       this.current = undefined;
       this.next = undefined;
    }
-
 }
+
 
 
 
@@ -154,5 +166,4 @@ export class EffectLink {
    remove() {
       this.vine?.delete(this)
    }
-
 }

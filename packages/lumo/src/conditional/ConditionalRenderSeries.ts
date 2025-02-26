@@ -126,6 +126,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       outerNodeVine.append(this.nodePod!)
       const $conditions = this.getConditionsIon()
+      $conditions.labelName = '$conditions'
+
       const phasicNode = this.phasicNode
       const series = this;
 
@@ -138,8 +140,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       // set up watcher for updates
       watch($conditions, function updateConditional({ state, prevState }) {
-         console.log("update conditional==================", state, prevState)
+         console.log("@% run conditional effect")
          if (areShallowEqualArrays(state!, prevState!)) return;
+         console.log("@% --changed", state, prevState)
 
          const prevIndex = series.activeIndex!;
          const activeIndex = series.evaluateConditions();

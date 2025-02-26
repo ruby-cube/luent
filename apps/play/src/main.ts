@@ -21,6 +21,7 @@ import { TabApp } from './demos/markdown-app/TestTabs';
 import { TreeApp } from './demos/tree-view';
 import { SortableTableApp } from './demos/sortable-table';
 import { TodoMVC } from './demos/todo-mvc';
+import { TestEffectCycle } from './TestEffectCycle';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';

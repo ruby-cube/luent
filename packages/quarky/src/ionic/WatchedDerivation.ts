@@ -17,6 +17,7 @@ export function isWatchedDerivation(value: unknown): value is WatchedDerivation 
 type WatchedDerivation = { type: string } & IonicCompoundMorph
 
 export function createWatchedDerivation(derivation: () => any, retrack: boolean) {
+   console.log('WATCHED DERIVATION')
    const quark: WatchedDerivation = {
       type: WATCHED_DERIVATION,
       asCompound: undefined,

@@ -55,10 +55,16 @@ export function createMultisubjectIon(subjects: unknown[] & AnyObject) {
       }
       finally {
          trackedCall = (subject: Ion) => subject()
-         absorbedFn = noop
-         fn = getValues;
+         absorbedFn = (model: IonizedModel) => {
+            compound.track(quarkOf(model))
+         }
+         fn = () => {
+            compound.untrackParticles()
+            return getValues();
+         }
       }
    }
+
 
    function getValues() {
       const values: unknown[] = []
@@ -67,7 +73,7 @@ export function createMultisubjectIon(subjects: unknown[] & AnyObject) {
             absorbedFn(subject)
             values.push(subject)
          }
-         else if (isIon(subject)) {
+         else if (isIon(subject) && hasQuark(subject)) {
             if (isInertIon(subject))
                values.push(subject())
             else if (isParticleMorphic(subject)) {
@@ -75,10 +81,12 @@ export function createMultisubjectIon(subjects: unknown[] & AnyObject) {
             }
          }
          else if (isGetter(subject)) {
+            //TODO: figure out how to retrack ... should we create a watched derivation and just watch that? but watched derivations are terminal
             values.push(trackedCall(subject))
          }
          else {
-            if (__DEV__) throw new Error('Invalid watch subject')
+            // inert object
+            values.push(subject)
          }
       }
    }

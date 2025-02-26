@@ -15,7 +15,7 @@ export function isWatchedIonizedIon(value: unknown): value is WatchedIonizedIon 
 type WatchedIonizedIon = { type: string } & IonicCompoundMorph
 
 export function createWatchedIonizedIon($state: $AtomicIonState | $AtomicPionState) {
-   console.log('%watched%ionized%ion')
+   console.log('@% watched ionized ion')
    const quark: WatchedIonizedIon = {
       type: WATCHED_IONIZED_ION,
       asCompound: undefined,

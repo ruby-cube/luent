@@ -214,7 +214,7 @@ function wrapWithFlask(callback: Callback, config: {
    const { afterCall, enclosingFlask, __DEV__asyncPath } = config
    const context = $_snap_context()
    let scene: Flask;
-   return (...args: any[]) => {
+   const wrappedCB =  (...args: any[]) => {
       if (scene) scene.emitDiscard()
       scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if dirty right?
       return callWithContext({
@@ -227,4 +227,6 @@ function wrapWithFlask(callback: Callback, config: {
          afterCall
       })
    }
+   wrappedCB.__DEV__cb = callback
+   return wrappedCB
 }

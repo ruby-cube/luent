@@ -16,6 +16,7 @@ import { isIonizedModel } from "../ionized/ionize";
 import { $AtomicIonState, isAtomicIon, isAtomicIonQuark } from "../ion/AtomicIon";
 import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
 import { createWatchedIonizedIon } from "./IonizedIon";
+import { debug } from "../debug/debug";
 
 export class ChangeEvent<S = unknown> {
    // trace?: string;
@@ -160,7 +161,7 @@ export function watch<
    const isMultiSubject = args.length > 1;
    const _subject = isMultiSubject ? args : args[0]
 
-   const retrack = !!(options?.retrack)
+   const retrack = options?.retrack === undefined ? true : options.retrack
 
    let subject = normalizeSubject(_subject, isMultiSubject, retrack)
 
@@ -190,6 +191,7 @@ export function watch<
    let hasChanged = getHasChangedFn(options, prevState)
 
    function wrappedEffect() {
+      console.log("@% watch wrappedEffect() for ", _subject.labelName)
       const newState = getValue(subject)
       if (!eager && !hasChanged(prevState, newState))
          return;
@@ -320,16 +322,19 @@ export function setUpWatcher(
             compound.untrackParticles()
       },
       pause() {
+         console.trace("@% pausing watch", subject.quark.entity?.labelName)
          subject.unwatch(effectLink, phase)
-         subject.watch(markDirty, phase)
+         subject.watch(markDirty, phase) //FIX: paused watchers are not being marked dirty
          return () => {
+            console.warn('@% unwatching mark dirty')
             subject.unwatch(markDirty, phase)
          }
       },
       resume(task) {
-         subject.unwatch(markDirty, phase)
+         console.log("@% resuming", subject.quark.entity?.labelName, 'dirty', dirty)
+         subject.unwatch(markDirty, phase) 
          subject.watch(effectLink, phase, forNextCycle)
-         if (dirty) {
+         if (dirty) { //FIX:
             task()
             dirty = false;
          }

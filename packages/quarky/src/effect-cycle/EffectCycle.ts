@@ -171,6 +171,7 @@ export class EffectCycle {
    }
 
    scheduleEffect(effect: EffectLink, phase: number) {
+      console.log("@% schedule single effect, phase", phase)
       if (phase < this.currentPhase) {
          if (__DEV__) console.warn(`CASE RESEARCH: Effect was triggered after phase ${phase} of this cycle. Will schedule for next cycle.`)
          nextCycle = nextCycle ?? new EffectCycle()
@@ -184,13 +185,18 @@ export class EffectCycle {
       this.currentPhase = phase;
       const effects = this.effects.get(phase);
       if (effects) {
-         console.log('RUN EFFECTS', phase)
+         console.log('@% RUN EFFECTS', phase, 'size:', effects.size, 'cycle count', cycleCount)
+         // if (phase === 2 && effects.size === 7 && cycleCount === 7) debugger;
          for (const effect of effects) {
+            console.log('@% >>>running effect')
             effect.task()
-            if (!effect.vine) continue; // effect has already been removed during the effect via 'once' or 'scheduler'
+            if (!effect.vine) {
+               console.log('@% effect removed during run')
+               continue; // effect has already been removed during the effect via 'once' or 'scheduler'
+            }
             effect.watchSubject?.completedEffects.addToVine(effect, phase)
          }
-         console.log('END', phase)
+         console.log('@% DONE EFFECTS', phase)
       }
    }
 }

@@ -128,6 +128,7 @@ function createRenderCyclePhase(
    return function cyclePhase() {
       if (!phases[phase]) {
          onCompletion(() => {
+            console.log("@% reset cyclePhase promise")
             phases[phase] = undefined
          })
       }

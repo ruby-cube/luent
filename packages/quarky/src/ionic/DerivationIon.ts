@@ -80,21 +80,24 @@ export function createMaybeMemoizedIon(
          compound.trigger = trigger
          const flask = getActiveFlask()
          assertValidInitialization(flask, creationFlask) // prevents memory leaks caused by usng memoized ion outside of its creation scope
-         flask?.onDiscard(() => {
-            console.log('discarding memoized ion particles')
+         creationFlask?.onDiscard(() => {
+            console.log('@% discarding memoized ion particles')
             compound!.untrackParticles()
+            fn = initialize;
          })
          return value;
       }
    }
 
    function getMemoizedState() {
+      // console.log("@% ion.dirty", ion.dirty)
       getActiveTracker()?.track(ion)
       const compound = ion.asCompound!
-      const value =
-         (retrack && ion.dirty) ? compound.retrackedCall(() => derivation(ion.state))
-            : ion.dirty ? derivation(ion.state)
-               : ion.state;
+      const value = 
+      compound.retrackedCall(()=>derivation(ion.state)) //FIX: temporary
+         // (retrack && ion.dirty) ? compound.retrackedCall(() => derivation(ion.state))
+         //    : ion.dirty ? derivation(ion.state)
+         //       : ion.state;
 
       // if (retrack && ion.dirty && isIonizedModel(value)) compound.track(quarkOf(value))
 
