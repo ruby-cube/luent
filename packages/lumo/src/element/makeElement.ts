@@ -2,18 +2,20 @@ import { DOMNode, Slot } from "../component/InternalComponent";
 import { isIon, AtomicIon, watch, isManagedDerivation } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
-import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask";
+import { $listen, $thisFlask, getActiveFlask, ResumableListener, SustainedListenerOptions } from "@rue/flask";
 import { mountNodeEntities } from "../node/mountNodeEntity";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
-import { isHTMLEvent } from "../html/attributes";
+import { isHTMLEvent } from "../template/attributes";
 import { MutableKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { initializeListRef, initializeRef, isAnyNodeRef, NodesRef, isNodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
 import { NodePod } from "../node/NodePod";
 import { RENDER } from "../render/render-cycle";
 import { MaybeIon } from "../InputTypes";
+import { debug } from "../../../utils/debug";
+import { isFlaskLifecycleHook, setUpHooks } from "../template/hooks";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -34,7 +36,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 ): DOMNode {
    const { class: classes, style: styles, ref, ...other } = config;
 
-   const { attributes, events } = analyzeAttributes(other)
+   const { attributes, events, hooks } = analyzeAttributes(other)
 
 
    const domNode = isHydrating() ? getElement() : document.createElement(tagName);
@@ -52,6 +54,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
    if (classes) setUpClasses(domNode, normalizeToArray(classes))
    if (styles) setUpStyles(domNode, normalizeToArray(styles))
    setUpEvents(domNode, events);
+   setUpHooks(domNode, hooks)
 
    const _Slot = bindView(domNode, Slot, attributes)
    setUpAttributes(domNode, attributes);
@@ -66,6 +69,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
       const rawOutput = normalizeToArray(isFunction(_Slot) ? _Slot() : _Slot)
       const nodePod = new NodePod();
       const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodePod)
+      if (tagName === 'section') console.log("@## nodeEntities", nodeEntities)
       mountNodeEntities(nodeEntities, domNode)
    }
    return domNode;
@@ -103,12 +107,16 @@ function analyzeAttributes(entries: AnyObject) {
    const events: AnyObject = {};
    // const jsxProps: AnyObject = {};
    const attributes: AnyObject = {};
+   const hooks: AnyObject = {}
    for (const key in entries) {
       if (key === "children") {
          continue;
       }
       else if (isHTMLEvent(key)) {
          events[key.slice(3)] = entries[key];
+      }
+      else if (isFlaskLifecycleHook(key)) {
+         hooks[key.slice(3)] = entries[key]
       }
       else {
          attributes[key] = entries[key];
@@ -117,6 +125,7 @@ function analyzeAttributes(entries: AnyObject) {
    return {
       attributes,
       events,
+      hooks
       // jsxProps
    }
 }
@@ -282,14 +291,12 @@ function setUpAttributes(node: Element, attributes: { [key: string]: any | Deriv
 }
 
 function setAttribute(node: Element & AnyObject, key: string, value: any) {
-   console.log('key', key, value)
    //TODO: what if attribute can take a falsey value like 0 or false?
    if (value) {
       // node.setAttribute(key, toString(value)) //NOTE: Programmatic checking and unchecking of check boxes breaks using setAttribute and removeAttribute
       node[key] = value;
    }
    else {
-      console.log('removing', key, node)
       node[key] = value;
       // node.removeAttribute(key);
    }
@@ -318,6 +325,7 @@ function setUpEvents(node: Element, events: { [key: string]: EventListener[] }, 
 
    }
 }
+
 
 
 
@@ -385,7 +393,6 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
       const value = entry[key]
       if (value && isIon(value)) {
          watch(value, ({ state, prevState }) => {
-            console.log('class changed', value, state, prevState)
             if (state) classList.add(key)
             else if (prevState) classList.remove(key)
          }, {

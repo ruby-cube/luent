@@ -113,3 +113,4 @@ const globalHTMLAttributes = new Set([
 export function isHTMLAttribute(key: string, tag: keyof HTMLElementTagNameMap) {
   return globalHTMLAttributes.has(key) || key.startsWith('aria-') || key.startsWith('data-') //TODO: need to add element specific attributes
 }
+

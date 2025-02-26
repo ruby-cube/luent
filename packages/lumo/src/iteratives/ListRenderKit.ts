@@ -149,7 +149,6 @@ export class ListRenderKit {
          }
 
          watch(data, ({ state, prevState }) => { // typecast as one of the options so that typescript won't complain
-            console.log("@% watch ListRenderKit effect for", data.labelName)
             // if (recording && state === prevState){
             //    recording.stop()
             //    console.log('updating list via MUTATIONS')
@@ -162,15 +161,11 @@ export class ListRenderKit {
             // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
             const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(state), _prevState, getUID)
             if (noChange) { //TODO: should we use hasChanged function in watch options instead?
-               console.log('@% no list change!!')
                return;
             }
             if (dynamicNodePod!.length !== _prevState.length)
                throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${prevState.length} are mismatched. This should never happen.`)
 
-            console.log('@% list changed, lets go!!!', _prevState, toRaw(state))
-            console.log('@% - prev state', _prevState)
-            console.log('@% - state', toRaw(state))
             this.castBeforeUpdate();
             this.removeItems(indicesToRemove!);
             try {

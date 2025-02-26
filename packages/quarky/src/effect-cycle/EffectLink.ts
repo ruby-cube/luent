@@ -71,8 +71,6 @@ export class EffectVine {
       if (nextLink) {
          nextLink.prev = prevLink;
       }
-//@ts-expect-error
-      console.trace("@% unlink()", link.watchSubject?.quark?.entity?.labelName ?? link.watchSubject ?? link.task.__DEV__cb)
       link.next = undefined;
       this._size--;
    }

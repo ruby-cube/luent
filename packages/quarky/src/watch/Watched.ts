@@ -72,7 +72,6 @@ export class Watched<T extends Watchable = Watchable> {
             this.scheduleSyncEffects(effects!);
          }
          else {
-            console.log("@% schedule effects for phase", phase, this.quark.entity?.labelName || this.quark, effects?.size)
             $effectCycle().scheduleEffects(effects!, phase)
             this.scheduleReabsorption(phase)
          }
@@ -84,7 +83,6 @@ export class Watched<T extends Watchable = Watchable> {
       if (completed || completed === null) return;
       this.completedEffects.set(phase, null);
       onEffectCycleComplete(() => {
-         console.log("@% reabsorption for ", this.quark.entity?.labelName || this.quark)
          const completed = this.completedEffects.get(phase)
          if (completed) this.effects.absorb(completed, phase)
          this.completedEffects.delete(phase)

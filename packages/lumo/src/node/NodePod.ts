@@ -1,4 +1,3 @@
-import { EffectFlask } from "@rue/flask";
 import { DOMNode, InternalComponent } from "../component/InternalComponent";
 import { NodeRef } from "./NodeRef";
 
@@ -121,11 +120,8 @@ export class NodePod extends Array<AnyNode> {
 
    private get prevNearestAunt(): AnyNode | undefined {
       let pod = this.pod;
-      console.log('prevNearestAunt')
       while (pod) {
-         console.log('pod', pod)
          const prevAunt = pod.prevSib
-         console.log('prevAunt', prevAunt)
          if (prevAunt) return prevAunt;
          pod = pod.pod
       }
@@ -134,10 +130,8 @@ export class NodePod extends Array<AnyNode> {
 
    get prevNode(): DOMNode | undefined {
       let prev = this.prev;
-      console.log('prev', prev)
       while (prev instanceof NodePod && !prev.active) {
          prev = prev.prev
-         console.log('prev', prev)
       }
       return prev instanceof NodePod ?
          (prev.activeLeafTail || prev.prevNode) : prev;

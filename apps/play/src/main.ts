@@ -22,6 +22,7 @@ import { TreeApp } from './demos/tree-view';
 import { SortableTableApp } from './demos/sortable-table';
 import { TodoMVC } from './demos/todo-mvc';
 import { TestEffectCycle } from './TestEffectCycle';
+import { TestShow } from './TestShow';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -88,7 +89,7 @@ import { TestEffectCycle } from './TestEffectCycle';
 
 // frog;
 
-const app = createApp(TodoMVC)
+const app = createApp(TestShow)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

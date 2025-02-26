@@ -1,7 +1,8 @@
-import { component, For, If } from "@rue/lumo"
-import { AtomicIon, Ion, ion, ionicTask, o$, watch } from "@rue/quarky"
+import { component, For, If, Else } from "@rue/lumo"
+import { AtomicIon, Ion, ion, ionicTask, Ionized, o$, watch } from "@rue/quarky"
 import { quarkOf } from "../../../../packages/quarky/src/Quark"
-import { RENDER } from "../../../../packages/lumo/src/render/render-cycle"
+import { postlude, RENDER } from "../../../../packages/lumo/src/render/render-cycle"
+import { $thisFlask } from "@rue/flask"
 
 //FIXED :)
 /*
@@ -44,8 +45,8 @@ export function TodoMVC() {
 
    const filters = {
       all: (todos: Todo[]) => todos,
-      active: (todos: Todo[]) => todos.filter((todo) => (console.log('active todo', todo), !todo.completed)),
-      completed: (todos: Todo[]) => todos.filter((todo) => (console.log('completed todo', todo), todo.completed))
+      active: (todos: Todo[]) => todos.filter(todo => !todo.completed),
+      completed: (todos: Todo[]) => todos.filter(todo => todo.completed)
    }
    // {
    //    id: Date.now(),
@@ -54,25 +55,25 @@ export function TodoMVC() {
    // }
 
    // get state
-   const $todos = ion.ionize([] as Todo[])
-   const $visibility = ion('all' as keyof typeof filters)
+   const $todos = ion.ionize((JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []) as Todo[])
+   const $view = ion('all' as keyof typeof filters)
    const $editedTodo = ion(null as Todo | null)
 
    //@ts-expect-error
    $todos.labelName = '$todos'
    //@ts-expect-error
-   $visibility.labelName = '$visibility'
+   $view.labelName = '$view'
 
    // derive state
-   // const $filteredTodos = () => (filters[$visibility()]($todos()))
-   const $filteredTodos = ion(() => (console.log("@% derive $filteredTodos"), filters[$visibility()]($todos())))
+   // const $filteredTodos = () => (filters[$view()]($todos()))
+   const $filteredTodos = ion(() => (filters[$view()]($todos())))
    //@ts-expect-error
    $filteredTodos.__DEV__label('$filteredTodos')
 
    // console.log($filteredTodos())
    // console.log(quarkOf($filteredTodos).asCompound?.particles)
 
-   const $remaining = ion(() => (console.log("@% derive $remaining"), filters.active($todos()).length))
+   const $remaining = ion(() => (filters.active($todos()).length))
    //@ts-expect-error
    $remaining.__DEV__label('$remaining')
 
@@ -102,21 +103,15 @@ export function TodoMVC() {
    onHashChange()
 
    // // persist state
-   // ionicTask(w => {
-   //    localStorage.setItem(STORAGE_KEY, JSON.stringify(w($todos)))
-   // })
+   ionicTask(w => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(w($todos)))
+   })
 
    function toggleAll(e: RadioInputEvent) {
-      console.log("@% ")
-      console.log("@% EVENT---------------------toggleAll")
-      console.log("@% toggleAll(radioInputEvent)")
       $todos().forEach((todo) => (todo.completed = e.target.checked))
    }
 
    function addTodo(e: InputEvent) {
-      console.log("@% ")
-      console.log("@% EVENT---------------------addTodo")
-      console.log("@% addTodo(inputEvent)")
       const value = e.target.value.trim()
       if (value) {
          $todos().push({
@@ -130,9 +125,6 @@ export function TodoMVC() {
    }
 
    function removeTodo(todo: Todo) {
-      console.log("@% ")
-      console.log("@% EVENT---------------------removeTodo")
-      console.log("@% removeTodo(todo)")
       $todos().splice($todos().indexOf(todo), 1)
    }
 
@@ -156,25 +148,19 @@ export function TodoMVC() {
    }
 
    function removeCompleted() {
-      console.log("@% ")
-      console.log("@% EVENT---------------------removeCompleted")
-      console.log("@% removeCompleted()")
       $todos.state = filters.active($todos())
    }
 
    function onHashChange() {
       const route = window.location.hash.replace(/#\/?/, '') as keyof typeof filters
-      console.log("@% ")
-      console.log("@% EVENT---------------------change view", route)
-      console.log("@% onHashChange()", route)
       if (filters[route]) {
-         $visibility.state = route
-         console.log('set visibility state to', route)
+         $view.state = route
       } else {
          window.location.hash = ''
-         $visibility.state = 'all'
+         $view.state = 'all'
       }
    }
+
    return component(
       <>
          <section class="todoapp">
@@ -187,7 +173,7 @@ export function TodoMVC() {
                   on:keyup={e => e.key === 'Enter' && addTodo(e as unknown as InputEvent)}
                />
             </header>
-            {If($todos().length, "create",
+            {If($todos().length, "show",
                <section class="main">
                   <input
                      id="toggle-all"
@@ -198,22 +184,19 @@ export function TodoMVC() {
                   />
                   <label for="toggle-all">Mark all as complete</label>
                   <ul class="todo-list">
-                     {For($filteredTodos, m => m.id, todo => (console.log('@% render new todo', todo),
-                        <li class={["todo", { completed: $ = todo.completed, editing: todo === $editedTodo() }]}>
+                     {For($filteredTodos, m => m.id, todo => (
+                        <li class={["todo", { completed: todo.$completed, editing: todo === $editedTodo() }]}>
                            <div class="view">
-                              <input class="toggle" type="checkbox" mu:checked={o$(todo).$completed} on:input={e => {
-                                 //@ts-expect-error
-                                 console.log("@% EVENT---------click todo checkbox", e.target.checked)
-                              }} />
-                              <label on:dblclick={e => editTodo(todo)}>{o$(todo).$title}</label>
+                              <input class="toggle" type="checkbox" mu:checked={todo.$completed} />
+                              <label on:dblclick={e => editTodo(todo)}>{todo.$title}</label>
                               <button class="destroy" on:click={e => removeTodo(todo)}></button>
                            </div>
                            {If(todo === $editedTodo(),
                               <input
                                  class="edit"
                                  type="text"
-                                 mu:value={o$(todo).$title}
-                                 // @vue:mounted="({el}) => el.focus()"
+                                 mu:value={todo.$title}
+                                 at:mount={async input => { await postlude(); input.focus() }}
                                  on:blur={e => doneEdit(todo)}
                                  on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
                               />
@@ -223,7 +206,8 @@ export function TodoMVC() {
                   </ul>
                </section >
             )}
-            {If($todos().length, 'mount', //FIX: when this is 'create' it doesn't show up :(
+            {Else('show', <p>X_X</p>)}
+            {If($todos().length, "show",
                <footer class="footer">
                   <span class="todo-count">
                      <strong>{$remaining}</strong>
@@ -232,13 +216,13 @@ export function TodoMVC() {
 
                   <ul class="filters">
                      <li>
-                        <a href="#/all" class={{ selected: $visibility() === 'all' }}>All</a>
+                        <a href="#/all" class={{ selected: $view() === 'all' }}>All</a>
                      </li>
                      <li>
-                        <a href="#/active" class={{ selected: $visibility() === 'active' }}>Active</a>
+                        <a href="#/active" class={{ selected: $view() === 'active' }}>Active</a>
                      </li>
                      <li>
-                        <a href="#/completed" class={{ selected: $visibility() === 'completed' }}>Completed</a>
+                        <a href="#/completed" class={{ selected: $view() === 'completed' }}>Completed</a>
                      </li >
                   </ul >
 
@@ -249,6 +233,7 @@ export function TodoMVC() {
                   )}
                </footer >
             )}
+            {Else('show', <p>X_X</p>)}
          </section >
          <$--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
       </>)

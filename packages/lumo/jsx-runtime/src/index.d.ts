@@ -661,11 +661,22 @@ declare namespace React {
 
 
    //$$$
-   type DOMAttributes<T> = _DOMAttributes<T> & DOMEvents<T>
+   type DOMAttributes<T> = _DOMAttributes<T> & DOMEvents<T> & LumoHooks<T>
 
    //$$$
    interface _DOMAttributes<T> {
       Slot?: Lumo.NodeEntity | undefined;
+   }
+
+   type LifecycleTask<T> = (element: T)=> void
+
+   interface LumoHooks<T> {
+      'at:creation'?: LifecycleTask<T>
+      'at:mount'?: LifecycleTask<T>
+      'at:remount'?: LifecycleTask<T>
+      'at:demount'?: LifecycleTask<T>
+      'at:unmount'?: LifecycleTask<T>
+      'at:discard'?: LifecycleTask<T>
    }
 
    //$$$

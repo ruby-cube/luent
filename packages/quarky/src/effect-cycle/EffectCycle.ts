@@ -36,7 +36,6 @@ type Phases = number[];
 type EndPhase = number;
 
 export function useReactivity(phases?: [CyclePhase, ...CyclePhase[]]): [SyncPhase, ...Phases, EndPhase] {
-   console.log('configuring reactivity')
    const completionPhase = definePhase('END_EFFECT_CYCLE')
    if (phases) {
       const phaseNums = [0]
@@ -56,7 +55,6 @@ export function useReactivity(phases?: [CyclePhase, ...CyclePhase[]]): [SyncPhas
       cyclePhases.push(completionPhase)
       phaseNums.push(endPhase)
       onEffectCycleComplete = createEffectCycleHook(endPhase)
-      console.log(cyclePhases)
       return phaseNums as [SyncPhase, ...Phases, EndPhase];
    }
    cyclePhases.push({
@@ -126,7 +124,6 @@ function schedulePhase(cycle: EffectCycle, { schedule, scheduleNextPhase, phase,
 }
 
 function scheduleFinalPhase(cycle: EffectCycle, { name, schedule, phase, next }: CyclePhase) {
-   console.log('schedule final phase', name)
    schedule(() => {
       // scheduleNextPhase
       cycle.runEffects(phase)
@@ -171,7 +168,6 @@ export class EffectCycle {
    }
 
    scheduleEffect(effect: EffectLink, phase: number) {
-      console.log("@% schedule single effect, phase", phase)
       if (phase < this.currentPhase) {
          if (__DEV__) console.warn(`CASE RESEARCH: Effect was triggered after phase ${phase} of this cycle. Will schedule for next cycle.`)
          nextCycle = nextCycle ?? new EffectCycle()
@@ -185,18 +181,13 @@ export class EffectCycle {
       this.currentPhase = phase;
       const effects = this.effects.get(phase);
       if (effects) {
-         console.log('@% RUN EFFECTS', phase, 'size:', effects.size, 'cycle count', cycleCount)
-         // if (phase === 2 && effects.size === 7 && cycleCount === 7) debugger;
          for (const effect of effects) {
-            console.log('@% >>>running effect')
             effect.task()
             if (!effect.vine) {
-               console.log('@% effect removed during run')
                continue; // effect has already been removed during the effect via 'once' or 'scheduler'
             }
             effect.watchSubject?.completedEffects.addToVine(effect, phase)
          }
-         console.log('@% DONE EFFECTS', phase)
       }
    }
 }
@@ -214,7 +205,6 @@ export function createEffectCycleHook(phase: number) { //TODO: what happens if p
       const _options = options || { cancel: null }
       _options.cancel = null
       const effectCycle = $effectCycle()
-      console.log('createhook', effectCycle)
       return $schedule(task, _options, {
          enroll(task) {
             const effectLink = new EffectLink(task)

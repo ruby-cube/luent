@@ -80,7 +80,6 @@ export function createMaybeMemoizedIon(
          compound.trigger = trigger
          assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
          creationFlask?.onDiscard(() => {
-            console.log('@% discarding memoized ion particles')
             compound!.untrackParticles()
             fn = initialize;
          })

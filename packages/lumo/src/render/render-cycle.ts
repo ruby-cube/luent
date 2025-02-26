@@ -25,10 +25,10 @@ export const onCompletion = onEffectCycleComplete
 // watch($active, () => {
 //    const { width } = measureWidth()
 
-//    await render_phase()
+//    await renderphase()
 //    column.width = width;
 
-//    await postlude_phase()
+//    await postlude()
 //    updateDatabase()
 
 // })
@@ -70,17 +70,17 @@ export const onCompletion = onEffectCycleComplete
 
 //    const { width } = measureWidth()
 
-//    await render_phase()
+//    await renderphase()
 //    column.width = width;
 
 //    if (!something) return;
 
-//    await postlude_phase()
+//    await postlude()
 //    updateDatabase()
 // })
 
 // watch($active, async () => {
-//    await postlude_phase()
+//    await postlude()
 //    doSomething()
 // })
 
@@ -90,7 +90,7 @@ export const onCompletion = onEffectCycleComplete
 //    const { width } = measureWidth()
 
 //    watch($count, async () => {
-//       await postlude_phase({ cancel: onAbort })
+//       await postlude({ cancel: onAbort })
 //       column.width = width;
 //    })
 // }) //TODO: { sync: true } with batched as default, no phases. Phases will be the responsibility of the ui framework
@@ -128,7 +128,6 @@ function createRenderCyclePhase(
    return function cyclePhase() {
       if (!phases[phase]) {
          onCompletion(() => {
-            console.log("@% reset cyclePhase promise")
             phases[phase] = undefined
          })
       }
@@ -136,9 +135,9 @@ function createRenderCyclePhase(
    }
 }
 
-export const prelude_phase = createRenderCyclePhase(renderCyclePhases, 'prelude', onPrelude)
-export const render_phase = createRenderCyclePhase(renderCyclePhases, 'render', onRender)
-export const postlude_phase = createRenderCyclePhase(renderCyclePhases, 'postlude', onPostlude)
+export const prelude = createRenderCyclePhase(renderCyclePhases, 'prelude', onPrelude)
+export const renderphase = createRenderCyclePhase(renderCyclePhases, 'render', onRender)
+export const postlude = createRenderCyclePhase(renderCyclePhases, 'postlude', onPostlude)
 
 
 
@@ -179,7 +178,7 @@ export function watch<
 // const $data = ion()
 
 // ionicTask(async w => {
-//    await postlude_phase()
+//    await postlude()
 
 //    if (w($active)) {
 

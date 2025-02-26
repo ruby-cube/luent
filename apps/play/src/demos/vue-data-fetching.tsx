@@ -1,6 +1,6 @@
 import { component, Else, For, If, ref } from "@rue/lumo"
 import { ion, ionicTask } from "@rue/quarky"
-import { onPostlude, postlude_phase, render_phase } from "../../../../packages/lumo/src/render/render-cycle"
+import { onPostlude, postlude, renderphase } from "../../../../packages/lumo/src/render/render-cycle"
 
 type Commit = {
    commit: {
@@ -35,7 +35,7 @@ export function View() {
    })
 
    ionicTask(async w => {
-      await postlude_phase()
+      await postlude()
       console.log('postlude logging', w($currentBranch))
    })
 

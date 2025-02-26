@@ -169,7 +169,6 @@ export function useTrackableOp(
       if (__DEV__) emitSignal();
       // args.forEach(arg => toRaw(arg))
       getActiveTracker()?.track(quarkOf(model))
-      console.log('trackable op', op, getActiveTracker())
       return fn.call(decoy(target), ...args) //FIX: I need to somehow get filter to pass ionized version of an object to the filter function, but still call filter on the raw target...?
    }
 }

@@ -140,9 +140,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       // set up watcher for updates
       watch($conditions, function updateConditional({ state, prevState }) {
-         console.log("@% run conditional effect")
          if (areShallowEqualArrays(state!, prevState!)) return;
-         console.log("@% --changed", state, prevState)
 
          const prevIndex = series.activeIndex!;
          const activeIndex = series.evaluateConditions();

@@ -59,6 +59,7 @@ export function makeComponent(
    $index: AtomicIon<number> | undefined
 ): InternalComponent {
 
+   //TODO: component flask lifecycle hooks
    setComponentAttributes({ Slot, ...config })
    const output = Component()
    if (output instanceof Promise)
