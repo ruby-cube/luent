@@ -105,7 +105,7 @@ function getIonValue(subject: Ion) {
    }
    // if (isManagedDerivation(subject)) // memoized
    // atomic ion/pion
-      return detachedCall(subject) // allows internal tracking, disables being tracked
+   return detachedCall(subject) // allows internal tracking, disables being tracked
    // return untrackedCall(subject) // disables being tracked
 }
 
@@ -179,7 +179,7 @@ export function watch<
       //    subject = prevState; // watch ionized model
       // }
       // else {
-         return InertWatcher()
+      return InertWatcher()
       // }
    }
 
@@ -220,11 +220,11 @@ export function watch<
    )
 }
 
-function getHasChangedFn(options: EffectOptions | undefined, state: unknown){
+function getHasChangedFn(options: EffectOptions | undefined, state: unknown) {
    return options?.hasChanged ?? isIonizedModel(state) ? always : notStrictlyEqual
 }
 
-function always(){
+function always() {
    return true;
 }
 
@@ -305,13 +305,15 @@ export function setUpWatcher(
    compound?: IonicCompound //
 ) {
    const forNextCycle = options?.cycle === 'next';
-   let dirty = false;
-   const markDirty = new EffectLink(() => {
-      dirty = true
-   }, subject)
    let effectLink: EffectLink;
+   let paused = false;
 
-   return $listen(effect, options || {}, {
+   function pausableEffect() {
+      if (paused) return;
+      return effect()
+   }
+
+   return $listen(pausableEffect, options || {}, {
       enroll(task) {
          effectLink = new EffectLink(task, subject)
          subject.watch(effectLink, phase, forNextCycle)
@@ -322,22 +324,11 @@ export function setUpWatcher(
             compound.untrackParticles()
       },
       pause() {
-         console.trace("@% pausing watch", subject.quark.entity?.labelName)
-         subject.unwatch(effectLink, phase)
-         subject.watch(markDirty, phase) //FIX: paused watchers are not being marked dirty
-         return () => {
-            console.warn('@% unwatching mark dirty')
-            subject.unwatch(markDirty, phase)
-         }
+         paused = true;
       },
       resume(task) {
-         console.log("@% resuming", subject.quark.entity?.labelName, 'dirty', dirty)
-         subject.unwatch(markDirty, phase) 
-         subject.watch(effectLink, phase, forNextCycle)
-         if (dirty) { //FIX:
-            task()
-            dirty = false;
-         }
+         paused = false;
+         task()
       }
    });
 }

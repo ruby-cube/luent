@@ -78,8 +78,7 @@ export function createMaybeMemoizedIon(
          ion.state = value;
          ion.asCompound = compound
          compound.trigger = trigger
-         const flask = getActiveFlask()
-         assertValidInitialization(flask, creationFlask) // prevents memory leaks caused by usng memoized ion outside of its creation scope
+         assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
          creationFlask?.onDiscard(() => {
             console.log('@% discarding memoized ion particles')
             compound!.untrackParticles()
@@ -89,17 +88,21 @@ export function createMaybeMemoizedIon(
       }
    }
 
+   function assertValidCall() {
+      const flask = getActiveFlask()
+      assertValidInitialization(flask, creationFlask) // prevents memory leaks caused by usng memoized ion outside of its creation scope
+   }
+
    function getMemoizedState() {
+      //TODO: not sure if I should assert initialization only or all calls
+      assertValidCall()
       // console.log("@% ion.dirty", ion.dirty)
       getActiveTracker()?.track(ion)
       const compound = ion.asCompound!
-      const value = 
-      compound.retrackedCall(()=>derivation(ion.state)) //FIX: temporary
-         // (retrack && ion.dirty) ? compound.retrackedCall(() => derivation(ion.state))
-         //    : ion.dirty ? derivation(ion.state)
-         //       : ion.state;
-
-      // if (retrack && ion.dirty && isIonizedModel(value)) compound.track(quarkOf(value))
+      const value =
+         (retrack && ion.dirty) ? compound.retrackedCall(() => derivation(ion.state))
+            : ion.dirty ? derivation(ion.state)
+               : ion.state;
 
       if (ion.dirty) {
          ion.state = value;

@@ -340,6 +340,27 @@ describe('EffectVine', () => {
       for (const item of list) {
          iterated.push(item);
          if (item === b) {
+            list.add(d); 
+            list.delete(c);
+         }
+      }
+
+      expect(iterated).toEqual([a, b, d]);
+   });
+   it('should iterate correctly when deleting from and adding to the list', () => {
+      const list = new EffectVine("");
+      const a = new EffectLink(() => { })
+      const b = new EffectLink(() => { })
+      const c = new EffectLink(() => { })
+      const d = new EffectLink(() => { })
+      list.add(a);
+      list.add(b);
+      list.add(c);
+
+      const iterated = [];
+      for (const item of list) {
+         iterated.push(item);
+         if (item === b) {
             list.delete(c);
             list.add(d); 
          }

@@ -86,14 +86,14 @@ export function TodoMVC() {
    //    console.log('@%')
    // })
 
-   watch($filteredTodos, ({ prevState, state }) => {
-      console.log('@% --------- RENDER PHASE')
-      //@ts-expect-error
-      console.log('@% $filteredTodos particles', quarkOf($filteredTodos).asCompound?.particles)
-      console.log('@% prevState', prevState.length, prevState)
-      console.log('@% state', state.length, state)
-      console.log('@%')
-   }, {phase: RENDER})
+   // watch($filteredTodos, ({ prevState, state }) => {
+   //    console.log('@% --------- RENDER PHASE')
+   //    //@ts-expect-error
+   //    console.log('@% $filteredTodos particles', quarkOf($filteredTodos).asCompound?.particles)
+   //    console.log('@% prevState', prevState.length, prevState)
+   //    console.log('@% state', state.length, state)
+   //    console.log('@%')
+   // }, {phase: RENDER})
 
    // watch($remaining, ()=>{})
 
@@ -187,28 +187,28 @@ export function TodoMVC() {
                   on:keyup={e => e.key === 'Enter' && addTodo(e as unknown as InputEvent)}
                />
             </header>
-            {If($todos().length, "mount",
-            <section class="main">
-               <input
-                  id="toggle-all"
-                  class="toggle-all"
-                  type="checkbox"
-                  checked={$remaining() === 0}
-                  on:change={e => toggleAll(e as unknown as RadioInputEvent)}
-               />
-               <label for="toggle-all">Mark all as complete</label>
-               <ul class="todo-list">
-                  {For($filteredTodos, m => m.id, todo => (console.log('@% render new todo', todo),
-                     <li class={["todo", { completed: $ = todo.completed, editing: todo === $editedTodo() }]}>
-                        <div class="view">
-                           <input class="toggle" type="checkbox" mu:checked={o$(todo).$completed} on:input={e => {
-                              //@ts-expect-error
-                              console.log("@% EVENT---------click todo checkbox", e.target.checked)
-                           }} />
-                           <label on:dblclick={e => editTodo(todo)}>{o$(todo).$title}</label>
-                           <button class="destroy" on:click={e => removeTodo(todo)}></button>
-                        </div>
-                        {/* {If(todo === $editedTodo(),
+            {If($todos().length, "create",
+               <section class="main">
+                  <input
+                     id="toggle-all"
+                     class="toggle-all"
+                     type="checkbox"
+                     checked={$remaining() === 0}
+                     on:change={e => toggleAll(e as unknown as RadioInputEvent)}
+                  />
+                  <label for="toggle-all">Mark all as complete</label>
+                  <ul class="todo-list">
+                     {For($filteredTodos, m => m.id, todo => (console.log('@% render new todo', todo),
+                        <li class={["todo", { completed: $ = todo.completed, editing: todo === $editedTodo() }]}>
+                           <div class="view">
+                              <input class="toggle" type="checkbox" mu:checked={o$(todo).$completed} on:input={e => {
+                                 //@ts-expect-error
+                                 console.log("@% EVENT---------click todo checkbox", e.target.checked)
+                              }} />
+                              <label on:dblclick={e => editTodo(todo)}>{o$(todo).$title}</label>
+                              <button class="destroy" on:click={e => removeTodo(todo)}></button>
+                           </div>
+                           {If(todo === $editedTodo(),
                               <input
                                  class="edit"
                                  type="text"
@@ -217,13 +217,13 @@ export function TodoMVC() {
                                  on:blur={e => doneEdit(todo)}
                                  on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
                               />
-                           )} */}
-                     </li>
-                  ))}
-               </ul>
-            </section >
+                           )}
+                        </li>
+                     ))}
+                  </ul>
+               </section >
             )}
-            {If($todos().length,  'mount', //FIX: when this is 'create' it doesn't show up :(
+            {If($todos().length, 'mount', //FIX: when this is 'create' it doesn't show up :(
                <footer class="footer">
                   <span class="todo-count">
                      <strong>{$remaining}</strong>
