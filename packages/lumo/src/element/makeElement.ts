@@ -15,7 +15,7 @@ import { NodePod } from "../node/NodePod";
 import { RENDER } from "../render/render-cycle";
 import { MaybeIon } from "../InputTypes";
 import { debug } from "../../../utils/debug";
-import { isFlaskLifecycleHook, setUpHooks } from "../template/hooks";
+import { isFlaskLifecycleHook, isFlaskPostludeLifecycleHook, isFlaskPreludeLifecycleHook, setUpHooks } from "../template/hooks";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -105,7 +105,6 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
 
 function analyzeAttributes(entries: AnyObject) {
    const events: AnyObject = {};
-   // const jsxProps: AnyObject = {};
    const attributes: AnyObject = {};
    const hooks: AnyObject = {}
    for (const key in entries) {
@@ -113,10 +112,10 @@ function analyzeAttributes(entries: AnyObject) {
          continue;
       }
       else if (isHTMLEvent(key)) {
-         events[key.slice(3)] = entries[key];
+         events[key.slice(3)] = entries[key]; // on:
       }
       else if (isFlaskLifecycleHook(key)) {
-         hooks[key.slice(3)] = entries[key]
+         hooks[key] = entries[key] // at:
       }
       else {
          attributes[key] = entries[key];
@@ -125,7 +124,7 @@ function analyzeAttributes(entries: AnyObject) {
    return {
       attributes,
       events,
-      hooks
+      hooks,
       // jsxProps
    }
 }

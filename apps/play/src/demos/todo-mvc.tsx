@@ -161,7 +161,7 @@ export function TodoMVC() {
       }
    }
 
-   function $active(){
+   function $active() {
       return $todos().length
    }
 
@@ -177,7 +177,7 @@ export function TodoMVC() {
                   on:keyup={e => e.key === 'Enter' && addTodo(e as unknown as InputEvent)}
                />
             </header>
-            {If($todos().length, "show",()=>(console.log('rendering todos section'),
+            {If($todos().length, "show", () => (console.log('rendering todos section'),
                <section class="main">
                   <input
                      id="toggle-all"
@@ -200,7 +200,7 @@ export function TodoMVC() {
                                  class="edit"
                                  type="text"
                                  mu:value={todo.$title}
-                                 at:mount={async input => { await postlude(); input.focus() }}
+                                 post:mount={node => node.focus()}
                                  on:blur={e => doneEdit(todo)}
                                  on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
                               />
@@ -210,7 +210,7 @@ export function TodoMVC() {
                   </ul>
                </section >
             ))}
-            {If($todos().length, "show",()=>(console.log('rendering footer'),
+            {If($todos().length, "show", () => (console.log('rendering footer'),
                <footer class="footer">
                   <span class="todo-count">
                      <strong>{$remaining}</strong>
@@ -236,7 +236,7 @@ export function TodoMVC() {
                   )}
                </footer >
             ))}
-             {Else(undefined)}
+            {Else(undefined)}
          </section >
          <$--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
       </>)
