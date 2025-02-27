@@ -103,15 +103,16 @@ function getStructureConfig(target: AnyObject, configs: any[]) {
    return getStructureConfig(proto, configs)
 }
 
-export const TRACK_ENTRY = 0 as const
-export const TRACK_MODEL = 1 as const
+export const TRACK_ENTRY = 1 as const
+export const TRACK_MODEL = 2 as const
+export const TRACK_MODEL_WITH_CALLBACK = 3 as const
 
 
 
 export type CustomIonizedModelConfig = {
    structure?: any;
    nontrackableKeys?: { [key: PropertyKey]: boolean };
-   trackableOps?: { [key: PropertyKey]: typeof TRACK_ENTRY | typeof TRACK_MODEL }
+   trackableOps?: { [key: PropertyKey]: typeof TRACK_ENTRY | typeof TRACK_MODEL | typeof TRACK_MODEL_WITH_CALLBACK }
    mutatingOps?: { [key: PropertyKey]: MutatingOpConfig };
    beforeSet?: BeforeSetCallback; //TODO:
    afterSet?: AfterSetCallback;
@@ -138,7 +139,8 @@ type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[
 
 const TrackableOp = {
    [TRACK_ENTRY]: useTrackableGetOp,
-   [TRACK_MODEL]: useTrackableOp
+   [TRACK_MODEL]: useTrackableOp,
+   [TRACK_MODEL_WITH_CALLBACK]: useTrackableOpWithCallback
 }
 
 export function useTrackableGetOp(
@@ -148,6 +150,7 @@ export function useTrackableGetOp(
 ) {
    const fn = target[op]
    const trackableOp = function trackableGetOp(arg: any) {
+      console.log('calling trackableGetOp')
       if (__DEV__) emitSignal();
       // const _arg = toRaw(arg)
       getActiveTracker()?.track(asAtomicOp(model, op, arg))
@@ -158,7 +161,7 @@ export function useTrackableGetOp(
 }
 
 
-// a `trackable op` is a method like 'find' or 'filter' that tracks the entire ionic model as a watch subject rather than a specific entry or property
+// a `trackable op` is a method like 'values()' or 'entries()' that tracks the entire ionic model as a watch subject rather than a specific entry or property
 export function useTrackableOp(
    model: IonizedModel,
    target: AnyObject,
@@ -169,7 +172,24 @@ export function useTrackableOp(
       if (__DEV__) emitSignal();
       // args.forEach(arg => toRaw(arg))
       getActiveTracker()?.track(quarkOf(model))
-      return fn.call(decoy(target), ...args) //FIX: I need to somehow get filter to pass ionized version of an object to the filter function, but still call filter on the raw target...?
+      return fn.call(target, ...args) 
+   }
+}
+
+// a `trackable op` is a method like 'filter' that tracks the entire ionic model as a watch subject rather than a specific entry or property
+// and also receives a callback that receives property values of the model
+export function useTrackableOpWithCallback(
+   model: IonizedModel,
+   target: AnyObject,
+   op: PropertyKey,
+) {
+   const fn = target[op]
+   return function trackableOp(...args: any[]) {
+      console.log('calling trackableOp with decoy')
+      if (__DEV__) emitSignal();
+      // args.forEach(arg => toRaw(arg))
+      getActiveTracker()?.track(quarkOf(model))
+      return fn.call(decoy(target), ...args)
    }
 }
 
@@ -352,13 +372,14 @@ export function initialPropertyAccess(
 }
 
 
-
+//FIX: figure out where to call traceableMethodWrap
 function bindMethod(method: Function, key: string | symbol, proxy: IonizedModel, switchMap: ProxySwitchMap) {
    if (!isMethod(method)) throw new Error('Invalid method')
    const boundMethod =
-      __DEV__ ?
-         traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
-         : method.bind(proxy);
+      // __DEV__ ?
+      //    traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
+      //    : 
+         method.bind(proxy);
    switchMap.set(key, () => boundMethod)
    return boundMethod;
 }
@@ -480,6 +501,7 @@ export function accessMethod(
    )
 }
 
+//FIX: figure out where to call traceableMethodWrap
 function getBoundMethod(
    proxy: IonizedModel,
    key: PropertyKey,
@@ -490,9 +512,10 @@ function getBoundMethod(
    if (boundMethod) return boundMethod;
    if (method) {
       boundMethod =
-         __DEV__ ?
-            traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
-            : method.bind(proxy);
+         // __DEV__ ?
+            // traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
+            // : 
+            method.bind(proxy);
       boundMethodMap.set(key, boundMethod!)
       return boundMethod;
    }
@@ -528,8 +551,9 @@ export function getNativeMethodConfig(
    return undefined;
 }
 
+//FIX: figure out where to call traceableMethodWrap
 function bindNativeMethod(
-   config: typeof TRACK_ENTRY | typeof TRACK_MODEL | AnyObject,
+   config: typeof TRACK_ENTRY | typeof TRACK_MODEL | typeof TRACK_MODEL_WITH_CALLBACK | AnyObject,
    nativeKey: string | symbol,
    publicKey: string | symbol,
    target: AnyObject,
@@ -540,8 +564,10 @@ function bindNativeMethod(
    if (isObject(config)) { 
       const createOp = config.createOp
       const getPreopData = config.preop
-      const op = __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, quark, getPreopData))
-      : createOp(target, ionizedModel, quark, getPreopData)
+      const op = 
+      // __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, quark, getPreopData))
+      // : 
+      createOp(target, ionizedModel, quark, getPreopData)
       switchMap.set(publicKey, () => op)
       return op;
    }

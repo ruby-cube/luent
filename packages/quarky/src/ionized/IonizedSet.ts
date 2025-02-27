@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { storeSnapshot, toRaw } from "./ionize";
-import { defineIonizedStructure, GetPreopData, IonizedModel, TRACK_ENTRY, TRACK_MODEL, useTrackableGetOp } from "./IonizedModel";
+import { defineIonizedStructure, GetPreopData, IonizedModel, TRACK_ENTRY, TRACK_MODEL, TRACK_MODEL_WITH_CALLBACK, useTrackableGetOp } from "./IonizedModel";
 import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { getAtomicPion } from "./Pion";
@@ -68,8 +68,8 @@ export function installIonicSet() {
    defineIonizedStructure(Set, {
       trackableOps: {
          has: TRACK_ENTRY,
-         [Symbol.iterator]: TRACK_MODEL,
-         forEach: TRACK_MODEL,
+         [Symbol.iterator]: TRACK_MODEL_WITH_CALLBACK,
+         forEach: TRACK_MODEL_WITH_CALLBACK,
          keys: TRACK_MODEL,
          values: TRACK_MODEL,
          entries: TRACK_MODEL,

@@ -102,7 +102,7 @@ export class EffectVine {
    private pour(destination?: EffectVine) {
       if (this.tail) this.storeNext(this.head!, this.tail)
       let current = this.head;
-      while (current) {
+      while (current) { // we use while-loop instead of for...of because EffectVine's for...of does extra checks to allow list modification during iteration. We don't modify the list here, so we use a simple efficient loop.
          current.vine = destination;
          current = current.next
       }

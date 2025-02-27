@@ -1,7 +1,7 @@
 import { storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
 import { useClearOp, useDeleteOp } from "./IonizedSet";
 import { getAtomicOp, getAtomicOps } from "./AtomicOp";
-import { defineIonizedStructure, TRACK_ENTRY, TRACK_MODEL, useTrackableGetOp } from "./IonizedModel";
+import { defineIonizedStructure, TRACK_ENTRY, TRACK_MODEL, TRACK_MODEL_WITH_CALLBACK, useTrackableGetOp } from "./IonizedModel";
 import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { $syncEffects } from "../effect-cycle/SyncEffects";
@@ -51,8 +51,8 @@ export function installIonicMap() {
       trackableOps: {
          has: TRACK_ENTRY,
          get: TRACK_ENTRY,
-         [Symbol.iterator]: TRACK_MODEL,
-         forEach: TRACK_MODEL,
+         [Symbol.iterator]: TRACK_MODEL_WITH_CALLBACK,
+         forEach: TRACK_MODEL_WITH_CALLBACK,
          keys: TRACK_MODEL,
          values: TRACK_MODEL,
          entries: TRACK_MODEL,

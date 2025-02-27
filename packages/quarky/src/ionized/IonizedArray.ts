@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
 import { AtomicOp, getAtomicOp } from "./AtomicOp";
-import { defineIonizedStructure, GetPreopData, IonizedModel, TRACK_ENTRY, TRACK_MODEL, useTrackableGetOp, useTrackableOp } from "./IonizedModel";
+import { defineIonizedStructure, GetPreopData, IonizedModel, TRACK_ENTRY, TRACK_MODEL, TRACK_MODEL_WITH_CALLBACK, useTrackableGetOp, useTrackableOp } from "./IonizedModel";
 import { getAtomicPion, PionQuark, triggerPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { IonizedModelQuark } from "./IonizedModelQuark";
@@ -194,17 +194,17 @@ export function installIonicArray() {
          [Symbol.iterator]: TRACK_MODEL,
          toReversed: TRACK_MODEL, // newArray = toReversed()
          flat: TRACK_MODEL, // newArray = flat(depth?)
-         toSorted: TRACK_MODEL, // newArray = toSorted(compareFn?)
-         flatMap: TRACK_MODEL, // newArray = flatMap(callbackFn, thisArg?)
-         map: TRACK_MODEL, // newArray = map(callbackFn, thisArg?)
-         reduce: TRACK_MODEL, // result = reduce(callbackFn, initialValue?)
-         reduceRight: TRACK_MODEL, // result = reduceRight(callbackFn, initialValue?)
+         toSorted: TRACK_MODEL_WITH_CALLBACK, // newArray = toSorted(compareFn?)
+         flatMap: TRACK_MODEL_WITH_CALLBACK, // newArray = flatMap(callbackFn, thisArg?)
+         map: TRACK_MODEL_WITH_CALLBACK, // newArray = map(callbackFn, thisArg?)
+         reduce: TRACK_MODEL_WITH_CALLBACK, // result = reduce(callbackFn, initialValue?)
+         reduceRight: TRACK_MODEL_WITH_CALLBACK, // result = reduceRight(callbackFn, initialValue?)
 
          join: TRACK_MODEL, // string = join(separator?)
          toLocaleString: TRACK_MODEL, // string = toLocaleString() 
          toString: TRACK_MODEL, // string = toString()
 
-         filter: TRACK_MODEL, // newArray = filter(callbackFn, thisArg?)
+         filter: TRACK_MODEL_WITH_CALLBACK, // newArray = filter(callbackFn, thisArg?)
          keys: TRACK_MODEL,  // newIterable = keys()
          entries: TRACK_MODEL, // newEntriesIterator = entries()
          values: TRACK_MODEL, // newIterable = values()
@@ -213,14 +213,14 @@ export function installIonicArray() {
          concat: TRACK_MODEL, // newArray = concat(arrayB, arrayC, ...)
          with: TRACK_MODEL, // newArray = arrayInstance.with(index, value)
 
-         find: TRACK_MODEL, // item = find(callbackFn, thisArg?)
-         findLast: TRACK_MODEL, // item = findLast(callbackFn, thisArg?)
+         find: TRACK_MODEL_WITH_CALLBACK, // item = find(callbackFn, thisArg?)
+         findLast: TRACK_MODEL_WITH_CALLBACK, // item = findLast(callbackFn, thisArg?)
 
-         findIndex: TRACK_MODEL, // index = findIndex(callbackFn, thisArg?)
-         findLastIndex: TRACK_MODEL, // index = findLastIndex(callbackFn, thisArg?)
+         findIndex: TRACK_MODEL_WITH_CALLBACK, // index = findIndex(callbackFn, thisArg?)
+         findLastIndex: TRACK_MODEL_WITH_CALLBACK, // index = findLastIndex(callbackFn, thisArg?)
 
-         every: TRACK_MODEL, // boolean = every(callbackFn, thisArg?)
-         some: TRACK_MODEL, // boolean = some(callbackFn, thisArg?)
+         every: TRACK_MODEL_WITH_CALLBACK, // boolean = every(callbackFn, thisArg?)
+         some: TRACK_MODEL_WITH_CALLBACK, // boolean = some(callbackFn, thisArg?)
 
          // depends on index //TODO: 
          slice: TRACK_MODEL, // newArray = slice(start?, end?)
