@@ -38,7 +38,7 @@ export class EffectVine {
       return link;
    }
 
-   private appendNextIfIterating(link: EffectLink | undefined){
+   private appendNextIfIterating(link: EffectLink | undefined) {
       if (this.current && this.current === this.tail) this.next = link
    }
 
@@ -101,8 +101,10 @@ export class EffectVine {
 
    private pour(destination?: EffectVine) {
       if (this.tail) this.storeNext(this.head!, this.tail)
-      for (const link of this) {
-         link.vine = destination
+      let current = this.head;
+      while (current) {
+         current.vine = destination;
+         current = current.next
       }
       this.head = undefined;
       this.tail = undefined;
@@ -117,7 +119,7 @@ export class EffectVine {
    private next?: EffectLink | undefined
 
    private storeNext(removalHead: EffectLink, removalTail: EffectLink) {
-      if (removalHead !== this.current 
+      if (removalHead !== this.current
          && removalHead !== this.next
       ) {
          return;
