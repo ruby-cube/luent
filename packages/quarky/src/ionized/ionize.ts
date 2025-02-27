@@ -4,10 +4,9 @@ import { timeTraveler } from "./TimeTraveler";
 import { $effectCycle } from "../effect-cycle/EffectCycle";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { inert, Inert, isInert } from "./inert";
-import { Ion, ion, isIon } from "../ion/ion";
+import { AtomicIon, Ion, ion, isIon } from "../ion/ion";
 import { createIonizedModel, getStructureConfigs, IonizedModel } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
-import { AtomicIonQuark } from "../ion/AtomicIon";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -40,16 +39,20 @@ export type Readonly<T extends AnyObject = AnyObject> = {
    readonly [K in keyof T]: T[K]
 }
 
-export type Ionized<T extends AnyObject, M extends {} = {}> = T & { [QUARK]: IonizedModelQuark }
+/**
+ * API
+ */
+export type Ionized<T> = T
 // export type Ionized<T extends AnyObject, M extends {} = {}> = {
 //    [K in keyof T as (K extends '~$methods' ? never : K extends keyof M ? M[K] extends boolean ? K : K extends string ? `_${K}` : K : K)]:
-//    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? T[K] : V :
-//    T[K] extends { [QUARK]: any } | Inert ? T[K]
+//    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? T[K] : V 
+//    // T[K] extends { [QUARK]: any } | Inert ? T[K]
 //    : T[K] extends (...args: any[]) => any ? IonizedGetter<T, K>
 //    : T[K] extends { [key: PropertyKey]: any } ? Ionized<T[K]>
 //    : T[K] extends { [key: PropertyKey]: any } | undefined ? Ionized<Exclude<T[K], undefined>> | undefined
 //    : T[K]
-// } & InvertIons<T, OmitTrue<M>> & OmitTrue<M> & { [QUARK]: IonizedModelQuark }
+// } & InvertIons<T, OmitTrue<M>> & OmitTrue<M> 
+// & { [QUARK]: IonizedModelQuark }
 
 type OmitTrue<M extends {}> = { [K in keyof M as M[K] extends true ? never : K]: Exclude<M[K], true> }
 
@@ -96,7 +99,7 @@ type IonizedGetter<T, K extends keyof T> =
 
 
 //API
-export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: string]: (...args: any[]) => any }): M extends AnyObject ? T & M : T {
+export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: string]: (...args: any[]) => any }): M extends AnyObject ? Ionized<T> & M : Ionized<T> {
    if (isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
       return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
@@ -168,13 +171,16 @@ export function toRaw<T>(target: T): AsRaw<T> {
 }
 
 
-export function o$<T>(model: T): AsIons<T> {
-   return model as AsIons<T>
+export function exposeIons<T>(model: T): asserts model is T & AsIons<T> {
+   if (!isIonizedModel(model)) throw new Error("model must be ionized")
 }
 
+// export function o$<T>(model: T): AsIons<T> {
+//    return model as AsIons<T>
+// }
+
 type AsIons<T> = {
-   //TODO: don't turn methods into ions
-   [K in keyof T as K extends string ? `$${K}` : K]: AtomicIon<T[K]>
+   [K in keyof T as T[K] extends (...args: any[])=>any ? never : K extends string ? `$${K}` : K]:  AtomicIon<T[K]>
 }
 
 
@@ -253,34 +259,34 @@ type AsIons<T> = {
 //     existingTraps?: ReactiveTraps,
 // ) {
 //     return {
-      //   get,
-      //   set,
-      //   getPrototypeOf: existingTraps ? existingTraps.getPrototypeOf : () => {
-      //       return Reflect.getPrototypeOf(target)
-      //   },
-      //   has: existingTraps ? existingTraps.has : (_: unknown, key: PropertyKey) => {
-      //       return Reflect.has(target, key)
-      //   },
-      //   deleteProperty: existingTraps ? existingTraps.deleteProperty : (_: unknown, key: any) => {
-      //       return Reflect.deleteProperty(target, key)
-      //   },
-      //   ownKeys: existingTraps ? existingTraps.ownKeys : () => {
-      //       return Reflect.ownKeys(target)
-      //   },
-      //   setPrototypeOf: existingTraps ? existingTraps.setPrototypeOf : (_: unknown, proto: ReactiveModelContainer | null) => {
-      //       return Reflect.setPrototypeOf(target, proto)
-      //   },
-      //   isExtensible: existingTraps ? existingTraps.isExtensible : () => {
-      //       return Reflect.isExtensible(target)
-      //   },
-      //   preventExtensions: existingTraps ? existingTraps.preventExtensions : () => {
-      //       return Reflect.preventExtensions(target)
-      //   },
-      //   getOwnPropertyDescriptor: existingTraps ? existingTraps.getOwnPropertyDescriptor : (_: unknown, key: PropertyKey) => {
-      //       return Reflect.getOwnPropertyDescriptor(target, key)
-      //   },
-      //   defineProperty: existingTraps ? existingTraps.defineProperty : (_: unknown, key: PropertyKey, attributes: PropertyDescriptor & ThisType<any>) => {
-      //       return Reflect.defineProperty(target, key, attributes)
-      //   }
+//   get,
+//   set,
+//   getPrototypeOf: existingTraps ? existingTraps.getPrototypeOf : () => {
+//       return Reflect.getPrototypeOf(target)
+//   },
+//   has: existingTraps ? existingTraps.has : (_: unknown, key: PropertyKey) => {
+//       return Reflect.has(target, key)
+//   },
+//   deleteProperty: existingTraps ? existingTraps.deleteProperty : (_: unknown, key: any) => {
+//       return Reflect.deleteProperty(target, key)
+//   },
+//   ownKeys: existingTraps ? existingTraps.ownKeys : () => {
+//       return Reflect.ownKeys(target)
+//   },
+//   setPrototypeOf: existingTraps ? existingTraps.setPrototypeOf : (_: unknown, proto: ReactiveModelContainer | null) => {
+//       return Reflect.setPrototypeOf(target, proto)
+//   },
+//   isExtensible: existingTraps ? existingTraps.isExtensible : () => {
+//       return Reflect.isExtensible(target)
+//   },
+//   preventExtensions: existingTraps ? existingTraps.preventExtensions : () => {
+//       return Reflect.preventExtensions(target)
+//   },
+//   getOwnPropertyDescriptor: existingTraps ? existingTraps.getOwnPropertyDescriptor : (_: unknown, key: PropertyKey) => {
+//       return Reflect.getOwnPropertyDescriptor(target, key)
+//   },
+//   defineProperty: existingTraps ? existingTraps.defineProperty : (_: unknown, key: PropertyKey, attributes: PropertyDescriptor & ThisType<any>) => {
+//       return Reflect.defineProperty(target, key, attributes)
+//   }
 //     }
 // }

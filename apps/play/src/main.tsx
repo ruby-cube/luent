@@ -1,3 +1,4 @@
+//@ts-nocheck
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
@@ -9,7 +10,7 @@
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { component, createApp } from '@rue/lumo';
+import { component, createApp, createGlobalCommons } from '@rue/lumo';
 import { TestCounter, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
@@ -89,13 +90,49 @@ import { TestShow } from './TestShow';
 
 // frog;
 
-const app = createApp(TodoMVC)
+// const root = createRoot(document.getElementById('app'));
+// root.render(<h1>Hello, world</h1>);
 
 if (__DEV__) configureFlask({
-    warnNoCleanup: true
+   warnNoCleanup: true
 })
 
-app.mount('#app')
+const globalCommons = createGlobalCommons([
+   m(DOOR, () => doSomething())
+])
+
+const app = createApp(
+   <SortableTableApp
+      hideApp={hideApp}
+      closeApp={closeApp}
+   />
+)
+
+app.initialize('#app', {
+   globalCommons,
+   provide: []
+})
+
+function hideApp() {
+   app.demount()
+}
+
+function showApp() {
+   app.remount()
+}
+
+function closeApp() {
+   app.terminate()
+}
+
+
+
+
+
+
+
+
+
 
 // function doSomething() {
 //     const dynamicNode = makeDynamicNode(false)

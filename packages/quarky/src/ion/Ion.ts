@@ -3,6 +3,7 @@ import { neutron } from "./Neutron";
 import { createMaybeMemoizedIon } from "../ionic/DerivationIon";
 import { createAtomicIon } from "./AtomicIon";
 import { maybeIonize } from "../ionized/IonizedModel";
+import { Ionized } from "../ionized/ionize";
 
 /* API */
 export type Ion<T = unknown, M = {}> = (() => T) & M
@@ -53,8 +54,8 @@ export function ion<
    return createAtomicIon(initialState, methods) as unknown as AsIon<T, M>
 }
 
-ion.ionize = function createIonizedIon<T extends object, M>(initialState: T, methods?: M & Methods): M extends Methods ? AtomicIon<T, M> : AtomicIon<T> {
-   return createAtomicIon(maybeIonize(initialState), methods, true) as unknown as M extends Methods ? AtomicIon<T, M> : AtomicIon<T>
+ion.ionize = function createIonizedIon<T extends object, M>(initialState: T, methods?: M & Methods): M extends Methods ? AtomicIon<Ionized<T>, M> : AtomicIon<Ionized<T>> {
+   return createAtomicIon(maybeIonize(initialState), methods, true) as unknown as M extends Methods ? AtomicIon<Ionized<T>, M> : AtomicIon<Ionized<T>>
 }
 
 

@@ -1,32 +1,7 @@
 import { component, For, If, Else } from "@rue/lumo"
-import { AtomicIon, Ion, ion, ionicTask, Ionized, o$, watch } from "@rue/quarky"
-import { quarkOf } from "../../../../packages/quarky/src/Quark"
-import { postlude, RENDER } from "../../../../packages/lumo/src/render/render-cycle"
-import { $thisFlask } from "@rue/flask"
+import { AtomicIon, exposeIons, Ion, ion, ionicTask,  } from "@rue/quarky"
 
-//FIXED :)
-/*
-- starting from #completed view, add item
-- change to #all view, item will appear, but any subsequent items added will not show
-*/
 
-/* 
-//FIX:
-- BUG: using a non-memoized derivation for $filteredTodos breaks things even more.
-*/
-
-/* 
-//FIX: for both non-memoized and memoized derivation
-- NOTE: The bug is not consistent. It swaps between this bug and the following bug.
-- from completed view
-- click [toggle all] (completed items will show in view)
-- click [clear completed]
-- BUG: completed items do not clear
-*/
-
-/* //FIX: for both non-memoized and memoized derivation (not consistent, swaps with above bug)
-- BUG: clearing all from completed view does not trigger $filteredTodos to empty. It is still using the old ionized todos instead of the new empty ionized todos.
-*/
 
 type Todo = {
    id: number,
@@ -39,7 +14,6 @@ type RadioInputEvent = { target: { checked: boolean } }
 
 
 export function TodoMVC() {
-
 
    const STORAGE_KEY = 'vue-todomvc'
 
@@ -59,50 +33,16 @@ export function TodoMVC() {
    const $view = ion('all' as keyof typeof filters)
    const $editedTodo = ion(null as Todo | null)
 
-   //@ts-expect-error
-   $todos.labelName = '$todos'
-   //@ts-expect-error
-   $view.labelName = '$view'
-
    // derive state
-   // const $filteredTodos = () => (filters[$view()]($todos()))
    const $filteredTodos = ion(() => (filters[$view()]($todos())))
-   //@ts-expect-error
-   $filteredTodos.__DEV__label('$filteredTodos')
-
-   // console.log($filteredTodos())
-   // console.log(quarkOf($filteredTodos).asCompound?.particles)
 
    const $remaining = ion(() => (filters.active($todos()).length))
-   //@ts-expect-error
-   $remaining.__DEV__label('$remaining')
-
-
-   // watch($filteredTodos, ({ prevState, state }) => {
-   //    console.log('@% ---------')
-   //    //@ts-expect-error
-   //    console.log('@% $filteredTodos particles', quarkOf($filteredTodos).asCompound?.particles)
-   //    console.log('@% prevState', prevState.length, prevState)
-   //    console.log('@% state', state.length, state)
-   //    console.log('@%')
-   // })
-
-   // watch($filteredTodos, ({ prevState, state }) => {
-   //    console.log('@% --------- RENDER PHASE')
-   //    //@ts-expect-error
-   //    console.log('@% $filteredTodos particles', quarkOf($filteredTodos).asCompound?.particles)
-   //    console.log('@% prevState', prevState.length, prevState)
-   //    console.log('@% state', state.length, state)
-   //    console.log('@%')
-   // }, {phase: RENDER})
-
-   // watch($remaining, ()=>{})
 
    // handle routing
    window.addEventListener('hashchange', onHashChange)
    onHashChange()
 
-   // // persist state
+   // persist state
    ionicTask(w => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(w($todos)))
    })
@@ -120,7 +60,6 @@ export function TodoMVC() {
             completed: false
          })
          e.target.value = ''
-         // console.log('$filtered todos particles', quarkOf($filteredTodos).asCompound?.particles)
       }
    }
 
@@ -161,9 +100,7 @@ export function TodoMVC() {
       }
    }
 
-   function $active() {
-      return $todos().length
-   }
+
 
    return component(
       <>
@@ -188,7 +125,7 @@ export function TodoMVC() {
                   />
                   <label for="toggle-all">Mark all as complete</label>
                   <ul class="todo-list">
-                     {For($filteredTodos, m => m.id, todo => (
+                     {For($filteredTodos, m => m.id, todo => (exposeIons(todo),
                         <li class={["todo", { completed: todo.$completed, editing: todo === $editedTodo() }]}>
                            <div class="view">
                               <input class="toggle" type="checkbox" mu:checked={todo.$completed} />
@@ -210,7 +147,7 @@ export function TodoMVC() {
                   </ul>
                </section >
             ))}
-            {If($todos().length, "show", () => (console.log('rendering footer'),
+            {If($todos().length, "show",
                <footer class="footer">
                   <span class="todo-count">
                      <strong>{$remaining}</strong>
@@ -235,7 +172,7 @@ export function TodoMVC() {
                      </button >
                   )}
                </footer >
-            ))}
+            )}
             {Else(undefined)}
          </section >
          <$--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />

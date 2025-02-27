@@ -1,8 +1,6 @@
-//@ts-nocheck
 import { component, CommonsKey, For, fromCommons, fromTag, If, Ion, Ionized, v } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
-import { AtomicIon, ion, ionize, o$ } from "@rue/quarky";
-import { MorphicNode } from "../../../../../packages/lumo/src/morphic/MorphicNode";
+import { AtomicIon, exposeIons, ion, ionize, watch } from "@rue/quarky";
 
 export function TabApp() {
 
@@ -228,9 +226,9 @@ function App(input = fromTag({
    const MainView = Polymorph({
       home: <Home></Home>
       ,
-      file: [(o: File) => o.id, file =>
-         <MarkdownApp mu:markdown={o$(file).$markdown}></MarkdownApp>
-      ],
+      file: [(o: File) => o.id, (file: File) => (exposeIons(file),
+         <MarkdownApp mu:markdown={file.$markdown}></MarkdownApp>
+      )],
       default: 'home' // key | render function | undefined (default)
    })
 
@@ -322,10 +320,10 @@ function Tab(input = fromTag({
    const { file, closeFile, focusFile, $index, inherited } = input
 
    return component(
-      <div style={[{ backgroundColor: $=file.active ? 'red' : 'gray' }, inherited.style]}
+      <div style={[{ backgroundColor: $ = file.active ? 'red' : 'gray' }, inherited.style]}
          on:click={e => focusFile($index())}
       >
-         {o$(file).$title}
+         {$ = file.title}
          <button on:click={e => closeFile($index())}>x</button>
       </div>
    )

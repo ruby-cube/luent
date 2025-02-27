@@ -1734,7 +1734,7 @@ declare namespace React {
       width?: number | string | undefined;
 
       'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, {set: (value: string)=>unknown}>
-      'mu:checked'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, {set: (value: string)=>unknown}>
+      'mu:checked'?: Quarky.AtomicIon<Booleanny, { state: Booleanny; }> | Quarky.Ion<Booleanny, {set: (value: Booleanny)=>unknown}>
    }
 
    interface KeygenHTMLAttributes<T> extends HTMLAttributes<T> {

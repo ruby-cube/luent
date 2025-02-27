@@ -1,5 +1,4 @@
 import { AnyObject } from "@rue/types";
-import { Ionized } from "./ionize";
 import { __DEV__proxyGetterAssertions, createProxySwitchMap, CustomIonizedModelConfig, getNativeMethodConfig, getTargetKey, initialPropertyAccess, IonizedModel, isMethod, isNativeMethod, ProxySwitchMap } from "./IonizedModel";
 import { asNonlocalReadonly, isLocalKey, restrictAccess } from "../capsule/Readonly";
 import { quarkOf } from "../Quark";
@@ -11,7 +10,7 @@ import { quarkOf } from "../Quark";
 
 
 export function createNonlocalReadonlyIonizedModel(originalIonizedModel: IonizedModel) {
-   const quark = quarkOf(<Ionized<Object>>originalIonizedModel)
+   const quark = quarkOf(<IonizedModel>originalIonizedModel)
    const { rawTarget, methods, structureConfigs } = quark
 
    const switchMap = createProxySwitchMap(quark)

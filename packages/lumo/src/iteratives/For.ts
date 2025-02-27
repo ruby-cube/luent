@@ -1,7 +1,7 @@
 import { getCommons } from "../commons/commons-stack";
 import { NodeEntity, normalizeToRenderFunction } from "../node/makeNode";
 import { ListRenderKit } from "./ListRenderKit";
-import { AnyIon, AtomicIon, Ion, ion, ReactiveGet } from "@rue/quarky";
+import { AnyIon, AtomicIon, Ion } from "@rue/quarky";
 
 
 export type RenderItem<L> = L extends Collection<infer I> ? (item: I, $i: AnyIon<number>) => NodeEntity : L extends Ion<Collection<infer I>> ? (item: I, $i: AnyIon<number>) => NodeEntity : (item: any, $i: AnyIon<number>) => NodeEntity

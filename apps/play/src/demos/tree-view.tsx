@@ -1,5 +1,4 @@
-//@ts-nocheck
-import { component, fromTag, Ionized, If, Else, For, watch, v, Nonlocal, _Nonlocal, pure, Pure } from "@rue/lumo";
+import { component, fromTag, Ionized, If, Else, For, v, Nonlocal, _Nonlocal } from "@rue/lumo";
 import { ion, ionize, toRaw } from "@rue/quarky";
 
 
@@ -132,7 +131,7 @@ function TreeItemView(input = fromTag({
    // list: v<string[]>,
    // 'on:click': v<(e: { pen: string }) => void>('?')
 })) {
-   const { item, emit } = input
+   const { item } = input
 
    // item.children
    // emit('click', { pen: 'hi' })
