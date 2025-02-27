@@ -89,7 +89,7 @@ import { TestShow } from './TestShow';
 
 // frog;
 
-const app = createApp(TestShow)
+const app = createApp(TodoMVC)
 
 if (__DEV__) configureFlask({
     warnNoCleanup: true

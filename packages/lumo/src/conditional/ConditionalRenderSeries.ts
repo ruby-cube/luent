@@ -60,8 +60,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          if (kit.type === 'show') {
             showKits = showKits || (showKits = this.showKits = [])
             showKits.push(kit);
-            kit.nodePod = dynamicPod.appendNodePod(false)
-            //QUESTION: Does the order of the nodeVines in the dynamicPod need to match the order of rendering? so far there's no problemt
+            kit.nodePod = dynamicPod.appendNodePod() //FIX:
          }
          else if (kit.type === 'mount') {
             kit.nodePod = dynamicPod.appendNodePod(false)
@@ -92,7 +91,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       if (kit.type !== 'show' && !this.isDynamic) {
          this.render(kit, parent, fragment) //TODO: render function is not wrapped in context because dynamicNode does it... why doesn't 'mount' get a dynamic node???
       }
-      else {
+      else if (kit.type !== 'show') {
          const flask = kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === 'create' })
          this.render(kit, parent, fragment, flask)
          flask.emitInitialMount() // emits mount hook
@@ -101,11 +100,10 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const showKits = this.showKits
       if (showKits)
          for (const showKit of showKits) {
+            console.log('show kit', showKit)
             const pod = showKit.nodePod!
-
             this.render(showKit, parent, fragment)
 
-            pod.activate()
             if (showKit !== kit) hideDOMNodes(pod)
          }
    }
@@ -343,6 +341,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          },
          callback: () => {
             const nodeEntities = kit.renderConditional(parent, kit.nodePod || (console.warn('DEV RESEARCH: no kit pod :('), this.nodePod))
+            if (kit.type === 'show') console.log('node entities', nodeEntities)
+            if (kit.type === 'show') console.log('nodepod', kit.nodePod)
             mountConditional(parent, kit.nodePod!, nodeEntities, fragment);
          },
       })
@@ -388,7 +388,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       }
       pod.activate()
 
-      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({type:'view', creationScope: kit.type === "create"}))
+      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       this.render(kit, parent, undefined, flask)
       if (activationType === 'create' || isInitialMount)
          flask.emitInitialMount()
@@ -405,6 +405,7 @@ export function mountConditional(
    nodeEntities: NodeKit[],
    fragment?: DocumentFragment
 ) {
+   console.log('fragment?', fragment)
    const _fragment = fragment || new DocumentFragment();
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
    if (fragment) return; // no need to mount to DOM yet since fragment originates higher up
@@ -413,14 +414,19 @@ export function mountConditional(
 
 
 export function mountDOMNodes(pod: NodePod, parent: Element, fragment: DocumentFragment) {
+   console.log('mountDOMNodes', pod)
    let prevNode = pod.prevNode;
+   console.log('prevNode', prevNode)
    if (prevNode && prevNode === parent) {
+      console.log('append', prevNode)
       parent.append(fragment) //for teleport
    }
    else if (prevNode) {
+      console.log('after', prevNode)
       prevNode.after(fragment)
    }
    else {
+      console.log('prepend', prevNode)
       parent.prepend(fragment)
    }
 }

@@ -1,10 +1,10 @@
-import { AnyIon, ReactiveGet } from "../../../quarky/src";
 import { ConditionalKit } from "./ConditionalKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { TransitionNode } from "../transition/TransitionNode";
 import { NodeKit } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
 import { Flask } from "@rue/flask";
+import { Ion } from "../InputTypes";
 
 export type RenderConditional = (parent: Element, nodePod: NodePod) => NodeKit[]
 
@@ -22,7 +22,7 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
         public transitionNodes: TransitionNode[],
         public optionals?: {
             // nodePodIndex?: number,
-            $condition?: AnyIon<Booleanny>,
+            $condition?: Ion<Booleanny>,
             // setup?: () => AnyObject,
             // phasicNode: TransitionNode | undefined,
         }

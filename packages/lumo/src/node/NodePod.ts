@@ -130,7 +130,7 @@ export class NodePod extends Array<AnyNode> {
 
    get prevNode(): DOMNode | undefined {
       let prev = this.prev;
-      while (prev instanceof NodePod && !prev.active) {
+      while (prev instanceof NodePod && (!prev.active) ) {
          prev = prev.prev
       }
       return prev instanceof NodePod ?
@@ -139,7 +139,7 @@ export class NodePod extends Array<AnyNode> {
 
    private get activeLeafTail(): DOMNode | undefined {
       let tail = this.at(-1);
-      while (tail instanceof NodePod && !tail.active) {
+      while (tail instanceof NodePod && (!tail.active || !tail.length /* empty nodePods */)) {
          tail = tail.prev
       }
       if (tail instanceof NodePod)

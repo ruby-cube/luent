@@ -161,6 +161,10 @@ export function TodoMVC() {
       }
    }
 
+   function $active(){
+      return $todos().length
+   }
+
    return component(
       <>
          <section class="todoapp">
@@ -173,7 +177,7 @@ export function TodoMVC() {
                   on:keyup={e => e.key === 'Enter' && addTodo(e as unknown as InputEvent)}
                />
             </header>
-            {If($todos().length, "show",
+            {If($todos().length, "show",()=>(console.log('rendering todos section'),
                <section class="main">
                   <input
                      id="toggle-all"
@@ -205,9 +209,8 @@ export function TodoMVC() {
                      ))}
                   </ul>
                </section >
-            )}
-            {Else('show', <p>X_X</p>)}
-            {If($todos().length, "show",
+            ))}
+            {If($todos().length, "show",()=>(console.log('rendering footer'),
                <footer class="footer">
                   <span class="todo-count">
                      <strong>{$remaining}</strong>
@@ -232,8 +235,8 @@ export function TodoMVC() {
                      </button >
                   )}
                </footer >
-            )}
-            {Else('show', <p>X_X</p>)}
+            ))}
+             {Else(undefined)}
          </section >
          <$--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
       </>)
