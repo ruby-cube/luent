@@ -7,7 +7,7 @@
 // - derived signal with memo
 
 import { component } from "@rue/lumo"
-import { ion, ionize, o$, SYNC, watch } from "@rue/quarky"
+import { ion, ionize, SYNC, watch } from "@rue/quarky"
 import { RENDER } from "../../../packages/lumo/src/render/render-cycle"
 
 export function TestCounter() {
@@ -71,7 +71,7 @@ export function TestCounterModel() {
 
    return component(
       <>
-         <div>{o$(counter).$count}</div>
+         <div>{$=counter.count}</div>
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
       </>

@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo";
-import { ion, ionize, o$ } from "@rue/quarky";
+import { ion, ionize } from "@rue/quarky";
 
 export function TestPropIons() {
    const frog = ionize({
@@ -22,7 +22,7 @@ export function TestPropIons() {
    return component(
       <>
          <h3>True prop ion</h3>
-         <div>{o$(frog).$name}</div>
+         <div>{$=frog.name}</div>
          <h3>Writable Derived "Prop ion"</h3>
          <div>{$frogName}</div>
          <button on:click={e => $frogName.set($frogName() + '!')}>shout name via writable method</button>

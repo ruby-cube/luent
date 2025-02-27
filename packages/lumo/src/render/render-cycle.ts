@@ -1,4 +1,4 @@
-import { $_run_with_, Listener, ResumableListener, SchedulerOptions } from "@rue/flask"
+import { ResumableListener } from "@rue/flask"
 import { $effectCycle, createEffectCycleHook, definePhase, onEffectCycleComplete, PHASE_ONE, queueTask, setDefaultPhase, useReactivity, watch as _watch, WatchSubjects, Effect } from "@rue/quarky"
 
 
@@ -11,7 +11,7 @@ export const [
 ] = useReactivity([ //(default to queueTask for all phases)
    definePhase('PRELUDE', (runPhase: VoidFunction) => queueMicrotask(() => queueMicrotask(runPhase))), // allows devs room to use queueMicrotask 
    definePhase('RENDER', requestAnimationFrame),
-   definePhase('POSTLUDE', queueTask)
+   definePhase('POSTLUDE', queueMicrotask)
 ])
 
 export const onPrelude = createEffectCycleHook(PRELUDE)

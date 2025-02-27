@@ -12,7 +12,7 @@ import { NodePod } from "../node/NodePod";
 import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, setAsyncPath } from "../../../flask/debug";
 import { Flask, setFlask } from "@rue/flask";
-import { RENDER } from "../render/render-cycle";
+import { PRELUDE } from "../render/render-cycle";
 
 //TODO: rename 'phasic node' to 'transition node'
 //TODO: rename transitionNodes to 'transitNodes'
@@ -124,7 +124,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       outerNodeVine.append(this.nodePod!)
       const $conditions = this.getConditionsIon()
-      $conditions.labelName = '$conditions'
 
       const phasicNode = this.phasicNode
       const series = this;
@@ -305,7 +304,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          }
       }, {
          // retrack: true,
-         phase: RENDER,
+         phase: PRELUDE,
       })
 
       // // set up watcher for updates

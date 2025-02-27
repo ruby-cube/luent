@@ -2,7 +2,6 @@ import { NodeEntity, normalizeToRenderFunction, RenderFunction } from "../node/m
 import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
-import { ReactiveGet } from "../../../quarky/src";
 import { Commons, getCommons } from "../commons/commons-stack";
 // import { getPhasicNode } from "../transition/PhasicNode";
 import { createCommons } from "../commons/Commons";

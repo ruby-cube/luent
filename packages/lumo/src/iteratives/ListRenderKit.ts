@@ -15,7 +15,7 @@ import { mountConditional, mountDOMNodes, removeDOMNodes } from "../conditional/
 import { Flask, getActiveFlask, setFlask } from "@rue/flask";
 import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, setAsyncPath } from "../../../flask/debug";
-import { RENDER } from "../render/render-cycle";
+import { PRELUDE, RENDER } from "../render/render-cycle";
 import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
 
@@ -175,7 +175,7 @@ export class ListRenderKit {
                console.error(err, this.__DEV__asyncPath)
             }
             // console.log('updating list', state.length, _oldValue.length)
-         }, { phase: RENDER })
+         }, { phase: PRELUDE })
       }
       // currentItem = undefined;
       $currentIndex = undefined;

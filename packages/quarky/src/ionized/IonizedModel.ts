@@ -151,7 +151,7 @@ export function useTrackableGetOp(
       if (__DEV__) emitSignal();
       // const _arg = toRaw(arg)
       getActiveTracker()?.track(asAtomicOp(model, op, arg))
-      return fn.call(decoy(target), arg)
+      return fn.call(target, arg)
    }
    trackableOp[TRACKED] = undefined;
    return trackableOp

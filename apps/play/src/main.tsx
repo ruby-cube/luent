@@ -1,4 +1,3 @@
-//@ts-nocheck
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
@@ -97,33 +96,37 @@ if (__DEV__) configureFlask({
    warnNoCleanup: true
 })
 
-const globalCommons = createGlobalCommons([
-   m(DOOR, () => doSomething())
-])
+// const globalCommons = createGlobalCommons([
+//    m(DOOR, () => doSomething())
+// ])
 
-const app = createApp(
-   <SortableTableApp
-      hideApp={hideApp}
-      closeApp={closeApp}
-   />
-)
+// const app = createApp(
+//    <SortableTableApp
+//       hideApp={hideApp}
+//       closeApp={closeApp}
+//    />
+// )
 
-app.initialize('#app', {
-   globalCommons,
-   provide: []
-})
+const app = createApp(TodoMVC)
 
-function hideApp() {
-   app.demount()
-}
+app.mount('#app')
 
-function showApp() {
-   app.remount()
-}
+// app.initialize('#app', {
+//    globalCommons,
+//    provide: []
+// })
 
-function closeApp() {
-   app.terminate()
-}
+// function hideApp() {
+//    app.demount()
+// }
+
+// function showApp() {
+//    app.remount('#section-2')
+// }
+
+// function closeApp() {
+//    app.close()
+// }
 
 
 

@@ -1,15 +1,15 @@
 import { getCommons } from "../commons/commons-stack";
 import { NodeEntity, normalizeToRenderFunction } from "../node/makeNode";
 import { ListRenderKit } from "./ListRenderKit";
-import { AnyIon, AtomicIon, Ion } from "@rue/quarky";
+import { AtomicIon, Ion } from "@rue/quarky";
 
 
-export type RenderItem<L> = L extends Collection<infer I> ? (item: I, $i: AnyIon<number>) => NodeEntity : L extends Ion<Collection<infer I>> ? (item: I, $i: AnyIon<number>) => NodeEntity : (item: any, $i: AnyIon<number>) => NodeEntity
+export type RenderItem<L> = L extends Collection<infer I> ? (item: I, $i: Ion<number>) => NodeEntity : L extends Ion<Collection<infer I>> ? (item: I, $i: Ion<number>) => NodeEntity : (item: any, $i: Ion<number>) => NodeEntity
 // L extends Collection<infer I> | Ion<Collection<infer I>> ? ((item: I) => NodeEntity) | ((item: I, $index: AtomicIon<number>) => NodeEntity)
    // : L extends Collection<infer I> ? ((item: I) => NodeEntity) | ((item: I, index: number) => NodeEntity)
       // : never
 // type ListData = AnyObject | any[] | Set<any> | Map<any, any> | Ionized<AnyObject[] | Set<any> | Map<any, any> | AnyObject> //TODO: Implement for maps, sets, and objects. Not sure about updating behavior. What about strings and iterating over characters?
-export type ListData<T = any> = Collection<T> | AnyIon<Collection<T>>
+export type ListData<T = any> = Collection<T> | Ion<Collection<T>>
 export type UniqueItem = any;
 export type Collection<T> = T[] | readonly T[] | Set<T> //TODO: add maps
 
