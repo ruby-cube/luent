@@ -47,7 +47,7 @@ function genId() {
 
 class Frog {
    name = 'kermit'
-   setName(){
+   setName() {
 
    }
 }
@@ -83,10 +83,8 @@ export function List(
    console.log([...list])
 
 
-   const mySet = new Set()
-   const selected = ionize(mySet, {
+   const selected = ionize(new Set(), {
       toggle(item: typeof list[number]) {
-         console.log(toRaw(selected))
          const prevSize = toRaw(selected).size;
          if (selected.has(item)) {
             selected.delete(item)
@@ -96,10 +94,9 @@ export function List(
          }
          console.log('toggle', toRaw(selected), prevSize, 'to', toRaw(selected).size)
       }
-   }
-   )
-   try {
+   })
 
+   try {
       console.log('has it?', selected.has(0))
    }
    catch (err) {
@@ -127,7 +124,7 @@ export function List(
             insert!
          </div>
 
-         {For(list, item => item.id, (item, $index) => (console.log('rendering', item.content, $index()),
+         {For(list, item => item.id, (item, $index) => (console.log('rendering', item, item.content, $index()),
             <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
                // <div
                style={{

@@ -152,9 +152,9 @@ export function useTrackableGetOp(
    const trackableOp = function trackableGetOp(arg: any) {
       console.log('calling trackableGetOp')
       if (__DEV__) emitSignal();
-      // const _arg = toRaw(arg)
-      getActiveTracker()?.track(asAtomicOp(model, op, arg))
-      return fn.call(target, arg)
+      const value = toRaw(arg)
+      getActiveTracker()?.track(asAtomicOp(model, op, value))
+      return fn.call(target, value)
    }
    trackableOp[TRACKED] = undefined;
    return trackableOp
@@ -170,7 +170,7 @@ export function useTrackableOp(
    const fn = target[op]
    return function trackableOp(...args: any[]) {
       if (__DEV__) emitSignal();
-      // args.forEach(arg => toRaw(arg))
+      args.forEach(arg => toRaw(arg))
       getActiveTracker()?.track(quarkOf(model))
       return fn.call(target, ...args) 
    }
@@ -187,7 +187,6 @@ export function useTrackableOpWithCallback(
    return function trackableOp(...args: any[]) {
       console.log('calling trackableOp with decoy')
       if (__DEV__) emitSignal();
-      // args.forEach(arg => toRaw(arg))
       getActiveTracker()?.track(quarkOf(model))
       return fn.call(decoy(target), ...args)
    }
