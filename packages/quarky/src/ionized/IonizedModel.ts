@@ -112,7 +112,7 @@ export const TRACK_MODEL_WITH_CALLBACK = 3 as const
 export type CustomIonizedModelConfig = {
    structure?: any;
    nontrackableKeys?: { [key: PropertyKey]: boolean };
-   trackableOps?: { [key: PropertyKey]: typeof TRACK_ENTRY | typeof TRACK_MODEL | typeof TRACK_MODEL_WITH_CALLBACK }
+   trackableOps?: { [key: PropertyKey]: CreateTrackableOp }
    mutatingOps?: { [key: PropertyKey]: MutatingOpConfig };
    beforeSet?: BeforeSetCallback; //TODO:
    afterSet?: AfterSetCallback;
@@ -123,7 +123,16 @@ export type CustomIonizedModelConfig = {
 type BeforeSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, oldValue: any) => void
 type AfterSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, newValue: any, oldValue: any) => void
 
-type CreateTrackableOp = (target: AnyObject, ionizedModel: IonizedModel) => (...args: any[]) => any
+
+type CreateTrackableOp = (
+   target: AnyObject,
+   model: IonizedModel,
+   op: PropertyKey,
+   transformArgs?: (args: any[]) => any[],
+   transformTarget?: (target: AnyObject, args: any[]) => AnyObject,
+   transformReturn?: (result: any) => any
+) => (...args: any[]) => any
+
 
 type MutatingOpConfig = {
    createOp: (target: AnyObject, ionizedModel: IonizedModel, meta: any, getPreopData: GetPreopData | undefined) => (...args: any[]) => any
@@ -137,15 +146,15 @@ type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[
 
 // A 'get op' is a o(1) get-like operation like set.has() or array.at()
 
-const TrackableOp = {
-   [TRACK_ENTRY]: useTrackableGetOp,
-   [TRACK_MODEL]: useTrackableOp,
-   [TRACK_MODEL_WITH_CALLBACK]: useTrackableOpWithCallback
-}
+// const TrackableOp = {
+//    [TRACK_ENTRY]: useTrackableGetOp,
+//    [TRACK_MODEL]: useTrackableOp,
+//    [TRACK_MODEL_WITH_CALLBACK]: useTrackableOpWithCallback
+// }
 
 export function useTrackableGetOp(
-   model: IonizedModel,
    target: AnyObject,
+   model: IonizedModel,
    op: PropertyKey,
 ) {
    const fn = target[op]
@@ -154,7 +163,7 @@ export function useTrackableGetOp(
       if (__DEV__) emitSignal();
       const value = toRaw(arg)
       getActiveTracker()?.track(asAtomicOp(model, op, value))
-      return fn.call(target, value)
+      return maybeIonize(fn.call(target, value))
    }
    trackableOp[TRACKED] = undefined;
    return trackableOp
@@ -163,41 +172,135 @@ export function useTrackableGetOp(
 
 // a `trackable op` is a method like 'values()' or 'entries()' that tracks the entire ionic model as a watch subject rather than a specific entry or property
 export function useTrackableOp(
-   model: IonizedModel,
    target: AnyObject,
+   model: IonizedModel,
    op: PropertyKey,
+   transformArgs: (args: any[]) => any[] = noTransform,
+   transformTarget: (target: AnyObject, args: any[]) => AnyObject = noTransform,
+   transformReturn: (result: any) => any = noTransform
 ) {
    const fn = target[op]
    return function trackableOp(...args: any[]) {
       if (__DEV__) emitSignal();
-      args.forEach(arg => toRaw(arg))
+      const _args = transformArgs(args);
       getActiveTracker()?.track(quarkOf(model))
-      return fn.call(target, ...args) 
+      return transformReturn(fn.call(transformTarget(target, _args), ..._args))
    }
+}
+
+export function useTrackableOpWithCallback(
+   target: AnyObject,
+   model: IonizedModel,
+   op: PropertyKey,
+) {
+   return useTrackableOp(target, model, op, undefined, (target) => decoy(target))
+}
+
+export function useTrackableIterative(
+   target: AnyObject,
+   model: IonizedModel,
+   op: PropertyKey,
+) {
+   return useTrackableOp(target, model, op, undefined, (target, args) => decoy(args[1] ?? target))
+}
+
+/**
+ * A method that produces a new version of the original data structure by iterating over the original, eg. array.map()
+ * @param target 
+ * @param model 
+ * @param op 
+ * @returns 
+ */
+export function useTrackableCreativeIterative(
+   target: AnyObject,
+   model: IonizedModel,
+   op: PropertyKey,
+) {
+   return useTrackableOp(
+      target, model, op, undefined,
+      (target, args) => decoy(args[1] ?? target),
+      (result) => ionize(result)
+   )
+}
+
+/**
+ * A method that produces a new version of the original data structure, eg. array.toReversed()
+ * @param target 
+ * @param model 
+ * @param op 
+ * @returns 
+ */
+export function useTrackableCreativeOp(
+   target: AnyObject,
+   model: IonizedModel,
+   op: PropertyKey,
+) {
+   return useTrackableOp(
+      target, model, op, undefined, undefined,
+      (result) => ionize(result)
+   )
+}
+
+/**
+ * A method that produces a new version of the original data structure, eg. array.toReversed()
+ * @param target 
+ * @param model 
+ * @param op 
+ * @returns 
+ */
+export function useTrackableCreativeOpWithArgs(
+   target: AnyObject,
+   model: IonizedModel,
+   op: PropertyKey,
+) {
+   return useTrackableOp(
+      target, model, op,
+      args => args.map(item => toRaw(item)),
+      undefined,
+      (result) => ionize(result)
+   )
+}
+
+
+
+export function useTrackableCheck(
+   target: AnyObject,
+   model: IonizedModel,
+   op: PropertyKey,
+) {
+   return useTrackableOp(target, model, op, (args) => (args[0] = toRaw(args[0]), args))
+}
+
+
+
+function noTransform(value: any) {
+   return value;
 }
 
 // a `trackable op` is a method like 'filter' that tracks the entire ionic model as a watch subject rather than a specific entry or property
 // and also receives a callback that receives property values of the model
-export function useTrackableOpWithCallback(
-   model: IonizedModel,
-   target: AnyObject,
-   op: PropertyKey,
-) {
-   const fn = target[op]
-   return function trackableOp(...args: any[]) {
-      console.log('calling trackableOp with decoy')
-      if (__DEV__) emitSignal();
-      getActiveTracker()?.track(quarkOf(model))
-      return fn.call(decoy(target), ...args)
-   }
-}
+// export function useTrackableOpWithCallback(
+//    model: IonizedModel,
+//    target: AnyObject,
+//    op: PropertyKey,
+//    ionizeArgs?: (args: any[]) => any[]
+// ) {
+//    const fn = target[op]
+//    return function trackableOp(...args: any[]) {
+//       console.log('calling trackableOp with decoy')
+//       if (__DEV__) emitSignal();
+//       const _args = ionizeArgs ? ionizeArgs(args) : args;
+//       getActiveTracker()?.track(quarkOf(model))
+//       return fn.call(decoy(target), ..._args)
+//    }
+// }
 
-function decoy(target: AnyObject){
+function decoy(target: AnyObject) {
    return new Proxy(target, {
-      get(target, key){
+      get(target, key) {
          return maybeIonize(target[key])
       },
-      set(target, key, value){
+      set(target, key, value) {
          target[key] = toRaw(value)
          return true;
       }
@@ -378,7 +481,7 @@ function bindMethod(method: Function, key: string | symbol, proxy: IonizedModel,
       // __DEV__ ?
       //    traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
       //    : 
-         method.bind(proxy);
+      method.bind(proxy);
    switchMap.set(key, () => boundMethod)
    return boundMethod;
 }
@@ -512,9 +615,9 @@ function getBoundMethod(
    if (method) {
       boundMethod =
          // __DEV__ ?
-            // traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
-            // : 
-            method.bind(proxy);
+         // traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
+         // : 
+         method.bind(proxy);
       boundMethodMap.set(key, boundMethod!)
       return boundMethod;
    }
@@ -552,7 +655,7 @@ export function getNativeMethodConfig(
 
 //FIX: figure out where to call traceableMethodWrap
 function bindNativeMethod(
-   config: typeof TRACK_ENTRY | typeof TRACK_MODEL | typeof TRACK_MODEL_WITH_CALLBACK | AnyObject,
+   config: CreateTrackableOp | AnyObject,
    nativeKey: string | symbol,
    publicKey: string | symbol,
    target: AnyObject,
@@ -560,19 +663,19 @@ function bindNativeMethod(
    quark: IonizedModelQuark,
    switchMap: ProxySwitchMap,
 ) {
-   if (isObject(config)) { 
-      const createOp = config.createOp
-      const getPreopData = config.preop
-      const op = 
-      // __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, quark, getPreopData))
-      // : 
-      createOp(target, ionizedModel, quark, getPreopData)
+   if (isFunction(config)) {
+      // trackable ops
+      const op = config(target, ionizedModel, nativeKey)
       switchMap.set(publicKey, () => op)
       return op;
    }
    else {
-      // trackable ops
-      const op = TrackableOp[config](ionizedModel, target, nativeKey)
+      const createOp = config.createOp
+      const getPreopData = config.preop
+      const op =
+         // __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, quark, getPreopData))
+         // : 
+         createOp(target, ionizedModel, quark, getPreopData)
       switchMap.set(publicKey, () => op)
       return op;
    }

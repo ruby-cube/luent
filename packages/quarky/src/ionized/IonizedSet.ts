@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { storeSnapshot, toRaw } from "./ionize";
-import { defineIonizedStructure, GetPreopData, IonizedModel, TRACK_ENTRY, TRACK_MODEL, TRACK_MODEL_WITH_CALLBACK, useTrackableGetOp } from "./IonizedModel";
+import { defineIonizedStructure, GetPreopData, IonizedModel, TRACK_ENTRY, TRACK_MODEL, TRACK_MODEL_WITH_CALLBACK, useTrackableCreativeOpWithArgs, useTrackableGetOp, useTrackableCheck, useTrackableIterative, useTrackableOp, useTrackableOpWithCallback } from "./IonizedModel";
 import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { getAtomicPion } from "./Pion";
@@ -67,20 +67,20 @@ const trackableSetOps = {
 export function installIonicSet() {
    defineIonizedStructure(Set, {
       trackableOps: {
-         has: TRACK_ENTRY,
-         [Symbol.iterator]: TRACK_MODEL_WITH_CALLBACK,
-         forEach: TRACK_MODEL_WITH_CALLBACK,
-         keys: TRACK_MODEL,
-         values: TRACK_MODEL,
-         entries: TRACK_MODEL,
-         difference: TRACK_MODEL, // newSet = difference(otherSet) 
-         union: TRACK_MODEL,
-         intersection: TRACK_MODEL,
-         symmetricDifference: TRACK_MODEL,
+         has: useTrackableGetOp,
+         [Symbol.iterator]: useTrackableOpWithCallback,
+         forEach: useTrackableIterative,
+         keys: useTrackableOp,
+         values: useTrackableOp,
+         entries: useTrackableOp,
+         difference: useTrackableCreativeOpWithArgs, // newSet = difference(otherSet) 
+         union: useTrackableCreativeOpWithArgs,
+         intersection: useTrackableCreativeOpWithArgs,
+         symmetricDifference: useTrackableCreativeOpWithArgs,
       
-         isSubsetOf: TRACK_MODEL, // boolean = isSubsetOf(otherSet)
-         isSupersetOf: TRACK_MODEL, // boolean = isSupersetOf(otherSet)
-         isDisjointFrom: TRACK_MODEL, // boolean = isDisjointFrom(otherSet)
+         isSubsetOf: useTrackableCheck, // boolean = isSubsetOf(otherSet)
+         isSupersetOf: useTrackableCheck, // boolean = isSupersetOf(otherSet)
+         isDisjointFrom: useTrackableCheck, // boolean = isDisjointFrom(otherSet)
       },
       mutatingOps: {
          add: {

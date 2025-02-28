@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
 import { AtomicOp, getAtomicOp } from "./AtomicOp";
-import { defineIonizedStructure, GetPreopData, IonizedModel, TRACK_ENTRY, TRACK_MODEL, TRACK_MODEL_WITH_CALLBACK, useTrackableGetOp, useTrackableOp } from "./IonizedModel";
+import { defineIonizedStructure, GetPreopData, IonizedModel, TRACK_ENTRY, TRACK_MODEL, TRACK_MODEL_WITH_CALLBACK, useTrackableGetOp, useTrackableOp, useTrackableOpWithCallback, useTrackableIterative, useTrackableCheck, useTrackableCreativeIterative, useTrackableCreativeOp, useTrackableCreativeOpWithArgs } from "./IonizedModel";
 import { getAtomicPion, PionQuark, triggerPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { IonizedModelQuark } from "./IonizedModelQuark";
@@ -118,61 +118,6 @@ const proxy = new Proxy(arr, {
 })
 
 
-const trackableArrayOps = {
-   [Symbol.iterator]: true,
-
-   // whole array, triggered by any change to array
-
-   toReversed: true, // newArray = toReversed()
-   flat: true, // newArray = flat(depth?)
-   toSorted: true, // newArray = toSorted(compareFn?)
-   flatMap: true, // newArray = flatMap(callbackFn, thisArg?)
-   map: true, // newArray = map(callbackFn, thisArg?)
-   reduce: true, // result = reduce(callbackFn, initialValue?)
-   reduceRight: true, // result = reduceRight(callbackFn, initialValue?)
-
-   join: true, // string = join(separator?)
-   toLocaleString: true, // string = toLocaleString() 
-   toString: true, // string = toString()
-
-   filter: true, // newArray = filter(callbackFn, thisArg?)
-   keys: true,  // newIterable = keys()
-   entries: true, // newEntriesIterator = entries()
-   values: true, // newIterable = values()
-   forEach: true,
-
-   concat: true, // newArray = concat(arrayB, arrayC, ...)
-   with: true, // newArray = arrayInstance.with(index, value)
-
-   find: true, // item = find(callbackFn, thisArg?)
-   findLast: true, // item = findLast(callbackFn, thisArg?)
-
-   findIndex: true, // index = findIndex(callbackFn, thisArg?)
-   findLastIndex: true, // index = findLastIndex(callbackFn, thisArg?)
-
-   every: true, // boolean = every(callbackFn, thisArg?)
-   some: true, // boolean = some(callbackFn, thisArg?)
-
-   // depends on index
-   slice: true, // newArray = slice(start?, end?)
-   toSpliced: true, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
-
-   // check if result changed
-   lastIndexOf: true, // index = lastIndexOf(item, fromIndex)
-   indexOf: true, // index = indexOf(item, fromIndex)
-   includes: true, // boolean = includes(item, fromIndex?)
-
-   // args
-   // copyWithin: true,
-   // fill: true,
-   // pop: true,
-   // push: true,
-   // shift: true,
-   // unshift: true,
-   // reverse: true,
-   // sort: true,
-   // splice: true,
-}
 
 export function installIonicArray() {
    defineIonizedStructure(Array, {
@@ -189,47 +134,60 @@ export function installIonicArray() {
       // },
 
       trackableOps: {
-         at: TRACK_ENTRY,
+         at: useTrackableGetOp,
 
-         [Symbol.iterator]: TRACK_MODEL,
-         toReversed: TRACK_MODEL, // newArray = toReversed()
-         flat: TRACK_MODEL, // newArray = flat(depth?)
-         toSorted: TRACK_MODEL_WITH_CALLBACK, // newArray = toSorted(compareFn?)
-         flatMap: TRACK_MODEL_WITH_CALLBACK, // newArray = flatMap(callbackFn, thisArg?)
-         map: TRACK_MODEL_WITH_CALLBACK, // newArray = map(callbackFn, thisArg?)
-         reduce: TRACK_MODEL_WITH_CALLBACK, // result = reduce(callbackFn, initialValue?)
-         reduceRight: TRACK_MODEL_WITH_CALLBACK, // result = reduceRight(callbackFn, initialValue?)
+         [Symbol.iterator]: useTrackableOpWithCallback, // decoy
 
-         join: TRACK_MODEL, // string = join(separator?)
-         toLocaleString: TRACK_MODEL, // string = toLocaleString() 
-         toString: TRACK_MODEL, // string = toString()
+         toReversed: useTrackableCreativeOp, // newArray = toReversed()
+         flat: useTrackableCreativeOp, // newArray = flat(depth?)
+         toSorted: useTrackableOpWithCallback, // newArray = toSorted(compareFn?) //TODO: newArray
+         flatMap: useTrackableCreativeIterative, // newArray = flatMap(callbackFn, thisArg?)
+         map: useTrackableCreativeIterative, // newArray = map(callbackFn, thisArg?)
+         filter: useTrackableCreativeIterative, // newArray = filter(callbackFn, thisArg?)
 
-         filter: TRACK_MODEL_WITH_CALLBACK, // newArray = filter(callbackFn, thisArg?)
-         keys: TRACK_MODEL,  // newIterable = keys()
-         entries: TRACK_MODEL, // newEntriesIterator = entries()
-         values: TRACK_MODEL, // newIterable = values()
-         forEach: TRACK_MODEL,
+         concat: useTrackableCreativeOpWithArgs, // newArray = concat(arrayB, arrayC, ...)
+         with: useTrackableCreativeOpWithArgs, // newArray = arrayInstance.with(index, value)
 
-         concat: TRACK_MODEL, // newArray = concat(arrayB, arrayC, ...)
-         with: TRACK_MODEL, // newArray = arrayInstance.with(index, value)
+         reduce: useTrackableOpWithCallback, // result = reduce(callbackFn, initialValue?)
+         reduceRight: useTrackableOpWithCallback, // result = reduceRight(callbackFn, initialValue?)
 
-         find: TRACK_MODEL_WITH_CALLBACK, // item = find(callbackFn, thisArg?)
-         findLast: TRACK_MODEL_WITH_CALLBACK, // item = findLast(callbackFn, thisArg?)
+         join: useTrackableOp, // string = join(separator?)
 
-         findIndex: TRACK_MODEL_WITH_CALLBACK, // index = findIndex(callbackFn, thisArg?)
-         findLastIndex: TRACK_MODEL_WITH_CALLBACK, // index = findLastIndex(callbackFn, thisArg?)
+         forEach: useTrackableIterative,//forEach(callbackFn, thisArg?)
 
-         every: TRACK_MODEL_WITH_CALLBACK, // boolean = every(callbackFn, thisArg?)
-         some: TRACK_MODEL_WITH_CALLBACK, // boolean = some(callbackFn, thisArg?)
+         keys: useTrackableOp,  // newIterable = keys()
+         entries: useTrackableOp, // newEntriesIterator = entries()
+         values: useTrackableOp, // newIterable = values()
 
-         // depends on index //TODO: 
-         slice: TRACK_MODEL, // newArray = slice(start?, end?)
-         toSpliced: TRACK_MODEL, // newArray = toSpliced(start?, deleteCount?, item1, item2, /* …, */ itemN)
+         toLocaleString: useTrackableOp, // string = toLocaleString() 
+         toString: useTrackableOp, // string = toString()
 
-         // check if result changed //TODO:
-         lastIndexOf: TRACK_MODEL, // index = lastIndexOf(item, fromIndex)
-         indexOf: TRACK_MODEL, // index = indexOf(item, fromIndex)
-         includes: TRACK_MODEL, // boolean = includes(item, fromIndex?)
+         find: useTrackableIterative, // item = find(callbackFn, thisArg?)
+         findLast: useTrackableIterative, // item = findLast(callbackFn, thisArg?)
+
+         findIndex: useTrackableIterative, // index = findIndex(callbackFn, thisArg?)
+         findLastIndex: useTrackableIterative, // index = findLastIndex(callbackFn, thisArg?)
+
+         every: useTrackableIterative, // boolean = every(callbackFn, thisArg?)
+         some: useTrackableIterative, // boolean = some(callbackFn, thisArg?)
+
+         // depends on index //TODO: possible performance optimization if we trigger based on indices?
+         lastIndexOf: useTrackableCheck, // index = lastIndexOf(item, fromIndex?)
+         indexOf: useTrackableCheck, // index = indexOf(item, fromIndex?)
+         includes: useTrackableCheck, // boolean = includes(item, fromIndex?)
+
+         slice: useTrackableCreativeOp, // newArray = slice(start?, end?) 
+
+         //TODO: test if this functions properly
+         toSpliced: (target, model, op) =>
+            useTrackableOp(
+               target,
+               model,
+               op,
+               (args) => args.map((item, index) => index < 2 ? item : toRaw(item)),
+               undefined,
+               (result) => ionize(result)
+            ), // newArray = toSpliced(start?, delete[Count?, item1, item2, /* …, */ itemN)
       },
 
       mutatingOps: {
