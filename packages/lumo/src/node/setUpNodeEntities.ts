@@ -3,22 +3,20 @@ import { DOMNode, InternalComponent } from "../component/InternalComponent";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
 import { MatchCaseKit } from "../conditional/MatchCaseKit";
-import { setUpElement } from "../element/mountElement";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
-import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { NodeEntity, SwapConfig, SwapType } from "./makeNode";
-import { setUpTextNode } from "./mountTextNode";
-import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./mountInnerHTML";
+import { setUpTextNode } from "./TextNode";
+import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./InnerHTML";
 import { getClosestCommons } from "../commons/commons-stack";
 import { NodePod } from "./NodePod";
 import { AnyObject } from "@rue/types";
+import { MorphicRenderKit } from "../conditional/MorphicNode";
 
 // [ ] validate and apply swap tag
 // [ ] validate and compose conditional series
 // [V] spread arrays and nested array
 
 export type NodeKit = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderSeries | MorphicRenderKit | InnerHTMLKit 
-// | MutableKit
 
 export type MutableKit = { mu: AnyObject }
 
@@ -147,7 +145,8 @@ export function setUpNodeEntity(
    nodePod: NodePod,
 ) {
    if (nodeEntity instanceof Element) { // Element type from Web API
-      return setUpElement(nodeEntity, nodePod)
+      nodePod.push(nodeEntity)
+      return nodeEntity;
    }
    if (
       nodeEntity instanceof InternalComponent

@@ -142,37 +142,6 @@ export const postlude = createRenderCyclePhase(renderCyclePhases, 'postlude', on
 
 
 
-// initial event
-// onPrelude
-// onRender
-// onPostlude
-export function watch<
-   T extends WatchSubjects,
-   P
->(subject: T, effect: Effect<T>): ResumableListener
-export function watch<
-   T extends WatchSubjects,
-   P
->(subject: T, effect: Effect<T>, options: EffectOptions): ResumableListener
-export function watch<
-   T extends WatchSubjects,
-   P
->(...args: [...T, Effect<T>] | [...T, Effect<T>, EffectOptions]): ResumableListener
-export function watch<
-   T extends WatchSubjects,
-   P
->(...args: [...T, Effect<T>, EffectOptions]): ResumableListener
-export function watch<
-   T extends WatchSubjects,
-   P
->(...args:
-   // [IonicTask<P>] | [IonicTask<P>, EffectOptions] |
-   [...T, Effect<T>] | [...T, Effect<T>, EffectOptions]): ResumableListener {
-   // function watch(options?: { sync?: boolean }) {
-   options.phase = options?.sync ? SYNC : $effectCycle().currentPhase || PHASE_ONE
-
-   return _watch(...args)
-}
 
 // const $todoID = ion('kldk')
 // const $data = ion()

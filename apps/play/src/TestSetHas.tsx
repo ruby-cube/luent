@@ -1,6 +1,6 @@
 import { component } from "@rue/lumo";
 import { ionize, watch } from "@rue/quarky";
-import { RENDER } from "../../../packages/lumo/src/render/render-cycle";
+import { RENDER } from "../../../packages/lumo/src/render-cycle";
 
 export function TestSetHas() {
    const mySet = ionize(new Set([0, 1, 2]))

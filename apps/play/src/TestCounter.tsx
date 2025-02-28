@@ -8,7 +8,7 @@
 
 import { component } from "@rue/lumo"
 import { ion, ionize, SYNC, watch } from "@rue/quarky"
-import { RENDER } from "../../../packages/lumo/src/render/render-cycle"
+import { RENDER } from "../../../packages/lumo/src/render-cycle"
 
 export function TestCounter() {
    const $count = ion(0, {

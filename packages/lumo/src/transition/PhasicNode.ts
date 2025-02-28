@@ -8,7 +8,7 @@ import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
 import type { Commons as CommonsType } from "../commons/commons-stack";
-import { v } from "../InputTypes";
+import { v } from "../component/InputTypes";
 import { Ion } from "@rue/quarky";
 import { component, Slot } from "../component/InternalComponent";
 import { Else, If } from "../conditional/If";

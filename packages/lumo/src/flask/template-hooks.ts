@@ -1,6 +1,6 @@
 import { getActiveFlask } from "@rue/flask";
 import { debug } from "@rue/utils";
-import { onPostlude, onRender, postlude } from "../render/render-cycle";
+import { onPostlude, onRender, postlude } from "../render-cycle";
 
 type LifecycleTask = (element: Element) => void;
 

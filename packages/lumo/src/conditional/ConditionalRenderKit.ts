@@ -4,7 +4,7 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { NodeKit } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
 import { Flask } from "@rue/flask";
-import { Ion } from "../InputTypes";
+import { Ion } from "../component/InputTypes";
 
 export type RenderConditional = (parent: Element, nodePod: NodePod) => NodeKit[]
 

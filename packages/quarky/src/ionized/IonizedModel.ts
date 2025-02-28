@@ -1,10 +1,10 @@
 import { AnyObject } from "@rue/types";
 import { ionize, registerIonizedModel, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
-import { asAtomicOp, TRACKED } from "./AtomicOp";
+import { asAtomicOp, getAtomicOp, TRACKED } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
 import { IonizedModelQuark } from "./IonizedModelQuark";
-import { isFunction, isObject, noop } from "@rue/utils";
+import { debug, isFunction, isObject, noop } from "@rue/utils";
 import { Ion, isIon } from "../ion/ion";
 import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
 import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
@@ -361,18 +361,16 @@ export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonized
    return false;
 }
 
+const INTERNAL_OP = "[[INTERNAL]]"
 
+//TODO:
+// - I really need to think through if property changes should trigger the whole model
+// - adding and deleting properties
 export function createIonizedModel(
    target: object,
    methods: AnyObject | undefined,
 ) {
    const ionizedModel = new Proxy(target, {
-      has(target, key) {
-         const getValue = switchMap.get(key)
-         if (getValue)
-            return true;
-         return key in target || !!methods && key in methods
-      },
       get(target, key, receiver) {
          __DEV__proxyGetterAssertions(ionizedModel, receiver)
          const getValue = switchMap.get(key)
@@ -387,6 +385,7 @@ export function createIonizedModel(
             switchMap
          )
       },
+
       set(target, key, value) {
          return reactiveSetter(
             ionizedModel,
@@ -394,7 +393,70 @@ export function createIonizedModel(
             key,
             value
          )
-      }
+      },
+
+      has(target, key) {
+         //FIX: This is not going to work asAtomicOp because currently I'm storing the atomic op on the function itself... I need to use a map again...
+         // getActiveTracker()?.track(asAtomicOp(ionizedModel, '[[in]]', key)) //TODO: trigger [[in]] when property is added or property is deleted
+         const getValue = switchMap.get(key)
+         if (getValue)
+            return true;
+         return key in target || !!methods && key in methods
+      },
+      ownKeys(target) {
+         getActiveTracker()?.track(asAtomicOp(ionizedModel, INTERNAL_OP, 'ownKeys')) //TODO: trigger [[in]] when any new property is added or deleted
+         return Reflect.ownKeys(target)
+      },
+
+      getOwnPropertyDescriptor(target, key) {
+         //TODO: track
+         console.log('getOwnPropertyDescriptor', key)
+         return Reflect.getOwnPropertyDescriptor(target, key)
+      },
+
+      defineProperty(target: AnyObject, key, attributes) {
+         const success = Reflect.defineProperty(target, key, attributes)
+         if (!success) return false;
+         if (!(key in target)) {
+            triggerKeysChange(key)
+         }
+         else if (target[key] !== attributes.value) {
+            getAtomicPion(ionizedModel, key)?.trigger()
+         }
+         modelQuark.trigger()
+         //TODO: record mutation?
+         return true;
+      },
+
+      deleteProperty(target: AnyObject, key) {
+         const success = delete target[key]
+         if (!success) return false;
+         if (target[key] !== undefined) {
+            getAtomicPion(ionizedModel, key)?.trigger()
+         }
+         if (key in target) {
+            triggerKeysChange(key)
+         }
+         modelQuark.trigger()
+         //TODO: record mutation?
+         return true;
+      },
+
+      setPrototypeOf(target, proto) {
+         debug.warn("[DISALLOWED] Cannot setPrototypeOf ionized model")
+         return false
+      },
+
+      isExtensible(target) {
+         getActiveTracker()?.track(asAtomicOp(ionizedModel, INTERNAL_OP, 'isExtensible'))
+         return Reflect.isExtensible(target)
+      },
+
+      preventExtensions(target) {
+         getAtomicOp(INTERNAL_OP, 'isExtensible')?.trigger()
+         return Reflect.preventExtensions(target)
+      },
+
    }) as IonizedModel
 
    const structureConfigs = getStructureConfigs(target);
@@ -407,6 +469,11 @@ export function createIonizedModel(
 
 export type ProxySwitchMap = Map<string | symbol, () => any>
 
+function triggerKeysChange(key: PropertyKey) {
+   getAtomicOp(INTERNAL_OP, 'ownKeys')?.trigger()
+   getAtomicOp("[[in]]", key)?.trigger()
+   //QUESTION: shoule this trigger the whole model? I don't think so?
+}
 
 function initialAccess(
    target: AnyObject,
@@ -719,7 +786,7 @@ export function reactiveSetter(
    const quark = quarkOf(model)
    if (quark.isNewProperty(key)) {
       quark.registerNewProperty(key)
-      // TODO:
+      // TODO: trigger 
       return true;
    }
 

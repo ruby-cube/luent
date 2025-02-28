@@ -3,19 +3,19 @@ import { isIon, AtomicIon, watch, isManagedDerivation } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
 import { $listen, $thisFlask, getActiveFlask, ResumableListener, SustainedListenerOptions } from "@rue/flask";
-import { mountNodeEntities } from "../node/mountNodeEntity";
+import { mountNodeEntities } from "../node/mountNodeKits";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
-import { isHTMLEvent } from "../template/attributes";
+import { isHTMLEvent } from "./attributes";
 import { MutableKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { initializeListRef, initializeRef, isAnyNodeRef, NodesRef, isNodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
 import { NodePod } from "../node/NodePod";
-import { RENDER } from "../render/render-cycle";
-import { MaybeIon } from "../InputTypes";
+import { RENDER } from "../render-cycle";
+import { MaybeIon } from "../component/InputTypes";
 import { debug } from "../../../utils/debug";
-import { isFlaskLifecycleHook, isFlaskPostludeLifecycleHook, isFlaskPreludeLifecycleHook, setUpHooks } from "../template/hooks";
+import { isFlaskLifecycleHook, isFlaskPostludeLifecycleHook, isFlaskPreludeLifecycleHook, setUpHooks } from "../flask/template-hooks";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap

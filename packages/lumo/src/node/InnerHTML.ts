@@ -1,7 +1,7 @@
 import { isIon, __devCheckIfTracked, watch } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
 import { NodeEntity } from "./makeNode";
-import { RENDER } from "../render/render-cycle";
+import { RENDER } from "../render-cycle";
 
 
 

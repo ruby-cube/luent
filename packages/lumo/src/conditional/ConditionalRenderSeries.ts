@@ -1,6 +1,6 @@
 import { getViewFlask } from "../flask/ViewFlask";
 import { NodeEntity, SwapType } from "../node/makeNode";
-import { mountNodeEntities } from "../node/mountNodeEntity";
+import { mountNodeEntities } from "../node/mountNodeKits";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { ConditionalSeries } from "./ConditionalSeries";
 import { hideDOMNodes, showDOMNodes } from "./toggledisplay";
@@ -12,7 +12,7 @@ import { NodePod } from "../node/NodePod";
 import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, setAsyncPath } from "../../../flask/debug";
 import { Flask, setFlask } from "@rue/flask";
-import { PRELUDE } from "../render/render-cycle";
+import { PRELUDE } from "../render-cycle";
 
 //TODO: rename 'phasic node' to 'transition node'
 //TODO: rename transitionNodes to 'transitNodes'

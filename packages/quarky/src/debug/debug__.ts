@@ -1,9 +1,8 @@
 import { AtomicIon, ionize, isAtomicIon, SYNC, watch } from "@rue/quarky"
-import { AtomicOp } from "../../../quarky/src/ionized/AtomicOp";
-import { isAtomicPionQuark } from "../../../quarky/src/ion/AtomicPion";
-import { quarkOf, hasQuark } from "../../../quarky/src/Quark";
+import { AtomicOp } from "../ionized/AtomicOp";
+import { isAtomicPionQuark } from "../ion/AtomicPion";
+import { quarkOf, hasQuark } from "../Quark";
 import { getTrace } from "../../../flask/debug";
-import { RENDER_CYCLE_COMPLETE } from "./render-cycle";
 
 
 

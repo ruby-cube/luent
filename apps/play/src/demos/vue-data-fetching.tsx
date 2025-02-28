@@ -1,6 +1,6 @@
 import { component, Else, For, If, ref } from "@rue/lumo"
 import { ion, ionicTask } from "@rue/quarky"
-import { onPostlude, postlude, renderphase } from "../../../../packages/lumo/src/render/render-cycle"
+import { onPostlude, postlude, renderphase } from "../../../../packages/lumo/src/render-cycle"
 
 type Commit = {
    commit: {

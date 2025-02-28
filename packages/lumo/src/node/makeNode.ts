@@ -13,8 +13,8 @@ import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries"
 import { createTryNode, TryNodeInput } from "../boundaries/Try";
 import { createSuspenseNode, SuspenseNodeInput } from "../boundaries/Suspense";
 import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
-import { InnerHTMLKit } from "./mountInnerHTML";
-import { MaybeIon } from "../InputTypes";
+import { InnerHTMLKit } from "./InnerHTML";
+import { MaybeIon } from "../component/InputTypes";
 
 // export function Fragment() {
 //    // for jsx-runtime

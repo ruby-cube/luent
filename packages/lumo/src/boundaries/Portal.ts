@@ -1,7 +1,7 @@
 import { component, unnestComponent } from "../component/InternalComponent";
 import { NodeEntity } from "../node/makeNode";
 import { isFunction, normalizeToArray } from "@rue/utils";
-import { mountNodeEntities } from "../node/mountNodeEntity";
+import { mountNodeEntities } from "../node/mountNodeKits";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
 

@@ -1,5 +1,5 @@
 import { TransitionNode } from "./TransitionNode";
-import { v } from "../InputTypes";
+import { v } from "../component/InputTypes";
 import { NodeRef } from "../node/NodeRef";
 import { NodeEntity } from "../node/makeNode";
 import { makeElement } from "../element/makeElement";

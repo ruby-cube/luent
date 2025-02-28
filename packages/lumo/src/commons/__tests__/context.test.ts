@@ -7,7 +7,7 @@ import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
 import { createCommons } from '../Commons';
 import { CommonsKey } from '../CommonsKey';
-import { Ion, Ionized, MaybeIon, v } from '../../InputTypes';
+import { Ion, Ionized, MaybeIon, v } from '../../component/InputTypes';
 import { ion, ionize, isIon, isIonizedModel } from '@rue/quarky';
 
 

@@ -1,5 +1,5 @@
 import { component, fromTag, NodeRef } from "@rue/lumo";
-import { v } from "../../../packages/lumo/src/InputTypes";
+import { v } from "../../../packages/lumo/src/component/InputTypes";
 
 function App() {
     const $list = NodeRef(List)

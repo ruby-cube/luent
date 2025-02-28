@@ -2,7 +2,7 @@ import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __devCheckIfTra
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
-import { mountNodeEntities } from "../node/mountNodeEntity";
+import { mountNodeEntities } from "../node/mountNodeKits";
 import { getViewFlask } from "../flask/ViewFlask";
 import { diff, InsertAndMoveKit } from "./diff";
 import { Commons } from "../commons/commons-stack";
@@ -15,7 +15,7 @@ import { mountConditional, mountDOMNodes, removeDOMNodes } from "../conditional/
 import { Flask, getActiveFlask, setFlask } from "@rue/flask";
 import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, setAsyncPath } from "../../../flask/debug";
-import { PRELUDE, RENDER } from "../render/render-cycle";
+import { PRELUDE, RENDER } from "../render-cycle";
 import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
 

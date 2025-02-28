@@ -28,6 +28,7 @@ function createPionQuark(model: IonizedModel, key: PropertyKey) {
 function getPropertyGetter(modelQuark: IonizedModelQuark, key: PropertyKey) {
    let rawTarget = modelQuark.rawTarget
    while (rawTarget !== Object) {
+      console.log('rawTarget', rawTarget, key)
       const propertyDescriptor = Object.getOwnPropertyDescriptor(rawTarget, key)
       if (propertyDescriptor)
          return propertyDescriptor.get;

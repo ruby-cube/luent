@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
-import { mountNodeEntities } from "../node/mountNodeEntity";
+import { mountNodeEntities } from "../node/mountNodeKits";
 import { AtomicIon, isAtomicIon, toValue } from "@rue/quarky";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { isFunction, normalizeToArray } from "@rue/utils";

@@ -1,4 +1,4 @@
-import { RENDER } from "../../../packages/lumo/src/render/render-cycle";
+import { RENDER } from "../../../packages/lumo/src/render-cycle";
 import { ion } from "../../../packages/quarky/src"
 import { NodeRef } from "@rue/lumo";
 

@@ -2,7 +2,7 @@ import { AnyObject, UnionToIntersection } from "@rue/types";
 import { isIon, toIon, } from "@rue/quarky";
 import { getComponentAttributes } from "./makeComponent";
 import { isFunction, isObject } from "@rue/utils";
-import { DeepReadonly, v, Readonly, MaybeIon } from "../InputTypes";
+import { DeepReadonly, v, Readonly, MaybeIon } from "./InputTypes";
 
 //TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
 

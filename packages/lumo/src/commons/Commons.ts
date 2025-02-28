@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { component, InternalComponent, Slot } from "../component/InternalComponent";
+import { component, InternalComponent, Slot, unnestComponent } from "../component/InternalComponent";
 import { getClosestCommons, popCommons, pushCommons } from "./commons-stack";
 import { AppCommons, _ContextInputType } from "./provide";
 import { ComponentConfig, NodeEntity } from "../node/makeNode";
@@ -40,15 +40,14 @@ export function Commons<T extends CommonsEntries<T>>(input: {
     pushCommons(commons)
     const nodeEntities = Slot()
     popCommons()
-    return component(nodeEntities)
+    return unnestComponent(nodeEntities)
 }
 
 export function createCommons(
     Slot: () => NodeEntity,
     config: ComponentConfig,
-): InternalComponent {
-   const output = Commons({ Slot, provide: config.provide })
-   return new InternalComponent(output, undefined, undefined);
+) {
+   return Commons({ Slot, provide: config.provide })
 }
 
 

@@ -2,7 +2,7 @@ import { normalizeToArray } from "@rue/utils";
 import { Component, unnestComponent } from "../component/InternalComponent";
 import { getViewFlask } from "../flask/ViewFlask";
 import { NodeEntity, RenderFunction } from "../node/makeNode";
-import { mountNodeEntities } from "../node/mountNodeEntity";
+import { mountNodeEntities } from "../node/mountNodeKits";
 import { mountConditional } from "../conditional/ConditionalRenderSeries";
 import { getCommons, getClosestCommons, popCommons, pushCommons } from "../commons/commons-stack";
 import { NodeCommons } from "../commons/Commons";

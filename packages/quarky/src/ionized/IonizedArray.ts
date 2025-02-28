@@ -73,66 +73,10 @@ import { $syncEffects } from "../effect-cycle/SyncEffects";
 
 // const jim = dogs.at(0)
 
-const arr = [1, 2, 3, 4]
-const proxy = new Proxy(arr, {
-   has(target, key) {
-      //TODO: track
-      console.log('has', key)
-      return Reflect.has(target, key)
-   },
-   deleteProperty(target, key) {
-      //TODO: trigger
-      console.log('deleteProperty', key)
-      return Reflect.deleteProperty(target, key)
-   },
-   ownKeys(target) {
-      //TODO: track
-      console.log('ownKeys', target)
-      return Reflect.ownKeys(target)
-   },
-   setPrototypeOf(target, proto) {
-      //TODO: disallow
-      console.log('setPrototypeOf', proto)
-      return Reflect.setPrototypeOf(target, proto)
-   },
-   isExtensible(target) {
-      //TODO: track
-      console.log('isExtensible')
-      return Reflect.isExtensible(target)
-   },
-   preventExtensions(target) {
-      //TODO: trigger
-      console.log('preventExtensions')
-      return Reflect.preventExtensions(target)
-   },
-   getOwnPropertyDescriptor(target, key) {
-      //TODO: track
-      console.log('getOwnPropertyDescriptor', key)
-      return Reflect.getOwnPropertyDescriptor(target, key)
-   },
-   defineProperty(target, key, attributes) {
-      //TODO: trigger
-      console.log('defineProperty', key, attributes)
-      return Reflect.defineProperty(target, key, attributes)
-   }
-})
-
 
 
 export function installIonicArray() {
    defineIonizedStructure(Array, {
-      // trackableGetOps: {
-      //    at(target, ionizedModel) {
-      //       return useTrackableGetOp(
-      //          ionizedModel,
-      //          target,
-      //          'at',
-      //          target.at
-      //       )
-      //    }
-      //    //TODO: Trackable ops (as oppsed to get ops)?? not sure if necessary yet
-      // },
-
       trackableOps: {
          at: useTrackableGetOp,
 
@@ -140,7 +84,7 @@ export function installIonicArray() {
 
          toReversed: useTrackableCreativeOp, // newArray = toReversed()
          flat: useTrackableCreativeOp, // newArray = flat(depth?)
-         toSorted: useTrackableOpWithCallback, // newArray = toSorted(compareFn?) //TODO: newArray
+         toSorted: useTrackableOpWithCallback, // newArray = toSorted(compareFn?)
          flatMap: useTrackableCreativeIterative, // newArray = flatMap(callbackFn, thisArg?)
          map: useTrackableCreativeIterative, // newArray = map(callbackFn, thisArg?)
          filter: useTrackableCreativeIterative, // newArray = filter(callbackFn, thisArg?)
@@ -155,7 +99,7 @@ export function installIonicArray() {
 
          forEach: useTrackableIterative,//forEach(callbackFn, thisArg?)
 
-         keys: useTrackableOp,  // newIterable = keys()
+         keys: useTrackableOp,  // newIterable = keys() //TODO: this does not need to track the entire model, just [[ownKeys]]
          entries: useTrackableOp, // newEntriesIterator = entries()
          values: useTrackableOp, // newIterable = values()
 

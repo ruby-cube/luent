@@ -1,4 +1,4 @@
-import { v } from "../InputTypes"
+import { v } from "../component/InputTypes"
 import { CommonsKey, createCommonsKey } from "./CommonsKey"
 import { _ContextInputType } from "./provide"
 
