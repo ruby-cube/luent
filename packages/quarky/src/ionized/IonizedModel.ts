@@ -183,6 +183,13 @@ export function useTrackableOp(
    return function trackableOp(...args: any[]) {
       if (__DEV__) emitSignal();
       const _args = transformArgs(args);
+      // if(op === 'indexOf'){
+      console.log('@% op', op)
+      console.log('@% args', args)
+      console.log('@% transformed args', _args)
+      console.log('@% target', target)
+      console.log('@% transformed target', transformTarget(target, _args))
+      // }
       getActiveTracker()?.track(quarkOf(model))
       return transformReturn(fn.call(transformTarget(target, _args), ..._args))
    }
@@ -193,7 +200,7 @@ export function useTrackableOpWithCallback(
    model: IonizedModel,
    op: PropertyKey,
 ) {
-   return useTrackableOp(target, model, op, undefined, (target) => decoy(target))
+   return useTrackableOp(target, model, op, undefined, (target) => ionizedDecoy(target))
 }
 
 export function useTrackableIterative(
@@ -201,7 +208,7 @@ export function useTrackableIterative(
    model: IonizedModel,
    op: PropertyKey,
 ) {
-   return useTrackableOp(target, model, op, undefined, (target, args) => decoy(args[1] ?? target))
+   return useTrackableOp(target, model, op, undefined, (target, args) => ionizedDecoy(args[1] ?? target))
 }
 
 /**
@@ -217,8 +224,9 @@ export function useTrackableCreativeIterative(
    op: PropertyKey,
 ) {
    return useTrackableOp(
-      target, model, op, undefined,
-      (target, args) => decoy(args[1] ?? target),
+      target, model, op, 
+      undefined,
+      (target, args) => ionizedDecoy(args[1] ?? target),
       (result) => ionize(result)
    )
 }
@@ -268,7 +276,13 @@ export function useTrackableCheck(
    model: IonizedModel,
    op: PropertyKey,
 ) {
-   return useTrackableOp(target, model, op, (args) => (args[0] = toRaw(args[0]), args))
+   return useTrackableOp(
+      target,
+      model,
+      op,
+      (args) => (args[0] = toRaw(args[0]), args),
+      target => rawDecoy(target)
+   )
 }
 
 
@@ -291,14 +305,26 @@ function noTransform(value: any) {
 //       if (__DEV__) emitSignal();
 //       const _args = ionizeArgs ? ionizeArgs(args) : args;
 //       getActiveTracker()?.track(quarkOf(model))
-//       return fn.call(decoy(target), ..._args)
+//       return fn.call(ionizedDecoy(target), ..._args)
 //    }
 // }
 
-function decoy(target: AnyObject) {
+function ionizedDecoy(target: AnyObject) {
    return new Proxy(target, {
       get(target, key) {
          return maybeIonize(target[key])
+      },
+      set(target, key, value) {
+         target[key] = toRaw(value)
+         return true;
+      }
+   })
+}
+
+function rawDecoy(target: AnyObject) {
+   return new Proxy(target, {
+      get(target, key) {
+         return toRaw(target[key])
       },
       set(target, key, value) {
          target[key] = toRaw(value)

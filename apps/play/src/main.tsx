@@ -24,6 +24,7 @@ import { TodoMVC } from './demos/todo-mvc';
 import { TestEffectCycle } from './TestEffectCycle';
 import { TestShow } from './TestShow';
 import { TestSetHas } from './TestSetHas';
+import { TestCustomRadioSelection } from './TestSelected';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';

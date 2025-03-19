@@ -8,22 +8,23 @@ export function TreeApp() {
    const treeData = {
       name: 'My Tree',
       children: [
+         // { name: 'hello' },
          { name: 'hello' },
          { name: 'world' },
          {
             name: 'child folder',
-            children: [
-               {
-                  name: 'child folder',
-                  children: [{ name: 'hello' }, { name: 'world' }]
-               },
-               { name: 'hello' },
-               { name: 'world' },
-               {
-                  name: 'child folder',
-                  children: [{ name: 'hello' }, { name: 'world' }]
-               }
-            ]
+            // children: [
+            //    {
+            //       name: 'child folder',
+            //       children: [{ name: 'hello' }, { name: 'world' }]
+            //    },
+            //    { name: 'hello' },
+            //    { name: 'world' },
+            //    {
+            //       name: 'child folder',
+            //       children: [{ name: 'hello' }, { name: 'world' }]
+            //    }
+            // ]
          }
       ]
    }
@@ -33,9 +34,13 @@ export function TreeApp() {
    return component((
       TreeItem = TreeItemView
    ) =>
+      <>
       <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
          <TreeItem mu:item={treeItem}></TreeItem>
       </ul>
+      <$--link href='/src/demos/tree-view.css' rel='stylesheet'/>
+      </>
+
    )
 }
 
@@ -158,6 +163,7 @@ function TreeItemView(input = fromTag({
          $isOpen.state = true
       }
    }
+
    return component((
       TreeItem = TreeItemView
    ) =>

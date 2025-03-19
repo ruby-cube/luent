@@ -131,6 +131,7 @@ export class Flask {
    }
 
    spawn(config: {type?: string, creationScope?: boolean}) {
+      console.trace('spawn', config.type)
       return new Flask({ outer: this, type: config.type, creationScope: config.creationScope });
    }
 

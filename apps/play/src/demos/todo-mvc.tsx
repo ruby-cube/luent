@@ -1,5 +1,5 @@
 import { component, For, If, Else } from "@rue/lumo"
-import { AtomicIon, exposeIons, Ion, ion, ionicTask,  } from "@rue/quarky"
+import { AtomicIon, exposeIons, Ion, ion, ionicTask, ionize,  } from "@rue/quarky"
 
 
 
@@ -64,7 +64,11 @@ export function TodoMVC() {
    }
 
    function removeTodo(todo: Todo) {
-      $todos().splice($todos().indexOf(todo), 1)
+      const index = $todos().indexOf(todo)
+      console.log('@% remove index', $todos())
+      console.log('@% remove index', todo)
+      console.log('@% remove index', index)
+      $todos().splice(index, 1)
    }
 
    let beforeEditCache = ''
@@ -87,6 +91,7 @@ export function TodoMVC() {
    }
 
    function removeCompleted() {
+      console.log('@% active', filters.active($todos()))
       $todos.state = filters.active($todos())
    }
 

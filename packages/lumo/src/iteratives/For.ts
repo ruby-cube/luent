@@ -17,8 +17,8 @@ export type Collection<T> = T[] | readonly T[] | Set<T> //TODO: add maps
 //TODO: Ionized item depending on if data is reactive
 //TODO: $index: number | AtomicIon<number> based on whether list data is reactive
 // export function For<L extends any[]>(data: L, render: ((item: L extends (infer I)[]? I : never, $index: Ion<number>)=>NodeEntity) | NodeEntity): ListRenderKit {
-export function For<L extends ListData>(data: L, render: RenderItem<L> | NodeEntity): ListRenderKit
-export function For<L extends ListData>(data: L, getUID: L extends Collection<infer T> ? (item: T) => unknown : (item: any) => unknown, render: RenderItem<L> | NodeEntity): ListRenderKit
+   export function For<L extends ListData>(data: L, render: RenderItem<L> | NodeEntity): ListRenderKit
+   export function For<L extends ListData>(data: L, getUID: L extends Collection<infer T> ? (item: T) => unknown : (item: any) => unknown, render: RenderItem<L> | NodeEntity): ListRenderKit
 export function For<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> | NodeEntity | (L extends Collection<infer T> ? (item: T) => unknown : never), render?: RenderItem<L> | NodeEntity): ListRenderKit {
    const uidProvided = arguments.length === 3
    const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID) as RenderItem<any[]>;

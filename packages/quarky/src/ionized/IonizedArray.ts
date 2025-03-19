@@ -73,6 +73,45 @@ import { $syncEffects } from "../effect-cycle/SyncEffects";
 
 // const jim = dogs.at(0)
 
+// How should these behave?
+
+// 1. deep ionized array
+// 2. array of ionized objects //This will fail identity checks because there is no way of intercepting methods like indexOf(). What is the most elegant mental model?
+// 3. ion of ionized array
+// 4. ionizing an array of ionized objects ... should the items be raw or ionized?
+// - raw decoy, ionized decoy
+
+// a. array output of any of these (e.g. .filter(), clone) should return an ionized model so that methods can be managed
+// b. method that performs identity checks internally (e.g. indexOf()) should treat raw and ionized models as identical
+// 
+
+/*
+ I don't want devs to have to worry about identity when working with raw and ionized models, 
+ but because of unmanaged arrays of ionized objects, devs do have to track what is raw vs ionized..
+ 
+ Which DX?
+ A. Keep ionization invisible.
+   - Discourage the creation of plain arrays of ionized objects/encourage ionizing everything.
+   - Methods like .filter should return ionized model
+   - Discourage using toRaw() and references to raw objects
+   - disallows key transform?
+   - provide an identity utility in place of x === y?
+ B. Make ionization visible. Support tracking of what is ionized and what is not... via Typescript? 
+   - requires complex re-typing of Array methods like splice
+ */
+
+
+
+ 
+
+const todo = ionize({
+   id: 0
+})
+
+const todos = [todo]
+
+todos.indexOf(todo)
+
 
 
 export function installIonicArray() {

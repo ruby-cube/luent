@@ -11,6 +11,7 @@ import { CompoundMorph, triggerEffects } from "../compound/Compound";
 import { Mutation } from "../Mutable";
 import { Traceable } from "../debug/Traceable";
 import { isIonizedModel } from "../ionized/ionize";
+import { debug } from "@rue/utils";
 
 
 
@@ -157,17 +158,20 @@ function assertValidInitialization(initializationFlask: Flask | undefined, creat
    if (!initializationFlask) {
       if (creationFlask.creationScopeID === "0") // both are in global creation scope
          return;
-      throw new Error("Memory leak alert. A memoized ion cannot be called outside its creation scope.")
+      debug.warn("Memory leak alert A. A memoized ion cannot be called outside its creation scope.")
+      return;
    }
    if (initializationFlask.creationScopeID === creationFlask.creationScopeID) return;
    if (!flaskAContainsFlaskB(creationFlask, initializationFlask))
-      throw new Error("Memory leak alert. A memoized ion cannot be called outside its creation scope.")
+      debug.warn("Memory leak alert B. A memoized ion cannot be called outside its creation scope.")
 }
 
 function flaskAContainsFlaskB(flaskA: Flask, flaskB: Flask) {
+   console.log('A', flaskA)
+   console.log('B', flaskB)
    let outer = flaskB.outer
    do {
-      if (outer === flaskA)
+      if (outer?.creationScopeID === flaskA.creationScopeID)
          return true;
       outer = outer?.outer;
    }
