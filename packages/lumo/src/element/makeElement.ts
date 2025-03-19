@@ -134,6 +134,10 @@ function bindView(element: Element, Slot: Slot | undefined, attributes: { [key: 
       case 'INPUT':
          bindInput(<HTMLInputElement>element, attributes)
          return Slot;
+      
+         case 'SELECT':
+         bindSelect(<HTMLSelectElement>element, attributes)
+         return Slot;
 
       case 'TEXTAREA':
          return bindTextarea(<HTMLTextAreaElement>element, Slot);
@@ -200,6 +204,25 @@ function bindInput(element: HTMLInputElement, attributes: { [key: string]: Mutab
    }
 }
 
+function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+   if (!('mu:value' in attributes))
+      return;
+   const ion = attributes['mu:value'];
+   watch(ion, e=>{
+      element.value = e.state
+   }, {eager: true})
+   delete attributes['mu:value'];
+   if (!isIon(ion) || !('state' in ion)) {
+      if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
+   }
+   else {
+      element.addEventListener('change', e => {
+         updateIonWithInput(ion, e)
+      })
+   }
+}
+
+
 function bindTextarea(element: Element, Slot: Slot | undefined) {
    console.log('bindTextArea', Slot)
    if (!Slot || !isFunction(Slot)) return;
@@ -218,40 +241,31 @@ function bindTextarea(element: Element, Slot: Slot | undefined) {
 
 function setUpCheckboxInputListener(element: Element, ion: { state: any } | { set: (value: any) => any }) {
    element.addEventListener('input', e => {
-      if (isManagedDerivation(ion) && 'set' in ion) {
-         ion.set(
-            //@ts-expect-error
-            e.target.checked
-         )
-      }
-      else if ('state' in ion) {
-         ion.state =
-            //@ts-expect-error
-            e.target.checked;
-      }
-      else {
-         throw new Error('invalid two-way binding')
-      }
+      updateIonWithInput(ion, e, 'checked')
    })
 }
 
 function setUpInputListener(element: Element, ion: { state: any } | { set: (value: any) => any }, key: string = 'value') {
    element.addEventListener('input', e => {
-      if (isManagedDerivation(ion) && 'set' in ion) {
-         ion.set(
-            //@ts-expect-error
-            e.target[key]
-         )
-      }
-      else if ('state' in ion) {
-         ion.state =
-            //@ts-expect-error
-            e.target[key];
-      }
-      else {
-         throw new Error('invalid two-way binding')
-      }
+      updateIonWithInput(ion, e, key)
    })
+}
+
+function updateIonWithInput(ion: {state: any}| { set: (value: any) => any }, e: Event, key: string = 'value'){
+   if (isManagedDerivation(ion) && 'set' in ion) {
+      ion.set(
+         //@ts-expect-error
+         e.target[key]
+      )
+   }
+   else if ('state' in ion) {
+      ion.state =
+         //@ts-expect-error
+         e.target[key];
+   }
+   else {
+      throw new Error('invalid two-way binding')
+   }
 }
 
 // type ViewBindingKit = {
