@@ -12,7 +12,6 @@ import { NodeRef } from "../../src/node/NodeRef";
 import { COMPONENT_ATTRIBUTES, CommonsKeyMap, _ContextInputType, Component, SuspenseNodeInput, TryNodeInput, TransitionNodeInput } from "@rue/lumo";
 import { AnyObject, Booleanny } from "@rue/types";
 import { PortalNodeInput } from "../../src/boundaries/Portal";
-import { MaybeIon } from "@rue/quarky";
 
 // export function jsxDEV(): "frog"
 // export function jsx(): "frog"
@@ -1733,9 +1732,10 @@ declare namespace React {
       value?: string | readonly string[] | number | undefined;
       width?: number | string | undefined;
 
-      'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, {set: (value: string)=>unknown}>
+      'mu:value'?: Quarky.AtomicIon<any, { state: any; }> | Quarky.Ion<any, {set: (value: any)=>unknown}>
       'mu:checked'?: Quarky.AtomicIon<Booleanny, { state: Booleanny; }> | Quarky.Ion<Booleanny, {set: (value: Booleanny)=>unknown}>
    }
+
 
    interface KeygenHTMLAttributes<T> extends HTMLAttributes<T> {
       challenge?: string | undefined;
@@ -1886,7 +1886,8 @@ declare namespace React {
       required?: boolean | undefined;
       size?: number | undefined;
       value?: string | readonly string[] | number | undefined;
-      onChange?: ChangeEventHandler<T> | undefined;
+      'on:change'?: ChangeEventHandler<T> | undefined;
+      'mu:value'?: Quarky.AtomicIon<string, { state: string; }> | Quarky.Ion<string, {set: (value: string)=>unknown}>
    }
 
    interface SourceHTMLAttributes<T> extends HTMLAttributes<T> {
@@ -2575,8 +2576,10 @@ declare global {
 
       type ClassInput = Lumo.MaybeIon<{[key: string]: Lumo.MaybeIon<Booleanny>}>
 
+      type MaybeIonAttributes<T> = {[K in keyof T]: T[K] extends Object ? {[P in keyof T[K]]: T[K][P] extends Function ? T[K][P] : Lumo.MaybeIon<T[K][P]>}: T[K]}
+
       type IntrinsicElements = {
-         [K in keyof JSX._IntrinsicElements]: JSX._IntrinsicElements[K] & {
+         [K in keyof JSX._IntrinsicElements]: MaybeIonAttributes<JSX._IntrinsicElements>[K] & {
             class?: ClassInput | Lumo.MaybeIon<string | Falsey> | (Lumo.MaybeIon<string | Falsey> | ClassInput)[];
             style?: StyleInput | StyleInput[];
             attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];

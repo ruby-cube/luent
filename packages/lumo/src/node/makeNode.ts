@@ -142,7 +142,7 @@ export function makeNode(
 
       case '$--link':
          return createPortalNode(() =>
-            makeElement('link', undefined, <ElementConfig>config, undefined)
+            makeElement(document.createElement('link'), undefined, <ElementConfig>config, undefined)
             , { to: 'head' })
 
       case 'vvv:show':
@@ -159,10 +159,21 @@ export function makeNode(
          if (!Slot) throw new Error(`Extraneous transition node`)
          return createTransitionNode(nodeType, Slot, <TransitionNodeInput>config)
 
+      case 'foreignObject':
+      case 'circle':
+      case 'svg':
+         return makeElement(
+            document.createElementNS("http://www.w3.org/2000/svg", nodeType),
+            <[string] | (() => NodeEntity[])>Slot,
+            <ElementConfig>config,
+            getCurrentIndex()
+         )
+
+
       default:
          if (typeof nodeType === 'string') {
             return makeElement(
-               nodeType,
+               document.createElement(nodeType),
                <[string] | (() => NodeEntity[])>Slot,
                <ElementConfig>config,
                getCurrentIndex()

@@ -130,7 +130,7 @@ export function TodoMVC() {
                   />
                   <label for="toggle-all">Mark all as complete</label>
                   <ul class="todo-list">
-                     {For($filteredTodos, m => m.id, todo => (exposeIons(todo),
+                     {For($filteredTodos, m => m.id, (todo, $index) => (exposeIons(todo),
                         <li class={["todo", { completed: todo.$completed, editing: todo === $editedTodo() }]}>
                            <div class="view">
                               <input class="toggle" type="checkbox" mu:checked={todo.$completed} />

@@ -175,9 +175,13 @@ export function exposeIons<T>(model: T): asserts model is T & AsIons<T> {
    if (!isIonizedModel(model)) throw new Error("model must be ionized")
 }
 
-// export function o$<T>(model: T): AsIons<T> {
-//    return model as AsIons<T>
-// }
+export function ions<T>(model: T): AsIons<T> {
+   return model as AsIons<T>
+}
+
+export function $$<T>(model: T): AsIons<T> {
+   return model as AsIons<T>
+}
 
 type AsIons<T> = {
    [K in keyof T as T[K] extends (...args: any[])=>any ? never : K extends string ? `$${K}` : K]:  AtomicIon<T[K]>

@@ -15,7 +15,7 @@ import { NodePod } from "../node/NodePod";
 import { RENDER } from "../render-cycle";
 import { MaybeIon } from "../component/InputTypes";
 import { debug } from "../../../utils/debug";
-import { isFlaskLifecycleHook, isFlaskPostludeLifecycleHook, isFlaskPreludeLifecycleHook, setUpHooks } from "../flask/template-hooks";
+import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -28,8 +28,8 @@ export function mE(
    return makeNode(nodeType, Slot, config || {}) as DOMNode
 }
 
-export function makeElement<T extends keyof HTMLElementTagNameMap>(
-   tagName: T,
+export function makeElement(
+   domNode: Element,
    Slot: Slot | undefined,
    config: ElementConfig,
    $index: AtomicIon<number> | undefined
@@ -39,7 +39,7 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
    const { attributes, events, hooks } = analyzeAttributes(other)
 
 
-   const domNode = isHydrating() ? getElement() : document.createElement(tagName);
+   // const domNode = isHydrating() ? getElement() : document.createElement(tagName);
 
    if (ref) {
       if (!isAnyNodeRef(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef as ref")
@@ -69,7 +69,6 @@ export function makeElement<T extends keyof HTMLElementTagNameMap>(
       const rawOutput = normalizeToArray(isFunction(_Slot) ? _Slot() : _Slot)
       const nodePod = new NodePod();
       const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodePod)
-      if (tagName === 'section') console.log("@## nodeEntities", nodeEntities)
       mountNodeEntities(nodeEntities, domNode)
    }
    return domNode;
@@ -286,6 +285,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: any | Deriv
       //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {
          watch(value, ({ state }) => {
+            console.log('updating', key, 'with', state, value())
             setAttribute(node, _key, state)
          }, { eager: true, phase: RENDER })
       }
@@ -298,21 +298,27 @@ function setUpAttributes(node: Element, attributes: { [key: string]: any | Deriv
       //    }, { eager: true, phase: Phase.RENDER })
       // }
       else if (!isHydrating()) {
-         node.setAttribute(_key, toString(value))
+         setAttribute(node, _key, toString(value))
       }
    }
 }
 
-function setAttribute(node: Element & AnyObject, key: string, value: any) {
+function setAttribute(node: AnyObject, key: string, value: any) {
+ 
    //TODO: what if attribute can take a falsey value like 0 or false?
-   if (value) {
-      // node.setAttribute(key, toString(value)) //NOTE: Programmatic checking and unchecking of check boxes breaks using setAttribute and removeAttribute
-      node[key] = value;
+   // if (value !== undefined) {
+   //    // node.setAttribute(key, toString(value)) //NOTE: Programmatic checking and unchecking of check boxes breaks using setAttribute and removeAttribute
+   //    node[key] = value;
+   // }
+   // else {
+   if (node instanceof SVGElement){
+      node.setAttribute(key, value)
    }
    else {
-      node[key] = value;
-      // node.removeAttribute(key);
+      node[key] = value ?? '';
    }
+      // node.removeAttribute(key);
+   // }
 }
 
 function toString(value: any) {

@@ -22,6 +22,7 @@ export * from './transition/transitions' //TODO: Limit to public API
 export * from './transition/TransitionNode' //TODO: Limit to public API
 export * from './flask/flask-hooks' //TODO: Limit to public API
 export * from './flask/ViewFlask' //TODO: Limit to public API
+export * from './component/InputTypes' //TODO: Limit to public API
 
 
 
