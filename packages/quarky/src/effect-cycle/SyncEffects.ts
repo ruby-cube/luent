@@ -3,7 +3,7 @@ import { EffectVine } from "./EffectLink";
 import { AsyncState } from "@rue/flask";
 import { EffectLink } from "./EffectLink";
 
-export const [getEffect, setEffect, _effectStack] = AsyncState<EffectLink>('current effect');
+export const [getEffect, _effectStack] = AsyncState<EffectLink>('current effect');
 
 const activeEffects = new Set()
 
@@ -26,8 +26,16 @@ export const effectStack = {
 
 let syncEffects: SyncEffects | undefined
 
-export function $syncEffects() {
+function $syncEffects() {
    return syncEffects ?? (syncEffects = new SyncEffects())
+}
+
+export function runSyncEffects(){
+   $syncEffects().run()
+}
+
+export function scheduleSyncEffects(effects: EffectVine){
+   $syncEffects().absorb(effects)
 }
 
 class SyncEffects {

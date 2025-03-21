@@ -14,6 +14,8 @@ export function SevenGUIs() {
    )
 }
 
+
+
 function TemperatureApp() {
    const $c = ion(0)
    const $f = ion(32)
@@ -117,8 +119,8 @@ function TimerApp() {
    const $duration = ion(15 * 1000)
    const $elapsed = ion(0)
 
-   let lastTime
-   let handle
+   let lastTime: DOMHighResTimeStamp;
+   let handle: number;
 
    const update = () => {
       $elapsed.state = performance.now() - lastTime
@@ -157,20 +159,28 @@ function TimerApp() {
          </div>
 
          <button on:click={reset}>Reset</button>
+
          <$--portal to='head'>
             <style>
-               {`
-               .elapsed-container {
-   width: 300px;
-   }
-   
-   .elapsed-bar {
-      background-color: red;
-      height: 10px;
-      }`}
+               {css`
+                  .elapsed-container {
+                     width: 300px;
+                     background-color: red;
+                  }
+
+                  .elapsed-bar {
+                     background-color: red;
+                     height: 10px;
+                  }
+               `}
             </style>
          </$--portal>
-      </>)
+      </>
+   )
+}
+
+function css(str: TemplateStringsArray) {
+   return str[0] as any
 }
 
 function CRUDApp() {
@@ -272,6 +282,7 @@ button + button {
 }
 
 type Circle = { cx: number, cy: number, r: number }
+
 function CircleApp() {
    const history = ionize([[]] as Circle[][])
    const $index = ion(0)
@@ -279,7 +290,7 @@ function CircleApp() {
    const $selected = ion(undefined as undefined | null | Circle)
    const $adjusting = ion(false)
 
-   function reClick({ clientX: x, clientY: y }) {
+   function reClick({ clientX: x, clientY: y }: MouseEvent) {
       if ($adjusting()) {
          $adjusting.state = false
          $selected.state = null
@@ -334,7 +345,7 @@ function CircleApp() {
                   Right-click on the canvas to adjust the radius of the selected circle.
                </p>
             </foreignObject>
-            {For($circles, circle => (console.log('rendering circle', circle),
+            {For($circles, circle => (
                <circle
                   cx={circle.cx}
                   cy={circle.cy}

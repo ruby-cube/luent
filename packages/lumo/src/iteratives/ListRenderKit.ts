@@ -12,9 +12,9 @@ import { createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { NodePod } from "../node/NodePod";
 import { mountConditional, mountDOMNodes, removeDOMNodes } from "../conditional/ConditionalRenderSeries";
-import { Flask, getActiveFlask, setFlask } from "@rue/flask";
-import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
-import { __DEV__buildAsyncPath, setAsyncPath } from "../../../flask/debug";
+import { FLASK, Flask} from "@rue/flask";
+import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
+import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { PRELUDE, RENDER } from "../render-cycle";
 import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
@@ -68,16 +68,11 @@ export class ListRenderKit {
    ) {
       const context = $_snap_context()
       this.renderItem = (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => {
-         callWithContext({
-            context,
-            beforeCall: () => {
-               if (flask) setFlask(flask)
-               if (__DEV__) setAsyncPath!(this.__DEV__asyncPath!)
-            },
-            callback: () => {
-               const nodeEntities = callWithCommons(renderItem, this, item, $index, parent, nodePod)
-               mountNodeEntities(nodeEntities, parent, fragment);
-            },
+         if (flask) context.set(FLASK, flask)
+         if (__DEV__) context.set(TRACE, this.__DEV__asyncPath!)
+         $_run_with_(context, () => {
+            const nodeEntities = callWithCommons(renderItem, this, item, $index, parent, nodePod)
+            mountNodeEntities(nodeEntities, parent, fragment);
          })
       }
 
@@ -139,12 +134,12 @@ export class ListRenderKit {
          let recording = isIonizedModel(_data) ? recordMutations(_data) : undefined
 
 
-         function createClone(subject: AnyObject, state: AnyObject){
+         function createClone(subject: AnyObject, state: AnyObject) {
             return isIonizedModel(state) ? shallowClone(toRaw(state)) : undefined
             // return isIon(subject) && isIonizedModel(state) ? shallowClone(toRaw(state)) : undefined
          }
 
-         function hasChanged(oldState: AnyObject, state: AnyObject){
+         function hasChanged(oldState: AnyObject, state: AnyObject) {
 
          }
 

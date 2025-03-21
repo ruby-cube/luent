@@ -11,7 +11,7 @@ import { Mutable, MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { trigger } from "../trigger";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { ParticleMorph } from "../compound/Particle";
-import { $syncEffects } from "../effect-cycle/SyncEffects";
+import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { Traceable } from "../debug/Traceable";
 import { isObject } from "@rue/utils";
 
@@ -95,7 +95,7 @@ export function createAtomicIon(
 
          ion.trigger()
          
-         $syncEffects().run()
+         runSyncEffects()
 
          return state;
       }

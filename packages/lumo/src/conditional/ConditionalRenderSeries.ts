@@ -9,9 +9,9 @@ import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { NodeKit } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
-import { $_snap_context, callWithContext } from "../../../flask/context/AsyncContext";
-import { __DEV__buildAsyncPath, setAsyncPath } from "../../../flask/debug";
-import { Flask, setFlask } from "@rue/flask";
+import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
+import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
+import { FLASK, Flask} from "@rue/flask";
 import { PRELUDE } from "../render-cycle";
 
 //TODO: rename 'phasic node' to 'transition node'
@@ -332,18 +332,13 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    }
 
    private render(kit: ConditionalRenderKit, parent: Element, fragment?: DocumentFragment, flask?: Flask) {
-      callWithContext({
-         context: this.context,
-         beforeCall: () => {
-            if (flask) setFlask(flask)
-            if (__DEV__) setAsyncPath!(this.__DEV__asyncPath!)
-         },
-         callback: () => {
-            const nodeEntities = kit.renderConditional(parent, kit.nodePod || (console.warn('DEV RESEARCH: no kit pod :('), this.nodePod))
-            if (kit.type === 'show') console.log('node entities', nodeEntities)
-            if (kit.type === 'show') console.log('nodepod', kit.nodePod)
-            mountConditional(parent, kit.nodePod!, nodeEntities, fragment);
-         },
+      const context = this.context;
+      if (flask) context.set(FLASK, flask);
+      if(__DEV__) context.set(TRACE, this.__DEV__asyncPath)
+
+      $_run_with_(context, () => {
+         const nodeEntities = kit.renderConditional(parent, kit.nodePod || (console.warn('DEV RESEARCH: no kit pod :('), this.nodePod))
+         mountConditional(parent, kit.nodePod!, nodeEntities, fragment);
       })
    }
 

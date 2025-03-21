@@ -117,8 +117,10 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 //    }
 // }
 
+type SVGTag = keyof SVGElementTagNameMap
+
 export function makeNode(
-   nodeType: HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--commons' | 'vvv:mount' | 'vvv:create' | 'vvv:show' | '$--try' | '$--suspense' | '$--portal' | '$--link',
+   nodeType: SVGTag | HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--commons' | 'vvv:mount' | 'vvv:create' | 'vvv:show' | '$--try' | '$--suspense' | '$--portal' | '$--link',
    Slot: undefined | (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent | SwapConfig | JSX.Element | undefined {
@@ -159,21 +161,10 @@ export function makeNode(
          if (!Slot) throw new Error(`Extraneous transition node`)
          return createTransitionNode(nodeType, Slot, <TransitionNodeInput>config)
 
-      case 'foreignObject':
-      case 'circle':
-      case 'svg':
-         return makeElement(
-            document.createElementNS("http://www.w3.org/2000/svg", nodeType),
-            <[string] | (() => NodeEntity[])>Slot,
-            <ElementConfig>config,
-            getCurrentIndex()
-         )
-
-
       default:
          if (typeof nodeType === 'string') {
             return makeElement(
-               document.createElement(nodeType),
+               nodeType,
                <[string] | (() => NodeEntity[])>Slot,
                <ElementConfig>config,
                getCurrentIndex()

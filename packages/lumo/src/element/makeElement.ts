@@ -2,7 +2,7 @@ import { DOMNode, Slot } from "../component/InternalComponent";
 import { isIon, AtomicIon, watch, isManagedDerivation } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
-import { $listen, $thisFlask, getActiveFlask, ResumableListener, SustainedListenerOptions } from "@rue/flask";
+import { $listen, SustainedListenerOptions } from "@rue/flask";
 import { mountNodeEntities } from "../node/mountNodeKits";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
@@ -14,22 +14,16 @@ import { camelToKebabCase } from "@rue/utils";
 import { NodePod } from "../node/NodePod";
 import { RENDER } from "../render-cycle";
 import { MaybeIon } from "../component/InputTypes";
-import { debug } from "../../../utils/debug";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
+import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
 
-export function mE(
-   nodeType: HTMLTag,
-   Slot?: () => NodeEntity[],
-   config?: ElementConfig,
-): DOMNode {
-   return makeNode(nodeType, Slot, config || {}) as DOMNode
-}
+
 
 export function makeElement(
-   domNode: Element,
+   tagName: string,
    Slot: Slot | undefined,
    config: ElementConfig,
    $index: AtomicIon<number> | undefined
@@ -38,8 +32,13 @@ export function makeElement(
 
    const { attributes, events, hooks } = analyzeAttributes(other)
 
+   let newXML_NS: string | undefined;
+   const XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes)) || getXMLNamespace();
 
-   // const domNode = isHydrating() ? getElement() : document.createElement(tagName);
+   const domNode = isHydrating() ? getElement()
+      : XML_NS ? createNSElement(tagName, XML_NS)
+         : document.createElement(tagName)
+
 
    if (ref) {
       if (!isAnyNodeRef(ref)) throw new Error("INVALID INPUT: Must use NodeRef or NodesRef as ref")
@@ -65,11 +64,20 @@ export function makeElement(
    //          dynamicAttributes
    //      );
 
+   // console.log('@% -----------------')
+   // console.log('@% before set', tagName, prevXMLNS, activeXMLNS)
+
+   // console.log('@% after set', prevXMLNS, activeXMLNS)
+   // console.log('@% -----------------')
+
    if (_Slot) {
-      const rawOutput = normalizeToArray(isFunction(_Slot) ? _Slot() : _Slot)
-      const nodePod = new NodePod();
-      const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodePod)
-      mountNodeEntities(nodeEntities, domNode)
+      const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
+      runWithXMLNamespace(() => {
+         const rawOutput = normalizeToArray(isFunction(_Slot) ? _Slot() : _Slot)
+         const nodePod = new NodePod();
+         const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodePod)
+         mountNodeEntities(nodeEntities, domNode)
+      }, xml_ns)
    }
    return domNode;
 }
@@ -128,13 +136,13 @@ function analyzeAttributes(entries: AnyObject) {
    }
 }
 
-function bindView(element: Element, Slot: Slot | undefined, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+function bindView(element: Element, Slot: Slot | undefined, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
    switch (element.tagName) {
       case 'INPUT':
          bindInput(<HTMLInputElement>element, attributes)
          return Slot;
-      
-         case 'SELECT':
+
+      case 'SELECT':
          bindSelect(<HTMLSelectElement>element, attributes)
          return Slot;
 
@@ -146,7 +154,7 @@ function bindView(element: Element, Slot: Slot | undefined, attributes: { [key: 
    }
 }
 
-function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
    if (!('mu:checked' in attributes))
       return;
    const ion = attributes['mu:checked'];
@@ -159,7 +167,7 @@ function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string
       setUpInputListener(element, ion, 'checked')
    }
 }
-function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
    if (!('mu:checked' in attributes))
       return;
    const ion = attributes['mu:checked'];
@@ -173,7 +181,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
       setUpInputListener(element, ion)
    }
 }
-function bindTextInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+function bindTextInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
    if (!('mu:value' in attributes))
       return;
    const ion = attributes['mu:value'];
@@ -187,7 +195,7 @@ function bindTextInput(element: HTMLInputElement, attributes: { [key: string]: M
    }
 }
 
-function bindInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+function bindInput(element: HTMLInputElement, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
    switch (attributes.type) {
       case 'radio':
          bindRadioInput(element, attributes)
@@ -203,13 +211,13 @@ function bindInput(element: HTMLInputElement, attributes: { [key: string]: Mutab
    }
 }
 
-function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: MutableKit | any | DerivedIon<any> }) {
+function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
    if (!('mu:value' in attributes))
       return;
    const ion = attributes['mu:value'];
-   watch(ion, e=>{
+   watch(ion, e => {
       element.value = e.state
-   }, {eager: true})
+   }, { eager: true })
    delete attributes['mu:value'];
    if (!isIon(ion) || !('state' in ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
@@ -250,7 +258,7 @@ function setUpInputListener(element: Element, ion: { state: any } | { set: (valu
    })
 }
 
-function updateIonWithInput(ion: {state: any}| { set: (value: any) => any }, e: Event, key: string = 'value'){
+function updateIonWithInput(ion: { state: any } | { set: (value: any) => any }, e: Event, key: string = 'value') {
    if (isManagedDerivation(ion) && 'set' in ion) {
       ion.set(
          //@ts-expect-error
@@ -276,7 +284,7 @@ function updateIonWithInput(ion: {state: any}| { set: (value: any) => any }, e: 
 //    return 'fromInput' in value;
 // }
 
-function setUpAttributes(node: Element, attributes: { [key: string]: any | DerivedIon<any> }) {
+function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<any> }) {
    for (const key in attributes) {
       const _key = key.startsWith('mu:') ? key.slice(3) : key;
       if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
@@ -304,20 +312,20 @@ function setUpAttributes(node: Element, attributes: { [key: string]: any | Deriv
 }
 
 function setAttribute(node: AnyObject, key: string, value: any) {
- 
+
    //TODO: what if attribute can take a falsey value like 0 or false?
    // if (value !== undefined) {
    //    // node.setAttribute(key, toString(value)) //NOTE: Programmatic checking and unchecking of check boxes breaks using setAttribute and removeAttribute
    //    node[key] = value;
    // }
    // else {
-   if (node instanceof SVGElement){
+   if (node instanceof SVGElement) {
       node.setAttribute(key, value)
    }
    else {
       node[key] = value ?? '';
    }
-      // node.removeAttribute(key);
+   // node.removeAttribute(key);
    // }
 }
 
@@ -464,9 +472,9 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
 function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey) {
    if (entry instanceof Object) {
       for (const key in entry) {
-         const value = entry[key];
+         const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isIon(value)) {
-            watch(value, ({ state }/* value: string | number | Falsey */) => {
+            watch(value, ({ state }) => {
                assignStyleProperty(style, toStylePropertyName(key), state)
             }, {
                eager: true,

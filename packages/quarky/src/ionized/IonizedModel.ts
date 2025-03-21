@@ -16,7 +16,7 @@ import { ParticleMorph } from "../compound/Particle";
 import { CompoundMorph } from "../compound/Compound";
 import { Watchable } from "../watch/Watched";
 import { IonizedCompound } from "./IonizedCompound";
-import { $syncEffects } from "../effect-cycle/SyncEffects";
+import {  runSyncEffects } from "../effect-cycle/SyncEffects";
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -853,7 +853,7 @@ export function reactiveSetter(
    quark.trigger()
    getAtomicPion(model, key)?.trigger()
 
-   $syncEffects().run()
+   runSyncEffects()
 
    return true;
 }

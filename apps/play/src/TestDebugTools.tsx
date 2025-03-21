@@ -49,7 +49,6 @@ export function TestDebugApp() {
       watch($count, async (effect) => {
          // doSomething()
          const context = $_snap_context()
-         // console.log(context.activeNodes.get('trace'))
 
          await pause();
 
@@ -65,7 +64,6 @@ export function TestDebugApp() {
          // }
          $_run_with_(context, () => {
             // const context = getAsyncContext()
-            // console.log(context.activeNodes.get('trace'))
             doSomething()
             // const context = getAsyncContext()
             // await pause()

@@ -508,6 +508,7 @@ declare namespace React {
    }
 
    interface FormEvent<T = Element> extends SyntheticEvent<T> {
+      target: EventTarget & T;
    }
 
    interface InvalidEvent<T = Element> extends SyntheticEvent<T> {
@@ -2576,7 +2577,7 @@ declare global {
 
       type ClassInput = Lumo.MaybeIon<{[key: string]: Lumo.MaybeIon<Booleanny>}>
 
-      type MaybeIonAttributes<T> = {[K in keyof T]: T[K] extends Object ? {[P in keyof T[K]]: T[K][P] extends Function ? T[K][P] : Lumo.MaybeIon<T[K][P]>}: T[K]}
+      type MaybeIonAttributes<T> = {[K in keyof T]: T[K] extends Object ? {[P in keyof T[K]]: T[K][P] extends Function | undefined ? T[K][P] : Lumo.MaybeIon<T[K][P]>}: T[K]}
 
       type IntrinsicElements = {
          [K in keyof JSX._IntrinsicElements]: MaybeIonAttributes<JSX._IntrinsicElements>[K] & {
@@ -2584,7 +2585,7 @@ declare global {
             style?: StyleInput | StyleInput[];
             attributes?: ((o: HTMLElementTagNameMap[K]) => void) | ((o: HTMLElementTagNameMap[K]) => void)[];
          }
-      }
+      } & LumoElements
 
 
 
@@ -2597,11 +2598,12 @@ declare global {
       //     Slot: (() => NodeEntity) | NodeEntity
       // }
 
-      interface _IntrinsicElements {
+      interface LumoElements {
          'vvv:show': {};
          'vvv:mount': {};
          'vvv:create': {};
          'i--i': {};
+         '$--style': { Slot: Lumo.Slot };
          '$--portal': PortalNodeInput & { Slot: Lumo.Slot }
          '$--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
          '$--commons': ContextNodeInput & { Slot: Lumo.Slot };
@@ -2610,6 +2612,9 @@ declare global {
          '$--transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
          '$--transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
          '$--dock': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+      }
+
+      interface _IntrinsicElements {
          // HTML
          a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
          abbr: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;

@@ -1,7 +1,7 @@
 import { onEffectCycleComplete, $effectCycle } from "../effect-cycle/EffectCycle";
 import { EffectLink, EffectVine } from "../effect-cycle/EffectLink";
 import { PhaseMap } from "../effect-cycle/PhaseMap";
-import { $syncEffects } from "../effect-cycle/SyncEffects";
+import { scheduleSyncEffects } from "../effect-cycle/SyncEffects";
 
 
 export type Watchable = {
@@ -90,7 +90,7 @@ export class Watched<T extends Watchable = Watchable> {
    }
 
    private scheduleSyncEffects(effects: EffectVine) {
-      $syncEffects().absorb(effects)
+      scheduleSyncEffects(effects)
    }
 
    private cleanups: (() => void)[] = []

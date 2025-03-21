@@ -7,7 +7,6 @@ import { ListRenderKit } from "../iteratives/ListRenderKit";
 import { NodeEntity, SwapConfig, SwapType } from "./makeNode";
 import { setUpTextNode } from "./TextNode";
 import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./InnerHTML";
-import { getClosestCommons } from "../commons/commons-stack";
 import { NodePod } from "./NodePod";
 import { AnyObject } from "@rue/types";
 import { MorphicRenderKit } from "../conditional/MorphicNode";

@@ -36,7 +36,9 @@ export function getCommons() {
    return commons;
 }
 
-export const [getClosestCommons, setCommons, commonsStack] = AsyncState<Commons>('commons')
+export const COMMONS = 'commons'
+
+export const [getClosestCommons, commonsStack] = AsyncState<Commons>(COMMONS)
 
 
 

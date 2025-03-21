@@ -4,7 +4,7 @@ import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { defineIonizedStructure, TRACK_ENTRY, TRACK_MODEL, TRACK_MODEL_WITH_CALLBACK, useTrackableGetOp, useTrackableIterative, useTrackableOp, useTrackableOpWithCallback } from "./IonizedModel";
 import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
-import { $syncEffects } from "../effect-cycle/SyncEffects";
+import {  runSyncEffects } from "../effect-cycle/SyncEffects";
 
 // declare global {
 //    interface Map<K, V> {
@@ -87,7 +87,7 @@ export function installIonicMap() {
                   getAtomicOp(model.has, key)?.trigger()
                   getAtomicOp(model.get, key)?.trigger()
 
-                  $syncEffects().run()
+                  runSyncEffects()
 
                   return output;
                }

@@ -2,9 +2,9 @@ import { Callback, CallbackRemover, useCleanupScheduler } from "./flaskableListe
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
 import { mapHandlers } from "./handlerMap";
 import { AbortSignal } from "./AbortSignal";
-import { $_snap_context, callWithContext } from "./context/AsyncContext";
-import { Flask, getActiveFlask, setFlask, ThisFlask } from "./Flask";
-import { setAsyncPath } from "./debug";
+import { $_run_with_, $_snap_context } from "./context/AsyncContext";
+import { FLASK, Flask, getActiveFlask, ThisFlask } from "./Flask";
+import { TRACE } from "./debug";
 import { noop } from "@rue/utils";
 
 export type ResumableListener = {
@@ -214,18 +214,18 @@ function wrapWithFlask(callback: Callback, config: {
    const { afterCall, enclosingFlask, __DEV__asyncPath } = config
    const context = $_snap_context()
    let scene: Flask;
-   const wrappedCB =  (...args: any[]) => {
+   const wrappedCB = (...args: any[]) => {
       if (scene) scene.emitDiscard()
       scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if dirty right?
-      return callWithContext({
-         context,
-         beforeCall() {
-            setFlask(scene)
-            if (__DEV__) setAsyncPath!(__DEV__asyncPath!)
-         },
-         callback: () => callback(...args),
-         afterCall
-      })
+      context.set(FLASK, scene)
+      context.set(TRACE, __DEV__asyncPath!)
+
+      try {
+         return $_run_with_(context, () => callback(...args))
+      }
+      finally {
+         afterCall?.()
+      }
    }
    wrappedCB.__DEV__cb = callback
    return wrappedCB
