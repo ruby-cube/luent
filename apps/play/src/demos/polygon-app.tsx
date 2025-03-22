@@ -1,5 +1,6 @@
 import { component, For, fromTag, Ion, Ionized, v } from "@rue/lumo"
 import { $$, ion, ionize } from "@rue/quarky"
+import { isObject } from "@rue/utils"
 
 type Stat = {
    label: string,
@@ -54,11 +55,10 @@ export function PolygonApp() {
             <button on:click={add}>Add a Stat</button>
          </form>
 
-         <pre id="raw">{ $=JSON.stringify(stats) }</pre>
+         <pre id="raw">{$ = JSON.stringify(stats, undefined, 2)}</pre>
 
-         <$--portal to='head'>
-            <style>
-               {`polygon {
+         <$--style>
+            {`polygon {
   fill: #42b983;
   opacity: 0.75;
 }
@@ -84,12 +84,36 @@ label {
   top: 0;
   left: 300px;
 }`}
-            </style>
-         </$--portal>
+         </$--style>
       </>
    )
 }
 
+// const replacer = (_key: string, val: unknown): any => {
+//    if (isRef(val)) {
+//      return replacer(_key, val.value)
+//    } else if (isMap(val)) {
+//      return {
+//        [`Map(${val.size})`]: [...val.entries()].reduce(
+//          (entries, [key, val], i) => {
+//            entries[stringifySymbol(key, i) + ' =>'] = val
+//            return entries
+//          },
+//          {} as Record<string, any>,
+//        ),
+//      }
+//    } else if (isSet(val)) {
+//      return {
+//        [`Set(${val.size})`]: [...val.values()].map(v => stringifySymbol(v)),
+//      }
+//    } else if (isSymbol(val)) {
+//      return stringifySymbol(val)
+//    } else if (isObject(val) && !isArray(val) && !isPlainObject(val)) {
+//      // native elements
+//      return String(val)
+//    }
+//    return val
+//  }
 
 
 function AxisLabel(
@@ -135,7 +159,7 @@ function PolyGraph(
             <AxisLabel
                stat={stat}
                index={$index}
-               total={$=stats.length}
+               total={$ = stats.length}
             >
             </AxisLabel>
          )}

@@ -80,8 +80,7 @@ export function CellsApp() {
                )}
             </tbody>
          </table >
-         <$--portal to='head'>
-            <style>{`
+            <$--style>{`
          body {
             margin: 0;
  }
@@ -110,8 +109,7 @@ export function CellsApp() {
          overflow: hidden;
  }
          `}
-            </style>
-         </$--portal>
+            </$--style>
       </>
    )
 }
@@ -145,8 +143,7 @@ function Cell({ $column, $row } = fromTag({
             )}
          </div >
 
-         <$--portal to='head'>
-            <style>{`
+            <$--style>{`
                .cell, .cell input {
                   height: 1.5em;
                line-height: 1.5;
@@ -161,8 +158,7 @@ function Cell({ $column, $row } = fromTag({
                   width: 100%;
                box-sizing: border-box;
    }`
-            }</style>
-         </$--portal>
+            }</$--style>
       </>)
 }
 

@@ -93,26 +93,25 @@ function FlightBooker() {
 
          <p>{$canBook() ? '' : 'Return date must be after departure date.'}</p>
 
-         <$--portal to='head'>
-            <style>{`
-            select,
-            input,
-            button {
-               display: block;
-            margin: 0.5em 0;
-            font-size: 15px;
-      }
+         <$--style>
+            {`
+               select,
+               input,
+               button {
+                  display: block;
+                  margin: 0.5em 0;
+                  font-size: 15px;
+               }
 
-            input[disabled] {
-               color: #999;
-      }
+               input[disabled] {
+                  color: #999;
+               }
 
-            p {
-               color: red;
-      }
-            
-         `}</style>
-         </$--portal>
+               p {
+                  color: red;
+               }
+            `}
+         </$--style>
       </>
    )
 }
@@ -162,9 +161,8 @@ function TimerApp() {
 
          <button on:click={reset}>Reset</button>
 
-         <$--portal to='head'>
-            <style>
-               {css`
+         <$--style>
+            {css`
                   .elapsed-container {
                      width: 300px;
                      background-color: red;
@@ -175,8 +173,7 @@ function TimerApp() {
                      height: 10px;
                   }
                `}
-            </style>
-         </$--portal>
+         </$--style>
       </>
    )
 }
@@ -251,8 +248,7 @@ function CRUDApp() {
             <button on:click={update} > Update</button >
             <button on:click={del} > Delete</button >
          </div >
-         <$--portal to='head'>
-            <style>{`
+         <$--style>{`
    * {
       font-size: inherit;
    }
@@ -275,8 +271,7 @@ select {
 button + button {
    margin-left: 5px;
 }
-`}</style>
-         </$--portal>
+`}</$--style>
       </>
 
 
@@ -373,8 +368,7 @@ function CircleApp() {
                />
             </div>
          )}
-         <$--portal to='head'>
-            <style>{`
+            <$--style>{`
 body {
    margin: 0;
    overflow: hidden;
@@ -427,8 +421,7 @@ circle {
    padding: 0 50px;
    color: #bbb;
 }`}
-            </style>
-         </$--portal>
+            </$--style>
       </>
    )
 }

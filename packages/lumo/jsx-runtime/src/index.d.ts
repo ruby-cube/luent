@@ -2603,7 +2603,7 @@ declare global {
          'vvv:mount': {};
          'vvv:create': {};
          'i--i': {};
-         '$--style': { Slot: Lumo.Slot };
+         '$--style': { Slot: string };
          '$--portal': PortalNodeInput & { Slot: Lumo.Slot }
          '$--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
          '$--commons': ContextNodeInput & { Slot: Lumo.Slot };

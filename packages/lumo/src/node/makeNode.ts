@@ -41,7 +41,7 @@ export type NodeEntity =
    | ConditionalRenderKit
    | ConditionalRenderSeries
    | InnerHTMLKit
-   // | MutableKit
+// | MutableKit
 
 
 
@@ -120,7 +120,7 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | '$--transit' | '$--transition' | '$--commons' | 'vvv:mount' | 'vvv:create' | 'vvv:show' | '$--try' | '$--suspense' | '$--portal' | '$--link',
+   nodeType: SVGTag | HTMLTag | ComponentSetup | '$--style' | '$--transit' | '$--transition' | '$--commons' | 'vvv:mount' | 'vvv:create' | 'vvv:show' | '$--try' | '$--suspense' | '$--portal' | '$--link',
    Slot: undefined | (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent | SwapConfig | JSX.Element | undefined {
@@ -145,6 +145,11 @@ export function makeNode(
       case '$--link':
          return createPortalNode(() =>
             makeElement('link', undefined, <ElementConfig>config, undefined)
+            , { to: 'head' })
+
+      case '$--style':
+         return createPortalNode(() =>
+            makeElement('style', Slot, <ElementConfig>config, undefined)
             , { to: 'head' })
 
       case 'vvv:show':
