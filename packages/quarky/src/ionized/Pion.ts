@@ -6,6 +6,7 @@ import { IonizedModelQuark } from "./IonizedModelQuark"
 import { $DerivedPionState, createDerivationPion, DerivationPionQuark } from "../ionic/DerivationPion"
 import { ParticleMorph } from "../compound/Particle"
 import { Watchable } from "../watch/Watched"
+import { debug } from "@rue/utils"
 
 export type PionQuark<T = $AtomicPionState | $DerivedPionState> = EntityQuark<T> & Watchable & ParticleMorph
 
@@ -13,8 +14,10 @@ export function asPionQuark(
    model: IonizedModel,
    key: PropertyKey,
 ) {
-   const quark = quarkOf(model)
-   return quark.pions.get(key) ?? createPionQuark(model, key)
+   const pionQuark = quarkOf(model).pions.get(key) ?? createPionQuark(model, key)
+   if (pionQuark instanceof AtomicPionQuark || pionQuark instanceof DerivationPionQuark)
+      return pionQuark;
+   debug.error(`[INVALID KEY] ${String(key)} is not a pion`)
 }
 
 function createPionQuark(model: IonizedModel, key: PropertyKey) {
@@ -27,7 +30,7 @@ function createPionQuark(model: IonizedModel, key: PropertyKey) {
 
 function getPropertyGetter(modelQuark: IonizedModelQuark, key: PropertyKey) {
    let rawTarget = modelQuark.rawTarget
-   while (rawTarget !== Object) {
+   while (rawTarget.constructor !== Object) {
       console.log('rawTarget', rawTarget, key)
       const propertyDescriptor = Object.getOwnPropertyDescriptor(rawTarget, key)
       if (propertyDescriptor)
@@ -40,8 +43,12 @@ function getPropertyGetter(modelQuark: IonizedModelQuark, key: PropertyKey) {
 export function asPion(
    model: IonizedModel,
    key: PropertyKey,
-): Ion {
+): Ion | undefined {
    const pion = asPionQuark(model, key)
+   if (!pion) {
+      debug.error(`${String(key)} is not a pion key`)
+      return;
+   }
    return pion.entity ?? (pion.entity = createPion(model, key, pion))
 }
 
@@ -66,7 +73,7 @@ function createPion(model: IonizedModel, key: PropertyKey, pionQuark: PionQuark)
 export function getAtomicPion(
    model: IonizedModel,
    key: PropertyKey,
-){
+) {
    const pion = quarkOf(model).pions.get(key)
    return pion && pion instanceof AtomicPionQuark ? pion : undefined
 }

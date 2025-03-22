@@ -37,6 +37,7 @@ export function TabApp() {
    )
 }
 
+/*
 
 type FileData = {
    id: number,
@@ -339,3 +340,4 @@ function Home() {
    )
 }
 
+*/

@@ -9,6 +9,8 @@ import { Mutable, Mutation } from "../Mutable"
 import { PionQuark } from "./Pion"
 import { trigger } from "../trigger"
 import { Traceable } from "../debug/Traceable"
+import { AtomicOp, TrackedOps } from "./AtomicOp"
+import { debug } from "@rue/utils"
 
 
 
@@ -45,6 +47,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
       }
       this.unwatch = () => unwatch.call(this)
    }
+
    asMutable: Mutable = new Mutable()
 
    asCompound?: IonizedCompound
@@ -84,15 +87,27 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
    trigger = trigger
 
-   pions: Map<PropertyKey, PionQuark> = new Map()
+   pions: Map<PropertyKey, PionQuark | TrackedOps> = new Map()
 
    registerPion(key: PropertyKey, pion: PionQuark) {
       this.pions.set(key, pion)
    }
 
+   registerOp(key: PropertyKey, entryKey: any, atomicOp: AtomicOp) {
+      const ops = this.pions.get(key) ?? new Map();
+      if (!(ops instanceof Map)) {
+         debug.error(`${String(key)} is not an op`)
+         return;
+      }
+      this.pions.set(key, ops);
+      ops.set(entryKey, atomicOp)
+   }
+
    // unregisterPion(key: PropertyKey){
    //    this.pions.delete(key)
    // }
+
+
 
    //TODO: Do I really need observed entry keys??  Do I need to unregister pion?
 

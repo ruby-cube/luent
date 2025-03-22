@@ -7,7 +7,6 @@ import { noop } from "@rue/utils";
 export class AtomicOp implements Quark, ParticleMorph {
    type: string | symbol = 'atomic op'
    asParticle!: Particle
-   trackableOp: Function & TrackableOp;
    asTraceable: Traceable;
 
    constructor(
@@ -15,25 +14,21 @@ export class AtomicOp implements Quark, ParticleMorph {
       public op: PropertyKey,
       public entryKey: any,
    ) {
-      const trackableOp = this.trackableOp = model[op]
-      registerAtomicOp(trackableOp, entryKey, this)
-      // const modelQuark = quarkOf(model);
-      // modelQuark.addObservedEntryKey(entryKey)
-      const particle = this.asParticle = asParticle(this);
-      particle.onDissociated(() => {
-         if (particle.compounds.size === 0) {
-            // modelQuark.deleteObservedEntryKey(entryKey)
-            this.discard()
-         }
-      })
-      
+      quarkOf(model).registerOp(op, entryKey, this)
+      // const particle = this.asParticle = asParticle(this);
+      // particle.onDissociated(() => {
+      //    if (particle.compounds.size === 0) {
+      //       this.discard()
+      //    }
+      // })
+
       this.asTraceable = quarkOf(this.model).asTraceable
    }
    entity = noop;
 
-   discard() {
-      unregisterAtomicOp(this.trackableOp, this.entryKey)
-   }
+   // discard() {
+   //    unregisterAtomicOp(this.trackableOp, this.entryKey)
+   // }
 
    // getOutput() {
    //    return this.modelQuark.rawTarget[this.op](this.entryKey)
@@ -55,41 +50,42 @@ export function asAtomicOp(
    op: PropertyKey,
    key: any
 ): AtomicOp {
-   const atomicOp = getAtomicOp(model[op], key)
-   if (atomicOp) return atomicOp;
-   return new AtomicOp(model, op, key)
+   return getAtomicOp(model, op, key) ?? new AtomicOp(model, op, key)
 }
 
-type TrackableOp = { [TRACKED]?: Map<EntryKey, AtomicOp> | undefined }
+export type TrackedOps = Map<EntryKey, AtomicOp>
 type EntryKey = any
-export const TRACKED = Symbol('tracked atomic ops')
 
-export function registerAtomicOp(
-   op: Function & TrackableOp,
-   entryKey: EntryKey,
-   atomicOp: AtomicOp
-) {
-   op[TRACKED]?.set(entryKey, atomicOp) ?? (op[TRACKED] = new Map([[entryKey, atomicOp]]))
-}
+// export function registerAtomicOp(
+//    model: IonizedModel,
+//    entryKey: EntryKey,
+//    atomicOp: AtomicOp
+// ) {
+//    quarkOf(model).pions.set((entryKey, atomicOp)
+// }
 
-export function unregisterAtomicOp(
-   op: Function & TrackableOp,
-   entryKey: EntryKey
-) {
-   const trackedOps = op[TRACKED]
-   trackedOps?.delete(entryKey)
-}
+// export function unregisterAtomicOp(
+//    model: IonizedModel,
+//    op: PropertyKey,
+//    entryKey: EntryKey
+// ) {
+//    getAtomicOps(model, op)?.delete(entryKey)
+// }
 
 export function getAtomicOp(
-   op: Function & TrackableOp,
+   model: IonizedModel,
+   op: PropertyKey,
    entryKey: EntryKey
 ) {
-   return op[TRACKED]?.get(entryKey)
+   return getAtomicOps(model, op)?.get(entryKey)
 }
 
 export function getAtomicOps(
-   op: Function & TrackableOp
+   model: IonizedModel,
+   op: PropertyKey
 ) {
-   return op[TRACKED]
+   const atomicOps = quarkOf(model).pions.get(op)
+   if (!(atomicOps instanceof Map)) return undefined;
+   return atomicOps;
 }
 

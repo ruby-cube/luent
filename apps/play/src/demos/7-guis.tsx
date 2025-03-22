@@ -1,15 +1,17 @@
 import { For, If } from "@rue/lumo"
 import { component, onUnmount } from "@rue/lumo"
-import { $$, exposeIons, ion, ionize, ions, watch } from "@rue/quarky"
+import { $$, ion, ionize, ions, watch } from "@rue/quarky"
 
 export function SevenGUIs() {
    return component(
       <>
-         {/* <TemperatureApp></TemperatureApp> */}
-         {/* <FlightBooker></FlightBooker> */}
-         {/* <TimerApp /> */}
-         {/* <CRUDApp /> */}
-         <CircleApp />
+         <TemperatureApp></TemperatureApp>
+         <hr />
+         <FlightBooker></FlightBooker>
+         <hr />
+         <TimerApp />
+         <hr />
+         <CRUDApp />
       </>
    )
 }

@@ -144,7 +144,7 @@ export function makeNode(
 
       case '$--link':
          return createPortalNode(() =>
-            makeElement(document.createElement('link'), undefined, <ElementConfig>config, undefined)
+            makeElement('link', undefined, <ElementConfig>config, undefined)
             , { to: 'head' })
 
       case 'vvv:show':

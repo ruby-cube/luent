@@ -107,7 +107,7 @@ export function installIonicSet() {
 
                   getAtomicPion(ionizedModel, 'size')?.trigger()
 
-                  getAtomicOp(ionizedModel.has, _newValue)?.trigger()
+                  getAtomicOp(ionizedModel, 'has', _newValue)?.trigger()
 
                   runSyncEffects()
 
@@ -334,7 +334,7 @@ export function useDeleteOp(
       modelQuark.trigger()
 
       getAtomicPion(ionizedModel, 'size')?.trigger()
-      getAtomicOp(ionizedModel.has, key)?.trigger()
+      getAtomicOp(ionizedModel, 'has', key)?.trigger()
 
       runSyncEffects()
 
@@ -370,7 +370,7 @@ export function useClearOp(
 
       modelQuark.trigger()
 
-      const hasOps = getAtomicOps(ionizedModel.has)
+      const hasOps = getAtomicOps(ionizedModel, 'has')
       if (hasOps) {
          for (const [_, atomicOp] of hasOps) {
             atomicOp.trigger()

@@ -84,8 +84,8 @@ export function installIonicMap() {
                      getAtomicPion(model, 'size')?.trigger()
                   }
 
-                  getAtomicOp(model.has, key)?.trigger()
-                  getAtomicOp(model.get, key)?.trigger()
+                  getAtomicOp(model, 'has', key)?.trigger()
+                  getAtomicOp(model, 'get', key)?.trigger()
 
                   runSyncEffects()
 
@@ -108,7 +108,7 @@ export function installIonicMap() {
 
                return () => {
                   const output = clearOp()
-                  const getOps = getAtomicOps(ionizedModel.get)
+                  const getOps = getAtomicOps(ionizedModel, 'get')
                   if (getOps) {
                      for (const [_, atomicOp] of getOps) {
                         atomicOp.trigger()
@@ -139,7 +139,7 @@ export function installIonicMap() {
 
                return (key: unknown) => {
                   const output = deleteOp(key)
-                  getAtomicOp(ionizedModel.get, key)?.trigger()
+                  getAtomicOp(ionizedModel, 'get', key)?.trigger()
                   return output;
                }
             },

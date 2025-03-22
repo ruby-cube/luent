@@ -42,9 +42,19 @@ export function CellsApp() {
    const cols = cells.map((_, i) => String.fromCharCode(65 + i))
    console.log('cols', cols)
 
-   function Spread(...args: any[]){
+   function Through(...args: any[]){
       return [] as any
    }
+
+   function Across(...args: any[]){
+      return [] as any
+   }
+
+   function Thru(...args: any[]){
+      return [] as any
+   }
+
+
 
    return component(
       <>
@@ -52,18 +62,18 @@ export function CellsApp() {
             <thead>
                <tr>
                   <th></th>
-                  {Spread(cols, col =>
+                  {Thru(cols, col =>
                      <th>{col}</th>
                   )}
                </tr>
             </thead>
             <tbody>
-               {Spread(cells[0].length, row => //TODO: allow numbers as input for For()
+               {For(cells[0], (item, $row) => //TODO: allow numbers as input for For()
                   <tr>
-                     <th>{row}</th>
-                     {Spread(cols, col =>
+                     <th>{$row}</th>
+                     {For(cols, (item, $col) =>
                         <td>
-                           <Cell row={row} column={col}></Cell>
+                           <Cell row={$row} column={$col}></Cell>
                         </td>
                      )}
                   </tr>

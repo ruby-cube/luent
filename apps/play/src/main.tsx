@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-// import './style.css'
+import './style.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
 // import { TestCounter } from './TestCounter';
@@ -14,7 +14,7 @@ import { TestCounter, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
 import { List } from './TestReactiveModel';
-import { definePhase, ion, queueTask, useReactivity, watch } from '@rue/quarky';
+import { definePhase, ion, ionize, queueTask, useReactivity, watch } from '@rue/quarky';
 import { MarkdownApp } from './demos/markdown-app/markdown-app';
 import { View } from './demos/vue-data-fetching';
 import { TabApp } from './demos/markdown-app/TestTabs';
@@ -27,6 +27,7 @@ import { TestSetHas } from './TestSetHas';
 import { TestCustomRadioSelection } from './TestSelected';
 import { SevenGUIs } from './demos/7-guis';
 import { CellsApp } from './demos/cells-app';
+import { PolygonApp } from './demos/polygon-app';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -111,7 +112,10 @@ if (__DEV__) configureFlask({
 //    />
 // )
 
-const app = createApp(SevenGUIs)
+// const array = ionize([{ name: 'a' }, { name: 'b' }])
+// console.log('Stringify', JSON.stringify(array))
+
+const app = createApp(PolygonApp)
 
 app.mount('#app')
 

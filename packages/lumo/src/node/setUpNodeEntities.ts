@@ -33,7 +33,7 @@ export function setUpNodeEntities(
       let nodeEntity = nodeEntities[i];
       if (nodeEntity instanceof Array) {
          if (series.isOpen) series.close()
-         setUpNodeEntities(nodeEntities, parent, nodePod, nodeKits) //QUESTION: should swap and conditionalArray be inherited by this setup scope?
+         setUpNodeEntities(nodeEntity, parent, nodePod, nodeKits) //QUESTION: should swap and conditionalArray be inherited by this setup scope?
       }
       else if (nodeEntity instanceof ConditionalRenderKit) {
          const statementType = nodeEntity.statementType

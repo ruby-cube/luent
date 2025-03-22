@@ -36,8 +36,8 @@ export function makeElement(
    const XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes)) || getXMLNamespace();
 
    const domNode = isHydrating() ? getElement()
-      : XML_NS ? createNSElement(tagName, XML_NS)
-         : document.createElement(tagName)
+      : XML_NS ? (console.log('creating XMLNS tag', tagName), createNSElement(tagName, XML_NS))
+         : (console.log('creating html tag', tagName), document.createElement(tagName))
 
 
    if (ref) {

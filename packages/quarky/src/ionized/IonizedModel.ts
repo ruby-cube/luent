@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { ionize, registerIonizedModel, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
-import { asAtomicOp, getAtomicOp, TRACKED } from "./AtomicOp";
+import { asAtomicOp, getAtomicOp } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { debug, isFunction, isObject, noop } from "@rue/utils";
@@ -16,7 +16,7 @@ import { ParticleMorph } from "../compound/Particle";
 import { CompoundMorph } from "../compound/Compound";
 import { Watchable } from "../watch/Watched";
 import { IonizedCompound } from "./IonizedCompound";
-import {  runSyncEffects } from "../effect-cycle/SyncEffects";
+import { runSyncEffects } from "../effect-cycle/SyncEffects";
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -165,7 +165,6 @@ export function useTrackableGetOp(
       getActiveTracker()?.track(asAtomicOp(model, op, value))
       return maybeIonize(fn.call(target, value))
    }
-   trackableOp[TRACKED] = undefined;
    return trackableOp
 }
 
@@ -224,7 +223,7 @@ export function useTrackableCreativeIterative(
    op: PropertyKey,
 ) {
    return useTrackableOp(
-      target, model, op, 
+      target, model, op,
       undefined,
       (target, args) => ionizedDecoy(args[1] ?? target),
       (result) => ionize(result)
@@ -388,6 +387,7 @@ export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonized
 }
 
 const INTERNAL_OP = "[[INTERNAL]]"
+const KEY_IN_OP = "[[in]]"
 
 //TODO:
 // - I really need to think through if property changes should trigger the whole model
@@ -444,7 +444,7 @@ export function createIonizedModel(
          const success = Reflect.defineProperty(target, key, attributes)
          if (!success) return false;
          if (!(key in target)) {
-            triggerKeysChange(key)
+            triggerKeysChange(ionizedModel, key)
          }
          else if (target[key] !== attributes.value) {
             getAtomicPion(ionizedModel, key)?.trigger()
@@ -461,7 +461,7 @@ export function createIonizedModel(
             getAtomicPion(ionizedModel, key)?.trigger()
          }
          if (key in target) {
-            triggerKeysChange(key)
+            triggerKeysChange(ionizedModel, key)
          }
          modelQuark.trigger()
          //TODO: record mutation?
@@ -479,7 +479,7 @@ export function createIonizedModel(
       },
 
       preventExtensions(target) {
-         getAtomicOp(INTERNAL_OP, 'isExtensible')?.trigger()
+         getAtomicOp(ionizedModel, INTERNAL_OP, 'isExtensible')?.trigger()
          return Reflect.preventExtensions(target)
       },
 
@@ -495,9 +495,9 @@ export function createIonizedModel(
 
 export type ProxySwitchMap = Map<string | symbol, () => any>
 
-function triggerKeysChange(key: PropertyKey) {
-   getAtomicOp(INTERNAL_OP, 'ownKeys')?.trigger()
-   getAtomicOp("[[in]]", key)?.trigger()
+function triggerKeysChange(model: IonizedModel, key: PropertyKey) {
+   getAtomicOp(model, INTERNAL_OP, 'ownKeys')?.trigger()
+   getAtomicOp(model, KEY_IN_OP, key)?.trigger()
    //QUESTION: shoule this trigger the whole model? I don't think so?
 }
 
@@ -659,7 +659,10 @@ function initialTrackableStateAccess(
    function getState(value: any) {
       const _value = maybeIonize(value)
       const tracker = getActiveTracker()
-      if (tracker) tracker.track(asPionQuark(ionizedModel, key)) //TODO: Tracking properties that are derivations (just a getter, no setter) or non-writable is superfluous
+      if (tracker) {
+         const pion = asPionQuark(ionizedModel, key)
+         if (pion) tracker.track(pion) //TODO: Tracking properties that are derivations (just a getter, no setter) or non-writable is superfluous
+      }
       return transformValue(_value);
    }
    switchMap.set(key, () => getState(target[key]))

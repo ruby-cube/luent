@@ -248,7 +248,7 @@ export function installIonicArray() {
 
       afterSet(ionizedModel, quark, key, newValue, oldValue) {
          if (isIntegerKey(key)) {
-            getAtomicOp(ionizedModel.at, key)?.trigger()
+            getAtomicOp(ionizedModel, 'at', key)?.trigger()
             return;
          }
 
@@ -266,10 +266,10 @@ export function installIonicArray() {
             const index = parseInt(<string>indexKey)
             if (index >= newValue) {
                getAtomicPion(ionizedModel, indexKey)?.trigger()
-               getAtomicOp(ionizedModel.at, index)?.trigger()
+               getAtomicOp(ionizedModel, 'at', index)?.trigger()
             }
             if (index > oldValue) {
-               getAtomicOp(ionizedModel.at, index)?.trigger()
+               getAtomicOp(ionizedModel, 'at', index)?.trigger()
             }
          }
       }
@@ -354,7 +354,7 @@ export function installIonicArray() {
             const index = parseInt(<string>indexKey)
             if (index >= newLength) {
                getAtomicPion(model, indexKey)?.trigger()
-               getAtomicOp(model.at, index)?.trigger()
+               getAtomicOp(model, 'at', index)?.trigger()
             }
          }
       }
@@ -375,7 +375,7 @@ export function installIonicArray() {
          const prevLength = target.length;
          const output = performOp()
          getAtomicPion(ionizedModel, (prevLength - 1).toString())?.trigger()
-         getAtomicOp(ionizedModel.at, - 1)?.trigger()
+         getAtomicOp(ionizedModel, 'at', - 1)?.trigger()
          return output;
       }
    }

@@ -1,0 +1,158 @@
+import { component, For, fromTag, Ion, Ionized, v } from "@rue/lumo"
+import { $$, ion, ionize } from "@rue/quarky"
+
+type Stat = {
+   label: string,
+   value: number
+}
+
+export function PolygonApp() {
+   const $newLabel = ion('')
+   const stats = ionize([
+      { label: 'A', value: 100 },
+      { label: 'B', value: 100 },
+      { label: 'C', value: 100 },
+      { label: 'D', value: 100 },
+      { label: 'E', value: 100 },
+      { label: 'F', value: 100 }
+   ] as Stat[])
+
+   function add(e: any) {
+      e.preventDefault()
+      if (!$newLabel()) return
+      stats.push({
+         label: $newLabel(),
+         value: 100
+      })
+      $newLabel.state = ''
+   }
+
+   function remove(stat: Stat) {
+      if (stats.length > 3) {
+         stats.splice(stats.indexOf(stat), 1)
+      } else {
+         alert("Can't delete more!")
+      }
+   }
+   return component(
+      <>
+         <svg width="200" height="200">
+            <PolyGraph stats={stats}></PolyGraph>
+         </svg >
+
+         {For(stats, stat =>
+            <div>
+               <label>{stat.label}</label>
+               <input type="range" mu:value={$$(stat).$value} min="0" max="100" />
+               <span>{$$(stat).$value}</span>
+               <button on:click={e => remove(stat)} class="remove">X</button>
+            </div>
+         )}
+
+         <form id="add">
+            <input name="newlabel" mu:value={$newLabel} />
+            <button on:click={add}>Add a Stat</button>
+         </form>
+
+         <pre id="raw">{ $=JSON.stringify(stats) }</pre>
+
+         <$--portal to='head'>
+            <style>
+               {`polygon {
+  fill: #42b983;
+  opacity: 0.75;
+}
+
+circle {
+  fill: transparent;
+  stroke: #999;
+}
+
+text {
+  font-size: 10px;
+  fill: #666;
+}
+
+label {
+  display: inline-block;
+  margin-left: 10px;
+  width: 20px;
+}
+
+#raw {
+  position: absolute;
+  top: 0;
+  left: 300px;
+}`}
+            </style>
+         </$--portal>
+      </>
+   )
+}
+
+
+
+function AxisLabel(
+   input = fromTag({
+      stat: Ionized<Stat>,
+      index: Ion<number>,
+      total: Ion<number>
+   })
+) {
+   const { $index, stat, $total } = input
+
+   const $point = ion(() =>
+      valueToPoint(+stat.value + 10, $index(), $total())
+   )
+
+   return component(
+      <text x={$point().x} y={$point().y}>{stat.label}</text>
+
+   )
+}
+
+function PolyGraph(
+   input = fromTag({
+      stats: Ionized<Stat[]>
+   })
+) {
+   const { stats } = input
+
+   const $points = ion(() => {
+      const total = stats.length
+      return stats
+         .map((stat, i) => {
+            const { x, y } = valueToPoint(stat.value, i, total)
+            return `${x},${y}`
+         })
+         .join(' ')
+   })
+   return component(
+      <g>
+         <polygon points={$points}></polygon>
+         <circle cx="100" cy="100" r="80"></circle>
+         {For(stats, (stat, $index) =>
+            <AxisLabel
+               stat={stat}
+               index={$index}
+               total={$=stats.length}
+            >
+            </AxisLabel>
+         )}
+      </g>
+   )
+}
+
+function valueToPoint(value: number, index: number, total: number) {
+   const x = 0
+   const y = -value * 0.8
+   const angle = ((Math.PI * 2) / total) * index
+   const cos = Math.cos(angle)
+   const sin = Math.sin(angle)
+   const tx = x * cos - y * sin + 100
+   const ty = x * sin + y * cos + 100
+   return {
+      x: tx,
+      y: ty
+   }
+}
