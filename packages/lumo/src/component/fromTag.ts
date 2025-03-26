@@ -2,7 +2,7 @@ import { AnyObject, UnionToIntersection } from "@rue/types";
 import { isIon, toIon, } from "@rue/quarky";
 import { getComponentAttributes } from "./makeComponent";
 import { isFunction, isObject } from "@rue/utils";
-import { DeepReadonly, v, Readonly, MaybeIon } from "./InputTypes";
+import { DeepReadonly, v, Readonly, MaybeIon, Input, OptionalInput, MutableInput, OptionalMutableInput, MutableIon } from "./InputTypes";
 
 //TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
 
@@ -86,9 +86,11 @@ function isMutable<T extends DeepReadonly<AnyObject> | AnyObject>(value: T): val
 
 const exampleConfig = {
    dove: v<Dove>,
+   'mu:frogA': v<Frog>,
    'mu?:frog': v<Frog>,
-   'mu?:well': v<Well>
-}
+   'mu?:well': v<Well>,
+   'mu:wellB': v<Well>
+} //TODO: Mutable Ions with state and set
 
 type Frog = { name: string }
 type Well = { depth: number }
@@ -116,7 +118,7 @@ const f = null as unknown as Frog
 const w = null as unknown as Well
 const d = null as unknown as Dove
 
-tryIt({ "mu:frog": f, dove: d, "mu:well": w })
+tryIt({ "mu:frog": f, dove: d, "mu:well": w, 'mu:frogA': f })
 tryIt({ frog: f, dove: d, "mu:well": w })
 tryIt({ "mu:frog": f, dove: d, well: w })
 tryIt({ frog: f, dove: d, well: w })
@@ -138,13 +140,13 @@ tryIt({ dove: d, well: w })
  * Component Tag Attributes
  */
 
-type ComponentAttributes<C> = {
-   [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `mu?:${string}` ? never : K : never]:
-   C[K] extends ((arg: any) => { inputType: infer I }) ? I : 'invalid typeConfig'
-} & {
-   [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `mu?:${string}` ? never : K : never]?:
-   C[K] extends { inputType: infer I } ? I : 'invalid typeConfig'
-} & (WithMaybeMutables<C> extends never ? {} : WithMaybeMutables<C>)
+// type ComponentAttributes<C> = {
+//    [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `mu?:${string}` ? never : K : never]:
+//    C[K] extends ((arg: any) => { inputType: infer I }) ? I : 'invalid typeConfig'
+// } & {
+//    [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `mu?:${string}` ? never : K : never]?:
+//    C[K] extends { inputType: infer I } ? I : 'invalid typeConfig'
+// } & (WithMaybeMutables<C> extends never ? {} : WithMaybeMutables<C>)
 // & {
 //    [K in keyof C as K extends `mu?:${infer S}` ? `mu:${K}` : never]:
 //    C[K] extends (arg: any) => { $inputType: infer I } ? I : 'invalid typeConfig'
@@ -174,6 +176,20 @@ type OptionalMaybeMutables<C> = {
    [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `mu?:${infer S}` ? S : never : never]:
    C[K] extends { inputType: infer I } ? K extends `mu?:${infer S}` ? [{ [K in `mu:${S}`]?: I }, { [K in S]?: I }] : never : 'invalid typeConfig'
 }
+
+export type RequiredInputKey<K extends string, C> = C extends { required: true } & ((arg: any) => { inputType: any }) ? ExcludeMutableKey<K> : never
+export type OptionalInputKey<K extends string, C> = C extends { optional: '?' | 'withDefault', inputType: any } ? ExcludeMutableKey<K>:never
+export type RequiredMutableInputKey<K extends string, C> = C extends { required: true } & ((arg: any) => { inputType: any }) ? InferMutableOnlyKey<K> : never;
+export type OptionalMutableInputKey<K extends string, C> = C extends { optional: '?' | 'withDefault', inputType: any } ? InferMutableOnlyKey<K>: never;
+
+export type ExcludeMutableKey<K extends string> = K extends `mu?:${string}` ? never : K extends `mu:${string}` ? never : K
+type InferMutableOnlyKey<K extends string> = K extends `mu:${infer S}` ? S : never
+
+type ComponentAttributes<C> = { [K in keyof C as K extends string ? RequiredInputKey<K, C[K]> : never]: K extends string ? Input<C[K]> : never }
+   & { [K in keyof C as K extends string ? OptionalInputKey<K, C[K]> : never]?: K extends string ? OptionalInput<C[K]> : never }
+   & { [K in keyof C as K extends string ? RequiredMutableInputKey<K, C[K]> : never]: K extends string ? MutableInput<K, C[K]> : never }
+   & { [K in keyof C as K extends string ? OptionalMutableInputKey<K, C[K]> : never]?: K extends string ? OptionalMutableInput<K, C[K]> : never }
+   & (WithMaybeMutables<C> extends never ? {} : WithMaybeMutables<C>)
 
 
 
@@ -235,7 +251,7 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                   else validatedAttributes[vKey] = unnestValue(value);
                   break;
 
-               case 'MaybeIon':
+               case 'ToIon':
                   const ionKey = key.startsWith('mu:') ? key.slice(3) : key;
                   // if (!isIon(value)) {
                   //    throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ion`)
@@ -245,11 +261,7 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                   validatedAttributes['$' + ionKey] = toIon(value) //QUESTION: We don't unnest value here... there may be deeply nested ions
                   break;
 
-               // case 'MaybeIon':
-               //    // validatedAttributes['$' + key] = isDerivationFunction(value) ? value : isIon(value) ? isReined(value) ? value : readonly(value) : readonly(toIon(value))
-               //    break;
-
-               case 'MaybeIonized':
+               case 'ToIonized':
                   const modelKey = key.startsWith('mu:') ? key.slice(3) : key;
                   // const model = unnestValue(value)
                   // if (!isIonizedModel(model)) {
@@ -261,11 +273,6 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                   if (!isObject(_value)) throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an object`)
                   validatedAttributes[modelKey] = _value;
                   break;
-
-               // case 'MaybeIonized':
-               //    // const _value = unnestValue(value)
-               //    // validatedAttributes[key] = isReined(value) ? _value : readonly(_value);
-               //    break;
 
                default:
                   break;

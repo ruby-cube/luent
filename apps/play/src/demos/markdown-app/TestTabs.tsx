@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { component, CommonsKey, For, fromCommons, fromTag, If, Ion, Ionized, v } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
 import { AtomicIon, exposeIons, ion, ionize, watch } from "@rue/quarky";
@@ -37,7 +38,6 @@ export function TabApp() {
    )
 }
 
-/*
 
 type FileData = {
    id: number,
@@ -249,6 +249,8 @@ function App(input = fromTag({
          }
    })
 
+   const openFile = fromCommons(OPEN_FILE)
+
    // MainView.mount('home')
    // MainView.mount('file', file)
    // MainView.unmount(); // will mount default if provided
@@ -258,24 +260,37 @@ function App(input = fromTag({
    return component(
       <>
          <Sidebar files={files} provide={[
-            m(OPENFILE, index => openFile(files[index])),
-            m(ADDFILE, addFile),
-            m(DELETEFILE, deleteFile)
+            OPEN_FILE(index => openFile(files[index])),
+            ADD_FILE(addFile),
+            DELETE_FILE(deleteFile),
+            ACTIVE(true),
+            MU_FROG_SHELL(frogShell),
          ]}></Sidebar>
          <main>
-            <Tabs files={$openedFiles} provide={[
-               m(CLOSEFILE, closeOpenedFile),
-               m(FOCUSFILE, focusOpenedFile)
-            ]} />
+            <Tabs files={$openedFiles} provide={[CLOSE_FILE(closeOpenedFile), FOCUS_FILE(focusOpenedFile)]} />
             <MainView as={existingFile ? ['file', file] : 'home'}></MainView>
          </main>
       </>
    )
 }
 
-const OPENFILE = CommonsKey(v<(index: number) => void>, 'm')
-const DELETEFILE = CommonsKey(v<(index: number) => void>, 'm')
-const ADDFILE = CommonsKey(v<(index: number) => void>, 'm')
+const ACTIVE = ''
+return () => { }
+function u(a) {
+   return (a) => { }
+}
+function m(a) {
+   return (a) => { }
+}
+function mu(a) {
+   return (a) => { }
+}
+
+const OPENFILE = CommonsKey('m:openFile', v<(index: number) => void>)
+const DELETEFILE = CommonsKey('m:deleteFile', v<(index: number) => void>)
+const ADDFILE = CommonsKey('m:addFile', v<(index: number) => void>)
+
+
 
 function Sidebar(input = fromTag({
    files: Ionized<File[]> //TODO: Interesting... 'native' methods are easy to be made public, but methods declared via ionize() will be difficult to share the type...
@@ -308,23 +323,23 @@ function Tabs(input = fromTag({
    )
 }
 
-const CLOSEFILE = CommonsKey(v<(index: number) => void>, 'm')
-const FOCUSFILE = CommonsKey(v<(index: number) => void>, 'm')
+const CLOSE_FILE = CommonsKey(v<(index: number) => void>)
+const FOCUS_FILE = CommonsKey(v<(index: number) => void>)
 
 function Tab(input = fromTag({
-   index: Ion<number>('??')('hi'),
+   index: Ion<number>('?')('hi'),
    file: Ionized<File>,
-   closeFile: v('??')(fromCommons(CLOSEFILE)),
-   focusFile: v('??')(fromCommons(FOCUSFILE)),
+   closeFile: v('?')(fromCommons(CLOSE_FILE)),
+   focusFile: v('?')(fromCommons(FOCUS_FILE)),
    inherited: ['style', 'class']
 })) {
    const { file, closeFile, focusFile, $index, inherited } = input
 
    return component(
-      <div style={[{ backgroundColor: $ = file.active ? 'red' : 'gray' }, inherited.style]}
+      <div style={[{ backgroundColor: $=file.active ? 'red' : 'gray' }, inherited.style]}
          on:click={e => focusFile($index())}
       >
-         {$ = file.title}
+         {$=file.title}
          <button on:click={e => closeFile($index())}>x</button>
       </div>
    )
@@ -339,5 +354,3 @@ function Home() {
       </div>
    )
 }
-
-*/

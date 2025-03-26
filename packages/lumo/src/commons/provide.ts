@@ -192,22 +192,22 @@ function validateContextEntry(key: string | symbol, value: any, typeConfig: Type
       case 'v':
          return unnestValue(value)
 
-      case '_Ion':
-         if (!isIon(value)) {
-            throw new Error(`[INVALID INPUT] Value of commons entry, '${String(key)}', must be an ion`)
-         }
-         return value; //TODO: make Ion read-only
+      // case '_Ion':
+      //    if (!isIon(value)) {
+      //       throw new Error(`[INVALID INPUT] Value of commons entry, '${String(key)}', must be an ion`)
+      //    }
+      //    return value; //TODO: make Ion read-only
 
-      case 'MaybeIon':
+      case 'ToIon':
          return toIon(value) //TODO: make Ion read-only
 
-      case '_Ionized':
-         if (!isIonizedModel(value)) {
-            throw new Error(`[INVALID INPUT] Value of commons entry, '${String(key)}', must be an ionized`)
-         }
-         return unnestValue(value); //TODO: readonly
+      // case '_Ionized':
+      //    if (!isIonizedModel(value)) {
+      //       throw new Error(`[INVALID INPUT] Value of commons entry, '${String(key)}', must be an ionized`)
+      //    }
+      //    return unnestValue(value); //TODO: readonly
 
-      case 'MaybeIonized':
+      case 'ToIonized':
          return unnestValue(value); //TODO: readonly
 
       default:

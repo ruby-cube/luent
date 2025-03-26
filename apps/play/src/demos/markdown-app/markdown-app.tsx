@@ -7,7 +7,7 @@ import { component, fromTag, Ion, NodeRef, onDemount, onMount, onRemount, onUnmo
 
 export function MarkdownApp(
    input = fromTag({
-      'mu:markdown': Ion<string>('??')(() => '#Hello World')
+      'mu:markdown': Ion<string>('?')('#Hello World')
    })
 ) {
 

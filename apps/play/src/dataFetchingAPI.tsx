@@ -64,7 +64,7 @@ function defineDispatch(...arg: any[]) {
 }
 
 defineDispatch(POSTS, {
-   type: v<string>('??')('dog'),
+   type: v<string>('?')('dog'),
    dispatch: ($userId: Ion<string>) =>
       fetch('')
 })

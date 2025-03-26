@@ -2,31 +2,40 @@
 //NOTE: It may be tempting to abstract the TypeDefs into a TypeDef with Generics, but because typescript
 // does not have higher order generics, this is not currently possible. Must manually type them all.
 
-import { AnyObject } from "@rue/types";
+import { AnyObject, UnionToIntersection } from "@rue/types";
+
+
+// [ ] Configure type with key
+//     - fromTag()
+//     - CommonsKey()
+//
+// [ ] Validate type via typescript
+//     - $M()
+//     - index.d.ts
+// 
+// [ ] Runtime validation and normalization of reactive type. Defaults
+//     - fromTag()
+//     - fromCommons()
+// 
+// [ ] Read-only and Reined conversion
+//     - fromTag()
+//     - fromCommons()
+//     - ref()
+// 
+// [ ] m: and mu: validation
+//     - fromTag()
+//     - fromCommons()
 
 export type MaybeIon<T> = T | Ion<T>
 
-// export type _Nonlocal<T> = T extends object
-//   ? T extends Function
-//     ? T
-//     : Nonlocal<T>
-//   : T;
 export type _Nonlocal<T> = T extends (...args: any[]) => void ? T :
    T extends () => infer V ? (V extends Object ? (() => Nonlocal<V>) : () => V) & Nonlocal<T> :
-   // T extends PropertyValuesOf<NonLocalDataStructures<T>>['structure'] ? PropertyValuesOf<NonLocalDataStructures<T>>['nonLocal'] :
    T extends Object ? Nonlocal<T>
    : T
 
-// export type _Nonlocal<T> = T extends Function ? T : T extends object ? Nonlocal<T> : T
-
 export type Nonlocal<T> =
-   // T extends () => infer V ? () => _Nonlocal<V> & {
-   //    readonly [K in keyof T]: _Nonlocal<T[K]>
-   // } :
    T extends PropertyValuesOf<NonLocalDataStructures<T>>['structure'] ? PropertyValuesOf<NonLocalDataStructures<T>>['nonLocal'] :
-   T extends Object ? {
-      readonly [K in keyof T]: _Nonlocal<T[K]>
-   }
+   T extends Object ? { readonly [K in keyof T]: _Nonlocal<T[K]> }
    : T
 
 //ARRAY ONLY
@@ -36,6 +45,9 @@ export type Nonlocal<T> =
 type AsNonlocal<T> = {
    readonly [K in keyof T]: T[K] extends Function ? T[K] : _Nonlocal<T[K]>
 }
+
+const OPTIONAL = '?' as const
+type Optional = typeof OPTIONAL
 
 
 
@@ -83,65 +95,78 @@ type PropertyValuesOf<T> = T[keyof T];
 // const e = array.pop()
 // const el = array.splice(0, 1)
 
+// type TypeConfig = {
+//    name: string,
+//    validatedType?: any,
+//    inputType?: any,
+//    default?: true | undefined;
+//    required?: true;
+//    optional?: '?' | 'withDefault'
+// }
+
+type MaybeDefaultType<T, D> = unknown extends T ? D : T
 
 
-export const v = ((optional?: '?' | '??') => {
-   if (optional === '??')
-      return function v(defaultValue: any) {
-         return {
-            name: 'v',
-            optional: 'withDefault',
-            default: defaultValue
-         }
+
+
+
+
+export const v = ((optional?: Optional) => {
+   function v(defaultValue: any) {
+      return {
+         name: 'v',
+         optional: 'withDefault',
+         default: defaultValue
       }
-   return {
-      name: v,
-      optional,
-   };
+   }
+   v.optional = OPTIONAL
+   return v;
 }) as {
-   <T>(optional?: '?' | '??'): {
+   <T>(optional?: Optional): {
       name: 'v',
       validatedType: T;
       inputType: T;
-      optional: '?';
+      optional: Optional;
       default: undefined
-   } & (<D>(defaultValue: D) => {
+   } & (<D>(defaultValue: MaybeDefaultType<T, D>) => {
       name: 'v',
-      validatedType: D;
-      inputType: D;
+      validatedType: MaybeDefaultType<T, D>;
+      inputType: MaybeDefaultType<T, D>;
       optional: 'withDefault';
       default: true;
    }),
+   // } & ((defaultValue: T) => {
+   //    name: 'v',
+   //    validatedType: T;
+   //    inputType: T;
+   //    optional: 'withDefault';
+   //    default: true;
+   // }),
    name: 'v';
    required: true;
 }
 
-
-
-export const z = ((optional?: '?' | '??') => {
-   if (optional === '??')
-      return function z(defaultValue: any) {
-         return {
-            name: 'z',
-            optional: 'withDefault',
-            default: defaultValue
-         }
+export const z = ((optional?: Optional) => {
+   function z(defaultValue: any) {
+      return {
+         name: 'z',
+         optional: 'withDefault',
+         default: defaultValue
       }
-   return {
-      name: z,
-      optional,
-   };
+   }
+   z.optional = OPTIONAL;
+   return z
 }) as {
-   <T>(optional?: '?' | '??'): {
+   <T>(optional?: Optional): {
       name: 'z',
       validatedType: T;
       inputType: T;
-      optional: '?';
+      optional: Optional;
       default: undefined
-   } & (<D>(defaultValue: D) => {
+   } & ((defaultValue: T) => {
       name: 'z',
-      validatedType: D;
-      inputType: D;
+      validatedType: T;
+      inputType: T;
       optional: 'withDefault';
       default: true;
    }),
@@ -149,205 +174,68 @@ export const z = ((optional?: '?' | '??') => {
    required: true;
 }
 
-// const _Ion = ((optional: '?') => {
-//    return {
-//       name: '_Ion',
-//       optional,
-//       default: undefined
-//    }
-// }) as {
-//    <T, M extends AnyObject = {}>(optional: '?'): {
-//       name: '_Ion',
-//       validatedType: Ion<T, M>; //TODO: need a way to indicate methods are required...
-//       inputType: Ion<T, M> | T;
-//       optional: '?';
-//       default: undefined
-//    },
-//    name: '_Ion';
-//    required: true;
-// }
 
-
-export const MaybeIon = ((optional: '?' | '??') => {
-   if (optional === '??')
-      return function MaybeIon(defaultValue: any) {
-         return {
-            name: 'MaybeIon',
-            optional: 'withDefault',
-            default: defaultValue
-         }
+export const ToIon = ((optional: Optional) => {
+   function ToIon(defaultValue: any) {
+      return {
+         name: 'ToIon',
+         optional: 'withDefault',
+         default: defaultValue
       }
-   return {
-      name: 'MaybeIon',
-      optional
    }
+   ToIon.optional = OPTIONAL;
+   return ToIon
 }) as {
-   <T, M extends AnyObject = {}>(optional?: '?' | '??'): {
-      name: 'MaybeIon',
+   <T, M extends AnyObject = {}>(optional?: Optional): {
+      name: 'ToIon',
       validatedType: Ion<T, M>;
       inputType: Ion<T, M> | T;
-      optional: '?';
+      optional: Optional;
       default: undefined
-   } & (<D extends Ion>(defaultValue: D) => {
-      name: 'MaybeIon',
-      validatedType: D extends Ion<infer S, infer F> ? Ion<S, F> : D;
-      inputType: D extends Ion<infer S, infer F> ? Ion<S, F> : D | T;
+   } & ((defaultValue: T) => {
+      name: 'ToIon',
+      validatedType: T extends Ion<infer S, infer F> ? Ion<S, F> : T;
+      inputType: T extends Ion<infer S, infer F> ? Ion<S, F> : T;
       optional: 'withDefault';
       default: true;
    }),
-   name: 'MaybeIon';
+   name: 'ToIon';
    required: true;
 }
-export { MaybeIon as Ion }
+export { ToIon as Ion }
 type Ion<T = any, M extends AnyObject = {}> = (() => T) & M
-// export const $Ion = ((optional: '?') => {
-//    return {
-//       name: '$Ion',
-//       optional,
-//       default: undefined
-//    }
-// }) as {
-//    <T, M extends AnyObject>(optional: '?'): {
-//       name: '$Ion',
-//       validatedType: Ion<T, M>;
-//       $attributeType: Ion<T, M>;
-//       optional: '?'
-//       default: undefined
-//    },
-//    name: '$Ion';
-//    required: true;
-// }
 
 
-// export const $Ref = ((optional: '?') => {
-//    return {
-//       name: '$Ref',
-//       optional,
-//       default: undefined
-//    }
-// }) as {
-//    <T, M extends AnyObject>(optional: '?'): {
-//       name: '$Ref',
-//       validatedType: Ion<T, M>;
-//       $attributeType: Ion<T, M>;
-//       optional: '?'
-//       default: undefined
-//    },
-//    name: '$Ref';
-//    required: true;
-// }
-
-// export const $IonOrIon = ((optional: '?') => {
-//    return {
-//       name: '$IonOrIon',
-//       optional,
-//       default: undefined
-//    }
-// }) as {
-//    <T, M extends AnyObject>(optional: '?'): {
-//       name: '$IonOrIon',
-//       validatedType: Ion<T> | Ion<T, M>;
-//       inputType: Ion<T> | T;
-//       $attributeType: Ion<T, M>;
-//       optional: '?'
-//       default: undefined
-//    },
-//    name: '$IonOrIon';
-//    required: true;
-// }
-
-// export type Ionized<T extends AnyObject, M = {}> = {
-//    [K in keyof T]: T[K] extends AtomicIon<infer V> | DerivedIon<infer V> | WritableDerivedIon<infer V> ? V : T[K]
-// } & M & { [QUARK]: IonizedModelQuark }
-
-// const _Ionized = ((optional: '?') => {
-//    return {
-//       name: '_Ionized',
-//       optional,
-//       default: undefined
-//    }
-// }) as {
-//    <T extends AnyObject>(optional: '?'): {
-//       name: '_Ionized',
-//       validatedType: T;
-//       inputType: T;
-//       optional: '?';
-//       default: undefined
-//    },
-//    name: '_Ionized';
-//    required: true;
-// }
-// export { _Ionized as Ionized }
-
-
-
-export const MaybeIonized = ((optional?: '?' | '??') => {
-   if (optional === '??')
-      return function MaybeIonized(defaultValue: any) {
-         return {
-            name: 'MaybeIonized',
-            optional: 'withDefault',
-            default: defaultValue
-         }
+export const ToIonized = ((optional?: Optional) => {
+   function ToIonized(defaultValue: any) {
+      return {
+         name: 'ToIonized',
+         optional: 'withDefault',
+         default: defaultValue
       }
-   return {
-      name: 'MaybeIonized',
-      optional,
    }
+   ToIonized.optional = OPTIONAL
+   return ToIonized
 }) as {
-   <T extends AnyObject>(optional?: '?' | '??'): {
-      name: 'MaybeIonized',
+   <T extends AnyObject>(optional?: Optional): {
+      name: 'ToIonized',
       validatedType: T;
       inputType: T;
-      optional: '?';
+      optional: Optional;
       default: undefined
-   } & (<D>(defaultValue: D) => {
-      name: 'MaybeIonized',
-      validatedType: D;
-      inputType: D;
+   } & ((defaultValue: T) => {
+      name: 'ToIonized',
+      validatedType: T;
+      inputType: T;
       optional: 'withDefault';
       default: true;
    }),
-   name: 'MaybeIonized';
+   name: 'ToIonized';
    required: true;
 }
 
-export { MaybeIonized as Ionized }
-// export const $Ionized = ((optional: '?') => {
-//    return {
-//       name: '$Ionized',
-//       optional,
-//       default: undefined
-//    }
-// }) as {
-//    <T extends AnyObject, M>(optional: '?'): {
-//       name: '$Ionized',
-//       validatedType: Ionized<T, M>;
-//       $attributeType: Ionized<T, M>;
-//       optional: '?'
-//       default: undefined
-//    },
-//    name: '$Ionized';
-//    required: true;
-// }
+export { ToIonized as Ionized }
 
-// export const $IonizedOrIonized = ((optional: '?') => {
-//    return {
-//       name: '$IonizedOrIonized',
-//       optional,
-//    }
-// }) as {
-//    <T extends AnyObject, M>(optional: '?'): {
-//       name: '$IonizedOrIonized',
-//       validatedType: Ionized<T, M> | Ionized<T>;
-//       inputType: Ionized<T>;
-//       $attributeType: Ionized<T, M>;
-//       optional: '?'
-//       default: undefined
-//    },
-//    name: '$IonizedOrIonized'
-//    required: true;
-// }
 
 
 
@@ -395,8 +283,54 @@ type AsReadonly<T> = {
 }
 
 
+export type MutableIon<T> = T & ({ state: unknown } | { set: (value: unknown) => unknown })
+
+export type RequiredInput = { required: true };
+
+// Raw input (vs validated input)
+export type Input<C> = C extends (arg: any) => ({ inputType?: infer I }) ? I : C extends { inputType: infer I } ? I : 'invalid typeConfig'
+
+export type OptionalInput<C> = Input<C> | undefined;
+
+export type MutableInput<K extends string, C> = C extends ((arg: any) => { inputType: infer I }) ? K extends `mu:${infer S}` ? I & MutableIon<I> : never : 'invalid typeConfig';
+
+export type OptionalMutableInput<K extends string, C> = MutableInput<K, C> | undefined;
 
 
-// type TypedReturn<T, K extends keyof T> = T[K] extends (...args: infer P) => infer R ? (this: Readonly<T>, ...args: P) => ReturnType<Readonly<T>[K]> : never
+// export type MaybeMutableInput<K extends string, C> = C extends ((arg: any) => { inputType: infer I }) ? K extends `mu?:${infer S}` ? [{ [K in `mu:${S}`]: MutableIon<I> }, { [K in S]: I }] : never : 'invalid typeConfig';
+// export type OptionalMaybeMutableInput<K extends string, C> = MutableInput<K, C> | undefined;
 
-// type GetFood = TypedReturn<Dog, 'getFood'>
+
+// type InferMutableKey<K extends string> = K extends `mu?:${infer S}` ? S : K extends `mu:${infer S}` ? S : never
+
+
+
+
+
+// type Attributes<C> = {
+//    [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `mu?:${string}` ? never : K : never]:
+//    C[K] extends ((arg: any) => { inputType: infer I }) ? I : 'invalid typeConfig'
+// } & {
+//    [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `mu?:${string}` ? never : K : never]?:
+//    C[K] extends { inputType: infer I } ? I : 'invalid typeConfig'
+// } & (WithMaybeMutables<C> extends never ? {} : WithMaybeMutables<C>)
+
+// type WithMaybeMutables<C> = IntersectionOfUnions<UnionToIntersection<(keyof RequiredMaybeMutables<C> extends never ? {} : RequiredMaybeMutables<C>[keyof RequiredMaybeMutables<C>])
+//    & (keyof OptionalMaybeMutables<C> extends never ? {} : OptionalMaybeMutables<C>[keyof OptionalMaybeMutables<C>])>>
+
+// type IntersectionOfUnions<T> =
+//    // Convert each intersected tuple to a union using distributive conditional types
+//    (T extends any[] ? TupleToUnion<T> : never);
+
+// type TupleToUnion<T extends any[]> = T[number];
+
+
+// type RequiredMaybeMutables<C> = {
+//    [K in keyof C as C[K] extends { required: true } & ((arg: any) => { inputType: any }) ? K extends `mu?:${infer S}` ? S : never : never]:
+//    C[K] extends ((arg: any) => { inputType: infer I }) ? K extends `mu?:${infer S}` ? [{ [K in `mu:${S}`]: I }, { [K in S]: I }] : never : 'invalid typeConfig'
+// }
+
+// type OptionalMaybeMutables<C> = {
+//    [K in keyof C as C[K] extends { optional: '?' | 'withDefault', inputType: any } ? K extends `mu?:${infer S}` ? S : never : never]:
+//    C[K] extends { inputType: infer I } ? K extends `mu?:${infer S}` ? [{ [K in `mu:${S}`]?: I }, { [K in S]?: I }] : never : 'invalid typeConfig'
+// }
