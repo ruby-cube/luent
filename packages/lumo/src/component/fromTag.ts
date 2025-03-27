@@ -2,7 +2,7 @@ import { AnyObject, UnionToIntersection } from "@rue/types";
 import { isIon, toIon, } from "@rue/quarky";
 import { getComponentAttributes } from "./makeComponent";
 import { isFunction, isObject } from "@rue/utils";
-import { DeepReadonly, v, Readonly, MaybeIon, Input, OptionalInput, MutableInput, OptionalMutableInput, MutableIon } from "./InputTypes";
+import { DeepReadonly, v, Readonly, MaybeIon, Input, OptionalInput, MutableInput, OptionalMutableInput, MutableIon, validateInput, manageAccess } from "./InputTypes";
 
 //TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
 
@@ -86,10 +86,10 @@ function isMutable<T extends DeepReadonly<AnyObject> | AnyObject>(value: T): val
 
 const exampleConfig = {
    dove: v<Dove>,
-   'mu:frogA': v<Frog>,
+   // 'mu:frogA': v<Frog>,
    'mu?:frog': v<Frog>,
    'mu?:well': v<Well>,
-   'mu:wellB': v<Well>
+   // 'mu:wellB': v<Well>
 } //TODO: Mutable Ions with state and set
 
 type Frog = { name: string }
@@ -118,7 +118,7 @@ const f = null as unknown as Frog
 const w = null as unknown as Well
 const d = null as unknown as Dove
 
-tryIt({ "mu:frog": f, dove: d, "mu:well": w, 'mu:frogA': f })
+tryIt({ "mu:frog": f, dove: d, "mu:well": w })
 tryIt({ frog: f, dove: d, "mu:well": w })
 tryIt({ "mu:frog": f, dove: d, well: w })
 tryIt({ frog: f, dove: d, well: w })
@@ -232,46 +232,28 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
          if (typeConfig) {
             const config = typeConfig[key];
             if (config === undefined) continue;
-            if ('optional' in config && value === undefined && 'default' in config && isFunction(config.default)) {
-               value = config.default()
-            }
-            else if (!('optional' in config) && value === undefined) {
-               throw new Error(`[INVALID INPUT] Required component attribute, ${key}, is undefined`)
-            }
+            const keyTuple = key.split(':')
+            const isNamespaced = keyTuple.length === 2;
+            const _key = isNamespaced ? keyTuple[1] : keyTuple[0]
+            const access = keyTuple[1]
+            value = manageAccess(validateInput(value, config, key), access)
 
             switch (config.name) {
                case 'v':
-                  const vKey = key.startsWith('mu:') || key.startsWith('on:') ? key.slice(3) : key;
                   if (key.startsWith('on:')) {
                      if (!isFunction(value) || isIon(value)) throw new Error('event handler must be a function')
                      const handlers = eventHandlers || (validatedAttributes.emit = (event: string) => { eventHandlers![event]() }, eventHandlers = {})
-                     handlers['emit' + vKey] = value;
+                     handlers['emit' + _key] = value;
                   }
-                  // else validatedAttributes[key] = (isFunction(value) || isReined(value)) ? value : value instanceof Object ? readonly(value) : value;
-                  else validatedAttributes[vKey] = unnestValue(value);
+                  else validatedAttributes[_key] = value;
                   break;
 
                case 'ToIon':
-                  const ionKey = key.startsWith('mu:') ? key.slice(3) : key;
-                  // if (!isIon(value)) {
-                  //    throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ion`)
-                  // }
-                  // validatedAttributes['$' + key] = value;
-                  // validatedAttributes['$' + key] = isReined(value) ? value : readonly(value);
-                  validatedAttributes['$' + ionKey] = toIon(value) //QUESTION: We don't unnest value here... there may be deeply nested ions
+                  validatedAttributes['$' + _key] = value
                   break;
 
                case 'ToIonized':
-                  const modelKey = key.startsWith('mu:') ? key.slice(3) : key;
-                  // const model = unnestValue(value)
-                  // if (!isIonizedModel(model)) {
-                  //    throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an ionized`)
-                  // }
-                  // // validatedAttributes[key] = isReined(value) ? value : readonly(value);
-                  // validatedAttributes[key] = model
-                  const _value = unnestValue(value)
-                  if (!isObject(_value)) throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an object`)
-                  validatedAttributes[modelKey] = _value;
+                  validatedAttributes[_key] = value;
                   break;
 
                default:

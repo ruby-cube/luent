@@ -326,11 +326,21 @@ function Tabs(input = fromTag({
 const CLOSE_FILE = CommonsKey(v<(index: number) => void>)
 const FOCUS_FILE = CommonsKey(v<(index: number) => void>)
 
+MutableIon
+MaybeMutableIon
+
+ReinedIon
+
+Obj
+Fn
+Val
+
+
 function Tab(input = fromTag({
    index: Ion<number>('?')('hi'),
    file: Ionized<File>,
-   closeFile: v('?')(fromCommons(CLOSE_FILE)),
-   focusFile: v('?')(fromCommons(FOCUS_FILE)),
+   closeFile: Val('?')(fromCommons(CLOSE_FILE)),
+   focusFile: Val('?')(fromCommons(FOCUS_FILE)),
    inherited: ['style', 'class']
 })) {
    const { file, closeFile, focusFile, $index, inherited } = input

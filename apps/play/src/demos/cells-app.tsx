@@ -62,7 +62,7 @@ export function CellsApp() {
             <thead>
                <tr>
                   <th></th>
-                  {Thru(cols, col =>
+                  {For(cols, col =>
                      <th>{col}</th>
                   )}
                </tr>

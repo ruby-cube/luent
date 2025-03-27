@@ -115,7 +115,7 @@ if (__DEV__) configureFlask({
 // const array = ionize([{ name: 'a' }, { name: 'b' }])
 // console.log('Stringify', JSON.stringify(array))
 
-const app = createApp(TestApp)
+const app = createApp(SevenGUIs)
 
 app.mount('#app')
 

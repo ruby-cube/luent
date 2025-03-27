@@ -1,99 +1,111 @@
-import { OptionalInputKey, RequiredInputKey } from "../component/fromTag";
-import { Input, OptionalInput, RequiredInput, v } from "../component/InputTypes";
+import { Input, OptionalInput, RequiredInput, TypeConfig, v, validateInput } from "../component/InputTypes";
 import { fromApp } from "./provide";
 
-type TypeConfig = { name: string }
 
-type ProviderKey<D = TypeConfig> = (value: D extends RequiredInput ? Input<D> : Input<D> | undefined) => [ProviderKey, any]
+export type RawInput<D> = D extends RequiredInput ? Input<D> : Input<D> | undefined
+
+export type CommonsEntryKey<D = TypeConfig> = {
+   (value: RawInput<D>): [CommonsEntryKey, unknown];
+   [TYPE_DEF]: TypeConfig;
+}
+
 
 type CommonsKeyReturn<D, M> =
-   M extends 'm' | 'mu' ? ProviderKey<D>
-   : M extends 'm?' | 'mu?' ? [ProviderKey<D>, ProviderKey<D>]
-   : ProviderKey<D>
+   M extends 'm' | 'mu' ? CommonsEntryKey<D>
+   : M extends 'm?' | 'mu?' ? [CommonsEntryKey<D>, CommonsEntryKey<D>]
+   : CommonsEntryKey<D>
 
 
 
-export const commonsTypeMap: Map<ProviderKey, TypeConfig> = new Map();
+// export const commonsTypeMap: Map<CommonsEntryKey, TypeConfig> = new Map();
 
 
 export function CommonsKey<D extends TypeConfig, M>(typeDef: D, mutability?: M & MutabilityMarker): CommonsKeyReturn<D, M> {
    switch (mutability) {
       case 'm':
-         return createReinedObjKey(typeDef) as CommonsKeyReturn<D, M>
+         return createProviderKey(typeDef, 'm') as CommonsKeyReturn<D, M>
 
       case 'mu':
-         return createMutableObjKey(typeDef) as CommonsKeyReturn<D, M>
+         return createProviderKey(typeDef, 'mu') as CommonsKeyReturn<D, M>
 
       case 'm?':
-         return [createProviderKey(typeDef), createReinedObjKey(typeDef)] as CommonsKeyReturn<D, M>
+         return [createProviderKey(typeDef), createProviderKey(typeDef, 'm')] as CommonsKeyReturn<D, M>
 
       case 'mu?':
-         return [createProviderKey(typeDef), createMutableObjKey(typeDef)] as CommonsKeyReturn<D, M>
+         return [createProviderKey(typeDef), createProviderKey(typeDef, 'mu')] as CommonsKeyReturn<D, M>
 
       default:
          return createProviderKey(typeDef) as CommonsKeyReturn<D, M>
    }
 }
 
-function createProviderKey(typeDef: TypeConfig) {
+
+
+export const TYPE_DEF = Symbol('type def')
+
+function createProviderKey(typeDef: TypeConfig, access?: 'mu' | 'm' | undefined) {
    function providerKey(value: unknown) {
-      //TODO: validate required/optional? validate reactive type?
-      return [providerKey, asReadonly(value)] as [ProviderKey, unknown]
+      return [providerKey, value] as [CommonsEntryKey, unknown]
    }
-   commonsTypeMap.set(providerKey, typeDef)
+   typeDef.access = access;
+   providerKey[TYPE_DEF] = typeDef
    return providerKey;
 }
-function createMutableObjKey(typeDef: TypeConfig) {
-   function mutableObjKey(value: unknown) {
-      return [mutableObjKey, value] as [ProviderKey, unknown]
-   }
-   commonsTypeMap.set(mutableObjKey, typeDef)
-   return mutableObjKey;
-}
-
-function createReinedObjKey(typeDef: TypeConfig) {
-   function reinedObjectKey(value: unknown) {
-      return [reinedObjectKey, asReined(value)] as [ProviderKey, unknown]
-   }
-   commonsTypeMap.set(reinedObjectKey, typeDef)
-   return reinedObjectKey;
-}
 
 
+//TODO: should we validate at provide() or validate at fromCommons()?
+// - required/optional/ toDefault
+// - readonly reined
+// - normalize reactivity
 
+// [ ] Runtime validation and normalization of reactive type. Defaults
+//     - fromTag()
+//     - fromCommons()
+// 
+// [ ] Read-only and Reined conversion
+//     - fromTag()
+//     - fromCommons()
+//     - ref()
 
-const [HELLO, MU_HELLO] = CommonsKey(v<{ dog: string }>, 'm?')
-const [HELLOA, MU_HELLOA] = CommonsKey(v<{ dog: string }>, 'mu?')
-const HELLOV = CommonsKey(v<{ dog: string }>, 'm')
-const HELLOC = CommonsKey(v<{ dog: string }>, 'mu')
-const HELLOD = CommonsKey(v<{ dog: string }>)
+// const [HELLO, MU_HELLO] = CommonsKey(v<{ dog: string }>, 'm?')
+// const [HELLOA, MU_HELLOA] = CommonsKey(v<{ dog: string }>, 'mu?')
+// const HELLOV = CommonsKey(v<{ dog: string }>, 'm')
+// const HELLOC = CommonsKey(v<{ dog: string }>, 'mu')
+// const HELLOD = CommonsKey(v<{ dog: string }>)
 
-const [OHELLO, OMU_HELLO] = CommonsKey(v<{ dog: string }>('?'), 'm?')
-const [OHELLOA, OMU_HELLOA] = CommonsKey(v<{ dog: string }>('?'), 'mu?')
-const OHELLOV = CommonsKey(v<{ dog: string }>('?'), 'm')
-const OHELLOC = CommonsKey(v<{ dog: string }>('?'), 'mu')
-const OHELLOD = CommonsKey(v<{ dog: string }>('?'))
+// const [OHELLO, OMU_HELLO] = CommonsKey(v<{ dog: string }>('?'), 'm?')
+// const [OHELLOA, OMU_HELLOA] = CommonsKey(v<{ dog: string }>('?'), 'mu?')
+// const OHELLOV = CommonsKey(v<{ dog: string }>('?'), 'm')
+// const OHELLOC = CommonsKey(v<{ dog: string }>('?'), 'mu')
+// const OHELLOD = CommonsKey(v<{ dog: string }>('?'))
 
-const DOHELLOD = CommonsKey(
-   v('?')({ dog: 'hi' })
-)
-
-const DOHELLODWORLD = CommonsKey(v<string>('?')('hi'))
+// const OHELLOD = CommonsKey(v<{ dog: string }>, 'm')
+// const OHELLOD = CommonsKey(v<{ dog: string }>, 'm?')
+// const OHELLOD = CommonsKey(v<{ dog: string }>, 'mu')
+// const OHELLOD = CommonsKey(v<{ dog: string }>, 'mu?')
 
 
 
-OHELLOD({ dog: '' })
-HELLOD({ dog: '' })
-DOHELLOD({ dog: 'sk' })
+// const DOHELLOD = CommonsKey(
+//    v('?')({ dog: 'hi' })
+// )
+
+// const DOHELLODWORLD = CommonsKey(v<string>('?')('hi'))
+
+
+
+// OHELLOD({ dog: '' })
+// HELLOD({ dog: '' })
+// DOHELLOD({ dog: 'sk' })
 
 
 type MutabilityMarker = 'm' | 'm?' | 'mu' | 'mu?'
 
 
-type ImmutableInput<S> = S extends { key: infer K } ? K extends string ?
-   K extends RequiredInputKey<K, S> ? Input<S>
-   : K extends OptionalInputKey<K, S> ? Input<S> | undefined
-   : never : never : never
+// type ImmutableInput<S> = S extends { key: infer K } ? K extends string ?
+//    K extends RequiredInputKey<K, S> ? Input<S>
+//    : K extends OptionalInputKey<K, S> ? Input<S> | undefined
+//    : never : never : never
 
 // provide
 // function $U<S extends symbol & CommonsTypeConfig>(key: ExcludeMutableKey<S>) {
@@ -120,11 +132,11 @@ type ImmutableInput<S> = S extends { key: infer K } ? K extends string ?
 
 
 
-export function createInjectedClass(classKey: string | symbol, contextualGetter: (key: string | symbol) => any = fromApp) {
+export function createInjectedClass(classKey: CommonsEntryKey, contextualGetter: (key: CommonsEntryKey) => any = fromApp) {
    return (...args: any[]) => new (contextualGetter(classKey))(...args)
 }
 
-export function createInjectedFactory(classKey: string | symbol, contextualGetter: (key: string | symbol) => any = fromApp) {
+export function createInjectedFactory(classKey: CommonsEntryKey, contextualGetter: (key: CommonsEntryKey) => any = fromApp) {
    return (...args: any[]) => contextualGetter(classKey)(...args)
 }
 

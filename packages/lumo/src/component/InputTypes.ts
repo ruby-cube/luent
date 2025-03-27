@@ -2,15 +2,18 @@
 //NOTE: It may be tempting to abstract the TypeDefs into a TypeDef with Generics, but because typescript
 // does not have higher order generics, this is not currently possible. Must manually type them all.
 
-import { AnyObject, UnionToIntersection } from "@rue/types";
+import { ionize, toIon, toValue } from "@rue/quarky";
+import { AnyObject } from "@rue/types";
+import { isFunction, isObject } from "@rue/utils";
+import { CommonsEntryKey } from "../commons/CommonsKey";
 
 
 // [ ] Configure type with key
 //     - fromTag()
-//     - CommonsKey()
+//     [X] CommonsKey()
 //
 // [ ] Validate type via typescript
-//     - $M()
+//     [X] CommonsKey
 //     - index.d.ts
 // 
 // [ ] Runtime validation and normalization of reactive type. Defaults
@@ -22,62 +25,7 @@ import { AnyObject, UnionToIntersection } from "@rue/types";
 //     - fromCommons()
 //     - ref()
 // 
-// [ ] m: and mu: validation
-//     - fromTag()
-//     - fromCommons()
 
-export type MaybeIon<T> = T | Ion<T>
-
-export type _Nonlocal<T> = T extends (...args: any[]) => void ? T :
-   T extends () => infer V ? (V extends Object ? (() => Nonlocal<V>) : () => V) & Nonlocal<T> :
-   T extends Object ? Nonlocal<T>
-   : T
-
-export type Nonlocal<T> =
-   T extends PropertyValuesOf<NonLocalDataStructures<T>>['structure'] ? PropertyValuesOf<NonLocalDataStructures<T>>['nonLocal'] :
-   T extends Object ? { readonly [K in keyof T]: _Nonlocal<T[K]> }
-   : T
-
-//ARRAY ONLY
-// type WithMethods<S, DepthTracker extends any[] = []> = 
-// { readonly [K in keyof S as S[K] extends number ? never : K]: S[K] extends Function ? S[K] : LimitedNonlocal<S[K], DepthTracker> }
-
-type AsNonlocal<T> = {
-   readonly [K in keyof T]: T[K] extends Function ? T[K] : _Nonlocal<T[K]>
-}
-
-const OPTIONAL = '?' as const
-type Optional = typeof OPTIONAL
-
-
-
-// type LimitedNonlocal<T, DepthTracker extends any[] = []> = DepthTracker['length'] extends 8 ? T : _Nonlocal<T, [...DepthTracker, any]>
-
-interface NonLocalDataStructures<T> {
-   Array: {
-      structure: Array<any>,
-      nonLocal: T extends Array<infer E> ? readonly (_Nonlocal<E>)[]
-      // :never
-      & ArrayMethods<Array<_Nonlocal<E>>> : never
-   }
-}
-
-type ArrayMethods<T> = Omit<T, number>
-
-interface NonLocalDataStructures<T> {
-   Set: {
-      structure: Set<any>,
-      nonLocal: T extends Set<infer E> ? AsNonlocal<Set<_Nonlocal<E>>> : never
-   }
-}
-interface NonLocalDataStructures<T> {
-   Map: {
-      structure: Map<any, any>,
-      nonLocal: T extends Map<infer E, infer V> ? AsNonlocal<Map<_Nonlocal<E>, _Nonlocal<V>>> : never
-   }
-}
-
-type PropertyValuesOf<T> = T[keyof T];
 
 
 
@@ -103,11 +51,6 @@ type PropertyValuesOf<T> = T[keyof T];
 //    required?: true;
 //    optional?: '?' | 'withDefault'
 // }
-
-type MaybeDefaultType<T, D> = unknown extends T ? D : T
-
-
-
 
 
 
@@ -146,33 +89,33 @@ export const v = ((optional?: Optional) => {
    required: true;
 }
 
-export const z = ((optional?: Optional) => {
-   function z(defaultValue: any) {
-      return {
-         name: 'z',
-         optional: 'withDefault',
-         default: defaultValue
-      }
-   }
-   z.optional = OPTIONAL;
-   return z
-}) as {
-   <T>(optional?: Optional): {
-      name: 'z',
-      validatedType: T;
-      inputType: T;
-      optional: Optional;
-      default: undefined
-   } & ((defaultValue: T) => {
-      name: 'z',
-      validatedType: T;
-      inputType: T;
-      optional: 'withDefault';
-      default: true;
-   }),
-   name: 'z';
-   required: true;
-}
+// export const Static = ((optional?: Optional) => {
+//    function Static(defaultValue: any) {
+//       return {
+//          name: 'Static',
+//          optional: 'withDefault',
+//          default: defaultValue
+//       }
+//    }
+//    Static.optional = OPTIONAL;
+//    return Static
+// }) as {
+//    <T>(optional?: Optional): {
+//       name: 'Static',
+//       validatedType: T;
+//       inputType: T;
+//       optional: Optional;
+//       default: undefined
+//    } & ((defaultValue: T) => {
+//       name: 'Static',
+//       validatedType: T;
+//       inputType: T;
+//       optional: 'withDefault';
+//       default: true;
+//    }),
+//    name: 'Static';
+//    required: true;
+// }
 
 
 export const ToIon = ((optional: Optional) => {
@@ -237,7 +180,114 @@ export const ToIonized = ((optional?: Optional) => {
 export { ToIonized as Ionized }
 
 
+export function validateInput(value: unknown, typeDef: TypeConfig, key: CommonsEntryKey | string) {
+   let _value = toDefault(typeDef, value, key)
+   switch (typeDef.name) {
+      case 'ToIon':
+         return toIon(_value)
 
+      case 'ToIonized':
+         _value = toValue(_value)
+         if (!isObject(_value)) throw new Error(`[INVALID INPUT] Value of '${key}' attribute must be an object`)
+         return ionize(_value)
+
+      case 'v':
+      default:
+         return _value;
+   }
+}
+
+export function manageAccess(value: unknown, access: string | undefined) {
+   switch (access) {
+      case 'mu':
+         return value;
+
+      case 'm':
+         return asReined(value);
+
+      default:
+         return asReadonly(value);
+   }
+}
+
+export type TypeConfig = {
+   name: string,
+   default?: () => unknown,
+   access?: 'mu' | 'm'
+}
+
+export type ValidatedInput<K extends CommonsEntryKey> = K extends (value: unknown) => { validatedType?: infer T } ? T : never;
+//TODO: 
+// - reactive normalization
+// - readonly/reined
+// - required/optional/default
+
+export function toDefault(typeDef: TypeConfig, value: unknown, key: CommonsEntryKey | string) {
+   if ('optional' in typeDef && value === undefined && 'default' in typeDef && isFunction(typeDef.default)) {
+      return typeDef.default()
+   }
+   else if (!('optional' in typeDef) && value === undefined) {
+      throw new Error(`[INVALID INPUT] Required component input, ${key}, is undefined`)
+   }
+   return value;
+}
+
+
+export type MaybeIon<T> = T | Ion<T>
+
+export type _Nonlocal<T> = T extends (...args: any[]) => void ? T :
+   T extends () => infer V ? (V extends Object ? (() => Nonlocal<V>) : () => V) & Nonlocal<T> :
+   T extends Object ? Nonlocal<T>
+   : T
+
+export type Nonlocal<T> =
+   T extends PropertyValuesOf<NonLocalDataStructures<T>>['structure'] ? PropertyValuesOf<NonLocalDataStructures<T>>['nonLocal'] :
+   T extends Object ? { readonly [K in keyof T]: _Nonlocal<T[K]> }
+   : T
+
+//ARRAY ONLY
+// type WithMethods<S, DepthTracker extends any[] = []> = 
+// { readonly [K in keyof S as S[K] extends number ? never : K]: S[K] extends Function ? S[K] : LimitedNonlocal<S[K], DepthTracker> }
+
+type AsNonlocal<T> = {
+   readonly [K in keyof T]: T[K] extends Function ? T[K] : _Nonlocal<T[K]>
+}
+
+const OPTIONAL = '?' as const
+type Optional = typeof OPTIONAL
+
+
+
+// type LimitedNonlocal<T, DepthTracker extends any[] = []> = DepthTracker['length'] extends 8 ? T : _Nonlocal<T, [...DepthTracker, any]>
+
+interface NonLocalDataStructures<T> {
+   Array: {
+      structure: Array<any>,
+      nonLocal: T extends Array<infer E> ? readonly (_Nonlocal<E>)[]
+      // :never
+      & ArrayMethods<Array<_Nonlocal<E>>> : never
+   }
+}
+
+type ArrayMethods<T> = Omit<T, number>
+
+interface NonLocalDataStructures<T> {
+   Set: {
+      structure: Set<any>,
+      nonLocal: T extends Set<infer E> ? AsNonlocal<Set<_Nonlocal<E>>> : never
+   }
+}
+interface NonLocalDataStructures<T> {
+   Map: {
+      structure: Map<any, any>,
+      nonLocal: T extends Map<infer E, infer V> ? AsNonlocal<Map<_Nonlocal<E>, _Nonlocal<V>>> : never
+   }
+}
+
+type PropertyValuesOf<T> = T[keyof T];
+
+
+type MaybeDefaultType<T, D> = unknown extends T ? D : T
 
 // export function pure<F extends (...args: any[]) => any>(fn: F): ReturnType<F> extends void ? F : Pure<F> {
 //    return fn as ReturnType<F> extends void ? F : Pure<F>

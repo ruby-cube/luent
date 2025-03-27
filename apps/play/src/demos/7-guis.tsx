@@ -5,12 +5,12 @@ import { $$, ion, ionize, ions, watch } from "@rue/quarky"
 export function SevenGUIs() {
    return component(
       <>
-         <TemperatureApp></TemperatureApp>
+         {/* <TemperatureApp></TemperatureApp>
          <hr />
          <FlightBooker></FlightBooker>
          <hr />
          <TimerApp />
-         <hr />
+         <hr /> */}
          <CRUDApp />
       </>
    )
@@ -182,6 +182,7 @@ function css(str: TemplateStringsArray) {
    return str[0] as any
 }
 
+//FIX: selected state disappears after clicking update
 function CRUDApp() {
 
    const names = ionize(['Emil, Hans', 'Mustermann, Max', 'Tisch, Roman'])
@@ -236,7 +237,7 @@ function CRUDApp() {
 
          <select size={5} mu:value={$selected}>
             {For($filteredNames, name =>
-               <option >{name}</option>
+               <option>{name}</option>
             )}
          </select >
 
@@ -368,7 +369,7 @@ function CircleApp() {
                />
             </div>
          )}
-            <$--style>{`
+         <$--style>{`
 body {
    margin: 0;
    overflow: hidden;
@@ -421,7 +422,7 @@ circle {
    padding: 0 50px;
    color: #bbb;
 }`}
-            </$--style>
+         </$--style>
       </>
    )
 }

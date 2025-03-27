@@ -1,26 +1,22 @@
-import { AnyObject } from "@rue/types";
 import { component, InternalComponent, Slot, unnestComponent } from "../component/InternalComponent";
 import { getClosestCommons, popCommons, pushCommons } from "./commons-stack";
-import { AppCommons, _ContextInputType } from "./provide";
+import { AppCommons } from "./provide";
 import { ComponentConfig, NodeEntity } from "../node/makeNode";
-import { CommonsKeyMap } from "@rue/lumo";
+import { CommonsKeyMap, CommonsEntryKey } from "@rue/lumo";
 import { debug } from "@rue/quarky";
 
 export interface NodeCommons {
-    entries: AnyObject;
+    entries: Map<CommonsEntryKey, unknown>;
     parent: NodeCommons | AppCommons,
     app: AppCommons,
     global?: AppCommons,
 }
 
-export type CommonsEntries<T> = {
-    [K in keyof T]: K extends keyof CommonsKeyMap ? _ContextInputType<CommonsKeyMap[K]> : any;
-}
 
 //API
 
-export function Commons<T extends CommonsEntries<T>>(input: {
-    provide: T,
+export function Commons(input: {
+    provide: [CommonsEntryKey, unknown][],
     Slot: ()=>NodeEntity
 }) {
     const { Slot } = input
@@ -32,7 +28,7 @@ export function Commons<T extends CommonsEntries<T>>(input: {
     }
 
     const commons: NodeCommons = {
-        entries: input.provide,
+        entries: new Map(input.provide),
         parent: parentCommons,
         app: parentCommons?.app,
         global: parentCommons?.global

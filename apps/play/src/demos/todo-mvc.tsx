@@ -1,5 +1,5 @@
 import { component, For, If, Else } from "@rue/lumo"
-import { AtomicIon, exposeIons, Ion, ion, ionicTask, ionize,  } from "@rue/quarky"
+import { $$, AtomicIon, exposeIons, Ion, ion, ionicTask, ionize, } from "@rue/quarky"
 
 
 
@@ -48,6 +48,7 @@ export function TodoMVC() {
    })
 
    function toggleAll(e: RadioInputEvent) {
+      console.log('toggling all')
       $todos().forEach((todo) => (todo.completed = e.target.checked))
    }
 
@@ -126,15 +127,16 @@ export function TodoMVC() {
                      class="toggle-all"
                      type="checkbox"
                      checked={$remaining() === 0}
-                     on:change={e => toggleAll(e as unknown as RadioInputEvent)}
+                     on:click={e => console.log('click toggleAll')}
+                     on:change={toggleAll}
                   />
                   <label for="toggle-all">Mark all as complete</label>
                   <ul class="todo-list">
-                     {For($filteredTodos, m => m.id, (todo, $index) => (exposeIons(todo),
+                     {For($filteredTodos, m => m.id, (todo) => (
                         <li class={["todo", { completed: todo.$completed, editing: todo === $editedTodo() }]}>
                            <div class="view">
-                              <input class="toggle" type="checkbox" mu:checked={todo.$completed} />
-                              <label on:dblclick={e => editTodo(todo)}>{todo.$title}</label>
+                              <input class="toggle" type="checkbox" mu:checked={$$(todo).$completed} />
+                              <label on:dblclick={e => editTodo(todo)}>{$$(todo).$title}</label>
                               <button class="destroy" on:click={e => removeTodo(todo)}></button>
                            </div>
                            {If(todo === $editedTodo(),
