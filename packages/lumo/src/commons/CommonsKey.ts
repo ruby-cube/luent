@@ -1,4 +1,4 @@
-import { Input, OptionalInput, RequiredInput, TypeConfig, v, validateInput } from "../component/InputTypes";
+import { Input, RequiredInput, TypeConfig, v, validateInput } from "../component/InputTypes";
 import { fromApp } from "./provide";
 
 
@@ -20,8 +20,8 @@ type CommonsKeyReturn<D, M> =
 // export const commonsTypeMap: Map<CommonsEntryKey, TypeConfig> = new Map();
 
 
-export function CommonsKey<D extends TypeConfig, M>(typeDef: D, mutability?: M & MutabilityMarker): CommonsKeyReturn<D, M> {
-   switch (mutability) {
+export function CommonsKey<D extends TypeConfig, M>(typeDef: D, access?: M & MutabilityMarker): CommonsKeyReturn<D, M> {
+   switch (access) {
       case 'm':
          return createProviderKey(typeDef, 'm') as CommonsKeyReturn<D, M>
 
