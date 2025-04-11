@@ -323,7 +323,7 @@ function setAttribute(node: AnyObject, key: string, value: any) {
       node.setAttribute(key, value)
    }
    else {
-      node[key] = value ?? '';
+      node[key] = toString(value) ?? '';
    }
    // node.removeAttribute(key);
    // }
@@ -499,9 +499,10 @@ function toStylePropertyName(key: string) {
 function assignStyleProperty(style: AnyObject, property: string, value: string | number | Falsey) {
    const key = camelToKebabCase(property)
    if (value != null) {
-      const splitValue = typeof value === 'string' ? value.split(' !importan') : ''; // ['red', 't'] 
-      const _value = typeof value === 'string' ? splitValue[0] : value;
-      if (splitValue.length === 1) {
+      const splitValue = typeof value === 'string' ? value.split(' !importan') : undefined; // ['red', 't'] 
+      const _value = String(splitValue ? splitValue[0] : value);
+      if (splitValue === undefined || splitValue.length === 1) {
+         console.log('@% key', key, _value, typeof _value)
          style.setProperty(key, _value)
       }
       else {

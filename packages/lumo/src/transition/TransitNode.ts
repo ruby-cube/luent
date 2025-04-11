@@ -52,15 +52,15 @@ export function renderTransitNode(
 
 
 
-const REGISTER_TRANSITION_NODE = Symbol('registerTransitionNode')
+// const REGISTER_TRANSITION_NODE = Symbol('registerTransitionNode')
 
-const pushTransitionNode = CommonsKey(REGISTER_TRANSITION_NODE, v<(transitionNode: TransitionNode) => void>)
+const REGISTER_TRANSITION_NODE = CommonsKey(v<(transitionNode: TransitionNode) => void>)
 
-declare module '@rue/lumo' {
-    interface CommonsKeyMap {
-        [REGISTER_TRANSITION_NODE]: typeof pushTransitionNode
-    }
-}
+// declare module '@rue/lumo' {
+//     interface CommonsKeyMap {
+//         [REGISTER_TRANSITION_NODE]: typeof pushTransitionNode
+//     }
+// }
 
 function registerTransitionNode(transitionNode: TransitionNode) {
     fromCommons(REGISTER_TRANSITION_NODE)(transitionNode)

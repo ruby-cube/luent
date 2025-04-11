@@ -28,6 +28,7 @@ import { TestCustomRadioSelection } from './TestSelected';
 import { SevenGUIs } from './demos/7-guis';
 import { CellsApp } from './demos/cells-app';
 import { PolygonApp } from './demos/polygon-app';
+import { TrafficLight } from './demos/traffic-lights';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -115,7 +116,7 @@ if (__DEV__) configureFlask({
 // const array = ionize([{ name: 'a' }, { name: 'b' }])
 // console.log('Stringify', JSON.stringify(array))
 
-const app = createApp(SevenGUIs)
+const app = createApp(TrafficLight)
 
 app.mount('#app')
 

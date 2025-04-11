@@ -4,6 +4,7 @@ import { createMaybeMemoizedIon } from "../ionic/DerivationIon";
 import { createAtomicIon } from "./AtomicIon";
 import { maybeIonize } from "../ionized/IonizedModel";
 import { Ionized } from "../ionized/ionize";
+import { finiton } from "./FiniteStates";
 
 /* API */
 export type Ion<T = unknown, M = {}> = (() => T) & M
@@ -58,6 +59,8 @@ ion.ionize = function createIonizedIon<T extends object, M>(initialState: T, met
    return createAtomicIon(maybeIonize(initialState), methods, true) as unknown as M extends Methods ? AtomicIon<Ionized<T>, M> : AtomicIon<Ionized<T>>
 }
 
+ion.finite = finiton
+
 
 // isIon // any sort of ion
 // isAtomic // primary
@@ -73,28 +76,28 @@ ion.ionize = function createIonizedIon<T extends object, M>(initialState: T, met
 // isReined
 
 
-const $count = ion(0)
+// const $count = ion(0)
 
-const $doublecount = ion(() => {if (isIon($count)) return $count() * 2}, {
-   doSomething(){}
-})
+// const $doublecount = ion(() => {if (isIon($count)) return $count() * 2}, {
+//    doSomething(){}
+// })
 
-const $countB = ion((prev?: number) => (prev ?? 0) + 2)
+// const $countB = ion((prev?: number) => (prev ?? 0) + 2)
 
-const $active = ion('frog', {
-   toggle() {
+// const $active = ion('frog', {
+//    toggle() {
 
-   }
-})
+//    }
+// })
 
-const $actived = ion(false, {
-   toggler() { }
-})
+// const $actived = ion(false, {
+//    toggler() { }
+// })
 
-$actived.state = true
+// $actived.state = true
 
-function som<T>(value: T): T {
-   return null as T;
-}
+// function som<T>(value: T): T {
+//    return null as T;
+// }
 
-som(true)
+// som(true)
