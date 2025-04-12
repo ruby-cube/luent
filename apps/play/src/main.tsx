@@ -29,6 +29,7 @@ import { SevenGUIs } from './demos/7-guis';
 import { CellsApp } from './demos/cells-app';
 import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
+import { VideoPlayer } from './video-player';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -116,7 +117,7 @@ if (__DEV__) configureFlask({
 // const array = ionize([{ name: 'a' }, { name: 'b' }])
 // console.log('Stringify', JSON.stringify(array))
 
-const app = createApp(TrafficLight)
+const app = createApp(VideoPlayer)
 
 app.mount('#app')
 

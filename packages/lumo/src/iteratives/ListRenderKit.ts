@@ -46,7 +46,7 @@ function callWithCommons(renderItem: RenderItem<any[]>, list: ListRenderKit, ite
       pushList(list)
       const nodeEntities = setUpNodeEntities(normalizeToArray(
          createCommons(() => renderItem(item, $index), {
-            provide: { [REGISTER_TRANSITION_NODE]: registerTransitionNode }
+            provide: [REGISTER_TRANSITION_NODE(registerTransitionNode)]
          })
       ), parent, nodePod)
       return nodeEntities;

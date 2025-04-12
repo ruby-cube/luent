@@ -502,7 +502,6 @@ function assignStyleProperty(style: AnyObject, property: string, value: string |
       const splitValue = typeof value === 'string' ? value.split(' !importan') : undefined; // ['red', 't'] 
       const _value = String(splitValue ? splitValue[0] : value);
       if (splitValue === undefined || splitValue.length === 1) {
-         console.log('@% key', key, _value, typeof _value)
          style.setProperty(key, _value)
       }
       else {

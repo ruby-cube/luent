@@ -203,10 +203,12 @@ export function manageAccess(value: unknown, access: string | undefined) {
          return value;
 
       case 'm':
-         return asReined(value);
+         return value;
+         // return asReined(value);
 
       default:
-         return asReadonly(value);
+         return value;
+         // return asReadonly(value);
    }
 }
 

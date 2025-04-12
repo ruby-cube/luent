@@ -8,6 +8,7 @@ import { createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
+import { CommonsEntryKey } from "../commons/CommonsKey";
 
 let currentNodePodIndex: number | undefined = undefined
 function resetCurrentNodePodIndex(index?: number) {
@@ -40,7 +41,7 @@ export function If($condition: Booleanny | ((_?: any) => Booleanny), typeOrRende
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
       'if',
-      wrapWithCommons(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getCommons()),
+      wrapWithCommons(_renderConditional, [REGISTER_TRANSITION_NODE(registerTransitionNode)], getCommons()),
       activationType,
       transitionNodes,
       { $condition }
@@ -57,7 +58,7 @@ export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), typeOrR
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
       'elseIf',
-      wrapWithCommons(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getCommons()),
+      wrapWithCommons(_renderConditional, [REGISTER_TRANSITION_NODE(registerTransitionNode)], getCommons()),
       activationType,
       transitionNodes,
       { $condition }
@@ -74,7 +75,7 @@ export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | Acti
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return new ConditionalRenderKit(
       'else',
-      wrapWithCommons(_renderConditional, { [REGISTER_TRANSITION_NODE]: registerTransitionNode }, getCommons()),
+      wrapWithCommons(_renderConditional, [REGISTER_TRANSITION_NODE(registerTransitionNode)], getCommons()),
       activationType,
       transitionNodes,
    )
@@ -82,7 +83,7 @@ export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | Acti
 
 
 //TODO: wrap with asyncContext instead of pushing commons?
-function wrapWithCommons(renderConditional: RenderFunction, provide: AnyObject, outerCommons: Commons) {
+function wrapWithCommons(renderConditional: RenderFunction, provide: [CommonsEntryKey, unknown][], outerCommons: Commons) {
    return (parent: Element, nodePod: NodePod) => {
       // try {
       //    pushCommons(outerCommons)

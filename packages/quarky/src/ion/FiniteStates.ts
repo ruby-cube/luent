@@ -205,10 +205,22 @@ export function finiton<M extends Methods>(initialState: string, states: FiniteS
 
       set(target, key) {
          return false;
-      }
+      },
+
+      has(target, key){
+         return key in stateMachine || Boolean(methods && key in methods)
+      },
+
+      getPrototypeOf(target){
+         return Reflect.getPrototypeOf(target);
+      },
+
+
    }) as unknown as Finiton
 
    const stateMachine = {
+      length: 0,
+      name: '$finiton',
       is,
       apply,
       on,
@@ -273,6 +285,8 @@ export function finiton<M extends Methods>(initialState: string, states: FiniteS
       if (!activated || finalized) return;
       if (timeout) clearTimeout(timeout);
       const transitionEvent = applyTransition(transition)
+      console.log('@% apply', transition)
+      console.log('@% apply', transitionEvent)
       if (transitionEvent) {
          runTransitionTasks(transition, transitionEvent)
          if (isTerminal(transitionEvent.state)) {
@@ -321,8 +335,12 @@ export function finiton<M extends Methods>(initialState: string, states: FiniteS
    function applyTransition(transition: string | Transition) {
       const prevStateID = $currentState.state;
       const state = states[prevStateID ?? '']
+      
       const getNextState = typeof transition === 'string' ? (state[transition] ?? states[ANY_STATE as any][transition]) : transition;
       if (!getNextState) return;
+      console.log('@% applyTransition', transition)
+      console.log('@% applyTransition prev', prevStateID)
+      console.log('@% applyTransition state', state)
 
       const nextStateID = getNextState();
       if (!nextStateID) return;

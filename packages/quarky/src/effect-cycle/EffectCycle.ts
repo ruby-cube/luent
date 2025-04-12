@@ -96,6 +96,14 @@ let cycleCount = -1;
 let currentCycle: EffectCycle | undefined;
 let nextCycle: EffectCycle | undefined;
 
+export function getCurrentEffectCycle(){
+   return currentCycle;
+}
+
+export function getNextEffectCycle(){
+   return nextCycle;
+}
+
 export function $effectCycle() {
    let effectCycle = currentCycle
    if (!effectCycle) {
@@ -106,7 +114,7 @@ export function $effectCycle() {
 
 function beginCycle(effectCycle: EffectCycle) {
    if (currentCycle)
-      throw new Error("Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
+      throw new Error("@% Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
    currentCycle = effectCycle;
    schedulePhaseOne(effectCycle, cyclePhases[PHASE_ONE])
 }
@@ -158,7 +166,7 @@ export class EffectCycle {
 
    scheduleEffects(effects: EffectVine, phase: number) {
       if (phase < this.currentPhase) {
-         if (__DEV__) console.warn(`CASE RESEARCH: Effect was triggered after phase ${phase} of this cycle. Will schedule for next cycle.`)
+         if (__DEV__) console.warn(`@% CASE RESEARCH: Effect was triggered after phase ${phase} of this cycle. Will schedule for next cycle.`)
          nextCycle = nextCycle ?? new EffectCycle()
          nextCycle.scheduleEffects(effects, phase)
          return;
@@ -169,7 +177,7 @@ export class EffectCycle {
 
    scheduleEffect(effect: EffectLink, phase: number) {
       if (phase < this.currentPhase) {
-         if (__DEV__) console.warn(`CASE RESEARCH: Effect was triggered after phase ${phase} of this cycle. Will schedule for next cycle.`)
+         if (__DEV__) console.warn(`@% CASE RESEARCH: Effect was triggered after phase ${phase} of this cycle. Will schedule for next cycle.`)
          nextCycle = nextCycle ?? new EffectCycle()
          nextCycle.scheduleEffect(effect, phase)
          return;
@@ -205,6 +213,7 @@ export function createEffectCycleHook(phase: number) { //TODO: what happens if p
       const _options = options || { cancel: null }
       _options.cancel = null
       const effectCycle = $effectCycle()
+
       return $schedule(task, _options, {
          enroll(task) {
             const effectLink = new EffectLink(task)
