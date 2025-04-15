@@ -90,7 +90,7 @@ export function useReactivitySystem(phases?: [CyclePhase, ...CyclePhase[]]): Eff
 
    addHooks(hooks, EventCycle)
    addHooks(hooks, UpdateCycle)
-
+console.log('HOOKS', hooks)
    return hooks as EffectCycleHooks;
 }
 
@@ -196,8 +196,8 @@ export function trigger( //TODO: figure out which abstraction this belongs to ..
    this: ParticleMorph & Watchable,
 ) {
 
-   if (getCurrentPhase() !== SYNC) {
-      debug.error(`Cannot mutate reactive data while running effects. Current Phase: ${getCurrentPhase()}. Use queueTask or something similar to defer mutation to a separate task/event`)
+   if (reactivitySystem.UpdateCycle.current && getCurrentPhase() !== SYNC) {
+      debug.error(`Cannot mutate reactive data during update cycle. Current Phase: ${getCurrentPhase()}. Use queueTask or something similar to defer mutation to a separate task/event`)
    }
 
    this.asParticle?.triggerCompounds()

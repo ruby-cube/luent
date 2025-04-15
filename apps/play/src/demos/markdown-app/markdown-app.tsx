@@ -1,5 +1,4 @@
 import { marked } from 'marked'
-//@ts-expect-error
 import { ion, ionize, watch } from '@rue/quarky'
 import { component, fromTag, Ion, NodeRef, onDemount, onMount, onRemount, onUnmount, ref } from '@rue/lumo'
 

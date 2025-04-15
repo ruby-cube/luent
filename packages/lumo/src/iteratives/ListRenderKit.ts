@@ -28,24 +28,24 @@ type DynamicList<T = any> = Collection<T> | ReactiveGet<Collection<T>>
 const flaskMap: WeakMap<NodePod, Flask> = new WeakMap()
 
 // let currentItem: any;
-let $currentIndex: Ion<number> | undefined;
+let $currentIndex: AtomicIon<number> | undefined;
 
-export function getCurrentIndex(): Ion<number> | undefined {
+export function getCurrentIndex(): AtomicIon<number> | undefined {
    return $currentIndex
 }
 
-export function setCurrentIndex($index: Ion<number> | undefined) {
+export function setCurrentIndex($index: AtomicIon<number> | undefined) {
    // currentItem = item;
    $currentIndex = $index;
 }
 
-function callWithCommons(renderItem: RenderItem<any[]>, list: ListRenderKit, item: any, $index: Ion<number>, parent: Element, nodePod: NodePod) {
+function callWithCommons(renderItem: RenderItem<any[]>, list: ListRenderKit, item: any, $index: AtomicIon<number>, parent: Element, nodePod: NodePod) {
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes() // QUESTION: Should this be outside of the render function??
    list.transitions.set($index, transitionNodes)
    try {
       pushList(list)
       const nodeEntities = setUpNodeEntities(normalizeToArray(
-         createCommons(() => renderItem(item, $index), {
+         createCommons(() => renderItem(item, function $i() { return $index() }), {
             provide: [REGISTER_TRANSITION_NODE(registerTransitionNode)]
          })
       ), parent, nodePod)
@@ -57,10 +57,10 @@ function callWithCommons(renderItem: RenderItem<any[]>, list: ListRenderKit, ite
 }
 
 export class ListRenderKit {
-   renderItem: (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => void
+   renderItem: (item: any, $index: AtomicIon<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => void
    __DEV__asyncPath?: string;
 
-   $list: Ion<any[]>
+   // $list: Ion<any[]>
 
    constructor(
       renderItem: RenderItem<any[]>, //QUESTION: Does this need the context object?
@@ -68,9 +68,9 @@ export class ListRenderKit {
       public getUID: ((item: unknown) => unknown) | undefined,
       public commons: Commons
    ) {
-      this.$list = toIon(data) as unknown as Ion<Array<any>>
+      // this.$list = toIon(data) as unknown as Ion<Array<any>>
       const context = $_snap_context()
-      this.renderItem = (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => {
+      this.renderItem = (item: any, $index: AtomicIon<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => {
          if (flask) context.set(FLASK, flask)
          if (__DEV__) context.set(TRACE, this.__DEV__asyncPath!)
          $_run_with_(context, () => {
@@ -100,7 +100,7 @@ export class ListRenderKit {
 
    private outerNodePod!: NodePod;
    private dynamicNodePod: NodePod | undefined
-   indices: Ion<number>[] = [];
+   indices: AtomicIon<number>[] = [];
    isDynamic: boolean = false;
 
    _transitions?: Map<Ion<number>, TransitionNode[]>
@@ -192,11 +192,12 @@ export class ListRenderKit {
       const listKit = this;
       const isDynamic = this.isDynamic;
       const dynamicNodePod = this.dynamicNodePod!;
-      const $list = this.$list;
+      // const $list = this.$list;
 
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
-         const $index = ion(() => $list().indexOf(item)) //TODO: this should be 
+         // const $index = ion(() => $list().indexOf(item)) 
+         const $index = ion(i)
          $currentIndex = $index;
          this.indices.push($index)
 
@@ -238,7 +239,7 @@ export class ListRenderKit {
       const indicesAndFragments: [number, DocumentFragment][] = []
       let fragment = new DocumentFragment();
 
-      const newIndices: Ion<number>[] = [];
+      const newIndices: AtomicIon<number>[] = [];
       const toFromIndices: [number, number][] = []
 
       for (let i = 0; i < newUArray.length; i++) {
@@ -252,8 +253,11 @@ export class ListRenderKit {
                : null;
 
          if (!_isNewItem) {
+            // update $index.state
             const $index = this.indices[oldIndex];
+            console.log('update index', $index(), i)
             newIndices.push($index);
+            $index.state = i
 
             // to update refs
             toFromIndices.push([i, oldIndex]);
@@ -273,16 +277,15 @@ export class ListRenderKit {
 
          if (isNewItem(uItem)) {
             // const item = getOriginalItem(uItem, newUArray)
-            const $list = this.$list
-            const item = toValue(this.data)[i]
-            const $index = ion(() => $list().indexOf(item)) //TODO: this should be 
+            // const $list = this.$list
+            const $index = ion(i) //TODO: this should be 
 
             setCurrentIndex($index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
             const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).stateIsIonized) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
-            this.renderItem(item, $index, parent, nodePod, fragment, flask)
+            this.renderItem(toValue(this.data)[i], $index, parent, nodePod, fragment, flask)
             flask.emitInitialMount()
             setCurrentIndex(undefined)
             flaskMap.set(nodePod, flask)

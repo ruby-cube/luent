@@ -190,6 +190,11 @@ function CRUDApp() {
    const $prefix = ion('')
    const $first = ion('')
    const $last = ion('')
+   const $fullName = () => `${$last()}, ${$first()}`
+
+   watch($selected, ({ state }) => {
+      [$last.state, $first.state] = state.split(', ')
+   })
 
    const $filteredNames = ion(() =>
       names.filter((n) =>
@@ -197,14 +202,9 @@ function CRUDApp() {
       )
    )
 
-   watch($selected, ({ state: name }) => {
-      [$last.state, $first.state] = name.split(', ')
-      console.log('split name', $first.state)
-   })
-
    function create() {
       if (hasValidInput()) {
-         const fullName = `${$last()}, ${$first()}`
+         const fullName = $selected()
          if (!names.includes(fullName)) {
             names.push(fullName)
             $first.state = $last.state = ''
@@ -215,7 +215,7 @@ function CRUDApp() {
    function update() {
       if (hasValidInput() && $selected()) {
          const i = names.indexOf($selected())
-         names[i] = $selected.state = `${$last()}, ${$first()}`
+         names[i] = $selected.state = $fullName()
       }
    }
 

@@ -1,5 +1,5 @@
 import { DOMNode, Slot } from "../component/InternalComponent";
-import { isIon, AtomicIon, watch, isManagedDerivation } from "@rue/quarky";
+import { isIon, AtomicIon, watch, isManagedDerivation, Ion } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
 import { $listen, SustainedListenerOptions } from "@rue/flask";
@@ -136,6 +136,10 @@ function analyzeAttributes(entries: AnyObject) {
    }
 }
 
+function isMutableIon(ion: unknown): ion is AtomicIon<any> {
+   return isIon(ion) && (('state' in ion) || ('set' in ion))
+}
+
 function bindView(element: Element, Slot: Slot | undefined, attributes: { [key: string]: MutableKit | MaybeIon<any> }) {
    switch (element.tagName) {
       case 'INPUT':
@@ -160,7 +164,7 @@ function bindCheckboxInput(element: HTMLInputElement, attributes: { [key: string
    const ion = attributes['mu:checked'];
    delete attributes['mu:checked'];
    attributes.checked = ion;
-   if (!isIon(ion) || !('state' in ion)) {
+   if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
    }
    else {
@@ -174,7 +178,7 @@ function bindRadioInput(element: HTMLInputElement, attributes: { [key: string]: 
    const radioValue = attributes.value;
    delete attributes['mu:checked'];
    attributes.checked = function $drv() { return ion() === radioValue };
-   if (!isIon(ion) || !('state' in ion)) {
+   if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
    }
    else {
@@ -187,7 +191,7 @@ function bindTextInput(element: HTMLInputElement, attributes: { [key: string]: M
    const ion = attributes['mu:value'];
    delete attributes['mu:value'];
    attributes.value = ion;
-   if (!isIon(ion) || !('state' in ion)) {
+   if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
    }
    else {
@@ -219,7 +223,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
       element.value = e.state
    }, { eager: true })
    delete attributes['mu:value'];
-   if (!isIon(ion) || !('state' in ion)) {
+   if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
    }
    else {
@@ -237,7 +241,7 @@ function bindTextarea(element: Element, Slot: Slot | undefined) {
    const kit = nodeEntities instanceof Array ? nodeEntities[0] : nodeEntities;
    if (!isObjectLiteral(kit) && !('mu' in kit)) return;
    const ion = kit.mu;
-   if (!isIon(ion) || !('state' in ion)) {
+   if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:value must receive a mutable ion for two-way binding to work')
    }
    else {
@@ -323,7 +327,7 @@ function setAttribute(node: AnyObject, key: string, value: any) {
       node.setAttribute(key, value)
    }
    else {
-      node[key] = toString(value) ?? '';
+      node[key] = value === false ? value : toString(value) ?? ''; //TODO: need to distinguish between attributes that take in booleans vs a string
    }
    // node.removeAttribute(key);
    // }
