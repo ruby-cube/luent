@@ -2,7 +2,7 @@ import { AnyObject, Glass } from "@rue/types";
 import { Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "../ionic/IonicCompound";
-import { $effectCycle, DEFAULT_PHASE, PHASE_ONE, SYNC } from "../effect-cycle/EffectCycle";
+import {  SYNC } from "../effect-cycle/EffectCycle";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { Ion, isIon } from "../ion/ion";
@@ -17,6 +17,7 @@ import { $AtomicIonState, isAtomicIon, isAtomicIonQuark } from "../ion/AtomicIon
 import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
 import { createWatchedIonizedIon } from "./IonizedIon";
 import { debug } from "../debug/debug";
+import { getDefaultPhase, getEffectCycle, scheduleEffect } from "../ReactivitySystem";
 
 export class ChangeEvent<S = unknown> {
    // trace?: string;
@@ -36,7 +37,7 @@ export class ChangeEvent<S = unknown> {
  * hasChanged: a !== b
  */
 export type EffectOptions = {
-   phase?: number;
+   phase?: string;
    sync?: boolean;
    cycle?: 'current' | 'next'
    eager?: boolean;
@@ -228,8 +229,10 @@ function always() {
 }
 
 export function getPhase(options: undefined | EffectOptions) {
-   return options?.phase ?? (options?.sync ? SYNC : $effectCycle().currentPhase || DEFAULT_PHASE)
+   return options?.phase ?? (options?.sync ? SYNC : getDefaultPhase())
 }
+
+
 
 function normalizeSubject(_subject: unknown, isMultiSubject: boolean, retrack: boolean) {
    return isMultiSubject ? createMultisubjectIon(<WatchSubjects>_subject)
@@ -260,12 +263,12 @@ function notStrictlyEqual(oldState: unknown, newState: unknown) {
 
 type WrappedEffect = () => void
 
-export function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: number) {
+export function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: string) {
    if (phase === SYNC) {
       effect()
    }
    else {
-      $effectCycle().scheduleEffect(new EffectLink(effect), phase)
+      scheduleEffect(new EffectLink(effect), phase)
    }
 }
 
@@ -278,28 +281,28 @@ export function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: number) {
  * This is useful if state needs to be shared between effect runs.
  * In most cases, an ionic effect will be a simple void function that performs side effects.
  */
-function initIonicEffect(effect: IonicTask, options?: EffectOptions) {
-   const phase = options?.phase ?? DEFAULT_PHASE;
-   const retrack = options?.retrack ?? false;
+// function initIonicEffect(effect: IonicTask, options?: EffectOptions) {
+//    const phase = options?.phase ?? DEFAULT_PHASE;
+//    const retrack = options?.retrack ?? false;
 
-   const wrappedEffect = createIonicEffect(effect, retrack)
+//    const wrappedEffect = createIonicEffect(effect, retrack)
 
-   scheduleEffectEagerly(wrappedEffect, phase);
+//    scheduleEffectEagerly(wrappedEffect, phase);
 
-   return setUpWatcher(
-      wrappedEffect.asWatched,
-      wrappedEffect,
-      phase,
-      options || {},
-      wrappedEffect.asCompound
-   )
-}
+//    return setUpWatcher(
+//       wrappedEffect.asWatched,
+//       wrappedEffect,
+//       phase,
+//       options || {},
+//       wrappedEffect.asCompound
+//    )
+// }
 
 
 export function setUpWatcher(
    subject: Watched,
    effect: WrappedEffect,
-   phase: number,
+   phase: string,
    options: EffectOptions,
    compound?: IonicCompound //
 ) {
@@ -318,7 +321,7 @@ export function setUpWatcher(
          subject.watch(effectLink, phase, forNextCycle)
       },
       remove() {
-         subject.unwatch(effectLink, phase)
+         subject.unwatch(effectLink)
          if (compound)
             compound.untrackParticles()
       },

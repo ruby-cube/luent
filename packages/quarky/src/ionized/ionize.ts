@@ -158,7 +158,7 @@ export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: 
 // type Marked<T extends AnyObject, M extends { [K in keyof Partial<T>]: 'public' | typeof inert }> = Omit<T, keyof M> & { [K in keyof M]: M[K] extends typeof inert ? T[K] & Inert : T[K] } //TODO: Mark public
 
 export function storeSnapshot(modelQuark: IonizedModelQuark, clone?: AnyObject) {
-   timeTraveler.takeSnapshot(toRaw(modelQuark), $effectCycle().count, clone)
+   // timeTraveler.takeSnapshot(toRaw(modelQuark), $effectCycle().count, clone)
 }
 
 

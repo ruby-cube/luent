@@ -1,7 +1,8 @@
-import { onEffectCycleComplete, $effectCycle } from "../effect-cycle/EffectCycle";
+import { SYNC } from "../effect-cycle/EffectCycle";
 import { EffectLink, EffectVine } from "../effect-cycle/EffectLink";
 import { PhaseMap } from "../effect-cycle/PhaseMap";
 import { scheduleSyncEffects } from "../effect-cycle/SyncEffects";
+import { getEffectCycle, scheduleEffects } from "../ReactivitySystem";
 
 
 export type Watchable = {
@@ -35,31 +36,31 @@ export class Watched<T extends Watchable = Watchable> {
    }
 
 
-   private queueForNextCycle(effect: EffectLink, phase: number) {
-      const nextCycleEffects = this.nextCycleEffects ?? (this.nextCycleEffects = new PhaseMap('next cycle effects'))
-      let toBeQueued = nextCycleEffects.get(phase);
-      nextCycleEffects.addToVine(effect, phase)
-      if (!toBeQueued) {
-         toBeQueued = nextCycleEffects.get(phase)
-         onEffectCycleComplete(() => {
-            this.effects.absorb(toBeQueued!, phase)
-         })
-      }
-   }
+   // private queueForNextCycle(effect: EffectLink, phase: number) {
+   //    const nextCycleEffects = this.nextCycleEffects ?? (this.nextCycleEffects = new PhaseMap('next cycle effects'))
+   //    let toBeQueued = nextCycleEffects.get(phase);
+   //    nextCycleEffects.addToVine(effect, phase)
+   //    if (!toBeQueued) {
+   //       toBeQueued = nextCycleEffects.get(phase)
+   //       onEffectCycleComplete(() => {
+   //          this.effects.absorb(toBeQueued!, phase)
+   //       })
+   //    }
+   // }
 
    watchCount: number = 0
 
-   watch(effect: EffectLink, phase: number, forNextCycle?: boolean) {
-      if (forNextCycle) {
-         this.queueForNextCycle(effect, phase)
-      }
-      else {
+   watch(effect: EffectLink, phase: string, forNextCycle?: boolean) {
+      // if (forNextCycle) {
+      //    this.queueForNextCycle(effect, phase)
+      // }
+      // else {
          this.effects.addToVine(effect, phase)
-      }
+      // }
       this.watchCount++
    }
 
-   unwatch(effect: EffectLink, phase: number) {
+   unwatch(effect: EffectLink) {
       effect.remove()
       if (this.watchCount === 0) {
          this.emitDiscard()
@@ -68,21 +69,21 @@ export class Watched<T extends Watchable = Watchable> {
 
    triggerEffects() { // the surrounding effect when original trigger happened
       for (const [phase, effects] of this.effects) {
-         if (phase === 0) {
+         if (phase === SYNC) {
             this.scheduleSyncEffects(effects!);
          }
          else {
-            $effectCycle().scheduleEffects(effects!, phase)
+            scheduleEffects(effects!, phase)
             this.scheduleReabsorption(phase)
          }
       }
    }
 
-   private scheduleReabsorption(phase: number) {
+   private scheduleReabsorption(phase: string) {
       const completed = this.completedEffects.get(phase);
       if (completed || completed === null) return;
       this.completedEffects.set(phase, null);
-      onEffectCycleComplete(() => {
+      getEffectCycle(phase).onComplete(() => {
          const completed = this.completedEffects.get(phase)
          if (completed) this.effects.absorb(completed, phase)
          this.completedEffects.delete(phase)

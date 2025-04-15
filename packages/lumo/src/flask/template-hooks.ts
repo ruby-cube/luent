@@ -1,6 +1,6 @@
 import { getActiveFlask } from "@rue/flask";
 import { debug } from "@rue/utils";
-import { onPostlude, onRender, postlude } from "../render-cycle";
+import { onPostrender, onRender } from "../render-cycle";
 
 type LifecycleTask = (element: Element) => void;
 
@@ -79,7 +79,7 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
          onRender(() => task(node))
       }
       function scheduleForPostlude() {
-         onPostlude(() => task(node))
+         onPostrender(() => task(node))
       }
    }
 }

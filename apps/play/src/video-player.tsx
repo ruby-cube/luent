@@ -1,19 +1,10 @@
 import { component, Else, fromTag, If, Ion, ref, v } from "@rue/lumo";
-import { $effectCycle, finiton, getCurrentEffectCycle, ion, isIon, watch } from "@rue/quarky";
-import { hasQuark } from "../../../packages/quarky/src/Quark";
+import { finiton, ion, isIon, watch } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
-import { RENDER } from "../../../packages/lumo/src/render-cycle";
 
-function markAnimationFrame(){
-   requestAnimationFrame(()=>{
-      console.log('@@@ ANIMATION FRAME-------')
-      markAnimationFrame()
-   })
-}
 
 export function VideoPlayer() {
    const $video = ref('video')
-   // markAnimationFrame()
 
    const $videoPlayer = finiton('loading', {
       'loading': {
@@ -33,7 +24,6 @@ export function VideoPlayer() {
          end: () => 'ended'
       },
       'ended': {
-         'on:enter': () => console.log('@% ...ended'),
          play: () => 'playing'
       }
    })
@@ -74,48 +64,48 @@ export function VideoPlayer() {
    $videoPlayer.activate()
    console.log('@% LOADING')
 
-   watch(() => $track.is('playing'), ({ state, prevState }) => {
-      console.log('@% track is playing changed', state, prevState)
-      console.log('@% watch phase:', getCurrentEffectCycle()?.currentPhase)
-   })
+   // watch(() => $track.is('playing'), ({ state, prevState }) => {
+   //    console.log('@% track is playing changed', state, prevState)
+   //    // console.log('@% watch phase:', getCurrentEffectCycle()?.currentPhase)
+   // })
 
-   watch($track, (e) => {
-      console.log('@% $track changed', e, $track())
-      console.log('@% watch phase:', getCurrentEffectCycle()?.currentPhase)
-   })
+   // watch($track, (e) => {
+   //    console.log('@% $track changed', e, $track())
+   //    // console.log('@% watch phase:', getCurrentEffectCycle()?.currentPhase)
+   // })
    
    function endVideo() {
       console.log("@@@ EVENT: End video")
-      console.log('@% end video phase:', getCurrentEffectCycle()?.currentPhase)
-      if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
+      // console.log('@% end video phase:', getCurrentEffectCycle()?.currentPhase)
+      // if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
       $track.apply('end')
    }
 
    function pauseVideo() {
       console.log("@@@ EVENT: click pause video")
-      console.log('@% pause video phase:', getCurrentEffectCycle()?.currentPhase)
-      if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
+      // console.log('@% pause video phase:', getCurrentEffectCycle()?.currentPhase)
+      // if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
       $track.apply('pause')
    }
 
    function playVideo() {
       console.log("@@@ EVENT: click play video")
-      console.log('@% play video phase:', getCurrentEffectCycle()?.currentPhase)
-      if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
+      // console.log('@% play video phase:', getCurrentEffectCycle()?.currentPhase)
+      // if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
       $track.apply('play')
    }
 
    function initVideo() {
       console.log("@@@ EVENT: init video")
-      console.log('@% init video phase:', getCurrentEffectCycle()?.currentPhase)
-      if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
+      // console.log('@% init video phase:', getCurrentEffectCycle()?.currentPhase)
+      // if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
       $videoPlayer.apply('init')
    }
 
    function updateTimeo() {
       console.log("@@@ EVENT: UPDATE TIME")
-      console.log('@% time video phase:', getCurrentEffectCycle()?.currentPhase)
-      if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
+      // console.log('@% time video phase:', getCurrentEffectCycle()?.currentPhase)
+      // if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
       updateTime($video()!.currentTime)
    }
 

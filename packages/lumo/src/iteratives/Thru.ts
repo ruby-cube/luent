@@ -85,7 +85,7 @@ class SpreadKit {
                   console.error(err, this.__DEV__asyncPath)
                }
                // console.log('updating list', state.length, _oldValue.length)
-            }, { phase: PRELUDE })
+            }, { phase: POSTEVENT })
          }
          // currentItem = undefined;
          $currentIndex = undefined;

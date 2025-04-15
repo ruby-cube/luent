@@ -8,7 +8,7 @@ import { Ion, isIon, AtomicIon } from "./ion";
 import { MutableCapsule } from "../capsule/Capsule";
 import { __DEV__traceMethodCall } from "../debug/debug";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
-import { trigger } from "../trigger";
+import { trigger } from "../ReactivitySystem";
 import { Traceable } from "../debug/Traceable";
 
 // writable vs non-writable 
@@ -104,6 +104,6 @@ export function createAtomicPion(model: IonizedModel, key: PropertyKey, pionQuar
       }
    })
 
-   return $atomicPionState as $AtomicPionState
+   return $atomicPionState as unknown as $AtomicPionState
 }
 

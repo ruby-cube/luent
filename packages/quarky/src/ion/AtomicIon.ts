@@ -8,7 +8,7 @@ import { attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
 import { AtomicIon } from "./ion";
 import { unwatch, watch, Watchable } from "../watch/Watched";
 import { Mutable, MutableEntity, Mutation, recordMutation } from "../Mutable";
-import { trigger } from "../trigger";
+import { trigger } from "../ReactivitySystem";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { ParticleMorph } from "../compound/Particle";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";

@@ -1,4 +1,4 @@
-import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __devCheckIfTracked, ionize, AtomicIon, toValue, untrackedCall, Ion, detachedCall } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __devCheckIfTracked, ionize, AtomicIon, toValue, untrackedCall, Ion, detachedCall, toIon } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
@@ -12,10 +12,10 @@ import { createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { NodePod } from "../node/NodePod";
 import { mountConditional, mountDOMNodes, removeDOMNodes } from "../conditional/ConditionalRenderSeries";
-import { FLASK, Flask} from "@rue/flask";
+import { FLASK, Flask } from "@rue/flask";
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
-import { PRELUDE, RENDER } from "../render-cycle";
+import { POSTEVENT, RENDER } from "../render-cycle";
 import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
 
@@ -28,13 +28,13 @@ type DynamicList<T = any> = Collection<T> | ReactiveGet<Collection<T>>
 const flaskMap: WeakMap<NodePod, Flask> = new WeakMap()
 
 // let currentItem: any;
-let $currentIndex: AtomicIon<number> | undefined;
+let $currentIndex: Ion<number> | undefined;
 
-export function getCurrentIndex(): AtomicIon<number> | undefined {
+export function getCurrentIndex(): Ion<number> | undefined {
    return $currentIndex
 }
 
-export function setCurrentIndex($index: AtomicIon<number> | undefined) {
+export function setCurrentIndex($index: Ion<number> | undefined) {
    // currentItem = item;
    $currentIndex = $index;
 }
@@ -60,12 +60,15 @@ export class ListRenderKit {
    renderItem: (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => void
    __DEV__asyncPath?: string;
 
+   $list: Ion<any[]>
+
    constructor(
       renderItem: RenderItem<any[]>, //QUESTION: Does this need the context object?
       public data: ListData,
       public getUID: ((item: unknown) => unknown) | undefined,
       public commons: Commons
    ) {
+      this.$list = toIon(data) as unknown as Ion<Array<any>>
       const context = $_snap_context()
       this.renderItem = (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => {
          if (flask) context.set(FLASK, flask)
@@ -97,10 +100,10 @@ export class ListRenderKit {
 
    private outerNodePod!: NodePod;
    private dynamicNodePod: NodePod | undefined
-   indices: AtomicIon<number>[] = [];
+   indices: Ion<number>[] = [];
    isDynamic: boolean = false;
 
-   _transitions?: Map<AtomicIon<number>, TransitionNode[]>
+   _transitions?: Map<Ion<number>, TransitionNode[]>
    get transitions() {
       if (this._transitions) return this._transitions;
       return this._transitions = new Map();
@@ -170,7 +173,7 @@ export class ListRenderKit {
                console.error(err, this.__DEV__asyncPath)
             }
             // console.log('updating list', state.length, _oldValue.length)
-         }, { phase: PRELUDE })
+         }, { phase: POSTEVENT })
       }
       // currentItem = undefined;
       $currentIndex = undefined;
@@ -184,14 +187,16 @@ export class ListRenderKit {
       fragment?: DocumentFragment
    ) {
       const data = toValue(this.data);
-      const list = data instanceof Array ? data : data //TODO: need to implement for sets, maps, and objects
+
+      const list = data instanceof Array ? data : data as unknown as Array<any> //TODO: need to implement for sets, maps, and objects
       const listKit = this;
       const isDynamic = this.isDynamic;
       const dynamicNodePod = this.dynamicNodePod!;
+      const $list = this.$list;
 
       for (let i = 0; i < list.length; i++) {
-         const $index = ion(i)
          const item = list[i]
+         const $index = ion(() => $list().indexOf(item)) //TODO: this should be 
          $currentIndex = $index;
          this.indices.push($index)
 
@@ -233,7 +238,7 @@ export class ListRenderKit {
       const indicesAndFragments: [number, DocumentFragment][] = []
       let fragment = new DocumentFragment();
 
-      const newIndices: AtomicIon<number>[] = [];
+      const newIndices: Ion<number>[] = [];
       const toFromIndices: [number, number][] = []
 
       for (let i = 0; i < newUArray.length; i++) {
@@ -247,11 +252,8 @@ export class ListRenderKit {
                : null;
 
          if (!_isNewItem) {
-            // update $index.state
             const $index = this.indices[oldIndex];
-            console.log('update index', $index(), i)
             newIndices.push($index);
-            $index.state = i
 
             // to update refs
             toFromIndices.push([i, oldIndex]);
@@ -271,14 +273,16 @@ export class ListRenderKit {
 
          if (isNewItem(uItem)) {
             // const item = getOriginalItem(uItem, newUArray)
-            const $index = ion(i)
+            const $list = this.$list
+            const item = toValue(this.data)[i]
+            const $index = ion(() => $list().indexOf(item)) //TODO: this should be 
+
             setCurrentIndex($index); // to retreive config
             newIndices.push($index);
             // create and collect consecutive new items onto the same fragment
             const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
-            const list = this.data;
             // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).stateIsIonized) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
-            this.renderItem(toValue(list)[i], $index, parent, nodePod, fragment, flask)
+            this.renderItem(item, $index, parent, nodePod, fragment, flask)
             flask.emitInitialMount()
             setCurrentIndex(undefined)
             flaskMap.set(nodePod, flask)

@@ -12,7 +12,7 @@ import { NodePod } from "../node/NodePod";
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FLASK, Flask} from "@rue/flask";
-import { PRELUDE } from "../render-cycle";
+import { POSTEVENT } from "../render-cycle";
 
 //TODO: rename 'phasic node' to 'transition node'
 //TODO: rename transitionNodes to 'transitNodes'
@@ -304,7 +304,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          }
       }, {
          // retrack: true,
-         phase: PRELUDE,
+         phase: POSTEVENT,
       })
 
       // // set up watcher for updates

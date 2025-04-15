@@ -112,3 +112,16 @@ export function useIncrementalID() {
     }
 }
 
+export function createAwaitableHook(
+   onPhase: (resolve: (...args: any[]) => any) => any
+) {
+   let awaitablePhase: Promise<void> | undefined
+   return function cyclePhase() {
+      return awaitablePhase ?? (awaitablePhase = new Promise(resolve => {
+         onPhase(() => {
+            awaitablePhase = undefined
+            resolve();
+         })
+      }))
+   }
+}

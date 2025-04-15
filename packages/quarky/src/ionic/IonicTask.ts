@@ -1,8 +1,7 @@
-import { noop } from "@rue/utils";
+import { debug, noop } from "@rue/utils";
 import { triggerEffects } from "../compound/Compound";
 import { Watched } from "../watch/Watched";
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
-import { $effectCycle, EffectCycle, onEffectCycleComplete } from "../effect-cycle/EffectCycle";
 
 /**
  * NOTES: 
@@ -19,25 +18,27 @@ export function createIonicTask(task: IonicTask, retrack: boolean = true) {
    compound.trigger = trigger
 
    let initialized = false;
-   let currentEffectCycle: EffectCycle | undefined
+   let syncCall = false;
 
    function watch(fn: IonicFunction) {
-      if ($effectCycle() !== currentEffectCycle)
-         throw new Error("Ionic Task cannot watch beyond the effect cycle that it was originally called in")
-      // NOTE: this means we cannot schedule for next cycle.. we need more research to know if this is a problem
+      if (!syncCall){
+         debug.warn('watch() must be called synchronously within ionic task')
+         return fn();
+      }
       if (initialized && !retrack) return fn()
       return compound.trackedCall(fn)
    }
 
    function effect() {
-      currentEffectCycle = $effectCycle()
       if (retrack) compound.untrackParticles()
-      if (!initialized)
-         onEffectCycleComplete(() => {
-            initialized = true
-            currentEffectCycle = undefined;
-         })
-      task(watch, !initialized)
+         syncCall = true;
+      try{
+         task(watch, initialized)
+      }
+      finally{
+         syncCall = false
+         initialized = true;
+      }
    }
 
    effect.asCompound = compound;

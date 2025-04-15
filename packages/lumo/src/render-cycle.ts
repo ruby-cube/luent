@@ -1,37 +1,168 @@
-import { ResumableListener } from "@rue/flask"
-import { $effectCycle, createEffectCycleHook, definePhase, onEffectCycleComplete, PHASE_ONE, queueTask, setDefaultPhase, useReactivity, watch as _watch, WatchSubjects, Effect } from "@rue/quarky"
+import {  createEffectCycleHook,  watch as _watch, useReactivitySystem,  } from "@rue/quarky"
+import { createAwaitableHook } from "@rue/utils"
 
 
-export const [
+// export const [
+//    SYNC,
+//    PRELUDE,
+//    RENDER,
+//    POSTLUDE,
+//    COMPLETION
+// ] = useReactivity([ //(default to queueTask for all phases)
+//    definePhase('PRELUDE', (runPhase: VoidFunction) => queueMicrotask(() => queueMicrotask(runPhase))), // allows devs room to use queueMicrotask 
+//    definePhase('RENDER', requestAnimationFrame),
+//    definePhase('POSTLUDE', queueMicrotask)
+// ])
+
+
+
+// const PRELUDE = 'PRELUDE'
+// const RENDER = 'RENDER'
+// const POSTLUDE = 'POSTLUDE'
+
+
+
+// watch($count, async () => {
+//    await $render_phase();
+
+//    await $prelude(); // this would schedule to the next event's prelude? which may or may not be before or after the next render (depending on )
+// })
+
+// // TODO:
+// // default phase: post-event
+// // must use sync: true for sync
+
+// watch($dog, async ({ state }) => {
+//    const width = catEl.width + state
+
+//    await $renderphase();
+//    petsEl.width = width;
+
+//    await $postrender();
+//    petsEl.focus()
+// })
+
+// ionicTask((w, initial) => {
+
+// }, { phase: RENDER })
+
+// //TODO: figure out updating ui vs updating database, e.g. animating drag, then posting final position to db
+
+// function reMouseDown() {
+//    listen('mousemove', e => {
+//       doAction(UPDATE_POSITION, [e.clientX, e.clientY])
+//    })
+
+//    listen('mouseup', () => {
+//       doAction(UPDATE_POSITION, [e.clientX, e.clientY])
+//       const success = await dispatch(POST_POSITION, { x, y })
+//       if (!success)
+//          doAction(UPDATE_POSITION, [prevX, prevY])
+//    })
+// }
+
+// watch($dog, async ({ state }) => {
+//    const width = catEl.width + state
+
+//    await $updatephase('db');
+//    petsEl.width = width;
+
+//    await $postupdate();
+//    petsEl.focus()
+
+//    await $updatecomplete();
+
+// })
+
+// watch($dog, async ({ state }) => {
+//    const width = catEl.width + state
+
+//    await $updatephase('db');
+//    petsEl.width = width;
+
+//    await $postupdate();
+//    petsEl.focus()
+// })
+
+// const INSERT_TEXT = defineAction({
+//    do(action) {
+//       return (document, word, index) => {
+//          action.snapshot(document, DEEP);
+//          return document.insertText(word, index)
+//       }
+//    },
+//    catch(err, action) {
+//       action.rollback()
+//    }
+// })
+
+
+
+
+
+// function reKeydown() {
+//    const output = doAction(INSERT_TEXT, [2])
+// }
+
+// const INSERT_TEXT = defineAction({
+//    name: 'insert-text',
+//    do(action, document, word, index) {
+//       action.snapshot(document, DEEP);
+//       return document.insertText(word, index)
+//    },
+//    catch(err, action) {
+//       action.rollback()
+//    }
+// })
+
+
+
+
+export const {
    SYNC,
-   PRELUDE,
+   POSTEVENT,
    RENDER,
-   POSTLUDE,
-   COMPLETION
-] = useReactivity([ //(default to queueTask for all phases)
-   definePhase('PRELUDE', (runPhase: VoidFunction) => queueMicrotask(() => queueMicrotask(runPhase))), // allows devs room to use queueMicrotask 
-   definePhase('RENDER', requestAnimationFrame),
-   definePhase('POSTLUDE', queueMicrotask)
-])
+   POSTRENDER,
+   getEndHook
+} = useReactivitySystem(
+//    {
+//    EventCycle: [
+//       definePhase('POSTEVENT', queueMicrotask)
+//    ],
+//    UpdateCycle: [
+//       definePhase('RENDER', requestAnimationFrame),
+//       definePhase('POSTRENDER', queueMicrotask)
+//    ]
+// }, {
+//    defaultPhase: () => {
+//       //TODO: must figure out how to handle default effect stage
+//    }
+// }
+)
 
-export const onPrelude = createEffectCycleHook(PRELUDE)
+
+export const onPostevent = createEffectCycleHook(POSTEVENT)
 export const onRender = createEffectCycleHook(RENDER)
-export const onPostlude = createEffectCycleHook(POSTLUDE)
+export const onPostrender = createEffectCycleHook(POSTRENDER)
 
-export const onCompletion = onEffectCycleComplete
+export const onEventCycleEnd = getEndHook('EventCycle')
+export const onRenderCycleEnd = getEndHook('UpdateCycle')
+
+export const $postevent = createAwaitableHook(onPostevent)
+export const $renderphase = createAwaitableHook(onRender)
+export const $postrender = createAwaitableHook(onPostrender)
+export const $endofeventcycle = createAwaitableHook(onEventCycleEnd)
+export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)
 
 
 
-
-
-
-// watch($active, () => {
+// watch($active, async () => {
 //    const { width } = measureWidth()
 
-//    await renderphase()
+//    await $render()
 //    column.width = width;
 
-//    await postlude()
+//    await $postlude()
 //    updateDatabase()
 
 // })
@@ -110,37 +241,14 @@ export const onCompletion = onEffectCycleComplete
 
 
 
-type Task = () => void
-type RenderCyclePhases = {
-   prelude: Promise<void> | undefined;
-   render: Promise<void> | undefined;
-   postlude: Promise<void> | undefined;
-}
 
-const renderCyclePhases: RenderCyclePhases = {
-   prelude: undefined,
-   render: undefined,
-   postlude: undefined,
-}
 
-function createRenderCyclePhase(
-   phases: RenderCyclePhases,
-   phase: keyof RenderCyclePhases,
-   hook: (resolve: (...args: any[]) => any) => any
-) {
-   return function cyclePhase() {
-      if (!phases[phase]) {
-         onCompletion(() => {
-            phases[phase] = undefined
-         })
-      }
-      return phases[phase] ?? (phases[phase] = new Promise(hook))
-   }
-}
 
-export const prelude = createRenderCyclePhase(renderCyclePhases, 'prelude', onPrelude)
-export const renderphase = createRenderCyclePhase(renderCyclePhases, 'render', onRender)
-export const postlude = createRenderCyclePhase(renderCyclePhases, 'postlude', onPostlude)
+
+
+
+
+
 
 
 

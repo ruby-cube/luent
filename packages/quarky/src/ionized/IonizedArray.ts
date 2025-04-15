@@ -104,13 +104,13 @@ import { runSyncEffects } from "../effect-cycle/SyncEffects";
 
  
 
-const todo = ionize({
-   id: 0
-})
+// const todo = ionize({
+//    id: 0
+// })
 
-const todos = [todo]
+// const todos = [todo]
 
-todos.indexOf(todo)
+// todos.indexOf(todo)
 
 
 

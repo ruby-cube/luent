@@ -20,6 +20,7 @@ export * from "./ionic/DerivationIon" //TODO: limit exports to public api
 export * from "./ionic/PionCapsule" //TODO: limit exports to public api
 export * from "./watch/ionicTask" //TODO: limit exports to public api
 export * from "./ion/FiniteStates" //TODO: limit exports to public api
+export * from "./ReactivitySystem" //TODO: limit exports to public api
 
 installIonicArray()
 installIonicSet()

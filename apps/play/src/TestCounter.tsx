@@ -30,15 +30,15 @@ export function TestCounter() {
       }
    })
 
-   watch($index, ()=>{
-      console.log('running index effect')
-   }, {phase: RENDER})
+   // watch($index, ()=>{
+   //    console.log('running index effect')
+   // }, {phase: RENDER})
 
-   watch($count, () => {
-      console.log('running $count effect')
-      // $count.increment()
-      $index.increment()
-   }, { phase: RENDER })
+   // watch($count, () => {
+   //    console.log('running $count effect')
+   //    // $count.increment()
+   //    $index.increment()
+   // }, { phase: RENDER })
 
    return component(
       <>
