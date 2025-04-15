@@ -52,9 +52,10 @@ function setUpEventCycleManager(phases?: [CyclePhase, ...CyclePhase[]]) {
    if (phases) {
       //TODO: custom phases
    }
-   cycleManager.pushPhase(new CyclePhase('EventCycle:POSTEVENT', queueMicrotask))
+   //FIX: phase names { POSTEVENT: 'EventCycle:POSTEVENT}
+   cycleManager.pushPhase(new CyclePhase('POSTEVENT', queueMicrotask))
    cycleManager.pushPhase(new CyclePhase(EVENT_CYCLE_END, noop))
-   cycleManager.onComplete = createEffectCycleHook(EVENT_CYCLE_END)
+   cycleManager.onComplete = createEffectCycleHook('EventCycle:'+EVENT_CYCLE_END)
    return cycleManager
 }
 
@@ -63,10 +64,10 @@ function setUpUpdateCycleManager(phases?: [CyclePhase, ...CyclePhase[]]) {
    if (phases) {
       //TODO: custom phases
    }
-   cycleManager.pushPhase(new CyclePhase('UpdateCycle:RENDER', requestAnimationFrame))
-   cycleManager.pushPhase(new CyclePhase('UpdateCycle:POSTRENDER', queueMicrotask))
+   cycleManager.pushPhase(new CyclePhase('RENDER', requestAnimationFrame))
+   cycleManager.pushPhase(new CyclePhase('POSTRENDER', queueMicrotask))
    cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop))
-   cycleManager.onComplete = createEffectCycleHook(UPDATE_CYCLE_END)
+   cycleManager.onComplete = createEffectCycleHook('UpdateCycle:'+UPDATE_CYCLE_END)
    return cycleManager;
 }
 
@@ -90,7 +91,7 @@ export function useReactivitySystem(phases?: [CyclePhase, ...CyclePhase[]]): Eff
 
    addHooks(hooks, EventCycle)
    addHooks(hooks, UpdateCycle)
-console.log('HOOKS', hooks)
+   console.log('HOOKS', hooks)
    return hooks as EffectCycleHooks;
 }
 
@@ -98,8 +99,8 @@ function addHooks(hooks: { [key: string]: string | any }, cycle: EffectCycleMana
    const phases = cycle.phases
    for (const phase of phases) {
       const phaseName = phase.phase
-      hooks[phaseName] = phaseName
-      // hooks[phaseName] = cycle.name + ':' + phaseName
+      // hooks[phaseName] = phaseName
+      hooks[phaseName] = phase.phaseHook = cycle.name + ':' + phaseName
    }
 }
 
@@ -166,7 +167,7 @@ export function createEffectCycleHook(phase: string) { //TODO: what happens if p
 export function getDefaultPhase() {
    const currentPhase = getCurrentPhase()
    if (currentPhase !== SYNC) return currentPhase
-   return reactivitySystem.EventCycle.phases[0].phase
+   return reactivitySystem.EventCycle.phases[0].phaseHook
 }
 
 
@@ -195,8 +196,8 @@ export function scheduleEffect(effect: EffectLink, phase: string) {
 export function trigger( //TODO: figure out which abstraction this belongs to ...  atomic ions, atomic pions, memoized derivations, but not terminal compound
    this: ParticleMorph & Watchable,
 ) {
-
-   if (reactivitySystem.UpdateCycle.current && getCurrentPhase() !== SYNC) {
+   const updateCycle = reactivitySystem.UpdateCycle
+   if (updateCycle.current && updateCycle.current.currentPhase !== SYNC) {
       debug.error(`Cannot mutate reactive data during update cycle. Current Phase: ${getCurrentPhase()}. Use queueTask or something similar to defer mutation to a separate task/event`)
    }
 

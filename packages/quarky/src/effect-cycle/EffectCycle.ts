@@ -100,6 +100,8 @@ export class CyclePhase {
    get next() {
       return this.phases[this.index + 1]
    }
+
+   phaseHook!: string
 }
 
 
@@ -181,25 +183,25 @@ export class EffectCycleManager {
 
 
 
-function schedulePhase(cycle: EffectCycle, { index, schedule, phase, next, phases }: CyclePhase) {
+function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
    console.log('PHASES', phases)
    schedule(() => {
       const finalIndex = phases.length - 2;
       if (index < finalIndex) schedulePhase(cycle, next)
-      cycle.runEffects(phase)
+      cycle.runEffects(phaseHook)
       console.log('INDEX', index)
       console.log('FINALINDEX', finalIndex)
       if (index === finalIndex)
          queueMicrotask(() => {
-            cycle.runEffects(next!.phase)
+            cycle.runEffects(next!.phaseHook)
             cycle.close();
          })
    })
 }
 
 export const SYNC = 'S' as const
-export const EVENT_CYCLE_END = 'EventCycle:ECE' as const
-export const UPDATE_CYCLE_END = 'UpdateCycle:UCE' as const
+export const EVENT_CYCLE_END = 'ECE' as const
+export const UPDATE_CYCLE_END = 'UCE' as const
 
 
 /**
