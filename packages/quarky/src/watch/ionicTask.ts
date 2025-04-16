@@ -4,7 +4,7 @@ import { EffectOptions, getPhase, scheduleEffectEagerly, setUpWatcher, WatchDebu
 import { Glass } from "@rue/types";
 
 type IonicTaskOptions = {
-   phase?: number;
+   phase?: string;
    sync?: boolean;
    // cycle?: "current" | "next"; //QUESTION: How does this work?? Do we really need this?
    retrack?: boolean; // defaults to true

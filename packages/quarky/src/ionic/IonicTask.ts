@@ -17,7 +17,7 @@ export function createIonicTask(task: IonicTask, retrack: boolean = true) {
    const compound: IonicCompound<IonicCompoundMorph> = new IonicCompound(effect)
    compound.trigger = trigger
 
-   let initialized = false;
+   let initial = true;
    let syncCall = false;
 
    function watch(fn: IonicFunction) {
@@ -25,7 +25,7 @@ export function createIonicTask(task: IonicTask, retrack: boolean = true) {
          debug.warn('watch() must be called synchronously within ionic task')
          return fn();
       }
-      if (initialized && !retrack) return fn()
+      if (!initial && !retrack) return fn()
       return compound.trackedCall(fn)
    }
 
@@ -33,11 +33,11 @@ export function createIonicTask(task: IonicTask, retrack: boolean = true) {
       if (retrack) compound.untrackParticles()
          syncCall = true;
       try{
-         task(watch, initialized)
+         task(watch, initial)
       }
       finally{
          syncCall = false
-         initialized = true;
+         initial = false;
       }
    }
 

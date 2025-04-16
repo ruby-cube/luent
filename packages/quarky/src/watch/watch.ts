@@ -16,7 +16,6 @@ import { isIonizedModel } from "../ionized/ionize";
 import { $AtomicIonState, isAtomicIon, isAtomicIonQuark } from "../ion/AtomicIon";
 import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
 import { createWatchedIonizedIon } from "./IonizedIon";
-import { debug } from "../debug/debug";
 import { getDefaultPhase, getEffectCycle, scheduleEffect } from "../ReactivitySystem";
 
 export class ChangeEvent<S = unknown> {
@@ -24,6 +23,7 @@ export class ChangeEvent<S = unknown> {
    constructor(
       public prevState: S,
       public state: S,
+      public eager: boolean
    ) { }
 }
 
@@ -196,12 +196,11 @@ export function watch<
       if (!eager && !hasChanged(prevState, newState))
          return;
 
-      eager = false;
-
       try {
-         (<Effect>effect)(new ChangeEvent(prevState, newState))
+         (<Effect>effect)(new ChangeEvent(prevState, newState, eager))
       }
       finally {
+         eager = false;
          prevState = newState;
          hasChanged = getHasChangedFn(options, prevState) //accounts for ions whose value may change from ionized to not ionized
       }

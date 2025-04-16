@@ -26,6 +26,7 @@ import { runSyncEffects } from "../effect-cycle/SyncEffects";
 //          shift(): MaybeIonized<T> | undefined;
 //          sort(compareFn?: (a: T, b: T) => number): MaybeIonized<T>[];
 //          splice(start: number, deleteCount?: number, ...items: T[]): MaybeIonized<T>[];
+//          splice<H>(this: H, start: number, deleteCount?: number, ...items: T[]): MaybeIonized<T[], H>;
 
 //          forEach<H, O>(
 //             this: H,

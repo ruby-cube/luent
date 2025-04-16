@@ -19,21 +19,25 @@ export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
    compound.trigger = trigger
 
    let fn = initialize;
-
+   let eager = true;
    let state: unknown;
    function effect() {
-      state = fn(new ChangeEvent(state, state))
-      return state;
+      try {
+         return state = fn(new ChangeEvent(state, state, eager))
+      }
+      finally {
+         eager = false;
+      }
    }
 
    function initialize(event: ChangeEvent) {
       fn = runEffect
-      return compound.trackedCall(()=>task(event))
+      return compound.trackedCall(() => task(event))
    }
 
    function runEffect(event: ChangeEvent) {
       if (retrack) {
-         return compound.retrackedCall(()=>task(event))
+         return compound.retrackedCall(() => task(event))
       }
       else {
          return task(event)
