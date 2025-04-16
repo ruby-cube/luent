@@ -665,7 +665,7 @@ declare namespace React {
 
    //$$$
    interface _DOMAttributes<T> {
-      Slot?: Lumo.NodeEntity | undefined;
+      children?: Lumo.NodeEntity | undefined;
    }
 
    type LifecycleTask<T> = (element: T)=> void
@@ -2565,7 +2565,7 @@ declare global {
       //$$$
       interface IntrinsicAttributes extends React.Attributes {
          ref?: NodeRef //#LUMO-EDIT
-         // Slot?: Lumo.InferSlot
+         // children?: Lumo.InferSlot
       }
       interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> { }
 
