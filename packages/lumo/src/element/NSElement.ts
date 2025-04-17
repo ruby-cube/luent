@@ -272,7 +272,6 @@ import { AnyObject } from "@rue/types";
 
 
 export function createNSElement(tagName: string, namespace: string) {
-   console.log('createNSElement', tagName, namespace)
    return document.createElementNS(namespace, tagName)
 }
 

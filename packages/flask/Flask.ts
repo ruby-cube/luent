@@ -72,6 +72,8 @@ export class ThisFlask {
 
 const genUID = UIDGenerator(11)
 
+let viewCount = 0
+
 export class Flask {
    thisFlask?: ThisFlask
    outer?: Flask
@@ -84,6 +86,7 @@ export class Flask {
       creationScope?: boolean
    } = {}) {
       const { outer, type, creationScope } = config
+      console.trace('new flask', type, this, type === 'view'? ++viewCount: undefined)
       this.outer = outer;
       this.type = type;
       this.creationScopeID = creationScope ? genUID() : outer?.creationScopeID ?? "0"
@@ -133,7 +136,6 @@ export class Flask {
    }
 
    spawn(config: {type?: string, creationScope?: boolean}) {
-      console.trace('spawn', config.type)
       return new Flask({ outer: this, type: config.type, creationScope: config.creationScope });
    }
 

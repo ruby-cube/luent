@@ -23,9 +23,8 @@ export function mountTextNode(textNode: CharacterData, parent: Element, fragment
 
 function keepTextNodeUpdated(text: Ion, textNode: CharacterData) {
    watch(text, ({state}) => {
-      // if (typeof state === 'number')console.log('index?', text)
       textNode.data = toString(state);
-   }, { phase: RENDER, __devName: keepTextNodeUpdated.name });
+   }, { phase: RENDER });
 }
 
 

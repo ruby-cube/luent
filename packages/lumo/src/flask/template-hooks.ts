@@ -10,7 +10,6 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
    const flask = getActiveFlask()
    for (const key in hooks) {
       const task = hooks[key]
-      console.log('@%%', key)
       switch (key) {
          case 'post:creation':
             flask?.onInitialMount(scheduleForPostlude)

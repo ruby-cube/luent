@@ -285,8 +285,6 @@ export function finiton<M extends Methods>(initialState: string | (() => string)
       if (!activated || finalized) return;
       if (timeout) clearTimeout(timeout);
       const transitionEvent = applyTransition(transition)
-      console.log('@% apply', transition)
-      console.log('@% apply', transitionEvent)
       if (transitionEvent) {
          runTransitionTasks(transition, transitionEvent)
          if (isTerminal(transitionEvent.state)) {
@@ -338,9 +336,6 @@ export function finiton<M extends Methods>(initialState: string | (() => string)
 
       const getNextState = typeof transition === 'string' ? (state[transition] ?? states[ANY_STATE as any][transition]) : transition;
       if (!getNextState) return;
-      console.log('@% applyTransition', transition)
-      console.log('@% applyTransition prev', prevStateID)
-      console.log('@% applyTransition state', state)
 
       const nextStateID = getNextState();
       if (!nextStateID) return;

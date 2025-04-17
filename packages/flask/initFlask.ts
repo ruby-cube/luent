@@ -1,4 +1,4 @@
-import { useIncrementalID } from "@rue/utils";
+import { debug, useIncrementalID } from "@rue/utils";
 import { Listener } from "./Listener";
 import { Flask } from "./Flask";
 
@@ -25,7 +25,7 @@ export function configureFlask(config: {
             //@ts-expect-error
              warned = listener.warnNoCleanup();
         }
-        if (!warned) console.log('Everything looks good :) All flaskable listeners have cleanup strategies.')
+        if (!warned) debug.log('Everything looks good :) All flaskable listeners have cleanup strategies.')
     }
 }
 
@@ -37,11 +37,11 @@ export const setUpCleanupWarning = __DEV__ ? (listener: Listener, cleanupFn: Fun
             const listenerID = genIncrementalId!();
             //@ts-expect-error
             listener.warnNoCleanup = () => {
-                console.warn(`FLASKABLE_LISTENER_#${listenerID} has not been cleaned up. Make sure there's a cleanup strategy in place.`)
+               debug.warn(`FLASKABLE_LISTENER_#${listenerID} has not been cleaned up. Make sure there's a cleanup strategy in place.`)
                 return true;
             }
-            console.log(`ResumableListener flagged as potentially having no cleanup. Call 'warnNoCleanup' in console and look for listener id: FLASKABLE_LISTENER_#${listenerID}`)
-            console.trace(`FLASKABLE_LISTENER_#${listenerID} trace:`)
+            debug.log(`ResumableListener flagged as potentially having no cleanup. Call 'warnNoCleanup' in console and look for listener id: FLASKABLE_LISTENER_#${listenerID}`)
+            debug.trace(`FLASKABLE_LISTENER_#${listenerID} trace:`)
             markNoCleanup(listener)
         }
     }

@@ -129,15 +129,12 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
       return true;
    }
    stop.isRemover = true as const;
-   // _remove.__devName = options?.__devName;
 
 
    let pauseCleanup: PauseCleanup | void;
    let paused = false;
    function _pause() {
-      console.log('pausing')
       if (stopped || paused) return false;
-      // remove(returnVal ?? _callback);
       if (pause) pauseCleanup = pause(returnVal ?? _callback);
       paused = true;
       return true;
@@ -173,7 +170,7 @@ const noopable = {
 }
 
 function bindListenerToFlask(listener: ResumableListener, flask: Flask, preserve: boolean, until: any | null) {
-   const { stop: cancelStop } = until === null ? noopable : (console.log('### onDiscard(stop)'), flask.onDiscard(listener.stop));
+   const { stop: cancelStop } = until === null ? noopable : flask.onDiscard(listener.stop);
    const { stop: stopPausing } = preserve ? noopable : flask.onDemount(listener.pause);
    const { stop: stopResuming } = preserve ? noopable : flask.onRemount(listener.resume);
 

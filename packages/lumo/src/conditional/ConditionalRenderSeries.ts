@@ -100,7 +100,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const showKits = this.showKits
       if (showKits)
          for (const showKit of showKits) {
-            console.log('show kit', showKit)
             const pod = showKit.nodePod!
             this.render(showKit, parent, fragment)
 
@@ -399,7 +398,6 @@ export function mountConditional(
    nodeEntities: NodeKit[],
    fragment?: DocumentFragment
 ) {
-   console.log('fragment?', fragment)
    const _fragment = fragment || new DocumentFragment();
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
    if (fragment) return; // no need to mount to DOM yet since fragment originates higher up
@@ -408,19 +406,14 @@ export function mountConditional(
 
 
 export function mountDOMNodes(pod: NodePod, parent: Element, fragment: DocumentFragment) {
-   console.log('mountDOMNodes', pod)
    let prevNode = pod.prevNode;
-   console.log('prevNode', prevNode)
    if (prevNode && prevNode === parent) {
-      console.log('append', prevNode)
       parent.append(fragment) //for teleport
    }
    else if (prevNode) {
-      console.log('after', prevNode)
       prevNode.after(fragment)
    }
    else {
-      console.log('prepend', prevNode)
       parent.prepend(fragment)
    }
 }

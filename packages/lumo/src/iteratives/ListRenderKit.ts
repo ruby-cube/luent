@@ -247,7 +247,6 @@ export class ListRenderKit {
          const _isNewItem = isNewItem(uItem);
          const itemHasMoved = hasMoved(uItem);
          const oldIndex = oldUArray.indexOf(uItem)
-         console.log('item has moved', oldIndex, i, itemHasMoved)
          const nodePod = _isNewItem ? new NodePod()
             : itemHasMoved ? (dynamicNodePod[oldIndex] as unknown as NodePod) // dynamicNodePod[index]
                : null;
@@ -255,7 +254,6 @@ export class ListRenderKit {
          if (!_isNewItem) {
             // update $index.state
             const $index = this.indices[oldIndex];
-            console.log('update index', $index(), i)
             newIndices.push($index);
             $index.state = i
 

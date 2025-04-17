@@ -285,7 +285,6 @@ export function installIonicArray() {
       deionizeArgs?: (args: any[]) => any[]
    ) {
       return function createOp(target: AnyObject, ionizedModel: IonizedModel, quark: IonizedModelQuark, getPreopData: GetPreopData | undefined) {
-         console.log(opName, target[0], target[1], target[2])
          const fn = target[opName]
          return useMutatingArrayOp(
             ionizedModel,

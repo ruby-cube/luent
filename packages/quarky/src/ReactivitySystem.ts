@@ -91,7 +91,6 @@ export function useReactivitySystem(phases?: [CyclePhase, ...CyclePhase[]]): Eff
 
    addHooks(hooks, EventCycle)
    addHooks(hooks, UpdateCycle)
-   console.log('HOOKS', hooks)
    return hooks as EffectCycleHooks;
 }
 

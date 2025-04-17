@@ -14,6 +14,7 @@ export const debug = {
    log,
    warn,
    error,
+   trace,
    throw: throwError
 }
 
@@ -24,6 +25,13 @@ function log(...details: any[]) {
    if (__DEV__) console.log(...details)
    else {
       logs.push({ type: 'log', details })
+   }
+}
+
+function trace(...details: any[]) {
+   if (__DEV__) console.trace(...details)
+   else {
+      logs.push({ type: 'trace', details })
    }
 }
 

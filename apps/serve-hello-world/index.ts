@@ -10,9 +10,7 @@ import { toKebab } from "to-kebab"
 import { generateHTML } from '@rue/literate';
 
 const app = express();
-// app.use((request, response) => {
-//     console.log("Got a request!")
-// })
+
 
 
 

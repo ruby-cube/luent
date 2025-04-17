@@ -184,13 +184,10 @@ export class EffectCycleManager {
 
 
 function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
-   console.log('PHASES', phases)
    schedule(() => {
       const finalIndex = phases.length - 2;
       if (index < finalIndex) schedulePhase(cycle, next)
       cycle.runEffects(phaseHook)
-      console.log('INDEX', index)
-      console.log('FINALINDEX', finalIndex)
       if (index === finalIndex)
          queueMicrotask(() => {
             cycle.runEffects(next!.phaseHook)
@@ -218,12 +215,10 @@ export class EffectCycle {
       if (manager.current)
          throw new Error("@% Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
       manager.current = this;
-      console.log('@%% manager', manager)
       schedulePhase(this, manager.phases[0])
    }
 
    close() {
-      console.log('CLOSING EFFECT CYCLE', this.manager.current)
       this.manager.current = undefined;
    }
 
@@ -242,17 +237,19 @@ export class EffectCycle {
    }
 
    runEffects(phase: string) {
-      console.log('RUNNING EFFECTS FOR', phase, this.effects)
       this.currentPhase = phase;
       const effects = this.effects.get(phase);
+      console.log(phase, 'start size', effects?.size)
       if (effects) {
          for (const effect of effects) {
+            console.log(phase, 'before run effect size', effects?.size)
             effect.task()
             if (!effect.vine) {
                continue; // effect has already been removed during the effect via 'once' or 'scheduler'
             }
             effect.watchSubject?.completedEffects.addToVine(effect, phase)
          }
+         console.log(phase, 'done size', effects?.size)
       }
    }
 }

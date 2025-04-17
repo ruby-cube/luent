@@ -75,7 +75,7 @@ export class Watched<T extends Watchable = Watchable> {
       const completed = this.completedEffects.get(phase);
       if (completed || completed === null) return;
       this.completedEffects.set(phase, null);
-      getEffectCycle(phase).onComplete(() => {
+      getEffectCycle(phase).onComplete(() => { //TODO: simple hooks like this do not need to be flasked listeners... too much overhead
          const completed = this.completedEffects.get(phase)
          if (completed) this.effects.absorb(completed, phase)
          this.completedEffects.delete(phase)

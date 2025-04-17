@@ -48,7 +48,6 @@ export function TodoMVC() {
    })
 
    function toggleAll(e: RadioInputEvent) {
-      console.log('toggling all')
       $todos().forEach((todo) => (todo.completed = e.target.checked))
    }
 
@@ -66,9 +65,6 @@ export function TodoMVC() {
 
    function removeTodo(todo: Todo) {
       const index = $todos().indexOf(todo)
-      console.log('@% remove index', $todos())
-      console.log('@% remove index', todo)
-      console.log('@% remove index', index)
       $todos().splice(index, 1)
    }
 
@@ -92,7 +88,6 @@ export function TodoMVC() {
    }
 
    function removeCompleted() {
-      console.log('@% active', filters.active($todos()))
       $todos.state = filters.active($todos())
    }
 
@@ -120,40 +115,37 @@ export function TodoMVC() {
                   on:keyup={e => e.key === 'Enter' && addTodo(e as unknown as InputEvent)}
                />
             </header>
-            {If($todos().length, "show", () => (console.log('rendering todos section'),
-               <section class="main">
-                  <input
-                     id="toggle-all"
-                     class="toggle-all"
-                     type="checkbox"
-                     checked={$remaining() === 0}
-                     on:click={e => console.log('click toggleAll')}
-                     on:change={toggleAll}
-                  />
-                  <label for="toggle-all">Mark all as complete</label>
-                  <ul class="todo-list">
-                     {For($filteredTodos, m => m.id, (todo) => (
-                        <li class={["todo", { completed: todo.$completed, editing: todo === $editedTodo() }]}>
-                           <div class="view">
-                              <input class="toggle" type="checkbox" mu:checked={$$(todo).$completed} />
-                              <label on:dblclick={e => editTodo(todo)}>{$$(todo).$title}</label>
-                              <button class="destroy" on:click={e => removeTodo(todo)}></button>
-                           </div>
-                           {If(todo === $editedTodo(),
-                              <input
-                                 class="edit"
-                                 type="text"
-                                 mu:value={todo.$title}
-                                 post:mount={node => node.focus()}
-                                 on:blur={e => doneEdit(todo)}
-                                 on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
-                              />
-                           )}
-                        </li>
-                     ))}
-                  </ul>
-               </section >
-            ))}
+            <section class="main">
+               <input
+                  id="toggle-all"
+                  class="toggle-all"
+                  type="checkbox"
+                  checked={$remaining() === 0}
+                  on:change={toggleAll}
+               />
+               <label for="toggle-all" on:click={e=>console.log('clicked')}>Mark all as complete</label>
+               <ul class="todo-list">
+                  {For($filteredTodos, m => m.id, (todo) => (
+                     <li class={["todo", { completed: todo.$completed, editing: todo === $editedTodo() }]}>
+                        <div class="view">
+                           <input class="toggle" type="checkbox" mu:checked={$$(todo).$completed} />
+                           <label on:dblclick={e => editTodo(todo)}>{$$(todo).$title}</label>
+                           <button class="destroy" on:click={e => removeTodo(todo)}></button>
+                        </div>
+                        {If(todo === $editedTodo(),
+                           <input
+                              class="edit"
+                              type="text"
+                              mu:value={todo.$title}
+                              post:mount={node => node.focus()}
+                              on:blur={e => doneEdit(todo)}
+                              on:keyup={e => e.key === 'Enter' && doneEdit(todo) || e.key === 'Escape' && cancelEdit(todo)}
+                           />
+                        )}
+                     </li>
+                  ))}
+               </ul>
+            </section >
             {If($todos().length, "show",
                <footer class="footer">
                   <span class="todo-count">

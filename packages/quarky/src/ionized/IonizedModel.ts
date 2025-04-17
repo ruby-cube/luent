@@ -159,7 +159,6 @@ export function useTrackableGetOp(
 ) {
    const fn = target[op]
    const trackableOp = function trackableGetOp(arg: any) {
-      console.log('calling trackableGetOp')
       if (__DEV__) emitSignal();
       const value = toRaw(arg)
       getActiveTracker()?.track(asAtomicOp(model, op, value))
@@ -183,11 +182,6 @@ export function useTrackableOp(
       if (__DEV__) emitSignal();
       const _args = transformArgs(args);
       // if(op === 'indexOf'){
-      console.log('@% op', op)
-      console.log('@% args', args)
-      console.log('@% transformed args', _args)
-      console.log('@% target', target)
-      console.log('@% transformed target', transformTarget(target, _args))
       // }
       getActiveTracker()?.track(quarkOf(model))
       return transformReturn(fn.call(transformTarget(target, _args), ..._args))
@@ -436,7 +430,6 @@ export function createIonizedModel(
 
       getOwnPropertyDescriptor(target, key) {
          //TODO: track
-         console.log('getOwnPropertyDescriptor', key)
          return Reflect.getOwnPropertyDescriptor(target, key)
       },
 

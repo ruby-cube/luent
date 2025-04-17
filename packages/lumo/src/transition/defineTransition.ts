@@ -112,8 +112,6 @@ function mountOffscreenClass(name: string) {
     existingOffscreenClasses.add(name)
     const style = transitionStylesheet ?? createTransitionStyleSheet()
     const property = compileCSSProperty(name)
-   console.log('name', name)
-   console.log('property', property)
     style.insertRule(`.${name} { ${property} }`, style.cssRules.length)
 }
 

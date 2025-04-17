@@ -36,8 +36,8 @@ export function makeElement(
    const XML_NS = (newXML_NS = newXMLNamespace(tagName, attributes)) || getXMLNamespace();
 
    const domNode = isHydrating() ? getElement()
-      : XML_NS ? (console.log('creating XMLNS tag', tagName), createNSElement(tagName, XML_NS))
-         : (console.log('creating html tag', tagName), document.createElement(tagName))
+      : XML_NS ? createNSElement(tagName, XML_NS)
+         : document.createElement(tagName)
 
 
    if (ref) {
@@ -64,11 +64,6 @@ export function makeElement(
    //          dynamicAttributes
    //      );
 
-   // console.log('@% -----------------')
-   // console.log('@% before set', tagName, prevXMLNS, activeXMLNS)
-
-   // console.log('@% after set', prevXMLNS, activeXMLNS)
-   // console.log('@% -----------------')
 
    if (_Slot) {
       const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
@@ -235,7 +230,6 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
 
 
 function bindTextarea(element: Element, Slot: Slot | undefined) {
-   console.log('bindTextArea', Slot)
    if (!Slot || !isFunction(Slot)) return;
    const nodeEntities = Slot();
    const kit = nodeEntities instanceof Array ? nodeEntities[0] : nodeEntities;
@@ -297,7 +291,6 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {
          watch(value, ({ state }) => {
-            console.log('updating', key, 'with', state, value())
             setAttribute(node, _key, state)
          }, { eager: true, phase: RENDER })
       }
@@ -310,12 +303,13 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       //    }, { eager: true, phase: Phase.RENDER })
       // }
       else if (!isHydrating()) {
+         if (node.tagName === 'LABEL') console.log('key', key, value)
          setAttribute(node, _key, toString(value))
       }
    }
 }
 
-function setAttribute(node: AnyObject, key: string, value: any) {
+function setAttribute(node: AnyObject, attribute: string, value: any) {
 
    //TODO: what if attribute can take a falsey value like 0 or false?
    // if (value !== undefined) {
@@ -324,14 +318,86 @@ function setAttribute(node: AnyObject, key: string, value: any) {
    // }
    // else {
    if (node instanceof SVGElement) {
-      node.setAttribute(key, value)
+      node.setAttribute(attribute, value)
    }
    else {
-      node[key] = value === false ? value : toString(value) ?? ''; //TODO: need to distinguish between attributes that take in booleans vs a string
+      node[toElementProperty(attribute)] = isBooleanAttribute(attribute) ?  Boolean(value) : toString(value) ?? ''; //TODO: need to distinguish between attributes that take in booleans vs a string
    }
    // node.removeAttribute(key);
    // }
 }
+
+const attributeToPropertyMap: Record<string, string> = {
+   // Global/common attributes
+   class: 'className',
+   for: 'htmlFor',
+   accesskey: 'accessKey',
+   contenteditable: 'contentEditable',
+   tabindex: 'tabIndex',
+   spellcheck: 'spellCheck',
+   autocapitalize: 'autoCapitalize',
+   inputmode: 'inputMode',
+ 
+   // Form-related attributes
+   readonly: 'readOnly',
+   maxlength: 'maxLength',
+   minlength: 'minLength',
+   formaction: 'formAction',
+   formenctype: 'formEnctype',
+   formmethod: 'formMethod',
+   formnovalidate: 'formNoValidate',
+   formtarget: 'formTarget',
+ 
+   // Table attributes
+   colspan: 'colSpan',
+   rowspan: 'rowSpan',
+ 
+   // Media/iframe
+   usemap: 'useMap',
+   frameborder: 'frameBorder',
+   allowfullscreen: 'allowFullscreen',
+ 
+   // Special behavior
+   // 'http-equiv': '', // No direct DOM property
+   // style: 'style', // Though technically same, its value is a CSSStyleDeclaration, not a string
+ }
+ 
+
+function toElementProperty(attribute: string){
+return attributeToPropertyMap[attribute] ?? attribute;
+}
+
+const booleanAttributes = {
+   async: true,
+   autofocus: true,
+   autoplay: true,
+   checked: true,
+   controls: true,
+   default: true,
+   defer: true,
+   disabled: true,
+   formnovalidate: true,
+   hidden: true,
+   inert: true,
+   ismap: true,
+   itemscope: true,
+   loop: true,
+   multiple: true,
+   muted: true,
+   nomodule: true,
+   novalidate: true,
+   open: true,
+   playsinline: true,
+   readonly: true,
+   required: true,
+   reversed: true,
+   selected: true,
+   truespeed: true,
+ };
+
+ function isBooleanAttribute(key: string){
+   return key in booleanAttributes
+ }
 
 function toString(value: any) {
    return value.toString(); //TODO: make sure it works with any value
@@ -366,6 +432,7 @@ type DynamicClassesConfig = {
 
 type Falsey = undefined | null | false | ''
 function setUpClasses(node: Element, classes: ClassInput[]) {
+   console.log('set up classes for node', node.tagName)
    const classList = node.classList
 
    for (const entry of classes) {
@@ -379,6 +446,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
          addClasses(entry, classList)
       }
    }
+   console.log('finish clases setup for ', node.tagName)
 }
 
 function removePreviousClasses(prevValue: string | AnyObject, classList: DOMTokenList) {
@@ -424,6 +492,9 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
       const value = entry[key]
       if (value && isIon(value)) {
          watch(value, ({ state, prevState }) => {
+            console.log('key', key)
+            console.log('state', state)
+            console.log('prevState', prevState)
             if (state) classList.add(key)
             else if (prevState) classList.remove(key)
          }, {

@@ -167,8 +167,6 @@ function assertValidInitialization(initializationFlask: Flask | undefined, creat
 }
 
 function flaskAContainsFlaskB(flaskA: Flask, flaskB: Flask) {
-   console.log('A', flaskA)
-   console.log('B', flaskB)
    let outer = flaskB.outer
    do {
       if (outer?.creationScopeID === flaskA.creationScopeID)

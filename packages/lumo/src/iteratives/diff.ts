@@ -6,7 +6,6 @@ import { UniqueItem } from "./For";
 
 // TODO: implementation for sets, objects, and maps
 export function diff(newArray: AnyObject[] | UniqueItem[], oldArray: AnyObject[] | UniqueItem[], getUID: ((item: unknown) => unknown) | undefined) {
-   console.log('diffing', newArray, oldArray)
    const [newArr, oldArr] = makeItemsUnique(newArray, oldArray, getUID);
 
    if (areShallowEqualArrays(newArr, oldArr)) return { noChange: true };
