@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types";
 import { Ion, ion } from "./ion";
-import { debug } from "@rue/utils";
+import { debug, isFunction } from "@rue/utils";
 
 
 // trafficLight.is('on') // reactive
@@ -169,8 +169,8 @@ type Finiton<M extends Methods = {}> = {
    can: (transition: string) => boolean
    nest: (config: { [key: string]: Finiton[] }) => Finiton
    onFinalState: (task: () => void) => void
-   activate:()=>void
-   deactivate:()=>void
+   activate: () => void
+   deactivate: () => void
 } & M
 
 
@@ -193,7 +193,7 @@ export function withTimeout(ms: number, transition: Transition) {
    return transition;
 }
 
-export function finiton<M extends Methods>(initialState: string, states: FiniteStates, methods?: M): Finiton<M> {
+export function finiton<M extends Methods>(initialState: string | (() => string), states: FiniteStates, methods?: M): Finiton<M> {
    const $currentState = ion(undefined as undefined | string);
 
    let activated = false;
@@ -207,11 +207,11 @@ export function finiton<M extends Methods>(initialState: string, states: FiniteS
          return false;
       },
 
-      has(target, key){
+      has(target, key) {
          return key in stateMachine || Boolean(methods && key in methods)
       },
 
-      getPrototypeOf(target){
+      getPrototypeOf(target) {
          return Reflect.getPrototypeOf(target);
       },
 
@@ -254,8 +254,8 @@ export function finiton<M extends Methods>(initialState: string, states: FiniteS
    function activate() {
       if (activated) return;
       activated = true;
-      $currentState.state = initialState;
-      runEnterHooks(initialState, getHooks(ANY_STATE))
+      const state = $currentState.state = isFunction(initialState) ? initialState() : initialState;
+      runEnterHooks(state, getHooks(ANY_STATE))
    }
 
    function deactivate() {
@@ -335,7 +335,7 @@ export function finiton<M extends Methods>(initialState: string, states: FiniteS
    function applyTransition(transition: string | Transition) {
       const prevStateID = $currentState.state;
       const state = states[prevStateID ?? '']
-      
+
       const getNextState = typeof transition === 'string' ? (state[transition] ?? states[ANY_STATE as any][transition]) : transition;
       if (!getNextState) return;
       console.log('@% applyTransition', transition)
@@ -351,9 +351,9 @@ export function finiton<M extends Methods>(initialState: string, states: FiniteS
       if (prevStateID) {
          runExitHooks(prevStateID, anyStateHooks) //TODO: should I pass the next state to the exit hook?
       }
-      
+
       $currentState.state = nextStateID;
-      
+
       runEnterHooks(nextStateID, anyStateHooks) //TODO: should I pass the prev state to the enter hook?
 
       return {

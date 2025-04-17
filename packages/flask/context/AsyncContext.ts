@@ -58,11 +58,11 @@ export function AsyncState<T>(name: string): [GetContextualState<T>, Stack<T>] {
             asyncContextStack.activeNodes.set(name, _stack.at(-1))
          else
             asyncContextStack.activeNodes.delete(name)
-
       }
    }
 
    asyncContextStack.stacks.set(name, stack)
+   
    return [
       function getCurrentState() {
          return _stack.at(-1)

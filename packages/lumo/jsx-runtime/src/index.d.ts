@@ -2411,16 +2411,16 @@ declare namespace React {
     * @deprecated - Use `typeof React.Children` instead.
     */
    // Sync with type of `const Children`.
-   interface ReactChildren {
-      map<T, C>(
-         Slot: C | readonly C[],
-         fn: (child: C, index: number) => T,
-      ): C extends null | undefined ? C : Array<Exclude<T, boolean | null | undefined>>;
-      forEach<C>(Slot: C | readonly C[], fn: (child: C, index: number) => void): void;
-      count(Slot: any): number;
-      only<C>(Slot: C): C extends any[] ? never : C;
-      toArray(Slot: Lumo.NodeEntity | Lumo.NodeEntity[]): Array<Exclude<Lumo.NodeEntity, boolean | null | undefined>>;
-   }
+   // interface ReactChildren {
+   //    map<T, C>(
+   //       Slot: C | readonly C[],
+   //       fn: (child: C, index: number) => T,
+   //    ): C extends null | undefined ? C : Array<Exclude<T, boolean | null | undefined>>;
+   //    forEach<C>(Slot: C | readonly C[], fn: (child: C, index: number) => void): void;
+   //    count(Slot: any): number;
+   //    only<C>(Slot: C): C extends any[] ? never : C;
+   //    toArray(Slot: Lumo.NodeEntity | Lumo.NodeEntity[]): Array<Exclude<Lumo.NodeEntity, boolean | null | undefined>>;
+   // }
 
    //
    // Browser Interfaces
@@ -2603,12 +2603,12 @@ declare global {
          'vvv:mount': {};
          'vvv:create': {};
          'i--i': {};
-         '$--style': { Slot: string };
-         '$--portal': PortalNodeInput & { Slot: Lumo.Slot }
+         '$--style': { children: string };
+         '$--portal': PortalNodeInput & { children: Lumo.Slot }
          '$--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
-         '$--commons': ContextNodeInput & { Slot: Lumo.Slot };
-         '$--suspense': SuspenseNodeInput & { Slot: Lumo.Slot };
-         '$--try': TryNodeInput & { Slot: Lumo.Slot };
+         '$--commons': ContextNodeInput & { children: Lumo.Slot };
+         '$--suspense': SuspenseNodeInput & { children: Lumo.Slot };
+         '$--try': TryNodeInput & { children: Lumo.Slot };
          '$--transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
          '$--transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
          '$--dock': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>

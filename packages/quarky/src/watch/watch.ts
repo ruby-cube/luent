@@ -197,7 +197,7 @@ export function watch<
          return;
 
       try {
-         (<Effect>effect)(new ChangeEvent(prevState, newState, eager))
+         (<Effect>effect)(new ChangeEvent(prevState, newState, !!eager))
       }
       finally {
          eager = false;
@@ -305,7 +305,6 @@ export function setUpWatcher(
    options: EffectOptions,
    compound?: IonicCompound //
 ) {
-   const forNextCycle = options?.cycle === 'next';
    let effectLink: EffectLink;
    let paused = false;
 
@@ -317,7 +316,7 @@ export function setUpWatcher(
    return $listen(pausableEffect, options || {}, {
       enroll(task) {
          effectLink = new EffectLink(task, subject)
-         subject.watch(effectLink, phase, forNextCycle)
+         subject.watch(effectLink, phase)
       },
       remove() {
          subject.unwatch(effectLink)

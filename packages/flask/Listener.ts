@@ -6,6 +6,7 @@ import { $_run_with_, $_snap_context } from "./context/AsyncContext";
 import { FLASK, Flask, getActiveFlask, ThisFlask } from "./Flask";
 import { TRACE } from "./debug";
 import { noop } from "@rue/utils";
+import { $thisScene } from "./Scene";
 
 export type ResumableListener = {
    stop(): boolean;
@@ -108,6 +109,7 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
    const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask())
 
    const _callback = callbackIsRemover ? callback : wrapWithFlask(callback, {
+      stop,
       afterCall: once ? stop : undefined,
       enclosingFlask,
       __DEV__asyncPath
@@ -171,7 +173,7 @@ const noopable = {
 }
 
 function bindListenerToFlask(listener: ResumableListener, flask: Flask, preserve: boolean, until: any | null) {
-   const { stop: cancelStop } = until === null ? noopable : flask.onDiscard(listener.stop);
+   const { stop: cancelStop } = until === null ? noopable : (console.log('### onDiscard(stop)'), flask.onDiscard(listener.stop));
    const { stop: stopPausing } = preserve ? noopable : flask.onDemount(listener.pause);
    const { stop: stopResuming } = preserve ? noopable : flask.onRemount(listener.resume);
 
@@ -207,6 +209,7 @@ function isRemover(callback: Callback) {
 
 
 function wrapWithFlask(callback: Callback, config: {
+   stop: () => boolean,
    afterCall?: () => void,
    enclosingFlask?: Flask,
    __DEV__asyncPath?: string
@@ -219,7 +222,6 @@ function wrapWithFlask(callback: Callback, config: {
       scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if dirty right?
       context.set(FLASK, scene)
       context.set(TRACE, __DEV__asyncPath!)
-
       try {
          return $_run_with_(context, () => callback(...args))
       }

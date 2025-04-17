@@ -27,7 +27,7 @@ type ComponentValidatedInput<C> = {
    K extends `on:${string}` ? never
    : K extends `mu:${string}` | `mu?:${string}` ? never
    : K extends `m:${infer S}` ? S
-   : C[K] extends { name: 'MaybeIon' } ? never : K]:
+   : C[K] extends { name: 'ToIon' } ? never : K]:
 
    C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ?
    // K extends `mu:${string}` ? MaybeOptional<I, C[K]>
@@ -53,7 +53,7 @@ type _EventsOnly<C> = { [K in keyof C as K extends `on:${infer S}` ? S : never]:
 
 
 type WithIons<C> = {
-   [K in keyof C as C[K] extends { name: 'MaybeIon' } ? K extends string ? `$${K}` : K : never]:
+   [K in keyof C as C[K] extends { name: 'ToIon' } ? K extends string ? `$${K}` : K : never]:
 
    C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? MaybeOptional<I, C[K]>
    : 'invalid typeConfig'
@@ -67,10 +67,10 @@ type WithMutable<C> = {
    : never : never
 }
 
-type MaybeIonKey<K, Config> = Config extends { name: 'MaybeIon' } ? K extends string ? `$${K}` : K : K;
+type MaybeIonKey<K, Config> = Config extends { name: 'ToIon' } ? K extends string ? `$${K}` : K : K;
 
 type MaybeMutableIon<I, Config> =
-   Config extends { name: 'MaybeIon' } ?
+   Config extends { name: 'ToIon' } ?
    I : I
 
 

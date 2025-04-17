@@ -73,7 +73,7 @@ export function VideoPlayer() {
    //    console.log('@% $track changed', e, $track())
    //    // console.log('@% watch phase:', getCurrentEffectCycle()?.currentPhase)
    // })
-   
+
    function endVideo() {
       console.log("@@@ EVENT: End video")
       // console.log('@% end video phase:', getCurrentEffectCycle()?.currentPhase)
@@ -120,18 +120,16 @@ export function VideoPlayer() {
          >
             <source src="/src/video-player-dance.mp4" type="video/mp4" />
          </video>
-         <p>{$ = $track.is('playing')}</p>
-         {If($ = $videoPlayer.is('x:ready'), (console.log('@% refresh'),
+         <p>{$=$track.is('playing')}</p>
+         {If($=$videoPlayer.is('x:ready'), (console.log('@% refresh'),
             <>
                <ElapsedBar elapsed={$elapsedTime} duration={duration} />
                <Timer elapsed={$elapsedTime} duration={duration} />
                {If($=$track.is('playing'),
-               <button on:click={pauseVideo}>Pause</button>
+                  <button on:click={pauseVideo}>Pause</button>
                )}
                {Else(
-               <button
-                  on:click={playVideo}
-               >Play</button>
+                  <button on:click={playVideo}>Play</button>
                )}
             </>
          ))}

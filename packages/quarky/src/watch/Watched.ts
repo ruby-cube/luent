@@ -27,7 +27,6 @@ export class Watched<T extends Watchable = Watchable> {
    }
 
    effects: PhaseMap = new PhaseMap('effects')
-   private nextCycleEffects: PhaseMap | undefined;
 
    private _completedEffects: PhaseMap | undefined;
 
@@ -50,13 +49,8 @@ export class Watched<T extends Watchable = Watchable> {
 
    watchCount: number = 0
 
-   watch(effect: EffectLink, phase: string, forNextCycle?: boolean) {
-      // if (forNextCycle) {
-      //    this.queueForNextCycle(effect, phase)
-      // }
-      // else {
-         this.effects.addToVine(effect, phase)
-      // }
+   watch(effect: EffectLink, phase: string) {
+      this.effects.addToVine(effect, phase)
       this.watchCount++
    }
 
