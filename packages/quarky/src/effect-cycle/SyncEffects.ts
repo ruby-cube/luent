@@ -31,11 +31,15 @@ function $syncEffects() {
 }
 
 export function runSyncEffects(){
-   $syncEffects().run()
+   syncEffects?.run()
 }
 
 export function scheduleSyncEffects(effects: EffectVine){
    $syncEffects().absorb(effects)
+}
+
+export function scheduleSyncEffect(effect: EffectLink){
+   $syncEffects().add(effect)
 }
 
 class SyncEffects {
@@ -43,7 +47,10 @@ class SyncEffects {
 
    absorb(effects: EffectVine) {
       this.effects.absorb(effects)
-      console.log(this.effects.size)
+   }
+
+   add(effect: EffectLink){
+      this.effects.add(effect)
    }
 
    run() {

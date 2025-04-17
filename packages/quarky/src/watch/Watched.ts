@@ -1,8 +1,8 @@
 import { SYNC } from "../effect-cycle/EffectCycle";
 import { EffectLink, EffectVine } from "../effect-cycle/EffectLink";
 import { PhaseMap } from "../effect-cycle/PhaseMap";
-import { scheduleSyncEffects } from "../effect-cycle/SyncEffects";
-import { getEffectCycle, scheduleEffects } from "../ReactivitySystem";
+import { runSyncEffects, scheduleSyncEffect, scheduleSyncEffects } from "../effect-cycle/SyncEffects";
+import { getEffectCycle, scheduleEffect, scheduleEffects } from "../ReactivitySystem";
 
 
 export type Watchable = {
@@ -34,19 +34,6 @@ export class Watched<T extends Watchable = Watchable> {
       return this._completedEffects || (this._completedEffects = new PhaseMap('completed effects'))
    }
 
-
-   // private queueForNextCycle(effect: EffectLink, phase: number) {
-   //    const nextCycleEffects = this.nextCycleEffects ?? (this.nextCycleEffects = new PhaseMap('next cycle effects'))
-   //    let toBeQueued = nextCycleEffects.get(phase);
-   //    nextCycleEffects.addToVine(effect, phase)
-   //    if (!toBeQueued) {
-   //       toBeQueued = nextCycleEffects.get(phase)
-   //       onEffectCycleComplete(() => {
-   //          this.effects.absorb(toBeQueued!, phase)
-   //       })
-   //    }
-   // }
-
    watchCount: number = 0
 
    watch(effect: EffectLink, phase: string) {
@@ -64,13 +51,24 @@ export class Watched<T extends Watchable = Watchable> {
    triggerEffects() { // the surrounding effect when original trigger happened
       for (const [phase, effects] of this.effects) {
          if (phase === SYNC) {
-            this.scheduleSyncEffects(effects!);
+            scheduleSyncEffects(effects!);
          }
          else {
             scheduleEffects(effects!, phase)
             this.scheduleReabsorption(phase)
          }
       }
+   }
+
+   scheduleEagerEffect(effect: EffectLink, phase: string){
+         if (phase === SYNC) {
+            scheduleSyncEffect(effect);
+            runSyncEffects()
+         }
+         else {
+            scheduleEffect(effect, phase)
+            this.scheduleReabsorption(phase)
+         }
    }
 
    private scheduleReabsorption(phase: string) {
@@ -82,10 +80,6 @@ export class Watched<T extends Watchable = Watchable> {
          if (completed) this.effects.absorb(completed, phase)
          this.completedEffects.delete(phase)
       })
-   }
-
-   private scheduleSyncEffects(effects: EffectVine) {
-      scheduleSyncEffects(effects)
    }
 
    private cleanups: (() => void)[] = []

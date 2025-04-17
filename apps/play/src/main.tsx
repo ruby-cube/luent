@@ -31,6 +31,7 @@ import { TrafficLight } from './demos/traffic-lights';
 import { VideoPlayer } from './video-player';
 import { TestNested } from './demos/TestNested';
 import { ion } from '@rue/quarky';
+import { TestViewFlasks } from './TestViewFlasks';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -120,7 +121,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(TestNested)
+const app = createApp(TreeApp)
 
 app.mount('#app')
 

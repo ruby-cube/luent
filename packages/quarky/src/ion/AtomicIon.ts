@@ -5,7 +5,6 @@ import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
 import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { attachCapsuleMethods, MutableCapsule } from "../capsule/Capsule";
-import { AtomicIon } from "./ion";
 import { unwatch, watch, Watchable } from "../watch/Watched";
 import { Mutable, MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { trigger } from "../ReactivitySystem";
@@ -14,6 +13,7 @@ import { ParticleMorph } from "../compound/Particle";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { Traceable } from "../debug/Traceable";
 import { isObject } from "@rue/utils";
+import { AtomicIon } from "./ion";
 
 /** INTERNAL */
 export type $AtomicIonState = AtomicIon & MutableCapsule & {

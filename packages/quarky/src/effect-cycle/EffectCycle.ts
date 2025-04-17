@@ -238,12 +238,6 @@ export class EffectCycle {
    }
 
    scheduleEffect(effect: EffectLink, phase: string) {
-      // if (phase < this.currentPhase) {
-      //    if (__DEV__) console.warn(`@% CASE RESEARCH: Effect was triggered after phase ${phase} of this cycle. Will schedule for next cycle.`)
-      //    nextCycle = nextCycle ?? new EffectCycle()
-      //    nextCycle.scheduleEffect(effect, phase)
-      //    return;
-      // }
       this.effects.addToVine(effect, phase)
    }
 

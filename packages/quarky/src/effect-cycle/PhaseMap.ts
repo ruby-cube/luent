@@ -16,8 +16,7 @@ export class PhaseMap extends Map<string, EffectVine | null> {
    }
 
    addToVine(value: EffectLink, phase: string) {
-      let vine = this.get(phase)
-      if (!vine) vine = this.initializeVine(phase);
+      const vine = this.get(phase) ?? this.initializeVine(phase);
       vine.add(value);
    }
 
@@ -26,8 +25,8 @@ export class PhaseMap extends Map<string, EffectVine | null> {
       vine?.delete(value);
    }
 
-   absorb(vine: EffectVine, phase: string){
-      const effects = this.get(phase) ?? this.initializeVine(phase);
-      effects.absorb(vine)
+   absorb(vine: EffectVine, phase: string) {
+      const hostVine = this.get(phase) ?? this.initializeVine(phase);
+      hostVine.absorb(vine)
    }
 }

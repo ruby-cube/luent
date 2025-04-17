@@ -2,7 +2,7 @@ import { AnyObject, Glass } from "@rue/types";
 import { Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "../ionic/IonicCompound";
-import {  SYNC } from "../effect-cycle/EffectCycle";
+import { SYNC } from "../effect-cycle/EffectCycle";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { Ion, isIon } from "../ion/ion";
@@ -153,16 +153,15 @@ export function watch<
    const lastArg = args.pop()
    const noOptions = lastArg instanceof Function
    const effect = lastArg instanceof Function ? lastArg : args.pop()
-   const options = noOptions ? {} : lastArg as EffectOptions
-   const _options = (options ?? {}) as EffectOptions
-   const phase = _options.phase = getPhase(options)
+   const options = noOptions ? {} : { ...lastArg } as EffectOptions
+   const phase = options.phase = getPhase(options)
    if (!effect || !(effect instanceof Function))
       throw new Error("Invalid input. Effect function must be last or second to last argument.")
    if (args.length === 0) throw new Error("Invalid input. No watch subjects")
    const isMultiSubject = args.length > 1;
    const _subject = isMultiSubject ? args : args[0]
 
-   const retrack = options?.retrack === undefined ? true : options.retrack
+   const retrack = options.retrack === undefined ? true : options.retrack
 
    let subject = normalizeSubject(_subject, isMultiSubject, retrack)
 
@@ -188,33 +187,30 @@ export function watch<
    const watchSubject = quark.watch()
    watchSubject.onDiscard(quark.unwatch)
 
-   let eager: boolean | undefined = options?.eager
    let hasChanged = getHasChangedFn(options, prevState)
 
    function wrappedEffect() {
       const newState = getValue(subject)
-      if (!eager && !hasChanged(prevState, newState))
+      if (!options.eager && !hasChanged(prevState, newState)) {
          return;
+      }
 
       try {
-         (<Effect>effect)(new ChangeEvent(prevState, newState, !!eager))
+         (<Effect>effect)(new ChangeEvent(prevState, newState, !!options.eager))
       }
       finally {
-         eager = false;
+         options.eager = false;
          prevState = newState;
          hasChanged = getHasChangedFn(options, prevState) //accounts for ions whose value may change from ionized to not ionized
       }
    }
-
-   if (eager) {
-      scheduleEffectEagerly(wrappedEffect, phase)
-   }
+   wrappedEffect.effect = effect
 
    return setUpWatcher(
       watchSubject,
       wrappedEffect,
       phase,
-      options || {},
+      options,
       !hasQuark(_subject) ? quark.asCompound : undefined // only pass terminal compounds
    )
 }
@@ -262,14 +258,7 @@ function notStrictlyEqual(oldState: unknown, newState: unknown) {
 
 type WrappedEffect = () => void
 
-export function scheduleEffectEagerly<T>(effect: WrappedEffect, phase: string) {
-   if (phase === SYNC) {
-      effect()
-   }
-   else {
-      scheduleEffect(new EffectLink(effect), phase)
-   }
-}
+
 
 /**
  * Initializes ionic effect by running the effect and then watching its dependencies, re-running the effect 
@@ -305,7 +294,6 @@ export function setUpWatcher(
    options: EffectOptions,
    compound?: IonicCompound //
 ) {
-   let effectLink: EffectLink;
    let paused = false;
 
    function pausableEffect() {
@@ -315,10 +303,15 @@ export function setUpWatcher(
 
    return $listen(pausableEffect, options || {}, {
       enroll(task) {
-         effectLink = new EffectLink(task, subject)
+         const effectLink = new EffectLink(task, subject)
+         // ORDER A: runs eagerly but not as an effect
          subject.watch(effectLink, phase)
+         if (options.eager) {
+            subject.scheduleEagerEffect(effectLink, phase)
+         }
+         return effectLink;
       },
-      remove() {
+      remove(effectLink) {
          subject.unwatch(effectLink)
          if (compound)
             compound.untrackParticles()
