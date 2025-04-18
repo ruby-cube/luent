@@ -9,6 +9,21 @@ export default function lumoPreTransform({ types }) {
    return {
       name: "lumo-pre-transform",
       visitor: {
+         Program: {
+            enter(path) {
+               path.traverse({
+                  ImportDeclaration(path) {
+                     storeLocalNameOfImport(path, 'watch', this.localWatchNames)
+                     storeLocalNameOfImport(path, 'ionicTask', this.localIonicTaskNames)
+                  },
+
+                  CallExpression(path) {
+                     transformWatchCalls(path, this.localWatchNames) //TODO: MultiSubject watch calls
+                     transformIonicTaskCalls(path, this.localIonicTaskNames)
+                  }
+               }, { localWatchNames: new Set(), localIonicTaskNames: new Set() })
+            }
+         },
          JSXFragment: {
             enter(path) {
                transformLiterals(path)
@@ -30,6 +45,50 @@ export default function lumoPreTransform({ types }) {
       }
    };
 }
+
+function storeLocalNameOfImport(path, functionName, localNames){
+   if (path.node.source.value === '@rue/quarky') {
+      for (const specifier of path.node.specifiers) {
+         if (
+            t.isImportSpecifier(specifier) &&
+            specifier.imported.name === functionName
+         ) {
+            localNames.add(specifier.local.name);
+         }
+      }
+   }
+}
+
+function transformWatchCalls(path, localWatchNames){
+   const callee = path.get('callee');
+   if (
+      t.isIdentifier(callee.node) &&
+      localWatchNames.has(callee.node.name)
+   ) {
+      transformWatchSubject(path)
+   }
+}
+
+function transformIonicTaskCalls(path, localIonicTaskNames){
+   const functionName = path.node.callee.name
+   if (localIonicTaskNames.has(functionName)) {
+      const effectFnP = path.get('arguments')[0]
+      const effectBody = effectFnP.get('body')
+      const watchFnName = effectFnP.node.params[0].name
+      effectBody.traverse({
+         CallExpression(path){
+            if (path.visited) return;
+            path.visited = true;
+
+            if (path.node.callee.name === watchFnName){
+               transformWatchSubject(path);
+            }
+         }
+      })
+   }
+}
+
+
 
 //TODO: 
 /*
@@ -199,6 +258,14 @@ function transformTemplateFnCall(name, path) {
    TemplateFunctions.get(name)(path);
 }
 
+function transformWatchSubject(path) {
+   const args = path.node.arguments;
+   if (args.length > 0 && isDerivationShorthand(path.get('arguments')[0])) {
+      args[0] = toDerivationFunction(args[0]);
+      path.node.arguments = args;
+   }
+}
+
 function transformIfCall(path) {
    transformIfDerivationExpression(path.get('arguments.0'))
    transformTemplateArgToRenderFunction(path.node.arguments)
@@ -210,7 +277,7 @@ function transformTemplateArgToRenderFunction(args) {
    // console.log('transforming template arg', templateArg)
    if (
       t.isCallExpression(templateArg) && isTemplateFunction(templateArg.callee.name)
-      ||templateArg && isJSXRoot(templateArg)
+      || templateArg && isJSXRoot(templateArg)
       || t.isSequenceExpression(templateArg)
    ) {
       args[lastIndex] = toRenderFunction(templateArg)
@@ -348,7 +415,7 @@ function toRenderFunction(node) {
 function normalizeToArrayExpression(node) {
    if (t.isArrayExpression(node)) return node;
    if (isJSXFragment(node)) return node;
-   if (t.isSequenceExpression(node)){
+   if (t.isSequenceExpression(node)) {
       return normalizeToArrayExpression(node.expressions.at(-1))
    }
    const arrayExpression = t.arrayExpression([node])
@@ -394,8 +461,8 @@ function normalizeToArrayExpression(node) {
 //    return t.isCallExpression(node) && /^\$[a-z]/.test(node.callee.name) && node.arguments.length === 0 && !isParenthesized(node)
 // }
 
-function isParenthesized(node){
-return 'extra' in node && node.extra.parenthesized === true;
+function isParenthesized(node) {
+   return 'extra' in node && node.extra.parenthesized === true;
 }
 
 function hasNonIonMemberExpression(path) {

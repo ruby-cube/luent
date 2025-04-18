@@ -121,7 +121,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(List)
+const app = createApp(TodoMVC)
 
 app.mount('#app')
 

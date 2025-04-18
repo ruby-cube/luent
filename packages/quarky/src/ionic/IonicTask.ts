@@ -1,4 +1,4 @@
-import { debug, noop } from "@rue/utils";
+import { debug, isFunction, noop } from "@rue/utils";
 import { triggerEffects } from "../compound/Compound";
 import { Watched } from "../watch/Watched";
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
@@ -11,7 +11,7 @@ import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 
 type IonicFunction = () => unknown
 
-export type IonicTask = (watch: (ionicFn: IonicFunction) => unknown, initial: boolean) => void | Promise<void>
+export type IonicTask = (watch: (ionicFn: IonicFunction | unknown) => unknown, initial: boolean) => void | Promise<void>
 
 export function createIonicTask(task: IonicTask, retrack: boolean = true) {
    const compound: IonicCompound<IonicCompoundMorph> = new IonicCompound(effect)
@@ -20,22 +20,23 @@ export function createIonicTask(task: IonicTask, retrack: boolean = true) {
    let initial = true;
    let syncCall = false;
 
-   function watch(fn: IonicFunction) {
-      if (!syncCall){
+   function watch(fn: IonicFunction | unknown) {
+      if (!isFunction(fn)) throw new Error('Compiler failed to transform watch argument')
+      if (!syncCall) {
          debug.warn('watch() must be called synchronously within ionic task')
          return fn();
       }
       if (!initial && !retrack) return fn()
-      return compound.trackedCall(fn)
+      return compound.trackedCall(fn as () => unknown)
    }
 
    function effect() {
       if (retrack) compound.untrackParticles()
-         syncCall = true;
-      try{
+      syncCall = true;
+      try {
          task(watch, initial)
       }
-      finally{
+      finally {
          syncCall = false
          initial = false;
       }

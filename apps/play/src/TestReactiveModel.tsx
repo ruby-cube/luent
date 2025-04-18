@@ -117,6 +117,10 @@ export function List(
       list.remove(index);
    }
 
+   watch((list[0]), () => {
+
+   })
+
    return component(
       <>
          <h1>hello world</h1>

@@ -1,5 +1,4 @@
 import { Input, RequiredInput, TypeConfig, v, validateInput } from "../component/InputTypes";
-import { fromApp } from "./provide";
 
 
 export type RawInput<D> = D extends RequiredInput ? Input<D> : Input<D> | undefined
@@ -132,13 +131,6 @@ type MutabilityMarker = 'm' | 'm?' | 'mu' | 'mu?'
 
 
 
-export function createInjectedClass(classKey: CommonsEntryKey, contextualGetter: (key: CommonsEntryKey) => any = fromApp) {
-   return (...args: any[]) => new (contextualGetter(classKey))(...args)
-}
-
-export function createInjectedFactory(classKey: CommonsEntryKey, contextualGetter: (key: CommonsEntryKey) => any = fromApp) {
-   return (...args: any[]) => contextualGetter(classKey)(...args)
-}
 
 
 
