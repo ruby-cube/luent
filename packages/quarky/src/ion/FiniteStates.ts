@@ -167,11 +167,18 @@ type Finiton<M extends Methods = {}> = {
    on: (transition: string, task: () => void) => void
    apply: (transition: string) => void
    can: (transition: string) => boolean
-   nest: (config: { [key: string]: Finiton[] }) => Finiton
    onFinalState: (task: () => void) => void
-   activate: () => void
+   activate: (initializer: () => string) => { nest: (config: { [key: string]: Nested[] }) => Nested }
    deactivate: () => void
+   init: (initializer: Initializer) => Nested & { nest: (config: { [key: string]: Nested[] }) => Nested }
 } & M
+
+type Nested = {
+   finiton: Finiton,
+   initializer: Initializer,
+}
+
+type Initializer = (prevState: string | undefined) => string
 
 
 type Methods = { [key: string | symbol]: (...args: unknown[]) => unknown }
@@ -184,7 +191,7 @@ type Hooks = {
    afterEnter: Transition | undefined
 }
 
-type NestedStates = { [key: string]: Finiton[] }
+type NestedStates = { [key: string]: Nested[] }
 
 export function withTimeout(ms: number, transition: Transition) {
    //@ts-expect-error
@@ -193,7 +200,7 @@ export function withTimeout(ms: number, transition: Transition) {
    return transition;
 }
 
-export function finiton<M extends Methods>(initialState: string | (() => string), states: FiniteStates, methods?: M): Finiton<M> {
+export function finiton<M extends Methods>(states: FiniteStates, methods?: M): Finiton<M> {
    const $currentState = ion(undefined as undefined | string);
 
    let activated = false;
@@ -228,41 +235,65 @@ export function finiton<M extends Methods>(initialState: string | (() => string)
       onFinalState,
       activate,
       deactivate,
-      nest
+      init,
    }
 
    let _nestedStates: NestedStates;
 
-   function nest(nestedStates: NestedStates) {
-      if (_nestedStates) {
-         debug.error('Cannot redefine nested states')
-         return;
-      }
-      _nestedStates = nestedStates;
-      return $state;
+
+
+
+   function init(initializer: Initializer) {
+      return {
+         finiton: $state,
+         initializer,
+         nest: (nestedStates: { [key: string]: Nested[] }) => {
+            if (_nestedStates) {
+               debug.error('Cannot redefine nested states')
+               return;
+            }
+            _nestedStates = nestedStates
+            return {
+               finiton: $state,
+               initializer,
+            };
+         }
+      };
    }
 
    function updateNestedStates(state: string, key: 'activate' | 'deactivate') {
       if (!_nestedStates) return;
       const nestedFinitons = _nestedStates[state];
       if (!nestedFinitons) return;
-      for (const finiton of nestedFinitons) {
-         finiton[key]()
+      for (const entry of nestedFinitons) {
+         const { finiton, initializer } = entry
+         key === 'activate' ? finiton.activate(initializer as () => string) : finiton.deactivate()
       }
    }
 
-   function activate() {
+   let prevState: string | undefined;
+
+   function activate(initializer: (prevState: string | undefined) => string) {
       if (activated) return;
       activated = true;
-      const state = $currentState.state = isFunction(initialState) ? initialState() : initialState;
+      const state = $currentState.state = initializer(prevState);
       runEnterHooks(state, getHooks(ANY_STATE))
+      return {
+         nest: (nestedStates: { [key: string]: Nested[] }) => {
+            if (_nestedStates) {
+               debug.error('Cannot redefine nested states')
+               return;
+            }
+            _nestedStates = nestedStates
+         }
+      }
    }
 
    function deactivate() {
       if (!activated) return;
       activated = false;
       if (timeout) clearTimeout(timeout);
-      const prevStateID = $currentState.state
+      const prevStateID = prevState = $currentState.state
       runExitHooks(prevStateID!, getHooks(ANY_STATE))
       $currentState.state = undefined;
    }

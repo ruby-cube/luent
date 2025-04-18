@@ -8,12 +8,22 @@ import { ANY_STATE, finiton, ion, withTimeout as transitionAfter } from "@rue/qu
 
 export function TrafficLight() {
 
-   const $power = finiton('off', {
-      'on': { switch: () => 'off' },
-      'off': { switch: () => 'on' }
+   const $power = finiton({
+      'on': {
+         switch: () => 'off'
+      },
+      'off': {
+         switch: () => 'on'
+      }
    })
 
-   const $trafficLight = finiton('red', {
+   const $state = finiton({
+      'on': { switch: () => 'sleep' },
+      'sleep': { switch: () => 'awake' },
+      'awake': { switch: () => 'sleep' }
+   })
+
+   const $trafficLight = finiton({
       'red': {
          "on:enter": () => console.log('@@% entering red'),
          'after:enter': transitionAfter(2000,
@@ -40,19 +50,30 @@ export function TrafficLight() {
       }
    })
 
-   $power.activate()
 
    $trafficLight.onFinalState(() => {
       console.log('@@% BROKED')
    })
 
-   $power.nest({
-      'on': [$trafficLight],
+   $power.activate(() => 'off').nest({
+      'on': [
+         $state.init(() => 'on').nest({
+            'on': [
+               $trafficLight.init(() => 'red')
+            ],
+            'awake': [
+               $trafficLight.init(state => state ?? 'red')
+            ]
+         })
+      ]
    })
+
+
+
 
    function getOpacity(color: string) {
       return function $opacity() {
-         return $power.is('on') ? $trafficLight.is('x:broken') ? 0 : $trafficLight.is(color) ? 1 : .3 : .15
+         return $power.is('on') && !$state.is('sleep') ? $trafficLight.is('x:broken') ? 0 : $trafficLight.is(color) ? 1 : .3 : .15
       }
    }
 
@@ -69,6 +90,7 @@ export function TrafficLight() {
          <button on:click={e => $trafficLight.apply('change')}>change</button>
          <button on:click={e => $trafficLight.apply('break')} style={{ opacity: $ = $trafficLight.is('x:broken') ? .5 : 1 }}>break</button>
          <button on:click={e => $power.apply('switch')}>{$ = $power.is('on') ? 'turn off' : 'turn on'}</button>
+         <button on:click={e => $state.apply('switch')}>{$ = $state.is('sleep') ? 'awaken' : 'sleep'}</button>
          <$--style>
             {`
 *,

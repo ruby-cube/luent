@@ -86,7 +86,6 @@ export class Flask {
       creationScope?: boolean
    } = {}) {
       const { outer, type, creationScope } = config
-      console.trace('new flask', type, this, type === 'view'? ++viewCount: undefined)
       this.outer = outer;
       this.type = type;
       this.creationScopeID = creationScope ? genUID() : outer?.creationScopeID ?? "0"

@@ -121,7 +121,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(TodoMVC)
+const app = createApp(TrafficLight)
 
 app.mount('#app')
 
