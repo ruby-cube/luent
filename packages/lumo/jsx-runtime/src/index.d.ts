@@ -1232,8 +1232,8 @@ declare namespace React {
       // React-specific Attributes
       defaultChecked?: boolean | undefined;
       defaultValue?: string | number | readonly string[] | undefined;
-      suppressContentEditableWarning?: boolean | undefined;
-      suppressHydrationWarning?: boolean | undefined;
+      // suppressContentEditableWarning?: boolean | undefined;
+      // suppressHydrationWarning?: boolean | undefined;
 
       // Standard HTML Attributes
       // class?: string | undefined | ((o: DOMTokenList) => void) | (((o: DOMTokenList) => void) | string)[]; // #LUMO-EDIT
@@ -1311,7 +1311,9 @@ declare namespace React {
        * @see {@link https://html.spec.whatwg.org/multipage/custom-elements.html#attr-is}
        */
  
-
+      // added
+      scrolltop?: number | undefined;
+      scrollleft?: number | undefined;
 
    }
 

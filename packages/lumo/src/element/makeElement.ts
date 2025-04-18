@@ -311,25 +311,60 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
 
 function setAttribute(node: AnyObject, attribute: string, value: any) {
 
-   //TODO: what if attribute can take a falsey value like 0 or false?
-   // if (value !== undefined) {
-   //    // node.setAttribute(key, toString(value)) //NOTE: Programmatic checking and unchecking of check boxes breaks using setAttribute and removeAttribute
-   //    node[key] = value;
-   // }
-   // else {
-   if (node instanceof SVGElement) {
-      node.setAttribute(attribute, value)
+   if (isBooleanAttribute(attribute)) {
+      const _value = Boolean(value)
+      if (_value === false) node.removeAttribute(attribute)
+      else node.setAttribute(attribute, _value)
+   }
+   else if (node instanceof SVGElement || isAttributeOnly(attribute)) {
+      node.setAttribute(attribute, toString(value) ?? '')
    }
    else {
-      node[toElementProperty(attribute)] = isBooleanAttribute(attribute) ?  Boolean(value) : toString(value) ?? ''; //TODO: need to distinguish between attributes that take in booleans vs a string
+      node[toElementProperty(attribute)] = isNumberValue(attribute) ? toNumber(value) : toString(value) ?? '';
    }
-   // node.removeAttribute(key);
-   // }
 }
 
+function toNumber(value: any) {
+   const type = typeof value;
+   return type === 'string' ? Number(value) : type === 'number' ? value : undefined
+}
+
+//TODO:
+// HTML Attribute | DOM Property | Notes
+// value (on <option>) | value | JS returns the value set by DOM, not necessarily the attribute.
+
+//TODO:
+// Writable properties with no html attribute
+// innerText	Represents the visible text content of an element, considering CSS visibility/display.
+// valueAsNumber	For <input type="number">, represents the value as a number.
+// valueAsDate	For <input type="date">, represents the value as a Date object.
+// scrollTop	Number of pixels the element’s content is scrolled vertically.
+// scrollLeft	Number of pixels the element’s content is scrolled horizontally.
+
+const attributeOnly = {
+   "role": true,           // Role attribute
+   "nonce": true,          // Script/Style nonce attribute
+   "crossorigin": true,    // Cross-origin attribute
+   "integrity": true,      // Subresource Integrity attribute
+   "http-equiv": true,     // Meta http-equiv attribute
+   "content": true,        // Meta content attribute
+   "charset": true,        // Meta charset attribute
+   "itemprop": true,       // Microdata itemprop attribute
+   "itemscope": true,      // Microdata itemscope attribute
+   "itemtype": true,       // Microdata itemtype attribute
+   "manifest": true,       // Manifest attribute (deprecated)
+   "part": true            // Web components part attribute
+};
+
+function isAttributeOnly(attribute: string) {
+   if (attribute.startsWith('aria-') || attribute.startsWith('data-')) return true;
+   return attribute in attributeOnly
+}
+
+
 const attributeToPropertyMap: Record<string, string> = {
+
    // Global/common attributes
-   class: 'className',
    for: 'htmlFor',
    accesskey: 'accessKey',
    contenteditable: 'contentEditable',
@@ -337,7 +372,7 @@ const attributeToPropertyMap: Record<string, string> = {
    spellcheck: 'spellCheck',
    autocapitalize: 'autoCapitalize',
    inputmode: 'inputMode',
- 
+
    // Form-related attributes
    readonly: 'readOnly',
    maxlength: 'maxLength',
@@ -347,24 +382,24 @@ const attributeToPropertyMap: Record<string, string> = {
    formmethod: 'formMethod',
    formnovalidate: 'formNoValidate',
    formtarget: 'formTarget',
- 
+
    // Table attributes
    colspan: 'colSpan',
    rowspan: 'rowSpan',
- 
+
    // Media/iframe
    usemap: 'useMap',
    frameborder: 'frameBorder',
    allowfullscreen: 'allowFullscreen',
- 
-   // Special behavior
-   // 'http-equiv': '', // No direct DOM property
-   // style: 'style', // Though technically same, its value is a CSSStyleDeclaration, not a string
- }
- 
 
-function toElementProperty(attribute: string){
-return attributeToPropertyMap[attribute] ?? attribute;
+   // non-html attributes
+   scrolltop: 'scrollTop',
+   scrollleft: 'scrollLeft'
+}
+
+
+function toElementProperty(attribute: string) {
+   return attributeToPropertyMap[attribute] ?? attribute;
 }
 
 const booleanAttributes = {
@@ -393,11 +428,43 @@ const booleanAttributes = {
    reversed: true,
    selected: true,
    truespeed: true,
- };
+};
 
- function isBooleanAttribute(key: string){
-   return key in booleanAttributes
- }
+const numberTypedAttributes: Record<string, true> = {
+   // Form/input-related
+   maxlength: true,
+   minlength: true,
+   tabindex: true,
+   size: true,
+   rows: true,
+   cols: true,
+
+   // Table
+   colspan: true,
+   rowspan: true,
+
+   // Media/image
+   width: true,
+   height: true,
+
+   // Meter/progress
+   // value: true,     // for <meter>, <progress>
+   min: true,
+   max: true,
+   low: true,
+   high: true,
+   optimum: true,
+
+}
+
+
+function isBooleanAttribute(attribute: string) {
+   return attribute in booleanAttributes
+}
+
+function isNumberValue(attribute: string) {
+   return attribute in numberTypedAttributes
+}
 
 function toString(value: any) {
    return value.toString(); //TODO: make sure it works with any value
