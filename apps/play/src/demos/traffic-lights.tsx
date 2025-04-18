@@ -88,9 +88,6 @@ export function TrafficLight() {
    return component(
       <>
          <div class='traffic-light-container'>
-            {/* <div class='light' style={{ backgroundColor: 'red', opacity: $=$power.is('on') ? $trafficLight.is('x:broken') ? 0 : $trafficLight.is('red') ? 1 : .3 : .15 }}></div>
-            <div class='light' style={{ backgroundColor: 'gold', opacity: $=$power.is('on') ? $trafficLight.is('x:broken') ? 0 : $trafficLight.is('yellow') ? 1 : .3 : .15 }}></div>
-            <div class='light' style={{ backgroundColor: 'green', opacity: $=$power.is('on') ? $trafficLight.is('x:broken') ? 0 : $trafficLight.is('green') ? 1 : .3 : .15 }}></div> */}
             <div class='light' style={{ backgroundColor: 'red', opacity: $LightOpacity('red') }}></div>
             <div class='light' style={{ backgroundColor: 'gold', opacity: $LightOpacity('yellow') }}></div>
             <div class='light' style={{ backgroundColor: 'green', opacity: $LightOpacity('green') }}></div>

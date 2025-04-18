@@ -257,6 +257,8 @@ export function finiton<M extends Methods>(states: FiniteStates, methods?: M): F
                return;
             }
             _nestedStates = nestedStates
+            updateNestedStates(initializer(undefined), 'activate')
+
             return {
                finiton: $state,
                initializer,
@@ -289,6 +291,7 @@ export function finiton<M extends Methods>(states: FiniteStates, methods?: M): F
                return;
             }
             _nestedStates = nestedStates
+            updateNestedStates(state, 'activate')
          }
       }
    }

@@ -34,7 +34,7 @@ export function TestNested() {
 
 export function TestNestedB() {
 
-   const $colorType = finiton('cool', {
+   const $colorType = finiton({
       'cool': {
          toggle: () => 'warm'
       },
@@ -43,7 +43,7 @@ export function TestNestedB() {
       }
    })
 
-   const $color = finiton(() => $colorType.is('cool') ? 'blue' : 'red', {
+   const $color = finiton({
       'blue': {
          toggle: () => 'green'
       },
@@ -58,12 +58,11 @@ export function TestNestedB() {
       }
    })
 
-   $colorType.nest({
-      'cool': [$color], //TODO: define initial state here
-      'warm': [$color]
+   $colorType.activate(() => 'cool').nest({
+      'cool': [$color.init(() => 'blue')],
+      'warm': [$color.init(() => 'red')]
    })
 
-   $colorType.activate() //TODO: define initial state here
 
    // const $hasColor = finiton('true', {
    //    'true': {
@@ -84,7 +83,7 @@ export function TestNestedB() {
 
    return component(
       <>
-         <div style={$ = $hasColor() ? { backgroundColor: $color } : { backgroundColor: 'black' }}>hi</div>
+         <div style={($hasColor() ? { backgroundColor: $color } : { backgroundColor: 'black' })}>hi</div>
          <div>hasColor: {$hasColor}</div>
          <div>color type: {$colorType}</div>
          <div>color: {$color}</div>

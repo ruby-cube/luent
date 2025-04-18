@@ -6,7 +6,7 @@ import { isFunction } from "@rue/utils";
 export function VideoPlayer() {
    const $video = ref('video')
 
-   const $videoPlayer = finiton('loading', {
+   const $videoPlayer = finiton({
       'loading': {
          init: () => 'x:ready',
          error: () => 'x:failure'
@@ -15,7 +15,7 @@ export function VideoPlayer() {
       'x:failure': {}
    })
 
-   const $track = finiton('paused', {
+   const $track = finiton({
       'paused': {
          play: () => 'playing'
       },
@@ -52,16 +52,18 @@ export function VideoPlayer() {
       $elapsedTime.state = currentTime;
    }
 
-   const $sound = finiton('on', {
+   const $sound = finiton({
       'on': { toggle: () => 'muted' },
       'muted': { toggle: () => 'on' }
    })
 
-   $videoPlayer.nest({
-      'x:ready': [$track, $sound]
+   $videoPlayer.activate(() => 'loading').nest({
+      'x:ready': [
+         $track.init(() => 'paused'),
+         $sound.init(() => 'on')
+      ]
    })
 
-   $videoPlayer.activate()
    console.log('@% LOADING')
 
    // watch(() => $track.is('playing'), ({ state, prevState }) => {
@@ -120,12 +122,12 @@ export function VideoPlayer() {
          >
             <source src="/src/video-player-dance.mp4" type="video/mp4" />
          </video>
-         <p>{$=$track.is('playing')}</p>
-         {If($=$videoPlayer.is('x:ready'), (console.log('@% refresh'),
+         <p>{($track.is('playing'))}</p>
+         {If(($videoPlayer.is('x:ready')), (console.log('@% refresh'),
             <>
                <ElapsedBar elapsed={$elapsedTime} duration={duration} />
                <Timer elapsed={$elapsedTime} duration={duration} />
-               {If($=$track.is('playing'),
+               {If(($track.is('playing')),
                   <button on:click={pauseVideo}>Pause</button>
                )}
                {Else(
@@ -183,7 +185,7 @@ function ElapsedBar(input = fromTag({
       <div class="elapsed">
          <div
             class="elapsed-bar"
-            style={{ width: `${percentage(duration, $elapsed())}%` }}
+            style={{ width: (`${percentage(duration, $elapsed())}%`) }}
          />
       </div>
    )
@@ -196,23 +198,25 @@ function Timer(input = fromTag({
    const { $elapsed, duration } = input
    return component(
       <span class="timer">
-         {minutes($elapsed())}:{seconds($elapsed())} of {minutes(duration)}:
-         {seconds(duration)}
+         {(asTime($elapsed()))} of {asTime(duration)}
       </span>
    )
 };
 
+function asTime(elapsed: number) {
+   return `${minutes(elapsed)}:${seconds(elapsed)}`
+}
 
-const percentage = (duration, elapsed) => {
+const percentage = (duration: number, elapsed: number) => {
    if (duration <= 0) {
       return 0;
    }
    return (elapsed / duration) * 100;
 };
 
-const minutes = seconds => Math.floor(seconds / 60);
+const minutes = (seconds: number) => Math.floor(seconds / 60);
 
-const seconds = seconds =>
+const seconds = (seconds: number) =>
    Math.floor(seconds % 60).toLocaleString("en-US", {
       minimumIntegerDigits: 2,
       useGrouping: false

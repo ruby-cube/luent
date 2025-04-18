@@ -71,7 +71,7 @@ export function TestCounterModel() {
 
    return component(
       <>
-         <div>{$=counter.count}</div>
+         <div>{counter.$count}</div>
          <button on:click={counter.increment}>increment</button>
          <button on:click={counter.decrement}>decrement</button>
       </>

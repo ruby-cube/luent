@@ -59,8 +59,8 @@ export function MountIf() {
    return component(
       <>
          {/* <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: 'lime' }}>shout</button> */}
-         <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: $color() + 'e' }}>shout</button>
-         <h1>Hello {$=todos[0].name}</h1>
+         <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: ($color() + 'e') }}>shout</button>
+         <h1>Hello {(todos[0].name)}</h1>
          <div>hi</div>
          <$--transition>
             {If($active, (debug.traceAsyncPath(),

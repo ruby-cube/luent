@@ -74,7 +74,7 @@ export function MarkdownApp(
       <>
          <div>local state: {$count}</div>
          <div>local state: {$doubleCount}</div>
-         <button on:click={$count.increment}>increment</button>
+         <button on:click={e => $count.increment()}>increment</button>
          <div class='editor'>
             <textarea class='input' ref={$textArea}>{{ mu: $markdown }}</textarea>
             {/* <div class='output'>{$output}</div> */}

@@ -87,7 +87,7 @@ export function View() {
 
          <p>vuejs/core@{$currentBranch}</p>
 
-         {If($commits().length > 0,
+         {If(($commits().length > 0),
             <ul>
                {For($commits, m => m.sha, ({ html_url, sha, author, commit }) => (
                   <li>

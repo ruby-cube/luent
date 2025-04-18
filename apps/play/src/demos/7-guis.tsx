@@ -5,13 +5,14 @@ import { $$, ion, ionize, ions, watch } from "@rue/quarky"
 export function SevenGUIs() {
    return component(
       <>
+         <CircleApp></CircleApp>
          {/* <TemperatureApp></TemperatureApp>
          <hr />
          <FlightBooker></FlightBooker>
          <hr />
          <TimerApp />
          <hr /> */}
-         <CRUDApp />
+         {/* <CRUDApp /> */}
       </>
    )
 }
@@ -87,11 +88,11 @@ function FlightBooker() {
          </select>
 
          <input type="date" mu:value={$departureDate} />
-         <input type="date" mu:value={$returnDate} disabled={!$isReturn()} />
+         <input type="date" mu:value={$returnDate} disabled={(!$isReturn())} />
 
-         <button disabled={!$canBook()} on:click={book}>Book</button>
+         <button disabled={(!$canBook())} on:click={book}>Book</button>
 
-         <p>{$canBook() ? '' : 'Return date must be after departure date.'}</p>
+         <p>{($canBook() ? '' : 'Return date must be after departure date.')}</p>
 
          <$--style>
             {`
@@ -152,11 +153,11 @@ function TimerApp() {
       <>
          <label>Elapsed Time: <progress value={$progressRate}></progress></label>
 
-         <div>{($elapsed() / 1000).toFixed(1)}s</div>
+         <div>{(($elapsed() / 1000).toFixed(1))}s</div>
 
          <div>
             Duration: <input type="range" mu:value={$duration} min="1" max="30000" />
-            {($duration() / 1000).toFixed(1)}s
+            {(($duration() / 1000).toFixed(1))}s
          </div>
 
          <button on:click={reset}>Reset</button>
@@ -336,7 +337,7 @@ function CircleApp() {
    }
    return component(
       <>
-         <svg on:click={reClick}>
+         <svg on:click={e=>reClick(e)}>
             <foreignObject x="0" y="40%" width="100%" height="200">
                <p class="tip">
                   Click on the canvas to draw a circle. Click on a circle to select it.
@@ -347,8 +348,8 @@ function CircleApp() {
                <circle
                   cx={circle.cx}
                   cy={circle.cy}
-                  r={$$(circle).$r}
-                  fill={circle === $selected() ? '#ccc' : '#fff'}
+                  r={circle.$r}
+                  fill={(circle === $selected() ? '#ccc' : '#fff')}
                   on:click={e => $selected.state = circle}
                   on:contextmenu={e => (e.preventDefault(), adjust(circle))}
                ></circle>)
@@ -356,15 +357,15 @@ function CircleApp() {
          </svg>
 
          <div class="controls">
-            <button on:click={undo} disabled={$index() <= 0}>Undo</button>
-            <button on:click={redo} disabled={$index() >= history.length - 1}>Redo</button>
+            <button on:click={undo} disabled={($index() <= 0)}>Undo</button>
+            <button on:click={redo} disabled={($index() >= history.length - 1)}>Redo</button>
          </div>
          {If($adjusting, (selected = $selected()!) =>
             <div class="dialog" on:click={e => e.stopPropagation()}>
                <p>Adjust radius of circle at ({selected.cx}, {selected.cy})</p>
                <input
                   type="range"
-                  mu:value={$$(selected).$r}
+                  mu:value={selected.$r}
                   min="1" max="300"
                />
             </div>

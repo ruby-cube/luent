@@ -330,7 +330,7 @@ const $trafficLight = ion.finite('red', {
    },
    onEnter() {
       setTimeout(() => {
-          $trafficLight.change()
+         $trafficLight.change()
       }, 100)
    },
    destroy: () => 'dead'
@@ -397,11 +397,11 @@ const auth = ion.finite({
 auth.process(TOO_MANY_ATTEMPTS)
 
 
-const PAUSED = 'ready.$track.paused'
-const PLAYING = 'ready.$track.playing'
-const ENDED = 'ready.$track.ended'
-const SOUND_ON = 'ready.$sound.on'
-const SOUND_MUTED = 'ready.$sound.muted'
+// const PAUSED = 'ready.$track.paused'
+// const PLAYING = 'ready.$track.playing'
+// const ENDED = 'ready.$track.ended'
+// const SOUND_ON = 'ready.$sound.on'
+// const SOUND_MUTED = 'ready.$sound.muted'
 
 class VideoPlayer {
 
@@ -485,6 +485,7 @@ function App() {
    videoPlayer.on('play', () => $video()?.play())
    videoPlayer.on('pause', () => $video()?.pause())
 
+
    return component(
       <>
          <video
@@ -496,9 +497,9 @@ function App() {
          >
             <source src="/fox.mp4" type="video/mp4" />
          </video>
-         {If($=videoPlayer.isReady,
+         {If((videoPlayer.isReady),
             <>
-               {If($=videoPlayer.isPlaying,
+               {If((videoPlayer.isPlaying),
                   <button>Pause</button>
                )}
                {Else(

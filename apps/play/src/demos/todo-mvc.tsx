@@ -120,19 +120,19 @@ export function TodoMVC() {
                   id="toggle-all"
                   class="toggle-all"
                   type="checkbox"
-                  checked={$remaining() === 0}
+                  checked={($remaining() === 0)}
                   on:change={toggleAll}
                />
-               <label for="toggle-all" on:click={e=>console.log('clicked')}>Mark all as complete</label>
+               <label for="toggle-all" on:click={e => console.log('clicked')}>Mark all as complete</label>
                <ul class="todo-list">
-                  {For($filteredTodos, m => m.id, (todo) => (
-                     <li class={["todo", { completed: todo.$completed, editing: todo === $editedTodo() }]}>
+                  {For($filteredTodos, m => m.id, (todo, _, $isEditing = ion(() => todo === $editedTodo())) => (
+                     <li class={["todo", { completed: todo.$completed, editing: $isEditing }]}>
                         <div class="view">
-                           <input class="toggle" type="checkbox" mu:checked={$$(todo).$completed} />
-                           <label on:dblclick={e => editTodo(todo)}>{$$(todo).$title}</label>
+                           <input class="toggle" type="checkbox" mu:checked={todo.$completed} />
+                           <label on:dblclick={e => editTodo(todo)}>{todo.$title}</label>
                            <button class="destroy" on:click={e => removeTodo(todo)}></button>
                         </div>
-                        {If(todo === $editedTodo(),
+                        {If($isEditing,
                            <input
                               class="edit"
                               type="text"
@@ -146,26 +146,26 @@ export function TodoMVC() {
                   ))}
                </ul>
             </section >
-            {If($todos().length, "show",
+            {If(($todos().length), "show",
                <footer class="footer">
                   <span class="todo-count">
                      <strong>{$remaining}</strong>
-                     <span>{$remaining() === 1 ? ' item' : ' items'} left</span>
+                     <span>{($remaining() === 1 ? ' item' : ' items')} left</span>
                   </span>
 
                   <ul class="filters">
                      <li>
-                        <a href="#/all" class={{ selected: $view() === 'all' }}>All</a>
+                        <a href="#/all" class={{ selected: ($view() === 'all') }}>All</a>
                      </li>
                      <li>
-                        <a href="#/active" class={{ selected: $view() === 'active' }}>Active</a>
+                        <a href="#/active" class={{ selected: ($view() === 'active') }}>Active</a>
                      </li>
                      <li>
-                        <a href="#/completed" class={{ selected: $view() === 'completed' }}>Completed</a>
+                        <a href="#/completed" class={{ selected: ($view() === 'completed') }}>Completed</a>
                      </li >
                   </ul >
 
-                  {If($todos().length > $remaining(), 'mount',
+                  {If(($todos().length > $remaining()), 'mount',
                      <button class="clear-completed" on:click={removeCompleted} >
                         Clear completed
                      </button >

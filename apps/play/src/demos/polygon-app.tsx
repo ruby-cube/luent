@@ -1,4 +1,4 @@
-import { component, For, fromTag, Ion, Ionized, v } from "@rue/lumo"
+import { component, For, fromTag, InputType, Ion, Ionized, v } from "@rue/lumo"
 import { $$, ion, ionize } from "@rue/quarky"
 import { isObject } from "@rue/utils"
 
@@ -44,8 +44,8 @@ export function PolygonApp() {
          {For(stats, stat =>
             <div>
                <label>{stat.label}</label>
-               <input type="range" mu:value={$$(stat).$value} min="0" max="100" />
-               <span>{$$(stat).$value}</span>
+               <input type="range" mu:value={stat.$value} min="0" max="100" />
+               <span>{stat.$value}</span>
                <button on:click={e => remove(stat)} class="remove">X</button>
             </div>
          )}
@@ -55,7 +55,7 @@ export function PolygonApp() {
             <button on:click={add}>Add a Stat</button>
          </form>
 
-         <pre id="raw">{$ = JSON.stringify(stats, undefined, 2)}</pre>
+         <pre id="raw">{(JSON.stringify(stats, undefined, 2))}</pre>
 
          <$--style>
             {`polygon {
@@ -115,32 +115,33 @@ label {
 //    return val
 //  }
 
+const AXIS_LABEL = InputType({
+   stat: Ionized<Stat>,
+   index: Ion<number>,
+   total: Ion<number>
+})
 
 function AxisLabel(
-   input = fromTag({
-      stat: Ionized<Stat>,
-      index: Ion<number>,
-      total: Ion<number>
-   })
+   { $index, stat, $total } = fromTag(AXIS_LABEL)
 ) {
-   const { $index, stat, $total } = input
 
    const $point = ion(() =>
       valueToPoint(+stat.value + 10, $index(), $total())
    )
 
    return component(
-      <text x={$point().x} y={$point().y}>{stat.label}</text>
+      <text x={($point().x)} y={($point().y)}>{stat.$label}</text>
 
    )
 }
 
-function PolyGraph(
-   input = fromTag({
-      stats: Ionized<Stat[]>
-   })
-) {
-   const { stats } = input
+const POLYGRAPH = InputType({
+   stats: Ionized<Stat[]>
+})
+
+function PolyGraph({
+   stats
+} = fromTag(POLYGRAPH)) {
 
    const $points = ion(() => {
       const total = stats.length
@@ -151,6 +152,7 @@ function PolyGraph(
          })
          .join(' ')
    })
+
    return component(
       <g>
          <polygon points={$points}></polygon>
@@ -159,7 +161,7 @@ function PolyGraph(
             <AxisLabel
                stat={stat}
                index={$index}
-               total={$ = stats.length}
+               total={stats.$length}
             >
             </AxisLabel>
          )}

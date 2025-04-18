@@ -170,12 +170,12 @@ function TreeItemView(input = fromTag({
    ) =>
       <li class='item'>
          <div
-            class={{ 'bold': $=$isFolder() && $isOpen() }}
+            class={{ 'bold': ($isFolder() && $isOpen()) }}
             on:click={$isOpen.toggle} on:dblclick={changeType}
          >
-            {item.name}
+            {item.$name}
             {If($isFolder,
-               <span>[{$isOpen() ? '-' : '+'}]</span>
+               <span>[{($isOpen() ? '-' : '+')}]</span>
             )}
          </div>
          {If($isFolder, 'create', If($isOpen, 'mount',

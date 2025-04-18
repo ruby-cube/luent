@@ -29,7 +29,7 @@ import { CellsApp } from './demos/cells-app';
 import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
 import { VideoPlayer } from './video-player';
-import { TestNested } from './demos/TestNested';
+import { TestNested, TestNestedB } from './demos/TestNested';
 import { ion } from '@rue/quarky';
 import { TestViewFlasks } from './TestViewFlasks';
 // import { MountIf } from './TestMountIf';
@@ -121,7 +121,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(TrafficLight)
+const app = createApp(List)
 
 app.mount('#app')
 

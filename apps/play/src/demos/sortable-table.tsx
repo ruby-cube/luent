@@ -92,15 +92,15 @@ function SortableTable(input = fromTag({
 
    return component(
       <>
-         {If($filteredData().length,
+         {If(($filteredData().length),
             // <p>yes</p>
             <table>
                <thead>
                   <tr>
                      {For(columns, key => (
-                        <th on:click={e => sortBy(key)} class={{ active: $sortKey() == key }}>
+                        <th on:click={e => sortBy(key)} class={{ active: ($sortKey() == key) }}>
                            {capitalize(key)}
-                           <span class={['arrow', $ = sortOrders[key] > 0 ? 'asc' : 'dsc']}></span>
+                           <span class={['arrow', (sortOrders[key] > 0 ? 'asc' : 'dsc')]}></span>
                         </th>
                      ))}
                   </tr>

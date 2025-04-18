@@ -7,6 +7,13 @@ import { AnyObject } from "@rue/types";
 import { isFunction, isObject } from "@rue/utils";
 import { CommonsEntryKey } from "../commons/CommonsKey";
 
+export type InputTypeDef = { 
+   [key: string]: { validatedType: any } | ((arg: any) => { validatedType: any }) 
+}
+
+export function InputType<T extends InputTypeDef>(inputType: T): T{
+   return inputType;
+}
 
 // [ ] Configure type with key
 //     - fromTag()

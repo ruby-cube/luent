@@ -129,14 +129,14 @@ export function List(
                // <div
                style={{
                   backgroundColor: randomColor.get(),
-                  outline: $=(selected.has(item) ? 'thick solid blue' : 'unset'),
+                  outline: (selected.has(item) ? 'thick solid blue' : 'unset'),
                }}>
                <p on:click={e => removeItem($index())} style="cursor: pointer">
                   X
                </p>
 
                <li on:click={e => list.changeContent($index())}>
-                  {$=item.content}
+                  {item.$content}
                </li>
                <p>{$index}</p>
                <div on:click={e => list.insert($index() + 1)} style="background-color: gray; cursor: pointer">
