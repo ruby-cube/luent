@@ -161,7 +161,7 @@ type StateDefinition = {
 } & { [key: string | symbol]: Transition }
 
 
-type Finiton<M extends Methods = {}> = {
+export type Finiton<M extends Methods = {}> = {
    (): string
    is: (state: string) => boolean
    on: (transition: string, task: () => void) => void
@@ -170,6 +170,7 @@ type Finiton<M extends Methods = {}> = {
    onFinalState: (task: () => void) => void
    activate: (initializer: () => string) => { nest: (config: { [key: string]: Nested[] }) => Nested }
    deactivate: () => void
+   isActive: ()=>boolean
    init: (initializer: Initializer) => Nested & { nest: (config: { [key: string]: Nested[] }) => Nested }
 } & M
 
@@ -236,6 +237,9 @@ export function finiton<M extends Methods>(states: FiniteStates, methods?: M): F
       activate,
       deactivate,
       init,
+      isActive(){
+         return $state() !== undefined;
+      }
    }
 
    let _nestedStates: NestedStates;

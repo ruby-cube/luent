@@ -117,13 +117,13 @@ function transformJSXChildren(childrenPath) {
 function transformIfDerivationExpression(path) {
    if (isDerivationShorthand(path)) {
       // transformLiterals(path.get('right'))
-      path.replaceWith(toDerivationFunction(path.node.right))
-   }
-   else if (isDerivation(path)) {
-      // console.log('isDerivation', path.node)
-      // transformLiterals(path)
       path.replaceWith(toDerivationFunction(path.node))
    }
+   // else if (isDerivation(path)) {
+   //    // console.log('isDerivation', path.node)
+   //    // transformLiterals(path)
+   //    path.replaceWith(toDerivationFunction(path.node))
+   // }
 }
 
 function transformLiterals(path) {
@@ -149,10 +149,11 @@ function transformLiterals(path) {
 
 function isDerivationShorthand(path) {
    const node = path.node;
-   if (t.isAssignmentExpression(node, { operator: '=' }) && node.left.name === '$' && t.isExpression(node.right)) {
-      return true;
-   }
-   return false;
+   return isParenthesized(node);
+   // if (t.isAssignmentExpression(node, { operator: '=' }) && node.left.name === '$' && t.isExpression(node.right)) {
+   //    return true;
+   // }
+   // return false;
 }
 
 
@@ -355,43 +356,43 @@ function normalizeToArrayExpression(node) {
    return arrayExpression
 }
 
-function isDerivation(path) {
-   const node = path.node;
-   if (!node || !t.isExpression(node))
-      return false;
-   if (t.isArrowFunctionExpression(node)
-      || t.isFunctionExpression(node)
-      || t.isObjectExpression(node)
-      || t.isArrayExpression(node)
-      || t.isIdentifier(node)
-      || t.isCallExpression(node) && isTemplateFunction(node.callee.name)) {
-      return false;
-   }
-   if (hasIonicCallExpression(path)) {
-      return true;
-   }
-   return false;
-}
+// function isDerivation(path) {
+//    const node = path.node;
+//    if (!node || !t.isExpression(node))
+//       return false;
+//    if (t.isArrowFunctionExpression(node)
+//       || t.isFunctionExpression(node)
+//       || t.isObjectExpression(node)
+//       || t.isArrayExpression(node)
+//       || t.isIdentifier(node)
+//       || t.isCallExpression(node) && isTemplateFunction(node.callee.name)) {
+//       return false;
+//    }
+//    if (hasIonicCallExpression(path)) {
+//       return true;
+//    }
+//    return false;
+// }
 
-function hasIonicCallExpression(path) {
-   if (isIonicCallExpression(path.node))
-      return true;
-   let found = false;
-   path.traverse({
-      CallExpression(path) {
-         if (isIonicCallExpression(path.node)) {
-            found = true;
-            path.stop()
-         }
-      }
-   })
-   return found;
-}
+// function hasIonicCallExpression(path) {
+//    if (isIonicCallExpression(path.node))
+//       return true;
+//    let found = false;
+//    path.traverse({
+//       CallExpression(path) {
+//          if (isIonicCallExpression(path.node)) {
+//             found = true;
+//             path.stop()
+//          }
+//       }
+//    })
+//    return found;
+// }
 
 
-function isIonicCallExpression(node) {
-   return t.isCallExpression(node) && /^\$[a-z]/.test(node.callee.name) && node.arguments.length === 0 && !isParenthesized(node)
-}
+// function isIonicCallExpression(node) {
+//    return t.isCallExpression(node) && /^\$[a-z]/.test(node.callee.name) && node.arguments.length === 0 && !isParenthesized(node)
+// }
 
 function isParenthesized(node){
 return 'extra' in node && node.extra.parenthesized === true;
