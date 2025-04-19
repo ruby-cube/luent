@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { component, CommonsKey, For, fromCommons, fromTag, If, Ion, Ionized, v } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
-import { AtomicIon, exposeIons, ion, ionize, watch } from "@rue/quarky";
+import { AtomicIon, exposeIons, finiton, ion, ionize, watch } from "@rue/quarky";
 
 export function TabApp() {
 
@@ -39,79 +39,51 @@ export function TabApp() {
 }
 
 
-// type FileData = {
-//    id: number,
-//    markdown: string,
-// }
+type FileData = {
+   id: number,
+   markdown: string,
+}
 
-// class File {
-//    // opened: boolean = false
-//    // active: boolean = false
+class File {
+   opened: boolean = false
+   // active: boolean = false
 
-//    constructor(
-//       public id: number = genId(),
-//       public markdown: string = ''
-//    ) { }
+   constructor(
+      public id: number = genId(),
+      public markdown: string = ''
+   ) { }
 
-//    get title() {
-//       return firstLineOf(this.markdown)
-//    }
+   get title() {
+      return firstLineOf(this.markdown)
+   }
 
-//    get preview() {
-//       return secondLineOf(this.markdown)
-//    }
+   get preview() {
+      return secondLineOf(this.markdown)
+   }
 
-//    // close() {
-//    //    this.active = false;
-//    //    this.opened = false;
-//    // }
+   close() {
+      this.opened = false;
+   }
 
-//    // open() {
-//    //    this.active = true;
-//    //    this.opened = true;
-//    // }
-// }
+   open() {
+      this.opened = true;
+   }
+}
 
-// function asFiles(data: FileData[]) {
-//    return data.map(file => new File(file.id, file.markdown))
-// }
+function asFiles(data: FileData[]) {
+   return data.map(file => new File(file.id, file.markdown))
+}
 
-// //TODO: What's the best way to sync with your database?
+//TODO: What's the best way to sync with your database?
 
 
-// // A resource is where you transform the raw data into a rich domain model and set up syncing to the db
+// A resource is where you transform the raw data into a rich domain model and set up syncing to the db
 
-// // const FILES = defineResource(async ({userId: number}) => {
-// //    const data = await dispatch({ get: DB_FILES })
-// //    // [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
+// const FILES = defineResource(async ({userId: number}) => {
+//    const data = await dispatch({ get: DB_FILES })
+//    // [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
 
-// //    //TODO: how do you set up realtime updates from database and locally from another tab
-
-// //    const files = ionize(asFiles(data), {
-// //       add(file: File) {
-// //          files.push(file)
-// //          files.sortAlphabetically()
-// //       },
-// //       delete(index: number) {
-// //          files.splice(index, 1)
-// //       },
-// //       sortAlphabetically() {
-// //          //TODO:
-// //       }
-// //    })
-
-// //    watch(files, ({ collectionChanges }) => {
-// //       // TODO: update database
-// //    })
-
-// //    return files;
-// // })
-// const data = [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
-
-// function LoadingApp() { //Stand in until I fix createApp
-
-//    // const files = fromResources(FILES, { $userId })
-
+//    //TODO: how do you set up realtime updates from database and locally from another tab
 
 //    const files = ionize(asFiles(data), {
 //       add(file: File) {
@@ -126,185 +98,232 @@ export function TabApp() {
 //       }
 //    })
 
+//    watch(files, ({ collectionChanges }) => {
+//       // TODO: update database
+//    })
 
-//    return component(
-//       // Await
-//       <App files={files}></App>
-//    )
-// }
+//    return files;
+// })
+const data = [{ id: 0, markdown: '# Sunny Day' }, { id: 2, markdown: '# Hola' }, { id: 3, markdown: '# Does this work?' }]
 
-// // type Files = ReturnType<typeof asIonizedFiles>
+function LoadingApp() { //Stand in until I fix createApp
 
-// // function asIonizedFiles(data: FileData[]){
-
-// //    return ionize(data.map(file => new File(file.id, file.markdown)), {
-
-// //       remove(index: number) {
-// //          files.splice(index, 1);
-// //       },
-
-// //       add(file: File, index) {
-// //          files.splice(index, 0, file)
-// //       }
-// //    }) // Assumes no realtime updates from db. For realtime updates, use derived ion
-// // }
-
-// // class Files extends Array<File> {
-
-// //    constructor(data: FileData[]){
-// //       super(...data.map(file=>new File(file.id, file.markdown)))
-// //    }
-
-// //    remove(index: number) {
-// //       files.splice(index, 1);
-// //    }
-
-// //    add(file: File, index) {
-// //       files.splice(index, 0, file)
-// //    }
-// // }
+   // const files = dispatchGET(FILES, { $userId })
 
 
-// function App(input = fromTag({
-//    files: Ionized<File[]>
-// })) {
+   const files = ionize(asFiles(data), {
+      add(file: File) {
+         files.push(file)
+         files.sortAlphabetically()
+      },
+      delete(index: number) {
+         files.splice(index, 1)
+      },
+      sortAlphabetically() {
+         //TODO:
+      }
+   })
 
-//    const { files } = input;
 
-//    function addNewFile() {
-//       const file = files.add(new File())
-//       openFile_makeActive(file)
-//    }
+   return component(
+      // Await
+      <App files={files}></App>
+   )
+}
 
-//    function deleteFile(index: number) {
-//       const file = files[index]
-//       if (isOpen(file)) closeFile(file)
-//       files.delete(index)
-//    }
+// type Files = ReturnType<typeof asIonizedFiles>
 
-//    const openedFiles = ionize([] as File[], {
-//       delete(index: number) {
-//          if (index < 0 || index >= openedFiles.length) return false;
-//          openedFiles.splice(index, 1);
-//          return true;
+// function asIonizedFiles(data: FileData[]){
+
+//    return ionize(data.map(file => new File(file.id, file.markdown)), {
+
+//       remove(index: number) {
+//          files.splice(index, 1);
 //       },
-//       insert(file: File, index) {
-//          openedFiles.splice(index, 0, file)
+
+//       add(file: File, index) {
+//          files.splice(index, 0, file)
 //       }
-//    })
+//    }) // Assumes no realtime updates from db. For realtime updates, use derived ion
+// }
 
-//    function openFile_makeActive(file: File) {
-//       const index = $activeFile() ? openedFiles.indexOf($activeFile()) : 0
-//       openedFiles.insert(file, index)
-//       $activeFile.as(file)
+// class Files extends Array<File> {
+
+//    constructor(data: FileData[]){
+//       super(...data.map(file=>new File(file.id, file.markdown)))
 //    }
 
-//    function isOpen(file: File) {
-//       return openedFiles.indexOf(file) !== -1
+//    remove(index: number) {
+//       files.splice(index, 1);
 //    }
 
-//    function closeOpenedFile(index: number) {
-//       openedFiles.delete(index)
-//       if ($activeFile() === file) {
-//          $activeFile.as(prevActiveFile)
-//       }
+//    add(file: File, index) {
+//       files.splice(index, 0, file)
 //    }
-
-//    function focusOpenedFile(index: number) {
-//       $activeFile.as($openedFiles()[index])
-//    }
-
-
-//    let prevActiveFile: File | undefined;
-
-//    const $activeFile = ion(undefined as File | undefined, {
-//       as(file: File) {
-//          prevActiveFile = $activeFile.state;
-//          $activeFile = file;
-//       }
-//    })
-
-//    const MainView = Polymorph({
-//       home: <Home></Home>
-//       ,
-//       file: [(o: File) => o.id, (file: File) => (exposeIons(file),
-//          <MarkdownApp mu:markdown={file.$markdown}></MarkdownApp>
-//       )],
-//       default: 'home' // key | render function | undefined (default)
-//    })
-
-//    watch($activeFile, ({ state: file }) => {
-//       if (!isOpen(prevActiveFile))
-//          MainView.discard('file', prevActiveFile.id)
-//       if (file) MainView.mount('file', file.id)
-//       else MainView.mount('home')
-
-//    })
-
-//    watch(openedFiles, ({ collectionChange }) => {
-//       const { removedItems, newItems, movedItems } = collectionChange //TODO: implement with getters for lazy computation
-//       if (removedItems)
-//          for (const file of removedItems) {
-//             MainView.discard('file', file.id)
-//          }
-//    })
-
-//    const openFile = fromCommons(OPEN_FILE)
-
-//    // MainView.mount('home')
-//    // MainView.mount('file', file)
-//    // MainView.unmount(); // will mount default if provided
-//    // MainView.discardAll()
-//    // MainView.discard('file', file)
-
-//    return component(
-//       <>
-//          <Sidebar files={files} provide={[
-//             OPEN_FILE(index => openFile(files[index])),
-//             ADD_FILE(addFile),
-//             DELETE_FILE(deleteFile),
-//             ACTIVE(true),
-//             MU_FROG_SHELL(frogShell),
-//          ]}></Sidebar>
-//          <main>
-//             <Tabs files={$openedFiles} provide={[CLOSE_FILE(closeOpenedFile), FOCUS_FILE(focusOpenedFile)]} />
-//             <MainView as={existingFile ? ['file', file] : 'home'}></MainView>
-//          </main>
-//       </>
-//    )
 // }
 
-// const ACTIVE = ''
-// return () => { }
-// function u(a) {
-//    return (a) => { }
-// }
-// function m(a) {
-//    return (a) => { }
-// }
-// function mu(a) {
-//    return (a) => { }
-// }
 
-// const OPENFILE = CommonsKey('m:openFile', v<(index: number) => void>)
-// const DELETEFILE = CommonsKey('m:deleteFile', v<(index: number) => void>)
-// const ADDFILE = CommonsKey('m:addFile', v<(index: number) => void>)
+function App(input = fromTag({
+   files: Ionized<File[]>
+})) {
+
+   const { files } = input;
+
+   function addNewFile() {
+      const file = files.add(new File())
+      openFile(file);
+   }
+
+   function deleteFile(file: File) {
+      const file = files[files.indexOf(file)]
+      if (file.opened) tabsManager.closeFile(file)
+      files.delete(index)
+   }
+
+   function openFile(file: File) {
+      const index = $activeFile() ? openedFiles.indexOf($activeFile()) : 0
+      openedFiles.insert(file, index)
+      file.open()
+      $activeFile.as(file);
+   }
+
+   function closeFile(file: File) {
+      openedFiles.delete(openedFiles.indexOf(file))
+      if ($activeFile() === file) {
+         $activeFile.as(prevActiveFile)
+      }
+      file.close()
+   }
+
+   function focusFile(file: File) {
+      $activeFile.as(openedFiles[index])
+   }
+
+   const openedFiles = ionize([] as File[], {
+      delete(index: number) {
+         if (index < 0 || index >= openedFiles.length) return false;
+         openedFiles.splice(index, 1);
+         return true;
+      },
+      insert(file: File, index) {
+         openedFiles.splice(index, 0, file)
+      }
+   })
+
+   let prevActiveFile: File | undefined;
+
+   const $activeFile = ion(undefined as File | undefined, {
+      as(file: File) {
+         prevActiveFile = $activeFile.state;
+         $activeFile = file;
+      }
+   })
+
+   const MainView = Morphable({
+      home: <Home></Home>
+      ,
+      file: [(o: File) => o.id, (file: File) => (
+         <MarkdownApp mu:markdown={file.$markdown}></MarkdownApp>
+      )],
+      default: 'home' // key | render function | undefined (default)
+   })
+
+   watch($activeFile, ({ state: file }) => {
+      if (file) MainView.mount('file', file.id)
+      else MainView.mount('home')
+   })
+
+   // watch(openedFiles, ({ collectionChange }) => {
+   //    const { removedItems, newItems, movedItems } = collectionChange //TODO: implement with getters for lazy computation
+   //    if (removedItems)
+   //       for (const file of removedItems) {
+   //          MainView.discard('file', file.id)
+   //       }
+   // })
+
+   watchItems(openedFiles, (file, index) => {
+      if(!file.opened) MainView.discard('file', file.id)
+   })
+
+
+   // MainView.mount('home')
+   // MainView.mount('file', file)
+   // MainView.unmount(); // will mount default if provided
+   // MainView.discardAll()
+   // MainView.discard('file', file)
+
+   return component(
+      <>
+         <Sidebar files={files} provide={[
+            FILES_KIT({ addNewFile, deleteFile, openFile }),
+         ]}></Sidebar>
+         <main>
+            <Tabs files={$openedFiles} provide={[
+               TABS_KIT({ closeFile, focusFile })
+            ]} />
+            <MainView as={existingFile ? ['file', file] : 'home'}></MainView>
+         </main>
+      </>
+   )
+}
+
+//NOTE: convention: kits are destructurable
+
+type FileManager = {
+   addNewFile(): void; //sidebar
+   deleteFile(file: File): void; //sidebar
+   openFile(file: File): void; //sidebar
+}
+
+type TabManager = {
+   closeFile(file: File): void; //tabs
+   focusFile(file: File): void; //tabs
+}
+
+const FILES_KIT = CommonsKey(v<FileManager>, 'm')
+const TABS_KIT = CommonsKey(v<TabManager>, 'm')
+
+// const OPEN_FILE = CommonsKey(v<FileManager['openFile']>)
+// const DELETE_FILE = CommonsKey(v<FileManager['deleteFile']>)
+// const ADD_NEW_FILE = CommonsKey(v<FileManager['addNewFile']>)
+// const CLOSE_FILE = CommonsKey(v<TabManager['closeFile']>)
+// const FOCUS_FILE = CommonsKey(v<TabManager['focusFile']>)
 
 
 
-// function Sidebar(input = fromTag({
-//    files: Ionized<File[]> //TODO: Interesting... 'native' methods are easy to be made public, but methods declared via ionize() will be difficult to share the type...
-// })) {
-//    const { files } = input
+function Sidebar(input = fromTag({
+   files: Ionized<File[]> //TODO: Interesting... 'native' methods are easy to be made public, but methods declared via ionize() will be difficult to share the type...
+})) {
+   const { files } = input
+   const { addFile } = fromCommons(FILES_KIT);
 
-//    return component(
-//       <div>
-//          {For($files, file => file.id, (file, $index) => (
-//             <File file={file} index={$index}></File>
-//          ))}
-//       </div>
-//    )
-// }
+   return component(
+      <div>
+         {For($files, file => file.id, (file, $index) => (
+            <SidebarFile file={file} index={$index}></SidebarFile>
+         ))}
+         <button on:click={e => addFile()}>+</button>
+      </div>
+   )
+}
+
+function SidebarFile(input = fromTag({
+   file: Ionized<File>,
+   index: Ion<number>
+})) {
+   const { $index, file } = input
+
+   const { openFile } = fromCommons(FILES_KIT)
+
+   return component(
+      <div on:click={e => openFile(file)} on:contextmenu={e => $menu.apply('open')}>
+         {If(($menu.is('opened')),
+            <FileContextMenu></FileContextMenu>
+         )}
+         {file.$title}
+      </div>
+   )
+}
 
 
 
@@ -326,34 +345,25 @@ export function TabApp() {
 // const CLOSE_FILE = CommonsKey(v<(index: number) => void>)
 // const FOCUS_FILE = CommonsKey(v<(index: number) => void>)
 
-// MutableIon
-// MaybeMutableIon
-
-// ReinedIon
-
-// Obj
-// Fn
-// Val
 
 
-// function Tab(input = fromTag({
-//    index: Ion<number>('?')('hi'),
-//    file: Ionized<File>,
-//    closeFile: Val('?')(fromCommons(CLOSE_FILE)),
-//    focusFile: Val('?')(fromCommons(FOCUS_FILE)),
-//    inherited: ['style', 'class']
-// })) {
-//    const { file, closeFile, focusFile, $index, inherited } = input
 
-//    return component(
-//       <div style={[{ backgroundColor: $=file.active ? 'red' : 'gray' }, inherited.style]}
-//          on:click={e => focusFile($index())}
-//       >
-//          {$=file.title}
-//          <button on:click={e => closeFile($index())}>x</button>
-//       </div>
-//    )
-// }
+function Tab(input = fromTag({
+   index: Ion<number>('?')('hi'),
+   file: Ionized<File>,
+   tabManager: v('?')(fromCommons(TABS_KIT)),
+})) {
+   const { file, tabManager: { closeFile, focusFile }, $index } = input
+
+   return component(
+      <div style={{ backgroundColor: (file.active ? 'red' : 'gray') }}
+         on:click={e => focusFile($index())}
+      >
+         {file.$title}
+         <button on:click={e => closeFile($index())}>x</button>
+      </div>
+   )
+}
 
 
 
