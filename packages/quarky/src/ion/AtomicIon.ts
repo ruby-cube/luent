@@ -21,7 +21,7 @@ export type $AtomicIonState = AtomicIon & MutableCapsule & {
    [QUARK]: {
       type: symbol;
       state: any,
-      ionized: boolean,
+      ionized: boolean | typeof MUTABLE_IONIZED,
       trigger(): void
    } & EntityQuark<$AtomicIonState> & ParticleMorph & Watchable
 } & MutableEntity
@@ -32,8 +32,8 @@ export type $AtomicIonState = AtomicIon & MutableCapsule & {
  * */
 export type AtomicIonQuark = QuarkOf<$AtomicIonState>
 
-export function shouldIonize(newValue: unknown, ionized: boolean): newValue is AnyObject {
-   return isObject(newValue) && ionized;
+export function shouldIonize(newValue: unknown, ionized: boolean | typeof MUTABLE_IONIZED): newValue is AnyObject {
+   return isObject(newValue) && Boolean(ionized);
 }
 
 export const MUTABLE = true
@@ -160,23 +160,26 @@ function createAtomicIonWithMethods(quark: AtomicIonQuark, stateKey: string, met
    const thisIon = Object.create(methods, {
       [stateKey]: {
          get: getState.bind(quark),
-         set: getState.bind(quark)
+         set: setState.bind(quark)
       }
    })
 
+   const boundMethods = Object.create(methods)
+
    const $ion: AnyObject = {
       name: '$stateCapsule',
-      length: 0
+      length: 0,
+      [QUARK]: quark
    }
 
    const $stateCapsule = new Proxy(quark.entity, {
       get(target, key) {
-         if (mutable && key === 'state') return thisIon[stateKey]
+         if (key === 'state') return thisIon[stateKey]
          if (key in $ion) return $ion[key]
-         else return thisIon[key]
+         else return getMethod(boundMethods, methods, key, thisIon)
       },
-      set(target, key, value) {
-         if (mutable && key === stateKey || key === 'state') {
+      set(target, key, value, receiver) {
+         if (mutable && key === 'state') {
             setState.apply(quark, [value])
             return true;
          }
@@ -187,4 +190,11 @@ function createAtomicIonWithMethods(quark: AtomicIonQuark, stateKey: string, met
 
    quark.entity = $stateCapsule
    return $stateCapsule
+}
+
+function getMethod(boundMethods: AnyObject, methods: AnyObject, key: PropertyKey, thisIon: AnyObject, ) {
+   const boundMethod = boundMethods[key]
+   const rawMethod = methods[key]
+   if (boundMethod !== rawMethod) return boundMethod;
+   return boundMethod[key] = rawMethod.bind(thisIon)
 }

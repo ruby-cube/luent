@@ -12,10 +12,11 @@ import { RENDER } from "../../../packages/lumo/src/render-cycle"
 
 export function TestCounter() {
 
-   const $count = ion.mu({
+   const $count = ion({
       'count': 0
    }, {
       increment() {
+         console.log('increment', this)
          this.count++
       },
       decrement() {
