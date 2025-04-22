@@ -11,19 +11,31 @@ export function TestDebugApp() {
    //NOTE: traceable is meant to enable you to trace functions and methods defined externally
    // const doSomething = traceable('doSomething', input.doSomething)
 
-   const $count = ion(0, {
-      increment() {
-         $count.state++
-      },
-      decrement() {
-         $count.state--
-      }
-   })
 
-   $count.label('$count')
-   debug.traceTriggers($count)
-   debug.traceCalls($count, 'decrement')
-   debug.logAtoms($doublCount)
+
+   const $count = ion(0,
+      {
+         increment() {
+            this.state++
+         },
+         decrement() {
+            this.state--
+         }
+      })
+
+   // $count.label('$count')
+   // debug.traceTriggers($count)
+   // debug.traceCalls($count, 'decrement')
+   // debug.logAtoms($doublCount)
+
+
+
+
+
+   debug.logDefinitionSource($count, '$count')
+   debug.logAtoms($doubleCount, '$doubleCount')
+
+
 
    const frog = ionize({
       name: { royalName: 'sir robin' },

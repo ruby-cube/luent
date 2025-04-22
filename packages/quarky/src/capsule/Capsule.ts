@@ -1,9 +1,9 @@
 import { AnyObject } from "@rue/types";
-import { DEVLabellable, traceableMethodWrap, TraceableSubject } from "../debug/debug";
+import { TraceableSubject } from "../debug/debug";
 import { QUARK, Quark, QuarkOf } from "../Quark";
 
 
-export type Capsule = DEVLabellable & TraceableSubject & {
+export type Capsule = TraceableSubject & {
    [QUARK]: Quark
 }
 
@@ -20,7 +20,9 @@ export type MutableCapsule = Capsule & {
 export function attachCapsuleMethods(type: string, capsule: Capsule & AnyObject, methods: AnyObject) {
    for (const key in methods) {
       capsule[key]
-         = __DEV__ ? traceableMethodWrap(type, capsule, key, methods[key]) : methods[key]
+         = 
+         // __DEV__ ? traceableMethodWrap(type, capsule, key, methods[key]) : 
+         methods[key]
    }
    return capsule;
 }

@@ -38,5 +38,6 @@ function createTextNode(value: Ion | any) {
 
 
 function toString(value: any) {
+   if (value=== undefined) return '';
     return value.toString(); //TODO: make sure it works with any value
 }

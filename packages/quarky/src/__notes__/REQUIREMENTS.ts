@@ -1,4 +1,4 @@
-import { ion } from "../ion/ion";
+import { ion } from "../ion/Ion";
 import { watch } from "../watch/watch";
 
 /* 

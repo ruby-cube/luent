@@ -1,7 +1,7 @@
 import { ParticleMorph, Particle } from "../compound/Particle";
 import { AnyObject } from "@rue/types";
 import { toRaw } from "./ionize";
-import { isIon } from "../ion/ion";
+import { isIon } from "../ion/Ion";
 import { Compound, track, untrackParticles, CompoundMorph, triggerEffects } from "../compound/Compound";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { hasQuark, quarkOf } from "../Quark";

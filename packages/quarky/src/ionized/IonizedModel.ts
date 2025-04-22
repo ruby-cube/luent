@@ -5,8 +5,8 @@ import { asAtomicOp, getAtomicOp } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { debug, isFunction, isObject, noop } from "@rue/utils";
-import { Ion, isIon } from "../ion/ion";
-import { __DEV__trace, __DEV__traceMethodCall, traceableMethodWrap } from "../debug/debug";
+import { Ion, isIon } from "../ion/Ion";
+import { __DEV__trace} from "../debug/debug";
 import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
@@ -773,22 +773,22 @@ function bindNativeMethod(
 
 
 export function createProxySwitchMap(meta: AnyObject) {
-   let labelName: string | undefined;
+   // let labelName: string | undefined;
 
-   function __DEV__label(label: string) {
-      labelName = label;
-   }
+   // function __DEV__label(label: string) {
+   //    labelName = label;
+   // }
 
    return new Map([
       [QUARK as any, () =>
          meta as any
-      ],
-      ['labelName', () =>
-         labelName
-      ],
-      ['__DEV__label', () =>
-         __DEV__label
-      ],
+      ]
+      // ['labelName', () =>
+      //    labelName
+      // ],
+      // ['__DEV__label', () =>
+      //    __DEV__label
+      // ],
    ])
 }
 
@@ -818,7 +818,7 @@ export function reactiveSetter(
       return setAbsorbedIonState(model, key, oldState, value) // we let absorbed ion to decide whether to ionize value or not
    }
 
-   __DEV__traceMethodCall('IonizedModel', model, key)
+   // __DEV__traceMethodCall('IonizedModel', model, key)
 
    if (!isWritable(target, key)) {
       if (__DEV__) console.warn(`${String(key)} is not writable.`)

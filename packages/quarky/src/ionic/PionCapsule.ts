@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { quarkOf, QUARK, hasQuark, QuarkOf, EntityQuark } from "../Quark";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
-import { Ion } from "../ion/ion";
+import { Ion } from "../ion/Ion";
 import { __DEV__label } from "../debug/debug";
 import { IonicCompound } from "./IonicCompound";
 import { Watched } from "../watch/Watched";
@@ -95,7 +95,7 @@ export function createPionCapsule(
 
    $capsuleIon[QUARK] = capsule
    $capsuleIon.labelName = undefined
-   $capsuleIon.__DEV__label = __DEV__label
+   // $capsuleIon.__DEV__label = __DEV__label
 
    attachCapsuleMethods('GetterIon', $capsuleIon, methods)
 

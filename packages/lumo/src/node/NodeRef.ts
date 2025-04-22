@@ -1,7 +1,7 @@
 import { Component, PublicComponent } from "../component/InternalComponent"
 import { HTMLTag } from "../element/makeElement"
 import { isSettingUpList, onBeforeListUpdate, onListUpdated } from "../iteratives/listStack"
-import { AtomicIon } from "@rue/quarky"
+import { AtomicIon, Ion } from "@rue/quarky"
 import { getActiveFlask } from "@rue/flask"
 
 const INTERNAL = Symbol('internal')
@@ -118,7 +118,7 @@ export class MetaNodesRef {
       pod?.splice(index, 1);
    }
 
-   assignIndex($index: AtomicIon<number>, value: NodeReferent) {
+   assignIndex($index: Ion<number>, value: NodeReferent) {
       const nodes = this.o()
       nodes[$index()] = value;
    }
@@ -146,7 +146,7 @@ export class MetaNodesRef {
 export function initializeListRef( // should this be initialize ref?
    ref: NodesRef,
    value: NodeReferent | undefined,
-   $index: AtomicIon<number>
+   $index: Ion<number>
 ) {
    const _ref = ref[INTERNAL]
    if (value) {

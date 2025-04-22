@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { IonicCompound, IonicCompoundMorph } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { unwatch, watch, Watched } from "./Watched";
-import { Ion, isIon } from "../ion/ion";
+import { Ion, isIon } from "../ion/Ion";
 import { noop } from "@rue/utils";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { isIonizedModel } from "../ionized/ionize";

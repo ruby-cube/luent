@@ -1,5 +1,5 @@
 import { Collection, For } from "@rue/lumo"
-import { AtomicIon, Ionized, ion } from "../../../packages/quarky/src"
+import { AtomicIon, Ion, Ionized, ion } from "../../../packages/quarky/src"
 
 class PortableNode {
 
@@ -29,7 +29,7 @@ class ListPort<L extends any[] = any[]> {
     // }
 }
 
-type RenderListItem<L extends any[]> = (item: L extends (infer I)[] ? I : never, $index: AtomicIon<number>) => any
+type RenderListItem<L extends any[]> = (item: L extends (infer I)[] ? I : never, $index: Ion<number>) => any
 
 type ListPortType = string
 type UID = string | number | symbol

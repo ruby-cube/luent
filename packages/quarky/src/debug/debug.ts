@@ -1,6 +1,6 @@
 import { isFunction, isObject } from "@rue/utils";
 import { isAtomicIon } from "../ion/AtomicIon";
-import { AtomicIon, isIon } from "../ion/ion";
+import { AtomicIon, isIon } from "../ion/Ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
 import { quarkOf, hasQuark, QUARK, Quark } from "../Quark";
@@ -10,15 +10,16 @@ import { isIonizedModel } from "../ionized/ionize";
 import { Particle } from "../compound/Particle";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { Traceable } from "./Traceable";
+import { debug as _debug } from "@rue/utils";
 
-export interface DEVLabellable {
-   labelName?: string
-   __DEV__label: (label: string) => void
-}
+// export interface DEVLabellable {
+//    labelName?: string
+//    __DEV__label: (label: string) => void
+// }
 
-export function __DEV__label(this: DEVLabellable, label: string) {
-   this.labelName = label;
-}
+// export function __DEV__label(this: DEVLabellable, label: string) {
+//    this.labelName = label;
+// }
 
 //QUESTION: dunno if this applies to only capsules or also effects
 
@@ -61,20 +62,27 @@ export function __DEV__trace(type: string, label: string | undefined, origin: st
 
 // type Traceable = AnyObject | Ion;
 
+
+// debug.logDefinitionSource($count)
+
+
 export const debug = {
    isReactive,
-   traceTriggers,
-   traceCalls,
+   // traceTriggers,
+   // traceCalls,
 
    logAtoms, // deeply? or shallowly?
-   traceable,
+   // logDefinitionSource, //TODO:
+   // traceable, // for tracing plain objects
 
    traceAsyncPath,
-
-   log
+   ..._debug
 }
 
-export type TraceableSubject = { [QUARK]: TraceableQuark, labelName?: string }
+export type TraceableSubject = { 
+   [QUARK]: TraceableQuark, 
+   // labelName?: string
+}
 
 // export type TraceableQuark = { asTraceable?: Traceable; }
 
@@ -85,21 +93,26 @@ export function asTraceable(subject: TraceableSubject): Traceable {
    return traceable;
 }
 
-function logAtoms(entity: { [QUARK]: CompoundMorph }) {
+function logAtoms(entity: { [QUARK]: CompoundMorph }, label: string) {
    if (!isIon(entity)) return;
-   entity() // TODO: we want to track both memoized and non-memoized ions
+   entity() // TODO: we need to track both memoized and non-memoized ions
+
+   debug.log('-------------------')
+   debug.log('[LOG ATOMS]', label)
    const particles = quarkOf(entity).asCompound?.particles
    if (particles) _logAtoms(particles)
+   else debug.log('No atoms')
+   debug.log('-------------------')
 }
 
-function logAbsorbedIons(model: IonizedModel) {
-   if (!isIonizedModel(model)) {
-      debug.log('No absorbed ions found. Target is not ionized model.')
-   }
-   const quark = quarkOf(model)
-   quark.trackAbsorbedIons()
-   //TODO: need to identify and log property keys
-}
+// function logAbsorbedIons(model: IonizedModel) {
+//    if (!isIonizedModel(model)) {
+//       debug.log('No absorbed ions found. Target is not ionized model.')
+//    }
+//    const quark = quarkOf(model)
+//    quark.trackAbsorbedIons()
+//    //TODO: need to identify and log property keys
+// }
 
 function _logAtoms(particles: Particle[]) {
    for (const particle of particles) {
@@ -112,174 +125,172 @@ function _logAtoms(particles: Particle[]) {
    }
 }
 
+
 function logAtom(atom: TraceableQuark) {
-   debug.log(atom.asTraceable.origin)
-}
-
-function log(...args: any[]) {
-   if (__DEV__) console.log(...args)
-   //TODO: production logger
-}
-
-export function __DEV__traceMethodCall(type: string, subject: TraceableSubject, key: PropertyKey) {
-   const traceable = asTraceable(subject);
-   if (traceable.traceTriggers.has(key)) __DEV__trace(type, subject.labelName, traceable.origin!, key)
-}
-
-function __DEV__traceFunctionCall(subject: Function & TraceableSubject) {
-   const traceable = asTraceable(subject);
-   __DEV__trace('Function', subject.labelName, traceable.origin!)
-}
-
-export function traceableMethodWrap(type: string, subject: TraceableSubject, key: PropertyKey, fn: Function) {
-   return (...args: any[]) => {
-      __DEV__traceMethodCall(type, subject, key)
-      return fn(...args)
-   }
-}
-export function traceableFunctionWrap(fn: TraceableSubject & Function) {
-   return (...args: any[]) => {
-      __DEV__traceFunctionCall(fn)
-      return fn(...args)
-   }
+   debug.log('•', atom.asTraceable.origin)
 }
 
 
 
+// export function __DEV__traceMethodCall(type: string, subject: TraceableSubject, key: PropertyKey) {
+//    const traceable = asTraceable(subject);
+//    if (traceable.traceTriggers.has(key)) __DEV__trace(type, subject.labelName, traceable.origin!, key)
+// }
+
+// function __DEV__traceFunctionCall(subject: Function & TraceableSubject) {
+//    const traceable = asTraceable(subject);
+//    __DEV__trace('Function', subject.labelName, traceable.origin!)
+// }
+
+// export function traceableMethodWrap(type: string, subject: TraceableSubject, key: PropertyKey, fn: Function) {
+//    return (...args: any[]) => {
+//       __DEV__traceMethodCall(type, subject, key)
+//       return fn(...args)
+//    }
+// }
+// export function traceableFunctionWrap(fn: TraceableSubject & Function) {
+//    return (...args: any[]) => {
+//       __DEV__traceFunctionCall(fn)
+//       return fn(...args)
+//    }
+// }
 
 
 
-function traceTriggers(subject: AnyObject, key?: PropertyKey) {
-   if (!isTraceable(subject)) {
-      console.warn('NonError Trace: subject of traceTriggers() is not traceable', getPublicTrace())
-      return;
-   }
-   if (key) {
-      const value = subject[key];
-      if (isFunction(value) && !isIon(value))
-         throw new Error('invalid subject. To trace a function call use traceCall()')
-      traceMemberTriggers(subject, key)
-   }
-   else if (isAtomicIon(subject)) traceIonTriggers(subject)
-   else if (isDerivationFunction(subject) || isDerivedIon(subject)) traceDerivationTriggers(subject)
-   else throw new Error('invalid subject. To trace a function call use traceCall()')
-}
 
-function traceCalls(subject: AnyObject, key?: PropertyKey) {
-   if (!isTraceable(subject)) {
-      console.warn('NonError Trace: subject of traceTriggers() is not traceable', getPublicTrace())
-      return;
-   }
-   if (key) {
-      const value = subject[key];
-      if (!isTrueFunction(value))
-         throw new Error('invalid subject. To trace a property use traceTriggers()')
-      traceMemberTriggers(subject, key)
-   }
-   else if (isTrueFunction(subject)) {
-      __DEV__traceFunctions.add(subject)
-   }
-   else throw new Error('invalid subject. To trace a property use traceTriggers()')
-}
 
-function isTrueFunction(value: any): value is Function {
-   return isFunction(value) && !isIon(value)
-}
 
-function traceIonTriggers(subject: AtomicIon) {
-   asTraceable(subject).traceTriggers!.add('state');
-}
+// function traceTriggers(subject: AnyObject, key?: PropertyKey) {
+//    if (!isTraceable(subject)) {
+//       console.warn('NonError Trace: subject of traceTriggers() is not traceable', getPublicTrace())
+//       return;
+//    }
+//    if (key) {
+//       const value = subject[key];
+//       if (isFunction(value) && !isIon(value))
+//          throw new Error('invalid subject. To trace a function call use traceCall()')
+//       traceMemberTriggers(subject, key)
+//    }
+//    else if (isAtomicIon(subject)) traceIonTriggers(subject)
+//    else if (isDerivationFunction(subject) || isDerivedIon(subject)) traceDerivationTriggers(subject)
+//    else throw new Error('invalid subject. To trace a function call use traceCall()')
+// }
 
-function traceDerivationTriggers(subject: () => any) {
-   //TODO: see watch/debug.ts
-}
+// function traceCalls(subject: AnyObject, key?: PropertyKey) {
+//    if (!isTraceable(subject)) {
+//       console.warn('NonError Trace: subject of traceTriggers() is not traceable', getPublicTrace())
+//       return;
+//    }
+//    if (key) {
+//       const value = subject[key];
+//       if (!isTrueFunction(value))
+//          throw new Error('invalid subject. To trace a property use traceTriggers()')
+//       traceMemberTriggers(subject, key)
+//    }
+//    else if (isTrueFunction(subject)) {
+//       __DEV__traceFunctions.add(subject)
+//    }
+//    else throw new Error('invalid subject. To trace a property use traceTriggers()')
+// }
+
+// function isTrueFunction(value: any): value is Function {
+//    return isFunction(value) && !isIon(value)
+// }
+
+// function traceIonTriggers(subject: AtomicIon) {
+//    asTraceable(subject).traceTriggers!.add('state');
+// }
+
+// function traceDerivationTriggers(subject: () => any) {
+//    //TODO: see watch/debug.ts
+// }
 
 export type TraceableQuark = {
    asTraceable: Traceable
 } & Quark
 
-function isTraceable(subject: AnyObject): subject is TraceableSubject {
-   return isDerivationFunction(subject) || hasQuark(subject);
-}
+// function isTraceable(subject: AnyObject): subject is TraceableSubject {
+//    return isDerivationFunction(subject) || hasQuark(subject);
+// }
 
-function traceMemberTriggers(subject: TraceableSubject, key: PropertyKey) {
-   asTraceable(subject).traceTriggers!.add(key);
-}
-
-
+// function traceMemberTriggers(subject: TraceableSubject, key: PropertyKey) {
+//    asTraceable(subject).traceTriggers!.add(key);
+// }
 
 
 
-export function traceable<T extends AnyObject>(subject: T): T & TraceableSubject {
-   if (isTraceable(subject)) return subject;
-   if (isFunction(subject)) {
-      return createTraceableFunction(subject)
-   }
-   if (isObject(subject))
-      return createTraceableObject(subject)
-   throw new Error('INVALID INPUT. Only objects or functions can be made traceable')
-}
 
-function createTraceableObject(target: Object) {
-   const meta = {
-      asTraceable: new Traceable()
-   }
-   const wrappedMethods: AnyObject = {}
 
-   let labelName: string | undefined;
+// export function traceable<T extends AnyObject>(subject: T): T & TraceableSubject {
+//    if (isTraceable(subject)) return subject;
+//    if (isFunction(subject)) {
+//       return createTraceableFunction(subject)
+//    }
+//    if (isObject(subject))
+//       return createTraceableObject(subject)
+//    throw new Error('INVALID INPUT. Only objects or functions can be made traceable')
+// }
 
-   function __DEV__label(label: string) {
-      labelName = label;
-   }
+// function createTraceableObject(target: Object) {
+//    const meta = {
+//       asTraceable: new Traceable()
+//    }
+//    const wrappedMethods: AnyObject = {}
 
-   const proxySwitchMap = new Map([
-      [QUARK as any, () =>
-         meta as any
-      ],
-      ['labelName', () =>
-         labelName
-      ],
-      ['__DEV__label', () =>
-         __DEV__label
-      ],
-   ])
+//    let labelName: string | undefined;
 
-   const proxy = new Proxy(target, {
-      get(target, key, receiver) {
-         const getValue = proxySwitchMap.get(key)
-         if (getValue) return getValue();
-         const value = Reflect.get(target, key, receiver)
-         if (isFunction(value) && !isIon(value)) {
-            return wrappedMethods[key] ?? (wrappedMethods[key] = traceableMethodWrap('IonizedModel', proxy, key, value))
-         }
-      },
-      set(target, key, newValue, receiver) {
-         __DEV__traceMethodCall('IonizedModel', proxy, key)
-         return Reflect.set(target, key, newValue, receiver)
-      }
-   })
-   return proxy;
-}
+//    function __DEV__label(label: string) {
+//       labelName = label;
+//    }
 
-const __DEV__traceFunctions = new Set()
-const __DEV__traceAsyncPathsFunctions = new Set()
+//    const proxySwitchMap = new Map([
+//       [QUARK as any, () =>
+//          meta as any
+//       ],
+//       ['labelName', () =>
+//          labelName
+//       ],
+//       ['__DEV__label', () =>
+//          __DEV__label
+//       ],
+//    ])
 
-function createTraceableFunction(fn: Function & TraceableSubject) {
-   const traceable = new Traceable()
-   function traceableFn(...args: any[]) {
-      if (__DEV__traceFunctions.has(traceableFn))
-         __DEV__trace('TraceableFunction', fn.labelName, traceable.origin!)
-      if (__DEV__traceAsyncPathsFunctions.has(traceableFn))
-         traceAsyncPath(fn.labelName)
-      return fn(...args)
-   }
-   //@ts-expect-error
-   traceableFn[QUARK] = {
-      asTraceable: traceable
-   }
-   traceableFn.__DEV__label = __DEV__label
-   return traceableFn;
-}
+//    const proxy = new Proxy(target, {
+//       get(target, key, receiver) {
+//          const getValue = proxySwitchMap.get(key)
+//          if (getValue) return getValue();
+//          const value = Reflect.get(target, key, receiver)
+//          if (isFunction(value) && !isIon(value)) {
+//             return wrappedMethods[key] ?? (wrappedMethods[key] = traceableMethodWrap('IonizedModel', proxy, key, value))
+//          }
+//       },
+//       set(target, key, newValue, receiver) {
+//          // __DEV__traceMethodCall('IonizedModel', proxy, key)
+//          return Reflect.set(target, key, newValue, receiver)
+//       }
+//    })
+//    return proxy;
+// }
+
+// const __DEV__traceFunctions = new Set()
+// const __DEV__traceAsyncPathsFunctions = new Set()
+
+// function createTraceableFunction(fn: Function & TraceableSubject) {
+//    const traceable = new Traceable()
+//    function traceableFn(...args: any[]) {
+//       if (__DEV__traceFunctions.has(traceableFn))
+//          __DEV__trace('TraceableFunction', fn.labelName, traceable.origin!)
+//       if (__DEV__traceAsyncPathsFunctions.has(traceableFn))
+//          traceAsyncPath(fn.labelName)
+//       return fn(...args)
+//    }
+//    //@ts-expect-error
+//    traceableFn[QUARK] = {
+//       asTraceable: traceable
+//    }
+//    traceableFn.__DEV__label = __DEV__label
+//    return traceableFn;
+// }
 
 // extended property and methods
 // wrapped methods (from target)

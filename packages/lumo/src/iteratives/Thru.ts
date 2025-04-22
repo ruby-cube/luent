@@ -1,4 +1,4 @@
-import { Ion } from "@rue/quarky"
+import { ion, Ion, toIon, toValue } from "@rue/quarky"
 import { NodeEntity } from "../node/makeNode"
 import { MaybeIon } from "../component/InputTypes"
 import { NodePod } from "../node/NodePod"
@@ -99,16 +99,17 @@ class SpreadKit {
          fragment?: DocumentFragment
       ) {
          const data = toValue(this.data);
+         const $list  = toIon(this.data);
          const list = data instanceof Array ? data : data //TODO: need to implement for sets, maps, and objects
          const listKit = this;
          const isDynamic = this.isDynamic;
          const dynamicNodePod = this.dynamicNodePod!;
    
          for (let i = 0; i < list.length; i++) {
-            const $index = ion(i)
             const item = list[i]
+            const $index = ion(()=>$list()?.indexOf(item))
             $currentIndex = $index;
-            this.indices.push($index)
+            // this.indices.push($index)
    
             const nodePod = isDynamic ? dynamicNodePod.appendNodePod() : this.outerNodePod;
    

@@ -32,6 +32,7 @@ import { VideoPlayer } from './video-player';
 import { TestNested, TestNestedB } from './demos/TestNested';
 import { ion } from '@rue/quarky';
 import { TestViewFlasks } from './TestViewFlasks';
+import { TestAnimationController } from './demos/animation-controller';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -121,7 +122,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(TodoMVC)
+const app = createApp(List)
 
 app.mount('#app')
 

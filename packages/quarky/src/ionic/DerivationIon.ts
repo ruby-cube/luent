@@ -4,9 +4,9 @@ import { Flask, getActiveFlask } from "@rue/flask";
 import { quarkOf, QUARK, hasQuark, EntityQuark, QuarkOf, Quark } from "../Quark";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { ParticleMorph } from "../compound/Particle";
-import { __DEV__label, emitSignal } from "../debug/debug";
+import { emitSignal } from "../debug/debug";
 import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
-import { Ion } from "../ion/ion";
+import { Ion } from "../ion/Ion";
 import { CompoundMorph, triggerEffects } from "../compound/Compound";
 import { Mutation } from "../Mutable";
 import { Traceable } from "../debug/Traceable";
@@ -131,7 +131,7 @@ export function createMaybeMemoizedIon(
 
    $derived[QUARK] = ion
    $derived.labelName = undefined
-   $derived.__DEV__label = __DEV__label
+   // $derived.__DEV__label = __DEV__label
 
 
    if (methods) {

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, CommonsKey, For, fromCommons, fromTag, If, Ion, Ionized, v } from "@rue/lumo";
+import { component, CommonsKey, For, fromCommons, fromTag, If, Ion, Ionized, v, listen, InputType } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
 import { AtomicIon, exposeIons, finiton, ion, ionize, watch } from "@rue/quarky";
 
@@ -242,7 +242,7 @@ function App(input = fromTag({
    // })
 
    watchItems(openedFiles, (file, index) => {
-      if(!file.opened) MainView.discard('file', file.id)
+      if (!file.opened) MainView.discard('file', file.id)
    })
 
 
@@ -313,18 +313,58 @@ function SidebarFile(input = fromTag({
 })) {
    const { $index, file } = input
 
+   const $menu = finiton({
+      'opened': {
+         close: () => 'closed'
+      },
+      'closed': {
+         open: () => 'opened'
+      }
+   })
+
+   function reMenuClick(e) {
+      e.stopPropagtion()
+   }
+
    const { openFile } = fromCommons(FILES_KIT)
 
    return component(
-      <div on:click={e => openFile(file)} on:contextmenu={e => $menu.apply('open')}>
+      <div on:click={e => openFile(file)} on:contextmenu={$menu.apply('open')}>
          {If(($menu.is('opened')),
-            <FileContextMenu></FileContextMenu>
+            <FileContextMenu on:click={reMenuClick}></FileContextMenu>
          )}
          {file.$title}
       </div>
    )
 }
 
+const CONTEXT_MENU = InputType({
+   open: Ion<boolean>,
+})
+
+function IfContextMenu({ $open } = fromTag(CONTEXT_MENU)) {
+   const $container = ref('div')
+
+   watch($open, ({ state: open, prevState }) => {
+      if (open) {
+         let menuClicked = false;
+         listen(document, 'click', e => menuClicked || $menu.apply('close'))
+         listen($container(), 'click', menuClicked = true)
+      }
+   })
+
+   return component(
+      <$--portal to='body'>
+         {If($open,
+            <div ref={$container}>
+               {Thru($options, (option, index) => {
+
+               })}
+            </div>
+         )}
+      </$--portal>
+   )
+}
 
 
 

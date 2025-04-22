@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
 import { mountNodeEntities } from "../node/mountNodeKits";
-import { AtomicIon, isAtomicIon, toValue } from "@rue/quarky";
+import { AtomicIon, Ion, isAtomicIon, toValue } from "@rue/quarky";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { isFunction, normalizeToArray } from "@rue/utils";
 import { initializeListRef, initializeRef, NodeRef, NodesRef } from "../node/NodeRef";
@@ -57,7 +57,7 @@ export class InternalComponent {
    constructor(
       component: Component,
       ref: NodeRef | undefined,
-      $index: AtomicIon<number> | undefined
+      $index: Ion<number> | undefined
    ) {
       const exposed = this.exposed = component.exposedComponent;
       if (ref) initializeComponentRef(ref, exposed || {}, $index)
@@ -87,7 +87,7 @@ export class InternalComponent {
 export function initializeComponentRef(
    ref: NodeRef | NodesRef,
    publicComponent: PublicComponent,
-   $index: AtomicIon<number> | undefined,
+   $index: Ion<number> | undefined,
 ) {
    if ($index) {
       initializeListRef(<NodesRef>ref, __DEV__leakProof(publicComponent), $index)

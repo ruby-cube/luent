@@ -1,7 +1,7 @@
 import { Capsule } from "../capsule/Capsule";
 import { Particle } from "../compound/Particle";
 import { Traceable } from "../debug/Traceable";
-import { Ion } from "../ion/ion";
+import { Ion } from "../ion/Ion";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
 import { QUARK, QuarkOf, quarkOf } from "../Quark";

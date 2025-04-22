@@ -11,6 +11,8 @@ export interface AppCommons {
    global?: AppCommons,
 }
 
+//TODO: trace provider
+// fromCommons.trace('dog')(DOG)
 
 export function fromCommons<K extends CommonsEntryKey>(key: K, commons?: NodeCommons | AppCommons): ValidatedInput<K> {
    let _context = commons || getClosestCommons();

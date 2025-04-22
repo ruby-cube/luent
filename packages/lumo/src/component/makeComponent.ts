@@ -1,7 +1,7 @@
 import { ComponentSetup, InternalComponent, Component, PublicComponent } from "./InternalComponent";
 import { ComponentConfig,  NodeEntity } from "../node/makeNode";
 import { AnyObject } from "@rue/types";
-import { AtomicIon } from "@rue/quarky";
+import { AtomicIon, Ion } from "@rue/quarky";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
@@ -56,7 +56,7 @@ export function makeComponent(
    Component: ComponentSetup,
    Slot: InferSlot | undefined,
    config: ComponentConfig,
-   $index: AtomicIon<number> | undefined
+   $index: Ion<number> | undefined
 ): InternalComponent {
 
    //TODO: component flask lifecycle hooks

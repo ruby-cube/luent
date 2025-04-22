@@ -26,7 +26,7 @@ export function makeElement(
    tagName: string,
    Slot: Slot | undefined,
    config: ElementConfig,
-   $index: AtomicIon<number> | undefined
+   $index: Ion<number> | undefined
 ): DOMNode {
    const { class: classes, style: styles, ref, ...other } = config;
 

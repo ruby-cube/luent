@@ -195,9 +195,9 @@ export function scheduleEffect(effect: EffectLink, phase: string) {
 export function trigger( //TODO: figure out which abstraction this belongs to ...  atomic ions, atomic pions, memoized derivations, but not terminal compound
    this: ParticleMorph & Watchable,
 ) {
-   const updateCycle = reactivitySystem.UpdateCycle
-   if (updateCycle.current && updateCycle.current.currentPhase !== SYNC) {
-      debug.error(`Cannot mutate reactive data during update cycle. Current Phase: ${getCurrentPhase()}. Use queueTask or something similar to defer mutation to a separate task/event`)
+   const eventCycle = reactivitySystem.EventCycle
+   if (eventCycle.current && eventCycle.current.currentPhase !== SYNC) {
+      debug.warn(`It is not recommended to mutate reactive state during batched effects. It can lead to state that doesn't match expectations. Current Phase: ${getCurrentPhase()}. Run effect synchronously to change using { phase: 'AT_CHANGE'} option or use queueTask or something similar to defer mutation to a separate task`)
    }
 
    this.asParticle?.triggerCompounds()

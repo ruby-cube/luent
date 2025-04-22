@@ -1,6 +1,6 @@
 import { COMPONENT, ComponentConfig, InferSlot, initializeListRef, initializeRef, NodeRef, NodesRef, PublicComponent } from "@rue/lumo";
 import { Literate } from "./Literate.js";
-import { AtomicIon, ion, isAtomicIon } from "../../quarky/src/index.js";
+import { AtomicIon, Ion, ion, isAtomicIon } from "../../quarky/src/index.js";
 import { collectEffects, getActiveFlask } from "@rue/flask";
 import { LifecycleHook, SSRComponent, SSRComponentSetup } from "./SSRComponent.js";
 
@@ -35,7 +35,7 @@ export function makeComponent(
     Component: SSRComponentSetup,
     Slot: InferSlot | undefined,
     config: ComponentConfig,
-    $index: AtomicIon<number> | undefined
+    $index: Ion<number> | undefined
 ): SSRComponent {
     const parent = getCurrentComponent<SSRComponent>()
     const component = new SSRComponent(parent);

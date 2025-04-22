@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { For, If } from "@rue/lumo"
 import { component, onUnmount } from "@rue/lumo"
 import { $$, ion, ionize, ions, watch } from "@rue/quarky"
@@ -5,33 +6,41 @@ import { $$, ion, ionize, ions, watch } from "@rue/quarky"
 export function SevenGUIs() {
    return component(
       <>
-         <CircleApp></CircleApp>
-         {/* <TemperatureApp></TemperatureApp>
+         {/* <CircleApp></CircleApp> */}
+         <TemperatureApp></TemperatureApp>
          <hr />
          <FlightBooker></FlightBooker>
          <hr />
          <TimerApp />
-         <hr /> */}
-         {/* <CRUDApp /> */}
+         <hr />
+         <CRUDApp />
       </>
    )
 }
 
 
-
+//FIX:
 function TemperatureApp() {
    const $c = ion(0)
-   const $f = ion(32)
+   const $f = ion(() => $c() * (9 / 5 + 32),
+   {
+      // set state(v: number) {
+      //    $c.state = (v - 32) * (5 / 9)
+      // },
+      set(v: number) {
+         $c.state = (v - 32) * (5 / 9)
+      }
+   })
 
    function setC(e, v = +e.target!.value) {
       $c.state = v
-      $f.state = v * (9 / 5) + 32
    }
 
    function setF(e, v = +e.target!.value) {
-      $f.state = v
-      $c.state = (v - 32) * (5 / 9)
+      $f.set(v)
+      // $f.state = v
    }
+
    return component(
       <>
          <input type="number" value={$c} on:change={setC} /> Celsius =
@@ -195,7 +204,7 @@ function CRUDApp() {
 
    watch($selected, ({ state }) => {
       [$last.state, $first.state] = state.split(', ')
-   })
+   }, { sync: true })
 
    const $filteredNames = ion(() =>
       names.filter((n) =>
@@ -337,7 +346,7 @@ function CircleApp() {
    }
    return component(
       <>
-         <svg on:click={e=>reClick(e)}>
+         <svg on:click={e => reClick(e)}>
             <foreignObject x="0" y="40%" width="100%" height="200">
                <p class="tip">
                   Click on the canvas to draw a circle. Click on a circle to select it.

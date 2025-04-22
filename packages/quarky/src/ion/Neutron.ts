@@ -50,7 +50,7 @@ export function createAtomicNeutron(
 
    $ion[QUARK] = ion
    $ion.labelName = undefined
-   $ion.__DEV__label = __DEV__label
+   // $ion.__DEV__label = __DEV__label
 
    const capsuleName = 'Neutron'
 
@@ -59,7 +59,7 @@ export function createAtomicNeutron(
          return ion.state;
       },
       set: value => {
-         __DEV__traceMethodCall(capsuleName, $ion, 'state')
+         // __DEV__traceMethodCall(capsuleName, $ion, 'state')
          return state = shouldIonize(value, ionized) ? ionize(value) : value
       }
    })
