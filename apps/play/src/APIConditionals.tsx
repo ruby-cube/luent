@@ -106,12 +106,24 @@ import { ion, ionize } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
 
+
+
 export function MountIf() {
-   const $count = ion(0, {
-      increment() {
-         $count.state++
-      }
-   })
+
+   const $count = ion.mu({ count: 0 },
+      {
+         increment() {
+            this.count++
+         },
+         update(value) {
+            return this.count = value
+         }
+      })
+
+   function doSomething() {
+      $count.update(e.target.input.value)
+      $count.value = e.target.input.value
+   }
 
    const list = ionize({
       count: 0,
@@ -121,9 +133,9 @@ export function MountIf() {
       }
    })
 
-   const $active = ion(true, {
+   const $active = ion({ active: true }, {
       toggle() {
-         $active.state = !$active()
+         this.active = !this.active
       }
    })
 
@@ -157,7 +169,7 @@ export function MountIf() {
    //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
    return component(
       <>
-         <button on:click={() => ($color.change(), todos[0].name += '!')} style={[{ color: $= $color() + 'e' }]}>shout</button>
+         <button on:click={() => ($color.change(), todos[0].name += '!')} style={[{ color: $ = $color() + 'e' }]}>shout</button>
          <h1>Hello {todos[0].name}</h1>
          <div>{() => 'hi'}</div>
          <$--transition>

@@ -10,7 +10,7 @@ export function setUpTextNode(text: Ion | any, nodePod: NodePod) {
     nodePod.push(textNode)
 
     if (isIon(text)) {
-
+      console.log('isIon', text)
         keepTextNodeUpdated(text, textNode)
     }
     return textNode;

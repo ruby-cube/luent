@@ -63,7 +63,11 @@ export function __DEV__trace(type: string, label: string | undefined, origin: st
 // type Traceable = AnyObject | Ion;
 
 
+//TODO:
 // debug.logDefinitionSource($count)
+// debug.traceTriggers('# animation', animation, { 
+//    canvas: true 
+// })
 
 
 export const debug = {

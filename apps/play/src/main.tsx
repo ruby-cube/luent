@@ -122,7 +122,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(List)
+const app = createApp(TestCounter)
 
 app.mount('#app')
 

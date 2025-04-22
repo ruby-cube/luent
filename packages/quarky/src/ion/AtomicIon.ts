@@ -36,20 +36,26 @@ export function shouldIonize(newValue: unknown, ionized: boolean): newValue is A
    return isObject(newValue) && ionized;
 }
 
+export const MUTABLE = true
+export const IONIZED = true
+export const MUTABLE_IONIZED = 'mutable'
+
 /** INTERNAL */
 export function createAtomicIon(
    state: any,
+   stateKey: string,
    methods?: object,
-   ionized: boolean = false
+   mutable: boolean = false,
+   ionized: boolean | typeof MUTABLE_IONIZED = false
 ) {
    const $state = (() => {
       if (__DEV__) emitSignal();
-      getActiveTracker()?.track(ion)
-      return ion.state;
+      getActiveTracker()?.track(quark)
+      return quark.state;
    }) as $AtomicIonState
 
 
-   const ion: AtomicIonQuark = {
+   const quark: AtomicIonQuark = {
       state,
       ionized,
       entity: $state,
@@ -62,19 +68,21 @@ export function createAtomicIon(
       asTraceable: new Traceable(),
       trigger,
       watch,
-      unwatch: () => unwatch.call(ion)
+      unwatch: () => unwatch.call(quark)
    }
 
    if (methods) {
-      return createAtomicIonWithMethods(ion)
+      return createAtomicIonWithMethods(quark, stateKey, methods, mutable)
    }
 
-   $state[QUARK] = ion
+   $state[QUARK] = quark
 
-   Object.defineProperty($state, 'state', {
-      get: getState.bind(ion),
-      set: setState.bind(ion)
-   })
+   if (mutable)
+      Object.defineProperty($state, 'state', {
+         get: getState.bind(quark),
+         set: setState.bind(quark)
+      })
+
    return $state
 }
 
@@ -92,7 +100,7 @@ export function isAtomicIonQuark(value: unknown): value is AtomicIonQuark {
 }
 
 function getState(this: AtomicIonQuark) {
-   return this.state;
+   return this.entity();
 }
 
 function setState(this: AtomicIonQuark, value: unknown) {
@@ -122,36 +130,53 @@ function setState(this: AtomicIonQuark, value: unknown) {
 
 
 
-function createGetState(getter: undefined | (() => unknown), quark: AtomicIonQuark) {
-   if (getter) {
-      return () => {
-         getter()
-         return getState.call(quark);
-      }
-   }
-   return getState.bind(quark)
-}
+// function createGetState(getter: undefined | (() => unknown), quark: AtomicIonQuark) {
+//    if (getter) {
+//       return () => {
+//          getter()
+//          return getState.call(quark);
+//       }
+//    }
+//    return getState.bind(quark)
+// }
 
-function createAtomicIonWithMethods(quark: AtomicIonQuark, methods: AnyObject) {
-   const descriptors = 'state' in methods ? Object.getOwnPropertyDescriptor(methods, 'state') : undefined
-   let _getState: undefined | (() => unknown);
-   let _setState: undefined | ((value: unknown) => unknown);
+// mutable ion: 
+//
+// state { count: 0 }  << extract key and value
+// methods { increment(){} } << use as is
+//
+// PUBLIC ion (proxy) << readonly is just the function
+// $count.state (get, set, bound to quark) (<< reined doesn't need this )
+// $count.increment() (bound to private this)
+//
+// PRIVATE this Object.create(methods)
+// this.count (get, set, bound to quark)
+// this.increment()  (bound to private this)
+//
+// 
+
+
+function createAtomicIonWithMethods(quark: AtomicIonQuark, stateKey: string, methods: AnyObject, mutable: boolean) {
+   const thisIon = Object.create(methods, {
+      [stateKey]: {
+         get: getState.bind(quark),
+         set: getState.bind(quark)
+      }
+   })
+
+   const $ion: AnyObject = {
+      name: '$stateCapsule',
+      length: 0
+   }
 
    const $stateCapsule = new Proxy(quark.entity, {
       get(target, key) {
-         if (key === 'state') return _getState ? _getState() : (_getState = createGetState(descriptors?.get, quark))
-
-         const value = values.get(key);
-         if (value) return value;
-
-         return initialAccess(
-            methods,
-            key,
-            values
-         )
+         if (mutable && key === 'state') return thisIon[stateKey]
+         if (key in $ion) return $ion[key]
+         else return thisIon[key]
       },
       set(target, key, value) {
-         if (key === 'state') {
+         if (mutable && key === stateKey || key === 'state') {
             setState.apply(quark, [value])
             return true;
          }
@@ -160,21 +185,6 @@ function createAtomicIonWithMethods(quark: AtomicIonQuark, methods: AnyObject) {
       }
    })
 
-   const values = new Map<string | symbol, unknown>([
-      [QUARK as any, quark]
-   ])
-
    quark.entity = $stateCapsule
    return $stateCapsule
-}
-
-function initialAccess(
-   methods: AnyObject,
-   key: PropertyKey,
-   values: Map<PropertyKey, unknown>
-) {
-
-   const sourceValue = methods
-
-   return value;
 }

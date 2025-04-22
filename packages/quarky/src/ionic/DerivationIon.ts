@@ -130,7 +130,7 @@ export function createMaybeMemoizedIon(
    }
 
    $derived[QUARK] = ion
-   $derived.labelName = undefined
+   // $derived.labelName = undefined
    // $derived.__DEV__label = __DEV__label
 
 

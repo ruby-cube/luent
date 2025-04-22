@@ -132,7 +132,21 @@ export function TestAnimationController() {
    }
 
    onMounted(() => {
-      const animation = $animation.state = ionize(new AnimationAnimator(inert($canvas())))
+
+      const animation = $animation.state = ionize(new AnimationAnimator($canvas()), {
+         [INERT_MAP]: {
+            canvas: inert,
+            ctx: inert
+         },
+         addSomething() {
+
+         }
+      })
+
+      debug.traceTriggers('# animation', animation, { canvas: true })
+
+      const list = ionize.shallow([])
+
       animation.play()
    })
 
