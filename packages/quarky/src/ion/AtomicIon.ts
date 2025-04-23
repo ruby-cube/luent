@@ -13,18 +13,23 @@ import { ParticleMorph } from "../compound/Particle";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
-import { AtomicIon } from "./Ion";
+import { AtomicIon, Ion, Methods } from "./Ion";
 import { createProxySwitchMap } from "../ionized/IonizedModel";
 
 /** INTERNAL */
 export type $AtomicIonState = AtomicIon & MutableCapsule & {
-   [QUARK]: {
-      type: symbol;
-      state: any,
-      ionized: boolean | typeof MUTABLE_IONIZED,
-      trigger(): void
-   } & EntityQuark<$AtomicIonState> & ParticleMorph & Watchable
+   [QUARK]: _AtomicIonQuark & EntityQuark<$AtomicIonState> & ParticleMorph & Watchable
 } & MutableEntity
+
+type _AtomicIonQuark = {
+   type: symbol;
+   mutable: boolean;
+   methods: Methods | undefined;
+   state: any
+   stateKey: string
+   ionized: boolean | typeof MUTABLE_IONIZED,
+   trigger(): void
+}
 
 /** 
  * INTERNAL 
@@ -39,12 +44,14 @@ export function shouldIonize(newValue: unknown, ionized: boolean | typeof MUTABL
 export const MUTABLE = true
 export const IONIZED = true
 export const MUTABLE_IONIZED = 'mutable'
+export const ALL_METHODS = 'all_methods'
+const SELECTED_METHODS = Symbol('selected_methods')
 
 /** INTERNAL */
 export function createAtomicIon(
    state: any,
    stateKey: string,
-   methods?: object,
+   methods?: Methods,
    mutable: boolean = false,
    ionized: boolean | typeof MUTABLE_IONIZED = false
 ) {
@@ -57,7 +64,10 @@ export function createAtomicIon(
 
    const quark: AtomicIonQuark = {
       state,
+      stateKey,
       ionized,
+      mutable,
+      methods,
       entity: $state,
       type: ATOMIC_ION,
       asMutable: new Mutable(),
@@ -71,10 +81,6 @@ export function createAtomicIon(
       unwatch: () => unwatch.call(quark)
    }
 
-   if (methods) {
-      return createAtomicIonWithMethods(quark, stateKey, methods, mutable)
-   }
-
    $state[QUARK] = quark
 
    if (mutable)
@@ -82,6 +88,11 @@ export function createAtomicIon(
          get: getState.bind(quark),
          set: setState.bind(quark)
       })
+
+   if (methods) {
+
+      return createAtomicIonWithMethods(quark, mutable)
+   }
 
    return $state
 }
@@ -156,7 +167,11 @@ function setState(this: AtomicIonQuark, value: unknown) {
 // 
 
 
-function createAtomicIonWithMethods(quark: AtomicIonQuark, stateKey: string, methods: AnyObject, mutable: boolean) {
+function createAtomicIonWithMethods(quark: AtomicIonQuark, mutable: boolean, selectedMethods?: string[]) {
+   const stateKey = quark.stateKey;
+   const methods = quark.methods;
+   if (!methods) throw new Error('methods missing')
+
    const thisIon = Object.create(methods, {
       [stateKey]: {
          get: getState.bind(quark),
@@ -164,21 +179,71 @@ function createAtomicIonWithMethods(quark: AtomicIonQuark, stateKey: string, met
       }
    })
 
-   const boundMethods = Object.create(methods)
+   const boundMethods = Object.create(methods, {
+      wM: {
+         value: (...keys: string[]) => {
+            if (keys[0] === ALL_METHODS) {
+               return $stateCapsule
+            }
+            return { [SELECTED_METHODS]: keys, capsule: $stateCapsule }
+         }
+      }
+   })
 
-   const $ion: AnyObject = {
-      name: '$stateCapsule',
-      length: 0,
-      [QUARK]: quark
+   const $stateCapsule = selectedMethods ?
+      createProxyWithSelectMethods(quark, boundMethods, thisIon, mutable, selectedMethods)
+      : createProxyWithAllMethods(quark, boundMethods, thisIon, mutable)
+
+   quark.entity = $stateCapsule
+   return $stateCapsule
+}
+
+function getMethod(boundMethods: AnyObject, methods: AnyObject, key: PropertyKey, thisIon: AnyObject, selectedMethods?: Set<PropertyKey>) {
+   const boundMethod = boundMethods[key]
+   const rawMethod = methods[key]
+   if (boundMethod !== rawMethod) return boundMethod;
+   if (selectedMethods && !selectedMethods.has(key)) {
+      return boundMethods[key] = undefined;
    }
+   return boundMethods[key] = rawMethod.bind(thisIon)
+}
 
-   const $stateCapsule = new Proxy(quark.entity, {
+/** INTERNAL */
+export function asReadonlyIon(ion: $AtomicIonState){
+   return createReadonlyAtomicIon(quarkOf(ion))
+}
+
+
+/** INTERNAL */
+function createReadonlyAtomicIon(
+   quark: AtomicIonQuark,
+) {
+   const originalIon = quark.entity
+
+   const $state = ((quark.mutable || quark.methods) ? function $readonlyState() {
+      return originalIon();
+   } : originalIon) as unknown as $ReadonlyState;
+
+   $state[QUARK] = quark
+
+   quark.asReadonly = $state
+
+   return $state
+}
+
+
+export type $ReadonlyState = Ion & {
+   [QUARK]: _AtomicIonQuark & EntityQuark<$AtomicIonState> & ParticleMorph & Watchable
+}
+
+function createProxyWithAllMethods(quark: AtomicIonQuark, boundMethods: Methods, thisIon: Methods, mutable: boolean) {
+   const methods = quark.methods!;
+   return new Proxy(quark.entity, {
       get(target, key) {
-         if (key === 'state') return thisIon[stateKey]
-         if (key in $ion) return $ion[key]
+         if (key in target) return target[key]
          else return getMethod(boundMethods, methods, key, thisIon)
       },
-      set(target, key, value, receiver) {
+      set(target, key, value) {
          if (mutable && key === 'state') {
             setState.apply(quark, [value])
             return true;
@@ -187,14 +252,42 @@ function createAtomicIonWithMethods(quark: AtomicIonQuark, stateKey: string, met
          return false;
       }
    })
-
-   quark.entity = $stateCapsule
-   return $stateCapsule
 }
 
-function getMethod(boundMethods: AnyObject, methods: AnyObject, key: PropertyKey, thisIon: AnyObject, ) {
-   const boundMethod = boundMethods[key]
-   const rawMethod = methods[key]
-   if (boundMethod !== rawMethod) return boundMethod;
-   return boundMethod[key] = rawMethod.bind(thisIon)
+const NONLOCAL_MUTABLE = Symbol('nonlocalMutable')
+
+function createProxyWithSelectMethods(quark: AtomicIonQuark, boundMethods: Methods, thisIon: Methods, mutable: boolean, _selectedMethods: string[]) {
+   const selectedMethods = new Set(_selectedMethods)
+   const methods = quark.methods!;
+   return new Proxy(quark.entity, {
+      get(target, key) {
+         if (key in target) return target[key]
+         else return getMethod(boundMethods, methods, key, thisIon, selectedMethods)
+      },
+      set(target, key, value) {
+         if (key === NONLOCAL_MUTABLE) {
+            if (quark.mutable && value === false)
+               mutable = value;
+         }
+         if (mutable && key === 'state') {
+            setState.apply(quark, [value])
+            return true;
+         }
+         debug.error(`${String(key)} is not a writable property`)
+         return false;
+      }
+   })
+}
+
+
+export function asReinedIon(ion: $AtomicIonState, selectedMethods: string[], mutable: boolean){
+   return createReinedAtomicIon(quarkOf(ion), mutable, selectedMethods)
+}
+
+export function createReinedAtomicIon(
+   quark: AtomicIonQuark,
+   mutable: boolean,
+   _selectedMethods: string[]
+) {
+   return createAtomicIonWithMethods(quark, mutable, _selectedMethods)
 }

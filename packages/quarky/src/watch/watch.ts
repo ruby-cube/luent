@@ -111,8 +111,9 @@ function getIonValue(subject: Ion) {
 }
 
 function noReactivity(subject: AnyObject) {
-   if (quarkOf(<HasQuark<{ inert: boolean }>>subject).inert) return true;
-   return subject.asCompound && subject.asCompound.particles.length === 0;
+   const quark = quarkOf(subject)
+   if (quark.inert) return true;
+   return quark.asCompound && quark.asCompound.particles.length === 0;
 }
 
 export type WatchSubjects = (Object | Ion)[]

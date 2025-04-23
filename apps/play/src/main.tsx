@@ -10,7 +10,7 @@
 // import { TestConditional } from './TestConditional';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { component, createApp, createGlobalCommons } from '@rue/lumo';
-import { TestCounter, TestCounterModel } from './TestCounter';
+import { CounterApp, TestCounter, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
 import { List } from './TestReactiveModel';
@@ -122,7 +122,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(TestCounter)
+const app = createApp(CounterApp)
 
 app.mount('#app')
 
