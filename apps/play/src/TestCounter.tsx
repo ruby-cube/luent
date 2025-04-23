@@ -31,6 +31,60 @@ export function CounterApp() {
    )
 }
 
+export function TestSimpleCount() {
+
+   const $count = ion(0)
+
+   const $doubleCount = ion(() => $count() * 2)
+
+   function increment() {
+      $count.state++
+   }
+   function decrement() {
+      $count.state--
+   }
+
+   return component(
+      <>
+         <h3>mutable ion with methods</h3>
+         <div>{$count}</div>
+         <div>{$doubleCount}</div>
+         <hr></hr>
+         <p>these should work</p>
+         <button on:click={increment}>increment</button>
+         <button on:click={decrement}>decrement</button>
+      </>
+   )
+}
+
+
+export function TestCount() {
+
+   const $count = ion.mu(0)
+
+   const $doubleCount = ion(() => $count() * 2)
+
+   function increment() {
+      $count.state++
+   }
+   
+   function decrement() {
+      $count.state--
+   }
+
+   return component(
+      <>
+         <h3>mutable ion with methods</h3>
+         <div>{$count}</div>
+         <div>{$doubleCount}</div>
+         <hr></hr>
+         <p>these should work</p>
+         <button on:click={increment}>increment</button>
+         <button on:click={decrement}>decrement</button>
+      </>
+   )
+}
+
 export function TestMutableCount() {
 
    const $count = ion.mu({
@@ -45,7 +99,9 @@ export function TestMutableCount() {
       }
    })
 
-   const $doubleCount = ion(() => $count() * 2)
+   console.log('is it in count', 'increment' in $count)
+
+   const $doubleCount = ion(() => $count() * 2, {increment(){}})
 
    function increment() {
       $count.state++
@@ -184,8 +240,8 @@ export function TestReadonlyMutableCount() {
          <div>{$doubleCount}</div>
          {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
          <p>these should BREAK</p>
-         <button on:click={e => $count.increment()}>increment</button>
-         <button on:click={e => $count.decrement()}>decrement</button>
+         <button on:click={$count.increment}>increment</button>
+         <button on:click={$count.decrement}>decrement</button>
          <hr></hr>
          <p>these should BREAK</p>
          <button on:click={increment}>increment</button>
@@ -201,13 +257,16 @@ export function TestReinedMutableCount() {
       'count': 0
    }, {
       increment() {
-         console.log('increment', this)
+         console.log('**increment', this)
          this.count++
       },
       decrement() {
          this.count--
       }
-   }), ['increment'], true)
+   }), true, ['increment'])
+
+   console.log('increment in coutn', 'increment' in $count)
+   console.log('decrement in coutn', 'decrement' in $count)
 
    const $doubleCount = ion(() => $count() * 2)
 
@@ -222,10 +281,10 @@ export function TestReinedMutableCount() {
       <>
          <h3>reined mutable ion with methods</h3>
          <div>{$count}</div>
-         <div>{$doubleCount}</div>
+         {/* <div>{$doubleCount}</div> */}
          {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
-         <button on:click={e => $count.increment()}>increment</button> this should work
-         <button on:click={e => $count.decrement()}>decrement</button> this should BREAK
+         <button on:click={$count.increment}>increment</button> this should work
+         <button on:click={$count.decrement}>decrement</button> this should BREAK
          <hr></hr>
          <p>these should work</p>
          <button on:click={increment}>increment</button>
@@ -248,7 +307,7 @@ export function TestReinedImmutableCount() {
       decrement() {
          this.count--
       }
-   }), ['increment'], false)
+   }), false, ['increment'])
 
    const $doubleCount = ion(() => $count() * 2)
 
@@ -265,8 +324,8 @@ export function TestReinedImmutableCount() {
          <div>{$count}</div>
          <div>{$doubleCount}</div>
          {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
-         <button on:click={e => $count.increment()}>increment</button> this should work
-         <button on:click={e => $count.decrement()}>decrement</button> this should BREAK
+         <button on:click={$count.increment}>increment</button> this should work
+         <button on:click={$count.decrement}>decrement</button> this should BREAK
          <hr></hr>
          <p>these should BREAK</p>
          <button on:click={increment}>increment</button>
@@ -288,7 +347,7 @@ export function TestMutableNoMethodCount() {
       decrement() {
          this.count--
       }
-   }), [], true)
+   }), true, [])
 
    const $doubleCount = ion(() => $count() * 2)
 

@@ -75,7 +75,7 @@ function __logTriggeredAtom(atom: Atom) {
       for (const atom of triggeredAtoms) {
          //FIX: atom.__DEV__logTrace
          if (isAtomicIon(atom)) logAtomicIonTrace(atom)
-         else if (isAtomicPionQuark(atom)) logPropTrace(atom);
+         else if (isAtomicPionQuark(quarkOf(atom))) logPropTrace(atom);
          else if (isTrackedOp(atom)) logTrackedOpTrace(atom)
          else throw new Error('Invalid atom')
 

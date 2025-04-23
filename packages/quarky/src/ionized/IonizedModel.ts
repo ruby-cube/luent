@@ -393,7 +393,7 @@ export function createIonizedModel(
    const ionizedModel = new Proxy(target, {
       get(target, key, receiver) {
          __DEV__proxyGetterAssertions(ionizedModel, receiver)
-         const getValue = switchMap.get(key)
+         const getValue = propertyMap.get(key)
          if (getValue) return getValue();
          return initialAccess(
             target,
@@ -402,7 +402,7 @@ export function createIonizedModel(
             modelQuark,
             structureConfigs,
             key,
-            switchMap
+            propertyMap
          )
       },
 
@@ -416,9 +416,8 @@ export function createIonizedModel(
       },
 
       has(target, key) {
-         //FIX: This is not going to work asAtomicOp because currently I'm storing the atomic op on the function itself... I need to use a map again...
          // getActiveTracker()?.track(asAtomicOp(ionizedModel, '[[in]]', key)) //TODO: trigger [[in]] when property is added or property is deleted
-         const getValue = switchMap.get(key)
+         const getValue = propertyMap.get(key)
          if (getValue)
             return true;
          return key in target || !!methods && key in methods
@@ -480,13 +479,13 @@ export function createIonizedModel(
 
    const structureConfigs = getStructureConfigs(target);
    const modelQuark = new IonizedModelQuark(ionizedModel, target, methods, structureConfigs)
-   const switchMap = createProxySwitchMap(modelQuark)
+   const propertyMap = createProxyPropertyMap(modelQuark, target)
 
    if (!methods) registerIonizedModel(ionizedModel, target)
    return ionizedModel
 }
 
-export type ProxySwitchMap = Map<string | symbol, () => any>
+export type ProxyPropertyMap = Map<string | symbol, () => any>
 
 function triggerKeysChange(model: IonizedModel, key: PropertyKey) {
    getAtomicOp(model, INTERNAL_OP, 'ownKeys')?.trigger()
@@ -501,7 +500,7 @@ function initialAccess(
    quark: IonizedModelQuark,
    structureConfigs: CustomIonizedModelConfig[],
    key: string | symbol,
-   switchMap: ProxySwitchMap
+   switchMap: ProxyPropertyMap
 ) {
    if (methods && key in methods) {
       return bindMethod(methods[key], key, ionizedModel, switchMap)
@@ -539,7 +538,7 @@ export function initialPropertyAccess(
    structureConfigs: CustomIonizedModelConfig[],
    key: string | symbol,
    value: any,
-   switchMap: ProxySwitchMap,
+   switchMap: ProxyPropertyMap,
    transformValue: (value: any) => any = (value: any) => value
 ) {
    const isIonAccessKey = typeof key === 'string' && key[0] === '$' //TODO: need to use regex
@@ -561,7 +560,7 @@ export function initialPropertyAccess(
 
 
 //FIX: figure out where to call traceableMethodWrap
-function bindMethod(method: Function, key: string | symbol, proxy: IonizedModel, switchMap: ProxySwitchMap) {
+function bindMethod(method: Function, key: string | symbol, proxy: IonizedModel, switchMap: ProxyPropertyMap) {
    if (!isMethod(method)) throw new Error('Invalid method')
    const boundMethod =
       // __DEV__ ?
@@ -576,7 +575,7 @@ function initialNonTrackablePropertyAccess(
    target: AnyObject,
    key: string | symbol,
    value: any,
-   switchMap: ProxySwitchMap,
+   switchMap: ProxyPropertyMap,
    transformValue: Function
 ) {
    switchMap.set(key, () => transformValue(target[key]))
@@ -588,7 +587,7 @@ function initialIonAccess(
    target: AnyObject,
    key: string,
    value: any,
-   switchMap: ProxySwitchMap,
+   switchMap: ProxyPropertyMap,
    transformValue: Function
 ) {
    if (isIon(value)) {
@@ -614,7 +613,7 @@ function initialIonAccess(
    if (__DEV__) console.warn('Invalid Property Key initialization: Property keys prefixed with a single dollar sign ($) are reserved for ions.\n' + asTraceable(proxy).origin)
 }
 
-function initialAbsorbedIonStateAccess(key: string | symbol, value: any, switchMap: ProxySwitchMap, transformValue: Function) {
+function initialAbsorbedIonStateAccess(key: string | symbol, value: any, switchMap: ProxyPropertyMap, transformValue: Function) {
    switchMap.set(key, () => transformValue(maybeIonize(value())))
    return transformValue(maybeIonize(value())); // { count: $count } get value case
 }
@@ -646,7 +645,7 @@ function initialTrackableStateAccess(
    target: AnyObject,
    key: string | symbol,
    value: any,
-   switchMap: ProxySwitchMap,
+   switchMap: ProxyPropertyMap,
    transformValue: Function
 ) {
    function getState(value: any) {
@@ -750,7 +749,7 @@ function bindNativeMethod(
    target: AnyObject,
    ionizedModel: IonizedModel,
    quark: IonizedModelQuark,
-   switchMap: ProxySwitchMap,
+   switchMap: ProxyPropertyMap,
 ) {
    if (isFunction(config)) {
       // trackable ops
@@ -772,17 +771,20 @@ function bindNativeMethod(
 
 
 
-export function createProxySwitchMap(meta: AnyObject) {
+export function createProxyPropertyMap(meta: AnyObject, target: AnyObject) {
    // let labelName: string | undefined;
 
    // function __DEV__label(label: string) {
    //    labelName = label;
    // }
 
+   let _super: AnyObject | undefined;
+
    return new Map([
       [QUARK as any, () =>
          meta as any
-      ]
+      ],
+      ['super', ()=> _super ?? createIonizedModel(target, undefined)]
       // ['labelName', () =>
       //    labelName
       // ],

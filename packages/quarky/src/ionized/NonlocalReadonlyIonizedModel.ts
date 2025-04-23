@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { __DEV__proxyGetterAssertions, createProxySwitchMap, CustomIonizedModelConfig, getNativeMethodConfig, getTargetKey, initialPropertyAccess, IonizedModel, isMethod, isNativeMethod, ProxySwitchMap } from "./IonizedModel";
+import { __DEV__proxyGetterAssertions, createProxyPropertyMap, CustomIonizedModelConfig, getNativeMethodConfig, getTargetKey, initialPropertyAccess, IonizedModel, isMethod, isNativeMethod, ProxyPropertyMap } from "./IonizedModel";
 import { asNonlocalReadonly, isLocalKey, restrictAccess } from "../capsule/Readonly";
 import { quarkOf } from "../Quark";
 
@@ -13,7 +13,7 @@ export function createNonlocalReadonlyIonizedModel(originalIonizedModel: Ionized
    const quark = quarkOf(<IonizedModel>originalIonizedModel)
    const { rawTarget, methods, structureConfigs } = quark
 
-   const switchMap = createProxySwitchMap(quark)
+   const switchMap = createProxyPropertyMap(quark)
 
    const readonlyModel = new Proxy(rawTarget, {
       has(target, key) { //TODO: should methods not be in readonly object?
@@ -52,7 +52,7 @@ function initialAccess(
    ionizedModel: IonizedModel,
    structureConfigs: CustomIonizedModelConfig[],
    key: string | symbol,
-   switchMap: ProxySwitchMap
+   switchMap: ProxyPropertyMap
 ) {
    if (isLocalKey(key) || methods && key in methods) {
       return restrictAccess(key, switchMap)

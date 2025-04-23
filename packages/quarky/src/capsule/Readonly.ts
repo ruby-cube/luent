@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { createNonlocalReadonlyIonizedModel } from "../ionized/NonlocalReadonlyIonizedModel";
 import { isIonizedModel } from "../ionized/ionize";
 import { createReadonlyIon, isWritableIon } from "../ion/ReadonlyIon";
-import { __DEV__proxyGetterAssertions, createProxySwitchMap, isMethod, ProxySwitchMap } from "../ionized/IonizedModel";
+import { __DEV__proxyGetterAssertions, createProxyPropertyMap, isMethod, ProxyPropertyMap } from "../ionized/IonizedModel";
 import { isFunction, isObject } from "@rue/utils";
 import { quarkOf, hasQuark } from "../Quark";
 import { Traceable } from "../debug/Traceable";
@@ -42,7 +42,7 @@ const readonlyQuarkMap = new Map()
 
 export function createReadonlyObject(obj: AnyObject) { //TODO: what about Arrays, Maps, and Sets for deep readonly
    const meta = readonlyQuarkMap.get(obj) ?? new MetaReadonlyObject(obj)
-   const switchMap = createProxySwitchMap(meta)
+   const switchMap = createProxyPropertyMap(meta)
    const proxy = new Proxy(obj, {
       has(target, key) { //TODO: should methods not be in readonly object?
          const getValue = switchMap.get(key)
@@ -87,7 +87,7 @@ function initialAccess(
    target: AnyObject,
    proxy: AnyObject,
    key: string | symbol,
-   switchMap: ProxySwitchMap
+   switchMap: ProxyPropertyMap
 ) {
    if (isLocalKey(key)) {
       return restrictAccess(key, switchMap)
@@ -108,7 +108,7 @@ function initialPropertyAccess(
    target: AnyObject,
    key: string | symbol,
    value: any,
-   switchMap: ProxySwitchMap
+   switchMap: ProxyPropertyMap
 ) {
    switchMap.set(key, () => asNonlocalReadonly(target[key]))
    return asNonlocalReadonly(value)
@@ -118,7 +118,7 @@ export function isLocalKey(key: string | symbol) {
    return (typeof key === 'string' && /^_[a-zA-Z]/.test(key))
 }
 
-export function restrictAccess(key: string | symbol, switchMap: ProxySwitchMap) {
+export function restrictAccess(key: string | symbol, switchMap: ProxyPropertyMap) {
    switchMap.set(key, getRestrictedProperty)
    return getRestrictedProperty()
 }

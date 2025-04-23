@@ -1,10 +1,8 @@
 import { AnyObject } from "@rue/types";
 import { isObject } from "@rue/utils";
-import { timeTraveler } from "./TimeTraveler";
-import { $effectCycle } from "../effect-cycle/EffectCycle";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { inert, Inert, isInert } from "./inert";
-import { AtomicIon, Ion, ion, isIon } from "../ion/Ion";
+import { AtomicIon, Ion, ion, isIon, Methods } from "../ion/Ion";
 import { createIonizedModel, getStructureConfigs, IonizedModel } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 
@@ -97,9 +95,8 @@ type IonizedGetter<T, K extends keyof T> =
 // { [K in keyof Partial<T> | PropertyKey]: K extends keyof T ? true|  ((...args: any[]) => any): (...args: any[]) => any }
 // { as: true | ((...args: any[]) => any) } | { as?: true | ((...args: any[]) => any) } & { [key: PropertyKey]: (...args: any[]) => any }
 
-
 //API
-export function ionize<T extends AnyObject, M>(target: T, methods?: M & { [key: string]: (...args: any[]) => any }): M extends AnyObject ? Ionized<T> & M : Ionized<T> {
+export function ionize<T, M>(target: T & object, methods?: (M & Methods) & ThisType<T & M & {super: T}>): M extends AnyObject ? Ionized<T> & M : Ionized<T> {
    if (!methods && isIonizedModel(target)) return target;
    if (isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)

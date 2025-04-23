@@ -32,7 +32,7 @@ Derivation vs direct value
  * @returns 
  */
 export function isAtomicPionQuark(value: any): value is AtomicPionQuark {
-   return quarkOf(value) instanceof AtomicPionQuark;
+   return value instanceof AtomicPionQuark;
 }
 
 /** INTERNAL */
