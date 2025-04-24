@@ -2604,11 +2604,10 @@ declare global {
          'vvv:show': {};
          'vvv:mount': {};
          'vvv:create': {};
-         'i--i': {};
+         'i--i': {}; //comments
          '$--style': { children: string };
          '$--portal': PortalNodeInput & { children: Lumo.Slot }
          '$--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
-         '$--commons': ContextNodeInput & { children: Lumo.Slot };
          '$--suspense': SuspenseNodeInput & { children: Lumo.Slot };
          '$--try': TryNodeInput & { children: Lumo.Slot };
          '$--transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>

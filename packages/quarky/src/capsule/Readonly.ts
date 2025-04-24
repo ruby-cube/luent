@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { createNonlocalReadonlyIonizedModel } from "../ionized/NonlocalReadonlyIonizedModel";
 import { isIonizedModel } from "../ionized/ionize";
 import { createReadonlyIon, isWritableIon } from "../ion/ReadonlyIon";
-import { __DEV__proxyGetterAssertions, createProxyPropertyMap, isMethod, ProxyPropertyMap } from "../ionized/IonizedModel";
+import { __DEV__proxyGetterAssertions, isMethod, ProxyPropertyMap } from "../ionized/IonizedModel";
 import { isFunction, isObject } from "@rue/utils";
 import { quarkOf, hasQuark } from "../Quark";
 import { Traceable } from "../debug/Traceable";

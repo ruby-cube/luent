@@ -5,7 +5,6 @@ import { InferSlot, makeComponent } from "../component/makeComponent";
 import { NodeReferent, NodeRef, NodesRef } from "./NodeRef";
 import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
-import { createCommons } from "../commons/Commons";
 import { AnyObject, Booleanny } from "@rue/types";
 import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
 import { MorphicRenderKit } from "../morphic/MorphicNode";
@@ -120,15 +119,12 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | '$--style' | '$--transit' | '$--transition' | '$--commons' | 'vvv:mount' | 'vvv:create' | 'vvv:show' | '$--try' | '$--suspense' | '$--portal' | '$--link',
+   nodeType: SVGTag | HTMLTag | ComponentSetup | '$--style' | '$--transit' | '$--transition' | 'vvv:mount' | 'vvv:create' | 'vvv:show' | '$--try' | '$--suspense' | '$--portal' | '$--link',
    Slot: undefined | (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent | SwapConfig | JSX.Element | undefined {
 
    switch (nodeType) {
-      case '$--commons':
-         if (!Slot) throw new Error(`Extraneous <$--commons>`)
-         return createCommons(Slot, <ComponentConfig>config)
 
       case '$--try':
          if (!Slot) throw new Error(`Extraneous <$--try>`)

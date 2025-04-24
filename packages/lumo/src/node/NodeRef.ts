@@ -158,6 +158,7 @@ export function initializeRef(ref: NodeRef, value: NodeReferent | undefined) {
    if (ref())
       throw new Error("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")
    const _ref = ref[INTERNAL]
+   console.log('set ref', value)
    if (value) {
       _ref.setValue(value)
       const flask = getActiveFlask()

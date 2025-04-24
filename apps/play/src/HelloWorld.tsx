@@ -3,6 +3,7 @@ import { Component, Else, ElseIf, expose, For, fromTag, If, Ion, prep, provideAp
 import { ion, ionize, Ionized, ionizeWithMarks } from "@rue/quarky";
 import { Inert, inert } from "../../../packages/quarky/src/ionized/inert";
 import { Well, Wellerman } from "./Well";
+import { Commons } from "../../../packages/lumo/src/commons/Commons";
 
 function Swap() {
    return component('')
@@ -364,10 +365,10 @@ function J(input: { for: any, Slot: any, params: any }) {
       door: 0
    },
       <>
-         <$--commons provide={{ [_dog_]: mu(dog) }}> //auto-readonly unless marked with m:
+         <Commons provide={{ [_dog_]: mu(dog) }}> //auto-readonly unless marked with m:
             <input value={mu($msg, 'set', '+trace')}></input> // auto-readonly unless marked with m: .. then it's reined
             <input value={$msg} on:input={e => { $msg.state = e.target.value }}></input> // auto-readonly unless marked with m: .. then it's reined
-         </$--commons>
+         </Commons>
       </>
    )
 }

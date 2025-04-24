@@ -43,6 +43,7 @@ export function component<T extends AnyObject | undefined = AnyObject | undefine
 export function component<T extends AnyObject | undefined = AnyObject | undefined>(templateOrComponent: T | JSXTemplate, template?: JSXTemplate): Component<T extends AnyObject ? T : undefined> {
    const renderedTemplate = arguments.length === 2 ? template : templateOrComponent as JSXTemplate;
    const exposedComponent = arguments.length === 2 ? templateOrComponent as AnyObject : undefined;
+   console.log('exposedComponent', exposedComponent)
    return {
       exposedComponent, //TODO: make read only
       renderedTemplate: toValue(renderedTemplate ? unnestComponent(renderedTemplate) : undefined),
@@ -90,10 +91,11 @@ export function initializeComponentRef(
    $index: Ion<number> | undefined,
 ) {
    if ($index) {
-      initializeListRef(<NodesRef>ref, __DEV__leakProof(publicComponent), $index)
+      initializeListRef(<NodesRef>ref, publicComponent, $index)
    }
    else {
-      initializeRef(ref, __DEV__leakProof(publicComponent))
+      console.log('initialize component ref', publicComponent)
+      initializeRef(ref, publicComponent)
    }
 }
 

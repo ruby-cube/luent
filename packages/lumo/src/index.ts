@@ -14,6 +14,7 @@ export * from './conditional/If' //TODO: Limit to public API
 export * from './conditional/toggledisplay' //TODO: Limit to public API
 export * from './commons/provide' //TODO: Limit to public API
 export * from './commons/CommonsKey' //TODO: Limit to public API
+export * from './commons/Commons' //TODO: Limit to public API
 export * from './events/target' //TODO: Limit to public API
 export * from './events/listen' //TODO: Limit to public API
 export * from './events/Abortable' //TODO: Limit to public API

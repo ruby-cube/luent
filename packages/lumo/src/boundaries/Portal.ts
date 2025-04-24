@@ -19,6 +19,8 @@ export type PortalNodeInput = {
    to: string | Element,
 }
 
+
+//TODO: need a portal kit in order for it to show up in node pod?
 export function createPortalNode(Slot: () => NodeEntity, input: PortalNodeInput) {
    const { to: container } = input
    if (!(isFunction(Slot))) throw new Error('')
@@ -29,6 +31,7 @@ export function createPortalNode(Slot: () => NodeEntity, input: PortalNodeInput)
 
    const _nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(Slot())), element, nodePod)
    mountNodeEntities(_nodeEntities, element)
+   console.log('portal node entitites', _nodeEntities)
    return undefined;
 }
 

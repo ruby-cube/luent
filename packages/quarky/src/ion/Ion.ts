@@ -39,7 +39,8 @@ export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
 
 
 
-type AsIon<T, M> = [T] extends [AtomicIon] ? T  // [T] extends [AtomicIon] to prevent type-narrowing
+type AsIon<T, M> = [T] extends [StateDef<infer D>] ? D :
+[T] extends [AtomicIon] ? T  // [T] extends [AtomicIon] to prevent type-narrowing
    : [T] extends [Derivation<infer R>] ? M extends Methods ? Ion<R, M & { wM: PickMethods }> : Ion<R>
    : M extends Methods ? Ion<T, M & { wM: PickMethods }> : Ion<T>
 
@@ -81,67 +82,71 @@ type StateDef<InitialState> = { [key: string]: InitialState }
  * @returns 
  */
 export function ion<
-   T,
-   M
->(initialStateDefinition: T & StateDef<unknown>, methods: M & Methods & ThisType<M & (T extends StateDef<unknown> ? T : {})>): AsIon<State<T>, M>
+T,
+M
+>(initialStateDefinition: T & StateDef<unknown>, methods: M & Methods & ThisType<M & (T extends StateDef<unknown> ? T : {})>): AsMutableIon<T, M>
+export function ion<
+T,
+M
+>(initialStateDefinition: T & (() => unknown), methods?: M & Methods& ThisType<M>): AsMutableIon<T, M>
 export function ion<
    T,
    M
->(initialStateDefinition: T & (() => unknown), methods?: M & Methods& ThisType<M>): AsIon<State<T>, M>
+>(initialStateDefinition: T, methods?: M & Methods& ThisType<M>): AsMutableIon<T, M>
 export function ion<
-   T extends StateDef<unknown> | (() => unknown),
+T,
    M
->(initialStateDefinition: T, methods?: M & Methods& ThisType<M & (T extends StateDef<unknown> ? T : {})>): AsIon<State<T>, M> {
-   return asIon(initialStateDefinition, false, false, methods) as AsIon<State<T>, M>
+>(initialStateDefinition: T & StateDef<unknown> | (() => unknown) | unknown, methods?: M & Methods& ThisType<M & (T extends StateDef<unknown> ? T : {})>): AsMutableIon<T, M> {
+   return asIon(initialStateDefinition, MUTABLE, false, methods) as AsMutableIon<T, M>
 }
+
+
+// function createIonizedIon<
+//    T extends Record<string, unknown>,
+//    M
+// >(initialStateDefinition: T, methods: M & Methods): AsMutableIon<T, M> {
+//    return asIon(initialStateDefinition, MUTABLE, IONIZED, methods) as AsMutableIon<T, M>
+// }
+
+// type State<D> = [D] extends [StateDef<infer T>] ? T : D
+
+ion.ionize = createIonizedIon
+// ion.mu = createMutableIon
+// createMutableIon.ionize = createMutableIonizedIon
+// createMutableIonizedIon.mu = createDeepMutableIonizedIon
+
+ion.finite = finiton
 
 
 function createIonizedIon<
    T extends Record<string, unknown>,
    M
->(initialStateDefinition: T, methods: M & Methods): AsIon<State<T>, M> {
-   return asIon(initialStateDefinition, false, IONIZED, methods) as AsIon<State<T>, M>
-}
-
-type State<D> = D extends StateDef<infer T> ? T : D
-
-ion.ionize = createIonizedIon
-ion.mu = createMutableIon
-createMutableIon.ionize = createMutableIonizedIon
-createMutableIonizedIon.mu = createDeepMutableIonizedIon
-
-ion.finite = finiton
-
-
-function createMutableIonizedIon<
-   T extends Record<string, unknown>,
-   M
->(initialStateDefinition: T, methods: M & Methods): AsMutableIon<State<T>, M>
-function createMutableIonizedIon<
+>(initialStateDefinition: T, methods: M & Methods): AsMutableIon<T, M>
+function createIonizedIon<
    T extends unknown,
    M
->(initialStateDefinition: T): AsMutableIon<State<T>, M>
-function createMutableIonizedIon<
+>(initialStateDefinition: T): AsMutableIon<T, M>
+function createIonizedIon<
    T extends Record<string, unknown> | unknown,
    M
->(initialStateDefinition: T, methods?: M & Methods): AsMutableIon<State<T>, M> {
-   return asIon(initialStateDefinition, MUTABLE, IONIZED, methods) as AsMutableIon<State<T>, M>
+>(initialStateDefinition: T, methods?: M & Methods): AsMutableIon<T, M> {
+   return asIon(initialStateDefinition, MUTABLE, IONIZED, methods) as AsMutableIon<T, M>
 }
 
-function createDeepMutableIonizedIon<
-   T extends Record<string, unknown>,
-   M
->(initialStateDefinition: T, methods: M & Methods): AsMutableIon<State<T>, M>
-function createDeepMutableIonizedIon<
-   T extends unknown,
-   M
->(initialStateDefinition: T): AsMutableIon<State<T>, M>
-function createDeepMutableIonizedIon<
-   T extends Record<string, unknown> | unknown,
-   M
->(initialStateDefinition: T, methods?: M & Methods): AsMutableIon<State<T>, M> {
-   return asIon(initialStateDefinition, MUTABLE, MUTABLE_IONIZED, methods) as AsMutableIon<State<T>, M>
-}
+// function createDeepMutableIonizedIon<
+//    T extends Record<string, unknown>,
+//    M
+// >(initialStateDefinition: T, methods: M & Methods): AsMutableIon<T, M>
+// function createDeepMutableIonizedIon<
+//    T extends unknown,
+//    M
+// >(initialStateDefinition: T): AsMutableIon<T, M>
+// function createDeepMutableIonizedIon<
+//    T extends Record<string, unknown> | unknown,
+//    M
+// >(initialStateDefinition: T, methods?: M & Methods): AsMutableIon<T, M> {
+//    return asIon(initialStateDefinition, MUTABLE, MUTABLE_IONIZED, methods) as AsMutableIon<T, M>
+// }
 
 
 
@@ -173,19 +178,19 @@ function createDeepMutableIonizedIon<
  * @param methods 
  * @returns 
  */
-export function createMutableIon<
+export function createEncapsulatedIon<
    T extends Record<string, unknown>,
    M
->(initialStateDefinition: T, methods: M & Methods& ThisType<M & (T extends Record<string, unknown> ? T : {})>): AsMutableIon<State<T>, M>
-export function createMutableIon<
+>(initialStateDefinition: T, methods: M & Methods& ThisType<M & (T extends Record<string, unknown> ? T : {})>): AsIon<T, M>
+export function createEncapsulatedIon<
    T extends unknown,
    M
->(initialStateDefinition: T): AsMutableIon<State<T>, M>
-export function createMutableIon<
+>(initialStateDefinition: T): AsIon<T, M>
+export function createEncapsulatedIon<
    T extends unknown | Record<string, unknown>,
    M
->(initialStateDefinition: T, methods?: M & Methods& ThisType<M & (T extends Record<string, unknown> ? T : {})>): AsMutableIon<State<T>, M> {
-   return asIon(initialStateDefinition, MUTABLE, !IONIZED, methods) as AsMutableIon<State<T>, M>
+>(initialStateDefinition: T, methods?: M & Methods& ThisType<M & (T extends Record<string, unknown> ? T : {})>): AsIon<T, M> {
+   return asIon(initialStateDefinition, !MUTABLE, !IONIZED, methods) as AsIon<T, M>
 }
 
 function asIon(

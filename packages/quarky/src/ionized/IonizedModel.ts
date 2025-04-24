@@ -6,7 +6,7 @@ import { storeSnapshot } from "./ionize";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { debug, isFunction, isObject, noop } from "@rue/utils";
 import { Ion, isIon } from "../ion/Ion";
-import { __DEV__trace} from "../debug/debug";
+import { __DEV__trace } from "../debug/debug";
 import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
@@ -17,6 +17,7 @@ import { CompoundMorph } from "../compound/Compound";
 import { Watchable } from "../watch/Watched";
 import { IonizedCompound } from "./IonizedCompound";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
+import { MUTABLE } from "../ion/AtomicIon";
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -389,6 +390,8 @@ const KEY_IN_OP = "[[in]]"
 export function createIonizedModel(
    target: object,
    methods: AnyObject | undefined,
+   mutable: boolean,
+   isPublic: boolean = true
 ) {
    const ionizedModel = new Proxy(target, {
       get(target, key, receiver) {
@@ -398,15 +401,19 @@ export function createIonizedModel(
          return initialAccess(
             target,
             methods,
-            ionizedModel,
+            thisModel,
             modelQuark,
             structureConfigs,
             key,
-            propertyMap
+            propertyMap,
          )
       },
 
       set(target, key, value) {
+         if (!mutable) {
+            debug.error('This model is encapsulated. Cannot set value of properties. Must use methods to set state')
+            return false;
+         }
          return reactiveSetter(
             ionizedModel,
             target,
@@ -479,9 +486,18 @@ export function createIonizedModel(
 
    const structureConfigs = getStructureConfigs(target);
    const modelQuark = new IonizedModelQuark(ionizedModel, target, methods, structureConfigs)
-   const propertyMap = createProxyPropertyMap(modelQuark, target)
+   let _super: AnyObject | undefined;
+   const propertyMap = isPublic ? new Map([
+      [QUARK as any, () => modelQuark as any]
+   ]) : new Map([
+      [QUARK as any, () => modelQuark as any],
+      ['super', () => _super ?? createIonizedModel(target, undefined, MUTABLE, false)]
+   ])
+
+   const thisModel = mutable ? ionizedModel : createIonizedModel(target, methods, true, false)
 
    if (!methods) registerIonizedModel(ionizedModel, target)
+
    return ionizedModel
 }
 
@@ -500,10 +516,10 @@ function initialAccess(
    quark: IonizedModelQuark,
    structureConfigs: CustomIonizedModelConfig[],
    key: string | symbol,
-   switchMap: ProxyPropertyMap
+   propertyMap: ProxyPropertyMap,
 ) {
    if (methods && key in methods) {
-      return bindMethod(methods[key], key, ionizedModel, switchMap)
+      return bindMethod(methods[key], key, ionizedModel, propertyMap)
    }
    const _key = methods ? getTargetKey(methods, key) : key;
    const nativeMethodConfig = getNativeMethodConfig(_key, structureConfigs)
@@ -515,12 +531,12 @@ function initialAccess(
          target,
          ionizedModel,
          quark,
-         switchMap
+         propertyMap,
       )
    }
    const value = target[_key]
    if (isMethod(value)) {
-      return bindMethod(value, key, ionizedModel, switchMap)
+      return bindMethod(value, key, ionizedModel, propertyMap)
    }
    return initialPropertyAccess(
       target,
@@ -528,7 +544,7 @@ function initialAccess(
       structureConfigs,
       key,
       value,
-      switchMap
+      propertyMap
    )
 }
 
@@ -538,36 +554,36 @@ export function initialPropertyAccess(
    structureConfigs: CustomIonizedModelConfig[],
    key: string | symbol,
    value: any,
-   switchMap: ProxyPropertyMap,
+   propertyMap: ProxyPropertyMap,
    transformValue: (value: any) => any = (value: any) => value
 ) {
    const isIonAccessKey = typeof key === 'string' && key[0] === '$' //TODO: need to use regex
 
    if (isNonTrackable(key, structureConfigs)) { //QUESTION: is this worth it? //TODO: include non-writable properties
-      return initialNonTrackablePropertyAccess(target, key, value, switchMap, transformValue);
+      return initialNonTrackablePropertyAccess(target, key, value, propertyMap, transformValue);
    }
 
    if (isIonAccessKey) {
-      return initialIonAccess(ionizedModel, target, key, value, switchMap, transformValue);
+      return initialIonAccess(ionizedModel, target, key, value, propertyMap, transformValue);
    }
 
    if (isIon(value)) {
-      return initialAbsorbedIonStateAccess(key, value, switchMap, transformValue)
+      return initialAbsorbedIonStateAccess(key, value, propertyMap, transformValue)
    }
 
-   return initialTrackableStateAccess(ionizedModel, target, key, value, switchMap, transformValue)
+   return initialTrackableStateAccess(ionizedModel, target, key, value, propertyMap, transformValue)
 }
 
 
 //FIX: figure out where to call traceableMethodWrap
-function bindMethod(method: Function, key: string | symbol, proxy: IonizedModel, switchMap: ProxyPropertyMap) {
+function bindMethod(method: Function, key: string | symbol, proxy: IonizedModel, propertyMap: ProxyPropertyMap) {
    if (!isMethod(method)) throw new Error('Invalid method')
    const boundMethod =
       // __DEV__ ?
       //    traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
       //    : 
       method.bind(proxy);
-   switchMap.set(key, () => boundMethod)
+   propertyMap.set(key, () => boundMethod)
    return boundMethod;
 }
 
@@ -575,10 +591,10 @@ function initialNonTrackablePropertyAccess(
    target: AnyObject,
    key: string | symbol,
    value: any,
-   switchMap: ProxyPropertyMap,
+   propertyMap: ProxyPropertyMap,
    transformValue: Function
 ) {
-   switchMap.set(key, () => transformValue(target[key]))
+   propertyMap.set(key, () => transformValue(target[key]))
    return transformValue(value);
 }
 
@@ -587,12 +603,12 @@ function initialIonAccess(
    target: AnyObject,
    key: string,
    value: any,
-   switchMap: ProxyPropertyMap,
+   propertyMap: ProxyPropertyMap,
    transformValue: Function
 ) {
    if (isIon(value)) {
       // Absorbed Ion
-      switchMap.set(key, () => transformValue(target[key]))
+      propertyMap.set(key, () => transformValue(target[key]))
       return transformValue(value); // { $count: $count } get ion case
    }
    const _key = key.slice(1);
@@ -600,21 +616,21 @@ function initialIonAccess(
       const _value = target[_key]
       if (isIon(_value)) {
          // Absorbed Ion
-         switchMap.set(key, () => transformValue(target[_key]))
+         propertyMap.set(key, () => transformValue(target[_key]))
          return transformValue(_value);  // { count: $count } get ion case
       }
       // Prop Ion
       const propIon = asPion(proxy, _key)  // { count: 0}  get ion case
-      switchMap.set(key, () => transformValue(propIon))
+      propertyMap.set(key, () => transformValue(propIon))
       return transformValue(propIon);
    }
    // Invalid property { $count: 0 } 
-   initialTrackableStateAccess(proxy, target, key, value, switchMap, transformValue)
+   initialTrackableStateAccess(proxy, target, key, value, propertyMap, transformValue)
    if (__DEV__) console.warn('Invalid Property Key initialization: Property keys prefixed with a single dollar sign ($) are reserved for ions.\n' + asTraceable(proxy).origin)
 }
 
-function initialAbsorbedIonStateAccess(key: string | symbol, value: any, switchMap: ProxyPropertyMap, transformValue: Function) {
-   switchMap.set(key, () => transformValue(maybeIonize(value())))
+function initialAbsorbedIonStateAccess(key: string | symbol, value: any, propertyMap: ProxyPropertyMap, transformValue: Function) {
+   propertyMap.set(key, () => transformValue(maybeIonize(value())))
    return transformValue(maybeIonize(value())); // { count: $count } get value case
 }
 
@@ -645,7 +661,7 @@ function initialTrackableStateAccess(
    target: AnyObject,
    key: string | symbol,
    value: any,
-   switchMap: ProxyPropertyMap,
+   propertyMap: ProxyPropertyMap,
    transformValue: Function
 ) {
    function getState(value: any) {
@@ -657,7 +673,7 @@ function initialTrackableStateAccess(
       }
       return transformValue(_value);
    }
-   switchMap.set(key, () => getState(target[key]))
+   propertyMap.set(key, () => getState(target[key]))
    return getState(value)
 }
 
@@ -749,12 +765,12 @@ function bindNativeMethod(
    target: AnyObject,
    ionizedModel: IonizedModel,
    quark: IonizedModelQuark,
-   switchMap: ProxyPropertyMap,
+   propertyMap: ProxyPropertyMap,
 ) {
    if (isFunction(config)) {
       // trackable ops
       const op = config(target, ionizedModel, nativeKey)
-      switchMap.set(publicKey, () => op)
+      propertyMap.set(publicKey, () => op)
       return op;
    }
    else {
@@ -764,35 +780,35 @@ function bindNativeMethod(
          // __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, quark, getPreopData))
          // : 
          createOp(target, ionizedModel, quark, getPreopData)
-      switchMap.set(publicKey, () => op)
+      propertyMap.set(publicKey, () => op)
       return op;
    }
 }
 
 
 
-export function createProxyPropertyMap(meta: AnyObject, target: AnyObject) {
-   // let labelName: string | undefined;
+// export function createProxyPropertyMap(meta: AnyObject, target: AnyObject) {
+//    // let labelName: string | undefined;
 
-   // function __DEV__label(label: string) {
-   //    labelName = label;
-   // }
+//    // function __DEV__label(label: string) {
+//    //    labelName = label;
+//    // }
 
-   let _super: AnyObject | undefined;
+//    let _super: AnyObject | undefined;
 
-   return new Map([
-      [QUARK as any, () =>
-         meta as any
-      ],
-      ['super', ()=> _super ?? createIonizedModel(target, undefined)]
-      // ['labelName', () =>
-      //    labelName
-      // ],
-      // ['__DEV__label', () =>
-      //    __DEV__label
-      // ],
-   ])
-}
+//    return new Map([
+//       [QUARK as any, () =>
+//          meta as any
+//       ],
+//       ['super', ()=> _super ?? createIonizedModel(target, undefined, MUTABLE, false)]
+//       // ['labelName', () =>
+//       //    labelName
+//       // ],
+//       // ['__DEV__label', () =>
+//       //    __DEV__label
+//       // ],
+//    ])
+// }
 
 export function __DEV__proxyGetterAssertions(proxy: AnyObject, receiver: AnyObject) {
    if (proxy !== receiver)
@@ -847,7 +863,6 @@ export function reactiveSetter(
       newState,
       oldState,
    ))
-
    quark.trigger()
    getAtomicPion(model, key)?.trigger()
 

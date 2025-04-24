@@ -8,7 +8,7 @@ import { diff, InsertAndMoveKit } from "./diff";
 import { Commons } from "../commons/commons-stack";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
-import { createCommons } from "../commons/Commons";
+import { Commons as createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { NodePod } from "../node/NodePod";
 import { mountConditional, mountDOMNodes, removeDOMNodes } from "../conditional/ConditionalRenderSeries";
@@ -48,7 +48,8 @@ function callWithCommons(renderItem: RenderItem<any[]>, list: ListRenderKit, ite
    try {
       pushList(list)
       const nodeEntities = setUpNodeEntities(normalizeToArray(
-         createCommons(() => renderItem(item, $i), {
+         createCommons({
+            Slot: () => renderItem(item, $i),
             provide: [REGISTER_TRANSITION_NODE(registerTransitionNode)]
          })
       ), parent, nodePod)

@@ -5,6 +5,7 @@ import { inert, Inert, isInert } from "./inert";
 import { AtomicIon, Ion, ion, isIon, Methods } from "../ion/Ion";
 import { createIonizedModel, getStructureConfigs, IonizedModel } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
+import { MUTABLE } from "../ion/AtomicIon";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -97,17 +98,29 @@ type IonizedGetter<T, K extends keyof T> =
 
 //API
 export function ionize<T, M>(target: T & object, methods?: (M & Methods) & ThisType<T & M & {super: T}>): M extends AnyObject ? Ionized<T> & M : Ionized<T> {
+   return ionizeModel(target, methods, MUTABLE) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
+}
+
+
+// ionize.mu = createMutableIonizedModel
+
+// function createMutableIonizedModel(target: object, methods?: object |undefined){
+// return ionizeModel(target, methods, MUTABLE)
+// }
+
+export function ionizeModel(target: object, methods: object |undefined, mutable: boolean = true) {
+   //TODO: prevent going from encapsulated to mutable;
    if (!methods && isIonizedModel(target)) return target;
    if (isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
-      return target as unknown as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
+      return target 
    }
    //TODO: What about a readonly object that is not an ionic model?
    if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
    const rawTarget = toRaw(target)
    const existingIonizedModel = !methods ? ionizedModels.get(rawTarget) : undefined;
-   if (existingIonizedModel) return existingIonizedModel as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>;
-   return createIonizedModel(rawTarget, methods) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
+   if (existingIonizedModel) return existingIonizedModel 
+   return createIonizedModel(rawTarget, methods, mutable)
 }
 
 // function traceIonized() { //TODO: what about objects that are ionized by ionsOf()?

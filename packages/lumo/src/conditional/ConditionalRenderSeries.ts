@@ -342,6 +342,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    }
 
    private deactivateConditional(index: number) {
+      console.log('deactivating conditional')
       const kit = this.statements[index]
       const pod = kit.nodePod!
       const activationType = kit.type
@@ -387,6 +388,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          flask.emitInitialMount()
       else
          flask.emitRemount() // remount preserved watchers etc.
+      console.log('activate conditional', pod)
    }
 }
 
@@ -419,7 +421,9 @@ export function mountDOMNodes(pod: NodePod, parent: Element, fragment: DocumentF
 }
 
 export function removeDOMNodes(pod: NodePod) {
+   console.log('remove domnodes', pod)
    pod.forEachNode(node => {
+      console.log('for each node', node)
       node.remove()
    })
    pod.deactivate()

@@ -52,7 +52,7 @@ class Frog {
    }
 }
 
-
+function mu(an: any){return an}
 export function List(
 
 ) {

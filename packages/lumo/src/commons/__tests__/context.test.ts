@@ -5,7 +5,7 @@ import { createApp } from '../../createApp';
 import { makeComponent } from '../../component/makeComponent';
 import { makeElement } from '../../element/makeElement';
 import { JSDOM } from 'jsdom'
-import { createCommons } from '../Commons';
+import { Commons, createCommons } from '../Commons';
 import { CommonsKey } from '../CommonsKey';
 import { Ion, Ionized, MaybeIon, v } from '../../component/InputTypes';
 import { ion, ionize, isIon, isIonizedModel } from '@rue/quarky';
@@ -195,9 +195,9 @@ describe('Integration tests the Context API', () => {
             function App() {
                 frogA = fromApp(_frog_)
                 return component(
-                    createCommons(() => [
-                        makeComponent(Parent, undefined, {}, undefined)
-                    ], { provide: { [_frog_]: value } })
+                    Commons({ Slot: () => [
+                     makeComponent(Parent, undefined, {}, undefined)
+                 ],provide: { [_frog_]: value } })
                 )
             }
 

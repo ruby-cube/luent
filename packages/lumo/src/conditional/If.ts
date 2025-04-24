@@ -2,9 +2,10 @@ import { NodeEntity, normalizeToRenderFunction, RenderFunction } from "../node/m
 import { normalizeToArray } from "@rue/utils";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
-import { Commons, getCommons } from "../commons/commons-stack";
+import type { Commons } from "../commons/commons-stack";
+import { getCommons } from "../commons/commons-stack";
 // import { getPhasicNode } from "../transition/PhasicNode";
-import { createCommons } from "../commons/Commons";
+import { Commons as createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
@@ -88,7 +89,7 @@ function wrapWithCommons(renderConditional: RenderFunction, provide: [CommonsEnt
       // try {
       //    pushCommons(outerCommons)
          const nodeEntities = setUpNodeEntities(normalizeToArray(  
-            createCommons(renderConditional, {
+            createCommons({Slot: renderConditional,
                provide
             })), parent, nodePod)
          return nodeEntities;

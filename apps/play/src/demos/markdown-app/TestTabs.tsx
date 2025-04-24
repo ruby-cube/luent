@@ -312,59 +312,21 @@ function SidebarFile(input = fromTag({
    index: Ion<number>
 })) {
    const { $index, file } = input
-
-   const $menu = finiton({
-      'opened': {
-         close: () => 'closed'
-      },
-      'closed': {
-         open: () => 'opened'
-      }
-   })
-
-   function reMenuClick(e) {
-      e.stopPropagtion()
-   }
+   const $menu = ref(IfContextMenu)
 
    const { openFile } = fromCommons(FILES_KIT)
 
+   const
+
    return component(
-      <div on:click={e => openFile(file)} on:contextmenu={$menu.apply('open')}>
-         {If(($menu.is('opened')),
-            <FileContextMenu on:click={reMenuClick}></FileContextMenu>
-         )}
+      <div on:click={e => openFile(file)} on:contextmenu={$menu.open}>
+         <IfContextMenu on:click={reMenuClick} ref={$menu}></IfContextMenu>
          {file.$title}
       </div>
    )
 }
 
-const CONTEXT_MENU = InputType({
-   open: Ion<boolean>,
-})
 
-function IfContextMenu({ $open } = fromTag(CONTEXT_MENU)) {
-   const $container = ref('div')
-
-   watch($open, ({ state: open, prevState }) => {
-      if (open) {
-         let menuClicked = false;
-         listen(document, 'click', e => menuClicked || $menu.apply('close'))
-         listen($container(), 'click', menuClicked = true)
-      }
-   })
-
-   return component(
-      <$--portal to='body'>
-         {If($open,
-            <div ref={$container}>
-               {Thru($options, (option, index) => {
-
-               })}
-            </div>
-         )}
-      </$--portal>
-   )
-}
 
 
 

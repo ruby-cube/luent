@@ -31,9 +31,9 @@ type ThreadData = {
 }
 
 type MessageData = {
-   id: string
+   id: number
    text: string
-   date: string
+   date: number
 }
 
 // Models
@@ -41,9 +41,9 @@ type MessageData = {
 class Message {
    constructor(
       public id: string,
-      public text: string,
-      public date: string
-   ){}
+      public text: string = 'hello',
+      public date: number = 0
+   ) { }
 }
 
 class Thread {
@@ -52,36 +52,59 @@ class Thread {
       to: ContactID[],
       messages: Message[],
       newMessages: Message[]
-   ){   }
+   ) { }
 
-   hasNewMessages(){
+   hasNewMessages() {
       return Boolean(this.hasNewMessages.length)
    }
 }
 
-function reviveData(){
-
+type RealtimeData = {
 }
+
+function getRandomIntInclusive(min, max) {
+   min = Math.ceil(min);
+   max = Math.floor(max);
+   return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+let _id = 0;
+
+function watchDB(handler: (data: MessageData) => void) {
+   const randomTimeout = getRandomIntInclusive(10000, 50000)
+   setTimeout(() => {
+      handler({
+         id: _id++,
+         text: 'hello',
+         date: _id++
+      })
+
+      watchDB(handler)
+   }, randomTimeout)
+}
+
+
 
 
 export function FBApp() {
 
-   
-   listen('new-messages', (data)=>{
+   watchDB((data) => {
       data.newMessages
    })
    const $mainContent = ref($Main)
 
-   const $unseenCount = ion(0, {
+   const $unseenCount = ion({
+      count: 0
+   }, {
       increment(count: number = 1) {
-         $unseenCount.state = $unseenCount() + count
+         this.count = $unseenCount() + count
       },
       decrement(count: number = 1) {
-         $unseenCount.state = $unseenCount() - count
+         this.count = $unseenCount() - count
       }
    })
 
-   const $chatPopup = finiton('closed', {
+   const $chatPopup = finiton({
       'closed': {
          open: () => 'opened'
       },
@@ -90,7 +113,7 @@ export function FBApp() {
       }
    })
 
-   const $chatPopupFocus = finiton('focused', {
+   const $popupFocus = finiton({
       'focused': {
          unfocus: () => 'unfocused'
       },
@@ -99,8 +122,10 @@ export function FBApp() {
       }
    })
 
-   $chatPopup.nest({
-      'open': [$chatPopupFocus]
+   $chatPopup.activate(() => 'closed').nest({
+      'open': [
+         $popupFocus.init(() => 'unfocused')
+      ]
    })
 
    return component(
@@ -143,6 +168,7 @@ function ChatPopup() {
       <div></div>
    )
 }
+
 function Home() {
    return component(
       <div></div>
@@ -155,13 +181,13 @@ function Chat() {
    )
 }
 
-function ThreadList(){
+function ThreadList() {
    return component(
       <>
       </>
    )
 }
-function MessageThread(){
+function MessageThread() {
    return component(
       <>
       </>

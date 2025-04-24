@@ -10,7 +10,7 @@
 // import { TestConditional } from './TestConditional';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { component, createApp, createGlobalCommons } from '@rue/lumo';
-import { CounterApp, TestCounter, TestCounterModel } from './TestCounter';
+import { CounterApp, TestCount } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
 import { List } from './TestReactiveModel';
@@ -34,6 +34,9 @@ import { ion } from '@rue/quarky';
 import { TestViewFlasks } from './TestViewFlasks';
 import { TestAnimationController } from './demos/animation-controller';
 import { CounterModelApp } from './TestCounterModel';
+import { Sidebar } from './demos/IfContextMenu';
+import { FBApp } from './demos/FBChatBug';
+import { IonizedModelBug } from './demos/IonizedModelBug';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -123,7 +126,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(CounterModelApp)
+const app = createApp(FBApp)
 
 app.mount('#app')
 

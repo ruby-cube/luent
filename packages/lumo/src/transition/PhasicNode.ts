@@ -1,4 +1,4 @@
-import { createCommons } from "../commons/Commons";
+import { Commons as createCommons } from "../commons/Commons";
 import { CommonsKey } from "../commons/CommonsKey";
 import { makeElement } from "../element/makeElement";
 import { NodeEntity } from "../node/makeNode";
@@ -7,7 +7,7 @@ import { fromCommons } from "../commons/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
-import type { Commons as CommonsType } from "../commons/commons-stack";
+import type { Commons } from "../commons/commons-stack";
 import { v } from "../component/InputTypes";
 import { Ion } from "@rue/quarky";
 import { component, Slot } from "../component/InternalComponent";
@@ -20,7 +20,7 @@ export type TransitionConfig = TransitionFunction | AnimationFunction | Transiti
 
 // export const GET_PHASIC_NODE = Symbol('usePhaseChange')
 
-const GET_PHASIC_NODE = CommonsKey(v<() => TransitionNode|null>('?'))
+const GET_PHASIC_NODE = CommonsKey(v<() => TransitionNode | null>('?'))
 
 // declare module '@rue/lumo' {
 //     interface CommonsKeyMap {
@@ -31,61 +31,64 @@ const GET_PHASIC_NODE = CommonsKey(v<() => TransitionNode|null>('?'))
 
 
 export type PhasicNode = {
-    phaseIn(endTransition: () => void): void;
-    phaseOut(endTransition: (cb: () => void) => void): void;
-    cancel(direction: "in" | "out", transitionStartTime: number): void
+   phaseIn(endTransition: () => void): void;
+   phaseOut(endTransition: (cb: () => void) => void): void;
+   cancel(direction: "in" | "out", transitionStartTime: number): void
 }
 
 
 export function renderPhasicNode(
-    $div: NodeRef<'div'>,
-    Slot: () => NodeEntity,
-    transitionNode: TransitionNode,
-    $disable: false | undefined | Ion<boolean>
+   $div: NodeRef<'div'>,
+   Slot: () => NodeEntity,
+   transitionNode: TransitionNode,
+   $disable: false | undefined | Ion<boolean>
 ) {
-    if ($disable) {
-        const output = isFunction(Slot) ? Slot() : Slot
-        return component([
-            If($disable, () =>
-                output
-            ),
-            Else(() => {
-                return createPhasicNode(
-                    $div,
-                    output,
-                    transitionNode
-                )
-            })
-        ])
-    }
-    return createPhasicNode(
-        $div,
-        Slot,
-        transitionNode
-    )
+   if ($disable) {
+      const output = isFunction(Slot) ? Slot() : Slot
+      return component([
+         If($disable, () =>
+            output
+         ),
+         Else(() => {
+            return createPhasicNode(
+               $div,
+               output,
+               transitionNode
+            )
+         })
+      ])
+   }
+   return createPhasicNode(
+      $div,
+      Slot,
+      transitionNode
+   )
 }
 
 function createPhasicNode(
-    $div: NodeRef<'div'>,
-    Slot: Slot,
-    transitionNode: TransitionNode,
+   $div: NodeRef<'div'>,
+   Slot: Slot,
+   transitionNode: TransitionNode,
 ) {
-    let phasicNode: null | TransitionNode = transitionNode
+   let phasicNode: null | TransitionNode = transitionNode
 
-    function _getPhasicNode() {
-        const _phaseNode = phasicNode
-        phasicNode = null;
-        return _phaseNode
-    }
+   function _getPhasicNode() {
+      const _phaseNode = phasicNode
+      phasicNode = null;
+      return _phaseNode
+   }
 
-    return createCommons(() => (
-        makeElement('div', Slot, { ref: $div, class: 'phasic' }, undefined)
-    ), { provide: [GET_PHASIC_NODE(_getPhasicNode)] })
+   return createCommons({
+      Slot: () => (
+         makeElement('div', Slot, { ref: $div, class: 'phasic' }, undefined)
+      ),
+      provide: [GET_PHASIC_NODE(_getPhasicNode)]
+   })
 }
 
-export function getPhasicNode(commons?: CommonsType) {
-    const phasicNode = fromCommons(GET_PHASIC_NODE, commons)?.()
-    return phasicNode
+export function getPhasicNode(commons?: Commons) {
+   const phasicNode = fromCommons(GET_PHASIC_NODE, commons)?.()
+   return phasicNode
 }
 
 

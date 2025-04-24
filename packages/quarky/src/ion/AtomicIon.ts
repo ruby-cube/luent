@@ -53,7 +53,7 @@ export function createAtomicIon(
    state: any,
    stateKey: string,
    methods?: Methods,
-   mutable: boolean = false,
+   mutable: boolean = true,
    ionized: boolean | typeof MUTABLE_IONIZED = false
 ) {
    const $state = (() => {
@@ -86,12 +86,14 @@ export function createAtomicIon(
    $state[QUARK] = quark
 
    if (mutable)
+      // public properties
       Object.defineProperty($state, 'state', {
          get: $state,
          set: setState.bind(quark)
       })
 
    if (methods) {
+      // private properties
       const thisIon = quark.thisIon = Object.create(methods, {
          [stateKey]: {
             get: $state,

@@ -21,6 +21,8 @@ export function Commons(input: {
 }) {
     const { Slot } = input
 
+    if (!Slot) debug.warn(`Extraneous <Commons>`)
+
     const parentCommons = getClosestCommons()
     if (!parentCommons) {
        debug.traceAsyncPath()
@@ -39,12 +41,12 @@ export function Commons(input: {
     return unnestComponent(nodeEntities)
 }
 
-export function createCommons(
-    Slot: () => NodeEntity,
-    config: ComponentConfig,
-) {
-   return Commons({ Slot, provide: config.provide })
-}
+// export function createCommons(
+//     Slot: () => NodeEntity,
+//     config: ComponentConfig,
+// ) {
+//    return Commons({ Slot, provide: config.provide })
+// }
 
 
 

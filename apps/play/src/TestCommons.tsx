@@ -1,4 +1,4 @@
-import { component, fromCommons } from "@rue/lumo";
+import { Commons, component, fromCommons } from "@rue/lumo";
 import { ion, watch } from "@rue/quarky";
 
 export function TestCommons() {
@@ -8,9 +8,9 @@ export function TestCommons() {
    return component(
       <>
          <h1>Something</h1>
-         <$--commons provide={{ $message }}>
+         <Commons provide={[['message', $message]]}>
             <Child></Child>
-         </$--commons>
+         </Commons>
          <input value={$message} on:input={e => $message.state = e.target.value}></input>
       </>
    )

@@ -113,7 +113,7 @@ function getIonValue(subject: Ion) {
 function noReactivity(subject: AnyObject) {
    const quark = quarkOf(subject)
    if (quark.inert) return true;
-   return quark.asCompound && quark.asCompound.particles.length === 0;
+   return quark.asCompound && quark.asCompound.particles.length === 0; //TODO: apply this only to derivations, not ionized models?
 }
 
 export type WatchSubjects = (Object | Ion)[]
@@ -165,13 +165,13 @@ export function watch<
    const retrack = options.retrack === undefined ? true : options.retrack
 
    let subject = normalizeSubject(_subject, isMultiSubject, retrack)
-
    if (options?.traceTriggers) {
       //TODO:
    }
 
-   if (!hasQuark(subject)) // plain object
+   if (!hasQuark(subject)) {// plain object
       return InertWatcher()
+   }
 
    let prevState = getValue(subject); // this is where initial reactivity tracking happens (if derivation not already initialized) 
 
@@ -191,6 +191,7 @@ export function watch<
    let hasChanged = getHasChangedFn(options, prevState)
 
    function wrappedEffect() {
+      console.log('running effect', effect)
       const newState = getValue(subject)
       if (!options.eager && !hasChanged(prevState, newState)) {
          return;
