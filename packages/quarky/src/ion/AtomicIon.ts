@@ -215,7 +215,7 @@ type PropertyMap = Map<PropertyKey, () => unknown>
 //       ['name', () => '$stateCapsule'],
 //       ['length', () => 0],
 //       ['state', $state],
-//       ['wM', (...keys: string[]) => {
+//       ['with_only', (...keys: string[]) => {
 //          if (keys[0] === ALL_METHODS) {
 //             return $stateCapsule
 //          }

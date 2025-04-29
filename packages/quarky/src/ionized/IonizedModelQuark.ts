@@ -11,6 +11,7 @@ import { trigger } from "../ReactivitySystem"
 import { Traceable } from "../debug/Traceable"
 import { AtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
+import { getIonizableMethodDef } from "./makeIonizable"
 
 
 
@@ -38,7 +39,6 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
       public entity: IonizedModel,
       public rawTarget: AnyObject,
       public methods: AnyObject | undefined,
-      public structureConfigs: CustomIonizedModelConfig[]
    ) {
       this.asTraceable = new Traceable()
       this.watch = () => {
@@ -135,16 +135,17 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
       const op = mutation.op
       this.reversionOps.get(op)?.(mutation) || (this.reversionOps.set(op, (mutation: Mutation) => {
          const initialized = true;
-         const configs = this.structureConfigs;
-         for (const config of configs) {
-            const mutatingOps = config.mutatingOps
-            if (mutatingOps && op in mutatingOps) {
-               const mutatingOp = mutatingOps[op]
-               if (!mutatingOp) continue;
-               mutatingOp.revert?.(mutation.target, mutation)
-               return initialized;
+         const configs = getIonizableMethodDef(this.rawTarget, op);
+         if (configs)
+            for (const config of configs) {
+               const mutatingOps = config.mutatingOps
+               if (mutatingOps && op in mutatingOps) {
+                  const mutatingOp = mutatingOps[op]
+                  if (!mutatingOp) continue;
+                  mutatingOp.revert?.(mutation.target, mutation)
+                  return initialized;
+               }
             }
-         }
          return initialized;
       }))
    }

@@ -7,13 +7,54 @@ import { AnyObject } from "@rue/types";
 import { isFunction, isObject } from "@rue/utils";
 import { CommonsEntryKey } from "../commons/CommonsKey";
 
-export type InputTypeDef = { 
-   [key: string]: { validatedType: any } | ((arg: any) => { validatedType: any }) 
+export type InputTypeDef = {
+   [key: string]: { validatedType: any } | ((arg: any) => { validatedType: any })
 }
 
-export function InputType<T extends InputTypeDef>(inputType: T): T{
+export function InputType<T extends InputTypeDef>(inputType: T): T {
    return inputType;
 }
+
+
+
+
+
+export const ToSlot = ((optional?: Optional) => {
+   function ToSlot(defaultValue: any) {
+      return {
+         name: 'ToSlot',
+         optional: 'withDefault',
+         default: defaultValue
+      }
+   }
+   ToSlot.optional = OPTIONAL
+   return ToSlot;
+}) as {
+   <T>(optional?: Optional): {
+      name: 'ToSlot',
+      validatedType: T extends any[] ? ((...args: T) => any) : () => any;
+      inputType: T extends any[] ? ((...args: T) => any) : any[];
+      optional: Optional;
+      default: undefined
+   } & (<D>(defaultValue: MaybeDefaultType<T, D>) => { //TODO:
+      name: 'ToSlot',
+      validatedType: MaybeDefaultType<T, D>;
+      inputType: MaybeDefaultType<T, D>;
+      optional: 'withDefault';
+      default: true;
+   }),
+   // } & ((defaultValue: T) => {
+   //    name: 'v',
+   //    validatedType: T;
+   //    inputType: T;
+   //    optional: 'withDefault';
+   //    default: true;
+   // }),
+   name: 'v';
+   required: true;
+}
+export { ToSlot as Slot }
+export type Slot<T extends any[] | undefined = undefined> = T extends any[] ? ((...args: T) => any) : any[]
 
 // [ ] Configure type with key
 //     - fromTag()
@@ -211,11 +252,11 @@ export function manageAccess(value: unknown, access: string | undefined) {
 
       case 'm':
          return value;
-         // return asReined(value);
+      // return asReined(value);
 
       default:
          return value;
-         // return asReadonly(value);
+      // return asReadonly(value);
    }
 }
 

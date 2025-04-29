@@ -1,11 +1,14 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
 import { AtomicOp, getAtomicOp } from "./AtomicOp";
-import { defineIonizedStructure, GetPreopData, IonizedModel, TRACK_ENTRY, TRACK_MODEL, TRACK_MODEL_WITH_CALLBACK, useTrackableGetOp, useTrackableOp, useTrackableOpWithCallback, useTrackableIterative, useTrackableCheck, useTrackableCreativeIterative, useTrackableCreativeOp, useTrackableCreativeOpWithArgs } from "./IonizedModel";
+import { GetPreopData, IonizedModel, maybeIonize, } from "./IonizedModel";
 import { getAtomicPion, PionQuark, triggerPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
+import { makeIonizable, TriggeringOpDef,  trigger, TrackableOpDef, IonizableClassDef } from "./makeIonizable";
+import { quarkOf } from "../Quark";
+import {maybeIonizeNested, trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trackableCreativeOpWithArgs, trackableGetOp, trackableIterative, trackableOp, trackableOpWithCallback, trackModel} from './OpDefinitions'
 
 // type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 
@@ -103,7 +106,7 @@ import { runSyncEffects } from "../effect-cycle/SyncEffects";
 
 
 
- 
+
 
 // const todo = ionize({
 //    id: 0
@@ -115,295 +118,337 @@ import { runSyncEffects } from "../effect-cycle/SyncEffects";
 
 
 
-export function installIonicArray() {
-   defineIonizedStructure(Array, {
-      trackableOps: {
-         at: useTrackableGetOp,
 
-         [Symbol.iterator]: useTrackableOpWithCallback, // decoy
 
-         toReversed: useTrackableCreativeOp, // newArray = toReversed()
-         flat: useTrackableCreativeOp, // newArray = flat(depth?)
-         toSorted: useTrackableOpWithCallback, // newArray = toSorted(compareFn?)
-         flatMap: useTrackableCreativeIterative, // newArray = flatMap(callbackFn, thisArg?)
-         map: useTrackableCreativeIterative, // newArray = map(callbackFn, thisArg?)
-         filter: useTrackableCreativeIterative, // newArray = filter(callbackFn, thisArg?)
+const arrayLengthMutatingOp: TriggeringOpDef = {
+   preop: (target) => ({ target, prevLength: target.length }),
+   shouldTrigger: ({ target, prevLength }) => target.length !== prevLength, // only for length mutating ops 
+   // push: true,
+   // pop: true,
+   // shift: true,
+   // unshift: true,
+   triggers: (model, args, { prevLength, target }) => (
+      triggerObservedIndices(model, prevLength, target.length), [
+         trigger(model),
+         trigger(model, '[[get]]', ['length']),
+      ])
+}
 
-         concat: useTrackableCreativeOpWithArgs, // newArray = concat(arrayB, arrayC, ...)
-         with: useTrackableCreativeOpWithArgs, // newArray = arrayInstance.with(index, value)
 
-         reduce: useTrackableOpWithCallback, // result = reduce(callbackFn, initialValue?)
-         reduceRight: useTrackableOpWithCallback, // result = reduceRight(callbackFn, initialValue?)
+//TODO: these need to be specialized to the different methods...
+function triggerObservedIndices(model: IonizedModel, prevLength: number, newLength: number) {
+   const pions = quarkOf(model).pions
+   if (pions && prevLength < newLength) {
+      for (const [indexKey] of pions) {
+         if (!isIntegerKey(indexKey)) continue;
+         const index = parseInt(<string>indexKey)
+         if (index >= newLength) {
+            getAtomicPion(model, indexKey)?.trigger()
+            getAtomicOp(model, 'at', index)?.trigger()
+         }
+      }
+   }
+}
 
-         join: useTrackableOp, // string = join(separator?)
 
-         forEach: useTrackableIterative,//forEach(callbackFn, thisArg?)
+export const ionizableArrayDef: IonizableClassDef = {
+   at: trackableGetOp,
 
-         keys: useTrackableOp,  // newIterable = keys() //TODO: this does not need to track the entire model, just [[ownKeys]]
-         entries: useTrackableOp, // newEntriesIterator = entries()
-         values: useTrackableOp, // newIterable = values()
+   [Symbol.iterator]: trackableOpWithCallback, // decoy
 
-         toLocaleString: useTrackableOp, // string = toLocaleString() 
-         toString: useTrackableOp, // string = toString()
+   toReversed: trackableCreativeOp, // newArray = toReversed()
+   flat: trackableCreativeOp, // newArray = flat(depth?)
+   toSorted: trackableOpWithCallback, // newArray = toSorted(compareFn?)
+   flatMap: trackableCreativeIterative, // newArray = flatMap(callbackFn, thisArg?)
+   map: trackableCreativeIterative, // newArray = map(callbackFn, thisArg?)
+   filter: trackableCreativeIterative, // newArray = filter(callbackFn, thisArg?)
 
-         find: useTrackableIterative, // item = find(callbackFn, thisArg?)
-         findLast: useTrackableIterative, // item = findLast(callbackFn, thisArg?)
+   concat: trackableCreativeOpWithArgs, // newArray = concat(arrayB, arrayC, ...)
+   with: trackableCreativeOpWithArgs, // newArray = arrayInstance.with(index, value)
 
-         findIndex: useTrackableIterative, // index = findIndex(callbackFn, thisArg?)
-         findLastIndex: useTrackableIterative, // index = findLastIndex(callbackFn, thisArg?)
+   reduce: trackableOpWithCallback, // result = reduce(callbackFn, initialValue?)
+   reduceRight: trackableOpWithCallback, // result = reduceRight(callbackFn, initialValue?)
 
-         every: useTrackableIterative, // boolean = every(callbackFn, thisArg?)
-         some: useTrackableIterative, // boolean = some(callbackFn, thisArg?)
+   join: trackableOp, // string = join(separator?)
 
-         // depends on index //TODO: possible performance optimization if we trigger based on indices?
-         lastIndexOf: useTrackableCheck, // index = lastIndexOf(item, fromIndex?)
-         indexOf: useTrackableCheck, // index = indexOf(item, fromIndex?)
-         includes: useTrackableCheck, // boolean = includes(item, fromIndex?)
+   forEach: trackableIterative,//forEach(callbackFn, thisArg?)
 
-         slice: useTrackableCreativeOp, // newArray = slice(start?, end?) 
+   keys: trackableOp,  // newIterable = keys() //TODO: this does not need to track the entire model, just [[ownKeys]]
+   entries: trackableOp, // newEntriesIterator = entries()
+   values: trackableOp, // newIterable = values()
 
-         //TODO: test if this functions properly
-         toSpliced: (target, model, op) =>
-            useTrackableOp(
-               target,
-               model,
-               op,
-               (args) => args.map((item, index) => index < 2 ? item : toRaw(item)),
-               undefined,
-               (result) => ionize(result)
-            ), // newArray = toSpliced(start?, delete[Count?, item1, item2, /* …, */ itemN)
+   toLocaleString: trackableOp, // string = toLocaleString() 
+   toString: trackableOp, // string = toString()
+
+   find: trackableIterative, // item = find(callbackFn, thisArg?)
+   findLast: trackableIterative, // item = findLast(callbackFn, thisArg?)
+
+   findIndex: trackableIterative, // index = findIndex(callbackFn, thisArg?)
+   findLastIndex: trackableIterative, // index = findLastIndex(callbackFn, thisArg?)
+
+   every: trackableIterative, // boolean = every(callbackFn, thisArg?)
+   some: trackableIterative, // boolean = some(callbackFn, thisArg?)
+
+   // depends on index //TODO: possible performance optimization if we trigger based on indices?
+   lastIndexOf: trackableCheckOp, // index = lastIndexOf(item, fromIndex?)
+   indexOf: trackableCheckOp, // index = indexOf(item, fromIndex?)
+   includes: trackableCheckOp, // boolean = includes(item, fromIndex?)
+
+   slice: trackableCreativeOp, // newArray = slice(start?, end?) 
+
+   //TODO: test if this functions properly
+   toSpliced: {
+      input: (args) => args.map((item, index) => index < 2 ? item : toRaw(item)),
+      track: trackModel,
+      output: maybeIonizeNested,
+   }, // newArray = toSpliced(start?, delete[Count?, item1, item2, /* …, */ itemN)
+
+   push: {
+      preop: arrayLengthMutatingOp.preop,
+      shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
+      triggers: (model) => [
+         trigger(model),
+         trigger(model, '[[get]]', ['length']),
+         //TODO: trigger Observed Indices
+      ],
+      revert(model, { preopData: { prevLength }, args }) {
+         model.splice(prevLength, args.length)
+      }
+   },
+
+   pop: {
+      preop: arrayLengthMutatingOp.preop,
+      shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
+      triggers: (model, _, { prevLength }) => [
+         trigger(model, '[[get]]', [(prevLength - 1).toString()]),
+         trigger(model, 'at', [- 1]),
+         trigger(model),
+         trigger(model, '[[get]]', ['length']),
+      ],
+      revert: (model, { output }) => {
+         model.push(output)
+      }
+   },
+
+   unshift: {
+      input: ([value]) => [toRaw(value)],
+      preop: arrayLengthMutatingOp.preop,
+      shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
+      triggers: (model) => [
+         trigger(model),
+         trigger(model, '[[get]]', ['length']),
+         //TODO: trigger Observed Indices
+      ],
+      revert(model, { args }) {
+         model.splice(0, args.length)
+      }
+   },
+
+   shift: {
+      preop: arrayLengthMutatingOp.preop,
+      shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
+      triggers: (model) => [
+         trigger(model),
+         trigger(model, '[[get]]', ['length']),
+         //TODO: trigger Observed Indices
+      ],
+      revert(model, { output }) {
+         model.unshift(output)
+      }
+   },
+
+   splice: {
+      input: ([start, deleteCount, ...args]: Parameters<Array<any>['splice']>) => [start, deleteCount, ...deionizeArgs(args)],
+      triggers: (model) => [
+         trigger(model),
+         trigger(model, '[[get]]', ['length']),
+         //TODO: trigger Observed Indices
+      ],
+      revert(model, { output, args }) {
+         const start = args[0];
+         const numItems = args.length - 2;
+         model.splice(start, numItems, ...output)
+      }
+   },
+
+   copyWithin: {
+      preop: fillOrCopyWithinPreop,
+      triggers: (model) => [trigger(model)],
+      revert: fillOrCopyWithinRevert
+   },
+
+   fill: {
+      input: ([value]: Parameters<Array<any>['fill']> | any[]) => toRaw(value),
+      preop: fillOrCopyWithinPreop,
+      triggers: (model) => [trigger(model)],
+      revert: fillOrCopyWithinRevert
+   },
+
+   reverse: {
+      triggers: (model) => [trigger(model)],
+      revert(model) {
+         model.reverse()
+      }
+   },
+
+   sort: {
+      preop(model) {
+         return model.slice()
       },
-
-      mutatingOps: {
-         push: {
-            createOp: useMutatingArrayOpFactory('push', deionizeArgs),
-            preop(model) {
-               return model.length
-            },
-            revert(model, { preopData: length, args }) {
-               model.splice(length, args.length)
-            }
-         },
-
-         pop: {
-            createOp: createPopMethod,
-            revert(model, { output }) {
-               model.push(output)
-            }
-         },
-
-         unshift: {
-            createOp: useMutatingArrayOpFactory('unshift', deionizeArgs),
-            revert(model, { args }) {
-               model.splice(0, args.length)
-            }
-         },
-
-         shift: {
-            createOp: useMutatingArrayOpFactory('shift'),
-            revert(model, { output }) {
-               model.unshift(output)
-            }
-         },
-
-         splice: {
-            createOp: useMutatingArrayOpFactory('splice', deionizeArgs),
-            revert(model, { output, args }) {
-               const start = args[0];
-               const numItems = args.length - 2;
-               model.splice(start, numItems, ...output)
-            }
-         },
-
-         copyWithin: {
-            createOp: useMutatingArrayOpFactory('copyWithin'),
-            preop: fillOrCopyWithinPreop,
-            revert: fillOrCopyWithinRevert
-         },
-
-         fill: {
-            createOp: useMutatingArrayOpFactory('fill', (args: any) => toRaw(args[0])),
-            preop: fillOrCopyWithinPreop,
-            revert: fillOrCopyWithinRevert
-         },
-
-         reverse: {
-            createOp: useMutatingArrayOpFactory('reverse'),
-            revert(model) {
-               model.reverse()
-            }
-         },
-
-         sort: {
-            createOp: useMutatingArrayOpFactory('sort'),
-            preop(model) {
-               return model.slice()
-            },
-            revert(model, { preopData: snapshot }) {
-               for (let i = 0; i < model.length; i++) {
-                  model[i] = snapshot[i]
-               }
-            }
-         },
-      },
-
-      afterSet(ionizedModel, quark, key, newValue, oldValue) {
-         if (isIntegerKey(key)) {
-            getAtomicOp(ionizedModel, 'at', key)?.trigger()
-            return;
-         }
-
-         if (key !== 'length') {
-            return;
-         }
-
-         const pions = quark.pions
-         if (!pions) {
-            return;
-         }
-
-         for (const [indexKey] of pions) {
-            if (!isIntegerKey(indexKey)) continue;
-            const index = parseInt(<string>indexKey)
-            if (index >= newValue) {
-               getAtomicPion(ionizedModel, indexKey)?.trigger()
-               getAtomicOp(ionizedModel, 'at', index)?.trigger()
-            }
-            if (index > oldValue) {
-               getAtomicOp(ionizedModel, 'at', index)?.trigger()
-            }
+      triggers: (model) => [trigger(model)],
+      revert(model, { preopData: snapshot }) {
+         for (let i = 0; i < model.length; i++) {
+            model[i] = snapshot[i]
          }
       }
+   },
+   '[[set]]': {
+      triggers: (model, [key, value]) => [
+         trigger(model),
+         isIntegerKey(key) ? trigger(model, 'at', key) : trigger(model, '[[get]]', key)
 
-      // isEntryKey(model, key) {
-      //    return !!(model instanceof Array && isIntegerKey(key))
-      // },
-   })
+         // afterSet(ionizedModel, quark, key, newValue, oldValue) {
+         //    if (isIntegerKey(key)) {
+         //       getAtomicOp(ionizedModel, 'at', key)?.trigger()
+         //       return;
+         //    }
 
-   function useMutatingArrayOpFactory(
-      opName: string,
-      deionizeArgs?: (args: any[]) => any[]
-   ) {
-      return function createOp(target: AnyObject, ionizedModel: IonizedModel, quark: IonizedModelQuark, getPreopData: GetPreopData | undefined) {
-         const fn = target[opName]
-         return useMutatingArrayOp(
-            ionizedModel,
-            quark,
-            <any[]>target,
-            opName,
-            fn,
-            getPreopData,
-            deionizeArgs
-         )
-      }
+         //    if (key !== 'length') {
+         //       return;
+         //    }
+
+         //    const pions = quark.pions
+         //    if (!pions) {
+         //       return;
+         //    }
+
+         //    for (const [indexKey] of pions) {
+         //       if (!isIntegerKey(indexKey)) continue;
+         //       const index = parseInt(<string>indexKey)
+         //       if (index >= newValue) {
+         //          getAtomicPion(ionizedModel, indexKey)?.trigger()
+         //          getAtomicOp(ionizedModel, 'at', index)?.trigger()
+         //       }
+         //       if (index > oldValue) {
+         //          getAtomicOp(ionizedModel, 'at', index)?.trigger()
+         //       }
+         //    }
+         // }
+      ]
    }
+}
 
-   const lengthMutatingOps = {
-      push: true,
-      pop: true,
-      shift: true,
-      unshift: true,
+// isEntryKey(model, key) {
+//    return !!(model instanceof Array && isIntegerKey(key))
+// },
+
+// function useMutatingArrayOpFactory(
+//    opName: string,
+//    deionizeArgs?: (args: any[]) => any[]
+// ) {
+//    return function createOp(target: AnyObject, ionizedModel: IonizedModel, quark: IonizedModelQuark, getPreopData: GetPreopData | undefined) {
+//       const fn = target[opName]
+//       return useMutatingArrayOp(
+//          ionizedModel,
+//          quark,
+//          <any[]>target,
+//          opName,
+//          fn,
+//          getPreopData,
+//          deionizeArgs
+//       )
+//    }
+// }
+
+
+
+// function useMutatingArrayOp(
+//    model: IonizedModel,
+//    modelQuark: IonizedModelQuark,
+//    target: any[],
+//    key: string,
+//    fn: Function,
+//    getPreopData?: ((target: any[], args: any[]) => any),
+//    deionizeArgs?: (args: any[]) => any[]
+// ) {
+
+//    return (...args: any[]) => {
+//       const preopData = getPreopData ? getPreopData(target, args) : undefined
+//       const _args = deionizeArgs ? deionizeArgs(args) : args
+//       const prevLength = target.length;
+
+//       const output = fn.apply(target, _args); // perform mutation
+
+//       const newLength = target.length;
+
+//       if (key in lengthMutatingOps && prevLength === newLength) return output;
+
+//       storeSnapshot(modelQuark)
+
+//       recordMutation(modelQuark, new Mutation(
+//          model,
+//          key,
+//          _args,
+//          output,
+//          preopData
+//       ))
+
+//       modelQuark.trigger()
+
+//       getAtomicPion(model, 'length')?.trigger()
+
+//       //FIX: These need to be different depending on the op
+//       triggerObservedIndices(model, modelQuark.pions, prevLength, newLength)
+
+//       runSyncEffects()
+
+//       return output;
+//    }
+// }
+
+// function createPopMethod(target: AnyObject, ionizedModel: IonizedModel, quark: IonizedModelQuark, getPreopData: GetPreopData | undefined) {
+//    const performOp = useMutatingArrayOp(
+//       ionizedModel,
+//       quark,
+//       <any[]>target,
+//       'pop',
+//       target.pop,
+//       getPreopData,
+//       deionizeArgs
+//    )
+
+//    return () => {
+//       const prevLength = target.length;
+//       const output = performOp()
+//       getAtomicPion(ionizedModel, (prevLength - 1).toString())?.trigger()
+//       getAtomicOp(ionizedModel, 'at', - 1)?.trigger()
+//       return output;
+//    }
+// }
+
+
+function fillOrCopyWithinPreop(model: AnyObject, args: any[] | undefined) {
+   const start = args![1] ?? 0
+   const end = args![2]
+   return model.slice(start, end)
+}
+
+function fillOrCopyWithinRevert(model: AnyObject, data: { preopData: any[], args: any[] }) {
+   const { preopData: slice, args } = data
+
+   let index = args![1] ?? 0;
+   for (let i = 0; i < slice.length; i++) {
+      model[index] = slice[i];
+      index++;
    }
+}
 
-   function useMutatingArrayOp(
-      model: IonizedModel,
-      modelQuark: IonizedModelQuark,
-      target: any[],
-      key: string,
-      fn: Function,
-      getPreopData?: ((target: any[], args: any[]) => any),
-      deionizeArgs?: (args: any[]) => any[]
-   ) {
-      return (...args: any[]) => {
-         const preopData = getPreopData ? getPreopData(target, args) : undefined
-         const _args = deionizeArgs ? deionizeArgs(args) : args
-         const prevLength = target.length;
-         const output = fn.apply(target, _args); // perform mutation
-         const newLength = target.length;
-
-         if (key in lengthMutatingOps && prevLength === newLength) return output;
-
-         storeSnapshot(modelQuark)
-
-         recordMutation(modelQuark, new Mutation(
-            model,
-            key,
-            _args,
-            output,
-            preopData
-         ))
-
-         modelQuark.trigger()
-
-         getAtomicPion(model, 'length')?.trigger()
-
-         //FIX: These need to be different depending on the op
-         triggerObservedIndices(model, modelQuark.pions, prevLength, newLength)
-
-         runSyncEffects()
-
-         return output;
-      }
+function deionizeArgs(args: any[]) {
+   const _args = []
+   for (const arg of args) {
+      _args.push(toRaw(arg))
    }
-
-   //TODO: these need to be specialized to the different methods...
-   function triggerObservedIndices(model: IonizedModel, pions: IonizedModelQuark['pions'], prevLength: number, newLength: number) {
-      if (pions && prevLength < newLength) {
-         for (const [indexKey] of pions) {
-            if (!isIntegerKey(indexKey)) continue;
-            const index = parseInt(<string>indexKey)
-            if (index >= newLength) {
-               getAtomicPion(model, indexKey)?.trigger()
-               getAtomicOp(model, 'at', index)?.trigger()
-            }
-         }
-      }
-   }
-
-   function createPopMethod(target: AnyObject, ionizedModel: IonizedModel, quark: IonizedModelQuark, getPreopData: GetPreopData | undefined) {
-      const performOp = useMutatingArrayOp(
-         ionizedModel,
-         quark,
-         <any[]>target,
-         'pop',
-         target.pop,
-         getPreopData,
-         deionizeArgs
-      )
-
-      return () => {
-         const prevLength = target.length;
-         const output = performOp()
-         getAtomicPion(ionizedModel, (prevLength - 1).toString())?.trigger()
-         getAtomicOp(ionizedModel, 'at', - 1)?.trigger()
-         return output;
-      }
-   }
-
-
-   function fillOrCopyWithinPreop(model: AnyObject, args: any[] | undefined) {
-      const start = args![1] ?? 0
-      const end = args![2]
-      return model.slice(start, end)
-   }
-
-   function fillOrCopyWithinRevert(model: AnyObject, data: { preopData: any[], args: any[] }) {
-      const { preopData: slice, args } = data
-
-      let index = args![1] ?? 0;
-      for (let i = 0; i < slice.length; i++) {
-         model[index] = slice[i];
-         index++;
-      }
-   }
-
-   function deionizeArgs(args: any[]) {
-      const _args = []
-      for (const arg of args) {
-         _args.push(toRaw(arg))
-      }
-      return _args;
-   }
+   return _args;
 }
 
 

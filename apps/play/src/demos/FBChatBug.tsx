@@ -1,4 +1,3 @@
-//@ts-nocheck
 
 // FB chat app
 // [] increment unseen thread count
@@ -45,14 +44,12 @@ class Message {
 export function FBApp() {
    const messages = ionize([new Message('bonjour', false), new Message('comment ca va', false), new Message('jai faim quoi', false)])
 
-   const $unseenCount = ion({
-      count: 0
-   }, {
+   const $unseenCount = ion(0, {
       increment() {
-         this.count++
+         this.state++
       },
       decrement() {
-         this.count--
+         this.state--
       },
    })
 
@@ -76,14 +73,16 @@ export function FBApp() {
       $unseenCount.increment()
    }
 
+   
+
    return component(
       <div style='border: solid 1px gray; width: 50rem; height: 50rem'>
          <button on:click={toggleChatPopup}>(Z)</button>
          <div style='border-radius: 50%; width: 25px; height: 25px; background-color: red; color: white; text-align: center'>{$unseenCount}</div>
          <div style='display: flex; flex-direction: horizontal'>
             <Commons provide={[
-               UNSEEN_COUNT.mu($unseenCount.with_only('decrement')),
-               MESSAGES.ro(messages),
+               UNSEEN_COUNT($unseenCount.with_only('increment')),
+               MESSAGES(messages),
                TOGGLE_CHAT_VIEW(toggleChatView)
             ]}>
                <div style='border: solid 1px gray; width: 25rem; height: 25rem'>
@@ -113,7 +112,7 @@ const UNSEEN_COUNT = CommonsKey(Ion<number, {
    increment(): void;
    decrement(): void;
 }>)
-const MESSAGES = CommonsKey(Ionized<{ text: string, new: boolean }[]>)
+const MESSAGES = CommonsKey(Ionized<Message[]>)
 const TOGGLE_CHAT_VIEW = CommonsKey(v<() => void>)
 
 
@@ -166,69 +165,3 @@ export function ChatView() {
 }
 
 
-
-export function FBAppB() {
-   const messages = ionize([new Message('bonjour', false), new Message('comment ca va', false), new Message('jai faim quoi', false)])
-
-   const $unseenCount = ion({
-      count: 0
-   }, {
-      increment() {
-         this.count++
-      },
-      decrement() {
-         this.count--
-      },
-   })
-
-   const $chatPopupOpen = ion(false)
-
-   function toggleChatPopup() {
-      $chatPopupOpen.state = !$chatPopupOpen.state
-   }
-
-   const $chatViewOpen = ion(false)
-
-   function toggleChatView() {
-      $chatViewOpen.state = !$chatViewOpen.state
-   }
-
-   const $newMessage = ion('')
-
-   function receiveNewMessage() {
-      messages.push(new Message($newMessage()))
-      $newMessage.state = ''
-      $unseenCount.increment()
-   }
-
-   return component(
-      <div class='container'>
-         <button on:click={e => toggleChatPopup()}>(Z)</button>
-         <div class='count'>{$unseenCount}</div>
-         <div class='outer-edge storage'>
-            <Commons provide={[
-               UNSEEN_COUNT.mu($unseenCount.wm('decrement')),
-               MESSAGES.ro(messages),
-               TOGGLE_CHAT_VIEW(toggleChatView)
-            ]}>
-               <div style='border: solid 1px gray'>
-                  {If($chatViewOpen,
-                     <ChatView></ChatView>
-                  )}
-               </div>
-               <div style='border: solid 1px gray; width: 15rem; height: 15rem'>
-                  {If($chatPopupOpen,
-                     <ChatPopup></ChatPopup>
-                  )}
-               </div>
-            </Commons>
-         </div>
-         <input
-            mu:value={$newMessage}
-            on:input={e => $newMessage.state = e.target.value}
-            on:keydown={e => e.code === 'Enter' && receiveNewMessage()}
-         ></input>
-         <button on:click={e => receiveNewMessage()}>receive new message</button>
-      </div>
-   )
-}

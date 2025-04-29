@@ -42,7 +42,7 @@ type MaybeOptional<V, C> = C extends { optional: '?' } ? V | undefined : V;
 type HasEvent<C> = keyof C extends never ? false : keyof C extends `on:${string}` ? true : false;
 
 type WithEmit<C> = C extends AnyObject ? {
-   emit: <K extends EventNames<C>>(eventName: K, event: EventObj<C, `on:${K}`>) => void
+   emit: <K extends EventNames<C>>(eventName: K, event?: EventObj<C, `on:${K}`>) => void
 } : {}
 
 type EventObj<C extends AnyObject, K extends string> = C[K] extends { validatedType: infer I } | ((arg: any) => { validatedType: infer I }) ? Parameters<I extends (...args: any) => any ? I : never>[0]
@@ -178,15 +178,17 @@ type OptionalMaybeMutables<C> = {
 }
 
 export type RequiredInputKey<K extends string, C> = C extends { required: true } & ((arg: any) => { inputType: any }) ? ExcludeMutableKey<K> : never
-export type OptionalInputKey<K extends string, C> = C extends { optional: '?' | 'withDefault', inputType: any } ? ExcludeMutableKey<K>:never
+export type OptionalInputKey<K extends string, C> = C extends { optional: '?' | 'withDefault', inputType: any } ? ExcludeMutableKey<K> : never
 export type RequiredMutableInputKey<K extends string, C> = C extends { required: true } & ((arg: any) => { inputType: any }) ? InferMutableOnlyKey<K> : never;
-export type OptionalMutableInputKey<K extends string, C> = C extends { optional: '?' | 'withDefault', inputType: any } ? InferMutableOnlyKey<K>: never;
+export type OptionalMutableInputKey<K extends string, C> = C extends { optional: '?' | 'withDefault', inputType: any } ? InferMutableOnlyKey<K> : never;
 
-export type ExcludeMutableKey<K extends string> = K extends `mu?:${string}` ? never : K extends `mu:${string}` ? never : K
+export type ExcludeMutableKey<K extends string> = K extends `mu?:${string}` ? never : K extends `mu:${string}` ? never : K extends `Slot` ? `children` : K
 type InferMutableOnlyKey<K extends string> = K extends `mu:${infer S}` ? S : never
 
-type ComponentAttributes<C> = { [K in keyof C as K extends string ? RequiredInputKey<K, C[K]> : never]: K extends string ? Input<C[K]> : never }
+type ComponentAttributes<C> =
+   { [K in keyof C as  K extends string ? RequiredInputKey<K, C[K]> : never]: K extends string ? Input<C[K]> : never }
    & { [K in keyof C as K extends string ? OptionalInputKey<K, C[K]> : never]?: K extends string ? OptionalInput<C[K]> : never }
+
    & { [K in keyof C as K extends string ? RequiredMutableInputKey<K, C[K]> : never]: K extends string ? MutableInput<K, C[K]> : never }
    & { [K in keyof C as K extends string ? OptionalMutableInputKey<K, C[K]> : never]?: K extends string ? OptionalMutableInput<K, C[K]> : never }
    & (WithMaybeMutables<C> extends never ? {} : WithMaybeMutables<C>)
@@ -258,6 +260,7 @@ export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typ
                   break;
 
                default:
+                  validatedAttributes[_key] = value;
                   break;
             }
          }

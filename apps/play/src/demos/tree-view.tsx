@@ -7,26 +7,26 @@ export function TreeApp() {
 
    const treeData = {
       name: 'My Tree',
-      // children: [
-      //    // { name: 'hello' },
-      //    // { name: 'hello' },
-      //    // { name: 'world' },
-      //    // {
-      //    //    name: 'child folder',
-      //    //    // children: [
-      //    //    //    {
-      //    //    //       name: 'child folder',
-      //    //    //       children: [{ name: 'hello' }, { name: 'world' }]
-      //    //    //    },
-      //    //    //    { name: 'hello' },
-      //    //    //    { name: 'world' },
-      //    //    //    {
-      //    //    //       name: 'child folder',
-      //    //    //       children: [{ name: 'hello' }, { name: 'world' }]
-      //    //    //    }
-      //    //    // ]
-      //    // }
-      // ]
+      children: [
+         // { name: 'hello' },
+         // { name: 'hello' },
+         // { name: 'world' },
+         {
+            name: 'child folder',
+            children: [
+               {
+                  name: 'child folder',
+                  children: [{ name: 'hello' }, { name: 'world' }]
+               },
+               { name: 'hello' },
+               { name: 'world' },
+               {
+                  name: 'child folder',
+                  children: [{ name: 'hello' }, { name: 'world' }]
+               }
+            ]
+         }
+      ]
    }
 
    const treeItem = ionize(createTreeItem(treeData), {})

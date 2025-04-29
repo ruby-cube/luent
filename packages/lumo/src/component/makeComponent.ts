@@ -1,11 +1,13 @@
 import { ComponentSetup, InternalComponent, Component, PublicComponent } from "./InternalComponent";
-import { ComponentConfig,  NodeEntity } from "../node/makeNode";
+import { ComponentConfig, NodeEntity } from "../node/makeNode";
 import { AnyObject } from "@rue/types";
 import { AtomicIon, Ion } from "@rue/quarky";
 
 // on: T extends (props: any, emit: infer E) => any ? E extends (event: infer N, e: any) => void ? E extends ((event: any, e: infer O) => void) ? { [K in keyof N]: (e: O) => void } : never : never : never;
 
 export type ComponentOptions = { preserve?: true }
+
+
 
 export type InferSlot<T extends ComponentSetup = ComponentSetup> =
    T extends (setup?: infer P) => any ?

@@ -65,15 +65,13 @@ export function TestCount() {
 
 export function TestMutableCount() {
 
-   const $count = ion({
-      count: 0
-   }, {
+   const $count = ion(0, {
       increment() {
          console.log('increment', this)
-         this.count++
+         this.state++
       },
       decrement() {
-         this.count--
+         this.state--
       }
    })
 
@@ -190,15 +188,13 @@ export function TestMutableCount() {
 
 export function TestReadonlyMutableCount() {
 
-   const $count = asReadonlyIon(ion({
-      'count': 0
-   }, {
+   const $count = asReadonlyIon(ion(0, {
       increment() {
          console.log('increment', this)
-         this.count++
+         this.state++
       },
       decrement() {
-         this.count--
+         this.state--
       }
    }))
 
@@ -231,15 +227,13 @@ export function TestReadonlyMutableCount() {
 
 export function TestReinedMutableCount() {
 
-   const $count = asReinedIon(ion({
-      'count': 0
-   }, {
+   const $count = asReinedIon(ion(0, {
       increment() {
          console.log('**increment', this)
-         this.count++
+         this.state++
       },
       decrement() {
-         this.count--
+         this.state--
       }
    }), true, ['increment'])
 
@@ -315,15 +309,13 @@ export function TestReinedMutableCount() {
 
 export function TestMutableNoMethodCount() {
 
-   const $count = asReinedIon(ion({
-      'count': 0
-   }, {
+   const $count = asReinedIon(ion(0, {
       increment() {
          console.log('increment', this)
-         this.count++
+         this.state++
       },
       decrement() {
-         this.count--
+         this.state--
       }
    }), true, [])
 

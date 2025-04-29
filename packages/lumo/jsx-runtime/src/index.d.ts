@@ -2551,7 +2551,7 @@ declare global {
          props: {};
       }
       interface ElementChildrenAttribute {
-         Slot: {};
+         children: {};
       }
 
       //$$$ important for converting component input types to attribute types

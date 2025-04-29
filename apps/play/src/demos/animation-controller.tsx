@@ -1,12 +1,13 @@
 //@ts-nocheck
-import { $thisView, component, If, NodeRef, ref } from "@rue/lumo";
+import { $thisView, component, If, NodeRef, ref, onInitialMount } from "@rue/lumo";
 import { ion, ionize, isIonizedModel, queueTask, watch } from "@rue/quarky";
 import { inert } from "../../../../packages/quarky/src/ionized/inert";
 
 class AnimationAnimator {
    constructor(canvas) {
-      this.canvas = canvas;
+      this.canvas = inert(canvas);
       this.ctx = inert(canvas.getContext('2d'));
+      console.log('ctx', this.ctx)
       this.squareSize = 50;
       this.startX = 0;
       this.endX = canvas.width - this.squareSize;
@@ -114,7 +115,7 @@ export function TestAnimationController() {
 
    const $elapsed = ion(() => $animation()?.$elapsed() ?? 0)
    const $isPlaying = ion(() => $animation()?.$isPlaying() ?? false)
-   const $animation = ion.mu(undefined)
+   const $animation = ion(undefined)
 
    function playPause() {
       const animation = $animation()
@@ -131,26 +132,17 @@ export function TestAnimationController() {
       animation.goToTime(timeMs);
    }
 
-   onMounted(() => {
 
-      const animation = $animation.state = ionize(new AnimationAnimator($canvas()), {
-         [INERT_MAP]: {
-            canvas: inert,
-            ctx: inert
-         },
-         addSomething() {
-
-         }
-      })
-
-      debug.traceTriggers('# animation', animation, { canvas: true })
-
-      const list = ionize.shallow([])
-
-      animation.play()
-   })
 
    function initAnimation(canvas) {
+      console.log('on mount')
+      const animation = $animation.state = ionize(new AnimationAnimator($canvas()))
+
+      // debug.traceTriggers('# animation', animation, { canvas: true })
+
+      // const list = ionize([])
+
+      // animation.play()
       // $elapsed = animation.$elapsed
       // $isPlaying = animation.$isPlaying
 
@@ -167,11 +159,13 @@ export function TestAnimationController() {
       // };
    }
 
+   setTimeout(initAnimation, 1)
+
 
    return component(
       <>
          <div style="display: flex; flex-direction: column; align-items: flex-start">
-            <canvas ref={$canvas} style="border: 1px solid black" width="600" height="200"></canvas>
+            <canvas ref={$canvas} post:mount={initAnimation} style="border: 1px solid black" width="600" height="200"></canvas>
             {/* {If($canvas, ({ $elapsed, $isPlaying, playPause, updateTime, play } = AnimationKit()) => (queueTask(() => play()), */}
             {/* {If($canvas, (o = initAnimation($canvas())) => */}
             {/* <> */}

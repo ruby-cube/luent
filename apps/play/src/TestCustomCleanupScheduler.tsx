@@ -10,6 +10,8 @@ import { toIonicProps } from "../../../packages/lumo/src/component/X_normalizePr
 // normalize
 // validate
 
+
+
 function type<T>(value: any): value is T {
    return true
 }

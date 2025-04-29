@@ -1,11 +1,13 @@
 import { AnyObject } from "@rue/types";
 import { storeSnapshot, toRaw } from "./ionize";
-import { defineIonizedStructure, GetPreopData, IonizedModel, TRACK_ENTRY, TRACK_MODEL, TRACK_MODEL_WITH_CALLBACK, useTrackableCreativeOpWithArgs, useTrackableGetOp, useTrackableCheck, useTrackableIterative, useTrackableOp, useTrackableOpWithCallback } from "./IonizedModel";
+import { GetPreopData, IonizedModel, useTrackableOp } from "./IonizedModel";
 import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
+import { quarkOf } from "../Quark";
+import { makeIonizable } from "./makeIonizable";
 
 // declare global {
 //    interface Set<T> {
@@ -64,10 +66,12 @@ const trackableSetOps = {
    isDisjointFrom: true, // boolean = isDisjointFrom(otherSet)
 }
 
+
+
 export function installIonicSet() {
-   defineIonizedStructure(Set, {
-      trackableOps: {
-         has: useTrackableGetOp,
+   makeIonizable(Set, {
+      // trackableOps: {
+         has: trackableGetOpDef,
          [Symbol.iterator]: useTrackableOpWithCallback,
          forEach: useTrackableIterative,
          keys: useTrackableOp,
@@ -77,12 +81,12 @@ export function installIonicSet() {
          union: useTrackableCreativeOpWithArgs,
          intersection: useTrackableCreativeOpWithArgs,
          symmetricDifference: useTrackableCreativeOpWithArgs,
-      
+
          isSubsetOf: useTrackableCheck, // boolean = isSubsetOf(otherSet)
          isSupersetOf: useTrackableCheck, // boolean = isSupersetOf(otherSet)
          isDisjointFrom: useTrackableCheck, // boolean = isDisjointFrom(otherSet)
-      },
-      mutatingOps: {
+      // },
+      // mutatingOps: {
          add: {
             createOp(target, ionizedModel, quark) {
                return function add(newValue: any) {
@@ -158,7 +162,7 @@ export function installIonicSet() {
                ionizedModel.add(preopData)
             }
          },
-      }
+      // }
    })
 }
 
@@ -344,6 +348,8 @@ export function useDeleteOp(
 
 
 
+
+
 export function useClearOp(
    ionizedModel: IonizedModel,
    modelQuark: IonizedModelQuark,
@@ -368,6 +374,7 @@ export function useClearOp(
          preopData
       ))
 
+      // custom triggers
       modelQuark.trigger()
 
       const hasOps = getAtomicOps(ionizedModel, 'has')
@@ -378,6 +385,7 @@ export function useClearOp(
       }
 
       getAtomicPion(ionizedModel, 'size')?.trigger()
+
 
       runSyncEffects()
 

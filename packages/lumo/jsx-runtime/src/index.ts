@@ -1,4 +1,4 @@
-import { ComponentSetup, HTMLTag, makeNode, normalizeToRenderFunction, Slot } from "@rue/lumo";
+import { ComponentSetup, HTMLTag, makeNode, normalizeToRenderFunction, Slot, Commons } from "@rue/lumo";
 import { AnyObject } from "@rue/types";
 import { isFunction, isObjectLiteral, normalizeToArray } from "@rue/utils";
 
@@ -11,8 +11,11 @@ export const jsxDEV = jsx;
 
 export const jsxs = jsx;
 
-export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Slot }) {
+export function jsx(nodeType: HTMLTag | ComponentSetup, config: { children: Slot } & AnyObject) {
    const Slot = processSlot(config.children);
+   if (nodeType === Commons) {
+      return Commons({Slot: config.children, provide: config.provide} as any)
+   }
    if (isFunction(nodeType) && nodeType !== Fragment) {
       return makeNode(
          nodeType,

@@ -2,7 +2,7 @@
 type IonizedMethod<M extends Function> = M extends (this: infer U, ...args: infer A) => infer R ? (ThisType<U> & { method: M })['method'] : unknown
 type IonizedValue<T> = T extends Function ? IonizedMethod<T> : Ionized<T>;
 type Ionized<T> = T extends object ? { [K in keyof T]: IonizedValue<T[K]> } & { ionized: true } : T
-type MaybeIonized<T, H> = H extends { ionized: true } ? Ionized<T> : T
+type IonizeByThis<T, H> = H extends { ionized: true } ? Ionized<T> : T
 
 
 class Frog {
@@ -22,7 +22,7 @@ interface Frog {
 declare global {
 
    interface Array<T> {
-      splice<H>(this: H, start: number, deleteCount?: number, ...items: T[]): MaybeIonized<T[], H>;
+      splice<H>(this: H, start: number, deleteCount?: number, ...items: T[]): IonizeByThis<T[], H>;
    }
 }
 
@@ -30,6 +30,8 @@ declare global {
 function ionize<T>(obj: T) {
    return obj as Ionized<T>
 }
+
+
 
 export const frog = new Frog()
 

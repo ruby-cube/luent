@@ -43,7 +43,7 @@ export class Mutation {
 
    constructor(
       public target: MutableEntity, //QUESTION: make sure these are readonly? Do I want these exposed to app devs? or just for internal use?
-      public op: '[[set]]' | string,
+      public op: '[[set]]' | PropertyKey,
       public args: [PropertyKey, unknown] | unknown[],
       public output: unknown,
       public preopData: undefined| unknown // old state for [[set]] ops

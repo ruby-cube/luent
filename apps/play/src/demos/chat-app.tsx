@@ -93,14 +93,12 @@ export function FBApp() {
    })
    const $mainContent = ref($Main)
 
-   const $unseenCount = ion({
-      count: 0
-   }, {
+   const $unseenCount = ion(0, {
       increment(count: number = 1) {
-         this.count = $unseenCount() + count
+         this.state = $unseenCount() + count
       },
       decrement(count: number = 1) {
-         this.count = $unseenCount() - count
+         this.state = $unseenCount() - count
       }
    })
 

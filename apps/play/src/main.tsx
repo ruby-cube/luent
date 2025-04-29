@@ -126,7 +126,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(FBApp)
+const app = createApp(CounterModelApp)
 
 app.mount('#app')
 

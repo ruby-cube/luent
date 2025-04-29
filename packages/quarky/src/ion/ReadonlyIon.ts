@@ -1,5 +1,5 @@
 import { Capsule, MutableCapsule } from "../capsule/Capsule";
-import { asNonlocalReadonly } from "../capsule/Readonly";
+// import { asNonlocalReadonly } from "../capsule/Readonly";
 import { quarkOf, QUARK } from "../Quark";
 import { AtomicIon, isIon } from "./ion";
 

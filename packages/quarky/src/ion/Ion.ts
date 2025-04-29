@@ -19,7 +19,6 @@ type Derivation<R = unknown> = (prevValue?: R) => R
 
 export type Methods = { [key: PropertyKey]: (...args: any) => any }
 
-type IonWithMethods = { wM: PickMethods }
 type PickMethods = (...args: string[]) => ReinConfig
 
 type ReinConfig = { capsule: AnyObject, selectedMethods: string[] }
@@ -39,26 +38,27 @@ export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
 
 
 
-type AsIon<T, M> = [T] extends [StateDef<infer D>] ? D :
-[T] extends [AtomicIon] ? T  // [T] extends [AtomicIon] to prevent type-narrowing
-   : [T] extends [Derivation<infer R>] ? M extends Methods ? Ion<R, M & { wM: PickMethods }> : Ion<R>
-   : M extends Methods ? Ion<T, M & { wM: PickMethods }> : Ion<T>
+type AsIon<T, M> = [T] extends [AtomicIon] ? T  // [T] extends [AtomicIon] to prevent type-narrowing
+   : [T] extends [Derivation<infer R>] ? M extends Methods ? Ion<R, M & { with_only: PickMethods }> : Ion<R>
+   : M extends Methods ? Ion<T, M & { with_only: PickMethods }> : Ion<T>
 
 type AsMutableIon<T, M> = [T] extends [AtomicIon] ? T  // [T] extends [AtomicIon] to prevent type-narrowing
-   : [T] extends [Derivation<infer R>] ? M extends Methods ? Ion<R, M & { wM: PickMethods }> : Ion<R>
-   : M extends Methods ? AtomicIon<T, M & { state: T, wM: PickMethods }> : AtomicIon<T>
+   : [T] extends [Derivation<infer R>] ? M extends Methods ? Ion<R, M & { with_only: PickMethods }> : Ion<R>
+   : M extends Methods ? AtomicIon<T, M & { state: T, with_only: PickMethods }> : AtomicIon<T>
 
-type StateDef<InitialState> = { [key: string]: InitialState }
+
 
 /**
- * Creates either an *encapsulated* ion capsule (if passed a state definition and methods) or derivation ion (if passed a pure getter function).
- * To create a *mutable* ion, use `ion.mu()`
+ * Creates an ion, ion capsule, or derivation ion, depending on parameters.
  * 
- * Ion capsule example:
+ * ##### ION:
  * ```
- * const $count = ion({ 
- *    'count': 0 
- * }, {
+ * const $count = ion(0)
+ * ```
+ * 
+ * ##### ION CAPSULE:
+ * ```
+ * const $count = ion(0, {
  *    increment() {
  *       this.count++
  *    },
@@ -68,36 +68,33 @@ type StateDef<InitialState> = { [key: string]: InitialState }
  * })
  * ```
  * 
- * Derivation ion example:
+ * ##### DERIVATION ION:
  * 
  * ```
  * const $doubleCount = ion(() => $count() * 2)
  * ```
  * 
  * 
- * //TODO: what happens when you pass an ion as the initial state?
+ * //TODO: what should happen when you pass an ion as the initial state?
  * 
- * @param initialState 
- * @param methods 
- * @returns 
+ * @param initialState or pure getter for derivations
+ * @param methods optional
+ * @returns `Ion<T>`
  */
-export function ion<
-T,
-M
->(initialStateDefinition: T & StateDef<unknown>, methods: M & Methods & ThisType<M & (T extends StateDef<unknown> ? T : {})>): AsMutableIon<T, M>
-export function ion<
-T,
-M
->(initialStateDefinition: T & (() => unknown), methods?: M & Methods& ThisType<M>): AsMutableIon<T, M>
+
 export function ion<
    T,
    M
->(initialStateDefinition: T, methods?: M & Methods& ThisType<M>): AsMutableIon<T, M>
+>(initialState: T & (() => unknown), methods?: M & Methods & ThisType<M & { state: T }>): AsMutableIon<T, M>
 export function ion<
-T,
+   T,
    M
->(initialStateDefinition: T & StateDef<unknown> | (() => unknown) | unknown, methods?: M & Methods& ThisType<M & (T extends StateDef<unknown> ? T : {})>): AsMutableIon<T, M> {
-   return asIon(initialStateDefinition, MUTABLE, false, methods) as AsMutableIon<T, M>
+>(initialState: T, methods?: M & Methods & ThisType<M & { state: T }>): AsMutableIon<T, M>
+export function ion<
+   T,
+   M
+>(initialState: T & (() => unknown) | unknown, methods?: M & Methods & ThisType<M & { state: T }>): AsMutableIon<T, M> {
+   return asIon(initialState, MUTABLE, false, methods) as AsMutableIon<T, M>
 }
 
 
@@ -118,19 +115,13 @@ ion.ionize = createIonizedIon
 ion.finite = finiton
 
 
+
+
 function createIonizedIon<
-   T extends Record<string, unknown>,
+   T,
    M
->(initialStateDefinition: T, methods: M & Methods): AsMutableIon<T, M>
-function createIonizedIon<
-   T extends unknown,
-   M
->(initialStateDefinition: T): AsMutableIon<T, M>
-function createIonizedIon<
-   T extends Record<string, unknown> | unknown,
-   M
->(initialStateDefinition: T, methods?: M & Methods): AsMutableIon<T, M> {
-   return asIon(initialStateDefinition, MUTABLE, IONIZED, methods) as AsMutableIon<T, M>
+>(initialState: T, methods?: M & Methods): AsMutableIon<T, M> {
+   return asIon(initialState, MUTABLE, IONIZED, methods) as AsMutableIon<T, M>
 }
 
 // function createDeepMutableIonizedIon<
@@ -178,42 +169,36 @@ function createIonizedIon<
  * @param methods 
  * @returns 
  */
-export function createEncapsulatedIon<
-   T extends Record<string, unknown>,
-   M
->(initialStateDefinition: T, methods: M & Methods& ThisType<M & (T extends Record<string, unknown> ? T : {})>): AsIon<T, M>
-export function createEncapsulatedIon<
-   T extends unknown,
-   M
->(initialStateDefinition: T): AsIon<T, M>
-export function createEncapsulatedIon<
-   T extends unknown | Record<string, unknown>,
-   M
->(initialStateDefinition: T, methods?: M & Methods& ThisType<M & (T extends Record<string, unknown> ? T : {})>): AsIon<T, M> {
-   return asIon(initialStateDefinition, !MUTABLE, !IONIZED, methods) as AsIon<T, M>
-}
+// export function createEncapsulatedIon<
+//    T extends Record<string, unknown>,
+//    M
+// >(initialStateDefinition: T, methods: M & Methods & ThisType<M & (T extends Record<string, unknown> ? T : {})>): AsIon<T, M>
+// export function createEncapsulatedIon<
+//    T extends unknown,
+//    M
+// >(initialStateDefinition: T): AsIon<T, M>
+// export function createEncapsulatedIon<
+//    T extends unknown | Record<string, unknown>,
+//    M
+// >(initialStateDefinition: T, methods?: M & Methods & ThisType<M & (T extends Record<string, unknown> ? T : {})>): AsIon<T, M> {
+//    return asIon(initialStateDefinition, !MUTABLE, !IONIZED, methods) as AsIon<T, M>
+// }
 
 function asIon(
-   initialStateDefinition: unknown | Record<string, unknown> | (() => unknown),
+   initialState: unknown | (() => unknown),
    mutable: boolean,
    ionized: boolean | 'mutable',
    methods?: AnyObject,
 ) {
-   if (isFunction(initialStateDefinition)) {
-      return createMaybeMemoizedIon(<Derivation>initialStateDefinition, methods, true)
+   if (isFunction(initialState)) {
+      return createMaybeMemoizedIon(<Derivation>initialState, methods, true)
    }
-   const [stateKey, initialState] = methods ? getStateKeyAndInitialState(initialStateDefinition as AnyObject) : ['state', initialStateDefinition]
+   
    if (isIon(initialState)) return initialState
-   return createAtomicIon(ionized ? maybeIonize(initialState) : initialState, stateKey, methods, mutable, ionized)
+   return createAtomicIon(ionized ? maybeIonize(initialState) : initialState, 'state', methods, mutable, ionized)
 }
 
-function getStateKeyAndInitialState(initialStateDefinition: AnyObject) {
-   const defKeys = Object.keys(initialStateDefinition)
-   if (defKeys.length !== 1) debug.error('[Invalid Input]: Ion state definition of an ion capsule must have one (and only one) property. The key must be a string')
-   const stateKey = defKeys[0] ?? 'value'
-   const initialState = initialStateDefinition[stateKey]
-   return [stateKey, initialState]
-}
+
 
 
 // isIon // any sort of ion

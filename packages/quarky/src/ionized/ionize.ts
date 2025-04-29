@@ -1,11 +1,12 @@
 import { AnyObject } from "@rue/types";
-import { isObject } from "@rue/utils";
+import { debug, isObject } from "@rue/utils";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { inert, Inert, isInert } from "./inert";
 import { AtomicIon, Ion, ion, isIon, Methods } from "../ion/Ion";
 import { createIonizedModel, getStructureConfigs, IonizedModel } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { MUTABLE } from "../ion/AtomicIon";
+import { isIonizable } from "./makeIonizable";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -101,6 +102,7 @@ export function ionize<T, M>(target: T & object, methods?: (M & Methods) & ThisT
    return ionizeModel(target, methods, MUTABLE) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
 }
 
+ionize.deep = ionize //TODO: 
 
 // ionize.mu = createMutableIonizedModel
 
@@ -109,6 +111,7 @@ export function ionize<T, M>(target: T & object, methods?: (M & Methods) & ThisT
 // }
 
 export function ionizeModel(target: object, methods: object |undefined, mutable: boolean = true) {
+   if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
    //TODO: prevent going from encapsulated to mutable;
    if (!methods && isIonizedModel(target)) return target;
    if (isIon(target) || isInert(target)) {
@@ -116,7 +119,10 @@ export function ionizeModel(target: object, methods: object |undefined, mutable:
       return target 
    }
    //TODO: What about a readonly object that is not an ionic model?
-   if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
+   if (!isIonizable(target.constructor)){
+      debug.warn(`The class ${target.constructor.name} must be made ionizable with makeIonizable() in order to ionize any instances of the class.`)
+      return target
+   }
    const rawTarget = toRaw(target)
    const existingIonizedModel = !methods ? ionizedModels.get(rawTarget) : undefined;
    if (existingIonizedModel) return existingIonizedModel 
