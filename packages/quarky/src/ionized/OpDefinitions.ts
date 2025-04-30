@@ -2,7 +2,6 @@ import { AnyObject } from "@rue/types"
 import { asIonized, ionize, toRaw } from "./ionize"
 import { TrackableOpDef } from "./makeIonizable"
 import { IonizedModel, maybeIonize } from "./IonizedModel"
-import { isObject } from "@rue/utils"
 
 const toIonizedDecoyOfTargetOrThisArg = (target: AnyObject, args: any[]) => ionizedDecoy(args[1] ?? target)
 export const trackModel = (model: IonizedModel) => [model] as [IonizedModel]
@@ -14,7 +13,7 @@ export const trackOp = (model: IonizedModel, op: PropertyKey, args: unknown[]) =
  * Checks for raw key, then checks for ionized key if raw key fails.
  * If ionized key works, replaces ionized key with raw key.
  * This optimizes .has(key) for future calls. Can be configured for 
- * .has() dependent ops such as .delete(), .add(), .set(), .get()
+ * .has() dependent ops such as delete(), get()
  * @param rawKey 
  * @param target 
  * @returns 
@@ -27,8 +26,8 @@ export function hasMaybeIonized(
       passIonized: (key: IonizedModel, rawKey: AnyObject) => unknown,
       fail: unknown
    } = {
-         passRaw: (key: unknown) => true,
-         passIonized: (key: object, rawKey?: object) =>{
+         passRaw: () => true,
+         passIonized: (key, rawKey?) =>{
             target.delete(key)
             target.add(rawKey)
             return true;
@@ -146,3 +145,4 @@ function rawDecoy(target: AnyObject) {
       }
    })
 }
+

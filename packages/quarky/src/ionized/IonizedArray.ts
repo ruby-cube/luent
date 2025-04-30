@@ -3,9 +3,9 @@ import { isIonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize
 import { AtomicOp, getAtomicOp } from "./AtomicOp";
 import { GetPreopData, IonizedModel, maybeIonize, } from "./IonizedModel";
 import { getAtomicPion, PionQuark, triggerPion } from "./Pion";
-import { makeIonizable, TriggeringOpDef,  trigger, TrackableOpDef, IonizableClassDef } from "./makeIonizable";
+import { makeIonizable, TriggeringOpDef, trigger, TrackableOpDef, IonizableClassDef } from "./makeIonizable";
 import { quarkOf } from "../Quark";
-import {simpleMethodAccess, trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackModel, trackOp} from './OpDefinitions'
+import { trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackModel, trackOp } from './OpDefinitions'
 
 // type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 
@@ -120,10 +120,6 @@ import {simpleMethodAccess, trackableCheckOp, trackableCreativeIterative, tracka
 const arrayLengthMutatingOp: TriggeringOpDef = {
    preop: (target) => ({ target, prevLength: target.length }),
    shouldTrigger: ({ target, prevLength }) => target.length !== prevLength, // only for length mutating ops 
-   // push: true,
-   // pop: true,
-   // shift: true,
-   // unshift: true,
    triggers: (model, args, { prevLength, target }) => (
       triggerObservedIndices(model, prevLength, target.length), [
          trigger(model),
@@ -177,7 +173,9 @@ export const ionizableArrayDef: IonizableClassDef = {
    entries: trackableOp, // newEntriesIterator = entries()
    values: trackableOp, // newIterable = values()
 
+   //@ts-expect-error
    toLocaleString: trackableOp, // string = toLocaleString() 
+   //@ts-expect-error
    toString: trackableOp, // string = toString()
 
    find: trackableIterative, // item = find(callbackFn, thisArg?)
@@ -190,7 +188,7 @@ export const ionizableArrayDef: IonizableClassDef = {
    some: trackableIterative, // boolean = some(callbackFn, thisArg?)
 
    // depends on index //TODO: possible performance optimization if we trigger based on indices?
-   lastIndexOf: trackableCheckOp, // index = lastIndexOf(item, fromIndex?)
+   lastIndexOf: trackableCheckOp, // index = lastIndexOf(item, fromIndex?) //TODO: atomic op that includes fromIndex
    indexOf: trackableCheckOp, // index = indexOf(item, fromIndex?)
    includes: trackableCheckOp, // boolean = includes(item, fromIndex?)
 
@@ -338,7 +336,7 @@ export const ionizableArrayDef: IonizableClassDef = {
    }
 }
 
-function triggerModel(model: IonizedModel) { return [trigger(model)]}
+function triggerModel(model: IonizedModel) { return [trigger(model)] }
 
 // isEntryKey(model, key) {
 //    return !!(model instanceof Array && isIntegerKey(key))
@@ -467,4 +465,13 @@ export function isIonizedArray(target: any): target is IonizedModel {
    if (!isIonizedModel(target)) return false;
    if (toRaw(target) instanceof Array) return true;
    return false;
+}
+
+// for .values(), .entries() and .keys() to output ionized objects
+
+export const ionizableIterable = {
+   next: {
+      output: o => maybeIonize(o),
+      track: trackModel
+   }
 }

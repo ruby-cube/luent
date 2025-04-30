@@ -5,7 +5,7 @@ import { getAtomicPion } from "./Pion"
 import { AtomicOp, getAtomicOp, getAtomicOps } from "./AtomicOp"
 import { quarkOf } from "../Quark"
 import { ionize, toRaw } from "./ionize"
-import { ionizableArrayDef } from "./IonizedArray"
+import { ionizableArrayDef, ionizableIterable } from "./IonizedArray"
 
 type Constructor = new (...args: any[]) => any
 
@@ -57,7 +57,8 @@ export const triggeringPropertySetOp: TriggeringOpDef = {
 
 const ionizableClassesMap = new Map([
    [Object as Constructor, { '[[set]]': triggeringPropertySetOp } as IonizableClassDef | undefined],
-   [Array, ionizableArrayDef]
+   [Array, ionizableArrayDef],
+   [[].values().constructor, ionizableIterable]
 ])
 
 export function isIonizable(constructor: Constructor) {

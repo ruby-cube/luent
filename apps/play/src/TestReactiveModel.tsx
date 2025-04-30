@@ -1,6 +1,8 @@
 import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { ion, __addDevName, ionize, toRaw, watch } from "@rue/quarky";
+import { makeIonizable } from "../../../packages/quarky/src/ionized/makeIonizable";
+import { trackModel } from "../../../packages/quarky/src/ionized/OpDefinitions";
 
 
 const randomColor = useRandomColorGenerator()
@@ -79,9 +81,31 @@ export function List(
       }
    })
 
-   console.log('list', list)
-   console.log('raw list', toRaw(list))
-   console.log([...list])
+   console.log('$$$ list values', list.values().next())
+   console.log('$$$ list iterator', list[Symbol.iterator])
+
+   const values = list.values()
+   for (const value of values) {
+      console.log('$$$ value', value)
+   }
+
+   for (const value of list) {
+      console.log('$$$ value of list', value)
+   }
+
+   console.log('$$$ values vs entries', [][Symbol.iterator].constructor)
+
+
+
+
+
+   const ionizedValues = ionize(list.values())
+   for (const value of ionizedValues) {
+      console.log('$$$ value of ionized values()', value)
+   }
+   // console.log('raw list', toRaw(list))
+   // console.log([...list])
+
 
 
    const selected = ionize(new Set(list), {
@@ -95,7 +119,7 @@ export function List(
          }
       }
    })
-   
+
    // const selectedB = new IonizedSet(list, {
    //    toggle(item: typeof list[number]) {
    //       console.log('$$$ selected', selected)

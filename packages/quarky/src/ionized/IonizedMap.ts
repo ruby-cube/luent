@@ -69,7 +69,7 @@ export function installIonicMap() {
       },
       [Symbol.iterator]: trackableOpWithCallback,
       forEach: trackableIterative,
-      keys: trackableOp, //TODO: maybeIonize output
+      keys: trackableOp,
       values: trackableOp,
       entries: trackableOp,
       set: {
