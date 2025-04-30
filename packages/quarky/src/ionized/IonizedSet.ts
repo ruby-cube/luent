@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { storeSnapshot, toRaw } from "./ionize";
+import { asIonized, storeSnapshot, toRaw } from "./ionize";
 import { GetPreopData, IonizedModel, useTrackableOp } from "./IonizedModel";
 import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { IonizedModelQuark } from "./IonizedModelQuark";
@@ -8,7 +8,7 @@ import { Mutation, recordMutation } from "../Mutable";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { quarkOf } from "../Quark";
 import { makeIonizable, trigger, triggerAll, TriggeringOpDef } from "./makeIonizable";
-import { trackableCheckOp, trackableCreativeOpWithArgs, trackableGetOp, trackableIterative, trackableOp, trackableOpWithCallback } from "./OpDefinitions";
+import { hasMaybeIonized, trackableCheckOp, trackableCreativeOpWithArgs, trackableHasOp, trackableIterative, trackableOp, trackableOpWithCallback, useDeleteOp } from "./OpDefinitions";
 
 // declare global {
 //    interface Set<T> {
@@ -72,7 +72,7 @@ import { trackableCheckOp, trackableCreativeOpWithArgs, trackableGetOp, trackabl
 export function installIonicSet() {
    makeIonizable(Set, {
       // trackableOps: {
-      has: trackableGetOp,
+      has: trackableHasOp,
       [Symbol.iterator]: trackableOpWithCallback,
       forEach: trackableIterative,
       keys: trackableOp,
@@ -87,10 +87,17 @@ export function installIonicSet() {
       isSupersetOf: trackableCheckOp, // boolean = isSupersetOf(otherSet)
       isDisjointFrom: trackableCheckOp, // boolean = isDisjointFrom(otherSet)
       add: {
+         createOp: (target) => {
+            return function add(value: unknown) {
+               const ionizedKey = asIonized(value);
+               if (ionizedKey) target.delete(ionizedKey);
+               return target.add(value)
+            }
+         },
          input: ([value]) => [toRaw(value)],
          preop: (target, [value]) => ({ prevSize: target.size, target, value }),
          shouldTrigger: isNotSameSize,
-         triggers: (model, [value]) =>[
+         triggers: (model, [value]) => [
             trigger(model),
             trigger(model, '[[get]]', 'size'),
             trigger(model, 'has', value)
@@ -120,6 +127,7 @@ export function installIonicSet() {
       },
       delete: {
          input: ([value]) => [toRaw(value)],
+         createOp: useDeleteOp,
          preop: (target, [value]) => ({
             target,
             value,
@@ -139,7 +147,7 @@ export function installIonicSet() {
    })
 }
 
-export function isNotSameSize({prevSize, target}: {prevSize: number, target: {size: number}}){
+export function isNotSameSize({ prevSize, target }: { prevSize: number, target: { size: number } }) {
    return prevSize !== target.size
 }
 

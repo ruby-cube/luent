@@ -3,12 +3,9 @@ import { isIonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize
 import { AtomicOp, getAtomicOp } from "./AtomicOp";
 import { GetPreopData, IonizedModel, maybeIonize, } from "./IonizedModel";
 import { getAtomicPion, PionQuark, triggerPion } from "./Pion";
-import { Mutation, recordMutation } from "../Mutable";
-import { IonizedModelQuark } from "./IonizedModelQuark";
-import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { makeIonizable, TriggeringOpDef,  trigger, TrackableOpDef, IonizableClassDef } from "./makeIonizable";
 import { quarkOf } from "../Quark";
-import {maybeIonizeNested, trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trackableCreativeOpWithArgs, trackableGetOp, trackableIterative, trackableOp, trackableOpWithCallback, trackModel} from './OpDefinitions'
+import {simpleMethodAccess, trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackModel, trackOp} from './OpDefinitions'
 
 // type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
 
@@ -152,7 +149,10 @@ function triggerObservedIndices(model: IonizedModel, prevLength: number, newLeng
 
 
 export const ionizableArrayDef: IonizableClassDef = {
-   at: trackableGetOp,
+   at: {
+      track: trackOp,
+      output: maybeIonize
+   },
 
    [Symbol.iterator]: trackableOpWithCallback, // decoy
 
@@ -200,7 +200,7 @@ export const ionizableArrayDef: IonizableClassDef = {
    toSpliced: {
       input: (args) => args.map((item, index) => index < 2 ? item : toRaw(item)),
       track: trackModel,
-      output: maybeIonizeNested,
+      output: maybeIonize,
    }, // newArray = toSpliced(start?, delete[Count?, item1, item2, /* …, */ itemN)
 
    push: {

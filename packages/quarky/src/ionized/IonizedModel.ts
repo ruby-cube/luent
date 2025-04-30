@@ -18,7 +18,8 @@ import { Watchable } from "../watch/Watched";
 import { IonizedCompound } from "./IonizedCompound";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { MUTABLE } from "../ion/AtomicIon";
-import { getIonizableMethodDef, TriggeringOpDef, TrackableOpDef, triggeringSetOp } from "./makeIonizable";
+import { getIonizableMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp } from "./makeIonizable";
+import { normalize } from "path";
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -146,57 +147,30 @@ export type GetPreopData = (target: AnyObject, args?: any[]) => any;
 type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
 
 
-// A 'get op' is a o(1) get-like operation like set.has() or array.at()
-
-// const TrackableOp = {
-//    [TRACK_ENTRY]: useTrackableGetOp,
-//    [TRACK_MODEL]: useTrackableOp,
-//    [TRACK_MODEL_WITH_CALLBACK]: useTrackableOpWithCallback
-// }
-
-// export function useTrackableGetOp(
-//    target: AnyObject,
-//    model: IonizedModel,
-//    op: PropertyKey,
-// ) {
-//    const fn = target[op]
-//    const trackableOp = function trackableGetOp(arg: any) {
-//       if (__DEV__) emitSignal();
-//       const value = toRaw(arg)
-//       getActiveTracker()?.track(asAtomicOp(model, op, value))
-//       return maybeIonize(fn.call(target, value)) //TODO: I think I'm binding `this` extraneously in the proxy. How can I make this more elegant? 
-//    }
-//    return trackableOp
-// }
-
 
 // a `trackable op` is a method like 'values()' or 'entries()' that tracks the entire ionic model as a watch subject rather than a specific entry or property
 export function useTrackableOp(
    target: AnyObject,
-   model: IonizedModel,
+   ionized: IonizedModel,
    op: PropertyKey,
-   transformInput: (args: any[]) => any[] = noTransform,
-   transformTarget: (target: AnyObject, args: any[]) => AnyObject = noTransform,
-   transformOutput: (output: any) => any = noTransform,
-   transformTrackable: (model: IonizedModel, op: PropertyKey, input: any[]) => [IonizedModel] | [IonizedModel, PropertyKey, any[]] = noTransform,
+   config: TrackableOpDef,
 ) {
+   const { createOp, track, input = noTransform, output = noTransform, this: transformThis = noTransform } = config
 
-   const fn = target[op]
-   const _transformTrackable = (model: IonizedModel, op: PropertyKey, input: any[]) => asParticleMorph(...transformTrackable(model, op, input))
+   const fn = createOp ? createOp(target, op) : target[op]
+
    return function trackableOp(...args: any[]) {
       if (__DEV__) emitSignal();
-      const _args = transformInput(args);
-      // if(op === 'indexOf'){
-      // }
-      getActiveTracker()?.track(/* quarkOf(model) */ _transformTrackable(model, op, _args))
-      return transformOutput(fn.call(transformTarget(target, _args), ..._args))
+      const _args = input(args);
+      getActiveTracker()?.track(asTrackable(track(ionized, op, _args)))
+      return output(fn.call(transformThis(target, _args), ..._args), ionized)
    }
 }
 
-function asParticleMorph(model: IonizedModel, op: PropertyKey | undefined, input: any[]) {
+function asTrackable(tracked: [IonizedModel] | [IonizedModel, PropertyKey, any[]]) {
+   const [model, op, input] = tracked;
    if (op) {
-      return asAtomicOp(model, op, input[0]) //TODO: 
-
+      return asAtomicOp(model, op, input![0]) //TODO: atomicOps that have more than one 'entry key'
    } else {
       return quarkOf(model)
    }
@@ -396,7 +370,7 @@ export function createIonizedModel(
       ['super', () => _super ?? createIonizedModel(target, undefined, MUTABLE, false)]
    ])
 
-   const setOp = useMutatingOp(target, ionizedModel, '[[set]]', (key, value) => { target[key] = value }, triggeringSetOp)
+   const setOp = useMutatingOp(target, ionizedModel, '[[set]]', triggeringPropertySetOp)
 
    const thisModel = mutable ? ionizedModel : createIonizedModel(target, methods, true, false)
 
@@ -424,7 +398,7 @@ function initialAccess(
    if (methods && key in methods) {
       return bindMethod(methods[key], key, ionizedModel, propertyMap)
    }
-   const nativeMethodDef = getIonizableMethodDef(target, key) 
+   const nativeMethodDef = getIonizableMethodDef(target, key)
    if (nativeMethodDef) { //NOTE: this block must be above target[_key] for Array.from(set) to work
       return bindNativeMethod(
          nativeMethodDef,
@@ -670,10 +644,7 @@ function bindNativeMethod(
          target,
          ionizedModel,
          key,
-         config.input,
-         config.this,
-         config.output,
-         config.track
+         config
       )
       propertyMap.set(key, () => op)
       return op;
@@ -683,7 +654,6 @@ function bindNativeMethod(
          target,
          ionizedModel,
          key,
-         target[key],
          config
       )
       // __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, quark, getPreopData))
@@ -699,15 +669,14 @@ function useMutatingOp(
    target: AnyObject,
    model: IonizedModel,
    op: PropertyKey,
-   fn: Function,
    config: TriggeringOpDef
 ) {
    const fnName = typeof op === 'string' ? 'ionic_' + op : 'ionic_mutating_op'
-   const { shouldTrigger, triggers: getTriggers, input = noTransform, output: transformOutput = noTransform } = config
-   // const fn = target[op];
+   const { shouldTrigger, triggers: getTriggers, input = noTransform, output: transformOutput = noTransform, createOp } = config
+   const fn = createOp ? createOp(target, op) : target[op];
    const quark = quarkOf(model)
 
-   const _ = {
+   const o = {
       [fnName](...args: any) {
          const _args = input(args)
          const preop = config.preop?.(target, _args)
@@ -737,7 +706,7 @@ function useMutatingOp(
          return output;
       }
    }
-   return _[fnName]
+   return o[fnName]
 }
 
 

@@ -19,8 +19,8 @@ import { isIonizable } from "./makeIonizable";
 
 const ionizedModels: WeakMap<AnyObject, IonizedModel> = new WeakMap()
 
-export function registerIonizedModel(ionicModel: IonizedModel, target: AnyObject) {
-   ionizedModels.set(target, ionicModel)
+export function registerIonizedModel(ionized: IonizedModel, target: AnyObject) {
+   ionizedModels.set(target, ionized)
 }
 
 export function isIonizedModel(value: any): value is IonizedModel {
@@ -28,6 +28,9 @@ export function isIonizedModel(value: any): value is IonizedModel {
    return hasQuark(value) && quarkOf(value) instanceof IonizedModelQuark;
 }
 
+export function asIonized(value: unknown){
+   return ionizedModels.get(value as AnyObject)
+}
 
 
 type AbsorbedIon<T> = {

@@ -52,12 +52,13 @@ class Frog {
    }
 }
 
-function mu(an: any){return an}
+
 export function List(
 
 ) {
+   const frog = ionize({ id: 0, content: "frog" })
    const list = ionize([
-      { id: 0, content: "frog" },
+      frog,
       { id: 1, content: "robin" },
       { id: 2, content: "fly" },
       { id: 3, content: "swamp" }
@@ -83,18 +84,29 @@ export function List(
    console.log([...list])
 
 
-   const selected = ionize(new Set(), {
+   const selected = ionize(new Set(list), {
       toggle(item: typeof list[number]) {
-         const prevSize = toRaw(selected).size;
+         console.log('$$$ selected', selected)
          if (selected.has(item)) {
             selected.delete(item)
          }
          else {
             selected.add(item)
          }
-         console.log('toggle', toRaw(selected), prevSize, 'to', toRaw(selected).size)
       }
    })
+   
+   // const selectedB = new IonizedSet(list, {
+   //    toggle(item: typeof list[number]) {
+   //       console.log('$$$ selected', selected)
+   //       if (selected.has(item)) {
+   //          selected.delete(item)
+   //       }
+   //       else {
+   //          selected.add(item)
+   //       }
+   //    }
+   // })
 
    try {
       console.log('has it?', selected.has(0))

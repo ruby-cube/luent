@@ -11,13 +11,15 @@ type Constructor = new (...args: any[]) => any
 
 export type TrackableOpDef = {
    // trackable ops
-   input?: (input: [any, any, any, ...any[]]) => any[],
+   createOp?: (target: AnyObject, key: PropertyKey, ionized?: IonizedModel) => Function,
+   input?: (input: any[]) => any[],
    output?: (output: any, model: IonizedModel) => any,
    this?: (target: AnyObject, input: any[]) => AnyObject,
    track: (model: IonizedModel, op: PropertyKey, input: any[]) => [IonizedModel] | [IonizedModel, PropertyKey, any[]] // track op
 }
 export type TriggeringOpDef = {
-   input?: (input: [any, any, any, ...any[]]) => any[],
+   createOp?: (target: AnyObject, key: PropertyKey, ionized?: IonizedModel) => Function,
+   input?: (input: any[]) => any[],
    preop?: GetPreopData
    shouldTrigger?: (preopData: any) => boolean
    triggers: (model: IonizedModel, args: any[], preopData: any) => (() => void)[]
@@ -34,7 +36,8 @@ export type IonizableClassDef = {
    [key: PropertyKey]: IonizableMethodDef
 }
 
-export const triggeringSetOp: TriggeringOpDef = {
+export const triggeringPropertySetOp: TriggeringOpDef = {
+   createOp: (target) => (key: PropertyKey, value: unknown) => target[key] = value,
    input: ([key, value]) => [key, toRaw(value)],
    preop: (target, [key, value]) => ({
       key,
@@ -53,7 +56,7 @@ export const triggeringSetOp: TriggeringOpDef = {
 }
 
 const ionizableClassesMap = new Map([
-   [Object as Constructor, { '[[set]]': triggeringSetOp } as IonizableClassDef | undefined],
+   [Object as Constructor, { '[[set]]': triggeringPropertySetOp } as IonizableClassDef | undefined],
    [Array, ionizableArrayDef]
 ])
 

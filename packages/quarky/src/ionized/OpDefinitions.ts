@@ -1,16 +1,69 @@
 import { AnyObject } from "@rue/types"
-import { ionize, toRaw } from "./ionize"
+import { asIonized, ionize, toRaw } from "./ionize"
 import { TrackableOpDef } from "./makeIonizable"
 import { IonizedModel, maybeIonize } from "./IonizedModel"
+import { isObject } from "@rue/utils"
 
 const toIonizedDecoyOfTargetOrThisArg = (target: AnyObject, args: any[]) => ionizedDecoy(args[1] ?? target)
 export const trackModel = (model: IonizedModel) => [model] as [IonizedModel]
+export const trackOp = (model: IonizedModel, op: PropertyKey, args: unknown[]) => [model, op, args] as [IonizedModel, PropertyKey, any[]]
 
-export const trackableGetOp: TrackableOpDef = {
-   input: (args) => (args[0] = toRaw(args[0]), args),
-   track: (model, op, args) => [model, op, args],
-   output: maybeIonizeNested
+
+
+/**
+ * Checks for raw key, then checks for ionized key if raw key fails.
+ * If ionized key works, replaces ionized key with raw key.
+ * This optimizes .has(key) for future calls. Can be configured for 
+ * .has() dependent ops such as .delete(), .add(), .set(), .get()
+ * @param rawKey 
+ * @param target 
+ * @returns 
+ */
+export function hasMaybeIonized(
+   rawKey: unknown,
+   target: Set<unknown>,
+   { passRaw, fail, passIonized }: {
+      passRaw: (key: unknown) => unknown,
+      passIonized: (key: IonizedModel, rawKey: AnyObject) => unknown,
+      fail: unknown
+   } = {
+         passRaw: (key: unknown) => true,
+         passIonized: (key: object, rawKey?: object) =>{
+            target.delete(key)
+            target.add(rawKey)
+            return true;
+         },
+         fail: false
+      }
+) {
+   if (target.has(rawKey)) {
+      return passRaw(rawKey);
+   }
+   const ionizedKey = asIonized(rawKey);
+   if (ionizedKey && target.has(ionizedKey)) {
+      return passIonized(ionizedKey, rawKey as AnyObject)
+   }
+   return fail;
 }
+
+export function useDeleteOp(target: AnyObject) {
+   const deleteOp = target.delete.bind(target)
+   return (key: unknown) => hasMaybeIonized(key, target as Set<unknown>, {
+      passRaw: deleteOp,
+      passIonized: deleteOp,
+      fail: false
+   })
+}
+
+
+
+
+export const trackableHasOp: TrackableOpDef = {
+   input: ([key]) => [toRaw(key)],
+   createOp: (target) => (key: unknown) => hasMaybeIonized(key, target as Set<unknown>),
+   track: trackOp,
+}
+
 
 export const trackableOp: TrackableOpDef = {
    track: trackModel
@@ -65,9 +118,9 @@ export const trackableCheckOp: TrackableOpDef = {
 
 
 
-export function maybeIonizeNested(value: any, model: IonizedModel){
-      return maybeIonize(value)//TODO: encapsulated or readonly
-}
+// export function maybeIonizeNested(value: any, model: IonizedModel) {
+//    return maybeIonize(value)//TODO: encapsulated or readonly
+// }
 
 
 function ionizedDecoy(target: AnyObject) {

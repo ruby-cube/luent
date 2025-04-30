@@ -1,12 +1,13 @@
-import { storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
+import { storeSnapshot, ionize, registerIonizedModel, toRaw, asIonized } from "./ionize";
 import { isNotSameSize, setDeleteOp, useClearOp } from "./IonizedSet";
 import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { makeIonizable, trigger, triggerAll } from "./makeIonizable";
-import { trackableGetOp, trackableIterative, trackableOp, trackableOpWithCallback } from "./OpDefinitions";
+import { hasMaybeIonized, trackableGetOp, trackableHasOp, trackableIterative, trackableOp, trackableOpWithCallback, trackOp, useDeleteOp } from "./OpDefinitions";
 import { noop } from "@rue/utils";
+import { maybeIonize } from "./IonizedModel";
 
 // declare global {
 //    interface Map<K, V> {
@@ -50,14 +51,35 @@ const trackableMapGetOps = {
 
 export function installIonicMap() {
    makeIonizable(Map, {
-      has: trackableGetOp,
-      get: trackableGetOp,
+      has: trackableHasOp,
+      get: {
+         input: ([key]) => [toRaw(key)],
+         createOp: (target) => (key: unknown) => hasMaybeIonized(key, target as Set<unknown>, {
+            passRaw: (key) => target.get(key),
+            passIonized(ionized, rawKey) {
+               const value = target.get(ionized);
+               target.delete(ionized);
+               target.set(rawKey, value);
+               return value;
+            },
+            fail: undefined
+         }),
+         track: trackOp,
+         output: maybeIonize
+      },
       [Symbol.iterator]: trackableOpWithCallback,
       forEach: trackableIterative,
-      keys: trackableOp,
+      keys: trackableOp, //TODO: maybeIonize output
       values: trackableOp,
       entries: trackableOp,
       set: {
+         createOp(target) {
+            return function set(key: unknown, value: unknown){
+               const ionizedKey = asIonized(key);
+               if (ionizedKey) target.delete(ionizedKey);
+               return target.set(key, value)
+            }
+         },
          input: ([key, value]) => [toRaw(key), toRaw(value)],
          preop: (target, [key, value]) => ({
             target,
@@ -65,14 +87,14 @@ export function installIonicMap() {
             prevState: target.get(key),
          }),
          shouldTrigger: ({ prevState, key, target }) => prevState !== target.get(key),
-         triggers: (model, [key], { prevSize, target }) => [
-            trigger(model),
-            trigger(model, 'has', key),
-            trigger(model, 'get', key),
-            prevSize !== target.size ? trigger(model, '[[get]]', 'size') : noop,
+         triggers: (ionized, [key], { prevSize, target }) => [
+            trigger(ionized),
+            trigger(ionized, 'has', key),
+            trigger(ionized, 'get', key),
+            prevSize !== target.size ? trigger(ionized, '[[get]]', 'size') : noop,
          ],
-         revert(model, data) {
-            model.delete(data.args[0])
+         revert(ionized, data) {
+            ionized.delete(data.args[0])
          }
       },
 
@@ -99,6 +121,7 @@ export function installIonicMap() {
 
       delete: {
          input: ([key]) => [toRaw(key)],
+         createOp: useDeleteOp,
          preop: (target, [key]) => ({
             target,
             key,
@@ -109,6 +132,7 @@ export function installIonicMap() {
          triggers: (model, [key]) => [
             trigger(model),
             trigger(model, 'has', key),
+            trigger(model, 'get', key),
             trigger(model, '[[get]]', 'size')
          ],
          revert(ionizedModel, { preopData: { key, value } }) {
