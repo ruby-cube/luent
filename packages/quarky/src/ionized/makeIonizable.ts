@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types"
 import { debug } from "@rue/utils"
-import { IonizedModel, maybeIonize, maybeIonizeNested } from "./IonizedModel"
+import { IonizedModel } from "./IonizedModel"
 import { getAtomicPion } from "./Pion"
 import { AtomicOp, getAtomicOp, getAtomicOps } from "./AtomicOp"
 import { quarkOf } from "../Quark"
@@ -44,7 +44,7 @@ export const triggeringSetOp: TriggeringOpDef = {
    shouldTrigger: ({ oldState, newState }) => oldState !== newState, // should both be raw objects
    triggers: (model, [key]) => [
       trigger(model),
-      trigger(model, '[[get]]', [key as PropertyKey])
+      trigger(model, '[[get]]', key as PropertyKey)
    ],
    // output: (o) => maybeIonize(o), //TODO: this is tricky if encapsulation is involved ... you need to pass the parent quark to know what kind of ionization to do
    revert: (model, { preopData: { key, oldState } }) => {
@@ -61,16 +61,21 @@ export function isIonizable(constructor: Constructor) {
    return ionizableClassesMap.has(constructor);
 }
 
-export function getIonizableMethodDef(target: AnyObject, methodKey: PropertyKey) {
+export function getIonizableMethodDef(target: AnyObject, methodKey: PropertyKey) { //FIX: this is causing infinite loops e.g. toJSON()
    let constructor = target.constructor as Constructor
-   while (constructor) {
+   let _target = target;
+   while (constructor !== Object) {
       if (Object.hasOwn(target, methodKey)) {
          return ionizableClassesMap.get(constructor)?.[methodKey]
       }
       const def = ionizableClassesMap.get(constructor)?.[methodKey]
-      if (def) return def;
-      constructor = Object.getPrototypeOf(target).constructor
+      if (def) {
+         return def;
+      }
+      _target = Object.getPrototypeOf(_target)
+      constructor = _target.constructor as Constructor
    }
+   // return ionizableClassesMap.get(Object)?.['[[set]]']
 }
 
 export function makeIonizable(constructor: Constructor, def?: IonizableClassDef) {
@@ -101,15 +106,15 @@ export function triggerAll(model: IonizedModel, op: PropertyKey): () => void {
 }
 
 export function trigger(model: IonizedModel): () => void
-export function trigger(model: IonizedModel, op: '[[get]]', args: [PropertyKey]): () => void
-export function trigger(model: IonizedModel, op: PropertyKey, args: any[]): () => void
-export function trigger(model: IonizedModel, op?: PropertyKey | '[[get]]', args?: any[]): () => void {
+export function trigger(model: IonizedModel, op: '[[get]]', entryKey: PropertyKey): () => void
+export function trigger(model: IonizedModel, op: PropertyKey, entryKey: any): () => void
+export function trigger(model: IonizedModel, op?: PropertyKey | '[[get]]', entryKey?: any): () => void {
    if (op === '[[get]]') {
-      if (!args) throw new Error('must provide property key to trigger [[get]] op')
-      return () => getAtomicPion(model, args[0])?.trigger()
+      if (!entryKey) throw new Error('must provide property key to trigger [[get]] op')
+      return () => getAtomicPion(model, entryKey)?.trigger()
    }
    else if (op) {
-      return () => getAtomicOp(model, op, args)?.trigger()
+      return () => getAtomicOp(model, op, entryKey)?.trigger()
    }
    return () => quarkOf(model).trigger()
 }

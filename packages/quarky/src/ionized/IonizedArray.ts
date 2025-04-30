@@ -130,7 +130,7 @@ const arrayLengthMutatingOp: TriggeringOpDef = {
    triggers: (model, args, { prevLength, target }) => (
       triggerObservedIndices(model, prevLength, target.length), [
          trigger(model),
-         trigger(model, '[[get]]', ['length']),
+         trigger(model, '[[get]]', 'length'),
       ])
 }
 
@@ -208,7 +208,7 @@ export const ionizableArrayDef: IonizableClassDef = {
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
       triggers: (model) => [
          trigger(model),
-         trigger(model, '[[get]]', ['length']),
+         trigger(model, '[[get]]', 'length'),
          //TODO: trigger Observed Indices
       ],
       revert(model, { preopData: { prevLength }, args }) {
@@ -220,10 +220,10 @@ export const ionizableArrayDef: IonizableClassDef = {
       preop: arrayLengthMutatingOp.preop,
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
       triggers: (model, _, { prevLength }) => [
-         trigger(model, '[[get]]', [(prevLength - 1).toString()]),
-         trigger(model, 'at', [- 1]),
+         trigger(model, '[[get]]', (prevLength - 1).toString()),
+         trigger(model, 'at', - 1),
          trigger(model),
-         trigger(model, '[[get]]', ['length']),
+         trigger(model, '[[get]]', 'length'),
       ],
       revert: (model, { output }) => {
          model.push(output)
@@ -236,7 +236,7 @@ export const ionizableArrayDef: IonizableClassDef = {
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
       triggers: (model) => [
          trigger(model),
-         trigger(model, '[[get]]', ['length']),
+         trigger(model, '[[get]]', 'length'),
          //TODO: trigger Observed Indices
       ],
       revert(model, { args }) {
@@ -249,7 +249,7 @@ export const ionizableArrayDef: IonizableClassDef = {
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
       triggers: (model) => [
          trigger(model),
-         trigger(model, '[[get]]', ['length']),
+         trigger(model, '[[get]]', 'length'),
          //TODO: trigger Observed Indices
       ],
       revert(model, { output }) {
@@ -261,7 +261,7 @@ export const ionizableArrayDef: IonizableClassDef = {
       input: ([start, deleteCount, ...args]: Parameters<Array<any>['splice']>) => [start, deleteCount, ...deionizeArgs(args)],
       triggers: (model) => [
          trigger(model),
-         trigger(model, '[[get]]', ['length']),
+         trigger(model, '[[get]]', 'length'),
          //TODO: trigger Observed Indices
       ],
       revert(model, { output, args }) {
@@ -273,19 +273,19 @@ export const ionizableArrayDef: IonizableClassDef = {
 
    copyWithin: {
       preop: fillOrCopyWithinPreop,
-      triggers: (model) => [trigger(model)],
+      triggers: triggerModel,
       revert: fillOrCopyWithinRevert
    },
 
    fill: {
       input: ([value]: Parameters<Array<any>['fill']> | any[]) => toRaw(value),
       preop: fillOrCopyWithinPreop,
-      triggers: (model) => [trigger(model)],
+      triggers: triggerModel,
       revert: fillOrCopyWithinRevert
    },
 
    reverse: {
-      triggers: (model) => [trigger(model)],
+      triggers: triggerModel,
       revert(model) {
          model.reverse()
       }
@@ -295,7 +295,7 @@ export const ionizableArrayDef: IonizableClassDef = {
       preop(model) {
          return model.slice()
       },
-      triggers: (model) => [trigger(model)],
+      triggers: triggerModel,
       revert(model, { preopData: snapshot }) {
          for (let i = 0; i < model.length; i++) {
             model[i] = snapshot[i]
@@ -337,6 +337,8 @@ export const ionizableArrayDef: IonizableClassDef = {
       ]
    }
 }
+
+function triggerModel(model: IonizedModel) { return [trigger(model)]}
 
 // isEntryKey(model, key) {
 //    return !!(model instanceof Array && isIntegerKey(key))

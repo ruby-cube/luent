@@ -8,7 +8,7 @@ export const trackModel = (model: IonizedModel) => [model] as [IonizedModel]
 
 export const trackableGetOp: TrackableOpDef = {
    input: (args) => (args[0] = toRaw(args[0]), args),
-   track: (model, op, args) => [model, op, args[0]],
+   track: (model, op, args) => [model, op, args],
    output: maybeIonizeNested
 }
 

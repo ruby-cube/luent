@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-// import './style.css'
+import './style.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
 // import { TestCounter } from './TestCounter';
@@ -36,7 +36,7 @@ import { TestAnimationController } from './demos/animation-controller';
 import { CounterModelApp } from './TestCounterModel';
 import { Sidebar } from './demos/IfContextMenu';
 import { FBApp } from './demos/FBChatBug';
-import { IonizedModelBug } from './demos/IonizedModelBug';
+import { PlainList } from './TestList';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -126,7 +126,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(CounterModelApp)
+const app = createApp(List)
 
 app.mount('#app')
 

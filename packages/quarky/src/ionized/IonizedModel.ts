@@ -18,7 +18,7 @@ import { Watchable } from "../watch/Watched";
 import { IonizedCompound } from "./IonizedCompound";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { MUTABLE } from "../ion/AtomicIon";
-import { getIonizableMethodDef, TriggeringOpDef, TrackableOpDef } from "./makeIonizable";
+import { getIonizableMethodDef, TriggeringOpDef, TrackableOpDef, triggeringSetOp } from "./makeIonizable";
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -195,7 +195,7 @@ export function useTrackableOp(
 
 function asParticleMorph(model: IonizedModel, op: PropertyKey | undefined, input: any[]) {
    if (op) {
-      return asAtomicOp(model, op, input)
+      return asAtomicOp(model, op, input[0]) //TODO: 
 
    } else {
       return quarkOf(model)
@@ -396,7 +396,7 @@ export function createIonizedModel(
       ['super', () => _super ?? createIonizedModel(target, undefined, MUTABLE, false)]
    ])
 
-   const setOp = useMutatingOp(target, ionizedModel, '[[set]]', (key, value) => { target[key] = value }, getIonizableMethodDef(target, '[[set]]') as TriggeringOpDef)
+   const setOp = useMutatingOp(target, ionizedModel, '[[set]]', (key, value) => { target[key] = value }, triggeringSetOp)
 
    const thisModel = mutable ? ionizedModel : createIonizedModel(target, methods, true, false)
 
@@ -424,7 +424,7 @@ function initialAccess(
    if (methods && key in methods) {
       return bindMethod(methods[key], key, ionizedModel, propertyMap)
    }
-   const nativeMethodDef = getIonizableMethodDef(target, key)
+   const nativeMethodDef = getIonizableMethodDef(target, key) 
    if (nativeMethodDef) { //NOTE: this block must be above target[_key] for Array.from(set) to work
       return bindNativeMethod(
          nativeMethodDef,
@@ -459,9 +459,9 @@ export function initialPropertyAccess(
 ) {
    const isIonAccessKey = typeof key === 'string' && key[0] === '$' //TODO: need to use regex
 
-   if (isNonTrackable(key)) { //QUESTION: is this worth it? //TODO: include non-writable properties
-      return initialNonTrackablePropertyAccess(target, key, value, propertyMap, transformValue);
-   }
+   // if (isNonTrackable(key)) { //QUESTION: is this worth it? //TODO: include non-writable properties
+   //    return initialNonTrackablePropertyAccess(target, key, value, propertyMap, transformValue);
+   // }
 
    if (isIonAccessKey) {
       return initialIonAccess(ionizedModel, target, key, value, propertyMap, transformValue);
@@ -726,7 +726,7 @@ function useMutatingOp(
             preop
          ))
 
-         const triggers = getTriggers(model, args, preop);
+         const triggers = getTriggers(model, _args, preop);
 
          for (const trigger of triggers) {
             trigger();

@@ -1,10 +1,12 @@
 import { storeSnapshot, ionize, registerIonizedModel, toRaw } from "./ionize";
-import { useClearOp, useDeleteOp } from "./IonizedSet";
+import { isNotSameSize, setDeleteOp, useClearOp } from "./IonizedSet";
 import { getAtomicOp, getAtomicOps } from "./AtomicOp";
-import { defineIonizedStructure, TRACK_ENTRY, TRACK_MODEL, TRACK_MODEL_WITH_CALLBACK, useTrackableGetOp, useTrackableIterative, useTrackableOp, useTrackableOpWithCallback } from "./IonizedModel";
 import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
-import {  runSyncEffects } from "../effect-cycle/SyncEffects";
+import { runSyncEffects } from "../effect-cycle/SyncEffects";
+import { makeIonizable, trigger, triggerAll } from "./makeIonizable";
+import { trackableGetOp, trackableIterative, trackableOp, trackableOpWithCallback } from "./OpDefinitions";
+import { noop } from "@rue/utils";
 
 // declare global {
 //    interface Map<K, V> {
@@ -47,115 +49,73 @@ const trackableMapGetOps = {
 }
 
 export function installIonicMap() {
-   defineIonizedStructure(Map, {
-      trackableOps: {
-         has: useTrackableGetOp,
-         get: useTrackableGetOp,
-         [Symbol.iterator]: useTrackableOpWithCallback,
-         forEach: useTrackableIterative,
-         keys: useTrackableOp,
-         values: useTrackableOp,
-         entries: useTrackableOp,
+   makeIonizable(Map, {
+      has: trackableGetOp,
+      get: trackableGetOp,
+      [Symbol.iterator]: trackableOpWithCallback,
+      forEach: trackableIterative,
+      keys: trackableOp,
+      values: trackableOp,
+      entries: trackableOp,
+      set: {
+         input: ([key, value]) => [toRaw(key), toRaw(value)],
+         preop: (target, [key, value]) => ({
+            target,
+            key,
+            prevState: target.get(key),
+         }),
+         shouldTrigger: ({ prevState, key, target }) => prevState !== target.get(key),
+         triggers: (model, [key], { prevSize, target }) => [
+            trigger(model),
+            trigger(model, 'has', key),
+            trigger(model, 'get', key),
+            prevSize !== target.size ? trigger(model, '[[get]]', 'size') : noop,
+         ],
+         revert(model, data) {
+            model.delete(data.args[0])
+         }
       },
-      mutatingOps: {
-         set: {
-            createOp(target, model, quark) {
 
-               return function set(key: any, newValue: any) { //QUESTION: do we need to toRaw the key?
-                  const oldSize = target.size
-                  const oldValue = target.get(key);
-                  const _newValue = toRaw(newValue)
-                  const output = target.set(key, _newValue); //perform op
-                  const newSize = target.size
-
-                  if (oldValue === _newValue) return;
-
-                  storeSnapshot(quark)
-
-                  recordMutation(quark, new Mutation(
-                     model,
-                     'set',
-                     [key, _newValue],
-                     output,
-                     oldValue
-                  ))
-
-                  if (oldSize !== newSize) {
-                     getAtomicPion(model, 'size')?.trigger()
-                  }
-
-                  getAtomicOp(model, 'has', key)?.trigger()
-                  getAtomicOp(model, 'get', key)?.trigger()
-
-                  runSyncEffects()
-
-                  return output;
-               }
-            },
-
-            revert(model, data) {
-               model.delete(data.args[0])
-            }
-         },
-         clear: {
-            createOp(target, ionizedModel, quark, getPreopData) {
-               const clearOp = useClearOp(
-                  ionizedModel,
-                  quark,
-                  target,
-                  getPreopData!
-               )
-
-               return () => {
-                  const output = clearOp()
-                  const getOps = getAtomicOps(ionizedModel, 'get')
-                  if (getOps) {
-                     for (const [_, atomicOp] of getOps) {
-                        atomicOp.trigger()
-                     }
-                  }
-                  return output;
-               }
-            },
-
-            preop(target) {
-               return Array.from(<Map<any, any>>target)
-            },
-
-            revert(ionizedModel, { preopData }) {
-               for (const [key, value] of preopData) {
-                  ionizedModel.set(key, value) //QUESTION: not sure if this should be the raw target or the ionic model
-               }
-            }
-         },
-         delete: {
-            createOp(target, ionizedModel, quark, getPreopData) {
-               const deleteOp = useDeleteOp(
-                  ionizedModel,
-                  quark,
-                  target,
-                  getPreopData!
-               )
-
-               return (key: unknown) => {
-                  const output = deleteOp(key)
-                  getAtomicOp(ionizedModel, 'get', key)?.trigger()
-                  return output;
-               }
-            },
-
-            preop(model, args) {
-               const key = args![0];
-               const value = model.get(key)
-               return { key, value }
-            },
-
-            revert(ionizedModel, { preopData }) {
-               ionizedModel.set(preopData.key, preopData.value)
-            }
+      clear: {
+         preop(target) {
+            return { entries: Array.from(<Map<any, any>>target), prevSize: target.size, target }
          },
 
-      }
+         shouldTrigger: isNotSameSize,
+
+         triggers: (model) => [
+            triggerAll(model, 'get'),
+            triggerAll(model, 'has'),
+            trigger(model, '[[get]]', 'size'),
+            trigger(model)
+         ],
+
+         revert(ionizedModel, { preopData: { entries } }) {
+            for (const [key, value] of entries) {
+               ionizedModel.set(key, value) //QUESTION: not sure if this should be the raw target or the ionic model
+            }
+         }
+      },
+
+      delete: {
+         input: ([key]) => [toRaw(key)],
+         preop: (target, [key]) => ({
+            target,
+            key,
+            value: target.get(key),
+            prevSize: target.size
+         }),
+         shouldTrigger: isNotSameSize,
+         triggers: (model, [key]) => [
+            trigger(model),
+            trigger(model, 'has', key),
+            trigger(model, '[[get]]', 'size')
+         ],
+         revert(ionizedModel, { preopData: { key, value } }) {
+            ionizedModel.set(key, value)
+         }
+      },
+
    })
 }
 

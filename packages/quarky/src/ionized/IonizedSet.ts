@@ -7,7 +7,8 @@ import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { quarkOf } from "../Quark";
-import { makeIonizable } from "./makeIonizable";
+import { makeIonizable, trigger, triggerAll, TriggeringOpDef } from "./makeIonizable";
+import { trackableCheckOp, trackableCreativeOpWithArgs, trackableGetOp, trackableIterative, trackableOp, trackableOpWithCallback } from "./OpDefinitions";
 
 // declare global {
 //    interface Set<T> {
@@ -30,140 +31,116 @@ import { makeIonizable } from "./makeIonizable";
 //    }
 // }
 
-const trackableCollectionOps = {
-   keys: true,  // newIterable = keys()
-   entries: true, // newEntriesIterator = entries()
-   values: true, // newIterable = values()
-}
+// const trackableCollectionOps = {
+//    keys: true,  // newIterable = keys()
+//    entries: true, // newEntriesIterator = entries()
+//    values: true, // newIterable = values()
+// }
 
-export const trackableIterableOps = {
-   forEach: true,
-   'Symbol.iterator': true
-}
-
-
+// export const trackableIterableOps = {
+//    forEach: true,
+//    'Symbol.iterator': true
+// }
 
 
-const trackableSetOps = {
-   has: true, // boolean = has(item) //NOTE: trackable ops
 
-   // add: true,
-   // delete: true,
-   // clear: true,
-   // forEach: true,
-   // size: true,
-   // entries: true, // newEntriesIterator = entries()
-   // keys: true, // newIterable = keys()
-   // values: true, // newIterable = values()
 
-   difference: true, // newSet = difference(otherSet) 
-   union: true,
-   intersection: true,
-   symmetricDifference: true,
+// const trackableSetOps = {
+//    has: true, // boolean = has(item) //NOTE: trackable ops
 
-   isSubsetOf: true, // boolean = isSubsetOf(otherSet)
-   isSupersetOf: true, // boolean = isSupersetOf(otherSet)
-   isDisjointFrom: true, // boolean = isDisjointFrom(otherSet)
-}
+//    // add: true,
+//    // delete: true,
+//    // clear: true,
+//    // forEach: true,
+//    // size: true,
+//    // entries: true, // newEntriesIterator = entries()
+//    // keys: true, // newIterable = keys()
+//    // values: true, // newIterable = values()
+
+//    difference: true, // newSet = difference(otherSet) 
+//    union: true,
+//    intersection: true,
+//    symmetricDifference: true,
+
+//    isSubsetOf: true, // boolean = isSubsetOf(otherSet)
+//    isSupersetOf: true, // boolean = isSupersetOf(otherSet)
+//    isDisjointFrom: true, // boolean = isDisjointFrom(otherSet)
+// }
 
 
 
 export function installIonicSet() {
    makeIonizable(Set, {
       // trackableOps: {
-         has: trackableGetOpDef,
-         [Symbol.iterator]: useTrackableOpWithCallback,
-         forEach: useTrackableIterative,
-         keys: useTrackableOp,
-         values: useTrackableOp,
-         entries: useTrackableOp,
-         difference: useTrackableCreativeOpWithArgs, // newSet = difference(otherSet) 
-         union: useTrackableCreativeOpWithArgs,
-         intersection: useTrackableCreativeOpWithArgs,
-         symmetricDifference: useTrackableCreativeOpWithArgs,
+      has: trackableGetOp,
+      [Symbol.iterator]: trackableOpWithCallback,
+      forEach: trackableIterative,
+      keys: trackableOp,
+      values: trackableOp,
+      entries: trackableOp,
+      difference: trackableCreativeOpWithArgs, // newSet = difference(otherSet) 
+      union: trackableCreativeOpWithArgs,
+      intersection: trackableCreativeOpWithArgs,
+      symmetricDifference: trackableCreativeOpWithArgs,
 
-         isSubsetOf: useTrackableCheck, // boolean = isSubsetOf(otherSet)
-         isSupersetOf: useTrackableCheck, // boolean = isSupersetOf(otherSet)
-         isDisjointFrom: useTrackableCheck, // boolean = isDisjointFrom(otherSet)
-      // },
-      // mutatingOps: {
-         add: {
-            createOp(target, ionizedModel, quark) {
-               return function add(newValue: any) {
-                  const oldSize = target.size
-                  const _newValue = toRaw(newValue)
-                  const output = target.add(_newValue); //perform op
-                  const newSize = target.size
-
-                  if (oldSize === newSize) return;
-
-                  storeSnapshot(quark)
-
-                  recordMutation(quark, new Mutation(
-                     ionizedModel,
-                     'add',
-                     [_newValue],
-                     output,
-                     undefined
-                  ))
-
-                  quark.trigger()
-
-                  getAtomicPion(ionizedModel, 'size')?.trigger()
-
-                  getAtomicOp(ionizedModel, 'has', _newValue)?.trigger()
-
-                  runSyncEffects()
-
-                  return output;
-               }
-            },
-
-            revert(model, data) {
-               model.delete(data.args[0])
-            }
+      isSubsetOf: trackableCheckOp, // boolean = isSubsetOf(otherSet)
+      isSupersetOf: trackableCheckOp, // boolean = isSupersetOf(otherSet)
+      isDisjointFrom: trackableCheckOp, // boolean = isDisjointFrom(otherSet)
+      add: {
+         input: ([value]) => [toRaw(value)],
+         preop: (target, [value]) => ({ prevSize: target.size, target, value }),
+         shouldTrigger: isNotSameSize,
+         triggers: (model, [value]) =>[
+            trigger(model),
+            trigger(model, '[[get]]', 'size'),
+            trigger(model, 'has', value)
+         ],
+         revert(model, { preopData: { value } }) {
+            model.delete(value)
+         }
+      },
+      clear: {
+         preop(target) {
+            return { entries: Array.from(<Set<any>>target), prevSize: target.size, target }
          },
-         clear: {
-            createOp(target, ionizedModel, quark, getPreopData) {
-               return useClearOp(
-                  ionizedModel,
-                  quark,
-                  target,
-                  getPreopData!
-               )
-            },
 
-            preop(model) {
-               return Array.from(<Set<any>>toRaw(model))
-            },
+         shouldTrigger: isNotSameSize,
 
-            revert(ionizedModel, { preopData }) {
-               for (const value of preopData) {
-                  ionizedModel.add(value) //QUESTION: not sure if this should be the raw target or the ionic model
-               }
+         triggers: (model) => [
+            triggerAll(model, 'has'),
+            trigger(model, '[[get]]', 'size'),
+            trigger(model)
+         ],
+
+         revert(model, { preopData: { entries } }) {
+            for (const value of entries) {
+               model.add(value) //QUESTION: not sure if this should be the raw target or the ionic model
             }
-         },
-         delete: {
-            createOp(target, ionizedModel, quark, getPreopData) {
-
-               return useDeleteOp(
-                  ionizedModel,
-                  quark,
-                  target,
-                  getPreopData!
-               )
-            },
-
-            preop(target, args) {
-               return target[args![0]]
-            },
-
-            revert(ionizedModel, { preopData }) {
-               ionizedModel.add(preopData)
-            }
-         },
+         }
+      },
+      delete: {
+         input: ([value]) => [toRaw(value)],
+         preop: (target, [value]) => ({
+            target,
+            value,
+            prevSize: target.size
+         }),
+         shouldTrigger: isNotSameSize,
+         triggers: (model, [value]) => [
+            trigger(model),
+            trigger(model, 'has', value),
+            trigger(model, '[[get]]', 'size')
+         ],
+         revert(ionizedModel, { preopData: { value } }) {
+            ionizedModel.add(value)
+         }
+      }
       // }
    })
+}
+
+export function isNotSameSize({prevSize, target}: {prevSize: number, target: {size: number}}){
+   return prevSize !== target.size
 }
 
 
@@ -311,86 +288,86 @@ export function installIonicSet() {
 
 
 
-export function useDeleteOp(
-   ionizedModel: IonizedModel,
-   modelQuark: IonizedModelQuark,
-   target: AnyObject,
-   getPreopData: GetPreopData
-) {
-   return function deleteOp(_key: any) {
-      const key = toRaw(_key)
-      const oldSize = target.size
-      const preopData = getPreopData(target, [key])
-      const output = target.delete(key); //perform op
-      const newSize = target.size
-      if (oldSize === newSize) return;
+// export function useDeleteOp(
+//    ionizedModel: IonizedModel,
+//    modelQuark: IonizedModelQuark,
+//    target: AnyObject,
+//    getPreopData: GetPreopData
+// ) {
+//    return function deleteOp(_key: any) {
+//       const key = toRaw(_key)
+//       const oldSize = target.size
+//       const preopData = getPreopData(target, [key])
+//       const output = target.delete(key); //perform op
+//       const newSize = target.size
+//       if (oldSize === newSize) return;
 
-      storeSnapshot(modelQuark)
+//       storeSnapshot(modelQuark)
 
-      recordMutation(modelQuark, new Mutation(
-         ionizedModel,
-         'delete',
-         [key],
-         output,
-         preopData
-      ))
+//       recordMutation(modelQuark, new Mutation(
+//          ionizedModel,
+//          'delete',
+//          [key],
+//          output,
+//          preopData
+//       ))
 
-      modelQuark.trigger()
+//       modelQuark.trigger()
 
-      getAtomicPion(ionizedModel, 'size')?.trigger()
-      getAtomicOp(ionizedModel, 'has', key)?.trigger()
+//       getAtomicPion(ionizedModel, 'size')?.trigger()
+//       getAtomicOp(ionizedModel, 'has', key)?.trigger()
 
-      runSyncEffects()
+//       runSyncEffects()
 
-      return output;
-   }
-}
-
-
+//       return output;
+//    }
+// }
 
 
 
-export function useClearOp(
-   ionizedModel: IonizedModel,
-   modelQuark: IonizedModelQuark,
-   target: AnyObject,
-   getPreopData: GetPreopData
-) {
-   return function clearOp() {
-      const preopData = getPreopData(target)
-      const oldSize = target.size
-      const output = target.clear(); //perform op
-      const newSize = target.size
-
-      if (oldSize === newSize) return;
-
-      storeSnapshot(modelQuark)
-
-      recordMutation(modelQuark, new Mutation(
-         ionizedModel,
-         'clear',
-         [],
-         output,
-         preopData
-      ))
-
-      // custom triggers
-      modelQuark.trigger()
-
-      const hasOps = getAtomicOps(ionizedModel, 'has')
-      if (hasOps) {
-         for (const [_, atomicOp] of hasOps) {
-            atomicOp.trigger()
-         }
-      }
-
-      getAtomicPion(ionizedModel, 'size')?.trigger()
 
 
-      runSyncEffects()
+// export function useClearOp(
+//    ionizedModel: IonizedModel,
+//    modelQuark: IonizedModelQuark,
+//    target: AnyObject,
+//    getPreopData: GetPreopData
+// ) {
+//    return function clearOp() {
+//       const preopData = getPreopData(target)
+//       const oldSize = target.size
+//       const output = target.clear(); //perform op
+//       const newSize = target.size
 
-      return output;
-   }
-}
+//       if (oldSize === newSize) return;
+
+//       storeSnapshot(modelQuark)
+
+//       recordMutation(modelQuark, new Mutation(
+//          ionizedModel,
+//          'clear',
+//          [],
+//          output,
+//          preopData
+//       ))
+
+//       // custom triggers
+//       modelQuark.trigger()
+
+//       const hasOps = getAtomicOps(ionizedModel, 'has')
+//       if (hasOps) {
+//          for (const [_, atomicOp] of hasOps) {
+//             atomicOp.trigger()
+//          }
+//       }
+
+//       getAtomicPion(ionizedModel, 'size')?.trigger()
+
+
+//       runSyncEffects()
+
+//       return output;
+//    }
+// }
 
 

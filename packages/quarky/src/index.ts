@@ -1,6 +1,6 @@
 // import { installIonicArray } from "./ionized/IonizedArray"
-// import { installIonicMap } from "./ionized/IonizedMap"
-// import { installIonicSet } from "./ionized/IonizedSet"
+import { installIonicMap } from "./ionized/IonizedMap"
+import { installIonicSet } from "./ionized/IonizedSet"
 
 export * from "./debug/debug" //TODO: limit exports to public api
 export * from "./ionized/ionize" //TODO: limit exports to public api
@@ -23,5 +23,5 @@ export * from "./ion/FiniteStates" //TODO: limit exports to public api
 export * from "./ReactivitySystem" //TODO: limit exports to public api
 
 // installIonicArray()
-// installIonicSet()
-// installIonicMap()
+installIonicSet()
+installIonicMap()
