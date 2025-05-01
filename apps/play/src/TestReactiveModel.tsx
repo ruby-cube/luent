@@ -1,8 +1,9 @@
 import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { ion, __addDevName, ionize, toRaw, watch } from "@rue/quarky";
+import { ion, __addDevName, ionize, toRaw, watch, FlattenMaybeIonized, IsMaybeIonized, Ionized, ToRaw, ToRawItems } from "@rue/quarky";
 import { makeIonizable } from "../../../packages/quarky/src/ionized/makeIonizable";
 import { trackModel } from "../../../packages/quarky/src/ionized/OpDefinitions";
+import { Glass, IsRedundantUnion } from "@rue/types";
 
 
 const randomColor = useRandomColorGenerator()
@@ -54,11 +55,45 @@ class Frog {
    }
 }
 
+// Ionized<(Ionized<{
+//    id: number;
+//    content: string;
+// }, {}> | {
+//    id: number;
+//    content: string;
+// })[], {}>
+
+// Ionized<{
+//    id: number;
+//    content: string;
+// }[], {}>
+
+// (Ionized<{
+//    id: number;
+//    content: string;
+// }, {}> | Ionized<Ionized<{
+//    id: number;
+//    content: string;
+// }, {}>, {}>)[]
+
+type Froggy = {
+   name?: string
+}
 
 export function List(
 
 ) {
    const frog = ionize({ id: 0, content: "frog" })
+   const mixed = [
+      frog,
+      { id: 1, content: "robin"},
+      { id: 2, content: "fly"},
+      { id: 3, content: "swamp" }
+   ]
+   type B = typeof mixed extends Array<infer I > ? ToRaw<I> : 'n'
+   type A = typeof mixed extends Array<infer I > ? IsRedundantUnion<ToRaw<I>> extends true  ? 'yes': 'no' : 'no'
+   // {[K in keyof ToRaw<I>]: ToRaw<I>[K]}[]  : never
+   // IsMaybeIonized<I> extends true ? 'yeah' : 'no' : 'nah'
    const list = ionize([
       frog,
       { id: 1, content: "robin" },
@@ -66,7 +101,7 @@ export function List(
       { id: 3, content: "swamp" }
    ], {
       insert(index: number) {
-         list.splice(index, 0, {
+         const removed = list.splice(index, 0, {
             id: genId(),
             content: (Math.random() * 100).toString(),
          })
@@ -80,6 +115,9 @@ export function List(
          item.content = 'something else'
       }
    })
+
+   
+
 
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])

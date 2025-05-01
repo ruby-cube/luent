@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { isIonizedModel, storeSnapshot, toRaw, Ionized, ionize, } from "./ionize";
+import { isIonizedModel, toRaw, Ionized, ionize, IonizeByThis, MaybeIonized, ToRaw, } from "./ionize";
 import { AtomicOp, getAtomicOp } from "./AtomicOp";
 import { GetPreopData, IonizedModel, maybeIonize, } from "./IonizedModel";
 import { getAtomicPion, PionQuark, triggerPion } from "./Pion";
@@ -7,7 +7,14 @@ import { makeIonizable, TriggeringOpDef, trigger, TrackableOpDef, IonizableClass
 import { quarkOf } from "../Quark";
 import { trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackModel, trackOp } from './OpDefinitions'
 
-// type MaybeIonized<T> = T extends AnyObject ? Ionized<T> : T;
+
+
+declare global {
+   interface Array<T> { 
+      splice<H>(this: H, start: number, deleteCount?: number, ...items: T[]): IonizeByThis<H, ToRaw<T>[]>;
+      values<H>(): IonizeByThis<H, ArrayIterator<ToRaw<T>>>;
+   }
+}
 
 // declare global {
 //    interface Array<T> {
@@ -257,6 +264,7 @@ export const ionizableArrayDef: IonizableClassDef = {
 
    splice: {
       input: ([start, deleteCount, ...args]: Parameters<Array<any>['splice']>) => [start, deleteCount, ...deionizeArgs(args)],
+      output: ionize,
       triggers: (model) => [
          trigger(model),
          trigger(model, '[[get]]', 'length'),

@@ -1,9 +1,9 @@
-import { AnyObject } from "@rue/types";
+import { AnyObject, Glass, ReadonlyKeys } from "@rue/types";
 import { debug, isObject } from "@rue/utils";
 import { IonizedModelQuark } from "./IonizedModelQuark";
-import { inert, Inert, isInert } from "./inert";
+import { Inert, isInert } from "./inert";
 import { AtomicIon, Ion, ion, isIon, Methods } from "../ion/Ion";
-import { createIonizedModel, getStructureConfigs, IonizedModel } from "./IonizedModel";
+import { createIonizedModel, IonizedModel } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { MUTABLE } from "../ion/AtomicIon";
 import { isIonizable } from "./makeIonizable";
@@ -28,7 +28,7 @@ export function isIonizedModel(value: any): value is IonizedModel {
    return hasQuark(value) && quarkOf(value) instanceof IonizedModelQuark;
 }
 
-export function asIonized(value: unknown){
+export function asIonized(value: unknown) {
    return ionizedModels.get(value as AnyObject)
 }
 
@@ -43,9 +43,84 @@ export type Readonly<T extends AnyObject = AnyObject> = {
 }
 
 /**
+ * [v] ion access --for objects only (not collections)
+ * [v] mutable ion vs readonly ions based on 
+ * [v] deep ionize, don't nest ionize if already ionized
+ * [] deep ionize with methods like .splice
+ * [v] allow both setting nested ionized properties with ionized and raw objects
+ * [] collections
+ * [] How does typescript know if a class is ionizable or inert?
+ */
+
+
+
+/**
  * API
  */
-export type Ionized<T> = T
+export type Ionized<T, M = {}> =
+   Properties<T>
+   & InvertProperties<T, ReadonlyKeys<T>>
+   & M
+   & { '~ionized'?: true }
+
+type Properties<T> = {
+   [K in keyof T]: MaybeIonizeProperty<K, T[K]>
+}
+
+type Value<T> = T & { value?: true }
+
+type InvertProperties<T, ROKeys> = {
+   [K in keyof T as K extends number ? never : IsMethod<K, T[K]> extends true ? never : IsAbsorbedIon<K, T[K]> extends true ? K extends `$${infer N}` ? N : never : K extends string ? `$${K}` : never]?:
+   IsAbsorbedIon<K, T[K]> extends true ? T[K] extends Ion<infer S> ? Value<S> : never : K extends ROKeys ? Ion<MaybeIonize<T[K]>> : Ion<MaybeIonize<T[K]>, { state: MaybeIonize<T[K]> }>
+}
+
+type IsAbsorbedIon<K, T> = K extends `$${string}` ? T extends Ion ? true : false : false
+type IsMethod<K, T> = K extends `$${string}` ? T extends Ion ? false : false : T extends Function ? true : false
+type IsIonized<T> = T extends { '~ionized'?: true } ? true : false
+// T extends Ion ? false : false : T extends Function ? true : false
+
+type MaybeIonizeProperty<K, T> =
+   IsIonized<T> extends true ? T
+   : IsAbsorbedIon<K, T> extends true ? T
+   : T extends Function ? MaybeIonizedMethod<T>
+   : T extends object ? Ionized<T>
+   : T
+
+type MaybeIonize<T> = IsIonized<T> extends true ? T : T extends Function ? T : T extends object ? Ionized<T> : T
+
+export type ToRaw<T> = T extends Ionized<infer R> ? R : T
+
+type MaybeIonizedMethod<M extends Function> = M extends (this: infer U, ...args: any) => any ? (ThisType<U> & { method: M })['method'] : M
+
+/**
+ * Wrap the return of a method of an ionizable class with this type helper in order to 
+ * propagate any deep ionization that has been defined in the class's makeIonizable config
+ */
+export type IonizeByThis<H, T> = IsIonized<H> extends true ? MaybeIonize<T> : T
+
+export type MaybeIonized<T> = ToRaw<T> | Ionized<T>
+// T extends Ionized<infer O> ? O | T : T | Ionized<T>
+
+// export function _ionize<T, M>(target: T & object, methods?: (M & Methods) & ThisType<T & M & { super: T }>): M extends AnyObject ? Ionized<T, M> : Ionized<T> {
+//    return null as unknown as M extends AnyObject ? Ionized<T> & M : Ionized<T>
+// }
+
+const $location = ion('')
+
+const frog = ionize({
+   name: { nom: 'kermit' },
+   setName(name: string) { return name },
+   $location,
+}, {
+   doSomething() { }
+})
+
+
+const list = ionize([{ name: 'kermit' }])
+const i = list[0]
+
+
+
 // export type Ionized<T extends AnyObject, M extends {} = {}> = {
 //    [K in keyof T as (K extends '~$methods' ? never : K extends keyof M ? M[K] extends boolean ? K : K extends string ? `_${K}` : K : K)]:
 //    T[K] extends AbsorbedIon<infer V> ? K extends `$${string}` ? T[K] : V 
@@ -57,7 +132,7 @@ export type Ionized<T> = T
 // } & InvertIons<T, OmitTrue<M>> & OmitTrue<M> 
 // & { [QUARK]: IonizedModelQuark }
 
-type OmitTrue<M extends {}> = { [K in keyof M as M[K] extends true ? never : K]: Exclude<M[K], true> }
+// type OmitTrue<M extends {}> = { [K in keyof M as M[K] extends true ? never : K]: Exclude<M[K], true> }
 
 type ReadonlyIon<T> = {
    (): T
@@ -99,13 +174,21 @@ type IonizedGetter<T, K extends keyof T> =
 // | { [K in keyof Partial<T>]?: boolean | ((...args: any[]) => any) } & { [key: PropertyKey]: (...args: any[]) => any }
 // { [K in keyof Partial<T> | PropertyKey]: K extends keyof T ? true|  ((...args: any[]) => any): (...args: any[]) => any }
 // { as: true | ((...args: any[]) => any) } | { as?: true | ((...args: any[]) => any) } & { [key: PropertyKey]: (...args: any[]) => any }
+export type FlattenMaybeIonized<T> = T extends Ionized<infer R, infer M> ? R & M : never
+export type ToRawItems<T> = T extends Array<infer I> ? ToRaw<I>[] : T
+
+export type IsMaybeIonized<T> = T extends Ionized<infer R, infer M> | infer O ? R & M extends O ? O extends R & M ? true : false : false : false
+
+
+
+
 
 //API
-export function ionize<T, M>(target: T & object, methods?: (M & Methods) & ThisType<T & M & {super: T}>): M extends AnyObject ? Ionized<T> & M : Ionized<T> {
+export function ionize<T, M>(target: T & object, methods?: (M & Methods) & ThisType<T & M & { super: T }>): M extends AnyObject ? Ionized<ToRawItems<T>, M> : Ionized<ToRawItems<T>> {
    return ionizeModel(target, methods, MUTABLE) as T extends Inert | Ion | Ionized<T> ? T : Ionized<T, M>
 }
 
-ionize.deep = ionize //TODO: 
+// ionize.deep = ionize //TODO: 
 
 // ionize.mu = createMutableIonizedModel
 
@@ -113,22 +196,22 @@ ionize.deep = ionize //TODO:
 // return ionizeModel(target, methods, MUTABLE)
 // }
 
-export function ionizeModel(target: object, methods: object |undefined, mutable: boolean = true) {
+export function ionizeModel(target: object, methods: object | undefined, mutable: boolean = true) {
    if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
    //TODO: prevent going from encapsulated to mutable;
    if (!methods && isIonizedModel(target)) return target;
    if (isIon(target) || isInert(target)) {
       if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
-      return target 
+      return target
    }
    //TODO: What about a readonly object that is not an ionic model?
-   if (!isIonizable(target.constructor)){
+   if (!isIonizable(target.constructor)) {
       debug.warn(`The class ${target.constructor.name} must be made ionizable with makeIonizable() in order to ionize any instances of the class.`)
       return target
    }
    const rawTarget = toRaw(target)
    const existingIonizedModel = !methods ? ionizedModels.get(rawTarget) : undefined;
-   if (existingIonizedModel) return existingIonizedModel 
+   if (existingIonizedModel) return existingIonizedModel
    return createIonizedModel(rawTarget, methods, mutable)
 }
 
@@ -191,21 +274,21 @@ export function toRaw<T>(target: T): AsRaw<T> {
 }
 
 
-export function exposeIons<T>(model: T): asserts model is T & AsIons<T> {
-   if (!isIonizedModel(model)) throw new Error("model must be ionized")
-}
+// export function exposeIons<T>(model: T): asserts model is T & AsIons<T> {
+//    if (!isIonizedModel(model)) throw new Error("model must be ionized")
+// }
 
-export function ions<T>(model: T): AsIons<T> {
-   return model as AsIons<T>
-}
+// export function ions<T>(model: T): AsIons<T> {
+//    return model as AsIons<T>
+// }
 
-export function $$<T>(model: T): AsIons<T> {
-   return model as AsIons<T>
-}
+// export function $$<T>(model: T): AsIons<T> {
+//    return model as AsIons<T>
+// }
 
-type AsIons<T> = {
-   [K in keyof T as T[K] extends (...args: any[])=>any ? never : K extends string ? `$${K}` : K]:  AtomicIon<T[K]>
-}
+// type AsIons<T> = {
+//    [K in keyof T as T[K] extends (...args: any[])=>any ? never : K extends string ? `$${K}` : K]:  AtomicIon<T[K]>
+// }
 
 
 

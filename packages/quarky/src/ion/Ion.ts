@@ -42,9 +42,9 @@ type AsIon<T, M> = [T] extends [AtomicIon] ? T  // [T] extends [AtomicIon] to pr
    : [T] extends [Derivation<infer R>] ? M extends Methods ? Ion<R, M & { with_only: PickMethods }> : Ion<R>
    : M extends Methods ? Ion<T, M & { with_only: PickMethods }> : Ion<T>
 
-type AsMutableIon<T, M> = [T] extends [AtomicIon] ? T  // [T] extends [AtomicIon] to prevent type-narrowing
-   : [T] extends [Derivation<infer R>] ? M extends Methods ? Ion<R, M & { with_only: PickMethods }> : Ion<R>
-   : M extends Methods ? AtomicIon<T, M & { state: T, with_only: PickMethods }> : AtomicIon<T>
+type AsMutableIon<T, M> = [T] extends [Ion] ? T  // [T] extends [AtomicIon] to prevent type-narrowing
+   : [T] extends [Derivation<infer R>] ? M extends Methods ? Ion<R, M> : Ion<R>
+   : Ion<T, M & { state: T }>
 
 
 
@@ -193,7 +193,7 @@ function asIon(
    if (isFunction(initialState)) {
       return createMaybeMemoizedIon(<Derivation>initialState, methods, true)
    }
-   
+
    if (isIon(initialState)) return initialState
    return createAtomicIon(ionized ? maybeIonize(initialState) : initialState, 'state', methods, mutable, ionized)
 }
