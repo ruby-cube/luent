@@ -5,7 +5,7 @@ import { getAtomicPion } from "./Pion"
 import { AtomicOp, getAtomicOp, getAtomicOps } from "./AtomicOp"
 import { quarkOf } from "../Quark"
 import { ionize, toRaw } from "./ionize"
-import { ionizableArrayDef, ionizableIterable } from "./IonizedArray"
+import { ionizedArray, ionizedIterable } from "./IonizedArray"
 
 type Constructor = new (...args: any[]) => any
 
@@ -32,7 +32,7 @@ type IonizableMethodDef = TrackableOpDef | TriggeringOpDef
 export type GetPreopData = (target: AnyObject, args: any[]) => any;
 type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
 
-export type IonizableClassDef = {
+export type IonizedMethodsDef = {
    [key: PropertyKey]: IonizableMethodDef
 }
 
@@ -55,38 +55,38 @@ export const triggeringPropertySetOp: TriggeringOpDef = {
    }
 }
 
-const ionizableClassesMap = new Map([
-   [Object as Constructor, { '[[set]]': triggeringPropertySetOp } as IonizableClassDef | undefined],
-   [Array, ionizableArrayDef],
-   [[].values().constructor, ionizableIterable]
+const ionizedMethodsMap = new Map([
+   [Object as Constructor, { '[[set]]': triggeringPropertySetOp } as IonizedMethodsDef | undefined],
+   [Array, ionizedArray],
+   [[].values().constructor, ionizedIterable]
 ])
 
 export function isIonizable(constructor: Constructor) {
-   return ionizableClassesMap.has(constructor);
+   return ionizedMethodsMap.has(constructor);
 }
 
-export function getIonizableMethodDef(target: AnyObject, methodKey: PropertyKey) { //FIX: this is causing infinite loops e.g. toJSON()
+export function getIonizedMethodDef(target: AnyObject, methodKey: PropertyKey) { //FIX: this is causing infinite loops e.g. toJSON()
    let constructor = target.constructor as Constructor
    let _target = target;
    while (constructor !== Object) {
       if (Object.hasOwn(target, methodKey)) {
-         return ionizableClassesMap.get(constructor)?.[methodKey]
+         return ionizedMethodsMap.get(constructor)?.[methodKey]
       }
-      const def = ionizableClassesMap.get(constructor)?.[methodKey]
+      const def = ionizedMethodsMap.get(constructor)?.[methodKey]
       if (def) {
          return def;
       }
       _target = Object.getPrototypeOf(_target)
       constructor = _target.constructor as Constructor
    }
-   // return ionizableClassesMap.get(Object)?.['[[set]]']
+   // return ionizedMethodsMap.get(Object)?.['[[set]]']
 }
 
-export function makeIonizable(constructor: Constructor, def?: IonizableClassDef) {
-   const existingDef = ionizableClassesMap.get(constructor)
-   if (existingDef && def) debug.warn(`Overriding existing Ionizable class defintion`)
+export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMethodsDef) {
+   const existingDef = ionizedMethodsMap.get(constructor)
+   if (existingDef && def) debug.warn(`Overriding existing Ionized Methods defintion for ${constructor.name}`)
    if (existingDef) return;
-   ionizableClassesMap.set(constructor, def)
+   ionizedMethodsMap.set(constructor, def)
 }
 
 /**

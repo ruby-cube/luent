@@ -3,7 +3,7 @@ import { isIonizedModel, toRaw, Ionized, ionize, IonizeByThis, MaybeIonized, ToR
 import { AtomicOp, getAtomicOp } from "./AtomicOp";
 import { GetPreopData, IonizedModel, maybeIonize, } from "./IonizedModel";
 import { getAtomicPion, PionQuark, triggerPion } from "./Pion";
-import { makeIonizable, TriggeringOpDef, trigger, TrackableOpDef, IonizableClassDef } from "./makeIonizable";
+import { enlistIonizedMethods, TriggeringOpDef, trigger, TrackableOpDef, IonizedMethodsDef } from "./IonizedMethods";
 import { quarkOf } from "../Quark";
 import { trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackModel, trackOp } from './OpDefinitions'
 
@@ -12,7 +12,7 @@ import { trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trac
 declare global {
    interface Array<T> { 
       splice<H>(this: H, start: number, deleteCount?: number, ...items: T[]): IonizeByThis<H, ToRaw<T>[]>;
-      values<H>(): IonizeByThis<H, ArrayIterator<ToRaw<T>>>;
+      // values<H>(): IonizeByThis<H, ArrayIterator<T>>;
    }
 }
 
@@ -151,7 +151,7 @@ function triggerObservedIndices(model: IonizedModel, prevLength: number, newLeng
 }
 
 
-export const ionizableArrayDef: IonizableClassDef = {
+export const ionizedArray: IonizedMethodsDef = {
    at: {
       track: trackOp,
       output: maybeIonize
@@ -477,7 +477,7 @@ export function isIonizedArray(target: any): target is IonizedModel {
 
 // for .values(), .entries() and .keys() to output ionized objects
 
-export const ionizableIterable = {
+export const ionizedIterable = {
    next: {
       output: o => maybeIonize(o),
       track: trackModel

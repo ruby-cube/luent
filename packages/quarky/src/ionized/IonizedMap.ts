@@ -4,7 +4,7 @@ import { getAtomicOp, getAtomicOps } from "./AtomicOp";
 import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
-import { makeIonizable, trigger, triggerAll } from "./makeIonizable";
+import { enlistIonizedMethods, trigger, triggerAll } from "./IonizedMethods";
 import { hasMaybeIonized, trackableGetOp, trackableHasOp, trackableIterative, trackableOp, trackableOpWithCallback, trackOp, useDeleteOp } from "./OpDefinitions";
 import { noop } from "@rue/utils";
 import { maybeIonize } from "./IonizedModel";
@@ -50,7 +50,7 @@ const trackableMapGetOps = {
 }
 
 export function installIonicMap() {
-   makeIonizable(Map, {
+   enlistIonizedMethods(Map, {
       has: trackableHasOp,
       get: {
          input: ([key]) => [toRaw(key)],

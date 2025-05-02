@@ -18,7 +18,7 @@ import { Watchable } from "../watch/Watched";
 import { IonizedCompound } from "./IonizedCompound";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { MUTABLE } from "../ion/AtomicIon";
-import { getIonizableMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp } from "./makeIonizable";
+import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp } from "./IonizedMethods";
 import { normalize } from "path";
 
 // // /** INTERNAL */
@@ -398,7 +398,7 @@ function initialAccess(
    if (methods && key in methods) {
       return bindMethod(methods[key], key, ionizedModel, propertyMap)
    }
-   const nativeMethodDef = getIonizableMethodDef(target, key)
+   const nativeMethodDef = getIonizedMethodDef(target, key)
    if (nativeMethodDef) { //NOTE: this block must be above target[_key] for Array.from(set) to work
       return bindNativeMethod(
          nativeMethodDef,

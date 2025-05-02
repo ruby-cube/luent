@@ -1,7 +1,7 @@
 import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
 import { ion, __addDevName, ionize, toRaw, watch, FlattenMaybeIonized, IsMaybeIonized, Ionized, ToRaw, ToRawItems } from "@rue/quarky";
-import { makeIonizable } from "../../../packages/quarky/src/ionized/makeIonizable";
+import { enlistIonizedMethods } from "../../../packages/quarky/src/ionized/IonizedMethods";
 import { trackModel } from "../../../packages/quarky/src/ionized/OpDefinitions";
 import { Glass, IsRedundantUnion } from "@rue/types";
 
@@ -86,12 +86,12 @@ export function List(
    const frog = ionize({ id: 0, content: "frog" })
    const mixed = [
       frog,
-      { id: 1, content: "robin"},
-      { id: 2, content: "fly"},
+      { id: 1, content: "robin" },
+      { id: 2, content: "fly" },
       { id: 3, content: "swamp" }
    ]
-   type B = typeof mixed extends Array<infer I > ? ToRaw<I> : 'n'
-   type A = typeof mixed extends Array<infer I > ? IsRedundantUnion<ToRaw<I>> extends true  ? 'yes': 'no' : 'no'
+   type B = typeof mixed extends Array<infer I> ? ToRaw<I> : 'n'
+   type A = typeof mixed extends Array<infer I> ? IsRedundantUnion<ToRaw<I>> extends true ? 'yes' : 'no' : 'no'
    // {[K in keyof ToRaw<I>]: ToRaw<I>[K]}[]  : never
    // IsMaybeIonized<I> extends true ? 'yeah' : 'no' : 'nah'
    const list = ionize([
@@ -115,9 +115,6 @@ export function List(
          item.content = 'something else'
       }
    })
-
-   
-
 
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])
@@ -202,9 +199,8 @@ export function List(
             insert!
          </div>
 
-         {For(list, item => item.id, (item, $index) => (console.log('rendering', item, item.content, $index()),
+         {For(list, m => m.id, (item, $index) => (console.log('rendering', item, item.content, $index()),
             <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
-               // <div
                style={{
                   backgroundColor: randomColor.get(),
                   outline: (selected.has(item) ? 'thick solid blue' : 'unset'),

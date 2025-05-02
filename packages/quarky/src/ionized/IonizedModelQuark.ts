@@ -11,7 +11,7 @@ import { trigger } from "../ReactivitySystem"
 import { Traceable } from "../debug/Traceable"
 import { AtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
-import { getIonizableMethodDef } from "./makeIonizable"
+import { getIonizedMethodDef } from "./IonizedMethods"
 
 
 
@@ -135,7 +135,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
       const op = mutation.op
       this.reversionOps.get(op)?.(mutation) || (this.reversionOps.set(op, (mutation: Mutation) => {
          const initialized = true;
-         const configs = getIonizableMethodDef(this.rawTarget, op);
+         const configs = getIonizedMethodDef(this.rawTarget, op);
          if (configs)
             for (const config of configs) {
                const mutatingOps = config.mutatingOps

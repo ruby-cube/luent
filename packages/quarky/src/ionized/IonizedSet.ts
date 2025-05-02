@@ -7,7 +7,7 @@ import { getAtomicPion } from "./Pion";
 import { Mutation, recordMutation } from "../Mutable";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { quarkOf } from "../Quark";
-import { makeIonizable, trigger, triggerAll, TriggeringOpDef } from "./makeIonizable";
+import { enlistIonizedMethods, trigger, triggerAll, TriggeringOpDef } from "./IonizedMethods";
 import { hasMaybeIonized, trackableCheckOp, trackableCreativeOpWithArgs, trackableHasOp, trackableIterative, trackableOp, trackableOpWithCallback, useDeleteOp } from "./OpDefinitions";
 
 // declare global {
@@ -70,7 +70,7 @@ import { hasMaybeIonized, trackableCheckOp, trackableCreativeOpWithArgs, trackab
 
 
 export function installIonicSet() {
-   makeIonizable(Set, {
+   enlistIonizedMethods(Set, {
       // trackableOps: {
       has: trackableHasOp,
       [Symbol.iterator]: trackableOpWithCallback,

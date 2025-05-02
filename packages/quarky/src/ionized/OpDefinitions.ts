@@ -1,6 +1,6 @@
 import { AnyObject } from "@rue/types"
 import { asIonized, ionize, toRaw } from "./ionize"
-import { TrackableOpDef } from "./makeIonizable"
+import { TrackableOpDef } from "./IonizedMethods"
 import { IonizedModel, maybeIonize } from "./IonizedModel"
 
 const toIonizedDecoyOfTargetOrThisArg = (target: AnyObject, args: any[]) => ionizedDecoy(args[1] ?? target)

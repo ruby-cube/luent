@@ -25,6 +25,32 @@ const files = ionize(list, { // should console.warn that methods have not been a
    }
 })
 
+function inert() { }
+
+
+
+const frog = ionize.withMap(new Frog(), {
+   canvas: inert,
+   something: {
+      context: inert
+   },
+   list: [inert],
+   set: [inert],
+   map: [inert, inert],
+   dog: inert
+}, {
+   addQuality(quality: Quality) {
+      this.qualities.push(quality)
+   }
+})
+
+const list = ionize.withMap([], [inert])
+
+const list = ionize.withMap(new List(), {
+   0: inert,
+   el: inert
+})
+
 // keep list and files in sync
 const $files = ion(() => list, {
    addFile(file: File) {

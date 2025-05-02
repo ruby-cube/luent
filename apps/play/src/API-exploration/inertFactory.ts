@@ -49,7 +49,7 @@ class _ThirdPartyCat {
 // })
 
 // Deep as default
-const animation = ionize.deep(new AnimationController(), {
+const animation = ionize(new AnimationController(), {
    [MARKED]: {
       ctx: inert,
       canvas: inert
@@ -79,9 +79,14 @@ const list = ionize([new Doc()])
 
 // Shallow as default
 const animation = ionize({
-   ctx: inert(undefined),
-   canvas: inert(undefined),
+   ctx: undefined,
+   canvas: undefined,
    elapsed: 0,
+}, {
+   [MARKED]: {
+      canvas: inert,
+      ctx: inert
+   }
 })
 
 const animation = ionize(new AnimationController(), {
@@ -94,7 +99,9 @@ const animation = ionize(new AnimationController(), {
    }
 })
 
-const list = ionize.shallow([new Doc()])
+const list = ionize([new Doc()], {
+   [MARKED]: shallow
+})
 
 // const list = ionize([new Doc()], {
 //    [MARKED]: {
