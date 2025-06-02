@@ -14,9 +14,9 @@ export function TestNested() {
       }
    })
 
-   watch($isActive, ({ state: isActive }) => {
+   watch($isActive, ({ current: isActive }) => {
       console.log('### isActive', isActive)
-      watch($isHappy, ({ state: isHappy }) => {
+      watch($isHappy, ({ current: isHappy }) => {
          console.log('### isHappy', isHappy)
       }, { eager: true })
    }, { eager: true })

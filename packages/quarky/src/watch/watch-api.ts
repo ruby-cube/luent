@@ -1,32 +1,32 @@
 //@ts-nocheck
 
 watch($style, {
-   effect: ({ state: styles }) => {
+   effect: ({ current: styles }) => {
       doSomething()
    }
 })
 
 
-watch($style, ({ state: styles }) => {
+watch($style, ({ current: styles }) => {
    doSomething()
 })
 
 
 watch($style, {
    phase: POSTRENDER,
-   effect: ({ state: styles }) => {
+   effect: ({ current: styles }) => {
       doSomething()
    }
 })
 
 watch($style, {
    phase: POSTRENDER,
-}, ({ state: styles }) => {
+}, ({ current: styles }) => {
    doSomething()
 })
 
 
-watch($style, ({ state: styles }) => {
+watch($style, ({ current: styles }) => {
    doSomething()
 }, { phase: POSTRENDER })
 
@@ -41,7 +41,7 @@ watch($style, () => {
 watch($style, {
    eager: true,
    phase: RENDER,
-   effect: ({ state: styles }) => {
+   effect: ({ current: styles }) => {
       for (const key in styles) {
          const value = styles[key]
          if (isIon(value)) {
@@ -63,7 +63,7 @@ watch($style, {
 })
 
 watch($style, {
-   effect: ({ state: styles }) => {
+   effect: ({ current: styles }) => {
       for (const key in styles) {
          const value = styles[key]
          if (isIon(value)) {
@@ -103,7 +103,7 @@ watch($style, {
    }
 })
 
-watch($style, ({ state: styles }) => {
+watch($style, ({ current: styles }) => {
    for (const key in styles) {
       const value = styles[key]
       if (isIon(value)) {
@@ -117,7 +117,7 @@ watch($style, ({ state: styles }) => {
    }
 })
 
-watch($style, ({ state: styles }) => {
+watch($style, ({ current: styles }) => {
    for (const key in styles) {
       const value = styles[key]
       if (isIon(value)) {

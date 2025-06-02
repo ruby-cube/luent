@@ -66,8 +66,8 @@ export function VideoPlayer() {
 
    console.log('@% LOADING')
 
-   // watch(() => $track.is('playing'), ({ state, prevState }) => {
-   //    console.log('@% track is playing changed', state, prevState)
+   // watch(() => $track.is('playing'), ({ current, previous }) => {
+   //    console.log('@% track is playing changed', current, previous)
    //    // console.log('@% watch phase:', getCurrentEffectCycle()?.currentPhase)
    // })
 

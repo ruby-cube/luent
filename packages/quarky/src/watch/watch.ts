@@ -18,14 +18,20 @@ import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
 import { createWatchedIonizedIon } from "./IonizedIon";
 import { getDefaultPhase, getEffectCycle, scheduleEffect } from "../ReactivitySystem";
 
-export class ChangeEvent<S = unknown> {
+export class StateChangeEvent<S = unknown> {
    // trace?: string;
    constructor(
-      public prevState: S,
-      public state: S,
+      public previous: S, //TODO: change to prev
+      public current: S, //TODO: change to current
       public eager: boolean
    ) { }
 }
+
+   // watch($user, ({ current: user }) => {
+   //    if (!user) {
+   //       router.navigate('Welcome')
+   //    }
+   // })
 
 /**
  * Default values:
@@ -50,7 +56,7 @@ export type WatchDebugOptions = {
    traceTriggers?: boolean
 }
 
-export type Effect<T = unknown> = (event: ChangeEvent<SubjectValues<T>>) => void;
+export type Effect<T = unknown> = (event: StateChangeEvent<SubjectValues<T>>) => void;
 
 type SubjectValues<T> = T extends [() => infer R] ? R : T extends [infer O] ? O : MultiSubjectValues<T>;
 
@@ -198,7 +204,7 @@ export function watch<
       }
 
       try {
-         (<Effect>effect)(new ChangeEvent(prevState, newState, !!options.eager))
+         (<Effect>effect)(new StateChangeEvent(prevState, newState, !!options.eager))
       }
       finally {
          options.eager = false;
@@ -334,7 +340,7 @@ export function setUpWatcher(
 
 // }, { cycle: "current" })
 
-// watch((event: ChangeEvent<number>) => {
+// watch((event: StateChangeEvent<number>) => {
 //    event.prevState
 //    return 9
 // }, { eager: true })

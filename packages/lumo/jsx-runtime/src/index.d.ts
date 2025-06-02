@@ -515,7 +515,7 @@ declare namespace React {
       target: EventTarget & T;
    }
 
-   interface ChangeEvent<T = Element> extends SyntheticEvent<T> {
+   interface StateChangeEvent<T = Element> extends SyntheticEvent<T> {
       target: EventTarget & T;
    }
 
@@ -633,7 +633,7 @@ declare namespace React {
    type DragEventHandler<T = Element> = EventHandler<DragEvent<T>>;
    type FocusEventHandler<T = Element> = EventHandler<FocusEvent<T>>;
    type FormEventHandler<T = Element> = EventHandler<FormEvent<T>>;
-   type ChangeEventHandler<T = Element> = EventHandler<ChangeEvent<T>>;
+   type ChangeEventHandler<T = Element> = EventHandler<StateChangeEvent<T>>;
    type KeyboardEventHandler<T = Element> = EventHandler<KeyboardEvent<T>>;
    type MouseEventHandler<T = Element> = EventHandler<MouseEvent<T>>;
    type TouchEventHandler<T = Element> = EventHandler<TouchEvent<T>>;

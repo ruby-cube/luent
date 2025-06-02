@@ -110,7 +110,7 @@ function IfContextMenuB() {
       $open.state = false
    }
 
-   watch($open, ({ state: open }) => {
+   watch($open, ({ current: open }) => {
       if (!open) return
       let menuClicked = false;
       listen(document, 'click', e => menuClicked || close(), { once: true })

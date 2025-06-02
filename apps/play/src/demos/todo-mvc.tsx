@@ -1,7 +1,14 @@
 import { component, For, If, Else } from "@rue/lumo"
-import { $$, AtomicIon, exposeIons, Ion, ion, ionicTask, ionize, } from "@rue/quarky"
+import { ion, ionicTask, ionize, } from "@rue/quarky"
+import { Inert } from "../../../../packages/quarky/src/ionized/inert"
 
 
+
+declare global {
+
+   type InertItemCollection<T> =
+      T
+}
 
 type Todo = {
    id: number,

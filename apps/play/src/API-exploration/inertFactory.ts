@@ -1,7 +1,11 @@
 //@ts-nocheck
 import { AnyObject } from "@rue/types"
 import { Inert, inert, markInertProps } from "../../../../packages/quarky/src/ionized/inert"
-import { ionize } from "@rue/quarky"
+import { ionize, MARKED, shallow } from "@rue/quarky"
+
+//TODO:
+// [] input type mark maps
+// [] collections with inert items
 
 class _ThirdPartyCat {
    stuffs: {
@@ -50,21 +54,23 @@ class _ThirdPartyCat {
 
 // Deep as default
 const animation = ionize(new AnimationController(), {
-   [MARKED]: {
+   [MARK]: {
       ctx: inert,
       canvas: inert
    }
 })
 
-const animation = ionize.deep({
+
+
+const animation = ionize({
    ctx: inert(undefined),
    canvas: inert(undefined),
    elapsed: 0,
    points: [new Point()]
 })
 
-const animation = ionize.deep(new AnimationController(), {
-   [MARKED]: { // markMap
+const animation = ionize(new AnimationController(), {
+   [MARK]: { // markMap
       ctx: inert,
       canvas: inert
    },
@@ -83,14 +89,14 @@ const animation = ionize({
    canvas: undefined,
    elapsed: 0,
 }, {
-   [MARKED]: {
+   [MARK]: {
       canvas: inert,
       ctx: inert
    }
 })
 
 const animation = ionize(new AnimationController(), {
-   [MARKED]: { // markMap
+   [MARK]: {
       ctx: inert,
       canvas: inert
    },
@@ -99,8 +105,26 @@ const animation = ionize(new AnimationController(), {
    }
 })
 
+function withInertItems() {
+
+}
+
+function withInertKeys() {
+
+}
+
+function withInertEntries() {
+
+}
+
+const something = ionize({
+   list: withInertItems([])
+})
+
+const list = ionize.withInertItems([new Doc()])
+
 const list = ionize([new Doc()], {
-   [MARKED]: shallow
+   [MARK]: withInertItems
 })
 
 // const list = ionize([new Doc()], {
@@ -125,12 +149,5 @@ const list = ionize([new Doc()], {
 
 
 
-const cat = ThirdPartyCat()
 
-const cat$ = ionize(cat)
-
-cat$.stuffs.otherStuffs
-
-cat$.fluff
-cat$.stuffs
 

@@ -202,8 +202,8 @@ function CRUDApp() {
    const $last = ion('')
    const $fullName = () => `${$last()}, ${$first()}`
 
-   watch($selected, ({ state }) => {
-      [$last.state, $first.state] = state.split(', ')
+   watch($selected, ({ current }) => {
+      [$last.state, $first.state] = current.split(', ')
    }, { sync: true })
 
    const $filteredNames = ion(() =>

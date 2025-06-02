@@ -214,8 +214,8 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
    if (!('mu:value' in attributes))
       return;
    const ion = attributes['mu:value'];
-   watch(ion, e => {
-      element.value = e.state
+   watch(ion, ({ current }) => {
+      element.value = current
    }, { eager: true })
    delete attributes['mu:value'];
    if (!isMutableIon(ion)) {
@@ -290,8 +290,8 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       const value = attributes[key]
       //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {
-         watch(value, ({ state }) => {
-            setAttribute(node, _key, state)
+         watch(value, ({ current }) => {
+            setAttribute(node, _key, current)
          }, { eager: true, phase: RENDER })
       }
       // else if (isViewBindingKit(value)) {
@@ -504,9 +504,9 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
 
    for (const entry of classes) {
       if (isIon(entry)) {
-         watch(entry, ({ state, prevState }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
-            if (prevState) removePreviousClasses(prevState, classList)
-            if (state) addClasses(state, classList)
+         watch(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
+            if (previous) removePreviousClasses(previous, classList)
+            if (current) addClasses(current, classList)
          }, { eager: true, phase: RENDER })
       }
       else if (entry) {
@@ -558,12 +558,12 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
    for (const key in entry) {
       const value = entry[key]
       if (value && isIon(value)) {
-         watch(value, ({ state, prevState }) => {
+         watch(value, ({ current, previous }) => {
             console.log('key', key)
-            console.log('state', state)
-            console.log('prevState', prevState)
-            if (state) classList.add(key)
-            else if (prevState) classList.remove(key)
+            console.log('state', current)
+            console.log('prevState', previous)
+            if (current) classList.add(key)
+            else if (previous) classList.remove(key)
          }, {
             eager: true,
             phase: RENDER,
@@ -601,8 +601,8 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {
       if (isIon(entry)) {
-         watch(entry, ({ state }/* value: string | AnyObject | Falsey */) => {
-            setUpStyleEntry(style, state);
+         watch(entry, ({ current }/* value: string | AnyObject | Falsey */) => {
+            setUpStyleEntry(style, current);
          }, { eager: true, phase: RENDER })
       }
       else {
@@ -616,8 +616,8 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
       for (const key in entry) {
          const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isIon(value)) {
-            watch(value, ({ state }) => {
-               assignStyleProperty(style, toStylePropertyName(key), state)
+            watch(value, ({ current }) => {
+               assignStyleProperty(style, toStylePropertyName(key), current)
             }, {
                eager: true,
                phase: RENDER,

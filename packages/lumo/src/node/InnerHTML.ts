@@ -21,8 +21,8 @@ export function mountInnerHTML(kit: InnerHTMLKit, parent: Element) {
 }
 
 function keepInnerHTMLUpdated(htmlString: ReactiveGet<any>, parentNode: Element) {
-   watch(htmlString, ({ state }) => {
-      parentNode.innerHTML = toString(state);
+   watch(htmlString, ({ current }) => {
+      parentNode.innerHTML = toString(current);
    }, { phase: RENDER });
 }
 

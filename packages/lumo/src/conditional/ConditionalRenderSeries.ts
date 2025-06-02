@@ -135,8 +135,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       let prevIncomingNodes: TransitionNode[];
 
       // set up watcher for updates
-      watch($conditions, function updateConditional({ state, prevState }) {
-         if (areShallowEqualArrays(state!, prevState!)) return;
+      watch($conditions, function updateConditional({ current, previous }) {
+         if (areShallowEqualArrays(current!, previous!)) return;
 
          const prevIndex = series.activeIndex!;
          const activeIndex = series.evaluateConditions();

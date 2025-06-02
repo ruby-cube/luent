@@ -187,7 +187,7 @@ function createIonizedIon<
 function asIon(
    initialState: unknown | (() => unknown),
    mutable: boolean,
-   ionized: boolean | 'mutable',
+   ionized: boolean,
    methods?: AnyObject,
 ) {
    if (isFunction(initialState)) {
@@ -197,6 +197,8 @@ function asIon(
    if (isIon(initialState)) return initialState
    return createAtomicIon(ionized ? maybeIonize(initialState) : initialState, 'state', methods, mutable, ionized)
 }
+
+//TODO: mark map for ion.ionize?
 
 
 

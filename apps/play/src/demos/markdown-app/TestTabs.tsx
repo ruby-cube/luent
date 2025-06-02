@@ -228,7 +228,7 @@ function App(input = fromTag({
       default: 'home' // key | render function | undefined (default)
    })
 
-   watch($activeFile, ({ state: file }) => {
+   watch($activeFile, ({ current: file }) => {
       if (file) MainView.mount('file', file.id)
       else MainView.mount('home')
    })

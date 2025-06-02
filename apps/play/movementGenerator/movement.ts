@@ -1,3 +1,5 @@
+console.log("running movement generator")
+
 const movements = [
    'undercurve-overcurve',
    'lunge switch',

@@ -58,23 +58,23 @@ class SpreadKit {
    
             }
    
-            watch(data, ({ state, prevState }) => { // typecast as one of the options so that typescript won't complain
-               // if (recording && state === prevState){
+            watch(data, ({ current, previous }) => { // typecast as one of the options so that typescript won't complain
+               // if (recording && current === previous){
                //    recording.stop()
                //    console.log('updating list via MUTATIONS')
                //    //TODO: this.applyMutations(recording.mutations)
                //    recording = recordMutations(_data)
                //    return;
                // }
-               const _prevState = clone ?? toRaw(prevState)
-               clone = createClone(data, state)
+               const _prevState = clone ?? toRaw(previous)
+               clone = createClone(data, current)
                // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
-               const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(state), _prevState, getUID)
+               const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(current), _prevState, getUID)
                if (noChange) { //TODO: should we use hasChanged function in watch options instead?
                   return;
                }
                if (dynamicNodePod!.length !== _prevState.length)
-                  throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${prevState.length} are mismatched. This should never happen.`)
+                  throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${previous.length} are mismatched. This should never happen.`)
    
                this.castBeforeUpdate();
                this.removeItems(indicesToRemove!);

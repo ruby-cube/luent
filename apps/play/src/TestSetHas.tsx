@@ -13,13 +13,13 @@ export function TestSetHas() {
       mySet.add(0)
    }
 
-   watch((mySet.has(0)), ({ state, prevState }) => {
-      console.log('mySet changed', state, prevState)
-   }, {phase: RENDER})
+   watch((mySet.has(0)), ({ current, previous }) => {
+      console.log('mySet changed', current, previous)
+   }, { phase: RENDER })
 
    return component(
       <>
-         <p style={{outline: (mySet.has(0) ? 'thick solid blue' : 'thick solid red')}}>{(mySet.has(0))}</p>
+         <p style={{ outline: (mySet.has(0) ? 'thick solid blue' : 'thick solid red') }}>{(mySet.has(0))}</p>
          <button on:click={addZero}>add</button>
          <button on:click={deleteZero}>delete</button>
       </>

@@ -82,12 +82,12 @@ function SortableTable(input = fromTag({
       return str.charAt(0).toUpperCase() + str.slice(1)
    }
 
-   watch($filteredData, ({ state }) => {
-      console.log('$filteredData', state)
+   watch($filteredData, ({ current }) => {
+      console.log('$filteredData', current)
    })
 
-   watch(input.$filterKey, ({ state }) => {
-      console.log('$filterKey', state)
+   watch(input.$filterKey, ({ current }) => {
+      console.log('$filterKey', current)
    })
 
    return component(

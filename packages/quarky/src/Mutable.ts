@@ -80,7 +80,7 @@ class MutationRecording {
 
 // let recording = recordMutations(target)
 
-// watch(target, ({ state, prevState }) => {
+// watch(target, ({ current, previous }) => {
 //    recording.stop()
 //    this.applyMutations(recording.mutations)
 

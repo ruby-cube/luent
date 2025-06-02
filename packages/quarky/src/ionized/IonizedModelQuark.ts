@@ -12,6 +12,7 @@ import { Traceable } from "../debug/Traceable"
 import { AtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
 import { getIonizedMethodDef } from "./IonizedMethods"
+import { MarkMap } from "./ionize"
 
 
 
@@ -29,16 +30,37 @@ import { getIonizedMethodDef } from "./IonizedMethods"
 // & ParticleMorph
 // & CompoundMorph<IonizedCompound>
 
+// INERT MAP:
+// inert
+// withInertItems
+// withInertEntries
+// withInertKeys
+
+// inertCollection:
+// - items
+// - entries
+// - keys
+
+export const InertCollection = {
+   NA: 0,
+   ITEMS: 1,
+   ENTRIES: 2,
+   KEYS: 3
+} as const
+
+export type InertCollectionType = (typeof InertCollection)[keyof typeof InertCollection]
+
 export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
-   asReined?: object
-   asReadonly?: object
+   // asReined?: object
+   // asReadonly?: object
    asTraceable: Traceable
 
    constructor(
       public entity: IonizedModel,
       public rawTarget: AnyObject,
       public methods: AnyObject | undefined,
+      public inertMap: MarkMap | InertCollectionType | undefined,
    ) {
       this.asTraceable = new Traceable()
       this.watch = () => {

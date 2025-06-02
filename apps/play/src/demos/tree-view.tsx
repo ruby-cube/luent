@@ -1,7 +1,11 @@
 import { component, fromTag, Ionized, If, Else, For, v, Nonlocal, _Nonlocal } from "@rue/lumo";
 import { ion, ionize, toRaw } from "@rue/quarky";
+import { Inert, withInertItems } from "../../../../packages/quarky/src/ionized/inert";
 
 
+
+
+const list = withInertItems(new Map([['hi', { nom: true }]]))
 
 export function TreeApp() {
 

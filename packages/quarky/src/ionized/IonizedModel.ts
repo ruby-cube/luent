@@ -1,9 +1,9 @@
 import { AnyObject } from "@rue/types";
-import { ionize, registerIonizedModel, toRaw } from "./ionize";
+import { InertMark, ionize, ionizeDeep, MARK, MarkMap, registerIonizedModel, ShallowMark, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
 import { asAtomicOp, getAtomicOp } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
-import { IonizedModelQuark } from "./IonizedModelQuark";
+import { InertCollectionType, IonizedModelQuark } from "./IonizedModelQuark";
 import { debug, isFunction, isObject, noop } from "@rue/utils";
 import { Ion, isIon } from "../ion/Ion";
 import { __DEV__trace } from "../debug/debug";
@@ -266,7 +266,7 @@ const KEY_IN_OP = "[[in]]"
 export function createIonizedModel(
    target: object,
    methods: AnyObject | undefined,
-   mutable: boolean,
+   markMap: MarkMap | InertCollectionType | undefined,
    isPublic: boolean = true
 ) {
 
@@ -278,6 +278,7 @@ export function createIonizedModel(
          return initialAccess(
             target,
             methods,
+            markMap,
             thisModel,
             modelQuark,
             key,
@@ -286,10 +287,10 @@ export function createIonizedModel(
       },
 
       set(target, key, value) {
-         if (!mutable) {
-            debug.error('This model is encapsulated. Cannot set value of properties. Must use methods to set state')
-            return false;
-         }
+         // if (!mutable) {
+         //    debug.error('This model is encapsulated. Cannot set value of properties. Must use methods to set state')
+         //    return false;
+         // }
          return reactiveSetter(
             ionizedModel,
             target,
@@ -361,25 +362,25 @@ export function createIonizedModel(
 
    }) as IonizedModel
 
-   const modelQuark = new IonizedModelQuark(ionizedModel, target, methods)
+   const modelQuark = new IonizedModelQuark(ionizedModel, target, methods, markMap)
    let _super: AnyObject | undefined;
    const propertyMap = isPublic ? new Map([
       [QUARK as any, () => modelQuark as any]
    ]) : new Map([
       [QUARK as any, () => modelQuark as any],
-      ['super', () => _super ?? createIonizedModel(target, undefined, MUTABLE, false)]
+      ['super', () => _super ?? createIonizedModel(target, undefined, markMap, false)]
    ])
 
    const setOp = useMutatingOp(target, ionizedModel, '[[set]]', triggeringPropertySetOp)
 
-   const thisModel = mutable ? ionizedModel : createIonizedModel(target, methods, true, false)
+   const thisModel = methods ? createIonizedModel(target, methods, markMap, false) : ionizedModel
 
    if (!methods) registerIonizedModel(ionizedModel, target)
 
    return ionizedModel
 }
 
-export type ProxyPropertyMap = Map<string | symbol, () => any>
+export type ProxyPropertyMap = Map<PropertyKey, () => any>
 
 function triggerKeysChange(model: IonizedModel, key: PropertyKey) {
    getAtomicOp(model, INTERNAL_OP, 'ownKeys')?.trigger()
@@ -390,6 +391,7 @@ function triggerKeysChange(model: IonizedModel, key: PropertyKey) {
 function initialAccess(
    target: AnyObject,
    methods: AnyObject | undefined,
+   marks: MarkMap | ShallowMark | undefined,
    ionizedModel: IonizedModel,
    quark: IonizedModelQuark,
    key: string | symbol,
@@ -418,7 +420,8 @@ function initialAccess(
       ionizedModel,
       key,
       value,
-      propertyMap
+      propertyMap,
+      marks
    )
 }
 
@@ -429,6 +432,7 @@ export function initialPropertyAccess(
    key: string | symbol,
    value: any,
    propertyMap: ProxyPropertyMap,
+   marks: MarkMap | ShallowMark | undefined,
    transformValue: (value: any) => any = (value: any) => value
 ) {
    const isIonAccessKey = typeof key === 'string' && key[0] === '$' //TODO: need to use regex
@@ -445,7 +449,15 @@ export function initialPropertyAccess(
       return initialAbsorbedIonStateAccess(key, value, propertyMap, transformValue)
    }
 
-   return initialTrackableStateAccess(ionizedModel, target, key, value, propertyMap, transformValue)
+   return initialTrackableStateAccess(
+      ionizedModel,
+      target,
+      key,
+      value,
+      propertyMap,
+      marks,
+      transformValue
+   )
 }
 
 
@@ -533,13 +545,14 @@ function getTargetPropertyValue(target: AnyObject, key: string | symbol, receive
 function initialTrackableStateAccess(
    ionizedModel: IonizedModel,
    target: AnyObject,
-   key: string | symbol,
+   key: PropertyKey,
    value: any,
    propertyMap: ProxyPropertyMap,
+   inertMap: MarkMap | InertCollectionType | undefined,
    transformValue: Function
 ) {
    function getState(value: any) {
-      const _value = maybeIonize(value)
+      const _value = maybeIonize(value, (inertMap instanceof Object && key in inertMap) ? inertMap[key as any] : inertMap)
       const tracker = getActiveTracker()
       if (tracker) {
          const pion = asPionQuark(ionizedModel, key)
@@ -551,10 +564,12 @@ function initialTrackableStateAccess(
    return getState(value)
 }
 
-export function maybeIonize(value: any) {
-   if (!isObject(value))
+
+
+export function maybeIonize(value: any, mark: ShallowMark | InertMark | MarkMap | undefined) {
+   if (!isObject(value) || mark === 'inert')
       return value;
-   return ionize(value)
+   return mark === 'shallow' ? ionize(value) : ionizeDeep(value, mark ? { [MARK]: mark as any } : undefined)
 }
 
 
