@@ -1,6 +1,5 @@
-//@ts-nocheck
-import { NodeRef, Try, } from "@rue/lumo";
-import { DerivedIon, watchEffect, ion, ionize } from "@rue/quarky";
+import { component, ref } from "@rue/lumo";
+import { ionize } from "@rue/quarky";
 
 
 //tests:
@@ -8,7 +7,7 @@ import { DerivedIon, watchEffect, ion, ionize } from "@rue/quarky";
 
 export function TestBox() {
 
-   const box$ = ionize({
+   const box = ionize({
       position: {
          x: 0,
          y: 0
@@ -17,21 +16,21 @@ export function TestBox() {
 
 
    function moveRight() {
-      box$.position.x = box$.position.x + 10;
+      box.position.x = box.position.x + 10;
    }
 
    function moveLeft() {
-      box$.position.x = box$.position.x - 10;
+      box.position.x = box.position.x - 10;
    }
 
-   const $div = NodeRef('div')
+   const $div = ref('div')
 
 
-   return (
+   return component(
       <>
          <div ref={$div} style={{
             backgroundColor: 'lightgray',
-            transform: (`translate(${box$.position.x}px)`)
+            transform: (`translate(${box.position.x}px)`)
          }}>I'm a box</div>
          <button on:click={moveLeft}>moveLeft</button>
          <button on:click={moveRight}>moveRight</button>

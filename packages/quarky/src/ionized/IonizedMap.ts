@@ -1,13 +1,9 @@
-import { storeSnapshot, ionize, registerIonizedModel, toRaw, asIonized } from "./ionize";
-import { isNotSameSize, setDeleteOp, useClearOp } from "./IonizedSet";
-import { getAtomicOp, getAtomicOps } from "./AtomicOp";
-import { getAtomicPion } from "./Pion";
-import { Mutation, recordMutation } from "../Mutable";
-import { runSyncEffects } from "../effect-cycle/SyncEffects";
+import { toRaw } from "./ionize";
+import { isNotSameSize } from "./IonizedSet";
 import { enlistIonizedMethods, trigger, triggerAll } from "./IonizedMethods";
-import { hasMaybeIonized, trackableGetOp, trackableHasOp, trackableIterative, trackableOp, trackableOpWithCallback, trackOp, useDeleteOp } from "./OpDefinitions";
+import { hasMaybeIonized, trackableHasOp, trackableIterative, trackableOp, trackableOpWithCallback, trackOp, useDeleteOp } from "./OpDefinitions";
 import { noop } from "@rue/utils";
-import { maybeIonize } from "./IonizedModel";
+import { getIonizedModel, maybeIonize } from "./IonizedModel";
 
 // declare global {
 //    interface Map<K, V> {
@@ -75,7 +71,7 @@ export function installIonicMap() {
       set: {
          createOp(target) {
             return function set(key: unknown, value: unknown){
-               const ionizedKey = asIonized(key);
+               const ionizedKey = getIonizedModel(key);
                if (ionizedKey) target.delete(ionizedKey);
                return target.set(key, value)
             }

@@ -7,32 +7,67 @@
 
 
 import { component } from "@rue/lumo"
-import { asReadonlyIon, asReinedIon, ion, ionize, isIon, SYNC, watch } from "@rue/quarky"
-import { RENDER } from "../../../packages/lumo/src/render-cycle"
+import { ion, ionize } from "@rue/quarky"
 
 export function CounterApp() {
    return component(
       <>
          <TestCount></TestCount>
-         <hr></hr>
-         <TestMutableCount></TestMutableCount>
+         {/* <hr></hr> */}
+         <TestThisCount></TestThisCount>
          <hr></hr>
          {/* <TestImmutableCount></TestImmutableCount>
          <hr></hr> */}
-         <TestReadonlyMutableCount></TestReadonlyMutableCount>
+         {/* <TestReadonlyMutableCount></TestReadonlyMutableCount> */}
          <hr></hr>
          {/* <TestReadonlyImmutableCount></TestReadonlyImmutableCount> */}
          {/* <hr></hr> */}
-         <TestReinedMutableCount></TestReinedMutableCount>
+         {/* <TestReinedMutableCount></TestReinedMutableCount> */}
          <hr></hr>
          {/* <TestReinedImmutableCount></TestReinedImmutableCount> */}
          {/* <hr></hr> */}
-         <TestMutableNoMethodCount></TestMutableNoMethodCount>
+         {/* <TestMutableNoMethodCount></TestMutableNoMethodCount> */}
       </>
 
    )
 }
 
+
+function TestIonize() {
+   const obj = ionize({message:'hi'})
+
+   function changeMessage() {
+      console.log('message', obj.message)
+      obj.message = 'bye'
+      console.log('new message', obj.message)
+   }
+
+   return component(
+      <>
+         <div>{obj.$message}</div>
+         <button on:click={changeMessage}>click</button>
+      </>
+   )
+}
+
+function TestIon() {
+   const $message = ion('hi')
+
+   function changeMessage() {
+      console.log('message', $message.state)
+      console.log('message (call)', $message())
+      $message.state = 'bye'
+      console.log('new message', $message.state)
+      console.log('new message (call)', $message())
+   }
+
+   return component(
+      <>
+         <div>{$message}</div>
+         <button on:click={changeMessage}>click</button>
+      </>
+   )
+}
 
 
 export function TestCount() {
@@ -51,8 +86,7 @@ export function TestCount() {
 
    return component(
       <>
-         <h3>mutable ion with methods</h3>
-         <div>{$count}</div>
+         <h3>mutable ion</h3>
          <div>{$count}</div>
          <div>{$doubleCount}</div>
          <hr></hr>
@@ -63,7 +97,7 @@ export function TestCount() {
    )
 }
 
-export function TestMutableCount() {
+export function TestThisCount() {
 
    const $count = ion(0, {
       increment() {
@@ -75,9 +109,7 @@ export function TestMutableCount() {
       }
    })
 
-   console.log('is it in count', 'increment' in $count)
-
-   const $doubleCount = ion(() => $count() * 2, { increment() { } })
+   const $doubleCount = ion(() => $count() * 2)
 
    function increment() {
       $count.state++
@@ -92,11 +124,11 @@ export function TestMutableCount() {
          <div>{$count}</div>
          <div>{$doubleCount}</div>
          {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
-         <p>these should work</p>
+         <p>mutate this: these should work</p>
          <button on:click={$count.increment}>increment</button>
          <button on:click={$count.decrement}>decrement</button>
          <hr></hr>
-         <p>these should work</p>
+         <p>mutate $count: these should work</p>
          <button on:click={increment}>increment</button>
          <button on:click={decrement}>decrement</button>
       </>
@@ -186,84 +218,84 @@ export function TestMutableCount() {
 // }
 
 
-export function TestReadonlyMutableCount() {
+// export function TestReadonlyMutableCount() {
 
-   const $count = asReadonlyIon(ion(0, {
-      increment() {
-         console.log('increment', this)
-         this.state++
-      },
-      decrement() {
-         this.state--
-      }
-   }))
+//    const $count = asReadonlyIon(ion(0, {
+//       increment() {
+//          console.log('increment', this)
+//          this.state++
+//       },
+//       decrement() {
+//          this.state--
+//       }
+//    }))
 
-   const $doubleCount = ion(() => $count() * 2)
+//    const $doubleCount = ion(() => $count() * 2)
 
-   function increment() {
-      $count.state++
-   }
-   function decrement() {
-      $count.state--
-   }
+//    function increment() {
+//       $count.state++
+//    }
+//    function decrement() {
+//       $count.state--
+//    }
 
-   return component(
-      <>
-         <h3>readonly mutable ion with methods</h3>
-         <div>{$count}</div>
-         <div>{$doubleCount}</div>
-         {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
-         <p>these should BREAK</p>
-         <button on:click={$count.increment}>increment</button>
-         <button on:click={$count.decrement}>decrement</button>
-         <hr></hr>
-         <p>these should BREAK</p>
-         <button on:click={increment}>increment</button>
-         <button on:click={decrement}>decrement</button>
-      </>
-   )
-}
+//    return component(
+//       <>
+//          <h3>readonly mutable ion with methods</h3>
+//          <div>{$count}</div>
+//          <div>{$doubleCount}</div>
+//          {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
+//          <p>these should BREAK</p>
+//          <button on:click={$count.increment}>increment</button>
+//          <button on:click={$count.decrement}>decrement</button>
+//          <hr></hr>
+//          <p>these should BREAK</p>
+//          <button on:click={increment}>increment</button>
+//          <button on:click={decrement}>decrement</button>
+//       </>
+//    )
+// }
 
 
-export function TestReinedMutableCount() {
+// export function TestReinedMutableCount() {
 
-   const $count = asReinedIon(ion(0, {
-      increment() {
-         console.log('**increment', this)
-         this.state++
-      },
-      decrement() {
-         this.state--
-      }
-   }), true, ['increment'])
+//    const $count = asReinedIon(ion(0, {
+//       increment() {
+//          console.log('**increment', this)
+//          this.state++
+//       },
+//       decrement() {
+//          this.state--
+//       }
+//    }), true, ['increment'])
 
-   console.log('increment in coutn', 'increment' in $count)
-   console.log('decrement in coutn', 'decrement' in $count)
+//    console.log('increment in coutn', 'increment' in $count)
+//    console.log('decrement in coutn', 'decrement' in $count)
 
-   const $doubleCount = ion(() => $count() * 2)
+//    const $doubleCount = ion(() => $count() * 2)
 
-   function increment() {
-      $count.state++
-   }
-   function decrement() {
-      $count.state--
-   }
+//    function increment() {
+//       $count.state++
+//    }
+//    function decrement() {
+//       $count.state--
+//    }
 
-   return component(
-      <>
-         <h3>reined mutable ion with methods</h3>
-         <div>{$count}</div>
-         {/* <div>{$doubleCount}</div> */}
-         {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
-         <button on:click={$count.increment}>increment</button> this should work
-         <button on:click={$count.decrement}>decrement</button> this should BREAK
-         <hr></hr>
-         <p>these should work</p>
-         <button on:click={increment}>increment</button>
-         <button on:click={decrement}>decrement</button>
-      </>
-   )
-}
+//    return component(
+//       <>
+//          <h3>reined mutable ion with methods</h3>
+//          <div>{$count}</div>
+//          {/* <div>{$doubleCount}</div> */}
+//          {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
+//          <button on:click={$count.increment}>increment</button> this should work
+//          <button on:click={$count.decrement}>decrement</button> this should BREAK
+//          <hr></hr>
+//          <p>these should work</p>
+//          <button on:click={increment}>increment</button>
+//          <button on:click={decrement}>decrement</button>
+//       </>
+//    )
+// }
 
 
 
@@ -307,43 +339,43 @@ export function TestReinedMutableCount() {
 // }
 
 
-export function TestMutableNoMethodCount() {
+// export function TestMutableNoMethodCount() {
 
-   const $count = asReinedIon(ion(0, {
-      increment() {
-         console.log('increment', this)
-         this.state++
-      },
-      decrement() {
-         this.state--
-      }
-   }), true, [])
+//    const $count = asReinedIon(ion(0, {
+//       increment() {
+//          console.log('increment', this)
+//          this.state++
+//       },
+//       decrement() {
+//          this.state--
+//       }
+//    }), true, [])
 
-   const $doubleCount = ion(() => $count() * 2)
+//    const $doubleCount = ion(() => $count() * 2)
 
-   function increment() {
-      $count.state++
-   }
-   function decrement() {
-      $count.state--
-   }
+//    function increment() {
+//       $count.state++
+//    }
+//    function decrement() {
+//       $count.state--
+//    }
 
-   return component(
-      <>
-         <h3>reined mutable ion, no methods</h3>
-         <div>{$count}</div>
-         <div>{$doubleCount}</div>
-         {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
-         <p>these should BREAK</p>
-         <button on:click={e => $count.increment()}>increment</button>
-         <button on:click={e => $count.decrement()}>decrement</button>
-         <hr></hr>
-         <p>these should work</p>
-         <button on:click={increment}>increment</button>
-         <button on:click={decrement}>decrement</button>
-      </>
-   )
-}
+//    return component(
+//       <>
+//          <h3>reined mutable ion, no methods</h3>
+//          <div>{$count}</div>
+//          <div>{$doubleCount}</div>
+//          {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
+//          <p>these should BREAK</p>
+//          <button on:click={e => $count.increment()}>increment</button>
+//          <button on:click={e => $count.decrement()}>decrement</button>
+//          <hr></hr>
+//          <p>these should work</p>
+//          <button on:click={increment}>increment</button>
+//          <button on:click={decrement}>decrement</button>
+//       </>
+//    )
+// }
 
 // export function TestCounterModel() {
 

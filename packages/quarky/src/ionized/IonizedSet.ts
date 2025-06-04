@@ -1,12 +1,5 @@
-import { AnyObject } from "@rue/types";
-import { asIonized, storeSnapshot, toRaw } from "./ionize";
-import { GetPreopData, IonizedModel, useTrackableOp } from "./IonizedModel";
-import { getAtomicOp, getAtomicOps } from "./AtomicOp";
-import { IonizedModelQuark } from "./IonizedModelQuark";
-import { getAtomicPion } from "./Pion";
-import { Mutation, recordMutation } from "../Mutable";
-import { runSyncEffects } from "../effect-cycle/SyncEffects";
-import { quarkOf } from "../Quark";
+import {  toRaw } from "./ionize";
+import { getIonizedModel, GetPreopData, IonizedModel, useTrackableOp } from "./IonizedModel";
 import { enlistIonizedMethods, trigger, triggerAll, TriggeringOpDef } from "./IonizedMethods";
 import { hasMaybeIonized, trackableCheckOp, trackableCreativeOpWithArgs, trackableHasOp, trackableIterative, trackableOp, trackableOpWithCallback, useDeleteOp } from "./OpDefinitions";
 
@@ -89,7 +82,7 @@ export function installIonicSet() {
       add: {
          createOp: (target) => {
             return function add(value: unknown) {
-               const ionizedKey = asIonized(value);
+               const ionizedKey = getIonizedModel(value);
                if (ionizedKey) target.delete(ionizedKey);
                return target.add(value)
             }

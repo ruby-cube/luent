@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { InertMark, ionize, ionizeDeep, MARK, MarkMap, registerIonizedModel, ShallowMark, toRaw } from "./ionize";
+import { InertMark, ionize, MARK, MarkMap, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
 import { asAtomicOp, getAtomicOp } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
@@ -20,6 +20,7 @@ import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { MUTABLE } from "../ion/AtomicIon";
 import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp } from "./IonizedMethods";
 import { normalize } from "path";
+import { inert, isInert } from "./inert";
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -265,11 +266,8 @@ const KEY_IN_OP = "[[in]]"
 // - adding and deleting properties
 export function createIonizedModel(
    target: object,
-   methods: AnyObject | undefined,
    markMap: MarkMap | InertCollectionType | undefined,
-   isPublic: boolean = true
 ) {
-
    const ionizedModel = new Proxy(target, {
       get(target, key, receiver) {
          __DEV__proxyGetterAssertions(ionizedModel, receiver)
@@ -277,9 +275,8 @@ export function createIonizedModel(
          if (getValue) return getValue();
          return initialAccess(
             target,
-            methods,
             markMap,
-            thisModel,
+            ionizedModel,
             modelQuark,
             key,
             propertyMap,
@@ -305,7 +302,7 @@ export function createIonizedModel(
          const getValue = propertyMap.get(key)
          if (getValue)
             return true;
-         return key in target || !!methods && key in methods
+         return key in target
       },
       ownKeys(target) {
          getActiveTracker()?.track(asAtomicOp(ionizedModel, INTERNAL_OP, 'ownKeys')) //TODO: trigger [[in]] when any new property is added or deleted
@@ -362,20 +359,15 @@ export function createIonizedModel(
 
    }) as IonizedModel
 
-   const modelQuark = new IonizedModelQuark(ionizedModel, target, methods, markMap)
-   let _super: AnyObject | undefined;
-   const propertyMap = isPublic ? new Map([
+   const modelQuark = new IonizedModelQuark(ionizedModel, target, markMap)
+   const propertyMap = new Map([
       [QUARK as any, () => modelQuark as any]
-   ]) : new Map([
-      [QUARK as any, () => modelQuark as any],
-      ['super', () => _super ?? createIonizedModel(target, undefined, markMap, false)]
    ])
 
    const setOp = useMutatingOp(target, ionizedModel, '[[set]]', triggeringPropertySetOp)
 
-   const thisModel = methods ? createIonizedModel(target, methods, markMap, false) : ionizedModel
 
-   if (!methods) registerIonizedModel(ionizedModel, target)
+   registerIonizedModel(ionizedModel, target)
 
    return ionizedModel
 }
@@ -390,16 +382,15 @@ function triggerKeysChange(model: IonizedModel, key: PropertyKey) {
 
 function initialAccess(
    target: AnyObject,
-   methods: AnyObject | undefined,
    marks: MarkMap | ShallowMark | undefined,
    ionizedModel: IonizedModel,
    quark: IonizedModelQuark,
    key: string | symbol,
    propertyMap: ProxyPropertyMap,
 ) {
-   if (methods && key in methods) {
-      return bindMethod(methods[key], key, ionizedModel, propertyMap)
-   }
+   // if (methods && key in methods) {
+   //    return bindMethod(methods[key], key, ionizedModel, propertyMap)
+   // }
    const nativeMethodDef = getIonizedMethodDef(target, key)
    if (nativeMethodDef) { //NOTE: this block must be above target[_key] for Array.from(set) to work
       return bindNativeMethod(
@@ -511,7 +502,7 @@ function initialIonAccess(
       return transformValue(propIon);
    }
    // Invalid property { $count: 0 } 
-   initialTrackableStateAccess(proxy, target, key, value, propertyMap, transformValue)
+   initialTrackableStateAccess(proxy, target, key, value, propertyMap, undefined, transformValue)
    if (__DEV__) console.warn('Invalid Property Key initialization: Property keys prefixed with a single dollar sign ($) are reserved for ions.\n' + asTraceable(proxy).origin)
 }
 
@@ -552,6 +543,7 @@ function initialTrackableStateAccess(
    transformValue: Function
 ) {
    function getState(value: any) {
+      console.log('value', value)
       const _value = maybeIonize(value, (inertMap instanceof Object && key in inertMap) ? inertMap[key as any] : inertMap)
       const tracker = getActiveTracker()
       if (tracker) {
@@ -564,12 +556,26 @@ function initialTrackableStateAccess(
    return getState(value)
 }
 
+const ionizedModels: WeakMap<AnyObject, IonizedModel> = new WeakMap()
+
+function registerIonizedModel(ionized: IonizedModel, target: AnyObject) {
+   ionizedModels.set(target, ionized)
+}
+
+export function getIonizedModel(value: unknown) {
+   return ionizedModels.get(value as AnyObject)
+}
 
 
-export function maybeIonize(value: any, mark: ShallowMark | InertMark | MarkMap | undefined) {
-   if (!isObject(value) || mark === 'inert')
+
+export function maybeIonize(value: any, mark: InertMark | MarkMap | undefined) {
+   if (!isObject(value) || isInert(value)){
       return value;
-   return mark === 'shallow' ? ionize(value) : ionizeDeep(value, mark ? { [MARK]: mark as any } : undefined)
+   }
+   if (mark?.["~markInert"]){
+      return inert(value)
+   }
+   return ionizedModels.get(value) ?? createIonizedModel(value, undefined, mark ? { [MARK]: mark as any } : undefined)
 }
 
 
@@ -691,15 +697,17 @@ function useMutatingOp(
    const fn = createOp ? createOp(target, op) : target[op];
    const quark = quarkOf(model)
 
+
    const o = {
       [fnName](...args: any) {
+         if (op === 'splice') console.log('mutating op', fnName)
          const _args = input(args)
          const preop = config.preop?.(target, _args)
 
          const output = transformOutput(fn.apply(target, _args), model); // perform mutation
 
          if (shouldTrigger && !shouldTrigger(preop)) return output;
-
+         if (op === 'splice') console.log('splicing: triggering')
          storeSnapshot(quark)
 
          recordMutation(quark, new Mutation(
@@ -711,6 +719,7 @@ function useMutatingOp(
          ))
 
          const triggers = getTriggers(model, _args, preop);
+         if (op === 'splice') console.log(triggers, model)
 
          for (const trigger of triggers) {
             trigger();

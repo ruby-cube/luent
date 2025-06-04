@@ -80,42 +80,60 @@ type Froggy = {
    name?: string
 }
 
+interface Item {
+   id: number, content: string
+}
+
+class ItemList extends Array<Item> {
+
+   insert(index: number) {
+      if (index === this.length) {
+         this.push({
+            id: genId(),
+            content: (Math.random() * 100).toString(),
+         })
+      }
+      else
+         this.splice(index, 0, {
+            id: genId(),
+            content: (Math.random() * 100).toString(),
+         })
+   }
+
+   remove(index: number) {
+      this.splice(index, 1);
+   }
+
+   changeContent(index: number) {
+      const item = this[index];
+      item.content = 'something else'
+   }
+}
+
 export function List(
 
 ) {
    const frog = ionize({ id: 0, content: "frog" })
-   const mixed = [
-      frog,
+   // const mixed = [
+   //    frog,
+   //    { id: 1, content: "robin" },
+   //    { id: 2, content: "fly" },
+   //    { id: 3, content: "swamp" }
+   // ]
+   // type B = typeof mixed extends Array<infer I> ? ToRaw<I> : 'n'
+   // type A = typeof mixed extends Array<infer I> ? IsRedundantUnion<ToRaw<I>> extends true ? 'yes' : 'no' : 'no'
+   // // {[K in keyof ToRaw<I>]: ToRaw<I>[K]}[]  : never
+   // // IsMaybeIonized<I> extends true ? 'yeah' : 'no' : 'nah'
+   const list = ionize(
+      new ItemList(
+      // [
+      // frog,
+      { id: 0, content: "frog" },
       { id: 1, content: "robin" },
       { id: 2, content: "fly" },
       { id: 3, content: "swamp" }
-   ]
-   type B = typeof mixed extends Array<infer I> ? ToRaw<I> : 'n'
-   type A = typeof mixed extends Array<infer I> ? IsRedundantUnion<ToRaw<I>> extends true ? 'yes' : 'no' : 'no'
-   // {[K in keyof ToRaw<I>]: ToRaw<I>[K]}[]  : never
-   // IsMaybeIonized<I> extends true ? 'yeah' : 'no' : 'nah'
-   const list = ionize([
-      frog,
-      { id: 1, content: "robin" },
-      { id: 2, content: "fly" },
-      { id: 3, content: "swamp" }
-   ], {
-      insert(index: number) {
-         const removed = list.splice(index, 0, {
-            id: genId(),
-            content: (Math.random() * 100).toString(),
-         })
-      },
-      remove(index: number) {
-         const rem = list.splice(index, 1);
-      },
-      changeContent(index: number) {
-         const item = list[index];
-         console.log("changing content", item, 'index:', index)
-         item.content = 'something else'
-      }
-   })
-
+   // ])
+   ))
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])
 
@@ -130,10 +148,6 @@ export function List(
 
    console.log('$$$ values vs entries', [][Symbol.iterator].constructor)
 
-
-
-
-
    const ionizedValues = ionize(list.values())
    for (const value of ionizedValues) {
       console.log('$$$ value of ionized values()', value)
@@ -143,17 +157,17 @@ export function List(
 
 
 
-   const selected = ionize(new Set(list), {
-      toggle(item: typeof list[number]) {
-         console.log('$$$ selected', selected)
-         if (selected.has(item)) {
-            selected.delete(item)
-         }
-         else {
-            selected.add(item)
-         }
+   const selected = ionize(new Set())
+
+   function toggleSelect(item: typeof list[number]) {
+      console.log('$$$ selected', selected)
+      if (selected.has(item)) {
+         selected.delete(item)
       }
-   })
+      else {
+         selected.add(item)
+      }
+   }
 
    // const selectedB = new IonizedSet(list, {
    //    toggle(item: typeof list[number]) {
@@ -188,9 +202,9 @@ export function List(
       list.remove(index);
    }
 
-   watch((list[0]), () => {
-
-   })
+   watch(list, () => {
+      console.log('#$% list changed!!')
+   }, { sync: true })
 
    return component(
       <>
@@ -200,7 +214,7 @@ export function List(
          </div>
 
          {For(list, m => m.id, (item, $index) => (console.log('rendering', item, item.content, $index()),
-            <div on:click={e => !target('style.cursor:pointer') && selected.toggle(item)}
+            <div on:click={e => !target('style.cursor:pointer') && toggleSelect(item)}
                style={{
                   backgroundColor: randomColor.get(),
                   outline: (selected.has(item) ? 'thick solid blue' : 'unset'),
@@ -254,4 +268,12 @@ export function List(
       //     ))}
       // </>
    )
+}
+
+
+class Selected extends Set<any> {
+   toggle(item: any) {
+      if (this.has(item)) this.delete(item)
+      this.add(item)
+   }
 }

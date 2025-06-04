@@ -4,10 +4,10 @@ import { ion } from "@rue/quarky";
 export function TestDerivedConditional() {
    const $count = ion(0, {
       increment() {
-         $count.state++
+         this.state++
       },
       decrement() {
-         $count.state--
+         this.state--
       }
 
    })
@@ -43,27 +43,25 @@ export function TestDerivedConditional() {
 
    return component(
       <article>
-         <div>{$count() + 1}</div>
-
-         <div>{[$count() + 1]}</div>
-
-         <div>{$doubleCount()}</div>
+         <div>{$count}</div>
+         <div>{($count() + 1)}</div>
          <div>{$doubleCount}</div>
-         <div>{frog.$name}</div>
-         <button on:click={$count.increment} class={(pref + $activeState())}>+</button>
+         <button on:click={$count.increment}>+</button>
          <button on:click={$count.decrement}>-</button>
-         {If($doubleCount() > 3, 'create',
-            <p>doublecount is greater than 3!</p>
+
+         {If($doubleCount() > 3,
+            <p>(0) doublecount is greater than 3!</p>
          )}
-         {If($doubleCount() > 0, 'mount',
-            <p>doublecount is greater than 0!</p>
+         {If($doubleCount() > 0,
+            <p>(1) doublecount is greater than 0!</p>
          )}
-         {If($count() > 3, 'mount',
-            <p>count is greater than 3!</p>
+         {If($count() > 3,
+            <p>(2) count is greater than 3!</p>
          )}
-         {If($count() > 0, 'show',
-            <p>count is greater than 0!</p>
+         {If($count() > 0,
+            <p>(3) count is greater than 0!</p>
          )}
+         {/*          
 
          {If($active,
             <p>doublecount is greater than 3!</p>
@@ -106,16 +104,16 @@ export function TestDerivedConditional() {
          )}
          {If($count() > 0, 'show',
             <p>count is greater than 0!</p>
-         )}
+         )} */}
 
          {/* <div>{$count}</div> */}
          {/* <div>{$doubleCount}</div> */}
-         <button on:click={e => $aActive.toggle()}>toggle A (mount)</button>
-         <button on:click={$bActive.toggle}>toggle B (create)</button>
+         {/* <button on:click={e => $aActive.toggle()}>toggle A (mount)</button> */}
+         {/* <button on:click={$bActive.toggle}>toggle B (create)</button> */}
          {/* <button on:click={$cActive.toggle}>toggle C (mount)</button>
          <button on:click={$dActive.toggle}>toggle D (show)</button> */}
          {/* <button on:click={$count.decrement}>-</button> */}
-         {If($aActive, 'create',
+         {/* {If($aActive, 'create',
             <p>A ACTIVE</p>
          )}
          {ElseIf($bActive, 'mount',
@@ -129,7 +127,7 @@ export function TestDerivedConditional() {
          )}
          {Else('create',
             <p>B GONE</p>
-         )}
+         )} */}
          {/* {If($cActive, 'mount',
             <p>C ACTIVE</p>
          )}

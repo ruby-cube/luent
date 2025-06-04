@@ -150,6 +150,8 @@ export class ListRenderKit {
 
          }
 
+         console.log('!!!!watching list', data)
+
          watch(data, ({ current, previous }) => { // typecast as one of the options so that typescript won't complain
             // if (recording && state === previous){
             //    recording.stop()
@@ -158,11 +160,13 @@ export class ListRenderKit {
             //    recording = recordMutations(_data)
             //    return;
             // }
+            console.log('!!!!updating list?')
             const _prevState = clone ?? toRaw(previous)
             clone = createClone(data, current)
             // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
             const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(current), _prevState, getUID)
             if (noChange) { //TODO: should we use hasChanged function in watch options instead?
+               console.log('no change :(')
                return;
             }
             if (dynamicNodePod!.length !== _prevState.length)

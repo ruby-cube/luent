@@ -3,7 +3,7 @@ import { debug, isFunction, isObject } from "@rue/utils";
 import { InertCollection, InertCollectionType, IonizedModelQuark } from "./IonizedModelQuark";
 import { BasicInertItemCollection, inert, Inert, isInert } from "./inert";
 import { AtomicIon, Ion, ion, isIon, Methods } from "../ion/Ion";
-import { createIonizedModel, IonizedModel } from "./IonizedModel";
+import { createIonizedModel, getIonizedModel, IonizedModel } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { MUTABLE } from "../ion/AtomicIon";
 
@@ -16,20 +16,7 @@ import { MUTABLE } from "../ion/AtomicIon";
 //TODO: figure out the simplest way developers can add types to custom data strucures
 
 
-const ionizedModels: WeakMap<AnyObject, IonizedModel> = new WeakMap()
 
-export function registerIonizedModel(ionized: IonizedModel, target: AnyObject) {
-   ionizedModels.set(target, ionized)
-}
-
-export function isIonizedModel(value: any): value is IonizedModel {
-   if (!isObject(value)) return false;
-   return hasQuark(value) && quarkOf(value) instanceof IonizedModelQuark;
-}
-
-export function asIonized(value: unknown) {
-   return ionizedModels.get(value as AnyObject)
-}
 
 
 type AbsorbedIon<T> = {
@@ -54,16 +41,7 @@ export type Readonly<T extends AnyObject = AnyObject> = {
 
 
 
-declare global {
 
-   interface HTMLElement {
-      '~inert': true
-   }
-
-   interface CanvasUserInterface {
-      '~inert': true
-   }
-}
 
 
 export const MARK = Symbol('marked')
@@ -71,44 +49,10 @@ export const MARK = Symbol('marked')
 /**
  * Ionized deeply
  */
-export type Ionized<T, M = {}> =
-   Properties<T> //TODO: apply mark map outside of Ionized
+export type Ionized<T> =
+   Properties<T>
    & InvertProperties<T, ReadonlyKeys<T>>
-   & M
    & { '~ionized'?: true }
-
-type Mark<T, MK> = MK extends undefined ? T : {
-   [K in keyof T]:
-   K extends keyof MK ?
-   MK[K] extends InertMark ?
-   Inert<T[K]>
-   : MK[K] extends AnyObject ? Mark<T[K], MK[K]>
-   : T[K]
-   : T[K]
-}
-
-// /**
-//  * Ionized shallowly
-//  */
-// export type Ionized<T, M = {}> =
-//    Properties<T>
-//    & InvertProperties<T, ReadonlyKeys<T>>
-//    & M
-//    & { '~ionized'?: 'shallow' | true }
-// // & (IsCollection<T> extends true ? T : {})
-
-// type Properties<T> = {
-//    [K in keyof T]: T[K]
-// }
-
-
-
-// type InvertProperties<T, ROKeys> = {
-//    [K in keyof T as K extends number ? never : IsMethod<K, T[K]> extends true ? never : IsAbsorbedIon<K, T[K]> extends true ? K extends `$${infer N}` ? N : never : K extends string ? `$${K}` : never]?:
-//    IsAbsorbedIon<K, T[K]> extends true ? T[K] extends Ion<infer S> ? Value<S> : never
-//    : K extends ROKeys ? Ion<T[K]>
-//    : Ion<T[K], { state: T[K] }>
-// }
 
 type Properties<T> = {
    [K in keyof T]: MaybeIonizeProperty<K, T[K]>
@@ -160,48 +104,48 @@ export type MaybeIonized<T> = ToRaw<T> | Ionized<T>
 //    return ionizeModel(target, methods, MUTABLE) as M extends AnyObject ? Ionized<T> & M : Ionized<T>
 // }
 
-const $location = ion('')
+// const $location = ion('')
 
-const frog = ionize({
-   name: {
-      nom: 'kermit', qualities: {
-         gallant: true
-      }
-   },
-   setName(name: string) { return name },
-   $location,
-}, {
-   [MARK]: {
-      name: { qualities: inert }
-   },
-   doSomething() { }
-})
+// const frog = ionize({
+//    name: {
+//       nom: 'kermit', qualities: {
+//          gallant: true
+//       }
+//    },
+//    setName(name: string) { return name },
+//    $location,
+// }, {
+//    [MARK]: {
+//       name: { qualities: inert }
+//    },
+//    doSomething() { }
+// })
 
-const nom = frog.name
-
-
-class AnimationController {
-   canvas = document.createElement('canvas')
-}
-
-//@ts-expect-error
-frog.name = o
+// const nom = frog.name
 
 
+// class AnimationController {
+//    canvas = document.createElement('canvas')
+// }
+
+// //@ts-expect-error
+// frog.name = o
 
 
 
-const list = ionize([{ name: 'kermit' }])
-const i = list[0]
+
+
+// const list = ionize([{ name: 'kermit' }])
+// const i = list[0]
 
 
 export type FlattenMaybeIonized<T> = T extends Ionized<infer R, infer M> ? R & M : never
-export type ToRawItems<T> = T extends Array<infer I> ? ToRaw<I>[] : T
+export type ToRawItems<T> = any[] extends T ? T extends Array<infer I> ? ToRaw<I>[] : T: T
 
 export type IsMaybeIonized<T> = T extends Ionized<infer R, infer M> | infer O ? R & M extends O ? O extends R & M ? true : false : false : false
 
 
-type Proto = { [MARK]?: MarkMap, [key: string]: (...args: any[]) => any }
+type Proto = { [key: string]: (...args: any[]) => any }
 
 export type InertMark = { '~markInert': true }
 export type IonizeWithInertItems = { '~markItemsInert': true }
@@ -210,9 +154,18 @@ export type MarkMap = {
    [key: PropertyKey]: MarkMap | InertMark | IonizeWithInertItems
 }
 
+type Mark<T, MK> = MK extends undefined ? T : {
+   [K in keyof T]:
+   K extends keyof MK ?
+   MK[K] extends InertMark ?
+   Inert<T[K]>
+   : MK[K] extends AnyObject ? Mark<T[K], MK[K]>
+   : T[K]
+   : T[K]
+}
+
 type IsInertMark<T> = T extends { '~markInert': true } ? true : false
 
-type ExtractMarks<M> = M extends { [MARK]: infer MK } ? MK : undefined
 
 
 // we need the markmap available to the maybeIonize function
@@ -222,24 +175,39 @@ type ExtractMarks<M> = M extends { [MARK]: infer MK } ? MK : undefined
 // Then if we ever try to mark an ionized object inert, print where it was first ionized or marked
 // QUESTION: Should we require a mark map then instead of devs calling inert on an object themselves?
 
-
 //API
-export function ionize<T, PROTO>(target: T & object, proto?: (PROTO & Proto) & ThisType<T & PROTO & { super: T }>): PROTO extends AnyObject ? Ionized<Mark<ToRawItems<T>, ExtractMarks<PROTO>>, PROTO> : Ionized<ToRawItems<T>> {
-   //TODO: store stack trace
-   const markMap = proto?.[MARK]
-   const methods = markMap && Object.keys(proto).length > 1 ? proto : undefined
-   return ionizeModel(target, methods, markMap) as PROTO extends AnyObject ? Ionized<Mark<ToRawItems<T>, ExtractMarks<PROTO>>, PROTO> : Ionized<ToRawItems<T>>
+// export function ionize<T, PROTO>(target: T & object, proto?: (PROTO & Proto) & ThisType<T & PROTO & { super: T }>): PROTO extends AnyObject ? Ionized<ToRawItems<T>, PROTO> : Ionized<ToRawItems<T>> {
+//    //TODO: store stack trace
+
+//    return <unknown>getExistingIonizedModel(target, proto) as PROTO extends AnyObject ? Ionized<ToRawItems<T>, PROTO> : Ionized<ToRawItems<T>> ??
+//       ionizeModel(target, proto, undefined) as PROTO extends AnyObject ? Ionized<ToRawItems<T>, PROTO> : Ionized<ToRawItems<T>>
+// }
+
+function getExistingIonizedModel(target: object, markMap?: object) {
+   const existing = getIonizedModel(target)
+   if (existing) {
+      if (markMap) {
+         throw Error('Cannot extend or modify existing ionized model with methods or markMap')
+      }
+      debug.warn('CASE RESEARCH: ionizing raw target with existing ionized model') // we want to track how often devs will ionize a raw target but not track when we ionize a raw target internally. That's why we have a public `ionize` and an internal `ionizeModel`
+   }
+   return existing
 }
 
-ionize.withInertItems = _withInertItems
+export function ionize<T, MARKS>(target: T & object, markMap?: MARKS & MarkMap): Ionized<Mark<ToRawItems<T>, MARKS>> {
+   //TODO: store stack trace
+   return <unknown>getExistingIonizedModel(target, markMap) as Ionized<Mark<ToRawItems<T>, MARKS>> ??
+      ionizeModel(target, markMap) as Ionized<Mark<ToRawItems<T>, MARKS>>
+}
 
-function _withInertItems<T, M>(target: T & object, methods?: (M & Methods) & ThisType<T & M & { super: T }>): M extends AnyObject ? Ionized<BasicInertItemCollection<ToRawItems<T>>, M> : Ionized<BasicInertItemCollection<ToRawItems<T>>> {
-   return ionizeModel(target, methods, InertCollection.ITEMS) as M extends AnyObject ? Ionized<BasicInertItemCollection<ToRawItems<T>>, M> : Ionized<BasicInertItemCollection<ToRawItems<T>>>
+
+function _withInertItems<T, M>(target: T & object): M extends AnyObject ? Ionized<BasicInertItemCollection<ToRawItems<T>>, M> : Ionized<BasicInertItemCollection<ToRawItems<T>>> {
+   return ionizeModel(target, InertCollection.ITEMS) as M extends AnyObject ? Ionized<BasicInertItemCollection<ToRawItems<T>>, M> : Ionized<BasicInertItemCollection<ToRawItems<T>>>
 }
 
 _withInertItems['~markItemsInert'] = true as const
 
-export {_withInertItems as withInertItems}
+export { _withInertItems as withInertItems }
 
 //TODO:
 // export function withInertKeys<T, M>(target: T & object, methods?: (M & Methods) & ThisType<T & M & { super: T }>): M extends AnyObject ? Ionized<Mark<ToRawItems<T>, ExtractMarks<M>>, M> : Ionized<ToRawItems<T>> {
@@ -278,18 +246,7 @@ export {_withInertItems as withInertItems}
 // return ionizeModel(target, methods, MUTABLE)
 // }
 
-export function ionizeModel(target: object, methods: object | undefined, markMap: MarkMap | InertCollectionType | undefined) {
-   if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
-   if (!methods && isIonizedModel(target)) return target;
-   if (isIon(target) || isInert(target)) {
-      if (methods) throw new Error(`INVALID INPUT: Cannot add methods to an ion or non-ionizable target using ionize.`)
-      return target
-   }
-   const rawTarget = toRaw(target) as object
-   const existingIonizedModel = !methods ? ionizedModels.get(rawTarget) : undefined;
-   if (existingIonizedModel) return existingIonizedModel
-   return createIonizedModel(rawTarget, methods, markMap)
-}
+
 
 // function traceIonized() { //TODO: what about objects that are ionized by ionsOf()?
 //    return extractTrace(getPublicTrace() 
@@ -339,7 +296,19 @@ export function storeSnapshot(modelQuark: IonizedModelQuark, clone?: AnyObject) 
    // timeTraveler.takeSnapshot(toRaw(modelQuark), $effectCycle().count, clone)
 }
 
+export function isIonizedModel(value: any): value is IonizedModel {
+   if (!isObject(value)) return false;
+   return hasQuark(value) && quarkOf(value) instanceof IonizedModelQuark;
+}
 
+export function ionizeModel(target: object, markMap: MarkMap | InertCollectionType | undefined) {
+   if (!isObject(target)) throw new Error(`INVALID INPUT: ionize or ionize must receive a reference value (object), not a primitive`)
+   if (isIonizedModel(target) || isIon(target) || isInert(target)) {
+      if (markMap) debug.warn(`CASE RESEARCH: Target is ${isIonizedModel(target) ? 'ionized model' : isIon(target) ? 'ion' : 'inert'}. Cannot extend using ionize()`)
+      return target
+   }
+   return createIonizedModel(target, markMap)
+}
 
 type AsRaw<T> = IsIonized<T> extends true ? T extends Ionized<infer R> ? R : T : T
 

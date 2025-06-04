@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types"
-import { asIonized, ionize, toRaw } from "./ionize"
+import { ionize, toRaw } from "./ionize"
 import { TrackableOpDef } from "./IonizedMethods"
-import { IonizedModel, maybeIonize } from "./IonizedModel"
+import { getIonizedModel, IonizedModel, maybeIonize } from "./IonizedModel"
 
 const toIonizedDecoyOfTargetOrThisArg = (target: AnyObject, args: any[]) => ionizedDecoy(args[1] ?? target)
 export const trackModel = (model: IonizedModel) => [model] as [IonizedModel]
@@ -38,7 +38,7 @@ export function hasMaybeIonized(
    if (target.has(rawKey)) {
       return passRaw(rawKey);
    }
-   const ionizedKey = asIonized(rawKey);
+   const ionizedKey = getIonizedModel(rawKey);
    if (ionizedKey && target.has(ionizedKey)) {
       return passIonized(ionizedKey, rawKey as AnyObject)
    }

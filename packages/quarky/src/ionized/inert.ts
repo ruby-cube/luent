@@ -1,5 +1,6 @@
+//@ts-nocheck
 import { AnyObject } from "@rue/types";
-import { ionize, Ionized, IsIonized, isIonizedModel } from "./ionize";
+import { IsIonized, isIonizedModel, withInertItems } from "./ionize";
 import { isFunction } from "@rue/utils";
 import { Collection } from "@rue/lumo";
 import { InertCollectionType } from "./IonizedModelQuark";
@@ -46,26 +47,66 @@ export type BasicInertItemCollection<T> =
    : InertItemCollection<T>
 
 
-function withInertItems<T>(value: T): BasicInertItemCollection<T> {
+function inertItems<T>(value: T): BasicInertItemCollection<T> {
 
 }
 
 
 
-// function withInertKeys() {
+// function inertKeys() {
 
 // }
 
-// function withInertEntries() {
+// function inertValues() {
 
 // }
 
 // const something = ionize({
-//    list: withInertItems([] as Frog[]) // Inert<Frog>[]
+//    name: 'kermitland',
+//    list: inertItems([] as Frog[]), // Inert<Frog>[]
+//    locationMap: inertKeys(new Map()),
+//    frog: inert({
+//       name: 'kermit'
+//    })
 // })
+
+// const something = ionize.with({
+//    list: inertItems,
+//    locationMap: inertKeys,
+//    frog: inert
+// }, new Character())
+
+// const list = ionize.with.inertItems([new Doc()])
 
 // const list = ionize.withInertItems([new Doc()])
 
-// function ionizeWithInertItems(){
 
+// const something = ionize({
+//    name: 'kermitland',
+//    list: inertItems([] as Frog[]), // Inert<Frog>[]
+//    locationMap: inertKeys(new Map()),
+//    frog: inert({
+//       name: 'kermit'
+//    })
+// })
+
+
+
+// const something = ionize(new Character(), {
+//    list: withInertItems,
+//    frog: inert
+// })
+
+// const list = ionize([], withInertItems)
+
+
+// declare global {
+
+//    interface HTMLElement {
+//       '~inert': true
+//    }
+
+//    interface CanvasUserInterface {
+//       '~inert': true
+//    }
 // }

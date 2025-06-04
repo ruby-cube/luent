@@ -121,7 +121,7 @@ function createIonizedIon<
    T,
    M
 >(initialState: T, methods?: M & Methods): AsMutableIon<T, M> {
-   return asIon(initialState, MUTABLE, IONIZED, methods) as AsMutableIon<T, M>
+   return asIon(initialState, MUTABLE, IONIZED, methods) as AsMutableIon<T, M> //TODO: add inert marks
 }
 
 // function createDeepMutableIonizedIon<
@@ -195,10 +195,8 @@ function asIon(
    }
 
    if (isIon(initialState)) return initialState
-   return createAtomicIon(ionized ? maybeIonize(initialState) : initialState, 'state', methods, mutable, ionized)
+   return createAtomicIon(ionized ? maybeIonize(initialState) : initialState, 'state', methods, mutable, ionized) // TODO: add inert mark map
 }
-
-//TODO: mark map for ion.ionize?
 
 
 

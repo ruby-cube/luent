@@ -11,7 +11,7 @@ export function TestCustomRadioSelection() {
 
    return component(
       For(choices, (item) =>
-         <p class={{ selected: item === $selectedItem() }} on:click={e => selectItem(item)}>
+         <p class={{ selected: (item === $selectedItem()) }} on:click={e => selectItem(item)}>
             {item}
          </p>
       )

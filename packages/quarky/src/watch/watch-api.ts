@@ -85,7 +85,7 @@ watch($style, {
 watch($style, {
    eager: true,
    phase: RENDER
-}, ({ state: styles }) => {
+}, ({ current: styles }) => {
    for (const key in styles) {
       const value = styles[key]
       if (isIon(value)) {

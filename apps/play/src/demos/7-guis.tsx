@@ -241,6 +241,8 @@ function CRUDApp() {
       return $first().trim() && $last().trim()
    }
 
+   
+
    return component(
       <>
          <div><input mu:value={$prefix} placeholder="Filter prefix" /></div>
