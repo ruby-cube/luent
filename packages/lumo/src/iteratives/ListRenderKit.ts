@@ -44,7 +44,7 @@ function callWithCommons(renderItem: RenderItem<any[]>, list: ListRenderKit, ite
    list.transitions.set($index, transitionNodes)
    const data = toIon(list.data);
 
-   const $i = ion(() => data()?.indexOf(item))
+   const $i = ion(() => data()?.indexOf(toRaw(item)))
    try {
       pushList(list)
       const nodeEntities = setUpNodeEntities(normalizeToArray(

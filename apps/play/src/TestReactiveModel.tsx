@@ -127,8 +127,8 @@ export function List(
    const list = ionize(
       new ItemList(
       // [
-      // frog,
-      { id: 0, content: "frog" },
+      frog,
+      // { id: 0, content: "frog" },
       { id: 1, content: "robin" },
       { id: 2, content: "fly" },
       { id: 3, content: "swamp" }
