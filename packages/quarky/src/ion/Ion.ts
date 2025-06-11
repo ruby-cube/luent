@@ -11,14 +11,13 @@ import { Inert } from "../ionized/inert";
 /* API */
 export type Ion<T = unknown> = ()=>T
 
-type MaybeInert<T = unknown> = IsIonized<T> extends true ? T : T extends object ? Inert<T> : T
+type MaybeInert<T = unknown> = IsIonized<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
 
-//TODO: Take into account ion.ionize(undefined as Frog | undefined)
 
 
 
 /* API */  // atomic ions, neutrons, and pions
-export type AtomicIon<T = unknown, M = { state: T }> = (() => T) & M & { state: T }
+type AtomicIon<T = unknown> = Ion<T> & { state: T }
 
 // NOTE: deprecating NonVoid because extending generic as NonVoid causes type-narrowing
 // export type NonVoid = string | number | object | undefined | boolean | bigint | symbol | null
@@ -45,7 +44,7 @@ export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
 }
 
 
-type AsIon<T, M = {}> = [T] extends [Ion & { state: unknown }] ? T  // [T] extends [AtomicIon] to prevent type-narrowing
+type AsIon<T, M = {}> = [T] extends [AtomicIon<unknown>] ? T // [T] extends [AtomicIon] to prevent type-narrowing
    : [T] extends [Derivation<infer R>] ? Ion<MaybeInert<R>> & M
    : 
    Ion<MaybeInert<T>> & M & { state: MaybeInert<T> }
@@ -119,14 +118,24 @@ ion.ionize = createIonizedIon
 
 ion.finite = finiton
 
+type Primitive = string | number | boolean | bigint | symbol | undefined | null;
 
+type ExcludePrimitives<T> = T extends Primitive ? never : T;
+
+type OnlyPrimitives<T> = T extends Primitive ? T : never;
+
+type Mixed = string | number | Date | RegExp | { name: string } | null;
+
+type OnlyReferences = ExcludePrimitives<Mixed>;
+
+type OnlyPrimitiv = OnlyPrimitives<Mixed>
 
 
 function createIonizedIon<
    T,
    M
->(initialState: T, methods?: M & Methods): AsIon<Ionized<T>, M> {
-   return asIon(initialState, MUTABLE, IONIZED, methods) as AsIon<Ionized<T>, M> //TODO: add inert marks
+>(initialState: T, methods?: M & Methods): AsIon<Ionized<ExcludePrimitives<T>>|OnlyPrimitives<T>, M> {
+   return asIon(initialState, MUTABLE, IONIZED, methods) as AsIon<Ionized<ExcludePrimitives<T>>|OnlyPrimitives<T>, M> //TODO: add inert marks
 }
 
 // function createDeepMutableIonizedIon<

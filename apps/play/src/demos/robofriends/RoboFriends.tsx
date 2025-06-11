@@ -37,7 +37,8 @@ class Frog { name: string = 'kermit' }
 // const $$greeting = muon('hi', {change(){}})
 
 export function RoboFriendsApp() {
-   const $robots = ion(9)
+   const $num = ion(9)
+   const $robots = ion.ionize('hi' as Robot[] | string) // Ion<Ionized<Robot> | undefined>
 
    return component(
       <>
