@@ -10,7 +10,7 @@ const cells = ionize(
       Array.from(Array(ROWS).keys()).map((i) => '')
    )
 )
- console.log('cells', cells)
+console.log('cells', cells)
 
 function evalCell(exp: string) {
    if (!exp.startsWith('=')) {
@@ -42,15 +42,15 @@ export function CellsApp() {
    const cols = cells.map((_, i) => String.fromCharCode(65 + i))
    console.log('cols', cols)
 
-   function Through(...args: any[]){
+   function Through(...args: any[]) {
       return [] as any
    }
 
-   function Across(...args: any[]){
+   function Across(...args: any[]) {
       return [] as any
    }
 
-   function Thru(...args: any[]){
+   function Thru(...args: any[]) {
       return [] as any
    }
 
@@ -80,7 +80,7 @@ export function CellsApp() {
                )}
             </tbody>
          </table >
-            <$--style>{`
+         <$--style>{`
          body {
             margin: 0;
  }
@@ -109,7 +109,7 @@ export function CellsApp() {
          overflow: hidden;
  }
          `}
-            </$--style>
+         </$--style>
       </>
    )
 }
@@ -143,7 +143,7 @@ function Cell({ $column, $row } = fromTag({
             )}
          </div >
 
-            <$--style>{`
+         <$--style>{`
                .cell, .cell input {
                   height: 1.5em;
                line-height: 1.5;
@@ -158,7 +158,7 @@ function Cell({ $column, $row } = fromTag({
                   width: 100%;
                box-sizing: border-box;
    }`
-            }</$--style>
+         }</$--style>
       </>)
 }
 

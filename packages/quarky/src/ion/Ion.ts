@@ -4,7 +4,7 @@ import { createMaybeMemoizedIon } from "../ionic/DerivationIon";
 import { createAtomicIon, IONIZED, MUTABLE, MUTABLE_IONIZED } from "./AtomicIon";
 import { maybeIonize } from "../ionized/IonizedModel";
 import { finiton } from "./FiniteStates";
-import { AnyObject } from "@rue/types";
+import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionized/ionize";
 import { Inert } from "../ionized/inert";
 
@@ -118,17 +118,6 @@ ion.ionize = createIonizedIon
 
 ion.finite = finiton
 
-type Primitive = string | number | boolean | bigint | symbol | undefined | null;
-
-type ExcludePrimitives<T> = T extends Primitive ? never : T;
-
-type OnlyPrimitives<T> = T extends Primitive ? T : never;
-
-type Mixed = string | number | Date | RegExp | { name: string } | null;
-
-type OnlyReferences = ExcludePrimitives<Mixed>;
-
-type OnlyPrimitiv = OnlyPrimitives<Mixed>
 
 
 function createIonizedIon<

@@ -115,14 +115,21 @@ export type Booleanny = any
 export type IsObject<T> = T extends object ? (T extends any[] ? false : true) : false;
 
 export type IsRedundantUnion<T> =
-  [T] extends [infer A | infer B]
-    ? IsObject<A> extends true
-      ? IsObject<B> extends true
-        ? (<U>() => U extends A ? 1 : 2) extends (<U>() => U extends B ? 1 : 2)
-          ? (<U>() => U extends B ? 1 : 2) extends (<U>() => U extends A ? 1 : 2)
-            ? true
-            : false
-          : false
-        : false
-      : false
-    : false;
+   [T] extends [infer A | infer B]
+   ? IsObject<A> extends true
+   ? IsObject<B> extends true
+   ? (<U>() => U extends A ? 1 : 2) extends (<U>() => U extends B ? 1 : 2)
+   ? (<U>() => U extends B ? 1 : 2) extends (<U>() => U extends A ? 1 : 2)
+   ? true
+   : false
+   : false
+   : false
+   : false
+   : false;
+
+
+export type Primitive = string | number | boolean | bigint | symbol | undefined | null;
+
+export type ExcludePrimitives<T> = T extends Primitive ? never : T;
+
+export type OnlyPrimitives<T> = T extends Primitive ? T : never;

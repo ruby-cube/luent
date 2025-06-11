@@ -131,7 +131,15 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(RoboFriendsApp)
+const app = createApp(SimpleApp)
+
+function SimpleApp() {
+   return component(
+      <p>
+         <div>some words</div>
+      </p>
+   )
+}
 
 app.mount('#app')
 

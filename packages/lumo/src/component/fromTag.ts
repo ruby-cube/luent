@@ -1,17 +1,20 @@
-import { AnyObject, UnionToIntersection } from "@rue/types";
-import { Inert, Ion, ion, ionize, Ionized, isIon, isIonKey, MaybeIonize, toIon, toValue, } from "@rue/quarky";
+import { AnyObject, ExcludePrimitives, OnlyPrimitives, UnionToIntersection } from "@rue/types";
+import { Inert, Ion, ion, ionize, Ionized, IsInert, isIon, IsIonized, isIonKey, MaybeIonize, toIon, toValue, } from "@rue/quarky";
 import { getComponentAttributes } from "./makeComponent";
 import { debug, isFunction, isObject } from "@rue/utils";
 import { DeepReadonly, v, Readonly, MaybeIon, Input, OptionalInput, MutableInput, OptionalMutableInput, MutableIon, validateInput, manageAccess, InputTypeDef } from "./InputTypes";
 
+// two types of component input
+// - commons input
+// - tag input
+
+//TODO: Should object inputs be normalized to ionized objects?? How should they be typed?
 
 //TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
 
 
 export const ATTRIBUTE_VALIDATION = Symbol('attribute-validation')
 
-// const attributes = $input(attrs)
-// const input = prep(attributes)
 
 //TODO: transform slot render function to Slot component
 // Ion<string>  => Ion<string>
@@ -77,10 +80,6 @@ type MaybeMutableIon<I, Config> =
 
 
 
-
-function isMutable<T extends DeepReadonly<AnyObject> | AnyObject>(value: T): value is Exclude<T, Readonly<any>> {
-   return true;
-}
 
 
 
@@ -197,11 +196,11 @@ type ComponentAttributes<C> =
 
 
 //API
-export function fromTag<C>(): ComponentInput<C> {
+export function fromTag<C>(): TagInput<C> {
    // C extends {} ? { [K in keyof ComponentValidatedInput<C>]: ComponentValidatedInput<C>[K] } & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject {
    const attributes = getComponentAttributes()
    if (!attributes) throw new Error(`input function must be called as default parameter of component factory`)
-   return toInput(attributes) as ComponentInput<C>
+   return toInput(attributes) as TagInput<C>
    // return prep(attributes, typeConfig) as C extends {} ? ComponentValidatedInput<C> & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject
 }
 
@@ -209,39 +208,53 @@ function assertFunction(value: unknown) {
    if (!isFunction(value) || isIon(value)) throw new Error('Event handler must be a function')
 }
 
-function toEventKey(key: string) {
-   return 'on:' + key
-}
-
-function ionKeyToAttributeKey(key: string) {
-   return key.slice(1)
-}
-
-function toFunctionKey(key: string) {
-   return 'can:' + key;
-}
-
+//TODO: Slots
 
 function toInput(attributes: AnyObject) {
 
    function emit(event: string, eventObject: object) {
-      const handler = attributes[toEventKey(event)]
+      const handler = attributes['on:' + event]
       if (!handler) return;
       assertFunction(handler)
       return handler(eventObject)
+   }
+
+   let muIons: Set<Ion> | undefined;
+
+   function mu(ion: Ion) {
+      return muIons ? muIons.has(ion) : (muIons = getMuIons(attributes), muIons.has(ion))
+   }
+
+   function getMuIons(attributes: AnyObject) {
+      const muIons: Set<Ion> = new Set()
+      for (const key in attributes) {
+         if (key.startsWith('mu')) {
+            const value = attributes[key]
+            assertMutableIon(value)
+            muIons.add(value)
+         }
+      }
+      return muIons
+   }
+
+   function assertMutableIon(value: unknown) {
+      if (!isIon(value) || !('state' in value)) throw new Error('[INVALID INPUT] attributes prefixed with mu: must receive a mutable ion')
    }
 
    return new Proxy(attributes, {
       get(target, key) {
          if (typeof key !== 'string') return undefined;
          if (key === 'emit') return emit;
+         if (key === 'mu') return mu;
+         if (key === 'slots') return target.children // TODO: Is this correct??
          if (isIonKey(key)) {
-            const fnKey = toFunctionKey(key)
-            if (fnKey in target) {
+            const ionKeyToAttributeKey = (key: string) => key.slice(1)
+            const opKey = 'can:' + key
+            if (opKey in target) {
                // case: can:$frog  (as shorthand for getFrog)
-               const fn = target[fnKey]
-               assertFunction(fn)
-               return fn;
+               const op = target[opKey]
+               assertFunction(op)
+               return op;
             }
             const attributeKey = ionKeyToAttributeKey(key)
             if (attributeKey in target) {
@@ -250,15 +263,15 @@ function toInput(attributes: AnyObject) {
             }
             return undefined; // optional
          }
-         const fnKey = toFunctionKey(key)
-         if (fnKey in target) {
-            const fn = target[fnKey]
-            assertFunction(fn)
-            return fn;
+         const opKey = 'can:' + key
+         if (opKey in target) {
+            const op = target[opKey]
+            assertFunction(op)
+            return op;
          }
          if (key in target) {
             const value = target[key]
-            if (isFunction(value) && !isIon(value)) 
+            if (isFunction(value) && !isIon(value))
                debug.error('To pass a function as component input, prefix attribute with `can:`')
             return toValue(target[key])
          }
@@ -274,76 +287,238 @@ function toInput(attributes: AnyObject) {
    })
 }
 
-type ComponentInput<D> = StaticInput<D> & IonInput<D> & MutableIonInput<D> & WithEmit<D>
 
-type Static<T> = T & { '~static': true }
+//TODO: only allow 'mu:' for ions
+type TagInput<D> =
+   StaticInput<D>
+   & ReadonlyIonInput<D>
+   & MutableIonInput<D>
+   & WithEmit<D>
+   & WithMu
+   & OpInput<D>
+   & SlotsInput<D>
+
+type WithMu = {
+   mu: <I extends { "~mu:": true; }>(ion: I) => ion is MuIon<I>
+}
+
 
 type StaticInput<D> = {
-   [K in keyof D as K extends `mu:${string}` ? never : K extends `mu?:${infer I}` ? I : K]: D[K] extends Static<infer T> ? MaybeIonize<T> : MaybeIonize<D[K]>
+   [K in keyof D as
+   IncludesIon<D[K]> extends true ? never
+   : K extends `mu:${string}` ? never
+   : K extends `mu?:${string}` ? never
+   : K extends `can:${string}` ? never
+   : K extends `on:${string}` ? never
+   : K extends `slots` ? never
+   : K]:
+   MaybeMarkInert<D[K]>
 }
 
-type MappedC<A, B> = {
-   [K in keyof A & keyof B]:
-   A[K] extends B[K]
-   ? never
-   : K
-};
+export type MaybeMarkInert<T> = IsIonized<T> extends true ? T : T extends Function ? T : IsInert<T> extends true ? T : T extends object ? Inert<T> : T
 
-type IsOptional<T, K extends keyof T> =
-  {} extends Pick<T, K> ? true : false;
+type IncludesIon<T> = Exclude<T, undefined> extends Ion ? true : false
 
-type Mapped<T> = {
-  [K in keyof T]-?: IsOptional<T, K> extends true
-    ? undefined extends T[K]
-      ? { [P in K]: T[K] }[K]        // optional + explicitly undefined → keep it
-      : NonNullable<T[K]>           // optional + no explicit undefined → strip it
-    : T[K];                          // not optional → leave as is
-};
+// type MappedC<A, B> = {
+//    [K in keyof A & keyof B]:
+//    A[K] extends B[K]
+//    ? never
+//    : K
+// };
+
+// type IsOptional<T, K extends keyof T> =
+//    {} extends Pick<T, K> ? true : false;
+
+// type Mapped<T> = {
+//    [K in keyof T]-?: IsOptional<T, K> extends true
+//    ? undefined extends T[K]
+//    ? { [P in K]: T[K] }[K]        // optional + explicitly undefined → keep it
+//    : NonNullable<T[K]>           // optional + no explicit undefined → strip it
+//    : T[K];                          // not optional → leave as is
+// };
 
 
 
-type IonInput<D> = {
+type ReadonlyIonInput<D> = {
    [K in keyof D
-   as D[K] extends Static<{}> ? never
-   : D[K] extends Function ? never
-   : K extends `mu:${infer I}` ? `$${I}`
-   : K extends `mu?:${infer I}` ? `$${I}`
+   as IncludesIon<D[K]> extends true ?
+   K extends `mu:${string}` ? never
+   : K extends `mu?:${string}` ? never
+   : K extends `can:${string}` ? never
+   : K extends `on:${string}` ? never
+   : K extends `slots` ? never
    : K extends string ? `$${K}`
-   : never]:
-   K extends OptionalKeys<D> ? 
-   // Ion<MaybeIonize<Exclude<D[K], undefined>>> 
-   D[K]
-   : Ion<MaybeIonize<D[K]>>
+   : never
+   : never
+   ]:
+   NonlocalIon<ExcludePrimitives<D[K]>> | OnlyPrimitives<D[K]>
 }
+
+
+
+type MutableIonInput<D> = {
+   [K in keyof D
+   as IncludesIon<D[K]> extends true ?
+   K extends `mu:${infer I}` ? `$${I}`
+   : K extends `mu?:${infer I}` ? `$${I}`
+   : K extends `can:${string}` ? never
+   : K extends `on:${string}` ? never
+   : K extends `slots` ? never
+   : never
+   : never
+   ]:
+   (NonlocalIon<ExcludePrimitives<D[K]>> & { '~mu:': true } | OnlyPrimitives<D[K]>)
+}
+
+// type AsMuIon<I> = ExcludePrimitives<I> extends { '~mu:': true } ? MuIon<I>
+//    : ExcludePrimitives<I> extends { '~mu:': boolean } ? MuIon<I> | undefined
+//    : undefined
+
+type MuIon<I> = ExcludePrimitives<I> extends { state: any } ? I
+   : ExcludePrimitives<I> & { state: ExcludePrimitives<I> extends Ion<infer S> ? S : never } | OnlyPrimitives<I>
+
+
+
+
+type NonlocalIon<T> = keyof IonMethods<T> extends never ? T extends Ion<infer S> ? Ion<MaybeMarkInert<S>> : never : T extends Ion<infer S> ? Ion<MaybeMarkInert<S>> & { [K in keyof T as K extends 'state' ? never : K]: T[K] } : never
+
+type IonMethods<T> = Omit<T, keyof Function>
+
+/**
+ * Types all properties as readonly and hides any function that is not marked pure.
+ * Deep read-only--Makes any nested objects read-only as well.
+ **/
+export type DeepNonlocal<T> = T extends Function ? T : T extends (infer E)[] ? readonly DeepNonlocal<E>[] : T extends Object ? Nonlocal<T> : T;
+
+
+export type Nonlocal<T> = {
+   readonly [K in keyof T]: DeepNonlocal<T[K]>
+}
+
+// type NonlocalIon<T> = { [K in keyof T as K extends 'state' ? never : K]: T[K] }
 
 class Robot {
    isRobot: true = true
 }
 
 type Ans = StaticInput<{
-   id: Static<number>
-   name: string
+   id: number
+   name: Ion<string> & { state: string } & { changeName: () => void }
+   nameB: Ion<string> & { changeName: () => void }
+   nameC: Ion<string>
+   frogA: Ion<Ionized<Frog>>
+   frogB: Ion<Frog> // --> Ion<Inert<Frog>>
    close: () => void
-   age?: string
-   'mu?:email'?: string,
-   'mu?:address': string,
-   'mu:email'?: string,
-   robots: Robot[], // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
-   frog: Inert<Frog>
+   age?: Ion<string>
+   location?: Ion<string | undefined>
+   'mu?:email'?: Ion<string>,
+   'mu?:address': Ion<string>,
+   'mu:email'?: Ion<string>,
+   robots: Ion<Robot[]>, // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
+   frogC: Frog // --> Inert<Frog>
+   frogD: Ionized<Frog> // --> Ionized<Frog>
+   frogE: Inert<Frog> // --> Inert<Frog>
 }>
 
-type AnsB = IonInput<{
-   close: () => void
-   id: Static<number>
-   name: string
-   age?: string
-   location?: string | undefined
-   'mu?:email'?: string,
-   'mu?:address': string,
-   'mu:email'?: string,
-   robots: Robot[], // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
-   frog: Inert<Frog>
+type Slots = { [key: string]: (input: AnyObject) => any[] } | ((input: AnyObject) => any[])
+
+type Slot<T> = (input: T) => any[]
+
+type MutableIon<T> = Ion<T> & { state: T }
+
+type AnsB = ReadonlyIonInput<{
+   id: number
+   frogC: Frog // --> Inert<Frog>
+   frogD: Ionized<Frog> // --> Ionized<Frog>
+   frogE: Inert<Frog> // --> Inert<Frog>
+   'can:close': () => void
+   'on:click': {}
+   slots: Slots
+   name: Ion<string> & { state: string } & { changeName: () => void }
+   nameB: Ion<string> & { changeName: () => void }
+   nameC: Ion<string>
+   frogA: Ion<Ionized<Frog>>
+   frogB: Ion<Frog> // --> Ion<Inert<Frog>>
+   frogO: Ion<Inert<Frog>> // --> Ion<Inert<Frog>>
+   age?: Ion<string>
+   location?: Ion<string | undefined>
+   'mu?:emailA'?: Ion<string>,
+   'mu?:addressA': Ion<string>,
+   'mu:emailB'?: Ion<string>,
+   'mu:emailReqA': Ion<string>,
+
+   'mu?:emailC'?: Ion<string> & { change: () => void },
+   'mu?:addressC': Ion<string> & { change: () => void },
+   'mu:emailD'?: Ion<string> & { change: () => void },
+   'mu:emailReqB': Ion<string> & { change: () => void },
+
+   'mu?:semailC'?: MutableIon<string> & { change: () => void },
+   'mu?:saddressC': MutableIon<string> & { change: () => void },
+   'mu:semailD'?: MutableIon<string> & { change: () => void },
+   'mu:semailReqB': MutableIon<string> & { change: () => void },
+   robots: Ion<Robot[]>, // $robots: Ion<Inert<Robot[]>> ---> robots={MaybeIon<Inert<Robot[]>>}
 }>
+
+type AnsC = MutableIonInput<{
+   id: number
+   frogC: Frog // --> Inert<Frog>
+   frogD: Ionized<Frog> // --> Ionized<Frog>
+   frogE: Inert<Frog> // --> Inert<Frog>
+   'can:close': () => void
+   'on:click': {}
+   slots: Slots
+   name: Ion<string> & { state: string } & { changeName: () => void }
+   nameB: Ion<string> & { changeName: () => void }
+   nameC: Ion<string>
+   frogA: Ion<Ionized<Frog>>
+   frogB: Ion<Frog> // --> Ion<Inert<Frog>>
+   frogO: Ion<Inert<Frog>> // --> Ion<Inert<Frog>>
+   age?: Ion<string>
+   location?: Ion<string | undefined>
+   'mu?:emailA'?: Ion<string>,
+   'mu?:addressA': Ion<string>,
+   'mu:emailOptA'?: Ion<string>,
+   'mu:emailReqA': Ion<string>,
+
+   'mu?:emailC'?: Ion<string> & { change: () => void },
+   'mu?:addressC': Ion<string> & { change: () => void },
+   'mu:emailD'?: Ion<string> & { change: () => void },
+   'mu:emailReqB': Ion<string> & { change: () => void },
+
+   'mu?:semailC'?: MutableIon<string> & { change: () => void },
+   'mu?:saddressC': MutableIon<string> & { change: () => void },
+   'mu:semailD'?: MutableIon<string> & { change: () => void },
+   'mu:semailReqB': MutableIon<string> & { change: () => void },
+   robots: Ion<Robot[]>, // $robots: Ion<Inert<Robot[]>> ---> robots={MaybeIon<Inert<Robot[]>>}
+}>
+
+
+const something = null as unknown as AnsB
+something.$name.changeName()
+something.$name.state = 'hi'
+something.$nameB
+something.$nameC
+something.$frogA
+something.$frogB
+something.$frogO
+something.$age
+something.$location
+something.$robots
+
+const mut = null as unknown as AnsC & WithMu
+const { $emailReqA, $emailReqB, $semailReqB, $emailD, $emailOptA, $semailD, $addressA, $addressC, $saddressC, $emailA, $emailC, $semailC, mu } = mut
+
+//@ts-expect-error
+if (mu(something.$nameB)) { }
+
+if (mu($emailReqA)) $emailReqA.state = 'kjl'
+
+if (mu($addressA)) $addressA.state = 'kjl'
+
+
+
+//NOTE: `'state' in $email` cannot be used to check if ion is mutable, because it will evaluate to true even when parent doesn't want it to
+// if ($emailA && 'state' in $emailA) $emailA.state = 'df'
 
 // export function RoboCard(input = fromTag<{
 //    id: Static<number>, ---> id: number

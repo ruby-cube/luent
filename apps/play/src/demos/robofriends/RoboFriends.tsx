@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, For, fromCommons, fromTag, Ionized, v } from "@rue/lumo";
+import { CommonsKey, component, For, fromCommons, fromTag, Ionized, v } from "@rue/lumo";
 import { inert, ion, Inert, ionize } from "@rue/quarky";
 import { robots } from "./robots";
 
@@ -75,6 +75,7 @@ export function RoboList(input = fromTag<{
 }>()) {
    const { $robots, $frog } = input; //TODO: type input such that $robots is defined
 
+
    return component(
       <div class='robo-list'>
          {For($robots!, m => m.id, robot => (
@@ -89,12 +90,17 @@ export function RoboList(input = fromTag<{
    )
 }
 
+const CAN_CLOSE_DIALOG = CommonsOpKey<>()
+const ON_CLOSE_DIALOG = CommonsEventKey<EVENT>()
+const LIST = CommonsKey<>()
+
 export function RoboCard(input = fromTag<{
-   id: number,
-   name: Ion<string>,
-   'mu?:email'?: Ion<string>,
-   robots: Ion<Ionized<Robot[]>>, // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
-   frog: Ion<Frog> // ion(frog) | frog --> $frog: Ion<Frog> | frog: Inert<Frog> ---> frog={MaybeIon<Frog>}
+   id: number;
+   name: Ion<string>;
+   'mu?:email'?: Ion<string>;
+   robots: Ion<Ionized<Robot[]>>; // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
+   frog: Ion<Frog>; // ion(frog) | frog --> $frog: Ion<Frog> | frog: Inert<Frog> ---> frog={MaybeIon<Frog>}
+   'can:openDialog': () => void
 }>()) {
    const {
       id,
@@ -104,10 +110,22 @@ export function RoboCard(input = fromTag<{
       $frog,
    } = input
 
-   if (mu($email)) mu($email).state = new Email()
+   const list = fromCommons(LIST, '?') ?? []
+   const $frog = fromCommons.asIon('mu?')(FROG)
+   const items = fromCommons(ITEMS)
+   const closeDialog = fromCommons(CAN_CLOSE_DIALOG)
+   const emitClick = fromCommons(ON_CLOSE_BUTTON_CLICK)
 
-   const $frog = fromCommons.ion('mu?')(FROG)
-   const list = fromCommons(LIST)
+
+   const $swamp = fromCommons.asIon()
+
+   function updateEmail() {
+      if (mu($email)) mu($email).state = new Email()
+   }
+
+   // optional and default
+   // mutability
+   // 
 
    return component(
       <>
