@@ -5,9 +5,17 @@ import { createAtomicIon, IONIZED, MUTABLE, MUTABLE_IONIZED } from "./AtomicIon"
 import { maybeIonize } from "../ionized/IonizedModel";
 import { finiton } from "./FiniteStates";
 import { AnyObject } from "@rue/types";
+import { Ionized, IsIonized } from "../ionized/ionize";
+import { Inert } from "../ionized/inert";
 
 /* API */
-export type Ion<T = unknown, M = {}> = (() => T) & M
+export type Ion<T = unknown> = ()=>T
+
+type MaybeInert<T = unknown> = IsIonized<T> extends true ? T : T extends object ? Inert<T> : T
+
+//TODO: Take into account ion.ionize(undefined as Frog | undefined)
+
+
 
 /* API */  // atomic ions, neutrons, and pions
 export type AtomicIon<T = unknown, M = { state: T }> = (() => T) & M & { state: T }
@@ -37,14 +45,10 @@ export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
 }
 
 
-
-type AsIon<T, M> = [T] extends [AtomicIon] ? T  // [T] extends [AtomicIon] to prevent type-narrowing
-   : [T] extends [Derivation<infer R>] ? M extends Methods ? Ion<R, M & { with_only: PickMethods }> : Ion<R>
-   : M extends Methods ? Ion<T, M & { with_only: PickMethods }> : Ion<T>
-
-type AsMutableIon<T, M> = [T] extends [Ion] ? T  // [T] extends [AtomicIon] to prevent type-narrowing
-   : [T] extends [Derivation<infer R>] ? M extends Methods ? Ion<R, M> : Ion<R>
-   : Ion<T, M & { state: T }>
+type AsIon<T, M = {}> = [T] extends [Ion & { state: unknown }] ? T  // [T] extends [AtomicIon] to prevent type-narrowing
+   : [T] extends [Derivation<infer R>] ? Ion<MaybeInert<R>> & M
+   : 
+   Ion<MaybeInert<T>> & M & { state: MaybeInert<T> }
 
 
 
@@ -85,16 +89,17 @@ type AsMutableIon<T, M> = [T] extends [Ion] ? T  // [T] extends [AtomicIon] to p
 export function ion<
    T,
    M
->(initialState: T & (() => unknown), methods?: M & Methods & ThisType<M & { state: T }>): AsMutableIon<T, M>
+>(initialState: T & (() => unknown), methods?: M & Methods & ThisType<M>): AsIon<T,M>
 export function ion<
    T,
    M
->(initialState: T, methods?: M & Methods & ThisType<M & { state: T }>): AsMutableIon<T, M>
+>(initialState: T, methods?: M & Methods & ThisType<M & { state: T }>):  AsIon<T,M>
 export function ion<
    T,
    M
->(initialState: T & (() => unknown) | unknown, methods?: M & Methods & ThisType<M & { state: T }>): AsMutableIon<T, M> {
-   return asIon(initialState, MUTABLE, false, methods) as AsMutableIon<T, M>
+>(initialState: T & (() => unknown) | unknown, methods?: M & Methods & ThisType<M & { state: T }>):  AsIon<T,M>
+   {
+   return asIon(initialState, MUTABLE, false, methods) as  AsIon<T,M>
 }
 
 
@@ -120,8 +125,8 @@ ion.finite = finiton
 function createIonizedIon<
    T,
    M
->(initialState: T, methods?: M & Methods): AsMutableIon<T, M> {
-   return asIon(initialState, MUTABLE, IONIZED, methods) as AsMutableIon<T, M> //TODO: add inert marks
+>(initialState: T, methods?: M & Methods): AsIon<Ionized<T>, M> {
+   return asIon(initialState, MUTABLE, IONIZED, methods) as AsIon<Ionized<T>, M> //TODO: add inert marks
 }
 
 // function createDeepMutableIonizedIon<

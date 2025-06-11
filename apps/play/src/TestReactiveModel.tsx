@@ -1,6 +1,6 @@
 import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { ion, __addDevName, ionize, toRaw, watch, FlattenMaybeIonized, IsMaybeIonized, Ionized, ToRaw, ToRawItems } from "@rue/quarky";
+import { ion, __addDevName, ionize, toRaw } from "@rue/quarky";
 import { enlistIonizedMethods } from "../../../packages/quarky/src/ionized/IonizedMethods";
 import { trackModel } from "../../../packages/quarky/src/ionized/OpDefinitions";
 import { Glass, IsRedundantUnion } from "@rue/types";
@@ -137,6 +137,7 @@ export function List(
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])
 
+
    const values = list.values()
    for (const value of values) {
       console.log('$$$ value', value)
@@ -157,7 +158,7 @@ export function List(
 
 
 
-   const selected = ionize(new Set())
+   const selected = ionize(new Set() as Set<Item>)
 
    function toggleSelect(item: typeof list[number]) {
       console.log('$$$ selected', selected)
@@ -181,12 +182,12 @@ export function List(
    //    }
    // })
 
-   try {
-      console.log('has it?', selected.has(0))
-   }
-   catch (err) {
-      console.error('EEP', err)
-   }
+   // try {
+   //    console.log('has it?', selected.has(0))
+   // }
+   // catch (err) {
+   //    console.error('EEP', err)
+   // }
 
    // toRaw(selected).add({id: '', content: ''})
 
@@ -201,10 +202,6 @@ export function List(
       selected.delete(list[index])
       list.remove(index);
    }
-
-   watch(list, () => {
-      console.log('#$% list changed!!')
-   }, { sync: true })
 
    return component(
       <>

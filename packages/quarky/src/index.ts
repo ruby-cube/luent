@@ -12,6 +12,7 @@ export * from "./__notes__/x_watch-debug" //TODO: limit exports to public api
 export * from "./effect-cycle/EffectCycle" //TODO: limit exports to public api
 export * from "./ionized/TimeTraveler" //TODO: limit exports to public api
 export * from "./ionized/ionize" //TODO: limit exports to public api
+export * from "./ionized/inert" //TODO: limit exports to public api
 export * from "./__notes__/areEqual" //TODO: limit exports to public api
 // export * from "./capsule/Readonly" //TODO: limit exports to public api
 export * from "./ionic/IonicCompound" //TODO: limit exports to public api

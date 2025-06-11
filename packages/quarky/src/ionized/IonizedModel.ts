@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { InertMark, ionize, MARK, MarkMap, toRaw } from "./ionize";
+import { InertMark, ionize, isIonKey, MARK, MarkMap, toRaw } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
 import { asAtomicOp, getAtomicOp } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
@@ -426,13 +426,12 @@ export function initialPropertyAccess(
    marks: MarkMap | ShallowMark | undefined,
    transformValue: (value: any) => any = (value: any) => value
 ) {
-   const isIonAccessKey = typeof key === 'string' && key[0] === '$' //TODO: need to use regex
 
    // if (isNonTrackable(key)) { //QUESTION: is this worth it? //TODO: include non-writable properties
    //    return initialNonTrackablePropertyAccess(target, key, value, propertyMap, transformValue);
    // }
 
-   if (isIonAccessKey) {
+   if (isIonKey(key)) {
       return initialIonAccess(ionizedModel, target, key, value, propertyMap, transformValue);
    }
 
@@ -568,14 +567,11 @@ export function getIonizedModel(value: unknown) {
 
 
 
-export function maybeIonize(value: any, mark: InertMark | MarkMap | undefined) {
+export function maybeIonize(value: any) {
    if (!isObject(value) || isInert(value)){
       return value;
    }
-   if (mark?.["~markInert"]){
-      return inert(value)
-   }
-   return ionizedModels.get(value) ?? createIonizedModel(value, undefined, mark ? { [MARK]: mark as any } : undefined)
+   return ionizedModels.get(value) ?? createIonizedModel(value, undefined)
 }
 
 

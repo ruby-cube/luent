@@ -1,18 +1,30 @@
-//@ts-nocheck
 import { AnyObject } from "@rue/types";
 import { IsIonized, isIonizedModel, withInertItems } from "./ionize";
 import { isFunction } from "@rue/utils";
 import { Collection } from "@rue/lumo";
 import { InertCollectionType } from "./IonizedModelQuark";
+import { getIonizedModel } from "./IonizedModel";
 
 const inertObjects: WeakSet<AnyObject> = new WeakSet()
 
 export type Inert<T = {}> = T & { '~inert': true }
 
+export type IsInert<T> = keyof T extends never ? false : T extends { '~inert': true } ? true : false
+
+//NOTE: Use type system to enforce marking objects as inert where they need to be inert, despite initialization as primitive value
+
+// let frog: undefined | Inert<Frog> = undefined
+
+// const swamp = ionize({
+//    frog: undefined as undefined | Inert<Frog>
+// })
+
 function _inert<T>(obj: T): T extends Function ? T : IsIonized<T> extends true ? T : T extends object ? Inert<T> : T {
-   if (!(obj instanceof Object)) throw new Error("Only objects can be marked as inert")
-   if (isIonizedModel(obj)) throw new Error('cannot mark an ion or ionized model as inert')
-   if (isFunction(obj)) throw new Error(`Functions are inert by default`)
+   if (!(obj instanceof Object)) throw new Error("[INVALID INPUT] Only objects can be marked as inert")
+
+   if (getIonizedModel(obj)) throw new Error('[INVALID INPUT] Cannot mark a the raw object of an ionized model as inert')
+   if (isIonizedModel(obj)) throw new Error('[INVALID INPUT] Cannot mark an ionized model as inert')
+   if (isFunction(obj)) throw new Error(`[INVALID INPUT] Functions are inert by default`)
    inertObjects.add(obj)
    return obj as T extends Function ? T : IsIonized<T> extends true ? T : T extends object ? Inert<T> : T
 }
@@ -53,44 +65,6 @@ function inertItems<T>(value: T): BasicInertItemCollection<T> {
 
 
 
-// function inertKeys() {
-
-// }
-
-// function inertValues() {
-
-// }
-
-// const something = ionize({
-//    name: 'kermitland',
-//    list: inertItems([] as Frog[]), // Inert<Frog>[]
-//    locationMap: inertKeys(new Map()),
-//    frog: inert({
-//       name: 'kermit'
-//    })
-// })
-
-// const something = ionize.with({
-//    list: inertItems,
-//    locationMap: inertKeys,
-//    frog: inert
-// }, new Character())
-
-// const list = ionize.with.inertItems([new Doc()])
-
-// const list = ionize.withInertItems([new Doc()])
-
-
-// const something = ionize({
-//    name: 'kermitland',
-//    list: inertItems([] as Frog[]), // Inert<Frog>[]
-//    locationMap: inertKeys(new Map()),
-//    frog: inert({
-//       name: 'kermit'
-//    })
-// })
-
-
 
 // const something = ionize(new Character(), {
 //    list: withInertItems,
@@ -98,15 +72,3 @@ function inertItems<T>(value: T): BasicInertItemCollection<T> {
 // })
 
 // const list = ionize([], withInertItems)
-
-
-// declare global {
-
-//    interface HTMLElement {
-//       '~inert': true
-//    }
-
-//    interface CanvasUserInterface {
-//       '~inert': true
-//    }
-// }

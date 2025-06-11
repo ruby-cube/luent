@@ -1,8 +1,9 @@
 import { AnyObject, UnionToIntersection } from "@rue/types";
-import { isIon, toIon, } from "@rue/quarky";
+import { Inert, Ion, ion, ionize, Ionized, isIon, isIonKey, MaybeIonize, toIon, toValue, } from "@rue/quarky";
 import { getComponentAttributes } from "./makeComponent";
-import { isFunction, isObject } from "@rue/utils";
+import { debug, isFunction, isObject } from "@rue/utils";
 import { DeepReadonly, v, Readonly, MaybeIon, Input, OptionalInput, MutableInput, OptionalMutableInput, MutableIon, validateInput, manageAccess, InputTypeDef } from "./InputTypes";
+
 
 //TODO: Runtime check that only one of either e.g. $message or message attribute is passed in (not both)
 
@@ -196,14 +197,174 @@ type ComponentAttributes<C> =
 
 
 //API
-export function fromTag<C>(typeConfig?: C & InputTypeDef
-): C extends {} ? { [K in keyof ComponentValidatedInput<C>]: ComponentValidatedInput<C>[K] } & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject {
+export function fromTag<C>(): ComponentInput<C> {
+   // C extends {} ? { [K in keyof ComponentValidatedInput<C>]: ComponentValidatedInput<C>[K] } & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject {
    const attributes = getComponentAttributes()
    if (!attributes) throw new Error(`input function must be called as default parameter of component factory`)
-   return prep(attributes, typeConfig) as C extends {} ? ComponentValidatedInput<C> & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject
+   return toInput(attributes) as ComponentInput<C>
+   // return prep(attributes, typeConfig) as C extends {} ? ComponentValidatedInput<C> & { [ATTRIBUTES]: C extends undefined ? AnyObject : ComponentAttributes<C> } : AnyObject
+}
+
+function assertFunction(value: unknown) {
+   if (!isFunction(value) || isIon(value)) throw new Error('Event handler must be a function')
+}
+
+function toEventKey(key: string) {
+   return 'on:' + key
+}
+
+function ionKeyToAttributeKey(key: string) {
+   return key.slice(1)
+}
+
+function toFunctionKey(key: string) {
+   return 'can:' + key;
 }
 
 
+function toInput(attributes: AnyObject) {
+
+   function emit(event: string, eventObject: object) {
+      const handler = attributes[toEventKey(event)]
+      if (!handler) return;
+      assertFunction(handler)
+      return handler(eventObject)
+   }
+
+   return new Proxy(attributes, {
+      get(target, key) {
+         if (typeof key !== 'string') return undefined;
+         if (key === 'emit') return emit;
+         if (isIonKey(key)) {
+            const fnKey = toFunctionKey(key)
+            if (fnKey in target) {
+               // case: can:$frog  (as shorthand for getFrog)
+               const fn = target[fnKey]
+               assertFunction(fn)
+               return fn;
+            }
+            const attributeKey = ionKeyToAttributeKey(key)
+            if (attributeKey in target) {
+               const value = target[ionKeyToAttributeKey(key)]
+               return ion(value);
+            }
+            return undefined; // optional
+         }
+         const fnKey = toFunctionKey(key)
+         if (fnKey in target) {
+            const fn = target[fnKey]
+            assertFunction(fn)
+            return fn;
+         }
+         if (key in target) {
+            const value = target[key]
+            if (isFunction(value) && !isIon(value)) 
+               debug.error('To pass a function as component input, prefix attribute with `can:`')
+            return toValue(target[key])
+         }
+         return undefined
+      },
+      set() {
+         debug.error('Cannot mutate component input object')
+         return false;
+      },
+      has(target, key) {
+         return key in target; //TODO:
+      }
+   })
+}
+
+type ComponentInput<D> = StaticInput<D> & IonInput<D> & MutableIonInput<D> & WithEmit<D>
+
+type Static<T> = T & { '~static': true }
+
+type StaticInput<D> = {
+   [K in keyof D as K extends `mu:${string}` ? never : K extends `mu?:${infer I}` ? I : K]: D[K] extends Static<infer T> ? MaybeIonize<T> : MaybeIonize<D[K]>
+}
+
+type MappedC<A, B> = {
+   [K in keyof A & keyof B]:
+   A[K] extends B[K]
+   ? never
+   : K
+};
+
+type IsOptional<T, K extends keyof T> =
+  {} extends Pick<T, K> ? true : false;
+
+type Mapped<T> = {
+  [K in keyof T]-?: IsOptional<T, K> extends true
+    ? undefined extends T[K]
+      ? { [P in K]: T[K] }[K]        // optional + explicitly undefined → keep it
+      : NonNullable<T[K]>           // optional + no explicit undefined → strip it
+    : T[K];                          // not optional → leave as is
+};
+
+
+
+type IonInput<D> = {
+   [K in keyof D
+   as D[K] extends Static<{}> ? never
+   : D[K] extends Function ? never
+   : K extends `mu:${infer I}` ? `$${I}`
+   : K extends `mu?:${infer I}` ? `$${I}`
+   : K extends string ? `$${K}`
+   : never]:
+   K extends OptionalKeys<D> ? 
+   // Ion<MaybeIonize<Exclude<D[K], undefined>>> 
+   D[K]
+   : Ion<MaybeIonize<D[K]>>
+}
+
+class Robot {
+   isRobot: true = true
+}
+
+type Ans = StaticInput<{
+   id: Static<number>
+   name: string
+   close: () => void
+   age?: string
+   'mu?:email'?: string,
+   'mu?:address': string,
+   'mu:email'?: string,
+   robots: Robot[], // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
+   frog: Inert<Frog>
+}>
+
+type AnsB = IonInput<{
+   close: () => void
+   id: Static<number>
+   name: string
+   age?: string
+   location?: string | undefined
+   'mu?:email'?: string,
+   'mu?:address': string,
+   'mu:email'?: string,
+   robots: Robot[], // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
+   frog: Inert<Frog>
+}>
+
+// export function RoboCard(input = fromTag<{
+//    id: Static<number>, ---> id: number
+//    name: string, 
+//    'mu?:email'?: string, ---> $email | email
+//    'mu:email'?: string, ---> $email
+//    robots: Robot[], // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
+//    frog: Inert<Frog> // ion(frog) | frog --> $frog: Ion<Frog> | frog: Inert<Frog> ---> frog={MaybeIon<Frog>}
+// }>()) {
+//    const {
+//       id, 
+//       $name,
+//       $email = new Email(), 
+//       $robots, 
+//       $frog, 
+//    } = input
+
+//    if (mu($email)) mu($email).state = new Email()
+
+//    const $frog = fromCommons.ion('mu?')(FROG)
+//    const list = fromCommons(LIST)
 
 // assertions?: { [K in keyof C]?: ((value: any) => void) | ((value: any) => void)[] }
 
@@ -213,11 +374,9 @@ export function unnestValue(value: any) {
       return unnestValue(value());
    }
    return value;
-
 }
 
-//API
-export function prep<C extends AnyObject | undefined>(attributes: AnyObject, typeConfig: C) {
+function prep<C extends AnyObject | undefined>(attributes: AnyObject, typeConfig: C) {
    let eventHandlers: AnyObject | undefined;
    if (typeConfig) {
       const validatedAttributes = {} as AnyObject;

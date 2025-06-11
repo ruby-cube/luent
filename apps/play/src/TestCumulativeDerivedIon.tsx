@@ -22,21 +22,30 @@ export function TestDerived() {
       sequence.push($accumulate())
    }
 
-   function $background(index: number) {
+   function $selectedColor(index: number) {
       return $count() === index ? 'beige' : 'unset'
    }
 
    return component(
       <>
          {For(counts, (n, $index) =>
-            <div style={{ display: 'inline-block', padding: '10px', backgroundColor: ($count() === $index() ? 'beige' : 'unset') }}>{n}</div>
+            <div class='count-box' style={`background-color: ${$count() === $index() ? 'beige' : 'unset'};`}>{n}</div>
+         )}
+         {For(counts, (n, $index) =>
+            <div class='count-box' style={{ display: 'inline-block', padding: '10px', backgroundColor: ($count() === $index() ? 'beige' : 'unset') }}>{n}</div>
          )}
          <hr></hr>
          {For(sequence, (n, $index) =>
-            <div style={{ display: 'inline-block', padding: '10px', backgroundColor: ($background($index())) }}>{n}</div>
+            <div style={{ display: 'inline-block', padding: '10px', backgroundColor: ($selectedColor($index())) }}>{n}</div>
          )}
          <div>{$accumulate}</div>
          <button on:click={nextNumber}>next cumulative</button>
+         {CSS`
+            .count-box {
+               display: inline-block; 
+               padding: 10px;
+            }
+         `}
       </>
    )
 }

@@ -10,11 +10,45 @@ import { trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trac
 
 
 declare global {
-   interface Array<T> { 
+   interface Array<T> {
       splice<H>(this: H, start: number, deleteCount?: number, ...items: T[]): IonizeByThis<H, ToRaw<T>[]>;
       // values<H>(): IonizeByThis<H, ArrayIterator<T>>;
+      ionizable: 'Array'
    }
 }
+
+class Frog {
+   name = 'kermit'
+}
+
+class Frogs extends Array<Frog> {
+   length = 9
+}
+
+class Log {
+   location = 'swamp'
+}
+
+class Logs extends Array<Log> {
+   length: number = 1
+}
+
+declare global {
+   interface Ionizables {
+      Array: Array<unknown>
+      Set: Set<unknown>
+   }
+}
+
+declare global {
+   interface Ionizables {
+      LogsA: Logs
+   }
+}
+
+type IsIonizable<T> = T extends Ionizables[keyof Ionizables] ? true : false
+
+type Ans = IsIonizable<Frogs>
 
 // declare global {
 //    interface Array<T> {

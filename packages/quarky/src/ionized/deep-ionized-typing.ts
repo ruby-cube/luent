@@ -1,4 +1,8 @@
 
+//QUESTION: Can I write Ionized<> such that it checks if a type is ionizable?
+// QUESTION: Can Typescript distinguish between an Array vs an extension of an Array?
+
+
 
 
 class Frog {

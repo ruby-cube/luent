@@ -1,11 +1,10 @@
 import { AnyObject, Glass, ReadonlyKeys } from "@rue/types";
 import { debug, isFunction, isObject } from "@rue/utils";
 import { InertCollection, InertCollectionType, IonizedModelQuark } from "./IonizedModelQuark";
-import { BasicInertItemCollection, inert, Inert, isInert } from "./inert";
+import { BasicInertItemCollection, inert, Inert, IsInert, isInert } from "./inert";
 import { AtomicIon, Ion, ion, isIon, Methods } from "../ion/Ion";
 import { createIonizedModel, getIonizedModel, IonizedModel } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
-import { MUTABLE } from "../ion/AtomicIon";
 
 
 // The current approach to reactivity depth is that all models are deeply reactive.
@@ -67,7 +66,7 @@ type InvertProperties<T, ROKeys> = {
 
 type IsAbsorbedIon<K, T> = K extends `$${string}` ? T extends Ion ? true : false : false
 type IsMethod<K, T> = K extends `$${string}` ? T extends Ion ? false : false : T extends Function ? true : false
-export type IsIonized<T> = T extends { '~ionized'?: true } ? true : false
+export type IsIonized<T> = keyof T extends never ? false : T extends { '~ionized'?: true } ? true : false
 // T extends Ion ? false : false : T extends Function ? true : false
 
 type MaybeIonizeProperty<K, T> =
@@ -78,16 +77,17 @@ type MaybeIonizeProperty<K, T> =
    : T extends object ? Ionized<T>
    : T
 
-type MaybeIonize<T> = IsIonized<T> extends true ? T : T extends Function ? T : T extends object ? Ionized<T> : T
+export type MaybeIonize<T> = IsIonized<T> extends true ? T : T extends Function ? T : IsInert<T> extends true ? T : T extends object ? Ionized<T> : T
 
 // type IsCollection<T> = T extends EnrolledCollections[keyof EnrolledCollections] ? true : false
+
 
 
 // type IonizeCollectionByMarkMap<T, MK, K> = MK extends Shallow ? Ionized<T> : Ionized<T,>
 
 
 
-export type ToRaw<T> = T extends Ionized<infer R> ? R : T
+export type ToRaw<T> = IsIonized<T> extends true ? T extends Ionized<infer R> ? R : T : T
 
 type MaybeIonizedMethod<M extends Function> = M extends (this: infer U, ...args: any) => any ? (ThisType<U> & { method: M })['method'] : M
 
@@ -139,10 +139,8 @@ export type MaybeIonized<T> = ToRaw<T> | Ionized<T>
 // const i = list[0]
 
 
-export type FlattenMaybeIonized<T> = T extends Ionized<infer R, infer M> ? R & M : never
-export type ToRawItems<T> = any[] extends T ? T extends Array<infer I> ? ToRaw<I>[] : T: T
+export type ToRawItems<T> = any[] extends T ? T extends Array<infer I> ? ToRaw<I>[] : T : T
 
-export type IsMaybeIonized<T> = T extends Ionized<infer R, infer M> | infer O ? R & M extends O ? O extends R & M ? true : false : false : false
 
 
 type Proto = { [key: string]: (...args: any[]) => any }
@@ -194,10 +192,10 @@ function getExistingIonizedModel(target: object, markMap?: object) {
    return existing
 }
 
-export function ionize<T, MARKS>(target: T & object, markMap?: MARKS & MarkMap): Ionized<Mark<ToRawItems<T>, MARKS>> {
+export function ionize<T, MARKS>(target: T & object, markMap?: MARKS & MarkMap): MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>> {
    //TODO: store stack trace
-   return <unknown>getExistingIonizedModel(target, markMap) as Ionized<Mark<ToRawItems<T>, MARKS>> ??
-      ionizeModel(target, markMap) as Ionized<Mark<ToRawItems<T>, MARKS>>
+   return <unknown>getExistingIonizedModel(target, markMap) as MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>> ??
+      <unknown>ionizeModel(target, markMap) as MARKS extends AnyObject ? Ionized<Mark<ToRawItems<T>, MARKS>> : Ionized<ToRawItems<T>>
 }
 
 
@@ -310,12 +308,15 @@ export function ionizeModel(target: object, markMap: MarkMap | InertCollectionTy
    return createIonizedModel(target, markMap)
 }
 
-type AsRaw<T> = IsIonized<T> extends true ? T extends Ionized<infer R> ? R : T : T
+export function isIonKey(key: PropertyKey): key is string {
+   return typeof key === 'string' && /^\$[a-z]/.test(key)
+}
 
-export function toRaw<T>(target: T): AsRaw<T> {
-   if (target instanceof IonizedModelQuark) return target.rawTarget as AsRaw<T>;
-   if (isIonizedModel(target)) return quarkOf(target).rawTarget as AsRaw<T>;
-   return target as AsRaw<T>; // already raw target
+
+export function toRaw<T>(target: T): ToRaw<T> {
+   if (target instanceof IonizedModelQuark) return target.rawTarget as ToRaw<T>;
+   if (isIonizedModel(target)) return quarkOf(target).rawTarget as ToRaw<T>;
+   return target as ToRaw<T>; // already raw target
 }
 
 

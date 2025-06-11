@@ -162,13 +162,13 @@ export function TodoMVC() {
 
                   <ul class="filters">
                      <li>
-                        <a href="#/all" class={{ selected: ($view() === 'all') }}>All</a>
+                        <a href="#/all" class={{ 'selected': ($view() === 'all') }}>All</a>
                      </li>
                      <li>
-                        <a href="#/active" class={{ selected: ($view() === 'active') }}>Active</a>
+                        <a href="#/active" class={{ 'selected': ($view() === 'active') }}>Active</a>
                      </li>
                      <li>
-                        <a href="#/completed" class={{ selected: ($view() === 'completed') }}>Completed</a>
+                        <a href="#/completed" class={{ 'selected': ($view() === 'completed') }}>Completed</a>
                      </li >
                   </ul >
 

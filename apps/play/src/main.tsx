@@ -1,7 +1,8 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import './style.css'
+// import './style.css'
+import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
 // import { TestCounter } from './TestCounter';
@@ -40,6 +41,7 @@ import { PlainList } from './TestList';
 import { TestBox } from './TestBox';
 import { TestDerivedConditional } from './TestCreateMountShow';
 import { TestDerived } from './TestCumulativeDerivedIon';
+import { RoboFriendsApp } from './demos/robofriends/RoboFriends';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -129,7 +131,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(List)
+const app = createApp(RoboFriendsApp)
 
 app.mount('#app')
 
