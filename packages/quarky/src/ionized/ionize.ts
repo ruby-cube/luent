@@ -2,7 +2,7 @@ import { AnyObject, Glass, ReadonlyKeys } from "@rue/types";
 import { debug, isFunction, isObject } from "@rue/utils";
 import { InertCollection, InertCollectionType, IonizedModelQuark } from "./IonizedModelQuark";
 import { BasicInertItemCollection, inert, Inert, IsInert, isInert } from "./inert";
-import { AtomicIon, Ion, ion, isIon, Methods } from "../ion/Ion";
+import { Ion, ion, isIon, Methods, MutableIon } from "../ion/Ion";
 import { createIonizedModel, getIonizedModel, IonizedModel } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 
@@ -51,7 +51,7 @@ export const MARK = Symbol('marked')
 export type Ionized<T> =
    Properties<T>
    & InvertProperties<T, ReadonlyKeys<T>>
-   & { '~ionized'?: true }
+   & { '~ionized': true }
 
 type Properties<T> = {
    [K in keyof T]: MaybeIonizeProperty<K, T[K]>
@@ -61,12 +61,12 @@ type Value<T> = T & { value?: true }
 
 type InvertProperties<T, ROKeys> = {
    [K in keyof T as K extends number ? never : IsMethod<K, T[K]> extends true ? never : IsAbsorbedIon<K, T[K]> extends true ? K extends `$${infer N}` ? N : never : K extends string ? `$${K}` : never]?:
-   IsAbsorbedIon<K, T[K]> extends true ? T[K] extends Ion<infer S> ? Value<S> : never : K extends ROKeys ? Ion<MaybeIonize<T[K]>> : Ion<MaybeIonize<T[K]>, { state: MaybeIonize<T[K]> }>
+   IsAbsorbedIon<K, T[K]> extends true ? T[K] extends Ion<infer S> ? Value<S> : never : K extends ROKeys ? Ion<MaybeIonize<T[K]>> : MutableIon<MaybeIonize<T[K]>>
 }
 
 type IsAbsorbedIon<K, T> = K extends `$${string}` ? T extends Ion ? true : false : false
 type IsMethod<K, T> = K extends `$${string}` ? T extends Ion ? false : false : T extends Function ? true : false
-export type IsIonized<T> = keyof T extends never ? false : T extends { '~ionized'?: true } ? true : false
+export type IsIonized<T> = keyof T extends never ? false : T extends { '~ionized': true } ? true : false
 // T extends Ion ? false : false : T extends Function ? true : false
 
 type MaybeIonizeProperty<K, T> =

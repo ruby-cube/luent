@@ -1,26 +1,24 @@
 import { AnyObject } from "@rue/types";
-import { InertMark, ionize, isIonKey, MARK, MarkMap, toRaw } from "./ionize";
+import { isIonKey } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
 import { asAtomicOp, getAtomicOp } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
-import { InertCollectionType, IonizedModelQuark } from "./IonizedModelQuark";
-import { debug, isFunction, isObject, noop } from "@rue/utils";
+import { IonizedModelQuark } from "./IonizedModelQuark";
+import { debug, isObject, noop } from "@rue/utils";
 import { Ion, isIon } from "../ion/Ion";
 import { __DEV__trace } from "../debug/debug";
-import { HasQuark, hasQuark, Quark, QUARK, quarkOf } from "../Quark";
+import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
-import { Mutable, MutableEntity, MutableMorph, Mutation, recordMutation } from "../Mutable";
+import { MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { asPion, asPionQuark, getAtomicPion } from "./Pion";
 import { ParticleMorph } from "../compound/Particle";
 import { CompoundMorph } from "../compound/Compound";
 import { Watchable } from "../watch/Watched";
 import { IonizedCompound } from "./IonizedCompound";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
-import { MUTABLE } from "../ion/AtomicIon";
 import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp } from "./IonizedMethods";
-import { normalize } from "path";
-import { inert, isInert } from "./inert";
+import { isInert } from "./inert";
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -68,9 +66,6 @@ export const UNDEFINED_OP: Function = noop
 // }
 
 
-export const OVERRIDE = true;
-
-
 //API
 // export function defineIonizedStructure(structureKey: any, config: CustomIonizedModelConfig, override?: boolean) {
 //    const existing = ionicStructureMap.get(structureKey)
@@ -106,11 +101,6 @@ export const OVERRIDE = true;
 //    if (config) configs.push(config);
 //    return getStructureConfig(proto, configs)
 // }
-
-export const TRACK_ENTRY = 1 as const
-export const TRACK_MODEL = 2 as const
-export const TRACK_MODEL_WITH_CALLBACK = 3 as const
-
 
 
 export type CustomIonizedModelConfig = {
@@ -266,7 +256,7 @@ const KEY_IN_OP = "[[in]]"
 // - adding and deleting properties
 export function createIonizedModel(
    target: object,
-   markMap: MarkMap | InertCollectionType | undefined,
+   // markMap: MarkMap | InertCollectionType | undefined,
 ) {
    const ionizedModel = new Proxy(target, {
       get(target, key, receiver) {
@@ -275,7 +265,6 @@ export function createIonizedModel(
          if (getValue) return getValue();
          return initialAccess(
             target,
-            markMap,
             ionizedModel,
             modelQuark,
             key,
@@ -359,7 +348,7 @@ export function createIonizedModel(
 
    }) as IonizedModel
 
-   const modelQuark = new IonizedModelQuark(ionizedModel, target, markMap)
+   const modelQuark = new IonizedModelQuark(ionizedModel, target)
    const propertyMap = new Map([
       [QUARK as any, () => modelQuark as any]
    ])
@@ -382,7 +371,7 @@ function triggerKeysChange(model: IonizedModel, key: PropertyKey) {
 
 function initialAccess(
    target: AnyObject,
-   marks: MarkMap | ShallowMark | undefined,
+   // marks: MarkMap | ShallowMark | undefined,
    ionizedModel: IonizedModel,
    quark: IonizedModelQuark,
    key: string | symbol,
@@ -412,7 +401,7 @@ function initialAccess(
       key,
       value,
       propertyMap,
-      marks
+      // marks
    )
 }
 
@@ -423,7 +412,7 @@ export function initialPropertyAccess(
    key: string | symbol,
    value: any,
    propertyMap: ProxyPropertyMap,
-   marks: MarkMap | ShallowMark | undefined,
+   // marks: MarkMap | ShallowMark | undefined,
    transformValue: (value: any) => any = (value: any) => value
 ) {
 
@@ -445,7 +434,7 @@ export function initialPropertyAccess(
       key,
       value,
       propertyMap,
-      marks,
+      // marks,
       transformValue
    )
 }
@@ -501,7 +490,7 @@ function initialIonAccess(
       return transformValue(propIon);
    }
    // Invalid property { $count: 0 } 
-   initialTrackableStateAccess(proxy, target, key, value, propertyMap, undefined, transformValue)
+   initialTrackableStateAccess(proxy, target, key, value, propertyMap, transformValue)
    if (__DEV__) console.warn('Invalid Property Key initialization: Property keys prefixed with a single dollar sign ($) are reserved for ions.\n' + asTraceable(proxy).origin)
 }
 
@@ -538,12 +527,11 @@ function initialTrackableStateAccess(
    key: PropertyKey,
    value: any,
    propertyMap: ProxyPropertyMap,
-   inertMap: MarkMap | InertCollectionType | undefined,
+   // inertMap: MarkMap | InertCollectionType | undefined,
    transformValue: Function
 ) {
    function getState(value: any) {
-      console.log('value', value)
-      const _value = maybeIonize(value, (inertMap instanceof Object && key in inertMap) ? inertMap[key as any] : inertMap)
+      const _value = maybeIonize(value)
       const tracker = getActiveTracker()
       if (tracker) {
          const pion = asPionQuark(ionizedModel, key)
@@ -571,7 +559,7 @@ export function maybeIonize(value: any) {
    if (!isObject(value) || isInert(value)){
       return value;
    }
-   return ionizedModels.get(value) ?? createIonizedModel(value, undefined)
+   return ionizedModels.get(value) ?? createIonizedModel(value)
 }
 
 

@@ -2518,7 +2518,7 @@ type Defaultize<P, D> = P extends any ? string extends keyof P ? P
    : never;
 
 
-type LumoAttributes<C, P> = P extends { [ATTRIBUTES]: infer A } ? A : P
+type LumoAttributes<C, P> = P extends { '~attributes': infer A } ? A : P
 // C extends { propTypes: infer T; defaultProps: infer D } ? Defaultize<MergePropTypes<P, PropTypes.InferProps<T>>, D> 
 // : C extends { propTypes: infer T } ? MergePropTypes<P, PropTypes.InferProps<T>>
 // : C extends { defaultProps: infer D } ? Defaultize<P, D>
@@ -2526,7 +2526,6 @@ type LumoAttributes<C, P> = P extends { [ATTRIBUTES]: infer A } ? A : P
 
 
 declare global {
-   const ATTRIBUTES = Symbol('component attributes')
    let $s;
    let $;
    /**
@@ -2601,9 +2600,6 @@ declare global {
       // }
 
       interface LumoElements {
-         'vvv:show': {};
-         'vvv:mount': {};
-         'vvv:create': {};
          'i--i': {}; //comments
          '$--style': { children: string };
          '$--portal': PortalNodeInput & { children: Lumo.Slot }

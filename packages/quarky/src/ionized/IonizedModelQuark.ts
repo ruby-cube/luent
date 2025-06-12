@@ -59,7 +59,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
    constructor(
       public entity: IonizedModel,
       public rawTarget: AnyObject,
-      public inertMap: MarkMap | InertCollectionType | undefined,
+      // public inertMap: MarkMap | InertCollectionType | undefined,
    ) {
       this.asTraceable = new Traceable()
       this.watch = () => {

@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { AnyObject } from "@rue/types";
 import { hasQuark, quarkOf } from "../Quark";
 import { Mutable, Mutation, MutableEntity, asMutable, isMutableEntity } from "../Mutable";
@@ -144,3 +145,39 @@ export function doAction<T>(name: Name, args: any[]) { //TODO: Generics
       thisAction.emitCompleted()
    }
 }
+
+
+//API exploration
+
+// state capsules
+// arguments
+
+const [result, error] = await perform(INSERT_TEXT, newText, cursorPosition, doc)
+
+if (error) {
+
+}
+
+
+const INSERT_TEXT = defineAction(
+   function insertText(text, position, doc) {
+
+   }
+)
+
+
+const result = await perform(INSERT_TEXT, newText, cursorPosition, doc, { // options obj must be POJO (distinguish from Promises)
+   catch(err) {
+
+   }
+})
+
+
+const INSERT_TEXT = defineAction(
+   function insertText(text, position, doc) {
+
+   }, {
+   catch(err) {
+
+   }
+})
