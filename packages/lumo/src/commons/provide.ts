@@ -1,53 +1,64 @@
 import { Commons, getClosestCommons } from "./commons-stack";
 import { NodeCommons } from "./Commons";
-import { CommonsEntryKey, RawInput, TYPE_DEF } from "./CommonsKey";
-import { manageAccess, ValidatedInput, validateInput } from "../component/InputTypes";
+import { CommonsEntryKey, getCommonsKey } from "./CommonsKey";
+import { assertMutableIon, manageAccess, ValidatedInput, validateInput } from "../component/Input";
+import { Ion, toIon, toValue } from "@rue/quarky";
+import { access } from "fs";
+import { isFunction } from "@rue/utils";
 
 
 export interface AppCommons {
-   entries?: Map<CommonsEntryKey, any>;
+   entries?: Map<string, any>;
    parent?: AppCommons,
    app: AppCommons,
    global?: AppCommons,
+   muIons: Set<Ion> | undefined
 }
+
+
 
 //TODO: trace provider
 // fromCommons.trace('dog')(DOG)
 
-export function fromCommons<K extends CommonsEntryKey>(key: K, commons?: NodeCommons | AppCommons): ValidatedInput<K> {
-   let _context = commons || getClosestCommons();
-   if (!_context) throw new Error(``)
-   const typeDef = key[TYPE_DEF]
-   const access = typeDef.access
+export function fromCommons<K extends Function>(key: K, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons): K extends CommonsEntryKey<infer V> ? V : never {
+   return _fromCommons(key, optionalOrRequired, commons)
+}
 
+function _fromCommons<K extends CommonsEntryKey | string>(key: K, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons, mutableIon?: 'mu' | 'mu?' | 'ro' | undefined): K extends CommonsEntryKey<infer V> ? V : never {
+   let _commons = commons || getClosestCommons();
+   if (!_commons) throw new Error(``)
+   const commonsKey = getCommonsKey(key)
    // climb commons tree
-   let parent: Commons | undefined = _context;
+   let parent: Commons | undefined = _commons;
    while (parent !== undefined) {
       const entries = parent.entries
-      if (has(key, entries)) {
-         const value = get(key, entries);
-         return manageAccess(validateInput(value, typeDef, key), access);
+      if (entries?.has(commonsKey)) {
+         const value = entries?.get(commonsKey);
+         return validateValue(value, mutableIon)
       }
       parent = parent.parent;
    }
-   return manageAccess(validateInput(undefined, typeDef, key), access);
+   if (optionalOrRequired === '!') throw new Error('Required commons entry is missing')
+   return undefined as K extends CommonsEntryKey<infer V> ? V : never
 }
 
-function has(key: CommonsEntryKey, entries: Map<CommonsEntryKey, any> | undefined) {
-   if (entries instanceof Map) {
-      return entries.has(key)
+function validateValue(value: any, mutableIon?: 'mu' | 'mu?' | undefined) {
+   if (mutableIon === 'mu') assertMutableIon(value)
+   return value
+}
+
+fromCommons.asIon = fromCommonsAsIon
+
+export function fromCommonsAsIon<K>(key: K & Function, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons): K extends CommonsEntryKey<infer V> ? V : never
+export function fromCommonsAsIon<K>(mutableIon: 'mu' | 'mu?')
+export function fromCommonsAsIon<K>(mutableIonOrKey: 'mu' | 'mu?' | K, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons) {
+   if (isFunction(mutableIonOrKey)) {
+      return _fromCommons(mutableIonOrKey, optionalOrRequired, commons, 'ro')
    }
-   return false;
-}
-
-function get(key: CommonsEntryKey, entries: Map<CommonsEntryKey, any> | undefined) {
-   if (entries instanceof Map) {
-      return entries.get(key)
+   return function fromCommons<K extends Function>(key: K, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons): K extends CommonsEntryKey<infer V> ? V : never {
+      return _fromCommons(key, optionalOrRequired, commons, mutableIonOrKey)
    }
-   return undefined;
 }
-
-
 
 
 export function createAppCommons(entries: [CommonsEntryKey, unknown][] | undefined, globalCommons: AppCommons | undefined) {
@@ -87,8 +98,7 @@ export function fromApp<K extends CommonsEntryKey>(key: K, commons?: NodeCommons
    if (!appCommons) throw new Error("No app commons found :( This should never happen")
    const value = appCommons.entries?.get(key)
    if (value === undefined) return fromGlobal(key);
-   const typeDef = key[TYPE_DEF]
-   return manageAccess(validateInput(value, typeDef, key), typeDef.access);
+   return validateValue(value)
 }
 
 
@@ -120,16 +130,14 @@ export function provideGlobal<K extends CommonsEntryKey>(key: K, value: RawInput
    return value;
 }
 
-export function fromGlobal<K extends CommonsEntryKey>(key: K, commons?: NodeCommons | AppCommons): ValidatedInput<K> {
+export function fromGlobal<K extends CommonsEntryKey>(key: K, commons?: NodeCommons | AppCommons): K extends CommonsEntryKey<infer V> ? V : never {
    let _context = commons || getClosestCommons();
    if (!_context)
       throw new Error('')
    const globalEntries = _context?.global?.entries
    const value = globalEntries?.get(key)
-   const typeDef = key[TYPE_DEF]
-   return manageAccess(validateInput(value, typeDef, key), typeDef.access);
+   return validateValue(value)
 }
-
 
 
 

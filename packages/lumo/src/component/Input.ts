@@ -2,10 +2,21 @@
 //NOTE: It may be tempting to abstract the TypeDefs into a TypeDef with Generics, but because typescript
 // does not have higher order generics, this is not currently possible. Must manually type them all.
 
-import { ionize, toIon, toValue } from "@rue/quarky";
+import { ionize, isIon, MutableIon, toIon, toValue } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 import { isFunction, isObject } from "@rue/utils";
 import { CommonsEntryKey } from "../commons/CommonsKey";
+import { AsyncState } from "@rue/flask";
+
+export const MU_IONS = 'mu_ions'
+
+export const MU = Symbol('mu')
+
+export const [getActiveMuIons, muIonsStack] = AsyncState<Set<Ion>>(MU_IONS)
+
+export function assertMutableIon(value: unknown): asserts value is MutableIon<unknown> {
+   if (!isIon(value) || !('state' in value)) throw new Error('[INVALID INPUT] attributes prefixed with mu: must receive a mutable ion')
+}
 
 export type InputTypeDef = {
    [key: string]: { validatedType: any } | ((arg: any) => { validatedType: any })
@@ -383,7 +394,6 @@ type AsReadonly<T> = {
 }
 
 
-export type MutableIon<T> = T & ({ state: unknown } | { set: (value: unknown) => unknown })
 
 export type RequiredInput = { required: true };
 

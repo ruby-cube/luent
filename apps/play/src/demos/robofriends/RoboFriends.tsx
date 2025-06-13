@@ -1,4 +1,4 @@
-import { CommonsKey, component, For, fromCommons, fromTag, v } from "@rue/lumo";
+import { CommonsEntryKey, CommonsEventKey, CommonsKey, CommonsOpKey, component, EventHandler, For, fromCommons, fromTag, getCommonsKey, v } from "@rue/lumo";
 import { inert, ion, Inert, ionize, Ion, Ionized } from "@rue/quarky";
 import { robots } from "./robots";
 
@@ -25,8 +25,6 @@ interface Robot {
    email: string;
 }
 
-class Frog { name: string = 'kermit' }
-
 // type Muon<T> = ()=>T
 
 // function muon<T, M>(value: T, methods: M): Muon<T> & M{
@@ -36,13 +34,13 @@ class Frog { name: string = 'kermit' }
 // const $$greeting = muon('hi', {change(){}})
 
 export function RoboFriendsApp() {
-   const robots = ionize([] as Robot[])
+   const $robots = ion([] as Robot[])
 
    return component(
       <>
          <h1>RoboFriends</h1>
          <RoboList
-            robots={robots}
+            robots={$robots}
          ></RoboList>
       </>
    )
@@ -59,27 +57,60 @@ export function RoboFriendsApp() {
 
 
 export function RoboList(input = fromTag<{
-   robots: Ionized<Robot[]>, // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
+   robots: Ion<Robot[]>, // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
 }>()) {
-   const { robots } = input; //TODO: type input such that $robots is defined
-
+   const { $robots } = input; //TODO: type input such that $robots is defined
 
    return component(
       <div class='robo-list'>
-         {For(robots!, m => m.id, robot => (
+         {For($robots, m => m.id, robot => (
             <RoboCard
                id={robot.id}
-               name={robot.$name!}
-               email={robot.$email!}
+               name={robot.name}
+               email={robot.email}
             ></RoboCard>
          ))}
       </div>
    )
 }
 
-// const CAN_CLOSE_DIALOG = CommonsOpKey<>()
-// const ON_CLOSE_DIALOG = CommonsEventKey<EVENT>()
-// const LIST = CommonsKey<>()
+
+export function LIST(v: Ion<string[]>) {
+   return [LIST, v]
+}
+
+export function CAN_CLOSE_DIALOG(v: () => void) {
+   return [CAN_CLOSE_DIALOG, v]
+}
+
+export function ON_CLOSE_DIALOG(v: LumoEventHandler) {
+   return [ON_CLOSE_DIALOG, v]
+}
+
+type LumoEventHandler<E = {}> = keyof E extends never ? (() => void) | ((event: E) => void) : (event: E) => void
+
+
+// mapCommonsKeys({
+//    LIST: [LIST, ITEMS],
+//    LIST_B: [LISTB]
+// })
+
+function MU_<K extends CommonsEntryKey | string>(key: K): CommonsEntryKey<K extends CommonsEntryKey<infer T> ? T : unknown> {
+   const commonsKey = getCommonsKey(key)
+   const name = 'MU_' + commonsKey;
+   const fnKey = function (value: unknown) {
+      return [name, value]
+   };
+   Object.defineProperty(fnKey, "name", { value: name });
+   return fnKey as CommonsEntryKey<K extends CommonsEntryKey<infer T> ? T : unknown>
+}
+
+function MAYBE_MU_() {
+
+}
+
+// provide={[MU_(SWAMP)(swamp)]}
+
 
 export function RoboCard(input = fromTag<{
    id: number;
@@ -92,22 +123,20 @@ export function RoboCard(input = fromTag<{
       $email,
    } = input
 
-   // const list = fromCommons(LIST, '?') ?? []
-   // const $frog = fromCommons.asIon('mu?')(FROG)
+   const list = fromCommons(LIST, '?') ?? []
    // const items = fromCommons(ITEMS)
    // const closeDialog = fromCommons(CAN_CLOSE_DIALOG)
    // const emitClick = fromCommons(ON_CLOSE_BUTTON_CLICK)
 
+   // const $swamp = fromCommons(SWAMP)
 
-   // const $swamp = fromCommons.asIon()
+   // const $swamp = fromCommons(MU_(SWAMP))
+
 
    // function updateEmail() {
-   //    if (mu($email)) mu($email).state = new Email()
+   //    if (mu($email)) $email.state = new Email()
    // }
 
-   // optional and default
-   // mutability
-   // 
 
    return component(
       <>

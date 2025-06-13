@@ -1,5 +1,5 @@
 import { getCommons } from "../commons/commons-stack";
-import { MaybeIon } from "../component/InputTypes";
+import { MaybeIon } from "../component/Input";
 import { NodeEntity, normalizeToRenderFunction } from "../node/makeNode";
 import { ListRenderKit } from "./ListRenderKit";
 import { Ion, Ionized, IsIonized, MaybeIonized } from "@rue/quarky";
@@ -19,6 +19,7 @@ export type UniqueItem = any;
 export type Collection<T> = MaybeIon<T[]> | MaybeIon<readonly T[]> | MaybeIon<Set<T>> //TODO: add maps
 
 
+//TODO: account for list ion having undefined state
 //TODO: Ionized item depending on if data is reactive
 //TODO: $index: number | AtomicIon<number> based on whether list data is reactive
 // export function For<L extends any[]>(data: L, render: ((item: L extends (infer I)[]? I : never, $index: Ion<number>)=>NodeEntity) | NodeEntity): ListRenderKit {

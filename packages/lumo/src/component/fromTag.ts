@@ -1,9 +1,10 @@
 import { AnyObject, ExcludePrimitives, OnlyPrimitives, Primitive, UnionToIntersection } from "@rue/types";
-import { Inert, Ion, ion, ionize, Ionized, IsInert, isIon, IsIonized, isIonKey, MaybeIonize, MutableIon, toIon, toValue, } from "@rue/quarky";
+import { Inert, Ion, ion, ionize, Ionized, IsInert, isIon, IsIonized, isIonKey, MaybeIonize, MutableIon, neutron, toIon, toValue, } from "@rue/quarky";
 import { getComponentAttributes } from "./makeComponent";
 import { debug, isFunction, isObject } from "@rue/utils";
-import { v, Input, OptionalInput, MutableInput, OptionalMutableInput, validateInput, manageAccess, InputTypeDef } from "./InputTypes";
+import { v, Input, OptionalInput, MutableInput, OptionalMutableInput, validateInput, manageAccess, InputTypeDef, assertMutableIon, MU, getActiveMuIons } from "./Input";
 import { NodeEntity } from "../node/makeNode";
+import { getMuIonFromCommons } from "../commons/provide";
 
 // two types of component input
 // - commons input
@@ -101,9 +102,19 @@ function assertFunction(value: unknown) {
 }
 
 //TODO: Slots
+// function getMuIons(attributes: AnyObject) {
+//    const muIons: Set<Ion> = new Set()
+//    for (const key in attributes) {
+//       if (key.startsWith('mu:')) {
+//          const value = attributes[key]
+//          assertMutableIon(value)
+//          muIons.add(value)
+//       }
+//    }
+//    return muIons
+// }
 
 function toInput(attributes: AnyObject) {
-
    function emit(event: string, eventObject: object) {
       const handler = attributes['on:' + event]
       if (!handler) return;
@@ -111,33 +122,14 @@ function toInput(attributes: AnyObject) {
       return handler(eventObject)
    }
 
-   let muIons: Set<Ion> | undefined;
-
-   function mu(ion: Ion) {
-      return muIons ? muIons.has(ion) : (muIons = getMuIons(attributes), muIons.has(ion))
-   }
-
-   function getMuIons(attributes: AnyObject) {
-      const muIons: Set<Ion> = new Set()
-      for (const key in attributes) {
-         if (key.startsWith('mu')) {
-            const value = attributes[key]
-            assertMutableIon(value)
-            muIons.add(value)
-         }
-      }
-      return muIons
-   }
-
-   function assertMutableIon(value: unknown) {
-      if (!isIon(value) || !('state' in value)) throw new Error('[INVALID INPUT] attributes prefixed with mu: must receive a mutable ion')
-   }
+   const muIons = getActiveMuIons()
+   if (!muIons) throw new Error('muIons missing')
 
    return new Proxy(attributes, {
       get(target, key) {
          if (typeof key !== 'string') return undefined;
          if (key === 'emit') return emit;
-         if (key === 'mu') return mu;
+         if (key === 'mu') return target[MU];
          if (key === 'Slot') return target.children // TODO: Is this correct??
          if (isIonKey(key)) {
             const ionKeyToAttributeKey = (key: string) => key.slice(1)
@@ -150,8 +142,15 @@ function toInput(attributes: AnyObject) {
             }
             const attributeKey = ionKeyToAttributeKey(key)
             if (attributeKey in target) {
-               const value = target[ionKeyToAttributeKey(key)]
-               return ion(value);
+               const value = target[attributeKey]
+               return toIon(value);
+            }
+            const muIonKey = 'mu:' + attributeKey
+            if (muIonKey in target) {
+               const value = target[muIonKey]
+               muIons.add(value)
+               assertMutableIon(value)
+               return value;
             }
             return undefined; // optional
          }
@@ -203,19 +202,18 @@ type TagSlot<D> = D extends { Slot: infer S } ? {
 type MaybeIonAttributes<D> = {
    [K in keyof D
    as IncludesIon<D[K]> extends true ?
-   K extends `mu?:${infer I}` ? I
-   : K extends `mu:${string}` | `can:${string}` | `on:${string}` | 'Slot' ? never
+   K extends `mu:${infer I}` ? I
+   : K extends `can:${string}` | `on:${string}` | 'Slot' ? never
    : K extends string ? K
    : never
    : never]:
-   (NonlocalIon<ExcludePrimitives<D[K]>> | ExcludePrimitives<D[K]>) | OnlyPrimitives<D[K]>
+   (NonlocalIon<ExcludePrimitives<D[K]>>) | (ExcludePrimitives<D[K]> extends Ion<infer S> ? MaybeMarkInert<S> : never) | (OnlyPrimitives<D[K]>)
 }
 
 type MutableIonAttributes<D> = {
    [K in keyof D
    as IncludesIon<D[K]> extends true ?
    K extends `mu:${string}` ? K
-   : K extends `mu?:${infer I}` ? `mu:${I}`
    : never
    : never]:
    ToMuIon<ExcludePrimitives<D[K]>> | OnlyPrimitives<D[K]>
@@ -255,18 +253,19 @@ type OpInput<D> = {
 
 type StaticInput<D> = {
    [K in keyof D   as IncludesIon<D[K]> extends true ? never
-   : K extends `mu:${string}` | `mu?:${string}` | `can:${string}` | `on:${string}` | 'Slot' ? never
+   : K extends `mu:${string}` | `can:${string}` | `on:${string}` | 'Slot' ? never
    : K]:
    MaybeMarkInert<D[K]>
 }
 
-export type MaybeMarkInert<T> = IsIonized<T> extends true ? T : T extends Function ? T : IsInert<T> extends true ? T : T extends object ? Inert<T> : T
+export type MaybeMarkInert<T> = IsIonized<ExcludePrimitives<T>> extends true ? T : T extends Function ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
+
 type IncludesIon<T> = Exclude<T, Primitive> extends never ? false : Exclude<T, Primitive> extends Ion ? true : false
 
 type ReadonlyIonInput<D> = {
    [K in keyof D
    as IncludesIon<D[K]> extends true ?
-   K extends `mu:${string}` | `mu?:${string}` | `can:${string}` | `on:${string}` | 'Slot' ? never
+   K extends `mu:${string}` | `can:${string}` | `on:${string}` | 'Slot' ? never
    : K extends string ? `$${K}`
    : never
    : never
@@ -280,7 +279,6 @@ type MutableIonInput<D> = {
    [K in keyof D
    as   IncludesIon<D[K]> extends true ?
    K extends `mu:${infer I}` ? `$${I}`
-   : K extends `mu?:${infer I}` ? `$${I}`
    : never
    : never]:
    (NonlocalIon<ExcludePrimitives<D[K]>> & { '~mu:': true } | OnlyPrimitives<D[K]>)
@@ -294,9 +292,15 @@ type MutableIonInput<D> = {
 
 
 
-type NonlocalIon<T> = keyof IonMethods<T> extends never ? T extends Ion<infer S> ? Ion<MaybeMarkInert<S>> : never : T extends Ion<infer S> ? Ion<MaybeMarkInert<S>> & IonMethods<T> : never
+type NonlocalIon<T> =
+   keyof IonMethods<T> extends never ?
+   T extends Ion<infer S> ? Ion<MaybeMarkInert<S>> : never
+   : T extends Ion<infer S> ? Ion<MaybeMarkInert<S>> & IonMethods<T> : never
 
 type IonMethods<T> = Omit<T, keyof Function | 'state'>
+
+type AnsG = NonlocalIon<ExcludePrimitives<Ion<Frog[]>>>
+
 
 
 
@@ -327,7 +331,7 @@ type Ans = StaticInput<{
 
 type Slot = { [key: string]: RenderSlot | NodeEntity } | RenderSlot | NodeEntity
 
-type RenderSlot<T = {}> = (input: T) => NodeEntity
+export type RenderSlot<T = {}> = (input?: T) => NodeEntity
 
 
 

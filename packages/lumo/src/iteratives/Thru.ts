@@ -1,6 +1,6 @@
 import { ion, Ion, toIon, toValue } from "@rue/quarky"
 import { NodeEntity } from "../node/makeNode"
-import { MaybeIon } from "../component/InputTypes"
+import { MaybeIon } from "../component/Input"
 import { NodePod } from "../node/NodePod"
 
 type RenderEntry<S> = S extends MaybeIon<infer I> ?

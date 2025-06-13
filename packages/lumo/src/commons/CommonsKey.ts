@@ -1,55 +1,83 @@
-import { Input, RequiredInput, TypeConfig, v, validateInput } from "../component/InputTypes";
+import { AnyObject } from "@rue/types";
+import { Input, RequiredInput, TypeConfig, v, validateInput } from "../component/Input";
+import { isFunction } from "@rue/utils";
 
 
-export type RawInput<D> = D extends RequiredInput ? Input<D> : Input<D> | undefined
 
-export type CommonsEntryKey<D = TypeConfig> = {
-   (value: RawInput<D>): [CommonsEntryKey, unknown];
-   [TYPE_DEF]: TypeConfig;
-}
+export type CommonsEntryKey<T = unknown> = (value: T) => [CommonsEntryKey<T>, T]
 
 
-type CommonsKeyReturn<D, M> =
-   M extends 'm' | 'mu' ? CommonsEntryKey<D>
-   : M extends 'm?' | 'mu?' ? [CommonsEntryKey<D>, CommonsEntryKey<D>]
-   : CommonsEntryKey<D>
+
 
 
 
 // export const commonsTypeMap: Map<CommonsEntryKey, TypeConfig> = new Map();
 
 
-export function CommonsKey<D extends TypeConfig, M>(typeDef: D, access?: M & MutabilityMarker): CommonsKeyReturn<D, M> {
-   switch (access) {
-      case 'm':
-         return createProviderKey(typeDef, 'm') as CommonsKeyReturn<D, M>
+// export function CommonsKey<D extends TypeConfig, M>(typeDef: D, access?: M & MutabilityMarker): CommonsKeyReturn<D, M> {
+//    switch (access) {
+//       case 'm':
+//          return createProviderKey(typeDef, 'm') as CommonsKeyReturn<D, M>
 
-      case 'mu':
-         return createProviderKey(typeDef, 'mu') as CommonsKeyReturn<D, M>
+//       case 'mu':
+//          return createProviderKey(typeDef, 'mu') as CommonsKeyReturn<D, M>
 
-      case 'm?':
-         return [createProviderKey(typeDef), createProviderKey(typeDef, 'm')] as CommonsKeyReturn<D, M>
+//       case 'm?':
+//          return [createProviderKey(typeDef), createProviderKey(typeDef, 'm')] as CommonsKeyReturn<D, M>
 
-      case 'mu?':
-         return [createProviderKey(typeDef), createProviderKey(typeDef, 'mu')] as CommonsKeyReturn<D, M>
+//       case 'mu?':
+//          return [createProviderKey(typeDef), createProviderKey(typeDef, 'mu')] as CommonsKeyReturn<D, M>
 
-      default:
-         return createProviderKey(typeDef) as CommonsKeyReturn<D, M>
+//       default:
+//          return createProviderKey(typeDef) as CommonsKeyReturn<D, M>
+//    }
+// }
+
+// export function CommonsKey<T>() {
+//    return function entryKey(value: T): [CommonsEntryKey<T>, T] {
+//       return [entryKey, value]
+//    }
+// }
+
+
+// export function CommonsOpKey<T extends Function>() {
+//    return function opKey(value: T): [CommonsEntryKey<T>, T] {
+//       return [opKey, value]
+//    }
+// }
+
+// export function CommonsEventKey<T extends AnyObject>() {
+//    return function eventKey(value: (event: T) => void): [CommonsEntryKey<(event: T) => void>, (event: T) => void] {
+//       return [eventKey, value]
+//    }
+// }
+
+
+type FnKey = CommonsEntryKey & { commonsKey: string }
+
+export function mapCommonsKeys(map: { [key: string]: CommonsEntryKey[] }) {
+   for (const key in map) {
+      const fnKeys = map[key];
+      for (const fnKey of fnKeys) {
+         (fnKey as FnKey).commonsKey = key
+      }
    }
 }
 
-
-
-export const TYPE_DEF = Symbol('type def')
-
-function createProviderKey(typeDef: TypeConfig, access?: 'mu' | 'm' | undefined) {
-   function providerKey(value: unknown) {
-      return [providerKey, value] as [CommonsEntryKey, unknown]
-   }
-   typeDef.access = access;
-   providerKey[TYPE_DEF] = typeDef
-   return providerKey;
+export function getCommonsKey(key: CommonsEntryKey | string): string {
+   if (typeof key === 'string') return key;
+   if ('commonsKey' in key)
+      return key.commonsKey as string
+   return key.name
 }
+
+// export function isOpKey(key: string) {
+//    return key.startsWith('CAN_')
+// }
+
+// export function isEventKey(key: string) {
+//    return key.startsWith('ON_')
+// }
 
 
 //TODO: should we validate at provide() or validate at fromCommons()?
@@ -98,7 +126,6 @@ function createProviderKey(typeDef: TypeConfig, access?: 'mu' | 'm' | undefined)
 // DOHELLOD({ dog: 'sk' })
 
 
-type MutabilityMarker = 'm' | 'm?' | 'mu' | 'mu?'
 
 
 // type ImmutableInput<S> = S extends { key: infer K } ? K extends string ?

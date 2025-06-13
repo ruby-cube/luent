@@ -13,7 +13,7 @@ import { initializeListRef, initializeRef, isAnyNodeRef, NodesRef, isNodesRef } 
 import { camelToKebabCase } from "@rue/utils";
 import { NodePod } from "../node/NodePod";
 import { RENDER } from "../render-cycle";
-import { MaybeIon } from "../component/InputTypes";
+import { MaybeIon } from "../component/Input";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 

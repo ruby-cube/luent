@@ -48,7 +48,7 @@ export const MARK = Symbol('marked')
 /**
  * Ionized deeply
  */
-export type Ionized<T> =
+export type Ionized<T extends object> =
    Properties<T>
    & InvertProperties<T, ReadonlyKeys<T>>
    & { '~ionized': true }
@@ -60,7 +60,7 @@ type Properties<T> = {
 type Value<T> = T & { value?: true }
 
 type InvertProperties<T, ROKeys> = {
-   [K in keyof T as K extends number ? never : IsMethod<K, T[K]> extends true ? never : IsAbsorbedIon<K, T[K]> extends true ? K extends `$${infer N}` ? N : never : K extends string ? `$${K}` : never]?:
+   [K in keyof T as K extends number ? never : IsMethod<K, T[K]> extends true ? never : IsAbsorbedIon<K, T[K]> extends true ? K extends `$${infer N}` ? N : never : K extends string ? `$${K}` : never]:
    IsAbsorbedIon<K, T[K]> extends true ? T[K] extends Ion<infer S> ? Value<S> : never : K extends ROKeys ? Ion<MaybeIonize<T[K]>> : MutableIon<MaybeIonize<T[K]>>
 }
 
