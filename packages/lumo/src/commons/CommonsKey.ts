@@ -1,57 +1,17 @@
-import { AnyObject } from "@rue/types";
-import { Input, RequiredInput, TypeConfig, v, validateInput } from "../component/Input";
 import { isFunction } from "@rue/utils";
 
-
+export function MU_<K extends CommonsEntryKey | string>(key: K): CommonsEntryKey<K extends CommonsEntryKey<infer T> ? T : unknown> {
+   const commonsKey = toCommonsKey(key)
+   const name = 'MU_' + commonsKey;
+   const fnKey = function (value: unknown) {
+      return [name, value]
+   };
+   Object.defineProperty(fnKey, "name", { value: name });
+   Object.defineProperty(fnKey, "commonsKey", { value: commonsKey });
+   return fnKey as CommonsEntryKey<K extends CommonsEntryKey<infer T> ? T : unknown>
+}
 
 export type CommonsEntryKey<T = unknown> = (value: T) => [CommonsEntryKey<T>, T]
-
-
-
-
-
-
-// export const commonsTypeMap: Map<CommonsEntryKey, TypeConfig> = new Map();
-
-
-// export function CommonsKey<D extends TypeConfig, M>(typeDef: D, access?: M & MutabilityMarker): CommonsKeyReturn<D, M> {
-//    switch (access) {
-//       case 'm':
-//          return createProviderKey(typeDef, 'm') as CommonsKeyReturn<D, M>
-
-//       case 'mu':
-//          return createProviderKey(typeDef, 'mu') as CommonsKeyReturn<D, M>
-
-//       case 'm?':
-//          return [createProviderKey(typeDef), createProviderKey(typeDef, 'm')] as CommonsKeyReturn<D, M>
-
-//       case 'mu?':
-//          return [createProviderKey(typeDef), createProviderKey(typeDef, 'mu')] as CommonsKeyReturn<D, M>
-
-//       default:
-//          return createProviderKey(typeDef) as CommonsKeyReturn<D, M>
-//    }
-// }
-
-// export function CommonsKey<T>() {
-//    return function entryKey(value: T): [CommonsEntryKey<T>, T] {
-//       return [entryKey, value]
-//    }
-// }
-
-
-// export function CommonsOpKey<T extends Function>() {
-//    return function opKey(value: T): [CommonsEntryKey<T>, T] {
-//       return [opKey, value]
-//    }
-// }
-
-// export function CommonsEventKey<T extends AnyObject>() {
-//    return function eventKey(value: (event: T) => void): [CommonsEntryKey<(event: T) => void>, (event: T) => void] {
-//       return [eventKey, value]
-//    }
-// }
-
 
 type FnKey = CommonsEntryKey & { commonsKey: string }
 
@@ -64,7 +24,11 @@ export function mapCommonsKeys(map: { [key: string]: CommonsEntryKey[] }) {
    }
 }
 
-export function getCommonsKey(key: CommonsEntryKey | string): string {
+export function isMuKey(key: unknown){
+   return isFunction(key) && key.name.startsWith('MU_')
+}
+
+export function toCommonsKey(key: CommonsEntryKey | string): string {
    if (typeof key === 'string') return key;
    if ('commonsKey' in key)
       return key.commonsKey as string

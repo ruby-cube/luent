@@ -1,9 +1,9 @@
 import { AnyObject } from "@rue/types";
 import { NodeEntity } from "../node/makeNode";
 import { mountNodeEntities } from "../node/mountNodeKits";
-import { AtomicIon, Ion, isAtomicIon, toValue } from "@rue/quarky";
+import { Ion, toValue } from "@rue/quarky";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
-import { isFunction, normalizeToArray } from "@rue/utils";
+import { normalizeToArray } from "@rue/utils";
 import { initializeListRef, initializeRef, NodeRef, NodesRef } from "../node/NodeRef";
 import { NodePod } from "../node/NodePod";
 

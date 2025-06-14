@@ -2,9 +2,8 @@ import { AnyObject, ExcludePrimitives, OnlyPrimitives, Primitive, UnionToInterse
 import { Inert, Ion, ion, ionize, Ionized, IsInert, isIon, IsIonized, isIonKey, MaybeIonize, MutableIon, neutron, toIon, toValue, } from "@rue/quarky";
 import { getComponentAttributes } from "./makeComponent";
 import { debug, isFunction, isObject } from "@rue/utils";
-import { v, Input, OptionalInput, MutableInput, OptionalMutableInput, validateInput, manageAccess, InputTypeDef, assertMutableIon, MU, getActiveMuIons } from "./Input";
+import { assertMutableIon, MU, getActiveMuIons } from "./Input";
 import { NodeEntity } from "../node/makeNode";
-import { getMuIonFromCommons } from "../commons/provide";
 
 // two types of component input
 // - commons input
@@ -186,6 +185,7 @@ type TagAttributes<D> =
    & TagEvents<D>
    & OpInput<D>
    & TagSlot<D>
+   & (D extends { provide: infer P } ? P : {})
 // [] mu ---> {mu:name: MutableIon<string>}
 // [] mu? --> {mu:name: MutableIon<string>}  and {frog: MaybeIon<string>}
 // [] Ion --> MaybeIon<string>
@@ -237,6 +237,7 @@ type TagInput<D> =
    & WithMu<D>
    & OpInput<D>
    & (D extends { Slot: infer S } ? { Slot: S } : {})
+   & (D extends { provide: infer S } ? { provide: S } : {})
    & { '~attributes': TagAttributes<D> }
 
 
@@ -252,8 +253,8 @@ type OpInput<D> = {
 }
 
 type StaticInput<D> = {
-   [K in keyof D   as IncludesIon<D[K]> extends true ? never
-   : K extends `mu:${string}` | `can:${string}` | `on:${string}` | 'Slot' ? never
+   [K in keyof D as IncludesIon<D[K]> extends true ? never
+   : K extends `mu:${string}` | `can:${string}` | `on:${string}` | 'Slot' | 'provide' ? never
    : K]:
    MaybeMarkInert<D[K]>
 }
@@ -310,24 +311,24 @@ class Robot {
    isRobot: true = true
 }
 
-type Ans = StaticInput<{
-   id: number
-   name: Ion<string> & { state: string } & { changeName: () => void }
-   nameB: Ion<string> & { changeName: () => void }
-   nameC: Ion<string>
-   frogA: Ion<Ionized<Frog>>
-   frogB: Ion<Frog> // --> Ion<Inert<Frog>>
-   close: () => void
-   age?: Ion<string>
-   location?: Ion<string | undefined>
-   'mu?:email'?: Ion<string>,
-   'mu?:address': Ion<string>,
-   'mu:email'?: Ion<string>,
-   robots: Ion<Robot[]>, // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
-   frogC: Frog // --> Inert<Frog>
-   frogD: Ionized<Frog> // --> Ionized<Frog>
-   frogE: Inert<Frog> // --> Inert<Frog>
-}>
+// type Ans = StaticInput<{
+//    id: number
+//    name: Ion<string> & { state: string } & { changeName: () => void }
+//    nameB: Ion<string> & { changeName: () => void }
+//    nameC: Ion<string>
+//    frogA: Ion<Ionized<Frog>>
+//    frogB: Ion<Frog> // --> Ion<Inert<Frog>>
+//    close: () => void
+//    age?: Ion<string>
+//    location?: Ion<string | undefined>
+//    'mu?:email'?: Ion<string>,
+//    'mu?:address': Ion<string>,
+//    'mu:email'?: Ion<string>,
+//    robots: Ion<Robot[]>, // $robots: Ion<Ionized<Robot[]>> | robots: Ionized<Robot[]> ---> robots={MaybeIon<Ionized<Robot[]>>}  // Robot[] OK! , but Inert<Robot>[] | Ion<Robot[]> ERROR!
+//    frogC: Frog // --> Inert<Frog>
+//    frogD: Ionized<Frog> // --> Ionized<Frog>
+//    frogE: Inert<Frog> // --> Inert<Frog>
+// }>
 
 type Slot = { [key: string]: RenderSlot | NodeEntity } | RenderSlot | NodeEntity
 
@@ -335,83 +336,83 @@ export type RenderSlot<T = {}> = (input?: T) => NodeEntity
 
 
 
-type AnsB = ReadonlyIonInput<{
-   id: number
-   frogC: Frog // --> Inert<Frog>
-   frogD: Ionized<Frog> // --> Ionized<Frog>
-   frogE: Inert<Frog> // --> Inert<Frog>
-   'can:close': () => void
-   'on:click': {}
-   Slot: Slot
-   name: Ion<string> & { state: string } & { changeName: () => void }
-   nameB: Ion<string> & { changeName: () => void }
-   nameC: Ion<string>
-   frogA: Ion<Ionized<Frog>>
-   frogB: Ion<Frog> // --> Ion<Inert<Frog>>
-   frogO: Ion<Inert<Frog>> // --> Ion<Inert<Frog>>
-   age?: Ion<string>
-   location?: Ion<string | undefined>
-   'mu?:emailA'?: Ion<string>,
-   'mu?:addressA': Ion<string>,
-   'mu:emailB'?: Ion<string>,
-   'mu:emailReqA': Ion<string>,
+// type AnsB = ReadonlyIonInput<{
+//    id: number
+//    frogC: Frog // --> Inert<Frog>
+//    frogD: Ionized<Frog> // --> Ionized<Frog>
+//    frogE: Inert<Frog> // --> Inert<Frog>
+//    'can:close': () => void
+//    'on:click': {}
+//    Slot: Slot
+//    name: Ion<string> & { state: string } & { changeName: () => void }
+//    nameB: Ion<string> & { changeName: () => void }
+//    nameC: Ion<string>
+//    frogA: Ion<Ionized<Frog>>
+//    frogB: Ion<Frog> // --> Ion<Inert<Frog>>
+//    frogO: Ion<Inert<Frog>> // --> Ion<Inert<Frog>>
+//    age?: Ion<string>
+//    location?: Ion<string | undefined>
+//    'mu?:emailA'?: Ion<string>,
+//    'mu?:addressA': Ion<string>,
+//    'mu:emailB'?: Ion<string>,
+//    'mu:emailReqA': Ion<string>,
 
-   'mu?:emailC'?: Ion<string> & { change: () => void },
-   'mu?:addressC': Ion<string> & { change: () => void },
-   'mu:emailD'?: Ion<string> & { change: () => void },
-   'mu:emailReqB': Ion<string> & { change: () => void },
+//    'mu?:emailC'?: Ion<string> & { change: () => void },
+//    'mu?:addressC': Ion<string> & { change: () => void },
+//    'mu:emailD'?: Ion<string> & { change: () => void },
+//    'mu:emailReqB': Ion<string> & { change: () => void },
 
-   'mu?:semailC'?: MutableIon<string> & { change: () => void },
-   'mu?:saddressC': MutableIon<string> & { change: () => void },
-   'mu:semailD'?: MutableIon<string> & { change: () => void },
-   'mu:semailReqB': MutableIon<string> & { change: () => void },
-   robots: Ion<Robot[]>, // $robots: Ion<Inert<Robot[]>> ---> robots={MaybeIon<Inert<Robot[]>>}
-}>
+//    'mu?:semailC'?: MutableIon<string> & { change: () => void },
+//    'mu?:saddressC': MutableIon<string> & { change: () => void },
+//    'mu:semailD'?: MutableIon<string> & { change: () => void },
+//    'mu:semailReqB': MutableIon<string> & { change: () => void },
+//    robots: Ion<Robot[]>, // $robots: Ion<Inert<Robot[]>> ---> robots={MaybeIon<Inert<Robot[]>>}
+// }>
 
-type AnsC = MutableIonInput<{
-   id: number
-   frogC: Frog // --> Inert<Frog>
-   frogD: Ionized<Frog> // --> Ionized<Frog>
-   frogE: Inert<Frog> // --> Inert<Frog>
-   'can:close': () => void
-   'on:click': {}
-   Slot: Slot
-   name: Ion<string> & { state: string } & { changeName: () => void }
-   nameB: Ion<string> & { changeName: () => void }
-   nameC: Ion<string>
-   frogA: Ion<Ionized<Frog>>
-   frogB: Ion<Frog> // --> Ion<Inert<Frog>>
-   frogO: Ion<Inert<Frog>> // --> Ion<Inert<Frog>>
-   age?: Ion<string>
-   location?: Ion<string | undefined>
-   'mu?:emailA'?: Ion<string>,
-   'mu?:addressA': Ion<string>,
-   'mu:emailOptA'?: Ion<string>,
-   'mu:emailReqA': Ion<string>,
+// type AnsC = MutableIonInput<{
+//    id: number
+//    frogC: Frog // --> Inert<Frog>
+//    frogD: Ionized<Frog> // --> Ionized<Frog>
+//    frogE: Inert<Frog> // --> Inert<Frog>
+//    'can:close': () => void
+//    'on:click': {}
+//    Slot: Slot
+//    name: Ion<string> & { state: string } & { changeName: () => void }
+//    nameB: Ion<string> & { changeName: () => void }
+//    nameC: Ion<string>
+//    frogA: Ion<Ionized<Frog>>
+//    frogB: Ion<Frog> // --> Ion<Inert<Frog>>
+//    frogO: Ion<Inert<Frog>> // --> Ion<Inert<Frog>>
+//    age?: Ion<string>
+//    location?: Ion<string | undefined>
+//    'mu?:emailA'?: Ion<string>,
+//    'mu?:addressA': Ion<string>,
+//    'mu:emailOptA'?: Ion<string>,
+//    'mu:emailReqA': Ion<string>,
 
-   'mu?:emailC'?: Ion<string> & { change: () => void },
-   'mu?:addressC': Ion<string> & { change: () => void },
-   'mu:emailD'?: Ion<string> & { change: () => void },
-   'mu:emailReqB': Ion<string> & { change: () => void },
+//    'mu?:emailC'?: Ion<string> & { change: () => void },
+//    'mu?:addressC': Ion<string> & { change: () => void },
+//    'mu:emailD'?: Ion<string> & { change: () => void },
+//    'mu:emailReqB': Ion<string> & { change: () => void },
 
-   'mu?:semailC'?: MutableIon<string> & { change: () => void },
-   'mu?:saddressC': MutableIon<string> & { change: () => void },
-   'mu:semailD'?: MutableIon<string> & { change: () => void },
-   'mu:semailReqB': MutableIon<string> & { change: () => void },
-   robots: Ion<Robot[]>, // $robots: Ion<Inert<Robot[]>> ---> robots={MaybeIon<Inert<Robot[]>>}
-}>
+//    'mu?:semailC'?: MutableIon<string> & { change: () => void },
+//    'mu?:saddressC': MutableIon<string> & { change: () => void },
+//    'mu:semailD'?: MutableIon<string> & { change: () => void },
+//    'mu:semailReqB': MutableIon<string> & { change: () => void },
+//    robots: Ion<Robot[]>, // $robots: Ion<Inert<Robot[]>> ---> robots={MaybeIon<Inert<Robot[]>>}
+// }>
 
 
-const something = null as unknown as AnsB
-something.$name.changeName()
-//@ts-expect-error
-something.$name.state = 'hi'
-something.$nameB
-something.$nameC
-something.$frogA
-something.$frogB
-something.$frogO
-something.$age
-something.$location
-something.$robots
+// const something = null as unknown as AnsB
+// something.$name.changeName()
+// //@ts-expect-error
+// something.$name.state = 'hi'
+// something.$nameB
+// something.$nameC
+// something.$frogA
+// something.$frogB
+// something.$frogO
+// something.$age
+// something.$location
+// something.$robots
 

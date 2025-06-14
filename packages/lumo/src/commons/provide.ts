@@ -1,9 +1,8 @@
 import { Commons, getClosestCommons } from "./commons-stack";
-import { NodeCommons } from "./Commons";
-import { CommonsEntryKey, getCommonsKey } from "./CommonsKey";
-import { assertMutableIon, manageAccess, ValidatedInput, validateInput } from "../component/Input";
-import { Ion, toIon, toValue } from "@rue/quarky";
-import { access } from "fs";
+import { NodeCommons, toCommonsEntries } from "./Commons";
+import { CommonsEntryKey, isMuKey, toCommonsKey } from "./CommonsKey";
+import { assertMutableIon } from "../component/Input";
+import { Ion } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 
 
@@ -20,125 +19,117 @@ export interface AppCommons {
 //TODO: trace provider
 // fromCommons.trace('dog')(DOG)
 
-export function fromCommons<K extends Function>(key: K, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons): K extends CommonsEntryKey<infer V> ? V : never {
-   return _fromCommons(key, optionalOrRequired, commons)
-}
-
-function _fromCommons<K extends CommonsEntryKey | string>(key: K, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons, mutableIon?: 'mu' | 'mu?' | 'ro' | undefined): K extends CommonsEntryKey<infer V> ? V : never {
+export function fromCommons<K>(key: K, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons): CommonsValue<K> {
    let _commons = commons || getClosestCommons();
    if (!_commons) throw new Error(``)
-   const commonsKey = getCommonsKey(key)
+   if (typeof key !== 'string' && !isFunction(key)) throw new Error('[INVALID INPUT] Invalid commons key')
+   const commonsKey = toCommonsKey(key as CommonsEntryKey | string)
    // climb commons tree
    let parent: Commons | undefined = _commons;
    while (parent !== undefined) {
       const entries = parent.entries
       if (entries?.has(commonsKey)) {
-         const value = entries?.get(commonsKey);
-         return validateValue(value, mutableIon)
+         return entries?.get(commonsKey);
       }
       parent = parent.parent;
    }
    if (optionalOrRequired === '!') throw new Error('Required commons entry is missing')
-   return undefined as K extends CommonsEntryKey<infer V> ? V : never
-}
-
-function validateValue(value: any, mutableIon?: 'mu' | 'mu?' | undefined) {
-   if (mutableIon === 'mu') assertMutableIon(value)
-   return value
-}
-
-fromCommons.asIon = fromCommonsAsIon
-
-export function fromCommonsAsIon<K>(key: K & Function, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons): K extends CommonsEntryKey<infer V> ? V : never
-export function fromCommonsAsIon<K>(mutableIon: 'mu' | 'mu?')
-export function fromCommonsAsIon<K>(mutableIonOrKey: 'mu' | 'mu?' | K, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons) {
-   if (isFunction(mutableIonOrKey)) {
-      return _fromCommons(mutableIonOrKey, optionalOrRequired, commons, 'ro')
-   }
-   return function fromCommons<K extends Function>(key: K, optionalOrRequired: '?' | '!' = '!', commons?: NodeCommons | AppCommons): K extends CommonsEntryKey<infer V> ? V : never {
-      return _fromCommons(key, optionalOrRequired, commons, mutableIonOrKey)
-   }
+   return undefined as CommonsValue<K>
 }
 
 
-export function createAppCommons(entries: [CommonsEntryKey, unknown][] | undefined, globalCommons: AppCommons | undefined) {
-   const _entries = new Map(entries)
+export function createAppCommons(provided: [CommonsEntryKey | string, unknown][] | undefined, globalCommons: AppCommons | undefined) {
+   const [entries, muIons] = provided ? toCommonsEntries(provided) : [undefined, undefined]
    const appCommons = {
-      entries: _entries,
+      entries,
       parent: globalCommons,
       app: undefined as unknown as AppCommons,
       global: globalCommons,
+      muIons
    }
    appCommons.app = appCommons
    return appCommons;
 }
 
+type CommonsValue<K> = K extends (arg: infer T) => any ? T : unknown
 
 //TODO: validate value
-export function provideAppwide<K extends CommonsEntryKey>(key: K, value: RawInput<K>) {
+export function provideAppwide<K extends CommonsEntryKey>(key: K, value: CommonsValue<K>) {
    let commons = getClosestCommons();
    if (!commons)
       throw new Error("No commons found :(")
-   const appEntries = commons.app.entries || (commons.app.entries = new Map());
-   if (appEntries.has(key)) {
+   const appCommons = commons.app;
+   const appEntries = appCommons.entries || (appCommons.entries = new Map());
+   const commonsKey = toCommonsKey(key)
+   markIfMuIon(key, value, appCommons)
+   if (appEntries.has(commonsKey)) {
       if (__DEV__) {
          console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
          console.trace();
       }
       return value; //TODO: Maybe allow overrides??
    }
-   appEntries.set(key, value);
+   appEntries.set(commonsKey, value);
    return value;
 }
 
-export function fromApp<K extends CommonsEntryKey>(key: K, commons?: NodeCommons | AppCommons): ValidatedInput<K> {
+export function fromApp<K extends CommonsEntryKey | string>(key: K, commons?: NodeCommons | AppCommons): CommonsValue<K> {
    let _context = commons || getClosestCommons();
    if (!_context) throw new Error(``)
    const appCommons = _context.app;
    if (!appCommons) throw new Error("No app commons found :( This should never happen")
-   const value = appCommons.entries?.get(key)
-   if (value === undefined) return fromGlobal(key);
-   return validateValue(value)
+   const commonsKey = toCommonsKey(key)
+   const value = appCommons.entries?.get(commonsKey)
+   if (value === undefined) return fromGlobal(commonsKey) as CommonsValue<K>;
+   return value
 }
 
 
 
 
-export function createGlobalCommons(entries?: [CommonsEntryKey, unknown][]) {
+export function createGlobalCommons(entries?: [CommonsEntryKey | string, unknown][]) {
    const commons = { entries: new Map(entries), app: undefined, global: undefined } as unknown as AppCommons
    commons.global = commons;
    return commons
 }
 
-//TODO: validate value
-export function provideGlobal<K extends CommonsEntryKey>(key: K, value: RawInput<K>) {
+export function provideGlobal<K extends CommonsEntryKey | string>(key: K, value: CommonsValue<K>) {
    let commons = getClosestCommons();
    if (!commons)
       throw new Error('')
-   if (!commons.global)
+   const globalCommons = commons.global
+   if (!globalCommons)
       throw new Error('No global commons found. Call createGlobalCommons() and pass into createApp() via config')
-
-   const globalEntries = commons.global.entries!
-   if (globalEntries.has(key)) {
+   const globalEntries = globalCommons.entries!
+   const commonsKey = toCommonsKey(key)
+   markIfMuIon(key, value, globalCommons)
+   if (globalEntries.has(commonsKey)) {
       if (__DEV__) {
          console.warn(`The key, '${key.toString()}', has already been used to provide app state.`)
          console.trace();
       }
       return value; //TODO: Maybe allow overrides??
    }
-   globalEntries.set(key, value);
+   globalEntries.set(commonsKey, value);
    return value;
 }
 
-export function fromGlobal<K extends CommonsEntryKey>(key: K, commons?: NodeCommons | AppCommons): K extends CommonsEntryKey<infer V> ? V : never {
+export function fromGlobal<K extends CommonsEntryKey | string>(key: K, commons?: NodeCommons | AppCommons): CommonsValue<K> {
    let _context = commons || getClosestCommons();
    if (!_context)
       throw new Error('')
    const globalEntries = _context?.global?.entries
-   const value = globalEntries?.get(key)
-   return validateValue(value)
+   const commonsKey = toCommonsKey(key)
+   const value = globalEntries?.get(commonsKey)
+   return value
 }
 
+export function markIfMuIon(key: string | CommonsEntryKey, value: unknown, commons: { muIons: Set<Ion> | undefined }) {
+   if (isMuKey(key)) {
+      assertMutableIon(value)
+      commons.muIons ? commons.muIons.add(value) : (commons.muIons = new Set([value]))
+   }
+}
 
 
 

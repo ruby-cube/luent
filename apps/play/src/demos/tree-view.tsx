@@ -1,11 +1,10 @@
-import { component, fromTag, Ionized, If, Else, For, v, Nonlocal, _Nonlocal } from "@rue/lumo";
-import { ion, ionize, toRaw } from "@rue/quarky";
-import { Inert, withInertItems } from "../../../../packages/quarky/src/ionized/inert";
+import { component, fromTag, If, Else, For } from "@rue/lumo";
+import { ion, ionize, Ionized } from "@rue/quarky";
 
 
 
 
-const list = withInertItems(new Map([['hi', { nom: true }]]))
+// const list = withInertItems(new Map([['hi', { nom: true }]]))
 
 export function TreeApp() {
 
@@ -40,7 +39,7 @@ export function TreeApp() {
    ) =>
       <>
       <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
-         <TreeItem mu:item={treeItem}></TreeItem>
+         <TreeItem item={treeItem}></TreeItem>
       </ul>
       <$--link href='/src/demos/tree-view.css' rel='stylesheet'/>
       </>
@@ -136,11 +135,11 @@ function createTreeItem(data: ItemData): TreeItem {
 
 const textarea = document.createElement('textarea')
 
-function TreeItemView(input = fromTag({
-   'mu:item': Ionized<TreeItem>,
+function TreeItemView(input = fromTag<{
+   item: Ionized<TreeItem>,
    // list: v<string[]>,
    // 'on:click': v<(e: { pen: string }) => void>('?')
-})) {
+}>()) {
    const { item } = input
 
    // item.children
@@ -185,7 +184,7 @@ function TreeItemView(input = fromTag({
          {If($isFolder, 'create', If($isOpen, 'mount',
             <ul>
                {For(item.children!, m => m, item => (
-                  <TreeItem mu:item={item}></TreeItem>
+                  <TreeItem item={item}></TreeItem>
                ))}
                <li class='add' on:click={e => item.addChild()}>+</li>
             </ul>

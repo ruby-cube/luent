@@ -1,8 +1,8 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-// import './style.css'
-import './demos/robofriends/robofriends.css'
+import './style.css'
+// import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
 // import { TestCounter } from './TestCounter';
@@ -131,15 +131,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(SimpleApp)
-
-function SimpleApp() {
-   return component(
-      <p>
-         <div>some words</div>
-      </p>
-   )
-}
+const app = createApp(TrafficLight)
 
 app.mount('#app')
 

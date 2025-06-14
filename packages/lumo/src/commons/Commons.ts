@@ -1,10 +1,9 @@
 import { unnestComponent } from "../component/InternalComponent";
 import { getClosestCommons, popCommons, pushCommons } from "./commons-stack";
-import { AppCommons } from "./provide";
+import { AppCommons, markIfMuIon } from "./provide";
 import { debug, Ion } from "@rue/quarky";
-import { CommonsEntryKey, getCommonsKey } from "./CommonsKey";
+import { CommonsEntryKey, toCommonsKey } from "./CommonsKey";
 import { fromTag, RenderSlot } from "../component/fromTag";
-import { assertMutableIon } from "../component/Input";
 
 export interface NodeCommons {
    entries: Map<string, unknown>;
@@ -42,23 +41,18 @@ export function Commons(input = fromTag<{
    }
    pushCommons(commons)
    const nodeEntities = Slot()
-   console.log('### Slot entities', nodeEntities)
    popCommons()
    return unnestComponent(nodeEntities)
 }
 
-function toCommonsEntries(provided: [CommonsEntryKey | string, unknown][]): [Map<string, unknown>, undefined | Set<Ion>] {
-   let muIons: Set<Ion> | undefined
+export function toCommonsEntries(provided: [CommonsEntryKey | string, unknown][]): [Map<string, unknown>, undefined | Set<Ion>] {
+   const commons = { muIons: undefined }
    const entries: Map<string, unknown> = new Map()
    for (const [key, value] of provided) {
-      const label = typeof key === 'string' ? key : key.name;
-      if (label.startsWith('MU_')) {
-         assertMutableIon(value)
-         muIons ? muIons.add(value) : muIons = new Set([value])
-      }
-      entries.set(getCommonsKey(key), value)
+      markIfMuIon(key, value, commons)
+      entries.set(toCommonsKey(key), value)
    }
-   return [entries, muIons]
+   return [entries, commons.muIons]
 }
 
 // export function createCommons(

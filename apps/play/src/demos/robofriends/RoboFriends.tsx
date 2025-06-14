@@ -1,4 +1,4 @@
-import { CommonsEntryKey, CommonsEventKey, CommonsKey, CommonsOpKey, component, EventHandler, For, fromCommons, fromTag, getCommonsKey, v } from "@rue/lumo";
+import { component, EventHandler, For, fromCommons, fromTag,} from "@rue/lumo";
 import { inert, ion, Inert, ionize, Ion, Ionized } from "@rue/quarky";
 import { robots } from "./robots";
 
@@ -95,19 +95,8 @@ type LumoEventHandler<E = {}> = keyof E extends never ? (() => void) | ((event: 
 //    LIST_B: [LISTB]
 // })
 
-function MU_<K extends CommonsEntryKey | string>(key: K): CommonsEntryKey<K extends CommonsEntryKey<infer T> ? T : unknown> {
-   const commonsKey = getCommonsKey(key)
-   const name = 'MU_' + commonsKey;
-   const fnKey = function (value: unknown) {
-      return [name, value]
-   };
-   Object.defineProperty(fnKey, "name", { value: name });
-   return fnKey as CommonsEntryKey<K extends CommonsEntryKey<infer T> ? T : unknown>
-}
 
-function MAYBE_MU_() {
 
-}
 
 // provide={[MU_(SWAMP)(swamp)]}
 
