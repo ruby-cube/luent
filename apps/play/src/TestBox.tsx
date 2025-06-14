@@ -1,4 +1,4 @@
-import { component, ref } from "@rue/lumo";
+import { component, nodeRef } from "@rue/lumo";
 import { ionize } from "@rue/quarky";
 
 
@@ -23,7 +23,7 @@ export function TestBox() {
       box.position.x = box.position.x - 10;
    }
 
-   const $div = ref('div')
+   const $div = nodeRef('div')
 
 
    return component(

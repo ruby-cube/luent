@@ -11,7 +11,7 @@ export function MU_<K extends CommonsEntryKey | string>(key: K): CommonsEntryKey
    return fnKey as CommonsEntryKey<K extends CommonsEntryKey<infer T> ? T : unknown>
 }
 
-export type CommonsEntryKey<T = unknown> = (value: T) => [CommonsEntryKey<T>, T]
+export type CommonsEntryKey<T = any> = (value: T) => [CommonsEntryKey<T>, T]
 
 type FnKey = CommonsEntryKey & { commonsKey: string }
 
@@ -24,7 +24,7 @@ export function mapCommonsKeys(map: { [key: string]: CommonsEntryKey[] }) {
    }
 }
 
-export function isMuKey(key: unknown){
+export function isMuKey(key: unknown) {
    return isFunction(key) && key.name.startsWith('MU_')
 }
 
@@ -33,6 +33,14 @@ export function toCommonsKey(key: CommonsEntryKey | string): string {
    if ('commonsKey' in key)
       return key.commonsKey as string
    return key.name
+}
+
+export function CommonsKey<T>(key: string): CommonsEntryKey<T> {
+   const fnKey = function (v: T) {
+      return [fnKey, v]
+   }
+   Object.defineProperty(fnKey, 'name', { value: key })
+   return fnKey as CommonsEntryKey<T>
 }
 
 // export function isOpKey(key: string) {

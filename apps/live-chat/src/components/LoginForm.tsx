@@ -1,15 +1,13 @@
-//@ts-nocheck
 import { ion } from '@rue/quarky'
 import { LoginKit } from '../composables/useLoginKit'
-import { component, fromTag, InputType, v } from '@rue/lumo'
+import { component, fromTag, HandleEvent } from '@rue/lumo'
 
-const LOGIN_FORM = InputType({
-   'on:login': v<Function>
-})
-
+type Som = HandleEvent
 export function LoginForm({
    emit
-} = fromTag(LOGIN_FORM)) {
+} = fromTag<{
+   'on:login': HandleEvent
+}>()) {
 
    const $email = ion('')
    const $password = ion('')
@@ -17,7 +15,7 @@ export function LoginForm({
    const { $error, login } = LoginKit()
 
    const handleSubmit = async () => {
-      await login($email.value, $password.value)
+      await login($email(), $password())
       if (!$error.value) {
          emit('login')
       }

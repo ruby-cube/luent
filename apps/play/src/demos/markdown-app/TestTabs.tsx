@@ -1,7 +1,6 @@
-//@ts-nocheck
-import { component, CommonsKey, For, fromCommons, fromTag, If, Ion, Ionized, v, listen, InputType } from "@rue/lumo";
+import { component, For, fromCommons, fromTag, If, nodeRef } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
-import { AtomicIon, exposeIons, finiton, ion, ionize, watch } from "@rue/quarky";
+import { Ion, ion, ionize, Ionized, watch } from "@rue/quarky";
 
 export function TabApp() {
 
@@ -163,9 +162,9 @@ function LoadingApp() { //Stand in until I fix createApp
 // }
 
 
-function App(input = fromTag({
+function App(input = fromTag<{
    files: Ionized<File[]>
-})) {
+}>()) {
 
    const { files } = input;
 
@@ -280,8 +279,9 @@ type TabManager = {
    focusFile(file: File): void; //tabs
 }
 
-const FILES_KIT = CommonsKey(v<FileManager>, 'm')
+const FILES_KIT = CommonsKey<FileManager>('FILES_KIT')
 const TABS_KIT = CommonsKey(v<TabManager>, 'm')
+
 
 // const OPEN_FILE = CommonsKey(v<FileManager['openFile']>)
 // const DELETE_FILE = CommonsKey(v<FileManager['deleteFile']>)
@@ -291,9 +291,9 @@ const TABS_KIT = CommonsKey(v<TabManager>, 'm')
 
 
 
-function Sidebar(input = fromTag({
+function Sidebar(input = fromTag<{
    files: Ionized<File[]> //TODO: Interesting... 'native' methods are easy to be made public, but methods declared via ionize() will be difficult to share the type...
-})) {
+}>()) {
    const { files } = input
    const { addFile } = fromCommons(FILES_KIT);
 
@@ -307,12 +307,12 @@ function Sidebar(input = fromTag({
    )
 }
 
-function SidebarFile(input = fromTag({
+function SidebarFile(input = fromTag<{
    file: Ionized<File>,
    index: Ion<number>
-})) {
+}>()) {
    const { $index, file } = input
-   const $menu = ref(IfContextMenu)
+   const $menu = nodeRef(IfContextMenu)
 
    const { openFile } = fromCommons(FILES_KIT)
 
@@ -350,12 +350,13 @@ function SidebarFile(input = fromTag({
 
 
 
-function Tab(input = fromTag({
-   index: Ion<number>('?')('hi'),
+function Tab(input = fromTag<{
+   index?: Ion<number>,
    file: Ionized<File>,
-   tabManager: v('?')(fromCommons(TABS_KIT)),
-})) {
-   const { file, tabManager: { closeFile, focusFile }, $index } = input
+   tabManager?: TabManager,
+}>()) {
+   const { file, tabManager = fromCommons(TABS_KIT), $index = ion('hi') } = input
+   const { closeFile, focusFile } = tabManager
 
    return component(
       <div style={{ backgroundColor: (file.active ? 'red' : 'gray') }}

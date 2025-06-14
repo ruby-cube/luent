@@ -1,6 +1,5 @@
-import { component, For, fromTag, InputType, Ion, Ionized, v } from "@rue/lumo"
-import { $$, ion, ionize } from "@rue/quarky"
-import { isObject } from "@rue/utils"
+import { component, For, fromTag,  } from "@rue/lumo"
+import {  Ion, ion, ionize, Ionized } from "@rue/quarky"
 
 type Stat = {
    label: string,
@@ -21,14 +20,14 @@ export function PolygonApp() {
    function add(e: any) {
       e.preventDefault()
       if (!$newLabel()) return
-      stats.push({
+      stats.push(ionize({
          label: $newLabel(),
          value: 100
-      })
+      }))
       $newLabel.state = ''
    }
 
-   function remove(stat: Stat) {
+   function remove(stat: Ionized<Stat>) {
       if (stats.length > 3) {
          stats.splice(stats.indexOf(stat), 1)
       } else {
@@ -115,15 +114,13 @@ label {
 //    return val
 //  }
 
-const AXIS_LABEL = InputType({
+
+function AxisLabel(input = fromTag<{
    stat: Ionized<Stat>,
    index: Ion<number>,
    total: Ion<number>
-})
-
-function AxisLabel(
-   { $index, stat, $total } = fromTag(AXIS_LABEL)
-) {
+}>()) {
+   const { $index, stat, $total } = input
 
    const $point = ion(() =>
       valueToPoint(+stat.value + 10, $index(), $total())
@@ -135,13 +132,10 @@ function AxisLabel(
    )
 }
 
-const POLYGRAPH = InputType({
-   stats: Ionized<Stat[]>
-})
 
-function PolyGraph({
-   stats
-} = fromTag(POLYGRAPH)) {
+function PolyGraph({ stats } = fromTag<{
+   stats: Ionized<Stat[]>
+}>()) {
 
    const $points = ion(() => {
       const total = stats.length

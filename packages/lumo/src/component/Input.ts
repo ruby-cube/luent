@@ -5,6 +5,8 @@
 import { Ion, isIon, MutableIon } from "@rue/quarky";
 import { AsyncState } from "@rue/flask";
 
+export type HandleEvent<E = {}> = keyof E extends never ? (() => void)|((event: E) => void) : (event: E) => void
+
 export const MU_IONS = 'mu_ions'
 
 export const MU = Symbol('mu')

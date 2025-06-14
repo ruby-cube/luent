@@ -20,8 +20,12 @@ import { NodeEntity } from "../node/makeNode";
 type HasEvent<C> = keyof C extends never ? false : Exclude<keyof C, Exclude<keyof C, `on:${string}`>> extends never ? false : true
 
 type WithEmit<C> = C extends AnyObject ? HasEvent<C> extends true ? {
-   emit: <K extends EventNames<C>>(eventName: K, event: C[`on:${K}`]) => void
+   emit: <K extends EventNames<C>>(...event: WithEventObject<K, C[`on:${K}`]>) => void
 } : {} : {}
+
+type WithEventObject<K, F> = F extends () => void ? [K] : F extends (arg: infer A) => any ? [K, A] : never
+
+// keyof E extends never ? (() => void) | ((event: E) => void) : (event: E) => void
 
 type EventNames<C> = keyof EventsOnly<C>
 
@@ -238,7 +242,7 @@ type TagInput<D> =
    & OpInput<D>
    & (D extends { Slot: infer S } ? { Slot: S } : {})
    & (D extends { provide: infer S } ? { provide: S } : {})
-   & { '~attributes': TagAttributes<D> }
+   & { '~attributes'?: TagAttributes<D> }
 
 
 type WithMu<D> = HasMu<D> extends true ? {

@@ -5,7 +5,7 @@ import { AnyObject, Booleanny } from "@rue/types";
 import type { Commons } from "../commons/commons-stack";
 import { getCommons } from "../commons/commons-stack";
 // import { getPhasicNode } from "../transition/PhasicNode";
-import { Commons as createCommons } from "../commons/Commons";
+import { Commons as createCommons, Provided } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
@@ -84,7 +84,7 @@ export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | Acti
 
 
 //TODO: wrap with asyncContext instead of pushing commons?
-function wrapWithCommons(renderConditional: RenderFunction, provide: [CommonsEntryKey, unknown][], outerCommons: Commons) {
+function wrapWithCommons(renderConditional: RenderFunction, provide: Provided, outerCommons: Commons) {
    return (parent: Element, nodePod: NodePod) => {
       // try {
       //    pushCommons(outerCommons)

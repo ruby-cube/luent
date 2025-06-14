@@ -1,7 +1,7 @@
 import { Component, PublicComponent } from "../component/InternalComponent"
 import { HTMLTag } from "../element/makeElement"
 import { isSettingUpList, onBeforeListUpdate, onListUpdated } from "../iteratives/listStack"
-import { AtomicIon, Ion } from "@rue/quarky"
+import { Ion } from "@rue/quarky"
 import { getActiveFlask } from "@rue/flask"
 
 const INTERNAL = Symbol('internal')
@@ -41,7 +41,7 @@ export function isNodesRef(value: any): value is NodesRef {
 
 type RefReturn<T extends RefSource, A> = A extends NodeReferent[] ? NodesRef<T> : NodeRef<T>
 
-export function ref<
+export function nodeRef<
 T extends RefSource,
 A,
 >(source: T, array?: A): RefReturn<T, A>{

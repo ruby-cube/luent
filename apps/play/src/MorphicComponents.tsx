@@ -1,6 +1,6 @@
 import { RENDER } from "../../../packages/lumo/src/render-cycle";
 import { ion } from "../../../packages/quarky/src"
-import { NodeRef, ref } from "@rue/lumo";
+import { nodeRef } from "@rue/lumo";
 
 export function MainBlock() {
 
@@ -37,7 +37,7 @@ export function MainBlock() {
 
 
 
-   const $mainContent = ref($MainContent)
+   const $mainContent = nodeRef($MainContent)
 
    $mainContent.render('bye')
 

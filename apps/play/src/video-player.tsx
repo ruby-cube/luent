@@ -1,10 +1,10 @@
-import { component, Else, fromTag, If, Ion, ref, v } from "@rue/lumo";
-import { finiton, ion, isIon, watch } from "@rue/quarky";
+import { component, Else, fromTag, If, nodeRef, } from "@rue/lumo";
+import { finiton, Ion, ion, isIon, watch } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 
 
 export function VideoPlayer() {
-   const $video = ref('video')
+   const $video = nodeRef('video')
 
    const $videoPlayer = finiton({
       'loading': {
@@ -176,10 +176,10 @@ button {
    )
 }
 
-function ElapsedBar(input = fromTag({
+function ElapsedBar(input = fromTag<{
    elapsed: Ion<number>,
-   duration: v<number>
-})) {
+   duration: number
+}>()) {
    const { $elapsed, duration } = input
    return component(
       <div class="elapsed">
@@ -191,10 +191,10 @@ function ElapsedBar(input = fromTag({
    )
 };
 
-function Timer(input = fromTag({
+function Timer(input = fromTag<{
    elapsed: Ion<number>,
-   duration: v<number>
-})) {
+   duration: number
+}>()) {
    const { $elapsed, duration } = input
    return component(
       <span class="timer">

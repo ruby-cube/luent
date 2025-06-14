@@ -225,12 +225,12 @@ function ParentG2() {
    )
 }
 
-function Child(input = fromTag({
-   Slot: v<(o?: any) => NodeEntity>,
-   something: v<string>('?')('dog')
-})) {
+function Child(input = fromTag<{
+   Slot: (o?: any) => NodeEntity,
+   something: string
+}>()) {
 
-   const { Slot } = prep(input)
+   const { Slot } = input
 
    return component(
       ''
@@ -243,25 +243,25 @@ function Child(input = fromTag({
 
 
 // - [ ]  transform derived value in template, node setup and style objects to `function $(){return *;}`
-function isDerivation(){
+function isDerivation() {
    // isExpression
    // hasCallExpression  // we can't statically differentiate a non-ionic expression from an ion expression, so we treat any calls as possibly having an ion call in it.
 }
 
 export default function (babel) {
    const { types: t } = babel;
-   
+
    return {
-     name: "ast-transform",
-     visitor: {
-       Identifier(path) {
-         console.log(t)
-         //path.node.name = path.node.name.split('').reverse().join('');
-       }
-     }
+      name: "ast-transform",
+      visitor: {
+         Identifier(path) {
+            console.log(t)
+            //path.node.name = path.node.name.split('').reverse().join('');
+         }
+      }
    };
- }
- 
+}
+
 
 // - [ ]  add `e` argument to `target()`
 // - [ ]  transform default input value to a getter function `v<string>('??')('dog')`

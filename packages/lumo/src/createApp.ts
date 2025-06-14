@@ -3,11 +3,12 @@ import { AnyObject } from "@rue/types";
 import { setComponentAttributes } from "./component/makeComponent";
 import { AppCommons, createAppCommons } from "./commons/provide";
 import { getCommons, popCommons, pushCommons } from "./commons/commons-stack";
-import { CommonsEntries } from "./commons/Commons";
-import { _dog_ } from "./commons/x_context-keys";
 import { NodePod } from "./node/NodePod";
 import { removeDOMNodes } from "./conditional/ConditionalRenderSeries";
 import { Flask } from "@rue/flask";
+import { MU, muIonsStack } from "./component/Input";
+import { Ion } from "@rue/quarky";
+import { Provided } from "./commons/Commons";
 
 let appRoot: Element;
 
@@ -26,7 +27,7 @@ export function getAppRoot() {
 // }
 
 
-export function createApp<T extends AnyObject, E extends CommonsEntries<E>>(App: ComponentSetup<T>, config?: { provide?: E, remountable?: boolean, globalCommons?: AppCommons, setup?: T }) {
+export function createApp<T extends AnyObject, E extends Provided>(App: ComponentSetup<T>, config?: { provide?: E, remountable?: boolean, globalCommons?: AppCommons, setup?: T }) {
 
    // (1) instantiate developer's root component
    const appCommons = createAppCommons(config?.provide, config?.globalCommons)
@@ -43,6 +44,15 @@ export function createApp<T extends AnyObject, E extends CommonsEntries<E>>(App:
          // (2) attach developer's root component to root element
          flask.containCall(function mountRootComponent() {
             let output: Component = { renderedTemplate: undefined }
+               const muIons: Set<Ion> = new Set()
+               const attributes = {
+                  ...config?.setup || {},
+                  [MU](ion: Ion) {
+                     return muIons?.has(ion)
+                  }
+               }
+               setComponentAttributes(attributes)
+               muIonsStack.push(muIons)
             pushCommons(appCommons)
             // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
             setComponentAttributes(config?.setup || {})
@@ -54,6 +64,7 @@ export function createApp<T extends AnyObject, E extends CommonsEntries<E>>(App:
             }
             finally {
                setComponentAttributes(undefined)
+               muIonsStack.pop()
                const component = new InternalComponent(output, undefined, undefined); //TODO: allow ref for root component?
                // if (remountable) markMountPhase()
                component.setUp(root, nodePod)

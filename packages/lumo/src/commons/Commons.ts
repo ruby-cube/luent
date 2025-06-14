@@ -13,11 +13,12 @@ export interface NodeCommons {
    muIons: Set<Ion> | undefined
 }
 
+export type Provided = [CommonsEntryKey | string, any][]
 
 //API
 
 export function Commons(input = fromTag<{
-   provide: [CommonsEntryKey | string, unknown][],
+   provide: Provided,
    Slot: RenderSlot
 }>()) {
    const { Slot } = input

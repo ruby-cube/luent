@@ -115,10 +115,10 @@ export function CellsApp() {
 }
 
 
-function Cell({ $column, $row } = fromTag({
+function Cell({ $column, $row } = fromTag<{
    column: Ion<number>,
    row: Ion<number>
-})) {
+}>()) {
 
    const $editing = ion(false)
 

@@ -1,18 +1,18 @@
 
-import { component, Else, For, fromTag, If, Ion, v } from '@rue/lumo'
-import { ion, ionize, watch } from '@rue/quarky'
+import { component, Else, For, fromTag, If } from '@rue/lumo'
+import { inert, Ion, ion, ionize, watch } from '@rue/quarky'
 import { AnyObject } from '@rue/types'
 
 
 export function SortableTableApp() {
    const $searchQuery = ion('')
-   const gridColumns = ['name', 'power']
-   const gridData = [
+   const gridColumns = inert(['name', 'power'])
+   const gridData = inert([
       { name: 'Chuck Norris', power: Infinity },
       { name: 'Bruce Lee', power: 9000 },
       { name: 'Jackie Chan', power: 7000 },
       { name: 'Jet Li', power: 8000 }
-   ]
+   ])
 
    return component(
       <>
@@ -30,26 +30,24 @@ export function SortableTableApp() {
 }
 
 
-function SortableTable(input = fromTag({
-   data: v<any[]>,
-   columns: v<string[]>,
+function SortableTable(input = fromTag<{
+   data: any[],
+   columns: string[],
    filterKey: Ion<string>
-})) {
-   const { columns } = input
+}>()) {
+   const { columns, data, $filterKey } = input
 
    const $sortKey = ion('')
    const sortOrders = ionize(columns.reduce((o: AnyObject, key) => ((o[key] = 1), o), {}))
 
-
    console.log('sort orders', sortOrders)
 
    const $filteredData = ion(() => {
-      const $filterKey = input.$filterKey
-      let data = input.data;
+      let filteredData = data;
       let filterKey = $filterKey()
       if (filterKey) {
          filterKey = filterKey.toLowerCase()
-         data = data.filter((row) => {
+         filteredData = filteredData.filter((row) => {
             return Object.keys(row).some((key) => {
                return String(row[key]).toLowerCase().indexOf(filterKey) > -1
             })
@@ -59,7 +57,7 @@ function SortableTable(input = fromTag({
       if (key) {
          console.log('sorting')
          const order = sortOrders[key]
-         data = data.slice().sort((a, b) => {
+         filteredData = filteredData.slice().sort((a, b) => {
             a = a[key]
             b = b[key]
             return (a === b ? 0 : a > b ? 1 : -1) * order

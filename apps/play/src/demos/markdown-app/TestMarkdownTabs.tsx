@@ -1,5 +1,5 @@
-import { component, For, fromTag, InputType, Ion } from "@rue/lumo";
-import { ion } from "@rue/quarky";
+import { component, For, fromTag } from "@rue/lumo";
+import { Ion, ion } from "@rue/quarky";
 
 let id = 1;
 
@@ -64,12 +64,11 @@ export function MarkdownApp() {
    )
 }
 
-const MAIN = InputType({
-   openedFiles: Ion<File[]>
-})
 
 function Main(
-   { $openedFiles } = fromTag(MAIN)
+   { $openedFiles } = fromTag<{
+   openedFiles: Ion<File[]>
+}>()
 ) {
 
    return component(

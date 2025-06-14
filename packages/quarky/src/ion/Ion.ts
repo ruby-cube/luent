@@ -6,12 +6,12 @@ import { maybeIonize } from "../ionized/IonizedModel";
 import { finiton } from "./FiniteStates";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionized/ionize";
-import { Inert } from "../ionized/inert";
+import { Inert, IsInert } from "../ionized/inert";
 
 /* API */
 export type Ion<T = unknown> = () => T
 
-type MaybeInert<T = unknown> = IsIonized<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
+type MaybeInert<T = unknown> = IsIonized<ExcludePrimitives<T>> extends true ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
 
 export type MutableIon<T> = Ion<T> & { state: T }
 
@@ -43,8 +43,7 @@ export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
 
 type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>] ? T // [T] extends [AtomicIon] to prevent type-narrowing
    : [T] extends [Derivation<infer R>] ? Ion<MaybeInert<R>> & M
-   :
-   MutableIon<MaybeInert<T>> & M 
+   : MutableIon<MaybeInert<T>> & M
 
 
 

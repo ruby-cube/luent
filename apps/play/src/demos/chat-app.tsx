@@ -4,7 +4,7 @@
 // [] if open, append message in main messages view
 // [] if chat tab is focused or main messages view is open, decrement unseen count
 
-import { component, fromTag, NodeEntity, ref, v } from "@rue/lumo";
+import { component, fromTag, nodeRef, Slot } from "@rue/lumo";
 import { MorphicNode as Morphable } from "../../../../packages/lumo/src/conditional/MorphicNode";
 import { finiton, ion } from "@rue/quarky";
 
@@ -91,7 +91,7 @@ export function FBApp() {
    watchDB((data) => {
       data.newMessages
    })
-   const $mainContent = ref($Main)
+   const $mainContent = nodeRef($Main)
 
    const $unseenCount = ion(0, {
       increment(count: number = 1) {
@@ -145,9 +145,9 @@ const $Main = Morphable({
       <Chat></Chat>
 })
 
-function Button(input = fromTag({
-   children: v<any>
-})) {
+function Button(input = fromTag<{
+   Slot: Slot
+}>()) {
    return component(
       <button>
 

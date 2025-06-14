@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { $thisView, component, If, NodeRef, ref, onInitialMount } from "@rue/lumo";
+import { $thisView, component, If, NodeRef, nodeRef, onInitialMount } from "@rue/lumo";
 import { ion, ionize, isIonizedModel, queueTask, watch } from "@rue/quarky";
 import { inert } from "../../../../packages/quarky/src/ionized/inert";
 
@@ -109,7 +109,7 @@ class AnimationAnimator {
 
 export function TestAnimationController() {
 
-   const $canvas = ref('canvas')
+   const $canvas = nodeRef('canvas')
 
    // const $animation = ion(() => $canvas() ? ionize(new AnimationAnimator(inert($canvas()))) : undefined)
 

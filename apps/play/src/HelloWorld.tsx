@@ -1,7 +1,6 @@
-//@ts-nocheck
-import { Component, Else, ElseIf, expose, For, fromTag, If, Ion, prep, provideAppwide, v, watch } from "@rue/lumo";
-import { ion, ionize, Ionized, ionizeWithMarks } from "@rue/quarky";
-import { Inert, inert } from "../../../packages/quarky/src/ionized/inert";
+import { Component, Else, ElseIf, For, fromTag, If,  provideAppwide } from "@rue/lumo";
+import { Ion, ion, ionize } from "@rue/quarky";
+import {  inert } from "../../../packages/quarky/src/ionized/inert";
 import { Well, Wellerman } from "./Well";
 import { Commons } from "../../../packages/lumo/src/commons/Commons";
 
@@ -289,7 +288,7 @@ function ColumnB() {
    )
 }
 
-function SomeComponent(input = fromTag({ name: v<string> })) {
+function SomeComponent(input = fromTag<{ name: string }>()) {
    return component(
       <></>
    )
@@ -314,9 +313,9 @@ const $attributes = fromTag
 
 
 function ColumnBlock(
-   input = fromTag({
-      name: v<string>
-   })
+   input = fromTag<{
+      name: string
+   }>()
 ) {
    const { name } = prep(input)
 
@@ -379,9 +378,9 @@ function MouseKit() {
    }
 }
 
-function Comp(input = fromTag({
-   value: XIon<{}>
-})) {
+function Comp(input = fromTag<{
+   value: Ion<{}>
+}>()) {
 
    const frog = ionize({
       firstName: 'sir',

@@ -7,11 +7,11 @@ import { AnimationFunction, AnimationKit } from "./defineAnimation";
 import { NodeRef } from "../node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
 import type { Commons } from "../commons/commons-stack";
-import { v } from "../component/Input";
 import { Ion } from "@rue/quarky";
 import { component, Slot } from "../component/InternalComponent";
 import { Else, If } from "../conditional/If";
 import { isFunction } from "@rue/utils";
+import { CommonsKey } from "../commons/CommonsKey";
 
 export type TransitionConfig = TransitionFunction | AnimationFunction | TransitionKit | AnimationKit
 
@@ -20,9 +20,8 @@ export type TransitionConfig = TransitionFunction | AnimationFunction | Transiti
 // export const GET_PHASIC_NODE = Symbol('usePhaseChange')
 
 
-function GET_PHASIC_NODE(v: ()=>TransitionNode|null){
-   return [GET_PHASIC_NODE, v] as const
-}
+const GET_PHASIC_NODE = CommonsKey<()=>TransitionNode|null>('GET_PHASIC_NODE')
+
 // declare module '@rue/lumo' {
 //     interface CommonsKeyMap {
 //         [GET_PHASIC_NODE]: typeof getPhasicNodeDef

@@ -1,15 +1,15 @@
 import { marked } from 'marked'
-import { ion, ionize, watch } from '@rue/quarky'
-import { component, fromTag, Ion, NodeRef, onDemount, onMount, onRemount, onUnmount, ref } from '@rue/lumo'
+import { Ion, ion, ionize, watch } from '@rue/quarky'
+import { component, fromTag, nodeRef, onDemount, onMount, onRemount } from '@rue/lumo'
 
 
 export function MarkdownApp(
-   input = fromTag({
-      'mu:markdown': Ion<string>('?')('#Hello World')
-   })
+   input = fromTag<{
+      'mu:markdown'?: Ion<string>
+   }>()
 ) {
 
-   const { $markdown } = input
+   const { $markdown = ion('# Hello World') } = input
    // const $markdown = ion('Hello World')
 
    const $output = ion(() => (marked($markdown())))
@@ -20,7 +20,7 @@ export function MarkdownApp(
    //    $markdown.state = e.target.value
    // }
 
-   const $textArea = ref('textarea')
+   const $textArea = nodeRef('textarea')
 
    const caretRange = ionize({
       selectionStart: undefined as undefined | number,

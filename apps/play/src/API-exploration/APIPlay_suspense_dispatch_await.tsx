@@ -55,9 +55,7 @@ const MARKDOWN_FILES = defineDBSync(() => {
 })
 
 
-function App(input = fromTag({
-   // data: v<FileData[]>
-})) {
+function App(input = fromTag()) {
    const $files = fromCloud(MARKDOWN_FILES, [])
 
    const $openedFiles = ion(() => $files().filter((file) => file.opened))

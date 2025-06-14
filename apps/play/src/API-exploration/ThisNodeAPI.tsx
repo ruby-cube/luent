@@ -12,9 +12,9 @@ import { DynamicNode } from "../../../../packages/lumo/src/flask/ViewFlask";
 function $thisNode() { return {} as ThisNode }
 
 function TestingStuff(
-   input = fromTag({
-      frog: Reined<Frog>
-   })
+   input = fromTag<{
+      frog: Frog
+   }>()
 ) {
    const { fromCoop, onDismantle } = $thisNode();
    const { frog } = input;

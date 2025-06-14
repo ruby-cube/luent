@@ -7,6 +7,7 @@ import { Ion } from "@rue/quarky";
 import { component } from "../component/InternalComponent";
 import { Else, If } from "../conditional/If";
 import { isFunction } from "@rue/utils";
+import { CommonsKey } from "../commons/CommonsKey";
 
 export function renderTransitNode(
    $div: NodeRef<'div'>,
@@ -52,9 +53,11 @@ export function renderTransitNode(
 
 // const REGISTER_TRANSITION_NODE = Symbol('registerTransitionNode')
 
-function REGISTER_TRANSITION_NODE(v: (transitionNode: TransitionNode) => void) {
-   return [REGISTER_TRANSITION_NODE, v]
-}
+// function REGISTER_TRANSITION_NODE(v: (transitionNode: TransitionNode) => void) {
+//    return [REGISTER_TRANSITION_NODE, v] 
+// }
+
+const REGISTER_TRANSITION_NODE = CommonsKey<(transitionNode: TransitionNode) => void>('REGISTER_TRANSITION_NODE')
 
 // declare module '@rue/lumo' {
 //     interface CommonsKeyMap {

@@ -4,7 +4,7 @@ import { fromTag, Ion } from "@rue/lumo"
 
 function Parent() {
    const $count = ion(0)
-   const $child = ref(Child)
+   const $child = nodeRef(Child)
 
    return component(
       <>
@@ -19,9 +19,9 @@ function Parent() {
 
 function Child({
    $count
-} = fromTag({
+} = fromTag<{
    count: Ion
-})) {
+}>()) {
    const $doubleCount = ion(() => $count() * 2)
    return component({
       $doubleCount

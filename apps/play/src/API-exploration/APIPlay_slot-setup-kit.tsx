@@ -31,9 +31,9 @@ function ColumnB() {
 // Slot<{ dog: string }, '?'> === optional render function
 // Slot<{ dog: string }, '?'>('?') === optional render function
 
-function SomeComponent(input = fromTag({
+function SomeComponent(input = fromTag<{
    Slot: Slot
-})) {
+}>()) {
    return component(
       ''
    )

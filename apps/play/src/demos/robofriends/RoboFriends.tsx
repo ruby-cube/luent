@@ -1,4 +1,4 @@
-import { component, EventHandler, For, fromCommons, fromTag,} from "@rue/lumo";
+import { component, EventHandler, For, fromCommons, fromTag, HandleEvent,} from "@rue/lumo";
 import { inert, ion, Inert, ionize, Ion, Ionized } from "@rue/quarky";
 import { robots } from "./robots";
 
@@ -83,11 +83,11 @@ export function CAN_CLOSE_DIALOG(v: () => void) {
    return [CAN_CLOSE_DIALOG, v]
 }
 
-export function ON_CLOSE_DIALOG(v: LumoEventHandler) {
+export function ON_CLOSE_DIALOG(v: HandleEvent) {
    return [ON_CLOSE_DIALOG, v]
 }
 
-type LumoEventHandler<E = {}> = keyof E extends never ? (() => void) | ((event: E) => void) : (event: E) => void
+
 
 
 // mapCommonsKeys({

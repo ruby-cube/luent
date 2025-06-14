@@ -1,4 +1,3 @@
-//@ts-nocheck
 
 
 
@@ -6,7 +5,7 @@
 
 
 
-import { component, fromTag, InputType, Ion, Ionized } from "@rue/lumo";
+import { component, fromTag } from "@rue/lumo";
 
 // - dispatch definition: converts fileData type to File model
 //   - FileData type
@@ -25,14 +24,13 @@ const GET_FILE = defineDispatchGET(FILE, async ($id: Ion<number>) => {
 
 // #region View
 
-const VIEW = InputType({
-   id: Ion<number>
-})
 
 const FILE = DispatchKey(Ionized<File>)
 
 function View(
-   { $id } = fromTag(VIEW)
+   { $id } = fromTag<{
+      id: Ion<number>
+   }>()
 ) {
    const file = dispatch(GET_FILE, { $id })
 

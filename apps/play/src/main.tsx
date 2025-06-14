@@ -131,7 +131,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(TrafficLight)
+const app = createApp(MarkdownApp)
 
 app.mount('#app')
 

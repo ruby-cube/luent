@@ -1,4 +1,4 @@
-import { component, For, If, listen, ref } from "@rue/lumo"
+import { component, For, If, listen, nodeRef } from "@rue/lumo"
 import { finiton, ion, watch } from "@rue/quarky"
 
 //FIX: 
@@ -6,7 +6,7 @@ import { finiton, ion, watch } from "@rue/quarky"
 
 export function Sidebar() {
    const items = ['a', 'b', 'c']
-   const $contextMenu = ref(IfContextMenu)
+   const $contextMenu = nodeRef(IfContextMenu)
 
    return component(
       <>
@@ -45,7 +45,7 @@ export function Sidebar() {
 }
 
 function IfContextMenu() {
-   const $container = ref('div')
+   const $container = nodeRef('div')
 
    const $menu = finiton({
       'opened': {
@@ -98,7 +98,7 @@ function IfContextMenu() {
 
 
 function IfContextMenuB() {
-   const $container = ref('div')
+   const $container = nodeRef('div')
 
    const $open = ion(false)
 
@@ -141,7 +141,7 @@ function IfContextMenuB() {
 }
 
 function IfContextMenuC() {
-   const $container = ref('div')
+   const $container = nodeRef('div')
 
    const $open = ion(false)
 
