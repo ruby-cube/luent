@@ -13,7 +13,17 @@ export class ConditionalRenderKit extends ConditionalKit<RenderConditional> {
     nodePodIndex?: number
 
     nodePod: NodePod | undefined;
-    flask: Flask | undefined;
+    _flask: Flask | undefined;
+
+    get flask(){
+      return this._flask
+    }
+
+    set flask(flask){
+      console.trace('!!! setting flask', flask)
+      console.log('!!! setting flask for', this.statementType)
+      this._flask = flask
+    }
 
     constructor(
         statementType: 'if' | 'elseIf' | 'else',

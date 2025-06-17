@@ -56,55 +56,43 @@ export function MountIf() {
    // })
    //NOTE: if o--transit duration is shorter than o--transition duration, it will disable o--transition transition
    return component(
-      <>
-         {If($active,
-            <div>
-               'hi'
-            </div>
-         )}
-         <div>bye</div>
-      </>
-      // <div>
-      //    <div>hi</div>
-      //    <div>bye</div>
-      // </div>
-      // <>
-      //    {/* <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: 'lime' }}>shout</button> */}
-      //    <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: ($color() + 'e') }}>shout</button>
-      //    <h1>Hello {(todos[0].name)}</h1>
-      //    <div>hi</div>
-      //    {/* <o--transition> */}
-      //    {If($active, (debug.traceAsyncPath(),
-      //       <>
-      //          oh
-      //          {/* <o--transit with={slide({ x: -100, duration: 2200 })}> */}
-      //          <h2>hi</h2>
-      //          {/* </o--transit> */}
-      //          {/* <o--transit with={slide({ x: 100, duration: 2200 })}> */}
-      //          <h2>hope</h2>
-      //          {/* </o--transit> */}
-      //          {If($ready,
-      //             <p>ready</p>
-      //          )}
-      //       </>
-      //    ))}
-      //    {ElseIf($ready,
-      //       <>
-      //          low
-      //          <h2>balloon</h2>
-      //       </>
-      //    )}
-      //    {Else(
-      //       <>
-      //          so
-      //          <h2>bye</h2>
-      //       </>
-      //    )}
-      //    {/* </o--transition> */}
-      //    <button on:click={$active.toggle}>toggle active</button>
-      //    <button on:click={$ready.toggle}>toggle ready</button>
-      //    {/* <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child> */}
-      // </>
+
+      <div>
+         <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: ($color() + 'e') }}>shout</button>
+         <h1>Hello {(todos[0].name)}</h1>
+         <div>hi</div>
+         <o--transition>
+            {If($active, (debug.traceAsyncPath(),
+               <>
+                  oh
+                  <o--transit with={slide({ x: -100, duration: 2200 })}>
+                     <h2>hi</h2>
+                  </o--transit>
+                  <o--transit with={slide({ x: 100, duration: 2200 })}>
+                     <h2>hope</h2>
+                  </o--transit>
+                  {If($ready,
+                     <p>ready</p>
+                  )}
+               </>
+            ))}
+            {ElseIf($ready,
+               <>
+                  low
+                  <h2>balloon</h2>
+               </>
+            )}
+            {Else(
+               <>
+                  so
+                  <h2>bye</h2>
+               </>
+            )}
+         </o--transition>
+         <button on:click={$active.toggle}>toggle active</button>
+         <button on:click={$ready.toggle}>toggle ready</button>
+         {/* <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child> */}
+      </div>
    )
 }
 

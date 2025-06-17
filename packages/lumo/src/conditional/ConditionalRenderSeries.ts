@@ -43,6 +43,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       this.context = $_snap_context()
       this.__DEV__asyncPath = __DEV__ ? __DEV__buildAsyncPath() : undefined
       this.outerFlask = getViewFlask() //ie: enclosingFlask
+      console.log('$$$ outerFlask', this.outerFlask)
       this.activeIndex = this.evaluateConditions()
       if (!this.isDynamic) {
          return;
@@ -354,6 +355,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       }
       else if (activationType === 'create') {
          // discard of flask
+         console.log('kit', kit)
          const flask = kit.flask!
          kit.flask = undefined;
          flask.emitDiscard()

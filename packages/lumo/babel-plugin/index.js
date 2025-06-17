@@ -185,7 +185,7 @@ function transformJSXChildrenToArrayExpression(paths) {
       const node = child.node
       if (t.isJSXExpressionContainer(node) && isConditionalSeriesElement(node.expression)) {
          if (node.expression.callee.name === 'If') {
-            closeConditionalSeries(conditionalSeries)
+            closeConditionalSeries(array, conditionalSeries)
             conditionalSeries = [node.expression]
          }
          else {
@@ -195,7 +195,7 @@ function transformJSXChildrenToArrayExpression(paths) {
       else if (t.isJSXText(node)) {
          const stringLiteral = transformJSXText(node)
          if (stringLiteral) {
-            conditionalSeries = closeConditionalSeries(conditionalSeries);
+            conditionalSeries = closeConditionalSeries(array, conditionalSeries);
             array.push(stringLiteral)
          }
       }
@@ -203,15 +203,15 @@ function transformJSXChildrenToArrayExpression(paths) {
          const expression = node.expression;
          if (t.isJSXEmptyExpression(expression))
             continue;
-         conditionalSeries = closeConditionalSeries(conditionalSeries);
+         conditionalSeries = closeConditionalSeries(array, conditionalSeries);
          array.push(expression)
       }
       else {
-         conditionalSeries = closeConditionalSeries(conditionalSeries);
+         conditionalSeries = closeConditionalSeries(array, conditionalSeries);
          array.push(node)
       }
    }
-   if (conditionalSeries) array.push(createConditionalSeries(conditionalSeries))
+   closeConditionalSeries(array, conditionalSeries);
    const arrayExpression = t.arrayExpression(array)
    arrayExpression.visited = true;
    return arrayExpression
