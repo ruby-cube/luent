@@ -5,12 +5,23 @@ import { ion, Ion } from "@rue/quarky";
 
 const POSTS = Symbol()
 
+const USER_POSTS = defineFetch({
+   fetch({ $userId }) {
+      return fetch(`https://someplace.com/${$userId()}`)
+   },
+   catch(err) {
+
+   }
+})
+
 export function List() {
    const $userId = ion('')
 
+   const $userPosts = fromServer(USER_POSTS, { $userId })
+
    const $userPosts = dispatch({ get: POSTS, with: $userId, overlap: 'pile | overwrite | block', suspense: true }); // returns an ion and collects promises for suspense, will rerun if $userId changes
 
-   const vvvalue = resolve(fetch(''), { suspense: true }) // returns an ion and collects promises for suspense
+   const value = resolve(fetch(''), { suspense: true }) // returns an ion and collects promises for suspense
 
 
    async function submit() {

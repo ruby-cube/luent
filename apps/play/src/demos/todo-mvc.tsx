@@ -1,6 +1,5 @@
 import { component, For, If, Else } from "@rue/lumo"
-import { ion, ionicTask, ionize, } from "@rue/quarky"
-import { Inert } from "../../../../packages/quarky/src/ionized/inert"
+import { ion, ionicTask, ionize, Ionized, } from "@rue/quarky"
 
 
 
@@ -25,9 +24,9 @@ export function TodoMVC() {
    const STORAGE_KEY = 'vue-todomvc'
 
    const filters = {
-      all: (todos: Todo[]) => todos,
-      active: (todos: Todo[]) => todos.filter(todo => !todo.completed),
-      completed: (todos: Todo[]) => todos.filter(todo => todo.completed)
+      all: (todos: Ionized<Todo[]>) => todos,
+      active: (todos: Ionized<Todo[]>) => todos.filter(todo => !todo.completed),
+      completed: (todos: Ionized<Todo[]>) => todos.filter(todo => todo.completed)
    }
    // {
    //    id: Date.now(),
@@ -61,11 +60,11 @@ export function TodoMVC() {
    function addTodo(e: InputEvent) {
       const value = e.target.value.trim()
       if (value) {
-         $todos().push({
+         $todos().push(ionize({
             id: Date.now(),
             title: value,
             completed: false
-         })
+         }))
          e.target.value = ''
       }
    }
@@ -181,7 +180,7 @@ export function TodoMVC() {
             )}
             {/* {Else(undefined)} */}
          </section >
-         <$--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
+         <o--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
       </>)
 }
 

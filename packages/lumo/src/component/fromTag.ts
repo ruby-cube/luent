@@ -211,7 +211,12 @@ type MaybeIonAttributes<D> = {
    : K extends string ? K
    : never
    : never]:
-   (NonlocalIon<ExcludePrimitives<D[K]>>) | (ExcludePrimitives<D[K]> extends Ion<infer S> ? MaybeMarkInert<S> : never) | (OnlyPrimitives<D[K]>)
+   (NonlocalIon<ExcludePrimitives<D[K]>>) |
+   (ExcludePrimitives<D[K]> extends Ion<infer S> ?
+      S
+      // MaybeMarkInert<S>
+      : never)
+   | (OnlyPrimitives<D[K]>)
 }
 
 type MutableIonAttributes<D> = {
@@ -226,8 +231,8 @@ type MutableIonAttributes<D> = {
 
 type ToMuIon<T> = ExcludePrimitives<T> extends { state: any } ? T
    : keyof IonMethods<T> extends never ?
-   T extends Ion<infer S> ? MutableIon<MaybeMarkInert<S>> : never
-   : T extends Ion<infer S> ? MutableIon<MaybeMarkInert<S>> & IonMethods<T> : never
+   T extends Ion<infer S> ? MutableIon<S/* MaybeMarkInert<S> */> : never
+   : T extends Ion<infer S> ? MutableIon<S/* MaybeMarkInert<S> */> & IonMethods<T> : never
 
 
 
@@ -260,10 +265,11 @@ type StaticInput<D> = {
    [K in keyof D as IncludesIon<D[K]> extends true ? never
    : K extends `mu:${string}` | `can:${string}` | `on:${string}` | 'Slot' | 'provide' ? never
    : K]:
-   MaybeMarkInert<D[K]>
+   D[K]
+   // MaybeMarkInert<D[K]>
 }
 
-export type MaybeMarkInert<T> = IsIonized<ExcludePrimitives<T>> extends true ? T : T extends Function ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
+// export type MaybeMarkInert<T> = IsIonized<ExcludePrimitives<T>> extends true ? T : T extends Function ? T : IsInert<ExcludePrimitives<T>> extends true ? T : T extends object ? Inert<ExcludePrimitives<T>> | OnlyPrimitives<T> : T
 
 type IncludesIon<T> = Exclude<T, Primitive> extends never ? false : Exclude<T, Primitive> extends Ion ? true : false
 
@@ -299,8 +305,9 @@ type MutableIonInput<D> = {
 
 type NonlocalIon<T> =
    keyof IonMethods<T> extends never ?
-   T extends Ion<infer S> ? Ion<MaybeMarkInert<S>> : never
-   : T extends Ion<infer S> ? Ion<MaybeMarkInert<S>> & IonMethods<T> : never
+   // T extends Ion<infer S> ? Ion<MaybeMarkInert<S>> : never
+   T
+   : T extends Ion<infer S> ? Ion<S/* MaybeMarkInert<S> */> & IonMethods<T> : never
 
 type IonMethods<T> = Omit<T, keyof Function | 'state'>
 

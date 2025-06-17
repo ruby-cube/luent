@@ -96,7 +96,7 @@ export function TrafficLight() {
          <button on:click={e => $power.apply('break')} style={{ opacity: $BtnOpacity(() => $power.is('on')) }}>break</button>
          <button on:click={e => $power.apply('switch')} style={{ opacity: $BtnOpacity() }}>{($power.is('on') ? 'turn off' : 'turn on')}</button>
          <button on:click={e => $state.apply('switch')} style={{ opacity: $BtnOpacity($state.isActive) }}>{($state.is('sleep') ? 'awaken' : 'sleep')}</button>
-         <$--style>
+         <o--style>
             {`
 *,
 *::before,
@@ -118,7 +118,7 @@ export function TrafficLight() {
            margin-bottom: 10px;
          }
             `}
-         </$--style>
+         </o--style>
       </>
    )
 }

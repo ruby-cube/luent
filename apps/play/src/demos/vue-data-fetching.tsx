@@ -100,7 +100,7 @@ export function View() {
                ))}
             </ul >
          )}
-         <$--link href="src/demos/vue-data-fetching.css" rel="stylesheet"/>
+         <o--link href="src/demos/vue-data-fetching.css" rel="stylesheet"/>
       </div>
    )
 }

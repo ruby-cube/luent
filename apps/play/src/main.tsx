@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import './style.css'
+// import './style.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
@@ -42,6 +42,7 @@ import { TestBox } from './TestBox';
 import { TestDerivedConditional } from './TestCreateMountShow';
 import { TestDerived } from './TestCumulativeDerivedIon';
 import { RoboFriendsApp } from './demos/robofriends/RoboFriends';
+import { getPublicTrace } from '../../../packages/flask/debug';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -131,9 +132,77 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(MarkdownApp)
+const app = createApp(TodoMVC)
 
 app.mount('#app')
+
+// insertText(text: 'hi, position: 9)
+// 
+//  - textBlot.push({ text: 'hi' }): 
+//     - textBlot.length: 2 -> 3
+//     - textBlot: [{ text: 'a' }, { text: 'b' }]
+//       -> [{ text: 'a' }, { text: 'b' }, { text: 'hi'}]
+
+// action/mutation details:
+// - state
+// - duration
+// - trace
+
+const textBlotA = [{ text: 'a' }, { text: 'b' }]
+const textBlotB = [{ text: 'a' }, { text: 'b' }, { text: 'hi' }]
+const textBlotC = { text: 'a', length: 9, starred: true }
+const textBlotD = { text: 'b', length: 9, starred: true }
+const inputA =
+   // 9
+   { text: 'hi', position: 9 }
+const inputB = [{ text: 'hi' }, ',', 9]
+const inputG = [{ text: 'bye' }, ',', 10]
+
+let trace;
+function doA(){
+   doB()
+}
+function doB(){
+   doC()
+}
+function doC(){
+   doD()
+}
+function doD(){
+   trace = getPublicTrace()
+}
+doA()
+
+
+console.log(
+   `insertText
+a formatted log`)
+console.group('@insertText(', inputA, ')');
+console.groupCollapsed(`textBlot.push(`, ...inputB, ')');
+console.log('$ textBlot:', textBlotC, '⟹', textBlotD);
+console.log('$ textBlot.length: 2 ⟹ 3');
+console.log(trace)
+console.groupEnd();
+console.groupCollapsed(`textBlot.push(`, ...inputG, `)`);
+console.log('$ textBlot:', textBlotA, '⟹', textBlotB);
+console.log('$ textBlot.length: 2 ⟹ 3');
+console.log(`NonError Trace:\n    `+trace)
+console.groupEnd();
+console.groupEnd();
+console.group('@insertText(', inputA, ')');
+console.groupCollapsed(`textBlot.push(`, ...inputB, ')');
+console.log('$ textBlot:', textBlotC, '⟹', textBlotD);
+console.log('$ textBlot.length: 2 ⟹ 3');
+console.log(trace)
+console.groupEnd();
+console.groupCollapsed(`textBlot.push(`, ...inputG, `)`);
+console.log('$ textBlot:', textBlotA, '⟹', textBlotB);
+console.log('$ textBlot.length: 2 ⟹ 3');
+console.log(`NonError Trace:\n    `+trace)
+console.groupEnd();
+// console.log('duration:', 90, 'ms')
+console.groupEnd();
+
 
 // app.initialize('#app', {
 //    globalCommons,

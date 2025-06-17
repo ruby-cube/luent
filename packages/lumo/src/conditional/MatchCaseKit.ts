@@ -1,5 +1,5 @@
-import { SwapType } from "../node/makeNode";
+import { ActivationType } from "../node/makeNode";
 
 export class MatchCaseKit {
-   swap: SwapType = 'instance'
+   activationType: ActivationType = 'instance'
 }

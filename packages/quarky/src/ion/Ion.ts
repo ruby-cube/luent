@@ -42,8 +42,8 @@ export function toValue<T>(maybeFn: T): T extends () => infer R ? R : T {
 
 
 type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>] ? T // [T] extends [AtomicIon] to prevent type-narrowing
-   : [T] extends [Derivation<infer R>] ? Ion<MaybeInert<R>> & M
-   : MutableIon<MaybeInert<T>> & M
+   : [T] extends [Derivation<infer R>] ? Ion<R> & M
+   : MutableIon<T> & M
 
 
 

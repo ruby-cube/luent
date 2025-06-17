@@ -2,13 +2,13 @@ import { getCommons } from "../commons/commons-stack";
 import { MaybeIon } from "../component/Input";
 import { NodeEntity, normalizeToRenderFunction } from "../node/makeNode";
 import { ListRenderKit } from "./ListRenderKit";
-import { Ion, Ionized, IsIonized, MaybeIonized } from "@rue/quarky";
+import { Ion, IonizeBy, Ionized, IsIonized, MaybeIonized } from "@rue/quarky";
 
 
 export type RenderItem<L> =
-L extends Ion<infer D> ? D extends Collection<infer I> ? (item: I, $i: Ion<number>) => NodeEntity : 'frog'
+L extends Ion<infer D> ? D extends Collection<infer I> ? (item: IonizeBy<D, I>, $i: Ion<number>) => NodeEntity : 'frog'
    :IsIonized<L> extends true  ? L extends {[key: number]: infer I} ?(item: I, $i: Ion<number>) => NodeEntity : 'frog' //TODO: Sets and maps?
-   : L extends Collection<infer I> ? (item: I, $i: Ion<number>) => NodeEntity
+   : L extends Collection<infer I> ? (item: IonizeBy<L, I>, $i: Ion<number>) => NodeEntity
    : (item: any, $i: Ion<number>) => NodeEntity
 // L extends Collection<infer I> | Ion<Collection<infer I>> ? ((item: I) => NodeEntity) | ((item: I, $index: AtomicIon<number>) => NodeEntity)
 // : L extends Collection<infer I> ? ((item: I) => NodeEntity) | ((item: I, index: number) => NodeEntity)

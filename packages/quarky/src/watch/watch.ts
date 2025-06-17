@@ -197,7 +197,7 @@ export function watch<
    let hasChanged = getHasChangedFn(options, prevState)
 
    function wrappedEffect() {
-      console.log('running effect', effect)
+      // console.log('running effect', effect)
       const newState = getValue(subject)
       if (!options.eager && !hasChanged(prevState, newState)) {
          return;

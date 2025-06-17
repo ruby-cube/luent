@@ -56,7 +56,7 @@ export function PolygonApp() {
 
          <pre id="raw">{(JSON.stringify(stats, undefined, 2))}</pre>
 
-         <$--style>
+         <o--style>
             {`polygon {
   fill: #42b983;
   opacity: 0.75;
@@ -83,7 +83,7 @@ label {
   top: 0;
   left: 300px;
 }`}
-         </$--style>
+         </o--style>
       </>
    )
 }

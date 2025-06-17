@@ -41,7 +41,7 @@ export function TreeApp() {
       <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
          <TreeItem item={treeItem}></TreeItem>
       </ul>
-      <$--link href='/src/demos/tree-view.css' rel='stylesheet'/>
+      <o--link href='/src/demos/tree-view.css' rel='stylesheet'/>
       </>
 
    )

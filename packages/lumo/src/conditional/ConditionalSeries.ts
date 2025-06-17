@@ -1,10 +1,9 @@
-import { __devCheckIfTracked } from "@rue/quarky";
-import { Muon } from "../../../quarky/src/__notes__/notes-reactivity-system";
+import { __devCheckIfTracked, Ion } from "@rue/quarky";
 import { ConditionalKit } from "./ConditionalKit";
 import { Booleanny } from "@rue/types";
 
 export class ConditionalSeries {
-    conditions: Muon<Booleanny>[] = [];
+    conditions: Ion<Booleanny>[] = [];
     prevActiveIndex?: number = undefined;
     activeIndex?: number = undefined;
 
@@ -48,6 +47,7 @@ export class ConditionalSeries {
         const conditions = this.conditions
         for (let i = 0; i < conditions.length; i++) {
             const $condition = conditions[i]
+            console.log('$condition', $condition)
             if ($condition()) {
                 this.prevActiveIndex = this.activeIndex;
                 this.activeIndex = i;
@@ -71,31 +71,6 @@ export class ConditionalSeries {
     } // must retrack in case any of its conditions require retracking
 }
 
-
-
-
-// export function buildConditionalSeries(statements: ConditionalKit[], series: ConditionalSeries, makeElseKit: () => ConditionalKit) {
-//     for (let i = 0; i < statements.length; i++) {
-//         const kit = statements[i]
-//         if (i === 0 && kit.statementType !== 'if' || i !== 0 && kit.statementType === 'if') {
-//             if (__DEV__) throw new Error('If must be the first child of a conditional series (or extraneous use of fragment)')
-//             else continue;
-//         }
-//         if (!(kit instanceof ConditionalKit)) {
-//             if (__DEV__) throw new Error("Conditional series can only contain conditional statements created by the If, ElseIf, and Else functions")
-//             else continue;
-//         }
-//         if (i !== statements.length - 1 && kit.statementType === 'else') {
-//             if (__DEV__) throw new Error("Else must be the very last statement of a conditional series");
-//             else continue;
-//         }
-//         series.addKit(kit);
-//     }
-//     if (noElseBlock(statements)) {
-//         series.addKit(makeElseKit())
-//     }
-//     return series;
-// }
 
 function noElseBlock(statements: ConditionalKit[]) {
     if (statements.length === 0) throw new Error(`Conditional series is empty`)

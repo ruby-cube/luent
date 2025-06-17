@@ -2,7 +2,7 @@ import { component, For, If, listen, nodeRef } from "@rue/lumo"
 import { finiton, ion, watch } from "@rue/quarky"
 
 //FIX: 
-// [] conditional rendering with <$--portal>
+// [] conditional rendering with <o--portal>
 
 export function Sidebar() {
    const items = ['a', 'b', 'c']
@@ -19,7 +19,7 @@ export function Sidebar() {
             <IfContextMenuC ref={$contextMenu}></IfContextMenuC>
          </ul>
 
-         <$--style>
+         <o--style>
             {`
             .sidebar-item {
                background-color: beige;
@@ -39,7 +39,7 @@ export function Sidebar() {
                height: 100vh;
             }
             `}
-         </$--style>
+         </o--style>
       </>
    )
 }
@@ -77,7 +77,7 @@ function IfContextMenu() {
       }
    },
       <>
-         <$--portal to='body'>
+         <o--portal to='body'>
             <div>
                {If(($menu.is('opened')),
                   <div ref={$container} post:mount={el => initMenu(el)} style={{ position: 'absolute', top: 0, left: 0 }}>
@@ -91,7 +91,7 @@ function IfContextMenu() {
                   </div>
                )}
             </div>
-         </$--portal>
+         </o--portal>
       </>
    )
 }
@@ -124,7 +124,7 @@ function IfContextMenuB() {
    return component({
       open
    },
-      <$--portal to='body'>
+      <o--portal to='body'>
          <dialog ref={$container} open={$open} style={{ position: 'absolute', top: 0, left: 0, width: '10rem', height: '10rem' }}>
             <div >
                menu item 1
@@ -136,7 +136,7 @@ function IfContextMenuB() {
                   })} */}
             </div>
          </dialog>
-      </$--portal>
+      </o--portal>
    )
 }
 
@@ -172,7 +172,7 @@ function IfContextMenuC() {
    },
       <div>
          {If($open,
-            <$--portal to='body'>
+            <o--portal to='body'>
                <div ref={$container} post:mount={initMenu} style={{ position: 'absolute', top: 0, left: 0 }}>
                   menu item 1
                   -
@@ -182,7 +182,7 @@ function IfContextMenuC() {
                   {/* {Thru($options, (option, index) => {
                   })} */}
                </div>
-            </$--portal>
+            </o--portal>
          )}
       </div>
    )
@@ -198,13 +198,13 @@ function IntuitivePopUpA() {
    const $open = ion(false)
 
    return component(
-      <$--portal to='body'>
+      <o--portal to='body'>
          {If($open,
             <div>
 
             </div>
          )}
-      </$--portal>
+      </o--portal>
    )
 }
 
@@ -216,11 +216,11 @@ function IntuitivePopUpB() {
    return component(
       <>
          {If($open,
-            <$--portal to='body'>
+            <o--portal to='body'>
                <div>
 
                </div>
-            </$--portal>
+            </o--portal>
          )}
       </>
    )
@@ -229,11 +229,11 @@ function IntuitivePopUpB() {
 
 //What actually works
 /* 
-<$--portal to='body'>
+<o--portal to='body'>
    <div>
       {If($open,
          <div></div>
       )}
    </div>
-</$--portal> 
+</o--portal> 
 */

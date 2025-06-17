@@ -13,6 +13,7 @@ export default function lumoPreTransform({ types }) {
             enter(path) {
                path.traverse({
                   ImportDeclaration(path) {
+                     // prevent name collisions
                      storeLocalNameOfImport(path, 'watch', this.localWatchNames)
                      storeLocalNameOfImport(path, 'ionicTask', this.localIonicTaskNames)
                   },
@@ -26,27 +27,86 @@ export default function lumoPreTransform({ types }) {
          },
          JSXFragment: {
             enter(path) {
+               // transformConditionalSeries(path)
                transformLiterals(path)
                transformTemplateCallExpressions(path)
                transformJSXFragment(path)
-            },
-            exit(path) {
             }
          },
          JSXElement: {
             enter(path) {
+               // transformConditionalSeries(path)
                transformLiterals(path)
                transformTemplateCallExpressions(path)
                transformJSXElement(path)
-            },
-            exit(path) {
             }
          }
       }
    };
 }
 
-function storeLocalNameOfImport(path, functionName, localNames){
+const conditionalStatements = {
+   If: true,
+   ElseIf: true,
+   Else: true
+}
+
+
+function isConditionalSeriesElement(node) {
+   return t.isCallExpression(node) && node.callee.name in conditionalStatements
+}
+
+function transformConditionalSeries(path) {
+   const children = path.node.children
+   if (children.length === 0) return;
+   path.node.children = consolidateSeries(children)
+}
+
+function consolidateSeries(children) {
+   const newChildren = []
+   let conditionalSeries;
+   for (const node of children) {
+      if (t.isJSXExpressionContainer(node) && isConditionalSeriesElement(node.expression)) {
+         if (node.expression.callee.name === 'If') {
+            if (conditionalSeries) newChildren.push(createConditionalSeries(conditionalSeries))
+            conditionalSeries = [node.expression]
+         }
+         else {
+            conditionalSeries.push(node.expression)
+         }
+      }
+      else if (t.isJSXText(node)) {
+         const stringLiteral = transformJSXText(node)
+         if (stringLiteral) {
+            if (conditionalSeries) {
+               newChildren.push(createConditionalSeries(conditionalSeries))
+               conditionalSeries = undefined;
+            }
+            newChildren.push(stringLiteral)
+         }
+      }
+      else if (conditionalSeries) {
+         console.log('uh oh', node)
+         newChildren.push(createConditionalSeries(conditionalSeries))
+         conditionalSeries = undefined;
+         newChildren.push(node)
+      } else {
+         newChildren.push(node)
+      }
+   }
+   if (conditionalSeries) newChildren.push(createConditionalSeries(conditionalSeries))
+   console.log('oldchildren', children.length)
+   console.log('newChildren', newChildren.length)
+   // return children
+   return newChildren;
+}
+
+function createConditionalSeries(conditionalSeries) {
+   //TODO: import '$$series'
+   return t.callExpression(t.identifier('$$series'), conditionalSeries)
+}
+
+function storeLocalNameOfImport(path, functionName, localNames) {
    if (path.node.source.value === '@rue/quarky') {
       for (const specifier of path.node.specifiers) {
          if (
@@ -59,7 +119,7 @@ function storeLocalNameOfImport(path, functionName, localNames){
    }
 }
 
-function transformWatchCalls(path, localWatchNames){
+function transformWatchCalls(path, localWatchNames) {
    const callee = path.get('callee');
    if (
       t.isIdentifier(callee.node) &&
@@ -69,18 +129,18 @@ function transformWatchCalls(path, localWatchNames){
    }
 }
 
-function transformIonicTaskCalls(path, localIonicTaskNames){
+function transformIonicTaskCalls(path, localIonicTaskNames) {
    const functionName = path.node.callee.name
    if (localIonicTaskNames.has(functionName)) {
       const effectFnP = path.get('arguments')[0]
       const effectBody = effectFnP.get('body')
       const watchFnName = effectFnP.node.params[0].name
       effectBody.traverse({
-         CallExpression(path){
+         CallExpression(path) {
             if (path.visited) return;
             path.visited = true;
 
-            if (path.node.callee.name === watchFnName){
+            if (path.node.callee.name === watchFnName) {
                transformWatchSubject(path);
             }
          }
@@ -112,24 +172,46 @@ function transformJSXFragment(path) {
    path.replaceWith(transformJSXChildrenToArrayExpression(children))
 }
 
+function closeConditionalSeries(array, series) {
+   if (series) {
+      array.push(createConditionalSeries(series))
+   }
+}
+
 function transformJSXChildrenToArrayExpression(paths) {
    const array = []
+   let conditionalSeries;
    for (const child of paths) {
-      if (t.isJSXText(child)) {
-         const stringLiteral = transformJSXText(child.node)
-         if (stringLiteral)
-            array.push(stringLiteral)
+      const node = child.node
+      if (t.isJSXExpressionContainer(node) && isConditionalSeriesElement(node.expression)) {
+         if (node.expression.callee.name === 'If') {
+            closeConditionalSeries(conditionalSeries)
+            conditionalSeries = [node.expression]
+         }
+         else {
+            conditionalSeries.push(node.expression)
+         }
       }
-      else if (t.isJSXExpressionContainer(child.node)) {
-         const expression = child.node.expression;
+      else if (t.isJSXText(node)) {
+         const stringLiteral = transformJSXText(node)
+         if (stringLiteral) {
+            conditionalSeries = closeConditionalSeries(conditionalSeries);
+            array.push(stringLiteral)
+         }
+      }
+      else if (t.isJSXExpressionContainer(node)) {
+         const expression = node.expression;
          if (t.isJSXEmptyExpression(expression))
             continue;
+         conditionalSeries = closeConditionalSeries(conditionalSeries);
          array.push(expression)
       }
       else {
-         array.push(child.node)
+         conditionalSeries = closeConditionalSeries(conditionalSeries);
+         array.push(node)
       }
    }
+   if (conditionalSeries) array.push(createConditionalSeries(conditionalSeries))
    const arrayExpression = t.arrayExpression(array)
    arrayExpression.visited = true;
    return arrayExpression
@@ -236,26 +318,26 @@ function isJSXRoot(node) {
 
 
 
-const TemplateFunctions = new Map([
-   ['If', transformIfCall],
-   ['ElseIf', transformIfCall],
-   ['Else', transformElseCall],
-   ['For', transformIfCall], //TODO:
+const TemplateFunctions = {
+   If: transformIfCall,
+   ElseIf: transformIfCall,
+   Else: transformElseCall,
+   For: transformIfCall, //TODO:
    // ['jsxDEV', transformJSXFragmentCall],
    // ['jsx', transformJSXFragmentCall],
    // ['_jsx', transformJSXFragmentCall],
    // ['jsxsDEV', transformJSXFragmentCall],
    // ['jsxs', transformJSXFragmentCall],
    // ['_jsxs', transformJSXFragmentCall],
-])
+}
 
 
 function isTemplateFunction(name) {
-   return TemplateFunctions.has(name)
+   return name in TemplateFunctions
 }
 
 function transformTemplateFnCall(name, path) {
-   TemplateFunctions.get(name)(path);
+   TemplateFunctions[name](path);
 }
 
 function transformWatchSubject(path) {

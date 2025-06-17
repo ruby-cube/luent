@@ -26,29 +26,28 @@ export function TestMorphic() {
 
          <i--i>do something</i--i>
 
-         <$--suspense>
+         <o--suspense>
             <Something />
-         </$--suspense>
+         </o--suspense>
 
-         <$--try>
+         <o--try>
 
-         </$--try>
+         </o--try>
 
-         <$--portal>
+         <o--portal>
 
-         </$--portal>
+         </o--portal>
 
-         <$--transition>
-            <$--swap display />
+         <o--transition>
             {If($active,
                <p>hey</p>
             )}
-         </$--transition>
+         </o--transition>
 
-         <$--client hydrate>
+         <o--client hydrate>
             <button on:click={() => morph('hi')}>change to hi</button>
             <button on:click={() => morph('bye')}>change to bye</button>
-         </$--client>
+         </o--client>
       </>
    )
 }

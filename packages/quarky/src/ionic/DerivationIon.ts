@@ -8,9 +8,7 @@ import { emitSignal } from "../debug/debug";
 import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
 import { Ion } from "../ion/Ion";
 import { CompoundMorph, triggerEffects } from "../compound/Compound";
-import { Mutation } from "../Mutable";
 import { Traceable } from "../debug/Traceable";
-import { isIonizedModel } from "../ionized/ionize";
 import { debug } from "@rue/utils";
 
 

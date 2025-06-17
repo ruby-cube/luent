@@ -80,7 +80,7 @@ export function CellsApp() {
                )}
             </tbody>
          </table >
-         <$--style>{`
+         <o--style>{`
          body {
             margin: 0;
  }
@@ -109,7 +109,7 @@ export function CellsApp() {
          overflow: hidden;
  }
          `}
-         </$--style>
+         </o--style>
       </>
    )
 }
@@ -143,7 +143,7 @@ function Cell({ $column, $row } = fromTag<{
             )}
          </div >
 
-         <$--style>{`
+         <o--style>{`
                .cell, .cell input {
                   height: 1.5em;
                line-height: 1.5;
@@ -158,7 +158,7 @@ function Cell({ $column, $row } = fromTag<{
                   width: 100%;
                box-sizing: border-box;
    }`
-         }</$--style>
+         }</o--style>
       </>)
 }
 

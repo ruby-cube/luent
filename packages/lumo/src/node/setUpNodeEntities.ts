@@ -4,18 +4,19 @@ import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
 import { MatchCaseKit } from "../conditional/MatchCaseKit";
 import { ListRenderKit } from "../iteratives/ListRenderKit";
-import { NodeEntity, SwapConfig, SwapType } from "./makeNode";
+import { getGroupActivationType, NodeEntity } from "./makeNode";
 import { setUpTextNode } from "./TextNode";
 import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./InnerHTML";
 import { NodePod } from "./NodePod";
 import { AnyObject } from "@rue/types";
 import { MorphicRenderKit } from "../conditional/MorphicNode";
+import { ActivationType } from "../conditional/If";
 
 // [ ] validate and apply swap tag
 // [ ] validate and compose conditional series
 // [V] spread arrays and nested array
 
-export type NodeKit = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderSeries | MorphicRenderKit | InnerHTMLKit 
+export type NodeKit = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderSeries | MorphicRenderKit | InnerHTMLKit
 
 export type MutableKit = { mu: AnyObject }
 
@@ -27,56 +28,24 @@ export function setUpNodeEntities(
    nodePod: NodePod,
    nodeKits: NodeKit[] = []
 ) {
-   const series = new ConditionalSeriesBuilder(parent, nodePod, nodeKits)
-
    for (let i = 0; i < nodeEntities.length; i++) {
       let nodeEntity = nodeEntities[i];
       if (nodeEntity instanceof Array) {
-         if (series.isOpen) series.close()
          setUpNodeEntities(nodeEntity, parent, nodePod, nodeKits) //QUESTION: should swap and conditionalArray be inherited by this setup scope?
       }
-      else if (nodeEntity instanceof ConditionalRenderKit) {
-         const statementType = nodeEntity.statementType
-         if (statementType === 'if') {
-            series.open(nodeEntity)
-         }
-         else if (statementType === 'elseIf') {
-            if (series.isOpen) series.add(nodeEntity)
-            else if (__DEV__) console.warn('extraneous ElseIf()')
-         }
-         else { //else 
-            if (series.isOpen) {
-               series.add(nodeEntity)
-               series.close()
-            }
-            else if (__DEV__) console.warn('extraneous Else()')
-         }
-      }
-      else if (nodeEntity instanceof SwapConfig) {
-         const nextEntity = nodeEntities[i + 1];
-         if (nextEntity instanceof ConditionalRenderKit && nextEntity.statementType === 'if') {
-            series.open(nodeEntity.swap)
-         }
-         else if (nextEntity instanceof MatchCaseKit) {
-            nextEntity.swap = nodeEntity.swap
-         }
-         else if (__DEV__) {
-            console.warn('extraneous swap tag')
-         }
-      }
+      // else if (nodeEntity instanceof ConditionalRenderKit) {
+      //    nodeKits.push(setUpNodeEntity(new ConditionalRenderSeries([nodeEntity], getGroupActivationType()), parent, nodePod))
+      // }
       else if (nodeEntity === undefined) {
-         // if (series.isOpen) series.close()
          continue;
       }
       else if (isInnerHTMLKit(nodeEntity)) {
          nodeKits.push(setUpInnerHTML(nodeEntity, parent))
       }
       else {
-         if (series.isOpen) series.close()
          nodeKits.push(setUpNodeEntity(nodeEntity, parent, nodePod))
       }
    }
-   if (series.isOpen) series.close()
    return nodeKits;
 }
 
@@ -87,55 +56,49 @@ export function setUpNodeEntities(
 //    nodeKits.push(setUpNodeEntity(series, parent, nodeVine));
 // }
 
-class ConditionalSeriesBuilder {
-   private conditionalArray: ConditionalRenderKit[] | null = null;
-   private swap: SwapType | undefined;
+// class ConditionalSeriesBuilder {
+//    private conditionalArray: ConditionalRenderKit[] | null = null;
 
-   constructor(
-      private parent: Element,
-      private nodePod: NodePod,
-      private nodeKits: NodeKit[],
-   ) {
+//    constructor(
+//       private parent: Element,
+//       private nodePod: NodePod,
+//       private nodeKits: NodeKit[],
+//    ) {
 
-   }
+//    }
 
-   get isOpen() {
-      return !!this.conditionalArray && this.conditionalArray.length > 0
-   }
+//    get isOpen() {
+//       return !!this.conditionalArray && this.conditionalArray.length > 0
+//    }
 
-   open(
-      kitOrSwap: ConditionalRenderKit | SwapType
-   ) {
-      if (this.isOpen) {
-         // complete previous conditional array
-         this.close()
-      }
-      const isSwap = typeof kitOrSwap === 'string'
-      this.conditionalArray = isSwap ? [] : [kitOrSwap]
-      this.swap = isSwap ? kitOrSwap : undefined;
-   }
+//    open(
+//       kit: ConditionalRenderKit
+//    ) {
+//       if (this.isOpen) {
+//          // complete previous conditional array
+//          this.close()
+//       }
+//       this.conditionalArray =  [kit]
+//    }
 
-   add(kit: ConditionalRenderKit) {
-      if (!this.conditionalArray) throw new Error('no open series')
-      this.conditionalArray?.push(kit)
-   }
+//    add(kit: ConditionalRenderKit) {
+//       if (!this.conditionalArray) throw new Error('no open series')
+//       this.conditionalArray?.push(kit)
+//    }
 
-   close() {
-      const series = this.conditionalArray && this.conditionalArray.length ?
-         new ConditionalRenderSeries(
-            this.conditionalArray!,
-            makeElseKit,
-            this.swap
-         ) : undefined
-      this.conditionalArray = null
-      this.swap = undefined;
-      if (series) this.nodeKits.push(setUpNodeEntity(series, this.parent, this.nodePod));
-   }
-}
+//    close() {
+//       const series = this.conditionalArray && this.conditionalArray.length ?
+//          new ConditionalRenderSeries(
+//             this.conditionalArray!,
+//             makeElseKit,
+//             getGroupActivationType()
+//          ) : undefined
+//       this.conditionalArray = null
+//       if (series) this.nodeKits.push(setUpNodeEntity(series, this.parent, this.nodePod));
+//    }
+// }
 
-function makeElseKit() {
-   return new ConditionalRenderKit('else', () => [], 'create', [])
-}
+
 
 
 export function setUpNodeEntity(

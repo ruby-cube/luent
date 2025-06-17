@@ -239,17 +239,17 @@ export class EffectCycle {
    runEffects(phase: string) {
       this.currentPhase = phase;
       const effects = this.effects.get(phase);
-      console.log(phase, 'start size', effects?.size)
+      // console.log(phase, 'start size', effects?.size)
       if (effects) {
          for (const effect of effects) {
-            console.log(phase, 'before run effect size', effects?.size)
+            // console.log(phase, 'before run effect size', effects?.size)
             effect.task()
             if (!effect.vine) {
                continue; // effect has already been removed during the effect via 'once' or 'scheduler'
             }
             effect.watchSubject?.completedEffects.addToVine(effect, phase)
          }
-         console.log(phase, 'done size', effects?.size)
+         // console.log(phase, 'done size', effects?.size)
       }
    }
 }

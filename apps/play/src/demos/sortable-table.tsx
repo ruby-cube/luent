@@ -1,18 +1,18 @@
 
 import { component, Else, For, fromTag, If } from '@rue/lumo'
-import { inert, Ion, ion, ionize, watch } from '@rue/quarky'
+import { Ion, ion, ionize, watch } from '@rue/quarky'
 import { AnyObject } from '@rue/types'
 
 
 export function SortableTableApp() {
    const $searchQuery = ion('')
-   const gridColumns = inert(['name', 'power'])
-   const gridData = inert([
+   const gridColumns = ['name', 'power']
+   const gridData = [
       { name: 'Chuck Norris', power: Infinity },
       { name: 'Bruce Lee', power: 9000 },
       { name: 'Jackie Chan', power: 7000 },
       { name: 'Jet Li', power: 8000 }
-   ])
+   ]
 
    return component(
       <>
@@ -24,7 +24,7 @@ export function SortableTableApp() {
             columns={gridColumns}
             filterKey={$searchQuery}>
          </SortableTable >
-         <$--link href='/src/demos/sortable-table.css' rel='stylesheet' />
+         <o--link href='/src/demos/sortable-table.css' rel='stylesheet' />
       </>
    )
 }
@@ -64,7 +64,7 @@ function SortableTable(input = fromTag<{
          })
       }
       console.log('data', data)
-      return data
+      return filteredData
    })
 
    // window.$filteredData = $filteredData;

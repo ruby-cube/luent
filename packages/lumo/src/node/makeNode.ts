@@ -7,14 +7,16 @@ import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
-import { MorphicRenderKit } from "../morphic/MorphicNode";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
 import { createTryNode, TryNodeInput } from "../boundaries/Try";
 import { createSuspenseNode, SuspenseNodeInput } from "../boundaries/Suspense";
 import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { MaybeIon } from "../component/Input";
-import { Commons } from "../commons/Commons";
+import { Commons, Provided, wrapWithCommons } from "../commons/Commons";
+import { ActivationType } from "../conditional/If";
+import { fromTag, RenderSlot } from "../component/fromTag";
+import { getClosestCommons } from "../commons/commons-stack";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -36,8 +38,7 @@ export type NodeEntity =
    | Ion
    | InternalComponent
    | ListRenderKit
-   | MorphicRenderKit
-   | SwapConfig
+   // | MorphicRenderKit
    | ConditionalRenderKit
    | ConditionalRenderSeries
    | InnerHTMLKit
@@ -82,18 +83,48 @@ export type ElementConfig<K extends HTMLTag = HTMLTag> = {
 
 type NodeSetup<T extends HTMLTag | ComponentSetup> = {
    ref?: NodeRef<T> | NodesRef<T>,
+   provide?: Provided
 }
 
 export type ComponentConfig<T extends ComponentSetup = ComponentSetup> =
    T extends (props: infer P) => any ? P & NodeSetup<T> : T extends () => any ? NodeSetup<T> : never
 
 
-export type SwapType = 'mount' | 'create' | 'show'
+let groupActivationType: ActivationType | undefined = undefined
+let outerGroupActivationType: ActivationType | undefined = undefined
 
-export class SwapConfig {
-   constructor(
-      public swap: SwapType
-   ) { }
+export function getGroupActivationType() {
+   return groupActivationType
+}
+
+
+
+export function withGroupActivationReset(Slot: RenderSlot) {
+   outerGroupActivationType = groupActivationType
+   groupActivationType = undefined;
+   try {
+      return Slot()
+   }
+   finally {
+      groupActivationType = outerGroupActivationType;
+      outerGroupActivationType = undefined
+   }
+}
+
+export function wrapWithActivationType(type: ActivationType, Slot: RenderSlot, provide: Provided | undefined) {
+   const parentCommons = getClosestCommons()
+   if (!parentCommons) throw new Error('missing commons')
+   outerGroupActivationType = groupActivationType
+   groupActivationType = type;
+   try {
+      if (provide)
+         return wrapWithCommons(provide, Slot, parentCommons)
+      return Slot()
+   }
+   finally {
+      groupActivationType = outerGroupActivationType;
+      outerGroupActivationType = undefined
+   }
 }
 
 // TODO: how to distinguish render function from derived getter 
@@ -120,46 +151,45 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | '$--style' | '$--transit' | '$--transition' | 'vvv:mount' | 'vvv:create' | 'vvv:show' | '$--try' | '$--suspense' | '$--portal' | '$--link',
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--style' | 'o--transit' | 'o--transition' | 'o--mount' | 'o--show' | 'o--try' | 'o--suspense' | 'o--portal' | 'o--link',
    Slot: undefined | (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
-): DOMNode | InternalComponent | SwapConfig | JSX.Element | undefined {
+): DOMNode | InternalComponent | JSX.Element | undefined {
 
    switch (nodeType) {
 
-      case '$--try':
-         if (!Slot) throw new Error(`Extraneous <$--try>`)
+      case 'o--try':
+         if (!Slot) throw new Error(`Extraneous <o--try>`)
          return createTryNode(Slot, <TryNodeInput>config)
 
-      case '$--suspense':
-         if (!Slot) throw new Error(`Extraneous <$--suspense>`)
+      case 'o--suspense':
+         if (!Slot) throw new Error(`Extraneous <o--suspense>`)
          return createSuspenseNode(Slot, <SuspenseNodeInput>config)
 
-      case '$--portal':
-         if (!Slot) throw new Error(`Extraneous <$--portal>`)
+      case 'o--portal':
+         if (!Slot) throw new Error(`Extraneous <o--portal>`)
          return createPortalNode(Slot, <PortalNodeInput>config)
 
-      case '$--link':
+      case 'o--link':
          return createPortalNode(() =>
             makeElement('link', undefined, <ElementConfig>config, undefined)
             , { to: 'head' })
 
-      case '$--style':
+      case 'o--style':
          return createPortalNode(() =>
             makeElement('style', Slot, <ElementConfig>config, undefined)
             , { to: 'head' })
 
-      case 'vvv:show':
-         return new SwapConfig('show')
+      case 'o--show':
+         if (!Slot) throw new Error(`Extraneous <o--show>`)
+         return wrapWithActivationType('show', Slot, config.provide)
 
-      case 'vvv:mount':
-         return new SwapConfig('mount')
+      case 'o--mount':
+         if (!Slot) throw new Error(`Extraneous <o--mount>`)
+         return wrapWithActivationType('mount', Slot, config.provide)
 
-      case 'vvv:create':
-         return new SwapConfig('create')
-
-      case '$--transit':
-      case '$--transition':
+      case 'o--transit':
+      case 'o--transition':
          if (!Slot) throw new Error(`Extraneous transition node`)
          return createTransitionNode(nodeType, Slot, <TransitionNodeInput>config)
 

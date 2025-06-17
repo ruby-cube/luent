@@ -151,14 +151,6 @@ export function doAction<T>(name: Name, args: any[]) { //TODO: Generics
 
 // state capsules
 // arguments
-
-const [result, error] = await perform(INSERT_TEXT, newText, cursorPosition, doc)
-
-if (error) {
-
-}
-
-
 const INSERT_TEXT = defineAction(
    function insertText(text, position, doc) {
 
@@ -173,11 +165,3 @@ const result = await perform(INSERT_TEXT, newText, cursorPosition, doc, { // opt
 })
 
 
-const INSERT_TEXT = defineAction(
-   function insertText(text, position, doc) {
-
-   }, {
-   catch(err) {
-
-   }
-})

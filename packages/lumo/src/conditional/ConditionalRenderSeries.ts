@@ -1,5 +1,4 @@
 import { getViewFlask } from "../flask/ViewFlask";
-import { NodeEntity, SwapType } from "../node/makeNode";
 import { mountNodeEntities } from "../node/mountNodeKits";
 import { ConditionalRenderKit } from "./ConditionalRenderKit";
 import { ConditionalSeries } from "./ConditionalSeries";
@@ -11,21 +10,24 @@ import { NodeKit } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
-import { FLASK, Flask} from "@rue/flask";
+import { FLASK, Flask } from "@rue/flask";
 import { POSTEVENT } from "../render-cycle";
+import { ActivationType } from "./If";
 
 //TODO: rename 'phasic node' to 'transition node'
 //TODO: rename transitionNodes to 'transitNodes'
 //TODO: rename TransitionNode to ???
 
-
+function makeElseKit() {
+   return new ConditionalRenderKit('else', () => [], 'create', [])
+}
 
 export class ConditionalRenderSeries extends ConditionalSeries {
    declare statements: ConditionalRenderKit[];
 
    nodePod!: NodePod;
 
-   phasicNode?: TransitionNode
+   phasicNode?: TransitionNode | null
 
    /* We render all show statements eagerly to prevent buggy rendering */
    showKits: ConditionalRenderKit[] | undefined
@@ -34,10 +36,10 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
    constructor(
       statements: ConditionalRenderKit[],
-      makeElseKit: () => ConditionalRenderKit,
-      swap: SwapType = 'create'
+      activationType: ActivationType = 'create'
    ) {
       super(statements, makeElseKit);
+
       this.context = $_snap_context()
       this.__DEV__asyncPath = __DEV__ ? __DEV__buildAsyncPath() : undefined
       this.outerFlask = getViewFlask() //ie: enclosingFlask
@@ -56,7 +58,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       let showKits: ConditionalRenderKit[] | undefined
 
       for (const kit of statements) {
-         if (!kit.type) kit.type = swap;
+         if (!kit.type) kit.type = activationType;
          if (kit.type === 'show') {
             showKits = showKits || (showKits = this.showKits = [])
             showKits.push(kit);
@@ -333,7 +335,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    private render(kit: ConditionalRenderKit, parent: Element, fragment?: DocumentFragment, flask?: Flask) {
       const context = this.context;
       if (flask) context.set(FLASK, flask);
-      if(__DEV__) context.set(TRACE, this.__DEV__asyncPath)
+      if (__DEV__) context.set(TRACE, this.__DEV__asyncPath)
 
       $_run_with_(context, () => {
          const nodeEntities = kit.renderConditional(parent, kit.nodePod || (console.warn('DEV RESEARCH: no kit pod :('), this.nodePod))

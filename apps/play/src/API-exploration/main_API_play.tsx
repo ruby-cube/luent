@@ -119,11 +119,11 @@ const mouse = collectEffects(useMouse, { outlive: true })
 
 function SideBar(
     setup: {
-        ['$--color']: string
+        ['o--color']: string
     }
 ) {
 
-    const { '$--color': color } = setup
+    const { 'o--color': color } = setup
 
     watchEffect(async () => {
 

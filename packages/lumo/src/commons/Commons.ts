@@ -1,5 +1,5 @@
 import { unnestComponent } from "../component/InternalComponent";
-import { getClosestCommons, popCommons, pushCommons } from "./commons-stack";
+import { Commons as CommonsType, getClosestCommons, popCommons, pushCommons } from "./commons-stack";
 import { AppCommons, markIfMuIon } from "./provide";
 import { debug, Ion } from "@rue/quarky";
 import { CommonsEntryKey, toCommonsKey } from "./CommonsKey";
@@ -21,18 +21,23 @@ export function Commons(input = fromTag<{
    provide: Provided,
    Slot: RenderSlot
 }>()) {
-   const { Slot } = input
-   console.log('### Slot', Slot)
-
+   const { Slot, provide } = input
    if (!Slot) debug.warn(`Extraneous <Commons>`)
-
    const parentCommons = getClosestCommons()
    if (!parentCommons) {
       debug.traceAsyncPath()
       throw new Error(`no commons found :( This should never happen`)
    }
+   return wrapWithCommons(provide, Slot, parentCommons)
+}
 
-   const [entries, muIons] = toCommonsEntries(input.provide)
+export function wrapWithCommons(
+   provide: Provided,
+   Slot: RenderSlot,
+   parentCommons: CommonsType,
+) {
+
+   const [entries, muIons] = toCommonsEntries(provide)
    const commons: NodeCommons = {
       entries,
       parent: parentCommons,

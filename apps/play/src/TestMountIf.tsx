@@ -1,4 +1,4 @@
-import { component, If, Else, fade, ElseIf, slide, fromTag, v, target, prep, Ion } from "@rue/lumo";
+import { component, If, Else, fade, ElseIf, slide } from "@rue/lumo";
 import { debug, ion, ionize, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
 
@@ -12,13 +12,12 @@ export function MountIf() {
 
    const list = ionize({
       count: 0,
-   }, {
       increment(value: number) {
-         return list.count = list.count + value
+         return this.count = this.count + value
       }
    })
 
-   const $active = ion(false, {
+   const $active = ion(true, {
       toggle() {
          $active.state = !$active()
       }
@@ -55,45 +54,57 @@ export function MountIf() {
    // watch($color, ()=>{
    //    debug.traceAsyncPath()
    // })
-   //NOTE: if $--transit duration is shorter than $--transition duration, it will disable $--transition transition
+   //NOTE: if o--transit duration is shorter than o--transition duration, it will disable o--transition transition
    return component(
       <>
-         {/* <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: 'lime' }}>shout</button> */}
-         <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: ($color() + 'e') }}>shout</button>
-         <h1>Hello {(todos[0].name)}</h1>
-         <div>hi</div>
-         <$--transition>
-            {If($active, (debug.traceAsyncPath(),
-               <>
-                  oh
-                  <$--transit with={slide({ x: -100, duration: 2200 })}>
-                     <h2>hi</h2>
-                  </$--transit>
-                  <$--transit with={slide({ x: 100, duration: 2200 })}>
-                     <h2>hope</h2>
-                  </$--transit>
-                  {If($ready,
-                     <p>ready</p>
-                  )}
-               </>
-            ))}
-            {ElseIf($ready,
-               <>
-                  low
-                  <h2>balloon</h2>
-               </>
-            )}
-            {Else(
-               <>
-                  so
-                  <h2>bye</h2>
-               </>
-            )}
-         </$--transition>
-         <button on:click={$active.toggle}>toggle active</button>
-         <button on:click={$ready.toggle}>toggle ready</button>
-         {/* <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child> */}
+         {If($active,
+            <div>
+               'hi'
+            </div>
+         )}
+         <div>bye</div>
       </>
+      // <div>
+      //    <div>hi</div>
+      //    <div>bye</div>
+      // </div>
+      // <>
+      //    {/* <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: 'lime' }}>shout</button> */}
+      //    <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: ($color() + 'e') }}>shout</button>
+      //    <h1>Hello {(todos[0].name)}</h1>
+      //    <div>hi</div>
+      //    {/* <o--transition> */}
+      //    {If($active, (debug.traceAsyncPath(),
+      //       <>
+      //          oh
+      //          {/* <o--transit with={slide({ x: -100, duration: 2200 })}> */}
+      //          <h2>hi</h2>
+      //          {/* </o--transit> */}
+      //          {/* <o--transit with={slide({ x: 100, duration: 2200 })}> */}
+      //          <h2>hope</h2>
+      //          {/* </o--transit> */}
+      //          {If($ready,
+      //             <p>ready</p>
+      //          )}
+      //       </>
+      //    ))}
+      //    {ElseIf($ready,
+      //       <>
+      //          low
+      //          <h2>balloon</h2>
+      //       </>
+      //    )}
+      //    {Else(
+      //       <>
+      //          so
+      //          <h2>bye</h2>
+      //       </>
+      //    )}
+      //    {/* </o--transition> */}
+      //    <button on:click={$active.toggle}>toggle active</button>
+      //    <button on:click={$ready.toggle}>toggle ready</button>
+      //    {/* <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child> */}
+      // </>
    )
 }
 

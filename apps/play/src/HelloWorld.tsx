@@ -1,6 +1,7 @@
-import { Component, Else, ElseIf, For, fromTag, If,  provideAppwide } from "@rue/lumo";
+//@ts-nocheck
+import { Component, Else, ElseIf, For, fromTag, If, provideAppwide } from "@rue/lumo";
 import { Ion, ion, ionize } from "@rue/quarky";
-import {  inert } from "../../../packages/quarky/src/ionized/inert";
+import { inert } from "../../../packages/quarky/src/ionized/inert";
 import { Well, Wellerman } from "./Well";
 import { Commons } from "../../../packages/lumo/src/commons/Commons";
 
@@ -141,16 +142,24 @@ export function IonAccess() {
 
    return component(
       <>
-         <vvv:mount />
-         {If($x() > 10,
+         {If($x() > 10, 'mount',
             <p>{$x} is greater than 10</p>
          )}
-         {ElseIf(5 > $x(),
+         {ElseIf(5 > $x(), 'mount',
             <p>{$x} is less than 5</p>
          )}
-         {Else(
+         {Else('mount',
             <p>{$x} is between 5 and 10</p>
          )}
+         {$$series(If($x() > 10, 'mount',
+            <p>{$x} is greater than 10</p>
+         ),
+            ElseIf(5 > $x(), 'mount',
+               <p>{$x} is less than 5</p>
+            ),
+            Else('mount',
+               <p>{$x} is between 5 and 10</p>
+            ))}
       </>
    )
 }
@@ -165,20 +174,20 @@ function SvelteA() {
    let $s: any;
    return component(
       <>
-         <vvv:mount />
-         {If($x() > 10,
-            $x
-         )}
-         {ElseIf(5 > $x(),
-            <>{$x} is less than 5</>
-         )}
-         {ElseIf($x,
-            <p>{$x} is less than 5</p>
-         )}
-         {Else(
-            <p>{$x} is between 5 and 10</p>
-         )}
-
+         <o--mount>
+            {If($x() > 10,
+               $x
+            )}
+            {ElseIf(5 > $x(),
+               <>{$x} is less than 5</>
+            )}
+            {ElseIf($x,
+               <p>{$x} is less than 5</p>
+            )}
+            {Else(
+               <p>{$x} is between 5 and 10</p>
+            )}
+         </o--mount>
          <div>
             {$ > $x() + 10}
          </div>
@@ -222,7 +231,7 @@ function ColumnB() {
 export function HelloWorld() {
    return component(
       // <h1>hello world</h1>
-      <input m:value={vvvalue}></input>
+      <input m:value={value}></input>
 
    )
 }
@@ -270,7 +279,7 @@ function Column() {
 function of(list: any) {
    return ['', 9] as [string, number]
 }
-// function For(input: { [key: string]: any, Slot: any[] }) {
+// function For(input: {[key: string]: any, Slot: any[] }) {
 //    return component(
 //       ''
 //    )
@@ -354,7 +363,7 @@ function J(input: { for: any, Slot: any, params: any }) {
    const $msg = ion('hi')
 
    provideAppwide(_appwide_dog_, mu(dog, 'set::setValue')) // auto-readonly unless marked with m
-   provideGlobal(_global_dog_, dog) // auto-readonly unless marked with 
+   provideGlobal(_global_dog_, dog) // auto-readonly unless marked with
 
    // [ ] should mu() allow setting values? ... there's no way to indicate from the child component that you want to be writable...
    // also there's no way to write a setter to trace the set

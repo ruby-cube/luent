@@ -53,7 +53,7 @@ const defaultFade: TransitionClasses = {
 
 
 export function createTransitionNode(
-   type: '$--transition' | '$--transit',
+   type: 'o--transition' | 'o--transit',
    Slot: (() => NodeEntity),
    input: TransitionNodeInput
 ) {
@@ -99,7 +99,7 @@ export function createTransitionNode(
             controller = new AbortController()
          
          if (transition_in) {
-            if (type === '$--transit') {
+            if (type === 'o--transit') {
                div.classList.add(...enterFromClasses!);
                div.classList.add(transition_in);
             }
@@ -269,7 +269,7 @@ export function createTransitionNode(
                         div.classList.remove(transition_out);
                         div.classList.remove(...exitClasses!);
 
-                        if (type === '$--transition' && transition_in) {
+                        if (type === 'o--transition' && transition_in) {
                            div.classList.add(...enterFromClasses!);
                            div.classList.add(transition_in);
                         }
@@ -338,7 +338,7 @@ export function createTransitionNode(
                div.classList.remove(transition_out);
                div.classList.remove(...exitClasses!);
 
-               if (type === '$--transition' && transition_in) {
+               if (type === 'o--transition' && transition_in) {
                   div.classList.add(...enterFromClasses!);
                   div.classList.add(transition_in);
                }
@@ -378,7 +378,7 @@ export function createTransitionNode(
       const div = $div()
    }
 
-   const renderNode = type === '$--transit' ? renderTransitNode : renderPhasicNode
+   const renderNode = type === 'o--transit' ? renderTransitNode : renderPhasicNode
 
    return renderNode(
       $div,

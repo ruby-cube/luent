@@ -103,7 +103,7 @@ function FlightBooker() {
 
          <p>{($canBook() ? '' : 'Return date must be after departure date.')}</p>
 
-         <$--style>
+         <o--style>
             {`
                select,
                input,
@@ -121,7 +121,7 @@ function FlightBooker() {
                   color: red;
                }
             `}
-         </$--style>
+         </o--style>
       </>
    )
 }
@@ -171,7 +171,7 @@ function TimerApp() {
 
          <button on:click={reset}>Reset</button>
 
-         <$--style>
+         <o--style>
             {css`
                   .elapsed-container {
                      width: 300px;
@@ -183,7 +183,7 @@ function TimerApp() {
                      height: 10px;
                   }
                `}
-         </$--style>
+         </o--style>
       </>
    )
 }
@@ -261,7 +261,7 @@ function CRUDApp() {
             <button on:click={update} > Update</button >
             <button on:click={del} > Delete</button >
          </div >
-         <$--style>{`
+         <o--style>{`
    * {
       font-size: inherit;
    }
@@ -284,7 +284,7 @@ select {
 button + button {
    margin-left: 5px;
 }
-`}</$--style>
+`}</o--style>
       </>
 
 
@@ -381,7 +381,7 @@ function CircleApp() {
                />
             </div>
          )}
-         <$--style>{`
+         <o--style>{`
 body {
    margin: 0;
    overflow: hidden;
@@ -434,7 +434,7 @@ circle {
    padding: 0 50px;
    color: #bbb;
 }`}
-         </$--style>
+         </o--style>
       </>
    )
 }

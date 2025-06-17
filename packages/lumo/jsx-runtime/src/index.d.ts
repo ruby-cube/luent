@@ -2601,14 +2601,14 @@ declare global {
 
       interface LumoElements {
          'i--i': {}; //comments
-         '$--style': { children: string };
-         '$--portal': PortalNodeInput & { children: Lumo.Slot }
-         '$--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
-         '$--suspense': SuspenseNodeInput & { children: Lumo.Slot };
-         '$--try': TryNodeInput & { children: Lumo.Slot };
-         '$--transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
-         '$--transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
-         '$--dock': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+         'o--style': { children: string };
+         'o--portal': PortalNodeInput & { children: Lumo.Slot }
+         'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
+         'o--suspense': SuspenseNodeInput & { children: Lumo.Slot };
+         'o--try': TryNodeInput & { children: Lumo.Slot };
+         'o--transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+         'o--transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
+         'o--dock': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
       }
 
       interface _IntrinsicElements {

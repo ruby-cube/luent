@@ -1,18 +1,69 @@
 import { AnyObject } from "@rue/types";
-import { isIonizedModel, toRaw, Ionized, ionize, IonizeByThis, MaybeIonized, ToRaw, } from "./ionize";
-import { AtomicOp, getAtomicOp } from "./AtomicOp";
-import { GetPreopData, IonizedModel, maybeIonize, } from "./IonizedModel";
-import { getAtomicPion, PionQuark, triggerPion } from "./Pion";
-import { enlistIonizedMethods, TriggeringOpDef, trigger, TrackableOpDef, IonizedMethodsDef } from "./IonizedMethods";
+import { isIonizedModel, toRaw, Ionized, ionize, IonizeBy, MaybeIonized, ToRaw, } from "./ionize";
+import { getAtomicOp } from "./AtomicOp";
+import { IonizedModel, maybeIonize, } from "./IonizedModel";
+import { getAtomicPion } from "./Pion";
+import { TriggeringOpDef, trigger, IonizedMethodsDef } from "./IonizedMethods";
 import { quarkOf } from "../Quark";
 import { trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackModel, trackOp } from './OpDefinitions'
 
-
-
 declare global {
    interface Array<T> {
-      splice<H>(this: H, start: number, deleteCount?: number, ...items: T[]): IonizeByThis<H, ToRaw<T>[]>;
-      // values<H>(): IonizeByThis<H, ArrayIterator<T>>;
+      values<H>(): IonizeBy<H, ArrayIterator<ToRaw<T>>>;
+      entries<H>(): IonizeBy<H, ArrayIterator<ToRaw<T>>>;
+
+      at<H>(index: number): IonizeBy<H, T> | undefined;
+      concat<H>(...items: (IonizeBy<H, T> | IonizeBy<H, T>[])[]): IonizeBy<H, ToRaw<T>[]>;
+      slice<H>(start?: number, end?: number): IonizeBy<H, ToRaw<T>[]>;
+
+      // // Mutator methods
+      copyWithin<H>(target: number, start: number, end?: number): IonizeBy<H, ToRaw<T>[]>;
+      fill<H>(value: IonizeBy<H, T>, start?: number, end?: number): IonizeBy<H, ToRaw<T>[]>;
+      pop<H>(): IonizeBy<H, T> | undefined;
+      push<H>(...items: IonizeBy<H, T>[]): number;
+      reverse<H>(): IonizeBy<H, ToRaw<T>[]>;
+      shift<H>(): IonizeBy<H, T> | undefined;
+      sort<H>(compareFn?: (a: IonizeBy<H, T>, b: IonizeBy<H, T>) => number): IonizeBy<H, ToRaw<T>[]>;
+      splice<H>(this: H, start: number, deleteCount?: number, ...items: IonizeBy<H, T>[]): IonizeBy<H, ToRaw<T>[]>;
+
+      forEach<H, O>(
+         this: H,
+         callback: (this: O, value: IonizeBy<H, T>, index: number, array: H) => void,
+         thisArg?: O
+      ): void;
+      map<U, H, O>(
+         this: H,
+         callback: (this: O, value: IonizeBy<H, T>, index: number, array: H) => U, //QUESTION: should the array be ionized?
+         thisArg?: O
+      ): IonizeBy<H, ToRaw<T>[]>;
+      filter<H, O>(
+         this: H,
+         predicate: (this: H, value: IonizeBy<H, T>, index: number, array: H) => boolean,
+         thisArg?: O
+      ): IonizeBy<H, ToRaw<T>[]>;
+      find<H, O>(
+         this: H,
+         predicate: (this: O, value: IonizeBy<H, T>, index: number, array: H) => boolean,
+         thisArg?: O
+      ): IonizeBy<H, T> | undefined;
+
+      reduce<U, H>(
+         this: H,
+         callback: (accumulator: U, currentValue: IonizeBy<H, T>, index: number, array: H) => U,
+         initialValue: IonizeBy<H, U>
+      ): IonizeBy<H, U>;
+      reduceRight<U, H>(
+         this: H,
+         callback: (accumulator: U, currentValue: IonizeBy<H, T>, index: number, array: H) => U,
+         initialValue: IonizeBy<H, U>
+      ): IonizeBy<H, U>;
+
+      // // Methods introduced in ES2023
+      toSorted<H>(compareFn?: (a: IonizeBy<H, T>, b: IonizeBy<H, T>) => number): IonizeBy<H, ToRaw<T>[]>;
+      toReversed<H>(): IonizeBy<H, ToRaw<T>[]>;
+      with<H>(index: number, value: IonizeBy<H, T>): IonizeBy<H, ToRaw<T>[]>;
+
+      [Symbol.iterator]<H>(): IonizeBy<H, IterableIterator<ToRaw<T>>>;
       ionizable: 'Array'
    }
 }
@@ -214,9 +265,7 @@ export const ionizedArray: IonizedMethodsDef = {
    entries: trackableOp, // newEntriesIterator = entries()
    values: trackableOp, // newIterable = values()
 
-   //@ts-expect-error
    toLocaleString: trackableOp, // string = toLocaleString() 
-   //@ts-expect-error
    toString: trackableOp, // string = toString()
 
    find: trackableIterative, // item = find(callbackFn, thisArg?)
@@ -297,7 +346,7 @@ export const ionizedArray: IonizedMethodsDef = {
    },
 
    splice: {
-      input: ([start, deleteCount, ...args]: Parameters<Array<any>['splice']>) => [start, deleteCount, ...deionizeArgs(args)],
+      input: ([start, deleteCount, ...args]) => [start, deleteCount, ...deionizeArgs(args)],
       output: ionize,
       triggers: (model) => [
          trigger(model),
@@ -513,7 +562,7 @@ export function isIonizedArray(target: any): target is IonizedModel {
 
 export const ionizedIterable = {
    next: {
-      output: o => maybeIonize(o),
+      output: (o: unknown) => maybeIonize(o),
       track: trackModel
    }
 }

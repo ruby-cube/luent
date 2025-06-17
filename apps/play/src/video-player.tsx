@@ -135,7 +135,7 @@ export function VideoPlayer() {
                )}
             </>
          ))}
-         <$--style>{`
+         <o--style>{`
          html {
   font-size: 18px;
 }
@@ -171,7 +171,7 @@ button {
   display: inline-block;
   margin-left: 5px;
 }
-         `}</$--style>
+         `}</o--style>
       </>
    )
 }
