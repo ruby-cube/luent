@@ -71,6 +71,10 @@ function setUpUpdateCycleManager(phases?: [CyclePhase, ...CyclePhase[]]) {
    return cycleManager;
 }
 
+export function getUpdateCycleCount(){
+   return reactivitySystem.UpdateCycle.count
+}
+
 
 
 

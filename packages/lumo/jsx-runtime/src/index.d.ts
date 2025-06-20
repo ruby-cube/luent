@@ -2601,11 +2601,16 @@ declare global {
 
       interface LumoElements {
          'i--i': {}; //comments
-         'o--style': { children: string };
          'o--portal': PortalNodeInput & { children: Lumo.Slot }
+         'o--style': { children: string };
          'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
+         
+         'o--show': { children: ConditionalRenderKit[]; };
+         'o--mount': { children: ConditionalRenderKit[]; };
+
          'o--suspense': SuspenseNodeInput & { children: Lumo.Slot };
          'o--try': TryNodeInput & { children: Lumo.Slot };
+
          'o--transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
          'o--transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
          'o--dock': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>

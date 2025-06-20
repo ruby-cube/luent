@@ -55,8 +55,6 @@ export function useDeleteOp(target: AnyObject) {
 }
 
 
-
-
 export const trackableHasOp: TrackableOpDef = {
    input: ([key]) => [toRaw(key)],
    createOp: (target) => (key: unknown) => hasMaybeIonized(key, target as Set<unknown>),
@@ -80,6 +78,7 @@ export const trackableIterative: TrackableOpDef = {
    track: trackModel,
 }
 
+
 /**
  * For methods that produce a new version of the original data structure by iterating over the original, eg. array.map()
  */
@@ -88,7 +87,6 @@ export const trackableCreativeIterative: TrackableOpDef = {
    track: trackModel,
    output: (o) => ionize(o)
 }
-
 
 
 /**

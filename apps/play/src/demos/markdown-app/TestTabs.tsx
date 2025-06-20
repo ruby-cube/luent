@@ -1,4 +1,4 @@
-import { component, For, fromCommons, fromTag, If, nodeRef } from "@rue/lumo";
+import { CommonsKey, component, For, fromCommons, fromTag, If, nodeRef } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
 import { Ion, ion, ionize, Ionized, watch } from "@rue/quarky";
 
@@ -280,7 +280,7 @@ type TabManager = {
 }
 
 const FILES_KIT = CommonsKey<FileManager>('FILES_KIT')
-const TABS_KIT = CommonsKey(v<TabManager>, 'm')
+const TABS_KIT = CommonsKey<TabManager>('TABS_KIT')
 
 
 // const OPEN_FILE = CommonsKey(v<FileManager['openFile']>)

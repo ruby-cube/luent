@@ -50,7 +50,10 @@ function throwError(...details: any[]) {
 }
 
 function warn(...details: any[]) {
-   if (__DEV__) console.warn(...details)
+   if (__DEV__) {
+      console.warn(...details)
+      console.trace()
+   }
    else {
       logs.push({ type: 'warn', details })
    }

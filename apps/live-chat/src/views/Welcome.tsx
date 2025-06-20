@@ -41,7 +41,7 @@ function Welcome() {
          )}
 
 
-         <style>{`
+         <o--style>{`
          .welcome {
             text - align: center;
          padding: 20px 0;
@@ -72,7 +72,7 @@ function Welcome() {
          .welcome button {
             margin: 20px auto;
   }
-      `}</style>
+      `}</o--style>
       </div >
    )
 }

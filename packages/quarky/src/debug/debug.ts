@@ -11,6 +11,7 @@ import { Particle } from "../compound/Particle";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { Traceable } from "./Traceable";
 import { debug as _debug } from "@rue/utils";
+import { Mutation } from "../Mutable";
 
 // export interface DEVLabellable {
 //    labelName?: string
@@ -83,8 +84,8 @@ export const debug = {
    ..._debug
 }
 
-export type TraceableSubject = { 
-   [QUARK]: TraceableQuark, 
+export type TraceableSubject = {
+   [QUARK]: TraceableQuark,
    // labelName?: string
 }
 
@@ -346,3 +347,97 @@ export type TraceableQuark = {
 // // called within an effect
 // debug.asyncTrace()
 // debug.triggerTrace()
+
+const textBlotA = [{ text: 'a' }, { text: 'b' }]
+const textBlotB = [{ text: 'a' }, { text: 'b' }, { text: 'hi' }]
+const textBlotC = { text: 'a', length: 9, starred: true }
+const textBlotD = { text: 'b', length: 9, starred: true }
+const inputA =
+   // 9
+   formatArgs([{ text: 'hi', position: 9 }])
+const inputB = formatArgs([{ text: 'hi' }, 9])
+const inputG = formatArgs([{ text: 'bye' }, 10])
+
+let trace;
+function doA() {
+   doB()
+}
+function doB() {
+   doC()
+}
+function doC() {
+   doD()
+}
+function doD() {
+   trace = getPublicTrace()
+}
+doA()
+
+
+console.log(
+   `insertText
+a formatted log`)
+console.group('@insertText(', ...inputA, ')');
+console.groupCollapsed(`textBlot.push(`, ...inputB, ')');
+console.log('$ textBlot:', textBlotC, '⟹', textBlotD);
+console.log('$ textBlot.length: 2 ⟹ 3'); // state
+console.log('> characterCount: "2 chars" ⟹ "3 chars"'); // derivation
+console.log(trace)
+console.groupEnd();
+console.groupCollapsed(`textBlot.push(`, ...inputG, `)`);
+console.log('$ textBlot:', textBlotA, '⟹', textBlotB);
+console.log('$ textBlot.length: 2 ⟹ 3');
+console.log(`NonError Trace:\n    ` + trace)
+console.groupEnd();
+console.groupEnd();
+console.group('@insertText(', inputA, ')');
+console.groupCollapsed(`textBlot.push(`, ...inputB, ')');
+console.log('$ textBlot:', textBlotC, '⟹', textBlotD);
+console.log('$ textBlot.length: 2 ⟹ 3');
+console.log(trace)
+console.groupEnd();
+console.groupCollapsed(`textBlot.push(`, ...inputG, `)`);
+console.log('$ textBlot:', textBlotA, '⟹', textBlotB);
+console.log('$ textBlot.length: 2 ⟹ 3');
+console.log(`NonError Trace:\n    ` + trace)
+console.groupEnd();
+// console.log('duration:', 90, 'ms')
+console.groupEnd();
+
+function formatArgs(args: any[]) {
+   const formatted = [args[0]]
+   let i = 1
+   while (i < args.length) {
+      formatted.push(',', args[i])
+      i++;
+   }
+   return formatted
+}
+
+function getObjName(obj: object) {
+   return 'DEV_label' in
+      obj ? obj.DEV_label : obj.constructor.name
+}
+
+type TrackedState = {
+   target: object,
+   op: '[[get]]' | string | '[[model]]',
+   args: any[],
+   previous: any,
+   current: any
+}
+
+
+function logMutatingOp(target: object, method: string, args: any[], states: TrackedState[], trace: string) {
+   const obj = getObjName(target)
+   if (method === '[[set]]') console.groupCollapsed(`${obj}.${args[0]} = ${args[1]}`)
+   else console.groupCollapsed(`${obj}.${method}(`, ...inputG, `)`);
+   for (const { op, args, previous, current, target } of states) {
+      const obj = getObjName(target)
+      if (op === '[[get]]') console.log('$', `${obj}.${args[0]}:`, previous, '⟹', current)
+         else if (op === '[[model]]') console.log('$', `${obj}:`, previous, '⟹', current)
+      else console.log('$', `${obj}.${op}(${args.toString()}):`, previous, '⟹', current) //NOTE: only if whole model is triggered
+   }
+   console.log(`NonError Trace:\n    ` + trace)
+   console.groupEnd();
+}

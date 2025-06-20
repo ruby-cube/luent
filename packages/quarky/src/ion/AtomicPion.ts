@@ -4,12 +4,12 @@ import { asParticle, Particle, ParticleMorph } from "../compound/Particle";
 import { quarkOf, QUARK, Quark, EntityQuark, QuarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
-import { Ion, isIon, AtomicIon } from "./ion";
 import { MutableCapsule } from "../capsule/Capsule";
-import { __DEV__traceMethodCall } from "../debug/debug";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
 import { trigger } from "../ReactivitySystem";
 import { Traceable } from "../debug/Traceable";
+import { MutableIon } from "./Ion";
+import { initializeSnapshots } from "../ionized/TimeTraveler";
 
 // writable vs non-writable 
 // inert vs reactive
@@ -36,7 +36,7 @@ export function isAtomicPionQuark(value: any): value is AtomicPionQuark {
 }
 
 /** INTERNAL */
-export type $AtomicPionState = AtomicIon & MutableCapsule & {
+export type $AtomicPionState = MutableIon<unknown> & MutableCapsule & {
    [QUARK]: PionQuark<$AtomicPionState> & ParticleMorph & Watchable
 }
 
@@ -47,9 +47,6 @@ export type $AtomicPionState = AtomicIon & MutableCapsule & {
  * pion quark can exist before the ion is created. 
  * */
 export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
-
-   asReadonly?: Ion
-   asReined?: Ion
 
    ionized: boolean = false;
 
@@ -103,6 +100,8 @@ export function createAtomicPion(model: IonizedModel, key: PropertyKey, pionQuar
          return model[key] = value;
       }
    })
+
+   initializeSnapshots($atomicPionState)
 
    return $atomicPionState as unknown as $AtomicPionState
 }

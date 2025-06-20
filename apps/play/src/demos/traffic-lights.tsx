@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo";
-import { ANY_STATE, Finiton, finiton, ion, withTimeout as transitionAfter } from "@rue/quarky";
+import { ANY_STATE, finiton, ion, withTimeout as transitionAfter } from "@rue/quarky";
 
 // click before timeout
 //  - clear timeout
@@ -16,6 +16,7 @@ export function TrafficLight() {
          switch: () => 'on'
       },
       'x:broken': {},
+      
       [ANY_STATE]: {
          break: () => 'x:broken'
       }
@@ -82,8 +83,6 @@ export function TrafficLight() {
          return $power.is('x:broken') ? .5 : (isActive() ?  1: .5)
       }
    }
-
-   //TODO: over eager compiler turn $btnOpacity() into a named derivation... how can I prevent this? don't turn single calls into derivation?
 
    return component(
       <>

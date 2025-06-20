@@ -1,7 +1,4 @@
-//@ts-nocheck
-import { AnyObject } from "@rue/types";
-import { hasQuark, quarkOf } from "../Quark";
-import { Mutable, Mutation, MutableEntity, asMutable, isMutableEntity } from "../Mutable";
+import { Mutation, MutableEntity, asMutable } from "../Mutable";
 
 // Actions may span mulitple effect cycles
 
@@ -47,26 +44,27 @@ export const DEEP = true;
 type Task = () => void;
 
 class Action {
+   stateEntities: Set<object> = new Set()
 
    mutations: Mutation[] = []
 
-   snapshot(target: MutableEntity, deep: boolean) {
-      if (!hasQuark(target)) return false; //TODO: or, if it is a plain object, we can do the clone method instead of mutations. What about derivations from neutrons?
-      if (deep) {
-         storeMutations(this, <MutableEntity>target)
-         //TODO: What about arrays, or arrays with properties on them, or tuples?
-         for (const key in target) {
-            const value = (<AnyObject>target)[key]
-            if (isMutableEntity(value)) {
-               this.snapshot(value, true)
-            }
-         }
-      }
-      else {
-         storeMutations(this, <MutableEntity>target)
-      }
-      return true;
-   }
+   // snapshot(target: MutableEntity, deep: boolean) {
+   //    if (!hasQuark(target)) return false; //TODO: or, if it is a plain object, we can do the clone method instead of mutations. What about derivations from neutrons?
+   //    if (deep) {
+   //       storeMutations(this, <MutableEntity>target)
+   //       //TODO: What about arrays, or arrays with properties on them, or tuples?
+   //       for (const key in target) {
+   //          const value = (<AnyObject>target)[key]
+   //          if (isMutableEntity(value)) {
+   //             this.snapshot(value, true)
+   //          }
+   //       }
+   //    }
+   //    else {
+   //       storeMutations(this, <MutableEntity>target)
+   //    }
+   //    return true;
+   // }
 
    rollback() {
       const mutations = this.mutations
@@ -109,27 +107,31 @@ type ActionDefinition = {
    catch(error: unknown, action: Action): any
 }
 
-const actionMap: Map<Name, ActionDefinition> = new Map()
+// const actionMap: Map<Name, ActionDefinition> = new Map()
 
-export function defineAction(action: ActionDefinition) { //TODO: generics
-   const name = Symbol()
-   actionMap.set(name, action)
-   return name;
-}
+// export function defineAction(action: ActionDefinition) { //TODO: generics
+//    const name = Symbol()
+//    actionMap.set(name, action)
+//    return name;
+// }
 
-export function doAction<T>(name: Name, args: any[]) { //TODO: Generics
-   const action = actionMap.get(name);
-   if (!action) throw new Error(`No action `)
+export function doAction<T>(action: Function, args: any[], options?: { catch?: (err: unknown) => void }) { //TODO: Generics
+   if (action.length === 0) throw new Error('Action cannot not be a method that mutates state via this or closure. Any state to be mutated by actions must be explicitly passed in as an argument')
    const thisAction = new Action()
    try {
-      const output = action.do(thisAction)(...args)
+      prepAction(thisAction, args) // 
+      const output = action(...args)
       if (output instanceof Promise) {
+         // TODO: not sure if this is correct...
          const awaitPromise = async () => {
             try {
                return await output;
             }
             catch (err) {
-               return action.catch(err, thisAction)
+               return options?.catch?.(err)
+            }
+            finally {
+               endAction(thisAction)
             }
          }
          return awaitPromise()
@@ -139,29 +141,60 @@ export function doAction<T>(name: Name, args: any[]) { //TODO: Generics
       }
    }
    catch (err) {
-      return action.catch(err, thisAction)
+      return options?.catch?.(err)
    }
    finally {
-      thisAction.emitCompleted()
+      endAction(thisAction)
    }
 }
 
+
+
+function prepAction(action: Action, args: any[]){
+   // store stateful entities for state lock
+
+   // check if stateful entities are currently involved in an active action
+   // - if so, queue action till after action completed
+   // - if not start action
+}
+
+function endAction(action: Action){
+   action.emitCompleted()
+}
 
 //API exploration
 
 // state capsules
 // arguments
-const INSERT_TEXT = defineAction(
-   function insertText(text, position, doc) {
+function INSERT_TEXT(text, position, doc) {
 
-   }
-)
+}
 
 
-const result = await perform(INSERT_TEXT, newText, cursorPosition, doc, { // options obj must be POJO (distinguish from Promises)
+const result = await doAction(
+   INSERT_TEXT, newText, cursorPosition, doc, { // options obj must be POJO (distinguish from Promises and other objs with catch method)
    catch(err) {
 
    }
 })
+
+const result = await doAction.fromApp(
+   INSERT_TEXT, newText, cursorPosition, doc, { // options obj must be POJO (distinguish from Promises)
+   catch(err) {
+
+   }
+})
+
+
+
+
+function insertText() {
+   return doAction(INSERT_TEXT, newText, cursorPosition, doc, { // options obj must be POJO (distinguish from Promises)
+      catch(err) {
+
+      }
+   })
+}
+
 
 

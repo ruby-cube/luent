@@ -188,6 +188,7 @@ function getExistingIonizedModel(target: object, markMap?: object) {
          throw Error('Cannot extend or modify existing ionized model with methods or markMap')
       }
       debug.warn('CASE RESEARCH: ionizing raw target with existing ionized model') // we want to track how often devs will ionize a raw target but not track when we ionize a raw target internally. That's why we have a public `ionize` and an internal `ionizeModel`
+      return existing
    }
    return existing
 }

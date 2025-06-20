@@ -1,11 +1,11 @@
-
+//@ts-nocheck
 function LoadingApp() {
    const $data = dispatch({ get: MARKDOWN_FILES }) // how to deal with latency?
 
    return component(
       <>
-         {Await($data,
-            <App data={$data}></App>
+         {Await(suspense =>
+            <App data={$data} {...suspense}></App>
          )}
          {Meanwhile(
             <>
@@ -20,11 +20,20 @@ function LoadingApp() {
    )
 }
 
-function Album() {
-   const $album = resolveSuspense(fromCloud(ALBUM)) 
-   const $albumB = resolveSuspense(fromCloud(ALBUMB)) // will resolve in parallel
-   const $albumDescription = resolveSuspense(fromCloud(ALBUM, )) //TODO: how to resolve in sequence (dependent fetches)
-
+function Album(input = fromTag<{
+   resolve: ResolveSuspense
+}>()) {
+   const { resolve } = input
+   
+   const $album = fromCloud(ALBUM, {
+      suspense: resolve,
+      catch(err) {
+         $album.state = 'default'
+      }
+   })
+   const $albumB = fromCloud(ALBUMB, { suspense: resolve }) // will resolve in parallel
+   const [$albumA, $albumB, $albumC]
+      = fromCloud([ALBUM_A, ALBUM_B, ALBUM_C]) // resolve in sequence (dependent fetches)
 
    return component((album = $album()) =>
       <div>{album.$title}</div>

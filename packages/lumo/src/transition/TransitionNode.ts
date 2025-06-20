@@ -13,7 +13,7 @@ export type TransitionHook = {
 }
 
 export type TransitionNodeInput = {
-   Slot: (() => NodeEntity) | NodeEntity,
+   // children: (() => NodeEntity) | NodeEntity,
    with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
    'load:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
    'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];

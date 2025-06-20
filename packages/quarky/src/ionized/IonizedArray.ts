@@ -294,10 +294,10 @@ export const ionizedArray: IonizedMethodsDef = {
    push: {
       preop: arrayLengthMutatingOp.preop,
       shouldTrigger: arrayLengthMutatingOp.shouldTrigger,
-      triggers: (model) => [
+      triggers: (model, _, { prevLength }) => [
          trigger(model),
          trigger(model, '[[get]]', 'length'),
-         //TODO: trigger Observed Indices
+         trigger(model, '[[get]]', (prevLength).toString()),
       ],
       revert(model, { preopData: { prevLength }, args }) {
          model.splice(prevLength, args.length)
@@ -395,6 +395,7 @@ export const ionizedArray: IonizedMethodsDef = {
       triggers: (model, [key, value]) => [
          trigger(model),
          isIntegerKey(key) ? trigger(model, 'at', key) : trigger(model, '[[get]]', key)
+         //TODO: length should trigger observed indices
 
          // afterSet(ionizedModel, quark, key, newValue, oldValue) {
          //    if (isIntegerKey(key)) {

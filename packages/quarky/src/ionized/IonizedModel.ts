@@ -19,6 +19,7 @@ import { IonizedCompound } from "./IonizedCompound";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp } from "./IonizedMethods";
 import { isInert } from "./inert";
+import { initializeSnapshots } from "./TimeTraveler";
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -258,6 +259,7 @@ export function createIonizedModel(
    target: object,
    // markMap: MarkMap | InertCollectionType | undefined,
 ) {
+
    const ionizedModel = new Proxy(target, {
       get(target, key, receiver) {
          __DEV__proxyGetterAssertions(ionizedModel, receiver)
@@ -357,7 +359,7 @@ export function createIonizedModel(
 
 
    registerIonizedModel(ionizedModel, target)
-
+   initializeSnapshots(target)
    return ionizedModel
 }
 
@@ -556,7 +558,7 @@ export function getIonizedModel(value: unknown) {
 
 
 export function maybeIonize(value: any) {
-   if (!isObject(value) || isInert(value)){
+   if (!isObject(value) || isInert(value)) {
       return value;
    }
    return ionizedModels.get(value) ?? createIonizedModel(value)

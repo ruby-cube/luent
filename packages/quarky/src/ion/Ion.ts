@@ -7,6 +7,7 @@ import { finiton } from "./FiniteStates";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionized/ionize";
 import { Inert, IsInert } from "../ionized/inert";
+import { initializeSnapshots } from "../ionized/TimeTraveler";
 
 /* API */
 export type Ion<T = unknown> = () => T
@@ -189,11 +190,11 @@ function asIon(
    methods?: AnyObject,
 ) {
    if (isFunction(initialState)) {
-      return createMaybeMemoizedIon(<Derivation>initialState, methods, true)
+      return initializeSnapshots(createMaybeMemoizedIon(<Derivation>initialState, methods, true))
    }
 
    if (isIon(initialState)) return initialState
-   return createAtomicIon(ionized ? maybeIonize(initialState) : initialState, 'state', methods, mutable, ionized) // TODO: add inert mark map
+   return initializeSnapshots(createAtomicIon(ionized ? maybeIonize(initialState) : initialState, 'state', methods, mutable, ionized)) // TODO: add inert mark map
 }
 
 

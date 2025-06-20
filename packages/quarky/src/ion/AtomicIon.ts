@@ -13,10 +13,11 @@ import { ParticleMorph } from "../compound/Particle";
 import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
-import { AtomicIon, Ion, Methods } from "./Ion";
+import { Ion, Methods, MutableIon } from "./Ion";
+
 
 /** INTERNAL */
-export type $AtomicIonState = AtomicIon & MutableCapsule & {
+export type $AtomicIonState = MutableIon<unknown> & MutableCapsule & {
    [QUARK]: _AtomicIonQuark & EntityQuark<$AtomicIonState> & ParticleMorph & Watchable
 } & MutableEntity
 
@@ -74,8 +75,6 @@ export function createAtomicIon(
       asMutable: new Mutable(),
       asParticle: undefined,
       asWatched: undefined,
-      asReadonly: undefined,
-      asReined: undefined,
       thisIon: undefined,
       asTraceable: new Traceable(),
       trigger,

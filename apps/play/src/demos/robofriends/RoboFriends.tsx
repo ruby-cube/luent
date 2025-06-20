@@ -34,7 +34,7 @@ interface Robot {
 // const $$greeting = muon('hi', {change(){}})
 
 export function RoboFriendsApp() {
-   const $robots = ion([] as Robot[])
+   const $robots = ion(robots as Robot[])
 
    return component(
       <>
@@ -75,17 +75,17 @@ export function RoboList(input = fromTag<{
 }
 
 
-export function LIST(v: Ion<string[]>) {
-   return [LIST, v]
-}
+// export function LIST(v: Ion<string[]>) {
+//    return [LIST, v]
+// }
 
-export function CAN_CLOSE_DIALOG(v: () => void) {
-   return [CAN_CLOSE_DIALOG, v]
-}
+// export function CAN_CLOSE_DIALOG(v: () => void) {
+//    return [CAN_CLOSE_DIALOG, v]
+// }
 
-export function ON_CLOSE_DIALOG(v: HandleEvent) {
-   return [ON_CLOSE_DIALOG, v]
-}
+// export function ON_CLOSE_DIALOG(v: HandleEvent) {
+//    return [ON_CLOSE_DIALOG, v]
+// }
 
 
 
@@ -112,7 +112,7 @@ export function RoboCard(input = fromTag<{
       $email,
    } = input
 
-   const list = fromCommons(LIST, '?') ?? []
+   // const list = fromCommons(LIST, '?') ?? []
    // const items = fromCommons(ITEMS)
    // const closeDialog = fromCommons(CAN_CLOSE_DIALOG)
    // const emitClick = fromCommons(ON_CLOSE_BUTTON_CLICK)
