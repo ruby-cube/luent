@@ -2608,8 +2608,8 @@ declare global {
          'o--show': { children: ConditionalRenderKit[]; };
          'o--mount': { children: ConditionalRenderKit[]; };
 
-         'o--suspense': SuspenseNodeInput & { children: Lumo.Slot };
-         'o--try': TryNodeInput & { children: Lumo.Slot };
+         // 'o--suspense': SuspenseNodeInput & { children: Lumo.Slot };
+         // 'o--try': TryNodeInput & { children: Lumo.Slot };
 
          'o--transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
          'o--transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>

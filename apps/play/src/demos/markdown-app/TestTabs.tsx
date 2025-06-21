@@ -218,7 +218,7 @@ function App(input = fromTag<{
       }
    })
 
-   const MainView = Morphable({
+   const MainView = Polymorph({
       home: <Home></Home>
       ,
       file: [(o: File) => o.id, (file: File) => (

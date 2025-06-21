@@ -38,7 +38,7 @@ export type NodeEntity =
    | Ion
    | InternalComponent
    | ListRenderKit
-   // | MorphicRenderKit
+   // | PolymorphKit
    | ConditionalRenderKit
    | ConditionalRenderSeries
    | InnerHTMLKit
@@ -151,20 +151,20 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity)
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--style' | 'o--transit' | 'o--transition' | 'o--mount' | 'o--show' | 'o--try' | 'o--suspense' | 'o--portal' | 'o--link',
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--style' | 'o--portal' | 'o--link' | 'o--transit' | 'o--transition' | 'o--mount' | 'o--show',
    Slot: undefined | (() => NodeEntity[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | InternalComponent | JSX.Element | undefined {
 
    switch (nodeType) {
 
-      case 'o--try':
-         if (!Slot) throw new Error(`Extraneous <o--try>`)
-         return createTryNode(Slot, <TryNodeInput>config)
+      // case 'o--try':
+      //    if (!Slot) throw new Error(`Extraneous <o--try>`)
+      //    return createTryNode(Slot, <TryNodeInput>config)
 
-      case 'o--suspense':
-         if (!Slot) throw new Error(`Extraneous <o--suspense>`)
-         return createSuspenseNode(Slot, <SuspenseNodeInput>config)
+      // case 'o--suspense':
+      //    if (!Slot) throw new Error(`Extraneous <o--suspense>`)
+      //    return createSuspenseNode(Slot, <SuspenseNodeInput>config)
 
       case 'o--portal':
          if (!Slot) throw new Error(`Extraneous <o--portal>`)

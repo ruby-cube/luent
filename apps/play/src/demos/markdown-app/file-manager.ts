@@ -20,47 +20,43 @@ interface FileTreeNodeData {
 }
 
 
-export class FileTreeNode {
+interface FileTreeNode {
+   id: string,
+   name: string,
+   parentID: string | null,
+   root: FileTree | null
+}
+
+export class File implements FileTreeNode {
+   // type = 'file' as const
    constructor(
       public id: string,
       public name: string,
       public parentID: string | null,
-      protected root: FileTree | null
+      public root: FileTree
    ) {
    }
 }
 
-export class File extends FileTreeNode {
-   // type = 'file' as const
-   constructor(
-      id: string,
-      name: string,
-      parentID: string | null,
-      root: FileTree
-   ) {
-      super(id, name, parentID, root)
-   }
-}
 
 
-
-class Folder extends FileTreeNode {
+class Folder implements FileTreeNode {
    // type = 'folder' as const
-   children: (File | Folder)[] = []
-   constructor(
-      id: string,
-      name: string,
-      parentID: string | null,
-      root: FileTree | null
-   ) {
-      super(id, name, parentID, root)
+   children: FileTreeNode[] = []
+   map!: Map<string, FileTreeNode>
 
+   constructor(
+      public id: string,
+      public name: string,
+      public parentID: string | null,
+      public root: FileTree | null
+   ) {
+      this.map = root?.map ?? new Map()
    }
 
    append(node: FileTreeNode) {
       if (node.parentID) {
-         const map = this instanceof FileTree ? this.map : this.root!.map
-         const prevParent = map.get(node.parentID);
+         const prevParent = this.map.get(node.parentID);
          if (prevParent && prevParent instanceof Folder) {
             prevParent.remove(node)
          }
@@ -72,18 +68,20 @@ class Folder extends FileTreeNode {
    remove(node: FileTreeNode) {
       this.children = this.children.filter(item => item.id !== node.id)
    }
-
 }
 
 class FileTree extends Folder {
-   map: Map<string, FileTreeNode>
 
    constructor(
       nodes: FileTreeNodeData[]
    ) {
       super('root', 'root', null, null)
 
-      const map = this.map = new Map()
+      this.populate(nodes)
+   }
+
+   populate(nodes: FileTreeNodeData[]) {
+      const map = this.map
 
       for (const node of nodes) {
          const { id, name, parentID } = node
@@ -100,7 +98,9 @@ class FileTree extends Folder {
             this.children.push(treeNode)
          }
       }
-
    }
 
+   reset() {
+      this.map.clear()
+   }
 }

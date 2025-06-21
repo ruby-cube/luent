@@ -28,13 +28,7 @@ function genId() {
 //         })
 //     },
 //     onIdle: true,
-//     Placeholder(props) {
-//         return <div>Eep! I'm not ready {props.frog}</div>
-//     },
 //     // timeout: 5000,
-//     Error(props) {
-//         return <div>{props.error}</div>
-//     },
 // });
 
 // const TestBox = lazyLoadComponent({

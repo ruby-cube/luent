@@ -9,14 +9,14 @@ import { setUpTextNode } from "./TextNode";
 import { InnerHTMLKit, isInnerHTMLKit, setUpInnerHTML } from "./InnerHTML";
 import { NodePod } from "./NodePod";
 import { AnyObject } from "@rue/types";
-import { MorphicRenderKit } from "../conditional/MorphicNode";
+import { PolymorphKit } from "../conditional/Polymorph";
 import { ActivationType } from "../conditional/If";
 
 // [ ] validate and apply swap tag
 // [ ] validate and compose conditional series
 // [V] spread arrays and nested array
 
-export type NodeKit = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderSeries | MorphicRenderKit | InnerHTMLKit
+export type NodeKit = DOMNode | InternalComponent | ListRenderKit | ConditionalRenderSeries | PolymorphKit | InnerHTMLKit
 
 export type MutableKit = { mu: AnyObject }
 
@@ -114,7 +114,7 @@ export function setUpNodeEntity(
       nodeEntity instanceof InternalComponent
       || nodeEntity instanceof ConditionalRenderSeries
       || nodeEntity instanceof ListRenderKit
-      || nodeEntity instanceof MorphicRenderKit
+      || nodeEntity instanceof PolymorphKit
    ) {
       return nodeEntity.setUp(parent, nodePod);
    }

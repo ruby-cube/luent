@@ -63,8 +63,6 @@ export function MountIf() {
          <div>hi</div>
          <o--transition>
             <o--show>
-
-
                {If($active, 'mount', (debug.traceAsyncPath(),
                   <>
                      oh

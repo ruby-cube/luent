@@ -12,7 +12,7 @@ import { isManagedDerivation } from "../ionic/DerivationIon";
 import { isObject, isObjectLiteral } from "@rue/utils";
 import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
 import { EffectLink } from "../effect-cycle/EffectLink";
-import { isIonizedModel } from "../ionized/ionize";
+import { Ionized, isIonizedModel } from "../ionized/ionize";
 import { $AtomicIonState, isAtomicIon, isAtomicIonQuark } from "../ion/AtomicIon";
 import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
 import { createWatchedIonizedIon } from "./IonizedIon";
@@ -27,11 +27,11 @@ export class StateChangeEvent<S = unknown> {
    ) { }
 }
 
-   // watch($user, ({ current: user }) => {
-   //    if (!user) {
-   //       router.navigate('Welcome')
-   //    }
-   // })
+// watch($user, ({ current: user }) => {
+//    if (!user) {
+//       router.navigate('Welcome')
+//    }
+// })
 
 /**
  * Default values:
@@ -58,7 +58,7 @@ export type WatchDebugOptions = {
 
 export type Effect<T = unknown> = (event: StateChangeEvent<SubjectValues<T>>) => void;
 
-type SubjectValues<T> = T extends [() => infer R] ? R : T extends [infer O] ? O : MultiSubjectValues<T>;
+type SubjectValues<T> = [T] extends [() => infer R] ? R : [T] extends [infer O] ? O : MultiSubjectValues<T>;
 
 type MultiSubjectValues<T> =
    T extends [infer A, infer B] ? [SubjectValue<A>, SubjectValue<B>]
@@ -132,41 +132,22 @@ export type WatchSubjects = (Object | Ion)[]
 //    T extends WatchSubjects,
 //    P
 // >(effect: IonicTask<P>, options: EffectOptions): ResumableListener
+
 export function watch<
-   T extends WatchSubjects,
+   T extends Ionized<object> | Ion<any> | WatchSubjects,
    P
->(subject: T, effect: Effect<T>): ResumableListener
-export function watch<
-   T extends WatchSubjects,
-   P
->(subject: T, effect: Effect<T>, options: EffectOptions): ResumableListener
-export function watch<
-   T extends WatchSubjects,
-   P
->(...args: [...T, Effect<T>] | [...T, Effect<T>, EffectOptions]): ResumableListener
-export function watch<
-   T extends WatchSubjects,
-   P
->(...args: [...T, Effect<T>, EffectOptions]): ResumableListener
-export function watch<
-   T extends WatchSubjects,
-   P
->(...args:
-   // [IonicTask<P>] | [IonicTask<P>, EffectOptions] |
-   [...T, Effect<T>] | [...T, Effect<T>, EffectOptions]): ResumableListener {
+>(_subject: T, effect: Effect<T>, options: EffectOptions = {}): ResumableListener {
    // if (args[0] instanceof Function && (args.length === 1 || args.length === 2 && isObjectLiteral(args[1]))) {
    //    return initIonicEffect(<IonicTask>args[0], <EffectOptions>args[1])
    // }
-   const lastArg = args.pop()
-   const noOptions = lastArg instanceof Function
-   const effect = lastArg instanceof Function ? lastArg : args.pop()
-   const options = noOptions ? {} : { ...lastArg } as EffectOptions
+   // const lastArg = args.pop()
+   // const noOptions = lastArg instanceof Function
+   // const effect = lastArg instanceof Function ? lastArg : args.pop()
+   // const options = noOptions ? {} : { ...lastArg } as EffectOptions
    const phase = options.phase = getPhase(options)
    if (!effect || !(effect instanceof Function))
       throw new Error("Invalid input. Effect function must be last or second to last argument.")
-   if (args.length === 0) throw new Error("Invalid input. No watch subjects")
-   const isMultiSubject = args.length > 1;
-   const _subject = isMultiSubject ? args : args[0]
+   const isMultiSubject = _subject instanceof Array && !isIonizedModel(_subject);
 
    const retrack = options.retrack === undefined ? true : options.retrack
 

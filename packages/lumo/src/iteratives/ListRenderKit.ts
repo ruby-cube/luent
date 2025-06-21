@@ -23,8 +23,6 @@ import { AnyObject } from "@rue/types";
 type Index = number
 type Count = number
 
-type DynamicList<T = any> = Collection<T> | ReactiveGet<Collection<T>>
-
 const flaskMap: WeakMap<NodePod, Flask> = new WeakMap()
 
 // let currentItem: any;
@@ -103,7 +101,7 @@ export class ListRenderKit {
    }
 
    private outerNodePod!: NodePod;
-   private dynamicNodePod: NodePod | undefined
+   private dynamicNodePod!: NodePod
    // indices: AtomicIon<number>[] = [];
    isDynamic: boolean = false;
 
@@ -123,15 +121,11 @@ export class ListRenderKit {
       const getUID = this.getUID
       if (__DEV__) __devCheckIfTracked()
 
-
-      const _isIonizedModel = isIonizedModel(data)
-      const isDynamic = this.isDynamic = _isIonizedModel || isIon(data);
       this.outerNodePod = outerNodePod;
-      const dynamicNodePod = this.dynamicNodePod = isDynamic ? outerNodePod.appendNodePod() : undefined;
+      const dynamicNodePod = this.dynamicNodePod = outerNodePod.appendNodePod();
 
       // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
 
-      if (isDynamic) {
          // set up watcher for updates
          // const effectCycle = getCurrentEffectCylce();
          const _data = isIon(data) ? detachedCall(data) : data // unwrap potentially nested ionized model
@@ -182,7 +176,6 @@ export class ListRenderKit {
             }
             // console.log('updating list', state.length, _oldValue.length)
          }, { phase: POSTEVENT })
-      }
       // currentItem = undefined;
       $currentIndex = undefined;
       //   popList();

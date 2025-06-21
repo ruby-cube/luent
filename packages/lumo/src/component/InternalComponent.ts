@@ -31,7 +31,7 @@ export type PublicComponent<T extends AnyObject = AnyObject> = T // contains any
 export interface Component<T extends AnyObject | undefined = AnyObject | undefined> {
    exposedComponent?: T extends AnyObject ? PublicComponent<T> : undefined;
    renderedTemplate: NodeEntity;
-   // morphicRenderKit?: MorphicRenderKit
+   // morphicRenderKit?: PolymorphKit
 }
 
 type JSXTemplate = NodeEntity

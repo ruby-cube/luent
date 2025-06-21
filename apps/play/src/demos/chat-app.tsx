@@ -5,7 +5,7 @@
 // [] if chat tab is focused or main messages view is open, decrement unseen count
 
 import { component, fromTag, nodeRef, Slot } from "@rue/lumo";
-import { MorphicNode as Morphable } from "../../../../packages/lumo/src/conditional/MorphicNode";
+import { MorphicNode as Polymorph } from "../../../../packages/lumo/src/conditional/Polymorph";
 import { finiton, ion } from "@rue/quarky";
 
 // data
@@ -126,18 +126,24 @@ export function FBApp() {
       ]
    })
 
+   function change(){
+      $mainContent()?.as
+   }
+
+   const $main = $Main.varion('home')
+
    return component(
       <>
          <NavBar></NavBar>
          <main>
-            <$Main as='home' ref={$mainContent}></$Main>
+            <$Main as={$main}></$Main>
          </main>
          <ChatPopup></ChatPopup>
       </>
    )
 }
 
-const $Main = Morphable({
+const $Main = Polymorph({
    home: () =>
       <Home></Home>
    ,

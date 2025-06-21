@@ -39,7 +39,7 @@ export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
 //    Component: T,
 //    Slot: InferSlot<T>,
 //    config?: ComponentConfig<T>
-// ): InternalComponent | MorphicRenderKit {
+// ): InternalComponent | PolymorphKit {
 //    const $index = getCurrentIndex()
 //    return makeComponent(Component, Slot, config || {}, $index)
 // }
