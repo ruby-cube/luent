@@ -107,7 +107,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          return this;
       }
 
-      outerNodeVine.append(this.nodePod!)
+      outerNodeVine.push(this.nodePod!)
       const $conditions = this.getConditionsIon()
 
       const phasicNode = this.phasicNode

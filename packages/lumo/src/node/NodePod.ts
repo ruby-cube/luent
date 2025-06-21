@@ -1,3 +1,4 @@
+import { Glass } from "@rue/types";
 import { DOMNode } from "../component/Component";
 import { NodeRef } from "./NodeRef";
 
@@ -38,20 +39,24 @@ import { NodeRef } from "./NodeRef";
 
 type AnyNode = NodePod | DOMNode
 
+export type DynamicPod = NodePod
+
+
+
+
 // Node pods contain the children of an element,the nodes of a component, or a grouping within a dynamic node pod (for lists and conditionals)
 export class NodePod extends Array<AnyNode> {
    index?: number;
    pod?: NodePod;
    refs: NodeRef[] = [];
 
-   constructor(pod?: NodePod, index?: number) {
-      super();
-      this.index = index;
-      this.pod = pod;
+   constructor(
+      public active: boolean = true
+   ) {
+      super()
    }
 
    // ACTIVE STATE for mount activation types
-   active: boolean = true;
    deactivate() {
       this.active = false;
    }
@@ -60,42 +65,41 @@ export class NodePod extends Array<AnyNode> {
    }
 
    // MUTATION
-   appendNodePod(active: boolean = true) {
-      const pod = new NodePod(this, this.length)
-      pod.active = active
-      this.push(pod);
-      return pod;
+
+   push(node: AnyNode) {
+      if (node instanceof NodePod) {
+         node.connect(this, this.length)
+      }
+      return super.push(node)
    }
 
-   append(nodePod: NodePod) {
-      nodePod.connect(this, this.length)
-      return super.push(nodePod)
+   clear() {
+      for (const node of this) {
+         if (node instanceof NodePod) {
+            node.disconnect()
+         }
+      }
+      this.length = 0;
    }
 
-   connect(pod: NodePod, index: number) {
+   connect(pod: DynamicPod, index: number) {
       this.index = index;
       this.pod = pod;
    }
+
    disconnect() {
       this.index = undefined
       this.pod = undefined
    }
 
-   // setNodePod(index: number, nodePod: NodePod) {
-   //    this[index] = nodePod;
-   //    nodePod.connect(this, index)
-   // }
-
-   removeNodePods(index: number, deleteCount: number) {
-      const nodePods = super.splice(index, deleteCount) as NodePod[]
-      for (const nodePod of nodePods) {
-         nodePod.index = undefined;
-         nodePod.pod = undefined;
-         nodePod.disconnect();
+   remove(index: number, deleteCount: number) {
+      const nodePods = super.splice(index, deleteCount)
+      for (const node of nodePods) {
+         if (node instanceof NodePod) node.disconnect();
       }
    }
 
-   insertNodePods(index: number, nodePods: NodePod[]) {
+   insert(index: number, nodePods: NodePod[]) {
       super.splice(index, 0, ...nodePods)
       let count = 0;
       for (const nodePod of nodePods) {
@@ -103,6 +107,12 @@ export class NodePod extends Array<AnyNode> {
          count++
       }
    }
+
+   splice(start: number, deleteCount?: number, ...rest: AnyNode[]): AnyNode[] {
+      console.warn('Do not use splice on node pod. Use remove and insert methods instead')
+      return super.splice(start, deleteCount, ...rest)
+   }
+
 
    // TRAVERSAL
 
@@ -130,7 +140,7 @@ export class NodePod extends Array<AnyNode> {
 
    get prevNode(): DOMNode | undefined {
       let prev = this.prev;
-      while (prev instanceof NodePod && (!prev.active) ) {
+      while (prev instanceof NodePod && (!prev.active)) {
          prev = prev.prev
       }
       return prev instanceof NodePod ?
@@ -159,7 +169,8 @@ export class NodePod extends Array<AnyNode> {
    forEachNode(doTask: (node: DOMNode, index: number | undefined) => void, index?: number) {
       for (const nodeEntity of this) {
          if (nodeEntity instanceof NodePod) {
-            for (let i = 0; i < nodeEntity.length; i++) {
+            const limit = nodeEntity.length;
+            for (let i = 0; i < limit; i++) {
                const entity = nodeEntity[i];
                if (entity instanceof NodePod) {
                   entity.forEachNode(doTask, i)
@@ -220,6 +231,7 @@ export class NodePod extends Array<AnyNode> {
 //       }
 //    }
 
+
 //    insertNodePods(index: number, nodePods: NodePod[]) {
 //       super.splice(index, 0, ...nodePods)
 //       let count = 0;
@@ -246,3 +258,23 @@ export class NodePod extends Array<AnyNode> {
 //    // }
 // }
 
+export function mountDOMNodes(pod: NodePod, parent: Element, fragment: DocumentFragment) {
+   let prevNode = pod.prevNode;
+   if (prevNode && prevNode === parent) {
+      parent.append(fragment) //for teleport
+   }
+   else if (prevNode) {
+      prevNode.after(fragment)
+   }
+   else {
+      parent.prepend(fragment)
+   }
+}
+
+
+export function removeDOMNodes(pod: NodePod) {
+   pod.forEachNode(node => {
+      node.remove()
+   })
+   pod.deactivate()
+}

@@ -95,7 +95,7 @@ class SpreadKit {
    
    
       mount(
-         parent: Element,
+         parent: Element ,
          fragment?: DocumentFragment
       ) {
          const data = toValue(this.data);

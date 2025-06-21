@@ -16,17 +16,19 @@ import { isInnerHTMLKit, mountInnerHTML } from "./InnerHTML";
 
 export function mountNodeEntities(
    nodeEntities: NodeEntity[],
-   parent: Element | DocumentFragment,
+   parent: Element,
+   fragment? : DocumentFragment
 ) {
    for (const nodeEntity of nodeEntities) {
-      mountNodeEntity(nodeEntity, parent)
+      mountNodeEntity(nodeEntity, parent, fragment)
    }
 }
 
 
 function mountNodeEntity(
    nodeEntity: NodeEntity,
-   parent: Element | DocumentFragment,
+   parent: Element,
+   fragment?: DocumentFragment
 ) {
    if (nodeEntity instanceof Element || nodeEntity instanceof CharacterData) { // Element type from Web API
       parent.appendChild(nodeEntity)
@@ -36,10 +38,10 @@ function mountNodeEntity(
          if (__DEV__) console.error('Cannot append innerHTML to document fragment')
          return;
       }
-      mountInnerHTML(nodeEntity, parent)
+      mountInnerHTML(nodeEntity.innerHTML, parent)
    }
    else if ('mount' in nodeEntity) {
-      nodeEntity.mount(parent)
+      nodeEntity.mount(parent, fragment)
    }
    else {
       debug.error('[[INVALID INPUT]] Invalid node entity')

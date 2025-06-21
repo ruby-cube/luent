@@ -76,7 +76,7 @@ export function makeElement(
             mountInnerHTML(innerHTML, domNode)
          }
          else {
-            const nodeEntities = setUpNodeEntities(flattenedOutput, new NodePod())
+            const nodeEntities = setUpNodeEntities(flattenedOutput, domNode, new NodePod())
             mountNodeEntities(nodeEntities, domNode)
          }
       }, xml_ns)

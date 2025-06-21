@@ -58,13 +58,14 @@ type HTMLString = string;
  */
 export function setUpNodeEntities(
    jsxNodes: JSXNode[],
+   parent: Element,
    nodePod: NodePod,
    nodeEntities: NodeEntity[] = []
 ) {
    for (let i = 0; i < jsxNodes.length; i++) {
       let jsxNode = jsxNodes[i];
       if (isInnerHTMLKit(jsxNode)) throw new Error('innerHTML cannot have sibling nodes')
-      nodeEntities.push(setUpNodeEntity(jsxNode, nodePod))
+      nodeEntities.push(setUpNodeEntity(jsxNode, parent, nodePod))
    }
    return nodeEntities;
 }
@@ -123,6 +124,7 @@ export function setUpNodeEntities(
 
 export function setUpNodeEntity(
    jsxNode: Exclude<JSXNode, InnerHTMLKit | Component>,
+   parent: Element,
    nodePod: NodePod,
 ) {
    if (jsxNode instanceof Element) { // Element type from Web API
@@ -134,7 +136,8 @@ export function setUpNodeEntity(
       || jsxNode instanceof ListRenderKit
       || jsxNode instanceof PolymorphKit
    ) {
-      return jsxNode.setUp(nodePod);
+      nodePod.push(jsxNode.dynamicPod) //TODO: move this to setup nodepod
+      return jsxNode.setUp(parent);
    }
    const textNode = createTextNode(jsxNode)
    setUpTextNode(jsxNode, textNode)

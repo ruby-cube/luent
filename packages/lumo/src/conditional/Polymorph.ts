@@ -8,11 +8,10 @@ import { getClosestCommons, getCommons, popCommons, pushCommons } from "../commo
 import { Commons, NodeCommons, Provided, wrapWithCommons } from "../commons/Commons";
 import { AppCommons } from "../commons/provide";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
-import { NodePod } from "../node/NodePod";
+import { DynamicPod, NodePod } from "../node/NodePod";
 import { $_run_with_, $_snap_context, FLASK, Flask } from "@rue/flask";
 import { fromTag } from "../component/fromTag";
 import { ion, Ion, isIon, toValue, watch } from "@rue/quarky";
-import { TRACE } from "../../../flask/debug";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";
 
@@ -142,8 +141,7 @@ export class PolymorphKit {
       parent: Element,
       fragment?: DocumentFragment
    ) {
-      const nodePod = this.dynamicNodePod[0] as NodePod
-      nodePod.activate()
+      const nodePod = this.dynamicPod[0]
 
       const flask = this.flask
 
@@ -170,14 +168,14 @@ export class PolymorphKit {
    //    })
    // }
 
-
+   dynamicPod: DynamicPod = new NodePod()
 
    setUp(
       parent: Element,
-      nodePod: NodePod,
    ) {
-      const dynamicPod = this.dynamicNodePod = nodePod.appendNodePod()
-      const _nodePod = dynamicPod.appendNodePod()
+      const nodePod = new NodePod()
+      this.dynamicPod.push(nodePod)
+
       this.flask = this.outerFlask.spawn({ type: 'view' })
       const $activeKey = this.activeKey
       if (!isIon($activeKey)) return this;
@@ -191,7 +189,7 @@ export class PolymorphKit {
 
          // render new morph
          pushCommons(morphable.commons)
-         morphable.activate(key, parent, _nodePod)
+         morphable.activate(key, parent, nodePod)
          popCommons()
 
       })

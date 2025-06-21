@@ -1,4 +1,4 @@
-import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __devCheckIfTracked, ionize, AtomicIon, toValue, untrackedCall, Ion, detachedCall, toIon, queueTask } from "@rue/quarky";
+import { isIon, isIonizedModel, ion, toRaw, shallowClone, watch, __devCheckIfTracked, toValue, untrackedCall, Ion, detachedCall, toIon, queueTask } from "@rue/quarky";
 import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
@@ -10,8 +10,7 @@ import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
 import { Commons as createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
-import { NodePod } from "../node/NodePod";
-import { mountConditional, mountDOMNodes, removeDOMNodes } from "../conditional/ConditionalRenderSeries";
+import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/NodePod";
 import { FLASK, Flask } from "@rue/flask";
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
@@ -100,10 +99,8 @@ export class ListRenderKit {
       }
    }
 
-   private outerNodePod!: NodePod;
-   private dynamicNodePod!: NodePod
+   dynamicPod: DynamicPod = new NodePod()
    // indices: AtomicIon<number>[] = [];
-   isDynamic: boolean = false;
 
    _transitions?: Map<Ion<number>, TransitionNode[]>
    get transitions() {
@@ -115,67 +112,64 @@ export class ListRenderKit {
 
    setUp(
       parent: Element,
-      outerNodePod: NodePod,
    ) {
       const data = this.data
       const getUID = this.getUID
       if (__DEV__) __devCheckIfTracked()
 
-      this.outerNodePod = outerNodePod;
-      const dynamicNodePod = this.dynamicNodePod = outerNodePod.appendNodePod();
-
       // [node, node, [[node, [node, node]], [node, [node]], [node, [node]]], ]
 
-         // set up watcher for updates
-         // const effectCycle = getCurrentEffectCylce();
-         const _data = isIon(data) ? detachedCall(data) : data // unwrap potentially nested ionized model
-         let clone = createClone(data, _data)
-         // let clone = isIon(data) && isIonizedModel(_data) ? shallowClone(toRaw(_data)) : undefined
-         //TODO: figure out typing for Set, Map, Object vs Array
-         let recording = isIonizedModel(_data) ? recordMutations(_data) : undefined
+      // set up watcher for updates
+      // const effectCycle = getCurrentEffectCylce();
+      const _data = isIon(data) ? detachedCall(data) : data // unwrap potentially nested ionized model
+      let clone = createClone(data, _data)
+      // let clone = isIon(data) && isIonizedModel(_data) ? shallowClone(toRaw(_data)) : undefined
+      //TODO: figure out typing for Set, Map, Object vs Array
+      let recording = isIonizedModel(_data) ? recordMutations(_data) : undefined
 
 
-         function createClone(subject: AnyObject, state: AnyObject) {
-            return isIonizedModel(state) ? shallowClone(toRaw(state)) : undefined
-            // return isIon(subject) && isIonizedModel(state) ? shallowClone(toRaw(state)) : undefined
+      function createClone(subject: AnyObject, state: AnyObject) {
+         return isIonizedModel(state) ? shallowClone(toRaw(state)) : undefined
+         // return isIon(subject) && isIonizedModel(state) ? shallowClone(toRaw(state)) : undefined
+      }
+
+      function hasChanged(oldState: AnyObject, state: AnyObject) {
+
+      }
+
+      console.log('!!!!watching list', data)
+      const dynamicPod = this.dynamicPod
+
+      watch(data, ({ current, previous }) => { // typecast as one of the options so that typescript won't complain
+         // if (recording && state === previous){
+         //    recording.stop()
+         //    console.log('updating list via MUTATIONS')
+         //    //TODO: this.applyMutations(recording.mutations)
+         //    recording = recordMutations(_data)
+         //    return;
+         // }
+         console.log('!!!!updating list?')
+         const _prevState = clone ?? toRaw(previous)
+         clone = createClone(data, current)
+         // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
+         const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(current), _prevState, getUID)
+         if (noChange) { //TODO: should we use hasChanged function in watch options instead?
+            console.log('no change :(')
+            return;
          }
+         if (dynamicPod!.length !== _prevState.length)
+            throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${previous.length} are mismatched. This should never happen.`)
 
-         function hasChanged(oldState: AnyObject, state: AnyObject) {
-
+         this.castBeforeUpdate();
+         this.removeItems(indicesToRemove!);
+         try {
+            this.insertAndMoveItems(insertAndMoveKit!, parent);
          }
-
-         console.log('!!!!watching list', data)
-
-         watch(data, ({ current, previous }) => { // typecast as one of the options so that typescript won't complain
-            // if (recording && state === previous){
-            //    recording.stop()
-            //    console.log('updating list via MUTATIONS')
-            //    //TODO: this.applyMutations(recording.mutations)
-            //    recording = recordMutations(_data)
-            //    return;
-            // }
-            console.log('!!!!updating list?')
-            const _prevState = clone ?? toRaw(previous)
-            clone = createClone(data, current)
-            // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
-            const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(current), _prevState, getUID)
-            if (noChange) { //TODO: should we use hasChanged function in watch options instead?
-               console.log('no change :(')
-               return;
-            }
-            if (dynamicNodePod!.length !== _prevState.length)
-               throw new Error(`dynamicPod length ${dynamicNodePod!.length} and data length ${previous.length} are mismatched. This should never happen.`)
-
-            this.castBeforeUpdate();
-            this.removeItems(indicesToRemove!);
-            try {
-               this.insertAndMoveItems(insertAndMoveKit!, parent);
-            }
-            catch (err) {
-               console.error(err, this.__DEV__asyncPath)
-            }
-            // console.log('updating list', state.length, _oldValue.length)
-         }, { phase: POSTEVENT })
+         catch (err) {
+            console.error(err, this.__DEV__asyncPath)
+         }
+         // console.log('updating list', state.length, _oldValue.length)
+      }, { phase: POSTEVENT })
       // currentItem = undefined;
       $currentIndex = undefined;
       //   popList();
@@ -192,35 +186,31 @@ export class ListRenderKit {
       const list = data instanceof Array ? data : data as unknown as Array<any> //TODO: need to implement for sets, maps, and objects
       const $list = this.$list
       const listKit = this;
-      const isDynamic = this.isDynamic;
-      const dynamicNodePod = this.dynamicNodePod!;
+      const dynamicPod = this.dynamicPod!;
       // const $list = this.$list;
 
       for (let i = 0; i < list.length; i++) {
          const item = list[i]
-         const $index = ion(() => $list().indexOf(item)) 
+         const $index = ion(() => $list().indexOf(item))
          // const $index = ion(i)
          $currentIndex = $index;
          // this.indices.push($index)
 
-         const nodePod = isDynamic ? dynamicNodePod.appendNodePod() : this.outerNodePod;
+         const nodePod = new NodePod()
+         dynamicPod.push(nodePod)
 
-         if (isDynamic) {
-            const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
-            listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
-            flask.emitInitialMount()
-            flaskMap.set(nodePod, flask)
-         }
-         else {
-            listKit.renderItem(item, $index, parent, nodePod, fragment)
-         }
+         const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
+         listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
+         flask.emitInitialMount()
+         flaskMap.set(nodePod, flask)
+
       }
    }
 
    private removeItems(indicesToRemove: number[]) {
       // remove from DOM
       for (const index of indicesToRemove) {
-         const nodePod = this.dynamicNodePod![index] as NodePod;
+         const nodePod = this.dynamicPod[index] as NodePod;
          const flask = flaskMap.get(nodePod)
          flask?.emitDiscard()
          removeDOMNodes(nodePod)
@@ -233,8 +223,8 @@ export class ListRenderKit {
       parent: Element,
    ) {
       const { isNewItem, hasMoved, newUArray, oldUArray, isRemoved } = insertAndMoveKit;
-      const dynamicNodePod = this.dynamicNodePod!
-      if (dynamicNodePod.length !== oldUArray.length)
+      const dynamicPod = this.dynamicPod!
+      if (dynamicPod.length !== oldUArray.length)
          throw new Error("dynamicPod and data length are mismatched")
 
       const indicesAndNodePods: [number, NodePod[]][] = []
@@ -250,7 +240,7 @@ export class ListRenderKit {
          const itemHasMoved = hasMoved(uItem);
          const oldIndex = oldUArray.indexOf(uItem)
          const nodePod = _isNewItem ? new NodePod()
-            : itemHasMoved ? (dynamicNodePod[oldIndex] as unknown as NodePod) // dynamicNodePod[index]
+            : itemHasMoved ? (dynamicPod[oldIndex] as unknown as NodePod) // dynamicNodePod[index]
                : null;
 
          if (!_isNewItem) {
@@ -279,7 +269,7 @@ export class ListRenderKit {
             // const item = getOriginalItem(uItem, newUArray)
             const $list = this.$list
             const item = $list()[i]
-            const $index = ion(()=>$list()?.indexOf(item)) //TODO: this should be 
+            const $index = ion(() => $list()?.indexOf(item)) //TODO: this should be 
 
             setCurrentIndex($index); // to retreive config
             // newIndices.push($index);
@@ -319,23 +309,22 @@ export class ListRenderKit {
       let k = indicesAndRemoveCount.length; // loop through backwards to avoid having to recalculate index
       while (k--) {
          const [index, count] = indicesAndRemoveCount[k];
-         dynamicNodePod!.removeNodePods(index, count);
+         dynamicPod.remove(index, count);
       }
 
       // (2) insert node pods into dynamic list
       for (const [index, nodePods] of indicesAndNodePods) {
-         dynamicNodePod.insertNodePods(index, nodePods)
+         dynamicPod.insert(index, nodePods)
       }
 
       // (3) insert nodes into DOM
       for (const [index, fragment] of indicesAndFragments) {
-         mountDOMNodes(<NodePod>dynamicNodePod[index], parent, fragment)
+         mountDOMNodes(<NodePod>dynamicPod[index], parent, fragment)
       }
 
       this.castUpdated(toFromIndices)
    }
 }
-
 
 
 

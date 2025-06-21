@@ -6,7 +6,7 @@ import { areShallowEqualArrays, Ion, watch } from "../../../quarky/src";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
-import { NodePod } from "../node/NodePod";
+import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/NodePod";
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FLASK, Flask } from "@rue/flask";
@@ -92,7 +92,7 @@ function makeElseKit(): DynamicConditionalRenderKit {
 export class ConditionalRenderSeries extends ConditionalSeries {
    declare statements: DynamicConditionalRenderKit[];
 
-   nodePod!: NodePod;
+   dynamicPod: DynamicPod = new NodePod()
 
    phasicNode?: TransitionNode | null
 
@@ -115,8 +115,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       this.activeIndex = this.evaluateConditions()
 
       this.phasicNode = getPhasicNode();
-      const dynamicPod = this.nodePod = new NodePod()
-      dynamicPod.activate()
+
+      const dynamicPod = this.dynamicPod
       // populate dynamic node pod
       // 'create' kits share a single node pod
       // This way, we can mount 'create' efficiently without having 
@@ -129,15 +129,17 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          if (kit.type === 'show') {
             showKits = showKits || (showKits = this.showKits = [])
             showKits.push(kit);
-            kit.nodePod = dynamicPod.appendNodePod() //FIX:
+            const nodePod = kit.nodePod = new NodePod()
+            dynamicPod.push(nodePod)
          }
          else if (kit.type === 'mount') {
-            kit.nodePod = dynamicPod.appendNodePod(false)
+            const nodePod = kit.nodePod = new NodePod(false)
+            dynamicPod.push(nodePod)
             kit.renderConditional = wrapToPreserve(kit.renderConditional)
          }
          else {
-            sharedPod = sharedPod || (sharedPod = dynamicPod.appendNodePod(false))
-            kit.nodePod = sharedPod;
+            sharedPod = kit.nodePod = sharedPod || (sharedPod = new NodePod(false))
+            dynamicPod.push(sharedPod)
          }
       }
    }
@@ -146,6 +148,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
    mount( // the initial mount after setup
       parent: Element,
+      fragment?: DocumentFragment
    ) {
       const activeIndex = this.activeIndex
 
@@ -154,7 +157,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       if (kit.type !== 'show') {
          const flask = kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === 'create' })
-         this.render(kit, parent, flask)
+         this.render(kit, parent, fragment, flask)
          flask.emitInitialMount() // emits mount hook
       }
 
@@ -162,20 +165,30 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       if (showKits)
          for (const showKit of showKits) {
             const pod = showKit.nodePod!
-            this.render(showKit, parent)
+            this.render(showKit, parent, fragment)
 
             if (showKit !== kit) hideDOMNodes(pod)
          }
    }
 
    outerFlask: Flask
-
+   /**
+    * set up watcher for updates, which involves:
+    * • calling the render function
+    * > processing the jsx output (setup node entities)
+    * > mounting to a new fragment
+    * > mounting fragement to appropriate node (parent.append(fragment), sibling.after(fragment))
+    * 
+    * @param parent 
+    * @param outerNodePod 
+    * @returns 
+    */
    setUp(
       parent: Element,
-      outerNodePod: NodePod,
+      // outerNodePod: NodePod,
    ) {
 
-      outerNodePod.append(this.nodePod!)
+
       const $conditions = this.getConditionsIon()
 
       const phasicNode = this.phasicNode
@@ -384,16 +397,22 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       return this;
    }
 
-   private render(kit: DynamicConditionalRenderKit, parent: Element | DocumentFragment, flask?: Flask) {
+   private render(kit: DynamicConditionalRenderKit, parent: Element, fragment?: DocumentFragment, flask?: Flask) {
       const context = this.context;
       if (flask) context.set(FLASK, flask);
       if (__DEV__) context.set(TRACE, this.__DEV__asyncPath)
 
       $_run_with_(context, () => {
-         const nodeEntities = kit.renderConditional(parent, kit.nodePod || (console.warn('DEV RESEARCH: no kit pod :('), this.nodePod))
+         const nodeEntities = kit.renderConditional(parent, kit.nodePod || (console.warn('DEV RESEARCH: no kit pod :('), this.dynamicPod))
          mountConditional(parent, kit.nodePod!, nodeEntities, fragment);
       })
    }
+
+   private renderSync(kit: DynamicConditionalRenderKit, parent: Element | DocumentFragment) {
+
+   }
+
+
 
    private deactivateConditional(index: number) {
       console.log('deactivating conditional')
@@ -413,7 +432,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
          // remove from 
          removeDOMNodes(pod)
-         pod.length = 0;
+         pod.clear()
       }
       else if (activationType === 'mount') {
          const flask = kit.flask
@@ -429,7 +448,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const kit = this.statements[activeIndex]
       const activationType = kit.type
       const isInitialMount = !kit.nodePod
-      const pod = kit.nodePod || (kit.nodePod = this.nodePod.appendNodePod())
+      const pod = kit.nodePod || (kit.nodePod = new NodePod())
+      this.dynamicPod.push(pod)
 
       if (activationType === 'show') { //NOTE: 'show' statements are not dynamic nodes because they are not removed from the DOM and setup is not rerun
          showDOMNodes(pod)
@@ -447,6 +467,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    }
 }
 
+// Two types of NodePods: SeriesPod and Pod
+// SeriesPod: [Pod, Pod] (can only contain pods)
+// Pod: [node, node, SeriesPod] (may contain dom nodes and series pods
 
 
 export function mountConditional(
@@ -462,27 +485,8 @@ export function mountConditional(
 }
 
 
-export function mountDOMNodes(pod: NodePod, parent: Element, fragment: DocumentFragment) {
-   let prevNode = pod.prevNode;
-   if (prevNode && prevNode === parent) {
-      parent.append(fragment) //for teleport
-   }
-   else if (prevNode) {
-      prevNode.after(fragment)
-   }
-   else {
-      parent.prepend(fragment)
-   }
-}
 
-export function removeDOMNodes(pod: NodePod) {
-   console.log('remove domnodes', pod)
-   pod.forEachNode(node => {
-      console.log('for each node', node)
-      node.remove()
-   })
-   pod.deactivate()
-}
+
 
 // function nullNodeRefValues(nodePod: NodePod, components: InternalComponent[]) {
 //     nodePod.forEachNode(node => {
