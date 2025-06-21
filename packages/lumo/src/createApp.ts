@@ -1,4 +1,4 @@
-import { Component, ComponentSetup, DOMNode, InternalComponent } from "./component/InternalComponent";
+import { Component, ComponentSetup } from "./component/Component";
 import { AnyObject } from "@rue/types";
 import { setComponentAttributes } from "./component/makeComponent";
 import { AppCommons, createAppCommons } from "./commons/provide";
@@ -43,7 +43,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
 
          // (2) attach developer's root component to root element
          flask.containCall(function mountRootComponent() {
-            let output: Component = { renderedTemplate: undefined }
+            let output: Component = {   exposed: undefined, jsxNodes: undefined }
                const muIons: Set<Ion> = new Set()
                const attributes = {
                   ...config?.setup || {},
@@ -67,8 +67,8 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
                muIonsStack.pop()
                const component = new InternalComponent(output, undefined, undefined); //TODO: allow ref for root component?
                // if (remountable) markMountPhase()
-               component.setUp(root, nodePod)
-               component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
+               // component.setUp(root, nodePod)
+               // component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
                // if (remountable) unmarkMountPhase()
                popCommons() // for sibling components to access parent, must be set AFTER `component()`
             }

@@ -1,12 +1,12 @@
 import { AnyObject } from "@rue/types";
-import { NodeEntity } from "../node/makeNode";
-import { component } from "../component/InternalComponent";
+import { JSXNode } from "../node/makeNode";
+import { component } from "../component/Component";
 
 export type TryNodeInput = {
-   catch?: (error: Error) => NodeEntity
+   catch?: (error: Error) => JSXNode
 }
 
-export function createTryNode<T extends AnyObject>(Slot: () => NodeEntity, input: TryNodeInput) {
+export function createTryNode<T extends AnyObject>(Slot: () => JSXNode, input: TryNodeInput) {
    const { catch: _catch } = input;
    if (!(isFunction(Slot))) throw new Error('Slot must be a function')
 

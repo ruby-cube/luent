@@ -1,4 +1,4 @@
-import { DOMNode, InternalComponent } from "../component/InternalComponent";
+import { DOMNode } from "../component/Component";
 import { NodeRef } from "./NodeRef";
 
 // Node Pods represent groups of nodes created by `For` and `If`.

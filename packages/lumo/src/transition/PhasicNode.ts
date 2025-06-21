@@ -1,6 +1,6 @@
 import { Commons as createCommons } from "../commons/Commons";
 import { makeElement } from "../element/makeElement";
-import { NodeEntity } from "../node/makeNode";
+import { JSXNode } from "../node/makeNode";
 import { TransitionFunction, TransitionKit, TransitionDef, TransitionClasses } from "./defineTransition";
 import { fromCommons } from "../commons/provide";
 import { AnimationFunction, AnimationKit } from "./defineAnimation";
@@ -8,7 +8,7 @@ import { NodeRef } from "../node/NodeRef";
 import { TransitionNode } from "./TransitionNode";
 import type { Commons } from "../commons/commons-stack";
 import { Ion } from "@rue/quarky";
-import { component, Slot } from "../component/InternalComponent";
+import { component, Slot } from "../component/Component";
 import { Else, If } from "../conditional/If";
 import { isFunction } from "@rue/utils";
 import { CommonsKey } from "../commons/CommonsKey";
@@ -39,7 +39,7 @@ export type PhasicNode = {
 
 export function renderPhasicNode(
    $div: NodeRef<'div'>,
-   Slot: () => NodeEntity,
+   Slot: () => JSXNode,
    transitionNode: TransitionNode,
    $disable: false | undefined | Ion<boolean>
 ) {

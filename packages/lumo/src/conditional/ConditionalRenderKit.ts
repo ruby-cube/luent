@@ -1,4 +1,4 @@
-import { NodeKit } from "../node/setUpNodeEntities";
+import { NodeEntity } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
 
 

@@ -1,4 +1,4 @@
-import { Component, PublicComponent } from "../component/InternalComponent"
+import { Component, PublicComponent } from "../component/Component"
 import { HTMLTag } from "../element/makeElement"
 import { isSettingUpList, onBeforeListUpdate, onListUpdated } from "../iteratives/listStack"
 import { Ion } from "@rue/quarky"

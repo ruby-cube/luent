@@ -1,7 +1,7 @@
 import { normalizeToArray } from "@rue/utils";
-import { Component, unnestComponent } from "../component/InternalComponent";
+import { Component, unnestComponent } from "../component/Component";
 import { getViewFlask } from "../flask/ViewFlask";
-import { NodeEntity, RenderFunction } from "../node/makeNode";
+import { JSXNode, RenderFunction } from "../node/makeNode";
 import { mountNodeEntities } from "../node/mountNodeKits";
 import { mountConditional } from "./ConditionalRenderSeries";
 import { getClosestCommons, getCommons, popCommons, pushCommons } from "../commons/commons-stack";
@@ -42,12 +42,13 @@ export function Polymorph(switchMap: { [key: string]: RenderFunction }) {
    function $Polymorph(input = fromTag<{
       as: Morphable | string,
       provide: Provided //TODO:
-   }>()) {
+   }>()): Component {
       const { $as: $activeKey, provide } = input
 
       if (typeof $activeKey === 'string') {
          return {
-            renderedTemplate: provide ? Commons({ provide, Slot: switchMap[$activeKey] }) : unnestComponent(switchMap[$activeKey]())
+            exposed: undefined,
+            jsxNodes: normalizeToArray(provide ? Commons({ provide, Slot: switchMap[$activeKey] }) : unnestComponent(switchMap[$activeKey]()))
          }
       }
 
@@ -59,15 +60,7 @@ export function Polymorph(switchMap: { [key: string]: RenderFunction }) {
       )
       registerPolymorph($activeKey, polymorphKit)
 
-      return {
-         // exposedComponent: {
-         //    as(key: string) {
-         //       if (morphicRenderKit.activeKey === key) return;
-         //       morphicRenderKit.render(key)
-         //    }
-         // },
-         renderedTemplate: polymorphKit
-      } as Component
+      return { exposed: undefined, jsxNodes: [polymorphKit] };
    }
 
    $Polymorph.morphable = (key: string) => {
@@ -103,9 +96,9 @@ export function Polymorph(switchMap: { [key: string]: RenderFunction }) {
 type DynamicRenderKit = {
    nodePod: NodePod | undefined;
    flask: Flask | undefined;
-   renderConditional: (parent: Element, nodePod: NodePod) => NodeEntity[];
+   renderConditional: (parent: Element, nodePod: NodePod) => JSXNode[];
    transitionNodes: TransitionNode[] | undefined;
-   cached: NodeEntity[] | undefined
+   cached: JSXNode[] | undefined
 }
 
 function createDynamicRenderKit(render: RenderFunction) {
@@ -139,7 +132,7 @@ export class PolymorphKit {
 
    renderedKeys: Set<string>;
 
-   // nodeEntities!: NodeEntity[]
+   // nodeEntities!: JSXNode[]
 
    flask!: Flask
    dynamicNodePod!: NodePod

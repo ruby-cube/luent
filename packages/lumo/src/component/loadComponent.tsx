@@ -1,4 +1,4 @@
-import { ComponentSetup } from "./InternalComponent";
+import { ComponentSetup } from "./Component";
 import { Else, ElseIf, If } from "../conditional/If";
 import { noop } from "@rue/utils";
 import { ion } from "../../../quarky/src";

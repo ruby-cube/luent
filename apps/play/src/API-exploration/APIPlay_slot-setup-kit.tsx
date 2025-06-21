@@ -25,7 +25,7 @@ function ColumnB() {
 
 
 // Slot input type
-// Slot === NodeEntity
+// Slot === JSXNode
 // Slot('?') === optional slot
 // Slot<{ dog: string }> === render function
 // Slot<{ dog: string }, '?'> === optional render function

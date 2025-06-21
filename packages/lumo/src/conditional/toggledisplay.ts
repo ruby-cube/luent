@@ -1,12 +1,12 @@
-import { DOMNode } from "../component/InternalComponent"
+import { DOMNode } from "../component/Component"
 import { NodePod } from "../node/NodePod";
-import { NodeKit } from "../node/setUpNodeEntities";
+import { NodeEntity } from "../node/setUpNodeEntities";
 import { mountConditional } from "./ConditionalRenderSeries"
 
 
 
 
-// export function showConditionalNodes(parent: Element, vine: NodeVine, nodeEntities: NodeKit[]) {
+// export function showConditionalNodes(parent: Element, vine: NodeVine, nodeEntities: NodeEntity[]) {
 //     if (vine.isEmpty) { // lazy render
 //         mountConditional(parent, vine, nodeEntities)
 //     }

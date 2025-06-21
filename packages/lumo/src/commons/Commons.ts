@@ -1,4 +1,4 @@
-import { unnestComponent } from "../component/InternalComponent";
+import { unnestComponent } from "../component/Component";
 import { Commons as CommonsType, getClosestCommons, popCommons, pushCommons } from "./commons-stack";
 import { AppCommons, markIfMuIon } from "./provide";
 import { debug, Ion } from "@rue/quarky";
@@ -62,7 +62,7 @@ export function toCommonsEntries(provided: [CommonsEntryKey | string, unknown][]
 }
 
 // export function createCommons(
-//     Slot: () => NodeEntity,
+//     Slot: () => JSXNode,
 //     config: ComponentConfig,
 // ) {
 //    return Commons({ Slot, provide: config.provide })

@@ -1,6 +1,6 @@
 // collection mutation to array mutation
 
-import { NodeEntity, NodePod } from "@rue/lumo";
+import { JSXNode, NodePod } from "@rue/lumo";
 import { Ion } from "@rue/quarky";
 
 // mutable structure: Set
@@ -25,7 +25,7 @@ function enrollMutableCollection(constructor: any, config: any) {
 }
 
 const toDOMMutation = {
-   push({ input: [value], nodePod, renderFunction, $index }: { nodePod: NodePod, $index: Ion<number>, input: [unknown], renderFunction: (item: unknown, $index: Ion<number>) => NodeEntity }) {
+   push({ input: [value], nodePod, renderFunction, $index }: { nodePod: NodePod, $index: Ion<number>, input: [unknown], renderFunction: (item: unknown, $index: Ion<number>) => JSXNode }) {
       const nodeEntities = renderFunction(value, $index)
       nodePod
 

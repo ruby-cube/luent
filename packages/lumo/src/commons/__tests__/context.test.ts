@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { fromApp, fromCommons, createGlobalCommons, fromGlobal } from '../provide';
-import { component } from '../../component/InternalComponent';
+import { component } from '../../component/Component';
 import { createApp } from '../../createApp';
 import { makeComponent } from '../../component/makeComponent';
 import { makeElement } from '../../element/makeElement';

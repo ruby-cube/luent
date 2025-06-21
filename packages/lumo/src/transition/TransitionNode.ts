@@ -1,4 +1,4 @@
-import { NodeEntity } from "../node/makeNode";
+import { JSXNode } from "../node/makeNode";
 import { renderPhasicNode, TransitionConfig } from "./PhasicNode";
 import { createTransitionStyleSheet, getTransitionStylesheet, TransitionClasses, TransitionFunction, TransitionKit } from "./defineTransition";
 import { AnimationClass, AnimationFunction, AnimationKit } from "./defineAnimation";
@@ -13,7 +13,7 @@ export type TransitionHook = {
 }
 
 export type TransitionNodeInput = {
-   // children: (() => NodeEntity) | NodeEntity,
+   // children: (() => JSXNode) | JSXNode,
    with?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
    'load:with'?: true | AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
    'in:with'?: AnimationClass | TransitionClasses | TransitionConfig | TransitionConfig[];
@@ -54,7 +54,7 @@ const defaultFade: TransitionClasses = {
 
 export function createTransitionNode(
    type: 'o--transition' | 'o--transit',
-   Slot: (() => NodeEntity),
+   Slot: (() => JSXNode),
    input: TransitionNodeInput
 ) {
    const { 'in:with': inputIn, 'out:with': inputOut, with: inputBoth, "load:with": inputLoad, onEnd, onStart, disable } = input;

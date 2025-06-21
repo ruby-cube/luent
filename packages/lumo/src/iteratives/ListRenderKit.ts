@@ -6,7 +6,7 @@ import { mountNodeEntities } from "../node/mountNodeKits";
 import { getViewFlask } from "../flask/ViewFlask";
 import { diff, InsertAndMoveKit } from "./diff";
 import { Commons } from "../commons/commons-stack";
-import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
+import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { TransitionNode } from "../transition/TransitionNode";
 import { Commons as createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";

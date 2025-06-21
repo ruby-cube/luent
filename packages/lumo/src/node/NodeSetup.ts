@@ -1,8 +1,8 @@
-import { ComponentSetup, InternalComponent } from "../component/InternalComponent";
+import { ComponentSetup } from "../component/Component";
 import { HTMLTag } from "../element/makeElement";
 import { ListData } from "../iteratives/For";
 import { ComponentConfig, ElementConfig } from "./makeNode";
-import { AtomicIon, Ion, ReactiveGet, ion } from "@rue/quarky";
+import {  Ion, ion } from "@rue/quarky";
 
 
 //NOTE: We use partial types so that we can split between spreading and directly passing values to template
@@ -18,7 +18,7 @@ export type ItemNodeConfig<
 > =
     L extends (infer I)[] ?
     ((item?: I, $index?: Ion<number>) => Partial<NodeSetup<T>>)
-    : L extends ReactiveGet<(infer I)[]> ?
+    : L extends Ion<(infer I)[]> ?
     (item?: I, $index?: Ion<number>) => Partial<NodeSetup<T>>
     : never
 

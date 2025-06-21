@@ -1,9 +1,8 @@
 import { __devCheckIfTracked, __devCheckIfNotTracked, Ion, isIon } from "../../../quarky/src";
-import { ComponentSetup, DOMNode, InternalComponent } from "../component/InternalComponent";
+import { Component, ComponentSetup, DOMNode } from "../component/Component";
 import { HTMLTag, makeElement } from "../element/makeElement";
 import { InferSlot, makeComponent } from "../component/makeComponent";
 import { NodeReferent, NodeRef, NodesRef } from "./NodeRef";
-import { ConditionalRenderKit } from "../conditional/ConditionalRenderKit";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
@@ -17,6 +16,7 @@ import { Commons, Provided, wrapWithCommons } from "../commons/Commons";
 import { ActivationType } from "../conditional/If";
 import { fromTag, RenderSlot } from "../component/fromTag";
 import { getClosestCommons } from "../commons/commons-stack";
+import { PolymorphKit } from "../conditional/Polymorph";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -28,28 +28,35 @@ import { getClosestCommons } from "../commons/commons-stack";
 //    return makeNode(tag, _children, config || {})
 // }
 
-export type NodeEntity =
-   NodeEntity[]
+export type RawJSXNode =
+   JSXNode[]
    | JSX.Element
    | DOMNode
    | string
    | undefined
-   | (() => any) // derived getter
    | Ion
-   | InternalComponent
+   | Component
    | ListRenderKit
-   // | PolymorphKit
-   | ConditionalRenderKit
+   | PolymorphKit
    | ConditionalRenderSeries
    | InnerHTMLKit
 // | MutableKit
+
+export type JSXNode =
+   | JSX.Element
+   | DOMNode
+   | string
+   | Ion
+   | ListRenderKit
+   | PolymorphKit
+   | ConditionalRenderSeries
 
 
 
 
 export type RenderFunction<Params = unknown> = Params extends any[] ?
-   (...args: Params) => NodeEntity :
-   () => NodeEntity
+   (...args: Params) => JSXNode :
+   () => JSXNode
 
 export type EventHandler<K extends keyof HTMLElementEventMap> = (event: HTMLElementEventMap[K]) => void
 
@@ -128,9 +135,9 @@ export function wrapWithActivationType(type: ActivationType, Slot: RenderSlot, p
 }
 
 // TODO: how to distinguish render function from derived getter 
-export function normalizeToRenderFunction(slot: ((...args: any[]) => NodeEntity) | NodeEntity) {
+export function normalizeToRenderFunction(slot: ((...args: any[]) => JSXNode) | JSXNode) {
    if (slot instanceof Function && !isIon(slot)) { // distinguishes derivation functions from render functions
-      return slot as (...args: any[]) => NodeEntity;
+      return slot as (...args: any[]) => JSXNode;
    }
    if (__DEV__) console.warn('jsx compiler failed to normalize slot to render function')
    return () => slot;
@@ -152,9 +159,9 @@ type SVGTag = keyof SVGElementTagNameMap
 
 export function makeNode(
    nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--style' | 'o--portal' | 'o--link' | 'o--transit' | 'o--transition' | 'o--mount' | 'o--show',
-   Slot: undefined | (() => NodeEntity[]) | InferSlot,
+   Slot: undefined | (() => JSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
-): DOMNode | InternalComponent | JSX.Element | undefined {
+): DOMNode | Component | JSX.Element | undefined {
 
    switch (nodeType) {
 
@@ -197,7 +204,7 @@ export function makeNode(
          if (typeof nodeType === 'string') {
             return makeElement(
                nodeType,
-               <[string] | (() => NodeEntity[])>Slot,
+               <[string] | (() => JSXNode[])>Slot,
                <ElementConfig>config,
                getCurrentIndex()
             )

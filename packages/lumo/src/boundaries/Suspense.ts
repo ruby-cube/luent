@@ -1,7 +1,7 @@
 import { ion, __addDevName, AtomicIon } from "../../../quarky/src";
 import { Else, ElseIf, If } from "../conditional/If";
-import { component, ComponentSetup } from "../component/InternalComponent";
-import { NodeEntity } from "../node/makeNode";
+import { component, ComponentSetup } from "../component/Component";
+import { JSXNode } from "../node/makeNode";
 
 
 const pendingPromisesStack: Promise<any>[][] = []
@@ -19,11 +19,11 @@ export function pend(promiseValue: Promise<any> | Promise<any>[]) {
 export type SuspenseNodeInput = {
    timeout?: number,
    await?: Promise<any> | Promise<any>[],
-   standin?: () => NodeEntity
-   catch?: (error: Error) => NodeEntity
+   standin?: () => JSXNode
+   catch?: (error: Error) => JSXNode
 }
 
-export function createSuspenseNode(Slot: () => NodeEntity, input: SuspenseNodeInput) {
+export function createSuspenseNode(Slot: () => JSXNode, input: SuspenseNodeInput) {
    const { standin: renderPlaceholder = () => undefined, timeout, catch: renderError = () => undefined } = input;
    const $pending = ion(true);
    const $error: AtomicIon<Error> = ion();

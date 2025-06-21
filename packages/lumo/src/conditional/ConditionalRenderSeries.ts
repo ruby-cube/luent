@@ -5,7 +5,7 @@ import { hideDOMNodes, showDOMNodes } from "./toggledisplay";
 import { areShallowEqualArrays, Ion, watch } from "../../../quarky/src";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
-import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
+import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
@@ -51,7 +51,7 @@ function toDynamicConditionalKits(kits: ConditionalKit[]): DynamicConditionalRen
 }
 
 
-export type RenderConditional = (parent: Element, nodePod: NodePod) => NodeKit[]
+export type RenderConditional = (parent: Element, nodePod: NodePod) => NodeEntity[]
 
 function renderWithCommons(renderConditional: RenderFunction, provide: Provided) {
    const parentCommons = getClosestCommons()
@@ -146,7 +146,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
    mount( // the initial mount after setup
       parent: Element,
-      fragment?: DocumentFragment
    ) {
       const activeIndex = this.activeIndex
 
@@ -155,7 +154,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       if (kit.type !== 'show') {
          const flask = kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === 'create' })
-         this.render(kit, parent, fragment, flask)
+         this.render(kit, parent, flask)
          flask.emitInitialMount() // emits mount hook
       }
 
@@ -163,7 +162,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       if (showKits)
          for (const showKit of showKits) {
             const pod = showKit.nodePod!
-            this.render(showKit, parent, fragment)
+            this.render(showKit, parent)
 
             if (showKit !== kit) hideDOMNodes(pod)
          }
@@ -385,7 +384,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       return this;
    }
 
-   private render(kit: DynamicConditionalRenderKit, parent: Element, fragment?: DocumentFragment, flask?: Flask) {
+   private render(kit: DynamicConditionalRenderKit, parent: Element | DocumentFragment, flask?: Flask) {
       const context = this.context;
       if (flask) context.set(FLASK, flask);
       if (__DEV__) context.set(TRACE, this.__DEV__asyncPath)
@@ -453,7 +452,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 export function mountConditional(
    parent: Element,
    pod: NodePod,
-   nodeEntities: NodeKit[],
+   nodeEntities: NodeEntity[],
    fragment?: DocumentFragment
 ) {
    const _fragment = fragment || new DocumentFragment();
@@ -497,8 +496,8 @@ export function removeDOMNodes(pod: NodePod) {
 // }
 
 
-function wrapToPreserve(renderConditional: (parent: Element, nodePod: NodePod) => NodeKit[]) {
-   let nodeEntities: NodeKit[];
+function wrapToPreserve(renderConditional: (parent: Element, nodePod: NodePod) => NodeEntity[]) {
+   let nodeEntities: NodeEntity[];
    return (parent: Element, nodePod: NodePod) => {
       if (nodeEntities) return nodeEntities;
       return nodeEntities = renderConditional(parent, nodePod)

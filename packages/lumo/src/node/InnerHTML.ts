@@ -1,7 +1,8 @@
-import { isIon, __devCheckIfTracked, watch } from "@rue/quarky";
+import { isIon, __devCheckIfTracked, watch, Ion, toValue } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
-import { NodeEntity } from "./makeNode";
+import { JSXNode } from "./makeNode";
 import { RENDER } from "../render-cycle";
+import { MaybeIon } from "../component/Input";
 
 
 
@@ -11,16 +12,14 @@ export function setUpInnerHTML(kit: InnerHTMLKit, parentNode: Element) {
    if (isIon(htmlString)) {
       keepInnerHTMLUpdated(htmlString, parentNode)
    }
-   return kit
+   return htmlString;
 }
 
-export function mountInnerHTML(kit: InnerHTMLKit, parent: Element) {
-   const htmlString = kit.innerHTML;
-   //  const root = fragment ? fragment : parent; //QUESTION: do I need to ever append to a fragment? a fragment doesn't have inner html property
-   parent.innerHTML = isIon(htmlString) ? htmlString() : htmlString;
+export function mountInnerHTML(htmlString: MaybeIon<string>, parent: Element) {
+   parent.innerHTML = toValue(htmlString)
 }
 
-function keepInnerHTMLUpdated(htmlString: ReactiveGet<any>, parentNode: Element) {
+function keepInnerHTMLUpdated(htmlString: Ion<any>, parentNode: Element) {
    watch(htmlString, ({ current }) => {
       parentNode.innerHTML = toString(current);
    }, { phase: RENDER });
@@ -34,6 +33,6 @@ function toString(value: any) {
 }
 
 export type InnerHTMLKit = { innerHTML: MaybeIon<string> }
-export function isInnerHTMLKit(nodeEntity: NodeEntity): nodeEntity is InnerHTMLKit {
+export function isInnerHTMLKit(nodeEntity: JSXNode): nodeEntity is InnerHTMLKit {
    return isObjectLiteral(nodeEntity) && 'innerHTML' in nodeEntity
 }

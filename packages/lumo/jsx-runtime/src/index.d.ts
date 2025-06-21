@@ -17,10 +17,10 @@ import { PortalNodeInput } from "../../src/boundaries/Portal";
 // export function jsx(): "frog"
 
 // #LUMO-EDIT
-// Replaced all ReactNode --> NodeEntity
+// Replaced all ReactNode --> JSXNode
 // Dunno if replacement will cause problems for:
-// - Iterable<NodeEntity>
-// - ReadonlyArray<NodeEntity>
+// - Iterable<JSXNode>
+// - ReadonlyArray<JSXNode>
 // - NodeEntityArray
 
 //$$$
@@ -232,17 +232,17 @@ declare namespace React {
    type ReactChild = ReactElement | string | number;
 
    /**
-    * @deprecated Use either `Lumo.NodeEntity[]` if you need an array or `Iterable<Lumo.NodeEntity>` if its passed to a host component.
+    * @deprecated Use either `Lumo.JSXNode[]` if you need an array or `Iterable<Lumo.JSXNode>` if its passed to a host component.
     */
-   interface NodeEntityArray extends ReadonlyArray<Lumo.NodeEntity> { }
+   interface NodeEntityArray extends ReadonlyArray<Lumo.JSXNode> { }
    /**
     * WARNING: Not related to `React.Fragment`.
     * @deprecated This type is not relevant when using React. Inline the type instead to make the intent clear.
     */
-   type ReactFragment = Iterable<Lumo.NodeEntity>;
+   type ReactFragment = Iterable<Lumo.JSXNode>;
 
    /**
-    * Different release channels declare additional types of NodeEntity this particular release channel accepts.
+    * Different release channels declare additional types of JSXNode this particular release channel accepts.
     * App or library types should never augment this interface.
     */
    // interface DO_NOT_USE_OR_YOU_WILL_BE_FIRED_EXPERIMENTAL_REACT_NODES { }
@@ -250,7 +250,7 @@ declare namespace React {
    /**
     * Represents all of the things React can render.
     *
-    * Where {@link ReactElement} only represents JSX, `Lumo.NodeEntity` represents everything that can be rendered.
+    * Where {@link ReactElement} only represents JSX, `Lumo.JSXNode` represents everything that can be rendered.
     *
     * @see {@link https://react-typescript-cheatsheet.netlify.app/docs/react-types/reactnode/ React TypeScript Cheatsheet}
     *
@@ -258,7 +258,7 @@ declare namespace React {
     *
     * ```tsx
     * // Typing Slot
-    * type Props = { Slot: Lumo.NodeEntity }
+    * type Props = { Slot: Lumo.JSXNode }
     *
     * const Component = ({ Slot }: Props) => <div>{Slot}</div>
     *
@@ -269,7 +269,7 @@ declare namespace React {
     *
     * ```tsx
     * // Typing a custom element
-    * type Props = { customElement: Lumo.NodeEntity }
+    * type Props = { customElement: Lumo.JSXNode }
     *
     * const Component = ({ customElement }: Props) => <div>{customElement}</div>
     *
@@ -278,12 +278,12 @@ declare namespace React {
     */
    // non-thenables need to be kept in sync with AwaitedNodeEntity
 
-   // EDITED BY LUMO: ReactNode --> NodeEntity
+   // EDITED BY LUMO: ReactNode --> JSXNode
    // type ReactNode =
    //     | ReactElement
    //     | string
    //     | number
-   //     | Iterable<Lumo.NodeEntity>
+   //     | Iterable<Lumo.JSXNode>
    //     | ReactPortal
    //     | boolean
    //     | null
@@ -325,22 +325,22 @@ declare namespace React {
    // function createElement(
    //     type: "input",
    //     props?: InputHTMLAttributes<HTMLInputElement> & ClassAttributes<HTMLInputElement> | null,
-   //     ...Slot: Lumo.NodeEntity[]
+   //     ...Slot: Lumo.JSXNode[]
    // ): DetailedReactHTMLElement<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
    // function createElement<P extends HTMLAttributes<T>, T extends HTMLElement>(
    //     type: keyof ReactHTML,
    //     props?: { frog: true } & ClassAttributes<T> & P | null,
-   //     ...Slot: Lumo.NodeEntity[]
+   //     ...Slot: Lumo.JSXNode[]
    // ): DetailedReactHTMLElement<P, T>;
    // function createElement<P extends SVGAttributes<T>, T extends SVGElement>(
    //     type: keyof ReactSVG,
    //     props?: { frog: true } & ClassAttributes<T> & P | null,
-   //     ...Slot: Lumo.NodeEntity[]
+   //     ...Slot: Lumo.JSXNode[]
    // ): ReactSVGElement;
    // function createElement<P extends DOMAttributes<T>, T extends Element>(
    //     type: string,
    //     props?: { frog: true } & ClassAttributes<T> & P | null,
-   //     ...Slot: Lumo.NodeEntity[]
+   //     ...Slot: Lumo.JSXNode[]
    // ): DOMElement<P, T>;
 
    // Custom components
@@ -361,7 +361,7 @@ declare namespace React {
     */
    //$$$
    interface ExoticComponent<P = {}> {
-      (props: P & { frog: 'blog' }): Lumo.NodeEntity;
+      (props: P & { frog: 'blog' }): Lumo.JSXNode;
       readonly $$typeof: symbol;
    }
 
@@ -394,7 +394,7 @@ declare namespace React {
    //$$$
    type CustomComponentPropsWithRef<T extends ComponentType> = T extends (new (props: infer P) => Component<any, any>)
       ? (PropsWithoutRef<P> & RefAttributes<InstanceType<T>>)
-      : T extends ((props: infer P, legacyContext?: any) => Lumo.NodeEntity) ? PropsWithRef<P>
+      : T extends ((props: infer P, legacyContext?: any) => Lumo.JSXNode) ? PropsWithRef<P>
       : never;
 
    /**
@@ -665,7 +665,7 @@ declare namespace React {
 
    //$$$
    interface _DOMAttributes<T> {
-      children?: Lumo.NodeEntity | undefined;
+      children?: Lumo.JSXNode | undefined;
    }
 
    type LifecycleTask<T> = (element: T)=> void
@@ -1319,7 +1319,7 @@ declare namespace React {
 
    /**
     * For internal usage only.
-    * Different release channels declare additional types of NodeEntity this particular release channel accepts.
+    * Different release channels declare additional types of JSXNode this particular release channel accepts.
     * App or library types should never augment this interface.
     */
 
@@ -2421,7 +2421,7 @@ declare namespace React {
    //    forEach<C>(Slot: C | readonly C[], fn: (child: C, index: number) => void): void;
    //    count(Slot: any): number;
    //    only<C>(Slot: C): C extends any[] ? never : C;
-   //    toArray(Slot: Lumo.NodeEntity | Lumo.NodeEntity[]): Array<Exclude<Lumo.NodeEntity, boolean | null | undefined>>;
+   //    toArray(Slot: Lumo.JSXNode | Lumo.JSXNode[]): Array<Exclude<Lumo.JSXNode, boolean | null | undefined>>;
    // }
 
    //
@@ -2596,7 +2596,7 @@ declare global {
 
       // type ContextNodeInput<T> = {
       //     with: T & CommonsEntries<T>,
-      //     Slot: (() => NodeEntity) | NodeEntity
+      //     Slot: (() => JSXNode) | JSXNode
       // }
 
       interface LumoElements {

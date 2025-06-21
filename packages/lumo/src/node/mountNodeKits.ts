@@ -1,5 +1,4 @@
-import { mountTextNode } from "./TextNode";
-import { NodeKit } from "./setUpNodeEntities";
+import { NodeEntity } from "./setUpNodeEntities";
 import { debug } from "@rue/utils";
 import { isInnerHTMLKit, mountInnerHTML } from "./InnerHTML";
 
@@ -16,33 +15,31 @@ import { isInnerHTMLKit, mountInnerHTML } from "./InnerHTML";
 // - 
 
 export function mountNodeEntities(
-   nodeEntities: NodeKit[],
-   parent: Element, //TODO: parent is as optional as fragment I think...
-   fragment?: DocumentFragment,
+   nodeEntities: NodeEntity[],
+   parent: Element | DocumentFragment,
 ) {
    for (const nodeEntity of nodeEntities) {
-      mountNodeEntity(nodeEntity, parent, fragment)
+      mountNodeEntity(nodeEntity, parent)
    }
 }
 
 
 function mountNodeEntity(
-   nodeEntity: NodeKit,
-   parent: Element, //TODO: parent is as optional as fragment I think...?
-   fragment?: DocumentFragment,
+   nodeEntity: NodeEntity,
+   parent: Element | DocumentFragment,
 ) {
-   if (nodeEntity instanceof Element) { // Element type from Web API
-      const root = fragment ? fragment : parent;
-      root.appendChild(nodeEntity)
-   }
-   else if (nodeEntity instanceof CharacterData){
-      mountTextNode(nodeEntity, parent, fragment)
+   if (nodeEntity instanceof Element || nodeEntity instanceof CharacterData) { // Element type from Web API
+      parent.appendChild(nodeEntity)
    }
    else if (isInnerHTMLKit(nodeEntity)) {
+      if (parent instanceof DocumentFragment) {
+         if (__DEV__) console.error('Cannot append innerHTML to document fragment')
+         return;
+      }
       mountInnerHTML(nodeEntity, parent)
    }
    else if ('mount' in nodeEntity) {
-      nodeEntity.mount(parent, fragment)
+      nodeEntity.mount(parent)
    }
    else {
       debug.error('[[INVALID INPUT]] Invalid node entity')

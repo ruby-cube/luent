@@ -5,7 +5,7 @@ import { hideDOMNodes, showDOMNodes } from "./toggledisplay";
 import { areShallowEqualArrays, watch } from "../../../quarky/src";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
-import { NodeKit } from "../node/setUpNodeEntities";
+import { NodeEntity } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
@@ -384,7 +384,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 export function mountConditional(
    parent: Element,
    pod: NodePod,
-   nodeEntities: NodeKit[],
+   nodeEntities: NodeEntity[],
    fragment?: DocumentFragment
 ) {
    const _fragment = fragment || new DocumentFragment();
@@ -428,8 +428,8 @@ export function removeDOMNodes(pod: NodePod) {
 // }
 
 
-function wrapToPreserve(renderConditional: (parent: Element, nodePod: NodePod) => NodeKit[]) {
-   let nodeEntities: NodeKit[];
+function wrapToPreserve(renderConditional: (parent: Element, nodePod: NodePod) => NodeEntity[]) {
+   let nodeEntities: NodeEntity[];
    return (parent: Element, nodePod: NodePod) => {
       if (nodeEntities) return nodeEntities;
       return nodeEntities = renderConditional(parent, nodePod)

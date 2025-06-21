@@ -1,14 +1,14 @@
 import { ion, Ion, toIon, toValue } from "@rue/quarky"
-import { NodeEntity } from "../node/makeNode"
+import { JSXNode } from "../node/makeNode"
 import { MaybeIon } from "../component/Input"
 import { NodePod } from "../node/NodePod"
 
 type RenderEntry<S> = S extends MaybeIon<infer I> ?
-   I extends number ? (entry: number, index: number) => NodeEntity
-   : I extends string ? ($entry: Ion<string>, index: number) => NodeEntity
-   : I extends Array<infer E> | Set<infer E> ? ($entry: Ion<E>, index: number) => NodeEntity
-   : I extends Map<infer K, infer V> ? ($entry: Ion<[K, V]>, index: number) => NodeEntity
-   : I extends { [K in keyof S]: infer V } ? ($entry: Ion<[PropertyKey, V]>, index: number) => NodeEntity
+   I extends number ? (entry: number, index: number) => JSXNode
+   : I extends string ? ($entry: Ion<string>, index: number) => JSXNode
+   : I extends Array<infer E> | Set<infer E> ? ($entry: Ion<E>, index: number) => JSXNode
+   : I extends Map<infer K, infer V> ? ($entry: Ion<[K, V]>, index: number) => JSXNode
+   : I extends { [K in keyof S]: infer V } ? ($entry: Ion<[PropertyKey, V]>, index: number) => JSXNode
    : never : never
 
 type Spreadable<K, V> = MaybeIon<number | string | Array<V> | Set<V> | Map<K, V> | { [key: PropertyKey]: V }>

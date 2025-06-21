@@ -1,9 +1,9 @@
-import { getGroupActivationType, NodeEntity, normalizeToRenderFunction, RenderFunction, withGroupActivationReset } from "../node/makeNode";
+import { getGroupActivationType, JSXNode, normalizeToRenderFunction, RenderFunction, withGroupActivationReset } from "../node/makeNode";
 import { normalizeToArray } from "@rue/utils";
 import { Booleanny } from "@rue/types";
 import { Provided, wrapWithCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
-import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
+import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
 import { getClosestCommons } from "../commons/commons-stack";
 import { Ion, isIon } from "@rue/quarky";
@@ -21,31 +21,31 @@ import { MaybeIon } from "../component/Input";
 export type ActivationType = 'show' | 'create' | 'mount'
 
 
-export function If($condition: Booleanny | ((_?: any) => Booleanny), renderConditional: RenderFunction | NodeEntity): ConditionalKit
-export function If($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderFunction | NodeEntity): ConditionalKit
-export function If($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalKit {
+export function If($condition: Booleanny | ((_?: any) => Booleanny), renderConditional: RenderFunction | JSXNode): ConditionalKit
+export function If($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderFunction | JSXNode): ConditionalKit
+export function If($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: JSXNode | RenderFunction | ActivationType, renderConditional?: RenderFunction | JSXNode): ConditionalKit {
    const [render, activationType] = getParams(typeOrRenderConditional, renderConditional)
    // resetCurrentNodePodIndex()
    return createConditionalKit('if', activationType, render, $condition)
 }
 
 
-export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), renderConditional: RenderFunction | NodeEntity): ConditionalKit
-export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderFunction | NodeEntity): ConditionalKit
-export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalKit {
+export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), renderConditional: RenderFunction | JSXNode): ConditionalKit
+export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderFunction | JSXNode): ConditionalKit
+export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: JSXNode | RenderFunction | ActivationType, renderConditional?: RenderFunction | JSXNode): ConditionalKit {
    const [render, activationType] = getParams(typeOrRenderConditional, renderConditional)
    return createConditionalKit('elseIf', activationType, render, $condition)
 }
 
 
-export function Else(renderConditional: RenderFunction | NodeEntity): ConditionalKit
-export function Else(activationType: ActivationType, renderConditional: RenderFunction | NodeEntity): ConditionalKit
-export function Else(typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity): ConditionalKit {
+export function Else(renderConditional: RenderFunction | JSXNode): ConditionalKit
+export function Else(activationType: ActivationType, renderConditional: RenderFunction | JSXNode): ConditionalKit
+export function Else(typeOrRenderConditional: JSXNode | RenderFunction | ActivationType, renderConditional?: RenderFunction | JSXNode): ConditionalKit {
    const [render, activationType] = getParams(typeOrRenderConditional, renderConditional)
    return createConditionalKit('else', activationType, render)
 }
 
-function getParams(typeOrRenderConditional: NodeEntity | RenderFunction | ActivationType, renderConditional?: RenderFunction | NodeEntity) {
+function getParams(typeOrRenderConditional: JSXNode | RenderFunction | ActivationType, renderConditional?: RenderFunction | JSXNode) {
    const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional)
    const activationType = renderConditional ? typeOrRenderConditional as ActivationType : undefined;
    return [_renderConditional, activationType] as const

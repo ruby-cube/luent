@@ -1,11 +1,8 @@
 import { AnyObject } from "@rue/types";
-import { NodeEntity } from "../node/makeNode";
-import { mountNodeEntities } from "../node/mountNodeKits";
+import { JSXNode, RawJSXNode } from "../node/makeNode";
 import { Ion, toValue } from "@rue/quarky";
-import { NodeKit, setUpNodeEntities } from "../node/setUpNodeEntities";
-import { normalizeToArray } from "@rue/utils";
+import { isObject, normalizeToArray } from "@rue/utils";
 import { initializeListRef, initializeRef, NodeRef, NodesRef } from "../node/NodeRef";
-import { NodePod } from "../node/NodePod";
 
 
 
@@ -16,11 +13,11 @@ export type DOMNode = CharacterData | Element
 // }
 
 export type Slot<P = undefined> =
-   P extends undefined ? (() => NodeEntity) | NodeEntity
-   : (props: P) => NodeEntity
+   P extends undefined ? (() => JSXNode) | JSXNode
+   : (props: P) => JSXNode
 
 
-// export type Slot = NodeEntity
+// export type Slot = JSXNode
 export type ComponentSetup<P extends never | AnyObject = never | AnyObject> = P extends never ? () => Component : (setup?: P) => Component
 
 export const COMPONENT = Symbol('publicComponent')
@@ -29,61 +26,35 @@ export type PublicComponent<T extends AnyObject = AnyObject> = T // contains any
 
 
 export interface Component<T extends AnyObject | undefined = AnyObject | undefined> {
-   exposedComponent?: T extends AnyObject ? PublicComponent<T> : undefined;
-   renderedTemplate: NodeEntity;
+   exposed: T extends AnyObject ? PublicComponent<T> : undefined;
+   jsxNodes: RawJSXNode[];
    // morphicRenderKit?: PolymorphKit
 }
 
-type JSXTemplate = NodeEntity
+type JSXTemplate = RawJSXNode
 
 //TODO: accept a third paramenter for mountTeleported
 // compiler macro to transform jsx template into render function
 export function component<T extends AnyObject | undefined = AnyObject | undefined>(exposedComponent: T, template: JSXTemplate): Component<T>
 export function component<T extends AnyObject | undefined = AnyObject | undefined>(template: JSXTemplate): Component<undefined>
 export function component<T extends AnyObject | undefined = AnyObject | undefined>(templateOrComponent: T | JSXTemplate, template?: JSXTemplate): Component<T extends AnyObject ? T : undefined> {
-   const renderedTemplate = arguments.length === 2 ? template : templateOrComponent as JSXTemplate;
-   const exposedComponent = arguments.length === 2 ? templateOrComponent as AnyObject : undefined;
-   console.log('exposedComponent', exposedComponent)
+   const jsxNodes = arguments.length === 2 ? template : templateOrComponent as JSXTemplate;
+   const exposed = arguments.length === 2 ? templateOrComponent as AnyObject : undefined;
    return {
-      exposedComponent, //TODO: make read only
-      renderedTemplate: toValue(renderedTemplate ? unnestComponent(renderedTemplate) : undefined),
+      exposed, //TODO: make read only
+      jsxNodes: normalizeToArray(toValue(jsxNodes ? unnestComponent(jsxNodes) : undefined)),
    } as Component<T extends AnyObject ? T : undefined>
 }
 
 
-export class InternalComponent {
-   nodeEntities: NodeEntity[] | undefined = undefined; // these are *initial* node entities. Node pods contain current nodes //TODO: add context type?? //QUESTION: should this be cleared or updated?
-   exposed: AnyObject | undefined;
-   nodeKits?: NodeKit[]
-
-   constructor(
-      component: Component,
-      ref: NodeRef | undefined,
-      $index: Ion<number> | undefined
-   ) {
-      const exposed = this.exposed = component.exposedComponent;
-      if (ref) initializeComponentRef(ref, exposed || {}, $index)
-      this.nodeEntities = normalizeToArray(component.renderedTemplate)
-   }
-
-   mount(
-      parent: Element,
-      fragment?: DocumentFragment,
-   ) { //TODO: what if a component's root elements is conditional or a dynamic list??
-      const nodeEntities = this.nodeKits!;
-      if (!(parent instanceof Element))
-         throw new Error("Parent cannot be a text node")
-      mountNodeEntities(nodeEntities, parent, fragment)
-   }
-
-   setUp(
-      parent: Element,
-      nodePod: NodePod
-   ) {
-      this.nodeKits = setUpNodeEntities(this.nodeEntities!, parent, nodePod)
-      return this;
-   }
+export function exposeComponent(
+   publicComponent: AnyObject,
+   ref: NodeRef,
+   $index: Ion<number> | undefined
+) {
+   initializeComponentRef(ref, publicComponent || {}, $index)
 }
+
 
 
 export function initializeComponentRef(
@@ -108,16 +79,20 @@ function __DEV__assertInCreationScope(object: AnyObject) {
    //TODO: assert that object is within its creation scope
 }
 
-export function unnestComponent(nodeEntities: NodeEntity) {
-   const isArray = nodeEntities instanceof Array;
-   if (isArray && nodeEntities.length > 1) return nodeEntities;
-   const entity = isArray ? nodeEntities[0] : nodeEntities;
-   if (entity instanceof InternalComponent) {
+export function unnestComponent(jsxNodes: JSXNode) {
+   const isArray = jsxNodes instanceof Array;
+   if (isArray && jsxNodes.length > 1) return jsxNodes;
+   const entity = isArray ? jsxNodes[0] : jsxNodes;
+   if (isComponentKit(entity)) {
       if (entity.exposed)
-         return nodeEntities;
-      return entity.nodeEntities;
+         return jsxNodes;
+      return entity.jsxNodes;
    }
-   return nodeEntities
+   return jsxNodes
+}
+
+export function isComponentKit(entity: unknown): entity is Component{
+   return isObject(entity) && 'exposed' in entity && 'jsxNodes' in entity
 }
 
 // function normalizeToFragmentArray(entity: any) { // distinguish conditional series from 

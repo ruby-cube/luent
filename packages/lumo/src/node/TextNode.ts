@@ -1,25 +1,19 @@
-import { isIon, __devCheckIfTracked, watch, Ion } from "@rue/quarky";
-import { NodePod } from "./NodePod";
+import { isIon, __devCheckIfTracked, watch, Ion, toValue } from "@rue/quarky";
 import { RENDER } from "../render-cycle";
 
 
 
-export function setUpTextNode(text: Ion | any, nodePod: NodePod) {
-   const textNode = createTextNode(text); //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
-
-   nodePod.push(textNode)
-
+export function setUpTextNode(text: Ion | any, textNode: Text) {
    if (isIon(text)) {
-      console.log('isIon', text)
       keepTextNodeUpdated(text, textNode)
    }
    return textNode;
 }
 
-export function mountTextNode(textNode: CharacterData, parent: Element, fragment?: DocumentFragment) {
-   const root = fragment ? fragment : parent;
-   root.appendChild(textNode)
-}
+// export function mountTextNode(textNode: CharacterData, parent: Element, fragment?: DocumentFragment) {
+//    const root = fragment ? fragment : parent;
+//    root.appendChild(textNode)
+// }
 
 function keepTextNodeUpdated(text: Ion, textNode: CharacterData) {
    watch(text, ({ current }) => {
@@ -28,12 +22,11 @@ function keepTextNodeUpdated(text: Ion, textNode: CharacterData) {
 }
 
 
-function createTextNode(value: Ion | any) {
+export function createTextNode(value: Ion | any) {
+   //QUESTION: In cases of empty string, should textNode be created? What is more important... clean HTML or less DOM manipulations?
    if (__DEV__) __devCheckIfTracked()
-   const _value = isIon(value) ? value() : value;
-   const text = toString(_value)
-   const textNode = document.createTextNode(text);
-   return textNode;
+   const text = toString(toValue(value))
+   return document.createTextNode(text);
 }
 
 

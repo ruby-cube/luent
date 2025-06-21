@@ -1,14 +1,14 @@
-import { DOMNode, Slot } from "../component/InternalComponent";
-import { isIon, AtomicIon, watch, isManagedDerivation, Ion } from "@rue/quarky";
+import { DOMNode, Slot } from "../component/Component";
+import { isIon, watch, isManagedDerivation, Ion, MutableIon } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
-import { ClassInput, ElementConfig, makeNode, NodeEntity, StyleInput } from "../node/makeNode";
+import { ClassInput, ElementConfig, makeNode, JSXNode, StyleInput, RawJSXNode } from "../node/makeNode";
 import { $listen, SustainedListenerOptions } from "@rue/flask";
 import { mountNodeEntities } from "../node/mountNodeKits";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
 import { AnyObject, Booleanny } from "@rue/types";
 import { isHTMLEvent } from "./attributes";
-import { MutableKit, setUpNodeEntities } from "../node/setUpNodeEntities";
+import { flattenJSXOutput, MutableKit, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { initializeListRef, initializeRef, isAnyNodeRef, NodesRef, isNodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
 import { NodePod } from "../node/NodePod";
@@ -16,6 +16,7 @@ import { RENDER } from "../render-cycle";
 import { MaybeIon } from "../component/Input";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
+import { isInnerHTMLKit, mountInnerHTML, setUpInnerHTML } from "../node/InnerHTML";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -68,18 +69,29 @@ export function makeElement(
    if (_Slot) {
       const xml_ns = newXML_NS ? newXML_NS : tagName === 'foreignObject' ? undefined : XML_NS
       runWithXMLNamespace(() => {
-         const rawOutput = normalizeToArray(isFunction(_Slot) ? _Slot() : _Slot)
-         const nodePod = new NodePod();
-         const nodeEntities = setUpNodeEntities(rawOutput, domNode, nodePod)
-         mountNodeEntities(nodeEntities, domNode)
+         const rawOutput = normalizeToArray(toOutput(_Slot))
+         const flattenedOutput = flattenJSXOutput(rawOutput)
+         if (isInnerHTMLKit(rawOutput[0])){
+            const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
+            mountInnerHTML(innerHTML, domNode)
+         }
+         else {
+            const nodeEntities = setUpNodeEntities(flattenedOutput, new NodePod())
+            mountNodeEntities(nodeEntities, domNode)
+         }
       }, xml_ns)
    }
    return domNode;
 }
 
+function toOutput(value: unknown){
+   return isFunction(value) ? value() : value;
+}
 
 
-// function wrapIfConditionalSeries(nodeEntities: NodeEntity[]) {
+
+
+// function wrapIfConditionalSeries(nodeEntities: JSXNode[]) {
 //     if (isNotConditionalSeries(nodeEntities)) {
 //         return nodeEntities;
 //     }
@@ -88,7 +100,7 @@ export function makeElement(
 // }
 
 
-// function isNotConditionalSeries(nodeEntities: NodeEntity[]) {
+// function isNotConditionalSeries(nodeEntities: JSXNode[]) {
 //     return !(nodeEntities[0] instanceof ConditionalRenderKit) ||
 //         !(nodeEntities[nodeEntities.length - 1] instanceof ConditionalRenderKit)
 // }
@@ -131,7 +143,7 @@ function analyzeAttributes(entries: AnyObject) {
    }
 }
 
-function isMutableIon(ion: unknown): ion is AtomicIon<any> {
+function isMutableIon(ion: unknown): ion is MutableIon<any> {
    return isIon(ion) && (('state' in ion) || ('set' in ion))
 }
 
@@ -215,7 +227,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
       return;
    const ion = attributes['mu:value'];
    watch(ion, ({ current }) => {
-      element.value = current
+      element.value = toString(current)
    }, { eager: true })
    delete attributes['mu:value'];
    if (!isMutableIon(ion)) {

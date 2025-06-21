@@ -1,5 +1,5 @@
-import { component, unnestComponent } from "../component/InternalComponent";
-import { NodeEntity } from "../node/makeNode";
+import { component, unnestComponent } from "../component/Component";
+import { JSXNode } from "../node/makeNode";
 import { isFunction, normalizeToArray } from "@rue/utils";
 import { mountNodeEntities } from "../node/mountNodeKits";
 import { setUpNodeEntities } from "../node/setUpNodeEntities";
@@ -21,7 +21,7 @@ export type PortalNodeInput = {
 
 
 //TODO: need a portal kit in order for it to show up in node pod?
-export function createPortalNode(Slot: () => NodeEntity, input: PortalNodeInput) {
+export function createPortalNode(Slot: () => JSXNode, input: PortalNodeInput) {
    const { to: container } = input
    if (!(isFunction(Slot))) throw new Error('')
    const element = typeof container === "string" ? document.querySelector(container) : container;

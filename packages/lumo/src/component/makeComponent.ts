@@ -1,5 +1,5 @@
-import { ComponentSetup, InternalComponent, Component, PublicComponent } from "./InternalComponent";
-import { ComponentConfig, NodeEntity } from "../node/makeNode";
+import { Component, ComponentSetup, exposeComponent } from "./Component";
+import { ComponentConfig, JSXNode } from "../node/makeNode";
 import { AnyObject } from "@rue/types";
 import { Ion, neutron } from "@rue/quarky";
 import { assertMutableIon, MU, muIonsStack } from "./Input";
@@ -22,27 +22,9 @@ export type SetupWithSlot = {
 }
 
 export type ComponentSetupWithSlot<P extends SetupWithSlot = SetupWithSlot> =
-   (setup?: P) => NodeEntity
+   (setup?: P) => JSXNode
 
 
-// export function mO<T extends ComponentSetupWithSlot>(
-//     Component: T,
-//     Slot: InferSlot<T>,
-//     config?: ComponentConfig<T>
-// ): InternalComponent
-// export function mO<T extends ComponentSetup>(
-//     Component: T,
-//     Slot?: undefined,
-//     config?: ComponentConfig<T>
-// ): InternalComponent
-// export function mO<T extends ComponentSetup>(
-//    Component: T,
-//    Slot: InferSlot<T>,
-//    config?: ComponentConfig<T>
-// ): InternalComponent | PolymorphKit {
-//    const $index = getCurrentIndex()
-//    return makeComponent(Component, Slot, config || {}, $index)
-// }
 
 
 let componentAttributes: AnyObject | undefined
@@ -60,7 +42,7 @@ export function makeComponent(
    Slot: InferSlot | undefined,
    config: ComponentConfig,
    $index: Ion<number> | undefined
-): InternalComponent {
+): Component {
    //TODO: component flask lifecycle hooks
    const muIons: Set<Ion> = new Set()
    const attributes = {
@@ -77,7 +59,8 @@ export function makeComponent(
       throw new Error("Components cannot return a promise. Use Suspense and pend to handle promises within component setup")
    setComponentAttributes(undefined);
    muIonsStack.pop()
-   return new InternalComponent(output, config.ref, $index);
+   if (config.ref) exposeComponent(output.exposed ?? {}, config.ref, $index)
+   return output
 }
 
 
@@ -111,7 +94,7 @@ export function makeComponent(
 //     return target as { [key: string]: (EventListener | DerivedIon<EventListener | null>)[] };
 // }
 
-// function assignAttributes(nodeEntity: NodeEntity, attributes: AssignedAttributes) {
+// function assignAttributes(nodeEntity: JSXNode, attributes: AssignedAttributes) {
 //     if (nodeEntity instanceof Element) { // from Web API
 //         applyAttributes(nodeEntity, attributes);
 //     }
