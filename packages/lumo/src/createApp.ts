@@ -8,6 +8,8 @@ import { Flask } from "@rue/flask";
 import { MU, muIonsStack } from "./component/Input";
 import { Ion } from "@rue/quarky";
 import { Provided } from "./commons/Commons";
+import { processJSXOutput } from "./node/setUpNodeEntities";
+import { mountNodeEntities } from "./node/mountNodeKits";
 
 let appRoot: Element;
 
@@ -40,9 +42,9 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
          if (!(root instanceof Element)) throw new Error('No root element to mount app to. Check selector string')
          appRoot = root!;
 
+      let component: Component ={exposed: undefined, jsxNodes:[]}
          // (2) attach developer's root component to root element
          flask.containCall(function mountRootComponent() {
-            let output: Component = {   exposed: undefined, jsxNodes: undefined }
                const muIons: Set<Ion> = new Set()
                const attributes = {
                   ...config?.setup || {},
@@ -56,7 +58,7 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
             // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
             setComponentAttributes(config?.setup || {})
             try {
-               output = App()
+               mountNodeEntities(processJSXOutput(App(), appRoot, nodePod), appRoot) 
             }
             catch (err) {
                console.error('uhoh', err)
@@ -64,7 +66,6 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
             finally {
                setComponentAttributes(undefined)
                muIonsStack.pop()
-               const component = new InternalComponent(output, undefined, undefined); //TODO: allow ref for root component?
                // if (remountable) markMountPhase()
                // component.setUp(root, nodePod)
                // component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?
@@ -73,7 +74,6 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
             }
          })
 
-         // return component;
       },
 
       unmount() { //TODO: should I call dynamicNode.unmount() instead of emit?? same for discard?

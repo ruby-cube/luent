@@ -60,9 +60,8 @@ export function MountIf() {
       <div>
          <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: ($color() + 'e') }}>shout</button>
          <h1>Hello {(todos[0].name)}</h1>
-         <div>hi</div>
          <o--transition>
-            <o--show>
+            {/* <o--show> */}
                {If($active, 'mount', (debug.traceAsyncPath(),
                   <>
                      oh
@@ -77,19 +76,19 @@ export function MountIf() {
                      )}
                   </>
                ))}
-               {ElseIf($ready,
+               {ElseIf($ready, 'show',
                   <>
                      low
                      <h2>balloon</h2>
                   </>
                )}
-               {Else(
+               {Else('show',
                   <>
                      so
                      <h2>bye</h2>
                   </>
                )}
-            </o--show>
+            {/* </o--show> */}
          </o--transition>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>

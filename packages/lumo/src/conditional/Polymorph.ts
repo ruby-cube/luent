@@ -1,4 +1,4 @@
-import { normalizeToArray } from "@rue/utils";
+import { isFunction, normalizeToArray } from "@rue/utils";
 import { Component, unnestComponent } from "../component/Component";
 import { getViewFlask } from "../flask/ViewFlask";
 import { JSXNode, RenderFunction } from "../node/makeNode";
@@ -100,13 +100,14 @@ type DynamicRenderKit = {
    cached: JSXNode[] | undefined
 }
 
-function createDynamicRenderKit(render: RenderFunction) {
+function createDynamicRenderKit(render: RenderFunction): DynamicRenderKit {
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return {
       nodePod: new NodePod(),
       flask: undefined as Flask | undefined,
       renderConditional: renderWithCommons(render, [REGISTER_TRANSITION_NODE(registerTransitionNode)]),
       transitionNodes,
+      cached: undefined
    }
 }
 
@@ -165,18 +166,7 @@ export class PolymorphKit {
       parent: Element,
       fragment?: DocumentFragment
    ) {
-      const nodePod = this.dynamicPod[0] as NodePod
-
-      const flask = this.outerFlask
-
-      // this.render(parent, fragment, flask)
-
-      //TODO: 
-      const nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(this.switchMap[toValue(this.activeKey)]())), parent, nodePod);
-      this.outerFlask.containCall(function renderMorphicNode() {
-         mountNodeEntities(nodeEntities, parent, fragment)
-      })
-      flask.emitInitialMount()
+      this.activateConditional()
    }
 
    // private render(parent: Element, fragment?: DocumentFragment, flask?: Flask) {
@@ -192,15 +182,17 @@ export class PolymorphKit {
 
 
 
-   deactivate() {
+   deactivateConditional(key: string) {
       const flask = this.flask
       //TODO:
       flask.emitDiscard()
 
    }
 
-   activate(key: string, parent: Element, nodePod: NodePod) {
-      const flask = this.flask = this.outerFlask.spawn({ type: 'view' })
+   activateConditional(key: string, parent: Element, nodePod: NodePod) {
+      const kitOrRenderfunction = this.switchMap[key]
+      const kit = isFunction(kitOrRenderfunction )? createDynamicRenderKit(kitOrRenderfunction) : kitOrRenderfunction
+      const flask = kit.flask = this.outerFlask.spawn({ type: 'view' })
       const _this = this
       if (this.renderedKeys.has(key)) {
          flask.emitRemount() //FIX:
