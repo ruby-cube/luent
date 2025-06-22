@@ -1,11 +1,11 @@
 import { isFunction, normalizeToArray } from "@rue/utils";
 import { Component, unnestComponent } from "../component/Component";
 import { getViewFlask } from "../flask/ViewFlask";
-import { JSXNode, RenderFunction } from "../node/makeNode";
+import { JSXNode, RawJSXNode } from "../node/makeNode";
 import { mountConditional } from "./ConditionalRenderSeries";
 import { getClosestCommons, getCommons, popCommons, pushCommons } from "../commons/commons-stack";
 import { Commons, NodeCommons, Provided, wrapWithCommons } from "../commons/Commons";
-import { setUpNodeEntities } from "../node/setUpNodeEntities";
+import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { DynamicPod, NodePod, removeDOMNodes } from "../node/NodePod";
 import { $_run_with_, $_snap_context, FLASK, Flask } from "@rue/flask";
 import { fromTag } from "../component/fromTag";
@@ -23,8 +23,8 @@ import { RenderTransient, toRenderTransient, wrapToPreserve } from "../dynamic/D
 // [] implement dynamic finite polymorph
 // [] implement dynamic infinite polymorph
 
-type Morphable = MutableIon<string> & {
-   as(key: string): void;
+type Morphable = MutableIon<string | [string, Object]> & {
+   as(key: string, input?: Object): void;
    discard(): void
    discardOthers(): void
    discardAll(): void
@@ -37,6 +37,8 @@ function registerPolymorph($activeKey: Morphable, polymorph: PolymorphKit) {
    polymorphs.push(polymorph)
    polymorphMap.set($activeKey, polymorphs)
 }
+
+type RenderFunction = (() => RawJSXNode) | ((input: Object) => RawJSXNode)
 
 export function Polymorph(switchMap: { [key: string]: RenderFunction }) {
 
@@ -59,15 +61,20 @@ export function Polymorph(switchMap: { [key: string]: RenderFunction }) {
       return { exposed: undefined, jsxNodes: [polymorphKit] };
    }
 
-   $Polymorph.morphable = function morphable(key: string): Morphable {
+   $Polymorph.morphable = function morphable(key: string, input?: Object): Morphable {
 
-      return ion(key, {
-         as(key: string) {
-            if (this.state === key) return key;
+      return ion(input ? [key, input] : key, {
+         as(key: string, input?: Object) {
+            if (input) {
+               if (Array.isArray(this.state) && this.state[0] === key && this.state[1] === input) return;
+               this.state = [key, input]
+               return;
+            }
+            if (this.state === key) return;
             this.state = key
-            return key;
+            return;
          },
-         discard(key: string) {
+         discard(key: string, unique?: Object) {
             const polymorphs = polymorphMap.get(this as unknown as Morphable)
             if (!polymorphs) return;
             for (const polymorph of polymorphs) {
@@ -84,7 +91,7 @@ export function Polymorph(switchMap: { [key: string]: RenderFunction }) {
             if (!polymorphs) return;
             // TODO: 
          }
-      }) 
+      })
    }
    return $Polymorph
 }
@@ -92,24 +99,40 @@ export function Polymorph(switchMap: { [key: string]: RenderFunction }) {
 type DynamicRenderKit = {
    nodePod: NodePod | undefined;
    flask: Flask | undefined;
-   renderConditional: RenderTransient
+   renderConditional: (parent: Element, nodePod: NodePod, input: Object | undefined) => NodeEntity[]
    transitionNodes: TransitionNode[] | undefined;
-   cached: JSXNode[] | undefined
+   cached: NodeEntity[] | undefined;
+   input: Object | undefined;
+   inputRequired: boolean
+}
+
+function createDynamicRenderKitOrMap(render: RenderFunction, input: Object | undefined): DynamicRenderKit | Map<Object, DynamicRenderKit> {
+   if (input) {
+      const map = new Map([[input, createDynamicRenderKit(render)]]) as VariantMap
+      map.render = render;
+      return map;
+   }
+   return createDynamicRenderKit(render)
 }
 
 function createDynamicRenderKit(render: RenderFunction): DynamicRenderKit {
+
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return {
       nodePod: new NodePod(),
       flask: undefined as Flask | undefined,
-      renderConditional: wrapToPreserve(toRenderTransient(render, [REGISTER_TRANSITION_NODE(registerTransitionNode)])),
+      renderConditional: toRenderTransient(render, [REGISTER_TRANSITION_NODE(registerTransitionNode)]),
       transitionNodes,
-      cached: undefined
+      cached: undefined,
+      input: undefined,
+      inputRequired: render.length !== 0
    }
 }
 
 
 
+
+type VariantMap = Map<Object, DynamicRenderKit> & { render: RenderFunction }
 
 export class PolymorphKit {
    // store contextual state
@@ -122,7 +145,7 @@ export class PolymorphKit {
    __DEV__asyncPath = __DEV__ ? __DEV__buildAsyncPath() : undefined
 
    constructor(
-      public switchMap: { [key: string]: RenderFunction | DynamicRenderKit },
+      public switchMap: { [key: string]: RenderFunction | DynamicRenderKit | VariantMap },
       public $activeKey: Morphable,
    ) {
    }
@@ -156,24 +179,36 @@ export class PolymorphKit {
       context.set(FLASK, kit.flask);
 
       $_run_with_(context, () => {
-         const nodeEntities = kit.renderConditional(parent, kit.nodePod!)
+         const nodeEntities = kit.cached ?? (kit.cached = kit.renderConditional(parent, kit.nodePod!, kit.input))
          mountConditional(parent, kit.nodePod!, nodeEntities, fragment);
       })
    }
 
-   deactivateConditional(key: string) {
-      const kit = this.switchMap[key] as DynamicRenderKit
+   deactivateConditional(id: string | [string, Object]) {
+      const key = typeof id === 'string' ? id : id[0]
+      const input = typeof id === 'string' ? undefined : id[1]
+      const kitOrMap = this.switchMap[key] as DynamicRenderKit
+      const kit = kitOrMap instanceof Map ? kitOrMap.get(input) : kitOrMap
       const flask = kit.flask
       console.log('kit', kit)
       flask?.emitDemount()
       removeDOMNodes(kit.nodePod!);
    }
 
-   activateConditional(key: string, parent: Element, fragment?: DocumentFragment) {
-      const kitOrRenderfunction = this.switchMap[key]
-      const isInitialMount = isFunction(kitOrRenderfunction)
-      const kit = isFunction(kitOrRenderfunction) ? (this.switchMap[key] = createDynamicRenderKit(kitOrRenderfunction) ): kitOrRenderfunction
+   activateConditional(id: string | [string, Object], parent: Element, fragment?: DocumentFragment) {
+      const key = typeof id === 'string' ? id : id[0]
+      const input = typeof id === 'string' ? undefined : id[1]
+      const kitOrRenderfunctionOrMap = this.switchMap[key]
+      const isInitialMount = isFunction(kitOrRenderfunctionOrMap)
+      const kit = isFunction(kitOrRenderfunctionOrMap) ?
+         (toKit(this.switchMap[key] = createDynamicRenderKitOrMap(kitOrRenderfunctionOrMap, input), input))
+         : toKit(kitOrRenderfunctionOrMap, input)
+      if (!kit) {
+         if (__DEV__) console.error('dynamic render kit missing')
+         return;
+      }
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view' }))
+      kit.input = input;
       this.render(kit, parent, fragment)
       if (isInitialMount)
          flask.emitInitialMount()
@@ -183,4 +218,19 @@ export class PolymorphKit {
 }
 
 
+function toKit(arg: DynamicRenderKit | VariantMap, input: undefined | Object): DynamicRenderKit | undefined {
+   if (arg instanceof Map) {
+      if (input) {
+         const kit = arg.get(input)
+         if (kit) return kit;
+         const newKit = createDynamicRenderKit(arg.render)
+         arg.set(input, newKit)
+         return newKit;
+      }
+      else console.error('Input object required with this polymorph key. Call .as() with key and input object')
+   }
+   else {
+      return arg;
+   }
+}
 

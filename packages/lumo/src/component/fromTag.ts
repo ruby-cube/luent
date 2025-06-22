@@ -3,7 +3,7 @@ import { Inert, Ion, ion, ionize, Ionized, IsInert, isIon, IsIonized, isIonKey, 
 import { getComponentAttributes } from "./makeComponent";
 import { debug, isFunction, isObject } from "@rue/utils";
 import { assertMutableIon, MU, getActiveMuIons } from "./Input";
-import { JSXNode } from "../node/makeNode";
+import { JSXNode, RawJSXNode } from "../node/makeNode";
 
 // two types of component input
 // - commons input
@@ -341,9 +341,9 @@ class Robot {
 //    frogE: Inert<Frog> // --> Inert<Frog>
 // }>
 
-type Slot = { [key: string]: RenderSlot | JSXNode } | RenderSlot | JSXNode
+type Slot = { [key: string]: RenderSlot | RawJSXNode } | RenderSlot | RawJSXNode
 
-export type RenderSlot<T = {}> = (input?: T) => JSXNode
+export type RenderSlot<T = {}> = (input?: T) => RawJSXNode
 
 
 

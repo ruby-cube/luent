@@ -8,13 +8,14 @@ import { Flask } from "@rue/flask";
 import { TransitionNode } from "../transition/TransitionNode";
 import { AnyObject } from "@rue/types";
 
+
 export type RenderTransient = (parent: Element, nodePod: NodePod) => NodeEntity[]
 
 export function toRenderTransient(renderConditional: RenderFunction, provide: Provided): RenderTransient {
    const parentCommons = getClosestCommons()
    if (!parentCommons) throw new Error('commons missing')
-   return (parent: Element, nodePod: NodePod) =>
-      processJSXOutput(wrapWithCommons(provide, () => withGroupActivationReset(renderConditional), parentCommons), parent, nodePod)
+   return (parent: Element, nodePod: NodePod, input?: Object) =>
+      processJSXOutput(wrapWithCommons(provide, () => withGroupActivationReset(() => renderConditional(input)), parentCommons), parent, nodePod)
 }
 
 export interface DynamicKit {

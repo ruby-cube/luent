@@ -51,9 +51,7 @@ export type JSXNode =
 
 
 
-export type RenderFunction<Params = unknown> = Params extends any[] ?
-   (...args: Params) => JSXNode :
-   () => JSXNode
+export type RenderFunction<Params = unknown> =    (input?: Object ) => RawJSXNode
 
 export type EventHandler<K extends keyof HTMLElementEventMap> = (event: HTMLElementEventMap[K]) => void
 
