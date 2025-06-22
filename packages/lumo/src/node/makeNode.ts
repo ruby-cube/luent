@@ -17,7 +17,7 @@ import { ActivationType } from "../conditional/If";
 import { fromTag, RenderSlot } from "../component/fromTag";
 import { getClosestCommons } from "../commons/commons-stack";
 import { PolymorphKit } from "../conditional/Polymorph";
-import { DynamicKit } from "../dynamic/dynamic-rendering";
+import { DynamicKit } from "../dynamic/DynamicKit";
 
 // export function Fragment() {
 //    // for jsx-runtime

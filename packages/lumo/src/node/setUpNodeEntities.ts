@@ -11,7 +11,7 @@ import { AnyObject } from "@rue/types";
 import { PolymorphKit } from "../conditional/Polymorph";
 import { ActivationType } from "../conditional/If";
 import { jsx } from "@rue/jsx-runtime";
-import { DynamicKit, isDynamicKit } from "../dynamic/dynamic-rendering";
+import { DynamicKit, isDynamicKit } from "../dynamic/DynamicKit";
 
 // [ ] validate and apply swap tag
 // [ ] validate and compose conditional series

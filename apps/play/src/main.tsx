@@ -43,6 +43,7 @@ import { TestDerivedConditional } from './TestCreateMountShow';
 import { TestDerived } from './TestCumulativeDerivedIon';
 import { RoboFriendsApp } from './demos/robofriends/RoboFriends';
 import { getPublicTrace } from '../../../packages/flask/debug';
+import { TestPolymorph } from './TestPolymorph';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -132,7 +133,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(MountIf)
+const app = createApp(TestPolymorph)
 
 app.mount('#app')
 

@@ -93,7 +93,7 @@ export function ion<
 export function ion<
    T,
    M
->(initialState: T & (() => unknown) | unknown, methods?: M & Methods & ThisType<M & { state: T }>): AsIon<T, M> {
+>(initialState: T & (() => unknown) | T, methods?: M & Methods & ThisType<M & { state: T }>): AsIon<T, M> {
    return asIon(initialState, MUTABLE, false, methods) as AsIon<T, M>
 }
 

@@ -4,7 +4,6 @@ import { flattenJSXOutput, NodeEntity, processJSXOutput, setUpNodeEntities } fro
 import { DynamicPod, NodePod } from "../node/NodePod";
 import { getClosestCommons } from "../commons/commons-stack";
 import { Provided, wrapWithCommons } from "../commons/Commons";
-import { ConditionalKit, ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
 import { Flask } from "@rue/flask";
 import { TransitionNode } from "../transition/TransitionNode";
 import { AnyObject } from "@rue/types";
@@ -46,5 +45,13 @@ export interface ConditionalSeriesKit extends DynamicKit {
    render(kit: ConditionalKit & AnyObject, parent: Element, fragment?: DocumentFragment): void
    deactivateConditional(id: any): void
    activateConditional(id: any, parent: Element, fragment?: DocumentFragment): void
+}
+
+export function wrapToPreserve(renderConditional: (parent: Element, nodePod: NodePod) => NodeEntity[]) {
+   let nodeEntities: NodeEntity[];
+   return (parent: Element, nodePod: NodePod) => {
+      if (nodeEntities) return nodeEntities;
+      return nodeEntities = renderConditional(parent, nodePod)
+   }
 }
 

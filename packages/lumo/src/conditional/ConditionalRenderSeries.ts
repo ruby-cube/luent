@@ -16,7 +16,7 @@ import { useTransitionNodes } from "../transition/TransitNode";
 import { RenderFunction, withGroupActivationReset } from "../node/makeNode";
 import { Booleanny } from "@rue/types";
 import { MaybeIon } from "../component/Input";
-import { ConditionalSeriesKit, toRenderTransient } from "../dynamic/dynamic-rendering";
+import { ConditionalSeriesKit, toRenderTransient, wrapToPreserve } from "../dynamic/DynamicKit";
 
 //TODO: rename 'phasic node' to 'transition node'
 //TODO: rename transitionNodes to 'transitNodes'
@@ -138,12 +138,10 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       fragment?: DocumentFragment
    ) {
       // mount show statements
-      this.showKits?.forEach(showKit =>{
+      this.showKits?.forEach(showKit => {
          this.render(showKit, parent, fragment)
          hideDOMNodes(showKit.nodePod)
-      }
-
-      )
+      })
 
       this.activateConditional(this.activeIndex, parent, fragment)
    }
@@ -412,8 +410,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    private activateConditional( // mount conditional from effect
       activeIndex: number,
       parent: Element,
-      fragment?: DocumentFragment,
-      isInitialMount: boolean = false
+      fragment?: DocumentFragment
    ) {
       const kit = this.statements[activeIndex]
       if (!kit) return;
@@ -425,11 +422,12 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          showDOMNodes(nodePod)
          return;
       }
-      nodePod.activate()
 
+      const isInitialMount = kit.flask === undefined
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       this.render(kit, parent, fragment)
-      if (activationType === 'create' || isInitialMount)
+      nodePod.activate()
+      if (activationType === 'create' || activationType ==='mount' && isInitialMount)
          flask.emitInitialMount()
       else
          flask.emitRemount() // remount preserved watchers etc.
@@ -469,11 +467,5 @@ export function mountConditional(
 // }
 
 
-function wrapToPreserve(renderConditional: (parent: Element, nodePod: NodePod) => NodeEntity[]) {
-   let nodeEntities: NodeEntity[];
-   return (parent: Element, nodePod: NodePod) => {
-      if (nodeEntities) return nodeEntities;
-      return nodeEntities = renderConditional(parent, nodePod)
-   }
-}
+
 

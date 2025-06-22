@@ -246,7 +246,7 @@ type TagInput<D> =
    & WithMu<D>
    & OpInput<D>
    & (D extends { Slot: infer S } ? { Slot: S } : {})
-   & (D extends { provide: infer S } ? { provide: S } : {})
+   & (D extends { provide: infer S } ? { provide: S } : { provide: undefined})
    & { '~attributes'?: TagAttributes<D> }
 
 
