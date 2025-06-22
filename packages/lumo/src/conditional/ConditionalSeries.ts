@@ -11,11 +11,13 @@ export class ConditionalSeries {
    conditions: Ion<Booleanny>[] = [];
    prevActiveIndex?: number = undefined;
    activeIndex?: number = undefined;
+   statements: (ConditionalKit | undefined)[]
 
    constructor(
-      public statements: ConditionalKit[],
-      makeElseKit: () => ConditionalKit
+      statements: ConditionalKit[],
+      makeElseKit?: () => ConditionalKit
    ) {
+      this.statements = statements;
       for (let i = 0; i < statements.length; i++) {
          const kit = statements[i]
          const $condition = kit.$condition
@@ -36,15 +38,13 @@ export class ConditionalSeries {
          }
       }
       if (noElseBlock(statements)) {
-         this.addKit(makeElseKit())
+         this.addKit(makeElseKit?.())
       }
    }
 
-   addKit(kit: ConditionalKit) {
+   addKit(kit: ConditionalKit | undefined) {
       this.statements.push(kit);
    }
-
-   isDynamic: boolean = true; //TODO: evaluate conditions should determine if conditional is dynamic
 
    evaluateConditions() {
       // if (__DEV__) __devCheckIfNotTracked()

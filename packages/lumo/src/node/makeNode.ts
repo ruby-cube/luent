@@ -17,6 +17,7 @@ import { ActivationType } from "../conditional/If";
 import { fromTag, RenderSlot } from "../component/fromTag";
 import { getClosestCommons } from "../commons/commons-stack";
 import { PolymorphKit } from "../conditional/Polymorph";
+import { DynamicKit } from "../dynamic/dynamic-rendering";
 
 // export function Fragment() {
 //    // for jsx-runtime
@@ -29,17 +30,15 @@ import { PolymorphKit } from "../conditional/Polymorph";
 // }
 
 export type RawJSXNode =
-   JSXNode[]
+   RawJSXNode[]
    | JSX.Element
    | DOMNode
    | string
-   | undefined
    | Ion
+   | DynamicKit
    | Component
-   | ListRenderKit
-   | PolymorphKit
-   | ConditionalRenderSeries
    | InnerHTMLKit
+   | undefined
 // | MutableKit
 
 export type JSXNode =
@@ -47,9 +46,7 @@ export type JSXNode =
    | DOMNode
    | string
    | Ion
-   | ListRenderKit
-   | PolymorphKit
-   | ConditionalRenderSeries
+   | DynamicKit
 
 
 

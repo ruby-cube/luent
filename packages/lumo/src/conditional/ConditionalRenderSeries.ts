@@ -5,7 +5,7 @@ import { hideDOMNodes, showDOMNodes } from "./toggledisplay";
 import { areShallowEqualArrays, Ion, watch } from "../../../quarky/src";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
-import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
+import { NodeEntity, processJSXOutput, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/NodePod";
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
@@ -19,6 +19,7 @@ import { getClosestCommons } from "../commons/commons-stack";
 import { Provided, wrapWithCommons } from "../commons/Commons";
 import { normalizeToArray } from "@rue/utils";
 import { MaybeIon } from "../component/Input";
+import { ConditionalSeriesKit, toRenderTransient } from "../dynamic/dynamic-rendering";
 
 //TODO: rename 'phasic node' to 'transition node'
 //TODO: rename transitionNodes to 'transitNodes'
@@ -29,10 +30,10 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", ac
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
 
    return {
-      nodePod: undefined as NodePod | undefined,
+      nodePod: undefined as unknown as NodePod,
       flask: undefined as Flask | undefined,
       statementType: statementType as 'if' | 'elseIf' | 'else',
-      renderConditional: renderWithCommons(render, [REGISTER_TRANSITION_NODE(registerTransitionNode)]),
+      renderConditional: toRenderTransient(render, [REGISTER_TRANSITION_NODE(registerTransitionNode)]),
       type: activationType,
       transitionNodes,
       $condition
@@ -44,6 +45,7 @@ function createDynamicConditionalKit(statementType: "if" | "elseIf" | "else", ac
 function toDynamicConditionalKits(kits: ConditionalKit[]): DynamicConditionalRenderKit[] {
    const dynamicKits = []
    for (const kit of kits) {
+      if (!kit) continue;
       const { $condition, renderConditional, statementType, type } = kit
       dynamicKits.push(createDynamicConditionalKit(statementType, type, renderConditional, $condition))
    }
@@ -51,14 +53,7 @@ function toDynamicConditionalKits(kits: ConditionalKit[]): DynamicConditionalRen
 }
 
 
-export type RenderConditional = (parent: Element, nodePod: NodePod) => NodeEntity[]
 
-function renderWithCommons(renderConditional: RenderFunction, provide: Provided) {
-   const parentCommons = getClosestCommons()
-   if (!parentCommons) throw new Error('commons missing')
-   return (parent: Element, nodePod: NodePod) =>
-      setUpNodeEntities(normalizeToArray(wrapWithCommons(provide, () => withGroupActivationReset(renderConditional), parentCommons)), parent, nodePod)
-}
 
 export type ConditionalKit = {
    statementType: "if" | "elseIf" | "else";
@@ -68,7 +63,7 @@ export type ConditionalKit = {
 }
 
 export type DynamicConditionalRenderKit = {
-   nodePod: NodePod | undefined;
+   nodePod: NodePod;
    flask: Flask | undefined;
    statementType: "if" | "elseIf" | "else";
    renderConditional: (parent: Element, nodePod: NodePod) => any[];
@@ -77,50 +72,48 @@ export type DynamicConditionalRenderKit = {
    $condition: Ion<Booleanny> | undefined
 }
 
-function makeElseKit(): DynamicConditionalRenderKit {
-   return {
-      nodePod: undefined as NodePod | undefined,
-      flask: undefined as Flask | undefined,
-      statementType: 'else' as 'if' | 'elseIf' | 'else',
-      renderConditional: () => [],
-      type: 'create',
-      transitionNodes: [],
-      $condition: undefined
-   }
-}
+// function makeElseKit(): DynamicConditionalRenderKit {
+//    return {
+//       nodePod: undefined as NodePod | undefined,
+//       flask: undefined as Flask | undefined,
+//       statementType: 'else' as 'if' | 'elseIf' | 'else',
+//       renderConditional: () => [],
+//       type: 'create',
+//       transitionNodes: [],
+//       $condition: undefined
+//    }
+// }
 
 export class ConditionalRenderSeries extends ConditionalSeries {
-   declare statements: DynamicConditionalRenderKit[];
+   declare statements: (DynamicConditionalRenderKit | undefined)[];
+
+   // store contextual state
+   context: Map<string | symbol, any> = $_snap_context()
+   outerFlask: Flask = getViewFlask()
+   phasicNode: TransitionNode | null = getPhasicNode()
 
    dynamicPod: DynamicPod = new NodePod()
-
-   phasicNode?: TransitionNode | null
+   __DEV__asyncPath = __DEV__ ? __DEV__buildAsyncPath() : undefined
 
    /* We render all show statements eagerly to prevent buggy rendering */
    showKits: DynamicConditionalRenderKit[] | undefined
-   context: Map<string | symbol, any>;
-   __DEV__asyncPath?: string
 
    constructor(
       statements: ConditionalKit[],
       activationType: ActivationType = 'create'
    ) {
       const kits = toDynamicConditionalKits(statements)
-      super(kits, makeElseKit);
+      super(kits);
 
-      this.context = $_snap_context()
-      this.__DEV__asyncPath = __DEV__ ? __DEV__buildAsyncPath() : undefined
-      this.outerFlask = getViewFlask() //ie: enclosingFlask
-      console.log('$$$ outerFlask', this.outerFlask)
+      if (__DEV__) this.context.set(TRACE, this.__DEV__asyncPath)
+
       this.activeIndex = this.evaluateConditions()
 
-      this.phasicNode = getPhasicNode();
-
-      const dynamicPod = this.dynamicPod
       // populate dynamic node pod
       // 'create' kits share a single node pod
       // This way, we can mount 'create' efficiently without having 
       // to traverse empty 'create' node pods when looking for previous sibling
+      const dynamicPod = this.dynamicPod
       let sharedPod: NodePod | undefined;
       let showKits: DynamicConditionalRenderKit[] | undefined
 
@@ -129,17 +122,14 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          if (kit.type === 'show') {
             showKits = showKits || (showKits = this.showKits = [])
             showKits.push(kit);
-            const nodePod = kit.nodePod = new NodePod()
-            dynamicPod.push(nodePod)
+            dynamicPod.push(kit.nodePod = new NodePod())
          }
          else if (kit.type === 'mount') {
-            const nodePod = kit.nodePod = new NodePod(false)
-            dynamicPod.push(nodePod)
+            dynamicPod.push(kit.nodePod = new NodePod(false))
             kit.renderConditional = wrapToPreserve(kit.renderConditional)
          }
          else {
-            sharedPod = kit.nodePod = sharedPod || (sharedPod = new NodePod(false))
-            dynamicPod.push(sharedPod)
+            kit.nodePod = sharedPod || (sharedPod = new NodePod(false), dynamicPod.push(sharedPod), sharedPod)
          }
       }
    }
@@ -150,28 +140,15 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       parent: Element,
       fragment?: DocumentFragment
    ) {
-      const activeIndex = this.activeIndex
+      // mount show statements
+      this.showKits?.forEach(showKit =>
+         this.render(showKit, parent, fragment)
+      )
 
-      const kit = this.statements[activeIndex]
-      kit.nodePod!.activate()
-
-      if (kit.type !== 'show') {
-         const flask = kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === 'create' })
-         this.render(kit, parent, fragment, flask)
-         flask.emitInitialMount() // emits mount hook
-      }
-
-      const showKits = this.showKits
-      if (showKits)
-         for (const showKit of showKits) {
-            const pod = showKit.nodePod!
-            this.render(showKit, parent, fragment)
-
-            if (showKit !== kit) hideDOMNodes(pod)
-         }
+      this.activateConditional(this.activeIndex, parent, fragment)
    }
 
-   outerFlask: Flask
+
    /**
     * set up watcher for updates, which involves:
     * • calling the render function
@@ -187,8 +164,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       parent: Element,
       // outerNodePod: NodePod,
    ) {
-
-
       const $conditions = this.getConditionsIon()
 
       const phasicNode = this.phasicNode
@@ -211,9 +186,9 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             return;
          }
 
-         const outgoingNodes = series.statements[prevIndex].transitionNodes
-         const incomingNodes = series.statements[activeIndex].transitionNodes
-         const activationType = series.statements[activeIndex].type;
+         const outgoingNodes = series.statements[prevIndex]?.transitionNodes ?? []
+         const incomingNodes = series.statements[activeIndex]?.transitionNodes ?? []
+         const activationType = series.statements[activeIndex]?.type;
          const shouldTransitionOut = phasicNode || outgoingNodes.length
 
          // (0) Pause previous transition
@@ -397,26 +372,20 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       return this;
    }
 
-   private render(kit: DynamicConditionalRenderKit, parent: Element, fragment?: DocumentFragment, flask?: Flask) {
+   private render(kit: DynamicConditionalRenderKit, parent: Element, fragment?: DocumentFragment) {
       const context = this.context;
-      if (flask) context.set(FLASK, flask);
-      if (__DEV__) context.set(TRACE, this.__DEV__asyncPath)
+      const flask = kit.flask
+      if (flask) context.set(FLASK, flask); //NOTE: flask is optional b/c/ show kits don't need flask
 
       $_run_with_(context, () => {
-         const nodeEntities = kit.renderConditional(parent, kit.nodePod || (console.warn('DEV RESEARCH: no kit pod :('), this.dynamicPod))
-         mountConditional(parent, kit.nodePod!, nodeEntities, fragment);
+         const nodeEntities = kit.renderConditional(parent, kit.nodePod)
+         mountConditional(parent, kit.nodePod, nodeEntities, fragment);
       })
    }
 
-   private renderSync(kit: DynamicConditionalRenderKit, parent: Element | DocumentFragment) {
-
-   }
-
-
-
    private deactivateConditional(index: number) {
-      console.log('deactivating conditional')
       const kit = this.statements[index]
+      if (!kit) return;
       const pod = kit.nodePod!
       const activationType = kit.type
       if (activationType === 'show') {
@@ -443,27 +412,28 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
    private activateConditional( // mount conditional from effect
       activeIndex: number,
-      parent: Element
+      parent: Element,
+      fragment?: DocumentFragment
    ) {
       const kit = this.statements[activeIndex]
+      if (!kit) return;
       const activationType = kit.type
       const isInitialMount = !kit.nodePod
-      const pod = kit.nodePod || (kit.nodePod = new NodePod())
-      this.dynamicPod.push(pod)
+      const nodePod = kit.nodePod || (kit.nodePod = new NodePod())
+      this.dynamicPod.push(nodePod)
 
       if (activationType === 'show') { //NOTE: 'show' statements are not dynamic nodes because they are not removed from the DOM and setup is not rerun
-         showDOMNodes(pod)
+         showDOMNodes(nodePod)
          return;
       }
-      pod.activate()
+      nodePod.activate()
 
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
-      this.render(kit, parent, undefined, flask)
+      this.render(kit, parent, fragment)
       if (activationType === 'create' || isInitialMount)
          flask.emitInitialMount()
       else
          flask.emitRemount() // remount preserved watchers etc.
-      console.log('activate conditional', pod)
    }
 }
 

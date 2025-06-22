@@ -14,6 +14,8 @@ import { fromTag } from "../component/fromTag";
 import { ion, Ion, isIon, toValue, watch } from "@rue/quarky";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { TransitionNode } from "../transition/TransitionNode";
+import { getPhasicNode } from "../transition/PhasicNode";
+import { __DEV__buildAsyncPath } from "../../../flask/debug";
 
 
 
@@ -53,9 +55,7 @@ export function Polymorph(switchMap: { [key: string]: RenderFunction }) {
 
       const polymorphKit = new PolymorphKit(
          switchMap,
-         $activeKey,
-         getCommons(),
-         getViewFlask()
+         $activeKey
       )
       registerPolymorph($activeKey, polymorphKit)
 
@@ -103,7 +103,7 @@ type DynamicRenderKit = {
 function createDynamicRenderKit(render: RenderFunction) {
    const { REGISTER_TRANSITION_NODE, registerTransitionNode, transitionNodes } = useTransitionNodes()
    return {
-      nodePod: undefined as NodePod | undefined,
+      nodePod: new NodePod(),
       flask: undefined as Flask | undefined,
       renderConditional: renderWithCommons(render, [REGISTER_TRANSITION_NODE(registerTransitionNode)]),
       transitionNodes,
@@ -119,41 +119,63 @@ function renderWithCommons(renderConditional: RenderFunction, provide: Provided)
 
 
 export class PolymorphKit {
-
-   constructor(
-      public switchMap: { [key: string]: RenderFunction | DynamicRenderKit },
-      public activeKey: Morphable | string,
-      public commons: NodeCommons | AppCommons,
-      public outerFlask: Flask
-   ) {
-      this.renderedKeys = new Set([toValue(activeKey)])
-   }
+   // store contextual state
+   context: Map<string | symbol, any> = $_snap_context()
+   outerFlask: Flask = getViewFlask()
+   phasicNode?: TransitionNode | null = getPhasicNode()
+   
+   // setup essentials
+   dynamicPod: DynamicPod = new NodePod()
+   __DEV__asyncPath = __DEV__ ? __DEV__buildAsyncPath() : undefined
 
    renderedKeys: Set<string>;
 
-   // nodeEntities!: JSXNode[]
+   constructor(
+      public switchMap: { [key: string]: RenderFunction | DynamicRenderKit },
+      public $activeKey: Morphable,
+   ) {
+      this.renderedKeys = new Set([$activeKey()])
+   }
 
-   flask!: Flask
-   dynamicNodePod!: NodePod
-   context: Map<string | symbol, any> = $_snap_context()
+   setUp(
+      parent: Element,
+   ) {
+      const nodePod = new NodePod()
+      this.dynamicPod.push(nodePod)
+
+      this.flask = this.outerFlask.spawn({ type: 'view' })
+
+      const $activeKey = this.$activeKey
+
+      const morphable = this
+
+      watch($activeKey, function updateMorphicComponent({ current: key }) {
+
+         // remove previous
+         morphable.deactivate()
+
+         // render new morph
+         morphable.activate(key, parent, nodePod)
+
+      })
+      return this;
+   }
 
    mount(
       parent: Element,
       fragment?: DocumentFragment
    ) {
-      const nodePod = this.dynamicPod[0]
+      const nodePod = this.dynamicPod[0] as NodePod
 
-      const flask = this.flask
+      const flask = this.outerFlask
 
       // this.render(parent, fragment, flask)
 
       //TODO: 
       const nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(this.switchMap[toValue(this.activeKey)]())), parent, nodePod);
-      pushCommons(this.commons)
-      this.flask.containCall(function renderMorphicNode() {
+      this.outerFlask.containCall(function renderMorphicNode() {
          mountNodeEntities(nodeEntities, parent, fragment)
       })
-      popCommons()
       flask.emitInitialMount()
    }
 
@@ -168,33 +190,7 @@ export class PolymorphKit {
    //    })
    // }
 
-   dynamicPod: DynamicPod = new NodePod()
 
-   setUp(
-      parent: Element,
-   ) {
-      const nodePod = new NodePod()
-      this.dynamicPod.push(nodePod)
-
-      this.flask = this.outerFlask.spawn({ type: 'view' })
-      const $activeKey = this.activeKey
-      if (!isIon($activeKey)) return this;
-
-      const morphable = this
-      watch($activeKey, function updateMorphicComponent({ current: key }) {
-         morphable.activeKey = key;
-
-         // remove previous
-         morphable.deactivate()
-
-         // render new morph
-         pushCommons(morphable.commons)
-         morphable.activate(key, parent, nodePod)
-         popCommons()
-
-      })
-      return this;
-   }
 
    deactivate() {
       const flask = this.flask

@@ -6,7 +6,6 @@ import { $_run_with_, $_snap_context } from "./context/AsyncContext";
 import { FLASK, Flask, getActiveFlask, ThisFlask } from "./Flask";
 import { TRACE } from "./debug";
 import { noop } from "@rue/utils";
-import { $thisScene } from "./Scene";
 
 export type ResumableListener = {
    stop(): boolean;

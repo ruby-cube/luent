@@ -1,4 +1,4 @@
-import { isObjectLiteral } from "@rue/utils";
+import { isObjectLiteral, normalizeToArray } from "@rue/utils";
 import { Component, DOMNode, isComponentKit } from "../component/Component";
 import { ConditionalRenderSeries } from "../conditional/ConditionalRenderSeries";
 import { MatchCaseKit } from "../conditional/MatchCaseKit";
@@ -11,12 +11,13 @@ import { AnyObject } from "@rue/types";
 import { PolymorphKit } from "../conditional/Polymorph";
 import { ActivationType } from "../conditional/If";
 import { jsx } from "@rue/jsx-runtime";
+import { DynamicKit, isDynamicKit } from "../dynamic/dynamic-rendering";
 
 // [ ] validate and apply swap tag
 // [ ] validate and compose conditional series
 // [V] spread arrays and nested array
 
-export type NodeEntity = DOMNode | ListRenderKit | ConditionalRenderSeries | PolymorphKit
+export type NodeEntity = DOMNode | DynamicKit
 
 export type MutableKit = { mu: AnyObject }
 
@@ -131,16 +132,16 @@ export function setUpNodeEntity(
       nodePod.push(jsxNode)
       return jsxNode;
    }
-   if (
-      jsxNode instanceof ConditionalRenderSeries
-      || jsxNode instanceof ListRenderKit
-      || jsxNode instanceof PolymorphKit
-   ) {
-      nodePod.push(jsxNode.dynamicPod) //TODO: move this to setup nodepod
+   if (isDynamicKit(jsxNode)) {
+      nodePod.push(jsxNode.dynamicPod)
       return jsxNode.setUp(parent);
    }
    const textNode = createTextNode(jsxNode)
    setUpTextNode(jsxNode, textNode)
    nodePod.push(textNode)
    return textNode
+}
+
+export function processJSXOutput(output: RawJSXNode, parent: Element, nodePod: NodePod) {
+   return setUpNodeEntities(flattenJSXOutput(normalizeToArray(output)), parent, nodePod)
 }
