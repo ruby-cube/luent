@@ -1,4 +1,4 @@
-import { ion, __addDevName, AtomicIon } from "../../../quarky/src";
+import { ion, __addDevName } from "../../../quarky/src";
 import { Else, ElseIf, If } from "../conditional/If";
 import { component, ComponentSetup } from "../component/Component";
 import { JSXNode } from "../node/makeNode";
@@ -26,7 +26,7 @@ export type SuspenseNodeInput = {
 export function createSuspenseNode(Slot: () => JSXNode, input: SuspenseNodeInput) {
    const { standin: renderPlaceholder = () => undefined, timeout, catch: renderError = () => undefined } = input;
    const $pending = ion(true);
-   const $error: AtomicIon<Error> = ion();
+   const $error = ion(undefined as undefined | Error);
    const $ready = ion(false);
    if (__DEV__) __addDevName($pending, "$pending");
 
@@ -56,11 +56,11 @@ export function createSuspenseNode(Slot: () => JSXNode, input: SuspenseNodeInput
          $pending.state = false
       })
 
-   return component(
-      [
-         If($pending, renderPlaceholder),
-         ElseIf($error, () => renderError($error())),
-         Else(() => output)
-      ]
-   )
+   return [
+      If($pending, renderPlaceholder),
+      ElseIf($error, () => renderError($error()!)),
+      Else(() => output)
+   ]
 }
+
+

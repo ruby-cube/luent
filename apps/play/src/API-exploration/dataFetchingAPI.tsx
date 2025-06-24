@@ -17,7 +17,7 @@ const USER_POSTS = defineFetch({
 export function List() {
    const $userId = ion('')
 
-   const $userPosts = fromServer(USER_POSTS, { $userId })
+   const $userPosts = fromCloud(USER_POSTS, { $userId })
 
    const $userPosts = dispatch({ get: POSTS, with: $userId, overlap: 'pile | overwrite | block', suspense: true }); // returns an ion and collects promises for suspense, will rerun if $userId changes
 

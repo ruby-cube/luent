@@ -9,6 +9,9 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { AnyObject } from "@rue/types";
 
 
+
+
+
 export type RenderTransient = (parent: Element, nodePod: NodePod) => NodeEntity[]
 
 export function toRenderTransient(renderConditional: RenderFunction, provide: Provided): RenderTransient {

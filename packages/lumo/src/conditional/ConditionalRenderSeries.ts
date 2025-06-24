@@ -393,16 +393,16 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       else if (activationType === 'create') {
          // discard of flask
          const flask = kit.flask!
-         kit.flask = undefined;
-         flask.emitDiscard()
+         kit.flask = undefined; // 
+         flask.emitDiscard() //
 
          // remove from 
          removeDOMNodes(pod)
-         pod.clear()
+         pod.clear() //
       }
       else if (activationType === 'mount') {
          const flask = kit.flask
-         flask?.emitDemount()
+         flask?.emitDemount() //
          removeDOMNodes(pod);
       }
    }
@@ -427,7 +427,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       this.render(kit, parent, fragment)
       nodePod.activate()
-      if (activationType === 'create' || activationType ==='mount' && isInitialMount)
+      if (isInitialMount)
          flask.emitInitialMount()
       else
          flask.emitRemount() // remount preserved watchers etc.

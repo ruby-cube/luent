@@ -1,5 +1,5 @@
-import { getGroupActivationType, JSXNode, normalizeToRenderFunction, RenderFunction, withGroupActivationReset } from "../node/makeNode";
-import { normalizeToArray } from "@rue/utils";
+import { getGroupActivationType, JSXNode, normalizeToRenderFunction, RawJSXNode, RenderFunction, withGroupActivationReset } from "../node/makeNode";
+import { isFunction, normalizeToArray } from "@rue/utils";
 import { Booleanny } from "@rue/types";
 import { Provided, wrapWithCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
@@ -11,6 +11,7 @@ import { ConditionalKit, ConditionalRenderSeries } from "./ConditionalRenderSeri
 import { Flask } from "@rue/flask";
 import { TransitionNode } from "../transition/TransitionNode";
 import { MaybeIon } from "../component/Input";
+import { createTryCatch } from "../boundaries/Try";
 
 // let currentNodePodIndex: number | undefined = undefined
 
@@ -51,7 +52,7 @@ function getParams(typeOrRenderConditional: JSXNode | RenderFunction | Activatio
    return [_renderConditional, activationType] as const
 }
 
-function createConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, $condition?: Ion<Booleanny> | Booleanny) {
+export function createConditionalKit(statementType: "if" | "elseIf" | "else", activationType: ActivationType | undefined, render: RenderFunction, $condition?: Ion<Booleanny> | Booleanny) {
 
    return {
       statementType: statementType as 'if' | 'elseIf' | 'else',
@@ -68,8 +69,8 @@ function $$series(...args: unknown[]) {
       if (!isIon(args[0].$condition)) return renderStaticConditional(args)
       return new ConditionalRenderSeries(args, getGroupActivationType())
    }
-   if (isMatchCase(args)) {
-      //TODO: match case
+   if (isTryCatch(args)) {
+      return createTryCatch(args)
    }
    return;
 }
@@ -79,9 +80,12 @@ function isConditionalSeries(args: unknown[]): args is ConditionalKit[] {
    return arg instanceof Object && '$condition' in arg
 }
 
-function isMatchCase(args: unknown[]) {
-   return true //TODO:
+function isTryCatch(args: unknown[]): args is [RenderFunction, undefined | ((err: Error) => RawJSXNode)] {
+   return args.length < 3 && isFunction(args[0]) && args[0].length === 0;
+
 }
+
+
 
 //@ts-expect-error
 window.$$series = $$series

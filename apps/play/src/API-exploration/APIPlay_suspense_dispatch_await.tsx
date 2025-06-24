@@ -1,4 +1,5 @@
 //@ts-nocheck
+import { component } from '@rue/lumo'
 function LoadingApp() {
    const $data = dispatch({ get: MARKDOWN_FILES }) // how to deal with latency?
 
@@ -42,8 +43,10 @@ function Album(input = fromTag<{
 
 // Lazy loading
 
-const $MarkdownPreview = Lazy(() => import('./MarkdownPreview.js'), {
-   loading: <Loading />
+const Z = LazyModule(() => import('./MarkdownPreview.js'));
+
+const ZZ = LazyModule(() => import('./MarkdownPreview.js'), {
+   MarkdownPreview: component,
 });
 
 export default function MarkdownEditor() {
@@ -58,12 +61,27 @@ export default function MarkdownEditor() {
             Show preview
          </label>
          <hr />
-         {If($showPreview,
-            <$MarkdownPreview markdown={$markdown} />
-         )}
+         {If($showPreview, [
+            Await(suspense =>
+               <>
+                  <h2>Preview</h2>
+                  <Z.MarkdownPreview markdown={$markdown} {...suspense} />
+                  <button on:click={e => Z.doSomething()}>click</button>
+               </>
+            ),
+            Meanwhile(
+               <Loading />
+            ),
+            Catch(err =>
+               <ErrorComp msg={err.msg} />
+            )
+         ])}
       </>
    );
 }
+
+
+
 
 const MarkdownPreview = Lazy(() => import('./MarkdownPreview.js'));
 
@@ -80,23 +98,22 @@ export default function MarkdownEditor() {
          </label>
          <hr />
          {If($showPreview,
-            <>
-               {Await(suspense =>
-                  <>
-                     <h2>Preview</h2>
-                     <MarkdownPreview markdown={$markdown} {...suspense} />
-                  </>
-               )}
-               {Meanwhile(
-                  <Loading />
-               )}
-            </>
+            Await(suspense => <>
+               <h2>Preview</h2>
+               <MarkdownPreview markdown={$markdown} {...suspense} />
+            </>),
+            Meanwhile(
+               <Loading />
+            )
          )}
       </>
    );
 }
 
 
+// {Await()} {Meanwhile()} {Catch()} 
+// useAwait()
+// Awaited()
 
 
 export default function MarkdownEditor() {
@@ -119,12 +136,10 @@ export default function MarkdownEditor() {
             Show preview
          </label>
          <hr />
-         {If($showPreview, Await(
-            <>
-               <h2>Preview</h2>
-               <MarkdownPreview markdown={$markdown} />
-            </>
-         ))}
+         {If($showPreview, Await(<>
+            <h2>Preview</h2>
+            <MarkdownPreview markdown={$markdown} />
+         </>))}
       </>
    );
 }
@@ -138,39 +153,41 @@ export default function MarkdownEditor() {
 function LoadingApp() {
    const $data = fromCloud(MARKDOWN_FILES) // how to deal with latency?
 
-   const Await = useAwait({ // output function
-      loading:
-         <Loading />
-      ,
-      timeout: 500
-      ,
-      catch: error =>
-         <div>oh no</div>
-   })
+   // const Await = useAwait({ // output function
+   //    loading:
+   //       <Loading />
+   //    ,
+   //    timeout: 500
+   //    ,
+   //    catch: error =>
+   //       <div>oh no</div>
+   // })
 
    const $App = Awaited({  // output component
-      await: (suspense) =>
+      await: suspense => (
          <App data={$data} {...suspense}></App>
-      ,
-      loading:
+      ),
+      meanwhile: () => (
          <Loading />
-      ,
-      timeout: 500
-      ,
-      catch: error =>
+      ),
+      timeout: 500,
+      catch: error => (
          <div>oh no</div>
+      )
    })
 
-   const Try = useTry({
-      catch: error =>
-         <div>oh no</div>
-   })
+   // const Try = useTry({
+   //    catch: error =>
+   //       <div>oh no</div>
+   // })
 
    const $App = Tentative({
-      try: <App data={$data}></App>
-      ,
-      catch: error =>
+      try: () => (
+         <App data={$data}></App>
+      ),
+      catch: error => (
          <div>oh no</div>
+      )
    })
 
    return component(
@@ -286,17 +303,17 @@ function App(input = fromTag()) {
 
    return component(
       <>
-         {Await($files, (files) =>
+         {Await($files, () =>
             <>
-               <Sidebar files={files} provide={[
-                  m(OPENFILE, index => openFile(files[index])),
-                  m(ADDFILE, addFile),
-                  m(DELETEFILE, deleteFile)
+               <Sidebar files={$files} provide={[
+                  CAN_OPEN_FILE(index => openFile(files[index])),
+                  CAN_ADD_FILE(addFile),
+                  CAN_DELETE_FILE(deleteFile)
                ]}></Sidebar>
                <main>
                   <Tabs files={$openedFiles} provide={[
-                     m(CLOSEFILE, index => closeFile($openedFiles()[index])),
-                     m(FOCUSFILE, index => focusFile($openedFiles()[index]))
+                     CAN_CLOSE_FILE(index => closeFile($openedFiles()[index])),
+                     CAN_FOCUS_FILE(index => focusFile($openedFiles()[index]))
                   ]} />
                   <MainView as={$main}></MainView>
                </main>

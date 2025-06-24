@@ -62,32 +62,26 @@ export function MountIf() {
          <h1>Hello {(todos[0].name)}</h1>
          <o--transition>
             {/* <o--show> */}
-               {If($active, 'mount', (debug.traceAsyncPath(),
-                  <>
-                     oh
-                     <o--transit with={slide({ x: -100, duration: 2200 })}>
-                        <h2>hi</h2>
-                     </o--transit>
-                     <o--transit with={slide({ x: 100, duration: 2200 })}>
-                        <h2>hope</h2>
-                     </o--transit>
-                     {If($ready,
-                        <p>ready</p>
-                     )}
-                  </>
-               ))}
-               {ElseIf($ready, 'show',
-                  <>
-                     low
-                     <h2>balloon</h2>
-                  </>
+            {If($active, <>
+               oh
+               <o--transit with={slide({ x: -100, duration: 2200 })}>
+                  <h2>hi</h2>
+               </o--transit>
+               <o--transit with={slide({ x: 100, duration: 2200 })}>
+                  <h2>hope</h2>
+               </o--transit>
+               {If($ready,
+                  <p>ready</p>
                )}
-               {Else('show',
-                  <>
-                     so
-                     <h2>bye</h2>
-                  </>
-               )}
+            </>)}
+            {ElseIf($ready, <>
+               low
+               <h2>balloon</h2>
+            </>)}
+            {Else(<>
+               so
+               <h2>bye</h2>
+            </>)}
             {/* </o--show> */}
          </o--transition>
          <button on:click={$active.toggle}>toggle active</button>
