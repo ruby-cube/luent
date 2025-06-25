@@ -1,0 +1,28 @@
+import { fromApp, fromGlobal, provideAppwide, provideGlobal } from "./provide";
+
+export function defineAppwide<F extends (...args: any[]) => any>(key: string, factory: F): F {
+   return defineCentralized(key, factory, fromApp, provideAppwide)
+}
+
+export function defineGlobal<F extends (...args: any[]) => any>(key: string, factory: F): F {
+   return defineCentralized(key, factory, fromGlobal, provideGlobal)
+}
+
+function defineCentralized<F extends (...args: any[]) => any>(key: string, factory: F, fromCentral: Function, provideCentral: Function): F {
+   return ((...args: any[]) => {
+      const existing = fromCentral(key)
+      if (existing) return existing;
+      const instance = factory(...args)
+      provideCentral(key, instance)
+      return instance;
+   }) as F
+}
+
+//TODO: Services are instantiated and removed based on usage
+export function defineService() {
+
+}
+
+export function defineGlobalService() {
+
+}

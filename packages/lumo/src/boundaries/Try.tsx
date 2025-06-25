@@ -2,7 +2,8 @@ import { component } from "../component/Component";
 import { fromTag } from "../component/fromTag";
 import { RawJSXNode, RenderFunction } from "../node/makeNode";
 
-export function Try(render: RenderFunction) {
+export function Try(render: RenderFunction | RawJSXNode) {
+   console.log('running try')
    return render;
 }
 
@@ -31,7 +32,7 @@ export function createTryCatch(tryCatch: [RenderFunction, undefined | ((err: Err
 //       <div>oh no</div>
 //    )
 // })
-type RenderError = (err: Error) => RawJSXNode
+export type RenderError = (err: Error) => RawJSXNode
 
 export function Tentative(config: { try: RenderFunction, catch?: RenderError }) {
 

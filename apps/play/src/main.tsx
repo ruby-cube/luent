@@ -44,6 +44,7 @@ import { TestDerived } from './TestCumulativeDerivedIon';
 import { RoboFriendsApp } from './demos/robofriends/RoboFriends';
 import { getPublicTrace } from '../../../packages/flask/debug';
 import { TestPolymorph } from './TestPolymorph';
+import { TestTry } from './API-exploration/TestTry';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -133,7 +134,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(TestPolymorph)
+const app = createApp(TestTry)
 
 app.mount('#app')
 

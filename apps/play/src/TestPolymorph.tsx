@@ -1,7 +1,9 @@
 //@ts-nocheck
-import { component, For, fromApp, fromCommons, fromTag } from "@rue/lumo";
+import { component, For, fromApp, fromCommons, fromGlobal, fromTag, provideAppwide, provideGlobal } from "@rue/lumo";
 import { Polymorph } from "../../../packages/lumo/src/conditional/Polymorph";
-import { ion } from "@rue/quarky";
+import { ion, ionicTask } from "@rue/quarky";
+import { watch } from "fs";
+import { FILE } from "dns";
 
 type File = { name: string }
 export function TestPolymorph() {
@@ -42,7 +44,7 @@ export function TestPolymorph() {
       //       <p>Welcome, {$user}</p>
       //    </>
       // ],
-      [route`/home/[${$user}]?search=${$search}&answer=${$answer}#${$section}`, r =>
+      [route`/home/${$user}?search=${$search}&answer=${$answer}#${$section}`, r =>
          <>
             <Home>{$section}</Home>
             <p>Welcome, {$user}</p>
@@ -54,6 +56,48 @@ export function TestPolymorph() {
    const { $file } = $route.derived
 
    const USER_ROUTE = route`/user/${$user}`
+
+   function wantIon(ion: Ion<string>) {
+
+   }
+
+   wantIon(null as Suspense<string>)
+
+
+   function fetchFile(FILE, $userID: Ion<string>, $fileID: Ion<string>) {
+      const $file = fromApp(FILE)
+      if ($file) return $file;
+
+      const $file = suspension($file => {
+         const id = $userID() + $fileID()
+         const existing = files.get(id)
+         if (existing) $file.state = existing;
+         else fetch(`http://${$userID()}/${$fileID()}`)
+            .then(response => response.json())
+            .then(value => {
+               value
+               files.set(id, value)
+            })
+      }, { awaitBoundary: '@boundary' })
+
+      provideAppwide(FILE, $file)
+      return $file;
+   }
+
+
+   const fetchFile = defineAppwide('$file', ($userID: Ion<string>, $fileID: Ion<string>) => {
+      return suspense($file => {
+         const id = $userID() + $fileID()
+         const existing = files.get(id)
+         if (existing) $file.state = existing;
+         else fetch(`http://${$userID()}/${$fileID()}`)
+            .then(response => response.json())
+            .then(value => {
+               value
+               files.set(id, value)
+            })
+      }, { mustAwait: true })
+   })
 
 
    const $Sidebar = RouteView([
@@ -78,18 +122,27 @@ export function TestPolymorph() {
          preserve: true,
       }],
       // without suspense (if $file returns undefined) // type: Ion<File | undefined>
-      [route`/${$userID}/${$fileID}#${$section}`, {
+      [route`/${$userID}/${$fileID}`, {
          render: () => (
             <>
-               {Await($file,
-                  <File id={$fileID()} file={$file()} />
+               {Await(($file = fetchFile($userID, $fileID)) =>
+                  <File id={$fileID()} file={$file} />
                )}
-               {Meanwhile(
+               {Meanwhile({ timeout: 500 },
                   <Loading />
+               )}
+               {Catch(err =>
+                  <div>{err}</div>
                )}
             </>
          ),
-         preserve: true
+         preserve: true,
+         beforeEnter() {
+
+         },
+         beforeLeave() {
+
+         }
       }],
       [route`/${$userID}#${$section}`, {
          redirect: USER_ROUTE
@@ -130,14 +183,14 @@ export function TestPolymorph() {
          res.json().then(v => $state.state = v)
       })
 
-      return () => $state()
+      return $state
    }
 
    const { $route, RouteView, $RouteView } = createRouter({
       input: {
          userID: {
             beforeViewRender(id) {
-
+               // validate
             }
          },
          fileID: {
@@ -153,21 +206,6 @@ export function TestPolymorph() {
          },
          lastName: {
 
-         }
-      },
-      derived: {
-         file() {
-            return fromCloud(FILE, {
-               query: {
-                  id: $route.$fileID,
-                  userID: $route.$userID
-               },
-               suspense: $route.resolve // p => fromCommons(RESOLVE)(p)
-            })
-         },
-         fullName() {
-            const { $firstName, $lastName } = $route
-            return ion(() => $firstName() + ' ' + $lastName())
          }
       },
       routes: []

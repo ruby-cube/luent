@@ -1,4 +1,12 @@
 
+export type RequireAll<T> = {
+  [K in keyof T as {} extends Pick<T, K> ? never : K]: T[K]; // Required keys
+} & {
+  [K in keyof T as {} extends Pick<T, K> ? K : never]-?: NonNullable<T[K]>; // Optional keys (made required, strip implicit undefined)
+};
+
+
+
 export type AnyObject = { [key: string | symbol]: any }
 
 export type Identity<T> = { // Flattens intersection

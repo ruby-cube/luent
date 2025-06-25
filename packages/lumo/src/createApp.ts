@@ -60,9 +60,9 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
             try {
                mountNodeEntities(processJSXOutput(App(), appRoot, nodePod), appRoot) 
             }
-            catch (err) {
-               console.error('uhoh', err)
-            }
+            // catch (err) {
+            //    console.error('uhoh', err)
+            // }
             finally {
                setComponentAttributes(undefined)
                muIonsStack.pop()

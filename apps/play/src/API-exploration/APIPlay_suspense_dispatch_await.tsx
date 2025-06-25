@@ -1,11 +1,11 @@
 //@ts-nocheck
 import { component } from '@rue/lumo'
 function LoadingApp() {
-   const $data = dispatch({ get: MARKDOWN_FILES }) // how to deal with latency?
+   const $data = fromCloud(MARKDOWN_FILES) // Data | undefined
 
    return component(
       <>
-         {Await(suspense =>
+         {Resolve(suspense =>
             <App data={$data} {...suspense}></App>
          )}
          {Meanwhile(
@@ -62,7 +62,7 @@ export default function MarkdownEditor() {
          </label>
          <hr />
          {If($showPreview, [
-            Await(suspense =>
+            Resolve(suspense =>
                <>
                   <h2>Preview</h2>
                   <Z.MarkdownPreview markdown={$markdown} {...suspense} />
