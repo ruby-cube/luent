@@ -3,6 +3,7 @@ import { Compound, CompoundMorph, track, untrackParticles } from "../compound/Co
 import { Watchable } from "../watch/Watched";
 import { isIonizedModel } from "../ionized/ionize";
 import { quarkOf } from "../Quark";
+import { watch } from "fs";
 
 const trackerStack: (Compound | null)[] = []
 
@@ -16,10 +17,31 @@ function popTracker() {
 
 let pauseTracking = false
 
+// export function getActiveTracker() {
+//    if (pauseTracking) return undefined;
+//    return trackerStack.at(-1)
+// }
+
 export function getActiveTracker() {
    if (pauseTracking) return undefined;
-   return trackerStack.at(-1)
+   return {
+      track(atom: unknown){
+         for (const tracker of trackerStack){
+            
+         }
+      }
+   }
 }
+
+export function getActiveTrackers() {
+   if (pauseTracking) return undefined;
+   return trackerStack
+}
+
+// export function track(atom: any){
+   
+// }
+
 
 export function isTrackedContext() {
    return Boolean(getActiveTracker())

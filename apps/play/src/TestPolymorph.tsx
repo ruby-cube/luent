@@ -178,8 +178,8 @@ export function TestPolymorph() {
    function getfiles() {
       const $state = ion(undefined);
 
-      ionicTask(w => {
-         const res = await fetch(`files/${w($id)}`)
+      ionicTask(() => {
+         const res = await fetch(`files/${$id()}`)
          res.json().then(v => $state.state = v)
       })
 

@@ -49,8 +49,8 @@ export function TodoMVC() {
    onHashChange()
 
    // persist state
-   ionicTask(w => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(w($todos)))
+   ionicTask(() => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify($todos()))
    })
 
    function toggleAll(e: RadioInputEvent) {

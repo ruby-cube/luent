@@ -125,7 +125,4 @@ export function trigger(model: IonizedModel, op?: PropertyKey | '[[get]]', entry
 
 
 
-// if (__DEV__) emitSignal();
-//       const value = toRaw(arg)
-//       getActiveTracker()?.track(asAtomicOp(model, op, value))
-//       return maybeIonize(fn.call(target, value))
+

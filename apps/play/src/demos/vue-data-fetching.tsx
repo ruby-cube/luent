@@ -28,15 +28,15 @@ export function View() {
    const $commits = ion([] as Commit[])
 
 
-   ionicTask(async (w, initial) => {
+   ionicTask(async (initial) => {
       if (!initial) $commits.state = []
-      const response = await fetch(`${API_URL}${w($currentBranch)}`)
+      const response = await fetch(`${API_URL}${$currentBranch()}`)
       $commits.state = await response.json()
    })
 
-   ionicTask(async w => {
+   ionicTask(async () => {
       await $postrender()
-      console.log('postlude logging', w($currentBranch))
+      console.log('postlude logging', $currentBranch())
    })
 
 

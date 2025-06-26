@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { If, component, Else, ElseIf } from "@rue/lumo";
 import { ion } from "@rue/quarky";
 
@@ -52,6 +53,8 @@ export function TestDerivedConditional() {
          {If(($doubleCount() > 3), 'create',
             <p>(0) doublecount is greater than 3!</p>
          )}
+
+
          {If(($doubleCount() > 0), 'create',
             <p>(1) doublecount is greater than 0!</p>
          )}

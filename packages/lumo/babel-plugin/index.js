@@ -9,22 +9,22 @@ export default function lumoPreTransform({ types }) {
    return {
       name: "lumo-pre-transform",
       visitor: {
-         Program: {
-            enter(path) {
-               path.traverse({
-                  ImportDeclaration(path) {
-                     // prevent name collisions
-                     storeLocalNameOfImport(path, 'watch', this.localWatchNames)
-                     storeLocalNameOfImport(path, 'ionicTask', this.localIonicTaskNames)
-                  },
+         // Program: {
+         //    enter(path) {
+         //       path.traverse({
+         //          ImportDeclaration(path) {
+         //             // prevent name collisions
+         //             // storeLocalNameOfImport(path, 'watch', this.localWatchNames)
+         //             // storeLocalNameOfImport(path, 'ionicTask', this.localIonicTaskNames)
+         //          },
 
-                  CallExpression(path) {
-                     transformWatchCalls(path, this.localWatchNames) //TODO: MultiSubject watch calls
-                     transformIonicTaskCalls(path, this.localIonicTaskNames)
-                  }
-               }, { localWatchNames: new Set(), localIonicTaskNames: new Set() })
-            }
-         },
+         //          CallExpression(path) {
+         //             transformWatchCalls(path, this.localWatchNames) //TODO: MultiSubject watch calls
+         //             // transformIonicTaskCalls(path, this.localIonicTaskNames)
+         //          }
+         //       }, { localWatchNames: new Set(), localIonicTaskNames: new Set() })
+         //    }
+         // },
          JSXFragment: {
             enter(path) {
                // transformConditionalSeries(path)
@@ -106,47 +106,47 @@ function createConditionalSeries(conditionalSeries) {
    return t.callExpression(t.identifier('$$series'), conditionalSeries)
 }
 
-function storeLocalNameOfImport(path, functionName, localNames) {
-   if (path.node.source.value === '@rue/quarky') {
-      for (const specifier of path.node.specifiers) {
-         if (
-            t.isImportSpecifier(specifier) &&
-            specifier.imported.name === functionName
-         ) {
-            localNames.add(specifier.local.name);
-         }
-      }
-   }
-}
+// function storeLocalNameOfImport(path, functionName, localNames) {
+//    if (path.node.source.value === '@rue/quarky') {
+//       for (const specifier of path.node.specifiers) {
+//          if (
+//             t.isImportSpecifier(specifier) &&
+//             specifier.imported.name === functionName
+//          ) {
+//             localNames.add(specifier.local.name);
+//          }
+//       }
+//    }
+// }
 
-function transformWatchCalls(path, localWatchNames) {
-   const callee = path.get('callee');
-   if (
-      t.isIdentifier(callee.node) &&
-      localWatchNames.has(callee.node.name)
-   ) {
-      transformWatchSubject(path)
-   }
-}
+// function transformWatchCalls(path, localWatchNames) {
+//    const callee = path.get('callee');
+//    if (
+//       t.isIdentifier(callee.node) &&
+//       localWatchNames.has(callee.node.name)
+//    ) {
+//       transformWatchSubject(path)
+//    }
+// }
 
-function transformIonicTaskCalls(path, localIonicTaskNames) {
-   const functionName = path.node.callee.name
-   if (localIonicTaskNames.has(functionName)) {
-      const effectFnP = path.get('arguments')[0]
-      const effectBody = effectFnP.get('body')
-      const watchFnName = effectFnP.node.params[0].name
-      effectBody.traverse({
-         CallExpression(path) {
-            if (path.visited) return;
-            path.visited = true;
+// function transformIonicTaskCalls(path, localIonicTaskNames) {
+//    const functionName = path.node.callee.name
+//    if (localIonicTaskNames.has(functionName)) {
+//       const effectFnP = path.get('arguments')[0]
+//       const effectBody = effectFnP.get('body')
+//       const watchFnName = effectFnP.node.params[0].name
+//       effectBody.traverse({
+//          CallExpression(path) {
+//             if (path.visited) return;
+//             path.visited = true;
 
-            if (path.node.callee.name === watchFnName) {
-               transformWatchSubject(path);
-            }
-         }
-      })
-   }
-}
+//             if (path.node.callee.name === watchFnName) {
+//                transformWatchSubject(path);
+//             }
+//          }
+//       })
+//    }
+// }
 
 
 
