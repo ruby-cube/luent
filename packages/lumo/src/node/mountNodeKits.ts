@@ -31,7 +31,8 @@ function mountNodeEntity(
    fragment?: DocumentFragment
 ) {
    if (nodeEntity instanceof Element || nodeEntity instanceof CharacterData) { // Element type from Web API
-      parent.appendChild(nodeEntity)
+       const root = fragment ? fragment : parent;
+      root.appendChild(nodeEntity)
    }
    else if (isInnerHTMLKit(nodeEntity)) {
       if (parent instanceof DocumentFragment) {

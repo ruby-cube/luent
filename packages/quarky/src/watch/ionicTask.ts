@@ -1,7 +1,7 @@
 import { SustainedListenerOptions, ThisFlask } from "@rue/flask";
-import { createIonicTask, IonicTask } from "../ionic/IonicTask";
 import { EffectOptions, getPhase, setUpWatcher, WatchDebugOptions } from "./watch";
 import { Glass } from "@rue/types";
+import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 
 type IonicTaskOptions = {
    phase?: string;
@@ -18,7 +18,7 @@ export function ionicTask(task: IonicTask, options?: IonicTaskOptions) {
    const retrack = opts.retrack === undefined ? true : opts.retrack
    const phase = opts.phase = getPhase(options)
 
-   const wrappedEffect = createIonicTask(task, retrack)
+   const wrappedEffect = createIonicEffect(task, retrack)
 
    return setUpWatcher(
       wrappedEffect.asWatched,

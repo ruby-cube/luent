@@ -416,7 +416,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       if (!kit) return;
       const activationType = kit.type
       const nodePod = kit.nodePod
-      // this.dynamicPod.push(nodePod)
 
       if (activationType === 'show') { //NOTE: 'show' statements are not dynamic nodes because they are not removed from the DOM and setup is not rerun
          showDOMNodes(nodePod)
