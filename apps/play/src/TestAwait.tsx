@@ -1,13 +1,14 @@
 import { component, createSuspenseIon, fromTag } from "@rue/lumo";
-import { _$$AwaitSeries, Await, Meanwhile, Catch } from "../../../packages/lumo/src/boundaries/Await";
+import { Await, Meanwhile, Catch } from "../../../packages/lumo/src/boundaries/Await";
 import { Ion } from "@rue/quarky";
 
 function fetchData() {
    return createSuspenseIon(new Promise((resolve, reject) => {
       setTimeout(() => {
+         reject('nooo')
          resolve({ name: 'kermit' })
       }, 5000)
-   }), { mustAwait: true })
+   }) as Promise<{ name: string }>, { mustAwait: true })
 }
 
 function fetchNestedData() {
@@ -15,7 +16,7 @@ function fetchNestedData() {
       setTimeout(() => {
          resolve({ name: 'sir robin' })
       }, 8000)
-   }), { mustAwait: true })
+   }) as Promise<{ name: string }>, { mustAwait: true })
 }
 
 export function TestAwait() {
@@ -24,28 +25,26 @@ export function TestAwait() {
    return component(
       <>
          <h1>Untitled Goose Game</h1>
-         {_$$AwaitSeries([
-            Await(() =>
-               <ChildB></ChildB>
-            ),
-            Meanwhile(() =>
-               <Loading></Loading>
-            ),
-            Catch(err =>
-               <ErrorView error={err}></ErrorView>
-            )])}
-            <hr></hr>
+         {Await(() =>
+            <ChildB></ChildB>
+         )}
+         {/* {Meanwhile(() =>
+            <Loading></Loading>
+         )} */}
+         {Catch(err =>(console.log('error!!', err),
+            <ErrorView error={err}></ErrorView>
+         ))}
+         <hr></hr>
          <h1>Untitled Goose Game</h1>
-         {_$$AwaitSeries([
-            Await(() =>
-               <Child></Child>
-            ),
-            Meanwhile(() =>
-               <Loading></Loading>
-            ),
-            Catch(err =>
-               <ErrorView error={err}></ErrorView>
-            )])}
+         {Await(() =>
+            <Child></Child>
+         )}
+         {Meanwhile(() =>
+            <Loading></Loading>
+         )}
+         {Catch(err =>
+            <ErrorView error={err}></ErrorView>
+         )}
       </>
    )
 }
@@ -55,7 +54,7 @@ function ChildB() {
 
    return component(
       <>
-      {'B'}
+         {'B'}
          <div>{($kermit()?.name)}</div>
          <div>Child :)</div>
       </>
@@ -98,7 +97,7 @@ function ErrorView({ $error } = fromTag<{ error: Ion<unknown> }>()) {
    console.log('render error view')
    return component(
       <>
-         {/* <div>{$error}</div> */}
+         <div>{($error()?.message)}</div>
       </>
    )
 }

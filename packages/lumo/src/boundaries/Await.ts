@@ -12,20 +12,40 @@ import { ion } from "@rue/quarky";
 import { defineAppwide, defineGlobal } from "../commons/centralized";
 import { RenderFunction } from "../node/makeNode";
 import { RenderError } from "./Try";
-import { Else, ElseIf, If } from "../conditional/If";
+import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
+import { normalizeToArray, toError } from "@rue/utils";
+import { SuspenseIon } from "./Suspense";
 
+type AwaitKit = {
+   suspense: SuspenseIon<unknown>[] | undefined;
+   renderResolved: RenderFunction;
+}
 
-export function Await(renderResolved: RenderFunction) {
+type MeanwhileKit = {
+   timeout: number | undefined;
+   renderPlaceholder: RenderFunction;
+}
+
+export function Await(renderResolved: RenderFunction): AwaitKit
+export function Await(suspense: SuspenseIon<unknown> | SuspenseIon<unknown>[], renderResolved: RenderFunction): AwaitKit
+export function Await(renderOrSuspense: SuspenseIon<unknown> | SuspenseIon<unknown>[] | RenderFunction, renderResolved?: RenderFunction): AwaitKit {
+   const suspense = renderResolved ? normalizeToArray(renderOrSuspense) as SuspenseIon<unknown>[] : undefined;
+   const render = renderResolved ? renderResolved : renderOrSuspense as RenderFunction;
+
    return {
-      renderResolved,
-      // suspense // Suspense<T> Awaited<T> Promise<T> []
+      suspense,
+      renderResolved: render,
    }
 }
 
-export function Meanwhile(renderPlaceholder: RenderFunction) {
+export function Meanwhile(renderPlaceholder: RenderFunction): MeanwhileKit
+export function Meanwhile(options: { timeout: number }): MeanwhileKit
+export function Meanwhile(renderOrOptions: RenderFunction | { timeout: number }, renderPlaceholder?: RenderFunction): MeanwhileKit {
+   const timeout = renderPlaceholder ? (<{ timeout: number }>renderOrOptions).timeout : undefined
+   const render = renderPlaceholder ? renderPlaceholder : renderOrOptions as RenderFunction
    return {
-      renderPlaceholder
-      // timeout
+      renderPlaceholder: render,
+      timeout
    }
 }
 
@@ -50,12 +70,20 @@ export function pend(promiseValue: Promise<any> | Promise<any>[]) {
 }
 
 
-export function _$$AwaitSeries(series: [{ renderResolved: RenderFunction }, { renderPlaceholder: RenderFunction, timeout?: number }, { renderError: RenderError }]) {
+export function createAwaitSeries(
+   series:
+      [{ renderResolved: RenderFunction }]
+      | [{ renderResolved: RenderFunction }, { renderError: RenderError }]
+      | [{ renderResolved: RenderFunction }, { renderPlaceholder: RenderFunction, timeout?: number }]
+      | [{ renderResolved: RenderFunction }, { renderPlaceholder: RenderFunction, timeout?: number }, { renderError: RenderError }]
+) {
    const awaitStack = getAwaitStack()
+   const secondKit = series[1]
+   const thirdKit = series[2]
    const renderResolved = series[0].renderResolved;
-   const renderPlaceholder = series[1].renderPlaceholder ?? (() => undefined);
-   const renderError = series[2].renderError ?? (() => undefined);
-   const timeout = series[1].timeout
+   const renderPlaceholder = secondKit && 'renderPlaceholder' in secondKit ? secondKit.renderPlaceholder : (() => undefined);
+   const renderError = secondKit && 'renderError' in secondKit ? secondKit.renderError : thirdKit?.renderError ?? (() => undefined);
+   const timeout = secondKit && 'timeout' in secondKit ? secondKit.timeout : undefined
    const $pending = ion(true);
    const $error = ion(undefined as undefined | Error);
 
@@ -82,15 +110,17 @@ export function _$$AwaitSeries(series: [{ renderResolved: RenderFunction }, { re
          // $ready.state = true
       })
       .catch(err => {
-         if (renderError === undefined) throw typeof err === 'string' ? new Error(err) : err;
-         $error.state = typeof err === 'string' ? new Error(err) : err;
+         if (renderError === undefined) throw toError(err);
+         $error.state = toError(err);
          $pending.state = false
       })
 
-   return window.$$series(
+   return createIfSeries([
       If($pending, renderPlaceholder),
       ElseIf($error, () => renderError($error()!)),
       Else(() => output)
-   )
+   ])
 }
 
+//@ts-expect-error
+window._$$AwaitSeries = createAwaitSeries

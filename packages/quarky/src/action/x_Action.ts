@@ -4,6 +4,7 @@ import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
 import { ObservedProp } from "../ionized/ObservedProp";
 import { Phase, EffectCycle, $effectCycle } from "../effect-cycle/EffectCycle";
 import { PropIon } from "../ion/AtomicPion";
+import { toError } from "@rue/utils";
 
 
 //TODO: 
@@ -93,9 +94,7 @@ function doAction(actionKey: string | TypedKey<(...args: unknown[]) => unknown>,
     }
     catch (err) {
         if (propagatesError) {
-            if (typeof err === 'string')
-                throw new Error(err)
-            else throw new Error(err.message)
+            throw toError(err)
         }
         return [null, err]
     }

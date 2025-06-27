@@ -62,33 +62,14 @@ export function createConditionalKit(statementType: "if" | "elseIf" | "else", ac
    }
 }
 
-
-
-function $$series(...args: unknown[]) {
-   if (isConditionalSeries(args)) {
-      if (!isIon(args[0].$condition)) return renderStaticConditional(args)
-      return new ConditionalRenderSeries(args, getGroupActivationType())
-   }
-   if (isTryCatch(args)) {
-      return createTryCatch(args)
-   }
-   return;
+export function createIfSeries(kits: ConditionalKit[]) {
+   if (!isIon(kits[0].$condition)) return renderStaticConditional(kits)
+   return new ConditionalRenderSeries(kits, getGroupActivationType())
 }
-
-function isConditionalSeries(args: unknown[]): args is ConditionalKit[] {
-   const arg = args[0]
-   return arg instanceof Object && '$condition' in arg
-}
-
-function isTryCatch(args: unknown[]): args is [RenderFunction, undefined | ((err: Error) => RawJSXNode)] {
-   return args.length < 3 && isFunction(args[0]) && args[0].length === 0;
-
-}
-
 
 
 //@ts-expect-error
-window.$$series = $$series
+window._$$IfSeries = createIfSeries
 
 
 function renderStaticConditional(statements: ConditionalKit[]) {

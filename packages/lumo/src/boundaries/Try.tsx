@@ -1,5 +1,3 @@
-import { component } from "../component/Component";
-import { fromTag } from "../component/fromTag";
 import { RawJSXNode, RenderFunction } from "../node/makeNode";
 
 export function Try(render: RenderFunction | RawJSXNode) {
@@ -11,8 +9,7 @@ export function Catch(render: (err: Error) => RawJSXNode) {
    return render;
 }
 
-export function createTryCatch(tryCatch: [RenderFunction, undefined | ((err: Error) => RawJSXNode)]) {
-   const [renderAttempt, renderError] = tryCatch
+export function createTryCatch(renderAttempt: RenderFunction, renderError: undefined | ((err: Error) => RawJSXNode)) {
    try {
       return renderAttempt();
    }
@@ -22,6 +19,9 @@ export function createTryCatch(tryCatch: [RenderFunction, undefined | ((err: Err
       return undefined;
    }
 }
+
+//@ts-expect-error
+window._$$TrySeries = createTryCatch
 
 // EXAMPLE:
 // const $App = Tentative({
@@ -34,16 +34,16 @@ export function createTryCatch(tryCatch: [RenderFunction, undefined | ((err: Err
 // })
 export type RenderError = (err: Error) => RawJSXNode
 
-export function Tentative(config: { try: RenderFunction, catch?: RenderError }) {
+// export function Tentative(config: { try: RenderFunction, catch?: RenderError }) {
 
-   return function $TryNode(
-      input = fromTag<{
-         // provide //TODO:
-      }>()
-   ) {
+//    return function $TryNode(
+//       input = fromTag<{
+//          // provide //TODO:
+//       }>()
+//    ) {
 
-      return component(
-         createTryCatch([config.try, config.catch])
-      )
-   }
-}
+//       return component(
+//          createTryCatch(config.try, config.catch)
+//       )
+//    }
+// }

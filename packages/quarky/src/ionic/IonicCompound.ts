@@ -17,21 +17,21 @@ function popTracker() {
 
 let pauseTracking = false
 
-// export function getActiveTracker() {
-//    if (pauseTracking) return undefined;
-//    return trackerStack.at(-1)
-// }
-
 export function getActiveTracker() {
    if (pauseTracking) return undefined;
-   return {
-      track(atom: unknown){
-         for (const tracker of trackerStack){
-            
-         }
-      }
-   }
+   return trackerStack.at(-1)
 }
+
+// export function getActiveTracker() {
+//    if (pauseTracking) return undefined;
+//    return {
+//       track(atom: unknown){
+//          for (const tracker of trackerStack){
+            
+//          }
+//       }
+//    }
+// }
 
 export function getActiveTrackers() {
    if (pauseTracking) return undefined;

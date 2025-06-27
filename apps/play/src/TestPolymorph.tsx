@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { component, For, fromApp, fromCommons, fromGlobal, fromTag, provideAppwide, provideGlobal } from "@rue/lumo";
+import { component, createSuspenseIon, For, fromApp, fromCommons, fromGlobal, fromTag, provideAppwide, provideGlobal } from "@rue/lumo";
 import { Polymorph } from "../../../packages/lumo/src/conditional/Polymorph";
 import { ion, ionicTask } from "@rue/quarky";
 import { watch } from "fs";
@@ -64,37 +64,38 @@ export function TestPolymorph() {
    wantIon(null as Suspense<string>)
 
 
-   function fetchFile(FILE, $userID: Ion<string>, $fileID: Ion<string>) {
-      const $file = fromApp(FILE)
-      if ($file) return $file;
 
-      const $file = suspension($file => {
-         const id = $userID() + $fileID()
-         const existing = files.get(id)
-         if (existing) $file.state = existing;
-         else fetch(`http://${$userID()}/${$fileID()}`)
-            .then(response => response.json())
-            .then(value => {
-               value
-               files.set(id, value)
-            })
-      }, { awaitBoundary: '@boundary' })
+   // function fetchFile(FILE, $userID: Ion<string>, $fileID: Ion<string>) {
+   //    const $file = fromApp(FILE)
+   //    if ($file) return $file;
 
-      provideAppwide(FILE, $file)
-      return $file;
-   }
+   //    const $file = suspension($file => {
+   //       const id = $userID() + $fileID()
+   //       const existing = files.get(id)
+   //       if (existing) $file.state = existing;
+   //       else fetch(`http://${$userID()}/${$fileID()}`)
+   //          .then(response => response.json())
+   //          .then(value => {
+   //             value
+   //             files.set(id, value)
+   //          })
+   //    }, { awaitBoundary: '@boundary' })
+
+   //    provideAppwide(FILE, $file)
+   //    return $file;
+   // }
 
 
    const fetchFile = defineAppwide('$file', ($userID: Ion<string>, $fileID: Ion<string>) => {
-      return suspense($file => {
-         const id = $userID() + $fileID()
-         const existing = files.get(id)
-         if (existing) $file.state = existing;
-         else fetch(`http://${$userID()}/${$fileID()}`)
+      return createSuspenseIon($file => {
+         const api = `/${$userID()}/${$fileID()}`
+         const cached = files.get(api)
+         if (cached) $file.state = cached; // or let browser cache it!
+         else fetch(api)
             .then(response => response.json())
             .then(value => {
                value
-               files.set(id, value)
+               files.set(api, value) // cache it
             })
       }, { mustAwait: true })
    })

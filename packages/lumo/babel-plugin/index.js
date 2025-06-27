@@ -52,59 +52,79 @@ const conditionalStatements = {
 }
 
 
-function isConditionalSeriesElement(node) {
+function isIfSeriesElement(node) {
    return t.isCallExpression(node) && node.callee.name in conditionalStatements
 }
 
-function transformConditionalSeries(path) {
-   const children = path.node.children
-   if (children.length === 0) return;
-   path.node.children = consolidateSeries(children)
+function isTrySeriesElement(node, seriesType) {
+   return t.isCallExpression(node) && (node.callee.name === 'Try' || node.callee.name === 'Catch' && seriesType === 'Try')
 }
 
-function consolidateSeries(children) {
-   const newChildren = []
-   let conditionalSeries;
-   for (const node of children) {
-      if (t.isJSXExpressionContainer(node) && isConditionalSeriesElement(node.expression)) {
-         if (node.expression.callee.name === 'If') {
-            if (conditionalSeries) newChildren.push(createConditionalSeries(conditionalSeries))
-            conditionalSeries = [node.expression]
-         }
-         else {
-            conditionalSeries.push(node.expression)
-         }
-      }
-      else if (t.isJSXText(node)) {
-         const stringLiteral = transformJSXText(node)
-         if (stringLiteral) {
-            if (conditionalSeries) {
-               newChildren.push(createConditionalSeries(conditionalSeries))
-               conditionalSeries = undefined;
-            }
-            newChildren.push(stringLiteral)
-         }
-      }
-      else if (conditionalSeries) {
-         console.log('uh oh', node)
-         newChildren.push(createConditionalSeries(conditionalSeries))
-         conditionalSeries = undefined;
-         newChildren.push(node)
-      } else {
-         newChildren.push(node)
-      }
-   }
-   if (conditionalSeries) newChildren.push(createConditionalSeries(conditionalSeries))
-   console.log('oldchildren', children.length)
-   console.log('newChildren', newChildren.length)
-   // return children
-   return newChildren;
+function isAwaitSeriesElement(node, seriesType) {
+   return t.isCallExpression(node) && (
+      node.callee.name === 'Await'
+      || node.callee.name === 'Meanwhile'
+      || node.callee.name === 'Catch' && seriesType === 'Await'
+   )
 }
 
-function createConditionalSeries(conditionalSeries) {
-   //TODO: import '$$series'
-   return t.callExpression(t.identifier('$$series'), conditionalSeries)
+// function transformConditionalSeries(path) {
+//    const children = path.node.children
+//    if (children.length === 0) return;
+//    path.node.children = consolidateSeries(children)
+// }
+
+// function consolidateSeries(children) {
+//    const newChildren = []
+//    let conditionalSeries;
+//    for (const node of children) {
+//       if (t.isJSXExpressionContainer(node) && isIfSeriesElement(node.expression)) {
+//          if (node.expression.callee.name === 'If') {
+//             if (conditionalSeries) newChildren.push(createIfSeriesElement(conditionalSeries))
+//             conditionalSeries = [node.expression]
+//          }
+//          else {
+//             conditionalSeries.push(node.expression)
+//          }
+//       }
+//       else if (t.isJSXText(node)) {
+//          const stringLiteral = transformJSXText(node)
+//          if (stringLiteral) {
+//             if (conditionalSeries) {
+//                newChildren.push(createIfSeriesElement(conditionalSeries))
+//                conditionalSeries = undefined;
+//             }
+//             newChildren.push(stringLiteral)
+//          }
+//       }
+//       else if (conditionalSeries) {
+//          console.log('uh oh', node)
+//          newChildren.push(createIfSeriesElement(conditionalSeries))
+//          conditionalSeries = undefined;
+//          newChildren.push(node)
+//       } else {
+//          newChildren.push(node)
+//       }
+//    }
+//    if (conditionalSeries) newChildren.push(createIfSeriesElement(conditionalSeries))
+//    console.log('oldchildren', children.length)
+//    console.log('newChildren', newChildren.length)
+//    // return children
+//    return newChildren;
+// }
+
+function createIfSeries(series) {
+   return t.callExpression(t.identifier('_$$IfSeries'), [t.ArrayExpression(series)])
 }
+
+function createTrySeries(series) {
+   return t.callExpression(t.identifier('_$$TrySeries'), series)
+}
+
+function createAwaitSeries(series) {
+   return t.callExpression(t.identifier('_$$AwaitSeries'), [t.ArrayExpression(series)])
+}
+
 
 // function storeLocalNameOfImport(path, functionName, localNames) {
 //    if (path.node.source.value === '@rue/quarky') {
@@ -172,30 +192,80 @@ function transformJSXFragment(path) {
    path.replaceWith(transformJSXChildrenToArrayExpression(children))
 }
 
-function closeConditionalSeries(array, series) {
-   if (series) {
-      array.push(createConditionalSeries(series))
-   }
-}
 
 function transformJSXChildrenToArrayExpression(paths) {
    const array = []
-   let conditionalSeries;
+   let series;
+   let seriesType;
+
+   function closeSeries() {
+      if (series) {
+         switch (seriesType) {
+            case 'If':
+               array.push(createIfSeries(series))
+               break;
+
+            case 'Try':
+               array.push(createTrySeries(series))
+               break;
+
+            case 'Await':
+               array.push(createAwaitSeries(series))
+               break;
+
+            default:
+               break;
+         }
+         series = null;
+         seriesType = null;
+      }
+   }
+
    for (const child of paths) {
       const node = child.node
-      if (t.isJSXExpressionContainer(node) && isConditionalSeriesElement(node.expression)) {
+      if (t.isJSXExpressionContainer(node) && isIfSeriesElement(node.expression)) {
          if (node.expression.callee.name === 'If') {
-            closeConditionalSeries(array, conditionalSeries)
-            conditionalSeries = [node.expression]
+            closeSeries()
+            seriesType = 'If'
+            series = [node.expression]
+         }
+         else if (node.expression.callee.name === 'Else') {
+            series.push(node.expression)
+            closeSeries()
          }
          else {
-            conditionalSeries.push(node.expression)
+            series.push(node.expression)
+         }
+      }
+      else if (t.isJSXExpressionContainer(node) && isTrySeriesElement(node.expression, seriesType)) {
+         if (node.expression.callee.name === 'Try') {
+            closeSeries()
+            seriesType = 'Try'
+            series = [node.expression]
+         }
+         else if (node.expression.callee.name === 'Catch') {
+            series.push(node.expression)
+            closeSeries()
+         }
+      }
+      else if (t.isJSXExpressionContainer(node) && isAwaitSeriesElement(node.expression, seriesType)) {
+         if (node.expression.callee.name === 'Await') {
+            closeSeries()
+            seriesType = 'Await'
+            series = [node.expression]
+         }
+         else if (node.expression.callee.name === 'Catch') {
+            series.push(node.expression)
+            closeSeries()
+         }
+         else {
+            series.push(node.expression)
          }
       }
       else if (t.isJSXText(node)) {
          const stringLiteral = transformJSXText(node)
          if (stringLiteral) {
-            conditionalSeries = closeConditionalSeries(array, conditionalSeries);
+            closeSeries()
             array.push(stringLiteral)
          }
       }
@@ -203,15 +273,15 @@ function transformJSXChildrenToArrayExpression(paths) {
          const expression = node.expression;
          if (t.isJSXEmptyExpression(expression))
             continue;
-         conditionalSeries = closeConditionalSeries(array, conditionalSeries);
+         closeSeries()
          array.push(expression)
       }
       else {
-         conditionalSeries = closeConditionalSeries(array, conditionalSeries);
+         closeSeries()
          array.push(node)
       }
    }
-   closeConditionalSeries(array, conditionalSeries);
+   closeSeries()
    const arrayExpression = t.arrayExpression(array)
    arrayExpression.visited = true;
    return arrayExpression
@@ -322,7 +392,10 @@ const TemplateFunctions = {
    If: transformIfCall,
    ElseIf: transformIfCall,
    Else: transformElseCall,
-   For: transformIfCall, //TODO:
+   Try: transformElseCall,
+   Await: transformElseCall,
+   Meanwhile: transformElseCall,
+   For: transformElseCall,
    // ['jsxDEV', transformJSXFragmentCall],
    // ['jsx', transformJSXFragmentCall],
    // ['_jsx', transformJSXFragmentCall],
