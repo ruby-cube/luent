@@ -167,7 +167,7 @@ function toInput(attributes: AnyObject) {
             const value = target[key]
             if (isFunction(value) && !isIon(value))
                debug.error('To pass a function as component input, prefix attribute with `can:`')
-            return toValue(target[key])
+            return target[key]
          }
          return undefined
       },

@@ -79,7 +79,7 @@ function __DEV__assertInCreationScope(object: AnyObject) {
    //TODO: assert that object is within its creation scope
 }
 
-export function unnestComponent(jsxNodes: JSXNode) {
+export function unnestComponent(jsxNodes: RawJSXNode) {
    const isArray = jsxNodes instanceof Array;
    if (isArray && jsxNodes.length > 1) return jsxNodes;
    const entity = isArray ? jsxNodes[0] : jsxNodes;

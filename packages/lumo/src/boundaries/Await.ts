@@ -10,14 +10,14 @@
 
 import { ion } from "@rue/quarky";
 import { defineAppwide, defineGlobal } from "../commons/centralized";
-import { RenderFunction } from "../node/makeNode";
+import { RawJSXNode, RenderFunction } from "../node/makeNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
 import { normalizeToArray, toError } from "@rue/utils";
 import { SuspenseIon } from "./Suspense";
 
 type AwaitKit = {
-   suspense: SuspenseIon<unknown>[] | undefined;
+   suspenseIons: SuspenseIon<unknown>[] | undefined;
    renderResolved: RenderFunction;
 }
 
@@ -26,23 +26,22 @@ type MeanwhileKit = {
    renderPlaceholder: RenderFunction;
 }
 
-export function Await(renderResolved: RenderFunction): AwaitKit
-export function Await(suspense: SuspenseIon<unknown> | SuspenseIon<unknown>[], renderResolved: RenderFunction): AwaitKit
-export function Await(renderOrSuspense: SuspenseIon<unknown> | SuspenseIon<unknown>[] | RenderFunction, renderResolved?: RenderFunction): AwaitKit {
-   const suspense = renderResolved ? normalizeToArray(renderOrSuspense) as SuspenseIon<unknown>[] : undefined;
-   const render = renderResolved ? renderResolved : renderOrSuspense as RenderFunction;
-
+export function Await(renderResolved: RenderFunction | RawJSXNode): AwaitKit
+export function Await(suspense: SuspenseIon<unknown> | SuspenseIon<unknown>[], renderResolved: RenderFunction | RawJSXNode): AwaitKit
+export function Await(renderOrSuspense: SuspenseIon<unknown> | SuspenseIon<unknown>[] | RenderFunction | RawJSXNode, renderResolved?: RenderFunction | RawJSXNode): AwaitKit {
+   const suspenseIons = renderResolved ? normalizeToArray(renderOrSuspense) as SuspenseIon<unknown>[] : undefined;
+   const render = renderResolved ? renderResolved as RenderFunction : renderOrSuspense as RenderFunction;
    return {
-      suspense,
+      suspenseIons,
       renderResolved: render,
    }
 }
 
-export function Meanwhile(renderPlaceholder: RenderFunction): MeanwhileKit
+export function Meanwhile(renderPlaceholder: RenderFunction | RawJSXNode): MeanwhileKit
 export function Meanwhile(options: { timeout: number }): MeanwhileKit
-export function Meanwhile(renderOrOptions: RenderFunction | { timeout: number }, renderPlaceholder?: RenderFunction): MeanwhileKit {
+export function Meanwhile(renderOrOptions: RenderFunction | RawJSXNode | { timeout: number }, renderPlaceholder?: RenderFunction | RawJSXNode): MeanwhileKit {
    const timeout = renderPlaceholder ? (<{ timeout: number }>renderOrOptions).timeout : undefined
-   const render = renderPlaceholder ? renderPlaceholder : renderOrOptions as RenderFunction
+   const render = (renderPlaceholder ? renderPlaceholder : renderOrOptions) as RenderFunction
    return {
       renderPlaceholder: render,
       timeout
@@ -60,7 +59,8 @@ const getAwaitStack = defineAppwide('awaitStack', () => [] as Promise<any>[][])
 
 export function pend(promiseValue: Promise<any> | Promise<any>[]) {
    const awaitStack = getAwaitStack()
-   if (awaitStack.length === 0) throw new Error('pend must eventually be handled by a Suspense call in a parent component. If you want to handle the promise with a placeholder and error view in this component, use Suspense instead');
+   if (awaitStack.length === 0) // awaitStack has not been initialized by Await()
+      throw new Error('pend must be handled by an Await call in a parent or ancestor component');
    const promise = promiseValue instanceof Array ?
       Promise.all(promiseValue)
       : promiseValue
@@ -72,15 +72,17 @@ export function pend(promiseValue: Promise<any> | Promise<any>[]) {
 
 export function createAwaitSeries(
    series:
-      [{ renderResolved: RenderFunction }]
-      | [{ renderResolved: RenderFunction }, { renderError: RenderError }]
-      | [{ renderResolved: RenderFunction }, { renderPlaceholder: RenderFunction, timeout?: number }]
-      | [{ renderResolved: RenderFunction }, { renderPlaceholder: RenderFunction, timeout?: number }, { renderError: RenderError }]
+      [AwaitKit]
+      | [AwaitKit, { renderError: RenderError }]
+      | [AwaitKit, { renderPlaceholder: RenderFunction, timeout?: number }]
+      | [AwaitKit, { renderPlaceholder: RenderFunction, timeout?: number }, { renderError: RenderError }]
 ) {
+   const awaitKit = series[0]
+   const { suspenseIons } = awaitKit;
    const awaitStack = getAwaitStack()
    const secondKit = series[1]
    const thirdKit = series[2]
-   const renderResolved = series[0].renderResolved;
+   const renderResolved = awaitKit.renderResolved;
    const renderPlaceholder = secondKit && 'renderPlaceholder' in secondKit ? secondKit.renderPlaceholder : (() => undefined);
    const renderError = secondKit && 'renderError' in secondKit ? secondKit.renderError : thirdKit?.renderError ?? (() => undefined);
    const timeout = secondKit && 'timeout' in secondKit ? secondKit.timeout : undefined
@@ -99,6 +101,11 @@ export function createAwaitSeries(
    // collect promises
    const pendingPromises: Promise<unknown>[] = []
    awaitStack.push(pendingPromises);
+   if (suspenseIons) {
+      for (const ion of suspenseIons) {
+         pend(ion.suspense)
+      }
+   }
    const output = renderResolved(); // any nested pend calls will collect promises into the pendingPromises array
    const allPromises = Promise.all(pendingPromises);
    console.log('allPromises', pendingPromises)
@@ -107,7 +114,6 @@ export function createAwaitSeries(
       .then(() => {
          clearTimeout(timeoutID)
          $pending.state = false
-         // $ready.state = true
       })
       .catch(err => {
          if (renderError === undefined) throw toError(err);

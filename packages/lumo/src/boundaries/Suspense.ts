@@ -14,11 +14,12 @@ import { pend } from "./Await";
 
 //TODO: Suspense Ion must have value (T | undefined)
 // QUESTION: should suspense boundaries be the default? No because you might not want to hold up rendering for something that is ok to be undefined
-// Should { mustAwait: true } be the default? or { renderUndefined: true } or { dontAwait } or 
+// Should { awaited: true } be the default? or { renderUndefined: true } or { dontAwait } or 
 
-export type SuspenseIon<T> = MutableIon<T | undefined> & { suspense: Promise<T>, error: null | Error }
-export type Awaited<T> = MutableIon<T | undefined> & { suspense: Promise<T>, error: null | Error }
-export type Resolved<T> = MutableIon<T> & { suspense: Promise<T>, error: null }
+export type Suspense<T> = { suspense: Promise<T>, error: null | Error, awaited: () => Awaited<T> }
+export type SuspenseIon<T> = MutableIon<T | undefined> & Suspense<T>
+export type Awaited<T> = MutableIon<T | undefined> & Suspense<T>
+export type Resolved<T> = MutableIon<T> & { suspense: Promise<T>, error: null, awaited: () => Awaited<T> }
 
 
 export function assertResolved<T>(ion: SuspenseIon<T>): asserts ion is Resolved<T> {
@@ -37,12 +38,17 @@ export function isPending(ion: SuspenseIon<unknown>) {
    return ion.state instanceof Promise;
 }
 
-export function createSuspenseIon<T, B extends boolean, OPT = undefined>(input: Promise<T> | ((ion: SuspenseIon<T>) => Promise<T>), options?: OPT & { mustAwait: B }): OPT extends undefined ? SuspenseIon<T> : B extends true ? Awaited<T> : SuspenseIon<T> {
+function createSuspenseIon<T, B extends boolean, OPT = undefined>(input: Promise<T> | ((ion: SuspenseIon<T>) => Promise<T>), options?: OPT & { awaited: B }): OPT extends undefined ? SuspenseIon<T> : B extends true ? Awaited<T> : SuspenseIon<T> {
    if (input instanceof Promise) {
-      if (options?.mustAwait) pend(input)
+      // if (options?.awaited) pend(input)
       const $ion = ion(undefined as T | undefined) as SuspenseIon<T>
       $ion.suspense = input
       $ion.error = null;
+      $ion.awaited = () => {
+         //TODO: trace must await calls for debugging
+         pend(input);
+         return $ion
+      }
 
       input
          .then(value => $ion.state = value)
@@ -52,13 +58,16 @@ export function createSuspenseIon<T, B extends boolean, OPT = undefined>(input: 
 
       return $ion;
    }
-   const $ion = ion(undefined) as SuspenseIon<T>
 
-   let initial = true;
+   const $ion = ion(undefined) as SuspenseIon<T>
+   $ion.awaited = () => {
+      //TODO: trace must await calls for debugging
+      pend($ion.suspense);
+      return $ion
+   }
    ionicTask(() => {
       const promise = input($ion);
-      if (initial && options?.mustAwait)
-         (initial = false, pend(promise))
+      $ion.suspense = promise;
 
       promise
          .then(value => $ion.state = value)
@@ -68,6 +77,11 @@ export function createSuspenseIon<T, B extends boolean, OPT = undefined>(input: 
          })
    })
    return $ion as SuspenseIon<T>;
+}
+
+export function asSuspenseIon<T>(value: SuspenseIon<T> | Promise<T>): SuspenseIon<T> {
+   if ('suspense' in value) return value;
+   return createSuspenseIon(value)
 }
 
 

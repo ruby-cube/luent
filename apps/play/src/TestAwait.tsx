@@ -1,45 +1,59 @@
-import { component, createSuspenseIon, fromTag } from "@rue/lumo";
+import { component, asSuspenseIon, fromTag } from "@rue/lumo";
 import { Await, Meanwhile, Catch } from "../../../packages/lumo/src/boundaries/Await";
 import { Ion } from "@rue/quarky";
 
 function fetchData() {
-   return createSuspenseIon(new Promise((resolve, reject) => {
-      setTimeout(() => {
-         reject('nooo')
-         resolve({ name: 'kermit' })
-      }, 5000)
-   }) as Promise<{ name: string }>, { mustAwait: true })
+   return asSuspenseIon(
+      new Promise((resolve, reject) => {
+         setTimeout(() => {
+            reject('nooo')
+            resolve({ name: 'kermit' })
+         }, 5000)
+      }) as Promise<{ name: string }>
+   )
 }
 
 function fetchNestedData() {
-   return createSuspenseIon(new Promise((resolve, reject) => {
-      setTimeout(() => {
-         resolve({ name: 'sir robin' })
-      }, 8000)
-   }) as Promise<{ name: string }>, { mustAwait: true })
+   return asSuspenseIon(
+      new Promise((resolve, reject) => {
+         setTimeout(() => {
+            resolve({ name: 'sir robin' })
+         }, 8000)
+      }) as Promise<{ name: string }>
+   )
+}
+
+function fetchNestedDataB() {
+   return asSuspenseIon(
+      new Promise((resolve, reject) => {
+         setTimeout(() => {
+            resolve({ name: 'sir robin the brave' })
+         }, 8000)
+      }) as Promise<{ name: string }>
+   )
 }
 
 export function TestAwait() {
-
+   const $brave = fetchNestedDataB()
 
    return component(
       <>
          <h1>Untitled Goose Game</h1>
-         {Await(() =>
+         {Await($brave,
             <ChildB></ChildB>
          )}
-         {/* {Meanwhile(() =>
+         {Meanwhile(() =>
             <Loading></Loading>
-         )} */}
-         {Catch(err =>(console.log('error!!', err),
+         )}
+         {Catch(err => (console.log('error!!', err),
             <ErrorView error={err}></ErrorView>
          ))}
          <hr></hr>
          <h1>Untitled Goose Game</h1>
-         {Await(() =>
+         {Await(
             <Child></Child>
          )}
-         {Meanwhile(() =>
+         {Meanwhile(
             <Loading></Loading>
          )}
          {Catch(err =>
@@ -50,7 +64,7 @@ export function TestAwait() {
 }
 
 function ChildB() {
-   const $kermit = fetchData()
+   const $kermit = fetchData().awaited()
 
    return component(
       <>
@@ -62,7 +76,7 @@ function ChildB() {
 }
 
 function Child() {
-   const $kermit = fetchData()
+   const $kermit = fetchData().awaited()
 
    return component(
       <>
@@ -74,7 +88,7 @@ function Child() {
 }
 
 function GrandChild() {
-   const $robin = fetchNestedData()
+   const $robin = fetchNestedData().awaited()
 
    return component(
       <>
@@ -93,7 +107,7 @@ function Loading() {
    )
 }
 
-function ErrorView({ $error } = fromTag<{ error: Ion<unknown> }>()) {
+function ErrorView({ $error } = fromTag<{ error: Ion<Error> }>()) {
    console.log('render error view')
    return component(
       <>

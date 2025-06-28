@@ -135,7 +135,7 @@ if (__DEV__) configureFlask({
 
 
 
-const app = createApp(TestAwait)
+const app = createApp(TestPolymorph)
 
 app.mount('#app')
 
