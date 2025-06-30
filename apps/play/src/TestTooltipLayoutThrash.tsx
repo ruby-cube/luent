@@ -1,5 +1,4 @@
-//@ts-nocheck
-import { component, Else, For, fromTag, If, JSXNode, measureLayout, nodeRef, onMounted, Portal, RawJSXNode, RenderFunction, Slot } from '@rue/lumo';
+import { component, Else, For, fromTag, If, JSXNode, measureLayout, nodeRef, onMounted, Portal, RawJSXNode, RenderFunction } from '@rue/lumo';
 import { Ion, ion, watch } from '@rue/quarky';
 
 
@@ -7,10 +6,43 @@ export function TestTooltipApp() {
 
    return component(
       <div>
-         <div style={{ height: '50px' }} />
+         {/* <ButtonWithTooltip>
+            {{
+               buttonText: () => 'Hover over me (tooltip below)',
+               tooltip: () =>
+                  <div>
+                     This tooltip does not fit above the button.
+                     <br />
+                     This is why it's displayed below instead!
+                  </div>
+            }}
+         </ButtonWithTooltip>
+         <div style={{ height: '100px' }} />
+         <ButtonWithTooltip>
+            {{
+               buttonText: () => 'Hover over me (tooltip below)',
+               tooltip: () =>
+                  <div>
+                     This tooltip does not fit above the button.
+                     <br />
+                     This is why it's displayed below instead!
+                  </div>
+            }}
+         </ButtonWithTooltip>
 
 
-         <div style={{ height: '50px' }} />
+         <div style={{ height: '100px' }} />
+         <ButtonWithTooltip>
+            {{
+               buttonText: () => 'Hover over me (tooltip below)',
+               tooltip: () =>
+                  <div>
+                     This tooltip does not fit above the button.
+                     <br />
+                     This is why it's displayed below instead!
+                  </div>
+            }}
+         </ButtonWithTooltip> */}
 
          <ButtonWithTooltip>
             Hover over me (tooltip below)
@@ -35,8 +67,8 @@ function Slot<T>(input: T): T {
 
 export function ButtonWithTooltip(input = fromTag<{
    Slot: {
-      default: JSXNode,
-      tooltip: JSXNode
+      default: RenderFunction,
+      tooltip: RenderFunction
    }
 }>()) {
    const { Slot } = input
@@ -48,13 +80,13 @@ export function ButtonWithTooltip(input = fromTag<{
          <button
             ref={$button}
             on:pointerenter={() => { $targetRect.state = $button()!.getBoundingClientRect(); }}
-            on:pointerleave={() => { console.log('poerter leave'); $targetRect.state = null }}
+            on:pointerleave={() => { $targetRect.state = null }}
          >
-            {Slot()[0].buttonText()}
+            {Slot.default()}
          </button>
          {If($targetRect,
             <Tooltip targetRect={$targetRect}>
-               {Slot()[0].tooltip()}
+               {Slot.tooltip()}
             </Tooltip>
          )}
       </>
@@ -80,7 +112,7 @@ type Rect = { left: number, top: number, bottom: number }
 
 
 export function Tooltip({ Slot, targetRect } = fromTag<{
-   Slot: () => RawJSXNode
+   Slot: RenderFunction
    targetRect: Rect
 }>()) {
    const $div = nodeRef('div')
@@ -100,23 +132,21 @@ export function Tooltip({ Slot, targetRect } = fromTag<{
    })
 
    return component(
-      <>
-         {Portal('body',
-            <div
-               style={{
-                  position: 'absolute',
-                  pointerEvents: 'none',
-                  left: 0,
-                  top: 0,
-                  transform: (`translate3d(${shiftX}px, ${$shiftY()}px, 0)`)
-               }}
-            >
-               <div ref={$div} class="tooltip">
-                  {Slot()}
-               </div>
+      Portal('body',
+         <div
+            style={{
+               position: 'absolute',
+               pointerEvents: 'none',
+               left: 0,
+               top: 0,
+               transform: (`translate3d(${shiftX}px, ${$shiftY()}px, 0)`)
+            }}
+         >
+            <div ref={$div} class="tooltip">
+               {Slot()}
             </div>
-         )}
-      </>
+         </div>
+      )
    )
 }
 

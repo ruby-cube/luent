@@ -1,7 +1,10 @@
-import { component, fromTag, onUnmount } from "@rue/lumo";
-import { ion } from "@rue/quarky";
+import { component, fromTag, measureLayout, onUnmount } from "@rue/lumo";
+import { ion, watch } from "@rue/quarky";
+import { afterEffects } from "../../../../packages/lumo/src/render-cycle";
 
 const TARGET = 25;
+
+const lazyBatch = useBatchedIdleTasks()
 
 export function TriangleDemo() {
    const $elapsed = ion(0)
@@ -12,7 +15,7 @@ export function TriangleDemo() {
    }),
       start = Date.now(),
       t = setInterval(() => $seconds.state = ($seconds() % 10) + 1, 1000);
-      // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
+   // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
    let f: any;
    const update = () => {
@@ -40,17 +43,21 @@ export function TriangleDemo() {
 function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
    if (s <= TARGET) {
       return component(
-         <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET} text={$seconds} />
+         <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET*1.25} text={$seconds} />
       );
    }
    s = s / 2;
 
-   const slow = ion(() => {
-      // var e = performance.now() + 0.8;
-      // Artificially long execution time.
-      // while (performance.now() < e) { }
-      return $seconds();
-   });
+   const slow = ion($seconds())
+
+   watch($seconds, async () => {
+      await lazyBatch(async () => {
+         var e = performance.now() + 0.8;
+         // Artificially long execution time.
+         while (performance.now() < e) { }
+      })
+      slow.state = $seconds()
+   })
 
    return component(
       <>
@@ -83,3 +90,42 @@ function Dot({ x, y, s, $text } = fromTag<any>()) {
       >{($hover() ? "**" + $text() + "**" : $text())}</div>
    );
 };
+
+
+
+function useBatchedIdleTasks(){
+   let idleTasks: (() => any)[] | undefined = undefined
+   let resolvers: ((value: any | PromiseLike<unknown>) => void)[] | undefined = undefined
+   
+   
+   return function onIdle<T>(task: () => T): Promise<void> {
+      if (idleTasks) {
+         idleTasks.push(task)
+         return new Promise((_resolve) => {
+            resolvers!.push(_resolve)
+         })
+      } else {
+         idleTasks = [task]
+         resolvers = []
+         afterEffects(() => {
+            const limit = idleTasks!.length
+            for (let i = 0; i < idleTasks!.length; i++) {
+               // const resolve = resolvers![i]
+               const task = idleTasks![i]
+               requestIdleCallback((deadline) => {
+                  task()
+                  if (i === limit - 1) {
+                     resolvers?.forEach(resolve => resolve(undefined))
+                     resolvers = undefined
+                  }
+               })
+            }
+            idleTasks = undefined;
+            // emitMeasureLayoutComplete()
+         })
+         return new Promise((_resolve) => {
+            resolvers!.push(_resolve)
+         })
+      }
+   }
+}

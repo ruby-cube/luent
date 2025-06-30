@@ -25,6 +25,11 @@ export default function lumoPreTransform({ types }) {
          //       }, { localWatchNames: new Set(), localIonicTaskNames: new Set() })
          //    }
          // },
+         CallExpression: {
+            enter(path) {
+               transformTemplateCallExpressions(path)
+            }
+         },
          JSXFragment: {
             enter(path) {
                // transformConditionalSeries(path)
@@ -391,12 +396,12 @@ function isJSXRoot(node) {
 const TemplateFunctions = {
    If: transformIfCall,
    ElseIf: transformIfCall,
-   Else: transformElseCall,
-   Try: transformElseCall,
-   Await: transformElseCall,
-   Meanwhile: transformElseCall,
-   For: transformElseCall,
-   Portal: transformElseCall,
+   Else: transformTemplateArgToRenderFunction,
+   Try: transformTemplateArgToRenderFunction,
+   Await: transformTemplateArgToRenderFunction,
+   Meanwhile: transformTemplateArgToRenderFunction,
+   For: transformTemplateArgToRenderFunction,
+   Portal: transformTemplateArgToRenderFunction,
    // ['jsxDEV', transformJSXFragmentCall],
    // ['jsx', transformJSXFragmentCall],
    // ['_jsx', transformJSXFragmentCall],
@@ -414,20 +419,15 @@ function transformTemplateFnCall(name, path) {
    TemplateFunctions[name](path);
 }
 
-function transformWatchSubject(path) {
-   const args = path.node.arguments;
-   if (args.length > 0 && isDerivationShorthand(path.get('arguments')[0])) {
-      args[0] = toDerivationFunction(args[0]);
-      path.node.arguments = args;
-   }
-}
+
 
 function transformIfCall(path) {
    transformIfDerivationExpression(path.get('arguments.0'))
-   transformTemplateArgToRenderFunction(path.node.arguments)
+   transformTemplateArgToRenderFunction(path)
 }
 
-function transformTemplateArgToRenderFunction(args) {
+function transformTemplateArgToRenderFunction(path) {
+   const args = path.node.arguments
    const lastIndex = args.length - 1;
    const templateArg = args[lastIndex]
    // console.log('transforming template arg', templateArg)
@@ -452,11 +452,6 @@ function toDerivationFunction(node) {
    )
 }
 
-
-function transformElseCall(path) {
-   console.log('else call!')
-   transformTemplateArgToRenderFunction(path.node.arguments)
-}
 
 function isJSXFragment(node) {
    if (t.isJSXFragment(node)) return true;
@@ -507,10 +502,105 @@ function transformTargetCall(eventListenerNode) {
 function transformJSXSlot(path) {
    const children = path.get('children')
    if (children.length === 0) return;
-   transformJSXChildren(children)
-   path.node.children = [normalizeSlotToRenderFunction(children)]
+   if (hasNamedSlot(children)) {
+      path.node.children = [transformToNamedSlots(children)]
+   }
+   else {
+      transformJSXChildren(children)
+      path.node.children = [normalizeSlotToRenderFunction(children)]
+   }
 }
 
+function hasNamedSlot(childPaths) {
+   for (const path of childPaths) {
+      if (isNamedSlot(path.node)) return true;
+   }
+   return false;
+}
+
+function isNamedSlot(node) {
+   if (!t.isJSXElement(node)) return false;
+   const openingElement = node.openingElement
+   return openingElement.name.name === 'Slot' && openingElement.attributes.length > 0
+}
+
+function transformToNamedSlots(childPaths) {
+   return t.jsxExpressionContainer(t.objectExpression(createNamedSlotProperties(childPaths)))
+}
+
+
+
+function createNamedSlotProperties(childPaths) {
+   const defaultSlotChildren = [];
+   const namedSlotProperties = [];
+   for (const path of childPaths) {
+      const node = path.node
+
+      if (isDefaultSlot(node)) {
+         defaultSlotChildren.push(...path.get('children'))
+      }
+      else if (isNamedSlot(node)) {
+         namedSlotProperties.push(
+            t.objectProperty(
+               t.identifier(getSlotName(node)),
+               t.arrowFunctionExpression(
+                  [],
+                  transformJSXChildrenToArrayExpression(path.get('children'))
+               )
+            ))
+      }
+      else {
+         defaultSlotChildren.push(path)
+      }
+   }
+   if (defaultSlotChildren.length) {
+      namedSlotProperties.push(
+         t.objectProperty(
+            t.identifier('default'),
+            t.arrowFunctionExpression(
+               [],
+               transformJSXChildrenToArrayExpression(defaultSlotChildren)
+            )
+         )
+      )
+   }
+   return namedSlotProperties
+}
+
+function getSlotName(node) {
+   const name = node.openingElement.attributes[0].name.name;
+   return name;
+}
+
+function isDefaultSlot(node) {
+   if (!t.isJSXElement(node)) return false;
+   const openingElement = node.openingElement
+   return openingElement.name.name === 'Slot' && openingElement.attributes.length === 0 //TODO: what if Slot provides?
+}
+
+
+/*
+Component with Slot:
+
+   <ButtonWithTooltip>
+      Hover over me (tooltip below
+      <Slot tooltip>
+         <div>
+         </div>
+      </Slot>
+   </ButtonWithTooltip>
+
+transforms to:
+
+   jsxDEV(ButtonWithTooltip, {
+      children: {
+         default: () => ["Hover over me (tooltip below)"],
+         tooltip: () => [
+            jsxDEV("div", {})
+         ]
+      }
+   }),
+*/
 
 
 function transformArrayElements(paths) {
