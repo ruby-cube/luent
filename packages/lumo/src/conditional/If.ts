@@ -1,7 +1,7 @@
 import { getGroupActivationType, JSXNode, normalizeToRenderFunction, RawJSXNode, RenderFunction, withGroupActivationReset } from "../node/makeNode";
 import { isFunction, normalizeToArray } from "@rue/utils";
 import { Booleanny } from "@rue/types";
-import { Provided, wrapWithCommons } from "../commons/Commons";
+import { Provided, callWithCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";

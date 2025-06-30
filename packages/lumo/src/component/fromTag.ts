@@ -201,8 +201,9 @@ type TagEvents<D> = {
 }
 
 type TagSlot<D> = D extends { Slot: infer S } ? {
-   children: S
+   children: RawJSXNode
 } : {}
+
 
 type MaybeIonAttributes<D> = {
    [K in keyof D
@@ -342,7 +343,7 @@ class Robot {
 //    frogE: Inert<Frog> // --> Inert<Frog>
 // }>
 
-type Slot = { [key: string]: RenderSlot | RawJSXNode } | RenderSlot | RawJSXNode
+// type Slot = { [key: string]: RenderSlot | RawJSXNode } | RenderSlot | RawJSXNode
 
 export type RenderSlot<T = {}> = (input?: T) => RawJSXNode
 

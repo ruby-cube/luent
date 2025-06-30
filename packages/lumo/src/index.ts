@@ -1,33 +1,37 @@
-export * from './node/NodePod' //TODO: Limit to public API
-export * from './node/NodeRef' //TODO: Limit to public API
-export * from './node/NodeSetup' //TODO: Limit to public API
-export * from './component/Component' //TODO: Limit to public API
-export * from './boundaries/Suspense' //TODO: Limit to public API
-export * from './boundaries/Portal' //TODO: Limit to public API
-export * from './component/fromTag' //TODO: Limit to public API
-export * from './component/Style' //TODO: Limit to public API
-export * from './createApp' //TODO: Limit to public API
-export * from './component/Input' //TODO: Limit to public API
-export * from './iteratives/For' //TODO: Limit to public API
-export * from './node/makeNode' //TODO: Limit to public API
-export * from './element/makeElement' //TODO: Limit to public API
-export * from './component/makeComponent' //TODO: Limit to public API
-export * from './conditional/If' //TODO: Limit to public API
-export * from './conditional/toggledisplay' //TODO: Limit to public API
-export * from './commons/provide' //TODO: Limit to public API
-export * from './commons/CommonsKey' //TODO: Limit to public API
-export * from './commons/Commons' //TODO: Limit to public API
-export * from './events/target' //TODO: Limit to public API
-export * from './events/listen' //TODO: Limit to public API
-export * from './events/Abortable' //TODO: Limit to public API
-export * from './boundaries/Try' //TODO: Limit to public API
-export * from './transition/transitions' //TODO: Limit to public API
-export * from './transition/TransitionNode' //TODO: Limit to public API
-export * from './flask/flask-hooks' //TODO: Limit to public API
-export * from './flask/ViewFlask' //TODO: Limit to public API
-export * from './component/Input' //TODO: Limit to public API
+import { wrapWithCommons } from './commons/Commons'
+
+export * from './node/NodePod' 
+export * from './node/NodeRef' 
+export * from './node/NodeSetup' 
+export * from './component/Component' 
+export * from './boundaries/Suspense' 
+export * from './boundaries/Portal' 
+export * from './component/fromTag' 
+export * from './component/Style' 
+export * from './createApp' 
+export * from './component/Input' 
+export * from './iteratives/For' 
+export * from './node/makeNode' 
+export * from './element/makeElement' 
+export * from './component/makeComponent' 
+export * from './conditional/If' 
+export * from './conditional/toggledisplay' 
+export * from './commons/provide' 
+export * from './commons/CommonsKey' 
+export * from './commons/Commons' 
+export * from './events/target' 
+export * from './events/listen' 
+export * from './events/Abortable' 
+export * from './boundaries/Try' 
+export * from './transition/transitions' 
+export * from './transition/TransitionNode' 
+export * from './flask/flask-hooks' 
+export * from './flask/ViewFlask' 
+export * from './component/Input' 
 export * from './measureLayout'
 
+//@ts-expect-error
+window._$$wrapWithCommons = wrapWithCommons;
 
 
 

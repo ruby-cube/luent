@@ -3,7 +3,7 @@ import { Component, unnestComponent } from "../component/Component";
 import { getViewFlask } from "../flask/ViewFlask";
 import { JSXNode, RawJSXNode } from "../node/makeNode";
 import { mountConditional } from "./ConditionalRenderSeries";
-import { Commons, NodeCommons, Provided, wrapWithCommons } from "../commons/Commons";
+import { Commons, NodeCommons, Provided, callWithCommons } from "../commons/Commons";
 import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { DynamicPod, NodePod, removeDOMNodes } from "../node/NodePod";
 import { $_run_with_, $_snap_context, FLASK, Flask } from "@rue/flask";

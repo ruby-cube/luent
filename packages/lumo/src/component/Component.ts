@@ -12,9 +12,6 @@ export type DOMNode = CharacterData | Element
 //     Slot?: ((...args: any[]) => any) | { [key: string]: (...args: any[]) => any }
 // }
 
-export type Slot<P = undefined> =
-   P extends undefined ? (() => JSXNode) | JSXNode
-   : (props: P) => JSXNode
 
 
 // export type Slot = JSXNode

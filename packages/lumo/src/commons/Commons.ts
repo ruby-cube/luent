@@ -23,20 +23,19 @@ export function Commons(input = fromTag<{
 }>()) {
    const { Slot, provide } = input
    if (!Slot) debug.warn(`Extraneous <Commons>`)
-   const parentCommons = getClosestCommons()
+   return callWithCommons(Slot, provide)
+}
+
+
+export function callWithCommons(
+   Slot: RenderSlot,
+   provide: Provided,
+   parentCommons: CommonsType | undefined = getClosestCommons(),
+) {
    if (!parentCommons) {
       debug.traceAsyncPath()
       throw new Error(`no commons found :( This should never happen`)
    }
-   return wrapWithCommons(provide, Slot, parentCommons)
-}
-
-export function wrapWithCommons(
-   provide: Provided,
-   Slot: RenderSlot,
-   parentCommons: CommonsType,
-) {
-
    const [entries, muIons] = toCommonsEntries(provide)
    const commons: NodeCommons = {
       entries,
@@ -49,6 +48,15 @@ export function wrapWithCommons(
    const nodeEntities = Slot()
    popCommons()
    return unnestComponent(nodeEntities)
+}
+
+export function wrapWithCommons(
+   Slot: RenderSlot,
+   provide: Provided) {
+      console.log('wrapping with commons')
+   return (arg: any) => {
+      return callWithCommons(() => Slot(arg), provide)
+   }
 }
 
 export function toCommonsEntries(provided: [CommonsEntryKey | string, unknown][]): [Map<string, unknown>, undefined | Set<Ion>] {

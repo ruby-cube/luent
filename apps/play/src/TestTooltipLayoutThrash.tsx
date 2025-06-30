@@ -1,4 +1,4 @@
-import { component, Else, For, fromTag, If, JSXNode, measureLayout, nodeRef, onMounted, Portal, RawJSXNode, RenderFunction } from '@rue/lumo';
+import { component, Else, For, fromTag, If, JSXNode, measureLayout, nodeRef, onMounted, Portal, RawJSXNode, RenderFunction, RenderSlot } from '@rue/lumo';
 import { Ion, ion, watch } from '@rue/quarky';
 
 
@@ -45,9 +45,11 @@ export function TestTooltipApp() {
          </ButtonWithTooltip> */}
 
          <ButtonWithTooltip>
+            <Slot>
             Hover over me (tooltip below)
+            </Slot>
 
-            <Slot tooltip>
+            <Slot Tooltip provide={[]}>
                <div>
                   This tooltip does not fit above the button.
                   <br />
@@ -61,20 +63,18 @@ export function TestTooltipApp() {
    );
 }
 
-function Slot<T>(input: T): T {
-   return component(<></>) as T
-}
+
 
 export function ButtonWithTooltip(input = fromTag<{
    Slot: {
-      default: RenderFunction,
-      tooltip: RenderFunction
+      Default: RenderSlot,
+      Tooltip: RenderSlot
    }
 }>()) {
    const { Slot } = input
    const $targetRect = ion(null as Rect | null)
    const $button = nodeRef('button');
-
+console.log('Slot', Slot)
    return component(
       <>
          <button
@@ -82,11 +82,11 @@ export function ButtonWithTooltip(input = fromTag<{
             on:pointerenter={() => { $targetRect.state = $button()!.getBoundingClientRect(); }}
             on:pointerleave={() => { $targetRect.state = null }}
          >
-            {Slot.default()}
+            {Slot.Default()}
          </button>
          {If($targetRect,
             <Tooltip targetRect={$targetRect}>
-               {Slot.tooltip()}
+               {Slot.Tooltip()}
             </Tooltip>
          )}
       </>

@@ -3,7 +3,7 @@ import { RawJSXNode, RenderFunction, withGroupActivationReset } from "../node/ma
 import { flattenJSXOutput, NodeEntity, processJSXOutput, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { DynamicPod, NodePod } from "../node/NodePod";
 import { getClosestCommons } from "../commons/commons-stack";
-import { Provided, wrapWithCommons } from "../commons/Commons";
+import { Provided, callWithCommons } from "../commons/Commons";
 import { Flask } from "@rue/flask";
 import { TransitionNode } from "../transition/TransitionNode";
 import { AnyObject } from "@rue/types";
@@ -18,7 +18,7 @@ export function toRenderTransient(renderConditional: RenderFunction, provide: Pr
    const parentCommons = getClosestCommons()
    if (!parentCommons) throw new Error('commons missing')
    return (parent: Element, nodePod: NodePod, input?: Object) =>
-      processJSXOutput(wrapWithCommons(provide, () => withGroupActivationReset(() => renderConditional(input)), parentCommons), parent, nodePod)
+      processJSXOutput(callWithCommons(() => withGroupActivationReset(() => renderConditional(input)), provide, parentCommons), parent, nodePod)
 }
 
 export interface DynamicKit {

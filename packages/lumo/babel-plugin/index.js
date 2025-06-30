@@ -513,7 +513,8 @@ function transformJSXSlot(path) {
 
 function hasNamedSlot(childPaths) {
    for (const path of childPaths) {
-      if (isNamedSlot(path.node)) return true;
+      if (isNamedSlot(path.node))
+         return true;
    }
    return false;
 }
@@ -521,32 +522,43 @@ function hasNamedSlot(childPaths) {
 function isNamedSlot(node) {
    if (!t.isJSXElement(node)) return false;
    const openingElement = node.openingElement
-   return openingElement.name.name === 'Slot' && openingElement.attributes.length > 0
+   const attribute = openingElement.attributes[0]
+   return openingElement.name.name === 'Slot' && attribute && attribute.name.name !== 'provide'
 }
 
 function transformToNamedSlots(childPaths) {
    return t.jsxExpressionContainer(t.objectExpression(createNamedSlotProperties(childPaths)))
 }
 
-
+function isProvider(node) {
+   if (!t.isJSXElement(node)) return false;
+   const openingElement = node.openingElement
+   const attributes = openingElement.attributes
+   for (const attribute of attributes) {
+      if (attribute.name.name === 'provide') return true;
+   }
+   return false;
+}
 
 function createNamedSlotProperties(childPaths) {
    const defaultSlotChildren = [];
    const namedSlotProperties = [];
+   let defaultNode;
    for (const path of childPaths) {
       const node = path.node
 
       if (isDefaultSlot(node)) {
+         if (!defaultNode) defaultNode = node
          defaultSlotChildren.push(...path.get('children'))
       }
       else if (isNamedSlot(node)) {
          namedSlotProperties.push(
             t.objectProperty(
                t.identifier(getSlotName(node)),
-               t.arrowFunctionExpression(
+               wrapIfProvides(t.arrowFunctionExpression(
                   [],
                   transformJSXChildrenToArrayExpression(path.get('children'))
-               )
+               ), node)
             ))
       }
       else {
@@ -556,15 +568,38 @@ function createNamedSlotProperties(childPaths) {
    if (defaultSlotChildren.length) {
       namedSlotProperties.push(
          t.objectProperty(
-            t.identifier('default'),
-            t.arrowFunctionExpression(
+            t.identifier('Default'),
+            wrapIfProvides(t.arrowFunctionExpression(
                [],
                transformJSXChildrenToArrayExpression(defaultSlotChildren)
-            )
+            ), defaultNode)
          )
       )
    }
    return namedSlotProperties
+}
+
+function wrapIfProvides(renderfunction, node) {
+   if (!node) return renderfunction;
+   const provided = getProvided(node)
+   if (provided) {
+      return t.callExpression(t.identifier('_$$wrapWithCommons'), [renderfunction, provided])
+   }
+   return renderfunction
+}
+
+function getProvided(node) {
+   const attributes = node.openingElement.attributes
+   for (const attribute of attributes) {
+      if (attribute.name.name === 'provide') {
+         const value = attribute.value
+         if (t.isJSXExpressionContainer(value)) {
+            return value.expression
+         }
+         return undefined;
+      }
+   }
+   return undefined;
 }
 
 function getSlotName(node) {
@@ -575,7 +610,9 @@ function getSlotName(node) {
 function isDefaultSlot(node) {
    if (!t.isJSXElement(node)) return false;
    const openingElement = node.openingElement
-   return openingElement.name.name === 'Slot' && openingElement.attributes.length === 0 //TODO: what if Slot provides?
+   const attribute = openingElement.attributes[0]
+   console.log('attribute', attribute)
+   return openingElement.name.name === 'Slot' && (attribute === undefined) || (attribute.name.name === 'provide')
 }
 
 

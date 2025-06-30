@@ -2590,6 +2590,7 @@ declare global {
          'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
          'o-show': { children: ConditionalRenderKit[]; };
          'o-mount': { children: ConditionalRenderKit[]; };
+         // 'Slot': {Slot: any}
 
          // 'o--suspense': SuspenseNodeInput & { children: Lumo.Slot };
          // 'o--try': TryNodeInput & { children: Lumo.Slot };
@@ -2598,6 +2599,8 @@ declare global {
          'ooo-transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
          'o--dock': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
       }
+
+    
 
       interface _IntrinsicElements {
          // HTML

@@ -6,10 +6,10 @@ import { NodeReferent, NodeRef, NodesRef } from "./NodeRef";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
-import { createPortalNode, Portal, PortalKit, PortalNodeInput } from "../boundaries/Portal";
+import { Portal, PortalKit, PortalNodeInput } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { MaybeIon } from "../component/Input";
-import { Commons, Provided, wrapWithCommons } from "../commons/Commons";
+import { Commons, Provided, callWithCommons } from "../commons/Commons";
 import { ActivationType } from "../conditional/If";
 import { fromTag, RenderSlot } from "../component/fromTag";
 import { getClosestCommons } from "../commons/commons-stack";
@@ -25,6 +25,10 @@ import { DynamicKit } from "../dynamic/DynamicKit";
 //    const _children = children.length === 1 && typeof children[0] === 'string' ? children as [string] : () => children
 //    return makeNode(tag, _children, config || {})
 // }
+
+declare global {
+   function Slot<T>(input: {children: RawJSXNode} & {provide?: Provided} & AnyObject): T
+}
 
 export type RawJSXNode =
    RawJSXNode[]
@@ -50,7 +54,7 @@ export type JSXNode =
 
 
 
-export type RenderFunction<Params = unknown> =    (input?: Object ) => RawJSXNode
+export type RenderFunction<Params = unknown> = (input?: Object) => RawJSXNode
 
 export type EventHandler<K extends keyof HTMLElementEventMap> = (event: HTMLElementEventMap[K]) => void
 
@@ -113,13 +117,11 @@ export function withGroupActivationReset(Slot: RenderSlot) {
 }
 
 export function wrapWithActivationType(type: ActivationType, Slot: RenderSlot, provide: Provided | undefined) {
-   const parentCommons = getClosestCommons()
-   if (!parentCommons) throw new Error('missing commons')
    outerGroupActivationType = groupActivationType
    groupActivationType = type;
    try {
       if (provide)
-         return wrapWithCommons(provide, Slot, parentCommons)
+         return callWithCommons(Slot, provide)
       return Slot()
    }
    finally {
@@ -162,7 +164,7 @@ export function makeNode(
       case 'o--link':
          return Portal('head', () =>
             makeElement('link', undefined, <ElementConfig>config, undefined)
-            )
+         )
 
       case 'o-show':
          if (!Slot) throw new Error(`Extraneous <o-show>`)
