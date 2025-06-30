@@ -15,6 +15,7 @@ import { getPhasicNode } from "../transition/PhasicNode";
 import { __DEV__buildAsyncPath } from "../../../flask/debug";
 import { RenderTransient, toRenderTransient, wrapToPreserve } from "../dynamic/DynamicKit";
 import { AnyObject } from "@rue/types";
+import { $renderphase, onRender } from "../render-cycle";
 
 
 
@@ -26,9 +27,9 @@ import { AnyObject } from "@rue/types";
 
 type PolymorphKey = string | symbol | Object
 
-export type Morphable = MutableIon<PolymorphKey | [PolymorphKey, Object]> & {
-   as(key: PolymorphKey, input?: Object): void;
-   discard(): void
+export type Morphable = MutableIon<PolymorphKey | [PolymorphKey, Object] | null> & {
+   as(key: PolymorphKey | null, input?: Object): void;
+   discard(key: PolymorphKey, input?: Object): void
    discardOthers(): void
    discardAll(): void
 }
@@ -73,10 +74,13 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][]) {
    $Polymorph.has = function has(key: PolymorphKey) {
       return switchMap.has(key);
    }
-   $Polymorph.morphable = function morphable(key: PolymorphKey, input?: Object): Morphable {
-      const activeForm = input ? [key, input] : key
-      return ion(activeForm, {
-         as(key: PolymorphKey, input?: Object) {
+   $Polymorph.morphable = function morphable(key: PolymorphKey | null, input?: Object): Morphable {
+      const morphable = ion(input ? [key, input] : key, {
+         as(key: PolymorphKey | null, input?: Object) {
+            if (key === null) {
+               this.state = null
+               return;
+            }
             if (input) {
                if (Array.isArray(this.state) && this.state[0] === key && this.state[1] === input) return;
                this.state = [key, input]
@@ -86,24 +90,26 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][]) {
             this.state = key
             return;
          },
-         discard(key: PolymorphKey, unique?: Object) {
-            const polymorphs = polymorphMap.get(this as unknown as Morphable)
+         discard(key: PolymorphKey, input?: Object) {
+            const polymorphs = polymorphMap.get(morphable as Morphable)
+            console.log('discard?', polymorphs)
             if (!polymorphs) return;
             for (const polymorph of polymorphs) {
-               // polymorph.discardCached(key)
+               polymorph.discard(key, input)
             }
          },
          discardOthers() {
-            const polymorphs = polymorphMap.get(this as unknown as Morphable)
+            const polymorphs = polymorphMap.get(morphable as Morphable)
             if (!polymorphs) return;
             // TODO:
          },
          discardAll(options: { except: [] }) {
-            const polymorphs = polymorphMap.get(this as unknown as Morphable)
+            const polymorphs = polymorphMap.get(morphable as Morphable)
             if (!polymorphs) return;
             // TODO: 
          }
       })
+      return morphable as Morphable
    }
    return $Polymorph
 }
@@ -171,10 +177,13 @@ export class PolymorphKit {
       watch($activeKey, function updateMorphicComponent({ current: key, previous }) {
          console.log('%%% changed!')
          // remove previous
-         morphable.deactivateConditional(previous)
+         if (previous)
+            morphable.deactivateConditional(previous)
 
          // render new morph
-         morphable.activateConditional(key, parent)
+         if (key)
+            morphable.activateConditional(key, parent)
+         console.log('switchMap', morphable.switchMap)
 
       })
       return this;
@@ -184,7 +193,9 @@ export class PolymorphKit {
       parent: Element,
       fragment?: DocumentFragment
    ) {
-      this.activateConditional(this.$activeKey(), parent, fragment)
+      const activeKey = this.$activeKey()
+      if (!activeKey) return;
+      this.activateConditional(activeKey, parent, fragment)
    }
 
    render(kit: DynamicRenderKit, parent: Element, fragment?: DocumentFragment) {
@@ -201,11 +212,13 @@ export class PolymorphKit {
       const key = Array.isArray(id) ? id[0] : id
       const input = Array.isArray(id) ? id[1] : undefined
       const kitOrMap = this.switchMap.get(key) as DynamicRenderKit
+      if (!kitOrMap) return;
       const kit = kitOrMap instanceof Map ? kitOrMap.get(input) : kitOrMap
+      if (!kit) return;
       const flask = kit.flask
-      console.log('kit', kit)
+
       flask?.emitDemount()
-      removeDOMNodes(kit.nodePod!);
+      removeDOMNodes(kit.nodePod!); //TODO: how do I manage this 
    }
 
    activateConditional(id: PolymorphKey | [PolymorphKey, Object], parent: Element, fragment?: DocumentFragment) {
@@ -223,11 +236,42 @@ export class PolymorphKit {
       }
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view' }))
       kit.input = input;
+
       this.render(kit, parent, fragment)
       if (isInitialMount)
          flask.emitInitialMount()
       else
          flask.emitRemount() // remount preserved watchers etc.
+   }
+
+   discard(key: PolymorphKey, input?: Object) {
+      console.log('discarding')
+      if (this.isActiveKey(key, input)) {
+         //TODO: This is the diamond problem... if the watch() is not sync, then we'd have to perform discard after update... 
+         // but how would anyone know whether the update were synchronous or batched?
+         // we want state manipulation to be synchronous but then schedule the rendering...
+         // but synchronous calls can end up with extraneous effects
+         this.deactivateConditional(this.$activeKey.state!)
+         this.$activeKey.as(null)
+      }
+      const kitOrMap = this.switchMap.get(key)
+      if (!kitOrMap) return;
+      if (input && kitOrMap instanceof Map) {
+         kitOrMap.delete(input)
+      }
+      if ('cached' in kitOrMap) {
+         kitOrMap.cached = undefined;
+      }
+      console.log('discarded', key, input, this.switchMap.get(key))
+   }
+
+   isActiveKey(key: PolymorphKey, input?: Object) {
+      const activeKey = this.$activeKey.state
+      if (activeKey === null) return;
+      if (activeKey instanceof Array) {
+         return activeKey[0] === key && activeKey[1] === input
+      }
+      return activeKey === key
    }
 }
 

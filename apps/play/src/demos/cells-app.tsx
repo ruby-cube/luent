@@ -1,5 +1,6 @@
 import { component, Else, For, fromTag, If, Ion } from "@rue/lumo"
 import { ion, ionize } from "@rue/quarky"
+import { Style } from "../../../../packages/lumo/src/component/Style"
 
 
 const COLS = 5
@@ -80,7 +81,7 @@ export function CellsApp() {
                )}
             </tbody>
          </table >
-         <o--style>{`
+         {Style`
          body {
             margin: 0;
  }
@@ -109,7 +110,6 @@ export function CellsApp() {
          overflow: hidden;
  }
          `}
-         </o--style>
       </>
    )
 }
@@ -135,7 +135,7 @@ function Cell({ $column, $row } = fromTag<{
                   value={cells[$column()][$row()]}
                   on:change={update}
                   on:blur={update}
-                  at:mount={el => el.focus()}
+                  on:mounted={el => el.focus()}
                />
             )}
             {Else(
@@ -143,7 +143,7 @@ function Cell({ $column, $row } = fromTag<{
             )}
          </div >
 
-         <o--style>{`
+         {Style`
                .cell, .cell input {
                   height: 1.5em;
                line-height: 1.5;
@@ -158,7 +158,7 @@ function Cell({ $column, $row } = fromTag<{
                   width: 100%;
                box-sizing: border-box;
    }`
-         }</o--style>
+         }
       </>)
 }
 

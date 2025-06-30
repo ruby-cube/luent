@@ -174,7 +174,7 @@ function SvelteA() {
    let $s: any;
    return component(
       <>
-         <o--mount>
+         <o-mount>
             {If($x() > 10,
                $x
             )}
@@ -187,7 +187,7 @@ function SvelteA() {
             {Else(
                <p>{$x} is between 5 and 10</p>
             )}
-         </o--mount>
+         </o-mount>
          <div>
             {$ > $x() + 10}
          </div>

@@ -1,4 +1,4 @@
-import {  createEffectCycleHook,  watch as _watch, useReactivitySystem,  } from "@rue/quarky"
+import { createEffectCycleHook, watch as _watch, useReactivitySystem, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
 
 
@@ -121,38 +121,51 @@ import { createAwaitableHook } from "@rue/utils"
 export const {
    SYNC,
    POSTEVENT,
-   RENDER,
-   POSTRENDER,
+   // RENDER,
+   // POSTRENDER,
    getEndHook
 } = useReactivitySystem(
-//    {
-//    EventCycle: [
-//       definePhase('POSTEVENT', queueMicrotask)
-//    ],
-//    UpdateCycle: [
-//       definePhase('RENDER', requestAnimationFrame),
-//       definePhase('POSTRENDER', queueMicrotask)
-//    ]
-// }, {
-//    defaultPhase: () => {
-//       //TODO: must figure out how to handle default effect stage
-//    }
-// }
-)
+      //    {
+      //    EventCycle: [
+      //       definePhase('POSTEVENT', queueMicrotask)
+      //    ],
+      //    UpdateCycle: [
+      //       definePhase('RENDER', requestAnimationFrame),
+      //       definePhase('POSTRENDER', queueMicrotask)
+      //    ]
+      // }, {
+      //    defaultPhase: () => {
+      //       //TODO: must figure out how to handle default effect stage
+      //    }
+      // }
+   )
 
 
-export const onPostevent = createEffectCycleHook(POSTEVENT)
-export const onRender = createEffectCycleHook(RENDER)
-export const onPostrender = createEffectCycleHook(POSTRENDER)
+// export const onPostevent = createEffectCycleHook(POSTEVENT)
+// export const onRender = createEffectCycleHook(RENDER)
+// export const onPostrender = createEffectCycleHook(POSTRENDER)
 
-export const onEventCycleEnd = getEndHook('EventCycle')
-export const onRenderCycleEnd = getEndHook('UpdateCycle')
+const onEventCycleEnd = getEndHook('EventCycle')
+// export const onRenderCycleEnd = getEndHook('UpdateCycle')
 
-export const $postevent = createAwaitableHook(onPostevent)
-export const $renderphase = createAwaitableHook(onRender)
-export const $postrender = createAwaitableHook(onPostrender)
-export const $endofeventcycle = createAwaitableHook(onEventCycleEnd)
-export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)
+// export const $postevent = createAwaitableHook(onPostevent)
+// export const $renderphase = createAwaitableHook(onRender)
+// export const $postrender = createAwaitableHook(onPostrender)
+const effectsComplete = createAwaitableHook(onEventCycleEnd)
+// export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)
+
+//NOTE: there may be multiple effect cycles per event
+// queueEffect (onPostevent)
+// afterEffects 
+// 
+
+export function afterEffects<T extends (() => void) | undefined = undefined>(task?: T): T extends () => void ? void : Promise<void> {
+   if (task) {
+      onEventCycleEnd(task)
+      return undefined as T extends () => void ? void : Promise<void>
+   }
+   return effectsComplete() as T extends () => void ? void : Promise<void>
+}
 
 
 

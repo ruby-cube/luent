@@ -1,7 +1,6 @@
 import { isIon, __devCheckIfTracked, watch, Ion, toValue } from "@rue/quarky";
 import { isObjectLiteral } from "@rue/utils";
 import { JSXNode } from "./makeNode";
-import { RENDER } from "../render-cycle";
 import { MaybeIon } from "../component/Input";
 
 
@@ -22,7 +21,7 @@ export function mountInnerHTML(htmlString: MaybeIon<string>, parent: Element) {
 function keepInnerHTMLUpdated(htmlString: Ion<any>, parentNode: Element) {
    watch(htmlString, ({ current }) => {
       parentNode.innerHTML = toString(current);
-   }, { phase: RENDER });
+   });
 }
 
 

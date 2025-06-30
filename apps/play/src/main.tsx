@@ -1,7 +1,8 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import './style.css'
+// import './style.css'
+import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
@@ -10,7 +11,7 @@ import './style.css'
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { component, createApp, createGlobalCommons } from '@rue/lumo';
+import { component, createApp, createGlobalCommons, fromTag, nodeRef, RawJSXNode, Slot } from '@rue/lumo';
 import { CounterApp, TestCount } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
@@ -46,6 +47,8 @@ import { getPublicTrace } from '../../../packages/flask/debug';
 import { TestPolymorph } from './TestPolymorph';
 import { TestTry } from './API-exploration/TestTry';
 import { TestAwait } from './TestAwait';
+import { TestTooltipApp } from './TestTooltipLayoutThrash';
+import { TriangleDemo } from './demos/SierpinskiTriangles';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -115,9 +118,9 @@ import { TestAwait } from './TestAwait';
 // const root = createRoot(document.getElementById('app'));
 // root.render(<h1>Hello, world</h1>);
 
-if (__DEV__) configureFlask({
-   warnNoCleanup: true
-})
+// if (__DEV__) configureFlask({
+//    warnNoCleanup: true
+// })
 
 // const globalCommons = createGlobalCommons([
 //    m(DOOR, () => doSomething())
@@ -133,9 +136,57 @@ if (__DEV__) configureFlask({
 // const array = ionize([{ name: 'a' }, { name: 'b' }])
 // console.log('Stringify', JSON.stringify(array))
 
+// const root = document.getElementById('app')!
+// const div = document.createElement('div')
+// root.appendChild(div)
+// const button = document.createElement('button')
+// button.innerText = 'click'
+// root.appendChild(button)
+
+// let text = 'hello'
+
+// button.addEventListener('click', () => {
+//    // div.clientWidth
+
+//    requestAnimationFrame(() => {
+//       const textNode = document.createTextNode(text = text + '!')
+//       div.appendChild(textNode);
+
+//    })
+//    // div.clientWidth
+//    // div.clientWidth
+//    requestAnimationFrame(() => {
+//       div.clientWidth
+//    })
+
+//    // const textNodeB = document.createTextNode(text = text + '!')
+//    // div.appendChild(textNodeB);
 
 
-const app = createApp(TestPolymorph)
+
+
+//    // read
+// })
+// button.addEventListener('click', () => {
+//    // div.clientWidth
+
+//    const textNode = document.createTextNode(text = text + '!')
+//    div.appendChild(textNode);
+
+//    requestAnimationFrame(() => {
+//       div.clientWidth
+//    })
+//    // div.clientWidth
+
+//    // const textNodeB = document.createTextNode(text = text + '!')
+//    // div.appendChild(textNodeB);
+
+//    // read
+// })
+
+
+
+const app = createApp(TriangleDemo)
 
 app.mount('#app')
 

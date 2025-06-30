@@ -166,22 +166,22 @@ export function MountIf() {
             $color.state = 'lim'
       }
    })
-   //NOTE: if o--transit duration is shorter than o--transition duration, it will disable o--transition transition
+   //NOTE: if ooo-transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
    return component(
       <>
          <button on:click={() => ($color.change(), todos[0].name += '!')} style={[{ color: $ = $color() + 'e' }]}>shout</button>
          <h1>Hello {todos[0].name}</h1>
          <div>{() => 'hi'}</div>
-         <o--transition>
+         <ooo-transition>
             {If($active)}{
                <>
                   oh
-                  <o--transit with={slide({ x: -100, duration: 2200 })}>
+                  <ooo-transit with={slide({ x: -100, duration: 2200 })}>
                      <h2>hi</h2>
-                  </o--transit>
-                  <o--transit with={slide({ x: 100, duration: 2200 })}>
+                  </ooo-transit>
+                  <ooo-transit with={slide({ x: 100, duration: 2200 })}>
                      <h2>hope</h2>
-                  </o--transit>
+                  </ooo-transit>
                   {If($ready,
                      <p>ready</p>
                   )}
@@ -199,7 +199,7 @@ export function MountIf() {
                   <h2>bye</h2>
                </>
             }
-         </o--transition>
+         </ooo-transition>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>
          {/* <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child> */}

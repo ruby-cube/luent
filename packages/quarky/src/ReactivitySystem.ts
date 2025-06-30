@@ -1,10 +1,9 @@
 import { $schedule, Listener, SchedulerOptions } from "@rue/flask";
-import { CyclePhase, EffectCycle, EffectCycleManager, EVENT_CYCLE_END, SYNC, UPDATE_CYCLE_END } from "./effect-cycle/EffectCycle";
+import { CyclePhase, EffectCycleManager, EVENT_CYCLE_END, SYNC, UPDATE_CYCLE_END } from "./effect-cycle/EffectCycle";
 import { EffectLink, EffectVine } from "./effect-cycle/EffectLink";
 import { debug, noop } from "@rue/utils";
 import { ParticleMorph } from "./compound/Particle";
 import { Watchable } from "./watch/Watched";
-import { AnyObject } from "@rue/types";
 
 
 
@@ -59,21 +58,21 @@ function setUpEventCycleManager(phases?: [CyclePhase, ...CyclePhase[]]) {
    return cycleManager
 }
 
-function setUpUpdateCycleManager(phases?: [CyclePhase, ...CyclePhase[]]) {
-   const cycleManager = reactivitySystem.UpdateCycle;
-   if (phases) {
-      //TODO: custom phases
-   }
-   cycleManager.pushPhase(new CyclePhase('RENDER', requestAnimationFrame))
-   cycleManager.pushPhase(new CyclePhase('POSTRENDER', queueMicrotask))
-   cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop))
-   cycleManager.onComplete = createEffectCycleHook('UpdateCycle:'+UPDATE_CYCLE_END)
-   return cycleManager;
-}
+// function setUpUpdateCycleManager(phases?: [CyclePhase, ...CyclePhase[]]) {
+//    const cycleManager = reactivitySystem.UpdateCycle;
+//    if (phases) {
+//       //TODO: custom phases
+//    }
+//    cycleManager.pushPhase(new CyclePhase('RENDER', requestAnimationFrame))
+//    cycleManager.pushPhase(new CyclePhase('POSTRENDER', queueMicrotask))
+//    cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop))
+//    cycleManager.onComplete = createEffectCycleHook('UpdateCycle:'+UPDATE_CYCLE_END)
+//    return cycleManager;
+// }
 
-export function getUpdateCycleCount(){
-   return reactivitySystem.UpdateCycle.count
-}
+// export function getUpdateCycleCount(){
+//    return reactivitySystem.UpdateCycle.count
+// }
 
 
 
@@ -91,10 +90,10 @@ export function useReactivitySystem(phases?: [CyclePhase, ...CyclePhase[]]): Eff
    }
 
    const EventCycle = setUpEventCycleManager(phases);
-   const UpdateCycle = setUpUpdateCycleManager(phases)
+   // const UpdateCycle = setUpUpdateCycleManager(phases)
 
    addHooks(hooks, EventCycle)
-   addHooks(hooks, UpdateCycle)
+   // addHooks(hooks, UpdateCycle)
    return hooks as EffectCycleHooks;
 }
 

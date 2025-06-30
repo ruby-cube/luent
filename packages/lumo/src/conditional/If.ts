@@ -6,7 +6,7 @@ import { useTransitionNodes } from "../transition/TransitNode";
 import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { NodePod } from "../node/NodePod";
 import { getClosestCommons } from "../commons/commons-stack";
-import { Ion, isIon } from "@rue/quarky";
+import { Ion, isInertIon, isIon, toValue } from "@rue/quarky";
 import { ConditionalKit, ConditionalRenderSeries } from "./ConditionalRenderSeries";
 import { Flask } from "@rue/flask";
 import { TransitionNode } from "../transition/TransitionNode";
@@ -63,7 +63,8 @@ export function createConditionalKit(statementType: "if" | "elseIf" | "else", ac
 }
 
 export function createIfSeries(kits: ConditionalKit[]) {
-   if (!isIon(kits[0].$condition)) return renderStaticConditional(kits)
+   const condition = kits[0].$condition
+   if (!isIon(condition) || isInertIon(condition)) return renderStaticConditional(kits)
    return new ConditionalRenderSeries(kits, getGroupActivationType())
 }
 
@@ -74,7 +75,7 @@ window._$$IfSeries = createIfSeries
 
 function renderStaticConditional(statements: ConditionalKit[]) {
    for (const kit of statements) {
-      if (!!kit.$condition === true) {
+      if (!!toValue(kit.$condition) === true) {
          return kit.renderConditional()
       }
    }

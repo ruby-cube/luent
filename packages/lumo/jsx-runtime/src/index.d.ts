@@ -671,24 +671,8 @@ declare namespace React {
    type LifecycleTask<T> = (element: T)=> void
 
    interface LumoHooks<T> {
-      'at:creation'?: LifecycleTask<T>
-      'at:mount'?: LifecycleTask<T>
-      'at:remount'?: LifecycleTask<T>
-      'pre:creation'?: LifecycleTask<T>
-      'pre:mount'?: LifecycleTask<T>
-      'pre:remount'?: LifecycleTask<T>
-      'post:creation'?: LifecycleTask<T>
-      'post:mount'?: LifecycleTask<T>
-      'post:remount'?: LifecycleTask<T>
-      'pre:demount'?: LifecycleTask<T>
-      'pre:unmount'?: LifecycleTask<T>
-      'pre:discard'?: LifecycleTask<T>
-      'at:demount'?: LifecycleTask<T>
-      'at:unmount'?: LifecycleTask<T>
-      'at:discard'?: LifecycleTask<T>
-      'post:demount'?: LifecycleTask<T>
-      'post:unmount'?: LifecycleTask<T>
-      'post:discard'?: LifecycleTask<T>
+      'on:mounted'?: LifecycleTask<T>
+      'on:unmount'?: LifecycleTask<T>
    }
 
    //$$$
@@ -2602,17 +2586,16 @@ declare global {
       interface LumoElements {
          'i--i': {}; //comments
          'o--portal': PortalNodeInput & { children: Lumo.Slot }
-         'o--style': { children: string };
+
          'o--link': React.DetailedHTMLProps<React.LinkHTMLAttributes<HTMLLinkElement>, HTMLLinkElement>
-         
-         'o--show': { children: ConditionalRenderKit[]; };
-         'o--mount': { children: ConditionalRenderKit[]; };
+         'o-show': { children: ConditionalRenderKit[]; };
+         'o-mount': { children: ConditionalRenderKit[]; };
 
          // 'o--suspense': SuspenseNodeInput & { children: Lumo.Slot };
          // 'o--try': TryNodeInput & { children: Lumo.Slot };
 
-         'o--transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
-         'o--transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
+         'ooo-transit': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
+         'ooo-transition': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput & { morph?: true }, HTMLDivElement>
          'o--dock': React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement> & TransitionNodeInput, HTMLDivElement>
       }
 

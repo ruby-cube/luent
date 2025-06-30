@@ -87,7 +87,7 @@ function __logTriggeredAtom(atom: Atom) {
       }
 
    }, {
-      phase: RENDER_CYCLE_COMPLETE
+      // phase: RENDER_CYCLE_COMPLETE
    })
 }
 

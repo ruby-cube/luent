@@ -132,6 +132,7 @@ function toInput(attributes: AnyObject) {
       get(target, key) {
          if (typeof key !== 'string') return undefined;
          if (key === 'emit') return emit;
+         if (key === '_raw_') return { ...attributes };
          if (key === 'mu') return target[MU];
          if (key === 'Slot') return target.children // TODO: Is this correct??
          if (isIonKey(key)) {
@@ -167,7 +168,7 @@ function toInput(attributes: AnyObject) {
             const value = target[key]
             if (isFunction(value) && !isIon(value))
                debug.error('To pass a function as component input, prefix attribute with `can:`')
-            return target[key]
+            return toValue(target[key])
          }
          return undefined
       },
@@ -246,7 +247,7 @@ type TagInput<D> =
    & WithMu<D>
    & OpInput<D>
    & (D extends { Slot: infer S } ? { Slot: S } : {})
-   & (D extends { provide: infer S } ? { provide: S } : { provide: undefined})
+   & (D extends { provide: infer S } ? { provide: S } : { provide: undefined })
    & { '~attributes'?: TagAttributes<D> }
 
 

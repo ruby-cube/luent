@@ -17,7 +17,7 @@ import { isInnerHTMLKit, mountInnerHTML } from "./InnerHTML";
 export function mountNodeEntities(
    nodeEntities: NodeEntity[],
    parent: Element,
-   fragment? : DocumentFragment
+   fragment?: DocumentFragment
 ) {
    for (const nodeEntity of nodeEntities) {
       mountNodeEntity(nodeEntity, parent, fragment)
@@ -31,7 +31,7 @@ function mountNodeEntity(
    fragment?: DocumentFragment
 ) {
    if (nodeEntity instanceof Element || nodeEntity instanceof CharacterData) { // Element type from Web API
-       const root = fragment ? fragment : parent;
+      const root = fragment ? fragment : parent;
       root.appendChild(nodeEntity)
    }
    else if (isInnerHTMLKit(nodeEntity)) {

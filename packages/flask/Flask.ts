@@ -43,31 +43,31 @@ export class ThisFlask {
       flask.thisFlask = this;
    }
 
-   get onInitialMount() {
-      return this.flask.onInitialMount;
+   // get onInitialMount() {
+   //    return this.flask.onInitialMount;
+   // }
+
+   // get onRemount() {
+   //    return this.flask.onRemount
+   // }
+
+   onMounted(task: (initial: boolean) => void) {
+      this.flask.onInitialMount(() => task(true))
+      this.flask.onRemount(() => task(false))
    }
 
-   get onRemount() {
-      return this.flask.onRemount
+   onUnmount(task: (final: boolean) => void) {
+      this.flask.onDemount(() => task(false))
+      this.flask.onDiscard(() => task(true))
    }
 
-   onMount(task: () => void) {
-      this.flask.onInitialMount(() => task())
-      this.flask.onRemount(() => task())
-   }
+   // get onDemount() {
+   //    return this.flask.onDemount
+   // }
 
-   onUnmount(task: () => void) {
-      this.flask.onDemount(() => task())
-      this.flask.onDiscard(() => task())
-   }
-
-   get onDemount() {
-      return this.flask.onDemount
-   }
-
-   get onDiscard() {
-      return this.flask.onDiscard
-   }
+   // get onDiscard() {
+   //    return this.flask.onDiscard
+   // }
 }
 
 const genUID = UIDGenerator(11)
@@ -134,7 +134,7 @@ export class Flask {
       }
    }
 
-   spawn(config: {type?: string, creationScope?: boolean}) {
+   spawn(config: { type?: string, creationScope?: boolean }) {
       return new Flask({ outer: this, type: config.type, creationScope: config.creationScope });
    }
 

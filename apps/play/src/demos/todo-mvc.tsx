@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { component, For, If, Else } from "@rue/lumo"
 import { ion, ionicTask, ionize, Ionized, } from "@rue/quarky"
 
@@ -180,6 +181,7 @@ export function TodoMVC() {
             )}
             {/* {Else(undefined)} */}
          </section >
+
          <o--link href="https://unpkg.com/todomvc-app-css@2.4.1/index.css" rel="stylesheet" />
       </>)
 }

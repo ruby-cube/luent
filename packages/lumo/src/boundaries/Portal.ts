@@ -1,9 +1,9 @@
-import { component, unnestComponent } from "../component/Component";
-import { JSXNode } from "../node/makeNode";
-import { isFunction, normalizeToArray } from "@rue/utils";
+import { JSXNode, RawJSXNode, RenderFunction } from "../node/makeNode";
+import { isFunction, isObject } from "@rue/utils";
 import { mountNodeEntities } from "../node/mountNodeKits";
-import { setUpNodeEntities } from "../node/setUpNodeEntities";
-import { NodePod } from "../node/NodePod";
+import { NodeEntity, processJSXOutput } from "../node/setUpNodeEntities";
+import { NodePod, removeDOMNodes } from "../node/NodePod";
+import { onMounted, onUnmount } from "../flask/flask-hooks";
 
 export type MorphConfig = {}
 
@@ -19,21 +19,51 @@ export type PortalNodeInput = {
    to: string | Element,
 }
 
+type SelectorString = string
 
 //TODO: need a portal kit in order for it to show up in node pod?
-export function createPortalNode(Slot: () => JSXNode, input: PortalNodeInput) {
-   const { to: container } = input
-   if (!(isFunction(Slot))) throw new Error('')
+// export function createPortalNode(Slot: () => JSXNode, input: PortalNodeInput) {
+//    const { to: container } = input
+//    if (!(isFunction(Slot))) throw new Error('')
+//    const element = typeof container === "string" ? document.querySelector(container) : container;
+//    if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')
+//    const nodePod = new NodePod(); //TODO: do I append to outer node pod?? how does this work?
+//    nodePod.push(element) // serves as an indicator to append instead of prepend for dynamic updates
+
+//    const _nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(Slot())), element, nodePod)
+//    mountNodeEntities(_nodeEntities, element)
+//    console.log('portal node entitites', _nodeEntities)
+//    return undefined;
+// }
+
+export type PortalKit = { nodePod: NodePod, type: 'portal', mount: (parent: Element, fragment: DocumentFragment | undefined)=>void }
+
+export function Portal(container: SelectorString | Element, render: RenderFunction | RawJSXNode) {
+   if (!(isFunction(render))) throw new Error('Compiler failed to turn JSX into render function')
    const element = typeof container === "string" ? document.querySelector(container) : container;
    if (!element) throw new Error('Portal destination not found. Please check value of "to" attribute.')
    const nodePod = new NodePod(); //TODO: do I append to outer node pod?? how does this work?
-   nodePod.push(element) // serves as an indicator to append instead of prepend for dynamic updates
+   // nodePod.push(element) // serves as an indicator to append instead of prepend for dynamic updates
 
-   const _nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(Slot())), element, nodePod)
-   mountNodeEntities(_nodeEntities, element)
-   console.log('portal node entitites', _nodeEntities)
-   return undefined;
+   const nodeEntities = processJSXOutput(render(), element, nodePod)
+   return {
+      type: 'portal',
+      nodePod,
+      mount(parent: Element, fragment: DocumentFragment | undefined) {
+         mountNodeEntities(nodeEntities, element)
+         onUnmount(() => {
+            removeDOMNodes(nodePod)
+         })
+         onMounted((initial) => {
+            if (initial) return;
+            mountNodeEntities(nodeEntities, element)
+         })
+      }
+   };
+
 }
 
-
+export function isPortal(value: unknown) {
+   return isObject(value) && 'type' in value && value.type === 'portal'
+}
 

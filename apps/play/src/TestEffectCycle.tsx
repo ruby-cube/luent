@@ -20,25 +20,25 @@ export function TestEffectCycle() {
 
    watch($doubleCount, ()=>{
       console.log("&% self-removing 1")
-   }, {phase: RENDER, once: true})
+   }, {once: true})
 
    watch($doubleCount, ()=>{
       console.log("&% self-removing 2")
-   }, {phase: RENDER, once: true})
+   }, { once: true})
 
    watch($doubleCount, () => {
       console.log("&% watch $doubleCount 1")
-   }, {phase: RENDER})
+   }, {})
 
    watch($doubleCount, () => {
       console.log("&% watch $doubleCount 2")
 
-   },{phase: RENDER})
+   },{})
 
    watch($doubleCount, () => {
       console.log("&% watch $doubleCount 3")
 
-   },{phase: RENDER})
+   },{})
 
    return component(
       <>

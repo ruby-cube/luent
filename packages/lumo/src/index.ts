@@ -3,7 +3,9 @@ export * from './node/NodeRef' //TODO: Limit to public API
 export * from './node/NodeSetup' //TODO: Limit to public API
 export * from './component/Component' //TODO: Limit to public API
 export * from './boundaries/Suspense' //TODO: Limit to public API
+export * from './boundaries/Portal' //TODO: Limit to public API
 export * from './component/fromTag' //TODO: Limit to public API
+export * from './component/Style' //TODO: Limit to public API
 export * from './createApp' //TODO: Limit to public API
 export * from './component/Input' //TODO: Limit to public API
 export * from './iteratives/For' //TODO: Limit to public API
@@ -24,6 +26,8 @@ export * from './transition/TransitionNode' //TODO: Limit to public API
 export * from './flask/flask-hooks' //TODO: Limit to public API
 export * from './flask/ViewFlask' //TODO: Limit to public API
 export * from './component/Input' //TODO: Limit to public API
+export * from './measureLayout'
+
 
 
 

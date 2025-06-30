@@ -1,5 +1,5 @@
-import { component, For, fromTag,  } from "@rue/lumo"
-import {  Ion, ion, ionize, Ionized } from "@rue/quarky"
+import { component, For, fromTag, Style, } from "@rue/lumo"
+import { Ion, ion, ionize, Ionized } from "@rue/quarky"
 
 type Stat = {
    label: string,
@@ -56,8 +56,8 @@ export function PolygonApp() {
 
          <pre id="raw">{(JSON.stringify(stats, undefined, 2))}</pre>
 
-         <o--style>
-            {`polygon {
+         {Style`
+         polygon {
   fill: #42b983;
   opacity: 0.75;
 }
@@ -83,7 +83,6 @@ label {
   top: 0;
   left: 300px;
 }`}
-         </o--style>
       </>
    )
 }

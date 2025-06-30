@@ -6,7 +6,7 @@ import { NodeReferent, NodeRef, NodesRef } from "./NodeRef";
 import { getCurrentIndex, ListRenderKit } from "../iteratives/ListRenderKit";
 import { AnyObject, Booleanny } from "@rue/types";
 import { createTransitionNode, TransitionNodeInput } from "../transition/TransitionNode";
-import { createPortalNode, PortalNodeInput } from "../boundaries/Portal";
+import { createPortalNode, Portal, PortalKit, PortalNodeInput } from "../boundaries/Portal";
 import { InnerHTMLKit } from "./InnerHTML";
 import { MaybeIon } from "../component/Input";
 import { Commons, Provided, wrapWithCommons } from "../commons/Commons";
@@ -36,6 +36,7 @@ export type RawJSXNode =
    | Component
    | InnerHTMLKit
    | undefined
+   | PortalKit
 // | MutableKit
 
 export type JSXNode =
@@ -44,6 +45,7 @@ export type JSXNode =
    | string
    | Ion
    | DynamicKit
+   | PortalKit
 
 
 
@@ -150,45 +152,28 @@ export function normalizeToRenderFunction(slot: ((...args: any[]) => JSXNode) | 
 type SVGTag = keyof SVGElementTagNameMap
 
 export function makeNode(
-   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--style' | 'o--portal' | 'o--link' | 'o--transit' | 'o--transition' | 'o--mount' | 'o--show',
+   nodeType: SVGTag | HTMLTag | ComponentSetup | 'o--link' | 'ooo-transit' | 'ooo-transition' | 'o-mount' | 'o-show',
    Slot: undefined | (() => JSXNode[]) | InferSlot,
    config: ElementConfig | ComponentConfig,
 ): DOMNode | Component | JSX.Element | undefined {
 
    switch (nodeType) {
 
-      // case 'o--try':
-      //    if (!Slot) throw new Error(`Extraneous <o--try>`)
-      //    return createTryNode(Slot, <TryNodeInput>config)
-
-      // case 'o--suspense':
-      //    if (!Slot) throw new Error(`Extraneous <o--suspense>`)
-      //    return createSuspenseNode(Slot, <SuspenseNodeInput>config)
-
-      case 'o--portal':
-         if (!Slot) throw new Error(`Extraneous <o--portal>`)
-         return createPortalNode(Slot, <PortalNodeInput>config)
-
       case 'o--link':
-         return createPortalNode(() =>
+         return Portal('head', () =>
             makeElement('link', undefined, <ElementConfig>config, undefined)
-            , { to: 'head' })
+            )
 
-      case 'o--style':
-         return createPortalNode(() =>
-            makeElement('style', Slot, <ElementConfig>config, undefined)
-            , { to: 'head' })
-
-      case 'o--show':
-         if (!Slot) throw new Error(`Extraneous <o--show>`)
+      case 'o-show':
+         if (!Slot) throw new Error(`Extraneous <o-show>`)
          return wrapWithActivationType('show', Slot, config.provide)
 
-      case 'o--mount':
-         if (!Slot) throw new Error(`Extraneous <o--mount>`)
+      case 'o-mount':
+         if (!Slot) throw new Error(`Extraneous <o-mount>`)
          return wrapWithActivationType('mount', Slot, config.provide)
 
-      case 'o--transit':
-      case 'o--transition':
+      case 'ooo-transit':
+      case 'ooo-transition':
          if (!Slot) throw new Error(`Extraneous transition node`)
          return createTransitionNode(nodeType, Slot, <TransitionNodeInput>config)
 

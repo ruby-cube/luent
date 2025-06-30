@@ -396,6 +396,7 @@ const TemplateFunctions = {
    Await: transformElseCall,
    Meanwhile: transformElseCall,
    For: transformElseCall,
+   Portal: transformElseCall,
    // ['jsxDEV', transformJSXFragmentCall],
    // ['jsx', transformJSXFragmentCall],
    // ['_jsx', transformJSXFragmentCall],

@@ -1,4 +1,4 @@
-import { component, For, If, listen, nodeRef } from "@rue/lumo"
+import { component, For, If, listen, nodeRef, Style } from "@rue/lumo"
 import { finiton, ion, watch } from "@rue/quarky"
 
 //FIX: 
@@ -19,8 +19,7 @@ export function Sidebar() {
             <IfContextMenuC ref={$contextMenu}></IfContextMenuC>
          </ul>
 
-         <o--style>
-            {`
+            {Style`
             .sidebar-item {
                background-color: beige;
                border: solid 3px white;
@@ -39,7 +38,6 @@ export function Sidebar() {
                height: 100vh;
             }
             `}
-         </o--style>
       </>
    )
 }
@@ -80,7 +78,7 @@ function IfContextMenu() {
          <o--portal to='body'>
             <div>
                {If(($menu.is('opened')),
-                  <div ref={$container} post:mount={el => initMenu(el)} style={{ position: 'absolute', top: 0, left: 0 }}>
+                  <div ref={$container} on:mounted={el => initMenu(el)} style={{ position: 'absolute', top: 0, left: 0 }}>
                      menu item 1
                      -
                      menu item 2
@@ -121,9 +119,10 @@ function IfContextMenuB() {
       }, { once: true })
    })
 
-   return component({
-      open
-   },
+   return component(
+      {
+         open
+      },
       <o--portal to='body'>
          <dialog ref={$container} open={$open} style={{ position: 'absolute', top: 0, left: 0, width: '10rem', height: '10rem' }}>
             <div >
@@ -173,12 +172,18 @@ function IfContextMenuC() {
       <div>
          {If($open,
             <o--portal to='body'>
-               <div ref={$container} post:mount={initMenu} style={{ position: 'absolute', top: 0, left: 0 }}>
-                  menu item 1
+               <div ref={$container} on:mounted={initMenu} style={{ position: 'absolute', top: 0, left: 0 }}>
+                  <p>
+                     menu item 1
+                  </p>
                   -
-                  menu item 2
+                  <p>
+                     menu item 2
+                  </p>
                   -
-                  menu item 3
+                  <p>
+                     menu item 3
+                  </p>
                   {/* {Thru($options, (option, index) => {
                   })} */}
                </div>

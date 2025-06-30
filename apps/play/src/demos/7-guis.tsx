@@ -23,14 +23,14 @@ export function SevenGUIs() {
 function TemperatureApp() {
    const $c = ion(0)
    const $f = ion(() => $c() * (9 / 5 + 32),
-   {
-      // set state(v: number) {
-      //    $c.state = (v - 32) * (5 / 9)
-      // },
-      set(v: number) {
-         $c.state = (v - 32) * (5 / 9)
-      }
-   })
+      {
+         // set state(v: number) {
+         //    $c.state = (v - 32) * (5 / 9)
+         // },
+         set(v: number) {
+            $c.state = (v - 32) * (5 / 9)
+         }
+      })
 
    function setC(e, v = +e.target!.value) {
       $c.state = v
@@ -103,25 +103,23 @@ function FlightBooker() {
 
          <p>{($canBook() ? '' : 'Return date must be after departure date.')}</p>
 
-         <o--style>
-            {`
-               select,
-               input,
-               button {
-                  display: block;
-                  margin: 0.5em 0;
-                  font-size: 15px;
-               }
-
-               input[disabled] {
-                  color: #999;
-               }
-
-               p {
-                  color: red;
-               }
-            `}
-         </o--style>
+         {Style`
+            select,
+            input,
+            button {
+               display: block;
+               margin: 0.5em 0;
+               font-size: 15px;
+            }
+         
+            input[disabled] {
+               color: #999;
+            }
+         
+            p {
+               color: red;
+            }
+         `}
       </>
    )
 }
@@ -171,8 +169,7 @@ function TimerApp() {
 
          <button on:click={reset}>Reset</button>
 
-         <o--style>
-            {css`
+            {Style`
                   .elapsed-container {
                      width: 300px;
                      background-color: red;
@@ -183,7 +180,6 @@ function TimerApp() {
                      height: 10px;
                   }
                `}
-         </o--style>
       </>
    )
 }
@@ -241,7 +237,7 @@ function CRUDApp() {
       return $first().trim() && $last().trim()
    }
 
-   
+
 
    return component(
       <>
@@ -261,7 +257,7 @@ function CRUDApp() {
             <button on:click={update} > Update</button >
             <button on:click={del} > Delete</button >
          </div >
-         <o--style>{`
+            {Style`
    * {
       font-size: inherit;
    }
@@ -284,7 +280,7 @@ select {
 button + button {
    margin-left: 5px;
 }
-`}</o--style>
+`}
       </>
 
 
@@ -381,7 +377,7 @@ function CircleApp() {
                />
             </div>
          )}
-         <o--style>{`
+            {Style`
 body {
    margin: 0;
    overflow: hidden;
@@ -434,7 +430,6 @@ circle {
    padding: 0 50px;
    color: #bbb;
 }`}
-         </o--style>
       </>
    )
 }

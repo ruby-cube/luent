@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { component, If, Else, fade, ElseIf, slide } from "@rue/lumo";
 import { debug, ion, ionize, watch } from "@rue/quarky";
 import { AnyObject } from "@rue/types";
@@ -54,36 +55,36 @@ export function MountIf() {
    // watch($color, ()=>{
    //    debug.traceAsyncPath()
    // })
-   //NOTE: if o--transit duration is shorter than o--transition duration, it will disable o--transition transition
+   //NOTE: if ooo-transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
    return component(
 
       <div>
          <button on:click={() => ($color.change(), todos[0].name += '!')} style={{ color: ($color() + 'e') }}>shout</button>
          <h1>Hello {(todos[0].name)}</h1>
-         <o--transition>
-            {/* <o--show> */}
-            {If($active, <>
-               oh
-               <o--transit with={slide({ x: -100, duration: 2200 })}>
-                  <h2>hi</h2>
-               </o--transit>
-               <o--transit with={slide({ x: 100, duration: 2200 })}>
-                  <h2>hope</h2>
-               </o--transit>
-               {If($ready,
-                  <p>ready</p>
-               )}
-            </>)}
-            {ElseIf($ready, <>
-               low
-               <h2>balloon</h2>
-            </>)}
-            {Else(<>
-               so
-               <h2>bye</h2>
-            </>)}
-            {/* </o--show> */}
-         </o--transition>
+         <ooo-transition>
+            <o-show>
+               {If($active, <>
+                  oh
+                  <ooo-transit with={slide({ x: -100, duration: 2200 })}>
+                     <h2>hi</h2>
+                  </ooo-transit>
+                  <ooo-transit with={slide({ x: 100, duration: 2200 })}>
+                     <h2>hope</h2>
+                  </ooo-transit>
+                  {If($ready,
+                     <p>ready</p>
+                  )}
+               </>)}
+               {ElseIf($ready, <>
+                  low
+                  <h2>balloon</h2>
+               </>)}
+               {Else(<>
+                  so
+                  <h2>bye</h2>
+               </>)}
+            </o-show>
+         </ooo-transition>
          <button on:click={$active.toggle}>toggle active</button>
          <button on:click={$ready.toggle}>toggle ready</button>
          {/* <Child dog-sled={$color() + 'd'} on:incrementclick={e => { open(); $active.toggle()}}></Child> */}

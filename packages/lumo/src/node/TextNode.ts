@@ -1,5 +1,4 @@
 import { isIon, __devCheckIfTracked, watch, Ion, toValue } from "@rue/quarky";
-import { RENDER } from "../render-cycle";
 
 
 
@@ -18,7 +17,7 @@ export function setUpTextNode(text: Ion | any, textNode: Text) {
 function keepTextNodeUpdated(text: Ion, textNode: CharacterData) {
    watch(text, ({ current }) => {
       textNode.data = toString(current);
-   }, { phase: RENDER });
+   });
 }
 
 
@@ -32,5 +31,6 @@ export function createTextNode(value: Ion | any) {
 
 function toString(value: any) {
    if (value === undefined) return '';
+   if (value instanceof Object) return JSON.stringify(value);
    return value.toString(); //TODO: make sure it works with any value
 }

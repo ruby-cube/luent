@@ -2,7 +2,7 @@ import { getCommons } from "../commons/commons-stack";
 import { MaybeIon } from "../component/Input";
 import { JSXNode, normalizeToRenderFunction, RawJSXNode } from "../node/makeNode";
 import { ListRenderKit } from "./ListRenderKit";
-import { Ion, IonizeBy, Ionized, isIon, IsIonized, isIonizedModel, MaybeIonized } from "@rue/quarky";
+import { Ion, IonizeBy, Ionized, isInert, isInertIon, isIon, IsIonized, isIonizedModel, MaybeIonized, toValue } from "@rue/quarky";
 
 
 export type RenderItem<L> =
@@ -29,8 +29,9 @@ export function For<L extends ListData>(data: L, renderOrGetUID: RenderItem<L> |
    const uidProvided = arguments.length === 3
    const _render = normalizeToRenderFunction(uidProvided ? render! : renderOrGetUID) as RenderItem<any[]>;
    const getUID = uidProvided ? <(item: unknown) => unknown>renderOrGetUID : undefined;
-   if (!isIon(data) && !isIonizedModel(data)) return renderStaticList(data, _render)
-   return new ListRenderKit(_render, data, getUID, getCommons())
+   if (isIon(data) || isIonizedModel(data) || isInertIon(data) && isIonizedModel(toValue(data)))
+      return new ListRenderKit(_render, data, getUID, getCommons())
+   return renderStaticList(data, _render)
 }
 
 

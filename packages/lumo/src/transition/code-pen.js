@@ -2,7 +2,7 @@ const p = document.querySelector("p");
 
 const div = document.querySelector("#style-container");
 
-const divIO = document.querySelector("#o--transit");
+const divIO = document.querySelector("#ooo-transit");
 
 const divIO2 = document.querySelector("#i-o2");
 

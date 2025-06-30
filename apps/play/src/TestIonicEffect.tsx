@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo"
-import { BEFORE_RENDER, watchEffect, ion, SYNC, watch } from "@rue/quarky"
+import {  ion, ionicTask, SYNC } from "@rue/quarky"
 
 
 export function TestIonicEffect() {
@@ -10,7 +10,7 @@ export function TestIonicEffect() {
         }
     })
 
-    watchEffect(() => {
+    ionicTask(() => {
         $count.increment()
     }, { phase: SYNC })
 

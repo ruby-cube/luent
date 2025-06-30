@@ -12,7 +12,6 @@ import { flattenJSXOutput, MutableKit, setUpNodeEntities } from "../node/setUpNo
 import { initializeListRef, initializeRef, isAnyNodeRef, NodesRef, isNodesRef } from "../node/NodeRef";
 import { camelToKebabCase } from "@rue/utils";
 import { NodePod } from "../node/NodePod";
-import { RENDER } from "../render-cycle";
 import { MaybeIon } from "../component/Input";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
@@ -304,7 +303,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       if (isIon(value)) {
          watch(value, ({ current }) => {
             setAttribute(node, _key, current)
-         }, { eager: true, phase: RENDER })
+         }, { eager: true })
       }
       // else if (isViewBindingKit(value)) {
       //    watch(value.ion, ({ newState }) => {
@@ -519,7 +518,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
          watch(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             if (previous) removePreviousClasses(previous, classList)
             if (current) addClasses(current, classList)
-         }, { eager: true, phase: RENDER })
+         }, { eager: true })
       }
       else if (entry) {
          addClasses(entry, classList)
@@ -577,8 +576,7 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
             if (current) classList.add(key)
             else if (previous) classList.remove(key)
          }, {
-            eager: true,
-            phase: RENDER,
+            eager: true
          })
       }
       else if (value) {
@@ -615,7 +613,7 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
       if (isIon(entry)) {
          watch(entry, ({ current }/* value: string | AnyObject | Falsey */) => {
             setUpStyleEntry(style, current);
-         }, { eager: true, phase: RENDER })
+         }, { eager: true })
       }
       else {
          setUpStyleEntry(style, entry)
@@ -631,8 +629,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
             watch(value, ({ current }) => {
                assignStyleProperty(style, toStylePropertyName(key), current)
             }, {
-               eager: true,
-               phase: RENDER,
+               eager: true
                // __devName: 'setUpStyles', 
             })
          }

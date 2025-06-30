@@ -1,6 +1,5 @@
 import { component } from "@rue/lumo";
 import { ionize, watch } from "@rue/quarky";
-import { RENDER } from "../../../packages/lumo/src/render-cycle";
 
 export function TestSetHas() {
    const mySet = ionize(new Set([0, 1, 2]))
@@ -15,7 +14,7 @@ export function TestSetHas() {
 
    watch((mySet.has(0)), ({ current, previous }) => {
       console.log('mySet changed', current, previous)
-   }, { phase: RENDER })
+   })
 
    return component(
       <>

@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { $thisView, component, If, NodeRef, nodeRef, onInitialMount } from "@rue/lumo";
+import { $thisView, component, If, NodeRef, nodeRef } from "@rue/lumo";
 import { ion, ionize, isIonizedModel, queueTask, watch } from "@rue/quarky";
 import { inert } from "../../../../packages/quarky/src/ionized/inert";
 

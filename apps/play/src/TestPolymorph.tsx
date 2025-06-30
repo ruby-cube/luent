@@ -38,7 +38,7 @@ export function TestPolymorph() {
       // ['/*', () =>
       //    <Missing></Missing>
       // ]
-      ['/file', (file: File) => 
+      ['/file', (file: File) =>
          <File file={file} />
       ]
    ])
@@ -89,7 +89,10 @@ export function TestPolymorph() {
          {/* <button on:click={e => $main.as('happy')}>Happy</button>
          <button on:click={e => $main.as('peas')}>Two Peas</button> */}
          {For(files, file =>
-            <button on:click={e => {$main.as('/file', file); history.pushState({input: file}, "", '/file') }}>{file.name}</button>
+            <>
+               <button on:click={e => { $main.as('/file', file); history.pushState({ input: file }, "", '/file') }}>{file.name}</button>
+               <button on:click={e => $main.discard('/file', file)}>[X]</button>
+            </>
          )}
       </>
    )

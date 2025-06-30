@@ -1,6 +1,8 @@
+//@ts-nocheck
 import { component, Else, fromTag, If, nodeRef, } from "@rue/lumo";
 import { finiton, Ion, ion, isIon, watch } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
+import { Style } from "../../../packages/lumo/src/component/Style";
 
 
 export function VideoPlayer() {
@@ -135,52 +137,64 @@ export function VideoPlayer() {
                )}
             </>
          ))}
-         <o--style>{`
-         html {
-  font-size: 18px;
-}
+         {Style`
+            html {
+              font-size: 18px;
+            }
 
-video {
-  max-width: 100%;
-  margin-bottom: -3px;
-}
+            video {
+              max-width: 100%;
+              margin-bottom: -3px;
+            }
 
-button {
-  background: #a8dba8;
-  padding: 0.25rem 0.5rem;
-  border: none;
-  cursor: pointer;
-}
+            button {
+              background: #a8dba8;
+              padding: 0.25rem 0.5rem;
+              border: none;
+              cursor: pointer;
+            }
 
-.container {
-  max-width: 600px;
-  margin: 0 auto;
-}
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+            }
 
-.elapsed {
-  width: 100%;
-  height: 5px;
-}
-.elapsed-bar {
-  transition: width 0.5 ease;
-  height: 5px;
-  background-color: #629460;
-}
+            .elapsed {
+              width: 100%;
+              height: 5px;
+            }
+            .elapsed-bar {
+              transition: width 0.5 ease;
+              height: 5px;
+              background-color: #629460;
+            }
 
-.timer {
-  display: inline-block;
-  margin-left: 5px;
-}
-         `}</o--style>
+            .timer {
+              display: inline-block;
+              margin-left: 5px;
+            }
+         `}
       </>
    )
 }
 
+// const $ = {
+//    elapsed: 0 as number | Ion<number>
+// }
+
+// if (isIon($.elapsed)) {
+//    $.elapsed()
+// }
+// if (typeof $.elapsed === 'number') {
+//    $.elapsed
+// }
+
 function ElapsedBar(input = fromTag<{
-   elapsed: Ion<number>,
+   elapsed: number,
    duration: number
 }>()) {
    const { $elapsed, duration } = input
+
    return component(
       <div class="elapsed">
          <div
@@ -192,10 +206,11 @@ function ElapsedBar(input = fromTag<{
 };
 
 function Timer(input = fromTag<{
-   elapsed: Ion<number>,
+   elapsed: number,
    duration: number
 }>()) {
    const { $elapsed, duration } = input
+
    return component(
       <span class="timer">
          {(asTime($elapsed()))} of {asTime(duration)}

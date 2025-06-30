@@ -12,6 +12,7 @@ import { PolymorphKit } from "../conditional/Polymorph";
 import { ActivationType } from "../conditional/If";
 import { jsx } from "@rue/jsx-runtime";
 import { DynamicKit, isDynamicKit } from "../dynamic/DynamicKit";
+import { isPortal } from "../boundaries/Portal";
 
 // [ ] validate and apply swap tag
 // [ ] validate and compose conditional series
@@ -135,6 +136,9 @@ export function setUpNodeEntity(
    if (isDynamicKit(jsxNode)) {
       nodePod.push(jsxNode.dynamicPod)
       return jsxNode.setUp(parent);
+   }
+   if (isPortal(jsxNode)){
+      return jsxNode;
    }
    const textNode = createTextNode(jsxNode)
    setUpTextNode(jsxNode, textNode)

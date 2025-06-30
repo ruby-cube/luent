@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isFunction } from "@rue/utils";
 import { isIon } from "../ion/Ion";
-import { getUpdateCycleCount } from "../ReactivitySystem";
+// import { getUpdateCycleCount } from "../ReactivitySystem";
 import { ionize, isIonKey, toRaw } from "./ionize";
 import { getIonizedModel } from "./IonizedModel";
 
@@ -112,16 +112,16 @@ export function initializeSnapshots(target: object) {
    return target;
 }
 
-function createSnapshotInfo(target: object) {
-   const index = getUpdateCycleCount() //TODO: make sure we are calling this at the appropriate time for an accurate count
-   const snapshots: Snapshots = {}
-   snapshots[index] = takeSnapshot(target)
-   return {
-      snapshots,
-      latestIndex: index,
-      indices: [index]
-   }
-}
+// function createSnapshotInfo(target: object) {
+//    const index = getUpdateCycleCount() //TODO: make sure we are calling this at the appropriate time for an accurate count
+//    const snapshots: Snapshots = {}
+//    snapshots[index] = takeSnapshot(target)
+//    return {
+//       snapshots,
+//       latestIndex: index,
+//       indices: [index]
+//    }
+// }
 
 
 function isIterable(obj: AnyObject): obj is { [Symbol.iterator]: () => Iterator<unknown> } {
