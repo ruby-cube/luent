@@ -1,8 +1,8 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-// import './style.css'
-import './demos/SierpinskiTriangles.css'
+import './style.css'
+// import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
@@ -11,7 +11,7 @@ import './demos/SierpinskiTriangles.css'
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { component, createApp, createGlobalCommons, fromTag, nodeRef, RawJSXNode, Slot } from '@rue/lumo';
+import { component, createApp, createGlobalCommons, fromTag, nodeRef} from '@rue/lumo';
 import { CounterApp, TestCount } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
@@ -186,7 +186,7 @@ import { TriangleDemo } from './demos/SierpinskiTriangles';
 
 
 
-const app = createApp(TestTooltipApp)
+const app = createApp(MountIf)
 
 app.mount('#app')
 

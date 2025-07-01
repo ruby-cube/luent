@@ -91,7 +91,7 @@ export function FBApp() {
    watchDB((data) => {
       data.newMessages
    })
-   const $mainContent = nodeRef($Main)
+   const mainContent = nodeRef($Main)
 
    const $unseenCount = ion(0, {
       increment(count: number = 1) {

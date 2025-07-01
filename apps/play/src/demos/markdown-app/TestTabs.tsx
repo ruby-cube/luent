@@ -312,15 +312,14 @@ function SidebarFile(input = fromTag<{
    index: Ion<number>
 }>()) {
    const { $index, file } = input
-   const $menu = nodeRef(IfContextMenu)
+   const menu = nodeRef(IfContextMenu)
 
    const { openFile } = fromCommons(FILES_KIT)
 
-   const
 
    return component(
-      <div on:click={e => openFile(file)} on:contextmenu={$menu.open}>
-         <IfContextMenu on:click={reMenuClick} ref={$menu}></IfContextMenu>
+      <div on:click={e => openFile(file)} on:contextmenu={menu.node.open}>
+         <IfContextMenu on:click={reMenuClick} ref={menu}></IfContextMenu>
          {file.$title}
       </div>
    )

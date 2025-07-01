@@ -63,7 +63,7 @@ export function TestTooltipApp() {
    );
 }
 
-
+type NodeRef<T> = T | undefined
 
 export function ButtonWithTooltip(input = fromTag<{
    Slot: {
@@ -73,19 +73,25 @@ export function ButtonWithTooltip(input = fromTag<{
 }>()) {
    const { Slot } = input
    const $targetRect = ion(null as Rect | null)
-   const $button = nodeRef('button');
+
+   const button = nodeRef('button')
 
    return component(
       <>
          <button
-            ref={$button}
-            on:pointerenter={() => { $targetRect.state = $button()!.getBoundingClientRect(); }}
-            on:pointerleave={() => { $targetRect.state = null }}
+            ref={button}
+            on:pointerenter={e => {
+               console.log('button', button)
+               if (button.node) {
+                  $targetRect.state = button.node.getBoundingClientRect();
+               }
+            }}
+            on:pointerleave={e => { $targetRect.state = null }}
          >
             {Slot.Default()}
          </button>
          {If($targetRect, v =>
-            <Tooltip targetRect={v($targetRect())}>
+            <Tooltip targetRect={$targetRect}>
                {Slot.Tooltip()}
             </Tooltip>
          )}
@@ -114,11 +120,13 @@ export function Tooltip({ Slot, targetRect } = fromTag<{
    Slot: RenderFunction
    targetRect: Rect
 }>()) {
-   const $div = nodeRef('div')
+   const div = nodeRef('div')
    const $height = ion(undefined as number | undefined)
 
    onMounted(async () => {
-      const height = await measureLayout(() => $div()!.getBoundingClientRect().height)
+      const divNode = div.node;
+      if (!divNode) return;
+      const height = await measureLayout(() => divNode.getBoundingClientRect().height)
       $height.state = height;
    })
 
@@ -141,7 +149,7 @@ export function Tooltip({ Slot, targetRect } = fromTag<{
                transform: (`translate3d(${shiftX}px, ${$shiftY()}px, 0)`)
             }}
          >
-            <div ref={$div} class="tooltip">
+            <div ref={div} class="tooltip">
                {Slot()}
             </div>
          </div>

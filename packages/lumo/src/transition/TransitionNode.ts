@@ -62,7 +62,7 @@ export function createTransitionNode(
       return isFunction(Slot) ? Slot() : Slot
    }
 
-   const $div = nodeRef('div')
+   const div = nodeRef('div')
 
    //TODO: init with
 
@@ -93,15 +93,15 @@ export function createTransitionNode(
             endTransition();
             return;
          }
-         const div = $div()!
-         
+         const node = div.node!
+
          if (onStart) onStart({ phase: 'in' })
-            controller = new AbortController()
-         
+         controller = new AbortController()
+
          if (transition_in) {
             if (type === 'ooo-transit') {
-               div.classList.add(...enterFromClasses!);
-               div.classList.add(transition_in);
+               node.classList.add(...enterFromClasses!);
+               node.classList.add(transition_in);
             }
 
             frameID =
@@ -112,17 +112,17 @@ export function createTransitionNode(
                   // if (paused) { //FIX:
                   //     div.style.removeProperty('animation-play-state')
                   //     for (const prop of transitionInProperties) {
-                     //         div.style.removeProperty(prop)
-                     //     }
-                     // }
-                     requestAnimationFrame(() => {
-                        div.classList.remove(...enterFromClasses!); // triggers enter
-                        
-                        div.addEventListener(
-                           "transitionend",
-                           () => {
-                           
-                           div.classList.remove(transition_in); // enter prep
+                  //         div.style.removeProperty(prop)
+                  //     }
+                  // }
+                  requestAnimationFrame(() => {
+                     node.classList.remove(...enterFromClasses!); // triggers enter
+
+                     node.addEventListener(
+                        "transitionend",
+                        () => {
+
+                           node.classList.remove(transition_in); // enter prep
                            afterTransition()
                         },
                         { once: true, signal: controller.signal }
@@ -132,12 +132,12 @@ export function createTransitionNode(
          }
 
          if (animate_in) {
-            div.classList.add(animate_in);
+            node.classList.add(animate_in);
 
-            div.addEventListener(
+            node.addEventListener(
                "animationend",
                () => {
-                  div.classList.remove(animate_in);
+                  node.classList.remove(animate_in);
                   afterTransition()
                },
                { once: true, signal: controller.signal }
@@ -156,19 +156,19 @@ export function createTransitionNode(
       },
 
       getDimsAndPosition() {
-         const div = $div();
-         if (!div) throw Error('missing div')
-         return div.getBoundingClientRect();
+         const node = div.node;
+         if (!node) throw Error('missing div')
+         return node.getBoundingClientRect();
       },
 
       prepOutgoingNode(initialPosition: DOMRect) {
-         const div = $div();
-         if (!div) throw Error('missing div')
-         div.style.position = 'absolute'
-         div.style.top = '0px'
-         div.style.left = '0px'
-         div.style.width = initialPosition.width + 'px'
-         div.style.height = initialPosition.height + 'px'
+         const node = div.node;
+         if (!node) throw Error('missing div')
+         node.style.position = 'absolute'
+         node.style.top = '0px'
+         node.style.left = '0px'
+         node.style.width = initialPosition.width + 'px'
+         node.style.height = initialPosition.height + 'px'
       },
 
       computeDelta(initialPosition: DOMRect, finalPosition: DOMRect) {
@@ -181,9 +181,9 @@ export function createTransitionNode(
       },
 
       transport(delta: TransitDelta) {
-         const div = $div();
-         if (!div) throw Error('missing div')
-         return div.animate([
+         const node = div.node;
+         if (!node) throw Error('missing div')
+         return node.animate([
             { transform: `translate(${delta.x}px, ${delta.y}px) scale(${delta.scaleX}, ${delta.scaleY})` },
             { transform: 'translate(0, 0) scale(1, 1)' }
          ], {
@@ -192,12 +192,12 @@ export function createTransitionNode(
          });
       },
 
-      morph(initialPosition: DOMRect, finalPosition: DOMRect){
-         const div = $div();
-         if (!div) throw Error('missing div')
-         return div.animate([
-            { width: initialPosition.width+ 'px', height: initialPosition.height + 'px' },
-            { width: finalPosition.width+ 'px', height: finalPosition.height+ 'px' }
+      morph(initialPosition: DOMRect, finalPosition: DOMRect) {
+         const node = div.node;
+         if (!node) throw Error('missing div')
+         return node.animate([
+            { width: initialPosition.width + 'px', height: initialPosition.height + 'px' },
+            { width: finalPosition.width + 'px', height: finalPosition.height + 'px' }
          ], {
             duration: 200, //TODO:
             easing: 'cubic-bezier(0,0,0.32,1)', //TODO:
@@ -205,9 +205,9 @@ export function createTransitionNode(
       },
 
       transportOut(delta: TransitDelta, initialPosition: DOMRect, finalPosition: DOMRect) {
-         const div = $div();
-         if (!div) throw Error('missing div')
-         return div.animate([{
+         const node = div.node;
+         if (!node) throw Error('missing div')
+         return node.animate([{
             transform: `translate(${initialPosition.x}px, ${initialPosition.y}px) scale(1, 1)`,
             opacity: 1
          }, {
@@ -224,9 +224,9 @@ export function createTransitionNode(
       // READ finalPosition
 
       transportIn(delta: TransitDelta) {
-         const div = $div();
-         if (!div) throw Error('missing div')
-         return div.animate([
+         const node = div.node;
+         if (!node) throw Error('missing div')
+         return node.animate([
             {
                transform: `translate(${delta.x}px, ${delta.y}px) scale(${delta.scaleX}, ${delta.scaleY})`,
                opacity: 0
@@ -248,7 +248,8 @@ export function createTransitionNode(
             endTransition();
             return;
          }
-         const div = $div()!
+         const node = div.node;
+         if (!node) throw Error('missing div')
          controller = new AbortController();
 
          if (onStart) onStart({ phase: 'out' })
@@ -259,19 +260,19 @@ export function createTransitionNode(
                requestAnimationFrame(() => {
                   frameID = undefined
 
-                  div.classList.add(transition_out);
-                  div.classList.add(...exitClasses!);
+                  node.classList.add(transition_out);
+                  node.classList.add(...exitClasses!);
 
-                  div.addEventListener(
+                  node.addEventListener(
                      "transitionend",
                      () => afterTransition(() => {
                         this.transitioningOut = false;
-                        div.classList.remove(transition_out);
-                        div.classList.remove(...exitClasses!);
+                        node.classList.remove(transition_out);
+                        node.classList.remove(...exitClasses!);
 
                         if (type === 'ooo-transition' && transition_in) {
-                           div.classList.add(...enterFromClasses!);
-                           div.classList.add(transition_in);
+                           node.classList.add(...enterFromClasses!);
+                           node.classList.add(transition_in);
                         }
                      }),
                      { once: true, signal: controller.signal }
@@ -281,13 +282,13 @@ export function createTransitionNode(
 
          if (animate_out) {
             this.animatingOut = true;
-            div.classList.add(animate_out);
+            node.classList.add(animate_out);
 
-            div.addEventListener(
+            node.addEventListener(
                "animationend",
                () => afterTransition(() => {
                   this.animatingOut = false;
-                  div.classList.remove(animate_out);
+                  node.classList.remove(animate_out);
                }),
                { once: true, signal: controller.signal }
             );
@@ -314,7 +315,7 @@ export function createTransitionNode(
       animatingOut: false,
 
       cancel(direction: 'in' | 'out') {
-         const div = $div()!
+         const node = div.node!
          controller.abort();
          if (direction === 'in') {
             //complete
@@ -322,10 +323,10 @@ export function createTransitionNode(
                if (frameID !== undefined)
                   cancelAnimationFrame(frameID)
 
-               div.classList.remove(transition_in);
+               node.classList.remove(transition_in);
             }
             if (animate_in) {
-               div.classList.remove(animate_in);
+               node.classList.remove(animate_in);
             }
 
          }
@@ -335,17 +336,17 @@ export function createTransitionNode(
                if (frameID !== undefined)
                   cancelAnimationFrame(frameID)
 
-               div.classList.remove(transition_out);
-               div.classList.remove(...exitClasses!);
+               node.classList.remove(transition_out);
+               node.classList.remove(...exitClasses!);
 
                if (type === 'ooo-transition' && transition_in) {
-                  div.classList.add(...enterFromClasses!);
-                  div.classList.add(transition_in);
+                  node.classList.add(...enterFromClasses!);
+                  node.classList.add(transition_in);
                }
             }
             if (animate_out) {
                this.animatingOut = false;
-               div.classList.remove(animate_out);
+               node.classList.remove(animate_out);
             }
          }
       },
@@ -365,23 +366,23 @@ export function createTransitionNode(
    let paused = false;
 
    function unpause(transitionProperties: AnyObject) {
-      const div = $div()!
-      div.style.removeProperty('animation-play-state')
+      const node = div.node!
+      node.style.removeProperty('animation-play-state')
       if (transitionInProperties) {
          for (const key in transitionProperties) {
-            div.style.removeProperty(key)
+            node.style.removeProperty(key)
          }
       }
    }
 
    function quickFade() {
-      const div = $div()
+      const node = div.node
    }
 
    const renderNode = type === 'ooo-transit' ? renderTransitNode : renderPhasicNode
 
    return renderNode(
-      $div,
+      div,
       Slot,
       transitionNode,
       disable

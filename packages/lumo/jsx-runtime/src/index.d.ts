@@ -189,7 +189,7 @@ declare namespace React {
        *
        * @see {@link https://react.dev/learn/referencing-values-with-refs#refs-and-the-dom React Docs}
        */
-      ref?: NodeRef | undefined;
+      ref?: Lumo.NodeRef | Lumo.NodesRef | undefined;
    }
 
    /**
@@ -203,9 +203,9 @@ declare namespace React {
 
 
 
-   interface FunctionComponentElement<P> extends ReactElement<P, FunctionComponent<P>> {
-      ref?: ("ref" extends keyof P ? P extends { ref?: infer R | undefined } ? R : never : never) | undefined;
-   }
+   // interface FunctionComponentElement<P> extends ReactElement<P, FunctionComponent<P>> {
+   //    ref?: ("ref" extends keyof P ? P extends { ref?: infer R | undefined } ? R : never : never) | undefined;
+   // }
 
 
    // ReactHTML for ReactHTMLElement

@@ -17,37 +17,40 @@ export type NodeReferent<
    I extends PublicComponent ? I
    : undefined : undefined : undefined
 /* 
-* o property:
+* nodeRef property:
 * - undefined means ref has not been set or has been removed from the DOM
 * - null means component did not expose anything
 */
 
-export type NodeRef<T extends RefSource = RefSource> = (() => NodeReferent<T> | undefined)
-   & {
-      [INTERNAL]: MetaNodeRef;
-   }
-export type NodesRef<T extends RefSource = RefSource> = (() => NodeReferent<T>[])
-   & {
-      [INTERNAL]: MetaNodesRef;
-   }
+export type NodeRef<T extends RefSource = RefSource> = {
+   node: NodeReferent<T> | undefined
+   nodes: undefined
+   // [INTERNAL]: MetaNodeRef;
+}
+export type NodesRef<T extends RefSource = RefSource> = {
+   nodes: NodeReferent<T>[],
+   node: undefined
+   // [INTERNAL]: MetaNodeRef;
+}
+
 
 export function isAnyNodeRef(value: any): value is NodeRef | NodesRef {
-   return value instanceof Object && INTERNAL in value
+   return value instanceof Object && 'nodes' in value && 'node' in value;
 }
 
 export function isNodesRef(value: any): value is NodesRef {
    return value instanceof Object && INTERNAL in value && value[INTERNAL] instanceof MetaNodesRef
 }
 
-type RefReturn<T extends RefSource, A> = A extends NodeReferent[] ? NodesRef<T> : NodeRef<T>
+type RefReturn<T extends RefSource, A> = A extends any[] ? NodesRef<T> : NodeRef<T>
 
 export function nodeRef<
-T extends RefSource,
-A,
->(source: T, array?: A): RefReturn<T, A>{
-   const $ref = createNodeRef(array)
+   T extends RefSource,
+   A,
+>(source: T, array?: A & any[]): RefReturn<T, A> {
+   const nodeRef = createNodeRef(array)
    if (array) {
-      const _ref = $ref[INTERNAL] as MetaNodesRef
+      const _ref = nodeRef[INTERNAL] as MetaNodesRef
 
       getActiveFlask()?.onDiscard(() => {
          _ref.setValue([]); // clear nodes
@@ -63,77 +66,95 @@ A,
          })
       }
    }
-   return $ref as RefReturn<T, A>
+   return nodeRef as unknown as RefReturn<T, A>
 }
 
 
-
-
-export class MetaNodeRef {
-
-   constructor(
-      readonly o: NodeRef,
-      public value: unknown,
-   ) { }
-
-   setValue(newValue: unknown) {
-      return this.value = newValue;
-   }
+type _NodeRef = {
+   node: any;
+   nodes: undefined;
+   // [INTERNAL]: MetaNodeRef
 }
+
+type _NodesRef = {
+   node: undefined;
+   nodes: any[]
+   [INTERNAL]: MetaNodesRef
+}
+
+// export class MetaNodeRef {
+
+//    constructor(
+//       readonly nodeRef: _NodeRef,
+//       public value: unknown,
+//    ) { }
+
+//    setValue(newValue: unknown) {
+//       return this.value = newValue;
+//    }
+// }
 
 export function createNodeRef(
-   value: unknown,
+   array: any[] | undefined,
 ) {
-   const metaRef = new MetaNodeRef(<NodeRef>$ref, value)
-
-   function $ref() {
-      return metaRef.value;
+   if (array) {
+      const nodeRef = {
+         nodes: array,
+         node: undefined,
+         get [INTERNAL]() {
+            return metaRef;
+         }
+      }
+      const metaRef = new MetaNodesRef(<_NodesRef>nodeRef, undefined)
+      return nodeRef
    }
-   $ref[INTERNAL] = metaRef
-
-   return $ref
+   const nodeRef = {
+      nodes: undefined,
+      node: undefined,
+   }
+   return nodeRef
 }
 
 
 
 export class MetaNodesRef {
    constructor(
-      readonly o: NodesRef,
+      readonly nodeRef: _NodesRef,
       public value: unknown,
    ) {
 
    }
 
-   setValue(newValue: NodeReferent[]) {
+   setValue(newValue: any[]) {
       return this.value = newValue;
    }
 
-   insertNode(node: NodeReferent, index: number) {
-      const pod = this.o();
+   insertNode(node: any, index: number) {
+      const pod = this.nodeRef.nodes;
       pod.splice(index, 0, node); //TODO: should this be splice?
    }
 
    removeNode(index: number) {
-      const pod = this.o()
+      const pod = this.nodeRef.nodes
       pod?.splice(index, 1);
    }
 
-   assignIndex($index: Ion<number>, value: NodeReferent) {
-      const nodes = this.o()
+   assignIndex($index: Ion<number>, value: any) {
+      const nodes = this.nodeRef.nodes
       nodes[$index()] = value;
    }
 
-   prevNodes?: NodeReferent[]
+   prevNodes?: any[]
 
    prepUpdate() {
-      this.prevNodes = this.o();
+      this.prevNodes = this.nodeRef.nodes;
       this.setValue([])
    }
 
    update(toFromIndices: [number, number][]) {
       const prevNodes = this.prevNodes;
       if (!prevNodes) throw new Error('prevNodes were not store, must call prepUpdate before list update')
-      const newNodes = this.o();
+      const newNodes = this.nodeRef.nodes;
       for (const indices of toFromIndices) {
          const [to, from] = indices
          const node = prevNodes[from];
@@ -144,7 +165,7 @@ export class MetaNodesRef {
 }
 
 export function initializeListRef( // should this be initialize ref?
-   ref: NodesRef,
+   ref: _NodesRef,
    value: NodeReferent | undefined,
    $index: Ion<number>
 ) {
@@ -154,16 +175,14 @@ export function initializeListRef( // should this be initialize ref?
    }
 }
 
-export function initializeRef(ref: NodeRef, value: NodeReferent | undefined) {
-   if (ref())
+export function initializeRef(nodeRef: _NodeRef, value: any | undefined) {
+   if (nodeRef.node)
       throw new Error("Node ref has already been assigned. A node ref can only be associated with a single dom node or component instance")
-   const _ref = ref[INTERNAL]
-   console.log('set ref', value)
    if (value) {
-      _ref.setValue(value)
+      nodeRef.node = value;
       const flask = getActiveFlask()
       flask?.onDiscard(() => {
-         _ref.setValue(undefined);
+         nodeRef.node = undefined
       })
    }
 }

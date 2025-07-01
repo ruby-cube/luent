@@ -1,4 +1,4 @@
-import { component, nodeRef } from "@rue/lumo";
+import { component } from "@rue/lumo";
 import { ionize } from "@rue/quarky";
 
 
@@ -23,12 +23,11 @@ export function TestBox() {
       box.position.x = box.position.x - 10;
    }
 
-   const $div = nodeRef('div')
 
 
    return component(
       <>
-         <div ref={$div} style={{
+         <div style={{
             backgroundColor: 'lightgray',
             transform: (`translate(${box.position.x}px)`)
          }}>I'm a box</div>
