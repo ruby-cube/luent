@@ -46,7 +46,7 @@ export function TestTooltipApp() {
 
          <ButtonWithTooltip>
             <Slot>
-            Hover over me (tooltip below)
+               Hover over me (tooltip below)
             </Slot>
 
             <Slot Tooltip provide={[]}>
@@ -74,7 +74,7 @@ export function ButtonWithTooltip(input = fromTag<{
    const { Slot } = input
    const $targetRect = ion(null as Rect | null)
    const $button = nodeRef('button');
-console.log('Slot', Slot)
+
    return component(
       <>
          <button
@@ -84,15 +84,14 @@ console.log('Slot', Slot)
          >
             {Slot.Default()}
          </button>
-         {If($targetRect,
-            <Tooltip targetRect={$targetRect}>
+         {If($targetRect, v =>
+            <Tooltip targetRect={v($targetRect())}>
                {Slot.Tooltip()}
             </Tooltip>
          )}
       </>
    );
 }
-
 
 
 type Rect = { left: number, top: number, bottom: number }

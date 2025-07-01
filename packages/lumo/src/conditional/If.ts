@@ -1,4 +1,4 @@
-import { getGroupActivationType, JSXNode, normalizeToRenderFunction, RawJSXNode, RenderFunction, withGroupActivationReset } from "../node/makeNode";
+import { getGroupActivationType, RawJSXNode, normalizeToRenderFunction, RenderFunction, withGroupActivationReset } from "../node/makeNode";
 import { isFunction, normalizeToArray } from "@rue/utils";
 import { Booleanny } from "@rue/types";
 import { Provided, callWithCommons } from "../commons/Commons";
@@ -21,33 +21,35 @@ import { createTryCatch } from "../boundaries/Try";
 
 export type ActivationType = 'show' | 'create' | 'mount'
 
+type RenderConditional = (v: <T>(value: T) => NonNullable<T extends Ion<infer V> ? Ion<NonNullable<V>>:T>) => RawJSXNode
 
-export function If($condition: Booleanny | ((_?: any) => Booleanny), renderConditional: RenderFunction | JSXNode): ConditionalKit
-export function If($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderFunction | JSXNode): ConditionalKit
-export function If($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: JSXNode | RenderFunction | ActivationType, renderConditional?: RenderFunction | JSXNode): ConditionalKit {
+
+export function If($condition: Booleanny | ((_?: any) => Booleanny), renderConditional: RenderConditional | RawJSXNode): ConditionalKit
+export function If($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderConditional | RawJSXNode): ConditionalKit
+export function If($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: RenderConditional | RawJSXNode | ActivationType, renderConditional?: RenderFunction | RawJSXNode): ConditionalKit {
    const [render, activationType] = getParams(typeOrRenderConditional, renderConditional)
    // resetCurrentNodePodIndex()
    return createConditionalKit('if', activationType, render, $condition)
 }
 
 
-export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), renderConditional: RenderFunction | JSXNode): ConditionalKit
-export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderFunction | JSXNode): ConditionalKit
-export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: JSXNode | RenderFunction | ActivationType, renderConditional?: RenderFunction | JSXNode): ConditionalKit {
+export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), renderConditional: RenderConditional | RawJSXNode): ConditionalKit
+export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), activationType: ActivationType, renderConditional: RenderConditional | RawJSXNode): ConditionalKit
+export function ElseIf($condition: Booleanny | ((_?: any) => Booleanny), typeOrRenderConditional: RawJSXNode | RenderConditional | ActivationType, renderConditional?: RenderFunction | RawJSXNode): ConditionalKit {
    const [render, activationType] = getParams(typeOrRenderConditional, renderConditional)
    return createConditionalKit('elseIf', activationType, render, $condition)
 }
 
 
-export function Else(renderConditional: RenderFunction | JSXNode): ConditionalKit
-export function Else(activationType: ActivationType, renderConditional: RenderFunction | JSXNode): ConditionalKit
-export function Else(typeOrRenderConditional: JSXNode | RenderFunction | ActivationType, renderConditional?: RenderFunction | JSXNode): ConditionalKit {
+export function Else(renderConditional: RenderConditional | RawJSXNode): ConditionalKit
+export function Else(activationType: ActivationType, renderConditional: RenderConditional | RawJSXNode): ConditionalKit
+export function Else(typeOrRenderConditional: RawJSXNode | RenderConditional | ActivationType, renderConditional?: RenderConditional | RawJSXNode): ConditionalKit {
    const [render, activationType] = getParams(typeOrRenderConditional, renderConditional)
    return createConditionalKit('else', activationType, render)
 }
 
-function getParams(typeOrRenderConditional: JSXNode | RenderFunction | ActivationType, renderConditional?: RenderFunction | JSXNode) {
-   const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional)
+function getParams(typeOrRenderConditional: RawJSXNode | RenderFunction | ActivationType, renderConditional?: RenderFunction | RawJSXNode) {
+   const _renderConditional = normalizeToRenderFunction(renderConditional ? renderConditional : typeOrRenderConditional!)
    const activationType = renderConditional ? typeOrRenderConditional as ActivationType : undefined;
    return [_renderConditional, activationType] as const
 }
