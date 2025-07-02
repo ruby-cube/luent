@@ -1,5 +1,5 @@
 import { component, Else, For, fromTag, If, JSXNode, measureLayout, nodeRef, onMounted, Portal, RawJSXNode, RenderFunction, RenderSlot } from '@rue/lumo';
-import { Ion, ion, watch } from '@rue/quarky';
+import { Ion, ion, isNonNull, watch } from '@rue/quarky';
 
 
 export function TestTooltipApp() {
@@ -76,22 +76,21 @@ export function ButtonWithTooltip(input = fromTag<{
 
    const button = nodeRef('button')
 
+   if (isNonNull($targetRect)){
+      
+   }
+
    return component(
       <>
          <button
             ref={button}
-            on:pointerenter={e => {
-               console.log('button', button)
-               if (button.node) {
-                  $targetRect.state = button.node.getBoundingClientRect();
-               }
-            }}
+            on:pointerenter={e => { if (button.node) $targetRect.state = button.node.getBoundingClientRect() }}
             on:pointerleave={e => { $targetRect.state = null }}
          >
             {Slot.Default()}
          </button>
          {If($targetRect, v =>
-            <Tooltip targetRect={$targetRect}>
+            <Tooltip targetRect={v($targetRect)}>
                {Slot.Tooltip()}
             </Tooltip>
          )}
@@ -117,8 +116,8 @@ type Rect = { left: number, top: number, bottom: number }
 
 
 export function Tooltip({ Slot, targetRect } = fromTag<{
-   Slot: RenderFunction
-   targetRect: Rect
+   Slot: RenderSlot
+   targetRect: Ion<Rect>
 }>()) {
    const div = nodeRef('div')
    const $height = ion(undefined as number | undefined)

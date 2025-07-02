@@ -50,7 +50,7 @@ export function nodeRef<
 >(source: T, array?: A & any[]): RefReturn<T, A> {
    const nodeRef = createNodeRef(array)
    if (array) {
-      const _ref = nodeRef[INTERNAL] as MetaNodesRef
+      const _ref = (<_NodesRef>nodeRef)[INTERNAL] as MetaNodesRef
 
       getActiveFlask()?.onDiscard(() => {
          _ref.setValue([]); // clear nodes
@@ -70,13 +70,13 @@ export function nodeRef<
 }
 
 
-type _NodeRef = {
+export type _NodeRef = {
    node: any;
    nodes: undefined;
    // [INTERNAL]: MetaNodeRef
 }
 
-type _NodesRef = {
+export type _NodesRef = {
    node: undefined;
    nodes: any[]
    [INTERNAL]: MetaNodesRef

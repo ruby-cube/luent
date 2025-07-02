@@ -186,7 +186,7 @@ import { TriangleDemo } from './demos/SierpinskiTriangles';
 
 
 
-const app = createApp(MountIf)
+const app = createApp(TestTooltipApp)
 
 app.mount('#app')
 

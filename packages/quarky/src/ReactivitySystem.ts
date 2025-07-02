@@ -46,33 +46,34 @@ const reactivitySystem = {
    UpdateCycle: new EffectCycleManager('UpdateCycle')
 }
 
-function setUpEventCycleManager(phases?: [CyclePhase, ...CyclePhase[]]) {
-   const cycleManager = reactivitySystem.EventCycle;
-   if (phases) {
-      //TODO: custom phases
-   }
-   //FIX: phase names { POSTEVENT: 'EventCycle:POSTEVENT}
-   cycleManager.pushPhase(new CyclePhase('POSTEVENT', queueMicrotask))
-   cycleManager.pushPhase(new CyclePhase(EVENT_CYCLE_END, noop))
-   cycleManager.onComplete = createEffectCycleHook('EventCycle:'+EVENT_CYCLE_END)
-   return cycleManager
-}
-
-// function setUpUpdateCycleManager(phases?: [CyclePhase, ...CyclePhase[]]) {
-//    const cycleManager = reactivitySystem.UpdateCycle;
+// function setUpEventCycleManager(phases?: [CyclePhase, ...CyclePhase[]]) {
+//    const cycleManager = reactivitySystem.EventCycle;
 //    if (phases) {
 //       //TODO: custom phases
 //    }
-//    cycleManager.pushPhase(new CyclePhase('RENDER', requestAnimationFrame))
-//    cycleManager.pushPhase(new CyclePhase('POSTRENDER', queueMicrotask))
-//    cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop))
-//    cycleManager.onComplete = createEffectCycleHook('UpdateCycle:'+UPDATE_CYCLE_END)
-//    return cycleManager;
+//    //FIX: phase names { POSTEVENT: 'EventCycle:POSTEVENT}
+//    cycleManager.pushPhase(new CyclePhase('POSTEVENT', queueMicrotask))
+//    cycleManager.pushPhase(new CyclePhase(EVENT_CYCLE_END, noop))
+//    cycleManager.onComplete = createEffectCycleHook('EventCycle:'+EVENT_CYCLE_END)
+//    return cycleManager
 // }
 
-// export function getUpdateCycleCount(){
-//    return reactivitySystem.UpdateCycle.count
-// }
+function setUpUpdateCycleManager(phases?: [CyclePhase, ...CyclePhase[]]) {
+   const cycleManager = reactivitySystem.UpdateCycle;
+   if (phases) {
+      //TODO: custom phases
+   }
+   cycleManager.pushPhase(new CyclePhase('PRERENDER', queueMicrotask))
+   cycleManager.pushPhase(new CyclePhase('RENDER', queueMicrotask))
+   // cycleManager.pushPhase(new CyclePhase('POSTRENDER', queueMicrotask))
+   cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop))
+   cycleManager.onComplete = createEffectCycleHook('UpdateCycle:'+UPDATE_CYCLE_END)
+   return cycleManager;
+}
+
+export function getUpdateCycleCount(){
+   return reactivitySystem.UpdateCycle.count
+}
 
 
 
@@ -89,11 +90,11 @@ export function useReactivitySystem(phases?: [CyclePhase, ...CyclePhase[]]): Eff
       }
    }
 
-   const EventCycle = setUpEventCycleManager(phases);
-   // const UpdateCycle = setUpUpdateCycleManager(phases)
+   // const EventCycle = setUpEventCycleManager(phases);
+   const UpdateCycle = setUpUpdateCycleManager(phases)
 
-   addHooks(hooks, EventCycle)
-   // addHooks(hooks, UpdateCycle)
+   // addHooks(hooks, EventCycle)
+   addHooks(hooks, UpdateCycle)
    return hooks as EffectCycleHooks;
 }
 
@@ -169,14 +170,15 @@ export function createEffectCycleHook(phase: string) { //TODO: what happens if p
 export function getDefaultPhase() {
    const currentPhase = getCurrentPhase()
    if (currentPhase !== SYNC) return currentPhase
-   return reactivitySystem.EventCycle.phases[0].phaseHook
+   return reactivitySystem.EventCycle.phases[0].phaseHook //FIX: What should the default phase be?
 }
 
 
 
 export function getEffectCycle(phase: string) {
-   if (phase.startsWith('EventCycle:')) return reactivitySystem.EventCycle
-   else return reactivitySystem.UpdateCycle
+   // if (phase.startsWith('EventCycle:')) return reactivitySystem.EventCycle
+   // else 
+   return reactivitySystem.UpdateCycle
 }
 
 
@@ -210,7 +212,7 @@ export function trigger( //TODO: figure out which abstraction this belongs to ..
 export function getCurrentPhase() {
    const updateCycle = reactivitySystem.UpdateCycle
    if (updateCycle.current && updateCycle.current.currentPhase !== SYNC) return updateCycle.current.currentPhase;
-   const eventCycle = reactivitySystem.EventCycle;
-   if (eventCycle.current && eventCycle.current.currentPhase !== SYNC) return eventCycle.current.currentPhase;
+   // const eventCycle = reactivitySystem.EventCycle;
+   // if (eventCycle.current && eventCycle.current.currentPhase !== SYNC) return eventCycle.current.currentPhase;
    return SYNC;
 }

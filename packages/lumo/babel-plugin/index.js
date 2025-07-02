@@ -396,7 +396,7 @@ function isJSXRoot(node) {
 const TemplateFunctions = {
    If: transformIfCall,
    ElseIf: transformIfCall,
-   Else: transformTemplateArgToRenderFunction,
+   Else: transformConditionalJSX,
    Try: transformTemplateArgToRenderFunction,
    Await: transformTemplateArgToRenderFunction,
    Meanwhile: transformTemplateArgToRenderFunction,
@@ -411,6 +411,8 @@ const TemplateFunctions = {
 }
 
 
+
+
 function isTemplateFunction(name) {
    return name in TemplateFunctions
 }
@@ -419,11 +421,33 @@ function transformTemplateFnCall(name, path) {
    TemplateFunctions[name](path);
 }
 
-
+function transformConditionalJSX(path) {
+   const lastArg = path.get('arguments').at(-1)
+   if (t.isArrowFunctionExpression(lastArg.node)) {
+      removeConditionAssertionTypeHelper(lastArg)
+   }
+   transformTemplateArgToRenderFunction(path)
+}
 
 function transformIfCall(path) {
    transformIfDerivationExpression(path.get('arguments.0'))
-   transformTemplateArgToRenderFunction(path)
+   transformConditionalJSX(path)
+
+}
+
+function removeConditionAssertionTypeHelper(path) {
+   const params = path.node.params
+   if (!params.length) return;
+   if (params[0].name === 'v') {
+      path.traverse({
+         CallExpression(path) {
+            if (path.node.callee.name !== 'v') return;
+            if (path.node.arguments.length !== 1) return;
+            const arg = path.get('arguments.0');
+            path.replaceWith(arg.node)
+         }
+      })
+   }
 }
 
 function transformTemplateArgToRenderFunction(path) {

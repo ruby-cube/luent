@@ -2,8 +2,6 @@ import { setImmediate } from "@rue/thread";
 import { $schedule, Listener, SchedulerOptions, unwrap } from "@rue/flask";
 import { PhaseMap } from "./PhaseMap";
 import { EffectLink, EffectVine } from "./EffectLink";
-import { noop, pipe } from "@rue/utils";
-import { getEffectCycle } from "../ReactivitySystem";
 
 // returns a enum for the phases
 //

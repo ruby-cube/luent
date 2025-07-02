@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { JSXNode, RawJSXNode } from "../node/makeNode";
 import { Ion, toValue } from "@rue/quarky";
 import { isObject, normalizeToArray } from "@rue/utils";
-import { initializeListRef, initializeRef, NodeRef, NodesRef } from "../node/NodeRef";
+import { _NodeRef, _NodesRef, initializeListRef, initializeRef, NodeRef, NodesRef } from "../node/NodeRef";
 
 
 
@@ -55,16 +55,16 @@ export function exposeComponent(
 
 
 export function initializeComponentRef(
-   ref: NodeRef | NodesRef,
+   ref: _NodeRef | _NodesRef,
    publicComponent: PublicComponent,
    $index: Ion<number> | undefined,
 ) {
    if ($index) {
-      initializeListRef(<NodesRef>ref, publicComponent, $index)
+      initializeListRef(<_NodesRef>ref, publicComponent, $index)
    }
    else {
       console.log('initialize component ref', publicComponent)
-      initializeRef(ref, publicComponent)
+      initializeRef(<_NodeRef>ref, publicComponent)
    }
 }
 
@@ -88,7 +88,7 @@ export function unnestComponent(jsxNodes: RawJSXNode) {
    return jsxNodes
 }
 
-export function isComponentKit(entity: unknown): entity is Component{
+export function isComponentKit(entity: unknown): entity is Component {
    return isObject(entity) && 'exposed' in entity && 'jsxNodes' in entity
 }
 

@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { CommonsKey, component, For, fromCommons, fromTag, If, nodeRef } from "@rue/lumo";
 import { MarkdownApp } from "./markdown-app";
 import { Ion, ion, ionize, Ionized, watch } from "@rue/quarky";
@@ -288,6 +289,28 @@ const TABS_KIT = CommonsKey<TabManager>('TABS_KIT')
 // const ADD_NEW_FILE = CommonsKey(v<FileManager['addNewFile']>)
 // const CLOSE_FILE = CommonsKey(v<TabManager['closeFile']>)
 // const FOCUS_FILE = CommonsKey(v<TabManager['focusFile']>)
+
+export function List(input = fromTag<{
+		apple?: string,
+		peach?: number,
+		pear?: object,
+		plum: Ion<string>
+}>()) {
+		const { 
+				$plum,
+				$apple = fromCommons($APPLE), 
+				peach = fromCommons(PEACH),
+				_raw_: $
+		} = input
+		
+		$.pear = $.pear ?? fromCommons(PEAR)
+
+		return component(<></>)
+}
+
+const $APPLE = CommonsKey<Ion<string>>('$APPLE')
+const PEACH = CommonsKey<string>('PEACH')
+const PEAR = CommonsKey<MaybeIon<string>>('PEAR')
 
 
 

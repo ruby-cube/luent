@@ -6,6 +6,17 @@ const TARGET = 25;
 
 const lazyBatch = useBatchedIdleTasks()
 
+
+function renderLazily(mutation: Function, deadline?: number) {
+
+}
+
+function renderAnimationFrame() {
+
+}
+
+
+
 export function TriangleDemo() {
    const $elapsed = ion(0)
    const $seconds = ion(0)
@@ -14,7 +25,7 @@ export function TriangleDemo() {
       return 1 + (e > 5 ? 10 - e : e) / 10;
    }),
       start = Date.now(),
-      t = setInterval(() => $seconds.state = ($seconds() % 10) + 1, 1000);
+      t = setInterval(() => renderLazily(() => $seconds.state = ($seconds() % 10) + 1, 1000), 1000);
    // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
    let f: any;
@@ -43,7 +54,7 @@ export function TriangleDemo() {
 function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
    if (s <= TARGET) {
       return component(
-         <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET*1.25} text={$seconds} />
+         <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET * 1.25} text={$seconds} />
       );
    }
    s = s / 2;
@@ -93,11 +104,11 @@ function Dot({ x, y, s, $text } = fromTag<any>()) {
 
 
 
-function useBatchedIdleTasks(){
+function useBatchedIdleTasks() {
    let idleTasks: (() => any)[] | undefined = undefined
    let resolvers: ((value: any | PromiseLike<unknown>) => void)[] | undefined = undefined
-   
-   
+
+
    return function onIdle<T>(task: () => T): Promise<void> {
       if (idleTasks) {
          idleTasks.push(task)
