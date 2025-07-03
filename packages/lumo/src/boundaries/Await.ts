@@ -103,7 +103,7 @@ export function createAwaitSeries(
    awaitStack.push(pendingPromises);
    if (suspenseIons) {
       for (const ion of suspenseIons) {
-         pend(ion.suspense)
+         pend(ion.promise)
       }
    }
    const output = renderResolved(); // any nested pend calls will collect promises into the pendingPromises array

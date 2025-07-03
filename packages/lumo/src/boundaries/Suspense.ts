@@ -16,10 +16,10 @@ import { pend } from "./Await";
 // QUESTION: should suspense boundaries be the default? No because you might not want to hold up rendering for something that is ok to be undefined
 // Should { awaited: true } be the default? or { renderUndefined: true } or { dontAwait } or 
 
-export type Suspense<T> = { suspense: Promise<T>, error: null | Error, awaited: () => Awaited<T> }
+export type Suspense<T> = { promise: Promise<T>, error: null | Error, awaited: () => Awaited<T> }
 export type SuspenseIon<T> = MutableIon<T | undefined> & Suspense<T>
 export type Awaited<T> = MutableIon<T | undefined> & Suspense<T>
-export type Resolved<T> = MutableIon<T> & { suspense: Promise<T>, error: null, awaited: () => Awaited<T> }
+export type Resolved<T> = MutableIon<T> & { promise: Promise<T>, error: null, awaited: () => Awaited<T> }
 
 
 export function assertResolved<T>(ion: SuspenseIon<T>): asserts ion is Resolved<T> {
@@ -42,7 +42,7 @@ function createSuspenseIon<T, B extends boolean, OPT = undefined>(input: Promise
    if (input instanceof Promise) {
       // if (options?.awaited) pend(input)
       const $ion = ion(undefined as T | undefined) as SuspenseIon<T>
-      $ion.suspense = input
+      $ion.promise = input
       $ion.error = null;
       $ion.awaited = () => {
          //TODO: trace must await calls for debugging
@@ -62,12 +62,12 @@ function createSuspenseIon<T, B extends boolean, OPT = undefined>(input: Promise
    const $ion = ion(undefined) as SuspenseIon<T>
    $ion.awaited = () => {
       //TODO: trace must await calls for debugging
-      pend($ion.suspense);
+      pend($ion.promise);
       return $ion
    }
    ionicTask(() => {
       const promise = input($ion);
-      $ion.suspense = promise;
+      $ion.promise = promise;
 
       promise
          .then(value => $ion.state = value)

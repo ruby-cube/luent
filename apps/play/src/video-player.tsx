@@ -5,9 +5,9 @@ import { Style } from "../../../packages/lumo/src/component/Style";
 
 
 export function VideoPlayer() {
-   const video = nodeRef('video')
+   const videoRef = nodeRef('video')
 
-   const $videoPlayer = finiton({
+   const $videoPlayer = ion.finite({
       'loading': {
          init: () => 'x:ready',
          error: () => 'x:failure'
@@ -16,7 +16,7 @@ export function VideoPlayer() {
       'x:failure': {}
    })
 
-   const $track = finiton({
+   const $track = ion.finite({
       'paused': {
          play: () => 'playing'
       },
@@ -31,17 +31,17 @@ export function VideoPlayer() {
 
    let duration = 0
 
-   $videoPlayer.on('init', () => { duration = video.node?.duration ?? 0 })
+   $videoPlayer.on('init', () => { duration = videoRef.node?.duration ?? 0 })
 
    console.log('@% isIon', isIon($videoPlayer))
    console.log('@% isFunction', isFunction($videoPlayer))
    console.log('@% name', $videoPlayer.name)
 
-   $track.on('play', () => video.node?.play())
-   $track.on('pause', () => video.node?.pause())
+   $track.on('play', () => videoRef.node?.play())
+   $track.on('pause', () => videoRef.node?.pause())
    $track.on('end', () => {
-      if (!video.node) return;
-      $elapsedTime.state = video.node.currentTime = 0;
+      if (!videoRef.node) return;
+      $elapsedTime.state = videoRef.node.currentTime = 0;
       // setTimeout(()=>$track.apply('play'), 1);
       console.log('@% on end')
    })
@@ -54,17 +54,18 @@ export function VideoPlayer() {
       $elapsedTime.state = currentTime;
    }
 
-   const $sound = finiton({
+   const $sound = ion.finite({
       'on': { toggle: () => 'muted' },
       'muted': { toggle: () => 'on' }
    })
 
-   $videoPlayer.activate(() => 'loading').nest({
-      'x:ready': [
-         $track.init(() => 'paused'),
-         $sound.init(() => 'on')
-      ]
-   })
+   $videoPlayer.activate(() => 'loading')
+      .nest({
+         'x:ready': [
+            $track.init(() => 'paused'),
+            $sound.init(() => 'on')
+         ]
+      })
 
    console.log('@% LOADING')
 
@@ -107,17 +108,17 @@ export function VideoPlayer() {
    }
 
    function updateTimeo() {
-      if (!video.node) return;
+      if (!videoRef.node) return;
       console.log("@@@ EVENT: UPDATE TIME")
       // console.log('@% time video phase:', getCurrentEffectCycle()?.currentPhase)
       // if (getCurrentEffectCycle()?.currentPhase !== undefined) console.warn('@% existing effect cycle!')
-      updateTime(video.node.currentTime)
+      updateTime(videoRef.node.currentTime)
    }
 
    return component(
       <>
          <video
-            ref={videoNode}
+            ref={videoRef}
             on:canplay={initVideo}
             on:timeupdate={updateTimeo}
             on:ended={endVideo}

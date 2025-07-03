@@ -4,16 +4,16 @@ import { afterEffects } from "../../../../packages/lumo/src/render-cycle";
 
 const TARGET = 25;
 
-const lazyBatch = useBatchedIdleTasks()
+const lazyBatch = useLazyBatch()
 
 
-function renderLazily(mutation: Function, deadline?: number) {
+// function renderLazily(mutation: Function, deadline?: number) {
 
-}
+// }
 
-function renderAnimationFrame() {
+// function renderAnimationFrame() {
 
-}
+// }
 
 
 
@@ -25,7 +25,7 @@ export function TriangleDemo() {
       return 1 + (e > 5 ? 10 - e : e) / 10;
    }),
       start = Date.now(),
-      t = setInterval(() => renderLazily(() => $seconds.state = ($seconds() % 10) + 1, 1000), 1000);
+      t = setInterval(() => () => $seconds.state = ($seconds() % 10) + 1, 1000);
    // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
    let f: any;
@@ -104,7 +104,7 @@ function Dot({ x, y, s, $text } = fromTag<any>()) {
 
 
 
-function useBatchedIdleTasks() {
+function useLazyBatch() {
    let idleTasks: (() => any)[] | undefined = undefined
    let resolvers: ((value: any | PromiseLike<unknown>) => void)[] | undefined = undefined
 

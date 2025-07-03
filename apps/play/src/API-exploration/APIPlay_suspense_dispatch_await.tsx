@@ -1,25 +1,25 @@
 //@ts-nocheck
 import { component } from '@rue/lumo'
-function LoadingApp() {
-   const $data = fromCloud(MARKDOWN_FILES) // Data | undefined
+// function LoadingApp() {
+//    const $data = fromCloud(MARKDOWN_FILES) // Data | undefined
 
-   return component(
-      <>
-         {Resolve(suspense =>
-            <App data={$data} {...suspense}></App>
-         )}
-         {Meanwhile(
-            <>
-               <Sidebar></Sidebar>
-               <main></main>
-            </>
-         )}
-         {Catch(error =>
-            <div>oh no</div>
-         )}
-      </>
-   )
-}
+//    return component(
+//       <>
+//          {Resolve(suspense =>
+//             <App data={$data} {...suspense}></App>
+//          )}
+//          {Meanwhile(
+//             <>
+//                <Sidebar></Sidebar>
+//                <main></main>
+//             </>
+//          )}
+//          {Catch(error =>
+//             <div>oh no</div>
+//          )}
+//       </>
+//    )
+// }
 
 function Album(input = fromTag<{
    resolve: ResolveSuspense
@@ -163,18 +163,18 @@ function LoadingApp() {
    //       <div>oh no</div>
    // })
 
-   const $App = Awaited({  // output component
-      await: suspense => (
-         <App data={$data} {...suspense}></App>
-      ),
-      meanwhile: () => (
-         <Loading />
-      ),
-      timeout: 500,
-      catch: error => (
-         <div>oh no</div>
-      )
-   })
+   // const $App = Awaited({  // output component
+   //    await: suspense => (
+   //       <App data={$data} {...suspense}></App>
+   //    ),
+   //    meanwhile: () => (
+   //       <Loading />
+   //    ),
+   //    timeout: 500,
+   //    catch: error => (
+   //       <div>oh no</div>
+   //    )
+   // })
 
    // const Try = useTry({
    //    catch: error =>

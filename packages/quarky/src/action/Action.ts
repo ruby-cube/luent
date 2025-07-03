@@ -1,3 +1,4 @@
+import { toError } from "@rue/utils";
 import { Mutation, MutableEntity, asMutable } from "../Mutable";
 
 // Actions may span mulitple effect cycles
@@ -66,7 +67,7 @@ class Action {
    //    return true;
    // }
 
-   rollback() {
+   cancel() {
       const mutations = this.mutations
       for (const mutation of mutations) {
          mutation.undo()
@@ -119,7 +120,6 @@ export function doAction<T>(action: Function, args: any[], options?: { catch?: (
    if (action.length === 0) throw new Error('Action cannot not be a method that mutates state via this or closure. Any state to be mutated by actions must be explicitly passed in as an argument')
    const thisAction = new Action()
    try {
-      prepAction(thisAction, args) // 
       const output = action(...args)
       if (output instanceof Promise) {
          // TODO: not sure if this is correct...
@@ -148,9 +148,70 @@ export function doAction<T>(action: Function, args: any[], options?: { catch?: (
    }
 }
 
+function insert() {
+
+   return new Promise((resolve, reject) => {
+      setTimeout(() => { resolve('wahh wanh') }, 2000)
+   })
+}
+
+type NewAction = {
+   cancel(): void
+   onCancel(task: () => void): void
+   isPending: boolean;
+   isSettled: boolean;
+   status: 'in progress' | 'queued' | 'canceled' | 'complete'
+   error: Error | null
+   onDone(task: () => void): void
+}
+
+function newdoAction(action: NewAction, fn: () => unknown, options: { catch: (err: Error) => void, lazy: true | { limit: number } }) {
+   let resolve: (value: unknown) => void;
+   const actionComplete = new Promise((_resolve) => {
+      resolve = _resolve
+   })
+   try {
+      const output = fn()
+      if (output instanceof Promise) {
+         output
+            .then(() => {
+               console.log('promise done: run effects now')
+               // await action.rendered
+               resolve(output)
+            })
+            .catch(err => {
+               action.cancel()
+               options.catch(toError(err))
+               console.log('done via promise fail')
+            })
+      }
+      else {
+         console.log('run effects now')
+         // await action.rendered
+         resolve!(output)
+      }
+   }
+   catch (err) {
+      action.cancel()
+      options.catch(toError(err))
+      console.log('done via error')
+   }
+   finally {
+      return actionComplete
+   }
+}
+
+// const output = await doAction(insert, {
+//    catch(err) {
+//       console.log('ACTION CATCH', err)
+//    }
+// })
+
+// console.log('output', output)
 
 
-function prepAction(action: Action, args: any[]){
+
+function prepAction(action: Action, args: any[]) {
    // store stateful entities for state lock
 
    // check if stateful entities are currently involved in an active action
@@ -158,7 +219,7 @@ function prepAction(action: Action, args: any[]){
    // - if not start action
 }
 
-function endAction(action: Action){
+function endAction(action: Action) {
    action.emitCompleted()
 }
 
