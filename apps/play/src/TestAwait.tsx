@@ -6,7 +6,7 @@ function fetchData(options: { awaited: true }) {
    return SuspenseIon(undefined,
       new Promise((resolve, reject) => {
          setTimeout(() => {
-            reject('nooo')
+            // reject('nooo')s
             resolve({ name: 'kermit' })
          }, 5000)
       }) as Promise<{ name: string }>,
@@ -28,7 +28,7 @@ function fetchNestedDataB() {
       new Promise((resolve, reject) => {
          setTimeout(() => {
             resolve({ name: 'sir robin the brave' })
-         }, 1000)
+         }, 8000)
       }) as Promise<{ name: string }>
    )
 }

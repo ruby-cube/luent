@@ -69,6 +69,10 @@ export function pend(promiseValue: Promise<any> | Promise<any>[]) {
    return promise;
 }
 
+export function pendReload(){
+   
+}
+
 
 export function createAwaitSeries(
    series:

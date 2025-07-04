@@ -1,15 +1,19 @@
 # TODOS:
 [ ] ion.suspense(() => {}, { awaited: true })
    - refetch
-[ ] watch( , { phase: 'sync' | 'prerender' | 'render' | 'postrender' })
+--
+EFFECT SYSTEM
+[ ] watch( , { phase: 'sync' | 'prerender' | 'internal render' | 'render' | 'postrender' })
 [ ] responsive rendering
    - console.warn when rendering exceeds 50ms
+[ ] PhaseEffectQueue and new effect cycle system
+[ ] remove particles
+--
+DO ACTION
 [ ] doAction()
    - async
    - lazy
-[ ] PhaseEffectQueue and new effect cycle system
-[ ] internal render phase
-[ ] remove particles
+   - compiler to register mutations
 --
 [ ] lazyBatch()
 [ ] lazyTask() (requestIdleCallback with promise)

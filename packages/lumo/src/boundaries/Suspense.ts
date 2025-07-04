@@ -22,12 +22,12 @@ const SUSPENSE_ION = Symbol('suspense ion')
 //TODO:
 export type Suspense<T> = {
    [SUSPENSE_ION]: true,
-   cancel(): void
-   onCancel(task: () => void): void
-   promise: Promise<T>,
    error: null | Error,
-   updating: boolean,
-   settled: boolean
+   promise: Promise<T>,
+   // cancel(): void
+   // onCancel(task: () => void): void
+   // updating: boolean,
+   // settled: boolean
 }
 export type SuspenseIon<T> = MutableIon<T | undefined> & Suspense<T>
 export type Awaited<T> = MutableIon<T | undefined> & Suspense<T>
@@ -35,10 +35,10 @@ export type Resolved<T> = MutableIon<T> & {
    [SUSPENSE_ION]: true,
    promise: Promise<T>,
    error: null, // different
-   updating: boolean,
-   cancel(): void
-   onCancel(task: () => void): void
-   settled: boolean
+   // updating: boolean,
+   // cancel(): void
+   // onCancel(task: () => void): void
+   // settled: boolean
 }
 
 
@@ -58,21 +58,22 @@ export function isPending(ion: SuspenseIon<unknown>) {
    return ion.state instanceof Promise;
 }
 
+type SuspenseIonOptions = {
+   awaited: true | 'load'
+}
+
 export function SuspenseIon<
    T,
    B extends boolean,
    OPT = undefined
->(initialState: T | undefined, input: Promise<T> | ((ion: SuspenseIon<T>) => Promise<T>), options?: OPT & { awaited: B }): OPT extends undefined ? SuspenseIon<T> : B extends true ? Awaited<T> : SuspenseIon<T> {
+>(initialState: T | undefined, input: Promise<T> | ((ion: SuspenseIon<T>) => Promise<T>), options?: OPT & SuspenseIonOptions): OPT extends undefined ? SuspenseIon<T> : B extends true | 'load' | 'reload' ? Awaited<T> : SuspenseIon<T> {
    if (input instanceof Promise) {
       if (options?.awaited) pend(input)
-      const $ion = ion(initialState as T | undefined) as SuspenseIon<T>
-      $ion.promise = input
-      $ion.error = null;
-      // $ion.awaited = () => {
-      //    //TODO: trace must await calls for debugging
-      //    pend(input);
-      //    return $ion
-      // }
+      const $ion = ion(initialState as T | undefined, {
+         [SUSPENSE_ION]: true,
+         promise: input,
+         error: null
+      }) as SuspenseIon<T>
 
       input
          .then(value => $ion.state = value)
@@ -83,15 +84,17 @@ export function SuspenseIon<
       return $ion;
    }
 
-   const $ion = ion(initialState) as SuspenseIon<T>
-   // $ion.awaited = () => {
-   //    //TODO: trace must await calls for debugging
-   //    pend($ion.promise);
-   //    return $ion
-   // }
+   const $promise = ion(undefined as undefined | Promise<unknown>)
+   const $ion = ion(initialState as unknown, {
+      [SUSPENSE_ION]: true,
+      get promise() {
+         return $promise()
+      },
+      error: null as null | Error
+   })
+
    ionicTask(() => {
-      const promise = input($ion);
-      $ion.promise = promise;
+      const promise = $promise.state = input($ion as SuspenseIon<T>);
 
       promise
          .then(value => $ion.state = value)
@@ -100,7 +103,7 @@ export function SuspenseIon<
             throw err;
          })
    })
-   if (options?.awaited) pend($ion.promise)
+   if (options?.awaited) pend($ion.promise!)
    return $ion as SuspenseIon<T>;
 }
 

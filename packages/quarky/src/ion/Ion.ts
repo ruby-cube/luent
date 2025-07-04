@@ -21,7 +21,8 @@ export type MutableIon<T> = Ion<T> & { state: T }
 
 type Derivation<R = unknown> = (prevValue?: R) => R
 
-export type Methods = { [key: PropertyKey]: (...args: any) => any }
+export type Methods = AnyObject
+// { [key: PropertyKey]: (...args: any) => any }
 
 type PickMethods = (...args: string[]) => ReinConfig
 
@@ -84,16 +85,16 @@ type AsIon<T, M = {}> = [T] extends [MutableIon<unknown>] ? T // [T] extends [At
 export function ion<
    T,
    M
->(initialState: T & (() => unknown), methods?: M & Methods & ThisType<M>): AsIon<T, M>
+>(initialState: T & (() => unknown), props?: M & ThisType<M>): AsIon<T, M>
 export function ion<
    T,
    M
->(initialState: T, methods?: M & Methods & ThisType<M & { state: T }>): AsIon<T, M>
+>(initialState: T, props?: M & ThisType<M & { state: T }>): AsIon<T, M>
 export function ion<
    T,
    M
->(initialState: T & (() => unknown) | T, methods?: M & Methods & ThisType<M & { state: T }>): AsIon<T, M> {
-   return asIon(initialState, MUTABLE, false, methods) as AsIon<T, M>
+>(initialState: T & (() => unknown) | T, props?: M & ThisType<M & { state: T }>): AsIon<T, M> {
+   return asIon(initialState, MUTABLE, false, props) as AsIon<T, M>
 }
 
 
@@ -185,14 +186,14 @@ function asIon(
    initialState: unknown | (() => unknown),
    mutable: boolean,
    ionized: boolean,
-   methods?: AnyObject,
+   props?: AnyObject,
 ) {
    if (isFunction(initialState)) {
-      return initializeSnapshots(createMaybeMemoizedIon(<Derivation>initialState, methods, true))
+      return initializeSnapshots(createMaybeMemoizedIon(<Derivation>initialState, props, true))
    }
 
    if (isIon(initialState)) return initialState
-   return initializeSnapshots(createAtomicIon(ionized ? maybeIonize(initialState) : initialState, 'state', methods, mutable, ionized)) // TODO: add inert mark map
+   return initializeSnapshots(createAtomicIon(ionized ? maybeIonize(initialState) : initialState, props, mutable, ionized)) // TODO: add inert mark map
 }
 
 

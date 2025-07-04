@@ -24,8 +24,7 @@ export type $AtomicIonState = MutableIon<unknown> & MutableCapsule & {
 type _AtomicIonQuark = {
    type: symbol;
    mutable: boolean;
-   methods: Methods | undefined;
-   thisIon: Methods & AnyObject | undefined;
+   props: AnyObject | undefined;
    state: any
    // stateKey: string
    ionized: boolean | typeof MUTABLE_IONIZED,
@@ -52,8 +51,7 @@ const REINED_QUARK = Symbol('reined-ion-quark')
 /** INTERNAL */
 export function createAtomicIon(
    state: any,
-   stateKey: string,
-   methods?: Methods,
+   props?: Methods,
    mutable: boolean = true,
    ionized: boolean | typeof MUTABLE_IONIZED = false
 ) {
@@ -69,13 +67,12 @@ export function createAtomicIon(
       // stateKey,
       ionized,
       mutable,
-      methods,
+      props,
       entity: $state,
       type: ATOMIC_ION,
       asMutable: new Mutable(),
       asParticle: undefined,
       asWatched: undefined,
-      thisIon: undefined,
       asTraceable: new Traceable(),
       trigger,
       watch,
@@ -86,44 +83,45 @@ export function createAtomicIon(
 
    if (mutable)
       // public properties
+   
+   if (props) {
+      Object.defineProperty(props, 'state', {
+         get: $state,
+         set: setState.bind(quark)
+      })
+      Object.defineProperties($state, Object.getOwnPropertyDescriptors(props))
+      // return quark.entity = createAtomicIonWithMethods(quark, mutable)
+   }
+   else {
       Object.defineProperty($state, 'state', {
          get: $state,
          set: setState.bind(quark)
       })
 
-   if (methods) {
-      // private properties
-      const thisIon = quark.thisIon = Object.create(methods, {
-         [stateKey]: {
-            get: $state,
-            set: setState.bind(quark)
-         }
-      })
-      attachCapsuleMethods($state, methods, thisIon)
-      // return quark.entity = createAtomicIonWithMethods(quark, mutable)
    }
 
    return $state
 }
 
-function attachCapsuleMethods(ion: Ion & AnyObject, methods: AnyObject, thisIon?: AnyObject, selectedMethods?: Set<string>, parentMethods?: Set<string>) {
-   if (selectedMethods)
-      for (const key in methods) {
-         if (selectedMethods.has(key)){
-            if (parentMethods && !parentMethods.has(key)) {
-               ion[key] = useBlockedMethod(key)
-               selectedMethods.delete(key)
-            }
-            else {
-               ion[key] = methods[key].bind(thisIon)
-            }
-         }
-         else ion[key] = useBlockedMethod(key)
-      }
-   else
-      for (const key in methods) {
-         ion[key] = methods[key].bind(thisIon)
-      }
+function attachCapsuleMethods(ion: Ion & AnyObject, props: AnyObject) {
+   Object.defineProperties(ion, Object.getOwnPropertyDescriptors(props))
+   // if (selectedMethods)
+   //    for (const key in methods) {
+   //       if (selectedMethods.has(key)){
+   //          if (parentMethods && !parentMethods.has(key)) {
+   //             ion[key] = useBlockedMethod(key)
+   //             selectedMethods.delete(key)
+   //          }
+   //          else {
+   //             ion[key] = methods[key].bind(thisIon)
+   //          }
+   //       }
+   //       else ion[key] = useBlockedMethod(key)
+   //    }
+   // else
+      // for (const key in methods) {
+      //    ion[key] = methods[key].bind(thisIon)
+      // }
 }
 
 const ATOMIC_ION = Symbol('atomic ion')
@@ -264,87 +262,87 @@ type PropertyMap = Map<PropertyKey, () => unknown>
 //    return boundMethods[key] = rawMethod?.bind(thisIon)
 // }
 
-const NO_METHODS: Set<string> = new Set()
+// const NO_METHODS: Set<string> = new Set()
 
-/** INTERNAL */
-export function asReadonlyIon(ion: $AtomicIonState) {
-   const quark = quarkOf(ion)
-   if (quark.asReadonly) return quark.asReadonly;
-   if (quark.mutable || quark.methods)
-      return createReadonlyAtomicIon(quark)
-   return quark.asReadonly = ion;
-}
+// /** INTERNAL */
+// export function asReadonlyIon(ion: $AtomicIonState) {
+//    const quark = quarkOf(ion)
+//    if (quark.asReadonly) return quark.asReadonly;
+//    if (quark.mutable || quark.methods)
+//       return createReadonlyAtomicIon(quark)
+//    return quark.asReadonly = ion;
+// }
 
-function useBlockedMethod(key: PropertyKey) {
-   return function restrictedMethod() {
-      throw new Error(`The method '${String(key)}' has been restricted by another component`)
-   }
-}
-
-
-/** INTERNAL */
-function createReadonlyAtomicIon(
-   quark: AtomicIonQuark,
-) {
-   const originalIon = quark.entity
-   const methods = quark.methods
-
-   const $state = function $readonlyState() {
-      return originalIon();
-   } as Ion & AnyObject;
-
-   $state[QUARK] = quark
-   $state[REINED_QUARK] = {
-      mutable: false,
-      selectedMethods: NO_METHODS
-   }
-
-   quark.asReadonly = $state
-
-   if (methods) {
-      attachCapsuleMethods($state, methods, undefined, NO_METHODS)
-   }
-
-   return $state
-}
-
-/** INTERNAL */
-function createReinedAtomicIon(
-   quark: AtomicIonQuark,
-   mutable: boolean,
-   selectedMethods?: Set<string>,
-   parentSelectedMethods?: Set<string>
-) {
-   const originalIon = quark.entity
-   const methods = quark.methods
-
-   const $state = function $reinedState() {
-      return originalIon();
-   } as AnyObject & Ion;
-
-   $state[QUARK] = quark
-   $state[REINED_QUARK] = {
-      mutable,
-      selectedMethods
-   }
-
-   if (mutable)
-      Object.defineProperty($state, 'state', {
-         get: $state,
-         set: setState.bind(quark)
-      })
-
-   if (methods) {
-      attachCapsuleMethods($state, methods, quark.thisIon, selectedMethods, parentSelectedMethods)
-   }
-
-   return $state
-}
+// function useBlockedMethod(key: PropertyKey) {
+//    return function restrictedMethod() {
+//       throw new Error(`The method '${String(key)}' has been restricted by another component`)
+//    }
+// }
 
 
-export type $ReadonlyState = Ion & {
-   [QUARK]: _AtomicIonQuark & EntityQuark<$AtomicIonState> & ParticleMorph & Watchable
-}
+// /** INTERNAL */
+// function createReadonlyAtomicIon(
+//    quark: AtomicIonQuark,
+// ) {
+//    const originalIon = quark.entity
+//    const methods = quark.methods
+
+//    const $state = function $readonlyState() {
+//       return originalIon();
+//    } as Ion & AnyObject;
+
+//    $state[QUARK] = quark
+//    $state[REINED_QUARK] = {
+//       mutable: false,
+//       selectedMethods: NO_METHODS
+//    }
+
+//    quark.asReadonly = $state
+
+//    if (methods) {
+//       attachCapsuleMethods($state, methods, undefined, NO_METHODS)
+//    }
+
+//    return $state
+// }
+
+// /** INTERNAL */
+// function createReinedAtomicIon(
+//    quark: AtomicIonQuark,
+//    mutable: boolean,
+//    selectedMethods?: Set<string>,
+//    parentSelectedMethods?: Set<string>
+// ) {
+//    const originalIon = quark.entity
+//    const methods = quark.methods
+
+//    const $state = function $reinedState() {
+//       return originalIon();
+//    } as AnyObject & Ion;
+
+//    $state[QUARK] = quark
+//    $state[REINED_QUARK] = {
+//       mutable,
+//       selectedMethods
+//    }
+
+//    if (mutable)
+//       Object.defineProperty($state, 'state', {
+//          get: $state,
+//          set: setState.bind(quark)
+//       })
+
+//    if (methods) {
+//       attachCapsuleMethods($state, methods, quark.thisIon, selectedMethods, parentSelectedMethods)
+//    }
+
+//    return $state
+// }
+
+
+// export type $ReadonlyState = Ion & {
+//    [QUARK]: _AtomicIonQuark & EntityQuark<$AtomicIonState> & ParticleMorph & Watchable
+// }
 
 // function createProxyWithAllMethods(quark: AtomicIonQuark, boundMethods: Methods, thisIon: Methods, mutable: boolean) {
 //    const methods = quark.methods!;
@@ -385,8 +383,8 @@ export type $ReadonlyState = Ion & {
 // }
 
 
-export function asReinedIon(ion: $AtomicIonState, mutable: boolean, selectedMethods?: string[]) {
-   const reinedQuark = (<{ [REINED_QUARK]: ReinedIonQuark }><unknown>ion)[REINED_QUARK]
-   if (reinedQuark && !reinedQuark.mutable && mutable) throw new Error('Cannot make readonly object mutable')
-   return createReinedAtomicIon(quarkOf(ion), mutable, selectedMethods ? new Set(selectedMethods) : undefined, reinedQuark?.selectedMethods)
-}
+// export function asReinedIon(ion: $AtomicIonState, mutable: boolean, selectedMethods?: string[]) {
+//    const reinedQuark = (<{ [REINED_QUARK]: ReinedIonQuark }><unknown>ion)[REINED_QUARK]
+//    if (reinedQuark && !reinedQuark.mutable && mutable) throw new Error('Cannot make readonly object mutable')
+//    return createReinedAtomicIon(quarkOf(ion), mutable, selectedMethods ? new Set(selectedMethods) : undefined, reinedQuark?.selectedMethods)
+// }
