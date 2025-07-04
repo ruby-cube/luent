@@ -8,7 +8,7 @@
 //    <div>{err}</div>
 // )}
 
-import { ion } from "@rue/quarky";
+import { Ion, ion, watch } from "@rue/quarky";
 import { RawJSXNode, RenderFunction } from "../node/makeNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
@@ -55,22 +55,30 @@ export function Catch(renderError: RenderError) {
 }
 
 
-const getAwaitStack = defineAppwide('awaitStack', () => [] as Promise<any>[][])
+const getAwaitStack = defineAppwide('awaitStack', () => [] as { promises: Promise<any>[], $promises: Ion<Promise<unknown>>[] }[])
 
-export function pend(promiseValue: Promise<any> | Promise<any>[]) {
+function $awaitStack() {
    const awaitStack = getAwaitStack()
    if (awaitStack.length === 0) // awaitStack has not been initialized by Await()
       throw new Error('pend must be handled by an Await call in a parent or ancestor component');
+   return awaitStack
+}
+
+export function pend(promiseValue: Promise<any> | Promise<any>[]) {
+   const awaitStack = $awaitStack()
    const promise = promiseValue instanceof Array ?
       Promise.all(promiseValue)
       : promiseValue
-   const pendingPromises = awaitStack.at(-1)!;
-   pendingPromises.push(promise)
+   const { promises } = awaitStack.at(-1)!;
+   promises.push(promise)
    return promise;
 }
 
-export function pendReload(){
-   
+export function pendReload($promise: Ion<Promise<unknown>>) {
+   const awaitStack = $awaitStack()
+   const { $promises } = awaitStack.at(-1)!;
+   $promises.push($promise)
+   return ion;
 }
 
 
@@ -104,7 +112,9 @@ export function createAwaitSeries(
 
    // collect promises
    const pendingPromises: Promise<unknown>[] = []
-   awaitStack.push(pendingPromises);
+   const $promises: Ion<Promise<unknown>>[] = []
+   const suspenseCollection = { promises: pendingPromises, $promises }
+   awaitStack.push(suspenseCollection);
    if (suspenseIons) {
       for (const ion of suspenseIons) {
          pend(ion.promise)
@@ -112,7 +122,6 @@ export function createAwaitSeries(
    }
    const output = renderResolved(); // any nested pend calls will collect promises into the pendingPromises array
    const allPromises = Promise.all(pendingPromises);
-   console.log('allPromises', pendingPromises)
    awaitStack.pop();
    allPromises
       .then(() => {
@@ -124,6 +133,39 @@ export function createAwaitSeries(
          $error.state = toError(err);
          $pending.state = false
       })
+
+   let promiseCount = 0;
+
+   for (const $promise of $promises) {
+      watch($promise, ({ current: promise }) => {
+         promiseCount++
+         if ($pending() === true) {
+            clearTimeout(timeoutID)
+         }
+         console.log('%%% running $pending reset')
+         $pending.state = true;
+
+         if (timeout) {
+            timeoutID = setTimeout(() => {
+               $error.state = new Error("Timed out");
+               $pending.state = false
+            }, timeout)
+         }
+
+         promise
+            .then(() => {
+               clearTimeout(timeoutID)
+               promiseCount--
+               if (promiseCount === 0)
+                  $pending.state = false
+            })
+            .catch(err => {
+               if (renderError === undefined) throw toError(err);
+               $error.state = toError(err);
+               $pending.state = false
+            })
+      })
+   }
 
    return createIfSeries([
       If($pending, renderPlaceholder),

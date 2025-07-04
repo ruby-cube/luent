@@ -1,6 +1,6 @@
 import { component, SuspenseIon, fromTag } from "@rue/lumo";
 import { Await, Meanwhile, Catch } from "../../../packages/lumo/src/boundaries/Await";
-import { Ion } from "@rue/quarky";
+import { ion, Ion } from "@rue/quarky";
 
 function fetchData(options: { awaited: true }) {
    return SuspenseIon(undefined,
@@ -13,18 +13,19 @@ function fetchData(options: { awaited: true }) {
       options)
 }
 
-function fetchNestedData(options: { awaited: true }) {
-   return SuspenseIon(undefined,
+function fetchNestedData($name: Ion<string>, options: { awaited: true }) {
+   return SuspenseIon(undefined, () =>
       new Promise((resolve, reject) => {
+         const name = $name()
          setTimeout(() => {
-            resolve({ name: 'sir robin' })
+            resolve({ name })
          }, 1000)
       }) as Promise<{ name: string }>,
       options)
 }
 
-function fetchNestedDataB() {
-   return SuspenseIon({name: 'placeholder'},
+function fetchNestedDataB($name: Ion<string>) {
+   return SuspenseIon({ name: 'placeholder' },
       new Promise((resolve, reject) => {
          setTimeout(() => {
             resolve({ name: 'sir robin the brave' })
@@ -34,11 +35,13 @@ function fetchNestedDataB() {
 }
 
 export function TestAwait() {
-   const $brave = fetchNestedDataB()
+   const $name = ion('sir robin the brave')
+   const $brave = fetchNestedDataB($name)
 
    return component(
       <>
-        <p>{($brave()?.name)}</p>
+         <button on:click={e => $name.state = $name() + '!'}>click</button>
+         <p>{($brave()?.name)}</p>
          <h1>Untitled Goose Game</h1>
          {Await($brave,
             <>
@@ -55,7 +58,7 @@ export function TestAwait() {
          <hr></hr>
          <h1>Untitled Goose Game</h1>
          {Await(
-            <Child></Child>
+            <Child name={$name}></Child>
          )}
          {Meanwhile(
             <Loading></Loading>
@@ -79,20 +82,20 @@ function ChildB() {
    )
 }
 
-function Child() {
+function Child({ $name } = fromTag<{ name: string }>()) {
    const $kermit = fetchData({ awaited: true })
 
    return component(
       <>
          <div>{($kermit()?.name)}</div>
          <div>Child :)</div>
-         <GrandChild></GrandChild>
+         <GrandChild name={$name}></GrandChild>
       </>
    )
 }
 
-function GrandChild() {
-   const $robin = fetchNestedData({ awaited: true })
+function GrandChild({ $name } = fromTag<{ name: string }>()) {
+   const $robin = fetchNestedData($name, { awaited: true })
 
    return component(
       <>

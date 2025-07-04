@@ -1,6 +1,7 @@
 import { toError } from "@rue/utils";
 import { ion, __addDevName, ionicTask, Ion, MutableIon, isIon } from "../../../quarky/src";
-import { pend } from "./Await";
+import { pend, pendReload } from "./Await";
+import { SYNC } from "../render-cycle";
 
 
 
@@ -68,7 +69,9 @@ export function SuspenseIon<
    OPT = undefined
 >(initialState: T | undefined, input: Promise<T> | ((ion: SuspenseIon<T>) => Promise<T>), options?: OPT & SuspenseIonOptions): OPT extends undefined ? SuspenseIon<T> : B extends true | 'load' | 'reload' ? Awaited<T> : SuspenseIon<T> {
    if (input instanceof Promise) {
-      if (options?.awaited) pend(input)
+      if (options?.awaited) {
+         pend(input)
+      }
       const $ion = ion(initialState as T | undefined, {
          [SUSPENSE_ION]: true,
          promise: input,
@@ -84,7 +87,7 @@ export function SuspenseIon<
       return $ion;
    }
 
-   const $promise = ion(undefined as undefined | Promise<unknown>)
+   const $promise = ion(new Promise(() => { }))
    const $ion = ion(initialState as unknown, {
       [SUSPENSE_ION]: true,
       get promise() {
@@ -94,6 +97,7 @@ export function SuspenseIon<
    })
 
    ionicTask(() => {
+      console.log('')
       const promise = $promise.state = input($ion as SuspenseIon<T>);
 
       promise
@@ -102,8 +106,14 @@ export function SuspenseIon<
             $ion.error = toError(err)
             throw err;
          })
-   })
-   if (options?.awaited) pend($ion.promise!)
+   }, {phase: SYNC})
+
+   if (options?.awaited) {
+      pend($promise())
+      if (options?.awaited === true) {
+         pendReload($promise)
+      }
+   }
    return $ion as SuspenseIon<T>;
 }
 
