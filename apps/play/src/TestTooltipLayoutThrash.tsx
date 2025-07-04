@@ -1,4 +1,4 @@
-import { component, Else, For, fromTag, If, JSXNode, measureLayout, nodeRef, onMounted, Portal, RawJSXNode, RenderFunction, RenderSlot } from '@rue/lumo';
+import { component, Else, For, fromTag, If, JSXNode, measureLayout, NodeRef, onMounted, Portal, RawJSXNode, RenderFunction, RenderSlot } from '@rue/lumo';
 import { Ion, ion, isNonNull, watch } from '@rue/quarky';
 
 
@@ -74,7 +74,7 @@ export function ButtonWithTooltip(input = fromTag<{
    const { Slot } = input
    const $targetRect = ion(null as Rect | null)
 
-   const button = nodeRef('button')
+   const button = NodeRef('button')
 
    if (isNonNull($targetRect)){
       
@@ -119,7 +119,7 @@ export function Tooltip({ Slot, targetRect } = fromTag<{
    Slot: RenderSlot
    targetRect: Ion<Rect>
 }>()) {
-   const div = nodeRef('div')
+   const div = NodeRef('div')
    const $height = ion(undefined as number | undefined)
 
    onMounted(async () => {

@@ -1,5 +1,5 @@
 import { toError } from "@rue/utils";
-import { ion, __addDevName, ionicTask, Ion, MutableIon } from "../../../quarky/src";
+import { ion, __addDevName, ionicTask, Ion, MutableIon, isIon } from "../../../quarky/src";
 import { pend } from "./Await";
 
 
@@ -16,10 +16,30 @@ import { pend } from "./Await";
 // QUESTION: should suspense boundaries be the default? No because you might not want to hold up rendering for something that is ok to be undefined
 // Should { awaited: true } be the default? or { renderUndefined: true } or { dontAwait } or 
 
-export type Suspense<T> = { promise: Promise<T>, error: null | Error, awaited: () => Awaited<T> }
+const SUSPENSE_ION = Symbol('suspense ion')
+
+
+//TODO:
+export type Suspense<T> = {
+   [SUSPENSE_ION]: true,
+   cancel(): void
+   onCancel(task: () => void): void
+   promise: Promise<T>,
+   error: null | Error,
+   updating: boolean,
+   settled: boolean
+}
 export type SuspenseIon<T> = MutableIon<T | undefined> & Suspense<T>
 export type Awaited<T> = MutableIon<T | undefined> & Suspense<T>
-export type Resolved<T> = MutableIon<T> & { promise: Promise<T>, error: null, awaited: () => Awaited<T> }
+export type Resolved<T> = MutableIon<T> & {
+   [SUSPENSE_ION]: true,
+   promise: Promise<T>,
+   error: null, // different
+   updating: boolean,
+   cancel(): void
+   onCancel(task: () => void): void
+   settled: boolean
+}
 
 
 export function assertResolved<T>(ion: SuspenseIon<T>): asserts ion is Resolved<T> {
@@ -38,17 +58,21 @@ export function isPending(ion: SuspenseIon<unknown>) {
    return ion.state instanceof Promise;
 }
 
-function createSuspenseIon<T, B extends boolean, OPT = undefined>(input: Promise<T> | ((ion: SuspenseIon<T>) => Promise<T>), options?: OPT & { awaited: B }): OPT extends undefined ? SuspenseIon<T> : B extends true ? Awaited<T> : SuspenseIon<T> {
+export function SuspenseIon<
+   T,
+   B extends boolean,
+   OPT = undefined
+>(initialState: T | undefined, input: Promise<T> | ((ion: SuspenseIon<T>) => Promise<T>), options?: OPT & { awaited: B }): OPT extends undefined ? SuspenseIon<T> : B extends true ? Awaited<T> : SuspenseIon<T> {
    if (input instanceof Promise) {
-      // if (options?.awaited) pend(input)
-      const $ion = ion(undefined as T | undefined) as SuspenseIon<T>
+      if (options?.awaited) pend(input)
+      const $ion = ion(initialState as T | undefined) as SuspenseIon<T>
       $ion.promise = input
       $ion.error = null;
-      $ion.awaited = () => {
-         //TODO: trace must await calls for debugging
-         pend(input);
-         return $ion
-      }
+      // $ion.awaited = () => {
+      //    //TODO: trace must await calls for debugging
+      //    pend(input);
+      //    return $ion
+      // }
 
       input
          .then(value => $ion.state = value)
@@ -59,12 +83,12 @@ function createSuspenseIon<T, B extends boolean, OPT = undefined>(input: Promise
       return $ion;
    }
 
-   const $ion = ion(undefined) as SuspenseIon<T>
-   $ion.awaited = () => {
-      //TODO: trace must await calls for debugging
-      pend($ion.promise);
-      return $ion
-   }
+   const $ion = ion(initialState) as SuspenseIon<T>
+   // $ion.awaited = () => {
+   //    //TODO: trace must await calls for debugging
+   //    pend($ion.promise);
+   //    return $ion
+   // }
    ionicTask(() => {
       const promise = input($ion);
       $ion.promise = promise;
@@ -76,12 +100,16 @@ function createSuspenseIon<T, B extends boolean, OPT = undefined>(input: Promise
             throw err;
          })
    })
+   if (options?.awaited) pend($ion.promise)
    return $ion as SuspenseIon<T>;
 }
 
-export function asSuspenseIon<T>(value: SuspenseIon<T> | Promise<T>): SuspenseIon<T> {
-   if ('suspense' in value) return value;
-   return createSuspenseIon(value)
+export function asSuspenseIon<T>(value: SuspenseIon<T> | Promise<T>, options: { awaited: true }): SuspenseIon<T> {
+   if (isSuspenseIon(value)) return value;
+   return SuspenseIon(undefined, value)
 }
 
+function isSuspenseIon(value: unknown): value is SuspenseIon<unknown> {
+   return isIon(value) && SUSPENSE_ION in value;
+}
 

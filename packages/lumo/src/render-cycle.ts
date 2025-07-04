@@ -121,8 +121,8 @@ import { createAwaitableHook } from "@rue/utils"
 export const {
    SYNC,
    POSTEVENT,
-   // RENDER,
-   // POSTRENDER,
+   RENDER,
+   POSTRENDER,
    getEndHook
 } = useReactivitySystem(
       //    {
@@ -141,18 +141,18 @@ export const {
    )
 
 
-// export const onPostevent = createEffectCycleHook(POSTEVENT)
-// export const onRender = createEffectCycleHook(RENDER)
-// export const onPostrender = createEffectCycleHook(POSTRENDER)
+export const onPostevent = createEffectCycleHook(POSTEVENT)
+export const onRender = createEffectCycleHook(RENDER)
+export const onPostrender = createEffectCycleHook(POSTRENDER)
 
 const onEventCycleEnd = getEndHook('EventCycle')
-// export const onRenderCycleEnd = getEndHook('UpdateCycle')
+export const onRenderCycleEnd = getEndHook('UpdateCycle')
 
-// export const $postevent = createAwaitableHook(onPostevent)
-// export const $renderphase = createAwaitableHook(onRender)
-// export const $postrender = createAwaitableHook(onPostrender)
+export const $postevent = createAwaitableHook(onPostevent)
+export const $renderphase = createAwaitableHook(onRender)
+export const $postrender = createAwaitableHook(onPostrender)
 const effectsComplete = createAwaitableHook(onEventCycleEnd)
-// export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)
+export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)
 
 //NOTE: there may be multiple effect cycles per event
 // queueEffect (onPostevent)

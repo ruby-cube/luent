@@ -1,5 +1,11 @@
+//@ts-nocheck
 import { toError } from "@rue/utils";
 import { Mutation, MutableEntity, asMutable } from "../Mutable";
+import { AsyncState } from "@rue/flask";
+import { E } from "vitest/dist/chunks/reporters.6vxQttCV";
+
+
+
 
 // Actions may span mulitple effect cycles
 
@@ -44,7 +50,7 @@ export const DEEP = true;
 
 type Task = () => void;
 
-class Action {
+class InternalAction {
    stateEntities: Set<object> = new Set()
 
    mutations: Mutation[] = []
@@ -67,7 +73,7 @@ class Action {
    //    return true;
    // }
 
-   cancel() {
+   rollback() {
       const mutations = this.mutations
       for (const mutation of mutations) {
          mutation.undo()
@@ -101,88 +107,103 @@ function storeMutations(action: Action, target: MutableEntity) {
 
 
 
-type Name = symbol
 
-type ActionDefinition = {
-   do(action: Action): (...args: any[]) => any
-   catch(error: unknown, action: Action): any
-}
+// const [deleteText, textDeletion] = useAction(textDeletion =>
+//    (document: Doc, position: number) => {
+//       if (textDeletion.isPending) textDeletion.cancel()
+//       return document.deleteText(position)
+//    }
+// )
 
-// const actionMap: Map<Name, ActionDefinition> = new Map()
-
-// export function defineAction(action: ActionDefinition) { //TODO: generics
-//    const name = Symbol()
-//    actionMap.set(name, action)
-//    return name;
-// }
-
-export function doAction<T>(action: Function, args: any[], options?: { catch?: (err: unknown) => void }) { //TODO: Generics
-   if (action.length === 0) throw new Error('Action cannot not be a method that mutates state via this or closure. Any state to be mutated by actions must be explicitly passed in as an argument')
-   const thisAction = new Action()
-   try {
-      const output = action(...args)
-      if (output instanceof Promise) {
-         // TODO: not sure if this is correct...
-         const awaitPromise = async () => {
-            try {
-               return await output;
-            }
-            catch (err) {
-               return options?.catch?.(err)
-            }
-            finally {
-               endAction(thisAction)
-            }
-         }
-         return awaitPromise()
-      }
-      else {
-         return output;
-      }
+class Action {
+   pending: boolean = true
+   settled: boolean = false
+   status: 'in progress' | 'queued' | 'canceled' | 'complete' | null
+   error: Error | null = null
+   cancel() {
+      if (this.status !== 'in progress') return;
+      metaaction(() => {
+         action.settled = true;
+         action.pending = false;
+         action?.status = 'canceled'
+         this[INTERNAL].rollback()
+      })
    }
-   catch (err) {
-      return options?.catch?.(err)
-   }
-   finally {
-      endAction(thisAction)
-   }
-}
-
-function insert() {
-
-   return new Promise((resolve, reject) => {
-      setTimeout(() => { resolve('wahh wanh') }, 2000)
-   })
-}
-
-type NewAction = {
-   cancel(): void
    onCancel(task: () => void): void
-   isPending: boolean;
-   isSettled: boolean;
-   status: 'in progress' | 'queued' | 'canceled' | 'complete'
-   error: Error | null
    onDone(task: () => void): void
+   [INTERNAL]: InternalAction
 }
 
-function newdoAction(action: NewAction, fn: () => unknown, options: { catch: (err: Error) => void, lazy: true | { limit: number } }) {
+type BoundActionFn = (...args: [unknown, ...any[]]) => any
+
+type MakeBoundActionFn = (...args: [unknown, ...any[]]) => (action: Action) => any
+
+function useAction<T extends (action: Action) => BoundActionFn>(createActionFn: T) {
+   const action = ionize(new Action())
+   const boundActionFn = createActionFn(action)
+   function makeActionFn(...args: any[]) {
+      function actionFn(action: Action) {
+         return boundActionFn(...args)
+      }
+      actionFn.action = action;
+      return actionFn
+   }
+
+   //TODO: provide from global if createActionFn not provided
+   return [makeActionFn, action]
+}
+
+type ActionFn = (action: Action) => T
+
+// outer actions cancel inner action
+
+const [getCurrentAction, actionStack] = AsyncState<Action | null>('action')
+
+/**
+ * prevents action state from being delayed by action's delayed rendering
+ * @param mutation 
+ */
+function metaaction(mutation: () => void) {
+   actionStack.push(null)
+   mutation()
+   actionStack.pop()
+}
+
+export function doAction<T>(actionFn: (action: Action) => T, options?: { lazy: true | number, catch?: (err: unknown) => void }): T {
+   if (action.length === 0) throw new Error('Action cannot not be a method that mutates state via this or closure. Any state to be mutated by actions must be explicitly passed in as an argument')
+   const action = 'actionFn' in actionFn ? actionFn.action as Action : ionize(new Action())
+   const outerAction = getCurrentAction()
+   outerAction?.onCancel(() => action.cancel())
+
    let resolve: (value: unknown) => void;
    const actionComplete = new Promise((_resolve) => {
       resolve = _resolve
    })
    try {
+      metaaction(() => {
+         action.settled = false;
+         action.pending = true
+         action.status = 'in progress'
+      })
+      actionStack.push(action)
       const output = fn()
       if (output instanceof Promise) {
          output
+            // action function complete, but state not rendered yet
             .then(() => {
-               console.log('promise done: run effects now')
-               // await action.rendered
+               if (action.status === 'canceled') return;
+               action[INTERNAL].scheduleEffects() // effects should run //TODO: 
+               await action[INTERNAL].rendered //TODO: I dunno how this should work
+               metaaction(() => {
+                  action.settled = true;
+                  action.pending = false;
+                  action?.status = 'complete'
+               })
                resolve(output)
             })
             .catch(err => {
                action.cancel()
                options.catch(toError(err))
-               console.log('done via promise fail')
             })
       }
       else {
@@ -197,9 +218,20 @@ function newdoAction(action: NewAction, fn: () => unknown, options: { catch: (er
       console.log('done via error')
    }
    finally {
+      actionStack.pop()
       return actionComplete
    }
 }
+
+// function insert() {
+
+//    return new Promise((resolve, reject) => {
+//       setTimeout(() => { resolve('wahh wanh') }, 2000)
+//    })
+// }
+
+
+
 
 // const output = await doAction(insert, {
 //    catch(err) {
@@ -223,39 +255,62 @@ function endAction(action: Action) {
    action.emitCompleted()
 }
 
-//API exploration
 
-// state capsules
-// arguments
-function INSERT_TEXT(text, position, doc) {
 
+const [DeleteText, textDeletion] = useAction((textDeletion) =>
+   (document, position) => {
+      $_registerMutation(document, 'deleteText')
+      $_registerMutation(document.cursor, 'updatePosition')
+
+      const { pos: newPosition } = document.deleteText(position)
+      document.cursor.updatePosition(newPosition)
+   }, {
+   onOverlap(currentAction) {
+      if (currentAction === textDeletion) return 'override';
+      if (currentAction === textDeletion) return 'yield';
+      if (currentAction === textDeletion) return 'queue'; // default
+   }
+})
+
+
+class Doc {
+
+   text: string
+
+   tags: { name: string }[]
+
+   cursorPosition: number
+
+   deleteText(position) {
+      target.text = ''
+      target.cursorPosition = position;
+      this.tags.splice(0, 2)
+      this.nestedObject.modify()
+   }
 }
 
-
-const result = await doAction(
-   INSERT_TEXT, newText, cursorPosition, doc, { // options obj must be POJO (distinguish from Promises and other objs with catch method)
-   catch(err) {
-
-   }
-})
-
-const result = await doAction.fromApp(
-   INSERT_TEXT, newText, cursorPosition, doc, { // options obj must be POJO (distinguish from Promises)
-   catch(err) {
-
-   }
-})
-
-
-
-
-function insertText() {
-   return doAction(INSERT_TEXT, newText, cursorPosition, doc, { // options obj must be POJO (distinguish from Promises)
-      catch(err) {
-
+$_registerMutations(Doc, {
+   deleteText: {
+      getMutableState(target) {
+         return [
+            target.$text,
+            target.$cursorPosition,
+            target.tags,
+            target.tags.forEach(tag => tag.$name),
+            getMutableState(target.nestedObj, 'modify')
+         ]
       }
-   })
+   }
+})
+
+
+function handleKeypress() {
+   const position = getPosition()
+   doAction(DeleteText(position))
 }
 
+onSomeEvent(e => {
+   cursor.updatePosition(e.cursorPosition) //what happens when this happens while textDeletion is in progress?
+})
 
-
+// cursor.updatePosition is an implicit action ... how do we register it as exclusive to textDeletion?

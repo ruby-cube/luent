@@ -3,7 +3,6 @@ import { neutron } from "./Neutron";
 import { createMaybeMemoizedIon } from "../ionic/DerivationIon";
 import { createAtomicIon, IONIZED, MUTABLE, MUTABLE_IONIZED } from "./AtomicIon";
 import { maybeIonize } from "../ionized/IonizedModel";
-import { finiton } from "./FiniteStates";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionized/ionize";
 import { Inert, IsInert } from "../ionized/inert";
@@ -112,7 +111,6 @@ ion.ionize = createIonizedIon
 // createMutableIon.ionize = createMutableIonizedIon
 // createMutableIonizedIon.mu = createDeepMutableIonizedIon
 
-ion.finite = finiton
 
 
 

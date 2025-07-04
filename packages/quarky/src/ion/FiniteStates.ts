@@ -1,6 +1,5 @@
-import { AnyObject } from "@rue/types";
-import { Ion, ion } from "./ion";
 import { debug, isFunction } from "@rue/utils";
+import { ion } from "./Ion";
 
 
 // trafficLight.is('on') // reactive
@@ -38,7 +37,7 @@ import { debug, isFunction } from "@rue/utils";
 // })
 
 
-// const $trafficLight = ion.finite('red', {
+// const $trafficLight = FiniteIon('red', {
 //    'red': {
 //       // 'on:enter': $ => { this.onTimeout(500, () => $.change()) },
 //       'after:500': () => 'green',
@@ -155,13 +154,13 @@ type Transition = () => string | undefined | false | null | void
 
 //TODO: should on:enter apply to intitial state?
 type StateDefinition = {
-   'on:enter'?: (this: Finiton) => void
-   'on:exit'?: (this: Finiton) => void
+   'on:enter'?: (this: FiniteIon) => void
+   'on:exit'?: (this: FiniteIon) => void
    'after:enter'?: Transition
 } & { [key: string | symbol]: Transition }
 
 
-export type Finiton<M extends Methods = {}> = {
+export type FiniteIon<M extends Methods = {}> = {
    (): string
    is: (state: string) => boolean
    on: (transition: string, task: () => void) => void
@@ -175,7 +174,7 @@ export type Finiton<M extends Methods = {}> = {
 } & M
 
 type Nested = {
-   finiton: Finiton,
+   finiton: FiniteIon,
    initializer: Initializer,
 }
 
@@ -187,8 +186,8 @@ type Methods = { [key: string | symbol]: (...args: unknown[]) => unknown }
 type TransitionEvent = { state: string | undefined, prevState: string | undefined }
 
 type Hooks = {
-   onEnter: ((this: Finiton) => void) | undefined;
-   onExit: ((this: Finiton) => void) | undefined;
+   onEnter: ((this: FiniteIon) => void) | undefined;
+   onExit: ((this: FiniteIon) => void) | undefined;
    afterEnter: Transition | undefined
 }
 
@@ -201,7 +200,7 @@ export function withTimeout(ms: number, transition: Transition) {
    return transition;
 }
 
-export function finiton<M extends Methods>(states: FiniteStates, methods?: M): Finiton<M> {
+export function FiniteIon<M extends Methods>(states: FiniteStates, methods?: M): FiniteIon<M> {
    const $currentState = ion(undefined as undefined | string);
 
    let activated = false;
@@ -224,7 +223,7 @@ export function finiton<M extends Methods>(states: FiniteStates, methods?: M): F
       },
 
 
-   }) as unknown as Finiton
+   }) as unknown as FiniteIon
 
    const stateMachine = {
       length: 0,
@@ -427,7 +426,7 @@ export function finiton<M extends Methods>(states: FiniteStates, methods?: M): F
       }, transition.timeout ?? 0)
    }
 
-   return $state as Finiton<M>
+   return $state as FiniteIon<M>
 }
 
 

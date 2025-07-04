@@ -1,6 +1,6 @@
 import { marked } from 'marked'
 import { Ion, ion, ionize, watch } from '@rue/quarky'
-import { component, fromTag, nodeRef, onMounted, onUnmount } from '@rue/lumo'
+import { component, fromTag, NodeRef, onMounted, onUnmount } from '@rue/lumo'
 
 
 export function MarkdownApp(
@@ -20,7 +20,7 @@ export function MarkdownApp(
    //    $markdown.state = e.target.value
    // }
 
-   const textArea = nodeRef('textarea')
+   const textArea = NodeRef('textarea')
 
    const caretRange = ionize({
       selectionStart: undefined as undefined | number,

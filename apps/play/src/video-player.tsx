@@ -1,13 +1,13 @@
-import { component, Else, fromTag, If, nodeRef, } from "@rue/lumo";
-import { finiton, Ion, ion, isIon, watch } from "@rue/quarky";
+import { component, Else, fromTag, If, NodeRef, } from "@rue/lumo";
+import { FiniteIon, ion, isIon } from "@rue/quarky";
 import { isFunction } from "@rue/utils";
 import { Style } from "../../../packages/lumo/src/component/Style";
 
 
 export function VideoPlayer() {
-   const videoRef = nodeRef('video')
+   const videoRef = NodeRef('video')
 
-   const $videoPlayer = ion.finite({
+   const $videoPlayer = FiniteIon({
       'loading': {
          init: () => 'x:ready',
          error: () => 'x:failure'
@@ -16,7 +16,7 @@ export function VideoPlayer() {
       'x:failure': {}
    })
 
-   const $track = ion.finite({
+   const $track = FiniteIon({
       'paused': {
          play: () => 'playing'
       },
@@ -54,7 +54,7 @@ export function VideoPlayer() {
       $elapsedTime.state = currentTime;
    }
 
-   const $sound = ion.finite({
+   const $sound = FiniteIon({
       'on': { toggle: () => 'muted' },
       'muted': { toggle: () => 'on' }
    })

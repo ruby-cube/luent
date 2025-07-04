@@ -1,34 +1,34 @@
-import { component, asSuspenseIon, fromTag } from "@rue/lumo";
+import { component, SuspenseIon, fromTag } from "@rue/lumo";
 import { Await, Meanwhile, Catch } from "../../../packages/lumo/src/boundaries/Await";
 import { Ion } from "@rue/quarky";
 
-function fetchData() {
-   return asSuspenseIon(
+function fetchData(options: { awaited: true }) {
+   return SuspenseIon(undefined,
       new Promise((resolve, reject) => {
          setTimeout(() => {
             reject('nooo')
             resolve({ name: 'kermit' })
          }, 5000)
-      }) as Promise<{ name: string }>
-   )
+      }) as Promise<{ name: string }>,
+      options)
 }
 
-function fetchNestedData() {
-   return asSuspenseIon(
+function fetchNestedData(options: { awaited: true }) {
+   return SuspenseIon(undefined,
       new Promise((resolve, reject) => {
          setTimeout(() => {
             resolve({ name: 'sir robin' })
-         }, 8000)
-      }) as Promise<{ name: string }>
-   )
+         }, 1000)
+      }) as Promise<{ name: string }>,
+      options)
 }
 
 function fetchNestedDataB() {
-   return asSuspenseIon(
+   return SuspenseIon({name: 'placeholder'},
       new Promise((resolve, reject) => {
          setTimeout(() => {
             resolve({ name: 'sir robin the brave' })
-         }, 8000)
+         }, 1000)
       }) as Promise<{ name: string }>
    )
 }
@@ -38,9 +38,13 @@ export function TestAwait() {
 
    return component(
       <>
+        <p>{($brave()?.name)}</p>
          <h1>Untitled Goose Game</h1>
          {Await($brave,
-            <ChildB></ChildB>
+            <>
+               <ChildB></ChildB>
+               <p>{($brave()?.name)}</p>
+            </>
          )}
          {Meanwhile(() =>
             <Loading></Loading>
@@ -64,7 +68,7 @@ export function TestAwait() {
 }
 
 function ChildB() {
-   const $kermit = fetchData().awaited()
+   const $kermit = fetchData({ awaited: true })
 
    return component(
       <>
@@ -76,7 +80,7 @@ function ChildB() {
 }
 
 function Child() {
-   const $kermit = fetchData().awaited()
+   const $kermit = fetchData({ awaited: true })
 
    return component(
       <>
@@ -88,7 +92,7 @@ function Child() {
 }
 
 function GrandChild() {
-   const $robin = fetchNestedData().awaited()
+   const $robin = fetchNestedData({ awaited: true })
 
    return component(
       <>

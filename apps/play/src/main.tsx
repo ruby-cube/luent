@@ -11,7 +11,7 @@ import './style.css'
 // import { App } from './App';
 // import { TestConditional } from './TestConditional';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
-import { component, createApp, createGlobalCommons, fromTag, nodeRef} from '@rue/lumo';
+import { component, createApp, createGlobalCommons, fromTag, NodeRef} from '@rue/lumo';
 import { CounterApp, TestCount } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
@@ -186,7 +186,7 @@ import { TriangleDemo } from './demos/SierpinskiTriangles';
 
 
 
-const app = createApp(TestTooltipApp)
+const app = createApp(TestAwait)
 
 app.mount('#app')
 

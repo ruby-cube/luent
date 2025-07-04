@@ -4,7 +4,7 @@ import { fromTag, Ion } from "@rue/lumo"
 
 function Parent() {
    const $count = ion(0)
-   const $child = nodeRef(Child)
+   const $child = NodeRef(Child)
 
    return component(
       <>

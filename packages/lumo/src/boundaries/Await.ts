@@ -9,12 +9,12 @@
 // )}
 
 import { ion } from "@rue/quarky";
-import { defineAppwide, defineGlobal } from "../commons/centralized";
 import { RawJSXNode, RenderFunction } from "../node/makeNode";
 import { RenderError } from "./Try";
 import { createIfSeries, Else, ElseIf, If } from "../conditional/If";
 import { normalizeToArray, toError } from "@rue/utils";
 import { SuspenseIon } from "./Suspense";
+import { defineAppwide } from "../commons/Centralized";
 
 type AwaitKit = {
    suspenseIons: SuspenseIon<unknown>[] | undefined;

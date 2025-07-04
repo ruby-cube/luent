@@ -52,6 +52,14 @@ This means we must separate derivation access from render
 - for now, don't implement exclusive actions and manually cancel overlaps.
 - see if there is ever a case where instead of cancelling the in-progress action, we cancel the new action.
 
+
+NOTE: Actions don't need dependency injection because the state should already be dependency injected.
+Still, we may want to try different implementations, hence actions being globally injected
+Also, actions are not stateful. They are procedures.
+
+# QUESTIONS:
+[ ] can an action object be used for different doAction calls? Should the action object be coupled with the action logic (cb function)?
+
 ```ts
 // const [lazyRender, cancelLazyRender] = useLazyRender()
 // const $pending = ion(false)
@@ -67,14 +75,13 @@ This means we must separate derivation access from render
 type Action = {
    cancel(): void
    onCancel(task: () => void): void
-   isPending: boolean;
-   isSettled: boolean;
-   status: 'in progress' | 'queued' | 'canceled' | 'complete'
+   pending: boolean;
+   settled: boolean;
+   status: 'in progress' | 'queued' | 'canceled' | 'complete' //TODO: use a finite ion instead?
    error: Error | null
    onDone(task: () => void): void
 }
 
-const textInsertion = useAction() // ionized model
 
 function handleKeypress() {
 
@@ -85,7 +92,6 @@ function handleKeypress() {
 
       return document.insertText(word, position)
    }, {
-      action: textInsertion,
       lazy: 1000,
       catch(err) {
          textInsertion.cancel()
@@ -94,11 +100,58 @@ function handleKeypress() {
    console.log(output)
 }
 
-const textDeletion = useAction() // ionized model
+
+// default shared action can be overriden with
+provideAction(deleteText, textDeletion => 
+   (document: Doc, position: number) => {
+      if (textDeletion.isPending) textDeletion.cancel()
+      return document.deleteText(position)
+   })
+
+// If injectable action state is needed outside of the function
+export const [deleteText, textDeletion] = useAction(textDeletion => 
+   (document: Doc, position: number) => { // must be a procedural function, not a closure method!! State must be passed in
+      if (textDeletion.isPending) textDeletion.cancel() 
+      return document.deleteText(position)
+   }
+)
+
+
+//NOTE: If doAction finds only one action/mutation within its call, the action is unnested and becomes the root action
+function handleDeletePress() {
+   const output = doAction(() =>
+      deleteText(doc, pos),
+      {
+         lazy: 1000,
+         catch(err) { 
+            textDeletion.cancel() 
+         }
+      })
+
+   console.log(output)
+}
+
+
+// If action state is needed outside of the function:
+const [DeleteText, textDeletion] = useAction(textDeletion =>
+   (document: Doc, position: number) => {
+      if (textDeletion.isPending) textDeletion.cancel()
+      return document.deleteText(position)
+   }
+)
 
 function handleDeletePress() {
-   const output = doAction(textDeletion, () => {
-      if (textAction.isPending) textAction.cancel()
+   const output = doAction(DeleteText(doc, pos), {
+      lazy: { limit: 1000 },
+      catch(err) { textDeletion.cancel() }
+   })
+   console.log(output)
+}
+
+function handleDeletePress() {
+   // if action state is not needed outside fn
+   const output = doAction(textDeletion => {
+      if (textDeletion.pending) textDeletion.cancel()
       return document.deleteText(position)
    }, {
       lazy: { limit: 1000 },
@@ -128,7 +181,7 @@ doAction(async (action) => {
 doAction(async (action) => {
 
 }, { 
-   lazyRender: true,  
+   lazy: true,  
 })
 
 
@@ -154,3 +207,55 @@ When a new update updates state that is already pending an update, the new state
 
 [ ] make sure most current state is rendered
 
+# Use Optimistic
+
+```ts
+
+const adding10ToCount = useAction()
+
+function handleClick(){
+   
+   doAction(() => {
+      $count.state = $count() + 10
+   }, {
+      action: adding10ToCount
+   })
+}
+
+// With dependency injection: This pattern should be used for any appwide/centralized functions and state (ie. stores, fetch)
+provideDispatch(dispatchCountUpdate, () => {
+
+})
+
+export const [dispatchCountUpdate, getCountUpdate] = useDispatch(() => {
+   // optional default implementation if defineDispatch is not called
+   // if no default implementation is provided, you should type the dispatch useDispatch<(count: number) => void>()
+})
+
+
+
+
+function MyComponent() {
+
+   const countUpdate = getCountUpdate()
+
+   watch($count, (count) => {
+      dispatchCountUpdate(count)
+   }, {
+      lazy: 1000
+   })
+
+   return component(
+      <>
+         {$count}
+         {If(countUpdate.posting,
+            <>sending...</>
+         )}
+         {ElseIf(countUpdate.failed, 
+            <>Failed. <button on:click={e => countUpdate.retry()}>retry</button>
+         )}
+      </>
+   )
+}
+
+```
