@@ -161,8 +161,9 @@ export function watch<
    }
 
    let prevState = getValue(subject); // this is where initial reactivity tracking happens (if derivation not already initialized) 
-
-   if (noReactivity(subject)) {
+console.log('watch A', prevState)
+if (noReactivity(subject)) {
+      console.log('watch X', prevState)
       // if (isIonizedModel(prevState)) {
       //    subject = prevState; // watch ionized model
       // }
@@ -170,20 +171,22 @@ export function watch<
       return InertWatcher()
       // }
    }
-
+   
    const quark = quarkOf(<HasQuark>subject) as Watchable & IonicCompoundMorph
    const watchSubject = quark.watch()
    watchSubject.onDiscard(quark.unwatch)
-
+   
    let hasChanged = getHasChangedFn(options, prevState)
 
    function wrappedEffect() {
-      // console.log('running effect', effect)
+      console.log('running effect', effect)
       const newState = getValue(subject)
       if (!options.eager && !hasChanged(prevState, newState)) {
+         console.log('no change', effect)
          return;
       }
-
+      
+      console.log('change', effect)
       try {
          (<Effect>effect)(new StateChangeEvent(prevState, newState, !!options.eager))
       }

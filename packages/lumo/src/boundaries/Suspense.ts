@@ -24,7 +24,7 @@ const SUSPENSE_ION = Symbol('suspense ion')
 export type Suspense<T> = {
    [SUSPENSE_ION]: true,
    error: null | Error,
-   promise: Promise<T>,
+   promise: Promise<T> | null,
    // cancel(): void
    // onCancel(task: () => void): void
    // updating: boolean,
@@ -34,7 +34,7 @@ export type SuspenseIon<T> = MutableIon<T | undefined> & Suspense<T>
 export type Awaited<T> = MutableIon<T | undefined> & Suspense<T>
 export type Resolved<T> = MutableIon<T> & {
    [SUSPENSE_ION]: true,
-   promise: Promise<T>,
+   promise: null,
    error: null, // different
    // updating: boolean,
    // cancel(): void
@@ -79,15 +79,19 @@ export function SuspenseIon<
       }) as SuspenseIon<T>
 
       input
-         .then(value => $ion.state = value)
+         .then(value => {
+            $ion.state = value;
+            $ion.promise = null;
+         })
          .catch(err => {
             $ion.error = toError(err)
+            $ion.promise = null;
          })
 
       return $ion;
    }
 
-   const $promise = ion(new Promise(() => { }))
+   const $promise = ion(null as null | Promise<T>)
    const $ion = ion(initialState as unknown, {
       [SUSPENSE_ION]: true,
       get promise() {
@@ -97,19 +101,23 @@ export function SuspenseIon<
    })
 
    ionicTask(() => {
-      console.log('')
       const promise = $promise.state = input($ion as SuspenseIon<T>);
 
       promise
-         .then(value => $ion.state = value)
+         .then(value => {
+            $ion.state = value
+            $promise.state = null;
+         })
          .catch(err => {
             $ion.error = toError(err)
+            $promise.state = null;
             throw err;
          })
-   }, {phase: SYNC})
+   }, { phase: SYNC })
 
    if (options?.awaited) {
-      pend($promise())
+      const promise = $promise()
+      if (promise) pend(promise)
       if (options?.awaited === true) {
          pendReload($promise)
       }

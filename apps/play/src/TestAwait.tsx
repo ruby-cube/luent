@@ -1,4 +1,4 @@
-import { component, SuspenseIon, fromTag } from "@rue/lumo";
+import { component, SuspenseIon, fromTag, Else, If } from "@rue/lumo";
 import { Await, Meanwhile, Catch } from "../../../packages/lumo/src/boundaries/Await";
 import { ion, Ion } from "@rue/quarky";
 
@@ -14,7 +14,7 @@ function fetchData(options: { awaited: true }) {
 }
 
 function fetchNestedData($name: Ion<string>, options: { awaited: true }) {
-   return SuspenseIon(undefined, () =>
+   return SuspenseIon({ name: 'standin' }, () =>
       new Promise((resolve, reject) => {
          const name = $name()
          setTimeout(() => {
@@ -28,7 +28,7 @@ function fetchNestedDataB($name: Ion<string>) {
    return SuspenseIon({ name: 'placeholder' },
       new Promise((resolve, reject) => {
          setTimeout(() => {
-            resolve({ name: 'sir robin the brave' })
+            resolve({ name: 'nona' })
          }, 8000)
       }) as Promise<{ name: string }>
    )
@@ -43,7 +43,7 @@ export function TestAwait() {
          <button on:click={e => $name.state = $name() + '!'}>click</button>
          <p>{($brave()?.name)}</p>
          <h1>Untitled Goose Game</h1>
-         {Await($brave,
+         {/* {Await($brave,
             <>
                <ChildB></ChildB>
                <p>{($brave()?.name)}</p>
@@ -55,7 +55,7 @@ export function TestAwait() {
          {Catch(err => (console.log('error!!', err),
             <ErrorView error={err}></ErrorView>
          ))}
-         <hr></hr>
+         <hr></hr> */}
          <h1>Untitled Goose Game</h1>
          {Await(
             <Child name={$name}></Child>
@@ -83,7 +83,7 @@ function ChildB() {
 }
 
 function Child({ $name } = fromTag<{ name: string }>()) {
-   const $kermit = fetchData({ awaited: true })
+   const $kermit = fetchData()
 
    return component(
       <>
@@ -95,13 +95,23 @@ function Child({ $name } = fromTag<{ name: string }>()) {
 }
 
 function GrandChild({ $name } = fromTag<{ name: string }>()) {
-   const $robin = fetchNestedData($name, { awaited: true })
+   const $robin = fetchNestedData($name, {
+      awaited: 'load'
+   })
 
    return component(
-      <>
+      <div>
+         {/* <div>{(JSON.stringify($robin.promise))}</div> */}
          <div>{($robin()?.name)}</div>
+         <hr></hr>
+         {If(ion(()=>(console.trace('if', $robin.promise), $robin.promise)),
+            <>reloading</>
+         )}
+         {Else(
+            <div>{($robin()?.name)}</div>
+         )}
          <div>GrandChild :)</div>
-      </>
+      </div>
    )
 }
 

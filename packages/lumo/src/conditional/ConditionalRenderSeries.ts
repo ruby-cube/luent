@@ -10,7 +10,7 @@ import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/Node
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FLASK, Flask } from "@rue/flask";
-import { POSTEVENT } from "../render-cycle";
+import { POSTEVENT, RENDER, SYNC } from "../render-cycle";
 import { ActivationType } from "./If";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { RenderFunction, withGroupActivationReset } from "../node/makeNode";
@@ -176,13 +176,16 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       // set up watcher for updates
       watch($conditions, function updateConditional({ current, previous }) {
+         console.log('update conditional? A')
          if (areShallowEqualArrays(current!, previous!)) return;
-
+         console.log('update conditional? B')
+         
          const prevIndex = series.activeIndex!;
          const activeIndex = series.evaluateConditions();
          if (prevIndex === activeIndex) {
             return;
          }
+         console.log('update conditional? C')
 
          const outgoingNodes = series.statements[prevIndex]?.transitionNodes ?? []
          const incomingNodes = series.statements[activeIndex]?.transitionNodes ?? []
@@ -343,7 +346,8 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          }
       }, {
          // retrack: true,
-         phase: POSTEVENT,
+         // phase: POSTEVENT,
+         phase: RENDER,
       })
 
       // // set up watcher for updates

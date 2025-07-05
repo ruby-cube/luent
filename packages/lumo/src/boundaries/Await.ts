@@ -55,7 +55,7 @@ export function Catch(renderError: RenderError) {
 }
 
 
-const getAwaitStack = defineAppwide('awaitStack', () => [] as { promises: Promise<any>[], $promises: Ion<Promise<unknown>>[] }[])
+const getAwaitStack = defineAppwide('awaitStack', () => [] as { promises: Promise<any>[], $promises: Ion<Promise<unknown> | null>[] }[])
 
 function $awaitStack() {
    const awaitStack = getAwaitStack()
@@ -74,7 +74,7 @@ export function pend(promiseValue: Promise<any> | Promise<any>[]) {
    return promise;
 }
 
-export function pendReload($promise: Ion<Promise<unknown>>) {
+export function pendReload($promise: Ion<Promise<unknown> | null>) {
    const awaitStack = $awaitStack()
    const { $promises } = awaitStack.at(-1)!;
    $promises.push($promise)
@@ -112,66 +112,82 @@ export function createAwaitSeries(
 
    // collect promises
    const pendingPromises: Promise<unknown>[] = []
-   const $promises: Ion<Promise<unknown>>[] = []
+   const $promises: Ion<Promise<unknown> | null>[] = []
    const suspenseCollection = { promises: pendingPromises, $promises }
-   awaitStack.push(suspenseCollection);
    if (suspenseIons) {
       for (const ion of suspenseIons) {
-         pend(ion.promise)
+         if (ion.promise)
+            pendingPromises.push(ion.promise)
       }
    }
-   const output = renderResolved(); // any nested pend calls will collect promises into the pendingPromises array
-   const allPromises = Promise.all(pendingPromises);
-   awaitStack.pop();
-   allPromises
-      .then(() => {
-         clearTimeout(timeoutID)
-         $pending.state = false
-      })
-      .catch(err => {
-         if (renderError === undefined) throw toError(err);
-         $error.state = toError(err);
-         $pending.state = false
-      })
 
-   let promiseCount = 0;
-
-   for (const $promise of $promises) {
-      watch($promise, ({ current: promise }) => {
-         promiseCount++
-         if ($pending() === true) {
-            clearTimeout(timeoutID)
-         }
-         console.log('%%% running $pending reset')
-         $pending.state = true;
-
-         if (timeout) {
-            timeoutID = setTimeout(() => {
-               $error.state = new Error("Timed out");
-               $pending.state = false
-            }, timeout)
-         }
-
-         promise
-            .then(() => {
-               clearTimeout(timeoutID)
-               promiseCount--
-               if (promiseCount === 0)
-                  $pending.state = false
-            })
-            .catch(err => {
-               if (renderError === undefined) throw toError(err);
-               $error.state = toError(err);
-               $pending.state = false
-            })
-      })
-   }
-
-   return createIfSeries([
+   const awaitSeries = createIfSeries([
       If($pending, renderPlaceholder),
       ElseIf($error, () => renderError($error()!)),
-      Else(() => output)
+      Else('show', () => {
+         try {
+            awaitStack.push(suspenseCollection);
+            return renderResolved()
+         }
+         finally {
+            awaitStack.pop();
+            if (pendingPromises.length === 0) {
+               return;
+            }
+            const allPromises = Promise.all(pendingPromises);
+            allPromises
+               .then(() => {
+                  clearTimeout(timeoutID)
+                  $pending.state = false
+               })
+               .catch(err => {
+                  if (renderError === undefined) throw toError(err);
+                  $error.state = toError(err);
+                  $pending.state = false
+               })
+
+            let promiseCount = 0;
+
+            for (const $promise of $promises) {
+               watch($promise, ({ current: promise }) => {
+                  if (promise === null) {
+                     // console.log('promise to null', promiseCount)
+                     // if (promiseCount === 1) $pending.state = false;
+                     // promiseCount--
+                     return;
+                  }
+                  promiseCount++
+                  if ($pending() === true) {
+                     clearTimeout(timeoutID)
+                  }
+                  $pending.state = true;
+
+                  if (timeout) {
+                     timeoutID = setTimeout(() => {
+                        $error.state = new Error("Timed out");
+                        $pending.state = false
+                     }, timeout)
+                  }
+
+                  promise
+                     .then(() => {
+                        clearTimeout(timeoutID)
+                        promiseCount--
+                        if (promiseCount === 0)
+                           $pending.state = false
+                     })
+                     .catch(err => {
+                        if (renderError === undefined) throw toError(err);
+                        $error.state = toError(err);
+                        $pending.state = false
+                     })
+               })
+            }
+         }
+      })
    ])
+
+   return awaitSeries
 }
 
 //@ts-expect-error
