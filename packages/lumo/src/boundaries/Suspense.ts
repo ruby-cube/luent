@@ -25,10 +25,9 @@ export type Suspense<T> = {
    [SUSPENSE_ION]: true,
    error: null | Error,
    promise: Promise<T> | null,
+   pending: boolean
    // cancel(): void
    // onCancel(task: () => void): void
-   // updating: boolean,
-   // settled: boolean
 }
 export type SuspenseIon<T> = MutableIon<T | undefined> & Suspense<T>
 export type Awaited<T> = MutableIon<T | undefined> & Suspense<T>
@@ -36,10 +35,9 @@ export type Resolved<T> = MutableIon<T> & {
    [SUSPENSE_ION]: true,
    promise: null,
    error: null, // different
-   // updating: boolean,
+   pending: false,
    // cancel(): void
    // onCancel(task: () => void): void
-   // settled: boolean
 }
 
 
@@ -75,17 +73,20 @@ export function SuspenseIon<
       const $ion = ion(initialState as T | undefined, {
          [SUSPENSE_ION]: true,
          promise: input,
-         error: null
+         error: null,
+         pending: true
       }) as SuspenseIon<T>
 
       input
          .then(value => {
             $ion.state = value;
             $ion.promise = null;
+            $ion.pending = false;
          })
          .catch(err => {
             $ion.error = toError(err)
             $ion.promise = null;
+            $ion.pending = false;
          })
 
       return $ion;
@@ -97,7 +98,10 @@ export function SuspenseIon<
       get promise() {
          return $promise()
       },
-      error: null as null | Error
+      get pending(){
+         return !!$promise()
+      },
+      error: null as null | Error,
    })
 
    ionicTask(() => {
