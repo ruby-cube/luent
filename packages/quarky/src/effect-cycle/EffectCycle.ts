@@ -3,27 +3,7 @@ import { $schedule, Listener, SchedulerOptions, unwrap } from "@rue/flask";
 import { PhaseMap } from "./PhaseMap";
 import { EffectLink, EffectVine } from "./EffectLink";
 
-// returns a enum for the phases
-//
-// export const [
-//    BEFORE_RENDER,
-//    RENDER,
-//    AFTER_RENDER,
-// ] = useReactivity([ //(default to queueTask for all phases)
-//    definePhase('BEFORE_RENDER', queueTask),
-//    definePhase('RENDER', beforeRepaint),
-//    definePhase('AFTER_RENDER', queueTask)
-// ])
 
-// export const SYNC = 'sync'; // 0 represents both sync and initial task phase
-// export const PHASE_ONE = 1;
-// export let DEFAULT_PHASE = PHASE_ONE;
-
-// export function setDefaultPhase(phase: number) {
-//    DEFAULT_PHASE = phase;
-// }
-
-type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
 
 // export let onEffectCycleComplete: EffectCycleHook
 // let schedulePhaseOne = schedulePhase
@@ -156,6 +136,8 @@ export class CyclePhase {
 //    })
 // }
 
+
+type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
 
 export class EffectCycleManager {
    constructor(public name: string) { }

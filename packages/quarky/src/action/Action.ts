@@ -82,16 +82,22 @@ class InternalAction {
 
    tasks: Task[] | undefined = []
 
-   onCompleted(task: Task) {
-      this.tasks!.push(task)
-   }
-
-   emitCompleted() {
+   emitDone() {
       const tasks = this.tasks!;
       for (const task of tasks) {
          task()
       }
       this.tasks = undefined; //releases reference to quark
+   }
+
+   cancelTasks: Task[] | undefined = []
+
+   emitCancel() {
+      const tasks = this.cancelTasks!;
+      for (const task of tasks) {
+         task()
+      }
+      this.cancelTasks = undefined; //releases reference to quark
    }
 }
 
@@ -102,7 +108,7 @@ function storeMutations(action: Action, target: MutableEntity) {
       const mutations = action.mutations;
       if (mutations.at(-1) === mutation) return; // prevents the same mutation from being recorded multiple times
       mutations.push(mutation)
-   }, { until: action.onCompleted });
+   }, { until: action.onDone });
 }
 
 
@@ -128,9 +134,16 @@ class Action {
          action?.status = 'canceled'
          this[INTERNAL].rollback()
       })
+      this[INTERNAL].emitCancel()
    }
-   onCancel(task: () => void): void
-   onDone(task: () => void): void
+
+   onCancel(task: Task) {
+      this[INTERNAL].cancelTasks!.push(task)
+   }
+
+   onDone(task: Task) {
+      this[INTERNAL].tasks!.push(task)
+   }
    [INTERNAL]: InternalAction
 }
 
@@ -169,11 +182,20 @@ function metaaction(mutation: () => void) {
    actionStack.pop()
 }
 
-export function doAction<T>(actionFn: (action: Action) => T, options?: { lazy: true | number, catch?: (err: unknown) => void }): T {
+type ActionOptions = {
+   deadline: 'urgent' | 'responsive' | number | 'lazy'
+   catch?: (err: unknown) => void,
+   onOverlap(currentAction: Action): 'override' | 'yield' | 'queue'
+}
+
+export function doAction<T>(actionFn: (action: Action) => T, options?: ActionOptions): T {
+   //TODO: onOverlap
    if (action.length === 0) throw new Error('Action cannot not be a method that mutates state via this or closure. Any state to be mutated by actions must be explicitly passed in as an argument')
    const action = 'actionFn' in actionFn ? actionFn.action as Action : ionize(new Action())
    const outerAction = getCurrentAction()
+
    outerAction?.onCancel(() => action.cancel())
+   outerAction?.onDone(() => action[INTERNAL].emitDone()) // TODO: maybe I need to distinguish onDone() and onAllDone()? and onRender() and afterRender()?
 
    let resolve: (value: unknown) => void;
    const actionComplete = new Promise((_resolve) => {

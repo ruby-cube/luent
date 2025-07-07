@@ -161,11 +161,12 @@ export function List(
    const selected = ionize(new Set() as Set<Item>)
 
    function toggleSelect(item: typeof list[number]) {
-      console.log('$$$ selected', selected)
       if (selected.has(item)) {
+         console.log('$$$ selected has', selected)
          selected.delete(item)
       }
       else {
+         console.log('$$$ selected has not', selected)
          selected.add(item)
       }
    }

@@ -96,7 +96,7 @@ function Child({ $name } = fromTag<{ name: string }>()) {
 
 function GrandChild({ $name } = fromTag<{ name: string }>()) {
    const $robin = fetchNestedData($name, {
-      awaited: true
+      awaited: 'load'
    })
 
    return component(
@@ -104,11 +104,12 @@ function GrandChild({ $name } = fromTag<{ name: string }>()) {
          {/* <div>{(JSON.stringify($robin.promise))}</div> */}
          <div>{($robin()?.name)}</div>
          <hr></hr>
-         {If(($robin.pending),
+         <div>{($robin()?.name)}</div>
+         {If(($robin.loading),
             <>reloading</>
          )}
          {Else(
-            <div>{($robin()?.name)}</div>
+            <>:)</>
          )}
          <div>GrandChild :)</div>
       </div>

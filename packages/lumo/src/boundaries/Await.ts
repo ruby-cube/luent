@@ -116,8 +116,8 @@ export function createAwaitSeries(
    const suspenseCollection = { promises: pendingPromises, $promises }
    if (suspenseIons) {
       for (const ion of suspenseIons) {
-         if (ion.promise)
-            pendingPromises.push(ion.promise)
+         if (ion.loading)
+            pendingPromises.push(ion.loading)
       }
    }
 

@@ -24,8 +24,8 @@ const SUSPENSE_ION = Symbol('suspense ion')
 export type Suspense<T> = {
    [SUSPENSE_ION]: true,
    error: null | Error,
-   promise: Promise<T> | null,
-   pending: boolean
+   loading: Promise<T> | false,
+   // pending: boolean
    // cancel(): void
    // onCancel(task: () => void): void
 }
@@ -33,9 +33,9 @@ export type SuspenseIon<T> = MutableIon<T | undefined> & Suspense<T>
 export type Awaited<T> = MutableIon<T | undefined> & Suspense<T>
 export type Resolved<T> = MutableIon<T> & {
    [SUSPENSE_ION]: true,
-   promise: null,
+   loading: false,
    error: null, // different
-   pending: false,
+   onLoaded(initial: boolean): unknown
    // cancel(): void
    // onCancel(task: () => void): void
 }
@@ -72,21 +72,18 @@ export function SuspenseIon<
       }
       const $ion = ion(initialState as T | undefined, {
          [SUSPENSE_ION]: true,
-         promise: input,
+         loading: input,
          error: null,
-         pending: true
       }) as SuspenseIon<T>
 
       input
          .then(value => {
             $ion.state = value;
-            $ion.promise = null;
-            $ion.pending = false;
+            $ion.loading = false;
          })
          .catch(err => {
             $ion.error = toError(err)
-            $ion.promise = null;
-            $ion.pending = false;
+            $ion.loading = false;
          })
 
       return $ion;
@@ -95,11 +92,8 @@ export function SuspenseIon<
    const $promise = ion(null as null | Promise<T>)
    const $ion = ion(initialState as unknown, {
       [SUSPENSE_ION]: true,
-      get promise() {
-         return $promise()
-      },
-      get pending(){
-         return !!$promise()
+      get loading() {
+         return $promise() ?? false
       },
       error: null as null | Error,
    })
