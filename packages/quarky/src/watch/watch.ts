@@ -3,12 +3,10 @@ import { Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "../ionic/IonicCompound";
 import { SYNC } from "../effect-cycle/EffectCycle";
-import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
 import { Ion, isIon } from "../ion/Ion";
 import { createWatchedDerivation, isWatchedDerivation } from "../ionic/WatchedDerivation";
 import { createMultisubjectIon, isMultisubjectIon } from "./MultiSubject";
-import { isManagedDerivation } from "../ionic/DerivationIon";
 import { isObject, isObjectLiteral } from "@rue/utils";
 import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
 import { EffectLink } from "../effect-cycle/EffectLink";
@@ -116,7 +114,7 @@ function getIonValue(subject: Ion) {
    // return untrackedCall(subject) // disables being tracked
 }
 
-function noReactivity(subject: AnyObject) {
+function noReactivity(subject: HasQuark) {
    const quark = quarkOf(subject)
    if (quark.inert) return true;
    return quark.asCompound && quark.asCompound.particles.length === 0; //TODO: apply this only to derivations, not ionized models?

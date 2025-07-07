@@ -14,9 +14,9 @@ import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/Node
 import { FLASK, Flask } from "@rue/flask";
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
-import { POSTEVENT } from "../render-cycle";
 import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
+import { PRERENDER } from "../render-cycle";
 
 
 type Index = number
@@ -169,7 +169,7 @@ export class ListRenderKit {
             console.error(err, this.__DEV__asyncPath)
          }
          // console.log('updating list', state.length, _oldValue.length)
-      }, { phase: POSTEVENT })
+      }, { phase: PRERENDER })
       // currentItem = undefined;
       $currentIndex = undefined;
       //   popList();

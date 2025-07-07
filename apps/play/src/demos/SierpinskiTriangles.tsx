@@ -1,6 +1,5 @@
 import { component, fromTag, measureLayout, onUnmount } from "@rue/lumo";
 import { ion, watch } from "@rue/quarky";
-import { afterEffects } from "../../../../packages/lumo/src/render-cycle";
 
 const TARGET = 25;
 
@@ -118,7 +117,7 @@ function useLazyBatch() {
       } else {
          idleTasks = [task]
          resolvers = []
-         afterEffects(() => {
+         queueMicrotask(() => {
             const limit = idleTasks!.length
             for (let i = 0; i < idleTasks!.length; i++) {
                // const resolve = resolvers![i]

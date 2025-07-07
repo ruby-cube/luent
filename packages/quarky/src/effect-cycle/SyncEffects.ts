@@ -3,6 +3,7 @@ import { EffectVine } from "./EffectLink";
 import { AsyncState } from "@rue/flask";
 import { EffectLink } from "./EffectLink";
 
+
 export const [getEffect, _effectStack] = AsyncState<EffectLink>('current effect');
 
 const activeEffects = new Set()

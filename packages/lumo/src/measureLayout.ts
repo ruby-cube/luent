@@ -1,4 +1,3 @@
-import { afterEffects } from "./render-cycle";
 
 let measureTasks: (() => any)[] | undefined = undefined
 let resolvers: ((value: any | PromiseLike<unknown>) => void)[] | undefined = undefined
@@ -12,16 +11,14 @@ export function measureLayout<T>(measure: () => T): Promise<T> {
    } else {
       measureTasks = [measure]
       resolvers = []
-      afterEffects(() => {
-         queueMicrotask(() => {
-            for (let i = 0; i < measureTasks!.length; i++) {
-               const resolve = resolvers![i]
-               resolve(measure())
-            }
-            measureTasks = undefined;
-            resolvers = undefined;
-            // emitMeasureLayoutComplete()
-         })
+      queueMicrotask(() => {
+         for (let i = 0; i < measureTasks!.length; i++) {
+            const resolve = resolvers![i]
+            resolve(measure())
+         }
+         measureTasks = undefined;
+         resolvers = undefined;
+         // emitMeasureLayoutComplete()
       })
       return new Promise((resolve) => {
          resolvers!.push(resolve)

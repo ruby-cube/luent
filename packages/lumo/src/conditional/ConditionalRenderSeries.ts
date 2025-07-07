@@ -10,7 +10,7 @@ import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/Node
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FLASK, Flask } from "@rue/flask";
-import { POSTEVENT, RENDER, SYNC } from "../render-cycle";
+import { RENDER, SYNC } from "../render-cycle";
 import { ActivationType } from "./If";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { RenderFunction, withGroupActivationReset } from "../node/makeNode";

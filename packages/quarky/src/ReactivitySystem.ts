@@ -1,105 +1,66 @@
 import { $schedule, Listener, SchedulerOptions } from "@rue/flask";
-import { CyclePhase, EffectCycleManager, EVENT_CYCLE_END, SYNC, UPDATE_CYCLE_END } from "./effect-cycle/EffectCycle";
+import { CyclePhase, EffectCycleManager, queueTask, SYNC, UPDATE_CYCLE_END } from "./effect-cycle/EffectCycle";
 import { EffectLink, EffectVine } from "./effect-cycle/EffectLink";
-import { debug, noop } from "@rue/utils";
+import { noop } from "@rue/utils";
 import { ParticleMorph } from "./compound/Particle";
 import { Watchable } from "./watch/Watched";
 
 
 
-// const {
-//    SYNC,
-//    POSTEVENT,
-//    RENDER,
-//    POSTRENDER,
-//    getEndHook
-// } = useReactivitySystem({
-//    EventCycle: [
-//       definePhase('POSTEVENT', queueMicrotask)
-//    ],
-//    UpdateCycle: [
-//       definePhase('RENDER', requestAnimationFrame),
-//       definePhase('POSTRENDER', queueMicrotask)
-//    ]
-// }, {
-//    defaultPhase: () => {
-//       //TODO: must figure out how to handle default effect stage
-//    }
-// })
-
-
-// export const onPostevent = createEffectCycleHook(POSTEVENT)
-// export const onRender = createEffectCycleHook(RENDER)
-// export const onPostrender = createEffectCycleHook(POSTRENDER)
-
-// export const onEventCycleEnd = getEffectCycleEndHook('EventCycle')
-// export const onRenderCycleEnd = getEffectCycleEndHook('UpdateCycle)
 
 type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
 
+//TODO:
+// [ ] sync effects
+// [ ] preventing infinite loop chains
+// [ ] Set up base rendering effect cycle
+// [ ] doAction integration
+// [ ] state locks
+// [ ] Set up lazy effect queue (needs to check if action was canceled)
+// [ ] Set up animation queue
 
 
 
 
-const reactivitySystem = {
-   EventCycle: new EffectCycleManager('EventCycle'),
-   UpdateCycle: new EffectCycleManager('UpdateCycle')
-}
+const cycleManager = new EffectCycleManager('UpdateCycle');
 
-function setUpEventCycleManager(phases?: [CyclePhase, ...CyclePhase[]]) {
-   const cycleManager = reactivitySystem.EventCycle;
-   if (phases) {
-      //TODO: custom phases
-   }
-   //FIX: phase names { POSTEVENT: 'EventCycle:POSTEVENT}
-   cycleManager.pushPhase(new CyclePhase('POSTEVENT', queueMicrotask))
-   cycleManager.pushPhase(new CyclePhase(EVENT_CYCLE_END, noop))
-   cycleManager.onComplete = createEffectCycleHook('EventCycle:'+EVENT_CYCLE_END)
-   return cycleManager
-}
-
-function setUpUpdateCycleManager(phases?: [CyclePhase, ...CyclePhase[]]) {
-   const cycleManager = reactivitySystem.UpdateCycle;
-   if (phases) {
-      //TODO: custom phases
-   }
-   cycleManager.pushPhase(new CyclePhase('PRERENDER', queueMicrotask))
-   cycleManager.pushPhase(new CyclePhase('RENDER', queueMicrotask))
-   cycleManager.pushPhase(new CyclePhase('POSTRENDER', queueMicrotask))
+function setUpUpdateCycleManager() {
+   cycleManager.pushPhase(new CyclePhase('PRERENDER', queueTask))
+   cycleManager.pushPhase(new CyclePhase('RENDER', queueTask))
+   cycleManager.pushPhase(new CyclePhase('POSTRENDER', queueTask))
    cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop))
-   cycleManager.onComplete = createEffectCycleHook('UpdateCycle:'+UPDATE_CYCLE_END)
+
+   cycleManager.onComplete = createEffectCycleHook('UpdateCycle:' + UPDATE_CYCLE_END)
    return cycleManager;
 }
 
-export function getUpdateCycleCount(){
-   return reactivitySystem.UpdateCycle.count
+export function getUpdateCycleCount() {
+   return cycleManager.count
 }
-
-
 
 
 type EffectCycleHooks = {
    SYNC: typeof SYNC,
-} & { [key: string]: string } & { getEndHook: (cycle: 'EventCycle' | 'UpdateCycle') => EffectCycleHook }
+} & {
+   [key: string]: string
+} & {
+   onEffectCycleComplete: EffectCycleHook
+}
 
-export function useReactivitySystem(phases?: [CyclePhase, ...CyclePhase[]]): EffectCycleHooks {
+export function useReactivitySystem(): EffectCycleHooks {
+   const cycleManager = setUpUpdateCycleManager()
+
    const hooks = {
       SYNC,
-      getEndHook(cycle: 'EventCycle' | 'UpdateCycle') {
-         return reactivitySystem[cycle].onComplete;
-      }
+      onEffectCycleComplete: cycleManager.onComplete
    }
 
-   const EventCycle = setUpEventCycleManager(phases);
-   const UpdateCycle = setUpUpdateCycleManager(phases)
-
-   addHooks(hooks, EventCycle)
-   addHooks(hooks, UpdateCycle)
+   addHooks(hooks, cycleManager)
    return hooks as EffectCycleHooks;
 }
 
 function addHooks(hooks: { [key: string]: string | any }, cycle: EffectCycleManager) {
-   const phases = cycle.phases
+   const phases = cycleManager.phases
    for (const phase of phases) {
       const phaseName = phase.phase
       // hooks[phaseName] = phaseName
@@ -119,7 +80,7 @@ export function createEffectCycleHook(phase: string) { //TODO: what happens if p
    return (task: () => void, options?: SchedulerOptions) => {
       const _options = options || { cancel: null }
       _options.cancel = null
-      const cycle = getEffectCycle(phase);
+      const cycle = getEffectCycle();
       const effectCycle = cycle.currentCycle()
 
       return $schedule(task, _options, {
@@ -136,58 +97,25 @@ export function createEffectCycleHook(phase: string) { //TODO: what happens if p
 }
 
 
-
-
-// type ReactivitySystem = {
-//    createPhaseHook: (phase: string) => PhaseHook;
-//    createCycleCompleteHook: (cycle: string) => CycleCompleteHook
-//    cycles: {
-//       [key: string]: EffectCycleManager
-//    },
-//    phases: {
-//       [key: string]: Phase
-//    }
-// }
-
-// type EffectCycleManager = {
-//    count: number
-//    current: EffectCycle | undefined
-//    // next: EffectCycle | undefined
-//    currentCycle(): EffectCycle
-//    // nextCycle(): EffectCycle
-// }
-
-
-// type Phase = {
-//    cycle: EffectCycleManager,
-//    index: number,
-// }
-
-// function getPhase(phase: string) {
-//    return reactivitySystem.phases[phase];
-// }
-
 export function getDefaultPhase() {
    const currentPhase = getCurrentPhase()
    if (currentPhase !== SYNC) return currentPhase
-   return reactivitySystem.UpdateCycle.phases[0].phaseHook //FIX: What should the default phase be?
+   return cycleManager.phases[0].phaseHook //FIX: What should the default phase be?
 }
 
 
 
-export function getEffectCycle(phase: string) {
-   if (phase.startsWith('EventCycle:')) return reactivitySystem.EventCycle
-   else 
-   return reactivitySystem.UpdateCycle
+export function getEffectCycle() {
+   return cycleManager
 }
 
 
 export function scheduleEffects(effects: EffectVine, phase: string) {
-   getEffectCycle(phase).currentCycle().scheduleEffects(effects, phase)
+   cycleManager.currentCycle().scheduleEffects(effects, phase)
 }
 
 export function scheduleEffect(effect: EffectLink, phase: string) {
-   getEffectCycle(phase).currentCycle().scheduleEffect(effect, phase)
+   cycleManager.currentCycle().scheduleEffect(effect, phase)
 }
 
 /**
@@ -200,19 +128,16 @@ export function scheduleEffect(effect: EffectLink, phase: string) {
 export function trigger( //TODO: figure out which abstraction this belongs to ...  atomic ions, atomic pions, memoized derivations, but not terminal compound
    this: ParticleMorph & Watchable,
 ) {
-   const eventCycle = reactivitySystem.EventCycle
-   if (eventCycle.current && eventCycle.current.currentPhase !== SYNC) {
-      debug.warn(`It is not recommended to mutate reactive state during batched effects. It can lead to state that doesn't match expectations. Current Phase: ${getCurrentPhase()}. Run effect synchronously to change using { phase: 'AT_CHANGE'} option or use queueTask or something similar to defer mutation to a separate task`)
-   }
+   // const updateCycle = reactivitySystem.UpdateCycle
+   // if (updateCycle.current && updateCycle.current.currentPhase !== SYNC) {
+   //    debug.warn(`It is not recommended to mutate reactive state during batched effects. It can lead to state that doesn't match expectations. Current Phase: ${getCurrentPhase()}. Run effect synchronously to change using { phase: 'AT_CHANGE'} option or use queueTask or something similar to defer mutation to a separate task`)
+   // }
 
    this.asParticle?.triggerCompounds()
    this.asWatched?.triggerEffects()
 }
 
 export function getCurrentPhase() {
-   const updateCycle = reactivitySystem.UpdateCycle
-   if (updateCycle.current && updateCycle.current.currentPhase !== SYNC) return updateCycle.current.currentPhase;
-   const eventCycle = reactivitySystem.EventCycle;
-   if (eventCycle.current && eventCycle.current.currentPhase !== SYNC) return eventCycle.current.currentPhase;
+   if (cycleManager.current && cycleManager.current.currentPhase !== SYNC) return cycleManager.current.currentPhase;
    return SYNC;
 }

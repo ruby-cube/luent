@@ -186,6 +186,7 @@ type ActionOptions = {
    deadline: 'urgent' | 'responsive' | number | 'lazy'
    catch?: (err: unknown) => void,
    onOverlap(currentAction: Action): 'override' | 'yield' | 'queue'
+   onRenderedOverlap(renderedAction: Action): 'yield' | 'queue'
 }
 
 export function doAction<T>(actionFn: (action: Action) => T, options?: ActionOptions): T {
@@ -291,6 +292,9 @@ const [DeleteText, textDeletion] = useAction((textDeletion) =>
       if (currentAction === textDeletion) return 'override';
       if (currentAction === textDeletion) return 'yield';
       if (currentAction === textDeletion) return 'queue'; // default
+   },
+   onRenderedOverlap(renderedAction) {
+      return 'yield'; 
    }
 })
 

@@ -27,7 +27,7 @@ type _AtomicIonQuark = {
    props: AnyObject | undefined;
    state: any
    // stateKey: string
-   ionized: boolean | typeof MUTABLE_IONIZED,
+   ionized: boolean,
    trigger(): void
 }
 
@@ -37,13 +37,12 @@ type _AtomicIonQuark = {
  * */
 export type AtomicIonQuark = QuarkOf<$AtomicIonState>
 
-export function shouldIonize(newValue: unknown, ionized: boolean | typeof MUTABLE_IONIZED): newValue is AnyObject {
+export function shouldIonize(newValue: unknown, ionized: boolean): newValue is AnyObject {
    return isObject(newValue) && Boolean(ionized);
 }
 
 export const MUTABLE = true
 export const IONIZED = true
-export const MUTABLE_IONIZED = 'mutable'
 export const ALL_METHODS = 'all_methods'
 const SELECTED_METHODS = Symbol('selected_methods')
 const REINED_QUARK = Symbol('reined-ion-quark')
@@ -53,7 +52,7 @@ export function createAtomicIon(
    state: any,
    props?: Methods,
    mutable: boolean = true,
-   ionized: boolean | typeof MUTABLE_IONIZED = false
+   ionized: boolean = false
 ) {
    const $state = (() => {
       if (__DEV__) emitSignal();

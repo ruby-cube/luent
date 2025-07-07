@@ -1,3 +1,5 @@
+import { AnyObject } from "@rue/types";
+
 export const QUARK = Symbol('quark')
 
 export function hasQuark(value: unknown): value is { [QUARK]: Quark } {
@@ -10,7 +12,7 @@ export function quarkOf<T extends {[QUARK]:Quark}>(obj: T ): T[typeof QUARK] {
 
 
 
-export type Quark = object
+export type Quark = AnyObject
 
 export type QuarkOf<T extends { [QUARK]: Quark }> = T extends { [QUARK]: infer Q } ? Q : never
 
