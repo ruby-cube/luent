@@ -188,7 +188,7 @@ import { TriangleDemo } from './demos/SierpinskiTriangles';
 
 
 
-const app = createApp(List)
+const app = createApp(TestSyncEffects)
 
 app.mount('#app')
 

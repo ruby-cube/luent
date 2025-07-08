@@ -177,14 +177,11 @@ if (noReactivity(subject)) {
    let hasChanged = getHasChangedFn(options, prevState)
 
    function wrappedEffect() {
-      console.log('running effect', effect)
       const newState = getValue(subject)
       if (!options.eager && !hasChanged(prevState, newState)) {
-         console.log('no change', effect)
          return;
       }
       
-      console.log('change', effect)
       try {
          (<Effect>effect)(new StateChangeEvent(prevState, newState, !!options.eager))
       }

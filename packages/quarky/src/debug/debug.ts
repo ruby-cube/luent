@@ -374,35 +374,35 @@ function doD() {
 doA()
 
 
-console.log(
-   `insertText
-a formatted log`)
-console.group('@insertText(', ...inputA, ')');
-console.groupCollapsed(`textBlot.push(`, ...inputB, ')');
-console.log('$ textBlot:', textBlotC, '⟹', textBlotD);
-console.log('$ textBlot.length: 2 ⟹ 3'); // state
-console.log('> characterCount: "2 chars" ⟹ "3 chars"'); // derivation
-console.log(trace)
-console.groupEnd();
-console.groupCollapsed(`textBlot.push(`, ...inputG, `)`);
-console.log('$ textBlot:', textBlotA, '⟹', textBlotB);
-console.log('$ textBlot.length: 2 ⟹ 3');
-console.log(`NonError Trace:\n    ` + trace)
-console.groupEnd();
-console.groupEnd();
-console.group('@insertText(', inputA, ')');
-console.groupCollapsed(`textBlot.push(`, ...inputB, ')');
-console.log('$ textBlot:', textBlotC, '⟹', textBlotD);
-console.log('$ textBlot.length: 2 ⟹ 3');
-console.log(trace)
-console.groupEnd();
-console.groupCollapsed(`textBlot.push(`, ...inputG, `)`);
-console.log('$ textBlot:', textBlotA, '⟹', textBlotB);
-console.log('$ textBlot.length: 2 ⟹ 3');
-console.log(`NonError Trace:\n    ` + trace)
-console.groupEnd();
-// console.log('duration:', 90, 'ms')
-console.groupEnd();
+// console.log(
+//    `insertText
+// a formatted log`)
+// console.group('@insertText(', ...inputA, ')');
+// console.groupCollapsed(`textBlot.push(`, ...inputB, ')');
+// console.log('$ textBlot:', textBlotC, '⟹', textBlotD);
+// console.log('$ textBlot.length: 2 ⟹ 3'); // state
+// console.log('> characterCount: "2 chars" ⟹ "3 chars"'); // derivation
+// console.log(trace)
+// console.groupEnd();
+// console.groupCollapsed(`textBlot.push(`, ...inputG, `)`);
+// console.log('$ textBlot:', textBlotA, '⟹', textBlotB);
+// console.log('$ textBlot.length: 2 ⟹ 3');
+// console.log(`NonError Trace:\n    ` + trace)
+// console.groupEnd();
+// console.groupEnd();
+// console.group('@insertText(', inputA, ')');
+// console.groupCollapsed(`textBlot.push(`, ...inputB, ')');
+// console.log('$ textBlot:', textBlotC, '⟹', textBlotD);
+// console.log('$ textBlot.length: 2 ⟹ 3');
+// console.log(trace)
+// console.groupEnd();
+// console.groupCollapsed(`textBlot.push(`, ...inputG, `)`);
+// console.log('$ textBlot:', textBlotA, '⟹', textBlotB);
+// console.log('$ textBlot.length: 2 ⟹ 3');
+// console.log(`NonError Trace:\n    ` + trace)
+// console.groupEnd();
+// // console.log('duration:', 90, 'ms')
+// console.groupEnd();
 
 function formatArgs(args: any[]) {
    const formatted = [args[0]]

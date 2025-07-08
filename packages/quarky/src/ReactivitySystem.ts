@@ -12,7 +12,8 @@ type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listene
 
 //TODO:
 // [ ] sync effects
-// [ ] preventing infinite loop chains
+// [ ] preventing infinite loop chains, but allow effects to be triggered further down the pipeline with updated state
+//     - prevention should be stopped at '$ion.state = x', do not allow effects that trigger previously triggered state by that effect chain to run
 // [ ] Set up base rendering effect cycle
 // [ ] doAction integration
 // [ ] state locks

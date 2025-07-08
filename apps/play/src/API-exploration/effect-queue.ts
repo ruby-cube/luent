@@ -119,23 +119,23 @@ class EffectCyclePhase {
    }
 }
 
-type Phase = 'sync' | 'preupdate' | 'update' | 'postupdate' | 'lazy'
+// type Phase = 'sync' | 'preupdate' | 'update' | 'postupdate' | 'lazy'
 // postupdate phase is for updates that you want to happen within 100ms
 
-class EffectCycle {
-   effects: Map<Phase, EffectCyclePhase> = new Map()
+// class EffectCycle {
+//    effects: Map<Phase, EffectCyclePhase> = new Map()
 
-   scheduleEffects(atom: WatchedAtom, phase: Phase) {
-      if (phase === 'lazy') {
-         const lazyPhase = getLazyPhase()
-         lazyPhase.queueAtom(atom as LazyWatchedAtom)
-         return;
-      }
-      let q;
-      const cyclePhase = this.effects.get(phase) ?? (this.effects.set(phase, q = new EffectCyclePhase()), q)
-      cyclePhase.queueAtom(atom)
-   }
-}
+//    scheduleEffects(atom: WatchedAtom, phase: Phase) {
+//       if (phase === 'lazy') {
+//          const lazyPhase = getLazyPhase()
+//          lazyPhase.queueAtom(atom as LazyWatchedAtom)
+//          return;
+//       }
+//       let q;
+//       const cyclePhase = this.effects.get(phase) ?? (this.effects.set(phase, q = new EffectCyclePhase()), q)
+//       cyclePhase.queueAtom(atom)
+//    }
+// }
 
 function calcIdleDeadline(startTime: DOMHighResTimeStamp, responseTime: number) {
    const now = new Performance().now()

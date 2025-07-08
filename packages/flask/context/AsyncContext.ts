@@ -51,18 +51,23 @@ export function AsyncState<T>(name: string): [GetContextualState<T>, Stack<T>] {
       }
    }
    const stack = {
+      get length(){
+         return _stack.length;
+      },
       push,
       pop() {
-         _stack.pop();
+         if (name === 'current effect' && _stack.length === 1) console.trace('!!popping')
+         const item = _stack.pop();
          if (_stack.length)
             asyncContextStack.activeNodes.set(name, _stack.at(-1))
          else
             asyncContextStack.activeNodes.delete(name)
+         return item;
       }
    }
 
    asyncContextStack.stacks.set(name, stack)
-   
+
    return [
       function getCurrentState() {
          return _stack.at(-1)

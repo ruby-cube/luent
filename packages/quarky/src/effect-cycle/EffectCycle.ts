@@ -143,8 +143,13 @@ export class EffectCycleManager {
    constructor(public name: string) { }
 
    count: number = 0;
-
+   
+   next: EffectCycle | undefined
    current: EffectCycle | undefined
+
+   nextCycle() {
+      return this.next ?? new EffectCycle(this)
+   }
 
    currentCycle() {
       return this.current ?? new EffectCycle(this)

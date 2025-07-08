@@ -1,11 +1,14 @@
 import { SYNC } from "./EffectCycle";
 import { EffectVine } from "./EffectLink";
-import { AsyncState } from "@rue/flask";
 import { EffectLink } from "./EffectLink";
 
 
-export const [getEffect, _effectStack] = AsyncState<EffectLink>('current effect');
+// export const [getEffect, _effectStack] = AsyncState<EffectLink>('current effect');
 
+let previousEffect: EffectLink | null = null
+let currentEffect: EffectLink | null = null
+
+const _effectStack: EffectLink[] = []
 const activeEffects = new Set()
 
 export const effectStack = {
@@ -16,11 +19,14 @@ export const effectStack = {
    push(effect: EffectLink) {
       activeEffects.add(effect)
       _effectStack.push(effect)
+      console.log("(push size", activeEffects.size)
    },
 
    pop() {
-      activeEffects.delete(getEffect())
-      _effectStack.pop()
+      // if (!currentEffect) console.log("pop currentEffect", currentEffect)
+         const effect= _effectStack.pop()
+      activeEffects.delete(effect)
+      console.log("(pop size", activeEffects.size)
    }
 }
 
@@ -31,15 +37,15 @@ function $syncEffects() {
    return syncEffects ?? (syncEffects = new SyncEffects())
 }
 
-export function runSyncEffects(){
+export function runSyncEffects() {
    syncEffects?.run()
 }
 
-export function scheduleSyncEffects(effects: EffectVine){
+export function scheduleSyncEffects(effects: EffectVine) {
    $syncEffects().absorb(effects)
 }
 
-export function scheduleSyncEffect(effect: EffectLink){
+export function scheduleSyncEffect(effect: EffectLink) {
    $syncEffects().add(effect)
 }
 
@@ -50,13 +56,16 @@ class SyncEffects {
       this.effects.absorb(effects)
    }
 
-   add(effect: EffectLink){
+   add(effect: EffectLink) {
       this.effects.add(effect)
    }
 
    run() {
       for (const effect of this.effects) {
-         if (effectStack.has(effect)) continue; // prevents infinite loops
+         if (effectStack.has(effect)) {
+            console.log('infinite loop prevented')
+            continue; // prevents infinite loops
+         }
          effectStack.push(effect)
          try {
             effect.task()
