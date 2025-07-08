@@ -1,5 +1,5 @@
 import { AnyObject, Glass } from "@rue/types";
-import { Watchable, Watched } from "./Watched";
+import { asWatched, Watchable, Watched } from "./Watched";
 import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
 import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "../ionic/IonicCompound";
 import { SYNC } from "../effect-cycle/EffectCycle";
@@ -14,7 +14,9 @@ import { Ionized, isIonizedModel } from "../ionized/ionize";
 import { $AtomicIonState, isAtomicIon, isAtomicIonQuark } from "../ion/AtomicIon";
 import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
 import { createWatchedIonizedIon } from "./IonizedIon";
-import { getDefaultPhase, getEffectCycle, scheduleEffect } from "../ReactivitySystem";
+import { getDefaultPhase, getEffectCycle, scheduleEagerEffect, scheduleEffect } from "../ReactivitySystem";
+import { Effect } from "../effect-cycle/EffectQueue";
+import { runSyncEffects, scheduleEagerSyncEffect } from "../effect-cycle/SyncEffects";
 
 export class StateChangeEvent<S = unknown> {
    // trace?: string;
@@ -54,7 +56,7 @@ export type WatchDebugOptions = {
    traceTriggers?: boolean
 }
 
-export type Effect<T = unknown> = (event: StateChangeEvent<SubjectValues<T>>) => void;
+export type EffectTask<T = unknown> = (event: StateChangeEvent<SubjectValues<T>>) => void;
 
 type SubjectValues<T> = [T] extends [() => infer R] ? R : [T] extends [infer O] ? O : MultiSubjectValues<T>;
 
@@ -134,7 +136,7 @@ export type WatchSubjects = (Object | Ion)[]
 export function watch<
    T extends Ionized<object> | Ion<any> | WatchSubjects,
    P
->(_subject: T, effect: Effect<T>, options: EffectOptions = {}): ResumableListener {
+>(_subject: T, effect: EffectTask<T>, options: EffectOptions = {}): ResumableListener {
    // if (args[0] instanceof Function && (args.length === 1 || args.length === 2 && isObjectLiteral(args[1]))) {
    //    return initIonicEffect(<IonicTask>args[0], <EffectOptions>args[1])
    // }
@@ -159,8 +161,8 @@ export function watch<
    }
 
    let prevState = getValue(subject); // this is where initial reactivity tracking happens (if derivation not already initialized) 
-console.log('watch A', prevState)
-if (noReactivity(subject)) {
+   console.log('watch A', prevState)
+   if (noReactivity(subject)) {
       console.log('watch X', prevState)
       // if (isIonizedModel(prevState)) {
       //    subject = prevState; // watch ionized model
@@ -169,21 +171,21 @@ if (noReactivity(subject)) {
       return InertWatcher()
       // }
    }
-   
+
    const quark = quarkOf(<HasQuark>subject) as Watchable & IonicCompoundMorph
-   const watchSubject = quark.watch()
-   watchSubject.onDiscard(quark.unwatch)
-   
+   const watchSubject = asWatched(quark)
+
    let hasChanged = getHasChangedFn(options, prevState)
+
 
    function wrappedEffect() {
       const newState = getValue(subject)
       if (!options.eager && !hasChanged(prevState, newState)) {
          return;
       }
-      
+
       try {
-         (<Effect>effect)(new StateChangeEvent(prevState, newState, !!options.eager))
+         (<EffectTask>effect)(new StateChangeEvent(prevState, newState, !!options.eager))
       }
       finally {
          options.eager = false;
@@ -191,7 +193,7 @@ if (noReactivity(subject)) {
          hasChanged = getHasChangedFn(options, prevState) //accounts for ions whose value may change from ionized to not ionized
       }
    }
-   wrappedEffect.effect = effect
+   wrappedEffect.__DEV__effect = effect
 
    return setUpWatcher(
       watchSubject,
@@ -243,7 +245,7 @@ function notStrictlyEqual(oldState: unknown, newState: unknown) {
    return newState !== oldState
 }
 
-type WrappedEffect = () => void
+type Task = () => void
 
 
 
@@ -275,8 +277,8 @@ type WrappedEffect = () => void
 
 
 export function setUpWatcher(
-   subject: Watched,
-   effect: WrappedEffect,
+   subject: Watched, //TODO: if we get rid of particles, this would have to be Watched[], and we would link the effect to each subject
+   effectTask: Task,
    phase: string,
    options: EffectOptions,
    compound?: IonicCompound //
@@ -285,21 +287,21 @@ export function setUpWatcher(
 
    function pausableEffect() {
       if (paused) return;
-      return effect()
+      return effectTask()
    }
 
    return $listen(pausableEffect, options || {}, {
       enroll(task) {
-         const effectLink = new EffectLink(task, subject)
+         const effect = new Effect(task)
          // ORDER A: runs eagerly but not as an effect
-         subject.watch(effectLink, phase)
+         subject.link(effect, phase)
          if (options.eager) {
-            subject.scheduleEagerEffect(effectLink, phase)
+            _scheduleEagerEffect(effect, phase)
          }
-         return effectLink;
+         return effect;
       },
       remove(effectLink) {
-         subject.unwatch(effectLink)
+         subject.unlink(effectLink, phase)
          if (compound)
             compound.untrackParticles()
       },
@@ -313,7 +315,15 @@ export function setUpWatcher(
    });
 }
 
-
+function _scheduleEagerEffect(effect: Effect, phase: string) {
+   if (phase === SYNC) {
+      scheduleEagerSyncEffect(effect);
+      runSyncEffects()
+   }
+   else {
+      scheduleEagerEffect(effect, phase)
+   }
+}
 
 // watch(() => {
 

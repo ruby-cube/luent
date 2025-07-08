@@ -4,6 +4,7 @@ import { EffectLink, EffectVine } from "./effect-cycle/EffectLink";
 import { noop } from "@rue/utils";
 import { ParticleMorph } from "./compound/Particle";
 import { Watchable } from "./watch/Watched";
+import { Effect, WatchedAtom } from "./effect-cycle/EffectQueue";
 
 
 
@@ -63,7 +64,7 @@ export function useReactivitySystem(): EffectCycleHooks {
 function addHooks(hooks: { [key: string]: string | any }, cycle: EffectCycleManager) {
    const phases = cycleManager.phases
    for (const phase of phases) {
-      const phaseName = phase.phase
+      const phaseName = phase.name
       // hooks[phaseName] = phaseName
       hooks[phaseName] = phase.phaseHook = cycle.name + ':' + phaseName
    }
@@ -82,7 +83,7 @@ export function createEffectCycleHook(phase: string) { //TODO: what happens if p
       const _options = options || { cancel: null }
       _options.cancel = null
       const cycle = getEffectCycle();
-      const effectCycle = cycle.currentCycle()
+      const effectCycle = cycle.current
 
       return $schedule(task, _options, {
          enroll(task) {
@@ -111,12 +112,12 @@ export function getEffectCycle() {
 }
 
 
-export function scheduleEffects(effects: EffectVine, phase: string) {
-   cycleManager.currentCycle().scheduleEffects(effects, phase)
+export function scheduleEffects(effects: WatchedAtom, phase: string) {
+   cycleManager.current.scheduleEffects(effects, phase)
 }
 
-export function scheduleEffect(effect: EffectLink, phase: string) {
-   cycleManager.currentCycle().scheduleEffect(effect, phase)
+export function scheduleEagerEffect(effect: Effect, phase: string) {
+   cycleManager.current.scheduleEagerEffect(effect, phase)
 }
 
 /**

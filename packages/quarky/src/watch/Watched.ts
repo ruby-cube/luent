@@ -1,86 +1,66 @@
 import { SYNC } from "../effect-cycle/EffectCycle";
-import { EffectLink, EffectVine } from "../effect-cycle/EffectLink";
-import { PhaseMap } from "../effect-cycle/PhaseMap";
-import { runSyncEffects, scheduleSyncEffect, scheduleSyncEffects } from "../effect-cycle/SyncEffects";
-import { getEffectCycle, scheduleEffect, scheduleEffects } from "../ReactivitySystem";
+import { Effect, WatchedAtom } from "../effect-cycle/EffectQueue";
+import { scheduleSyncEffects } from "../effect-cycle/SyncEffects";
+import { scheduleEffects } from "../ReactivitySystem";
 
 
 export type Watchable = {
    asWatched?: Watched
-   watch: () => Watched
-   unwatch: () => void
 }
 
-export function watch(this: Watchable) {
-   return this.asWatched ?? (this.asWatched = new Watched(this))
+export function asWatched(watchable: Watchable) {
+   return watchable.asWatched ?? (watchable.asWatched = new Watched(watchable))
 }
 
-export function unwatch(this: Watchable) {
-   this.asWatched = undefined
-}
+// export function unwatch(this: Watchable) {
+//    this.asWatched = undefined
+// }
 
-export class Watched<T extends Watchable = Watchable> {
+export class Watched {
 
    constructor(
-      public quark: T
-   ) {
-   }
+      private watchable: Watchable
+   ) { }
 
-   effects: PhaseMap = new PhaseMap('effects')
-
-   private _completedEffects: PhaseMap | undefined;
-
-   get completedEffects() {
-      return this._completedEffects || (this._completedEffects = new PhaseMap('completed effects'))
-   }
+   effects: AtomPhaseMap = new AtomPhaseMap('effects')
 
    watchCount: number = 0
 
-   watch(effect: EffectLink, phase: string) {
-      this.effects.addToVine(effect, phase)
+   link(effect: Effect, phase: string) {
+      this.effects.link(effect, phase)
       this.watchCount++
    }
 
-   unwatch(effect: EffectLink) {
-      effect.remove()
+   unlink(effect: Effect, phase: string) {
+      this.effects.unlink(effect, phase)
       if (this.watchCount === 0) {
          this.emitDiscard()
       }
    }
 
    triggerEffects() { // the surrounding effect when original trigger happened
-      for (const [phase, effects] of this.effects) {
+      for (const [phase, atomicEffects] of this.effects) {
          if (phase === SYNC) {
-            scheduleSyncEffects(effects!);
+            scheduleSyncEffects(atomicEffects);
          }
          else {
-            scheduleEffects(effects!, phase)
-            this.scheduleReabsorption(phase)
+            scheduleEffects(atomicEffects!, phase)
          }
       }
    }
 
-   scheduleEagerEffect(effect: EffectLink, phase: string){
-         if (phase === SYNC) {
-            scheduleSyncEffect(effect);
-            runSyncEffects()
-         }
-         else {
-            scheduleEffect(effect, phase)
-            this.scheduleReabsorption(phase)
-         }
-   }
 
-   private scheduleReabsorption(phase: string) {
-      const completed = this.completedEffects.get(phase);
-      if (completed || completed === null) return;
-      this.completedEffects.set(phase, null);
-      getEffectCycle(phase).onComplete(() => { //TODO: simple hooks like this do not need to be flasked listeners... too much overhead
-         const completed = this.completedEffects.get(phase)
-         if (completed) this.effects.absorb(completed, phase)
-         this.completedEffects.delete(phase)
-      })
-   }
+
+   // private scheduleReabsorption(phase: string) {
+   //    const completed = this.completedEffects.get(phase);
+   //    if (completed || completed === null) return;
+   //    this.completedEffects.set(phase, null);
+   //    getEffectCycle().onComplete(() => { //TODO: simple hooks like this do not need to be flasked listeners... too much overhead
+   //       const completed = this.completedEffects.get(phase)
+   //       if (completed) this.effects.absorb(completed, phase)
+   //       this.completedEffects.delete(phase)
+   //    })
+   // }
 
    private cleanups: (() => void)[] = []
 
@@ -89,8 +69,42 @@ export class Watched<T extends Watchable = Watchable> {
    }
 
    private emitDiscard() {
+      this.watchable.asWatched = undefined;
       for (const cleanUp of this.cleanups) {
          cleanUp()
       }
+   }
+}
+
+
+class AtomPhaseMap extends Map<string, WatchedAtom> {
+   constructor(
+      public __DEV__name: string
+   ) {
+      super();
+   }
+
+   private initializeAtom(phase: string) {
+      const atom: WatchedAtom = new WatchedAtom()
+      this.set(phase, atom);
+      return atom
+   }
+
+   /**
+     * To be called by watch() when initializing watcher
+     * @param effect 
+     */
+   link(effect: Effect, phase: string) {
+      const atom = this.get(phase) ?? this.initializeAtom(phase);
+      effect.link(atom)
+   }
+
+   /**
+    * To be called by watcher's stop() function
+    * @param effect 
+    */
+   unlink(effect: Effect, phase: string) {
+      const atom = this.get(phase) ?? this.initializeAtom(phase);
+      effect.unlink(atom)
    }
 }

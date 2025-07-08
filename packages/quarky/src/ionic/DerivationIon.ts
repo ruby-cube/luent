@@ -5,7 +5,7 @@ import { quarkOf, QUARK, hasQuark, EntityQuark, QuarkOf, Quark } from "../Quark"
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { ParticleMorph } from "../compound/Particle";
 import { emitSignal } from "../debug/debug";
-import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
+import { Watchable, Watched } from "../watch/Watched";
 import { Ion } from "../ion/Ion";
 import { CompoundMorph, triggerEffects } from "../compound/Compound";
 import { Traceable } from "../debug/Traceable";

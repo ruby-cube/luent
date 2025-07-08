@@ -1,7 +1,6 @@
 import { setImmediate } from "@rue/thread";
-import { $schedule, Listener, SchedulerOptions, unwrap } from "@rue/flask";
-import { PhaseMap } from "./PhaseMap";
-import { EffectLink, EffectVine } from "./EffectLink";
+import { Listener, SchedulerOptions } from "@rue/flask";
+import { Effect, EffectQueue, WatchedAtom } from "./EffectQueue";
 
 
 
@@ -71,7 +70,7 @@ export class CyclePhase {
    index: number = 0
 
    constructor(
-      public phase: string,
+      public name: string,
       public schedule: Function,
    ) { }
 
@@ -143,16 +142,34 @@ export class EffectCycleManager {
    constructor(public name: string) { }
 
    count: number = 0;
-   
-   next: EffectCycle | undefined
-   current: EffectCycle | undefined
 
-   nextCycle() {
-      return this.next ?? new EffectCycle(this)
+   private nextCycle: EffectCycle | undefined
+   private currentCycle: EffectCycle | undefined
+
+   get next() {
+      return this.nextCycle ?? (this.nextCycle = this.createCycle())
    }
 
-   currentCycle() {
-      return this.current ?? new EffectCycle(this)
+   get current() {
+      return this.currentCycle ?? (this.currentCycle = this.initCycle())
+   }
+
+   createCycle() {
+      this.count++;
+      if (this.currentCycle)
+         throw new Error("@% Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
+      return new EffectCycle(this.phases[0].name, this);
+   }
+
+   initCycle() {
+      const cycle = this.createCycle()
+      schedulePhase(cycle, this.phases[0]
+      )
+      return cycle;
+   }
+
+   closeCycle() {
+      this.currentCycle = this.nextCycle
    }
 
    phases: CyclePhase[] = []
@@ -182,7 +199,6 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
 }
 
 export const SYNC = 'S' as const
-export const EVENT_CYCLE_END = 'ECE' as const
 export const UPDATE_CYCLE_END = 'UCE' as const
 
 
@@ -191,58 +207,69 @@ export const UPDATE_CYCLE_END = 'UCE' as const
  */
 export class EffectCycle {
 
-   currentPhase: string = SYNC
-
    constructor(
+      public currentPhase: string,
       public manager: EffectCycleManager
    ) {
-      manager.count++;
-      if (manager.current)
-         throw new Error("@% Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
-      manager.current = this;
-      schedulePhase(this, manager.phases[0])
+
    }
 
    close() {
-      this.manager.current = undefined;
+      this.manager.closeCycle()
    }
 
-   get count() {
-      return this.manager.count;
-   }
+   // get count() {
+   //    return this.manager.count;
+   // }
 
    effects: PhaseMap = new PhaseMap('effect cycle');
 
-   scheduleEffects(effects: EffectVine, phase: string) {
-      this.effects.absorb(effects, phase)
+   scheduleEffects(atom: WatchedAtom, phase: string) {
+      this.effects.scheduleEffects(atom, phase)
    }
 
-   scheduleEffect(effect: EffectLink, phase: string) {
-      this.effects.addToVine(effect, phase)
+   scheduleEagerEffect(effect: Effect, phase: string) {
+      this.effects.scheduleEagerEffect(effect, phase)
    }
+
+   subphase: 'effects' | 'microtasks' = 'effects'
 
    runEffects(phase: string) {
       this.currentPhase = phase;
+      this.subphase = 'effects'
       const effects = this.effects.get(phase);
-      // console.log(phase, 'start size', effects?.size)
-      if (effects) {
-         for (const effect of effects) {
-            // console.log(phase, 'before run effect size', effects?.size)
-            effect.task()
-            if (!effect.vine) {
-               continue; // effect has already been removed during the effect via 'once' or 'scheduler'
-            }
-            effect.watchSubject?.completedEffects.addToVine(effect, phase)
-         }
-         // console.log(phase, 'done size', effects?.size)
-      }
+      effects?.runEffects()
+      this.subphase = 'microtasks'
    }
 }
 
 
 
 
+class PhaseMap extends Map<string, EffectQueue | null> {
+   constructor(
+      public __DEV__name: string
+   ) {
+      super();
+   }
 
+   private initializeQueue(phase: string) {
+      const queue: EffectQueue = new EffectQueue()
+      this.set(phase, queue);
+      return queue
+   }
+
+   scheduleEagerEffect(effect: Effect, phase: string){
+      const queue = this.get(phase) ?? this.initializeQueue(phase);
+      queue.scheduleEagerEffect(effect)
+   }
+
+   scheduleEffects(atom: WatchedAtom, phase: string) {
+      const queue = this.get(phase) ?? this.initializeQueue(phase);
+      queue.scheduleEffects(atom)
+
+   }
+}
 
 
 

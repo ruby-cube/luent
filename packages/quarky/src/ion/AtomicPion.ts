@@ -1,5 +1,5 @@
 import { isIonizedModel, ionize, toRaw } from "../ionized/ionize";
-import { unwatch, watch, Watchable, Watched } from "../watch/Watched";
+import { Watchable, Watched } from "../watch/Watched";
 import { asParticle, Particle, ParticleMorph } from "../compound/Particle";
 import { quarkOf, QUARK, Quark, EntityQuark, QuarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
@@ -53,9 +53,6 @@ export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
    asWatched?: Watched
    asParticle?: Particle
 
-   watch: () => Watched<Watchable>;
-   unwatch: () => void;
-
    asTraceable: Traceable = new Traceable()
 
    private _entity: undefined | $AtomicPionState
@@ -72,8 +69,6 @@ export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
       public model: IonizedModel,
       public key: PropertyKey,
    ) {
-      this.watch = watch;
-      this.unwatch = () => unwatch.call(this)
    }
 
    trigger = trigger

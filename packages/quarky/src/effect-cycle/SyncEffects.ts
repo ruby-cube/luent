@@ -1,12 +1,7 @@
 import { SYNC } from "./EffectCycle";
-import { EffectVine } from "./EffectLink";
 import { EffectLink } from "./EffectLink";
+import { Effect, EffectQueue, WatchedAtom } from "./EffectQueue";
 
-
-// export const [getEffect, _effectStack] = AsyncState<EffectLink>('current effect');
-
-let previousEffect: EffectLink | null = null
-let currentEffect: EffectLink | null = null
 
 const _effectStack: EffectLink[] = []
 const activeEffects = new Set()
@@ -19,62 +14,59 @@ export const effectStack = {
    push(effect: EffectLink) {
       activeEffects.add(effect)
       _effectStack.push(effect)
-      console.log("(push size", activeEffects.size)
    },
 
    pop() {
-      // if (!currentEffect) console.log("pop currentEffect", currentEffect)
-         const effect= _effectStack.pop()
+      const effect = _effectStack.pop()
       activeEffects.delete(effect)
-      console.log("(pop size", activeEffects.size)
    }
 }
 
 
-let syncEffects: SyncEffects | undefined
+let syncEffects: EffectQueue | undefined
 
 function $syncEffects() {
-   return syncEffects ?? (syncEffects = new SyncEffects())
+   return syncEffects ?? (syncEffects = new EffectQueue())
 }
 
 export function runSyncEffects() {
    syncEffects?.run()
 }
 
-export function scheduleSyncEffects(effects: EffectVine) {
-   $syncEffects().absorb(effects)
+export function scheduleSyncEffects(atom: WatchedAtom) {
+   $syncEffects().scheduleEffects(atom)
 }
 
-export function scheduleSyncEffect(effect: EffectLink) {
-   $syncEffects().add(effect)
+export function scheduleEagerSyncEffect(effect: Effect) {
+   $syncEffects().scheduleEagerEffect(effect)
 }
 
-class SyncEffects {
-   private effects = new EffectVine('sync effects')
+// class SyncEffects {
+//    private effects = new EffectQueue()
 
-   absorb(effects: EffectVine) {
-      this.effects.absorb(effects)
-   }
+//    scheduleEagerEffect(effect: Effect){
+//       this.effects.scheduleEagerEffect(effect)
+//    }
 
-   add(effect: EffectLink) {
-      this.effects.add(effect)
-   }
+//    scheduleEffects(atom: WatchedAtom) {
+//       this.effects.scheduleEffects(atom)
+//    }
 
-   run() {
-      for (const effect of this.effects) {
-         if (effectStack.has(effect)) {
-            console.log('infinite loop prevented')
-            continue; // prevents infinite loops
-         }
-         effectStack.push(effect)
-         try {
-            effect.task()
-         }
-         finally {
-            effectStack.pop()
-            if (!effect.vine) continue; // effect has already been removed during the effect via 'once' or 'scheduler'
-            effect.watchSubject!.effects.addToVine(effect, SYNC) // return to watch subject
-         }
-      }
-   }
-}
+//    run() { //FIX: 
+//       for (const effect of this.effects) {
+//          if (effectStack.has(effect)) {
+//             console.log('infinite loop prevented')
+//             continue; // prevents infinite loops
+//          }
+//          effectStack.push(effect)
+//          try {
+//             effect.task()
+//          }
+//          finally {
+//             effectStack.pop()
+//             if (!effect.vine) continue; // effect has already been removed during the effect via 'once' or 'scheduler'
+//             effect.watchSubject!.effects.addToVine(effect, SYNC) // return to watch subject
+//          }
+//       }
+//    }
+// }

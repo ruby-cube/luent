@@ -7,16 +7,30 @@ import { queueTask } from "@rue/thread";
 // effect cycle queues
 // need to iterate efficiently: array
 
-type Task = () => void
+type Task = (...args: any[]) => void
 
-type Effect = {
-   task: Task | null;
-   once: boolean;
-   atoms: Set<WatchedAtom>
-   isLinked(atom: WatchedAtom): boolean;
-   link(atom: WatchedAtom): void
-   unlink(atom: WatchedAtom): void;
+export class Effect {
+   constructor(
+      public task: Task | null,
+   ) { }
+
+   private atoms: Set<WatchedAtom> = new Set()
+
+   isLinked(atom: WatchedAtom) {
+      return this.atoms.has(atom)
+   }
+
+   link(atom: WatchedAtom) {
+      this.atoms.add(atom)
+   }
+
+   unlink(atom: WatchedAtom) {
+      this.atoms.delete(atom)
+      this.task = null;
+   }
 }
+
+
 
 
 export class WatchedAtom {
@@ -33,7 +47,6 @@ export class WatchedAtom {
       for (const effect of effects) {
          if (effect.task) {
             effect.task() // What about async tasks? T_T How will it affect this system?
-            if (effect.once) return;
             this.retain(effect)
          }
       }
@@ -70,25 +83,31 @@ export class WatchedAtom {
       }
    }
 
-   /**
-    * To be called by watcher's stop() function
-    * @param effect 
-    */
-   unlink(effect: Effect) {
-      effect.unlink(this)
-      effect.task = null;
-   }
+   // /**
+   //  * To be called by watcher's stop() function
+   //  * @param effect 
+   //  */
+   // unlink(effect: Effect) {
+   //    effect.unlink(this)
+   //    effect.task = null;
+   // }
 
    requeued: boolean = false;
    queued: boolean = false
 }
 
 
-class EffectCyclePhase {
-   extendedQueue: WatchedAtom[] | undefined;
-   queue: WatchedAtom[] = []
+export class EffectQueue {
+   private extendedQueue: WatchedAtom[] | undefined;
+   private queue: WatchedAtom[] = []
+   private eagerQueue: Effect[] | undefined;
 
-   queueAtom(atom: WatchedAtom) {
+   scheduleEagerEffect(effect: Effect) {
+      const eagerQueue = this.eagerQueue ?? (this.eagerQueue = [])
+      eagerQueue.push(effect)
+   }
+
+   scheduleEffects(atom: WatchedAtom) {
       if (this.runningEffects && !atom.requeued) {
          atom.requeued = true;
          const extension = this.extendedQueue ?? (this.extendedQueue = [])
@@ -100,10 +119,13 @@ class EffectCyclePhase {
       }
    }
 
-   runningEffects: boolean = false
+   private runningEffects: boolean = false
 
-   runEffects() {
+   runEffects() { //QUESTION: can infinite loop protect be implemented here?
       this.runningEffects = true
+
+      this.runEagerEffects()
+
       const queue = this.queue;
       for (const atom of queue) {
          atom.runEffects()
@@ -117,23 +139,49 @@ class EffectCyclePhase {
       }
       this.runningEffects = false;
    }
+
+   private runEagerEffects() {
+      const eagerEffects = this.eagerQueue
+      if (!eagerEffects) return;
+      for (const effect of eagerEffects) {
+         effect.task?.()
+      }
+   }
+
+   runSyncEffects() {
+      for (const effect of this.effects) {
+         if (effectStack.has(effect)) {
+            console.log('infinite loop prevented')
+            continue; // prevents infinite loops
+         }
+         effectStack.push(effect)
+         try {
+            effect.task()
+         }
+         finally {
+            effectStack.pop()
+            if (!effect.vine) continue; // effect has already been removed during the effect via 'once' or 'scheduler'
+            effect.watchSubject!.effects.addToVine(effect, SYNC) // return to watch subject
+         }
+      }
+   }
 }
 
 // type Phase = 'sync' | 'preupdate' | 'update' | 'postupdate' | 'lazy'
 // postupdate phase is for updates that you want to happen within 100ms
 
 // class EffectCycle {
-//    effects: Map<Phase, EffectCyclePhase> = new Map()
+//    effects: Map<Phase, EffectQueue> = new Map()
 
 //    scheduleEffects(atom: WatchedAtom, phase: Phase) {
 //       if (phase === 'lazy') {
 //          const lazyPhase = getLazyPhase()
-//          lazyPhase.queueAtom(atom as LazyWatchedAtom)
+//          lazyPhase.scheduleEffects(atom as LazyWatchedAtom)
 //          return;
 //       }
 //       let q;
-//       const cyclePhase = this.effects.get(phase) ?? (this.effects.set(phase, q = new EffectCyclePhase()), q)
-//       cyclePhase.queueAtom(atom)
+//       const cyclePhase = this.effects.get(phase) ?? (this.effects.set(phase, q = new EffectQueue()), q)
+//       cyclePhase.scheduleEffects(atom)
 //    }
 // }
 
@@ -177,7 +225,6 @@ class LazyWatchedAtom extends WatchedAtom {
             const effect = effects[i]
             if (effect.task) {
                effect.task() // What about async tasks? T_T How will it affect this system?
-               if (effect.once) return;
                this.retain(effect)
             }
          }
@@ -193,15 +240,15 @@ class LazyWatchedAtom extends WatchedAtom {
 
 // a queue that runs synchronously until the next animation frame where it will pause execution and continue after animation frame complete (onIdle)
 
-class LazyEffectPhase implements EffectCyclePhase {
+class LazyEffectPhase implements EffectQueue {
    constructor() {
       startFrameTracker()
    }
 
-   extendedQueue: LazyWatchedAtom[] | undefined;
-   queue: LazyWatchedAtom[] = []
+   private extendedQueue: LazyWatchedAtom[] | undefined;
+   private queue: LazyWatchedAtom[] = []
 
-   queueAtom(atom: LazyWatchedAtom) {
+   scheduleEffects(atom: LazyWatchedAtom) {
       if (this.runningEffects && !atom.requeued) {
          atom.requeued = true;
          const extension = this.extendedQueue ?? (this.extendedQueue = [])
@@ -213,7 +260,7 @@ class LazyEffectPhase implements EffectCyclePhase {
       }
    }
 
-   runningEffects: boolean = false
+   private runningEffects: boolean = false
    currentIndex = 0;
 
    async runEffects() {

@@ -3,7 +3,8 @@ import { toError } from "@rue/utils";
 import { Mutation, MutableEntity, asMutable } from "../Mutable";
 import { AsyncState } from "@rue/flask";
 import { E } from "vitest/dist/chunks/reporters.6vxQttCV";
-
+import { EffectCycle } from "../effect-cycle/EffectCycle";
+import { getEffectCycle } from "../ReactivitySystem";
 
 
 
@@ -82,7 +83,10 @@ class InternalAction {
 
    tasks: Task[] | undefined = []
 
+   done: boolean = false;
+
    emitDone() {
+      this.done = true;
       const tasks = this.tasks!;
       for (const task of tasks) {
          task()
@@ -98,6 +102,22 @@ class InternalAction {
          task()
       }
       this.cancelTasks = undefined; //releases reference to quark
+   }
+
+   _effectCycle = EffectCycle
+
+   get effectCycle() {
+      if (!this.done) throw new Error("Cannot access effect cycle until action is done")
+      if (this._effectCycle) return this._effectCycle;
+      const effectCycle = getEffectCycle()
+      const currentCycle = effectCycle.current
+      const currentPhase = currentCycle.currentPhase
+      if (currentPhase === effectCycle.phases[0].name && currentCycle.subphase === 'effects') { // accepting new actions
+         return this._effectCycle = currentCycle;
+      }
+      else {
+         return this._effectCycle = effectCycle.next
+      }
    }
 }
 
@@ -141,9 +161,14 @@ class Action {
       this[INTERNAL].cancelTasks!.push(task)
    }
 
+   /**
+    * Action logic is done, but effects have not yet run.
+    * @param task 
+    */
    onDone(task: Task) {
       this[INTERNAL].tasks!.push(task)
    }
+   
    [INTERNAL]: InternalAction
 }
 
@@ -170,16 +195,16 @@ type ActionFn = (action: Action) => T
 
 // outer actions cancel inner action
 
-const [getCurrentAction, actionStack] = AsyncState<Action | null>('action')
+const [getCurrentAction, rootActionStack] = AsyncState<Action | null>('root action')
 
 /**
- * prevents action state from being delayed by action's delayed rendering
+ * prevents action object's state mutations from being delayed by outer action's delayed rendering
  * @param mutation 
  */
-function metaaction(mutation: () => void) {
-   actionStack.push(null)
-   mutation()
-   actionStack.pop()
+function metaaction(mutations: () => void) {
+   rootActionStack.push(null)
+   mutations()
+   rootActionStack.pop()
 }
 
 type ActionOptions = {
@@ -208,14 +233,14 @@ export function doAction<T>(actionFn: (action: Action) => T, options?: ActionOpt
          action.pending = true
          action.status = 'in progress'
       })
-      actionStack.push(action)
+      if (!outerAction) rootActionStack.push(action) // only push if is root action
       const output = fn()
       if (output instanceof Promise) {
          output
             // action function complete, but state not rendered yet
             .then(() => {
                if (action.status === 'canceled') return;
-               action[INTERNAL].scheduleEffects() // effects should run //TODO: 
+               action[INTERNAL].emitDone() // will run effects
                await action[INTERNAL].rendered //TODO: I dunno how this should work
                metaaction(() => {
                   action.settled = true;
@@ -230,7 +255,7 @@ export function doAction<T>(actionFn: (action: Action) => T, options?: ActionOpt
             })
       }
       else {
-         console.log('run effects now')
+         action[INTERNAL].emitDone()
          // await action.rendered
          resolve!(output)
       }
@@ -241,7 +266,7 @@ export function doAction<T>(actionFn: (action: Action) => T, options?: ActionOpt
       console.log('done via error')
    }
    finally {
-      actionStack.pop()
+      if (!outerAction) rootActionStack.pop()
       return actionComplete
    }
 }
@@ -294,7 +319,7 @@ const [DeleteText, textDeletion] = useAction((textDeletion) =>
       if (currentAction === textDeletion) return 'queue'; // default
    },
    onRenderedOverlap(renderedAction) {
-      return 'yield'; 
+      return 'yield';
    }
 })
 
