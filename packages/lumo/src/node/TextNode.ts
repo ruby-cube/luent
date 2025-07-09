@@ -1,4 +1,5 @@
 import { isIon, __devCheckIfTracked, watch, Ion, toValue } from "@rue/quarky";
+import { INTERNAL_RENDER } from "../render-cycle";
 
 
 
@@ -15,9 +16,10 @@ export function setUpTextNode(text: Ion | any, textNode: Text) {
 // }
 
 function keepTextNodeUpdated(text: Ion, textNode: CharacterData) {
-   watch(text, ({ current }) => {
+   watch(text, async ({ current }) => {
+
       textNode.data = toString(current);
-   });
+   }, {phase: INTERNAL_RENDER});
 }
 
 

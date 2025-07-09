@@ -1,16 +1,34 @@
-import { $schedule, Listener, SchedulerOptions } from "@rue/flask";
+import { $listen, $schedule, Listener, ListenerOptions, SchedulerOptions } from "@rue/flask";
 import { CyclePhase, EffectCycle, queueTask, SYNC, UPDATE_CYCLE_END } from "./effect-cycle/EffectCycle";
 import { noop } from "@rue/utils";
 import { ParticleMorph } from "./compound/Particle";
 import { Watchable } from "./watch/Watched";
 import { Effect, WatchedAtom } from "./effect-cycle/EffectQueue";
-import { TaskRef } from "./effect-cycle/TaskQueue";
+import { TaskQueue, TaskRef } from "./effect-cycle/TaskQueue";
 
 
 type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
 
 export class EffectCycleManager {
    constructor(public name: string) { }
+
+   private tasks: Map<string, TaskQueue> = new Map()
+
+   private initializeQueue(phase: string) {
+      const queue: TaskQueue = new TaskQueue()
+      this.tasks.set(phase, queue);
+      return queue
+   }
+
+   scheduleTask(task: TaskRef, phase: string) {
+      this.current // ensures there will be an effect cycle to run the tasks;
+      const queue = this.tasks.get(phase) ?? this.initializeQueue(phase);
+      queue.scheduleTask(task)
+   }
+
+   runTasks(phase: string) {
+      this.tasks.get(phase)?.runTasks()
+   }
 
    count: number = 0;
 
@@ -56,13 +74,16 @@ export class EffectCycleManager {
 
 
 
+
 function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
    schedule(() => {
       const finalIndex = phases.length - 2;
       if (index < finalIndex) schedulePhase(cycle, next)
+      cycleManager.runTasks(phaseHook)
       cycle.runEffects(phaseHook)
       if (index === finalIndex)
          queueMicrotask(() => {
+            cycleManager.runTasks(next!.phaseHook)
             cycle.runEffects(next!.phaseHook)
             cycle.close();
          })
@@ -72,8 +93,8 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
 
 
 //TODO:
-// [ ] sync effects
-// [ ] preventing infinite loop chains, but allow effects to be triggered further down the pipeline with updated state
+// [X] sync effects
+// [X] preventing infinite loop chains, but allow effects to be triggered further down the pipeline with updated state
 //     - prevention should be stopped at '$ion.state = x', do not allow effects that trigger previously triggered state by that effect chain to run
 // [ ] Set up base rendering effect cycle
 // [ ] doAction integration
@@ -87,7 +108,9 @@ const cycleManager = new EffectCycleManager('UpdateCycle');
 
 function setUpUpdateCycleManager() {
    cycleManager.pushPhase(new CyclePhase('PRERENDER', queueTask))
-   cycleManager.pushPhase(new CyclePhase('RENDER', queueTask))
+   // cycleManager.pushPhase(new CyclePhase('PRE_INTERNAL_RENDER', queueTask))
+   cycleManager.pushPhase(new CyclePhase('INTERNAL_RENDER', queueTask))
+   cycleManager.pushPhase(new CyclePhase('RENDER', queueMicrotask))
    cycleManager.pushPhase(new CyclePhase('POSTRENDER', queueTask))
    cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop))
 
@@ -138,16 +161,11 @@ function addHooks(hooks: { [key: string]: string | any }, cycle: EffectCycleMana
  * @returns 
  */
 export function createEffectCycleHook(phase: string) { //TODO: what happens if phase has already passed? should we queue to next cycle?
-   return (task: () => void, options?: SchedulerOptions) => {
-      const _options = options || { cancel: null }
-      _options.cancel = null
-      const cycle = getEffectCycleManager();
-      const effectCycle = cycle.current
-
-      return $schedule(task, _options, {
+   return (task: () => void, options?: ListenerOptions) => {
+      return $listen(task, options ?? {}, {
          enroll(fn) {
             const task = new TaskRef(fn)
-            effectCycle.effects.scheduleTask(task, phase)
+            getEffectCycleManager().scheduleTask(task, phase)
             return task;
          },
          remove(task) {
@@ -171,7 +189,7 @@ export function getEffectCycleManager() {
 }
 
 
-export function $currentEffectCycle(){
+export function $currentEffectCycle() {
    return cycleManager.current
 }
 

@@ -89,10 +89,10 @@ export class WatchedAtom {
       for (const effect of effects) {
          if (!effect.task) { continue; }
          if (effectStack.has(effect)) {
-            if (!retained.has(effect)) {
-               this.retain(effect)
-               retained.add(effect)
-            }
+            if (retained.has(effect))
+               continue;
+            this.retain(effect)
+            retained.add(effect)
             console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
             continue;
          }
@@ -102,17 +102,19 @@ export class WatchedAtom {
          }
          finally {
             effectStack.pop()
-            if (!retained.has(effect)) {
-               this.retain(effect)
-               retained.add(effect)
-            }
+            if (retained.has(effect))
+               continue;
+            this.retain(effect)
+            retained.add(effect)
          }
       }
 
       this.runningEffects = false;
 
       if (effectStack.size === 0) {
-         this.effects = [...(this.retainedEffects ?? []), ...(this.nestedEffects ?? [])]
+         this.effects = this.nestedEffects ? this.retainedEffects ?
+            [...this.retainedEffects, ...this.nestedEffects]
+            : this.nestedEffects : this.retainedEffects ?? []
          this.retained.clear()
          this.retainedEffects = undefined
          this.nestedEffects = undefined;
@@ -135,10 +137,11 @@ export class WatchedAtom {
          if (effectStack.has(effect)
             || $currentEffectCycle().effectStack.has(effect)
          ) {
-            if (!retained.has(effect)) {
-               this.retain(effect)
-               retained.add(effect)
-            }
+            if (retained.has(effect))
+               continue;
+            this.retain(effect)
+            retained.add(effect)
+
             console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
             continue;
          }
@@ -149,16 +152,20 @@ export class WatchedAtom {
          finally {
             effectStack.pop()
             completedEffects?.add(effect)
-            if (!retained.has(effect)) {
-               this.retain(effect)
-               retained.add(effect)
-            }
+            if (retained.has(effect))
+               continue;
+            this.retain(effect)
+            retained.add(effect)
+
          }
       }
 
       this.runningEffects = false;
-      console.log('$$$ Nested???', this.nestedEffects?.length)
-      this.effects = [...(this.retainedEffects ?? []), ...(this.nestedEffects ?? [])] //TODO: make more efficient
+      // console.log('$$$ Nested???', this.nestedEffects?.length)
+      this.effects = this.nestedEffects ? this.retainedEffects ?
+         [...this.retainedEffects, ...this.nestedEffects]
+         : this.nestedEffects : this.retainedEffects ?? []
+
       this.retainedEffects = undefined
       this.nestedEffects = undefined;
    }
@@ -204,11 +211,12 @@ export class EffectQueue {
    private extendedQueue: WatchedAtom[] | undefined;
    private queue: WatchedAtom[] = []
    private eagerQueue: Effect[] | undefined;
-   private taskQueue: TaskQueue | undefined;
+   // private taskQueue: TaskQueue | undefined;
 
-   scheduleTask(task: TaskRef) {
-      this.taskQueue?.scheduleTask(task)
-   }
+   // scheduleTask(task: TaskRef) {
+   //    const taskQueue = this.taskQueue ?? (this.taskQueue = new TaskQueue())
+   //    taskQueue.scheduleTask(task)
+   // }
 
    scheduleEagerEffect(effect: Effect) {
       const eagerQueue = this.eagerQueue ?? (this.eagerQueue = [])
@@ -263,6 +271,12 @@ export class EffectQueue {
          effect.task?.()
       }
    }
+
+   // runTasks() {
+   //    const tasks = this.taskQueue;
+   //    if (!tasks) return;
+   //    tasks.runTasks()
+   // }
 
    // runSyncEffects() {
    //    for (const effect of this.effects) {

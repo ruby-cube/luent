@@ -10,7 +10,7 @@ import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/Node
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FLASK, Flask } from "@rue/flask";
-import { RENDER, SYNC } from "../render-cycle";
+import { onInternalRender, PRERENDER, RENDER, SYNC } from "../render-cycle";
 import { ActivationType } from "./If";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { RenderFunction, withGroupActivationReset } from "../node/makeNode";
@@ -179,7 +179,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          console.log('update conditional? A')
          if (areShallowEqualArrays(current!, previous!)) return;
          console.log('update conditional? B')
-         
+
          const prevIndex = series.activeIndex!;
          const activeIndex = series.evaluateConditions();
          if (prevIndex === activeIndex) {
@@ -347,7 +347,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       }, {
          // retrack: true,
          // phase: POSTEVENT,
-         phase: RENDER,
+         phase: PRERENDER,
       })
 
       // // set up watcher for updates
@@ -386,29 +386,31 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    }
 
    private deactivateConditional(index: number) {
-      const kit = this.statements[index]
-      if (!kit) return;
-      const pod = kit.nodePod!
-      const activationType = kit.type
-      if (activationType === 'show') {
-         // preserve dynamic node and node pod
-         hideDOMNodes(pod);
-      }
-      else if (activationType === 'create') {
-         // discard of flask
-         const flask = kit.flask!
-         kit.flask = undefined; // 
-         flask.emitDiscard() //
+      onInternalRender(() => {
+         const kit = this.statements[index]
+         if (!kit) return;
+         const pod = kit.nodePod!
+         const activationType = kit.type
+         if (activationType === 'show') {
+            // preserve dynamic node and node pod
+            hideDOMNodes(pod);
+         }
+         else if (activationType === 'create') {
+            // discard of flask
+            const flask = kit.flask!
+            kit.flask = undefined; // 
+            flask.emitDiscard() //
 
-         // remove from 
-         removeDOMNodes(pod)
-         pod.clear() //
-      }
-      else if (activationType === 'mount') {
-         const flask = kit.flask
-         flask?.emitDemount() //
-         removeDOMNodes(pod);
-      }
+            // remove from 
+            removeDOMNodes(pod)
+            pod.clear() //
+         }
+         else if (activationType === 'mount') {
+            const flask = kit.flask
+            flask?.emitDemount() //
+            removeDOMNodes(pod);
+         }
+      })
    }
 
    private activateConditional( // mount conditional from effect
@@ -416,24 +418,26 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       parent: Element,
       fragment?: DocumentFragment
    ) {
-      const kit = this.statements[activeIndex]
-      if (!kit) return;
-      const activationType = kit.type
-      const nodePod = kit.nodePod
+      onInternalRender(() => {
+         const kit = this.statements[activeIndex]
+         if (!kit) return;
+         const activationType = kit.type
+         const nodePod = kit.nodePod
 
-      if (activationType === 'show') { //NOTE: 'show' statements are not dynamic nodes because they are not removed from the DOM and setup is not rerun
-         showDOMNodes(nodePod)
-         return;
-      }
+         if (activationType === 'show') { //NOTE: 'show' statements are not dynamic nodes because they are not removed from the DOM and setup is not rerun
+            showDOMNodes(nodePod)
+            return;
+         }
 
-      const isInitialMount = kit.flask === undefined
-      const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
-      this.render(kit, parent, fragment)
-      nodePod.activate()
-      if (isInitialMount)
-         flask.emitInitialMount()
-      else
-         flask.emitRemount() // remount preserved watchers etc.
+         const isInitialMount = kit.flask === undefined
+         const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
+         this.render(kit, parent, fragment)
+         nodePod.activate()
+         if (isInitialMount)
+            flask.emitInitialMount()
+         else
+            flask.emitRemount() // remount preserved watchers etc.
+      })
    }
 }
 

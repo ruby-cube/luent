@@ -15,7 +15,7 @@ import { getPhasicNode } from "../transition/PhasicNode";
 import { __DEV__buildAsyncPath } from "../../../flask/debug";
 import { RenderTransient, toRenderTransient, wrapToPreserve } from "../dynamic/DynamicKit";
 import { AnyObject } from "@rue/types";
-import { $renderphase, onRender } from "../render-cycle";
+import { $renderphase, INTERNAL_RENDER, onRender, PRERENDER } from "../render-cycle";
 
 
 
@@ -185,7 +185,7 @@ export class PolymorphKit {
             morphable.activateConditional(key, parent)
          console.log('switchMap', morphable.switchMap)
 
-      })
+      }, {phase: INTERNAL_RENDER})
       return this;
    }
 

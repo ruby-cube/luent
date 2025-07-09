@@ -16,6 +16,7 @@ import { MaybeIon } from "../component/Input";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 import { isInnerHTMLKit, mountInnerHTML, setUpInnerHTML } from "../node/InnerHTML";
+import { INTERNAL_RENDER } from "../render-cycle";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -227,7 +228,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
    const ion = attributes['mu:value'];
    watch(ion, ({ current }) => {
       element.value = toString(current)
-   }, { eager: true })
+   }, { eager: true, phase: INTERNAL_RENDER })
    delete attributes['mu:value'];
    if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
@@ -303,7 +304,7 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       if (isIon(value)) {
          watch(value, ({ current }) => {
             setAttribute(node, _key, current)
-         }, { eager: true })
+         }, { eager: true, phase: INTERNAL_RENDER })
       }
       // else if (isViewBindingKit(value)) {
       //    watch(value.ion, ({ newState }) => {
@@ -518,7 +519,7 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
          watch(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             if (previous) removePreviousClasses(previous, classList)
             if (current) addClasses(current, classList)
-         }, { eager: true })
+         }, { eager: true, phase: INTERNAL_RENDER })
       }
       else if (entry) {
          addClasses(entry, classList)
@@ -576,7 +577,8 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
             if (current) classList.add(key)
             else if (previous) classList.remove(key)
          }, {
-            eager: true
+            eager: true,
+            phase: INTERNAL_RENDER
          })
       }
       else if (value) {
@@ -613,7 +615,7 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
       if (isIon(entry)) {
          watch(entry, ({ current }/* value: string | AnyObject | Falsey */) => {
             setUpStyleEntry(style, current);
-         }, { eager: true })
+         }, { eager: true, phase: INTERNAL_RENDER })
       }
       else {
          setUpStyleEntry(style, entry)
@@ -629,7 +631,8 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
             watch(value, ({ current }) => {
                assignStyleProperty(style, toStylePropertyName(key), current)
             }, {
-               eager: true
+               eager: true,
+               phase: INTERNAL_RENDER
                // __devName: 'setUpStyles', 
             })
          }

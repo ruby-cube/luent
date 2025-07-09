@@ -195,7 +195,7 @@ export function watch<
    wrappedEffect.__DEV__effect = effect
 
    return setUpWatcher(
-      watchSubject,
+      [watchSubject], //FIX:
       wrappedEffect,
       phase,
       options,
@@ -276,7 +276,7 @@ type Task = () => void
 
 
 export function setUpWatcher(
-   subject: Watched, //TODO: if we get rid of particles, this would have to be Watched[], and we would link the effect to each subject
+   subjects: Watched[], //TODO: if we get rid of particles, this would have to be Watched[], and we would link the effect to each subject
    effectTask: Task,
    phase: string,
    options: EffectOptions,
@@ -293,14 +293,18 @@ export function setUpWatcher(
       enroll(task) {
          const effect = new Effect(task)
          // ORDER A: runs eagerly but not as an effect
-         subject.link(effect, phase)
-         if (options.eager) {
-            _scheduleEagerEffect(subject, effect, phase)
+         for (const subject of subjects){
+            subject.link(effect, phase)
+            if (options.eager) {
+               _scheduleEagerEffect(subject, effect, phase)
+            }
          }
          return effect;
       },
       remove(effectLink) {
-         subject.unlink(effectLink, phase)
+         for (const subject of subjects){
+            subject.unlink(effectLink, phase)
+         }
          if (compound)
             compound.untrackParticles()
       },

@@ -50,6 +50,7 @@ import { TestAwait } from './TestAwait';
 import { TestTooltipApp } from './TestTooltipLayoutThrash';
 import { TriangleDemo } from './demos/SierpinskiTriangles';
 import { TestSyncEffects } from './demos/TestSyncEffects';
+import { TestEffectCyclePhases } from './TestEffectCyclePhases';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -189,7 +190,7 @@ import { TestSyncEffects } from './demos/TestSyncEffects';
 
 
 
-const app = createApp(TestSyncEffects)
+const app = createApp(TestEffectCyclePhases)
 
 app.mount('#app')
 

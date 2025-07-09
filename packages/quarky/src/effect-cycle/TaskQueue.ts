@@ -13,15 +13,18 @@ export class TaskRef {
 
 
 export class TaskQueue {
-   extendedQueue: TaskRef[] | undefined
+   nestedTasks: TaskRef[] | undefined
    queue: TaskRef[] = []
-   retainedTasks: TaskRef[] | undefined
 
-   runningEffects: boolean = false;
+   runningTasks: boolean = false;
 
-   runEffects() {
-      this.runningEffects = true;
+   runTasks() {
+      this.runningTasks = true;
       const tasks = this.queue
+      
+
+      const retained = new Set()
+      const retainedTasks = []
 
       for (const task of tasks) {
          if (task.fn) {
@@ -29,32 +32,28 @@ export class TaskQueue {
                task.fn()
             }
             finally {
-               this.retain(task)
+               if (retained.has(task) || !task.fn) // fn may have been removed within call
+                  continue;
+               retained.add(task)
+               retainedTasks.push(task)
             }
          }
       }
-      this.runningEffects = false;
+      this.runningTasks = false;
+      this.queue = this.nestedTasks ? retained.size ?
+         [...retainedTasks, ...this.nestedTasks]
+         : this.nestedTasks : retained.size ? retainedTasks : []
+      // this.queue = [...retainedTasks, ...(this.nestedTasks ?? [])]
 
-      this.queue = this.extendedQueue ?? []
-      this.extendedQueue = undefined;
-   }
-
-   retain(task: TaskRef) {
-      if (!task.fn) return;
-      const retainedTasks = this.retainedTasks ?? (this.retainedTasks = [])
-      retainedTasks.push(task)
+      this.nestedTasks = undefined;
    }
 
    scheduleTask(task: TaskRef) {
-      if (this.runningEffects) {
-         const extension = this.extendedQueue ?? (this.extendedQueue = [])
-         extension.push(task)
+      if (this.runningTasks) {
+         const nested = this.nestedTasks ?? (this.nestedTasks = [])
+         nested.push(task)
       }
       else {
-         if (this.retainedTasks) {
-            this.queue = this.retainedTasks
-            this.retainedTasks = undefined;
-         }
          this.queue.push(task)
       }
    }

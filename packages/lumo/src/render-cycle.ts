@@ -4,6 +4,7 @@ import { createAwaitableHook } from "@rue/utils"
 export const {
    SYNC,
    PRERENDER,
+   INTERNAL_RENDER,
    RENDER,
    POSTRENDER,
    onEffectCycleComplete: onRenderCycleEnd
@@ -11,10 +12,14 @@ export const {
 
 
 export const onPrerender = createEffectCycleHook(PRERENDER)
+export const onInternalRender = createEffectCycleHook(INTERNAL_RENDER)
 export const onRender = createEffectCycleHook(RENDER)
 export const onPostrender = createEffectCycleHook(POSTRENDER)
 
+
+//QUESTION: Not sure how this will interact with microtasks, especially with onRender being a microtask
 export const $postevent = createAwaitableHook(onPrerender)
+export const $internalrender = createAwaitableHook(onInternalRender)
 export const $renderphase = createAwaitableHook(onRender)
 export const $postrender = createAwaitableHook(onPostrender)
 export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)
