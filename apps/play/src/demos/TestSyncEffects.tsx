@@ -17,15 +17,15 @@ export function TestSyncEffects() {
 
       watch($count, () => {
          console.log('$$$ --start effect increment')
-         $count.state = $count() + 1;
+         $count2.state = $count() + 1;
          console.log('--end effect increment')
-      }, { phase: PRERENDER })
+      }, { sync: true })
 
-      // watch($count2, () => {
-      //    console.log('$$$ --start effect2 increment')
-      //    $count.state = $count2() + 1;
-      //    console.log('--end effect2 increment')
-      // }, { phase: PRERENDER })
+      watch($count2, () => {
+         console.log('$$$ --start effect2 increment')
+         $count.state = $count2() + 1;
+         console.log('--end effect2 increment')
+      }, { phase: PRERENDER })
 
       watch($count, () => {
          console.log('$$$ ---effect')

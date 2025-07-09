@@ -165,7 +165,7 @@ export class EffectCycle {
 
    effects: PhaseMap = new PhaseMap('effect cycle');
 
-   effectChains: Map<WatchedAtom, Set<Effect>> = new Map()
+   effectStack: Set<Effect> = new Set()
 
    scheduleEffects(atom: WatchedAtom, phase: string) {
       this.effects.scheduleEffects(atom, phase)
@@ -178,6 +178,7 @@ export class EffectCycle {
    subphase: 'effects' | 'microtasks' = 'effects'
 
    runEffects(phase: string) {
+      console.log('runEffects', phase)
       this.currentPhase = phase;
       this.subphase = 'effects'
       const effects = this.effects.get(phase);

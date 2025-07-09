@@ -69,14 +69,14 @@ export class WatchedAtom {
 
    runningEffects: boolean = false;
 
-   get effectChain() {
-      const effectChains = $currentEffectCycle().effectChains
-      const effectChain = effectChains.get(this);
-      if (effectChain) return effectChain;
-      const chain: Set<Effect> = new Set();
-      effectChains.set(this, chain)
-      return chain;
-   }
+   // get effectChain() {
+   //    const effectChains = $currentEffectCycle().effectChains
+   //    const effectChain = effectChains.get(this);
+   //    if (effectChain) return effectChain;
+   //    const chain: Set<Effect> = new Set();
+   //    effectChains.set(this, chain)
+   //    return chain;
+   // }
 
    retained: Set<Effect> = new Set()
 
@@ -134,12 +134,13 @@ export class WatchedAtom {
       for (const effect of effects) {
          if (!effect.task
             || effectStack.has(effect)
-            || completedEffects?.has(effect) // prevents repeats
-            || this.effectChain.has(effect) // prevents infinite loops
+            || completedEffects?.has(effect) // prevents repeats within queue (but not across extended queues and phases)
+            || $currentEffectCycle().effectStack.has(effect) // prevents infinite loops
+            // || this.effectChain.has(effect) // prevents infinite loops
          ) {
             console.log('** effectStack.has(effect)', effectStack.has(effect))
             console.log('** completedEffects.has(effect)', completedEffects?.has(effect))
-            console.log('** effectChain.has(effect)', this.effectChain.has(effect))
+            console.log('** effectChain.has(effect)', $currentEffectCycle().effectStack.has(effect))
             if (!retained.has(effect)) {
                this.retain(effect)
                retained.add(effect)
@@ -213,6 +214,7 @@ export class WatchedAtom {
 }
 
 
+
 export class EffectQueue {
    private extendedQueue: WatchedAtom[] | undefined;
    private queue: WatchedAtom[] = []
@@ -229,35 +231,35 @@ export class EffectQueue {
    }
 
    scheduleEffects(atom: WatchedAtom) {
-      const currentEffect = $currentEffect()
-      if (currentEffect) {
-         atom.effectChain.add(currentEffect)
-      }
-
+      
       console.log('effectQueue.scheduleEffects')
       if (this.runningEffects && !atom.requeued) { //TODO: is the requeued correct??
+         const currentEffect = $currentEffect()
+         if (currentEffect) $currentEffectCycle().effectStack.add(currentEffect)
          atom.requeued = true;
          const extension = this.extendedQueue ?? (this.extendedQueue = [])
          extension.push(atom)
+         console.log('+ext')
       }
       else if (!atom.queued) {
          this.queue.push(atom)
          atom.queued = true;
+         console.log('+que')
       }
    }
 
    private runningEffects: boolean = false
 
    runEffects() {
-
       this.runningEffects = true
       let completed: Set<Effect> = new Set()
       this.runEagerEffects()
-
+      
       const queue = this.queue;
+      console.log('runEffects', queue.length)
       for (const atom of queue) {
          atom.runEffects(completed)
-         atom.queued = atom.requeued;
+         atom.queued = this.extendedQueue?.length ? atom.requeued : false;
          atom.requeued = false;
       }
       this.queue = this.extendedQueue ?? []
