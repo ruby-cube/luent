@@ -1,10 +1,6 @@
-import { noop } from "@rue/utils";
 import { triggerEffects } from "../compound/Compound";
 import { Watched } from "../watch/Watched";
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
-import { StateChangeEvent } from "../watch/watch";
-
-
 
 /**
  * NOTES: 

@@ -13,7 +13,7 @@ export class TaskRef {
 
 
 export class TaskQueue {
-   nestedTasks: TaskRef[] | undefined
+   nextQueue: TaskRef[] | undefined
    queue: TaskRef[] = []
 
    runningTasks: boolean = false;
@@ -21,10 +21,9 @@ export class TaskQueue {
    runTasks() {
       this.runningTasks = true;
       const tasks = this.queue
-      
+
 
       const retained = new Set()
-      const retainedTasks = []
 
       for (const task of tasks) {
          if (task.fn) {
@@ -35,22 +34,21 @@ export class TaskQueue {
                if (retained.has(task) || !task.fn) // fn may have been removed within call
                   continue;
                retained.add(task)
-               retainedTasks.push(task)
+               const nextQueue = this.nextQueue ?? (this.nextQueue = [])
+               nextQueue.push(task)
             }
          }
       }
       this.runningTasks = false;
-      this.queue = this.nestedTasks ? retained.size ?
-         [...retainedTasks, ...this.nestedTasks]
-         : this.nestedTasks : retained.size ? retainedTasks : []
+      this.queue = this.nextQueue ?? []
       // this.queue = [...retainedTasks, ...(this.nestedTasks ?? [])]
 
-      this.nestedTasks = undefined;
+      this.nextQueue = undefined;
    }
 
    scheduleTask(task: TaskRef) {
       if (this.runningTasks) {
-         const nested = this.nestedTasks ?? (this.nestedTasks = [])
+         const nested = this.nextQueue ?? (this.nextQueue = [])
          nested.push(task)
       }
       else {

@@ -63,9 +63,9 @@ export const effectStack = {
 
 
 export class WatchedAtom {
-   nestedEffects: Effect[] | undefined
+   // nestedEffects: Effect[] | undefined
    effects: Effect[] = []
-   retainedEffects: Effect[] | undefined
+   nextEffects: Effect[] | undefined
 
    runningEffects: boolean = false;
 
@@ -112,12 +112,13 @@ export class WatchedAtom {
       this.runningEffects = false;
 
       if (effectStack.size === 0) {
-         this.effects = this.nestedEffects ? this.retainedEffects ?
-            [...this.retainedEffects, ...this.nestedEffects]
-            : this.nestedEffects : this.retainedEffects ?? []
+         this.effects = this.nextEffects ?? []
+         // this.nestedEffects ? this.retainedEffects ?
+         //    [...this.retainedEffects, ...this.nestedEffects]
+         //    : this.nestedEffects : this.retainedEffects ?? []
          this.retained.clear()
-         this.retainedEffects = undefined
-         this.nestedEffects = undefined;
+         this.nextEffects = undefined
+         // this.nestedEffects = undefined;
       }
    }
 
@@ -162,17 +163,18 @@ export class WatchedAtom {
 
       this.runningEffects = false;
       // console.log('$$$ Nested???', this.nestedEffects?.length)
-      this.effects = this.nestedEffects ? this.retainedEffects ?
-         [...this.retainedEffects, ...this.nestedEffects]
-         : this.nestedEffects : this.retainedEffects ?? []
+      this.effects = this.nextEffects ?? []
+      // this.effects = this.nestedEffects ? this.retainedEffects ?
+      //    [...this.retainedEffects, ...this.nestedEffects]
+      //    : this.nestedEffects : this.retainedEffects ?? []
 
-      this.retainedEffects = undefined
-      this.nestedEffects = undefined;
+      this.nextEffects = undefined
+      // this.nestedEffects = undefined;
    }
 
    retain(effect: Effect) {
       if (!effect.task) return;
-      const retainedEffects = this.retainedEffects ?? (this.retainedEffects = [])
+      const retainedEffects = this.nextEffects ?? (this.nextEffects = [])
       retainedEffects.push(effect)
    }
 
@@ -185,8 +187,8 @@ export class WatchedAtom {
       effect.link(this)
 
       if (this.runningEffects) {
-         const nested = this.nestedEffects ?? (this.nestedEffects = [])
-         nested.push(effect)
+         const nestedEffects = this.nextEffects ?? (this.nextEffects = [])
+         nestedEffects.push(effect)
       }
       else {
          this.effects.push(effect)
