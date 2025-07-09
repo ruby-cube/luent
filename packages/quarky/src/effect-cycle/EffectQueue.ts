@@ -43,7 +43,7 @@ export function $currentEffect() {
 }
 
 export const effectStack = {
-   get size(){
+   get size() {
       return activeEffects.size;
    },
    has(effect: Effect) {
@@ -83,18 +83,17 @@ export class WatchedAtom {
    runSyncEffects() {
       this.runningEffects = true;
       const effects = this.effects
-      console.log('watchedAtom.runEffects::', effects.length)
-      console.log('retained effects?????', this.retainedEffects?.length)
 
       const retained = this.retained
 
       for (const effect of effects) {
-         if (!effect.task || effectStack.has(effect)) {
-            console.log('** effectStack.has(effect)', effectStack.has(effect))
+         if (!effect.task) { continue; }
+         if (effectStack.has(effect)) {
             if (!retained.has(effect)) {
                this.retain(effect)
                retained.add(effect)
             }
+            console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
             continue;
          }
          try {
@@ -111,10 +110,8 @@ export class WatchedAtom {
       }
 
       this.runningEffects = false;
-      console.log('retained::', this.retainedEffects?.length)
-      console.log('nested::', this.nestedEffects?.length)
 
-      if (effectStack.size === 0){
+      if (effectStack.size === 0) {
          this.effects = [...(this.retainedEffects ?? []), ...(this.nestedEffects ?? [])]
          this.retained.clear()
          this.retainedEffects = undefined
@@ -125,26 +122,24 @@ export class WatchedAtom {
    runEffects(completedEffects?: Set<Effect>) {
       this.runningEffects = true;
       const effects = this.effects
-      console.log('watchedAtom.runEffects::', effects.length)
-      console.log('completedEffects', completedEffects)
-      console.log('retained effects?????', this.retainedEffects?.length)
 
       const retained = new Set()
 
       for (const effect of effects) {
          if (!effect.task
-            || effectStack.has(effect)
             || completedEffects?.has(effect) // prevents repeats within queue (but not across extended queues and phases)
-            || $currentEffectCycle().effectStack.has(effect) // prevents infinite loops
-            // || this.effectChain.has(effect) // prevents infinite loops
          ) {
-            console.log('** effectStack.has(effect)', effectStack.has(effect))
-            console.log('** completedEffects.has(effect)', completedEffects?.has(effect))
-            console.log('** effectChain.has(effect)', $currentEffectCycle().effectStack.has(effect))
+            continue;
+         }
+         // stops infinite loops
+         if (effectStack.has(effect)
+            || $currentEffectCycle().effectStack.has(effect)
+         ) {
             if (!retained.has(effect)) {
                this.retain(effect)
                retained.add(effect)
             }
+            console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
             continue;
          }
          try {
@@ -162,17 +157,14 @@ export class WatchedAtom {
       }
 
       this.runningEffects = false;
-      console.log('retained::', this.retainedEffects?.length)
-      console.log('nested::', this.nestedEffects?.length)
-
-      this.effects = [...(this.retainedEffects ?? []), ...(this.nestedEffects ?? [])]
+      console.log('$$$ Nested???', this.nestedEffects?.length)
+      this.effects = [...(this.retainedEffects ?? []), ...(this.nestedEffects ?? [])] //TODO: make more efficient
       this.retainedEffects = undefined
       this.nestedEffects = undefined;
    }
 
    retain(effect: Effect) {
       if (!effect.task) return;
-      console.log('>retained effect', this.retainedEffects?.length)
       const retainedEffects = this.retainedEffects ?? (this.retainedEffects = [])
       retainedEffects.push(effect)
    }
@@ -182,9 +174,7 @@ export class WatchedAtom {
    * @param effect 
    */
    link(effect: Effect) {
-      console.log('link?')
       if (effect.isLinked(this)) return;
-      console.log('link')
       effect.link(this)
 
       if (this.runningEffects) {
@@ -192,11 +182,6 @@ export class WatchedAtom {
          nested.push(effect)
       }
       else {
-         console.log('push into effects')
-         // if (this.retainedEffects) {
-         //    this.effects = this.retainedEffects
-         //    this.retainedEffects = undefined;
-         // }
          this.effects.push(effect)
       }
    }
@@ -231,20 +216,19 @@ export class EffectQueue {
    }
 
    scheduleEffects(atom: WatchedAtom) {
-      
-      console.log('effectQueue.scheduleEffects')
-      if (this.runningEffects && !atom.requeued) { //TODO: is the requeued correct??
+
+      if (this.runningEffects && !atom.requeued) {
+         // a currentEffect during runningEffects means the effect triggered 
+         // other effects and should be added to the effectStack to prevent infinite loops
          const currentEffect = $currentEffect()
          if (currentEffect) $currentEffectCycle().effectStack.add(currentEffect)
          atom.requeued = true;
          const extension = this.extendedQueue ?? (this.extendedQueue = [])
          extension.push(atom)
-         console.log('+ext')
       }
       else if (!atom.queued) {
          this.queue.push(atom)
          atom.queued = true;
-         console.log('+que')
       }
    }
 
@@ -254,7 +238,7 @@ export class EffectQueue {
       this.runningEffects = true
       let completed: Set<Effect> = new Set()
       this.runEagerEffects()
-      
+
       const queue = this.queue;
       console.log('runEffects', queue.length)
       for (const atom of queue) {
