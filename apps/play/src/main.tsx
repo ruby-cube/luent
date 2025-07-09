@@ -49,6 +49,7 @@ import { TestTry } from './API-exploration/TestTry';
 import { TestAwait } from './TestAwait';
 import { TestTooltipApp } from './TestTooltipLayoutThrash';
 import { TriangleDemo } from './demos/SierpinskiTriangles';
+import { TestSyncEffects } from './demos/TestSyncEffects';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';

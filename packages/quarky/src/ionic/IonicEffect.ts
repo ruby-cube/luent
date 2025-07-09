@@ -48,8 +48,6 @@ export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
 
    effect.asCompound = compound;
    effect.asWatched = new Watched(effect as IonicEffect)
-   effect.watch = noop as () => Watched;
-   effect.unwatch = noop;
 
    return effect
 }

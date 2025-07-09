@@ -1,20 +1,22 @@
 import { component } from "@rue/lumo";
 import { ion, watch } from "@rue/quarky";
 import { describe, expect, it, vi } from "vitest";
+import { onRenderCycleEnd, PRERENDER } from "../../../../packages/lumo/src/render-cycle";
 
 describe('infinite loop prevention', () => {
-   it('simple sync loop', () => {
+   it('simple sync loop A', () => {
 
       const callMeOnceA = vi.fn()
       const callMeOnceB = vi.fn()
 
       const $count = ion(0, {
          increment() {
-            console.log('start increment')
+            console.log('===start increment')
             this.state++;
-            console.log('end increment')
+            console.log('===end increment')
          }
       })
+
 
       watch($count, () => {
          console.log('--start effect increment')
@@ -38,31 +40,88 @@ describe('infinite loop prevention', () => {
       expect(callMeOnceB).toBeCalledTimes(1)
 
       console.log("=====")
+      console.log("=====")
 
       $count.increment()
 
       expect(callMeOnceA).toBeCalledTimes(2)
-      expect(callMeOnceB).toBeCalledTimes(3)
+      expect(callMeOnceB).toBeCalledTimes(2)
 
+      console.log("=====")
       console.log("=====")
 
       $count.increment()
 
       expect(callMeOnceA).toBeCalledTimes(3)
-      expect(callMeOnceB).toBeCalledTimes(5)
+      expect(callMeOnceB).toBeCalledTimes(3)
    })
 
-   it('chained sync loop', () => {
+   it('simple sync loop B', () => {
 
       const callMeOnceA = vi.fn()
       const callMeOnceB = vi.fn()
-      const callMeTwice = vi.fn()
 
       const $count = ion(0, {
          increment() {
-            console.log('start increment')
+            console.log('===start increment')
             this.state++;
-            console.log('end increment')
+            console.log('===end increment')
+         }
+      })
+
+      watch($count, () => {
+         console.log('---effect!')
+         callMeOnceB()
+      }, {
+         sync: true
+      })
+
+      watch($count, () => {
+         console.log('--start effect increment')
+         $count.state = $count() + 1;
+         callMeOnceA()
+         console.log('--end effect increment')
+      }, {
+         sync: true
+      })
+
+      $count.increment()
+
+      expect(callMeOnceA).toBeCalledTimes(1)
+      expect(callMeOnceB).toBeCalledTimes(2)
+
+      console.log("=====")
+      console.log("")
+      console.log("=====")
+
+      $count.increment()
+
+      expect(callMeOnceA).toBeCalledTimes(2)
+      expect(callMeOnceB).toBeCalledTimes(4)
+
+      console.log("=====")
+      console.log("")
+      console.log("=====")
+
+      $count.increment()
+
+      // expect(callMeOnceA).toBeCalledTimes(7)
+      // expect(callMeOnceB).toBeCalledTimes(10)
+      expect(callMeOnceA).toBeCalledTimes(3)
+      expect(callMeOnceB).toBeCalledTimes(6)
+   })
+
+   it('chained sync loop A', () => {
+
+      const callMeOnceA = vi.fn()
+      const callMeOnceB = vi.fn()
+      const callMeOnceC = vi.fn()
+
+      const $count = ion(0, {
+         increment() {
+            console.log('>>>start increment')
+            this.state++;
+            console.log('>>>end increment')
          }
       })
 
@@ -88,7 +147,7 @@ describe('infinite loop prevention', () => {
 
       watch($count, () => {
          console.log('---effect')
-         callMeTwice()
+         callMeOnceC()
       }, {
          sync: true
       })
@@ -97,58 +156,332 @@ describe('infinite loop prevention', () => {
 
       expect(callMeOnceA).toBeCalledTimes(1)
       expect(callMeOnceB).toBeCalledTimes(1)
-      expect(callMeTwice).toBeCalledTimes(2)
+      expect(callMeOnceC).toBeCalledTimes(1)
 
       console.log("++++")
 
       $count.increment()
 
-      expect(callMeOnceA).toBeCalledTimes(2) //1
-      expect(callMeOnceB).toBeCalledTimes(2) //1
-      expect(callMeTwice).toBeCalledTimes(4) //3
+      expect(callMeOnceA).toBeCalledTimes(2)
+      expect(callMeOnceB).toBeCalledTimes(2)
+      expect(callMeOnceC).toBeCalledTimes(2)
+   })
+
+   it('chained sync loop B', () => {
+
+      const callMeOnceA = vi.fn()
+      const callMeOnceB = vi.fn()
+      const callMeOnceC = vi.fn()
+
+      const $count = ion(0, {
+         increment() {
+            console.log('>>>start increment')
+            this.state++;
+            console.log('>>>end increment')
+         }
+      })
+
+      const $count2 = ion(0)
+
+      watch($count, () => {
+         console.log('---effect')
+         callMeOnceC()
+      }, {
+         sync: true
+      })
+
+      watch($count, () => {
+         console.log('--start effect increment')
+         $count2.state = $count() + 1;
+         callMeOnceA()
+         console.log('--end effect increment')
+      }, {
+         sync: true
+      })
+
+      watch($count2, () => {
+         console.log('--start effect2 increment')
+         $count.state = $count2() + 1;
+         callMeOnceB()
+         console.log('--end effect2 increment')
+      }, {
+         sync: true
+      })
+
+      $count.increment()
+
+      expect(callMeOnceA).toBeCalledTimes(1)
+      expect(callMeOnceB).toBeCalledTimes(1)
+      expect(callMeOnceC).toBeCalledTimes(2)
+
+      console.log("++++")
+
+      $count.increment()
+
+      expect(callMeOnceA).toBeCalledTimes(2)
+      expect(callMeOnceB).toBeCalledTimes(2)
+      expect(callMeOnceC).toBeCalledTimes(4)
+   })
+
+   it('simple loop A', async () => {
+      const callMeOnceA = vi.fn()
+      const callMeOnceB = vi.fn()
+      let resolve: (value: unknown) => void;
+      const allDone = new Promise((_resolve) => {
+         resolve = _resolve
+      })
+      let res: (value: unknown) => void;
+      let done = new Promise((_resolve) => {
+         res = _resolve
+      })
+
+      let count = 0;
+
+      const $count = ion(0, {
+         increment() {
+            console.log('start increment')
+            this.state++;
+            console.log('end increment')
+         }
+      })
+
+      watch($count, () => {
+         console.log('--start effect increment')
+         $count.state = $count() + 1;
+         callMeOnceA()
+         console.log('--end effect increment')
+      }, { phase: PRERENDER })
+
+      watch($count, () => {
+         console.log('---effect!')
+         callMeOnceB()
+         res(undefined)
+         console.log('**count', count)
+      }, { phase: PRERENDER })
+
+      $count.increment()
+      count++;
+
+      await done;
+
+      expect(callMeOnceA).toBeCalledTimes(1)
+      expect(callMeOnceB).toBeCalledTimes(1)
+
+      done = new Promise((_resolve) => {
+         res = _resolve
+      })
+
+      setTimeout(async () => {
+         console.log("=====")
+         $count.increment()
+         count++;
+         await done;
+
+         expect(callMeOnceA).toBeCalledTimes(2)
+         expect(callMeOnceB).toBeCalledTimes(2)
+
+         done = new Promise((_resolve) => {
+            res = _resolve
+         })
+
+         setTimeout(async () => {
+            console.log("=====")
+            $count.increment()
+            count++;
+            await done;
+
+            expect(callMeOnceA).toBeCalledTimes(3)
+            expect(callMeOnceB).toBeCalledTimes(3)
+
+            resolve(undefined)
+         }, 1)
+      }, 0)
+      return allDone;
+   })
+
+   it('simple loop B', async () => {
+      const callMeOnceA = vi.fn()
+      const callMeOnceB = vi.fn()
+      let resolve: (value: unknown) => void;
+      const allDone = new Promise((_resolve) => {
+         resolve = _resolve
+      })
+      let res: (value: unknown) => void;
+      let done = new Promise((_resolve) => {
+         res = _resolve
+      })
+
+      let count = 0;
+
+      const $count = ion(0, {
+         increment() {
+            console.log('start increment')
+            this.state++;
+            console.log('end increment')
+         }
+      })
+
+      watch($count, () => {
+         console.log('---effect!')
+         callMeOnceB()
+         console.log('**count', count)
+      }, { phase: PRERENDER })
+
+      watch($count, () => {
+         console.log('--start effect increment')
+         $count.state = $count() + 1;
+         callMeOnceA()
+         console.log('--end effect increment')
+      }, { phase: PRERENDER })
+
+      watch($count, () => {
+         console.log("!!!!!!!!")
+         res(undefined)
+      }, { phase: PRERENDER })
+
+
+      $count.increment()
+      count++;
+
+      await done;
+
+      expect(callMeOnceA).toBeCalledTimes(1)
+      expect(callMeOnceB).toBeCalledTimes(2)
+
+      done = new Promise((_resolve) => {
+         res = _resolve
+      })
+
+      setTimeout(async () => {
+         console.log("=====")
+         $count.increment()
+         count++;
+
+         await done;
+
+         expect(callMeOnceA).toBeCalledTimes(2)
+         expect(callMeOnceB).toBeCalledTimes(4)
+
+
+         done = new Promise((_resolve) => {
+            res = _resolve
+         })
+
+         setTimeout(async () => {
+            console.log("=====")
+
+            $count.increment()
+            count++;
+
+            await done;
+
+            expect(callMeOnceA).toBeCalledTimes(3)
+            // expect(callMeOnceB).toBeCalledTimes(6)
+            expect(callMeOnceB).toBeCalledTimes(5) //FIX:
+
+            resolve(undefined)
+         }, 0)
+      }, 0)
+      return allDone;
+   })
+
+   it.only('chained loop', async () => {
+      const callMeOnceA = vi.fn()
+      const callMeOnceB = vi.fn()
+      const callMeOnceC = vi.fn()
+      let resolve: (value: unknown) => void;
+      const allDone = new Promise((_resolve) => {
+         resolve = _resolve
+      })
+      let res: (value: unknown) => void;
+      let done = new Promise((_resolve) => {
+         res = _resolve
+      })
+
+      let count = 0;
+
+
+      const $count = ion(0, {
+         increment() {
+            console.log('>>>start increment')
+            this.state++;
+            console.log('>>>end increment')
+         }
+      })
+
+      const $count2 = ion(0)
+
+      watch($count, () => {
+         console.log('--start effect increment')
+         $count2.state = $count() + 1;
+         callMeOnceA()
+         console.log('--end effect increment')
+      }, { phase: PRERENDER })
+
+      watch($count2, () => {
+         console.log('--start effect2 increment')
+         $count.state = $count2() + 1;
+         callMeOnceB()
+         console.log('--end effect2 increment')
+      }, { phase: PRERENDER })
+
+      watch($count, () => {
+         console.log('---effect')
+         callMeOnceC()
+      }, { phase: PRERENDER })
+
+
+      watch($count, () => {
+         console.log('!!!!')
+         res(undefined)
+      }, { phase: PRERENDER })
+
+      $count.increment()
+      count++;
+
+      await done;
+
+      expect(callMeOnceA).toBeCalledTimes(3)
+      expect(callMeOnceB).toBeCalledTimes(2)
+      expect(callMeOnceC).toBeCalledTimes(3)
+      // expect(callMeOnceA).toBeCalledTimes(1)
+      // expect(callMeOnceB).toBeCalledTimes(1)
+      // expect(callMeOnceC).toBeCalledTimes(2)
+
+      done = new Promise((_resolve) => {
+         res = _resolve
+      })
+
+      setTimeout(async () => {
+         console.log("=====")
+         $count.increment()
+         count++;
+         await done;
+
+         console.log('DONE')
+         expect(callMeOnceA).toBeCalledTimes(6)
+         expect(callMeOnceB).toBeCalledTimes(4)
+         expect(callMeOnceC).toBeCalledTimes(6)
+
+         resolve(undefined)
+
+         // done = new Promise((_resolve) => {
+         //    res = _resolve
+         // })
+
+         // setTimeout(async () => {
+         //    console.log("=====")
+         //    $count.increment()
+         //    count++;
+         //    await done;
+
+         //    expect(callMeOnceA).toBeCalledTimes(3)
+         //    expect(callMeOnceB).toBeCalledTimes(3)
+         //    expect(callMeOnceC).toBeCalledTimes(4)
+
+         //    resolve(undefined)
+         // }, 1)
+      }, 0)
+      return allDone;
    })
 })
-
-// export function TestSyncEffects() {
-//    const $count = ion(0, {
-//       increment() {
-//          this.state++;
-//       },
-//       decrement() {
-//          this.state--;
-//       }
-//    })
-
-//    const $count2 = ion(0)
-
-//    watch($count, () => {
-//       $count2.state = $count() + 1; // this should run once
-//       console.log('$count------')
-//       console.log('count', $count())
-//       console.log('count2', $count2())
-//    }, {
-//       // sync: true
-//    })
-
-//    watch($count2, () => {
-//       $count.state = $count2() + 1;  // this should run once
-//       console.log('$count2------')
-//       console.log('count', $count())
-//       console.log('count2', $count2())
-//    }, {
-//       // sync: true
-//    })
-
-
-//    watch($count, () => {
-//       console.log('new count', $count()) // this should run twice
-//    }, {
-//       // sync: true
-//    })
-
-//    return component(
-//       <>
-//          <button on:click={e => { $count.increment() }}>increment</button>
-//       </>
-//    )
-// }

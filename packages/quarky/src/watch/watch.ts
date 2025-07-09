@@ -9,12 +9,11 @@ import { createWatchedDerivation, isWatchedDerivation } from "../ionic/WatchedDe
 import { createMultisubjectIon, isMultisubjectIon } from "./MultiSubject";
 import { isObject, isObjectLiteral } from "@rue/utils";
 import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
-import { EffectLink } from "../effect-cycle/EffectLink";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
 import { $AtomicIonState, isAtomicIon, isAtomicIonQuark } from "../ion/AtomicIon";
 import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
 import { createWatchedIonizedIon } from "./IonizedIon";
-import { getDefaultPhase, getEffectCycle, scheduleEagerEffect, scheduleEffect } from "../ReactivitySystem";
+import { getDefaultPhase, getEffectCycleManager, scheduleEagerEffect } from "../ReactivitySystem";
 import { Effect } from "../effect-cycle/EffectQueue";
 import { runSyncEffects, scheduleEagerSyncEffect } from "../effect-cycle/SyncEffects";
 
@@ -296,7 +295,7 @@ export function setUpWatcher(
          // ORDER A: runs eagerly but not as an effect
          subject.link(effect, phase)
          if (options.eager) {
-            _scheduleEagerEffect(effect, phase)
+            _scheduleEagerEffect(subject, effect, phase)
          }
          return effect;
       },
@@ -315,10 +314,12 @@ export function setUpWatcher(
    });
 }
 
-function _scheduleEagerEffect(effect: Effect, phase: string) {
+function _scheduleEagerEffect(subject: Watched, effect: Effect, phase: string) {
    if (phase === SYNC) {
-      scheduleEagerSyncEffect(effect);
-      runSyncEffects()
+      const atom = subject.effects.get(phase)
+      atom?.runEffects(new Set())
+      // scheduleEagerSyncEffect(effect);
+      // runSyncEffects()
    }
    else {
       scheduleEagerEffect(effect, phase)

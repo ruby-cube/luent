@@ -4,7 +4,7 @@ import { Mutation, MutableEntity, asMutable } from "../Mutable";
 import { AsyncState } from "@rue/flask";
 import { E } from "vitest/dist/chunks/reporters.6vxQttCV";
 import { EffectCycle } from "../effect-cycle/EffectCycle";
-import { getEffectCycle } from "../ReactivitySystem";
+import { getEffectCycleManager } from "../ReactivitySystem";
 
 
 
@@ -109,7 +109,7 @@ class InternalAction {
    get effectCycle() {
       if (!this.done) throw new Error("Cannot access effect cycle until action is done")
       if (this._effectCycle) return this._effectCycle;
-      const effectCycle = getEffectCycle()
+      const effectCycle = getEffectCycleManager()
       const currentCycle = effectCycle.current
       const currentPhase = currentCycle.currentPhase
       if (currentPhase === effectCycle.phases[0].name && currentCycle.subphase === 'effects') { // accepting new actions

@@ -1,6 +1,8 @@
 import { setImmediate } from "@rue/thread";
 import { Listener, SchedulerOptions } from "@rue/flask";
 import { Effect, EffectQueue, WatchedAtom } from "./EffectQueue";
+import { TaskRef } from "./TaskQueue";
+import { EffectCycleManager } from "../ReactivitySystem";
 
 
 
@@ -136,67 +138,6 @@ export class CyclePhase {
 // }
 
 
-type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
-
-export class EffectCycleManager {
-   constructor(public name: string) { }
-
-   count: number = 0;
-
-   private nextCycle: EffectCycle | undefined
-   private currentCycle: EffectCycle | undefined
-
-   get next() {
-      return this.nextCycle ?? (this.nextCycle = this.createCycle())
-   }
-
-   get current() {
-      return this.currentCycle ?? (this.currentCycle = this.initCycle())
-   }
-
-   createCycle() {
-      this.count++;
-      if (this.currentCycle)
-         throw new Error("@% Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
-      return new EffectCycle(this.phases[0].name, this);
-   }
-
-   initCycle() {
-      const cycle = this.createCycle()
-      schedulePhase(cycle, this.phases[0]
-      )
-      return cycle;
-   }
-
-   closeCycle() {
-      this.currentCycle = this.nextCycle
-   }
-
-   phases: CyclePhase[] = []
-
-   onComplete!: EffectCycleHook
-
-   pushPhase(phase: CyclePhase) {
-      phase.phases = this.phases;
-      phase.index = this.phases.length
-      this.phases.push(phase);
-   }
-}
-
-
-
-function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
-   schedule(() => {
-      const finalIndex = phases.length - 2;
-      if (index < finalIndex) schedulePhase(cycle, next)
-      cycle.runEffects(phaseHook)
-      if (index === finalIndex)
-         queueMicrotask(() => {
-            cycle.runEffects(next!.phaseHook)
-            cycle.close();
-         })
-   })
-}
 
 export const SYNC = 'S' as const
 export const UPDATE_CYCLE_END = 'UCE' as const
@@ -211,7 +152,7 @@ export class EffectCycle {
       public currentPhase: string,
       public manager: EffectCycleManager
    ) {
-
+      console.log('NEW EFFECT CYCLE')
    }
 
    close() {
@@ -223,6 +164,8 @@ export class EffectCycle {
    // }
 
    effects: PhaseMap = new PhaseMap('effect cycle');
+
+   effectChains: Map<WatchedAtom, Set<Effect>> = new Map()
 
    scheduleEffects(atom: WatchedAtom, phase: string) {
       this.effects.scheduleEffects(atom, phase)
@@ -268,6 +211,11 @@ class PhaseMap extends Map<string, EffectQueue | null> {
       const queue = this.get(phase) ?? this.initializeQueue(phase);
       queue.scheduleEffects(atom)
 
+   }
+
+   scheduleTask(task: TaskRef, phase: string){
+        const queue = this.get(phase) ?? this.initializeQueue(phase);
+        queue.scheduleTask(task)
    }
 }
 

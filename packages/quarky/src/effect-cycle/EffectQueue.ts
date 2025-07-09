@@ -1,7 +1,8 @@
 // watched queues
 // need to add and remove easily: set
 
-import { queueTask } from "@rue/thread";
+import { TaskQueue, TaskRef } from "./TaskQueue";
+import { $currentEffectCycle } from "../ReactivitySystem";
 
 
 // effect cycle queues
@@ -33,31 +34,144 @@ export class Effect {
 
 
 
+
+const _effectStack: Effect[] = []
+const activeEffects = new Set()
+
+export function $currentEffect() {
+   return _effectStack.at(-1)
+}
+
+export const effectStack = {
+   get size(){
+      return activeEffects.size;
+   },
+   has(effect: Effect) {
+      return activeEffects.has(effect)
+   },
+
+   push(effect: Effect) {
+      activeEffects.add(effect)
+      _effectStack.push(effect)
+   },
+
+   pop() {
+      const effect = _effectStack.pop()
+      activeEffects.delete(effect)
+   }
+}
+
+
 export class WatchedAtom {
-   extendedEffects: Effect[] | undefined
+   nestedEffects: Effect[] | undefined
    effects: Effect[] = []
    retainedEffects: Effect[] | undefined
 
    runningEffects: boolean = false;
 
-   runEffects() {
+   get effectChain() {
+      const effectChains = $currentEffectCycle().effectChains
+      const effectChain = effectChains.get(this);
+      if (effectChain) return effectChain;
+      const chain: Set<Effect> = new Set();
+      effectChains.set(this, chain)
+      return chain;
+   }
+
+   retained: Set<Effect> = new Set()
+
+   runSyncEffects() {
       this.runningEffects = true;
       const effects = this.effects
+      console.log('watchedAtom.runEffects::', effects.length)
+      console.log('retained effects?????', this.retainedEffects?.length)
+
+      const retained = this.retained
 
       for (const effect of effects) {
-         if (effect.task) {
+         if (!effect.task || effectStack.has(effect)) {
+            console.log('** effectStack.has(effect)', effectStack.has(effect))
+            if (!retained.has(effect)) {
+               this.retain(effect)
+               retained.add(effect)
+            }
+            continue;
+         }
+         try {
+            effectStack.push(effect);
             effect.task() // What about async tasks? T_T How will it affect this system?
-            this.retain(effect)
+         }
+         finally {
+            effectStack.pop()
+            if (!retained.has(effect)) {
+               this.retain(effect)
+               retained.add(effect)
+            }
          }
       }
-      this.runningEffects = false;
 
-      this.effects = this.extendedEffects ?? []
-      this.extendedEffects = undefined;
+      this.runningEffects = false;
+      console.log('retained::', this.retainedEffects?.length)
+      console.log('nested::', this.nestedEffects?.length)
+
+      if (effectStack.size === 0){
+         this.effects = [...(this.retainedEffects ?? []), ...(this.nestedEffects ?? [])]
+         this.retained.clear()
+         this.retainedEffects = undefined
+         this.nestedEffects = undefined;
+      }
+   }
+
+   runEffects(completedEffects?: Set<Effect>) {
+      this.runningEffects = true;
+      const effects = this.effects
+      console.log('watchedAtom.runEffects::', effects.length)
+      console.log('completedEffects', completedEffects)
+      console.log('retained effects?????', this.retainedEffects?.length)
+
+      const retained = new Set()
+
+      for (const effect of effects) {
+         if (!effect.task
+            || effectStack.has(effect)
+            || completedEffects?.has(effect) // prevents repeats
+            || this.effectChain.has(effect) // prevents infinite loops
+         ) {
+            console.log('** effectStack.has(effect)', effectStack.has(effect))
+            console.log('** completedEffects.has(effect)', completedEffects?.has(effect))
+            console.log('** effectChain.has(effect)', this.effectChain.has(effect))
+            if (!retained.has(effect)) {
+               this.retain(effect)
+               retained.add(effect)
+            }
+            continue;
+         }
+         try {
+            effectStack.push(effect);
+            effect.task() // What about async tasks? T_T How will it affect this system?
+         }
+         finally {
+            effectStack.pop()
+            completedEffects?.add(effect)
+            if (!retained.has(effect)) {
+               this.retain(effect)
+               retained.add(effect)
+            }
+         }
+      }
+
+      this.runningEffects = false;
+      console.log('retained::', this.retainedEffects?.length)
+      console.log('nested::', this.nestedEffects?.length)
+
+      this.effects = [...(this.retainedEffects ?? []), ...(this.nestedEffects ?? [])]
+      this.retainedEffects = undefined
+      this.nestedEffects = undefined;
    }
 
    retain(effect: Effect) {
       if (!effect.task) return;
+      console.log('>retained effect', this.retainedEffects?.length)
       const retainedEffects = this.retainedEffects ?? (this.retainedEffects = [])
       retainedEffects.push(effect)
    }
@@ -67,30 +181,32 @@ export class WatchedAtom {
    * @param effect 
    */
    link(effect: Effect) {
+      console.log('link?')
       if (effect.isLinked(this)) return;
+      console.log('link')
       effect.link(this)
 
       if (this.runningEffects) {
-         const extension = this.extendedEffects ?? (this.extendedEffects = [])
-         extension.push(effect)
+         const nested = this.nestedEffects ?? (this.nestedEffects = [])
+         nested.push(effect)
       }
       else {
-         if (this.retainedEffects) {
-            this.effects = this.retainedEffects
-            this.retainedEffects = undefined;
-         }
+         console.log('push into effects')
+         // if (this.retainedEffects) {
+         //    this.effects = this.retainedEffects
+         //    this.retainedEffects = undefined;
+         // }
          this.effects.push(effect)
       }
    }
 
-   // /**
-   //  * To be called by watcher's stop() function
-   //  * @param effect 
-   //  */
-   // unlink(effect: Effect) {
-   //    effect.unlink(this)
-   //    effect.task = null;
-   // }
+   /**
+    * To be called by watcher's stop() function
+    * @param effect 
+    */
+   unlink(effect: Effect) {
+      effect.unlink(this)
+   }
 
    requeued: boolean = false;
    queued: boolean = false
@@ -101,6 +217,11 @@ export class EffectQueue {
    private extendedQueue: WatchedAtom[] | undefined;
    private queue: WatchedAtom[] = []
    private eagerQueue: Effect[] | undefined;
+   private taskQueue: TaskQueue | undefined;
+
+   scheduleTask(task: TaskRef) {
+      this.taskQueue?.scheduleTask(task)
+   }
 
    scheduleEagerEffect(effect: Effect) {
       const eagerQueue = this.eagerQueue ?? (this.eagerQueue = [])
@@ -108,7 +229,13 @@ export class EffectQueue {
    }
 
    scheduleEffects(atom: WatchedAtom) {
-      if (this.runningEffects && !atom.requeued) {
+      const currentEffect = $currentEffect()
+      if (currentEffect) {
+         atom.effectChain.add(currentEffect)
+      }
+
+      console.log('effectQueue.scheduleEffects')
+      if (this.runningEffects && !atom.requeued) { //TODO: is the requeued correct??
          atom.requeued = true;
          const extension = this.extendedQueue ?? (this.extendedQueue = [])
          extension.push(atom)
@@ -121,22 +248,25 @@ export class EffectQueue {
 
    private runningEffects: boolean = false
 
-   runEffects() { //QUESTION: can infinite loop protect be implemented here?
-      this.runningEffects = true
+   runEffects() {
 
+      this.runningEffects = true
+      let completed: Set<Effect> = new Set()
       this.runEagerEffects()
 
       const queue = this.queue;
       for (const atom of queue) {
-         atom.runEffects()
+         atom.runEffects(completed)
          atom.queued = atom.requeued;
          atom.requeued = false;
       }
       this.queue = this.extendedQueue ?? []
       this.extendedQueue = undefined;
       if (this.queue.length) {
+         console.log('EXTENDING', this.queue.length)
          this.runEffects()
       }
+
       this.runningEffects = false;
    }
 
@@ -148,23 +278,23 @@ export class EffectQueue {
       }
    }
 
-   runSyncEffects() {
-      for (const effect of this.effects) {
-         if (effectStack.has(effect)) {
-            console.log('infinite loop prevented')
-            continue; // prevents infinite loops
-         }
-         effectStack.push(effect)
-         try {
-            effect.task()
-         }
-         finally {
-            effectStack.pop()
-            if (!effect.vine) continue; // effect has already been removed during the effect via 'once' or 'scheduler'
-            effect.watchSubject!.effects.addToVine(effect, SYNC) // return to watch subject
-         }
-      }
-   }
+   // runSyncEffects() {
+   //    for (const effect of this.effects) {
+   //       if (effectStack.has(effect)) {
+   //          console.log('infinite loop prevented')
+   //          continue; // prevents infinite loops
+   //       }
+   //       effectStack.push(effect)
+   //       try {
+   //          effect.task()
+   //       }
+   //       finally {
+   //          effectStack.pop()
+   //          if (!effect.vine) continue; // effect has already been removed during the effect via 'once' or 'scheduler'
+   //          effect.watchSubject!.effects.addToVine(effect, SYNC) // return to watch subject
+   //       }
+   //    }
+   // }
 }
 
 // type Phase = 'sync' | 'preupdate' | 'update' | 'postupdate' | 'lazy'
@@ -184,143 +314,3 @@ export class EffectQueue {
 //       cyclePhase.scheduleEffects(atom)
 //    }
 // }
-
-function calcIdleDeadline(startTime: DOMHighResTimeStamp, responseTime: number) {
-   const now = new Performance().now()
-   const elapsed = now - startTime;
-   const deadline = responseTime - elapsed
-   return deadline < 0 ? 0 : deadline;
-}
-
-class LazyWatchedAtom extends WatchedAtom {
-   constructor(
-      public responseTime?: number
-   ) {
-      super()
-   }
-   startTime?: DOMHighResTimeStamp
-   currentIndex = 0
-   resolve: ((value: void | PromiseLike<void>) => void) | undefined
-   override runEffects(): void | Promise<void> {
-      this.runningEffects = true;
-      const effects = this.effects
-      if (this.responseTime && this.startTime === undefined) this.startTime = new Performance().now()
-      for (let i = this.currentIndex; i < effects.length; i++) {
-         if (timeLeft < 1) {
-            this.currentIndex = i;
-            if (this.responseTime) {
-               const deadline = calcIdleDeadline(this.startTime!, this.responseTime)
-               if (deadline === 0) queueTask(() => this.runEffects())
-               else requestIdleCallback(() => this.runEffects(), { timeout: deadline })
-            }
-            else {
-               requestIdleCallback(() => this.runEffects())
-            }
-
-            return new Promise((resolve) => {
-               this.resolve = resolve
-            })
-         }
-         else {
-            const effect = effects[i]
-            if (effect.task) {
-               effect.task() // What about async tasks? T_T How will it affect this system?
-               this.retain(effect)
-            }
-         }
-      }
-      this.runningEffects = false;
-
-      this.effects = this.extendedEffects ?? []
-      this.extendedEffects = undefined;
-      if (this.resolve) this.resolve()
-   }
-}
-
-
-// a queue that runs synchronously until the next animation frame where it will pause execution and continue after animation frame complete (onIdle)
-
-class LazyEffectPhase implements EffectQueue {
-   constructor() {
-      startFrameTracker()
-   }
-
-   private extendedQueue: LazyWatchedAtom[] | undefined;
-   private queue: LazyWatchedAtom[] = []
-
-   scheduleEffects(atom: LazyWatchedAtom) {
-      if (this.runningEffects && !atom.requeued) {
-         atom.requeued = true;
-         const extension = this.extendedQueue ?? (this.extendedQueue = [])
-         extension.push(atom)
-      }
-      else if (!atom.queued) {
-         this.queue.push(atom)
-         atom.queued = true;
-      }
-   }
-
-   private runningEffects: boolean = false
-   currentIndex = 0;
-
-   async runEffects() {
-      this.runningEffects = true
-      const queue = this.queue;
-      for (let i = this.currentIndex; i < queue.length; i++) {
-         if (timeLeft < 1) {
-            this.currentIndex = i;
-            requestIdleCallback(() => this.runEffects())
-            return;
-         }
-         else {
-            const atom = queue[i]
-            const resume = atom.runEffects()
-            if (resume) {
-               await resume;
-               atom.queued = atom.requeued;
-               atom.requeued = false;
-            }
-            else {
-               atom.queued = atom.requeued;
-               atom.requeued = false;
-            }
-         }
-      }
-      this.queue = this.extendedQueue ?? []
-      this.extendedQueue = undefined;
-      if (this.queue.length) {
-         await this.runEffects()
-         this.runningEffects = false;
-         this.currentIndex = 0
-      }
-      else {
-         this.runningEffects = false;
-         this.currentIndex = 0
-      }
-   }
-}
-
-let lazyPhase = new LazyEffectPhase()
-
-function getLazyPhase() {
-   return lazyPhase;
-}
-
-const interval = 1000 / 60; // ~16.67ms for 60Hz //TODO: what if user has a different frame rate
-let frameTrackerActive = false;
-let timeLeft = interval;
-
-function startFrameTracker() {
-   if (frameTrackerActive) return;
-   frameTrackerActive = true;
-   let lastFrame = performance.now();
-
-   function trackTimeLeft(now: DOMHighResTimeStamp) {
-      timeLeft = interval - (now - lastFrame);
-      lastFrame = now;
-      requestAnimationFrame(trackTimeLeft);
-   }
-
-   requestAnimationFrame(trackTimeLeft);
-}
-

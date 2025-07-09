@@ -711,7 +711,7 @@ function useMutatingOp(
             trigger();
          }
 
-         runSyncEffects()
+         // runSyncEffects()
 
          return output;
       }

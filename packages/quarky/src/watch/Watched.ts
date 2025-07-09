@@ -1,6 +1,5 @@
 import { SYNC } from "../effect-cycle/EffectCycle";
-import { Effect, WatchedAtom } from "../effect-cycle/EffectQueue";
-import { scheduleSyncEffects } from "../effect-cycle/SyncEffects";
+import { $currentEffect, Effect, WatchedAtom } from "../effect-cycle/EffectQueue";
 import { scheduleEffects } from "../ReactivitySystem";
 
 
@@ -39,9 +38,10 @@ export class Watched {
    }
 
    triggerEffects() { // the surrounding effect when original trigger happened
+      console.log('watched.triggerEffects')
       for (const [phase, atomicEffects] of this.effects) {
          if (phase === SYNC) {
-            scheduleSyncEffects(atomicEffects);
+            atomicEffects.runSyncEffects()
          }
          else {
             scheduleEffects(atomicEffects!, phase)
@@ -55,7 +55,7 @@ export class Watched {
    //    const completed = this.completedEffects.get(phase);
    //    if (completed || completed === null) return;
    //    this.completedEffects.set(phase, null);
-   //    getEffectCycle().onComplete(() => { //TODO: simple hooks like this do not need to be flasked listeners... too much overhead
+   //    getEffectCycleManager().onComplete(() => { //TODO: simple hooks like this do not need to be flasked listeners... too much overhead
    //       const completed = this.completedEffects.get(phase)
    //       if (completed) this.effects.absorb(completed, phase)
    //       this.completedEffects.delete(phase)
@@ -96,7 +96,7 @@ class AtomPhaseMap extends Map<string, WatchedAtom> {
      */
    link(effect: Effect, phase: string) {
       const atom = this.get(phase) ?? this.initializeAtom(phase);
-      effect.link(atom)
+      atom.link(effect)
    }
 
    /**
@@ -105,6 +105,6 @@ class AtomPhaseMap extends Map<string, WatchedAtom> {
     */
    unlink(effect: Effect, phase: string) {
       const atom = this.get(phase) ?? this.initializeAtom(phase);
-      effect.unlink(atom)
+      atom.unlink(effect)
    }
 }

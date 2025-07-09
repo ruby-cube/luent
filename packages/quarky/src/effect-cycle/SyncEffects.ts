@@ -1,26 +1,24 @@
-import { SYNC } from "./EffectCycle";
-import { EffectLink } from "./EffectLink";
 import { Effect, EffectQueue, WatchedAtom } from "./EffectQueue";
 
 
-const _effectStack: EffectLink[] = []
-const activeEffects = new Set()
+// // const _effectStack: EffectLink[] = []
+// const activeEffects = new Set()
 
-export const effectStack = {
-   has(effect: EffectLink) {
-      return activeEffects.has(effect)
-   },
+// export const effectStack = {
+//    has(effect: EffectLink) {
+//       return activeEffects.has(effect)
+//    },
 
-   push(effect: EffectLink) {
-      activeEffects.add(effect)
-      _effectStack.push(effect)
-   },
+//    push(effect: EffectLink) {
+//       activeEffects.add(effect)
+//       // _effectStack.push(effect)
+//    },
 
-   pop() {
-      const effect = _effectStack.pop()
-      activeEffects.delete(effect)
-   }
-}
+//    pop(effect: EffectLink) {
+//       // const effect = _effectStack.pop()
+//       activeEffects.delete(effect)
+//    }
+// }
 
 
 let syncEffects: EffectQueue | undefined
@@ -29,16 +27,19 @@ function $syncEffects() {
    return syncEffects ?? (syncEffects = new EffectQueue())
 }
 
-export function runSyncEffects() {
-   syncEffects?.run()
-}
-
-export function scheduleSyncEffects(atom: WatchedAtom) {
-   $syncEffects().scheduleEffects(atom)
-}
+// export function scheduleSyncEffects(atom: WatchedAtom) {
+//    console.log('scheduleSyncEffects')
+//    const effects = atom.effects
+//    $syncEffects().scheduleEffects(atom)
+// }
 
 export function scheduleEagerSyncEffect(effect: Effect) {
    $syncEffects().scheduleEagerEffect(effect)
+}
+
+export function runSyncEffects() {
+   console.log('run sync effects')
+   syncEffects?.runEffects()
 }
 
 // class SyncEffects {

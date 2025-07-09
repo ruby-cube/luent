@@ -44,8 +44,6 @@ export function createIonicTask(task: IonicTask, retrack: boolean = true) {
 
    effect.asCompound = compound;
    effect.asWatched = new Watched(effect as IonicCompoundMorph)
-   effect.watch = noop as () => Watched;
-   effect.unwatch = noop;
 
    return effect
 }

@@ -64,7 +64,7 @@ export function createPionCapsule(
    derivation: () => unknown,
    methods: AnyObject,
 ) {
-   let compound: IonicCompound | undefined = new IonicCompound({ watch: noop as () => Watched, unwatch: noop })
+   let compound: IonicCompound | undefined = new IonicCompound({})
    compound.trackedCall(derivation)
    const particles = compound.particles
    compound = undefined;

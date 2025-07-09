@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { IonicCompound, IonicCompoundMorph } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
-import { unwatch, watch, Watched } from "./Watched";
+import { Watched } from "./Watched";
 import { Ion, isIon } from "../ion/Ion";
 import { noop } from "@rue/utils";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
@@ -26,8 +26,6 @@ export function createMultisubjectIon(subjects: unknown[] & AnyObject) {
       type: MULTISUBJECT_ION,
       asCompound: undefined,
       asWatched: undefined,
-      watch,
-      unwatch: () => unwatch.call(quark)
    }
    const compound: IonicCompound = new IonicCompound(quark)
    quark.asCompound = compound;

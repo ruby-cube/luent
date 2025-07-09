@@ -1,7 +1,7 @@
 import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { CustomIonizedModelConfig, IonizedModel } from "./IonizedModel"
-import { unwatch, watch, Watchable, Watched } from "../watch/Watched"
+import { Watchable, Watched } from "../watch/Watched"
 import { ParticleMorph, Particle } from "../compound/Particle"
 import { IonizedCompound } from "./IonizedCompound"
 import { EntityQuark, Quark, QuarkOf } from "../Quark"
@@ -62,21 +62,21 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
       // public inertMap: MarkMap | InertCollectionType | undefined,
    ) {
       this.asTraceable = new Traceable()
-      this.watch = () => {
-         this.trackAbsorbedIons()
-         return watch.call(this)
-      }
-      this.unwatch = () => unwatch.call(this)
+      // this.watch = () => {
+      //    this.trackAbsorbedIons() //FIX: find where to put this
+      //    return watch.call(this)
+      // }
+      // this.unwatch = () => unwatch.call(this)
    }
 
    asMutable: Mutable = new Mutable()
 
    asCompound?: IonizedCompound
    asParticle?: Particle | undefined
-   asWatched?: Watched<Watchable> | undefined
+   asWatched?: Watched | undefined
 
-   watch: (this: Watchable) => Watched<Watchable>
-   unwatch: () => void
+   // watch: (this: Watchable) => Watched<Watchable>
+   // unwatch: () => void
 
    private appendedProperties: Set<PropertyKey> = new Set()
 

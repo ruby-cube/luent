@@ -1,15 +1,75 @@
 import { $schedule, Listener, SchedulerOptions } from "@rue/flask";
-import { CyclePhase, EffectCycleManager, queueTask, SYNC, UPDATE_CYCLE_END } from "./effect-cycle/EffectCycle";
-import { EffectLink, EffectVine } from "./effect-cycle/EffectLink";
+import { CyclePhase, EffectCycle, queueTask, SYNC, UPDATE_CYCLE_END } from "./effect-cycle/EffectCycle";
 import { noop } from "@rue/utils";
 import { ParticleMorph } from "./compound/Particle";
 import { Watchable } from "./watch/Watched";
 import { Effect, WatchedAtom } from "./effect-cycle/EffectQueue";
-
-
+import { TaskRef } from "./effect-cycle/TaskQueue";
 
 
 type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
+
+export class EffectCycleManager {
+   constructor(public name: string) { }
+
+   count: number = 0;
+
+   private nextCycle: EffectCycle | undefined
+   private currentCycle: EffectCycle | undefined
+
+   get next() {
+      return this.nextCycle ?? (this.nextCycle = this.createCycle())
+   }
+
+   get current() {
+      return this.currentCycle ?? (this.currentCycle = this.initCycle())
+   }
+
+   createCycle() {
+      this.count++;
+      if (this.currentCycle)
+         throw new Error("@% Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
+      return new EffectCycle(this.phases[0].name, this);
+   }
+
+   initCycle() {
+      const cycle = this.createCycle()
+      schedulePhase(cycle, this.phases[0]
+      )
+      return cycle;
+   }
+
+   closeCycle() {
+      this.currentCycle = this.nextCycle
+   }
+
+   phases: CyclePhase[] = []
+
+   onComplete!: EffectCycleHook
+
+   pushPhase(phase: CyclePhase) {
+      phase.phases = this.phases;
+      phase.index = this.phases.length
+      this.phases.push(phase);
+   }
+}
+
+
+
+function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
+   schedule(() => {
+      const finalIndex = phases.length - 2;
+      if (index < finalIndex) schedulePhase(cycle, next)
+      cycle.runEffects(phaseHook)
+      if (index === finalIndex)
+         queueMicrotask(() => {
+            cycle.runEffects(next!.phaseHook)
+            cycle.close();
+         })
+   })
+}
+
+
 
 //TODO:
 // [ ] sync effects
@@ -20,7 +80,6 @@ type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listene
 // [ ] state locks
 // [ ] Set up lazy effect queue (needs to check if action was canceled)
 // [ ] Set up animation queue
-
 
 
 
@@ -82,17 +141,17 @@ export function createEffectCycleHook(phase: string) { //TODO: what happens if p
    return (task: () => void, options?: SchedulerOptions) => {
       const _options = options || { cancel: null }
       _options.cancel = null
-      const cycle = getEffectCycle();
+      const cycle = getEffectCycleManager();
       const effectCycle = cycle.current
 
       return $schedule(task, _options, {
-         enroll(task) {
-            const effectLink = new EffectLink(task)
-            effectCycle.effects.addToVine(effectLink, phase)
-            return effectLink;
+         enroll(fn) {
+            const task = new TaskRef(fn)
+            effectCycle.effects.scheduleTask(task, phase)
+            return task;
          },
-         remove(effectLink) {
-            effectLink.remove()
+         remove(task) {
+            task.discard()
          }
       })
    }
@@ -107,10 +166,14 @@ export function getDefaultPhase() {
 
 
 
-export function getEffectCycle() {
+export function getEffectCycleManager() {
    return cycleManager
 }
 
+
+export function $currentEffectCycle(){
+   return cycleManager.current
+}
 
 export function scheduleEffects(effects: WatchedAtom, phase: string) {
    cycleManager.current.scheduleEffects(effects, phase)
@@ -135,7 +198,7 @@ export function trigger( //TODO: figure out which abstraction this belongs to ..
    //    debug.warn(`It is not recommended to mutate reactive state during batched effects. It can lead to state that doesn't match expectations. Current Phase: ${getCurrentPhase()}. Run effect synchronously to change using { phase: 'AT_CHANGE'} option or use queueTask or something similar to defer mutation to a separate task`)
    // }
 
-   this.asParticle?.triggerCompounds()
+   // this.asParticle?.triggerCompounds()
    this.asWatched?.triggerEffects()
 }
 
@@ -143,3 +206,5 @@ export function getCurrentPhase() {
    if (cycleManager.current && cycleManager.current.currentPhase !== SYNC) return cycleManager.current.currentPhase;
    return SYNC;
 }
+
+

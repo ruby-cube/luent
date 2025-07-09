@@ -4,7 +4,7 @@ import { $AtomicPionState } from "../ion/AtomicPion";
 import { IonicCompound, IonicCompoundMorph } from "../ionic/IonicCompound";
 import { isIonizedModel } from "../ionized/ionize";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
-import { unwatch, watch, Watched } from "./Watched";
+import {  Watched } from "./Watched";
 
 const WATCHED_IONIZED_ION = 'watched ionized ion'
 
@@ -19,8 +19,6 @@ export function createWatchedIonizedIon($state: $AtomicIonState | $AtomicPionSta
       type: WATCHED_IONIZED_ION,
       asCompound: undefined,
       asWatched: undefined,
-      watch,
-      unwatch: () => unwatch.call(quark)
    }
    const compound: IonicCompound = new IonicCompound(quark)
    compound.trigger = () => triggerEffects(compound)

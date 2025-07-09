@@ -123,8 +123,6 @@ export function createMaybeMemoizedIon(
       asCompound: undefined,
       asWatched: undefined,
       asTraceable: new Traceable(),
-      watch,
-      unwatch: () => unwatch.call(ion)
    }
 
    $derived[QUARK] = ion

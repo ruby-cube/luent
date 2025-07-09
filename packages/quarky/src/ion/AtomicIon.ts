@@ -154,7 +154,7 @@ function setState(this: AtomicIonQuark, value: unknown) {
 
    this.trigger()
 
-   runSyncEffects()
+   // runSyncEffects()
 
    return state;
 }

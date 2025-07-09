@@ -1,7 +1,7 @@
 import { triggerEffects } from "../compound/Compound";
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
-import { unwatch, watch, Watched } from "../watch/Watched";
+import { Watched } from "../watch/Watched";
 
 /**
  * NOTES: 
@@ -21,8 +21,6 @@ export function createWatchedDerivation(derivation: () => any, retrack: boolean)
       type: WATCHED_DERIVATION,
       asCompound: undefined,
       asWatched: undefined,
-      watch,
-      unwatch: () => unwatch.call(quark)
    }
    const compound: IonicCompound = new IonicCompound(quark)
    compound.trigger = () => triggerEffects(compound)
