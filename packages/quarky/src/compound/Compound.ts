@@ -16,10 +16,17 @@ export function isCompound(value: unknown): value is Compound {
 /**
  * INTERNAL
  */
-export interface Compound {
-   atoms: Set<Watchable>
-   track(atom: Watchable): Watchable
-   untrackAtoms(): void
+export class Compound {
+   atoms: Set<Watchable> = new Set()
+
+   track(atom: Watchable) {
+      this.atoms.add(atom)
+      return atom;
+   }
+
+   untrackAtoms() {
+      this.atoms.clear()
+   }
 }
 
 

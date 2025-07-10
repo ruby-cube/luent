@@ -1,17 +1,17 @@
 import { isFunction, isObject } from "@rue/utils";
 import { isAtomicIon } from "../ion/AtomicIon";
-import { AtomicIon, isIon } from "../ion/Ion";
+import {  isIon } from "../ion/Ion";
 import { __DEV__getTrace, getPublicTrace, traceAsyncPath } from "../../../flask/debug";
 import { AnyObject } from "@rue/types";
 import { quarkOf, hasQuark, QUARK, Quark } from "../Quark";
 import { detachedCall, untrackedCall } from "../ionic/IonicCompound";
 import { Compound, CompoundMorph, isCompound } from "../compound/Compound";
 import { isIonizedModel } from "../ionized/ionize";
-import { Particle } from "../compound/Particle";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { Traceable } from "./Traceable";
 import { debug as _debug } from "@rue/utils";
 import { Mutation } from "../Mutable";
+import { Watchable } from "../watch/Watched";
 
 // export interface DEVLabellable {
 //    labelName?: string
@@ -104,8 +104,8 @@ function logAtoms(entity: { [QUARK]: CompoundMorph }, label: string) {
 
    debug.log('-------------------')
    debug.log('[LOG ATOMS]', label)
-   const particles = quarkOf(entity).asCompound?.particles
-   if (particles) _logAtoms(particles)
+   const atoms = quarkOf(entity).asCompound?.atoms
+   if (atoms) _logAtoms(atoms)
    else debug.log('No atoms')
    debug.log('-------------------')
 }
@@ -119,13 +119,13 @@ function logAtoms(entity: { [QUARK]: CompoundMorph }, label: string) {
 //    //TODO: need to identify and log property keys
 // }
 
-function _logAtoms(particles: Particle[]) {
-   for (const particle of particles) {
-      if (isCompound(particle)) {
-         _logAtoms(particle.atoms)
+function _logAtoms(atoms: Set<Watchable>) {
+   for (const atom of atoms) {
+      if (isCompound(atom)) {
+         _logAtoms(atom.atoms)
       }
       else {
-         logAtom(particle.quark)
+         logAtom(atom)
       }
    }
 }

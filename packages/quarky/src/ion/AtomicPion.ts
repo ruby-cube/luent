@@ -1,6 +1,5 @@
 import { isIonizedModel, ionize, toRaw } from "../ionized/ionize";
 import { Watchable, Watched } from "../watch/Watched";
-import { asParticle, Particle, ParticleMorph } from "../compound/Particle";
 import { quarkOf, QUARK, Quark, EntityQuark, QuarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
@@ -37,7 +36,7 @@ export function isAtomicPionQuark(value: any): value is AtomicPionQuark {
 
 /** INTERNAL */
 export type $AtomicPionState = MutableIon<unknown> & MutableCapsule & {
-   [QUARK]: PionQuark<$AtomicPionState> & ParticleMorph & Watchable
+   [QUARK]: PionQuark<$AtomicPionState>  & Watchable
 }
 
 /** 
@@ -51,7 +50,6 @@ export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
    ionized: boolean = false;
 
    asWatched?: Watched
-   asParticle?: Particle
 
    asTraceable: Traceable = new Traceable()
 

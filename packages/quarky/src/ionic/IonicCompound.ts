@@ -107,16 +107,16 @@ export function trackMemoized(ion: ManagedDerivation) {
 
 export type IonicCompoundMorph = CompoundMorph<IonicCompound>
 
-export class IonicCompound implements Compound {
+export class IonicCompound extends Compound {
 
    // dirty: boolean = false;
 
-   atoms: Set<Watchable> = new Set()
+   // atoms: Set<Watchable> = new Set()
 
-   track(atom: Watchable) {
-      this.atoms.add(atom)
-      return atom
-   }
+   // track(atom: Watchable) {
+   //    this.atoms.add(atom)
+   //    return atom
+   // }
 
    trackedCall(fn: () => any) {
       // this.untrackAtoms()
@@ -139,9 +139,9 @@ export class IonicCompound implements Compound {
       return this.trackedCall(fn)
    }
 
-   untrackAtoms() {
-      this.atoms.clear()
-   }
+   // untrackAtoms() {
+   //    this.atoms.clear()
+   // }
 }
 
 export function __devCheckIfTracked() {

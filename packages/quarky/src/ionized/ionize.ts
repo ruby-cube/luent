@@ -1,8 +1,8 @@
-import { AnyObject, Glass, ReadonlyKeys } from "@rue/types";
-import { debug, isFunction, isObject } from "@rue/utils";
+import { AnyObject, ReadonlyKeys } from "@rue/types";
+import { debug, isObject } from "@rue/utils";
 import { InertCollection, InertCollectionType, IonizedModelQuark } from "./IonizedModelQuark";
-import { BasicInertItemCollection, inert, Inert, IsInert, isInert } from "./inert";
-import { Ion, ion, isIon, Methods, MutableIon } from "../ion/Ion";
+import { BasicInertItemCollection, Inert, IsInert, isInert } from "./inert";
+import { Ion, isIon, MutableIon } from "../ion/Ion";
 import { createIonizedModel, getIonizedModel, IonizedModel } from "./IonizedModel";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 

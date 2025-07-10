@@ -61,12 +61,12 @@ export function createPionCapsule(
    derivation: () => unknown,
    methods: AnyObject,
 ) {
-   let compound: IonicCompound | undefined = new IonicCompound({})
+   let compound: IonicCompound | undefined = new IonicCompound()
    compound.trackedCall(derivation)
-   const particles = compound.particles
+   const atoms = compound.atoms
    compound = undefined;
 
-   if (particles.length > 1) {
+   if (atoms.size > 1) {
       if (__DEV__) throw new Error('A getter ion cannot have more than one particle. Consider creating a derivation ion instead')
       return derivation;
    }
@@ -79,11 +79,11 @@ export function createPionCapsule(
       asTraceable: new Traceable(),
    }
 
-   if (particles.length === 0) {
+   if (atoms.size === 0) {
       capsule.inert = true;
    }
    else {
-      capsule.coreIon = particles[0].quark.entity as $AtomicPionState
+      capsule.coreIon = Array.from(atoms)[0].entity as $AtomicPionState
    }
 
    function $capsuleIon() { // wrap so that name starts with $

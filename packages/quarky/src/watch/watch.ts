@@ -1,36 +1,13 @@
-import { AnyObject, Glass } from "@rue/types";
-import { asWatched, Watchable, Watched } from "./Watched";
-import { $listen, ResumableListener, getActiveFlask, SustainedListenerOptions } from "@rue/flask";
-import { detachedCall, IonicCompound, IonicCompoundMorph, untrackedCall } from "../ionic/IonicCompound";
-import { SYNC } from "../effect-cycle/EffectCycle";
-import { HasQuark, hasQuark, QUARK, quarkOf } from "../Quark";
+import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon } from "../ion/Ion";
-import { createWatchedDerivation, isWatchedDerivation } from "../ionic/WatchedDerivation";
-import { createMultisubjectIon, isMultisubjectIon } from "./MultiSubject";
-import { isObject, isObjectLiteral } from "@rue/utils";
-import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
-import { $AtomicIonState, isAtomicIon, isAtomicIonQuark } from "../ion/AtomicIon";
-import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
-import { createWatchedIonizedIon } from "./IonizedIon";
-import { getDefaultPhase, getEffectCycleManager, scheduleEagerEffect } from "../ReactivitySystem";
+import { SYNC } from "../effect-cycle/EffectCycle";
+import { Watched } from "./Watched";
 import { Effect } from "../effect-cycle/EffectQueue";
-import { runSyncEffects, scheduleEagerSyncEffect } from "../effect-cycle/SyncEffects";
+import { getDefaultPhase, scheduleEagerEffect } from "../ReactivitySystem";
+import { asWatchSubject, WatchSubject } from "./WatchSubject";
+import { Glass } from "@rue/types";
 
-export class StateChangeEvent<S = unknown> {
-   // trace?: string;
-   constructor(
-      public previous: S, //TODO: change to prev
-      public current: S, //TODO: change to current
-      public eager: boolean
-   ) { }
-}
-
-// watch($user, ({ current: user }) => {
-//    if (!user) {
-//       router.navigate('Welcome')
-//    }
-// })
 
 /**
  * Default values:
@@ -82,103 +59,41 @@ type SubjectValue<T> = T extends () => infer R ? R : T
 // --
 // ionized collection
 
-
-
-
-
-function InertWatcher() {
-   function noOp() {
-      return false;
-   }
-   return { // inert watch subjects
-      stop: noOp,
-      pause: noOp,
-      resume: noOp,
-   }
-}
-
-function getValue(subject: unknown) {
-
-   if (isIon(subject)) {
-      return getIonValue(subject)
-   }
-   return subject
-}
-
-function getIonValue(subject: Ion) {
-   if (isMultisubjectIon(subject) || isWatchedDerivation(subject)) {
-      return subject() // allow internal tracking, no need to detach because multisubject and watch derivations cannot be particles
-   }
-   // if (isManagedDerivation(subject)) // memoized
-   // atomic ion/pion
-   return detachedCall(subject) // allows internal tracking, disables being tracked
-   // return untrackedCall(subject) // disables being tracked
-}
-
-function noReactivity(subject: HasQuark) {
-   const quark = quarkOf(subject)
-   if (quark.inert) return true;
-   return quark.asCompound && quark.asCompound.particles.length === 0; //TODO: apply this only to derivations, not ionized models?
+export class StateChangeEvent<S = unknown> {
+   // trace?: string;
+   constructor(
+      public previous: S, //TODO: change to prev
+      public current: S, //TODO: change to current
+      public eager: boolean
+   ) { }
 }
 
 export type WatchSubjects = (Object | Ion)[]
 
-// export function watch<
-//    T extends WatchSubjects,
-//    P
-// >(effect: IonicTask<P>): ResumableListener
-// export function watch<
-//    T extends WatchSubjects,
-//    P
-// >(effect: IonicTask<P>, options: EffectOptions): ResumableListener
-
 export function watch<
-   T extends Ionized<object> | Ion<any> | WatchSubjects,
-   P
->(_subject: T, effect: EffectTask<T>, options: EffectOptions = {}): ResumableListener {
-   // if (args[0] instanceof Function && (args.length === 1 || args.length === 2 && isObjectLiteral(args[1]))) {
-   //    return initIonicEffect(<IonicTask>args[0], <EffectOptions>args[1])
-   // }
-   // const lastArg = args.pop()
-   // const noOptions = lastArg instanceof Function
-   // const effect = lastArg instanceof Function ? lastArg : args.pop()
-   // const options = noOptions ? {} : { ...lastArg } as EffectOptions
-   const phase = options.phase = getPhase(options)
-   if (!effect || !(effect instanceof Function))
-      throw new Error("Invalid input. Effect function must be last or second to last argument.")
-   const isMultiSubject = _subject instanceof Array && !isIonizedModel(_subject);
+   T extends Ionized<object> | Ion<any> | WatchSubjects
+>(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): ResumableListener {
 
-   const retrack = options.retrack === undefined ? true : options.retrack
 
-   let subject = normalizeSubject(_subject, isMultiSubject, retrack)
+   const watchSubject = asWatchSubject(subject, options.retrack)
    if (options?.traceTriggers) {
       //TODO:
    }
 
-   if (!hasQuark(subject)) {// plain object
+   if (watchSubject.inert) { // plain object
       return InertWatcher()
    }
 
-   let prevState = getValue(subject); // this is where initial reactivity tracking happens (if derivation not already initialized) 
-   console.log('watch A', prevState)
-   if (noReactivity(subject)) {
-      console.log('watch X', prevState)
-      // if (isIonizedModel(prevState)) {
-      //    subject = prevState; // watch ionized model
-      // }
-      // else {
-      return InertWatcher()
-      // }
-   }
+   let [prevState, atoms] = watchSubject.getValueAndAtoms(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
 
-   const quark = quarkOf(<HasQuark>subject) as Watchable & IonicCompoundMorph
-   const watchSubject = asWatched(quark)
+   if (!atoms.length) {
+      return InertWatcher()
+   }
 
    let hasChanged = getHasChangedFn(options, prevState)
 
-
    function wrappedEffect() {
-      const newState = getValue(subject)
+      const newState = watchSubject.getValue() // retracking happens here //TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
       if (!options.eager && !hasChanged(prevState, newState)) {
          return;
       }
@@ -195,116 +110,41 @@ export function watch<
    wrappedEffect.__DEV__effect = effect
 
    return setUpWatcher(
-      [watchSubject], //FIX:
+      watchSubject,
       wrappedEffect,
-      phase,
       options,
-      !hasQuark(_subject) ? quark.asCompound : undefined // only pass terminal compounds
    )
 }
 
-function getHasChangedFn(options: EffectOptions | undefined, state: unknown) {
-   return options?.hasChanged ?? isIonizedModel(state) ? ()=>true : notStrictlyEqual
-}
-
-
+type Task = () => void
 
 export function getPhase(options: undefined | EffectOptions) {
    return options?.phase ?? (options?.sync ? SYNC : getDefaultPhase())
 }
 
-
-
-function normalizeSubject(_subject: unknown, isMultiSubject: boolean, retrack: boolean) {
-   return isMultiSubject ? createMultisubjectIon(<WatchSubjects>_subject)
-      : isIonizedIon(_subject) ? createWatchedIonizedIon(_subject)
-         : isPionCapsule(_subject) ? asCoreIon(_subject)
-            : hasQuark(_subject) ? _subject
-               : isGetter(_subject) ? createWatchedDerivation(<() => unknown>_subject, retrack)
-                  : isObject(_subject) ? _subject as AnyObject //non-ionized object
-                     : null
-}
-
-
-
-export function isIonizedIon(subject: unknown): subject is $AtomicIonState | $AtomicPionState {
-   if (!hasQuark(subject)) return false;
-   const quark = quarkOf(subject)
-   return (isAtomicIonQuark(quark) || isAtomicPionQuark(quark)) && quark.ionized;
-}
-
-
-export function isGetter(value: unknown): value is () => any {
-   return value instanceof Function && value.length === 0;
-}
-
-function notStrictlyEqual(oldState: unknown, newState: unknown) {
-   return newState !== oldState
-}
-
-type Task = () => void
-
-
-
-/**
- * Initializes ionic effect by running the effect and then watching its dependencies, re-running the effect 
- * when any of its dependencies change in state.
- * 
- * An ionic effect is essentially a watch subject and effect combined into one function.
- * As a watch subject, it can return state. As an effect it receives the previous state.
- * This is useful if state needs to be shared between effect runs.
- * In most cases, an ionic effect will be a simple void function that performs side effects.
- */
-// function initIonicEffect(effect: IonicTask, options?: EffectOptions) {
-//    const phase = options?.phase ?? DEFAULT_PHASE;
-//    const retrack = options?.retrack ?? false;
-
-//    const wrappedEffect = createIonicEffect(effect, retrack)
-
-//    scheduleEffectEagerly(wrappedEffect, phase);
-
-//    return setUpWatcher(
-//       wrappedEffect.asWatched,
-//       wrappedEffect,
-//       phase,
-//       options || {},
-//       wrappedEffect.asCompound
-//    )
-// }
-
-
 export function setUpWatcher(
-   atoms: Watched[], //TODO: if we get rid of particles, this would have to be Watched[], and we would link the effect to each subject
-   effectTask: Task,
-   phase: string,
+   subject: WatchSubject,
+   effect: Task,
    options: EffectOptions,
-   compound?: IonicCompound //
 ) {
+   const phase = options.phase = getPhase(options)
+   const eager = options.eager ?? false;
+
    let paused = false;
 
-   function pausableEffect() {
+   function pausableEffect() { //TODO: can i get rid of this extra wrap?
       if (paused) return;
-      return effectTask()
+      return effect()
    }
 
    return $listen(pausableEffect, options || {}, {
       enroll(task) {
          const effect = new Effect(task)
-         // ORDER A: runs eagerly but not as an effect
-         for (const subject of subjects){
-            subject.link(effect, phase)
-            if (options.eager) {
-               _scheduleEagerEffect(subject, effect, phase)
-            }
-         }
+         subject.linkEffect(effect, phase, eager, true)
          return effect;
       },
-      remove(effectLink) {
-         for (const subject of subjects){
-            subject.unlink(effectLink, phase)
-         }
-         if (compound)
-            compound.untrackAtoms()
+      remove(effect) {
+         subject.unlinkEffect(effect, phase)
       },
       pause() {
          paused = true;
@@ -316,35 +156,33 @@ export function setUpWatcher(
    });
 }
 
-function _scheduleEagerEffect(subject: Watched, effect: Effect, phase: string) {
-   if (phase === SYNC) {
-      const atom = subject.effects.get(phase)
-      atom?.runEffects(new Set())
-      // scheduleEagerSyncEffect(effect);
-      // runSyncEffects()
+
+
+
+
+function isInertSubject() {
+
+}
+
+function InertWatcher() {
+   function noOp() {
+      return false;
    }
-   else {
-      scheduleEagerEffect(effect, phase)
+   return { // inert watch subjects
+      stop: noOp,
+      pause: noOp,
+      resume: noOp,
    }
 }
 
-// watch(() => {
+function getHasChangedFn(options: EffectOptions | undefined, state: unknown) {
+   return options?.hasChanged ?? isIonizedModel(state) ? always : notStrictlyEqual
+}
 
-// }, { cycle: "current" })
+function always() {
+   return true
+}
 
-// watch((event: StateChangeEvent<number>) => {
-//    event.prevState
-//    return 9
-// }, { eager: true })
-
-// watch(() => 3, e => {
-//    console.log(e.prevState, "llfll;klsflff")
-// })
-
-// watch(() => 3, () => 'hi', {frog: 'sir'}, e => {
-//    console.log(e.state, "llfllff")
-// })
-
-// watch({ dog: 9 }, (e) => {
-//    console.log('dookkr', e.prevState)
-// })
+function notStrictlyEqual(oldState: unknown, newState: unknown) {
+   return newState !== oldState
+}

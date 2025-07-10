@@ -12,18 +12,16 @@ import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
 import { MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { asPion, asPionQuark, getAtomicPion } from "./Pion";
-import { ParticleMorph } from "../compound/Particle";
 import { CompoundMorph } from "../compound/Compound";
 import { Watchable } from "../watch/Watched";
 import { IonizedCompound } from "./IonizedCompound";
-import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp } from "./IonizedMethods";
 import { isInert } from "./inert";
 import { initializeSnapshots } from "./TimeTraveler";
 
 // // /** INTERNAL */
 export type IonizedModel = {
-   [QUARK]: Watchable & ParticleMorph & CompoundMorph<IonizedCompound> & IonizedModelQuark
+   [QUARK]: Watchable & CompoundMorph<IonizedCompound> & IonizedModelQuark
 } & Capsule & MutableEntity & AnyObject
 
 // for inert properties use absorbed neutrons

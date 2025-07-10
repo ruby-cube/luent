@@ -1,12 +1,10 @@
-import { asParticle, ParticleMorph, Particle } from "../compound/Particle";
 import { Traceable } from "../debug/Traceable";
 import { Quark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
 import { noop } from "@rue/utils";
 
-export class AtomicOp implements Quark, ParticleMorph {
+export class AtomicOp implements Quark {
    type: string | symbol = 'atomic op'
-   asParticle!: Particle
    asTraceable: Traceable;
 
    constructor(
@@ -33,10 +31,6 @@ export class AtomicOp implements Quark, ParticleMorph {
    // getOutput() {
    //    return this.modelQuark.rawTarget[this.op](this.entryKey)
    // }
-
-   trigger() {
-      this.asParticle.triggerCompounds()
-   }
 }
 
 

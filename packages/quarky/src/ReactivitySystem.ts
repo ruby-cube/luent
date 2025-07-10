@@ -1,7 +1,6 @@
 import { $listen, $schedule, Listener, ListenerOptions, SchedulerOptions } from "@rue/flask";
 import { CyclePhase, EffectCycle, queueTask, SYNC, UPDATE_CYCLE_END } from "./effect-cycle/EffectCycle";
 import { noop } from "@rue/utils";
-import { ParticleMorph } from "./compound/Particle";
 import { Watchable } from "./watch/Watched";
 import { Effect, PhaseAtom } from "./effect-cycle/EffectQueue";
 import { TaskQueue, TaskRef } from "./effect-cycle/TaskQueue";
@@ -209,14 +208,8 @@ export function scheduleEagerEffect(effect: Effect, phase: string) {
  * @param preopData 
  */
 export function trigger( //TODO: figure out which abstraction this belongs to ...  atomic ions, atomic pions, memoized derivations, but not terminal compound
-   this: ParticleMorph & Watchable,
+   this: Watchable,
 ) {
-   // const updateCycle = reactivitySystem.UpdateCycle
-   // if (updateCycle.current && updateCycle.current.currentPhase !== SYNC) {
-   //    debug.warn(`It is not recommended to mutate reactive state during batched effects. It can lead to state that doesn't match expectations. Current Phase: ${getCurrentPhase()}. Run effect synchronously to change using { phase: 'AT_CHANGE'} option or use queueTask or something similar to defer mutation to a separate task`)
-   // }
-
-   // this.asParticle?.triggerCompounds()
    this.asWatched?.triggerEffects()
 }
 

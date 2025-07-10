@@ -1,15 +1,13 @@
 import { AnyObject } from "@rue/types";
 import { IonicCompound, IonicCompoundMorph } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
-import { Watched } from "./Watched";
+import { isWatchableEntity, Watchable, Watched } from "./Watched";
 import { Ion, isIon } from "../ion/Ion";
-import { noop } from "@rue/utils";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { isIonizedModel } from "../ionized/ionize";
-import { isParticleMorphic, ParticleMorph } from "../compound/Particle";
 import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
 import { isInertIon } from "../ion/Neutron";
-import { isGetter } from "./watch";
+import { isGetter } from "./WatchSubject";
 
 const MULTISUBJECT_ION = 'MultisubjectIon'
 
@@ -27,12 +25,12 @@ export function createMultisubjectIon(subjects: unknown[] & AnyObject) {
       asCompound: undefined,
       asWatched: undefined,
    }
-   const compound: IonicCompound = new IonicCompound(quark)
+   const compound: IonicCompound = new IonicCompound()
    quark.asCompound = compound;
    quark.asWatched = new Watched(quark)
 
    let fn = initialize
-   let getterFn = (subject: Ion & { [QUARK]: ParticleMorph }) => {
+   let getterFn = (subject: Ion & { [QUARK]: Watchable }) => {
       compound.track(quarkOf(subject))
       return subject()
    }
@@ -74,7 +72,7 @@ export function createMultisubjectIon(subjects: unknown[] & AnyObject) {
          else if (isIon(subject) && hasQuark(subject)) {
             if (isInertIon(subject))
                values.push(subject())
-            else if (isParticleMorphic(subject)) {
+            else if (isWatchableEntity(subject)) {
                values.push(getterFn(isPionCapsule(subject) ? asCoreIon(subject)! : subject))
             }
          }

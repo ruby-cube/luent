@@ -1,10 +1,16 @@
+import { isObject } from "@rue/utils";
 import { SYNC } from "../effect-cycle/EffectCycle";
 import {  Effect, PhaseAtom } from "../effect-cycle/EffectQueue";
 import { scheduleEffects } from "../ReactivitySystem";
+import { QUARK } from "../Quark";
 
 
 export type Watchable = {
    asWatched?: Watched
+}
+
+export function isWatchableEntity(value: unknown): value is {[QUARK]:Watchable}{
+   return isObject(value) && 'asWatched' in value;
 }
 
 export function asWatched(watchable: Watchable) {

@@ -1,12 +1,11 @@
 import { Capsule } from "../capsule/Capsule";
-import { Particle } from "../compound/Particle";
 import { Traceable } from "../debug/Traceable";
 import { Effect } from "../effect-cycle/EffectQueue";
 import { Ion } from "../ion/Ion";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
 import { QUARK, QuarkOf, quarkOf } from "../Quark";
-import { Watchable, Watched } from "../watch/Watched";
+import { Watched } from "../watch/Watched";
 import { createMaybeMemoizedIon, DERIVATION_ION, ManagedDerivation } from "./DerivationIon";
 import { IonicCompound } from "./IonicCompound";
 

@@ -7,7 +7,6 @@ EFFECT SYSTEM
 [ ] responsive rendering
    - console.warn when rendering exceeds 50ms
 [ ] PhaseEffectQueue and new effect cycle system
-[ ] remove particles
 --
 DO ACTION
 [ ] doAction()

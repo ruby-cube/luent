@@ -17,7 +17,6 @@ export * from "./ionized/inert" //TODO: limit exports to public api
 export * from "./__notes__/areEqual" //TODO: limit exports to public api
 // export * from "./capsule/Readonly" //TODO: limit exports to public api
 export * from "./ionic/IonicCompound" //TODO: limit exports to public api
-export * from "./compound/Particle" //TODO: limit exports to public api
 export * from "./ionic/DerivationIon" //TODO: limit exports to public api
 export * from "./ionic/PionCapsule" //TODO: limit exports to public api
 export * from "./watch/ionicTask" //TODO: limit exports to public api

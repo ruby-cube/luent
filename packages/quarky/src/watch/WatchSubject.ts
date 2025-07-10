@@ -10,10 +10,12 @@ import { isManagedDerivation } from "../ionic/DerivationIon";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
 import { Ion, isIon } from "../ion/Ion";
 import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
+import { scheduleEagerEffect } from "../ReactivitySystem";
+import { SYNC } from "../effect-cycle/EffectCycle";
 import { WatchSubjects } from "./watch";
 
 
-function asWatchSubject(subject: Ionized<object> | Ion<any> | WatchSubjects, retrack?: boolean): WatchSubject {
+export function asWatchSubject(subject: Ionized<object> | Ion<any> | WatchSubjects, retrack?: boolean): WatchSubject {
    // const retrack = options.retrack === undefined ? true : options.retrack
    const isMultiSubject = subject instanceof Array && !isIonizedModel(subject);
 
@@ -70,7 +72,8 @@ class IonizedModelSubject implements WatchSubject {
       const atoms = quark.trackAbsorbedIons(); //TODO: output the atom's quark
       if (atoms)
          for (const atom of atoms) {
-            watchedAtoms.push(asWatchSubject(atom))
+      asWatchSubject(atom)
+            watchedAtoms.push()
          }
    }
 
@@ -120,5 +123,29 @@ class IonSubject implements WatchSubject {
 
    unlinkEffect(effect: Effect, phase: string) {
       unlinkEffect(this.watchedAtoms, effect, phase)
+   }
+}
+
+function linkEffect(atoms: Watched[], effect: Effect, phase: string, eager: boolean = false, initial: boolean = false) {
+   for (const atom of atoms) {
+      atom.link(effect, phase)
+      if (initial && eager) {
+         _scheduleEagerEffect(atom, effect, phase)
+      }
+   }
+}
+
+function unlinkEffect(atoms: Watched[], effect: Effect, phase: string) {
+   for (const atom of atoms) {
+      atom.unlink(effect, phase)
+   }
+}
+
+function _scheduleEagerEffect(watchedAtom: Watched, effect: Effect, phase: string) {
+   if (phase === SYNC) {
+      watchedAtom.runSyncEffects()
+   }
+   else {
+      scheduleEagerEffect(effect, phase)
    }
 }
