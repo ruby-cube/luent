@@ -31,7 +31,7 @@ export function createIonicTask(task: IonicTask, retrack: boolean = true) {
    }
 
    function effect() {
-      if (retrack) compound.untrackParticles()
+      if (retrack) compound.untrackAtoms()
       syncCall = true;
       try {
          task(watch, initial)

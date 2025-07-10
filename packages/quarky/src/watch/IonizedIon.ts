@@ -28,7 +28,7 @@ export function createWatchedIonizedIon($state: $AtomicIonState | $AtomicPionSta
 
    function $watchedIon() {
       const state = $state()
-      compound.untrackParticles()
+      compound.untrackAtoms()
       compound.track(quarkOf($state))
       if (isIonizedModel(state)) {
          compound.track(quarkOf(state))

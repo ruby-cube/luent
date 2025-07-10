@@ -15,17 +15,17 @@ export class Effect {
       public task: Task | null,
    ) { }
 
-   private atoms: Set<WatchedAtom> = new Set()
+   private atoms: Set<PhaseAtom> = new Set()
 
-   isLinked(atom: WatchedAtom) {
+   isLinked(atom: PhaseAtom) {
       return this.atoms.has(atom)
    }
 
-   link(atom: WatchedAtom) {
+   link(atom: PhaseAtom) {
       this.atoms.add(atom)
    }
 
-   unlink(atom: WatchedAtom) {
+   unlink(atom: PhaseAtom) {
       this.atoms.delete(atom)
       this.task = null;
    }
@@ -62,7 +62,7 @@ export const effectStack = {
 }
 
 
-export class WatchedAtom {
+export class PhaseAtom {
    // nestedEffects: Effect[] | undefined
    effects: Effect[] = []
    nextEffects: Effect[] | undefined
@@ -210,8 +210,8 @@ export class WatchedAtom {
 
 
 export class EffectQueue {
-   private extendedQueue: WatchedAtom[] | undefined;
-   private queue: WatchedAtom[] = []
+   private extendedQueue: PhaseAtom[] | undefined;
+   private queue: PhaseAtom[] = []
    private eagerQueue: Effect[] | undefined;
    // private taskQueue: TaskQueue | undefined;
 
@@ -225,7 +225,7 @@ export class EffectQueue {
       eagerQueue.push(effect)
    }
 
-   scheduleEffects(atom: WatchedAtom) {
+   scheduleEffects(atom: PhaseAtom) {
 
       if (this.runningEffects && !atom.requeued) {
          // a currentEffect during runningEffects means the effect triggered 
@@ -305,7 +305,7 @@ export class EffectQueue {
 // class EffectCycle {
 //    effects: Map<Phase, EffectQueue> = new Map()
 
-//    scheduleEffects(atom: WatchedAtom, phase: Phase) {
+//    scheduleEffects(atom: PhaseAtom, phase: Phase) {
 //       if (phase === 'lazy') {
 //          const lazyPhase = getLazyPhase()
 //          lazyPhase.scheduleEffects(atom as LazyWatchedAtom)

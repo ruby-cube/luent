@@ -3,7 +3,7 @@ import { CyclePhase, EffectCycle, queueTask, SYNC, UPDATE_CYCLE_END } from "./ef
 import { noop } from "@rue/utils";
 import { ParticleMorph } from "./compound/Particle";
 import { Watchable } from "./watch/Watched";
-import { Effect, WatchedAtom } from "./effect-cycle/EffectQueue";
+import { Effect, PhaseAtom } from "./effect-cycle/EffectQueue";
 import { TaskQueue, TaskRef } from "./effect-cycle/TaskQueue";
 
 
@@ -193,7 +193,7 @@ export function $currentEffectCycle() {
    return cycleManager.current
 }
 
-export function scheduleEffects(effects: WatchedAtom, phase: string) {
+export function scheduleEffects(effects: PhaseAtom, phase: string) {
    cycleManager.current.scheduleEffects(effects, phase)
 }
 
@@ -224,5 +224,4 @@ export function getCurrentPhase() {
    if (cycleManager.current && cycleManager.current.currentPhase !== SYNC) return cycleManager.current.currentPhase;
    return SYNC;
 }
-
 

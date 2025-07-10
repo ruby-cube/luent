@@ -2,7 +2,7 @@ import { ParticleMorph, Particle } from "../compound/Particle";
 import { AnyObject } from "@rue/types";
 import { toRaw } from "./ionize";
 import { isIon } from "../ion/Ion";
-import { Compound, track, untrackParticles, CompoundMorph, triggerEffects } from "../compound/Compound";
+import { Compound, track, untrackAtoms, CompoundMorph, triggerEffects } from "../compound/Compound";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { hasQuark, quarkOf } from "../Quark";
 import { IonizedModel } from "./IonizedModel";
@@ -43,5 +43,5 @@ export class IonizedCompound implements Compound {
       }
    }
 
-   untrackParticles = untrackParticles
+   untrackAtoms = untrackAtoms
 }

@@ -1,11 +1,10 @@
 import { triggerEffects } from "../compound/Compound";
 import { Watched } from "../watch/Watched";
-import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
+import { detachedCall, IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 
 /**
  * NOTES: 
  * - Ionic effects don't need a dirty state because if they are called, it means they're dirty
- * - TODO: DEPRECATE once ionicTask is stable
  */
 
 type IonicEffect = IonicCompoundMorph
@@ -13,8 +12,7 @@ type IonicEffect = IonicCompoundMorph
 export type IonicTask<S = unknown> = (initial: boolean) => S
 
 export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
-   const compound: IonicCompound<IonicEffect> = new IonicCompound(effect)
-   compound.trigger = trigger
+   const compound: IonicCompound = new IonicCompound()
 
    let fn = initialize;
    let initial = true;
@@ -30,12 +28,12 @@ export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
 
    function initialize(initial: boolean) {
       fn = runEffect
-      return compound.trackedCall(() => task(initial))
+      return detachedCall(() => compound.trackedCall(() => task(initial)))
    }
 
    function runEffect(initial: boolean) {
       if (retrack) {
-         return compound.retrackedCall(() => task(initial))
+         return detachedCall(() => compound.retrackedCall(() => task(initial)))
       }
       else {
          return task(initial)
@@ -48,7 +46,5 @@ export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
    return effect
 }
 
-function trigger(this: IonicCompound<IonicEffect>): void {
-   triggerEffects(this)
-}
+
 

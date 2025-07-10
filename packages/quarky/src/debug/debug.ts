@@ -122,7 +122,7 @@ function logAtoms(entity: { [QUARK]: CompoundMorph }, label: string) {
 function _logAtoms(particles: Particle[]) {
    for (const particle of particles) {
       if (isCompound(particle)) {
-         _logAtoms(particle.particles)
+         _logAtoms(particle.atoms)
       }
       else {
          logAtom(particle.quark)

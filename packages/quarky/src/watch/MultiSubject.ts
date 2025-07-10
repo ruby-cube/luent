@@ -57,7 +57,7 @@ export function createMultisubjectIon(subjects: unknown[] & AnyObject) {
             compound.track(quarkOf(model))
          }
          fn = () => {
-            compound.untrackParticles()
+            compound.untrackAtoms()
             return getValues();
          }
       }

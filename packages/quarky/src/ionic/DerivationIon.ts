@@ -1,15 +1,15 @@
-import { getActiveTracker, IonicCompound, IonicCompoundMorph } from "./IonicCompound";
+import { IonicCompound, IonicCompoundMorph, trackMemoized } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
 import { quarkOf, QUARK, hasQuark, EntityQuark, QuarkOf, Quark } from "../Quark";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
-import { ParticleMorph } from "../compound/Particle";
 import { emitSignal } from "../debug/debug";
-import { Watchable, Watched } from "../watch/Watched";
+import { asWatched, Watchable, Watched } from "../watch/Watched";
 import { Ion } from "../ion/Ion";
-import { CompoundMorph, triggerEffects } from "../compound/Compound";
 import { Traceable } from "../debug/Traceable";
 import { debug } from "@rue/utils";
+import { Effect } from "../effect-cycle/EffectQueue";
+import { SYNC } from "../effect-cycle/EffectCycle";
 
 
 
@@ -29,10 +29,11 @@ export type $DerivedState = Ion & Capsule & {
       inert: boolean
       state: unknown
       dirty: boolean
+      derivation: (prev?: unknown) => unknown
+      markDirty: Effect | undefined
    }
    & EntityQuark<$DerivedState>
    & Watchable
-   & ParticleMorph
    & IonicCompoundMorph
 }
 
@@ -60,10 +61,11 @@ export function createMaybeMemoizedIon(
    const $derived = () => fn()
 
    function initialize() {
-      compound = new IonicCompound(ion)
+      compound = new IonicCompound()
       const value = compound.trackedCall(derivation)
+      const atoms = compound.atoms
       // if (isIonizedModel(value)) compound.track(quarkOf(value))
-      if (compound.particles.length === 0) {
+      if (atoms.size === 0) {
          fn = getState
          ion.inert = true;
          // no reactivity, no memoization
@@ -72,14 +74,16 @@ export function createMaybeMemoizedIon(
       }
       else {
          if (__DEV__) emitSignal();
-         getActiveTracker()?.track(ion)
+         // getActiveTracker()?.track(ion)
          fn = getMemoizedState
          ion.state = value;
          ion.asCompound = compound
-         compound.trigger = trigger
          assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
+         const effect = ion.markDirty = new Effect(() => ion.dirty = true)
+         watchAtoms(compound, effect)
          creationFlask?.onDiscard(() => {
-            compound!.untrackParticles()
+            unwatchAtoms(compound!, effect)
+            compound!.untrackAtoms()
             fn = initialize;
          })
          return value;
@@ -95,10 +99,9 @@ export function createMaybeMemoizedIon(
       //TODO: not sure if I should assert initialization only or all calls
       assertValidCall()
       // console.log("@% ion.dirty", ion.dirty)
-      getActiveTracker()?.track(ion)
-      const compound = ion.asCompound!
+      if (!retrack) trackMemoized(ion)
       const value =
-         (retrack && ion.dirty) ? compound.retrackedCall(() => derivation(ion.state))
+         (retrack && ion.dirty) ? retrackedCall(ion)
             : ion.dirty ? derivation(ion.state)
                : ion.state;
 
@@ -117,9 +120,10 @@ export function createMaybeMemoizedIon(
       inert: false,
       dirty: false,
       state: undefined,
+      derivation,
+      markDirty: undefined,
       entity: $derived,
       type: DERIVATION_ION,
-      asParticle: undefined,
       asCompound: undefined,
       asWatched: undefined,
       asTraceable: new Traceable(),
@@ -137,14 +141,38 @@ export function createMaybeMemoizedIon(
    return $derived;
 }
 
-
-
-
-function trigger(this: IonicCompound<ManagedDerivation>): void {
-   this.quark.dirty = true;
-   this.quark.asParticle?.triggerCompounds()
-   triggerEffects(this)
+function retrackedCall(ion: ManagedDerivation) {
+   const { derivation, markDirty } = ion
+   const compound = ion.asCompound!
+   unwatchAtoms(compound, markDirty!)
+   const value = compound.retrackedCall(() => derivation(ion.state))
+   watchAtoms(compound, markDirty!)
+   return value;
 }
+
+function watchAtoms(compound: IonicCompound, effect: Effect) {
+   const atoms = compound.atoms;
+   for (const atom of atoms) {
+      const watchedAtom = asWatched(atom)
+      watchedAtom.link(effect, SYNC)
+   }
+   return effect;
+}
+
+function unwatchAtoms(compound: IonicCompound, effect: Effect) {
+   const atoms = compound.atoms;
+   for (const atom of atoms) {
+      const watchedAtom = asWatched(atom)
+      watchedAtom.unlink(effect, SYNC)
+   }
+}
+
+
+// function trigger(this: IonicCompound<>): void {
+//    this.quark.dirty = true;
+//    this.quark.asParticle?.triggerCompounds()
+//    triggerEffects(this)
+// }
 
 /* Not sure if this is correct. 
 Memory leaks occur when an object is referenced outside of its creation scope in a way that does not reassign it with the new version of the object, ie collecting it in an array, map, or set.

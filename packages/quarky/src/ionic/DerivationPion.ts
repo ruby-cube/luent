@@ -1,6 +1,7 @@
 import { Capsule } from "../capsule/Capsule";
 import { Particle } from "../compound/Particle";
 import { Traceable } from "../debug/Traceable";
+import { Effect } from "../effect-cycle/EffectQueue";
 import { Ion } from "../ion/Ion";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { asPionQuark, PionQuark } from "../ionized/Pion";
@@ -35,9 +36,9 @@ export class DerivationPionQuark implements QuarkOf<$DerivedPionState> {
    inert: boolean = false
    state: unknown;
    dirty: boolean = false
+   markDirty: Effect | undefined
 
-   asParticle?: Particle
-   asCompound?: IonicCompound<{ asCompound?: IonicCompound; } & Watchable> | undefined;
+   asCompound?: IonicCompound | undefined;
 
    asWatched?: Watched
 

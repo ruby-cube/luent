@@ -204,12 +204,10 @@ export function watch<
 }
 
 function getHasChangedFn(options: EffectOptions | undefined, state: unknown) {
-   return options?.hasChanged ?? isIonizedModel(state) ? always : notStrictlyEqual
+   return options?.hasChanged ?? isIonizedModel(state) ? ()=>true : notStrictlyEqual
 }
 
-function always() {
-   return true;
-}
+
 
 export function getPhase(options: undefined | EffectOptions) {
    return options?.phase ?? (options?.sync ? SYNC : getDefaultPhase())
@@ -276,7 +274,7 @@ type Task = () => void
 
 
 export function setUpWatcher(
-   subjects: Watched[], //TODO: if we get rid of particles, this would have to be Watched[], and we would link the effect to each subject
+   atoms: Watched[], //TODO: if we get rid of particles, this would have to be Watched[], and we would link the effect to each subject
    effectTask: Task,
    phase: string,
    options: EffectOptions,
@@ -306,7 +304,7 @@ export function setUpWatcher(
             subject.unlink(effectLink, phase)
          }
          if (compound)
-            compound.untrackParticles()
+            compound.untrackAtoms()
       },
       pause() {
          paused = true;

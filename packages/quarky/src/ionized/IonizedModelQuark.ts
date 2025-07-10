@@ -105,6 +105,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
       derivation.collectAbsorbedIons(this.entity!)
       if (this.asCompound.particles.length === 0) this.asCompound = undefined // prevents watch from marking model as no reactivity
       // this.undirty()
+      return derivation.particles;
    }
 
    trigger = trigger

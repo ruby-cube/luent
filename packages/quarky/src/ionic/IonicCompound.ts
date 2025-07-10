@@ -1,13 +1,12 @@
-import { Particle } from "../compound/Particle";
-import { Compound, CompoundMorph, track, untrackParticles } from "../compound/Compound";
-import { Watchable } from "../watch/Watched";
+import { Compound, CompoundMorph } from "../compound/Compound";
 import { isIonizedModel } from "../ionized/ionize";
-import { quarkOf } from "../Quark";
-import { watch } from "fs";
+import { Quark, quarkOf } from "../Quark";
+import { Watchable } from "../watch/Watched";
+import { ManagedDerivation } from "./DerivationIon";
 
-const trackerStack: (Compound | null)[] = []
+const trackerStack: (IonicCompound | null)[] = []
 
-function pushTracker(tracker: Compound | null) {
+function pushTracker(tracker: IonicCompound | null) {
    trackerStack.push(tracker)
 }
 
@@ -27,7 +26,7 @@ export function getActiveTracker() {
 //    return {
 //       track(atom: unknown){
 //          for (const tracker of trackerStack){
-            
+
 //          }
 //       }
 //    }
@@ -39,7 +38,7 @@ export function getActiveTrackers() {
 }
 
 // export function track(atom: any){
-   
+
 // }
 
 
@@ -78,25 +77,49 @@ export function detachedCall(fn: Function) {
    }
 }
 
+export function track(atom: Watchable) {
+   let i = trackerStack.length;
+   while (i--) {
+      const compound = trackerStack[i]
+      if (!compound) return; // due to detached call (for nested ionicTasks and eager watch calls)
+      compound.track(atom)
+   }
+}
+
+/**
+ * Use trackMemoized to collect/forward the atoms of a memoized compound if the memoized compound is not dirty
+ * If dirty, simply retrack and track atoms as normal
+ * @param derivation 
+ */
+export function trackMemoized(ion: ManagedDerivation) {
+   let i = trackerStack.length;
+   while (i--) {
+      const compound = trackerStack[i]
+      if (!compound) return; // due to detached call (for nested ionicTasks)
+      const atoms = ion.asCompound?.atoms
+      if (atoms)
+         for (const atom of atoms) {
+            compound.track(atom)
+         }
+   }
+}
+
+
 export type IonicCompoundMorph = CompoundMorph<IonicCompound>
 
-export class IonicCompound<T extends IonicCompoundMorph = { asCompound?: IonicCompound } & Watchable> implements Compound {
-
-   constructor(
-      readonly quark: T,
-   ) {
-   }
+export class IonicCompound implements Compound {
 
    // dirty: boolean = false;
 
-   particles: Particle[] = []
+   atoms: Set<Watchable> = new Set()
 
-   track = track
-
-   trigger!: () => void
+   track(atom: Watchable) {
+      this.atoms.add(atom)
+      return atom
+   }
 
    trackedCall(fn: () => any) {
-      // this.untrackParticles()
+      // this.untrackAtoms()
       pushTracker(this);
       try {
          const value = fn();
@@ -105,18 +128,20 @@ export class IonicCompound<T extends IonicCompoundMorph = { asCompound?: IonicCo
       }
       finally {
          popTracker();
-         if (__DEV__ && this.particles.length === 0) {
+         if (__DEV__ && this.atoms.size === 0) {
             console.warn(`Watch target or derived AtomicIon has no dependencies (and therefore no reactivity)`, this)
          }
       }
    }
 
    retrackedCall(fn: () => any) {
-      this.untrackParticles()
+      this.untrackAtoms()
       return this.trackedCall(fn)
    }
 
-   untrackParticles = untrackParticles
+   untrackAtoms() {
+      this.atoms.clear()
+   }
 }
 
 export function __devCheckIfTracked() {

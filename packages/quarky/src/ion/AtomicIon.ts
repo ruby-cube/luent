@@ -9,8 +9,6 @@ import { Watchable } from "../watch/Watched";
 import { Mutable, MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { trigger } from "../ReactivitySystem";
 import { getActiveTracker } from "../ionic/IonicCompound";
-import { ParticleMorph } from "../compound/Particle";
-import { runSyncEffects } from "../effect-cycle/SyncEffects";
 import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
 import { Ion, Methods, MutableIon } from "./Ion";
@@ -18,7 +16,7 @@ import { Ion, Methods, MutableIon } from "./Ion";
 
 /** INTERNAL */
 export type $AtomicIonState = MutableIon<unknown> & MutableCapsule & {
-   [QUARK]: _AtomicIonQuark & EntityQuark<$AtomicIonState> & ParticleMorph & Watchable
+   [QUARK]: _AtomicIonQuark & EntityQuark<$AtomicIonState> & Watchable
 } & MutableEntity
 
 type _AtomicIonQuark = {
@@ -44,8 +42,6 @@ export function shouldIonize(newValue: unknown, ionized: boolean): newValue is A
 export const MUTABLE = true
 export const IONIZED = true
 export const ALL_METHODS = 'all_methods'
-const SELECTED_METHODS = Symbol('selected_methods')
-const REINED_QUARK = Symbol('reined-ion-quark')
 
 /** INTERNAL */
 export function createAtomicIon(
@@ -56,7 +52,7 @@ export function createAtomicIon(
 ) {
    const $state = (() => {
       if (__DEV__) emitSignal();
-      getActiveTracker()?.track(quark)
+      track(quark)
       return quark.state;
    }) as $AtomicIonState
 
@@ -70,7 +66,6 @@ export function createAtomicIon(
       entity: $state,
       type: ATOMIC_ION,
       asMutable: new Mutable(),
-      asParticle: undefined,
       asTraceable: new Traceable(),
       trigger,
       asWatched: undefined,

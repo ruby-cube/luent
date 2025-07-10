@@ -1,5 +1,5 @@
 import { SYNC } from "../effect-cycle/EffectCycle";
-import { $currentEffect, Effect, WatchedAtom } from "../effect-cycle/EffectQueue";
+import {  Effect, PhaseAtom } from "../effect-cycle/EffectQueue";
 import { scheduleEffects } from "../ReactivitySystem";
 
 
@@ -21,46 +21,53 @@ export class Watched {
       private watchable: Watchable
    ) { }
 
-   effects: AtomPhaseMap = new AtomPhaseMap('effects')
+   private effects: Map<string, PhaseAtom> = new Map()
 
-   watchCount: number = 0
+   private watchCount: number = 0
 
+   private initializeAtom(phase: string) {
+      const atom: PhaseAtom = new PhaseAtom()
+      this.effects.set(phase, atom);
+      return atom
+   }
+
+   /**
+     * To be called by watch() when initializing watcher
+     * @param effect 
+     */
    link(effect: Effect, phase: string) {
-      this.effects.link(effect, phase)
+      const atom = this.effects.get(phase) ?? this.initializeAtom(phase);
+      atom.link(effect)
       this.watchCount++
    }
 
+   /**
+    * To be called by watcher's stop() function
+    * @param effect 
+    */
    unlink(effect: Effect, phase: string) {
-      this.effects.unlink(effect, phase)
+      const atom = this.effects.get(phase) ?? this.initializeAtom(phase);
+      atom.unlink(effect)
       if (this.watchCount === 0) {
          this.emitDiscard()
       }
    }
 
    triggerEffects() { // the surrounding effect when original trigger happened
-      console.log('watched.triggerEffects')
-      for (const [phase, atomicEffects] of this.effects) {
+      for (const [phase, atom] of this.effects) {
          if (phase === SYNC) {
-            atomicEffects.runSyncEffects()
+            atom.runSyncEffects()
          }
          else {
-            scheduleEffects(atomicEffects!, phase)
+            scheduleEffects(atom!, phase)
          }
       }
    }
 
-
-
-   // private scheduleReabsorption(phase: string) {
-   //    const completed = this.completedEffects.get(phase);
-   //    if (completed || completed === null) return;
-   //    this.completedEffects.set(phase, null);
-   //    getEffectCycleManager().onComplete(() => { //TODO: simple hooks like this do not need to be flasked listeners... too much overhead
-   //       const completed = this.completedEffects.get(phase)
-   //       if (completed) this.effects.absorb(completed, phase)
-   //       this.completedEffects.delete(phase)
-   //    })
-   // }
+   runSyncEffects(){
+      const phaseAtom = this.effects.get(SYNC)
+      phaseAtom?.runSyncEffects()
+   }
 
    private cleanups: (() => void)[] = []
 
@@ -77,34 +84,3 @@ export class Watched {
 }
 
 
-class AtomPhaseMap extends Map<string, WatchedAtom> {
-   constructor(
-      public __DEV__name: string
-   ) {
-      super();
-   }
-
-   private initializeAtom(phase: string) {
-      const atom: WatchedAtom = new WatchedAtom()
-      this.set(phase, atom);
-      return atom
-   }
-
-   /**
-     * To be called by watch() when initializing watcher
-     * @param effect 
-     */
-   link(effect: Effect, phase: string) {
-      const atom = this.get(phase) ?? this.initializeAtom(phase);
-      atom.link(effect)
-   }
-
-   /**
-    * To be called by watcher's stop() function
-    * @param effect 
-    */
-   unlink(effect: Effect, phase: string) {
-      const atom = this.get(phase) ?? this.initializeAtom(phase);
-      atom.unlink(effect)
-   }
-}

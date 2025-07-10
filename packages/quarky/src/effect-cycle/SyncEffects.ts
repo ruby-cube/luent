@@ -1,46 +1,25 @@
-import { Effect, EffectQueue, WatchedAtom } from "./EffectQueue";
+import { Effect, EffectQueue, PhaseAtom } from "./EffectQueue";
 
+// let syncEffects: EffectQueue | undefined
 
-// // const _effectStack: EffectLink[] = []
-// const activeEffects = new Set()
-
-// export const effectStack = {
-//    has(effect: EffectLink) {
-//       return activeEffects.has(effect)
-//    },
-
-//    push(effect: EffectLink) {
-//       activeEffects.add(effect)
-//       // _effectStack.push(effect)
-//    },
-
-//    pop(effect: EffectLink) {
-//       // const effect = _effectStack.pop()
-//       activeEffects.delete(effect)
-//    }
+// function $syncEffects() {
+//    return syncEffects ?? (syncEffects = new EffectQueue())
 // }
 
-
-let syncEffects: EffectQueue | undefined
-
-function $syncEffects() {
-   return syncEffects ?? (syncEffects = new EffectQueue())
-}
-
-// export function scheduleSyncEffects(atom: WatchedAtom) {
+// export function scheduleSyncEffects(atom: PhaseAtom) {
 //    console.log('scheduleSyncEffects')
 //    const effects = atom.effects
 //    $syncEffects().scheduleEffects(atom)
 // }
 
-export function scheduleEagerSyncEffect(effect: Effect) {
-   $syncEffects().scheduleEagerEffect(effect)
-}
+// export function scheduleEagerSyncEffect(effect: Effect) {
+//    $syncEffects().scheduleEagerEffect(effect)
+// }
 
-export function runSyncEffects() {
-   console.log('run sync effects')
-   syncEffects?.runEffects()
-}
+// export function runSyncEffects() {
+//    console.log('run sync effects')
+//    syncEffects?.runEffects()
+// }
 
 // class SyncEffects {
 //    private effects = new EffectQueue()
@@ -49,7 +28,7 @@ export function runSyncEffects() {
 //       this.effects.scheduleEagerEffect(effect)
 //    }
 
-//    scheduleEffects(atom: WatchedAtom) {
+//    scheduleEffects(atom: PhaseAtom) {
 //       this.effects.scheduleEffects(atom)
 //    }
 

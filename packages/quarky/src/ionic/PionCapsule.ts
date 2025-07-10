@@ -2,10 +2,7 @@ import { AnyObject } from "@rue/types";
 import { quarkOf, QUARK, hasQuark, QuarkOf, EntityQuark } from "../Quark";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { Ion } from "../ion/Ion";
-import { __DEV__label } from "../debug/debug";
 import { IonicCompound } from "./IonicCompound";
-import { Watched } from "../watch/Watched";
-import { noop } from "@rue/utils";
 import { $AtomicPionState } from "../ion/AtomicPion";
 import { Traceable } from "../debug/Traceable";
 
@@ -41,7 +38,7 @@ import { Traceable } from "../debug/Traceable";
 
 // /** INTERNAL */
 export type $GetterIonState = Ion & Capsule & {
-   [QUARK]: EntityQuark<$GetterIonState> & { type: symbol, inert: boolean, coreIon: undefined | $AtomicPionState }
+   [QUARK]: EntityQuark<$GetterIonState> & { type: symbol, inert: boolean, coreIon: $GetterIonState | $AtomicPionState }
 }
 
 /** 
@@ -77,7 +74,7 @@ export function createPionCapsule(
    const capsule: GetterIon = {
       inert: false,
       entity: $capsuleIon,
-      coreIon: undefined,  // this is what needs to be returned as the watched ion, either a pion or an ion
+      coreIon: $capsuleIon,  // this is what needs to be returned as the watched ion, either a pion or an ion
       type: GETTER_ION,
       asTraceable: new Traceable(),
    }

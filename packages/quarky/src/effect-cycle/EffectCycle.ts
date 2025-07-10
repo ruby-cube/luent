@@ -1,6 +1,6 @@
 import { setImmediate } from "@rue/thread";
 import { Listener, SchedulerOptions } from "@rue/flask";
-import { Effect, EffectQueue, WatchedAtom } from "./EffectQueue";
+import { Effect, EffectQueue, PhaseAtom } from "./EffectQueue";
 import { TaskRef } from "./TaskQueue";
 import { EffectCycleManager } from "../ReactivitySystem";
 
@@ -143,13 +143,14 @@ export const SYNC = 'S' as const
 export const UPDATE_CYCLE_END = 'UCE' as const
 
 
+type Phase = string
 /**
  * 
  */
 export class EffectCycle {
 
    constructor(
-      public currentPhase: string,
+      public currentPhase: Phase,
       public manager: EffectCycleManager
    ) {
       console.log('NEW EFFECT CYCLE')
@@ -163,16 +164,25 @@ export class EffectCycle {
    //    return this.manager.count;
    // }
 
-   effects: PhaseMap = new PhaseMap('effect cycle');
+   private effects: Map<Phase, EffectQueue> = new Map();
 
    effectStack: Set<Effect> = new Set()
 
-   scheduleEffects(atom: WatchedAtom, phase: string) {
-      this.effects.scheduleEffects(atom, phase)
+   private initializeQueue(phase: Phase) {
+      const queue: EffectQueue = new EffectQueue()
+      this.effects.set(phase, queue);
+      return queue
    }
 
-   scheduleEagerEffect(effect: Effect, phase: string) {
-      this.effects.scheduleEagerEffect(effect, phase)
+   scheduleEagerEffect(effect: Effect, phase: Phase) {
+      const queue = this.effects.get(phase) ?? this.initializeQueue(phase);
+      queue.scheduleEagerEffect(effect)
+   }
+
+   scheduleEffects(atom: PhaseAtom, phase: Phase) {
+      const queue = this.effects.get(phase) ?? this.initializeQueue(phase);
+      queue.scheduleEffects(atom)
+
    }
 
    subphase: 'effects' | 'microtasks' = 'effects'
@@ -187,38 +197,6 @@ export class EffectCycle {
    }
 }
 
-
-
-
-class PhaseMap extends Map<string, EffectQueue | null> {
-   constructor(
-      public __DEV__name: string
-   ) {
-      super();
-   }
-
-   private initializeQueue(phase: string) {
-      const queue: EffectQueue = new EffectQueue()
-      this.set(phase, queue);
-      return queue
-   }
-
-   scheduleEagerEffect(effect: Effect, phase: string){
-      const queue = this.get(phase) ?? this.initializeQueue(phase);
-      queue.scheduleEagerEffect(effect)
-   }
-
-   scheduleEffects(atom: WatchedAtom, phase: string) {
-      const queue = this.get(phase) ?? this.initializeQueue(phase);
-      queue.scheduleEffects(atom)
-
-   }
-
-   // scheduleTask(task: TaskRef, phase: string){
-   //      const queue = this.get(phase) ?? this.initializeQueue(phase);
-   //      queue.scheduleTask(task)
-   // }
-}
 
 
 
