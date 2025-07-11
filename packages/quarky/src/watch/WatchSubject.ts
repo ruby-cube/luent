@@ -72,7 +72,7 @@ class Multisubject implements WatchSubject {
 
    inertCount: number = 0;
 
-   getValueAndTrackAtoms() {
+   trackedCall() {
       const subjects = this.subjects;
       const values = this.values
       const initialized = this.initialized
@@ -82,7 +82,7 @@ class Multisubject implements WatchSubject {
             values.push(toValue(subject))
             if (!initialized) this.inertCount++
          }
-         const value = subject.getValueAndTrackAtoms()
+         const value = subject.trackedCall()
          values.push(value)
       }
 
@@ -126,7 +126,7 @@ export function isGetter(value: unknown): value is () => any {
 
 export interface WatchSubject {
    inert: boolean,
-   getValueAndTrackAtoms: () => unknown
+   trackedCall: () => unknown
    linkEffect(effect: Effect, phase: string, eager: boolean, initial?: boolean): void
    unlinkEffect(effect: Effect, phase: string): void
 }
@@ -145,7 +145,7 @@ class IonizedModelSubject implements WatchSubject {
       this.watchedAtom = asWatched(quarkOf(model))
    }
 
-   getValueAndTrackAtoms() {
+   trackedCall() {
       return this.model
    }
 
@@ -182,7 +182,7 @@ class IonSubject implements WatchSubject {
 
    private initialized = false;
 
-   getValueAndTrackAtoms() {
+   trackedCall() {
       if (this.initialized)
          return this.getValueAndRelinkAtoms()
       this.initialized = true;
@@ -287,4 +287,38 @@ function toWatchedAtoms(atoms: Set<Watchable>) {
       watchedAtoms.push(asWatched(atom))
    }
    return watchedAtoms;
+}
+
+
+export class IonicTaskSubject implements WatchSubject {
+   inert: boolean = false;
+
+   watchedAtoms: Watched[] = []
+
+   constructor(
+      private ionicEffect: {
+         (): void;
+         asCompound: IonicCompound;
+      },
+      private retrack: boolean
+   ) { }
+
+   private initialized = false
+
+   trackedCall() {
+      this.ionicEffect()
+      if (!this.initialized || this.retrack) {
+         const compound = this.ionicEffect.asCompound
+         this.watchedAtoms = toWatchedAtoms(compound.atoms)
+         this.initialized = true;
+      }
+   }
+
+   linkEffect(effect: Effect, phase: string, eager: boolean, initial?: boolean): void {
+      linkEffectToAtoms(this.watchedAtoms, effect, phase, eager, initial)
+   }
+
+   unlinkEffect(effect: Effect, phase: string): void {
+      unlinkEffect(this.watchedAtoms, effect, phase)
+   }
 }

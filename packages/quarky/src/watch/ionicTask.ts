@@ -1,12 +1,12 @@
-import { SustainedListenerOptions, ThisFlask } from "@rue/flask";
-import { EffectOptions, getPhase, setUpWatcher, WatchDebugOptions } from "./watch";
+import { SustainedListenerOptions } from "@rue/flask";
+import { EffectOptions, setUpWatcher, WatchDebugOptions } from "./watch";
 import { Glass } from "@rue/types";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
+import { IonicTaskSubject } from "./WatchSubject";
 
 type IonicTaskOptions = {
    phase?: string;
    sync?: boolean;
-   // cycle?: "current" | "next"; //QUESTION: How does this work?? Do we really need this?
    retrack?: boolean; // defaults to true
 } & Glass<SustainedListenerOptions & WatchDebugOptions>
 
@@ -19,8 +19,10 @@ export function ionicTask(task: IonicTask, options?: IonicTaskOptions) {
 
    const wrappedEffect = createIonicEffect(task, retrack)
 
+   const watchSubject = new IonicTaskSubject(wrappedEffect, retrack)
+
    return setUpWatcher(
-      [wrappedEffect.asWatched], //FIX:
+      watchSubject,
       wrappedEffect,
       opts,
    )

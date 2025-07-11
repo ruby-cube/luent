@@ -1,5 +1,3 @@
-import { triggerEffects } from "../compound/Compound";
-import { Watched } from "../watch/Watched";
 import { detachedCall, IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 
 /**
@@ -41,7 +39,6 @@ export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
    }
 
    effect.asCompound = compound;
-   effect.asWatched = new Watched(effect as IonicEffect)
 
    return effect
 }

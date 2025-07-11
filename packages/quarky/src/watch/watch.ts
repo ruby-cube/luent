@@ -99,7 +99,7 @@ export function watch<
       return InertWatcher()
    }
 
-   let prevState = watchSubject.getValueAndTrackAtoms(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
+   let prevState = watchSubject.trackedCall(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
 
    if (watchSubject.inert) {
       return InertWatcher()
@@ -176,7 +176,7 @@ export function setUpWatcher(
 
 
 
-function InertWatcher() {
+export function InertWatcher() {
    function noOp() {
       return false;
    }
