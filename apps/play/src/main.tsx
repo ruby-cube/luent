@@ -190,7 +190,7 @@ import { TestEffectCyclePhases } from './TestEffectCyclePhases';
 
 
 
-const app = createApp(TestCount)
+const app = createApp(List)
 
 app.mount('#app')
 

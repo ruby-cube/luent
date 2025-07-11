@@ -208,16 +208,16 @@ export class ListRenderKit {
    }
 
    private removeItems(indicesToRemove: number[]) {
-      onInternalRender(() => {
-         // remove from DOM
-         for (const index of indicesToRemove) {
-            const nodePod = this.dynamicPod[index] as NodePod;
-            const flask = flaskMap.get(nodePod)
-            flask?.emitDiscard()
+      // remove from DOM
+      for (const index of indicesToRemove) {
+         const nodePod = this.dynamicPod[index] as NodePod;
+         const flask = flaskMap.get(nodePod)
+         flask?.emitDiscard()
+         onInternalRender(() => {
             removeDOMNodes(nodePod)
-         }
-         //TODO: how do I handle items that have been moved to another port?
-      })
+         })
+      }
+      //TODO: how do I handle items that have been moved to another port?
    }
 
    private async insertAndMoveItems(
@@ -275,11 +275,9 @@ export class ListRenderKit {
 
             setCurrentIndex($index); // to retreive config
 
+            const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
+            
             onInternalRender(() => {
-               // newIndices.push($index);
-               // create and collect consecutive new items onto the same fragment
-               const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
-               // const _item = (isIonizedModel(list) && item instanceof Object|| isAtomicIon(list) && asMetaIon(list).stateIsIonized) ? ionize(item) : item; //TODO: what about DerivedSignals that output a deep reactive?
                this.renderItem(item, $index, parent, nodePod, fragment, flask)
                flask.emitInitialMount()
                setCurrentIndex(undefined)

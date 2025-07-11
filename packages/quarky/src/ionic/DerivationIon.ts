@@ -77,7 +77,7 @@ export function createMaybeMemoizedIon(
          const effect = ion.markDirtyEffect = new Effect(() => ion.dirty = true)
          linkAtoms(compound, effect)
          creationFlask?.onDiscard(() => {
-            unlinkAtoms(compound, effect)
+            effect.destroy()
             compound!.untrackAtoms()
             fn = initialize;
          })
