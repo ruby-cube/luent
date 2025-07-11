@@ -92,7 +92,6 @@ export function Polymorph(entries: [PolymorphKey, RenderFunction][]) {
          },
          discard(key: PolymorphKey, input?: Object) {
             const polymorphs = polymorphMap.get(morphable as Morphable)
-            console.log('discard?', polymorphs)
             if (!polymorphs) return;
             for (const polymorph of polymorphs) {
                polymorph.discard(key, input)
@@ -175,7 +174,6 @@ export class PolymorphKit {
       const morphable = this
 
       watch($activeKey, function updateMorphicComponent({ current: key, previous }) {
-         console.log('%%% changed!')
          // remove previous
          if (previous)
             morphable.deactivateConditional(previous)
@@ -183,7 +181,6 @@ export class PolymorphKit {
          // render new morph
          if (key)
             morphable.activateConditional(key, parent)
-         console.log('switchMap', morphable.switchMap)
 
       }, {phase: INTERNAL_RENDER})
       return this;
@@ -245,7 +242,6 @@ export class PolymorphKit {
    }
 
    discard(key: PolymorphKey, input?: Object) {
-      console.log('discarding')
       if (this.isActiveKey(key, input)) {
          //TODO: This is the diamond problem... if the watch() is not sync, then we'd have to perform discard after update... 
          // but how would anyone know whether the update were synchronous or batched?
@@ -262,7 +258,6 @@ export class PolymorphKit {
       if ('cached' in kitOrMap) {
          kitOrMap.cached = undefined;
       }
-      console.log('discarded', key, input, this.switchMap.get(key))
    }
 
    isActiveKey(key: PolymorphKey, input?: Object) {

@@ -1,7 +1,7 @@
 import { isObject } from "@rue/utils";
 import { SYNC } from "../effect-cycle/EffectCycle";
 import { Effect, PhaseAtom } from "../effect-cycle/EffectQueue";
-import { scheduleEffects } from "../ReactivitySystem";
+import { $currentEffectCycle } from "../effect-cycle/ReactivitySystem";
 import { hasQuark, Quark, QUARK } from "../Quark";
 
 
@@ -49,7 +49,7 @@ export class Watched {
    private watchCount: number = 0
 
    private initializeAtom(phase: string) {
-      const atom: PhaseAtom = new PhaseAtom()
+      const atom: PhaseAtom = new PhaseAtom(phase)
       this.effects.set(phase, atom);
       return atom
    }
@@ -78,19 +78,14 @@ export class Watched {
 
    triggerEffects() { // the surrounding effect when original trigger happened
       for (const [phase, atom] of this.effects) {
-         if (phase === SYNC) {
-            atom.runSyncEffects()
-         }
-         else {
-            scheduleEffects(atom!, phase)
-         }
+         $currentEffectCycle().scheduleEffects(atom, phase)
       }
    }
 
-   runSyncEffects() {
-      const phaseAtom = this.effects.get(SYNC)
-      phaseAtom?.runSyncEffects()
-   }
+   // runSyncEffects() {
+   //    const phaseAtom = this.effects.get(SYNC)
+   //    phaseAtom?.runSyncEffects()
+   // }
 
    // private cleanups: (() => void)[] = []
 

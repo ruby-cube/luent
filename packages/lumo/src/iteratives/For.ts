@@ -43,7 +43,6 @@ function renderStaticList(data: undefined | unknown[] | Set<unknown> | Map<unkno
    for (let i = 0; i < array.length; i++) {
       renderedList.push(render(array[i], i))
    }
-   console.log('rendering static list', renderedList, data, array)
    return renderedList
 }
 

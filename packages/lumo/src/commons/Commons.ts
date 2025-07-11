@@ -53,7 +53,6 @@ export function callWithCommons(
 export function wrapWithCommons(
    Slot: RenderSlot,
    provide: Provided) {
-      console.log('wrapping with commons')
    return (arg: any) => {
       return callWithCommons(() => Slot(arg), provide)
    }

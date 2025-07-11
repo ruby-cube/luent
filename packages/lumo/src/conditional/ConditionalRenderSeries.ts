@@ -176,16 +176,14 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       // set up watcher for updates
       watch($conditions, function updateConditional({ current, previous }) {
-         console.log('update conditional? A')
-         if (areShallowEqualArrays(current!, previous!)) return;
-         console.log('update conditional? B')
+         console.log('update conditional?')
 
          const prevIndex = series.activeIndex!;
          const activeIndex = series.evaluateConditions();
          if (prevIndex === activeIndex) {
             return;
          }
-         console.log('update conditional? C')
+         console.log('update conditional, yes')
 
          const outgoingNodes = series.statements[prevIndex]?.transitionNodes ?? []
          const incomingNodes = series.statements[activeIndex]?.transitionNodes ?? []
@@ -327,7 +325,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
          function transitionConditionalIn(initialPosition?: DOMRect, finalPosition?: DOMRect) {
             let nodeCount = incomingNodes.length + (phasicNode ? 1 : 0)
-            // console.log('nodeCount', incomingNodes.length)
             entranceStateTime = new Date().getTime()
             for (const node of incomingNodes) {
                node.transitionIn(endTransition);
@@ -352,7 +349,6 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       // // set up watcher for updates
       // watch($conditions, function updateConditional(newValue: boolean[], oldValue: boolean[]) {
-      //     console.log("update conditional")
       //     if (areShallowEqualArrays(newValue, oldValue)) return;
 
       //     // (1)

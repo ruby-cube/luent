@@ -63,7 +63,6 @@ export function initializeComponentRef(
       initializeListRef(<_NodesRef>ref, publicComponent, $index)
    }
    else {
-      console.log('initialize component ref', publicComponent)
       initializeRef(<_NodeRef>ref, publicComponent)
    }
 }

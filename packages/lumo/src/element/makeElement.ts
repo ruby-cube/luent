@@ -315,7 +315,6 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       //    }, { eager: true, phase: Phase.RENDER })
       // }
       else if (!isHydrating()) {
-         if (node.tagName === 'LABEL') console.log('key', key, value)
          setAttribute(node, _key, toString(value))
       }
    }
@@ -511,7 +510,6 @@ type DynamicClassesConfig = {
 
 type Falsey = undefined | null | false | ''
 function setUpClasses(node: Element, classes: ClassInput[]) {
-   console.log('set up classes for node', node.tagName)
    const classList = node.classList
 
    for (const entry of classes) {
@@ -525,7 +523,6 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
          addClasses(entry, classList)
       }
    }
-   console.log('finish clases setup for ', node.tagName)
 }
 
 function removePreviousClasses(prevValue: string | AnyObject, classList: DOMTokenList) {
@@ -571,9 +568,6 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
       const value = entry[key]
       if (value && isIon(value)) {
          watch(value, ({ current, previous }) => {
-            console.log('key', key)
-            console.log('state', current)
-            console.log('prevState', previous)
             if (current) classList.add(key)
             else if (previous) classList.remove(key)
          }, {

@@ -262,16 +262,12 @@ export function mountDOMNodes(pod: NodePod, parent: Element, fragment: DocumentF
    let prevNode = pod.prevNode;
 
    if (prevNode && prevNode === parent) {
-      console.log('parent.append', parent)
       parent.append(fragment) //for teleport
    }
    else if (prevNode) {
-      console.log('pod', pod, fragment.children.length)
-      console.log('after prevNode', prevNode, pod[0])
       prevNode.after(fragment)
    }
    else {
-      console.log('prepend')
       parent.prepend(fragment)
    }
 }

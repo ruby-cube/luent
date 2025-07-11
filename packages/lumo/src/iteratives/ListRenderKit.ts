@@ -137,7 +137,6 @@ export class ListRenderKit {
 
       }
 
-      console.log('!!!!watching list', data)
       const dynamicPod = this.dynamicPod
 
       watch(data, ({ current, previous }) => { // typecast as one of the options so that typescript won't complain
@@ -148,18 +147,18 @@ export class ListRenderKit {
          //    recording = recordMutations(_data)
          //    return;
          // }
-         console.log('!!!!updating list?')
+         console.log('updating list?')
          const _prevState = clone ?? toRaw(previous)
          clone = createClone(data, current)
          // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
          const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(current), _prevState, getUID)
          if (noChange) { //TODO: should we use hasChanged function in watch options instead?
-            console.log('no change :(', current, _prevState)
+            console.log('no list change', current, _prevState)
             return;
          }
          if (dynamicPod!.length !== _prevState.length)
             throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${previous.length} are mismatched. This should never happen.`)
-
+         console.log('updating list, yes')
          this.castBeforeUpdate();
          this.removeItems(indicesToRemove!);
          try {
@@ -168,7 +167,6 @@ export class ListRenderKit {
          catch (err) {
             console.error(err, this.__DEV__asyncPath)
          }
-         // console.log('updating list', state.length, _oldValue.length)
       }, { phase: PRERENDER })
       // currentItem = undefined;
       $currentIndex = undefined;
@@ -214,7 +212,7 @@ export class ListRenderKit {
          const flask = flaskMap.get(nodePod)
          flask?.emitDiscard()
          // queueInternalRender(() => {
-            removeDOMNodes(nodePod)
+         removeDOMNodes(nodePod)
          // })
       }
       //TODO: how do I handle items that have been moved to another port?
@@ -278,15 +276,15 @@ export class ListRenderKit {
             const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
 
             // queueInternalRender(() => {
-               this.renderItem(item, $index, parent, nodePod, fragment, flask)
-               flask.emitInitialMount()
-               setCurrentIndex(undefined)
-               flaskMap.set(nodePod, flask)
+            this.renderItem(item, $index, parent, nodePod, fragment, flask)
+            flask.emitInitialMount()
+            setCurrentIndex(undefined)
+            flaskMap.set(nodePod, flask)
             // })
          }
          else if (hasMoved(uItem)) {
-               // move node to fragment (DOM will auto-remove node from DOM)
-               transferNodes(fragment, nodePod);
+            // move node to fragment (DOM will auto-remove node from DOM)
+            transferNodes(fragment, nodePod);
          }
       }
       // this.indices = newIndices;
@@ -323,7 +321,7 @@ export class ListRenderKit {
       // (3) insert nodes into DOM
       for (const [index, fragment] of indicesAndFragments) {
          // queueInternalRender(()=>{
-            mountDOMNodes(<NodePod>dynamicPod[index], parent, fragment)
+         mountDOMNodes(<NodePod>dynamicPod[index], parent, fragment)
          // })
       }
 
@@ -349,7 +347,7 @@ function transferNodes(fragment: DocumentFragment, nodePod: NodePod) {
    for (const nodeOrPod of nodePod) {
       if (nodeOrPod instanceof Node) {
          // queueInternalRender(()=>{
-            fragment.appendChild(nodeOrPod)
+         fragment.appendChild(nodeOrPod)
          // })
       }
       else {

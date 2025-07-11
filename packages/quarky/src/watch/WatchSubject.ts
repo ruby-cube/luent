@@ -8,7 +8,7 @@ import { asWatched, isWatchable, isWatchableEntity, Watchable, Watched } from ".
 import { isObject, noop } from "@rue/utils";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
 import { Ion, isIon, toValue } from "../ion/Ion";
-import { scheduleEagerEffect } from "../ReactivitySystem";
+import { $currentEffectCycle, scheduleEagerEffect } from "../effect-cycle/ReactivitySystem";
 import { SYNC } from "../effect-cycle/EffectCycle";
 import { WatchSubjects } from "./watch";
 import { detachedCall, IonicCompound } from "../ionic/IonicCompound";
@@ -260,7 +260,7 @@ function linkEffectToAtom(atom: Watched | undefined, effect: Effect, phase: stri
    if (!atom) return;
    atom.link(effect, phase)
    if (initial && eager) {
-      _scheduleEagerEffect(atom, effect, phase)
+      $currentEffectCycle().scheduleEagerEffect(effect, phase)
    }
 }
 
@@ -271,14 +271,14 @@ function linkEffectToAtom(atom: Watched | undefined, effect: Effect, phase: stri
 //    }
 // }
 
-function _scheduleEagerEffect(watchedAtom: Watched, effect: Effect, phase: string) {
-   if (phase === SYNC) {
-      watchedAtom.runSyncEffects()
-   }
-   else {
-      scheduleEagerEffect(effect, phase)
-   }
-}
+// function _scheduleEagerEffect(watchedAtom: Watched, effect: Effect, phase: string) {
+//    if (phase === SYNC) {
+//       watchedAtom.runSyncEffects()
+//    }
+//    else {
+//       scheduleEagerEffect(effect, phase)
+//    }
+// }
 
 function toWatchedAtoms(atoms: Set<Watchable>) {
    const watchedAtoms = [];

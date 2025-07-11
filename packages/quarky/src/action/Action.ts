@@ -4,7 +4,7 @@ import { Mutation, MutableEntity, asMutable } from "../Mutable";
 import { AsyncState } from "@rue/flask";
 import { E } from "vitest/dist/chunks/reporters.6vxQttCV";
 import { EffectCycle } from "../effect-cycle/EffectCycle";
-import { getEffectCycleManager } from "../ReactivitySystem";
+import { getEffectCycleManager } from "../effect-cycle/ReactivitySystem";
 
 
 
@@ -263,7 +263,6 @@ export function doAction<T>(actionFn: (action: Action) => T, options?: ActionOpt
    catch (err) {
       action.cancel()
       options.catch(toError(err))
-      console.log('done via error')
    }
    finally {
       if (!outerAction) rootActionStack.pop()

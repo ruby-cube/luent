@@ -1,9 +1,8 @@
 import { $listen, $schedule, Listener, ListenerOptions, SchedulerOptions } from "@rue/flask";
-import { CyclePhase, EffectCycle, queueTask, SYNC, UPDATE_CYCLE_END } from "./effect-cycle/EffectCycle";
+import { CyclePhase, EffectCycle, queueTask, SYNC, UPDATE_CYCLE_END } from "./EffectCycle";
 import { noop } from "@rue/utils";
-import { Watchable } from "./watch/Watched";
-import { Effect, PhaseAtom } from "./effect-cycle/EffectQueue";
-import { TaskQueue, TaskRef } from "./effect-cycle/TaskQueue";
+import { Effect, PhaseAtom } from "./EffectQueue";
+import { TaskQueue, TaskRef } from "./TaskQueue";
 
 
 type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
@@ -51,8 +50,8 @@ export class EffectCycleManager {
 
    initCycle() {
       const cycle = this.createCycle()
-      schedulePhase(cycle, this.phases[0]
-      )
+      console.log('%%% INIT NEW CYCLE!')
+      schedulePhase(cycle, this.phases[0])
       return cycle;
    }
 
@@ -78,7 +77,9 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
    schedule(() => {
       const finalIndex = phases.length - 2;
       if (index < finalIndex) schedulePhase(cycle, next)
+      console.log(`%%% ${phaseHook} run tasks...`)
       cycleManager.runTasks(phaseHook)
+      console.log(`%%% ${phaseHook} run effects...`)
       cycle.runEffects(phaseHook)
       if (index === finalIndex)
          queueMicrotask(() => {
@@ -213,9 +214,9 @@ export function $currentEffectCycle() {
    return cycleManager.current
 }
 
-export function scheduleEffects(effects: PhaseAtom, phase: string) {
-   cycleManager.current.scheduleEffects(effects, phase)
-}
+// export function scheduleEffects(effects: PhaseAtom, phase: string) {
+//    cycleManager.current.scheduleEffects(effects, phase)
+// }
 
 export function scheduleEagerEffect(effect: Effect, phase: string) {
    cycleManager.current.scheduleEagerEffect(effect, phase)

@@ -684,14 +684,12 @@ function useMutatingOp(
 
    const o = {
       [fnName](...args: any) {
-         if (op === 'splice') console.log('mutating op', fnName)
          const _args = input(args)
          const preop = config.preop?.(target, _args)
 
          const output = transformOutput(fn.apply(target, _args), model); // perform mutation
 
          if (shouldTrigger && !shouldTrigger(preop)) return output;
-         if (op === 'splice') console.log('splicing: triggering')
          storeSnapshot(quark)
 
          recordMutation(quark, new Mutation(
@@ -703,7 +701,6 @@ function useMutatingOp(
          ))
 
          const triggers = getTriggers(model, _args, preop);
-         if (op === 'splice') console.log(triggers, model)
 
          for (const trigger of triggers) {
             trigger();

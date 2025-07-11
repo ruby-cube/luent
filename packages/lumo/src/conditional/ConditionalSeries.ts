@@ -52,7 +52,6 @@ export class ConditionalSeries {
       const conditions = this.conditions
       for (let i = 0; i < conditions.length; i++) {
          const $condition = conditions[i]
-         console.log('$condition', $condition)
          if ($condition()) {
             this.prevActiveIndex = this.activeIndex;
             this.activeIndex = i;

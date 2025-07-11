@@ -1,4 +1,4 @@
-import { EffectLink, EffectVine } from "../EffectLink"
+import { EffectLink, EffectVine } from "./EffectLink"
 import { describe, it, expect } from 'vitest';
 
 // const vine = new EffectVine('')

@@ -151,7 +151,6 @@ export function createAwaitSeries(
             for (const $promise of $promises) {
                watch($promise, ({ current: promise }) => {
                   if (promise === null) {
-                     // console.log('promise to null', promiseCount)
                      // if (promiseCount === 1) $pending.state = false;
                      // promiseCount--
                      return;

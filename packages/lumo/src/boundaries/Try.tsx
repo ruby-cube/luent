@@ -1,7 +1,6 @@
 import { RawJSXNode, RenderFunction } from "../node/makeNode";
 
 export function Try(render: RenderFunction | RawJSXNode) {
-   console.log('running try')
    return render;
 }
 

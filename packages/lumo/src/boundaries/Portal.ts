@@ -32,7 +32,6 @@ type SelectorString = string
 
 //    const _nodeEntities = setUpNodeEntities(normalizeToArray(unnestComponent(Slot())), element, nodePod)
 //    mountNodeEntities(_nodeEntities, element)
-//    console.log('portal node entitites', _nodeEntities)
 //    return undefined;
 // }
 

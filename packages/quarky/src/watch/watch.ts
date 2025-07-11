@@ -2,9 +2,8 @@ import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask
 import { Ion, isIon } from "../ion/Ion";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
 import { SYNC } from "../effect-cycle/EffectCycle";
-import { Watched } from "./Watched";
 import { Effect } from "../effect-cycle/EffectQueue";
-import { getDefaultPhase, scheduleEagerEffect } from "../ReactivitySystem";
+import { getDefaultPhase } from "../effect-cycle/ReactivitySystem";
 import { asWatchSubject, isWatchSubject, WatchSubject } from "./WatchSubject";
 import { Glass } from "@rue/types";
 

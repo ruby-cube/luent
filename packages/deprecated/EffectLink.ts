@@ -1,4 +1,4 @@
-import { Watched } from "../watch/Watched";
+import { Watched } from "../quarky/src/watch/Watched";
 
 export class EffectVine {
    private head: EffectLink | undefined

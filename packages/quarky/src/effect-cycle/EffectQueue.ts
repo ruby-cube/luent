@@ -1,13 +1,5 @@
-// watched queues
-// need to add and remove easily: set
-
-import { TaskQueue, TaskRef } from "./TaskQueue";
-import { $currentEffectCycle } from "../ReactivitySystem";
-import { debug } from "@rue/utils";
-
-
-// effect cycle queues
-// need to iterate efficiently: array
+import { SYNC } from "./EffectCycle";
+import { $currentEffectCycle } from "./ReactivitySystem";
 
 type Task = (...args: any[]) => void
 
@@ -31,26 +23,12 @@ export class Effect {
       this.task = null;
    }
 
-   unlink(){
+   unlink() {
       this.atoms.clear()
    }
 
-   renew(task: Task){
-      if (this.task) {
-         debug.error('Cannot renew an active effect. Effect must be destroyed first.')
-      }
-      this.task = task;
-      return this;
-   }
-
-   // unlink(atom: PhaseAtom) {
-   //    this.atoms.delete(atom)
-   //    this.task = null;
-   // }
+   queued: boolean = false
 }
-
-
-
 
 
 const _effectStack: Effect[] = []
@@ -79,121 +57,127 @@ export const effectStack = {
    }
 }
 
+const runStack: true[] = [] // manage recursive runEffects calls during sync effects
 
-export class PhaseAtom {
-   // nestedEffects: Effect[] | undefined
-   effects: Effect[] = []
-   nextEffects: Effect[] | undefined
+
+export class EffectQueue {
+   private atoms: PhaseAtom[] = []
+
+   addAtom(atom: PhaseAtom) {
+      this.atoms.push(atom)
+   }
+
+   private releaseAtoms() {
+      const atoms = this.atoms
+      for (const atom of atoms) {
+         atom.releaseTrigger()
+      }
+      this.atoms = []
+   }
+
+   private activeQueue: Effect[] | undefined
+   private triggeredQueue: Effect[] = []
+   private nextQueue: Set<Effect> | undefined;
+
+   private eagerQueue: Effect[] | undefined;
+
+   scheduleEagerEffect(effect: Effect) {
+      if (effect.queued) return;
+      const eagerQueue = this.eagerQueue ?? (this.eagerQueue = [])
+      eagerQueue.push(effect)
+      effect.queued = true;
+   }
+
+   scheduleEffect(effect: Effect) {
+      if (effect.queued) return;
+      this.triggeredQueue.push(effect)
+      effect.queued = true;
+   }
+
+   scheduleNestedEffect(effect: Effect) {
+      const nested = this.nextQueue ?? (this.nextQueue = new Set())
+      if (nested.has(effect)) return;
+      nested.add(effect)
+   }
 
    runningEffects: boolean = false;
 
-   // get effectChain() {
-   //    const effectChains = $currentEffectCycle().effectChains
-   //    const effectChain = effectChains.get(this);
-   //    if (effectChain) return effectChain;
-   //    const chain: Set<Effect> = new Set();
-   //    effectChains.set(this, chain)
-   //    return chain;
-   // }
+   runTriggeredEffects() {
+      this.activeQueue = this.triggeredQueue
+      this.runEffects()
+   }
 
-   retained: Set<Effect> = new Set()
-
-   runSyncEffects() {
+   private runEffects() {
       this.runningEffects = true;
-      const effects = this.effects
+      runStack.push(true)
+      try {
+         const effects = this.activeQueue
+         if (!effects) return;
+         console.log('%%% -- effects:', effects.length)
+         for (const effect of effects) {
+            if (!effect.task) continue;
 
-      const retained = this.retained
+            // stops infinite loops
+            if (effectStack.has(effect) || $currentEffectCycle().effectStack.has(effect)) {
+               console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
+               continue;
+            }
+            try {
+               effectStack.push(effect);
+               effect.task() // What about async tasks? T_T How will it affect this system?
+            }
+            finally {
+               effectStack.pop()
+            }
+         }
 
-      for (const effect of effects) {
-         if (!effect.task) { continue; }
-         if (effectStack.has(effect)) {
-            if (retained.has(effect))
-               continue;
-            this.retain(effect)
-            retained.add(effect)
-            console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
-            continue;
-         }
-         try {
-            effectStack.push(effect);
-            effect.task() // What about async tasks? T_T How will it affect this system?
-         }
-         finally {
-            effectStack.pop()
-            if (retained.has(effect))
-               continue;
-            this.retain(effect)
-            retained.add(effect)
+         if (runStack.length === 1) { // run next queue only after all nested sync effects have run
+            this.activeQueue = this.nextQueue ? Array.from(this.nextQueue) : []
+            this.nextQueue = undefined;
+            try {
+               if (this.activeQueue.length) {
+                  this.runEffects()
+               }
+            }
+            finally {
+               this.activeQueue = undefined
+               this.runningEffects = false;
+               this.dequeueEffects()
+               this.releaseAtoms()
+            }
          }
       }
-
-      this.runningEffects = false;
-
-      if (effectStack.size === 0) {
-         this.effects = this.nextEffects ?? []
-         // this.nestedEffects ? this.retainedEffects ?
-         //    [...this.retainedEffects, ...this.nestedEffects]
-         //    : this.nestedEffects : this.retainedEffects ?? []
-         this.retained.clear()
-         this.nextEffects = undefined
-         // this.nestedEffects = undefined;
+      finally {
+         runStack.pop()
       }
    }
 
-   runEffects(completedEffects?: Set<Effect>) {
-      this.runningEffects = true;
-      const effects = this.effects
-
-      const retained = new Set()
-
-      for (const effect of effects) {
-         if (!effect.task
-            || completedEffects?.has(effect) // prevents repeats within queue (but not across extended queues and phases)
-         ) {
-            continue;
-         }
-         // stops infinite loops
-         if (effectStack.has(effect)
-            || $currentEffectCycle().effectStack.has(effect)
-         ) {
-            if (retained.has(effect))
-               continue;
-            this.retain(effect)
-            retained.add(effect)
-
-            console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
-            continue;
-         }
-         try {
-            effectStack.push(effect);
-            effect.task() // What about async tasks? T_T How will it affect this system?
-         }
-         finally {
-            effectStack.pop()
-            completedEffects?.add(effect)
-            if (retained.has(effect))
-               continue;
-            this.retain(effect)
-            retained.add(effect)
-
-         }
-      }
-
-      this.runningEffects = false;
-      // console.log('$$$ Nested???', this.nestedEffects?.length)
-      this.effects = this.nextEffects ?? []
-      // this.effects = this.nestedEffects ? this.retainedEffects ?
-      //    [...this.retainedEffects, ...this.nestedEffects]
-      //    : this.nestedEffects : this.retainedEffects ?? []
-
-      this.nextEffects = undefined
-      // this.nestedEffects = undefined;
+   runEagerEffects() {
+      this.activeQueue = this.eagerQueue;
+      this.runEffects()
    }
 
-   retain(effect: Effect) {
-      if (!effect.task) return;
-      const retainedEffects = this.nextEffects ?? (this.nextEffects = [])
-      retainedEffects.push(effect)
+   dequeueEffects() {
+      const effects = this.triggeredQueue;
+      for (const effect of effects) {
+         effect.queued = false;
+      }
+   }
+}
+
+
+
+
+export class PhaseAtom {
+
+   private triggered: boolean = false
+   private currentQueue: EffectQueue | undefined; // undefined if not triggered
+
+   private effects: Effect[] = []
+   private untriggeredEffects: Effect[] | undefined;
+
+   constructor(phase: string) {
+      this.scheduleEffects = phase === SYNC ? this.queueSyncEffects : this.queueEffects
    }
 
    /**
@@ -201,136 +185,64 @@ export class PhaseAtom {
    * @param effect 
    */
    link(effect: Effect) {
-      if (effect.isLinked(this)) return;
+      if (this.triggered) {
+         const untriggered = this.untriggeredEffects ?? (this.untriggeredEffects = [])
+         untriggered.push(effect)
+      }
+
+      if (effect.isLinked(this)) {
+         return;
+      }
+
       effect.link(this)
-
-      if (this.runningEffects) {
-         const nestedEffects = this.nextEffects ?? (this.nextEffects = [])
-         nestedEffects.push(effect)
-      }
-      else {
-         this.effects.push(effect)
-      }
+      this.effects.push(effect)
    }
 
-   // /**
-   //  * To be called by watcher's stop() function
-   //  * @param effect 
-   //  */
-   // unlink(effect: Effect) {
-   //    effect.unlink(this)
-   // }
+   scheduleEffects: (queue: EffectQueue) => void
 
-   requeued: boolean = false;
-   queued: boolean = false
+   private queueSyncEffects(queue: EffectQueue) {
+      this.queueEffects(queue)
+      queue.runTriggeredEffects()
+   }
+
+   private queueEffects(queue: EffectQueue) {
+      if (this.triggered) {
+         if (!this.untriggeredEffects) return;
+         this._queueEffects(this.untriggeredEffects, queue)
+         return;
+      }
+      this.markTriggered(queue)
+      queue.addAtom(this)
+
+      this._queueEffects(this.effects, queue)
+   }
+
+   private markTriggered(queue: EffectQueue) {
+      this.triggered = true;
+      this.currentQueue = queue;
+   }
+
+   releaseTrigger() {
+      this.triggered = false;
+      this.currentQueue = undefined
+
+      // remove cancelled effects
+      const retained = []
+      const effects = this.effects
+      for (const effect of effects) {
+         if (!effect.task) continue;
+         retained.push(effect)
+      }
+      this.effects = retained;
+      this.untriggeredEffects = undefined;
+   }
+
+   private _queueEffects(effects: Effect[], queue: EffectQueue) {
+      for (const effect of effects) {
+         this.currentQueue?.runningEffects ? queue.scheduleNestedEffect(effect) : queue.scheduleEffect(effect)
+      }
+   }
 }
 
 
 
-export class EffectQueue {
-   private extendedQueue: PhaseAtom[] | undefined;
-   private queue: PhaseAtom[] = []
-   private eagerQueue: Effect[] | undefined;
-   // private taskQueue: TaskQueue | undefined;
-
-   // scheduleTask(task: TaskRef) {
-   //    const taskQueue = this.taskQueue ?? (this.taskQueue = new TaskQueue())
-   //    taskQueue.scheduleTask(task)
-   // }
-
-   scheduleEagerEffect(effect: Effect) {
-      const eagerQueue = this.eagerQueue ?? (this.eagerQueue = [])
-      eagerQueue.push(effect)
-   }
-
-   scheduleEffects(atom: PhaseAtom) {
-
-      if (this.runningEffects && !atom.requeued) {
-         // a currentEffect during runningEffects means the effect triggered 
-         // other effects and should be added to the effectStack to prevent infinite loops
-         const currentEffect = $currentEffect()
-         if (currentEffect) $currentEffectCycle().effectStack.add(currentEffect)
-         atom.requeued = true;
-         const extension = this.extendedQueue ?? (this.extendedQueue = [])
-         extension.push(atom)
-      }
-      else if (!atom.queued) {
-         this.queue.push(atom)
-         atom.queued = true;
-      }
-   }
-
-   private runningEffects: boolean = false
-
-   runEffects() {
-      this.runningEffects = true
-      let completed: Set<Effect> = new Set()
-      this.runEagerEffects()
-
-      const queue = this.queue;
-      console.log('runEffects', queue.length)
-      for (const atom of queue) {
-         atom.runEffects(completed)
-         atom.queued = this.extendedQueue?.length ? atom.requeued : false;
-         atom.requeued = false;
-      }
-      this.queue = this.extendedQueue ?? []
-      this.extendedQueue = undefined;
-      if (this.queue.length) {
-         console.log('EXTENDING', this.queue.length)
-         this.runEffects()
-      }
-
-      this.runningEffects = false;
-   }
-
-   private runEagerEffects() {
-      const eagerEffects = this.eagerQueue
-      if (!eagerEffects) return;
-      for (const effect of eagerEffects) {
-         effect.task?.()
-      }
-   }
-
-   // runTasks() {
-   //    const tasks = this.taskQueue;
-   //    if (!tasks) return;
-   //    tasks.runTasks()
-   // }
-
-   // runSyncEffects() {
-   //    for (const effect of this.effects) {
-   //       if (effectStack.has(effect)) {
-   //          console.log('infinite loop prevented')
-   //          continue; // prevents infinite loops
-   //       }
-   //       effectStack.push(effect)
-   //       try {
-   //          effect.task()
-   //       }
-   //       finally {
-   //          effectStack.pop()
-   //          if (!effect.vine) continue; // effect has already been removed during the effect via 'once' or 'scheduler'
-   //          effect.watchSubject!.effects.addToVine(effect, SYNC) // return to watch subject
-   //       }
-   //    }
-   // }
-}
-
-// type Phase = 'sync' | 'preupdate' | 'update' | 'postupdate' | 'lazy'
-// postupdate phase is for updates that you want to happen within 100ms
-
-// class EffectCycle {
-//    effects: Map<Phase, EffectQueue> = new Map()
-
-//    scheduleEffects(atom: PhaseAtom, phase: Phase) {
-//       if (phase === 'lazy') {
-//          const lazyPhase = getLazyPhase()
-//          lazyPhase.scheduleEffects(atom as LazyWatchedAtom)
-//          return;
-//       }
-//       let q;
-//       const cyclePhase = this.effects.get(phase) ?? (this.effects.set(phase, q = new EffectQueue()), q)
-//       cyclePhase.scheduleEffects(atom)
-//    }
-// }

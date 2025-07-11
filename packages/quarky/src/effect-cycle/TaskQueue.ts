@@ -22,7 +22,6 @@ export class TaskQueue {
       this.runningTasks = true;
       const tasks = this.queue
 
-
       const retained = new Set()
 
       for (const task of tasks) {
@@ -41,8 +40,6 @@ export class TaskQueue {
       }
       this.runningTasks = false;
       this.queue = this.nextQueue ?? []
-      // this.queue = [...retainedTasks, ...(this.nestedTasks ?? [])]
-
       this.nextQueue = undefined;
    }
 
