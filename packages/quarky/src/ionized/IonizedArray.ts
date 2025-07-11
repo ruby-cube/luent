@@ -1,8 +1,8 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel, toRaw, Ionized, ionize, IonizeBy, MaybeIonized, ToRaw, } from "./ionize";
-import { getAtomicOp } from "./AtomicOp";
+import { $atomicOp } from "./AtomicOp";
 import { IonizedModel, maybeIonize, } from "./IonizedModel";
-import { getAtomicPion } from "./Pion";
+import { $atomicPion } from "./Pion";
 import { TriggeringOpDef, trigger, IonizedMethodsDef } from "./IonizedMethods";
 import { quarkOf } from "../Quark";
 import { trackableCheckOp, trackableCreativeIterative, trackableCreativeOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackModel, trackOp } from './OpDefinitions'
@@ -228,8 +228,8 @@ function triggerObservedIndices(model: IonizedModel, prevLength: number, newLeng
          if (!isIntegerKey(indexKey)) continue;
          const index = parseInt(<string>indexKey)
          if (index >= newLength) {
-            getAtomicPion(model, indexKey)?.trigger()
-            getAtomicOp(model, 'at', index)?.trigger()
+            $atomicPion(model, indexKey)?.trigger()
+            $atomicOp(model, 'at', index)?.trigger()
          }
       }
    }
@@ -399,7 +399,7 @@ export const ionizedArray: IonizedMethodsDef = {
 
          // afterSet(ionizedModel, quark, key, newValue, oldValue) {
          //    if (isIntegerKey(key)) {
-         //       getAtomicOp(ionizedModel, 'at', key)?.trigger()
+         //       $atomicOp(ionizedModel, 'at', key)?.trigger()
          //       return;
          //    }
 
@@ -416,11 +416,11 @@ export const ionizedArray: IonizedMethodsDef = {
          //       if (!isIntegerKey(indexKey)) continue;
          //       const index = parseInt(<string>indexKey)
          //       if (index >= newValue) {
-         //          getAtomicPion(ionizedModel, indexKey)?.trigger()
-         //          getAtomicOp(ionizedModel, 'at', index)?.trigger()
+         //          $atomicPion(ionizedModel, indexKey)?.trigger()
+         //          $atomicOp(ionizedModel, 'at', index)?.trigger()
          //       }
          //       if (index > oldValue) {
-         //          getAtomicOp(ionizedModel, 'at', index)?.trigger()
+         //          $atomicOp(ionizedModel, 'at', index)?.trigger()
          //       }
          //    }
          // }
@@ -487,7 +487,7 @@ function triggerModel(model: IonizedModel) { return [trigger(model)] }
 
 //       modelQuark.trigger()
 
-//       getAtomicPion(model, 'length')?.trigger()
+//       $atomicPion(model, 'length')?.trigger()
 
 //       //FIX: These need to be different depending on the op
 //       triggerObservedIndices(model, modelQuark.pions, prevLength, newLength)
@@ -512,8 +512,8 @@ function triggerModel(model: IonizedModel) { return [trigger(model)] }
 //    return () => {
 //       const prevLength = target.length;
 //       const output = performOp()
-//       getAtomicPion(ionizedModel, (prevLength - 1).toString())?.trigger()
-//       getAtomicOp(ionizedModel, 'at', - 1)?.trigger()
+//       $atomicPion(ionizedModel, (prevLength - 1).toString())?.trigger()
+//       $atomicOp(ionizedModel, 'at', - 1)?.trigger()
 //       return output;
 //    }
 // }

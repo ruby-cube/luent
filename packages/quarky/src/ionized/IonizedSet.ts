@@ -267,7 +267,7 @@ export function isNotSameSize({ prevSize, target }: { prevSize: number, target: 
 //         if (sizeProp)
 //             trigger(sizeProp, newSize, oldSize);
 
-//         const hasOp = getAtomicOp(ionizedModel, 'has', _newValue)
+//         const hasOp = $atomicOp(ionizedModel, 'has', _newValue)
 //         if (hasOp) triggerIonicAtom(hasOp);
 
 //         triggerIonizedModel(
@@ -315,8 +315,8 @@ export function isNotSameSize({ prevSize, target }: { prevSize: number, target: 
 
 //       modelQuark.trigger()
 
-//       getAtomicPion(ionizedModel, 'size')?.trigger()
-//       getAtomicOp(ionizedModel, 'has', key)?.trigger()
+//       $atomicPion(ionizedModel, 'size')?.trigger()
+//       $atomicOp(ionizedModel, 'has', key)?.trigger()
 
 //       runSyncEffects()
 
@@ -362,7 +362,7 @@ export function isNotSameSize({ prevSize, target }: { prevSize: number, target: 
 //          }
 //       }
 
-//       getAtomicPion(ionizedModel, 'size')?.trigger()
+//       $atomicPion(ionizedModel, 'size')?.trigger()
 
 
 //       runSyncEffects()

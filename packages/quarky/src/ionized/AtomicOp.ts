@@ -1,11 +1,13 @@
 import { Traceable } from "../debug/Traceable";
 import { Quark, quarkOf } from "../Quark";
+import { trigger, Watchable, Watched } from "../watch/Watched";
 import { IonizedModel } from "./IonizedModel";
-import { noop } from "@rue/utils";
 
-export class AtomicOp implements Quark {
-   type: string | symbol = 'atomic op'
+export class AtomicOp implements Quark, Watchable {
+   quarkType: string | symbol = 'atomic op'
    asTraceable: Traceable;
+   asWatched: Watched | undefined;
+   trigger = trigger
 
    constructor(
       public model: IonizedModel,
@@ -13,16 +15,11 @@ export class AtomicOp implements Quark {
       public entryKey: any,
    ) {
       quarkOf(model).registerOp(op, entryKey, this)
-      // const particle = this.asParticle = asParticle(this);
-      // particle.onDissociated(() => {
-      //    if (particle.compounds.size === 0) {
-      //       this.discard()
-      //    }
-      // })
 
       this.asTraceable = quarkOf(this.model).asTraceable
    }
-   entity = noop;
+
+   entity = undefined
 
    // discard() {
    //    unregisterAtomicOp(this.trackableOp, this.entryKey)
@@ -44,7 +41,7 @@ export function asAtomicOp(
    op: PropertyKey,
    key: any
 ): AtomicOp {
-   return getAtomicOp(model, op, key) ?? new AtomicOp(model, op, key)
+   return $atomicOp(model, op, key) ?? new AtomicOp(model, op, key)
 }
 
 export type TrackedOps = Map<EntryKey, AtomicOp>
@@ -66,7 +63,7 @@ type EntryKey = any
 //    getAtomicOps(model, op)?.delete(entryKey)
 // }
 
-export function getAtomicOp(
+export function $atomicOp(
    model: IonizedModel,
    op: PropertyKey,
    entryKey: EntryKey

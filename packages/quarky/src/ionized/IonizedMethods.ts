@@ -1,8 +1,8 @@
 import { AnyObject } from "@rue/types"
 import { debug } from "@rue/utils"
 import { IonizedModel } from "./IonizedModel"
-import { getAtomicPion } from "./Pion"
-import { AtomicOp, getAtomicOp, getAtomicOps } from "./AtomicOp"
+import { $atomicPion } from "./Pion"
+import { AtomicOp, $atomicOp, getAtomicOps } from "./AtomicOp"
 import { quarkOf } from "../Quark"
 import { ionize, toRaw } from "./ionize"
 import { ionizedArray, ionizedIterable } from "./IonizedArray"
@@ -115,10 +115,10 @@ export function trigger(model: IonizedModel, op: PropertyKey, entryKey: any): ()
 export function trigger(model: IonizedModel, op?: PropertyKey | '[[get]]', entryKey?: any): () => void {
    if (op === '[[get]]') {
       if (!entryKey) throw new Error('must provide property key to trigger [[get]] op')
-      return () => getAtomicPion(model, entryKey)?.trigger()
+      return () => $atomicPion(model, entryKey)?.trigger()
    }
    else if (op) {
-      return () => getAtomicOp(model, op, entryKey)?.trigger()
+      return () => $atomicOp(model, op, entryKey)?.trigger()
    }
    return () => quarkOf(model).trigger()
 }

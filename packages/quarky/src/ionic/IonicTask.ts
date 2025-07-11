@@ -14,8 +14,7 @@ type IonicFunction = () => unknown
 export type IonicTask = (watch: (ionicFn: IonicFunction | unknown) => unknown, initial: boolean) => void | Promise<void>
 
 export function createIonicTask(task: IonicTask, retrack: boolean = true) {
-   const compound: IonicCompound<IonicCompoundMorph> = new IonicCompound(effect)
-   compound.trigger = trigger
+   const compound: IonicCompound = new IonicCompound()
 
    let initial = true;
    let syncCall = false;

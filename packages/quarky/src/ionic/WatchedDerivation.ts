@@ -1,7 +1,5 @@
-import { triggerEffects } from "../compound/Compound";
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
-import { hasQuark, QUARK, quarkOf } from "../Quark";
-import { Watched } from "../watch/Watched";
+import { hasQuark, Quark, QUARK, quarkOf } from "../Quark";
 
 /**
  * NOTES: 
@@ -11,22 +9,20 @@ import { Watched } from "../watch/Watched";
 const WATCHED_DERIVATION = 'watched derivation'
 
 export function isWatchedDerivation(value: unknown): value is WatchedDerivation {
-   return hasQuark(value) && (<WatchedDerivation>quarkOf(value)).type === WATCHED_DERIVATION
+   return hasQuark(value) && (<WatchedDerivation>quarkOf(value)).quarkType === WATCHED_DERIVATION
 }
 
-type WatchedDerivation = { type: string } & IonicCompoundMorph
+type WatchedDerivation = Quark<typeof WATCHED_DERIVATION> & IonicCompoundMorph & { inert: boolean }
 
 export function createWatchedDerivation(derivation: () => any, retrack: boolean) {
    const quark: WatchedDerivation = {
-      type: WATCHED_DERIVATION,
-      asCompound: undefined,
-      asWatched: undefined,
+      inert: false,
+      quarkType: WATCHED_DERIVATION,
+      asCompound: new IonicCompound(),
+      entity: undefined
    }
-   const compound: IonicCompound = new IonicCompound(quark)
-   compound.trigger = () => triggerEffects(compound)
 
-   quark.asCompound = compound;
-   quark.asWatched = new Watched(quark)
+   const compound = quark.asCompound
 
    let fn = retrack ? retrackedCall : initialize;
    function $watchedDerivedState() {
@@ -36,7 +32,9 @@ export function createWatchedDerivation(derivation: () => any, retrack: boolean)
 
    function initialize() {
       fn = derivation
-      return compound.trackedCall(derivation)
+      const value = compound.trackedCall(derivation)
+      if (compound.atoms.size === 0) quark.inert = true;
+      return value
    }
 
    function retrackedCall() {

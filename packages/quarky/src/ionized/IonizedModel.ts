@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isIonKey } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
-import { asAtomicOp, getAtomicOp } from "./AtomicOp";
+import { asAtomicOp, $atomicOp } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 import { debug, isObject, noop } from "@rue/utils";
@@ -11,7 +11,7 @@ import { hasQuark, QUARK, quarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
 import { MutableEntity, Mutation, recordMutation } from "../Mutable";
-import { asPion, asPionQuark, getAtomicPion } from "./Pion";
+import { asPion, asPionQuark, $atomicPion } from "./Pion";
 import { CompoundMorph } from "../compound/Compound";
 import { Watchable } from "../watch/Watched";
 import { IonizedCompound } from "./IonizedCompound";
@@ -310,7 +310,7 @@ export function createIonizedModel(
             triggerKeysChange(ionizedModel, key)
          }
          else if (target[key] !== attributes.value) {
-            getAtomicPion(ionizedModel, key)?.trigger()
+            $atomicPion(ionizedModel, key)?.trigger()
          }
          modelQuark.trigger()
          //TODO: record mutation?
@@ -321,7 +321,7 @@ export function createIonizedModel(
          const success = delete target[key]
          if (!success) return false;
          if (target[key] !== undefined) {
-            getAtomicPion(ionizedModel, key)?.trigger()
+            $atomicPion(ionizedModel, key)?.trigger()
          }
          if (key in target) {
             triggerKeysChange(ionizedModel, key)
@@ -342,7 +342,7 @@ export function createIonizedModel(
       },
 
       preventExtensions(target) {
-         getAtomicOp(ionizedModel, INTERNAL_OP, 'isExtensible')?.trigger()
+         $atomicOp(ionizedModel, INTERNAL_OP, 'isExtensible')?.trigger()
          return Reflect.preventExtensions(target)
       },
 
@@ -364,8 +364,8 @@ export function createIonizedModel(
 export type ProxyPropertyMap = Map<PropertyKey, () => any>
 
 function triggerKeysChange(model: IonizedModel, key: PropertyKey) {
-   getAtomicOp(model, INTERNAL_OP, 'ownKeys')?.trigger()
-   getAtomicOp(model, KEY_IN_OP, key)?.trigger()
+   $atomicOp(model, INTERNAL_OP, 'ownKeys')?.trigger()
+   $atomicOp(model, KEY_IN_OP, key)?.trigger()
    //QUESTION: shoule this trigger the whole model? I don't think so?
 }
 
@@ -536,6 +536,7 @@ function initialTrackableStateAccess(
       if (tracker) {
          const pion = asPionQuark(ionizedModel, key)
          if (pion) tracker.track(pion) //TODO: Tracking properties that are derivations (just a getter, no setter) or non-writable is superfluous
+         //FIX: only track atomic pions
       }
       return transformValue(_value);
    }

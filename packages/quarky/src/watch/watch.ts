@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon } from "../ion/Ion";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
@@ -5,8 +6,18 @@ import { SYNC } from "../effect-cycle/EffectCycle";
 import { Watched } from "./Watched";
 import { Effect } from "../effect-cycle/EffectQueue";
 import { getDefaultPhase, scheduleEagerEffect } from "../ReactivitySystem";
-import { asWatchSubject, WatchSubject } from "./WatchSubject";
+import { asWatchSubject, isWatchSubject, WatchSubject } from "./WatchSubject";
 import { Glass } from "@rue/types";
+
+
+// watch(multisubject(
+//    list.$length,
+//    list.$couch
+// ), () => {
+//    doSomething(prevList)
+// }, {
+//    phase: SYNC
+// })
 
 
 /**
@@ -47,6 +58,10 @@ type MultiSubjectValues<T> =
 type SubjectValue<T> = T extends () => infer R ? R : T
 
 
+
+
+
+
 // Possible subjects
 // ---
 // plain function (potentially inert)
@@ -80,13 +95,13 @@ export function watch<
       //TODO:
    }
 
-   if (watchSubject.inert) { // plain object
+   if (!isWatchSubject(watchSubject)) { // plain object
       return InertWatcher()
    }
 
-   let [prevState, atoms] = watchSubject.getValueAndAtoms(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
+   let prevState = watchSubject.getValueAndTrackAtoms(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
 
-   if (!atoms.length) {
+   if (watchSubject.inert) {
       return InertWatcher()
    }
 
@@ -160,9 +175,6 @@ export function setUpWatcher(
 
 
 
-function isInertSubject() {
-
-}
 
 function InertWatcher() {
    function noOp() {

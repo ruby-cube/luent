@@ -1,11 +1,10 @@
-import { isIonizedModel, ionize, toRaw } from "../ionized/ionize";
-import { Watchable, Watched } from "../watch/Watched";
-import { quarkOf, QUARK, Quark, EntityQuark, QuarkOf } from "../Quark";
+import { toRaw } from "../ionized/ionize";
+import { trigger, Watchable, Watched } from "../watch/Watched";
+import { Quark, QUARK, QuarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { MutableCapsule } from "../capsule/Capsule";
-import { asPionQuark, PionQuark } from "../ionized/Pion";
-import { trigger } from "../ReactivitySystem";
+import { asPionQuark } from "../ionized/Pion";
 import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
 import { initializeSnapshots } from "../ionized/TimeTraveler";
@@ -35,9 +34,15 @@ export function isAtomicPionQuark(value: any): value is AtomicPionQuark {
 }
 
 /** INTERNAL */
-export type $AtomicPionState = MutableIon<unknown> & MutableCapsule & {
-   [QUARK]: PionQuark<$AtomicPionState>  & Watchable
-}
+export type $AtomicPionState =
+   MutableIon<unknown>
+   & MutableCapsule
+   & {
+      [QUARK]: Quark<typeof ATOMIC_PION, $AtomicPionState>
+      & Watchable
+   }
+
+const ATOMIC_PION = 'atomic pion' as const
 
 /** 
  * INTERNAL 
@@ -46,10 +51,12 @@ export type $AtomicPionState = MutableIon<unknown> & MutableCapsule & {
  * pion quark can exist before the ion is created. 
  * */
 export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
+   quarkType = ATOMIC_PION
 
    ionized: boolean = false;
 
-   asWatched?: Watched
+   asWatched: Watched | undefined
+   trigger = trigger
 
    asTraceable: Traceable = new Traceable()
 
@@ -68,8 +75,6 @@ export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
       public key: PropertyKey,
    ) {
    }
-
-   trigger = trigger
 }
 
 

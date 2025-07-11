@@ -3,40 +3,115 @@ import { Effect } from "../effect-cycle/EffectQueue"
 import { $AtomicIonState, isAtomicIonQuark } from "../ion/AtomicIon";
 import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
 import { IonizedModel } from "../ionized/IonizedModel"
-import { hasQuark, quarkOf } from "../Quark"
-import { asWatched, Watched } from "./Watched"
-import { isObject } from "@rue/utils";
-import { isManagedDerivation } from "../ionic/DerivationIon";
+import { hasQuark, QUARK, Quark, quarkOf } from "../Quark"
+import { asWatched, isWatchable, isWatchableEntity, Watchable, Watched } from "./Watched"
+import { isObject, noop } from "@rue/utils";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
-import { Ion, isIon } from "../ion/Ion";
-import { asCoreIon, isPionCapsule } from "../ionic/PionCapsule";
+import { Ion, isIon, toValue } from "../ion/Ion";
 import { scheduleEagerEffect } from "../ReactivitySystem";
 import { SYNC } from "../effect-cycle/EffectCycle";
 import { WatchSubjects } from "./watch";
+import { IonicCompound } from "../ionic/IonicCompound";
+import { createWatchedDerivation } from "../ionic/WatchedDerivation";
 
+export function isWatchSubject(value: AnyObject): value is WatchSubject {
+   if ('inert' in value) return !value.inert;
+   return false;
+}
 
-export function asWatchSubject(subject: Ionized<object> | Ion<any> | WatchSubjects, retrack?: boolean): WatchSubject {
-   // const retrack = options.retrack === undefined ? true : options.retrack
-   const isMultiSubject = subject instanceof Array && !isIonizedModel(subject);
+const MULTISUBJECT = '--multisubject' as const
 
-   return isMultiSubject ? createMultisubject(<WatchSubjects>subject)
-      : isIonizedIon(subject) ? createWatchedIonizedIon(subject)
-         : isPionCapsule(subject) ? new IonSubject(asCoreIon(subject))
-            : isIon(subject) ? new IonSubject(subject)
-               : isIonizedModel(subject) ? new IonizedModelSubject(subject)
-                  : isManagedDerivation(subject) ? new DerivationIonSubject(subject)
-                     : isGetter(subject) ? createWatchedDerivation(<() => unknown>subject, retrack)
-                        : isObject(subject) ? subject as AnyObject //non-ionized object
-                           : null
-
+export function multisubject<S extends unknown[]>(...subject: S) {
+   const subj = subject as S & { [MULTISUBJECT]: true }
+   subj[MULTISUBJECT] = true;
+   return subj;
 }
 
 
+// watch collection
+// watch properties -- must specify which properties to watch in multi subject: absorbed ions and derivation ions
 
-//TODO: ionized ions need to retrack its 'atoms' (i.e. the ionized model) and setup new links if the ionized model has changed...
+export function asWatchSubject(subject: Ionized<object> | Ion<any> | WatchSubjects, retrack?: boolean): WatchSubject | AnyObject {
+   return isMultiSubject(subject) ? new Multisubject(subject) //TODO:
+      : asSingleWatchSubject(subject, retrack)
+}
+
+function asSingleWatchSubject(subject: Ionized<object> | Ion<any> | AnyObject, retrack?: boolean) {
+   return isIonizedModel(subject) ? new IonizedModelSubject(subject)
+      : isQuarkyIon(subject) ? new IonSubject(subject)
+         : isGetter(subject) ? new IonSubject(createWatchedDerivation(subject, !!retrack))
+            : isObject(subject) ? subject  //non-ionized object
+               : invalidSubject
+}
+
+function isMultiSubject(subject: AnyObject): subject is WatchSubjects {
+   return MULTISUBJECT in subject;
+}
+
+const invalidSubject = {}
+
+function isQuarkyIon(value: unknown): value is QuarkyIon {
+   return hasQuark(value) && isIon(value);
+}
 
 
+class Multisubject implements WatchSubject {
+   private subjects: AnyObject[] = []
+   private values: unknown[] = []
+   inert: boolean = false;
 
+   constructor(multisubject: WatchSubjects) {
+      const subjects = this.subjects;
+      for (const subject of multisubject) {
+         const watchSubject = asSingleWatchSubject(subject)
+         subjects.push(watchSubject)
+      }
+   }
+
+   private initialized = false;
+
+   inertCount: number = 0;
+
+   getValueAndTrackAtoms() {
+      const subjects = this.subjects;
+      const values = this.values
+      const initialized = this.initialized
+
+      for (const subject of subjects) {
+         if (!isWatchSubject(subject)) {
+            values.push(toValue(subject))
+            if (!initialized) this.inertCount++
+         }
+         const value = subject.getValueAndTrackAtoms()
+         values.push(value)
+      }
+
+      if (!initialized) {
+         if (this.inertCount === subjects.length) {
+            this.inert = true;
+         }
+         this.initialized = true;
+      }
+      return values;
+   }
+
+   linkEffect(effect: Effect, phase: string, eager: boolean, initial?: boolean): void {
+      const subjects = this.subjects;
+      for (const subject of subjects) {
+         if (!isWatchSubject(subject)) continue;
+         subject.linkEffect(effect, phase, eager, initial)
+      }
+   }
+
+   unlinkEffect(effect: Effect, phase: string): void {
+      const subjects = this.subjects;
+      for (const subject of subjects) {
+         if (!isWatchSubject(subject)) continue;
+         subject.unlinkEffect(effect, phase)
+      }
+   }
+
+}
 
 
 export function isIonizedIon(subject: unknown): subject is $AtomicIonState | $AtomicPionState {
@@ -51,89 +126,145 @@ export function isGetter(value: unknown): value is () => any {
 
 export interface WatchSubject {
    inert: boolean,
-   getValueAndAtoms: () => readonly [unknown, Watched[]]
-   getValue: () => unknown
+   getValueAndTrackAtoms: () => unknown
    linkEffect(effect: Effect, phase: string, eager: boolean, initial?: boolean): void
    unlinkEffect(effect: Effect, phase: string): void
 }
 
+/**
+ * Watching ionized models will NOT track absorbed ions and derivations. 
+ * To watch absorbed ions and derivations, use multisubject
+ */
 class IonizedModelSubject implements WatchSubject {
-   inert: boolean
-   watchedAtoms: Watched[]
+   inert: boolean = false
+   private watchedAtom: Watched
 
    constructor(
       private model: IonizedModel,
    ) {
-      const quark = quarkOf(model)
-      this.inert = false
-      const watchedAtoms = this.watchedAtoms = [asWatched(quark)] //TODO: add absorbed ions
-
-
-      const atoms = quark.trackAbsorbedIons(); //TODO: output the atom's quark
-      if (atoms)
-         for (const atom of atoms) {
-      asWatchSubject(atom)
-            watchedAtoms.push()
-         }
+      this.watchedAtom = asWatched(quarkOf(model))
    }
 
-   getValueAndAtoms() {
-      return [this.model as unknown, this.watchedAtoms] as const
-   }
-
-   getValue() {
-      // retrack absorbed ions 
-      // A) can watchedAtoms be an ionized model so that we can link/unlink effect when absorbed ions are reassigned? Or should reassigning absorbed ions be disallowed?
-
+   getValueAndTrackAtoms() {
       return this.model
    }
 
    linkEffect(effect: Effect, phase: string, eager: boolean, initial: boolean = false) {
-      linkEffect(this.watchedAtoms, effect, phase, eager, initial)
+      linkEffectToAtom(this.watchedAtom, effect, phase, eager, initial)
    }
 
    unlinkEffect(effect: Effect, phase: string) {
-      unlinkEffect(this.watchedAtoms, effect, phase)
+      this.watchedAtom.unlink(effect, phase)
    }
 }
 
+type QuarkyIon = {
+   (): unknown
+   [QUARK]: { asCompound?: IonicCompound, inert: boolean } & Quark
+}
+
+/**
+ * - relinks value to effect if value is ionized
+ * - relinks derivation atoms to effect on every call if derivation ion
+ */
 class IonSubject implements WatchSubject {
-   inert: boolean
-   watchedAtoms: Watched[]
+   inert: boolean = false;
+
+   private watchedAtoms: Watched[] = []
+   private valueAtom?: Watched
+   private quark: { asCompound?: IonicCompound, inert: boolean } & Quark
 
    constructor(
-      private ion: Ion & HasQuark,
+      private ion: QuarkyIon,
    ) {
-      const quark = quarkOf(ion)
-      this.inert = 'inert' in quark ? quark.inert : false
-      this.watchedAtoms = [asWatched(quark)]
+      this.quark = quarkOf(ion)
    }
 
-   getValueAndAtoms() {
-      return [this.ion() as unknown, this.watchedAtoms] as const
+   private initialized = false;
+
+   getValueAndTrackAtoms() {
+      if (this.initialized)
+         return this.getValueAndRelinkAtoms()
+      this.initialized = true;
+
+      const value = this.ion()
+      const quark = this.quark;
+      const compound = quark.asCompound
+
+      this.watchedAtoms = compound ? compound.atoms.size ? toWatchedAtoms(compound.atoms) : (quark.inert = true, [])
+         : !quark.inert && isWatchable(quark) ? [asWatched(quark)] : []
+
+      if (isWatchableEntity(value)) {
+         this.valueAtom = asWatched(quarkOf(value)) //TODO: need to add valueAtom to watchedAtoms
+      }
+      return value;
    }
 
-   getValue() {
-      return this.ion()
+   private getValueAndRelinkAtoms() {
+      const quark = this.quark
+      const compound = quark.asCompound
+
+      if (compound) unlinkEffect(this.watchedAtoms, this.effect, this.phase)
+      const value = this.ion()
+      if (compound) {
+         this.watchedAtoms = compound.atoms.size ? toWatchedAtoms(compound.atoms) : []
+         linkEffectToAtoms(this.watchedAtoms, this.effect, this.phase)
+      }
+
+      this.relinkValue(value)
+
+      return value;
    }
+
+   private effect!: Effect;
+   private phase!: string;
 
    linkEffect(effect: Effect, phase: string, eager: boolean, initial: boolean = false) {
-      linkEffect(this.watchedAtoms, effect, phase, eager, initial)
+      this.effect = effect;
+      this.phase = phase;
+      linkEffectToAtoms(this.watchedAtoms, effect, phase, eager, initial)
+      linkEffectToAtom(this.valueAtom, effect, phase, eager, initial)
    }
 
    unlinkEffect(effect: Effect, phase: string) {
       unlinkEffect(this.watchedAtoms, effect, phase)
+      this.valueAtom?.unlink(effect, phase)
    }
-}
 
-function linkEffect(atoms: Watched[], effect: Effect, phase: string, eager: boolean = false, initial: boolean = false) {
-   for (const atom of atoms) {
-      atom.link(effect, phase)
-      if (initial && eager) {
-         _scheduleEagerEffect(atom, effect, phase)
+   relinkValue(
+      value: unknown,
+   ) {
+      const prevAtom = this.valueAtom;
+      const atom = this.valueAtom = isWatchableEntity(value) ? asWatched(quarkOf(value)) : undefined
+
+      if (atom === prevAtom)
+         return;
+
+      // relink effects
+      if (isWatchableEntity(prevAtom)) {
+         prevAtom.unlink(this.effect, this.phase)
+      }
+      if (isWatchableEntity(value)) {
+         asWatched(quarkOf(value)).link(this.effect, this.phase)
       }
    }
 }
+
+
+function linkEffectToAtoms(atoms: Watched[], effect: Effect, phase: string, eager: boolean = false, initial: boolean = false) {
+   for (const atom of atoms) {
+      linkEffectToAtom(atom, effect, phase, eager, initial)
+   }
+}
+
+function linkEffectToAtom(atom: Watched | undefined, effect: Effect, phase: string, eager: boolean = false, initial: boolean = false) {
+   if (!atom) return;
+   atom.link(effect, phase)
+   if (initial && eager) {
+      _scheduleEagerEffect(atom, effect, phase)
+   }
+}
+
 
 function unlinkEffect(atoms: Watched[], effect: Effect, phase: string) {
    for (const atom of atoms) {
@@ -148,4 +279,12 @@ function _scheduleEagerEffect(watchedAtom: Watched, effect: Effect, phase: strin
    else {
       scheduleEagerEffect(effect, phase)
    }
+}
+
+function toWatchedAtoms(atoms: Set<Watchable>) {
+   const watchedAtoms = [];
+   for (const atom of atoms) {
+      watchedAtoms.push(asWatched(atom))
+   }
+   return watchedAtoms;
 }

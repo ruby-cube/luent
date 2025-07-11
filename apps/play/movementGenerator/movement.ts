@@ -1,3 +1,4 @@
+import ''
 console.log("running movement generator")
 
 const movements = [

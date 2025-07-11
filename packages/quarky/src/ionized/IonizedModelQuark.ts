@@ -1,11 +1,10 @@
 import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
-import { CustomIonizedModelConfig, IonizedModel } from "./IonizedModel"
-import { Watchable, Watched } from "../watch/Watched"
+import { IonizedModel } from "./IonizedModel"
+import { Watched } from "../watch/Watched"
 import { IonizedCompound } from "./IonizedCompound"
-import { EntityQuark, Quark, QuarkOf } from "../Quark"
+import { Quark, QuarkOf } from "../Quark"
 import { Mutable, Mutation } from "../Mutable"
-import { PionQuark } from "./Pion"
 import { trigger } from "../ReactivitySystem"
 import { Traceable } from "../debug/Traceable"
 import { AtomicOp, TrackedOps } from "./AtomicOp"
@@ -48,10 +47,10 @@ export const InertCollection = {
 
 export type InertCollectionType = (typeof InertCollection)[keyof typeof InertCollection]
 
-export class IonizedModelQuark implements QuarkOf<IonizedModel> {
+const IONIZED_MODEL = 'ionized model' as const
 
-   // asReined?: object
-   // asReadonly?: object
+export class IonizedModelQuark implements QuarkOf<IonizedModel> {
+   quarkType = IONIZED_MODEL
    asTraceable: Traceable
 
    constructor(
@@ -107,9 +106,9 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
    trigger = trigger
 
-   pions: Map<PropertyKey, PionQuark | TrackedOps> = new Map()
+   pions: Map<PropertyKey, Quark | TrackedOps> = new Map()
 
-   registerPion(key: PropertyKey, pion: PionQuark) {
+   registerPion(key: PropertyKey, pion: Quark) {
       this.pions.set(key, pion)
    }
 

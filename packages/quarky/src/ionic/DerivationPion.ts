@@ -3,8 +3,8 @@ import { Traceable } from "../debug/Traceable";
 import { Effect } from "../effect-cycle/EffectQueue";
 import { Ion } from "../ion/Ion";
 import { IonizedModel } from "../ionized/IonizedModel";
-import { asPionQuark, PionQuark } from "../ionized/Pion";
-import { QUARK, QuarkOf, quarkOf } from "../Quark";
+import { asPionQuark } from "../ionized/Pion";
+import { Quark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { Watched } from "../watch/Watched";
 import { createMaybeMemoizedIon, DERIVATION_ION, ManagedDerivation } from "./DerivationIon";
 import { IonicCompound } from "./IonicCompound";
@@ -19,10 +19,14 @@ export function isDerivationPionQuark(value: any): value is DerivationPionQuark 
    return quarkOf(value) instanceof DerivationPionQuark;
 }
 
+const DERIVATION_PION = 'derivation pion' as const
+
 /** INTERNAL */
-export type $DerivedPionState = Ion & Capsule & {
-   [QUARK]: PionQuark<$DerivedPionState> & ManagedDerivation
-}
+export type $DerivedPionState = Ion
+   & Capsule
+   & {
+      [QUARK]: Quark<typeof DERIVATION_PION, $DerivedPionState> & ManagedDerivation
+   }
 
 /** 
  * INTERNAL 
@@ -31,7 +35,7 @@ export type $DerivedPionState = Ion & Capsule & {
  * pion quark can exist before the ion is created. 
  * */
 export class DerivationPionQuark implements QuarkOf<$DerivedPionState> {
-   type = DERIVATION_ION
+   quarkType = DERIVATION_ION
    inert: boolean = false
    state: unknown;
    dirty: boolean = false

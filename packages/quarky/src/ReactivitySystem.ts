@@ -200,18 +200,7 @@ export function scheduleEagerEffect(effect: Effect, phase: string) {
    cycleManager.current.scheduleEagerEffect(effect, phase)
 }
 
-/**
- * @param quark 
- * @param op 
- * @param args 
- * @param output 
- * @param preopData 
- */
-export function trigger( //TODO: figure out which abstraction this belongs to ...  atomic ions, atomic pions, memoized derivations, but not terminal compound
-   this: Watchable,
-) {
-   this.asWatched?.triggerEffects()
-}
+
 
 export function getCurrentPhase() {
    if (cycleManager.current && cycleManager.current.currentPhase !== SYNC) return cycleManager.current.currentPhase;

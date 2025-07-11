@@ -1,13 +1,13 @@
 import { Ion } from "../ion/Ion"
-import { EntityQuark, quarkOf } from "../Quark"
-import { $AtomicPionState, AtomicPionQuark, createAtomicPion } from "../ion/AtomicPion"
+import { Quark, quarkOf } from "../Quark"
+import { AtomicPionQuark, createAtomicPion } from "../ion/AtomicPion"
 import { IonizedModel } from "./IonizedModel"
 import { IonizedModelQuark } from "./IonizedModelQuark"
-import { $DerivedPionState, createDerivationPion, DerivationPionQuark } from "../ionic/DerivationPion"
-import { Watchable } from "../watch/Watched"
+import { createDerivationPion, DerivationPionQuark } from "../ionic/DerivationPion"
 import { debug } from "@rue/utils"
+import { AnyObject } from "@rue/types"
 
-export type PionQuark<T = $AtomicPionState | $DerivedPionState> = EntityQuark<T> & Watchable
+// export type PionQuark = Quark<string | symbol, $AtomicPionState | $DerivedPionState>
 
 export function asPionQuark(
    model: IonizedModel,
@@ -50,9 +50,9 @@ export function asPion(
    return pion.entity ?? (pion.entity = createPion(model, key, pion))
 }
 
-function createPion(model: IonizedModel, key: PropertyKey, pionQuark: PionQuark) {
+function createPion(model: IonizedModel, key: PropertyKey, pionQuark: Quark & AnyObject) {
    const derivation = pionQuark && 'derivation' in pionQuark ? pionQuark.derivation : getPropertyGetter(quarkOf(model), key)
-   return derivation ? createDerivationPion(model, key, <DerivationPionQuark>pionQuark) : createAtomicPion(model, key, <AtomicPionQuark>pionQuark)
+   return derivation ? createDerivationPion(model, key, pionQuark) : createAtomicPion(model, key, pionQuark)
 }
 
 // /**
@@ -68,7 +68,7 @@ function createPion(model: IonizedModel, key: PropertyKey, pionQuark: PionQuark)
 //    return pion && (pion.asWatched || pion.asParticle) ? pion : undefined
 // }
 
-export function getAtomicPion(
+export function $atomicPion(
    model: IonizedModel,
    key: PropertyKey,
 ) {
@@ -76,6 +76,6 @@ export function getAtomicPion(
    return pion && pion instanceof AtomicPionQuark ? pion : undefined
 }
 
-export function triggerPion(quark: PionQuark | undefined) {
-   quark?.asWatched?.triggerEffects()
-}
+// export function triggerPion(quark: PionQuark | undefined) {
+//    quark?.asWatched?.triggerEffects()
+// }

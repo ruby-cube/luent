@@ -1,10 +1,10 @@
 import { IonicCompound, IonicCompoundMorph, trackMemoized } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
-import { quarkOf, QUARK, hasQuark, EntityQuark, QuarkOf, Quark } from "../Quark";
+import { quarkOf, QUARK, hasQuark, QuarkOf, Quark } from "../Quark";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { emitSignal } from "../debug/debug";
-import { asWatched, Watchable, Watched } from "../watch/Watched";
+import { asWatched} from "../watch/Watched";
 import { Ion } from "../ion/Ion";
 import { Traceable } from "../debug/Traceable";
 import { debug } from "@rue/utils";
@@ -25,15 +25,13 @@ import { SYNC } from "../effect-cycle/EffectCycle";
 // /** INTERNAL */
 export type $DerivedState = Ion & Capsule & {
    [QUARK]: {
-      type: symbol
       inert: boolean
       state: unknown
       dirty: boolean
       derivation: (prev?: unknown) => unknown
       markDirty: Effect | undefined
    }
-   & EntityQuark<$DerivedState>
-   & Watchable
+   & Quark<typeof DERIVATION_ION, $DerivedState>
    & IonicCompoundMorph
 }
 
@@ -45,7 +43,7 @@ export type ManagedDerivation = QuarkOf<$DerivedState>
 export const DERIVATION_ION = Symbol('Derivation Ion')
 
 export function isManagedDerivation(value: unknown): value is $DerivedState {
-   return hasQuark(value) && quarkOf(<$DerivedState>value).type === DERIVATION_ION
+   return hasQuark(value) && quarkOf(<$DerivedState>value).quarkType === DERIVATION_ION
 }
 
 export function createMaybeMemoizedIon(
@@ -56,12 +54,11 @@ export function createMaybeMemoizedIon(
 ) {
    const creationFlask = getActiveFlask()
 
-   let compound: IonicCompound | undefined
    let fn = initialize
    const $derived = () => fn()
 
    function initialize() {
-      compound = new IonicCompound()
+      const compound = ion.asCompound;
       const value = compound.trackedCall(derivation)
       const atoms = compound.atoms
       // if (isIonizedModel(value)) compound.track(quarkOf(value))
@@ -69,7 +66,6 @@ export function createMaybeMemoizedIon(
          fn = getState
          ion.inert = true;
          // no reactivity, no memoization
-         compound = undefined;
          return value;
       }
       else {
@@ -77,12 +73,11 @@ export function createMaybeMemoizedIon(
          // getActiveTracker()?.track(ion)
          fn = getMemoizedState
          ion.state = value;
-         ion.asCompound = compound
          assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
          const effect = ion.markDirty = new Effect(() => ion.dirty = true)
-         watchAtoms(compound, effect)
+         linkAtoms(compound, effect)
          creationFlask?.onDiscard(() => {
-            unwatchAtoms(compound!, effect)
+            unlinkAtoms(compound!, effect)
             compound!.untrackAtoms()
             fn = initialize;
          })
@@ -123,10 +118,10 @@ export function createMaybeMemoizedIon(
       derivation,
       markDirty: undefined,
       entity: $derived,
-      type: DERIVATION_ION,
-      asCompound: undefined,
-      asWatched: undefined,
-      asTraceable: new Traceable(),
+      quarkType: DERIVATION_ION,
+      asCompound: new IonicCompound(),
+      asTraceable: new Traceable()
+
    }
 
    $derived[QUARK] = ion
@@ -143,27 +138,27 @@ export function createMaybeMemoizedIon(
 
 function retrackedCall(ion: ManagedDerivation) {
    const { derivation, markDirty } = ion
-   const compound = ion.asCompound!
-   unwatchAtoms(compound, markDirty!)
+   const compound = ion.asCompound
+   unlinkAtoms(compound, markDirty!)
    const value = compound.retrackedCall(() => derivation(ion.state))
-   watchAtoms(compound, markDirty!)
+   linkAtoms(compound, markDirty!)
    return value;
 }
 
-function watchAtoms(compound: IonicCompound, effect: Effect) {
+export function linkAtoms(compound: IonicCompound, effect: Effect, phase: string = SYNC) {
    const atoms = compound.atoms;
    for (const atom of atoms) {
       const watchedAtom = asWatched(atom)
-      watchedAtom.link(effect, SYNC)
+      watchedAtom.link(effect, phase)
    }
    return effect;
 }
 
-function unwatchAtoms(compound: IonicCompound, effect: Effect) {
+export function unlinkAtoms(compound: IonicCompound, effect: Effect, phase: string = SYNC) {
    const atoms = compound.atoms;
    for (const atom of atoms) {
       const watchedAtom = asWatched(atom)
-      watchedAtom.unlink(effect, SYNC)
+      watchedAtom.unlink(effect, phase)
    }
 }
 

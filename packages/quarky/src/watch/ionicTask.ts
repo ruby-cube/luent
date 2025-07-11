@@ -16,15 +16,12 @@ export function ionicTask(task: IonicTask, options?: IonicTaskOptions) {
       eager: true
    } as EffectOptions
    const retrack = opts.retrack === undefined ? true : opts.retrack
-   const phase = opts.phase = getPhase(options)
 
    const wrappedEffect = createIonicEffect(task, retrack)
 
    return setUpWatcher(
       [wrappedEffect.asWatched], //FIX:
       wrappedEffect,
-      phase,
       opts,
-      wrappedEffect.asCompound
    )
 }

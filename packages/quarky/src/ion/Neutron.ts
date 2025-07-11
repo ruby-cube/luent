@@ -1,26 +1,24 @@
-import { EntityQuark, hasQuark, QUARK, QuarkOf, quarkOf } from "../Quark";
+import { hasQuark, Quark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { shouldIonize } from "./AtomicIon";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
-import { __DEV__label, __DEV__traceMethodCall } from "../debug/debug";
 import { ionize } from "../ionized/ionize";
-import { AtomicIon, Methods } from "./ion";
 import { Traceable } from "../debug/Traceable";
+import { MutableIon } from "./Ion";
 
 
-export function neutron<T, M>(initialState: T, methods?: M & Methods): M extends Methods ? AtomicIon<T, M> : AtomicIon<T> {
-   return createAtomicNeutron(initialState, methods, false) as unknown as M extends Methods ? AtomicIon<T, M> : AtomicIon<T>
+export function neutron<T, M>(initialState: T, props?: M & object): MutableIon<T> & M {
+   return createAtomicNeutron(initialState, props, false) as MutableIon<T> & M
 }
 
 
 //TODO: I don't know how I should handle read-only, and traceability for neutrons.
 /** INTERNAL */
-export type $AtomicNeutronState = AtomicIon & Capsule & {
+export type $AtomicNeutronState = MutableIon<unknown> & Capsule & {
    [QUARK]: {
-      type: symbol;
       inert: true;
       state: any,
       ionized: boolean, //TODO: remove? an ionized neutron is useless because the watcher will never be triggered... to work, you need to make the neutron reactive.
-   } & EntityQuark<$AtomicNeutronState>
+   } & Quark<typeof INERT_ION, $AtomicNeutronState>
 }
 
 /** 
@@ -44,12 +42,11 @@ export function createAtomicNeutron(
       ionized,
       inert: true,
       entity: $ion,
-      type: INERT_ION,
+      quarkType: INERT_ION,
       asTraceable: new Traceable()
    }
 
    $ion[QUARK] = ion
-   $ion.labelName = undefined
    // $ion.__DEV__label = __DEV__label
 
    const capsuleName = 'Neutron'
@@ -68,10 +65,12 @@ export function createAtomicNeutron(
       attachCapsuleMethods(capsuleName, $ion, methods)
    }
 
-   return $ion
+   return $ion as MutableIon<unknown>
 }
 
 
 export function isInertIon(value: unknown): value is { [QUARK]: { inert: true } } {
-   return hasQuark(value) && (<{ inert: true }>quarkOf(value)).inert === true;
+   if (!hasQuark(value)) return false;
+   const quark = quarkOf(value)
+   return 'inert' in quark && quark.inert === true;
 }

@@ -1,10 +1,12 @@
 import { AnyObject } from "@rue/types";
-import { quarkOf, QUARK, hasQuark, QuarkOf, EntityQuark } from "../Quark";
+import { quarkOf, QUARK, hasQuark, QuarkOf, Quark } from "../Quark";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { Ion } from "../ion/Ion";
 import { IonicCompound } from "./IonicCompound";
-import { $AtomicPionState } from "../ion/AtomicPion";
 import { Traceable } from "../debug/Traceable";
+import { Watchable } from "../watch/Watched";
+
+//NOTE: DEFERRED / DEPRECATED until further notice
 
 // USE CASE: 
 // For pions that need methods
@@ -38,7 +40,7 @@ import { Traceable } from "../debug/Traceable";
 
 // /** INTERNAL */
 export type $GetterIonState = Ion & Capsule & {
-   [QUARK]: EntityQuark<$GetterIonState> & { type: symbol, inert: boolean, coreIon: $GetterIonState | $AtomicPionState }
+   [QUARK]: Quark<typeof GETTER_ION, $GetterIonState> & { inert: boolean, coreQuark: Quark & Watchable }
 }
 
 /** 
@@ -50,11 +52,11 @@ export type GetterIon = QuarkOf<$GetterIonState>
 export const GETTER_ION = Symbol('GetterIon')
 
 export function isPionCapsule(value: unknown): value is $GetterIonState {
-   return hasQuark(value) && quarkOf(<$GetterIonState>value).type === GETTER_ION
+   return hasQuark(value) && quarkOf(<$GetterIonState>value).quarkType === GETTER_ION
 }
 
-export function asCoreIon($state: $GetterIonState){
-   return quarkOf($state).coreIon;
+export function asCoreQuark($state: $GetterIonState){
+   return quarkOf($state).coreQuark;
 }
 
 export function createPionCapsule(
@@ -74,16 +76,17 @@ export function createPionCapsule(
    const capsule: GetterIon = {
       inert: false,
       entity: $capsuleIon,
-      coreIon: $capsuleIon,  // this is what needs to be returned as the watched ion, either a pion or an ion
-      type: GETTER_ION,
+      coreQuark: undefined as unknown as Quark,
+      quarkType: GETTER_ION,
       asTraceable: new Traceable(),
    }
 
    if (atoms.size === 0) {
       capsule.inert = true;
+      capsule.coreQuark = capsule
    }
    else {
-      capsule.coreIon = Array.from(atoms)[0].entity as $AtomicPionState
+      capsule.coreQuark = Array.from(atoms)[0] as Quark
    }
 
    function $capsuleIon() { // wrap so that name starts with $

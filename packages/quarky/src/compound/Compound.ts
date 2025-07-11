@@ -6,8 +6,8 @@ import { isObject } from "@rue/utils"
  * INTERNAL
  */
 export type CompoundMorph<T> = {
-   asCompound?: T
-} & Watchable
+   asCompound: T
+}
 
 export function isCompound(value: unknown): value is Compound {
    return isObject(value) && 'atoms' in value;
