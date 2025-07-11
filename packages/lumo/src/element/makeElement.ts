@@ -16,7 +16,7 @@ import { MaybeIon } from "../component/Input";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 import { isInnerHTMLKit, mountInnerHTML, setUpInnerHTML } from "../node/InnerHTML";
-import { INTERNAL_RENDER } from "../render-cycle";
+import { INTERNAL_RENDER, PRERENDER } from "../render-cycle";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap

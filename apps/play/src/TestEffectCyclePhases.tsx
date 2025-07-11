@@ -36,7 +36,7 @@ export function TestEffectCyclePhases() {
 
    // watch($count, () => {
    //    console.log('### internal render: watch $count')
-   // }, { phase: INTERNAL_RENDER })
+   // }, { phase: PRERENDER })
 
    // watch($count, () => {
    //    console.log('### render: watch $count')

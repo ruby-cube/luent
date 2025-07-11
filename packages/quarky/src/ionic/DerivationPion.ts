@@ -41,7 +41,7 @@ export class DerivationPionQuark implements QuarkOf<$DerivedPionState> {
    dirty: boolean = false
    markDirty: Effect | undefined
 
-   asCompound?: IonicCompound | undefined;
+   asCompound: IonicCompound | undefined;
 
    asWatched?: Watched
 

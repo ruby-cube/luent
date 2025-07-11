@@ -54,7 +54,7 @@ export class EffectCycle {
    effectStack: Set<Effect> = new Set()
 
    private initializeQueue(phase: Phase) {
-      const queue: EffectQueue = new EffectQueue()
+      const queue: EffectQueue = new EffectQueue(phase)
       this.effects.set(phase, queue);
       return queue
    }
@@ -69,7 +69,10 @@ export class EffectCycle {
 
    scheduleEffects(atom: PhaseAtom, phase: Phase) {
       const queue = this.effects.get(phase) ?? this.initializeQueue(phase);
-      atom.scheduleEffects(queue)
+      queue.scheduleEffects(atom)
+      if (phase === SYNC){
+         queue.runEffects()
+      }
    }
 
    subphase: 'effects' | 'microtasks' = 'effects'
@@ -77,8 +80,8 @@ export class EffectCycle {
    runEffects(phase: string) {
       this.currentPhase = phase;
       this.subphase = 'effects'
-      const effects = this.effects.get(phase);
-      effects?.runTriggeredEffects()
+      const queue = this.effects.get(phase);
+      queue?.runEffects()
       console.log(`%%% ${phase} microtasks...?`)
       this.subphase = 'microtasks'
    }

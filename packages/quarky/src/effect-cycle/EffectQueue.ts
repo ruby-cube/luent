@@ -26,8 +26,6 @@ export class Effect {
    unlink() {
       this.atoms.clear()
    }
-
-   queued: boolean = false
 }
 
 
@@ -57,127 +55,118 @@ export const effectStack = {
    }
 }
 
-const runStack: true[] = [] // manage recursive runEffects calls during sync effects
 
-
-export class EffectQueue {
-   private atoms: PhaseAtom[] = []
-
-   addAtom(atom: PhaseAtom) {
-      this.atoms.push(atom)
-   }
-
-   private releaseAtoms() {
-      const atoms = this.atoms
-      for (const atom of atoms) {
-         atom.releaseTrigger()
-      }
-      this.atoms = []
-   }
-
-   private activeQueue: Effect[] | undefined
-   private triggeredQueue: Effect[] = []
-   private nextQueue: Set<Effect> | undefined;
-
-   private eagerQueue: Effect[] | undefined;
-
-   scheduleEagerEffect(effect: Effect) {
-      if (effect.queued) return;
-      const eagerQueue = this.eagerQueue ?? (this.eagerQueue = [])
-      eagerQueue.push(effect)
-      effect.queued = true;
-   }
-
-   scheduleEffect(effect: Effect) {
-      if (effect.queued) return;
-      this.triggeredQueue.push(effect)
-      effect.queued = true;
-   }
-
-   scheduleNestedEffect(effect: Effect) {
-      const nested = this.nextQueue ?? (this.nextQueue = new Set())
-      if (nested.has(effect)) return;
-      nested.add(effect)
-   }
+export class PhaseAtom {
+   effects: Effect[] = []
+   nextEffects: Effect[] | undefined
 
    runningEffects: boolean = false;
 
-   runTriggeredEffects() {
-      this.activeQueue = this.triggeredQueue
-      this.runEffects()
+   retained: Set<Effect> = new Set()
+
+   constructor(private phase: string | typeof SYNC) {
+
    }
 
-   private runEffects() {
+   // runSyncEffects() {
+   //    this.runningEffects = true;
+   //    const effects = this.effects
+
+   //    const retained = this.retained
+
+   //    for (const effect of effects) {
+   //       if (!effect.task) { continue; }
+   //       if (effectStack.has(effect)) {
+   //          if (retained.has(effect))
+   //             continue;
+   //          this.retain(effect)
+   //          retained.add(effect)
+   //          console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
+   //          continue;
+   //       }
+   //       try {
+   //          effectStack.push(effect);
+   //          effect.task() // What about async tasks? T_T How will it affect this system?
+   //       }
+   //       finally {
+   //          effectStack.pop()
+   //          if (retained.has(effect))
+   //             continue;
+   //          this.retain(effect)
+   //          retained.add(effect)
+   //       }
+   //    }
+
+   //    this.runningEffects = false;
+
+   //    if (this.phase === SYNC && effectStack.size !== 0) {
+   //       return;
+   //    }
+   //       this.effects = this.nextEffects ?? []
+   //       this.retained.clear()
+   //       this.nextEffects = undefined
+   // }
+
+   runEffects(completedEffects?: Set<Effect>) {
       this.runningEffects = true;
-      runStack.push(true)
-      try {
-         const effects = this.activeQueue
-         if (!effects) return;
-         console.log('%%% -- effects:', effects.length)
-         for (const effect of effects) {
-            if (!effect.task) continue;
-
-            // stops infinite loops
-            if (effectStack.has(effect) || $currentEffectCycle().effectStack.has(effect)) {
-               console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
-               continue;
-            }
-            try {
-               effectStack.push(effect);
-               effect.task() // What about async tasks? T_T How will it affect this system?
-            }
-            finally {
-               effectStack.pop()
-            }
-         }
-
-         if (runStack.length === 1) { // run next queue only after all nested sync effects have run
-            this.activeQueue = this.nextQueue ? Array.from(this.nextQueue) : []
-            this.nextQueue = undefined;
-            try {
-               if (this.activeQueue.length) {
-                  this.runEffects()
-               }
-            }
-            finally {
-               this.activeQueue = undefined
-               this.runningEffects = false;
-               this.dequeueEffects()
-               this.releaseAtoms()
-            }
-         }
-      }
-      finally {
-         runStack.pop()
-      }
-   }
-
-   runEagerEffects() {
-      this.activeQueue = this.eagerQueue;
-      this.runEffects()
-   }
-
-   dequeueEffects() {
-      const effects = this.triggeredQueue;
+      const effects = this.effects
+      const sync = this.phase === SYNC
+      if (sync) console.log('running SYNC')
+      const retained = sync ? this.retained : new Set()
+      console.log('%%% -- effects:', effects.length)
       for (const effect of effects) {
-         effect.queued = false;
+         if (!effect.task
+            || completedEffects?.has(effect) // prevents repeats within queue (but not across extended queues and phases)
+         ) {
+            if (!effect.task) console.log('%%% EMPTY EFFECT')
+            if (completedEffects?.has(effect)) console.log('%%% EMPTY EFFECT')
+            continue;
+         }
+         // stops infinite loops
+         if (effectStack.has(effect)
+            || $currentEffectCycle().effectStack.has(effect)
+         ) {
+            if (retained.has(effect))
+               continue;
+            this.retain(effect)
+            retained.add(effect)
+
+            console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
+            continue;
+         }
+         try {
+            effectStack.push(effect);
+            effect.task() // What about async tasks? T_T How will it affect this system?
+         }
+         finally {
+            effectStack.pop()
+            completedEffects?.add(effect)
+            if (retained.has(effect))
+               continue;
+            this.retain(effect)
+            retained.add(effect)
+         }
       }
+
+      
+      if (sync && effectStack.size !== 0) {
+         return;
+      }
+      
+      this.runningEffects = false;
+      this.effects = this.nextEffects ?? []
+      if (sync) this.retained.clear()
+      this.nextEffects = undefined
+
+      //     this.effects = this.nextEffects ?? []
+      // this.retained.clear()
+      // this.nextEffects = undefined
    }
-}
 
-
-
-
-export class PhaseAtom {
-
-   private triggered: boolean = false
-   private currentQueue: EffectQueue | undefined; // undefined if not triggered
-
-   private effects: Effect[] = []
-   private untriggeredEffects: Effect[] | undefined;
-
-   constructor(phase: string) {
-      this.scheduleEffects = phase === SYNC ? this.queueSyncEffects : this.queueEffects
+   retain(effect: Effect) {
+      if (!effect.task) return;
+      const retainedEffects = this.nextEffects ?? (this.nextEffects = [])
+      retainedEffects.push(effect)
    }
 
    /**
@@ -185,64 +174,82 @@ export class PhaseAtom {
    * @param effect 
    */
    link(effect: Effect) {
-      if (this.triggered) {
-         const untriggered = this.untriggeredEffects ?? (this.untriggeredEffects = [])
-         untriggered.push(effect)
-      }
-
-      if (effect.isLinked(this)) {
-         return;
-      }
-
+      if (effect.isLinked(this)) return;
       effect.link(this)
-      this.effects.push(effect)
-   }
 
-   scheduleEffects: (queue: EffectQueue) => void
-
-   private queueSyncEffects(queue: EffectQueue) {
-      this.queueEffects(queue)
-      queue.runTriggeredEffects()
-   }
-
-   private queueEffects(queue: EffectQueue) {
-      if (this.triggered) {
-         if (!this.untriggeredEffects) return;
-         this._queueEffects(this.untriggeredEffects, queue)
-         return;
+      if (this.runningEffects) {
+         const nestedEffects = this.nextEffects ?? (this.nextEffects = [])
+         nestedEffects.push(effect)
       }
-      this.markTriggered(queue)
-      queue.addAtom(this)
-
-      this._queueEffects(this.effects, queue)
-   }
-
-   private markTriggered(queue: EffectQueue) {
-      this.triggered = true;
-      this.currentQueue = queue;
-   }
-
-   releaseTrigger() {
-      this.triggered = false;
-      this.currentQueue = undefined
-
-      // remove cancelled effects
-      const retained = []
-      const effects = this.effects
-      for (const effect of effects) {
-         if (!effect.task) continue;
-         retained.push(effect)
-      }
-      this.effects = retained;
-      this.untriggeredEffects = undefined;
-   }
-
-   private _queueEffects(effects: Effect[], queue: EffectQueue) {
-      for (const effect of effects) {
-         this.currentQueue?.runningEffects ? queue.scheduleNestedEffect(effect) : queue.scheduleEffect(effect)
+      else {
+         this.effects.push(effect)
       }
    }
+
+   requeued: boolean = false;
+   queued: boolean = false
 }
 
 
 
+export class EffectQueue {
+   private extendedQueue: PhaseAtom[] | undefined;
+   private queue: PhaseAtom[] = []
+   private eagerQueue: Effect[] | undefined;
+
+   constructor(phase: string){}
+
+   scheduleEagerEffect(effect: Effect) {
+      const eagerQueue = this.eagerQueue ?? (this.eagerQueue = [])
+      eagerQueue.push(effect)
+   }
+
+   scheduleEffects(atom: PhaseAtom) {
+
+      if (this.runningEffects && !atom.requeued) {
+         // a currentEffect during runningEffects means the effect triggered 
+         // other effects and should be added to the effectStack to prevent infinite loops
+         const currentEffect = $currentEffect()
+         if (currentEffect) $currentEffectCycle().effectStack.add(currentEffect)
+         atom.requeued = true;
+         const extension = this.extendedQueue ?? (this.extendedQueue = [])
+         extension.push(atom)
+      }
+      else if (!atom.queued) {
+         this.queue.push(atom)
+         atom.queued = true;
+      }
+   }
+
+   private runningEffects: boolean = false
+
+   runEffects() {
+      this.runningEffects = true
+      let completed: Set<Effect> = new Set()
+      this.runEagerEffects()
+
+      const queue = this.queue;
+      console.log('%%% -- atoms:', queue.length)
+      for (const atom of queue) {
+         atom.runEffects(completed)
+         atom.queued = this.extendedQueue?.length ? atom.requeued : false;
+         atom.requeued = false;
+      }
+      this.queue = this.extendedQueue ?? []
+      this.extendedQueue = undefined;
+      if (this.queue.length) {
+         console.log('%%% -- more atoms', this.queue.length)
+         this.runEffects()
+      }
+
+      this.runningEffects = false;
+   }
+
+   runEagerEffects() { //TODO: use runEffects to allow nested eager effects
+      const eagerEffects = this.eagerQueue
+      if (!eagerEffects) return;
+      for (const effect of eagerEffects) {
+         effect.task?.()
+      }
+   }
+}

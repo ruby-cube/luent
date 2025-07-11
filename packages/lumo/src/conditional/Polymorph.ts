@@ -182,7 +182,7 @@ export class PolymorphKit {
          if (key)
             morphable.activateConditional(key, parent)
 
-      }, {phase: INTERNAL_RENDER})
+      }, {phase: PRERENDER})
       return this;
    }
 
