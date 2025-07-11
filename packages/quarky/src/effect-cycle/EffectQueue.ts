@@ -148,11 +148,11 @@ export class PhaseAtom {
          }
       }
 
-      
+
       if (sync && effectStack.size !== 0) {
          return;
       }
-      
+
       this.runningEffects = false;
       this.effects = this.nextEffects ?? []
       if (sync) this.retained.clear()
@@ -197,7 +197,7 @@ export class EffectQueue {
    private queue: PhaseAtom[] = []
    private eagerQueue: Effect[] | undefined;
 
-   constructor(phase: string){}
+   constructor(phase: string) { }
 
    scheduleEagerEffect(effect: Effect) {
       const eagerQueue = this.eagerQueue ?? (this.eagerQueue = [])
@@ -225,9 +225,9 @@ export class EffectQueue {
 
    runEffects() {
       this.runningEffects = true
-      let completed: Set<Effect> = new Set()
       this.runEagerEffects()
-
+      
+      let completed: Set<Effect> = new Set()
       const queue = this.queue;
       console.log('%%% -- atoms:', queue.length)
       for (const atom of queue) {
@@ -245,11 +245,27 @@ export class EffectQueue {
       this.runningEffects = false;
    }
 
-   runEagerEffects() { //TODO: use runEffects to allow nested eager effects
+   runEagerEffects() {
       const eagerEffects = this.eagerQueue
       if (!eagerEffects) return;
       for (const effect of eagerEffects) {
-         effect.task?.()
+         if (!effect.task) {
+            continue;
+         }
+         // stops infinite loops
+         if (effectStack.has(effect)
+            || $currentEffectCycle().effectStack.has(effect)
+         ) {
+            console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
+            continue;
+         }
+         try {
+            effectStack.push(effect);
+            effect.task() // What about async tasks? T_T How will it affect this system?
+         }
+         finally {
+            effectStack.pop()
+         }
       }
    }
 }

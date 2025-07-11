@@ -17,7 +17,6 @@ export function setUpTextNode(text: Ion | any, textNode: Text) {
 
 function keepTextNodeUpdated(text: Ion, textNode: CharacterData) {
    watch(text, async ({ current }) => {
-
       textNode.data = toString(current);
    }, {phase: INTERNAL_RENDER});
 }

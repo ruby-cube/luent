@@ -79,8 +79,8 @@ export class EffectQueue {
       this.atoms = []
    }
 
-   private activeQueue: Effect[] | undefined
-   private triggeredQueue: Effect[] = []
+   // private activeQueue: Effect[] | undefined
+   private queue: Effect[] = []
    private nextQueue: Set<Effect> | undefined;
 
    private eagerQueue: Effect[] | undefined;
@@ -97,8 +97,12 @@ export class EffectQueue {
 
    scheduleEffect(effect: Effect) {
       if (effect.queued) return;
-      this.triggeredQueue.push(effect)
+      this.queue.push(effect)
       effect.queued = true;
+   }
+
+   scheduleEffects(atom: PhaseAtom){
+      atom.scheduleEffects(this)
    }
 
    scheduleNestedEffect(effect: Effect) {
@@ -109,15 +113,15 @@ export class EffectQueue {
 
    runningEffects: boolean = false;
 
-   runTriggeredEffects() {
-      this.activeQueue = this.triggeredQueue
-      this.runEffects()
-   }
+   // runTriggeredEffects() {
+   //    this.activeQueue = this.triggeredQueue
+   //    this.runEffects()
+   // }
 
-   private runEffects() {
-      const effects = this.activeQueue
-      if (!effects) return;
+   runEffects() {
+      const effects = this.queue
       this.runningEffects = true;
+      this.runEagerEffects()
       console.log('%%% -- effects:', effects.length)
       for (const effect of effects) {
          if (!effect.task) continue;
@@ -138,10 +142,10 @@ export class EffectQueue {
 
       if (this.phase === SYNC && effectStack.size !== 0) return;
 
-      this.activeQueue = this.nextQueue ? Array.from(this.nextQueue) : undefined
+      this.queue = this.nextQueue ? Array.from(this.nextQueue) : []
       this.nextQueue = undefined;
       try {
-         if (this.activeQueue) {
+         if (this.queue.length) {
             this.runEffects()
          }
       }
@@ -149,18 +153,32 @@ export class EffectQueue {
          this.runningEffects = false;
          this.dequeueEffects()
          this.releaseAtoms()
-         this.activeQueue = undefined
       }
    }
 
    runEagerEffects() {
-      this.activeQueue = this.eagerQueue;
-      this.runEffects()
+      const eagerEffects = this.eagerQueue
+      if (!eagerEffects) return;
+      for (const effect of eagerEffects) {
+         if (!effect.task) continue;
+         // stops infinite loops
+         if (effectStack.has(effect) || $currentEffectCycle().effectStack.has(effect)) {
+            console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
+            continue;
+         }
+         try {
+            effectStack.push(effect)
+            effect.task?.()
+         }
+         finally {
+            effectStack.pop()
+         }
+      }
    }
 
    dequeueEffects() {
-      const effects = this.activeQueue;
-      if (!effects)return;
+      const effects = this.queue;
+      if (!effects) return;
       for (const effect of effects) {
          effect.queued = false;
       }
@@ -204,7 +222,7 @@ export class PhaseAtom {
 
    private queueSyncEffects(queue: EffectQueue) {
       this.queueEffects(queue)
-      queue.runTriggeredEffects()
+      queue.runEffects()
    }
 
    private queueEffects(queue: EffectQueue) {
