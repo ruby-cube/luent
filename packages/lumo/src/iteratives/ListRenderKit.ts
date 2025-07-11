@@ -16,7 +16,7 @@ import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
-import { $internalrender, $postrender, onInternalRender, PRERENDER } from "../render-cycle";
+import { $internalrender, $postrender, queueInternalRender, PRERENDER } from "../render-cycle";
 
 
 type Index = number
@@ -154,7 +154,7 @@ export class ListRenderKit {
          // clone = isIon(data) && isIonizedModel(state) ? shallowClone(_state) as any[] : undefined
          const { indicesToRemove, insertAndMoveKit, noChange } = diff(toRaw(current), _prevState, getUID)
          if (noChange) { //TODO: should we use hasChanged function in watch options instead?
-            console.log('no change :(')
+            console.log('no change :(', current, _prevState)
             return;
          }
          if (dynamicPod!.length !== _prevState.length)
@@ -213,9 +213,9 @@ export class ListRenderKit {
          const nodePod = this.dynamicPod[index] as NodePod;
          const flask = flaskMap.get(nodePod)
          flask?.emitDiscard()
-         onInternalRender(() => {
+         // queueInternalRender(() => {
             removeDOMNodes(nodePod)
-         })
+         // })
       }
       //TODO: how do I handle items that have been moved to another port?
    }
@@ -276,19 +276,17 @@ export class ListRenderKit {
             setCurrentIndex($index); // to retreive config
 
             const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
-            
-            onInternalRender(() => {
+
+            // queueInternalRender(() => {
                this.renderItem(item, $index, parent, nodePod, fragment, flask)
                flask.emitInitialMount()
                setCurrentIndex(undefined)
                flaskMap.set(nodePod, flask)
-            })
+            // })
          }
          else if (hasMoved(uItem)) {
-            onInternalRender(() => {
                // move node to fragment (DOM will auto-remove node from DOM)
                transferNodes(fragment, nodePod);
-            })
          }
       }
       // this.indices = newIndices;
@@ -322,10 +320,11 @@ export class ListRenderKit {
          dynamicPod.insert(index, nodePods)
       }
 
-      await $internalrender()
       // (3) insert nodes into DOM
       for (const [index, fragment] of indicesAndFragments) {
-         mountDOMNodes(<NodePod>dynamicPod[index], parent, fragment)
+         // queueInternalRender(()=>{
+            mountDOMNodes(<NodePod>dynamicPod[index], parent, fragment)
+         // })
       }
 
       this.castUpdated(toFromIndices)
@@ -349,7 +348,9 @@ export class ListRenderKit {
 function transferNodes(fragment: DocumentFragment, nodePod: NodePod) {
    for (const nodeOrPod of nodePod) {
       if (nodeOrPod instanceof Node) {
-         fragment.appendChild(nodeOrPod)
+         // queueInternalRender(()=>{
+            fragment.appendChild(nodeOrPod)
+         // })
       }
       else {
          for (const nodePod of nodeOrPod) {

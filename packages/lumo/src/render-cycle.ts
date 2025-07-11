@@ -1,4 +1,4 @@
-import { createEffectCycleHook, watch as _watch, useReactivitySystem, } from "@rue/quarky"
+import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
 
 export const {
@@ -16,12 +16,17 @@ export const onInternalRender = createEffectCycleHook(INTERNAL_RENDER)
 export const onRender = createEffectCycleHook(RENDER)
 export const onPostrender = createEffectCycleHook(POSTRENDER)
 
+export const queuePrerender = createEffectCycleScheduler(PRERENDER)
+export const queueInternalRender = createEffectCycleScheduler(INTERNAL_RENDER)
+export const queueRender = createEffectCycleScheduler(RENDER)
+export const queuePostrender = createEffectCycleScheduler(POSTRENDER)
+
 
 //QUESTION: Not sure how this will interact with microtasks, especially with onRender being a microtask
-export const $postevent = createAwaitableHook(onPrerender)
-export const $internalrender = createAwaitableHook(onInternalRender)
-export const $renderphase = createAwaitableHook(onRender)
-export const $postrender = createAwaitableHook(onPostrender)
+export const $postevent = createAwaitableHook(queuePrerender)
+export const $internalrender = createAwaitableHook(queueInternalRender)
+export const $renderphase = createAwaitableHook(queueRender)
+export const $postrender = createAwaitableHook(queuePostrender)
 export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)
 
 //NOTE: there may be multiple effect cycles per event

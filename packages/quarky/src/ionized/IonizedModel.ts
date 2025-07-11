@@ -8,20 +8,20 @@ import { debug, isObject, noop } from "@rue/utils";
 import { Ion, isIon } from "../ion/Ion";
 import { __DEV__trace } from "../debug/debug";
 import { hasQuark, QUARK, quarkOf } from "../Quark";
-import { getActiveTracker } from "../ionic/IonicCompound";
+import { getActiveTracker, trackAtom } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
 import { MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { asPion, asPionQuark, $atomicPion } from "./Pion";
 import { CompoundMorph } from "../compound/Compound";
-import { Watchable } from "../watch/Watched";
-import { IonizedCompound } from "./IonizedCompound";
+import { isWatchable, Watchable } from "../watch/Watched";
+// import { IonizedCompound } from "./IonizedCompound";
 import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp } from "./IonizedMethods";
 import { isInert } from "./inert";
 import { initializeSnapshots } from "./TimeTraveler";
 
 // // /** INTERNAL */
 export type IonizedModel = {
-   [QUARK]: Watchable & CompoundMorph<IonizedCompound> & IonizedModelQuark
+   [QUARK]: Watchable & IonizedModelQuark
 } & Capsule & MutableEntity & AnyObject
 
 // for inert properties use absorbed neutrons
@@ -152,7 +152,7 @@ export function useTrackableOp(
    return function trackableOp(...args: any[]) {
       if (__DEV__) emitSignal();
       const _args = input(args);
-      getActiveTracker()?.track(asTrackable(track(ionized, op, _args)))
+      trackAtom(asTrackable(track(ionized, op, _args)))
       return output(fn.call(transformThis(target, _args), ..._args), ionized)
    }
 }
@@ -294,7 +294,7 @@ export function createIonizedModel(
          return key in target
       },
       ownKeys(target) {
-         getActiveTracker()?.track(asAtomicOp(ionizedModel, INTERNAL_OP, 'ownKeys')) //TODO: trigger [[in]] when any new property is added or deleted
+         trackAtom(asAtomicOp(ionizedModel, INTERNAL_OP, 'ownKeys')) //TODO: trigger [[in]] when any new property is added or deleted
          return Reflect.ownKeys(target)
       },
 
@@ -337,7 +337,7 @@ export function createIonizedModel(
       },
 
       isExtensible(target) {
-         getActiveTracker()?.track(asAtomicOp(ionizedModel, INTERNAL_OP, 'isExtensible'))
+         trackAtom(asAtomicOp(ionizedModel, INTERNAL_OP, 'isExtensible'))
          return Reflect.isExtensible(target)
       },
 
@@ -535,8 +535,7 @@ function initialTrackableStateAccess(
       const tracker = getActiveTracker()
       if (tracker) {
          const pion = asPionQuark(ionizedModel, key)
-         if (pion) tracker.track(pion) //TODO: Tracking properties that are derivations (just a getter, no setter) or non-writable is superfluous
-         //FIX: only track atomic pions
+         if (pion && isWatchable(pion)) trackAtom(pion)
       }
       return transformValue(_value);
    }

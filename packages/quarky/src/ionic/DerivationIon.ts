@@ -61,7 +61,6 @@ export function createMaybeMemoizedIon(
       const compound = ion.asCompound;
       const value = compound.trackedCall(derivation)
       const atoms = compound.atoms
-      // if (isIonizedModel(value)) compound.track(quarkOf(value))
       if (atoms.size === 0) {
          fn = getState
          ion.inert = true;
@@ -93,7 +92,7 @@ export function createMaybeMemoizedIon(
    function getMemoizedState() {
       //TODO: not sure if I should assert initialization only or all calls
       assertValidCall()
-      if (!retrack) trackMemoized(ion)
+      if (!ion.dirty || !retrack) trackMemoized(ion)
 
       const value =
          (retrack && ion.dirty) ? retrackedCall(ion)

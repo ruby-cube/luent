@@ -1,6 +1,7 @@
 //@ts-nocheck
 import { component, For, If, Else } from "@rue/lumo"
 import { ion, ionicTask, ionize, Ionized, } from "@rue/quarky"
+import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 
 
 
@@ -29,11 +30,6 @@ export function TodoMVC() {
       active: (todos: Ionized<Todo[]>) => todos.filter(todo => !todo.completed),
       completed: (todos: Ionized<Todo[]>) => todos.filter(todo => todo.completed)
    }
-   // {
-   //    id: Date.now(),
-   //    title: 'kermit',
-   //    completed: false
-   // }
 
    // get state
    const $todos = ion.ionize((JSON.parse(localStorage.getItem(STORAGE_KEY)!) || []) as Todo[])
@@ -51,8 +47,8 @@ export function TodoMVC() {
 
    // persist state
    ionicTask(() => {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify($todos()))
-   })
+      localStorage.setItem(STORAGE_KEY, JSON.stringify($todos())) //FIX: not reactive
+   }, {phase: PRERENDER})
 
    function toggleAll(e: RadioInputEvent) {
       $todos().forEach((todo) => (todo.completed = e.target.checked))

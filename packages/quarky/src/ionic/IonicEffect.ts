@@ -1,4 +1,4 @@
-import { detachedCall, IonicCompound, IonicCompoundMorph } from "./IonicCompound";
+import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 
 /**
  * NOTES: 
@@ -26,12 +26,12 @@ export function createIonicEffect(task: IonicTask, retrack: boolean = true) {
 
    function initialize(initial: boolean) {
       fn = runEffect
-      return detachedCall(() => compound.trackedCall(() => task(initial)))
+      return compound.trackedCall(() => task(initial))
    }
 
    function runEffect(initial: boolean) {
       if (retrack) {
-         return detachedCall(() => compound.retrackedCall(() => task(initial)))
+         return compound.retrackedCall(() => task(initial))
       }
       else {
          return task(initial)

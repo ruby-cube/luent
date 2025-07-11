@@ -377,28 +377,30 @@ export function TestThisCount() {
 //    )
 // }
 
-// export function TestCounterModel() {
+export function TestCounterModel() {
 
-//    const counter = ionize({
-//       count: 0
-//    }, {
-//       increment() {
-//          counter.count++
-//       },
-//       decrement() {
-//          counter.count--
-//       }
-//    })
+   const counter = ionize({
+      count: 0,
+      increment() {
+         this.count++
+      },
+      decrement() {
+         this.count--
+      }
+   })
 
-//    watch(counter, ({ state }) => {
-//       console.log('changed', state)
-//    }, { eager: true, phase: RENDER })
+   const $doubleCount = ion(()=>counter.count * 2)
 
-//    return component(
-//       <>
-//          <div>{counter.$count}</div>
-//          <button on:click={counter.increment}>increment</button>
-//          <button on:click={counter.decrement}>decrement</button>
-//       </>
-//    )
-// }
+   // watch(counter, ({ state }) => {
+   //    console.log('changed', state)
+   // }, { eager: true, phase: RENDER })
+
+   return component(
+      <>
+         <div>{counter.$count}</div>
+         <div>{$doubleCount}</div>
+         <button on:click={counter.increment}>increment</button>
+         <button on:click={counter.decrement}>decrement</button>
+      </>
+   )
+}

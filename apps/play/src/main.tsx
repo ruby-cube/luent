@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import './style.css'
+// import './style.css'
 // import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
@@ -12,7 +12,7 @@ import './style.css'
 // import { TestConditional } from './TestConditional';
 import { configureFlask, genIncrementalId } from '../../../packages/flask/initFlask';
 import { component, createApp, createGlobalCommons, fromTag, NodeRef} from '@rue/lumo';
-import { CounterApp, TestCount } from './TestCounter';
+import { CounterApp, TestCount, TestCounterModel } from './TestCounter';
 import { TestApp } from './TestApp';
 import { MountIf } from './TestMountIf';
 import { List } from './TestReactiveModel';
@@ -51,6 +51,7 @@ import { TestTooltipApp } from './TestTooltipLayoutThrash';
 import { TriangleDemo } from './demos/SierpinskiTriangles';
 import { TestSyncEffects } from './demos/TestSyncEffects';
 import { TestEffectCyclePhases } from './TestEffectCyclePhases';
+import { TestTrackableOps } from './TestTrackableOps';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -190,7 +191,7 @@ import { TestEffectCyclePhases } from './TestEffectCyclePhases';
 
 
 
-const app = createApp(List)
+const app = createApp(TodoMVC)
 
 app.mount('#app')
 

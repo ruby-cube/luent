@@ -1,6 +1,6 @@
 import { component } from "@rue/lumo";
 import { ion, ionize, watch } from "@rue/quarky";
-import { $renderphase, INTERNAL_RENDER, onInternalRender, onPostrender, onPrerender, onRender, onRenderCycleEnd, POSTRENDER, PRERENDER, RENDER } from "../../../packages/lumo/src/render-cycle";
+import {  PRERENDER } from "../../../packages/lumo/src/render-cycle";
 
 export function TestEffectCyclePhases() {
 

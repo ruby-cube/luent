@@ -77,7 +77,7 @@ export function detachedCall(fn: Function) {
    }
 }
 
-export function track(atom: Watchable) {
+export function trackAtom(atom: Watchable) {
    let i = trackerStack.length;
    while (i--) {
       const compound = trackerStack[i]
@@ -123,7 +123,7 @@ export class IonicCompound extends Compound {
       pushTracker(this);
       try {
          const value = fn();
-         if (isIonizedModel(value)) this.track(quarkOf(value))
+         if (isIonizedModel(value)) trackAtom(quarkOf(value))
          return value;
       }
       finally {

@@ -11,7 +11,7 @@ import { Ion, isIon, toValue } from "../ion/Ion";
 import { scheduleEagerEffect } from "../ReactivitySystem";
 import { SYNC } from "../effect-cycle/EffectCycle";
 import { WatchSubjects } from "./watch";
-import { IonicCompound } from "../ionic/IonicCompound";
+import { detachedCall, IonicCompound } from "../ionic/IonicCompound";
 import { createWatchedDerivation } from "../ionic/WatchedDerivation";
 
 export function isWatchSubject(value: AnyObject): value is WatchSubject {
@@ -188,7 +188,7 @@ class IonSubject implements WatchSubject {
 
       this.initialized = true;
 
-      const value = this.ion()
+      const value = detachedCall(this.ion)
       const quark = this.quark;
       const compound = quark.asCompound
 
@@ -205,7 +205,7 @@ class IonSubject implements WatchSubject {
       const quark = this.quark
       const compound = quark.asCompound
       if (compound) this.effect.unlink()
-      const value = this.ion()
+      const value = detachedCall(this.ion)
       if (compound && compound.atoms.size) {
          linkEffectToAtoms(toWatchedAtoms(compound.atoms), this.effect, this.phase)
       }
@@ -308,7 +308,7 @@ export class IonicTaskSubject implements WatchSubject {
       if (this.initialized) return this.retrackedCall()
       this.initialized = true;
       const ionicEffect = this.ionicEffect
-      ionicEffect()
+      detachedCall(ionicEffect)
       this.watchedAtoms = toWatchedAtoms(ionicEffect.asCompound.atoms)
    }
 
@@ -320,7 +320,7 @@ export class IonicTaskSubject implements WatchSubject {
       const ionicEffect = this.ionicEffect
       const effect = this.effect
       effect.unlink()
-      ionicEffect()
+      detachedCall(ionicEffect)
       linkEffectToAtoms(toWatchedAtoms(ionicEffect.asCompound.atoms), effect, this.phase)
    }
 

@@ -10,7 +10,7 @@ import { Mutable, MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
 import { Ion, Methods, MutableIon } from "./Ion";
-import { track } from "../ionic/IonicCompound";
+import { trackAtom } from "../ionic/IonicCompound";
 
 
 /** INTERNAL */
@@ -53,7 +53,7 @@ export function createAtomicIon(
 ) {
    const $state = (() => {
       if (__DEV__) emitSignal();
-      track(quark)
+      trackAtom(quark)
       return quark.state;
    }) as $AtomicIonState
 

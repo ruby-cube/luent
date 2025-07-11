@@ -113,7 +113,7 @@ function setUpUpdateCycleManager() {
    cycleManager.pushPhase(new CyclePhase('POSTRENDER', queueTask))
    cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop))
 
-   cycleManager.onComplete = createEffectCycleHook('UpdateCycle:' + UPDATE_CYCLE_END)
+   cycleManager.onComplete = createEffectCycleScheduler('UpdateCycle:' + UPDATE_CYCLE_END)
    return cycleManager;
 }
 
@@ -162,6 +162,27 @@ function addHooks(hooks: { [key: string]: string | any }, cycle: EffectCycleMana
 export function createEffectCycleHook(phase: string) { //TODO: what happens if phase has already passed? should we queue to next cycle?
    return (task: () => void, options?: ListenerOptions) => {
       return $listen(task, options ?? {}, {
+         enroll(fn) {
+            const task = new TaskRef(fn)
+            getEffectCycleManager().scheduleTask(task, phase)
+            return task;
+         },
+         remove(task) {
+            task.discard()
+         }
+      })
+   }
+}
+
+/**
+ * Library API
+ * 
+ * @param phase 
+ * @returns 
+ */
+export function createEffectCycleScheduler(phase: string) { //TODO: what happens if phase has already passed? should we queue to next cycle?
+   return (task: () => void, options?: SchedulerOptions) => {
+      return $schedule(task, options ?? {}, {
          enroll(fn) {
             const task = new TaskRef(fn)
             getEffectCycleManager().scheduleTask(task, phase)
