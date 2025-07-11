@@ -31,7 +31,7 @@ export function isWatchableEntity(value: unknown): value is { [QUARK]: Watchable
 }
 
 export function asWatched(watchable: Watchable) {
-   return watchable.asWatched ?? (watchable.asWatched = new Watched(watchable))
+   return watchable.asWatched ?? (watchable.asWatched = new Watched())
 }
 
 // export function unwatch(this: Watchable) {
@@ -41,7 +41,7 @@ export function asWatched(watchable: Watchable) {
 export class Watched {
 
    constructor(
-      private watchable: Watchable
+      // private watchable: Watchable
    ) { }
 
    private effects: Map<string, PhaseAtom> = new Map()
@@ -64,17 +64,17 @@ export class Watched {
       this.watchCount++
    }
 
-   /**
-    * To be called by watcher's stop() function
-    * @param effect 
-    */
-   unlink(effect: Effect, phase: string) {
-      const atom = this.effects.get(phase) ?? this.initializeAtom(phase);
-      atom.unlink(effect)
-      if (this.watchCount === 0) {
-         this.emitDiscard()
-      }
-   }
+   // /**
+   //  * To be called by watcher's stop() function
+   //  * @param effect 
+   //  */
+   // unlink(effect: Effect, phase: string) {
+   //    const atom = this.effects.get(phase) ?? this.initializeAtom(phase);
+   //    atom.unlink(effect)
+   //    if (this.watchCount === 0) {
+   //       this.emitDiscard()
+   //    }
+   // }
 
    triggerEffects() { // the surrounding effect when original trigger happened
       for (const [phase, atom] of this.effects) {
@@ -92,18 +92,18 @@ export class Watched {
       phaseAtom?.runSyncEffects()
    }
 
-   private cleanups: (() => void)[] = []
+   // private cleanups: (() => void)[] = []
 
-   onDiscard(cleanUp: () => void) {
-      this.cleanups.push(cleanUp)
-   }
+   // onDiscard(cleanUp: () => void) {
+   //    this.cleanups.push(cleanUp)
+   // }
 
-   private emitDiscard() {
-      this.watchable.asWatched = undefined;
-      for (const cleanUp of this.cleanups) {
-         cleanUp()
-      }
-   }
+   // private emitDiscard() {
+   //    this.watchable.asWatched = undefined;
+   //    for (const cleanUp of this.cleanups) {
+   //       cleanUp()
+   //    }
+   // }
 }
 
 

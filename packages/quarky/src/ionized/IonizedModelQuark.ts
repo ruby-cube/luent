@@ -1,11 +1,9 @@
 import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { IonizedModel } from "./IonizedModel"
-import { Watched } from "../watch/Watched"
-import { IonizedCompound } from "./IonizedCompound"
+import { trigger, Watched } from "../watch/Watched"
 import { Quark, QuarkOf } from "../Quark"
 import { Mutable, Mutation } from "../Mutable"
-import { trigger } from "../ReactivitySystem"
 import { Traceable } from "../debug/Traceable"
 import { AtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
@@ -68,8 +66,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
    asMutable: Mutable = new Mutable()
 
-   asCompound?: IonizedCompound
-   asWatched?: Watched | undefined
+   asWatched: Watched | undefined
 
    // watch: (this: Watchable) => Watched<Watchable>
    // unwatch: () => void
@@ -95,14 +92,14 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
    // absorbedIons?: IterableSet<ParticleMorph> 
 
-   trackAbsorbedIons() {
-      if (this.asCompound) return;
-      const derivation = this.asCompound || (this.asCompound = new IonizedCompound(this))
-      derivation.collectAbsorbedIons(this.entity!)
-      if (this.asCompound.atoms.size === 0) this.asCompound = undefined // prevents watch from marking model as no reactivity
-      // this.undirty()
-      return derivation.atoms;
-   }
+   // trackAbsorbedIons() {
+   //    if (this.asCompound) return;
+   //    const derivation = this.asCompound || (this.asCompound = new IonizedCompound(this))
+   //    derivation.collectAbsorbedIons(this.entity!)
+   //    if (this.asCompound.atoms.size === 0) this.asCompound = undefined // prevents watch from marking model as no reactivity
+   //    // this.undirty()
+   //    return derivation.atoms;
+   // }
 
    trigger = trigger
 

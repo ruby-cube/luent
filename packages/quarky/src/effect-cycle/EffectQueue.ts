@@ -3,6 +3,7 @@
 
 import { TaskQueue, TaskRef } from "./TaskQueue";
 import { $currentEffectCycle } from "../ReactivitySystem";
+import { debug } from "@rue/utils";
 
 
 // effect cycle queues
@@ -25,10 +26,27 @@ export class Effect {
       this.atoms.add(atom)
    }
 
-   unlink(atom: PhaseAtom) {
-      this.atoms.delete(atom)
+   destroy() {
+      this.atoms.clear()
       this.task = null;
    }
+
+   unlink(){
+      this.atoms.clear()
+   }
+
+   renew(task: Task){
+      if (this.task) {
+         debug.error('Cannot renew an active effect. Effect must be destroyed first.')
+      }
+      this.task = task;
+      return this;
+   }
+
+   // unlink(atom: PhaseAtom) {
+   //    this.atoms.delete(atom)
+   //    this.task = null;
+   // }
 }
 
 
@@ -195,13 +213,13 @@ export class PhaseAtom {
       }
    }
 
-   /**
-    * To be called by watcher's stop() function
-    * @param effect 
-    */
-   unlink(effect: Effect) {
-      effect.unlink(this)
-   }
+   // /**
+   //  * To be called by watcher's stop() function
+   //  * @param effect 
+   //  */
+   // unlink(effect: Effect) {
+   //    effect.unlink(this)
+   // }
 
    requeued: boolean = false;
    queued: boolean = false

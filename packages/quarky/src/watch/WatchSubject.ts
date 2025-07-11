@@ -103,13 +103,13 @@ class Multisubject implements WatchSubject {
       }
    }
 
-   unlinkEffect(effect: Effect, phase: string): void {
-      const subjects = this.subjects;
-      for (const subject of subjects) {
-         if (!isWatchSubject(subject)) continue;
-         subject.unlinkEffect(effect, phase)
-      }
-   }
+   // unlinkEffect(effect: Effect, phase: string): void {
+   //    const subjects = this.subjects;
+   //    for (const subject of subjects) {
+   //       if (!isWatchSubject(subject)) continue;
+   //       subject.unlinkEffect(effect, phase)
+   //    }
+   // }
 
 }
 
@@ -128,7 +128,7 @@ export interface WatchSubject {
    inert: boolean,
    trackedCall: () => unknown
    linkEffect(effect: Effect, phase: string, eager: boolean, initial?: boolean): void
-   unlinkEffect(effect: Effect, phase: string): void
+   // unlinkEffect(effect: Effect, phase: string): void
 }
 
 /**
@@ -153,9 +153,9 @@ class IonizedModelSubject implements WatchSubject {
       linkEffectToAtom(this.watchedAtom, effect, phase, eager, initial)
    }
 
-   unlinkEffect(effect: Effect, phase: string) {
-      this.watchedAtom.unlink(effect, phase)
-   }
+   // unlinkEffect(effect: Effect, phase: string) {
+   //    this.watchedAtom.unlink(effect, phase)
+   // }
 }
 
 type QuarkyIon = {
@@ -184,7 +184,8 @@ class IonSubject implements WatchSubject {
 
    trackedCall() {
       if (this.initialized)
-         return this.getValueAndRelinkAtoms()
+         return this.retrackedCall()
+
       this.initialized = true;
 
       const value = this.ion()
@@ -200,15 +201,13 @@ class IonSubject implements WatchSubject {
       return value;
    }
 
-   private getValueAndRelinkAtoms() {
+   private retrackedCall() {
       const quark = this.quark
       const compound = quark.asCompound
-
-      if (compound) unlinkEffect(this.watchedAtoms, this.effect, this.phase)
+      if (compound) this.effect.unlink()
       const value = this.ion()
-      if (compound) {
-         this.watchedAtoms = compound.atoms.size ? toWatchedAtoms(compound.atoms) : []
-         linkEffectToAtoms(this.watchedAtoms, this.effect, this.phase)
+      if (compound && compound.atoms.size) {
+         linkEffectToAtoms(toWatchedAtoms(compound.atoms), this.effect, this.phase)
       }
 
       this.relinkValue(value)
@@ -226,10 +225,10 @@ class IonSubject implements WatchSubject {
       linkEffectToAtom(this.valueAtom, effect, phase, eager, initial)
    }
 
-   unlinkEffect(effect: Effect, phase: string) {
-      unlinkEffect(this.watchedAtoms, effect, phase)
-      this.valueAtom?.unlink(effect, phase)
-   }
+   // unlinkEffect(effect: Effect, phase: string) {
+   //    unlinkEffect(this.watchedAtoms, effect, phase)
+   //    this.valueAtom?.unlink(effect, phase)
+   // }
 
    relinkValue(
       value: unknown,
@@ -241,8 +240,8 @@ class IonSubject implements WatchSubject {
          return;
 
       // relink effects
-      if (isWatchableEntity(prevAtom)) {
-         prevAtom.unlink(this.effect, this.phase)
+      if (prevAtom) {
+         this.effect.unlink()
       }
       if (isWatchableEntity(value)) {
          asWatched(quarkOf(value)).link(this.effect, this.phase)
@@ -266,11 +265,11 @@ function linkEffectToAtom(atom: Watched | undefined, effect: Effect, phase: stri
 }
 
 
-function unlinkEffect(atoms: Watched[], effect: Effect, phase: string) {
-   for (const atom of atoms) {
-      atom.unlink(effect, phase)
-   }
-}
+// function unlinkEffect(atoms: Watched[], effect: Effect, phase: string) {
+//    for (const atom of atoms) {
+//       atom.unlink(effect, phase)
+//    }
+// }
 
 function _scheduleEagerEffect(watchedAtom: Watched, effect: Effect, phase: string) {
    if (phase === SYNC) {
@@ -306,19 +305,32 @@ export class IonicTaskSubject implements WatchSubject {
    private initialized = false
 
    trackedCall() {
-      this.ionicEffect()
-      if (!this.initialized || this.retrack) {
-         const compound = this.ionicEffect.asCompound
-         this.watchedAtoms = toWatchedAtoms(compound.atoms)
-         this.initialized = true;
-      }
+      if (this.initialized) return this.retrackedCall()
+      this.initialized = true;
+      const ionicEffect = this.ionicEffect
+      ionicEffect()
+      this.watchedAtoms = toWatchedAtoms(ionicEffect.asCompound.atoms)
+   }
+
+   effect!: Effect
+   phase!: string
+
+   private retrackedCall() {
+      if (!this.retrack) return this.ionicEffect()
+      const ionicEffect = this.ionicEffect
+      const effect = this.effect
+      effect.unlink()
+      ionicEffect()
+      linkEffectToAtoms(toWatchedAtoms(ionicEffect.asCompound.atoms), effect, this.phase)
    }
 
    linkEffect(effect: Effect, phase: string, eager: boolean, initial?: boolean): void {
+      this.effect = effect;
+      this.phase = phase;
       linkEffectToAtoms(this.watchedAtoms, effect, phase, eager, initial)
    }
 
-   unlinkEffect(effect: Effect, phase: string): void {
-      unlinkEffect(this.watchedAtoms, effect, phase)
-   }
+   // unlinkEffect(effect: Effect, phase: string): void {
+   //    unlinkEffect(this.watchedAtoms, effect, phase)
+   // }
 }

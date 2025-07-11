@@ -1,4 +1,3 @@
-//@ts-nocheck
 import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon } from "../ion/Ion";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
@@ -89,6 +88,7 @@ export function watch<
    T extends Ionized<object> | Ion<any> | WatchSubjects
 >(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): ResumableListener {
 
+   options.retrack = options.retrack ?? true;
 
    const watchSubject = asWatchSubject(subject, options.retrack)
    if (options?.traceTriggers) {
@@ -108,7 +108,7 @@ export function watch<
    let hasChanged = getHasChangedFn(options, prevState)
 
    function wrappedEffect() {
-      const newState = watchSubject.getValue() // retracking happens here //TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
+      const newState = watchSubject.trackedCall() // retracking happens here //TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
       if (!options.eager && !hasChanged(prevState, newState)) {
          return;
       }
@@ -158,8 +158,8 @@ export function setUpWatcher(
          subject.linkEffect(effect, phase, eager, true)
          return effect;
       },
-      remove(effect) {
-         subject.unlinkEffect(effect, phase)
+      remove(effect: Effect) {
+         effect.destroy()
       },
       pause() {
          paused = true;
