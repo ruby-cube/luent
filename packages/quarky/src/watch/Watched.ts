@@ -1,5 +1,5 @@
 import { isObject } from "@rue/utils";
-import { SYNC } from "../effect-cycle/EffectCycle";
+import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { Effect, PhaseAtom } from "../effect-cycle/EffectQueue";
 import { $currentEffectCycle } from "../effect-cycle/ReactivitySystem";
 import { hasQuark, Quark, QUARK } from "../Quark";
@@ -44,11 +44,11 @@ export class Watched {
       // private watchable: Watchable
    ) { }
 
-   private effects: Map<string, PhaseAtom> = new Map()
+   private effects: Map<Phase, PhaseAtom> = new Map()
 
    private watchCount: number = 0
 
-   private initializeAtom(phase: string) {
+   private initializeAtom(phase: Phase) {
       const atom: PhaseAtom = new PhaseAtom(phase)
       this.effects.set(phase, atom);
       return atom
@@ -58,7 +58,7 @@ export class Watched {
      * To be called by watch() when initializing watcher
      * @param effect 
      */
-   link(effect: Effect, phase: string) {
+   link(effect: Effect, phase: Phase) {
       const atom = this.effects.get(phase) ?? this.initializeAtom(phase);
       atom.link(effect)
       this.watchCount++

@@ -387,10 +387,10 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const pod = kit.nodePod!
       const activationType = kit.type
       if (activationType === 'show') {
-         // queueInternalRender(() => {
+         queueInternalRender(() => {
             // preserve dynamic node and node pod
             hideDOMNodes(pod);
-         // })
+         })
       }
       else if (activationType === 'create') {
          // discard of flask
@@ -398,18 +398,18 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          kit.flask = undefined; // 
          flask.emitDiscard() //
 
-         // queueInternalRender(() => {
+         queueInternalRender(() => {
             // remove from 
             removeDOMNodes(pod)
             pod.clear() //
-         // })
+         })
       }
       else if (activationType === 'mount') {
          const flask = kit.flask
          flask?.emitDemount() //
-         // queueInternalRender(() => {
+         queueInternalRender(() => {
             removeDOMNodes(pod);
-         // })
+         })
       }
    }
 
@@ -424,22 +424,22 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const nodePod = kit.nodePod
 
       if (activationType === 'show') { //NOTE: 'show' statements are not dynamic nodes because they are not removed from the DOM and setup is not rerun
-         // queueInternalRender(() => {
+         queueInternalRender(() => {
             showDOMNodes(nodePod)
-         // })
+         })
          return;
       }
 
       const isInitialMount = kit.flask === undefined
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
-      // queueInternalRender(() => {
+      queueInternalRender(() => {
          this.render(kit, parent, fragment)
          nodePod.activate()
          if (isInitialMount)
             flask.emitInitialMount()
          else
             flask.emitRemount() // remount preserved watchers etc.
-      // })
+      })
    }
 }
 

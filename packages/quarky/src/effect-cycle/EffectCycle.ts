@@ -1,11 +1,12 @@
 import { setImmediate } from "@rue/thread";
 import { Effect, EffectQueue, PhaseAtom } from "./EffectQueue";
-import { EffectCycleManager } from "./ReactivitySystem";
+import { EffectCycleManager, getCurrentPhase } from "./ReactivitySystem";
+import { getCurrentIndex } from "../../../lumo/src/iteratives/ListRenderKit";
 
 export const SYNC = 'SYNC' as const
 export const UPDATE_CYCLE_END = 'UCE' as const
 
-type Phase = string
+export type Phase = number | typeof SYNC |typeof UPDATE_CYCLE_END
 
 export function definePhase(phaseName: string, scheduler?: Function): CyclePhase {
    return new CyclePhase(
@@ -31,13 +32,14 @@ export class CyclePhase {
 }
 
 
+
 /**
  * 
  */
 export class EffectCycle {
 
+   public currentPhase: Phase = SYNC
    constructor(
-      public currentPhase: Phase,
       public manager: EffectCycleManager
    ) {
       console.log('%%% (new effect cycle created)')
@@ -47,11 +49,11 @@ export class EffectCycle {
       this.manager.closeCycle()
    }
 
-   get count(){ return this.manager.count}
+   get count() { return this.manager.count }
 
    private effects: Map<Phase, EffectQueue> = new Map();
 
-   effectStack: Set<Effect> = new Set()
+   // effectStack: Set<Effect> = new Set()
 
    private initializeQueue(phase: Phase) {
       const queue: EffectQueue = new EffectQueue(phase)
@@ -60,31 +62,53 @@ export class EffectCycle {
    }
 
    scheduleEagerEffect(effect: Effect, phase: Phase) {
-      const queue = this.effects.get(phase) ?? this.initializeQueue(phase);
+      console.log('&&& scheduleEager', phase, getCurrentPhase())
+      const adjustedPhase = this.adjustPhase(phase)
+      const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
       queue.scheduleEagerEffect(effect)
-      if (phase === SYNC){
-         queue.runEagerEffects()
+      if (phase === SYNC) {
+         queue.runEffects()
+         // queue.runEagerEffects()
       }
    }
 
+   scheduleTask(effect: Effect, phase: Phase) {
+      const adjustedPhase = this.adjustPhase(phase)
+      const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
+      queue.scheduleTask(effect)
+   }
+
    scheduleEffects(atom: PhaseAtom, phase: Phase) {
-      const queue = this.effects.get(phase) ?? this.initializeQueue(phase);
+      const adjustedPhase = this.adjustPhase(phase)
+      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted')
+      const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
       queue.scheduleEffects(atom)
-      if (phase === SYNC){
+      if (phase === SYNC) {
          queue.runEffects()
       }
    }
 
    subphase: 'effects' | 'microtasks' = 'effects'
 
-   runEffects(phase: string) {
-      this.currentPhase = phase;
-      this.subphase = 'effects'
+   runEffects(phase: Phase) {
+      // this.currentPhase = phase;
+      console.log(`%%% ${this.currentPhase} run effects...`)
+      // this.subphase = 'effects'
       const queue = this.effects.get(phase);
+      console.log('queue?', this.effects)
       queue?.runEffects()
       console.log(`%%% ${phase} microtasks...?`)
-      this.subphase = 'microtasks'
+      // this.subphase = 'microtasks'
+   }
+
+   adjustPhase(phase: Phase) {
+      return this.currentPhase === phase ? phase
+         : phase === SYNC ? this.currentPhase
+            : this.currentPhase === SYNC ? phase : phase > this.currentPhase ? phase : this.currentPhase
+      //TODO: what about if current phase is post render and scheduled phase is pre, internal render, or render? 
+      // should it get scheduled for the next cycle? I think this is the answer--it should start a new cycle
    }
 }
+
 
 export const queueTask = setImmediate;

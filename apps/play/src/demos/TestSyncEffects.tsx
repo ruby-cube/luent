@@ -1,4 +1,4 @@
-import { ion, watch } from "@rue/quarky";
+import { ion, SYNC, watch } from "@rue/quarky";
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle";
 import { component } from "@rue/lumo";
 
@@ -19,9 +19,9 @@ export function TestSyncEffects() {
       console.log('$$$ ---effect')
       watch($count, () => {
          console.log('$$$ NESTED')
-      }, { phase: PRERENDER })
-      
-   }, { phase: PRERENDER })
+      }, { phase: SYNC })
+
+   }, { phase: SYNC })
 
    watch($count, () => {
       console.log('$$$ --start effect increment')
@@ -29,11 +29,11 @@ export function TestSyncEffects() {
       console.log('--end effect increment')
    }, { sync: true })
 
-   watch($count2, () => {
-      console.log('$$$ --start effect2 increment')
-      $count.state = $count2() + 1;
-      console.log('--end effect2 increment')
-   }, { phase: PRERENDER })
+   // watch($count2, () => {
+   //    console.log('$$$ --start effect2 increment')
+   //    $count.state = $count2() + 1;
+   //    console.log('--end effect2 increment')
+   // }, { phase: SYNC })
 
 
 

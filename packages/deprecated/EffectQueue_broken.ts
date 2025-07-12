@@ -157,6 +157,7 @@ export class EffectQueue {
    }
 
    runEagerEffects() {
+      console.log('&&& runEagerEffects', this)
       const eagerEffects = this.eagerQueue
       if (!eagerEffects) return;
       for (const effect of eagerEffects) {

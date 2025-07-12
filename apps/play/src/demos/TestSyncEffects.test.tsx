@@ -1,7 +1,8 @@
-import { component } from "@rue/lumo";
 import { ion, watch } from "@rue/quarky";
 import { describe, expect, it, vi } from "vitest";
-import { onRenderCycleEnd, PRERENDER } from "../../../../packages/lumo/src/render-cycle";
+import { PRERENDER } from "../../../../packages/lumo/src/render-cycle";
+
+//NOTE: Infinite loops should be eliminated from an app, not supported. Infinite loop prevention is for debugging and tracking down loops.
 
 describe('infinite loop prevention', () => {
    it.only('simple sync loop A', () => {
@@ -17,10 +18,11 @@ describe('infinite loop prevention', () => {
          }
       })
 
+      const $something = ion('')
 
       watch($count, () => {
          console.log('--start effect increment')
-         $count.state = $count() + 1;
+         $something.state = 'frog' + $count()
          callMeOnceA()
          console.log('--end effect increment')
       }, {
@@ -44,7 +46,7 @@ describe('infinite loop prevention', () => {
 
       $count.increment()
 
-      // expect(callMeOnceA).toBeCalledTimes(2)
+      expect(callMeOnceA).toBeCalledTimes(2)
       expect(callMeOnceB).toBeCalledTimes(2)
 
       console.log("=====")
@@ -52,7 +54,7 @@ describe('infinite loop prevention', () => {
 
       $count.increment()
 
-      // expect(callMeOnceA).toBeCalledTimes(3)
+      expect(callMeOnceA).toBeCalledTimes(3)
       expect(callMeOnceB).toBeCalledTimes(3)
    })
 

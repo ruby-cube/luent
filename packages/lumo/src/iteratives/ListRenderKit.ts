@@ -160,13 +160,15 @@ export class ListRenderKit {
             throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${previous.length} are mismatched. This should never happen.`)
          console.log('updating list, yes')
          this.castBeforeUpdate();
-         this.removeItems(indicesToRemove!);
-         try {
-            this.insertAndMoveItems(insertAndMoveKit!, parent);
-         }
-         catch (err) {
-            console.error(err, this.__DEV__asyncPath)
-         }
+         queueInternalRender(()=>{
+            this.removeItems(indicesToRemove!);
+            try {
+               this.insertAndMoveItems(insertAndMoveKit!, parent);
+            }
+            catch (err) {
+               console.error(err, this.__DEV__asyncPath)
+            }
+         })
       }, { phase: PRERENDER })
       // currentItem = undefined;
       $currentIndex = undefined;
@@ -201,7 +203,6 @@ export class ListRenderKit {
          listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
          flask.emitInitialMount()
          flaskMap.set(nodePod, flask)
-
       }
    }
 
@@ -212,7 +213,7 @@ export class ListRenderKit {
          const flask = flaskMap.get(nodePod)
          flask?.emitDiscard()
          // queueInternalRender(() => {
-         removeDOMNodes(nodePod)
+            removeDOMNodes(nodePod)
          // })
       }
       //TODO: how do I handle items that have been moved to another port?
@@ -273,18 +274,19 @@ export class ListRenderKit {
 
             setCurrentIndex($index); // to retreive config
 
-            const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
-
             // queueInternalRender(() => {
-            this.renderItem(item, $index, parent, nodePod, fragment, flask)
-            flask.emitInitialMount()
-            setCurrentIndex(undefined)
-            flaskMap.set(nodePod, flask)
+               const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
+               this.renderItem(item, $index, parent, nodePod, fragment, flask)
+               flask.emitInitialMount()
+               setCurrentIndex(undefined)
+               flaskMap.set(nodePod, flask)
             // })
          }
          else if (hasMoved(uItem)) {
             // move node to fragment (DOM will auto-remove node from DOM)
-            transferNodes(fragment, nodePod);
+            // queueInternalRender(() => {
+               transferNodes(fragment, nodePod);
+            // })
          }
       }
       // this.indices = newIndices;
@@ -319,11 +321,11 @@ export class ListRenderKit {
       }
 
       // (3) insert nodes into DOM
-      for (const [index, fragment] of indicesAndFragments) {
-         // queueInternalRender(()=>{
-         mountDOMNodes(<NodePod>dynamicPod[index], parent, fragment)
-         // })
-      }
+      // queueInternalRender(() => {
+         for (const [index, fragment] of indicesAndFragments) {
+            mountDOMNodes(<NodePod>dynamicPod[index], parent, fragment)
+         }
+      // })
 
       this.castUpdated(toFromIndices)
    }
@@ -344,11 +346,10 @@ export class ListRenderKit {
 
 
 function transferNodes(fragment: DocumentFragment, nodePod: NodePod) {
+   // queueInternalRender(()=>{
    for (const nodeOrPod of nodePod) {
       if (nodeOrPod instanceof Node) {
-         // queueInternalRender(()=>{
          fragment.appendChild(nodeOrPod)
-         // })
       }
       else {
          for (const nodePod of nodeOrPod) {
@@ -356,4 +357,5 @@ function transferNodes(fragment: DocumentFragment, nodePod: NodePod) {
          }
       }
    }
+   // })
 }

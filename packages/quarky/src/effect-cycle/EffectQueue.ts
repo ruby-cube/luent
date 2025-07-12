@@ -1,4 +1,4 @@
-import { SYNC } from "./EffectCycle";
+import { Phase, SYNC } from "./EffectCycle";
 import { $currentEffectCycle } from "./ReactivitySystem";
 
 type Task = (...args: any[]) => void
@@ -29,31 +29,31 @@ export class Effect {
 }
 
 
-const _effectStack: Effect[] = []
-const activeEffects = new Set()
+const effectStack: Effect[] = []
+// const activeEffects = new Set()
 
-export function $currentEffect() {
-   return _effectStack.at(-1)
-}
+// export function $currentEffect() {
+//    return _effectStack.at(-1)
+// }
 
-export const effectStack = {
-   get size() {
-      return activeEffects.size;
-   },
-   has(effect: Effect) {
-      return activeEffects.has(effect)
-   },
+// export const effectStack = {
+//    get size() {
+//       return activeEffects.size;
+//    },
+//    has(effect: Effect) {
+//       return activeEffects.has(effect)
+//    },
 
-   push(effect: Effect) {
-      activeEffects.add(effect)
-      _effectStack.push(effect)
-   },
+//    push(effect: Effect) {
+//       activeEffects.add(effect)
+//       _effectStack.push(effect)
+//    },
 
-   pop() {
-      const effect = _effectStack.pop()
-      activeEffects.delete(effect)
-   }
-}
+//    pop() {
+//       const effect = _effectStack.pop()
+//       activeEffects.delete(effect)
+//    }
+// }
 
 
 export class PhaseAtom {
@@ -64,7 +64,7 @@ export class PhaseAtom {
 
    retained: Set<Effect> = new Set()
 
-   constructor(private phase: string | typeof SYNC) {
+   constructor(private phase: Phase) {
 
    }
 
@@ -123,17 +123,17 @@ export class PhaseAtom {
             continue;
          }
          // stops infinite loops
-         if (effectStack.has(effect)
-            || $currentEffectCycle().effectStack.has(effect)
-         ) {
-            if (retained.has(effect))
-               continue;
-            this.retain(effect)
-            retained.add(effect)
+         // if (effectStack.has(effect)
+         //    || $currentEffectCycle().effectStack.has(effect)
+         // ) {
+         //    if (retained.has(effect))
+         //       continue;
+         //    this.retain(effect)
+         //    retained.add(effect)
 
-            console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
-            continue;
-         }
+         //    console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
+         //    continue;
+         // }
          try {
             effectStack.push(effect);
             effect.task() // What about async tasks? T_T How will it affect this system?
@@ -149,7 +149,7 @@ export class PhaseAtom {
       }
 
 
-      if (sync && effectStack.size !== 0) {
+      if (sync && effectStack.length !== 0) {
          return;
       }
 
@@ -190,18 +190,31 @@ export class PhaseAtom {
    queued: boolean = false
 }
 
-
+let __debug__=false;
+export function initDebugger(){
+__debug__ = true
+}
 
 export class EffectQueue {
    private extendedQueue: PhaseAtom[] | undefined;
    private queue: PhaseAtom[] = []
-   private eagerQueue: Effect[] | undefined;
+   private eagerQueue: PhaseAtom | undefined;
 
-   constructor(phase: string) { }
+   private taskQueue: PhaseAtom | undefined;
+
+
+   constructor(private phase: Phase) { }
+
+   scheduleTask(task: Effect) {
+      const taskQueue = this.taskQueue ?? (this.taskQueue = new PhaseAtom(this.phase))
+      taskQueue.link(task)
+      this.scheduleEffects(taskQueue)
+   }
 
    scheduleEagerEffect(effect: Effect) {
-      const eagerQueue = this.eagerQueue ?? (this.eagerQueue = [])
-      eagerQueue.push(effect)
+      const eagerQueue = this.eagerQueue ?? (this.eagerQueue = new PhaseAtom(this.phase))
+      eagerQueue.link(effect)
+      this.scheduleEffects(eagerQueue)
    }
 
    scheduleEffects(atom: PhaseAtom) {
@@ -209,8 +222,8 @@ export class EffectQueue {
       if (this.runningEffects && !atom.requeued) {
          // a currentEffect during runningEffects means the effect triggered 
          // other effects and should be added to the effectStack to prevent infinite loops
-         const currentEffect = $currentEffect()
-         if (currentEffect) $currentEffectCycle().effectStack.add(currentEffect)
+         // const currentEffect = $currentEffect()
+         // if (currentEffect) $currentEffectCycle().effectStack.add(currentEffect)
          atom.requeued = true;
          const extension = this.extendedQueue ?? (this.extendedQueue = [])
          extension.push(atom)
@@ -225,7 +238,9 @@ export class EffectQueue {
 
    runEffects() {
       this.runningEffects = true
-      this.runEagerEffects()
+      // if (__debug__) debugger;
+      // this.runEagerEffects() //FIX: eager effects and tasks need to be integrated into the never ending effect cycle. Maybe schedule an eager effect atom and task atom
+      // PhaseBatch.runEffects
       
       let completed: Set<Effect> = new Set()
       const queue = this.queue;
@@ -245,27 +260,28 @@ export class EffectQueue {
       this.runningEffects = false;
    }
 
-   runEagerEffects() {
-      const eagerEffects = this.eagerQueue
-      if (!eagerEffects) return;
-      for (const effect of eagerEffects) {
-         if (!effect.task) {
-            continue;
-         }
-         // stops infinite loops
-         if (effectStack.has(effect)
-            || $currentEffectCycle().effectStack.has(effect)
-         ) {
-            console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
-            continue;
-         }
-         try {
-            effectStack.push(effect);
-            effect.task() // What about async tasks? T_T How will it affect this system?
-         }
-         finally {
-            effectStack.pop()
-         }
-      }
-   }
+   // runEagerEffects() {
+      
+   //    const eagerEffects = this.eagerQueue
+   //    if (!eagerEffects) return;
+   //    for (const effect of eagerEffects) {
+   //       if (!effect.task) {
+   //          continue;
+   //       }
+   //       // stops infinite loops
+   //       if (effectStack.has(effect)
+   //          || $currentEffectCycle().effectStack.has(effect)
+   //       ) {
+   //          console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
+   //          continue;
+   //       }
+   //       try {
+   //          effectStack.push(effect);
+   //          effect.task() // What about async tasks? T_T How will it affect this system?
+   //       }
+   //       finally {
+   //          effectStack.pop()
+   //       }
+   //    }
+   // }
 }

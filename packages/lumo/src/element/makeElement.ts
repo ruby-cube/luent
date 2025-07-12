@@ -1,5 +1,5 @@
 import { DOMNode, Slot } from "../component/Component";
-import { isIon, watch, isManagedDerivation, Ion, MutableIon } from "@rue/quarky";
+import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, JSXNode, StyleInput, RawJSXNode } from "../node/makeNode";
 import { $listen, SustainedListenerOptions } from "@rue/flask";
@@ -16,7 +16,7 @@ import { MaybeIon } from "../component/Input";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 import { isInnerHTMLKit, mountInnerHTML, setUpInnerHTML } from "../node/InnerHTML";
-import { INTERNAL_RENDER, PRERENDER } from "../render-cycle";
+import { INTERNAL_RENDER, PRERENDER, queueInternalRender } from "../render-cycle";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -71,7 +71,7 @@ export function makeElement(
       runWithXMLNamespace(() => {
          const rawOutput = normalizeToArray(toOutput(_Slot))
          const flattenedOutput = flattenJSXOutput(rawOutput)
-         if (isInnerHTMLKit(rawOutput[0])){
+         if (isInnerHTMLKit(rawOutput[0])) {
             const innerHTML = setUpInnerHTML(rawOutput[0], domNode)
             mountInnerHTML(innerHTML, domNode)
          }
@@ -84,7 +84,7 @@ export function makeElement(
    return domNode;
 }
 
-function toOutput(value: unknown){
+function toOutput(value: unknown) {
    return isFunction(value) ? value() : value;
 }
 
@@ -226,9 +226,11 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
    if (!('mu:value' in attributes))
       return;
    const ion = attributes['mu:value'];
-   watch(ion, ({ current }) => {
-      element.value = toString(current)
-   }, { eager: true, phase: INTERNAL_RENDER })
+   watch(ion, () => {
+      queueInternalRender(() => {
+         element.value = toString(ion())
+      })
+   }, { eager: true, phase: PRERENDER })
    delete attributes['mu:value'];
    if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
@@ -302,9 +304,11 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       const value = attributes[key]
       //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {
-         watch(value, ({ current }) => {
-            setAttribute(node, _key, current)
-         }, { eager: true, phase: INTERNAL_RENDER })
+         watch(value, () => {
+            queueInternalRender(() => {
+               setAttribute(node, _key, value())
+            })
+         }, { eager: true, phase: PRERENDER })
       }
       // else if (isViewBindingKit(value)) {
       //    watch(value.ion, ({ newState }) => {
@@ -514,10 +518,13 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
 
    for (const entry of classes) {
       if (isIon(entry)) {
-         watch(entry, ({ current, previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
-            if (previous) removePreviousClasses(previous, classList)
-            if (current) addClasses(current, classList)
-         }, { eager: true, phase: INTERNAL_RENDER })
+         watch(entry, ({ previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
+            queueInternalRender(() => {
+               const current = entry()
+               if (previous) removePreviousClasses(previous, classList)
+               if (current) addClasses(current, classList)
+            })
+         }, { eager: true, phase: PRERENDER })
       }
       else if (entry) {
          addClasses(entry, classList)
@@ -562,17 +569,32 @@ function addClasses(value: string | Falsey | { [key: string]: Booleanny }, class
    }
 }
 
+// let __debug__=false;
+// // export function initDebugger(){
+// // __debug__ = true
+// // }
 
 function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList) {
+   console.log('&&& SET UP CLASSES')
    for (const key in entry) {
+
       const value = entry[key]
-      if (value && isIon(value)) {
-         watch(value, ({ current, previous }) => {
-            if (current) classList.add(key)
-            else if (previous) classList.remove(key)
+      if (isIon(value)) {
+         if (key === 'completed') {
+            // debugger;
+            console.log('&&& $completed style set up', getCurrentPhase())
+         }
+         //FIX: effect to render completed style is not running because value didn't change...
+         watch(value, ({ previous }) => {
+            // if (key === 'completed') console.log('&&& completed', value())
+            queueInternalRender(() => {
+               // if (key === 'completed') console.log('&&& rendering complete', value())
+               if (value()) classList.add(key)
+               else if (previous) classList.remove(key)
+            })
          }, {
             eager: true,
-            phase: INTERNAL_RENDER
+            phase: PRERENDER
          })
       }
       else if (value) {
@@ -607,9 +629,11 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {
       if (isIon(entry)) {
-         watch(entry, ({ current }/* value: string | AnyObject | Falsey */) => {
-            setUpStyleEntry(style, current);
-         }, { eager: true, phase: INTERNAL_RENDER })
+         watch(entry, (/* value: string | AnyObject | Falsey */) => {
+            queueInternalRender(() => {
+               setUpStyleEntry(style, entry());
+            })
+         }, { eager: true, phase: PRERENDER })
       }
       else {
          setUpStyleEntry(style, entry)
@@ -620,13 +644,16 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
 function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey) {
    if (entry instanceof Object) {
       for (const key in entry) {
+
          const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isIon(value)) {
-            watch(value, ({ current }) => {
-               assignStyleProperty(style, toStylePropertyName(key), current)
+            watch(value, () => {
+               queueInternalRender(() => {
+                  assignStyleProperty(style, toStylePropertyName(key), value())
+               })
             }, {
                eager: true,
-               phase: INTERNAL_RENDER
+               phase: PRERENDER
                // __devName: 'setUpStyles', 
             })
          }

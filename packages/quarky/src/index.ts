@@ -11,6 +11,7 @@ export * from "./ion/type-utils" //TODO: limit exports to public api
 export * from "./watch/watch" //TODO: limit exports to public api
 export * from "./__notes__/x_watch-debug" //TODO: limit exports to public api
 export * from "./effect-cycle/EffectCycle" //TODO: limit exports to public api
+export * from "./effect-cycle/EffectQueue" //TODO: limit exports to public api
 export * from "./ionized/TimeTraveler" //TODO: limit exports to public api
 export * from "./ionized/ionize" //TODO: limit exports to public api
 export * from "./ionized/inert" //TODO: limit exports to public api

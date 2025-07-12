@@ -9,7 +9,7 @@ import { isObject, noop } from "@rue/utils";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
 import { Ion, isIon, toValue } from "../ion/Ion";
 import { $currentEffectCycle, scheduleEagerEffect } from "../effect-cycle/ReactivitySystem";
-import { SYNC } from "../effect-cycle/EffectCycle";
+import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { WatchSubjects } from "./watch";
 import { detachedCall, IonicCompound } from "../ionic/IonicCompound";
 import { createWatchedDerivation } from "../ionic/WatchedDerivation";
@@ -95,7 +95,7 @@ class Multisubject implements WatchSubject {
       return values;
    }
 
-   linkEffect(effect: Effect, phase: string, eager: boolean, initial?: boolean): void {
+   linkEffect(effect: Effect, phase: Phase, eager: boolean, initial?: boolean): void {
       const subjects = this.subjects;
       for (const subject of subjects) {
          if (!isWatchSubject(subject)) continue;
@@ -127,7 +127,7 @@ export function isGetter(value: unknown): value is () => any {
 export interface WatchSubject {
    inert: boolean,
    trackedCall: () => unknown
-   linkEffect(effect: Effect, phase: string, eager: boolean, initial?: boolean): void
+   linkEffect(effect: Effect, phase: Phase, eager: boolean, initial?: boolean): void
    // unlinkEffect(effect: Effect, phase: string): void
 }
 
@@ -149,7 +149,7 @@ class IonizedModelSubject implements WatchSubject {
       return this.model
    }
 
-   linkEffect(effect: Effect, phase: string, eager: boolean, initial: boolean = false) {
+   linkEffect(effect: Effect, phase: Phase, eager: boolean, initial: boolean = false) {
       linkEffectToAtom(this.watchedAtom, effect, phase, eager, initial)
    }
 
@@ -216,9 +216,9 @@ class IonSubject implements WatchSubject {
    }
 
    private effect!: Effect;
-   private phase!: string;
+   private phase!: Phase;
 
-   linkEffect(effect: Effect, phase: string, eager: boolean, initial: boolean = false) {
+   linkEffect(effect: Effect, phase: Phase, eager: boolean, initial: boolean = false) {
       this.effect = effect;
       this.phase = phase;
       linkEffectToAtoms(this.watchedAtoms, effect, phase, eager, initial)
@@ -250,13 +250,13 @@ class IonSubject implements WatchSubject {
 }
 
 
-function linkEffectToAtoms(atoms: Watched[], effect: Effect, phase: string, eager: boolean = false, initial: boolean = false) {
+function linkEffectToAtoms(atoms: Watched[], effect: Effect, phase: Phase, eager: boolean = false, initial: boolean = false) {
    for (const atom of atoms) {
       linkEffectToAtom(atom, effect, phase, eager, initial)
    }
 }
 
-function linkEffectToAtom(atom: Watched | undefined, effect: Effect, phase: string, eager: boolean = false, initial: boolean = false) {
+function linkEffectToAtom(atom: Watched | undefined, effect: Effect, phase: Phase, eager: boolean = false, initial: boolean = false) {
    if (!atom) return;
    atom.link(effect, phase)
    if (initial && eager) {
@@ -313,7 +313,7 @@ export class IonicTaskSubject implements WatchSubject {
    }
 
    effect!: Effect
-   phase!: string
+   phase!: Phase
 
    private retrackedCall() {
       if (!this.retrack) return this.ionicEffect()
@@ -324,7 +324,7 @@ export class IonicTaskSubject implements WatchSubject {
       linkEffectToAtoms(toWatchedAtoms(ionicEffect.asCompound.atoms), effect, this.phase)
    }
 
-   linkEffect(effect: Effect, phase: string, eager: boolean, initial?: boolean): void {
+   linkEffect(effect: Effect, phase: Phase, eager: boolean, initial?: boolean): void {
       this.effect = effect;
       this.phase = phase;
       linkEffectToAtoms(this.watchedAtoms, effect, phase, eager, initial)

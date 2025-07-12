@@ -73,7 +73,7 @@ export function createMaybeMemoizedIon(
          fn = getMemoizedState
          ion.state = value;
          assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
-         const effect = ion.markDirtyEffect = new Effect(() => ion.dirty = true)
+         const effect = ion.markDirtyEffect = new Effect(() => (/* console.trace('&&& mark dirty') */ ion.dirty = true))
          linkAtoms(compound, effect)
          creationFlask?.onDiscard(() => {
             effect.destroy()
