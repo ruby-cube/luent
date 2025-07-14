@@ -13,7 +13,7 @@ import { Capsule } from "../capsule/Capsule";
 import { MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { asPion, asPionQuark, $atomicPion } from "./Pion";
 import { CompoundMorph } from "../compound/Compound";
-import { isWatchable, Watchable } from "../watch/Watched";
+import { isWatchable, Watchable } from "../watch/WatchedAtom";
 // import { IonizedCompound } from "./IonizedCompound";
 import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp } from "./IonizedMethods";
 import { isInert } from "./inert";
@@ -152,6 +152,12 @@ export function useTrackableOp(
    return function trackableOp(...args: any[]) {
       if (__DEV__) emitSignal();
       const _args = input(args);
+      if (op === 'indexOf') console.log('&&& indexOf', args)
+      if (op === 'indexOf') console.log('&&& indexOf', input)
+      if (op === 'indexOf') console.log('&&& indexOf', _args)
+      if (op === 'indexOf') console.log('&&& indexOf', input(_args))
+      if (op === 'indexOf') console.log('&&& indexOf', _args[0] === transformThis(target, _args)[0])
+      if (op === 'indexOf') console.log('&&& indexOf', _args[0], transformThis(target, _args)[0])
       trackAtom(asTrackable(track(ionized, op, _args)))
       return output(fn.call(transformThis(target, _args), ..._args), ionized)
    }
@@ -783,9 +789,9 @@ export function reactiveSetter(
 // export function triggerIonizedModel(
 //    model: IonizedModel
 // ) {
-//    const { asParticle, asWatched } = quarkOf(model);
+//    const { asParticle, asWatchedAtom } = quarkOf(model);
 //    asParticle?.triggerCompounds()
-//    asWatched?.triggerEffects()
+//    asWatchedAtom?.triggerEffects()
 // }
 
 

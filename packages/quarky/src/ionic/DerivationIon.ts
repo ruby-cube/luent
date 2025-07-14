@@ -4,7 +4,7 @@ import { Flask, getActiveFlask } from "@rue/flask";
 import { quarkOf, QUARK, hasQuark, QuarkOf, Quark } from "../Quark";
 import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { emitSignal } from "../debug/debug";
-import { asWatched } from "../watch/Watched";
+import { asWatchedAtom } from "../watch/WatchedAtom";
 import { Ion } from "../ion/Ion";
 import { Traceable } from "../debug/Traceable";
 import { debug } from "@rue/utils";
@@ -73,7 +73,7 @@ export function createMaybeMemoizedIon(
          fn = getMemoizedState
          ion.state = value;
          assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
-         const effect = ion.markDirtyEffect = new Effect(() => (/* console.trace('&&& mark dirty') */ ion.dirty = true))
+         const effect = ion.markDirtyEffect = new Effect(() => (ion.dirty = true))
          linkAtoms(compound, effect)
          creationFlask?.onDiscard(() => {
             effect.destroy()
@@ -138,7 +138,7 @@ export function createMaybeMemoizedIon(
 function retrackedCall(ion: ManagedDerivation) {
    const { derivation, markDirtyEffect } = ion
    const compound = ion.asCompound
-   markDirtyEffect!.unlink()
+   markDirtyEffect!.remove()
    const value = compound.retrackedCall(() => derivation(ion.state))
    linkAtoms(compound, markDirtyEffect!)
    return value;
@@ -147,7 +147,7 @@ function retrackedCall(ion: ManagedDerivation) {
 function linkAtoms(compound: IonicCompound, effect: Effect) {
    const atoms = compound.atoms;
    for (const atom of atoms) {
-      asWatched(atom).link(effect, SYNC)
+      asWatchedAtom(atom).link(effect, SYNC)
    }
 }
 

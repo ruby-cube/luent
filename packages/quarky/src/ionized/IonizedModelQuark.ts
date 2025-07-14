@@ -1,7 +1,7 @@
 import type { AnyObject } from "@rue/types"
 import { __DEV__getTrace } from "../../../flask/debug"
 import { IonizedModel } from "./IonizedModel"
-import { trigger, Watched } from "../watch/Watched"
+import { trigger, WatchedAtom } from "../watch/WatchedAtom"
 import { Quark, QuarkOf } from "../Quark"
 import { Mutable, Mutation } from "../Mutable"
 import { Traceable } from "../debug/Traceable"
@@ -66,9 +66,9 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
    asMutable: Mutable = new Mutable()
 
-   asWatched: Watched | undefined
+   asWatchedAtom: WatchedAtom | undefined
 
-   // watch: (this: Watchable) => Watched<Watchable>
+   // watch: (this: Watchable) => WatchedAtom<Watchable>
    // unwatch: () => void
 
    private appendedProperties: Set<PropertyKey> = new Set()

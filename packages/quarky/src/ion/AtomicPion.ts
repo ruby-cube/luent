@@ -1,5 +1,5 @@
 import { toRaw } from "../ionized/ionize";
-import { trigger, Watchable, Watched } from "../watch/Watched";
+import { trigger, Watchable, WatchedAtom } from "../watch/WatchedAtom";
 import { Quark, QUARK, QuarkOf } from "../Quark";
 import { getActiveTracker } from "../ionic/IonicCompound";
 import { IonizedModel } from "../ionized/IonizedModel";
@@ -55,7 +55,7 @@ export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
 
    ionized: boolean = false;
 
-   asWatched: Watched | undefined
+   asWatchedAtom: WatchedAtom | undefined
    trigger = trigger
 
    asTraceable: Traceable = new Traceable()

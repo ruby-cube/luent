@@ -1,4 +1,4 @@
-import { Watched } from "../quarky/src/watch/Watched";
+import { WatchedAtom } from "../quarky/src/watch/WatchedAtom";
 
 export class EffectVine {
    private head: EffectLink | undefined
@@ -150,7 +150,7 @@ export class EffectLink {
 
    constructor(
       public task: () => void,
-      public watchSubject?: Watched
+      public watchSubject?: WatchedAtom
    ) { }
 
    /**

@@ -65,7 +65,7 @@ function createPion(model: IonizedModel, key: PropertyKey, pionQuark: Quark & An
 //    key: PropertyKey,
 // ) {
 //    const pion = quarkOf(model).pions.get(key)
-//    return pion && (pion.asWatched || pion.asParticle) ? pion : undefined
+//    return pion && (pion.asWatchedAtom || pion.asParticle) ? pion : undefined
 // }
 
 export function $atomicPion(
@@ -77,5 +77,5 @@ export function $atomicPion(
 }
 
 // export function triggerPion(quark: PionQuark | undefined) {
-//    quark?.asWatched?.triggerEffects()
+//    quark?.asWatchedAtom?.triggerEffects()
 // }

@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { component, For, If, Else } from "@rue/lumo"
-import { ion, ionicTask, ionize, Ionized, initDebugger } from "@rue/quarky"
+import { ion, ionicTask, ionize, Ionized, initDebugger, toRaw } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 
 
@@ -48,7 +48,7 @@ export function TodoMVC() {
    // persist state
    ionicTask(() => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify($todos())) //FIX: not reactive
-   }, {phase: PRERENDER})
+   }, { phase: PRERENDER })
 
    function toggleAll(e: RadioInputEvent) {
       $todos().forEach((todo) => (todo.completed = e.target.checked))
@@ -66,8 +66,11 @@ export function TodoMVC() {
       }
    }
 
-   function removeTodo(todo: Todo) {
+   function removeTodo(todo: Ionized<Todo>) {
       const index = $todos().indexOf(todo)
+      console.log("&%% same raw", toRaw(todo)===toRaw($todos()[0]))
+      console.log("&%% same proxy", todo === $todos()[0])
+      console.log('&%% removing index', index, todo, $todos())
       $todos().splice(index, 1)
    }
 
@@ -108,7 +111,7 @@ export function TodoMVC() {
 
    return component(
       <>
-      <button on:click={initDebugger}>debug</button>
+         <button on:click={initDebugger}>debug</button>
          <section class="todoapp">
             <header class="header">
                <h1>Todos</h1>
@@ -129,7 +132,7 @@ export function TodoMVC() {
                />
                <label for="toggle-all" on:click={e => console.log('clicked')}>Mark all as complete</label>
                <ul class="todo-list">
-                  {For($filteredTodos, (todo, _, $isEditing = ion(() => todo === $editedTodo())) => (console.log('&&& rerendering list item'),
+                  {For($filteredTodos, m => m.id, (todo, _, $isEditing = ion(() => todo === $editedTodo())) => (console.log('&&& rerendering list item'),
                      <li class={["todo", { completed: todo.$completed, editing: $isEditing }]}>
                         <div class="view">
                            <input class="toggle" type="checkbox" mu:checked={todo.$completed} />

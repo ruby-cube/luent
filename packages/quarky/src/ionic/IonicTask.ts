@@ -1,6 +1,6 @@
 import { debug, isFunction, noop } from "@rue/utils";
 import { triggerEffects } from "../compound/Compound";
-import { Watched } from "../watch/Watched";
+import { WatchedAtom } from "../watch/WatchedAtom";
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 
 /**
@@ -42,7 +42,7 @@ export function createIonicTask(task: IonicTask, retrack: boolean = true) {
    }
 
    effect.asCompound = compound;
-   effect.asWatched = new Watched(effect as IonicCompoundMorph)
+   effect.asWatchedAtom = new WatchedAtom(effect as IonicCompoundMorph)
 
    return effect
 }

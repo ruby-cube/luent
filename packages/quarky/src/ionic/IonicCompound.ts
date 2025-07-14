@@ -1,7 +1,7 @@
 import { Compound, CompoundMorph } from "../compound/Compound";
 import { isIonizedModel } from "../ionized/ionize";
 import { Quark, quarkOf } from "../Quark";
-import { Watchable } from "../watch/Watched";
+import { Watchable } from "../watch/WatchedAtom";
 import { ManagedDerivation } from "./DerivationIon";
 
 const trackerStack: (IonicCompound | null)[] = []

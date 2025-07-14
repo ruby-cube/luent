@@ -27,7 +27,7 @@ export function hasMaybeIonized(
       fail: unknown
    } = {
          passRaw: () => true,
-         passIonized: (key, rawKey?) =>{
+         passIonized: (key, rawKey?) => {
             target.delete(key)
             target.add(rawKey)
             return true;
@@ -108,7 +108,10 @@ export const trackableCreativeOpWithArgs: TrackableOpDef = {
 }
 
 export const trackableCheckOp: TrackableOpDef = {
-   input: (args) => (args[0] = toRaw(args[0]), args),
+   input: (args) => {
+      args[0] = toRaw(args[0]);
+      return args
+   },
    this: rawDecoy,
    track: trackModel
 }

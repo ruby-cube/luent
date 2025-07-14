@@ -11,7 +11,7 @@ import { IonizedModel } from "../ionized/IonizedModel";
 import { Traceable } from "./Traceable";
 import { debug as _debug } from "@rue/utils";
 import { Mutation } from "../Mutable";
-import { Watchable } from "../watch/Watched";
+import { Watchable } from "../watch/WatchedAtom";
 
 // export interface DEVLabellable {
 //    labelName?: string

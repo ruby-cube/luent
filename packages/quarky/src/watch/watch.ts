@@ -107,16 +107,12 @@ export function watch<
    }
 
    let hasChanged = getHasChangedFn(options, prevState)
-console.log('&&& set up watcher!')
+   
    function wrappedEffect() {
-      console.log('&&& effect!', prevState)
       const newState = watchSubject.trackedCall() // retracking happens here //TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
-      console.log('&&& effect!', newState)
-      console.log('&&& effect eager?', options.eager)
       if (!options.eager && !hasChanged(prevState, newState)) {
          return;
       }
-      console.log('&&& effect eager!', options.eager)
 
       try {
          (<EffectTask>effect)(new StateChangeEvent(prevState, newState, !!options.eager))

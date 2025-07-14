@@ -5,7 +5,7 @@ import { Ion } from "../ion/Ion";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { asPionQuark } from "../ionized/Pion";
 import { Quark, QUARK, QuarkOf, quarkOf } from "../Quark";
-import { Watched } from "../watch/Watched";
+import { WatchedAtom } from "../watch/WatchedAtom";
 import { createMaybeMemoizedIon, DERIVATION_ION, ManagedDerivation } from "./DerivationIon";
 import { IonicCompound } from "./IonicCompound";
 
@@ -43,7 +43,7 @@ export class DerivationPionQuark implements QuarkOf<$DerivedPionState> {
 
    asCompound: IonicCompound | undefined;
 
-   asWatched?: Watched
+   asWatchedAtom?: WatchedAtom
 
    asTraceable: Traceable = new Traceable()
 

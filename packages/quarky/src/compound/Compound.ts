@@ -1,4 +1,4 @@
-import { Watchable } from "../watch/Watched"
+import { Watchable } from "../watch/WatchedAtom"
 import { isObject } from "@rue/utils"
 
 
@@ -64,5 +64,5 @@ export class Compound {
 //  * @param compound 
 //  */
 // export function triggerEffects(compound: Compound) {
-//    compound.quark.asWatched?.triggerEffects()
+//    compound.quark.asWatchedAtom?.triggerEffects()
 // }

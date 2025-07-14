@@ -4,7 +4,7 @@ import { attachCapsuleMethods, Capsule } from "../capsule/Capsule";
 import { Ion } from "../ion/Ion";
 import { IonicCompound } from "./IonicCompound";
 import { Traceable } from "../debug/Traceable";
-import { Watchable } from "../watch/Watched";
+import { Watchable } from "../watch/WatchedAtom";
 
 //NOTE: DEFERRED / DEPRECATED until further notice
 
@@ -21,7 +21,7 @@ import { Watchable } from "../watch/Watched";
 * The getter ion is an interesting entity because
 * it is not memoized, but it 
 * 
-* How is the getter ion different from Watched Derivation?
+* How is the getter ion different from WatchedAtom Derivation?
 * 
 * Both: 
 * - may or may not be reactive (we don't know until we call)

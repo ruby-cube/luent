@@ -575,20 +575,12 @@ function addClasses(value: string | Falsey | { [key: string]: Booleanny }, class
 // // }
 
 function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList) {
-   console.log('&&& SET UP CLASSES')
    for (const key in entry) {
 
       const value = entry[key]
       if (isIon(value)) {
-         if (key === 'completed') {
-            // debugger;
-            console.log('&&& $completed style set up', getCurrentPhase())
-         }
-         //FIX: effect to render completed style is not running because value didn't change...
          watch(value, ({ previous }) => {
-            // if (key === 'completed') console.log('&&& completed', value())
             queueInternalRender(() => {
-               // if (key === 'completed') console.log('&&& rendering complete', value())
                if (value()) classList.add(key)
                else if (previous) classList.remove(key)
             })

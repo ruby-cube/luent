@@ -10,13 +10,13 @@ export class Effect {
       public task: Task | null,
    ) { }
 
-   private atoms: Set<PhaseAtom> = new Set()
+   private atoms: Set<PhaseEffects> = new Set()
 
-   isLinked(atom: PhaseAtom) {
+   isLinked(atom: PhaseEffects) {
       return this.atoms.has(atom)
    }
 
-   link(atom: PhaseAtom) {
+   link(atom: PhaseEffects) {
       this.atoms.add(atom)
    }
 
@@ -61,9 +61,9 @@ export const effectStack = {
 
 
 export class EffectQueue {
-   private atoms: PhaseAtom[] = []
+   private atoms: PhaseEffects[] = []
 
-   addAtom(atom: PhaseAtom) {
+   addAtom(atom: PhaseEffects) {
       this.atoms.push(atom)
    }
 
@@ -101,7 +101,7 @@ export class EffectQueue {
       effect.queued = true;
    }
 
-   scheduleEffects(atom: PhaseAtom){
+   scheduleEffects(atom: PhaseEffects){
       atom.scheduleEffects(this)
    }
 
@@ -157,7 +157,6 @@ export class EffectQueue {
    }
 
    runEagerEffects() {
-      console.log('&&& runEagerEffects', this)
       const eagerEffects = this.eagerQueue
       if (!eagerEffects) return;
       for (const effect of eagerEffects) {
@@ -189,7 +188,7 @@ export class EffectQueue {
 
 
 
-export class PhaseAtom {
+export class PhaseEffects {
 
    private triggered: boolean = false
    private currentQueue: EffectQueue | undefined; // undefined if not triggered

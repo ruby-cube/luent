@@ -1,12 +1,12 @@
 import { Traceable } from "../debug/Traceable";
 import { Quark, quarkOf } from "../Quark";
-import { trigger, Watchable, Watched } from "../watch/Watched";
+import { trigger, Watchable, WatchedAtom } from "../watch/WatchedAtom";
 import { IonizedModel } from "./IonizedModel";
 
 export class AtomicOp implements Quark, Watchable {
    quarkType: string | symbol = 'atomic op'
    asTraceable: Traceable;
-   asWatched: Watched | undefined;
+   asWatchedAtom: WatchedAtom | undefined;
    trigger = trigger
 
    constructor(

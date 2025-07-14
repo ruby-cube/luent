@@ -1,7 +1,6 @@
 import { setImmediate } from "@rue/thread";
-import { Effect, EffectQueue, PhaseAtom } from "./EffectQueue";
+import { Effect, EffectQueue, PhaseEffects } from "./EffectQueue";
 import { EffectCycleManager, getCurrentPhase } from "./ReactivitySystem";
-import { getCurrentIndex } from "../../../lumo/src/iteratives/ListRenderKit";
 
 export const SYNC = 'SYNC' as const
 export const UPDATE_CYCLE_END = 'UCE' as const
@@ -62,7 +61,6 @@ export class EffectCycle {
    }
 
    scheduleEagerEffect(effect: Effect, phase: Phase) {
-      console.log('&&& scheduleEager', phase, getCurrentPhase())
       const adjustedPhase = this.adjustPhase(phase)
       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
       queue.scheduleEagerEffect(effect)
@@ -78,11 +76,11 @@ export class EffectCycle {
       queue.scheduleTask(effect)
    }
 
-   scheduleEffects(atom: PhaseAtom, phase: Phase) {
+   scheduleEffects(effects: PhaseEffects, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
       if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted')
       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
-      queue.scheduleEffects(atom)
+      queue.scheduleEffects(effects)
       if (phase === SYNC) {
          queue.runEffects()
       }

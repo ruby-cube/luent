@@ -373,7 +373,7 @@ export function toRaw<T>(target: T): ToRaw<T> {
 //     }
 //     // clean up
 //     const prop = asObservedProp(reactive, key)
-//     const watchSubject = asWatched(prop)
+//     const watchSubject = asWatchedAtom(prop)
 //     watchSubject.onUnwatched(() => {
 //         unobserve(prop, isIndex ? () => {
 //             (<MetaIonicCollection>modelQuark).deleteObservedEntryKey(key)
@@ -384,7 +384,7 @@ export function toRaw<T>(target: T): ToRaw<T> {
 
 
 // function unobserve(prop: ObservedProp) {
-//     const watchSubject = asWatched(prop)
+//     const watchSubject = asWatchedAtom(prop)
 //     const atom = asParticle(prop)
 //     if (watchSubject.watchCount === 0 && atom.compounds.size === 0) {
 //         prop.discard()

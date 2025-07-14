@@ -1,12 +1,12 @@
 import { isObject } from "@rue/utils";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
-import { Effect, PhaseAtom } from "../effect-cycle/EffectQueue";
+import { Effect, PhaseEffects } from "../effect-cycle/EffectQueue";
 import { $currentEffectCycle } from "../effect-cycle/ReactivitySystem";
 import { hasQuark, Quark, QUARK } from "../Quark";
 
 
 export type Watchable = {
-   asWatched: Watched | undefined,
+   asWatchedAtom: WatchedAtom | undefined,
    trigger: () => void
 }
 
@@ -20,36 +20,36 @@ export type Watchable = {
 export function trigger( //TODO: figure out which abstraction this belongs to ...  atomic ions, atomic pions, memoized derivations, but not terminal compound
    this: Watchable,
 ) {
-   this.asWatched?.triggerEffects()
+   this.asWatchedAtom?.triggerEffects()
 }
 
 export function isWatchable(value: unknown): value is Watchable & Quark {
-   return isObject(value) && 'asWatched' in value;
+   return isObject(value) && 'asWatchedAtom' in value;
 }
 export function isWatchableEntity(value: unknown): value is { [QUARK]: Watchable & Quark } {
-   return hasQuark(value) && 'asWatched' in value[QUARK];
+   return hasQuark(value) && 'asWatchedAtom' in value[QUARK];
 }
 
-export function asWatched(watchable: Watchable) {
-   return watchable.asWatched ?? (watchable.asWatched = new Watched())
+export function asWatchedAtom(watchable: Watchable) {
+   return watchable.asWatchedAtom ?? (watchable.asWatchedAtom = new WatchedAtom())
 }
 
 // export function unwatch(this: Watchable) {
-//    this.asWatched = undefined
+//    this.asWatchedAtom = undefined
 // }
 
-export class Watched {
+export class WatchedAtom {
 
    constructor(
       // private watchable: Watchable
    ) { }
 
-   private effects: Map<Phase, PhaseAtom> = new Map()
+   private effects: Map<Phase, PhaseEffects> = new Map()
 
    private watchCount: number = 0
 
-   private initializeAtom(phase: Phase) {
-      const atom: PhaseAtom = new PhaseAtom(phase)
+   private initializePhase(phase: Phase) {
+      const atom: PhaseEffects = new PhaseEffects(phase)
       this.effects.set(phase, atom);
       return atom
    }
@@ -59,8 +59,8 @@ export class Watched {
      * @param effect 
      */
    link(effect: Effect, phase: Phase) {
-      const atom = this.effects.get(phase) ?? this.initializeAtom(phase);
-      atom.link(effect)
+      const phaseQueue = this.effects.get(phase) ?? this.initializePhase(phase);
+      phaseQueue.queue(effect)
       this.watchCount++
    }
 
@@ -69,7 +69,7 @@ export class Watched {
    //  * @param effect 
    //  */
    // unlink(effect: Effect, phase: string) {
-   //    const atom = this.effects.get(phase) ?? this.initializeAtom(phase);
+   //    const atom = this.effects.get(phase) ?? this.initializePhase(phase);
    //    atom.unlink(effect)
    //    if (this.watchCount === 0) {
    //       this.emitDiscard()
@@ -94,7 +94,7 @@ export class Watched {
    // }
 
    // private emitDiscard() {
-   //    this.watchable.asWatched = undefined;
+   //    this.watchable.asWatchedAtom = undefined;
    //    for (const cleanUp of this.cleanups) {
    //       cleanUp()
    //    }

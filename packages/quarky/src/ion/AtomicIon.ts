@@ -5,7 +5,7 @@ import { __DEV__getTrace, } from "../../../flask/debug";
 import { __DEV__trace } from "../debug/debug";
 import { hasQuark, Quark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { MutableCapsule } from "../capsule/Capsule";
-import { trigger, Watchable } from "../watch/Watched";
+import { trigger, Watchable } from "../watch/WatchedAtom";
 import { Mutable, MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
@@ -69,7 +69,7 @@ export function createAtomicIon(
       asMutable: new Mutable(),
       asTraceable: new Traceable(),
       trigger,
-      asWatched: undefined,
+      asWatchedAtom: undefined,
    }
 
    $state[QUARK] = quark

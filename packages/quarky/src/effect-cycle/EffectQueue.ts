@@ -1,5 +1,4 @@
 import { Phase, SYNC } from "./EffectCycle";
-import { $currentEffectCycle } from "./ReactivitySystem";
 
 type Task = (...args: any[]) => void
 
@@ -8,23 +7,23 @@ export class Effect {
       public task: Task | null,
    ) { }
 
-   private atoms: Set<PhaseAtom> = new Set()
+   private phases: Set<PhaseEffects> = new Set()
 
-   isLinked(atom: PhaseAtom) {
-      return this.atoms.has(atom)
+   isIn(atom: PhaseEffects) {
+      return this.phases.has(atom)
    }
 
-   link(atom: PhaseAtom) {
-      this.atoms.add(atom)
+   addTo(atom: PhaseEffects) {
+      this.phases.add(atom)
    }
 
    destroy() {
-      this.atoms.clear()
+      this.phases.clear()
       this.task = null;
    }
 
-   unlink() {
-      this.atoms.clear()
+   remove() {
+      this.phases.clear()
    }
 }
 
@@ -56,7 +55,7 @@ const effectStack: Effect[] = []
 // }
 
 
-export class PhaseAtom {
+export class PhaseEffects {
    effects: Effect[] = []
    nextEffects: Effect[] | undefined
 
@@ -173,9 +172,9 @@ export class PhaseAtom {
    * To be called by watch() when initializing watcher
    * @param effect 
    */
-   link(effect: Effect) {
-      if (effect.isLinked(this)) return;
-      effect.link(this)
+   queue(effect: Effect) {
+      if (effect.isIn(this)) return;
+      effect.addTo(this)
 
       if (this.runningEffects) {
          const nestedEffects = this.nextEffects ?? (this.nextEffects = [])
@@ -196,28 +195,28 @@ __debug__ = true
 }
 
 export class EffectQueue {
-   private extendedQueue: PhaseAtom[] | undefined;
-   private queue: PhaseAtom[] = []
-   private eagerQueue: PhaseAtom | undefined;
+   private extendedQueue: PhaseEffects[] | undefined;
+   private queue: PhaseEffects[] = []
+   private eagerQueue: PhaseEffects | undefined;
 
-   private taskQueue: PhaseAtom | undefined;
+   private taskQueue: PhaseEffects | undefined;
 
 
    constructor(private phase: Phase) { }
 
    scheduleTask(task: Effect) {
-      const taskQueue = this.taskQueue ?? (this.taskQueue = new PhaseAtom(this.phase))
-      taskQueue.link(task)
+      const taskQueue = this.taskQueue ?? (this.taskQueue = new PhaseEffects(this.phase))
+      taskQueue.queue(task)
       this.scheduleEffects(taskQueue)
    }
 
    scheduleEagerEffect(effect: Effect) {
-      const eagerQueue = this.eagerQueue ?? (this.eagerQueue = new PhaseAtom(this.phase))
-      eagerQueue.link(effect)
+      const eagerQueue = this.eagerQueue ?? (this.eagerQueue = new PhaseEffects(this.phase))
+      eagerQueue.queue(effect)
       this.scheduleEffects(eagerQueue)
    }
 
-   scheduleEffects(atom: PhaseAtom) {
+   scheduleEffects(atom: PhaseEffects) {
 
       if (this.runningEffects && !atom.requeued) {
          // a currentEffect during runningEffects means the effect triggered 
