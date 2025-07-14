@@ -51,12 +51,12 @@ export class ThisFlask {
    //    return this.flask.onRemount
    // }
 
-   onMounted(task: (initial: boolean) => void) {
+   atMounted(task: (initial: boolean) => void) {
       this.flask.onInitialMount(() => task(true))
       this.flask.onRemount(() => task(false))
    }
 
-   onUnmount(task: (final: boolean) => void) {
+   atUnmount(task: (final: boolean) => void) {
       this.flask.onDemount(() => task(false))
       this.flask.onDiscard(() => task(true))
    }

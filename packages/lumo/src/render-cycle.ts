@@ -6,8 +6,8 @@ export const {
    PRERENDER,
    INTERNAL_RENDER,
    RENDER,
-   POSTRENDER,
-   onEffectCycleComplete: onRenderCycleEnd
+   POSTRENDER
+   // onEffectCycleComplete: onRenderCycleEnd
 } = useReactivitySystem()
 
 
@@ -17,6 +17,7 @@ export const onRender = createEffectCycleHook(RENDER)
 export const onPostrender = createEffectCycleHook(POSTRENDER)
 
 export const queuePrerender = createEffectCycleScheduler(PRERENDER)
+// export const queueInternalRender = (fn: any)=>fn()
 export const queueInternalRender = createEffectCycleScheduler(INTERNAL_RENDER)
 export const queueRender = createEffectCycleScheduler(RENDER)
 export const queuePostrender = createEffectCycleScheduler(POSTRENDER)
@@ -27,7 +28,7 @@ export const $postevent = createAwaitableHook(queuePrerender)
 export const $internalrender = createAwaitableHook(queueInternalRender)
 export const $renderphase = createAwaitableHook(queueRender)
 export const $postrender = createAwaitableHook(queuePostrender)
-export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)
+// export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)
 
 //NOTE: there may be multiple effect cycles per event
 // queueEffect (onPrerender)

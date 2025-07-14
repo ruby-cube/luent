@@ -50,7 +50,6 @@ export class EffectCycleManager {
 
    initCycle() {
       const cycle = this.createCycle()
-      console.log('%%% INIT NEW CYCLE!')
       schedulePhase(cycle, this.phases[0])
       return cycle;
    }
@@ -81,7 +80,6 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
       // console.log(`%%% ${phaseHook} run tasks...`)
       // cycleManager.runTasks(index) // FIX: It's me Hi I'm the problem it's me
       cycle.subphase = 'effects'
-      console.log(`%%% ${phaseHook} run effects...`)
       cycle.runEffects(index)
       cycle.subphase = 'microtasks'
       if (index === finalIndex)
@@ -110,9 +108,9 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
 const cycleManager = new EffectCycleManager('UpdateCycle');
 
 function setUpUpdateCycleManager() {
-   cycleManager.pushPhase(new CyclePhase('PRERENDER', queueTask))
+   cycleManager.pushPhase(new CyclePhase('PRERENDER', queueMicrotask))
    // cycleManager.pushPhase(new CyclePhase('PRE_INTERNAL_RENDER', queueTask))
-   cycleManager.pushPhase(new CyclePhase('INTERNAL_RENDER', queueTask))
+   cycleManager.pushPhase(new CyclePhase('INTERNAL_RENDER', queueMicrotask))
    cycleManager.pushPhase(new CyclePhase('RENDER', queueMicrotask))
    cycleManager.pushPhase(new CyclePhase('POSTRENDER', noop)) //TODO: Think...
    // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
@@ -129,7 +127,7 @@ export function getUpdateCycleCount() {
 type EffectCycleHooks = {
    SYNC: typeof SYNC,
 } & {
-   [key: string]: string
+   [key: string]: Phase
 } & {
    // onEffectCycleComplete: EffectCycleHook
 }

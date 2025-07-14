@@ -3,16 +3,16 @@ import { $thisFlask } from "@rue/flask";
 
 //TODO: API
 
-// onMounted: initial mount       <div on:mounted={doSomething}> <div on:mountedremounted={doSomething}> 
+// atMounted: initial mount       <div at:mounted={doSomething}> <div on:mountedremounted={doSomething}> 
 // onRemounted: subsequent mounts <div on:remounted={doSomething}>
 // onDemount: temporary unmount   <div on:demount={doSomething}> <div on:unmountdemount={doSomething}> 
-// onUnmount: permanent unmount on <div on:unmount={doSomething}>
+// atUnmount: permanent unmount on <div at:unmount={doSomething}>
 
-// onMounted.Remounted(()=>{
+// atMounted.Remounted(()=>{
 // 
 // })
 
-// onUnmount.Demount(()=>{
+// atUnmount.Demount(()=>{
 //
 // })
 
@@ -26,12 +26,12 @@ import { $thisFlask } from "@rue/flask";
 //    $thisFlask().onRemount(task);
 // }
 
-export function onMounted(task: (initial: boolean) => void) {
-   $thisFlask().onMounted(task);
+export function atMounted(task: (initial: boolean) => void) {
+   $thisFlask().atMounted(task);
 }
 
-export function onUnmount(task: (final: boolean) => void) {
-   $thisFlask().onUnmount(task);
+export function atUnmount(task: (final: boolean) => void) {
+   $thisFlask().atUnmount(task);
 }
 
 // export function onDemount(task: () => void) {

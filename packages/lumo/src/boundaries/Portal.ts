@@ -3,7 +3,7 @@ import { isFunction, isObject } from "@rue/utils";
 import { mountNodeEntities } from "../node/mountNodeKits";
 import { NodeEntity, processJSXOutput } from "../node/setUpNodeEntities";
 import { NodePod, removeDOMNodes } from "../node/NodePod";
-import { onMounted, onUnmount } from "../flask/flask-hooks";
+import { atMounted, atUnmount } from "../flask/flask-hooks";
 
 export type MorphConfig = {}
 
@@ -50,10 +50,10 @@ export function Portal(container: SelectorString | Element, render: RenderFuncti
       nodePod,
       mount(parent: Element, fragment: DocumentFragment | undefined) {
          mountNodeEntities(nodeEntities, element)
-         onUnmount(() => {
+         atUnmount(() => {
             removeDOMNodes(nodePod)
          })
-         onMounted((initial) => {
+         atMounted((initial) => {
             if (initial) return;
             mountNodeEntities(nodeEntities, element)
          })

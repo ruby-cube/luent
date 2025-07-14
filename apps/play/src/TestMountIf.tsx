@@ -206,7 +206,7 @@ function ArticleBlock(setup: {
 //     //     console.log("activated yo")
 //     // })
 
-//     // onUnmount(() => {
+//     // atUnmount(() => {
 //     //     console.log("unmount")
 //     // })
 

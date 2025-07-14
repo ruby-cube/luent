@@ -52,6 +52,7 @@ export function createMaybeMemoizedIon(
    retrack: boolean = true,
    quark?: ManagedDerivation,
 ) {
+   console.trace('memoized derivation')
    const creationFlask = getActiveFlask()
 
    let fn = initialize

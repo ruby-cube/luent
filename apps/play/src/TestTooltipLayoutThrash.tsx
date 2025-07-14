@@ -1,4 +1,4 @@
-import { component, Else, For, fromTag, If, JSXNode, measureLayout, NodeRef, onMounted, Portal, RawJSXNode, RenderFunction, RenderSlot } from '@rue/lumo';
+import { component, Else, For, fromTag, If, JSXNode, measureLayout, NodeRef, atMounted, Portal, RawJSXNode, RenderFunction, RenderSlot } from '@rue/lumo';
 import { Ion, ion, isNonNull, watch } from '@rue/quarky';
 
 
@@ -122,7 +122,7 @@ export function Tooltip({ Slot, targetRect } = fromTag<{
    const div = NodeRef('div')
    const $height = ion(undefined as number | undefined)
 
-   onMounted(async () => {
+   atMounted(async () => {
       const divNode = div.node;
       if (!divNode) return;
       const height = await measureLayout(() => divNode.getBoundingClientRect().height)

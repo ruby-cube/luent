@@ -1,5 +1,5 @@
 import { UIDGenerator } from "@rue/utils";
-import { onUnmount } from "../flask/flask-hooks";
+import { atUnmount } from "../flask/flask-hooks";
 
 const genUID = UIDGenerator(11)
 
@@ -8,7 +8,7 @@ export function Style(strings: TemplateStringsArray, ...values: string[]) {
    const cssText = composeCSSText(strings, values)
    const id = genUID()
    const style = insertStyle(cssText, id)
-   onUnmount(() => {
+   atUnmount(() => {
       style.remove();
    })
 }

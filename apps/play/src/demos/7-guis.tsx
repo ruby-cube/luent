@@ -1,6 +1,6 @@
 //@ts-nocheck
 import { For, If } from "@rue/lumo"
-import { component, onUnmount } from "@rue/lumo"
+import { component, atUnmount } from "@rue/lumo"
 import { $$, ion, ionize, ions, watch } from "@rue/quarky"
 
 export function SevenGUIs() {
@@ -152,7 +152,7 @@ function TimerApp() {
 
    reset()
 
-   onUnmount(() => {
+   atUnmount(() => {
       cancelAnimationFrame(handle)
    })
 

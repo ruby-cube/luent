@@ -38,10 +38,10 @@ export function TreeApp() {
       TreeItem = TreeItemView
    ) =>
       <>
-      <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
-         <TreeItem item={treeItem}></TreeItem>
-      </ul>
-      <o--link href='/src/demos/tree-view.css' rel='stylesheet'/>
+         <ul style={{ width: '900px', backgroundColor: '#f6f6f6' }}>
+            <TreeItem item={treeItem}></TreeItem>
+         </ul>
+         <o--link href='/src/demos/tree-view.css' rel='stylesheet' />
       </>
 
    )
@@ -181,13 +181,25 @@ function TreeItemView(input = fromTag<{
                <span>[{($isOpen() ? '-' : '+')}]</span>
             )}
          </div>
-         {If($isFolder, 'create', If($isOpen, 'mount',
+         {/* {If($isFolder, 'create', If($isOpen, 'mount',
             <ul>
                {For(item.children!, m => m, item => (
                   <TreeItem item={item}></TreeItem>
                ))}
                <li class='add' on:click={e => item.addChild()}>+</li>
             </ul>
+         ))} */}
+         {If($isFolder, 'create',()=>(console.log('*** render contents'),
+            <>
+               {If($isOpen, 'mount', ()=>(console.log('*** render nested'),
+                  <ul>
+                     {For(item.children!, m => m, item => (
+                        <TreeItem item={item}></TreeItem>
+                     ))}
+                     <li class='add' on:click={e => item.addChild()}>+</li>
+                  </ul>
+               ))}
+            </>
          ))}
       </li>
    )

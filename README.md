@@ -111,11 +111,11 @@ Provides flasked versions of Vue’s `watch`, `watchEffect` and `computed`.
 Many of the functions in this repo take in configurations that are purely for typing purposes. If using pure Javascript, you can pass in an object or primitive that satisfies the type definition, for example: 
 
 ```ts
-const [castMounted, onMounted] = createHook({
+const [castMounted, atMounted] = createHook({
     data: { id: "" }, // enables type hints
 });
 
-onMounted((data) => {
+atMounted((data) => {
     data // type hint: { id: string }
 });
 ```
@@ -127,13 +127,13 @@ This convention opens the opportunity to remove the argument or config property 
 ```ts
 import { $type } from "@rue/utils";
 
-const [castMounted, onMounted] = createHook({
+const [castMounted, atMounted] = createHook({
     hook: "mounted",
     data: $type as { id: string }, // enables type hints
 });
 
 // can theoretically transform to: (...once I've built the plugin)
-const [castMounted, onMounted] = createHook({
+const [castMounted, atMounted] = createHook({
     hook: "mounted",
 });
 ```

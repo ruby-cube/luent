@@ -1,6 +1,6 @@
 import { marked } from 'marked'
 import { Ion, ion, ionize, watch } from '@rue/quarky'
-import { component, fromTag, NodeRef, onMounted, onUnmount } from '@rue/lumo'
+import { component, fromTag, NodeRef, atMounted, atUnmount } from '@rue/lumo'
 
 
 export function MarkdownApp(
@@ -27,7 +27,7 @@ export function MarkdownApp(
       selectionEnd: undefined as undefined | number,
    })
 
-   onUnmount((final) => {
+   atUnmount((final) => {
       if (final) return;
       const textAreaNode = textArea.node!
       const isActive = document.activeElement !== textAreaNode
@@ -35,7 +35,7 @@ export function MarkdownApp(
       caretRange.selectionEnd = isActive ? textAreaNode.selectionEnd : undefined
    })
 
-   onMounted((initial) => {
+   atMounted((initial) => {
       if (initial) return;
       const textAreaNode = textArea.node!
       const { selectionEnd, selectionStart } = caretRange

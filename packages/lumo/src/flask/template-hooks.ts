@@ -8,11 +8,11 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
    for (const key in hooks) {
       const task = hooks[key]
       switch (key) {
-         case 'on:mounted':
+         case 'at:mounted':
             flask?.onInitialMount(() => task(node, true))
             flask?.onRemount(() => task(node, false))
             break;
-         case 'on:unmount':
+         case 'at:unmount':
             flask?.onDemount(() => task(node, false))
             flask?.onDiscard(() => task(node, true))
             break;
@@ -24,8 +24,8 @@ export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask 
 
 
 const flaskHooks = new Set([
-   'on:mounted',
-   'on:unmount',
+   'at:mounted',
+   'at:unmount',
 ])
 
 export function isFlaskLifecycleHook(attibuteName: string) {

@@ -12,7 +12,6 @@ import { getActiveTracker, trackAtom } from "../ionic/IonicCompound";
 import { Capsule } from "../capsule/Capsule";
 import { MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { asPion, asPionQuark, $atomicPion } from "./Pion";
-import { CompoundMorph } from "../compound/Compound";
 import { isWatchable, Watchable } from "../watch/WatchedAtom";
 // import { IonizedCompound } from "./IonizedCompound";
 import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp } from "./IonizedMethods";

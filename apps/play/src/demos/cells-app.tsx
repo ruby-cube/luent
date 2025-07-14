@@ -135,7 +135,7 @@ function Cell({ $column, $row } = fromTag<{
                   value={cells[$column()][$row()]}
                   on:change={update}
                   on:blur={update}
-                  on:mounted={el => el.focus()}
+                  at:mounted={el => el.focus()}
                />
             )}
             {Else(

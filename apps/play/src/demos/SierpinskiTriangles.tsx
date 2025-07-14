@@ -1,5 +1,6 @@
-import { component, fromTag, measureLayout, onUnmount } from "@rue/lumo";
+import { component, fromTag, measureLayout, atUnmount } from "@rue/lumo";
 import { ion, watch } from "@rue/quarky";
+import { queueTask } from "@rue/thread";
 
 const TARGET = 25;
 
@@ -14,28 +15,52 @@ const lazyBatch = useLazyBatch()
 
 // }
 
+let renderingFrame = false;
 
+function animate(fn: (time: DOMHighResTimeStamp | undefined) => void) {
+   const animation = {
+      nextFrame: undefined as undefined | number
+   }
+
+   prepFrame(undefined)
+
+   function renderFrame(time: DOMHighResTimeStamp) {
+      queueTask(() => {
+         prepFrame(time)
+      })
+   }
+
+   function prepFrame(time: DOMHighResTimeStamp | undefined) {
+      renderingFrame = true;
+      fn(time)
+      renderingFrame = false;
+      animation.nextFrame = requestAnimationFrame(renderFrame)
+   }
+
+   return animation
+}
 
 export function TriangleDemo() {
    const $elapsed = ion(0)
    const $seconds = ion(0)
+   // const $scale = () => {
+   //    const e = ($elapsed() / 1000) % 10;
+   //    return 1 + (e > 5 ? 10 - e : e) / 10;
+   // }
    const $scale = ion(() => {
       const e = ($elapsed() / 1000) % 10;
       return 1 + (e > 5 ? 10 - e : e) / 10;
-   }),
-      start = Date.now(),
-      t = setInterval(() => () => $seconds.state = ($seconds() % 10) + 1, 1000);
+   })
+   const start = Date.now()
+   const t = setInterval(() => $seconds.state = ($seconds() % 10) + 1, 1000);
    // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
-   let f: any;
-   const update = () => {
+   const animation = animate(() => {
       $elapsed.state = Date.now() - start;
-      f = requestAnimationFrame(update);
-   };
-   f = requestAnimationFrame(update);
+   })
 
-   onUnmount(() => {
-      clearInterval(t), cancelAnimationFrame(f);
+   atUnmount(() => {
+      clearInterval(t); cancelAnimationFrame(animation.nextFrame!);
    });
 
    return component(
@@ -58,22 +83,24 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
    }
    s = s / 2;
 
-   const slow = ion($seconds())
+   // const $slow = ion(()=>$seconds())
 
-   watch($seconds, async () => {
-      await lazyBatch(async () => {
-         var e = performance.now() + 0.8;
-         // Artificially long execution time.
-         while (performance.now() < e) { }
-      })
-      slow.state = $seconds()
-   })
+   // const slow = ion($seconds())
+
+   // watch($seconds, async () => {
+   //    // await lazyBatch(async () => {
+   //    //    var e = performance.now() + 0.8;
+   //    //    // Artificially long execution time.
+   //    //    while (performance.now() < e) { }
+   //    // })
+   //    $slow.state = $seconds()
+   // }, {phase: PRERENDER})
 
    return component(
       <>
-         <Triangle x={x} y={y - s / 2} s={s} seconds={slow} />
-         <Triangle x={x - s} y={y + s / 2} s={s} seconds={slow} />
-         <Triangle x={x + s} y={y + s / 2} s={s} seconds={slow} />
+         <Triangle x={x} y={y - s / 2} s={s} seconds={$seconds} />
+         <Triangle x={x - s} y={y + s / 2} s={s} seconds={$seconds} />
+         <Triangle x={x + s} y={y + s / 2} s={s} seconds={$seconds} />
       </>
    );
 };

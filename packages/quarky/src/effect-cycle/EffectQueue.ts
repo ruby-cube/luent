@@ -110,20 +110,16 @@ export class PhaseEffects {
       this.runningEffects = true;
       const effects = this.effects
       const sync = this.phase === SYNC
-      if (sync) console.log('running SYNC')
       const retained = sync ? this.retained : new Set()
-      console.log('%%% -- effects:', effects.length)
       for (const effect of effects) {
          if (!effect.task
             || completedEffects?.has(effect) // prevents repeats within queue (but not across extended queues and phases)
          ) {
-            if (!effect.task) console.log('%%% EMPTY EFFECT')
-            if (completedEffects?.has(effect)) console.log('%%% EMPTY EFFECT')
             continue;
          }
-         // stops infinite loops
+         // // stops infinite loops
          // if (effectStack.has(effect)
-         //    || $currentEffectCycle().effectStack.has(effect)
+         //    // || $currentEffectCycle().effectStack.has(effect)
          // ) {
          //    if (retained.has(effect))
          //       continue;
@@ -243,7 +239,6 @@ export class EffectQueue {
       
       let completed: Set<Effect> = new Set()
       const queue = this.queue;
-      console.log('%%% -- atoms:', queue.length)
       for (const atom of queue) {
          atom.runEffects(completed)
          atom.queued = this.extendedQueue?.length ? atom.requeued : false;
@@ -252,7 +247,6 @@ export class EffectQueue {
       this.queue = this.extendedQueue ?? []
       this.extendedQueue = undefined;
       if (this.queue.length) {
-         console.log('%%% -- more atoms', this.queue.length)
          this.runEffects()
       }
 

@@ -5,7 +5,7 @@ import { EffectCycleManager, getCurrentPhase } from "./ReactivitySystem";
 export const SYNC = 'SYNC' as const
 export const UPDATE_CYCLE_END = 'UCE' as const
 
-export type Phase = number | typeof SYNC |typeof UPDATE_CYCLE_END
+export type Phase = number | typeof SYNC | typeof UPDATE_CYCLE_END
 
 export function definePhase(phaseName: string, scheduler?: Function): CyclePhase {
    return new CyclePhase(
@@ -41,7 +41,6 @@ export class EffectCycle {
    constructor(
       public manager: EffectCycleManager
    ) {
-      console.log('%%% (new effect cycle created)')
    }
 
    close() {
@@ -62,6 +61,7 @@ export class EffectCycle {
 
    scheduleEagerEffect(effect: Effect, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
+      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted for eager effect')
       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
       queue.scheduleEagerEffect(effect)
       if (phase === SYNC) {
@@ -72,13 +72,14 @@ export class EffectCycle {
 
    scheduleTask(effect: Effect, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
+      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted for task')
       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
       queue.scheduleTask(effect)
    }
 
    scheduleEffects(effects: PhaseEffects, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
-      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted')
+      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
       queue.scheduleEffects(effects)
       if (phase === SYNC) {
@@ -90,16 +91,14 @@ export class EffectCycle {
 
    runEffects(phase: Phase) {
       // this.currentPhase = phase;
-      console.log(`%%% ${this.currentPhase} run effects...`)
       // this.subphase = 'effects'
       const queue = this.effects.get(phase);
-      console.log('queue?', this.effects)
       queue?.runEffects()
-      console.log(`%%% ${phase} microtasks...?`)
       // this.subphase = 'microtasks'
    }
 
    adjustPhase(phase: Phase) {
+      // if (phase === SYNC) return SYNC;
       return this.currentPhase === phase ? phase
          : phase === SYNC ? this.currentPhase
             : this.currentPhase === SYNC ? phase : phase > this.currentPhase ? phase : this.currentPhase
