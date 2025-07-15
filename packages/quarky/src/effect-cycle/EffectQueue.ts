@@ -1,3 +1,4 @@
+import { unnestOriginalFn } from "@rue/utils";
 import { WatchedAtom } from "../watch/WatchedAtom";
 import { Phase, SYNC } from "./EffectCycle";
 
@@ -36,7 +37,7 @@ export class Effect {
 
    private atoms: Set<WatchedAtom> = new Set()
 
-   linked: boolean = false;
+   active: boolean = false;
 
    isLinked(atom: WatchedAtom) {
       return this.atoms.has(atom)
@@ -45,7 +46,7 @@ export class Effect {
    link(atom: WatchedAtom) {
       if (this.isLinked(atom)) return;
       atom.link(this)
-      this.linked = true;
+      this.active = true;
       this.atoms.add(atom);
    }
 
@@ -55,7 +56,7 @@ export class Effect {
    }
 
    unlink() {
-      this.linked = false;
+      this.active = false;
       this.atoms.clear()
    }
 
@@ -76,13 +77,14 @@ export function createOneoff(fn: () => void, phase: Phase) {
       effect.destroy()
    }
    effect.fn = oneoff
-   
+   effect.active = true;
+
    if (__DEV__) oneoff.__DEV__fn = fn;
 
    return effect;
 }
 
-const effectStack: Effect[] = []
+let effectStackCount = 0;
 // const activeEffects = new Set()
 
 // export function $currentEffect() {
@@ -129,39 +131,23 @@ export class EffectQueue {
       this.runningEffects = true;
       const effects = this.effects
       const sync = this.phase === SYNC
-      // const retained = sync ? this.retained : new Set()
+
       for (const effect of effects) {
-         if (!effect.fn || effect.completed
-         ) {
+         if (!effect.fn || effect.completed || !effect.active) {
             continue;
          }
-         // // stops infinite loops
-         // if (effectStack.has(effect)
-         //    // || $currentEffectCycle().effectStack.has(effect)
-         // ) {
-         //    if (retained.has(effect))
-         //       continue;
-         //    this.retain(effect)
-         //    retained.add(effect)
 
-         //    console.warn('Infinite loop prevented. Prefer derivation ions over setting state in effects')
-         //    continue;
-         // }
          try {
-            effectStack.push(effect); //TODO: if we don't care about infinite loops, this should be a counter
+            effectStackCount++
             effect.fn() // What about async tasks? T_T How will it affect this system?
          }
          finally {
-            effectStack.pop()
+            effectStackCount--
             effect.completed = true;
-            // if (retained.has(effect))
-            //    continue;
-            // this.retain(effect)
-            // retained.add(effect)
          }
       }
 
-      if (sync && effectStack.length !== 0) {
+      if (sync && effectStackCount !== 0) {
          return;
       }
 
@@ -182,29 +168,6 @@ export class EffectQueue {
          this.runningEffects = false;
       }
    }
-
-   // retain(effect: Effect) {
-   //    if (!effect.fn) return;
-   //    const retainedEffects = this.nextEffects ?? (this.nextEffects = [])
-   //    retainedEffects.push(effect)
-   // }
-
-   // /**
-   // * To be called by watch() when initializing watcher
-   // * @param effect 
-   // */
-   // queue(effect: Effect) {
-   //    if (effect.isIn(this)) return;
-   //    effect.addTo(this)
-
-   //    if (this.runningEffects) {
-   //       const nestedEffects = this.nextEffects ?? (this.nextEffects = [])
-   //       nestedEffects.push(effect)
-   //    }
-   //    else {
-   //       this.effects.push(effect)
-   //    }
-   // }
 
    scheduleEffect(effect: Effect) {
       if (this.runningEffects && !effect.requeued) {

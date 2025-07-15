@@ -44,43 +44,20 @@ export class WatchedAtom {
       // private watchable: Watchable
    ) { }
 
-   // private effects: Map<Phase, PhaseQueue> = new Map()
    private effects: Effect[] = []
 
    // private watchCount: number = 0
 
-   // private initializePhase(phase: Phase) {
-   //    const atom: PhaseQueue = new PhaseQueue(phase)
-   //    this.effects.set(phase, atom);
-   //    return atom
-   // }
-
    link(effect: Effect) {
       this.effects.push(effect)
-      // const phaseQueue = this.effects.get(phase) ?? this.initializePhase(phase);
-      // phaseQueue.queue(effect)
       // this.watchCount++
    }
-
-   // /**
-   //  * To be called by watcher's stop() function
-   //  * @param effect 
-   //  */
-   // unlink(effect: Effect) {
-   //    // remove effect from effect list
-   //    effect.unlink()
-
-   //    this.watchCount--
-   //    if (this.watchCount === 0) {
-   //       this.emitDiscard()
-   //    }
-   // }
 
    triggerEffects() { // the surrounding effect when original trigger happened
       const effects = this.effects;
       const retained = [];
       for (const effect of effects) {
-         if (!effect.linked) return;
+         if (!effect.active) return;
          $currentEffectCycle().scheduleEffect(effect)
          retained.push(effect)
       }

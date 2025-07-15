@@ -1,7 +1,7 @@
 import { $listen, $schedule, Listener, ListenerOptions, SchedulerOptions } from "@rue/flask";
 import { CyclePhase, EffectCycle, Phase, queueTask, SYNC, UPDATE_CYCLE_END } from "./EffectCycle";
 import { noop } from "@rue/utils";
-import { Effect, PhaseQueue } from "./EffectQueue";
+import { Effect } from "./EffectQueue";
 import { TaskQueue, TaskRef } from "./TaskQueue";
 
 

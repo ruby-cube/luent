@@ -6,6 +6,7 @@ import { Effect } from "../effect-cycle/EffectQueue";
 import { getDefaultPhase } from "../effect-cycle/ReactivitySystem";
 import { asWatchSubject, isWatchSubject, WatchSubject } from "./WatchSubject";
 import { Glass } from "@rue/types";
+import { unnestOriginalFn } from "@rue/utils";
 
 
 // watch(multisubject(
@@ -123,7 +124,7 @@ export function watch<
          hasChanged = getHasChangedFn(options, prevState) //accounts for ions whose value may change from ionized to not ionized
       }
    }
-   wrappedEffect.__DEV__effect = effect
+   wrappedEffect.__DEV__fn = effect
 
    return setUpWatcher(
       watchSubject,
@@ -152,6 +153,7 @@ export function setUpWatcher(
       if (paused) return;
       return effect()
    }
+   pausableEffect.__DEV__fn = unnestOriginalFn(effect)
 
    return $listen(pausableEffect, options || {}, {
       enroll(task) {

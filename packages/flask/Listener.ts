@@ -5,7 +5,7 @@ import { AbortSignal } from "./AbortSignal";
 import { $_run_with_, $_snap_context } from "./context/AsyncContext";
 import { FLASK, Flask, getActiveFlask, ThisFlask } from "./Flask";
 import { TRACE } from "./debug";
-import { noop } from "@rue/utils";
+import { noop, unnestOriginalFn } from "@rue/utils";
 
 export type ResumableListener = {
    stop(): boolean;
@@ -225,6 +225,8 @@ function wrapWithFlask(callback: Callback, config: {
          afterCall?.()
       }
    }
-   wrappedCB.__DEV__cb = callback
+   if (__DEV__) wrappedCB.__DEV__fn = unnestOriginalFn(callback)
    return wrappedCB
 }
+
+

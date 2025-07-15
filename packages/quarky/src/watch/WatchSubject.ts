@@ -102,15 +102,6 @@ class Multisubject implements WatchSubject {
          subject.linkEffect(effect, eager, initial)
       }
    }
-
-   // unlinkEffect(effect: Effect, phase: string): void {
-   //    const subjects = this.subjects;
-   //    for (const subject of subjects) {
-   //       if (!isWatchSubject(subject)) continue;
-   //       subject.unlinkEffect(effect, phase)
-   //    }
-   // }
-
 }
 
 
@@ -211,18 +202,12 @@ class IonSubject implements WatchSubject {
    }
 
    private effect!: Effect;
-   private phase!: Phase;
 
    linkEffect(effect: Effect, eager: boolean, initial: boolean = false) {
       this.effect = effect;
       linkEffectToAtoms(this.watchedAtoms, effect, eager, initial)
       linkEffectToAtom(this.valueAtom, effect, eager, initial)
    }
-
-   // unlinkEffect(effect: Effect, phase: string) {
-   //    unlinkEffect(this.watchedAtoms, effect, phase)
-   //    this.valueAtom?.unlink(effect, phase)
-   // }
 
    relinkValue(
       value: Watchable,
@@ -257,22 +242,6 @@ function linkEffectToAtom(atom: WatchedAtom | undefined, effect: Effect, eager: 
       $currentEffectCycle().scheduleEffect(effect)
    }
 }
-
-
-// function unlinkEffect(atoms: WatchedAtom[], effect: Effect, phase: string) {
-//    for (const atom of atoms) {
-//       atom.unlink(effect, phase)
-//    }
-// }
-
-// function _scheduleEagerEffect(watchedAtom: WatchedAtom, effect: Effect, phase: string) {
-//    if (phase === SYNC) {
-//       watchedAtom.runSyncEffects()
-//    }
-//    else {
-//       scheduleEagerEffect(effect, phase)
-//    }
-// }
 
 function toWatchedAtoms(atoms: Set<Watchable>) {
    const watchedAtoms = [];

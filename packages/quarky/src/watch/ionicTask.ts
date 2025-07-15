@@ -3,9 +3,10 @@ import { EffectOptions, setUpWatcher, WatchDebugOptions } from "./watch";
 import { Glass } from "@rue/types";
 import { createIonicEffect, IonicTask } from "../ionic/IonicEffect";
 import { IonicTaskSubject } from "./WatchSubject";
+import { Phase } from "../effect-cycle/EffectCycle";
 
 type IonicTaskOptions = {
-   phase?: string;
+   phase?: Phase;
    sync?: boolean;
    retrack?: boolean; // defaults to true
 } & Glass<SustainedListenerOptions & WatchDebugOptions>
