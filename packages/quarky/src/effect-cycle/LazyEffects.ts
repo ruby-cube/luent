@@ -1,4 +1,4 @@
-import { EffectQueue, PhaseEffects } from "./EffectQueue";
+import { EffectQueue, PhaseQueue } from "./EffectQueue";
 
 function calcIdleDeadline(startTime: DOMHighResTimeStamp, responseTime: number) {
    const now = new Performance().now()
@@ -7,7 +7,7 @@ function calcIdleDeadline(startTime: DOMHighResTimeStamp, responseTime: number) 
    return deadline < 0 ? 0 : deadline;
 }
 
-class LazyWatchedAtom extends PhaseEffects {
+class LazyWatchedAtom extends PhaseQueue {
    constructor(
       public responseTime?: number
    ) {

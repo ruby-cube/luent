@@ -1,7 +1,7 @@
 import { $listen, $schedule, Listener, ListenerOptions, SchedulerOptions } from "@rue/flask";
 import { CyclePhase, EffectCycle, Phase, queueTask, SYNC, UPDATE_CYCLE_END } from "./EffectCycle";
 import { noop } from "@rue/utils";
-import { Effect, PhaseEffects } from "./EffectQueue";
+import { Effect, PhaseQueue } from "./EffectQueue";
 import { TaskQueue, TaskRef } from "./TaskQueue";
 
 
@@ -218,7 +218,7 @@ export function $currentEffectCycle() {
    return cycleManager.current
 }
 
-// export function scheduleEffects(effects: PhaseEffects, phase: string) {
+// export function scheduleEffects(effects: PhaseQueue, phase: string) {
 //    cycleManager.current.scheduleEffects(effects, phase)
 // }
 

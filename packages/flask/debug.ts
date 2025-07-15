@@ -36,21 +36,22 @@ export function getTrace() {
 const libraryPaths = ['/packages/'] //TODO: make this configurable
 
 
-
-
-export function getPublicTrace() {
-   const rawTrace = getTrace() as string;
-   const traceLines = rawTrace.split('\n');
-   traceLines.shift()
-   let appLines = traceLines;
-   for (const path of libraryPaths) {
-      appLines = appLines.filter((line) => !line.includes(path))
-   }
-   if (appLines.length){
-      return appLines.reduce((prev, line) => prev + '\n' + line).trim()
-   }
-   return undefined
+export function getPublicTrace(){
 }
+
+// export function getPublicTrace() {
+//    const rawTrace = getTrace() as string;
+//    const traceLines = rawTrace.split('\n');
+//    traceLines.shift()
+//    let appLines = traceLines;
+//    for (const path of libraryPaths) {
+//       appLines = appLines.filter((line) => !line.includes(path))
+//    }
+//    if (appLines.length){
+//       return appLines.reduce((prev, line) => prev + '\n' + line).trim()
+//    }
+//    return undefined
+// }
 
 export function getInternalTrace(cutoff: string) {
    const rawTrace = getTrace() as string;

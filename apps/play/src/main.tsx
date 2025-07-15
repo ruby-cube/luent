@@ -52,6 +52,7 @@ import { TriangleDemo } from './demos/SierpinskiTriangles';
 import { TestSyncEffects } from './demos/TestSyncEffects';
 import { TestEffectCyclePhases } from './TestEffectCyclePhases';
 import { TestTrackableOps } from './TestTrackableOps';
+import { SimpleCounter } from './SimpleCounter';
 // import { MountIf } from './TestMountIf';
 // import { List } from './TestReactiveModel';
 // import { TestDerived } from './testDerivedIon';
@@ -191,7 +192,7 @@ import { TestTrackableOps } from './TestTrackableOps';
 
 
 
-const app = createApp(TriangleDemo)
+const app = createApp(SimpleCounter)
 
 app.mount('#app')
 

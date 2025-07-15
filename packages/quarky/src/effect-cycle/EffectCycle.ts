@@ -1,5 +1,5 @@
 import { setImmediate } from "@rue/thread";
-import { Effect, EffectQueue, PhaseEffects } from "./EffectQueue";
+import { Effect, EffectQueue, PhaseQueue } from "./EffectQueue";
 import { EffectCycleManager, getCurrentPhase } from "./ReactivitySystem";
 
 export const SYNC = 'SYNC' as const
@@ -49,7 +49,7 @@ export class EffectCycle {
 
    get count() { return this.manager.count }
 
-   private effects: Map<Phase, EffectQueue> = new Map();
+   private effects: Map<Phase, EffectQueue> = new Map(); // pass in an object to constructor instead of map
 
    // effectStack: Set<Effect> = new Set()
 
@@ -77,7 +77,7 @@ export class EffectCycle {
       queue.scheduleTask(effect)
    }
 
-   scheduleEffects(effects: PhaseEffects, phase: Phase) {
+   scheduleEffects(effects: PhaseQueue, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
       if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);

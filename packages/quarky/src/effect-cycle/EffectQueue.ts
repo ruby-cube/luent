@@ -7,13 +7,13 @@ export class Effect {
       public task: Task | null,
    ) { }
 
-   private phases: Set<PhaseEffects> = new Set()
+   private phases: Set<PhaseQueue> = new Set()
 
-   isIn(atom: PhaseEffects) {
+   isIn(atom: PhaseQueue) {
       return this.phases.has(atom)
    }
 
-   addTo(atom: PhaseEffects) {
+   addTo(atom: PhaseQueue) {
       this.phases.add(atom)
    }
 
@@ -54,8 +54,12 @@ const effectStack: Effect[] = []
 //    }
 // }
 
+// 1) atom triggered
+// 2) atom schedules all effects to appropriate queue
 
-export class PhaseEffects {
+
+//QUESTION: Can I get rid of phase queue and go directly to effects?
+export class PhaseQueue {
    effects: Effect[] = []
    nextEffects: Effect[] | undefined
 
@@ -190,42 +194,45 @@ export function initDebugger(){
 __debug__ = true
 }
 
+/**
+ * Belongs to the current effect cycle.
+ */
 export class EffectQueue {
-   private extendedQueue: PhaseEffects[] | undefined;
-   private queue: PhaseEffects[] = []
-   private eagerQueue: PhaseEffects | undefined;
+   private extendedQueue: PhaseQueue[] | undefined;
+   private queue: PhaseQueue[] = []
+   private eagerQueue: PhaseQueue | undefined;
 
-   private taskQueue: PhaseEffects | undefined;
+   private taskQueue: PhaseQueue | undefined;
 
 
    constructor(private phase: Phase) { }
 
    scheduleTask(task: Effect) {
-      const taskQueue = this.taskQueue ?? (this.taskQueue = new PhaseEffects(this.phase))
+      const taskQueue = this.taskQueue ?? (this.taskQueue = new PhaseQueue(this.phase))
       taskQueue.queue(task)
       this.scheduleEffects(taskQueue)
    }
 
    scheduleEagerEffect(effect: Effect) {
-      const eagerQueue = this.eagerQueue ?? (this.eagerQueue = new PhaseEffects(this.phase))
+      const eagerQueue = this.eagerQueue ?? (this.eagerQueue = new PhaseQueue(this.phase))
       eagerQueue.queue(effect)
       this.scheduleEffects(eagerQueue)
    }
 
-   scheduleEffects(atom: PhaseEffects) {
+   scheduleEffects(effects: PhaseQueue) {
 
-      if (this.runningEffects && !atom.requeued) {
+      if (this.runningEffects && !effects.requeued) {
          // a currentEffect during runningEffects means the effect triggered 
          // other effects and should be added to the effectStack to prevent infinite loops
          // const currentEffect = $currentEffect()
          // if (currentEffect) $currentEffectCycle().effectStack.add(currentEffect)
-         atom.requeued = true;
+         effects.requeued = true;
          const extension = this.extendedQueue ?? (this.extendedQueue = [])
-         extension.push(atom)
+         extension.push(effects)
       }
-      else if (!atom.queued) {
-         this.queue.push(atom)
-         atom.queued = true;
+      else if (!effects.queued) {
+         this.queue.push(effects)
+         effects.queued = true;
       }
    }
 

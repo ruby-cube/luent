@@ -1,7 +1,12 @@
 import { SYNC } from "./EffectCycle";
 import { $currentEffectCycle } from "./ReactivitySystem";
 
-//NOTE: scheduling nested effects into nextQueue is broken
+//NOTE: 
+// - this implementation aims to schedule effects instead of atoms.
+//   The thought is that it spreads out the work of weeding out repeat effects
+//    across scheduling and running effects, instead of schedule 'atoms' and weeding out
+//    repeat effects as you run effects
+// - scheduling nested effects into nextQueue is broken
 
 type Task = (...args: any[]) => void
 
@@ -10,13 +15,13 @@ export class Effect {
       public task: Task | null,
    ) { }
 
-   private atoms: Set<PhaseEffects> = new Set()
+   private atoms: Set<PhaseQueue> = new Set()
 
-   isLinked(atom: PhaseEffects) {
+   isLinked(atom: PhaseQueue) {
       return this.atoms.has(atom)
    }
 
-   link(atom: PhaseEffects) {
+   link(atom: PhaseQueue) {
       this.atoms.add(atom)
    }
 
@@ -61,9 +66,9 @@ export const effectStack = {
 
 
 export class EffectQueue {
-   private atoms: PhaseEffects[] = []
+   private atoms: PhaseQueue[] = []
 
-   addAtom(atom: PhaseEffects) {
+   addAtom(atom: PhaseQueue) {
       this.atoms.push(atom)
    }
 
@@ -101,7 +106,7 @@ export class EffectQueue {
       effect.queued = true;
    }
 
-   scheduleEffects(atom: PhaseEffects){
+   scheduleEffects(atom: PhaseQueue){
       atom.scheduleEffects(this)
    }
 
@@ -188,7 +193,7 @@ export class EffectQueue {
 
 
 
-export class PhaseEffects {
+export class PhaseQueue {
 
    private triggered: boolean = false
    private currentQueue: EffectQueue | undefined; // undefined if not triggered
