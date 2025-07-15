@@ -38,8 +38,8 @@ class LazyWatchedAtom extends PhaseQueue {
          }
          else {
             const effect = effects[i]
-            if (effect.task) {
-               effect.task() // What about async tasks? T_T How will it affect this system?
+            if (effect.fn) {
+               effect.fn() // What about async tasks? T_T How will it affect this system?
                this.retain(effect)
             }
          }

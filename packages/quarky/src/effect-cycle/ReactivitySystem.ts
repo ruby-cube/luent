@@ -166,10 +166,8 @@ export function createEffectCycleHook(phase: Phase) { //TODO: what happens if ph
    return (task: () => void, options?: ListenerOptions) => {
       return $listen(task, options ?? {}, {
          enroll(fn) {
-            // const task = new TaskRef(fn)
-            // getEffectCycleManager().scheduleTask(task, phase)
-            const effect = new Effect(fn)
-            $currentEffectCycle().scheduleTask(effect, phase)
+            const effect = new Effect(fn, phase)
+            $currentEffectCycle().scheduleEffect(effect)
             return task;
          },
          remove(task) {
@@ -189,8 +187,8 @@ export function createEffectCycleScheduler(phase: Phase) { //TODO: what happens 
    return (task: () => void, options?: SchedulerOptions) => {
       return $schedule(task, options ?? {}, {
          enroll(task) {
-            const effect = new Effect(task)
-            $currentEffectCycle().scheduleTask(effect, phase)
+            const effect = new Effect(task, phase)
+            $currentEffectCycle().scheduleEffect(effect)
             return effect;
          },
          remove(effect: Effect) {
@@ -222,9 +220,9 @@ export function $currentEffectCycle() {
 //    cycleManager.current.scheduleEffects(effects, phase)
 // }
 
-export function scheduleEagerEffect(effect: Effect, phase: Phase) {
-   cycleManager.current.scheduleEagerEffect(effect, phase)
-}
+// export function scheduleEagerEffect(effect: Effect, phase: Phase) {
+//    cycleManager.current.scheduleEagerEffect(effect, phase)
+// }
 
 
 

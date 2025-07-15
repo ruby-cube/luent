@@ -1,7 +1,7 @@
 import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon } from "../ion/Ion";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
-import { SYNC } from "../effect-cycle/EffectCycle";
+import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { Effect } from "../effect-cycle/EffectQueue";
 import { getDefaultPhase } from "../effect-cycle/ReactivitySystem";
 import { asWatchSubject, isWatchSubject, WatchSubject } from "./WatchSubject";
@@ -28,7 +28,7 @@ import { Glass } from "@rue/types";
  * hasChanged: a !== b
  */
 export type EffectOptions = {
-   phase?: string;
+   phase?: Phase;
    sync?: boolean;
    cycle?: 'current' | 'next'
    eager?: boolean;
@@ -155,8 +155,8 @@ export function setUpWatcher(
 
    return $listen(pausableEffect, options || {}, {
       enroll(task) {
-         const effect = new Effect(task)
-         subject.linkEffect(effect, phase, eager, true)
+         const effect = new Effect(task, phase)
+         subject.linkEffect(effect, eager, true)
          return effect;
       },
       remove(effect: Effect) {

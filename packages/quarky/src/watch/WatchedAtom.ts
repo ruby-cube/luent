@@ -1,6 +1,6 @@
 import { isObject } from "@rue/utils";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
-import { Effect, PhaseQueue } from "../effect-cycle/EffectQueue";
+import { Effect } from "../effect-cycle/EffectQueue";
 import { $currentEffectCycle } from "../effect-cycle/ReactivitySystem";
 import { hasQuark, Quark, QUARK } from "../Quark";
 
@@ -44,42 +44,47 @@ export class WatchedAtom {
       // private watchable: Watchable
    ) { }
 
-   private effects: Map<Phase, PhaseQueue> = new Map()
+   // private effects: Map<Phase, PhaseQueue> = new Map()
+   private effects: Effect[] = []
 
-   private watchCount: number = 0
+   // private watchCount: number = 0
 
-   private initializePhase(phase: Phase) {
-      const atom: PhaseQueue = new PhaseQueue(phase)
-      this.effects.set(phase, atom);
-      return atom
-   }
+   // private initializePhase(phase: Phase) {
+   //    const atom: PhaseQueue = new PhaseQueue(phase)
+   //    this.effects.set(phase, atom);
+   //    return atom
+   // }
 
-   /**
-     * To be called by watch() when initializing watcher
-     * @param effect 
-     */
-   link(effect: Effect, phase: Phase) {
-      const phaseQueue = this.effects.get(phase) ?? this.initializePhase(phase);
-      phaseQueue.queue(effect)
-      this.watchCount++
+   link(effect: Effect) {
+      this.effects.push(effect)
+      // const phaseQueue = this.effects.get(phase) ?? this.initializePhase(phase);
+      // phaseQueue.queue(effect)
+      // this.watchCount++
    }
 
    // /**
    //  * To be called by watcher's stop() function
    //  * @param effect 
    //  */
-   // unlink(effect: Effect, phase: string) {
-   //    const atom = this.effects.get(phase) ?? this.initializePhase(phase);
-   //    atom.unlink(effect)
+   // unlink(effect: Effect) {
+   //    // remove effect from effect list
+   //    effect.unlink()
+
+   //    this.watchCount--
    //    if (this.watchCount === 0) {
    //       this.emitDiscard()
    //    }
    // }
 
    triggerEffects() { // the surrounding effect when original trigger happened
-      for (const [phase, atom] of this.effects) {
-         $currentEffectCycle().scheduleEffects(atom, phase)
+      const effects = this.effects;
+      const retained = [];
+      for (const effect of effects) {
+         if (!effect.linked) return;
+         $currentEffectCycle().scheduleEffect(effect)
+         retained.push(effect)
       }
+      this.effects = retained;
    }
 
    // runSyncEffects() {

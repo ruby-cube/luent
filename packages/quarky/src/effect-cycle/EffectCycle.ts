@@ -1,5 +1,5 @@
 import { setImmediate } from "@rue/thread";
-import { Effect, EffectQueue, PhaseQueue } from "./EffectQueue";
+import { Effect, EffectQueue } from "./EffectQueue";
 import { EffectCycleManager, getCurrentPhase } from "./ReactivitySystem";
 
 export const SYNC = 'SYNC' as const
@@ -59,29 +59,32 @@ export class EffectCycle {
       return queue
    }
 
-   scheduleEagerEffect(effect: Effect, phase: Phase) {
-      const adjustedPhase = this.adjustPhase(phase)
-      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted for eager effect')
-      const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
-      queue.scheduleEagerEffect(effect)
-      if (phase === SYNC) {
-         queue.runEffects()
-         // queue.runEagerEffects()
-      }
-   }
-
-   scheduleTask(effect: Effect, phase: Phase) {
-      const adjustedPhase = this.adjustPhase(phase)
-      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted for task')
-      const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
-      queue.scheduleTask(effect)
-   }
-
-   scheduleEffects(effects: PhaseQueue, phase: Phase) {
+   // scheduleEagerEffect(effect: Effect) {
+   //    const phase = effect.phase
+   //    const adjustedPhase = this.adjustPhase(phase)
+   //    if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted for eager effect')
+   //       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
+   //    queue.scheduleEagerEffect(effect)
+   //    if (phase === SYNC) {
+   //       queue.runEffects()
+   //       // queue.runEagerEffects()
+   //    }
+   // }
+   
+   // scheduleTask(effect: Effect) {
+   //    const phase = effect.phase
+   //    const adjustedPhase = this.adjustPhase(phase)
+   //    if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted for task')
+   //       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
+   //    queue.scheduleTask(effect)
+   // }
+   
+   scheduleEffect(effect: Effect) {
+      const phase = effect.phase
       const adjustedPhase = this.adjustPhase(phase)
       if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
-      queue.scheduleEffects(effects)
+      queue.scheduleEffect(effect)
       if (phase === SYNC) {
          queue.runEffects()
       }

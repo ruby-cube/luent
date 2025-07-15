@@ -192,7 +192,7 @@ import { SimpleCounter } from './SimpleCounter';
 
 
 
-const app = createApp(SimpleCounter)
+const app = createApp(TriangleDemo)
 
 app.mount('#app')
 

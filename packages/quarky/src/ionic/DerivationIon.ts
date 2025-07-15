@@ -74,7 +74,7 @@ export function createMaybeMemoizedIon(
          fn = getMemoizedState
          ion.state = value;
          assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
-         const effect = ion.markDirtyEffect = new Effect(() => (ion.dirty = true))
+         const effect = ion.markDirtyEffect = new Effect(() => (ion.dirty = true), SYNC)
          linkAtoms(compound, effect)
          creationFlask?.onDiscard(() => {
             effect.destroy()
@@ -139,7 +139,7 @@ export function createMaybeMemoizedIon(
 function retrackedCall(ion: ManagedDerivation) {
    const { derivation, markDirtyEffect } = ion
    const compound = ion.asCompound
-   markDirtyEffect!.remove()
+   markDirtyEffect!.unlink()
    const value = compound.retrackedCall(() => derivation(ion.state))
    linkAtoms(compound, markDirtyEffect!)
    return value;
@@ -148,7 +148,7 @@ function retrackedCall(ion: ManagedDerivation) {
 function linkAtoms(compound: IonicCompound, effect: Effect) {
    const atoms = compound.atoms;
    for (const atom of atoms) {
-      asWatchedAtom(atom).link(effect, SYNC)
+      effect.link(asWatchedAtom(atom))
    }
 }
 

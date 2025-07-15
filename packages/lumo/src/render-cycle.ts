@@ -1,4 +1,4 @@
-import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, } from "@rue/quarky"
+import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, $currentEffectCycle, createOneoff, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
 
 export const {
@@ -11,23 +11,28 @@ export const {
 } = useReactivitySystem()
 
 
-export const onPrerender = createEffectCycleHook(PRERENDER)
-export const onInternalRender = createEffectCycleHook(INTERNAL_RENDER)
-export const onRender = createEffectCycleHook(RENDER)
-export const onPostrender = createEffectCycleHook(POSTRENDER)
+// export const onPrerender = createEffectCycleHook(PRERENDER)
+// export const onInternalRender = createEffectCycleHook(INTERNAL_RENDER)
+// export const onRender = createEffectCycleHook(RENDER)
+// export const onPostrender = createEffectCycleHook(POSTRENDER)
 
-export const queuePrerender = createEffectCycleScheduler(PRERENDER)
-// export const queueInternalRender = (fn: any)=>fn()
-export const queueInternalRender = createEffectCycleScheduler(INTERNAL_RENDER)
-export const queueRender = createEffectCycleScheduler(RENDER)
-export const queuePostrender = createEffectCycleScheduler(POSTRENDER)
+export const atPrerender = createEffectCycleScheduler(PRERENDER)
+
+export function queueInternalRender(fn: () => void) { //TODO: needs to be able to be cancelled if action is cancelled
+   $currentEffectCycle().scheduleEffect(createOneoff(fn, INTERNAL_RENDER))
+}
+
+
+// export const queueInternalRender = createEffectCycleScheduler(INTERNAL_RENDER)
+export const atRender = createEffectCycleScheduler(RENDER)
+export const atPostrender = createEffectCycleScheduler(POSTRENDER)
 
 
 //QUESTION: Not sure how this will interact with microtasks, especially with onRender being a microtask
-export const $postevent = createAwaitableHook(queuePrerender)
+export const $postevent = createAwaitableHook(atPrerender)
 export const $internalrender = createAwaitableHook(queueInternalRender)
-export const $renderphase = createAwaitableHook(queueRender)
-export const $postrender = createAwaitableHook(queuePostrender)
+export const $renderphase = createAwaitableHook(atRender)
+export const $postrender = createAwaitableHook(atPostrender)
 // export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)
 
 //NOTE: there may be multiple effect cycles per event
