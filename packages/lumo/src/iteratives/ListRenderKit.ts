@@ -201,8 +201,8 @@ export class ListRenderKit {
 
          const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
          listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
-         flask.emitInitialMount()
          flaskMap.set(nodePod, flask)
+           queueInternalRender(()=>flask.emitInitialMount(), this.outerFlask)
       }
    }
 
@@ -277,7 +277,7 @@ export class ListRenderKit {
 
             const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
             this.renderItem(item, $index, parent, nodePod, fragment, flask)
-            flask.emitInitialMount()
+             queueInternalRender(()=>flask.emitInitialMount(), this.outerFlask)
             setCurrentIndex(undefined)
             flaskMap.set(nodePod, flask)
          }
