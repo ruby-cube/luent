@@ -192,7 +192,7 @@ import { SimpleCounter } from './SimpleCounter';
 
 
 
-const app = createApp(List)
+const app = createApp(TreeApp)
 
 app.mount('#app')
 

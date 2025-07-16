@@ -1,6 +1,6 @@
 import { isObject, unnestOriginalFn } from "@rue/utils";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
-import { Effect } from "../effect-cycle/EffectQueue";
+import { Effect, PhaseQueue } from "../effect-cycle/EffectQueue";
 import { $currentEffectCycle } from "../effect-cycle/ReactivitySystem";
 import { hasQuark, Quark, QUARK } from "../Quark";
 
@@ -44,32 +44,64 @@ export class WatchedAtom {
       // private watchable: Watchable
    ) { }
 
-   private effects: Effect[] = []
+   private effects: Map<Phase, PhaseQueue> = new Map()
 
    // private watchCount: number = 0
+   private phases: Phase[] = []
 
+   private initializePhase(phase: Phase) {
+      this.phases.push(phase)
+      const queue: PhaseQueue = new PhaseQueue(phase)
+      this.effects.set(phase, queue);
+      return queue
+   }
+
+   /**
+     * To be called by watch() when initializing watcher
+     * @param effect 
+     */
    link(effect: Effect) {
-      this.effects.push(effect)
+      const phase = effect.phase;
+      const phaseQueue = this.effects.get(phase) ?? this.initializePhase(phase);
+      phaseQueue.queue(effect)
       // this.watchCount++
    }
 
+   // link(effect: Effect) {
+   //    this.effects.push(effect)
+   //    // this.watchCount++
+   // }
+
+   // triggerEffects() { // the surrounding effect when original trigger happened
+   //    const effects = this.effects;
+   //    const prevLength = effects.length
+   //    // const retained = []; //for cleaning up inactive effects
+   //    for (const effect of effects) {
+   //       if (!effect.active) {
+   //          continue;
+   //       }
+   //       if (effect.phase === SYNC) {
+   //          effect.fn?.()
+   //       }
+   //       else {
+   //          $currentEffectCycle().scheduleEffect(effect)
+   //       }
+   //       // if (effect.active && effect.fn)
+   //       //    retained.push(effect)
+   //    }
+   //    if (effects.length !== prevLength) console.warn('length changed!')
+   //    // this.effects = retained;
+   // }
+
    triggerEffects() { // the surrounding effect when original trigger happened
-      const effects = this.effects;
-      // const retained = []; //for cleaning up inactive effects
-      for (const effect of effects) {
-         if (!effect.active) {
-            continue;
+      const phases = this.phases
+      for (const phase of phases) {
+         const queue = this.effects.get(phase)!
+         $currentEffectCycle().scheduleEffects(queue, phase)
+         if (phase === SYNC) {
+            $currentEffectCycle().runEffects(SYNC)
          }
-         if (effect.phase === SYNC) {
-            effect.fn?.()
-         }
-         else {
-            $currentEffectCycle().scheduleEffect(effect)
-         }
-         // if (effect.active && effect.fn)
-         //    retained.push(effect)
       }
-      // this.effects = retained;
    }
 
    // runSyncEffects() {

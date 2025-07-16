@@ -1,3 +1,4 @@
+import { getActiveFlask } from "@rue/flask"
 import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, $currentEffectCycle, createOneoff, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
 
@@ -20,10 +21,12 @@ export const atPrerender = createEffectCycleScheduler(PRERENDER)
 
 
 // export function queueInternalRender(fn: () => void) { //TODO: needs to be able to be cancelled if action is cancelled
-//    $currentEffectCycle().scheduleEffect(createOneoff(fn, INTERNAL_RENDER))
+//    const effect = createOneoff(fn, INTERNAL_RENDER)
+//    $currentEffectCycle().scheduleEffect(effect)
+//    getActiveFlask()?.onDiscard(() => effect.destroy())
 // }
 
-export const queueInternalRender = (fn: Function)=>fn()
+export const queueInternalRender = (fn: Function) => fn()
 
 
 // export const queueInternalRender = createEffectCycleScheduler(INTERNAL_RENDER)

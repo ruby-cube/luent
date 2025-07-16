@@ -1,7 +1,7 @@
 import { debug, isFunction } from "@rue/utils";
 import { neutron } from "./Neutron";
 import { createMaybeMemoizedIon } from "../ionic/DerivationIon";
-import { createAtomicIon, IONIZED, MUTABLE, MUTABLE_IONIZED } from "./AtomicIon";
+import { createAtomicIon, IONIZED, MUTABLE } from "./AtomicIon";
 import { maybeIonize } from "../ionized/IonizedModel";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionized/ionize";
