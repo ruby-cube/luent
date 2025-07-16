@@ -1,5 +1,5 @@
 import { component, For, If, Else } from "@rue/lumo"
-import { ion, ionicTask, ionize, Ionized, toRaw } from "@rue/quarky"
+import { ion, ionicTask, ionize, Ionized, isIonizedModel, toRaw } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 
 
@@ -67,9 +67,6 @@ export function TodoMVC() {
 
    function removeTodo(todo: Ionized<Todo>) {
       const index = $todos().indexOf(todo)
-      console.log("&%% same raw", toRaw(todo)===toRaw($todos()[0]))
-      console.log("&%% same proxy", todo === $todos()[0])
-      console.log('&%% removing index', index, todo, $todos())
       $todos().splice(index, 1)
    }
 

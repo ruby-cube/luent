@@ -162,11 +162,9 @@ export function List(
 
    function toggleSelect(item: typeof list[number]) {
       if (selected.has(item)) {
-         console.log('$$$ selected has', selected)
          selected.delete(item)
       }
       else {
-         console.log('$$$ selected has not', selected)
          selected.add(item)
       }
    }

@@ -85,9 +85,6 @@ export class EffectCycle {
       if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
       queue.scheduleEffect(effect)
-      if (phase === SYNC) {
-         queue.runEffects()
-      }
    }
 
    subphase: 'effects' | 'microtasks' = 'effects'

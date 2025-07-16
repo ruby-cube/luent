@@ -1,4 +1,4 @@
-import { isObject } from "@rue/utils";
+import { isObject, unnestOriginalFn } from "@rue/utils";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { Effect } from "../effect-cycle/EffectQueue";
 import { $currentEffectCycle } from "../effect-cycle/ReactivitySystem";
@@ -55,13 +55,21 @@ export class WatchedAtom {
 
    triggerEffects() { // the surrounding effect when original trigger happened
       const effects = this.effects;
-      const retained = [];
+      // const retained = []; //for cleaning up inactive effects
       for (const effect of effects) {
-         if (!effect.active) return;
-         $currentEffectCycle().scheduleEffect(effect)
-         retained.push(effect)
+         if (!effect.active) {
+            continue;
+         }
+         if (effect.phase === SYNC) {
+            effect.fn?.()
+         }
+         else {
+            $currentEffectCycle().scheduleEffect(effect)
+         }
+         // if (effect.active && effect.fn)
+         //    retained.push(effect)
       }
-      this.effects = retained;
+      // this.effects = retained;
    }
 
    // runSyncEffects() {

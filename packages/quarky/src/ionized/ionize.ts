@@ -315,8 +315,12 @@ export function isIonKey(key: PropertyKey): key is string {
 
 
 export function toRaw<T>(target: T): ToRaw<T> {
-   if (target instanceof IonizedModelQuark) return target.rawTarget as ToRaw<T>;
-   if (isIonizedModel(target)) return quarkOf(target).rawTarget as ToRaw<T>;
+   if (target instanceof IonizedModelQuark) {
+      return target.rawTarget as ToRaw<T>;
+   }
+   if (isIonizedModel(target)) {
+      return quarkOf(target).rawTarget as ToRaw<T>;
+   }
    return target as ToRaw<T>; // already raw target
 }
 

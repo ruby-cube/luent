@@ -57,6 +57,8 @@ export class Effect {
 
    unlink() {
       this.active = false;
+      this.requeued = false;
+      // this.queued = false;
       this.atoms.clear()
    }
 
@@ -130,7 +132,6 @@ export class EffectQueue {
    runEffects() {
       this.runningEffects = true;
       const effects = this.effects
-      const sync = this.phase === SYNC
 
       for (const effect of effects) {
          if (!effect.fn || effect.completed || !effect.active) {
@@ -138,26 +139,27 @@ export class EffectQueue {
          }
 
          try {
-            effectStackCount++
+            // effectStackCount++
             effect.fn() // What about async tasks? T_T How will it affect this system?
          }
          finally {
-            effectStackCount--
+            // effectStackCount--
             effect.completed = true;
          }
       }
 
-      if (sync && effectStackCount !== 0) {
-         return;
-      }
+      // if (sync && effectStackCount !== 0) { //QUESTION: do we need to reset completion state for sync effects?
+      //    return;
+      // }
+
+      // const nextEffects = this.nextEffects ?? []
 
       // reset queued status
       for (const effect of effects) {
-         effect.queued = effect.requeued;
+         effect.queued = this.nextEffects?.length ? effect.requeued : false;
          effect.requeued = false;
          effect.completed = false;
       }
-
       this.effects = this.nextEffects ?? []
       this.nextEffects = undefined
 

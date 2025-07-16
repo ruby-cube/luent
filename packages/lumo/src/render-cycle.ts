@@ -18,9 +18,12 @@ export const {
 
 export const atPrerender = createEffectCycleScheduler(PRERENDER)
 
-export function queueInternalRender(fn: () => void) { //TODO: needs to be able to be cancelled if action is cancelled
-   $currentEffectCycle().scheduleEffect(createOneoff(fn, INTERNAL_RENDER))
-}
+
+// export function queueInternalRender(fn: () => void) { //TODO: needs to be able to be cancelled if action is cancelled
+//    $currentEffectCycle().scheduleEffect(createOneoff(fn, INTERNAL_RENDER))
+// }
+
+export const queueInternalRender = (fn: Function)=>fn()
 
 
 // export const queueInternalRender = createEffectCycleScheduler(INTERNAL_RENDER)

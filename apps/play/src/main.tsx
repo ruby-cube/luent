@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import './style.css'
+// import './style.css'
 // import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
@@ -32,7 +32,7 @@ import { PolygonApp } from './demos/polygon-app';
 import { TrafficLight } from './demos/traffic-lights';
 import { VideoPlayer } from './video-player';
 import { TestNested, TestNestedB } from './demos/TestNested';
-import { ion } from '@rue/quarky';
+import { ion, ionize, isIonizedModel } from '@rue/quarky';
 import { TestViewFlasks } from './TestViewFlasks';
 import { TestAnimationController } from './demos/animation-controller';
 import { CounterModelApp } from './TestCounterModel';
@@ -192,7 +192,7 @@ import { SimpleCounter } from './SimpleCounter';
 
 
 
-const app = createApp(SimpleCounter)
+const app = createApp(TodoMVC)
 
 app.mount('#app')
 

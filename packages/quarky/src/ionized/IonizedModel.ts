@@ -1,5 +1,5 @@
 import { AnyObject } from "@rue/types";
-import { isIonKey } from "./ionize";
+import { isIonizedModel, isIonKey } from "./ionize";
 import { asTraceable, emitSignal } from "../debug/debug";
 import { asAtomicOp, $atomicOp } from "./AtomicOp";
 import { storeSnapshot } from "./ionize";
@@ -151,12 +151,6 @@ export function useTrackableOp(
    return function trackableOp(...args: any[]) {
       if (__DEV__) emitSignal();
       const _args = input(args);
-      if (op === 'indexOf') console.log('&&& indexOf', args)
-      if (op === 'indexOf') console.log('&&& indexOf', input)
-      if (op === 'indexOf') console.log('&&& indexOf', _args)
-      if (op === 'indexOf') console.log('&&& indexOf', input(_args))
-      if (op === 'indexOf') console.log('&&& indexOf', _args[0] === transformThis(target, _args)[0])
-      if (op === 'indexOf') console.log('&&& indexOf', _args[0], transformThis(target, _args)[0])
       trackAtom(asTrackable(track(ionized, op, _args)))
       return output(fn.call(transformThis(target, _args), ..._args), ionized)
    }
@@ -564,6 +558,7 @@ export function maybeIonize(value: any) {
    if (!isObject(value) || isInert(value)) {
       return value;
    }
+   if (isIonizedModel(value)) return value;
    return ionizedModels.get(value) ?? createIonizedModel(value)
 }
 

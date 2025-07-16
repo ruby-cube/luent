@@ -52,7 +52,6 @@ export function createMaybeMemoizedIon(
    retrack: boolean = true,
    quark?: ManagedDerivation,
 ) {
-   console.trace('memoized derivation')
    const creationFlask = getActiveFlask()
 
    let fn = initialize
@@ -74,7 +73,7 @@ export function createMaybeMemoizedIon(
          fn = getMemoizedState
          ion.state = value;
          assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
-         const effect = ion.markDirtyEffect = new Effect(() => (ion.dirty = true), SYNC)
+         const effect = ion.markDirtyEffect = new Effect(() => (console.log('$$$ mark stale'), ion.dirty = true), SYNC)
          linkAtoms(compound, effect)
          creationFlask?.onDiscard(() => {
             effect.destroy()

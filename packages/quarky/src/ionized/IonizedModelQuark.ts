@@ -8,6 +8,7 @@ import { Traceable } from "../debug/Traceable"
 import { AtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
 import { getIonizedMethodDef } from "./IonizedMethods"
+import { isIonizedModel, toRaw } from "./ionize"
 
 
 

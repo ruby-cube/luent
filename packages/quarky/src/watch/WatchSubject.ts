@@ -239,7 +239,12 @@ function linkEffectToAtom(atom: WatchedAtom | undefined, effect: Effect, eager: 
    if (!atom) return;
    effect.link(atom)
    if (initial && eager) {
-      $currentEffectCycle().scheduleEffect(effect)
+      if (effect.phase === SYNC){
+         effect.fn?.()
+      }
+      else {
+         $currentEffectCycle().scheduleEffect(effect)
+      }
    }
 }
 
