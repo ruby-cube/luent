@@ -67,7 +67,7 @@ export function untrackedCall(fn: Function) {
  * @param fn 
  * @returns 
  */
-export function detachedCall(fn: Function) {
+export function detachedCall<T extends ((...args: any[])=>any)>(fn: T): ReturnType<T> {
    pushTracker(null)
    try {
       return fn();

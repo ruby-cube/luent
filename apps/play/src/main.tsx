@@ -192,7 +192,7 @@ import { SimpleCounter } from './SimpleCounter';
 
 
 
-const app = createApp(TodoMVC)
+const app = createApp(List)
 
 app.mount('#app')
 

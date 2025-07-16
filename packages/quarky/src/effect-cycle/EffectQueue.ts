@@ -57,6 +57,8 @@ export class Effect {
 
    unlink() {
       this.active = false;
+      if (this.requeued) console.warn('unlinking requeued effect')
+      if (this.queued) console.warn('unlinking queued effect')
       this.requeued = false;
       // this.queued = false;
       this.atoms.clear()

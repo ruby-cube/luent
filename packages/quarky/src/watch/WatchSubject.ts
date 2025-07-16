@@ -105,7 +105,7 @@ class Multisubject implements WatchSubject {
 }
 
 
-export function isIonizedIon(subject: unknown): subject is $AtomicIonState | $AtomicPionState {
+function isIonizedIon(subject: unknown): subject is $AtomicIonState | $AtomicPionState {
    if (!hasQuark(subject)) return false;
    const quark = quarkOf(subject)
    return (isAtomicIonQuark(quark) || isAtomicPionQuark(quark)) && quark.ionized;
@@ -210,7 +210,7 @@ class IonSubject implements WatchSubject {
    }
 
    relinkValue(
-      value: Watchable,
+      value: unknown,
    ) {
       const prevAtom = this.valueAtom;
       const atom = this.valueAtom = isWatchableEntity(value) ? asWatchedAtom(quarkOf(value)) : undefined

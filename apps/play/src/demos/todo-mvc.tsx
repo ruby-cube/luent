@@ -1,5 +1,5 @@
 import { component, For, If, Else } from "@rue/lumo"
-import { ion, ionicTask, ionize, Ionized, isIonizedModel, toRaw } from "@rue/quarky"
+import { ion, ionicTask, ionize, Ionized, isIon, isIonizedModel, toRaw } from "@rue/quarky"
 import { PRERENDER } from "../../../../packages/lumo/src/render-cycle"
 
 
@@ -36,9 +36,9 @@ export function TodoMVC() {
    const $editedTodo = ion(null as Todo | null)
 
    // derive state
-   const $filteredTodos = ion(() => (filters[$view()]($todos())))
+   const $filteredTodos = () => (filters[$view()]($todos()))
 
-   const $remaining = ion(() => (filters.active($todos()).length))
+   const $remaining = () => (filters.active($todos()).length)
 
    // handle routing
    window.addEventListener('hashchange', onHashChange)

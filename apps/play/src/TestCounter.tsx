@@ -74,7 +74,14 @@ export function TestCount() {
 
    const $count = ion(0)
 
-   const $doubleCount = ion(() => $count() * 2)
+   const $active = ion(true)
+
+   const $doubleCount = () => {
+      if ($active()){
+         return $count() * 2
+      }
+      return 'sorry'
+   }
 
    function increment() {
       $count.state++
@@ -88,11 +95,13 @@ export function TestCount() {
       <>
          <h3>mutable ion</h3>
          <div>{$count}</div>
+         <div>{$active}</div>
          <div>{$doubleCount}</div>
          <hr></hr>
          <p>these should work</p>
          <button on:click={increment}>increment</button>
          <button on:click={decrement}>decrement</button>
+         <button on:click={e=>$active.state = !$active()}>toggle active</button>
       </>
    )
 }
