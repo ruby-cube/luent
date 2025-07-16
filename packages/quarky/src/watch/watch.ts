@@ -30,8 +30,6 @@ import { unnestOriginalFn } from "@rue/utils";
  */
 export type EffectOptions = {
    phase?: Phase;
-   sync?: boolean;
-   cycle?: 'current' | 'next'
    eager?: boolean;
    retrack?: boolean;
    hasChanged?: (prevState?: any, newState?: any) => boolean;
@@ -99,16 +97,16 @@ export function watch<
       console.log('inert watcher a')
       return InertWatcher()
    }
-   
+
    let prevState = watchSubject.trackedCall(); // this is where initial reactivity tracking happens (if derivation not already initialized) 
-   
+
    if (watchSubject.inert) {
       console.log('inert watcher b')
       return InertWatcher()
    }
 
    let hasChanged = getHasChangedFn(options, prevState)
-   
+
    function wrappedEffect() {
       const newState = watchSubject.trackedCall() // retracking happens here //TODO: segregate this call from the actual effect to prevent long derivations from blocking renders
       if (!options.eager && !hasChanged(prevState, newState)) {
@@ -136,7 +134,7 @@ export function watch<
 type Task = () => void
 
 export function getPhase(options: undefined | EffectOptions) {
-   return options?.phase ?? (options?.sync ? SYNC : getDefaultPhase())
+   return options?.phase ?? getDefaultPhase()
 }
 
 export function setUpWatcher(
@@ -158,7 +156,7 @@ export function setUpWatcher(
    return $listen(pausableEffect, options || {}, {
       enroll(task) {
          const effect = new Effect(task, phase)
-         subject.linkEffect(effect, eager, true)
+         subject.linkEffect(effect, eager)
          return effect;
       },
       remove(effect: Effect) {

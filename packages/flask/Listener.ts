@@ -216,8 +216,8 @@ function wrapWithFlask(callback: Callback, config: {
    const wrappedCB = (...args: any[]) => {
       if (scene) scene.emitDiscard()
       scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if stale right?
-      context.set(FLASK, scene)
-      context.set(TRACE, __DEV__asyncPath!)
+      context[FLASK] = scene
+      context[TRACE] = __DEV__asyncPath!
       try {
          return $_run_with_(context, () => callback(...args))
       }

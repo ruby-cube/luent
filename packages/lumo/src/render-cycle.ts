@@ -1,6 +1,10 @@
-import { getActiveFlask } from "@rue/flask"
-import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, $currentEffectCycle, createOneoff, } from "@rue/quarky"
+import { Flask, getActiveFlask } from "@rue/flask"
+import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, $currentEffectCycle, createOneoff, Ion, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
+import { asWatchSubject, IonSubject, isQuarkyIon } from "../../quarky/src/watch/WatchSubject"
+import { hasQuark } from "../../quarky/src/Quark"
+import { createWatchedDerivation } from "../../quarky/src/ionic/WatchedDerivation"
+import { getViewFlask } from "./flask/ViewFlask"
 
 export const {
    SYNC,
@@ -20,17 +24,19 @@ export const {
 export const atPrerender = createEffectCycleScheduler(PRERENDER)
 
 
-// export function queueInternalRender(fn: () => void) { //TODO: needs to be able to be cancelled if action is cancelled
-//    const effect = createOneoff(fn, INTERNAL_RENDER)
-//    // const effect = createOneoff(() => {console.log('running internal render'),fn()}, INTERNAL_RENDER)
-//    $currentEffectCycle().scheduleEffect(effect)
-//    // getActiveFlask()?.onDiscard(() => effect.destroy()) //NOTE: this is a performance bottleneck
-// }
-
-export const queueInternalRender = (fn: Function) => {
-   // console.log('running internal render'),
-   fn()
+export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: needs to be able to be cancelled if action is cancelled
+   const effect = createOneoff(fn, INTERNAL_RENDER)
+   // const effect = createOneoff(() => {console.log('running internal render'),fn()}, INTERNAL_RENDER)
+   $currentEffectCycle().scheduleEffect(effect)
+   flask.onDiscard(() => effect.destroy())
+   // flask.onDemount(()=> effect.unlink()) //TODO:
+   // flask.onRemount(()=> effect.destroy())//TODO: 
 }
+
+// export const queueInternalRender = (fn: Function) => {
+//    // console.log('running internal render'),
+//    fn()
+// }
 
 
 // export const queueInternalRender = createEffectCycleScheduler(INTERNAL_RENDER)
@@ -40,7 +46,7 @@ export const atPostrender = createEffectCycleScheduler(POSTRENDER)
 
 //QUESTION: Not sure how this will interact with microtasks, especially with onRender being a microtask
 export const $postevent = createAwaitableHook(atPrerender)
-export const $internalrender = createAwaitableHook(queueInternalRender)
+export const $internalrender = createAwaitableHook((fn: () => void) => queueInternalRender(fn, getViewFlask()))
 export const $renderphase = createAwaitableHook(atRender)
 export const $postrender = createAwaitableHook(atPostrender)
 // export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)
@@ -147,9 +153,35 @@ export const $postrender = createAwaitableHook(atPostrender)
 
 
 
+/**
+ * Optimized barebones ion-only watch function. links effect to atoms and flask. No async context used.
+ * @param ion 
+ * @param render 
+ * @param eager 
+ * @returns 
+ */
+export function watchForRender(ion: Ion, render: (previous: unknown) => void, flask: Flask, eager: boolean = false) {
+   const subject = new IonSubject(isQuarkyIon(ion) ? ion : createWatchedDerivation(ion, true))
+
+   let prevState = subject.trackedCall()
+
+   if (subject.inert) return;
+
+   const effect = new Effect(() => {
+      const newState = subject.trackedCall()
+      render(prevState)
+      prevState = newState;
+   }, PRERENDER)
+
+   subject.linkEffect(effect, eager)
+
+   flask.onDiscard(/* listener.stop */() => effect.destroy());
+   flask.onDemount(/* listener.pause */() => effect.unlink());
+   flask.onRemount(/* listener.resume */() => subject.linkEffect(effect, true));
+}  
 
 
-
+export const RUN_EAGERLY = true;
 
 
 

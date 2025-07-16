@@ -108,9 +108,9 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
 const cycleManager = new EffectCycleManager('UpdateCycle');
 
 function setUpUpdateCycleManager() {
-   cycleManager.pushPhase(new CyclePhase('PRERENDER', queueMicrotask))
+   cycleManager.pushPhase(new CyclePhase('PRERENDER', queueTask))
    // cycleManager.pushPhase(new CyclePhase('PRE_INTERNAL_RENDER', queueTask))
-   cycleManager.pushPhase(new CyclePhase('INTERNAL_RENDER', queueMicrotask))
+   cycleManager.pushPhase(new CyclePhase('INTERNAL_RENDER', queueTask))
    cycleManager.pushPhase(new CyclePhase('RENDER', queueMicrotask))
    cycleManager.pushPhase(new CyclePhase('POSTRENDER', noop)) //TODO: Think...
    // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...

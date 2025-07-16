@@ -1,5 +1,7 @@
 import { isIon, __devCheckIfTracked, watch, Ion, toValue } from "@rue/quarky";
-import { INTERNAL_RENDER, PRERENDER, queueInternalRender } from "../render-cycle";
+import { INTERNAL_RENDER, PRERENDER, queueInternalRender, watchForRender } from "../render-cycle";
+import { getActiveFlask } from "@rue/flask";
+import { getViewFlask } from "../flask/ViewFlask";
 
 
 
@@ -16,11 +18,12 @@ export function setUpTextNode(text: Ion | any, textNode: Text) {
 // }
 
 function keepTextNodeUpdated(text: Ion, textNode: CharacterData) {
-   watch(text, () => {
+   const flask = getViewFlask()
+   watchForRender(text, () => {
       queueInternalRender(() => {
          textNode.data = toString(text());
-      })
-   }, { phase: PRERENDER });
+      }, flask)
+   }, flask);
 }
 
 

@@ -27,7 +27,7 @@ export function TestSyncEffects() {
       console.log('$$$ --start effect increment')
       $count2.state = $count() + 1;
       console.log('--end effect increment')
-   }, { sync: true })
+   }, { phase: SYNC })
 
    // watch($count2, () => {
    //    console.log('$$$ --start effect2 increment')

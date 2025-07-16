@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { For, If } from "@rue/lumo"
 import { component, atUnmount } from "@rue/lumo"
-import { $$, ion, ionize, ions, watch } from "@rue/quarky"
+import { $$, ion, ionize, ions, SYNC, watch } from "@rue/quarky"
 
 export function SevenGUIs() {
    return component(
@@ -200,7 +200,7 @@ function CRUDApp() {
 
    watch($selected, ({ current }) => {
       [$last.state, $first.state] = current.split(', ')
-   }, { sync: true })
+   }, { phase: SYNC })
 
    const $filteredNames = ion(() =>
       names.filter((n) =>

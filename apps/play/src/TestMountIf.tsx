@@ -52,9 +52,10 @@ export function MountIf() {
       }
    })
 
-   // watch($color, ()=>{
-   //    debug.traceAsyncPath()
-   // })
+   watch($color, ()=>{
+      debug.traceAsyncPath()
+   })
+
    //NOTE: if ooo-transit duration is shorter than ooo-transition duration, it will disable ooo-transition transition
    return component(
 

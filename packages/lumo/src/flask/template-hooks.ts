@@ -1,20 +1,21 @@
-import { getActiveFlask } from "@rue/flask";
 import { debug } from "@rue/utils";
+import { $renderphase } from "../render-cycle";
+import { getViewFlask } from "./ViewFlask";
 
 type LifecycleTask = (element: Element, initialOrFinal: boolean) => void;
 
 export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask }) {
-   const flask = getActiveFlask()
+   const flask = getViewFlask()
    for (const key in hooks) {
       const task = hooks[key]
       switch (key) {
          case 'at:mounted':
-            flask?.onInitialMount(() => task(node, true))
-            flask?.onRemount(() => task(node, false))
+            flask.onInitialMount(async () => { await $renderphase(); task(node, true) })
+            flask.onRemount(async () => { await $renderphase(); task(node, true) })
             break;
          case 'at:unmount':
-            flask?.onDemount(() => task(node, false))
-            flask?.onDiscard(() => task(node, true))
+            flask.onDemount(() => task(node, false))
+            flask.onDiscard(() => task(node, true))
             break;
          default:
             debug.error('invalid inline hook')

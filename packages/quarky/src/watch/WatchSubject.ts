@@ -50,7 +50,7 @@ function isMultiSubject(subject: AnyObject): subject is WatchSubjects {
 
 const invalidSubject = {}
 
-function isQuarkyIon(value: unknown): value is QuarkyIon {
+export function isQuarkyIon(value: unknown): value is QuarkyIon {
    return hasQuark(value) && isIon(value);
 }
 
@@ -95,11 +95,11 @@ class Multisubject implements WatchSubject {
       return values;
    }
 
-   linkEffect(effect: Effect, eager: boolean, initial?: boolean): void {
+   linkEffect(effect: Effect, eager: boolean): void {
       const subjects = this.subjects;
       for (const subject of subjects) {
          if (!isWatchSubject(subject)) continue;
-         subject.linkEffect(effect, eager, initial)
+         subject.linkEffect(effect, eager)
       }
    }
 }
@@ -118,7 +118,7 @@ export function isGetter(value: unknown): value is () => any {
 export interface WatchSubject {
    inert: boolean,
    trackedCall: () => unknown
-   linkEffect(effect: Effect, eager: boolean, initial?: boolean): void
+   linkEffect(effect: Effect, eager: boolean): void
 }
 
 /**
@@ -139,8 +139,8 @@ class IonizedModelSubject implements WatchSubject {
       return this.model
    }
 
-   linkEffect(effect: Effect, eager: boolean, initial: boolean = false) {
-      linkEffectToAtom(this.watchedAtom, effect, eager, initial)
+   linkEffect(effect: Effect, eager: boolean) {
+      linkEffectToAtom(this.watchedAtom, effect, eager)
    }
 }
 
@@ -153,7 +153,7 @@ type QuarkyIon = {
  * - relinks value to effect if value is ionized
  * - relinks derivation atoms to effect on every call if derivation ion
  */
-class IonSubject implements WatchSubject {
+export class IonSubject implements WatchSubject {
    inert: boolean = false;
 
    private watchedAtoms: WatchedAtom[] = []
@@ -203,13 +203,13 @@ class IonSubject implements WatchSubject {
 
    private effect!: Effect;
 
-   linkEffect(effect: Effect, eager: boolean, initial: boolean = false) {
+   linkEffect(effect: Effect, eager: boolean = false) {
       this.effect = effect;
-      linkEffectToAtoms(this.watchedAtoms, effect, eager, initial)
-      linkEffectToAtom(this.valueAtom, effect, eager, initial)
+      linkEffectToAtoms(this.watchedAtoms, effect, eager)
+      linkEffectToAtom(this.valueAtom, effect, eager)
    }
 
-   relinkValue(
+   private relinkValue(
       value: unknown,
    ) {
       const prevAtom = this.valueAtom;
@@ -229,16 +229,16 @@ class IonSubject implements WatchSubject {
 }
 
 
-function linkEffectToAtoms(atoms: WatchedAtom[], effect: Effect, eager: boolean = false, initial: boolean = false) {
+function linkEffectToAtoms(atoms: WatchedAtom[], effect: Effect, eager: boolean = false) {
    for (const atom of atoms) {
-      linkEffectToAtom(atom, effect, eager, initial)
+      linkEffectToAtom(atom, effect, eager)
    }
 }
 
-function linkEffectToAtom(atom: WatchedAtom | undefined, effect: Effect, eager: boolean = false, initial: boolean = false) {
+function linkEffectToAtom(atom: WatchedAtom | undefined, effect: Effect, eager: boolean = false) {
    if (!atom) return;
    effect.link(atom)
-   if (initial && eager) {
+   if (eager) {
       $currentEffectCycle().scheduleEffect(effect)
       if (effect.phase === SYNC){
          $currentEffectCycle().runEffects(SYNC)
@@ -289,8 +289,8 @@ export class IonicTaskSubject implements WatchSubject {
       linkEffectToAtoms(toWatchedAtoms(ionicEffect.asCompound.atoms), effect)
    }
 
-   linkEffect(effect: Effect, eager: boolean, initial?: boolean): void {
+   linkEffect(effect: Effect, eager: boolean): void {
       this.effect = effect;
-      linkEffectToAtoms(this.watchedAtoms, effect, eager, initial)
+      linkEffectToAtoms(this.watchedAtoms, effect, eager)
    }
 }

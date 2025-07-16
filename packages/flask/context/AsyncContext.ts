@@ -1,32 +1,35 @@
-type ContextSnapshot = Map<string | symbol, any>
-
+export type ContextSnapshot = Record<Key, any>
+type Key = string | symbol
 class AsyncContextStack {
 
-   stacks: Map<string | symbol, Stack> = new Map()
+   stacks: Record<Key, Stack> = {}
 
-   activeNodes: ContextSnapshot = new Map()
+   stackKeys: Key[] = []
+   activeNodes: ContextSnapshot = {}
 
    push(context: ContextSnapshot) {
-      const nodes = this.activeNodes = new Map(context);
+      this.activeNodes = context //QUESTION: clone the context here? is that necessary
       const stacks = this.stacks;
-      for (const [name, node] of nodes) {
-         const stack = stacks.get(name)
+      const keys = this.stackKeys;
+      for (const key of keys) {
+         const stack = stacks[key]
+         const node = context[key]
          if (stack) stack.push(node)
       }
    }
 
    pop() {
-      const activeNodes = this.activeNodes
       const stacks = this.stacks;
-      for (const [name] of activeNodes) {
-         const stack = stacks.get(name)
+      const keys = this.stackKeys;
+      for (const key in keys) {
+         const stack = stacks[key]
          if (stack) stack.pop()
       }
    }
 }
 
 export function $_snap_context() {
-   return new Map(asyncContextStack.activeNodes)
+   return { ...asyncContextStack.activeNodes }
 }
 
 export const asyncContextStack = new AsyncContextStack()
@@ -40,18 +43,19 @@ type GetContextualState<T> = () => T | undefined
 // type SetContextualState<T> = (state: T) => void
 
 
-export function AsyncState<T>(name: string): [GetContextualState<T>, Stack<T>] {
+export function AsyncState<T>(name: Key): [GetContextualState<T>, Stack<T>] {
+   asyncContextStack.stackKeys.push(name)
 
    const _stack: T[] = [];
 
    function push(node: T) {
       _stack.push(node)
       if (_stack.length) {
-         asyncContextStack.activeNodes.set(name, node)
+         asyncContextStack.activeNodes[name] = node
       }
    }
    const stack = {
-      get length(){
+      get length() {
          return _stack.length;
       },
       push,
@@ -59,14 +63,14 @@ export function AsyncState<T>(name: string): [GetContextualState<T>, Stack<T>] {
          if (name === 'current effect' && _stack.length === 1) console.trace('!!popping')
          const item = _stack.pop();
          if (_stack.length)
-            asyncContextStack.activeNodes.set(name, _stack.at(-1))
+            asyncContextStack.activeNodes[name] = _stack.at(-1)
          else
-            asyncContextStack.activeNodes.delete(name)
+            asyncContextStack.activeNodes[name] = null
          return item;
       }
    }
 
-   asyncContextStack.stacks.set(name, stack)
+   asyncContextStack.stacks[name] = stack
 
    return [
       function getCurrentState() {

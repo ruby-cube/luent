@@ -2,7 +2,7 @@ import { DOMNode, Slot } from "../component/Component";
 import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, JSXNode, StyleInput, RawJSXNode } from "../node/makeNode";
-import { $listen, SustainedListenerOptions } from "@rue/flask";
+import { $listen, Flask, SustainedListenerOptions } from "@rue/flask";
 import { mountNodeEntities } from "../node/mountNodeKits";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
@@ -16,7 +16,8 @@ import { MaybeIon } from "../component/Input";
 import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 import { isInnerHTMLKit, mountInnerHTML, setUpInnerHTML } from "../node/InnerHTML";
-import { INTERNAL_RENDER, PRERENDER, queueInternalRender } from "../render-cycle";
+import { queueInternalRender, RUN_EAGERLY, watchForRender } from "../render-cycle";
+import { getViewFlask } from "../flask/ViewFlask";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -226,11 +227,12 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
    if (!('mu:value' in attributes))
       return;
    const ion = attributes['mu:value'];
-   watch(ion, () => {
+   const flask = getViewFlask()
+   watchForRender(ion, () => {
       queueInternalRender(() => {
          element.value = toString(ion())
-      })
-   }, { eager: true, phase: PRERENDER })
+      }, flask)
+   }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
    if (!isMutableIon(ion)) {
       if (__DEV__) console.warn('mu:checked must receive a mutable ion for two-way binding to work')
@@ -297,6 +299,7 @@ function updateIonWithInput(ion: { state: any } | { set: (value: any) => any }, 
 // }
 
 function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<any> }) {
+   const flask = getViewFlask()
    for (const key in attributes) {
       const _key = key.startsWith('mu:') ? key.slice(3) : key;
       if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
@@ -304,11 +307,11 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       const value = attributes[key]
       //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {
-         watch(value, () => {
+         watchForRender(value, () => {
             queueInternalRender(() => {
                setAttribute(node, _key, value())
-            })
-         }, { eager: true, phase: PRERENDER })
+            }, flask)
+         }, flask, RUN_EAGERLY)
       }
       // else if (isViewBindingKit(value)) {
       //    watch(value.ion, ({ newState }) => {
@@ -514,20 +517,21 @@ type DynamicClassesConfig = {
 
 type Falsey = undefined | null | false | ''
 function setUpClasses(node: Element, classes: ClassInput[]) {
+   const flask = getViewFlask()
    const classList = node.classList
 
    for (const entry of classes) {
       if (isIon(entry)) {
-         watch(entry, ({ previous }/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
+         watchForRender(entry, (previous/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
             queueInternalRender(() => {
                const current = entry()
                if (previous) removePreviousClasses(previous, classList)
-               if (current) addClasses(current, classList)
-            })
-         }, { eager: true, phase: PRERENDER })
+               if (current) addClasses(current, classList, flask)
+            }, flask)
+         }, flask, RUN_EAGERLY)
       }
       else if (entry) {
-         addClasses(entry, classList)
+         addClasses(entry, classList, flask)
       }
    }
 }
@@ -554,7 +558,7 @@ function removePreviousClasses(prevValue: string | AnyObject, classList: DOMToke
 }
 
 
-function addClasses(value: string | Falsey | { [key: string]: Booleanny }, classList: DOMTokenList) {
+function addClasses(value: string | Falsey | { [key: string]: Booleanny }, classList: DOMTokenList, flask: Flask) {
    if (!value) {
       return;
    }
@@ -562,7 +566,7 @@ function addClasses(value: string | Falsey | { [key: string]: Booleanny }, class
       setUpClassesFromString(value, classList)
    }
    else if (isObject(value)) {
-      setUpClassesFromObject(value, classList)
+      setUpClassesFromObject(value, classList, flask)
    }
    else {
       if (__DEV__) console.warn('DEV RESEARCH: Reactive class input has not been handled for', value)
@@ -574,20 +578,16 @@ function addClasses(value: string | Falsey | { [key: string]: Booleanny }, class
 // // __debug__ = true
 // // }
 
-function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList) {
+function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMTokenList, flask: Flask) {
    for (const key in entry) {
-
       const value = entry[key]
       if (isIon(value)) {
-         watch(value, ({ previous }) => {
+         watchForRender(value, (previous) => {
             queueInternalRender(() => {
                if (value()) classList.add(key)
                else if (previous) classList.remove(key)
-            })
-         }, {
-            eager: true,
-            phase: PRERENDER
-         })
+            }, flask)
+         }, flask, RUN_EAGERLY)
       }
       else if (value) {
          classList.add(key)
@@ -618,36 +618,33 @@ function setUpClassesFromString(classString: string, classList: DOMTokenList) {
 // }
 
 function setUpStyles(node: Element, styles: StyleInput[]) {
+   const flask = getViewFlask()
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {
       if (isIon(entry)) {
-         watch(entry, (/* value: string | AnyObject | Falsey */) => {
+         watchForRender(entry, (/* value: string | AnyObject | Falsey */) => {
             queueInternalRender(() => {
-               setUpStyleEntry(style, entry());
-            })
-         }, { eager: true, phase: PRERENDER })
+               setUpStyleEntry(style, entry(), flask);
+            }, flask)
+         }, flask, RUN_EAGERLY)
       }
       else {
-         setUpStyleEntry(style, entry)
+         setUpStyleEntry(style, entry, flask)
       }
    }
 }
 
-function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey) {
+function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject | Falsey, flask: Flask) {
    if (entry instanceof Object) {
       for (const key in entry) {
 
          const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isIon(value)) {
-            watch(value, () => {
+            watchForRender(value, () => {
                queueInternalRender(() => {
                   assignStyleProperty(style, toStylePropertyName(key), value())
-               })
-            }, {
-               eager: true,
-               phase: PRERENDER
-               // __devName: 'setUpStyles', 
-            })
+               }, flask)
+            }, flask, RUN_EAGERLY)
          }
          else {
             assignStyleProperty(style, toStylePropertyName(key), value)

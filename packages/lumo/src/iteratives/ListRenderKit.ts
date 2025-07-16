@@ -16,7 +16,7 @@ import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
-import { $internalrender, $postrender, queueInternalRender, PRERENDER } from "../render-cycle";
+import { queueInternalRender, PRERENDER, watchForRender } from "../render-cycle";
 
 
 type Index = number
@@ -72,8 +72,8 @@ export class ListRenderKit {
       this.$list = toIon(data) as unknown as Ion<Array<any>>
       const context = $_snap_context()
       this.renderItem = (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => {
-         if (flask) context.set(FLASK, flask)
-         if (__DEV__) context.set(TRACE, this.__DEV__asyncPath!)
+         if (flask) context[FLASK]= flask
+         if (__DEV__) context[TRACE]= this.__DEV__asyncPath!
          $_run_with_(context, () => {
             const nodeEntities = callWithCommons(renderItem, this, item, $index, parent, nodePod)
             mountNodeEntities(nodeEntities, parent, fragment);
@@ -138,8 +138,9 @@ export class ListRenderKit {
       }
 
       const dynamicPod = this.dynamicPod
+      const $list = this.$list
 
-      watch(data, ({ current, previous }) => { // typecast as one of the options so that typescript won't complain
+      watchForRender(this.$list, (previous) => { // typecast as one of the options so that typescript won't complain
          // if (recording && state === previous){
          //    recording.stop()
          //    console.log('updating list via MUTATIONS')
@@ -147,6 +148,7 @@ export class ListRenderKit {
          //    recording = recordMutations(_data)
          //    return;
          // }
+         const current = $list()
          console.log('updating list?')
          const _prevState = clone ?? toRaw(previous)
          clone = createClone(data, current)
@@ -160,16 +162,14 @@ export class ListRenderKit {
             throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${previous.length} are mismatched. This should never happen.`)
          console.log('updating list, yes')
          this.castBeforeUpdate();
-         // queueInternalRender(()=>{
-            this.removeItems(indicesToRemove!);
-            try {
-               this.insertAndMoveItems(insertAndMoveKit!, parent);
-            }
-            catch (err) {
-               console.error(err, this.__DEV__asyncPath)
-            }
-         // })
-      }, { phase: PRERENDER })
+         this.removeItems(indicesToRemove!);
+         try {
+            this.insertAndMoveItems(insertAndMoveKit!, parent);
+         }
+         catch (err) {
+            console.error(err, this.__DEV__asyncPath)
+         }
+      }, this.outerFlask)
       // currentItem = undefined;
       $currentIndex = undefined;
       //   popList();
@@ -214,7 +214,7 @@ export class ListRenderKit {
          flask?.emitDiscard()
          queueInternalRender(() => {
             removeDOMNodes(nodePod)
-         })
+         }, this.outerFlask)
       }
       //TODO: how do I handle items that have been moved to another port?
    }
@@ -224,6 +224,7 @@ export class ListRenderKit {
       parent: Element,
    ) {
       const { isNewItem, hasMoved, newUArray, oldUArray, isRemoved } = insertAndMoveKit;
+      const flask = this.outerFlask
       const dynamicPod = this.dynamicPod!
       if (dynamicPod.length !== oldUArray.length)
          throw new Error("dynamicPod and data length are mismatched")
@@ -274,19 +275,17 @@ export class ListRenderKit {
 
             setCurrentIndex($index); // to retreive config
 
-            // queueInternalRender(() => {
-               const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
-               this.renderItem(item, $index, parent, nodePod, fragment, flask)
-               flask.emitInitialMount()
-               setCurrentIndex(undefined)
-               flaskMap.set(nodePod, flask)
-            // })
+            const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
+            this.renderItem(item, $index, parent, nodePod, fragment, flask)
+            flask.emitInitialMount()
+            setCurrentIndex(undefined)
+            flaskMap.set(nodePod, flask)
          }
          else if (hasMoved(uItem)) {
             // move node to fragment (DOM will auto-remove node from DOM)
             queueInternalRender(() => {
                transferNodes(fragment, nodePod);
-            })
+            }, flask)
          }
       }
       // this.indices = newIndices;
@@ -325,7 +324,7 @@ export class ListRenderKit {
          for (const [index, fragment] of indicesAndFragments) {
             mountDOMNodes(<NodePod>dynamicPod[index], parent, fragment)
          }
-      })
+      }, flask)
 
       this.castUpdated(toFromIndices)
    }

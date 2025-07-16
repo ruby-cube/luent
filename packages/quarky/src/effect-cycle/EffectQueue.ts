@@ -168,7 +168,7 @@ export class PhaseQueue {
    //       this.nextEffects = undefined
    // }
 
-   runEffects(completedEffects?: Set<Effect>) {
+   runEffects(completedEffects: Set<Effect>) {
       this.runningEffects = true;
       const effects = this.effects
       // const sync = this.phase === SYNC

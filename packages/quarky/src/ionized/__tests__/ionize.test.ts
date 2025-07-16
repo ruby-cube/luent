@@ -42,7 +42,7 @@ describe('ionize', () => {
       let currentName = frog.name;
       watch(frog.$name!, ({ current: name }) => {
          currentName = name;
-      }, { sync: true })
+      }, { phase: SYNC })
 
       // change value
       const name2 = 'sir robin';
@@ -69,7 +69,7 @@ describe('ionize', () => {
       let currentName = swamp.frog.name;
       watch(() => (swamp.frog.name), ({ current: name }) => {
          currentName = name;
-      }, { sync: true })
+      }, { phase: SYNC })
 
       // change value
       const name2 = 'sir robin';

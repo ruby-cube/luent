@@ -7,10 +7,10 @@ import { getPhasicNode } from "../transition/PhasicNode";
 import { TransitionNode } from "../transition/TransitionNode";
 import { NodeEntity } from "../node/setUpNodeEntities";
 import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/NodePod";
-import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
+import { $_run_with_, $_snap_context, ContextSnapshot } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { FLASK, Flask } from "@rue/flask";
-import { queueInternalRender, PRERENDER, RENDER, SYNC } from "../render-cycle";
+import { queueInternalRender, PRERENDER, RENDER, SYNC, watchForRender } from "../render-cycle";
 import { ActivationType } from "./If";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { RenderFunction, withGroupActivationReset } from "../node/makeNode";
@@ -85,7 +85,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    declare statements: (DynamicConditionalRenderKit | undefined)[];
 
    // store contextual state
-   context: Map<string | symbol, any> = $_snap_context()
+   context: ContextSnapshot = $_snap_context()
    outerFlask: Flask = getViewFlask()
    phasicNode: TransitionNode | null = getPhasicNode()
 
@@ -102,7 +102,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const kits = toDynamicConditionalKits(statements)
       super(kits);
 
-      if (__DEV__) this.context.set(TRACE, this.__DEV__asyncPath)
+      if (__DEV__) this.context[TRACE]= this.__DEV__asyncPath
 
       this.activeIndex = this.evaluateConditions()
       // populate dynamic node pod
@@ -175,7 +175,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       let prevIncomingNodes: TransitionNode[];
 
       // set up watcher for updates
-      watch($conditions, function updateConditional({ current, previous }) {
+      watchForRender($conditions, function updateConditional() {
          console.log('update conditional?')
 
          const prevIndex = series.activeIndex!;
@@ -341,11 +341,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
                }
             }
          }
-      }, {
-         // retrack: true,
-         // phase: POSTEVENT,
-         phase: PRERENDER,
-      })
+      }, this.outerFlask)
 
       // // set up watcher for updates
       // watch($conditions, function updateConditional(newValue: boolean[], oldValue: boolean[]) {
@@ -373,7 +369,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    private render(kit: DynamicConditionalRenderKit, parent: Element, fragment?: DocumentFragment) {
       const context = this.context;
       const flask = kit.flask
-      if (flask) context.set(FLASK, flask); //NOTE: flask is optional b/c/ show kits don't need flask
+      if (flask) context[FLASK]= flask; //NOTE: flask is optional b/c/ show kits don't need flask
 
       $_run_with_(context, () => {
          const nodeEntities = kit.renderConditional(parent, kit.nodePod)
@@ -390,7 +386,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          queueInternalRender(() => {
             // preserve dynamic node and node pod
             hideDOMNodes(pod);
-         })
+         }, this.outerFlask)
       }
       else if (activationType === 'create') {
          // discard of flask
@@ -402,14 +398,14 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             // remove from 
             removeDOMNodes(pod)
             pod.clear() //
-         })
+         }, this.outerFlask)
       }
       else if (activationType === 'mount') {
          const flask = kit.flask
          flask?.emitDemount() //
          queueInternalRender(() => {
             removeDOMNodes(pod);
-         })
+         }, this.outerFlask)
       }
    }
 
@@ -426,7 +422,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       if (activationType === 'show') { //NOTE: 'show' statements are not dynamic nodes because they are not removed from the DOM and setup is not rerun
          queueInternalRender(() => {
             showDOMNodes(nodePod)
-         })
+         }, this.outerFlask)
          return;
       }
 

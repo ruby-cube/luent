@@ -152,7 +152,7 @@ describe('async context', () => {
       peachStack.pop()
       renderWithoutFruit()
 
-      context.set(THUMB, thumbValue)
+      context[THUMB]= thumbValue
       $_run_with_(context, renderAsyncWithFruit)
       const outsideApple = getActiveApple()
       const outsidePeach = getActivePeach()
@@ -341,7 +341,7 @@ describe('async context', () => {
       appleStack.pop()
       renderWithoutApple()
 
-      childContext.set(BUBBLE, bubbleValue)
+      childContext[BUBBLE]= bubbleValue
       $_run_with_(childContext, renderAsync)
    })
 })
