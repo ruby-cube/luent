@@ -3,7 +3,7 @@ import { hasQuark, Quark, QUARK, quarkOf } from "../Quark";
 
 /**
  * NOTES: 
- * - WatchedAtom derivations don't need a dirty state because if they are called, it means they're dirty
+ * - WatchedAtom derivations don't need a stale state because if they are called, it means they're stale
  */
 
 const WATCHED_DERIVATION = 'watched derivation'

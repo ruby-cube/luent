@@ -80,11 +80,11 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
 
    registerNewProperty(key: PropertyKey) {
       this.appendedProperties.add(key)
-      // this.markDirty()
+      // this.markStale()
    }
 
    // private hasNewAbsorbedIons: boolean = true;
-   // private markDirty() {
+   // private markStale() {
    //    this.hasNewAbsorbedIons = true
    // }
    // private undirty() {

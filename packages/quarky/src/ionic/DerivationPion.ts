@@ -38,8 +38,8 @@ export class DerivationPionQuark implements QuarkOf<$DerivedPionState> {
    quarkType = DERIVATION_ION
    inert: boolean = false
    state: unknown;
-   dirty: boolean = false
-   markDirty: Effect | undefined
+   stale: boolean = false
+   markStale: Effect | undefined
 
    asCompound: IonicCompound | undefined;
 

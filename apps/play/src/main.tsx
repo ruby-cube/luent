@@ -2,7 +2,7 @@
 // // console.log(jsx)
 // // import { App } from './App';
 // import './style.css'
-// import './demos/SierpinskiTriangles.css'
+import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
@@ -192,7 +192,7 @@ import { SimpleCounter } from './SimpleCounter';
 
 
 
-const app = createApp(TreeApp)
+const app = createApp(TriangleDemo)
 
 app.mount('#app')
 

@@ -24,7 +24,7 @@ When would you expect immediate DOM updates vs when would an update spread over 
 - derivation ion
 
 # Effects
-- dirty marking (must be synchronous)
+- stale marking (must be synchronous)
 - effects (batched)
 - render (QUESTION: should this be a separate batch from effects? It needs to wait for all effects to complete to update)
 

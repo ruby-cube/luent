@@ -1,5 +1,5 @@
 import { component, fromTag, measureLayout, atUnmount } from "@rue/lumo";
-import { ion, watch } from "@rue/quarky";
+import { ion } from "@rue/quarky";
 import { queueTask } from "@rue/thread";
 
 const TARGET = 25;

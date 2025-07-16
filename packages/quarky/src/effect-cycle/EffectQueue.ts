@@ -31,7 +31,7 @@ type TaskFn = (...args: any[]) => void
 
 export class Effect {
    constructor(
-      public fn: TaskFn | null,
+      public run: TaskFn | null,
       public phase: Phase
    ) { }
 
@@ -51,7 +51,7 @@ export class Effect {
    }
 
    destroy() {
-      this.fn = null;
+      this.run = null;
       this.unlink()
    }
 
@@ -80,7 +80,7 @@ export function createOneoff(fn: () => void, phase: Phase) {
       fn();
       effect.destroy()
    }
-   effect.fn = oneoff
+   effect.run = oneoff
    effect.active = true;
 
    if (__DEV__) oneoff.__DEV__fn = fn;
@@ -121,7 +121,7 @@ export class PhaseQueue {
 
    runningEffects: boolean = false;
 
-   retained: Set<Effect> = new Set()
+   // retained: Set<Effect> = new Set()
 
    constructor(
       private phase: Phase,
@@ -171,10 +171,12 @@ export class PhaseQueue {
    runEffects(completedEffects?: Set<Effect>) {
       this.runningEffects = true;
       const effects = this.effects
-      const sync = this.phase === SYNC
-      const retained = sync ? this.retained : new Set()
+      // const sync = this.phase === SYNC
+      const retained = 
+      // sync ? this.retained : 
+      new Set()
       for (const effect of effects) {
-         if (!effect.fn
+         if (!effect.run
             || completedEffects?.has(effect) // prevents repeats within queue (but not across extended queues and phases)
          ) {
             continue;
@@ -193,11 +195,11 @@ export class PhaseQueue {
          // }
          try {
             // effectStack.push(effect);
-            effectStackCount++
-            effect.fn() // What about async tasks? T_T How will it affect this system?
+            // effectStackCount++
+            effect.run() // What about async tasks? T_T How will it affect this system?
          }
          finally {
-            effectStackCount--
+            // effectStackCount--
             // effectStack.pop()
             completedEffects?.add(effect)
             if (retained.has(effect))
@@ -208,22 +210,19 @@ export class PhaseQueue {
       }
 
 
-      if (sync && effectStackCount !== 0) {
-         return;
-      }
+      // if (sync && effectStackCount !== 0) {
+      //    return;
+      // }
 
       this.runningEffects = false;
       this.effects = this.nextEffects ?? []
-      if (sync) this.retained.clear()
+      // if (sync) this.retained.clear()
       this.nextEffects = undefined
 
-      //     this.effects = this.nextEffects ?? []
-      // this.retained.clear()
-      // this.nextEffects = undefined
    }
 
    retain(effect: Effect) {
-      if (!effect.fn) return;
+      if (!effect.run) return;
       const retainedEffects = this.nextEffects ?? (this.nextEffects = [])
       retainedEffects.push(effect)
    }

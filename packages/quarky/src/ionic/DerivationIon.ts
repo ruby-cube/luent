@@ -27,9 +27,9 @@ export type $DerivedState = Ion & Capsule & {
    [QUARK]: {
       inert: boolean
       state: unknown
-      dirty: boolean
+      stale: boolean
       derivation: (prev?: unknown) => unknown
-      markDirtyEffect: Effect | undefined
+      staleMarker: Effect | undefined
    }
    & Quark<typeof DERIVATION_ION, $DerivedState>
    & IonicCompoundMorph
@@ -73,7 +73,7 @@ export function createMaybeMemoizedIon(
          fn = getMemoizedState
          ion.state = value;
          assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
-         const effect = ion.markDirtyEffect = new Effect(() => (console.log('$$$ mark stale'), ion.dirty = true), SYNC)
+         const effect = ion.staleMarker = new Effect(() => (ion.stale = true), SYNC)
          linkAtoms(compound, effect)
          creationFlask?.onDiscard(() => {
             effect.destroy()
@@ -92,16 +92,16 @@ export function createMaybeMemoizedIon(
    function getMemoizedState() {
       //TODO: not sure if I should assert initialization only or all calls
       assertValidCall()
-      if (!ion.dirty || !retrack) trackMemoized(ion)
+      if (!ion.stale || !retrack) trackMemoized(ion)
 
       const value =
-         (retrack && ion.dirty) ? retrackedCall(ion)
-            : ion.dirty ? derivation(ion.state)
+         (retrack && ion.stale) ? retrackedCall(ion)
+            : ion.stale ? derivation(ion.state)
                : ion.state;
 
-      if (ion.dirty) {
+      if (ion.stale) {
          ion.state = value;
-         ion.dirty = false;
+         ion.stale = false;
       }
       return value;
    }
@@ -112,10 +112,10 @@ export function createMaybeMemoizedIon(
 
    const ion: ManagedDerivation = quark ?? {
       inert: false,
-      dirty: false,
+      stale: false,
       state: undefined,
       derivation,
-      markDirtyEffect: undefined,
+      staleMarker: undefined,
       entity: $derived,
       quarkType: DERIVATION_ION,
       asCompound: new IonicCompound(),
@@ -136,11 +136,11 @@ export function createMaybeMemoizedIon(
 }
 
 function retrackedCall(ion: ManagedDerivation) {
-   const { derivation, markDirtyEffect } = ion
+   const { derivation, staleMarker } = ion
    const compound = ion.asCompound
-   markDirtyEffect!.unlink()
+   staleMarker!.unlink()
    const value = compound.retrackedCall(() => derivation(ion.state))
-   linkAtoms(compound, markDirtyEffect!)
+   linkAtoms(compound, staleMarker!)
    return value;
 }
 
@@ -160,7 +160,7 @@ function linkAtoms(compound: IonicCompound, effect: Effect) {
 
 
 // function trigger(this: IonicCompound<>): void {
-//    this.quark.dirty = true;
+//    this.quark.stale = true;
 //    this.quark.asParticle?.triggerCompounds()
 //    triggerEffects(this)
 // }

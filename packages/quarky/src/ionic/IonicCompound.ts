@@ -1,6 +1,6 @@
 import { Compound, CompoundMorph } from "../compound/Compound";
 import { isIonizedModel } from "../ionized/ionize";
-import { Quark, quarkOf } from "../Quark";
+import { quarkOf } from "../Quark";
 import { Watchable } from "../watch/WatchedAtom";
 import { ManagedDerivation } from "./DerivationIon";
 
@@ -87,8 +87,8 @@ export function trackAtom(atom: Watchable) {
 }
 
 /**
- * Use trackMemoized to collect/forward the atoms of a memoized compound if the memoized compound is not dirty
- * If dirty, simply retrack and track atoms as normal
+ * Use trackMemoized to collect/forward the atoms of a memoized compound if the memoized compound is not stale
+ * If stale, simply retrack and track atoms as normal
  * @param derivation 
  */
 export function trackMemoized(ion: ManagedDerivation) {
@@ -109,7 +109,7 @@ export type IonicCompoundMorph = CompoundMorph<IonicCompound>
 
 export class IonicCompound extends Compound {
 
-   // dirty: boolean = false;
+   // stale: boolean = false;
 
    // atoms: Set<Watchable> = new Set()
 

@@ -5,7 +5,7 @@ import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 
 /**
  * NOTES: 
- * - Ionic effects don't need a dirty state because if they are called, it means they're dirty
+ * - Ionic effects don't need a stale state because if they are called, it means they're stale
  */
 
 

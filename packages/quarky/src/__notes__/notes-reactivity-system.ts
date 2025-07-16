@@ -146,7 +146,7 @@ class MemoizedIonQuark implements IonicCompound, Particle, WatchedAtom, Quark<Me
    particles: Set<Particle>
    particlesHead: Link | undefined
    particlesTail: Link | undefined
-   dirty: boolean
+   stale: boolean
    compounds?: Set<IonicCompound> | undefined
    compoundsHead?: Link | undefined
    compoundsTail?: Link | undefined
@@ -168,7 +168,7 @@ class IonicEffectQuark implements IonicCompound, WatchedAtom, Quark<IonicEffect>
    particles: Set<Particle>
    particlesHead: Link | undefined
    particlesTail: Link | undefined
-   dirty: boolean
+   stale: boolean
    effects: Set<WatchEffect>
    effectsHead: WatchEffect
    effectsTail: WatchEffect
