@@ -160,7 +160,7 @@ export class ListRenderKit {
             throw new Error(`dynamicPod length ${dynamicPod!.length} and data length ${previous.length} are mismatched. This should never happen.`)
          console.log('updating list, yes')
          this.castBeforeUpdate();
-         queueInternalRender(()=>{
+         // queueInternalRender(()=>{
             this.removeItems(indicesToRemove!);
             try {
                this.insertAndMoveItems(insertAndMoveKit!, parent);
@@ -168,7 +168,7 @@ export class ListRenderKit {
             catch (err) {
                console.error(err, this.__DEV__asyncPath)
             }
-         })
+         // })
       }, { phase: PRERENDER })
       // currentItem = undefined;
       $currentIndex = undefined;
@@ -212,9 +212,9 @@ export class ListRenderKit {
          const nodePod = this.dynamicPod[index] as NodePod;
          const flask = flaskMap.get(nodePod)
          flask?.emitDiscard()
-         // queueInternalRender(() => {
+         queueInternalRender(() => {
             removeDOMNodes(nodePod)
-         // })
+         })
       }
       //TODO: how do I handle items that have been moved to another port?
    }
@@ -284,9 +284,9 @@ export class ListRenderKit {
          }
          else if (hasMoved(uItem)) {
             // move node to fragment (DOM will auto-remove node from DOM)
-            // queueInternalRender(() => {
+            queueInternalRender(() => {
                transferNodes(fragment, nodePod);
-            // })
+            })
          }
       }
       // this.indices = newIndices;
@@ -321,11 +321,11 @@ export class ListRenderKit {
       }
 
       // (3) insert nodes into DOM
-      // queueInternalRender(() => {
+      queueInternalRender(() => {
          for (const [index, fragment] of indicesAndFragments) {
             mountDOMNodes(<NodePod>dynamicPod[index], parent, fragment)
          }
-      // })
+      })
 
       this.castUpdated(toFromIndices)
    }

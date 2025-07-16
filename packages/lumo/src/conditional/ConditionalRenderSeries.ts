@@ -432,14 +432,14 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       const isInitialMount = kit.flask === undefined
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
-      queueInternalRender(() => {
+      // queueInternalRender(() => {
          this.render(kit, parent, fragment)
          nodePod.activate()
          if (isInitialMount)
             flask.emitInitialMount()
          else
             flask.emitRemount() // remount preserved watchers etc.
-      })
+      // })
    }
 }
 

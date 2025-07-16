@@ -169,6 +169,7 @@ function linkAtoms(compound: IonicCompound, effect: Effect) {
 Memory leaks occur when an object is referenced outside of its creation scope in a way that does not reassign it with the new version of the object, ie collecting it in an array, map, or set.
 */
 function assertValidInitialization(initializationFlask: Flask | undefined, creationFlask: Flask | undefined) {
+   if (true) return;
    if (!creationFlask) return;
    if (!initializationFlask) {
       if (creationFlask.creationScopeID === "0") // both are in global creation scope

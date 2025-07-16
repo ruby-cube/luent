@@ -20,13 +20,13 @@ export const {
 export const atPrerender = createEffectCycleScheduler(PRERENDER)
 
 
-// export function queueInternalRender(fn: () => void) { //TODO: needs to be able to be cancelled if action is cancelled
-//    const effect = createOneoff(fn, INTERNAL_RENDER)
-//    $currentEffectCycle().scheduleEffect(effect)
-//    getActiveFlask()?.onDiscard(() => effect.destroy())
-// }
+export function queueInternalRender(fn: () => void) { //TODO: needs to be able to be cancelled if action is cancelled
+   const effect = createOneoff(() => {console.log('running internal render'),fn()}, INTERNAL_RENDER)
+   $currentEffectCycle().scheduleEffect(effect)
+   getActiveFlask()?.onDiscard(() => effect.destroy())
+}
 
-export const queueInternalRender = (fn: Function) => fn()
+// export const queueInternalRender = (fn: Function) => {console.log('running internal render'),fn()}
 
 
 // export const queueInternalRender = createEffectCycleScheduler(INTERNAL_RENDER)
