@@ -162,9 +162,9 @@ function addHooks(hooks: { [key: string]: string | any }, cycle: EffectCycleMana
  * @param phase 
  * @returns 
  */
-export function createEffectCycleHook(phase: Phase) { //TODO: what happens if phase has already passed? should we queue to next cycle?
+export function createEffectCycleHook(phase: Phase) {
    return (task: () => void, options?: ListenerOptions) => {
-      return $listen(task, options ?? {}, {
+      return $listen(task, options ?? {}, { //TODO: potentially get rid of $listen depending on typical usage
          enroll(fn) {
             const effect = new Effect(fn, phase)
             $currentEffectCycle().scheduleEffect(effect)
@@ -183,9 +183,9 @@ export function createEffectCycleHook(phase: Phase) { //TODO: what happens if ph
  * @param phase 
  * @returns 
  */
-export function createEffectCycleScheduler(phase: Phase) { //TODO: what happens if phase has already passed? should we queue to next cycle?
+export function createEffectCycleScheduler(phase: Phase) { 
    return (task: () => void, options?: SchedulerOptions) => {
-      return $schedule(task, options ?? {}, {
+      return $schedule(task, options ?? {}, { //TODO: potentially get rid of $listen depending on typical usage
          enroll(task) {
             const effect = new Effect(task, phase)
             $currentEffectCycle().scheduleEffect(effect)

@@ -25,6 +25,8 @@ export const atPrerender = createEffectCycleScheduler(PRERENDER)
 
 
 export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: needs to be able to be cancelled if action is cancelled
+   if ($currentEffectCycle().currentPhase === INTERNAL_RENDER) 
+      console.warn('already in internal render', $currentEffectCycle().currentPhase, INTERNAL_RENDER)
    const effect = createOneoff(fn, INTERNAL_RENDER)
    // const effect = createOneoff(() => {console.log('running internal render'),fn()}, INTERNAL_RENDER)
    $currentEffectCycle().scheduleEffect(effect)

@@ -72,8 +72,8 @@ export class ListRenderKit {
       this.$list = toIon(data) as unknown as Ion<Array<any>>
       const context = $_snap_context()
       this.renderItem = (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => {
-         if (flask) context[FLASK]= flask
-         if (__DEV__) context[TRACE]= this.__DEV__asyncPath!
+         if (flask) context[FLASK] = flask
+         if (__DEV__) context[TRACE] = this.__DEV__asyncPath!
          $_run_with_(context, () => {
             const nodeEntities = callWithCommons(renderItem, this, item, $index, parent, nodePod)
             mountNodeEntities(nodeEntities, parent, fragment);
@@ -202,7 +202,9 @@ export class ListRenderKit {
          const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
          listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
          flaskMap.set(nodePod, flask)
-           queueInternalRender(()=>flask.emitInitialMount(), this.outerFlask)
+         // queueInternalRender(() => 
+            flask.emitInitialMount()
+         // , this.outerFlask)
       }
    }
 
@@ -277,7 +279,9 @@ export class ListRenderKit {
 
             const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
             this.renderItem(item, $index, parent, nodePod, fragment, flask)
-             queueInternalRender(()=>flask.emitInitialMount(), this.outerFlask)
+            // queueInternalRender(() => 
+               flask.emitInitialMount()
+            // , this.outerFlask)
             setCurrentIndex(undefined)
             flaskMap.set(nodePod, flask)
          }
@@ -320,13 +324,13 @@ export class ListRenderKit {
       }
 
       // (3) insert nodes into DOM
-      queueInternalRender(() => {
-         for (const [index, fragment] of indicesAndFragments) {
-            mountDOMNodes(<NodePod>dynamicPod[index], parent, fragment)
-         }
-      }, flask)
-
+      for (const [index, fragment] of indicesAndFragments) {
+         // queueInternalRender(()=>{
+            mountDOMNodes(dynamicPod[index] as NodePod, parent, fragment)
+         // }, this.outerFlask)
+      }
       this.castUpdated(toFromIndices)
+
    }
 }
 

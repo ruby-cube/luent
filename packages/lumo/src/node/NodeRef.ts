@@ -56,6 +56,7 @@ export function NodeRef<
          _ref.setValue([]); // clear nodes
       })
 
+      //TODO: there has to be a better way T_T
       if (isSettingUpList()) {
          onBeforeListUpdate(() => {
             _ref.prepUpdate();

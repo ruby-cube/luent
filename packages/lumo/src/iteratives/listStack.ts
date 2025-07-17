@@ -1,4 +1,4 @@
-import { $listen, SustainedListenerOptions } from "@rue/flask";
+import { SustainedListenerOptions } from "@rue/flask";
 import type { ListRenderKit } from "./ListRenderKit";
 
 const listSetupStack: ListRenderKit[] = [];
@@ -21,28 +21,18 @@ export function isSettingUpList() {
 //     return activeList && activeList.isUpdating;
 // }
 
-export function onListUpdated(task: (toFromIndices: [number, number][]) => void, options?: SustainedListenerOptions) {
+export function onListUpdated(task: (toFromIndices: [number, number][]) => void) {
    const list = listSetupStack.at(-1);
    if (!list) throw new Error(`onListUpdated hook must be called during list setup`)
-   return $listen(task, options ?? {}, {
-      enroll(cb) {
-         list.afterUpdateTasks.add(cb);
-      },
-      remove(cb) {
-         list.afterUpdateTasks.delete(cb)
-      }
-   })
+   list.afterUpdateTasks.add(task)
+   const flask = list.outerFlask
+   flask.onDiscard(() => list.afterUpdateTasks.delete(task));
 }
 
 export function onBeforeListUpdate(task: () => void, options?: SustainedListenerOptions) {
    const list = listSetupStack.at(-1);
    if (!list) throw new Error(`onListUpdated hook must be called during list setup`)
-   return $listen(task, options ?? {}, {
-      enroll(cb) {
-         list.beforeUpdateTasks.add(cb);
-      },
-      remove(cb) {
-         list.beforeUpdateTasks.delete(cb)
-      }
-   })
+   list.afterUpdateTasks.add(task)
+   const flask = list.outerFlask
+   flask.onDiscard(() => list.beforeUpdateTasks.delete(task));
 }

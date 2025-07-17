@@ -258,13 +258,19 @@ export class NodePod extends Array<AnyNode> {
 //    // }
 // }
 
-export function mountDOMNodes(pod: NodePod, parent: Element, fragment: DocumentFragment) {
-   let prevNode = pod.prevNode;
+export function mountDOMNodes(
+   // prevNode: Element | null | undefined
+   pod: NodePod
+   ,
+   parent: Element, fragment: DocumentFragment) {
+      
+   const prevNode = pod.prevNode
 
    if (prevNode && prevNode === parent) {
       parent.append(fragment) //for teleport
    }
    else if (prevNode) {
+      console.warn('inserted fragment after prevNode')
       prevNode.after(fragment)
    }
    else {
