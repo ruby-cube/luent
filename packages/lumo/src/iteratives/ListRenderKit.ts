@@ -201,10 +201,10 @@ export class ListRenderKit {
 
          const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
          listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
-         flaskMap.set(nodePod, flask)
          // queueInternalRender(() => 
-            flask.emitInitialMount()
+         flask.emitInitialMount()
          // , this.outerFlask)
+         flaskMap.set(nodePod, flask)
       }
    }
 
@@ -280,7 +280,7 @@ export class ListRenderKit {
             const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
             this.renderItem(item, $index, parent, nodePod, fragment, flask)
             // queueInternalRender(() => 
-               flask.emitInitialMount()
+            flask.emitInitialMount()
             // , this.outerFlask)
             setCurrentIndex(undefined)
             flaskMap.set(nodePod, flask)
@@ -324,12 +324,13 @@ export class ListRenderKit {
       }
 
       // (3) insert nodes into DOM
-      for (const [index, fragment] of indicesAndFragments) {
-         // queueInternalRender(()=>{
+      queueInternalRender(() => {
+         for (const [index, fragment] of indicesAndFragments) {
             mountDOMNodes(dynamicPod[index] as NodePod, parent, fragment)
-         // }, this.outerFlask)
-      }
-      this.castUpdated(toFromIndices)
+         }
+         this.castUpdated(toFromIndices)
+      }, this.outerFlask)
+      
 
    }
 }
