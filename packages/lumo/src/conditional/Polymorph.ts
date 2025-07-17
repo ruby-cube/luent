@@ -6,7 +6,7 @@ import { mountConditional } from "./ConditionalRenderSeries";
 import { Commons, NodeCommons, Provided, callWithCommons } from "../commons/Commons";
 import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
 import { DynamicPod, NodePod, removeDOMNodes } from "../node/NodePod";
-import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask } from "@rue/flask";
+import { $_run_with_, $_snap_context, FLASK, Flask } from "@rue/flask";
 import { fromTag } from "../component/fromTag";
 import { ion, Ion, isIon, MutableIon, toValue, watch } from "@rue/quarky";
 import { useTransitionNodes } from "../transition/TransitNode";
@@ -15,7 +15,7 @@ import { getPhasicNode } from "../transition/PhasicNode";
 import { __DEV__buildAsyncPath } from "../../../flask/debug";
 import { RenderTransient, toRenderTransient, wrapToPreserve } from "../dynamic/DynamicKit";
 import { AnyObject } from "@rue/types";
-import { $renderphase, INTERNAL_RENDER, onRender, PRERENDER } from "../render-cycle";
+import { $renderphase, INTERNAL_RENDER, onRender, PRERENDER, queueInternalRender } from "../render-cycle";
 
 
 
@@ -153,7 +153,7 @@ type VariantMap = Map<Object, DynamicRenderKit> & { render: RenderFunction }
 
 export class PolymorphKit {
    // store contextual state
-   context: ContextSnapshot = $_snap_context()
+   context: Map<string | symbol, any> = $_snap_context()
    outerFlask: Flask = getViewFlask()
    phasicNode?: TransitionNode | null = getPhasicNode()
 
@@ -182,7 +182,7 @@ export class PolymorphKit {
          if (key)
             morphable.activateConditional(key, parent)
 
-      }, {phase: PRERENDER})
+      }, { phase: PRERENDER })
       return this;
    }
 
@@ -197,7 +197,7 @@ export class PolymorphKit {
 
    render(kit: DynamicRenderKit, parent: Element, fragment?: DocumentFragment) {
       const context = this.context;
-      context[FLASK]= kit.flask;
+      context[FLASK] = kit.flask;
 
       $_run_with_(context, () => {
          const nodeEntities = kit.cached ?? (kit.cached = kit.renderConditional(parent, kit.nodePod!, kit.input))
@@ -236,9 +236,9 @@ export class PolymorphKit {
 
       this.render(kit, parent, fragment)
       if (isInitialMount)
-         flask.emitInitialMount()
+          queueInternalRender(()=>flask.emitInitialMount(), this.outerFlask)
       else
-         flask.emitRemount() // remount preserved watchers etc.
+         queueInternalRender(()=>flask.emitRemount(), this.outerFlask) // remount preserved watchers etc.
    }
 
    discard(key: PolymorphKey, input?: Object) {

@@ -432,20 +432,10 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          this.render(kit, parent, fragment)
          nodePod.activate()
          if (isInitialMount)
-<<<<<<< HEAD
-            // queueInternalRender(()=>
-         flask.emitInitialMount()
-         // , this.outerFlask)
-         else
-            // queueInternalRender(()=>
-         flask.emitRemount()
-         // , this.outerFlask) // remount preserved watchers etc.
-=======
             flask.emitInitialMount()
          else
             flask.emitRemount() // remount preserved watchers etc.
       // })
->>>>>>> parent of cff6781 (scheduled flask.emitInitialMount() with queueInternalRender to fix timing issue)
    }
 }
 
