@@ -15,7 +15,7 @@ import { getPhasicNode } from "../transition/PhasicNode";
 import { __DEV__buildAsyncPath } from "../../../flask/debug";
 import { RenderTransient, toRenderTransient, wrapToPreserve } from "../dynamic/DynamicKit";
 import { AnyObject } from "@rue/types";
-import { $renderphase, INTERNAL_RENDER, onRender, PRERENDER, queueInternalRender } from "../render-cycle";
+import { $renderphase, INTERNAL_RENDER, onRender, PRERENDER } from "../render-cycle";
 
 
 
@@ -182,7 +182,7 @@ export class PolymorphKit {
          if (key)
             morphable.activateConditional(key, parent)
 
-      }, { phase: PRERENDER })
+      }, {phase: PRERENDER})
       return this;
    }
 
@@ -197,7 +197,7 @@ export class PolymorphKit {
 
    render(kit: DynamicRenderKit, parent: Element, fragment?: DocumentFragment) {
       const context = this.context;
-      context[FLASK] = kit.flask;
+      context[FLASK]= kit.flask;
 
       $_run_with_(context, () => {
          const nodeEntities = kit.cached ?? (kit.cached = kit.renderConditional(parent, kit.nodePod!, kit.input))
@@ -236,9 +236,9 @@ export class PolymorphKit {
 
       this.render(kit, parent, fragment)
       if (isInitialMount)
-          queueInternalRender(()=>flask.emitInitialMount(), this.outerFlask)
+         flask.emitInitialMount()
       else
-         queueInternalRender(()=>flask.emitRemount(), this.outerFlask) // remount preserved watchers etc.
+         flask.emitRemount() // remount preserved watchers etc.
    }
 
    discard(key: PolymorphKey, input?: Object) {

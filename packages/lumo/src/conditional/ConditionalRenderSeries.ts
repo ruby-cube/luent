@@ -428,9 +428,11 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
       const isInitialMount = kit.flask === undefined
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
+      // queueInternalRender(() => {
          this.render(kit, parent, fragment)
          nodePod.activate()
          if (isInitialMount)
+<<<<<<< HEAD
             // queueInternalRender(()=>
          flask.emitInitialMount()
          // , this.outerFlask)
@@ -438,6 +440,12 @@ export class ConditionalRenderSeries extends ConditionalSeries {
             // queueInternalRender(()=>
          flask.emitRemount()
          // , this.outerFlask) // remount preserved watchers etc.
+=======
+            flask.emitInitialMount()
+         else
+            flask.emitRemount() // remount preserved watchers etc.
+      // })
+>>>>>>> parent of cff6781 (scheduled flask.emitInitialMount() with queueInternalRender to fix timing issue)
    }
 }
 
