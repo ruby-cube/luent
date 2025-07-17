@@ -1,5 +1,5 @@
 import { Flask, getActiveFlask } from "@rue/flask"
-import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, $currentEffectCycle, createOneoff, Ion, } from "@rue/quarky"
+import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, $currentEffectCycle, createOneoff, Ion, useAnimationCycle, $currentCycle, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
 import { asWatchSubject, IonSubject, isQuarkyIon } from "../../quarky/src/watch/WatchSubject"
 import { hasQuark } from "../../quarky/src/Quark"
@@ -15,6 +15,8 @@ export const {
    // onEffectCycleComplete: onRenderCycleEnd
 } = useReactivitySystem()
 
+useAnimationCycle()
+
 
 // export const onPrerender = createEffectCycleHook(PRERENDER)
 // export const onInternalRender = createEffectCycleHook(INTERNAL_RENDER)
@@ -26,7 +28,7 @@ export const atPrerender = createEffectCycleScheduler(PRERENDER)
 
 export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: needs to be able to be cancelled if action is cancelled
    const effect = createOneoff(fn, INTERNAL_RENDER)
-   $currentEffectCycle().scheduleEffect(effect)
+   $currentCycle().scheduleEffect(effect)
    flask.onDiscard(() => effect.destroy())
 }
 

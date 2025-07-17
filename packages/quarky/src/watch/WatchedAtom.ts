@@ -1,8 +1,8 @@
 import { isObject, unnestOriginalFn } from "@rue/utils";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { Effect, PhaseQueue } from "../effect-cycle/EffectQueue";
-import { $currentEffectCycle } from "../effect-cycle/ReactivitySystem";
 import { hasQuark, Quark, QUARK } from "../Quark";
+import { $currentCycle } from "../effect-cycle/ReactivitySystem";
 
 
 export type Watchable = {
@@ -95,11 +95,12 @@ export class WatchedAtom {
 
    triggerEffects() { // the surrounding effect when original trigger happened
       const phases = this.phases
+      const cycle = $currentCycle()
       for (const phase of phases) {
          const queue = this.effects.get(phase)!
-         $currentEffectCycle().scheduleEffects(queue, phase)
+         cycle.scheduleEffects(queue, phase)
          if (phase === SYNC) {
-            $currentEffectCycle().runEffects(SYNC)
+            cycle.runEffects(SYNC)
          }
       }
    }

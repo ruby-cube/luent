@@ -81,7 +81,7 @@ export class EffectCycle {
 
       scheduleEffects(effects: PhaseQueue, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
-      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
+      // if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
       queue.scheduleEffects(effects)
    }
@@ -89,7 +89,7 @@ export class EffectCycle {
    scheduleEffect(effect: Effect) {
       const phase = effect.phase
       const adjustedPhase = this.adjustPhase(phase)
-      if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
+      // if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
       queue.scheduleEffect(effect)
    }

@@ -1,5 +1,5 @@
 import { component, fromTag, measureLayout, atUnmount } from "@rue/lumo";
-import { ion } from "@rue/quarky";
+import { animate, ion } from "@rue/quarky";
 import { queueTask } from "@rue/thread";
 
 const TARGET = 25;
@@ -15,30 +15,6 @@ const lazyBatch = useLazyBatch()
 
 // }
 
-let renderingFrame = false;
-
-function animate(fn: (time: DOMHighResTimeStamp | undefined) => void) {
-   const animation = {
-      nextFrame: undefined as undefined | number
-   }
-
-   prepFrame(undefined)
-
-   function renderFrame(time: DOMHighResTimeStamp) {
-      queueTask(() => {
-         prepFrame(time)
-      })
-   }
-
-   function prepFrame(time: DOMHighResTimeStamp | undefined) {
-      renderingFrame = true;
-      fn(time)
-      renderingFrame = false;
-      animation.nextFrame = requestAnimationFrame(renderFrame)
-   }
-
-   return animation
-}
 
 export function TriangleDemo() {
    const $elapsed = ion(0)
@@ -52,7 +28,7 @@ export function TriangleDemo() {
       return 1 + (e > 5 ? 10 - e : e) / 10;
    })
    const start = Date.now()
-   const t = setInterval(() => $seconds.state = ($seconds() % 10) + 1, 1000);
+   const t = setInterval(() => ($seconds.state = ($seconds() % 10) + 1), 1000);
    // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
    const animation = animate(() => {
