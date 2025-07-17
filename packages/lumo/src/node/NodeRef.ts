@@ -3,6 +3,7 @@ import { HTMLTag } from "../element/makeElement"
 import { isSettingUpList, onBeforeListUpdate, onListUpdated } from "../iteratives/listStack"
 import { Ion } from "@rue/quarky"
 import { getActiveFlask } from "@rue/flask"
+import { getViewFlask } from "../flask/ViewFlask"
 
 const INTERNAL = Symbol('internal')
 
@@ -52,7 +53,8 @@ export function NodeRef<
    if (array) {
       const _ref = (<_NodesRef>NodeRef)[INTERNAL] as MetaNodesRef
 
-      getActiveFlask()?.onDiscard(() => {
+      const flask = getViewFlask()
+      flask.onDiscard(() => {
          _ref.setValue([]); // clear nodes
       })
 
@@ -60,11 +62,11 @@ export function NodeRef<
       if (isSettingUpList()) {
          onBeforeListUpdate(() => {
             _ref.prepUpdate();
-         })
+         }, flask)
 
          onListUpdated((toFromIndices) => {
             _ref.update(toFromIndices)
-         })
+         }, flask)
       }
    }
    return NodeRef as unknown as RefReturn<T, A>
@@ -153,6 +155,7 @@ export class MetaNodesRef {
    }
 
    update(toFromIndices: [number, number][]) {
+      //FIX: not accurate
       const prevNodes = this.prevNodes;
       if (!prevNodes) throw new Error('prevNodes were not store, must call prepUpdate before list update')
       const newNodes = this.NodeRef.nodes;

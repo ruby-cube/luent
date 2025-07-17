@@ -5,6 +5,7 @@ body {
   line-height: 1.7;
   margin: 0;
   padding: 30px;
+  overflow: hidden;
 }
 
 a {

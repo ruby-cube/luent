@@ -1,5 +1,5 @@
 import { Flask, getActiveFlask } from "@rue/flask"
-import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, $currentEffectCycle, createOneoff, Ion, } from "@rue/quarky"
+import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, $currentEffectCycle, createOneoff, Ion, useAnimationCycle, $currentCycle, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
 import { asWatchSubject, IonSubject, isQuarkyIon } from "../../quarky/src/watch/WatchSubject"
 import { hasQuark } from "../../quarky/src/Quark"
@@ -15,6 +15,8 @@ export const {
    // onEffectCycleComplete: onRenderCycleEnd
 } = useReactivitySystem()
 
+useAnimationCycle()
+
 
 // export const onPrerender = createEffectCycleHook(PRERENDER)
 // export const onInternalRender = createEffectCycleHook(INTERNAL_RENDER)
@@ -28,11 +30,8 @@ export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: need
    if ($currentEffectCycle().currentPhase === INTERNAL_RENDER) 
       console.warn('already in internal render', $currentEffectCycle().currentPhase, INTERNAL_RENDER)
    const effect = createOneoff(fn, INTERNAL_RENDER)
-   // const effect = createOneoff(() => {console.log('running internal render'),fn()}, INTERNAL_RENDER)
-   $currentEffectCycle().scheduleEffect(effect)
+   $currentCycle().scheduleEffect(effect)
    flask.onDiscard(() => effect.destroy())
-   // flask.onDemount(()=> effect.unlink()) //TODO:
-   // flask.onRemount(()=> effect.destroy())//TODO: 
 }
 
 // export const queueInternalRender = (fn: Function) => {

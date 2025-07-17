@@ -2,7 +2,8 @@ import { $listen, $schedule, Listener, ListenerOptions, SchedulerOptions } from 
 import { CyclePhase, EffectCycle, Phase, queueTask, SYNC, UPDATE_CYCLE_END } from "./EffectCycle";
 import { noop } from "@rue/utils";
 import { Effect } from "./EffectQueue";
-import { TaskQueue, TaskRef } from "./TaskQueue";
+import { $forAnimation } from "./animation";
+
 
 
 type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
@@ -74,6 +75,8 @@ export class EffectCycleManager {
 
 function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
    schedule(() => {
+      const prevManager = currentCycleManager;
+      currentCycleManager = cycle.manager
       const finalIndex = phases.length - 2;
       if (index < finalIndex) schedulePhase(cycle, next)
       cycle.currentPhase = index;
@@ -84,10 +87,14 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
       cycle.subphase = 'microtasks'
       if (index === finalIndex)
          queueMicrotask(() => {
+            const prevManager = currentCycleManager;
+            currentCycleManager = cycle.manager
             // cycleManager.runTasks(next!.index)
             cycle.runEffects(next!.index)
             cycle.close();
+            currentCycleManager = prevManager;
          })
+      currentCycleManager = prevManager;
    })
 }
 
@@ -118,6 +125,18 @@ function setUpUpdateCycleManager() {
    // cycleManager.onComplete = createEffectCycleScheduler(UPDATE_CYCLE_END)//TODO: Think...
    return cycleManager;
 }
+const animationCycleManager = new EffectCycleManager('AnimationCycle');
+
+function setUpAnimationCycleManager() {
+   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:PRERENDER', queueMicrotask))
+   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:INTERNAL_RENDER', queueMicrotask))
+   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:RENDER', queueMicrotask))
+   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:POSTRENDER', noop)) //TODO: Think...
+   // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
+   return animationCycleManager;
+}
+
+let currentCycleManager: EffectCycleManager = cycleManager;
 
 export function getUpdateCycleCount() {
    return cycleManager.count
@@ -144,8 +163,17 @@ export function useReactivitySystem(): EffectCycleHooks {
    return hooks as EffectCycleHooks;
 }
 
+export function useAnimationCycle(): EffectCycleHooks {
+   const manager = setUpAnimationCycleManager();
+   const hooks = {
+      SYNC
+   }
+   addHooks(hooks, manager)
+   return hooks as EffectCycleHooks;
+}
+
 function addHooks(hooks: { [key: string]: string | any }, cycle: EffectCycleManager) {
-   const phases = cycleManager.phases
+   const phases = cycle.phases
    for (const phase of phases) {
       const phaseName = phase.name
       // hooks[phaseName] = phaseName
@@ -167,7 +195,7 @@ export function createEffectCycleHook(phase: Phase) {
       return $listen(task, options ?? {}, { //TODO: potentially get rid of $listen depending on typical usage
          enroll(fn) {
             const effect = new Effect(fn, phase)
-            $currentEffectCycle().scheduleEffect(effect)
+            $currentCycle().scheduleEffect(effect)
             return task;
          },
          remove(task) {
@@ -188,7 +216,7 @@ export function createEffectCycleScheduler(phase: Phase) {
       return $schedule(task, options ?? {}, { //TODO: potentially get rid of $listen depending on typical usage
          enroll(task) {
             const effect = new Effect(task, phase)
-            $currentEffectCycle().scheduleEffect(effect)
+            $currentCycle().scheduleEffect(effect)
             return effect;
          },
          remove(effect: Effect) {
@@ -196,6 +224,15 @@ export function createEffectCycleScheduler(phase: Phase) {
          }
       })
    }
+}
+
+export function $currentCycle() {
+   return $currentCycleManager().current;
+}
+
+function $currentCycleManager() {
+   if ($forAnimation()) return animationCycleManager;
+   return currentCycleManager;
 }
 
 
@@ -207,27 +244,33 @@ export function getDefaultPhase() {
 
 
 
-export function getEffectCycleManager() {
-   return cycleManager
-}
-
-
-export function $currentEffectCycle() {
-   return cycleManager.current
-}
-
-// export function scheduleEffects(effects: PhaseQueue, phase: string) {
-//    cycleManager.current.scheduleEffects(effects, phase)
-// }
-
-// export function scheduleEagerEffect(effect: Effect, phase: Phase) {
-//    cycleManager.current.scheduleEagerEffect(effect, phase)
+// export function getEffectCycleManager() {
+//    return cycleManager
 // }
 
 
+// export function $currentEffectCycle() {
+//    return cycleManager.current
+// }
 
 export function getCurrentPhase() {
+   const cycleManager = $currentCycleManager()
    if (cycleManager.current && cycleManager.current.currentPhase !== SYNC) return cycleManager.current.currentPhase;
    return SYNC;
 }
+
+
+// export function getAnimationCycleManager() {
+//    return animationCycleManager
+// }
+
+
+// export function $currentAnimationCycle() {
+//    return animationCycleManager.current
+// }
+
+// export function getCurrentAnimationPhase() {
+//    if (animationCycleManager.current && animationCycleManager.current.currentPhase !== SYNC) return animationCycleManager.current.currentPhase;
+//    return SYNC;
+// }
 

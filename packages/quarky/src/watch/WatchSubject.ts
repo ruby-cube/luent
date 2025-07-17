@@ -8,7 +8,7 @@ import { asWatchedAtom, isWatchable, isWatchableEntity, Watchable, WatchedAtom }
 import { isObject, noop } from "@rue/utils";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
 import { Ion, isIon, toValue } from "../ion/Ion";
-import { $currentEffectCycle } from "../effect-cycle/ReactivitySystem";
+import { $currentCycle, $currentEffectCycle } from "../effect-cycle/ReactivitySystem";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { WatchSubjects } from "./watch";
 import { detachedCall, IonicCompound } from "../ionic/IonicCompound";
@@ -239,9 +239,9 @@ function linkEffectToAtom(atom: WatchedAtom | undefined, effect: Effect, eager: 
    if (!atom) return;
    effect.link(atom)
    if (eager) {
-      $currentEffectCycle().scheduleEffect(effect)
+      $currentCycle().scheduleEffect(effect)
       if (effect.phase === SYNC){
-         $currentEffectCycle().runEffects(SYNC)
+         $currentCycle().runEffects(SYNC)
       }
    }
 }

@@ -1,8 +1,8 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-import './style.css'
-// import './demos/SierpinskiTriangles.css'
+// import './style.css'
+import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
 // import {TreeApp} from './demos/tree-view'
@@ -192,7 +192,11 @@ import { SimpleCounter } from './SimpleCounter';
 
 
 
+<<<<<<< HEAD
 const app = createApp(List)
+=======
+const app = createApp(TriangleDemo)
+>>>>>>> c25155b2daadac386f57f7ccadb15a72cb231da5
 
 app.mount('#app')
 
