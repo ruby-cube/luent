@@ -192,11 +192,7 @@ import { SimpleCounter } from './SimpleCounter';
 
 
 
-<<<<<<< HEAD
-const app = createApp(List)
-=======
 const app = createApp(TriangleDemo)
->>>>>>> c25155b2daadac386f57f7ccadb15a72cb231da5
 
 app.mount('#app')
 

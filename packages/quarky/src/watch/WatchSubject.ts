@@ -8,7 +8,7 @@ import { asWatchedAtom, isWatchable, isWatchableEntity, Watchable, WatchedAtom }
 import { isObject, noop } from "@rue/utils";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
 import { Ion, isIon, toValue } from "../ion/Ion";
-import { $currentCycle, $currentEffectCycle } from "../effect-cycle/ReactivitySystem";
+import { $currentCycle } from "../effect-cycle/ReactivitySystem";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { WatchSubjects } from "./watch";
 import { detachedCall, IonicCompound } from "../ionic/IonicCompound";
