@@ -193,6 +193,7 @@ export class IonSubject implements WatchSubject {
       if (compound) this.effect.unlink()
       const value = detachedCall(this.ion)
       if (compound && compound.atoms.size) {
+         if (compound.atoms.size === 0) console.warn('WE LOST REACTIVITY')
          linkEffectToAtoms(toWatchedAtoms(compound.atoms), this.effect)
       }
 

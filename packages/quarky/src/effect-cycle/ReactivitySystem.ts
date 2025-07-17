@@ -2,7 +2,6 @@ import { $listen, $schedule, Listener, ListenerOptions, SchedulerOptions } from 
 import { CyclePhase, EffectCycle, Phase, queueTask, SYNC, UPDATE_CYCLE_END } from "./EffectCycle";
 import { noop } from "@rue/utils";
 import { Effect } from "./EffectQueue";
-import { $forAnimation } from "./animation";
 
 
 
@@ -44,8 +43,6 @@ export class EffectCycleManager {
 
    createCycle() {
       this.count++;
-      if (this.currentCycle)
-         throw new Error("@% Overlapping update cycles! Need to either implement a different type of update cycle management system or set up guards to prevent overlaps")
       return new EffectCycle(this);
    }
 
@@ -56,7 +53,11 @@ export class EffectCycleManager {
    }
 
    closeCycle() {
-      this.currentCycle = this.nextCycle
+      const cycle = this.currentCycle = this.nextCycle
+      if (cycle) {
+         this.nextCycle = undefined;
+         schedulePhase(cycle, this.phases[0])
+      }
    }
 
    phases: CyclePhase[] = []
@@ -75,26 +76,25 @@ export class EffectCycleManager {
 
 function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
    schedule(() => {
-      const prevManager = currentCycleManager;
-      currentCycleManager = cycle.manager
-      const finalIndex = phases.length - 2;
-      if (index < finalIndex) schedulePhase(cycle, next)
+      // activeManager = cycle.manager
+      const final = index === phases.length - 1;
+      if (!final)
+         schedulePhase(cycle, next)
       cycle.currentPhase = index;
-      // console.log(`%%% ${phaseHook} run tasks...`)
-      // cycleManager.runTasks(index) // FIX: It's me Hi I'm the problem it's me
       cycle.subphase = 'effects'
       cycle.runEffects(index)
       cycle.subphase = 'microtasks'
-      if (index === finalIndex)
-         queueMicrotask(() => {
-            const prevManager = currentCycleManager;
-            currentCycleManager = cycle.manager
-            // cycleManager.runTasks(next!.index)
-            cycle.runEffects(next!.index)
-            cycle.close();
-            currentCycleManager = prevManager;
-         })
-      currentCycleManager = prevManager;
+      // if (index === finalIndex)
+      //    queueMicrotask(() => {
+      //       activeManager = cycle.manager
+      //       // cycleManager.runTasks(next!.index)
+      //       cycle.runEffects(next!.index)
+      //       cycle.close();
+      //       activeManager = null;
+      //    })
+      // if (index === phases.length-2/*after render*/) 
+         // activeManager = null; //FIX: This does not wait for microtasks :( ... any microtasks will be considered outside of cycle :( 
+      if (final) cycle.close() // TODO: close before post render??
    })
 }
 
@@ -115,28 +115,28 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
 const cycleManager = new EffectCycleManager('UpdateCycle');
 
 function setUpUpdateCycleManager() {
-   cycleManager.pushPhase(new CyclePhase('PRERENDER', queueTask))
-   // cycleManager.pushPhase(new CyclePhase('PRE_INTERNAL_RENDER', queueTask))
-   cycleManager.pushPhase(new CyclePhase('INTERNAL_RENDER', queueTask))
+   cycleManager.pushPhase(new CyclePhase('PRERENDER', queueMicrotask))
+   cycleManager.pushPhase(new CyclePhase('INTERNAL_RENDER', queueMicrotask))
    cycleManager.pushPhase(new CyclePhase('RENDER', queueMicrotask))
-   cycleManager.pushPhase(new CyclePhase('POSTRENDER', noop)) //TODO: Think...
+   // cycleManager.pushPhase(new CyclePhase('POSTRENDER', queueTask)) //TODO: Think...
    // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
 
    // cycleManager.onComplete = createEffectCycleScheduler(UPDATE_CYCLE_END)//TODO: Think...
    return cycleManager;
 }
-const animationCycleManager = new EffectCycleManager('AnimationCycle');
 
-function setUpAnimationCycleManager() {
-   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:PRERENDER', queueMicrotask))
-   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:INTERNAL_RENDER', queueMicrotask))
-   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:RENDER', queueMicrotask))
-   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:POSTRENDER', noop)) //TODO: Think...
-   // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
-   return animationCycleManager;
-}
+// const animationCycleManager = new EffectCycleManager('AnimationCycle');
 
-let currentCycleManager: EffectCycleManager = cycleManager;
+// function setUpAnimationCycleManager() {
+//    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:PRERENDER', queueMicrotask))
+//    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:INTERNAL_RENDER', queueMicrotask))
+//    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:RENDER', queueMicrotask))
+//    // animationCycleManager.pushPhase(new CyclePhase('ANIMATION:POSTRENDER', queueTask)) //TODO: Think...
+//    // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
+//    return animationCycleManager;
+// }
+
+// let activeManager: EffectCycleManager | null = null
 
 export function getUpdateCycleCount() {
    return cycleManager.count
@@ -163,14 +163,14 @@ export function useReactivitySystem(): EffectCycleHooks {
    return hooks as EffectCycleHooks;
 }
 
-export function useAnimationCycle(): EffectCycleHooks {
-   const manager = setUpAnimationCycleManager();
-   const hooks = {
-      SYNC
-   }
-   addHooks(hooks, manager)
-   return hooks as EffectCycleHooks;
-}
+// export function useAnimationCycle(): EffectCycleHooks {
+//    const manager = setUpAnimationCycleManager();
+//    const hooks = {
+//       SYNC
+//    }
+//    addHooks(hooks, manager)
+//    return hooks as EffectCycleHooks;
+// }
 
 function addHooks(hooks: { [key: string]: string | any }, cycle: EffectCycleManager) {
    const phases = cycle.phases
@@ -211,7 +211,7 @@ export function createEffectCycleHook(phase: Phase) {
  * @param phase 
  * @returns 
  */
-export function createEffectCycleScheduler(phase: Phase) { 
+export function createEffectCycleScheduler(phase: Phase) {
    return (task: () => void, options?: SchedulerOptions) => {
       return $schedule(task, options ?? {}, { //TODO: potentially get rid of $listen depending on typical usage
          enroll(task) {
@@ -226,13 +226,21 @@ export function createEffectCycleScheduler(phase: Phase) {
    }
 }
 
+
+
+
 export function $currentCycle() {
-   return $currentCycleManager().current;
+   return cycleManager.current;
+   // const phase = getCurrentPhase()
+   // if (phase !== SYNC && !activeManager) return cycleManager.next;
+   // return $currentCycleManager().current;
 }
 
+
 function $currentCycleManager() {
-   if ($forAnimation()) return animationCycleManager;
-   return currentCycleManager;
+   return cycleManager;
+   // if (forAnimation()) return animationCycleManager;
+   // return activeManager ?? cycleManager;
 }
 
 

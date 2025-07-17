@@ -54,14 +54,19 @@ export function TriangleDemo() {
 function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
    if (s <= TARGET) {
       return component(
-         <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET * 1.25} text={$seconds} />
+         <Dot x={x - TARGET / 2} y={y - TARGET / 2} s={TARGET} text={$seconds} />
       );
    }
    s = s / 2;
 
-   // const $slow = ion(()=>$seconds())
+   // const $slow = ion(() => {
+   //    var e = performance.now() + 0.8;
+   //    // Artificially long execution time.
+   //    while (performance.now() < e) { }
+   //   return $seconds()
+   // })
 
-   // const slow = ion($seconds())
+   const $slow = ion(()=>$seconds())
 
    // watch($seconds, async () => {
    //    // await lazyBatch(async () => {
@@ -74,9 +79,9 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
 
    return component(
       <>
-         <Triangle x={x} y={y - s / 2} s={s} seconds={$seconds} />
-         <Triangle x={x - s} y={y + s / 2} s={s} seconds={$seconds} />
-         <Triangle x={x + s} y={y + s / 2} s={s} seconds={$seconds} />
+         <Triangle x={x} y={y - s / 2} s={s} seconds={$slow} />
+         <Triangle x={x - s} y={y + s / 2} s={s} seconds={$slow} />
+         <Triangle x={x + s} y={y + s / 2} s={s} seconds={$slow} />
       </>
    );
 };

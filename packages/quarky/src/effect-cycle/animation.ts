@@ -1,15 +1,10 @@
 
-let forAnimation = false;
-export function $forAnimation(){
-   return forAnimation;
-}
-
 export function animate(fn: (time: DOMHighResTimeStamp | undefined) => void) {
    const animation = {
       nextFrame: undefined as undefined | number
    }
 
-   prepFrame(undefined)
+   requestAnimationFrame(renderFrame)
 
    function renderFrame(time: DOMHighResTimeStamp) {
       setImmediate(() => {
@@ -18,9 +13,7 @@ export function animate(fn: (time: DOMHighResTimeStamp | undefined) => void) {
    }
 
    function prepFrame(time: DOMHighResTimeStamp | undefined) {
-      forAnimation = true;
       fn(time)
-      forAnimation = false;
       animation.nextFrame = requestAnimationFrame(renderFrame)
    }
 
