@@ -74,8 +74,8 @@ export class ListRenderKit {
       const listContext = $_snap_context()
       this.renderItem = (item: any, $index: Ion<number>, parent: Element, nodePod: NodePod, fragment?: DocumentFragment, flask?: Flask) => {
          const context = { ...listContext }
-         if (flask) context[FLASK] = flask
-         if (__DEV__) context[TRACE] = this.__DEV__asyncPath!
+         if (flask) context[FLASK]  = flask
+         if (__DEV__) context[TRACE]  = this.__DEV__asyncPath!
          $_run_with_(context, () => {
             const nodeEntities = callWithCommons(renderItem, this, item, $index, parent, nodePod)
             mountNodeEntities(nodeEntities, parent, fragment);
