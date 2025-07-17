@@ -29,6 +29,7 @@ export * from './flask/flask-hooks'
 export * from './flask/ViewFlask' 
 export * from './component/Input' 
 export * from './measureLayout'
+export * from './render-cycle'
 
 //@ts-expect-error
 window._$$wrapWithCommons = wrapWithCommons;

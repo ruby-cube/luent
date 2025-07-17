@@ -1,10 +1,10 @@
-import { component, fromTag, measureLayout, atUnmount } from "@rue/lumo";
-import { animate, ion } from "@rue/quarky";
+import { component, fromTag, measureLayout, atUnmount, PRERENDER } from "@rue/lumo";
+import { animate, ion, watch } from "@rue/quarky";
 import { queueTask } from "@rue/thread";
 
 const TARGET = 25;
 
-const lazyBatch = useLazyBatch()
+
 
 
 // function renderLazily(mutation: Function, deadline?: number) {
@@ -14,7 +14,7 @@ const lazyBatch = useLazyBatch()
 // function renderAnimationFrame() {
 
 // }
-
+const lazyBatch = useLazyBatch()
 
 export function TriangleDemo() {
    const $elapsed = ion(0)
@@ -39,6 +39,8 @@ export function TriangleDemo() {
       clearInterval(t); cancelAnimationFrame(animation.nextFrame!);
    });
 
+
+
    return component(
       <div
          class="container"
@@ -46,6 +48,7 @@ export function TriangleDemo() {
             transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)")
          }}
       >
+         {/* <div>{$seconds}</div> */}
          <Triangle x={0} y={0} s={1000} seconds={$seconds} />
       </div>
    );
@@ -59,23 +62,20 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
    }
    s = s / 2;
 
-   // const $slow = ion(() => {
-   //    var e = performance.now() + 0.8;
-   //    // Artificially long execution time.
-   //    while (performance.now() < e) { }
-   //   return $seconds()
-   // })
 
-   const $slow = ion(()=>$seconds())
 
-   // watch($seconds, async () => {
-   //    // await lazyBatch(async () => {
-   //    //    var e = performance.now() + 0.8;
-   //    //    // Artificially long execution time.
-   //    //    while (performance.now() < e) { }
-   //    // })
-   //    $slow.state = $seconds()
-   // }, {phase: PRERENDER})
+   const $slow = ion($seconds())
+
+   // SOLUTION: segregate long derivation from rendering with watch() prerender, 
+
+   watch($seconds, async () => {
+      await lazyBatch(() => {
+         var e = performance.now() + 0.8;
+         // Artificially long execution time.
+         while (performance.now() < e) { }
+      })
+      $slow.state = $seconds()
+   }, { phase: PRERENDER }) // phase doesn't really matter since await makes this into a separate task
 
    return component(
       <>

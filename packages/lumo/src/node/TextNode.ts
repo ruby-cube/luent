@@ -20,9 +20,9 @@ export function setUpTextNode(text: Ion | any, textNode: Text) {
 function keepTextNodeUpdated(text: Ion, textNode: CharacterData) {
    const flask = getViewFlask()
    watchForRender(text, () => {
-      queueInternalRender(() => {
+      // queueInternalRender(() => {
          textNode.data = toString(text());
-      }, flask)
+      // }, flask)
    }, flask);
 }
 

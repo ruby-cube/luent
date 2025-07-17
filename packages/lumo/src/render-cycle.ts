@@ -168,7 +168,7 @@ export function watchForRender(ion: Ion, render: (previous: unknown) => void, fl
       const newState = subject.trackedCall()
       render(prevState)
       prevState = newState;
-   }, PRERENDER)
+   }, INTERNAL_RENDER)
 
    subject.linkEffect(effect, eager)
 

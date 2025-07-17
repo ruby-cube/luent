@@ -383,10 +383,10 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const pod = kit.nodePod!
       const activationType = kit.type
       if (activationType === 'show') {
-         queueInternalRender(() => {
+         // queueInternalRender(() => {
             // preserve dynamic node and node pod
             hideDOMNodes(pod);
-         }, this.outerFlask)
+         // }, this.outerFlask)
       }
       else if (activationType === 'create') {
          // discard of flask
@@ -394,18 +394,18 @@ export class ConditionalRenderSeries extends ConditionalSeries {
          kit.flask = undefined; // 
          flask.emitDiscard() //
 
-         queueInternalRender(() => {
+         // queueInternalRender(() => {
             // remove from 
             removeDOMNodes(pod)
             pod.clear() //
-         }, this.outerFlask)
+         // }, this.outerFlask)
       }
       else if (activationType === 'mount') {
          const flask = kit.flask
          flask?.emitDemount() //
-         queueInternalRender(() => {
+         // queueInternalRender(() => {
             removeDOMNodes(pod);
-         }, this.outerFlask)
+         // }, this.outerFlask)
       }
    }
 
@@ -420,22 +420,24 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const nodePod = kit.nodePod
 
       if (activationType === 'show') { //NOTE: 'show' statements are not dynamic nodes because they are not removed from the DOM and setup is not rerun
-         queueInternalRender(() => {
+         // queueInternalRender(() => {
             showDOMNodes(nodePod)
-         }, this.outerFlask)
+         // }, this.outerFlask)
          return;
       }
 
       const isInitialMount = kit.flask === undefined
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
-      // queueInternalRender(() => {
       this.render(kit, parent, fragment)
       nodePod.activate()
       if (isInitialMount)
-         queueInternalRender(()=>flask.emitInitialMount(), this.outerFlask)
+         // queueInternalRender(()=>
+         flask.emitInitialMount()
+      // , this.outerFlask)
       else
-         queueInternalRender(()=>flask.emitRemount(), this.outerFlask) // remount preserved watchers etc.
-      // })
+         // queueInternalRender(()=>
+         flask.emitRemount() // remount preserved watchers etc.
+      // , this.outerFlask) 
    }
 }
 
@@ -454,9 +456,9 @@ export function mountConditional(
    const _fragment = fragment || new DocumentFragment();
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
    if (fragment) return; // no need to mount to DOM yet since fragment originates higher up
-   queueInternalRender(()=>{
-      mountDOMNodes(pod, parent, _fragment)
-   }, flask)
+   // queueInternalRender(()=>{
+   mountDOMNodes(pod, parent, _fragment)
+   // }, flask)
 }
 
 

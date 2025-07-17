@@ -229,9 +229,9 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
    const ion = attributes['mu:value'];
    const flask = getViewFlask()
    watchForRender(ion, () => {
-      queueInternalRender(() => {
+      // queueInternalRender(() => {
          element.value = toString(ion())
-      }, flask)
+      // }, flask)
    }, flask, RUN_EAGERLY)
    delete attributes['mu:value'];
    if (!isMutableIon(ion)) {
@@ -308,9 +308,9 @@ function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<an
       //TODO: only attributes that affect layout should be scheduled for render phase
       if (isIon(value)) {
          watchForRender(value, () => {
-            queueInternalRender(() => {
+            // queueInternalRender(() => {
                setAttribute(node, _key, value())
-            }, flask)
+            // }, flask)
          }, flask, RUN_EAGERLY)
       }
       // else if (isViewBindingKit(value)) {
@@ -523,11 +523,11 @@ function setUpClasses(node: Element, classes: ClassInput[]) {
    for (const entry of classes) {
       if (isIon(entry)) {
          watchForRender(entry, (previous/* newState: DynamicClassesConfig | string | Falsey, oldState: DynamicClassesConfig | string | Falsey */) => {
-            queueInternalRender(() => {
+            // queueInternalRender(() => {
                const current = entry()
                if (previous) removePreviousClasses(previous, classList)
                if (current) addClasses(current, classList, flask)
-            }, flask)
+            // }, flask)
          }, flask, RUN_EAGERLY)
       }
       else if (entry) {
@@ -583,10 +583,10 @@ function setUpClassesFromObject(entry: DynamicClassesConfig, classList: DOMToken
       const value = entry[key]
       if (isIon(value)) {
          watchForRender(value, (previous) => {
-            queueInternalRender(() => {
+            // queueInternalRender(() => {
                if (value()) classList.add(key)
                else if (previous) classList.remove(key)
-            }, flask)
+            // }, flask)
          }, flask, RUN_EAGERLY)
       }
       else if (value) {
@@ -623,9 +623,9 @@ function setUpStyles(node: Element, styles: StyleInput[]) {
    for (const entry of styles) {
       if (isIon(entry)) {
          watchForRender(entry, (/* value: string | AnyObject | Falsey */) => {
-            queueInternalRender(() => {
+            // queueInternalRender(() => {
                setUpStyleEntry(style, entry(), flask);
-            }, flask)
+            // }, flask)
          }, flask, RUN_EAGERLY)
       }
       else {
@@ -641,9 +641,9 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isIon(value)) {
             watchForRender(value, () => {
-               queueInternalRender(() => {
+               // queueInternalRender(() => {
                   assignStyleProperty(style, toStylePropertyName(key), value())
-               }, flask)
+               // }, flask)
             }, flask, RUN_EAGERLY)
          }
          else {

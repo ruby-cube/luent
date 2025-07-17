@@ -23,9 +23,9 @@ export function mountInnerHTML(htmlString: MaybeIon<string>, parent: Element) {
 function keepInnerHTMLUpdated(htmlString: Ion<any>, parentNode: Element) {
     const flask = getViewFlask()
    watchForRender(htmlString, () => {
-      queueInternalRender(() => {
+      // queueInternalRender(() => {
          parentNode.innerHTML = toString(htmlString());
-      }, flask)
+      // }, flask)
    }, flask);
 }
 

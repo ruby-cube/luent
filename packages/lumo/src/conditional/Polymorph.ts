@@ -236,9 +236,13 @@ export class PolymorphKit {
 
       this.render(kit, parent, fragment)
       if (isInitialMount)
-          queueInternalRender(()=>flask.emitInitialMount(), this.outerFlask)
+         //  queueInternalRender(()=>
+         flask.emitInitialMount()
+      // , this.outerFlask)
       else
-         queueInternalRender(()=>flask.emitRemount(), this.outerFlask) // remount preserved watchers etc.
+         // queueInternalRender(()=>
+         flask.emitRemount()
+      // , this.outerFlask) // remount preserved watchers etc.
    }
 
    discard(key: PolymorphKey, input?: Object) {
