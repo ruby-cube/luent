@@ -102,7 +102,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const kits = toDynamicConditionalKits(statements)
       super(kits);
 
-      if (__DEV__) this.context[TRACE]= this.__DEV__asyncPath
+      if (__DEV__) this.context[TRACE] = this.__DEV__asyncPath
 
       this.activeIndex = this.evaluateConditions()
       // populate dynamic node pod
@@ -367,13 +367,13 @@ export class ConditionalRenderSeries extends ConditionalSeries {
    }
 
    private render(kit: DynamicConditionalRenderKit, parent: Element, fragment?: DocumentFragment) {
-      const context = this.context;
+      const context = { ...this.context };
       const flask = kit.flask
-      if (flask) context[FLASK]= flask; //NOTE: flask is optional b/c/ show kits don't need flask
+      if (flask) context[FLASK] = flask; //NOTE: flask is optional b/c/ show kits don't need flask
 
       $_run_with_(context, () => {
          const nodeEntities = kit.renderConditional(parent, kit.nodePod)
-         mountConditional(parent, kit.nodePod, nodeEntities, fragment);
+         mountConditional(parent, kit.nodePod, nodeEntities, this.outerFlask, fragment);
       })
    }
 
@@ -429,12 +429,12 @@ export class ConditionalRenderSeries extends ConditionalSeries {
       const isInitialMount = kit.flask === undefined
       const flask = kit.flask ?? (kit.flask = this.outerFlask.spawn({ type: 'view', creationScope: kit.type === "create" }))
       // queueInternalRender(() => {
-         this.render(kit, parent, fragment)
-         nodePod.activate()
-         if (isInitialMount)
-            flask.emitInitialMount()
-         else
-            flask.emitRemount() // remount preserved watchers etc.
+      this.render(kit, parent, fragment)
+      nodePod.activate()
+      if (isInitialMount)
+         queueInternalRender(()=>flask.emitInitialMount(), this.outerFlask)
+      else
+         queueInternalRender(()=>flask.emitRemount(), this.outerFlask) // remount preserved watchers etc.
       // })
    }
 }
@@ -448,12 +448,15 @@ export function mountConditional(
    parent: Element,
    pod: NodePod,
    nodeEntities: NodeEntity[],
+   flask: Flask,
    fragment?: DocumentFragment
 ) {
    const _fragment = fragment || new DocumentFragment();
    mountNodeEntities(nodeEntities, parent, _fragment) //TODO: pass in index in case it's in a list?
    if (fragment) return; // no need to mount to DOM yet since fragment originates higher up
-   mountDOMNodes(pod, parent, _fragment)
+   queueInternalRender(()=>{
+      mountDOMNodes(pod, parent, _fragment)
+   }, flask)
 }
 
 

@@ -1,6 +1,6 @@
 import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { ion, __addDevName, ionize, toRaw } from "@rue/quarky";
+import { ion, __addDevName, ionize, toRaw, watch } from "@rue/quarky";
 import { enlistIonizedMethods } from "../../../packages/quarky/src/ionized/IonizedMethods";
 import { trackModel } from "../../../packages/quarky/src/ionized/OpDefinitions";
 import { Glass, IsRedundantUnion } from "@rue/types";
@@ -201,6 +201,7 @@ export function List(
       selected.delete(list[index])
       list.remove(index);
    }
+
 
    return component(
       <>

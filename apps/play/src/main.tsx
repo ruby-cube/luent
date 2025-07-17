@@ -1,7 +1,7 @@
 // // import {jsx} from '@rue/jsx-dev-runtime'
 // // console.log(jsx)
 // // import { App } from './App';
-// import './style.css'
+import './style.css'
 // import './demos/SierpinskiTriangles.css'
 // import './demos/robofriends/robofriends.css'
 // import './demos/tree-view.css'
@@ -192,7 +192,7 @@ import { SimpleCounter } from './SimpleCounter';
 
 
 
-const app = createApp(TodoMVC)
+const app = createApp(List)
 
 app.mount('#app')
 

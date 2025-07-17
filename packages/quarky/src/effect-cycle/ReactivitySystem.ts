@@ -2,7 +2,6 @@ import { $listen, $schedule, Listener, ListenerOptions, SchedulerOptions } from 
 import { CyclePhase, EffectCycle, Phase, queueTask, SYNC, UPDATE_CYCLE_END } from "./EffectCycle";
 import { noop } from "@rue/utils";
 import { Effect } from "./EffectQueue";
-import { TaskQueue, TaskRef } from "./TaskQueue";
 
 
 type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
