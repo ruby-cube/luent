@@ -1,6 +1,6 @@
 import { SetMap, UIDGenerator } from "@rue/utils";
 import { AsyncState } from "./context/AsyncContext";
-import { ResumableListener, SustainedListenerOptions } from "./Listener";
+import { PausableListener, SustainedListenerOptions } from "./Listener";
 
 export const FLASK = 'flask'
 
@@ -161,13 +161,13 @@ export class Flask {
 
    emitDemount!: () => void
 
-   onDemount!: (task: Task, options?: SustainedListenerOptions) => ResumableListener
+   onDemount!: (task: Task, options?: SustainedListenerOptions) => PausableListener
 
    emitRemount!: () => void
 
-   onRemount!: (task: Task, options?: SustainedListenerOptions) => ResumableListener
+   onRemount!: (task: Task, options?: SustainedListenerOptions) => PausableListener
 
-   onDiscard!: (task: Task) => ResumableListener
+   onDiscard!: (task: Task) => PausableListener
 
    emitDiscard!: () => void
 

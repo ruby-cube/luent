@@ -1,4 +1,4 @@
-import { $listen, ResumableListener, SustainedListenerOptions } from "@rue/flask";
+import { $listen, PausableListener, SustainedListenerOptions } from "@rue/flask";
 import { Ion, isIon } from "../ion/Ion";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
@@ -6,7 +6,7 @@ import { Effect } from "../effect-cycle/EffectQueue";
 import { getDefaultPhase } from "../effect-cycle/ReactivitySystem";
 import { asWatchSubject, isWatchSubject, WatchSubject } from "./WatchSubject";
 import { Glass } from "@rue/types";
-import { unnestOriginalFn } from "@rue/utils";
+import { __DEV__unwrap } from "@rue/utils";
 
 
 // watch(multisubject(
@@ -84,7 +84,7 @@ export type WatchSubjects = (Object | Ion)[]
 
 export function watch<
    T extends Ionized<object> | Ion<any> | WatchSubjects
->(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): ResumableListener {
+>(subject: T, effect: EffectTask<T>, options: EffectOptions = {}): PausableListener {
 
    options.retrack = options.retrack ?? true;
 
@@ -142,18 +142,21 @@ export function setUpWatcher(
    effect: Task,
    options: EffectOptions,
 ) {
-   const phase = options.phase = getPhase(options)
+   let phase = options.phase = getPhase(options)
    const eager = options.eager ?? false;
 
-   let paused = false;
-
-   function pausableEffect() { //TODO: can i get rid of this extra wrap?
-      if (paused) return;
-      return effect()
+   if (phase === 'postrender') {
+      const _effect = effect
+      function delayed() { //TODO: need to cancel with action
+         const id = requestIdleCallback(_effect, { timeout: 18 })
+         // $action().onCancel(()=>cancelIdleCallback(id))
+      }
+      if (__DEV__) delayed.__DEV__fn = effect;
+      effect = delayed;
+      phase = 3 //INTERNAL_RENDER
    }
-   pausableEffect.__DEV__fn = unnestOriginalFn(effect)
-
-   return $listen(pausableEffect, options || {}, {
+   // TODO: options.preserve means non-pausable watcher
+   return $listen(effect, options || {}, {
       enroll(task) {
          const effect = new Effect(task, phase)
          subject.linkEffect(effect, eager)
@@ -161,13 +164,6 @@ export function setUpWatcher(
       },
       remove(effect: Effect) {
          effect.destroy()
-      },
-      pause() {
-         paused = true;
-      },
-      resume(task) {
-         paused = false;
-         task()
       }
    });
 }

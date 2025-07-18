@@ -1,5 +1,5 @@
 import { $listen, $schedule, Listener, ListenerOptions, SchedulerOptions } from "@rue/flask";
-import { CyclePhase, EffectCycle, Phase, queueTask, SYNC, UPDATE_CYCLE_END } from "./EffectCycle";
+import { CyclePhase, EffectCycle, Phase, queueTask, SYNC } from "./EffectCycle";
 import { noop } from "@rue/utils";
 import { Effect } from "./EffectQueue";
 
@@ -55,8 +55,11 @@ export class EffectCycleManager {
    closeCycle() {
       const cycle = this.currentCycle = this.nextCycle
       if (cycle) {
+         console.log('next cycle')
+         // queueTask(()=>{
          this.nextCycle = undefined;
-         schedulePhase(cycle, this.phases[0])
+            schedulePhase(cycle, this.phases[0])
+         // })
       }
    }
 
@@ -76,10 +79,9 @@ export class EffectCycleManager {
 
 function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
    schedule(() => {
-      // activeManager = cycle.manager
       const final = index === phases.length - 1;
-      if (!final)
-         schedulePhase(cycle, next)
+         if (!final) schedulePhase(cycle, next)
+
       cycle.currentPhase = index;
       cycle.subphase = 'effects'
       cycle.runEffects(index)
@@ -93,8 +95,7 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
       //       activeManager = null;
       //    })
       // if (index === phases.length-2/*after render*/) 
-         // activeManager = null; //FIX: This does not wait for microtasks :( ... any microtasks will be considered outside of cycle :( 
-      if (final) cycle.close() // TODO: close before post render??
+      if (final) cycle.close()
    })
 }
 
@@ -118,7 +119,7 @@ function setUpUpdateCycleManager() {
    cycleManager.pushPhase(new CyclePhase('PRERENDER', queueMicrotask))
    cycleManager.pushPhase(new CyclePhase('INTERNAL_RENDER', queueMicrotask))
    cycleManager.pushPhase(new CyclePhase('RENDER', queueMicrotask))
-   // cycleManager.pushPhase(new CyclePhase('POSTRENDER', queueTask)) //TODO: Think...
+   cycleManager.pushPhase(new CyclePhase('INTERNAL_POSTRENDER', queueMicrotask))
    // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
 
    // cycleManager.onComplete = createEffectCycleScheduler(UPDATE_CYCLE_END)//TODO: Think...

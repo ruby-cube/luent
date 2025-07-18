@@ -1,13 +1,33 @@
-import { Callback, CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
+import { $listen, Callback, CallbackRemover, useCleanupScheduler } from "./flaskableListeners";
 import { setUpCleanupWarning, unmarkNoCleanup } from "./initFlask";
-import { mapHandlers } from "./handlerMap";
-import { AbortSignal } from "./AbortSignal";
-import { $_run_with_, $_snap_context } from "./context/AsyncContext";
+import { $_run_with_, $_snap_context, asyncContextStack, ContextSnapshot } from "./context/AsyncContext";
 import { FLASK, Flask, getActiveFlask, ThisFlask } from "./Flask";
 import { TRACE } from "./debug";
-import { noop, unnestOriginalFn } from "@rue/utils";
+import { noop, __DEV__unwrap } from "@rue/utils";
 
-export type ResumableListener = {
+type A = { [K in keyof AbortSignal]: AbortSignal[K] }['removeEventListener']
+
+//TODO: make sure abort signal can be used generically and not just for events
+type _AbortSignal = {
+   readonly aborted: boolean;
+   readonly reason: any;
+   onabort: ((this: AbortSignal, ev: Event) => any) | null; // handleAbort/remove function
+   throwIfAborted: {
+      (): void;
+      (): void;
+   };
+   addEventListener: {
+      <K extends keyof AbortSignalEventMap>(type: K, removeHandlers: (this: AbortSignal, ev: AbortSignalEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+      (type: string, onAbort: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+   };
+   removeEventListener: {
+      <K extends keyof AbortSignalEventMap>(type: K, removeHandlers: (this: AbortSignal, ev: AbortSignalEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+      (type: string, onAbort: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+   };
+   dispatchEvent: (event: Event) => boolean;
+}
+
+export type PausableListener = {
    stop(): boolean;
    pause(): boolean;
    resume(): boolean;
@@ -17,21 +37,21 @@ export type Listener = {
    stop(): boolean;
 }
 
+export type Until = ScheduleStop | AbortSignal | null
 
 export type SustainedListenerOptions = {
    once?: boolean;
-   until?: ScheduleStop | AbortSignal | null
+   until?: Until
 } & ListenerOptions
 
 export type ScheduleStop = (stop: CallbackRemover) => Listener;
 
 export type SchedulerOptions = {
-   cancel?: ScheduleStop | AbortSignal | null,
+   cancel?: Until,
 } & ListenerOptions
 
 export type ListenerOptions = {
    within?: ThisFlask | null //| 'outlive',
-   preserve?: true
 }
 
 
@@ -50,8 +70,6 @@ type ListenerConfig<E extends EnrollFunction = EnrollFunction> = {
    callback: Callback,
    enroll: E,
    remove: RemoveFunction<E>,
-   pause?: Pause,
-   resume?: EnrollFunction,
    options: SustainedListenerOptions | undefined
    __DEV__asyncPath?: string,
 }
@@ -65,113 +83,219 @@ export function toListenerOptions(options: SchedulerOptions | undefined) {
    }
 }
 
-export function makeListener<E extends (wrappedCB: Callback) => void | Callback>(
+
+
+export function makeScheduler<E extends (wrappedCB: Callback) => void | Callback>(
    config: ListenerConfig<E>
-): ResumableListener {
-   const { enroll, remove, callback, pause, resume, options, __DEV__asyncPath } = config;
+): Listener {
+   const { enroll, remove, callback, options } = config;
    if (!callback) {
       if (__DEV__) console.warn("No callback was passed into makeListener")
-      function noOp() {
-         return false;
+      return {
+         stop() { return false; }
+      };
+   }
+
+   const listener = {
+      stop
+   }
+
+   const flask = getFlask(options?.within)
+   const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask())
+   const context = $_snap_context()
+
+   const effect: { run: Callback | null } = { // wrap callback in object so it doesn't cause memory leak
+      run: (...args: any[]) => {
+         if (!effect.run) return;
+         const _context = { ...context }
+         _context[FLASK] = enclosingFlask
+         _context[TRACE] = config.__DEV__asyncPath ?? ""
+         $_run_with_(_context, () => effect.run?.(...args))
+         stop()
       }
+   }
+
+   const until = options?.until
+   const returnVal: any = enroll(effect.run!);
+
+   const unbind = bindToFlask(listener, until, enclosingFlask)
+
+   function stop() {
+      return stopListener(listener, effect, () => remove(returnVal ?? effect.run), unbind)
+   }
+   stop.isRemover = true as const;
+
+   setUpCleanup(until, stop, listener, flask, enclosingFlask)
+
+   return listener;
+}
+
+function bindToFlask(listener: Listener, until: Until | undefined, enclosingFlask: Flask | undefined) {
+   return (until === null || !enclosingFlask) ? undefined : enclosingFlask.onDiscard(listener.stop).stop
+}
+
+
+function getFlask(within: ThisFlask | null | undefined) {
+   return within instanceof ThisFlask ?
+      //@ts-expect-error: flask is private
+      within.flask
+      : within;
+}
+
+
+export function makeListener<E extends (wrappedCB: Callback) => void | Callback>(
+   config: ListenerConfig<E>
+): Listener {
+   const { enroll, remove, callback, options } = config;
+   if (!callback) {
+      if (__DEV__) console.warn("No callback was passed into makeListener")
+      return {
+         stop() { return false; }
+      };
+   }
+
+   const listener = {
+      stop
+   }
+
+   const flask = getFlask(options?.within)
+   const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask())
+   const context = $_snap_context()
+   let scene: Flask;
+
+   const effect: { run: Callback | null } = { // wrap callback in object so it doesn't cause memory leak
+      run: (...args: any[]) => {
+         if (!effect.run) return;
+         if (scene) scene.emitDiscard()
+         scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true })
+         const _context = { ...context }
+         _context[FLASK] = scene
+         _context[TRACE] = config.__DEV__asyncPath ?? ""
+         $_run_with_(_context, () => effect.run?.(...args))
+      }
+   }
+
+   const until = options?.until
+   const returnVal: any = enroll(effect.run!);
+
+   const unbind = bindToFlask(listener, until, enclosingFlask)
+
+   function stop() {
+      return stopListener(listener, effect, () => remove(returnVal ?? effect.run), unbind)
+   }
+   stop.isRemover = true as const;
+
+   setUpCleanup(until, stop, listener, flask, enclosingFlask)
+
+   return listener;
+}
+
+function noOp() {
+   return false;
+}
+
+export function makePausableListener<E extends (wrappedCB: Callback) => void | Callback>(
+   config: ListenerConfig<E>
+): PausableListener {
+   const { enroll, remove, callback, options } = config;
+   if (!callback) {
+      if (__DEV__) console.warn("No callback was passed into makeListener")
+
       return {
          stop: noOp,
          pause: noOp,
          resume: noOp
       };
    }
-   const callbackIsRemover = isRemover(callback);
-   const once = options?.once || callbackIsRemover;
-   const preserve = options?.preserve || false;
-   const within = options?.within;
-   const flask = within instanceof ThisFlask ?
-      //@ts-expect-error: flask is private
-      within.flask
-      : within;
 
-   let returnVal: any;
-   let cancelPendingStop: (() => void) | undefined
-   let unbind: (() => void) | undefined
-
+   let paused = false;
+   let dirty = false;
    const activeListener = {
       stop,
-      pause: _pause,
+      pause() {
+         if (!effect.run || paused) return false;
+         paused = true;
+         dirty = false;
+         return true;
+      },
       resume() {
-         if (stopped || !paused) return false;
+         if (!effect.run || !paused) return false;
          paused = false;
-         // returnVal = enroll(_callback);
-         if (resume) returnVal = resume(_callback);
+         if (dirty) effect.run()
          return true;
       }
    }
 
+   const flask = getFlask(options?.within)
    const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask())
+   const context = $_snap_context()
+   let scene: Flask;
 
-   const _callback = callbackIsRemover ? callback : wrapWithFlask(callback, {
-      stop,
-      afterCall: once ? stop : undefined,
-      enclosingFlask,
-      __DEV__asyncPath
-   })
+   const effect: { run: Callback | null } = { // wrap callback in object so it doesn't cause memory leak
+      run: (...args: any[]) => {
+         if (!effect.run) return;
+         if (paused) {
+            dirty = true;
+            return;
+         }
+         dirty = false;
 
-   mapHandlers(_callback, callback);
+         if (scene) scene.emitDiscard()
+         scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if stale right?
+         const _context = { ...context }
+         _context[FLASK] = scene
+         _context[TRACE] = config.__DEV__asyncPath ?? ""
+         $_run_with_(_context, () => effect.run?.(...args))
+      }
+   }
 
-   let stopped = false;
+   const returnVal: any = enroll(effect.run!);
+
+   const until = options?.until
+
+   const unbind = enclosingFlask ? bindListenerToFlask(activeListener, enclosingFlask, until) : undefined // batch cleanup
+
    function stop() {
-      if (stopped) return false;
-      stopped = true;
-      remove(returnVal ?? _callback);
-      if (__DEV__) unmarkNoCleanup(activeListener);
-      if (cancelPendingStop) cancelPendingStop();
-      if (unbind) unbind();
-      if (pauseCleanup) pauseCleanup()
-      return true;
+      return stopListener(activeListener, effect, () => remove(returnVal ?? effect.run), unbind)
    }
    stop.isRemover = true as const;
 
+   setUpCleanup(until, stop, activeListener, flask, enclosingFlask)
 
-   let pauseCleanup: PauseCleanup | void;
-   let paused = false;
-   function _pause() {
-      if (stopped || paused) return false;
-      if (pause) pauseCleanup = pause(returnVal ?? _callback);
-      paused = true;
+   return activeListener as PausableListener;
+}
+
+function setUpCleanup(until: Until | undefined, stop: CallbackRemover, listener: Listener, flask: Flask | null | undefined, enclosingFlask: Flask | undefined) {
+   const success = _setUpCleanup(until, stop)
+   if (__DEV__ && (flask !== null || success)) setUpCleanupWarning!(listener, until, enclosingFlask)
+}
+
+function _setUpCleanup(until: Until | undefined, stop: CallbackRemover) {
+   if (until === null) return true;
+   if (!until) return false;
+   if (until instanceof AbortSignal) {
+      until.onabort = stop;
       return true;
    }
-
-   let until = options?.until
-   // as ScheduleStop | RegisterAbortSignal | null | undefined | any[]
-
    if (until instanceof Array) {
       until = useCleanupScheduler(...until) // for custom cleanup, like [document, 'mouseup']
    }
-
    if (until) {
-      const pendingStop = until(stop);
-      if (pendingStop) cancelPendingStop = pendingStop.stop;
-      if (__DEV__ && !cancelPendingStop)
-         console.warn('`until` function should be a flaskable scheduler that return a Pending object for cleanup. See @rue/flask')
+      until(stop);
+      return true;
    }
 
-   if (enclosingFlask) {
-      unbind = bindListenerToFlask(activeListener, enclosingFlask, preserve, until)
-   }
 
-   if (__DEV__ && (flask !== null || until !== null)) setUpCleanupWarning!(activeListener, until, enclosingFlask)
-
-   returnVal = enroll(_callback);
-
-   return activeListener as ResumableListener;
 }
 
 const noopable = {
-   stop: noop
+   stop: noOp
 }
 
-function bindListenerToFlask(listener: ResumableListener, flask: Flask, preserve: boolean, until: any | null) {
+function bindListenerToFlask(listener: PausableListener, flask: Flask, until: any | null) {
    const { stop: cancelStop } = until === null ? noopable : flask.onDiscard(listener.stop);
-   const { stop: stopPausing } = preserve ? noopable : flask.onDemount(listener.pause);
-   const { stop: stopResuming } = preserve ? noopable : flask.onRemount(listener.resume);
+   const { stop: stopPausing } = flask.onDemount(listener.pause);
+   const { stop: stopResuming } = flask.onRemount(listener.resume);
 
    return function unbind() {
       cancelStop()
@@ -180,53 +304,69 @@ function bindListenerToFlask(listener: ResumableListener, flask: Flask, preserve
    }
 }
 
+type Effect = { run: null | Callback }
 
+function stopListener(listener: Listener, effect: Effect, remove: () => void, unbind: (() => void) | undefined) {
+   if (!effect.run) return false;
+   remove();
+   if (__DEV__) unmarkNoCleanup(listener);
+   unbind?.();
+   effect.run = null;
+   return true;
+}
 
 function isRemover(callback: Callback) {
    return "isRemover" in callback && callback.isRemover;
 }
 // // onMount doesn't make sense for task flasks except as remount... $thisTask() instead of flask? $thisNode()
 
-// function wrapWithFlask(callback: Callback, config: {
-//    afterCall?: () => void,
-//    enclosingFlask: Flask | undefined,
-//    __DEV__asyncPath: string | undefined
-// }) {
-//    const { afterCall, enclosingFlask } = config
-//    let taskFlask: Flask;
-//    const context = $_snap_context()
-//    return (...args: any[]) => {
-//       if (taskFlask) taskFlask.discard()
-//       taskFlask = enclosingFlask?.spawn() || new Flask()
-//       taskFlask.activate(() => callback(...args)) //TODO: pass in dev trace
-//       if (afterCall) afterCall()
-//    }
-// }
 
 
-function wrapWithFlask(callback: Callback, config: {
+
+function wrapTask(callback: Callback, config: {
+   context: ContextSnapshot,
    stop: () => boolean,
-   afterCall?: () => void,
    enclosingFlask?: Flask,
    __DEV__asyncPath?: string
 }) {
-   const { afterCall, enclosingFlask, __DEV__asyncPath } = config
-   const context = $_snap_context()
-   let scene: Flask;
-   const wrappedCB = (...args: any[]) => {
-      if (scene) scene.emitDiscard()
-      scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if stale right?
-      context[FLASK] = scene
-      context[TRACE] = __DEV__asyncPath!
-      try {
-         return $_run_with_(context, () => callback(...args))
-      }
-      finally {
-         afterCall?.()
-      }
+   const { context, enclosingFlask, stop } = config;
+
+   function wrapped(...args: any[]) {
+      context[FLASK] = enclosingFlask
+      context[TRACE] = config.__DEV__asyncPath ?? ""
+      $_run_with_(context, () => callback(...args))
+      stop()
    }
-   if (__DEV__) wrappedCB.__DEV__fn = unnestOriginalFn(callback)
-   return wrappedCB
+   if (__DEV__) wrapped.__DEV__fn = __DEV__unwrap(callback)
+   return wrapped
 }
 
 
+// [] schedulers do not need a flask--they can just use the outer flask
+// [] 
+
+
+
+
+
+// $listen((...args: any[]) => { }, {
+//    once: true,
+//    preserve: true, // relevant to pausable listeners only
+//    until: (...task: any) => { }, // TODO: don't require Listener
+//    within: null
+// }, {
+//    enroll(cb) {
+//       document.addEventListener('click', cb)
+//    },
+//    remove(cb) {
+//       document.removeEventListener('click', cb)
+//    }
+// })
+
+
+
+
+
+// pausable listener
+// listener
+// scheduler (listeners with once)

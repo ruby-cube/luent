@@ -1,4 +1,4 @@
-import { unnestOriginalFn } from "@rue/utils";
+import { __DEV__unwrap } from "@rue/utils";
 import { WatchedAtom } from "../watch/WatchedAtom";
 import { Phase, SYNC } from "./EffectCycle";
 
@@ -121,7 +121,7 @@ export class PhaseQueue {
 
    runningEffects: boolean = false;
 
-   // retained: Set<Effect> = new Set()
+   retained: Set<Effect> = new Set() // for sync effects
 
    constructor(
       private phase: Phase,
@@ -168,16 +168,14 @@ export class PhaseQueue {
    //       this.nextEffects = undefined
    // }
 
-   runEffects(completedEffects: Set<Effect>) {
+   runEffects(completed: Set<Effect> | undefined) {
       this.runningEffects = true;
       const effects = this.effects
-      // const sync = this.phase === SYNC
-      const retained = 
-      // sync ? this.retained : 
-      new Set()
+      const sync = this.phase === SYNC
+      const retained = sync ? this.retained : new Set()
       for (const effect of effects) {
          if (!effect.run
-            || completedEffects?.has(effect) // prevents repeats within queue (but not across extended queues and phases)
+            || completed?.has(effect) // prevents repeats within queue (but not across extended queues and phases)
          ) {
             continue;
          }
@@ -194,14 +192,12 @@ export class PhaseQueue {
          //    continue;
          // }
          try {
-            // effectStack.push(effect);
-            // effectStackCount++
+            effectStackCount++
             effect.run() // What about async tasks? T_T How will it affect this system?
          }
          finally {
-            // effectStackCount--
-            // effectStack.pop()
-            completedEffects?.add(effect)
+            effectStackCount--
+            completed?.add(effect)
             if (retained.has(effect))
                continue;
             this.retain(effect)
@@ -209,15 +205,14 @@ export class PhaseQueue {
          }
       }
 
-
-      // if (sync && effectStackCount !== 0) {
-      //    return;
-      // }
+      if (sync && effectStackCount !== 0) {
+         return;
+      }
 
       this.runningEffects = false;
       this.effects = this.nextEffects ?? []
-      // if (sync) this.retained.clear()
       this.nextEffects = undefined
+      this.retained.clear()
 
    }
 
@@ -362,8 +357,8 @@ export class EffectQueue {
 
    runEffects() {
       this.runningEffects = true
-      
-      let completed: Set<Effect> = new Set()
+
+      const completed: Set<Effect> | undefined = this.phase === SYNC ? undefined : new Set()
       const queues = this.queues;
       for (const batch of queues) {
          batch.runEffects(completed)

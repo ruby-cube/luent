@@ -8,7 +8,7 @@ vi.mock('../EffectFlask', () => ({
     getActiveFlask: vi.fn()
 }));
 
-describe("ResumableListener", () => {
+describe("PausableListener", () => {
     let enroll: ReturnType<typeof vi.fn>;
     let remove: ReturnType<typeof vi.fn>;
     let callback: ReturnType<typeof vi.fn>;
@@ -33,7 +33,7 @@ describe("ResumableListener", () => {
     });
 
 
-    it('should enroll the callback and return an ResumableListener', () => {
+    it('should enroll the callback and return an PausableListener', () => {
         const listener = makeListener(config);
 
         expect(enroll).toHaveBeenCalledOnce();

@@ -1,5 +1,5 @@
 import { debug, useIncrementalID } from "@rue/utils";
-import { Listener } from "./Listener";
+import { Listener, Until } from "./Listener";
 import { Flask } from "./Flask";
 
 export let shouldWarnNoCleanup = false;
@@ -31,16 +31,16 @@ export function configureFlask(config: {
 
 export const genIncrementalId = __DEV__ ? useIncrementalID() : undefined;
 
-export const setUpCleanupWarning = __DEV__ ? (listener: Listener, cleanupFn: Function | null | undefined, flask: Flask | undefined) => {
+export const setUpCleanupWarning = __DEV__ ? (listener: Listener, until: Until | undefined, flask: Flask | undefined) => {
     if (shouldWarnNoCleanup) {
-        if (!flask && !cleanupFn) {
+        if (!flask && !until) {
             const listenerID = genIncrementalId!();
             //@ts-expect-error
             listener.warnNoCleanup = () => {
                debug.warn(`FLASKABLE_LISTENER_#${listenerID} has not been cleaned up. Make sure there's a cleanup strategy in place.`)
                 return true;
             }
-            debug.log(`ResumableListener flagged as potentially having no cleanup. Call 'warnNoCleanup' in console and look for listener id: FLASKABLE_LISTENER_#${listenerID}`)
+            debug.log(`PausableListener flagged as potentially having no cleanup. Call 'warnNoCleanup' in console and look for listener id: FLASKABLE_LISTENER_#${listenerID}`)
             debug.trace(`FLASKABLE_LISTENER_#${listenerID} trace:`)
             markNoCleanup(listener)
         }

@@ -10,16 +10,17 @@ export const {
    PRERENDER,
    INTERNAL_RENDER,
    RENDER,
-   POSTRENDER
-   // onEffectCycleComplete: onRenderCycleEnd
+   INTERNAL_POSTRENDER
 } = useReactivitySystem()
 
+export const POSTRENDER = 'postrender'
 
 
 // export const onPrerender = createEffectCycleHook(PRERENDER)
 // export const onInternalRender = createEffectCycleHook(INTERNAL_RENDER)
 // export const onRender = createEffectCycleHook(RENDER)
-// export const onPostrender = createEffectCycleHook(POSTRENDER)
+// export const onPostrender = createEffectCycleHook(INTERNAL_POSTRENDER)
+
 
 export const atPrerender = createEffectCycleScheduler(PRERENDER)
 
@@ -38,7 +39,7 @@ export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: need
 
 // export const queueInternalRender = createEffectCycleScheduler(INTERNAL_RENDER)
 export const atRender = createEffectCycleScheduler(RENDER)
-export const atPostrender = createEffectCycleScheduler(POSTRENDER)
+export const atPostrender = createEffectCycleScheduler(INTERNAL_POSTRENDER)
 
 
 //QUESTION: Not sure how this will interact with microtasks, especially with onRender being a microtask
@@ -175,7 +176,7 @@ export function watchForRender(ion: Ion, render: (previous: unknown) => void, fl
    flask.onDiscard(/* listener.stop */() => effect.destroy());
    flask.onDemount(/* listener.pause */() => effect.unlink());
    flask.onRemount(/* listener.resume */() => subject.linkEffect(effect, true));
-}  
+}
 
 
 export const RUN_EAGERLY = true;

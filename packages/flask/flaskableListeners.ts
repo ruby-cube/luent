@@ -1,4 +1,4 @@
-import { ResumableListener, EnrollFunction, SustainedListenerOptions, RemoveFunction, ScheduleStop, toListenerOptions, SchedulerOptions, makeListener, Listener, Pause } from "./Listener";
+import { PausableListener, EnrollFunction, SustainedListenerOptions, RemoveFunction, ScheduleStop, toListenerOptions, SchedulerOptions, makeListener, Listener, Pause, makeScheduler, makePausableListener } from "./Listener";
 import { __DEV__buildAsyncPath } from "./debug";
 
 export type CallbackRemover = {
@@ -10,7 +10,7 @@ export type Callback = (...arg: any[]) => any;
 export type Callbacks = Set<Callback | CallbackRemover>;
 
 
-let _useCleanupScheduler: undefined | ((...args: any[]) => (cleanup: CallbackRemover) => ResumableListener)
+let _useCleanupScheduler: undefined | ((...args: any[]) => (cleanup: CallbackRemover) => PausableListener)
 
 export function useCleanupScheduler(...args: any[]) {
    if (_useCleanupScheduler) {
@@ -19,7 +19,7 @@ export function useCleanupScheduler(...args: any[]) {
 }
 
 // allows custom clean up option like { until: [document, 'click'] }
-export function defineCustomCleanupScheduler(scheduler: (...args: any[]) => (cleanup: CallbackRemover) => ResumableListener) {
+export function defineCustomCleanupScheduler(scheduler: (...args: any[]) => (cleanup: CallbackRemover) => PausableListener) {
    if (__DEV__ && _useCleanupScheduler) console.warn(`overriding custom cleanup scheduler`)
    _useCleanupScheduler = scheduler;
 }
@@ -34,17 +34,17 @@ export function $listen<
    config: {
       enroll: E,
       remove: RemoveFunction<E>,
-      pause?: Pause,
-      resume?: EnrollFunction,
+      pausable: boolean
    }
 ) {
-   const { enroll, remove, pause, resume } = config;
-   return makeListener({
+   const { enroll, remove, pausable } = config;
+   const { once } = options
+   const make = once ? makeScheduler : pausable ? makePausableListener : makeListener
+
+   return make({
       callback,
       enroll,
       remove,
-      pause,
-      resume,
       options,
       __DEV__asyncPath: __DEV__buildAsyncPath()
    })
@@ -56,16 +56,12 @@ export function $schedule<
 >(callback: Callback, options: SchedulerOptions | undefined, config: {
    enroll: EnrollFunction,
    remove: RemoveFunction<E>,
-   pause?: Pause,
-   resume?: EnrollFunction,
 }): Pending {
-   const { enroll, remove, pause, resume } = config;
-   return makeListener({
+   const { enroll, remove} = config;
+   return makeScheduler({
       callback,
       enroll,
       remove,
-      pause,
-      resume,
       options: toListenerOptions(options),
       __DEV__asyncPath: __DEV__ ? __DEV__buildAsyncPath() : undefined
    })

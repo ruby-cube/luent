@@ -1,6 +1,6 @@
-export function unnestOriginalFn(fn: any){
-   if ('__DEV__fn' in fn){
-      return unnestOriginalFn(fn.__DEV__fn)
+export function __DEV__unwrap(fn: { __DEV__fn: Function } | {}) {
+   if ('__DEV__fn' in fn) {
+      return __DEV__unwrap(fn.__DEV__fn)
    }
    return fn;
 }

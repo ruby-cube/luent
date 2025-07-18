@@ -6,7 +6,11 @@ import { E } from "vitest/dist/chunks/reporters.6vxQttCV";
 import { EffectCycle } from "../effect-cycle/EffectCycle";
 import { getEffectCycleManager } from "../effect-cycle/ReactivitySystem";
 
+// responsive 
 
+requestIdleCallback(()=>{
+
+}, {timeout: 17}) // allows animations to schedule their queueTask first
 
 // Actions may span mulitple effect cycles
 

@@ -1,11 +1,11 @@
 import { setImmediate } from "@rue/thread";
 import { Effect, EffectQueue, PhaseQueue } from "./EffectQueue";
 import { EffectCycleManager, getCurrentPhase } from "./ReactivitySystem";
+import { POSTRENDER } from "@rue/lumo";
 
 export const SYNC = 'SYNC' as const
-export const UPDATE_CYCLE_END = 'UCE' as const
 
-export type Phase = number | typeof SYNC | typeof UPDATE_CYCLE_END
+export type Phase = number | typeof SYNC | typeof POSTRENDER
 
 export function definePhase(phaseName: string, scheduler?: Function): CyclePhase {
    return new CyclePhase(

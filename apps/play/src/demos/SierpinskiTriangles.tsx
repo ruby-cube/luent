@@ -1,10 +1,12 @@
-import { component, fromTag, measureLayout, atUnmount, PRERENDER } from "@rue/lumo";
+import { component, fromTag, measureLayout, atUnmount, PRERENDER, POSTRENDER } from "@rue/lumo";
 import { animate, ion, watch } from "@rue/quarky";
 import { queueTask } from "@rue/thread";
 
 const TARGET = 25;
 
-
+function doAction(fn: IdleRequestCallback) {
+   return requestIdleCallback(fn, { timeout: 17 })
+}
 
 
 // function renderLazily(mutation: Function, deadline?: number) {
@@ -28,7 +30,7 @@ export function TriangleDemo() {
       return 1 + (e > 5 ? 10 - e : e) / 10;
    })
    const start = Date.now()
-   const t = setInterval(() => ($seconds.state = ($seconds() % 10) + 1), 1000);
+   const t = setInterval(() => doAction(() => $seconds.state = ($seconds() % 10) + 1), 1000);
    // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
    const animation = animate(() => {
@@ -39,7 +41,9 @@ export function TriangleDemo() {
       clearInterval(t); cancelAnimationFrame(animation.nextFrame!);
    });
 
-
+   watch($seconds, () => {
+      console.log('changed', $seconds())
+   }, { phase: POSTRENDER })
 
    return component(
       <div
@@ -75,7 +79,7 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
          while (performance.now() < e) { }
       })
       $slow.state = $seconds()
-   }, { phase: PRERENDER }) // phase doesn't really matter since await makes this into a separate task
+   }) // phase doesn't really matter since await makes this into a separate task
 
    return component(
       <>
@@ -88,8 +92,8 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
 
 function Dot({ x, y, s, $text } = fromTag<any>()) {
    const $hover = ion(false),
-      onEnter = () => $hover.state = true,
-      onExit = () => $hover.state = false;
+      onEnter = () => doAction(() => $hover.state = true),
+      onExit = () => doAction(() => $hover.state = false);
 
    return component(
       <div
