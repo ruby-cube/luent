@@ -84,7 +84,6 @@ export function toListenerOptions(options: SchedulerOptions | undefined) {
 }
 
 
-
 export function makeScheduler<E extends (wrappedCB: Callback) => void | Callback>(
    config: ListenerConfig<E>
 ): Listener {
@@ -100,19 +99,24 @@ export function makeScheduler<E extends (wrappedCB: Callback) => void | Callback
       stop
    }
 
+   const effect: { run: Callback | null } = { // wrap callback in object so it doesn't cause memory leak
+      run: (...args: any[]) => {
+         if (!effect.run) return;
+         const returnVal = runCallback(args)
+         stop()
+         return returnVal
+      }
+   }
+
    const flask = getFlask(options?.within)
    const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask())
    const context = $_snap_context()
 
-   const effect: { run: Callback | null } = { // wrap callback in object so it doesn't cause memory leak
-      run: (...args: any[]) => {
-         if (!effect.run) return;
-         const _context = { ...context }
-         _context[FLASK] = enclosingFlask
-         _context[TRACE] = config.__DEV__asyncPath ?? ""
-         $_run_with_(_context, () => effect.run?.(...args))
-         stop()
-      }
+   function runCallback(args: any[]) {
+      const _context = { ...context }
+      _context[FLASK] = enclosingFlask
+      _context[TRACE] = config.__DEV__asyncPath ?? ""
+      $_run_with_(_context, () => callback(...args))
    }
 
    const until = options?.until
@@ -158,21 +162,25 @@ export function makeListener<E extends (wrappedCB: Callback) => void | Callback>
       stop
    }
 
+   const effect: { run: Callback | null } = { // wrap callback in object so it doesn't cause memory leak
+      run: (...args: any[]) => {
+         if (!effect.run) return;
+         return runCallback(args)
+      }
+   }
+
    const flask = getFlask(options?.within)
    const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask())
    const context = $_snap_context()
    let scene: Flask;
 
-   const effect: { run: Callback | null } = { // wrap callback in object so it doesn't cause memory leak
-      run: (...args: any[]) => {
-         if (!effect.run) return;
-         if (scene) scene.emitDiscard()
-         scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true })
-         const _context = { ...context }
-         _context[FLASK] = scene
-         _context[TRACE] = config.__DEV__asyncPath ?? ""
-         $_run_with_(_context, () => effect.run?.(...args))
-      }
+   function runCallback(args: any[]) {
+      if (scene) scene.emitDiscard()
+      scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true })
+      const _context = { ...context }
+      _context[FLASK] = scene
+      _context[TRACE] = config.__DEV__asyncPath ?? ""
+      $_run_with_(_context, () => callback(...args))
    }
 
    const until = options?.until
@@ -226,10 +234,6 @@ export function makePausableListener<E extends (wrappedCB: Callback) => void | C
       }
    }
 
-   const flask = getFlask(options?.within)
-   const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask())
-   const context = $_snap_context()
-   let scene: Flask;
 
    const effect: { run: Callback | null } = { // wrap callback in object so it doesn't cause memory leak
       run: (...args: any[]) => {
@@ -240,13 +244,22 @@ export function makePausableListener<E extends (wrappedCB: Callback) => void | C
          }
          dirty = false;
 
-         if (scene) scene.emitDiscard()
-         scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if stale right?
-         const _context = { ...context }
-         _context[FLASK] = scene
-         _context[TRACE] = config.__DEV__asyncPath ?? ""
-         $_run_with_(_context, () => effect.run?.(...args))
+         return runCallback(args)
       }
+   }
+
+   const flask = getFlask(options?.within)
+   const enclosingFlask = flask === null ? undefined : (flask || getActiveFlask())
+   const context = $_snap_context()
+   let scene: Flask;
+   
+   function runCallback(args: any[]) {
+      if (scene) scene.emitDiscard()
+      scene = enclosingFlask?.spawn({ type: 'scene', creationScope: true }) || new Flask({ type: 'scene', creationScope: true }) //QUESTION: Do we want callback to be called again on remount?? you should only call if stale right?
+      const _context = { ...context }
+      _context[FLASK] = scene
+      _context[TRACE] = config.__DEV__asyncPath ?? ""
+      $_run_with_(_context, () => effect.run?.(...args))
    }
 
    const returnVal: any = enroll(effect.run!);
