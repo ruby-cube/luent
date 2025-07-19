@@ -20,7 +20,7 @@ function lazy(fn: Function) {
 
 
 function calcIdleDeadline(startTime: DOMHighResTimeStamp, responseTime: number) {
-   const now = new Performance().now()
+   const now = performance.now()
    const elapsed = now - startTime;
    const deadline = responseTime - elapsed
    return deadline < 0 ? 0 : deadline;
@@ -40,7 +40,7 @@ class LazyPhaseQueue extends PhaseQueue {
    override runEffects(): void | Promise<void> {
       this.runningEffects = true;
       const effects = this.effects
-      if (this.responseTime && this.startTime === undefined) this.startTime = new Performance().now()
+      if (this.responseTime && this.startTime === undefined) this.startTime = performance.now()
       for (let i = this.currentIndex; i < effects.length; i++) {
          if (timeLeft < 1) {
             this.currentIndex = i;

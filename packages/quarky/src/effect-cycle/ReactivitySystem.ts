@@ -8,7 +8,9 @@ import { $forAnimation } from "./animation";
 type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
 
 export class EffectCycleManager {
-   constructor(public name: string) { }
+   constructor(public name: string, public timeWarning: number = 1000) { 
+
+   }
 
    // private tasks: Map<Phase, TaskQueue> = new Map()
 
@@ -43,7 +45,7 @@ export class EffectCycleManager {
 
    createCycle() {
       this.count++;
-      return new EffectCycle(this, $forAnimation());
+      return new EffectCycle(this);
    }
 
    initCycle() {
@@ -55,7 +57,6 @@ export class EffectCycleManager {
    closeCycle() {
       const cycle = this.currentCycle = this.nextCycle
       if (cycle) {
-         console.log('next cycle')
          // queueTask(()=>{
          this.nextCycle = undefined;
          schedulePhase(cycle, this.phases[0])
@@ -74,12 +75,22 @@ export class EffectCycleManager {
    }
 }
 
-
+export function isAnimationCycle(cycle: EffectCycle){
+   return cycle.manager.name === 'AnimationCycle'
+}
 
 
 function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
-   // const _schedule = cycle.animation ? queueMicrotask : schedule
-   schedule(() => {
+   if (cycle.pendingPrerender) {
+      cycle.pendingPrerender.then(() => {
+         schedule(runEffects)
+      })
+   }
+   else {
+      schedule(runEffects)
+   }
+
+   function runEffects() {
       const final = index === phases.length - 1;
       if (!final) schedulePhase(cycle, next)
 
@@ -99,7 +110,8 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
       //    })
       // if (index === phases.length-2/*after render*/) 
       if (final) cycle.close()
-   })
+   }
+
 }
 
 
@@ -131,7 +143,7 @@ function setUpUpdateCycleManager() {
    return cycleManager;
 }
 
-const animationCycleManager = new EffectCycleManager('AnimationCycle');
+const animationCycleManager = new EffectCycleManager('AnimationCycle', 16.7);
 
 export function setUpAnimationCycleManager() {
    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:PRERENDER', queueMicrotask))
@@ -142,20 +154,20 @@ export function setUpAnimationCycleManager() {
    return animationCycleManager;
 }
 
-export const lazyActionCycleManager = new EffectCycleManager('LazyActionCycle');
+// export const lazyActionCycleManager = new EffectCycleManager('LazyActionCycle');
 
-export function setUpLazyCycleManager() {
-   lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:PRERENDER', queueMicrotask))
-   lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:INTERNAL_RENDER', queueMicrotask))
-   lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:RENDER', queueMicrotask))
-   lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:POSTRENDER', queueMicrotask)) //TODO: Think...
-   // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
-   return lazyActionCycleManager;
-}
+// export function setUpLazyCycleManager() {
+//    lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:PRERENDER', queueMicrotask))
+//    lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:INTERNAL_RENDER', queueMicrotask))
+//    lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:RENDER', queueMicrotask))
+//    lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:POSTRENDER', queueMicrotask)) //TODO: Think...
+//    // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
+//    return lazyActionCycleManager;
+// }
 
-export class LazyAction {
-   cycle: EffectCycle = $currentCycle(lazyActionCycleManager)
-}
+// export class LazyAction {
+//    cycle: EffectCycle = $currentCycle(lazyActionCycleManager)
+// }
 
 let activeManager: EffectCycleManager | null = null;
 

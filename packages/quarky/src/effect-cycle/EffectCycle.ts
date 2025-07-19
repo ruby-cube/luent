@@ -1,6 +1,6 @@
 import { setImmediate } from "@rue/thread";
 import { Effect, EffectQueue, PhaseQueue } from "./EffectQueue";
-import { EffectCycleManager, getCurrentPhase } from "./ReactivitySystem";
+import { EffectCycleManager } from "./ReactivitySystem";
 import { POSTRENDER } from "@rue/lumo";
 
 export const SYNC = 'SYNC' as const
@@ -37,14 +37,18 @@ export class CyclePhase {
  */
 export class EffectCycle {
 
-   public currentPhase: Phase = SYNC
+   currentPhase: Phase = SYNC
+
+   startTime = performance.now()
+
    constructor(
-      public manager: EffectCycleManager,
-      public animation: boolean = false
+      public manager: EffectCycleManager
    ) {
    }
 
    close() {
+      const delta = performance.now() - this.startTime
+      if (delta > this.manager.timeWarning) console.warn('Interaction-to-paint time exceeds', this.manager.timeWarning, 'ms:', delta)
       this.manager.closeCycle()
    }
 
@@ -101,7 +105,7 @@ export class EffectCycle {
       // this.currentPhase = phase;
       // this.subphase = 'effects'
       const queue = this.effects.get(phase);
-      queue?.runEffects()
+      queue?.runEffects(this)
       // this.subphase = 'microtasks'
    }
 
@@ -113,6 +117,10 @@ export class EffectCycle {
       //TODO: what about if current phase is post render and scheduled phase is pre, internal render, or render? 
       // should it get scheduled for the next cycle? I think this is the answer--it should start a new cycle
    }
+
+   pendingPrerender?: Promise<void>;
+   resolvePrerender?: () => void
+   prerenderCount: number = 0;
 }
 
 

@@ -202,9 +202,9 @@ export class ListRenderKit {
 
          const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
          listKit.renderItem(item, $index, parent, nodePod, fragment, flask)
-         // queueInternalRender(()=>
+         queueInternalRender(()=>
             flask.emitInitialMount()
-         // , this.outerFlask)
+         , this.outerFlask)
          flaskMap.set(nodePod, flask)
       }
    }
@@ -215,9 +215,9 @@ export class ListRenderKit {
          const nodePod = this.dynamicPod[index] as NodePod;
          const flask = flaskMap.get(nodePod)
          flask?.emitDiscard()
-         // queueInternalRender(() => {
+         queueInternalRender(() => {
             removeDOMNodes(nodePod)
-         // }, this.outerFlask)
+         }, this.outerFlask)
       }
       //TODO: how do I handle items that have been moved to another port?
    }
@@ -280,18 +280,18 @@ export class ListRenderKit {
 
             const flask = this.outerFlask.spawn({ type: 'view', creationScope: true })
             this.renderItem(item, $index, parent, nodePod, fragment, flask)
-            //  queueInternalRender(()=>
+             queueInternalRender(()=>
                flask.emitInitialMount()
-            //  , this.outerFlask)
+             , this.outerFlask)
             setCurrentIndex(undefined)
             flaskMap.set(nodePod, flask) // store for removal
          }
          else if (hasMoved(uItem)) {
             // move node to fragment (DOM will auto-remove node from DOM)
             const frag = fragment; // must pass reference since fragment is reassigned across the loop
-            // queueInternalRender(() => {
+            queueInternalRender(() => {
                transferNodes(frag, nodePod);
-            // }, this.outerFlask)
+            }, this.outerFlask)
          }
       }
       // this.indices = newIndices;
@@ -326,12 +326,12 @@ export class ListRenderKit {
       }
 
       // (3) insert nodes into DOM
-      // queueInternalRender(() => {
+      queueInternalRender(() => {
          for (const [index, fragment] of indicesAndFragments) {
             mountDOMNodes(dynamicPod[index] as NodePod, parent, fragment)
          }
          this.castUpdated(toFromIndices)
-      // }, this.outerFlask)
+      }, this.outerFlask)
       
 
    }

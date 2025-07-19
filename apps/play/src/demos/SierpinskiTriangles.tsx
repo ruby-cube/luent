@@ -1,5 +1,9 @@
 import { component, fromTag, atUnmount, PRERENDER, POSTRENDER } from "@rue/lumo";
-import { animate, ion, useSharedRenderThrottle, watch } from "@rue/quarky";
+import { $currentCycle, Animation, EffectCycle, EffectCycleManager, Interval, ion, useSharedRenderThrottle, watch } from "@rue/quarky";
+
+//TODO:
+// - time warning for lazy update
+// - lazyState for consistency
 
 const TARGET = 25;
 
@@ -8,7 +12,7 @@ function doAction(fn: Function) {
 }
 
 
-
+// const updu1000 = useRenderer(1000)
 
 // function renderLazily(mutation: Function, deadline?: number) {
 
@@ -17,7 +21,24 @@ function doAction(fn: Function) {
 // function renderAnimationFrame() {
 
 // }
+
 const lazyBatch = useLazyBatch()
+
+// const upd1000 = (fn: any) => { fn() }
+
+const lazyEffectCycleManagers: Map<number, EffectCycleManager> = new Map();
+
+function useLazyUpdate(timeWarning: number = Infinity) {
+   const manager = lazyEffectCycleManagers.get(timeWarning) ?? new EffectCycleManager('LazyEffectCycle', timeWarning)
+   lazyEffectCycleManagers.set(timeWarning, manager)
+
+   return function upd<T>(fn: () => T): Promise<T> {
+      const startTime = new Performance().now()
+      
+   }
+}
+
+const upd1000 = useLazyUpdate(1000)
 
 export function TriangleDemo() {
    const $elapsed = ion(0)
@@ -28,15 +49,17 @@ export function TriangleDemo() {
       return 1 + (e > 5 ? 10 - e : e) / 10;
    })
    const start = Date.now()
-   const t = setInterval(() =>  $seconds.state = ($seconds() % 10) + 1, 1000);
+
+   const secondsInterval = Interval(() => upd1000(() => $seconds.state = ($seconds() % 10) + 1), 1000).start();
    // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
-   const animation = animate(() => {
+   const animation = Animation(() => {
       $elapsed.state = Date.now() - start;
-   })
+   }).start()
 
    atUnmount(() => {
-      clearInterval(t); cancelAnimationFrame(animation.nextFrame!);
+      secondsInterval.stop();
+      animation.stop();
    });
 
    // watch($seconds, () => {
@@ -44,15 +67,21 @@ export function TriangleDemo() {
    // }, { phase: POSTRENDER })
 
    return component(
-      <div
-         class="container"
-         style={{
-            transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)")
-         }}
-      >
-         {/* <div>{$seconds}</div> */}
-         <Triangle x={0} y={0} s={1000} seconds={$seconds} />
-      </div>
+      <>
+         <button on:click={e => (secondsInterval.stop(), animation.stop())}>stop</button>
+         <button on:click={e => (secondsInterval.start(), animation.start())}>play</button>
+         <div
+            class="container"
+            style={{
+               transform: function $drv() {
+                  return "scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)"
+               }
+            }}
+         >
+            {/* <div>{$seconds}</div> */}
+            <Triangle x={0} y={0} s={1000} seconds={$seconds} />
+         </div>
+      </>
    );
 };
 
@@ -64,18 +93,26 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
    }
    s = s / 2;
 
-   const $slow = ion($seconds())
+   // const $slow = ion($seconds())
 
-   // SOLUTION: segregate long derivation from rendering with watch() prerender, 
+   // // SOLUTION: segregate long derivation from rendering with watch() prerender, 
 
-   watch($seconds, async () => {
-      await lazyBatch(() => {
-         var e = performance.now() + 0.8;
-         // Artificially long execution time.
-         while (performance.now() < e) { }
-      })
-      $slow.state = $seconds()
-   }, { phase: PRERENDER }) // phase doesn't really matter since await makes this into a separate task
+   // watch($seconds, async () => {
+   //    await lazyBatch(() => {
+   //       var e = performance.now() + 0.8;
+   //       // Artificially long execution time.
+   //       while (performance.now() < e) { }
+   //    })
+   //    $slow.state = $seconds()
+   // }, { phase: PRERENDER }) // phase doesn't really matter since await makes this into a separate task
+
+
+   const $slow = ion(() => {
+      var e = performance.now() + 0.8;
+      // Artificially long execution time.
+      while (performance.now() < e) { }
+      return $seconds()
+   })
 
    return component(
       <>
@@ -89,11 +126,12 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
 
 function Dot({ x, y, s, $text } = fromTag<any>()) {
    const $hover = ion(false)
-   
+
    const Throttled = useSharedRenderThrottle()
-   
+
    const hover = Throttled(() => $hover.state = true)
    const unhover = Throttled(() => $hover.state = false)
+
 
    return component(
       <div
@@ -131,19 +169,21 @@ function useLazyBatch() {
          resolvers = []
          queueMicrotask(() => {
             const limit = idleTasks!.length
-            for (let i = 0; i < idleTasks!.length; i++) {
-               // const resolve = resolvers![i]
+            for (let i = 0; i < limit; i++) {
                const task = idleTasks![i]
-               requestIdleCallback((deadline) => {
-                  task()
-                  if (i === limit - 1) {
-                     resolvers?.forEach(resolve => resolve(undefined))
-                     resolvers = undefined
+               requestIdleCallback(() => {
+                  try {
+                     task()
                   }
-               }, {timeout: 17})
+                  finally {
+                     if (i === limit - 1) {
+                        resolvers?.forEach(resolve => resolve(undefined))
+                        resolvers = undefined
+                     }
+                  }
+               }, { timeout: 17 })
             }
             idleTasks = undefined;
-            // emitMeasureLayoutComplete()
          })
          return new Promise((_resolve) => {
             resolvers!.push(_resolve)

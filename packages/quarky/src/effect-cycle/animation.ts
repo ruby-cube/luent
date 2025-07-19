@@ -13,8 +13,8 @@ export function prioritize(fn: Function) {
  * Throttle by animation frame across mouse events like mouse enter and mouse leave
  */
 export function useSharedRenderThrottle() {
-   let frameID: number | null = null
    return function Throttled(fn: Function) {
+      let frameID: number | null = null
 
       return function throttled() {
          if (frameID !== null) return;
@@ -71,14 +71,33 @@ export function ThrottledRender(fn: Function) {
 //    };
 // }
 
-export function animate(fn: (time: DOMHighResTimeStamp | undefined) => void) {
-   const animation = {
-      nextFrame: undefined as undefined | number
-   }
 
-   requestAnimationFrame(renderFrame)
+export function Interval(fn: () => void, interval: number) {
+
+   let timeout: undefined | NodeJS.Timeout = undefined
+   let stopped = true;
+
+   return {
+      stop() {
+         stopped = true;
+         if (timeout) clearInterval(timeout)
+      },
+      start() {
+         if (!stopped) return this;
+         stopped = false;
+         timeout = setInterval(fn, interval)
+         return this;
+      }
+   }
+}
+
+export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
+
+   let nextFrame: undefined | number = undefined
+   let stopped = true;
 
    function renderFrame(time: DOMHighResTimeStamp) {
+      //TODO: maybe warn if time between animation frame and setImmediate is too long
       setImmediate(() => {
          forAnimation = true;
          prepFrame(time)
@@ -88,8 +107,20 @@ export function animate(fn: (time: DOMHighResTimeStamp | undefined) => void) {
 
    function prepFrame(time: DOMHighResTimeStamp | undefined) {
       fn(time)
-      animation.nextFrame = requestAnimationFrame(renderFrame)
+      if (stopped) return;
+      nextFrame = requestAnimationFrame(renderFrame)
    }
 
-   return animation
+   return {
+      stop() {
+         stopped = true;
+         if (nextFrame) cancelAnimationFrame(nextFrame)
+      },
+      start() {
+         if (!stopped) return this;
+         stopped = false;
+         requestAnimationFrame(renderFrame)
+         return this;
+      }
+   }
 }

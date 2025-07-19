@@ -1,6 +1,9 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { WatchedAtom } from "../watch/WatchedAtom";
-import { Phase, SYNC } from "./EffectCycle";
+import { EffectCycle, Phase, SYNC } from "./EffectCycle";
+import { isAnimationCycle } from "./ReactivitySystem";
+
+const PRERENDER = 0 //QUESTION: Should EffectCycle and EffectQueue belong to Lumo also??
 
 type TaskFn = (...args: any[]) => void
 
@@ -168,10 +171,11 @@ export class PhaseQueue {
    //       this.nextEffects = undefined
    // }
 
-   runEffects(completed: Set<Effect> | undefined) {
+   runEffects(cycle: EffectCycle, completed: Set<Effect> | undefined) {
       this.runningEffects = true;
       const effects = this.effects
       const sync = this.phase === SYNC
+      const pre = this.phase === PRERENDER
       const retained = sync ? this.retained : new Set()
       for (const effect of effects) {
          if (!effect.run
@@ -193,7 +197,17 @@ export class PhaseQueue {
          // }
          try {
             effectStackCount++
-            effect.run() // What about async tasks? T_T How will it affect this system?
+            if (pre && !isAnimationCycle(cycle)) {
+               cycle.prerenderCount++;
+               requestIdleCallback(() => {
+                  effect.run?.();
+                  cycle.prerenderCount--
+                  if (cycle.prerenderCount === 0) {
+                     cycle.resolvePrerender!()
+                  }
+               }, { timeout: 17 })
+            }
+            else effect.run() // What about async tasks? T_T How will it affect this system?
          }
          finally {
             effectStackCount--
@@ -355,13 +369,14 @@ export class EffectQueue {
 
    private runningEffects: boolean = false
 
-   runEffects() {
+   runEffects(cycle: EffectCycle) {
       this.runningEffects = true
 
       const completed: Set<Effect> | undefined = this.phase === SYNC ? undefined : new Set()
       const queues = this.queues;
+      if (this.phase === PRERENDER && !isAnimationCycle(cycle)) cycle.pendingPrerender = new Promise((resolve) => { cycle.resolvePrerender = resolve })
       for (const batch of queues) {
-         batch.runEffects(completed)
+         batch.runEffects(cycle, completed)
          batch.queued = this.moreQueues?.length ? batch.requeued : false;
          batch.requeued = false;
       }
@@ -369,7 +384,7 @@ export class EffectQueue {
       this.queues = this.moreQueues ?? []
       this.moreQueues = undefined;
       if (this.queues.length) {
-         this.runEffects()
+         this.runEffects(cycle)
       }
 
       this.runningEffects = false;

@@ -34,7 +34,7 @@ export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: need
 }
 
 // export const queueInternalRender = (fn: Function) => {
-//    // console.log('running internal render'),
+//    console.log('running internal render'),
 //    fn()
 // }
 
@@ -171,7 +171,7 @@ export function watchForRender(ion: Ion, render: (previous: unknown) => void, fl
       const newState = subject.trackedCall()
       render(prevState)
       prevState = newState;
-   }, INTERNAL_RENDER)
+   }, PRERENDER)
 
    subject.linkEffect(effect, eager)
 

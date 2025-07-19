@@ -157,7 +157,10 @@ export function setUpWatcher(
       }
       if (__DEV__) delayed.__DEV__fn = effect;
       effect = delayed;
-      phase = 3 //INTERNAL_RENDER
+      phase = 3 //INTERNAL_POSTRENDER
+   }
+   else if (phase === 0){
+
    }
    
    return $listen(effect, options || {}, {
