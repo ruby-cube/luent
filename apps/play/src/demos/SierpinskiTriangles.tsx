@@ -1,5 +1,5 @@
 import { component, fromTag, atUnmount, PRERENDER, POSTRENDER } from "@rue/lumo";
-import { animate, ion, prioritize, throttle, Throttled, watch } from "@rue/quarky";
+import { animate, ion, Throttled, watch } from "@rue/quarky";
 
 const TARGET = 25;
 
