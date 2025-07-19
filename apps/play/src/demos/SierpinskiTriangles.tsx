@@ -1,12 +1,13 @@
-import { component, fromTag, measureLayout, atUnmount, PRERENDER, POSTRENDER } from "@rue/lumo";
-import { animate, ion, watch } from "@rue/quarky";
-import { queueTask } from "@rue/thread";
+import { component, fromTag, atUnmount, PRERENDER, POSTRENDER } from "@rue/lumo";
+import { animate, ion, prioritize, throttle, Throttled, watch } from "@rue/quarky";
 
 const TARGET = 25;
 
-function doAction(fn: IdleRequestCallback) {
-   return requestIdleCallback(fn, { timeout: 17 })
+function doAction(fn: Function) {
+   return fn()
 }
+
+
 
 
 // function renderLazily(mutation: Function, deadline?: number) {
@@ -21,16 +22,13 @@ const lazyBatch = useLazyBatch()
 export function TriangleDemo() {
    const $elapsed = ion(0)
    const $seconds = ion(0)
-   // const $scale = () => {
-   //    const e = ($elapsed() / 1000) % 10;
-   //    return 1 + (e > 5 ? 10 - e : e) / 10;
-   // }
+
    const $scale = ion(() => {
       const e = ($elapsed() / 1000) % 10;
       return 1 + (e > 5 ? 10 - e : e) / 10;
    })
    const start = Date.now()
-   const t = setInterval(() => doAction(() => $seconds.state = ($seconds() % 10) + 1), 1000);
+   const t = setInterval(() =>  $seconds.state = ($seconds() % 10) + 1, 1000);
    // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
    const animation = animate(() => {
@@ -41,9 +39,9 @@ export function TriangleDemo() {
       clearInterval(t); cancelAnimationFrame(animation.nextFrame!);
    });
 
-   watch($seconds, () => {
-      console.log('changed', $seconds())
-   }, { phase: POSTRENDER })
+   // watch($seconds, () => {
+   //    console.log('changed', $seconds())
+   // }, { phase: POSTRENDER })
 
    return component(
       <div
@@ -66,8 +64,6 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
    }
    s = s / 2;
 
-
-
    const $slow = ion($seconds())
 
    // SOLUTION: segregate long derivation from rendering with watch() prerender, 
@@ -79,7 +75,7 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
          while (performance.now() < e) { }
       })
       $slow.state = $seconds()
-   }) // phase doesn't really matter since await makes this into a separate task
+   }, { phase: PRERENDER }) // phase doesn't really matter since await makes this into a separate task
 
    return component(
       <>
@@ -91,9 +87,9 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
 };
 
 function Dot({ x, y, s, $text } = fromTag<any>()) {
-   const $hover = ion(false),
-      onEnter = () => doAction(() => $hover.state = true),
-      onExit = () => doAction(() => $hover.state = false);
+   const $hover = ion(false)
+   const hover = Throttled(() => $hover.state = true)
+   const unhover = Throttled(() => $hover.state = false)
 
    return component(
       <div
@@ -107,8 +103,8 @@ function Dot({ x, y, s, $text } = fromTag<any>()) {
             "line-height": s + "px",
             background: ($hover() ? "#ff0" : "#61dafb")
          }}
-         on:mouseenter={onEnter}
-         on:mouseleave={onExit}
+         on:mouseenter={hover}
+         on:mouseleave={unhover}
       >{($hover() ? "**" + $text() + "**" : $text())}</div>
    );
 };

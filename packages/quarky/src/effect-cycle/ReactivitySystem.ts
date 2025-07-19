@@ -1,7 +1,7 @@
 import { $listen, $schedule, Listener, ListenerOptions, SchedulerOptions } from "@rue/flask";
 import { CyclePhase, EffectCycle, Phase, queueTask, SYNC } from "./EffectCycle";
-import { noop } from "@rue/utils";
 import { Effect } from "./EffectQueue";
+import { $forAnimation } from "./animation";
 
 
 
@@ -43,7 +43,7 @@ export class EffectCycleManager {
 
    createCycle() {
       this.count++;
-      return new EffectCycle(this);
+      return new EffectCycle(this, $forAnimation());
    }
 
    initCycle() {
@@ -58,7 +58,7 @@ export class EffectCycleManager {
          console.log('next cycle')
          // queueTask(()=>{
          this.nextCycle = undefined;
-            schedulePhase(cycle, this.phases[0])
+         schedulePhase(cycle, this.phases[0])
          // })
       }
    }
@@ -78,9 +78,10 @@ export class EffectCycleManager {
 
 
 function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
-   schedule(() => {
+   const _schedule = cycle.animation ?queueMicrotask : schedule
+   _schedule(() => {
       const final = index === phases.length - 1;
-         if (!final) schedulePhase(cycle, next)
+      if (!final) schedulePhase(cycle, next)
 
       cycle.currentPhase = index;
       cycle.subphase = 'effects'
@@ -111,13 +112,15 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
 // [ ] Set up lazy effect queue (needs to check if action was canceled)
 // [ ] Set up animation queue
 
-
+function queueResponsive(fn: IdleRequestCallback){
+   return requestIdleCallback(fn, {timeout: 17}) 
+}
 
 const cycleManager = new EffectCycleManager('UpdateCycle');
 
 function setUpUpdateCycleManager() {
    cycleManager.pushPhase(new CyclePhase('PRERENDER', queueMicrotask))
-   cycleManager.pushPhase(new CyclePhase('INTERNAL_RENDER', queueMicrotask))
+   cycleManager.pushPhase(new CyclePhase('INTERNAL_RENDER', queueResponsive))
    cycleManager.pushPhase(new CyclePhase('RENDER', queueMicrotask))
    cycleManager.pushPhase(new CyclePhase('INTERNAL_POSTRENDER', queueMicrotask))
    // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
@@ -132,7 +135,7 @@ function setUpUpdateCycleManager() {
 //    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:PRERENDER', queueMicrotask))
 //    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:INTERNAL_RENDER', queueMicrotask))
 //    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:RENDER', queueMicrotask))
-//    // animationCycleManager.pushPhase(new CyclePhase('ANIMATION:POSTRENDER', queueTask)) //TODO: Think...
+//    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:POSTRENDER', queueMicrotask)) //TODO: Think...
 //    // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
 //    return animationCycleManager;
 // }
@@ -231,10 +234,10 @@ export function createEffectCycleScheduler(phase: Phase) {
 
 
 export function $currentCycle() {
-   return cycleManager.current;
-   // const phase = getCurrentPhase()
-   // if (phase !== SYNC && !activeManager) return cycleManager.next;
-   // return $currentCycleManager().current;
+   // return cycleManager.current;
+   const phase = getCurrentPhase()
+   if (phase !== SYNC) return cycleManager.next;
+   return $currentCycleManager().current;
 }
 
 
@@ -248,7 +251,7 @@ function $currentCycleManager() {
 export function getDefaultPhase() {
    const currentPhase = getCurrentPhase()
    if (currentPhase !== SYNC) return currentPhase
-   return 0 //FIX: What should the default phase be?
+   return 'postrender' // POST_RENDER
 }
 
 

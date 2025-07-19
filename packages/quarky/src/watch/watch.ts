@@ -31,6 +31,7 @@ import { __DEV__unwrap } from "@rue/utils";
 export type EffectOptions = {
    phase?: Phase;
    eager?: boolean;
+   preserve?: boolean;
    retrack?: boolean;
    hasChanged?: (prevState?: any, newState?: any) => boolean;
 } & Glass<SustainedListenerOptions & WatchDebugOptions>
@@ -144,8 +145,11 @@ export function setUpWatcher(
 ) {
    let phase = options.phase = getPhase(options)
    const eager = options.eager ?? false;
+   // TODO: options.preserve means non-pausable watcher
+   const preserve = options.preserve
 
    if (phase === 'postrender') {
+      console.trace('postrender')
       const _effect = effect
       function delayed() { //TODO: need to cancel with action
          const id = requestIdleCallback(_effect, { timeout: 18 })
@@ -155,7 +159,7 @@ export function setUpWatcher(
       effect = delayed;
       phase = 3 //INTERNAL_RENDER
    }
-   // TODO: options.preserve means non-pausable watcher
+   
    return $listen(effect, options || {}, {
       enroll(task) {
          const effect = new Effect(task, phase)

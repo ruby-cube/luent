@@ -34,10 +34,10 @@ export function $listen<
    config: {
       enroll: E,
       remove: RemoveFunction<E>,
-      pausable: boolean
+      pausable?: boolean
    }
 ) {
-   const { enroll, remove, pausable } = config;
+   const { enroll, remove, pausable = false } = config;
    const { once } = options
    const make = once ? makeScheduler : pausable ? makePausableListener : makeListener
 

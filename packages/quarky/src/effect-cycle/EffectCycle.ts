@@ -39,7 +39,8 @@ export class EffectCycle {
 
    public currentPhase: Phase = SYNC
    constructor(
-      public manager: EffectCycleManager
+      public manager: EffectCycleManager,
+      public animation: boolean
    ) {
    }
 

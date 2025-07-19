@@ -641,6 +641,7 @@ function setUpStyleEntry(style: CSSStyleDeclaration, entry: string | AnyObject |
          const value = entry[key] as MaybeIon<string | number | Falsey>;
          if (isIon(value)) {
             watchForRender(value, () => {
+               console.log('transform')
                // queueInternalRender(() => {
                   assignStyleProperty(style, toStylePropertyName(key), value())
                // }, flask)
