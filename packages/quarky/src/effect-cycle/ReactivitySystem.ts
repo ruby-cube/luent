@@ -78,15 +78,17 @@ export class EffectCycleManager {
 
 
 function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
-   const _schedule = cycle.animation ?queueMicrotask : schedule
-   _schedule(() => {
+   // const _schedule = cycle.animation ? queueMicrotask : schedule
+   schedule(() => {
       const final = index === phases.length - 1;
       if (!final) schedulePhase(cycle, next)
 
+      activeManager = cycle.manager; //TODO: Replace with async context $_run_with_context
       cycle.currentPhase = index;
       cycle.subphase = 'effects'
       cycle.runEffects(index)
       cycle.subphase = 'microtasks'
+      activeManager = null; //NOTE: microtasks and promise tasks cannot be used for animations since activeManager will be null by then.. unless I can pass it via AsyncContext
       // if (index === finalIndex)
       //    queueMicrotask(() => {
       //       activeManager = cycle.manager
@@ -112,8 +114,8 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
 // [ ] Set up lazy effect queue (needs to check if action was canceled)
 // [ ] Set up animation queue
 
-function queueResponsive(fn: IdleRequestCallback){
-   return requestIdleCallback(fn, {timeout: 17}) 
+function queueResponsive(fn: IdleRequestCallback) {
+   return requestIdleCallback(fn, { timeout: 17 })
 }
 
 const cycleManager = new EffectCycleManager('UpdateCycle');
@@ -129,18 +131,33 @@ function setUpUpdateCycleManager() {
    return cycleManager;
 }
 
-// const animationCycleManager = new EffectCycleManager('AnimationCycle');
+const animationCycleManager = new EffectCycleManager('AnimationCycle');
 
-// function setUpAnimationCycleManager() {
-//    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:PRERENDER', queueMicrotask))
-//    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:INTERNAL_RENDER', queueMicrotask))
-//    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:RENDER', queueMicrotask))
-//    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:POSTRENDER', queueMicrotask)) //TODO: Think...
-//    // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
-//    return animationCycleManager;
-// }
+export function setUpAnimationCycleManager() {
+   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:PRERENDER', queueMicrotask))
+   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:INTERNAL_RENDER', queueMicrotask))
+   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:RENDER', queueMicrotask))
+   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:POSTRENDER', queueMicrotask)) //TODO: Think...
+   // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
+   return animationCycleManager;
+}
 
-// let activeManager: EffectCycleManager | null = null
+export const lazyActionCycleManager = new EffectCycleManager('LazyActionCycle');
+
+export function setUpLazyCycleManager() {
+   lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:PRERENDER', queueMicrotask))
+   lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:INTERNAL_RENDER', queueMicrotask))
+   lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:RENDER', queueMicrotask))
+   lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:POSTRENDER', queueMicrotask)) //TODO: Think...
+   // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
+   return lazyActionCycleManager;
+}
+
+export class LazyAction {
+   cycle: EffectCycle = $currentCycle(lazyActionCycleManager)
+}
+
+let activeManager: EffectCycleManager | null = null;
 
 export function getUpdateCycleCount() {
    return cycleManager.count
@@ -233,18 +250,18 @@ export function createEffectCycleScheduler(phase: Phase) {
 
 
 
-export function $currentCycle() {
+export function $currentCycle(cycleManager = $currentCycleManager()) {
    // return cycleManager.current;
-   const phase = getCurrentPhase()
+   const phase = getCurrentPhase(cycleManager)
    if (phase !== SYNC) return cycleManager.next;
-   return $currentCycleManager().current;
+   return cycleManager.current;
 }
 
 
 function $currentCycleManager() {
-   return cycleManager;
-   // if (forAnimation()) return animationCycleManager;
-   // return activeManager ?? cycleManager;
+   // return cycleManager;
+   if ($forAnimation()) return animationCycleManager;
+   return activeManager ?? cycleManager; //TODO: instead of using activeManager, getActiveManager via AsyncContext
 }
 
 
@@ -265,8 +282,7 @@ export function getDefaultPhase() {
 //    return cycleManager.current
 // }
 
-export function getCurrentPhase() {
-   const cycleManager = $currentCycleManager()
+export function getCurrentPhase(cycleManager = $currentCycleManager()) {
    if (cycleManager.current && cycleManager.current.currentPhase !== SYNC) return cycleManager.current.currentPhase;
    return SYNC;
 }

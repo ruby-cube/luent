@@ -1,5 +1,5 @@
 import { Flask, getActiveFlask } from "@rue/flask"
-import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, createOneoff, Ion, $currentCycle, } from "@rue/quarky"
+import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, createOneoff, Ion, $currentCycle, setUpAnimationCycleManager, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
 import { asWatchSubject, IonSubject, isQuarkyIon } from "../../quarky/src/watch/WatchSubject"
 import { createWatchedDerivation } from "../../quarky/src/ionic/WatchedDerivation"
@@ -12,6 +12,8 @@ export const {
    RENDER,
    INTERNAL_POSTRENDER
 } = useReactivitySystem()
+
+setUpAnimationCycleManager()
 
 export const POSTRENDER = 'postrender'
 

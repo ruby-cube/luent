@@ -40,7 +40,7 @@ export class EffectCycle {
    public currentPhase: Phase = SYNC
    constructor(
       public manager: EffectCycleManager,
-      public animation: boolean
+      public animation: boolean = false
    ) {
    }
 
@@ -71,7 +71,7 @@ export class EffectCycle {
    //       // queue.runEagerEffects()
    //    }
    // }
-   
+
    // scheduleTask(effect: Effect) {
    //    const phase = effect.phase
    //    const adjustedPhase = this.adjustPhase(phase)
@@ -80,13 +80,13 @@ export class EffectCycle {
    //    queue.scheduleTask(effect)
    // }
 
-      scheduleEffects(effects: PhaseQueue, phase: Phase) {
+   scheduleEffects(effects: PhaseQueue, phase: Phase) {
       const adjustedPhase = this.adjustPhase(phase)
       // if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
       const queue = this.effects.get(adjustedPhase) ?? this.initializeQueue(adjustedPhase);
       queue.scheduleEffects(effects)
    }
-   
+
    scheduleEffect(effect: Effect) {
       const phase = effect.phase
       const adjustedPhase = this.adjustPhase(phase)

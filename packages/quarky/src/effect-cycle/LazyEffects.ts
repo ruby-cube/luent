@@ -1,4 +1,23 @@
-import { EffectQueue, PhaseQueue } from "./EffectQueue";
+import { AsyncState } from "@rue/flask";
+import { EffectCycle, Phase } from "./EffectCycle";
+import { Effect, EffectQueue, PhaseQueue } from "./EffectQueue";
+import { $currentCycle, LazyAction, lazyActionCycleManager } from "./ReactivitySystem";
+
+
+const [getLazyAction, lazyActionStack] = AsyncState('lazyAction')
+
+
+
+function lazy(fn: Function) {
+   try {
+      lazyActionStack.push(new LazyAction())
+      fn()
+   }
+   finally {
+      lazyActionStack.pop()
+   }
+}
+
 
 function calcIdleDeadline(startTime: DOMHighResTimeStamp, responseTime: number) {
    const now = new Performance().now()
@@ -7,15 +26,17 @@ function calcIdleDeadline(startTime: DOMHighResTimeStamp, responseTime: number) 
    return deadline < 0 ? 0 : deadline;
 }
 
-class LazyWatchedAtom extends PhaseQueue {
+class LazyPhaseQueue extends PhaseQueue {
    constructor(
+      phase: Phase,
       public responseTime?: number
    ) {
-      super()
+      super(phase)
    }
    startTime?: DOMHighResTimeStamp
    currentIndex = 0
    resolve: ((value: void | PromiseLike<void>) => void) | undefined
+
    override runEffects(): void | Promise<void> {
       this.runningEffects = true;
       const effects = this.effects
@@ -46,8 +67,8 @@ class LazyWatchedAtom extends PhaseQueue {
       }
       this.runningEffects = false;
 
-      this.effects = this.extendedEffects ?? []
-      this.extendedEffects = undefined;
+      this.effects = this.nextEffects ?? []
+      this.nextEffects = undefined;
       if (this.resolve) this.resolve()
    }
 }
@@ -55,15 +76,18 @@ class LazyWatchedAtom extends PhaseQueue {
 
 // a queue that runs synchronously until the next animation frame where it will pause execution and continue after animation frame complete (onIdle)
 
-class LazyEffectPhase implements EffectQueue {
+class LazyEffectQueue implements EffectQueue {
    constructor() {
       startFrameTracker()
    }
+   scheduleEffect(task: Effect): void {
+      throw new Error("Method not implemented."); //TODO:
+   }
 
-   private extendedQueue: LazyWatchedAtom[] | undefined;
-   private queue: LazyWatchedAtom[] = []
+   private extendedQueue: LazyPhaseQueue[] | undefined;
+   private queue: LazyPhaseQueue[] = []
 
-   scheduleEffects(atom: LazyWatchedAtom) {
+   scheduleEffects(atom: LazyPhaseQueue) {
       if (this.runningEffects && !atom.requeued) {
          atom.requeued = true;
          const extension = this.extendedQueue ?? (this.extendedQueue = [])
@@ -115,11 +139,11 @@ class LazyEffectPhase implements EffectQueue {
    }
 }
 
-let lazyPhase = new LazyEffectPhase()
+// let lazyPhase = new LazyEffectPhase()
 
-function getLazyPhase() {
-   return lazyPhase;
-}
+// function getLazyPhase() {
+//    return lazyPhase;
+// }
 
 const interval = 1000 / 60; // ~16.67ms for 60Hz //TODO: what if user has a different frame rate
 let frameTrackerActive = false;
