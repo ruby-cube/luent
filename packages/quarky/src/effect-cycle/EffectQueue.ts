@@ -1,11 +1,11 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { WatchedAtom } from "../watch/WatchedAtom";
 import { EffectCycle, Phase, SYNC } from "./EffectCycle";
-import { isAnimationCycle } from "./ReactivitySystem";
+import { isAnimationCycle, isLazyCycle } from "./ReactivitySystem";
 
 const PRERENDER = 0 //QUESTION: Should EffectCycle and EffectQueue belong to Lumo also??
 
-type TaskFn = (...args: any[]) => void
+type TaskFn = (...args: any[]) => unknown
 
 // export class Effect {
 //    constructor(
@@ -173,6 +173,7 @@ export class PhaseQueue {
 
    runEffects(cycle: EffectCycle, completed: Set<Effect> | undefined) {
       this.runningEffects = true;
+      const promises: Promise<unknown>[] = []
       const effects = this.effects
       const sync = this.phase === SYNC
       const pre = this.phase === PRERENDER
@@ -197,17 +198,25 @@ export class PhaseQueue {
          // }
          try {
             effectStackCount++
-            if (pre && !isAnimationCycle(cycle)) {
+            if (isLazyCycle(cycle) && pre) {
                cycle.prerenderCount++;
-               requestIdleCallback(() => {
-                  effect.run?.();
-                  cycle.prerenderCount--
-                  if (cycle.prerenderCount === 0) {
-                     cycle.resolvePrerender!()
-                  }
-               }, { timeout: 17 })
+               const promise = new Promise((resolve) => {
+                  requestIdleCallback(() => {
+                     const _promise = effect.run?.();
+                     if (_promise instanceof Promise) _promise.then(resolve)
+                     else resolve(undefined)
+                     cycle.prerenderCount--
+                     if (cycle.prerenderCount === 0) {
+                        cycle.resolvePrerender!()
+                     }
+                  }, { timeout: 17 })
+               })
+               promises.push(promise)
             }
-            else effect.run() // What about async tasks? T_T How will it affect this system?
+            else {
+               const promise = effect.run() // What about async tasks? T_T How will it affect this system?
+               if (promise instanceof Promise) promises.push(promise)
+            }
          }
          finally {
             effectStackCount--
@@ -227,7 +236,7 @@ export class PhaseQueue {
       this.effects = this.nextEffects ?? []
       this.nextEffects = undefined
       this.retained.clear()
-
+      return !sync && promises.length ? Promise.allSettled(promises) : undefined;
    }
 
    retain(effect: Effect) {
@@ -372,11 +381,14 @@ export class EffectQueue {
    runEffects(cycle: EffectCycle) {
       this.runningEffects = true
 
+      const pendingPrerender = cycle.pendingPrerender = (isLazyCycle(cycle) && this.phase === PRERENDER) ? new Promise((resolve) => { cycle.resolvePrerender = resolve }) : undefined
+      const promises: Promise<unknown>[] = pendingPrerender ? [pendingPrerender] : []
+
       const completed: Set<Effect> | undefined = this.phase === SYNC ? undefined : new Set()
       const queues = this.queues;
-      if (this.phase === PRERENDER && !isAnimationCycle(cycle)) cycle.pendingPrerender = new Promise((resolve) => { cycle.resolvePrerender = resolve })
       for (const batch of queues) {
-         batch.runEffects(cycle, completed)
+         const promise = batch.runEffects(cycle, completed)
+         if (promise) promises.push(promise)
          batch.queued = this.moreQueues?.length ? batch.requeued : false;
          batch.requeued = false;
       }
@@ -384,9 +396,11 @@ export class EffectQueue {
       this.queues = this.moreQueues ?? []
       this.moreQueues = undefined;
       if (this.queues.length) {
-         this.runEffects(cycle)
+         const promise = this.runEffects(cycle)
+         if (promise) promises.push(promise)
       }
 
       this.runningEffects = false;
+      return promises.length ? Promise.allSettled(promises) : undefined
    }
 }

@@ -105,7 +105,7 @@ export class EffectCycle {
       // this.currentPhase = phase;
       // this.subphase = 'effects'
       const queue = this.effects.get(phase);
-      queue?.runEffects(this)
+      return queue?.runEffects(this)
       // this.subphase = 'microtasks'
    }
 

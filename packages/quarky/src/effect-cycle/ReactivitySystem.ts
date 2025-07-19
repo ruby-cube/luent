@@ -8,7 +8,7 @@ import { $forAnimation } from "./animation";
 type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
 
 export class EffectCycleManager {
-   constructor(public name: string, public timeWarning: number = 1000) { 
+   constructor(public name: string, public timeWarning: number = 1000) {
 
    }
 
@@ -75,8 +75,13 @@ export class EffectCycleManager {
    }
 }
 
-export function isAnimationCycle(cycle: EffectCycle){
+export function isAnimationCycle(cycle: EffectCycle) {
    return cycle.manager.name === 'AnimationCycle'
+}
+
+export function isLazyCycle(cycle: EffectCycle) {
+    return cycle.manager.name !== 'AnimationCycle'
+   return cycle.manager.name === 'LazyEffectCycle'
 }
 
 
@@ -93,23 +98,25 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
    function runEffects() {
       const final = index === phases.length - 1;
       if (!final) schedulePhase(cycle, next)
-
       activeManager = cycle.manager; //TODO: Replace with async context $_run_with_context
       cycle.currentPhase = index;
       cycle.subphase = 'effects'
-      cycle.runEffects(index)
+      const running = cycle.runEffects(index)
       cycle.subphase = 'microtasks'
-      activeManager = null; //NOTE: microtasks and promise tasks cannot be used for animations since activeManager will be null by then.. unless I can pass it via AsyncContext
-      // if (index === finalIndex)
-      //    queueMicrotask(() => {
-      //       activeManager = cycle.manager
-      //       // cycleManager.runTasks(next!.index)
-      //       cycle.runEffects(next!.index)
-      //       cycle.close();
-      //       activeManager = null;
-      //    })
-      // if (index === phases.length-2/*after render*/) 
-      if (final) cycle.close()
+
+      if (running) {
+         running.then(closePhase)
+      }
+      else {
+         closePhase()
+      }
+
+      function closePhase() {
+         const final = index === phases.length - 1;
+         if (final) cycle.close()
+         // else schedulePhase(cycle, next)
+         activeManager = null; //NOTE: microtasks and promise tasks cannot be used for animations since activeManager will be null by then.. unless I can pass it via AsyncContext
+      }
    }
 
 }
