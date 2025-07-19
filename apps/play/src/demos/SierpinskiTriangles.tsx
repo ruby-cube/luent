@@ -1,5 +1,5 @@
 import { component, fromTag, atUnmount, PRERENDER, POSTRENDER } from "@rue/lumo";
-import { animate, ion, Throttled, watch } from "@rue/quarky";
+import { animate, ion, useSharedRenderThrottle, watch } from "@rue/quarky";
 
 const TARGET = 25;
 
@@ -86,8 +86,12 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
    );
 };
 
+
 function Dot({ x, y, s, $text } = fromTag<any>()) {
    const $hover = ion(false)
+   
+   const Throttled = useSharedRenderThrottle()
+   
    const hover = Throttled(() => $hover.state = true)
    const unhover = Throttled(() => $hover.state = false)
 
@@ -136,7 +140,7 @@ function useLazyBatch() {
                      resolvers?.forEach(resolve => resolve(undefined))
                      resolvers = undefined
                   }
-               })
+               }, {timeout: 17})
             }
             idleTasks = undefined;
             // emitMeasureLayoutComplete()

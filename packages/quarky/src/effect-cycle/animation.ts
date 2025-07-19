@@ -9,9 +9,34 @@ export function prioritize(fn: Function) {
    forAnimation = false;
 }
 
+/**
+ * Throttle by animation frame across mouse events like mouse enter and mouse leave
+ */
+export function useSharedRenderThrottle() {
+   let frameID: number | null = null
+   return function Throttled(fn: Function) {
 
+      return function throttled() {
+         if (frameID !== null) return;
+         frameID = requestAnimationFrame(() => {
+            setImmediate(() => {
+               frameID = null;
+               forAnimation = true;
+               fn(); // Execute the original function with its context and arguments
+               forAnimation = false;
+            })
+         })
+         // Otherwise, the function call is ignored (throttled)
+      };
+   }
+}
 
-export function Throttled(fn: Function) {
+/**
+ * Throttled by animation frame
+ * @param fn 
+ * @returns 
+ */
+export function ThrottledRender(fn: Function) {
    let frameID: number | null = null
 
    return function throttled() {

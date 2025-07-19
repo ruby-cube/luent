@@ -6,7 +6,7 @@ import { $currentCycle, LazyAction, lazyActionCycleManager } from "./ReactivityS
 
 const [getLazyAction, lazyActionStack] = AsyncState('lazyAction')
 
-
+//NOTE: Lazy actions should be INTERRUPTIBLE and REPLACABLE. Not queued.
 
 function lazy(fn: Function) {
    try {
