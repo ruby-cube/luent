@@ -1,6 +1,6 @@
-import { $listen, $schedule, Listener, ListenerOptions, SchedulerOptions } from "@rue/flask";
+import { $listen, $schedule, Flask, Listener, ListenerOptions, SchedulerOptions } from "@rue/flask";
 import { CyclePhase, EffectCycle, Phase, queueTask, SYNC } from "./EffectCycle";
-import { Effect } from "./EffectQueue";
+import { createOneoff, Effect } from "./EffectQueue";
 import { $forAnimation } from "./animation";
 
 
@@ -185,7 +185,16 @@ const lazyEffectCycleManagers: Map<number, EffectCycleManager> = new Map();
 let lazyUpdate = false;
 
 export function isLazyUpdate(){
-   return lazyUpdate;
+   return lazyUpdate || $currentCycleManager().name !== 'AnimationCycle' //FIX: temporary
+}
+
+//NOTE: TEMPORARY till i find a better solution
+export function queueInternalRender(fn: () => void
+// , flask: Flask
+) { 
+   const effect = createOneoff(fn, 3)
+   cycleManager.current.scheduleEffect(effect)
+   // flask.onDiscard(() => effect.destroy())
 }
 
 export function useLazyUpdate(timeWarning: number = Infinity) {

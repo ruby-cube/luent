@@ -149,7 +149,6 @@ export function setUpWatcher(
    const preserve = options.preserve
 
    if (phase === 'postrender') {
-      console.trace('postrender')
       const _effect = effect
       function delayed() { //TODO: need to cancel with action
          const id = requestIdleCallback(_effect, { timeout: 18 })

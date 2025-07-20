@@ -85,12 +85,6 @@ export function trackAtom(atom: Watchable) {
       const compound = trackerStack[i]
       if (!compound) return; // due to detached call (for nested ionicTasks and eager watch calls)
       compound.track(atom)
-      if (atom.pendingPrerender && atom.lazyState !== NULL && compound.lazyState === NULL) {
-         compound.lazyState = compound.entity.state /* memoized */;
-         atom.pendingPrerender.then(() => {
-            compound.lazyState = NULL
-         })
-      }
    }
 }
 
@@ -108,12 +102,6 @@ export function trackMemoized(ion: ManagedDerivation) {
       if (atoms)
          for (const atom of atoms) {
             compound.track(atom)
-            if (atom.pendingPrerender && atom.lazyState !== NULL && compound.lazyState === NULL) {
-               compound.lazyState =  compound.entity.state /* memoized */;
-               atom.pendingPrerender.then(() => {
-                  compound.lazyState = NULL
-               })
-            }
          }
    }
 }
@@ -123,7 +111,7 @@ export type IonicCompoundMorph = CompoundMorph<IonicCompound>
 
 export class IonicCompound extends Compound {
    entity: any;
-   lazyState: unknown = NULL
+   tState: unknown = NULL
    // stale: boolean = false;
 
    // atoms: Set<Watchable> = new Set()

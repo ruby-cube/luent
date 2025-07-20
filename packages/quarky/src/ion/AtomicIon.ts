@@ -11,8 +11,7 @@ import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
 import { Ion, Methods, MutableIon } from "./Ion";
 import { getActiveTracker, trackAtom } from "../ionic/IonicCompound";
-import { $currentCycle, isLazyUpdate } from "../effect-cycle/ReactivitySystem";
-import { atPostrender } from "@rue/lumo";
+import { $currentCycle, isLazyUpdate, queueInternalRender } from "../effect-cycle/ReactivitySystem";
 
 export const NULL = Symbol('null')
 /** INTERNAL */
@@ -25,7 +24,7 @@ export type $AtomicIonState =
          mutable: boolean;
          props: AnyObject | undefined;
          state: any,
-         lazyState: any | typeof NULL,
+         tState: any | typeof NULL,
          ionized: boolean,
       }
       & Quark<typeof ATOMIC_ION, $AtomicIonState>
@@ -57,8 +56,8 @@ export function createAtomicIon(
    const $state = (() => {
       if (__DEV__) emitSignal();
       trackAtom(quark)
-      if (quark.lazyState !== NULL && !getActiveTracker()) {
-         return quark.lazyState;
+      if (isLazyUpdate() && quark.tState !== NULL) {
+         return quark.tState;
       }
       return quark.state;
    }) as $AtomicIonState
@@ -66,7 +65,7 @@ export function createAtomicIon(
 
    const quark: AtomicIonQuark = {
       state,
-      lazyState: NULL,
+      tState: NULL,
       // stateKey,
       ionized,
       mutable,
@@ -145,15 +144,17 @@ function setState(this: AtomicIonQuark, value: unknown) {
       return value;
    }
    const state = shouldIonize(value, this.ionized) ? ionize(value) : value
-   if (isLazyUpdate() && this.lazyState === NULL) {
-      this.pendingPrerender = $currentCycle().pendingPrerender;
-      $currentCycle().pendingPrerender?.then(() => {
-         // console.log('resetting lazy state')
-         this.lazyState = NULL
+
+   if (isLazyUpdate()) {
+      this.tState = state;
+      
+      queueInternalRender(() => {
+         this.state = this.tState;
       })
-      this.lazyState = this.state;
    }
-   this.state = state;
+   else {
+      this.state = state;
+   }
 
    recordMutation(this, new Mutation(
       this.entity,

@@ -3,7 +3,7 @@ import { $currentCycle, Animation, EffectCycle, EffectCycleManager, Interval, io
 
 //TODO:
 // - time warning for lazy update
-// - lazyState for consistency, how to keep lazy state consistent with 'watch() derivations'?
+// - tState for consistency, how to keep lazy state consistent with 'watch() derivations'?
 //QUESTION:
 // - async effects?
 // - when to cancel, when to queue?
@@ -40,7 +40,7 @@ export function TriangleDemo() {
    })
    const start = Date.now()
 
-   const secondsInterval = Interval(() => upd1000(() => $seconds.state = ($seconds() % 10) + 1), 1000).start();
+   const secondsInterval = Interval(() => upd1000(() => ($seconds.state = ($seconds() % 10) + 1)), 1000).start();
    // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
    const animation = Animation(() => {
@@ -56,10 +56,22 @@ export function TriangleDemo() {
    //    console.log('changed', $seconds())
    // }, { phase: POSTRENDER })
 
+   function stop() {
+      secondsInterval.stop(); 
+      animation.stop()
+      // for (const log of window.__DEV__log) {
+      //    console.log(log)
+      // }
+      // window.__DEV__log.length = 0;
+   }
+
    return component(
       <>
-         <button on:click={e => (secondsInterval.stop(), animation.stop())}>stop</button>
-         <button on:click={e => (secondsInterval.start(), animation.start())}>play</button>
+         <button on:click={stop}>stop</button>
+         <button on:click={e => (
+            secondsInterval.start(),
+            animation.start()
+            )}>play</button>
          <div
             class="container"
             style={{

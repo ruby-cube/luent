@@ -11,6 +11,7 @@ import { debug } from "@rue/utils";
 import { Effect } from "../effect-cycle/EffectQueue";
 import { SYNC } from "../effect-cycle/EffectCycle";
 import { NULL } from "../ion/AtomicIon";
+import { isLazyUpdate, queueInternalRender } from "../effect-cycle/ReactivitySystem";
 
 
 
@@ -29,6 +30,8 @@ export type $DerivedState = Ion & Capsule & {
       inert: boolean
       state: unknown
       stale: boolean
+      tStale: boolean | undefined
+      tState: unknown
       derivation: (prev?: unknown) => unknown
       staleMarker: Effect | undefined
    }
@@ -46,7 +49,7 @@ export const DERIVATION_ION = Symbol('Derivation Ion')
 export function isManagedDerivation(value: unknown): value is $DerivedState {
    return hasQuark(value) && quarkOf(<$DerivedState>value).quarkType === DERIVATION_ION
 }
-
+window.__DEV__log = []
 export function createMaybeMemoizedIon(
    derivation: (previousValue?: unknown) => unknown,
    methods?: AnyObject,
@@ -74,13 +77,33 @@ export function createMaybeMemoizedIon(
          fn = getMemoizedState
          ion.state = value;
          assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
-         const effect = ion.staleMarker = new Effect(() => (ion.stale = true), SYNC)
+         const effect = ion.staleMarker = new Effect(() => {
+            if (isLazyUpdate()) {
+               ion.tStale = true;
+            }
+            else ion.stale = true
+         }, SYNC)
          linkAtoms(compound, effect)
          creationFlask?.onDiscard(() => {
             effect.destroy()
             compound!.untrackAtoms()
             fn = initialize;
          })
+         if (isLazyUpdate()) {
+            ion.tState = value;
+            ion.tStale = false;
+            // window.__DEV__log.push('lazy update ' + value)
+            if (ion.tStale) {
+               queueInternalRender(() => {
+                  ion.state = value;
+                  ion.stale = true;
+
+                  ion.tState = NULL;
+                  ion.tStale = undefined;
+               })
+            }
+            return value;
+         }
          return value;
       }
    }
@@ -93,21 +116,37 @@ export function createMaybeMemoizedIon(
    function getMemoizedState() {
       //TODO: not sure if I should assert initialization only or all calls
       assertValidCall()
-      if (!ion.stale || !retrack) trackMemoized(ion)
+      const stale = isLazyUpdate() ? ion.tStale : ion.stale;
+      if (!stale || !retrack) trackMemoized(ion)
+
+      const prevState = isLazyUpdate() && ion.tState !== NULL ? ion.tState : ion.state
 
       const value =
-         (retrack && ion.stale) ? retrackedCall(ion)
-            : ion.stale ? derivation(ion.state)
-               : ion.state;
+         (retrack && stale) ? retrackedCall(ion)
+            : stale ? derivation(prevState)
+               : prevState;
+
+      if (isLazyUpdate()) {
+         ion.tState = value;
+         ion.tStale = false;
+         // window.__DEV__log.push('lazy update ' + value)
+         if (stale) {
+            queueInternalRender(() => {
+               ion.state = value;
+               ion.stale = true;
+
+               ion.tState = NULL;
+               ion.tStale = undefined;
+            })
+         }
+         return value;
+      }
 
       if (ion.stale) {
          ion.state = value;
          ion.stale = false;
       }
-      if (ion.lazyState !== NULL) {
-         console.log('lazyyyyy')
-         return ion.lazyState;
-      }
+
       return value;
    }
 
@@ -119,7 +158,8 @@ export function createMaybeMemoizedIon(
       inert: false,
       stale: false,
       state: undefined,
-      lazyState: NULL,
+      tState: NULL,
+      tStale: undefined,
       derivation,
       staleMarker: undefined,
       entity: $derived,
