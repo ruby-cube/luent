@@ -14,7 +14,11 @@ export function isWatchedDerivation(value: unknown): value is WatchedDerivation 
    return hasQuark(value) && (<WatchedDerivation>quarkOf(value)).quarkType === WATCHED_DERIVATION
 }
 
-type WatchedDerivation = Quark<typeof WATCHED_DERIVATION> & IonicCompoundMorph & { inert: boolean }
+type WatchedDerivation = Quark<typeof WATCHED_DERIVATION> & IonicCompoundMorph & { 
+   inert: boolean ,
+   state: unknown,
+   tState: unknown
+}
 
 export function createWatchedDerivation(derivation: () => any, retrack: boolean) {
    const quark: WatchedDerivation = {

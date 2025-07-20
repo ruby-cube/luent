@@ -46,6 +46,16 @@ export class EffectCycle {
    ) {
    }
 
+   idleIDs: number[] = []
+
+   cancelled: boolean = false;
+
+   cancel(){
+      console.log('cancelled')
+      this.idleIDs.forEach((id)=>cancelIdleCallback(id))
+      this.cancelled = true;
+   }
+
    close() {
       const delta = performance.now() - this.startTime
       if (delta > this.manager.timeWarning) console.warn('Interaction-to-paint time exceeds', this.manager.timeWarning, 'ms:', delta)

@@ -31,6 +31,7 @@ const lazyBatch = useLazyBatch()
 const upd1000 = useLazyUpdate(1000)
 
 export function TriangleDemo() {
+   console.log('demo')
    const $elapsed = ion(0)
    const $seconds = ion(0)
 
@@ -130,6 +131,7 @@ function Dot({ x, y, s, $text } = fromTag<any>()) {
    const $hover = ion(false)
 
    const Throttled = useSharedRenderThrottle()
+   // const Throttled = (fn: Function)=>fn
 
    const hover = Throttled(() => $hover.state = true)
    const unhover = Throttled(() => $hover.state = false)

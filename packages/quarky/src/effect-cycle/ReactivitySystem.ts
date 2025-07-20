@@ -80,20 +80,20 @@ export function isAnimationCycle(cycle: EffectCycle) {
 }
 
 export function isLazyCycle(cycle: EffectCycle) {
-    return cycle.manager.name !== 'AnimationCycle'
+   return cycle.manager.name !== 'AnimationCycle'
    return cycle.manager.name === 'LazyEffectCycle'
 }
 
 
 function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
-   if (cycle.pendingPrerender) {
-      cycle.pendingPrerender.then(() => {
-         schedule(runEffects)
-      })
-   }
-   else {
-      schedule(runEffects)
-   }
+   // if (cycle.pendingPrerender) {
+   //    cycle.pendingPrerender.then(() => {
+   //       schedule(runEffects)
+   //    })
+   // }
+   // else {
+   schedule(runEffects)
+   // }
 
    function runEffects() {
       // const final = index === phases.length - 1;
@@ -107,6 +107,7 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
       if (cycle.pendingPrerender) {
          // console.log('pending prerender')
          cycle.pendingPrerender.then(closePhase)
+         cycle.pendingPrerender = undefined
       }
       else {
          closePhase()
@@ -114,7 +115,7 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
 
       function closePhase() {
          const final = index === phases.length - 1;
-         if (final) cycle.close()
+         if (final || cycle.cancelled) cycle.close()
          else schedulePhase(cycle, next)
          activeManager = null; //NOTE: microtasks and promise tasks cannot be used for animations since activeManager will be null by then.. unless I can pass it via AsyncContext
       }
@@ -184,14 +185,14 @@ const lazyEffectCycleManagers: Map<number, EffectCycleManager> = new Map();
 
 let lazyUpdate = false;
 
-export function isLazyUpdate(){
+export function isLazyUpdate() {
    return lazyUpdate || $currentCycleManager().name !== 'AnimationCycle' //FIX: temporary
 }
 
 //NOTE: TEMPORARY till i find a better solution
 export function queueInternalRender(fn: () => void
-// , flask: Flask
-) { 
+   // , flask: Flask
+) {
    const effect = createOneoff(fn, 3)
    cycleManager.current.scheduleEffect(effect)
    // flask.onDiscard(() => effect.destroy())
@@ -202,8 +203,10 @@ export function useLazyUpdate(timeWarning: number = Infinity) {
    // lazyEffectCycleManagers.set(timeWarning, manager)
 
    return function upd<T>(fn: () => T): Promise<T> {
+      // const phase = getCurrentPhase(cycleManager)
+      // if (phase !== SYNC) $currentCycle().cancel()
       const cycle = $currentCycle(); //TODO: Replace with actual lazy cycle
-      const promise = cycle.pendingPrerender =  new Promise((resolve) => { cycle.resolvePrerender = resolve }) 
+      const promise = cycle.pendingPrerender = new Promise((resolve) => { cycle.resolvePrerender = resolve })
       //NOTE: assumes one cycle per lazy call... is this what I want? no... I need a promise.all but for now, let's just use one promise
 
       try {

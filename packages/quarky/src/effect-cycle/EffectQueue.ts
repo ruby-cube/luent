@@ -207,7 +207,7 @@ export class PhaseQueue {
                      else resolve(undefined)
                      cycle.prerenderCount--
                      if (cycle.prerenderCount === 0) {
-                        cycle.resolvePrerender?.(cycle.lazyResult)
+                        cycle.resolvePrerender?.(cycle.lazyResult) //TODO: need to wait till all promises resolve
                      }
                   }, { timeout: 17 })
                })

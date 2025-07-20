@@ -49,7 +49,7 @@ export const DERIVATION_ION = Symbol('Derivation Ion')
 export function isManagedDerivation(value: unknown): value is $DerivedState {
    return hasQuark(value) && quarkOf(<$DerivedState>value).quarkType === DERIVATION_ION
 }
-window.__DEV__log = []
+
 export function createMaybeMemoizedIon(
    derivation: (previousValue?: unknown) => unknown,
    methods?: AnyObject,
@@ -92,7 +92,6 @@ export function createMaybeMemoizedIon(
          if (isLazyUpdate()) {
             ion.tState = value;
             ion.tStale = false;
-            // window.__DEV__log.push('lazy update ' + value)
             if (ion.tStale) {
                queueInternalRender(() => {
                   ion.state = value;
@@ -167,6 +166,7 @@ export function createMaybeMemoizedIon(
       asCompound: new IonicCompound(),
       asTraceable: new Traceable()
    }
+   
    ion.asCompound.entity = ion;
 
    $derived[QUARK] = ion
