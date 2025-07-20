@@ -1,4 +1,5 @@
 import { Compound, CompoundMorph } from "../compound/Compound";
+import { NULL } from "../ion/AtomicIon";
 import { isIonizedModel } from "../ionized/ionize";
 import { quarkOf } from "../Quark";
 import { Watchable } from "../watch/WatchedAtom";
@@ -83,6 +84,12 @@ export function trackAtom(atom: Watchable) {
       const compound = trackerStack[i]
       if (!compound) return; // due to detached call (for nested ionicTasks and eager watch calls)
       compound.track(atom)
+      if (atom.lazyState !== NULL && compound.lazyState === NULL){
+         compound.lazyState = compound.entity.state;
+         atom.pendingPrerender.then(()=>{
+            compound.lazyState = NULL
+         })
+      }
    }
 }
 
@@ -108,7 +115,7 @@ export function trackMemoized(ion: ManagedDerivation) {
 export type IonicCompoundMorph = CompoundMorph<IonicCompound>
 
 export class IonicCompound extends Compound {
-
+   entity: any;
    // stale: boolean = false;
 
    // atoms: Set<Watchable> = new Set()

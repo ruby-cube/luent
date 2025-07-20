@@ -1,5 +1,6 @@
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 import { hasQuark, Quark, QUARK, quarkOf } from "../Quark";
+import { NULL } from "../ion/AtomicIon";
 
 /**
  * NOTES: 

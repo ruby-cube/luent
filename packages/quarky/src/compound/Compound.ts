@@ -17,6 +17,7 @@ export function isCompound(value: unknown): value is Compound {
  * INTERNAL
  */
 export class Compound {
+
    atoms: Set<Watchable> = new Set()
 
    track(atom: Watchable) {

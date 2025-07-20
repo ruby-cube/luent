@@ -1,5 +1,5 @@
 import { component, fromTag, atUnmount, PRERENDER, POSTRENDER } from "@rue/lumo";
-import { $currentCycle, Animation, EffectCycle, EffectCycleManager, Interval, ion, useSharedRenderThrottle, watch } from "@rue/quarky";
+import { $currentCycle, Animation, EffectCycle, EffectCycleManager, Interval, ion, useLazyUpdate, useSharedRenderThrottle, watch } from "@rue/quarky";
 
 //TODO:
 // - time warning for lazy update
@@ -27,21 +27,8 @@ function doAction(fn: Function) {
 
 const lazyBatch = useLazyBatch()
 
-const upd1000 = (fn: any) => { fn() }
 
-const lazyEffectCycleManagers: Map<number, EffectCycleManager> = new Map();
-
-function useLazyUpdate(timeWarning: number = Infinity) {
-   const manager = lazyEffectCycleManagers.get(timeWarning) ?? new EffectCycleManager('LazyEffectCycle', timeWarning)
-   lazyEffectCycleManagers.set(timeWarning, manager)
-
-   return function upd<T>(fn: () => T): Promise<T> {
-      const startTime = new Performance().now()
-
-   }
-}
-
-// const upd1000 = useLazyUpdate(1000)
+const upd1000 = useLazyUpdate(1000)
 
 export function TriangleDemo() {
    const $elapsed = ion(0)

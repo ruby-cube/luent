@@ -96,16 +96,17 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
    }
 
    function runEffects() {
-      const final = index === phases.length - 1;
-      if (!final) schedulePhase(cycle, next)
+      // const final = index === phases.length - 1;
+      // if (!final) schedulePhase(cycle, next)
       activeManager = cycle.manager; //TODO: Replace with async context $_run_with_context
       cycle.currentPhase = index;
       cycle.subphase = 'effects'
       const running = cycle.runEffects(index)
       cycle.subphase = 'microtasks'
 
-      if (running) {
-         running.then(closePhase)
+      if (cycle.pendingPrerender) {
+         console.log('pending prerender')
+         cycle.pendingPrerender.then(closePhase)
       }
       else {
          closePhase()
@@ -114,7 +115,7 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
       function closePhase() {
          const final = index === phases.length - 1;
          if (final) cycle.close()
-         // else schedulePhase(cycle, next)
+         else schedulePhase(cycle, next)
          activeManager = null; //NOTE: microtasks and promise tasks cannot be used for animations since activeManager will be null by then.. unless I can pass it via AsyncContext
       }
    }
@@ -175,6 +176,37 @@ export function setUpAnimationCycleManager() {
 // export class LazyAction {
 //    cycle: EffectCycle = $currentCycle(lazyActionCycleManager)
 // }
+
+
+const upd1000 = (fn: any) => { fn() }
+
+const lazyEffectCycleManagers: Map<number, EffectCycleManager> = new Map();
+
+let lazyUpdate = false;
+
+export function isLazyUpdate(){
+   return lazyUpdate;
+}
+
+export function useLazyUpdate(timeWarning: number = Infinity) {
+   // const manager = lazyEffectCycleManagers.get(timeWarning) ?? new EffectCycleManager('LazyEffectCycle', timeWarning)
+   // lazyEffectCycleManagers.set(timeWarning, manager)
+
+   return function upd<T>(fn: () => T): Promise<T> {
+      const cycle = $currentCycle(); //TODO: Replace with actual lazy cycle
+      const promise = cycle.pendingPrerender =  new Promise((resolve) => { cycle.resolvePrerender = resolve }) 
+      //NOTE: assumes one cycle per lazy call... is this what I want? no... I need a promise.all but for now, let's just use one promise
+
+      try {
+         lazyUpdate = true; // assuming function is synchronous. Need AsyncState for asynchronous
+         cycle.lazyResult = fn()
+         return promise as Promise<T>
+      }
+      finally {
+         lazyUpdate = false;
+      }
+   }
+}
 
 let activeManager: EffectCycleManager | null = null;
 

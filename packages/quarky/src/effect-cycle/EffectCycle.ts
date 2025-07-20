@@ -119,8 +119,9 @@ export class EffectCycle {
    }
 
    pendingPrerender?: Promise<void>;
-   resolvePrerender?: () => void
+   resolvePrerender?: (result: any) => void
    prerenderCount: number = 0;
+   lazyResult: unknown
 }
 
 

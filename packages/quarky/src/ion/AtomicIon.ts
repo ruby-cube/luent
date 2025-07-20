@@ -10,9 +10,11 @@ import { Mutable, MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
 import { Ion, Methods, MutableIon } from "./Ion";
-import { trackAtom } from "../ionic/IonicCompound";
+import { getActiveTracker, trackAtom } from "../ionic/IonicCompound";
+import { $currentCycle, isLazyUpdate } from "../effect-cycle/ReactivitySystem";
+import { atPostrender } from "@rue/lumo";
 
-
+export const NULL = Symbol('null')
 /** INTERNAL */
 export type $AtomicIonState =
    MutableIon<unknown>
@@ -22,7 +24,8 @@ export type $AtomicIonState =
       [QUARK]: {
          mutable: boolean;
          props: AnyObject | undefined;
-         state: any
+         state: any,
+         lazyState: any | typeof NULL,
          ionized: boolean,
       }
       & Quark<typeof ATOMIC_ION, $AtomicIonState>
@@ -54,12 +57,16 @@ export function createAtomicIon(
    const $state = (() => {
       if (__DEV__) emitSignal();
       trackAtom(quark)
+      if (quark.lazyState !== NULL && !getActiveTracker()) {
+         return quark.lazyState;
+      }
       return quark.state;
    }) as $AtomicIonState
 
 
    const quark: AtomicIonQuark = {
       state,
+      lazyState: NULL,
       // stateKey,
       ionized,
       mutable,
@@ -138,6 +145,14 @@ function setState(this: AtomicIonQuark, value: unknown) {
       return value;
    }
    const state = shouldIonize(value, this.ionized) ? ionize(value) : value
+   if (isLazyUpdate() && this.lazyState === NULL) {
+      $currentCycle().pendingPrerender?.then(() => {
+         console.log('resetting lazy state')
+         this.lazyState = NULL
+         this.pendingPrerender = $currentCycle().pendingPrerender;
+      })
+      this.lazyState = this.state;
+   }
    this.state = state;
 
    recordMutation(this, new Mutation(
@@ -149,8 +164,6 @@ function setState(this: AtomicIonQuark, value: unknown) {
    ))
 
    this.trigger()
-
-   // runSyncEffects()
 
    return state;
 }

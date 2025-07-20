@@ -1,4 +1,4 @@
-import { IonicCompound, IonicCompoundMorph, trackMemoized } from "./IonicCompound";
+import { getActiveTracker, IonicCompound, IonicCompoundMorph, trackMemoized } from "./IonicCompound";
 import { AnyObject } from "@rue/types";
 import { Flask, getActiveFlask } from "@rue/flask";
 import { quarkOf, QUARK, hasQuark, QuarkOf, Quark } from "../Quark";
@@ -10,6 +10,7 @@ import { Traceable } from "../debug/Traceable";
 import { debug } from "@rue/utils";
 import { Effect } from "../effect-cycle/EffectQueue";
 import { SYNC } from "../effect-cycle/EffectCycle";
+import { NULL } from "../ion/AtomicIon";
 
 
 
@@ -103,6 +104,10 @@ export function createMaybeMemoizedIon(
          ion.state = value;
          ion.stale = false;
       }
+      if (ion.lazyState !== NULL) {
+         console.log('lazyyyyy')
+         return ion.lazyState;
+      }
       return value;
    }
 
@@ -114,14 +119,15 @@ export function createMaybeMemoizedIon(
       inert: false,
       stale: false,
       state: undefined,
+      lazyState: NULL,
       derivation,
       staleMarker: undefined,
       entity: $derived,
       quarkType: DERIVATION_ION,
       asCompound: new IonicCompound(),
       asTraceable: new Traceable()
-
    }
+   ion.asCompound.entity = ion;
 
    $derived[QUARK] = ion
    // $derived.labelName = undefined
