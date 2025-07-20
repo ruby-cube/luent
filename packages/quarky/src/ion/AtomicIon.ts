@@ -146,10 +146,10 @@ function setState(this: AtomicIonQuark, value: unknown) {
    }
    const state = shouldIonize(value, this.ionized) ? ionize(value) : value
    if (isLazyUpdate() && this.lazyState === NULL) {
+      this.pendingPrerender = $currentCycle().pendingPrerender;
       $currentCycle().pendingPrerender?.then(() => {
-         console.log('resetting lazy state')
+         // console.log('resetting lazy state')
          this.lazyState = NULL
-         this.pendingPrerender = $currentCycle().pendingPrerender;
       })
       this.lazyState = this.state;
    }

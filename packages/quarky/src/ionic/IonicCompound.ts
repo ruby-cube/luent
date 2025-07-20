@@ -1,3 +1,4 @@
+import { isFunction } from "@rue/utils";
 import { Compound, CompoundMorph } from "../compound/Compound";
 import { NULL } from "../ion/AtomicIon";
 import { isIonizedModel } from "../ionized/ionize";
@@ -68,7 +69,7 @@ export function untrackedCall(fn: Function) {
  * @param fn 
  * @returns 
  */
-export function detachedCall<T extends ((...args: any[])=>any)>(fn: T): ReturnType<T> {
+export function detachedCall<T extends ((...args: any[]) => any)>(fn: T): ReturnType<T> {
    pushTracker(null)
    try {
       return fn();
@@ -84,9 +85,9 @@ export function trackAtom(atom: Watchable) {
       const compound = trackerStack[i]
       if (!compound) return; // due to detached call (for nested ionicTasks and eager watch calls)
       compound.track(atom)
-      if (atom.lazyState !== NULL && compound.lazyState === NULL){
-         compound.lazyState = compound.entity.state;
-         atom.pendingPrerender.then(()=>{
+      if (atom.pendingPrerender && atom.lazyState !== NULL && compound.lazyState === NULL) {
+         compound.lazyState = compound.entity.state /* memoized */;
+         atom.pendingPrerender.then(() => {
             compound.lazyState = NULL
          })
       }
@@ -107,6 +108,12 @@ export function trackMemoized(ion: ManagedDerivation) {
       if (atoms)
          for (const atom of atoms) {
             compound.track(atom)
+            if (atom.pendingPrerender && atom.lazyState !== NULL && compound.lazyState === NULL) {
+               compound.lazyState =  compound.entity.state /* memoized */;
+               atom.pendingPrerender.then(() => {
+                  compound.lazyState = NULL
+               })
+            }
          }
    }
 }
@@ -116,6 +123,7 @@ export type IonicCompoundMorph = CompoundMorph<IonicCompound>
 
 export class IonicCompound extends Compound {
    entity: any;
+   lazyState: unknown = NULL
    // stale: boolean = false;
 
    // atoms: Set<Watchable> = new Set()
@@ -136,7 +144,7 @@ export class IonicCompound extends Compound {
       finally {
          popTracker();
          if (__DEV__ && this.atoms.size === 0) {
-            console.warn(`Watch target or derived AtomicIon has no dependencies (and therefore no reactivity)`, this)
+            // console.warn(`Ionic compound has no dependencies (and therefore no reactivity)`, this)
          }
       }
    }

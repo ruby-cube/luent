@@ -105,7 +105,7 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
       cycle.subphase = 'microtasks'
 
       if (cycle.pendingPrerender) {
-         console.log('pending prerender')
+         // console.log('pending prerender')
          cycle.pendingPrerender.then(closePhase)
       }
       else {
