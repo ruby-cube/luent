@@ -2,7 +2,7 @@ import { DOMNode, Slot } from "../component/Component";
 import { isIon, watch, isManagedDerivation, Ion, MutableIon, getCurrentPhase } from "@rue/quarky";
 import { isFunction, isObject, isObjectLiteral, isString, noop, normalizeToArray } from "@rue/utils";
 import { ClassInput, ElementConfig, makeNode, JSXNode, StyleInput, RawJSXNode } from "../node/makeNode";
-import { $listen, Flask, SustainedListenerOptions } from "@rue/flask";
+import { $listen, Flask, getActiveFlask, getFlask, SustainedListenerOptions } from "@rue/flask";
 import { mountNodeEntities } from "../node/mountNodeKits";
 import { isHydrating } from "../hydration/hydration";
 import { getElement } from "../hydration/getElement";
@@ -17,7 +17,6 @@ import { isFlaskLifecycleHook, setUpHooks } from "../flask/template-hooks";
 import { runWithXMLNamespace, createNSElement, getXMLNamespace, newXMLNamespace, XMLNamespaceStack } from "./NSElement";
 import { isInnerHTMLKit, mountInnerHTML, setUpInnerHTML } from "../node/InnerHTML";
 import { queueInternalRender, RUN_EAGERLY, watchForRender } from "../render-cycle";
-import { getViewFlask } from "../flask/ViewFlask";
 
 
 export type HTMLTag = keyof HTMLElementTagNameMap
@@ -227,7 +226,7 @@ function bindSelect(element: HTMLSelectElement, attributes: { [key: string]: Mut
    if (!('mu:value' in attributes))
       return;
    const ion = attributes['mu:value'];
-   const flask = getViewFlask()
+   const flask = getActiveFlask()
    watchForRender(ion, () => {
       queueInternalRender(() => {
          element.value = toString(ion())
@@ -299,7 +298,7 @@ function updateIonWithInput(ion: { state: any } | { set: (value: any) => any }, 
 // }
 
 function setUpAttributes(node: Element, attributes: { [key: string]: MaybeIon<any> }) {
-   const flask = getViewFlask()
+   const flask = getFlask()
    for (const key in attributes) {
       const _key = key.startsWith('mu:') ? key.slice(3) : key;
       if (__DEV__ && key.startsWith('mu:')) console.warn(`The attribute ${_key} is not a valid two-way binding attribute`)
@@ -517,7 +516,7 @@ type DynamicClassesConfig = {
 
 type Falsey = undefined | null | false | ''
 function setUpClasses(node: Element, classes: ClassInput[]) {
-   const flask = getViewFlask()
+   const flask = getFlask()
    const classList = node.classList
 
    for (const entry of classes) {
@@ -618,7 +617,7 @@ function setUpClassesFromString(classString: string, classList: DOMTokenList) {
 // }
 
 function setUpStyles(node: Element, styles: StyleInput[]) {
-   const flask = getViewFlask()
+   const flask = getFlask()
    const style = (<HTMLElement | SVGAElement | MathMLElement>node).style;
    for (const entry of styles) {
       if (isIon(entry)) {

@@ -1,9 +1,8 @@
-import { Flask, getActiveFlask } from "@rue/flask"
-import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, createOneoff, Ion, $currentCycle, setUpAnimationCycleManager, } from "@rue/quarky"
+import { Flask, getActiveFlask, getFlask } from "@rue/flask"
+import { createEffectCycleHook, watch as _watch, useReactivitySystem, createEffectCycleScheduler, Effect, createOneoff, Ion, $currentCycle, setUpAnimationCycleManager, $currentCycleManager, } from "@rue/quarky"
 import { createAwaitableHook } from "@rue/utils"
 import { asWatchSubject, IonSubject, isQuarkyIon } from "../../quarky/src/watch/WatchSubject"
 import { createWatchedDerivation } from "../../quarky/src/ionic/WatchedDerivation"
-import { getViewFlask } from "./flask/ViewFlask"
 
 export const {
    SYNC,
@@ -29,7 +28,7 @@ export const atPrerender = createEffectCycleScheduler(PRERENDER)
 
 export function queueInternalRender(fn: () => void, flask: Flask) { //TODO: needs to be able to be cancelled if action is cancelled
    const effect = createOneoff(fn, INTERNAL_RENDER)
-   $currentCycle().scheduleEffect(effect)
+   $currentCycleManager().current.scheduleEffect(effect)
    flask.onDiscard(() => effect.destroy())
 }
 
@@ -46,7 +45,7 @@ export const atPostrender = createEffectCycleScheduler(INTERNAL_POSTRENDER)
 
 //QUESTION: Not sure how this will interact with microtasks, especially with onRender being a microtask
 export const $postevent = createAwaitableHook(atPrerender)
-export const $internalrender = createAwaitableHook((fn: () => void) => queueInternalRender(fn, getViewFlask()))
+export const $internalrender = createAwaitableHook((fn: () => void) => queueInternalRender(fn, getFlask()))
 export const $renderphase = createAwaitableHook(atRender)
 export const $postrender = createAwaitableHook(atPostrender)
 // export const $endofrendercycle = createAwaitableHook(onRenderCycleEnd)

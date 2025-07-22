@@ -1,4 +1,3 @@
-import { getViewFlask } from "../flask/ViewFlask";
 import { mountNodeEntities } from "../node/mountNodeKits";
 import { ConditionalSeries } from "./ConditionalSeries";
 import { hideDOMNodes, showDOMNodes } from "./toggledisplay";
@@ -9,7 +8,7 @@ import { NodeEntity } from "../node/setUpNodeEntities";
 import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/NodePod";
 import { $_run_with_, $_snap_context, ContextSnapshot } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
-import { FLASK, Flask } from "@rue/flask";
+import { FLASK, Flask, getFlask } from "@rue/flask";
 import { queueInternalRender, PRERENDER, RENDER, SYNC, watchForRender } from "../render-cycle";
 import { ActivationType } from "./If";
 import { useTransitionNodes } from "../transition/TransitNode";
@@ -86,7 +85,7 @@ export class ConditionalRenderSeries extends ConditionalSeries {
 
    // store contextual state
    context: ContextSnapshot = $_snap_context()
-   outerFlask: Flask = getViewFlask()
+   outerFlask: Flask = getFlask()
    phasicNode: TransitionNode | null = getPhasicNode()
 
    dynamicPod: DynamicPod = new NodePod()

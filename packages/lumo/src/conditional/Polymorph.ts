@@ -1,12 +1,11 @@
 import { isFunction, normalizeToArray } from "@rue/utils";
 import { Component, unnestComponent } from "../component/Component";
-import { getViewFlask } from "../flask/ViewFlask";
 import { JSXNode, RawJSXNode } from "../node/makeNode";
 import { mountConditional } from "./ConditionalRenderSeries";
 import { Commons, NodeCommons, Provided, callWithCommons } from "../commons/Commons";
-import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
+import { NodeEntity } from "../node/setUpNodeEntities";
 import { DynamicPod, NodePod, removeDOMNodes } from "../node/NodePod";
-import { $_run_with_, $_snap_context, FLASK, Flask } from "@rue/flask";
+import { $_run_with_, $_snap_context, ContextSnapshot, FLASK, Flask, getFlask } from "@rue/flask";
 import { fromTag } from "../component/fromTag";
 import { ion, Ion, isIon, MutableIon, toValue, watch } from "@rue/quarky";
 import { useTransitionNodes } from "../transition/TransitNode";
@@ -14,8 +13,7 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { getPhasicNode } from "../transition/PhasicNode";
 import { __DEV__buildAsyncPath } from "../../../flask/debug";
 import { RenderTransient, toRenderTransient, wrapToPreserve } from "../dynamic/DynamicKit";
-import { AnyObject } from "@rue/types";
-import { $renderphase, INTERNAL_RENDER, onRender, PRERENDER, queueInternalRender } from "../render-cycle";
+import {  PRERENDER } from "../render-cycle";
 
 
 
@@ -153,8 +151,8 @@ type VariantMap = Map<Object, DynamicRenderKit> & { render: RenderFunction }
 
 export class PolymorphKit {
    // store contextual state
-   context: Map<string | symbol, any> = $_snap_context()
-   outerFlask: Flask = getViewFlask()
+   context: ContextSnapshot = $_snap_context()
+   outerFlask: Flask = getFlask()
    phasicNode?: TransitionNode | null = getPhasicNode()
 
    // setup essentials

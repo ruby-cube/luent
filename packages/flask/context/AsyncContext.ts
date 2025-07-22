@@ -55,6 +55,7 @@ export function AsyncState<T>(name: Key): [GetContextualState<T>, Stack<T>] {
       }
    }
    const stack = {
+      _stack,
       get length() {
          return _stack.length;
       },
@@ -87,5 +88,12 @@ export function $_run_with_(context: ContextSnapshot, fn: Function) {
       return fn();
    } finally {
       asyncContextStack.pop()
+   }
+}
+
+export function $_wrap_with_context(fn: Function) {
+   const context = $_snap_context()
+   return () => {
+      $_run_with_(context, fn)
    }
 }

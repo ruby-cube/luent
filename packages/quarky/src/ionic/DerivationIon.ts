@@ -11,7 +11,7 @@ import { debug } from "@rue/utils";
 import { Effect } from "../effect-cycle/EffectQueue";
 import { SYNC } from "../effect-cycle/EffectCycle";
 import { NULL } from "../ion/AtomicIon";
-import { isLazyUpdate, queueInternalRender } from "../effect-cycle/ReactivitySystem";
+import { isLazyUpdate, queueUpdate } from "../effect-cycle/ReactivitySystem";
 
 
 
@@ -93,7 +93,7 @@ export function createMaybeMemoizedIon(
             ion.tState = value;
             ion.tStale = false;
             if (ion.tStale) {
-               queueInternalRender(() => {
+               queueUpdate(() => {
                   ion.state = value;
                   ion.stale = true;
 
@@ -130,7 +130,7 @@ export function createMaybeMemoizedIon(
          ion.tStale = false;
          // window.__DEV__log.push('lazy update ' + value)
          if (stale) {
-            queueInternalRender(() => {
+            queueUpdate(() => {
                ion.state = value;
                ion.stale = true;
 

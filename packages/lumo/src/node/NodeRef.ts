@@ -2,8 +2,7 @@ import { Component, PublicComponent } from "../component/Component"
 import { HTMLTag } from "../element/makeElement"
 import { isSettingUpList, onBeforeListUpdate, onListUpdated } from "../iteratives/listStack"
 import { Ion } from "@rue/quarky"
-import { getActiveFlask } from "@rue/flask"
-import { getViewFlask } from "../flask/ViewFlask"
+import { getActiveFlask, getFlask } from "@rue/flask"
 
 const INTERNAL = Symbol('internal')
 
@@ -53,7 +52,7 @@ export function NodeRef<
    if (array) {
       const _ref = (<_NodesRef>NodeRef)[INTERNAL] as MetaNodesRef
 
-      const flask = getViewFlask()
+      const flask = getFlask()
       flask.onDiscard(() => {
          _ref.setValue([]); // clear nodes
       })

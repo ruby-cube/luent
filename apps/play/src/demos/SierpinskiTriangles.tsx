@@ -25,13 +25,9 @@ function doAction(fn: Function) {
 
 // }
 
-const lazyBatch = useLazyBatch()
-
-
 const upd1000 = useLazyUpdate(1000)
 
 export function TriangleDemo() {
-   console.log('demo')
    const $elapsed = ion(0)
    const $seconds = ion(0)
 

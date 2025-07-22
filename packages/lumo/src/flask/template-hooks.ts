@@ -1,11 +1,11 @@
 import { debug } from "@rue/utils";
 import { $renderphase } from "../render-cycle";
-import { getViewFlask } from "./ViewFlask";
+import { getFlask } from "@rue/flask";
 
 type LifecycleTask = (element: Element, initialOrFinal: boolean) => void;
 
 export function setUpHooks(node: Element, hooks: { [key: string]: LifecycleTask }) {
-   const flask = getViewFlask()
+   const flask = getFlask()
    for (const key in hooks) {
       const task = hooks[key]
       switch (key) {

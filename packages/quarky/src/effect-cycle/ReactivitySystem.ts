@@ -1,15 +1,18 @@
-import { $listen, $schedule, Flask, Listener, ListenerOptions, SchedulerOptions } from "@rue/flask";
+import { $_wrap_with_context, $listen, $schedule, AsyncState, Flask, getFlask, Listener, ListenerOptions, SchedulerOptions } from "@rue/flask";
 import { CyclePhase, EffectCycle, Phase, queueTask, SYNC } from "./EffectCycle";
 import { createOneoff, Effect } from "./EffectQueue";
 import { $forAnimation } from "./animation";
 
-
+const [getActiveCycleManager, cycleManagerStack] = AsyncState<EffectCycleManager>('cycle-manager')
 
 type EffectCycleHook = (task: () => void, options?: SchedulerOptions) => Listener //Should this be void?
 
 export class EffectCycleManager {
-   constructor(public name: string, public timeWarning: number = 1000) {
-
+   constructor(
+      public name: string, 
+      public timeWarning: number = 100,
+      public initialLoad: number | undefined = undefined
+   ) {
    }
 
    // private tasks: Map<Phase, TaskQueue> = new Map()
@@ -57,6 +60,7 @@ export class EffectCycleManager {
    closeCycle() {
       const cycle = this.currentCycle = this.nextCycle
       if (cycle) {
+         console.log('next!')
          // queueTask(()=>{
          this.nextCycle = undefined;
          schedulePhase(cycle, this.phases[0])
@@ -80,33 +84,22 @@ export function isAnimationCycle(cycle: EffectCycle) {
 }
 
 export function isLazyCycle(cycle: EffectCycle) {
-   return cycle.manager.name !== 'AnimationCycle'
-   return cycle.manager.name === 'LazyEffectCycle'
+   // return cycle.manager.name !== 'AnimationCycle'
+   return cycle.manager.name === 'LazyCycle'
 }
 
 
 function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, phases }: CyclePhase) {
-   // if (cycle.pendingPrerender) {
-   //    cycle.pendingPrerender.then(() => {
-   //       schedule(runEffects)
-   //    })
-   // }
-   // else {
-   schedule(runEffects)
-   // }
-
-   function runEffects() {
-      // const final = index === phases.length - 1;
-      // if (!final) schedulePhase(cycle, next)
-      activeManager = cycle.manager; //TODO: Replace with async context $_run_with_context
+   schedule(() => {
       cycle.currentPhase = index;
       cycle.subphase = 'effects'
-      const running = cycle.runEffects(index)
+      cycleManagerStack.push(cycle.manager)
+      const running = cycle.runEffects(index) //TODO: for async effects, must coordinate with pendingPrerender
       cycle.subphase = 'microtasks'
+      cycleManagerStack.pop()
 
       if (cycle.pendingPrerender) {
-         // console.log('pending prerender')
-         cycle.pendingPrerender.then(closePhase)
+         cycle.pendingPrerender.then(closePhase) // delays scheduling next phase until prerender is complete
          cycle.pendingPrerender = undefined
       }
       else {
@@ -115,12 +108,12 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
 
       function closePhase() {
          const final = index === phases.length - 1;
-         if (final || cycle.cancelled) cycle.close()
+         if (final || cycle.cancelled) {
+            cycle.close()
+         }
          else schedulePhase(cycle, next)
-         activeManager = null; //NOTE: microtasks and promise tasks cannot be used for animations since activeManager will be null by then.. unless I can pass it via AsyncContext
       }
-   }
-
+   })
 }
 
 
@@ -136,19 +129,16 @@ function schedulePhase(cycle: EffectCycle, { index, schedule, phaseHook, next, p
 // [ ] Set up animation queue
 
 function queueResponsive(fn: IdleRequestCallback) {
-   return requestIdleCallback(fn, { timeout: 17 })
+   return requestIdleCallback($_wrap_with_context(fn), { timeout: 17 })
 }
 
-const cycleManager = new EffectCycleManager('UpdateCycle');
+const cycleManager = new EffectCycleManager('UpdateCycle', 100, 1000);
 
 function setUpUpdateCycleManager() {
    cycleManager.pushPhase(new CyclePhase('PRERENDER', queueMicrotask))
    cycleManager.pushPhase(new CyclePhase('INTERNAL_RENDER', queueResponsive))
    cycleManager.pushPhase(new CyclePhase('RENDER', queueMicrotask))
    cycleManager.pushPhase(new CyclePhase('INTERNAL_POSTRENDER', queueMicrotask))
-   // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
-
-   // cycleManager.onComplete = createEffectCycleScheduler(UPDATE_CYCLE_END)//TODO: Think...
    return cycleManager;
 }
 
@@ -158,59 +148,65 @@ export function setUpAnimationCycleManager() {
    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:PRERENDER', queueMicrotask))
    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:INTERNAL_RENDER', queueMicrotask))
    animationCycleManager.pushPhase(new CyclePhase('ANIMATION:RENDER', queueMicrotask))
-   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:POSTRENDER', queueMicrotask)) //TODO: Think...
-   // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
+   animationCycleManager.pushPhase(new CyclePhase('ANIMATION:POSTRENDER', queueMicrotask))
    return animationCycleManager;
 }
 
-// export const lazyActionCycleManager = new EffectCycleManager('LazyActionCycle');
+export function useLazyCycleManager(timeWarning: number) {
+   const lazyActionCycleManager = new EffectCycleManager('LazyCycle', timeWarning);
 
-// export function setUpLazyCycleManager() {
-//    lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:PRERENDER', queueMicrotask))
-//    lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:INTERNAL_RENDER', queueMicrotask))
-//    lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:RENDER', queueMicrotask))
-//    lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:POSTRENDER', queueMicrotask)) //TODO: Think...
-//    // cycleManager.pushPhase(new CyclePhase(UPDATE_CYCLE_END, noop)) //TODO: Think...
-//    return lazyActionCycleManager;
-// }
+   lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:PRERENDER', queueMicrotask))
+   lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:INTERNAL_RENDER', queueMicrotask))
+   lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:RENDER', queueMicrotask))
+   lazyActionCycleManager.pushPhase(new CyclePhase('LAZY:POSTRENDER', queueMicrotask))
+   return lazyActionCycleManager;
+}
 
 // export class LazyAction {
 //    cycle: EffectCycle = $currentCycle(lazyActionCycleManager)
 // }
 
 
-const upd1000 = (fn: any) => { fn() }
 
-const lazyEffectCycleManagers: Map<number, EffectCycleManager> = new Map();
+//TODO: need to manage which cycle manager is going to be used.
+// - do we need separate cycle managers for each lazy update? yes.
+// - how do we access the appropriate cycle manager? async context? 
 
-let lazyUpdate = false;
+const lazyEffectCycleManagers: Record<number, EffectCycleManager> = {}
+
+let lazyUpdate: false | number = false;
 
 export function isLazyUpdate() {
-   return lazyUpdate || $currentCycleManager().name !== 'AnimationCycle' //FIX: temporary
+   return lazyUpdate || $currentCycleManager().name === 'LazyCycle' //FIX: temporary
 }
+
+// export let queueUpdate: (fn: () => void)=> void
+
+let UPDATE_PHASE = 3; //TODO: need to register
 
 //NOTE: TEMPORARY till i find a better solution
-export function queueInternalRender(fn: () => void
-   // , flask: Flask
-) {
-   const effect = createOneoff(fn, 3)
-   cycleManager.current.scheduleEffect(effect)
-   // flask.onDiscard(() => effect.destroy())
+export function queueUpdate(fn: () => void) {
+   const effect = createOneoff(fn, UPDATE_PHASE)
+   $currentCycleManager().current.scheduleEffect(effect)
+   getFlask().onDiscard(() => effect.destroy()) 
+   //FIX: getFlask will fail if you set state in any non-flasked async fn (e.g. setTimeout, setInterval..  unless I use the compiler to auto-provide async context)
 }
 
+//QUESTION: do scheduled effects need to be discarded with flask? closest flask? view flask? scene?
+// - yes, that is how you cancel an effect if you close/change the view before the effect renders
+// - scene flask? Yes, if you nest a queueInternalRender in an effect, the effect is run and then run again, we want to override the first queueInternalRender.
+// CONCLUSION: discard with closest flask
+
 export function useLazyUpdate(timeWarning: number = Infinity) {
-   // const manager = lazyEffectCycleManagers.get(timeWarning) ?? new EffectCycleManager('LazyEffectCycle', timeWarning)
-   // lazyEffectCycleManagers.set(timeWarning, manager)
+   const manager = lazyEffectCycleManagers[timeWarning] ?? (lazyEffectCycleManagers[timeWarning] = useLazyCycleManager(timeWarning))
 
    return function upd<T>(fn: () => T): Promise<T> {
-      // const phase = getCurrentPhase(cycleManager)
-      // if (phase !== SYNC) $currentCycle().cancel()
-      const cycle = $currentCycle(); //TODO: Replace with actual lazy cycle
+      const cycle = manager.current;
       const promise = cycle.pendingPrerender = new Promise((resolve) => { cycle.resolvePrerender = resolve })
       //NOTE: assumes one cycle per lazy call... is this what I want? no... I need a promise.all but for now, let's just use one promise
 
       try {
-         lazyUpdate = true; // assuming function is synchronous. Need AsyncState for asynchronous
+         lazyUpdate = timeWarning; // assuming function is synchronous. Need AsyncState for asynchronous
          cycle.lazyResult = fn()
          return promise as Promise<T>
       }
@@ -220,7 +216,6 @@ export function useLazyUpdate(timeWarning: number = Infinity) {
    }
 }
 
-let activeManager: EffectCycleManager | null = null;
 
 export function getUpdateCycleCount() {
    return cycleManager.count
@@ -279,8 +274,8 @@ export function createEffectCycleHook(phase: Phase) {
       return $listen(task, options ?? {}, { //TODO: potentially get rid of $listen depending on typical usage
          enroll(fn) {
             const effect = new Effect(fn, phase)
-            $currentCycle().scheduleEffect(effect)
-            return task;
+            $currentCycleManager().current.scheduleEffect(effect)
+            return effect;
          },
          remove(task) {
             task.discard()
@@ -300,7 +295,7 @@ export function createEffectCycleScheduler(phase: Phase) {
       return $schedule(task, options ?? {}, { //TODO: potentially get rid of $listen depending on typical usage
          enroll(task) {
             const effect = new Effect(task, phase)
-            $currentCycle().scheduleEffect(effect)
+            $currentCycleManager().current.scheduleEffect(effect)
             return effect;
          },
          remove(effect: Effect) {
@@ -316,15 +311,19 @@ export function createEffectCycleScheduler(phase: Phase) {
 export function $currentCycle(cycleManager = $currentCycleManager()) {
    // return cycleManager.current;
    const phase = getCurrentPhase(cycleManager)
-   if (phase !== SYNC) return cycleManager.next;
+   if (phase !== SYNC) {
+      if (cycleManager.name === 'LazyCycle') console.trace('next!!')
+      return cycleManager.next;
+   }
    return cycleManager.current;
 }
 
 
-function $currentCycleManager() {
+export function $currentCycleManager() {
    // return cycleManager;
    if ($forAnimation()) return animationCycleManager;
-   return activeManager ?? cycleManager; //TODO: instead of using activeManager, getActiveManager via AsyncContext
+   if (lazyUpdate) return lazyEffectCycleManagers[lazyUpdate]
+   return getActiveCycleManager() ?? cycleManager; //TODO: instead of using activeManager, getActiveManager via AsyncContext
 }
 
 

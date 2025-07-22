@@ -3,7 +3,6 @@ import { Collection, ListData, RenderItem } from "./For";
 import { popList, pushList } from "./listStack";
 import { normalizeToArray } from "@rue/utils";
 import { mountNodeEntities } from "../node/mountNodeKits";
-import { getViewFlask } from "../flask/ViewFlask";
 import { diff, InsertAndMoveKit } from "./diff";
 import { Commons } from "../commons/commons-stack";
 import { NodeEntity, setUpNodeEntities } from "../node/setUpNodeEntities";
@@ -11,13 +10,12 @@ import { TransitionNode } from "../transition/TransitionNode";
 import { Commons as createCommons } from "../commons/Commons";
 import { useTransitionNodes } from "../transition/TransitNode";
 import { DynamicPod, mountDOMNodes, NodePod, removeDOMNodes } from "../node/NodePod";
-import { FLASK, Flask } from "@rue/flask";
+import { FLASK, Flask, getFlask } from "@rue/flask";
 import { $_run_with_, $_snap_context } from "../../../flask/context/AsyncContext";
 import { __DEV__buildAsyncPath, TRACE } from "../../../flask/debug";
 import { recordMutations } from "../../../quarky/src/Mutable";
 import { AnyObject } from "@rue/types";
 import { queueInternalRender, PRERENDER, watchForRender } from "../render-cycle";
-import { NodesRef } from "../node/NodeRef";
 
 
 type Index = number
@@ -83,7 +81,7 @@ export class ListRenderKit {
       }
 
       if (__DEV__) this.__DEV__asyncPath = __DEV__buildAsyncPath()
-      this.outerFlask = getViewFlask()
+      this.outerFlask = getFlask()
    }
 
    beforeUpdateTasks: Set<Function> = new Set()

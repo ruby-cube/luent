@@ -30,7 +30,7 @@ export class CyclePhase {
    phaseHook!: string
 }
 
-
+let initialLoad = true;
 
 /**
  * 
@@ -50,16 +50,18 @@ export class EffectCycle {
 
    cancelled: boolean = false;
 
-   cancel(){
-      console.log('cancelled')
-      this.idleIDs.forEach((id)=>cancelIdleCallback(id))
+   cancel() {
+      this.idleIDs.forEach((id) => cancelIdleCallback(id))
       this.cancelled = true;
    }
 
    close() {
       const delta = performance.now() - this.startTime
-      if (delta > this.manager.timeWarning) console.warn('Interaction-to-paint time exceeds', this.manager.timeWarning, 'ms:', delta)
-      this.manager.closeCycle()
+      const manager = this.manager;
+      const timeLimit = manager.initialLoad ? 1000 : manager.timeWarning
+      if (delta > timeLimit) console.warn('Interaction-to-paint time exceeds', timeLimit, 'ms:', delta)
+      manager.closeCycle()
+      manager.initialLoad = undefined;
    }
 
    get count() { return this.manager.count }
@@ -102,6 +104,7 @@ export class EffectCycle {
    }
 
    scheduleEffect(effect: Effect) {
+      // if ($currentCycle().manager.name === 'UpdateCycle') console.trace('wrong cycle?')
       const phase = effect.phase
       const adjustedPhase = this.adjustPhase(phase)
       // if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)

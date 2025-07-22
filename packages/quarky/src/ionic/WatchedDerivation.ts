@@ -1,6 +1,6 @@
 import { IonicCompound, IonicCompoundMorph } from "./IonicCompound";
 import { hasQuark, Quark, QUARK, quarkOf } from "../Quark";
-import { isLazyUpdate, queueInternalRender } from "../effect-cycle/ReactivitySystem";
+import { isLazyUpdate, queueUpdate } from "../effect-cycle/ReactivitySystem";
 import { NULL } from "../ion/AtomicIon";
 
 /**
@@ -45,7 +45,7 @@ export function createWatchedDerivation(derivation: () => any, retrack: boolean)
       if (compound.atoms.size === 0) quark.inert = true;
       if (isLazyUpdate()){
          quark.tState = value;
-         queueInternalRender(()=>{
+         queueUpdate(()=>{
             quark.state = value;
             quark.tState = NULL;
          })
@@ -59,7 +59,7 @@ export function createWatchedDerivation(derivation: () => any, retrack: boolean)
       const value = compound.retrackedCall(derivation)
       if (isLazyUpdate()){
          quark.tState = value;
-         queueInternalRender(()=>{
+         queueUpdate(()=>{
             quark.state = value;
             quark.tState = NULL;
          })

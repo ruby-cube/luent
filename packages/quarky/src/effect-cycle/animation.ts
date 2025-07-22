@@ -1,3 +1,5 @@
+import { $_wrap_with_context } from "@rue/flask";
+
 let forAnimation = false;
 export function $forAnimation() {
    return forAnimation
@@ -76,6 +78,7 @@ export function Interval(fn: () => void, interval: number) {
 
    let timeout: undefined | NodeJS.Timeout = undefined
    let stopped = true;
+   const fnWithContext = $_wrap_with_context(fn)
 
    return {
       stop() {
@@ -85,7 +88,7 @@ export function Interval(fn: () => void, interval: number) {
       start() {
          if (!stopped) return this;
          stopped = false;
-         timeout = setInterval(fn, interval)
+         timeout = setInterval(fnWithContext, interval)
          return this;
       }
    }

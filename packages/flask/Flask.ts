@@ -6,6 +6,11 @@ export const FLASK = 'flask'
 
 export const [getActiveFlask, flaskStack] = AsyncState<Flask>(FLASK)
 
+export function getFlask() {
+   const flask = getActiveFlask()
+   if (!flask) throw new Error('No flask found. Must call within the scope of a flask')
+   return flask;
+}
 
 
 // export function pushFlask(flask: Flask) {

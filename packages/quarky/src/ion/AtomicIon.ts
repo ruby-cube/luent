@@ -11,7 +11,7 @@ import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
 import { Ion, Methods, MutableIon } from "./Ion";
 import { getActiveTracker, trackAtom } from "../ionic/IonicCompound";
-import { $currentCycle, isLazyUpdate, queueInternalRender } from "../effect-cycle/ReactivitySystem";
+import { isLazyUpdate, queueUpdate } from "../effect-cycle/ReactivitySystem";
 
 export const NULL = Symbol('null')
 /** INTERNAL */
@@ -147,8 +147,8 @@ function setState(this: AtomicIonQuark, value: unknown) {
 
    if (isLazyUpdate()) {
       this.tState = state;
-      
-      queueInternalRender(() => {
+
+      queueUpdate(() => {
          this.state = this.tState;
       })
    }

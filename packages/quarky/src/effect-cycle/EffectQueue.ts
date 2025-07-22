@@ -1,7 +1,8 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { WatchedAtom } from "../watch/WatchedAtom";
 import { EffectCycle, Phase, SYNC } from "./EffectCycle";
-import {  isLazyCycle } from "./ReactivitySystem";
+import { isLazyCycle } from "./ReactivitySystem";
+import {$_wrap_with_context } from "@rue/flask";
 
 const PRERENDER = 0 //QUESTION: Should EffectCycle and EffectQueue belong to Lumo also??
 
@@ -201,7 +202,7 @@ export class PhaseQueue {
             if (isLazyCycle(cycle) && pre) {
                cycle.prerenderCount++;
                const promise = new Promise((resolve) => {
-                  requestIdleCallback(() => {
+                  requestIdleCallback($_wrap_with_context(() => {
                      const _promise = effect.run?.();
                      if (_promise instanceof Promise) _promise.then(resolve)
                      else resolve(undefined)
@@ -209,7 +210,7 @@ export class PhaseQueue {
                      if (cycle.prerenderCount === 0) {
                         cycle.resolvePrerender?.(cycle.lazyResult) //TODO: need to wait till all promises resolve
                      }
-                  }, { timeout: 17 })
+                  }), { timeout: 17 })
                })
                promises.push(promise)
             }
