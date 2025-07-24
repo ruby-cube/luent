@@ -1,6 +1,6 @@
 import { setImmediate } from "@rue/thread";
 import { Effect, EffectQueue, PhaseQueue } from "./EffectQueue";
-import { EffectCycleManager } from "./ReactivitySystem";
+import {schedulePhase, Update } from "./ReactivitySystem";
 import { POSTRENDER } from "@rue/lumo";
 
 export const SYNC = 'SYNC' as const
@@ -30,7 +30,6 @@ export class CyclePhase {
    phaseHook!: string
 }
 
-let initialLoad = true;
 
 /**
  * 
@@ -42,8 +41,10 @@ export class EffectCycle {
    startTime = performance.now()
 
    constructor(
-      public manager: EffectCycleManager
+      public update: Update,
+      phases: CyclePhase[]
    ) {
+      schedulePhase(this, phases[0])
    }
 
    idleIDs: number[] = []
@@ -57,14 +58,9 @@ export class EffectCycle {
 
    close() {
       const delta = performance.now() - this.startTime
-      const manager = this.manager;
-      const timeLimit = manager.initialLoad ? 1000 : manager.timeWarning
-      if (delta > timeLimit) console.warn('Interaction-to-paint time exceeds', timeLimit, 'ms:', delta)
-      manager.closeCycle()
-      manager.initialLoad = undefined;
+      const timeMargin = this.update.timeMargin
+      if (delta > timeMargin) console.warn('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
    }
-
-   get count() { return this.manager.count }
 
    private effects: Map<Phase, EffectQueue> = new Map(); // pass in an object to constructor instead of map
 
@@ -104,7 +100,7 @@ export class EffectCycle {
    }
 
    scheduleEffect(effect: Effect) {
-      // if ($currentCycle().manager.name === 'UpdateCycle') console.trace('wrong cycle?')
+      // if ($currentOrNextCycle().manager.name === 'UpdateCycle') console.trace('wrong cycle?')
       const phase = effect.phase
       const adjustedPhase = this.adjustPhase(phase)
       // if (__DEV__ && adjustedPhase !== phase) console.warn('RESEARCH: phase has been adjusted', phase, adjustedPhase)
@@ -139,3 +135,4 @@ export class EffectCycle {
 
 
 export const queueTask = setImmediate;
+

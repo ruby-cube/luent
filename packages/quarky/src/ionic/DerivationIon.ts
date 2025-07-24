@@ -11,7 +11,7 @@ import { debug } from "@rue/utils";
 import { Effect } from "../effect-cycle/EffectQueue";
 import { SYNC } from "../effect-cycle/EffectCycle";
 import { NULL } from "../ion/AtomicIon";
-import { isLazyUpdate, queueUpdate } from "../effect-cycle/ReactivitySystem";
+import { isLazyUpdate,  initUpdate, $activeUpdate } from "../effect-cycle/ReactivitySystem";
 
 
 
@@ -30,8 +30,8 @@ export type $DerivedState = Ion & Capsule & {
       inert: boolean
       state: unknown
       stale: boolean
-      tStale: boolean | undefined
-      tState: unknown
+      pStale: boolean | undefined
+      pState: unknown
       derivation: (prev?: unknown) => unknown
       staleMarker: Effect | undefined
    }
@@ -79,7 +79,7 @@ export function createMaybeMemoizedIon(
          assertValidCall() // prevents memory leaks caused by usng memoized ion outside of its creation scope
          const effect = ion.staleMarker = new Effect(() => {
             if (isLazyUpdate()) {
-               ion.tStale = true;
+               ion.pStale = true;
             }
             else ion.stale = true
          }, SYNC)
@@ -90,15 +90,15 @@ export function createMaybeMemoizedIon(
             fn = initialize;
          })
          if (isLazyUpdate()) {
-            ion.tState = value;
-            ion.tStale = false;
-            if (ion.tStale) {
-               queueUpdate(() => {
+            ion.pState = value;
+            ion.pStale = false;
+            if (ion.pStale) {
+               $activeUpdate().queue(() => {
                   ion.state = value;
                   ion.stale = true;
 
-                  ion.tState = NULL;
-                  ion.tStale = undefined;
+                  ion.pState = NULL;
+                  ion.pStale = undefined;
                })
             }
             return value;
@@ -115,10 +115,10 @@ export function createMaybeMemoizedIon(
    function getMemoizedState() {
       //TODO: not sure if I should assert initialization only or all calls
       assertValidCall()
-      const stale = isLazyUpdate() ? ion.tStale : ion.stale;
+      const stale = isLazyUpdate() ? ion.pStale : ion.stale;
       if (!stale || !retrack) trackMemoized(ion)
 
-      const prevState = isLazyUpdate() && ion.tState !== NULL ? ion.tState : ion.state
+      const prevState = isLazyUpdate() && ion.pState !== NULL ? ion.pState : ion.state
 
       const value =
          (retrack && stale) ? retrackedCall(ion)
@@ -126,16 +126,17 @@ export function createMaybeMemoizedIon(
                : prevState;
 
       if (isLazyUpdate()) {
-         ion.tState = value;
-         ion.tStale = false;
+         ion.pState = value;
+         ion.pStale = false;
          // window.__DEV__log.push('lazy update ' + value)
          if (stale) {
-            queueUpdate(() => {
+            const update = initUpdate(100)
+            update.queue(() => {
                ion.state = value;
                ion.stale = true;
 
-               ion.tState = NULL;
-               ion.tStale = undefined;
+               ion.pState = NULL;
+               ion.pStale = undefined;
             })
          }
          return value;
@@ -157,8 +158,8 @@ export function createMaybeMemoizedIon(
       inert: false,
       stale: false,
       state: undefined,
-      tState: NULL,
-      tStale: undefined,
+      pState: NULL,
+      pStale: undefined,
       derivation,
       staleMarker: undefined,
       entity: $derived,
@@ -166,7 +167,7 @@ export function createMaybeMemoizedIon(
       asCompound: new IonicCompound(),
       asTraceable: new Traceable()
    }
-   
+
    ion.asCompound.entity = ion;
 
    $derived[QUARK] = ion
@@ -216,16 +217,17 @@ Memory leaks occur when an object is referenced outside of its creation scope in
 */
 function assertValidInitialization(initializationFlask: Flask | undefined, creationFlask: Flask | undefined) {
    if (true) return;
-   if (!creationFlask) return;
-   if (!initializationFlask) {
-      if (creationFlask.creationScopeID === "0") // both are in global creation scope
-         return;
-      debug.warn("Memory leak alert A. A memoized ion cannot be called outside its creation scope.")
-      return;
-   }
-   if (initializationFlask.creationScopeID === creationFlask.creationScopeID) return;
-   if (!flaskAContainsFlaskB(creationFlask, initializationFlask))
-      debug.warn("Memory leak alert B. A memoized ion cannot be called outside its creation scope.")
+   //TODO:
+   // if (!creationFlask) return;
+   // if (!initializationFlask) {
+   //    if (creationFlask.creationScopeID === "0") // both are in global creation scope
+   //       return;
+   //    debug.warn("Memory leak alert A. A memoized ion cannot be called outside its creation scope.")
+   //    return;
+   // }
+   // if (initializationFlask.creationScopeID === creationFlask.creationScopeID) return;
+   // if (!flaskAContainsFlaskB(creationFlask, initializationFlask))
+   //    debug.warn("Memory leak alert B. A memoized ion cannot be called outside its creation scope.")
 }
 
 function flaskAContainsFlaskB(flaskA: Flask, flaskB: Flask) {

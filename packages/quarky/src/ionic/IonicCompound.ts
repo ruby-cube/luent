@@ -111,7 +111,7 @@ export type IonicCompoundMorph = CompoundMorph<IonicCompound>
 
 export class IonicCompound extends Compound {
    entity: any;
-   tState: unknown = NULL
+   pState: unknown = NULL
    // stale: boolean = false;
 
    // atoms: Set<Watchable> = new Set()

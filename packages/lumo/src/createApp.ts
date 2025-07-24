@@ -6,7 +6,7 @@ import { getCommons, popCommons, pushCommons } from "./commons/commons-stack";
 import { NodePod, removeDOMNodes } from "./node/NodePod";
 import { Flask } from "@rue/flask";
 import { MU, muIonsStack } from "./component/Input";
-import { Ion } from "@rue/quarky";
+import { Ion, Update, updateStack } from "@rue/quarky";
 import { Provided } from "./commons/Commons";
 import { processJSXOutput } from "./node/setUpNodeEntities";
 import { mountNodeEntities } from "./node/mountNodeKits";
@@ -42,30 +42,31 @@ export function createApp<T extends AnyObject, E extends Provided>(App: Componen
          if (!(root instanceof Element)) throw new Error('No root element to mount app to. Check selector string')
          appRoot = root!;
 
-      let component: Component ={exposed: undefined, jsxNodes:[]}
+         let component: Component = { exposed: undefined, jsxNodes: [] }
          // (2) attach developer's root component to root element
          flask.containCall(function mountRootComponent() {
-               const muIons: Set<Ion> = new Set()
-               const attributes = {
-                  ...config?.setup || {},
-                  [MU](ion: Ion) {
-                     return muIons?.has(ion)
-                  }
+            const muIons: Set<Ion> = new Set()
+            const attributes = {
+               ...config?.setup || {},
+               [MU](ion: Ion) {
+                  return muIons?.has(ion)
                }
-               setComponentAttributes(attributes)
-               muIonsStack.push(muIons)
+            }
+            const update = new Update(1000, flask)
+            updateStack.push(update)
+            setComponentAttributes(attributes)
+            muIonsStack.push(muIons)
             pushCommons(appCommons)
             // runProviderComponentSetup(App, component, undefined, {}, undefined); //TODO: preserve node entities for remount
             setComponentAttributes(config?.setup || {})
             try {
-               mountNodeEntities(processJSXOutput(App(), appRoot, nodePod), appRoot) 
+               mountNodeEntities(processJSXOutput(App(), appRoot, nodePod), appRoot)
             }
-            // catch (err) {
-            //    console.error('uhoh', err)
-            // }
             finally {
                setComponentAttributes(undefined)
                muIonsStack.pop()
+               updateStack.pop()
+               console.log('update stack', updateStack)
                // if (remountable) markMountPhase()
                // component.setUp(root, nodePod)
                // component.mount(root) //TODO: if this is a remount, how would it be different than a first mount? use fragment?

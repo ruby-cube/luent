@@ -1,9 +1,9 @@
 import { component, fromTag, atUnmount, PRERENDER, POSTRENDER } from "@rue/lumo";
-import { $currentCycle, Animation, EffectCycle, EffectCycleManager, Interval, ion, useLazyUpdate, useSharedRenderThrottle, watch } from "@rue/quarky";
+import { Animation, EffectCycle, EffectCycleManager, Interval, ion, update, SharedThrottledUpdate, watch } from "@rue/quarky";
 
 //TODO:
 // - time warning for lazy update
-// - tState for consistency, how to keep lazy state consistent with 'watch() derivations'?
+// - pState for consistency, how to keep lazy state consistent with 'watch() derivations'?
 //QUESTION:
 // - async effects?
 // - when to cancel, when to queue?
@@ -25,7 +25,6 @@ function doAction(fn: Function) {
 
 // }
 
-const upd1000 = useLazyUpdate(1000)
 
 export function TriangleDemo() {
    const $elapsed = ion(0)
@@ -37,7 +36,9 @@ export function TriangleDemo() {
    })
    const start = Date.now()
 
-   const secondsInterval = Interval(() => upd1000(() => ($seconds.state = ($seconds() % 10) + 1)), 1000).start();
+   const secondsInterval = Interval(() => {
+      update(() => ($seconds.state = ($seconds() % 10) + 1), { lazy: 1000 })
+   }, 1000).start();
    // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
    const animation = Animation(() => {
@@ -54,27 +55,29 @@ export function TriangleDemo() {
    // }, { phase: POSTRENDER })
 
    function stop() {
-      secondsInterval.stop(); 
+      secondsInterval.stop();
       animation.stop()
-      // for (const log of window.__DEV__log) {
-      //    console.log(log)
-      // }
-      // window.__DEV__log.length = 0;
    }
 
    return component(
       <>
-         <button on:click={stop}>stop</button>
+         <button on:click={stop}>
+            stop
+         </button>
          <button on:click={e => (
-            secondsInterval.start(),
+            secondsInterval.start()
+            ,
             animation.start()
-            )}>play</button>
+         )}>
+            play
+         </button>
+         <button on:click={e => update(() => $seconds.state = 0, { lazy: 1000 })}>
+            reset
+         </button>
          <div
             class="container"
             style={{
-               transform: function $drv() {
-                  return "scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)"
-               }
+               transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)")
             }}
          >
             {/* <div>{$seconds}</div> */}
@@ -126,7 +129,7 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
 function Dot({ x, y, s, $text } = fromTag<any>()) {
    const $hover = ion(false)
 
-   const Throttled = useSharedRenderThrottle()
+   const Throttled = SharedThrottledUpdate()
    // const Throttled = (fn: Function)=>fn
 
    const hover = Throttled(() => $hover.state = true)

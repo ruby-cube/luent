@@ -11,7 +11,7 @@ import { Traceable } from "../debug/Traceable";
 import { debug, isObject } from "@rue/utils";
 import { Ion, Methods, MutableIon } from "./Ion";
 import { getActiveTracker, trackAtom } from "../ionic/IonicCompound";
-import { isLazyUpdate, queueUpdate } from "../effect-cycle/ReactivitySystem";
+import { $activeUpdate, getActiveUpdate, isLazyUpdate, Update, initUpdate } from "../effect-cycle/ReactivitySystem";
 
 export const NULL = Symbol('null')
 /** INTERNAL */
@@ -24,8 +24,9 @@ export type $AtomicIonState =
          mutable: boolean;
          props: AnyObject | undefined;
          state: any,
-         tState: any | typeof NULL,
+         pState: any | typeof NULL,
          ionized: boolean,
+         pendingUpdate: Update | null |undefined
       }
       & Quark<typeof ATOMIC_ION, $AtomicIonState>
       & Watchable
@@ -56,8 +57,8 @@ export function createAtomicIon(
    const $state = (() => {
       if (__DEV__) emitSignal();
       trackAtom(quark)
-      if (isLazyUpdate() && quark.tState !== NULL) {
-         return quark.tState;
+      if (isLazyUpdate() && quark.pState !== NULL) {
+         return quark.pState;
       }
       return quark.state;
    }) as $AtomicIonState
@@ -65,7 +66,8 @@ export function createAtomicIon(
 
    const quark: AtomicIonQuark = {
       state,
-      tState: NULL,
+      pState: NULL,
+      pendingUpdate: undefined,
       // stateKey,
       ionized,
       mutable,
@@ -145,14 +147,27 @@ function setState(this: AtomicIonQuark, value: unknown) {
    }
    const state = shouldIonize(value, this.ionized) ? ionize(value) : value
 
-   if (isLazyUpdate()) {
-      this.tState = state;
+   const update = initUpdate()
 
-      queueUpdate(() => {
-         this.state = this.tState;
+   if (update.lazy) {
+      this.pState = state;
+
+      update.queue(() => {
+         this.state = this.pState;
+         this.pendingUpdate = null;
       })
+
+      if (this.pendingUpdate && this.pendingUpdate !== update) {
+         this.pendingUpdate.cancel()
+      }
+
+      this.pendingUpdate = update
    }
    else {
+      if (this.pendingUpdate) {
+         this.pendingUpdate.cancel()
+         this.pendingUpdate = null;
+      }
       this.state = state;
    }
 
@@ -164,7 +179,7 @@ function setState(this: AtomicIonQuark, value: unknown) {
       oldState
    ))
 
-   this.trigger()
+   this.trigger(update)
 
    return state;
 }

@@ -1,8 +1,8 @@
 import { __DEV__unwrap } from "@rue/utils";
 import { WatchedAtom } from "../watch/WatchedAtom";
 import { EffectCycle, Phase, SYNC } from "./EffectCycle";
-import { isLazyCycle } from "./ReactivitySystem";
-import {$_wrap_with_context } from "@rue/flask";
+import { $_wrap_with_context } from "@rue/flask";
+import { updateStack } from "./ReactivitySystem";
 
 const PRERENDER = 0 //QUESTION: Should EffectCycle and EffectQueue belong to Lumo also??
 
@@ -199,18 +199,26 @@ export class PhaseQueue {
          // }
          try {
             effectStackCount++
-            if (isLazyCycle(cycle) && pre) {
+            const lazy = cycle.update.lazy
+            if (lazy && pre) {
                cycle.prerenderCount++;
                const promise = new Promise((resolve) => {
-                  requestIdleCallback($_wrap_with_context(() => {
-                     const _promise = effect.run?.();
-                     if (_promise instanceof Promise) _promise.then(resolve)
-                     else resolve(undefined)
-                     cycle.prerenderCount--
-                     if (cycle.prerenderCount === 0) {
-                        cycle.resolvePrerender?.(cycle.lazyResult) //TODO: need to wait till all promises resolve
+                  requestIdleCallback(() => {
+                     let _promise;
+                     try {
+                        updateStack.push(cycle.update)
+                        _promise = effect.run?.();
                      }
-                  }), { timeout: 17 })
+                     finally {
+                        updateStack.pop()
+                        if (_promise instanceof Promise) _promise.then(resolve)
+                        else resolve(undefined)
+                        cycle.prerenderCount--
+                        if (cycle.prerenderCount === 0) {
+                           cycle.resolvePrerender?.(cycle.lazyResult) //TODO: need to wait till all promises resolve
+                        }
+                     }
+                  }, { timeout: 17/* TODO: prioritize based on time margin */ })
                })
                promises.push(promise)
             }

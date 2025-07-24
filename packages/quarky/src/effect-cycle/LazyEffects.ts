@@ -1,7 +1,7 @@
 import { AsyncState } from "@rue/flask";
 import { EffectCycle, Phase } from "./EffectCycle";
 import { Effect, EffectQueue, PhaseQueue } from "./EffectQueue";
-import { $currentCycle, LazyAction, lazyActionCycleManager } from "./ReactivitySystem";
+import {  LazyAction, lazyActionCycleManager } from "./ReactivitySystem";
 
 
 const [getLazyAction, lazyActionStack] = AsyncState('lazyAction')

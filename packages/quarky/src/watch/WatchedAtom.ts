@@ -2,12 +2,12 @@ import { isObject, __DEV__unwrap } from "@rue/utils";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { Effect, PhaseQueue } from "../effect-cycle/EffectQueue";
 import { hasQuark, Quark, QUARK } from "../Quark";
-import { $currentCycle } from "../effect-cycle/ReactivitySystem";
+import { Update } from "../effect-cycle/ReactivitySystem";
 
 
 export type Watchable = {
    asWatchedAtom: WatchedAtom | undefined,
-   trigger: () => void
+   trigger: (update: Update) => void
 }
 
 /**
@@ -19,8 +19,9 @@ export type Watchable = {
  */
 export function trigger( //TODO: figure out which abstraction this belongs to ...  atomic ions, atomic pions, memoized derivations, but not terminal compound
    this: Watchable,
+   update: Update
 ) {
-   this.asWatchedAtom?.triggerEffects()
+   this.asWatchedAtom?.triggerEffects(update)
 }
 
 export function isWatchable(value: unknown): value is Watchable & Quark {
@@ -31,7 +32,7 @@ export function isWatchableEntity(value: unknown): value is { [QUARK]: Watchable
 }
 
 export function asWatchedAtom(watchable: Watchable) {
-   return watchable.asWatchedAtom ?? (watchable.asWatchedAtom = new WatchedAtom())
+   return watchable.asWatchedAtom ?? (watchable.asWatchedAtom = new WatchedAtom(watchable))
 }
 
 // export function unwatch(this: Watchable) {
@@ -41,7 +42,7 @@ export function asWatchedAtom(watchable: Watchable) {
 export class WatchedAtom {
 
    constructor(
-      // private watchable: Watchable
+      public quark: Watchable
    ) { }
 
    private effects: Map<Phase, PhaseQueue> = new Map()
@@ -93,9 +94,9 @@ export class WatchedAtom {
    //    // this.effects = retained;
    // }
 
-   triggerEffects() { // the surrounding effect when original trigger happened
+   triggerEffects(update: Update) { // the surrounding effect when original trigger happened
       const phases = this.phases
-      const cycle = $currentCycle()
+      const cycle = update.cycle
       for (const phase of phases) {
          const queue = this.effects.get(phase)!
          cycle.scheduleEffects(queue, phase)

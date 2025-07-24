@@ -1,31 +1,38 @@
-import { $_wrap_with_context } from "@rue/flask";
+import { $_run_with_, $_snap_context, $_wrap_with_context, getFlask } from "@rue/flask";
+import { Update, updateStack } from "./ReactivitySystem";
 
-let forAnimation = false;
-export function $forAnimation() {
-   return forAnimation
-}
+// let forAnimation = false;
+// export function $forAnimation() {
+//    return forAnimation
+// }
 
-export function prioritize(fn: Function) {
-   forAnimation = true;
-   fn()
-   forAnimation = false;
-}
+// export function prioritize(fn: Function) {
+//    forAnimation = true;
+//    fn()
+//    forAnimation = false;
+// }
 
 /**
  * Throttle by animation frame across mouse events like mouse enter and mouse leave
  */
-export function useSharedRenderThrottle() {
+export function SharedThrottledUpdate() {
+   let frameID: number | null = null
    return function Throttled(fn: Function) {
-      let frameID: number | null = null
+      const flask = getFlask()
 
       return function throttled() {
          if (frameID !== null) return;
          frameID = requestAnimationFrame(() => {
             setImmediate(() => {
                frameID = null;
-               forAnimation = true;
-               fn(); // Execute the original function with its context and arguments
-               forAnimation = false;
+               const update = new Update(16.7, flask)
+               try {
+                  updateStack.push(update)
+                  fn(); // Execute the original function with its context and arguments
+               }
+               finally {
+                  updateStack.pop()
+               }
             })
          })
          // Otherwise, the function call is ignored (throttled)
@@ -38,17 +45,23 @@ export function useSharedRenderThrottle() {
  * @param fn 
  * @returns 
  */
-export function ThrottledRender(fn: Function) {
+export function ThrottledUpdate(fn: Function) {
    let frameID: number | null = null
+   const flask = getFlask()
 
    return function throttled() {
       if (frameID !== null) return;
       frameID = requestAnimationFrame(() => {
          setImmediate(() => {
             frameID = null;
-            forAnimation = true;
-            fn(); // Execute the original function with its context and arguments
-            forAnimation = false;
+            const update = new Update(16.7, flask)
+            try {
+               updateStack.push(update)
+               fn(); // Execute the original function with its context and arguments
+            }
+            finally {
+               updateStack.pop()
+            }
          })
       })
       // Otherwise, the function call is ignored (throttled)
@@ -98,20 +111,30 @@ export function Animation(fn: (time: DOMHighResTimeStamp | undefined) => void) {
 
    let nextFrame: undefined | number = undefined
    let stopped = true;
+   const flask = getFlask()
+   const context = $_snap_context()
 
    function renderFrame(time: DOMHighResTimeStamp) {
-      //TODO: maybe warn if time between animation frame and setImmediate is too long
       setImmediate(() => {
-         forAnimation = true;
-         prepFrame(time)
-         forAnimation = false;
+         try {
+            const update = new Update(16.7, flask)
+            updateStack.push(update)
+            prepFrame(time)
+         }
+         finally {
+            updateStack.pop()
+         }
       })
    }
 
    function prepFrame(time: DOMHighResTimeStamp | undefined) {
-      fn(time)
-      if (stopped) return;
-      nextFrame = requestAnimationFrame(renderFrame)
+      try {
+         $_run_with_(context, () => fn(time))
+      }
+      finally {
+         if (stopped) return;
+         nextFrame = requestAnimationFrame(renderFrame)
+      }
    }
 
    return {

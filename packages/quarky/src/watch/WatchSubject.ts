@@ -8,7 +8,7 @@ import { asWatchedAtom, isWatchable, isWatchableEntity, Watchable, WatchedAtom }
 import { isObject, noop } from "@rue/utils";
 import { Ionized, isIonizedModel } from "../ionized/ionize";
 import { Ion, isIon, toValue } from "../ion/Ion";
-import { $currentCycle } from "../effect-cycle/ReactivitySystem";
+import { $currentOrNextCycle } from "../effect-cycle/ReactivitySystem";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
 import { WatchSubjects } from "./watch";
 import { detachedCall, IonicCompound } from "../ionic/IonicCompound";
@@ -149,6 +149,8 @@ type QuarkyIon = {
    [QUARK]: { asCompound?: IonicCompound, inert: boolean } & Quark
 }
 
+
+
 /**
  * - relinks value to effect if value is ionized
  * - relinks derivation atoms to effect on every call if derivation ion
@@ -159,6 +161,13 @@ export class IonSubject implements WatchSubject {
    private watchedAtoms: WatchedAtom[] = []
    private valueAtom?: WatchedAtom
    private quark: { asCompound?: IonicCompound, inert: boolean } & Quark
+
+   // get pendingUpdates(){
+   //    this.watchedAtoms.forEach((atom)=>{
+
+   //    })
+   //    this.valueAtom?.quark.pendingUpdate
+   // } //NOTE: These may have many updates from different update calls
 
    constructor(
       private ion: QuarkyIon,
@@ -173,7 +182,6 @@ export class IonSubject implements WatchSubject {
          return this.retrackedCall()
 
       this.initialized = true;
-
       const value = detachedCall(this.ion)
       const quark = this.quark;
       const compound = quark.asCompound
@@ -240,9 +248,9 @@ function linkEffectToAtom(atom: WatchedAtom | undefined, effect: Effect, eager: 
    if (!atom) return;
    effect.link(atom)
    if (eager) {
-      $currentCycle().scheduleEffect(effect)
+      $currentOrNextCycle().scheduleEffect(effect)
       if (effect.phase === SYNC){
-         $currentCycle().runEffects(SYNC)
+         $currentOrNextCycle().runEffects(SYNC)
       }
    }
 }
