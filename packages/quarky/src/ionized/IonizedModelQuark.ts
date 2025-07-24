@@ -9,6 +9,7 @@ import { AtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
 import { getIonizedMethodDef } from "./IonizedMethods"
 import { isIonizedModel, toRaw } from "./ionize"
+import { Update } from "../effect-cycle/ReactivitySystem"
 
 
 
@@ -64,6 +65,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
       // }
       // this.unwatch = () => unwatch.call(this)
    }
+   pendingUpdate: Update | null = null
 
    asMutable: Mutable = new Mutable()
 

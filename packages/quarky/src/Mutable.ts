@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel } from "./ionized/ionize";
 import { hasQuark, QUARK, quarkOf } from "./Quark";
-import { AbortSignal, OnAbort } from "../../flask/AbortSignal";
+import { Abort, AbortSignal } from "../../flask/AbortSignal";
 import { IterableSet } from "@rue/utils";
 
 export type MutableEntity = {
@@ -12,7 +12,7 @@ export type MutableMorph = {
    asMutable: Mutable
 }
 
-export function isMutableEntity(value: unknown): value is MutableEntity{
+export function isMutableEntity(value: unknown): value is MutableEntity {
    return hasQuark(value) && 'asMutable' in quarkOf(value)
 }
 
@@ -46,7 +46,7 @@ export class Mutation {
       public op: '[[set]]' | PropertyKey,
       public args: [PropertyKey, unknown] | unknown[],
       public output: unknown,
-      public preopData: undefined| unknown // old state for [[set]] ops
+      public preopData: undefined | unknown // old state for [[set]] ops
    ) { }
 
    undo() {
@@ -73,7 +73,7 @@ class MutationRecording {
 
    mutations: Mutation[] = []
 
-   stop: AbortSignal
+   stop: Abort
 }
 
 
@@ -101,10 +101,10 @@ export function recordMutations(entity: MutableEntity) {
 }
 
 
-export function asMutable(entity: MutableEntity){
+export function asMutable(entity: MutableEntity) {
    return quarkOf(entity).asMutable;
 }
 
-export function recordMutation(quark: MutableMorph, mutation: Mutation){
+export function recordMutation(quark: MutableMorph, mutation: Mutation) {
    quark.asMutable.emitMutation(mutation)
 }

@@ -1,7 +1,11 @@
-import {  toRaw } from "./ionize";
+import { toRaw } from "./ionize";
 import { getIonizedModel, GetPreopData, IonizedModel, useTrackableOp } from "./IonizedModel";
 import { enlistIonizedMethods, trigger, triggerAll, TriggeringOpDef } from "./IonizedMethods";
 import { hasMaybeIonized, trackableCheckOp, trackableCreativeOpWithArgs, trackableHasOp, trackableIterative, trackableOp, trackableOpWithCallback, useDeleteOp } from "./OpDefinitions";
+import { initUpdate, Update } from "../effect-cycle/ReactivitySystem";
+import { $atomicOp, AtomicOp, getAtomicOps } from "./AtomicOp";
+import { AtomicPionQuark } from "../ion/AtomicPion";
+import { IonizedModelQuark } from "./IonizedModelQuark";
 
 // declare global {
 //    interface Set<T> {

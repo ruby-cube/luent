@@ -1,4 +1,5 @@
 import { Traceable } from "../debug/Traceable";
+import { Update } from "../effect-cycle/ReactivitySystem";
 import { Quark, quarkOf } from "../Quark";
 import { trigger, Watchable, WatchedAtom } from "../watch/WatchedAtom";
 import { IonizedModel } from "./IonizedModel";
@@ -18,6 +19,7 @@ export class AtomicOp implements Quark, Watchable {
 
       this.asTraceable = quarkOf(this.model).asTraceable
    }
+   pendingUpdate: Update | null = null
 
    entity = undefined
 

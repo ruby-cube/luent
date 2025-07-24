@@ -48,6 +48,7 @@ export function asPion(
       return;
    }
    return pion.entity ?? (pion.entity = createPion(model, key, pion))
+   //TODO: tidy up pion code... some of it feels redundant, especially setting entity
 }
 
 function createPion(model: IonizedModel, key: PropertyKey, pionQuark: Quark & AnyObject) {

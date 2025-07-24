@@ -6,6 +6,10 @@ import { AtomicOp, $atomicOp, getAtomicOps } from "./AtomicOp"
 import { quarkOf } from "../Quark"
 import { ionize, toRaw } from "./ionize"
 import { ionizedArray, ionizedIterable } from "./IonizedArray"
+import { IonizedModelQuark } from "./IonizedModelQuark"
+import { initUpdate, Update } from "../effect-cycle/ReactivitySystem"
+import { NULL } from "../ion/AtomicIon"
+import { AtomicPionQuark } from "../ion/AtomicPion"
 
 type Constructor = new (...args: any[]) => any
 
@@ -24,7 +28,7 @@ export type TriggeringOpDef = {
    shouldTrigger?: (preopData: any) => boolean
    triggers: (model: IonizedModel, args: any[], preopData: any) => (() => void)[]
    output?: (output: any, model: IonizedModel) => any,
-   revert?: Revert
+   revert?: Revert,
 }
 
 type IonizableMethodDef = TrackableOpDef | TriggeringOpDef
@@ -100,10 +104,11 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
  * }
  *  */
 export function triggerAll(model: IonizedModel, op: PropertyKey): () => void {
-   return () => {
+   return function triggerAllOps(this: {update: Update}) {
       const ops = getAtomicOps(model, op)
       if (ops)
          for (const [_, op] of ops) {
+            prepPendingUpdate(op, this.update)
             op.trigger()
          }
    }
@@ -115,14 +120,54 @@ export function trigger(model: IonizedModel, op: PropertyKey, entryKey: any): ()
 export function trigger(model: IonizedModel, op?: PropertyKey | '[[get]]', entryKey?: any): () => void {
    if (op === '[[get]]') {
       if (!entryKey) throw new Error('must provide property key to trigger [[get]] op')
-      return () => $atomicPion(model, entryKey)?.trigger()
+      return function triggerPion(this: { update: Update }) {
+         const pion = $atomicPion(model, entryKey)
+         if (pion) {
+            prepPendingUpdate(pion, this.update)
+            pion.trigger()
+         }
+      }
    }
    else if (op) {
-      return () => $atomicOp(model, op, entryKey)?.trigger()
+      return function triggerOp(this: { update: Update }) {
+         const atomicOp = $atomicOp(model, op, entryKey)
+         if (atomicOp) {
+            prepPendingUpdate(atomicOp, this.update)
+            atomicOp.trigger()
+         }
+      }
    }
-   return () => quarkOf(model).trigger()
+   return function triggerModel(this: { update: Update }){
+      const quark = quarkOf(model)
+      prepPendingUpdate(quark, this.update)
+      quark.trigger()
+   } 
 }
 
 
 
 
+function prepPendingUpdate(op: AtomicOp | AtomicPionQuark | IonizedModelQuark, update: Update) {
+   // if (update.lazy) {
+   //    this.pState = state;
+
+   //    update.queue(() => {
+   //       this.state = this.pState;
+   //       this.pState = NULL
+   //       this.pendingUpdate = null;
+   //    })
+
+   //    if (this.pendingUpdate && this.pendingUpdate !== update) {
+   //       this.pendingUpdate.cancel()
+   //    }
+   // }
+   // else {
+   if (op.pendingUpdate && op.pendingUpdate !== update) {
+      op.pendingUpdate.cancel()
+      op.pendingUpdate = null;
+      // pion.pState = NULL;
+   }
+   // pion.state = state;
+   // }
+   op.pendingUpdate = update
+}

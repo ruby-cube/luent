@@ -8,6 +8,7 @@ import { asPionQuark } from "../ionized/Pion";
 import { Traceable } from "../debug/Traceable";
 import { MutableIon } from "./Ion";
 import { initializeSnapshots } from "../ionized/TimeTraveler";
+import { Update } from "../effect-cycle/ReactivitySystem";
 
 // writable vs non-writable 
 // inert vs reactive
@@ -57,6 +58,7 @@ export class AtomicPionQuark implements QuarkOf<$AtomicPionState> {
 
    asWatchedAtom: WatchedAtom | undefined
    trigger = trigger
+   pendingUpdate: Update | null = null
 
    asTraceable: Traceable = new Traceable()
 

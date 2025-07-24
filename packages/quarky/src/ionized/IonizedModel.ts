@@ -17,6 +17,7 @@ import { isWatchable, Watchable } from "../watch/WatchedAtom";
 import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp } from "./IonizedMethods";
 import { isInert } from "./inert";
 import { initializeSnapshots } from "./TimeTraveler";
+import { initUpdate, updateStack } from "../effect-cycle/ReactivitySystem";
 
 // // /** INTERNAL */
 export type IonizedModel = {
@@ -681,7 +682,6 @@ function useMutatingOp(
    const fn = createOp ? createOp(target, op) : target[op];
    const quark = quarkOf(model)
 
-
    const o = {
       [fnName](...args: any) {
          const _args = input(args)
@@ -690,8 +690,10 @@ function useMutatingOp(
          const output = transformOutput(fn.apply(target, _args), model); // perform mutation
 
          if (shouldTrigger && !shouldTrigger(preop)) return output;
-         
+
          storeSnapshot(quark)
+
+         const update = initUpdate()
 
          recordMutation(quark, new Mutation(
             model,
@@ -703,8 +705,9 @@ function useMutatingOp(
 
          const triggers = getTriggers(model, _args, preop);
 
+         const mu = { update }
          for (const trigger of triggers) {
-            trigger();
+            trigger.apply(mu)
          }
 
          // runSyncEffects()

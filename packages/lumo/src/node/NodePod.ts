@@ -270,7 +270,6 @@ export function mountDOMNodes(
       parent.append(fragment) //for teleport
    }
    else if (prevNode) {
-      console.warn('inserted fragment after prevNode')
       prevNode.after(fragment)
    }
    else {
