@@ -25,8 +25,7 @@ export type $AtomicIonState =
          props: AnyObject | undefined;
          state: any,
          pState: any | typeof NULL,
-         ionized: boolean,
-         pendingUpdate: Update | null | undefined
+         ionized: boolean
       }
       & Quark<typeof ATOMIC_ION, $AtomicIonState>
       & Watchable
@@ -67,7 +66,7 @@ export function createAtomicIon(
    const quark: AtomicIonQuark = {
       state,
       pState: NULL,
-      pendingUpdate: undefined,
+      pendingUpdate: null,
       // stateKey,
       ionized,
       mutable,
@@ -160,10 +159,7 @@ function setState(this: AtomicIonQuark, value: unknown) {
 
       if (this.pendingUpdate && this.pendingUpdate !== update) {
          this.pendingUpdate.cancel()
-         this.pState = NULL;
       }
-
-      this.pendingUpdate = update
    }
    else {
       if (this.pendingUpdate) {
@@ -173,6 +169,7 @@ function setState(this: AtomicIonQuark, value: unknown) {
       }
       this.state = state;
    }
+   this.pendingUpdate = update
 
    recordMutation(this, new Mutation(
       this.entity,
@@ -182,7 +179,7 @@ function setState(this: AtomicIonQuark, value: unknown) {
       oldState
    ))
 
-   this.trigger(update)
+   this.trigger()
 
    return state;
 }

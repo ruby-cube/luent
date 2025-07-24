@@ -6,8 +6,9 @@ import { Update } from "../effect-cycle/ReactivitySystem";
 
 
 export type Watchable = {
-   asWatchedAtom: WatchedAtom | undefined,
-   trigger: (update: Update) => void
+   asWatchedAtom: WatchedAtom | undefined;
+   pendingUpdate: Update |  null;
+   trigger: () => void
 }
 
 /**
@@ -17,11 +18,11 @@ export type Watchable = {
  * @param output 
  * @param preopData 
  */
-export function trigger( //TODO: figure out which abstraction this belongs to ...  atomic ions, atomic pions, memoized derivations, but not terminal compound
-   this: Watchable,
-   update: Update
+export function trigger(
+   this: Watchable
 ) {
-   this.asWatchedAtom?.triggerEffects(update)
+   if (!this.pendingUpdate) throw Error('no pending update')
+   this.asWatchedAtom?.triggerEffects(this.pendingUpdate)
 }
 
 export function isWatchable(value: unknown): value is Watchable & Quark {

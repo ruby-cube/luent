@@ -41,9 +41,9 @@ export function TriangleDemo() {
    }, 1000).start();
    // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
-   // const animation = Animation(() => {
-   //    $elapsed.state = Date.now() - start;
-   // }).start()
+   const animation = Animation(() => {
+      $elapsed.state = Date.now() - start;
+   }).start()
 
    // const $x = ion(0)
    // const $y = ion(0)
@@ -54,7 +54,7 @@ export function TriangleDemo() {
 
    atUnmount(() => {
       secondsInterval.stop();
-      // animation.stop();
+      animation.stop();
    });
 
    // watch($seconds, () => {
@@ -63,7 +63,7 @@ export function TriangleDemo() {
 
    function stop() {
       secondsInterval.stop();
-      // animation.stop()
+      animation.stop()
    }
 
    function reset() {
@@ -76,15 +76,15 @@ export function TriangleDemo() {
 
    return component(
       <>
-         <div style={['border-radius: 50%; background-color: green; position: absolute; left: 0; width: 10px; height: 10px', {transform: (`translate(${$x()}px, ${$y()}px)`)}]}></div>
+         {/* <div style={['border-radius: 50%; background-color: green; position: absolute; left: 0; width: 10px; height: 10px', {transform: (`translate(${$x()}px, ${$y()}px)`)}]}></div> */}
          <div>
             <button on:click={stop}>
                stop
             </button>
             <button on:click={e => (
                secondsInterval.start()
-               // ,
-               // animation.start()
+               ,
+               animation.start()
             )}>
                play
             </button>
