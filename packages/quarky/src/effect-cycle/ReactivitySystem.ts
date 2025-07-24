@@ -90,6 +90,7 @@ export class EffectCycleManager {
 
 export function schedulePhase(cycle: EffectCycle, { index, schedule, next, phases }: CyclePhase) {
    schedule(() => {
+      console.log('running phase: ', index)
       cycle.currentPhase = index;
       cycle.subphase = 'effects'
       updateStack.push(cycle.update)
@@ -98,6 +99,7 @@ export function schedulePhase(cycle: EffectCycle, { index, schedule, next, phase
       updateStack.pop()
 
       if (cycle.pendingPrerender) {
+         console.log('close via pending prerender')
          cycle.pendingPrerender.then(closePhase) // delays scheduling next phase until prerender is complete
          cycle.pendingPrerender = undefined
       }
@@ -108,6 +110,7 @@ export function schedulePhase(cycle: EffectCycle, { index, schedule, next, phase
       function closePhase() {
          const final = index === phases.length - 1;
          if (final || cycle.cancelled) {
+            if (cycle.cancelled) console.log('cycle cancelled')
             cycle.close()
          }
          else schedulePhase(cycle, next)
@@ -397,13 +400,14 @@ export class Update {
    queue(commitUpdate: () => void) {
       const effect = createOneoff(commitUpdate, UPDATE_PHASE)
       this.cycle.scheduleEffect(effect)
-      this.flask.onDiscard(() => effect.destroy())
+      // this.flask.onDiscard(() => (console.trace('discarding commit'), effect.destroy()))
       this.commits.push(effect)
    }
 
    private commits: Effect[] = []
 
    cancel() {
+      console.trace('cancelling commits')
       this.commits.forEach(commit => commit.destroy())
       this.cycle.cancel()
       this.cancelTasks.forEach(task => task())
@@ -496,15 +500,16 @@ export function update<T>(fn: () => T, options?: { timeMargin?: number, lazy?: n
    // const update =  new Update(timeMargin, getFlask());
    const timeMargin = options?.lazy ?? options?.timeMargin ?? 100;
    const update = initUpdate(timeMargin, !!(options?.lazy)) //FIX: because Interval wraps context, the loading update is passed down
+   console.log('update is lazy?', update.lazy)
    const cycle = update.cycle
-   const promise = cycle.pendingPrerender = new Promise((resolve) => { cycle.resolvePrerender = resolve })
+   const promise = cycle.pendingPrerender = update.lazy ? new Promise((resolve) => { cycle.resolvePrerender = resolve }) : undefined
    //NOTE: assumes one cycle per lazy call... is this what I want? no... I need a promise.all but for now, let's just use one promise
 
    try {
       updateStack.push(update)
       // lazyUpdate = timeMargin; // assuming function is synchronous. Need AsyncState for asynchronous
-      cycle.lazyResult = fn()
-      return promise as Promise<T>
+      const result = cycle.lazyResult = fn()
+      return update.lazy ? promise as Promise<T> : result
    }
    finally {
       updateStack.pop()

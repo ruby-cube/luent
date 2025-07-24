@@ -163,6 +163,7 @@ function prepPendingUpdate(op: AtomicOp | AtomicPionQuark | IonizedModelQuark, u
    // }
    // else {
    if (op.pendingUpdate && op.pendingUpdate !== update) {
+      console.trace('cancelling', op, update)
       op.pendingUpdate.cancel()
       op.pendingUpdate = null;
       // pion.pState = NULL;
@@ -170,4 +171,9 @@ function prepPendingUpdate(op: AtomicOp | AtomicPionQuark | IonizedModelQuark, u
    // pion.state = state;
    // }
    op.pendingUpdate = update
+   console.trace('set pending update')
+   update.queue(()=>{
+       console.log('mutate model update done')
+      op.pendingUpdate = null
+   })
 }

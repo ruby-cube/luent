@@ -162,12 +162,16 @@ function setState(this: AtomicIonQuark, value: unknown) {
       }
    }
    else {
-      if (this.pendingUpdate) {
+      if (this.pendingUpdate && this.pendingUpdate !== update) {
          this.pendingUpdate.cancel()
-         this.pendingUpdate = null;
          this.pState = NULL;
+         this.pendingUpdate = null;
       }
       this.state = state;
+      update.queue(() => {
+          console.log('set ion update done')
+         this.pendingUpdate = null;
+      })
    }
    this.pendingUpdate = update
 

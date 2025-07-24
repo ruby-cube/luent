@@ -1,6 +1,6 @@
 import { NodesRef, component, If, Else, For, NodeRef, target } from "@rue/lumo";
 import { moveUniqueItems, useRandomColorGenerator } from "@rue/utils";
-import { ion, __addDevName, ionize, toRaw, watch } from "@rue/quarky";
+import { ion, __addDevName, ionize, toRaw, watch, update } from "@rue/quarky";
 import { enlistIonizedMethods } from "../../../packages/quarky/src/ionized/IonizedMethods";
 import { trackModel } from "../../../packages/quarky/src/ionized/OpDefinitions";
 import { Glass, IsRedundantUnion } from "@rue/types";
@@ -126,14 +126,14 @@ export function List(
    // // IsMaybeIonized<I> extends true ? 'yeah' : 'no' : 'nah'
    const list = ionize(
       new ItemList(
-      // [
-      frog,
-      // { id: 0, content: "frog" },
-      { id: 1, content: "robin" },
-      { id: 2, content: "fly" },
-      { id: 3, content: "swamp" }
-   // ])
-   ))
+         // [
+         frog,
+         // { id: 0, content: "frog" },
+         { id: 1, content: "robin" },
+         { id: 2, content: "fly" },
+         { id: 3, content: "swamp" }
+         // ])
+      ))
    console.log('$$$ list values', list.values().next())
    console.log('$$$ list iterator', list[Symbol.iterator])
 
@@ -194,7 +194,9 @@ export function List(
    Array.from(toRaw(selected))
 
    function moveSelectedItems(index: number) {
-      moveUniqueItems(selected, list, index)
+      update(() =>
+         moveUniqueItems(selected, list, index)
+      )
    }
 
    function removeItem(index: number) {
