@@ -32,7 +32,7 @@ export function isWatchableEntity(value: unknown): value is { [QUARK]: Watchable
 }
 
 export function asWatchedAtom(watchable: Watchable) {
-   return watchable.asWatchedAtom ?? (watchable.asWatchedAtom = new WatchedAtom(watchable))
+   return watchable.asWatchedAtom ?? (watchable.asWatchedAtom = new WatchedAtom())
 }
 
 // export function unwatch(this: Watchable) {
@@ -42,7 +42,6 @@ export function asWatchedAtom(watchable: Watchable) {
 export class WatchedAtom {
 
    constructor(
-      public quark: Watchable
    ) { }
 
    private effects: Map<Phase, PhaseQueue> = new Map()

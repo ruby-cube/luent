@@ -14,8 +14,8 @@ export function isWatchedDerivation(value: unknown): value is WatchedDerivation 
    return hasQuark(value) && (<WatchedDerivation>quarkOf(value)).quarkType === WATCHED_DERIVATION
 }
 
-type WatchedDerivation = Quark<typeof WATCHED_DERIVATION> & IonicCompoundMorph & { 
-   inert: boolean ,
+type WatchedDerivation = Quark<typeof WATCHED_DERIVATION> & IonicCompoundMorph & {
+   inert: boolean,
    state: unknown,
    pState: unknown
 }
@@ -43,10 +43,14 @@ export function createWatchedDerivation(derivation: () => any, retrack: boolean)
       fn = derivation
       const value = compound.trackedCall(derivation)
       if (compound.atoms.size === 0) quark.inert = true;
-      if (isLazyUpdate()){
+      if (isLazyUpdate()) {
          quark.pState = value;
-         $activeUpdate().queue(()=>{
+         const update = $activeUpdate()
+         update.queue(() => {
             quark.state = value;
+            quark.pState = NULL;
+         })
+         update.onCancel(() => {
             quark.pState = NULL;
          })
          return value;
@@ -57,10 +61,14 @@ export function createWatchedDerivation(derivation: () => any, retrack: boolean)
 
    function retrackedCall() {
       const value = compound.retrackedCall(derivation)
-      if (isLazyUpdate()){
+      if (isLazyUpdate()) {
          quark.pState = value;
-         $activeUpdate().queue(()=>{
+         const update = $activeUpdate()
+         update.queue(() => {
             quark.state = value;
+            quark.pState = NULL;
+         })
+         update.onCancel(() => {
             quark.pState = NULL;
          })
          return value;

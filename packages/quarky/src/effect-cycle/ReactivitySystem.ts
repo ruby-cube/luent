@@ -381,7 +381,6 @@ export function getCurrentPhase() {
 
 // updateManager
 
-//TODO: createApp and dynamic rendering nodes (conditionals and iteratives) need to create updates
 
 export class Update {
    constructor(
@@ -389,7 +388,6 @@ export class Update {
       private flask: Flask,
       public lazy: boolean = false
    ) {
-      if (timeMargin === 1000) console.log('new update')
    }
 
    atoms: Set<WatchedAtom> = new Set()
@@ -408,6 +406,14 @@ export class Update {
    cancel() {
       this.commits.forEach(commit => commit.destroy())
       this.cycle.cancel()
+      this.cancelTasks.forEach(task => task())
+      this.cancelTasks = []
+   }
+
+   private cancelTasks: (() => void)[] = []
+
+   onCancel(task: () => void) {
+      this.cancelTasks.push(task)
    }
 }
 

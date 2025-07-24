@@ -162,13 +162,6 @@ export class IonSubject implements WatchSubject {
    private valueAtom?: WatchedAtom
    private quark: { asCompound?: IonicCompound, inert: boolean } & Quark
 
-   // get pendingUpdates(){
-   //    this.watchedAtoms.forEach((atom)=>{
-
-   //    })
-   //    this.valueAtom?.quark.pendingUpdate
-   // } //NOTE: These may have many updates from different update calls
-
    constructor(
       private ion: QuarkyIon,
    ) {

@@ -26,7 +26,7 @@ export type $AtomicIonState =
          state: any,
          pState: any | typeof NULL,
          ionized: boolean,
-         pendingUpdate: Update | null |undefined
+         pendingUpdate: Update | null | undefined
       }
       & Quark<typeof ATOMIC_ION, $AtomicIonState>
       & Watchable
@@ -154,11 +154,13 @@ function setState(this: AtomicIonQuark, value: unknown) {
 
       update.queue(() => {
          this.state = this.pState;
+         this.pState = NULL
          this.pendingUpdate = null;
       })
 
       if (this.pendingUpdate && this.pendingUpdate !== update) {
          this.pendingUpdate.cancel()
+         this.pState = NULL;
       }
 
       this.pendingUpdate = update
@@ -167,6 +169,7 @@ function setState(this: AtomicIonQuark, value: unknown) {
       if (this.pendingUpdate) {
          this.pendingUpdate.cancel()
          this.pendingUpdate = null;
+         this.pState = NULL;
       }
       this.state = state;
    }

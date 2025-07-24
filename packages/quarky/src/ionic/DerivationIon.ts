@@ -11,7 +11,7 @@ import { debug } from "@rue/utils";
 import { Effect } from "../effect-cycle/EffectQueue";
 import { SYNC } from "../effect-cycle/EffectCycle";
 import { NULL } from "../ion/AtomicIon";
-import { isLazyUpdate,  initUpdate, $activeUpdate } from "../effect-cycle/ReactivitySystem";
+import { isLazyUpdate, initUpdate, $activeUpdate } from "../effect-cycle/ReactivitySystem";
 
 
 
@@ -92,8 +92,9 @@ export function createMaybeMemoizedIon(
          if (isLazyUpdate()) {
             ion.pState = value;
             ion.pStale = false;
+            const update = $activeUpdate()
             if (ion.pStale) {
-               $activeUpdate().queue(() => {
+               update.queue(() => {
                   ion.state = value;
                   ion.stale = true;
 
@@ -101,6 +102,10 @@ export function createMaybeMemoizedIon(
                   ion.pStale = undefined;
                })
             }
+            update.onCancel(() => {
+               ion.pState = NULL;
+               ion.pStale = undefined;
+            })
             return value;
          }
          return value;
@@ -129,16 +134,20 @@ export function createMaybeMemoizedIon(
          ion.pState = value;
          ion.pStale = false;
          // window.__DEV__log.push('lazy update ' + value)
+         const update = $activeUpdate()
          if (stale) {
-            const update = initUpdate(100)
             update.queue(() => {
-               ion.state = value;
-               ion.stale = true;
+               ion.state = ion.pState;
+               ion.stale = ion.pStale!;
 
                ion.pState = NULL;
                ion.pStale = undefined;
             })
          }
+         update.onCancel(() => {
+            ion.pState = NULL;
+            ion.pStale = undefined
+         })
          return value;
       }
 

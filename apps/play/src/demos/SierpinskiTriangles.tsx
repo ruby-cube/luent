@@ -59,6 +59,14 @@ export function TriangleDemo() {
       animation.stop()
    }
 
+   function reset() {
+      secondsInterval.stop()
+      // update(() => 
+         $seconds.state = 0
+      // , { lazy: 1000 })
+      secondsInterval.start()
+   }
+
    return component(
       <>
          <button on:click={stop}>
@@ -71,7 +79,7 @@ export function TriangleDemo() {
          )}>
             play
          </button>
-         <button on:click={e => update(() => $seconds.state = 0, { lazy: 1000 })}>
+         <button on:click={reset}>
             reset
          </button>
          <div

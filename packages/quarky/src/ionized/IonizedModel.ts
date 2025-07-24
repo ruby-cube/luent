@@ -690,6 +690,7 @@ function useMutatingOp(
          const output = transformOutput(fn.apply(target, _args), model); // perform mutation
 
          if (shouldTrigger && !shouldTrigger(preop)) return output;
+         
          storeSnapshot(quark)
 
          recordMutation(quark, new Mutation(

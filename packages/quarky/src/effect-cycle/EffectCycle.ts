@@ -1,6 +1,6 @@
 import { setImmediate } from "@rue/thread";
 import { Effect, EffectQueue, PhaseQueue } from "./EffectQueue";
-import {schedulePhase, Update } from "./ReactivitySystem";
+import { schedulePhase, Update } from "./ReactivitySystem";
 import { POSTRENDER } from "@rue/lumo";
 
 export const SYNC = 'SYNC' as const
@@ -56,10 +56,17 @@ export class EffectCycle {
       this.cancelled = true;
    }
 
+   // private closingTasks: (() => void)[] = []
+
+   // onClose(task: () => void) {
+   //    this.closingTasks.push(task)
+   // }
+
    close() {
       const delta = performance.now() - this.startTime
       const timeMargin = this.update.timeMargin
-      if (delta > timeMargin) console.warn('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
+      if (timeMargin && delta > timeMargin) console.warn('Interaction-to-paint time exceeds', timeMargin, 'ms:', delta)
+      // this.closingTasks.forEach(task => task())
    }
 
    private effects: Map<Phase, EffectQueue> = new Map(); // pass in an object to constructor instead of map
