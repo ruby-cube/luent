@@ -130,8 +130,6 @@ export class EffectCycle {
       return this.currentPhase === phase ? phase
          : phase === SYNC ? this.currentPhase
             : this.currentPhase === SYNC ? phase : phase > this.currentPhase ? phase : this.currentPhase
-      //TODO: what about if current phase is post render and scheduled phase is pre, internal render, or render? 
-      // should it get scheduled for the next cycle? I think this is the answer--it should start a new cycle
    }
 
    pendingPrerender?: Promise<void>;

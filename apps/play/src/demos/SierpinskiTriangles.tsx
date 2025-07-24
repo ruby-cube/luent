@@ -1,5 +1,5 @@
-import { component, fromTag, atUnmount, PRERENDER, POSTRENDER } from "@rue/lumo";
-import { Animation, EffectCycle, EffectCycleManager, Interval, ion, update, SharedThrottledUpdate, watch } from "@rue/quarky";
+import { component, fromTag, atUnmount, PRERENDER, POSTRENDER, listen, NodeRef } from "@rue/lumo";
+import { Animation, EffectCycle, EffectCycleManager, Interval, ion, update, SharedThrottledUpdate, watch, ThrottledHover, ThrottlePointer } from "@rue/quarky";
 
 //TODO:
 // - time warning for lazy update
@@ -41,13 +41,20 @@ export function TriangleDemo() {
    }, 1000).start();
    // t = setInterval(() => startTransition(() => $seconds.state = ($seconds() % 10) + 1), 1000);
 
-   const animation = Animation(() => {
-      $elapsed.state = Date.now() - start;
-   }).start()
+   // const animation = Animation(() => {
+   //    $elapsed.state = Date.now() - start;
+   // }).start()
+
+   // const $x = ion(0)
+   // const $y = ion(0)
+   // listen(document, 'mousemove', ThrottlePointer((e: MouseEvent) => {
+   //    $x.state = e.clientX;
+   //    $y.state = e.clientY;
+   // }))
 
    atUnmount(() => {
       secondsInterval.stop();
-      animation.stop();
+      // animation.stop();
    });
 
    // watch($seconds, () => {
@@ -56,40 +63,43 @@ export function TriangleDemo() {
 
    function stop() {
       secondsInterval.stop();
-      animation.stop()
+      // animation.stop()
    }
 
    function reset() {
       secondsInterval.stop()
       // update(() => 
-         $seconds.state = 0
+      $seconds.state = 0
       // , { lazy: 1000 })
       secondsInterval.start()
    }
 
    return component(
       <>
-         <button on:click={stop}>
-            stop
-         </button>
-         <button on:click={e => (
-            secondsInterval.start()
-            ,
-            animation.start()
-         )}>
-            play
-         </button>
-         <button on:click={reset}>
-            reset
-         </button>
-         <div
-            class="container"
-            style={{
-               transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)")
-            }}
-         >
-            {/* <div>{$seconds}</div> */}
-            <Triangle x={0} y={0} s={1000} seconds={$seconds} />
+         <div style={['border-radius: 50%; background-color: green; position: absolute; left: 0; width: 10px; height: 10px', {transform: (`translate(${$x()}px, ${$y()}px)`)}]}></div>
+         <div>
+            <button on:click={stop}>
+               stop
+            </button>
+            <button on:click={e => (
+               secondsInterval.start()
+               // ,
+               // animation.start()
+            )}>
+               play
+            </button>
+            <button on:click={reset}>
+               reset
+            </button>
+            <div
+               class="container"
+               style={{
+                  transform: ("scaleX(" + $scale() / 2.1 + ") scaleY(0.7) translateZ(0.1px)")
+               }}
+            >
+               {/* <div>{$seconds}</div> */}
+               <Triangle x={0} y={0} s={1000} seconds={$seconds} />
+            </div>
          </div>
       </>
    );
@@ -137,11 +147,11 @@ function Triangle({ x, y, s, $seconds } = fromTag<any>()) {
 function Dot({ x, y, s, $text } = fromTag<any>()) {
    const $hover = ion(false)
 
-   const Throttled = SharedThrottledUpdate()
+   const [Hover, Unhover] = ThrottledHover()
    // const Throttled = (fn: Function)=>fn
 
-   const hover = Throttled(() => $hover.state = true)
-   const unhover = Throttled(() => $hover.state = false)
+   const hover = Hover(() => $hover.state = true)
+   const unhover = Unhover(() => $hover.state = false)
 
 
    return component(

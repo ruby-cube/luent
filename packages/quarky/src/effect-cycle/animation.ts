@@ -15,8 +15,62 @@ import { Update, updateStack } from "./ReactivitySystem";
 /**
  * Throttle by animation frame across mouse events like mouse enter and mouse leave
  */
+export function ThrottledHover() {
+   let hoverID: number | null = null
+   let unhoverID: number | null = null
+
+   return [function Hover(fn: <T>(e: T)=>void) {
+      const flask = getFlask()
+
+      return function hover<T>(e: T) {
+         if (unhoverID !== null) cancelAnimationFrame(unhoverID)
+         if (hoverID !== null) cancelAnimationFrame(hoverID)
+         hoverID = requestAnimationFrame(() => {
+            // setImmediate(() => {
+            hoverID = null;
+            const update = new Update(16.7, flask)
+            try {
+               updateStack.push(update)
+               fn(e); // Execute the original function with its context and arguments
+            }
+            finally {
+               updateStack.pop()
+            }
+            // })
+         })
+         // Otherwise, the function call is ignored (throttled)
+      };
+   },
+   function Unhover(fn: <T>(e: T)=>void) {
+      const flask = getFlask()
+
+      return function unhover<T>(e: T) {
+         if (unhoverID !== null) cancelAnimationFrame(unhoverID)
+         if (hoverID !== null) cancelAnimationFrame(hoverID)
+         unhoverID = requestAnimationFrame(() => {
+            // setImmediate(() => {
+            unhoverID = null;
+            const update = new Update(16.7, flask)
+            try {
+               updateStack.push(update)
+               fn(e); // Execute the original function with its context and arguments
+            }
+            finally {
+               updateStack.pop()
+            }
+            // })
+         })
+         // Otherwise, the function call is ignored (throttled)
+      };
+   }]
+}
+
+/**
+ * Throttle by animation frame across mouse events like mouse enter and mouse leave
+ */
 export function SharedThrottledUpdate() {
    let frameID: number | null = null
+
    return function Throttled(fn: Function) {
       const flask = getFlask()
 
@@ -40,6 +94,31 @@ export function SharedThrottledUpdate() {
    }
 }
 
+/**
+ * Throttled by animation frame
+ * @param fn 
+ * @returns 
+ */
+export function ThrottlePointer(fn: Function) {
+   let frameID: number | null = null
+   const flask = getFlask()
+
+   return function throttled(e: MouseEvent) {
+      if (frameID !== null) cancelAnimationFrame(frameID)
+      frameID = requestAnimationFrame(() => {
+            frameID = null;
+            const update = new Update(16.7, flask)
+            try {
+               updateStack.push(update)
+               fn(e); // Execute the original function with its context and arguments
+            }
+            finally {
+               updateStack.pop()
+            }
+      })
+      // Otherwise, the function call is ignored (throttled)
+   };
+}
 /**
  * Throttled by animation frame
  * @param fn 
