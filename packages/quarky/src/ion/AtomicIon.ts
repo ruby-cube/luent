@@ -21,7 +21,6 @@ export type $AtomicIonState =
    & MutableEntity
    & {
       [QUARK]: {
-         mutable: boolean;
          props: AnyObject | undefined;
          state: any,
          pState: any | typeof NULL,
@@ -42,7 +41,6 @@ export function shouldIonize(newValue: unknown, ionized: boolean): newValue is A
    return isObject(newValue) && Boolean(ionized);
 }
 
-export const MUTABLE = true
 export const IONIZED = true
 export const ALL_METHODS = 'all_methods'
 
@@ -50,7 +48,6 @@ export const ALL_METHODS = 'all_methods'
 export function createAtomicIon(
    state: any,
    props?: Methods,
-   mutable: boolean = true,
    ionized: boolean = false
 ) {
    const $state = (() => {
@@ -69,7 +66,6 @@ export function createAtomicIon(
       pendingUpdate: null,
       // stateKey,
       ionized,
-      mutable,
       props,
       entity: $state,
       quarkType: ATOMIC_ION,
@@ -81,24 +77,22 @@ export function createAtomicIon(
 
    $state[QUARK] = quark
 
-   if (mutable)
-      // public properties
 
-      if (props) {
-         Object.defineProperty(props, 'state', {
-            get: $state,
-            set: setState.bind(quark)
-         })
-         Object.defineProperties($state, Object.getOwnPropertyDescriptors(props))
-         // return quark.entity = createAtomicIonWithMethods(quark, mutable)
-      }
-      else {
-         Object.defineProperty($state, 'state', {
-            get: $state,
-            set: setState.bind(quark)
-         })
+   if (props) {
+      Object.defineProperty(props, 'state', {
+         get: $state,
+         set: setState.bind(quark)
+      })
+      Object.defineProperties($state, Object.getOwnPropertyDescriptors(props))
+      // return quark.entity = createAtomicIonWithMethods(quark, mutable)
+   }
+   else {
+      Object.defineProperty($state, 'state', {
+         get: $state,
+         set: setState.bind(quark)
+      })
 
-      }
+   }
 
    return $state
 }
@@ -169,7 +163,7 @@ function setState(this: AtomicIonQuark, value: unknown) {
       }
       this.state = state;
       update.queue(() => {
-          console.log('set ion update done')
+         console.log('set ion update done')
          this.pendingUpdate = null;
       })
    }

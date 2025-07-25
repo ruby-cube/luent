@@ -161,12 +161,14 @@ export function List(
    const selected = ionize(new Set() as Set<Item>)
 
    function toggleSelect(item: typeof list[number]) {
-      if (selected.has(item)) {
-         selected.delete(item)
-      }
-      else {
-         selected.add(item)
-      }
+      update(() => {
+         if (selected.has(item)) {
+            selected.delete(item)
+         }
+         else {
+            selected.add(item)
+         }
+      }, { lazy: 100 })
    }
 
    // const selectedB = new IonizedSet(list, {
@@ -196,14 +198,15 @@ export function List(
    function moveSelectedItems(index: number) {
       update(() =>
          moveUniqueItems(selected, list, index)
-      )
+      ,{lazy: 100})
    }
 
    function removeItem(index: number) {
-      selected.delete(list[index])
-      list.remove(index);
+      update(()=>{
+         selected.delete(list[index])
+         list.remove(index);
+      }, {lazy: 100})
    }
-
 
    return component(
       <>
@@ -222,11 +225,11 @@ export function List(
                   X
                </p>
 
-               <li on:click={e => list.changeContent($index())}>
+               <li on:click={e => responsive(()=>list.changeContent($index()))}>
                   {item.$content}
                </li>
                <p>{$index}</p>
-               <div on:click={e => list.insert($index() + 1)} style="background-color: gray; cursor: pointer">
+               <div on:click={e => responsive(()=>list.insert($index() + 1))} style="background-color: gray; cursor: pointer">
                   insert
                </div>
                <div on:click={e => moveSelectedItems($index() + 1)} style="background-color: white; cursor: pointer">
@@ -235,7 +238,7 @@ export function List(
             </div>
          ))}
 
-         <button on:click={e => selected.clear()}>clear</button>
+         <button on:click={e => responsive(()=>selected.clear())}>clear</button>
          {/* <button
                 on:click={[incrementCount, preventDefault.endHere, target(THIS_NODE)]}
             >
@@ -275,4 +278,8 @@ class Selected extends Set<any> {
       if (this.has(item)) this.delete(item)
       this.add(item)
    }
+}
+
+function responsive(fn: ()=>unknown){
+   return update(fn, {lazy: 100})
 }

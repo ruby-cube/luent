@@ -1,7 +1,7 @@
 import { debug, isFunction } from "@rue/utils";
 import { neutron } from "./Neutron";
 import { createMaybeMemoizedIon } from "../ionic/DerivationIon";
-import { createAtomicIon, IONIZED, MUTABLE } from "./AtomicIon";
+import { createAtomicIon, IONIZED } from "./AtomicIon";
 import { maybeIonize } from "../ionized/IonizedModel";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionized/ionize";
@@ -94,7 +94,7 @@ export function ion<
    T,
    M
 >(initialState: T & (() => unknown) | T, props?: M & ThisType<M & { state: T }>): AsIon<T, M> {
-   return asIon(initialState, MUTABLE, false, props) as AsIon<T, M>
+   return asIon(initialState, false, props) as AsIon<T, M>
 }
 
 
@@ -119,7 +119,7 @@ function createIonizedIon<
    T,
    M
 >(initialState: T, methods?: M & Methods): AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> {
-   return asIon(initialState, MUTABLE, IONIZED, methods) as AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> //TODO: add inert marks
+   return asIon(initialState, IONIZED, methods) as AsIon<Ionized<ExcludePrimitives<T>> | OnlyPrimitives<T>, M> //TODO: add inert marks
 }
 
 // function createDeepMutableIonizedIon<
@@ -184,7 +184,6 @@ function createIonizedIon<
 
 function asIon(
    initialState: unknown | (() => unknown),
-   mutable: boolean,
    ionized: boolean,
    props?: AnyObject,
 ) {
@@ -193,7 +192,7 @@ function asIon(
    }
 
    if (isIon(initialState)) return initialState
-   return initializeSnapshots(createAtomicIon(ionized ? maybeIonize(initialState) : initialState, props, mutable, ionized)) // TODO: add inert mark map
+   return initializeSnapshots(createAtomicIon(ionized ? maybeIonize(initialState) : initialState, props, ionized)) // TODO: add inert mark map
 }
 
 
