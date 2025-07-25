@@ -12,6 +12,8 @@ import { debug, isObject } from "@rue/utils";
 import { Ion, Methods, MutableIon } from "./Ion";
 import { getActiveTracker, trackAtom } from "../ionic/IonicCompound";
 import { $activeUpdate, getActiveUpdate, isLazyUpdate, Update, initUpdate } from "../effect-cycle/ReactivitySystem";
+import { IonizedModel } from "../ionized/IonizedModel";
+import { IonizedModelQuark } from "../ionized/IonizedModelQuark";
 
 export const NULL = Symbol('null')
 /** INTERNAL */
@@ -24,7 +26,9 @@ export type $AtomicIonState =
          props: AnyObject | undefined;
          state: any,
          pState: any | typeof NULL,
-         ionized: boolean
+         ionized: boolean,
+         models: undefined | IonizedModelQuark[]
+         addModel(quark: IonizedModelQuark): void
       }
       & Quark<typeof ATOMIC_ION, $AtomicIonState>
       & Watchable
@@ -73,6 +77,13 @@ export function createAtomicIon(
       asTraceable: new Traceable(),
       trigger,
       asWatchedAtom: undefined,
+      models: undefined,
+      addModel(quark: IonizedModelQuark){
+         const models = this.models ?? (this.models = [])
+         if (models.indexOf(quark) === -1){
+            models.push(quark)
+         }
+      }
    }
 
    $state[QUARK] = quark
@@ -163,7 +174,6 @@ function setState(this: AtomicIonQuark, value: unknown) {
       }
       this.state = state;
       update.queue(() => {
-         console.log('set ion update done')
          this.pendingUpdate = null;
       })
    }
@@ -178,6 +188,16 @@ function setState(this: AtomicIonQuark, value: unknown) {
    ))
 
    this.trigger()
+
+   if (this.models) {
+      for (const quark of this.models) {
+         quark.pendingUpdate = update;
+         update.queue(() => {
+            quark.pendingUpdate = null;
+         })
+         quark.trigger();
+      }
+   }
 
    return state;
 }

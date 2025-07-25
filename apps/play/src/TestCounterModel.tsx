@@ -15,8 +15,8 @@ export function CounterModelApp() {
       <>
          <TestMutableCounter></TestMutableCounter>
          <hr></hr>
-         <TestEncapsulatedCounter></TestEncapsulatedCounter>
-         <hr></hr>
+         {/* <TestEncapsulatedCounter></TestEncapsulatedCounter>
+         <hr></hr> */}
       </>
 
    )

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ion } from '../ion';
 import { MetaIon } from '../AtomicIon';
-import { DERIVED_ION } from '../../ionic/PionCapsule';
+import { DERIVED_ION } from '../../ionic/x_PionCapsule';
 import exp from 'constants';
 
 describe('ion function', () => {
