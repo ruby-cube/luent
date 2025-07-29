@@ -19,29 +19,24 @@ import { ion, ionize } from "@rue/quarky"
 
 const list = ionize([])
 
-const files = ionize(list, { // should console.warn that methods have not been attached
-   addFile() {
 
+function inert<T>(value: T) {
+   return {
+      value,
+      '~inert': true
    }
-})
-
-function inert() { }
+}
 
 
-
-const frog = ionize.withMap(new Frog(), {
+const frog = ionize(new Frog(), {
    canvas: inert,
    something: {
       context: inert
    },
    list: [inert],
    set: [inert],
-   map: [inert, inert],
+   map: [ionize, inert],
    dog: inert
-}, {
-   addQuality(quality: Quality) {
-      this.qualities.push(quality)
-   }
 })
 
 const list = ionize.withMap([], [inert])

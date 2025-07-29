@@ -68,9 +68,9 @@ export function TriangleDemo() {
 
    function reset() {
       secondsInterval.stop()
-      // update(() => 
-      $seconds.state = 0
-      // , { lazy: 1000 })
+      // update(() =>
+         $seconds.state = 0
+         // , { lazy: 1000 }) //TODO: reset is inconsistent without lazy update
       secondsInterval.start()
    }
 

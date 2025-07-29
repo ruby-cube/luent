@@ -10,6 +10,7 @@ import { debug } from "@rue/utils"
 import { getIonizedMethodDef } from "./IonizedMethods"
 import { isIonizedModel, toRaw } from "./ionize"
 import { Update } from "../effect-cycle/ReactivitySystem"
+import { Ion } from "../ion/Ion"
 
 
 
@@ -49,15 +50,18 @@ export type InertCollectionType = (typeof InertCollection)[keyof typeof InertCol
 
 const IONIZED_MODEL = 'ionized model' as const
 
+
 export class IonizedModelQuark implements QuarkOf<IonizedModel> {
    quarkType = IONIZED_MODEL
    asTraceable: Traceable
-
+   
    constructor(
       public entity: IonizedModel,
-      public rawTarget: AnyObject,
+      public rawTarget: AnyObject, //initialData
+      public state: {current: AnyObject, pending: AnyObject | null},
       // public inertMap: MarkMap | InertCollectionType | undefined,
    ) {
+      // this.$ = Object.create(this.rawTarget)
       this.asTraceable = new Traceable()
       // this.watch = () => {
       //    this.trackAbsorbedIons() //FIX: find where to put this
@@ -65,6 +69,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
       // }
       // this.unwatch = () => unwatch.call(this)
    }
+
    pendingUpdate: Update | null = null
 
    asMutable: Mutable = new Mutable()
@@ -103,6 +108,7 @@ export class IonizedModelQuark implements QuarkOf<IonizedModel> {
    //    // this.undirty()
    //    return derivation.atoms;
    // }
+   // $: Record<PropertyKey, Ion | TrackedOps>;
 
    trigger = trigger
 

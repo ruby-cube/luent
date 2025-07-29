@@ -235,6 +235,9 @@ function triggerObservedIndices(model: IonizedModel, prevLength: number, newLeng
    }
 }
 
+function $indexIon(model: IonizedModel, index: PropertyKey){
+   return quarkOf(model).$[index]
+}
 
 export const ionizedArray: IonizedMethodsDef = {
    at: {
@@ -567,3 +570,5 @@ export const ionizedIterable = {
       track: trackModel
    }
 }
+
+

@@ -6,7 +6,7 @@ import { IonizedModel } from "../ionized/IonizedModel";
 import { asPionQuark } from "../ionized/Pion";
 import { Quark, QUARK, QuarkOf, quarkOf } from "../Quark";
 import { WatchedAtom } from "../watch/WatchedAtom";
-import { createMaybeMemoizedIon, DERIVATION_ION, ManagedDerivation } from "./DerivationIon";
+import { createManagedDerivation, DERIVATION_ION, ManagedDerivation } from "./DerivationIon";
 import { IonicCompound } from "./IonicCompound";
 
 
@@ -67,6 +67,6 @@ export class DerivationPionQuark implements QuarkOf<$DerivedPionState> {
 
 export function createDerivationPion(model: IonizedModel, key: PropertyKey, pionQuark?: DerivationPionQuark): $DerivedPionState {
    const quark = pionQuark ?? asPionQuark(model, key) as DerivationPionQuark
-   return createMaybeMemoizedIon(quark.derivation, undefined, undefined, quark)
+   return createManagedDerivation(quark.derivation, undefined, undefined, quark)
 }
 

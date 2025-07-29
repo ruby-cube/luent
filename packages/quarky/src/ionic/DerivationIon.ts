@@ -50,7 +50,7 @@ export function isManagedDerivation(value: unknown): value is $DerivedState {
    return hasQuark(value) && quarkOf(<$DerivedState>value).quarkType === DERIVATION_ION
 }
 
-export function createMaybeMemoizedIon(
+export function createManagedDerivation(
    derivation: (previousValue?: unknown) => unknown,
    methods?: AnyObject,
    retrack: boolean = true,

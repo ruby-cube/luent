@@ -1,7 +1,7 @@
 import { AnyObject } from "@rue/types";
 import { isIonizedModel } from "./ionized/ionize";
 import { hasQuark, QUARK, quarkOf } from "./Quark";
-import { Abort, AbortSignal } from "../../flask/AbortSignal";
+import { AbortSignal } from "../../flask/AbortSignal";
 import { IterableSet } from "@rue/utils";
 
 export type MutableEntity = {
@@ -105,6 +105,6 @@ export function asMutable(entity: MutableEntity) {
    return quarkOf(entity).asMutable;
 }
 
-export function recordMutation(quark: MutableMorph, mutation: Mutation) {
-   quark.asMutable.emitMutation(mutation)
+export function recordMutation(mutable: Mutable, mutation: Mutation) {
+   mutable.emitMutation(mutation)
 }

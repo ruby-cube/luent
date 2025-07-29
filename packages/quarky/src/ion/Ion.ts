@@ -1,7 +1,7 @@
 import { debug, isFunction } from "@rue/utils";
 import { neutron } from "./Neutron";
-import { createMaybeMemoizedIon } from "../ionic/DerivationIon";
-import { createAtomicIon, IONIZED } from "./AtomicIon";
+import { createManagedDerivation } from "../ionic/DerivationIon";
+import { createAtomicIon, IONIZED, IonState } from "./AtomicIon";
 import { maybeIonize } from "../ionized/IonizedModel";
 import { AnyObject, ExcludePrimitives, OnlyPrimitives } from "@rue/types";
 import { Ionized, IsIonized } from "../ionized/ionize";
@@ -188,11 +188,11 @@ function asIon(
    props?: AnyObject,
 ) {
    if (isFunction(initialState)) {
-      return initializeSnapshots(createMaybeMemoizedIon(<Derivation>initialState, props, true))
+      return initializeSnapshots(createManagedDerivation(<Derivation>initialState, props, true))
    }
 
    if (isIon(initialState)) return initialState
-   return initializeSnapshots(createAtomicIon(ionized ? maybeIonize(initialState) : initialState, props, ionized)) // TODO: add inert mark map
+   return initializeSnapshots(createAtomicIon(new IonState(ionized ? maybeIonize(initialState) : initialState), props, ionized)) // TODO: add inert mark map
 }
 
 

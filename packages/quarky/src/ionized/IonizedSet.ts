@@ -4,7 +4,7 @@ import { enlistIonizedMethods, trigger, triggerAll, TriggeringOpDef } from "./Io
 import { hasMaybeIonized, trackableCheckOp, trackableCreativeOpWithArgs, trackableHasOp, trackableIterative, trackableOp, trackableOpWithCallback, useDeleteOp } from "./OpDefinitions";
 import { initUpdate, Update } from "../effect-cycle/ReactivitySystem";
 import { $atomicOp, AtomicOp, getAtomicOps } from "./AtomicOp";
-import { AtomicPionQuark } from "../ion/AtomicPion";
+import { AtomicPionQuark } from "../ion/x_AtomicPion";
 import { IonizedModelQuark } from "./IonizedModelQuark";
 
 // declare global {

@@ -1,5 +1,5 @@
 import { component } from "@rue/lumo";
-import { asPion } from "../../../packages/quarky/src/ion/AtomicPion";
+import { asPion } from "../../../packages/quarky/src/ion/x_AtomicPion";
 import { ion, ionize, watch } from "@rue/quarky";
 
 

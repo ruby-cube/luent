@@ -3,7 +3,7 @@ import { TypedKey } from "@rue/lumo";
 import { AtomicIon, isAtomicIon } from "../ion/AtomicIon";
 import { ObservedProp } from "../ionized/ObservedProp";
 import { Phase, EffectCycle, $effectCycle } from "../effect-cycle/EffectCycle";
-import { PropIon } from "../ion/AtomicPion";
+import { PropIon } from "../ion/x_AtomicPion";
 import { toError } from "@rue/utils";
 
 const output = doAction((action) => {

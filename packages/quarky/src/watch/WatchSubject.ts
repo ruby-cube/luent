@@ -1,12 +1,12 @@
 import { AnyObject } from "@rue/types";
 import { Effect } from "../effect-cycle/EffectQueue"
 import { $AtomicIonState, isAtomicIonQuark } from "../ion/AtomicIon";
-import { $AtomicPionState, isAtomicPionQuark } from "../ion/AtomicPion";
+import { $AtomicPionState, isAtomicPionQuark } from "../ion/x_AtomicPion";
 import { IonizedModel } from "../ionized/IonizedModel"
 import { hasQuark, QUARK, Quark, quarkOf } from "../Quark"
 import { asWatchedAtom, isWatchable, isWatchableEntity, Watchable, WatchedAtom } from "./WatchedAtom"
 import { isObject, noop } from "@rue/utils";
-import { Ionized, isIonizedModel } from "../ionized/ionize";
+import { Ionized, isIonizedModel, toRaw } from "../ionized/ionize";
 import { Ion, isIon, toValue } from "../ion/Ion";
 import { $currentOrNextCycle } from "../effect-cycle/ReactivitySystem";
 import { Phase, SYNC } from "../effect-cycle/EffectCycle";
@@ -127,12 +127,13 @@ export interface WatchSubject {
  */
 class IonizedModelSubject implements WatchSubject {
    inert: boolean = false
-   private watchedAtom: WatchedAtom
+   private watchedAtoms: WatchedAtom[]
 
    constructor(
       private model: IonizedModel,
    ) {
-      this.watchedAtom = asWatchedAtom(quarkOf(model))
+      this.watchedAtoms = [asWatchedAtom(quarkOf(model))]
+      this.collectIons() //TODO: if absorbed ions can be reassigned, we need to retrack
    }
 
    trackedCall() {
@@ -140,13 +141,24 @@ class IonizedModelSubject implements WatchSubject {
    }
 
    linkEffect(effect: Effect, eager: boolean) {
-      linkEffectToAtom(this.watchedAtom, effect, eager)
+      linkEffectToAtoms(this.watchedAtoms, effect, eager)
+   }
+
+   collectIons() {
+
+      // const target = toRaw(this.model) as AnyObject;
+      // for (const key in target) {
+      //    const value = target[key]
+      //    if (isQuarkyIon(value)) {
+      //       this.watchedAtoms.push(asWatchedAtom(quarkOf(value)))
+      //    }
+      // }
    }
 }
 
 type QuarkyIon = {
    (): unknown
-   [QUARK]: { asCompound?: IonicCompound, inert: boolean } & Quark
+   [QUARK]: { asCompound?: IonicCompound, inert: boolean } & Quark & Watchable
 }
 
 
@@ -242,7 +254,7 @@ function linkEffectToAtom(atom: WatchedAtom | undefined, effect: Effect, eager: 
    effect.link(atom)
    if (eager) {
       $currentOrNextCycle().scheduleEffect(effect)
-      if (effect.phase === SYNC){
+      if (effect.phase === SYNC) {
          $currentOrNextCycle().runEffects(SYNC)
       }
    }

@@ -1,15 +1,14 @@
 import { AnyObject } from "@rue/types";
 import { IsIonized, isIonizedModel, withInertItems } from "./ionize";
 import { isFunction } from "@rue/utils";
-import { Collection } from "@rue/lumo";
 import { InertCollectionType } from "./IonizedModelQuark";
 import { getIonizedModel } from "./IonizedModel";
 
 const inertObjects: WeakSet<AnyObject> = new WeakSet()
 
-export type Inert<T = {}> = T & { '~inert': true }
+export type Inert<T> = T extends { '~ionized': true } ? 'TypeError: Invalid value. Value cannot be ionized.' : T
 
-export type IsInert<T> = keyof T extends never ? false : T extends { '~inert': true } ? true : false
+export type IsInert<T> = keyof T extends never ? false : Inert<T> extends 'TypeError: Invalid value. Value cannot be ionized.' ? false : true
 
 //NOTE: Use type system to enforce marking objects as inert where they need to be inert, despite initialization as primitive value
 

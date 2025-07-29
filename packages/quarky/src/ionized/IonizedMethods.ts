@@ -9,7 +9,7 @@ import { ionizedArray, ionizedIterable } from "./IonizedArray"
 import { IonizedModelQuark } from "./IonizedModelQuark"
 import { initUpdate, Update } from "../effect-cycle/ReactivitySystem"
 import { NULL } from "../ion/AtomicIon"
-import { AtomicPionQuark } from "../ion/AtomicPion"
+import { AtomicPionQuark } from "../ion/x_AtomicPion"
 
 type Constructor = new (...args: any[]) => any
 

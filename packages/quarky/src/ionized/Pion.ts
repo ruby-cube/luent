@@ -1,9 +1,9 @@
 import { Ion } from "../ion/Ion"
 import { Quark, quarkOf } from "../Quark"
-import { AtomicPionQuark, createAtomicPion } from "../ion/AtomicPion"
+import { AtomicPionQuark, createAtomicPion } from "../ion/x_AtomicPion"
 import { IonizedModel } from "./IonizedModel"
 import { IonizedModelQuark } from "./IonizedModelQuark"
-import { createDerivationPion, DerivationPionQuark } from "../ionic/DerivationPion"
+import { createDerivationPion, DerivationPionQuark } from "../ionic/x_DerivationPion"
 import { debug } from "@rue/utils"
 import { AnyObject } from "@rue/types"
 
