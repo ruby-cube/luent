@@ -14,6 +14,7 @@ import { getActiveTracker, trackAtom } from "../ionic/IonicCompound";
 import { $activeUpdate, getActiveUpdate, isLazyUpdate, Update, initUpdate } from "../effect-cycle/ReactivitySystem";
 import { IonizedModel } from "../ionized/IonizedModel";
 import { IonizedModelQuark } from "../ionized/IonizedModelQuark";
+import { stat } from "fs";
 
 export const NULL = Symbol('null')
 /** INTERNAL */
@@ -59,9 +60,11 @@ interface State {
    commitChange(): void
    cancelChange(): void
    recordChange(newState: unknown, oldState: unknown): void
+   canPend: boolean
 }
 
 export class IonState implements State {
+   canPend: boolean = true
 
    constructor(
       public current: unknown
@@ -108,11 +111,15 @@ export type ModelState = {
 }
 
 export class PionState implements State {
+   canPend: boolean;
+
    constructor(
       private modelState: ModelState,
       public key: PropertyKey,
-      private clone: (current: AnyObject) => AnyObject
-   ) { }
+      private clone: ((current: AnyObject) => AnyObject) | undefined
+   ) {
+      this.canPend = !!clone
+   }
 
    get current() {
       return this.modelState.current[this.key]
@@ -130,7 +137,7 @@ export class PionState implements State {
 
    set pending(value: unknown) {
       if (this.modelState.pending === NULL) {
-         this.modelState.pending = this.clone(this.modelState.current)
+         this.modelState.pending = this.clone!(this.modelState.current)
       }
       this.modelState.pending[this.key] = value;
    }
@@ -272,11 +279,10 @@ export function isAtomicIonQuark(value: unknown): value is AtomicIonQuark {
 }
 
 
-function setState(this: AtomicIonQuark, value: unknown) {
+export function setState(this: AtomicIonQuark, value: unknown) {
    const state = this.state
 
    const oldState = isLazyUpdate() ? state.pending : state.current;
-   // const oldState = this.state; //TODO: depends on lazy context
 
    if (value === oldState) {
       return value;
@@ -285,7 +291,7 @@ function setState(this: AtomicIonQuark, value: unknown) {
 
    const update = initUpdate()
 
-   if (update.lazy) {
+   if (update.lazy && state.canPend) {
       state.pending = newState
 
       update.queue(() => {
@@ -299,6 +305,8 @@ function setState(this: AtomicIonQuark, value: unknown) {
       }
    }
    else {
+      if (update.lazy && !state.canPend) update.lazy = false
+
       if (this.pendingUpdate && this.pendingUpdate !== update) {
          this.pendingUpdate.cancel()
          state.cancelChange

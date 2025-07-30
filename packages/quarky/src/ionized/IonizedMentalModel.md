@@ -57,6 +57,7 @@ console.log(swamp.logCreature !== frog)
 
 console.log(list)
 
+// how can we have pending state for an object with private properties? The object must be cloned, but it must have a clone method
 
 class Frog {
     

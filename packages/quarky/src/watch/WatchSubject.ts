@@ -2,7 +2,7 @@ import { AnyObject } from "@rue/types";
 import { Effect } from "../effect-cycle/EffectQueue"
 import { $AtomicIonState, isAtomicIonQuark } from "../ion/AtomicIon";
 import { $AtomicPionState, isAtomicPionQuark } from "../ion/x_AtomicPion";
-import { IonizedModel } from "../ionized/IonizedModel"
+import { IonizedModel, setTracking } from "../ionized/IonizedModel"
 import { hasQuark, QUARK, Quark, quarkOf } from "../Quark"
 import { asWatchedAtom, isWatchable, isWatchableEntity, Watchable, WatchedAtom } from "./WatchedAtom"
 import { isObject, noop } from "@rue/utils";
@@ -145,7 +145,7 @@ class IonizedModelSubject implements WatchSubject {
    }
 
    collectIons() {
-
+      setTracking(true)
       // const target = toRaw(this.model) as AnyObject;
       // for (const key in target) {
       //    const value = target[key]
@@ -153,15 +153,21 @@ class IonizedModelSubject implements WatchSubject {
       //       this.watchedAtoms.push(asWatchedAtom(quarkOf(value)))
       //    }
       // }
+      setTracking(false)
    }
 }
 
 type QuarkyIon = {
    (): unknown
-   [QUARK]: { asCompound?: IonicCompound, inert: boolean } & Quark & Watchable
+   [QUARK]: { asCompound?: IonicCompound, inert: boolean } & Quark
 }
 
-
+function trackedCall(ion: Ion) {
+   setTracking(true)
+   const value = detachedCall(ion)
+   setTracking(false)
+   return value;
+}
 
 /**
  * - relinks value to effect if value is ionized
@@ -187,7 +193,7 @@ export class IonSubject implements WatchSubject {
          return this.retrackedCall()
 
       this.initialized = true;
-      const value = detachedCall(this.ion)
+      const value = trackedCall(this.ion)
       const quark = this.quark;
       const compound = quark.asCompound
 
@@ -204,7 +210,7 @@ export class IonSubject implements WatchSubject {
       const quark = this.quark
       const compound = quark.asCompound
       if (compound) this.effect.unlink()
-      const value = detachedCall(this.ion)
+      const value = trackedCall(this.ion)
       if (compound && compound.atoms.size) {
          if (compound.atoms.size === 0) console.warn('WE LOST REACTIVITY')
          linkEffectToAtoms(toWatchedAtoms(compound.atoms), this.effect)
@@ -288,7 +294,7 @@ export class IonicTaskSubject implements WatchSubject {
       if (this.initialized) return this.retrackedCall()
       this.initialized = true;
       const ionicEffect = this.ionicEffect
-      detachedCall(ionicEffect)
+      trackedCall(ionicEffect)
       this.watchedAtoms = toWatchedAtoms(ionicEffect.asCompound.atoms)
    }
 
@@ -299,7 +305,7 @@ export class IonicTaskSubject implements WatchSubject {
       const ionicEffect = this.ionicEffect
       const effect = this.effect
       effect.unlink()
-      detachedCall(ionicEffect)
+      trackedCall(ionicEffect)
       linkEffectToAtoms(toWatchedAtoms(ionicEffect.asCompound.atoms), effect)
    }
 

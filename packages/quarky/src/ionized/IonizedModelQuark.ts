@@ -8,9 +8,10 @@ import { Traceable } from "../debug/Traceable"
 import { AtomicOp, TrackedOps } from "./AtomicOp"
 import { debug } from "@rue/utils"
 import { getIonizedMethodDef } from "./IonizedMethods"
-import { isIonizedModel, toRaw } from "./ionize"
+import { isIonizedModel, isIonKey, toRaw } from "./ionize"
 import { Update } from "../effect-cycle/ReactivitySystem"
-import { Ion } from "../ion/Ion"
+import { Ion, isIon } from "../ion/Ion"
+import { ModelState, NULL } from "../ion/AtomicIon"
 
 
 
@@ -50,17 +51,39 @@ export type InertCollectionType = (typeof InertCollection)[keyof typeof InertCol
 
 const IONIZED_MODEL = 'ionized model' as const
 
+type CloneFn = (entity: any) => any
+
+function getCloner(entity: object): CloneFn {
+   //TODO: get cloner from data structure configs
+   if (entity instanceof Array) return (entity: any[]) => {
+      return Object.assign([], entity)
+   }
+   if (entity instanceof Set) return (entity: Set<any>) => {
+      return Object.assign(new Set(entity), entity)
+   }
+   if (entity instanceof Map) return (entity: Map<any, any>) => {
+      return Object.assign(new Map(entity), entity)
+   }
+   return (entity: object) => {
+      return Object.create(Object.getPrototypeOf(entity), Object.getOwnPropertyDescriptors(entity))
+   }
+}
 
 export class IonizedModelQuark implements QuarkOf<IonizedModel> {
    quarkType = IONIZED_MODEL
    asTraceable: Traceable
-   
+   clone: ((entity: AnyObject) => AnyObject) | undefined
+
    constructor(
       public entity: IonizedModel,
       public rawTarget: AnyObject, //initialData
-      public state: {current: AnyObject, pending: AnyObject | null},
+      public state: ModelState
       // public inertMap: MarkMap | InertCollectionType | undefined,
    ) {
+      this.clone = getCloner(rawTarget)
+
+
+
       // this.$ = Object.create(this.rawTarget)
       this.asTraceable = new Traceable()
       // this.watch = () => {
