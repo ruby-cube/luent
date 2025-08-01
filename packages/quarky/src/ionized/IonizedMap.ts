@@ -1,7 +1,7 @@
 import { toRaw } from "./ionize";
 import { isNotSameSize } from "./IonizedSet";
 import { enlistIonizedMethods, trigger, triggerAll } from "./IonizedMethods";
-import { hasMaybeIonized, trackableHasOp, trackableIterative, trackableOp, trackableOpWithCallback, trackOp, useDeleteOp } from "./OpDefinitions";
+import { deleteOp, hasMaybeIonized, trackableIterative, trackableOp, trackableOpWithCallback, trackOp } from "./OpDefinitions";
 import { noop } from "@rue/utils";
 import { getIonizedModel, maybeIonize } from "./IonizedModel";
 
@@ -47,19 +47,37 @@ const trackableMapGetOps = {
 
 export function installIonicMap() {
    enlistIonizedMethods(Map, {
-      has: trackableHasOp,
+      has: {
+         input: ([key]) => [toRaw(key)],
+         op: function has(this: Map<unknown, unknown>, key: unknown) {
+            return hasMaybeIonized(key, this, {
+               passRaw: () => true,
+               passIonized: (key, rawKey?) => {
+                  const value = this.get(key)
+                  this.delete(key)
+                  this.set(rawKey, value)
+                  return true;
+               },
+               fail: false
+            })
+         }
+         ,
+         track: trackOp,
+      },
       get: {
          input: ([key]) => [toRaw(key)],
-         createOp: (target) => (key: unknown) => hasMaybeIonized(key, target as Set<unknown>, {
-            passRaw: (key) => target.get(key),
-            passIonized(ionized, rawKey) {
-               const value = target.get(ionized);
-               target.delete(ionized);
-               target.set(rawKey, value);
-               return value;
-            },
-            fail: undefined
-         }),
+         op: function get(this: Map<unknown, unknown>, key: unknown) {
+            return hasMaybeIonized(key, this, {
+               passRaw: (key) => this.get(key),
+               passIonized: (ionized, rawKey) => {
+                  const value = this.get(ionized);
+                  this.delete(ionized);
+                  this.set(rawKey, value);
+                  return value;
+               },
+               fail: undefined
+            })
+         },
          track: trackOp,
          output: maybeIonize
       },
@@ -69,12 +87,10 @@ export function installIonicMap() {
       values: trackableOp,
       entries: trackableOp,
       set: {
-         createOp(target) {
-            return function set(key: unknown, value: unknown){
-               const ionizedKey = getIonizedModel(key);
-               if (ionizedKey) target.delete(ionizedKey);
-               return target.set(key, value)
-            }
+         op: function set(this: Map<unknown, unknown>, key: unknown, value: unknown) {
+            const ionizedKey = getIonizedModel(key);
+            if (ionizedKey) this.delete(ionizedKey);
+            return this.set(key, value)
          },
          input: ([key, value]) => [toRaw(key), toRaw(value)],
          preop: (target, [key, value]) => ({
@@ -117,7 +133,7 @@ export function installIonicMap() {
 
       delete: {
          input: ([key]) => [toRaw(key)],
-         createOp: useDeleteOp,
+         op: deleteOp,
          preop: (target, [key]) => ({
             target,
             key,

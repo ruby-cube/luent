@@ -1,7 +1,7 @@
 import { toRaw } from "./ionize";
 import { getIonizedModel, GetPreopData, IonizedModel, useTrackableOp } from "./IonizedModel";
 import { enlistIonizedMethods, trigger, triggerAll, TriggeringOpDef } from "./IonizedMethods";
-import { hasMaybeIonized, trackableCheckOp, trackableCreativeOpWithArgs, trackableHasOp, trackableIterative, trackableOp, trackableOpWithCallback, useDeleteOp } from "./OpDefinitions";
+import { deleteOp, hasMaybeIonized, trackableCheckOp, trackableCreativeOpWithArgs, trackableIterative, trackableOp, trackableOpWithCallback, trackOp } from "./OpDefinitions";
 import { initUpdate, Update } from "../effect-cycle/ReactivitySystem";
 import { $atomicOp, AtomicOp, getAtomicOps } from "./AtomicOp";
 import { AtomicPionQuark } from "../ion/x_AtomicPion";
@@ -69,7 +69,22 @@ import { IonizedModelQuark } from "./IonizedModelQuark";
 export function installIonicSet() {
    enlistIonizedMethods(Set, {
       // trackableOps: {
-      has: trackableHasOp,
+      has: {
+         input: ([key]) => [toRaw(key)],
+         op: function has(this: Set<unknown>, key: unknown) {
+            return hasMaybeIonized(key, this, {
+               passRaw: () => true,
+               passIonized: (key, rawKey?) => {
+                  this.delete(key)
+                  this.add(rawKey)
+                  return true;
+               },
+               fail: false
+            })
+         }
+         ,
+         track: trackOp,
+      },
       [Symbol.iterator]: trackableOpWithCallback,
       forEach: trackableIterative,
       keys: trackableOp,
@@ -84,12 +99,10 @@ export function installIonicSet() {
       isSupersetOf: trackableCheckOp, // boolean = isSupersetOf(otherSet)
       isDisjointFrom: trackableCheckOp, // boolean = isDisjointFrom(otherSet)
       add: {
-         createOp: (target) => {
-            return function add(value: unknown) {
-               const ionizedKey = getIonizedModel(value);
-               if (ionizedKey) target.delete(ionizedKey);
-               return target.add(value)
-            }
+         op: function add(this: Set<unknown>, value: unknown) {
+            const ionizedKey = getIonizedModel(value);
+            if (ionizedKey) this.delete(ionizedKey);
+            return this.add(value)
          },
          input: ([value]) => [toRaw(value)],
          preop: (target, [value]) => ({ prevSize: target.size, target, value }),
@@ -124,7 +137,7 @@ export function installIonicSet() {
       },
       delete: {
          input: ([value]) => [toRaw(value)],
-         createOp: useDeleteOp,
+         op: deleteOp,
          preop: (target, [value]) => ({
             target,
             value,

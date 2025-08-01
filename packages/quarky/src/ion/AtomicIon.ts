@@ -108,6 +108,7 @@ export class IonState implements State {
 export type ModelState = {
    pending: AnyObject | typeof NULL
    current: AnyObject
+   getActiveTarget: ()=>AnyObject
 }
 
 export class PionState implements State {
@@ -174,14 +175,15 @@ export function createAtomicIon(
    props?: Methods,
    ionized: boolean = false,
 ) {
-   const $state = (() => {
+   function $state ()  {
       if (__DEV__) emitSignal();
       trackAtom(quark)
       if (isLazyUpdate()) {
          return state.pending;
       }
       return state.current;
-   }) as $AtomicIonState
+   }
+   //  as $AtomicIonState
 
 
    const quark: AtomicIonQuark = {
@@ -190,7 +192,7 @@ export function createAtomicIon(
       pendingUpdate: null,
       ionized,
       props,
-      entity: $state,
+      entity: $state as $AtomicIonState,
       quarkType: ATOMIC_ION,
       asTraceable: new Traceable(),
       trigger,
@@ -281,31 +283,32 @@ export function isAtomicIonQuark(value: unknown): value is AtomicIonQuark {
 
 export function setState(this: AtomicIonQuark, value: unknown) {
    const state = this.state
-
+   
    const oldState = isLazyUpdate() ? state.pending : state.current;
-
+   
    if (value === oldState) {
       return value;
    }
    const newState = shouldIonize(value, this.ionized) ? ionize(value) : value //TODO: this should be an assertion rather than auto-transform, right?
-
+   
    const update = initUpdate()
-
+   
    if (update.lazy && state.canPend) {
       state.pending = newState
-
+      
       update.queue(() => {
          state.commitChange()
          state.recordChange(newState, oldState)
          this.pendingUpdate = null;
       })
-
+      
       if (this.pendingUpdate && this.pendingUpdate !== update) {
          this.pendingUpdate.cancel()
       }
    }
    else {
       if (update.lazy && !state.canPend) update.lazy = false
+      console.log('$$$ set state', value)
 
       if (this.pendingUpdate && this.pendingUpdate !== update) {
          this.pendingUpdate.cancel()

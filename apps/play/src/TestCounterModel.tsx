@@ -28,11 +28,10 @@ export function TestMutableCounter() {
       value: 0,
       increment() {
          this.value++
-         return 0
+         console.log('increment', this.value)
       },
       decrement() {
          this.value--
-         return 'for'
       },
       logSuper(){
          console.log('super')
@@ -40,9 +39,10 @@ export function TestMutableCounter() {
       }
    })
 
+
    console.log('is it in count', 'increment' in count)
 
-   const $doubleCount = ion(() => count.value * 2)
+   // const $doubleCount = ion(() => count.value * 2)
 
    function increment() {
       count.value++
@@ -54,8 +54,8 @@ export function TestMutableCounter() {
    return component(
       <>
          <h3>encapsulated model with methods</h3>
-         <div>{(count.value)}</div>
-         <div>{$doubleCount}</div>
+         <div>{function $drv999(){console.log('derv'); return count.value}}</div>
+         {/* <div>{$doubleCount}</div> */}
          {/* <div>The count is: {$count}. Doubled: {$doubleCount}</div> */}
          <p>these should work</p>
          <button on:click={count.increment}>increment</button>

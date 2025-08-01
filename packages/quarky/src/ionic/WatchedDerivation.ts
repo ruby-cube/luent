@@ -33,16 +33,19 @@ export function createWatchedDerivation(derivation: () => any, retrack: boolean)
    const compound = quark.asCompound
    compound.entity = quark;
 
-   let fn = retrack ? retrackedCall : initialize;
+   let fn = initialize;
    function $watchedDerivedState() {
+      console.log('create watched derivation')
       return fn()
    }
    $watchedDerivedState[QUARK] = quark
 
    function initialize() {
-      fn = derivation
+      console.log('initializing watched derivation')
+      fn = retrack ? retrackedCall : derivation
       const value = compound.trackedCall(derivation)
       if (compound.atoms.size === 0) quark.inert = true;
+      console.log('$$$ Watched derivation', compound.atoms)
       if (isLazyUpdate()) {
          quark.pState = value;
          const update = $activeUpdate()

@@ -14,7 +14,7 @@ import { MutableEntity, Mutation, recordMutation } from "../Mutable";
 import { asPion, asPionQuark, $atomicPion } from "./Pion";
 import { isWatchable, Watchable } from "../watch/WatchedAtom";
 // import { IonizedCompound } from "./IonizedCompound";
-import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp } from "./IonizedMethods";
+import { getIonizedMethodDef, TriggeringOpDef, TrackableOpDef, triggeringPropertySetOp, getMethodDef, Constructor } from "./IonizedMethods";
 import { isInert } from "./inert";
 import { initializeSnapshots } from "./TimeTraveler";
 import { initUpdate, isLazyUpdate, updateStack } from "../effect-cycle/ReactivitySystem";
@@ -104,69 +104,69 @@ export const UNDEFINED_OP: Function = noop
 // }
 
 
-export type CustomIonizedModelConfig = {
-   structure?: any;
-   nontrackableKeys?: { [key: PropertyKey]: boolean };
-   trackableOps?: { [key: PropertyKey]: CreateTrackableOp }
-   mutatingOps?: { [key: PropertyKey]: MutatingOpConfig };
-   beforeSet?: BeforeSetCallback; //TODO:
-   afterSet?: AfterSetCallback;
-   isEntryKey?: (model: AnyObject, key: PropertyKey) => boolean
-   // getStructureKeys: (model: AnyObject) => any[]
-}
+// export type CustomIonizedModelConfig = {
+//    structure?: any;
+//    nontrackableKeys?: { [key: ProxyKey]: boolean };
+//    trackableOps?: { [key: ProxyKey]: CreateTrackableOp }
+//    mutatingOps?: { [key: ProxyKey]: MutatingOpConfig };
+//    beforeSet?: BeforeSetCallback; //TODO:
+//    afterSet?: AfterSetCallback;
+//    isEntryKey?: (model: AnyObject, key: ProxyKey) => boolean
+//    // getStructureKeys: (model: AnyObject) => any[]
+// }
 
-type BeforeSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, oldValue: any) => void
-type AfterSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: PropertyKey, newValue: any, oldValue: any) => void
-
-
-type CreateTrackableOp = (
-   target: AnyObject,
-   model: IonizedModel,
-   op: PropertyKey,
-   transformInput?: (args: any[]) => any[],
-   transformTarget?: (target: AnyObject, args: any[]) => AnyObject,
-   transformOutput?: (output: any) => any
-) => (...args: any[]) => any
+// type BeforeSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: ProxyKey, oldValue: any) => void
+// type AfterSetCallback = (ionizedModel: IonizedModel, meta: IonizedModelQuark, key: ProxyKey, newValue: any, oldValue: any) => void
 
 
-type MutatingOpConfig = {
-   createOp: (target: AnyObject, ionizedModel: IonizedModel, meta: any, getPreopData: GetPreopData | undefined) => (...args: any[]) => any
-   preop?: GetPreopData
-   revert?: Revert
-}
+// type CreateTrackableOp = (
+//    target: AnyObject,
+//    model: IonizedModel,
+//    op: ProxyKey,
+//    transformInput?: (args: any[]) => any[],
+//    transformTarget?: (target: AnyObject, args: any[]) => AnyObject,
+//    transformOutput?: (output: any) => any
+// ) => (...args: any[]) => any
+
+
+// type MutatingOpConfig = {
+//    createOp: (state: ModelState, ionizedModel: IonizedModel, meta: any, getPreopData: GetPreopData | undefined) => (...args: any[]) => any
+//    preop?: GetPreopData
+//    revert?: Revert
+// }
 
 export type GetPreopData = (target: AnyObject, args?: any[]) => any;
-type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
+// type Revert = (model: AnyObject, data: { output: any, preopData: any, args: any[] }) => void
 
 
 
 // a `trackable op` is a method like 'values()' or 'entries()' that tracks the entire ionic model as a watch subject rather than a specific entry or property
 export function useTrackableOp(
-   target: AnyObject,
+   state: ModelState,
    ionized: IonizedModel,
-   op: PropertyKey,
+   opKey: ProxyKey,
    config: TrackableOpDef,
 ) {
-   const { createOp, track, input = noTransform, output = noTransform, this: transformThis = noTransform } = config
+   const { op, track, input = noTransform, output = noTransform, this: transformThis = noTransform } = config
 
-   const fn = createOp ? createOp(target, op) : target[op]
+   const fn = op ?? state.current[opKey]
 
    return function trackableOp(...args: any[]) {
       if (__DEV__) emitSignal();
       const _args = input(args);
-      trackAtom(asTrackable(track(ionized, op, _args)))
-      return output(fn.call(transformThis(target, _args), ..._args), ionized)
+      track(ionized, opKey, _args)
+      return output(fn.call(transformThis(state.getActiveTarget(), _args), ..._args), ionized)
    }
 }
 
-function asTrackable(tracked: [IonizedModel] | [IonizedModel, PropertyKey, any[]]) {
-   const [model, op, input] = tracked;
-   if (op) {
-      return asAtomicOp(model, op, input![0]) //TODO: atomicOps that have more than one 'entry key'
-   } else {
-      return quarkOf(model)
-   }
-}
+// function asTrackable(tracked: [IonizedModel] | [IonizedModel, ProxyKey, any[]]) {
+//    const [model, op, input] = tracked;
+//    if (op) {
+//       return asAtomicOp(model, op, input![0]) //TODO: atomicOps that have more than one 'entry key'
+//    } else {
+//       return quarkOf(model)
+//    }
+// }
 
 
 
@@ -181,7 +181,7 @@ function noTransform(value: any) {
 // export function useTrackableOpWithCallback(
 //    model: IonizedModel,
 //    target: AnyObject,
-//    op: PropertyKey,
+//    op: ProxyKey,
 //    ionizeArgs?: (args: any[]) => any[]
 // ) {
 //    const fn = target[op]
@@ -224,7 +224,7 @@ function noTransform(value: any) {
 //     return config.mutatingOps
 // }
 
-// function emitAfterSet(model: IonizedModel, key: PropertyKey, newValue: any, oldValue: any) {
+// function emitAfterSet(model: IonizedModel, key: ProxyKey, newValue: any, oldValue: any) {
 //    const quark = quarkOf(model)
 //    const configs = quark.structureConfigs;
 //    if (configs[0].structure === Object) return;
@@ -240,7 +240,7 @@ function noTransform(value: any) {
 // }
 
 
-export function isNonTrackable(key: PropertyKey, structureConfigs: CustomIonizedModelConfig[]) { //TODO: ?
+export function isNonTrackable(key: ProxyKey, structureConfigs: CustomIonizedModelConfig[]) { //TODO: ?
    // for (const config of structureConfigs) {
    //    const nontrackableKeys = config.nontrackableKeys
    //    if (nontrackableKeys && key in nontrackableKeys) return true;
@@ -281,6 +281,11 @@ function initializeState(initialData: AnyObject) {
    return initialData;
 }
 
+const GET = 0 as const;
+const SET = 1 as const;
+
+type ProxyKey = string | symbol
+
 //TODO:
 // - I really need to think through if property changes should trigger the whole model
 // - adding and deleting properties
@@ -291,50 +296,90 @@ export function createIonizedModel(
 
    const state = {
       current: initializeState(initialTarget),
-      pending: NULL as typeof NULL | AnyObject
+      pending: NULL as typeof NULL | AnyObject,
+      getActiveTarget() {
+         return isLazyUpdate() && this.pending !== NULL ? this.pending : this.current
+      }
    }
+
+   console.log('model state', state.current)
 
    const proxyProto = Object.create(null) // state keys and ion access keys
    const initializedProperties = { [QUARK]: true } as AnyObject
 
-   function initializeProperty(proxyProto: AnyObject, key: PropertyKey) {
-      initializedProperties[key] = true;
+   function initializeProperty(proxyProto: AnyObject, key: ProxyKey, op: typeof GET | typeof SET = GET) {
+      let target = initialTarget
 
       const _isIonKey = isIonKey(key);
-      let stateKey = _isIonKey ? undefined : key;
+      let stateKey = _isIonKey ? key in target ? key : key.slice(1) : key;
       let ionKey = _isIonKey ? key : undefined;
 
+      initializedProperties[stateKey] = true;
+
+      console.log('stateKey', stateKey)
+      console.log('ionKey', ionKey)
+      console.log('yes object', target)
+      console.log(Object.getPrototypeOf(target).constructor)
       let isProto = false; // prototypes do not hold any state, only getters and methods
-      while (initialTarget.constructor !== Object) {
-         const propertyDescriptor = Object.getOwnPropertyDescriptor(initialTarget, key)
+      do {
+         console.log('in loop')
+         const propertyDescriptor = Object.getOwnPropertyDescriptor(target, stateKey)
          if (propertyDescriptor) {
             if (propertyDescriptor.get || propertyDescriptor.set) {
                //TODO: check if there's a special config for tracking and triggering
                // else no special treatment
-               Object.defineProperty(proxyProto, key, propertyDescriptor)
-               return true; //TODO: not sure if I should return true here
+               Object.defineProperty(proxyProto, stateKey, propertyDescriptor)
+               return true;
             }
             else {
                const value = propertyDescriptor.value
+               console.log('value!!', value)
                if (isIon(value)) {
+                  const $key = ionKey ?? toIonKey(key, initialTarget)
+                  if ($key) initializedProperties[$key] = true;
                   initializeAbsorbedIon(
                      proxyProto,
-                     stateKey ?? ionKey!.slice(1),
+                     stateKey,
                      value,
-                     ionKey ?? toIonKey(key, initialTarget)
+                     $key
                   )
-                  return;
+                  return true;
                }
                else if (isFunction(value)) {
-                  //TODO: bind method either based on config or simply to ionized model
-                  return;
+                  if (op === SET) {
+                     // TODO: if setting method before it's initialized
+                     return propertyDescriptor.writable
+                  }
+                  const methodDef = getIonizedMethodDef(initialTarget, key)
+                  if (methodDef) { //NOTE: this block must be above target[_key] for Array.from(set) to work
+                     return bindNativeMethod(
+                        methodDef,
+                        key,
+                        state,
+                        ionizedModel,
+                        propertyDescriptor,
+                        proxyProto,
+                     )
+                  }
+                  bindMethod(
+                     proxyProto,
+                     key,
+                     value,
+                     propertyDescriptor,
+                     ionizedModel
+                  )
+                  return propertyDescriptor.writable
                }
                else if (!isProto && propertyDescriptor.writable) {
+                  console.log('???? made it???')
                   if (inTrackingContext()) {
+                     console.log('???? made it??? Tracking')
+                     const $key = ionKey ?? toIonKey(key, initialTarget)
+                     if ($key) initializedProperties[$key] = true;
                      initializePion(
                         proxyProto,
-                        stateKey ?? ionKey!.slice(1),
-                        ionKey ?? toIonKey(key, initialTarget),
+                        stateKey,
+                        $key,
                         state,
                         modelQuark,
                         propertyDescriptor
@@ -343,25 +388,49 @@ export function createIonizedModel(
                   }
                   else {
                      let _value = propertyDescriptor.value;
-                     Object.defineProperty(proxyProto, key, {
+                     Object.defineProperty(proxyProto, stateKey, {
                         enumerable: propertyDescriptor.enumerable,
                         configurable: propertyDescriptor.configurable,
                         get() {
-                           if (inTrackingContext())
+                           if (inTrackingContext()) {
+                              const $key = ionKey ?? toIonKey(key, initialTarget)
+                              if ($key) initializedProperties[$key] = true;
                               initializePion(
                                  proxyProto,
-                                 stateKey ?? ionKey!.slice(1),
-                                 ionKey ?? toIonKey(key, initialTarget),
+                                 stateKey,
+                                 $key,
                                  state,
                                  modelQuark,
                                  propertyDescriptor
                               )
+                           }
                            return _value
                         },
                         set(value) {
                            _value = value;
                         }
                      })
+                     const $key = ionKey ?? toIonKey(key, initialTarget)
+                     if ($key)
+                        Object.defineProperty(proxyProto, $key, {
+                           enumerable: propertyDescriptor.enumerable,
+                           configurable: propertyDescriptor.configurable,
+                           get() {
+                              const $key = ionKey ?? toIonKey(key, initialTarget)
+                              if ($key) initializedProperties[$key] = true;
+                              return initializePion(
+                                 proxyProto,
+                                 stateKey,
+                                 $key,
+                                 state,
+                                 modelQuark,
+                                 propertyDescriptor
+                              )
+                           },
+                           set(value) {
+                              _value = value;
+                           }
+                        })
                      return true;
                   }
                }
@@ -371,8 +440,11 @@ export function createIonizedModel(
                }
             }
          }
-         initialTarget = Object.getPrototypeOf(initialTarget)
+         target = Object.getPrototypeOf(target)
          isProto = true;
+      } while (target.constructor !== Object)
+      if (op === SET) {
+         //TODO: add new property
       }
       return;
    }
@@ -381,7 +453,6 @@ export function createIonizedModel(
 
       get(proxyProto, key, receiver) {
          __DEV__proxyGetterAssertions(ionizedModel, receiver)
-         //TODO: Array integer keys need special handling
          if (key in initializedProperties) {
             return proxyProto[key]
          }
@@ -397,10 +468,10 @@ export function createIonizedModel(
             proxyProto[key] = value;
             return true;
          }
-         // TODO: handle new properties
          const writable = initializeProperty(
             proxyProto,
             key,
+            SET
          )
          proxyProto[key] = value;
          return writable;
@@ -448,7 +519,7 @@ export function createIonizedModel(
       ownKeys() {
          if (inTrackingContext())
             trackAtom(asAtomicOp(ionizedModel, INTERNAL_OP, 'ownKeys')) //TODO: trigger when any new property is added or deleted
-         return Reflect.ownKeys(isLazyUpdate() && state.pending !== NULL ? state.pending : state.current)
+         return Reflect.ownKeys(state.getActiveTarget())
       },
 
       setPrototypeOf(target, proto) {
@@ -471,7 +542,7 @@ export function createIonizedModel(
    const modelQuark = new IonizedModelQuark(ionizedModel, initialTarget, state)
    proxyProto[QUARK] = modelQuark
 
-   const setOp = useMutatingOp(initialTarget, ionizedModel, '[[set]]', triggeringPropertySetOp)
+   // const setOp = useMutatingOp(initialTarget, ionizedModel, '[[set]]', triggeringPropertySetOp)
 
 
    registerIonizedModel(ionizedModel, initialTarget)
@@ -479,9 +550,9 @@ export function createIonizedModel(
    return ionizedModel
 }
 
-export type ProxyPropertyMap = Record<PropertyKey, (() => any) | undefined>
+export type ProxyPropertyMap = Record<ProxyKey, (() => any) | undefined>
 
-function triggerKeysChange(model: IonizedModel, key: PropertyKey) {
+function triggerKeysChange(model: IonizedModel, key: ProxyKey) {
    $atomicOp(model, INTERNAL_OP, 'ownKeys')?.trigger()
    $atomicOp(model, KEY_IN_OP, key)?.trigger()
    //QUESTION: shoule this trigger the whole model? I don't think so?
@@ -534,7 +605,7 @@ function inTrackingContext() {
 }
 
 
-function initializeAbsorbedIon(proxyProto: AnyObject, key: PropertyKey, value: Ion, ionKey: PropertyKey | undefined) {
+function initializeAbsorbedIon(proxyProto: AnyObject, key: ProxyKey, value: Ion, ionKey: ProxyKey | undefined) {
    // absorbed ion
    Object.defineProperty(proxyProto, key, {
       enumerable: true,
@@ -553,7 +624,7 @@ function initializeAbsorbedIon(proxyProto: AnyObject, key: PropertyKey, value: I
 // TODO:
 // [] ionize objects
 
-function toIonKey(key: PropertyKey, initialTarget: AnyObject) {
+function toIonKey(key: ProxyKey, initialTarget: AnyObject) {
    return typeof key === 'string' && !(key in initialTarget) ? '$' + key! : undefined
 }
 function initializeProperty(
@@ -587,12 +658,15 @@ function initializeProperty(
 
 function initializePion(
    proxyProto: ProxyPropertyMap,
-   key: PropertyKey,
+   key: ProxyKey,
    ionKey: string | undefined,
    state: ModelState,
    quark: IonizedModelQuark,
    propertyDescriptor: PropertyDescriptor
 ) {
+   console.log('&&& initializePion')
+   console.log('&&& key', key)
+   console.log('&&& ionKey', ionKey)
    const ion = createAtomicIon(new PionState(state, key, quark.clone), undefined, true)
    Object.defineProperty(proxyProto, key, {
       enumerable: propertyDescriptor.enumerable,
@@ -608,6 +682,7 @@ function initializePion(
          writable: false
       })
    }
+   return ion;
 }
 
 export function initialPropertyAccess(
@@ -644,15 +719,11 @@ export function initialPropertyAccess(
 
 
 //FIX: figure out where to call traceableMethodWrap
-function bindMethod(method: Function, key: string | symbol, proxy: IonizedModel, proxyProto: ProxyPropertyMap) {
-   if (!isMethod(method)) throw new Error('Invalid method')
-   const boundMethod =
-      // __DEV__ ?
-      //    traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
-      //    : 
-      method.bind(proxy);
-   proxyProto[key] = () => boundMethod
-   return boundMethod;
+function bindMethod(proxyProto: ProxyPropertyMap, key: ProxyKey, method: Function, propertyDescriptor: PropertyDescriptor, ionizedModel: IonizedModel) {
+   Object.defineProperty(proxyProto, key, {
+      ...propertyDescriptor,
+      value: method.bind(ionizedModel)
+   })
 }
 
 // function initialNonTrackablePropertyAccess(
@@ -736,7 +807,7 @@ function getTargetPropertyValue(target: AnyObject, key: string | symbol, receive
 function initialTrackableStateAccess(
    ionizedModel: IonizedModel,
    target: AnyObject,
-   key: PropertyKey,
+   key: ProxyKey,
    value: any,
    proxyProto: ProxyPropertyMap,
    // inertSchema: MarkMap | InertCollectionType | undefined,
@@ -746,7 +817,7 @@ function initialTrackableStateAccess(
    return pion?.()
 }
 
-function createPion(ionizedModel: IonizedModel, target: AnyObject, key: PropertyKey, value: unknown) {
+function createPion(ionizedModel: IonizedModel, target: AnyObject, key: ProxyKey, value: unknown) {
    let isProto = false;
    while (target.constructor !== Object) {
       const propertyDescriptor = Object.getOwnPropertyDescriptor(target, key)
@@ -795,8 +866,8 @@ export function accessMethod(
    target: AnyObject,
    proxy: IonizedModel,
    receiver: AnyObject,
-   key: PropertyKey,
-   boundMethodMap: Map<PropertyKey, Function>,
+   key: ProxyKey,
+   boundMethodMap: Map<ProxyKey, Function>,
    method?: Function
 ) {
    return getBoundMethod(
@@ -808,107 +879,109 @@ export function accessMethod(
 }
 
 //FIX: figure out where to call traceableMethodWrap
-function getBoundMethod(
-   proxy: IonizedModel,
-   key: PropertyKey,
-   boundMethodMap: Map<PropertyKey, Function>,
-   method?: Function
-) {
-   let boundMethod = boundMethodMap.get(key)
-   if (boundMethod) return boundMethod;
-   if (method) {
-      boundMethod =
-         // __DEV__ ?
-         // traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
-         // : 
-         method.bind(proxy);
-      boundMethodMap.set(key, boundMethod!)
-      return boundMethod;
-   }
-   throw new Error('No method provided')
-}
+// function getBoundMethod(
+//    proxy: IonizedModel,
+//    key: ProxyKey,
+//    boundMethodMap: Map<ProxyKey, Function>,
+//    method?: Function
+// ) {
+//    let boundMethod = boundMethodMap.get(key)
+//    if (boundMethod) return boundMethod;
+//    if (method) {
+//       boundMethod =
+//          // __DEV__ ?
+//          // traceableMethodWrap('Ionized Method', proxy, key, method.bind(proxy))
+//          // : 
+//          method.bind(proxy);
+//       boundMethodMap.set(key, boundMethod!)
+//       return boundMethod;
+//    }
+//    throw new Error('No method provided')
+// }
 
-export function isNativeMethod(key: PropertyKey, structureConfigs: CustomIonizedModelConfig[]) {
-   for (const structure of structureConfigs) {
-      const mutatingOps = structure.mutatingOps
-      if (mutatingOps && key in mutatingOps)
-         return true;
-      const trackableOps = structure.trackableOps
-      if (trackableOps && key in trackableOps)
-         return true;
-   }
-   return false;
-}
+// export function isNativeMethod(key: ProxyKey, structureConfigs: CustomIonizedModelConfig[]) {
+//    for (const structure of structureConfigs) {
+//       const mutatingOps = structure.mutatingOps
+//       if (mutatingOps && key in mutatingOps)
+//          return true;
+//       const trackableOps = structure.trackableOps
+//       if (trackableOps && key in trackableOps)
+//          return true;
+//    }
+//    return false;
+// }
 
-export function getNativeMethodConfig(
-   nativeKey: string | symbol,
-   structureConfigs: CustomIonizedModelConfig[],
-) {
-   for (const config of structureConfigs) {
-      const mutatingOps = config.mutatingOps
-      if (mutatingOps && nativeKey in mutatingOps) {
-         return mutatingOps[nativeKey]
-      }
-      const trackableOps = config.trackableOps
-      if (trackableOps && nativeKey in trackableOps) {
-         return trackableOps[nativeKey]
-      }
-   }
-   return undefined;
-}
+// export function getNativeMethodConfig(
+//    nativeKey: string | symbol,
+//    structureConfigs: CustomIonizedModelConfig[],
+// ) {
+//    for (const config of structureConfigs) {
+//       const mutatingOps = config.mutatingOps
+//       if (mutatingOps && nativeKey in mutatingOps) {
+//          return mutatingOps[nativeKey]
+//       }
+//       const trackableOps = config.trackableOps
+//       if (trackableOps && nativeKey in trackableOps) {
+//          return trackableOps[nativeKey]
+//       }
+//    }
+//    return undefined;
+// }
 
 //FIX: figure out where to call traceableMethodWrap
 function bindNativeMethod(
    config: TrackableOpDef | TriggeringOpDef,
    key: string | symbol,
-   target: AnyObject,
+   state: ModelState,
    ionizedModel: IonizedModel,
-   quark: IonizedModelQuark,
+   propertyDescriptor: PropertyDescriptor,
    proxyProto: ProxyPropertyMap,
 ) {
    if ('track' in config) {
-      const op = useTrackableOp(
-         target,
-         ionizedModel,
-         key,
-         config
-      )
-      proxyProto[key] = () => op
-      return op;
+      Object.defineProperty(proxyProto, key, {
+         ...propertyDescriptor,
+         value: useTrackableOp(
+            state,
+            ionizedModel,
+            key,
+            config
+         )
+      })
    }
    else {
-      const op = useMutatingOp(
-         target,
-         ionizedModel,
-         key,
-         config
-      )
       // __DEV__ ? traceableMethodWrap('Ionized Method', ionizedModel, nativeKey, createOp(target, ionizedModel, quark, getPreopData))
       // : 
       // createOp(target, ionizedModel, quark, getPreopData)
-      proxyProto[key] = () => op
-      return op;
+      Object.defineProperty(proxyProto, key, {
+         ...propertyDescriptor,
+         value: useMutatingOp(
+            state,
+            ionizedModel,
+            key,
+            config
+         )
+      })
    }
 }
 
 
 function useMutatingOp(
-   target: AnyObject,
+   state: ModelState,
    model: IonizedModel,
-   op: PropertyKey,
+   opKey: ProxyKey,
    config: TriggeringOpDef
 ) {
-   const fnName = typeof op === 'string' ? 'ionic_' + op : 'ionic_mutating_op'
-   const { shouldTrigger, triggers: getTriggers, input = noTransform, output: transformOutput = noTransform, createOp } = config
-   const fn = createOp ? createOp(target, op) : target[op];
+   const fnName = typeof opKey === 'string' ? 'ionic_' + opKey : 'ionic_mutating_op'
+   const { shouldTrigger, triggers: getTriggers, input = noTransform, output: transformOutput = noTransform, op = state.current[opKey] } = config
    const quark = quarkOf(model)
 
    const o = {
       [fnName](...args: any) {
          const _args = input(args)
+         const target = state.getActiveTarget()
          const preop = config.preop?.(target, _args)
 
-         const output = transformOutput(fn.apply(target, _args), model); // perform mutation
+         const output = transformOutput(op.apply(target, _args), model); // perform mutation
 
          if (shouldTrigger && !shouldTrigger(preop)) return output;
 
@@ -918,7 +991,7 @@ function useMutatingOp(
 
          recordMutation(quark.asMutable, new Mutation(
             model,
-            op,
+            opKey,
             _args,
             output,
             preop
@@ -926,9 +999,9 @@ function useMutatingOp(
 
          const triggers = getTriggers(model, _args, preop);
 
-         const mu = { update }
+         const u = { update }
          for (const trigger of triggers) {
-            trigger.apply(mu)
+            trigger.apply(u)
          }
 
          // runSyncEffects()
@@ -975,7 +1048,7 @@ export function reactiveSetter(
    initialTarget: AnyObject,
    key: string | symbol,
    value: unknown,
-   setOp: (key: PropertyKey, value: any) => void,
+   setOp: (key: ProxyKey, value: any) => void,
    proxyProto: ProxyPropertyMap
 ) {
    if (isIonKey(key)) {
@@ -1042,27 +1115,27 @@ export function reactiveSetter(
 
 
 
-export function setAbsorbedIonState(model: IonizedModel, key: PropertyKey, ion: Ion, value: unknown) {
-   // const oldState = ion()
-   if (hasQuark(ion) && 'state' in ion) {
-      try {
-         ion.state = value;
-      }
-      catch (err) {
-         if (__DEV__) throw new Error("Absorbed AtomicIon is read only") //TODO: since readonly is only being enforced at the typescript level, make sure typescript prevents mutation of readonly absorbed ions
-         return false;
-      }
-      // const newState = ion.state // get the state that has been maybeIonized
+// export function setAbsorbedIonState(model: IonizedModel, key: ProxyKey, ion: Ion, value: unknown) {
+//    // const oldState = ion()
+//    if (hasQuark(ion) && 'state' in ion) {
+//       try {
+//          ion.state = value;
+//       }
+//       catch (err) {
+//          if (__DEV__) throw new Error("Absorbed AtomicIon is read only") //TODO: since readonly is only being enforced at the typescript level, make sure typescript prevents mutation of readonly absorbed ions
+//          return false;
+//       }
+//       // const newState = ion.state // get the state that has been maybeIonized
 
-      // emitAfterSet(model, key, newState, oldState)
+//       // emitAfterSet(model, key, newState, oldState)
 
-      quarkOf(model).trigger()
+//       quarkOf(model).trigger()
 
-      return true;
-   }
-   if (__DEV__) throw new Error("Absorbed AtomicIon is read only")
-   return false;
-}
+//       return true;
+//    }
+//    if (__DEV__) throw new Error("Absorbed AtomicIon is read only")
+//    return false;
+// }
 
 // function getMutation(ion: HasQuark<Mutable>) {
 //    const quark = quarkOf(ion)

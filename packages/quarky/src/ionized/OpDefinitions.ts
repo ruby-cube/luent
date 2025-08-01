@@ -2,10 +2,17 @@ import { AnyObject } from "@rue/types"
 import { ionize, toRaw } from "./ionize"
 import { TrackableOpDef } from "./IonizedMethods"
 import { getIonizedModel, IonizedModel, maybeIonize } from "./IonizedModel"
+import { trackAtom } from "../ionic/IonicCompound"
+import { quarkOf } from "../Quark"
+import { asAtomicOp } from "./AtomicOp"
 
 const toIonizedDecoyOfTargetOrThisArg = (target: AnyObject, args: any[]) => ionizedDecoy(args[1] ?? target)
-export const trackModel = (model: IonizedModel) => [model] as [IonizedModel]
-export const trackOp = (model: IonizedModel, op: PropertyKey, args: unknown[]) => [model, op, args] as [IonizedModel, PropertyKey, any[]]
+export const trackModel = (model: IonizedModel) => {
+   trackAtom(quarkOf(model))
+}
+export const trackOp = (model: IonizedModel, op: PropertyKey, args: unknown[]) => {
+   trackAtom(asAtomicOp(model, op, args![0]))
+}
 
 
 
@@ -20,21 +27,12 @@ export const trackOp = (model: IonizedModel, op: PropertyKey, args: unknown[]) =
  */
 export function hasMaybeIonized(
    rawKey: unknown,
-   target: Set<unknown>,
+   target: { has(value: unknown): boolean },
    { passRaw, fail, passIonized }: {
       passRaw: (key: unknown) => unknown,
       passIonized: (key: IonizedModel, rawKey: AnyObject) => unknown,
       fail: unknown
-   } = {
-         passRaw: () => true,
-         passIonized: (key, rawKey?) => {
-            target.delete(key)
-            target.add(rawKey)
-            return true;
-         },
-         fail: false
-      }
-) {
+   }) {
    if (target.has(rawKey)) {
       return passRaw(rawKey);
    }
@@ -45,9 +43,9 @@ export function hasMaybeIonized(
    return fail;
 }
 
-export function useDeleteOp(target: AnyObject) {
-   const deleteOp = target.delete.bind(target)
-   return (key: unknown) => hasMaybeIonized(key, target as Set<unknown>, {
+   export function deleteOp(this: Set<unknown> | Map<unknown, unknown>, key: unknown) {
+      const deleteOp = this.delete.bind(this)
+      return hasMaybeIonized(key, this as Set<unknown>, {
       passRaw: deleteOp,
       passIonized: deleteOp,
       fail: false
@@ -55,11 +53,7 @@ export function useDeleteOp(target: AnyObject) {
 }
 
 
-export const trackableHasOp: TrackableOpDef = {
-   input: ([key]) => [toRaw(key)],
-   createOp: (target) => (key: unknown) => hasMaybeIonized(key, target as Set<unknown>),
-   track: trackOp,
-}
+
 
 
 export const trackableOp: TrackableOpDef = {

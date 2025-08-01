@@ -83,6 +83,7 @@ export function trackAtom(atom: Watchable) {
    let i = trackerStack.length;
    while (i--) {
       const compound = trackerStack[i]
+      console.log('trackAtom', compound)
       if (!compound) return; // due to detached call (for nested ionicTasks and eager watch calls)
       compound.track(atom)
    }

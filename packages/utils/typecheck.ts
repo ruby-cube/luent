@@ -1,4 +1,4 @@
-export function isFunction(value: any): value is Function {
+export function isFunction(value: any): value is (...args: any[])=>any {
    // return value instanceof Function
    return typeof value === 'function';
 }

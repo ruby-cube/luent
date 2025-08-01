@@ -95,6 +95,7 @@ export class WatchedAtom {
    // }
 
    triggerEffects(update: Update) { // the surrounding effect when original trigger happened
+      console.log('triggerEffects')
       const phases = this.phases
       const cycle = update.cycle
       for (const phase of phases) {

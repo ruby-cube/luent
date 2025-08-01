@@ -10,20 +10,20 @@ import { IonizedModelQuark } from "./IonizedModelQuark"
 import { initUpdate, Update } from "../effect-cycle/ReactivitySystem"
 import { AtomicPionQuark } from "../ion/x_AtomicPion"
 
-type Constructor = new (...args: any[]) => any
+export type Constructor = new (...args: any[]) => any
 
 //TODO: if you don't provide a clone method, you cannot update lazily
 
 export type TrackableOpDef = {
    // trackable ops
-   createOp?: (target: AnyObject, key: PropertyKey, ionized?: IonizedModel) => Function,
+   op?: Function,
    input?: (input: any[]) => any[],
    output?: (output: any, model: IonizedModel) => any,
    this?: (target: AnyObject, input: any[]) => AnyObject,
-   track: (model: IonizedModel, op: PropertyKey, input: any[]) => [IonizedModel] | [IonizedModel, PropertyKey, any[]] // track op
+   track: (model: IonizedModel, op: PropertyKey, input: any[]) => void
 }
 export type TriggeringOpDef = {
-   createOp?: (target: AnyObject, key: PropertyKey, ionized?: IonizedModel) => Function,
+   op?: Function,
    input?: (input: any[]) => any[],
    preop?: GetPreopData
    shouldTrigger?: (preopData: any) => boolean
@@ -42,7 +42,7 @@ export type IonizedMethodsDef = {
 }
 
 export const triggeringPropertySetOp: TriggeringOpDef = {
-   createOp: (target) => (key: PropertyKey, value: unknown) => target[key] = value,
+   op: function set(this: AnyObject, key: PropertyKey, value: unknown) { this[key] = value },
    input: ([key, value]) => [key, toRaw(value)],
    preop: (target, [key, value]) => ({
       key,
@@ -69,6 +69,8 @@ const ionizedMethodsMap = new Map([
 export function isIonizable(constructor: Constructor) {
    return ionizedMethodsMap.has(constructor);
 }
+
+
 
 export function getIonizedMethodDef(target: AnyObject, methodKey: PropertyKey) { //FIX: this is causing infinite loops e.g. toJSON()
    let constructor = target.constructor as Constructor
@@ -105,7 +107,7 @@ export function enlistIonizedMethods(constructor: Constructor, def?: IonizedMeth
  * }
  *  */
 export function triggerAll(model: IonizedModel, op: PropertyKey): () => void {
-   return function triggerAllOps(this: {update: Update}) {
+   return function triggerAllOps(this: { update: Update }) {
       const ops = getAtomicOps(model, op)
       if (ops)
          for (const [_, op] of ops) {
@@ -138,11 +140,11 @@ export function trigger(model: IonizedModel, op?: PropertyKey | '[[get]]', entry
          }
       }
    }
-   return function triggerModel(this: { update: Update }){
+   return function triggerModel(this: { update: Update }) {
       const quark = quarkOf(model)
       prepPendingUpdate(quark, this.update)
       quark.trigger()
-   } 
+   }
 }
 
 
@@ -173,8 +175,8 @@ function prepPendingUpdate(op: AtomicOp | AtomicPionQuark | IonizedModelQuark, u
    // }
    op.pendingUpdate = update
    console.trace('set pending update')
-   update.queue(()=>{
-       console.log('mutate model update done')
+   update.queue(() => {
+      console.log('mutate model update done')
       op.pendingUpdate = null
    })
 }
